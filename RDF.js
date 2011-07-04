@@ -4,12 +4,13 @@
 	"label":"RDF",
 	"creator":"Simon Kornblith",
 	"target":"rdf",
-	"minVersion":"2.1b2",
+	"minVersion":"2.1.9",
 	"maxVersion":"",
 	"priority":100,
+	"browserSupport":"gcs",
 	"configOptions":{"dataMode":"rdf/xml"},
 	"inRepository":true,
-	"lastUpdated":"2011-02-03 07:00:12"
+	"lastUpdated":"2011-07-04 04:58:27"
 }
 
 function detectImport() {
@@ -39,8 +40,6 @@ var n = {
 };
 
 var callNumberTypes = [n.dcterms+"LCC", n.dcterms+"DDC", n.dcterms+"UDC"];
-
-var defaultUnknownType = "book";
 
 // gets the first result set for a property that can be encoded in multiple
 // ontologies
@@ -301,7 +300,7 @@ function importItem(newItem, node, type) {
 	}
 	
 	if(!newItem.itemType) {
-		newItem.itemType = defaultUnknownType;
+		newItem.itemType = Export.defaultUnknownType;
 	}
 	
 	// regular author-type creators
@@ -634,3 +633,11 @@ function doImport() {
 		}
 	}
 }
+
+/*
+ * Export doImport and defaultUnknownType to other translators
+ */
+var Export = {
+	"doImport":doImport,
+	"defaultUnknownType":"book"
+};
