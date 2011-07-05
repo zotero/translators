@@ -2,7 +2,7 @@
 	"translatorID":"0e2235e7-babf-413c-9acf-f27cce5f059c",
 	"translatorType":3,
 	"label":"MODS",
-	"creator":"Simon Kornblith",
+	"creator":"Simon Kornblith and Richard Karnesky",
 	"target":"xml",
 	"minVersion":"2.1b3",
 	"maxVersion":"",
@@ -21,7 +21,7 @@ function detectImport() {
 	return name.uri == "http://www.loc.gov/mods/v3" && (name.localName == "modsCollection" || name.localName == "mods");
 }
 
-var partialItemTypes = ["bookSection", "journalArticle", "magazineArticle", "newspaperArticle"];
+var partialItemTypes = ["bookSection", "journalArticle", "magazineArticle", "newspaperArticle", "conferencePaper", "encyclopediaArticle", "dictionaryEntry"];
 
 function doExport() {
 	Zotero.setCharacterSet("utf-8");
@@ -39,18 +39,21 @@ function doExport() {
 		if(item.title) {
 			mods.titleInfo.title = item.title;
 		}
+		if(item.shortTitle) {
+			mods.titleInfo += <titleInfo type="abbreviated"><title>{item.shortTitle}</title></titleInfo>;
+		}
 		
 		// XML tag typeOfResource/genre; object field type
+		// 
+		// The exact marcGenre of a book section can, perhaps, be debated;
+		// But it should have 'book' as the host's genre.
 		var modsType, marcGenre;
-		if(item.itemType == "book" || item.itemType == "bookSection") {
+		if(item.itemType == "book") {
 			modsType = "text";
 			marcGenre = "book";
-		} else if(item.itemType == "journalArticle" || item.itemType == "magazineArticle") {
+		} else if(item.itemType == "journalArticle" || item.itemType == "magazineArticle" || item.itemType == "conferencePaper" || item.itemType == "encyclopediaArticle" || item.itemType == "newspaperArticle" || item.itemType == "bookSection") {
 			modsType = "text";
-			marcGenre = "periodical";
-		} else if(item.itemType == "newspaperArticle") {
-			modsType = "text";
-			marcGenre = "newspaper";
+			marcGenre = "article";
 		} else if(item.itemType == "thesis") {
 			modsType = "text";
 			marcGenre = "thesis";
@@ -84,8 +87,7 @@ function doExport() {
 		// XML tag genre; object field thesisType, type
 		if(item.thesisType) {
 			mods.genre += <genre>{item.thesisType}</genre>;
-		}
-		if(item.type) {
+		} else if(item.type) {
 			mods.genre += <genre>{item.type}</genre>;
 		}
 		
@@ -96,22 +98,41 @@ function doExport() {
 				roleTerm = "aut";
 			} else if(item.creators[j].creatorType == "editor") {
 				roleTerm = "edt";
+			} else if(item.creators[j].creatorType == "translator") {
+				roleTerm = "trl";
 			} else {
 				roleTerm = "ctb";
 			}
 			
 			// FIXME - currently all names are personal
-			if(item.creators[j].fieldMode == 1) {
-				mods.name += <name type="personal">
-					<namePart>{item.creators[j].lastName}</namePart>
-					<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
-					</name>;
-			} else {
-				mods.name += <name type="personal">
-					<namePart type="family">{item.creators[j].lastName}</namePart>
-					<namePart type="given">{item.creators[j].firstName}</namePart>
-					<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
-					</name>;
+			if(item.creators[j].creatorType != "seriesEditor") {
+				if(isPartialItem && item.creators[j].creatorType == "editor"){
+					if(item.creators[j].fieldMode == 1) {
+						mods.relatedItem.name += <name type="personal">
+							<namePart>{item.creators[j].lastName}</namePart>
+							<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
+							</name>;
+					} else {
+						mods.relatedItem.name += <name type="personal">
+							<namePart type="family">{item.creators[j].lastName}</namePart>
+							<namePart type="given">{item.creators[j].firstName}</namePart>
+							<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
+							</name>;
+					}
+				} else {
+					if(item.creators[j].fieldMode == 1) {
+						mods.name += <name type="personal">
+							<namePart>{item.creators[j].lastName}</namePart>
+							<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
+							</name>;
+					} else {
+						mods.name += <name type="personal">
+							<namePart type="family">{item.creators[j].lastName}</namePart>
+							<namePart type="given">{item.creators[j].firstName}</namePart>
+							<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
+							</name>;
+					}
+				}
 			}
 		}
 		
@@ -209,15 +230,51 @@ function doExport() {
 			var tag = <{dateType}>{item.date}</{dateType}>;
 			originInfo += tag;
 		}
-		if(item.accessDate) {
-			originInfo += <dateCaptured>{item.accessDate}</dateCaptured>;
-		}
+
+		if(item.numPages) {
+			mods.physicalDescription = <physicalDescription><extent unit="pages"><total>{item.numPages}</total></extent></physicalDescription>;
+ 		}
+
 		if(originInfo.length() != 1) {
 			if(isPartialItem) {
 				// For a journal article, bookSection, etc., this goes under the host
 				mods.relatedItem.originInfo += <originInfo>{originInfo}</originInfo>;
 			} else {
 				mods.originInfo += <originInfo>{originInfo}</originInfo>;
+			}
+		}
+
+		// eXist Solutions points out that most types are more often
+		// monographic than not & will use this internally.
+		// Perhaps comment this out in the main distribution, though.
+		mods.originInfo.issuance = "monographic";
+
+		if(isPartialItem) {
+			// eXist Solutions points out that these types are more often
+			// continuing than not & will use this internally.
+			// Perhaps comment this out in the main distribution, though.
+			if(item.itemType == "journalArticle" || item.itemType == "magazineArticle" || item.itemType == "newspaperArticle") {
+				mods.relatedItem.originInfo.issuance = "continuing";
+				if(item.itemType == "journalArticle" || item.itemType == "magazineArticle") {
+					mods.relatedItem.genre += <genre authority="marcgt">periodical</genre>;
+				} else if (item.itemType == "newspaperArticle") {
+					mods.relatedItem.genre += <genre authority="marcgt">newspaper</genre>;
+				}
+			}
+			else if (item.itemType == "bookSection" || item.itemType == "conferencePaper" || item.itemType == "encyclopediaArticle") {
+				mods.relatedItem.originInfo.issuance = "monographic";
+				if (item.itemType == "bookSection") {
+					mods.relatedItem.genre += <genre authority="marcgt">book</genre>;
+				} else if (item.itemType == "conferencePaper") {
+					mods.relatedItem.genre += <genre authority="marcgt">conference publication</genre>;
+					if (item.conferenceName) {
+						mods.relatedItem.name += <name type="conference">
+							<namePart>{item.conferenceName}</namePart>
+							</name>;
+					}
+				} else if (item.itemType == "encyclopediaArticle") {
+					mods.relatedItem.genre += <genre authority="marcgt">encyclopedia</genre>;
+				}
 			}
 		}
 		
@@ -246,15 +303,19 @@ function doExport() {
 		if(item.callNumber) {
 			mods.classification = item.callNumber;
 		}
+
+		// XML tag location.url; object field archiveLocation
+		if(item.url) {
+			mods.location.url += item.url;
+			if(item.accessDate) {
+				mods.location.url.@dateLastAccessed = item.accessDate;
+			}
+		}
+
 		
 		// XML tag location.physicalLocation; object field archiveLocation
 		if(item.archiveLocation) {
-			mods.location.physicalLocation = item.archiveLocation;
-		}
-		
-		// XML tag location.url; object field archiveLocation
-		if(item.url) {
-			mods.location.url = item.url;
+			mods.location += <location><physicalLocation>{item.archiveLocation}</physicalLocation></location>;
 		}
 		
 		// XML tag title.titleInfo; object field journalAbbreviation
@@ -286,18 +347,34 @@ function doExport() {
 		for(var j in item.tags) {
 			mods.subject += <subject><topic>{item.tags[j].tag}</topic></subject>;
 		}
+
+		/** LANGUAGE **/
+
+		if(item.language) {
+			mods.language.languageTerm = <languageTerm type="text">{item.language}</languageTerm>;
+		}
+
+		/** EXTRA->NOTE **/
+		if(item.extra) {
+			mods.note += <note>{item.extra}</note>;
+		}
 		
 		
 		// XML tag relatedItem.titleInfo; object field series
 		if(item.seriesTitle || item.series || item.seriesNumber || item.seriesText) {
 			var series = <relatedItem type="series"/>;
+
+			// eXist Solutions points out that these types are more often
+			// continuing than not & will use this internally.
+			// Perhaps comment this out in the main distribution, though.
+			series.originInfo.issuance = "continuing";
 			
 			if(item.series) {
 				series.titleInfo.title = item.series;
 			}
 			
 			if(item.seriesTitle) {
-				series.titleInfo.partTitle = item.seriesTitle;
+				series.titleInfo.title += <title>{item.seriesTitle}</title>;
 			}
 			
 			if(item.seriesText) {
@@ -305,16 +382,36 @@ function doExport() {
 			}
 			
 			if(item.seriesNumber) {
-				series.titleInfo.partNumber = item.seriesNumber;
+				series.part.detail = <detail type="volume"><number>{item.seriesNumber}</number></detail>;
+			}
+
+			// handle series editors
+			for(var j in item.creators) {
+				var roleTerm = "";
+				if(item.creators[j].creatorType == "seriesEditor") {
+					roleTerm = "pbd";
+					if(item.creators[j].fieldMode == 1) {
+						series.name += <name type="personal">
+							<namePart>{item.creators[j].lastName}</namePart>
+							<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
+							</name>;
+					} else {
+						series.name += <name type="personal">
+							<namePart type="family">{item.creators[j].lastName}</namePart>
+							<namePart type="given">{item.creators[j].firstName}</namePart>
+							<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
+							</name>;
+					}
+				}
 			}
 			
 			// TODO: make this work in import
-			/*if(item.itemType == "bookSection") {
-				// For a book section, series info must go inside host tag
+			//
+			if(isPartialItem) {
 				mods.relatedItem.relatedItem = series;
-			} else {*/
+			} else {
 				mods.relatedItem += series;
-			//}
+			}
 		}
 		
 		modsCollection.mods += mods;
