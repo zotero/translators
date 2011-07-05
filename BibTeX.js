@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-07-04 12:38:24"
+	"lastUpdated": "2011-07-05 00:48:01"
 }
 
 function detectImport() {
@@ -1571,11 +1571,20 @@ function processField(item, field, value) {
 		for(var i in names) {
 			var name = names[i];
 			// skip empty names
-			if (Zotero.Utilities.trim(name) == '') {
+			if (name.trim() == '') {
 				continue;
 			}
-			item.creators.push(Zotero.Utilities.cleanAuthor(name, field,
-											(name.indexOf(",") != -1)));
+			// Names in BibTeX can have three commas
+			pieces = name.split(',');
+			var creator = {};
+			if (pieces.length > 1) {
+				creator.firstName = pieces.pop().trim();
+				creator.lastName = pieces.join(',').trim();
+				creator.creatorType = field;
+			} else {
+				creator = Zotero.Utilities.cleanAuthor(name, field, false);
+			}
+			item.creators.push(creator);
 		}
 	} else if(field == "institution" || field == "organization") {
 		item.backupPublisher = value;
