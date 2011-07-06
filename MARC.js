@@ -339,8 +339,8 @@ record.prototype.translate = function(item) {
 		this._associateDBField(item, "330", "a", "abstractNote");
 		
 		// Extract tags
-		// TODO : Ajouter les autres champs en 6xx avec les autorit�s construites. 
-		// n�cessite de reconstruire les autorit�s
+		// TODO : Ajouter les autres champs en 6xx avec les autorités construites. 
+		// nécessite de reconstruire les autorités
 		this._associateTags(item, "610", "a");
 		
 		// Extract scale (for maps)
