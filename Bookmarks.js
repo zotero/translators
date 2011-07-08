@@ -7,8 +7,9 @@
 	"minVersion":"2.1b6",
 	"maxVersion":"",
 	"priority":100,
+	"browserSupport":"gcsn",
 	"inRepository":true,
-	"lastUpdated":"2011-03-16 23:24:54"
+	"lastUpdated":"2011-07-08 04:51:41"
 }
 
 /*

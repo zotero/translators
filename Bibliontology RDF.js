@@ -7,10 +7,11 @@
 	"minVersion":"2.0",
 	"maxVersion":"",
 	"priority":50,
+	"browserSupport":"gcs",
 	"configOptions":{"getCollections":"true", "dataMode":"rdf/xml"},
 	"displayOptions":{"exportNotes":true, "exportFileData":false},
 	"inRepository":false,
-	"lastUpdated":"2011-02-22 00:39:57"
+	"lastUpdated":"2011-07-08 04:50:39"
 }
 
 var n = {
@@ -233,11 +234,19 @@ var FIELDS = {
 	"assignee":				[ITEM, 			n.z+"assignee"],			// TODO
 	"priorityNumbers": 		[function(item) {							// TODO
 		var priorityNumbers = item.priorityNumbers.split(/, ?| /g);
-		return [[ITEM, n.z+"priorityNumber", number, true] for each(number in priorityNumbers)];
+		var returnNumbers = [];
+		for each(var number in priorityNumbers) {
+			returnNumbers.push([ITEM, n.z+"priorityNumber", number, true]);
+		}
+		return returnNumbers;
 	}, function(nodes) {
 		var statements = Zotero.RDF.getStatementsMatching(nodes[ITEM], n.z+"priorityNumber", null);
 		if(!statements) return false;
-		return [statement[2] for each(statement in statements)].join(", ");
+		var predicates = [];
+		for each(var statement in statements) {
+			predicates.push(statement[2]);
+		}
+		return predicates.join(", ");
 	}],
 	"references":			[ITEM,			n.z+"references"],
 	"legalStatus":			[ITEM,			n.bibo+"status"],
@@ -332,7 +341,9 @@ function getBlankNode(attachToNode, itemPredicate, blankNodePairs, create) {
 	if(!blankNode && create) {
 		blankNode = Zotero.RDF.newResource();
 		Zotero.RDF.addStatement(attachToNode, itemPredicate, blankNode, false);
-		[Zotero.RDF.addStatement(blankNode, pair[0], pair[1], false) for each(pair in blankNodePairs)];
+		for each(var pair in blankNodePairs) {
+			Zotero.RDF.addStatement(blankNode, pair[0], pair[1], false);
+		}
 	}
 	
 	return blankNode;
@@ -362,7 +373,11 @@ Type.prototype.getMatchScore = function(node) {
 	var nodes = {2:node};
 	
 	// check item (+2 for each match, -1 for each nonmatch)
-	var score = 3*[true for each(pair in this[ITEM].pairs) if(Zotero.RDF.getStatementsMatching(node, pair[0], pair[1]))].length-this[ITEM].pairs.length;
+	var score = -this[ITEM].pairs.length;
+	for each(var pair in this[ITEM].pairs) {
+		if(Zotero.RDF.getStatementsMatching(node, pair[0], pair[1])) score += 3;
+	}
+	
 	// check subcontainer
 	[score, nodes[SUBCONTAINER]] = this._scoreNodeRelationship(node, this[SUBCONTAINER], score);
 	// check container
@@ -387,7 +402,11 @@ Type.prototype._scoreNodeRelationship = function(node, definition, score) {
 			var bestScore = -9999;
 			for each(var statement in statements) {
 				// +2 for each match, -1 for each nonmatch
-				var testScore = 3*[true for each(pair in definition.pairs) if(Zotero.RDF.getStatementsMatching(statement[2], pair[0], pair[1]))].length-definition.pairs.length;
+				var testScore = -definition.pairs.length;
+				for each(var pair in definition.pairs) {
+					if(Zotero.RDF.getStatementsMatching(statement[2], pair[0], pair[1])) score += 3;
+				}
+				
 				if(testScore > bestScore) {
 					subNode = statement[2];
 					bestScore = testScore;
@@ -462,8 +481,9 @@ Type.prototype.addNodeRelations = function(nodes) {
 			}
 			
 			// add type
-			[Zotero.RDF.addStatement(nodes[i], pair[0], pair[1], false) 
-				for each(pair in this[i].pairs)];
+			for each(var pair in this[i].pairs) {
+				Zotero.RDF.addStatement(nodes[i], pair[0], pair[1], false)
+			}
 			
 			// add relation to parent
 			for(var j = i-1; j>1; j--) {
@@ -560,7 +580,12 @@ LiteralProperty.prototype.mapToItem = function(newItem, nodes) {
 		if(!node) return false;
 		var statements = getStatementsByDefinition(this.mapping[1], node);
 		if(!statements) return false;
-		newItem[this.field] = [stmt[2].toString() for each(stmt in statements)].join(", ");
+		
+		var content = [];
+		for each(var stmt in statements) {
+			content.push(stmt[2].toString());
+		}
+		newItem[this.field] = content.join(",");
 	}
 	return true;
 }
@@ -571,8 +596,9 @@ LiteralProperty.prototype.mapToItem = function(newItem, nodes) {
 LiteralProperty.prototype.mapFromItem = function(item, nodes) {
 	if(typeof this.mapping[0] == "function") {				// function case: triples returned
 		// check function case
-		[Zotero.RDF.addStatement(nodes[triple[0]], triple[1], triple[2], triple[3])
-			for each(triple in this.mapping[0](item))];
+		for each(var triple in this.mapping[0](item)) {
+			Zotero.RDF.addStatement(nodes[triple[0]], triple[1], triple[2], triple[3])
+		}
 	} else if(typeof this.mapping[1] == "string") {		// string case: simple predicate
 		Zotero.RDF.addStatement(nodes[this.mapping[0]],
 			this.mapping[1], item.uniqueFields[this.field], true);
@@ -975,7 +1001,7 @@ var usedURIs = {};
 
 function doExport() {
 	// add namespaces
-	[Zotero.RDF.addNamespace(i, n[i]) for(i in n)];
+	for(var i in n) Zotero.RDF.addNamespace(i, n[i]);
 	
 	// compile references and create URIs
 	var item;
