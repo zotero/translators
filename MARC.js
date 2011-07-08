@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"browserSupport": "gcs",
-	"lastUpdated": "2011-07-04 22:53:03"
+	"browserSupport": "gcsn",
+	"lastUpdated": "2011-07-08 05:02:57"
 }
 
 function detectImport() {
