@@ -7,10 +7,10 @@
 	"minVersion":"2.1.9",
 	"maxVersion":"",
 	"priority":100,
-	"browserSupport":"gcs",
+	"browserSupport":"gcsn",
 	"configOptions":{"dataMode":"rdf/xml"},
 	"inRepository":true,
-	"lastUpdated":"2011-07-04 04:58:27"
+	"lastUpdated":"2011-07-08 04:51:41"
 }
 
 function detectImport() {
