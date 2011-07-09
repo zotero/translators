@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsn",
-	"lastUpdated": "2011-07-08 04:50:39"
+	"lastUpdated": "2011-07-09 15:21:31"
 }
 
 function detectImport() {
@@ -45,7 +45,10 @@ function detectImport() {
 				// read until next newline
 				block = "";
 				inComment = true;
-			} else if((chr == "\n" || chr == "\r") && block) {
+			} else if((chr == "\n" || chr == "\r"
+				// allow one-line entries
+						|| i == (buffer.length - 1))
+						&& block) {
 				// check if this is a BibTeX entry
 				if(re.test(block)) {
 					return true;
@@ -2330,6 +2333,32 @@ var testCases = [
 				"place": "Palo Alto",
 				"edition": "1st,",
 				"ISBN": "0-69-697269-4"
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@article{Oliveira_2009, title={USGS monitoring ecological impacts}, volume={107}, number={29}, journal={Oil & Gas Journal}, author={Oliveira, A}, year={2009}, pages={29}}",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "A",
+						"lastName": "Oliveira",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "USGS monitoring ecological impacts",
+				"volume": "107",
+				"issue": "29",
+				"publicationTitle": "Oil & Gas Journal",
+				"date": "2009",
+				"pages": "29"
 			}
 		]
 	}
