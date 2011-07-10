@@ -2,7 +2,7 @@
         "translatorID": "fe728bc9-595a-4f03-98fc-766f1d8d0936",
         "label": "Wiley Online Library",
         "creator": "Sean Takats, Michael Berkowitz and Avram Lyon",
-        "target": "https?://onlinelibrary\\.wiley\\.com[^\\/]*/(?:doi|advanced/search)",
+        "target": "^https?://onlinelibrary\\.wiley\\.com[^\\/]*/(?:doi|advanced/search)",
         "minVersion": "1.0.0b4.r5",
         "maxVersion": "",
         "priority": 100,
