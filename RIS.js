@@ -416,7 +416,7 @@ function doImport(attachments) {
 			// if this line is a tag, take a look at the previous line to map
 			// its tag
 			if(tag) {
-				Zotero.debug("tag: '"+tag+"'; data: '"+data+"'");
+				//Zotero.debug("tag: '"+tag+"'; data: '"+data+"'");
 				processTag(item, tag, data);
 			}
 
@@ -455,7 +455,7 @@ function doImport(attachments) {
 	}
 
 	if(tag && tag != "ER") {	// save any unprocessed tags
-		Zotero.debug(tag);
+		//Zotero.debug(tag);
 		processTag(item, tag, data);
 		completeItem(item);
 	}

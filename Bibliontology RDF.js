@@ -433,17 +433,17 @@ Type.prototype.getItemSeriesNodes = function(nodes) {
 	// get ITEM_SERIES node
 	var score, subNode;
 	[score, subNode] = this._scoreNodeRelationship(nodes[ITEM], seriesDefinition, 0);
-	Zotero.debug("got itemSeries with score "+score);
+	//Zotero.debug("got itemSeries with score "+score);
 	if(score >= 1) nodes[ITEM_SERIES] = subNode;
 	
 	// get SUBCONTAINER_SERIES node
 	[score, subNode] = this._scoreNodeRelationship(nodes[SUBCONTAINER], seriesDefinition, 0);
-	Zotero.debug("got subcontainerSeries with score "+score);
+	//Zotero.debug("got subcontainerSeries with score "+score);
 	if(score >= 1) nodes[CONTAINER_SERIES] = subNode;
 	
 	// get CONTAINER_SERIES node
 	[score, subNode] = this._scoreNodeRelationship(nodes[CONTAINER], seriesDefinition, 0);
-	Zotero.debug("got containerSeries with score "+score);
+	//Zotero.debug("got containerSeries with score "+score);
 	if(score >= 1) nodes[CONTAINER_SERIES] = subNode;
 }
 
@@ -561,7 +561,7 @@ LiteralProperty = function(field) {
 	this.field = field;
 	this.mapping = FIELDS[field];
 	if(!this.mapping) {
-		Zotero.debug("WARNING: unrecognized field "+field+" in Bibliontology RDF; mapping to Zotero namespace");
+		//Zotero.debug("WARNING: unrecognized field "+field+" in Bibliontology RDF; mapping to Zotero namespace");
 		this.mapping = [ITEM, n.z+field];
 	}
 }
@@ -621,7 +621,7 @@ CreatorProperty = function(field) {
  * Maps creator from an foaf:Agent
  */
 CreatorProperty.prototype.mapToCreator = function(creatorNode, zoteroType) {
-	Zotero.debug("mapping "+Zotero.RDF.getResourceURI(creatorNode)+" to a creator");
+	//Zotero.debug("mapping "+Zotero.RDF.getResourceURI(creatorNode)+" to a creator");
 	var lastNameStmt = Zotero.RDF.getStatementsMatching(creatorNode, n.foaf+"surname", null);
 	if(lastNameStmt) {		// look for a person with a last name
 		creator = {lastName:lastNameStmt[0][2].toString()};
@@ -632,7 +632,7 @@ CreatorProperty.prototype.mapToCreator = function(creatorNode, zoteroType) {
 		if(nameStmt) {		// an organization
 			creator = {lastName:nameStmt[0][2].toString(), fieldMode:1};
 		} else {			// an unnamed entity; ignore it
-			Zotero.debug("Dropping unnamed creator "+creatorNode.toString());
+			//Zotero.debug("Dropping unnamed creator "+creatorNode.toString());
 			return false;
 		}
 	}
@@ -687,7 +687,7 @@ CreatorProperty.prototype.mapFromCreator = function(item, creator, nodes) {
 			// treat other primary creators as dcterms:creators
 			var mapping = CREATORS["author"];
 		} else {
-			Zotero.debug("WARNING: unrecognized creator type "+this.field+" in Bibliontology RDF; mapping to Zotero namespace");
+			//Zotero.debug("WARNING: unrecognized creator type "+this.field+" in Bibliontology RDF; mapping to Zotero namespace");
 			var mapping = [ITEM, AUTHOR_LIST, n.z+this.field];
 		}
 	}
@@ -855,7 +855,7 @@ function doImport() {
 			
 			for each(var type in collapsedTypes[rdfType[2].uri]) {
 				[score, nodes] = type.getMatchScore(itemNode);
-				Zotero.debug("Type "+type.zoteroType+" has score "+score);
+				//Zotero.debug("Type "+type.zoteroType+" has score "+score);
 				
 				// check if this is the best we can do
 				if(score > bestTypeScore) {
@@ -868,11 +868,11 @@ function doImport() {
 		
 		// skip if this doesn't fit any type very well
 		if(bestTypeScore < 1) {
-			Zotero.debug("No good type mapping; best type was "+bestType.zoteroType+" with score "+bestTypeScore);
+			//Zotero.debug("No good type mapping; best type was "+bestType.zoteroType+" with score "+bestTypeScore);
 			continue;
 		}
 		
-		Zotero.debug("Got item of type "+bestType.zoteroType+" with score "+bestTypeScore);
+		//Zotero.debug("Got item of type "+bestType.zoteroType+" with score "+bestTypeScore);
 		nodes = bestNodes;
 		bestType.getItemSeriesNodes(nodes);
 		
@@ -889,7 +889,7 @@ function doImport() {
 				// only handle each property once
 				if(propertiesHandled[property]) continue;
 				propertiesHandled[property] = true;
-				Zotero.debug("handling "+property);
+				//Zotero.debug("handling "+property);
 				
 				var propertyMappings = collapsedProperties[i][property];
 				if(propertyMappings) {
@@ -967,13 +967,13 @@ function doImport() {
 							} else {
 								// creator not already processed, use default for this list type
 								if(j == AUTHOR_LIST) {
-									Zotero.debug("WARNING: creator in authorList lacks relationship to item in Bibliontology RDF; treating as primary creator");
+									//Zotero.debug("WARNING: creator in authorList lacks relationship to item in Bibliontology RDF; treating as primary creator");
 									var prop = new CreatorProperty("author");
 								} else if(j == EDITOR_LIST) {
-									Zotero.debug("WARNING: creator in editorList lacks relationship to item in Bibliontology RDF; treating as editor");
+									//Zotero.debug("WARNING: creator in editorList lacks relationship to item in Bibliontology RDF; treating as editor");
 									var prop = new CreatorProperty("editor");
 								} else {
-									Zotero.debug("WARNING: creator in contributorList lacks relationship to item in Bibliontology RDF; treating as contributor");
+									//Zotero.debug("WARNING: creator in contributorList lacks relationship to item in Bibliontology RDF; treating as contributor");
 									var prop = new CreatorProperty("contributor");
 								}							
 								var creator = prop.mapToCreator(creatorNode, zoteroType);
@@ -1025,7 +1025,7 @@ function doExport() {
 			var property = new LiteralProperty(field);
 			property.mapFromItem(item, nodes);
 		}
-		Zotero.debug("fields added");
+		//Zotero.debug("fields added");
 		
 		// add creators
 		var creatorLists = [];
@@ -1034,7 +1034,7 @@ function doExport() {
 			var property = new CreatorProperty(creator.creatorType);
 			property.mapFromCreator(item, creator, nodes);
 		}
-		Zotero.debug("creators added");
+		//Zotero.debug("creators added");
 		
 		// add tags
 		for each(var tag in item.tags) {
@@ -1054,6 +1054,6 @@ function doExport() {
 		}
 		
 		type.addNodeRelations(nodes);
-		Zotero.debug("relations added");
+		//Zotero.debug("relations added");
 	}
 }
