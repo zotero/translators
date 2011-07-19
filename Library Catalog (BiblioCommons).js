@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-07-19 20:28:38"
+	"lastUpdated": "2011-07-19 20:37:25"
 }
 
 
@@ -41,9 +41,9 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 	var n = doc.documentElement.namespaceURI;
-    var ns = n ? function(prefix) {
-        if (prefix == 'x') return n; else return null;
-    } : null;
+	var ns = n ? function(prefix) {
+		if (prefix == 'x') return n; else return null;
+	} : null;
 
 	// Load MARC
 	var translator = Z.loadTranslator("import");
@@ -71,19 +71,19 @@ function doWeb(doc, url) {
 			});
 		})
 	} else if (url.match(/\/search\?t=/)) {
-    	var results = doc.evaluate('//div[@id="bibList"]/div/div//span[@class="title"]/a[1]', doc, ns, XPathResult.ANY_TYPE, null);
-        var items = new Array();
-        var result;
-        while(result = results.iterateNext()) {
-                var title = result.textContent;
-                var url = result.href.replace(/\/show\//,"/catalogue_info/");
-                items[url] = title;
-        }
-        Zotero.selectItems(items, function (items) {
-        	var urls = [];
-        	var i;
-        	for (i in items) urls.push(i);
-        	Zotero.Utilities.doGet(urls, function (text) {
+		var results = doc.evaluate('//div[@id="bibList"]/div/div//span[@class="title"]/a[1]', doc, ns, XPathResult.ANY_TYPE, null);
+		var items = new Array();
+		var result;
+		while(result = results.iterateNext()) {
+				var title = result.textContent;
+				var url = result.href.replace(/\/show\//,"/catalogue_info/");
+				items[url] = title;
+		}
+		Zotero.selectItems(items, function (items) {
+			var urls = [];
+			var i;
+			for (i in items) urls.push(i);
+			Zotero.Utilities.doGet(urls, function (text) {
 				translator.getTranslatorObject(function (obj) {
 					processor({
 						translator: obj,
@@ -104,7 +104,8 @@ function processor (obj) {
 					.replace(/^.*<div id="marc_details">(?:\s*<[^>"]+>\s*)*/,"")
 					.replace(/<tr +class="(?:odd|even)">\s*/g,"")
 					.replace(/<td +class="marcTag"><strong>(\d+)<\/strong><\/td>\s*/g,"$1\x1F")
-					.replace(/<td +class="marcIndicator">(\d*)\s*<\/td>\s*/g,"$1\x1F")
+					// We may be breaking the indicator here
+					.replace(/<td\s+class="marcIndicator">\s*(\d*)\s*<\/td>\s*/g,"$1\x1F")
 					.replace(/<td +class="marcTagData">(.*?)<\/td>\s*<\/tr>\s*/g,"$1\x1E")
 					.replace(/\x1F(?:[^\x1F]*)$/,"\x1F")
 					// We have some extra 0's at the start of the leader
@@ -180,6 +181,40 @@ var testCases = [
 		"type": "web",
 		"url": "http://nypl.bibliocommons.com/search?t=smart&search_category=keyword&q=tatar&commit=Search&searchOpt=catalogue",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://bostonpl.bibliocommons.com/item/show/3679347042_adam_smith",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "James R",
+						"lastName": "Otteson",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Smith, Adam",
+					"Classical school of economics",
+					"Free enterprise"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"ISBN": "9780826429834",
+				"title": "Adam Smith",
+				"place": "New York",
+				"publisher": "Continuum",
+				"date": "2011",
+				"numPages": "179",
+				"series": "Major conservative and libertarian thinkers",
+				"seriesNumber": "v. 16",
+				"callNumber": "HB103.S6",
+				"libraryCatalog": "bostonpl Library Catalog"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
