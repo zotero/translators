@@ -1,9 +1,9 @@
 {
 	"translatorID": "d0b1914a-11f1-4dd7-8557-b32fe8a3dd47",
 	"label": "EBSCOhost",
-	"creator": "Simon Kornblith and Michael Berkowitz",
+	"creator": "Simon Kornblith, Michael Berkowitz, Josh Geller",
 	"target": "^https?://[^/]+/(?:eds|bsi|ehost)/(?:results|detail|folder)",
-	"minVersion": "1.0.0b3.r1",
+	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": "1",
@@ -32,76 +32,20 @@ function detectWeb(doc, url) {
 	if(searchResult) {
 		return "multiple";
 	}
-/*
-	var xpath = '//div[@class="citation-wrapping-div"]/dl[@class="citation-fields"]/dt[starts-with(text(), "Persistent link to this record")'
-		+' or starts-with(text(), "Vínculo persistente a este informe")'
-		+' or starts-with(text(), "Lien permanent à cette donnée")'
-		+' or starts-with(text(), "Permanenter Link zu diesem Datensatz")'
-		+' or starts-with(text(), "Link permanente al record")'
-		+' or starts-with(text(), "Link permanente para este registro")'
-		+' or starts-with(text(), "本記錄固定連結")'
-		+' or starts-with(text(), "此记录的永久链接")'
-		+' or starts-with(text(), "このレコードへのパーシスタント リンク")'
-		+' or starts-with(text(), "레코드 링크 URL")'
-		+' or starts-with(text(), "Постоянная ссылка на эту запись")'
-		+' or starts-with(text(), "Bu kayda sürekli bağlantı")'
-		+' or starts-with(text(), "Μόνιμος σύνδεσμος σε αυτό το αρχείο")]';
-*/
-	var xpath = '//input[@id="ctl00_ctl00_Column2_Column2_topDeliveryControl_deliveryButtonControl_lnkExport"]';
+
+	var xpath = '//a[@class="permalink-link"]';
 	var persistentLink = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 	if(persistentLink) {
 		return "journalArticle";
 	}
 }
 
-var customViewStateMatch = /<input type="hidden" name="__CUSTOMVIEWSTATE" id="__CUSTOMVIEWSTATE" value="([^"]+)" \/>/
-var host;
-
-function fullEscape(text) {
-	return escape(text).replace(/\//g, "%2F").replace(/\+/g, "%2B");
-}
-
-function generateDeliverString(nsResolver, doc){	
-	var hiddenInputs = doc.evaluate('//input[@type="hidden" and not(contains(@name, "folderHas")) and not(@name ="ajax")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var hiddenInput;
-	var deliverString ="";
-	while(hiddenInput = hiddenInputs.iterateNext()) {
-		if (hiddenInput.name !== "__EVENTTARGET" && hiddenInput.name !== "") {
-			deliverString = deliverString+hiddenInput.name.replace(/\$/g, "%24")+"="+encodeURIComponent(hiddenInput.value) + "&";
-		}
-	}
-	var otherHiddenInputs = doc.evaluate('//input[@type="hidden" and contains(@name, "folderHas")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	while(hiddenInput = otherHiddenInputs.iterateNext()) {
-		deliverString = deliverString+hiddenInput.name.replace(/\$/g, "%24")+"="+escape(hiddenInput.value).replace(/\//g, "%2F").replace(/%20/g, "+") + "&";
-	}
-	
-	deliverString = "__EVENTTARGET=ctl00%24ctl00%24Column2%24Column2%24topDeliveryControl%24deliveryButtonControl%24lnkExport&" + deliverString;
-	
-	return deliverString;
-}
-
-
 /*
  * given the text of the delivery page, downloads an item
  */
 function downloadFunction(text) {
-	var postMatch = false;
-	var form = text.match(/<form[^>]*(?:id|name)="aspnetForm"[^>]*/);
-	if (form) postMatch = form[0].match(/action="([^"]+)"/);
-	else postMatch = customViewStateMatch.exec(text);
- 	if (!postMatch) {
-	 	Zotero.debug("Failed to find download URI in delivery page.");
-	 	return false;
- 	}
-	var deliveryURL = postMatch[1].replace(/&amp;/g,"&");
- 	var viewstateMatch = customViewStateMatch.exec(text);
- 	var downloadString = "__EVENTTARGET=&__EVENTARGUMENT=&__CUSTOMVIEWSTATE="+fullEscape(viewstateMatch[1])+"&__VIEWSTATE=&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl00%24btnSubmit=Save&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl00%24BibFormat=1&ajax=enabled";
-
 	
-	Zotero.Utilities.HTTP.doPost(host+"/ehost/"+deliveryURL,
-								 downloadString, function(text) {	// get marked records as RIS
 		Zotero.debug(text);
-		// load translator for RIS
 		if (text.match(/^AB\s\s\-/m)) text = text.replace(/^AB\s\s\-/m, "N2  -");
 		if (!text.match(/^TY\s\s-/m)) text = text+"\nTY  - JOUR\n"; 
 		// load translator for RIS
@@ -131,8 +75,9 @@ function downloadFunction(text) {
 		translator.translate();
 		
 		Zotero.done();
-	});
 }
+
+var host;
 
 function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
@@ -148,12 +93,24 @@ function doWeb(doc, url) {
 	                                XPathResult.ANY_TYPE, null).iterateNext();                              
 
 	if(searchResult) {
+		/* Get title links and text */
 		var titlex = '//a[@class = "title-link color-p4"]';
 		var titles = doc.evaluate(titlex, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		
+		/* Get folder data for AN, DB, and tag */
+		var folderx = '//span[@class = "item add-to-folder"]/input/@value';
+		var folderData = doc.evaluate(folderx, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		
 		var items = new Object();
-		var title;
+		var folderInfos = new Object();
+		var title, folderInfo;
+		
+		/* load up urls, title text and records keys (DB, AN, tag) */
 		while (title = titles.iterateNext()) {
 			items[title.href] = title.textContent;
+			
+			folderInfo = folderData.iterateNext();
+			folderInfos[title.href] = folderInfo.textContent;
 		}
 		
 		var items = Zotero.selectItems(items);
@@ -161,28 +118,53 @@ function doWeb(doc, url) {
 			return true;
 		}
 
-		var uris = new Array();
+		/* Get each citation page and pass in record key (db, tag, an) since data does not exist in an easily digestable way on this page */
+		var urls = [];
+		var infos = [];
 		for(var i in items) {
-			uris.push(i);
+			urls.push(i);
+			infos.push(folderInfos[i]);
 		}
-		
-		Zotero.Utilities.processDocuments(uris, function(newDoc){
-			var postURL = newDoc.evaluate('//form[@id="aspnetForm"]/@action', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			postURL = host+"/ehost/"+postURL.nodeValue;
-			var deliverString = generateDeliverString(nsResolver, newDoc);
-			Zotero.Utilities.HTTP.doPost(postURL, deliverString, downloadFunction);
-		});
-	} else {
-		//This is a hack, generateDeliveryString is acting up for single pages, but it works on the plink url
-		// The URL-encoding can cause issues too-- we decode it
-		var link = [decodeURI(doc.evaluate("//input[@id ='pLink']/@value", doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue)];
-		Zotero.Utilities.processDocuments(link, function(newDoc){			
-			var postURL = newDoc.evaluate('//form[@id="aspnetForm"]/@action', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			postURL = host+"/ehost/"+postURL.nodeValue;
-			var deliverString = generateDeliverString(nsResolver, newDoc);
-			Zotero.Utilities.HTTP.doPost(postURL, deliverString, downloadFunction);
-		});
 
+		var run (urls, infos) {
+			var url, info;
+			if (urls.length == 0 || folderInfos.length == 0) {
+				Zotero.done();
+				return true;
+			}
+			url = urls.shift();
+			info = infos.shift();
+			Zotero.Utilities.processDocuments(url, function (newDoc) {
+				doDelivery(doc, nsResolver, info);
+			}, function () {run(urls, infos)});
+		}
+
+		run (urls, infos);
+
+		Zotero.wait();
+	} else {
+		/* Individual record. Record key exists in attribute for add to folder link in DOM */
+		doDelivery(doc, nsResolver, null);
 	}
-	Zotero.wait();
+}
+function doDelivery(doc, nsResolver, folderData) {
+	if(folderData === null)	{
+		/* On page that has add to folder link and easily read db, tag, and an */
+		folderData = doc.evaluate('//a[@class="folder-link"]/@data-folder', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	}
+
+	var jsonData = JSON.parse(folderData);
+	
+	var postURL = doc.evaluate('//form[@id="aspnetForm"]/@action', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+
+	var queryString = {};
+	postURL.replace(
+		new RegExp("([^?=&]+)(=([^&]*))?", "g"),
+			function($0, $1, $2, $3) { queryString[$1] = $3; }
+	);
+	
+	/* ExportFormat = 1 for RIS file */
+	postURL = host+"/ehost/delivery/ExportPanelSave/"+jsonData.db+"_"+jsonData.uiTerm+"_"+jsonData.uiTag+"?sid="+queryString["sid"]+"&vid="+queryString["vid"]+"&bdata="+queryString["bdata"]+"&theExportFormat=1";
+	
+	Zotero.Utilities.HTTP.doGet(postURL, downloadFunction);
 }
