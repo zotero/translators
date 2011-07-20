@@ -119,17 +119,19 @@ function doWeb(doc, url) {
 		}
 
 		/* Get each citation page and pass in record key (db, tag, an) since data does not exist in an easily digestable way on this page */
+		var urls = [];
 		for(var i in items) {
-			Zotero.debug(i + folderInfos[i]);
-			var newDoc = Zotero.Utilities.processDocuments(i, function (newDoc) {
-				doDelivery(newDoc, nsResolver, folderInfos[i]);
-			}, function() {Zotero.done()}); 
+			urls.push(i);
 		}
+		Zotero.Utilities.processDocuments(urls, function (newDoc) {
+			var j = newDoc.location.href;
+			doDelivery(newDoc, nsResolver, folderInfos[j]);
+		}, function() {Zotero.done()}); 
+		Zotero.wait();
 	} else {
 		/* Individual record. Record key exists in attribute for add to folder link in DOM */
 		doDelivery(doc, nsResolver, null);
 	}
-	Zotero.wait();
 }
 function doDelivery(doc, nsResolver, folderData) {
 	if(folderData === null)	{
