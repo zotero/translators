@@ -1,14 +1,14 @@
 {
-        "translatorID": "fe728bc9-595a-4f03-98fc-766f1d8d0936",
-        "label": "Wiley Online Library",
-        "creator": "Sean Takats, Michael Berkowitz and Avram Lyon",
-        "target": "^https?://onlinelibrary\\.wiley\\.com[^\\/]*/(?:doi|advanced/search)",
-        "minVersion": "1.0.0b4.r5",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": "1",
-        "translatorType": 4,
-        "lastUpdated": "2011-03-27 01:29:16"
+	"translatorID": "fe728bc9-595a-4f03-98fc-766f1d8d0936",
+	"label": "Wiley Online Library",
+	"creator": "Sean Takats, Michael Berkowitz and Avram Lyon",
+	"target": "^https?://onlinelibrary\\.wiley\\.com[^\\/]*/(?:doi|advanced/search)",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"lastUpdated": "2011-07-20 14:25:04"
 }
 
 function detectWeb(doc, url){
@@ -96,25 +96,25 @@ function scrape(doc,url)
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
-       
+	   
 	var newItem=new Zotero.Item("journalArticle");
-       var temp;
-       var xpath;
-       var row;
-       var rows;
+	   var temp;
+	   var xpath;
+	   var row;
+	   var rows;
 
-       newItem.url = doc.location.href;
-       var metaTags = doc.getElementsByTagName("meta");
+	   newItem.url = doc.location.href;
+	   var metaTags = doc.getElementsByTagName("meta");
 
-       var pages = [false, false];
-       var doi = false;
-       var pdf = false;
-       var html = false;
+	   var pages = [false, false];
+	   var doi = false;
+	   var pdf = false;
+	   var html = false;
 	for (var i = 0; i< metaTags.length; i++) {
 		var tag = metaTags[i].getAttribute("name");
 		var value = metaTags[i].getAttribute("content");
 		//Zotero.debug(pages + pdf + html);
-       		//Zotero.debug("Have meta tag: " + tag + " => " + value);
+	   		//Zotero.debug("Have meta tag: " + tag + " => " + value);
 		switch (tag) {
 			// PRISM
 			case "prism.publicationName": newItem.publicationTitle = value; break;
@@ -184,7 +184,14 @@ function scrape(doc,url)
 		var abstractNode = doc.evaluate('//div[@id="abstract"]/div[@class="para"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 		if (abstractNode) newItem.abstractNote = abstractNode.textContent;
 	}
-       newItem.complete();
+	
+	// Fix things in uppercase
+	var toFix = [ "title", "shortTitle" ];
+	for each (var i in toFix) {
+		if (newItem[i] && newItem[i].toUpperCase() == newItem[i])
+			newItem[i] = Zotero.Utilities.capitalizeTitle(newItem[i].toLowerCase(), true);
+	}
+	newItem.complete();
 }
 
 // Implementation of ISBN and ISSN check-digit verification
@@ -322,3 +329,53 @@ idCheck = function(isbn) {
 	if(!valid13) {num13 = false};
 	return {"isbn10" : num10, "isbn13" : num13, "issn" : num8};
 }
+
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://onlinelibrary.wiley.com/doi/10.1111/j.1088-4963.2009.01154.x/abstract",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Michael",
+						"lastName": "Otsuka",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alex",
+						"lastName": "Voorhoeve",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": false,
+						"title": "Wiley Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"url": "http://onlinelibrary.wiley.com/doi/10.1111/j.1088-4963.2009.01154.x/abstract",
+				"DOI": "10.1111/j.1088-4963.2009.01154.x",
+				"volume": "37",
+				"issue": "2",
+				"publicationTitle": "Philosophy & Public Affairs",
+				"publisher": "Blackwell Publishing Inc",
+				"ISSN": "1088-4963",
+				"title": "Why It Matters That Some Are Worse Off Than Others: An Argument against the Priority View",
+				"language": "en",
+				"date": "2009/03/01",
+				"pages": "171-199",
+				"libraryCatalog": "Wiley Online Library",
+				"shortTitle": "Why It Matters That Some Are Worse Off Than Others"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
