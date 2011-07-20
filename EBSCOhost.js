@@ -122,11 +122,22 @@ function doWeb(doc, url) {
 		var urls = [];
 		for(var i in items) {
 			urls.push(i);
+			infos.push(folderInfos[i]);
 		}
-		Zotero.Utilities.processDocuments(urls, function (newDoc) {
-			var j = newDoc.location.href;
-			doDelivery(newDoc, nsResolver, folderInfos[j]);
-		}, function() {Zotero.done()}); 
+
+		var run (urls, infos) {
+			var url, info;
+			if (urls.length == 0 || folderInfos.length == 0)
+				Zotero.done();
+			url = urls.shift();
+			info = infos.shift();
+			Zotero.Utilities.processDocuments(url, function (newDoc) {
+				doDelivery(doc, nsResolver, info);
+			}, function () {run(urls, infos)});
+		}
+
+		run (urls, infos);
+
 		Zotero.wait();
 	} else {
 		/* Individual record. Record key exists in attribute for add to folder link in DOM */
