@@ -120,6 +120,7 @@ function doWeb(doc, url) {
 
 		/* Get each citation page and pass in record key (db, tag, an) since data does not exist in an easily digestable way on this page */
 		var urls = [];
+		var infos = [];
 		for(var i in items) {
 			urls.push(i);
 			infos.push(folderInfos[i]);
