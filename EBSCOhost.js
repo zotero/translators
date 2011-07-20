@@ -69,6 +69,7 @@ function downloadFunction(text) {
 			item.url = false;
 			// RIS translator tries to download the link in "UR" this leads to unhappyness
 			item.attachments = [];
+			item.notes = [];
 			item.complete();
 
 		});
