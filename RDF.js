@@ -300,7 +300,7 @@ function importItem(newItem, node, type) {
 	}
 	
 	if(!newItem.itemType) {
-		newItem.itemType = Export.defaultUnknownType;
+		newItem.itemType = exports.defaultUnknownType;
 	}
 	
 	// regular author-type creators
@@ -634,10 +634,8 @@ function doImport() {
 	}
 }
 
-/*
+/**
  * Export doImport and defaultUnknownType to other translators
  */
-var Export = {
-	"doImport":doImport,
-	"defaultUnknownType":"book"
-};
+exports.doImport = doImport;
+exports.defaultUnknownType = "book";
