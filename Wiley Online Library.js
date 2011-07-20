@@ -23,10 +23,6 @@ function detectWeb(doc, url){
 }
 
 function doWeb(doc, url){
-	// Define ZU, Z
-	if (!ZU) var ZU = Zotero.Utilities;
-	if (!Z) var Z = Zotero;
-
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
@@ -138,7 +134,7 @@ function scrape(doc,url)
 				if (newItem.creators.length == 0) {
 					for each(var author in value.split(';')) {
 						if (author.toUpperCase() == author)
-							author = ZU.capitalizeTitle(author.toLowerCase(), true);
+							author = Zotero.Utilities.capitalizeTitle(author.toLowerCase(), true);
 						newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author", true));
 					}
 				}
