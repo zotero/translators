@@ -32,21 +32,7 @@ function detectWeb(doc, url) {
 	if(searchResult) {
 		return "multiple";
 	}
-/*
-	var xpath = '//div[@class="citation-wrapping-div"]/dl[@class="citation-fields"]/dt[starts-with(text(), "Persistent link to this record")'
-		+' or starts-with(text(), "Vínculo persistente a este informe")'
-		+' or starts-with(text(), "Lien permanent à cette donnée")'
-		+' or starts-with(text(), "Permanenter Link zu diesem Datensatz")'
-		+' or starts-with(text(), "Link permanente al record")'
-		+' or starts-with(text(), "Link permanente para este registro")'
-		+' or starts-with(text(), "本記錄固定連結")'
-		+' or starts-with(text(), "此记录的永久链接")'
-		+' or starts-with(text(), "このレコードへのパーシスタント リンク")'
-		+' or starts-with(text(), "레코드 링크 URL")'
-		+' or starts-with(text(), "Постоянная ссылка на эту запись")'
-		+' or starts-with(text(), "Bu kayda sürekli bağlantı")'
-		+' or starts-with(text(), "Μόνιμος σύνδεσμος σε αυτό το αρχείο")]';
-*/
+
 	var xpath = '//a[@class="permalink-link"]';
 	var persistentLink = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 	if(persistentLink) {
