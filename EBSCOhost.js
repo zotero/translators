@@ -127,8 +127,10 @@ function doWeb(doc, url) {
 
 		var run (urls, infos) {
 			var url, info;
-			if (urls.length == 0 || folderInfos.length == 0)
+			if (urls.length == 0 || folderInfos.length == 0) {
 				Zotero.done();
+				return true;
+			}
 			url = urls.shift();
 			info = infos.shift();
 			Zotero.Utilities.processDocuments(url, function (newDoc) {
