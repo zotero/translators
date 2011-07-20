@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-07-20 14:25:04"
+	"lastUpdated": "2011-07-20 17:14:04"
 }
 
 function detectWeb(doc, url){
@@ -172,10 +172,7 @@ function scrape(doc,url)
 				Zotero.debug("Ignoring meta tag: " + tag + " => " + value);
 		}
 	}
-	
-	if (pdf) newItem.attachments = [{url:pdf, title:"Wiley Full Text PDF", mimeType:"application/pdf"}];
-	if (html) newItem.attachments = [{url:html, title:"Wiley Full Text HTML"}];
-	
+
 	if (pages[0] && pages[1]) newItem.pages = pages.join('-')
 	else newItem.pages = pages[0] ? pages[1] : (pages[1] ? pages[1] : "");
 
@@ -191,7 +188,19 @@ function scrape(doc,url)
 		if (newItem[i] && newItem[i].toUpperCase() == newItem[i])
 			newItem[i] = Zotero.Utilities.capitalizeTitle(newItem[i].toLowerCase(), true);
 	}
-	newItem.complete();
+
+	if (html) newItem.attachments = [{url:html, title:"Wiley Full Text HTML"}];
+
+	if (pdf) {
+		Zotero.Utilities.doGet(pdf, function(text) {
+			pdf = text.match(/<iframe id="pdfDocument" src="([^"]*)"/);
+			if (pdf) newItem.attachments.push({url:pdf[1].replace(/&amp;/g,"&"), title:"Wiley Full Text PDF", mimeType:"application/pdf"});	
+			//<iframe id="pdfDocument" src="http://onlinelibrary.wiley.com/store/10.1111/j.1088-4963.2009.01154.x/asset/j.1088-4963.2009.01154.x.pdf?v=1&amp;t=gqcawqo5&amp;s=7ea8c89d203f02c212feeda25925ae663d37cc48" width="100%" height="100%">
+			newItem.complete();
+		}, function () {Zotero.done()});
+	} else {
+		newItem.complete();
+	}
 }
 
 // Implementation of ISBN and ISSN check-digit verification
