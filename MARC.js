@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsn",
-	"lastUpdated": "2011-07-08 05:02:57"
+	"lastUpdated": "2011-07-21 17:16:37"
 }
 
 function detectImport() {
@@ -171,8 +171,8 @@ record.prototype.getField = function(field) {
 		
 		// add to array, replacing null characters
 		fields.push([this.content.substr(location[0], this.indicatorLength),
-		             this.content.substr(location[0]+this.indicatorLength,
-		               location[1]-this.indicatorLength-1).replace(/\x00/g, "")]);
+			this.content.substr(location[0]+this.indicatorLength,
+			location[1]-this.indicatorLength-1).replace(/\x00/g, "")]);
 	}
 	
 	return fields;
@@ -450,11 +450,11 @@ record.prototype.translate = function(item) {
 		this._associateDBField(item, "260", "c", "date", pullNumber);
 		// Extract pages
 		this._associateDBField(item, "300", "a", "numPages", pullNumber);
-                // Extract series and series number
-                // The current preference is 490
-                this._associateDBField(item, "490", "a", "series");
-                this._associateDBField(item, "490", "v", "seriesNumber");
-                // 440 was made obsolete as of 2008; see http://www.loc.gov/marc/bibliographic/bd4xx.html
+		// Extract series and series number
+		// The current preference is 490
+		this._associateDBField(item, "490", "a", "series");
+		this._associateDBField(item, "490", "v", "seriesNumber");
+		// 440 was made obsolete as of 2008; see http://www.loc.gov/marc/bibliographic/bd4xx.html
 		this._associateDBField(item, "440", "a", "series");
 		this._associateDBField(item, "440", "v", "seriesNumber");
 		// Extract call number
@@ -533,6 +533,11 @@ function doImport() {
 		}
 	}
 }
+
+exports.record = record;
+exports.fieldTerminator = fieldTerminator;
+exports.recordTerminator = recordTerminator;
+exports.subfieldDelimiter = subfieldDelimiter;
 
 /** BEGIN TEST CASES **/
 var testCases = [
