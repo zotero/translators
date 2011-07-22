@@ -3,12 +3,12 @@
 	"label": "ISI Web of Knowledge",
 	"creator": "Michael Berkowitz, Avram Lyon",
 	"target": "(WOS_GeneralSearch|product=WOS|product=CABI)",
-	"minVersion": "2.0",
+	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 5,
-	"lastUpdated": "2011-07-21 13:00:54"
+	"lastUpdated": "2011-07-22 13:20:21"
 }
 
 function detectWeb(doc, url) {
@@ -79,25 +79,30 @@ function fetchIds(ids, url) {
 }
 
 function detectImport() {
-        var line;
-        var i = 0;
-        while((line = Zotero.read()) !== false) {
-                line = line.replace(/^\s+/, "");
-                if(line != "") {
-                        if(line.substr(0, 4).match(/^PT [A-Z]/)) {
-                                return true;
-                        } else {
-                                if(i++ > 3) {
-                                        return false;
-                                }
-                        }
-                }
-        }
+		var line;
+		var i = 0;
+		while((line = Zotero.read()) !== false) {
+				line = line.replace(/^\s+/, "");
+				if(line != "") {
+						if(line.substr(0, 4).match(/^PT [A-Z]/)) {
+								return true;
+						} else {
+								if(i++ > 3) {
+										return false;
+								}
+						}
+				}
+		}
 
 }
 
 function processTag(item, field, content) {
-	var map = {"J": "journalArticle"};
+	var map = {
+		"J": "journalArticle",
+		"S": "bookSection", // Not sure
+		"P": "patent",
+		"B": "book"
+	};
 	if (field == "PT") {
 		item.itemType = map[content];
 		if (item.itemType === undefined) {
@@ -105,37 +110,77 @@ function processTag(item, field, content) {
 			Z.debug("Unknown type: " + content);
 		}
 	} else if ((field == "AF" || field == "AU")) {
+		//Z.debug(content);
 		authors = content.split("\n");
 		for each (var i in authors) {
 			var author = i.split(",");
-			item.creators.push({firstName:author[1], lastName:author[0], creatorType:"author"});
+			item.creators[0][field].push({firstName:author[1].trim(),
+					lastName:author[0].trim(),
+					creatorType:"author"});
+		}
+	} else if ((field == "BE")) {
+		//Z.debug(content);
+		authors = content.split("\n");
+		for each (var i in authors) {
+			var author = i.split(",");
+			item.creators[1].push({firstName:author[1].trim(),
+					lastName:author[0].trim(),
+					creatorType:"editor"});
 		}
 	} else if (field == "TI") {
 		item.title = content;
+	} else if (field == "JI") {
+		item.journalAbbreviation = content;
 	} else if (field == "SO") {
-		// People say ISI is bad about being all-caps; let's try this for now
-		// http://forums.zotero.org/discussion/17316
-		if (content.toUpperCase() == content)
-			content = Zotero.Utilities.capitalizeTitle(content.toLowerCase(), true);
 		item.publicationTitle = content;
 	} else if (field == "SN") {
 		item.ISSN = content;
+	} else if (field == "BN") {
+		item.ISBN = content;
 	} else if (field == "PD" || field == "PY") {
 		if (item.date) {
 			item.date += " " + content;
 		} else {
 			item.date = content;
 		}
+		var year = item.date.match(/\d{4}/);
+		// If we have a double year, eliminate one
+		if (year && item.date.replace(year,"").indexOf(year) !== -1)
+			item.date = item.date.replace(year,"");
 	} else if (field == "VL") {
 		item.volume = content;
 	} else if (field == "IS") {
 		item.issue = content;
+	} else if (field == "UT") {
+		item.extra += content;
 	} else if (field == "BP") {
 		item.pages = content;
 	} else if (field == "EP") {
 		item.pages += "-" + content;
 	} else if (field == "AB") {
 		item.abstractNote = content;
+	} else if (field == "PI" || field == "C1") {
+		item.place = content;
+	} else if (field == "LA") {
+		item.language = content;
+	} else if (field == "PU") {
+		item.publisher = content;
+	// Patent stuff
+	} else if (field == "DG") {
+		item.issueDate = content;
+	} else if (field == "PN") {
+		item.patentNumber = content;
+	} else if (field == "AE") {
+		item.assignee = content;
+	} else if (field == "PL") { // not sure...
+		item.priorityNumber = content;
+	} else if (field == "PC") { // use for patents
+		item.country = content;
+	// A whole mess of tags
+	} else if (field == "DE" || field == "BD"
+			|| field == "OR" || field == "ID"
+			|| field == "MC" || field == "MQ") {
+		item.tags = item.tags.concat(content.split(";"));
 	} else if (field == "DI") {
 		item.DOI = content;
 	} else {
@@ -144,6 +189,43 @@ function processTag(item, field, content) {
 }
 
 function completeItem(item) {
+	var i;
+	var creators = [];
+	// If we have full names, drop the short ones
+	if (item.creators[0]["AF"].length) {
+		creators = item.creators[0]["AF"];
+	} else {
+		creators = item.creators[0]["AU"];
+	}
+	// Add other creators
+	if (item.creators[1])
+		item.creators = creators.concat(item.creators[1]);
+	else
+		item.creators = creators;
+		
+	// If we have a patent, change author to inventor
+	if (item.itemType == "patent") {
+		for (i in item.creators) {
+			if (item.creators[i].creatorType == "author") {
+				item.creators[i].creatorType = "inventor";
+			}
+		}
+	}
+	
+	// Fix caps, trim in various places
+	for (i in item.tags) {
+		item.tags[i] = item.tags[i].trim();
+		if (item.tags[i].toUpperCase() == item.tags[i])
+			item.tags[i]=item.tags[i].toLowerCase();
+	}
+	
+	var toFix = ["publisher", "publicationTitle", "place"];
+	for (i in toFix) {
+		var field = toFix[i];
+		if (item[field] && item[field].toUpperCase() == item[field])
+			item[field]=ZU.capitalizeTitle(item[field].toLowerCase(),true);		
+	}
+
 	item.complete();
 }
 
@@ -157,6 +239,9 @@ function doImport(text) {
 
 	var item = new Zotero.Item();
 	var i = 0;
+	item.creators = [{"AU":[], "AF":[]}, []];
+	item.extra = "";
+
 
 	var tag = "PT";
 	
@@ -189,11 +274,13 @@ function doImport(text) {
 			if(tag == "PT") {
 				// new item
 				item = new Zotero.Item();
+				item.creators = [{"AU":[], "AF":[]}, []];
+				item.extra = "";
 				i++;
 			}
 		} else {
 			// otherwise, assume this is data from the previous line continued
-			if(tag == "AU") {
+			if(tag == "AU" || tag == "AF" || tag == "BE") {
 				//Z.debug(rawLine);
 				// preserve line endings for AU fields
 				data += rawLine.replace(/^  /,"\n");
@@ -256,7 +343,7 @@ var testCases = [
 				"issue": "3",
 				"pages": "732-738",
 				"DOI": "10.1128/AEM.02132-10",
-				"date": "FEB 2011 2011",
+				"date": "FEB  2011",
 				"abstractNote": "Malic enzyme catalyzes the reversible oxidative decarboxylation of   malate to pyruvate and CO(2). The Saccharomyces cerevisiae MAE1 gene   encodes a mitochondrial malic enzyme whose proposed physiological roles   are related to the oxidative, malate-decarboxylating reaction. Hitherto,   the inability of pyruvate carboxylase-negative (Pyc(-)) S. cerevisiae   strains to grow on glucose suggested that Mae1p cannot act as a   pyruvate-carboxylating, anaplerotic enzyme. In this study, relocation of   malic enzyme to the cytosol and creation of thermodynamically favorable   conditions for pyruvate carboxylation by metabolic engineering, process   design, and adaptive evolution, enabled malic enzyme to act as the sole   anaplerotic enzyme in S. cerevisiae. The Escherichia coli NADH-dependent   sfcA malic enzyme was expressed in a Pyc(-) S. cerevisiae background.   When PDC2, a transcriptional regulator of pyruvate decarboxylase genes,   was deleted to increase intracellular pyruvate levels and cells were   grown under a CO(2) atmosphere to favor carboxylation, adaptive   evolution yielded a strain that grew on glucose (specific growth rate,   0.06 +/- 0.01 h(-1)). Growth of the evolved strain was enabled by a   single point mutation (Asp336Gly) that switched the cofactor preference   of E. coli malic enzyme from NADH to NADPH. Consistently, cytosolic   relocalization of the native Mae1p, which can use both NADH and NADPH,   in a pyc1,2 Delta pdc2 Delta strain grown under a CO(2) atmosphere, also   enabled slow-growth on glucose. Although growth rates of these strains   are still low, the higher ATP efficiency of carboxylation via malic   enzyme, compared to the pyruvate carboxylase pathway, may contribute to   metabolic engineering of S. cerevisiae for anaerobic, high-yield   C(4)-dicarboxylic acid production.",
 				"ISSN": "0099-2240"
 			},
@@ -299,7 +386,7 @@ var testCases = [
 				"issue": "16",
 				"pages": "5383-5389",
 				"DOI": "10.1128/AEM.01077-10",
-				"date": "AUG 2010 2010",
+				"date": "AUG  2010",
 				"abstractNote": "Pyruvate carboxylase is the sole anaplerotic enzyme in glucose-grown   cultures of wild-type Saccharomyces cerevisiae. Pyruvate   carboxylase-negative (Pyc(-)) S. cerevisiae strains cannot grow on   glucose unless media are supplemented with C(4) compounds, such as   aspartic acid. In several succinate-producing prokaryotes,   phosphoenolpyruvate carboxykinase (PEPCK) fulfills this anaplerotic   role. However, the S. cerevisiae PEPCK encoded by PCK1 is repressed by   glucose and is considered to have a purely decarboxylating and   gluconeogenic function. This study investigates whether and under which   conditions PEPCK can replace the anaplerotic function of pyruvate   carboxylase in S. cerevisiae. Pyc(-) S. cerevisiae strains   constitutively overexpressing the PEPCK either from S. cerevisiae or   from Actinobacillus succinogenes did not grow on glucose as the sole   carbon source. However, evolutionary engineering yielded mutants able to   grow on glucose as the sole carbon source at a maximum specific growth   rate of ca. 0.14 h(-1), one-half that of the (pyruvate   carboxylase-positive) reference strain grown under the same conditions.   Growth was dependent on high carbon dioxide concentrations, indicating   that the reaction catalyzed by PEPCK operates near thermodynamic   equilibrium. Analysis and reverse engineering of two independently   evolved strains showed that single point mutations in pyruvate kinase,   which competes with PEPCK for phosphoenolpyruvate, were sufficient to   enable the use of PEPCK as the sole anaplerotic enzyme. The PEPCK   reaction produces one ATP per carboxylation event, whereas the original   route through pyruvate kinase and pyruvate carboxylase is ATP neutral.   This increased ATP yield may prove crucial for engineering of efficient   and low-cost anaerobic production of C(4) dicarboxylic acids in S.   cerevisiae.",
 				"ISSN": "0099-2240"
 			},
@@ -342,7 +429,7 @@ var testCases = [
 				"issue": "3",
 				"pages": "744-750",
 				"DOI": "10.1128/AEM.02396-09",
-				"date": "FEB 2010 2010",
+				"date": "FEB  2010",
 				"abstractNote": "A recent effort to improve malic acid production by Saccharomyces   cerevisiae by means of metabolic engineering resulted in a strain that   produced up to 59 g liter(-1) of malate at a yield of 0.42 mol (mol   glucose)(-1) in calcium carbonate-buffered shake flask cultures. With   shake flasks, process parameters that are important for scaling up this   process cannot be controlled independently. In this study, growth and   product formation by the engineered strain were studied in bioreactors   in order to separately analyze the effects of pH, calcium, and carbon   dioxide and oxygen availability. A near-neutral pH, which in shake   flasks was achieved by adding CaCO(3), was required for efficient C(4)   dicarboxylic acid production. Increased calcium concentrations, a side   effect of CaCO(3) dissolution, had a small positive effect on malate   formation. Carbon dioxide enrichment of the sparging gas (up to 15%   [vol/vol]) improved production of both malate and succinate. At higher   concentrations, succinate titers further increased, reaching 0.29 mol   (mol glucose)(-1), whereas malate formation strongly decreased. Although   fully aerobic conditions could be achieved, it was found that moderate   oxygen limitation benefitted malate production. In conclusion, malic   acid production with the engineered S. cerevisiae strain could be   successfully transferred from shake flasks to 1-liter batch bioreactors   by simultaneous optimization of four process parameters (pH and   concentrations of CO(2), calcium, and O(2)). Under optimized conditions,   a malate yield of 0.48 +/- 0.01 mol (mol glucose)(-1) was obtained in   bioreactors, a 19% increase over yields in shake flask experiments.",
 				"ISSN": "0099-2240"
 			},
@@ -380,7 +467,7 @@ var testCases = [
 				"issue": "8",
 				"pages": "1123-1136",
 				"DOI": "10.1111/j.1567-1364.2009.00537.x",
-				"date": "DEC 2009 2009",
+				"date": "DEC  2009",
 				"abstractNote": "To meet the demands of future generations for chemicals and energy and   to reduce the environmental footprint of the chemical industry,   alternatives for petrochemistry are required. Microbial conversion of   renewable feedstocks has a huge potential for cleaner, sustainable   industrial production of fuels and chemicals. Microbial production of   organic acids is a promising approach for production of chemical   building blocks that can replace their petrochemically derived   equivalents. Although Saccharomyces cerevisiae does not naturally   produce organic acids in large quantities, its robustness, pH tolerance,   simple nutrient requirements and long history as an industrial workhorse   make it an excellent candidate biocatalyst for such processes. Genetic   engineering, along with evolution and selection, has been successfully   used to divert carbon from ethanol, the natural endproduct of S.   cerevisiae, to pyruvate. Further engineering, which included expression   of heterologous enzymes and transporters, yielded strains capable of   producing lactate and malate from pyruvate. Besides these metabolic   engineering strategies, this review discusses the impact of transport   and energetics as well as the tolerance towards these organic acids. In   addition to recent progress in engineering S. cerevisiae for organic   acid production, the key limitations and challenges are discussed in the   context of sustainable industrial production of organic acids from   renewable feedstocks.",
 				"ISSN": "1567-1356"
 			},
@@ -448,9 +535,331 @@ var testCases = [
 				"issue": "9",
 				"pages": "2766-2777",
 				"DOI": "10.1128/AEM.02591-07",
-				"date": "MAY 2008 2008",
+				"date": "MAY  2008",
 				"abstractNote": "Malic acid is a potential biomass-derivable \"building block\" for   chemical synthesis. Since wild-type Saccharomyces cerevisiae strains   produce only low levels of malate, metabolic engineering is required to   achieve efficient malate production with this yeast. A promising pathway   for malate production from glucose proceeds via carboxylation of   pyruvate, followed by reduction of oxaloacetate to malate. This redox-   and ATP-neutral, CO2-fixing pathway has a theoretical maximum yield of 2   mol malate (mol glucose)(-1). A previously engineered glucose-tolerant,   C-2-independent pyruvate decarboxylase-negative S. cerevisiae strain was   used as the platform to evaluate the impact of individual and combined   introduction of three genetic modifications: (i) overexpression of the   native pyruvate carboxylase encoded by PYC2, (ii) high-level expression   of an allele of the MDH3 gene, of which the encoded malate dehydrogenase   was retargeted to the cytosol by deletion of the C-terminal peroxisomal   targeting sequence, and (iii) functional expression of the   Schizosaccharomyces pombe malate transporter gene SpMAE1. While single   or double modifications improved malate production, the highest malate   yields and titers were obtained with the simultaneous introduction of   all three modifications. In glucose-grown batch cultures, the resulting   engineered strain produced malate at titers of up to 59 g liter(-1) at a   malate yield of 0.42 mol (mol glucose)(-1). Metabolic flux analysis   showed that metabolite labeling patterns observed upon nuclear magnetic   resonance analyses of cultures grown on C-13-labeled glucose were   consistent with the envisaged nonoxidative, fermentative pathway for   malate production. The engineered strains still produced substantial   amounts of pyruvate, indicating that the pathway efficiency can be   further improved.",
 				"ISSN": "0099-2240"
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "FN Thomson Reuters Web of Knowledge\u000aVR 1.0\u000aPT J\u000aAU Smith, L. J.\u000a   Schwark, W. S.\u000a   Cook, D. R.\u000a   Moon, P. F.\u000a   Erb, H. N.\u000a   Looney, A. L.\u000aTI Pharmacokinetics of intravenous mivacurium in halothane-anesthetized\u000a   dogs.\u000aSO Veterinary Surgery\u000aVL 27\u000aIS 2\u000aPS 170\u000aPY 1998\u000aUT CABI:19982209000\u000aDT Abstract only\u000aLA English\u000aSN 0161-3499\u000aCC LL900Animal Toxicology, Poisoning and Pharmacology (Discontinued March\u000a   2000); LL070Pets and Companion Animals\u000aCN 151-67-7\u000aDE anaesthesia; halothane; muscle relaxants; pharmacokinetics\u000aOR dogs\u000aBD Canis; Canidae; Fissipeda; carnivores; mammals; vertebrates; Chordata;\u000a   animals; small mammals; eukaryotes\u000aER\u000a\u000aEF",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": " L. J.",
+						"lastName": "Smith",
+						"creatorType": "author"
+					},
+					{
+						"firstName": " W. S.",
+						"lastName": " Schwark",
+						"creatorType": "author"
+					},
+					{
+						"firstName": " D. R.",
+						"lastName": " Cook",
+						"creatorType": "author"
+					},
+					{
+						"firstName": " P. F.",
+						"lastName": " Moon",
+						"creatorType": "author"
+					},
+					{
+						"firstName": " H. N.",
+						"lastName": " Erb",
+						"creatorType": "author"
+					},
+					{
+						"firstName": " A. L.",
+						"lastName": " Looney",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"anaesthesia",
+					" halothane",
+					" muscle relaxants",
+					" pharmacokinetics",
+					"dogs",
+					"Canis",
+					" Canidae",
+					" Fissipeda",
+					" carnivores",
+					" mammals",
+					" vertebrates",
+					" Chordata",
+					"   animals",
+					" small mammals",
+					" eukaryotes"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Pharmacokinetics of intravenous mivacurium in halothane-anesthetized   dogs.",
+				"publicationTitle": "Veterinary Surgery",
+				"volume": "27",
+				"issue": "2",
+				"date": "1998",
+				"language": "English",
+				"ISSN": "0161-3499"
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "FN Thomson Reuters Web of Knowledge\u000aVR 1.0\u000aPT J\u000aAU Smith, JM \u000aAF Smith, J. Mark\u000aTI Gripewater\u000aSO FIDDLEHEAD\u000aLA English \u000aDT Poetry\u000aNR 0\u000aTC 0\u000aZ9 0\u000aPU UNIV NEW BRUNSWICK\u000aPI FREDERICTON\u000aPA DEPT ENGLISH, CAMPUS HOUSE, PO BOX 4400, FREDERICTON, NB E3B 5A3, CANADA\u000aSN 0015-0630\u000aJ9 FIDDLEHEAD\u000aJI Fiddlehead\u000aPD SPR\u000aPY 2011\u000aIS 247\u000aBP 82\u000aEP 82\u000aPG 1\u000aWC Literary Reviews\u000aSC Literature\u000aGA 757VG\u000aUT WOS:000290115300030\u000aER\u000a\u000aEF",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": " JM ",
+						"lastName": "Smith",
+						"creatorType": "author"
+					},
+					{
+						"firstName": " J. Mark",
+						"lastName": "Smith",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Gripewater",
+				"publicationTitle": "Fiddlehead",
+				"language": "English",
+				"publisher": "UNIV NEW BRUNSWICK",
+				"ISSN": "0015-0630",
+				"date": "SPR 2011",
+				"issue": "247",
+				"pages": "82-82"
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "﻿FN Thomson Reuters Web of Knowledge\u000aVR 1.0\u000aPT S\u000aAU McCormick, MC\u000a   Litt, JS\u000a   Smith, VC\u000a   Zupancic, JAF\u000aAF McCormick, Marie C.\u000a   Litt, Jonathan S.\u000a   Smith, Vincent C.\u000a   Zupancic, John A. F.\u000aBE Fielding, JE\u000a   Brownson, RC\u000a   Green, LW\u000aTI Prematurity: An Overview and Public Health Implications\u000aSO ANNUAL REVIEW OF PUBLIC HEALTH, VOL 32\u000aSE Annual Review of Public Health\u000aLA English\u000aDT Review\u000aDE infant mortality; childhood morbidity; prevention\u000aID LOW-BIRTH-WEIGHT; NEONATAL INTENSIVE-CARE; QUALITY-OF-LIFE; EXTREMELY\u000a   PRETERM BIRTH; YOUNG-ADULTS BORN; AGE 8 YEARS; CHILDREN BORN;\u000a   BRONCHOPULMONARY DYSPLASIA; LEARNING-DISABILITIES; EXTREME PREMATURITY\u000aAB The high rate of premature births in the United States remains a public\u000a   health concern. These infants experience substantial morbidity and\u000a   mortality in the newborn period, which translate into significant\u000a   medical costs. In early childhood, survivors are characterized by a\u000a   variety of health problems, including motor delay and/or cerebral palsy,\u000a   lower IQs, behavior problems, and respiratory illness, especially\u000a   asthma. Many experience difficulty with school work, lower\u000a   health-related quality of life, and family stress. Emerging information\u000a   in adolescence and young adulthood paints a more optimistic picture,\u000a   with persistence of many problems but with better adaptation and more\u000a   positive expectations by the young adults. Few opportunities for\u000a   prevention have been identified; therefore, public health approaches to\u000a   prematurity include assurance of delivery in a facility capable of\u000a   managing neonatal complications, quality improvement to minimize\u000a   interinstitutional variations, early developmental support for such\u000a   infants, and attention to related family health issues.\u000aC1 [McCormick, MC] Harvard Univ, Dept Soc Human Dev & Hlth, Sch Publ Hlth, Boston, MA 02115 USA\u000a   [McCormick, MC; Litt, JS; Smith, VC; Zupancic, JAF] Beth Israel Deaconess Med Ctr, Dept Neonatol, Boston, MA 02215 USA\u000a   [Litt, JS] Childrens Hosp Boston, Div Newborn Med, Boston, MA 02115 USA\u000aRP McCormick, MC (reprint author), Harvard Univ, Dept Soc Human Dev & Hlth, Sch Publ Hlth, Boston, MA 02115 USA\u000aEM mmccormi@hsph.harvard.edu\u000a   vsmith1@bidmc.harvard.edu\u000a   jzupanci@bidmc.harvard.edu\u000a   Jonathan.Litt@childrens.harvard.edu\u000aNR 91\u000aTC 1\u000aZ9 1\u000aPU ANNUAL REVIEWS\u000aPI PALO ALTO\u000aPA 4139 EL CAMINO WAY, PO BOX 10139, PALO ALTO, CA 94303-0897 USA\u000aSN 0163-7525\u000aBN 978-0-8243-2732-3\u000aJ9 ANNU REV PUBL HEALTH\u000aJI Annu. Rev. Public Health\u000aPY 2011\u000aVL 32\u000aBP 367\u000aEP 379\u000aDI 10.1146/annurev-publhealth-090810-182459\u000aPG 13\u000aGA BUZ33\u000aUT WOS:000290776200020\u000aER\u000a\u000aEF",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"creators": [
+					{
+						"firstName": "Marie C.",
+						"lastName": "McCormick",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jonathan S.",
+						"lastName": "Litt",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Vincent C.",
+						"lastName": "Smith",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "John A. F.",
+						"lastName": "Zupancic",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "JE",
+						"lastName": "Fielding",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "RC",
+						"lastName": "Brownson",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "LW",
+						"lastName": "Green",
+						"creatorType": "editor"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"infant mortality",
+					"childhood morbidity",
+					"prevention",
+					"low-birth-weight",
+					"neonatal intensive-care",
+					"quality-of-life",
+					"extremely   preterm birth",
+					"young-adults born",
+					"age 8 years",
+					"children born",
+					"bronchopulmonary dysplasia",
+					"learning-disabilities",
+					"extreme prematurity"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"extra": "WOS:000290776200020",
+				"title": "Prematurity: An Overview and Public Health Implications",
+				"publicationTitle": "Annual Review of Public Health, Vol 32",
+				"language": "English",
+				"abstractNote": "The high rate of premature births in the United States remains a public   health concern. These infants experience substantial morbidity and   mortality in the newborn period, which translate into significant   medical costs. In early childhood, survivors are characterized by a   variety of health problems, including motor delay and/or cerebral palsy,   lower IQs, behavior problems, and respiratory illness, especially   asthma. Many experience difficulty with school work, lower   health-related quality of life, and family stress. Emerging information   in adolescence and young adulthood paints a more optimistic picture,   with persistence of many problems but with better adaptation and more   positive expectations by the young adults. Few opportunities for   prevention have been identified; therefore, public health approaches to   prematurity include assurance of delivery in a facility capable of   managing neonatal complications, quality improvement to minimize   interinstitutional variations, early developmental support for such   infants, and attention to related family health issues.",
+				"publisher": "Annual Reviews",
+				"place": "Palo Alto",
+				"ISSN": "0163-7525",
+				"ISBN": "978-0-8243-2732-3",
+				"journalAbbreviation": "Annu. Rev. Public Health",
+				"date": "2011",
+				"volume": "32",
+				"pages": "367-379",
+				"DOI": "10.1146/annurev-publhealth-090810-182459"
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "﻿FN Thomson Reuters Web of Knowledge\u000aVR 1.0\u000aPT P\u000aUT BIOSIS:PREV201100469175\u000aDT Patent\u000aTI Indexing cell delivery catheter\u000aAU Solar, Matthew S.\u000a   Parmer, Kari\u000a   Smith, Philip\u000a   Murdock, Frank\u000aPN US 07967789\u000aAE Medtronic Inc\u000aDG June 28, 2011\u000aPC USA\u000aPL 604-16501\u000aSO Official Gazette of the United States Patent and Trademark Office\u000a   Patents\u000aPY 2011\u000aPD JUN 28 2011\u000aLA English\u000aAB An insertion device with an insertion axis includes an axial actuator\u000a   with a first portion and a second portion. The first portion is moveable\u000a   along the insertion axis relative to the second portion. The insertion\u000a   device further includes a first tube coupled to the first portion of the\u000a   axial actuator, and the first tube is movable along the insertion axis\u000a   in response to movement of the first portion relative to the second\u000a   portion. The device further includes a second tube having a radially\u000a   biased distal end. The distal end is substantially contained within the\u000a   first tube in a first state, and the second tube is rotatable with\u000a   respect to the first tube. Also, the second tube is axially movable to a\u000a   second state, and a portion of a distal end of the second tube is\u000a   exposed from a distal end of the first tube in the second state.\u000aC1 Indialantic, FL USA\u000aSN 0098-1133\u000aMC Human Medicine (Medical Sciences); Equipment Apparatus Devices and\u000a   Instrumentation\u000aCC 12502, Pathology - General\u000aMQ indexing cell delivery catheter; medical supplies\u000aER\u000a\u000aEF",
+		"items": [
+			{
+				"itemType": "patent",
+				"creators": [
+					{
+						"firstName": "Matthew S.",
+						"lastName": "Solar",
+						"creatorType": "inventor"
+					},
+					{
+						"firstName": "Kari",
+						"lastName": "Parmer",
+						"creatorType": "inventor"
+					},
+					{
+						"firstName": "Philip",
+						"lastName": "Smith",
+						"creatorType": "inventor"
+					},
+					{
+						"firstName": "Frank",
+						"lastName": "Murdock",
+						"creatorType": "inventor"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Human Medicine (Medical Sciences)",
+					"Equipment Apparatus Devices and   Instrumentation",
+					"indexing cell delivery catheter",
+					"medical supplies"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"extra": "BIOSIS:PREV201100469175",
+				"title": "Indexing cell delivery catheter",
+				"patentNumber": "US 07967789",
+				"assignee": "Medtronic Inc",
+				"issueDate": "June 28, 2011",
+				"country": "USA",
+				"priorityNumber": "604-16501",
+				"publicationTitle": "Official Gazette of the United States Patent and Trademark Office   Patents",
+				"date": "JUN 28 2011",
+				"language": "English",
+				"abstractNote": "An insertion device with an insertion axis includes an axial actuator   with a first portion and a second portion. The first portion is moveable   along the insertion axis relative to the second portion. The insertion   device further includes a first tube coupled to the first portion of the   axial actuator, and the first tube is movable along the insertion axis   in response to movement of the first portion relative to the second   portion. The device further includes a second tube having a radially   biased distal end. The distal end is substantially contained within the   first tube in a first state, and the second tube is rotatable with   respect to the first tube. Also, the second tube is axially movable to a   second state, and a portion of a distal end of the second tube is   exposed from a distal end of the first tube in the second state.",
+				"place": "Indialantic, FL USA",
+				"ISSN": "0098-1133"
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "﻿FN Thomson Reuters Web of Knowledge\u000aVR 1.0\u000aPT B\u000aAU Smith, W. G.\u000aTI Ecological anthropology of households in East Madura, Indonesia.\u000aSO Ecological anthropology of households in East Madura, Indonesia\u000aPD 2011\u000aPY 2011\u000aZ9 0\u000aBN 978-90-8585933-8\u000aUT CABI:20113178956\u000aER\u000a\u000aPT J\u000aAU Smith, S. A.\u000aTI Production and characterization of polyclonal antibodies to\u000a   hexanal-lysine adducts for use in an ELISA to monitor lipid oxidation in\u000a   a meat model system.\u000aSO Dissertation Abstracts International, B\u000aVL 58\u000aIS 9\u000aPD 1998, thesis publ. 1997\u000aPY 1998\u000aZ9 0\u000aSN 0419-4217\u000aUT FSTA:1998-09-Sn1570\u000aER\u000a\u000aPT J\u000aAU Smith, E. H.\u000aTI The enzymic oxidation of linoleic and linolenic acid.\u000aSO Dissertation Abstracts International, B\u000aVL 49\u000aIS 4\u000aBP BRD\u000aPD 1988\u000aPY 1988\u000aZ9 0\u000aSN 0419-4217\u000aUT FSTA:1989-04-N-0004\u000aER\u000a\u000aPT J\u000aAU Smith, C. S.\u000aTI The syneresis of renneted milk gels.\u000aSO Dissertation Abstracts International. B, Sciences and Engineering\u000aVL 49\u000aIS 5\u000aBP 1459\u000aPD 1988\u000aPY 1988\u000aZ9 0\u000aSN 0419-4217\u000aUT CABI:19910448509\u000aER\u000a\u000aEF",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "W. G.",
+						"lastName": "Smith",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"extra": "CABI:20113178956",
+				"title": "Ecological anthropology of households in East Madura, Indonesia.",
+				"publicationTitle": "Ecological anthropology of households in East Madura, Indonesia",
+				"date": "2011",
+				"ISBN": "978-90-8585933-8"
+			},
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "S. A.",
+						"lastName": "Smith",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"extra": "FSTA:1998-09-Sn1570",
+				"title": "Production and characterization of polyclonal antibodies to   hexanal-lysine adducts for use in an ELISA to monitor lipid oxidation in   a meat model system.",
+				"publicationTitle": "Dissertation Abstracts International, B",
+				"volume": "58",
+				"issue": "9",
+				"date": ", thesis publ. 1997 1998",
+				"ISSN": "0419-4217"
+			},
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "E. H.",
+						"lastName": "Smith",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"extra": "FSTA:1989-04-N-0004",
+				"title": "The enzymic oxidation of linoleic and linolenic acid.",
+				"publicationTitle": "Dissertation Abstracts International, B",
+				"volume": "49",
+				"issue": "4",
+				"pages": "BRD",
+				"date": "1988",
+				"ISSN": "0419-4217"
+			},
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "C. S.",
+						"lastName": "Smith",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"extra": "CABI:19910448509",
+				"title": "The syneresis of renneted milk gels.",
+				"publicationTitle": "Dissertation Abstracts International. B, Sciences and Engineering",
+				"volume": "49",
+				"issue": "5",
+				"pages": "1459",
+				"date": "1988",
+				"ISSN": "0419-4217"
 			}
 		]
 	}
