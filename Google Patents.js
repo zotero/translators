@@ -112,6 +112,8 @@ function scrape(doc, url) {
 	associateData (newItem, dataTags, "Abstract", "abstractNote");
 	associateData (newItem, dataTags, "Application number", "applicationNumber");
 	
+	var pdf = doc.evaluate('//div[@class="g-button-basic"]/span/span/a[contains(@href,"/download/)]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+	if (pdf) newItem.attachments.push({url:pdf.href, title:"Google Patents PDF", mimeType:"application/pdf"});
 	newItem.title = doc.evaluate('//h1[@class="gb-volume-title"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	newItem.url = doc.location.href.replace(/(^[^\?]*\?id=[a-zA-Z0-9]+).*/,"$1");
 
