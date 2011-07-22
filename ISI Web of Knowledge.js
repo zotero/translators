@@ -107,7 +107,7 @@ function processTag(item, field, content) {
 		item.itemType = map[content];
 		if (item.itemType === undefined) {
 			item.itemType = "journalArticle";
-			Z.debug("Unknown type: " + content);
+			Zotero.debug("Unknown type: " + content);
 		}
 	} else if ((field == "AF" || field == "AU")) {
 		//Z.debug(content);
