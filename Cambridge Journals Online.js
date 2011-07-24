@@ -101,6 +101,13 @@ function scrape (doc) {
 				if (kws) item.tags = kws;
 				if (abs) item.abstractNote = Zotero.Utilities.trimInternal(abs);
 				if (pdflink) {
+					// We push twice, because one will fail
+					// Some PDFs aren't paywalled, so they don't need the 2nd request
+					item.attachments.push({
+						url: pdflink,
+						title: "Cambridge Journals PDF", 
+						mimeType:"application/pdf"
+					});
 					Zotero.Utilities.doGet(pdflink, function(text) {
 						var domain = pdflink.match(/^https?:\/\/[^\/]+\//);
 						var realpdf = text.match(/<iframe src="\/(action\/displayFulltext[^"]+)"/);
