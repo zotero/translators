@@ -244,6 +244,24 @@ record.prototype._associateDBField = function(item, fieldNo, part, fieldName, ex
 	}
 }
 
+// add field to DB as note
+record.prototype._associateNotes = function(item, fieldNo, part) {
+	var field = this.getFieldSubfields(fieldNo);
+	var texts = [];	
+
+	for(var i in field) {
+		for(var j=0; j<part.length; j++) {
+			var myPart = part[j];
+			if(field[i][myPart]) {
+				texts.push(clean(field[i][myPart]));
+			}
+		}
+	}
+	var text = texts.join(' ');
+	if (text.trim() != "")
+		item.notes.push({note: text});
+}
+
 // add field to DB as tags
 record.prototype._associateTags = function(item, fieldNo, part) {
 	var field = this.getFieldSubfields(fieldNo);
@@ -431,6 +449,17 @@ record.prototype.translate = function(item) {
 		this._associateTags(item, "658", "ab");
 		// hierarchical geographic place name
 		this._associateTags(item, "662", "abcdfgh");
+
+		// Extract note fields
+		// http://www.loc.gov/marc/bibliographic/bd5xx.html
+		// general note
+		this._associateNotes(item, "500", "a");
+		// formatted contents (table of contents)
+		this._associateNotes(item, "505", "art");
+		// summary
+		this._associateNotes(item, "520", "ab");
+		// biographical or historical data
+		this._associateNotes(item, "545", "ab");
 		
 		// Extract title
 		this._associateDBField(item, "245", "ab", "title");
@@ -554,7 +583,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
+				"notes": [
+					{
+						"note": "Brunet and Graesse both mention a map of Paraguay; this copy has a map of Chile with title: Tabula geocraphica [sic] regni Chile / studio et labore P. Procuratoris Chilensis Societatis Jesu In 3 books; the first two are biographies of Jesuits, Simon Mazeta and Francisco Diaz Taño, the 3rd deals with Jesuit missions in Paraguay Head and tail pieces"
+					}
+				],
 				"tags": [
 					"Masseta, Simon",
 					"Cuellar y Mosquera, Gabriel de",
