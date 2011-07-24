@@ -69,6 +69,7 @@ function downloadFunction(text) {
 			item.url = false;
 			// RIS translator tries to download the link in "UR" this leads to unhappyness
 			item.attachments = [];
+			item.notes = [];
 			item.complete();
 
 		});
@@ -126,7 +127,7 @@ function doWeb(doc, url) {
 			infos.push(folderInfos[i]);
 		}
 
-		var run (urls, infos) {
+		var run = function(urls, infos) {
 			var url, info;
 			if (urls.length == 0 || folderInfos.length == 0) {
 				Zotero.done();
@@ -139,7 +140,7 @@ function doWeb(doc, url) {
 			}, function () {run(urls, infos)});
 		}
 
-		run (urls, infos);
+		run(urls, infos);
 
 		Zotero.wait();
 	} else {
