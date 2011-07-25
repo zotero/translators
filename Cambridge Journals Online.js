@@ -88,20 +88,24 @@ function scrape (doc) {
 			translator.setString(text);
 			translator.setHandler("itemDone", function(obj, item) {
 				item.attachments = 	[{url:locURL,
-										title:"Cambridge Journals Snapshot",
-										mimeType:"text/html"}];
+							title:"Cambridge Journals Snapshot",
+							mimeType:"text/html"}];
 				item.title = Zotero.Utilities.capitalizeTitle(item.title);
 				var authors = item.creators;
 				item.creators = new Array();
 				for each (var aut in authors) {
+					// correct all-caps, if present
+					if (aut.firstName. && aut.firstName.toUpperCase() == aut.firstName)
+						aut.firstName=Zotero.Utilities.capitalizeTitle(aut.firstName.toLowerCase(),true);	
+					if (aut.lastName. && aut.lastName.toUpperCase() == aut.lastName)
+						aut.lastName=Zotero.Utilities.capitalizeTitle(aut.lastName.toLowerCase(),true);	
 					item.creators.push({firstName:aut.firstName,
-										lastName:aut.lastName,
-										creatorType:"author"});
+								lastName:aut.lastName,
+								creatorType:"author"});
 				}
 				if (kws) item.tags = kws;
 				if (abs) item.abstractNote = Zotero.Utilities.trimInternal(abs);
 				if (pdflink) {
-					// We push twice, because one will fail
 					// Some PDFs aren't paywalled, so they don't need the 2nd request
 					item.attachments.push({
 						url: pdflink,
@@ -112,10 +116,10 @@ function scrape (doc) {
 						var domain = pdflink.match(/^https?:\/\/[^\/]+\//);
 						var realpdf = text.match(/<iframe src="\/(action\/displayFulltext[^"]+)"/);
 						if (realpdf && domain) {
-							item.attachments.push({
-								url: (domain[0]+realpdf[1]).replace(/&amp;/g,"&"),
-								title: "Cambridge Journals PDF", 
-								mimeType:"application/pdf"
+							// If we matched the IFRAME, the first attachment must be bad
+							for (var i in item.attachments) {
+								if (item.attachments[i].mimeType.indexOf("pdf") !== -1)
+									item.attachments[i].url = (domain[0]+realpdf[1]).replace(/&amp;/g,"&");
 							});
 						}
 					}, function () {
