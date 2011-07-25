@@ -8,8 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2011-07-25 22:40:20"
+	"lastUpdated": "2011-07-26 01:43:28"
 }
 
 function detectWeb(doc, url)	{
@@ -68,8 +67,9 @@ function scrape (doc) {
 	var datastring="format=RIS&emailId=&Download=Download&componentIds=";
 
 		var locURL = doc.location.href;
-		if (doc.evaluate('//p[@class="AbsType"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-			var abs = doc.evaluate('//p[@class="AbsType"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var abs;
+		if (abs = doc.evaluate('//p[@class="section-title" and contains(text(),"Abstract")]/following-sibling::p[not(@class) and text() != ""]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			abs = abs.textContent;
 		}
 		if (doc.evaluate('//p[@class="KeyWords"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 			var kws = doc.evaluate('//p[@class="KeyWords"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.substr(11).split('; ');
@@ -104,7 +104,7 @@ function scrape (doc) {
 								lastName:aut.lastName,
 								creatorType:"author"});
 				}
-				if (kws) item.tags = kws;
+				if (item.tags.length === 1) item.tags = item.tags[0].split(",");
 				if (abs) item.abstractNote = Zotero.Utilities.trimInternal(abs);
 				if (pdflink) {
 					// Some PDFs aren't paywalled, so they don't need the 2nd request
@@ -149,8 +149,8 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "LAURIE A.",
-						"lastName": "RODRIGUES",
+						"firstName": "Laurie A.",
+						"lastName": "Rodrigues",
 						"creatorType": "author"
 					}
 				],
@@ -164,11 +164,6 @@ var testCases = [
 						"url": false,
 						"title": "Cambridge Journals Snapshot",
 						"mimeType": "text/html"
-					},
-					{
-						"url": false,
-						"title": "Cambridge Journals PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"date": "2011",
@@ -178,6 +173,7 @@ var testCases = [
 				"volume": "45",
 				"issue": "02",
 				"DOI": "10.1017/S0021875810001738",
+				"abstractNote": "Heir to the racist configuration of the American art exchange and the delimiting appraisals of blackness in the American mainstream media, Jean-Michel Basquiat appeared on the late 1970s New York City street art scene – then he called himself “SAMO.” Not long thereafter, Basquiat grew into one of the most influential artists of an international movement that began around 1980, marked by a return to figurative painting. Given its rough, seemingly untrained and extreme, conceptual nature, Basquiat's high-art oeuvre might not look so sophisticated to the uninformed viewer. However, Basquiat's work reveals a powerful poetic and visual gift, “heady enough to confound academics and hip enough to capture the attention span of the hip hop nation,” as Greg Tate has remarked. As noted by Richard Marshall, Basquiat's aesthetic strength actually comes from his striving “to achieve a balance between the visual and intellectual attributes” of his artwork. Like Marshall, Tate, and others, I will connect with Basquiat's unique, self-reflexively experimental visual practices of signifying and examine anew Basquiat's active contribution to his self-alienation, as Hebdige has called it. Basquiat's aesthetic makes of his paintings economies of accumulation, building a productive play of contingency from the mainstream's constructions of race. This aesthetic move speaks to a need for escape from the perceived epistemic necessities of blackness. Through these economies of accumulation we see, as Tate has pointed out, Basquiat's “intellectual obsession” with issues such as ancestry/modernity, personhood/property and originality/origins of knowledge, driven by his tireless need to problematize mainstream media's discourses surrounding race – in other words, a commodified American Africanism.",
 				"libraryCatalog": "Cambridge Journals Online",
 				"shortTitle": "“SAMO© as an Escape Clause”"
 			}
