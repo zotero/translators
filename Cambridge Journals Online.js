@@ -8,7 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-07-24 23:08:37"
+	"browserSupport": "g",
+	"lastUpdated": "2011-07-25 22:40:20"
 }
 
 function detectWeb(doc, url)	{
@@ -95,9 +96,9 @@ function scrape (doc) {
 				item.creators = new Array();
 				for each (var aut in authors) {
 					// correct all-caps, if present
-					if (aut.firstName. && aut.firstName.toUpperCase() == aut.firstName)
+					if (aut.firstName && aut.firstName.toUpperCase() == aut.firstName)
 						aut.firstName=Zotero.Utilities.capitalizeTitle(aut.firstName.toLowerCase(),true);	
-					if (aut.lastName. && aut.lastName.toUpperCase() == aut.lastName)
+					if (aut.lastName && aut.lastName.toUpperCase() == aut.lastName)
 						aut.lastName=Zotero.Utilities.capitalizeTitle(aut.lastName.toLowerCase(),true);	
 					item.creators.push({firstName:aut.firstName,
 								lastName:aut.lastName,
@@ -120,7 +121,7 @@ function scrape (doc) {
 							for (var i in item.attachments) {
 								if (item.attachments[i].mimeType.indexOf("pdf") !== -1)
 									item.attachments[i].url = (domain[0]+realpdf[1]).replace(/&amp;/g,"&");
-							});
+							};
 						}
 					}, function () {
 						item.complete();
