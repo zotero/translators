@@ -1,14 +1,15 @@
 {
-	"translatorID":"a14ac3eb-64a0-4179-970c-92ecc2fec992",
-	"translatorType":4,
-	"label":"Scopus",
-	"creator":"Michael Berkowitz and Rintze Zelle",
-	"target":"http://[^/]*www.scopus.com[^/]*",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-06-04 00:00:00"
+	"translatorID": "a14ac3eb-64a0-4179-970c-92ecc2fec992",
+	"label": "Scopus",
+	"creator": "Michael Berkowitz, Rintze Zelle and Avram Lyon",
+	"target": "http://[^/]*www.scopus.com[^/]*",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-07-26 12:36:28"
 }
 
 function detectWeb(doc, url) {
@@ -23,8 +24,8 @@ function getEID(url) {
 	return url.match(/eid=([^&]+)/)[1];
 }
 
-function returnURL(eid) {
-	return 'http://www.scopus.com/scopus/citation/output.url?origin=recordpage&eid=' + eid + '&src=s&view=CiteAbsKeywsRefs';
+function returnURL(eid, base) {
+	return base + 'citation/output.url?origin=recordpage&eid=' + eid + '&src=s&view=FullDocument&outputType=export';
 }
 
 function doWeb(doc, url) {
@@ -33,27 +34,37 @@ function doWeb(doc, url) {
 	if (prefix == 'x') return namespace; else return null;
 	} : null;
 
+	var base = "http://www.scopus.com/";
+
+	// We're breaking proxy support by constructing URLs the way we do, so let's get
+	// the real base URL we need to use. This is a hack.
+	base = url.match(/^https?:\/\/[^\/]*\//)[0];
+	Zotero.debug(base);
+
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		items = new Object();
-		var boxes = doc.evaluate('//table/tbody/tr[@class]/td[@class="fldtextPad"][1]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var boxes = doc.evaluate('//div[@id="resultsBody"]/table/tbody/tr[@class and (not(@id) or not(contains(@id,"previewabstractrow")))]/td[@class="fldtextPad"][1]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var box;
 		while (box = boxes.iterateNext()) {
-			var title = Zotero.Utilities.trimInternal(doc.evaluate('.//span[@class="txtBoldOnly"]', box, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-			var link = doc.evaluate('.//a[@class="outwardLink"]', box, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
-			items[link] = title;
+			var link = doc.evaluate('.//a', box, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			items[link.href] = Zotero.Utilities.trimInternal(link.textContent);
 		}
 		items = Zotero.selectItems(items);
 		for (var i in items) {
-			articles.push(returnURL(getEID(i)));
+			articles.push(returnURL(getEID(i), base));
 		}
 	} else {
-		articles = [returnURL(getEID(url))];
+		articles = [returnURL(getEID(url), base)];
 	}
-	Zotero.Utilities.processDocuments(articles, function(newDoc) {
-		var eid = getEID(newDoc.location.href);
-		var stateKey = newDoc.evaluate('//input[@name="stateKey"]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
-		var get = 'http://www.scopus.com/scopus/citation/export.url';
+	Zotero.Utilities.doGet(articles, function(text, obj) {
+		var stateKey = text.match(/<input[^>]*name="stateKey"[^>]*>/);
+		if (!stateKey) Zotero.debug("No stateKey");
+		else stateKey = stateKey[0].match(/value="([^"]*)"/)[1];
+		var eid = text.match(/<input[^>]*name="eid"[^>]*>/);
+		if (!eid) Zotero.debug("No eid");
+		else eid = eid[0].match(/value="([^"]*)"/)[1];
+		var get = base+'citation/export.url';
 		var post = 'origin=recordpage&sid=&src=s&stateKey=' + stateKey + '&eid=' + eid + '&sort=&exportFormat=RIS&view=CiteAbsKeyws&selectedCitationInformationItemsAll=on';
 		var rislink = get + "?" + post;	
 		Zotero.Utilities.HTTP.doGet(rislink, function(text) {
