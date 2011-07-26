@@ -37,7 +37,8 @@ function doWeb(doc, url) {
 
 	// We're breaking proxy support by constructing URLs the way we do, so let's get
 	// the real base URL we need to use. This is a hack.
-	base = url.match(/^https?:\/\/[^\/]*\//)[0];
+	// XXX Apparently this hack is only needed by MLZ. Must investigate
+	//base = url.match(/^https?:\/\/[^\/]*\//)[0];
 	Zotero.debug(base);
 
 	var articles = new Array();
@@ -72,6 +73,7 @@ function doWeb(doc, url) {
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			translator.setString(text);
 			translator.setHandler("itemDone", function(obj, item) {
+				item.attachments = [];
 				if (item.notes[0]['note']) {
 					item.abstractNote = item.notes[0]['note'];
 					item.notes = new Array();
