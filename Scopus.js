@@ -60,13 +60,19 @@ function doWeb(doc, url) {
 			var link = doc.evaluate('.//a', box, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			items[link.href] = Zotero.Utilities.trimInternal(link.textContent);
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(returnURL(getEID(i)));
-		}
+		Zotero.selectItems(items, function (items) {
+			for (var i in items) {
+				articles.push(returnURL(getEID(i)));
+			}
+			scrape(articles);
+		});
 	} else {
 		articles = [returnURL(getEID(url))];
+		scrape(articles);
 	}
+}
+
+function scrape(articles) {
 	Zotero.Utilities.doGet(articles, function(text, obj) {
 		var stateKey = text.match(/<input[^>]*name="stateKey"[^>]*>/);
 		if (!stateKey) Zotero.debug("No stateKey");
