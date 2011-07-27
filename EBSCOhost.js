@@ -6,9 +6,9 @@
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
-	"inRepository": "1",
+	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-03-24 23:30:00"
+	"lastUpdated": "2011-07-28 01:59:25"
 }
 
 function detectWeb(doc, url) {
@@ -43,10 +43,15 @@ function detectWeb(doc, url) {
 /*
  * given the text of the delivery page, downloads an item
  */
-function downloadFunction(text) {
-	
-		Zotero.debug(text);
-		if (text.match(/^AB\s\s\-/m)) text = text.replace(/^AB\s\s\-/m, "N2  -");
+function downloadFunction(text, url) {
+		var pdf = false;
+		var queryString = {};
+		url.replace(
+			new RegExp("([^?=&]+)(=([^&]*))?", "g"),
+				function($0, $1, $2, $3) { queryString[$1] = $3; }
+		);
+		pdf = "/ehost/pdfviewer/pdfviewer?sid="+queryString["sid"]+"&vid="+queryString["vid"];
+
 		if (!text.match(/^TY\s\s-/m)) text = text+"\nTY  - JOUR\n"; 
 		// load translator for RIS
 		var translator = Zotero.loadTranslator("import");
@@ -70,8 +75,19 @@ function downloadFunction(text) {
 			// RIS translator tries to download the link in "UR" this leads to unhappyness
 			item.attachments = [];
 			item.notes = [];
-			item.complete();
-
+			Zotero.Utilities.doGet(pdf, function (text) {
+				Z.debug(text);
+				var realpdf = text.match(/<embed id="pdfEmbed"[^>]*>/);
+				if(realpdf) {
+					realpdf = text.match(/<embed[^>]*src="([^"]+)"/);
+					if (realpdf) {
+						realpdf = realpdf[1];
+						item.attachments.push({url:realpdf.replace(/&amp;/g, "&"),
+								title: "EBSCO Full Text",
+								mimeType:"application/pdf"});
+					}
+				}
+			}, function () { item.complete(); });
 		});
 		translator.translate();
 		
@@ -89,9 +105,8 @@ function doWeb(doc, url) {
 	var hostRe = new RegExp("^(https?://[^/]+)/");
 	var hostMatch = hostRe.exec(url);
 	host = hostMatch[1];
-	                                
-	var searchResult = doc.evaluate('//ul[@class="result-list" or @class="folder-list"]/li/div[@class="result-list-record" or @class="folder-item"]', doc, nsResolver,
-	                                XPathResult.ANY_TYPE, null).iterateNext();                              
+									
+	var searchResult = doc.evaluate('//ul[@class="result-list" or @class="folder-list"]/li/div[@class="result-list-record" or @class="folder-item"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();                              
 
 	if(searchResult) {
 		/* Get title links and text */
@@ -114,35 +129,37 @@ function doWeb(doc, url) {
 			folderInfos[title.href] = folderInfo.textContent;
 		}
 		
-		var items = Zotero.selectItems(items);
-		if(!items) {
-			return true;
-		}
+		var items = Zotero.selectItems(items, function (items) {
+				if(!items) {
+					return true;
+				}
 
-		/* Get each citation page and pass in record key (db, tag, an) since data does not exist in an easily digestable way on this page */
-		var urls = [];
-		var infos = [];
-		for(var i in items) {
-			urls.push(i);
-			infos.push(folderInfos[i]);
-		}
+				/* Get each citation page and pass in record key (db, tag, an) since data does not exist in an easily digestable way on this page */
+				var urls = [];
+				var infos = [];
+				for(var i in items) {
+					urls.push(i);
+					infos.push(folderInfos[i]);
+				}
 
-		var run = function(urls, infos) {
-			var url, info;
-			if (urls.length == 0 || folderInfos.length == 0) {
-				Zotero.done();
-				return true;
-			}
-			url = urls.shift();
-			info = infos.shift();
-			Zotero.Utilities.processDocuments(url, function (newDoc) {
-				doDelivery(doc, nsResolver, info);
-			}, function () {run(urls, infos)});
-		}
+				var run = function(urls, infos) {
+					var url, info;
+					if (urls.length == 0 || folderInfos.length == 0) {
+						Zotero.done();
+						return true;
+					}
+					url = urls.shift();
+					info = infos.shift();
+					Zotero.Utilities.processDocuments(url, 
+						function (newDoc) { doDelivery(doc, nsResolver, info); },
+						function () {run(urls, infos)
+					});
+				}
 
-		run(urls, infos);
+				run(urls, infos);
 
-		Zotero.wait();
+				Zotero.wait();
+		});
 	} else {
 		/* Individual record. Record key exists in attribute for add to folder link in DOM */
 		doDelivery(doc, nsResolver, null);
@@ -167,5 +184,5 @@ function doDelivery(doc, nsResolver, folderData) {
 	/* ExportFormat = 1 for RIS file */
 	postURL = host+"/ehost/delivery/ExportPanelSave/"+jsonData.db+"_"+jsonData.uiTerm+"_"+jsonData.uiTag+"?sid="+queryString["sid"]+"&vid="+queryString["vid"]+"&bdata="+queryString["bdata"]+"&theExportFormat=1";
 	
-	Zotero.Utilities.HTTP.doGet(postURL, downloadFunction);
+	Zotero.Utilities.HTTP.doGet(postURL, function (text) { downloadFunction(text, postURL)});
 }
