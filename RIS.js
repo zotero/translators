@@ -119,7 +119,7 @@ function processTag(item, tag, value) {
 	if (tag != "N1" && tag != "AB" && Zotero.Utilities.unescapeHTML) {
 		value = Zotero.Utilities.unescapeHTML(value);
 	}
-    
+	
 	if(fieldMap[tag]) {
 		item[fieldMap[tag]] = value;
 	} else if(inputFieldMap[tag]) {
@@ -271,7 +271,8 @@ function processTag(item, tag, value) {
 	// to overlook or ignore this, so we will too on import
 	} else if(tag == "N2" || tag == "AB") {
 		// abstract
-		item.abstractNote = value;
+		if (item.abstractNote) item.abstractNote += "\n" + value;
+		else item.abstractNote = value;
 	} else if(tag == "KW") {
 		// keywords/tags
 		
