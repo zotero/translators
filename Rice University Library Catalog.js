@@ -1,14 +1,14 @@
 {
-        "translatorID": "23ba3be6-412d-4dde-9cc1-c4df0cc09378",
-        "label": "Rice University Library Catalog",
-        "creator": "Mang Sun",
-        "target": "^https?://\\S*\\.rice\\.edu[^/]*/cgisirsi",
-        "minVersion": "2.1",
-        "maxVersion": "",
-        "priority": 90,
-        "inRepository": true,
-        "translatorType": 4,
-        "lastUpdated": "2011-06-10 15:26:03"
+	"translatorID": "23ba3be6-412d-4dde-9cc1-c4df0cc09378",
+	"label": "Rice University Library Catalog",
+	"creator": "Mang Sun",
+	"target": "^https?://[^/]*\\.rice\\.edu[^/]*/\\S*cgisirsi",
+	"minVersion": "2.1",
+	"maxVersion": "",
+	"priority": 90,
+	"inRepository": true,
+	"translatorType": 4,
+	"lastUpdated": "2011-07-28 01:01:31"
 }
 
 /* Based on the SIRSI translator by Simon Kornblith and Michael Berkowitz,
