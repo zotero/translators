@@ -70,10 +70,17 @@ function downloadFunction(text, url) {
 			if (text.match(/^T1\s+-/m)) {
 				item.title = text.match(/^T1\s+-\s*(.*)/m)[1];
 			}
-			//item.itemType = "journalArticle";
-			item.url = false;
 			// RIS translator tries to download the link in "UR" this leads to unhappyness
 			item.attachments = [];
+
+			// But keep the stable link as a link attachment
+			if(item.url) {
+				item.attachments.push({url: item.url,
+							title: "EBSCO Record",
+							mimeType: "text/html",
+							snapshot: false});
+				item.url = "";
+			}
 			item.notes = [];
 			Zotero.Utilities.doGet(pdf, function (text) {
 				Z.debug(text);
