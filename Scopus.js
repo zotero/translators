@@ -70,10 +70,12 @@ function doWeb(doc, url) {
 		articles = [returnURL(getEID(url))];
 		scrape(articles);
 	}
+	Zotero.wait();
 }
 
 function scrape(articles) {
-	Zotero.Utilities.doGet(articles, function(text, obj) {
+	var article = articles.shift();
+	Zotero.Utilities.doGet(article, function(text, obj) {
 		var stateKey = text.match(/<input[^>]*name="stateKey"[^>]*>/);
 		if (!stateKey) Zotero.debug("No stateKey");
 		else stateKey = stateKey[0].match(/value="([^"]*)"/)[1];
@@ -97,7 +99,9 @@ function scrape(articles) {
 				item.complete();
 			});
 			translator.translate();
+		}, function() { 
+			if (articles.length > 0) scrape(articles);
+			else Zotero.done();
 		});
-	}, function() {Zotero.done();});
-	Zotero.wait();
+	});
 }
