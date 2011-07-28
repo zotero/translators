@@ -273,6 +273,7 @@ function mapToZotero (type) {
 	"Book Review-Mixed" : false, // FIX AS NECESSARY
 	"Reports" : "report",
 	"REPORT" : "report",
+	"Historical Newspapers" : "newspaperArticle",
 	"Newspapers" : "newspaperArticle",
 	//"News" : "newspaperArticle",	// Otherwise Foreign Policy is treated as a newspaper http://search.proquest.com/docview/840433348
 	"Magazines" : "magazineArticle",
