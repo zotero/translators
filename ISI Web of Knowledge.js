@@ -45,7 +45,6 @@ function fetchIds(ids, url) {
 	// Call yourself
 	var importer = Zotero.loadTranslator("import");
 	importer.setTranslator("594ebe3c-90a0-4830-83bc-9502825a6810");
-	Zotero.debug(importer);
 	
 	var hostRegexp = new RegExp("^(https?://[^/]+)/");
 	var m = hostRegexp.exec(url);
@@ -56,15 +55,12 @@ function fetchIds(ids, url) {
 	var product = url.match("product=([^\&]+)\&")[1];
 	Zotero.Utilities.processDocuments(ids, function (newDoc) {
 		var url = newDoc.location.href;
-		//Zotero.debug("pd");
 		var sid = newDoc.evaluate('//input[@name="selectedIds"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
 		var nid = newDoc.evaluate('//input[@name="SID"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
 		var post2 = 'product='+product+'&product_sid=' + nid + '&plugin=&product_st_thomas=http://esti.isiknowledge.com:8360/esti/xrpc&export_ref.x=0&export_ref.y=0';
 		var post = 'action=go&mode=quickOutput&product='+product+'&SID=' + nid + '&format=ref&fields=BibAbs&mark_id='+product+'&count_new_items_marked=0&selectedIds=' + sid + '&qo_fields=bib&endnote.x=95&endnote.y=12&save_options=default';
 		Zotero.Utilities.doPost('http://apps.isiknowledge.com/OutboundService.do', post, function (text, obj) {
-			//Zotero.debug("post1");
 			Zotero.Utilities.doPost('http://pcs.isiknowledge.com/uml/uml_view.cgi', post2, function (text, obj) {
-				//Zotero.debug("post2");
 				//Zotero.debug(text);
 				importer.setString(text);
 				importer.setHandler("itemDone", function (obj, item) {
@@ -79,21 +75,20 @@ function fetchIds(ids, url) {
 }
 
 function detectImport() {
-		var line;
-		var i = 0;
-		while((line = Zotero.read()) !== false) {
-				line = line.replace(/^\s+/, "");
-				if(line != "") {
-						if(line.substr(0, 4).match(/^PT [A-Z]/)) {
-								return true;
-						} else {
-								if(i++ > 3) {
-										return false;
-								}
-						}
+	var line;
+	var i = 0;
+	while((line = Zotero.read()) !== false) {
+		line = line.replace(/^\s+/, "");
+		if(line != "") {
+			if(line.substr(0, 4).match(/^PT [A-Z]/)) {
+				return true;
+			} else {
+				if(i++ > 3) {
+					return false;
 				}
+			}
 		}
-
+	}
 }
 
 function processTag(item, field, content) {
