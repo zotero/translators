@@ -16,8 +16,8 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"browserSupport": "gcsn",
-	"lastUpdated": "2011-07-09 15:35:08"
+	"browserSupport": "gcs",
+	"lastUpdated": "2011-07-29 03:35:07"
 }
 
 function detectImport() {
@@ -1069,7 +1069,6 @@ var mappingTable = {
 var reversemappingTable = {
 	"\\url"                           : "",       // strip 'url'
 	"\\href"                          : "",       // strip 'href'
-	"~"                               : "\u00A0", // NO-BREAK SPACE
 	"{\\textexclamdown}"              : "\u00A1", // INVERTED EXCLAMATION MARK
 	"{\\textcent}"                    : "\u00A2", // CENT SIGN
 	"{\\textsterling}"                : "\u00A3", // POUND SIGN
@@ -1211,7 +1210,6 @@ var reversemappingTable = {
 	"<=>"                             : "\u21D4", // LEFT RIGHT DOUBLE ARROW
 	"$\\infty$"                       : "\u221E", // INFINITY
 	"||"                              : "\u2225", // PARALLEL TO
-	"\\~{}"                           : "\u223C", // TILDE OPERATOR
 	"/="                              : "\u2260", // NOT EQUAL TO
 //    "<="                              : "\u2264", // LESS-THAN OR EQUAL TO
 	">="                              : "\u2265", // GREATER-THAN OR EQUAL TO
@@ -1535,7 +1533,9 @@ var reversemappingTable = {
 	"\\d{Y}"                          : "\u1EF4", // LATIN CAPITAL LETTER Y WITH DOT BELOW
 	"\\d{y}"                          : "\u1EF5", // LATIN SMALL LETTER Y WITH DOT BELOW
 	"\\~{Y}"                          : "\u1EF8", // LATIN CAPITAL LETTER Y WITH TILDE
-	"\\~{y}"                          : "\u1EF9" // LATIN SMALL LETTER Y WITH TILDE
+	"\\~{y}"                          : "\u1EF9", // LATIN SMALL LETTER Y WITH TILDE
+	"\\~{}"                           : "\u223C", // TILDE OPERATOR
+	"~"                               : "\u00A0" // NO-BREAK SPACE
 };
 
 var alwaysMap = {
@@ -2359,6 +2359,21 @@ var testCases = [
 				"publicationTitle": "Oil & Gas Journal",
 				"date": "2009",
 				"pages": "29"
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@article{test-ticket1661,\u000atitle={non-braking space: ~; accented characters: {\\~n} and \\~{n}; tilde operator: \\~},\u000a} ",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "non-braking space: ; accented characters: ñ and ñ; tilde operator: ∼"
 			}
 		]
 	}
