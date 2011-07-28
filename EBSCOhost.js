@@ -83,7 +83,7 @@ function downloadFunction(text, url) {
 			}
 			item.notes = [];
 			Zotero.Utilities.doGet(pdf, function (text) {
-				Z.debug(text);
+				//Z.debug(text);
 				var realpdf = text.match(/<embed id="pdfEmbed"[^>]*>/);
 				if(realpdf) {
 					realpdf = text.match(/<embed[^>]*src="([^"]+)"/);
