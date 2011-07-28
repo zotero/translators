@@ -119,7 +119,9 @@ function scrape (doc) {
 	item.thesisType = [];
 	var account_id;
 	while (record_row = record_rows.iterateNext()) {
-		var field = doc.evaluate('./div[@class="display_record_indexing_fieldname"]', record_row, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.trim();
+		var field = doc.evaluate('./div[@class="display_record_indexing_fieldname"]', record_row, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()
+		if (!field) continue;
+		field = field.textContent.trim();
 		var value = doc.evaluate('./div[@class="display_record_indexing_data"]', record_row, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.trim();
 		// Separate values in a single field are generally wrapped in <a> nodes; pull a list of them
 		var valueAResult = doc.evaluate('./div[@class="display_record_indexing_data"]/a', record_row, nsResolver, XPathResult.ANY_TYPE, null);
@@ -192,8 +194,8 @@ function scrape (doc) {
 					item.libraryCatalog = value; break;
 			case "Document URL":
 					item.attachments.push({url:value,
-										title: "ProQuest Record",
-										mimeType: "text/html"}); break;
+								title: "ProQuest Record",
+								mimeType: "text/html"}); break;
 			case "Language of Publication":
 					item.language = value; break;
 			case "Section":
