@@ -30,9 +30,9 @@
  */
 
 function detectWeb(doc, url) {
-	if (url.indexOf("/results/") != -1) {
+	if (url.indexOf("/results/") !== -1) {
 		return "multiple";
-	} else if (url.indexOf("/record/") != -1) {
+	} else if (url.indexOf("/record/") !== -1) {
 		return "journalArticle";
 	}
 }
@@ -42,7 +42,7 @@ function getEID(url) {
 }
 
 function returnURL(eid) {
-	return '/citation/output.url?origin=recordpage&eid=' + eid + '&src=s&view=FullDocument&outputType=export';
+	return 'http://www.scopus.com/citation/output.url?origin=recordpage&eid=' + eid + '&src=s&view=FullDocument&outputType=export';
 }
 
 function doWeb(doc, url) {
@@ -82,7 +82,7 @@ function scrape(articles) {
 		var eid = text.match(/<input[^>]*name="eid"[^>]*>/);
 		if (!eid) Zotero.debug("No eid");
 		else eid = eid[0].match(/value="([^"]*)"/)[1];
-		var get = '/citation/export.url';
+		var get = 'http://www.scopus.com/citation/export.url';
 		var post = 'origin=recordpage&sid=&src=s&stateKey=' + stateKey + '&eid=' + eid + '&sort=&exportFormat=RIS&view=CiteAbsKeyws&selectedCitationInformationItemsAll=on';
 		var rislink = get + "?" + post;	
 		Zotero.Utilities.HTTP.doGet(rislink, function(text) {
