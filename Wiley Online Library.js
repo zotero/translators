@@ -192,6 +192,9 @@ function scrape(doc,url)
 		if (newItem[i] && newItem[i].toUpperCase() == newItem[i])
 			newItem[i] = Zotero.Utilities.capitalizeTitle(newItem[i].toLowerCase(), true);
 	}
+	
+	// Remove final asterisk in title if present
+	newItem.title = newItem.title.replace(/\*$/,''); 
 
 	if (html) newItem.attachments = [{url:html, title:"Wiley Full Text HTML"}];
 
@@ -387,6 +390,38 @@ var testCases = [
 				"pages": "171-199",
 				"libraryCatalog": "Wiley Online Library",
 				"shortTitle": "Why It Matters That Some Are Worse Off Than Others"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://onlinelibrary.wiley.com/doi/10.1111/j.1533-6077.2008.00144.x/abstract",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "David",
+						"lastName": "Copp",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"url": "http://onlinelibrary.wiley.com/doi/10.1111/j.1533-6077.2008.00144.x/abstract",
+				"DOI": "10.1111/j.1533-6077.2008.00144.x",
+				"volume": "18",
+				"issue": "1",
+				"publicationTitle": "Philosophical Issues",
+				"publisher": "Blackwell Publishing Inc",
+				"ISSN": "1758-2237",
+				"title": "Darwinian Skepticism About Moral Realism",
+				"language": "en",
+				"date": "2008/09/01",
+				"pages": "186-206",
+				"libraryCatalog": "Wiley Online Library"
 			}
 		]
 	}
