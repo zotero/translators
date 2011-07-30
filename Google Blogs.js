@@ -2,13 +2,12 @@
 	"translatorID": "58641ca2-d324-445b-a618-4e7c4631726f",
 	"label": "Google Blogs",
 	"creator": "Avram Lyon",
-	"target": "^https?://www.google.[^/]+/.*[#&]tbm=blg",
-	"minVersion": "2.1.9",
+	"target": "^https?://www\\.google\\.[^/]+/.*[#&]tbm=blg",
+	"minVersion": "2.1.8",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcs",
 	"lastUpdated": "2011-07-30 03:19:03"
 }
 
@@ -17,6 +16,18 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
+	if (ZU === undefined) {
+		var ZU = {};
+		ZU.xpath = function (node, xpath, ns) {
+			var nodes = [];
+			var i;
+			var result = doc.evaluate(xpath, node, ns, XPathResult.ANY_TYPE, null);
+			while (i = result.iterateNext()) nodes.push(i);
+			if (nodes.length > 0) return nodes;
+			return null;
+		}
+	}
+
 	var list = ZU.xpath(doc, '//div[@id="search"]//ol[@id="rso"]/li/div[@class="vsc"]');
 	var i, node;
 	var items = [];
@@ -34,11 +45,11 @@ function doWeb(doc, url) {
 		node = ZU.xpath(list[i], './/div[@class="f kb"]')[0].textContent.match(/^(.*) by (.*)$/);
 		if (node) {
 			items[i].date = node[1];
-			items[i].creators.push(ZU.cleanAuthor(node[2], "author"));
+			items[i].creators.push(Zotero.Utilities.cleanAuthor(node[2], "author"));
 		}
 	}
 
-	Z.selectItems(names, function(names) {
+	Zotero.selectItems(names, function(names) {
 		var j;
 		for (j in names) {
 			items[j].complete();
