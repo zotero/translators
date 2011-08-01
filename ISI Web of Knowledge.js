@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 5,
-	"lastUpdated": "2011-07-22 13:20:21"
+	"lastUpdated": "2011-08-01 16:50:59"
 }
 
 function detectWeb(doc, url) {
@@ -308,23 +308,23 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": " Rintze M.",
+						"firstName": "Rintze M.",
 						"lastName": "Zelle",
 						"creatorType": "author"
 					},
 					{
-						"firstName": " Jacob C.",
-						"lastName": " Harrison",
+						"firstName": "Jacob C.",
+						"lastName": "Harrison",
 						"creatorType": "author"
 					},
 					{
-						"firstName": " Jack T.",
-						"lastName": " Pronk",
+						"firstName": "Jack T.",
+						"lastName": "Pronk",
 						"creatorType": "author"
 					},
 					{
-						"firstName": " Antonius J. A.",
-						"lastName": " van Maris",
+						"firstName": "Antonius J. A.",
+						"lastName": "van Maris",
 						"creatorType": "author"
 					}
 				],
@@ -332,6 +332,7 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
+				"extra": "WOS:000286597100004",
 				"title": "Anaplerotic Role for Cytosolic Malic Enzyme in Engineered Saccharomyces   cerevisiae Strains",
 				"publicationTitle": "Applied and Environmental Microbiology",
 				"volume": "77",
@@ -346,28 +347,28 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": " Rintze M.",
+						"firstName": "Rintze M.",
 						"lastName": "Zelle",
 						"creatorType": "author"
 					},
 					{
-						"firstName": " Josh",
-						"lastName": " Trueheart",
+						"firstName": "Josh",
+						"lastName": "Trueheart",
 						"creatorType": "author"
 					},
 					{
-						"firstName": " Jacob C.",
-						"lastName": " Harrison",
+						"firstName": "Jacob C.",
+						"lastName": "Harrison",
 						"creatorType": "author"
 					},
 					{
-						"firstName": " Jack T.",
-						"lastName": " Pronk",
+						"firstName": "Jack T.",
+						"lastName": "Pronk",
 						"creatorType": "author"
 					},
 					{
-						"firstName": " Antonius J. A.",
-						"lastName": " van Maris",
+						"firstName": "Antonius J. A.",
+						"lastName": "van Maris",
 						"creatorType": "author"
 					}
 				],
@@ -375,6 +376,7 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
+				"extra": "WOS:000280633400006",
 				"title": "Phosphoenolpyruvate Carboxykinase as the Sole Anaplerotic Enzyme in   Saccharomyces cerevisiae",
 				"publicationTitle": "Applied and Environmental Microbiology",
 				"volume": "76",
@@ -389,28 +391,28 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": " Rintze M.",
+						"firstName": "Rintze M.",
 						"lastName": "Zelle",
 						"creatorType": "author"
 					},
 					{
-						"firstName": " Erik",
-						"lastName": " De Hulster",
+						"firstName": "Erik",
+						"lastName": "De Hulster",
 						"creatorType": "author"
 					},
 					{
-						"firstName": " Wendy",
-						"lastName": " Kloezen",
+						"firstName": "Wendy",
+						"lastName": "Kloezen",
 						"creatorType": "author"
 					},
 					{
-						"firstName": " Jack T.",
-						"lastName": " Pronk",
+						"firstName": "Jack T.",
+						"lastName": "Pronk",
 						"creatorType": "author"
 					},
 					{
-						"firstName": " Antonius J. A.",
-						"lastName": " van Maris",
+						"firstName": "Antonius J. A.",
+						"lastName": "van Maris",
 						"creatorType": "author"
 					}
 				],
@@ -418,6 +420,7 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
+				"extra": "WOS:000274017400015",
 				"title": "Key Process Conditions for Production of C(4) Dicarboxylic Acids in   Bioreactor Batch Cultures of an Engineered Saccharomyces cerevisiae   Strain",
 				"publicationTitle": "Applied and Environmental Microbiology",
 				"volume": "76",
@@ -432,23 +435,23 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": " Derek A.",
+						"firstName": "Derek A.",
 						"lastName": "Abbott",
 						"creatorType": "author"
 					},
 					{
-						"firstName": " Rintze M.",
-						"lastName": " Zelle",
+						"firstName": "Rintze M.",
+						"lastName": "Zelle",
 						"creatorType": "author"
 					},
 					{
-						"firstName": " Jack T.",
-						"lastName": " Pronk",
+						"firstName": "Jack T.",
+						"lastName": "Pronk",
 						"creatorType": "author"
 					},
 					{
-						"firstName": " Antonius J. A.",
-						"lastName": " van Maris",
+						"firstName": "Antonius J. A.",
+						"lastName": "van Maris",
 						"creatorType": "author"
 					}
 				],
@@ -456,6 +459,7 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
+				"extra": "WOS:000271264400001",
 				"title": "Metabolic engineering of Saccharomyces cerevisiae for production of   carboxylic acids: current status and challenges",
 				"publicationTitle": "Fems Yeast Research",
 				"volume": "9",
@@ -470,53 +474,53 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": " Rintze M.",
+						"firstName": "Rintze M.",
 						"lastName": "Zelle",
 						"creatorType": "author"
 					},
 					{
-						"firstName": " Erik",
-						"lastName": " de Hulster",
+						"firstName": "Erik",
+						"lastName": "de Hulster",
 						"creatorType": "author"
 					},
 					{
-						"firstName": " WoUter A.",
-						"lastName": " van Winden",
+						"firstName": "WoUter A.",
+						"lastName": "van Winden",
 						"creatorType": "author"
 					},
 					{
-						"firstName": " Pieter",
-						"lastName": " de Waard",
+						"firstName": "Pieter",
+						"lastName": "de Waard",
 						"creatorType": "author"
 					},
 					{
-						"firstName": " Cor",
-						"lastName": " Dijkema",
+						"firstName": "Cor",
+						"lastName": "Dijkema",
 						"creatorType": "author"
 					},
 					{
-						"firstName": " Aaron A.",
-						"lastName": " Winkler",
+						"firstName": "Aaron A.",
+						"lastName": "Winkler",
 						"creatorType": "author"
 					},
 					{
-						"firstName": " Jan-Maarten A.",
-						"lastName": " Geertman",
+						"firstName": "Jan-Maarten A.",
+						"lastName": "Geertman",
 						"creatorType": "author"
 					},
 					{
-						"firstName": " Johannes P.",
-						"lastName": " van Dijken",
+						"firstName": "Johannes P.",
+						"lastName": "van Dijken",
 						"creatorType": "author"
 					},
 					{
-						"firstName": " Jack T.",
-						"lastName": " Pronk",
+						"firstName": "Jack T.",
+						"lastName": "Pronk",
 						"creatorType": "author"
 					},
 					{
-						"firstName": " Antonius J. A.",
-						"lastName": " van Maris",
+						"firstName": "Antonius J. A.",
+						"lastName": "van Maris",
 						"creatorType": "author"
 					}
 				],
@@ -524,6 +528,7 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
+				"extra": "WOS:000255567900024",
 				"title": "Malic acid production by Saccharomyces cerevisiae: Engineering of   pyruvate carboxylation, oxaloacetate reduction, and malate export",
 				"publicationTitle": "Applied and Environmental Microbiology",
 				"volume": "74",
@@ -544,56 +549,57 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": " L. J.",
+						"firstName": "L. J.",
 						"lastName": "Smith",
 						"creatorType": "author"
 					},
 					{
-						"firstName": " W. S.",
-						"lastName": " Schwark",
+						"firstName": "W. S.",
+						"lastName": "Schwark",
 						"creatorType": "author"
 					},
 					{
-						"firstName": " D. R.",
-						"lastName": " Cook",
+						"firstName": "D. R.",
+						"lastName": "Cook",
 						"creatorType": "author"
 					},
 					{
-						"firstName": " P. F.",
-						"lastName": " Moon",
+						"firstName": "P. F.",
+						"lastName": "Moon",
 						"creatorType": "author"
 					},
 					{
-						"firstName": " H. N.",
-						"lastName": " Erb",
+						"firstName": "H. N.",
+						"lastName": "Erb",
 						"creatorType": "author"
 					},
 					{
-						"firstName": " A. L.",
-						"lastName": " Looney",
+						"firstName": "A. L.",
+						"lastName": "Looney",
 						"creatorType": "author"
 					}
 				],
 				"notes": [],
 				"tags": [
 					"anaesthesia",
-					" halothane",
-					" muscle relaxants",
-					" pharmacokinetics",
+					"halothane",
+					"muscle relaxants",
+					"pharmacokinetics",
 					"dogs",
 					"Canis",
-					" Canidae",
-					" Fissipeda",
-					" carnivores",
-					" mammals",
-					" vertebrates",
-					" Chordata",
-					"   animals",
-					" small mammals",
-					" eukaryotes"
+					"Canidae",
+					"Fissipeda",
+					"carnivores",
+					"mammals",
+					"vertebrates",
+					"Chordata",
+					"animals",
+					"small mammals",
+					"eukaryotes"
 				],
 				"seeAlso": [],
 				"attachments": [],
+				"extra": "CABI:19982209000",
 				"title": "Pharmacokinetics of intravenous mivacurium in halothane-anesthetized   dogs.",
 				"publicationTitle": "Veterinary Surgery",
 				"volume": "27",
@@ -612,12 +618,7 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": " JM ",
-						"lastName": "Smith",
-						"creatorType": "author"
-					},
-					{
-						"firstName": " J. Mark",
+						"firstName": "J. Mark",
 						"lastName": "Smith",
 						"creatorType": "author"
 					}
@@ -626,11 +627,14 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
+				"extra": "WOS:000290115300030",
 				"title": "Gripewater",
 				"publicationTitle": "Fiddlehead",
 				"language": "English",
-				"publisher": "UNIV NEW BRUNSWICK",
+				"publisher": "Univ New Brunswick",
+				"place": "Fredericton",
 				"ISSN": "0015-0630",
+				"journalAbbreviation": "Fiddlehead",
 				"date": "SPR 2011",
 				"issue": "247",
 				"pages": "82-82"
@@ -703,8 +707,8 @@ var testCases = [
 				"publicationTitle": "Annual Review of Public Health, Vol 32",
 				"language": "English",
 				"abstractNote": "The high rate of premature births in the United States remains a public   health concern. These infants experience substantial morbidity and   mortality in the newborn period, which translate into significant   medical costs. In early childhood, survivors are characterized by a   variety of health problems, including motor delay and/or cerebral palsy,   lower IQs, behavior problems, and respiratory illness, especially   asthma. Many experience difficulty with school work, lower   health-related quality of life, and family stress. Emerging information   in adolescence and young adulthood paints a more optimistic picture,   with persistence of many problems but with better adaptation and more   positive expectations by the young adults. Few opportunities for   prevention have been identified; therefore, public health approaches to   prematurity include assurance of delivery in a facility capable of   managing neonatal complications, quality improvement to minimize   interinstitutional variations, early developmental support for such   infants, and attention to related family health issues.",
-				"publisher": "Annual Reviews",
 				"place": "Palo Alto",
+				"publisher": "Annual Reviews",
 				"ISSN": "0163-7525",
 				"ISBN": "978-0-8243-2732-3",
 				"journalAbbreviation": "Annu. Rev. Public Health",
