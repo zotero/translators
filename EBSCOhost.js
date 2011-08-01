@@ -28,7 +28,7 @@ function detectWeb(doc, url) {
 	
 	// See if this is a search results or folder results page
 	var searchResult = doc.evaluate('//ul[@class="result-list" or @class="folder-list"]/li/div[@class="result-list-record" or @class="folder-item"]', doc, nsResolver,
-	                                XPathResult.ANY_TYPE, null).iterateNext();         
+					XPathResult.ANY_TYPE, null).iterateNext();         
 	if(searchResult) {
 		return "multiple";
 	}
@@ -70,6 +70,12 @@ function downloadFunction(text, url) {
 			if (text.match(/^T1\s+-/m)) {
 				item.title = text.match(/^T1\s+-\s*(.*)/m)[1];
 			}
+			
+			// If we have a double year, eliminate one
+			var year = item.date.match(/\d{4}/);
+			if (year && item.date.replace(year,"").indexOf(year) !== -1)
+			item.date = item.date.replace(year,"");
+			
 			// RIS translator tries to download the link in "UR" this leads to unhappyness
 			item.attachments = [];
 
@@ -136,7 +142,7 @@ function doWeb(doc, url) {
 			folderInfos[title.href] = folderInfo.textContent;
 		}
 		
-		var items = Zotero.selectItems(items, function (items) {
+		Zotero.selectItems(items, function (items) {
 				if(!items) {
 					return true;
 				}
