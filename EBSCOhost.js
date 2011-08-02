@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-08-02 01:59:25"
+	"lastUpdated": "2011-08-03 01:00:36"
 }
 
 function detectWeb(doc, url) {
@@ -194,11 +194,13 @@ function doDelivery(doc, nsResolver, folderData) {
 	if (script === "") { return; }
 	/* We now have the script containing ep.clientData */
 
-	/* Get just the ep var assignment to minimize the possibility of eval problems. */
-	var startClientData = script.indexOf("var ep");
-	var endClientData = script.indexOf("};", startClientData);
-	var clientData = script.substr(startClientData, endClientData);
-	eval(clientData);
+	/* The JSON is technically invalid, since it doesn't quote the
+	   attribute names-- we pull out the valid bit inside it. */
+	var clientData = script.match(/var ep\s*=\s*({[^;]*});/);
+	if (!clientData) { return false; }
+	clientData = clientData[1].match(/"currentRecord"\s*:\s*({[^}]*})/);
+	/* If this starts throwing exceptions, we should probably start try-elsing it */
+	clientData = JSON.parse(clientData[1]);
 	
 	var postURL = doc.evaluate('//form[@id="aspnetForm"]/@action', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 
@@ -209,7 +211,61 @@ function doDelivery(doc, nsResolver, folderData) {
 	);
 	
 	/* ExportFormat = 1 for RIS file */
-	postURL = host+"/ehost/delivery/ExportPanelSave/"+ep.clientData.currentRecord.Db+"_"+ep.clientData.currentRecord.Term+"_"+ep.clientData.currentRecord.Tag+"?sid="+queryString["sid"]+"&vid="+queryString["vid"]+"&bdata="+queryString["bdata"]+"&theExportFormat=1";
+	postURL = host+"/ehost/delivery/ExportPanelSave/"+clientData.Db+"_"+clientData.Term+"_"+clientData.Tag+"?sid="+queryString["sid"]+"&vid="+queryString["vid"]+"&bdata="+queryString["bdata"]+"&theExportFormat=1";
 	
 	Zotero.Utilities.HTTP.doGet(postURL, function (text) { downloadFunction(text, postURL); });
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://search.ebscohost.com/login.aspx?direct=true&db=a9h&AN=4370815&lang=cs&site=ehost-live",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Warren",
+						"firstName": "Karen J.",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"RECONCILIATION",
+					"WAR -- Moral & ethical aspects",
+					"SOCIAL sciences -- Philosophy",
+					"STERBA, James",
+					"JUSTICE for Here & Now (Book)"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": false,
+						"title": "EBSCO Record",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"url": false,
+						"title": "EBSCO Full Text",
+						"mimeType": "application/pdf"
+					}
+				],
+				"title": "Peacemaking and Philosophy: A Critique of Justice for Hero and Now.",
+				"publicationTitle": "Journal of Social Philosophy",
+				"date": "Winter 1999",
+				"volume": "30",
+				"issue": "3",
+				"pages": "411-423",
+				"publisher": "Wiley-Blackwell",
+				"ISBN": "00472786",
+				"ISSN": "00472786",
+				"abstractNote": "This article presents a critical analysis of James Sterba's book, Justice for Here and Now.  In the book, Sterba undertakes two distinct but interconnected objects--one primarily methodological and the other primarily ethical. The methodological project is to establish the necessity and desirability of adopting a peacemaking model of doing philosophy, that is, one that is committed to fair-mindedness, openness and self-criticalness in seeking to determine which philosophical views are most justified. Sterba contrasts the peacemaking model with a war-making model of doing philosophy. The ethical project involves establishing two related claims: rationality is required for morality, and it is possible and desirable to reconcile the practical perspectives of alternative positions on justice; welfare liberalism, libertarianism, socialism, feminism, multiculturalism, anthropocentric and nonanthropocentric environmental ethics, and pacifism and just war theory. There is an important and intimate connection between the methodological and ethical projects. In fact, at various places throughout the book Sterba suggests that the relationship is one of logical entailment: not only does appeal to a peacemaking model of doing philosophy establish the two main claims of the ethical project; by showing the rational grounds for reconciling alternative philosophical positions on justice, one establishes that a peacemaking model of philosophy ought to be adopted.",
+				"libraryCatalog": "EBSCOhost",
+				"shortTitle": "Peacemaking and Philosophy"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
