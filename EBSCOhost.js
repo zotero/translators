@@ -73,8 +73,8 @@ function downloadFunction(text, url) {
 			
 			// If we have a double year, eliminate one
 			var year = item.date.match(/\d{4}/);
-			if (year && item.date.replace(year,"").indexOf(year) !== -1)
-			item.date = item.date.replace(year,"");
+			if (year && item.date.replace(year[0],"").indexOf(year[0]) !== -1)
+			item.date = item.date.replace(year[0],"");
 			
 			// RIS translator tries to download the link in "UR" this leads to unhappyness
 			item.attachments = [];
