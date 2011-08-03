@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-08-03 01:00:36"
+	"lastUpdated": "2011-08-03 11:24:45"
 }
 
 function detectWeb(doc, url) {
@@ -44,6 +44,7 @@ function detectWeb(doc, url) {
  * given the text of the delivery page, downloads an item
  */
 function downloadFunction(text, url) {
+		var an = url.match(/_(\d+)_AN/);
 		var pdf = false;
 		var queryString = {};
 		url.replace(
@@ -69,6 +70,10 @@ function downloadFunction(text, url) {
 			}
 			if (text.match(/^T1\s+-/m)) {
 				item.title = text.match(/^T1\s+-\s*(.*)/m)[1];
+			}
+			
+			if (an) {
+				item.callNumber = an[1];
 			}
 			
 			// If we have a double year, eliminate one
