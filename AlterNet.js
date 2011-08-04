@@ -1,14 +1,13 @@
 {
 	"translatorID": "ea531652-cdeb-4ec2-940e-627d4b107263",
 	"label": "AlterNet",
-	"creator": "Jesse Johnson",
+	"creator": "Jesse Johnson, BBUCommander",
 	"target": "^http://(?:www\\.)alternet.org",
-	"minVersion": "1.0.0b4.r1",
+	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
 	"lastUpdated": "2011-08-04 22:46:35"
 }
 
