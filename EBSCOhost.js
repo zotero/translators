@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-08-03 11:24:45"
+	"lastUpdated": "2011-08-05 23:01:16"
 }
 
 function detectWeb(doc, url) {
@@ -87,7 +87,9 @@ function downloadFunction(text, url) {
 
 			// But keep the stable link as a link attachment
 			if(item.url) {
-				item.attachments.push({url: item.url,
+				// Trim the ⟨=cs suffix -- EBSCO can't find the record with it!
+				item.url = item.url.replace(/(AN=[0-9]+)⟨=[a-z]{2}/,"$1");
+				item.attachments.push({url: item.url+"&scope=cite",
 							title: "EBSCO Record",
 							mimeType: "text/html",
 							snapshot: false});
