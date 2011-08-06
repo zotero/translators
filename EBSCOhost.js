@@ -8,7 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-08-05 23:01:16"
+	"browserSupport": "g",
+	"lastUpdated": "2011-08-06 22:53:30"
 }
 
 function detectWeb(doc, url) {
@@ -55,6 +56,7 @@ function downloadFunction(text, url) {
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
+		Zotero.debug(text);
 		translator.setHandler("itemDone", function(obj, item) {
 			if (text.match(/^L3\s+-\s*(.*)/m)) {
 				item.DOI = text.match(/^L3\s+\-\s*(.*)/m)[1];
@@ -88,13 +90,14 @@ function downloadFunction(text, url) {
 			}
 			item.notes = [];
 			Zotero.Utilities.doGet(pdf, function (text) {
-				//Z.debug(text);
+				//Z.debug(pdf);
 				var realpdf = text.match(/<embed id="pdfEmbed"[^>]*>/);
 				if(realpdf) {
 					realpdf = text.match(/<embed[^>]*src="([^"]+)"/);
 					if (realpdf) {
 						realpdf = realpdf[1];
-						item.attachments.push({url:realpdf.replace(/&amp;/g, "&"),
+						item.attachments.push({url:realpdf.replace(/&amp;/g, "&")
+										.replace(/K=\d+/,"K="+an[1]),
 								title: "EBSCO Full Text",
 								mimeType:"application/pdf"});
 					}
