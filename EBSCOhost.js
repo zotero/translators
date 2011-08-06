@@ -72,7 +72,11 @@ function downloadFunction(text, url) {
 			}
 			
 			if (an) {
-				item.callNumber = an[1];
+				an = an[1];
+				item.callNumber = an;
+			} else {
+				var an = item.url.match(/AN=([0-9]+)/);
+				if (an) an = an[1];
 			}
 			
 			// RIS translator tries to download the link in "UR" this leads to unhappyness
@@ -97,7 +101,7 @@ function downloadFunction(text, url) {
 					if (realpdf) {
 						realpdf = realpdf[1];
 						item.attachments.push({url:realpdf.replace(/&amp;/g, "&").replace(/#.*$/,'')
-										.replace(/K=\d+/,"K="+an[1]),
+										.replace(/K=\d+/,"K="+an),
 								title: "EBSCO Full Text",
 								mimeType:"application/pdf"});
 					}
