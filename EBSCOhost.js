@@ -77,11 +77,11 @@ function downloadFunction(text, url) {
 			
 			// RIS translator tries to download the link in "UR" this leads to unhappyness
 			item.attachments = [];
-
+			
 			// But keep the stable link as a link attachment
 			if(item.url) {
 				// Trim the ⟨=cs suffix -- EBSCO can't find the record with it!
-				item.url = item.url.replace(/(AN=[0-9]+)⟨=[a-z]{2}/,"$1");
+				item.url = item.url.replace(/(AN=[0-9]+)⟨=[a-z]{2}/,"$1").replace(/#.*$/,'');
 				item.attachments.push({url: item.url+"&scope=cite",
 							title: "EBSCO Record",
 							mimeType: "text/html",
@@ -96,7 +96,7 @@ function downloadFunction(text, url) {
 					realpdf = text.match(/<embed[^>]*src="([^"]+)"/);
 					if (realpdf) {
 						realpdf = realpdf[1];
-						item.attachments.push({url:realpdf.replace(/&amp;/g, "&")
+						item.attachments.push({url:realpdf.replace(/&amp;/g, "&").replace(/#.*$/,'')
 										.replace(/K=\d+/,"K="+an[1]),
 								title: "EBSCO Full Text",
 								mimeType:"application/pdf"});
