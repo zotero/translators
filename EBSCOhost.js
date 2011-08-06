@@ -18,8 +18,7 @@ function detectWeb(doc, url) {
 	} : null;
 	
 	// See if this is a search results or folder results page
-	var searchResult = doc.evaluate('//ul[@class="result-list" or @class="folder-list"]/li/div[@class="result-list-record" or @class="folder-item"]', doc, nsResolver,
-					XPathResult.ANY_TYPE, null).iterateNext();         
+	var searchResult = doc.evaluate('//ul[@class="result-list" or @class="folder-list"]/li/div[@class="result-list-record" or @class="folder-item"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();         
 	if(searchResult) {
 		return "multiple";
 	}
@@ -37,6 +36,7 @@ function detectWeb(doc, url) {
 function downloadFunction(text, url) {
 		var an = url.match(/_(\d+)_AN/);
 		var pdf = false;
+		var risDate = false;
 		var queryString = {};
 		url.replace(
 			new RegExp("([^?=&]+)(=([^&]*))?", "g"),
@@ -44,10 +44,8 @@ function downloadFunction(text, url) {
 		);
 		pdf = "/ehost/pdfviewer/pdfviewer?sid="+queryString["sid"]+"&vid="+queryString["vid"];
 
-		if (text.match(/^Y2\s+-.*\d{4}.*/m) && text.match(/^(Y1|PY)\s+-.*\d{4}.*/m)) {
-			// prefer Y1 or PY over Y2
-			//Z.debug("got a second one!");
-			text = text.replace(/^Y2\s+-.*/m,'');
+		if (text.match(/^Y1\s+-(.*)$/m)) {
+			risDate = text.match(/^Y1\s+-(.*)$/m);
 		}
 
 		if (!text.match(/^TY\s\s-/m)) { text = text+"\nTY  - JOUR\n"; }
@@ -74,10 +72,19 @@ function downloadFunction(text, url) {
 				an = an[1];
 				item.callNumber = an;
 			} else {
-				var an = item.url.match(/AN=([0-9]+)/);
+				an = item.url.match(/AN=([0-9]+)/);
 				if (an) an = an[1];
 			}
-			
+
+			if (risDate) {
+				var year = risDate[1].match(/\d{4}/);
+				var extra = risDate[1].match(/\/([^\/]*)$/);
+				// If we have a double year in risDate, use last section
+				if (year && extra && extra[1].indexOf(year[0]) !== -1) {
+					item.date = extra[1];
+				}
+			}		
+	
 			// RIS translator tries to download the link in "UR" this leads to unhappyness
 			item.attachments = [];
 			
