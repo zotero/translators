@@ -16,15 +16,6 @@ function detectWeb(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') { return namespace; } else { return null; }
 	} : null;
-		// The Scientific American Archive breaks this translator, disabling 
-		try {
-			var databases = doc.evaluate("//span[@class = 'selected-databases']", doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			if(databases.indexOf("Scientific American Archive Online") != -1) {
-				return false;
-			}
-		} catch(e) {
-		}
-	
 	
 	// See if this is a search results or folder results page
 	var searchResult = doc.evaluate('//ul[@class="result-list" or @class="folder-list"]/li/div[@class="result-list-record" or @class="folder-item"]', doc, nsResolver,
@@ -53,6 +44,12 @@ function downloadFunction(text, url) {
 		);
 		pdf = "/ehost/pdfviewer/pdfviewer?sid="+queryString["sid"]+"&vid="+queryString["vid"];
 
+		if (text.match(/^Y2\s+-.*\d{4}.*/m) && text.match(/^(Y1|PY)\s+-.*\d{4}.*/m)) {
+			// prefer Y1 or PY over Y2
+			//Z.debug("got a second one!");
+			text = text.replace(/^Y2\s+-.*/m,'');
+		}
+
 		if (!text.match(/^TY\s\s-/m)) { text = text+"\nTY  - JOUR\n"; }
 		// load translator for RIS
 		var translator = Zotero.loadTranslator("import");
@@ -74,14 +71,6 @@ function downloadFunction(text, url) {
 			
 			if (an) {
 				item.callNumber = an[1];
-			}
-			
-			// If we have a double year, eliminate one
-			if (item.date) {
-				var year = item.date.match(/\d{4}/);
-				if (year && item.date.replace(year[0],"").indexOf(year[0]) !== -1) {
-					item.date = item.date.replace(year[0],"");
-				}
 			}
 			
 			// RIS translator tries to download the link in "UR" this leads to unhappyness
@@ -113,8 +102,6 @@ function downloadFunction(text, url) {
 			}, function () { item.complete(); });
 		});
 		translator.translate();
-		
-		Zotero.done();
 }
 
 var host;
