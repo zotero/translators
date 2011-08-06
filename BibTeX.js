@@ -6,9 +6,6 @@
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 200,
-	"configOptions": {
-		"dataMode": "block"
-	},
 	"displayOptions": {
 		"exportCharset": "UTF-8",
 		"exportNotes": true,
@@ -1668,6 +1665,7 @@ function processField(item, field, value) {
 			var parts = attachment.split(":");
 			var filetitle = parts[0];
 			var filepath = parts[1];
+			if (filepath.trim() === '') continue; // skip empty entries
 			var filetype = parts[2];
 			if (filetitle.length == 0) {
 				filetitle = "Attachment";

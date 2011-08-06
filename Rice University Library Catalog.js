@@ -1,14 +1,14 @@
 {
-	"translatorID": "23ba3be6-412d-4dde-9cc1-c4df0cc09378",
-	"label": "Rice University Library Catalog",
-	"creator": "Mang Sun",
-	"target": "^https?://[^/]*\\.rice\\.edu[^/]*/\\S*cgisirsi",
-	"minVersion": "2.1",
-	"maxVersion": "",
-	"priority": 90,
-	"inRepository": true,
-	"translatorType": 4,
-	"lastUpdated": "2011-07-28 01:01:31"
+        "translatorID":"23ba3be6-412d-4dde-9cc1-c4df0cc09378",
+        "label":"Rice University Library Catalog",
+        "creator":"Mang Sun",
+        "target":"^https?://[^/]*\\.rice\\.edu[^/]*/uhtbin/cgisirsi",
+        "minVersion":"2.1",
+        "maxVersion":"",
+        "priority":90,
+        "inRepository":"1",
+        "translatorType":4,
+        "lastUpdated":"2011-07-29 12:52:04"
 }
 
 /* Based on the SIRSI translator by Simon Kornblith and Michael Berkowitz,
@@ -31,8 +31,6 @@ function scrape(doc) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
 
-	//var xpath = '/html/body/div[@class="columns_container"]/div[contains(@class, "left_column")]/form[@name="item_view"]/div[@class="content_container item_details"]/div[@class="content"]/ul[contains(@class, "detail_page")]/li/div/table//tr[th[@class="viewmarctags1"]][td[@class="viewmarctags"]]';
-	//rice path
           var xpath = '/html/body/div[@class="columns_container"]/div[contains(@class, "left_column")]/form[@name="item_view"]/div[@class="content_container item_details"]/div[@class="content"]/ul[contains(@class, "detail_page")]/li[@id="detail_marc_record"]/dl/dt[@class="viewmarctags"]';
           
 	 var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
@@ -46,25 +44,15 @@ function scrape(doc) {
 
 	var newItem = new Zotero.Item("book");
 	newItem.extra = "";
-	
-
 	newItem.series = "";
 	var seriesItemCount = 0;
-	//Added by Rice
-	//var dtpos=1;
+	
 
 	while(elmt) {
 		try {
-		
-		//Zotero.debug('hell');
-			//var node = doc.evaluate('./TD[1]/A[1]/text()[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+						
 			//By Rice. Select all non space text nodes.
 			var node = doc.evaluate('./text()[normalize-space()]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			
-			//By Rice. The following three lines have been commented out.
-			//if(!node) {
-			//var node = doc.evaluate('./text()[2]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			//}
 			
 			if(node) {
 			    
@@ -79,15 +67,12 @@ function scrape(doc) {
 				//while other metadata can be retrieved directly from the text node of  DD tags 	
 				var value = Zotero.Utilities.superCleanString(doc.evaluate('following-sibling::dd[position()=1]/text()[normalize-space()]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);	
 				}
+							
 								
-				//Zotero.debug(value);
-						
-				//Zotero.debug(casedField);
 				//acquire label and create super clean text by removing colon, space and etc.
                                 casedField = Zotero.Utilities.superCleanString(node.nodeValue);
 				field = casedField.toLowerCase();
-				//Zotero.debug(field);
-				
+							
 
 				if(field == "publisher") {
 					newItem.publisher = value;
@@ -100,13 +85,10 @@ function scrape(doc) {
 					var m = re.exec(value);
 					newItem.ISBN = m[0];
 				}else if(field == "title") {
-					//Zotero.debug(value);
 					var titleParts = value.split(" / ");
 					re = /\[(.+)\]/i;
 				if (re.test(titleParts[0])) {
 					var ar = re.exec(titleParts[0]);
-					//Zotero.debug(titleParts[0]);
-					Zotero.debug(ar);
 					var itype = ar[1].toLowerCase();
 					if(itype== "phonodisc" || itype == "sound recording"){
 						newItem.itemType = "audioRecording";
@@ -119,6 +101,7 @@ function scrape(doc) {
 					}
 				}
 				newItem.title = Zotero.Utilities.capitalizeTitle(titleParts[0]);
+
 				}else if(field == "series") {//push onto item, delimit with semicolon when needed
 	  				if (seriesItemCount != 0){
 						newItem.series +=  "; " + value;
@@ -134,8 +117,8 @@ function scrape(doc) {
 						newItem.date = uniDate[1];
 					}else if(field == "edition") {
 						newItem.edition = value;
-					}else if(field == "physical descrip") {
-						//support
+					}else if(field == "physical description") {
+                                                
 						var physParts = value.split(" : ");
 						var physParts = physParts[0].split(" ; ");
 						//determine pages, split on " p."
@@ -180,10 +163,9 @@ function scrape(doc) {
 						newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "contributor", true));
 					}else if(field == "conference author" || field == "corporate author") {
 						
-					       // Zotero.debug(value);
-					       //newItem.creators.push(value);
-						//The above line has been commented out to avoid the error of "Could not save items:"
-						//The following line has been included by Rice to handle corporate or conference author
+					     
+					      
+						//The following line is included by Rice to handle corporate or conference author
 						 newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "author", true));
 					}else if(field == "subject" || field == "corporate subject" || field == "geographic term") {
 						var subjects = value.split("--");
@@ -197,7 +179,7 @@ function scrape(doc) {
 				}
 			} catch (e) {}
 				elmt = elmts.iterateNext();
-				//Zotero.debug('hello');
+				
 			}//END if node
 
 			if(newItem.extra) {
@@ -225,7 +207,7 @@ function scrape(doc) {
 			var sirsiNew = true; //toggle between SIRSI -2003 and SIRSI 2003+
                         //Adapted to catch the hitlist page of Rice Catalog
 			var xpath = '/html/body/div[@class="columns_container"]/div[contains(@class, "left_column")]/div[@class="content_container"]/div[@class="content"]/form[@id="hitlist"]/ul[@class="hit_list"]/li/ul[starts-with(@class, "hit_list_row")]/li[@class="hit_list_item_info"]/dl';
-                         //Zotero.debug(xpath);
+                        
 			if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 				Zotero.debug("SIRSI doWeb: searchsum");
 				sirsiNew = true;
@@ -280,7 +262,6 @@ function scrape(doc) {
 				Zotero.debug("href: " + doc.location.href);
 				var hitlist = doc.forms.namedItem("hitlist");
 				var baseUrl = m[0]+hitlist.getAttribute("action")+"?first_hit="+hitlist.elements.namedItem("first_hit").value+"&last_hit="+hitlist.elements.namedItem("last_hit").value;
-				//Zotero.debug(baseUrl);
 				var alexandria = new Array();
 				for(var i in items) {
 					alexandria.push(baseUrl+"&"+i+"=Details");

@@ -3,12 +3,12 @@
 	"label": "ProQuest",
 	"creator": "Avram Lyon",
 	"target": "^https?://search\\.proquest\\.com[^/]*(/pqrl|/pqdt|/hnp[a-z]*)?/(docview|publication|publicationissue|results)",
-	"minVersion": "2.0",
+	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-07-27 23:38:30"
+	"lastUpdated": "2011-08-02 02:41:31"
 }
 
 /*
@@ -193,7 +193,7 @@ function scrape (doc) {
 			case "Database":
 					item.libraryCatalog = value; break;
 			case "Document URL":
-					item.attachments.push({url:value,
+					item.attachments.push({url:value.replace(/\?accountid=[0-9]+$/,''),
 								title: "ProQuest Record",
 								mimeType: "text/html"}); break;
 			case "Language of Publication":
@@ -246,6 +246,7 @@ function scrape (doc) {
 		item.attachments.push({url:realLink.href,
 								title:"ProQuest PDF",
 								mimeType:"application/pdf"});
+		item.complete();
 	} else {
 		// The PDF link requires two requests-- we fetch the PDF full text page
 		var pdf = doc.evaluate('//a[@class="formats_base_sprite format_pdf"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
@@ -261,9 +262,7 @@ function scrape (doc) {
 				item.complete();
 			}, function () {});
 		} else {
-				// If no PDF, we'll save at least something. This might be fulltext, but we're not sure.
-				item.attachments.push({url:url, title:"ProQuest HTML", mimeType:"text/html"});
-				item.complete();
+			item.complete();
 		}
 	}
 }
@@ -289,3 +288,61 @@ function mapToZotero (type) {
 	Zotero.debug("No mapping for type: "+type);
 	return false;
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://search.proquest.com/docview/213445241",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Gerald F",
+						"lastName": "Powers",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Drew",
+						"lastName": "Christiansen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Robert T",
+						"lastName": "Hennemeyer",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Peace",
+					"Book reviews"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": false,
+						"title": "ProQuest Record",
+						"mimeType": "text/html"
+					}
+				],
+				"place": "Winnipeg",
+				"title": "Peacemaking: moral & policy challenges for a new world // Review",
+				"publicationTitle": "Peace Research",
+				"volume": "27",
+				"issue": "2",
+				"pages": "90-100",
+				"numPages": "0",
+				"date": "May 1995",
+				"publisher": "Menno Simons College",
+				"ISSN": "00084697",
+				"language": "English",
+				"rights": "Copyright Peace Research May 1995",
+				"proceedingsTitle": "Peace Research",
+				"libraryCatalog": "ProQuest",
+				"shortTitle": "Peacemaking"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
