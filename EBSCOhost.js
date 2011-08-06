@@ -77,9 +77,11 @@ function downloadFunction(text, url) {
 			}
 			
 			// If we have a double year, eliminate one
-			var year = item.date.match(/\d{4}/);
-			if (year && item.date.replace(year[0],"").indexOf(year[0]) !== -1) {
-				item.date = item.date.replace(year[0],"");
+			if (item.date) {
+				var year = item.date.match(/\d{4}/);
+				if (year && item.date.replace(year[0],"").indexOf(year[0]) !== -1) {
+					item.date = item.date.replace(year[0],"");
+				}
 			}
 			
 			// RIS translator tries to download the link in "UR" this leads to unhappyness
@@ -166,16 +168,15 @@ function doWeb(doc, url) {
 
 				var run = function(urls, infos) {
 					var url, info;
-					if (urls.length == 0 || folderInfos.length == 0) {
+					if (urls.length == 0 || infos.length == 0) {
 						Zotero.done();
 						return true;
 					}
 					url = urls.shift();
 					info = infos.shift();
 					Zotero.Utilities.processDocuments(url, 
-						function (newDoc) { doDelivery(doc, nsResolver, info); },
-						function () {run(urls, infos);
-					});
+						function (newDoc) { doDelivery(doc, nsResolver, info, function () { run(urls, infos) }); },
+						function () { return true; });
 				};
 
 				run(urls, infos);
@@ -184,30 +185,38 @@ function doWeb(doc, url) {
 		});
 	} else {
 		/* Individual record. Record key exists in attribute for add to folder link in DOM */
-		doDelivery(doc, nsResolver, null);
+		doDelivery(doc, nsResolver, null, function () { Zotero.done(); return true; });
+		Zotero.wait();
 	}
 }
-function doDelivery(doc, nsResolver, folderData) {
+function doDelivery(doc, nsResolver, folderData, onDone) {
+	//Z.debug(folderData);
 	if(folderData === null)	{
 		/* Get the db, AN, and tag from ep.clientData instead */
 		var script;
 		var scripts = doc.evaluate('//script[@type="text/javascript"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		while (script = scripts.iterateNext().textContent) {
-			if (script.indexOf("var ep") > -1) { break; }
-			script = "";
+			var clientData = script.match(/var ep\s*=\s*({[^;]*});/);
+			if (clientData) break;
 		}
+		if (!clientData) {return false;}
+			/* We now have the script containing ep.clientData */
+
+		/* The JSON is technically invalid, since it doesn't quote the
+		   attribute names-- we pull out the valid bit inside it. */
+		var clientData = script.match(/var ep\s*=\s*({[^;]*});/);
+		if (!clientData) { return false; }
+		clientData = clientData[1].match(/"currentRecord"\s*:\s*({[^}]*})/);
+		/* If this starts throwing exceptions, we should probably start try-elsing it */
+		folderData = JSON.parse(clientData[1]);
+	} else {
+		/* Ditto for this. */
+		// The attributes are a little different
+		folderData = JSON.parse(folderData);
+		folderData.Db = folderData.db;
+		folderData.Term = folderData.uiTerm;
+		folderData.Tag = folderData.uiTag;
 	}
-
-	if (script === "") { return; }
-	/* We now have the script containing ep.clientData */
-
-	/* The JSON is technically invalid, since it doesn't quote the
-	   attribute names-- we pull out the valid bit inside it. */
-	var clientData = script.match(/var ep\s*=\s*({[^;]*});/);
-	if (!clientData) { return false; }
-	clientData = clientData[1].match(/"currentRecord"\s*:\s*({[^}]*})/);
-	/* If this starts throwing exceptions, we should probably start try-elsing it */
-	clientData = JSON.parse(clientData[1]);
 	
 	var postURL = doc.evaluate('//form[@id="aspnetForm"]/@action', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 
@@ -218,9 +227,9 @@ function doDelivery(doc, nsResolver, folderData) {
 	);
 	
 	/* ExportFormat = 1 for RIS file */
-	postURL = host+"/ehost/delivery/ExportPanelSave/"+clientData.Db+"_"+clientData.Term+"_"+clientData.Tag+"?sid="+queryString["sid"]+"&vid="+queryString["vid"]+"&bdata="+queryString["bdata"]+"&theExportFormat=1";
-	
-	Zotero.Utilities.HTTP.doGet(postURL, function (text) { downloadFunction(text, postURL); });
+	postURL = host+"/ehost/delivery/ExportPanelSave/"+folderData.Db+"_"+folderData.Term+"_"+folderData.Tag+"?sid="+queryString["sid"]+"&vid="+queryString["vid"]+"&bdata="+queryString["bdata"]+"&theExportFormat=1";
+	//Z.debug(postURL);
+	Zotero.Utilities.HTTP.doGet(postURL, function (text) { downloadFunction(text, postURL); }, onDone);
 }
 /** BEGIN TEST CASES **/
 var testCases = [
