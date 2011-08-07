@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-08-06 22:53:30"
+	"lastUpdated": "2011-08-07 11:11:54"
 }
 
 function detectWeb(doc, url) {
@@ -67,7 +67,8 @@ function downloadFunction(text, url) {
 			if (text.match(/^T1\s+-/m)) {
 				item.title = text.match(/^T1\s+-\s*(.*)/m)[1];
 			}
-			
+		
+			// Get the accession number from URL or elsewhere	
 			if (an) {
 				an = an[1];
 				item.callNumber = an;
@@ -78,14 +79,14 @@ function downloadFunction(text, url) {
 
 			if (risDate) {
 				var year = risDate[1].match(/\d{4}/);
-				var extra = risDate[1].match(/\/([^\/]*)$/);
+				var extra = risDate[1].match(/\/([^\/]+)$/);
 				// If we have a double year in risDate, use last section
 				if (year && extra && extra[1].indexOf(year[0]) !== -1) {
 					item.date = extra[1];
 				}
 			}		
 	
-			// RIS translator tries to download the link in "UR" this leads to unhappyness
+			// RIS translator tries to download the link in "UR"
 			item.attachments = [];
 			
 			// But keep the stable link as a link attachment
@@ -98,21 +99,23 @@ function downloadFunction(text, url) {
 							snapshot: false});
 				item.url = "";
 			}
+			// A lot of extra info is jammed into notes by the RIS translator
 			item.notes = [];
-			Zotero.Utilities.doGet(pdf, function (text) {
-				//Z.debug(pdf);
+			// Since order of requests might matter, let's grab the stable link, then the PDF
+			Zotero.Utilities.doGet(item.url, function (doc) { Zotero.Utilities.doGet(pdf, function (text) {
 				var realpdf = text.match(/<embed id="pdfEmbed"[^>]*>/);
 				if(realpdf) {
 					realpdf = text.match(/<embed[^>]*src="([^"]+)"/);
 					if (realpdf) {
-						realpdf = realpdf[1];
-						item.attachments.push({url:realpdf.replace(/&amp;/g, "&").replace(/#.*$/,'')
-										.replace(/K=\d+/,"K="+an),
+						realpdf = realpdf[1].replace(/&amp;/g, "&").replace(/#.*$/,'')
+								.replace(/K=\d+/,"K="+an);
+						Zotero.debug("PDF for "+item.title+": "+realpdf);
+						item.attachments.push({url:realpdf,
 								title: "EBSCO Full Text",
 								mimeType:"application/pdf"});
 					}
 				}
-			}, function () { item.complete(); });
+			}, function () { item.complete(); }); }, function () { return true; });
 		});
 		translator.translate();
 }
@@ -174,7 +177,7 @@ function doWeb(doc, url) {
 					}
 					url = urls.shift();
 					info = infos.shift();
-					Zotero.Utilities.processDocuments(url, 
+					Zotero.Utilities.processDocuments(url.replace(/#.*$/,''), 
 						function (newDoc) { doDelivery(doc, nsResolver, info, function () { run(urls, infos) }); },
 						function () { return true; });
 				};
