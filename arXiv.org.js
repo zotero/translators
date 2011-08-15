@@ -184,7 +184,7 @@ function getXPathNodeTrimmed(xml, name) {
 function getCreatorNodes(xml, name, newItem, creatorType) {
 	var nodes = ZU.xpath(xml, "//GetRecord/record/metadata/oai_dc_dc/"+name);
 	for(var i=0; i<nodes.length; i++) {
-		newItem.creators.push(Zotero.Utilities.cleanAuthor(nodes[i].textContent, creatorType));
+		newItem.creators.push(Zotero.Utilities.cleanAuthor(nodes[i].textContent, creatorType, true));
 	}
 }/** BEGIN TEST CASES **/
 var testCases = [
