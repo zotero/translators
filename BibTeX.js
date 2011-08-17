@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-07-30 11:46:45"
+	"lastUpdated": "2011-07-29 03:35:07"
 }
 
 function detectImport() {

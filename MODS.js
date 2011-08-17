@@ -170,29 +170,17 @@ function doExport() {
 		
 		// XML tag detail; object field volume
 		if(item.volume) {
-			if(parseInt(item.volume) == item.volume) {
-				part += <detail type="volume"><number>{item.volume}</number></detail>;
-			} else {
-				part += <detail type="volume"><text>{item.volume}</text></detail>;
-			}
+			part += <detail type="volume"><number>{item.volume}</number></detail>;
 		}
 		
 		// XML tag detail; object field number
 		if(item.issue) {
-			if(parseInt(item.issue) == item.issue) {
-				part += <detail type="issue"><number>{item.issue}</number></detail>;
-			} else {
-				part += <detail type="issue"><text>{item.issue}</text></detail>;
-			}
+			part += <detail type="issue"><number>{item.issue}</number></detail>;
 		}
 		
 		// XML tag detail; object field section
 		if(item.section) {
-			if(parseInt(item.section) == item.section) {
-				part += <detail type="section"><number>{item.section}</number></detail>;
-			} else {
-				part += <detail type="section"><text>{item.section}</text></detail>;
-			}
+			part += <detail type="section"><number>{item.section}</number></detail>;
 		}
 		
 		// XML tag detail; object field pages
