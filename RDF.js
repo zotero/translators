@@ -10,7 +10,7 @@
 	"browserSupport":"gcsn",
 	"configOptions":{"dataMode":"rdf/xml"},
 	"inRepository":true,
-	"lastUpdated":"2011-07-08 04:51:41"
+	"lastUpdated":"2011-08-22 23:29:49"
 }
 
 function detectImport() {
@@ -637,5 +637,7 @@ function doImport() {
 /**
  * Export doImport and defaultUnknownType to other translators
  */
-exports.doImport = doImport;
-exports.defaultUnknownType = "book";
+var exports = {
+	"doImport":doImport,
+	"defaultUnknownType":"book"
+};
