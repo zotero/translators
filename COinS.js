@@ -7,9 +7,9 @@
 	"maxVersion": "",
 	"priority": 300,
 	"inRepository": true,
-	"translatorType": 4,
+	"translatorType": 6,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-07-01 19:16:28"
+	"lastUpdated": "2011-08-24 11:55:56"
 }
 
 function detectWeb(doc, url) {
@@ -195,6 +195,15 @@ function doWeb(doc, url) {
 	}
 }
 
+function doExport() {
+	var item;
+	var co;
+	
+	while (item = Zotero.nextItem()) {
+		co = Zotero.Utilities.createContextObject(item);
+		Zotero.write("<span class='Z3988' title='"+ co +"'></span>\n");
+	}
+}
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
