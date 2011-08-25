@@ -9,12 +9,12 @@
 	"inRepository": true,
 	"translatorType": 6,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-08-24 11:55:56"
+	"lastUpdated": "2011-08-25 23:46:18"
 }
 
 function detectWeb(doc, url) {
 	var spanTags = doc.getElementsByTagName("span");
-	
+
 	var encounteredType = false;
 	
 	// This and the x: prefix in the XPath are to work around an issue with pages
@@ -83,13 +83,13 @@ function completeCOinS(newItems, couldUseFullItems, doc) {
 		for(var i in newItems) {
 			selectArray[i] = newItems[i].title;
 		}
-        
+		
 		Zotero.selectItems(selectArray, function (selectArray) {
-    		var useIndices = new Array();
-    		for(var i in selectArray) {
-    			useIndices.push(i);
-    		}
-    		completeItems(newItems, useIndices, couldUseFullItems);
+			var useIndices = new Array();
+			for(var i in selectArray) {
+				useIndices.push(i);
+			}
+			completeItems(newItems, useIndices, couldUseFullItems);
 		});
 	} else if(newItems.length) {
 		completeItems(newItems, [0], couldUseFullItems);
@@ -200,7 +200,7 @@ function doExport() {
 	var co;
 	
 	while (item = Zotero.nextItem()) {
-		co = Zotero.Utilities.createContextObject(item);
+		co = Zotero.Utilities.createContextObject(item, "1.0");
 		Zotero.write("<span class='Z3988' title='"+ co +"'></span>\n");
 	}
 }
