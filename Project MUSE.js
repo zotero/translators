@@ -25,7 +25,7 @@ function doWeb(doc, url) {
 
 	var searchRe = new RegExp("^https?://[^/]+/search/results|/search/save");
 	if(detectWeb(doc, url) == "multiple") {
-		var items = new Array();
+		var items = {};
 		var attachments = new Array();
 		var pdfRe = /PDF/;
 		var htmlRe = /HTML/;
@@ -67,7 +67,7 @@ function doWeb(doc, url) {
 				} 
 			}
 		}
-		items = Zotero.selectItems(items, function(items) {
+		Zotero.selectItems(items, function(items) {
 			if(!items) {
 				return true;
 			}	
