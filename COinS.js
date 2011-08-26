@@ -201,7 +201,7 @@ function doExport() {
 	
 	while (item = Zotero.nextItem()) {
 		co = Zotero.Utilities.createContextObject(item, "1.0");
-		Zotero.write("<span class='Z3988' title='"+ co +"'></span>\n");
+		Zotero.write("<span class='Z3988' title='"+ Zotero.Utilities.htmlSpecialChars(co) +"'></span>\n");
 	}
 }
 /** BEGIN TEST CASES **/
