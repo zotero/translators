@@ -3,12 +3,12 @@
 	"label": "Library Catalog (InnoPAC)",
 	"creator": "Simon Kornblith and Michael Berkowitz",
 	"target": "(search~|\\/search\\?|(a|X|t|Y|w)\\?|\\?(searchtype|searchscope)|frameset&FF|record=b[0-9]+(~S[0-9])?|/search/q\\?)",
-	"minVersion": "1.0.0b3.r1",
+	"minVersion": "2.1.8",
 	"maxVersion": "",
 	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-07-22 17:52:39"
+	"lastUpdated": "2011-09-03 11:00:21"
 }
 
 function detectWeb(doc, url) {
@@ -22,9 +22,6 @@ function detectWeb(doc, url) {
 // URL MATCHING - translator should detect the following urls...
 // First page results
 // http://bearcat.baylor.edu/search~S7/?searchtype=t&searcharg=test&searchscope=7&sortdropdown=-&SORT=D&extended=0&SUBMIT=Search&searchlimits=&searchorigarg=tone+hundred+years+of+solitude
-// http://innopac.cooley.edu/search~S0/?searchtype=X&searcharg=test&SORT=DZ&extended=0&SUBMIT=Search&searchlimits=&searchorigarg=Xtest
-// TODO: get it working for this: http://opac.library.usyd.edu.au/search
-// n page results
 // http://bearcat.baylor.edu/search~S7?/ttest/ttest/1837%2C1838%2C2040%2CB/browse/indexsort=-
 // http://innopac.cooley.edu/search~S0?/Xtest&SORT=DZ/Xtest&SORT=DZ&SUBKEY=test/1%2C960%2C960%2CB/browse
 // Individual item from search
@@ -185,13 +182,13 @@ function doWeb(doc, url) {
 		var availableItems = new Array();
 		var firstURL = false;
 		
-		var tableRows = doc.evaluate('//table[@class="browseScreen"]//tr[@class="browseEntry" or @class="briefCitRow" or td/input[@type="checkbox"] or td[contains(@class,"briefCitRow")]]',
+		var tableRows = doc.evaluate('//table//tr[@class="browseEntry" or @class="briefCitRow" or td/input[@type="checkbox"] or td[contains(@class,"briefCitRow") or contains(@class,"briefcitCell")]]',
 									 doc, nsResolver, XPathResult.ANY_TYPE, null);
 		// Go through table rows
 		var i = 0;
 		while(tableRow = tableRows.iterateNext()) {
 			// get link
-			var links = doc.evaluate('.//span[@class="briefcitTitle"]/a', tableRow, nsResolver, XPathResult.ANY_TYPE, null);
+			var links = doc.evaluate('.//*[@class="briefcitTitle"]/a', tableRow, nsResolver, XPathResult.ANY_TYPE, null);
 			var link = links.iterateNext();
 			if(!link) {
 				var links = doc.evaluate(".//a", tableRow, nsResolver, XPathResult.ANY_TYPE, null);
@@ -272,6 +269,26 @@ var testCases = [
 				"libraryCatalog": "books.luther.edu Library Catalog"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://utmost.cl.utoledo.edu/search/?searchtype=X&SORT=D&searcharg=history+of+communication&searchscope=3",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://umiss.lib.olemiss.edu/search/?searchtype=X&SORT=D&searcharg=history+of+communication",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://luna.wellesley.edu/search/?searchtype=X&SORT=D&searcharg=history+of+ideas&searchscope=1",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://clues.concordia.ca/search/?searchtype=X&SORT=D&searcharg=history+of+communication",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
