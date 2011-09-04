@@ -1,15 +1,17 @@
 {
-        "translatorID": "312bbb0e-bfb6-4563-a33c-085445d391ed",
-        "label": "Die Zeit",
-        "creator": "Martin Meyerhoff",
-        "target": "^http://www\\.zeit\\.de/",
-        "minVersion": "1.0",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": true,
-        "translatorType": 4,
-        "lastUpdated": "2011-04-21 02:25:21"
+	"translatorID": "312bbb0e-bfb6-4563-a33c-085445d391ed",
+	"label": "Die Zeit",
+	"creator": "Martin Meyerhoff",
+	"target": "^http://www\\.zeit\\.de/",
+	"minVersion": "1.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-09-04 08:59:33"
 }
+
 
 /*
 Die Zeit Translator
@@ -58,8 +60,7 @@ function detectWeb(doc, url) {
 		return "newspaperArticle";
 	} else if (doc.evaluate(Zeit_Archive_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
 		Zotero.debug("multiple");
-		//return "multiple";
-		return false; // TODO Make this not throw javascript errors when using processDocuments
+		return "multiple";
 	}
 }
 function scrape(doc, url) {
@@ -142,8 +143,8 @@ function scrape(doc, url) {
 
 	
 	// Section
-	var section_XPath = '//meta[contains(@name, "zeit::ressort")]'
-	var section = doc.evaluate(section_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().content;
+	var section_XPath = '//div[@class="cap"]/a'
+	var section = doc.evaluate(section_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	newItem.section= section; 
 
 	newItem.attachments.push({url:doc.location.href+"?page=all&print=true", title:doc.title, mimeType:"text/html"}); 
@@ -180,4 +181,83 @@ function doWeb(doc, url) {
 	} else {
 		scrape(doc, url);
 	}
-}	
+}	/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.zeit.de/2011/36/Interview-Lahm-Rinke",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "Moritz",
+						"lastName": "Müller-Wirth",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Fußball",
+					"Autor",
+					"Schriftsteller"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": false,
+						"title": "Philipp Lahm: \"Hast du elf Freunde?\" | Sport | ZEIT ONLINE",
+						"mimeType": "text/html"
+					}
+				],
+				"url": "http://www.zeit.de/2011/36/Interview-Lahm-Rinke",
+				"title": "Philipp Lahm: \"Hast du elf Freunde?\"",
+				"date": "17:12 Uhr",
+				"abstractNote": "Tschechow und Robben, Drama im Flutlicht und Wahrhaftigkeit bei der Arbeit. Der Fußballprofi und Autor Philipp Lahm im Gespräch mit dem Schriftsteller und Fußballer Moritz Rinke.",
+				"publicationTitle": "Die Zeit",
+				"section": "sport",
+				"libraryCatalog": "Die Zeit",
+				"shortTitle": "Philipp Lahm"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.zeit.de/politik/ausland/2011-09/libyen-bani-walid",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Muammar al-Gadhafi",
+					"Libyen",
+					"Bürgerkrieg"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": false,
+						"title": "Libyen: Rebellen bereiten Angriff auf Bani Walid vor | Politik | ZEIT ONLINE",
+						"mimeType": "text/html"
+					}
+				],
+				"url": "http://www.zeit.de/politik/ausland/2011-09/libyen-bani-walid",
+				"title": "Libyen: Rebellen bereiten Angriff auf Bani Walid vor",
+				"date": "15:12 Uhr",
+				"abstractNote": "Die von Gadhafi-Anhängern geführte Stadt ist von Rebellentruppen eingekreist. Gespräche über eine friedliche Übergabe sind gescheitert, ein Angriff steht offenbar bevor.",
+				"publicationTitle": "Die Zeit",
+				"section": "Ausland",
+				"libraryCatalog": "Die Zeit",
+				"shortTitle": "Libyen"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
