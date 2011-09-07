@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-07-01 02:58:17"
+	"lastUpdated": "2011-09-05 23:41:20"
 }
 
 function detectWeb(doc, url) {
@@ -198,12 +198,12 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.jstor.org.libproxy.mit.edu/action/doBasicSearch?Query=chicken&Search.x=0&Search.y=0&wc=on",
+		"url": "http://www.jstor.org/action/doBasicSearch?Query=chicken&Search.x=0&Search.y=0&wc=on",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.jstor.org.libproxy.mit.edu/stable/1593514?&Search=yes&searchText=chicken&list=hide&searchUri=%2Faction%2FdoBasicSearch%3FQuery%3Dchicken%26Search.x%3D0%26Search.y%3D0%26wc%3Don&prevSearch=&item=1&ttl=70453&returnArticleService=showFullText",
+		"url": "http://www.jstor.org/stable/1593514?&Search=yes&searchText=chicken&list=hide&searchUri=%2Faction%2FdoBasicSearch%3FQuery%3Dchicken%26Search.x%3D0%26Search.y%3D0%26wc%3Don&prevSearch=&item=1&ttl=70453&returnArticleService=showFullText",
 		"items": [
 			{
 				"itemType": "journalArticle",
