@@ -6,17 +6,17 @@
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
-	"browserSupport": "gcs",
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-08-22 22:43:11"
+	"browserSupport": "gcs",
+	"lastUpdated": "2011-09-10 14:58:04"
 }
 
 function detectWeb(doc, url) {
 	if (url.match(/search\.searchResults/)) {
 		return false;
 		//return "multiple";
-	} else if (url.match(/search\.displayRecord/)) {
+	} else if (url.match(/search\.displayRecord|journals\/\S+\/\d+\/\d+\/\d+\//)) {
 		return "journalArticle";
 	}
 }
@@ -59,6 +59,7 @@ function scrape (doc) {
 			var post = 'id=' + id + '&lstUIDs=' + lstSelectedUIDs + '&lstSelectedUIDs=&records=records&displayFormat=&exportFormat=referenceSoftware&printDoc=0';
 			// http://psycnet.apa.org/index.cfm?fa=search.exportFormat&singlerecord=1
 			// id=&lstSelectedUIDs=&lstUIDs=2004-16644-010&records=records&displayFormat=&exportFormat=referenceSoftware&printDoc=0
+			//Zotero.debug(get);
 			Zotero.Utilities.HTTP.doPost(get, post, function(text) {
 				// http://psycnet.apa.org/index.cfm?fa=search.export
 				var translator = Zotero.loadTranslator("import");
@@ -67,6 +68,7 @@ function scrape (doc) {
 				//Z.debug(text);
 				translator.setHandler("itemDone", function(obj, item) {
 					//item.url = newurl;
+					item.title = item.title.replace(/\.$/,'');
 					//item.attachments = [{url:newurl, title:"APA PsycNET Snapshot", mimeType:"text/html"}];
 					item.complete();
 				});
@@ -126,7 +128,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"itemID": "2004-16644-010",
-				"title": "Neuropsychology of Adults With Attention-Deficit/Hyperactivity Disorder: A Meta-Analytic Review.",
+				"title": "Neuropsychology of Adults With Attention-Deficit/Hyperactivity Disorder: A Meta-Analytic Review",
 				"publicationTitle": "Neuropsychology",
 				"volume": "18",
 				"issue": "3",
@@ -138,7 +140,53 @@ var testCases = [
 				"abstractNote": "A comprehensive, empirically based review of the published studies addressing neuropsychological performance in adults diagnosed with attention-deficit/hyperactivity disorder (ADHD) was conducted to identify patterns of performance deficits. Findings from 33 published studies were submitted to a meta-analytic procedure producing sample-size-weighted mean effect sizes across test measures. Results suggest that neuropsychological deficits are expressed in adults with ADHD across multiple domains of functioning, with notable impairments in attention, behavioral inhibition, and memory, whereas normal performance is noted in simple reaction time. Theoretical and developmental considerations are discussed, including the role of behavioral inhibition and working memory impairment. Future directions for research based on these findings are highlighted, including further exploration of specific impairments and an emphasis on particular tests and testing conditions. (PsycINFO Database Record (c) 2010 APA, all rights reserved)",
 				"DOI": "10.1037/0894-4105.18.3.485",
 				"libraryCatalog": "APA PsycNET",
-				"shortTitle": "Neuropsychology of Adults With Attention-Deficit/Hyperactivity Disorder"
+				"shortTitle": "Neuropsychology of Adults With Attention-Deficit/Hyperactivity Disorder",
+				"checkFields": "title"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://psycnet.apa.org/journals/xge/50/5/325/",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Osgood",
+						"firstName": "Charles E.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Suci",
+						"firstName": "George J.",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"factor analysis",
+					"evaluation",
+					"potency",
+					"activity",
+					"semantic"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"itemID": "1956-05944-001",
+				"title": "Factor analysis of meaning",
+				"publicationTitle": "Journal of Experimental Psychology",
+				"volume": "50",
+				"issue": "5",
+				"pages": "325-338",
+				"date": "1955",
+				"publisher": "US: American Psychological Association",
+				"ISBN": "0022-1015 (Print)",
+				"ISSN": "0022-1015 (Print)",
+				"abstractNote": "Two factor analytic studies of meaningful judgments based upon the same sample of 50 bipolar descriptive scales are reported. Both analyses reveal three major connotative factors: evaluation, potency, and activity. These factors appear to be independent dimensions of the semantic space within which the meanings of concepts may be specified. (PsycINFO Database Record (c) 2010 APA, all rights reserved)",
+				"DOI": "10.1037/h0043965",
+				"libraryCatalog": "APA PsycNET",
+				"checkFields": "title"
 			}
 		]
 	}
