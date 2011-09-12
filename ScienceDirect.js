@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2011-09-05 02:15:00"
+	"lastUpdated": "2011-09-12 01:17:34"
 }
 
 function detectWeb(doc, url) {
@@ -127,19 +127,31 @@ function doWeb(doc, url) {
 			var get = set.get;
 			
 			Zotero.Utilities.HTTP.doGet(get, function(text) {
-				var md5 = text.match(/<input type=hidden name=md5 value=([^>]+)>/)[1];
-				var acct = text.match(/<input type=hidden name=_acct value=([^>]+)>/)[1];
-				var userid = text.match(/<input type=hidden name=_userid value=([^>]+)>/)[1];
-				var uoikey = text.match(/<input type=hidden name=_uoikey value=([^>]+)>/)[1];
-				if (text.match(/<input type=hidden name=_ArticleListID value=([^>]+)>/)) {
-					var alid = text.match(/<input type=hidden name=_ArticleListID value=([^>]+)>/)[1];
+				const postOrder = ["_ob", "_method", "_acct", "_userid", "_docType",
+					"_ArticleListID", "_uoikey", "_eidkey", "count", "md5", "JAVASCRIPT_ON",
+					"format", "citation-type", "Export"];
+				var postParams = {
+					"_ob":"DownloadURL",
+					"_method":"finish",
+					"_docType":"FLA",
+					"count":"1",
+					"JAVASCRIPT_ON":"Y",
+					"format":"cite-abs",
+					"citation-type":"RIS",
+					"Export":"Export"
+				};
+				
+				const re = /<input type=hidden name=(md5|_acct|_userid|_uoikey|_eidkey|_ArticleListID) value=([^>]+)>/g;
+				while((m = re.exec(text)) != null) {
+					postParams[encodeURIComponent(m[1])] = encodeURIComponent(m[2]);
 				}
-				if (alid) {
-					var docID = "_ArticleListID=" + alid + "&_uoikey=" + uoikey;
-				} else {
-					var docID = "_uoikey=" + uoikey;
+				
+				var post = "";
+				for(var i=0, n=postOrder.length; i<n; i++) {
+					var key = postOrder[i];
+					if(postParams[key]) post += "&"+key+"="+postParams[key];
 				}
-				var post = "_ob=DownloadURL&_method=finish&_acct=" + acct + "&_userid=" + userid + "&_docType=FLA&" + docID + "&md5=" + md5 + "&count=1&JAVASCRIPT_ON=Y&format=cite-abs&citation-type=RIS&Export=Export&x=26&y=17";
+				
 				var baseurl = url.match(/https?:\/\/[^/]+\//)[0];
 				
 				set.post = post;
