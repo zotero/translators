@@ -2,14 +2,14 @@
 	"translatorID": "d71e9b6d-2baa-44ed-acb4-13fe2fe592c0",
 	"label": "Google Patents",
 	"creator": "Adam Crymble, Avram Lyon",
-	"target": "^http://www\\.google\\.*/patents",
+	"target": "^http://www\\.google\\.[^/]*/patents",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2011-09-07 10:29:18"
+	"browserSupport": "gcs",
+	"lastUpdated": "2011-09-12 01:44:08"
 }
 
 function detectWeb(doc, url) {
@@ -134,7 +134,7 @@ function scrape(doc, url) {
 		newItem[i] = Zotero.Utilities.capitalizeTitle(newItem[i].toLowerCase(), true);
 	}
 
-	var pdf = doc.evaluate('//div[@class="g-button-basic"]/span/span/a[contains(@href,"/download/)]', doc, null, XPathResult.ANY_TYPE, null
+	var pdf = doc.evaluate('//div[@class="g-button-basic"]/span/span/a[contains(@href,"/download/")]', doc, null, XPathResult.ANY_TYPE, null);
 	if (pdf) newItem.attachments.push({url:pdf.href, title:"Google Patents PDF", mimeType:"application/pdf"});
 
 	newItem.complete();
