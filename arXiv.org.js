@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-07-27 13:39:47"
+	"lastUpdated": "2011-09-13 09:22:33"
 }
 
 function detectWeb(doc, url) {
@@ -140,7 +140,7 @@ function parseXML(text) {
 	for(var j=0; j<identifiers.length; j++) {
 		var identifier = ZU.trimInternal(identifiers[j].textContent);
 		if (identifier.substr(0, 4) == "doi:") {
-			newItem.DOI = identifier;
+			newItem.DOI = identifier.substr(4);
 		}
 		else if (identifier.substr(0, 7) == "http://") {
 			newItem.url = identifier;
