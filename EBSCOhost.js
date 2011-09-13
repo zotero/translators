@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-08-07 11:11:54"
+	"lastUpdated": "2011-09-13 11:11:54"
 }
 
 function detectWeb(doc, url) {
@@ -92,7 +92,7 @@ function downloadFunction(text, url) {
 			// But keep the stable link as a link attachment
 			if(item.url) {
 				// Trim the ⟨=cs suffix -- EBSCO can't find the record with it!
-				item.url = item.url.replace(/(AN=[0-9]+)⟨=[a-z]{2}/,"$1");
+				item.url = item.url.replace(/(AN=[0-9]+)⟨=[a-z]{2}/,"$1").replace(/#.*$/,'');
 				item.attachments.push({url: item.url+"&scope=cite",
 							title: "EBSCO Record",
 							mimeType: "text/html",
@@ -107,7 +107,8 @@ function downloadFunction(text, url) {
 				if(realpdf) {
 					realpdf = text.match(/<embed[^>]*src="([^"]+)"/);
 					if (realpdf) {
-						realpdf = realpdf[1].replace(/&amp;/g, "&").replace(/K=\d+/,"K="+an);
+						realpdf = realpdf[1].replace(/&amp;/g, "&").replace(/#.*$/,'')
+								.replace(/K=\d+/,"K="+an);
 						Zotero.debug("PDF for "+item.title+": "+realpdf);
 						item.attachments.push({url:realpdf,
 								title: "EBSCO Full Text",
@@ -176,7 +177,7 @@ function doWeb(doc, url) {
 					}
 					url = urls.shift();
 					info = infos.shift();
-					Zotero.Utilities.processDocuments(url, 
+					Zotero.Utilities.processDocuments(url.replace(/#.*$/,''), 
 						function (newDoc) { doDelivery(doc, nsResolver, info, function () { run(urls, infos) }); },
 						function () { return true; });
 				};
@@ -231,6 +232,7 @@ function doDelivery(doc, nsResolver, folderData, onDone) {
 	postURL = host+"/ehost/delivery/ExportPanelSave/"+folderData.Db+"_"+folderData.Term+"_"+folderData.Tag+"?sid="+queryString["sid"]+"&vid="+queryString["vid"]+"&bdata="+queryString["bdata"]+"&theExportFormat=1";
 	Zotero.Utilities.HTTP.doGet(postURL, function (text) { downloadFunction(text, postURL); }, onDone);
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{

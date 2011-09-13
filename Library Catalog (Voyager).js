@@ -9,17 +9,17 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-07-04 13:09:56"
+	"lastUpdated": "2011-09-10 11:56:48"
 }
 
 function detectWeb(doc, url) {
 	var export_options = ZU.xpath(doc, '//form[@name="frm"]//*[@name="RD"]');
 	if(!export_options.length) return false;
 	export_options = export_options[0];
-	
 	for(var i in export_options) {
 		if(export_options[i].text == 'Latin1 MARC'
 		|| export_options[i].text == 'Raw MARC'
+		|| export_options[i].text == 'MARC 21'
 		|| export_options[i].text == 'MARC 8'
 		|| export_options[i].text == 'MARC-8'
 		|| export_options[i].text == 'UTF-8'
@@ -132,6 +132,7 @@ function doWeb(doc, url) {
 		|| export_options[i].text == 'UTF8-Unicode'
 		|| export_options[i].text == 'MARC UTF-8'
 		|| export_options[i].text == 'MARC (Unicode/UTF-8)'
+		|| export_options[i].text == 'MARC 21'
 		|| export_options[i].text == 'MARC communication format'
 		|| export_options[i].text == 'MARC Record') {
 			unicode = i;

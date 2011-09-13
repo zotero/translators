@@ -3,13 +3,13 @@
 	"label": "Highwire 2.0",
 	"creator": "Matt Burton",
 	"target": "(content/([0-9]+/[0-9]+|current|firstcite|early)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
-	"minVersion": "2.1",
+	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
-	"browserSupport": "gcsib",
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-09-05 06:38:30"
+	"browserSupport": "g",
+	"lastUpdated": "2011-09-12 23:20:08"
 }
 
 /*
@@ -98,10 +98,10 @@ function doWeb(doc, url) {
 		}	
 		var linkx = './/a[1]';
 		var searchres = doc.evaluate(searchx, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var next_res;
+		var next_res, title, link;
 		while (next_res = searchres.iterateNext()) {
-			var title = doc.evaluate(titlex, next_res, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			var link = doc.evaluate(linkx, next_res, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+			title = doc.evaluate(titlex, next_res, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			link = doc.evaluate(linkx, next_res, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
 			items[link] = title;
 		}
 		items = Zotero.selectItems(items);
@@ -129,9 +129,16 @@ function doWeb(doc, url) {
 			match = text.match(/=([^=]+)\">\s*Download to citation manager/);
 			if (!match || match.length < 1) {
 				// Journal of Cell Biology
-		  			match = text.match(/=([^=]+)\">\s*Add to Citation Manager/);
-				}
+		  		match = text.match(/=([^=]+)\">\s*Add to Citation Manager/);
+		  		if (!match || match.length < 1) {
+		  			/* apparently we can get frames */
+		  			/* but they have the ID too! */
+		  			Z.debug("Attempting to fetch ID from frameset");
+		  			match = text.match(/<meta content="([^"]+)"\s*name="citation_mjid"\s*\/>/);
+		  		}
+			}
 		}
+		
 		id = match[1];
 		newurl = newurls.shift();		
 		if (newurl.match("cgi/content")) {
