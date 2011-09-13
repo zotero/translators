@@ -1,14 +1,15 @@
 {
 	"translatorID": "d71e9b6d-2baa-44ed-acb4-13fe2fe592c0",
 	"label": "Google Patents",
-	"creator": "Adam Crymble",
-	"target": "^http://www\\.google.*/patents",
+	"creator": "Adam Crymble, Avram Lyon",
+	"target": "^http://www\\.google\\.[^/]*/patents",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-07-16 14:00:40"
+	"browserSupport": "gcs",
+	"lastUpdated": "2011-09-12 01:44:08"
 }
 
 function detectWeb(doc, url) {
@@ -38,7 +39,9 @@ function scrape(doc, url) {
 
 	//Grab the patent_bibdata items and the text node directly next to them 
 	var xPathHeadings = doc.evaluate('//div[@class="patent_bibdata"]//b', doc, null, XPathResult.ANY_TYPE, null);
-	var xPathContents = doc.evaluate('//div[@class="patent_bibdata"]//b/following::text()[1]', doc, null, XPathResult.ANY_TYPE, null);
+	// We avoid the next node containing only :\u00A0 (colon followed by a non-breaking space),
+	// since it is a separate node when the field's value is linked (authors, assignees).
+	var xPathContents = doc.evaluate('//div[@class="patent_bibdata"]//b/following::text()[not(.=":\u00A0")][1]', doc, null, XPathResult.ANY_TYPE, null);
 	
 	// create an associative array of the items and their contents
 	var heading, content;
@@ -72,7 +75,8 @@ function scrape(doc, url) {
 	newItem.extra = '';
 
 	for (fieldTitle in dataTags) {
-		Zotero.debug(fieldTitle);
+		//Zotero.debug(fieldTitle);
+		//Z.debug(dataTags[fieldTitle]);
 		//fieldTitle = item.replace(/\s+|\W*/g, '');
 		/*
 		if (fieldTitle == "US Classification" | fieldTitle == "International Classification" | fieldTitle == "Abstract") {
@@ -85,13 +89,19 @@ function scrape(doc, url) {
 			dataTags[fieldTitle] = dataTags[fieldTitle].replace("About this patent", '');
 		}
 		
-	//author(s)
-		if (fieldTitle == "Inventors" | fieldTitle == "Inventor") {
+		// Creators
+		if (fieldTitle == "Inventors") {
+			// Fix all-uppercase
+			if (dataTags[fieldTitle] && dataTags[fieldTitle].toUpperCase() == dataTags[fieldTitle])
+            			dataTags[fieldTitle] = Zotero.Utilities.capitalizeTitle(dataTags[fieldTitle].toLowerCase(), true);
 			var authors = dataTags[fieldTitle].split(", ");
 			for (var j = 0; j < authors.length; j++) {
 				newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[j], "inventor"));
 			}
 		} else if (fieldTitle == "Inventor") {
+			// Fix all-uppercase
+			if (dataTags[fieldTitle] && dataTags[fieldTitle].toUpperCase() == dataTags[fieldTitle])
+				dataTags[fieldTitle] = Zotero.Utilities.capitalizeTitle(dataTags[fieldTitle].toLowerCase(), true);
 			newItem.creators.push(Zotero.Utilities.cleanAuthor(dataTags["Inventor"], "inventor"));
 		}
 		
@@ -109,13 +119,23 @@ function scrape(doc, url) {
 	associateData (newItem, dataTags, "Filing date", "filingDate");
 	associateData (newItem, dataTags, "Assignees", "assignee");
 	associateData (newItem, dataTags, "Assignee", "assignee");
+	// This may be an abuse of the field, since the current assignee may differ
+	associateData (newItem, dataTags, "Original Assignee", "assignee");
 	associateData (newItem, dataTags, "Abstract", "abstractNote");
 	associateData (newItem, dataTags, "Application number", "applicationNumber");
 	
-	var pdf = doc.evaluate('//div[@class="g-button-basic"]/span/span/a[contains(@href,"/download/)]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-	if (pdf) newItem.attachments.push({url:pdf.href, title:"Google Patents PDF", mimeType:"application/pdf"});
 	newItem.title = doc.evaluate('//h1[@class="gb-volume-title"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	newItem.url = doc.location.href.replace(/(^[^\?]*\?id=[a-zA-Z0-9]+).*/,"$1");
+
+	// Fix things in uppercase
+	var toFix = [ "title", "shortTitle", "assignee" ];
+	for each (var i in toFix) {
+		if (newItem[i] && newItem[i].toUpperCase() == newItem[i])
+		newItem[i] = Zotero.Utilities.capitalizeTitle(newItem[i].toLowerCase(), true);
+	}
+
+	var pdf = doc.evaluate('//div[@class="g-button-basic"]/span/span/a[contains(@href,"/download/")]', doc, null, XPathResult.ANY_TYPE, null);
+	if (pdf) newItem.attachments.push({url:pdf.href, title:"Google Patents PDF", mimeType:"application/pdf"});
 
 	newItem.complete();
 }
@@ -150,7 +170,7 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "T.",
-						"lastName": "SHOOK",
+						"lastName": "Shook",
 						"creatorType": "inventor"
 					}
 				],
@@ -162,7 +182,7 @@ var testCases = [
 				"patentNumber": "1065211",
 				"date": "Jun 17, 1913",
 				"filingDate": "Aug 3, 1912",
-				"title": "BOTTLE-STOPPER",
+				"title": "Bottle-Stopper",
 				"url": "http://www.google.com/patents/about?id=j5NSAAAAEBAJ",
 				"libraryCatalog": "Google Patents"
 			}
@@ -172,6 +192,34 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.google.com/search?tbm=pts&tbo=1&hl=en&q=book&btnG=Search+Patents",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.google.com/patents/about?id=KchEAAAAEBAJ",
+		"items": [
+			{
+				"itemType": "patent",
+				"creators": [
+					{
+						"firstName": "Jonathan a.",
+						"lastName": "Hunt",
+						"creatorType": "inventor"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"extra": "U.S. Classification: 411/477",
+				"patentNumber": "1120656",
+				"date": "Dec 8, 1914",
+				"filingDate": "Jan 14, 1914",
+				"assignee": "Hunt Specialty Manufacturing Company",
+				"title": "A Corpobation Of",
+				"url": "http://www.google.com/patents/about?id=KchEAAAAEBAJ",
+				"libraryCatalog": "Google Patents"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
