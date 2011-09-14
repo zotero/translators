@@ -1,16 +1,19 @@
 {
-	"translatorID":"32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7",
-	"translatorType":3,
-	"label":"RIS",
-	"creator":"Simon Kornblith",
-	"target":"ris",
-	"minVersion":"2.1.3",
-	"maxVersion":"",
-	"priority":100,
-	"browserSupport":"gcsn",
-	"inRepository":true,
-	"displayOptions":{"exportCharset":"UTF-8", "exportNotes":true},
-	"lastUpdated":"2011-07-08 04:51:41"
+	"translatorID": "32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7",
+	"label": "RIS",
+	"creator": "Simon Kornblith",
+	"target": "ris",
+	"minVersion": "2.1.3",
+	"maxVersion": "",
+	"priority": 100,
+	"displayOptions": {
+		"exportCharset": "UTF-8",
+		"exportNotes": true
+	},
+	"inRepository": true,
+	"translatorType": 3,
+	"browserSupport": "gcs",
+	"lastUpdated": "2011-09-13 22:13:04"
 }
 
 function detectImport() {
@@ -393,6 +396,12 @@ function completeItem(item) {
 		}
 		item.backupPublicationTitle = undefined;
 	}
+
+	// fix for doi: prefixed to DOI
+	if(item.DOI) {
+		item.DOI = item.DOI.replace(/\s*doi:\s*/,'');
+	}
+
 	// hack for sites like Nature, which only use JA, journal abbreviation
 	if(item.journalAbbreviation && !item.publicationTitle){
 		item.publicationTitle = item.journalAbbreviation;
