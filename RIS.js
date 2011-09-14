@@ -217,17 +217,14 @@ function processTag(item, tag, value) {
 		// the secondary date field can mean two things, a secondary date, or an
 		// invalid EndNote-style date. let's see which one this is.
 		// patent: application (filing) date -- do not append to date field 
+		// Secondary dates could be access dates-- they don't need to be appended
+		// to the existing date
 		var dateParts = value.split("/");
 		if(dateParts.length != 4 && item.itemType != "patent") {
 			// an invalid date and not a patent. 
-			// It's from EndNote or Delphion (YYYY-MM-DD)
-			if(item.date && value.indexOf(item.date) == -1) {
-				// append existing year
-				value += " " + item.date;
-			}
-			item.date = value;
+			item.accessDate = value;
 		} else if (item.itemType == "patent") {
-				// Date-handling code copied from above
+			// Date-handling code copied from above
 			if(dateParts.length == 1) {
 				// technically, if there's only one date part, the file isn't valid
 				// RIS, but EndNote writes this, so we have to too
@@ -245,6 +242,30 @@ function processTag(item, tag, value) {
 				}
 
 				item.filingDate = Zotero.Utilities.formatDate({year:dateParts[0],
+								  month:month,
+								  day:dateParts[2],
+								  part:dateParts[3]});
+			}
+		} else {
+			// Consensus is that Y2 can be treated as accessDate
+			// Date-handling code copied from above
+			if(dateParts.length == 1) {
+				// technically, if there's only one date part, the file isn't valid
+				// RIS, but EndNote writes this, so we have to too
+				// Nick: RIS spec example records also only contain a single part
+				// even though it says the slashes are not optional (?)
+				item.accessDate = value;
+			} else {
+				// in the case that we have a year and other data, format that way
+
+				var month = parseInt(dateParts[1]);
+				if(month) {
+					month--;
+				} else {
+					month = undefined;
+				}
+
+				item.accessDate = Zotero.Utilities.formatDate({year:dateParts[0],
 								  month:month,
 								  day:dateParts[2],
 								  part:dateParts[3]});
