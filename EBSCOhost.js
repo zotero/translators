@@ -53,7 +53,7 @@ function downloadFunction(text, url) {
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
-		Zotero.debug(text);
+		//Zotero.debug(text);
 		translator.setHandler("itemDone", function(obj, item) {
 			if (text.match(/^L3\s+-\s*(.*)/m)) {
 				item.DOI = text.match(/^L3\s+\-\s*(.*)/m)[1];
@@ -67,6 +67,9 @@ function downloadFunction(text, url) {
 			if (text.match(/^T1\s+-/m)) {
 				item.title = text.match(/^T1\s+-\s*(.*)/m)[1];
 			}
+
+			// Strip final period from title if present
+			item.title = item.title.replace(/\.$/,'');
 		
 			// Get the accession number from URL or elsewhere	
 			if (an) {
@@ -109,7 +112,7 @@ function downloadFunction(text, url) {
 					if (realpdf) {
 						realpdf = realpdf[1].replace(/&amp;/g, "&").replace(/#.*$/,'')
 								.replace(/K=\d+/,"K="+an);
-						Zotero.debug("PDF for "+item.title+": "+realpdf);
+						//Zotero.debug("PDF for "+item.title+": "+realpdf);
 						item.attachments.push({url:realpdf,
 								title: "EBSCO Full Text",
 								mimeType:"application/pdf"});
