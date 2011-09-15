@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2011-09-12 01:17:34"
+	"lastUpdated": "2011-09-14 01:17:34"
 }
 
 function detectWeb(doc, url) {
@@ -186,7 +186,7 @@ function doWeb(doc, url) {
 				translator.translate();
 				
 				next();
-			}, false, 'windows-1252');
+			}, false, 'utf8');
 			
 			
 		};
@@ -351,12 +351,12 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Schaaf",
-						"firstName": "Christian P.",
+						"firstName": "Christian P.",
 						"creatorType": "author"
 					},
 					{
 						"lastName": "Zoghbi",
-						"firstName": "Huda Y.",
+						"firstName": "Huda Y.",
 						"creatorType": "author"
 					}
 				],
@@ -385,8 +385,87 @@ var testCases = [
 				"ISSN": "0896-6273",
 				"DOI": "10.1016/j.neuron.2011.05.025",
 				"url": "http://www.sciencedirect.com/science/article/pii/S0896627311004430",
-				"abstractNote": "In this issue, a pair of studies (Levy et al. and Sanders et al.) identify several de novo copy-number variants that together account for 5%-8% of cases of simplex autism spectrum disorders. These studies suggest that several hundreds of loci are likely to contribute to the complex genetic heterogeneity of this group of disorders. An accompanying study in this issue (Gilman et al.), presents network analysis implicating these CNVs in neural processes related to synapse development, axon targeting, and neuron motility.",
-				"libraryCatalog": "ScienceDirect"
+				"abstractNote": "In this issue, a pair of studies (Levy et al. and Sanders et al.) identify several de novo copy-number variants that together account for 5%–8% of cases of simplex autism spectrum disorders. These studies suggest that several hundreds of loci are likely to contribute to the complex genetic heterogeneity of this group of disorders. An accompanying study in this issue (Gilman et al.), presents network analysis implicating these CNVs in neural processes related to synapse development, axon targeting, and neuron motility.",
+				"libraryCatalog": "ScienceDirect",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"checkFields": "title"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.sciencedirect.com/science/article/pii/S016748890800116X",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Pereira",
+						"firstName": "C.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Silva",
+						"firstName": "R.D.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Saraiva",
+						"firstName": "L.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Johansson",
+						"firstName": "B.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Sousa",
+						"firstName": "M.J.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Côrte-Real",
+						"firstName": "M.",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Yeast apoptosis",
+					"Apoptotic regulators",
+					"Mitochondrial outer membrane permeabilization",
+					"Permeability transition pore",
+					"Bcl-2 family",
+					"Mitochondrial fragmentation"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": false,
+						"title": "ScienceDirect Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"url": false,
+						"title": "ScienceDirect Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"title": "Mitochondria-dependent apoptosis in yeast",
+				"publicationTitle": "Biochimica et Biophysica Acta (BBA) - Molecular Cell Research",
+				"volume": "1783",
+				"issue": "7",
+				"pages": "1286-1302",
+				"date": "July 2008",
+				"ISBN": "0167-4889",
+				"ISSN": "0167-4889",
+				"DOI": "10.1016/j.bbamcr.2008.03.010",
+				"url": "http://www.sciencedirect.com/science/article/pii/S016748890800116X",
+				"abstractNote": "Mitochondrial involvement in yeast apoptosis is probably the most unifying feature in the field. Reports proposing a role for mitochondria in yeast apoptosis present evidence ranging from the simple observation of ROS accumulation in the cell to the identification of mitochondrial proteins mediating cell death. Although yeast is unarguably a simple model it reveals an elaborate regulation of the death process involving distinct proteins and most likely different pathways, depending on the insult, growth conditions and cell metabolism. This complexity may be due to the interplay between the death pathways and the major signalling routes in the cell, contributing to a whole integrated response. The elucidation of these pathways in yeast has been a valuable help in understanding the intricate mechanisms of cell death in higher eukaryotes, and of severe human diseases associated with mitochondria-dependent apoptosis. In addition, the absence of obvious orthologues of mammalian apoptotic regulators, namely of the Bcl-2 family, favours the use of yeast to assess the function of such proteins. In conclusion, yeast with its distinctive ability to survive without respiration-competent mitochondria is a powerful model to study the involvement of mitochondria and mitochondria interacting proteins in cell death.",
+				"libraryCatalog": "ScienceDirect",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"checkFields": "title"
 			}
 		]
 	}
