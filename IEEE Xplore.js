@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-09-15 22:58:32"
+	"lastUpdated": "2011-09-15 23:36:59"
 }
 
 function detectWeb(doc, url) {
@@ -79,10 +79,11 @@ function doWeb(doc, url) {
 		Zotero.wait();
 	} else {
 		if (url.indexOf("/search/") !== -1 || url.indexOf("/stamp/") !== -1
-			|| url.indexOf("/ielx4/") || url.indexOf("/ielx5/")) {
+			|| url.indexOf("/ielx4/") !== -1 || url.indexOf("/ielx5/") !== -1) {
 			// Address the same missing metadata problem as above
 			// Also address issue of saving from PDF itself, I hope
 			// URL like http://ieeexplore.ieee.org/ielx4/78/2655/00080767.pdf?tp=&arnumber=80767&isnumber=2655
+			// Or: http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1575188&tag=1
 			var arnumber = url.match(/arnumber=(\d+)/)[1];
 			url = url.replace(/\/(?:search|stamp|ielx[45])\/.*$/, "/xpls/abs_all.jsp?arnumber="+arnumber);
 			Zotero.Utilities.processDocuments([url], scrape, function () { Zotero.done(); });
