@@ -128,7 +128,7 @@ UnAPIID.prototype = {
 	 */
 	"getItems":function(callback) {
 		if(this.items) {
-			callback(me.items);
+			callback(this.items);
 			return;
 		}
 		
