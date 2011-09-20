@@ -111,7 +111,7 @@ UnAPIID.prototype = {
 	 */
 	"getItemType":function(callback) {
 		var me = this;
-		this.getItems(function(items) {
+		me.getItems(function(items) {
 			if(items.length === 0) {
 				callback(false);
 			} else if(items.length === 1) {
@@ -127,14 +127,14 @@ UnAPIID.prototype = {
 	 * @param {Function} callback Callback to be passed items when they have been retrieved
 	 */
 	"getItems":function(callback) {
-		if(this.items) {
-			callback(this.items);
+		var me = this;
+		if(me.items) {
+			callback(me.items);
 			return;
 		}
 		
-		var me = this;
-		this.items = [];
-		this.isSupported(function(isSupported) {
+		me.items = [];
+		me.isSupported(function(isSupported) {
 			if(!isSupported) {
 				callback([]);
 				return;
@@ -167,13 +167,12 @@ UnAPIID.prototype = {
 	 * @param {Function} callback Callback to be passed isSupported when it is known
 	 */
 	"isSupported":function(callback) {
-		if(this.hasOwnProperty("format")) {
-			callback(this.format.isSupported);
+		var me = this;
+		if(me.hasOwnProperty("format")) {
+			callback(me.format.isSupported);
 			return;
 		}
-		
-		var me = this;
-		
+
 		getDefaultFormat(function(defaultFormat) {
 			// first try default format, since this won't require >1 HTTP request
 			if(defaultFormat.isSupported) {
