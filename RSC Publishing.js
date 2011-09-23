@@ -1,438 +1,128 @@
 {
-	"translatorID":"1c34744d-690f-4cac-b31b-b7f0c90ac14d",
-	"translatorType":4,
-	"label":"RSC Publishing",
-	"creator":"Ramesh Srigiriraju",
-	"target":"http://(:?www\\.|google\\.)?rsc\\.org/",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"translatorID": "ca0e7488-ef20-4485-8499-9c47e60dcfa7",
+	"label": "RSC Publishing",
+	"creator": "Sebastian Karcher",
+	"target": "^https?://(:?www\\.|google\\.)?(pubs\\.)rsc\\.org/",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcs",
+	"lastUpdated": "2011-09-22 22:20:35"
 }
 
-function detectWeb(doc, url)	{
-	var namespace=doc.documentElement.namespaceURI;
-	var nsResolver=namespace?function(prefix)	{
-		return (prefix=="x")?namespace:null;
-	}:null;
-	var journalreg=new RegExp("http://(:?www\.)?rsc\.org/(:?P|p)ublishing/(:?J|j)ournals");
-	if(journalreg.test(url))	{
-		var browspath='//div/p/a[text()="Use advanced search"]';
-		if(doc.evaluate(browspath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())
-			return "multiple";
-		var searchpath='//a[text()="Back to Search Form"]';
-		if(doc.evaluate(searchpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())
-			return "multiple";
-		var singpath='//ul/li/a[text()="HTML Article" or text()="PDF"]';
-		if(doc.evaluate(singpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())
-			return "journalArticle";
-	}
-	var magpath='//div/h3[text()="Link to journal article"]';
-	if(doc.evaluate(magpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())
-		return "magazineArticle";
-	var magbrows='//div/h4[@class="newstitle"]/a';
-	if(doc.evaluate(magbrows, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())
-		return "multiple";
-	var magsearch='//p[@class="more"]/strong/a[text()="Search RSC journals"]';
-	if(doc.evaluate(magsearch, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())
-		return "multiple";
-	var bookreg=new RegExp("http://(:?www\.)?rsc\.org/(:?P|p)ublishing/e(:?B|b)ooks");
-	if(bookreg.test(url))	{
-		var pagepath='//title/text()';
-		var page=doc.evaluate(pagepath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
-		if((page=="Books in a publication year")||(page=="Subject Area Books")||(page=="A - Z Index")
-			||(page=="Book Series"))
-				return "multiple";
-		var chappath='//dt/img[@alt="Chapter"]';
-		var singpath='//h3[text()="Table of Contents"]';
-		if(doc.evaluate(chappath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())
-			return "bookSection";
-		else if(doc.evaluate(singpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())
-			return "book";
-	}
-	var searchpath='//div/p[@class="title"][text()="Search Results"]';
-	if(doc.evaluate(searchpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())
-		return "multiple";
-}
+/*
+RSC Publishing Translator
+Copyright (C) 2011 Sebastian Karcher
 
-function doChap(newItem, chaptext)	{
-	var chapdata=chaptext.split("<br>");
-	for(var pos=chapdata.length-2; pos>=0; pos--)	{
-		chapdata[pos]=Zotero.Utilities.cleanTags(chapdata[pos]);
-		if(chapdata[pos].indexOf("Editors")!=-1)	{
-			var editors=chapdata[pos].split(",");
-			for(var i=0; i<=editors.length-1; i++)	{
-				editors[i]=Zotero.Utilities.trimInternal(editors[i]);
-				var names=editors[i].split(" ");
-				var creators=new Array();
-				if(i==0)
-					creators.firstName=names[1];
-				else
-					creators.firstName=names[0];
-				creators.lastName=names[names.length-1];
-				creators.creatorType="editor";
-				newItem.creators.push(creators);
-			}
-		}
-		if(chapdata[pos].indexOf("Authors")!=-1)	{
-			var authors=chapdata[pos].split(",");
-			for(var i=0; i<=authors.length-1; i++)	{
-				authors[i]=Zotero.Utilities.trimInternal(authors[i]);
-				var names=authors[i].split(" ");
-				var creators=new Array();
-				if(i==0)
-					creators.firstName=names[1];
-				else
-					creators.firstName=names[0];
-				creators.lastName=names[names.length-1];
-				creators.creatorType="editor";
-				newItem.creators.push(creators);
-			}
-		}
-		if(chapdata[pos].indexOf("DOI")!=-1)
-			newItem.itemID=chapdata[pos].substring(chapdata[pos].indexOf("1"));
-		if(chapdata[pos].indexOf("Book")!=-1)
-			newItem.bookTitle=chapdata[pos].substring(chapdata[pos].indexOf(" ")+1);
-	}
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/* FW LINE 51:6e1628381879 */ function flatten(c){var b=new Array();for(var d in c){var e=c[d];if(e instanceof Array){b=b.concat(flatten(e))}else{b.push(e)}}return b}var FW={_scrapers:new Array()};FW._Base=function(){this.callHook=function(b,c,e,a){if(typeof this["hooks"]==="object"){var d=this["hooks"][b];if(typeof d==="function"){d(c,e,a)}}};this.evaluateThing=function(f,e,c){var b=typeof f;if(b==="string"){return f}else{if(b==="object"){if(f instanceof Array){var d=this.evaluateThing;var a=f.map(function(g){return d(g,e,c)});return flatten(a)}else{return f.evaluate(e,c)}}else{if(b==="function"){return f(e,c)}else{return undefined}}}}};FW.Scraper=function(a){FW._scrapers.push(new FW._Scraper(a))};FW._Scraper=function(a){for(x in a){this[x]=a[x]}this._singleFieldNames=["abstractNote","applicationNumber","archive","archiveLocation","artworkMedium","artworkSize","assignee","audioFileType","audioRecordingType","billNumber","blogTitle","bookTitle","callNumber","caseName","code","codeNumber","codePages","codeVolume","committee","company","conferenceName","country","court","date","dateDecided","dateEnacted","dictionaryTitle","distributor","docketNumber","documentNumber","DOI","edition","encyclopediaTitle","episodeNumber","extra","filingDate","firstPage","forumTitle","genre","history","institution","interviewMedium","ISBN","ISSN","issue","issueDate","issuingAuthority","journalAbbreviation","label","language","legalStatus","legislativeBody","letterType","libraryCatalog","manuscriptType","mapType","medium","meetingName","nameOfAct","network","number","numberOfVolumes","numPages","pages","patentNumber","place","postType","presentationType","priorityNumbers","proceedingsTitle","programTitle","programmingLanguage","publicLawNumber","publicationTitle","publisher","references","reportNumber","reportType","reporter","reporterVolume","rights","runningTime","scale","section","series","seriesNumber","seriesText","seriesTitle","session","shortTitle","studio","subject","system","thesisType","title","type","university","url","version","videoRecordingType","volume","websiteTitle","websiteType"];this._makeAttachments=function(q,b,f,s){if(f instanceof Array){f.forEach(function(k){this._makeAttachments(q,b,k,s)},this)}else{if(typeof f==="object"){var p=f.urls||f.url;var m=f.types||f.type;var e=f.titles||f.title;var h=this.evaluateThing(p,q,b);var o=this.evaluateThing(e,q,b);var r=this.evaluateThing(m,q,b);var l=(r instanceof Array);var n=(o instanceof Array);if(!(h instanceof Array)){h=[h]}for(var j in h){var c=h[j];var g;var d;if(l){g=r[j]}else{g=r}if(n){d=o[j]}else{d=o}s.attachments.push({url:c,title:d,type:g})}}}};if(this.itemTrans!==undefined){this.makeItems=this.itemTrans.makeItems}else{this.makeItems=function(o,b,m,c,l){var q=new Zotero.Item(this.itemType);q.url=b;for(var h in this._singleFieldNames){var n=this._singleFieldNames[h];if(this[n]){var g=this.evaluateThing(this[n],o,b);if(g instanceof Array){q[n]=g[0]}else{q[n]=g}}}var r=["creators","tags"];for(var f in r){var p=r[f];var d=this.evaluateThing(this[p],o,b);if(d){for(var e in d){q[p].push(d[e])}}}this._makeAttachments(o,b,this["attachments"],q);c(q,this,o,b);l([q])}}};FW._Scraper.prototype=new FW._Base;FW.MultiScraper=function(a){FW._scrapers.push(new FW._MultiScraper(a))};FW._MultiScraper=function(a){for(x in a){this[x]=a[x]}this._mkSelectItems=function(e,d){var b=new Object;for(var c in e){b[d[c]]=e[c]}return b};this._selectItems=function(d,c,e){var b=new Array();Zotero.selectItems(this._mkSelectItems(d,c),function(f){for(var g in f){b.push(g)}e(b)})};this._mkAttachments=function(g,d,f){var b=this.evaluateThing(this["attachments"],g,d);var c=new Object();if(b){for(var e in f){c[f[e]]=b[e]}}return c};this._makeChoices=function(f,p,c,d,h){if(f instanceof Array){f.forEach(function(k){this._makeTitlesUrls(k,p,c,d,h)},this)}else{if(typeof f==="object"){var m=f.urls||f.url;var e=f.titles||f.title;var n=this.evaluateThing(m,p,c);var j=this.evaluateThing(e,p,c);var l=(j instanceof Array);if(!(n instanceof Array)){n=[n]}for(var g in n){var b=n[g];var o;if(l){o=j[g]}else{o=j}h.push(b);d.push(o)}}}};this.makeItems=function(j,b,g,c,f){if(this.beforeFilter){var k=this.beforeFilter(j,b);if(k!=b){this.makeItems(j,k,g,c,f);return}}var e=[];var h=[];this._makeChoices(this["choices"],j,b,e,h);var d=this._mkAttachments(j,b,h);this._selectItems(e,h,function(m){if(!m){f([])}else{var l=[];var n=this.itemTrans;Zotero.Utilities.processDocuments(m,function(q){var p=q.documentURI;var o=n;if(o===undefined){o=FW.getScraper(q,p)}if(o===undefined){}else{o.makeItems(q,p,d[p],function(r){l.push(r);c(r,o,q,p)},function(){})}},function(){f(l)})}})}};FW._MultiScraper.prototype=new FW._Base;FW.DelegateTranslator=function(a){return new FW._DelegateTranslator(a)};FW._DelegateTranslator=function(a){for(x in a){this[x]=a[x]}this._translator=Zotero.loadTranslator(this.translatorType);this._translator.setTranslator(this.translatorId);this.makeItems=function(g,d,b,f,c){var e;Zotero.Utilities.HTTP.doGet(d,function(h){this._translator.setHandler("itemDone",function(k,j){e=j;if(b){j.attachments=b}});if(this.preProcess){h=this.preProcess(h)}this._translator.setString(h);this._translator.translate();f(e)},function(){c([e])})}};FW.DelegateTranslator.prototype=new FW._Scraper;FW._StringMagic=function(){this._filters=new Array();this.addFilter=function(a){this._filters.push(a);return this};this.split=function(a){return this.addFilter(function(b){return b.split(a).filter(function(c){return(c!="")})})};this.replace=function(c,b,a){return this.addFilter(function(d){if(d.match(c)){return d.replace(c,b,a)}else{return d}})};this.prepend=function(a){return this.replace(/^/,a)};this.append=function(a){return this.replace(/$/,a)};this.remove=function(b,a){return this.replace(b,"",a)};this.trim=function(){return this.addFilter(function(a){return Zotero.Utilities.trim(a)})};this.trimInternal=function(){return this.addFilter(function(a){return Zotero.Utilities.trimInternal(a)})};this.match=function(a,b){if(!b){b=0}return this.addFilter(function(d){var c=d.match(a);if(c===undefined||c===null){return undefined}else{return c[b]}})};this.cleanAuthor=function(b,a){return this.addFilter(function(c){return Zotero.Utilities.cleanAuthor(c,b,a)})};this.key=function(a){return this.addFilter(function(b){return b[a]})};this.capitalizeTitle=function(){return this.addFilter(function(a){return Zotero.Utilities.capitalizeTitle(a)})};this.unescapeHTML=function(){return this.addFilter(function(a){return Zotero.Utilities.unescapeHTML(a)})};this.unescape=function(){return this.addFilter(function(a){return unescape(a)})};this._applyFilters=function(c,e){for(i in this._filters){c=flatten(c);c=c.filter(function(a){return((a!==undefined)&&(a!==null))});for(var d=0;d<c.length;d++){try{if((c[d]===undefined)||(c[d]===null)){continue}else{c[d]=this._filters[i](c[d],e)}}catch(b){c[d]=undefined;Zotero.debug("Caught exception "+b+"on filter: "+this._filters[i])}}c=c.filter(function(a){return((a!==undefined)&&(a!==null))})}return c}};FW.PageText=function(){return new FW._PageText()};FW._PageText=function(){this._filters=new Array();this.evaluate=function(c){var b=[c.documentElement.innerHTML];b=this._applyFilters(b,c);if(b.length==0){return false}else{return b}}};FW._PageText.prototype=new FW._StringMagic();FW.Url=function(){return new FW._Url()};FW._Url=function(){this._filters=new Array();this.evaluate=function(d,c){var b=[c];b=this._applyFilters(b,d);if(b.length==0){return false}else{return b}}};FW._Url.prototype=new FW._StringMagic();FW.Xpath=function(a){return new FW._Xpath(a)};FW._Xpath=function(a){this._xpath=a;this._filters=new Array();this.text=function(){var b=function(c){if(typeof c==="object"&&c.textContent){return c.textContent}else{return c}};this.addFilter(b);return this};this.sub=function(b){var c=function(f,e){var d=e.evaluate(b,f,null,XPathResult.ANY_TYPE,null);if(d){return d.iterateNext()}else{return undefined}};this.addFilter(c);return this};this.evaluate=function(f){var e=f.evaluate(this._xpath,f,null,XPathResult.ANY_TYPE,null);var d=e.resultType;var c=new Array();if(d==XPathResult.STRING_TYPE){c.push(e.stringValue)}else{if(d==XPathResult.ORDERED_NODE_ITERATOR_TYPE||d==XPathResult.UNORDERED_NODE_ITERATOR_TYPE){var b;while((b=e.iterateNext())){c.push(b)}}}c=this._applyFilters(c,f);if(c.length==0){return false}else{return c}}};FW._Xpath.prototype=new FW._StringMagic();FW.detectWeb=function(e,b){for(var c in FW._scrapers){var d=FW._scrapers[c];var f=d.evaluateThing(d.itemType,e,b);var a=d.evaluateThing(d.detect,e,b);if(a.length>0&&a[0]){return f}}return undefined};FW.getScraper=function(b,a){var c=FW.detectWeb(b,a);return FW._scrapers.filter(function(d){return(d.evaluateThing(d.itemType,b,a)==c)&&(d.evaluateThing(d.detect,b,a))})[0]};FW.doWeb=function(c,a){var b=FW.getScraper(c,a);b.makeItems(c,a,[],function(f,e,g,d){e.callHook("scraperDone",f,g,d);if(!f.title){f.title=""}f.complete()},function(){Zotero.done()});Zotero.wait()};
+function detectWeb(doc, url) { return FW.detectWeb(doc, url); }
+function doWeb(doc, url) { return FW.doWeb(doc, url); }
+
+/** Articles */
+FW.Scraper({
+itemType : 'journalArticle',
+detect : FW.Xpath('//meta[@name="citation_journal_title"]'),
+title : FW.Xpath('//meta[@name="citation_title"]').key("content").text().trim(),
+attachments : [{ url: FW.Xpath('//meta[@name="citation_pdf_url"]').key("content").text().trim(),
+  title: "RSC Journal Snapshot",
+  type: "pdf" }],
+creators : FW.Xpath('//meta[@name="citation_author"]').key("content").text().cleanAuthor("author"),
+date : FW.Xpath('//meta[@name="citation_date"]').key("content").text(),
+issue : FW.Xpath('//meta[@name="citation_issue"]').key("content").text(),
+volume : FW.Xpath('//meta[@name="citation_volume"]').key("content").text(),
+pages : FW.Xpath('concat(//meta[@name="citation_firstpage"]/@content, "-", //meta[@name="citation_lastpage"]/@content)').remove(/^-$/),
+issn : FW.Xpath('//meta[@name="citation_issn"]').key("content").text(),
+abstractNote: FW.Xpath('//meta[@name="description"]').key("content").text(),
+journalAbbreviation : FW.Xpath('//meta[@name="citation_journal_abbrev"]').key("content").text(),
+DOI :  FW.Xpath('//meta[@name="citation_doi"]').key("content").text(),
+language : FW.Xpath('//meta[@name="DC.Language"]').key("content").text(), 
+publicationTitle : FW.Xpath('//meta[@name="citation_journal_title"]').key("content").text()
+});
+
+ 
+FW.MultiScraper({
+itemType         : 'multiple',
+detect           : FW.Url().match(/results\?/),
+choices          : {
+  titles :  FW.Xpath('//div/h2/a').text().trim(),
+  urls    :  FW.Xpath('//div/h2/a').key("href")
 }
-function doBook(newItem, bookdata)	{
-	var fields=bookdata.split("<br>");
-	for(var pos=fields.length-2; pos>=0; pos--)	{
-		fields[pos]=Zotero.Utilities.cleanTags(fields[pos]);
-		if(fields[pos].indexOf("Volume")!=-1)	{
-			var i=fields[pos].lastIndexOf(";");
-			var vol;
-			if(i!=-1)
-				vol=fields[pos].substring(i+1);
-			else
-				vol=fields[pos].substring(fields[pos].lastIndexOf(" "));
-			newItem.volume=Zotero.Utilities.trimInternal(vol);
-		}
-		if(fields[pos].indexOf("Edition")!=-1)	{
-			var i=fields[pos].lastIndexOf(";");
-			if(i!=-1)
-				ed=fields[pos].substring(i+1);
-			else
-				ed=fields[pos].substring(fields[pos].lastIndexOf(" "));
-			newItem.edition=Zotero.Utilities.trimInternal(ed);
-		}
-		if(fields[pos].indexOf("Copyright")!=-1)	{
-			var i=fields[pos].lastIndexOf(";");
-			var date;
-			if(i!=-1)
-				date=fields[pos].substring(i+1);
-			else
-				date=fields[pos].substring(fields[pos].indexOf(":")+2);
-			newItem.date=Zotero.Utilities.trimInternal(date);
-		}
-		if(fields[pos].indexOf("ISBN")!=-1&&fields[pos].indexOf("print")!=-1)	{
-			var i=fields[pos].lastIndexOf(";");
-			var isbn;
-			if(i!=-1)
-				isbn=fields[pos].substring(i+1);
-			else
-				isbn=fields[pos].substring(fields[pos].indexOf(":")+2);
-			newItem.ISBN=Zotero.Utilities.trimInternal(isbn);
-		}
-		if(fields[pos].indexOf("Author")!=-1||fields[pos].indexOf("Editor")!=-1)	{
-			var authors=fields[pos].split(",");
-			for(var i=0; i<=authors.length-1; i++)	{
-				authors[i]=Zotero.Utilities.trimInternal(authors[i]);
-				var names=authors[i].split(" ");
-				var creators=new Array();
-				creators.firstName=names[0];
-				creators.lastName=names[names.length-2];
-				if(names[names.length-1]=="(Editor)")
-					creators.creatorType="editor";
-				if(names[names.length-1]=="(Author)")
-					creators.creatorType="author";
-				newItem.creators.push(creators);
-			}
-		}
-		if(fields[pos].indexOf("DOI:")!=-1)
-			newItem.itemID=fields[pos].substring(fields[pos].indexOf("1"));
-	}
-}
-function doWeb(doc, url)	{
-	var namespace=doc.documentElement.namespaceURI;
-	var nsResolver=namespace?function(prefix)	{
-		return (prefix=="x")?namespace:null;
-	}:null;
-	var journalreg=new RegExp("http://(:?www\.)?rsc\.org/(:?P|p)ublishing/(:?J|j)ournals");
-	if(journalreg.test(url))	{
-		var browspath='//div/p/a[text()="Use advanced search"]';
-		if(doc.evaluate(browspath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())	{
-			var doipath='//p[strong/text()="DOI:"]/a/text()';
-			var dois=doc.evaluate(doipath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-			var titlpath='//p/strong/a';
-			var titles=doc.evaluate(titlpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-			var items=new Array();
-			var doi;
-			while(doi=dois.iterateNext())
-				items[doi.nodeValue]=Zotero.Utilities.trimInternal(titles.iterateNext().textContent);
-			items=Zotero.selectItems(items);
-			var string="http://www.rsc.org/delivery/_ArticleLinking/refdownload.asp?";
-			for(var codes in items)	{
-				var string="http://www.rsc.org/delivery/_ArticleLinking/refdownload.asp?ManuscriptID=";
-				string+=codes.substring(codes.indexOf("/")+1)+"&type=refman";
-				Zotero.Utilities.HTTP.doGet(string, function(text)	{
-					var trans=Zotero.loadTranslator("import");
-					trans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-					// fix bad Y1 tags, which have wrong spacing and typically terminate with "///"
-					text = text.replace("Y1 -  ", "Y1  - ");
-					trans.setString(text);
-					trans.translate();
-					Zotero.done();	
-				});
-			}
-		}
-		var searchpath='//a[text()="Back to Search Form"]';
-		if(doc.evaluate(searchpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())	{
-			var doipath='//p[strong/text()="DOI:"]/a/text()';
-			var dois=doc.evaluate(doipath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-			var titlpath='//form/div/h5';
-			var titles=doc.evaluate(titlpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-			var title;
-			var items=new Array();
-			while(title=titles.iterateNext())
-				items[dois.iterateNext().nodeValue]=title.textContent;
-			items=Zotero.selectItems(items);
-			var string="http://www.rsc.org/delivery/_ArticleLinking/refdownload.asp?";
-			for(var codes in items)	{
-				var string="http://www.rsc.org/delivery/_ArticleLinking/refdownload.asp?ManuscriptID=";
-				string+=codes.substring(codes.indexOf("/")+1)+"&type=refman";
-				Zotero.Utilities.HTTP.doGet(string, function(text)	{
-					var trans=Zotero.loadTranslator("import");
-					trans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-					// fix bad Y1 tags, which have wrong spacing and typically terminate with "///"
-					text = text.replace("Y1 -  ", "Y1  - ");
-					trans.setString(text);
-					trans.translate();
-					Zotero.done();
-				});
-			}
-		}
-		var singpath='//ul/li/a[text()="HTML Article" or text()="PDF"]';
-		if(doc.evaluate(singpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())	{
-			var doipath='//div/p[strong/text()="DOI:"]';
-			var text=doc.evaluate(doipath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			var doi=text.substring(text.indexOf("/")+1);
-			var string="http://www.rsc.org/delivery/_ArticleLinking/refdownload.asp?ManuscriptID="+doi;
-			string+="&type=refman";
-			Zotero.Utilities.HTTP.doGet(string, function(text)	{
-				var trans=Zotero.loadTranslator("import");
-				trans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-				// fix bad Y1 tags, which have wrong spacing and typically terminate with "///"
-				text = text.replace("Y1 -  ", "Y1  - ");				
-				trans.setString(text);
-				trans.setHandler("itemDone", function(obj, newItem)	{
-					var url2=newItem.url;
-					var stringy;
-					var archpath='//div[h3/text()="Journals archive purchaser access"]';
-					if(doc.evaluate(archpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())	{
-						var stringy="http://www.rsc.org/ejarchive/";
-						stringy+=url2.substring(url2.lastIndexOf("/")+1)+".pdf";
-						newItem.attachments.push({url:stringy, title:"RSC PDF", mimeType:"application/pdf"});
+});
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://pubs.rsc.org/en/content/articlelanding/2012/ee/c1ee02148f",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Wei",
+						"lastName": "Guo",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ya-Xia",
+						"lastName": "Yin",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sen",
+						"lastName": "Xin",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yu-Guo",
+						"lastName": "Guo",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Li-Jun",
+						"lastName": "Wan",
+						"creatorType": "author"
 					}
-					else	{
-						var stringy="http://www.rsc.org/delivery/_ArticleLinking/DisplayArticleForFree.cfm?doi=";
-						stringy+=url2.substring(url2.lastIndexOf("/")+1);
-						newItem.attachments.push({url:stringy, title:"RSC PDF", mimeType:"application/pdf"});
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://pubs.rsc.org/en/content/articlepdf/2012/ee/c1ee02148f",
+						"title": "RSC Journal Snapshot",
+						"type": "pdf"
 					}
-					newItem.complete();
-				});
-				trans.translate();
-				Zotero.done();
-			});
-		}
-	}
-	var magpath='//div/h3[text()="Link to journal article"]';
-	if(doc.evaluate(magpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())	{
-		var newItem=new Zotero.Item("magazineArticle");
-		var titlpath='//div/h2/div[@class="header"]/text()';
-		newItem.title=doc.evaluate(titlpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
-		var authpath='//em/text()';
-		var auth=doc.evaluate(authpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
-		var authors=auth.split(",");
-		if(newItem.title.indexOf("Interview")==-1)
-			for(var i=0; i<=authors.length-1; i++)	{
-				authors[i]=Zotero.Utilities.trimInternal(authors[i]);
-				var names=authors[i].split(" ");
-				var creator=new Array();
-				creator.firstName=names[0];
-				creator.lastName=names[names.length-1];
-				newItem.creators.push(creator);
+				],
+				"url": "http://pubs.rsc.org/en/content/articlelanding/2012/ee/c1ee02148f",
+				"abstractNote": "Poly(2,2,6,6-tetramethyl-1-piperidinyloxy-4-yl methacrylate) (PTMA) displays a two–electron process redox reaction, high capacity of up to 222 mA h g−1, good rate performance and long cycle life, which is promoted by graphene as cathode material for lithium rechargeable batteries.",
+				"date": "2011/09/06",
+				"DOI": "10.1039/C1EE02148F",
+				"journalAbbreviation": "Energy Environ. Sci.",
+				"language": "en",
+				"publicationTitle": "Energy Environ. Sci.",
+				"title": "Superior radical polymer cathode material with a two-electron process redox reaction promoted by graphene",
+				"libraryCatalog": "RSC Publishing",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"checkFields": "title"
 			}
-		var textpath='//div[@id="content"]//text()';
-		var text=doc.evaluate(textpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var temp;
-		while(temp=text.iterateNext())
-			if(temp.nodeValue==newItem.title)	{
-				newItem.date=text.iterateNext().nodeValue;
-				break;
-			}
-		var datapath= '//div[@id="breadcrumbs"]/ul/li/a/text()';
-		var data=doc.evaluate(datapath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var prev;
-		while(temp=data.iterateNext())	{
-			if(temp.nodeValue.indexOf("Chemi")!=-1)
-				newItem.publication=temp.nodeValue;
-			prev=temp;
-		}
-		newItem.issue=prev.nodeValue;
-		newItem.complete();
+		]
 	}
-	var magbrows='//div/h4[@class="newstitle"]/a';
-	if(doc.evaluate(magbrows, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())	{
-		var titlpath='//h4[@class="newstitle"]/a';
-		var titles=doc.evaluate(titlpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var title;
-		var items=new Array();
-		while(title=titles.iterateNext())
-			items[title.href]=title.textContent;
-		items=Zotero.selectItems(items);
-		for(var linx in items)	{
-			var newItem=new Zotero.Item("magazineArticle");
-			newItem.url=linx;
-			newItem.title=items[linx];
-			var datepath='//div[h4/a/text()="'+items[linx]+'"]/h4[@class="datetext"]/text()';
-			newItem.date=doc.evaluate(datepath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
-			var datapath= '//div[@id="breadcrumbs"]/ul/li/a/text()';
-			var data=doc.evaluate(datapath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-			var prev;
-			var temp;
-			while(temp=data.iterateNext())	{
-				if(temp.nodeValue.indexOf("Chemi")!=-1)
-					newItem.publication=temp.nodeValue;
-				prev=temp;
-			}
-			if(prev.nodeValue!=newItem.publication)
-				newItem.issue=prev.nodeValue;
-			newItem.complete();
-		}
-	}
-	var magsearch='//p[@class="more"]/strong/a[text()="Search RSC journals"]';
-	if(doc.evaluate(magsearch, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())	{
-		var titlpath='//div/p/a';
-		var titles=doc.evaluate(titlpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		titlpath='//blockquote/p/a[span/@class="l"]';
-		var titles2=doc.evaluate(titlpath, doc, nsResolver, XPathResult.ANY_TYPE, null)
-		var title;
-		var items=new Array();
-		while(title=titles.iterateNext())
-			items[title.href]=title.textContent;
-		while(title=titles2.iterateNext())
-			items[title.href]=title.textContent;
-		items=Zotero.selectItems(items);
-		for(var linx in items)	{
-			var newItem=new Zotero.Item("magazineArticle");
-			newItem.url=linx;
-			newItem.title=items[linx];
-			newItem.complete();
-		}
-	}
-	var bookreg=new RegExp("http://(:?www\.)?rsc\.org/(:?P|p)ublishing/e(:?B|b)ooks");
-	if(bookreg.test(url))	{
-		var browspath='//title/text()';
-		var page=doc.evaluate(browspath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
-		if((page=="Books in a publication year")||(page=="Subject Area Books")||(page=="A - Z Index")
-			||(page=="Book Series"))	{
-			var doipath='//dd/p/a/text()';
-			var dois=doc.evaluate(doipath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-			var items=new Array();
-			var title;
-			while(title=dois.iterateNext())	{
-				var doi=dois.iterateNext().nodeValue;
-				items[doi.substring(doi.indexOf("1"))]=title.nodeValue;
-			}
-			items=Zotero.selectItems(items);
-			for(var codes in items)	{
-				var newItem=new Zotero.Item("book");
-				newItem.itemID=codes;
-				newItem.title=items[codes];
-				var itempath='//dd/p[contains(a[2]/text(), "'+codes+'")]';
-				var itempath2='//dd/p[contains(a/text(), "'+codes+'")]';
-				var data;
-				if(data=doc.evaluate(itempath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())
-					data=data.innerHTML;
-				else if(data=doc.evaluate(itempath2, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())
-					data=data.innerHTML;
-				doBook(newItem, data);
-				newItem.complete();
-			}	
-		}
-		var chappath='//dt/img[@alt="Chapter"]';
-		var singpath='//h3[text()="Table of Contents"]';
-		if(doc.evaluate(chappath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())	{
-			var newItem=new Zotero.Item("bookSection");
-			var titlpath='//span/h3/text()';
-			var titles=doc.evaluate(titlpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-			newItem.title=titles.iterateNext().nodeValue;
-			newItem.bookTitle=titles.iterateNext().nodeValue;
-			var datapath='//dd/p';
-			var entries=doc.evaluate(datapath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-			var chaptext=entries.iterateNext().innerHTML;
-			doChap(newItem, chaptext);
-			var bookdata=entries.iterateNext().innerHTML;
-			doBook(newItem, bookdata);
-			var linkpath='//td[1][@class="td1"]/a[1]';
-			var linx=doc.evaluate(linkpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-			var pdflink;
-			while(pdflink=linx.iterateNext())
-				newItem.attachments.push({url:pdflink.href, title:"RCS PDF", mimeType:"application/pdf"});
-			newItem.complete();
-		}
-		else if(doc.evaluate(singpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())	{
-			var newItem=new Zotero.Item("book");
-			var itempath='//dd/p';
-			var data=doc.evaluate(itempath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().innerHTML;
-			doBook(newItem, data);
-			var titlpath='//div/h2/text()';
-			newItem.title=doc.evaluate(titlpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
-			var linkpath='//td[1][@class="td1"]/a[1]';
-			var linx=doc.evaluate(linkpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-			var pdflink;
-			while(pdflink=linx.iterateNext())
-				newItem.attachments.push({url:pdflink.href, title:"RCS PDF", mimeType:"application/pdf"});
-			newItem.complete();
-		}
-	}
-	var searchpath='//div/p[@class="title"][text()="Search Results"]';
-	if(doc.evaluate(searchpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())	{
-		var doipath='//dd/p/a/text()';
-		var dois=doc.evaluate(doipath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var title;
-		var items=new Array();
-		while(title=dois.iterateNext())	{
-			var doi=dois.iterateNext().nodeValue;
-			items[doi.substring(doi.indexOf("1"))]=title.nodeValue;
-		}
-		items=Zotero.selectItems(items);
-		for(var codes in items)	{
-			var itempath='//dd/p[contains(a/text(), "'+codes+'")]';
-			var newpath='//dd[contains(p[2]/a/text(), "'+codes+'")]/p[1]/strong/text()';
-			var data=doc.evaluate(itempath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().innerHTML;
-			if(data.indexOf("Book:")!=-1)	{
-				var newItem=new Zotero.Item("bookSection");
-				newItem.itemID=codes;
-				newItem.title=items[codes];
-				doChap(newItem, data);
-				newItem.complete();
-			}
-			else		{
-				var newItem=new Zotero.Item("book");
-				var newdata=doc.evaluate(newpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
-				if(newdata.indexOf("Volume")!=-1)
-					newItem.volume=newdata.substring(newdata.lastIndexOf(" ")+1);
-				else
-					newItem.series=newdata;
-				newItem.itemID=codes;
-				newItem.title=items[codes];
-				doBook(newItem, data);
-				newItem.complete();
-			}
-		}
-	}
-	Zotero.wait();
-}
+]
+/** END TEST CASES **/
