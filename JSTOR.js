@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-09-05 23:41:20"
+	"lastUpdated": "2011-09-22 23:05:23"
 }
 
 function detectWeb(doc, url) {
@@ -56,7 +56,7 @@ function doWeb(doc, url) {
 	}
 	// Sometimes JSTOR uses DOIs as JID; here we exclude "?" characters, since it's a URL
 	// And exclude TOC for journal issues that have their own DOI
-	else if (/(?:pss|stable)\/(10\.\d+\/.+)(?:\?.*)?/.test(url)
+	else if (/(?:pss|stable)\/(10\.\d+\/[^?]+)(?:\?.*)?/.test(url)
 		 && !doc.evaluate('//form[@id="toc"]', doc, nsResolver,
 			XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue) {
 	Zotero.debug("URL " + url);
@@ -168,7 +168,7 @@ function doWeb(doc, url) {
 			// parse XML with DOMParser
 			try {
 				var parser = new DOMParser();
-                var xml = parser.parseFromString(text, "text/xml");
+				var xml = parser.parseFromString(text, "text/xml");
 			} catch(e) {
 				item.complete();
 				next();
@@ -248,6 +248,47 @@ var testCases = [
 				"extra": "ArticleType: research-article / Full publication date: Sep., 2004 / Copyright © 2004 American Association of Avian Pathologists, Inc.",
 				"libraryCatalog": "JSTOR",
 				"shortTitle": "Chicken Primary Enterocytes"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.jstor.org/stable/10.1086/245591?&Search=yes&searchText=bread&searchText=engel&searchText=alpern&searchText=barbara&searchText=alone&list=hide&searchUri=%2Faction%2FdoAdvancedSearch%3Fq0%3Dnot%2Bby%2Bbread%2Balone%26f0%3Dall%26c1%3DAND%26q1%3Dbarbara%2Balpern%2Bengel%26f1%3Dall%26acc%3Don%26wc%3Don%26Search%3DSearch%26sd%3D%26ed%3D%26la%3D%26jo%3D&prevSearch=&item=2&ttl=82&returnArticleService=showFullText",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Engel",
+						"firstName": "Barbara Alpern",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.jstor.org/stable/pdfplus/10.1086/245591.pdf?acceptTC=true",
+						"title": "JSTOR Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"publicationTitle": "The Journal of Modern History",
+				"title": "Not by Bread Alone: Subsistence Riots in Russia during World War I",
+				"volume": "69",
+				"issue": "4",
+				"publisher": "The University of Chicago Press",
+				"ISBN": "00222801",
+				"ISSN": "0022-2801",
+				"url": "http://www.jstor.org/stable/10.1086/245591",
+				"date": "December 01, 1997",
+				"pages": "696-721",
+				"extra": "ArticleType: research-article / Full publication date: December 1997 / Copyright © 1997 The University of Chicago Press",
+				"libraryCatalog": "JSTOR",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Not by Bread Alone",
+				"checkFields": "title"
 			}
 		]
 	}
