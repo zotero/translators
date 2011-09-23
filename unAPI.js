@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-08-26 18:39:33"
+	"lastUpdated": "2011-09-20 20:24:17"
 }
 
 var RECOGNIZABLE_FORMATS = ["rdf_zotero", "rdf_bibliontology", "mods", "marc", "unimarc", "ris",
@@ -128,7 +128,7 @@ UnAPIID.prototype = {
 	 */
 	"getItems":function(callback) {
 		if(this.items) {
-			callback(me.items);
+			callback(this.items);
 			return;
 		}
 		

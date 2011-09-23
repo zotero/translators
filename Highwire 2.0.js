@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2011-09-12 23:20:08"
+	"browserSupport": "gcsib",
+	"lastUpdated": "2011-09-20 20:17:54"
 }
 
 /*
@@ -78,7 +78,7 @@ function doWeb(doc, url) {
 		return true;
 	}
 	
-	var host = 'http://' + doc.location.host + "/";
+	var host = doc.location.protocol+'//' + doc.location.host + "/";
 	
 	var arts = new Array();
 	if (detectWeb(doc, url) == "multiple") {
