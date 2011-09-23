@@ -41,7 +41,7 @@ detect : FW.Xpath('//meta[@name="citation_journal_title"]'),
 title : FW.Xpath('//meta[@name="citation_title"]').key("content").text().trim(),
 attachments : [{ url: FW.Xpath('//meta[@name="citation_pdf_url"]').key("content").text().trim(),
   title: "RSC Journal Snapshot",
-  type: "pdf" }],
+  type: "application/pdf" }],
 creators : FW.Xpath('//meta[@name="citation_author"]').key("content").text().cleanAuthor("author"),
 date : FW.Xpath('//meta[@name="citation_date"]').key("content").text(),
 issue : FW.Xpath('//meta[@name="citation_issue"]').key("content").text(),
@@ -107,7 +107,7 @@ var testCases = [
 					{
 						"url": "http://pubs.rsc.org/en/content/articlepdf/2012/ee/c1ee02148f",
 						"title": "RSC Journal Snapshot",
-						"type": "pdf"
+						"type": "application/pdf"
 					}
 				],
 				"url": "http://pubs.rsc.org/en/content/articlelanding/2012/ee/c1ee02148f",
