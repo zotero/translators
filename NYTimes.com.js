@@ -2,7 +2,7 @@
 	"translatorID": "ce7a3727-d184-407f-ac12-52837f3361ff",
 	"label": "NYTimes.com",
 	"creator": "Simon Kornblith",
-	"target": "^https?://(?:query\\.nytimes\\.com/search/(?:alternate/)?|(?:select\\.|www\\.)?nytimes\\.com/.)",
+	"target": "^https?://(?:query\\.nytimes\\.com/(?:search|gst)/(?:alternate/)?|(?:select\\.|www\\.)?nytimes\\.com/.)",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
@@ -209,6 +209,38 @@ var testCases = [
 		"type": "web",
 		"url": "http://query.nytimes.com/search/query?frow=0&n=10&srcht=a&query=marc+hauser&srchst=nyt&submit.x=18&submit.y=12&hdlquery=&bylquery=&daterange=period&mon1=01&day1=01&year1=2010&mon2=01&day2=18&year2=2011",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://query.nytimes.com/gst/abstract.html?res=F30D15FD3F5813738DDDAC0894DB405B828DF1D3",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "Special To The New York",
+						"lastName": "Times",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"document": false,
+						"title": "New York Times Snapshot"
+					}
+				],
+				"publicationTitle": "The New York Times",
+				"ISSN": "0362-4331",
+				"url": "http://query.nytimes.com/gst/abstract.html?res=F30D15FD3F5813738DDDAC0894DB405B828DF1D3",
+				"date": "1912-03-05",
+				"title": "TWO MONEY INQUIRIES.; Hearings of Trust Charges and Aldrich Plan at the Same Time.",
+				"accessionNumber": "100523320",
+				"libraryCatalog": "NYTimes.com"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

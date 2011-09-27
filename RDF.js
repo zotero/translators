@@ -75,7 +75,12 @@ function handleCreators(newItem, creators, creatorType) {
 	if(typeof(creators[0]) == "string") {	// support creators encoded as strings
 		for(var i in creators) {
 			if(typeof(creators[i]) != "object") {
-				newItem.creators.push(Zotero.Utilities.cleanAuthor(creators[i], creatorType, true));
+				// Use comma to split if present
+				if (creators[i].indexOf(',') !== -1) {
+					newItem.creators.push(Zotero.Utilities.cleanAuthor(creators[i], creatorType, true));
+				} else {
+					newItem.creators.push(Zotero.Utilities.cleanAuthor(creators[i], creatorType, false));
+				}
 			}
 		}
 	} else {								// also support foaf

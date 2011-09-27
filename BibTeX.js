@@ -2041,6 +2041,8 @@ function doExport() {
 
 				if (creator.firstName) {
 					creatorString = creator.lastName + ", " + creator.firstName;
+				} else if (creator.fieldMode == true) { // fieldMode true, assume corporate author
+					creatorString = "{" + creator.lastName + "}";
 				}
 
 				if (creator.creatorType == "editor") {

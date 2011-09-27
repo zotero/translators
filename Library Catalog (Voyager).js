@@ -13,9 +13,8 @@
 }
 
 function detectWeb(doc, url) {
-	var export_options = ZU.xpath(doc, '//form[@name="frm"]//*[@name="RD"]');
+	var export_options = ZU.xpath(doc, '//form[@name="frm"]//*[@name="RD"]/option');
 	if(!export_options.length) return false;
-	export_options = export_options[0];
 	for(var i in export_options) {
 		if(export_options[i].text == 'Latin1 MARC'
 		|| export_options[i].text == 'Raw MARC'

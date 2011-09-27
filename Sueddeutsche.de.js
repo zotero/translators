@@ -30,29 +30,31 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 /*
-This one has the search function on a different host, so I cannot scan the search results. A multiple option, though, is given for the page itself. 
+This one has the search function on a different host, so I cannot scan the search results. A multiple option, though, is given for the page itself.
 Test here:
 http://www.sueddeutsche.de/politik
 http://www.sueddeutsche.de/thema/Krieg_in_Libyen
 http://www.sueddeutsche.de/muenchen
+
+Reference article: http://www.sueddeutsche.de/wissen/embryonale-stammzellen-wo-sind-die-naiven-1.1143034
 */
 
 function detectWeb(doc, url) {
 
 	// I use XPaths. Therefore, I need the following block.
-	
+
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
-	
-	var SZ_ArticleTitle_XPath = ".//h1[@id='articleTitle']";
+
+	var SZ_ArticleTitle_XPath = ".//h2[@id='articleTitle']";
 	var SZ_Multiple_XPath = ".//*[contains(@class, 'maincolumn')]/ol/li/a|.//*[contains(@class, 'maincolumn')]/ol/li/ul/li/a";
 
-	if (doc.evaluate(SZ_ArticleTitle_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
+	if (doc.evaluate(SZ_ArticleTitle_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){
 		Zotero.debug("newspaperArticle");
 		return "newspaperArticle";
-	} else if (doc.evaluate(SZ_Multiple_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
+	} else if (doc.evaluate(SZ_Multiple_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){
 		Zotero.debug("multiple");
 		return "multiple";
 	}
@@ -64,26 +66,26 @@ function scrape(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
-	
-	var title_XPath =".//h1[@id='articleTitle']";
-	// This is clumsy, but it excludes image galleries, which link fine but then are not articles. The closing bracket is right at the end of scrape().
-	if (doc.evaluate(title_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){  
-		
-	
-	var newItem = new Zotero.Item("newspaperArticle");
-	newItem.url = doc.location.href; 
 
-	
+	var title_XPath =".//h2[@id='articleTitle']";
+	// This is clumsy, but it excludes image galleries, which link fine but then are not articles. The closing bracket is right at the end of scrape().
+	if (doc.evaluate(title_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){
+
+
+	var newItem = new Zotero.Item("newspaperArticle");
+	newItem.url = doc.location.href;
+
+
 	// This is for the title!
-	
+
 	var title_XPath = '//meta[contains(@property, "og:title")]';
 	var title = doc.evaluate(title_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().content;
 	newItem.title = Zotero.Utilities.trim(title.replace(/\s?–\s?/, ": "));
-	
+
 	// Author. This is tricky, the SZ uses the author field for whatever they like. Sometimes, there is no author.
-	
+
 	var author_XPath = './/span[contains(@class, "hcard fn")]';
-	
+
 	// If there is an author, use it. Otherwise: ""
 	if (doc.evaluate(author_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 		var author = doc.evaluate(author_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
@@ -97,21 +99,21 @@ function scrape(doc, url) {
 	if (author.match(/\.$/)){
 		author = "";
 	}
-	
+
 	// For multiple Authors, the SZ uses comma, und and u. separate em, and put them into an array of strings.
-	author = author.split(/\sund\s|\su\.\s|\,\s/); 
+	author = author.split(/\sund\s|\su\.\s|\,\s/);
 	Zotero.debug(author);
 	for (var i in author) {
 		if (author[i].match(/\s/)) { // only names that contain a space!
 			newItem.creators.push(Zotero.Utilities.cleanAuthor(author[i], "author"));
 		}
 	}
-	
+
 	// Now the summary
 	var summary_XPath = '//meta[contains(@property, "og:description")]';
 	var summary = doc.evaluate(summary_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().content;
 	newItem.abstractNote = summary;
-	
+
 	// Date
 	var date_XPath = ".//*[@class='updated']/*[@class='value']";
 	var date = doc.evaluate(date_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
@@ -122,8 +124,8 @@ function scrape(doc, url) {
 	var section_XPath = "//meta[contains(@name, 'keywords')]";
 	var section= doc.evaluate(section_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().content;
 	section = section.split(",")[0];
-	newItem.section = section; 
-	
+	newItem.section = section;
+
 	// Tags
 	var tags_XPath = ".//ul[@class='themen']"
 	var tags= doc.evaluate(tags_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
@@ -134,21 +136,23 @@ function scrape(doc, url) {
 			newItem.tags.push(tags[i]);
 	}
 
-	// Publikation 
+	// Publikation
 	newItem.publicationTitle = "sueddeutsche.de"
-	
+	newItem.ISSN = "0174-4917";
+	newItem.language = "de";
+
 	// Attachment. Difficult. They want something inserted into the URL.
-	
+
 	var printurl = doc.location.href;
 	printurl = printurl.replace(/(.*\/)(.*$)/, '$12.220/$2'); //done!
-	Zotero.debug(printurl); 
+	Zotero.debug(printurl);
 	newItem.attachments.push({url:printurl, title:doc.title, mimeType:"text/html"});
-	
+
 	newItem.complete()
 	}
-	
+
 }
- 
+
 function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -156,12 +160,12 @@ function doWeb(doc, url) {
 	} : null;
 
 	var articles = new Array();
-	
+
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
-		
+
 		var titles = doc.evaluate(".//*[contains(@class, 'maincolumn')]/ol/li/a|.//*[contains(@class, 'maincolumn')]/ol/li/ul/li/a", doc, nsResolver, XPathResult.ANY_TYPE, null);
-		
+
 		var next_title;
 		while (next_title = titles.iterateNext()) {
 			if (next_title.href.match(/^http\:\/\/www\.sueddeutsche\.de/)) {
@@ -176,10 +180,10 @@ function doWeb(doc, url) {
 		for (var i in items) {
 			articles.push(i);
 		}
-		Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();}); 
+		Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 		Zotero.wait();
 	} else {
 		scrape(doc, url);
-	} 
+	}
 }
 
