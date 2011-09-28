@@ -2,7 +2,7 @@
 	"translatorID": "82174f4f-8c13-403b-99b2-affc7bc7769b",
 	"label": "Cambridge Scientific Abstracts",
 	"creator": "Simon Kornblith and Michael Berkowitz",
-	"target": "https?://[^/]+/ids70/(?:results.php|view_record.php)",
+	"target": "^https?://[^/]+/ids70/(?:results\\.php|view_record\\.php)",
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
 	"priority": 100,
