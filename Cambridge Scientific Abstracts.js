@@ -1,18 +1,19 @@
 {
-	"translatorID":"82174f4f-8c13-403b-99b2-affc7bc7769b",
-	"translatorType":4,
-	"label":"Cambridge Scientific Abstracts",
-	"creator":"Simon Kornblith and Michael Berkowitz",
-	"target":"https?://[^/]+/ids70/(?:results.php|view_record.php)",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2011-06-14 04:31:00"
+	"translatorID": "82174f4f-8c13-403b-99b2-affc7bc7769b",
+	"label": "Cambridge Scientific Abstracts",
+	"creator": "Simon Kornblith and Michael Berkowitz",
+	"target": "https?://[^/]+/ids70/(?:results.php|view_record.php)",
+	"minVersion": "1.0.0b3.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-09-28 11:45:02"
 }
 
 /* Provides support for databases of Cambridge Scientific Abstracts
-    Tested with CSA Illumina, http://www.csa.com/
+	Tested with CSA Illumina, http://www.csa.com/
    CSA does not provide stable URLs
  */
 
@@ -120,7 +121,7 @@ function scrape(doc) {
 					newItem.publisher = m[2];
 				}
 			} else if(itemType == "bookSection") {
-                var untitled = !newItem.publicationTitle;
+				var untitled = !newItem.publicationTitle;
 				if(untitled || (content.length > newItem.publicationTitle.length
 				   && content.substr(0, newItem.publicationTitle.length) == newItem.publicationTitle)
 				   || content.indexOf(newItem.publicationTitle)) {
@@ -132,10 +133,10 @@ function scrape(doc) {
 					}
 					var m = content.match(/\)\. ([^:()]+): ([^,0-9]+)/);
 					if(m) {
-                        if (untitled) {
-                            var n = content.match(/\([0-9]{4}\)([^(]*)/);
-                            if (n) newItem.publicationTitle = n[1];
-                        }
+						if (untitled) {
+							var n = content.match(/\([0-9]{4}\)([^(]*)/);
+							if (n) newItem.publicationTitle = n[1];
+						}
 						newItem.place = m[1];
 						newItem.publisher = m[2];
 					}
@@ -163,6 +164,8 @@ function scrape(doc) {
 			}
 		} else if(heading == "journal volume") {
 			newItem.volume = content;
+		} else if(heading == "doi") {
+			newItem.DOI = content;
 		} else if(heading == "journal pages") {
 			newItem.pages = content;
 		} else if(heading == "journal issue") {
