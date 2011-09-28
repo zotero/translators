@@ -1,14 +1,15 @@
 {
-	"translatorID":"1b9ed730-69c7-40b0-8a06-517a89a3a278",
-	"translatorType":4,
-	"label":"Sudoc",
-	"creator":"Sean Takats, Michael Berkowitz, Sylvain Machefert",
-	"target":"^http://(www|corail)\\.sudoc\\.abes\\.fr",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2010-09-03 14:40:00"
+	"translatorID": "1b9ed730-69c7-40b0-8a06-517a89a3a278",
+	"label": "Sudoc",
+	"creator": "Sean Takats, Michael Berkowitz, Sylvain Machefert",
+	"target": "^http://(www|corail)\\.sudoc\\.abes\\.fr",
+	"minVersion": "1.0.0b3.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-09-28 14:56:54"
 }
 
 function detectWeb(doc, url) {
@@ -81,11 +82,10 @@ function scrape(doc, url) {
 			var coins = eltCoins.getAttribute('title');
 
 			var newItem = new Zotero.Item();
-			newItem.repository = false;	// do not save repository
+			newItem.repository = "SUDOC";	// do not save repository
 			if(Zotero.Utilities.parseContextObject(coins, newItem)) 
 			{
-				// ppn is the national identifier, used to make a permalink on the record
-				var ppn = "";
+				var permalink = "";
 				if (newItem.title) 
 				{
 					newItem.itemType = detectWeb(doc, url);
@@ -228,14 +228,16 @@ function scrape(doc, url) {
 							var thesisType = value.split(/ ?:/)[0];
 							newItem.type = thesisType;
 						}
-						else if ( (field == "Numéro\u00A0de\u00A0notice") || (field == "Record\u00A0number") )
+						else if ( (field == "Identifiant\u00A0pérenne de\u00A0la\u00A0notice") || (field == "Persistent identifier of the record") )
 						{
-							ppn = value;
+							newItem.attachments = [{url:value, title:"Notice sudoc", mimeType:"text/html", snapshot:false}];
+						}
+						else
+						{
+							Zotero.debug("==> " + field);
 						}
 					}
 					
-					// We store the original place of the record, using its ppn
-					newItem.attachments = [{url:'http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=' + ppn, title:"Notice sudoc", mimeType:"text/html", snapshot:false}];
 					newItem.complete();
 				}
 			}
