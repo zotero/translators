@@ -2,13 +2,13 @@
 	"translatorID": "58641ca2-d324-445b-a618-4e7c4631726f",
 	"label": "Google Blogs",
 	"creator": "Avram Lyon",
-	"target": "^https?://www\\.google\\.[^/]+/.*[#&]tbm=blg",
+	"target": "^https?://www\\.google\\.[^/]+/.*[?#&]tbm=blg",
 	"minVersion": "2.1.8",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-07-30 03:19:03"
+	"lastUpdated": "2011-09-28 03:19:03"
 }
 
 /*
