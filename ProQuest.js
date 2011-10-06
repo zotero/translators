@@ -9,7 +9,7 @@
 	"browserSupport": "gcs",
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-08-22 22:32:08"
+	"lastUpdated": "2011-10-05 22:32:08"
 }
 
 /*
@@ -254,9 +254,20 @@ function scrape (doc) {
 		item.complete();
 	} else {
 		// The PDF link requires two requests-- we fetch the PDF full text page
-		var pdf = doc.evaluate('//a[@class="formats_base_sprite format_pdf"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-		if (pdf) {
-			Zotero.Utilities.processDocuments(pdf.href, function(pdfDoc){
+		var pdfNodes = doc.evaluate('//a[@class="formats_base_sprite format_pdf"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var pdfs = [];
+		var pdf;
+		var full = false;
+		while (pdf = pdfNodes.iterateNext()) {
+			pdfs.push(pdf.href);
+		}
+		
+		if (pdfs.length == 0) {
+			item.complete();
+			return;
+		}
+		
+		Zotero.Utilities.processDocuments(pdfs, function(pdfDoc){
 				// This page gives a beautiful link directly to the PDF, right in the HTML
 				realLink = pdfDoc.evaluate('//div[@id="pdffailure"]/div[@class="body"]/a', pdfDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 				if (realLink) {
@@ -264,11 +275,7 @@ function scrape (doc) {
 											title:"ProQuest PDF",
 											mimeType:"application/pdf"});
 				}
-				item.complete();
-			}, function () {});
-		} else {
-			item.complete();
-		}
+			}, function () { item.complete() });
 	}
 }
 
