@@ -81,4 +81,6 @@ function doWeb(doc,url)
 	translator.getTranslatorObject(function (obj) {
 		obj.doWeb(doc, url);
 	});
+
+	Zotero.wait();
 }
