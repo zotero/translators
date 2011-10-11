@@ -9,9 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-09-14 09:10:10"
+	"lastUpdated": "2011-10-10 21:24:27"
 }
-
 
 // Known formats
 // Reverse
@@ -35,6 +34,7 @@ var _prefixes = {};
 
 // These are the ones that we will read without a declared schema
 var _dcDefined = false;
+var _prismDefined = false;
 
 function getPrefixes(doc) {
 	if(_prefixes.length) {
@@ -52,20 +52,27 @@ function getPrefixes(doc) {
 					_prefixes[matches[1].toLowerCase()] = links[i].getAttribute("href");
 					if (_n[links[i].getAttribute("href")] == "dc") {
 						_dcDefined = true;	
+					} else if (_n[links[i].getAttribute("href")] == "prism") {
+						_prismDefined = true;
 					}
 				}
 			}
 		}
 	}
-	// We allow prefix-less DC
+	// We allow prefix-less DC and PRISM
 	if (!_dcDefined && !_prefixes["dc"]) {
 		_prefixes["dc"] = "http://purl.org/dc/elements/1.1/";
+	}
+	if (!_prismDefined && !_prefixes["prism"]) {
+		_prefixes["prism"] = "http://prismstandard.org/namespaces/1.2/basic/";
 	}
 	return _prefixes;
 }
 
 function detectWeb(doc, url) {
 	var prefixes = getPrefixes(doc);
+	
+	var rdfPresent = false;
 	
 	// XXX What is this blacklisting?
 	if (url.indexOf("reprint") != -1) return false;
@@ -75,10 +82,14 @@ function detectWeb(doc, url) {
 		// See if the supposed prefix is there, split by period or underscore
 		if(tag && (prefixes[tag.split('.')[0].toLowerCase()] 
 				|| prefixes[tag.split('_')[0].toLowerCase()])) {
-			return "webpage";
+			// If we have PRISM data, don't use the generic webpage icon
+			if (prefixes[tag.split('.')[0].toLowerCase()] 
+					== "http://prismstandard.org/namespaces/1.2/basic/")
+				return "journalArticle";
 		}
 	}
-	
+	if (rdfPresent) return "webpage";
+
 	return false;
 }
 
@@ -98,26 +109,28 @@ function doWeb(doc, url) {
 		newItem.complete();
 	});
 	
-	translator.getTranslatorObject(function(rdf) {
-		var metaTags = doc.getElementsByTagName("meta");
-		for(var i=0; i<metaTags.length; i++) {
-			var tag = metaTags[i].getAttribute("name");
-			var value = metaTags[i].getAttribute("content");
+translator.getTranslatorObject(function(rdf) {
+	var metaTags = doc.getElementsByTagName("meta");
 
-			// See if the supposed prefix is there, split by period or underscore
-			if(tag && (prefixes[tag.split('.')[0].toLowerCase()] 
-					|| prefixes[tag.split('_')[0].toLowerCase()])) {
-				// Set the delimiter for this tag
-				var delim = (prefixes[tag.split('_')[0].toLowerCase()]) ? '_' : '.';
-				var pieces = tag.split(delim);
-				var prefix = pieces.shift().toLowerCase();
+	for(var i=0; i<metaTags.length; i++) {
+		var tag = metaTags[i].getAttribute("name");
+		var value = metaTags[i].getAttribute("content");
 
-				rdf.Zotero.RDF.addStatement(url, prefixes[prefix] + pieces.join(delim).toLowerCase(), value, true);
-			}
+		// See if the supposed prefix is there, split by period or underscore
+		if(tag && (prefixes[tag.split('.')[0].toLowerCase()] 
+				|| prefixes[tag.split('_')[0].toLowerCase()])) {
+			// Set the delimiter for this tag
+			var delim = (prefixes[tag.split('_')[0].toLowerCase()]) ? '_' : '.';
+			var pieces = tag.split(delim);
+			var prefix = pieces.shift().toLowerCase();
+
+			rdf.Zotero.RDF.addStatement(url, prefixes[prefix] + pieces.join(delim).toLowerCase(), value, true);
 		}
-
-		rdf.defaultUnknownType = "webpage";
+	}
+		// Fall back on the same type we displayed-- maybe a journal article
+		rdf.defaultUnknownType = detectWeb(doc, url);
 		rdf.doImport();
+	
 	});
 }
 
