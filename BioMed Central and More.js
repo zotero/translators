@@ -1,140 +1,84 @@
 {
-	"translatorID":"1a3e63b2-0adf-4c8e-928b-c58c2594b45d",
-	"translatorType":4,
-	"label":"BioMed Central and More",
-	"creator":"Ben Parr",
-	"target":"http://[^/]*(jcmr-online|respiratory-research|bio-diglib|nuclear-receptor|medimmunol|kinetoplastids|filariajournal|cellandchromosome|actavetscand|aidsrestherapy|almob|ann-clinmicrob|annals-general-psychiatry|asir-journal|arthritis-research|apfmj|anzhealthpolicy|behavioralandbrainfunctions|biodatamining|biology-direct|biomagres|biomedical-engineering-online|bpsmedicine|biotechnologyforbiofuels|biomedcentral|breast-cancer-research|cancerci|cbmjournal|cardiab|cardiovascularultrasound|casesjournal|lipidsignaling.cbdjournals|biosignaling|celldiv|cerebrospinalfluidresearch|journal.chemistrycentral|capmh|cmjournal|chiroandosteo|clinicalmolecularallergy|cpementalhealth|comparative-hepatology|conflictandhealth|resource-allocation|coughjournal|ccforum|cytojournal|diagnosticpathology|dynamic-med|ete-online|ehjournal|epi-perspectives|epigeneticsandchromatin|fibrogenesis|frontiersinzoology|gvt-journal|genomebiology|genomemedicine|geochemicaltransactions|globalizationandhealth|gutpathogens|harmreductionjournal|head-face-med|hqlo|health-policy-systems|human-resources-health|immunityageing|immunome-research|implementationscience|infectagentscancer|intarchmed|internationalbreastfeedingjournal|equityhealthj|ijbnpa|ij-healthgeographics|ijmhs|issoonline|jautoimdis|jbioleng|jbiol|j-biomed-discovery|jbppni|carcinogenesis|cardiothoracicsurgery|jcmr-online|jcircadianrhythms|ethnobiomed|jexpclinassistreprod|jeccr|jfootankleres|jhoonline|jibtherapies|journal-inflammation|jmedicalcasereports|jmolecularsignaling|jnanobiotechnology|jnrbm|jneuroengrehab|jneuroinflammation|occup-med|josr-online|jissn|translational-medicine|traumamanagement|lipidworld|malariajournal|microbialcellfactories|molecularbrain|molecular-cancer|molecularcytogenetics|molecularneurodegeneration|molecularpain|neuraldevelopment|nonlinearbiomedphys|nutritionandmetabolism|nutritionj|ojrd|om-pc|parasitesandvectors|particleandfibretoxicology|pathogeneticsjournal|pssjournal|ped-rheum|peh-med|plantmethods|pophealthmetrics|proteomesci|ro-journal|rbej|reproductive-health-journal|respiratory-research|retrovirology|salinesystems|the-scientist|scoliosisjournal|scfbm|substanceabusepolicy|tbiomed|thrombosisjournal|thyroidresearchjournal|tobaccoinduceddiseases|trialsjournal|urooncologyjournal|virologyj|wjes|wjso)\\.(com|org|net)",
-	"minVersion":"1.0.0b4.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-07-15 19:45:00"
+	"translatorID": "1a3e63b2-0adf-4c8e-928b-c58c2594b45d",
+	"label": "BioMed Central and More",
+	"creator": "Ben Parr and Avram Lyon",
+	"target": "http://[^/]*(jcmr-online|respiratory-research|bio-diglib|nuclear-receptor|medimmunol|kinetoplastids|filariajournal|cellandchromosome|actavetscand|aidsrestherapy|almob|ann-clinmicrob|annals-general-psychiatry|asir-journal|arthritis-research|apfmj|anzhealthpolicy|behavioralandbrainfunctions|biodatamining|biology-direct|biomagres|biomedical-engineering-online|bpsmedicine|biotechnologyforbiofuels|biomedcentral|breast-cancer-research|cancerci|cbmjournal|cardiab|cardiovascularultrasound|casesjournal|lipidsignaling.cbdjournals|biosignaling|celldiv|cerebrospinalfluidresearch|journal.chemistrycentral|capmh|cmjournal|chiroandosteo|clinicalmolecularallergy|cpementalhealth|comparative-hepatology|conflictandhealth|resource-allocation|coughjournal|ccforum|cytojournal|diagnosticpathology|dynamic-med|ete-online|ehjournal|epi-perspectives|epigeneticsandchromatin|fibrogenesis|frontiersinzoology|gvt-journal|genomebiology|genomemedicine|geochemicaltransactions|globalizationandhealth|gutpathogens|harmreductionjournal|head-face-med|hqlo|health-policy-systems|human-resources-health|immunityageing|immunome-research|implementationscience|infectagentscancer|intarchmed|internationalbreastfeedingjournal|equityhealthj|ijbnpa|ij-healthgeographics|ijmhs|issoonline|jautoimdis|jbioleng|jbiol|j-biomed-discovery|jbppni|carcinogenesis|cardiothoracicsurgery|jcmr-online|jcircadianrhythms|ethnobiomed|jexpclinassistreprod|jeccr|jfootankleres|jhoonline|jibtherapies|journal-inflammation|jmedicalcasereports|jmolecularsignaling|jnanobiotechnology|jnrbm|jneuroengrehab|jneuroinflammation|occup-med|josr-online|jissn|translational-medicine|traumamanagement|lipidworld|malariajournal|microbialcellfactories|molecularbrain|molecular-cancer|molecularcytogenetics|molecularneurodegeneration|molecularpain|neuraldevelopment|nonlinearbiomedphys|nutritionandmetabolism|nutritionj|ojrd|om-pc|parasitesandvectors|particleandfibretoxicology|pathogeneticsjournal|pssjournal|ped-rheum|peh-med|plantmethods|pophealthmetrics|proteomesci|ro-journal|rbej|reproductive-health-journal|respiratory-research|retrovirology|salinesystems|the-scientist|scoliosisjournal|scfbm|substanceabusepolicy|tbiomed|thrombosisjournal|thyroidresearchjournal|tobaccoinduceddiseases|trialsjournal|urooncologyjournal|virologyj|wjes|wjso)\\.(com|org|net)",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-10 21:47:47"
 }
+
+/*
+   BioMed Central Translator
+   Copyright (C) 2011 Avram Lyon, ajlyon@gmail.com
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affer General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affer General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/*
+Translator completely rewritten by Avram Lyon to use RDF. Original target regex by Ben Parr.
+ */
 
 function detectWeb(doc,url)
 {
 	var namespace = doc.documentElement.namespaceURI;
-    	var nsResolver = namespace ? function(prefix) {
-        if (prefix == "x" ) return namespace; else return null;
-    	} : null;
-    	
-    	var xpath='//meta[@name="citation_fulltext_html_url"]';
-    	
-    	//Single
-    	if (doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) 
-    		{return "journalArticle";}
-    		
-    	
-    	//Multiple
-    	xpath='//a[@class="hiddenlink"][span[@class="xcitationtitle"][b]]';
-	xpath+=' | //span[@class="xcitationtitle2"]/a[@class="hiddenlink"]';
-	xpath+=' | //div[@class="bodytext"]/a[@class="hiddenlink"][font/b]';
-	xpath+=' | //p[@class="bodytext"]/a[@class="hiddenblack"][b]';
-	xpath+=' | //div[@class="bodytext"]/a[@class="hiddenblack"][b]';
-	xpath+=' | //div[@class="bodytext"]/a[@class="hiddenlink"][font/b]';
-	
-	var rows=doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var row;
-	var link;
-	while(row=rows.iterateNext())
-	{
-		link=row.href;
-		if(link.indexOf("pubmed")<0 && link.substr(link.length-4)!=".pdf" && link.indexOf("blogs.")<0)
-			{return "multiple";}
-	}
-	
-}
-
-function parseRIS(getURL)
-{  
-    Zotero.Utilities.HTTP.doGet(getURL, function(text){
-        // load translator for RIS
-        var translator = Zotero.loadTranslator ("import");
-        translator.setHandler("itemDone", function(obj, newItem) {
-	        var doi = newItem.DOI;
-		var splitURL = newItem.url.split('/');
+	var nsResolver = namespace ? function(prefix) {
+	if (prefix == "x" ) return namespace; else return null;
+	} : null;
 		
-		if(splitURL.length>=3 && doi){
-			var doiSuffix = doi.slice(doi.indexOf('/')+1);
-			var pdfURL = splitURL[0] + '/' + splitURL[1] + '/' + splitURL[2];
-			pdfURL += '/content/pdf/' + doiSuffix + '.pdf';
-			var source = splitURL[2].replace(/^www./i,'').replace(/\.[\w]+$/i,'');
-			newItem.attachments = [
-				//{url:newItem.url+'/abstract', title:source + " Abstract Snapshot", mimeType:"text/html"},
-				{url:newItem.url, title:source + " Snapshot", mimeType:"text/html"},
-				{url:pdfURL, title:source + " PDF", mimeType:"application/pdf"}
-			];
-		}
-	        newItem.complete();
-        });
-        translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-        translator.setString(text);
-        translator.translate();
-        Zotero.done();
-    }, function() {});
-
-    Zotero.wait();
+	var xpath='//meta[@name="citation_journal_title"]';
+		
+	//Single
+	if (doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) 
+		{return "journalArticle";}
+			
+	if (url.match(/\/search\/results\?.*terms=/)) return "multiple";
 }
+
 
 function doWeb(doc,url)
 {
-	var namespace = doc.documentElement.namespaceURI;
-    	var nsResolver = namespace ? function(prefix) {
-        if (prefix == "x" ) return namespace; else return null;
-    	} : null;
-    	
-    	var xpath='//meta[@name="citation_fulltext_html_url"]/@content';
-    	var rows;
-    	var row=doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-    	if (row) 
-    	{
-	    	//Single Article	    	
-	    	var url=row.textContent+"/citation/";
-	    	Zotero.Utilities.HTTP.doPost(url, 'include=cit&format=refman&direct=on&submit=Download+references&action=submit', function(text)
-	    		{parseRIS(url+'?include=cit&format=refman&direct=on&submit=Download+references&action=submit');});
-   
-    		Zotero.wait();
-    		return true;
-	}
- 	
- 	
- 	//Multiple
-    	xpath='//a[@class="hiddenlink"][span[@class="xcitationtitle"][b]]';
-	xpath+=' | //span[@class="xcitationtitle2"]/a[@class="hiddenlink"]';
-	xpath+=' | //div[@class="bodytext"]/a[@class="hiddenlink"][font/b]';
-	xpath+=' | //p[@class="bodytext"]/a[@class="hiddenblack"][b]';
-	xpath+=' | //div[@class="bodytext"]/a[@class="hiddenblack"][b]';
-	xpath+=' | //div[@class="bodytext"]/a[@class="hiddenlink"][font/b]';
-
-	rows=doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var items=new Array();
-	var link;
-	var t;
-	while(row=rows.iterateNext())
-	{
-		link=row.href;
-		if(link.indexOf("pubmed")<0 && link.substr(link.length-4)!=".pdf" && link.indexOf("blogs.")<0)
-		{
-			t=link.split('/');
-			if(t[t.length-1].indexOf("comments#")>-1)
-				{link=t.slice(0,t.length-1).join('/');}
-			items[link.replace("/abstract","")+"/citation"]=row.textContent;
+	if (detectWeb(doc, url) == "multiple") {
+		var hits = {};
+		var urls = [];
+		var results = ZU.xpath(doc,"//table[@id='articles-list']//td[@class='article-entry']//p/strong/a");
+		for (var i in results) {
+			hits[results[i].href] = results[i].textContent;
 		}
+		Z.selectItems(hits, function(items) {
+			if (items == null) return true;
+			for (var j in items) {
+				urls.push(j);
+			}
+			ZU.processDocuments(urls, function (myDoc) { 
+				doWeb(myDoc, myDoc.location.href) }, function () {Z.done()});
+		});
 	}
 	
-	items = Zotero.selectItems(items);
-       	var uris=new Array();
-       	if (!items)
-               {return true;}
-
-        for (var i in items)
-               {uris.push(i);}
-
-       	Zotero.Utilities.HTTP.doPost(uris, "include=cit&format=refman&direct=on&submit=Download+references&action=submit", function(text)
-       	{
-       	    for (var j = 0 ; j < uris.length ; j++)
-       	    	{parseRIS(uris[j] + "?include=cit&format=refman&direct=on&submit=Download+references&action=submit");}
-       	});
-       
-       	Zotero.wait();
+	// We call the Embedded RDF translator to do the actual work
+	var translator = Zotero.loadTranslator("import");
+	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+	translator.setHandler("itemDone", function(obj, item) {
+		item.abstractNote = item.extra;
+		item.extra = '';
+		item.complete();
+	});
+	translator.getTranslatorObject(function (obj) {
+		obj.doWeb(doc, url);
+	});
 }
