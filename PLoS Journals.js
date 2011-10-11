@@ -6,11 +6,10 @@
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
-	"browserSupport": "gcs",
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-08-22 22:31:21"
+	"lastUpdated": "2011-10-10 21:01:38"
 }
 
 function detectWeb(doc, url) {
@@ -31,12 +30,12 @@ function getSelectedItems(doc, articleRegEx) {
 		items[next_art.href] = next_art.textContent;
 		next_art = articles.iterateNext();
 	}
-    Zotero.selectItems(items, function(items) {
-    	for (var i in items) {
-    		texts.push(i);
-    	}
-    	processTexts(texts);
-    });
+	Zotero.selectItems(items, function(items) {
+		for (var i in items) {
+			texts.push(i);
+		}
+		processTexts(texts);
+	});
 }
 
 function doWeb(doc, url) {
@@ -49,13 +48,13 @@ function doWeb(doc, url) {
 	} else {
 		processTexts([url]);
 	}
-    
-    Zotero.wait();
+	
+	Zotero.wait();
 }
 
 function processTexts(texts) {
-    var risLinks = [];
-    for (var i in texts) {
+	var risLinks = [];
+	for (var i in texts) {
 		texts[i]=texts[i].replace(/;jsessionid[^;]+/, "");//Strip sessionID string
 		texts[i]=texts[i].replace(/\?.*/, "");//Strip referrer messes
 		var risLink = texts[i].replace("info", "getRisCitation.action?articleURI=info");
@@ -73,6 +72,10 @@ function processTexts(texts) {
 		// grab the UR link for a snapshot then blow it away 
 		var snapshot = text.match(/UR\s+\-\s+(.*)/)[1];
 		text = text.replace(/UR\s+\-(.*)/, "");
+		// PLoS has an issue where T1 is globbed onto TY:
+		// TY  - JOURT1  - Prediction of Associations between microRNAs and Gene Expression in Glioma Biology
+		// If they fix that, we can eliminate the following line.
+		text = text.replace(/TY  - ([A-Z0-9]+)T1  - /,"TY  - $1\nT1  - ");
 				
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -109,13 +112,13 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Selva",
-						"firstName": "Eric ",
+						"lastName": "Kim",
+						"firstName": "Tae Min ",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Khadra",
-						"firstName": "Nadine ",
+						"lastName": "Kim",
+						"firstName": "Young Min ",
 						"creatorType": "author"
 					},
 					{

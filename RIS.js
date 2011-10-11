@@ -13,7 +13,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-09-13 22:13:04"
+	"lastUpdated": "2011-10-10 20:43:17"
 }
 
 function detectImport() {
@@ -120,7 +120,8 @@ var inputTypeMap = {
 };
 
 function processTag(item, tag, value) {
-	if (tag != "N1" && tag != "AB" && Zotero.Utilities.unescapeHTML) {
+	if (tag != "N1" && tag != "AB" && value !== undefined
+				&& Zotero.Utilities.unescapeHTML) {
 		value = Zotero.Utilities.unescapeHTML(value);
 	}
 	
@@ -661,3 +662,100 @@ function doExport() {
 		Zotero.write("ER  - \r\n\r\n");
 	}
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "import",
+		"input": "TY  - JOUR\nA1  - Baldwin,S.A.\nA1  - Fugaccia,I.\nA1  - Brown,D.R.\nA1  - Brown,L.V.\nA1  - Scheff,S.W.\nT1  - Blood-brain barrier breach following\ncortical contusion in the rat\nJO  - J.Neurosurg.\nY1  - 1996\nVL  - 85\nSP  - 476\nEP  - 481\nRP  - Not In File\nKW  - cortical contusion\nKW  - blood-brain barrier\nKW  - horseradish peroxidase\nKW  - head trauma\nKW  - hippocampus\nKW  - rat\nN2  - Adult Fisher 344 rats were subjected to a unilateral impact to the dorsal cortex above the hippocampus at 3.5 m/sec with a 2 mm cortical depression. This caused severe cortical damage and neuronal loss in hippocampus subfields CA1, CA3 and hilus. Breakdown of the blood-brain barrier (BBB) was assessed by injecting the protein horseradish peroxidase (HRP) 5 minutes prior to or at various times following injury (5 minutes, 1, 2, 6, 12 hours, 1, 2, 5, and 10 days). Animals were killed 1 hour after HRP injection and brain sections were reacted with diaminobenzidine to visualize extravascular accumulation of the protein. Maximum staining occurred in animals injected with HRP 5 minutes prior to or 5 minutes after cortical contusion. Staining at these time points was observed in the ipsilateral hippocampus. Some modest staining occurred in the dorsal contralateral cortex near the superior sagittal sinus. Cortical HRP stain gradually decreased at increasing time intervals postinjury. By 10 days, no HRP stain was observed in any area of the brain. In the ipsilateral hippocampus, HRP stain was absent by 3 hours postinjury and remained so at the 6- and 12- hour time points. Surprisingly, HRP stain was again observed in the ipsilateral hippocampus 1 and 2 days following cortical contusion, indicating a biphasic opening of the BBB following head trauma and a possible second wave of secondary brain damage days after the contusion injury. These data indicate regions not initially destroyed by cortical impact, but evidencing BBB breach, may be accessible to neurotrophic factors administered intravenously both immediately and days after brain trauma.\nER  - ",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Baldwin",
+						"firstName": "S.A.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Fugaccia",
+						"firstName": "I.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Brown",
+						"firstName": "D.R.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Brown",
+						"firstName": "L.V.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Scheff",
+						"firstName": "S.W.",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"cortical contusion",
+					"blood-brain barrier",
+					"horseradish peroxidase",
+					"head trauma",
+					"hippocampus",
+					"rat"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Blood-brain barrier breach following cortical contusion in the rat",
+				"publicationTitle": "J.Neurosurg.",
+				"date": "1996",
+				"volume": "85",
+				"pages": "476-481",
+				"abstractNote": "Adult Fisher 344 rats were subjected to a unilateral impact to the dorsal cortex above the hippocampus at 3.5 m/sec with a 2 mm cortical depression. This caused severe cortical damage and neuronal loss in hippocampus subfields CA1, CA3 and hilus. Breakdown of the blood-brain barrier (BBB) was assessed by injecting the protein horseradish peroxidase (HRP) 5 minutes prior to or at various times following injury (5 minutes, 1, 2, 6, 12 hours, 1, 2, 5, and 10 days). Animals were killed 1 hour after HRP injection and brain sections were reacted with diaminobenzidine to visualize extravascular accumulation of the protein. Maximum staining occurred in animals injected with HRP 5 minutes prior to or 5 minutes after cortical contusion. Staining at these time points was observed in the ipsilateral hippocampus. Some modest staining occurred in the dorsal contralateral cortex near the superior sagittal sinus. Cortical HRP stain gradually decreased at increasing time intervals postinjury. By 10 days, no HRP stain was observed in any area of the brain. In the ipsilateral hippocampus, HRP stain was absent by 3 hours postinjury and remained so at the 6- and 12- hour time points. Surprisingly, HRP stain was again observed in the ipsilateral hippocampus 1 and 2 days following cortical contusion, indicating a biphasic opening of the BBB following head trauma and a possible second wave of secondary brain damage days after the contusion injury. These data indicate regions not initially destroyed by cortical impact, but evidencing BBB breach, may be accessible to neurotrophic factors administered intravenously both immediately and days after brain trauma."
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "TY  - PAT\nA1  - Burger,D.R.\nA1  - Goldstein,A.S.\nT1  - Method of detecting AIDS virus infection\nY1  - 1990/2/27\nVL  - 877609\nIS  - 4,904,581\nRP  - Not In File\nA2  - Epitope,I.\nCY  - OR\nPB  - 4,629,783\nKW  - AIDS\nKW  - virus\nKW  - infection\nKW  - antigens\nY2  - 1986/6/23\nM1  - G01N 33/569 G01N 33/577\nM2  - 435/5 424/3 424/7.1 435/7 435/29 435/32 435/70.21 435/240.27 435/172.2 530/387 530/808 530/809 935/110\nN2  - A method is disclosed for detecting the presence of HTLV III infected cells in a medium. The method comprises contacting the medium with monoclonal antibodies against an antigen produced as a result of the infection and detecting the binding of the antibodies to the antigen. The antigen may be a gene product of the HTLV III virus or may be bound to such gene product. On the other hand the antigen may not be a viral gene product but may be produced as a result of the infection and may further be bound to a lymphocyte. The medium may be a human body fluid or a culture medium. A particular embodiment of the present method involves a method for determining the presence of a AIDS virus in a person. The method comprises combining a sample of a body fluid from the person with a monoclonal antibody that binds to an antigen produced as a result of the infection and detecting the binding of the monoclonal antibody to the antigen. The presence of the binding indicates the presence of a AIDS virus infection. Also disclosed are novel monoclonal antibodies, noval compositions of matter, and novel diagnostic kits\nER  - ",
+		"items": [
+			{
+				"itemType": "patent",
+				"creators": [
+					{
+						"lastName": "Burger",
+						"firstName": "D.R.",
+						"creatorType": "inventor"
+					},
+					{
+						"lastName": "Goldstein",
+						"firstName": "A.S.",
+						"creatorType": "inventor"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"AIDS",
+					"virus",
+					"infection",
+					"antigens"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Method of detecting AIDS virus infection",
+				"date": "February 27, 1990",
+				"applicationNumber": "877609",
+				"patentNumber": "4,904,581",
+				"assignee": "Epitope,I.",
+				"place": "OR",
+				"references": "4,629,783",
+				"filingDate": "June 23, 1986",
+				"extra": "G01N 33/569 G01N 33/577; 435/5 424/3 424/7.1 435/7 435/29 435/32 435/70.21 435/240.27 435/172.2 530/387 530/808 530/809 935/110",
+				"abstractNote": "A method is disclosed for detecting the presence of HTLV III infected cells in a medium. The method comprises contacting the medium with monoclonal antibodies against an antigen produced as a result of the infection and detecting the binding of the antibodies to the antigen. The antigen may be a gene product of the HTLV III virus or may be bound to such gene product. On the other hand the antigen may not be a viral gene product but may be produced as a result of the infection and may further be bound to a lymphocyte. The medium may be a human body fluid or a culture medium. A particular embodiment of the present method involves a method for determining the presence of a AIDS virus in a person. The method comprises combining a sample of a body fluid from the person with a monoclonal antibody that binds to an antigen produced as a result of the infection and detecting the binding of the monoclonal antibody to the antigen. The presence of the binding indicates the presence of a AIDS virus infection. Also disclosed are novel monoclonal antibodies, noval compositions of matter, and novel diagnostic kits"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
