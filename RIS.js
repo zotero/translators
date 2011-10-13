@@ -46,12 +46,11 @@ var fieldMap = {
 var bookSectionFieldMap = {
 	ID:"itemID",
 	T1:"title",
-	T2:"proceedingsTitle",
+	T2:"publicationTitle",
 	T3:"series",
 	T2:"bookTitle",
 	CY:"place",
 	JA:"journalAbbreviation",
-	JF:"publicationTitle",
 	M3:"DOI"
 };
 
