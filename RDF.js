@@ -321,8 +321,8 @@ function importItem(newItem, node, type) {
 		if(creators) handleCreators(newItem, creators, creatorType);
 	}
 	
-	// source
-	newItem.source = getFirstResults(node, [n.dc+"source"], true);
+	// source -- first try PRISM, then DC
+	newItem.source = getFirstResults(node, [n.prism+"publicationName", n.dc+"source"], true);
 	
 	// rights
 	newItem.rights = getFirstResults(node, [n.dc+"rights"], true);
@@ -363,10 +363,13 @@ function importItem(newItem, node, type) {
 	newItem.version = newItem.edition;
 	
 	// pages
-	newItem.pages = getFirstResults(node, [n.bib+"pages"], true);
+	newItem.pages = getFirstResults(node, [n.bib+"pages", n.prism+"startingPage"], true);
 	
 	// mediums
 	newItem.artworkMedium = newItem.interviewMedium = getFirstResults(node, [n.dcterms+"medium"], true);
+	
+	// ISSN, if encoded per PRISM (DC uses "identifier")
+	newItem.ISSN = getFirstResults(node, [n.prism+"issn"], true);
 	
 	// publisher
 	var publisher = getFirstResults(node, [n.dc+"publisher", n.vcard2+"org"]);
@@ -425,13 +428,16 @@ function importItem(newItem, node, type) {
 			if(typeof(identifiers[i]) == "string") {
 				// grab other things
 				var beforeSpace = identifiers[i].substr(0, identifiers[i].indexOf(" ")).toUpperCase();
-				
+			
+				// Attempt to determine type of identifier	
 				if(beforeSpace == "ISBN") {
 					newItem.ISBN = identifiers[i].substr(5).toUpperCase();
 				} else if(beforeSpace == "ISSN") {
 					newItem.ISSN = identifiers[i].substr(5).toUpperCase();
 				} else if(beforeSpace == "DOI") {
 					newItem.DOI = identifiers[i].substr(4);
+				} else if(identifiers[i].substr(0,3) == "10.") {
+					newItem.DOI = identifiers[i];
 				} else if(!newItem.accessionNumber) {
 					newItem.accessionNumber = identifiers[i];
 				}
