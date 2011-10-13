@@ -50,6 +50,7 @@ var bookSectionFieldMap = {
 	T2:"bookTitle",
 	CY:"place",
 	JA:"journalAbbreviation",
+	JF:"publicationTitle",
 	M3:"DOI"
 };
 
