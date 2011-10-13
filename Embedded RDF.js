@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-10-10 21:24:27"
+	"lastUpdated": "2011-10-12 21:17:24"
 }
 
 // Known formats
@@ -34,6 +34,7 @@ var _prefixes = {};
 
 // These are the ones that we will read without a declared schema
 var _dcDefined = false;
+var _ghDefined = false;
 var _prismDefined = false;
 
 function getPrefixes(doc) {
@@ -49,9 +50,12 @@ function getPrefixes(doc) {
 			if(rel) {
 				var matches = rel.match(/^schema\.([a-zA-Z]+)/);
 				if(matches) {
+					//Zotero.debug("Prefix '" + matches[1].toLowerCase() +"' => '" + links[i].getAttribute("href") + "'");
 					_prefixes[matches[1].toLowerCase()] = links[i].getAttribute("href");
 					if (_n[links[i].getAttribute("href")] == "dc") {
 						_dcDefined = true;	
+					} else if (_n[links[i].getAttribute("href")] == "gh") {
+						_ghDefined = true;
 					} else if (_n[links[i].getAttribute("href")] == "prism") {
 						_prismDefined = true;
 					}
@@ -123,11 +127,12 @@ translator.getTranslatorObject(function(rdf) {
 			var delim = (prefixes[tag.split('_')[0].toLowerCase()]) ? '_' : '.';
 			var pieces = tag.split(delim);
 			var prefix = pieces.shift().toLowerCase();
-
-			rdf.Zotero.RDF.addStatement(url, prefixes[prefix] + pieces.join(delim).toLowerCase(), value, true);
+			// Z.debug(prefixes[prefix] + pieces.join(delim) +
+			//		"\nvalue: "+value);
+			rdf.Zotero.RDF.addStatement(url, prefixes[prefix] + pieces.join(delim), value, true);
 		}
 	}
-		// Fall back on the same type we displayed-- maybe a journal article
+		
 		rdf.defaultUnknownType = detectWeb(doc, url);
 		rdf.doImport();
 	
