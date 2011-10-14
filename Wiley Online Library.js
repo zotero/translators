@@ -164,7 +164,10 @@ function scrape(doc,url)
 					for each(var author in value.split(';')) {
 						if (author.toUpperCase() == author)
 							author = ZU.capitalizeTitle(author.toLowerCase(), true);
-						newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author", true));
+						var create = Zotero.Utilities.cleanAuthor(author, "author", true);
+						if (create.lastName == create.lastName.toUpperCase())
+							create.lastName = ZU.capitalizeTitle(create.lastName.toLowerCase(),true);
+						newItem.creators.push(create);
 					}
 				}
 				break;
