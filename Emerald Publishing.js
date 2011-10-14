@@ -1,7 +1,7 @@
 {
 	"translatorID": "79f6f9ed-537a-4d4f-8270-c4fbaafdf327",
 	"label": "Emerald Publishing",
-	"creator": "Michael Berkowitz",
+	"creator": "Sebastian Karcher",
 	"target": "^https?://(www\\.)?emeraldinsight\\.com",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
