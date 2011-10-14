@@ -9,7 +9,7 @@
 	"browserSupport": "gcs",
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-10-14 22:33:07"
+	"lastUpdated": "2011-10-14 22:42:07"
 }
 
 /*
@@ -70,8 +70,9 @@ function doWeb(doc, url){
 		}
 		Zotero.Utilities.processDocuments(urls, scrape, function () { Zotero.done(); });
 	} else { //single article
-		if (url.indexOf("/pdf/") != -1) {
-			url = url.replace(/\/pdf\/.+$/,'/abstract');
+		if (url.indexOf("/pdf") != -1) {
+		    //redirect needs to work where URL end in /pdf and where it end in /pdf/something
+			url = url.replace(/\/pdf(.+)?$/,'/abstract');
 			Z.debug("Redirecting to abstract page: "+url);
 			Zotero.Utilities.processDocuments([ url ], scrape, function () { Zotero.done(); });
 		} else {
