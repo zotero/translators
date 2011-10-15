@@ -2,14 +2,14 @@
 	"translatorID": "fce388a6-a847-4777-87fb-6595e710b7e7",
 	"label": "ProQuest",
 	"creator": "Avram Lyon",
-	"target": "^https?://search\\.proquest\\.com[^/]*(/pqrl|/pqdt|/hnp[a-z]*)?/(docview|publication|publicationissue|results)",
+	"target": "^https?://search\\.proquest\\.com[^/]*(/abi[a-z]*|/pqrl|/pqdt|/hnp[a-z]*)?/(docview|publication|publicationissue|results)",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
-	"browserSupport": "gcs",
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-10-05 22:32:08"
+	"browserSupport": "gcs",
+	"lastUpdated": "2011-10-14 13:15:17"
 }
 
 /*
