@@ -3,13 +3,13 @@
 	"label": "Google Patents",
 	"creator": "Adam Crymble, Avram Lyon",
 	"target": "^http://www\\.google\\.[^/]*/patents",
-	"minVersion": "2.1",
+	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-09-12 01:44:08"
+	"lastUpdated": "2011-10-16 13:19:29"
 }
 
 function detectWeb(doc, url) {
@@ -37,6 +37,11 @@ function scrape(doc, url) {
 	var dataTags = new Object();
 	var newItem = new Zotero.Item("patent");
 
+
+	newItem.abstractNote = ZU.xpathText(doc, '//p[@class="patent_abstract_text"]');
+	// XXX This is temporary, but Google Patents currently covers only US patents
+	newItem.country = "United States";
+
 	//Grab the patent_bibdata items and the text node directly next to them 
 	var xPathHeadings = doc.evaluate('//div[@class="patent_bibdata"]//b', doc, null, XPathResult.ANY_TYPE, null);
 	// We avoid the next node containing only :\u00A0 (colon followed by a non-breaking space),
@@ -49,7 +54,12 @@ function scrape(doc, url) {
 		if(heading.textContent == 'Publication number'){
 			content = doc.evaluate('//div[@class="patent_bibdata"]//b[text()="Publication number"]/following::nobr[1]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 		}
-		dataTags[heading.textContent] = content.textContent.replace(": ", '');;
+		if(heading.textContent == 'Inventors'){
+			content = ZU.xpathText(doc,'//div[@class="patent_bibdata"]//b[text()="Inventors"]/following::a[contains(@href,"inventor")]');
+			dataTags["Inventors"] = content;
+		} else {
+			dataTags[heading.textContent] = content.textContent.replace(": ", '');;
+		}
 		//Zotero.debug(dataTags);
 	}
 	
@@ -75,8 +85,6 @@ function scrape(doc, url) {
 	newItem.extra = '';
 
 	for (fieldTitle in dataTags) {
-		//Zotero.debug(fieldTitle);
-		//Z.debug(dataTags[fieldTitle]);
 		//fieldTitle = item.replace(/\s+|\W*/g, '');
 		/*
 		if (fieldTitle == "US Classification" | fieldTitle == "International Classification" | fieldTitle == "Abstract") {
@@ -89,17 +97,15 @@ function scrape(doc, url) {
 			dataTags[fieldTitle] = dataTags[fieldTitle].replace("About this patent", '');
 		}
 		
-		// Creators
+	//author(s)
 		if (fieldTitle == "Inventors") {
-			// Fix all-uppercase
 			if (dataTags[fieldTitle] && dataTags[fieldTitle].toUpperCase() == dataTags[fieldTitle])
-            			dataTags[fieldTitle] = Zotero.Utilities.capitalizeTitle(dataTags[fieldTitle].toLowerCase(), true);
+				dataTags[fieldTitle] = Zotero.Utilities.capitalizeTitle(dataTags[fieldTitle].toLowerCase(), true);
 			var authors = dataTags[fieldTitle].split(", ");
 			for (var j = 0; j < authors.length; j++) {
 				newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[j], "inventor"));
 			}
 		} else if (fieldTitle == "Inventor") {
-			// Fix all-uppercase
 			if (dataTags[fieldTitle] && dataTags[fieldTitle].toUpperCase() == dataTags[fieldTitle])
 				dataTags[fieldTitle] = Zotero.Utilities.capitalizeTitle(dataTags[fieldTitle].toLowerCase(), true);
 			newItem.creators.push(Zotero.Utilities.cleanAuthor(dataTags["Inventor"], "inventor"));
@@ -119,7 +125,6 @@ function scrape(doc, url) {
 	associateData (newItem, dataTags, "Filing date", "filingDate");
 	associateData (newItem, dataTags, "Assignees", "assignee");
 	associateData (newItem, dataTags, "Assignee", "assignee");
-	// This may be an abuse of the field, since the current assignee may differ
 	associateData (newItem, dataTags, "Original Assignee", "assignee");
 	associateData (newItem, dataTags, "Abstract", "abstractNote");
 	associateData (newItem, dataTags, "Application number", "applicationNumber");
@@ -134,7 +139,7 @@ function scrape(doc, url) {
 		newItem[i] = Zotero.Utilities.capitalizeTitle(newItem[i].toLowerCase(), true);
 	}
 
-	var pdf = doc.evaluate('//div[@class="g-button-basic"]/span/span/a[contains(@href,"/download/")]', doc, null, XPathResult.ANY_TYPE, null);
+	var pdf = doc.evaluate('//div[@class="g-button-basic"]//a[contains(@href,"/download/")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (pdf) newItem.attachments.push({url:pdf.href, title:"Google Patents PDF", mimeType:"application/pdf"});
 
 	newItem.complete();
@@ -177,14 +182,22 @@ var testCases = [
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
-				"attachments": [],
+				"attachments": [
+					{
+						"url": "http://www.google.com/patents/download/1065211_BOTTLE_STOPPER.pdf?id=j5NSAAAAEBAJ&output=pdf&sig=ACfU3U1IW3o2y-wcE_CaWx3h-dlawJw3SQ&source=gbs_overview_r&cad=0",
+						"title": "Google Patents PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"extra": "U.S. Classification: 215/273",
 				"patentNumber": "1065211",
 				"date": "Jun 17, 1913",
 				"filingDate": "Aug 3, 1912",
 				"title": "Bottle-Stopper",
 				"url": "http://www.google.com/patents/about?id=j5NSAAAAEBAJ",
-				"libraryCatalog": "Google Patents"
+				"libraryCatalog": "Google Patents",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"checkFields": "title"
 			}
 		]
 	},
@@ -209,7 +222,13 @@ var testCases = [
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
-				"attachments": [],
+				"attachments": [
+					{
+						"url": "http://www.google.com/patents/download/1120656_A_CORPOBATION_OF.pdf?id=KchEAAAAEBAJ&output=pdf&sig=ACfU3U0aFZjZxlKB8pW3J_BglwI49i6xig&source=gbs_overview_r&cad=0",
+						"title": "Google Patents PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"extra": "U.S. Classification: 411/477",
 				"patentNumber": "1120656",
 				"date": "Dec 8, 1914",
@@ -217,7 +236,71 @@ var testCases = [
 				"assignee": "Hunt Specialty Manufacturing Company",
 				"title": "A Corpobation Of",
 				"url": "http://www.google.com/patents/about?id=KchEAAAAEBAJ",
-				"libraryCatalog": "Google Patents"
+				"libraryCatalog": "Google Patents",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"checkFields": "title"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.google.fr/patents?id=Nh17AAAAEBAJ",
+		"items": [
+			{
+				"itemType": "patent",
+				"creators": [
+					{
+						"firstName": "Hisatada",
+						"lastName": "Miyatake",
+						"creatorType": "inventor"
+					},
+					{
+						"firstName": "Kohki",
+						"lastName": "Noda",
+						"creatorType": "inventor"
+					},
+					{
+						"firstName": "Toshio",
+						"lastName": "Sunaga",
+						"creatorType": "inventor"
+					},
+					{
+						"firstName": "Hiroshi",
+						"lastName": "Umezaki",
+						"creatorType": "inventor"
+					},
+					{
+						"firstName": "Hideo",
+						"lastName": "Asano",
+						"creatorType": "inventor"
+					},
+					{
+						"firstName": "Koji",
+						"lastName": "Kitamura",
+						"creatorType": "inventor"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.google.fr/patents/download/7123498_Non_volatile_memory_device.pdf?id=Nh17AAAAEBAJ&output=pdf&sig=ACfU3U04Tn3o-e6Qv6NxqD3Qg1PTcbCunQ&source=gbs_overview_r&cad=0",
+						"title": "Google Patents PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"extra": "U.S. Classification: 365/63",
+				"patentNumber": "7123498",
+				"date": "17 Oct 2006",
+				"filingDate": "12 Oct 2004",
+				"assignee": "International Business Machines Corporation",
+				"applicationNumber": "10/964,352",
+				"title": "Non-volatile memory device",
+				"url": "http://www.google.fr/patents?id=Nh17AAAAEBAJ",
+				"libraryCatalog": "Google Patents",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"checkFields": "title"
 			}
 		]
 	}
