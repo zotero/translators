@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-10-16 20:41:31"
+	"lastUpdated": "2011-10-16 21:51:32"
 }
 
 function detectWeb(doc, url) {
@@ -85,7 +85,8 @@ function doWeb(doc, url) {
 		post += "&hdl="+escape(hdl);
 	}
 	post = post.substr(1);
-	
+	post = post.replace(/\//g,"%2F");
+
 	Zotero.Utilities.HTTP.doPost("http://global.factiva.com/pps/default.aspx?pp=XML", post, function(text) {
 		// Remove xml parse instruction and doctype
 		text = text.replace(/<!DOCTYPE[^>]*>/, "").replace(/<\?xml[^>]*\?>/, "");
@@ -95,6 +96,7 @@ function doWeb(doc, url) {
 		text = text.replace(/<ppsHeadlineResponse xmlns="[^"]+">/, "<ppsHeadlineResponse>");
 		// kill hlt tags; they just make parsing harder
 		text = text.replace(/<\/?hlt>/g, "");
+		//Z.debug(text);
 		var xml = new XML(text);
 
 		var articles = [];
