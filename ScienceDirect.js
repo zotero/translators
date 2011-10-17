@@ -17,9 +17,7 @@ function detectWeb(doc, url) {
 		return false;
 	}
 	if((!url.match("pdf") && url.indexOf("_ob=ArticleURL") == -1 && url.indexOf("/article/") == -1) || url.indexOf("/journal/") != -1) {
-		// TEMP: disabled
-		//return "multiple";
-		return false;
+		return "multiple";
 	} else if (!url.match("pdf")) {
 		return "journalArticle";
 	}
@@ -351,12 +349,12 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Schaaf",
-						"firstName": "Christian P.",
+						"firstName": "Christian P.",
 						"creatorType": "author"
 					},
 					{
 						"lastName": "Zoghbi",
-						"firstName": "Huda Y.",
+						"firstName": "Huda Y.",
 						"creatorType": "author"
 					}
 				],
@@ -385,7 +383,7 @@ var testCases = [
 				"ISSN": "0896-6273",
 				"DOI": "10.1016/j.neuron.2011.05.025",
 				"url": "http://www.sciencedirect.com/science/article/pii/S0896627311004430",
-				"abstractNote": "In this issue, a pair of studies (Levy et al. and Sanders et al.) identify several de novo copy-number variants that together account for 5%–8% of cases of simplex autism spectrum disorders. These studies suggest that several hundreds of loci are likely to contribute to the complex genetic heterogeneity of this group of disorders. An accompanying study in this issue (Gilman et al.), presents network analysis implicating these CNVs in neural processes related to synapse development, axon targeting, and neuron motility.",
+				"abstractNote": "In this issue, a pair of studies (Levy et al. and Sanders et al.) identify several de novo copy-number variants that together account for 5%–8% of cases of simplex autism spectrum disorders. These studies suggest that several hundreds of loci are likely to contribute to the complex genetic heterogeneity of this group of disorders. An accompanying study in this issue (Gilman et al.), presents network analysis implicating these CNVs in neural processes related to synapse development, axon targeting, and neuron motility.",
 				"libraryCatalog": "ScienceDirect",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"checkFields": "title"
@@ -468,6 +466,11 @@ var testCases = [
 				"checkFields": "title"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.sciencedirect.com/science?_ob=ArticleListURL&_method=list&_ArticleListID=1828350808&_sort=r&_st=13&view=c&_acct=C000059605&_version=1&_urlVersion=0&_userid=4423&md5=5c1e5d44885677eb58595ccc1b9ef34c&searchtype=a",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
