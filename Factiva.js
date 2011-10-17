@@ -1,14 +1,15 @@
 {
-	"translatorID":"7bdb79e-a47f-4e3d-b317-ccd5a0a74456",
-	"translatorType":4,
-	"label":"Factiva",
-	"creator":"Simon Kornblith",
-	"target":"https?://[^/]*global\\.factiva\\.com[^/]*/ha/default\\.aspx$",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"translatorID": "7bdb79e-a47f-4e3d-b317-ccd5a0a74456",
+	"label": "Factiva",
+	"creator": "Simon Kornblith",
+	"target": "https?://[^/]*global\\.factiva\\.com[^/]*/ha/default\\.aspx$",
+	"minVersion": "1.0.0b3.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-16 20:41:31"
 }
 
 function detectWeb(doc, url) {
@@ -90,21 +91,49 @@ function doWeb(doc, url) {
 		text = text.replace(/<!DOCTYPE[^>]*>/, "").replace(/<\?xml[^>]*\?>/, "");
 		// kill the XML namespace, too, because we have no way of knowing what it will be, which presents a problem
 		text = text.replace(/<ppsArticleResponse xmlns="[^"]+">/, "<ppsArticleResponse>");
+		// kill the XML namespace here, too
+		text = text.replace(/<ppsHeadlineResponse xmlns="[^"]+">/, "<ppsHeadlineResponse>");
 		// kill hlt tags; they just make parsing harder
 		text = text.replace(/<\/?hlt>/g, "");
 		var xml = new XML(text);
-		
+
+		var articles = [];
 		// loop through articles
 		for each(var ppsarticle in xml[0]..ppsarticle) {
-			var article = ppsarticle.article;
+			articles.push(ppsarticle.article);
+		}
+		
+		// Consolidated, de-duped results are <ppsHeadlineResponse>
+		if (xml[1]) {
+			for each(var ppshl in xml[1]..contentHeadline) {
+				articles.push(ppshl);
+			}
+		}
+
+		// loop through articles
+		for each(var article in articles) {
 			var newItem = new Zotero.Item("newspaperArticle");
 			
 			newItem.title = Zotero.Utilities.trimInternal(article.headline.paragraph.text().toString());
-			newItem.publicationTitle = Zotero.Utilities.trimInternal(article.sourceName.text().toString());
+			if(article.sourceName.length()) {
+				newItem.publicationTitle = Zotero.Utilities.trimInternal(article.sourceName.text().toString());
+			}
+			if(article.source.sourceName.length()) {
+				newItem.publicationTitle = Zotero.Utilities.trimInternal(article.source.sourceName.text().toString());
+			}
 			for each(var tag in article..name) {
 				newItem.tags.push(tag.text().toString());
 			}
-			newItem.date = Zotero.Utilities.formatDate(Zotero.Utilities.strToDate(article.publicationDate.date.text().toString()));
+			if(article.publicationDate.dateTime.length()) {
+				newItem.date = Zotero.Utilities.formatDate(
+					Zotero.Utilities.strToDate(
+						article.publicationDate.dateTime.text().toString()));
+			}
+			if(article.publicationDate.date.length()) {
+				newItem.date = Zotero.Utilities.formatDate(
+					Zotero.Utilities.strToDate(
+						article.publicationDate.date.text().toString()));
+			}
 			if(article.byline.length()) {
 				var byline = Zotero.Utilities.trimInternal(article.byline.text().toString().replace(/By/i, ""));
 				var authors = byline.split(/ (?:\&|and) /i);
@@ -114,6 +143,8 @@ function doWeb(doc, url) {
 			}
 			newItem.section = article.sectionName.text().toString();
 			newItem.edition = article.edition.text().toString();
+			if (article.snippet.length())
+				newItem.abstractNote = article.snippet.paragraph.text().toString();
 			
 			if(article.pages.length()) {
 				newItem.pages = "";
@@ -123,10 +154,12 @@ function doWeb(doc, url) {
 				newItem.pages = newItem.pages.substr(1);
 			}
 			
+			newItem.callNumber = article.accessionNo.text().toString();
+			
 			var m = article.volume.text().toString().match(/ISSN[:\s]*([\-0-9]{8,9})/i);
 			if(m) newItem.ISSN = m[1];
-			
-			newItem.complete();
+			if (newItem.title)
+				newItem.complete();
 		}
 		
 		Zotero.done();
