@@ -1,384 +1,169 @@
 {
-        "translatorID": "f3f092bf-ae09-4be6-8855-a22ddd817925",
-        "label": "ACM Digital Library",
-        "creator": "Simon Kornblith, Michael Berkowitz and John McCaffery",
-        "target": "^https?://[^/]*portal\\.acm\\.org[^/]*/(?:results\\.cfm|citation\\.cfm)",
-        "minVersion": "1.0",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": true,
-        "translatorType": 4,
-        "lastUpdated": "2011-06-10 01:14:01"
+  "translatorID": "f3f092bf-ae09-4be6-8855-a22ddd817925",
+  "label": "ACM Digital Library",
+  "creator": "Simon Kornblith, Michael Berkowitz, John McCaffery, and Sebastian Karcher",
+  "target": "^https?://[^/]*dl\\.acm\\.org[^/]*/(?:results\\.cfm|citation\\.cfm)",
+  "minVersion": "1.0",
+  "maxVersion": "",
+  "priority": 100,
+  "inRepository": true,
+  "translatorType": 4,
+  "browserSupport": "g",
+  "lastUpdated": "2011-10-16 15:33:48"
 }
 
-/**
- * The XPath for all the search result <a> elements
- */
-var searchResultX = '//td[@colspan="3"]/a[@class="medium-text" and @target="_self"]';
-/**
- * The XPath for all the journal TOC <a> elements
- */
-var tocResultX = '//td[@colspan="1"]/span[@style]/a[contains(@href,"citation.cfm")]';
+/*
+ACM Digital Library Translator
+Copyright (C) 2011 Sebastian Karcher and CHNM
 
-/**
- * The XPath for the tag elements in a justified format tags list
- */
-var justifiedTagX = '//div[@id="divtags"]/p/a';
-/**
- * The XPath for the tag elements in an un-justified format tags list
- */
-var unjustifiedTagX = '//div[@id="divtags"]/a';
-/**
- * the XPath for the "more tags" link element
- */
-var moreTagsX = '//a[@href="javascript:ColdFusion.Window.show(' + "'thetags'" + ')"]';
-/**
- * the XPath for the tag elements in the "more tags" popup
- */
-var moreTagX = '//a/span[@class="small-text"]';
-/**
- * the XPath for the title heading element - not strictly necessary, more helpful for debugging
- */
-var titleX = '//div[@class="large-text"]/h1[@class="mediumb-text"]/strong';
-/**
- * XPath for Table of Contents headline for journal issue
- */
-var tocX = "//div[@id='citationdetails']//h5[@class='medium-text' and contains(.,'Table of Contents')]";
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
 
 
 
-/**
- * Scan to see what type of page this is
- * @param doc The XML document describing the page
- * @param url The URL of the page being scanned
- * @return What type of article this page is (multiple, journal or conference proceedings)
- */
 function detectWeb(doc, url) {
-	var nsResolver = getNsResolver(doc);
-	var title = getText(titleX, doc, nsResolver);	
-	Zotero.debug("Title: " + title);
-	
-	if(url.indexOf("/results.cfm") != -1) {
-		Zotero.debug("Multiple items detected");		
-		return "multiple";
-	} else if (url.indexOf("/citation.cfm") != -1) {
-		Zotero.debug("Single item detected");
-		return getArticleType(doc, url, nsResolver);
-		/*
-		var type = getArticleType(doc, url, nsResolver);		
-		if (type .indexOf("conferencePaper") != -1) {
-			return "conferencePaper";
-		} else
-			return "journalArticle";
-		}*/
-	}
+  var nsResolver = getNsResolver(doc);
+
+
+  if (url.indexOf("/results.cfm") != -1) {
+    Zotero.debug("Multiple items detected");
+    return "multiple";
+  } else if (url.indexOf("/citation.cfm") != -1) {
+    Zotero.debug("Single item detected");
+    return getArticleType(doc, url, nsResolver);
+
+  }
 }
 
-/**
- * Parse the page
- * @param doc The XML document describing the page
- * @param url The URL of the page being scanned
- */
+
+
 function doWeb(doc, url) {
-	var nsResolver = getNsResolver(doc, url);
-	
-	//If there are multiple pages
-	if (getArticleType(doc, url) == "multiple") {
-		//If this is a search results page
-		if (url.indexOf("results.cfm") != -1) 
-			scrapeMulti(doc, url, nsResolver, "search");
-		else if(getText(tocX, doc, nsResolver) =="Table of Contents")
-			scrapeMulti(doc, url, nsResolver, "toc");
-		Zotero.wait();		
-	} //If this is a single page
-	else 
-		scrape(doc, url, nsResolver);
+  var namespace = doc.documentElement.namespaceURI;
+  var nsResolver = namespace ?
+  function (prefix) {
+    if (prefix == 'x') return namespace;
+    else return null;
+  } : null;
+
+  var URIs = new Array();
+  var items = new Object();
+  if (detectWeb(doc, url) == "multiple") {
+
+    var xpath = '//tr/td/a[@target="_self"]';
+    var articles = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+    var next_art = articles.iterateNext();
+    while (next_art) {
+      items[next_art.href] = next_art.textContent;
+      next_art = articles.iterateNext();
+    }
+
+    Zotero.selectItems(items, function (items) {
+      if (!items) {
+        Zotero.done();
+        return true;
+      }
+      for (var i in items) {
+        URIs.push(i);
+      }
+      Zotero.Utilities.processDocuments(URIs, scrape, function () {
+        Zotero.done();
+      });
+    });
+  } else {
+    URIs.push(url);
+    Zotero.Utilities.processDocuments(URIs, scrape, function () {
+      Zotero.done();
+    });
+  }
 }
+//get abstract where possible - this fails frequently
 
-/**
- * Scrape search results and journal tables of contents
- * @param doc The XML document describing the page
- * @param url The URL of the page being scanned
- * @param nsResolver the namespace resolver function
- * @param type Type of result-- "search" or "toc"
- */
-function scrapeMulti(doc, url, nsResolver, type) {
-	switch(type) {
-		case "toc":
-			Zotero.debug("Scraping journal TOC");
-			var resultPath= doc.evaluate(tocResultX, doc, null, XPathResult.ANY_TYPE, null);
-			break;
-		case "search":
-			Zotero.debug("Scraping search");
-		default:
-			var resultPath= doc.evaluate(searchResultX, doc, null, XPathResult.ANY_TYPE, null);
-	}
-
-	//Count how mange pages have been scraped
-	var node;
-	var urls = {};
-	//Iterate through all the results
-	while(node= resultPath.iterateNext()) {
-		urls[node.href + '&preflayout=flat'] = node.textContent;
-	}
-	
-	var items = Zotero.selectItems(urls);
-	if(!items) return true;
-	
-	var i;
-	urls = [];
-	for (i in items) urls.push(i);
-	
-	Zotero.Utilities.processDocuments(urls, scrape, function(){Zotero.done()});
-}
-
-/**
- * Scrape a single page
- * @param doc The XML document describing the page
- */
 function scrape(doc) {
-	var url = doc.location.href;
-	var nsResolver = getNsResolver(doc, url);
-			
-	//Get all the details not scraped from the bibtex file
-	var tags = scrapeKeywords(doc);
-	var attachments = scrapeAttachments(doc, url);
-	var abs = scrapeAbstract(doc);
-	// Type not used, since it was less reliable than BibTeX
-	var type = getArticleType(doc, url, nsResolver);
-	// Manual journal not used. Some pieces are multiply published, see http://portal.acm.org/citation.cfm?id=52400.52432&coll=DL&dl=GUIDECFID=16073284&CFTOKEN=77905982
-	// and also http://forums.zotero.org/discussion/17532/
-	var journal = getText("//meta[@name='citation_journal_title']/@content",doc, nsResolver);	
-	//Get the bibtex reference for this document as a string
-	var bibtex = scrapeBibtex(url, nsResolver);
-	
-	//Create the new item
-	var newItem = new Zotero.Item(type);
-	
-	//Use the bibtex translator to parse the bibtex string
-	var translator = Zotero.loadTranslator("import");
-	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
-	translator.setString(bibtex );
-	//Set the function to run when the bibtex string has been parsed
-	translator.setHandler("itemDone", function(obj, newItem) {
-		//Store all details not parsed from the bibtex
-		if(abs) newItem.abstractNote = abs;
-		newItem.tags = tags;
-		newItem.attachments = attachments;
-		// There were issues with grabbing type from the page;
-		// see http://forums.zotero.org/discussion/17246/
-		//newItem.itemType= type;
-		/*if (journal && journal != newItem.publicationTitle) {
-			newItem.journalAbbreviation = newItem.publicationTitle;
-			newItem.publicationTitle = journal;
-		}*/
-		// If the URL is just a DOI, clear it.
-		if (newItem.url && newItem.url.match(/^http:\/\/doi\.acm\.org\//)) newItem.url = "";
-		if (newItem.DOI) newItem.DOI = newItem.DOI.replace(/^http:\/\/doi\.acm\.org\//, '');
-		var acmid = bibtex.match(/acmid = {(\d+)}/);
-		if(acmid) newItem.extra = "ACM ID: "+ acmid[1];
-		newItem.place = newItem.archiveLocation;
-		newItem.archiveLocation = null;
-		//Complete the parsing of the page
-		newItem.complete();
-	});
-	
-	//Trigger the translation
-	translator.translate();
+  var xpath = '//div/div[@style="display:inline"]|//div[@id="abstract"]//div';
+  var abs = getText(xpath, doc);
+
+  //get genric URL
+  var url = getText('//meta[@name="citation_abstract_html_url"]/@content', doc);
+  Zotero.debug('generic URL: ' + url);
+  var matchtest = url.match(/[0-9]+\.[0-9]+/);
+
+  //get item ID and parent ID
+  //Some items have no parent ID - set the parent ID for them to empty
+  if (url.match(/[0-9]+\.[0-9]/) != null) {
+    var itemid = String(url.match(/\.[0-9]+/)).replace(/\./, '');
+    var parentid = String(url.match(/id\=[0-9]+/)).replace(/id\=/, "");
+  } else {
+    var itemid = String(url.match(/id\=[0-9]+/)).replace(/id\=/, "");
+    var parentid = "";
+  }
+
+  //compose bibtex URL
+  var bibtexstring = 'id=' + itemid + '&parent_id=' + parentid + '&expformat=bibtex';
+  var bibtexURL = url.replace(/citation\.cfm/, "exportformats.cfm").replace(/id\=.+/, bibtexstring);
+  Zotero.debug('bibtex URL: ' + bibtexURL);
+  Zotero.Utilities.HTTP.doGet(bibtexURL, function (text) {
+    var translator = Zotero.loadTranslator("import");
+    translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+    translator.setString(text);
+    //Zotero.debug('bibtex data: ' + text);
+    translator.setHandler("itemDone", function (obj, item) {
+      //get the URL for the pdf fulltext from the metadata
+      var pdfURL = getText('//meta[@name="citation_pdf_url"]/@content', doc);
+      item.attachments = [{
+        url: pdfURL,
+        title: "ACM Full Text PDF",
+        mimeType: "application/pdf"
+      }];
+      //fix DOIs if they're in URL form
+      if (item.DOI) item.DOI = item.DOI.replace(/^.*\/10\./, "10.");
+      //The Abstract from above - may or may not work
+      if (abs) item.abstractNote = abs;
+      //Conference Locations shouldn't go int Loc in Archive (nor should anything else)
+      item.archiveLocation = "";
+      // some bibtext contains odd </kwd> tags - remove them
+      if (item.tags) item.tags = String(item.tags).replace(/\<\/kwd\>/g, "").split(",");
+      item.complete();
+    });
+
+
+    translator.translate();
+  });
 }
 
+//Simon's helper funcitons.
 /**
- * Scrape all keywords attached to this document
- * @param doc The XML document describing the page
- * @return an array of all keywords attached to this document
- */
-function scrapeKeywords(doc) {
-	Zotero.debug("Scraping Keywords");
-	//Try scraping keywords from the "more keywords" popup
-	var keywords = scrapeMoreTagsKeywords(doc);
-	
-	if (keywords) return keywords;
-	
-	keywords = new Array();
-	
-	//Otherwise look for the keywords - check justified format
-	var keywordPath = doc.evaluate(justifiedTagX, doc, null, XPathResult.ANY_TYPE, null);
-	var keywordNode = keywordPath.iterateNext();
-	//If justified format didn't work check unjustified
-	if (!keywordNode) {		
-		keywordPath = doc.evaluate(unjustifiedTagX, doc, null, XPathResult.ANY_TYPE, null);
-		keywordNode = keywordPath.iterateNext();
-	}
-	//Iterate through all the keywords
-	while(keywordNode) {
-		keywords.push(Zotero.Utilities.trimInternal(keywordNode .textContent.toLowerCase()));
-		Zotero.debug("Keyword: " + keywordNode .textContent.toLowerCase());
-		keywordNode = keywordPath.iterateNext();
-	}	
-		
-	return keywords;
-}
-
-/**
- * Scrape keywords from a "more tags" popup
- * @param doc The XML document describing the page
- * @return an array of all the keywords attached to the page which will be used as the tags for the document
- */
-function scrapeMoreTagsKeywords(doc) {
-	var keywords = new Array();
-	
-	//Look for a link for a javascript code for a "more tags" popup
-	var morePath = doc.evaluate(moreTagsX, doc, null, XPathResult.ANY_TYPE, null);	
-	var moreNode = morePath ? morePath.iterateNext() : null;
-	//If there is no "more tags" popup
-	if (!moreNode)
-		return null;
-	
-	var keywordPath = doc.evaluate(moreTagX, doc, null, XPathResult.ANY_TYPE, null);
-	
-	var keywordNode;
-	//Iterate through all the keywords
-	while(keywordNode = keywordPath.iterateNext()) {
-		keywords.push(Zotero.Utilities.trimInternal(keywordNode .textContent.toLowerCase()));
-		Zotero.debug("Keyword: " + keywordNode .textContent.toLowerCase());
-	}
-	return keywords;
-}
-
-/**
- * Scrape all the relevant attachments from the page. 
- * Firstly grabs a snapshot of the ACM page then looks for any links to the full text
- * @param doc The XML document describing the page
- * @param url The URL of the page being scanned
- * @return an array of all the attachments
- */
-function scrapeAttachments(doc, url) {
-	Zotero.debug("Scraping attachments");
-	var attachments = new Array();
-	
-	//Add the scrapeshot of this page
-	attachments.push({title:"ACM Snapshot", mimeType:"text/html", url:url});
-	
-	//XPath for the full text links
-	var textPath = doc.evaluate('//a[@name="FullTextPdf" or @name="FullTextHtml" or @name="FullText Html"][not(ancestor::div[@class="flatbody"])]', doc, null, XPathResult.ANY_TYPE, null);
-	
-	var textNode;
-	//Iterate through all the links
-	while (textNode= textPath .iterateNext()) {
-		var textURL= textNode.href;
-		
-		//If the full text is a pdf
-		if (textNode.name == "FullTextPdf") {
-			Zotero.debug("Text PDF: " + textURL);		
-			attachments.push({title:"ACM Full Text PDF", mimeType:"application/pdf", url:textURL});
-		} else { //Otherwise the text is an HTML link
-			Zotero.debug("Text Page: " + textURL);					
-			attachments.push({title:"ACM Full Text HTML", mimeType:"text/html", url:textURL});
-		}
-
-		// Break at a reasonable limit
-		if (attachments.length > 20) return attachments;
-	}
-		
-	return attachments;
-}
-
-/**
- * Scrape the abstract from the page
- * @param doc The XML document describing the page
- * @param url The URL of the page being scanned
- * @return a string with the text of the abstract
- */
-function scrapeAbstract(doc) {
-	Zotero.debug("Scraping abstract");
-	var text = getText('//div[@class="flatbody" or @class="tabbody"]', doc);
-	return Zotero.Utilities.trimInternal(text);
-}
-
-/**
- * Get the text of the bibtex format reference
- * @param url The URL of the page being scanned
- * @param nsResolver the namespace resolver function
- * @return the bibtex reference as a trimmed string
- */
-function scrapeBibtex(url, nsResolver) {
-	Zotero.debug("Scraping full details from bibtex");
-	//Get the ID of this document
-	var id = getId(url);
-	//The link of the bibtex popup
-	var bibtex = "http://portal.acm.org/exportformats.cfm?id=" + id + "&expformat=bibtex";
-	
-	Zotero.debug("Bibtex: " + bibtex);
-	
-	//Get the xml document which will be loaded into the popup box
-	var texDoc = Zotero.Utilities.retrieveDocument(bibtex);	
-	//Find the node with the bibtex text in it
-	var path = texDoc.evaluate('//pre', texDoc, nsResolver, XPathResult.ANY_TYPE, null);	
-	var node = path.iterateNext();
-
-	if (node != null && node.textContent != null) {
-		var ref =  node.textContent;
-		Zotero.debug("\nref : " + (ref == null ? "null":ref));
-		ref = Zotero.Utilities.trimInternal(ref);
-		ref = Zotero.Utilities.trim(ref);
-		return ref;
-	}
-	return null;
-}
-
-/**
- * Get the unique identifier of this document
- * @param url The URL of the page being scanned
- * @param journal [optional]whether to get the ID of the journal the document is in or of the document itself
- * @return a string containing the identifier of the document or journal the document is in
- */
-function getId(url, journal) {
-	if (journal=== undefined) 
-		journal= false;
-
-	var cfmIndex = url.indexOf(".cfm");	
-	var atIndex = url.indexOf('&');
-	
-	var id = url.substr(cfmIndex + 8);
-	
-	if (atIndex != -1)
-		id = id.replace(url.substring(atIndex), "");
-	
-	var dotIndex = id.indexOf('.');	
-	if (dotIndex != -1)
-		if (!journal) 
-			id = id.replace(id .substring(0, (dotIndex+1)), "");
-		else 
-			id = id.replace(id .substring(dotIndex), "");
-	
-	return id;
-}
-
-/**
- * Find out what kind of document this is
+ * Find out what kind of document this is by checking google metadata
  * @param doc The XML document describing the page
  * @param url The URL of the page being scanned
  * @param nsResolver the namespace resolver function
- * @return a string with either "multiple", "journalArticle" or "conferencePaper" in it, depending on the type of document
+ * @return a string with either "multiple", "journalArticle",  "conferencePaper", or "book" in it, depending on the type of document
  */
+
 function getArticleType(doc, url, nsResolver) {
-	var toc = doc.evaluate(tocX, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-	if (url.indexOf("results.cfm") != -1 || toc) {	
-		Zotero.debug("Type: multiple");
-		return "multiple";
-	}
+  //var toc = doc.evaluate(tocX, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+  if (url.indexOf("results.cfm") != -1) {
+    Zotero.debug("Type: multiple");
+    return "multiple";
+  }
 
-	//XPath for the table cell which has either "Journal" or "Proceeding" in it
-	var text = getText('//td[@nowrap="nowrap" and @style="padding-bottom: 0px;"]', doc, nsResolver);
-			
-	Zotero.debug("Type: " + text);
-	if (text.indexOf("Proceeding") != -1) 
-		return "conferencePaper";
-	else if (text.indexOf("Magazine") != -1)
-		return "magazineArticle";
-	else
-		return "journalArticle";
-	
+  var conference = getText('//meta[@name="citation_conference"]/@content', doc);
+  var journal = getText('//meta[@name="citation_journal_title"]/@content', doc);
+  Zotero.debug(conference);
+  if (conference.indexOf(" ") != -1) return "conferencePaper";
+  else if (journal.indexOf(" ") != -1) return "journalArticle";
+  else return "book";
+
 }
 
 /**
@@ -388,28 +173,129 @@ function getArticleType(doc, url, nsResolver) {
  * @param nsResolver the namespace resolver function
  * @return the text in the defined node or "Unable to scrape text" if the node was not found or if there was no text content
  */
+
 function getText(pathString, doc, nsResolver) {
-	var path  = doc.evaluate(pathString, doc, nsResolver, XPathResult.ANY_TYPE, null);	
-	var node = path.iterateNext();		
-	
-	if (node == null || node.textContent == undefined || node.textContent == null) {
-		Zotero.debug("Unable to retrieve text for XPath: "+pathString);
-		return "";
-	}
-				
-	return node.textContent;
+  var path = doc.evaluate(pathString, doc, nsResolver, XPathResult.ANY_TYPE, null);
+  var node = path.iterateNext();
+
+  if (node == null || node.textContent == undefined || node.textContent == null) {
+    Zotero.debug("Unable to retrieve text for XPath: " + pathString);
+    return "";
+  }
+
+  return node.textContent;
 }
 
 /**
  * Get a function for returning the namespace of a given document given its prefix
  * @param nsResolver the namespace resolver function
  */
+
 function getNsResolver(doc) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace;
-		else return null;	
-	} : null;
-	
-	return nsResolver;
-}
+  var namespace = doc.documentElement.namespaceURI;
+  var nsResolver = namespace ?
+  function (prefix) {
+    if (prefix == 'x') return namespace;
+    else return null;
+  } : null;
+
+  return nsResolver;
+} /** BEGIN TEST CASES **/
+var testCases = [{
+  "type": "web",
+  "url": "http://dl.acm.org/citation.cfm?id=1596682&preflayout=tabs",
+  "items": [{
+    "itemType": "conferencePaper",
+    "creators": [{
+      "firstName": "Nagy",
+      "lastName": "Mostafa",
+      "creatorType": "author"
+    }, {
+      "firstName": "Chandra",
+      "lastName": "Krintz",
+      "creatorType": "author"
+    }],
+    "notes": [],
+    "tags": ["calling context tree", "performance-aware revision control", "profiling"],
+    "seeAlso": [],
+    "attachments": [{
+      "url": "http://dl.acm.org/ft_gateway.cfm?id=1596682&type=pdf",
+      "title": "ACM Full Text PDF",
+      "mimeType": "application/pdf"
+    }],
+    "title": "Tracking performance across software revisions",
+    "publicationTitle": "Proceedings of the 7th International Conference on Principles and Practice of Programming in Java",
+    "series": "PPPJ '09",
+    "date": "2009",
+    "ISBN": "978-1-60558-598-7",
+    "pages": "162–171",
+    "url": "http://doi.acm.org/10.1145/1596655.1596682",
+    "DOI": "10.1145/1596655.1596682",
+    "publisher": "ACM",
+    "place": "New York, NY, USA",
+    "libraryCatalog": "ACM Digital Library",
+    "accessDate": "CURRENT_TIMESTAMP"
+  }]
+}, {
+  "type": "web",
+  "url": "http://dl.acm.org/citation.cfm?id=1717186&coll=DL&dl=GUIDE&CFID=48452129&CFTOKEN=58065473",
+  "items": [{
+    "itemType": "book",
+    "creators": [{
+      "firstName": "Jon",
+      "lastName": "Loeliger",
+      "creatorType": "author"
+    }],
+    "notes": [],
+    "tags": [],
+    "seeAlso": [],
+    "attachments": [{
+      "url": "",
+      "title": "ACM Full Text PDF",
+      "mimeType": "application/pdf"
+    }],
+    "title": "Version Control with Git: Powerful Tools and Techniques for Collaborative Software Development",
+    "date": "2009",
+    "ISBN": "0596520123, 9780596520120",
+    "edition": "1st",
+    "publisher": "O'Reilly Media, Inc.",
+    "libraryCatalog": "ACM Digital Library",
+    "shortTitle": "Version Control with Git"
+  }]
+}, {
+  "type": "web",
+  "url": "http://dl.acm.org/citation.cfm?id=254650.257486&coll=DL&dl=GUIDE&CFID=48452129&CFTOKEN=58065473",
+  "items": [{
+    "itemType": "journalArticle",
+    "creators": [{
+      "firstName": "Mick",
+      "lastName": "Tegethoff",
+      "creatorType": "author"
+    }, {
+      "firstName": "Tom",
+      "lastName": "Chen",
+      "creatorType": "author"
+    }],
+    "notes": [],
+    "tags": ["DFM", "DFT", "MCM", "SMT", "board", "simulation", "test", "yield"],
+    "seeAlso": [],
+    "attachments": [{
+      "url": "http://dl.acm.org/ft_gateway.cfm?id=257486&type=pdf",
+      "title": "ACM Full Text PDF",
+      "mimeType": "application/pdf"
+    }],
+    "title": "Simulation Techniques for the Manufacturing Test of MCMs",
+    "publicationTitle": "J. Electron. Test.",
+    "volume": "10",
+    "issue": "1-2",
+    "date": "February 1997",
+    "ISSN": "0923-8174",
+    "pages": "137–149",
+    "url": "http://dx.doi.org/10.1023/A:1008286901817",
+    "DOI": "10.1023/A:1008286901817",
+    "publisher": "Kluwer Academic Publishers",
+    "place": "Norwell, MA, USA",
+    "libraryCatalog": "ACM Digital Library",
+    "accessDate": "CURRENT_TIMESTAMP"
+  }]
+}] /** END TEST CASES **/
