@@ -77,81 +77,80 @@ function doWeb(doc, url) {
             for (var i in items) {
                 articles.push(i);
             }
+	    Zotero.Utilities.processDocuments(articles, scrape, function () { Zotero.done();});
         });
 
 
     } else {
         articles = [url];
+	Zotero.Utilities.processDocuments(articles, scrape, function () {Zotero.done(); });
     }
 
-    Zotero.Utilities.processDocuments(articles, function (newDoc) {
-        var osalink = newDoc.evaluate('//div[@id="abstract-header"]/p/a[contains(text(), "opticsinfobase")]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+}
 
+function scrape (newDoc) {
+	var osalink = newDoc.evaluate('//div[@id="abstract-header"]/p/a[contains(text(), "opticsinfobase")]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
 
+	var abstractblock = newDoc.evaluate('//meta[@name="dc.description"]', newDoc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+	var identifierblock = newDoc.evaluate('//meta[@name="dc.identifier"]', newDoc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+	Zotero.Utilities.HTTP.doGet(osalink, function (text) {
+			var action = text.match(/select\s+name=\"([^"]+)\"/)[1];
+			var id = text.match(/input\s+type=\"hidden\"\s+name=\"articles\"\s+value=\"([^"]+)\"/)[1];
+			var get = 'http://' + host + '/custom_tags/IB_Download_Citations.cfm';
+			var post = 'articles=' + id + '&ArticleAction=save_endnote2&' + action + '=save_endnote2';
+			Zotero.Utilities.HTTP.doPost(get, post, function (text) {
+				var translator = Zotero.loadTranslator("import");
+				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+				translator.setString(text);
+				translator.setHandler("itemDone", function (obj, item) {
+					var pubName;
+					if (item.journalAbbreviation) {
+					pubName = item.journalAbbreviation;
+					} else {
+					pubName = item.publicationTitle;
+					}
+					if (identifierblock) {
+					if (/doi:(.*)$/.test(identifierblock.getAttribute('content'))) {
+					item.DOI = RegExp.$1;
+					}
+					}
+					if (abstractblock) {
+					item.abstractNote = abstractblock.getAttribute('content');
+					var pdfpath = '//meta[@name="citation_pdf_url"]/@content';
+					item.attachments = [{
+url: osalink,
+title: pubName + " Snapshot",
+mimeType: "text/html"
+}];
 
-        var abstractblock = newDoc.evaluate('//meta[@name="dc.description"]', newDoc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-        var identifierblock = newDoc.evaluate('//meta[@name="dc.identifier"]', newDoc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-        Zotero.Utilities.HTTP.doGet(osalink, function (text) {
-            var action = text.match(/select\s+name=\"([^"]+)\"/)[1];
-            var id = text.match(/input\s+type=\"hidden\"\s+name=\"articles\"\s+value=\"([^"]+)\"/)[1];
-            var get = 'http://' + host + '/custom_tags/IB_Download_Citations.cfm';
-            var post = 'articles=' + id + '&ArticleAction=save_endnote2&' + action + '=save_endnote2';
-            Zotero.Utilities.HTTP.doPost(get, post, function (text) {
-                var translator = Zotero.loadTranslator("import");
-                translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-                translator.setString(text);
-                translator.setHandler("itemDone", function (obj, item) {
-                    var pubName;
-                    if (item.journalAbbreviation) {
-                        pubName = item.journalAbbreviation;
-                    } else {
-                        pubName = item.publicationTitle;
-                    }
-                    if (identifierblock) {
-                        if (/doi:(.*)$/.test(identifierblock.getAttribute('content'))) {
-                            item.DOI = RegExp.$1;
-                        }
-                    }
-                    if (abstractblock) {
-                        item.abstractNote = abstractblock.getAttribute('content');
-                        var pdfpath = '//meta[@name="citation_pdf_url"]/@content';
-                        item.attachments = [{
-                            url: osalink,
-                            title: pubName + " Snapshot",
-                            mimeType: "text/html"
-                        }];
+var pdflink = getText(pdfpath, newDoc);
+Zotero.debug('pdflink: ' + pdflink);
 
-                        var pdflink = getText(pdfpath, newDoc);
-                        Zotero.debug('pdflink: ' + pdflink);
+if (pdflink) {
 
-                        if (pdflink) {
+	Zotero.Utilities.doGet(pdflink, function (text) {
+			Zotero.debug('try to get realpdf');
+			var realpdf = String(text.match(/"https?:.*?"/)).replace(/\"/g, "");
+			Zotero.debug('realpdf: ' + realpdf);
+			if (realpdf) {
+			item.attachments.push({
+url: realpdf,
+title: pubName + ' Full Text PDF',
+mimeType: "application/pdf"
+});
+			}
+			}, function () {
+			item.complete();
+			});
+} else {
+	item.complete();
+}
 
-                            Zotero.Utilities.doGet(pdflink, function (text) {
-                                Zotero.debug('try to get realpdf');
-                                var realpdf = String(text.match(/"https?:.*?"/)).replace(/\"/g, "");
-                                Zotero.debug('realpdf: ' + realpdf);
-                                if (realpdf) {
-                                    item.attachments.push({
-                                        url: realpdf,
-					title: pubName + ' Full Text PDF',
-                                        mimeType: "application/pdf"
-                                    });
-                                }
-                            }, function () {
-                                item.complete();
-                            });
-                        } else {
-                            item.complete();
-                        }
-
-                    }
-                });
-                translator.translate();
-            });
-        });
-    }, function () {
-        Zotero.done();
-    });
+}
+});
+translator.translate();
+});
+});
 }
 
 //Helper Functions
