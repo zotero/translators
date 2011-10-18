@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-10-17 19:59:47"
+	"lastUpdated": "2011-10-18 10:07:20"
 }
 
 /*
@@ -31,64 +31,71 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 function detectWeb(doc, url) {
-    var namespace = doc.documentElement.namespaceURI;
-    var nsResolver = namespace ?
-    function (prefix) {
-        if (prefix == 'x') return namespace;
-        else return null;
-    } : null;
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ?
+	function (prefix) {
+		if (prefix == 'x') return namespace;
+		else return null;
+	} : null;
 
 
-    if (url.indexOf("search2.cfm") != -1) {
-        return "multiple";
-    } else if (url.indexOf("abstract.cfm") != -1) {
-        return getArticleType(doc, url, nsResolver);
-    }
+	if (url.indexOf("search2.cfm") != -1) {
+		return "multiple";
+	} else if (url.indexOf("abstract.cfm") != -1) {
+		return getArticleType(doc, url, nsResolver);
+	}
 }
 
 function doWeb(doc, url) {
-    var namespace = doc.documentElement.namespaceURI;
-    var nsResolver = namespace ?
-    function (prefix) {
-        if (prefix == 'x') return namespace;
-        else return null;
-    } : null;
-    var host = doc.location.host;
-    var articles = new Array();
-    if (detectWeb(doc, url) == "multiple") {
-        var items = new Object();
-        var xpath = '//div[@id="section-article_info"]';
-        var rows = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-        var row;
-        while (row = rows.iterateNext()) {
-            var title = Zotero.Utilities.trimInternal(doc.evaluate('.//label', row, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-            var id = doc.evaluate('.//li[@class="article-link-abstract"]/a', row, null, XPathResult.ANY_TYPE, null).iterateNext().href;
-            //	items[next_art.href] = Zotero.Utilities.trimInternal(next_art.textContent);
-            items[id] = title;
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ?
+	function (prefix) {
+		if (prefix == 'x') return namespace;
+		else return null;
+	} : null;
+	var articles = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var xpath = '//div[@id="section-article_info"]';
+		var rows = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var row;
+		while (row = rows.iterateNext()) {
+			var title = Zotero.Utilities.trimInternal(doc.evaluate('.//label', row, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+			var id = doc.evaluate('.//li[@class="article-link-abstract"]/a', row, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+			//	items[next_art.href] = Zotero.Utilities.trimInternal(next_art.textContent);
+			items[id] = title;
 
-        }
-
-
-        Zotero.selectItems(items, function (items) {
-            if (!items) {
-                Zotero.done();
-                return true;
-            }
-            for (var i in items) {
-                articles.push(i);
-            }
-	    Zotero.Utilities.processDocuments(articles, scrape, function () { Zotero.done();});
-        });
+		}
 
 
-    } else {
-        articles = [url];
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				Zotero.done();
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+		Zotero.Utilities.processDocuments(articles, scrape, function () { Zotero.done();});
+		});
+
+
+	} else {
+		articles = [url];
 	Zotero.Utilities.processDocuments(articles, scrape, function () {Zotero.done(); });
-    }
+	}
 
 }
 
 function scrape (newDoc) {
+	var namespace = newDoc.documentElement.namespaceURI;
+	var nsResolver = namespace ?
+	function (prefix) {
+		if (prefix == 'x') return namespace;
+		else return null;
+	} : null;
+	var host = newDoc.location.host;
+
 	var osalink = newDoc.evaluate('//div[@id="abstract-header"]/p/a[contains(text(), "opticsinfobase")]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
 
 	var abstractblock = newDoc.evaluate('//meta[@name="dc.description"]', newDoc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
@@ -164,16 +171,16 @@ translator.translate();
  */
 
 function getArticleType(doc, url, nsResolver) {
-    if (url.indexOf("search2.cfm") != -1) {
-        Zotero.debug("Type: multiple");
-        return "multiple";
-    }
+	if (url.indexOf("search2.cfm") != -1) {
+		Zotero.debug("Type: multiple");
+		return "multiple";
+	}
 
-    var conference = getText('//meta[@name="citation_conference"]/@content', doc);
-    var journal = getText('//meta[@name="citation_journal_title"]/@content', doc);
-    if (conference.indexOf(" ") != -1) return "conferencePaper";
-    else if (journal.indexOf(" ") != -1) return "journalArticle";
-    else return "book";
+	var conference = getText('//meta[@name="citation_conference"]/@content', doc);
+	var journal = getText('//meta[@name="citation_journal_title"]/@content', doc);
+	if (conference.indexOf(" ") != -1) return "conferencePaper";
+	else if (journal.indexOf(" ") != -1) return "journalArticle";
+	else return "book";
 
 }
 
@@ -186,15 +193,15 @@ function getArticleType(doc, url, nsResolver) {
  */
 
 function getText(pathString, doc, nsResolver) {
-    var path = doc.evaluate(pathString, doc, nsResolver, XPathResult.ANY_TYPE, null);
-    var node = path.iterateNext();
+	var path = doc.evaluate(pathString, doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var node = path.iterateNext();
 
-    if (node == null || node.textContent == undefined || node.textContent == null) {
-        Zotero.debug("Unable to retrieve text for XPath: " + pathString);
-        return "";
-    }
+	if (node == null || node.textContent == undefined || node.textContent == null) {
+		Zotero.debug("Unable to retrieve text for XPath: " + pathString);
+		return "";
+	}
 
-    return node.textContent;
+	return node.textContent;
 }
 
 /** BEGIN TEST CASES **/
