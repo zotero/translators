@@ -196,11 +196,13 @@ function getText(pathString, doc, nsResolver) {
     }
 
     return node.textContent;
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.opticsinfobase.org.turing.library.northwestern.edu/josaa/abstract.cfm?URI=josaa-16-1-191",
+		"url": "http://www.opticsinfobase.org/josaa/abstract.cfm?URI=josaa-16-1-191",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -225,12 +227,12 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.opticsinfobase.org.turing.library.northwestern.edu/josaa/abstract.cfm?URI=josaa-16-1-191",
+						"url": "http://www.opticsinfobase.org/josaa/abstract.cfm?URI=josaa-16-1-191",
 						"title": "J. Opt. Soc. Am. A Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"url": "http://www.opticsinfobase.org.turing.library.northwestern.edu/DirectPDFAccess/CF32D459-E4D0-7718-BCDD5C79C05EFB4B_1091.pdf?da=1&id=1091&seq=0&mobile=no",
+						"url": "http://www.opticsinfobase.org/DirectPDFAccess/CF32D459-E4D0-7718-BCDD5C79C05EFB4B_1091.pdf?da=1&id=1091&seq=0&mobile=no",
 						"title": "J. Opt. Soc. Am. A Full Text PDF",
 						"mimeType": "application/pdf"
 					}
@@ -254,12 +256,12 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.opticsinfobase.org.turing.library.northwestern.edu/search2.cfm?reissue=J&journalList=&fullrecord=test&basicsearch=Go",
+		"url": "http://www.opticsinfobase.org/search2.cfm?reissue=J&journalList=&fullrecord=test&basicsearch=Go",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.opticsinfobase.org.turing.library.northwestern.edu/abstract.cfm?URI=OFC-2006-JThB89",
+		"url": "http://www.opticsinfobase.org/abstract.cfm?URI=OFC-2006-JThB89",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -280,12 +282,12 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.opticsinfobase.org.turing.library.northwestern.edu/abstract.cfm?URI=OFC-2006-JThB89",
+						"url": "http://www.opticsinfobase.org/abstract.cfm?URI=OFC-2006-JThB89",
 						"title": "Optical Fiber Communication Conference and Exposition and The National Fiber Optic Engineers Conference Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"url": "http://www.opticsinfobase.org.turing.library.northwestern.edu/DirectPDFAccess/CF627CA4-F95D-0D08-FF23221370F3B617_107182.pdf?da=1&id=107182&uri=OFC-2006-JThB89&seq=0&mobile=no",
+						"url": "http://www.opticsinfobase.org/DirectPDFAccess/CF627CA4-F95D-0D08-FF23221370F3B617_107182.pdf?da=1&id=107182&uri=OFC-2006-JThB89&seq=0&mobile=no",
 						"title": "Optical Fiber Communication Conference and Exposition and The National Fiber Optic Engineers Conference Full Text PDF",
 						"mimeType": "application/pdf"
 					}
