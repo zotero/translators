@@ -122,7 +122,7 @@ function doWeb(doc, url){
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://pubs.acs.org.turing.library.northwestern.edu/doi/full/10.1021/es103607c",
+		"url": "http://pubs.acs.org/doi/full/10.1021/es103607c",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -152,12 +152,12 @@ var testCases = [
 					},
 					{
 						"title": "ACS Full Text PDF",
-						"url": "http://pubs.acs.org.turing.library.northwestern.edu/doi/pdf/10.1021/es103607c",
+						"url": "http://pubs.acs.org/doi/pdf/10.1021/es103607c",
 						"mimeType": "application/pdf"
 					},
 					{
 						"title": "ACS Full Text Snapshot",
-						"url": "http://pubs.acs.org.turing.library.northwestern.edu/doi/full/10.1021/es103607c",
+						"url": "http://pubs.acs.org/doi/full/10.1021/es103607c",
 						"mimeType": "text/html"
 					}
 				],
