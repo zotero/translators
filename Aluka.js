@@ -1,14 +1,15 @@
 {
-	"translatorID":"e8fc7ebc-b63d-4eb3-a16c-91da232f7220",
-	"translatorType":4,
-	"label":"Aluka",
-	"creator":"Sean Takats",
-	"target":"https?://(?:www\\.)aluka.org/action/(?:showMetadata\\?doi=[^&]+|doSearch\\?|doBrowseResults\\?)",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-02-12 10:00:00"
+	"translatorID": "e8fc7ebc-b63d-4eb3-a16c-91da232f7220",
+	"label": "Aluka",
+	"creator": "Sean Takats",
+	"target": "^https?://(?:www\\.)aluka\\.org/action/(?:showMetadata\\?doi=[^&]+|doSearch\\?|doBrowseResults\\?)",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-20 11:35:02"
 }
 
 function detectWeb(doc, url){
@@ -188,4 +189,65 @@ function doWeb(doc, url){
 		Zotero.done();
 	});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.aluka.org/action/doSearch?sa=4&sa=xst&sa=xhr&searchText=argentina&submit=Search",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.aluka.org/action/showMetadata?doi=10.5555/AL.SFF.DOCUMENT.ydlwcc0342",
+		"items": [
+			{
+				"itemType": "document",
+				"creators": [
+					{
+						"firstName": "Programme to Combat Racism",
+						"lastName": "World Council of Churches",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Paul",
+						"lastName": "Abrecht",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Regional And International Contexts",
+					"Global",
+					"Brazil",
+					"Argentina",
+					"United Kingdom",
+					"Colombia",
+					"1969"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Aluka Link",
+						"snapshot": false,
+						"mimeType": "text/html",
+						"url": "http://www.aluka.org/action/showMetadata?doi=10.5555/AL.SFF.DOCUMENT.ydlwcc0342"
+					},
+					{
+						"url": "http://ts-den.aluka.org/delivery/aluka-contentdelivery/pdf/10.5555/AL.SFF.DOCUMENT.ydlwcc0342?type=img&q=high"
+					}
+				],
+				"title": "[Letter from P. Abrecht (WCC, Geneva) to L. Nillus, Buenos Aires]",
+				"date": "1968-12-13",
+				"medium": "image/tiff",
+				"language": "English",
+				"pages": "1 page(s)",
+				"DOI": "10.5555/AL.SFF.DOCUMENT.ydlwcc0342",
+				"url": "http://www.aluka.org/action/showMetadata?doi=10.5555/AL.SFF.DOCUMENT.ydlwcc0342",
+				"rights": "By kind permission of the World Council of Churches (WCC).",
+				"libraryCatalog": "Aluka: World Council of Churches Library and Archives: Programme to Combat Racism; microfilm created by the Yale University Divinity Library with funding from the Kenneth Scott Latourette Initiative for the Documentation of World Christianity.",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
