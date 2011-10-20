@@ -1,14 +1,15 @@
 {
-	"translatorID":"b8a86e36-c270-48c9-bdd1-22aaa167ef46",
-	"translatorType":4,
-	"label":"Agencia del ISBN",
-	"creator":"Michael Berkowitz",
-	"target":"http://www.mcu.es/webISBN",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"translatorID": "b8a86e36-c270-48c9-bdd1-22aaa167ef46",
+	"label": "Agencia del ISBN",
+	"creator": "Michael Berkowitz",
+	"target": "^https?://www\\.mcu\\.es/webISBN",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-20 00:53:36"
 }
 
 function detectWeb(doc, url) {
@@ -62,4 +63,33 @@ function doWeb(doc, url) {
 		item.complete();
 	}, function() {Zotero.done();});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.mcu.es/webISBN/tituloDetalle.do?sidTitul=1696742&action=busquedaInicial&noValidating=true&POS=0&MAX=50&TOTAL=0&prev_layout=busquedaisbn&layout=busquedaisbn&language=es",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Adrian",
+						"lastName": "Fernández García",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"ISBN": "978-84-9934-054-8",
+				"title": "Argentina : causas y efectos de la crisis económica",
+				"publisher": "Tutorial Formación, S.L.L.",
+				"date": "10/2009",
+				"libraryCatalog": "Agencia del ISBN",
+				"shortTitle": "Argentina"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
