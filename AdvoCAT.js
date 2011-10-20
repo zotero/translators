@@ -1,14 +1,15 @@
 {
-	"translatorID":"138de272-0d2a-4ab5-8cfb-0fd879958d04",
-	"translatorType":4,
-	"label":"AdvoCAT",
-	"creator":"Adam Crymble",
-	"target":"^http://(142.57.32.51|library.lsuc.on.ca)",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-07-25 17:40:00"
+	"translatorID": "138de272-0d2a-4ab5-8cfb-0fd879958d04",
+	"label": "AdvoCAT",
+	"creator": "Adam Crymble",
+	"target": "^https?://(142\\.57\\.32\\.51|library\\.lsuc\\.on\\.ca)",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-19 20:54:59"
 }
 
 function detectWeb(doc, url) {
@@ -41,13 +42,13 @@ function scrape(doc, url) {
 	var contents = doc.evaluate('//table[2]/tbody/tr/td', doc, nsResolver, XPathResult.ANY_TYPE, null);
 
 	for (i=0; i<xPathCount.numberValue; i++) {	 	
-     			
-     		fieldTitle = headers.iterateNext().textContent.replace(/\s+/g, '');
-     		if (!fieldTitle.match(/\w/)) {
-	     		fieldTitle = "Blank" + i;
-     		}
-     		 dataTags[fieldTitle] = Zotero.Utilities.cleanTags(contents.iterateNext().textContent.replace(/^\s*|\s*$/g, ''));
-     	}
+	 			
+	 		fieldTitle = headers.iterateNext().textContent.replace(/\s+/g, '');
+	 		if (!fieldTitle.match(/\w/)) {
+		 		fieldTitle = "Blank" + i;
+	 		}
+	 		 dataTags[fieldTitle] = Zotero.Utilities.cleanTags(contents.iterateNext().textContent.replace(/^\s*|\s*$/g, ''));
+	 	}
 
 	if (dataTags["MainAuthor:"]) {
 		var author = dataTags["MainAuthor:"];
@@ -114,4 +115,31 @@ function doWeb(doc, url) {
 	}
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://142.57.32.51/cgi-bin/Pwebrecon.cgi?v1=1&ti=1,1&Search%5FArg=constitution&Search%5FCode=GKEY%5E%2A&CNT=20&PID=VTZQazz8uq0pWFC1uMfb8w_qdLjM_&SEQ=20111019230725&SID=1",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Michael.",
+						"lastName": "Dewing",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Municipalities, the constitution, and the Canadian federal system [electronic resource] / Michael Dewing, William R. Young, Erin Tolley.",
+				"url": "http://142.57.32.51/cgi-bin/Pwebrecon.cgi?v1=1&ti=1,1&Search%5FArg=constitution&Search%5FCode=GKEY%5E%2A&CNT=20&PID=VTZQazz8uq0pWFC1uMfb8w_qdLjM_&SEQ=20111019230725&SID=1",
+				"libraryCatalog": "LSUC Great Library",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
