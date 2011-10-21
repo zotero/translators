@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-07-19 00:16:21"
+	"lastUpdated": "2011-10-20 14:03:17"
 }
 
 function detectWeb(doc, url) {
@@ -33,7 +33,7 @@ function detectWeb(doc, url) {
 				else if (storeID=="music"){
 					return "audioRecording";
 				}
-				else if (storeID=="dvd"|storeID=="video"){
+				else if (storeID=="dvd"|storeID=="video"|storeID=="movies-tv"){
 					return "videoRecording";
 				}
 				else {
@@ -626,20 +626,45 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"url": "http://www.amazon.com/s?ie=UTF8&keywords=The%20Harvard%20Concise%20Dictionary%20of%20Music%20and%20Musicians&index=blended&Go=o",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
 		"url": "http://www.amazon.com/Adaptation-Superbit-Collection-Nicholas-Cage/dp/B00005JLRE/ref=sr_1_1?ie=UTF8&qid=1309683150&sr=8-1",
 		"items": [
 			{
 				"itemType": "videoRecording",
 				"creators": [
 					{
-						"firstName": "Nicholas",
+						"firstName": "Nicolas",
 						"lastName": "Cage",
+						"creatorType": "castMember"
+					},
+					{
+						"firstName": "Meryl",
+						"lastName": "Streep",
 						"creatorType": "castMember"
 					},
 					{
 						"firstName": "Chris",
 						"lastName": "Cooper",
 						"creatorType": "castMember"
+					},
+					{
+						"firstName": "Tilda",
+						"lastName": "Swinton",
+						"creatorType": "castMember"
+					},
+					{
+						"firstName": "Jay",
+						"lastName": "Tavare",
+						"creatorType": "castMember"
+					},
+					{
+						"firstName": "Spike",
+						"lastName": "Jonze",
+						"creatorType": "director"
 					}
 				],
 				"notes": [],
@@ -650,7 +675,7 @@ var testCases = [
 						"title": "Amazon.com Link",
 						"snapshot": false,
 						"mimeType": "text/html",
-						"url": false
+						"url": "http://www.amazon.com/dp/B00005JLRE"
 					}
 				],
 				"studio": "Sony Pictures Home Entertainment",
@@ -663,11 +688,6 @@ var testCases = [
 				"libraryCatalog": "Amazon.com"
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.amazon.com/s?ie=UTF8&keywords=The%20Harvard%20Concise%20Dictionary%20of%20Music%20and%20Musicians&index=blended&Go=o",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
