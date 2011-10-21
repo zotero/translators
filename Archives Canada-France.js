@@ -1,14 +1,15 @@
 {
-	"translatorID":"d9a16cf3-8b86-4cab-8610-dbd913ad1a44",
-	"translatorType":4,
-	"label":"Archives Canada-France",
-	"creator":"Adam Crymble",
-	"target":"http://bd.archivescanadafrance.org",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-07-24 05:30:00"
+	"translatorID": "d9a16cf3-8b86-4cab-8610-dbd913ad1a44",
+	"label": "Archives Canada-France",
+	"creator": "Adam Crymble",
+	"target": "^https?://bd\\.archivescanadafrance\\.org",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-21 15:07:58"
 }
 
 function detectWeb(doc, url) {
@@ -145,4 +146,30 @@ function doWeb(doc, url) {
 	}
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://bd.archivescanadafrance.org/sdx-222-acf-pleade-2/acf/search-acf.xsp?sq1=montreal&fi1=fulltext&sq2=&fi2=fulltext&sq3=&fi3=fulltext&ed=&dbeg=&dend=&frepo=&forig=&x=0&y=0#resume",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://bd.archivescanadafrance.org/sdx-222-acf-pleade-2/acf/doc.xsp?id=CAANQ_PISTARD_03Q808_392_CAANQ_PISTARD_03Q808_392&qid=sdx_q0&fmt=tab&base=fa&n=5&root=CAANQ_PISTARD_03Q808_392&ss=true&as=&ai=&from=",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Fonds Intendants",
+				"url": "http://bd.archivescanadafrance.org/sdx-222-acf-pleade-2/acf/doc.xsp?id=ANQ_00001_intendants&fmt=tab&base=fa&root=CAANQ_PISTARD_03Q808_392&n=5&qid=sdx_q0&ss=true&as=&ai=",
+				"libraryCatalog": "Archives Canada-France",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
