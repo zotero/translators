@@ -1,14 +1,15 @@
 {
-	"translatorID":"75edc5a1-6470-465a-a928-ccb77d95eb72",
-	"translatorType":4,
-	"label":"American Institute of Aeronautics and Astronautics",
-	"creator":"Michael Berkowitz",
-	"target":"http://www.aiaa.org/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-05-12 19:00:00"
+	"translatorID": "75edc5a1-6470-465a-a928-ccb77d95eb72",
+	"label": "American Institute of Aeronautics and Astronautics",
+	"creator": "Michael Berkowitz",
+	"target": "^https?://www\\.aiaa\\.org/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-20 14:11:45"
 }
 
 function detectWeb(doc, url) {
@@ -93,4 +94,12 @@ function doWeb(doc, url) {
 			}
 		}
 	}
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.aiaa.org/content.cfm?pageid=322&lupubid=2",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
