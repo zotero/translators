@@ -1,14 +1,15 @@
 {
-	"translatorID":"18bc329c-51af-497e-a7cf-aa572fae363d",
-	"translatorType":4,
-	"label":"Archives Canada",
-	"creator":"Adam Crymble",
-	"target":"http://(www.)?archivescanada.ca",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-06-20 20:45:00"
+	"translatorID": "18bc329c-51af-497e-a7cf-aa572fae363d",
+	"label": "Archives Canada",
+	"creator": "Adam Crymble",
+	"target": "^https?://(www\\.)?archivescanada\\.ca",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-21 14:54:00"
 }
 
 function detectWeb (doc, url) {
@@ -40,57 +41,57 @@ function scrape(doc, url) {
 	var dataCount = doc.evaluate('count (//td/p)', doc, nsResolver, XPathResult.ANY_TYPE, null);
 
 	for (i=0; i<dataCount.numberValue; i++) {	 	
-     		data1 = data.iterateNext().textContent.replace(/^\s*|\s*$/g, '').split(":");
-     		fieldTitle = data1[0].replace(/\s+/g, '');
+	 		data1 = data.iterateNext().textContent.replace(/^\s*|\s*$/g, '').split(":");
+	 		fieldTitle = data1[0].replace(/\s+/g, '');
 
-     		if (fieldTitle == "PROVENANCE") {
-	     		
-	     		var multiAuthors = data1[1].split(/\n/);
-	     		
-	     		for (var j = 0; j < multiAuthors.length; j++) {
-		     		if (multiAuthors[j].match(",")) {
-			     		
-			     		var authorName = multiAuthors[j].replace(/^\s*|\s*$/g, '').split(",");
-			     	
-			     		authorName[0] = authorName[0].replace(/\s+/g, '');
-			     		dataTags["PROVENANCE"] = (authorName[1] + (" ") + authorName[0]);
-			     		newItem.creators.push(Zotero.Utilities.cleanAuthor(dataTags["PROVENANCE"], "author")); 	
+	 		if (fieldTitle == "PROVENANCE") {
+		 		
+		 		var multiAuthors = data1[1].split(/\n/);
+		 		
+		 		for (var j = 0; j < multiAuthors.length; j++) {
+			 		if (multiAuthors[j].match(",")) {
+				 		
+				 		var authorName = multiAuthors[j].replace(/^\s*|\s*$/g, '').split(",");
+				 	
+				 		authorName[0] = authorName[0].replace(/\s+/g, '');
+				 		dataTags["PROVENANCE"] = (authorName[1] + (" ") + authorName[0]);
+				 		newItem.creators.push(Zotero.Utilities.cleanAuthor(dataTags["PROVENANCE"], "author")); 	
  		
-		     		} else {	
-		     		
-		     			newItem.creators.push({lastName: multiAuthors[j].replace(/^\s*|\s*$/g, ''), creatorType: "creator"});
-	     			}
-	     		} 		
-	     		
-     		} else if (fieldTitle == "SUBJECTS" | fieldTitle == "MATIÈRES") {
-	     		tagsContent = data1[1].split(/\n/);
-	     		     		
-     		} else {
-     		
-     			dataTags[fieldTitle] = data1[1];
-     		}
-     	}
-     	
-     	if (doc.evaluate('//tr[3]/td/table/tbody/tr[1]/td/table/tbody/tr[2]/td/table/tbody/tr/td[1]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-     		cainNo = doc.evaluate('//tr[3]/td/table/tbody/tr[1]/td/table/tbody/tr[2]/td/table/tbody/tr/td[1]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-     		newItem.extra = cainNo.replace(/^\s*|\s*$/g, '');
-     	}
-     		for (var i = 0; i < tagsContent.length; i++) {
-	     		newItem.tags[i] = tagsContent[i].replace(/^\s*|\s*$/g, '');
-     		}
-     		
-     	associateData (newItem, dataTags, "TITLE", "title" );
-     	associateData (newItem, dataTags, "REPOSITORY", "repository" );
-     	associateData (newItem, dataTags, "RETRIEVALNUMBER", "callNumber" );
-     	associateData (newItem, dataTags, "DATES", "date" );
-     	associateData (newItem, dataTags, "SCOPEANDCONTENT", "abstractNote" );
-     	associateData (newItem, dataTags, "LANGUAGE", "language" );
-     	
-     	associateData (newItem, dataTags, "LANGUE", "language" );
-     	associateData (newItem, dataTags, "TITRE", "title" );
-     	associateData (newItem, dataTags, "CENTRED'ARCHIVES", "repository" );
-     	associateData (newItem, dataTags, "NUMÉROD'EXTRACTION", "callNumber" );
-     	associateData (newItem, dataTags, "PORTÉEETCONTENU", "abstractNote" );
+			 		} else {	
+			 		
+			 			newItem.creators.push({lastName: multiAuthors[j].replace(/^\s*|\s*$/g, ''), creatorType: "creator"});
+		 			}
+		 		} 		
+		 		
+	 		} else if (fieldTitle == "SUBJECTS" | fieldTitle == "MATIÈRES") {
+		 		tagsContent = data1[1].split(/\n/);
+		 			 		
+	 		} else {
+	 		
+	 			dataTags[fieldTitle] = data1[1];
+	 		}
+	 	}
+	 	
+	 	if (doc.evaluate('//tr[3]/td/table/tbody/tr[1]/td/table/tbody/tr[2]/td/table/tbody/tr/td[1]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+	 		cainNo = doc.evaluate('//tr[3]/td/table/tbody/tr[1]/td/table/tbody/tr[2]/td/table/tbody/tr/td[1]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	 		newItem.archiveLocation = cainNo.replace(/^\s*|\s*$/g, '');
+	 	}
+	 		for (var i = 0; i < tagsContent.length; i++) {
+		 		newItem.tags[i] = tagsContent[i].replace(/^\s*|\s*$/g, '');
+	 		}
+	 		
+	 	associateData (newItem, dataTags, "TITLE", "title" );
+	 	associateData (newItem, dataTags, "REPOSITORY", "repository" );
+	 	associateData (newItem, dataTags, "RETRIEVALNUMBER", "callNumber" );
+	 	associateData (newItem, dataTags, "DATES", "date" );
+	 	associateData (newItem, dataTags, "SCOPEANDCONTENT", "abstractNote" );
+	 	associateData (newItem, dataTags, "LANGUAGE", "language" );
+	 	
+	 	associateData (newItem, dataTags, "LANGUE", "language" );
+	 	associateData (newItem, dataTags, "TITRE", "title" );
+	 	associateData (newItem, dataTags, "CENTRED'ARCHIVES", "repository" );
+	 	associateData (newItem, dataTags, "NUMÉROD'EXTRACTION", "callNumber" );
+	 	associateData (newItem, dataTags, "PORTÉEETCONTENU", "abstractNote" );
 	
 	newItem.url = doc.location.href;
 
@@ -123,4 +124,6 @@ function doWeb(doc, url) {
 	}
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = []
+/** END TEST CASES **/
