@@ -1,16 +1,16 @@
 {
-	"translatorID":"34B1E0EA-FD02-4069-BAE4-ED4D98674A5E",
-	"translatorType":4,
-	"label":"allAfrica.com",
-	"creator":"Matt Bachtell",
-	"target":"^http://allafrica\\.com/stories/*",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":false,
-	"lastUpdated":"2009-05-05 07:15:00"
+	"translatorID": "34B1E0EA-FD02-4069-BAE4-ED4D98674A5E",
+	"label": "allAfrica.com",
+	"creator": "Matt Bachtell",
+	"target": "^https?://allafrica\\.com/stories/*",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-20 01:27:16"
 }
-
 
 function detectWeb (doc, url) {
 	
@@ -23,8 +23,8 @@ function doWeb (doc, url){
 }	
 
 function scrape(doc, url) {
-	var title = doc.evaluate("/html/body/div[3]/div/h1[@class='headline']", doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	var date = doc.evaluate("/html/body/div[3]/div/p[@class='date']", doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;	
+	var title = doc.evaluate("//h1[@class='headline']", doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	var date = doc.evaluate("//p[@class='date']", doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;	
 				
 // zotero entry creation code
 	var newItem = new Zotero.Item('newspaperArticle');
@@ -34,7 +34,7 @@ function scrape(doc, url) {
 
 	//AUTHORS
 			try{
-				var authors = doc.evaluate("/html/body/div[3]/div/p[@class='reporter']", doc, null, XPathResult.ANY_TYPE,null).iterateNext().textContent;
+				var authors = doc.evaluate("//p[@class='reporter']", doc, null, XPathResult.ANY_TYPE,null).iterateNext().textContent;
 				if (authors.match(/ &| And/)){
 					var aus = authors.split(" And");
 					for (var i=0; i < aus.length ; i++){
@@ -62,9 +62,60 @@ function scrape(doc, url) {
 		newItem.publicationTitle = newspaper_source;				
 	}
 	catch(e){
-		var newspaper_source = doc.evaluate("/html/body/div[3]/div/p", doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var newspaper_source = doc.evaluate("//p[@class='publisher']/a/img/@alt|//p[@class='publisher text']/a", doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		newItem.publicationTitle = newspaper_source;				
 	}
 	newItem.complete();
 
-} // end scrape
+} // end scrape/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://allafrica.com/stories/201110180002.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "Lisa",
+						"lastName": "Otto",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Angola: Political Upheaval Ahead of 2012 Polls",
+				"date": "17 October 2011",
+				"url": "http://allafrica.com/stories/201110180002.html",
+				"publicationTitle": "Institute for Security Studies",
+				"libraryCatalog": "allAfrica.com",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Angola"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://allafrica.com/stories/201110040606.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Angola: Justice Minister On Voter's Registration Update",
+				"date": "3 October 2011",
+				"url": "http://allafrica.com/stories/201110040606.html",
+				"publicationTitle": "Angola Press Agency (Luanda)",
+				"libraryCatalog": "allAfrica.com",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Angola"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
