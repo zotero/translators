@@ -1,14 +1,15 @@
 {
-	"translatorID":"f6717cbb-2771-4043-bde9-dbae19129bb3",
-	"translatorType":4,
-	"label":"Archeion",
-	"creator":"Adam Crymble",
-	"target":"http://archeion-aao",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-07-24 05:15:00"
+	"translatorID": "f6717cbb-2771-4043-bde9-dbae19129bb3",
+	"label": "Archeion",
+	"creator": "Adam Crymble",
+	"target": "^https?://archeion-aao",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-21 14:24:15"
 }
 
 function detectWeb(doc, url) {
@@ -155,3 +156,52 @@ function doWeb(doc, url) {
 	Zotero.wait();
 
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://archeion-aao.fis.utoronto.ca/cgi-bin/ifetch?DBRootName=ON&RecordKey=375617521392&FieldKey=F&FilePath=ON00313f/ON00313-f0000180.xml",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Ephraim Scott",
+						"creatorType": "creator"
+					},
+					{
+						"lastName": "Memorial Presbyterian",
+						"creatorType": "creator"
+					},
+					{
+						"lastName": "Church (Montreal",
+						"creatorType": "creator"
+					},
+					{
+						"lastName": "Mount Royal",
+						"creatorType": "creator"
+					},
+					{
+						"lastName": "Vale Presbyterian",
+						"creatorType": "creator"
+					},
+					{
+						"lastName": "Church (Montreal",
+						"creatorType": "creator"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"date": "microfilmed 1992 (originally created 1919-1980)",
+				"extra": "1 reel of microfilm",
+				"title": "Ephraim Scott Memorial Presbyterian Church (Montreal, Quebec) fonds",
+				"url": "http://archeion-aao.fis.utoronto.ca/cgi-bin/ifetch?DBRootName=ON&RecordKey=375617521392&FieldKey=F&FilePath=ON00313f/ON00313-f0000180.xml",
+				"libraryCatalog": "Presbyterian Church in Canada Archives",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
