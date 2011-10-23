@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-10-23 00:33:18 "
+	"lastUpdated": "2011-10-23 01:02:52"
 }
 
 var HIGHWIRE_MAPPINGS = {
@@ -58,14 +58,13 @@ function detectWeb(doc, url) {
 	for(var i=0; i<metaTags.length; i++) {
 		var tag = metaTags[i].getAttribute("name");
 		if(!tag) continue;
-		Zotero.debug(tag);
+		var schema = _prefixes[tag.split('.')[0].toLowerCase()] || _prefixes[tag.split('_')[0].toLowerCase()];
 		
 		// See if the supposed prefix is there, split by period or underscore
-		if(_prefixes[tag.split('.')[0].toLowerCase()] || _prefixes[tag.split('_')[0].toLowerCase()]) {
+		if(schema) {
 			_rdfPresent = true;
-			// If we have PRISM data, don't use the generic webpage icon
-			if (_prefixes[tag.split('.')[0].toLowerCase()] 
-					== "http://prismstandard.org/namespaces/1.2/basic/") {
+			// If we have PRISM or eprints data, don't use the generic webpage icon
+			if (schema === _prefixes.prism || schema === _prefixes.eprints) {
 				return (_itemType = "journalArticle");
 			}
 		} else if(tag.toLowerCase() === "citation_journal_title") {
@@ -157,8 +156,10 @@ function addHighwireMetadata(doc, newItem) {
 		if(pages.length) newItem.pages = pages.join("-");
 	}
 	
-	var pdfURL = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
-	if(pdfURL) newItem.attachments.push({title:"Full Text PDF", url:pdfURL, mimeType:"application/pdf"});
+	if(!newItem.attachments.length) {
+		var pdfURL = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
+		if(pdfURL) newItem.attachments.push({title:"Full Text PDF", url:pdfURL, mimeType:"application/pdf"});
+	}
 	
 	// Other last chances
 	if(!newItem.url) newItem.url = doc.location.href;
@@ -168,6 +169,8 @@ function addHighwireMetadata(doc, newItem) {
 	newItem.attachments.push({document:doc, title:"Snapshot"});
 	// add access date
 	newItem.accessDate = 'CURRENT_TIMESTAMP';
+	
+	newItem.libraryCatalog = doc.location.host;
 	newItem.complete();
 }
 
