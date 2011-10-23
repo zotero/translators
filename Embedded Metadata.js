@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-10-23 01:02:52"
+	"lastUpdated": "2011-10-23 04:18:44"
 }
 
 var HIGHWIRE_MAPPINGS = {
@@ -17,12 +17,17 @@ var HIGHWIRE_MAPPINGS = {
 	"citation_publication_date":"date",
 	"citation_journal_title":"publicationTitle",
 	"citation_volume":"volume",
-	"citation_issue":"issue"
+	"citation_issue":"issue",
+	"citation_conference_title":"conferenceName",
+	"citation_technical_report_institution":"institution",
+	"citation_technical_report_number":"number",
+	"citation_issn":"ISSN",
+	"citation_isbn":"ISBN"
 };
 
 // Maps actual prefix in use to URI
 var _prefixes = {
-	"dc":"http://purl.org/dc/elements/1.1/",
+	"dc":"http://purl.org/dc/terms/",
 	"dcterms":"http://purl.org/dc/terms/",
 	"prism":"http://prismstandard.org/namespaces/1.2/basic/",
 	"foaf":"http://xmlns.com/foaf/0.1/",
@@ -58,7 +63,9 @@ function detectWeb(doc, url) {
 	for(var i=0; i<metaTags.length; i++) {
 		var tag = metaTags[i].getAttribute("name");
 		if(!tag) continue;
-		var schema = _prefixes[tag.split('.')[0].toLowerCase()] || _prefixes[tag.split('_')[0].toLowerCase()];
+		tag = tag.toLowerCase();
+		
+		var schema = _prefixes[tag.split('.')[0]] || _prefixes[tag.split('_')[0]];
 		
 		// See if the supposed prefix is there, split by period or underscore
 		if(schema) {
@@ -67,8 +74,12 @@ function detectWeb(doc, url) {
 			if (schema === _prefixes.prism || schema === _prefixes.eprints) {
 				return (_itemType = "journalArticle");
 			}
-		} else if(tag.toLowerCase() === "citation_journal_title") {
+		} else if(tag === "citation_journal_title") {
 			_itemType = "journalArticle";
+		} else if(tag === "citation_technical_report_institution") {
+			_itemType = "report";
+		} else if(tag === "citation_conference_title") {
+			_itemType = "conferencePaper";
 		}
 	}
 	
