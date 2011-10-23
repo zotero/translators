@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-10-23 04:18:44"
+	"lastUpdated": "2011-10-23 04:22:28"
 }
 
 var HIGHWIRE_MAPPINGS = {
@@ -71,7 +71,7 @@ function detectWeb(doc, url) {
 		if(schema) {
 			_rdfPresent = true;
 			// If we have PRISM or eprints data, don't use the generic webpage icon
-			if (schema === _prefixes.prism || schema === _prefixes.eprints) {
+			if (!_itemType && schema === _prefixes.prism || schema === _prefixes.eprints) {
 				return (_itemType = "journalArticle");
 			}
 		} else if(tag === "citation_journal_title") {
