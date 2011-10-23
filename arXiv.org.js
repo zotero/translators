@@ -2,14 +2,14 @@
 	"translatorID": "ecddda2e-4fc6-4aea-9f17-ef3b56d7377a",
 	"label": "arXiv.org",
 	"creator": "Sean Takats and Michael Berkowitz",
-	"target": "http://(?:([^\\.]+\\.))?(?:(arxiv\\.org|xxx.lanl.gov)/(?:find/\\w|list/\\w|abs/)|eprintweb.org/S/(?:search|archive|article)(?!.*refs$)(?!.*cited$))",
+	"target": "^https?://(?:([^\\.]+\\.))?(?:(arxiv\\.org|xxx.lanl.gov)/(?:find/\\w|list/\\w|abs/)|eprintweb.org/S/(?:search|archive|article)(?!.*refs$)(?!.*cited$))",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-09-13 09:22:33"
+	"lastUpdated": "2011-10-22 15:44:59"
 }
 
 function detectWeb(doc, url) {
@@ -201,23 +201,23 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "O'Dea, D.",
-						"lastName": "T",
+						"firstName": "D. T",
+						"lastName": "O'Dea",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Clark, C.",
-						"lastName": "N",
+						"firstName": "C. N",
+						"lastName": "Clark",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Contaldi, C.",
-						"lastName": "R",
+						"firstName": "C. R",
+						"lastName": "Contaldi",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "MacTavish, C.",
-						"lastName": "J",
+						"firstName": "C. J",
+						"lastName": "MacTavish",
 						"creatorType": "author"
 					}
 				],
@@ -229,12 +229,12 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": false,
+						"url": "http://arxiv.org/abs/1107.4612",
 						"title": "arXiv.org Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"url": false,
+						"url": "http://www.arxiv.org/pdf/1107.4612.pdf",
 						"mimeType": "application/pdf",
 						"title": "1107.4612 PDF"
 					}
@@ -244,7 +244,8 @@ var testCases = [
 				"url": "http://arxiv.org/abs/1107.4612",
 				"publicationTitle": "arXiv:1107.4612",
 				"abstractNote": "The upcoming generation of cosmic microwave background (CMB) experiments face a major challenge in detecting the weak cosmic B-mode signature predicted as a product of primordial gravitational waves. To achieve the required sensitivity these experiments must have impressive control of systematic effects and detailed understanding of the foreground emission that will influence the signal. In this paper we describe a model of foreground dust intensity and polarisation. The model includes a 3D description of the Galactic magnetic field, examining both large and small scales. We also include in the model the details of the dust density, grain alignment and the intrinsic polarisation of the emission from an individual grain. We present here Stokes parameter maps at 150 GHz and provide an on-line repository for these and additional template maps at frequencies that will be targeted by upcoming experiments such as EBEX, Spider and SPTpol.",
-				"libraryCatalog": "arXiv.org"
+				"libraryCatalog": "arXiv.org",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}
