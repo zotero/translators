@@ -1,14 +1,15 @@
 {
-	"translatorID":"661fc39a-2500-4710-8285-2d67ddc00a69",
-	"translatorType":4,
-	"label":"Artefacts Canada",
-	"creator":"Adam Crymble",
-	"target":"http://daryl.chin.gc.ca",
-	"minVersion":"1.0",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-09-02 13:55:00"
+	"translatorID": "661fc39a-2500-4710-8285-2d67ddc00a69",
+	"label": "Artefacts Canada",
+	"creator": "Adam Crymble",
+	"target": "^https?://(www\\.)?pro\\.rcip-chin\\.gc\\.ca",
+	"minVersion": "1.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-22 15:00:20"
 }
 
 function detectWeb(doc, url) {
@@ -158,3 +159,40 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.pro.rcip-chin.gc.ca/bd-dl/artefacts-eng.jsp?emu=en.artefacts:/Proxac/ws/human/user/www/ResultSet&w=NATIVE(%27(WAT%20ph%20is%20%27%27montreal%27%27%20or%20WHAIR%20ph%20is%20%27%27montreal%27%27%20or%20WHOO%20ph%20is%20%27%27montreal%27%27%20or%20WEN%20ph%20is%20%27%27montreal%27%27%20or%20HOUU%20ph%20is%20%27%27montreal%27%27)%27)&upp=0&currLang=English",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.pro.rcip-chin.gc.ca/bd-dl/artefacts-eng.jsp?emu=en.artefacts:/Proxac/ws/human/user/www/Record&upp=0&m=12&w=NATIVE%28%27%28WAT+ph+is+%27%27montreal%27%27+or+WHAIR+ph+is+%27%27montreal%27%27+or+WHOO+ph+is+%27%27montreal%27%27+or+WEN+ph+is+%27%27montreal%27%27+or+HOUU+ph+is+%27%27montreal%27%27%29%27%29",
+		"items": [
+			{
+				"itemType": "artwork",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "Bourbon",
+						"creatorType": "creator"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"locInArchive": "Accession Number: 2005.385",
+				"title": "Canada 1976",
+				"medium": "porte-clefs",
+				"date": "1976",
+				"description": "Porte-clefs en métal doré décoré d'un médaillon en acrylique clair présentant le logo des Jeux olympiques de Montréal.",
+				"url": "http://www.pro.rcip-chin.gc.ca/bd-dl/artefacts-eng.jsp?emu=en.artefacts:/Proxac/ws/human/user/www/Record&upp=0&m=12&w=NATIVE%28%27%28WAT+ph+is+%27%27montreal%27%27+or+WHAIR+ph+is+%27%27montreal%27%27+or+WHOO+ph+is+%27%27montreal%27%27+or+WEN+ph+is+%27%27montreal%27%27+or+HOUU+ph+is+%27%27montreal%27%27%29%27%29",
+				"libraryCatalog": "Centre d'histoire de Montréal",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
