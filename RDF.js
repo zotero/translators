@@ -11,7 +11,7 @@
 	"configOptions":{"dataMode":"rdf/xml"},
 	"displayOptions":null,
 	"inRepository":true,
-	"lastUpdated":"2011-10-24 14:12:38"
+	"lastUpdated":"2011-10-24 17:29:20"
 }
 
 /*
