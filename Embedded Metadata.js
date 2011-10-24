@@ -36,8 +36,9 @@ var _prefixes = {
 };
 
 // These are the ones that we will read without a declared schema
-var _rdfPresent = false;
-var _itemType;
+var _rdfPresent = false,
+	_haveItem = false,
+	_itemType;
 
 function getPrefixes(doc) {
 	var links = doc.getElementsByTagName("link");
@@ -97,7 +98,10 @@ function doWeb(doc, url) {
 		// load RDF translator, so that we don't need to replicate import code
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f");
-		translator.setHandler("itemDone", function(obj, newItem) { addHighwireMetadata(doc, newItem); });
+		translator.setHandler("itemDone", function(obj, newItem) { 
+			_haveItem = true;
+			addHighwireMetadata(doc, newItem);
+		});
 		
 		translator.getTranslatorObject(function(rdf) {
 			var metaTags = doc.getElementsByTagName("meta");
@@ -112,7 +116,7 @@ function doWeb(doc, url) {
 		
 				// See if the supposed prefix is there, split by period or underscore
 				if(_prefixes[prefix]) {
-					var prop = tag[dotIndex+1].toLowerCase()+tag.substr(dotIndex+2);
+					var prop = "";//tag[dotIndex+1].toLowerCase()+tag.substr(dotIndex+2);
 					//Z.debug(_prefixes[prefix] + pieces.join(delim) +
 					//		"\nvalue: "+value);
 					rdf.Zotero.RDF.addStatement(url, _prefixes[prefix] + prop, value, true);
@@ -120,11 +124,13 @@ function doWeb(doc, url) {
 			}
 			
 			rdf.defaultUnknownType = _itemType;
-			rdf.doImport();		
+			rdf.doImport();
+			if(!_haveItem) {
+				addHighwireMetadata(doc, new Zotero.Item(_itemType));
+			}
 		});
 	} else {
-		var newItem = new Zotero.Item(_itemType);
-		addHighwireMetadata(doc, newItem);
+		addHighwireMetadata(doc, new Zotero.Item(_itemType));
 	}
 }
 
