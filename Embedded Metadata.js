@@ -65,7 +65,7 @@ function detectWeb(doc, url) {
 		if(!tag) continue;
 		tag = tag.toLowerCase();
 		
-		var schema = _prefixes[tag.split('.')[0]] || _prefixes[tag.split('_')[0]];
+		var schema = _prefixes[tag.split('.')[0]];
 		
 		// See if the supposed prefix is there, split by period or underscore
 		if(schema) {
@@ -105,17 +105,17 @@ function doWeb(doc, url) {
 			for(var i=0; i<metaTags.length; i++) {
 				var tag = metaTags[i].getAttribute("name");
 				var value = metaTags[i].getAttribute("content");
+				if(!tag || !value) continue;
+				var dotIndex = tag.indexOf('.');
+				if(dotIndex === -1) continue;
+				var prefix = tag.substr(0, dotIndex).toLowerCase();
 		
 				// See if the supposed prefix is there, split by period or underscore
-				if(tag && (_prefixes[tag.split('.')[0].toLowerCase()] 
-						|| _prefixes[tag.split('_')[0].toLowerCase()])) {
-					// Set the delimiter for this tag
-					var delim = (_prefixes[tag.split('_')[0].toLowerCase()]) ? '_' : '.';
-					var pieces = tag.split(delim);
-					var prefix = pieces.shift().toLowerCase();
+				if(_prefixes[prefix]) {
+					var prop = tag[dotIndex+1].toLowerCase()+tag.substr(dotIndex+2);
 					//Z.debug(_prefixes[prefix] + pieces.join(delim) +
 					//		"\nvalue: "+value);
-					rdf.Zotero.RDF.addStatement(url, _prefixes[prefix] + pieces.join(delim), value, true);
+					rdf.Zotero.RDF.addStatement(url, _prefixes[prefix] + prop, value, true);
 				}
 			}
 			
