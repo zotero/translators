@@ -1,15 +1,15 @@
 {
-        "translatorID": "1e6d1529-246f-4429-84e2-1f1b180b250d",
-        "label": "The Chronicle of Higher Education",
-        "creator": "Simon Kornblith, Avram Lyon",
-        "target": "^http://chronicle\\.com/",
-        "minVersion": "2.1",
-        "maxVersion": "",
-        "priority": 100,
-        "browserSupport": "gcs",
-        "inRepository": true,
-        "translatorType": 4,
-        "lastUpdated": "2011-07-01 20:03:35"
+	"translatorID": "1e6d1529-246f-4429-84e2-1f1b180b250d",
+	"label": "The Chronicle of Higher Education",
+	"creator": "Simon Kornblith, Avram Lyon",
+	"target": "^https?://chronicle\\.com/",
+	"minVersion": "2.1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcs",
+	"lastUpdated": "2011-10-23 15:18:54"
 }
 
 /*
@@ -23,7 +23,7 @@ function detectWeb(doc, url) {
 	/* The /daily/ and /weekly/ sections are leftover from the previous version
 	   of the translator; they don't appear to still be on the Chronicle site, but
 	   they might persist in older URLs. */
-	var articleRegexp = /^http:\/\/chronicle\.com\/(daily|weekly|article|blogPost|blogs\/\w+)\/[^/]+\// ;
+	var articleRegexp = /\/(daily|weekly|article|blogPost|blogs\/\w+)\/[^/]+\// ;
 	if(articleRegexp.test(url)) {
 		var section = url.match(articleRegexp);
 		switch (section[1]) {
@@ -98,7 +98,7 @@ function doWeb (doc, url) {
 				item.date = Zotero.Utilities.trimInternal(dateline.textContent);
 			}
 			item.title = doc.evaluate('//div[@class="blog-mod"]//h1[@class="entry-title" or @class="title"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-            
+			
 			// We keep the Chronicle as the Website Type, for lack of a better place
 			item.websiteType = item.publicationTitle;
 			item.publicationTitle = doc.evaluate('//div[@class="header-breadcrumb-wrap"]/ul/li[last()]/a', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
@@ -156,143 +156,143 @@ function parseAuthors(author) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
-    {
-        "type": "web",
-        "url": "http://chronicle.com/blogs/profhacker/the-second-day-of-thatcamp/23068",
-        "items": [
-            {
-                "itemType": "blogPost",
-                "creators": [
-                    {
-                        "firstName": "Amy",
-                        "lastName": "Cavender",
-                        "creatorType": "author"
-                    }
-                ],
-                "notes": [],
-                "tags": [],
-                "seeAlso": [],
-                "attachments": [
-                    {
-                        "url": false,
-                        "title": "Chronicle of Higher Education Snapshot",
-                        "mimeType": "text/html"
-                    }
-                ],
-                "url": "http://chronicle.com/blogs/profhacker/the-second-day-of-thatcamp/23068",
-                "publicationTitle": "ProfHacker",
-                "ISSN": "0009-5982",
-                "date": "March 26, 2010, 2:07 pm",
-                "title": "The Second Day of THATCamp",
-                "websiteType": "The Chronicle of Higher Education",
-                "libraryCatalog": "The Chronicle of Higher Education"
-            }
-        ]
-    },
-    {
-        "type": "web",
-        "url": "http://chronicle.com/article/A-Little-Advice-From-32000/46210/",
-        "items": [
-            {
-                "itemType": "newspaperArticle",
-                "creators": [
-                    {
-                        "firstName": "Adam",
-                        "lastName": "Fagen",
-                        "creatorType": "author"
-                    },
-                    {
-                        "firstName": "Kimberly Suedkamp",
-                        "lastName": "Wells",
-                        "creatorType": "author"
-                    }
-                ],
-                "notes": [],
-                "tags": [],
-                "seeAlso": [],
-                "attachments": [
-                    {
-                        "url": false,
-                        "title": "Chronicle of Higher Education Snapshot",
-                        "mimeType": "text/html"
-                    }
-                ],
-                "url": "http://chronicle.com/article/A-Little-Advice-From-32000/46210/",
-                "publicationTitle": "The Chronicle of Higher Education",
-                "ISSN": "0009-5982",
-                "date": "January 14, 2002",
-                "title": "A Little Advice From 32,000 Graduate Students",
-                "section": "Advice",
-                "libraryCatalog": "The Chronicle of Higher Education"
-            }
-        ]
-    },
-    {
-        "type": "web",
-        "url": "http://chronicle.com/article/Grinnells-Green-Secrets/2653/",
-        "items": [
-            {
-                "itemType": "newspaperArticle",
-                "creators": [
-                    {
-                        "firstName": "Xiao-Bo",
-                        "lastName": "Yuan",
-                        "creatorType": "author"
-                    }
-                ],
-                "notes": [],
-                "tags": [],
-                "seeAlso": [],
-                "attachments": [
-                    {
-                        "url": false,
-                        "title": "Chronicle of Higher Education Snapshot",
-                        "mimeType": "text/html"
-                    }
-                ],
-                "url": "http://chronicle.com/article/Grinnells-Green-Secrets/2653/",
-                "publicationTitle": "The Chronicle of Higher Education",
-                "ISSN": "0009-5982",
-                "date": "June 16, 2006",
-                "title": "Grinnell's Green Secrets",
-                "section": "News",
-                "libraryCatalog": "The Chronicle of Higher Education"
-            }
-        ]
-    },
-    {
-        "type": "web",
-        "url": "http://chronicle.com/blogPost/humanities-cyberinfrastructure-project-bamboo/6138",
-        "items": [
-            {
-                "itemType": "blogPost",
-                "creators": [
-                    {
-                        "firstName": "Stan",
-                        "lastName": "Katz",
-                        "creatorType": "author"
-                    }
-                ],
-                "notes": [],
-                "tags": [],
-                "seeAlso": [],
-                "attachments": [
-                    {
-                        "url": false,
-                        "title": "Chronicle of Higher Education Snapshot",
-                        "mimeType": "text/html"
-                    }
-                ],
-                "url": "http://chronicle.com/blogPost/humanities-cyberinfrastructure-project-bamboo/6138",
-                "publicationTitle": "Brainstorm",
-                "ISSN": "0009-5982",
-                "date": "July 17, 2008, 01:29 PM ET",
-                "title": "Humanities Cyberinfrastructure: Project Bamboo",
-                "websiteType": "The Chronicle of Higher Education",
-                "libraryCatalog": "The Chronicle of Higher Education",
-                "shortTitle": "Humanities Cyberinfrastructure"
-            }
-        ]
-    }
+	{
+		"type": "web",
+		"url": "http://chronicle.com/blogs/profhacker/the-second-day-of-thatcamp/23068",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"creators": [
+					{
+						"firstName": "Amy",
+						"lastName": "Cavender",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": false,
+						"title": "Chronicle of Higher Education Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"url": "http://chronicle.com/blogs/profhacker/the-second-day-of-thatcamp/23068",
+				"publicationTitle": "ProfHacker",
+				"ISSN": "0009-5982",
+				"date": "March 26, 2010, 2:07 pm",
+				"title": "The Second Day of THATCamp",
+				"websiteType": "The Chronicle of Higher Education",
+				"libraryCatalog": "The Chronicle of Higher Education"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://chronicle.com/article/A-Little-Advice-From-32000/46210/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "Adam",
+						"lastName": "Fagen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kimberly Suedkamp",
+						"lastName": "Wells",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": false,
+						"title": "Chronicle of Higher Education Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"url": "http://chronicle.com/article/A-Little-Advice-From-32000/46210/",
+				"publicationTitle": "The Chronicle of Higher Education",
+				"ISSN": "0009-5982",
+				"date": "January 14, 2002",
+				"title": "A Little Advice From 32,000 Graduate Students",
+				"section": "Advice",
+				"libraryCatalog": "The Chronicle of Higher Education"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://chronicle.com/article/Grinnells-Green-Secrets/2653/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "Xiao-Bo",
+						"lastName": "Yuan",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": false,
+						"title": "Chronicle of Higher Education Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"url": "http://chronicle.com/article/Grinnells-Green-Secrets/2653/",
+				"publicationTitle": "The Chronicle of Higher Education",
+				"ISSN": "0009-5982",
+				"date": "June 16, 2006",
+				"title": "Grinnell's Green Secrets",
+				"section": "News",
+				"libraryCatalog": "The Chronicle of Higher Education"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://chronicle.com/blogPost/humanities-cyberinfrastructure-project-bamboo/6138",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"creators": [
+					{
+						"firstName": "Stan",
+						"lastName": "Katz",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": false,
+						"title": "Chronicle of Higher Education Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"url": "http://chronicle.com/blogPost/humanities-cyberinfrastructure-project-bamboo/6138",
+				"publicationTitle": "Brainstorm",
+				"ISSN": "0009-5982",
+				"date": "July 17, 2008, 01:29 PM ET",
+				"title": "Humanities Cyberinfrastructure: Project Bamboo",
+				"websiteType": "The Chronicle of Higher Education",
+				"libraryCatalog": "The Chronicle of Higher Education",
+				"shortTitle": "Humanities Cyberinfrastructure"
+			}
+		]
+	}
 ]
 /** END TEST CASES **/
