@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-10-24 02:22:39"
+	"lastUpdated": "2011-10-24 03:52:52"
 }
 
 /*
     ***** BEGIN LICENSE BLOCK *****
     
-    Copyright © 2011 Avram Lyon and rthe Center for History and New Media
+    Copyright © 2011 Avram Lyon and the Center for History and New Media
                      George Mason University, Fairfax, Virginia, USA
                      http://zotero.org
     
