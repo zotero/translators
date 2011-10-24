@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-10-23 04:22:28"
+	"lastUpdated": "2011-10-24 02:22:39"
 }
 
 var HIGHWIRE_MAPPINGS = {
@@ -116,7 +116,7 @@ function doWeb(doc, url) {
 		
 				// See if the supposed prefix is there, split by period or underscore
 				if(_prefixes[prefix]) {
-					var prop = "";//tag[dotIndex+1].toLowerCase()+tag.substr(dotIndex+2);
+					var prop = tag[dotIndex+1].toLowerCase()+tag.substr(dotIndex+2);
 					//Z.debug(_prefixes[prefix] + pieces.join(delim) +
 					//		"\nvalue: "+value);
 					rdf.Zotero.RDF.addStatement(url, _prefixes[prefix] + prop, value, true);
