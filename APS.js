@@ -6,10 +6,11 @@
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
 	"priority": 100,
+	"browserSupport": "gcs",
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-10-21 14:15:58"
+	"lastUpdated": "2011-10-25 03:25:58"
 }
 
 // Works for all APS journals: http://publish.aps.org/

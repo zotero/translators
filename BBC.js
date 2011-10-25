@@ -6,10 +6,11 @@
 	"minVersion": "1.0.0b4.r1",
 	"maxVersion": "",
 	"priority": 100,
+	"browserSupport": "gcs",
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-10-23 22:29:35"
+	"lastUpdated": "2011-10-25 03:26:31"
 }
 
 function detectWeb(doc, url)

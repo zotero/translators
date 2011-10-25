@@ -6,10 +6,11 @@
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
+	"browserSupport": "gcs",
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-10-24 09:59:42"
+	"lastUpdated": "2011-10-25 03:26:38"
 }
 
 /*
