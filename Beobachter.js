@@ -1,14 +1,15 @@
 {
-        "translatorID":"a571680e-6338-46c2-a740-3cd9eb80fc7f",
-        "label":"Beobachter",
-        "creator":"ibex",
-        "target":"^http://((www\\.)?beobachter\\.ch/.)",
-        "minVersion":"2.1.9",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":"0",
-        "translatorType":4,
-        "lastUpdated":"2011-09-17 11:17:03"
+	"translatorID": "a571680e-6338-46c2-a740-3cd9eb80fc7f",
+	"label": "Beobachter",
+	"creator": "ibex",
+	"target": "^http://((www\\.)?beobachter\\.ch/.)",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-24 09:59:42"
 }
 
 /*
@@ -163,7 +164,7 @@ function fetchMeta(doc) {
  */
 function associateMeta(newItem, metaTags, name, zoteroField) {
   if (metaTags[name]) {
-    newItem[zoteroField] = ZU.trimInternal(metaTags[name]);
+	newItem[zoteroField] = ZU.trimInternal(metaTags[name]);
   }
 }
 
@@ -179,4 +180,51 @@ function associateMeta(newItem, metaTags, name, zoteroField) {
  */
 function containingClass(className) {
   return "contains(concat(' ',normalize-space(@class),' '),' " + className + " ')";
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.beobachter.ch/natur/natuerlich-leben/wohnen-freizeit/artikel/beleuchtung_es-werde-led/",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"creators": [
+					{
+						"firstName": "Thomas",
+						"lastName": "Bürgisser",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Beobachter Article Snapshot",
+						"mimeType": "text/html",
+						"url": "http://www.beobachter.ch/natur/natuerlich-leben/wohnen-freizeit/artikel/beleuchtung_es-werde-led//print.html",
+						"snapshot": true
+					}
+				],
+				"url": "http://www.beobachter.ch/natur/natuerlich-leben/wohnen-freizeit/artikel/beleuchtung_es-werde-led/",
+				"shortTitle": "Es werde LED",
+				"title": "Beleuchtung: Es werde LED",
+				"date": "2011-10-19T14:12:05+02:00",
+				"publicationTitle": "Beobachter",
+				"abstractNote": "Die neue LED-Technologie ist sparsam und ­öffnet den Weg zum variablen Licht­design. Was ist heute schon möglich – und was sinnvoll?",
+				"language": "de",
+				"ISSN": "1661-7444",
+				"issue": "19",
+				"volume": "11",
+				"libraryCatalog": "Beobachter",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.beobachter.ch/natur/forschung-wissen/",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
