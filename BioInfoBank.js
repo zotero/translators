@@ -1,14 +1,15 @@
 {
-	"translatorID":"4c9dbe33-e64f-4536-a02f-f347fa1f187d",
-	"translatorType":4,
-	"label":"BioInfoBank",
-	"creator":"Michael Berkowitz",
-	"target":"http://lib.bioinfo.pl/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-04-03 19:45:00"
+	"translatorID": "4c9dbe33-e64f-4536-a02f-f347fa1f187d",
+	"label": "BioInfoBank",
+	"creator": "Michael Berkowitz",
+	"target": "^https?://lib\\.bioinfo\\.pl/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-24 19:21:30"
 }
 
 function detectWeb(doc, url) {
@@ -118,4 +119,12 @@ function doWeb(doc, url) {
 
 		Zotero.done();
 	});
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://lib.bioinfo.pl/find?field=Papers&query=cancer",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

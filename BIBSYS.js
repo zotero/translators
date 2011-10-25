@@ -1,14 +1,15 @@
 {
-	"translatorID":"ab961e61-2a8a-4be1-b8a3-044f20d52d78",
-	"translatorType":4,
-	"label":"BIBSYS",
-	"creator":"Ramesh Srigiriraju",
-	"target":"^http://ask\\.bibsys\\.no/ask/action",
-	"minVersion":"1.0.0b4.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2007-07-31 16:45:00"
+	"translatorID": "ab961e61-2a8a-4be1-b8a3-044f20d52d78",
+	"label": "BIBSYS",
+	"creator": "Ramesh Srigiriraju",
+	"target": "^http://ask\\.bibsys\\.no/ask/action",
+	"minVersion": "1.0.0b4.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-24 17:31:36"
 }
 
 function detectWeb(doc, url)	{
@@ -63,4 +64,56 @@ function doWeb(doc, url)	{
 		});
 		Zotero.wait();
 	}
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://ask.bibsys.no/ask/action/result?cmd=&kilde=biblio&q=thelen",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://ask.bibsys.no/ask/action/show?pid=042152526&kid=biblio",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Thelen",
+						"firstName": "Kathleen A.",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Bibliografi: s. 297-322</p>"
+					}
+				],
+				"tags": [
+					"faglærte",
+					"yrkesopplæring",
+					"arbeidstakere",
+					"opplæring",
+					"Storbritannia",
+					"USA",
+					"Tyskland",
+					"Japan"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"itemID": "042152526",
+				"title": "How institutions evolve: the political economy of skills in Germany, Britain, the United States, and Japan",
+				"date": "2004",
+				"pages": "XV, 333 s.",
+				"numPages": "XV, 333 s.",
+				"place": "Cambridge",
+				"publisher": "Cambridge University Press",
+				"ISBN": "0-521-83768-5",
+				"ISSN": "0-521-83768-5",
+				"libraryCatalog": "BIBSYS",
+				"shortTitle": "How institutions evolve"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
