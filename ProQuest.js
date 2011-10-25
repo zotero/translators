@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-10-14 13:15:17"
+	"lastUpdated": "2011-10-25 11:19:12"
 }
 
 /*
@@ -230,12 +230,12 @@ function scrape (doc) {
 	// On historical newspapers, we see:
 	// Rights: Copyright New York Times Company Dec 1, 1852
 	// Date: 1852
-	// We can improve on this, so we do.
-	var fullerDate = item.rights.match(/([A-Z][a-z]{2} \d{1,2}, \d{4}$)/);
+	// We can improve on this, so we do, but if there's no full-text there's no item.rights, so first test for that.
+if(item.rights)	var fullerDate = item.rights.match(/([A-Z][a-z]{2} \d{1,2}, \d{4}$)/);
 	if (!item.date || 
-		(item.date.match(/^\d{4}$/) && fullerDate)) {
+	(item.date.match(/^\d{4}$/) && fullerDate)) {
 		item.date = fullerDate[1];
-	}
+}
 	
 	if (!item.itemType && item.libraryCatalog && item.libraryCatalog.match(/Historical Newspapers/))
 		item.itemType = "newspaperArticle";
