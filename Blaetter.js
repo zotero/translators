@@ -1,14 +1,15 @@
 {
-        "translatorID": "e8e10bd4-fd6f-4297-a060-a8e0a479043f",
-        "label": "Blaetter fuer deutsche und internationale Politik",
-        "creator": "Martin Meyerhoff",
-        "target": "^http://www\\.blaetter\\.de",
-        "minVersion": "1.0",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": "1",
-        "translatorType": 4,
-        "lastUpdated": "2011-03-31 15:50:04"
+	"translatorID": "e8e10bd4-fd6f-4297-a060-a8e0a479043f",
+	"label": "Blaetter fuer deutsche und internationale Politik",
+	"creator": "Martin Meyerhoff",
+	"target": "^http://www\\.blaetter\\.de",
+	"minVersion": "1.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-24 23:16:51"
 }
 
 /*
@@ -154,3 +155,51 @@ function doWeb(doc, url) {
 		scrape(doc, url);
 	}
 }	
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.blaetter.de/archiv/themen/antisemitismus",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.blaetter.de/archiv/jahrgaenge/2011/august/die-linkspartei-ideologie-oder-politik",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"creators": [
+					{
+						"firstName": "André",
+						"lastName": "Brie",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Parteien",
+					"Antisemitismus",
+					"Demokratie"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.blaetter.de/archiv/jahrgaenge/2011/august/die-linkspartei-ideologie-oder-politik",
+						"title": "Die Linkspartei: Ideologie oder Politik | Blätter für deutsche und internationale Politik",
+						"mimeType": "text/html"
+					}
+				],
+				"url": "http://www.blaetter.de/archiv/jahrgaenge/2011/august/die-linkspartei-ideologie-oder-politik",
+				"title": "Die Linkspartei: Ideologie oder Politik",
+				"publicationTitle": "Blätter für deutsche und internationale Politik",
+				"date": "2011-08-00",
+				"pages": "16-22",
+				"abstractNote": "„Eine Partei zerfleischt sich“, hieß es am 1. Juli in den „heute“-Nachrichten des ZDF über die Linkspartei. Es ist erst gut zwei Monate her, dass die Parteiführung ihre heftigen Differenzen für beendet erklärt hatte und zu gemeinsamer politischer Sacharbeit zurückkehren wollte.",
+				"libraryCatalog": "Blaetter fuer deutsche und internationale Politik",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Die Linkspartei"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

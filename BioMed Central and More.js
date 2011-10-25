@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-10-12 21:23:59"
+	"lastUpdated": "2011-10-24 22:30:17"
 }
 
 /*
@@ -89,4 +89,137 @@ function doWeb(doc,url)
 	translator.getTranslatorObject(function (obj) {
 		obj.doWeb(doc, url);
 	});
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://respiratory-research.com/search/results?terms=cells",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://respiratory-research.com/content/11/1/133",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Zbigniew",
+						"lastName": "Mikulski",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Petra",
+						"lastName": "Hartmann",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Gitte",
+						"lastName": "Jositsch",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Zbigniew",
+						"lastName": "Zasłona",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Katrin S",
+						"lastName": "Lips",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Uwe",
+						"lastName": "Pfeil",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hjalmar",
+						"lastName": "Kurzen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jürgen",
+						"lastName": "Lohmeyer",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Wolfgang G",
+						"lastName": "Clauss",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Veronika",
+						"lastName": "Grau",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Martin",
+						"lastName": "Fronius",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Wolfgang",
+						"lastName": "Kummer",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"url": "http://respiratory-research.com/content/pdf/1465-9921-11-133.pdf, http://respiratory-research.com/content/pdf/1465-9921-11-133.pdf",
+						"mimeType": "application/pdf"
+					},
+					{
+						"document": {
+							"location": {}
+						},
+						"title": "Snapshot"
+					},
+					{
+						"url": "http://respiratory-research.com/content/pdf/1465-9921-11-133.pdf",
+						"title": "BMC Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"itemID": "http://respiratory-research.com/content/11/1/133",
+				"title": "Nicotinic receptors on rat alveolar macrophages dampen ATP-induced increase in cytosolic calcium concentration",
+				"source": "Respiratory Research",
+				"publicationTitle": "Respiratory Research",
+				"rights": "http://creativecommons.org/licenses/by/2.0/",
+				"volume": "11",
+				"issue": "1",
+				"number": "1",
+				"patentNumber": "1",
+				"pages": "133",
+				"ISSN": "1465-9921",
+				"publisher": "BioMed Central Ltd",
+				"institution": "BioMed Central Ltd",
+				"company": "BioMed Central Ltd",
+				"label": "BioMed Central Ltd",
+				"distributor": "BioMed Central Ltd",
+				"date": "2010-09-29",
+				"DOI": "10.1186/1465-9921-11-133",
+				"reportType": "Research",
+				"videoRecordingType": "Research",
+				"letterType": "Research",
+				"manuscriptType": "Research",
+				"mapType": "Research",
+				"thesisType": "Research",
+				"websiteType": "Research",
+				"audioRecordingType": "Research",
+				"presentationType": "Research",
+				"postType": "Research",
+				"audioFileType": "Research",
+				"url": "http://respiratory-research.com/content/11/1/133",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "respiratory-research.com",
+				"abstractNote": "Nicotinic acetylcholine receptors (nAChR) have been identified on a variety of cells of the immune system and are generally considered to trigger anti-inflammatory events. In the present study, we determine the nAChR inventory of rat alveolar macrophages (AM), and investigate the cellular events evoked by stimulation with nicotine."
+			}
+		]
+	}
+]
+/** END TEST CASES **/
