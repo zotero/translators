@@ -1,14 +1,15 @@
 {
-	"translatorID":"f9373e49-e6ac-46f7-aafe-bb24a2fbc3f0",
-	"translatorType":4,
-	"label":"Bracero History Archive",
-	"creator":"Adam Crymble",
-	"target":"http://braceroarchive.org",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-09-02 13:40:00"
+	"translatorID": "f9373e49-e6ac-46f7-aafe-bb24a2fbc3f0",
+	"label": "Bracero History Archive",
+	"creator": "Adam Crymble",
+	"target": "^https?://braceroarchive\\.org",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-25 09:02:18"
 }
 
 function detectWeb(doc, url) {
@@ -43,15 +44,15 @@ function scrape(doc, url) {
 	var xPathCount = doc.evaluate('count (//div[@class="field"]/div)', doc, nsResolver, XPathResult.ANY_TYPE, null);
 
 	for (i=0; i<xPathCount.numberValue -1; i++) {	 	
-     			
-     		fieldTitle = headers.iterateNext().textContent.replace(/\s+/g, '');
-     		contents1 = contents.iterateNext().textContent.replace(/^\s*|\s*$/g, '');
+	 			
+	 		fieldTitle = headers.iterateNext().textContent.replace(/\s+/g, '');
+	 		contents1 = contents.iterateNext().textContent.replace(/^\s*|\s*$/g, '');
   
-     		if (contents1.match("Empty")) {
-	     		contents1 = '';
-     		}
-     		dataTags[fieldTitle] = Zotero.Utilities.cleanTags(contents1);
-     	}
+	 		if (contents1.match("Empty")) {
+		 		contents1 = '';
+	 		}
+	 		dataTags[fieldTitle] = Zotero.Utilities.cleanTags(contents1);
+	 	}
 
    //media type?
 	if (dataTags["TypeName"]) {
@@ -168,4 +169,36 @@ function doWeb(doc, url) {
 
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://braceroarchive.org/items/show/3229",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Mario",
+						"lastName": "Perez",
+						"creatorType": "creator"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "\"The lemons are Freezing!\"",
+				"url": "http://braceroarchive.org/items/show/3229",
+				"libraryCatalog": "Bracero History Archive",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://braceroarchive.org/items/browse?search=juarez&submit_search=Search",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

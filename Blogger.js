@@ -1,14 +1,15 @@
 {
-        "translatorID": "6f9aa90d-6631-4459-81ef-a0758d2e3921",
-        "label": "Blogger",
-        "creator": "Adam Crymble",
-        "target": "blogspot\\.com",
-        "minVersion": "1.0.0b4.r5",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": true,
-        "translatorType": 4,
-        "lastUpdated": "2011-05-27 20:13:50"
+	"translatorID": "6f9aa90d-6631-4459-81ef-a0758d2e3921",
+	"label": "Blogger",
+	"creator": "Adam Crymble",
+	"target": "\\.blogspot\\.com",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-25 00:15:30"
 }
 
 function detectWeb(doc, url) {
@@ -122,4 +123,41 @@ function doWeb(doc, url) {
 	}
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://observationalepidemiology.blogspot.com/2011/10/tweet-from-matt-yglesias.html",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "Joseph",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Mark",
+					"Matthew Yglesias"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "A tweet from Matt Yglesias",
+				"date": "Monday, October 24, 2011",
+				"blogTitle": "Observational Epidemiology",
+				"url": "http://observationalepidemiology.blogspot.com/2011/10/tweet-from-matt-yglesias.html",
+				"libraryCatalog": "Blogger",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://observationalepidemiology.blogspot.com/",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

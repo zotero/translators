@@ -1,14 +1,15 @@
 {
-	"translatorID":"fb342bae-7727-483b-a871-c64c663c2fae",
-	"translatorType":4,
-	"label":"BusinessWeek",
-	"creator":"Michael Berkowitz",
-	"target":"http://(www\\.)?businessweek.com",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"translatorID": "fb342bae-7727-483b-a871-c64c663c2fae",
+	"label": "BusinessWeek",
+	"creator": "Michael Berkowitz",
+	"target": "^https?://(www\\.)?businessweek\\.com",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-25 13:33:14"
 }
 
 function detectWeb(doc, url) {
@@ -22,7 +23,7 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		var results = doc.evaluate('//div[@class="result"]/h3[@class="story"]/a', doc, null, XPathResult.ANY_TYPE, null);
+		var results = doc.evaluate('//h3[@class="story"]/a', doc, null, XPathResult.ANY_TYPE, null);
 		var result;
 		var items = new Object();
 		while (result = results.iterateNext()) {
@@ -48,11 +49,54 @@ function doWeb(doc, url) {
 		item.title = metaTags['headline'];
 		item.abstractNote = metaTags['abstract'];
 		item.tags = metaTags['keywords'].split(/\s*,\s*/);
-		item.creators.push(Zotero.Utilities.cleanAuthor(metaTags['author'], "author"));
+		//some articles don't have author tags - prevent this from failing
+		if (metaTags['author']) item.creators.push(Zotero.Utilities.cleanAuthor(metaTags['author'], "author"));
 		item.publicationTitle = "BusinessWeek: " + metaTags['channel'];
 		item.url = newDoc.location.href;
 		item.date = metaTags['pub_date'].replace(/(\d{4})(\d{2})(\d{2})/, "$2/$3/$1");
 		item.complete();
 	}, function() {Zotero.done();});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.businessweek.com/management/ten-things-only-bad-managers-say-09232011.html?campaign_id=rss_topStories",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"creators": [
+					{
+						"firstName": "Liz",
+						"lastName": "Ryan",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"leadership",
+					"management",
+					"bad bosses",
+					"leaders",
+					"Liz Ryan",
+					"bad managers",
+					"lousy managers"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Ten Things Only Bad Managers Say",
+				"publicationTitle": "BusinessWeek: Management",
+				"url": "http://www.businessweek.com/management/ten-things-only-bad-managers-say-09232011.html?campaign_id=rss_topStories",
+				"date": "09/23/2011",
+				"libraryCatalog": "BusinessWeek",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://search.businessweek.com/Search?searchTerm=linux&resultsPerPage=20",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

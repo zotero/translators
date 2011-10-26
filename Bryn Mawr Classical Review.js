@@ -1,14 +1,15 @@
 {
-	"translatorID":"635c1246-e0c8-40a0-8799-a73a0b013ad8",
-	"translatorType":4,
-	"label":"Bryn Mawr Classical Review",
-	"creator":"Michael Berkowitz",
-	"target":"http://ccat.sas.upenn.edu/bmcr/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"translatorID": "635c1246-e0c8-40a0-8799-a73a0b013ad8",
+	"label": "Bryn Mawr Classical Review",
+	"creator": "Michael Berkowitz",
+	"target": "^https?://bmcr\\.brynmawr\\.edu",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-25 09:07:27"
 }
 
 function detectWeb(doc, url) {
@@ -82,4 +83,49 @@ function doWeb(doc, url) {
 		item.complete();
 	}, function() {Zotero.done();});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://bmcr.brynmawr.edu/2010/2010-01-02.html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Christina S.",
+						"lastName": "Kraus",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael",
+						"lastName": "Comber",
+						"creatorType": "reviewedAuthor"
+					},
+					{
+						"firstName": "Catalina",
+						"lastName": "Balmaceda",
+						"creatorType": "reviewedAuthor"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://bmcr.brynmawr.edu/2010/2010-01-02.html",
+						"title": "Review of: Sallust: The War Against Jugurtha. Aris and Phillips Classical Texts",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Review of: Sallust: The War Against Jugurtha. Aris and Phillips Classical Texts",
+				"url": "http://bmcr.brynmawr.edu/2010/2010-01-02.html",
+				"date": "2010/01/02",
+				"libraryCatalog": "Bryn Mawr Classical Review",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Review of"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

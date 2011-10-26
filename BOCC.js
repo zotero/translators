@@ -1,14 +1,15 @@
 {
-        "translatorID":"ecd1b7c6-8d31-4056-8c15-1807b2489254",
-        "label":"BOCC",
-        "creator":"José Antonio Meira da Rocha",
-        "target":"^http:\\/\\/[^/]*bocc[^/]*/(?:_listas|_esp)",
-        "minVersion":"1.0",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":true,
-        "translatorType":4,
-        "lastUpdated":"2010-09-20 18:12:01"
+	"translatorID": "ecd1b7c6-8d31-4056-8c15-1807b2489254",
+	"label": "BOCC",
+	"creator": "José Antonio Meira da Rocha",
+	"target": "^http:\\/\\/[^/]*bocc[^/]*/(?:_listas|_esp)",
+	"minVersion": "1.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-25 00:21:01"
 }
 
 /* Translator for Biblioteca Online de Ciências da Comunicação (BOCC,
@@ -43,15 +44,15 @@ function detectWeb(doc, url) {
 function getAuthors(newItem, itemsAutors) {
   //Formatting and saving "Author" field
   if (items["AUTOR"]) {
-    var author = itemsAutors["AUTOR"];
-    if (author.match(";")) {
-      var authors = author.split(";");
-      for (var i in authors) {
-        newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i], "author"));
-      }
-    } else {
-      newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
-    }
+	var author = itemsAutors["AUTOR"];
+	if (author.match(";")) {
+	  var authors = author.split(";");
+	  for (var i in authors) {
+		newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i], "author"));
+	  }
+	} else {
+	  newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
+	}
   } 
 }
 // Standard Zotero translator entry point
@@ -210,3 +211,12 @@ function doWeb(doc, url) {
 		Zotero.wait();
 	}
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.bocc.ubi.pt/_listas/titulos_letra.php?letra=B",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
