@@ -1,14 +1,15 @@
 {
-	"translatorID":"4da40f07-904b-4472-93b6-9bea1fe7d4df",
-	"translatorType":4,
-	"label":"Canada.com",
-	"creator":"Adam Crymble",
-	"target":"http://www.canada.com",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-07-24 05:30:00"
+	"translatorID": "4da40f07-904b-4472-93b6-9bea1fe7d4df",
+	"label": "Canada.com",
+	"creator": "Adam Crymble",
+	"target": "^https?://www\\.canada\\.com",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-26 00:14:26"
 }
 
 function detectWeb(doc, url) {
@@ -41,8 +42,8 @@ function scrape(doc, url) {
 		newItem.abstracteNote = doc.evaluate('//div[@class="storyheader"]/h2', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	}
 
-	if (doc.evaluate('//div[@class="feed_details"]/h4', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-		var author = doc.evaluate('//div[@class="feed_details"]/h4', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	if (doc.evaluate('//meta[@name="Author"]/@content', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		var author = doc.evaluate('//meta[@name="Author"]/@content', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	
 		if (author.match(/\n/)) {
 			author1 = author.split(/\n/);
@@ -59,10 +60,9 @@ function scrape(doc, url) {
 		}
 	}
 		
-	if (doc.evaluate('//div[@class="feed_details"]/span', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-		var date1 = doc.evaluate('//div[@class="feed_details"]/span', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/^\s*|\s*$/g, '');
-		if (date1.match("Published:")) {
-			date1 = date1.substr(11);
+	if (doc.evaluate('//meta[@name="PubDate"]/@content', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		var date1 = doc.evaluate('//meta[@name="PubDate"]/@content', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/^\s*|\s*$/g, '');
+		if (date1) {
 			newItem.date = date1;
 		}
 	}	
@@ -98,6 +98,17 @@ function doWeb(doc, url) {
 		if (doc.evaluate('//div[@class="even"]/p/a', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 		Zotero.debug("AAAAAA");
 			var titles0 = doc.evaluate('//div[@class="even"]/p/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			
+			while (next_title = titles0.iterateNext()) {
+				if (next_title.href.match("story") && next_title.href.match("canada.com")) {
+					items[next_title.href] = next_title.textContent;
+				}
+			}
+		}
+		
+		if (doc.evaluate('//h1/a', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		Zotero.debug("new site?");
+			var titles0 = doc.evaluate('//h1/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
 			
 			while (next_title = titles0.iterateNext()) {
 				if (next_title.href.match("story") && next_title.href.match("canada.com")) {
@@ -150,4 +161,12 @@ function doWeb(doc, url) {
 	}
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.canada.com/search/search.html?stype=si&q=argentina&x=0&y=0&radio_btns=canada.com",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
