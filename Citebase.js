@@ -1,14 +1,15 @@
 {
-	"translatorID":"daa26181-71d4-48ef-8cac-54c06ff4c20e",
-	"translatorType":12,
-	"label":"Citebase",
-	"creator":"Michael Berkowitz",
-	"target":"^http://www\\.citebase\\.org/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"translatorID": "daa26181-71d4-48ef-8cac-54c06ff4c20e",
+	"label": "Citebase",
+	"creator": "Michael Berkowitz",
+	"target": "^https?://(www\\.)?citebase\\.org/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-26 21:48:44"
 }
 
 function detectWeb(doc, url) {
@@ -91,4 +92,66 @@ function doSearch(item) {
 	});
 	
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://citebase.org/abstract?id=oai%3Abiomedcentral.com%3A2040-7378-3-11",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Arthur",
+						"lastName": "Liesz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Moritz",
+						"lastName": "Middelhoff",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Wei",
+						"lastName": "Zhou",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Simone",
+						"lastName": "Karcher",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sergio",
+						"lastName": "Illanes",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Roland",
+						"lastName": "Veltkamp",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://citebase.org/abstract?id=oai:biomedcentral.com:2040-7378-3-11",
+						"title": "Citebase Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Comparison of humoral neuroinflammation and adhesion molecule expression in two models of experimental intracerebral hemorrhage",
+				"publicationTitle": "Experimental & Translational Stroke Medicine",
+				"volume": "3",
+				"pages": "11",
+				"url": "http://citebase.org/abstract?id=oai:biomedcentral.com:2040-7378-3-11",
+				"date": "2011",
+				"libraryCatalog": "Citebase",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

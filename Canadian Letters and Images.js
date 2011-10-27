@@ -1,21 +1,22 @@
 {
-	"translatorID":"a7c8b759-6f8a-4875-9d6e-cc0a99fe8f43",
-	"translatorType":4,
-	"label":"Canadian Letters and Images",
-	"creator":"Adam Crymble",
-	"target":"http://(www.)?canadianletters.ca/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-06-20 20:45:00"
+	"translatorID": "a7c8b759-6f8a-4875-9d6e-cc0a99fe8f43",
+	"label": "Canadian Letters and Images",
+	"creator": "Adam Crymble",
+	"target": "^https?://(www\\.)?canadianletters\\.ca/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-26 00:41:02"
 }
 
 function detectWeb(doc, url) {
 	if (doc.location.href.match("results")) {
 		return "multiple";
 	} else if (doc.location.href.match("letters.php")) {
-		return "document";
+		return "letter";
 	} else if (doc.location.href.match("template")) {
 		return "artwork";
 	}
@@ -35,7 +36,7 @@ function scrape(doc, url) {
 	var dataTags = new Object();
 	
 	var mediaType = (detectWeb(doc, url));
-	if (mediaType == "document") {
+	if (mediaType == "letter") {
 		var newItem = new Zotero.Item("letter");
 		var title2;
 		
@@ -121,4 +122,39 @@ function doWeb(doc, url) {
 	}
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://canadianletters.ca/results.php?searchFor=Germany&x=0&y=0",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://canadianletters.ca/letters.php?letterid=10944&warid=3&docid=1&collectionid=421",
+		"items": [
+			{
+				"itemType": "letter",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "Jack",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Davey, John (Jack)",
+				"type": "Letter",
+				"date": "December 12, 1915",
+				"abstractNote": "To: Kate",
+				"url": "http://canadianletters.ca/letters.php?letterid=10944&warid=3&docid=1&collectionid=421",
+				"libraryCatalog": "Canadian Letters and Images",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
