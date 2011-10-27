@@ -1,14 +1,15 @@
 {
-	"translatorID":"50d3ca81-3c4c-406b-afb2-0fe8105b9b38",
-	"translatorType":4,
-	"label":"Champlain Society - Collection",
-	"creator":"Adam Crymble",
-	"target":"http://link.library.utoronto.ca",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-09-02 13:40:00"
+	"translatorID": "50d3ca81-3c4c-406b-afb2-0fe8105b9b38",
+	"label": "Champlain Society - Collection",
+	"creator": "Adam Crymble",
+	"target": "^https?://link\\.library\\.utoronto\\.ca",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-26 20:37:05"
 }
 
 function detectWeb(doc, url) {
@@ -45,22 +46,22 @@ function scrape(doc, url) {
 	var xPathCount = doc.evaluate('count (//table[1]/tbody/tr/td[1]/b/font)', doc, nsResolver, XPathResult.ANY_TYPE, null);
 
 	for (i=0; i<xPathCount.numberValue; i++) {	 	
-     		fieldTitle = headers.iterateNext().textContent.replace(/\s+/g, '');
-     		if (fieldTitle == "Auteur:" ) {
-	     		fieldTitle = "Author:";
-     		} else if (fieldTitle == "Titre:") {
-	     		fieldTitle = "Title:";
-     		} else if (fieldTitle == "Description:") {
-	     		fieldTitle = "Extent:";
-     		} else if (fieldTitle == "Éditeur:") {
-	     		fieldTitle =  "Published:";
-     		} else if (fieldTitle == "Sujet:") {
-	     		fieldTitle = "Subjects:";
-     		}
-     		
-     		 dataTags[fieldTitle] = (contents.iterateNext().textContent.replace(/^\s*|\s*$/g, ''));
-     	}
-     
+	 		fieldTitle = headers.iterateNext().textContent.replace(/\s+/g, '');
+	 		if (fieldTitle == "Auteur:" ) {
+		 		fieldTitle = "Author:";
+	 		} else if (fieldTitle == "Titre:") {
+		 		fieldTitle = "Title:";
+	 		} else if (fieldTitle == "Description:") {
+		 		fieldTitle = "Extent:";
+	 		} else if (fieldTitle == "Éditeur:") {
+		 		fieldTitle =  "Published:";
+	 		} else if (fieldTitle == "Sujet:") {
+		 		fieldTitle = "Subjects:";
+	 		}
+	 		
+	 		 dataTags[fieldTitle] = (contents.iterateNext().textContent.replace(/^\s*|\s*$/g, ''));
+	 	}
+	 
 //author
 	var multiAuthors = 0;
 	if (dataTags["Author:"]) {
@@ -164,4 +165,57 @@ function doWeb(doc, url) {
 	}
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://link.library.utoronto.ca/champlain/search_results.cfm?lang=eng&query=test&searchtype=Fulltext&limit=All",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://link.library.utoronto.ca/champlain/item_record.cfm?Idno=9_96862&lang=eng&query=test&searchtype=Fulltext&startrow=1&Limit=All",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "John",
+						"lastName": "Knox",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Arthur G. (Arthur George)",
+						"lastName": "Doughty",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"United States -- History -- French and Indian War, 1755-1763 -- Bibliography.",
+					"United States -- History -- French and Indian War, 1755-1763.",
+					"United States -- History -- French and Indian War, 1755-1763 -- Registers.",
+					"Canada -- History -- Seven Years' War, 1755-1763.",
+					"Amherst, Jeffrey Amherst, Baron, 1717-1797.",
+					"Amherst, William, 1732-1781.",
+					"Doughty, Arthur G. (Arthur George), Sir, 1860-1936.",
+					"Johnson, William, Sir, 1715-1774.",
+					"Murray, James, 1721-1794."
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"place": "Toronto",
+				"date": "1914-16.",
+				"publisher": "Champlain Society",
+				"pages": "596 pages.",
+				"callNumber": "9_96862",
+				"abstractNote": "• Original issued in series: The Publications of the Champlain Society. General series ; 8.\n              \n               • Title from title screen.\n              \n               • Includes bibliographical references and an index.",
+				"title": "An historical journal of the campaigns in North America for the years 1757, 1758, 1759 and 1760, Vol. I",
+				"url": "http://link.library.utoronto.ca/champlain/item_record.cfm?Idno=9_96862&lang=eng&query=test&searchtype=Fulltext&startrow=1&Limit=All",
+				"libraryCatalog": "Champlain Society - Collection",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

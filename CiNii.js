@@ -1,14 +1,15 @@
 {
-	"translatorID":"46291dc3-5cbd-47b7-8af4-d009078186f6",
-	"translatorType":4,
-	"label":"CiNii",
-	"creator":"Michael Berkowitz and Mitsuo Yoshida",
-	"target":"http://ci.nii.ac.jp/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2010-05-20 04:00:00"
+	"translatorID": "46291dc3-5cbd-47b7-8af4-d009078186f6",
+	"label": "CiNii",
+	"creator": "Michael Berkowitz and Mitsuo Yoshida",
+	"target": "^https?://ci\\.nii\\.ac\\.jp/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-26 21:32:21"
 }
 
 function detectWeb(doc, url) {
@@ -69,4 +70,64 @@ function doWeb(doc, url) {
 		});
 	}, function() {Zotero.done();});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://ci.nii.ac.jp/naid/110000244188",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "大井 謙一=Kenichi",
+						"lastName": "Ohi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "嶋脇 輿助=Yosuke",
+						"lastName": "Shimawaki",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "伊藤 拓海=Takumi",
+						"lastName": "Ito",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yushun",
+						"lastName": "Li",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://ci.nii.ac.jp/naid/110000244188",
+						"title": "<研究速報>観測用既存鉄骨造モデル構造物を用いたオンライン応答実験=Pseudo-dynamic tests on existing steel model structure for seismic monitoring Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "<研究速報>観測用既存鉄骨造モデル構造物を用いたオンライン応答実験=Pseudo-dynamic tests on existing steel model structure for seismic monitoring",
+				"publicationTitle": "生産研究",
+				"ISSN": "0037105X",
+				"publisher": "東京大学",
+				"date": "2002-11",
+				"volume": "54",
+				"issue": "6",
+				"pages": "384-387",
+				"url": "http://ci.nii.ac.jp/naid/110000244188",
+				"libraryCatalog": "CiNii",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://ci.nii.ac.jp/search?q=test&range=0&count=20&sortorder=1&type=0",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
