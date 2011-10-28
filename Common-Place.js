@@ -1,14 +1,15 @@
 {
-	"translatorID":"c3edb423-f267-47a1-a8c2-158c247f87c2",
-	"translatorType":4,
-	"label":"Common-Place",
-	"creator":"Frederick Gibbs",
-	"target":"http://www.common-place\\.|historycooperative\\.org/journals/cp",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-06-12 19:30:00"
+	"translatorID": "c3edb423-f267-47a1-a8c2-158c247f87c2",
+	"label": "Common-Place",
+	"creator": "Frederick Gibbs",
+	"target": "^https?://(www\\.)?(common-place\\.org/vol-.*/no-.*/.|historycooperative\\.org/journals/cp)",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-27 21:35:13"
 }
 
 function detectWeb(doc, url) {
@@ -163,4 +164,37 @@ if (type == "multiple") {
 	} else {
 		scrape(doc);
 	}
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.common-place.org/vol-12/no-01/tales/",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"document": {
+							"location": {}
+						},
+						"title": "Common-place: Tales from the Vault"
+					}
+				],
+				"publicationTitle": "Common-Place",
+				"url": "http://www.common-place.org/vol-12/no-01/tales/",
+				"volume": "12",
+				"issue": "1",
+				"date": "October 2011",
+				"author": "Megan Kate Nelson",
+				"title": "Looking for Limbs in all the Right Places",
+				"libraryCatalog": "Common-Place",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
