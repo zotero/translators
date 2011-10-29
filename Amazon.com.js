@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-10-20 14:03:17"
+	"lastUpdated": "2011-10-29 13:47:54"
 }
 
 function detectWeb(doc, url) {
@@ -17,7 +17,6 @@ function detectWeb(doc, url) {
 	var suffixMatch = suffixRe.exec(url);
 	var suffix = suffixMatch[1];
 	var searchRe = new RegExp('^https?://(?:www\.)?amazon\.' + suffix + '/(gp/search/|exec/obidos/search-handle-url/|s/|s\\?|[^/]+/lm/|gp/richpub/)');
-	Zotero.debug(searchRe.test(doc.location.href));
 	if(searchRe.test(doc.location.href)) {
 		return "multiple";
 	} else {
@@ -26,7 +25,6 @@ function detectWeb(doc, url) {
 			var elmt = doc.evaluate('//input[@name="storeID"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 			if(elmt) {
 				var storeID = elmt.value;
-				Zotero.debug("store id: " + storeID);
 				if (storeID=="books"){
 					return "book";
 				}
@@ -94,7 +92,7 @@ function doWeb(doc, url) {
 			
 			for(var i in items) {
 				var timestamp = encodeURIComponent(generateISODate());
-				var params = "AWSAccessKeyId=AKIAIPYIWJ24AGZJ64AA&ItemId=" + Zotero.Utilities.trim(asins[i]) + "&Operation=ItemLookup&ResponseGroup=ItemAttributes&Service=AWSECommerceService&Timestamp="+timestamp+"&Version=2006-06-28";
+				var params = "AWSAccessKeyId=AKIAIPYIWJ24AGZJ64AA&AssociateTag=httpwwwdig0e7-20&ItemId=" + Zotero.Utilities.trim(asins[i]) + "&Operation=ItemLookup&ResponseGroup=ItemAttributes&Service=AWSECommerceService&Timestamp="+timestamp+"&Version=2011-08-01";
 				var signString = "GET\necs.amazonaws."+suffix+"\n/onca/xml\n"+params;
 				var signature = b64_hmac_sha256("054vk/Lt3LJMxch1srIHUbvI+2T/fZ6E5c0qwlbj", signString);
 				signature = encodeURIComponent(signature);
@@ -111,7 +109,7 @@ function doWeb(doc, url) {
 			var asin = elmt.value;
 		}
 		var timestamp = encodeURIComponent(generateISODate()); 
-		var params = "AWSAccessKeyId=AKIAIPYIWJ24AGZJ64AA&ItemId=" + Zotero.Utilities.trim(asin) + "&Operation=ItemLookup&ResponseGroup=ItemAttributes&Service=AWSECommerceService&Timestamp="+timestamp+"&Version=2006-06-28";
+		var params = "AWSAccessKeyId=AKIAIPYIWJ24AGZJ64AA&AssociateTag=httpwwwdig0e7-20&ItemId=" + Zotero.Utilities.trim(asin) + "&Operation=ItemLookup&ResponseGroup=ItemAttributes&Service=AWSECommerceService&Timestamp="+timestamp+"&Version=2011-08-01";
 		var signString = "GET\necs.amazonaws."+suffix+"\n/onca/xml\n"+params;
 		var signature = b64_hmac_sha256("054vk/Lt3LJMxch1srIHUbvI+2T/fZ6E5c0qwlbj", signString);
 		signature = encodeURIComponent(signature);		
