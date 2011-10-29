@@ -1,14 +1,15 @@
 {
-        "translatorID": "374ac2a5-dd45-461e-bf1f-bf90c2eb7085",
-        "label": "Der Tagesspiegel",
-        "creator": "Martin Meyerhoff",
-        "target": "^http://www\\.tagesspiegel\\.de",
-        "minVersion": "1.0",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": "1",
-        "translatorType": 4,
-        "lastUpdated": "2011-03-30 22:04:46"
+	"translatorID": "374ac2a5-dd45-461e-bf1f-bf90c2eb7085",
+	"label": "Der Tagesspiegel",
+	"creator": "Martin Meyerhoff",
+	"target": "^https?://www\\.tagesspiegel\\.de",
+	"minVersion": "1.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-28 14:44:13"
 }
 
 /*
@@ -144,3 +145,51 @@ function doWeb(doc, url) {
 		scrape(doc, url);
 	}
 }	
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.tagesspiegel.de/berlin/radler-und-fussgaenger-leben-wieder-gefaehrlicher/5767876.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "Christoph",
+						"lastName": "Stollowsky",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Verkehr",
+					"Statistik",
+					"Radfahrer",
+					"Fahrrad"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.tagesspiegel.de/berlin/radler-und-fussgaenger-leben-wieder-gefaehrlicher/v_print,5767876.html?p=",
+						"title": "Statistik: Radler und Fußgänger leben wieder gefährlicher - Berlin - Tagesspiegel",
+						"mimeType": "text/html"
+					}
+				],
+				"url": "http://www.tagesspiegel.de/berlin/radler-und-fussgaenger-leben-wieder-gefaehrlicher/5767876.html",
+				"title": "Statistik : Radler und Fußgänger leben wieder gefährlicher",
+				"date": "28.10.2011",
+				"abstractNote": "Die Zahl der Verkehrstoten nimmt erneut zu. Die Polizei beklagt Unachtsamkeit von Autofahrern – und hofft auf mehr Radspuren.",
+				"publicationTitle": "Der Tagesspiegel Online",
+				"libraryCatalog": "Der Tagesspiegel",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Statistik"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.tagesspiegel.de/",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

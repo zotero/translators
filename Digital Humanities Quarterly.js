@@ -1,14 +1,15 @@
 {
-	"translatorID":"bbad0221-134b-495a-aa56-d77cfaa67ab5",
-	"translatorType":4,
-	"label":"Digital Humanities Quarterly",
-	"creator":"Michael Berkowitz",
-	"target":"http://www.digitalhumanities.org/(dhq)?",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"translatorID": "bbad0221-134b-495a-aa56-d77cfaa67ab5",
+	"label": "Digital Humanities Quarterly",
+	"creator": "Michael Berkowitz",
+	"target": "^https?://www\\.digitalhumanities\\.org/(dhq)?",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-29 13:46:26"
 }
 
 function detectWeb(doc, url) {
@@ -58,4 +59,45 @@ function doWeb(doc, url) {
 		item.attachments = [{url:item.url, title:"DHQ Snapshot", mimeType:"text/html"}];
 		item.complete();
 	}, function() {Zotero.done();});
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.digitalhumanities.org/dhq/vol/5/2/000094/000094.html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Wesley",
+						"lastName": "Beal",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.digitalhumanities.org/dhq/vol/5/2/000094/000094.html",
+						"title": "DHQ Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"url": "http://www.digitalhumanities.org/dhq/vol/5/2/000094/000094.html",
+				"title": "Network Narration in John Dos Passos’s U.S.A. Trilogy",
+				"date": "Spring 2011",
+				"volume": "5",
+				"issue": "2",
+				"libraryCatalog": "Digital Humanities Quarterly",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.digitalhumanities.org/dhq/vol/5/1/index.html",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

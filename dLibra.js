@@ -1,15 +1,17 @@
 {
-        "translatorID":"915e3ae2-afa9-4b1d-9780-28ed3defe0ab",
-        "label":"dLibra",
-        "creator":"Pawel Kolodziej <p.kolodziej@gmail.com>",
-        "target":"/.*dlibra\\/(doccontent|docmetadata|collectiondescription|results)|/dlibra/?",
-        "minVersion":"1.0.0b3.r1",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":"1",
-        "translatorType":4,
-        "lastUpdated":"2011-04-18 23:20:17"
+	"translatorID": "915e3ae2-afa9-4b1d-9780-28ed3defe0ab",
+	"label": "dLibra",
+	"creator": "Pawel Kolodziej <p.kolodziej@gmail.com>",
+	"target": "/.*dlibra\\/(doccontent|docmetadata|collectiondescription|results)|/dlibra/?",
+	"minVersion": "1.0.0b3.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-29 15:33:44"
 }
+
 /*
    dLibra Translator
    Copyright (C) 2010 Pawel Kolodziej, p.kolodziej@gmail.com
@@ -71,7 +73,7 @@ function doWeb(doc, url) {
 			}: null;
 
 
-		var itemsXPath = '//ol[@class="itemlist"]/li/a | //td[@class="searchhit"]/b/a';
+		var itemsXPath = '//ol[@class="itemlist"]/li/a | //td[@class="searchhit"]/b/a | //p[@class="resultTitle"]/b/a[@class="dLSearchResultTitle"]';
 
 		var obj = doc.evaluate(itemsXPath, doc, nsResolver, XPathResult.ANY_TYPE, null); 
 		var itemHtml;
@@ -99,7 +101,7 @@ function doSingleItem(url)
 	var baseUrl = m[1];
 	var id = m[2];
 	var isPIA = baseUrl.match("lib.pia.org.pl|cyfrowaetnografia.pl");
-	var rdf = Zotero.Utilities.retrieveSource( baseUrl + "/rdf.xml?type=e&id="+id);
+	Zotero.Utilities.HTTP.doGet( baseUrl + "/rdf.xml?type=e&id="+id, function(rdf){
 	
 	rdf = rdf.replace(/<\?xml[^>]*\?>/, "");
 	var rdfXml = new XML(rdf);
@@ -158,10 +160,47 @@ function doSingleItem(url)
 			if(issue)
 				item.issue = issue[1];
 		}
-		
-	}
+	}	
+	
 //	Zotero.debug(item);
 	
 	item.complete();
-	return item;	
+	return item;	})
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://bcul.lib.uni.lodz.pl/dlibra/results?action=SearchAction&skipSearch=true&mdirids=&server%3Atype=both&tempQueryType=-3&encode=false&isExpandable=on&isRemote=off&roleId=-3&queryType=-3&dirids=1&rootid=&query=Karte&localQueryType=-3&remoteQueryType=-2",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://bcul.lib.uni.lodz.pl/dlibra/docmetadata?id=1247&from=&dirids=1&ver_id=&lp=2&QI=",
+		"items": [
+			{
+				"itemType": "document",
+				"creators": [
+					{
+						"firstName": "David",
+						"lastName": "Gilly",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "D2. Special Karte von Südpreussen : mit Allergrösster Erlaubniss aus der Königlichen grossen topographischen Vermessungs-Karte, unter Mitwürkung des Directors Langner",
+				"rights": "Biblioteka Uniwersytetu Łódzkiego",
+				"publisher": "Simon Schropp u. Comp.",
+				"date": "1802-1803",
+				"language": "ger",
+				"description": "Mapy topograficzne Prus Południowych.13 arkuszy o wymiarach 62 x 82 cm. Skala [ca 1:150000]. Miedzioryt, ręcznie kolorowany",
+				"libraryCatalog": "dLibra",
+				"shortTitle": "D2. Special Karte von Südpreussen"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
