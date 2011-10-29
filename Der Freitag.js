@@ -1,14 +1,15 @@
 {
-        "translatorID": "1ab8b9a4-72b5-4ef4-adc8-4956a50718f7",
-        "label": "Der Freitag",
-        "creator": "Martin Meyerhoff",
-        "target": "^http://www\\.freitag\\.de",
-        "minVersion": "1.0",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": false,
-        "translatorType": 4,
-        "lastUpdated": "2011-04-21 01:51:03"
+	"translatorID": "1ab8b9a4-72b5-4ef4-adc8-4956a50718f7",
+	"label": "Der Freitag",
+	"creator": "Martin Meyerhoff",
+	"target": "^https?://www\\.freitag\\.de",
+	"minVersion": "1.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-28 14:15:23"
 }
 
 /*
@@ -143,4 +144,47 @@ function doWeb(doc, url) {
 	} else {
 		scrape(doc, url);
 	}
-}	
+}	/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.freitag.de/politik/1143-bankrottmanager-in-eigener-sache",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "Lutz",
+						"lastName": "Herden",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.freitag.de/datenbank/freitag/2011/43/bankrottmanager-in-eigener-sache/print",
+						"title": "Griechenland: Bankrottmanager in eigener Sache — Der Freitag",
+						"mimeType": "text/html"
+					}
+				],
+				"url": "http://www.freitag.de/politik/1143-bankrottmanager-in-eigener-sache",
+				"date": "28.10.2011",
+				"title": "Griechenland: Bankrottmanager in eigener Sache",
+				"publicationTitle": "Der Freitag",
+				"abstractNote": "Schuldenschnitt hin oder her. Vielleicht wäre eine geordnete Staatsinsolvenz das Beste für den Pleitier. Leider fehlen in der EU die erforderlichen Insolvenzregeln",
+				"section": "Politik",
+				"libraryCatalog": "Der Freitag",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Griechenland"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.freitag.de/search?modus=articles&SearchableText=Gaddafi*",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
