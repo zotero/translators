@@ -2,14 +2,14 @@
 	"translatorID": "fce388a6-a847-4777-87fb-6595e710b7e7",
 	"label": "ProQuest",
 	"creator": "Avram Lyon",
-	"target": "^https?://search\\.proquest\\.com[^/]*(/abi[a-z]*|/pqrl|/pqdt|/hnp[a-z]*)?/(docview|publication|publicationissue|results)",
+	"target": "^https?://search\\.proquest\\.com[^/]*(/abi[a-z]*|/pqrl|/pqdt|/hnp[a-z]*|dissertations)?/(docview|publication|publicationissue|results)",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-10-25 11:19:12"
+	"lastUpdated": "2011-10-29 21:52:37"
 }
 
 /*
@@ -45,6 +45,8 @@ function detectWeb(doc, url) {
 			type = type.textContent.trim();
 			type = mapToZotero(type);
 			if (type) return type;
+		} else if (url.match(/\/dissertations\//)) {
+			return "thesis";
 		}
 		// Fall back on journalArticle-- even if we couldn't guess the type
 		return "journalArticle";
@@ -233,9 +235,9 @@ function scrape (doc) {
 	// We can improve on this, so we do, but if there's no full-text there's no item.rights, so first test for that.
 if(item.rights)	var fullerDate = item.rights.match(/([A-Z][a-z]{2} \d{1,2}, \d{4}$)/);
 	if (!item.date || 
-	(item.date.match(/^\d{4}$/) && fullerDate)) {
+		(item.date.match(/^\d{4}$/) && fullerDate)) {
 		item.date = fullerDate[1];
-}
+	}
 	
 	if (!item.itemType && item.libraryCatalog && item.libraryCatalog.match(/Historical Newspapers/))
 		item.itemType = "newspaperArticle";
@@ -300,6 +302,7 @@ function mapToZotero (type) {
 	Zotero.debug("No mapping for type: "+type);
 	return false;
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -354,6 +357,63 @@ var testCases = [
 				"proceedingsTitle": "Peace Research",
 				"libraryCatalog": "ProQuest",
 				"shortTitle": "Peacemaking"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://search.proquest.com/dissertations/docview/251755786/abstract/132B8A749B71E82DBA1/1?accountid=14512",
+		"items": [
+			{
+				"itemType": "thesis",
+				"creators": [
+					{
+						"firstName": "Valleri Jane",
+						"lastName": "Robinson",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Communication and the arts",
+					"Stanislavsky",
+					"Konstantin",
+					"Konstantin Stanislavsky",
+					"Russian",
+					"Modernism",
+					"Theater"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://search.proquest.com/docview/251755786/abstract",
+						"title": "ProQuest Record",
+						"mimeType": "text/html"
+					},
+					{
+						"url": "http://media.proquest.com/media/pq/classic/doc/726077491/fmt/prv/rep/300PDF?hl=&cit%3Aauth=Robinson%2C+Valleri+Jane&cit%3Atitle=Beyond+Stanislavsky%3A+The+influence+of+Russian+modernism+on+the+American+theatre&cit%3Apub=ProQuest+Dissertations+and+Theses&cit%3Avol=&cit%3Aiss=&cit%3Apg=n%2Fa&cit%3Adate=2001&ic=true&cit%3Aprod=ProQuest&_a=20111030044405336%253A322793-96095-ONE_SEARCH-128.97.245.28-18750-251755786-FullTextPreview-null-null-Online-FT-PRW-2001%252F01%252F01-2001%252F12%252F31---Online--------Dissertations%2B%2526%2BTheses---------PrePaid--%257BP-1007586-7267-CUSTOMER-10000115-1046531%257D&_s=jELbJkrJmfETEPQ6uj02mXndC%2B0%3D",
+						"title": "ProQuest PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"url": "http://media.proquest.com/media/pq/classic/doc/726077491/fmt/ai/rep/300PDF?hl=&cit%3Aauth=Robinson%2C+Valleri+Jane&cit%3Atitle=Beyond+Stanislavsky%3A+The+influence+of+Russian+modernism+on+the+American+theatre&cit%3Apub=ProQuest+Dissertations+and+Theses&cit%3Avol=&cit%3Aiss=&cit%3Apg=n%2Fa&cit%3Adate=2001&ic=true&cit%3Aprod=ProQuest&_a=20111030044405336%253A322793-96095-ONE_SEARCH-128.97.245.28-18750-251755786-DocumentImage-null-null-Online-FT-PFT-2001%252F01%252F01-2001%252F12%252F31---Online--------Dissertations%2B%2526%2BTheses---------PrePaid--%257BP-1007586-7267-CUSTOMER-10000115-1046531%257D&_s=%2F9Vl6GgF%2BJA5ZMsfgCM006g67Ws%3D",
+						"title": "ProQuest PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"place": "United States -- Ohio",
+				"thesisType": "Ph.D.",
+				"title": "Beyond Stanislavsky: The influence of Russian modernism on the American theatre",
+				"pages": "233 p.",
+				"date": "2001",
+				"section": "0168",
+				"ISBN": "9780493440408, 0493440402",
+				"university": "The Ohio State University",
+				"callNumber": "251755786",
+				"rights": "Copyright UMI - Dissertations Publishing 2001",
+				"libraryCatalog": "ProQuest Dissertations & Theses (PQDT); ProQuest Dissertations & Theses A&I",
+				"shortTitle": "Beyond Stanislavsky",
+				"checkFields": "title"
 			}
 		]
 	}
