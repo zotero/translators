@@ -1,14 +1,15 @@
 {
-	"translatorID":"930d49bc-44a1-4c22-9dde-aa6f72fb11e5",
-	"translatorType":4,
-	"label":"Cornell LII",
-	"creator":"Bill McKinney",
-	"target":"^http://www\\.law\\.cornell\\.edu/supct/html/.+",
-	"minVersion":"1.0.0b4.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-03-19 17:36:00"
+	"translatorID": "930d49bc-44a1-4c22-9dde-aa6f72fb11e5",
+	"label": "Cornell LII",
+	"creator": "Bill McKinney",
+	"target": "^http://www\\.law\\.cornell\\.edu/supct/html/.+",
+	"minVersion": "1.0.0b4.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-27 23:57:31"
 }
 
 function detectWeb(doc, url) {
@@ -19,7 +20,7 @@ function detectWeb(doc, url) {
 	
 	var liiRegexp = /http:\/\/www\.law\.cornell\.edu\/supct\/html\/.+/
 	if(liiRegexp.test(url)) {
-		return "book";
+		return "case";
 	} else {
 		var aTags = doc.getElementsByTagName("a");
 		for(var i=0; i<aTags.length; i++) {
@@ -206,4 +207,51 @@ function doWeb(doc, url) {
 		Zotero.Utilities.processDocuments(urls, scrape, function() { Zotero.done(); });
 		Zotero.wait();
 	}
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.law.cornell.edu/supct/html/01-618.ZD1.html",
+		"items": [
+			{
+				"itemType": "case",
+				"creators": [
+					{
+						"lastName": "Breyer",
+						"creatorType": "judge",
+						"fieldMode": true
+					}
+				],
+				"notes": [
+					{
+						"note": "Bluebook citation: eldred v. ashcroft, 537 U.S. 186 (2003)."
+					}
+				],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.law.cornell.edu/supct/pdf/01-618P.ZD1",
+						"title": "PDF version",
+						"mimeType": "application/pdf",
+						"downloadable": true
+					}
+				],
+				"url": "http://www.law.cornell.edu/supct/html/01-618.ZD1.html",
+				"language": "en-us",
+				"court": "U.S. Supreme Court",
+				"reporter": "U.S.",
+				"title": "ELDRED V. ASHCROFT (Breyer, J., dissenting)",
+				"caseName": "eldred v. ashcroft (Breyer, J., dissenting)",
+				"history": "ON WRIT OF CERTIORARI TO THE UNITED STATES COURT OF APPEALS FOR THE DISTRICT OF COLUMBIA CIRCUIT",
+				"shortTitle": "eldred v. ashcroft",
+				"dateDecided": "2003 January 15",
+				"reporterVolume": "537",
+				"firstPage": "186",
+				"libraryCatalog": "Cornell LII",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

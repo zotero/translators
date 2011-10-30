@@ -9,9 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-09-04 08:59:33"
+	"lastUpdated": "2011-10-29 13:09:31"
 }
-
 
 /*
 Die Zeit Translator
@@ -185,44 +184,6 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.zeit.de/2011/36/Interview-Lahm-Rinke",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"creators": [
-					{
-						"firstName": "Moritz",
-						"lastName": "Müller-Wirth",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"Fußball",
-					"Autor",
-					"Schriftsteller"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"url": false,
-						"title": "Philipp Lahm: \"Hast du elf Freunde?\" | Sport | ZEIT ONLINE",
-						"mimeType": "text/html"
-					}
-				],
-				"url": "http://www.zeit.de/2011/36/Interview-Lahm-Rinke",
-				"title": "Philipp Lahm: \"Hast du elf Freunde?\"",
-				"date": "17:12 Uhr",
-				"abstractNote": "Tschechow und Robben, Drama im Flutlicht und Wahrhaftigkeit bei der Arbeit. Der Fußballprofi und Autor Philipp Lahm im Gespräch mit dem Schriftsteller und Fußballer Moritz Rinke.",
-				"publicationTitle": "Die Zeit",
-				"section": "sport",
-				"libraryCatalog": "Die Zeit",
-				"shortTitle": "Philipp Lahm"
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "http://www.zeit.de/politik/ausland/2011-09/libyen-bani-walid",
 		"items": [
 			{
@@ -256,6 +217,45 @@ var testCases = [
 				"section": "Ausland",
 				"libraryCatalog": "Die Zeit",
 				"shortTitle": "Libyen"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.zeit.de/2011/36/Interview-Lahm-Rinke",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "Moritz",
+						"lastName": "Müller-Wirth",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Fußball",
+					"Autor",
+					"Schriftsteller"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.zeit.de/2011/36/Interview-Lahm-Rinke?page=all&print=true",
+						"title": "Philipp Lahm: \"Hast du elf Freunde?\" | Sport | ZEIT ONLINE",
+						"mimeType": "text/html"
+					}
+				],
+				"url": "http://www.zeit.de/2011/36/Interview-Lahm-Rinke",
+				"title": "Philipp Lahm: \"Hast du elf Freunde?\"",
+				"date": "17:12 Uhr",
+				"abstractNote": "Tschechow und Robben, Drama im Flutlicht und Wahrhaftigkeit bei der Arbeit. Der Fußballprofi und Autor Philipp Lahm im Gespräch mit dem Schriftsteller und Fußballer Moritz Rinke",
+				"publicationTitle": "Die Zeit",
+				"section": "sport",
+				"libraryCatalog": "Die Zeit",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Philipp Lahm"
 			}
 		]
 	}

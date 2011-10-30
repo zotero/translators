@@ -1,14 +1,15 @@
 {
-	"translatorID":"99be9976-2ff9-40df-96e8-82edfa79d9f3",
-	"translatorType":4,
-	"label":"Defense Technical Information Center",
-	"creator":"Matt Burton",
-	"target":"http://oai\\.dtic\\.mil/oai/",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"translatorID": "99be9976-2ff9-40df-96e8-82edfa79d9f3",
+	"label": "Defense Technical Information Center",
+	"creator": "Matt Burton",
+	"target": "^https?://oai\\.dtic\\.mil/oai/",
+	"minVersion": "1.0.0b3.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-28 11:30:27"
 }
 
 function detectWeb(doc, url) {
@@ -123,4 +124,67 @@ function doWeb(doc, url) {
 		newItem.complete();
 	}, function() {Zotero.done();}, null);
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://oai.dtic.mil/oai/oai?&verb=getRecord&metadataPrefix=html&identifier=ADA466425",
+		"items": [
+			{
+				"itemType": "report",
+				"creators": [
+					{
+						"firstName": "Dennis M",
+						"lastName": "DeCoste",
+						"creatorType": ""
+					}
+				],
+				"notes": [],
+				"tags": [
+					"CYBERNETICS",
+					"*ARTIFICIAL INTELLIGENCE",
+					"*SYSTEMS ANALYSIS",
+					"*QUALITATIVE ANALYSIS",
+					"MONITORING",
+					"THESES",
+					"*QUALITATIVE REASONING",
+					"MEASUREMENT INTERPRETATION",
+					"EXPLANATION",
+					"*QUALITATIVE PHYSICS",
+					"SYSTEMS BEHAVIOR",
+					"PINTERP SPACE",
+					"PINTERPS",
+					"QUALITATIVE STATES",
+					"ENVISIONMENTS",
+					"FAULTY DATA",
+					"INTERPRETATION CREDIBILITIES",
+					"DURATION CONSTRAINTS",
+					"DEPENDENCY PATHS",
+					"COMPLEXITY ANALYSIS",
+					"DATMI(DYNAMIC ACROSS-TIME MEASUREMENT INTERPRETATION)"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://stinet.dtic.mil/oai/oai?&verb=getRecord&metadataPrefix=html&identifier=ADA466425",
+						"title": "DTIC Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Dynamic Across-Time Measurement Interpretation: Maintaining Qualitative Understandings of Physical System Behavior",
+				"date": "1990-02",
+				"url": "http://stinet.dtic.mil/oai/oai?&verb=getRecord&metadataPrefix=html&identifier=ADA466425",
+				"abstractNote": "Incrementally maintaining a qualitative understanding of physical system behavior based on observations is crucial to real-time process monitoring, control, and diagnosis . This paper describes the DATMI theory for dynamically maintaining a pinterp-space, a concise representation of local and global interpretations consistent with the observations over time. Each interpretation signifies alternative paths of states in a qualitative envisionment . Representing a space of interpretations, instead of just a \"current best\" one, avoids the need for extensive backtracking to handle incomplete or faulty data. Domain-specific knowledge about state and transition probabilities can be used to maintain the best working interpretation as well. Domain-specific knowledge about durations of states and paths of states can also be used to further constrain the interpretation space. When all these constraints lead to inconsistencies, faulty-data hypotheses are generated and then tested by adjusting the pinterp-space. The time and space complexity of maintaining the pinterp-space is polynomial in the number of measurements and envisionment states.",
+				"libraryCatalog": "Defense Technical Information Center",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Dynamic Across-Time Measurement Interpretation"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://oai.dtic.mil/oai/20070613_3_docs.html",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

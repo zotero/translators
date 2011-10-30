@@ -1,14 +1,15 @@
 {
-	"translatorID":"625c6435-e235-4402-a48f-3095a9c1a09c",
-	"translatorType":4,
-	"label":"DBLP Computer Science Bibliography",
-	"creator":"Adam Crymble",
-	"target":"http://(search?|dblp?).mpi-inf",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-09-02 13:40:00"
+	"translatorID": "625c6435-e235-4402-a48f-3095a9c1a09c",
+	"label": "DBLP Computer Science Bibliography",
+	"creator": "Adam Crymble",
+	"target": "^https?://(www\\.)?dblp\\.org",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-28 11:16:23"
 }
 
 function detectWeb(doc, url) {
@@ -167,4 +168,103 @@ function doWeb(doc, url) {
 	//}
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.dblp.org/rec/bibtex/journals/cssc/XuY12",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Jianwen",
+						"lastName": "Xu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hu",
+						"lastName": "Yang",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"url": "http://www.dblp.org/rec/bibtex/journals/cssc/XuY12",
+				"date": "2012",
+				"pages": "327-341",
+				"title": "On the Preliminary Test Backfitting and Speckman Estimators\n               in Partially Linear Models and Numerical Comparisons",
+				"volume": "41",
+				"publicationTitle": "Communications in Statistics - Simulation and Computation",
+				"issue": "3",
+				"libraryCatalog": "DBLP Computer Science Bibliography",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.dblp.org/rec/bibtex/conf/ats/KochteZBIWHCP10",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"creators": [
+					{
+						"firstName": "Michael A.",
+						"lastName": "Kochte",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Christian G.",
+						"lastName": "Zoellin",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Rafal",
+						"lastName": "Baranowski",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael E.",
+						"lastName": "Imhof",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hans-Joachim",
+						"lastName": "Wunderlich",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nadereh",
+						"lastName": "Hatami",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Stefano Di",
+						"lastName": "Carlo",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Paolo",
+						"lastName": "Prinetto",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"conferenceName": "Asian Test Symposium",
+				"url": "http://www.dblp.org/rec/bibtex/conf/ats/KochteZBIWHCP10",
+				"date": "2010",
+				"pages": "3-8",
+				"title": "Efficient Simulation of Structural Faults for the Reliability\n               Evaluation at System-Level",
+				"libraryCatalog": "DBLP Computer Science Bibliography",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
