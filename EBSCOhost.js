@@ -8,7 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-09-13 11:11:54"
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-30 17:04:30"
 }
 
 function detectWeb(doc, url) {
@@ -53,7 +54,7 @@ function downloadFunction(text, url) {
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
-		//Zotero.debug(text);
+		Zotero.debug(text);
 		translator.setHandler("itemDone", function(obj, item) {
 			if (text.match(/^L3\s+-\s*(.*)/m)) {
 				item.DOI = text.match(/^L3\s+\-\s*(.*)/m)[1];
@@ -67,9 +68,6 @@ function downloadFunction(text, url) {
 			if (text.match(/^T1\s+-/m)) {
 				item.title = text.match(/^T1\s+-\s*(.*)/m)[1];
 			}
-
-			// Strip final period from title if present
-			item.title = item.title.replace(/\.$/,'');
 		
 			// Get the accession number from URL or elsewhere	
 			if (an) {
@@ -112,7 +110,7 @@ function downloadFunction(text, url) {
 					if (realpdf) {
 						realpdf = realpdf[1].replace(/&amp;/g, "&").replace(/#.*$/,'')
 								.replace(/K=\d+/,"K="+an);
-						//Zotero.debug("PDF for "+item.title+": "+realpdf);
+						Zotero.debug("PDF for "+item.title+": "+realpdf);
 						item.attachments.push({url:realpdf,
 								title: "EBSCO Full Text",
 								mimeType:"application/pdf"});
@@ -240,7 +238,7 @@ function doDelivery(doc, nsResolver, folderData, onDone) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://search.ebscohost.com/login.aspx?direct=true&db=a9h&AN=4370815&lang=cs&site=ehost-live",
+		"url": "http://web.ebscohost.com/ehost/detail?vid=3&hid=24&sid=32b28a70-2e49-443b-b143-e55a55c6a45c%40sessionmgr14&bdata=JnNpdGU9ZWhvc3QtbGl2ZQ%3d%3d#",
 		"items": [
 			{
 				"itemType": "journalArticle",
