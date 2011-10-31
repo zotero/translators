@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-10-23 20:45:22"
+	"lastUpdated": "2011-10-30 20:45:22"
 }
 
 /*
@@ -99,16 +99,17 @@ function doWeb(doc, url) {
 				}
 			};
 			
-			var items = Zotero.selectItems(availableItems);
-			if(!items) {
-				return true;
-			}
-			
-			var newUrls = new Array();
-			for(var itemURL in items) {
-				newUrls.push(itemURL.replace("?", "?marcData=Y&"));
-			}
-			pageByPage(marc, newUrls);
+			Zotero.selectItems(availableItems, function (items) {
+				if(!items) {
+					return true;
+				}
+				
+				var newUrls = new Array();
+				for(var itemURL in items) {
+					newUrls.push(itemURL.replace("?", "?marcData=Y&"));
+				}
+				pageByPage(marc, newUrls);
+			});
 		}
 	});
 	
