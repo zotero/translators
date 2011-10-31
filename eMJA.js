@@ -1,20 +1,21 @@
 {
-	"translatorID":"966a7612-900c-42d9-8780-2a3247548588",
-	"translatorType":4,
-	"label":"eMJA",
-	"creator":"Michael Berkowitz",
-	"target":"http://www.mja.com.au/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"translatorID": "966a7612-900c-42d9-8780-2a3247548588",
+	"label": "eMJA",
+	"creator": "Michael Berkowitz",
+	"target": "^https?://www\\.mja\\.com\\.au/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-30 21:49:48"
 }
 
 function detectWeb(doc, url) {
 	if (doc.evaluate('//p[@class="Pfoot"]/b/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate('/html/body/table/tbody/tr[1]/td[2]/a/b', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
-	} else if (doc.title.indexOf("eMJA:") != -1) {
+	} else if (doc.evaluate('//META[@NAME="citation"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "journalArticle";
 	}
 }
@@ -122,4 +123,89 @@ function doWeb(doc, url) {
 		];
 		newItem.complete();
 	}, function() {Zotero.done();});
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.mja.com.au/public/issues/195_01_040711/hee11421_fm.html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Emma L",
+						"lastName": "Heeley",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jade W",
+						"lastName": "Wei",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kristie",
+						"lastName": "Carter",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Md Shaheenul",
+						"lastName": "Islam",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Amanda G",
+						"lastName": "Thrift",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Graeme J",
+						"lastName": "Hankey",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alan",
+						"lastName": "Cass",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Craig S",
+						"lastName": "Anderson",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.mja.com.au/public/issues/195_01_040711/hee11421_fm.html",
+						"title": "eMJA Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"url": "http://www.mja.com.au/public/issues/195_01_040711/hee11421_fm.pdf",
+						"title": "eMJA PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"title": "Ocioeconomic Disparities in Stroke Rates and Outcome: Pooled Analysis of Stroke Incidence Studies in Australia and New Zealand",
+				"publicationTitle": "The Medical Journal of Australia",
+				"ISSN": "0025-729X",
+				"url": "http://www.mja.com.au/public/issues/195_01_040711/hee11421_fm.html",
+				"date": "2011-07-04",
+				"volume": "195",
+				"issue": "1",
+				"pages": "10-14",
+				"libraryCatalog": "eMJA",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Ocioeconomic Disparities in Stroke Rates and Outcome"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.mja.com.au/public/issues/195_01_040711/contents_040711.html",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
