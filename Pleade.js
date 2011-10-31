@@ -1,14 +1,15 @@
 {
-        "translatorID":"ce68b0ed-3137-4e38-b691-f3bc49bc1497",
-        "label":"Pleade",
-        "creator":"DIA Modou",
-        "target":"base=ead|ead\\.html|list-results\\.html",
-        "minVersion":"1.0",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":true,
-        "translatorType":4,
-        "lastUpdated":"2011-03-03 20:46:08"
+	"translatorID": "ce68b0ed-3137-4e38-b691-f3bc49bc1497",
+	"label": "Pleade",
+	"creator": "DIA Modou",
+	"target": "(?:list-results|results|ead)\\.html\\?.*(?:base=ead|mode=|id=)",
+	"minVersion": "1.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-30 21:15:14"
 }
 
 /*
@@ -223,15 +224,12 @@ function getMultipleQid(doc,url)
 
 			var newURL2 = url.substring(url.indexOf("http"), url.indexOf("results.html"))+"functions/zotero/";
 		
-			var tpids = Zotero.selectItems(pids);
-		
-			for(var i in tpids) {
-				scrape(newURL2+i+".xml?fragment=null");
-			}
-
+			Zotero.selectItems(pids, function (tpids) {
+				for(var i in tpids) {
+					scrape(newURL2+i+".xml?fragment=null");
+				}
+			});
 		})
-
-		Zotero.done();
 	})
 	Zotero.wait();
 }
@@ -262,3 +260,62 @@ function doWeb(doc, url) {
 		scrape(url.substring(url.indexOf("http"), url.indexOf("ead.html"))+"functions/zotero/"+pleadeId+".xml?fragment="+fragmentId);
 	}
 }
+
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://gael.gironde.fr/pleade/ead.html?id=FRAD033_IR_11AV#!{%22content%22:[%22FRAD033_IR_11AV_e0000023%22,true,%22%22]}",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"url": "http://gael.gironde.fr/ead.html?id=FRAD033_IR_11AV",
+				"title": "Archives sonores et audiovisuelles de l'association Gric de Prat",
+				"date": "2010",
+				"publisher": "Archives départementales de la Gironde",
+				"place": "Bordeaux",
+				"language": "français",
+				"callNumber": "11 AV 1-14",
+				"libraryCatalog": "Pleade",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"checkFields": "title"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://jubilotheque.upmc.fr/ead.html?id=GM_000001_014&c=GM_000001_014_page24&qid=sdx_q13#!{%22content%22:[%22GM_000001_014_page24%22,false,%22sdx_q13%22]}",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"url": "http://jubilotheque.upmc.fr//ead.html?id=GM_000001_014",
+				"title": "Journal d'un voyage géologique fait à travers toute la chaîne des Carpathes, en Bukowine, en Transylvanie et dans le Marmarosch / par feu M. Lill de Lilienbach. Observations remises en ordre et accompagnées de notes par M.A. Boué",
+				"date": "1834",
+				"publisher": "F.-G. Levrault. Paris ; Strasbourg",
+				"language": "fre",
+				"rights": "Utilisation libre dans le cadre d'un usage non commercial, en mentionnant la source et sans dénaturer l'oeuvre Free use for non-commercial purposes with mandatory acknowledgement of the source and without adulterating the work",
+				"callNumber": "260",
+				"libraryCatalog": "Pleade",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"checkFields": "title"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://jubilotheque.upmc.fr/results.html?base=ead&champ1=fulltext&op1=AND&search_type=simple&query1=tatar&ssearch-submit-npt.x=0&ssearch-submit-npt.y=0",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
