@@ -1,14 +1,15 @@
 {
-	"translatorID":"09a9599e-c20e-a405-d10d-35ad4130a426",
-	"translatorType":4,
-	"label":"Electronic Colloquium on Computational Complexity",
-	"creator":"Jonas Schrieb",
-	"minVersion":"1.0.0b3.r1",
-	"target":"http://(www.)?eccc.(uni-trier|hpi-web).de/",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":false,
-	"lastUpdated":"2010-03-03 15:00:00"
+	"translatorID": "09a9599e-c20e-a405-d10d-35ad4130a426",
+	"label": "Electronic Colloquium on Computational Complexity",
+	"creator": "Jonas Schrieb",
+	"target": "^https?://(www\\.)?eccc\\.(uni-trier|hpi-web)\\.de/",
+	"minVersion": "1.0.0b3.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-30 21:10:51"
 }
 
 function detectWeb(doc, url) {
@@ -111,3 +112,65 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function(){Zotero.done();});
 	Zotero.wait();
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://eccc.hpi-web.de/report/2006/067/",
+		"items": [
+			{
+				"itemType": "report",
+				"creators": [
+					{
+						"firstName": "Heiner",
+						"lastName": "Ackermann",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Heiko",
+						"lastName": "Röglin",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Berthold",
+						"lastName": "Vöcking",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Combinatorial Structure",
+					"Congestion Games",
+					"Convergence Time",
+					"PLS-Completeness"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://eccc.hpi-web.de/report/2006/067/",
+						"title": "ECCC Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"url": "http://eccc.hpi-web.de/report/2006/067/download",
+						"title": "ECCC Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"date": "2006",
+				"reportNumber": "067",
+				"url": "http://eccc.hpi-web.de/report/2006/067/",
+				"title": "On the Impact of Combinatorial Structure on Congestion Games",
+				"abstractNote": "",
+				"libraryCatalog": "Electronic Colloquium on Computational Complexity",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://eccc.hpi-web.de/keyword/13486/",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

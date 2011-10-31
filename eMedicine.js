@@ -1,14 +1,15 @@
 {
-	"translatorID":"ab88d517-d88c-4a73-a0ad-c94c76cca849",
-	"translatorType":4,
-	"label":"eMedicine",
-	"creator":"William Smith",
-	"target":"http://emedicine.medscape.com/article/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-12-09 13:40:00"
+	"translatorID": "ab88d517-d88c-4a73-a0ad-c94c76cca849",
+	"label": "eMedicine",
+	"creator": "William Smith",
+	"target": "^https?://emedicine\\.medscape\\.com/article/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-30 21:36:06"
 }
 
 // Emedicine.Medscape.com translator.
@@ -52,7 +53,7 @@ function scrape(doc, url) {
 	newItem.publication = 'Medscape - eMedicine';
 
 	// Geta few useful fields.
-	useMeta(doc, newItem, "displayTitle", "title");
+	useMeta(doc, newItem, "title", "title");
 	useMeta(doc, newItem, "date"        , "date" );
 	useMeta(doc, newItem, "book"        , "repository");
 	useMeta(doc, newItem, "description" , "abstractNote"); 
@@ -60,7 +61,8 @@ function scrape(doc, url) {
 	
 	// Authors - we only handle one.
 	authors = getMeta(doc, newItem, "authors");
-	if (authors) {
+	Zotero.debug(authors)
+	if (!String(authors).match(/[a-z]/)) {
 		authors = authors.iterateNext().textContent;
 		Zotero.debug('author: <'+authors+'>');
 		newItem.creators.push(Zotero.Utilities.cleanAuthor(authors, "author"));
@@ -94,3 +96,32 @@ function doWeb(doc, url) {
 
 	scrape(doc,url);
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://emedicine.medscape.com/article/163751-overview",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [],
+				"notes": [],
+				"tags": [
+					"Brugada Syndrome information",
+					" Brugada Syndrome articles"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"publication": "Medscape - eMedicine",
+				"title": "Brugada Syndrome",
+				"date": "2011-06-20-04:00",
+				"abstractNote": "Brugada syndrome is a disorder characterized by sudden death associated with one of several electrocardiographic (ECG) patterns characterized by incomplete right bundle-branch block and ST elevations in the anterior precordial leads.",
+				"url": "http://emedicine.medscape.com/article/163751-overview",
+				"libraryCatalog": "eMedicine",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
