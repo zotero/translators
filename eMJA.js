@@ -37,14 +37,14 @@ function senCase(string) {
 
 function doWeb(doc, url) {
 	var URIs = new Array();
-	
+
 	if (doc.evaluate('//p[@class="Pfoot"]/b/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		var xpath = '//p[@class="Pfoot"]/b/a';
 	} else if (doc.evaluate('//tr[1]/td[2]/a/b', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		var xpath = '//tr[1]/td[2]/a/b';
 		var linkpath = '//tr[2]/td[2]/small[@class="gr"]';
 	}
-	
+
 	if (xpath) {
 		if (linkpath) {
 			var items = new Object();
@@ -80,14 +80,14 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(URIs, function(newDoc) {
 		var newItem = new Zotero.Item("journalArticle");
 		newItem.title = senCase(newDoc.title.substring(6));
-		
+
 		newItem.publicationTitle = "The Medical Journal of Australia";
 		newItem.ISSN = "0025-729X";
 		newItem.url = newDoc.location.href;
-		
+
 		//date
 		newItem.date = newDoc.evaluate('//meta[@name="date"]/@content', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.substring(0,10);
-		
+
 		//voliss
 		var voliss = newDoc.evaluate('//meta[@name="citation"]/@content', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		//voliss = voliss.match(/[^\d]+(\d+)\s+\((\d+)\)/);
@@ -95,7 +95,7 @@ function doWeb(doc, url) {
 		newItem.volume = voliss[1];
 		newItem.issue = voliss[2];
 		newItem.pages = voliss[3];
-		
+
 		//authors
 		var authors = new Array();
 		var apath = '//div[@class="By"]/span[@class="Pn"]';
@@ -111,11 +111,11 @@ function doWeb(doc, url) {
 			authors.push(name);
 			next_a = author.iterateNext();
 		}
-		
+
 		for (var i in authors) {
 			newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i], "author"));
 		}
-		
+
 		//attachments
 		newItem.attachments = [
 			{url:newDoc.location.href, title:"eMJA Snapshot", mimeType:"text/html"},
@@ -123,7 +123,9 @@ function doWeb(doc, url) {
 		];
 		newItem.complete();
 	}, function() {Zotero.done();});
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",

@@ -18,7 +18,7 @@ function detectWeb(doc,url)
 	   var nsResolver = namespace ? function(prefix) {
 	   if (prefix == 'x') return namespace; else return null;
 	   } : null;
-	   
+
 	   var xpath='//meta[@name="Story_type"]/@content';
 	   var temp=doc.evaluate(xpath, doc, nsResolver,XPathResult.ANY_TYPE,null).iterateNext();
 	   if(temp)
@@ -93,7 +93,9 @@ function doWeb(doc,url)
 			 if(temp.value.indexOf("Story")>-1 || temp.value=="Blog")
 					   {scrape(doc,url);}
 	  }
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",

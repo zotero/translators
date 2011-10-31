@@ -8,8 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2011-10-30 17:04:30"
+	"lastUpdated": "2011-09-13 11:11:54"
 }
 
 function detectWeb(doc, url) {
@@ -17,9 +16,9 @@ function detectWeb(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') { return namespace; } else { return null; }
 	} : null;
-	
+
 	// See if this is a search results or folder results page
-	var searchResult = doc.evaluate('//ul[@class="result-list" or @class="folder-list"]/li/div[@class="result-list-record" or @class="folder-item"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();         
+	var searchResult = doc.evaluate('//ul[@class="result-list" or @class="folder-list"]/li/div[@class="result-list-record" or @class="folder-item"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if(searchResult) {
 		return "multiple";
 	}
@@ -54,7 +53,7 @@ function downloadFunction(text, url) {
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
-		Zotero.debug(text);
+		//Zotero.debug(text);
 		translator.setHandler("itemDone", function(obj, item) {
 			if (text.match(/^L3\s+-\s*(.*)/m)) {
 				item.DOI = text.match(/^L3\s+\-\s*(.*)/m)[1];
@@ -68,8 +67,11 @@ function downloadFunction(text, url) {
 			if (text.match(/^T1\s+-/m)) {
 				item.title = text.match(/^T1\s+-\s*(.*)/m)[1];
 			}
-		
-			// Get the accession number from URL or elsewhere	
+
+			// Strip final period from title if present
+			item.title = item.title.replace(/\.$/,'');
+
+			// Get the accession number from URL or elsewhere
 			if (an) {
 				an = an[1];
 				item.callNumber = an;
@@ -85,11 +87,11 @@ function downloadFunction(text, url) {
 				if (year && extra && extra[1].indexOf(year[0]) !== -1) {
 					item.date = extra[1];
 				}
-			}		
-	
+			}
+
 			// RIS translator tries to download the link in "UR"
 			item.attachments = [];
-			
+
 			// But keep the stable link as a link attachment
 			if(item.url) {
 				// Trim the ⟨=cs suffix -- EBSCO can't find the record with it!
@@ -110,7 +112,7 @@ function downloadFunction(text, url) {
 					if (realpdf) {
 						realpdf = realpdf[1].replace(/&amp;/g, "&").replace(/#.*$/,'')
 								.replace(/K=\d+/,"K="+an);
-						Zotero.debug("PDF for "+item.title+": "+realpdf);
+						//Zotero.debug("PDF for "+item.title+": "+realpdf);
 						item.attachments.push({url:realpdf,
 								title: "EBSCO Full Text",
 								mimeType:"application/pdf"});
@@ -132,30 +134,30 @@ function doWeb(doc, url) {
 	var hostRe = new RegExp("^(https?://[^/]+)/");
 	var hostMatch = hostRe.exec(url);
 	host = hostMatch[1];
-									
-	var searchResult = doc.evaluate('//ul[@class="result-list" or @class="folder-list"]/li/div[@class="result-list-record" or @class="folder-item"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();                              
+
+	var searchResult = doc.evaluate('//ul[@class="result-list" or @class="folder-list"]/li/div[@class="result-list-record" or @class="folder-item"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 
 	if(searchResult) {
 		/* Get title links and text */
 		var titlex = '//a[@class = "title-link color-p4"]';
 		var titles = doc.evaluate(titlex, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		
+
 		/* Get folder data for AN, DB, and tag */
 		var folderx = '//span[@class = "item add-to-folder"]/input/@value';
 		var folderData = doc.evaluate(folderx, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		
+
 		var items = {};
 		var folderInfos = {};
 		var title, folderInfo;
-		
+
 		/* load up urls, title text and records keys (DB, AN, tag) */
 		while (title = titles.iterateNext()) {
 			items[title.href] = title.textContent;
-			
+
 			folderInfo = folderData.iterateNext();
 			folderInfos[title.href] = folderInfo.textContent;
 		}
-		
+
 		Zotero.selectItems(items, function (items) {
 				if(!items) {
 					return true;
@@ -178,7 +180,7 @@ function doWeb(doc, url) {
 					}
 					url = urls.shift();
 					info = infos.shift();
-					Zotero.Utilities.processDocuments(url.replace(/#.*$/,''), 
+					Zotero.Utilities.processDocuments(url.replace(/#.*$/,''),
 						function (newDoc) { doDelivery(doc, nsResolver, info, function () { run(urls, infos) }); },
 						function () { return true; });
 				};
@@ -220,7 +222,7 @@ function doDelivery(doc, nsResolver, folderData, onDone) {
 		folderData.Term = folderData.uiTerm;
 		folderData.Tag = folderData.uiTag;
 	}
-	
+
 	var postURL = doc.evaluate('//form[@id="aspnetForm"]/@action', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 
 	var queryString = {};
@@ -228,7 +230,7 @@ function doDelivery(doc, nsResolver, folderData, onDone) {
 		new RegExp("([^?=&]+)(=([^&]*))?", "g"),
 			function($0, $1, $2, $3) { queryString[$1] = $3; }
 	);
-	
+
 	/* ExportFormat = 1 for RIS file */
 	postURL = host+"/ehost/delivery/ExportPanelSave/"+folderData.Db+"_"+folderData.Term+"_"+folderData.Tag+"?sid="+queryString["sid"]+"&vid="+queryString["vid"]+"&bdata="+queryString["bdata"]+"&theExportFormat=1";
 	Zotero.Utilities.HTTP.doGet(postURL, function (text) { downloadFunction(text, postURL); }, onDone);
@@ -238,7 +240,7 @@ function doDelivery(doc, nsResolver, folderData, onDone) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://web.ebscohost.com/ehost/detail?vid=3&hid=24&sid=32b28a70-2e49-443b-b143-e55a55c6a45c%40sessionmgr14&bdata=JnNpdGU9ZWhvc3QtbGl2ZQ%3d%3d#",
+		"url": "http://search.ebscohost.com/login.aspx?direct=true&db=aph&AN=4370815&site=ehost-live",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -271,7 +273,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "Peacemaking and Philosophy: A Critique of Justice for Hero and Now.",
+				"title": "Peacemaking and Philosophy: A Critique of Justice for Hero and Now",
 				"publicationTitle": "Journal of Social Philosophy",
 				"date": "Winter 1999",
 				"volume": "30",

@@ -95,7 +95,9 @@ function doWeb(doc, url) {
 	
 
 	scrape(doc,url);
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",

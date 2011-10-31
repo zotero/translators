@@ -17,23 +17,23 @@ function detectWeb(doc, url){
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 		} : null;
-		
+
 	var xpath = '//div[@id="ingredients"]';
 	var multxpath = '//div[@id="searchresults"]';
 
 	if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 		return "document";
-	} 
+	}
 	// multiple disabled bc of permission issue
 	/** else if (doc.evaluate(multxpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
-		return "multiple"; 
+		return "multiple";
 	}*/
-	
+
 }
 
 function cleanText(s){
 	s = s.replace(/\n+/g, "\n");
-	s = s.replace(/(\n|\r)\t+/g, "\n");  
+	s = s.replace(/(\n|\r)\t+/g, "\n");
 	s = s.replace(/\t+/g, " ");
 	s = s.replace("        ", "", "g");
 	return s;
@@ -71,12 +71,12 @@ function scrape(doc){
 			newItem.creators.push(Zotero.Utilities.cleanAuthor(elmt.textContent, "contributor", false));
 		}
 	}
-		
+
 	xpath = '//div[@id="recipe_intro"]/p';
 	if (elmt = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 		var abstract = elmt.textContent;
 		abstract = Zotero.Utilities.trimInternal(abstract);
-		newItem.abstractNote = abstract;		
+		newItem.abstractNote = abstract;
 	}
 
 	xpath = '//div[@id="ingredients"]';
@@ -105,7 +105,7 @@ function scrape(doc){
 	newItem.notes.push({note:serving});
 
 	var url = doc.location.href;
-	
+
 	var snapshotURL = url.replace("/views/", "/printerfriendly/");
 	newItem.attachments.push({title:"Epicurious.com Snapshot", mimeType:"text/html", url:snapshotURL, snapshot:true});
 	newItem.url = url;
@@ -137,21 +137,23 @@ function doWeb(doc, url){
 				items[link] = title;
 			}
 		}
-		
+
 		var items = Zotero.selectItems(items);
 		if(!items) {
 			return true;
 		}
-		
+
 		var urls = new Array();
 		for(var i in items) {
 			urls.push(i);
 		}
-		
+
 		Zotero.Utilities.processDocuments(urls, scrape, function() { Zotero.done(); });
-		Zotero.wait();	
+		Zotero.wait();
 	}
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
