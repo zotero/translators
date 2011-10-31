@@ -17,9 +17,9 @@ function detectWeb(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') { return namespace; } else { return null; }
 	} : null;
-	
+
 	// See if this is a search results or folder results page
-	var searchResult = doc.evaluate('//ul[@class="result-list" or @class="folder-list"]/li/div[@class="result-list-record" or @class="folder-item"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();         
+	var searchResult = doc.evaluate('//ul[@class="result-list" or @class="folder-list"]/li/div[@class="result-list-record" or @class="folder-item"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if(searchResult) {
 		return "multiple";
 	}
@@ -81,8 +81,8 @@ function downloadFunction(text, url) {
 
 			// Strip final period from title if present
 			item.title = item.title.replace(/\.$/,'');
-		
-			// Get the accession number from URL or elsewhere	
+
+			// Get the accession number from URL or elsewhere
 			if (an) {
 				an = an[1];
 				item.callNumber = an;
@@ -98,11 +98,11 @@ function downloadFunction(text, url) {
 				if (year && extra && extra[1].indexOf(year[0]) !== -1) {
 					item.date = extra[1];
 				}
-			}		
-	
+			}
+
 			// RIS translator tries to download the link in "UR"
 			item.attachments = [];
-			
+
 			// But keep the stable link as a link attachment
 			if(item.url) {
 				// Trim the ⟨=cs suffix -- EBSCO can't find the record with it!
@@ -145,30 +145,30 @@ function doWeb(doc, url) {
 	var hostRe = new RegExp("^(https?://[^/]+)/");
 	var hostMatch = hostRe.exec(url);
 	host = hostMatch[1];
-									
-	var searchResult = doc.evaluate('//ul[@class="result-list" or @class="folder-list"]/li/div[@class="result-list-record" or @class="folder-item"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();                              
+
+	var searchResult = doc.evaluate('//ul[@class="result-list" or @class="folder-list"]/li/div[@class="result-list-record" or @class="folder-item"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 
 	if(searchResult) {
 		/* Get title links and text */
 		var titlex = '//a[@class = "title-link color-p4"]';
 		var titles = doc.evaluate(titlex, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		
+
 		/* Get folder data for AN, DB, and tag */
 		var folderx = '//span[@class = "item add-to-folder"]/input/@value';
 		var folderData = doc.evaluate(folderx, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		
+
 		var items = {};
 		var folderInfos = {};
 		var title, folderInfo;
-		
+
 		/* load up urls, title text and records keys (DB, AN, tag) */
 		while (title = titles.iterateNext()) {
 			items[title.href] = title.textContent;
-			
+
 			folderInfo = folderData.iterateNext();
 			folderInfos[title.href] = folderInfo.textContent;
 		}
-		
+
 		Zotero.selectItems(items, function (items) {
 				if(!items) {
 					return true;
@@ -191,7 +191,7 @@ function doWeb(doc, url) {
 					}
 					url = urls.shift();
 					info = infos.shift();
-					Zotero.Utilities.processDocuments(url.replace(/#.*$/,''), 
+					Zotero.Utilities.processDocuments(url.replace(/#.*$/,''),
 						function (newDoc) { doDelivery(doc, nsResolver, info, function () { run(urls, infos) }); },
 						function () { return true; });
 				};
@@ -233,7 +233,7 @@ function doDelivery(doc, nsResolver, folderData, onDone) {
 		folderData.Term = folderData.uiTerm;
 		folderData.Tag = folderData.uiTag;
 	}
-	
+
 	var postURL = doc.evaluate('//form[@id="aspnetForm"]/@action', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 
 	var queryString = {};
@@ -241,7 +241,7 @@ function doDelivery(doc, nsResolver, folderData, onDone) {
 		new RegExp("([^?=&]+)(=([^&]*))?", "g"),
 			function($0, $1, $2, $3) { queryString[$1] = $3; }
 	);
-	
+
 	/* ExportFormat = 1 for RIS file */
 	postURL = host+"/ehost/delivery/ExportPanelSave/"+folderData.Db+"_"+folderData.Term+"_"+folderData.Tag+"?sid="+queryString["sid"]+"&vid="+queryString["vid"]+"&bdata="+queryString["bdata"]+"&theExportFormat=1";
 	Zotero.Utilities.HTTP.doGet(postURL, function (text) { downloadFunction(text, postURL); }, onDone);
@@ -251,7 +251,7 @@ function doDelivery(doc, nsResolver, folderData, onDone) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://web.ebscohost.com/ehost/detail?sid=611715e0-04f7-4c12-82fd-c9440f2d83c2%40sessionmgr12&vid=1&hid=11&bdata=Jmxhbmc9Y3Mmc2l0ZT1laG9zdC1saXZl",
+		"url": "http://search.ebscohost.com/login.aspx?direct=true&db=aph&AN=4370815&site=ehost-live",
 		"items": [
 			{
 				"itemType": "journalArticle",
