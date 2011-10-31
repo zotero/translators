@@ -27,7 +27,6 @@ function doWeb(doc, url){
 		for (var i in rows) {
 			var title = ZU.xpathText(rows[i], './/span[@class="title"]');
 			var id = ZU.xpath(rows[i], './/a[@class="cataloglinkhref"]')[0].href;
-			Zotero.debug(id)
 			items[id] = title;
 		}
 
@@ -52,21 +51,19 @@ function doWeb(doc, url){
 function scrape(doc, url){
 	//get Endnote Link
 	var baseurl = url.replace(/^(.*?)(\/Record\/)(.*)$/, "$1");
-	Zotero.debug(baseurl);
 	var itemid = url.match(/\/([0-9]+)/)[1];
 	var risurl = baseurl + "/Search/SearchExport?handpicked=" + itemid + "&method=ris";
-	Zotero.debug(risurl);
 	Zotero.Utilities.HTTP.doGet(risurl, function (text) {
 		text = text.replace(/N1  -/g, "N2  -");
-		Zotero.debug("RIS: " + text)
+		//Zotero.debug("RIS: " + text)
 
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
 		translator.setHandler("itemDone", function(obj, item) {
 			item.extra="";
-			if(item.place)	item.place = item.place.replace(/\[/, "").replace(/\]/, "");
-			if (item.tags) item.tags = String(item.tags).split("/")
+			if (item.place)	item.place = item.place.replace(/\[/, "").replace(/\]/, "");
+			if (item.tags) item.tags = item.tags.join("/").split("/")
 			item.attachments = [{url:item.url, title: "Hathi Trust Record", mimeType: "text/html"}];
 			item.url = "";
 			item.complete();
