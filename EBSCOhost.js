@@ -8,7 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-09-13 11:11:54"
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-31 00:58:29"
 }
 
 function detectWeb(doc, url) {
@@ -61,6 +62,16 @@ function downloadFunction(text, url) {
 			if (text.match(/^M3\s+-\s*(.*)/m)) {
 				if (item.DOI == text.match(/^M3\s+\-\s*(.*)/m)[1]) { item.DOI = ""; }
 			}
+			
+			// There are cases where the RIS type isn't good--
+			// there is sometimes better data in M3
+			// This list should be augmented over time
+			if (item.itemType == "document") {
+				var m3 = text.match(/^M3\s+-\s*(.*)$/m);
+				if (m3 && m3[1] == "Literary Criticism")
+					item.itemType = "journalArticle";
+			}
+			
 			if (text.match(/^DO\s+-\s*(.*)/m)) {
 				item.DOI = text.match(/^DO\s+-\s*(.*)/m)[1];
 			}
@@ -240,7 +251,7 @@ function doDelivery(doc, nsResolver, folderData, onDone) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://search.ebscohost.com/login.aspx?direct=true&db=a9h&AN=4370815&lang=cs&site=ehost-live",
+		"url": "http://web.ebscohost.com/ehost/detail?sid=611715e0-04f7-4c12-82fd-c9440f2d83c2%40sessionmgr12&vid=1&hid=11&bdata=Jmxhbmc9Y3Mmc2l0ZT1laG9zdC1saXZl",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -262,20 +273,20 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": false,
+						"url": "http://search.ebscohost.com/login.aspx?direct=true&db=a9h&AN=4370815&site=ehost-live&scope=cite",
 						"title": "EBSCO Record",
 						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
-						"url": false,
+						"url": "http://content.ebscohost.com/ContentServer.asp?T=P&P=AN&K=4370815&S=R&D=a9h&EbscoContent=dGJyMMvl7ESeqa84zdnyOLCmr0meprFSs664SLSWxWXS&ContentCustomer=dGJyMPGstk%2B0qbJPuePfgeyx44Dt6fIA",
 						"title": "EBSCO Full Text",
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "Peacemaking and Philosophy: A Critique of Justice for Hero and Now.",
+				"title": "Peacemaking and Philosophy: A Critique of Justice for Hero and Now",
 				"publicationTitle": "Journal of Social Philosophy",
-				"date": "Winter 1999",
+				"date": "Winter1999",
 				"volume": "30",
 				"issue": "3",
 				"pages": "411-423",
@@ -283,8 +294,58 @@ var testCases = [
 				"ISBN": "00472786",
 				"ISSN": "00472786",
 				"abstractNote": "This article presents a critical analysis of James Sterba's book, Justice for Here and Now.  In the book, Sterba undertakes two distinct but interconnected objects--one primarily methodological and the other primarily ethical. The methodological project is to establish the necessity and desirability of adopting a peacemaking model of doing philosophy, that is, one that is committed to fair-mindedness, openness and self-criticalness in seeking to determine which philosophical views are most justified. Sterba contrasts the peacemaking model with a war-making model of doing philosophy. The ethical project involves establishing two related claims: rationality is required for morality, and it is possible and desirable to reconcile the practical perspectives of alternative positions on justice; welfare liberalism, libertarianism, socialism, feminism, multiculturalism, anthropocentric and nonanthropocentric environmental ethics, and pacifism and just war theory. There is an important and intimate connection between the methodological and ethical projects. In fact, at various places throughout the book Sterba suggests that the relationship is one of logical entailment: not only does appeal to a peacemaking model of doing philosophy establish the two main claims of the ethical project; by showing the rational grounds for reconciling alternative philosophical positions on justice, one establishes that a peacemaking model of philosophy ought to be adopted.",
+				"callNumber": "4370815",
 				"libraryCatalog": "EBSCOhost",
-				"shortTitle": "Peacemaking and Philosophy"
+				"shortTitle": "Peacemaking and Philosophy",
+				"checkFields": "title"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://web.ebscohost.com/ehost/detail?sid=3f8c768f-e9bd-4c06-874e-30075b5a2e43%40sessionmgr15&vid=1&hid=11&bdata=JnNpdGU9ZWhvc3QtbGl2ZQ%3d%3d#db=a9h&AN=9606204477",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Brodsky",
+						"firstName": "Joseph",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"POETS, Polish",
+					"HERBERT, Zbigniew, 1924-1998"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://search.ebscohost.com/login.aspx?direct=true&db=a9h&AN=9606204477&site=ehost-live&scope=cite",
+						"title": "EBSCO Record",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"url": "http://content.ebscohost.com/ContentServer.asp?T=P&P=AN&K=9606204477&S=R&D=a9h&EbscoContent=dGJyMMvl7ESeqa84zdnyOLCmr0meprFSs664SLaWxWXS&ContentCustomer=dGJyMPGstk%2B0qbJPuePfgeyx44Dt6fIA",
+						"title": "EBSCO Full Text",
+						"mimeType": "application/pdf"
+					}
+				],
+				"title": "Zbigniew Herbert",
+				"publicationTitle": "Wilson Quarterly",
+				"date": "Winter93 1993",
+				"volume": "17",
+				"issue": "1",
+				"pages": "112",
+				"publisher": "Woodrow Wilson International Center for Scholars",
+				"ISBN": "03633276",
+				"ISSN": "03633276",
+				"abstractNote": "Introduces the poetry of Polish poet Zbigniew Herbert. Impression of difficulty in modern poetry; Polish poet Czeslaw Milosz; Herbert's 1980 Nobel Prize; Translations into English; Use of vers libre; Sample poems.",
+				"callNumber": "9606204477",
+				"libraryCatalog": "EBSCOhost",
+				"checkFields": "title"
 			}
 		]
 	}
