@@ -58,7 +58,9 @@ FW.Scraper({ itemType         : 'journalArticle',
 			 publicationTitle : "eTatar.ru" 
 });
 
-/* Uses Yandex in an IFRAME for search results, so we don't do multiple *//** BEGIN TEST CASES **/
+/* Uses Yandex in an IFRAME for search results, so we don't do multiple */
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",

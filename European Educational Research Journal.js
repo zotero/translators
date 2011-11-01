@@ -85,7 +85,9 @@ function doWeb(doc, url) {
 			item.complete();
 		}
 	}
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
