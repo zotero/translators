@@ -1,14 +1,15 @@
 {
-	"translatorID":"2e304579-dd7b-4770-85e9-0d724c9b49a5",
-	"translatorType":4,
-	"label":"European Educational Research Journal",
-	"creator":"Michael Berkowitz",
-	"target":"http://www.wwwords.co.uk/eerj/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-05-05 07:45:00"
+	"translatorID": "2e304579-dd7b-4770-85e9-0d724c9b49a5",
+	"label": "European Educational Research Journal",
+	"creator": "Michael Berkowitz",
+	"target": "^https?://www\\.wwwords\\.co\\.uk/eerj/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-10-31 19:09:23"
 }
 
 function detectWeb(doc, url) {
@@ -47,7 +48,7 @@ function doWeb(doc, url) {
 		items[text] = text;
 	}
 	items = Zotero.selectItems(items);
-	Zotero.debug(items);
+	//Zotero.debug(items);
 	
 	var articles = doc.evaluate('//div[@id="maincontent"]/table[*//p[@class="articletitle"]]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 	var art;
@@ -85,3 +86,13 @@ function doWeb(doc, url) {
 		}
 	}
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.wwwords.co.uk/eerj/content/pdfs/10/issue10_3.asp",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
