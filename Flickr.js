@@ -155,7 +155,9 @@ function doWeb(doc, url) {
 		}, function(){Zotero.done();});	
 	});
 	Zotero.wait();
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
