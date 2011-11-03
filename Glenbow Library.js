@@ -1,14 +1,15 @@
 {
-	"translatorID":"330f283f-12e9-4421-aa59-e17ec5f4aa37",
-	"translatorType":4,
-	"label":"Glenbow Library",
-	"creator":"Adam Crymble",
-	"target":"http://ww2.glenbow.org/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-08-21 15:45:00"
+	"translatorID": "330f283f-12e9-4421-aa59-e17ec5f4aa37",
+	"label": "Glenbow Library",
+	"creator": "Adam Crymble",
+	"target": "^https?://ww2\\.glenbow\\.org/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-03 02:28:26"
 }
 
 function detectWeb(doc, url) {
@@ -262,4 +263,47 @@ function doWeb(doc, url) {
 	
 	Zotero.Utilities.processDocuments(uris, scrape, function() {Zotero.done();});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://ww2.glenbow.org/search/libraryMainResults.aspx?AC=GET_RECORD&XC=/search/libraryMainResults.aspx&BU=&TN=GLENCAT&SN=AUTO24715&SE=1581&RN=8&MR=20&TR=0&TX=1000&ES=0&CS=0&XP=&RF=WebResults&EF=&DF=WebResultsDetails&RL=0&EL=0&DL=0&NP=255&ID=&MF=WPEngMsg.ini&MQ=&TI=0&DT=&ST=0&IR=56813&NR=0&NB=0&SV=0&BG=&FG=&QS=LibraryMainSearch&OEX=ISO-8859-1&OEH=ISO-8859-1",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Marlene A.D. Lynne Van",
+						"lastName": "Luven",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Priscilla L.",
+						"lastName": "Walton",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Popular culture - Canada",
+					"Canada - Social life and customs - 20th century"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"callNumber": "306.40971 P831",
+				"title": "Pop Can : popular culture in Canada / edited by Lynne Van Luven, Priscilla L. Walton",
+				"place": "Scarborough, Ont.",
+				"publisher": "Prentice Hall Allyn and Bacon Canada",
+				"date": "c1999.",
+				"pages": "xii, 237 p. ; 24 cm.",
+				"abstractNote": "Includes bibliographical references and index.",
+				"extra": "Accession number: [99092222]",
+				"url": "http://ww2.glenbow.org/search/libraryMainResults.aspx?AC=GET_RECORD&XC=/search/libraryMainResults.aspx&BU=&TN=GLENCAT&SN=AUTO24715&SE=1581&RN=8&MR=20&TR=0&TX=1000&ES=0&CS=0&XP=&RF=WebResults&EF=&DF=WebResultsDetails&RL=0&EL=0&DL=0&NP=255&ID=&MF=WPEngMsg.ini&MQ=&TI=0&DT=&ST=0&IR=56813&NR=0&NB=0&SV=0&BG=&FG=&QS=LibraryMainSearch&OEX=ISO-8859-1&OEH=ISO-8859-1",
+				"libraryCatalog": "Glenbow Library",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Pop Can"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

@@ -8,7 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-09-28 03:19:03"
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-03 15:36:22"
 }
 
 /*
@@ -73,4 +74,12 @@ function doWeb(doc, url) {
 			items[j].complete();
 		}
 	});
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.google.com/search?tbm=blg&hl=en&source=hp&biw=1024&bih=656&q=argentina&btnG=Search&gbv=2",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

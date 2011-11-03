@@ -1,14 +1,15 @@
 {
-	"translatorID":"f87c10fe-2bdc-4e1e-aedd-7fd20ec4b4c2",
-	"translatorType":4,
-	"label":"Getty Research Library Catalog",
-	"creator":"Adam Crymble",
-	"target":"http://(opac.pub|library).getty.edu",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-08-21 15:45:00"
+	"translatorID": "f87c10fe-2bdc-4e1e-aedd-7fd20ec4b4c2",
+	"label": "Getty Research Library Catalog",
+	"creator": "Adam Crymble",
+	"target": "^https?://(opac\\.pub|library)\\.getty\\.edu",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-03 02:37:12"
 }
 
 function detectWeb(doc, url) {
@@ -56,7 +57,8 @@ function scrape(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;	
-	
+	Zotero.debug("I'm getting here. URL: " + url)
+	Zotero.wait();
 	var dataTags = new Object();
 	
 	var fieldContent = new Array();
@@ -82,6 +84,7 @@ function scrape(doc, url) {
 			fieldContent.push(content1.textContent.replace(/^\s*|\s*&/g, ''));
 		}
 	}
+
 	
 	//Entries that do not line up perfectly with a field heading are put into an array and these are then removed from the field Content array.
 	var extraField = doc.evaluate('//table[2]/tbody/tr/td[2]', doc, nsResolver, XPathResult.ANY_TYPE, null);
@@ -252,4 +255,35 @@ function doWeb(doc, url) {
 	}
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://library.getty.edu/cgi-bin/Pwebrecon.cgi?v1=3&ti=1,3&SC=Subject&SA=Philosophy%20History%20Netherlands%2E&PID=8bf9l-jMWj7fQ37fcDaJDMTNDB0my&SEQ=20111103013521&SID=1",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [],
+				"notes": [
+					{
+						"title": "Title",
+						"note": "Site is designed to timeout user. This may prevent Zotero from saving a screen capture."
+					}
+				],
+				"tags": "Universitetet i Oslo. Institutt for idéhistorie.",
+				"seeAlso": [],
+				"attachments": [],
+				"extra": "Location in Library:  B1 .I33",
+				"url": "STORAGE",
+				"publisher": "v. ; 21 cm.",
+				"title": "Idea.; Idea (Oslo); Idea (Oslo); Kursrapport",
+				"description": "Annual",
+				"abstractNote": "Philosophy --History --Periodicals.; Intellectual life --History --Periodicals.; Idea (Philosophy) --History --Periodicals.",
+				"callNumber": "nr.4(1982)",
+				"libraryCatalog": "Getty Research Library Catalog",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
