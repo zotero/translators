@@ -173,13 +173,13 @@ var mappingTable = {
 	"\u00C6":"{\\AE}", // LATIN CAPITAL LETTER AE
 	"\u00D0":"{\\DH}", // LATIN CAPITAL LETTER ETH
 	"\u00D7":"{\\texttimes}", // MULTIPLICATION SIGN
-	"\U00D8":"{\\O}", // LATIN CAPITAL LETTER O WITH STROKE
+	"\u00D8":"{\\O}", // LATIN CAPITAL LETTER O WITH STROKE
 	"\u00DE":"{\\TH}", // LATIN CAPITAL LETTER THORN
 	"\u00DF":"{\\ss}", // LATIN SMALL LETTER SHARP S
 	"\u00E6":"{\\ae}", // LATIN SMALL LETTER AE
 	"\u00F0":"{\\dh}", // LATIN SMALL LETTER ETH
 	"\u00F7":"{\\textdiv}", // DIVISION SIGN
-	"\U00F8":"{\\o}", // LATIN SMALL LETTER O WITH STROKE
+	"\u00F8":"{\\o}", // LATIN SMALL LETTER O WITH STROKE
 	"\u00FE":"{\\th}", // LATIN SMALL LETTER THORN
 	"\u0131":"{\\i}", // LATIN SMALL LETTER DOTLESS I
 	"\u0132":"IJ", // LATIN CAPITAL LIGATURE IJ
@@ -2058,6 +2058,7 @@ function doExport() {
 					creatorString = creator.lastName + ", " + creator.firstName;
 				} else if (creator.fieldMode == true) { // fieldMode true, assume corporate author
 					creatorString = "{" + creator.lastName + "}";
+				}
 
 				if (creator.creatorType == "editor") {
 					editor += " and "+creatorString;
