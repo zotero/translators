@@ -1,14 +1,15 @@
 {
-	"translatorID":"c41c9c66-8540-4216-b138-7c00532748c9",
-	"translatorType":4,
-	"label":"Gulag: Many Days, Many Lives",
-	"creator":"Adam Crymble",
-	"target":"http://gulaghistory.org",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-08-04 07:10:00"
+	"translatorID": "c41c9c66-8540-4216-b138-7c00532748c9",
+	"label": "Gulag: Many Days, Many Lives",
+	"creator": "Adam Crymble",
+	"target": "^https?://gulaghistory\\.org",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-03 16:17:15"
 }
 
 function detectWeb(doc, url) {
@@ -84,12 +85,12 @@ function scrape(doc, url) {
 	} else {
 
 		var split1 = cite.split(". ");
-		Zotero.debug(split1);
+		//Zotero.debug(split1);
 
 		//author
 		var author = split1[0].split(/\, /);
 		author = author[1] + ' ' + author[0];
-		Zotero.debug(author);
+		//Zotero.debug(author);
 		newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
 
 		//title
@@ -139,4 +140,40 @@ function doWeb(doc, url) {
 	}
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://gulaghistory.org/items/browse?search=Siberia&submit_search=Search",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://gulaghistory.org/items/show/47",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Thomas",
+						"lastName": "Sgovio",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"abstractNote": "Map of Thomas Sgovio's two journeys. One journey took him from Moscow to Magadan, the other from Moscow beyond the Ural Mountains to Boguchani in Siberia.",
+				"title": "Dear America! Why I Turned Against Communism",
+				"place": "Kenmore, NY",
+				"date": "NY: Partners' Press",
+				"publisher": "nmore",
+				"url": "http://gulaghistory.org/items/show/47",
+				"libraryCatalog": "Gulag: Many Days, Many Lives",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
