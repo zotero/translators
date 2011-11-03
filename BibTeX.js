@@ -1766,6 +1766,7 @@ function beginRecord(type, closeChar) {
 		var zoteroType = bibtex2zoteroTypeMap[type];
 		if (!zoteroType) {
 			Zotero.debug("discarded item from BibTeX; type was "+type);
+			return;
 		}
 		var item = new Zotero.Item(zoteroType);
 		
@@ -1845,7 +1846,7 @@ function doImport() {
 			} else if(read == "(") {		// possible open character
 				beginRecord(type, ")");
 				type = false;
-			} else {
+			} else if(/[a-zA-Z0-9-_]/.test(read)) {
 				type += read;
 			}
 		}
