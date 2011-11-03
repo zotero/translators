@@ -38,7 +38,7 @@ function scrape(doc) {
 	var tmpSection = "";
 	newItem.code = "Electronic Code of Federal Regulations";
 	newItem.language = "en-us";
-	
+
 	var spanTags = doc.getElementsByTagName("span");
 	for(var i=0; i<spanTags.length; i++) {
 		if (spanTags[i].className == "mainheader") {
@@ -90,22 +90,24 @@ function doWeb(doc, url) {
 	} else {
 		var items = Zotero.Utilities.getItemArray(doc, doc,"http://ecfr\.gpoaccess\.gov/cgi/t/text/text-idx.+");
 		items = Zotero.selectItems(items);
-		
+
 		if(!items) {
 			return true;
 		}
-		
+
 		var uris = new Array();
 		for(var i in items) {
 			uris.push(i);
 		}
-		
+
 		Zotero.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
 			function() { Zotero.done(); }, null);
-		
+
 		Zotero.wait();
 	}
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",

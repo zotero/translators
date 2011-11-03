@@ -74,7 +74,9 @@ function doWeb(doc, url) {
 			items[j].complete();
 		}
 	});
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
