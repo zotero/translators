@@ -1,14 +1,15 @@
 {
-	"translatorID":"9418dcc2-cc1e-432b-b7a6-7b00b7402d2f",
-	"translatorType":4,
-	"label":"Hurricane Digital Memory Bank",
-	"creator":"Adam Crymble",
-	"target":"http://hurricanearchive.org",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-08-21 15:45:00"
+	"translatorID": "9418dcc2-cc1e-432b-b7a6-7b00b7402d2f",
+	"label": "Hurricane Digital Memory Bank",
+	"creator": "Adam Crymble",
+	"target": "^https?://hurricanearchive\\.org",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-04 00:07:53"
 }
 
 function detectWeb(doc, url) {
@@ -111,4 +112,38 @@ function doWeb(doc, url) {
 	}
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://hurricanearchive.org/object/44530",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "Anonymous",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Untitled",
+				"callNumber": "Object #44530",
+				"date": "June 13 2011, 11:26 pm",
+				"url": "http://hurricanearchive.org/object/44530",
+				"libraryCatalog": "Hurricane Digital Memory Bank",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://hurricanearchive.org/browse/?search=9th+ward",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

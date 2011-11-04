@@ -1,14 +1,15 @@
 {
-	"translatorID":"e85a3134-8c1a-8644-6926-584c8565f23e",
-	"translatorType":4,
-	"label":"History Cooperative",
-	"creator":"Simon Kornblith",
-	"target":"https?://[^/]*historycooperative\\.org[^/]*/(?:journals/.+/.+/.+\\.s?html$|cgi-bin/search.cgi|journals/(?!cp|whc).+/.+/)",
-	"minVersion":"1.0.0b4.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-05-06 08:15:00"
+	"translatorID": "e85a3134-8c1a-8644-6926-584c8565f23e",
+	"label": "History Cooperative",
+	"creator": "Simon Kornblith",
+	"target": "https?://[^/]*historycooperative\\.org[^/]*/(?:journals/.+/.+/.+\\.s?html$|cgi-bin/search.cgi|journals/(?!cp|whc).+/.+/)",
+	"minVersion": "1.0.0b4.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-04 00:01:47"
 }
 
 function detectWeb(doc, url) {
@@ -65,7 +66,7 @@ function scrape(doc) {
 	//different journals want their reviewed book titles formatted in different ways (or have bizarre markup)
 	jNames = new Array ("The Western Historical Quarterly", "Journal of American Ethnic History", "Labour History","Environmental History",
 						"New York History","Indiana Magazine of History");
-					       
+						   
 	jXpaths = new Array("//tr[4]/td[3]/table/tbody/tr[1]/td/b/i",
 						"//[4]/td[3]/table/tbody/tr[1]/td/b/i",
 						"//tr[4]/td[3]/table/tbody/tr[1]/td/b/b/i",
@@ -142,4 +143,52 @@ function doWeb(doc, url) {
 	} else {
 		scrape(doc);
 	}
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.historycooperative.org/journals/ahr/112.2/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.historycooperative.org/journals/lab/93/hearn.html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Mark",
+						"lastName": "Hearn",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"document": {
+							"location": {}
+						},
+						"title": "History Cooperative Snapshot"
+					}
+				],
+				"url": "http://www.historycooperative.org/journals/lab/93/hearn.html",
+				"publicationTitle": "Labour History",
+				"volume": "93",
+				"title": "Sifting the Evidence: Labour History and the Transcripts of Industrial Arbitration Proceedings",
+				"date": "November 2007",
+				"libraryCatalog": "History Cooperative",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Sifting the Evidence"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.historycooperative.org/cgi-bin/search.cgi?Search=American+Federation&Journal=ahr&form=any",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
