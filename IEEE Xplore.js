@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-09-15 23:36:59"
+	"lastUpdated": "2011-11-04 02:26:29"
 }
 
 function detectWeb(doc, url) {
@@ -105,7 +105,7 @@ function parseIdentifier(identifier) {
 			case "pmid": return ["pmid", idPieces.join(':')];
 			default: // do nothing
 		}
-		Zotero.debug("Unknown identifier prefix '"+prefix+"'");
+		//Zotero.debug("Unknown identifier prefix '"+prefix+"'");
 		return [prefix, idPieces.join(':')];
 	}
 	if (identifer.substr(0,3) == '10.') return ["doi", identifier];
@@ -211,7 +211,7 @@ function scrape(doc,url) {
 			case "dc.date": if (!newItem.date && value != "NaN" && value !== "") newItem.date = value; break;
 			case "dc.identifier": addIdentifier(value, newItem); break; 
 			default:
-				Zotero.debug("Ignoring meta tag: " + tag + " => " + value);
+				//Zotero.debug("Ignoring meta tag: " + tag + " => " + value);
 		}
 	}
 	
@@ -396,4 +396,72 @@ idCheck = function(isbn) {
 	if(!valid10) {num10 = false};
 	if(!valid13) {num13 = false};
 	return {"isbn10" : num10, "isbn13" : num13, "issn" : num8};
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://ieeexplore.ieee.org/search/searchresult.jsp?newsearch=true&queryText=turing&x=0&y=0&tag=1",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://ieeexplore.ieee.org/search/freesrchabstract.jsp?tp=&arnumber=4607247&refinements%3D4294967131%26openedRefinements%3D*%26filter%3DAND%28NOT%284283010803%29%29%26searchField%3DSearch+All%26queryText%3Dturing",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Yongming Li",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Deterministic fuzzy Turing machine (DFTM)",
+					"Turing machines",
+					"computational complexity",
+					"deterministic automata",
+					"deterministic fuzzy Turing machines",
+					"fixed finite subset",
+					"fuzzy computational complexity",
+					"fuzzy grammar",
+					"fuzzy languages",
+					"fuzzy polynomial time-bounded computation",
+					"fuzzy recursive language",
+					"fuzzy recursively enumerable (f.r.e.) language",
+					"fuzzy set theory",
+					"fuzzy sets",
+					"nondeterministic fuzzy Turing machine (NFTM)",
+					"nondeterministic fuzzy Turing machines",
+					"nondeterministic polynomial time-bounded computation",
+					"universal fuzzy Turing machine (FTM)",
+					""
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=4607247",
+						"title": "IEEE Xplore Abstract Record",
+						"snapshot": false
+					}
+				],
+				"publicationTitle": "IEEE Transactions on Fuzzy Systems",
+				"publisher": "IEEE",
+				"title": "Fuzzy Turing Machines: Variants and Universality",
+				"date": "Dec.  2008",
+				"volume": "16",
+				"issue": "6",
+				"DOI": "10.1109/TFUZZ.2008.2004990",
+				"ISSN": "1063-6706",
+				"language": "English",
+				"pages": "1491-1502",
+				"abstractNote": "In this paper, we study some variants of fuzzy Turing machines (FTMs) and universal FTM. First, we give several formulations of FTMs, including, in particular, deterministic FTMs (DFTMs) and nondeterministic FTMs (NFTMs). We then show that DFTMs and NFTMs are not equivalent as far as the power of recognizing fuzzy languages is concerned. This contrasts sharply with classical TMs. Second, we show that there is no universal FTM that can exactly simulate any FTM on it. But if the membership degrees of fuzzy sets are restricted to a fixed finite subset A of [0,1], such a universal machine exists. We also show that a universal FTM exists in some approximate sense. This means, for any prescribed accuracy, that we can construct a universal machine that simulates any FTM with the given accuracy. Finally, we introduce the notions of fuzzy polynomial time-bounded computation and nondeterministic fuzzy polynomial time-bounded computation, and investigate their connections with polynomial time-bounded computation and nondeterministic polynomial time-bounded computation.",
+				"conferenceName": "IEEE Transactions on Fuzzy Systems",
+				"proceedingsTitle": "IEEE Transactions on Fuzzy Systems",
+				"libraryCatalog": "IEEE Xplore",
+				"shortTitle": "Fuzzy Turing Machines"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
