@@ -1,14 +1,15 @@
 {
-	"translatorID":"8d72adbc-376c-4a33-b6be-730bc235190f",
-	"translatorType":4,
-	"label":"IEEE Computer Society",
-	"creator":"fasthae@gmail.com",
-	"target":"^http?://(www[0-9]?|search[0-9]?).computer.org/(portal/web/csdl/(magazines/[0-9a-z]+#(3|4)|transactions/[0-9a-z]+#(3|4)|letters/[0-9a-z]+#(3|4)|proceedings/[0-9a-z]+#(4|5)|doi|abs/proceedings)|search/results)",
-	"minVersion":"1.0.7",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":false,
-	"lastUpdated":"2009-03-14 16:07:05"
+	"translatorID": "8d72adbc-376c-4a33-b6be-730bc235190f",
+	"label": "IEEE Computer Society",
+	"creator": "fasthae@gmail.com",
+	"target": "^http?://(www[0-9]?|search[0-9]?)\\.computer\\.org/(portal/web/csdl/(magazines/[0-9a-z]+#(3|4)|transactions/[0-9a-z]+#(3|4)|letters/[0-9a-z]+#(3|4)|proceedings/[0-9a-z]+#(4|5)|doi|abs/proceedings)|search/results)",
+	"minVersion": "1.0.7",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-04 02:12:22"
 }
 
 function detectWeb(doc, url) {
@@ -16,23 +17,23 @@ function detectWeb(doc, url) {
 	if (url.indexOf("search/results") >1) {
 		return "multiple";
 	} else if (url.indexOf("/portal/web/csdl/magazines/") > 1) {
-		if (url.indexOf("#3") != -1) return "multiple"; 
+		if (url.indexOf("#3") != -1) return "multiple";
 		else return "magazineArticle";
 	} else if (url.indexOf("/portal/web/csdl/transactions/") > 1) {
-		if (url.indexOf("#3") != -1) return "multiple"; 
+		if (url.indexOf("#3") != -1) return "multiple";
 		else return "journalArticle";
 	} else if (url.indexOf("/portal/web/csdl/proceedings/") > 1) {
-		if (url.indexOf("#4") != -1) return "multiple"; 
+		if (url.indexOf("#4") != -1) return "multiple";
 		else return "conferencePaper";
 	} else if (url.indexOf("/portal/web/csdl/abs/proceedings/") > 1) {
 		return "multiple";
 	} else if (url.indexOf("/portal/web/csdl/letters/") > 1) {
-		if (url.indexOf("#3") != -1) return "multiple"; 
+		if (url.indexOf("#3") != -1) return "multiple";
 		else return "letter";
 	} else if (url.indexOf("/portal/web/csdl/doi/") > 1) {
 		var namespace = doc.documentElement.namespaceURI;
 		var nsResolver = namespace ? function(prefix) {
-			if (prefix == 'x') return namespace; 
+			if (prefix == 'x') return namespace;
 			else return null;
 		} : null;
 		var refWork = doc.evaluate('//div[@id="refWorksText-content"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
@@ -55,14 +56,14 @@ function doWeb(doc, url) {
 			var nsResolver = namespace ? function(prefix) {
 				if (prefix == 'x') return namespace; else return null;
 			} : null;
-    	
+
 		templte = doc.body.innerHTML;
 		templte = templte.substr(templte.indexOf("linkWithParms += '&")+19);
 		templte = templte.substr(0,templte.indexOf("';"));
-    	
+
 		var items = new Array();
 		var search = 0;
-    	
+
 		if (url.indexOf("search/results") != -1) {
 			var entries = doc.evaluate('//div[@id="toc-articles-list" or @class="searchresult-data"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 			var entry;
@@ -89,7 +90,7 @@ function doWeb(doc, url) {
 					var linkk;
 					if (titleNode.href.indexOf( 'javascript:void(0)') != -1) {
 						linkk = titleNode.attributes.getNamedItem("onclick").value;
-						linkk = linkk.substr(linkk.indexOf('"')+1); 
+						linkk = linkk.substr(linkk.indexOf('"')+1);
 						linkk = linkk.substr(0,linkk.indexOf('"'));
 						if (linkk.indexOf("?") > -1) {
 							linkk += '&'+templte;
@@ -99,12 +100,12 @@ function doWeb(doc, url) {
 						}
 						linkk = "http://www2.computer.org"+linkk;
 					} else linkk=titleNode.href;
-					
+
 					items[linkk] = Zotero.Utilities.trimInternal(title);
 				}
 			}
 		}
-		
+
 		// let user select documents to scrape
 		items = Zotero.selectItems(items);
 		if(!items) return true;
@@ -112,10 +113,10 @@ function doWeb(doc, url) {
 		for(var url in items) {
 			urls.push(url);
 		}
-		
-		if (search != 1)  Zotero.Utilities.processDocuments(urls, scrape, function() { Zotero.done(); }); 
+
+		if (search != 1)  Zotero.Utilities.processDocuments(urls, scrape, function() { Zotero.done(); });
 		else Zotero.Utilities.doGet(urls, scrapt,function() { Zotero.done(); });
-		
+
 		Zotero.wait();
 	} else {
 		 scrape(doc);
@@ -174,9 +175,9 @@ function scrape(doc,url) {
 		//var onclickAttrValue = pdf.attributes.getNamedItem("onclick").value;
 		//var urlField = onclickAttrValue.substring( 10, onclickAttrValue.indexOf("',") );
 		var urlField = pdf.attributes.getNamedItem("onclick").value;
-		urlField = urlField.substr(urlField.indexOf('"')+1); 
+		urlField = urlField.substr(urlField.indexOf('"')+1);
 		urlField = urlField.substr(0,urlField.indexOf('"'));
-		
+
 		if (urlField.indexOf("?") > -1) {
 			urlField += '&'+templte;
 		}
@@ -196,7 +197,7 @@ function scrape(doc,url) {
 
 	if (bibtex) {
 		bibtex = bibtex.textContent;
-		//bibtex = bibtex.substring(bibtex.indexOf("document.write('")+16,bibtex.indexOf("');Popup.document.close();")); 
+		//bibtex = bibtex.substring(bibtex.indexOf("document.write('")+16,bibtex.indexOf("');Popup.document.close();"));
 		//workaround as bibtex translator obviously needs a whitespace following the first curly brace
 		bibtex = Zotero.Utilities.cleanTags(bibtex);
 		bibtex = Zotero.Utilities.trimInternal(bibtex);
@@ -213,7 +214,7 @@ function scrape(doc,url) {
 			if (abstractText) item.abstractNote = abstractText;
 			if (keywords) item.tags = keywords;
 			if (notes) item.notes = notes;
-			
+
 			item.complete();
 		});
 		translator.translate();
@@ -222,3 +223,54 @@ function scrape(doc,url) {
 		throw "No BibTeX found!";
 	}
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.computer.org/portal/web/csdl/abs/proceedings/icalt/2011/4346/00/4346a428toc.htm",
+		"items": "multiple"
+	},
+
+	{
+	"type": "web",
+		"url": "http://www.computer.org/portal/web/csdl/doi/10.1109/MAHC.2010.19",
+		"items": [
+
+	 {
+         	"itemType": "magazineArticle",
+         	"creators": [
+         		{
+         			"firstName": "Jeffrey R.",
+         			"lastName": "Yost",
+         			"creatorType": "author"
+         		}
+         	],
+         	"notes": [
+         		{
+         			"note": "Complete PDF document was either not available or accessible. Please make sure you're logged in to the digital library to retrieve the complete PDF document."
+         		}
+         	],
+         	"tags": [],
+         	"seeAlso": [],
+         	"attachments": [
+         		{
+         			"document": "[object]"
+         		}
+         	],
+         	"title": "From the Editor's Desk",
+         	"publicationTitle": "IEEE Annals of the History of Computing",
+         	"volume": "32",
+         	"issue": "1",
+         	"ISSN": "1058-6180",
+         	"date": "2010",
+         	"pages": "2-3",
+         	"DOI": "http://doi.ieeecomputersociety.org/10.1109/MAHC.2010.19",
+         	"publisher": "IEEE Computer Society",
+         	"place": "Los Alamitos, CA, USA",
+         	"libraryCatalog": "IEEE Computer Society"
+         }
+	]
+	}
+]
+/** END TEST CASES **/
