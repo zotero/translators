@@ -1,14 +1,15 @@
 {
-	"translatorID":"58ab2618-4a25-4b9b-83a7-80cd0259f896",
-	"translatorType":4,
-	"label":"Gallica",
-	"creator":"Sylvain Machefert",
-	"target":"^http://gallica\\.bnf\\.fr",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2010-02-20 10:40:00"
+	"translatorID": "58ab2618-4a25-4b9b-83a7-80cd0259f896",
+	"label": "Gallica",
+	"creator": "Sylvain Machefert",
+	"target": "^http://gallica\\.bnf\\.fr",
+	"minVersion": "1.0.0b3.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-02 01:36:48"
 }
 
 function detectWeb(doc, url) {
@@ -114,7 +115,7 @@ function doWeb(doc, url) {
 			
 			var i = 1;
 			do {
-				var id = doc.evaluate('div[@class="resultat_id"]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+				var id = doc.evaluate('.//div[@class="resultat_id"]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 				var this_result = doc.evaluate('div[@class="resultat_desc"]/div[@class="titre"]/a', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 				availableItems[i] = Zotero.Utilities.cleanTags(this_result.getAttribute('title'));
 				
@@ -264,3 +265,42 @@ function scrapeGallica(doc, nsResolver, div, type, direct_url)
 	}
 	item.complete();
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://gallica.bnf.fr/ark:/12148/bpt6k58121413.r=cervantes.langEN",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Édouard",
+						"lastName": "Cat",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Cervantes Saavedra, Miguel de (1547-1616)"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Miguel Cervantès / par É. Cat,...",
+				"publisher": "Gedalge (Paris)",
+				"date": "1892",
+				"language": "French",
+				"rights": "domaine public",
+				"url": "http://gallica.bnf.fr/ark:/12148/bpt6k58121413",
+				"libraryCatalog": "Gallica",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://gallica.bnf.fr/Search?ArianeWireIndex=index&p=1&lang=EN&q=cervantes",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

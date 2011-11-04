@@ -1,18 +1,19 @@
 {
-        "translatorID": "c436f3c7-4246-4ed3-a227-a538c8113a0e",
-        "label": "fishpond.co.nz",
-        "creator": "Sopheak Hean",
-        "target": "^https?://www\\.fishpond\\.co\\.nz/",
-        "minVersion": "1.0",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": true,
-        "translatorType": 4,
-        "lastUpdated": "2011-04-21 09:34:42"
+	"translatorID": "c436f3c7-4246-4ed3-a227-a538c8113a0e",
+	"label": "fishpond.co.nz",
+	"creator": "Sopheak Hean",
+	"target": "^https?://www\\.fishpond\\.co\\.nz/",
+	"minVersion": "1.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-01 00:33:15"
 }
 
 /*
-    Fishpond.co.nz Translator- Parses Fishpond.co.nz articles and creates Zotero-based metadata
+	Fishpond.co.nz Translator- Parses Fishpond.co.nz articles and creates Zotero-based metadata
    Copyright (C) 2011 Sopheak Hean, University of Waikato, Faculty of Education
    Contact:  maxximuscool@gmail.com
    
@@ -36,7 +37,7 @@ function detectWeb(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == "x" ) return namespace; else return null;
 	} : null;
-	var definePath = '//td[@class="main hproduct"]/h1';
+	var definePath = '//td[@class="main hproduct"]//h1';
 	var XpathObject = doc.evaluate(definePath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if  (XpathObject) {
 		return "book";
@@ -68,12 +69,17 @@ function scrape(doc, url) {
 	if (authorObject){
 			authorObject = authorObject.textContent;
 			if (( authorObject.match(/By\s/)) && (authorObject.match(/\([A-Za-z]+\W[a-zA-Z]+\)/)  )){
-				authorObject = authorObject.replace(/By\s/, '').replace(/\([A-Za-z]+\W[a-zA-Z]+\)/, '');
+				authorObject = authorObject.replace(/By\s/, '').replace(/\([A-Za-z]+\W[a-zA-Z]+\)/, '').split(",");
 				newItem.creators.push(Zotero.Utilities.cleanAuthor(authorObject, "author"));   
 			} 
 			else if (authorObject.match(/By\W/)) {
-				authorObject = authorObject.replace(/By\s/, '');
-				newItem.creators.push(Zotero.Utilities.cleanAuthor(authorObject, "author"));   
+				authorObject = authorObject.replace(/By\s/, '').split(",");
+				
+				var i = 0
+				while (authorObject[i]){
+				newItem.creators.push(Zotero.Utilities.cleanAuthor(authorObject[i], "author"));   
+				i++;
+				}
 			}
 			
 		}
@@ -127,7 +133,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		
-		var titles = '//td[@class="productSearch-data"]/table/tbody/tr/td/div/a';
+		var titles = '//div[@style="padding-bottom:1em;"]/a';
 		var titleObject = doc.evaluate(titles, doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var next_title; 
 		while ( next_title = titleObject.iterateNext()) {
@@ -144,3 +150,36 @@ function doWeb(doc, url) {
 		scrape(doc, url);
 	}
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.fishpond.co.nz/Books/Pippi-Longstocking-Astrid-Lindgren/9780670014040?cf=3&rid=2103878406&i=3&keywords=lindgren",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Astrid",
+						"lastName": "Lindgren",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "FishPond Record",
+						"mimeType": "text/html",
+						"url": "http://www.fishpond.co.nz/Books/Pippi-Longstocking-Astrid-Lindgren/9780670014040?cf=3&rid=2103878406&i=3&keywords=lindgren"
+					}
+				],
+				"title": "Pippi Longstocking",
+				"abstractNote": "The classic novel about the little girl with crazy red pigtails and a flair for the outrageous is available once again in this large-format gift edition. Full color.",
+				"libraryCatalog": "fishpond.co.nz"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

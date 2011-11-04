@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2011-09-05 02:20:00"
+	"lastUpdated": "2011-11-03 20:31:08"
 }
 
 /*
@@ -97,7 +97,7 @@ var scrapeListing = function (doc) {
 	var nsResolver = doc.createNSResolver(doc.documentElement);
 
 	// XML fragment lists
-	var titleFrags = doc.evaluate('//div[@class="gs_r"]//h3', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var titleFrags = doc.evaluate('//div[@class="gs_r"]//h3[not(contains(a/@href,"/citations"))]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 	var citeletFrags = doc.evaluate('//span[@class="gs_a"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 	var  bibtexFrags = doc.evaluate('//a[contains(@href, "scholar.bib")]',
 				doc, nsResolver, XPathResult.ANY_TYPE, null);
@@ -483,58 +483,58 @@ ItemFactory.prototype.saveItemCommonVars = function () {
 
 /** BEGIN TEST CASES **/
 var testCases = [
-    {
-        "type": "web",
-        "url": "http://scholar.google.com/scholar?q=marbury&hl=en&btnG=Search&as_sdt=1%2C22&as_sdtp=on",
-        "items": "multiple"
-    },
-    {
-        "type": "web",
-        "url": "http://scholar.google.com/scholar?hl=en&q=kelo&btnG=Search&as_sdt=0%2C22&as_ylo=&as_vis=0",
-        "items": "multiple"
-    },
-    {
-        "type": "web",
-        "url": "http://scholar.google.com/scholar?hl=en&q=smith&btnG=Search&as_sdt=0%2C22&as_ylo=&as_vis=0",
-        "items": "multiple"
-    },
-    {
-        "type": "web",
-        "url": "http://scholar.google.com/scholar?hl=en&q=view+of+the+cathedral&btnG=Search&as_sdt=0%2C22&as_ylo=&as_vis=0",
-        "items": "multiple"
-    },
-    {
-        "type": "web",
-        "url": "http://scholar.google.com/scholar?hl=en&q=clifford&btnG=Search&as_sdt=0%2C22&as_ylo=&as_vis=0",
-        "items": "multiple"
-    },
-    {
-        "type": "web",
-        "url": "http://scholar.google.com/scholar_case?case=9834052745083343188&q=marbury+v+madison&hl=en&as_sdt=2,5",
-        "items": [
-            {
-                "itemType": "case",
-                "creators": [],
-                "notes": [],
-                "tags": [],
-                "seeAlso": [],
-                "attachments": [
-                    {
-                        "title": "Google Scholar Linked Judgement",
-                        "type": "text/html",
-                        "url": false
-                    }
-                ],
-                "volume": "5",
-                "reporter": "US",
-                "pages": "137",
-                "title": "Marbury v. Madison",
-                "court": "Supreme Court",
-                "date": "1803",
-                "itemID": "1",
-                "libraryCatalog": "Google Scholar"
-            }
-        ]
-    }
+	{
+		"type": "web",
+		"url": "http://scholar.google.com/scholar?q=marbury&hl=en&btnG=Search&as_sdt=1%2C22&as_sdtp=on",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://scholar.google.com/scholar?hl=en&q=kelo&btnG=Search&as_sdt=0%2C22&as_ylo=&as_vis=0",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://scholar.google.com/scholar?hl=en&q=smith&btnG=Search&as_sdt=0%2C22&as_ylo=&as_vis=0",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://scholar.google.com/scholar?hl=en&q=view+of+the+cathedral&btnG=Search&as_sdt=0%2C22&as_ylo=&as_vis=0",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://scholar.google.com/scholar?hl=en&q=clifford&btnG=Search&as_sdt=0%2C22&as_ylo=&as_vis=0",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://scholar.google.com/scholar_case?case=9834052745083343188&q=marbury+v+madison&hl=en&as_sdt=2,5",
+		"items": [
+			{
+				"itemType": "case",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Google Scholar Linked Judgement",
+						"type": "text/html",
+						"url": false
+					}
+				],
+				"volume": "5",
+				"reporter": "US",
+				"pages": "137",
+				"title": "Marbury v. Madison",
+				"court": "Supreme Court",
+				"date": "1803",
+				"itemID": "1",
+				"libraryCatalog": "Google Scholar"
+			}
+		]
+	}
 ]
 /** END TEST CASES **/

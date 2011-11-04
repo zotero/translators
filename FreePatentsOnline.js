@@ -1,14 +1,15 @@
 {
-	"translatorID":"879d738c-bbdd-4fa0-afce-63295764d3b7",
-	"translatorType":4,
-	"label":"FreePatentsOnline",
-	"creator":"Adam Crymble",
-	"target":"http://www.freepatentsonline.com",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-09-02 13:40:00"
+	"translatorID": "879d738c-bbdd-4fa0-afce-63295764d3b7",
+	"label": "FreePatentsOnline",
+	"creator": "Adam Crymble",
+	"target": "^https?://www\\.freepatentsonline\\.com",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-01 22:12:24"
 }
 
 function detectWeb(doc, url) {
@@ -43,11 +44,11 @@ function scrape(doc, url) {
 	
 
 	for (i=0; i<xPathCount.numberValue/2; i++) {	 	
-     			
-     		fieldTitle = pageContent.iterateNext().textContent.replace(/\s+/g, '');
-     		content = pageContent.iterateNext().textContent.replace(/^\s*|\s*$/g, '');
-     		dataTags[fieldTitle] = (content);
-     	}
+	 			
+	 		fieldTitle = pageContent.iterateNext().textContent.replace(/\s+/g, '');
+	 		content = pageContent.iterateNext().textContent.replace(/^\s*|\s*$/g, '');
+	 		dataTags[fieldTitle] = (content);
+	 	}
 	
 	var inventors = new Array();
 	var parenthesis;
@@ -68,7 +69,7 @@ function scrape(doc, url) {
 			}
 			
 		} else {
-			Zotero.debug(doc.title);
+			//Zotero.debug(doc.title);
 			parenthesis = dataTags["Inventors:"].indexOf("(");
 			dataTags["Inventors:"] = dataTags["Inventors:"].substr(0, parenthesis).replace(/^\s*|\s*$/g, '');
 			
@@ -121,4 +122,50 @@ function doWeb(doc, url) {
 	}
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.freepatentsonline.com/result.html?query_txt=encryption&sort=relevance&srch=top&search=",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.freepatentsonline.com/7751561.html",
+		"items": [
+			{
+				"itemType": "patent",
+				"creators": [
+					{
+						"firstName": "Brant L.",
+						"lastName": "Candelore",
+						"creatorType": "inventor"
+					},
+					{
+						"firstName": "Robert Allan",
+						"lastName": "Unger",
+						"creatorType": "inventor"
+					},
+					{
+						"firstName": "Leo M. Pedlow",
+						"lastName": "Jr",
+						"creatorType": "inventor"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Partial encryption",
+				"abstract": "A multiple partial encryption device consistent with certain embodiments has an input for receiving a unencrypted video signal. An encryption arrangement produces a partially multiple encrypted video signal from the unencrypted video signal. An output provides the partially multiple encrypted video signal. This abstract is not to be considered limiting, since other embodiments may deviate from the features described in this abstract.",
+				"applicationNumber": "12/001561",
+				"issueDate": "07/06/2010",
+				"assignee": "Sony Corporation (Tokyo, JP)\t\t\t\t\n\t\t\t\t\t\t\t\t\tSony Electronics Inc. (Park Ridge, NJ, US)",
+				"url": "http://www.freepatentsonline.com/7751561.html",
+				"libraryCatalog": "FreePatentsOnline",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

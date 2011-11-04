@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-10-16 13:19:29"
+	"lastUpdated": "2011-11-03 15:48:56"
 }
 
 function detectWeb(doc, url) {
@@ -168,6 +168,11 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
+		"url": "http://www.google.com/search?tbm=pts&tbo=1&hl=en&q=book&btnG=Search+Patents",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
 		"url": "http://www.google.com/patents/about?id=j5NSAAAAEBAJ",
 		"items": [
 			{
@@ -189,6 +194,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
+				"country": "United States",
 				"extra": "U.S. Classification: 215/273",
 				"patentNumber": "1065211",
 				"date": "Jun 17, 1913",
@@ -196,15 +202,9 @@ var testCases = [
 				"title": "Bottle-Stopper",
 				"url": "http://www.google.com/patents/about?id=j5NSAAAAEBAJ",
 				"libraryCatalog": "Google Patents",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"checkFields": "title"
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.google.com/search?tbm=pts&tbo=1&hl=en&q=book&btnG=Search+Patents",
-		"items": "multiple"
 	},
 	{
 		"type": "web",
@@ -229,6 +229,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
+				"country": "United States",
 				"extra": "U.S. Classification: 411/477",
 				"patentNumber": "1120656",
 				"date": "Dec 8, 1914",
@@ -237,8 +238,7 @@ var testCases = [
 				"title": "A Corpobation Of",
 				"url": "http://www.google.com/patents/about?id=KchEAAAAEBAJ",
 				"libraryCatalog": "Google Patents",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"checkFields": "title"
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -290,6 +290,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
+				"abstractNote": "MRAM has read word lines WLR and write word line WLW extending in the y direction, write/read bit line BLW/R and write bit line BLW extending in the x direction, and the memory cells MC disposed at the points of the intersection of these lines. The memory MC includes sub-cells SC1 and SC2. The sub-cell SC1 includes magneto resistive elements MTJ1 and MTJ2 and a selection transistor Tr1, and the sub-cell SC2 includes magneto resistive elements MTJ3 and MTJ4 and a selection transistor Tr2. The magneto resistive elements MTJ1 and MTJ2 are connected in parallel, and the magneto resistive elements MTJ3 and MTJ4 are also connected in parallel. Further, the sub-cells SC1 and SC2 are connected in series between the write/read bit line BLW/R and the ground.",
+				"country": "United States",
 				"extra": "U.S. Classification: 365/63",
 				"patentNumber": "7123498",
 				"date": "17 Oct 2006",
@@ -299,8 +301,7 @@ var testCases = [
 				"title": "Non-volatile memory device",
 				"url": "http://www.google.fr/patents?id=Nh17AAAAEBAJ",
 				"libraryCatalog": "Google Patents",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"checkFields": "title"
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}
