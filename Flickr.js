@@ -1,14 +1,15 @@
 {
-	"translatorID":"5dd22e9a-5124-4942-9b9e-6ee779f1023e",
-	"translatorType":4,
-	"label":"Flickr",
-	"creator":"Sean Takats",
-	"target":"^http://(?:www\\.)?flickr\\.com/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"translatorID": "5dd22e9a-5124-4942-9b9e-6ee779f1023e",
+	"label": "Flickr",
+	"creator": "Sean Takats",
+	"target": "^http://(?:www\\.)?flickr\\.com/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-01 16:31:25"
 }
 
 function detectWeb(doc, url) {
@@ -155,3 +156,87 @@ function doWeb(doc, url) {
 	});
 	Zotero.wait();
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.flickr.com/photos/doug88888/3122503680/in/set-72157624194059533",
+		"items": [
+			{
+				"itemType": "artwork",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "doug88888",
+						"creatorType": "artist"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"nature",
+					"plant",
+					"living",
+					"green",
+					"frosty",
+					"blue",
+					"bokeh",
+					"canon",
+					"eos",
+					"400d",
+					"18mm",
+					"55mm",
+					"gimp",
+					"pretty",
+					"beautiful",
+					"tones",
+					"ham",
+					"house",
+					"richmond",
+					"south",
+					"west",
+					"bloom",
+					"flower",
+					"grass",
+					"strand",
+					"lone",
+					"isolated",
+					"isolation",
+					"uk",
+					"england",
+					"doug88888",
+					"southwest",
+					"leaf",
+					"fall",
+					"bright",
+					"blossom",
+					"fresh",
+					"december",
+					"dec07",
+					"buy",
+					"purchase",
+					"picture",
+					"pictures",
+					"image",
+					"images",
+					"creative",
+					"commons"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "The blues and the greens EXPLORED",
+						"url": "http://farm4.static.flickr.com/3123/3122503680_739103322d_o.jpg"
+					}
+				],
+				"title": "The blues and the greens EXPLORED",
+				"date": "2008-12-07",
+				"url": "http://www.flickr.com/photos/doug88888/3122503680/",
+				"abstractNote": "More xmas shopping today - gulp.\n\nCheck out my  <a href=\"http://doug88888.blogspot.com/\">blog</a> if you like.",
+				"libraryCatalog": "Flickr",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

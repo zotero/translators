@@ -1,14 +1,15 @@
 {
-        "translatorID":"cb9e794e-7a65-47cd-90f6-58cdd191e8b0",
-        "label":"Frontiers",
-        "creator":"Jason Friedman",
-        "target":"^https?://www\\.frontiersin\\.org.*/",
-        "minVersion":"2.0.10",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":"1",
-        "translatorType":4,
-        "lastUpdated":"2011-01-11 23:21:54"
+	"translatorID": "cb9e794e-7a65-47cd-90f6-58cdd191e8b0",
+	"label": "Frontiers",
+	"creator": "Jason Friedman",
+	"target": "^https?://www\\.frontiersin\\.org.*/",
+	"minVersion": "2.0.10",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-01 22:41:09"
 }
 
 /*
@@ -81,7 +82,7 @@ function doWeb(doc, url) {
 		var items = new Object();
 		var noitems = 1;
 		
-                var links = doc.evaluate('//div[@class="ArchiveList"]/div/p/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+				var links = doc.evaluate('//div[@class="ArchiveList"]/div/p/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		while (link = links.iterateNext()) {
 			var url = link.href;
 			if (url.indexOf("abstract")!= -1) {
@@ -281,3 +282,91 @@ function scrape(doc,url) {
 	}	
 	newItem.complete();
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.frontiersin.org/SearchServer.aspx?sq=animal",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.frontiersin.org/neuropharmacology/10.3389/fnins.2010.00191/abstract",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Thomas A. van",
+						"lastName": "Essen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ruben S. van der",
+						"lastName": "Giessen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sebastiaan K. E.",
+						"lastName": "Koekkoek",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Frans",
+						"lastName": "VanderWerf",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Chris I. De",
+						"lastName": "Zeeuw",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Perry J. J. van",
+						"lastName": "Genderen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "David",
+						"lastName": "Overbosch",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marcel T. G. de",
+						"lastName": "Jeu",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"mefloquine",
+					"gap junctions",
+					"motor behavior",
+					"eye-blink conditioning",
+					"cerebellum"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.frontiersin.org/journal/downloadfile.aspx?fileid=1895&jid=26&artId=2246&rId=22&cId=21",
+						"title": "Full text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"url": "http://www.frontiersin.org/neuropharmacology/10.3389/fnins.2010.00191/pdf/abstract",
+				"title": "Anti-malaria drug mefloquine induces motor learning deficits in humans",
+				"publicationTitle": "Frontiers in Neuropharmacology",
+				"abstractNote": "Mefloquine (a marketed anti-malaria drug) prophylaxis has a high risk of causing adverse events. Interestingly, animal studies have shown that mefloquine imposes a major deficit in motor learning skills by affecting the connexin 36 gap junctions of the inferior olive. We were therefore interested in assessing whether mefloquine might induce similar effects in humans. The main aim of this study was to investigate the effect of mefloquine on olivary-related motor performance and motor learning tasks in humans. We subjected nine participants to voluntary motor timing (dart throwing task), perceptual timing (rhythm perceptual task) and reflex timing tasks (eye-blink task) before and 24 h after the intake of mefloquine. The influence of mefloquine on motor learning was assessed by subjecting participants with and without mefloquine intake (controls: n = 11 vs mefloquine: n = 8) to an eye-blink conditioning task. Voluntary motor performance, perceptual timing, and reflex blinking were not affected by mefloquine use. However, the influence of mefloquine on motor learning was substantial; both learning speed as well as learning capacity was impaired by mefloquine use. Our data suggest that mefloquine disturbs motor learning skills. This adverse effect can have clinical as well as social clinical implications for mefloquine users. Therefore, this side-effect of mefloquine should be further investigated and recognized by clinicians.",
+				"DOI": "10.3389/fnins.2010.00191",
+				"pages": "191",
+				"date": "2010",
+				"journalAbbreviation": "Front. Neurosci",
+				"volume": "4",
+				"libraryCatalog": "Frontiers",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

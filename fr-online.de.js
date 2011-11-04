@@ -1,14 +1,15 @@
 {
-        "translatorID": "488fe1e0-b7d2-406f-8257-5060418ce9b2",
-        "label": "fr-online.de",
-        "creator": "Martin Meyerhoff",
-        "target": "^http://www\\.fr-online\\.de",
-        "minVersion": "1.0",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": "1",
-        "translatorType": 4,
-        "lastUpdated": "2011-03-26 15:45:54"
+	"translatorID": "488fe1e0-b7d2-406f-8257-5060418ce9b2",
+	"label": "fr-online.de",
+	"creator": "Martin Meyerhoff",
+	"target": "^http://www\\.fr-online\\.de",
+	"minVersion": "1.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-01 22:37:46"
 }
 
 /*
@@ -51,13 +52,13 @@ function detectWeb(doc, url) {
 
 		
 	if (doc.evaluate(FR_article_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()  ){ 
-		Zotero.debug("newspaperArticle");
+		//Zotero.debug("newspaperArticle");
 		return "newspaperArticle";
 	} else if (doc.location.href.match(/^http\:\/\/www\.fr-online\.de\/.*?page\/search/) ) {
-		Zotero.debug("multiple");
+		//Zotero.debug("multiple");
 		return "multiple";
 	} else if (doc.evaluate(FR_multiple_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()  ){ 
-		Zotero.debug("multiple");
+		//Zotero.debug("multiple");
 		return "multiple";
 	}
 }
@@ -174,3 +175,46 @@ function doWeb(doc, url) {
 		scrape(doc, url);
 	}
 }	
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.fr-online.de/spezials/wikileaks---die-enthuellungsplattform,4882932,4882932.html",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.fr-online.de/krise/1471908,1471908.html",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.fr-online.de/krise/portugal-koennte-rettungspaket-benoetigen,1471908,8251842.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.fr-online.de/krise/portugal-koennte-rettungspaket-benoetigen,1471908,8251842.html",
+						"title": "Andeutung des Finanzministers: Portugal könnte Rettungspaket benötigen | Krise - Frankfurter Rundschau",
+						"mimeType": "text/html"
+					}
+				],
+				"url": "http://www.fr-online.de/krise/portugal-koennte-rettungspaket-benoetigen,1471908,8251842.html",
+				"title": "Andeutung des Finanzministers: Portugal könnte Rettungspaket benötigen",
+				"abstractNote": "Eine politische Krise in Portugal aufgrund der harten Sparvorgaben der Europäischen Union könnte ein Rettungspaket notwendig machen, fürchtet Finanzminister Fernando Teixeira dos Santos.",
+				"date": "2011-3-21",
+				"publicationTitle": "fr-online.de",
+				"section": "Krise",
+				"libraryCatalog": "fr-online.de",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Andeutung des Finanzministers"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
