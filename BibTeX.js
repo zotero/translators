@@ -864,7 +864,7 @@ var mappingTable = {
 	"\u0125":"\\^{h}", // LATIN SMALL LETTER H WITH CIRCUMFLEX
 	"\u0128":"\\~{I}", // LATIN CAPITAL LETTER I WITH TILDE
 	"\u0129":"\\~{i}", // LATIN SMALL LETTER I WITH TILDE
-	"\u012A":"\\={\\I}", // LATIN CAPITAL LETTER I WITH MACRON
+	"\u012A":"\\={I}", // LATIN CAPITAL LETTER I WITH MACRON
 	"\u012B":"\\={\\i}", // LATIN SMALL LETTER I WITH MACRON
 	"\u012C":"\\u{I}", // LATIN CAPITAL LETTER I WITH BREVE
 	"\u012D":"\\u{i}", // LATIN SMALL LETTER I WITH BREVE
@@ -1337,6 +1337,7 @@ var reversemappingTable = {
 	"\\~{i}"                          : "\u0129", // LATIN SMALL LETTER I WITH TILDE
 	"\\={I}"                          : "\u012A", // LATIN CAPITAL LETTER I WITH MACRON
 	"\\={i}"                          : "\u012B", // LATIN SMALL LETTER I WITH MACRON
+	"\\={\\i}"                        : "\u012B", // LATIN SMALL LETTER I WITH MACRON
 	"\\u{I}"                          : "\u012C", // LATIN CAPITAL LETTER I WITH BREVE
 	"\\u{i}"                          : "\u012D", // LATIN SMALL LETTER I WITH BREVE
 	"\\k{I}"                          : "\u012E", // LATIN CAPITAL LETTER I WITH OGONEK
