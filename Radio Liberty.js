@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-08-18 15:31:42"
+	"lastUpdated": "2011-11-05 13:47:39"
 }
 
 /*
@@ -75,7 +75,7 @@
 */
 
 function detectWeb(doc, url){
-	if (url.match(/\/content\/|\/archive\/news/)) {
+	if (url.match(/\/content\/|\/archive\/news|\/archive\/ru_news_zone/)) {
 		// The translator uses this type because RFE/RL generally has a place of publication
 		// and a Section; both are specific to newspaperArticle.
 		return "newspaperArticle";
@@ -171,7 +171,7 @@ function doWeb(doc, url){
 		}
 
 		item.url = url;
-		item.publicationTitle = doc.evaluate('//h2[@id="header_logo_anchor"]//span', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		item.publicationTitle = doc.evaluate('//h2[@id="header_logo_anchor" or @id="header_logo"]//span', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 
 		// Language map:
 		var map = {
@@ -260,6 +260,32 @@ var testCases = [
 				"url": "http://www.azatliq.org/content/article/24281041.html",
 				"publicationTitle": "Азатлык Радиосы",
 				"language": "Tatar/Bashkir",
+				"libraryCatalog": "Radio Free Europe / Radio Liberty"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.svobodanews.ru/archive/ru_news_zone/20111105/17/17.html?id=24382010",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": false,
+						"title": " Радио Свобода  Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Партия \"Яблоко\" перевела свою предвыборную программу на 18 языков",
+				"section": "Новости",
+				"url": "http://www.svobodanews.ru/archive/ru_news_zone/20111105/17/17.html?id=24382010",
+				"publicationTitle": "Радио Свобода",
+				"language": "Russian",
 				"libraryCatalog": "Radio Free Europe / Radio Liberty"
 			}
 		]
