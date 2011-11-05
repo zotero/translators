@@ -1,14 +1,15 @@
 {
-	"translatorID":"409c520b-0720-4011-8fce-70fcd9806493",
-	"translatorType":4,
-	"label":"InderScience",
-	"creator":"Michael Berkowitz",
-	"target":"http://www.inderscience.com/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"translatorID": "409c520b-0720-4011-8fce-70fcd9806493",
+	"label": "InderScience",
+	"creator": "Michael Berkowitz",
+	"target": "^https?://www\\.inderscience\\.com/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-04 18:09:59"
 }
 
 function detectWeb(doc, url) {
@@ -59,7 +60,7 @@ function scrape(link) {
 			var value = Zotero.Utilities.trimInternal(newDoc.evaluate('./td[3]', row, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 			data[tag] = value;
 		}
-		Zotero.debug(data);
+		//Zotero.debug(data);
 		var item = new Zotero.Item("journalArticle");
 		item.title = data['Title:'];
 		item.abstractNote = data['Abstract:'];
@@ -72,7 +73,7 @@ function scrape(link) {
 			item.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
 		}
 		var voliss = data['Journal:'].match(/^([^\d]+)(\d+)\s*\-\s*Vol\.\s*(\d+)\s*,\s*No\.(.+)pp\.\s*(.*)$/);
-		Zotero.debug(voliss);
+		//Zotero.debug(voliss);
 		item.publicationTitle = voliss[1];
 		item.date = voliss[2];
 		item.volume = voliss[3];
@@ -80,4 +81,68 @@ function scrape(link) {
 		item.pages = voliss[5];
 		item.complete();
   	}, function() {Zotero.done();});
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.inderscience.com/search/index.php?action=record&rec_id=29401&prevQuery=&ps=10&m=or",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Casey Man Kong",
+						"lastName": "Lum",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"karaoke singing",
+					"cross-cultural appropriation",
+					"globalisation",
+					"hybrid media",
+					"cultural practice",
+					"music videos",
+					"music industry",
+					"McLuhan",
+					"orality",
+					"sense-making",
+					"culture",
+					"ethnography",
+					"Hong Kong",
+					"China",
+					"Taiwan",
+					"Japan",
+					"USA",
+					"United States"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.inderscience.com/search/index.php?action=record&rec_id=29401&prevQuery=&ps=10&m=or",
+						"title": "Karaoke and the cross-cultural appropriations of music: InderScience Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Karaoke and the cross-cultural appropriations of music",
+				"abstractNote": "Marshall McLuhan observed in his 1964 paradigm-shifting classic, Understanding Media, that the ''crossings or hybridisations of the media release great new force and energy as by fission or fusion'' (p.48) and that the ''hybrid or the meeting of two media is a moment of truth and revelation from which new form is born'' (p.55). This study seeks to shed light on karaoke as a hybrid media form and on karaoke singing as a complex sense-making experience in an age of interactive electronic media. It reflects upon the implications of the cross-cultural appropriation of music by examining the production and uses of karaoke music videos. The discussion in this study is supported in part by data from ethnographic case studies conducted in Hong Kong, Taiwan, Japan and New York City. Further research on karaoke within the theoretical framework of media and globalisation is suggested.",
+				"url": "http://www.inderscience.com/search/index.php?action=record&rec_id=29401&prevQuery=&ps=10&m=or",
+				"DOI": "10.1504/IJCCM.2009.029401",
+				"publicationTitle": "International Journal of Chinese Culture and Management",
+				"date": "2009",
+				"volume": "2",
+				"issue": "3",
+				"pages": "194 - 205",
+				"libraryCatalog": "InderScience",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.inderscience.com/browse/index.php?journalID=220&year=2009&vol=2&issue=3",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

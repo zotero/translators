@@ -1,14 +1,15 @@
 {
-	"translatorID":"add79dfd-7951-4c72-af1d-ce1d50aa4fb4",
-	"translatorType":4,
-	"label":"informIT database",
-	"creator":"Adam Crymble",
-	"target":"http://www.informit.com",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-07-07 14:50:00"
+	"translatorID": "add79dfd-7951-4c72-af1d-ce1d50aa4fb4",
+	"label": "informIT database",
+	"creator": "Adam Crymble",
+	"target": "^https?://www\\.informit\\.com",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-04 20:48:12"
 }
 
 function detectWeb(doc,  url) {
@@ -80,8 +81,8 @@ function scrape(doc, url) {
 		var xPathCount = doc.evaluate('count (//ul[@class="bibliography"]/li)', doc, nsResolver, XPathResult.ANY_TYPE, null);
 	
 		for (i=0; i<xPathCount.numberValue; i++) {	 	
-	     		dataTags[i] = Zotero.Utilities.cleanTags(contents.iterateNext().textContent.replace(/^\s*|\s*$/g, ''));
-	     	}
+		 		dataTags[i] = Zotero.Utilities.cleanTags(contents.iterateNext().textContent.replace(/^\s*|\s*$/g, ''));
+		 	}
 	
 		var authors = dataTags[0].substr(3);			
 	
@@ -159,7 +160,7 @@ function doWeb(doc, url) {
 		if (doc.location.href.match("topics")) {
 			var titles = doc.evaluate('//div[@class="productList articles"]/dl/dt/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		} else {
-			var titles = doc.evaluate('//td[3][@class="results"]/ul/li/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var titles = doc.evaluate('//div[@class="searchresult"]/ul/li/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
 			var chapters = doc.evaluate('//dt/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		}
 		
@@ -182,4 +183,66 @@ function doWeb(doc, url) {
 	}
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.informit.com/articles/article.aspx?p=1756412",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"creators": [
+					{
+						"firstName": "Jeffrey",
+						"lastName": "Hughes",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"date": "Nov 3, 2011",
+				"title": "Your iPhone and iPad App Marketing Strategy: Grand Slam or Base Hits?",
+				"url": "http://www.informit.com/articles/article.aspx?p=1756412",
+				"libraryCatalog": "informIT database",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Your iPhone and iPad App Marketing Strategy"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.informit.com/store/product.aspx?isbn=0132371782",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Bruce",
+						"lastName": "Barringer",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"date": "Aug 12, 2010",
+				"description": "Dimensions: undefined",
+				"pages": "ight 2011",
+				"edition": "Dimensions: 5-3/8 X 8-1/4",
+				"title": "Marketing Your New Business",
+				"url": "http://www.informit.com/store/product.aspx?isbn=0132371782",
+				"libraryCatalog": "informIT database",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.informit.com/search/index.aspx?query=marketing&imageField.x=0&imageField.y=0",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
