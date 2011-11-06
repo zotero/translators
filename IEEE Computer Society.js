@@ -2,14 +2,14 @@
 	"translatorID": "8d72adbc-376c-4a33-b6be-730bc235190f",
 	"label": "IEEE Computer Society",
 	"creator": "fasthae@gmail.com",
-	"target": "^http?://(www[0-9]?|search[0-9]?)\\.computer\\.org/(portal/web/csdl/(magazines/[0-9a-z]+#(3|4)|transactions/[0-9a-z]+#(3|4)|letters/[0-9a-z]+#(3|4)|proceedings/[0-9a-z]+#(4|5)|doi|abs/proceedings)|search/results)",
+	"target": "^https?://(www[0-9]?|search[0-9]?)\\.computer\\.org/(portal/web/csdl/(magazines/[0-9a-z]+#(3|4)|transactions/[0-9a-z]+#(3|4)|letters/[0-9a-z]+#(3|4)|proceedings/[0-9a-z]+#(4|5)|doi|abs/proceedings)|search/results)",
 	"minVersion": "1.0.7",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-11-04 02:12:22"
+	"lastUpdated": "2011-11-05 22:24:21"
 }
 
 function detectWeb(doc, url) {
@@ -80,44 +80,31 @@ function doWeb(doc, url) {
 		}
 		else {
 			var entries = doc.evaluate('//div[@id="toc-articles-list"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-			var entry;
+			var entry, title, linkk;
 			while(entry = entries.iterateNext()) {
-				var title = "";
 				titleNode = doc.evaluate('./a', entry,nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 				if (titleNode)  {
-					title += titleNode.textContent;
+					title = titleNode.textContent;
 					//add link url of the abstract icon
-					var linkk;
-					if (titleNode.href.indexOf( 'javascript:void(0)') != -1) {
-						linkk = titleNode.attributes.getNamedItem("onclick").value;
-						linkk = linkk.substr(linkk.indexOf('"')+1);
-						linkk = linkk.substr(0,linkk.indexOf('"'));
-						if (linkk.indexOf("?") > -1) {
-							linkk += '&'+templte;
-						}
-						else {
-							linkk += '?'+templte;
-						}
-						linkk = "http://www2.computer.org"+linkk;
-					} else linkk=titleNode.href;
-
+					linkk = ZU.xpathText(entry, "./following-sibling::div[@id='toc-articles-img-main'][1]//td[@class='toc-description'][1]//a/@href");
 					items[linkk] = Zotero.Utilities.trimInternal(title);
 				}
 			}
 		}
 
 		// let user select documents to scrape
-		items = Zotero.selectItems(items);
-		if(!items) return true;
-		var urls = new Array();
-		for(var url in items) {
-			urls.push(url);
-		}
-
-		if (search != 1)  Zotero.Utilities.processDocuments(urls, scrape, function() { Zotero.done(); });
-		else Zotero.Utilities.doGet(urls, scrapt,function() { Zotero.done(); });
-
-		Zotero.wait();
+		Zotero.selectItems(items, function (items) {
+			if(!items) return true;
+			var urls = new Array();
+			for(var url in items) {
+				urls.push(url);
+			}
+	
+			if (search != 1)  Zotero.Utilities.processDocuments(urls, scrape, function() { Zotero.done(); });
+			else Zotero.Utilities.doGet(urls, scrapt,function() { Zotero.done(); });
+	
+			Zotero.wait();		
+		});
 	} else {
 		 scrape(doc);
 	}
@@ -231,46 +218,44 @@ var testCases = [
 		"url": "http://www.computer.org/portal/web/csdl/abs/proceedings/icalt/2011/4346/00/4346a428toc.htm",
 		"items": "multiple"
 	},
-
 	{
-	"type": "web",
+		"type": "web",
 		"url": "http://www.computer.org/portal/web/csdl/doi/10.1109/MAHC.2010.19",
 		"items": [
-
-	 {
-         	"itemType": "magazineArticle",
-         	"creators": [
-         		{
-         			"firstName": "Jeffrey R.",
-         			"lastName": "Yost",
-         			"creatorType": "author"
-         		}
-         	],
-         	"notes": [
-         		{
-         			"note": "Complete PDF document was either not available or accessible. Please make sure you're logged in to the digital library to retrieve the complete PDF document."
-         		}
-         	],
-         	"tags": [],
-         	"seeAlso": [],
-         	"attachments": [
-         		{
-         			"document": "[object]"
-         		}
-         	],
-         	"title": "From the Editor's Desk",
-         	"publicationTitle": "IEEE Annals of the History of Computing",
-         	"volume": "32",
-         	"issue": "1",
-         	"ISSN": "1058-6180",
-         	"date": "2010",
-         	"pages": "2-3",
-         	"DOI": "http://doi.ieeecomputersociety.org/10.1109/MAHC.2010.19",
-         	"publisher": "IEEE Computer Society",
-         	"place": "Los Alamitos, CA, USA",
-         	"libraryCatalog": "IEEE Computer Society"
-         }
-	]
+			{
+				"itemType": "magazineArticle",
+				"creators": [
+					{
+						"firstName": "Jeffrey R.",
+						"lastName": "Yost",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "Complete PDF document was either not available or accessible. Please make sure you're logged in to the digital library to retrieve the complete PDF document."
+					}
+				],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"document": "[object]"
+					}
+				],
+				"title": "From the Editor's Desk",
+				"publicationTitle": "IEEE Annals of the History of Computing",
+				"volume": "32",
+				"issue": "1",
+				"ISSN": "1058-6180",
+				"date": "2010",
+				"pages": "2-3",
+				"DOI": "http://doi.ieeecomputersociety.org/10.1109/MAHC.2010.19",
+				"publisher": "IEEE Computer Society",
+				"place": "Los Alamitos, CA, USA",
+				"libraryCatalog": "IEEE Computer Society"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
