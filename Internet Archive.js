@@ -1,14 +1,15 @@
 {
-	"translatorID":"db0f4858-10fa-4f76-976c-2592c95f029c",
-	"translatorType":4,
-	"label":"Internet Archive",
-	"creator":"Adam Crymble",
-	"target":"http://www.archive.org/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2010-04-29 21:53:40"
+	"translatorID": "db0f4858-10fa-4f76-976c-2592c95f029c",
+	"label": "Internet Archive",
+	"creator": "Adam Crymble",
+	"target": "^https?://www\\.archive\\.org/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-05 16:29:13"
 }
 
 function detectWeb(doc, url) {
@@ -191,8 +192,8 @@ function scrape(doc, url) {
 		}
 		if (tagsCount == "multiple") {
 			for (var i = 0; i < tagsContent.length; i++) {
-	     			newItem.tags[i] = tagsContent[i];
-     			}
+		 			newItem.tags[i] = tagsContent[i];
+	 			}
 		} else if (tagsCount == "one") {
 			newItem.tags = tagsContent;
 		}
@@ -325,7 +326,7 @@ function processBuckets(doc, url, ids) {
 
 function doWeb(doc, url) {
 	var items = {};
-	var articles = {};
+	var articles = new Array();
 	var itemCount = 0;
 	
 	// iterate through links under item/bucket name to check for zoterocommons (the collection name)
@@ -377,27 +378,10 @@ function doWeb(doc, url) {
 		Zotero.debug("multiple");
 		var items = new Object();
 		
-		var titles = doc.evaluate('//td[2][@class="hitCell"]/a', doc, null, XPathResult.ANY_TYPE, null);
-		var titlesCount = doc.evaluate('count (//td[2][@class="hitCell"]/a)', doc, null, XPathResult.ANY_TYPE, null);
-		
-		Zotero.debug(titlesCount.numberValue);
-		
+		var titles = doc.evaluate('//td[2][@class="hitCell"]/a[@class="titleLink"]', doc, null, XPathResult.ANY_TYPE, null);
 		var next_title;
-		for (var i = 0; i < titlesCount.numberValue; i++) {
-			next_title = titles.iterateNext();
-			
-			while (!next_title.href.match(/details/)) {
-				i++;
-				if (i == titlesCount.numberValue) {
-					Zotero.debug(i);
-					break;
-				}
-				next_title = titles.iterateNext();			
-			}
-			
-			if (next_title.href.match(/details/)) {
-				items[next_title.href] = next_title.textContent;
-			}
+		while (next_title = titles.iterateNext()) {
+					items[next_title.href] = next_title.textContent;
 		}
 		
 		items = Zotero.selectItems(items);
@@ -412,3 +396,32 @@ function doWeb(doc, url) {
 	
 	Zotero.wait();
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.archive.org/details/gullshornbookstu00dekk",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "The gull's hornbook : Stultorum plena sunt omnia. Al savio mezza parola basta : Dekker, Thomas, ca. 1572-1632 : Free Download & Streaming : Internet Archive",
+				"url": "http://www.archive.org/details/gullshornbookstu00dekk",
+				"libraryCatalog": "Internet Archive",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "The gull's hornbook"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.archive.org/search.php?query=cervantes%20AND%20mediatype%3Atexts",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

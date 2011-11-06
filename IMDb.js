@@ -1,14 +1,15 @@
 {
-        "translatorID": "a30274ac-d3d1-4977-80f4-5320613226ec",
-        "label": "IMDb",
-        "creator": "Avram Lyon",
-        "target": "^https?://www\\.imdb\\.com/",
-        "minVersion": "2.1",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": true,
-        "translatorType": 4,
-        "lastUpdated": "2011-05-29 09:44:03"
+	"translatorID": "a30274ac-d3d1-4977-80f4-5320613226ec",
+	"label": "IMDb",
+	"creator": "Avram Lyon",
+	"target": "^https?://www\\.imdb\\.com/",
+	"minVersion": "2.1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-04 17:48:21"
 }
 
 /*
@@ -51,7 +52,7 @@ function doWeb(doc, url){
 		while(result = results.iterateNext()) {
 			var link = doc.evaluate('./a[contains(@href,"/title/tt")]', result, ns, XPathResult.ANY_TYPE, null).iterateNext();
 			var title = result.textContent;
-			Zotero.debug(link.href);
+			//Zotero.debug(link.href);
 			var url = link.href.match(/\/title\/(tt\d+)/)[1];
 			items[url] = title;
 		}
@@ -83,8 +84,8 @@ function apiFetch(ids) {
 // parse result from imdbapi.com
 // should be json
 function parseIMDBapi(text, response, url) {
-	Zotero.debug(url);
-	Zotero.debug(text);
+	//Zotero.debug(url);
+	//Zotero.debug(text);
 	try {
 		var obj = JSON.parse(text);
 	} catch (e) {
@@ -121,3 +122,74 @@ function addCreator (item, creator, type) {
 	}
 	return item;
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.imdb.com/title/tt0089276/",
+		"items": [
+			{
+				"itemType": "film",
+				"creators": [
+					{
+						"firstName": "Luis",
+						"lastName": "Puenzo",
+						"creatorType": "director"
+					},
+					{
+						"firstName": "Aída",
+						"lastName": "Bortnik",
+						"creatorType": "scriptwriter"
+					},
+					{
+						"firstName": "Luis",
+						"lastName": "Puenzo",
+						"creatorType": "scriptwriter"
+					},
+					{
+						"firstName": "Norma",
+						"lastName": "Aleandro",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Héctor",
+						"lastName": "Alterio",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Chunchuna",
+						"lastName": "Villafañe",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Hugo",
+						"lastName": "Arana",
+						"creatorType": "contributor"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://ia.media-imdb.com/images/M/MV5BMTMyNTc1MjIwNF5BMl5BanBnXkFtZTcwOTcyMTcyMQ@@._V1._SX320.jpg",
+						"title": "Poster"
+					}
+				],
+				"title": "The Official Story",
+				"date": "8 Nov 1985",
+				"genre": "Drama, History, Thriller, War",
+				"abstractNote": "Alicia Marnet de Ibáñez is a high school history professor and a well-to-do housewife in Buenos Aires...",
+				"runningTime": "1 hr 52 mins",
+				"extra": "IMDB ID: tt0089276; IMDB Rating: 7.8 (2693 votes); Rotten Tomatoes: 8.3 (8 reviews  8 fresh, 0 rotten), Tomato Meter: 100",
+				"libraryCatalog": "IMDb"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.imdb.com/find?q=shakespeare&s=tt",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-10-15 11:31:24"
+	"lastUpdated": "2011-11-04 23:00:27"
 }
 
 function detectWeb(doc, url) {
@@ -137,7 +137,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": false,
+						"url": "http://iopscience.iop.org/0022-3727/34/10/311/pdf/0022-3727_34_10_311.pdf",
 						"title": "IOP Full Text PDF",
 						"mimeType": "application/pdf"
 					}
@@ -150,7 +150,8 @@ var testCases = [
 				"DOI": "10.1088/0022-3727/34/10/311",
 				"url": "http://iopscience.iop.org/0022-3727/34/10/311",
 				"title": "Hydrodynamical simulation of the electric wind in a cylindrical vessel with positive point-to-plane device",
-				"libraryCatalog": "CrossRef"
+				"libraryCatalog": "Intitute of Physics",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
