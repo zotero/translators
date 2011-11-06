@@ -1,14 +1,15 @@
 {
-	"translatorID":"0863b8ec-e717-4b6d-9e35-0b2db2ac6b0f",
-	"translatorType":4,
-	"label":"Institute of Pure and Applied Physics",
-	"creator":"Michael Berkowitz",
-	"target":"http://(jjap|apex|jpsj)\\.ipap\\.jp/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"translatorID": "0863b8ec-e717-4b6d-9e35-0b2db2ac6b0f",
+	"label": "Institute of Pure and Applied Physics",
+	"creator": "Michael Berkowitz",
+	"target": "^https?://(jjap|apex|jpsj)\\.ipap\\.jp/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-04 23:37:28"
 }
 
 function detectWeb(doc, url) {
@@ -123,3 +124,138 @@ function doWeb(doc, url) {
 	}, function() {Zotero.done();});
 	Zotero.wait();
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://jjap.jsap.jp/link?JJAP/50/01AA01/",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Hyunho",
+						"lastName": "Park",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kong-soo",
+						"lastName": "Lee",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Dohuyn",
+						"lastName": "Baek",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Juseong",
+						"lastName": "Kang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Byungse",
+						"lastName": "So",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Seok Il",
+						"lastName": "Kwon",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Byoungdeok",
+						"lastName": "Choi",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://jjap.jsap.jp/link?JJAP/50/01AA01/",
+						"title": "IPAP Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"url": "http://jjap.jsap.jp/link?JJAP/50/01AA01/pdf",
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"url": "http://jjap.jsap.jp/link?JJAP/50/01AA01/",
+				"publicationTitle": "Japanese Journal of Applied Physics",
+				"ISSN": "0021-4922",
+				"title": "Electrical Extractions of One Dimensional Doping Profile and Effective Mobility for Metal–Oxide–Semiconductor Field-Effect Transistors",
+				"journalAbbreviation": "Jpn. J. Appl. Phys.",
+				"volume": "50",
+				"date": "2011",
+				"pages": "01",
+				"DOI": "10.1143/JJAP.50.01AA01",
+				"abstractNote": "In this study, an attempt is made to provide a framework to assess and improve metal–oxide–semiconductor field-effect transistor (MOSFET) reliability from the early stage of the design to the completion of the product. A small gate area has very small capacitances that are difficult to measure, making capacitance–voltage (C–V) based techniques difficult or impossible. In view of these experimental difficulties, we tried electrical doping profiling measurement for MOSFET with short gate length, ultra thin oxide thickness and asymmetric source/drain structure and checked the agreement with simulation result. We could get the effective mobility by simple drain current versus drain bias voltage measurement. The calculated effective mobility was smaller than expected value and we explained some reasons. An accurate effective mobility for asymmetric source–drain junction transistor was successfully extracted by using the split C–V technique, with the capacitance measured between the gate and source–drain and between the gate and the substrate.",
+				"libraryCatalog": "Institute of Pure and Applied Physics",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://jpsj.ipap.jp/link?JPSJ/80/053703/",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Ai",
+						"lastName": "Yamakage",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kentaro",
+						"lastName": "Nomura",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ken-Ichiro",
+						"lastName": "Imura",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yoshio",
+						"lastName": "Kuramoto",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://jpsj.ipap.jp/link?JPSJ/80/053703/",
+						"title": "IPAP Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"url": "http://jpsj.ipap.jp/link?JPSJ/80/053703/pdf",
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"url": "http://jpsj.ipap.jp/link?JPSJ/80/053703/",
+				"publicationTitle": "Journal of the Physical Society of Japan",
+				"ISSN": "0031-9015",
+				"title": "Disorder-Induced Multiple Transition Involving Z2 Topological Insulator",
+				"journalAbbreviation": "J. Phys. Soc. Jpn.",
+				"volume": "80",
+				"date": "2011",
+				"pages": "053703",
+				"DOI": "10.1143/JPSJ.80.053703",
+				"abstractNote": "Effects of disorder on two-dimensional Z2 topological insulator are studied numerically by the transfer matrix method. Based on the scaling analysis, the phase diagram is derived for a model of HgTe quantum well as a function of disorder strength and magnitude of the energy gap. In the presence of sz non-conserving spin–orbit coupling, a finite metallic region is found that partitions the two topologically distinct insulating phases. As disorder increases, a narrow-gap topologically trivial insulator undergoes a series of transitions; first to metal, second to topological insulator, third to metal, and finally back to trivial insulator. We show that this multiple transition is a consequence of two disorder effects; renormalization of the band gap, and Anderson localization. The metallic region found in the scaling analysis corresponds roughly to the region of finite density of states at the Fermi level evaluated in the self-consistent Born approximation. ©2011 The Physical Society of Japan",
+				"libraryCatalog": "Institute of Pure and Applied Physics",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

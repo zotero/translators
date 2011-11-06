@@ -1,14 +1,15 @@
 {
-	"translatorID":"513a53f5-b95e-4df6-a03e-3348d9ec9f44",
-	"translatorType":4,
-	"label":"Internet Archive Wayback Machine",
-	"creator":"Sean Takats",
-	"target":"^http://web.archive.org/web/",
-	"minVersion":"1.0",
-	"maxVersion":null,
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"translatorID": "513a53f5-b95e-4df6-a03e-3348d9ec9f44",
+	"label": "Internet Archive Wayback Machine",
+	"creator": "Sean Takats",
+	"target": "^https?://web\\.archive\\.org/web/",
+	"minVersion": "1.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-05 16:36:01"
 }
 
 function detectWeb(doc, url){
@@ -21,12 +22,12 @@ function detectWeb(doc, url){
 	if (links.iterateNext()){
 		return "multiple";
 	}
-	return "webpage";	
+	return "webpage";
 }
 
 function doWeb(doc, url){
 	var uris = new Array();
-	var dateRe = new RegExp("^http://web.archive.org/web/([0-9]+)"); 
+	var dateRe = new RegExp("^http://web.archive.org/web/([0-9]+)");
 	if (dateRe.test(url)){ //handle single item
 		uris.push(url);
 	} else{//handle multiple items
@@ -60,4 +61,34 @@ function doWeb(doc, url){
 		newItem.complete();
 	}, function() {Zotero.done();});
 	Zotero.wait();
+
+
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://web.archive.org/web/20110310073553/http://www.taz.de/",
+		"items": [
+			{
+				"itemType": "webpage",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://web.archive.org/web/20110310073553/http://www.taz.de/",
+						"title": "taz.de",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "taz.de",
+				"date": "2011-03-10",
+				"libraryCatalog": "Internet Archive Wayback Machine"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

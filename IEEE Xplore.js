@@ -9,19 +9,19 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-09-15 23:36:59"
+	"lastUpdated": "2011-11-04 02:26:29"
 }
 
 function detectWeb(doc, url) {
 	var articleRe = /[?&]ar(N|n)umber=([0-9]+)/;
 	var m = articleRe.exec(url);
-	
+
 	if(m) {
 		return "journalArticle";
 	} else {
 		return "multiple";
 	}
-	
+
 	return false;
 }
 
@@ -30,22 +30,22 @@ function doWeb(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
-	
+
 	var hostRe = new RegExp("^(https?://[^/]+)/");
 	var hostMatch = hostRe.exec(url);
-	
+
 	var articleRe = /[?&]ar(?:N|n)umber=([0-9]+)/;
 	var m = articleRe.exec(url);
-	
+
 	if(detectWeb(doc, url) == "multiple") {
 		// search page
 		var items = new Array();
-		
+
 		var xPathRows = '//ul[@class="Results"]/li[@class="noAbstract"]/div[@class="header"]';
 		var tableRows = doc.evaluate(xPathRows, doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var tableRow;
 		while(tableRow = tableRows.iterateNext()) {
-			var linknode = doc.evaluate('.//div[@class="detail"]/h3/a', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();			
+			var linknode = doc.evaluate('.//div[@class="detail"]/h3/a', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			if(!linknode) {
 				// There are things like tables of contents that don't have item pages, so we'll just skip them
 				continue;
@@ -58,13 +58,13 @@ function doWeb(doc, url) {
 					title += strong.textContent+" ";
 				}
 			}
-			
+
 			items[link] = Zotero.Utilities.trimInternal(title);
 		}
-		
+
 		items = Zotero.selectItems(items);
 		if(!items) return true;
-		
+
 		var urls = new Array();
 		for(var url in items) {
 			// Some pages don't show the metadata we need (http://forums.zotero.org/discussion/16283)
@@ -105,7 +105,7 @@ function parseIdentifier(identifier) {
 			case "pmid": return ["pmid", idPieces.join(':')];
 			default: // do nothing
 		}
-		Zotero.debug("Unknown identifier prefix '"+prefix+"'");
+		//Zotero.debug("Unknown identifier prefix '"+prefix+"'");
 		return [prefix, idPieces.join(':')];
 	}
 	if (identifer.substr(0,3) == '10.') return ["doi", identifier];
@@ -115,7 +115,7 @@ function parseIdentifier(identifier) {
 	if (ids.isbn13) return ["isbn13", isbn13];
 	if (ids.isbn10) return ["isbn10", isbn10];
 	if (ids.issn) return ["issn", isbn10];
-	
+
 	return ["unknown", identifier];
 }
 
@@ -136,7 +136,7 @@ function scrape(doc,url) {
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
-	   
+
 	   var newItem=new Zotero.Item("journalArticle");
 	   var temp;
 	   var xpath;
@@ -209,19 +209,19 @@ function scrape(doc,url) {
 			case "dc.creator": if(!newItem.creators.length == 0) newItem.creators.push(Zotero.Utilities.cleanAuthor(value)); break;
 			// This is often NaN for some reason
 			case "dc.date": if (!newItem.date && value != "NaN" && value !== "") newItem.date = value; break;
-			case "dc.identifier": addIdentifier(value, newItem); break; 
+			case "dc.identifier": addIdentifier(value, newItem); break;
 			default:
-				Zotero.debug("Ignoring meta tag: " + tag + " => " + value);
+				//Zotero.debug("Ignoring meta tag: " + tag + " => " + value);
 		}
 	}
-	
+
 	// Split if we have only one tag
 	if (newItem.tags.length == 1) {
 		newItem.tags = newItem.tags[0].split(";");
 	}
-	
+
 	if (html) newItem.attachments.push({url:html, title:"IEEE Xplore Full Text HTML"});
-	
+
 	if (pages[0] && pages[1]) newItem.pages = pages.join('-')
 	else newItem.pages = pages[0] ? pages[1] : (pages[1] ? pages[1] : "");
 
@@ -235,7 +235,7 @@ function scrape(doc,url) {
 		var abstractNode = doc.evaluate('//a[@name="Abstract"]/following-sibling::p[1]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 		if (abstractNode) newItem.abstractNote = Zotero.Utilities.trimInternal(abstractNode.textContent);
 	}
-	
+
 	var res;
 	// Rearrange titles, per http://forums.zotero.org/discussion/8056
 	// If something has a comma or a period, and the text after comma ends with
@@ -245,7 +245,7 @@ function scrape(doc,url) {
 				 newItem.publicationTitle.trim().match(/^(.*),(.*(?:of|on|IEE|IEEE|IET|IRE))$/))
 		newItem.publicationTitle = res[2]+" "+res[1];
 	newItem.proceedingsTitle = newItem.conferenceName = newItem.publicationTitle;
-	
+
 	if (pdf) {
 		Zotero.Utilities.processDocuments([pdf], function (doc, url) {
 				var namespace = doc.documentElement.namespaceURI;
@@ -284,7 +284,7 @@ function scrape(doc,url) {
 // takes the first 10 valid digits and tries to read an ISBN 10,
 // and takes the first 13 valid digits to try to read an ISBN 13
 // Returns an object with four attributes:
-// 	"issn" 
+// 	"issn"
 // 	"isbn10"
 // 	"isbn13"
 // Each will be set to a valid identifier if found, and otherwise be a
@@ -386,14 +386,84 @@ idCheck = function(isbn) {
 	var valid10 = ((11 - sum10 % 11) % 11) == check10;
 	var valid13 = (10 - sum13 % 10 == check13);
 	var matches = false;
-	
+
 	// Since ISSNs have a standard hyphen placement, we can add a hyphen
 	if (valid8 && (matches = num8.match(/([0-9]{4})([0-9]{3}[0-9Xx])/))) {
 		num8 = matches[1] + '-' + matches[2];
-	} 
+	}
 
 	if(!valid8) {num8 = false};
 	if(!valid10) {num10 = false};
 	if(!valid13) {num13 = false};
 	return {"isbn10" : num10, "isbn13" : num13, "issn" : num8};
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://ieeexplore.ieee.org/search/searchresult.jsp?newsearch=true&queryText=turing&x=0&y=0&tag=1",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://ieeexplore.ieee.org/search/freesrchabstract.jsp?tp=&arnumber=4607247&refinements%3D4294967131%26openedRefinements%3D*%26filter%3DAND%28NOT%284283010803%29%29%26searchField%3DSearch+All%26queryText%3Dturing",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Yongming Li",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Deterministic fuzzy Turing machine (DFTM)",
+					"Turing machines",
+					"computational complexity",
+					"deterministic automata",
+					"deterministic fuzzy Turing machines",
+					"fixed finite subset",
+					"fuzzy computational complexity",
+					"fuzzy grammar",
+					"fuzzy languages",
+					"fuzzy polynomial time-bounded computation",
+					"fuzzy recursive language",
+					"fuzzy recursively enumerable (f.r.e.) language",
+					"fuzzy set theory",
+					"fuzzy sets",
+					"nondeterministic fuzzy Turing machine (NFTM)",
+					"nondeterministic fuzzy Turing machines",
+					"nondeterministic polynomial time-bounded computation",
+					"universal fuzzy Turing machine (FTM)",
+					""
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=4607247",
+						"title": "IEEE Xplore Abstract Record",
+						"snapshot": false
+					}
+				],
+				"publicationTitle": "IEEE Transactions on Fuzzy Systems",
+				"publisher": "IEEE",
+				"title": "Fuzzy Turing Machines: Variants and Universality",
+				"date": "Dec.  2008",
+				"volume": "16",
+				"issue": "6",
+				"DOI": "10.1109/TFUZZ.2008.2004990",
+				"ISSN": "1063-6706",
+				"language": "English",
+				"pages": "1491-1502",
+				"abstractNote": "In this paper, we study some variants of fuzzy Turing machines (FTMs) and universal FTM. First, we give several formulations of FTMs, including, in particular, deterministic FTMs (DFTMs) and nondeterministic FTMs (NFTMs). We then show that DFTMs and NFTMs are not equivalent as far as the power of recognizing fuzzy languages is concerned. This contrasts sharply with classical TMs. Second, we show that there is no universal FTM that can exactly simulate any FTM on it. But if the membership degrees of fuzzy sets are restricted to a fixed finite subset A of [0,1], such a universal machine exists. We also show that a universal FTM exists in some approximate sense. This means, for any prescribed accuracy, that we can construct a universal machine that simulates any FTM with the given accuracy. Finally, we introduce the notions of fuzzy polynomial time-bounded computation and nondeterministic fuzzy polynomial time-bounded computation, and investigate their connections with polynomial time-bounded computation and nondeterministic polynomial time-bounded computation.",
+				"conferenceName": "IEEE Transactions on Fuzzy Systems",
+				"proceedingsTitle": "IEEE Transactions on Fuzzy Systems",
+				"libraryCatalog": "IEEE Xplore",
+				"shortTitle": "Fuzzy Turing Machines"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

@@ -1,14 +1,15 @@
 {
-	"translatorID":"8e5f8616-05d0-4d33-8554-dad76b20ecbx",
-	"translatorType":4,
-	"label":"Hanrei Watch RSS service",
-	"creator":"Frank Bennett",
-	"target":"http://kanz.jp/hanrei/detail.html\\?idx=[0-9]+$",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-10-22 19:00:00"
+	"translatorID": "8e5f8616-05d0-4d33-8554-dad76b20ecbx",
+	"label": "Hanrei Watch RSS service",
+	"creator": "Frank Bennett",
+	"target": "^https?://kanz\\.jp/hanrei/detail/[0-9]+/",
+	"minVersion": "1.0.0b3.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-03 22:29:30"
 }
 
 function detectWeb(doc, url) {
@@ -88,3 +89,35 @@ function doWeb(doc, url) {
 		mimeType:"application/pdf"} );
 	item.complete();
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://kanz.jp/hanrei/detail/81611/",
+		"items": [
+			{
+				"itemType": "case",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.courts.go.jp/hanrei/pdf/20110912150000.pdf",
+						"title": "SupCt PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"type": "case",
+				"docketNumber": "平成22(ワ)503",
+				"title": "慰謝料請求事件",
+				"court": "仙台地方裁判所　第1民事部",
+				"date": "2011-8-30",
+				"url": "http://kanz.jp/hanrei/detail/81611/",
+				"libraryCatalog": "Hanrei Watch RSS service",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
