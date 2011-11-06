@@ -22,12 +22,12 @@ function detectWeb(doc, url){
 	if (links.iterateNext()){
 		return "multiple";
 	}
-	return "webpage";	
+	return "webpage";
 }
 
 function doWeb(doc, url){
 	var uris = new Array();
-	var dateRe = new RegExp("^http://web.archive.org/web/([0-9]+)"); 
+	var dateRe = new RegExp("^http://web.archive.org/web/([0-9]+)");
 	if (dateRe.test(url)){ //handle single item
 		uris.push(url);
 	} else{//handle multiple items
@@ -63,7 +63,9 @@ function doWeb(doc, url){
 	Zotero.wait();
 
 
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",

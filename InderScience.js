@@ -13,7 +13,7 @@
 }
 
 function detectWeb(doc, url) {
-	if (doc.evaluate('/html/body/table/tbody/tr/td[2]/table[tbody/tr/td[3]][2]', doc, null, XPathResult.ANY_TYPE, null).iterateNext() 
+	if (doc.evaluate('/html/body/table/tbody/tr/td[2]/table[tbody/tr/td[3]][2]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()
 		|| doc.evaluate('//td[1][@class="textcontent"]/table/tbody/tr/td[2]/b/u/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
 	} else if (url.indexOf("rec_id") != -1) {
@@ -81,7 +81,9 @@ function scrape(link) {
 		item.pages = voliss[5];
 		item.complete();
   	}, function() {Zotero.done();});
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",

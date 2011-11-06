@@ -29,7 +29,7 @@ function doWeb(doc, url) {
 	var ns = n ? function(prefix) {
 		if (prefix == 'x') return n; else return null;
 	} : null;
-	
+
 	var books = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var titles = doc.evaluate('/html/body/form/table/tbody/tr/td[3]/a', doc, ns, XPathResult.ANY_TYPE, null);
@@ -69,7 +69,7 @@ function doWeb(doc, url) {
 							ind += field[4];
 						}
 					}
-				
+
 					record.addField(code, ind, value);
 				}
 			}
@@ -79,7 +79,9 @@ function doWeb(doc, url) {
 		item.complete();
 	}, function() {Zotero.done();});
 	Zotero.wait();
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
