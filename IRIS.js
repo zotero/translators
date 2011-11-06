@@ -1,14 +1,15 @@
 {
-	"translatorID":"8381bf68-11fa-418c-8530-2e00284d3efd",
-	"translatorType":4,
-	"label":"IRIS",
-	"creator":"Chad Mills and Michael Berkowitz",
-	"target":"https://[^/]*www.iris.rutgers.edu[^/]*/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"translatorID": "8381bf68-11fa-418c-8530-2e00284d3efd",
+	"label": "IRIS",
+	"creator": "Chad Mills and Michael Berkowitz",
+	"target": "^https?://[^/]*www\\.iris\\.rutgers\\.edu[^/]*/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-05 18:13:46"
 }
 
 function detectWeb(doc, url) {
@@ -321,6 +322,60 @@ function scrape(doc) {
 				}//end FOR
 			Zotero.done();
 			});
-    	Zotero.wait();
+		Zotero.wait();
 	}//END while
 }//END scrape function
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.iris.rutgers.edu/cgi-bin/IRISquickSearch.cgi?searchdata1=4716226{CKEY}&searchfield1=GENERAL^SUBJECT^GENERAL^^&user_id=WEBSERVER",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "William C. ",
+						"lastName": "Smith",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Carlos (Carlos H. )",
+						"lastName": "Acuña",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Eduardo",
+						"lastName": "Gamarra",
+						"creatorType": "contributor"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Democracy",
+					"Latin America",
+					"Latin America",
+					"Economic conditions",
+					"1982",
+					"Latin America",
+					"Economic policy",
+					"Latin America",
+					"Politics and government",
+					"1980"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"extra": "Contents: Future politico-economic scenarios for Latin America / William C. Smith and Carlos H. Acuña -- Politics and economics in the Argentina of the nineties (or, why the future no longer is what it used to be) / Carlos H. Acuña -- Crisis and transformation of the Argentine state (1978-1992) / Adolfo Canitrot -- Crafting political support for stabilization : political pacts and the new economic policy in Bolivia / Eduardo A. Gamarra -- Democracy, economic liberalism, and structural reform in Bolivia / Juan Antonio Morales -- The state, structural reform, and democratization in Brazil / Lourdes Sola -- Renegade development : rise and demise of state-led development in Brazil / Antônio Barros de Castro -- The political dimension of processes of transformation in Chile / Manuel Antonio Garretón -- Market economy, social welfare, and democratic consolidation in Chile / Pilar Vergara -- Making economic reform politically viable : the Mexican experience / Blanca Heredia -- On the political economy of market and state reform in Mexico / Jaime Ros\nSecondary subject: Democracia--América Latina\nSecondary subject: Democracia--Hispanoamérica\nSecondary subject: Démocratie--Amérique latine\nSecondary subject: Wirtschaftspolitik\nSecondary subject: Kongress\nSecondary subject: América Latina--Condiciones económicas--1982\nSecondary subject: América Latina--Política económica\nSecondary subject: América Latina--Gobierno\nSecondary subject: América Latina--Política\nSecondary subject: Hispanoamérica--Política económica\nSecondary subject: Hispanoamérica--Política--1980\nSecondary subject: Amérique latine--Conditions économiques--1982\nSecondary subject: Amérique latine--Politique économique\nSecondary subject: Amérique latine--Politique et gouvernement--1980\nSecondary subject: Lateinamerika",
+				"title": "Democracy, markets, and structural reform in Latin America: Argentina, Bolivia, Brazil, Chile, and Mexico",
+				"place": "New Brunswick, N.J.",
+				"publisher": "Transaction Publishers",
+				"date": "1994",
+				"numPages": "331",
+				"callNumber": "HC125.D444 1993",
+				"libraryCatalog": "IRIS",
+				"shortTitle": "Democracy, markets, and structural reform in Latin America"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
