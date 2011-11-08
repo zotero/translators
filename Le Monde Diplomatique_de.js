@@ -1,14 +1,15 @@
 {
-        "translatorID": "530cf18c-e80a-4e67-ae9c-9b8c08591610",
-        "label": "Le monde diplomatique",
-        "creator": "Martin Meyerhoff",
-        "target": "^http://www\\.monde-diplomatique\\.de",
-        "minVersion": "1.0",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": "1",
-        "translatorType": 4,
-        "lastUpdated": "2011-03-26 16:50:57"
+	"translatorID": "530cf18c-e80a-4e67-ae9c-9b8c08591610",
+	"label": "Le monde diplomatique",
+	"creator": "Martin Meyerhoff",
+	"target": "^http://www\\.monde-diplomatique\\.de",
+	"minVersion": "1.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-07 21:14:38"
 }
 
 /*
@@ -122,7 +123,7 @@ function doWeb(doc, url) {
 		
 		var next_title;
 		while (next_title = titles.iterateNext()) {
-			if (next_title.href.match(/^http:\/\/www\.monde-diplomatique\.de\/pm\/\d\d\d\d\/\d\d/) ){
+			if (next_title.href.match(/tid=\d\d\d\d/) ){
 				items[next_title.href] = next_title.textContent;
 			}
 		}
@@ -137,3 +138,45 @@ function doWeb(doc, url) {
 	}
 }	
 
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.monde-diplomatique.de/pm/2011/10/14.mondeText1.artikel,a0010.idx,1",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "Heiner",
+						"lastName": "Ganßmann",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.monde-diplomatique.de/pm/2011/10/14.mondeText1.artikel,a0010.idx,1",
+						"title": "Le Monde diplomatique, deutsche Ausgabe",
+						"mimeType": "text/html"
+					}
+				],
+				"url": "http://www.monde-diplomatique.de/pm/2011/10/14.mondeText1.artikel,a0010.idx,1",
+				"title": "Wir sind der Markt",
+				"date": "14.10.2011",
+				"abstractNote": "Spekulation und Alltag",
+				"publicationTitle": "Le Monde Diplomatique (Deutsch)",
+				"libraryCatalog": "Le monde diplomatique",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.monde-diplomatique.de/pm/.search?dos=1&is=1&tx=Globalisierung",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
