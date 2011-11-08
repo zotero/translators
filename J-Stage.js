@@ -31,7 +31,7 @@ function doWeb(doc, url) {
 	var ns = n ? function(prefix) {
 		if (prefix == 'x') return n; else return null;
 	} : null;
-	
+
 	var arts = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
@@ -48,7 +48,7 @@ function doWeb(doc, url) {
 			linkx = './/td/a[contains(@href, "_article")]';
 		}
 		Zotero.debug(xpath);
-		
+
 		var list = doc.evaluate(xpath, doc, ns, XPathResult.ANY_TYPE, null);
 		var nextitem;
 		while (nextitem = list.iterateNext()) {
@@ -85,7 +85,8 @@ function doWeb(doc, url) {
 			translator.translate();
 		});
 	}
-}/** BEGIN TEST CASES **/
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
