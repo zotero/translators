@@ -1,22 +1,24 @@
 {
-	"translatorID":"d93c14fb-d327-4540-b60a-327309ea512b",
-	"translatorType":4,
-	"label":"Journal of Electronic Publishing",
-	"creator":"Michael Berkowitz",
-	"target":"http://quod.lib.umich.edu/.*c=jep",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"translatorID": "d93c14fb-d327-4540-b60a-327309ea512b",
+	"label": "Journal of Electronic Publishing",
+	"creator": "Michael Berkowitz",
+	"target": "http://quod.lib.umich.edu/.*c=jep",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-06 23:47:04"
 }
 
 function detectWeb(doc, url) {
-	if (doc.evaluate('//div/span[text() = "Search Results"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	/** if (doc.evaluate('//div/span[text() = "Search Results"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
 	} else if (url.match(/\d+\.\d+\.\d+/)) {
 		return "journalArticle";
-	}
+	} */
+	return false
 }
 
 function doWeb(doc, url) {
