@@ -1,14 +1,15 @@
 {
-	"translatorID":"b56d756e-814e-4b46-bc58-d61dccc9f32f",
-	"translatorType":4,
-	"label":"Nagoya University OPAC",
-	"creator":"Frank Bennett",
-	"target":"^http://opac.nul.nagoya-u.ac.jp/webopac/(catdbl.do|ctlsrh.do)",
-	"minVersion":"2.0b7",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-01-23 02:17:07"
+	"translatorID": "b56d756e-814e-4b46-bc58-d61dccc9f32f",
+	"label": "Nagoya University OPAC",
+	"creator": "Frank Bennett",
+	"target": "^https?://opac\\.nul\\.nagoya-u\\.ac\\.jp/webopac/(catdbl.do|ctlsrh\\.do)",
+	"minVersion": "2.0b7",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-09 12:14:53"
 }
 
 // #######################
@@ -298,3 +299,36 @@ function doWeb(doc, url) {
 		scrapeAndParse(doc, url);
 	}
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://opac.nul.nagoya-u.ac.jp/webopac/catdbl.do?pkey=TY50091937&initFlg=_RESULT_SET_NOTBIB",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Jeremy",
+						"lastName": "Adelman",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"authorstrings": " Jeremy Adelman",
+				"title": "Frontier development : land, labour, and capital on the wheatlands of Argentina and Canada, 1890-1914",
+				"date": "1994",
+				"place": "Oxford",
+				"publisher": "Clarendon Press",
+				"series": "Oxford historical monographs",
+				"ISBN": "0198204418",
+				"libraryCatalog": "Nagoya University OPAC",
+				"shortTitle": "Frontier development"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

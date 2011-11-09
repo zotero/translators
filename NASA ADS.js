@@ -1,14 +1,15 @@
 {
-	"translatorID":"7987b420-e8cb-4bea-8ef7-61c2377cd686",
-	"translatorType":4,
-	"label":"NASA ADS",
-	"creator":"Asa Kusuma and Ramesh Srigiriraju",
-	"target":"http://(ukads|cdsads|ads|adsabs|esoads|adswww|www.ads)\\.(inasan|iucaa.ernet|nottingham.ac|harvard|eso|u-strasbg|nao.ac|astro.puc|bao.ac|on|kasi.re|grangenet|lipi.go|mao.kiev)\\.(edu|org|net|fr|jp|cl|id|uk|cn|ua|in|ru|br|kr)/(?:cgi-bin|abs)/",
-	"minVersion":"1.0.0b4.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"translatorID": "7987b420-e8cb-4bea-8ef7-61c2377cd686",
+	"label": "NASA ADS",
+	"creator": "Asa Kusuma and Ramesh Srigiriraju",
+	"target": "^https?://(ukads|cdsads|ads|adsabs|esoads|adswww|www\\.ads)\\.(inasan|iucaa\\.ernet|nottingham\\.ac|harvard|eso|u-strasbg|nao\\.ac|astro\\.puc|bao\\.ac|on|kasi\\.re|grangenet|lipi\\.go|mao\\.kiev)\\.(edu|org|net|fr|jp|cl|id|uk|cn|ua|in|ru|br|kr)/(?:cgi-bin|abs)/",
+	"minVersion": "1.0.0b4.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-09 11:17:58"
 }
 
 function detectWeb(doc, url) {
@@ -78,4 +79,45 @@ function doWeb(doc, url) {
 		var bibcodes = "bibcode="+encodeURIComponent(bibcode) + "&";
 		parseRIS(bibcodes, hostname);
 	}
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://adsabs.harvard.edu/cgi-bin/basic_connect?qsearch=star&version=1",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://adsabs.harvard.edu/abs/1955ApJ...121..161S",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Salpeter",
+						"firstName": "Edwin E.",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://adsabs.harvard.edu/abs/1955ApJ...121..161S"
+					}
+				],
+				"title": "The Luminosity Function and Stellar Evolution.",
+				"publicationTitle": "The Astrophysical Journal",
+				"volume": "121",
+				"date": "January 1, 1955",
+				"pages": "161",
+				"url": "http://adsabs.harvard.edu/abs/1955ApJ...121..161S",
+				"abstractNote": "Abstract image available at: \nhttp://adsabs.harvard.edu/abs/1955ApJ...121..161S",
+				"libraryCatalog": "NASA ADS",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
