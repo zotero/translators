@@ -1,14 +1,15 @@
 {
-	"translatorID":"e40a27bc-0eef-4c50-b78b-37274808d7d2",
-	"translatorType":4,
-	"label":"J-Stage",
-	"creator":"Michael Berkowitz",
-	"target":"http://www.jstage.jst.go.jp/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-06-06 08:45:00"
+	"translatorID": "e40a27bc-0eef-4c50-b78b-37274808d7d2",
+	"label": "J-Stage",
+	"creator": "Michael Berkowitz",
+	"target": "^https?://www\\.jstage\\.jst\\.go\\.jp/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-07 17:29:05"
 }
 
 function detectWeb(doc, url) {
@@ -30,7 +31,7 @@ function doWeb(doc, url) {
 	var ns = n ? function(prefix) {
 		if (prefix == 'x') return n; else return null;
 	} : null;
-	
+
 	var arts = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
@@ -47,7 +48,7 @@ function doWeb(doc, url) {
 			linkx = './/td/a[contains(@href, "_article")]';
 		}
 		Zotero.debug(xpath);
-		
+
 		var list = doc.evaluate(xpath, doc, ns, XPathResult.ANY_TYPE, null);
 		var nextitem;
 		while (nextitem = list.iterateNext()) {
@@ -62,10 +63,12 @@ function doWeb(doc, url) {
 	} else {
 		arts = [RISify(url)];
 	}
-	Zotero.debug(arts);
+	//Zotero.debug(arts);
 	for each (var uri in arts) {
 		Zotero.Utilities.HTTP.doGet(uri, function(text) {
-			Zotero.debug(text);
+			//the RIS has an extra, empty title line which breaks it
+			text = text.replace(/TI  -\s+\n/, "")
+			//Zotero.debug(text)
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			translator.setString(text);
@@ -83,3 +86,92 @@ function doWeb(doc, url) {
 		});
 	}
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.jstage.jst.go.jp/article/internalmedicine/50/5/50_375/_article",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Shinozaki",
+						"firstName": "Masae",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Kanazawa",
+						"firstName": "Motoyori",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Palsson",
+						"firstName": "Olafur S",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Sagami",
+						"firstName": "Yasuhiro",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Endo",
+						"firstName": "Yuka",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Hongo",
+						"firstName": "Michio",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Drossman",
+						"firstName": "Douglas A",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Whitehead",
+						"firstName": "William E",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Fukudo",
+						"firstName": "Shin",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.jstage.jst.go.jp/article/internalmedicine/50/5/50_375/_article",
+						"title": "Internal Medicine Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"url": "http://www.jstage.jst.go.jp/article/internalmedicine/50/5/375/_pdf",
+						"title": "Internal Medicine PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"title": "Validation of the Japanese Version of Comorbid Conditions Questionnaire (CCQ-J) and Recent Physical Symptoms Questionnaire (RPSQ-J)",
+				"publicationTitle": "Internal Medicine",
+				"volume": "50",
+				"issue": "5",
+				"pages": "375-380",
+				"date": "2011",
+				"url": "http://www.jstage.jst.go.jp/article/internalmedicine/50/5/50_375/_article",
+				"libraryCatalog": "J-Stage",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.jstage.jst.go.jp/browse/general/11/1/_contents",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
