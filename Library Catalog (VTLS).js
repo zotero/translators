@@ -1,14 +1,15 @@
 {
-	"translatorID":"63a0a351-3131-18f4-21aa-f46b9ac51d87",
-	"translatorType":4,
-	"label":"Library Catalog (VTLS)",
-	"creator":"Simon Kornblith",
-	"target":"/chameleon(?:\\?|$)",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"translatorID": "63a0a351-3131-18f4-21aa-f46b9ac51d87",
+	"label": "Library Catalog (VTLS)",
+	"creator": "Simon Kornblith",
+	"target": "/chameleon(?:\\?|$)",
+	"minVersion": "1.0.0b3.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-08 16:04:55"
 }
 
 function detectWeb(doc, url) {
@@ -32,7 +33,7 @@ function doWeb(doc, url) {
 	var newUris = new Array();
 	
 	var marcs = doc.evaluate('//a[text()="marc"]', doc, nsResolver,
-	                         XPathResult.ANY_TYPE, null);
+							 XPathResult.ANY_TYPE, null);
 	var record = marcs.iterateNext();
 	
 	if(record && !marcs.iterateNext()) {
@@ -45,7 +46,7 @@ function doWeb(doc, url) {
 		var items = new Array();
 		
 		var tableRows = doc.evaluate('//tr[@class="intrRow"]', doc, nsResolver,
-		                             XPathResult.ANY_TYPE, null);
+									 XPathResult.ANY_TYPE, null);
 		var tableRow;
 		// Go through table rows
 		while(tableRow = tableRows.iterateNext()) {
@@ -61,14 +62,14 @@ function doWeb(doc, url) {
 			if(url) {
 				// Collect title information
 				var fields = doc.evaluate('./td/table/tbody/tr[th]', tableRow,
-				                          nsResolver, XPathResult.ANY_TYPE, null);
+										  nsResolver, XPathResult.ANY_TYPE, null);
 				var field;
 				while(field = fields.iterateNext()) {
 					var header = doc.evaluate('./th/text()', field, nsResolver,
-					                          XPathResult.ANY_TYPE, null).iterateNext();
+											  XPathResult.ANY_TYPE, null).iterateNext();
 					if(header.nodeValue == "Title") {
 						var value = doc.evaluate('./td', field, nsResolver,
-					    	XPathResult.ANY_TYPE, null).iterateNext();
+							XPathResult.ANY_TYPE, null).iterateNext();
 						if(value) {
 							items[url] = Zotero.Utilities.trimInternal(value.textContent);
 						}
@@ -111,7 +112,7 @@ function doWeb(doc, url) {
 //		/html/body/table[@class="header2"]/tbody/tr/td[2]/table/tbody/tr/td/table/tbody/tr/td/table[@class="marctable"]/tbody/tr/td[4][@class="marcSubfields"]
 		var xpath = '//table[@class="marctable"]/tbody/tr[td[4]]';
 		var elmts = newDoc.evaluate(xpath, newDoc, nsResolver,
-		                            XPathResult.ANY_TYPE, null);
+									XPathResult.ANY_TYPE, null);
 		
 		while(elmt = elmts.iterateNext()) {
 			var field = newDoc.evaluate('./TD[1]/text()[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
@@ -133,4 +134,79 @@ function doWeb(doc, url) {
 	}, function(){ Zotero.done(); }, null);
 	
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://gemilang.ukm.my/cgi-bin/chameleon?sessionid=2011110905053919925&skin=default&lng=en&inst=consortium&host=202.185.40.3%2b1888%2bDEFAULT&patronhost=202.185.40.3%201888%20DEFAULT&searchid=H1&sourcescreen=INITREQ&pos=1&itempos=1&rootsearch=SCAN&function=INITREQ&search=AUTHID&authid=1609910&authidu=4",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Guido",
+						"lastName": "Di Tella",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Argentina",
+					"Economic conditions"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"ISBN": "0333531418",
+				"title": "Argentina, 1946-83: the economic ministers speak",
+				"place": "London",
+				"publisher": "Macmillan Press",
+				"date": "1990",
+				"numPages": "219",
+				"callNumber": "HC173",
+				"libraryCatalog": "gemilang.ukm.my Library Catalog",
+				"shortTitle": "Argentina, 1946-83"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://webvirtua.ums.edu.my/cgi-bin/gw/chameleon?sessionid=2011110906595202796&skin=ums&lng=en&inst=consortium&host=10.11.50.2%2b1111%2bDEFAULT&sourcescreen=INITREQ&scant1=Peronism%20without%20Peron%20%3a%20unions,%20parties,%20and%20democracy%20in%20Argentina%20%2f%20James%20W.%20McGuire&scanu1=4&elementcount=1&t1=Peronism%20without%20Peron%20%3a%20unions,%20parties,%20and%20democracy%20in%20Argentina%20%2f%20James%20W.%20McGuire&u1=4&op1=0&pos=1&itempos=1&rootsearch=KEYWORD&function=INITREQ&search=AUTHID&authid=428069&authidu=4",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "James W",
+						"lastName": "McGuire",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Peronism",
+					"Trade-unions",
+					"Political activity History",
+					"Argentina",
+					"Democracy",
+					"History",
+					"Argentina",
+					"Argentina",
+					"Politics and government",
+					"1943-"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"ISBN": "0804728313",
+				"title": "Peronism without Peron: unions, parties, and democracy in Argentina",
+				"place": "Stanford",
+				"publisher": "Stanford University Press",
+				"date": "1997",
+				"numPages": "388",
+				"callNumber": "F2849",
+				"libraryCatalog": "webvirtua.ums.edu.my Library Catalog",
+				"shortTitle": "Peronism without Peron"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

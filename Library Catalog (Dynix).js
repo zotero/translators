@@ -8,7 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-07-24 19:43:47"
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-08 10:41:14"
 }
 
 function detectWeb(doc, url) {
@@ -18,13 +19,13 @@ function detectWeb(doc, url) {
 	} : null;
 	// make sure there are multiple results, check to see if the search results number exists
 	var xpath = '/html/body/table[4]/tbody/tr[2]/td[1]/table/tbody/tr[2]/td/a/b[1]';
-	
+	//issue: currently wrongly detects "browse" results as single items
 	var detailsRe = new RegExp('ipac\.jsp\?.*uri=(?:full|link)=[0-9]');
 	if(detailsRe.test(doc.location.href)) {
 		return "book";
 	} else if(!doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) { // this hack catches search results w/ single items
 	  return "book";
-	} else {
+	} else { 
 		return "multiple";
 	}
 }
@@ -200,7 +201,14 @@ var testCases = [
 						"creatorType": "contributor"
 					}
 				],
-				"notes": [],
+				"notes": [
+					{
+						"note": "Reproduces the full texts of the manuscripts in Bregler's collection Fully co-ordinated with and cross-referenced to a companion volume, Writing about Eakins, which contains biographical and critical essays, chronologies, lists of all the manuscripts and an index to microfiche locations At head of title: Archives, Pennsylvania Academy of the Fine Arts Title on information label issued with set: Microfiche edition of the manuscripts in Charles Bregler's Thomas Eakins Collection"
+					},
+					{
+						"note": "Series 1. The papers of Thomas Eakins -- (12 microfiches) Series 2. The papers of Susan Macdowell Eakins (8 microfiches) -- Series 3. Benjamin Eakins and Macdowell family papers (1 microfiche) -- Series 4. The papers of Charles Bregler (16 microfiches)"
+					}
+				],
 				"tags": [
 					"Eakins, Thomas",
 					"Eakins, Susan Macdowell",
@@ -216,7 +224,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": false,
+						"url": "http://siris-libraries.si.edu/ipac20/ipac.jsp?uri=full=3100001~!820431~!0&profile=all",
 						"title": "Original record",
 						"mimeType": "text/html",
 						"snapshot": false
@@ -232,6 +240,11 @@ var testCases = [
 				"libraryCatalog": "siris-libraries.si.edu Library Catalog"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://siris-libraries.si.edu/ipac20/ipac.jsp?session=Y3X077P415286.52120&menu=search&aspect=Keyword&npp=20&ipp=20&spp=20&profile=liball&ri=&term=&index=GW&x=0&y=0&aspect=Keyword&term=smith&index=AW&term=&index=TW&term=&index=SW&term=&index=.JW",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
