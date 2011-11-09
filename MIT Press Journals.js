@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-11-09 00:03:05"
+	"lastUpdated": "2011-11-09 00:21:03"
 }
 
 function detectWeb(doc, url) {
@@ -54,8 +54,9 @@ function doWeb(doc, url) {
 			//Zotero.debug(text)
 			translator.setString(text);
 			translator.setHandler("itemDone", function(obj, item) {
-				//picks up some weird attachments from the RIS - delete
+				//picks up some weird attachments and notes from the RIS - delete
 				item.attachments= [];
+				item.notes=[];
 				item.attachments.push({url:doc.location.href, title:item.publicationTitle + " Snapshot", mimeType:"text/html"})
 				item.attachments.push({url:pdfurl, title:item.publicationTitle + " Full Text PDF", mimeType:"application/pdf"});
 				if (abs) item.abstractNote = abs;
@@ -87,11 +88,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [
-					{
-						"note": "<p>doi: 10.1162/afar.2010.43.4.60</p>"
-					}
-				],
+				"notes": [],
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [
@@ -124,7 +121,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.mitpressjournals.org.turing.library.northwestern.edu/action/doSearch?type=simple&target=simple&filter=multiple&searchText=test&x=0&y=0&history=&categoryId=all",
+		"url": "http://www.mitpressjournals.org/action/doSearch?type=simple&target=simple&filter=multiple&searchText=test&x=0&y=0&history=&categoryId=all",
 		"items": "multiple"
 	}
 ]
