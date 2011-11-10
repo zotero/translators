@@ -74,7 +74,8 @@ function doWeb(doc, url) {
 		translator.translate();
 	});
 	Zotero.wait();
-}/** BEGIN TEST CASES **/
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -104,7 +105,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://papers.nber.org.turing.library.northwestern.edu/papers/w17577.pdf",
+						"url": "http://papers.nber.org/papers/w17577.pdf",
 						"title": "NBER Full Text PDF",
 						"mimeType": "application/pdf"
 					}
@@ -122,12 +123,12 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://papers.nber.org.turing.library.northwestern.edu/s/search?restrict_papers=yes&whichsearch=db&client=test3_fe&proxystylesheet=test3_fe&site=default_collection&entqr=0&ud=1&output=xml_no_dtd&oe=UTF-8&ie=UTF-8&sort=date%253AD%253AL%253Ad1&q=labor",
+		"url": "http://papers.nber.org/s/search?restrict_papers=yes&whichsearch=db&client=test3_fe&proxystylesheet=test3_fe&site=default_collection&entqr=0&ud=1&output=xml_no_dtd&oe=UTF-8&ie=UTF-8&sort=date%253AD%253AL%253Ad1&q=labor",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://papers.nber.org.turing.library.northwestern.edu/new.html",
+		"url": "http://papers.nber.org/new.html",
 		"items": "multiple"
 	}
 ]
