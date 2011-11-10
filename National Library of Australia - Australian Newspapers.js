@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-08-24 15:59:48"
+	"lastUpdated": "2011-11-09 17:23:39"
 }
 
 /*
@@ -31,11 +31,11 @@
 */
 
 function detectWeb(doc, url) {
-    if (url.match(/\/newspaper\/result/i) || url.match(/\/ndp\/del\/page/)) {
-        return "multiple";
-    } else if (url.match(/\/ndp\/del\/article\//i)) {
-        return "newspaperArticle";
-    }
+	if (url.match(/\/newspaper\/result/i) || url.match(/\/ndp\/del\/page/)) {
+		return "multiple";
+	} else if (url.match(/\/ndp\/del\/article\//i)) {
+		return "newspaperArticle";
+	}
 }
 
 function doWeb(doc, url) {
@@ -56,7 +56,7 @@ function doWeb(doc, url) {
 		}
 		while (nextTitle = titles.iterateNext()) {
 			if (nextTitle.textContent != '[coming soon]') {
-    			items[nextTitle.href] = nextTitle.textContent;			}
+				items[nextTitle.href] = nextTitle.textContent;			}
 		}
 		items = Zotero.selectItems(items);
 		for (var i in items) {
@@ -84,7 +84,7 @@ function scrape(doc) {
 	newItem.title =  Zotero.Utilities.trimInternal(doc.evaluate('//meta[@name="newsarticle_headline"]/@content', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
 	var pubDetails = doc.evaluate('//div[@class="box title"]/strong', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent;
 	newItem.publicationTitle = pubDetails.match(/(.+?) \(/)[1];
-    if (pubDetails.indexOf(':') != -1) {
+	if (pubDetails.indexOf(':') != -1) {
 		newItem.place = pubDetails.match(/\((.+?) :/)[1];
 	}
 	newItem.date = doc.evaluate('//div[@class="box issue"]/strong', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent.match(/\w+ (\d{1,2} .+)/)[1];
@@ -136,7 +136,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": false,
+						"url": "http://trove.nla.gov.au/ndp/del/printArticlePdf/972415/3?print=n",
 						"title": "The Argus, 8 August 1945, p. 1",
 						"mimeType": "application/pdf"
 					}
@@ -148,14 +148,10 @@ var testCases = [
 				"place": "Melbourne, Vic.",
 				"date": "8 August 1945",
 				"pages": "1",
-				"abstractNote": "ATOMIC  BOMB  WARNING  TO  JAPS\n  PEOPLE  TOLD  OF\n  HORRORS\n  OF  NEW  WEAPON\n  Intensive  Broadcast  Campaign\n  FROM  OUR  OWN  CORRESPONDENT  IN  NEW  YORK  AND  AAP\n  NOW  THAT  AN  ATOMIC  BOMB  HAS  BEEN  DROPPED  ON  JAPAN\n  ALL  POSSIBLE  MEANS  ARE  BEING  USED  TO  TELL  THE\n  JAPANESE  OF  THE  HORRORS  OF  THE  BOMB  AND  AT  THE\n  SAME  TIME  TO  DRIVE  HOME  TO  THEM  THE  POTSDAM\n  SURRENDER  TERMS.\n  Four  powerful  Office  of  War  Information  stations  are  broadcasting\n  news  to  Japan,  while  leaflets  being  produced  at  Saipan  and  Manila  will\n  be  dropped  over  Japanese  communities  and  troop  concentrations.\n  The  two  regular  newspapers  which  are  carried  to  Japan  weekly  by\n  Super-Fortresses  -  \"Jiho,\"  published  on  Saipan,  and  \"Rakkason,\"\n  published  in  Manila-will  lead  with  the  atomic  bomb  story.\n  The  Office  of  War  Information\n  revealed  yesterday  that   \n  transmissions  to  Japan  began\n  immediately  after  President\n  Truman's  statement  that  the\n  atomic  bomb  was  already  in  use\n  was  issued.\n  New  York  Times  Washington\n  correspondent  says  that  while\n  Mr  Stimson,  US  War  Secretary,\n  said  the  atomic  bomb  should\n  prove  a  tremendous  aid  in\n  shortening  the  war  against\n  Japan,  other  responsible  officials\n  thought  that  that  was  an   \n  extreme  understatement,  and\n  that  Japan  might  be  unable  to\n  remain  in  the  war  under  the\n  coming  rain  of  atomic  bombs.\n  Obviously  the  news  was   \n  released  now,  the  correspondent\n  adds,  because  of  the  possible\n  psychological  effect  in  forcing\n  the  Japanese  to  surrender.\n  DETAILS  AWAITED\n  Meanwhile  London  is  eagerly\n  awaiting  an  official  statement\n  on  the  scientific  details  of  the\n  atomic  bomb,  which  Sir  John\n  Anderson,  who  supervised   \n  research  work  in  Britain,  said\n  would  be  issued  in  a  few  days.\n  Press  Association  says  it  is\n  clear  from  the  announcements\n  already  made  that  the  industrial\n  application  of  this  new   \n  source  of  energy  will  require\n  many  years  of  research  and   \n  development  before  it  is  ready\n  for  exploitation.\n  Reuter's  military  correspondent\n  says:  \"It  seems  that  the   \n  secrets  of  the  atomic  bomb  will\n  not  be  shared  by  any  power\n  other  than  those  directly   \n  concerned  with  its  production.\n  \"As  soon  as  the  Big  Three's\n  experts  had  an  opportunity  to\n  study  all  the  strategic  implications,\n  it  is  likely  that  consultations   \n  will  begin  to  consider   \n  methods  for  the  agreed  control\n  of  the  super-bomb's  manufacture\n  and  use.   \n  \"Its  offensive  uses  at  the\n  moment  are  in  the  limelight,\n  but  its  use  in  defence  may\n  equally  outmode  the  present\n  forms  of  aerial  warfare.\n  \"So  far  experts  have  been   \n  unable  to  do  anything  more  than\n  grasp  the  sheer  magnitude  of\n  the  revolution  facing  them,  but\n  the  Big  Three  Governments  are\n  expected  to  act  speedily  to\n  regulate  this  unforeseen   \n  situation.\"\n  DECISION  OUTDATED\n  The  correspondent  adds:  \"The\n  strategic  decisions  taken  at\n  Teheran,  Yalta,  and  Potsdam,\n  according  to  military  experts,\n  have  already  been  outdated  by\n  the  advent  of  the  bomb.\n  \"Security  can  no  longer  be   \n  defined  for  instance  by  control  of\n  the  Dardanelles  and  the  Suez\n  Canal,  and  by  possession  of  this\n  or  that  port,  river,  or   \n  mountain."
+				"abstractNote": "ATOMIC  BOMB  WARNING  TO  JAPS\n  PEOPLE  TOLD  OF\n  HORRORS\n  OF  NEW  WEAPON\n  Intensive  Broadcast  Campaign\n  FROM  OUR  OWN  CORRESPONDENT  IN  NEW  YORK  AND  AAP\n  NOW  THAT  AN  ATOMIC  BOMB  HAS  BEEN  DROPPED  ON  JAPAN\n  ALL  POSSIBLE  MEANS  ARE  BEING  USED  TO  TELL  THE\n  JAPANESE  OF  THE  HORRORS  OF  THE  BOMB  AND  AT  THE\n  SAME  TIME  TO  DRIVE  HOME  TO  THEM  THE  POTSDAM\n  SURRENDER  TERMS.\n  Four  powerful  Office  of  War  Information  stations  are  broadcasting\n  news  to  Japan,  while  leaflets  being  produced  at  Saipan  and  Manila  will\n  be  dropped  over  Japanese  communities  and  troop  concentrations.\n  The  two  regular  newspapers  which  are  carried  to  Japan  weekly  by\n  Super-Fortresses  -  \"Jiho,\"  published  on  Saipan,  and  \"Rakkason,\"\n  published  in  Manila-will  lead  with  the  atomic  bomb  story.\n  The  Office  of  War  Information\n  revealed  yesterday  that   \n  transmissions  to  Japan  began\n  immediately  after  President\n  Truman's  statement  that  the\n  atomic  bomb  was  already  in  use\n  was  issued.\n  New  York  Times  Washington\n  correspondent  says  that  while\n  Mr  Stimson,  US  War  Secretary,\n  said  the  atomic  bomb  should\n  prove  a  tremendous  aid  in\n  shortening  the  war  against\n  Japan,  other  responsible  officials\n  thought  that  that  was  an   \n  extreme  understatement,  and\n  that  Japan  might  be  unable  to\n  remain  in  the  war  under  the\n  coming  rain  of  atomic  bombs.\n  Obviously  the  news  was   \n  released  now,  the  correspondent\n  adds,  because  of  the  possible\n  psychological  effect  in  forcing\n  the  Japanese  to  surrender.\n  DETAILS  AWAITED\n  Meanwhile  London  is  eagerly\n  awaiting  an  official  statement\n  on  the  scientific  details  of  the\n  atomic  bomb,  which  Sir  John\n  Anderson,  who  supervised   \n  research  work  in  Britain,  said\n  would  be  issued  in  a  few  days.\n  Press  Association  says  it  is\n  clear  from  the  announcements\n  already  made  that  the  industrial\n  application  of  this  new   \n  source  of  energy  will  require\n  many  years  of  research  and   \n  development  before  it  is  ready\n  for  exploitation.\n  Reuter's  military  correspondent\n  says:  \"It  seems  that  the   \n  secrets  of  the  atomic  bomb  will\n  not  be  shared  by  any  power\n  other  than  those  directly   \n  concerned  with  its  production.\n  \"As  soon  as  the  Big  Three's\n  experts  had  an  opportunity  to\n  study  all  the  strategic  implications,\n  it  is  likely  that  consultations   \n  will  begin  to  consider   \n  methods  for  the  agreed  control\n  of  the  super-bomb's  manufacture\n  and  use.   \n  \"Its  offensive  uses  at  the\n  moment  are  in  the  limelight,\n  but  its  use  in  defence  may\n  equally  outmode  the  present\n  forms  of  aerial  warfare.\n  \"So  far  experts  have  been   \n  unable  to  do  anything  more  than\n  grasp  the  sheer  magnitude  of\n  the  revolution  facing  them,  but\n  the  Big  Three  Governments  are\n  expected  to  act  speedily  to\n  regulate  this  unforeseen   \n  situation.\"\n  DECISION  OUTDATED\n  The  correspondent  adds:  \"The\n  strategic  decisions  taken  at\n  Teheran,  Yalta,  and  Potsdam,\n  according  to  military  experts,\n  have  already  been  outdated  by\n  the  advent  of  the  bomb.\n  \"Security  can  no  longer  be   \n  defined  for  instance  by  control  of\n  the  Dardanelles  and  the  Suez\n  Canal,  and  by  possession  of  this\n  or  that  port,  river,  or   \n  mountain.",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://trove.nla.gov.au/newspaper/result?q=clement+wragge",
-		"items": "multiple"
 	},
 	{
 		"type": "web",
