@@ -80,6 +80,9 @@ function scrape(doc, url){
 	//the xpaths aren't great , but seem reliable across pages
 	var abs = ZU.xpathText(doc,'//p[1]').replace(/\n/g, "")
 var tags = ZU.xpathText(doc, '//p[last()]').replace(/\n/g, "").split(/\|/);
+	for (i in tags){
+		tags[i] = ZU.trimInternal(tags[i])
+			}
 	//get BibTex Link
 	var bibtexurl = url.replace(/entries\//,"cgi-bin/encyclopedia/archinfo.cgi?entry=").replace(/\/$/, "");
 	Zotero.Utilities.HTTP.doGet(bibtexurl, function (text) {
@@ -126,15 +129,15 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					" abstract objects ",
-					" Aristotle ",
-					" education, philosophy of ",
-					" epistemology ",
-					" metaphysics ",
-					" Plato: ethics and politics in The Republic ",
-					" religion: and morality ",
-					" Socrates ",
-					" Socratic Dialogues"
+					"abstract objects",
+					"Aristotle",
+					"education, philosophy of",
+					"epistemology",
+					"metaphysics",
+					"Plato: ethics and politics in The Republic",
+					"religion: and morality",
+					"Socrates",
+					"Socratic Dialogues"
 				],
 				"seeAlso": [],
 				"attachments": [
