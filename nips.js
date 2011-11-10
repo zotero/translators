@@ -1,14 +1,15 @@
 {
-	"translatorID":"c816f8ad-4c73-4f6d-914e-a6e7212746cf",
-	"translatorType":4,
-	"label":"Neural Information Processing Systems",
-	"creator":"Fei Qi",
-	"target":"^http://books.nips.cc/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":false,
-	"lastUpdated":"2009-12-26 06:00:00"
+	"translatorID": "c816f8ad-4c73-4f6d-914e-a6e7212746cf",
+	"label": "Neural Information Processing Systems",
+	"creator": "Fei Qi",
+	"target": "^https?://books\\.nips\\.cc/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-09 23:47:10"
 }
 
 function detectWeb(doc, url) {
@@ -78,3 +79,12 @@ function doWeb( doc, url ) {
 	}
 	Zotero.wait();
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://books.nips.cc/nips22.html",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
