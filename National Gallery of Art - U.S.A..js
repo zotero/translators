@@ -1,14 +1,15 @@
 {
-	"translatorID":"ed28758b-9c39-4e1c-af89-ce1c9202b70f",
-	"translatorType":4,
-	"label":"National Gallery of Art - U.S.A.",
-	"creator":"Adam Crymble",
-	"target":"http://www.nga.gov/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-08-21 15:45:00"
+	"translatorID": "ed28758b-9c39-4e1c-af89-ce1c9202b70f",
+	"label": "National Gallery of Art - U.S.A.",
+	"creator": "Adam Crymble",
+	"target": "^https?://www\\.nga\\.gov/cgi-bin",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-09 14:50:09"
 }
 
 function detectWeb(doc, url) {
@@ -166,4 +167,44 @@ function doWeb(doc, url) {
 	}
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.nga.gov/fcgi-bin/tinfo_f?object=1237",
+		"items": [
+			{
+				"itemType": "artwork",
+				"creators": [
+					{
+						"firstName": "Attributed to Johannes",
+						"lastName": "Vermeer",
+						"creatorType": "artist"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Dutch",
+				"date": "1632 - 1675",
+				"extra": "Aquisition: 1942.9.98",
+				"callNumber": "On View",
+				"url": "http://www.nga.gov/fcgi-bin/tinfo_f?object=1237",
+				"libraryCatalog": "National Gallery of Art - U.S.A.",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.nga.gov/cgi-bin/tsearch?artistid=1951",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.nga.gov/cgi-bin/tsearch?artist=&title=flower",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

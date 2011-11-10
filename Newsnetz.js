@@ -1,14 +1,15 @@
 {
-	"translatorID":"caecaea0-5d06-11df-a08a-0800200c9a66",
-	"translatorType":4,
-	"label":"tagesanzeiger.ch/Newsnetz",
-	"creator":"ibex",
-	"target":"^http://((www\\.)?(tagesanzeiger|bernerzeitung|bazonline|derbund|thurgauerzeitung)\\.ch/.)",
-	"minVersion":"2.0",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":false,
-	"lastUpdated":"2010-09-08 12:00:00"
+	"translatorID": "caecaea0-5d06-11df-a08a-0800200c9a66",
+	"label": "tagesanzeiger.ch/Newsnetz",
+	"creator": "ibex",
+	"target": "^http://((www\\.)?(tagesanzeiger|bernerzeitung|bazonline|derbund|thurgauerzeitung)\\.ch/.)",
+	"minVersion": "2.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-09 23:57:51"
 }
 
 /*
@@ -136,4 +137,41 @@ function countObjectProperties(obj) {
 		if (obj.hasOwnProperty(key)) size++;
 	}
 	return size;
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.tagesanzeiger.ch/wissen/natur/Duestere-Fakten-zum-Klimawandel/story/13137025",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "tagesanzeiger.ch Article Snapshot",
+						"mimeType": "text/html",
+						"url": "http://www.tagesanzeiger.ch/wissen/natur/Duestere-Fakten-zum-Klimawandel/story/13137025/print.html",
+						"snapshot": true
+					}
+				],
+				"url": "http://www.tagesanzeiger.ch/wissen/natur/Duestere-Fakten-zum-Klimawandel/story/13137025",
+				"title": "Düstere Fakten zum Klimawandel",
+				"date": "09.11.2011",
+				"abstractNote": "Der neueste Bericht der Internationalen Energieagentur ist besorgniserregend. Das Klima könnte sich noch viel stärker erwärmen als bisher erwartet.",
+				"publicationTitle": "tagesanzeiger.ch: (kle/dapd)",
+				"section": "Wissen",
+				"libraryCatalog": "tagesanzeiger.ch/Newsnetz",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.tagesanzeiger.ch/service/suche/suche.html?date=alle&order=date&key=arbeitsmarkt",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

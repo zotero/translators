@@ -1,14 +1,15 @@
 {
-	"translatorID" : "c7830593-807e-48cb-99f2-c3bed2b148c2",
-	"label" : "New Zealand Herald",
-	"creator" : "Sopheak Hean, Michael Berkowitz",
-	"target" : "^http://www\\.nzherald\\.co\\.nz",
-	"minVersion" : "1.0",
-	"maxVersion" : "",
-	"priority" : 100,
-	"inRepository" : "1",
-	"translatorType":4,
-	"lastUpdated":"2010-08-03 10:49:18"
+	"translatorID": "c7830593-807e-48cb-99f2-c3bed2b148c2",
+	"label": "New Zealand Herald",
+	"creator": "Sopheak Hean, Michael Berkowitz",
+	"target": "^http://www\\.nzherald\\.co\\.nz",
+	"minVersion": "1.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-09 23:52:29"
 }
 
 function detectWeb(doc, url) {
@@ -62,8 +63,8 @@ function scrape(doc, url){
 	 Remove "By " then replace "and " with ", "
 
 	 Put the string into an array then split the array and loop all
-     authors then push author to Zotero.  Possible with more than 1 author
-     on an article.
+	 authors then push author to Zotero.  Possible with more than 1 author
+	 on an article.
 	*/
 	var authorXPath = '//span[@class="credits"]';
 	var authorXPathObject = doc.evaluate(authorXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
@@ -137,7 +138,7 @@ function doWeb(doc, url){
 	var nextTitle;
 
 	if (detectWeb(doc, url) == "multiple"){
-		var titles = doc.evaluate('//p[@class="results"]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//div[@id="results"]//a[@class="headline"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		while (nextTitle = titles.iterateNext()){
 			items[nextTitle.href] = nextTitle.textContent;
 		}
@@ -152,3 +153,31 @@ function doWeb(doc, url){
 	Zotero.Utilities.processDocuments(articles, scrape, function(){Zotero.done();});
 	Zotero.wait();
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.nzherald.co.nz/business/news/article.cfm?c_id=3&objectid=10765066",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"url": "http://www.nzherald.co.nz/business/news/article.cfm?c_id=3&objectid=10765066",
+				"publicationTitle": "New Zealand Herald",
+				"ISSN": "1170-0777",
+				"date": "Nov 10, 2011",
+				"section": "Business",
+				"title": "Manufacturing slumps in October",
+				"language": "English",
+				"abstractNote": "The New Zealand manufacturing sector contracted in October to its worst level since June 2009 as the Rugby World Cup distracted business and the construction sector ebbed.",
+				"libraryCatalog": "New Zealand Herald",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
