@@ -1,14 +1,15 @@
 {
-	"translatorID":"45763818-8530-49c6-a069-34acdee1a096",
-	"translatorType":4,
-	"label":"National Library of New Zealand",
-	"creator":"Adam Crymble",
-	"target":"http://nlnzcat.natlib",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-08-11 20:40:00"
+	"translatorID": "45763818-8530-49c6-a069-34acdee1a096",
+	"label": "National Library of New Zealand",
+	"creator": "Adam Crymble",
+	"target": "^https?://nlnzcat\\.natlib.\\govt\\.nz/cgi-bin/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-09 23:24:11"
 }
 
 function detectWeb(doc, url) {
@@ -97,15 +98,17 @@ function scrape(doc, url) {
 			newItem.publisher = publisher1;
 		}
 	}
-
+    if (dataTags["Title:"]){
+    dataTags["Title:"]	= dataTags["Title:"].replace(/\/.+/, "")
+    }
 	if (dataTags["Subject:"]) {
 		if (dataTags["Subject:"].match(/\n/)) {
 			tagsContent = dataTags["Subject:"].split(/\n/)
 			for (var i = 0; i < tagsContent.length; i++) {
-	     			if (tagsContent[i].match(/\w/)) {
-		     			newItem.tags[i] = tagsContent[i];
-	     			}
-     			}
+		 			if (tagsContent[i].match(/\w/)) {
+			 			newItem.tags[i] = tagsContent[i];
+		 			}
+	 			}
 		} else {
 			newItem.tags = dataTags["Subject:"]
 		}
@@ -116,21 +119,24 @@ function scrape(doc, url) {
 			tagsContent = dataTags["LCSubject:"].split(/\n/)
 			var k = 0;
 			for (var i = 0; i < tagsContent.length; i++) {
-	     			if (tagsContent[i].match(/\w/)) {
-		     			newItem.tags[k] = tagsContent[i];
-		     			k++;
-	     			}
-     			}
+		 			if (tagsContent[i].match(/\w/)) {
+			 			newItem.tags[k] = tagsContent[i];
+			 			k++;
+		 			}
+	 			}
 		} else {
 			newItem.tags = dataTags["LCSubject:"]
 		}
 	}
-
+if (dataTags["ISBN:"]){
+	dataTags["ISBN:"] = dataTags["ISBN:"].replace(/\n.+/, "")
+	
+}
 	associateData (newItem, dataTags, "Title:", "title");
 	associateData (newItem, dataTags, "Description:", "pages");
 	associateData (newItem, dataTags, "CallNumber:", "callNumber");
 	associateData (newItem, dataTags, "Location:", "repository");
-	
+	associateData (newItem, dataTags, "ISBN:", "ISBN");
 	newItem.url = doc.location.href;
 	newItem.complete();
 }
@@ -163,4 +169,48 @@ function doWeb(doc, url) {
 	}
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://nlnzcat.natlib.govt.nz/cgi-bin/Pwebrecon.cgi?v1=1&ti=1,1&SEQ=20111110191728&Search%5FArg=argentina&SL=None&Search%5FCode=GKEY%5E%2A&CNT=25&PID=oz4cCqqjUc1Zay9PNLbkaR9likB0deo&SID=1",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Suzanne Paul.",
+						"lastName": "Dell’Oro",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Argentina --Juvenile literature.",
+					null,
+					null,
+					null,
+					" Argentina."
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"place": "Minneapolis, MN",
+				"date": "c2009.",
+				"publisher": "Lerner Publications",
+				"title": "Argentina",
+				"pages": "48 p. : col. ill., col. maps ; 22 x 25 cm.",
+				"callNumber": "918.2 DEL",
+				"ISBN": "9781580138178",
+				"url": "http://nlnzcat.natlib.govt.nz/cgi-bin/Pwebrecon.cgi?v1=1&ti=1,1&SEQ=20111110191728&Search%5FArg=argentina&SL=None&Search%5FCode=GKEY%5E%2A&CNT=25&PID=oz4cCqqjUc1Zay9PNLbkaR9likB0deo&SID=1",
+				"libraryCatalog": "Auckland Service Centre",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://nlnzcat.natlib.govt.nz/cgi-bin/Pwebrecon.cgi?Search_Arg=argentina&SL=None&Search_Code=GKEY%5E*&PID=Z6FqFuuAzWHIEHqgKOsR6K2TLcABf90&SEQ=20111110191018&CNT=25&HIST=1",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

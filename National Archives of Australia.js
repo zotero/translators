@@ -1,23 +1,24 @@
 {
-        "translatorID":"50a4cf3f-92ef-4e9f-ab15-815229159b16",
-        "label":"National Archives of Australia",
-        "creator":"Tim Sherratt",
-        "target":"^http://[^/]*naa\\.gov\\.au/",
-        "minVersion":"1.0",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":true,
-        "translatorType":4,
-        "lastUpdated":"2010-09-03 06:10:00"
+	"translatorID": "50a4cf3f-92ef-4e9f-ab15-815229159b16",
+	"label": "National Archives of Australia",
+	"creator": "Tim Sherratt",
+	"target": "^http://[^/]*naa\\.gov\\.au/",
+	"minVersion": "1.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-09 11:28:11"
 }
 
 function detectWeb(doc, url) {
 	//RecordSearch - items and series - or Photosearch results
-    if (url.match(/SeriesListing.asp/i) || url.match(/ItemsListing.asp/i) || url.match(/PhotoSearchSearchResults.asp/i)) {
-        return "multiple";
-    } else if (url.match(/SeriesDetail.asp/i) || url.match(/ItemDetail.asp/i) || url.match(/PhotoSearchItemDetail.asp/i) || url.match(/imagine.asp/i)) {
-    	return "manuscript";
-    }
+	if (url.match(/SeriesListing.asp/i) || url.match(/ItemsListing.asp/i) || url.match(/PhotoSearchSearchResults.asp/i)) {
+		return "multiple";
+	} else if (url.match(/SeriesDetail.asp/i) || url.match(/ItemDetail.asp/i) || url.match(/PhotoSearchItemDetail.asp/i) || url.match(/imagine.asp/i)) {
+		return "manuscript";
+	}
 }
 function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
@@ -249,3 +250,37 @@ function scrape(doc) {
 	item.complete();
 }
 
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://recordsearch.naa.gov.au/SearchNRetrieve/Interface/DetailsReports/ItemDetail.aspx?Barcode=5287511",
+		"items": [
+			{
+				"itemType": "manuscript",
+				"creators": [],
+				"notes": [],
+				"tags": [
+					"dcterms:isPartOf=\"http://www.naa.gov.au/cgi-bin/Search?Number=A3280\"",
+					"dcterms:bibliographicCitation=\"NAA: A3280, P2605\"",
+					"dcterms:identifier=\"5287511\"",
+					"dcterms:accessRights=\"Not yet examined\"",
+					"dcterms:format=\"PAPER FILES AND DOCUMENTS (allocated at series level)\"",
+					"xmlns:dcterms=\"http://purl.org/dc/terms/\""
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"archive": "National Archives of Australia",
+				"manuscriptType": "file",
+				"libraryCatalog": "RecordSearch",
+				"title": "Rifle range - Williamstown Vic - licence to erect building thereon by Melbourne Rifle Club",
+				"archiveLocation": "A3280, P2605",
+				"url": "http://www.naa.gov.au/cgi-bin/Search?O=I&Number=5287511",
+				"date": "1914 - 1914",
+				"place": "Canberra",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

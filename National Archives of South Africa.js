@@ -1,14 +1,15 @@
 {
-	"translatorID":"5b02e8d4-d8fb-4143-af3d-3576d4c1b49c",
-	"translatorType":4,
-	"label":"National Archives of South Africa",
-	"creator":"Adam Crymble",
-	"target":"http://www.national.archsrch.gov.za",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-07-17 05:25:00"
+	"translatorID": "5b02e8d4-d8fb-4143-af3d-3576d4c1b49c",
+	"label": "National Archives of South Africa",
+	"creator": "Adam Crymble",
+	"target": "^https?://www\\.national\\.archsrch\\.gov\\.za",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-09 11:44:46"
 }
 
 function detectWeb(doc, url) {
@@ -86,6 +87,7 @@ function scrape(doc, url) {
 	associateData (newItem, dataTags, "SOURCE", "series");
 	if (dataTags["DESCRIPTION"]) {
 		associateData (newItem, dataTags, "DESCRIPTION", "title");
+		newItem.title = ZU.capitalizeTitle(newItem.title, ignorePreference="true")
 	} else {
 		newItem.title = "No Title Found";
 	}
@@ -124,4 +126,27 @@ function doWeb(doc, url) {
 	}
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.national.archsrch.gov.za/sm300cv/smws/sm30ddf0?20111109203413A6680686&DN=00000001",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"callNumber": "187",
+				"date": "19700000",
+				"volume": "1/1/1/1403",
+				"series": "CSC",
+				"title": "Record of Proceedings of Criminal Case. Criminal Session, August. the State Versus Gilbert Mandela and Thabo Mklahlo/Mhlahlo. Murder.",
+				"libraryCatalog": "KAB"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

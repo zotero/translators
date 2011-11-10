@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-07-03 04:20:14"
+	"lastUpdated": "2011-11-09 23:40:51"
 }
 
 var articleRe = /(https?:\/\/[^\/]+\/[^\/]+\/journal\/v[^\/]+\/n[^\/]+\/)(full|abs)(\/.+)\.html/;
@@ -19,10 +19,10 @@ function detectWeb(doc, url) {
 		if (doc.evaluate('//a[contains(@href, ".ris")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 			return "journalArticle";
 		} else {
-            return false;
-        }
+			return false;
+		}
 	} else {
-    	var links = doc.evaluate('//ol[@class="results-list"]//h2[@class="atl"]/a', doc, null, XPathResult.ANY_TYPE, null);
+		var links = doc.evaluate('//ol[@class="results-list"]//h2[@class="atl"]/a', doc, null, XPathResult.ANY_TYPE, null);
 		
 		if(links.iterateNext()) {
 			return "multiple";
@@ -46,24 +46,24 @@ function doWeb(doc, url) {
 		}
 		
 		Zotero.selectItems(items, function(items) {
-    		if(!items) return true;
-    		
-    		var urls = new Array();
-    		for(var url in items) {
-    			urls.push(url);
-    		}
-            processArticles(urls);
+			if(!items) return true;
+			
+			var urls = new Array();
+			for(var url in items) {
+				urls.push(url);
+			}
+			processArticles(urls);
 		});
 	} else {
-        processArticles([url]);
+		processArticles([url]);
 	}
-    	
+		
 	Zotero.wait();
 }
 
 function processArticles(urls) {
-    var RIS = new Array();
-    var regexps = new Array();
+	var RIS = new Array();
+	var regexps = new Array();
 	
 	for each(var item in urls) {
 		var m = articleRe.exec(item);
@@ -100,7 +100,7 @@ function processArticles(urls) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.nature.com/emboj/journal/vaop/ncurrent/full/emboj2011212a.html",
+		"url": "http://www.nature.com/emboj/journal/v30/n15/full/emboj2011212a.html",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -151,27 +151,30 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": false,
+						"url": "http://www.nature.com/emboj/journal/v30/n15/full/emboj2011212a.html",
 						"title": "Nature Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"url": false,
+						"url": "http://www.nature.com/emboj/journal/v30/n15/pdf/emboj2011212a.pdf",
 						"title": "Nature Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
 				"title": "Activation of Src and transformation by an RPTP[alpha] splice mutant found in human tumours",
 				"journalAbbreviation": "EMBO J",
-				"date": "online July 01, 2011",
-				"volume": "advance online publication",
+				"date": "2011",
+				"volume": "30",
+				"issue": "15",
+				"pages": "3200-3211",
 				"publisher": "European Molecular Biology Organization",
-				"ISBN": "1460-2075",
-				"ISSN": "1460-2075",
+				"ISBN": "0261-4189",
+				"ISSN": "0261-4189",
 				"url": "http://dx.doi.org/10.1038/emboj.2011.212",
 				"DOI": "10.1038/emboj.2011.212",
 				"publicationTitle": "EMBO J",
-				"libraryCatalog": "Nature"
+				"libraryCatalog": "Nature",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},

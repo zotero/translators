@@ -1,14 +1,15 @@
 {
-	"translatorID":"54ac4ec1-9d07-45d3-9d96-48bed3411fb6",
-	"translatorType":4,
-	"label":"National Library of Australia (new catalog)",
-	"creator":"Mark Triggs, Steve McPhillips and Matt Burton",
-	"target":"catalogue.nla.gov.au",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-11-13 07:10:00"
+	"translatorID": "54ac4ec1-9d07-45d3-9d96-48bed3411fb6",
+	"label": "National Library of Australia (new catalog)",
+	"creator": "Mark Triggs, Steve McPhillips and Matt Burton",
+	"target": "^https?://catalogue\\.nla\\.gov\\.au",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-09 16:41:21"
 }
 
 function detectWeb(doc, url) {
@@ -121,7 +122,7 @@ function doWeb(doc, url) {
 											(doc, doc, "/Record/[0-9]+")))) {
 			var bibid = url.match("^.*\/Record/([0-9]+)")[1];
 			// grab the item type for that bibid so we don't have to make a processDocuments call for each
-			var xpath = "//div[contains(./div/a/@href, '"+bibid+"')]/div[@id = 'resultItemLine3']/span/text()";
+			var xpath = "//div[contains(./div/a/@href, '"+bibid+"')]/div[@class = 'resultItemLine3']/span/text()";
 			var nlaFormat = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 			// populate an associative array with bibid -> format for the doGet
 			items[bibid] = computeFormat(nlaFormat);
@@ -145,3 +146,45 @@ function doWeb(doc, url) {
 		Zotero.wait();
 	}
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://catalogue.nla.gov.au/Record/773336?lookfor=labor&offset=10&max=65985",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Richard Allen",
+						"lastName": "Lester",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Working class",
+					"United States.",
+					"Labor unions"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Labor : readings on major issues / [edited by] Richard A. Lester",
+				"publisher": "Random House",
+				"callNumber": "331.082 L642",
+				"place": "New York :",
+				"date": "New York : Random House, [1967].",
+				"authors": "Lester, Richard Allen, 1908-",
+				"extra": "Bibliographical footnotes.",
+				"libraryCatalog": "National Library of Australia",
+				"shortTitle": "Labor"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://catalogue.nla.gov.au/Search/Home?lookfor=labor&type=all&limit%5B%5D=&submit=Find&filter[]=language:%22eng%22",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
