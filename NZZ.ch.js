@@ -1,14 +1,15 @@
 {
-        "translatorID":"61ffe600-55e0-11df-bed9-0002a5d5c51b",
-        "label":"nzz.ch",
-        "creator":"ibex",
-        "target":"^http://((www\\.)?nzz\\.ch/.)",
-        "minVersion":"2.0",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":"0",
-        "translatorType":4,
-        "lastUpdated":"2010-12-20 11:17:03"
+	"translatorID": "61ffe600-55e0-11df-bed9-0002a5d5c51b",
+	"label": "nzz.ch",
+	"creator": "ibex",
+	"target": "^http://((www\\.)?nzz\\.ch/.)",
+	"minVersion": "2.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-10 00:02:11"
 }
 
 /*
@@ -144,3 +145,43 @@ function countObjectProperties(obj) {
 	}
 	return size;
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.nzz.ch/nachrichten/wirtschaft/aktuell/kuoni_gta-uebernahme_1.13276960.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "NZZ Online Article Snapshot",
+						"mimeType": "text/html",
+						"url": "http://www.nzz.ch/nachrichten/wirtschaft/aktuell/kuoni_gta-uebernahme_1.13276960.html",
+						"snapshot": true
+					}
+				],
+				"url": "http://www.nzz.ch/nachrichten/wirtschaft/aktuell/kuoni_gta-uebernahme_1.13276960.html",
+				"title": "Kuoni profitiert von der GTA-Übernahme: Deutliches Umsatzplus in den ersten neun Monaten",
+				"date": "10. November 2011",
+				"publicationTitle": "NZZ Online",
+				"shortTitle": "Kuoni profitiert von der GTA-Übernahme",
+				"abstractNote": "Der Reisekonzern Kuoni hat in den ersten neun Monaten von der Übernahme des Reisekonzerns Gullivers Travel Associates (GTA) profitiert. Der Umsatz stieg, und der Konzern machte Gewinn.",
+				"section": "Wirtschaft",
+				"extra": "sda",
+				"libraryCatalog": "nzz.ch",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.nzz.ch/search?q=arbeitsmarkt",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
