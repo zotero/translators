@@ -1,14 +1,15 @@
 {
-	"translatorID":"f203db7f-7b7b-4dc4-b018-115b7885fe3b",
-	"translatorType":4,
-	"label":"Oxford Music and Art Online",
-	"creator":"Michael Berkowitz",
-	"target":"http://[^/]*www.oxford(music|art)online.com[^/]*/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-07-10 06:15:00"
+	"translatorID": "f203db7f-7b7b-4dc4-b018-115b7885fe3b",
+	"label": "Oxford Music and Art Online",
+	"creator": "Michael Berkowitz",
+	"target": "http://[^/]*www.oxford(music|art)online.com[^/]*/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-10 18:23:34"
 }
 
 function detectWeb(doc, url) {
@@ -56,4 +57,55 @@ function doWeb(doc, url) {
 			translator.translate();
 		});
 	}
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.oxfordmusiconline.com/subscriber/search_results?q=Bach&hbutton_search.x=0&hbutton_search.y=0&source=omo_epm&source=omo_t237&source=omo_gmo&source=omo_t114&search=quick",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.oxfordmusiconline.com/subscriber/article/grove/music/40023?q=Bach&hbutton_search.x=0&hbutton_search.y=0&source=omo_epm&source=omo_t237&source=omo_gmo&source=omo_t114&search=quick&pos=1&_start=1#firsthit",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Christoph",
+						"lastName": "Wolff",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Walter",
+						"lastName": "Emery",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Peter",
+						"lastName": "Wollny",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ulrich",
+						"lastName": "Leisinger",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Stephen",
+						"lastName": "Roe",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Bach",
+				"publicationTitle": "Grove Music Online",
+				"libraryCatalog": "Oxford Music and Art Online"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
