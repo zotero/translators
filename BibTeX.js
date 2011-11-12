@@ -2061,7 +2061,7 @@ function doExport() {
 					creatorString = "{" + creator.lastName + "}";
 				}
 
-				if (creator.creatorType == "editor") {
+				if (creator.creatorType == "editor" || creator.creatorType == "seriesEditor") {
 					editor += " and "+creatorString;
 				} else if (creator.creatorType == "translator") {
 					translator += " and "+creatorString;
