@@ -92,7 +92,7 @@ function fetchIds(ids, url) {
 				+'&format=saveToRef&filters=FUNDING+SUBJECT_CATEGORY+JCR_CATEGORY+LANG+IDS+PAGEC+SABBR+CITREFC+ISSN+PUBINFO+KEYWORDS+CITTIMES+ADDRS+CONFERENCE_SPONSORS+DOCTYPE+ABSTRACT+CONFERENCE_INFO+SOURCE+TITLE+AUTHORS++&selectedIds=3&mark_to=&mark_from=&count_new_items_marked=0&value%28record_select_type%29=selrecords&marked_list_candidates=3&LinksAreAllowedRightClick=CitedRefList.do&LinksAreAllowedRightClick=CitingArticles.do&LinksAreAllowedRightClick=OneClickSearch.do&LinksAreAllowedRightClick=full_record.do&fields_selection=FUNDING+SUBJECT_CATEGORY+JCR_CATEGORY+LANG+IDS+PAGEC+SABBR+CITREFC+ISSN+PUBINFO+KEYWORDS+CITTIMES+ADDRS+CONFERENCE_SPONSORS+DOCTYPE+ABSTRACT+CONFERENCE_INFO+SOURCE+TITLE+AUTHORS++&save_options=fieldtagged';
 		Z.debug(post);
 		Zotero.Utilities.doPost('http://apps.webofknowledge.com/OutboundService.do',post, function (text, obj) {
-			//Z.debug(text);
+			Z.debug(text);
 			var qid = text.match(/<input type="hidden" id="qid" name="qid" value='(\d+)' \/>/)[1];
 			var post2 = 'locale=en_US&fileOpt=fieldtagged'+
 					'&colName=' + values.colName + '&action=saveDataToRef'+
@@ -100,12 +100,12 @@ function fetchIds(ids, url) {
 					'&SID='+values.SID+'&product='+values.product+'&filters=FUNDING+SUBJECT_CATEGORY+JCR_CATEGORY+LANG+IDS+PAGEC+SABBR+CITREFC+ISSN+PUBINFO+KEYWORDS+CITTIMES+ADDRS+CONFERENCE_SPONSORS+DOCTYPE+ABSTRACT+CONFERENCE_INFO+SOURCE+TITLE+AUTHORS++&numRecords=1&locale=en_US';
 			Z.debug(post2);
 			Zotero.Utilities.doPost('http://ets.webofknowledge.com/ETS/saveDataToRef.do',post2, function (text, obj) {
-				//Z.debug(text);
+				Z.debug(text);
 				importer.setString(text);
 				importer.setHandler("itemDone", function (obj, item) {
 					item.attachments = [{url: url, type: "text/html", title: "ISI Web of Knowledge Record"}];
-					Z.debug(item.title);
-					//item.complete();
+					//Z.debug(item.title);
+					item.complete();
 				});
 				importer.translate();
 			});
