@@ -1,14 +1,15 @@
 {
-        "translatorID":"b24ee183-58a6-443d-b8f9-c5cd5a3a0f73",
-        "label":"Paris Review",
-        "creator":"Avram Lyon",
-        "target":"^http://www\\.theparisreview\\.org/",
-        "minVersion":"1.0",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":true,
-        "translatorType":4,
-        "lastUpdated":"2010-10-31 21:49:18"
+	"translatorID": "b24ee183-58a6-443d-b8f9-c5cd5a3a0f73",
+	"label": "Paris Review",
+	"creator": "Avram Lyon",
+	"target": "^http://www\\.theparisreview\\.org/",
+	"minVersion": "1.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-10 23:09:00"
 }
 
 /*
@@ -50,12 +51,12 @@ function doWeb(doc, url){
 		var items = new Array();
 		
 		var aTags = doc.getElementsByTagName("a");
-                for(var i=0; i<aTags.length; i++) {
-	                var type = detectWeb(doc,aTags[i].href);
-	                if(type && type != "multiple") {
-		                items[aTags[i].href]=aTags[i].textContent;
-	                }
-                }
+				for(var i=0; i<aTags.length; i++) {
+					var type = detectWeb(doc,aTags[i].href);
+					if(type && type != "multiple") {
+						items[aTags[i].href]=aTags[i].textContent;
+					}
+				}
 
 		items = Zotero.selectItems(items);
 		if(!items) return true;
@@ -79,10 +80,10 @@ function scrape (doc,url) {
 }
 
 function magazineArticle(doc,url) {
-	    var n = doc.documentElement.namespaceURI;
-    var ns = n ? function(prefix) {
-        if (prefix == 'x') return n; else return null;
-    } : null;
+		var n = doc.documentElement.namespaceURI;
+	var ns = n ? function(prefix) {
+		if (prefix == 'x') return n; else return null;
+	} : null;
 		var item = new Zotero.Item("magazineArticle");
 		item.title = doc.evaluate('//div[@id="left"]//h3[1]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		if (url.match(/\/interviews\//)) {
@@ -101,10 +102,10 @@ function magazineArticle(doc,url) {
 }
 
 function blogPost(doc,url) {
-		    var n = doc.documentElement.namespaceURI;
-    var ns = n ? function(prefix) {
-        if (prefix == 'x') return n; else return null;
-    } : null;
+			var n = doc.documentElement.namespaceURI;
+	var ns = n ? function(prefix) {
+		if (prefix == 'x') return n; else return null;
+	} : null;
 		var item = new Zotero.Item("blogPost");
 		item.title = doc.evaluate('//h2[@class="blog-title"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		item.creators.push(Zotero.Utilities.cleanAuthor(doc.evaluate('//p[@class="blog-date"]/a', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent,"author"));
@@ -114,3 +115,42 @@ function blogPost(doc,url) {
 		item.attachments.push({url:url})
 				item.complete();
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.theparisreview.org/search?q=argentina",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.theparisreview.org/blog/2011/11/07/o-and-i/",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"creators": [
+					{
+						"firstName": "Adam",
+						"lastName": "Wilson",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.theparisreview.org/blog/2011/11/07/o-and-i/"
+					}
+				],
+				"title": "O. and I",
+				"date": "November 7, 2011",
+				"blogTitle": "Paris Review Daily",
+				"url": "http://www.theparisreview.org/blog/2011/11/07/o-and-i/",
+				"libraryCatalog": "Paris Review",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
