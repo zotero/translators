@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 5,
 	"browserSupport": "g",
-	"lastUpdated": "2011-11-12 00:39:48"
+	"lastUpdated": "2011-11-12 20:39:41"
 }
 
 function detectWeb(doc, url) {
@@ -44,6 +44,9 @@ function doWeb(doc, url) {
 }
 
 function fetchIds(ids, url) {
+	// XXX Use only the first selected ID, since otherwise we have problems
+	Z.debug("Fetching only first selected item, since we have errors on multi-item save.");
+	ids = [ids[0]];
 	// Call yourself
 	var importer = Zotero.loadTranslator("import");
 	importer.setTranslator("594ebe3c-90a0-4830-83bc-9502825a6810");
@@ -57,7 +60,7 @@ function fetchIds(ids, url) {
 	var product = url.match("product=([^\&]+)\&")[1];
 	Zotero.Utilities.processDocuments(ids, function (newDoc) {
 		var url = newDoc.location.href;
-		Z.debug(url);
+		//Z.debug(url);
 		var names = ["recordID", "colName", "SID", "selectedIds", "sortBy", "qid", "product" ];
 		var values = {};
 		var n;
@@ -66,41 +69,43 @@ function fetchIds(ids, url) {
 		}
 		// locale=en_US&fileOpt=fieldtagged&colName=&action=saveDataToRef&qid=2&sortBy=PY.D%3BLD.D%3BVL.D%3BSO.A%3BPG.A%3BAU.A&SID=2Al7l8BHkljH2J%402gPc&product=UA&filters=ISSN_ISBN+CITTIMES+SOURCE+TITLE+AUTHORS++&numRecords=1&locale=en_US
 /*
-            <input type="hidden" id="locale" name="locale" value="en_US" />
-         	<input type="hidden" id="fileOpt" name="fileOpt" value='fieldtagged' />
-         	<input type="hidden" id="colName" name="colName" value='WOS' />
-         	<input type="hidden" id="action" name="action" value='saveDataToRef' />
-         	<input type="hidden" id="qid" name="qid" value='8' />
-         	<input type="hidden" id="sortBy" name="sortBy" value='PY.D;LD.D;VL.D;SO.A;PG.A;AU.A' />
-         	<input type="hidden" id="SID" name="SID" value="2Al7l8BHkljH2J@2gPc" />
-         	<input type="hidden" id="product" name="product" value="UA" />
-         	<input type="hidden" id="filters" name="filters" value='FUNDING SUBJECT_CATEGORY JCR_CATEGORY LANG IDS PAGEC SABBR CITREFC ISSN PUBINFO KEYWORDS CITTIMES ADDRS CONFERENCE_SPONSORS DOCTYPE ABSTRACT CONFERENCE_INFO SOURCE TITLE AUTHORS  ' />
-             <input type="hidden" id="numRecords" name="numRecords" value="1" />
-         	<div class="QprocInstruct">Please wait while your request is processed.<br />
-         	  (Note: Depending on the number of records, this may take a few moments.) </div>
-         	  <input type="hidden" id="locale" name="locale" value="en_US" />
+			<input type="hidden" id="locale" name="locale" value="en_US" />
+		 	<input type="hidden" id="fileOpt" name="fileOpt" value='fieldtagged' />
+		 	<input type="hidden" id="colName" name="colName" value='WOS' />
+		 	<input type="hidden" id="action" name="action" value='saveDataToRef' />
+		 	<input type="hidden" id="qid" name="qid" value='8' />
+		 	<input type="hidden" id="sortBy" name="sortBy" value='PY.D;LD.D;VL.D;SO.A;PG.A;AU.A' />
+		 	<input type="hidden" id="SID" name="SID" value="2Al7l8BHkljH2J@2gPc" />
+		 	<input type="hidden" id="product" name="product" value="UA" />
+		 	<input type="hidden" id="filters" name="filters" value='FUNDING SUBJECT_CATEGORY JCR_CATEGORY LANG IDS PAGEC SABBR CITREFC ISSN PUBINFO KEYWORDS CITTIMES ADDRS CONFERENCE_SPONSORS DOCTYPE ABSTRACT CONFERENCE_INFO SOURCE TITLE AUTHORS  ' />
+			 <input type="hidden" id="numRecords" name="numRecords" value="1" />
+		 	<div class="QprocInstruct">Please wait while your request is processed.<br />
+		 	  (Note: Depending on the number of records, this may take a few moments.) </div>
+		 	  <input type="hidden" id="locale" name="locale" value="en_US" />
 */
 		// viewType=summary&product=UA&mark_id=UA&colName=&sortBy=PY.D%3BLD.D%3BVL.D%3BSO.A%3BPG.A%3BAU.A&mode=outputService&qid=1&SID=2Al7l8BHkljH2J%402gPc&format=saveToRef&filters=ISSN_ISBN+CITTIMES+SOURCE+TITLE+AUTHORS++&selectedIds=1&mark_to=&mark_from=&count_new_items_marked=0&value%28record_select_type%29=selrecords&markFrom=&markTo=&fields_selection=ISSN_ISBN+CITTIMES+SOURCE+TITLE+AUTHORS++&rurl=&save_options=fieldtagged
 		// FOR ONE:
 		// action=go&viewType=fullRecord&product=UA&mark_id=UA&colName=WOS&recordID=WOS%3A000287717800001&sortBy=PY.D%3BLD.D%3BVL.D%3BSO.A%3BPG.A%3BAU.A&mode=outputService&qid=1&SID=2Al7l8BHkljH2J%402gPc&format=saveToRef&filters=FUNDING+SUBJECT_CATEGORY+JCR_CATEGORY+LANG+IDS+PAGEC+SABBR+CITREFC+ISSN+PUBINFO+KEYWORDS+CITTIMES+ADDRS+CONFERENCE_SPONSORS+DOCTYPE+ABSTRACT+CONFERENCE_INFO+SOURCE+TITLE+AUTHORS++&selectedIds=1&mark_to=&mark_from=&count_new_items_marked=0&value%28record_select_type%29=selrecords&marked_list_candidates=1&LinksAreAllowedRightClick=CitedRefList.do&LinksAreAllowedRightClick=CitingArticles.do&LinksAreAllowedRightClick=OneClickSearch.do&LinksAreAllowedRightClick=full_record.do&fields_selection=FUNDING+SUBJECT_CATEGORY+JCR_CATEGORY+LANG+IDS+PAGEC+SABBR+CITREFC+ISSN+PUBINFO+KEYWORDS+CITTIMES+ADDRS+CONFERENCE_SPONSORS+DOCTYPE+ABSTRACT+CONFERENCE_INFO+SOURCE+TITLE+AUTHORS++&save_options=fieldtagged
 		// locale=en_US&fileOpt=fieldtagged&colName=WOS&action=saveDataToRef&qid=6&sortBy=PY.D%3BLD.D%3BVL.D%3BSO.A%3BPG.A%3BAU.A&SID=2Al7l8BHkljH2J%402gPc&product=UA&filters=FUNDING+SUBJECT_CATEGORY+JCR_CATEGORY+LANG+IDS+PAGEC+SABBR+CITREFC+ISSN+PUBINFO+KEYWORDS+CITTIMES+ADDRS+CONFERENCE_SPONSORS+DOCTYPE+ABSTRACT+CONFERENCE_INFO+SOURCE+TITLE+AUTHORS++&numRecords=1&locale=en_US
+		// locale=en_US&fileOpt=fieldtagged&colName=WOS&action=saveDataToRef&qid=17&sortBy=PY.D%3BLD.D%3BVL.D%3BSO.A%3BPG.A%3BAU.A&SID=2Cb1oI6ijMjk8hNDk51&product=UA&filters=FUNDING+SUBJECT_CATEGORY+JCR_CATEGORY+LANG+IDS+PAGEC+SABBR+CITREFC+ISSN+PUBINFO+KEYWORDS+CITTIMES+ADDRS+CONFERENCE_SPONSORS+DOCTYPE+ABSTRACT+CONFERENCE_INFO+SOURCE+TITLE+AUTHORS++&numRecords=1&locale=en_US
+		// locale=en_US&fileOpt=fieldtagged&colName=WOS&action=saveDataToRef&qid=15&sortBy=PY.D%3BLD.D%3BVL.D%3BSO.A%3BPG.A%3BAU.A&SID=2Cb1oI6ijMjk8hNDk51&product=WOS&filters=FUNDING+SUBJECT_CATEGORY+JCR_CATEGORY+LANG+IDS+PAGEC+SABBR+CITREFC+ISSN+PUBINFO+KEYWORDS+CITTIMES+ADDRS+CONFERENCE_SPONSORS+DOCTYPE+ABSTRACT+CONFERENCE_INFO+SOURCE+TITLE+AUTHORS++&numRecords=1&locale=en_US
 		var post = 'action=go&viewType=fullRecord&product='+values.product
 				+'&mark_id='+values.product+'&colName=' + values.colName
 				+'&recordID='+values.recordID.replace(/;/g,"%3B").replace(/:/g,"%3A")
 				+'&sortBy='+values.sortBy.replace(/;/g,"%3B").replace(/:/g,"%3A")+'&mode=outputService'
 				+'&qid='+values.qid+'&SID='+values.SID
 				+'&format=saveToRef&filters=FUNDING+SUBJECT_CATEGORY+JCR_CATEGORY+LANG+IDS+PAGEC+SABBR+CITREFC+ISSN+PUBINFO+KEYWORDS+CITTIMES+ADDRS+CONFERENCE_SPONSORS+DOCTYPE+ABSTRACT+CONFERENCE_INFO+SOURCE+TITLE+AUTHORS++&selectedIds=3&mark_to=&mark_from=&count_new_items_marked=0&value%28record_select_type%29=selrecords&marked_list_candidates=3&LinksAreAllowedRightClick=CitedRefList.do&LinksAreAllowedRightClick=CitingArticles.do&LinksAreAllowedRightClick=OneClickSearch.do&LinksAreAllowedRightClick=full_record.do&fields_selection=FUNDING+SUBJECT_CATEGORY+JCR_CATEGORY+LANG+IDS+PAGEC+SABBR+CITREFC+ISSN+PUBINFO+KEYWORDS+CITTIMES+ADDRS+CONFERENCE_SPONSORS+DOCTYPE+ABSTRACT+CONFERENCE_INFO+SOURCE+TITLE+AUTHORS++&save_options=fieldtagged';
-		Z.debug(post);
+		//Z.debug(post);
 		Zotero.Utilities.doPost('http://apps.webofknowledge.com/OutboundService.do',post, function (text, obj) {
-			Z.debug(text);
+			//Z.debug(text);
 			var qid = text.match(/<input type="hidden" id="qid" name="qid" value='(\d+)' \/>/)[1];
 			var post2 = 'locale=en_US&fileOpt=fieldtagged'+
 					'&colName=' + values.colName + '&action=saveDataToRef'+
 					'&qid='+qid+'&sortBy='+values.sortBy.replace(/;/g,"%3B").replace(/:/g,"%3A")+
-					'&SID='+values.SID+'&product='+values.product+'&filters=FUNDING+SUBJECT_CATEGORY+JCR_CATEGORY+LANG+IDS+PAGEC+SABBR+CITREFC+ISSN+PUBINFO+KEYWORDS+CITTIMES+ADDRS+CONFERENCE_SPONSORS+DOCTYPE+ABSTRACT+CONFERENCE_INFO+SOURCE+TITLE+AUTHORS++&numRecords=1&locale=en_US';
-			Z.debug(post2);
+					'&SID='+values.SID+'&product='+'UA'+'&filters=FUNDING+SUBJECT_CATEGORY+JCR_CATEGORY+LANG+IDS+PAGEC+SABBR+CITREFC+ISSN+PUBINFO+KEYWORDS+CITTIMES+ADDRS+CONFERENCE_SPONSORS+DOCTYPE+ABSTRACT+CONFERENCE_INFO+SOURCE+TITLE+AUTHORS++&numRecords=1&locale=en_US';
+			//Z.debug(post2);
 			Zotero.Utilities.doPost('http://ets.webofknowledge.com/ETS/saveDataToRef.do',post2, function (text, obj) {
-				Z.debug(text);
+				//Z.debug(text);
 				importer.setString(text);
 				importer.setHandler("itemDone", function (obj, item) {
 					item.attachments = [{url: url, type: "text/html", title: "ISI Web of Knowledge Record"}];
