@@ -1,14 +1,15 @@
 {
-        "translatorID": "cd77f1e5-507f-4c41-a6d2-bda5fa6f8694",
-        "label": "Readability",
-        "creator": "Avram Lyon",
-        "target": "^https?://www\\.readability\\.com/articles",
-        "minVersion": "2.1.3",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": "0",
-        "translatorType": 4,
-        "lastUpdated": "2011-04-03 17:16:55"
+	"translatorID": "cd77f1e5-507f-4c41-a6d2-bda5fa6f8694",
+	"label": "Readability",
+	"creator": "Avram Lyon",
+	"target": "^https?://www\\.readability\\.com/articles",
+	"minVersion": "2.1.3",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-14 16:27:00"
 }
 
 /*
@@ -80,3 +81,40 @@ function doWeb(doc, url){
 	item.attachments = [{document:doc, title:"Readability Snapshot"}]
 	item.complete();
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.readability.com/articles/a7bk0mlz?readbar=1",
+		"items": [
+			{
+				"itemType": "webpage",
+				"creators": [
+					{
+						"firstName": "Florence",
+						"lastName": "Waters",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"document": {
+							"location": {}
+						},
+						"title": "Readability Snapshot"
+					}
+				],
+				"title": "Why is Andreas Gursky's Rhine II the most expensive photograph?",
+				"url": "http://www.telegraph.co.uk/culture/art/8884829/Why-is-Andreas-Gurskys-Rhine-II-the-most-expensive-photograph.html",
+				"websiteTitle": "telegraph.co.uk",
+				"date": "Nov. 11, 2011",
+				"libraryCatalog": "Readability",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

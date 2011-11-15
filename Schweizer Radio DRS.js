@@ -1,14 +1,15 @@
 {
-        "translatorID":"a8e51f4e-0372-42ad-81a8-bc3dcea6dc03",
-        "label":"Schweizer Radio DRS",
-        "creator":"ibex",
-        "target":"^http://((www\\.)?drs[123]?\\.ch/.)",
-        "minVersion":"2.1.9",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":"0",
-        "translatorType":4,
-        "lastUpdated":"2011-09-17 11:17:03"
+	"translatorID": "a8e51f4e-0372-42ad-81a8-bc3dcea6dc03",
+	"label": "Schweizer Radio DRS",
+	"creator": "ibex",
+	"target": "^http://((www\\.)?drs[123]?\\.ch/.)",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-14 17:03:48"
 }
 
 /*
@@ -171,7 +172,7 @@ function fetchMeta(doc) {
  */
 function associateMeta(newItem, metaTags, name, zoteroField) {
   if (metaTags[name]) {
-    newItem[zoteroField] = ZU.trimInternal(metaTags[name]);
+	newItem[zoteroField] = ZU.trimInternal(metaTags[name]);
   }
 }
 
@@ -187,4 +188,52 @@ function associateMeta(newItem, metaTags, name, zoteroField) {
  */
 function containingClass(className) {
   return "contains(concat(' ',normalize-space(@class),' '),' " + className + " ')";
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.drs.ch/www/de/drs/sendungen/echo-der-zeit/2646.sh10192671.html",
+		"items": [
+			{
+				"itemType": "radioBroadcast",
+				"creators": [
+					{
+						"firstName": "Ursula",
+						"lastName": "Hürzeler",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Markus",
+						"lastName": "Mugglin",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"url": "http://www.drs.ch/www/de/drs/sendungen/echo-der-zeit/2646.sh10192671.html",
+				"title": "Micheline Calmy-Rey zu ihrem Rücktritt",
+				"date": "2011-09-07T18:00:00+02:00",
+				"network": "Schweizer Radio DRS",
+				"programTitle": "Echo der Zeit",
+				"language": "de",
+				"abstractNote": "Bundespräsidentin Micheline Calmy Rey tritt im Dezember nicht mehr an zur Wiederwahl. Nach neun Jahren im Amt möchte sich die 66jährige mehr Zeit für ihre Familie nehmen. Das Interview. Mehr",
+				"runningTime": "45:07",
+				"libraryCatalog": "Schweizer Radio DRS",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.drs1.ch/www/suche?query=Google",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.drs2.ch/www/de/drs2/sendungen/top/atlas.html",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
