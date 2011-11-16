@@ -1,16 +1,16 @@
 {
-	"translatorID":"f520b141-9ce8-42f4-93ec-a39e375a9516",
-	"translatorType":4,
-	"label":"Pubget",
-	"creator":"Matt Burton",
-	"target":"https?://pubget\\.com/(search|journal|site/search)",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2010-03-05 11:01:00"
+	"translatorID": "f520b141-9ce8-42f4-93ec-a39e375a9516",
+	"label": "Pubget",
+	"creator": "Matt Burton",
+	"target": "https?://pubget\\.com/(search|journal|site/search)",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-13 19:18:52"
 }
-
 
 function detectWeb (doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
@@ -18,9 +18,9 @@ function detectWeb (doc, url) {
   	if (prefix == 'x') return namespace; else return null;
   } : null;
 
-	var results = doc.evaluate("//div[@id = 'resultlist']", doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var results = doc.evaluate("//ul[@class = 'resultlist']", doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if (results){
-		if (doc.evaluate("//ul[@id='resultul']//li", doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+		if (doc.evaluate("//ul[@class = 'resultlist']//a[@class='title']", doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 				return "multiple";
 		}
 	

@@ -1,15 +1,15 @@
-﻿{
-	"translatorID":"87766765-919e-4d3b-9071-3dd7efe984c8",
-	"translatorType":4,
-	"label":"Revues.org",
-	"creator":"Michael Berkowitz",
-	"creator":"Pierre-Alain Mignot",
-	"target":"http://.*\\.revues\\.org",
-	"minVersion":"1.0.1b1.r1",
-	"maxVersion":"",
-	"priority":1,
-	"inRepository":true,
-	"lastUpdated":"2010-02-23 11:26:00"
+{
+	"translatorID": "87766765-919e-4d3b-9071-3dd7efe984c8",
+	"label": "Revues.org",
+	"creator": "Pierre-Alain Mignot",
+	"target": "^http://.*\\.revues\\.org",
+	"minVersion": "1.0.1b1.r1",
+	"maxVersion": "",
+	"priority": 1,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-13 23:22:33"
 }
 
 function detectWeb(doc, url) {
@@ -138,7 +138,7 @@ function doWeb(doc, url) {
 						for(var i in authors) {
 							if(!data['authors'][authors[i]]) {
 								data['authors'][authors[i]] = true;
-								data['creators'].push(Zotero.Utilities.cleanAuthor(authors[i], "author", true));
+								data['creators'].push(Zotero.Utilities.cleanAuthor(ZU.capitalizeTitle(authors[i].toLowerCase()), "author", true));
 							}
 						}
 						break;
@@ -343,3 +343,147 @@ function doWeb(doc, url) {
 	}
 	Zotero.wait();
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://e-spania.revues.org/12303",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "georges",
+						"lastName": "martin",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Georges",
+						"lastName": "Martin",
+						"creatorType": "editor"
+					}
+				],
+				"notes": [
+					{
+						"note": "<h1>Plan</h1><h1>L’infantat</h1><h1>L’infante</h1><h1>Annexe</h1>"
+					}
+				],
+				"tags": [
+					"infante Elvire",
+					"Saint-Isidore de León",
+					"testament",
+					"Elvire Fernandez",
+					"Urraque Fernandez",
+					"infante Urraque",
+					"Sancie Raimundez",
+					"infante Sancie",
+					"Ferdinand Ier de Castille et de León",
+					"Alphonse VI de Castille et de León",
+					"infantat",
+					"infantaticum",
+					"XIe siècle",
+					"Urraca Fernández",
+					"San Isidoro de León",
+					"testamento",
+					"Infantazgo",
+					"Infanta Elvira",
+					"Infanta Urraca",
+					"Elvira Fernández",
+					"Sancha Raimundez",
+					"Infanta Sancha",
+					"Fernando I de Castilla y León",
+					"Alfonso VI de Castilla y León",
+					"siglo XI",
+					"infante Elvire",
+					"Saint-Isidore de León",
+					"testament",
+					"Elvire Fernandez",
+					"Urraque Fernandez",
+					"infante Urraque",
+					"Sancie Raimundez",
+					"infante Sancie",
+					"Ferdinand Ier de Castille et de León",
+					"Alphonse VI de Castille et de León",
+					"infantat",
+					"infantaticum",
+					"XIe siècle",
+					"Urraca Fernández",
+					"testamento",
+					"San Isidoro de León",
+					"Infantazgo",
+					"Infanta Elvira",
+					"Infanta Urraca",
+					"Elvira Fernández",
+					"Sancha Raimundez",
+					"Infanta Sancha",
+					"Fernando I de Castilla y León",
+					"Alfonso VI de Castilla y León",
+					"siglo XI",
+					"\ninfante Elvire",
+					"Saint-Isidore de León",
+					"testament",
+					"Elvire Fernandez",
+					"Urraque Fernandez",
+					"infante Urraque",
+					"Sancie Raimundez",
+					"infante Sancie",
+					"Ferdinand Ier de Castille et de León",
+					"Alphonse VI de Castille et de León",
+					"infantat",
+					"infantaticum",
+					"XIe siècle",
+					"\nUrraca Fernández",
+					"testamento",
+					"San Isidoro de León",
+					"Infantazgo",
+					"Infanta Elvira",
+					"Infanta Urraca",
+					"Elvira Fernández",
+					"Sancha Raimundez",
+					"Infanta Sancha",
+					"Fernando I de Castilla y León",
+					"Alfonso VI de Castilla y León",
+					"siglo XI"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://e-spania.revues.org/pdf/12303",
+						"title": "Le testament d’Elvire (Tábara, 1099)",
+						"mimeType": "application/pdf",
+						"downloadable": true
+					},
+					{
+						"title": "Le testament d’Elvire (Tábara, 1099)",
+						"url": "http://e-spania.revues.org/12303",
+						"mimeType": "text/html"
+					}
+				],
+				"authors": "",
+				"contrib": "",
+				"editors": "",
+				"translators": "",
+				"url": "http://e-spania.revues.org/12303",
+				"ISSN": "1951-6169",
+				"title": "Le testament d’Elvire (Tábara, 1099)",
+				"publisher": "SEMH-Sorbonne",
+				"language": "fr",
+				"abstractNote": "Le testament d’Elvire livre de précieuses informations sur la réalité historique de l’infantat : son implantation, la composition de ses biens, ses évolutions, les formes de son acquisition et de sa transmission, sa fonction politique. Mais il nous renseigne aussi sur une infante de niveau moyen, sur son cadre de vie, son entourage, ses activités, les réseaux de son pouvoir et même sur sa foi. ;El testamento de Elvira brinda una preciosísima información sobre la realidad del infantazgo : su extensión, la composición de sus bienes, sus evoluciones, las formas de su adquisición y transmisión, su papel político. También nos informa sobre una infanta de nivel mediano, sobre el marco de su vida, su entorno personal, sus actividades, la red de sus influencias e incluso sobre su fe.",
+				"date": "2011-11-13",
+				"rights": "© e-Spania",
+				"publicationTitle": "e-Spania",
+				"issue": "5",
+				"extra": "Le 11 novembre 1099, dans sa ville de Tábara, non loin de Benavente, l’infante Elvire, âgée d’environ 63 ans et « prisonnière de la lourde chaîne de la maladie », ordonne son testament. Celui-ci nous a été convenablement conservé dans une copie précoce, écrite sur parchemin en lettres wisigothiques rondes. Il est signé par l’infante et souscrit par sa sœur, l’infante Urraque, ainsi que par les évêques de León, de Tuy et d’Oviedo. Elvire était la fille du roi Ferdinand Ier, mort en 1065, et la...",
+				"seriesTitle": "Alphonse X le Sage | Infantes",
+				"libraryCatalog": "Revues.org",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://amerika.revues.org/1283",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

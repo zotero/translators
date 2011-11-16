@@ -1,14 +1,15 @@
 {
-	"translatorID":"411f9a8b-64f3-4465-b7df-a3c988b602f3",
-	"translatorType":4,
-	"label":"RePEc",
-	"creator":"Asa Kusuma",
-	"target":"^https?://ideas\\.repec\\.org/",
-	"minVersion":"1.0.0b4.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"translatorID": "411f9a8b-64f3-4465-b7df-a3c988b602f3",
+	"label": "RePEc",
+	"creator": "Asa Kusuma",
+	"target": "^https?://ideas\\.repec\\.org/",
+	"minVersion": "1.0.0b4.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-13 21:36:25"
 }
 
 function detectWeb(doc, url) {
@@ -26,7 +27,7 @@ function detectWeb(doc, url) {
 		if(doc.evaluate(multXpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.indexOf("Search")!=-1)
 			return "multiple";
 	} else if(doc.evaluate(singXpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-		return "journalArticle";
+		return "report";
 	}
 }
 
@@ -34,12 +35,13 @@ function strrev(str) {
    if (!str) return '';
    var revstr='';
    for (i = str.length-1; i>=0; i--)
-       revstr+=str.charAt(i)
+	   revstr+=str.charAt(i)
    return revstr;
 }
 
 
 function parseRIS(uris) {
+	Zotero.debug(uris)
 	
 
 	Zotero.Utilities.HTTP.doGet(uris, function(text){	
@@ -107,16 +109,16 @@ function doWeb(doc, url) {
 				
 				//Insert colons between numbers and letters and letters and numbers
 				bibcode=bibcode.replace(/([A-Za-z])([0-9])/g,
-                   		function (str, p1, p2, offset, s) {
-                      			return p1 + ":" + p2;
-                   		}
-                		)
+				   		function (str, p1, p2, offset, s) {
+					  			return p1 + ":" + p2;
+				   		}
+						)
 
 				bibcode=bibcode.replace(/([0-9])([A-Za-z])/g,
-                   		function (str, p1, p2, offset, s) {
-                      			return p1 + ":" + p2;
-                   		}
-                		)
+				   		function (str, p1, p2, offset, s) {
+					  			return p1 + ":" + p2;
+				   		}
+						)
 				
 				items[bibcode] = Zotero.Utilities.trimInternal(titleElmt.textContent);
 
@@ -156,16 +158,16 @@ function doWeb(doc, url) {
 				
 		//Insert colons between numbers and letters and letters and numbers
 		bibcode=bibcode.replace(/([A-Za-z])([0-9])/g,
-                   function (str, p1, p2, offset, s) {
-                      	return p1 + ":" + p2;
-                   }
-                )
+				   function (str, p1, p2, offset, s) {
+					  	return p1 + ":" + p2;
+				   }
+				)
 
 		bibcode=bibcode.replace(/([0-9])([A-Za-z])/g,
-                   function (str, p1, p2, offset, s) {
-                      	return p1 + ":" + p2;
-                   }
-                )	
+				   function (str, p1, p2, offset, s) {
+					  	return p1 + ":" + p2;
+				   }
+				)	
 		
 
 		var getURL = "http://ideas.repec.org/cgi-bin/ref.cgi?handle=RePEc";
@@ -178,4 +180,45 @@ function doWeb(doc, url) {
 	}
 
 
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://ideas.repec.org/p/fip/fedhwp/wp-2010-08.html",
+		"items": [
+			{
+				"itemType": "report",
+				"creators": [
+					{
+						"lastName": "Eric French",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Christopher Taber",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Labor market"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://ideas.repec.org/p/fip/fedhwp/wp-2010-08.html"
+					}
+				],
+				"title": "Identification of models of the labor market",
+				"series": "Working Paper Series",
+				"date": "2010",
+				"publisher": "Federal Reserve Bank of Chicago",
+				"issue": "WP-2010-08",
+				"url": "http://ideas.repec.org/p/fip/fedhwp/wp-2010-08.html",
+				"abstractNote": "This chapter discusses identification of common selection models of the labor market. We start with the classic Roy model and show how it can be identified with exclusion restrictions. We then extend the argument to the generalized Roy model, treatment effect models, duration models, search models, and dynamic discrete choice models. In all cases, key ingredients for identification are exclusion restrictions and support conditions.",
+				"libraryCatalog": "RePEc",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
