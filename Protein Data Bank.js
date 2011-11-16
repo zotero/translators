@@ -1,14 +1,15 @@
 {
-	"translatorID":"e16095ae-986c-4117-9cb6-20f3b7a52f64",
-	"translatorType":4,
-	"label":"Protein Data Bank",
-	"creator":"Michael Berkowitz",
-	"target":"http://www.pdb.org/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"translatorID": "e16095ae-986c-4117-9cb6-20f3b7a52f64",
+	"label": "Protein Data Bank",
+	"creator": "Michael Berkowitz",
+	"target": "^https?://www\\.pdb\\.org/pdb/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-13 19:04:47"
 }
 
 function detectWeb(doc, url) {
@@ -71,7 +72,7 @@ function doWeb(doc, url) {
 			var authors = xml3..citation_author.toString().split(/\n/);
 			for (var i in authors) {
 				var name = authors[i].match(/name=\"([^"]+)\"/)[1].split(", ");;
-				Zotero.debug(name);
+				//Zotero.debug(name);
 				item.creators.push({firstName:name[1], lastName:name[0], creatorType:"author"});
 			}
 			item.attachments = [
@@ -83,4 +84,154 @@ function doWeb(doc, url) {
 		Zotero.done();
 	}
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.pdb.org/pdb/explore/explore.do?structureId=1COW",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "M.J.",
+						"lastName": "van Raaij",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "J.P.",
+						"lastName": "Abrahams",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "A.G.",
+						"lastName": "Leslie",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "J.E.",
+						"lastName": "Walker",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "J.P.",
+						"lastName": "Abrahams",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "A.G.",
+						"lastName": "Leslie",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "R.",
+						"lastName": "Lutter",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "J.E.",
+						"lastName": "Walker",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "R.",
+						"lastName": "Lutter",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "J.P.",
+						"lastName": "Abrahams",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "M.J.",
+						"lastName": "Van Raaij",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "R.J.",
+						"lastName": "Todd",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "T.",
+						"lastName": "Lundqvist",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "S.K.",
+						"lastName": "Buchanan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "A.G.",
+						"lastName": "Leslie",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "J.E.",
+						"lastName": "Walker",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "J.P.",
+						"lastName": "Abrahams",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "R.",
+						"lastName": "Lutter",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "R.J.",
+						"lastName": "Todd",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "M.J.",
+						"lastName": "Van Raaij",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "A.G.",
+						"lastName": "Leslie",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "J.E.",
+						"lastName": "Walker",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.pdb.org/pdb/explore/explore.do?structureId=1COW1COW",
+						"title": "PDB Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"url": "http://www.pdb.org/pdb/download/downloadFile.do?fileFormat=pdb&compression=NO&structureId=1COW",
+						"title": "Protein Data Bank .pdb File",
+						"mimeType": "chemical/x-pdb"
+					}
+				],
+				"title": "The structure of bovine F1-ATPase complexed with the antibiotic inhibitor aurovertin B.",
+				"publicationTitle": "Proc.Natl.Acad.Sci.USA",
+				"volume": "93",
+				"pages": "6913-6917",
+				"ISSN": "0027-8424",
+				"extra": "PubMed ID: 8692918",
+				"DOI": "10.1073/pnas.93.14.6913",
+				"date": "1996-05-08",
+				"url": "http://www.pdb.org/pdb/explore/explore.do?structureId=1COW1COW",
+				"libraryCatalog": "Protein Data Bank",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

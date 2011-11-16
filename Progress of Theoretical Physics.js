@@ -1,21 +1,22 @@
 {
-	"translatorID":"0b356cb6-7fa1-4662-b6e8-7ffc9ca2cd4a",
-	"translatorType":4,
-	"label":"Progress of Theoretical Physics",
-	"creator":"Michael Berkowitz",
-	"target":"http://ptp.ipap.jp/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-12-31 08:19:07"
+	"translatorID": "0b356cb6-7fa1-4662-b6e8-7ffc9ca2cd4a",
+	"label": "Progress of Theoretical Physics",
+	"creator": "Michael Berkowitz",
+	"target": "http://ptp.ipap.jp/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-13 16:44:43"
 }
 
 function detectWeb(doc, url) {
 	if (doc.title.match(/search result/) || doc.title.match(/Table of Contents/)) {
-		return "multiple";
+		return false;
 	} else if (url.match(/getarticle\?/) || url.match(/link\?/)) {
-		return "journalArticle";
+		return false;
 	}
 }
 
