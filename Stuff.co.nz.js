@@ -1,18 +1,19 @@
 {
-        "translatorID":"631ff0c7-2e64-4279-a9c9-ad9518d40f2b",
-        "label":"Stuff.co.nz",
-        "creator":"Sopheak Hean (University of Waikato, Faculty of Education)",
-        "target":"^http://(www\\.)?stuff\\.co\\.nz/",
-        "minVersion":"1.0",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":"1",
-        "translatorType":4,
-        "lastUpdated":"2010-08-23 00:34:34"
+	"translatorID": "631ff0c7-2e64-4279-a9c9-ad9518d40f2b",
+	"label": "Stuff.co.nz",
+	"creator": "Sopheak Hean (University of Waikato, Faculty of Education)",
+	"target": "^http://(www\\.)?stuff\\.co\\.nz/",
+	"minVersion": "1.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-15 17:16:53"
 }
 
 /*
-    Stuff.co.nz Translator- Parses Stuff.co.nz articles and creates Zotero-based metadata
+	Stuff.co.nz Translator- Parses Stuff.co.nz articles and creates Zotero-based metadata
    Copyright (C) 2010 Sopheak Hean, University of Waikato, Faculty of Education
 
    This program is free software: you can redistribute it and/or modify
@@ -341,8 +342,8 @@ function scrape(doc, url) {
 		}
 		//Snapshot of  the web page.
 		newItem.attachments.push({url:url, title:"Stuff.co.nz Snapshot",
-	 	                          mimeType:"text/html"});
-	 	                          
+	 							  mimeType:"text/html"});
+	 							  
 		//Call Do date function to make it cleaner in scape. This way things are easier to follow.
 		newItem.date = doDate(doc,url);
 		newItem.complete();
@@ -467,3 +468,43 @@ function doWeb(doc, url) {
 	
 }
 
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.stuff.co.nz/national/politics/campaign-trail/5967550/Green-party-link-to-billboard-attacks",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "DANYA-LEVY",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.stuff.co.nz/national/politics/campaign-trail/5967550/Green-party-link-to-billboard-attacks",
+						"title": "Stuff.co.nz Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"url": "http://www.stuff.co.nz/national/politics/campaign-trail/5967550/Green-party-link-to-billboard-attacks",
+				"publicationTitle": "Stuff.co.nz",
+				"language": "English",
+				"abstractNote": "The man who coordinated the vandalism of 700 National billboards says it was an attempt at \"freedom of expression.\"",
+				"title": "Green party link to billboard attacks",
+				"section": "Campaign Trail",
+				"place": "New Zealand",
+				"date": "Nov 15, 2011",
+				"libraryCatalog": "Stuff.co.nz",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
