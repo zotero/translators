@@ -3,13 +3,13 @@
 	"label": "PubMed Central",
 	"creator": "Michael Berkowitz and Rintze Zelle",
 	"target": "https?://[^/]*.nih.gov/",
-	"minVersion": "1.0.0b4.r5",
+	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-11-16 13:04:03"
+	"lastUpdated": "2011-11-16 14:33:05"
 }
 
 function detectWeb(doc, url) {
@@ -23,7 +23,7 @@ function detectWeb(doc, url) {
 		return "journalArticle";
 	}
 	
-	var uids = doc.evaluate('//div[@class="toc-pmcid"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var uids = doc.evaluate('//div[@class="rprt"]//dl[@class="rprtid"]/dd', doc, nsResolver, XPathResult.ANY_TYPE, null);
 	if(uids.iterateNext()) {
 		if (uids.iterateNext()){
 			return "multiple";
@@ -191,8 +191,8 @@ function doWeb(doc, url) {
 		ids.push(pmcid);
 		lookupPMCIDs(ids, doc, pdfLink);
 	} else {
-		var pmcids = doc.evaluate('//div[@class="toc-pmcid"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var titles = doc.evaluate('//div[@class="toc-title"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var pmcids = doc.evaluate('//div[@class="rprt"]//dl[@class="rprtid"]/dd', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//div[@class="rprt"]//div[@class="title"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var title;
 		while (pmcid = pmcids.iterateNext()) {
 			title = titles.iterateNext();
@@ -200,16 +200,16 @@ function doWeb(doc, url) {
 			resultsCount = resultsCount + 1;
 		}
 		if (resultsCount > 1) {
-			ids = Zotero.selectItems(ids);
+			Zotero.selectItems(ids, function(ids) {
+				if (!ids) {
+					return true;
+				}
+				var pmcids = new Array();
+				for (var i in ids) {
+					pmcids.push(i);
+				}
+				lookupPMCIDs(pmcids, doc);
+			});
 		}
-		if (!ids) {
-			return true;
-		}
-
-		var pmcids = new Array();
-		for (var i in ids) {
-			pmcids.push(i);
-		}
-		lookupPMCIDs(pmcids, doc);
 	}
 }
