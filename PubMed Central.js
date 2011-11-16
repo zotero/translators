@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-11-15 22:41:32"
+	"lastUpdated": "2011-11-16 13:04:03"
 }
 
 function detectWeb(doc, url) {
@@ -32,7 +32,7 @@ function detectWeb(doc, url) {
 	}
 }
 
-function lookupPMCIDs(ids, doc) {
+function lookupPMCIDs(ids, doc, pdfLink) {
 	Zotero.wait();
 	var newUri = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&retmode=xml&id=" + ids.join(",");
 	Zotero.debug(newUri);
@@ -143,12 +143,16 @@ function lookupPMCIDs(ids, doc) {
 			
 			if (ZU.xpathText(article, 'selfuri/@xlinktitle') == "pdf") {
 				var pdfFileName = ZU.xpathText(article, 'selfuri/@xlinkhref');
+			} else if (pdfLink) {
+				var pdfFileName = pdfLink;
+			}
+			if (pdfFileName) {
 				var pdfURL = "http://www.ncbi.nlm.nih.gov/pmc/articles/PMC" + ids[i] + "/pdf/" + pdfFileName;
 				newItem.attachments.push({
 				title:"PubMed Central Full Text PDF",
 				mimeType:"application/pdf",
 				url:pdfURL
-			}); 
+				});
 			}
 
 			newItem.complete();
@@ -170,13 +174,22 @@ function doWeb(doc, url) {
 
 	var ids = new Array();
 	var pmcid;
+	var pdfLink;
 	var resultsCount = 0;
 	try {
 		pmcid = url.match(/ncbi\.nlm\.nih\.gov\/pmc\/articles\/PMC([\d]+)/)[1];
 	} catch(e) {}
 	if (pmcid) {
+		try {
+			var formatLinks = doc.evaluate('//td[@class="format-menu"]//a/@href', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			while (formatLink = formatLinks.iterateNext().textContent) {
+				if(pdfLink = formatLink.match(/\/pdf\/([^\/]*\.pdf$)/)) {
+					pdfLink = pdfLink[1];
+				}
+			}
+		} catch (e) {}
 		ids.push(pmcid);
-		lookupPMCIDs(ids, doc);
+		lookupPMCIDs(ids, doc, pdfLink);
 	} else {
 		var pmcids = doc.evaluate('//div[@class="toc-pmcid"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var titles = doc.evaluate('//div[@class="toc-title"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
