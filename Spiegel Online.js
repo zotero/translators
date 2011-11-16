@@ -1,14 +1,15 @@
 {
-        "translatorID": "eef50507-c756-4081-86fd-700ae4ebf22e",
-        "label": "Spiegel Online",
-        "creator": "Martin Meyerhoff",
-        "target": "^http://www\\.spiegel\\.de/",
-        "minVersion": "1.0",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": "1",
-        "translatorType": 4,
-        "lastUpdated": "2011-04-01 11:56:06"
+	"translatorID": "eef50507-c756-4081-86fd-700ae4ebf22e",
+	"label": "Spiegel Online",
+	"creator": "Martin Meyerhoff",
+	"target": "^http://www\\.spiegel\\.de/",
+	"minVersion": "1.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-15 12:20:31"
 }
 
 /*
@@ -219,3 +220,54 @@ function doWeb(doc, url) {
 		scrape(doc, url);
 	}
 }	
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.spiegel.de/politik/deutschland/0,1518,797954,00.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "Ein Kommentar von Peter",
+						"lastName": "MüllerLeipzig",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Deutschland",
+					"Angela Merkel",
+					"CDU",
+					"Merkels schwarz-gelbe Regierung",
+					"Mindestlohn",
+					"Euro-Krise",
+					"Betreuungsgeld"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.spiegel.de/politik/deutschland/0,1518,druck-797954,00.html",
+						"title": "CDU-Parteitag: Partei im Koma - SPIEGEL ONLINE - Nachrichten - Politik",
+						"mimeType": "text/html"
+					}
+				],
+				"url": "http://www.spiegel.de/politik/deutschland/0,1518,797954,00.html",
+				"title": "Partei im Koma",
+				"section": "Politik",
+				"abstractNote": "Die CDU feiert sich in Leipzig selbst, doch in Wahrheit befindet sie sich in einem traurigen Zustand: Die Partei ist in ein kollektives Koma gefallen, politische Debatten finden kaum noch statt. Hauptverantwortlich dafür ist Angela Merkel.",
+				"date": "15.11.2011",
+				"publicationTitle": "Spiegel Online",
+				"libraryCatalog": "Spiegel Online",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.spiegel.de/international/topic/german_french_relations/",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
