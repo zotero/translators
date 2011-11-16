@@ -9,12 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-09-10 11:56:48"
+	"lastUpdated": "2011-11-08 15:20:06"
 }
 
 function detectWeb(doc, url) {
-	var export_options = ZU.xpath(doc, '//form[@name="frm"]//*[@name="RD"]/option');
+	var export_options = ZU.xpath(doc, '//form[@name="frm"]//*[@name="RD"]|//td/select[@name="RD"]');
 	if(!export_options.length) return false;
+	export_options = export_options[0];
 	for(var i in export_options) {
 		if(export_options[i].text == 'Latin1 MARC'
 		|| export_options[i].text == 'Raw MARC'
@@ -186,11 +187,6 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://catalog.loc.gov/cgi-bin/Pwebrecon.cgi?DB=local&Search_Arg=zotero&Search_Code=GKEY^*&CNT=100&hist=1&type=quick",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "https://i-share.carli.illinois.edu/nby/cgi-bin/Pwebrecon.cgi?DB=local&v1=1&BBRecID=790862",
 		"items": [
 			{
@@ -202,7 +198,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
+				"notes": [
+					{
+						"note": "Brunet and Graesse both mention a map of Paraguay; this copy has a map of Chile with title: Tabula geocraphica [sic] regni Chile / studio et labore P. Procuratoris Chilensis Societatis Jesu In 3 books; the first two are biographies of Jesuits, Simon Mazeta and Francisco Diaz Taño, the 3rd deals with Jesuit missions in Paraguay Head and tail pieces"
+					}
+				],
 				"tags": [
 					"Masseta, Simon",
 					"Cuellar y Mosquera, Gabriel de",
@@ -216,7 +216,7 @@ var testCases = [
 				"publisher": "Por Juan Micòn, Impressor",
 				"date": "1687",
 				"numPages": "24",
-				"callNumber": "F2681 .X3",
+				"callNumber": "VAULT Ayer 1343 .J515 P211 X2 1687",
 				"libraryCatalog": "i-share.carli.illinois.edu Library Catalog",
 				"shortTitle": "Insignes missioneros de la Compañia de Jesus en la prouincia del Paraguay"
 			}
@@ -224,37 +224,40 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://catalog.loc.gov/cgi-bin/Pwebrecon.cgi?v1=1&ti=1,1&Search%5FArg=zotero&Search%5FCode=GKEY%5E%2A&CNT=100&type=quick&PID=UiW_ZKCUShsRhZ5pIpsx_-5hND3W&SEQ=20110704130645&SID=1",
+		"url": "http://www.library.nps.gov/cgi-bin/Pwebrecon.cgi?v1=1&ti=1,1&SAB1=argentina&BOOL1=all%20of%20these&FLD1=Keyword%20Any%20Field%20%28GKEY%29&GRP1=AND%20with%20next%20set&SAB2=&BOOL2=all%20of%20these&FLD2=Library%20Location%20Keyword%20%28HKEY%29&CNT=50&PID=GM_wANboxYmSwO9H6KC7tE5XcxwL&SEQ=20111108171419&SID=2",
 		"items": [
 			{
 				"itemType": "book",
-				"creators": [
+				"creators": [],
+				"notes": [
 					{
-						"firstName": "Jason",
-						"lastName": "Puckett",
-						"creatorType": "author"
+						"note": "\"Separata de la revista 'a/mbiente' [sic].\""
 					}
 				],
-				"notes": [],
 				"tags": [
-					"Zotero",
-					"Bibliographical citations",
-					"Computer programs",
-					"Citation of electronic information resources",
-					"Computer programs"
+					"National parks and reserves",
+					"Management",
+					"Argentina",
+					"National parks and reserves",
+					"Planning",
+					"Argentina"
 				],
 				"seeAlso": [],
 				"attachments": [],
-				"ISBN": "9780838985892",
-				"title": "Zotero: a guide for librarians, researchers, and educators",
-				"place": "Chicago",
-				"publisher": "Association of College and Research Libraries",
-				"date": "2011",
-				"callNumber": "PN171.F56 P83 2011",
-				"libraryCatalog": "Library of Congress Catalog",
-				"shortTitle": "Zotero"
+				"title": "3 anos de gestion democratica en los parques nacionales",
+				"place": "Buenos Aires, Argentina?",
+				"publisher": "PN",
+				"date": "1986",
+				"numPages": "23",
+				"callNumber": "SB484.A7 A14 1986",
+				"libraryCatalog": "www.library.nps.gov Library Catalog"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.library.nps.gov/cgi-bin/Pwebrecon.cgi?SAB1=argentina&BOOL1=all+of+these&FLD1=Keyword+Any+Field+%28GKEY%29&GRP1=AND+with+next+set&SAB2=&BOOL2=all+of+these&FLD2=Library+Location+Keyword+%28HKEY%29&PID=gP0n-XwZaO7SV61848sStPnd5tpZ&SEQ=20111108171417&CNT=50&HIST=1",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

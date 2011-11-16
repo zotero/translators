@@ -1,14 +1,15 @@
 {
-	"translatorID":"b56f856e-934e-4b46-bc58-d61dccc9f32f",
-	"translatorType":4,
-	"label":"Mainichi Daily News",
-	"creator":"Frank Bennett",
-	"target":"^http://(?:search\\.)*mdn\\.mainichi\\.jp/(?:$|result\\?|mdnnews/|perspectives/|features/|arts/|travel/)",
-	"minVersion":"2.0b7",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2010-06-05 20:35:00"
+	"translatorID": "b56f856e-934e-4b46-bc58-d61dccc9f32f",
+	"label": "Mainichi Daily News",
+	"creator": "Frank Bennett",
+	"target": "^http://(?:search\\.)*mdn\\.mainichi\\.jp/(?:$|result\\?|mdnnews/|perspectives/|features/|arts/|travel/)",
+	"minVersion": "2.0b7",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-08 21:08:22"
 }
 
 // #################################
@@ -79,7 +80,8 @@ var doWeb = function (doc, url) {
 			availableItems[found.href] = headline;
 			found = nodes.iterateNext();
 		}
-		if (availableItems.__count__) {
+		if (availableItems!=null) {
+			Zotero.debug("test")
 			items = Zotero.selectItems(availableItems);
 			for (myurl in items) {
 				if (items.hasOwnProperty(myurl)) {
@@ -119,3 +121,39 @@ var scrapeAndParse = function (url, title) {
 	item.attachments.push({title:"Mainichi Daily News snapshot", mimeType:"text/html", url:url});
 	item.complete();
 };
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://mdn.mainichi.jp/mdnnews/national/news/20111108p2g00m0dm122000c.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Mainichi Daily News snapshot",
+						"mimeType": "text/html",
+						"url": "http://mdn.mainichi.jp/mdnnews/national/news/20111108p2g00m0dm122000c.html"
+					}
+				],
+				"title": "Principals, vice principals, senior teachers seek demotion",
+				"publicationTitle": "Mainichi Daily News",
+				"edition": "online edition",
+				"url": "http://mdn.mainichi.jp/mdnnews/national/news/20111108p2g00m0dm122000c.html",
+				"date": "2011-11-08",
+				"libraryCatalog": "Mainichi Daily News",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://search.mdn.mainichi.jp/result?p=kyoto&st=s",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

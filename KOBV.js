@@ -1,14 +1,15 @@
 {
-	"translatorID":"fef07360-ee97-4f67-b022-6f64d5ec0c25",
-	"translatorType":4,
-	"label":"KOBV",
-	"creator":"Gunar Maiwald",
-	"target":"^http://vs13.kobv.de/V/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"translatorID": "fef07360-ee97-4f67-b022-6f64d5ec0c25",
+	"label": "KOBV",
+	"creator": "Gunar Maiwald",
+	"target": "^http://vs13.kobv.de/V/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-07 20:29:22"
 }
 
 function detectWeb(doc, url) {
@@ -58,7 +59,7 @@ function scrape(doc) {
 					value = marc.subfieldDelimiter+"a"+surname+", "+forename;
 					ind = 1;
 				}
-    		    		record.addField(code, ind, value);
+						record.addField(code, ind, value);
 			}
 			
 			var newItem = new Zotero.Item();
@@ -77,7 +78,8 @@ function doWeb(doc, url) {
 	var newUrls = new Array();
 	
 	if (doc.evaluate(xpath1, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		var items = Zotero.Utilities.getItemArray(doc, doc, '^http://vs13.kobv.de/V/.*format=999$','^[0-9]+$');
+		var items = Zotero.Utilities.getItemArray(doc, doc, '^http://vs13\.kobv\.de/V/.*format=999$','^\s[0-9]+$');
+		//http://vs13.kobv.de/V/EV2X4CXH83SACASM9IRHI283QIE7GQGIVRTYYM5G9NLVI5LB7Q-09472?func=meta-3&short-format=002&set_number=000364&set_entry=000002&format=999
 		items = Zotero.selectItems(items);
 		for (var url in items) {
 			newUrls.push(url);
@@ -91,3 +93,43 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(newUrls, scrape, function() { Zotero.done(); });
 	Zotero.wait();
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://vs13.kobv.de/V/EV2X4CXH83SACASM9IRHI283QIE7GQGIVRTYYM5G9NLVI5LB7Q-08626?func=meta-3&short-format=002&set_number=000358&set_entry=000001&format=999",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Claudia",
+						"lastName": "Zilla",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"ISBN": "978-3-8329-6571-6",
+				"title": "\"Demokratie\" im Diskurs politischer Parteien Argentinien und Chile im Vergleich",
+				"edition": "1. Aufl",
+				"place": "Baden-Baden",
+				"publisher": "Nomos",
+				"date": "2011",
+				"numPages": "305",
+				"series": "Nomos-Universitätsschriften",
+				"seriesNumber": "177",
+				"libraryCatalog": "KOBV"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://vs13.kobv.de/V/FPA8QQHCHFKG1YIFAR9QNJ4Y2FAJA1QIJ3U7C4DC3CLFPFRDDQ-11814?func=meta-3&short-format=000",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
