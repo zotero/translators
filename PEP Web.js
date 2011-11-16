@@ -1,14 +1,15 @@
 {
-	"translatorID":"32ad4782-b106-4ccb-8ae1-ff102ba93eef",
-	"translatorType":4,
-	"label":"PEP Web",
-	"creator":"Akilesh Ayyar",
-	"target":"^https?://www\\.pep-web\\.org",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":false,
-	"lastUpdated":"2011-02-15 04:50:00"
+	"translatorID": "32ad4782-b106-4ccb-8ae1-ff102ba93eef",
+	"label": "PEP Web",
+	"creator": "Akilesh Ayyar",
+	"target": "^https?://www\\.pep-web\\.org",
+	"minVersion": "1.0.0b3.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-11 14:26:09"
 }
 
 //Only works for journal articles, and only for single entries.
@@ -49,7 +50,7 @@ function scrape(doc, url) {
 	//authors
 	var authors = citeString.match(/(^.*)\(/)[1].toString();
 	if (authors == ' ') {
-     authors = "Unknown";
+	 authors = "Unknown";
    } 
 
 	var currentauthor;
@@ -113,3 +114,41 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function(){Zotero.done();});
 	Zotero.wait();
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.pep-web.org/document.php?id=ajp.068.0024a",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "P. J",
+						"lastName": "Boschan",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.pep-web.org/document.php?id=ajp.068.0024a",
+						"title": "PEP Web Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"url": "http://www.pep-web.org/document.php?id=ajp.068.0024a",
+				"title": "Childhood and Trauma",
+				"date": "2008",
+				"publicationTitle": "Am. J. Psychoanal.",
+				"volume": "68",
+				"pages": "24-32",
+				"libraryCatalog": "PEP Web",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

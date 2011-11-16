@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-10-10 21:01:38"
+	"lastUpdated": "2011-11-13 10:30:40"
 }
 
 function detectWeb(doc, url) {
@@ -112,13 +112,13 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Kim",
-						"firstName": "Tae Min ",
+						"lastName": "Selva",
+						"firstName": "Eric ",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Kim",
-						"firstName": "Young Min ",
+						"lastName": "Khadra",
+						"firstName": "Nadine ",
 						"creatorType": "author"
 					},
 					{
@@ -177,12 +177,12 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": false,
+						"url": "http://www.plosbiology.org/article/fetchObjectAttachment.action?uri=info%3Adoi%2F10.1371%2Fjournal.pbio.1001090&representation=PDF",
 						"title": "PLoS Full Text PDF",
 						"mimeType": "application/pdf"
 					},
 					{
-						"url": false,
+						"url": "http://dx.doi.org/10.1371/journal.pbio.1001090",
 						"title": "PLoS Snapshot",
 						"mimeType": "text/html",
 						"snapshot": true
@@ -197,9 +197,10 @@ var testCases = [
 				"issue": "6",
 				"pages": "e1001090",
 				"publisher": "Public Library of Science",
-				"url": "http://dx.doi.org/10.1371/journal.pbio.1001090",
 				"DOI": "10.1371/journal.pbio.1001090",
-				"libraryCatalog": "PLoS Biol"
+				"url": "http://dx.doi.org/10.1371/journal.pbio.1001090",
+				"libraryCatalog": "PLoS Biol",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},

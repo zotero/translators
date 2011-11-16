@@ -1,14 +1,15 @@
 {
-	"translatorID":"1300cd65-d23a-4bbf-93e5-a3c9e00d1066",
-	"translatorType":4,
-	"label":"Primo",
-	"creator":"Matt Burton, Avram Lyon, Etienne Cavalié",
-	"target":"/primo_library/",
-	"minVersion":"2.0",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2010-06-08 07:15:00"
+	"translatorID": "1300cd65-d23a-4bbf-93e5-a3c9e00d1066",
+	"label": "Primo",
+	"creator": "Matt Burton, Avram Lyon, Etienne Cavalié",
+	"target": "/primo_library/",
+	"minVersion": "2.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-13 11:20:47"
 }
 
 /*
@@ -820,3 +821,124 @@ MAP_ISO6391_ISO6392 = {'aar' : 'Afar',
 	var lang;
 	return ((lang = MAP_ISO6391_ISO6392[code]) !== null) ? lang : false;
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://solo.bodleian.ox.ac.uk/primo_library/libweb/action/display.do?dscnt=1&elementId=0&recIdxs=0&frbrVersion=&vl(103770091UI1)=all_items&scp.scps=scope%3A(NET)%2Cscope%3A(OX)&tab=local&dstmp=1321207982311&srt=rank&mode=Basic&indx=1&tb=t&renderMode=poppedOut&vl(freeText0)=witchcraft%20and%20whigs&fn=search&vid=OXVU1&vl(105258007UI0)=any&frbg=&displayMode=full&ct=display&dum=true&recIds=oxfaleph016861820&vl(1UIStartWith0)=contains&doc=oxfaleph016861820&tabs=detailsTab&fromLogin=true",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Sneddon,",
+						"lastName": "Andrew",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Hutchinson, Francis, 1661-1739.",
+					"Bishops England Biography.",
+					"Bishops Ireland Biography.",
+					"Church and state England.",
+					"Church and state Ireland.",
+					"Witchcraft England History.",
+					"Witchcraft Ireland History.",
+					"England Church history 17th century.",
+					"England Church history 18th century.",
+					"Ireland Church history.",
+					"Poblacht na h'Éireann",
+					"Írország",
+					"Irlande",
+					"Irlanda",
+					"Eire",
+					"Irland",
+					"Republic of Ireland",
+					"Irish Republic",
+					"Inghilterra",
+					"Inglaterra",
+					"Anglii͡a",
+					"Engeland",
+					"Angleterre",
+					"Sorcery",
+					"Black art (Witchcraft)",
+					"State and church",
+					"Separation of church and state",
+					"Christianity and state",
+					"Orders, Major",
+					"Metropolitans",
+					"Archbishops",
+					"Clergy Major orders",
+					"Major orders",
+					"F. H., M.A. (Francis Hutchinson), 1661-1739",
+					"Francis, Bishop of Down and Connor, 1661-1739",
+					"Down and Connor, Francis, Bishop of, 1661-1739",
+					"H., F., M.A. (Francis Hutchinson), 1661-1739"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Witchcraft and whigs : the life of Bishop Francis Hutchinson, 1660-1739",
+				"place": "Manchester",
+				"publisher": "Manchester University Press",
+				"date": "2008",
+				"language": "English",
+				"pages": "219",
+				"libraryCatalog": "Primo",
+				"shortTitle": "Witchcraft and whigs"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://solo.bodleian.ox.ac.uk/primo_library/libweb/action/search.do?dscnt=0&vl(105258007UI0)=any&vl(103770091UI1)=all_items&scp.scps=scope%3A%28NET%29%2Cscope%3A%28OX%29&frbg=&tab=local&dstmp=1321208072496&srt=rank&ct=search&mode=Basic&dum=true&tb=t&indx=1&vl(1UIStartWith0)=contains&vl(freeText0)=witchcraft&fn=search&vid=OXVU1",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://catalogue.unice.fr/primo_library/libweb/action/search.do?dscnt=0&vl(14793452UI1)=all_items&frbg=&scp.scps=&tab=default_tab&dstmp=1321209523561&srt=rank&ct=search&mode=Basic&dum=true&indx=1&vl(9521613UI0)=any&vl(freeText0)=labor&vid=UNS&fn=search",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://catalogue.unice.fr/primo_library/libweb/action/display.do?tabs=detailsTab&ct=display&fn=search&doc=sc_aleph_uns01000176747&indx=1&recIds=sc_aleph_uns01000176747&recIdxs=0&elementId=0&renderMode=poppedOut&displayMode=full&frbrVersion=&fctN=facet_creator&dscnt=0&vl(14793452UI1)=all_items&scp.scps=&fctV=De%20Ghelderode%2C%20Michel%20(1898-1962)&frbg=&tab=default_tab&dstmp=1321209651462&srt=rank&mode=Basic&dum=true&vl(9521613UI0)=any&vl(freeText0)=labor&vid=UNS",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Michel De",
+						"lastName": "Ghelderode",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Beyen -",
+						"lastName": "Roland",
+						"creatorType": "contributor"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"92",
+					"920",
+					"840",
+					"De Ghelderode, Michel -- (1898-1962) -- Correspondance",
+					"Ghelderode, Michel de -- (1898-1962) -- Correspondence",
+					"Dramatists, Belgian -- Correspondence -- 20th century"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Correspondance de Michel de Ghelderode. Tome II. 1928-1931",
+				"place": "Bruxelles",
+				"publisher": "Labor",
+				"date": "1992",
+				"language": "French",
+				"pages": "610",
+				"ISBN": "2-8040-0815-0",
+				"callNumber": "PQ 2613 .H17 A8",
+				"libraryCatalog": "Primo"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

@@ -1,14 +1,15 @@
 {
-        "translatorID": "9405db4b-be7f-42ab-86ca-430226be9b35",
-        "label": "Potsdamer Neueste Nachrichten",
-        "creator": "Martin Meyerhoff",
-        "target": "^http://www\\.pnn\\.de",
-        "minVersion": "1.0",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": "1",
-        "translatorType": 4,
-        "lastUpdated": "2011-05-06 11:34:44"
+	"translatorID": "9405db4b-be7f-42ab-86ca-430226be9b35",
+	"label": "Potsdamer Neueste Nachrichten",
+	"creator": "Martin Meyerhoff",
+	"target": "^http://www\\.pnn\\.de",
+	"minVersion": "1.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-13 10:39:24"
 }
 
 /*
@@ -141,3 +142,61 @@ function doWeb(doc, url) {
 	}
 	Zotero.wait();
 }	
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.pnn.de/zeitung/12.01.2011/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.pnn.de/titelseite/364752/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "Von K.",
+						"lastName": "Christmann",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "C.",
+						"lastName": "Wermke",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "K.",
+						"lastName": "Schulze",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "M.",
+						"lastName": "Matern",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.pnn.de/titelseite/364752/",
+						"title": "Von K. Christmann, C. Wermke, K. Schulze und M. Matern: Dioxin nun auch im Schweinefleisch - Schlagzeilen - pnn.de",
+						"mimeType": "text/html"
+					}
+				],
+				"url": "http://www.pnn.de/titelseite/364752/",
+				"title": "Von K. Christmann, C. Wermke, K. Schulze und M. Matern: Dioxin nun auch im Schweinefleisch",
+				"abstractNote": "Mastbetrieb in Niedersachsen muss notschlachten / Kritik am Krisenmanagement von Ministerin Aigner",
+				"date": "2011-01-12",
+				"publicationTitle": "Potsdamer Neueste Nachrichten",
+				"libraryCatalog": "Potsdamer Neueste Nachrichten",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Von K. Christmann, C. Wermke, K. Schulze und M. Matern"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
