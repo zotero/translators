@@ -1,14 +1,15 @@
 {
-	"translatorID":"66928fe3-1e93-45a7-8e11-9df6de0a11b3",
-	"translatorType":4,
-	"label":"Max Planck Institute for the History of Science: Virtual Laboratory Library",
-	"creator":"Sean Takats",
-	"target":"http://vlp.mpiwg-berlin.mpg.de/library/",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"translatorID": "66928fe3-1e93-45a7-8e11-9df6de0a11b3",
+	"label": "Max Planck Institute for the History of Science: Virtual Laboratory Library",
+	"creator": "Sean Takats",
+	"target": "^https?://vlp\\.mpiwg-berlin\\.mpg\\.de/library/",
+	"minVersion": "1.0.0b3.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-08 21:18:11"
 }
 
 function detectWeb(doc, url){
@@ -72,4 +73,38 @@ function doWeb(doc, url){
 		translator.translate();
 	}, function() {Zotero.done();}, null);
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://vlp.mpiwg-berlin.mpg.de/library/search?-format=search&-op_referencetype=eq&referencetype=&-op_author=all&author=&-op_title=all&title=test&-op_secondarytitle=all&secondarytitle=&-op_sql_year=numerical&sql_year=&-op_fullreference=all&fullreference=&-op_online=numerical&-op_transcription=eq&-op_id=numerical&id=&-op_volumeid_search=ct&volumeid_search=&-op_project=eq&project=&-max=25&-display=short&-sort=author%2Csql_year&-find=+Start+Search+",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://vlp.mpiwg-berlin.mpg.de/library/data/lit38593?",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "The Cambridge Scientific Instrument",
+						"lastName": "Company",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"date": "1887",
+				"title": "A descriptive list of anthropometric apparatus, consisting of instruments for measuring and testing the chief physical characteristics of the human body. Designed under the direction of Mr. Francis Galton",
+				"place": "Cambridge",
+				"url": "http://vlp.mpiwg-berlin.mpg.de/references?id=lit38593",
+				"libraryCatalog": "Max Planck Institute for the History of Science: Virtual Laboratory Library",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

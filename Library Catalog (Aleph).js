@@ -1,14 +1,15 @@
 {
-	"translatorID":"cf87eca8-041d-b954-795a-2d86348999d5",
-	"translatorType":4,
-	"label":"Library Catalog (Aleph)",
-	"creator":"Simon Kornblith, Michael Berkowitz, Ming Yeung Cheung",
-	"target":"https?://[^/]+/F(?:/[A-Z0-9\\-]+(?:\\?.*)?$|\\?func=find|\\?func=scan|\\?func=short)",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-10-22 19:00:00"
+	"translatorID": "cf87eca8-041d-b954-795a-2d86348999d5",
+	"label": "Library Catalog (Aleph)",
+	"creator": "Simon Kornblith, Michael Berkowitz, Ming Yeung Cheung",
+	"target": "https?://[^/]+/F(?:/[A-Z0-9\\-]+(?:\\?.*)?$|\\?func=find|\\?func=scan|\\?func=short)",
+	"minVersion": "1.0.0b3.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-07 23:19:20"
 }
 
 /*
@@ -80,7 +81,6 @@ function doWeb(doc, url) {
 	} else {
 		var itemRegexp = '^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set.*\&format=999|func=direct|func=myshelf-full.*)'
 		var items = Zotero.Utilities.getItemArray(doc, doc, itemRegexp, '^[0-9]+$');
-		
 		// ugly hack to see if we have any items
 		var haveItems = false;
 		for(var i in items) {
@@ -94,7 +94,7 @@ function doWeb(doc, url) {
 		}
 		
 		items = Zotero.selectItems(items);
-		
+		Zotero.debug(items)
 		if(!items) {
 			return true;
 		}
@@ -143,20 +143,20 @@ function doWeb(doc, url) {
 		var record = new marc.record();
 		while(elmt = elmts.iterateNext()) {
 			if (th) {
-          var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./th', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-      } else {
-          var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./td[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-      }
-      // if (nonstandard) {
-      //     var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./td[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-      // } else {
-      //     var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./TD[1]/text()[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
-      // }
-     // var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./td[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		  var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./th', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+	  } else {
+		  var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./td[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+	  }
+	  // if (nonstandard) {
+	  //     var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./td[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+	  // } else {
+	  //     var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./TD[1]/text()[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
+	  // }
+	 // var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./td[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 			if(field) {
 				var value;
 				if (th) {
-				    value = newDoc.evaluate('./TD[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent; //.split(/\n/)[1];
+					value = newDoc.evaluate('./TD[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent; //.split(/\n/)[1];
 				} else {
 				  value = newDoc.evaluate('./TD[2]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent; //.split(/\n/)[1];
 				}
@@ -212,3 +212,62 @@ function doWeb(doc, url) {
 	}, function() {Zotero.done();});
 	Zotero.wait();
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://babel.bu.univ-paris5.fr/F/QAP3QAEYXFR2M9FTM4GC9J8TPLLT9C1EYQILB3CCHGB9UFN19P-01386?func=full-set-set&set_number=000327&set_entry=000001&format=999",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Karl",
+						"lastName": "Marx ",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Le 18. Brumaire de Louis Bonaparte",
+				"place": "Paris",
+				"publisher": "Éd. Sociales",
+				"date": "1969",
+				"libraryCatalog": "babel.bu.univ-paris5.fr Library Catalog"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://aleph.u-paris10.fr/F/DLSKEBLNRQN2S2G69SQ8IPII5TSYF3JJ59AJT9UMG8SHT1PTNS-03646?func=full-set-set&set_number=000015&set_entry=000001&format=999",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Louis",
+						"lastName": "Althusser ",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"ISBN": "978-2-13-059079-8",
+				"language": "fre",
+				"abstractNote": "La reproduction des rapports de production, ici présenté avec d'autres écrits qui complètent le dossier, est le manuscrit, demeuré inédit, dont Althusser a tiré son célèbre texte, paru en 1971 dans La pensée, \"Idéologie et appareils idéologiques d'Etat\". L'auteur pose la question du paradoxe de la permanence des pyramides sociales dans une société libérale",
+				"title": "Sur la reproduction",
+				"place": "Paris",
+				"publisher": "PUF",
+				"date": "2011",
+				"series": "Actuel Marx-Confrontation",
+				"callNumber": "194",
+				"libraryCatalog": "aleph.u-paris10.fr Library Catalog"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

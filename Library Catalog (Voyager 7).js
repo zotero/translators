@@ -1,14 +1,15 @@
 {
-	"translatorID":"a81243b5-a9fd-4921-8441-3142a518fdb7",
-	"translatorType":4,
-	"label":"Library Catalog (Voyager 7)",
-	"creator":"Sean Takats",
-	"target":"/vwebv/(holdingsInfo|search)",
-	"minVersion":"1.0",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2011-02-12 19:11:09"
+	"translatorID": "a81243b5-a9fd-4921-8441-3142a518fdb7",
+	"label": "Library Catalog (Voyager 7)",
+	"creator": "Sean Takats",
+	"target": "/vwebv/(holdingsInfo|search)",
+	"minVersion": "1.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-08 14:59:00"
 }
 
 function detectWeb(doc, url){
@@ -80,3 +81,52 @@ function doWeb(doc, url){
 	
 	Zotero.wait();
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://groucho.lib.rochester.edu/vwebv/search?searchArg=argentina&searchCode=GKEY%5E*&limitTo=none&recCount=50&searchType=1&page.search.search.button=Search",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://groucho.lib.rochester.edu/vwebv/holdingsInfo?searchId=3544&recCount=50&recPointer=1&bibId=78520",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Mildred Anna",
+						"lastName": "Phoebus",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "United States",
+						"fieldMode": true
+					}
+				],
+				"notes": [
+					{
+						"note": "Supplement to Commerce reports. Published by the Bureau of foreign and domestic commerce. October 29, 1923"
+					}
+				],
+				"tags": [
+					"Argentina",
+					"Economic conditions"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Economic development in Argentina since 1921",
+				"place": "Washington",
+				"publisher": "Govt. print. off",
+				"date": "1923",
+				"numPages": "14",
+				"series": "U. S. Bureau of foreign and domestic commerce (Dept. of commerce) Trade information bulletin",
+				"seriesNumber": "no. 156",
+				"callNumber": "HF105 .F71tr no.156",
+				"libraryCatalog": "groucho.lib.rochester.edu Library Catalog"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
