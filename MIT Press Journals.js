@@ -2,14 +2,14 @@
 	"translatorID": "2e43f4a9-d2e2-4112-a6ef-b3528b39b4d2",
 	"label": "MIT Press Journals",
 	"creator": "Michael Berkowitz",
-	"target": "http://www.mitpressjournals.org/",
+	"target": "^https?://www\\.mitpressjournals\\.org/(action|toc|doi)/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
-	"browserSupport": "gcs",
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-08-22 22:31:06"
+	"browserSupport": "gcs",
+	"lastUpdated": "2011-11-09 00:21:03"
 }
 
 function detectWeb(doc, url) {
@@ -51,14 +51,13 @@ function doWeb(doc, url) {
 		Zotero.Utilities.HTTP.doGet(risurl, function(text) {
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			//Zotero.debug(text)
 			translator.setString(text);
 			translator.setHandler("itemDone", function(obj, item) {
-				if (item.notes[0]['note'].match(/doi:/)) {
-					item.DOI = item.notes[0]['note'].substr(5);
-					item.notes = new Array();
-				}
-				item.attachments[0].title= item.publicationTitle + " Snapshot";
-				item.attachments[0].mimeType = "text/html";
+				//picks up some weird attachments and notes from the RIS - delete
+				item.attachments= [];
+				item.notes=[];
+				item.attachments.push({url:doc.location.href, title:item.publicationTitle + " Snapshot", mimeType:"text/html"})
 				item.attachments.push({url:pdfurl, title:item.publicationTitle + " Full Text PDF", mimeType:"application/pdf"});
 				if (abs) item.abstractNote = abs;
 				item.complete();	
@@ -94,19 +93,19 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": false,
+						"url": "http://www.mitpressjournals.org/doi/abs/10.1162/afar.2010.43.4.60",
 						"title": "African Arts Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"url": false,
+						"url": "http://www.mitpressjournals.org/doi/pdf/10.1162/afar.2010.43.4.60",
 						"title": "African Arts Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
 				"title": "Removable Hair Caps of Karamoja (Uganda)",
-				"date": "2011/07/13 2010",
-				"DOI": "i: 10.1162/afar.2010.43.4.60</p>",
+				"date": "2010",
+				"DOI": "10.1162/afar.2010.43.4.60",
 				"publicationTitle": "African Arts",
 				"pages": "60-71",
 				"volume": "43",
@@ -115,9 +114,15 @@ var testCases = [
 				"ISBN": "0001-9933",
 				"ISSN": "0001-9933",
 				"url": "http://dx.doi.org/10.1162/afar.2010.43.4.60",
+				"accessDate": "2011/11/08",
 				"libraryCatalog": "MIT Press Journals"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.mitpressjournals.org/action/doSearch?type=simple&target=simple&filter=multiple&searchText=test&x=0&y=0&history=&categoryId=all",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

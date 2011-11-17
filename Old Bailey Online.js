@@ -1,14 +1,15 @@
 {
-	"translatorID":"b10bf941-12e9-4188-be04-f6357fa594a0",
-	"translatorType":4,
-	"label":"Old Bailey Online",
-	"creator":"Adam Crymble",
-	"target":"^http://www\\.oldbaileyonline\\.org/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2011-01-10 21:20:00"
+	"translatorID": "b10bf941-12e9-4188-be04-f6357fa594a0",
+	"label": "Old Bailey Online",
+	"creator": "Adam Crymble",
+	"target": "^http://www\\.oldbaileyonline\\.org/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-10 15:31:35"
 }
 
 function detectWeb(doc, url) {
@@ -80,8 +81,8 @@ function scrape(doc, url) {
 		
 	if (noMoreTags != 1) {
 		for (var i = 0; i < tagsContent.length; i++) {
-	     		newItem.tags[i] = tagsContent[i];
-     		}
+		 		newItem.tags[i] = tagsContent[i];
+	 		}
 	}
 	
 	newItem.title = doc.evaluate('//div[@class="sessionsPaperTitle"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;	
@@ -181,3 +182,34 @@ function doWeb(doc, url) {
 		Zotero.wait();	
 	}	
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.oldbaileyonline.org/browse.jsp?id=t16780828-12&div=t16780828-12&terms=hog#highlight",
+		"items": [
+			{
+				"itemType": "case",
+				"creators": [],
+				"notes": [],
+				"tags": [
+					"Verdict: Guilty",
+					"Offence: Theft > animal theft"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"extra": "Reference Number: t16780828-12",
+				"title": "Theft > animal theft, 28th August 1678.",
+				"url": "http://www.oldbaileyonline.org/browse.jsp?id=t16780828-12&div=t16780828-12&terms=hog#highlight",
+				"libraryCatalog": "Old Bailey Online",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.oldbaileyonline.org/search.jsp?form=custom&_divs_fulltext=animal&kwparse=and&_persNames_surname=&_persNames_given=&_persNames_alias=&_persNames_gender=&fromAge=&toAge=&_occupations_value=&_persNames_home=&_offences_offenceCategory_offenceSubcategory=&_offences_offenceDescription=&_verdicts_verdictCategory_verdictSubcategory=&_punishments_punishmentCategory_punishmentSubcategory=&_punishments_punishmentDescription=&_crimeDates_value=&_offences_crimeLocation=&_divs_div0Type_div1Type=&fromMonth=&fromYear=&toMonth=&toYear=&ref=&submit.x=0&submit.y=0",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

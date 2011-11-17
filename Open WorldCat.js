@@ -1,14 +1,15 @@
 {
-	"translatorID":"c73a4a8c-3ef1-4ec8-8229-7531ee384cc4",
-	"translatorType":12,
-	"label":"Open WorldCat",
-	"creator":"Simon Kornblith",
-	"target":"^http://www\\.worldcat\\.org/",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2010-06-05 20:35:00"
+	"translatorID": "c73a4a8c-3ef1-4ec8-8229-7531ee384cc4",
+	"label": "Open WorldCat",
+	"creator": "Simon Kornblith",
+	"target": "^http://www\\.worldcat\\.org/",
+	"minVersion": "1.0.0b3.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-10 16:21:56"
 }
 
 /**
@@ -128,4 +129,39 @@ function doSearch(item) {
 	}, null);
 	
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.worldcat.org/search?qt=worldcat_org_bks&q=argentina&fq=dt%3Abks",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.worldcat.org/title/zotero-a-guide-for-librarians-researchers-and-educators/oclc/723141626&referer=brief_results",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Puckett",
+						"creatorType": "author",
+						"firstName": "Jason"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"ISBN": "9780838985892",
+				"title": "Zotero : a guide for librarians, researchers, and educators",
+				"date": "2011",
+				"place": "Chicago",
+				"publisher": "Association of College and Research Libraries",
+				"libraryCatalog": "Open WorldCat",
+				"shortTitle": "Zotero"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

@@ -1,14 +1,15 @@
 {
-	"translatorID":"b0abb562-218c-4bf6-af66-c320fdb8ddd3",
-	"translatorType":4,
-	"label":"Philosopher's Imprint",
-	"creator":"Michael Berkowitz",
-	"target":"http://quod.lib.umich.edu/cgi/t/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"translatorID": "b0abb562-218c-4bf6-af66-c320fdb8ddd3",
+	"label": "Philosopher's Imprint",
+	"creator": "Michael Berkowitz",
+	"target": "http://quod.lib.umich.edu/p/phimp",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-11 15:25:28"
 }
 
 function detectWeb(doc, url) {
@@ -72,7 +73,9 @@ function doWeb(doc, url) {
 		Zotero.debug(voliss);
 		item.volume = voliss.match(/vol\.\s+(\d+)/)[1];
 		item.issue = voliss.match(/no\.\s+(\d+)/)[1];
+		if (voliss.match(/pp\.\s+([\d\-]+)/)){
 		item.pages = voliss.match(/pp\.\s+([\d\-]+)/)[1];
+		}
 		item.date = Zotero.Utilities.trimInternal(voliss.match(/[^,]+$/)[0]);
 		item.place = "Ann Arbor, MI";
 		item.publisher = "University of Michigan";
@@ -85,4 +88,61 @@ function doWeb(doc, url) {
 		item.complete();
 	}, function() {Zotero.done();});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://quod.lib.umich.edu/p/phimp?type=simple&rgn=full+text&q1=epistemology&cite1=&cite1restrict=author&cite2=&cite2restrict=author&Submit=Search",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://quod.lib.umich.edu/p/phimp/3521354.0004.003/1?rgn=full+text;view=image;q1=epistemology",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Brian",
+						"lastName": "Weatherson",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Tamar Szabó Gendler",
+					"Kendall Walton",
+					"concepts",
+					"imagination",
+					"possibility",
+					"fiction",
+					"morality"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://hdl.handle.net/2027/spo.3521354.0004.003",
+						"title": "Morality, Fiction, and Possibility Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"url": "http://quod.lib.umich.edu/p/phimp/images/3521354.0004.003.pdf",
+						"title": "Philosopher's Imprint Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"title": "Morality, Fiction, and Possibility",
+				"volume": "4",
+				"issue": "3",
+				"date": "November 2004",
+				"place": "Ann Arbor, MI",
+				"publisher": "University of Michigan",
+				"abstractNote": "Authors have a lot of leeway with regard to what they can make true in their story. In general, if the author says that p is true in the fiction we're reading, we believe that p is true in that fiction. And if we're playing along with the fictional game, we imagine that, along with everything else in the story, p is true. But there are exceptions to these general principles. Many authors, most notably Kendall Walton and Tamar Szabó Gendler, have discussed apparent counterexamples when p is \"morally deviant\". Many other statements that are conceptually impossible also seem to be counterexamples. In this paper I do four things. I survey the range of counterexamples, or at least putative counterexamples, to the principles. Then I look to explanations of the counterexamples. I argue, following Gendler, that the explanation cannot simply be that morally deviant claims are impossible. I argue that the distinctive attitudes we have towards moral propositions cannot explain the counterexamples, since some of the examples don't involve moral concepts. And I put forward a proposed explanation that turns on the role of 'higher-level concepts', concepts that if they are satisfied are satisfied in virtue of more fundamental facts about the world, in fiction, and in imagination.",
+				"url": "http://hdl.handle.net/2027/spo.3521354.0004.003",
+				"libraryCatalog": "Philosopher's Imprint",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

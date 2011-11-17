@@ -9,9 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-07-19 20:37:25"
+	"lastUpdated": "2011-11-07 23:26:39"
 }
-
 
 /*
    BiblioCommons Translator
@@ -92,8 +91,8 @@ function doWeb(doc, url) {
 					});
 				})
 			}, function() {Zotero.done()});
-        });
-        Zotero.wait();
+		});
+		Zotero.wait();
 	}
 }
 
@@ -156,7 +155,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
+				"notes": [
+					{
+						"note": "In the security-obsessed, elitist United States of the near future, where a standardized test determines each person's entire life, a powerful man runs a corrupt empire until seventeen-year-old Ann and other students take the lead in boycotting the test"
+					}
+				],
 				"tags": [
 					"Education",
 					"Immigrants",
@@ -198,12 +201,12 @@ var testCases = [
 				"notes": [],
 				"tags": [
 					"Smith, Adam",
-					"Classical school of economics",
-					"Free enterprise"
+					"Free enterprise",
+					"Classical school of economics"
 				],
 				"seeAlso": [],
 				"attachments": [],
-				"ISBN": "9780826429834",
+				"ISBN": "0826429831",
 				"title": "Adam Smith",
 				"place": "New York",
 				"publisher": "Continuum",

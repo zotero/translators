@@ -1,15 +1,15 @@
 {
-	"translatorID":"22d17fb9-ae32-412e-bcc4-7650ed3359bc",
-	"translatorType":4,
-	"label":"Musee du Louvre",
-	"creator":"Adam Crymble",
-	"target":"http://www.louvre.fr",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"browserSupport":"g",
-	"inRepository":true,
-	"lastUpdated":"2011-08-22 22:44:24"
+	"translatorID": "22d17fb9-ae32-412e-bcc4-7650ed3359bc",
+	"label": "Musee du Louvre",
+	"creator": "Adam Crymble",
+	"target": "^https?://www\\.louvre\\.fr/llv",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-09 00:13:03"
 }
 
 function detectWeb(doc, url) {
@@ -144,8 +144,8 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 
-		var links = doc.evaluate('//td[4][@class="alignTop"]/a[@class="lkContent"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var titles = doc.evaluate('//h4', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var links = doc.evaluate('//h4/a[@class="lien"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//h4/a/@title', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		
 		var next_title;
 		while (next_title = titles.iterateNext()) {
@@ -160,4 +160,87 @@ function doWeb(doc, url) {
 	}
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();	
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.louvre.fr/llv/activite/detail_evenement.jsp?CONTENT%3C%3Ecnt_id=10134198673390879&CURRENT_LLV_ACTIVITE%3C%3Ecnt_id=10134198673390879&FOLDER%3C%3Efolder_id=9852723696500927",
+		"items": [
+			{
+				"itemType": "artwork",
+				"creators": [],
+				"notes": [],
+				"tags": [
+					",Activité ",
+					"Musée du Louvre",
+					"Musée",
+					"Louvre "
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"abstractNote": "Présentation centrée sur l'étude d'une oeuvre",
+				"title": "Détails des activités <i>La Dentellière</i> de Vermeer",
+				"extra": "Visites guidées",
+				"url": "http://www.louvre.fr/llv/activite/detail_evenement.jsp?CONTENT%3C%3Ecnt_id=10134198673390879&CURRENT_LLV_ACTIVITE%3C%3Ecnt_id=10134198673390879&FOLDER%3C%3Efolder_id=9852723696500927",
+				"libraryCatalog": "Musée du Louvre",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.louvre.fr/llv/oeuvres/detail_notice.jsp?CONTENT%3C%3Ecnt_id=10134198673225228&CURRENT_LLV_NOTICE%3C%3Ecnt_id=10134198673225228&FOLDER%3C%3Efolder_id=9852723696500800&fromDept=true&baseIndex=4",
+		"items": [
+			{
+				"itemType": "artwork",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "",
+						"creatorType": "artist"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"stèle ",
+					"monument",
+					"Ishtar",
+					"déesse",
+					"déesse de l'amour",
+					"amour",
+					"guerrière",
+					"guerre",
+					"lion",
+					"animal",
+					"épée",
+					"carquois",
+					"tiare",
+					"astral",
+					"reliefs",
+					"inscription",
+					"Assyriens",
+					"Tell Ahmar",
+					"Til Barsip",
+					"Bît Adini",
+					"Syrie",
+					"Assyrie",
+					"Euphrate",
+					"VIIIe siècle avant J.-C.,Oeuvres ",
+					"Musée du Louvre",
+					"Musée",
+					"Louvre "
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"abstractNote": "Stèle : déesse Ishtar . Provenance : Tell Ahmar, antique Til Barsip. Epoque néo-assyrienne, VIIIe siècle av. J.-C. - Département des Antiquités orientales",
+				"date": "Epoque néo-assyrienne, VIIIe siècle av. J.-C.",
+				"title": "Stèle figurant la déesse Ishtar – <br /> – Antiquités orientales",
+				"extra": "Antiquités orientales : Mésopotamie",
+				"url": "http://www.louvre.fr/llv/oeuvres/detail_notice.jsp?CONTENT%3C%3Ecnt_id=10134198673225228&CURRENT_LLV_NOTICE%3C%3Ecnt_id=10134198673225228&FOLDER%3C%3Efolder_id=9852723696500800&fromDept=true&baseIndex=4",
+				"libraryCatalog": "Musée du Louvre",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

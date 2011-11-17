@@ -1,14 +1,15 @@
 {
-	"translatorID":"095239e7-c18c-4f45-a932-bcf4a9e48c08",
-	"translatorType":4,
-	"label":"Probing the Past",
-	"creator":"Adam Crymble",
-	"target":"http://chnm.gmu.edu/probateinventory/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-08-11 20:40:00"
+	"translatorID": "095239e7-c18c-4f45-a932-bcf4a9e48c08",
+	"label": "Probing the Past",
+	"creator": "Adam Crymble",
+	"target": "^https?://chnm\\.gmu\\.edu/probateinventory/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-13 11:43:14"
 }
 
 function detectWeb(doc, url) {
@@ -99,4 +100,38 @@ function doWeb(doc, url) {
 	}
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://chnm.gmu.edu/probateinventory/document.php?estateID=76",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "William",
+						"lastName": "Cumming",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Probate of William Cumming",
+				"date": "7/2/1752",
+				"place": "Annapolis, MD",
+				"url": "http://chnm.gmu.edu/probateinventory/document.php?estateID=76",
+				"libraryCatalog": "Probing the Past",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://chnm.gmu.edu/probateinventory/browse.php?type=time&years=1740",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

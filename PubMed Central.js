@@ -186,7 +186,6 @@ function doWeb(doc, url) {
 			ids[pmcid.textContent.match(/PMC([\d]+)/)[1]] = title.textContent;
 			resultsCount = resultsCount + 1;
 		}
-		
 		// Don't display selectItems when there's only one
 		// The actual PMCID is the array key
 		if (resultsCount == 1) {
@@ -211,3 +210,68 @@ function doWeb(doc, url) {
 	}
 }
 
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2377243/?tool=pmcentrez",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Aoki",
+						"firstName": "Takuya"
+					},
+					{
+						"lastName": "Yamasawa",
+						"firstName": "Fumihiro"
+					},
+					{
+						"lastName": "Kawashiro",
+						"firstName": "Takeo"
+					},
+					{
+						"lastName": "Shibata",
+						"firstName": "Tetsuichi"
+					},
+					{
+						"lastName": "Ishizaka",
+						"firstName": "Akitoshi"
+					},
+					{
+						"lastName": "Urano",
+						"firstName": "Tetsuya"
+					},
+					{
+						"lastName": "Okada",
+						"firstName": "Yasumasa"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2377243/",
+						"title": "PubMed Central Link",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"journalAbbreviation": "Respir Res",
+				"publicationTitle": "Respiratory Research",
+				"ISSN": "1465-9921",
+				"DOI": "10.1186/1465-9921-9-37",
+				"extra": "PMID: 18439301\nPMCID: 2377243",
+				"title": "Effects of long-term low-dose oxygen supplementation on the epithelial function, collagen metabolism and interstitial fibrogenesis in the guinea pig lung",
+				"volume": "9",
+				"issue": "1",
+				"pages": "37-37",
+				"date": "2008",
+				"libraryCatalog": "PubMed Central"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

@@ -1,14 +1,15 @@
 {
-        "translatorID": "83979786-44af-494a-9ddb-46654e0486ef",
-        "label": "Reuters",
-        "creator": "Avram Lyon, Michael Berkowitz",
-        "target": "^https?://(www\\.)?reuters\\.com/",
-        "minVersion": "2.0",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": "1",
-        "translatorType": 4,
-        "lastUpdated": "2011-03-10 21:05:59"
+	"translatorID": "83979786-44af-494a-9ddb-46654e0486ef",
+	"label": "Reuters",
+	"creator": "Avram Lyon, Michael Berkowitz",
+	"target": "^https?://(www\\.)?reuters\\.com/",
+	"minVersion": "2.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-13 23:12:42"
 }
 
 /*
@@ -79,3 +80,35 @@ function authorFix(author) {
 	}
 	return cleaned;
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.reuters.com/article/2011/11/14/us-eurozone-idUSTRE7AC15K20111114",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "Philip Pullella and Harry",
+						"lastName": "Papachristou",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "New Italian, Greek governments race to limit damage",
+				"date": "Mon Nov 14 06:05:15 UTC 2011",
+				"place": "Rome/Athens",
+				"abstractNote": "Technocrat leaders in Italy and Greece rushing to form governments will face a critical test of their ability to limit the damage from the euro zone debt crisis when financial markets open in Europe on Monday.",
+				"url": "http://www.reuters.com/article/2011/11/14/us-eurozone-idUSTRE7AC15K20111114",
+				"publicationTitle": "Reuters",
+				"libraryCatalog": "Reuters",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
