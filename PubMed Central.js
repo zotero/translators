@@ -186,17 +186,28 @@ function doWeb(doc, url) {
 			ids[pmcid.textContent.match(/PMC([\d]+)/)[1]] = title.textContent;
 			resultsCount = resultsCount + 1;
 		}
-		if (resultsCount > 1) {
-			ids = Zotero.selectItems(ids);
-		}
-		if (!ids) {
+		
+		// Don't display selectItems when there's only one
+		// The actual PMCID is the array key
+		if (resultsCount == 1) {
+			for (var i in ids) {
+				lookupPMCIDs(i, doc);
+				break;
+			}
 			return true;
 		}
-
-		var pmcids = new Array();
-		for (var i in ids) {
-			pmcids.push(i);
-		}
-		lookupPMCIDs(pmcids, doc);
+		
+		
+		Zotero.selectItems(ids, function (ids) {
+			if (!ids) {
+				return true;
+			}
+			var pmcids = new Array();
+			for (var i in ids) {
+				pmcids.push(i);
+			}
+			lookupPMCIDs(pmcids, doc);
+		});
 	}
 }
+
