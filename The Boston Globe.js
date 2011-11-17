@@ -1,14 +1,15 @@
 {
-        "translatorID": "1f245496-4c1b-406a-8641-d286b3888231",
-        "label": "The Boston Globe",
-        "creator": "Adam Crymble and Frank Bennett",
-        "target": "^http://(www|search|articles)\\.boston\\.com/",
-        "minVersion": "1.0.0b4.r5",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": false,
-        "translatorType": 4,
-        "lastUpdated": "2011-05-06 20:57:16"
+	"translatorID": "1f245496-4c1b-406a-8641-d286b3888231",
+	"label": "The Boston Globe",
+	"creator": "Adam Crymble and Frank Bennett",
+	"target": "^http://(www|search|articles)\\.boston\\.com/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-16 17:48:04"
 }
 
 /*
@@ -219,3 +220,76 @@ function doWeb (doc, url) {
 		scrape(doc, url);
 	}
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://articles.boston.com/2011-04-28/lifestyle/29483639_1_galleries-flower-easter-egg-hunt",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "Carol",
+						"lastName": "Stocker",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://articles.boston.com/2011-04-28/lifestyle/29483639_1_galleries-flower-easter-egg-hunt",
+						"mimetype": "text/html",
+						"snapshot": true,
+						"title": "Boston.com page"
+					}
+				],
+				"publicationTitle": "Boston.com",
+				"url": "http://articles.boston.com/2011-04-28/lifestyle/29483639_1_galleries-flower-easter-egg-hunt",
+				"title": "Anticipation grows for MFA’s spring flower festival",
+				"libraryCatalog": "The Boston Globe",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://articles.boston.com/2011-05-03/news/29500032_1_bouncer-assault-local-restaurant",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "Andrea",
+						"lastName": "Estes",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sean P.",
+						"lastName": "Murphy",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://articles.boston.com/2011-05-03/news/29500032_1_bouncer-assault-local-restaurant",
+						"mimetype": "text/html",
+						"snapshot": true,
+						"title": "Boston.com page"
+					}
+				],
+				"publicationTitle": "Boston.com",
+				"url": "http://articles.boston.com/2011-05-03/news/29500032_1_bouncer-assault-local-restaurant",
+				"title": "Vocal critic of mayor of Lawrence is beaten",
+				"libraryCatalog": "The Boston Globe",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

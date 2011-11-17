@@ -1,14 +1,15 @@
 {
-	"translatorID":"f909cbda-2fac-4700-965f-6c0783b77eeb",
-	"translatorType":4,
-	"label":"Tatknigafund",
-	"creator":"Avram Lyon",
-	"target":"^https?://www.tatknigafund.ru/books/",
-	"minVersion":"1.0.0b4.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":false,
-	"lastUpdated":"2009-12-31 16:20:00"
+	"translatorID": "f909cbda-2fac-4700-965f-6c0783b77eeb",
+	"label": "Tatknigafund",
+	"creator": "Avram Lyon",
+	"target": "^https?://www\\.tatknigafund\\.ru/books/",
+	"minVersion": "1.0.0b4.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-15 23:56:12"
 }
 
 /*
@@ -127,3 +128,41 @@ function doWeb(doc, url) {
 	}, function() {Zotero.done();});
 	Zotero.wait();
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.tatknigafund.ru/books/search?locale=ru&type=meta&query=%D0%B8%D1%81%D1%85%D0%B0%D0%BA%D0%B8",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.tatknigafund.ru/books/1037",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Ф.",
+						"lastName": "Гибадуллина",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Роман и нация: Жанр романа в творчестве Гаяза Исхаки",
+				"publisher": "Татарское книжное издательство, 2007 г.",
+				"date": "2007",
+				"numPages": "128",
+				"abstractNote": "В книге рассматривается жанровая природа произведений классика национальной литературы Гаяза Исхаки, определяется его вклад в развитие татарского романа. Труд будет полезен литературоведам, студентам, аспирантам, школьным учителям и всем тем, кто интересуется литературным наследием татарского народа.",
+				"url": "http://www.tatknigafund.ru/books/1037",
+				"libraryCatalog": "Tatknigafund",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Роман и нация"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

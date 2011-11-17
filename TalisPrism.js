@@ -1,14 +1,15 @@
 {
-	"translatorID":"53f8d182-4edc-4eab-b5a1-141698a20202",
-	"label":"TalisPrism",
-	"creator":"William Smith and Emma Reisz",
-	"target":"/TalisPrism/(browseResults|doSearch)",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":"1",
-	"translatorType":4,
-	"lastUpdated":"2011-01-31 19:10:00"
+	"translatorID": "53f8d182-4edc-4eab-b5a1-141698a20202",
+	"label": "TalisPrism",
+	"creator": "William Smith and Emma Reisz",
+	"target": "/TalisPrism/(browseResults|doSearch|doOpenURLSearch)",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-15 23:48:48"
 }
 
 /* TalisPrism translator.
@@ -431,4 +432,80 @@ function doWeb(doc, url) {
 	}
 	Zotero.wait();
 		
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://opac.staffordshire.gov.uk/TalisPrism/doOpenURLSearch.do?sid=Talis:prod_talis&pid=Key%3A324818%3BArtifactType%3AMarc21Slim%3BsearchLocation%3Atalislms",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Arthur R",
+						"lastName": "Taylor",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://opac.staffordshire.gov.uk/TalisPrism/doOpenURLSearch.do?sid=Talis:prod_talis&pid=Key%3A324818%3BArtifactType%3AMarc21Slim%3BsearchLocation%3Atalislms",
+						"title": "Snapshot of Library Page",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Labour and love: an oral history of the brass band movement",
+				"date": "1983",
+				"publisher": "Elm Tree",
+				"ISBN": "0241111323",
+				"libraryCatalog": "http://opac.staffordshire.gov.uk",
+				"callNumber": "County Reserve Music _ 785.13",
+				"shortTitle": "Labour and love"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://lclcat.lancashire.gov.uk/TalisPrism/doOpenURLSearch.do?sid=Talis:prod_talis&pid=Key%3A525143%3BArtifactType%3AMarc21Slim%3BsearchLocation%3Atalislms",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Fisheries and Food",
+						"lastName": "Great Britain. Ministry of Agriculture",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://lclcat.lancashire.gov.uk/TalisPrism/doOpenURLSearch.do?sid=Talis:prod_talis&pid=Key%3A525143%3BArtifactType%3AMarc21Slim%3BsearchLocation%3Atalislms",
+						"title": "Snapshot of Library Page",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Aids to management : labour and machinery.",
+				"date": "1969",
+				"publisher": "HMSO",
+				"series": "Farm as a business",
+				"seriesNumber": "6",
+				"edition": "2nd ed.",
+				"libraryCatalog": "http://lclcat.lancashire.gov.uk",
+				"callNumber": "(ZBS) HQ Bowran Street _ Reserve Stock 338.16/GRE",
+				"shortTitle": "Aids to management"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://opac.staffordshire.gov.uk/TalisPrism/doSearch.do?REF=%3C1%3D%221.0%22%3E%3C2%3E%3C3%3E%3C%3D%3E%3C4%3Etitle%3C%2F4%3E%3C5%3Elabour%3C%2F5%3E%3C%2F%3D%3E%3C%2F3%3E%3C7%3E%3C%3C9%3E%3C8%3E2%3C%2F8%3E%3C%2F%3C9%3E%3C%2F7%3E%3C%2F2%3E%3C6%3D%22talislms%22+%3E%3C%2F6%3E%3C%2F1%3E",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
