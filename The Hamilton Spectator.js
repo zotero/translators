@@ -1,18 +1,19 @@
 {
-	"translatorID":"c9338ed5-b512-4967-8ffe-ab9c973559ef",
-	"translatorType":4,
-	"label":"The Hamilton Spectator",
-	"creator":"Adam Crymble",
-	"target":"http://www.thespec.com",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-08-04 07:10:00"
+	"translatorID": "c9338ed5-b512-4967-8ffe-ab9c973559ef",
+	"label": "The Hamilton Spectator",
+	"creator": "Adam Crymble",
+	"target": "^https?://www\\.thespec\\.com",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-16 21:30:55"
 }
 
 function detectWeb(doc, url) {
-	if (doc.location.href.match("search")) {
+	if (doc.location.href.match("SearchResults")) {
 		return "multiple";
 	} else if (doc.location.href.match("article")) {
 		return "newspaperArticle";
@@ -57,24 +58,17 @@ function scrape(doc, url) {
 		newItem.creators.push(Zotero.Utilities.cleanAuthor(author1, "author"));	
 	}
 	
-	var xPathAuthor2 = '//span[@class="articleAuthor"][@id="ctl00_ContentPlaceHolder_article_NavWebPart_Article_ctl00___Author2__"]';
+	var xPathAuthor2 = '//span[@class="td_page_author"]';
 	if (doc.evaluate(xPathAuthor2, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 		var author2 = doc.evaluate(xPathAuthor2, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		if (author2.match(", ")) {
 			author2 = author2.split(", ");
 			author2 = author2[0];
 		}
-		var words = author2.toLowerCase().split(/\s/);
-				
-		for (var i in words) {
-			words[i] = words[i][0].toUpperCase() + words[i].substr(1).toLowerCase();
-		}
-				
-		author2 = words.join(" ");
 		newItem.creators.push(Zotero.Utilities.cleanAuthor(author2, "author"));	
 	}
 	
-	var xPathTitle = '//span[@class="headlineArticle"][@id="ctl00_ContentPlaceHolder_article_NavWebPart_Article_ctl00___Title__"]';
+	var xPathTitle = '//h1';
 	newItem.title = doc.evaluate(xPathTitle, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;	
 	
 	newItem.url = doc.location.href;
@@ -94,13 +88,11 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		
-		var titles = doc.evaluate('//a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//span[@class="td_tsr_title"]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		
 		var next_title;
 		while (next_title = titles.iterateNext()) {
-			if (next_title.href.match("article") && !next_title.href.match("229246") && !next_title.textContent.match(/\s\s\s/)) {
 				items[next_title.href] = next_title.textContent;
-			}
 		}
 		items = Zotero.selectItems(items);
 		for (var i in items) {
@@ -111,4 +103,37 @@ function doWeb(doc, url) {
 	}
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.thespec.com/news/ontario/article/626278--expert-calls-occupy-demos-most-important-in-generations",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "Colin",
+						"lastName": "Perkel",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Expert calls Occupy demos most important in generations",
+				"url": "http://www.thespec.com/news/ontario/article/626278--expert-calls-occupy-demos-most-important-in-generations",
+				"publicationTitle": "The Hamilton Spectator",
+				"libraryCatalog": "The Hamilton Spectator",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.thespec.com/SearchResults?AssetType=Article&q=labor",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
