@@ -1,32 +1,33 @@
 {
-        "translatorID":"7448d1d7-57e4-4685-b6e4-d4d9f7046fc2",
-        "label":"SFU IPinCH",
-        "creator":"Gladys Tang",
-        "target":"^http://www\\.sfu\\.ca/kbipinch/",
-        "minVersion":"1.0",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":"1",
-        "translatorType":4,
-        "lastUpdated":"2011-01-13 10:29:52"
+	"translatorID": "7448d1d7-57e4-4685-b6e4-d4d9f7046fc2",
+	"label": "SFU IPinCH",
+	"creator": "Gladys Tang",
+	"target": "^http://www\\.sfu\\.ca/kbipinch/",
+	"minVersion": "1.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-14 20:43:05"
 }
 
 /*
-    SFU IPinCH - translator for Zotero
-    Copyright (C) 2010 Gladys Tang
+	SFU IPinCH - translator for Zotero
+	Copyright (C) 2010 Gladys Tang
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 function detectWeb(doc, url) {
@@ -188,3 +189,101 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(uris, scrape, function() {Zotero.done();});
 	Zotero.wait();
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.sfu.ca/kbipinch/records/125/",
+		"items": [
+			{
+				"itemType": "presentation",
+				"creators": [
+					{
+						"lastName": "Garth Harmsworth",
+						"creatorType": "presenter"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"url": "http://www.sfu.ca/kbipinch/records/125/",
+				"": "IE=EmulateIE7",
+				"description": "<p>The Intellectual Property Issues in Cultural Heritage (IPinCH) research project is an international collaboration of over 50 archaeologists, lawyers, anthropologists, museum specialists, ethicists and other specialists, and 25 partnering organizations (including, among others, Parks Canada, the World Intellectual Property Organization, the Champagne and Aishihik First Nation, and the Barunga Community Management Board, an Aboriginal organization from Australia) building a foundation to facilitate fair and equitable exchanges of knowledge relating to archaeology and cultural heritage. The project is concerned with the theoretical, ethical, and practical implications of using knowledge about the past, and how these may affect communities, researchers, and other stakeholders.  Based at the Archaeology Department of Simon Fraser University, in Burnaby, British Columbia, Canada, the project is funded by the Social Sciences and Humanities Research Council of Canada. Project team members and partner organizations can be found in Canada, USA, Australia, New Zealand, UK, Germany, Switzerland and South Africa. A number of partner organizations are indigenous communities. Research will follow a community-based participatory research (CBPR) approach. The IPinCH project provides a foundation of research, knowledge and resources to assist scholars, academic institutions, descendant communities, policy makers, and many other stakeholders in negotiating more equitable and successful terms of research and policies through an agenda of community-based field research and topical exploration of intellectual property issues.</p>",
+				"keywords": "IPinCH, ipinch, IP, intellectual property, cultural heritage, traditional knowledge, community-based participatory research, theory, practice, policy, ethics, archaeology, research, Aboriginal, indigenous, culture, anthropology, law, museum, community, knowledge, academic",
+				"rights": "Author",
+				"title": "Indigenous concepts, values and knowledge for sustainable development: New Zealand case studies",
+				"date": "November-22-2002- to -24-",
+				"place": "University of Waikato, Hamilton , New Zealand",
+				"libraryCatalog": "SFU IPinCH",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Indigenous concepts, values and knowledge for sustainable development"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.sfu.ca/kbipinch/records/145/",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Joshua P Rosenthal",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"url": "http://www.sfu.ca/kbipinch/records/145/",
+				"": "IE=EmulateIE7",
+				"description": "<p>The Intellectual Property Issues in Cultural Heritage (IPinCH) research project is an international collaboration of over 50 archaeologists, lawyers, anthropologists, museum specialists, ethicists and other specialists, and 25 partnering organizations (including, among others, Parks Canada, the World Intellectual Property Organization, the Champagne and Aishihik First Nation, and the Barunga Community Management Board, an Aboriginal organization from Australia) building a foundation to facilitate fair and equitable exchanges of knowledge relating to archaeology and cultural heritage. The project is concerned with the theoretical, ethical, and practical implications of using knowledge about the past, and how these may affect communities, researchers, and other stakeholders.  Based at the Archaeology Department of Simon Fraser University, in Burnaby, British Columbia, Canada, the project is funded by the Social Sciences and Humanities Research Council of Canada. Project team members and partner organizations can be found in Canada, USA, Australia, New Zealand, UK, Germany, Switzerland and South Africa. A number of partner organizations are indigenous communities. Research will follow a community-based participatory research (CBPR) approach. The IPinCH project provides a foundation of research, knowledge and resources to assist scholars, academic institutions, descendant communities, policy makers, and many other stakeholders in negotiating more equitable and successful terms of research and policies through an agenda of community-based field research and topical exploration of intellectual property issues.</p>",
+				"keywords": "IPinCH, ipinch, IP, intellectual property, cultural heritage, traditional knowledge, community-based participatory research, theory, practice, policy, ethics, archaeology, research, Aboriginal, indigenous, culture, anthropology, law, museum, community, knowledge, academic",
+				"rights": "Author",
+				"publicationTitle": "Current Anthropology",
+				"volume": "47(1)",
+				"pages": "119-141",
+				"title": "Politics, Culture, and Governance in the Development of Prior Informed Consent in Indigenous Communities",
+				"date": "2006",
+				"libraryCatalog": "SFU IPinCH",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.sfu.ca/kbipinch/records/203/",
+		"items": [
+			{
+				"itemType": "report",
+				"creators": [
+					{
+						"lastName": "Daryl Pullman",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Laura Arbour",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"url": "http://www.sfu.ca/kbipinch/records/203/",
+				"": "IE=EmulateIE7",
+				"description": "<p>The Intellectual Property Issues in Cultural Heritage (IPinCH) research project is an international collaboration of over 50 archaeologists, lawyers, anthropologists, museum specialists, ethicists and other specialists, and 25 partnering organizations (including, among others, Parks Canada, the World Intellectual Property Organization, the Champagne and Aishihik First Nation, and the Barunga Community Management Board, an Aboriginal organization from Australia) building a foundation to facilitate fair and equitable exchanges of knowledge relating to archaeology and cultural heritage. The project is concerned with the theoretical, ethical, and practical implications of using knowledge about the past, and how these may affect communities, researchers, and other stakeholders.  Based at the Archaeology Department of Simon Fraser University, in Burnaby, British Columbia, Canada, the project is funded by the Social Sciences and Humanities Research Council of Canada. Project team members and partner organizations can be found in Canada, USA, Australia, New Zealand, UK, Germany, Switzerland and South Africa. A number of partner organizations are indigenous communities. Research will follow a community-based participatory research (CBPR) approach. The IPinCH project provides a foundation of research, knowledge and resources to assist scholars, academic institutions, descendant communities, policy makers, and many other stakeholders in negotiating more equitable and successful terms of research and policies through an agenda of community-based field research and topical exploration of intellectual property issues.</p>",
+				"keywords": "IPinCH, ipinch, IP, intellectual property, cultural heritage, traditional knowledge, community-based participatory research, theory, practice, policy, ethics, archaeology, research, Aboriginal, indigenous, culture, anthropology, law, museum, community, knowledge, academic",
+				"rights": "Authors",
+				"title": "\"Cultural Appropriation\" of Human Genetic Materials: So What's the Question?",
+				"date": "n.d",
+				"libraryCatalog": "SFU IPinCH",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "\"Cultural Appropriation\" of Human Genetic Materials"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

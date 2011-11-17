@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-09-28 14:56:54"
+	"lastUpdated": "2011-11-15 17:51:40"
 }
 
 function detectWeb(doc, url) {
@@ -287,4 +287,92 @@ function doWeb(doc, url) {
 		{
 			scrape(doc, url);
 		}
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.sudoc.abes.fr/DB=2.1/CMD?ACT=SRCHA&IKT=1016&SRT=RLV&TRM=labor",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.sudoc.fr/000942073",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Bureau international du travail",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Femmes -- Travail",
+					"Conditions de travail",
+					"Formation professionnelle",
+					"Normes de travail",
+					"Relations industrielles",
+					"Emploi",
+					"Droit social",
+					"Marché du travail"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.sudoc.fr/000942073",
+						"title": "Notice sudoc",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"date": "1985",
+				"ISBN": "92-2-203848-7",
+				"title": "Le Travail dans le monde : 2, relations professionnelles, normes internationales du travail, formation, conditions de travail, travailleuses",
+				"language": "français",
+				"abstractNote": "Annexes. - 9789222038480",
+				"libraryCatalog": "SUDOC",
+				"shortTitle": "Le Travail dans le monde"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.sudoc.fr/147745608",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Jacques",
+						"lastName": "Delga",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Stress lié au travail -- France",
+					"Harcèlement -- France",
+					"Conditions de travail -- France",
+					"Violence en milieu de travail",
+					"Psychologie du travail"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.sudoc.fr/147745608",
+						"title": "Notice sudoc",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"date": "2010",
+				"ISBN": "978-2-7472-1729-3",
+				"title": "Souffrance au travail dans les grandes entreprises",
+				"language": "français",
+				"libraryCatalog": "SUDOC"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
