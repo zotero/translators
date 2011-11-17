@@ -3,13 +3,13 @@
 	"label": "PubMed Central",
 	"creator": "Michael Berkowitz and Rintze Zelle",
 	"target": "https?://[^/]*.nih.gov/",
-	"minVersion": "1.0.0b4.r5",
+	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-11-15 22:41:32"
+	"lastUpdated": "2011-11-16 14:33:05"
 }
 
 function detectWeb(doc, url) {
@@ -23,7 +23,7 @@ function detectWeb(doc, url) {
 		return "journalArticle";
 	}
 	
-	var uids = doc.evaluate('//div[@class="toc-pmcid"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var uids = doc.evaluate('//div[@class="rprt"]//dl[@class="rprtid"]/dd', doc, nsResolver, XPathResult.ANY_TYPE, null);
 	if(uids.iterateNext()) {
 		if (uids.iterateNext()){
 			return "multiple";
@@ -32,7 +32,7 @@ function detectWeb(doc, url) {
 	}
 }
 
-function lookupPMCIDs(ids, doc) {
+function lookupPMCIDs(ids, doc, pdfLink) {
 	Zotero.wait();
 	var newUri = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&retmode=xml&id=" + ids.join(",");
 	Zotero.debug(newUri);
@@ -143,12 +143,16 @@ function lookupPMCIDs(ids, doc) {
 			
 			if (ZU.xpathText(article, 'selfuri/@xlinktitle') == "pdf") {
 				var pdfFileName = ZU.xpathText(article, 'selfuri/@xlinkhref');
+			} else if (pdfLink) {
+				var pdfFileName = pdfLink;
+			}
+			if (pdfFileName) {
 				var pdfURL = "http://www.ncbi.nlm.nih.gov/pmc/articles/PMC" + ids[i] + "/pdf/" + pdfFileName;
 				newItem.attachments.push({
 				title:"PubMed Central Full Text PDF",
 				mimeType:"application/pdf",
 				url:pdfURL
-			}); 
+				});
 			}
 
 			newItem.complete();
@@ -170,16 +174,25 @@ function doWeb(doc, url) {
 
 	var ids = new Array();
 	var pmcid;
+	var pdfLink;
 	var resultsCount = 0;
 	try {
 		pmcid = url.match(/ncbi\.nlm\.nih\.gov\/pmc\/articles\/PMC([\d]+)/)[1];
 	} catch(e) {}
 	if (pmcid) {
+		try {
+			var formatLinks = doc.evaluate('//td[@class="format-menu"]//a/@href', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			while (formatLink = formatLinks.iterateNext().textContent) {
+				if(pdfLink = formatLink.match(/\/pdf\/([^\/]*\.pdf$)/)) {
+					pdfLink = pdfLink[1];
+				}
+			}
+		} catch (e) {}
 		ids.push(pmcid);
-		lookupPMCIDs(ids, doc);
+		lookupPMCIDs(ids, doc, pdfLink);
 	} else {
-		var pmcids = doc.evaluate('//div[@class="toc-pmcid"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var titles = doc.evaluate('//div[@class="toc-title"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var pmcids = doc.evaluate('//div[@class="rprt"]//dl[@class="rprtid"]/dd', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//div[@class="rprt"]//div[@class="title"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var title;
 		while (pmcid = pmcids.iterateNext()) {
 			title = titles.iterateNext();
