@@ -1,14 +1,15 @@
 {
-        "translatorID": "40b9ca22-8df4-4f3b-9cb6-8f9b55486d30",
-        "label": "The Telegraph",
-        "creator": "Reino Ruusu",
-        "target": "^http://www\\.telegraph\\.co\\.uk/",
-        "minVersion": "1.0.0b4.r5",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": true,
-        "translatorType": 4,
-        "lastUpdated": "2011-05-05 19:58:29"
+	"translatorID": "40b9ca22-8df4-4f3b-9cb6-8f9b55486d30",
+	"label": "The Telegraph",
+	"creator": "Reino Ruusu",
+	"target": "^http://www\\.telegraph\\.co\\.uk/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-17 12:12:19"
 }
 
 function detectWeb(doc, url) {
@@ -71,3 +72,35 @@ function doWeb(doc, url) {
 	}
 	newArticle.complete();
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.telegraph.co.uk/news/worldnews/asia/china/8888909/China-Google-Earth-spots-huge-unidentified-structures-in-Gobi-desert.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "Malcolm",
+						"lastName": "Moore",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"url": "http://www.telegraph.co.uk/news/worldnews/asia/china/8888909/China-Google-Earth-spots-huge-unidentified-structures-in-Gobi-desert.html",
+				"publicationTitle": "The Telegraph",
+				"publisher": "Telegraph Media Group Limited",
+				"abstractNote": "Vast, unidentified, structures have been spotted by satellites in the barren Gobi desert, raising questions about what China might be building in a region it uses for its military, space and nuclear programmes.",
+				"title": "China: Google Earth spots huge, unidentified structures in Gobi desert",
+				"libraryCatalog": "The Telegraph",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "China"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
