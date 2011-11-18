@@ -1,14 +1,15 @@
 {
-	"translatorID":"b61c224b-34b6-4bfd-8a76-a476e7092d43",
-	"translatorType":4,
-	"label":"SSRN",
-	"creator":"Michael Berkowitz",
-	"target":"http://papers\\.ssrn\\.com/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2011-07-01 18:10:00"
+	"translatorID": "b61c224b-34b6-4bfd-8a76-a476e7092d43",
+	"label": "SSRN",
+	"creator": "Michael Berkowitz",
+	"target": "http://papers\\.ssrn\\.com/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-15 16:56:43"
 }
 
 function detectWeb(doc, url)	{
@@ -64,7 +65,7 @@ function doWeb(doc, url) {
 					item.itemType = "journalArticle";
 					var tags = new Array();
 					for each (var tag in item.tags) {
-						var newtags = tag.split(",");
+						var newtags = tag.split(/,|;/);
 						for each (var newtag in newtags) tags.push(newtag);
 					}
 					item.tags = tags;
@@ -86,7 +87,7 @@ function doWeb(doc, url) {
 			item.abstractNote = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="innerWhite"]/font[1]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent).replace(/^abstract/i,'');
 			var tags = doc.evaluate('//font[contains(./b/text(), "Key")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			if (tags) {
-				item.tags = Zotero.Utilities.trimInternal(tags.textContent).substr(10).split(/,\s+/);
+					item.tags = Zotero.Utilities.trimInternal(tags.textContent).substr(10).split(/;|,/);
 			}
 			item.publicationTitle = "SSRN eLibrary";
 			
@@ -110,3 +111,55 @@ function doWeb(doc, url) {
 	}, function() {Zotero.done();});
 	Zotero.wait();
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://papers.ssrn.com/sol3/papers.cfm?abstract_id=1450589",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Brian D.",
+						"lastName": "Greenhill",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael",
+						"lastName": "Ward",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Audrey E.",
+						"lastName": "Sacks",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Visual Evidence",
+					" Logistic Regression",
+					" Fit"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://papers.ssrn.com/sol3/papers.cfm?abstract_id=1450589",
+						"title": "SSRN Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "The 'Separation Plot': A New Visual Method for Evaluating the Predictive Power of Logit/Probit Models",
+				"abstractNote": "We present a new visual method for assessing the predictive power of models with binary outcomes. This technique allows the analyst to quickly and easily choose among alternative model specifications based upon the models' ability to consistently match high-probability predictions to actual occurrences of the event of interest, and low-probability predictions to non-occurrences of the event of interest. Unlike existing methods for assessing predictive power for logit and probit models such as the use of \"percent correctly predicted\" statistics, Brier scores and the ROC plot, our \"separation plot\" has the advantage of producing a visual display that is more informative and easier to explain to a general audience than a ROC plot, while also remaining insensitive to the user's often arbitrary choice of threshold for distinguishing between events and non-events. We show how to implement this technique in R and demonstrate its effectiveness in building predictive models in four different areas of political research.",
+				"publicationTitle": "SSRN eLibrary",
+				"date": "2009",
+				"url": "http://papers.ssrn.com/sol3/papers.cfm?abstract_id=1450589",
+				"libraryCatalog": "SSRN",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "The 'Separation Plot'"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

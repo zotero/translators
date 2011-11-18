@@ -1,14 +1,15 @@
 {
-        "translatorID": "d84574f1-e4d6-4337-934f-bf9d01173bf0",
-        "label": "taz.de",
-        "creator": "Martin Meyerhoff",
-        "target": "^https?://(?:www\\.)?taz\\.de",
-        "minVersion": "1.0",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": "1",
-        "translatorType": 4,
-        "lastUpdated": "2011-06-14 17:18:22"
+	"translatorID": "d84574f1-e4d6-4337-934f-bf9d01173bf0",
+	"label": "taz.de",
+	"creator": "Martin Meyerhoff",
+	"target": "^https?://(?:www\\.)?taz\\.de",
+	"minVersion": "1.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-15 23:59:25"
 }
 
 /*
@@ -175,3 +176,41 @@ function doWeb(doc, url) {
 		scrape(doc, url);
 	}
 }	
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.taz.de/!67936/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.taz.de/!67936/",
+						"title": "Wortklauberei: Hängt sie höher! - taz.de",
+						"mimeType": "text/html"
+					}
+				],
+				"url": "http://www.taz.de/!67936/",
+				"title": "Wortklauberei: Hängt sie höher!",
+				"abstractNote": "Der deutsche Wald als Leistungsträger. Oder: zynisch Kranke auf freiem Fuß! Was ist mit der öffentlichen Sicherheit?",
+				"section": "Kolumnen",
+				"date": "23.03.2011",
+				"publicationTitle": "die tageszeitung",
+				"libraryCatalog": "taz.de",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Wortklauberei"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://taz.de/",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

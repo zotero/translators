@@ -1,14 +1,15 @@
 {
-        "translatorID": "2e4ebd19-83ab-4a56-8fa6-bcd52b576470",
-        "label": "Sueddeutsche.de",
-        "creator": "Martin Meyerhoff",
-        "target": "^http://www\\.sueddeutsche\\.de",
-        "minVersion": "1.0",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": "1",
-        "translatorType": 4,
-        "lastUpdated": "2011-03-26 15:02:54"
+	"translatorID": "2e4ebd19-83ab-4a56-8fa6-bcd52b576470",
+	"label": "Sueddeutsche.de",
+	"creator": "Martin Meyerhoff",
+	"target": "^http://www\\.sueddeutsche\\.de",
+	"minVersion": "1.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-15 17:58:53"
 }
 
 /*
@@ -187,3 +188,58 @@ function doWeb(doc, url) {
 	}
 }
 
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.sueddeutsche.de/politik/verdacht-gegen-hessischen-verfassungsschuetzer-spitzname-kleiner-adolf-1.1190178",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "Peter",
+						"lastName": "Blechschmidt",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marc",
+						"lastName": "Widmann",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Euro",
+					"Handy",
+					"Mein Kampf"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.sueddeutsche.de/politik/2.220/verdacht-gegen-hessischen-verfassungsschuetzer-spitzname-kleiner-adolf-1.1190178",
+						"title": "Verdacht gegen hessischen Verfassungsschützer - Spitzname \"Kleiner Adolf\" - Politik - sueddeutsche.de",
+						"mimeType": "text/html"
+					}
+				],
+				"url": "http://www.sueddeutsche.de/politik/verdacht-gegen-hessischen-verfassungsschuetzer-spitzname-kleiner-adolf-1.1190178",
+				"title": "Verdacht gegen hessischen Verfassungsschützer: Spitzname \"Kleiner Adolf\"",
+				"abstractNote": "Als die Zwickauer Zelle in einem Kasseler Internet-Café Halit Y. hinrichtet, surft ein hessischer Verfassungsschützer dort im Netz. In seiner Wohnung findet die Polizei später Hinweise auf eine rechtsradikale Gesinnung - doch die Ermittlungen gegen den Mann werden eingestellt. Dabei bleiben viele Fragen offen.",
+				"date": "2011-11-15",
+				"section": "Politik",
+				"publicationTitle": "sueddeutsche.de",
+				"ISSN": "0174-4917",
+				"language": "de",
+				"libraryCatalog": "Sueddeutsche.de",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Verdacht gegen hessischen Verfassungsschützer"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.sueddeutsche.de/politik",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
