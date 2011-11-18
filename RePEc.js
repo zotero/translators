@@ -27,7 +27,7 @@ function detectWeb(doc, url) {
 		if(doc.evaluate(multXpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.indexOf("Search")!=-1)
 			return "multiple";
 	} else if(doc.evaluate(singXpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-		return "report";
+		return false;
 	}
 }
 
