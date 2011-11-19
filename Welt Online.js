@@ -1,14 +1,15 @@
 {
-        "translatorID": "f61beec2-1431-4218-a9d3-68063ede6ecd",
-        "label": "Welt Online",
-        "creator": "Martin Meyerhoff",
-        "target": "^http://www\\.welt\\.de",
-        "minVersion": "1.0",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": "1",
-        "translatorType": 4,
-        "lastUpdated": "2011-03-29 18:43:49"
+	"translatorID": "f61beec2-1431-4218-a9d3-68063ede6ecd",
+	"label": "Welt Online",
+	"creator": "Martin Meyerhoff",
+	"target": "^http://www\\.welt\\.de",
+	"minVersion": "1.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-19 00:05:50"
 }
 
 /*
@@ -154,3 +155,52 @@ function doWeb(doc, url) {
 		scrape(doc, url);
 	}
 }	
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.welt.de/wirtschaft/article12962920/Krankenkassen-werfen-Aerzten-Gewinnstreben-vor.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "Philipp",
+						"lastName": "Neumann",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Krankenkassen",
+					"Verband",
+					"Doris Pfeiffer",
+					"Gesundheit",
+					"Kliniken"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.welt.de/wirtschaft/article12962920/Krankenkassen-werfen-Aerzten-Gewinnstreben-vor.html?print=true",
+						"title": "Gesundheit: Krankenkassen werfen Ärzten Gewinnstreben vor - Nachrichten Wirtschaft - WELT ONLINE",
+						"mimeType": "text/html"
+					}
+				],
+				"url": "http://www.welt.de/wirtschaft/article12962920/Krankenkassen-werfen-Aerzten-Gewinnstreben-vor.html",
+				"title": "Krankenkassen werfen Ärzten Gewinnstreben vor",
+				"abstractNote": "Die Chefin des Krankenkassenverbands Doris Pfeiffer fordert den Gesundheitsminister auf, überschüssiges Geld im Gesundheitsfonds zurückzugegeben.",
+				"date": "26.03.2011",
+				"publicationTitle": "Welt Online",
+				"section": "Wirtschaft",
+				"libraryCatalog": "Welt Online",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.welt.de/wirtschaft/",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

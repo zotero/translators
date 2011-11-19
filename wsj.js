@@ -1,14 +1,15 @@
 {
-	"translatorID":"53f8d182-4edc-4eab-b5a1-141698a1303b",
-	"translatorType":4,
-	"label":"Wall Street Journal",
-	"creator":"Matt Burton",
-	"target":"http://online\\.wsj\\.com/article/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-12-10 00:45:00"
+	"translatorID": "53f8d182-4edc-4eab-b5a1-141698a1303b",
+	"label": "Wall Street Journal",
+	"creator": "Matt Burton",
+	"target": "http://online\\.wsj\\.com/article/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-18 23:59:06"
 }
 
 function detectWeb(doc, url){
@@ -39,4 +40,41 @@ function doWeb(doc, url){
 	item.attachments.push({url:url, title:"Wall Street Journal Snapshot", mimeType:"text/html"});
 	
 	item.complete();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://online.wsj.com/article/SB10001424052970204517204577046222233016362.html?mod=WSJ_hp_LEFTWhatsNewsCollection",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "John W.",
+						"lastName": "Miller",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://online.wsj.com/article/SB10001424052970204517204577046222233016362.html?mod=WSJ_hp_LEFTWhatsNewsCollection",
+						"title": "Wall Street Journal Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"publicationTitle": "wsj.com",
+				"date": "2011-11-19",
+				"abstractNote": "A profile of an Australian miner making $200,000 a year led hundreds of people to ask how they could apply for such a job.",
+				"title": "America's Jobless, Yearning for Oz",
+				"url": "http://online.wsj.com/article/SB10001424052970204517204577046222233016362.html?mod=WSJ_hp_LEFTWhatsNewsCollection",
+				"section": "Careers",
+				"libraryCatalog": "Wall Street Journal",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
