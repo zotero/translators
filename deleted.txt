@@ -1,4 +1,4 @@
-7  # Increment number when modifying file
+8  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -20,4 +20,26 @@ e78d20f7-488-4023-831-dfe39679f3f     # ACM (replaced by newer version)
 3f44a651-8b6b-4591-8ca4-4bfb943a13f4  # Edutopia (replaced with nothing)
 636c8ea6-2af7-4488-8ccd-ea280e4a7a98  # Sage Journals Online (replaced by Highwire 2.0)
 a8df3cb0-f76c-4e2c-a11e-5fa283f8010c  # Copernicus (replaced by newer version)
-1c34744d-690f-4cac-b31b-b7f0c90ac14d  # RSC Publishing (replaced by newer version)
+1c34744d-690f-4cac-b31b-b7f0c90ac14d  # RSC Publishing (replaced by newer version
+0a01d85e-483c-4998-891b-24707728d83e  # AJHG (moved to Cell)
+84bd421d-c6d1-4223-ab80-a156f98a8e30  # IHT (now NYTimes)
+4654c76f-451c-4ae6-9a36-575e982b3cdb  # IOVS (moved to Highwire 2.0)
+252c6a50-0900-41c5-a66b-ec456137c43c  # AcademicJournals.net (moved to scialert - needs replacement)
+cb48083-4d9-4ed-ac95-2e93dceea0ec     # Blackwell Synergy (moved to Wiley)
+39ea814e-8fdb-486c-a88d-59479f341066  # Bibliotheque UQUAM (replaced by Primo)
+1885b93c-cf37-4b25-aef5-283f42eada9d  # Informaworld (moved to T&F - needs translator)
+8b35ab14-f18a-4f69-8472-b2df18c984da  # Davidson College Library (moved to Worldcat)
+70295509-4c29-460f-81a3-16d4ddbb93f6	# GSA Journals (moved to Highwire 2.0)
+4345839f-b4fd-4e3f-a73d-268b6f280f6e  # Journal of Vision (moved to Highwire 2.0)
+5e3e6245-83da-4f55-a39b-b712df54a935  # Melvyl (moved to Worldcat)
+4afb932d-9211-4c0b-a31c-cfa984d62b66  # OAIster (moved to Worldcat/Firstsearch)
+8a07dd43-2bce-47bf-b4bf-c0fc441b79a9  # Optics Express (moved to OSA)
+e1140aa1-3bcf-4226-9099-78ef0b63bb3e  # Oesterreichischer BBV (now has Aleph and Primo - both broken)
+a69deb08-47d9-46ad-afca-bc3a2499ad34  # RHS (new site uses COinS)
+b33bbb49-03d2-4175-91c4-3840501bc953  # Time-Blog (moved to Times.com - not yet covered by translator)
+35d6c82d-4749-4cc5-9e12-2924307df28f  # UBC Library Catalogue (now Voyager 7)
+df966c80-c199-4329-ab02-fa410c8eb6dc  # UofC Journals (now JSTOR)
+04153a16-5f34-491c-9475-7f4093db8e3e  # University of Michigan (now UnAPI/Aleph)
+6bb5099b-ae1a-4a08-8f2a-3429138ec2e5  # Wikileaks/Cable (replaced by cablegatesearch)
+
+
