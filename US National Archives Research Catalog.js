@@ -1,14 +1,15 @@
 {
-	"translatorID":"f8b5501a-1acc-4ffa-a0a5-594add5e6bd3",
-	"translatorType":4,
-	"label":"US National Archives Research Catalog",
-	"creator":"Adam Crymble",
-	"target":"http://arcweb.archives.gov",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-08-06 17:00:00"
+	"translatorID": "f8b5501a-1acc-4ffa-a0a5-594add5e6bd3",
+	"label": "US National Archives Research Catalog",
+	"creator": "Adam Crymble",
+	"target": "^https?://arcweb\\.archives\\.gov",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-18 15:37:00"
 }
 
 function detectWeb(doc, url) {
@@ -101,14 +102,14 @@ function scrape(doc, url) {
 		}
 		if (tagsContent.length > 1) {
 			for (var i = 0; i < tagsContent.length; i++) {
-	     			if (tagsContent[i].match(/\w/)) {
-		     			if (k == 1) {
-			     			newItem.tags[j] = tagsContent[i];
-		     				j++;
-		     			}
-		     			k = 1;
-	     			}
-     			}
+		 			if (tagsContent[i].match(/\w/)) {
+			 			if (k == 1) {
+				 			newItem.tags[j] = tagsContent[i];
+			 				j++;
+			 			}
+			 			k = 1;
+		 			}
+	 			}
 		}
 	}
 
@@ -165,4 +166,39 @@ function doWeb(doc, url) {
 	}
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://arcweb.archives.gov/arc/action/ShowFullRecord?tab=init/showFullDescriptionTabs/details&mn=resultsDetailPageModel&goto=4&%24searchId=1&%24showFullDescriptionTabs.selectedPaneId=&%24digiDetailPageModel.currentPage=0&%24resultsPartitionPageModel.targetModel=true&%24resultsSummaryPageModel.pageSize=10&%24partitionIndex=0&%24digiSummaryPageModel.targetModel=true&%24submitId=1&%24resultsDetailPageModel.search=true&%24digiDetailPageModel.resultPageModel=true&%24resultsDetailPageModel.currentPage=0&%24showArchivalDescriptionsTabs.selectedPaneId=&%24resultsDetailPageModel.pageSize=1&%24resultsSummaryPageModel.targetModel=true&%24sort=RELEVANCE_ASC&%24resultsPartitionPageModel.search=true&%24highlight=false",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Supreme Commander for the Allied Powers. Economic and Scientific Section. Director for Labor. Labor Division.\t (08/22/1949 - 04/28/1952)",
+						"creatorType": "creator"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "The Struggle for Trade Union Democracy, December 1947, 1945 - 1952",
+				"extra": "ARC Identifier 486076",
+				"locInArchive": "File Unit from Record Group 331: Records of Allied Operational and Occupation Headquarters, World War II, 1907 - 1966",
+				"series": "Series: Topical File, compiled 1945 - 1952",
+				"callNumber": "NAIL Control Number: NWCTM-331-UD1799-8483(20)",
+				"url": "http://arcweb.archives.gov/arc/action/ShowFullRecord?tab=init/showFullDescriptionTabs/details&mn=resultsDetailPageModel&goto=4&%24searchId=1&%24showFullDescriptionTabs.selectedPaneId=&%24digiDetailPageModel.currentPage=0&%24resultsPartitionPageModel.targetModel=true&%24resultsSummaryPageModel.pageSize=10&%24partitionIndex=0&%24digiSummaryPageModel.targetModel=true&%24submitId=1&%24resultsDetailPageModel.search=true&%24digiDetailPageModel.resultPageModel=true&%24resultsDetailPageModel.currentPage=0&%24showArchivalDescriptionsTabs.selectedPaneId=&%24resultsDetailPageModel.pageSize=1&%24resultsSummaryPageModel.targetModel=true&%24sort=RELEVANCE_ASC&%24resultsPartitionPageModel.search=true&%24highlight=false",
+				"libraryCatalog": "US National Archives Research Catalog",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://arcweb.archives.gov/arc/action/ShowArchivalDescriptions?%24searchId=1&%24showFullDescriptionTabs.selectedPaneId=&%24digiDetailPageModel.currentPage=0&%24resultsPartitionPageModel.targetModel=true&%24resultsSummaryPageModel.pageSize=10&%24partitionIndex=0&%24digiSummaryPageModel.targetModel=true&%24submitId=1&%24resultsDetailPageModel.search=true&%24digiDetailPageModel.resultPageModel=true&%24resultsDetailPageModel.currentPage=0&%24showArchivalDescriptionsTabs.selectedPaneId=&%24resultsDetailPageModel.pageSize=1&%24resultsSummaryPageModel.targetModel=true&%24sort=RELEVANCE_ASC&%24resultsPartitionPageModel.search=true&%24highlight=false",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

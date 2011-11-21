@@ -1,18 +1,19 @@
 {
-	"translatorID":"d9be934c-edb9-490c-a88d-34e2ee106cd7",
-	"translatorType":4,
-	"label":"Time.com",
-	"creator":"Michael Berkowitz",
-	"target":"http://www.time.com/time/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"translatorID": "d9be934c-edb9-490c-a88d-34e2ee106cd7",
+	"label": "Time.com",
+	"creator": "Michael Berkowitz",
+	"target": "^https?://www\\.time\\.com/time/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-17 15:34:32"
 }
 
 function detectWeb(doc, url) {
-	if (doc.title == "TIME Magazine - Search Results") {
+	if (url.match(/results\.html/)) {
 		return "multiple";
 	} else {
 		var namespace = doc.documentElement.namespaceURI;
@@ -135,9 +136,9 @@ function doWeb(doc, url) {
 	} : null;
 	
 	var urls = new Array();
-	if (doc.title == "TIME Magazine - Search Results") {
+	if (url.match(/results\.html/)) {
 		var items = new Array();
-		var items = Zotero.Utilities.getItemArray(doc, doc.getElementById("search_results").getElementsByTagName("h3"), '^http://www.time.com/time/.*\.html$');
+		var items = Zotero.Utilities.getItemArray(doc, doc.getElementsByTagName("h3"), '^http://www.time.com/time/.*\.html$');
 
 		items = Zotero.selectItems(items);
 	
@@ -157,4 +158,52 @@ function doWeb(doc, url) {
 		scrape(newDoc);
 	}, function() { Zotero.done(); } );
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.time.com/time/nation/article/0,8599,2099187,00.html",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"creators": [
+					{
+						"firstName": "Josh",
+						"lastName": "Sanburn",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Post Offices",
+					"Postal Service",
+					"USPS",
+					"United States Postal Service"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"document": {
+							"location": {}
+						},
+						"title": "Death of U.S. Postal Service: Many Jobs, Locations at Risk - TIME"
+					}
+				],
+				"publicationTitle": "Time",
+				"ISSN": "0040-718X",
+				"url": "http://www.time.com/time/nation/article/0,8599,2099187,00.html",
+				"title": "How the U.S. Postal Service Fell Apart",
+				"abstractNote": "Battling debilitating congressional mandates and competition online, the USPS is closing thousands of post offices and struggling to find a place in the modern world. But there are people behind the scenes trying to save this American institution",
+				"date": "November 17, 2011",
+				"libraryCatalog": "Time.com",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://search.time.com/results.html?N=0&Nty=1&p=0&cmd=tags&srchCat=Full+Archive&Ntt=labor+union&x=0&y=0",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

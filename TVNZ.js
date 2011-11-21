@@ -1,14 +1,15 @@
 {
-	"translatorID" : "649c2836-a94d-4bbe-8e28-6771f283702f",
-	"label" : "TVNZ",
-	"creator" : "Sopheak Hean",
-	"target" : "^http://tvnz\\.co\\.nz",
-	"minVersion" : "1.0",
-	"maxVersion" : "",
-	"priority" : 100,
-	"inRepository" : true,
-	"translatorType" : 4,
-	"lastUpdated":"2010-09-20 10:30:20"
+	"translatorID": "649c2836-a94d-4bbe-8e28-6771f283702f",
+	"label": "TVNZ",
+	"creator": "Sopheak Hean",
+	"target": "^http://tvnz\\.co\\.nz",
+	"minVersion": "1.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-18 00:00:55"
 }
 
 function detectWeb(doc, url) {
@@ -213,3 +214,29 @@ function doWeb(doc, url){
 	
 	Zotero.wait();	
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://tvnz.co.nz/politics-news/jon-johansson-s-all-2014-4523189",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"url": "http://tvnz.co.nz/politics-news/jon-johansson-s-all-2014-4523189",
+				"publicationTitle": "TVNZ",
+				"language": "English",
+				"title": "Jon Johansson: It's all about 2014",
+				"abstractNote": "As polls continue to show National positioned to govern alone, just over two weeks out from the election, voters are going to have to confront a stark…",
+				"libraryCatalog": "TVNZ",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Jon Johansson"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
