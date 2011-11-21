@@ -1,14 +1,15 @@
 {
-        "translatorID": "d3b1d34c-f8a1-43bb-9dd6-27aa6403b217",
-        "label": "YouTube",
-        "creator": "Sean Takats and Michael Berkowitz and Matt Burton",
-        "target": "https?://[^/]*youtube\\.com\\/",
-        "minVersion": "1.0.0rc4",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": "1",
-        "translatorType": 4,
-        "lastUpdated": "2011-03-20 03:10:43"
+	"translatorID": "d3b1d34c-f8a1-43bb-9dd6-27aa6403b217",
+	"label": "YouTube",
+	"creator": "Sean Takats, Michael Berkowitz, Matt Burton and Rintze Zelle",
+	"target": "https?://[^/]*youtube\\.com\\/",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-20 22:58:48"
 }
 
 function detectWeb(doc, url){
@@ -52,10 +53,11 @@ function doWeb(doc, url){
 	if(video_id = videoRe.exec(url)) {
 		//single video
 		video_ids.push(video_id[1]);
+		getData(video_ids, host);
 	} else {
 		// multiple videos
 		var items = new Object();
-// search results and community/user pages
+		// search results and community/user pages
 		if (elmt = doc.evaluate('//div[@class="result-item-main-content"]//a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 			elmts = doc.evaluate('//div[@class="result-item-main-content"]//a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		} 
@@ -72,17 +74,20 @@ function doWeb(doc, url){
 			title = Zotero.Utilities.trimInternal(title);
 			var link = elmt.href;
 			Zotero.debug(link);
-			var m = videoRe(link);
-			var video_id = m[1];
+			var video_id = videoRe.exec(link)[1];
 			items[video_id] = title;
 		}
-		items = Zotero.selectItems(items);
-		if(!items) return true;
-		for(var i in items) {
-			video_ids.push(i);
-		}
-	}
-	getData(video_ids, host);			
+		
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				video_ids.push(i);
+			}
+			getData(video_ids, host);
+		});
+	}			
 }
 
 function getData(ids, host){
@@ -142,27 +147,60 @@ function getData(ids, host){
 		if (xml..mediaNS::description.length()){
 			newItem.abstractNote = xml..mediaNS::description[0].text().toString();
 		}
-		/*
-//temporary fix for downloads using techcrunch
-		var techcrunchurl = "http://www.techcrunch.com/ytdownload3.php?url="+encodeURIComponent(newItem.url)+"&submit=Get+Video";
-		Zotero.debug(techcrunchurl);
-		Zotero.Utilities.HTTP.doGet(techcrunchurl, function(text) {
-			var flv = text.match(/HREF='([^']+)'/);
-			if (flv[1]){
-				flv = flv[1];
-				// title parameter needs to be encoded
-				var title = flv.match(/&title=([^&]+)/);
-				if (title[1]){
-					title = encodeURIComponent(title[1]);
-					flv = flv.replace(/&title=([^&]+)/, title);
-				}
-				newItem.attachments.push({url:flv, title:"YouTube Video Recording", mimeType:"video/x-flv"});
-			}
-			newItem.complete();
-		}, function() {Zotero.done();});
-		*/
 		newItem.complete();
 		Zotero.done();
 	});
 	Zotero.wait();
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.youtube.com/watch?v=ggFKLxAQBbc&feature=feedrec_grec_index",
+		"items": [
+			{
+				"itemType": "videoRecording",
+				"creators": [
+					{
+						"lastName": "carrieannefan1",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					}
+				],
+				"notes": [],
+				"tags": [
+					"the",
+					"matrix",
+					"keanu",
+					"reeves",
+					"carrie",
+					"anne",
+					"moss",
+					"bullet",
+					"time",
+					"neo",
+					"trinity",
+					"help",
+					"agent",
+					"rooftop",
+					"scene",
+					"hd",
+					"hq",
+					"high",
+					"definition",
+					"quality"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "The Matrix: Dodge this (HD)",
+				"date": "2010-04-12",
+				"url": "http://www.youtube.com/watch?v=ggFKLxAQBbc&feature=youtube_gdata_player",
+				"runningTime": "70 seconds",
+				"abstractNote": "Famous Matrix scene.",
+				"libraryCatalog": "YouTube",
+				"shortTitle": "The Matrix"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
