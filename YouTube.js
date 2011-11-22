@@ -1,14 +1,15 @@
 {
-        "translatorID": "d3b1d34c-f8a1-43bb-9dd6-27aa6403b217",
-        "label": "YouTube",
-        "creator": "Sean Takats and Michael Berkowitz and Matt Burton",
-        "target": "https?://[^/]*youtube\\.com\\/",
-        "minVersion": "1.0.0rc4",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": "1",
-        "translatorType": 4,
-        "lastUpdated": "2011-03-20 03:10:43"
+	"translatorID": "d3b1d34c-f8a1-43bb-9dd6-27aa6403b217",
+	"label": "YouTube",
+	"creator": "Sean Takats, Michael Berkowitz, Matt Burton and Rintze Zelle",
+	"target": "https?://[^/]*youtube\\.com\\/",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-11-21 19:25:19"
 }
 
 function detectWeb(doc, url){
@@ -52,10 +53,11 @@ function doWeb(doc, url){
 	if(video_id = videoRe.exec(url)) {
 		//single video
 		video_ids.push(video_id[1]);
+		getData(video_ids, host);
 	} else {
 		// multiple videos
 		var items = new Object();
-// search results and community/user pages
+		// search results and community/user pages
 		if (elmt = doc.evaluate('//div[@class="result-item-main-content"]//a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 			elmts = doc.evaluate('//div[@class="result-item-main-content"]//a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		} 
@@ -71,18 +73,21 @@ function doWeb(doc, url){
 			var title = elmt.textContent;
 			title = Zotero.Utilities.trimInternal(title);
 			var link = elmt.href;
-			Zotero.debug(link);
-			var m = videoRe(link);
-			var video_id = m[1];
+			//Zotero.debug(link);
+			var video_id = videoRe.exec(link)[1];
 			items[video_id] = title;
 		}
-		items = Zotero.selectItems(items);
-		if(!items) return true;
-		for(var i in items) {
-			video_ids.push(i);
-		}
-	}
-	getData(video_ids, host);			
+		
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				video_ids.push(i);
+			}
+			getData(video_ids, host);
+		});
+	}			
 }
 
 function getData(ids, host){
@@ -91,78 +96,104 @@ function getData(ids, host){
 	for each(var id in ids){
 		uris.push(url+id);
 	}
-	Zotero.Utilities.HTTP.doGet(uris, function(text) {
-		// Strip XML header
-		text = text.replace(/<\?xml[^>]*\?>/, "");
+	Zotero.Utilities.HTTP.doGet(uris, function(text) {	
+		var ns = {"default":"http://www.w3.org/2005/Atom", "media":"http://search.yahoo.com/mrss/", "yt":"http://gdata.youtube.com/schemas/2007"};
 		
-		default xml namespace = "http://www.w3.org/2005/Atom"; with({});
-		var mediaNS = new Namespace("http://search.yahoo.com/mrss/");
-		var ytNS = new Namespace("http://gdata.youtube.com/schemas/2007");
-		
-		// pad xml
-		text = "<zotero>"+text+"</zotero>";
-		var xml = new XML(text);
+		var parser = new DOMParser();
+		var doc = parser.parseFromString(text, "text/xml");
+
 		var newItem = new Zotero.Item("videoRecording");
-		var title = "";
-		var title = xml..mediaNS::title[0].text().toString();
-		if (xml..mediaNS::title.length()){
-			var title = Zotero.Utilities.trimInternal(xml..mediaNS::title[0].text().toString());
-			if (title == ""){
-				title = " ";
-			}
-			newItem.title = title;
+		
+		var title;
+		if ((title = ZU.xpathText(doc, '//media:group/media:title', ns))) {
+			newItem.title = ZU.trimInternal(title);
+		} else {
+			newItem.title = " ";
 		}
-		if (xml..mediaNS::keywords.length()){
-			var keywords = xml..mediaNS::keywords[0].text().toString();
+		var keywords;
+		if ((keywords = ZU.xpathText(doc, '//media:group/media:keywords', ns))) {
 			keywords = keywords.split(",");
 			for each(var tag in keywords){
 				newItem.tags.push(Zotero.Utilities.trimInternal(tag));
 			}
 		}
-		if (xml..published.length()){
-			var date = xml..published[0].text().toString();
+		var date;
+		if ((date = ZU.xpathText(doc, '//default:published', ns))) {
 			newItem.date = date.substr(0, 10);
 		}
-		if (xml..author.name.length()){
-			var author = xml..author.name[0].text().toString();
-			var creator = Zotero.Utilities.cleanAuthor(author, "contributor", true);
-			if (!creator.firstName) {
-				creator.fieldMode = 1;
+		var author;
+		if ((author = ZU.xpathText(doc, '//default:author/default:name', ns))) {
+			author = ZU.cleanAuthor(author, "contributor", true);
+			if (!author.firstName) {
+				author.fieldMode = 1;
 			}
-			newItem.creators.push(creator);
+			newItem.creators.push(author);
 		}
-		if (xml..mediaNS::player.length()){
-			var url = xml..mediaNS::player[0].@url.toString();
+		var url;
+		if ((url = ZU.xpathText(doc, '//media:group/media:player/@url', ns))) {
 			newItem.url = url;
 		}
-		if (xml..ytNS::duration.length()){
-			var runningTime = xml..ytNS::duration[0].@seconds.toString();
+		var runningTime;
+		if ((runningTime = ZU.xpathText(doc, '//media:group/yt:duration/@seconds', ns))) {
 			newItem.runningTime = runningTime + " seconds";
 		}
-		if (xml..mediaNS::description.length()){
-			newItem.abstractNote = xml..mediaNS::description[0].text().toString();
+		var description;
+		if ((description = ZU.xpathText(doc, '//media:group/media:description', ns))) {
+			newItem.abstractNote = description;
 		}
-		/*
-//temporary fix for downloads using techcrunch
-		var techcrunchurl = "http://www.techcrunch.com/ytdownload3.php?url="+encodeURIComponent(newItem.url)+"&submit=Get+Video";
-		Zotero.debug(techcrunchurl);
-		Zotero.Utilities.HTTP.doGet(techcrunchurl, function(text) {
-			var flv = text.match(/HREF='([^']+)'/);
-			if (flv[1]){
-				flv = flv[1];
-				// title parameter needs to be encoded
-				var title = flv.match(/&title=([^&]+)/);
-				if (title[1]){
-					title = encodeURIComponent(title[1]);
-					flv = flv.replace(/&title=([^&]+)/, title);
-				}
-				newItem.attachments.push({url:flv, title:"YouTube Video Recording", mimeType:"video/x-flv"});
-			}
-			newItem.complete();
-		}, function() {Zotero.done();});
-		*/
 		newItem.complete();
 		Zotero.done();
 	});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.youtube.com/watch?v=ggFKLxAQBbc&feature=feedrec_grec_index",
+		"items": [
+			{
+				"itemType": "videoRecording",
+				"creators": [
+					{
+						"lastName": "carrieannefan1",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					}
+				],
+				"notes": [],
+				"tags": [
+					"the",
+					"matrix",
+					"keanu",
+					"reeves",
+					"carrie",
+					"anne",
+					"moss",
+					"bullet",
+					"time",
+					"neo",
+					"trinity",
+					"help",
+					"agent",
+					"rooftop",
+					"scene",
+					"hd",
+					"hq",
+					"high",
+					"definition",
+					"quality"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "The Matrix: Dodge this (HD)",
+				"date": "2010-04-12",
+				"url": "http://www.youtube.com/watch?v=ggFKLxAQBbc&feature=youtube_gdata_player",
+				"runningTime": "70 seconds",
+				"abstractNote": "Famous Matrix scene.",
+				"libraryCatalog": "YouTube",
+				"shortTitle": "The Matrix"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
