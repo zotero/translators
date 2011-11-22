@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-07-27 14:06:10"
+	"lastUpdated": "2011-11-21 14:06:10"
 }
 
 /*
@@ -91,11 +91,14 @@ function scrape(articles) {
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			translator.setString(text);
 			translator.setHandler("itemDone", function(obj, item) {
+				var notes = [];
 				for (i in item.notes) {
 					if (item.notes[i]['note'].match(/Export Date:|Source:/))
-						delete item.notes[i];
+						continue;
+					notes.push(item.notes[i]);
 				}
-				delete item.url;
+				item.notes = notes;
+				item.url = "";
 				item.complete();
 			});
 			translator.translate();
