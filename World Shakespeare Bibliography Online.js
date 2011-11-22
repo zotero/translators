@@ -2,15 +2,17 @@
 	"translatorID": "bf6b49e3-9198-4fbc-a559-a81fcfcce908",
 	"label": "World Shakespeare Bibliography Online",
 	"creator": "Matthias Heim",
-	"target": "worldshakesbib.org",
+	"target": "^https?://(?:www\\.)?worldshakesbib\\.org",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-11-08 10:59:21"
+	"lastUpdated": "2011-11-21 21:12:49"
 }
+
+
 
 /*
 * Translator for the World Shakespeare Bibliography Online http://www.worldshakesbib.org
@@ -461,3 +463,53 @@ function detectWeb(doc, url) {
 		} // else no entry present
 	}
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.worldshakesbib.org/search?searchtype=browse&index=30.14.05.30&rid=49952&words=&returnlink=%2Fsearch%3Fsearchtype%3Dbrowse%26index%3D30.14.05.30%26return%3D1",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Melissa D",
+						"lastName": "Aaron",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "Review(s): Hansen, Matthew C. <i>Year's Work in English Studies</i> 86 (2007 for 2005): 399-400; Palmer, Barbara D. <i>Shakespeare Quarterly</i> 58 (2007): 119-22; Johnson, Nora. <i>Medieval and Renaissance Drama in England</i> 21 (2008): 296-99"
+					}
+				],
+				"tags": [
+					"economics",
+					"King's Men",
+					"Lord Chamberlain's Men",
+					"Globe Theatre",
+					"metatheater",
+					"bear",
+					"masque",
+					"wedding",
+					"Elizabeth I"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Global Economics: A History of the Theater Business, the Chamberlain's/King's Men, and Their Plays, 1599-1642",
+				"numPages": "250",
+				"place": "Newark",
+				"publisher": "University of Delaware Press",
+				"language": "English",
+				"archiveLocation": "30.14.05.30  Individual Works — Plays; <i>Hamlet</i>; Scholarship And Criticism; Criticism",
+				"callNumber": "aaq473",
+				"date": "2005",
+				"abstractNote": "In an examination of the of the Chamberlain's Men/King's Men as a business, offers \"economic readings\" of <i>Henry V</i> (and its relation to the building of the Globe Theatre), <i>Julius Caesar</i> (in the context of the daily earnings of the company), <i>Twelfth Night</i> and <i>Richard II</i> (as examples of income generated from private performances), <i>Hamlet</i> (with attention to how its metatheatrical references relate to the economic state of the company at the end of Elizabeth I's reign), <i>Winter's Tale</i> (with attention to the bear in relation to the popularity of the masque), <i>Tempest</i> (in its commercial context as a wedding play), and <i>Henry VIII</i> (in its relation to the masque). Also considers the company's participation in the publication of the First Folio as a \"corporate statement.\" Published version of \"Global Economics: An Institutional Economic History of the Chamberlain's/King's Men and Their Texts, 1599-1642,\" <i>Dissertation Abstracts International</i> 59 (1998-99): 2516A (Wisconsin--Madison)",
+				"libraryCatalog": "World Shakespeare Bibliography Online",
+				"shortTitle": "Global Economics"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
