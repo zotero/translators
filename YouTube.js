@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-11-20 22:58:48"
+	"lastUpdated": "2011-11-21 19:25:19"
 }
 
 function detectWeb(doc, url){
@@ -73,7 +73,7 @@ function doWeb(doc, url){
 			var title = elmt.textContent;
 			title = Zotero.Utilities.trimInternal(title);
 			var link = elmt.href;
-			Zotero.debug(link);
+			//Zotero.debug(link);
 			var video_id = videoRe.exec(link)[1];
 			items[video_id] = title;
 		}
@@ -96,63 +96,56 @@ function getData(ids, host){
 	for each(var id in ids){
 		uris.push(url+id);
 	}
-	Zotero.Utilities.HTTP.doGet(uris, function(text) {
-		// Strip XML header
-		text = text.replace(/<\?xml[^>]*\?>/, "");
+	Zotero.Utilities.HTTP.doGet(uris, function(text) {	
+		var ns = {"default":"http://www.w3.org/2005/Atom", "media":"http://search.yahoo.com/mrss/", "yt":"http://gdata.youtube.com/schemas/2007"};
 		
-		default xml namespace = "http://www.w3.org/2005/Atom"; with({});
-		var mediaNS = new Namespace("http://search.yahoo.com/mrss/");
-		var ytNS = new Namespace("http://gdata.youtube.com/schemas/2007");
-		
-		// pad xml
-		text = "<zotero>"+text+"</zotero>";
-		var xml = new XML(text);
+		var parser = new DOMParser();
+		var doc = parser.parseFromString(text, "text/xml");
+
 		var newItem = new Zotero.Item("videoRecording");
-		var title = "";
-		var title = xml..mediaNS::title[0].text().toString();
-		if (xml..mediaNS::title.length()){
-			var title = Zotero.Utilities.trimInternal(xml..mediaNS::title[0].text().toString());
-			if (title == ""){
-				title = " ";
-			}
-			newItem.title = title;
+		
+		var title;
+		if ((title = ZU.xpathText(doc, '//media:group/media:title', ns))) {
+			newItem.title = ZU.trimInternal(title);
+		} else {
+			newItem.title = " ";
 		}
-		if (xml..mediaNS::keywords.length()){
-			var keywords = xml..mediaNS::keywords[0].text().toString();
+		var keywords;
+		if ((keywords = ZU.xpathText(doc, '//media:group/media:keywords', ns))) {
 			keywords = keywords.split(",");
 			for each(var tag in keywords){
 				newItem.tags.push(Zotero.Utilities.trimInternal(tag));
 			}
 		}
-		if (xml..published.length()){
-			var date = xml..published[0].text().toString();
+		var date;
+		if ((date = ZU.xpathText(doc, '//default:published', ns))) {
 			newItem.date = date.substr(0, 10);
 		}
-		if (xml..author.name.length()){
-			var author = xml..author.name[0].text().toString();
-			var creator = Zotero.Utilities.cleanAuthor(author, "contributor", true);
-			if (!creator.firstName) {
-				creator.fieldMode = 1;
+		var author;
+		if ((author = ZU.xpathText(doc, '//default:author/default:name', ns))) {
+			author = ZU.cleanAuthor(author, "contributor", true);
+			if (!author.firstName) {
+				author.fieldMode = 1;
 			}
-			newItem.creators.push(creator);
+			newItem.creators.push(author);
 		}
-		if (xml..mediaNS::player.length()){
-			var url = xml..mediaNS::player[0].@url.toString();
+		var url;
+		if ((url = ZU.xpathText(doc, '//media:group/media:player/@url', ns))) {
 			newItem.url = url;
 		}
-		if (xml..ytNS::duration.length()){
-			var runningTime = xml..ytNS::duration[0].@seconds.toString();
+		var runningTime;
+		if ((runningTime = ZU.xpathText(doc, '//media:group/yt:duration/@seconds', ns))) {
 			newItem.runningTime = runningTime + " seconds";
 		}
-		if (xml..mediaNS::description.length()){
-			newItem.abstractNote = xml..mediaNS::description[0].text().toString();
+		var description;
+		if ((description = ZU.xpathText(doc, '//media:group/media:description', ns))) {
+			newItem.abstractNote = description;
 		}
 		newItem.complete();
 		Zotero.done();
 	});
 	Zotero.wait();
-}
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
