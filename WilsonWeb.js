@@ -98,7 +98,6 @@ function doWeb(doc, url) {
 			for (var t in titleObj ) {				
 				articles.push(t);			
 				var newArticle = new Zotero.Item(resultType);				
-				newArticle.url = doc.location.href;
 				newArticle.title = titleObj[t];	
 				switch(resultType) {
 					case 'journalArticle' : associateBIBLData(doc,newArticle,t);	
@@ -694,7 +693,6 @@ function scrape(doc, url) {
 	} : null;
 		
 	var newItem = new Zotero.Item(resultType);
-	newItem.url = doc.location.href;
 	
 	var titleObj = doc.evaluate(getXPath(dispType,'ti'), doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	newItem.title = titleObj.textContent;
