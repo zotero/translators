@@ -496,8 +496,6 @@ record.prototype.translate = function(item) {
 		this._associateDBField(item, "090", "ab", "callNumber");
 		this._associateDBField(item, "099", "a", "callNumber");
 		this._associateDBField(item, "852", "khim", "callNumber");
-		// Used for locator in the Cambridge University Libraries
-		this._associateDBField(item, "948", "a", "callNumber");
 		
 		//German
 		if (!item.place) this._associateDBField(item, "410", "a", "place");
