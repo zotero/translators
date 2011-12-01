@@ -1,15 +1,15 @@
 {
 	"translatorID": "5dd22e9a-5124-4942-9b9e-6ee779f1023e",
 	"label": "Flickr",
-	"creator": "Sean Takats",
+	"creator": "Sean Takats and Rintze Zelle",
 	"target": "^http://(?:www\\.)?flickr\\.com/",
-	"minVersion": "1.0.0b4.r5",
+	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-11-01 16:31:25"
+	"lastUpdated": "2011-11-30 22:42:44"
 }
 
 function detectWeb(doc, url) {
@@ -109,55 +109,53 @@ function doWeb(doc, url) {
 		uris.push("http://api.flickr.com/services/rest/?method=flickr.photos.getInfo&api_key="+key+"&photo_id="+photo_id);
 	}
 	Zotero.Utilities.HTTP.doGet(uris, function(text) {
-		text = text.replace(/<\?xml[^>]*\?>/, "");
-		var xml = new XML(text);
+		var parser = new DOMParser();
+		var doc = parser.parseFromString(text, "text/xml");
+
 		var newItem = new Zotero.Item("artwork");
-		var title = "";
-		if (xml..title.length()){
-			var title = Zotero.Utilities.trimInternal(xml..title[0].text().toString());
-			if (title == ""){
-				title = " ";
+		
+		var title;
+		if ((title = ZU.xpathText(doc, '//photo/title'))) {
+			newItem.title = ZU.trimInternal(title);
+		} else {
+			newItem.title = " ";
+		}
+		var tags;
+		if ((tags = ZU.xpath(doc, '//photo//tag'))) {
+			for(var i in tags) {
+			newItem.tags.push(tags[i].textContent);
 			}
-			newItem.title = title;
 		}
-		for(var i=0; i<xml..tag.length(); i++) {
-			newItem.tags.push(Zotero.Utilities.trimInternal(xml..tag[i].text().toString()));
-		}
-		if (xml..dates.length()){
-			var date = xml..dates[0].@taken.toString();
+		var date;
+		if ((date = ZU.xpathText(doc, '//photo/dates/@taken'))) {
 			newItem.date = date.substr(0, 10);
 		}
-		if (xml..owner.length()){
-			var author = xml..owner[0].@realname.toString();
-			if (author == ""){
-				author = xml..owner[0].@username.toString();
-			}
-			newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "artist"));
+		var owner;
+		if ((owner = ZU.xpathText(doc, '//photo/owner/@realname') || (owner = ZU.xpathText(doc, '//photo/owner/@username')))) {
+			newItem.creators.push(ZU.cleanAuthor(owner, "artist"));
 		}
-		if (xml..url.length()){
-			newItem.url = xml..url[0].text().toString();
+		var url;
+		if ((url = ZU.xpathText(doc, '//photo//url'))) {
+			newItem.url = url;
 		}
-		if (xml..description.length()){
-			newItem.abstractNote = xml..description[0].text().toString();
+		var description;
+		if ((description = ZU.xpathText(doc, '//photo/description'))) {
+			newItem.url = description;
 		}
-		var format = xml..photo[0].@originalformat.toString();
-		var photo_id = xml..photo[0].@id.toString();
 		
-// get attachment code
+		// get attachment code
 		var uri = "http://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key="+key+"&photo_id="+photo_id;
 		Zotero.Utilities.HTTP.doGet(uri, function(text) {
-			text = text.replace(/<\?xml[^>]*\?>/, "");
-			var xml = new XML(text);
-			var last = xml..size.length() - 1;
-			var attachmentUri = xml..size[last].@source.toString();
+			var parser = new DOMParser();
+			var doc = parser.parseFromString(text, "text/xml");
+			var last = ZU.xpath(doc, '//size').length - 1;Zotero.debug(last);
+			var attachmentUri = ZU.xpathText(doc, '//size[last]/@source');
 			newItem.attachments = [{title:title, url:attachmentUri}];
 			newItem.complete();
 		}, function(){Zotero.done();});	
 	});
 	Zotero.wait();
-}
-
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
