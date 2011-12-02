@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-11-30 22:42:44"
+	"lastUpdated": "2011-12-01 23:09:39"
 }
 
 function detectWeb(doc, url) {
@@ -20,7 +20,7 @@ function detectWeb(doc, url) {
 
 	if (elmt = doc.evaluate('//h1[@property="dc:title" and starts-with(@id, "title_div")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){		                       
 		return "artwork";
-	} else if (doc.evaluate('//td[@class="DetailPic"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+	} else if (doc.evaluate('//span[contains(@class, "photo_container")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 		return "multiple";
 	} else if (doc.evaluate('//div[contains(@class, "StreamView")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 		return "multiple";
@@ -55,14 +55,13 @@ function doWeb(doc, url) {
 	} else { //multiple results
 		var photoRe = /\/photos\/[^\/]*\/([0-9]+)\//;
 //search results
-		if (doc.evaluate('//td[@class="DetailPic"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
-			elmts = doc.evaluate('//td[@class="DetailPic"]//a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		if (doc.evaluate('//span[contains(@class, "photo_container")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+			elmts = doc.evaluate('//div[contains(@style, "display: block")]//span[contains(@class, "photo_container")]/a[1]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 			while (elmt = elmts.iterateNext()){
 				var title = elmt.title;
-				title = Zotero.Utilities.trimInternal(title);
+				title = ZU.trimInternal(title);
 				var link = elmt.href;
-				var m = photoRe(link);
-				var photo_id = m[1];
+				var photo_id = link.match(photoRe)[1];
 				items[photo_id] = title;
 			}
 // photo stream
@@ -148,8 +147,8 @@ function doWeb(doc, url) {
 		Zotero.Utilities.HTTP.doGet(uri, function(text) {
 			var parser = new DOMParser();
 			var doc = parser.parseFromString(text, "text/xml");
-			var last = ZU.xpath(doc, '//size').length - 1;Zotero.debug(last);
-			var attachmentUri = ZU.xpathText(doc, '//size[last]/@source');
+			var last = ZU.xpath(doc, '//size').length - 1;
+			var attachmentUri = ZU.xpathText(doc, '//size['+last+']/@source');
 			newItem.attachments = [{title:title, url:attachmentUri}];
 			newItem.complete();
 		}, function(){Zotero.done();});	
