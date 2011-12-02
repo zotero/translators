@@ -2,25 +2,46 @@
 	"translatorID": "a0a9a45c-cc9e-497c-962e-a366618df985",
 	"label": "Library Catalog (Amicus)",
 	"creator": "Sebastian Karcher",
-	"target": "http://amicus.collectionscanada.ca",
+	"target": "^https?://amicus\\.collectionscanada\\.ca/aaweb-bin/aamain",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-12-01 21:59:08"
+	"lastUpdated": "2011-12-02 00:47:20"
 }
+
+/*
+Amicus Library Translator
+Copyright (C) 2011 Sebastian Karcher and CHNM
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
+
 
 function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
-
-
-		return "book";
-	
+	if (url.match(/aamain\/itemdisp/)){
+		return "book"
+	}
+else if (url.match(/aamain\/rqst_sb/)){
+		return "multiple";
+}
 }
 
 function scrape(marc, newDoc) {
@@ -35,13 +56,13 @@ function scrape(marc, newDoc) {
 	while(elmt = elmts.iterateNext()) {
 		var text = elmt.textContent;
 		text = text.replace(/AMICUS No. [0-9]+\n\s+/, "");
-		Z.debug(text);
+		//Z.debug(text);
 		var newItem = new Zotero.Item();
 		var record = new marc.record();
 		
 		var linee = text.split("\n");
 		linee[0]=linee[0].replace(/^\s+/, "");
-		Zotero.debug(linee[0]);
+		//Zotero.debug(linee[0]);
 		for (var i=0; i<=linee.length; i++) {
 			if(!linee[i]) {
 				continue;
@@ -55,15 +76,14 @@ function scrape(marc, newDoc) {
 				if(linee[i].substr(0, 3) == "000") {
 					// trap leader
 					record.leader = value;
-					Zotero.debug("Leader: " + record.leader);
+					//Zotero.debug("Leader: " + record.leader);
 				} else {
 					if(tagValue) {	// finish last tag
 						tagValue = tagValue.replace(/º/g, marc.subfieldDelimiter);
 						if(tagValue[0] != marc.subfieldDelimiter) {
 							tagValue = marc.subfieldDelimiter+"a"+tagValue;
 						}
-				
-						Zotero.debug("tag: "+tag+" ind: " + ind+" tagValue: "+tagValue );
+						//Zotero.debug("tag: "+tag+" ind: " + ind+" tagValue: "+tagValue );
 							record.addField(tag, ind, tagValue);
 					}
 					var tag = linee[i].substr(0, 3);
@@ -80,11 +100,10 @@ function scrape(marc, newDoc) {
 			// add previous tag
 			record.addField(tag, ind, tagValue);
 		}
-		Zotero.debug(record);
+		//Zotero.debug(record);
 		record.translate(newItem);
-		
-		//var domain = newDoc.location.href.match(/https?:\/\/([^/]+)/);
-		//newItem.repository = domain[1]+" Library Catalog";
+	   //remove notes
+		newItem.notes= []
 		newItem.complete();
 	}
 }
@@ -109,7 +128,7 @@ function doWeb(doc, url) {
 		
 		if (detectWeb(doc, url) == "book") {
 			newUri = url+"&d=3"
-			Z.debug(newUri);
+			//Z.debug(newUri);
 			pageByPage(marc, [newUri]);
 		} 
 		
@@ -123,13 +142,12 @@ function doWeb(doc, url) {
 			var availableItems = new Array();
 			var firstURL = false;
 			
-			var tableRows = doc.evaluate('//table//tr[@class="browseEntry" or @class="briefCitRow" or td/input[@type="checkbox"] or td[contains(@class,"briefCitRow") or contains(@class,"briefcitCell")]]',
-										 doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var tableRows = doc.evaluate('//table/tbody/tr[@valign="TOP"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 			// Go through table rows
 			var i = 0;
 			while(tableRow = tableRows.iterateNext()) {
 				// get link
-				var links = doc.evaluate('.//*[@class="briefcitTitle"]/a', tableRow, nsResolver, XPathResult.ANY_TYPE, null);
+				var links = doc.evaluate('.//td/a[0]', tableRow, nsResolver, XPathResult.ANY_TYPE, null);
 				var link = links.iterateNext();
 				if(!link) {
 					var links = doc.evaluate(".//a[@href]", tableRow, nsResolver, XPathResult.ANY_TYPE, null);
@@ -149,87 +167,70 @@ function doWeb(doc, url) {
 					i++;
 				}
 			};
-			
-			var items = Zotero.selectItems(availableItems);
-			
+		
+			 Zotero.selectItems(availableItems, function (items) {
+			Zotero.done();
 			if(!items) {
 				return true;
 			}
 			
 			var newUrls = new Array();
 			for(var itemURL in items) {
-				newUrls.push(itemURL.replace("frameset", "marc"));
+				newUrls.push(itemURL + "&d=3");
 			}
 			pageByPage(marc, newUrls);
+			})
 		}
 	});
 	
 	Zotero.wait();
 }
 
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://books.luther.edu/record=b2115431~S9",
+		"url": "http://amicus.collectionscanada.ca/aaweb-bin/aamain/itemdisp?sessionKey=1322662685049_142_78_200_11&l=0&v=1&lvl=1&rt=1&itm=24266276&rsn=S_WWWdba2jqBrX&all=1&dt=%22Suspended+conversations+%3A+the+afterlife+of+memory+in+photographic+albums+%2F+Martha+Langford%22&spi=-",
 		"items": [
 			{
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "G. W",
-						"lastName": "Kimura",
-						"creatorType": "contributor"
+						"firstName": "Martha",
+						"lastName": "Langford",
+						"creatorType": "author"
 					},
 					{
-						"lastName": "ebrary, Inc",
+						"lastName": "McCord Museum of Canadian History",
 						"fieldMode": true
 					}
 				],
 				"notes": [],
 				"tags": [
-					"Alaska",
-					"History",
-					"Alaska",
-					"Anniversaries, etc",
-					"Alaska",
-					"Social conditions",
-					"Alaska",
-					"Economic conditions",
-					"Electronic books"
+					"Photograph albums",
+					"Social aspects",
+					"Oral tradition",
+					"Photographs in genealogy",
+					"Photography in historiography",
+					"Photographies",
+					"Albums Aspect social",
+					"Tradition orale",
+					"Photographies en généalogie",
+					"Photographie en historiographie"
 				],
 				"seeAlso": [],
 				"attachments": [],
-				"title": "Alaska at 50 the past, present, and next fifty years of statehood",
-				"place": "Fairbanks",
-				"publisher": "University of Alaska Press",
-				"date": "2009",
-				"numPages": "285",
-				"callNumber": "F904 .A477 2009eb",
-				"libraryCatalog": "books.luther.edu Library Catalog"
+				"ISBN": "0773521747",
+				"title": "Suspended conversations: the afterlife of memory in photographic albums",
+				"place": "Montreal",
+				"publisher": "McGill-Queen's University Press",
+				"date": "2001",
+				"numPages": "241",
+				"callNumber": "907/.2",
+				"libraryCatalog": "Library Catalog (Amicus)",
+				"shortTitle": "Suspended conversations"
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://utmost.cl.utoledo.edu/search/?searchtype=X&SORT=D&searcharg=history+of+communication&searchscope=3",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://umiss.lib.olemiss.edu/search/?searchtype=X&SORT=D&searcharg=history+of+communication",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://luna.wellesley.edu/search/?searchtype=X&SORT=D&searcharg=history+of+ideas&searchscope=1",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://clues.concordia.ca/search/?searchtype=X&SORT=D&searcharg=history+of+communication",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
