@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsn",
-	"lastUpdated": "2011-08-22 23:29:49"
+	"lastUpdated": "2011-11-30 23:29:49"
 }
 
 function detectImport() {
@@ -493,7 +493,7 @@ record.prototype.translate = function(item) {
 		this._associateDBField(item, "070", "ab", "callNumber");
 		this._associateDBField(item, "060", "ab", "callNumber");
 		this._associateDBField(item, "050", "ab", "callNumber");
-		this._associateDBField(item, "090", "a", "callNumber");
+		this._associateDBField(item, "090", "ab", "callNumber");
 		this._associateDBField(item, "099", "a", "callNumber");
 		this._associateDBField(item, "852", "khim", "callNumber");
 		

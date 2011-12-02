@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-12-01 21:16:36"
+	"lastUpdated": "2011-12-01 21:59:08"
 }
 
 function detectWeb(doc, url) {
@@ -33,15 +33,15 @@ function scrape(marc, newDoc) {
 		var elmts = newDoc.evaluate(xpath, newDoc, null, XPathResult.ANY_TYPE, null);
 	var elmt;
 	while(elmt = elmts.iterateNext()) {
-		var text = elmt.textContent
+		var text = elmt.textContent;
 		text = text.replace(/AMICUS No. [0-9]+\n\s+/, "");
-		Z.debug(text)
+		Z.debug(text);
 		var newItem = new Zotero.Item();
 		var record = new marc.record();
 		
 		var linee = text.split("\n");
-		linee[0]=linee[0].replace(/^\s+/, "")
-		Zotero.debug(linee[0])
+		linee[0]=linee[0].replace(/^\s+/, "");
+		Zotero.debug(linee[0]);
 		for (var i=0; i<=linee.length; i++) {
 			if(!linee[i]) {
 				continue;
@@ -55,16 +55,16 @@ function scrape(marc, newDoc) {
 				if(linee[i].substr(0, 3) == "000") {
 					// trap leader
 					record.leader = value;
-					Zotero.debug("Leader: " + record.leader)
+					Zotero.debug("Leader: " + record.leader);
 				} else {
 					if(tagValue) {	// finish last tag
-						tagValue = tagValue.replace(/º./g, marc.subfieldDelimiter+"$1");
+						tagValue = tagValue.replace(/º/g, marc.subfieldDelimiter);
 						if(tagValue[0] != marc.subfieldDelimiter) {
 							tagValue = marc.subfieldDelimiter+"a"+tagValue;
-												}
+						}
 				
-				Zotero.debug("tag: "+tag+" ind: " + ind+" tagValue: "+tagValue )
-				record.addField(tag, ind, tagValue);
+						Zotero.debug("tag: "+tag+" ind: " + ind+" tagValue: "+tagValue );
+							record.addField(tag, ind, tagValue);
 					}
 					var tag = linee[i].substr(0, 3);
 					var ind  = linee[i].substr(4, 2);
@@ -73,14 +73,14 @@ function scrape(marc, newDoc) {
 			}
 		}
 		if(tagValue) {
-			tagValue = tagValue.replace(/°./g, marc.subfieldDelimiter+"$1");
+			tagValue = tagValue.replace(/°/g, marc.subfieldDelimiter);
 			if(tagValue[0] != marc.subfieldDelimiter) {
 				tagValue = marc.subfieldDelimiter+"a"+tagValue;
 			}
 			// add previous tag
 			record.addField(tag, ind, tagValue);
 		}
-		Zotero.debug(record)
+		Zotero.debug(record);
 		record.translate(newItem);
 		
 		//var domain = newDoc.location.href.match(/https?:\/\/([^/]+)/);
@@ -109,7 +109,7 @@ function doWeb(doc, url) {
 		
 		if (detectWeb(doc, url) == "book") {
 			newUri = url+"&d=3"
-			Z.debug(newUri)
+			Z.debug(newUri);
 			pageByPage(marc, [newUri]);
 		} 
 		
