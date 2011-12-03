@@ -59,7 +59,7 @@ function scrape(marc, newDoc) {
 	var nsResolver = namespace ? function(prefix) {
 	  if (prefix == 'x') return namespace; else return null;
 	} : null;
-	
+
 	var newItem = new Zotero.Item();
 	var record = new marc.record();
 	//The width = 95% seems consistent, though there really should be a better way to get to this
@@ -67,47 +67,53 @@ function scrape(marc, newDoc) {
 	var elmts = newDoc.evaluate(xpath, newDoc, nsResolver, XPathResult.ANY_TYPE, null);
 	var elmt;
 	while(elmt = elmts.iterateNext()) {
-		
-	var tag =	ZU.xpathText(elmt, './td[1]')
-	var ind =   ZU.xpathText(elmt, './td[2]')
-	var tagValue =   ZU.xpathText(elmt, './td[3]')
+
+	  var tag =	ZU.xpathText(elmt, './td[1]');
+	  var ind =   ZU.xpathText(elmt, './td[2]');
+	  var tagValue =   ZU.xpathText(elmt, './td[3]');
 	//Z.debug("tag: "+tag+" ind: "+ind+" tagValue: "+tagValue)
 	if (tag == "LDR"){
-		record.leader = tagValue
+	  record.leader = tagValue;
 	}
 	else if (tag != "FMT"){
-		tagValue = tagValue.replace(/\|/g, marc.subfieldDelimiter)
+	  tagValue = tagValue.replace(/\|/g, marc.subfieldDelimiter);
 		record.addField(tag, ind, tagValue);
 	}
-	
-	}	
+
+	}
 	//Z.debug(record)
 		record.translate(newItem);
 	// put stuff from notes into extra
 		for (var i in newItem.notes){
 		if (extra){
-			extra = extra + "\n" +newItem.notes[i].note
+		  extra = extra + "\n" +newItem.notes[i].note;
 		}
 		else{
-		var	extra= newItem.notes[i].note		
+		  var	extra= newItem.notes[i].note;
 		}
 		}
-		newItem.extra = extra
+  newItem.extra = extra;
 		newItem.notes = [];
-		//editors get mapped as contributos - but so do many others who should be
+		//editors get mapped as contributors - but so do many others who should be
 		// --> for books that don't have an author, turn contributors into editors.
-		if (newItem.itemType=="book"){
-		for (var i in newItem.creators) {
-			if (newItem.creators[i].creatorType=="author") var t ="author";
-		 if (!t){
-		 if (newItem.creators[i].creatorType=="contributor") {
-				newItem.creators[i].creatorType="editor";
-			}}
-		}
-		}
+  if (newItem.itemType=="book"){
+    var hasAuthor = false;
+    for (var i in newItem.creators) {
+      if (newItem.creators[i].creatorType=="author") {
+	hasAuthor = true;
+      }
+    }
+    if (!hasAuthor) {
+      for (var i in newItem.creators) {
+	if (newItem.creators[i].creatorType=="contributor") {
+	  newItem.creators[i].creatorType="editor";
+	}
+      }
+    }
+  }
 
-		newItem.complete();
-	
+  newItem.complete();
+
 }
 
 function pageByPage(marc, urls) {
@@ -127,25 +133,25 @@ function doWeb(doc, url) {
 		var nsResolver = namespace ? function(prefix) {
 			if (prefix == 'x') return namespace; else return null;
 		} : null;
-		
+
 		if (detectWeb(doc, url) == "book") {
-			//we prefer local MARC, but some items have only unimarc
-			var localmarc = '//td/a[contains(@href, "&V=M")]'
-			var unimarc = '//td/a[contains(@href, "&V=U")]'
+	//we prefer local MARC, but some items have only unimarc
+		  var localmarc = '//td/a[contains(@href, "&V=M")]';
+		  var unimarc = '//td/a[contains(@href, "&V=U")]';
 			if (doc.evaluate(localmarc, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 			newUri = uri.replace(/\&V=D\&/, "&V=M&");
 			}
 			else if (doc.evaluate(unimarc, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 				newUri = uri.replace(/\&V=D\&/, "&V=U&");
 			}
-			Z.debug(newUri)
+		  Z.debug(newUri);
 			pageByPage(marc, [newUri]);
 		}
-else {	// Search results page	
+else {	// Search results page
 			var urls = new Array();
 			var availableItems = new Array();
 			var firstURL = false;
-			
+
 			var tableRows = doc.evaluate('//td[@id="dimRecords3"]/table//table[@width="100%"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 			// Go through table rows
 			var i = 0;
@@ -157,12 +163,12 @@ else {	// Search results page
 					var links = doc.evaluate('.//div/a[contains(@id, "Title")]/@href', tableRow, nsResolver, XPathResult.ANY_TYPE, null);
 					link = links.iterateNext();
 				}
-				
+
 				if(link) {
 					if(availableItems[link.href]) {
 						continue;
 					}
-					
+
 					// Go through links
 					while(link) {
 						if (link.textContent.match(/\w+/)) availableItems[link.href] = link.textContent;
@@ -171,12 +177,12 @@ else {	// Search results page
 					i++;
 				}
 			};
-		
+
 			 Zotero.selectItems(availableItems, function (items) {
 			if(!items) {
 				return true;
 			}
-			
+
 			var newUrls = new Array();
 			for(var itemURL in items) {
 				newUrls.push(itemURL.replace(/\&V=D\&/, "&V=M&"));
@@ -185,7 +191,7 @@ else {	// Search results page
 			})
 		}
 	});
-	
+
 	Zotero.wait();
 }
 /** BEGIN TEST CASES **/
