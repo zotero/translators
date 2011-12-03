@@ -1,15 +1,15 @@
 {
 	"translatorID": "5dd22e9a-5124-4942-9b9e-6ee779f1023e",
 	"label": "Flickr",
-	"creator": "Sean Takats",
+	"creator": "Sean Takats and Rintze Zelle",
 	"target": "^http://(?:www\\.)?flickr\\.com/",
-	"minVersion": "1.0.0b4.r5",
+	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-11-01 16:31:25"
+	"lastUpdated": "2011-12-03 11:43:35"
 }
 
 function detectWeb(doc, url) {
@@ -20,15 +20,7 @@ function detectWeb(doc, url) {
 
 	if (elmt = doc.evaluate('//h1[@property="dc:title" and starts-with(@id, "title_div")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){		                       
 		return "artwork";
-	} else if (doc.evaluate('//td[@class="DetailPic"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
-		return "multiple";
-	} else if (doc.evaluate('//div[contains(@class, "StreamView")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
-		return "multiple";
-	} else if (doc.evaluate('//div[@id="setThumbs"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
-		if (!doc.URL.match('/comments/')) {
-			return "multiple";
-		}
-	} else if (doc.evaluate('//p[@class="StreamList" or @class="UserTagList"]/span/a', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+	} else if (doc.evaluate('//span[contains(@class, "photo_container")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 		return "multiple";
 	}
 }
@@ -40,123 +32,116 @@ function doWeb(doc, url) {
 		} : null;
 		
 	var items = new Object();
-	var photo_ids = new Array();
-	var uris = new Array();
-	var key = "3cde2fca0879089abf827c1ec70268b5";
-
 	var elmts;
 	var elmt;
 
-// single result
+	// single result
 	if (elmt = doc.evaluate('//h1[@property="dc:title" and starts-with(@id, "title_div")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){		                       
 		var photo_id = elmt.id;
 		photo_id = photo_id.substr(9);
-		photo_ids.push(photo_id);
+		items[photo_id]="title";
+		fetchForIds(items);
 	} else { //multiple results
 		var photoRe = /\/photos\/[^\/]*\/([0-9]+)\//;
-//search results
-		if (doc.evaluate('//td[@class="DetailPic"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
-			elmts = doc.evaluate('//td[@class="DetailPic"]//a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		//tested for:
+		//search: http://www.flickr.com/search/?q=test
+		//galleries: http://www.flickr.com/photos/lomokev/galleries/72157623433999749/
+		//archives: http://www.flickr.com/photos/lomokev/archives/date-taken/2003/12/04/
+		//favorites: http://www.flickr.com/photos/lomokev/favorites/
+		//photostream: http://www.flickr.com/photos/lomokev/with/4952001059/
+		//set: http://www.flickr.com/photos/lomokev/sets/502509/
+		//tag: http://www.flickr.com/photos/tags/bmw/
+		if (doc.evaluate('//span[contains(@class, "photo_container")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+			
+			//some search results are hidden ("display: none")
+			//videos have a second <a/> element ("a[1]")
+			elmts = doc.evaluate('//div[not(contains(@style, "display: none"))]/*/span[contains(@class, "photo_container")]/a[1]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 			while (elmt = elmts.iterateNext()){
 				var title = elmt.title;
-				title = Zotero.Utilities.trimInternal(title);
+				//in photostreams, the <a/> element doesn't have a title attribute
+				if (title == "") {
+					title = elmt.getElementsByTagName("img")[0].alt;
+				}
+				title = ZU.trimInternal(title);
 				var link = elmt.href;
-				var m = photoRe(link);
-				var photo_id = m[1];
-				items[photo_id] = title;
-			}
-// photo stream
-		} else if (doc.evaluate('//div[contains(@class, "StreamView")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
-			if (doc.evaluate('//div[contains(@class, "StreamView") and starts-with(@id, "sv_title_")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-				elmts = doc.evaluate('//div[contains(@class, "StreamView") and starts-with(@id, "sv_title_")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-			} else {
-				elmts = doc.evaluate('//div[contains(@class, "StreamView") and starts-with(@id, "sv_body_")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-			}
-			while (elmt = elmts.iterateNext()){
-				//var title = Zotero.Utilities.trimInternal(elmt.textContent);
-				var title = elmt.getElementsByTagName("h4")[0].textContent
-				var photo_id = elmt.id;
-				photo_id = photo_id.replace(/(sv_body_|sv_title_)/,''); 
-				Zotero.debug("id="+photo_id)
-				items[photo_id] = title;
-			}
-// photo set
-		} else if (doc.evaluate('//div[@class="setThumbs-indv"]/span', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
-			elmts = doc.evaluate('//div[@class="setThumbs-indv"]/span', doc, nsResolver, XPathResult.ANY_TYPE, null);
-			while (elmt = elmts.iterateNext()){
-				var title = doc.evaluate('./a/@title', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-				var photo_id = elmt.id.substr(11);
-				items[photo_id] = title;
-			}
-// tagged with
-		} else if (doc.evaluate('//p[@class="StreamList" or @class="UserTagList"]/span/a', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
-			var elmts = doc.evaluate('//p[@class="StreamList" or @class="UserTagList"]//a[img]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-			while (elmt = elmts.iterateNext()){
-				var title = Zotero.Utilities.trimInternal(elmt.title);
-				var link = elmt.href;
-				var m = photoRe(link);
-				var photo_id = m[1];
+				var photo_id = link.match(photoRe)[1];
 				items[photo_id] = title;
 			}
 		}
-		items = Zotero.selectItems(items);
-		if(!items) return true;
-		for(var i in items) {
-			photo_ids.push(i);
-		}
+		Zotero.selectItems(items, function(items) {
+			if(!items) {
+				return true;
+			}
+			fetchForIds(items);
+		});
 	}
-	for each(var photo_id in photo_ids){
-		uris.push("http://api.flickr.com/services/rest/?method=flickr.photos.getInfo&api_key="+key+"&photo_id="+photo_id);
-	}
-	Zotero.Utilities.HTTP.doGet(uris, function(text) {
-		text = text.replace(/<\?xml[^>]*\?>/, "");
-		var xml = new XML(text);
-		var newItem = new Zotero.Item("artwork");
-		var title = "";
-		if (xml..title.length()){
-			var title = Zotero.Utilities.trimInternal(xml..title[0].text().toString());
-			if (title == ""){
-				title = " ";
-			}
-			newItem.title = title;
-		}
-		for(var i=0; i<xml..tag.length(); i++) {
-			newItem.tags.push(Zotero.Utilities.trimInternal(xml..tag[i].text().toString()));
-		}
-		if (xml..dates.length()){
-			var date = xml..dates[0].@taken.toString();
-			newItem.date = date.substr(0, 10);
-		}
-		if (xml..owner.length()){
-			var author = xml..owner[0].@realname.toString();
-			if (author == ""){
-				author = xml..owner[0].@username.toString();
-			}
-			newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "artist"));
-		}
-		if (xml..url.length()){
-			newItem.url = xml..url[0].text().toString();
-		}
-		if (xml..description.length()){
-			newItem.abstractNote = xml..description[0].text().toString();
-		}
-		var format = xml..photo[0].@originalformat.toString();
-		var photo_id = xml..photo[0].@id.toString();
-		
-// get attachment code
-		var uri = "http://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key="+key+"&photo_id="+photo_id;
-		Zotero.Utilities.HTTP.doGet(uri, function(text) {
-			text = text.replace(/<\?xml[^>]*\?>/, "");
-			var xml = new XML(text);
-			var last = xml..size.length() - 1;
-			var attachmentUri = xml..size[last].@source.toString();
-			newItem.attachments = [{title:title, url:attachmentUri}];
-			newItem.complete();
-		}, function(){Zotero.done();});	
-	});
-	Zotero.wait();
 }
 
+function fetchForIds(ids) {
+	var key = "3cde2fca0879089abf827c1ec70268b5";
+	var uris = new Array();
+	var atts = new Array();
+	var parser = new DOMParser();
+	var toComplete = new Array();
+	var newItem;
+
+	for(var i in ids) {
+		uris.push("http://api.flickr.com/services/rest/?method=flickr.photos.getInfo&api_key="+key+"&photo_id="+i);
+		atts.push("http://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key="+key+"&photo_id="+i);
+	}
+
+	// We first fetch the items, then their attachments
+	Zotero.Utilities.HTTP.doGet(uris, function(text) {
+		toComplete.push(parseResponse(text, parser));
+	}, function() {
+		ZU.doGet(atts, function (text) {
+			newItem = toComplete.pop();
+			var doc = parser.parseFromString(text, "text/xml");
+			var attachmentUri = ZU.xpathText(doc, '//size[last()]/@source');
+			newItem.attachments = [{title:newItem.title, url:attachmentUri}];
+			newItem.complete();
+		}, function () {Z.done()})
+	});
+	
+	Z.wait();
+}
+
+function parseResponse(text, parser) {
+		var doc = parser.parseFromString(text, "text/xml");
+
+		var newItem = new Zotero.Item("artwork");
+
+		var title;
+		if ((title = ZU.xpathText(doc, '//photo/title'))) {
+			title = ZU.trimInternal(title);
+			newItem.title = title;
+		} else {
+			newItem.title = " ";
+		}
+		var tags;
+		if ((tags = ZU.xpath(doc, '//photo//tag'))) {
+			for(var i in tags) {
+			newItem.tags.push(tags[i].textContent);
+			}
+		}
+		var date;
+		if ((date = ZU.xpathText(doc, '//photo/dates/@taken'))) {
+			newItem.date = date.substr(0, 10);
+		}
+		var owner;
+		if ((owner = ZU.xpathText(doc, '//photo/owner/@realname') || (owner = ZU.xpathText(doc, '//photo/owner/@username')))) {
+			newItem.creators.push(ZU.cleanAuthor(owner, "artist"));
+		}
+		var url;
+		if ((url = ZU.xpathText(doc, '//photo//url'))) {
+			newItem.url = url;
+		}
+		var description;
+		if ((description = ZU.xpathText(doc, '//photo/description'))) {
+			newItem.abstractNote = description;
+		}
+		return newItem;
+}
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -237,6 +222,21 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.flickr.com/search/?q=test",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.flickr.com/photos/lomokev/with/4952001059/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.flickr.com/photos/tags/bmw/",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
