@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-12-02 18:41:52"
+	"lastUpdated": "2011-12-02 19:12:24"
 }
 
 /*
@@ -192,7 +192,7 @@ else {	// Search results page
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://fsu.catalog.fcla.edu/permalink.jsp?23FS000905416",
+		"url": "http://fsu.catalog.fcla.edu/fs.jsp?st=FS000905416&ix=pm&I=0&V=D&pm=1",
 		"items": [
 			{
 				"itemType": "book",
@@ -232,7 +232,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://fgcu.catalog.fcla.edu/permalink.jsp?25GC000505950",
+		"url": "http://fgcu.catalog.fcla.edu/gc.jsp?st=GC000505950&ix=pm&I=0&V=D&pm=1",
 		"items": [
 			{
 				"itemType": "book",
