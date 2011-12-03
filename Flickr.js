@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-12-02 23:53:49"
+	"lastUpdated": "2011-12-03 00:04:20"
 }
 
 function detectWeb(doc, url) {
@@ -89,7 +89,8 @@ function doWeb(doc, url) {
 		
 		var title;
 		if ((title = ZU.xpathText(doc, '//photo/title'))) {
-			newItem.title = ZU.trimInternal(title);
+			title = ZU.trimInternal(title);
+			newItem.title = title;
 		} else {
 			newItem.title = " ";
 		}
