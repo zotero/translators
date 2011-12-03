@@ -32,16 +32,12 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 
 function detectWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
 	if (url.match(/aamain\/itemdisp/)){
 		return "book"
 	}
-else if (url.match(/aamain\/rqst_sb/)){
+	else if (url.match(/aamain\/rqst_sb/)){
 		return "multiple";
-}
+	}
 }
 
 function scrape(marc, newDoc) {
@@ -51,7 +47,7 @@ function scrape(marc, newDoc) {
 	} : null;
 	
 	var xpath = '//pre';
-		var elmts = newDoc.evaluate(xpath, newDoc, null, XPathResult.ANY_TYPE, null);
+	var elmts = newDoc.evaluate(xpath, newDoc, null, XPathResult.ANY_TYPE, null);
 	var elmt;
 	while(elmt = elmts.iterateNext()) {
 		var text = elmt.textContent;
@@ -84,7 +80,7 @@ function scrape(marc, newDoc) {
 							tagValue = marc.subfieldDelimiter+"a"+tagValue;
 						}
 						//Zotero.debug("tag: "+tag+" ind: " + ind+" tagValue: "+tagValue );
-							record.addField(tag, ind, tagValue);
+						record.addField(tag, ind, tagValue);
 					}
 					var tag = linee[i].substr(0, 3);
 					var ind  = linee[i].substr(4, 2);
@@ -105,28 +101,33 @@ function scrape(marc, newDoc) {
 		//Zotero.debug(record);
 		record.translate(newItem);
 	 
-	 // put stuff from notes into extra, separated by new lines for each note
-		for (var i in newItem.notes){
-		if (extra){
-			extra = extra + "\n" +newItem.notes[i].note
-		}
-		else{
-		var	extra= newItem.notes[i].note		
-		}
+		// put stuff from notes into extra, separated by new lines for each note
+		for (var i in newItem.notes) {
+			if (extra) {
+				extra = extra + "\n" +newItem.notes[i].note
+			} else {
+				var extra = newItem.notes[i].note		
+			}
 		}
 		newItem.extra = extra
 		newItem.notes = [];
 		
-		//editors get mapped as contributos - but so do many others who should be
+		//editors get mapped as contributors - but so do many others who should be
 		// --> for books that don't have an author, turn contributors into editors.
 		if (newItem.itemType=="book"){
-		for (var i in newItem.creators) {
-			if (newItem.creators[i].creatorType=="author") var t ="author";
-		 if (!t){
-		 if (newItem.creators[i].creatorType=="contributor") {
-				newItem.creators[i].creatorType="editor";
-			}}
-		}
+			var hasAuthor = false;
+			for (var i in newItem.creators) {
+				if (newItem.creators[i].creatorType=="author") {
+					hasAuthor = true;
+				}
+			}
+			if (!hasAuthor) {
+				for (var i in newItem.creators) {
+			 		if (newItem.creators[i].creatorType=="contributor") {
+						newItem.creators[i].creatorType="editor";
+					}
+				}
+			}
 		}
 		newItem.complete();
 	}
@@ -185,28 +186,27 @@ function doWeb(doc, url) {
 					
 					// Go through links
 					while(link) {
-						if (link.textContent.match(/\w+/)) availableItems[link.href] = link.textContent;
+						if (link.textContent.match(/\w+/))
+							availableItems[link.href] = link.textContent;
 						link = links.iterateNext();
 					}
 					i++;
 				}
 			};
 		
-			 Zotero.selectItems(availableItems, function (items) {
-			Zotero.done();
-			if(!items) {
-				return true;
-			}
-			
-			var newUrls = new Array();
-			for(var itemURL in items) {
-				newUrls.push(itemURL + "&d=3");
-			}
-			pageByPage(marc, newUrls);
+			Zotero.selectItems(availableItems, function (items) {
+				if(!items) {
+					return true;
+				}
+
+				var newUrls = new Array();
+				for(var itemURL in items) {
+					newUrls.push(itemURL + "&d=3");
+				}
+				 pageByPage(marc, newUrls);
 			})
 		}
 	});
-	
 	Zotero.wait();
 }
 
