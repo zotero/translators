@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-12-02 00:47:20"
+	"lastUpdated": "2011-12-02 19:00:52"
 }
 
 /*
@@ -63,7 +63,7 @@ function scrape(marc, newDoc) {
 		var linee = text.split("\n");
 		linee[0]=linee[0].replace(/^\s+/, "");
 		//Zotero.debug(linee[0]);
-		for (var i=0; i<=linee.length; i++) {
+		for (var i=0; i<linee.length; i++) {
 			if(!linee[i]) {
 				continue;
 			}
@@ -93,17 +93,41 @@ function scrape(marc, newDoc) {
 			}
 		}
 		if(tagValue) {
-			tagValue = tagValue.replace(/°/g, marc.subfieldDelimiter);
+			tagValue = tagValue.replace(/º/g, marc.subfieldDelimiter);
 			if(tagValue[0] != marc.subfieldDelimiter) {
+				//Z.debug("here")
 				tagValue = marc.subfieldDelimiter+"a"+tagValue;
 			}
 			// add previous tag
+			//Zotero.debug("tag: "+tag+" ind: " + ind+" tagValue: "+tagValue );
 			record.addField(tag, ind, tagValue);
 		}
 		//Zotero.debug(record);
 		record.translate(newItem);
-	   //remove notes
-		newItem.notes= []
+	 
+	 // put stuff from notes into extra, separated by new lines for each note
+		for (var i in newItem.notes){
+		if (extra){
+			extra = extra + "\n" +newItem.notes[i].note
+		}
+		else{
+		var	extra= newItem.notes[i].note		
+		}
+		}
+		newItem.extra = extra
+		newItem.notes = [];
+		
+		//editors get mapped as contributos - but so do many others who should be
+		// --> for books that don't have an author, turn contributors into editors.
+		if (newItem.itemType=="book"){
+		for (var i in newItem.creators) {
+			if (newItem.creators[i].creatorType=="author") var t ="author";
+		 if (!t){
+		 if (newItem.creators[i].creatorType=="contributor") {
+				newItem.creators[i].creatorType="editor";
+			}}
+		}
+		}
 		newItem.complete();
 	}
 }
@@ -227,6 +251,7 @@ var testCases = [
 				"date": "2001",
 				"numPages": "241",
 				"callNumber": "907/.2",
+				"extra": "Based on a collection of albums, compiled 1860-1960, held by the McCord Museum of Canadian History",
 				"libraryCatalog": "Library Catalog (Amicus)",
 				"shortTitle": "Suspended conversations"
 			}
