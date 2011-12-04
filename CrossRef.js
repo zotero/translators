@@ -9,7 +9,7 @@
 	"priority":90,
 	"browserSupport":"gcs",
 	"inRepository":true,
-	"lastUpdated":"2011-07-29 18:13:47"
+	"lastUpdated":"2011-12-04 18:13:47"
 }
 
 /* CrossRef uses unixref; documentation at http://www.crossref.org/schema/documentation/unixref1.0/unixref.html */
