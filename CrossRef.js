@@ -9,7 +9,7 @@
 	"priority":90,
 	"browserSupport":"gcs",
 	"inRepository":true,
-	"lastUpdated":"2011-07-29 18:13:47"
+	"lastUpdated":"2011-12-04 18:13:47"
 }
 
 /* CrossRef uses unixref; documentation at http://www.crossref.org/schema/documentation/unixref1.0/unixref.html */
@@ -107,6 +107,9 @@ function processCrossRef(xmlOutput) {
 		item.journalAbbreviation = ZU.xpathText(refXML, 'c:abbrev_title[1]', ns);
 		item.volume = ZU.xpathText(itemXML, 'c:journal_issue/c:journal_volume/c:volume', ns);
 		item.issue = ZU.xpathText(itemXML, 'c:journal_issue/c:journal_volume/c:issue', ns);
+		// Sometimes the <issue> tag is not nested inside the volume tag; see 10.1007/BF00938486
+		if (!item.issue)
+			item.issue = ZU.xpathText(itemXML, 'c:journal_issue/c:issue', ns);
    } else if((itemXML = ZU.xpath(doiRecord, 'c:crossref/c:report-paper', ns)).length) {
 		// Report Paper
 		// Example: doi: 10.4271/2010-01-0907
