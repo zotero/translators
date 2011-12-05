@@ -9,15 +9,22 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-09-10 14:58:04"
+	"lastUpdated": "2011-12-04 20:37:25"
 }
 
 function detectWeb(doc, url) {
 	if (url.match(/search\.searchResults/)) {
-		return false;
+	//permission error
+	return false;
 		//return "multiple";
 	} else if (url.match(/search\.displayRecord|journals\/\S+\/\d+\/\d+\/\d+\//)) {
 		return "journalArticle";
+		
+//for the book database - item IDs ending in 000 are books, everything else chapters)
+	} else if (url.match(/psycinfo\/[0-9]{4}-[0-9]+-000/)){
+	    return "book";
+	} else if (url.match(/psycinfo\/[0-9]{4}-[0-9]+-[0-9]{3}/)){
+		return "bookSection";
 	}
 }
 
@@ -64,8 +71,9 @@ function scrape (doc) {
 				// http://psycnet.apa.org/index.cfm?fa=search.export
 				var translator = Zotero.loadTranslator("import");
 				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+				//A2s should be editors here for all practical purposes
+				text = text.replace(/A2  -/g, "ED  -");
 				translator.setString(text);
-				//Z.debug(text);
 				translator.setHandler("itemDone", function(obj, item) {
 					//item.url = newurl;
 					item.title = item.title.replace(/\.$/,'');
@@ -187,6 +195,89 @@ var testCases = [
 				"DOI": "10.1037/h0043965",
 				"libraryCatalog": "APA PsycNET",
 				"checkFields": "title"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://psycnet.apa.org/psycinfo/1992-98221-010",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"creators": [
+					{
+						"lastName": "Gallup",
+						"firstName": "Gordon G.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Maser",
+						"firstName": "Jack D.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Maser",
+						"firstName": "Jack D.",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Seligman",
+						"firstName": "Martin E. P.",
+						"creatorType": "editor"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"discusses tonic immobility as an animal model for catatonia & catalepsy"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"itemID": "1992-98221-010",
+				"title": "Catatonia: Tonic immobility: Evolutionary underpinnings of human catalepsy and catatonia",
+				"series": "A series of books in psychology.",
+				"pages": "334-357",
+				"date": "1977",
+				"publisher": "New York, NY, US: W H Freeman/Times Books/ Henry Holt & Co",
+				"ISBN": "0-7167-0368-8 (Hardcover); 0-7167-0367-X (Paperback)",
+				"ISSN": "0-7167-0368-8 (Hardcover); 0-7167-0367-X (Paperback)",
+				"abstractNote": "tonic immobility [animal hypnosis] might be a useful laboratory analog or research model for catatonia / we have been collaborating on an interdisciplinary program of research in an effort to pinpoint the behavioral antecedents and biological bases for tonic immobility / attempt to briefly summarize our findings, and . . . discuss the implications of these data in terms of the model characteristics of tonic immobility / hypnosis / catatonia, catalepsy, and cataplexy / tonic immobility as a model for catatonia / fear potentiation / fear alleviation / fear or arousal / learned helplessness / neurological correlates / pharmacology and neurochemistry / genetic underpinnings / evolutionary considerations / implications for human psychopathology (PsycINFO Database Record (c) 2010 APA, all rights reserved)",
+				"publicationTitle": "Psychopathology: Experimental models.",
+				"libraryCatalog": "APA PsycNET",
+				"shortTitle": "Catatonia"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://psycnet.apa.org/psycinfo/2004-16329-000/",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "White",
+						"firstName": "Robert W.",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"abnormal personality",
+					"abnormal psychology",
+					"personality disorders"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"itemID": "2004-16329-000",
+				"title": "The abnormal personality: A textbook",
+				"pages": "x, 617",
+				"numPages": "x, 617",
+				"date": "1948",
+				"publisher": "New York, NY, US: Ronald Press Company",
+				"abstractNote": "The author's intent is to write about abnormal people in a way that will be valuable and interesting to students new to the subject. A first course in abnormal psychology is not intended to train specialists. Its goal is more general: it should provide the student with the opportunity to whet his interest, expand his horizons, register a certain body of new facts, and relate this to the rest of his knowledge about mankind. I have tried to present the subject in such a way as to emphasize its usefulness to all students of human nature. I have tried the experiment of writing two introductory chapters, one historical and the other clinical. This reflects my desire to set the subject-matter in a broad perspective and at the same time to anchor it in concrete fact. Next comes a block of six chapters designed to set forth the topics of maladjustment and neurosis. The two chapters on psychotherapy complete the more purely psychological or developmental part of the work. In the final chapter the problem of disordered personalities is allowed to expand to its full social dimensions. Treatment, care, and prevention call for social effort and social organization. I have sought to show some of the lines, both professional and nonprofessional, along which this effort can be expended. (PsycINFO Database Record (c) 2010 APA, all rights reserved)",
+				"DOI": "10.1037/10023-000",
+				"libraryCatalog": "APA PsycNET",
+				"shortTitle": "The abnormal personality"
 			}
 		]
 	}
