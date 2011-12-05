@@ -1,18 +1,16 @@
 {
-	"translatorID": "04e63564-b92b-41cd-a9d5-366a02056d10",
-	"label": "GaleGDC",
-	"creator": "GaleGDC",
-	"target": "/gdc/ncco/",
-	"minVersion": "1.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2011-11-07 12:02:12"
+        "translatorID":"04e63564-b92b-41cd-a9d5-366a02056d10",
+        "translatorType":4,
+        "label":"GaleGDC",
+        "creator":"GaleGDC",
+        "target":"/gdc/ncco/",
+        "minVersion":"1.0",
+        "maxVersion":null,
+        "priority":100,
+        "inRepository":true,
+        "browserSupport":"g",
+        "lastUpdated":"2011-11-07 20:10:00"
 }
-
-
 
 /*
  * Gale GDC Copyright (C) 2011 Gale GDC
@@ -41,6 +39,11 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 
     var importer = Zotero.loadTranslator("import");
+    importer.setHandler("itemDone", function(obj, item) {
+		item.attachments = [];
+		item.complete();
+    });
+
     importer.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 
     var searchResults = doc.evaluate('//div[@regionid="searchResults"]  | //table[@id="searchResult"]', doc, null, XPathResult.ANY_TYPE, null)
