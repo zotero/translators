@@ -74,12 +74,9 @@ function getpages(citationurl) {
 				      scrape(doc);
 	}, function() { Zotero.done() });
 }
-function scrape (doc) {
-  var namespace = doc.documentElement.namespaceURI;
-  var nsResolver = namespace ? function(prefix) {
-    if (prefix == 'x') return namespace; else return null;
-  } : null;
 
+
+function scrape (doc) {
   var newurl = doc.location.href;
   var pdfurl = newurl.replace(/\/action\/showCitFormats\?doi=/, "/doi/pdf/");
   var absurl = newurl.replace(/\/action\/showCitFormats\?doi=/, "/doi/abs/");
@@ -90,22 +87,23 @@ function scrape (doc) {
   var post = 'doi=' + doi + '&downloadFileName=' + filename + '&format=ris&direct=true&include=abs';
   Zotero.Utilities.HTTP.doPost(get, post, function(text) {
 	var translator = Zotero.loadTranslator("import");
-			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-			translator.setString(text);
-			translator.setHandler("itemDone", function(obj, item) {
-			item.url = absurl;
-			item.notes = [];
-			item.attachments = [
-						{url:pdfurl, title:"T&F PDF fulltext", mimeType:"application/pdf"},
-						{url:absurl, title:"T&F Snapshot", mimeType:"text/html"}
-						];
-					item.complete();
-				});
-				translator.translate();
-			});
+	// Calling the RIS translator
+	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+	translator.setString(text);
+	translator.setHandler("itemDone", function(obj, item) {
+		item.url = absurl;
+		item.notes = [];
+		item.attachments = [
+			{url:pdfurl, title:"T&F PDF fulltext", mimeType:"application/pdf"},
+			{url:absurl, title:"T&F Snapshot", mimeType:"text/html"}
+		];
+		item.complete();
+	});
+	translator.translate();
+  });
+}
 
-	}
-	/** BEGIN TEST CASES **/
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
