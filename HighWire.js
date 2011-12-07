@@ -48,11 +48,12 @@ function handleRequests(requests) {
 			//remove all caps from titles and authors.
 			for (i in item.creators){
 				if (item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
-				item.creators[i].lastName = Zotero.Utilities.capitalizeTitle(item.creators[i].lastName.toLowerCase(),true);
+					item.creators[i].lastName = Zotero.Utilities.capitalizeTitle(item.creators[i].lastName.toLowerCase(),true);
 				}
 				if (item.creators[i].firstName == item.creators[i].firstName.toUpperCase()) {
-				item.creators[i].firstName = Zotero.Utilities.capitalizeTitle(item.creators[i].firstName.toLowerCase(),true);
-			}}
+					item.creators[i].firstName = Zotero.Utilities.capitalizeTitle(item.creators[i].firstName.toLowerCase(),true);
+				}
+			}
 			if (item.title == item.title.toUpperCase()) {
 				item.title = Zotero.Utilities.capitalizeTitle(item.title.toLowerCase(),true);
 			}
@@ -159,7 +160,7 @@ function doWeb(doc, url) {
 			items[gca] = Zotero.Utilities.trimInternal(title);
 		}
 		
-		items = Zotero.selectItems(items, function(items) {
+		Zotero.selectItems(items, function(items) {
 			if(!items) return true;
 			
 			var requests = new Array();
