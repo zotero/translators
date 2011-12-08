@@ -76,7 +76,9 @@ choices          : {
   titles :  FW.Xpath('//div[@class="item"]/h3/a').text().trim(),
   urls    :  FW.Xpath('//div[@class="item"]/h3/a').key("href")
 }
-});/** BEGIN TEST CASES **/
+});
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",

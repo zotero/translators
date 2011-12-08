@@ -160,6 +160,9 @@ function processTag(item, tag, value) {
 		// ignore, unless this is a book or unpublished work, as per spec
 		if(item.itemType == "book" || item.itemType == "manuscript") {
 			item.title = value;
+		// allow for book sections as well, since it makes sense
+		} else if(item.itemType == "bookSection") {
+			item.bookTitle = value;
 		} else {
 			item.backupPublicationTitle = value;
 		}
