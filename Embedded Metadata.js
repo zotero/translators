@@ -48,6 +48,7 @@ var HIGHWIRE_MAPPINGS = {
 	"citation_technical_report_number":"number",
 	"citation_issn":"ISSN",
 	"citation_isbn":"ISBN",
+	"citation_abstract":"abstractNote",
 	"citation_doi":"DOI"
 };
 
