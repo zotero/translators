@@ -8,11 +8,11 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"lastUpdated":"2011-01-12 04:31:00"
 }
 
 function detectWeb(doc, url) {
-	var articleRe = /^http:\/\/(?:www|en|de)\.scientificcommons\.org\/([0-9]+)/;
+	/**var articleRe = /^http:\/\/(?:www|en|de)\.scientificcommons\.org\/([0-9]+)/;
 	var m = articleRe.exec(url);
 
 	if(m) {
@@ -27,7 +27,7 @@ function detectWeb(doc, url) {
 			} : null;
 		var listElt = doc.evaluate('//div[@id="content_search_details"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 		if (listElt) return "multiple";
-	}
+	} */
 	return false;
 }
 
