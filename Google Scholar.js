@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2011-11-03 20:31:08"
+	"lastUpdated": "2011-12-09 20:31:08"
 }
 
 /*
@@ -55,7 +55,10 @@ var detectWeb = function (doc, url) {
 			return "case";
 		}
 	} else {
-		return "multiple";
+		if (ZU.xpath(doc, "//div[@class='gs_r']").length > 0)
+			return "multiple";
+		else
+			return false;
 	}
 };
 
@@ -135,6 +138,11 @@ var scrapeListing = function (doc) {
 			labels.push(titleString);
 		}
 		factories.push(factory);
+	}
+
+	// Error reports indicate that we often attempt to call selectItems without any items
+	if (!labels) {
+		return false;
 	}
 
 	Zotero.selectItems(labels, function(items) {
