@@ -9,14 +9,18 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2011-11-12 19:20:00"
+	"lastUpdated": "2011-12-07 20:36:33"
 }
 
 function detectWeb(doc, url) {
 	if ((url.indexOf("_ob=DownloadURL") != -1) || doc.title == "ScienceDirect Login" || doc.title == "ScienceDirect - Dummy") {
 		return false;
 	}
-	if((!url.match("pdf") && url.indexOf("_ob=ArticleURL") == -1 && url.indexOf("/article/") == -1) || url.indexOf("/journal/") != -1) {
+	if((url.indexOf("pdf") !== -1
+				&& url.indexOf("_ob=ArticleURL") === -1 
+				&& url.indexOf("/article/") === -1) 
+			|| url.indexOf("/journal/") !== -1
+			|| url.indexOf("/book/") !== -1) {
 		return "multiple";
 	} else if (!url.match("pdf")) {
 		return "journalArticle";
@@ -31,8 +35,6 @@ function doWeb(doc, url) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
 	
-	if (doc.evaluate('//*[contains(@class, "icon_exportarticlesci_dir")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()
-			|| doc.evaluate('//*[contains(@src, "exportarticle_a.gif")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 		var articles = new Array();
 		if(detectWeb(doc, url) == "multiple") {
 			//search page
@@ -42,7 +44,7 @@ function doWeb(doc, url) {
 				// not sure if this case still arises. may need to be fixed at some point
 				xpath = '//table[@class="resultRow"]/tbody/tr/td[2]/a';
 			} else {
-				xpath = '//div[@class="font3"][@id="bodyMainResults"]/table/tbody/tr/td[2]/a';
+				xpath = '//div[@class="font3"][@id="bodyMainResults"]//td[@class="pubBody"]/div/table/tbody/tr/td[3]/a';
 			}
 			var rows = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 			var next_row;
@@ -191,7 +193,6 @@ function doWeb(doc, url) {
 		
 		
 		if(detectWeb(doc, url) == "journalArticle") {
-			Zotero.debug("Single");
 			var set = scrape(doc, {});
 			second(set, function(){
 				third(set, function(){
@@ -204,136 +205,6 @@ function doWeb(doc, url) {
 			Zotero.Utilities.processAsync(sets, callbacks, function() {Zotero.done()});
 		}
 		
-	} else {
-		throw ("Guest-mode saving from ScienceDirect temporarily disabled due to a site update -- an updated Zotero translator will be available soon");
-		
-		var sets = [];
-		var articles = new Array();
-		if (detectWeb(doc, url) == "multiple") {
-			var items = new Object();
-			if (url.indexOf("_ob=PublicationURL") != -1) {
-				xpath = '//table[@class="resultRow"]/tbody/tr/td[2]/a';
-				// not sure whether this case still exists
-			} else {
-				xpath = '//div[@class="font3"][@id="bodyMainResults"]/table/tbody/tr/td[2]/a';
-			}
-			var rows = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-			var next_row;
-			while (next_row = rows.iterateNext()) {
-				var title = next_row.textContent;
-				var link = next_row.href;
-				if (!title.match(/PDF \(/) && !title.match(/Related Articles/)) items[link] = title;
-			}
-			items = Zotero.selectItems(items);
-			for (var i in items) {
-				articles.push(i);
-			}
-			
-		} else {
-			articles = [url];
-		}
-		if(articles.length == 0) {
-			Zotero.debug('no items');
-			return;
-		}
-		
-		for each (article in articles) {
-			sets.push({article:article});
-		}
-		
-		var unauthScrape = function(doc2) {
-			var item = new Zotero.Item("journalArticle");
-			item.repository = "ScienceDirect";
-			item.url = doc2.location.href;
-			var title = doc2.title.match(/^[^-]+\-([^:]+):(.*)$/);
-			item.title = Zotero.Utilities.trimInternal(title[2]);
-			item.publicationTitle = Zotero.Utilities.trimInternal(title[1]);
-			voliss = doc2.evaluate('//div[@class="pageText"][@id="sdBody"]/table/tbody/tr/td[1]', doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			if (voliss.match(/Volume\s+\d+/)) item.volume = voliss.match(/Volume\s+(\d+)/)[1];
-			if (voliss.match(/Issues?\s+[^,]+/)) item.issue = voliss.match(/Issues?\s+([^,]+)/)[1];
-			if (voliss.match(/(J|F|M|A|S|O|N|D)\w+\s+\d{4}/)) item.date = voliss.match(/(J|F|M|A|S|O|N|D)\w+\s+\d{4}/)[0];
-			if (voliss.match(/Pages?\s+[^,^\s]+/)) item.pages = voliss.match(/Pages?\s+([^,^\s]+)/)[1];
-			/*
-			
-			FIXME: pulling full article content
-			
-			var abspath = '//div[@class="articleHeaderInner"][@id="articleHeader"]/div[@class="articleText"]/p';
-			var absx = doc2.evaluate(abspath, doc2, nsResolver, XPathResult.ANY_TYPE, null);
-			var ab;
-			item.abstractNote = "";
-			while (ab = absx.iterateNext()) {
-				item.abstractNote += Zotero.Utilities.trimInternal(ab.textContent) + " ";
-			}
-			if (item.abstractNote.substr(0, 7) == "Summary") {
-				item.abstractNote = item.abstractNote.substr(9);
-			}
-			*/
-			var tagpath = '//div[@class="articleText"]/p[strong[starts-with(text(), "Keywords:")]]';
-			if (doc2.evaluate(tagpath, doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-				if (doc2.evaluate(tagpath, doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(":")[1]) {
-					var tags = doc2.evaluate(tagpath, doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(":")[1].split(";");
-					for (var i in tags) {
-						item.tags.push(Zotero.Utilities.trimInternal(tags[i]));
-					}
-				}
-			}
-			/*
-			
-			FIXME: producing empty pages
-			
-			item.attachments.push({url:doc2.location.href, title:"ScienceDirect Snapshot", mimeType:"text/html"});
-			
-			*/
-			
-			return item;
-		};
-		
-		var first = function(set, next) {
-			
-			var article = set.article;
-		
-			Zotero.Utilities.processDocuments(article, function(doc2) {
-				
-				set.item = unauthScrape(doc2);
-				
-				next();
-			});
-		
-		};
-		
-		var second = function(set, next) {
-			var item = set.item;
-			
-			Zotero.Utilities.HTTP.doGet(item.url, function(text) {
-				item.DOI = text.match(/>doi:([^<]*)/)[1];
-				
-				try {
-					var aus = text.match(/<strong>\s+<p>.*<\/strong>/)[0].replace(/<sup>/g, "$").replace(/<\/sup>/g, "$");
-					aus = aus.replace(/\$[^$]*\$/g, "");
-					aus = aus.replace(/<a[^>]*>/g, "$").replace(/<\/a[^>]*>/g, "$");
-					aus = aus.replace(/\$[^$]*\$/g, "");
-					aus = Zotero.Utilities.cleanTags(aus);
-					aus = aus.split(/(,|and)/);
-					for (var a in aus) {
-						if (aus[a] != "," && aus[a] != "and" && aus[a].match(/\w+/)) {
-							item.creators.push(Zotero.Utilities.cleanAuthor(Zotero.Utilities.unescapeHTML(Zotero.Utilities.trimInternal(aus[a]), "author")));
-						}
-					}
-				} catch(e) {
-					Zotero.debug("No Authors listed.");
-				}
-				item.complete();
-				next();
-			});
-		};
-		var callbacks = [first, second];
-		if(detectWeb(doc, url) == "journalArticle") {
-			second({item:unauthScrape(doc)}, function() {Zotero.done()});
-		} else {
-			Zotero.Utilities.processAsync(sets, callbacks, function() {Zotero.done()});
-		}
-		
-	}
 	Zotero.wait();
 }
 
@@ -469,8 +340,45 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sciencedirect.com/science?_ob=ArticleListURL&_method=list&_ArticleListID=1828350808&_sort=r&_st=13&view=c&_acct=C000059605&_version=1&_urlVersion=0&_userid=4423&md5=5c1e5d44885677eb58595ccc1b9ef34c&searchtype=a",
+		"url": "http://www.sciencedirect.com/science/book/9780123694683",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.sciencedirect.com/science/article/pii/B9780123694683500083",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"creators": [
+					{
+						"lastName": "Dierk",
+						"firstName": "Raabe",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": false,
+						"title": "ScienceDirect Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "8 - Introduction to discrete dislocation statics and dynamics",
+				"bookTitle": "Computational Materials Engineering",
+				"publisher": "Academic Press",
+				"place": "Burlington",
+				"date": "2007",
+				"pages": "267-316",
+				"ISBN": "978-0-12-369468-3",
+				"ISSN": "978-0-12-369468-3",
+				"DOI": "10.1016/B978-012369468-3/50008-3",
+				"url": "http://www.sciencedirect.com/science/article/pii/B9780123694683500083",
+				"libraryCatalog": "ScienceDirect"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

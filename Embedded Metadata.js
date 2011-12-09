@@ -9,32 +9,32 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-10-24 03:52:52"
+	"lastUpdated": "2011-12-08 08:32:11"
 }
 
 /*
-    ***** BEGIN LICENSE BLOCK *****
-    
-    Copyright © 2011 Avram Lyon and the Center for History and New Media
-                     George Mason University, Fairfax, Virginia, USA
-                     http://zotero.org
-    
-    This file is part of Zotero.
-    
-    Zotero is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-    
-    Zotero is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Affero General Public License for more details.
-    
-    You should have received a copy of the GNU Affero General Public License
-    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
-    
-    ***** END LICENSE BLOCK *****
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2011 Avram Lyon and the Center for History and New Media
+					 George Mason University, Fairfax, Virginia, USA
+					 http://zotero.org
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
 */
 
 var HIGHWIRE_MAPPINGS = {
@@ -48,7 +48,8 @@ var HIGHWIRE_MAPPINGS = {
 	"citation_technical_report_number":"number",
 	"citation_issn":"ISSN",
 	"citation_isbn":"ISBN",
-	"citation_abstract":"abstractNote"
+	"citation_abstract":"abstractNote",
+	"citation_doi":"DOI"
 };
 
 // Maps actual prefix in use to URI
@@ -83,7 +84,7 @@ function getPrefixes(doc) {
 
 function detectWeb(doc, url) {
 	getPrefixes(doc);
-	
+
 	// XXX What is this blacklisting?
 	if (url.indexOf("reprint") != -1) return false;
 	var metaTags = doc.getElementsByTagName("meta");
@@ -91,9 +92,9 @@ function detectWeb(doc, url) {
 		var tag = metaTags[i].getAttribute("name");
 		if(!tag) continue;
 		tag = tag.toLowerCase();
-		
+
 		var schema = _prefixes[tag.split('.')[0]];
-		
+
 		// See if the supposed prefix is there, split by period or underscore
 		if(schema) {
 			_rdfPresent = true;
@@ -109,9 +110,9 @@ function detectWeb(doc, url) {
 			_itemType = "conferencePaper";
 		}
 	}
-	
+
 	if(!_rdfPresent && !_itemType) return false;
-	
+
 	if(!_itemType) _itemType = "webpage";
 	return _itemType;
 }
@@ -119,19 +120,19 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 	// populate _rdfPresent, _itemType, and _prefixes
 	detectWeb(doc, url);
-	
+
 	if(_rdfPresent) {
 		// load RDF translator, so that we don't need to replicate import code
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f");
-		translator.setHandler("itemDone", function(obj, newItem) { 
+		translator.setHandler("itemDone", function(obj, newItem) {
 			_haveItem = true;
 			addHighwireMetadata(doc, newItem);
 		});
-		
+
 		translator.getTranslatorObject(function(rdf) {
 			var metaTags = doc.getElementsByTagName("meta");
-		
+
 			for(var i=0; i<metaTags.length; i++) {
 				var tag = metaTags[i].getAttribute("name");
 				var value = metaTags[i].getAttribute("content");
@@ -139,7 +140,7 @@ function doWeb(doc, url) {
 				var dotIndex = tag.indexOf('.');
 				if(dotIndex === -1) continue;
 				var prefix = tag.substr(0, dotIndex).toLowerCase();
-		
+
 				// See if the supposed prefix is there, split by period or underscore
 				if(_prefixes[prefix]) {
 					var prop = tag[dotIndex+1].toLowerCase()+tag.substr(dotIndex+2);
@@ -148,7 +149,7 @@ function doWeb(doc, url) {
 					rdf.Zotero.RDF.addStatement(url, _prefixes[prefix] + prop, value, true);
 				}
 			}
-			
+
 			rdf.defaultUnknownType = _itemType;
 			rdf.doImport();
 			if(!_haveItem) {
@@ -171,7 +172,7 @@ function addHighwireMetadata(doc, newItem) {
 			newItem[zoteroName] = ZU.xpathText(doc, '//meta[@name="'+metaName+'"]/@content');
 		}
 	}
-	
+
 	if(!newItem.creators.length) {
 		// TODO: This data needs to be normalized. It comes in at least the following forms:
 		// 1. Separate meta tags per author
@@ -179,17 +180,21 @@ function addHighwireMetadata(doc, newItem) {
 		// 3. Authors in John Doe format, comma-delimited
 		// Currently, we only handle the first two, and we guess at Last, First or First, Last
 		// based on the presence or absence of a comma
-		
+
 		var authorNodes = ZU.xpath(doc, '//meta[@name="citation_author"]/@content | //meta[@name="citation_authors"]/@content');
 		for(var i=0, n=authorNodes.length; i<n; i++) {
-			var authors = authorNodes[i].nodeValue.split(/\s*;\s/);
+		  //make sure there are no empty authors
+		  var authors = authorNodes[i].nodeValue.replace(/(;[^A-Za-z0-9]*)$/, "").split(/\s*;\s/);
 			for(var j=0, m=authors.length; j<m; j++) {
 				var author = authors[j];
 				newItem.creators.push(ZU.cleanAuthor(author, "author", author.indexOf(",") !== -1));
 			}
 		}
 	}
-	
+	//Cleanup DOI
+	if (newItem.DOI){
+		newItem.DOI =newItem.DOI.replace(/^doi:/, "");
+	}
 	if(!newItem.pages) {
 		var pages = [];
 		var firstpage = ZU.xpathText(doc, '//meta[@name="citation_firstpage"]/@content');
@@ -198,21 +203,21 @@ function addHighwireMetadata(doc, newItem) {
 		if(lastpage) pages.push(lastpage);
 		if(pages.length) newItem.pages = pages.join("-");
 	}
-	
+
 	if(!newItem.attachments.length) {
 		var pdfURL = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
 		if(pdfURL) newItem.attachments.push({title:"Full Text PDF", url:pdfURL, mimeType:"application/pdf"});
 	}
-	
+
 	// Other last chances
 	if(!newItem.url) newItem.url = doc.location.href;
 	if(!newItem.title) newItem.title = doc.title;
-	
+
 	// add attachment
 	newItem.attachments.push({document:doc, title:"Snapshot"});
 	// add access date
 	newItem.accessDate = 'CURRENT_TIMESTAMP';
-	
+
 	newItem.libraryCatalog = doc.location.host;
 	newItem.complete();
 }
