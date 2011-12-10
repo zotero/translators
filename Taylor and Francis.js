@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-12-05 17:01:11"
+	"lastUpdated": "2011-12-10 15:53:22"
 }
 
 /*
@@ -32,7 +32,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 
 function detectWeb(doc, url) {
-  if (url.match(/\/doi\/abs\/10\./))	return "journalArticle";
+  if (url.match(/\/doi\/abs\/10\.|\/doi\/full\/10\./))	return "journalArticle";
   else if(url.match(/\/action\/doSearch\?|\/toc\//))	return "multiple";
 }
 
@@ -40,30 +40,30 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
   var namespace = doc.documentElement.namespaceURI;
   var nsResolver = namespace ? function(prefix) {
-    if (prefix == 'x') return namespace; else return null;
+	if (prefix == 'x') return namespace; else return null;
 		} : null;
   var arts = new Array();
   if (detectWeb(doc, url) == "multiple") {
-    var items = new Object();
-    var titles = doc.evaluate('//label[@class="resultTitle"]/a|//a[@class="entryTitle"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-    var title;
-    while (title = titles.iterateNext()) {
-      items[title.href] = title.textContent;
+	var items = new Object();
+	var titles = doc.evaluate('//label[@class="resultTitle"]/a|//a[@class="entryTitle"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var title;
+	while (title = titles.iterateNext()) {
+	  items[title.href] = title.textContent;
 		}
-    Zotero.selectItems(items, function(items){
+	Zotero.selectItems(items, function(items){
 			 if(!items) {
 			   return true;
 			 }
 			 citationurls = new Array();
 			 for (var itemurl in items) {
-			   citationurls.push(itemurl.replace(/\/doi\/abs\//, "/action/showCitFormats?doi="));
+			   citationurls.push(itemurl.replace(/\/doi\/abs\/|\/doi\/full\//, "/action/showCitFormats?doi="));
 			 }
 			 getpages(citationurls);
-		       });
+			   });
 
   } else {
-    var citationurl = url.replace(/\/doi\/abs\//, "/action/showCitFormats?doi=");
-    getpages(citationurl);
+	var citationurl = url.replace(/\/doi\/abs\/|\/doi\/full\//, "/action/showCitFormats?doi=");
+	getpages(citationurl);
   }
   Zotero.wait();
 }
@@ -71,7 +71,7 @@ function doWeb(doc, url) {
 function getpages(citationurl) {
 	//we work entirely from the citations page
   Zotero.Utilities.processDocuments(citationurl, function(doc) {
-				      scrape(doc);
+					  scrape(doc);
 	}, function() { Zotero.done() });
 }
 
@@ -169,6 +169,61 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.tandfonline.com/toc/clah20/22/4",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.tandfonline.com/doi/full/10.1080/17487870802543480",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Chong",
+						"firstName": "Alberto",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Galdo",
+						"firstName": "Jose",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Saavedra",
+						"firstName": "Jaime",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.tandfonline.com/doi/pdf/10.1080/17487870802543480",
+						"title": "T&F PDF fulltext",
+						"mimeType": "application/pdf"
+					},
+					{
+						"url": "http://www.tandfonline.com/doi/abs/10.1080/17487870802543480",
+						"title": "T&F Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Informality and productivity in the labor market in Peru",
+				"date": "2008",
+				"DOI": "10.1080/17487870802543480",
+				"publicationTitle": "Journal of Economic Policy Reform",
+				"pages": "229-245",
+				"volume": "11",
+				"issue": "4",
+				"publisher": "Routledge",
+				"abstractNote": "This article analyzes the evolution of informal employment in Peru from 1986 to 2001. Contrary to what one would expect, the informality rates increased steadily during the 1990s despite the introduction of flexible contracting mechanisms, a healthy macroeconomic recovery, and tighter tax codes and regulation. We explore different factors that may explain this upward trend including the role of labor legislation and labor allocation between/within sectors of economic activity. Finally, we illustrate the negative correlation between productivity and informality by evaluating the impacts of the Youth Training PROJOVEN Program that offers vocational training to disadvantaged young individuals. We find significant training impacts on the probability of formal employment for both males and females.\nThis article analyzes the evolution of informal employment in Peru from 1986 to 2001. Contrary to what one would expect, the informality rates increased steadily during the 1990s despite the introduction of flexible contracting mechanisms, a healthy macroeconomic recovery, and tighter tax codes and regulation. We explore different factors that may explain this upward trend including the role of labor legislation and labor allocation between/within sectors of economic activity. Finally, we illustrate the negative correlation between productivity and informality by evaluating the impacts of the Youth Training PROJOVEN Program that offers vocational training to disadvantaged young individuals. We find significant training impacts on the probability of formal employment for both males and females.",
+				"ISBN": "1748-7870",
+				"ISSN": "1748-7870",
+				"url": "http://www.tandfonline.com/doi/abs/10.1080/17487870802543480",
+				"accessDate": "2011/12/10",
+				"libraryCatalog": "Taylor&Francis"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
