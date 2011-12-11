@@ -75,18 +75,16 @@ function doWeb(doc, url) {
 				return true;
 			}
 			for (var itemurl in items) {
-				arts.push[itemurl];
+				arts.push(itemurl);
 			}
-			ZU.processDocuments(itemurl, scrape, function () {
+			ZU.processDocuments(arts, scrape, function () {
 				Zotero.done();
 			});
 			Zotero.wait();
 		});
-
 	} else {
 		scrape(doc);
 	}
-	Zotero.wait();
 }
 
 
