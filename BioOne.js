@@ -2,7 +2,7 @@
 	"translatorID": "7cb0089b-9551-44b2-abca-eb03cbf586d9",
 	"label": "BioOne",
 	"creator": "Michael Berkowitz",
-	"target": "http://[^/]*www.bioone.org[^/]*/",
+	"target": "^http://[^/]*www\\.bioone\\.org[^/]*/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
@@ -50,8 +50,8 @@ function doWeb(doc, url) {
      var title = ZU.xpathText(rows[i], './/h4[@class="searchTitle"]');
 			var id = ZU.xpath(rows[i], './/p[@class="searchEntryTools"]/a')[0].href;
 			items[id] = title;
-		}
-    Zotero.selectItems(items, function(items){
+	}
+    	Zotero.selectItems(items, function(items){
 			 if(!items) {
 			   return true;
 			 }
@@ -106,7 +106,9 @@ function scrape (doc) {
 	});
 	translator.translate();
   });
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
