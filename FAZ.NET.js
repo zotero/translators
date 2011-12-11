@@ -82,11 +82,9 @@ function doWeb(doc, url) {
 			});
 			Zotero.wait();
 		});
-
 	} else {
 		scrape(doc);
 	}
-	Zotero.wait();
 }
 
 
