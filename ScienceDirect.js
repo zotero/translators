@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2011-12-07 20:36:33"
+	"lastUpdated": "2011-12-10 17:21:32"
 }
 
 function detectWeb(doc, url) {
@@ -21,9 +21,18 @@ function detectWeb(doc, url) {
 				&& url.indexOf("/article/") === -1) 
 			|| url.indexOf("/journal/") !== -1
 			|| url.indexOf("/book/") !== -1) {
-		return "multiple";
+		if (ZU.xpath(doc, '//table[@class="resultRow"]/tbody/tr/td[2]/a').length > 0
+			|| ZU.xpath(doc, '//div[@class="font3"][@id="bodyMainResults"]//td[@class="pubBody"]/div/table/tbody/tr/td[3]/a').length > 0) {
+			return "multiple";
+		} else {
+			return false;
+		}
 	} else if (!url.match("pdf")) {
-		return "journalArticle";
+		// Book sections have the ISBN in the URL
+		if (url.indexOf("/B978") !== -1)
+			return "bookSection";
+		else
+			return "journalArticle";
 	}
 }
 
@@ -191,8 +200,9 @@ function doWeb(doc, url) {
 			
 		};
 		
-		
-		if(detectWeb(doc, url) == "journalArticle") {
+		var detectedType = detectWeb(doc, url);
+		if(detectedType == "journalArticle"
+			|| detectedType == "bookSection") {
 			var set = scrape(doc, {});
 			second(set, function(){
 				third(set, function(){
@@ -220,12 +230,12 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Schaaf",
-						"firstName": "Christian P.",
+						"firstName": "Christian P.",
 						"creatorType": "author"
 					},
 					{
 						"lastName": "Zoghbi",
-						"firstName": "Huda Y.",
+						"firstName": "Huda Y.",
 						"creatorType": "author"
 					}
 				],
@@ -254,10 +264,8 @@ var testCases = [
 				"ISSN": "0896-6273",
 				"DOI": "10.1016/j.neuron.2011.05.025",
 				"url": "http://www.sciencedirect.com/science/article/pii/S0896627311004430",
-				"abstractNote": "In this issue, a pair of studies (Levy et al. and Sanders et al.) identify several de novo copy-number variants that together account for 5%–8% of cases of simplex autism spectrum disorders. These studies suggest that several hundreds of loci are likely to contribute to the complex genetic heterogeneity of this group of disorders. An accompanying study in this issue (Gilman et al.), presents network analysis implicating these CNVs in neural processes related to synapse development, axon targeting, and neuron motility.",
-				"libraryCatalog": "ScienceDirect",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"checkFields": "title"
+				"abstractNote": "In this issue, a pair of studies (Levy et al. and Sanders et al.) identify several de novo copy-number variants that together account for 5%–8% of cases of simplex autism spectrum disorders. These studies suggest that several hundreds of loci are likely to contribute to the complex genetic heterogeneity of this group of disorders. An accompanying study in this issue (Gilman et al.), presents network analysis implicating these CNVs in neural processes related to synapse development, axon targeting, and neuron motility.",
+				"libraryCatalog": "ScienceDirect"
 			}
 		]
 	},
@@ -364,6 +372,11 @@ var testCases = [
 						"url": false,
 						"title": "ScienceDirect Snapshot",
 						"mimeType": "text/html"
+					},
+					{
+						"url": false,
+						"title": "ScienceDirect Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"title": "8 - Introduction to discrete dislocation statics and dynamics",
