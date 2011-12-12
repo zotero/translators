@@ -1,11 +1,11 @@
 {
 	"translatorID": "f26cfb71-efd7-47ae-a28c-d4d8852096bd",
 	"label": "Cell Press",
-	"creator": "Michael Berkowitz",
-	"target": "http://www.(cancercell|cell|cellhostandmicrobe|cellmetabolism|cellstemcell|chembiol|current-biology|developmentalcell|immunity|molecule|neuron|structure).(org|com)",
-	"minVersion": "1.0.0b4.r5",
+	"creator": "Michael Berkowitz, Sebastian Karcher",
+	"target": "^http://www\\.(cancercell|cell|cellhostandmicrobe|cellmetabolism|cellstemcell|chembiol|current-biology|developmentalcell|immunity|molecule|neuron|structure)\\.(org|com)",
+	"minVersion": "2.1",
 	"maxVersion": "",
-	"priority": 99,
+	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
@@ -47,7 +47,7 @@ attachments : [{ url: FW.Xpath('//meta[@name="citation_pdf_url"]/@content').text
   type: "application/pdf" },
   {url: FW.Xpath('//meta[@name="citation_abstract_html_url"]/@content').text(),
   title: "Cell Journal Snapshot",
-  type: "text/html"},
+  type: "text/html"}
   ],
 //make sure there are no empty authors:
 creators : FW.Xpath('//meta[@name="citation_author"]/@content').text().replace(/(;[^A-Za-z0-9]*)$/, "").cleanAuthor("author"),
