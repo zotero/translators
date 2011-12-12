@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-12-08 08:32:11"
+	"lastUpdated": "2011-12-11 16:51:37"
 }
 
 /*
@@ -174,17 +174,25 @@ function addHighwireMetadata(doc, newItem) {
 	}
 
 	if(!newItem.creators.length) {
-		// TODO: This data needs to be normalized. It comes in at least the following forms:
-		// 1. Separate meta tags per author
-		// 2. Authors in Doe, John format, semicolon-delimited
-		// 3. Authors in John Doe format, comma-delimited
-		// Currently, we only handle the first two, and we guess at Last, First or First, Last
-		// based on the presence or absence of a comma
+		/* Three author formats:
+		 * 1. Separate meta tags per author
+		 * 2. Authors in Doe, John format, semicolon-delimited
+		 * 3. Authors in John Doe format, comma-delimited
+		 */
 
 		var authorNodes = ZU.xpath(doc, '//meta[@name="citation_author"]/@content | //meta[@name="citation_authors"]/@content');
 		for(var i=0, n=authorNodes.length; i<n; i++) {
 		  //make sure there are no empty authors
 		  var authors = authorNodes[i].nodeValue.replace(/(;[^A-Za-z0-9]*)$/, "").split(/\s*;\s/);
+		  if (authors.length == 1) {
+		  	  /* If we get nothing when splitting by semicolon, and at least two words on
+		  	   * either side of the comma when splitting by comma, we split by comma. */
+			  var authorsByComma = authors[0].split(/\s*,\s*/);
+			  if (authorsByComma.length > 1
+			  		&& authorsByComma[0].indexOf(" ") !== -1
+			  		&& authorsByComma[1].indexOf(" ") !== -1)
+			  		authors = authorsByComma;
+		  }
 			for(var j=0, m=authors.length; j<m; j++) {
 				var author = authors[j];
 				newItem.creators.push(ZU.cleanAuthor(author, "author", author.indexOf(",") !== -1));
@@ -205,7 +213,7 @@ function addHighwireMetadata(doc, newItem) {
 	}
 
 	if(!newItem.attachments.length) {
-		var pdfURL = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
+		var pdfURL = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"][1]/@content');
 		if(pdfURL) newItem.attachments.push({title:"Full Text PDF", url:pdfURL, mimeType:"application/pdf"});
 	}
 
