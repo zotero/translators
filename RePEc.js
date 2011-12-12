@@ -52,7 +52,7 @@ creators : FW.Xpath('//meta[@name="citation_authors"]/@content').text().replace(
 date : FW.Xpath('//meta[@name="citation_date"]/@content|//meta[@name="citation_year"]/@content').text(),
 issue : FW.Xpath('//meta[@name="citation_issue"]/@content').text(),
 volume : FW.Xpath('//meta[@name="citation_volume"]/@content').text(),
-pages : FW.Xpath('concat(//meta[@name="citation_firstpage"]/@content, "-", //meta[@name="citation_lastpage"]/@content)').remove(/^-$/),
+pages : FW.Xpath('concat(//meta[@name="citation_firstpage"]/@content, "-", //meta[@name="citation_lastpage"]/@content)').remove(/^-|-$/),
 ISSN : FW.Xpath('//meta[@name="citation_issn"]/@content').text(),
 abstractNote: FW.Xpath('//meta[@name="citation_abstract"]/@content').text(),
 journalAbbreviation : FW.Xpath('//meta[@name="citation_journal_abbrev"]/@content').text(),
@@ -82,7 +82,7 @@ attachments : [{ url: FW.Xpath('//meta[@name="citation_pdf_url"]/@content').text
 //make sure there are no empty authors:
 creators : FW.Xpath('//meta[@name="citation_authors"]/@content').text().replace(/(;[^A-Za-z0-9]*)$/, "").split(/;/).cleanAuthor("author", "true"),
 date : FW.Xpath('//meta[@name="citation_date"]/@content|//meta[@name="citation_year"]/@content').text(),
-pages : FW.Xpath('concat(//meta[@name="citation_firstpage"]/@content, "-", //meta[@name="citation_lastpage"]/@content)').remove(/^-$/),
+pages : FW.Xpath('concat(//meta[@name="citation_firstpage"]/@content, "-", //meta[@name="citation_lastpage"]/@content)').remove(/^-|-$/),
 ISSN : FW.Xpath('//meta[@name="citation_issn"]/@content').text(),
 abstractNote: FW.Xpath('//meta[@name="citation_abstract"]/@content').text(),
 DOI : FW.Xpath('//meta[@name="citation_doi"]/@content').text(),
