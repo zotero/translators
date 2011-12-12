@@ -50,11 +50,11 @@ attachments : [{ url: FW.Xpath('//meta[@name="citation_pdf_url"]/@content').text
   type: "text/html"},
   ],
 //make sure there are no empty authors:
-creators : FW.Xpath('//meta[@name="citation_author"]/@content').text().replace(/(;[^A-Za-z0-9]*)$/, "").cleanAuthor("author"),
+creators : FW.Xpath('//meta[@name="citation_author"]/@content').text().cleanAuthor("author"),
 date : FW.Xpath('//meta[@name="citation_date"]/@content').text(),
 issue : FW.Xpath('//meta[@name="citation_issue"]/@content').text(),
 volume : FW.Xpath('//meta[@name="citation_volume"]/@content').text(),
-pages : FW.Xpath('concat(//meta[@name="citation_firstpage"]/@content, "-", //meta[@name="citation_lastpage"]/@content)').remove(/^-$/),
+pages : FW.Xpath('concat(//meta[@name="citation_firstpage"]/@content, "-", //meta[@name="citation_lastpage"]/@content)').remove(/^-|-$/),
 ISSN : FW.Xpath('//meta[@name="citation_issn"]/@content').text(),
 abstractNote: FW.Xpath('//meta[@name="description"]/@content').text(),
 journalAbbreviation : FW.Xpath('//meta[@name="citation_journal_abbrev"]/@content').text(),
@@ -63,7 +63,7 @@ language : FW.Xpath('//meta[@name="DC.Language"]/@content').text(),
 publicationTitle : FW.Xpath('//meta[@name="citation_journal_title"]/@content').text()
 });
 
- 
+
 FW.MultiScraper({
 itemType : 'multiple',
 detect : FW.Url().match(/searchresults\?/),
