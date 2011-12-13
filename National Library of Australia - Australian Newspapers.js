@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-11-09 17:23:39"
+	"lastUpdated": "2011-12-13 21:23:39"
 }
 
 /*
@@ -58,14 +58,19 @@ function doWeb(doc, url) {
 			if (nextTitle.textContent != '[coming soon]') {
 				items[nextTitle.href] = nextTitle.textContent;			}
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
+		Zotero.selectItems(items, function(items) {
+		    if(!items) {
+			Zotero.done();
+			return true;
+		    }
+                    for (var i in items) {
 			articles.push(i);
-		}
+                    }
+                    Zotero.Utilities.processDocuments(articles, scrape, function(){Zotero.done();});
+                });
 	} else {
-		articles = [url];
+            Zotero.Utilities.processDocuments([url], scrape, function(){Zotero.done();});
 	}
-	Zotero.Utilities.processDocuments(articles, scrape, function(){Zotero.done();});
 	Zotero.wait();
 }
 
@@ -82,7 +87,7 @@ function scrape(doc) {
 	newItem.url = 'http://nla.gov.au/nla.news-article' + articleId
 	// Gather all the basic details
 	newItem.title =  Zotero.Utilities.trimInternal(doc.evaluate('//meta[@name="newsarticle_headline"]/@content', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
-	var pubDetails = doc.evaluate('//div[@class="box title"]/strong', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent;
+	var pubDetails = doc.evaluate('//div[@class="box title"]/h1', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent;
 	newItem.publicationTitle = pubDetails.match(/(.+?) \(/)[1];
 	if (pubDetails.indexOf(':') != -1) {
 		newItem.place = pubDetails.match(/\((.+?) :/)[1];
