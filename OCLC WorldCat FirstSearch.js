@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-11-10 13:42:28"
+	"lastUpdated": "2011-12-12 19:24:10"
 }
 
 function detectWeb(doc, url) {
 	var detailRe = /FirstSearch: [\w ]+ Detailed Record/;
 	var searchRe = /FirstSearch: [\w ]+ List of Records/;
-	
+
 	if(detailRe.test(doc.title)) {
 		return "book";
 	} else if(searchRe.test(doc.title)) {
@@ -23,22 +23,26 @@ function detectWeb(doc, url) {
 	}
 }
 
-function processURLs(urls) {
+
+function processURLs(urls, url) {
 	if(!urls.length) {	// last url
 		Zotero.done();
 		return;
 	}
-	
+	//Z.debug(url)
 	var newUrl = urls.shift();
-	
+	//if non-roman characters are shown, shift the charset to utf-8,
+	//else move it to iso8859 so that accented roman letters work
+	if (url.match(/dfltcharset\=UTF\-8/)) var charset="utf-8";
+	else var charset="iso-8859-1"
 	Zotero.Utilities.HTTP.doPost(newUrl,
-	'exportselect=record&exporttype=plaintext', function(text) {
+	'exportselect=record&exporttype=wc-endnote', function(text) {
 		var lineRegexp = new RegExp();
 		lineRegexp.compile("^([\\w() ]+): *(.*)$");
-		
+
 		var newItem = new Zotero.Item("book");
 		newItem.extra = "";
-		
+
 		var lines = text.split('\n');
 		for(var i=0;i<lines.length;i++) {
 			var testMatch = lineRegexp.exec(lines[i]);
@@ -48,7 +52,7 @@ function processURLs(urls) {
 			} else {
 				var match = false;
 			}
-			
+
 			if(match) {
 				// is a useful match
 				if(match[1] == 'Title') {
@@ -64,20 +68,20 @@ function processURLs(urls) {
 				} else if(match[1] == "Series") {
 					newItem.series = match[2];
 				} else if(match[1] == "Description") {
-					var pageMatch = /([0-9]+) p\.?/
+				  var pageMatch = /([0-9]+) p\.?/;
 					var m = pageMatch.exec(match[2]);
 					if(m) {
 						newItem.pages = m[1];
 					}
 				} else if(match[1] == 'Author(s)' || match[1] == "Corp Author(s)") {
 					var yearRegexp = /[0-9]{4}-([0-9]{4})?/;
-					
+
 					var authors = match[2].split(';');
 					if(authors) {
 						newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[0], "author", true));
 						for(var j=1; j<authors.length; j+=2) {
 							if(authors[j-1].substring(0, 1) != '(' && !yearRegexp.test(authors[j])) {
-								// ignore places where there are parentheses		
+								// ignore places where there are parentheses
 								newItem.creators.push({lastName:authors[j], creatorType:"author", fieldMode:true});
 							}
 						}
@@ -89,7 +93,7 @@ function processURLs(urls) {
 					if(match[2].substring(match[2].length-1) == ',') {
 						match[2] = match[2].substring(0, match[2].length-1);
 					}
-					
+
 					// most, but not all, WorldCat publisher/places are
 					// colon delimited
 					var parts = match[2].split(/ ?: ?/);
@@ -102,7 +106,7 @@ function processURLs(urls) {
 				} else if(match[1] == 'Institution') {
 					newItem.publisher = match[2];
 				} else if(match[1] == 'Standard No') {
-					var ISBNRe = /ISBN:\s*([0-9X]+)/
+				  var ISBNRe = /ISBN:\s*([0-9X]+)/;
 					var m = ISBNRe.exec(match[2]);
 					if(m) newItem.ISBN = m[1];
 				} else if(match[1] == 'Year') {
@@ -111,7 +115,7 @@ function processURLs(urls) {
 					if(match[2][match[2].length-1] == ".") {
 						match[2] = match[2].substr(0, match[2].length-1);
 					}
-					
+
 					var tags = match[2].split("--");
 					for(var j in tags) {
 						newItem.tags.push(Zotero.Utilities.trimInternal(tags[j]));
@@ -138,14 +142,14 @@ function processURLs(urls) {
 				}
 			}
 		}
-		
+
 		if(newItem.extra) {
 			newItem.extra = newItem.extra.substr(0, newItem.extra.length-1);
 		}
-		
+
 		newItem.complete();
 		processURLs(urls);
-	}, false, 'iso-8859-1');
+	}, false, charset);
 }
 
 function doWeb(doc, url) {
@@ -153,26 +157,26 @@ function doWeb(doc, url) {
 	var numberRegexp = /(?:\?|\:)recno=([^?:]+)(?:\?|\:|$)/;
 	var resultsetRegexp = /(?:\?|\:)resultset=([^?:]+)(?:\?|\:|$)/;
 	var hostRegexp = new RegExp("^(https?://[^/]+)/");
-		
+
 	var sMatch = sessionRegexp.exec(url);
 	var sessionid = sMatch[1];
-	
+
 	var hMatch = hostRegexp.exec(url);
 	var host = hMatch[1];
-	
+
 	var newUri, exportselect;
-	
+
 	var detailRe = /FirstSearch: [\w ]+ Detailed Record/;
 	if(detailRe.test(doc.title)) {
 		var publisherRegexp = /^(.*), (.*?),?$/;
-		
+
 		var nMatch = numberRegexp.exec(url);
 		if(nMatch) {
 			var number = nMatch[1];
 		} else {
 			number = 1;
 		}
-		
+
 		var rMatch = resultsetRegexp.exec(url);
 		if(rMatch) {
 			var resultset = rMatch[1];
@@ -180,18 +184,18 @@ function doWeb(doc, url) {
 			// It's in an XPCNativeWrapper, so we have to do this black magic
 			resultset = doc.forms.namedItem('main').elements.namedItem('resultset').value;
 		}
-		
+
 		urls = [host+'/WebZ/DirectExport?numrecs=10:smartpage=directexport:entityexportnumrecs=10:entityexportresultset=' + resultset + ':entityexportrecno=' + number + ':sessionid=' + sessionid + ':entitypagenum=35:0'];
 	} else {
 		var items = Zotero.Utilities.getItemArray(doc, doc, '/WebZ/FSFETCH\\?fetchtype=fullrecord', '^(See more details for locating this item|Detailed Record)$');
 		items = Zotero.selectItems(items);
-		
+
 		if(!items) {
 			return true;
 		}
-		
+
 		var urls = new Array();
-		
+
 		for(var i in items) {
 			var nMatch = numberRegexp.exec(i);
 			var rMatch = resultsetRegexp.exec(i);
@@ -202,8 +206,8 @@ function doWeb(doc, url) {
 			}
 		}
 	}
-	
-	processURLs(urls);
+	//we need to pass on the original url to get at the charset
+	processURLs(urls, url);
 	Zotero.wait();
 }/** BEGIN TEST CASES **/
 var testCases = [
