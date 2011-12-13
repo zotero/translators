@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2011-09-20 20:17:54"
+	"lastUpdated": "2011-12-13 10:16:31"
 }
 
 /*
@@ -165,6 +165,20 @@ function doWeb(doc, url) {
 					{url:pdfurl, title:"Full Text PDF", mimeType:"application/pdf"}
 				];
 				if (doi) item.DOI = doi;
+			
+			//remove all caps in Names and Titles
+			for (i in item.creators){
+				if (item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
+					item.creators[i].lastName = Zotero.Utilities.capitalizeTitle(item.creators[i].lastName.toLowerCase(),true);
+				}
+				if (item.creators[i].firstName == item.creators[i].firstName.toUpperCase()) {
+					item.creators[i].firstName = Zotero.Utilities.capitalizeTitle(item.creators[i].firstName.toLowerCase(),true);
+				}
+			}
+			if (item.title == item.title.toUpperCase()) {
+				item.title = Zotero.Utilities.capitalizeTitle(item.title.toLowerCase(),true);
+			}
+			
 				if (item.notes) item.notes = [];
 				item.complete();
 			});
