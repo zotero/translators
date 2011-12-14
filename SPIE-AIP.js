@@ -75,7 +75,7 @@ choices : {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://spiedigitallibrary.org.turing.library.northwestern.edu/jei/resource/1/jeime5/v9/i1/p72_s1",
+		"url": "http://spiedigitallibrary.org/jei/resource/1/jeime5/v9/i1/p72_s1",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -106,17 +106,17 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://link.aip.org.turing.library.northwestern.edu/link/?JEIME5/9/72/1/pdf",
+						"url": "http://link.aip.org/link/?JEIME5/9/72/1/pdf",
 						"title": "AIP Journal PDF",
 						"type": "application/pdf"
 					},
 					{
-						"url": "http://link.aip.org.turing.library.northwestern.edu/link/?JEIME5/9/72/1",
+						"url": "http://link.aip.org/link/?JEIME5/9/72/1",
 						"title": "AIP Journal Snapshot",
 						"type": "text/html"
 					}
 				],
-				"url": "http://spiedigitallibrary.org.turing.library.northwestern.edu/jei/resource/1/jeime5/v9/i1/p72_s1",
+				"url": "http://spiedigitallibrary.org/jei/resource/1/jeime5/v9/i1/p72_s1",
 				"date": "2000-01-01",
 				"DOI": "doi:10.1117/1.482728",
 				"ISSN": "10179909",
@@ -132,17 +132,17 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://spiedigitallibrary.org.turing.library.northwestern.edu/search?key=SPIE_ALL&societykey=SPIE&coden=OPEGAR&q=analysis&displayid=SPIE&sortby=relevance&faceted=faceted&sortby=newestdate&CP_Style=false&alias=%2Foe&searchzone=2",
+		"url": "http://spiedigitallibrary.org/search?key=SPIE_ALL&societykey=SPIE&coden=OPEGAR&q=analysis&displayid=SPIE&sortby=relevance&faceted=faceted&sortby=newestdate&CP_Style=false&alias=%2Foe&searchzone=2",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://apl.aip.org.turing.library.northwestern.edu/search?q=phonon&searchzone=2&searchtype=&faceted=faceted&ignoredates=true&alias=&todate=2011-12-13&fromdate=1962-9-1&showMap=&sortby=newestdate&recordspage=25&possible1=phonon&possible1zone=article&bool1=and&possible2=&possible2zone=article&bool2=and&possible3=&possible3zone=article&z=&displayid=AIP&key=AIP_ALL&fromvolume=&fromissue=&tovolume=&toissue=&submit0=Update+Search",
+		"url": "http://apl.aip.org/search?q=phonon&searchzone=2&searchtype=&faceted=faceted&ignoredates=true&alias=&todate=2011-12-13&fromdate=1962-9-1&showMap=&sortby=newestdate&recordspage=25&possible1=phonon&possible1zone=article&bool1=and&possible2=&possible2zone=article&bool2=and&possible3=&possible3zone=article&z=&displayid=AIP&key=AIP_ALL&fromvolume=&fromissue=&tovolume=&toissue=&submit0=Update+Search",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://jcp.aip.org.turing.library.northwestern.edu/resource/1/jcpsa6/v135/i22/p224903_s1",
+		"url": "http://jcp.aip.org/resource/1/jcpsa6/v135/i22/p224903_s1",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -163,17 +163,17 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://link.aip.org.turing.library.northwestern.edu/link/?JCPSA6/135/224903/1/pdf",
+						"url": "http://link.aip.org/link/?JCPSA6/135/224903/1/pdf",
 						"title": "AIP Journal PDF",
 						"type": "application/pdf"
 					},
 					{
-						"url": "http://link.aip.org.turing.library.northwestern.edu/link/?JCPSA6/135/224903/1",
+						"url": "http://link.aip.org/link/?JCPSA6/135/224903/1",
 						"title": "AIP Journal Snapshot",
 						"type": "text/html"
 					}
 				],
-				"url": "http://jcp.aip.org.turing.library.northwestern.edu/resource/1/jcpsa6/v135/i22/p224903_s1",
+				"url": "http://jcp.aip.org/resource/1/jcpsa6/v135/i22/p224903_s1",
 				"abstractNote": "Self-localized domain walls are found trapped at the potential wells created by π-conjugated branching junctions due to the intrinsic electron-phonon couplings. The potential well depths are 0.14 eV for soliton, 0.28 eV for polaron, and 0.32 eV for exciton using the adapted Su-Schrieffer-Heeger model Hamiltonian, as compared to 0.23 eV for soliton, 0.25 eV for positively charged polaron, 0.33 eV for negatively charged polaron, and 0.21 eV for exciton using the ab initio Hartree-Fock method. Once the junction trapping wells are filled, however, branching junctions turn repulsive to additional self-localized domain walls. Torsions around the branching junction center have significant effects on the junction band gap and electron localizations.",
 				"date": "2011-12-13",
 				"DOI": "doi:10.1063/1.3665133",
