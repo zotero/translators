@@ -2,7 +2,7 @@
 	"translatorID": "48d3b115-7e09-4134-ad5d-0beda6296761",
 	"label": "SPIE/AIP",
 	"creator": "Sebastian Karcher",
-	"target": "http://(.+\\.aip|spiedigitallibrary)\\.org/.*(search\\?|resource)",
+	"target": "^http://(.+\\.aip|spiedigitallibrary)\\.org/.*(search\\?|resource)",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
@@ -69,7 +69,9 @@ choices : {
   titles : FW.Xpath('//p[@class="dbttitle"]/a').text().trim(),
   urls : FW.Xpath('//p[@class="dbttitle"]/a').key("href")
 }
-});/** BEGIN TEST CASES **/
+});
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
