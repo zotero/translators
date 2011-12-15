@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-12-14 18:48:21"
+	"lastUpdated": "2011-12-14 19:48:14"
 }
 
 function detectWeb(doc, url) {
@@ -49,7 +49,7 @@ function doWeb(doc, url) {
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
-		var titles = doc.evaluate('//span[@class="title"]/a|//p[2]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//span[@class="title"]/a[contains(@href, "/art")]|//p[2]/a[contains(@href, "/art")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var next_title;
 		while (next_title = titles.iterateNext()) {
 			items[next_title.href] = next_title.textContent;
@@ -60,14 +60,14 @@ function doWeb(doc, url) {
 			}
 			Zotero.Utilities.processDocuments(articles, scrape, 
 				function() { Zotero.done(); } );
-		}
+		});
 		Zotero.wait();
 	} else {
 		scrape(doc);
 	}
 }
 
-function scrape(doc) {
+function scrape(newDoc) {
 	var metatags = new Object();
 	var metas = newDoc.evaluate('//meta[contains(@name, "bepress_citation")]', newDoc, null, XPathResult.ANY_TYPE, null);
 	var next_meta;
@@ -87,9 +87,11 @@ function scrape(doc) {
 	}
 
 	//authors
-	var authors = metatags['author'].split('|');
-	for each (var author in authors) {
-		item.creators.push(Zotero.Utilities.cleanAuthor(author, "author", useComma=true));
+	if (metatags['author']) {
+		var authors = metatags['author'].split('|');
+		for each (var author in authors) {
+			item.creators.push(Zotero.Utilities.cleanAuthor(author, "author", useComma=true));
+		}
 	}
 	//they use mark-up in titles, but we want <i> and note <em> for italics
 	item.title =item.title.replace(/\<(\/)?em\>/g, "<$1i>");
@@ -149,6 +151,11 @@ var testCases = [
 				"checkFields": "title"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.bepress.com/forum/vol9/iss2/",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
