@@ -9,13 +9,22 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-09-22 22:43:26"
+	"lastUpdated": "2011-12-14 18:48:21"
 }
 
 function detectWeb(doc, url) {
-	if (url.match("cgi/query.cgi")) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+	if (prefix == 'x') return namespace; else return null;
+	} : null;
+	
+	
+	if (url.match("/do/search/")) {
 		return "multiple";
-	} else if (url.match(/vol[\d+]\/iss[\d]+\/art/)) {
+	} else if (doc.evaluate('//div[@class="article-list"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+		return "multiple";
+	}
+	else if (url.match(/vol[\d+]\/iss[\d]+\/art/)) {
 		return "journalArticle";
 	}
 }
@@ -39,7 +48,7 @@ function doWeb(doc, url) {
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
-		var titles = doc.evaluate('//table[@id="query"]/tbody/tr/td[4]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//span[@class="title"]/a|//p[2]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var next_title;
 		while (next_title = titles.iterateNext()) {
 			items[next_title.href] = next_title.textContent;
@@ -63,7 +72,7 @@ function doWeb(doc, url) {
 			else metatags[name] = next_meta.content;
 		}
 		var item = new Zotero.Item("journalArticle");
-
+        
 		//regularly mapped tags
 		for (var tag in tagMap) {
 			if (metatags[tag]) {
@@ -76,7 +85,8 @@ function doWeb(doc, url) {
 		for each (var author in authors) {
 			item.creators.push(Zotero.Utilities.cleanAuthor(author, "author", useComma=true));
 		}
-
+		//they use mark-up in titles, but we want <i> and note <em> for italics
+        item.title =item.title.replace(/\<em\>/g, "<i>").replace(/\<\/em\>/g, "</i>")
 		//attachments
 		item.attachments = [
 			{url:item.url, title:item.title, mimeType:"text/html"},
