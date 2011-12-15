@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-12-11 16:51:37"
+	"lastUpdated": "2011-12-15 10:47:35"
 }
 
 /*
@@ -36,6 +36,8 @@
 
 	***** END LICENSE BLOCK *****
 */
+
+var exports = { "doWeb":doWeb };
 
 var HIGHWIRE_MAPPINGS = {
 	"citation_title":"title",
