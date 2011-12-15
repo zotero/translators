@@ -385,7 +385,7 @@ function importItem(newItem, node, type) {
 	
 	// issue
 	newItem.issue = getFirstResults((container ? container : node), [n.prism+"number",
-		n.eprints+"number", n.dcterms+"citation.isssue"], true);
+		n.eprints+"number", n.dcterms+"citation.issue"], true);
 	// these mean the same thing
 	newItem.patentNumber = newItem.number = newItem.issue;
 	
