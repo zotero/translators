@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-12-16 14:28:02"
+	"lastUpdated": "2011-12-17 14:28:02"
 }
 
 /*
@@ -91,20 +91,26 @@ function detectWeb(doc, url) {
 
 	var metaTags = doc.getElementsByTagName("meta");
 	for(var i=0; i<metaTags.length; i++) {
+		// Two formats allowed:
+		// 	<meta name="..." content="..." />
+		//	<meta property="..." content="..." />
+		// The first is more common; the second is recommended by Facebook
+		// for their OpenGraph vocabulary
 		var tag = metaTags[i].getAttribute("name");
 		if (!tag) tag = metaTags[i].getAttribute("property");
 		var value = metaTags[i].getAttribute("content");
 		if(!tag || !value) continue;
+		// We allow three delimiters between the namespace and the property
 		var delimIndex = tag.indexOf('.');
 		if(delimIndex === -1) delimIndex = tag.indexOf(':');
 		if(delimIndex === -1) delimIndex = tag.indexOf('_');
 		if(delimIndex === -1) continue;
+		
 		var prefix = tag.substr(0, delimIndex).toLowerCase();
 		tag = tag.toLowerCase();
 		var prop = tag[delimIndex+1].toLowerCase()+tag.substr(delimIndex+2);
 
 		var schema = _prefixes[prefix];
-		// See if the supposed prefix is there, split by period or underscore
 		if(schema) {
 			_rdfPresent = true;
 			// If we have PRISM or eprints data, don't use the generic webpage icon
@@ -162,20 +168,27 @@ function doWeb(doc, url) {
 			var metaTags = doc.getElementsByTagName("meta");
 
 			for(var i=0; i<metaTags.length; i++) {
+				// Two formats allowed:
+				// 	<meta name="..." content="..." />
+				//	<meta property="..." content="..." />
+				// The first is more common; the second is recommended by Facebook
+				// for their OpenGraph vocabulary
 				var tag = metaTags[i].getAttribute("name");
 				if (!tag) tag = metaTags[i].getAttribute("property");
 				var value = metaTags[i].getAttribute("content");
 				if(!tag || !value) continue;
+				// We allow three delimiters between the namespace and the property
 				var delimIndex = tag.indexOf('.');
 				if(delimIndex === -1) delimIndex = tag.indexOf(':');
 				if(delimIndex === -1) delimIndex = tag.indexOf('_');
 				if(delimIndex === -1) continue;
+
 				var prefix = tag.substr(0, delimIndex).toLowerCase();
 
-				// See if the supposed prefix is there, split by period or underscore
 				if(_prefixes[prefix]) {
 					var prop = tag[delimIndex+1].toLowerCase()+tag.substr(delimIndex+2);
-					Zotero.debug(prefix+":"+prop +"=>"+value);
+					// This debug is for seeing what is being sent to RDF
+					Zotero.debug(_prefixes[prefix]+prop +"=>"+value);
 					rdf.Zotero.RDF.addStatement(url, _prefixes[prefix] + prop, value, true);
 				}
 			}
