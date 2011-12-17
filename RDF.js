@@ -1,42 +1,43 @@
 {
-	"translatorID":"5e3ad958-ac79-463d-812b-a86a9235c28f",
-	"translatorType":1,
-	"label":"RDF",
-	"creator":"Simon Kornblith",
-	"target":"rdf",
-	"minVersion":"2.1.9",
-	"maxVersion":"",
-	"priority":100,
-	"browserSupport":"gcsn",
-	"configOptions":{"dataMode":"rdf/xml"},
-	"displayOptions":null,
-	"inRepository":true,
-	"lastUpdated":"2011-12-14 17:29:20"
+	"translatorID": "5e3ad958-ac79-463d-812b-a86a9235c28f",
+	"label": "RDF",
+	"creator": "Simon Kornblith",
+	"target": "rdf",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"configOptions": {
+		"dataMode": "rdf/xml"
+	},
+	"inRepository": true,
+	"translatorType": 1,
+	"browserSupport": "gcs",
+	"lastUpdated": "2011-12-16 13:58:49"
 }
 
 /*
-    ***** BEGIN LICENSE BLOCK *****
-    
-    Copyright © 2011 Center for History and New Media
-                     George Mason University, Fairfax, Virginia, USA
-                     http://zotero.org
-    
-    This file is part of Zotero.
-    
-    Zotero is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-    
-    Zotero is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Affero General Public License for more details.
-    
-    You should have received a copy of the GNU Affero General Public License
-    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
-    
-    ***** END LICENSE BLOCK *****
+	***** BEGIN LICENSE BLOCK *****
+	
+	Copyright © 2011 Center for History and New Media
+					 George Mason University, Fairfax, Virginia, USA
+					 http://zotero.org
+	
+	This file is part of Zotero.
+	
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+	
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+	
+	***** END LICENSE BLOCK *****
 */
 
 function detectImport() {
@@ -58,11 +59,14 @@ var n = {
 	foaf:"http://xmlns.com/foaf/0.1/",
 	vcard:"http://nwalsh.com/rdf/vCard#",
 	vcard2:"http://www.w3.org/2006/vcard/ns#",	// currently used only for NSF, but is probably
-												// very similar to the nwalsh vcard ontology in a
-												// different namespace
+							// very similar to the nwalsh vcard ontology in a
+							// different namespace
 	link:"http://purl.org/rss/1.0/modules/link/",
 	z:"http://www.zotero.org/namespaces/export#",
-	eprints:"http://purl.org/eprint/terms/"
+	eprints:"http://purl.org/eprint/terms/",
+	og:"http://ogp.me/ns#",				// Used for Facebook's OpenGraph Protocol
+	article:"http://ogp.me/ns/article#",
+	book:"http://ogp.me/ns/book#"
 };
 
 var callNumberTypes = [n.dcterms+"LCC", n.dcterms+"DDC", n.dcterms+"UDC"];
@@ -253,8 +257,8 @@ function importItem(newItem, node, type) {
 			newItem.itemType = "bookSection";
 			container = getNodeByType(isPartOf, n.bib+"Book");
 		} else if(type == n.bib+"Article") {	// choose between journal,
-												// newspaper, and magazine
-												// articles
+							// newspaper, and magazine
+							// articles
 			// use of container = (not container ==) is intentional
 			if(container = getNodeByType(isPartOf, n.bib+"Journal")) {
 				newItem.itemType = "journalArticle";
@@ -314,6 +318,25 @@ function importItem(newItem, node, type) {
 	if(zoteroType && Zotero.Utilities.itemTypeExists(zoteroType)) {
 		newItem.itemType = zoteroType;
 	}
+
+	// do type handling for OGP
+	var ogType = getFirstResults(node, [n.og+"type"], true);
+	switch (ogType) {
+		case "video.movie":
+		case "video.episode":
+		case "video.tv_show":
+		case "video.other":
+			newItem.itemType = "videoRecording"; break;
+		case "article":
+			newItem.itemType = "newspaperArticle"; break;
+		case "book":
+			newItem.itemType = "book"; break;
+		case "music.song":
+		case "music.album":
+			newItem.itemType = "audioRecording"; break;
+		case "website":
+			newItem.itemType = "webpage"; break;
+	}
 	
 	if(newItem.itemType == "blogPost") {
 		container = getNodeByType(isPartOf, n.z+"Blog");
@@ -325,9 +348,9 @@ function importItem(newItem, node, type) {
 	
 	// title
 	newItem.title = getFirstResults(node, [n.dc+"title", n.dcterms+"title", n.prism+"title",
-		n.eprints+"title", n.vcard2+"fn"], true);
-	if(!newItem.itemType && !newItem.title) {			// require the title
-														// (if not a known type)
+		n.eprints+"title", n.vcard2+"fn", n.og+"title"], true);
+	if(!newItem.itemType && !newItem.title) {	// require the title
+							// (if not a known type)
 		return false;
 	}
 	
@@ -351,7 +374,7 @@ function importItem(newItem, node, type) {
 	
 	// source -- first try PRISM, then DC
 	newItem.source = getFirstResults(node, [n.prism+"publicationName", n.eprints+"publication",
-		n.dc+"source", n.dcterms+"source"], true);
+		n.dc+"source", n.dcterms+"source", n.og+"site_name"], true);
 	newItem.publicationTitle = newItem.source;
 	
 	// rights
@@ -361,6 +384,9 @@ function importItem(newItem, node, type) {
 	var section = getNodeByType(isPartOf, n.bib+"Part");
 	if(section) {
 		newItem.section = getFirstResults(section, [n.dc+"title", n.dcterms+"title"], true);
+	}
+	if (!section) {
+		newItem.section = getFirstResults(node, [n.article+"section"], true);
 	}
 	
 	// publication
@@ -439,7 +465,7 @@ function importItem(newItem, node, type) {
 	// date
 	newItem.date = getFirstResults(node, [n.eprints+"date", n.dc+"date", n.dcterms+"date",
 		n.dc+"date.issued", n.dcterms+"date.issued", n.dcterms+"issued", n.dcterms+"dateSubmitted",
-		n.eprints+"datestamp"], true);
+		n.eprints+"datestamp", n.og+"published_time"], true);
 	// accessDate
 	newItem.accessDate = getFirstResults(node, [n.dcterms+"dateSubmitted"], true);
 	// lastModified
@@ -488,7 +514,7 @@ function importItem(newItem, node, type) {
 	}
 	
 	if(!newItem.url) {
-		var url = getFirstResults(node, [n.eprints+"official_url", n.vcard2+"url"]);
+		var url = getFirstResults(node, [n.eprints+"official_url", n.vcard2+"url", n.og+"url"]);
 		if(url) {
 			newItem.url = Zotero.RDF.getResourceURI(url[0]);
 		}
@@ -499,7 +525,7 @@ function importItem(newItem, node, type) {
 	
 	// abstract
 	newItem.abstractNote = getFirstResults(node, [n.dcterms+"abstract", n.dc+"description.abstract",
-		 n.dcterms+"description.abstract", n.eprints+"abstract"], true);
+		 n.dcterms+"description.abstract", n.eprints+"abstract", n.og+"description"], true);
 	
 	// type
 	var type = getFirstResults(node, [n.dc+"type", n.dcterms+"type"], true);
@@ -579,7 +605,7 @@ function importItem(newItem, node, type) {
 	
 	/** TAGS **/
 	
-	var subjects = getFirstResults(node, [n.dc+"subject", n.dcterms+"subject"]);
+	var subjects = getFirstResults(node, [n.dc+"subject", n.dcterms+"subject", n.article+"tag"]);
 	for each(var subject in subjects) {
 		if(typeof(subject) == "string") {	// a regular tag
 			newItem.tags.push(subject);

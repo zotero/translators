@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-12-15 10:47:35"
+	"lastUpdated": "2011-12-16 14:28:02"
 }
 
 /*
@@ -61,10 +61,12 @@ var _prefixes = {
 	"prism":"http://prismstandard.org/namespaces/1.2/basic/",
 	"foaf":"http://xmlns.com/foaf/0.1/",
 	"eprint":"http://purl.org/eprint/terms/",
-	"eprints":"http://purl.org/eprint/terms/"
+	"eprints":"http://purl.org/eprint/terms/",
+	"og":"http://ogp.me/ns#",
+	"article":"http://ogp.me/ns/article#",
+	"book":"http://ogp.me/ns/book#"
 };
 
-// These are the ones that we will read without a declared schema
 var _rdfPresent = false,
 	_haveItem = false,
 	_itemType;
@@ -87,22 +89,46 @@ function getPrefixes(doc) {
 function detectWeb(doc, url) {
 	getPrefixes(doc);
 
-	// XXX What is this blacklisting?
-	if (url.indexOf("reprint") != -1) return false;
 	var metaTags = doc.getElementsByTagName("meta");
 	for(var i=0; i<metaTags.length; i++) {
 		var tag = metaTags[i].getAttribute("name");
-		if(!tag) continue;
+		if (!tag) tag = metaTags[i].getAttribute("property");
+		var value = metaTags[i].getAttribute("content");
+		if(!tag || !value) continue;
+		var delimIndex = tag.indexOf('.');
+		if(delimIndex === -1) delimIndex = tag.indexOf(':');
+		if(delimIndex === -1) delimIndex = tag.indexOf('_');
+		if(delimIndex === -1) continue;
+		var prefix = tag.substr(0, delimIndex).toLowerCase();
 		tag = tag.toLowerCase();
+		var prop = tag[delimIndex+1].toLowerCase()+tag.substr(delimIndex+2);
 
-		var schema = _prefixes[tag.split('.')[0]];
-
+		var schema = _prefixes[prefix];
 		// See if the supposed prefix is there, split by period or underscore
 		if(schema) {
 			_rdfPresent = true;
 			// If we have PRISM or eprints data, don't use the generic webpage icon
 			if (!_itemType && schema === _prefixes.prism || schema === _prefixes.eprints) {
 				return (_itemType = "journalArticle");
+			}
+
+			if (!_itemType && schema === _prefixes.og && prop === "type") {
+				switch (metaTags[i].getAttribute("content")) { 
+		                	case "video.movie":
+					case "video.episode":
+					case "video.tv_show":
+					case "video.other":
+						return "videoRecording";
+					case "article":
+						return "newspaperArticle";
+					case "book":
+						return "book";
+					case "music.song":
+					case "music.album":
+						return "audioRecording";
+					case "website":
+						return "webpage";
+				}
 			}
 		} else if(tag === "citation_journal_title") {
 			_itemType = "journalArticle";
@@ -137,17 +163,19 @@ function doWeb(doc, url) {
 
 			for(var i=0; i<metaTags.length; i++) {
 				var tag = metaTags[i].getAttribute("name");
+				if (!tag) tag = metaTags[i].getAttribute("property");
 				var value = metaTags[i].getAttribute("content");
 				if(!tag || !value) continue;
-				var dotIndex = tag.indexOf('.');
-				if(dotIndex === -1) continue;
-				var prefix = tag.substr(0, dotIndex).toLowerCase();
+				var delimIndex = tag.indexOf('.');
+				if(delimIndex === -1) delimIndex = tag.indexOf(':');
+				if(delimIndex === -1) delimIndex = tag.indexOf('_');
+				if(delimIndex === -1) continue;
+				var prefix = tag.substr(0, delimIndex).toLowerCase();
 
 				// See if the supposed prefix is there, split by period or underscore
 				if(_prefixes[prefix]) {
-					var prop = tag[dotIndex+1].toLowerCase()+tag.substr(dotIndex+2);
-					//Z.debug(_prefixes[prefix] + pieces.join(delim) +
-					//		"\nvalue: "+value);
+					var prop = tag[delimIndex+1].toLowerCase()+tag.substr(delimIndex+2);
+					Zotero.debug(prefix+":"+prop +"=>"+value);
 					rdf.Zotero.RDF.addStatement(url, _prefixes[prefix] + prop, value, true);
 				}
 			}
