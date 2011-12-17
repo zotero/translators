@@ -113,22 +113,22 @@ function detectWeb(doc, url) {
 			}
 
 			if (!_itemType && schema === _prefixes.og && prop === "type") {
-		       switch (metaTags[i].getAttribute("content")) { 
-		                case "video.movie":
-		                case "video.episode":
-		                case "video.tv_show":
-		                case "video.other":
-		                        return "videoRecording";
-		                case "article":
-		                        return "newspaperArticle";
-		                case "book":
-		                        return "book";
-		                case "music.song":
-		                case "music.album":
-		                        return "audioRecording";
-		                case "website":
-		                        return "webpage";
-		        }
+				switch (metaTags[i].getAttribute("content")) { 
+		                	case "video.movie":
+					case "video.episode":
+					case "video.tv_show":
+					case "video.other":
+						return "videoRecording";
+					case "article":
+						return "newspaperArticle";
+					case "book":
+						return "book";
+					case "music.song":
+					case "music.album":
+						return "audioRecording";
+					case "website":
+						return "webpage";
+				}
 			}
 		} else if(tag === "citation_journal_title") {
 			_itemType = "journalArticle";
