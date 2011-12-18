@@ -1,21 +1,26 @@
 {
-    "translatorID":"032ae9b7-ab90-9205-a479-baf81f49184a",
-	"translatorType":2,
-    "label":"TEI",
-    "creator":"Stefan Majewski",
-    "target":"xml",
-    "minVersion":"2.1b3",
-    "maxVersion":"",
-    "priority":25,
-    "inRepository":true,
-    "configOptions":{"dataMode":"xml/e4x", "getCollections":"true"},
-    "displayOptions":{"exportNotes":false,
-                      "generateXMLIds":true,
-                      "fullTEIDocument":false,
-                      "createCollections":false
-                     },
-    "lastUpdated":"2011-11-11 12:12:00"
+	"translatorID": "032ae9b7-ab90-9205-a479-baf81f49184a",
+	"translatorType": 2,
+	"label": "TEI",
+	"creator": "Stefan Majewski",
+	"target": "xml",
+	"minVersion": "2.1b3",
+	"maxVersion": null,
+	"priority": 25,
+	"inRepository": true,
+	"configOptions": {
+		"dataMode": "xml/e4x",
+		"getCollections": "true"
+	},
+	"displayOptions": {
+		"exportNotes": false,
+		"generateXMLIds": true,
+		"fullTEIDocument": false,
+		"createCollections": false
+	},
+	"lastUpdated": "2011-12-18 13:12:00"
 }
+
 // ********************************************************************
 //
 // tei-zotero-translator. Zotero 2 to TEI P5 exporter.
@@ -197,8 +202,11 @@ function generateItem(item) {
     
     // create title or monogr
     if(isAnalytic){
-        if(item.title) {
+        if(item.title){
             bibl.analytic.title = item.title;
+        }
+        else{
+            bibl.analytic.title = "";
         }
         // there should be a publication title!
         if(item.publicationTitle){
@@ -209,10 +217,11 @@ function generateItem(item) {
             bibl.monogr.title = "";
         }
     }
-    else{
-        if(item.title){
-            bibl.monogr.title = item.title;
-        }
+    else if(item.title){
+        bibl.monogr.title = item.title;
+    }
+    else {
+        bibl.monogr.title = "";
     }
     // itemTypes in Database do unfortunately not match fields
     // of item
