@@ -1,15 +1,15 @@
 {
-        "translatorID": "4f0d0c90-5da0-11df-a08a-0800200c9a66",
-        "label": "FAZ.NET",
-        "creator": "ibex",
-        "target": "^http://((www\\.)?faz\\.net/.)",
-        "minVersion": "2.1",
-        "maxVersion": "",
-        "priority": 100,
-        "browserSupport": "gcs",
-        "inRepository": true,
-        "translatorType": 4,
-        "lastUpdated": "2011-07-01 07:38:34"
+	"translatorID": "4f0d0c90-5da0-11df-a08a-0800200c9a66",
+	"label": "FAZ.NET",
+	"creator": "ibex, Sebastian Karcher",
+	"target": "^http://((www\\.)?faz\\.net/.)",
+	"minVersion": "2.1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcs",
+	"lastUpdated": "2011-12-10 18:30:42"
 }
 
 /*
@@ -30,96 +30,102 @@
 	along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*
-Test with the following URLs:
-http://www.faz.net/artikel/C30783/wissenschaftsphilosophie-krumme-wege-der-vernunft-30436005.html
-http://www.faz.net/f30/common/Suchergebnis.aspx?term=philosophie&x=0&y=0&allchk=1
-*/
 
-/* Get the first xpath element from doc, if not found return null. */
+
 function getXPath(xpath, doc) {
 	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == "x") return namespace; else return null;
+	var nsResolver = namespace ?
+	function (prefix) {
+		if (prefix == "x") return namespace;
+		else return null;
 	} : null;
 
 	return doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 }
 
 /* Zotero API */
+
 function detectWeb(doc, url) {
 	//Zotero.debug("ibex detectWeb URL= "+ url);
-	if (doc.title == "Suche - FAZ.NET" && getXPath('//div[@class = "SuchPagingModul"]', doc)) {
+	if (doc.title == "Suche und Suchergebnisse - FAZ" && getXPath('//div[@class = "SuchergebnisListe"]', doc)) {
 		return "multiple";
-	} else if (getXPath('//div[@class = "Article"]', doc)) {
+	} else if (getXPath('//div[@class = "FAZArtikelEinleitung"]', doc)) {
 		return "newspaperArticle";
 	}
 }
 
-/* Zotero API */
-function doWeb(doc, url) {
-	//Zotero.debug("ibex doWeb URL = "+ url);
-	var urls = new Array();
-	if (detectWeb(doc, url) == "multiple") {
-		var items = Zotero.Utilities.getItemArray(doc,
-                doc.getElementById("MainColumn")
-                .getElementsByTagName("h1"),
-                '/artikel/.+\\.html');
-		if (!items || countObjectProperties(items) == 0) {
-            Zotero.debug("no items");
-			return true;
-		}
-		items = Zotero.selectItems(items);
-		if (!items) {
-			return true;
-		}
 
-		for (var i in items) {
-			urls.push(i);
+function doWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ?
+	function (prefix) {
+		if (prefix == 'x') return namespace;
+		else return null;
+	} : null;
+	var arts = new Array();
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var titles = doc.evaluate('//a[@class="TeaserHeadLink"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var title;
+		while (title = titles.iterateNext()) {
+			items[title.href] = title.textContent.trim();
 		}
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var itemurl in items) {
+				arts.push(itemurl);
+			}
+			ZU.processDocuments(arts, scrape, function () {
+				Zotero.done();
+			});
+			Zotero.wait();
+		});
 	} else {
-		urls.push(doc.location.href);
+		scrape(doc);
 	}
-	Zotero.Utilities.processDocuments(urls, scrape, function() { Zotero.done(); } );
-	Zotero.wait();
 }
 
+
+
+
 function scrape(doc) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ?
+	function (prefix) {
+		if (prefix == "x") return namespace;
+		else return null;
+	} : null;
+
 	var newArticle = new Zotero.Item('newspaperArticle');
 	newArticle.url = doc.location.href;
-	newArticle.title = Zotero.Utilities.trimInternal(getXPath('//div[@class = "Article"]/h1', doc).textContent);
-	var date = getXPath('//div[@class = "Article"]//span[@id = "dateline"][1]', doc).textContent;
+	newArticle.title = ZU.trimInternal(ZU.xpathText(doc, '//div[@class = "FAZArtikelEinleitung"]/h1/text()')).replace(/^,/, "");
+	var date = getXPath('//span[@class = "Datum"]', doc).textContent;
 	newArticle.date = Zotero.Utilities.trimInternal(date.replace(/ .*$/, ""));
 
 
-	var subtitle = getXPath('//div[@class = "Article"]/h2', doc);
-	if (subtitle != null) {
-		newArticle.shortTitle = newArticle.title;
-		newArticle.title = Zotero.Utilities.trimInternal(subtitle.textContent) + ": " + newArticle.title;
-	}
-
-	var teaser = getXPath('//div[@class = "Article"]/h4', doc);
+	var teaser = ZU.xpathText(doc, '//div[@class="FAZArtikelEinleitung"]/p[@class = "Copy"]/text()');
 	if (teaser != null) {
-		newArticle.abstractNote = Zotero.Utilities.trimInternal(teaser.textContent);
+		newArticle.abstractNote = Zotero.Utilities.trimInternal(teaser).replace(/^,\s*/, "");
 	}
 
-	var authorline = getXPath('//div[@class = "Article"]/p[@class = "Author"]', doc);
-	if (authorline != null) {
-		authorline = Zotero.Utilities.trimInternal(authorline.textContent);
-		//assumption of authorline: "Von name1 [und Name2][, location]"
-		authorline = authorline.replace(/Von /, "");
-		//remove ", location"
-		authorline = Zotero.Utilities.trim(authorline.replace(/, .*$/, ""));
-
-		var authors = authorline.split(" und ");
-		for (var i = 0; i < authors.length && authorline.length > 0; i++) {
-			newArticle.creators.push(Zotero.Utilities.cleanAuthor(authors[i], "author"));
+	//some authors are in /a, some aren't we need to distinguish to get this right
+	if (getXPath('//div[@class="FAZArtikelEinleitung"]/span[@class = "Autor"]/span[@class="caps"]/a', doc)) {
+		var xpath = '//div[@class="FAZArtikelEinleitung"]/span[@class = "Autor"]/span[@class="caps"]/a';
+	} else {
+		var xpath = '//div[@class="FAZArtikelEinleitung"]/span[@class = "Autor"]/span[@class="caps"]';
+	};
+	var authors = ZU.xpath(doc, xpath);
+	if (authors != null) {
+		for (i in authors) {
+			newArticle.creators.push(Zotero.Utilities.cleanAuthor(authors[i].textContent, "author"));
 		}
 	}
 
 	newArticle.publicationTitle = "FAZ.NET";
 
-	var section = getXPath('//div[@id="FAZNavMain"]//li[@class = "tabSelected"]/a', doc);
+	var section = getXPath('//ul[@id="nav"]/li/span[@class = "Selected"]', doc);
 	if (section != null) {
 		newArticle.section = Zotero.Utilities.trimInternal(section.textContent);
 	}
@@ -128,14 +134,19 @@ function scrape(doc) {
 	if (source != null) {
 		newArticle.extra = Zotero.Utilities.trimInternal(Zotero.Utilities.cleanTags(source.innerHTML));
 	}
-
-	//unfortunately a print dialog will be shown due to <script>window.print();</script> if the snapshot is opened. A user must click on cancel afterwards.
-	var length = newArticle.attachments.push({title:"FAZ.NET Article Snapshot", mimeType:"text/html", url:doc.location.href.replace("~Scontent.html", "~Scontent~Afor~Eprint.html"), snapshot:true});
+	newArticle.ISSN = "0174-4909";
+	newArticle.attachments.push({
+		title: "FAZ.NET Article Snapshot",
+		mimeType: "text/html",
+		url: doc.location.href,
+		snapshot: true
+	});
 
 	newArticle.complete();
 }
 
 /* There is no built-in function to count object properties which often are used as associative arrays.*/
+
 function countObjectProperties(obj) {
 	var size = 0;
 	for (var key in obj) {
@@ -146,51 +157,40 @@ function countObjectProperties(obj) {
 
 
 /** BEGIN TEST CASES **/
-var testCases = [
-    {
-        "type": "web",
-        "url": "http://www.faz.net/artikel/C30783/wissenschaftsphilosophie-krumme-wege-der-vernunft-30436005.html",
-        "items": [
-            {
-                "itemType": "newspaperArticle",
-                "creators": [
-                    {
-                        "firstName": "Fynn Ole",
-                        "lastName": "Engler",
-                        "creatorType": "author"
-                    },
-                    {
-                        "firstName": "Jürgen",
-                        "lastName": "Renn",
-                        "creatorType": "author"
-                    }
-                ],
-                "notes": [],
-                "tags": [],
-                "seeAlso": [],
-                "attachments": [
-                    {
-                        "title": "FAZ.NET Article Snapshot",
-                        "mimeType": "text/html",
-                        "url": false,
-                        "snapshot": true
-                    }
-                ],
-                "url": "http://www.faz.net/artikel/C30783/wissenschaftsphilosophie-krumme-wege-der-vernunft-30436005.html",
-                "title": "Wissenschaftsphilosophie: Krumme Wege der Vernunft",
-                "date": "2011-06-13",
-                "shortTitle": "Krumme Wege der Vernunft",
-                "abstractNote": "Wissenschaft hat eine Geschichte, wie kann sie dann aber rational sein? Im Briefwechsel zwischen Ludwik Fleck und Moritz Schlick deuteten sich bereits Antworten an.",
-                "publicationTitle": "FAZ.NET",
-                "extra": "Fynn Ole Engler ist Mitherausgeber der als Langzeitvorhaben der Akademie der Wissenschaften in Hamburg erscheinenden Moritz-Schlick-Gesamtausgabe. Jürgen Renn ist Direktor am Max-Planck-Institut für Wissenschaftsgeschichte in Berlin. Text: F.A.S. Bildmaterial: Foto ETH Zürich, ÖNB Bildarchiv Austria",
-                "libraryCatalog": "FAZ.NET"
-            }
-        ]
-    },
-    {
-        "type": "web",
-        "url": "http://www.faz.net/f30/common/Suchergebnis.aspx?term=philosophie&x=0&y=0&allchk=1",
-        "items": "multiple"
-    }
-]
-/** END TEST CASES **/
+var testCases = [{
+	"type": "web",
+	"url": "http://www.faz.net/artikel/C30783/wissenschaftsphilosophie-krumme-wege-der-vernunft-30436005.html",
+	"items": [{
+		"itemType": "newspaperArticle",
+		"creators": [{
+			"firstName": "Fynn Ole",
+			"lastName": "Engler",
+			"creatorType": "author"
+		}, {
+			"firstName": "Jürgen",
+			"lastName": "Renn",
+			"creatorType": "author"
+		}],
+		"notes": [],
+		"tags": [],
+		"seeAlso": [],
+		"attachments": [{
+			"title": "FAZ.NET Article Snapshot",
+			"mimeType": "text/html",
+			"url": false,
+			"snapshot": true
+		}],
+		"url": "http://www.faz.net/artikel/C30783/wissenschaftsphilosophie-krumme-wege-der-vernunft-30436005.html",
+		"title": "Wissenschaftsphilosophie: Krumme Wege der Vernunft",
+		"date": "2011-06-13",
+		"shortTitle": "Krumme Wege der Vernunft",
+		"abstractNote": "Wissenschaft hat eine Geschichte, wie kann sie dann aber rational sein? Im Briefwechsel zwischen Ludwik Fleck und Moritz Schlick deuteten sich bereits Antworten an.",
+		"publicationTitle": "FAZ.NET",
+		"extra": "Fynn Ole Engler ist Mitherausgeber der als Langzeitvorhaben der Akademie der Wissenschaften in Hamburg erscheinenden Moritz-Schlick-Gesamtausgabe. Jürgen Renn ist Direktor am Max-Planck-Institut für Wissenschaftsgeschichte in Berlin. Text: F.A.S. Bildmaterial: Foto ETH Zürich, ÖNB Bildarchiv Austria",
+		"libraryCatalog": "FAZ.NET"
+	}]
+}, {
+	"type": "web",
+	"url": "http://www.faz.net/f30/common/Suchergebnis.aspx?term=philosophie&x=0&y=0&allchk=1",
+	"items": "multiple"
+}]; /** END TEST CASES **/

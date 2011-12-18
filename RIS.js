@@ -13,7 +13,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-10-10 20:43:17"
+	"lastUpdated": "2011-12-07 20:43:17"
 }
 
 function detectImport() {
@@ -160,6 +160,9 @@ function processTag(item, tag, value) {
 		// ignore, unless this is a book or unpublished work, as per spec
 		if(item.itemType == "book" || item.itemType == "manuscript") {
 			item.title = value;
+		// allow for book sections as well, since it makes sense
+		} else if(item.itemType == "bookSection") {
+			item.bookTitle = value;
 		} else {
 			item.backupPublicationTitle = value;
 		}

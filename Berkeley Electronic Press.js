@@ -9,15 +9,25 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-09-22 22:43:26"
+	"lastUpdated": "2011-12-14 19:48:14"
 }
 
 function detectWeb(doc, url) {
-	if (url.match("cgi/query.cgi")) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+	if (prefix == 'x') return namespace; else return null;
+	} : null;
+	
+	
+	if (url.match("/do/search/")) {
+		return "multiple";
+	} else if (doc.evaluate('//div[@class="article-list"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 		return "multiple";
 	} else if (url.match(/vol[\d+]\/iss[\d]+\/art/)) {
 		return "journalArticle";
 	}
+
+	return false;
 }
 
 var tagMap = {
@@ -39,53 +49,60 @@ function doWeb(doc, url) {
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
-		var titles = doc.evaluate('//table[@id="query"]/tbody/tr/td[4]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//span[@class="title"]/a[contains(@href, "/art")]|//p[2]/a[contains(@href, "/art")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var next_title;
 		while (next_title = titles.iterateNext()) {
 			items[next_title.href] = next_title.textContent;
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
+		Zotero.selectItems(items, function (selected) {
+			for (var i in selected) {
+				articles.push(i);
+			}
+			Zotero.Utilities.processDocuments(articles, scrape, 
+				function() { Zotero.done(); } );
+		});
+		Zotero.wait();
 	} else {
-		articles = [url];
+		scrape(doc);
+	}
+}
+
+function scrape(newDoc) {
+	var metatags = new Object();
+	var metas = newDoc.evaluate('//meta[contains(@name, "bepress_citation")]', newDoc, null, XPathResult.ANY_TYPE, null);
+	var next_meta;
+	var name;
+	while (next_meta = metas.iterateNext()) {
+		name = next_meta.name.replace("bepress_citation_", "");
+		if (metatags[name]) metatags[name] += "|" + next_meta.content;
+		else metatags[name] = next_meta.content;
+	}
+	var item = new Zotero.Item("journalArticle");
+
+	//regularly mapped tags
+	for (var tag in tagMap) {
+		if (metatags[tag]) {
+			item[tagMap[tag]] = metatags[tag];
+		}
 	}
 
-	Zotero.Utilities.processDocuments(articles, function(newDoc) {
-		var metatags = new Object();
-		var metas = newDoc.evaluate('//meta[contains(@name, "bepress_citation")]', newDoc, null, XPathResult.ANY_TYPE, null);
-		var next_meta;
-		var name;
-		while (next_meta = metas.iterateNext()) {
-			name = next_meta.name.replace("bepress_citation_", "");
-			if (metatags[name]) metatags[name] += "|" + next_meta.content;
-			else metatags[name] = next_meta.content;
-		}
-		var item = new Zotero.Item("journalArticle");
-
-		//regularly mapped tags
-		for (var tag in tagMap) {
-			if (metatags[tag]) {
-				item[tagMap[tag]] = metatags[tag];
-			}
-		}
-
-		//authors
+	//authors
+	if (metatags['author']) {
 		var authors = metatags['author'].split('|');
 		for each (var author in authors) {
 			item.creators.push(Zotero.Utilities.cleanAuthor(author, "author", useComma=true));
 		}
-
-		//attachments
-		item.attachments = [
-			{url:item.url, title:item.title, mimeType:"text/html"},
-			{url:metatags['pdf_url'], title:"Berkeley Electronic Press Full Text PDF", mimeType:"application/pdf"}
-		];
-		item.complete();
-	}, function() {Zotero.done();});
-	Zotero.wait();
+	}
+	//they use mark-up in titles, but we want <i> and note <em> for italics
+	item.title =item.title.replace(/\<(\/)?em\>/g, "<$1i>");
+	//attachments
+	item.attachments = [
+		{url:item.url, title:item.title, mimeType:"text/html"},
+		{url:metatags['pdf_url'], title:"Berkeley Electronic Press Full Text PDF", mimeType:"application/pdf"}
+	];
+	item.complete();
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -134,6 +151,11 @@ var testCases = [
 				"checkFields": "title"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.bepress.com/forum/vol9/iss2/",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

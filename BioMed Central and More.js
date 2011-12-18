@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-10-24 22:30:17"
+	"lastUpdated": "2011-12-15 10:47:59"
 }
 
 /*
@@ -34,20 +34,18 @@
 Translator completely rewritten by Avram Lyon to use RDF. Original target regex by Ben Parr.
  */
 
-function detectWeb(doc,url)
-{
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-	if (prefix == "x" ) return namespace; else return null;
-	} : null;
-		
+function detectWeb(doc,url) {
 	var xpath='//meta[@name="citation_journal_title"]';
 		
-	//Single
-	if (doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) 
-		{return "journalArticle";}
+	if (ZU.xpath(doc, xpath).length > 0) {
+		return "journalArticle";
+	}
 			
-	if (url.match(/\/search\/results(\.asp)?\?.*terms=/)) return "multiple";
+	if (url.match(/\/search\/results(\.asp)?\?.*terms=/)) {
+		return "multiple";
+	}
+
+	return false;
 }
 
 
@@ -68,28 +66,25 @@ function doWeb(doc,url)
 			}
 			ZU.processDocuments(urls, function (myDoc) { 
 				doWeb(myDoc, myDoc.location.href) }, function () {Z.done()});
+
+			Z.wait();
 		});
+	} else {
+		// We call the Embedded Metadata translator to do the actual work
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+		translator.setHandler("itemDone", function(obj, item) {
+				item.abstractNote = item.extra;
+				item.extra = '';
+				item.complete();
+				});
+		translator.getTranslatorObject(function (obj) {
+				obj.doWeb(doc, url);
+				});
 	}
-	
-	// We call the Embedded RDF translator to do the actual work
-	var translator = Zotero.loadTranslator("import");
-	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
-	translator.setHandler("itemDone", function(obj, item) {
-		item.abstractNote = item.extra;
-		item.extra = '';
-		var pdf = ZU.xpath(doc,'//meta[@name="citation_pdf_url"]');
-		if (pdf && pdf.length > 0)
-			item.attachments.push({
-				url:pdf.shift().content,
-				title: "BMC Full Text PDF",
-				mimeType: "application/pdf"
-			});
-		item.complete();
-	});
-	translator.getTranslatorObject(function (obj) {
-		obj.doWeb(doc, url);
-	});
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -170,54 +165,22 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Full Text PDF",
-						"url": "http://respiratory-research.com/content/pdf/1465-9921-11-133.pdf, http://respiratory-research.com/content/pdf/1465-9921-11-133.pdf",
+						"url": false,
 						"mimeType": "application/pdf"
 					},
 					{
-						"document": {
-							"location": {}
-						},
+						"document": false,
 						"title": "Snapshot"
-					},
-					{
-						"url": "http://respiratory-research.com/content/pdf/1465-9921-11-133.pdf",
-						"title": "BMC Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
-				"itemID": "http://respiratory-research.com/content/11/1/133",
 				"title": "Nicotinic receptors on rat alveolar macrophages dampen ATP-induced increase in cytosolic calcium concentration",
-				"source": "Respiratory Research",
 				"publicationTitle": "Respiratory Research",
-				"rights": "http://creativecommons.org/licenses/by/2.0/",
 				"volume": "11",
 				"issue": "1",
-				"number": "1",
-				"patentNumber": "1",
-				"pages": "133",
-				"ISSN": "1465-9921",
-				"publisher": "BioMed Central Ltd",
-				"institution": "BioMed Central Ltd",
-				"company": "BioMed Central Ltd",
-				"label": "BioMed Central Ltd",
-				"distributor": "BioMed Central Ltd",
-				"date": "2010-09-29",
 				"DOI": "10.1186/1465-9921-11-133",
-				"reportType": "Research",
-				"videoRecordingType": "Research",
-				"letterType": "Research",
-				"manuscriptType": "Research",
-				"mapType": "Research",
-				"thesisType": "Research",
-				"websiteType": "Research",
-				"audioRecordingType": "Research",
-				"presentationType": "Research",
-				"postType": "Research",
-				"audioFileType": "Research",
+				"pages": "133",
 				"url": "http://respiratory-research.com/content/11/1/133",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "respiratory-research.com",
-				"abstractNote": "Nicotinic acetylcholine receptors (nAChR) have been identified on a variety of cells of the immune system and are generally considered to trigger anti-inflammatory events. In the present study, we determine the nAChR inventory of rat alveolar macrophages (AM), and investigate the cellular events evoked by stimulation with nicotine."
+				"libraryCatalog": "respiratory-research.com"
 			}
 		]
 	}

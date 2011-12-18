@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2011-09-05 02:15:00"
+	"lastUpdated": "2011-12-06 21:11:01"
 }
 
 function detectWeb(doc, url) {
@@ -45,7 +45,18 @@ function handleRequests(requests) {
 				item.DOI = Zotero.Utilities.unescapeHTML(item.notes[0].note);
 				item.notes = new Array();
 			}
-			
+			//remove all caps from titles and authors.
+			for (i in item.creators){
+				if (item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
+					item.creators[i].lastName = Zotero.Utilities.capitalizeTitle(item.creators[i].lastName.toLowerCase(),true);
+				}
+				if (item.creators[i].firstName == item.creators[i].firstName.toUpperCase()) {
+					item.creators[i].firstName = Zotero.Utilities.capitalizeTitle(item.creators[i].firstName.toLowerCase(),true);
+				}
+			}
+			if (item.title == item.title.toUpperCase()) {
+				item.title = Zotero.Utilities.capitalizeTitle(item.title.toLowerCase(),true);
+			}
 			item.attachments = new Array();
 			var snapshot = request.snapshots.shift();
 			var pdf = request.pdfs.shift();
@@ -149,36 +160,36 @@ function doWeb(doc, url) {
 			items[gca] = Zotero.Utilities.trimInternal(title);
 		}
 		
-		items = Zotero.selectItems(items, function(items) {
-    		if(!items) return true;
-    		
-    		var requests = new Array();
-    		for(var gca in items) {
-    			var m = hostRe.exec(pdfs[gca]);
-    			var baseURL = 'http://' + doc.location.host + '/cgi/citmgr?type=refman';
-    			
-    			var thisRequest = null;
-    			for each(var request in requests) {
-    				if(request.baseURL == baseURL) {
-    					thisRequest = request;
-    					break;
-    				}
-    			}
-    			
-    			if(!thisRequest) {
-    				thisRequest = new Object();
-    				thisRequest.snapshots = new Array();
-    				thisRequest.pdfs = new Array();
-    				thisRequest.args = "";
-    				thisRequest.baseURL = baseURL;
-    				requests.push(thisRequest);
-    			}
-    			
-    			thisRequest.snapshots.push(snapshots[gca]);
-    			thisRequest.pdfs.push(pdfs[gca]);
-    			thisRequest.args += "&gca="+gca;
-    		}
-            handleRequests(requests);
+		Zotero.selectItems(items, function(items) {
+			if(!items) return true;
+			
+			var requests = new Array();
+			for(var gca in items) {
+				var m = hostRe.exec(pdfs[gca]);
+				var baseURL = 'http://' + doc.location.host + '/cgi/citmgr?type=refman';
+				
+				var thisRequest = null;
+				for each(var request in requests) {
+					if(request.baseURL == baseURL) {
+						thisRequest = request;
+						break;
+					}
+				}
+				
+				if(!thisRequest) {
+					thisRequest = new Object();
+					thisRequest.snapshots = new Array();
+					thisRequest.pdfs = new Array();
+					thisRequest.args = "";
+					thisRequest.baseURL = baseURL;
+					requests.push(thisRequest);
+				}
+				
+				thisRequest.snapshots.push(snapshots[gca]);
+				thisRequest.pdfs.push(pdfs[gca]);
+				thisRequest.args += "&gca="+gca;
+			}
+			handleRequests(requests);
 		});
 	} else {
 		var baseURL = doc.evaluate('//a[substring(@href, 1, 16) = "/cgi/citmgr?gca="]', doc, null,
@@ -186,7 +197,7 @@ function doWeb(doc, url) {
 		var pdf = doc.location.href.replace(/\/content\/[^\/]+\//, "/reprint/");
 		Zotero.debug(pdf);
 		var requests = [{baseURL:baseURL, args:"&type=refman", snapshots:[doc], pdfs:[pdf]}];
-        handleRequests(requests);
+		handleRequests(requests);
 	}
 		
 	Zotero.wait();

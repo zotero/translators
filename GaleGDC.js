@@ -1,18 +1,16 @@
 {
-	"translatorID": "04e63564-b92b-41cd-a9d5-366a02056d10",
-	"label": "GaleGDC",
-	"creator": "GaleGDC",
-	"target": "/gdc/ncco/",
-	"minVersion": "1.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2011-11-07 12:02:12"
+        "translatorID":"04e63564-b92b-41cd-a9d5-366a02056d10",
+        "translatorType":4,
+        "label":"GaleGDC",
+        "creator":"GaleGDC",
+        "target":"/gdc/ncco/",
+        "minVersion":"1.0",
+        "maxVersion":null,
+        "priority":100,
+        "inRepository":true,
+        "browserSupport":"g",
+        "lastUpdated":"2011-12-15 20:10:00"
 }
-
-
 
 /*
  * Gale GDC Copyright (C) 2011 Gale GDC
@@ -40,14 +38,19 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 
-    var importer = Zotero.loadTranslator("import");
-    importer.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+    var risImporter = Zotero.loadTranslator("import");
+    risImporter.setHandler("itemDone", function(obj, item) {
+		item.attachments = [];
+		item.complete();
+    });
+
+    risImporter.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 
     var searchResults = doc.evaluate('//div[@regionid="searchResults"]  | //table[@id="searchResult"]', doc, null, XPathResult.ANY_TYPE, null)
             .iterateNext();
 
     if (searchResults) {
-        var items = Zotero.Utilities.getItemArray(doc, searchResults, /DetailsPage((?!displayFullCitation).)*$/);
+        var items = Zotero.Utilities.getItemArray(doc, searchResults, /\&zid=/);
         Zotero.selectItems(items, function(selectedItems) {
             if (!selectedItems) return true;
             for ( var item in selectedItems) {
@@ -56,27 +59,27 @@ function doWeb(doc, url) {
                 var docid = item.substring(start + 11, end > -1 ? end : item.length);
                 var urlForPosting = doc.getElementById("zotero_form").action + '&doCitation=' + docid + '&citation_document_url='
                         + encodeURIComponent(item.replace('|', '%7C'));
-                importSingleDocument(importer, urlForPosting);
+                importSingleDocument(risImporter, urlForPosting);
             }
         });
     } else {
-        processSingleDocument(importer, doc);
+        processSingleDocument(risImporter, doc);
     }
 }
 
-function processSingleDocument(importer, doc) {
+function processSingleDocument(risImporter, doc) {
     var citationForm = doc.getElementById("citation_form");
     var otherUrl;
     for ( var i = 0; i < citationForm.length; i++) {
         if (citationForm.elements[i].name === 'citation_document_url') otherUrl = citationForm.elements[i].value;
     }
     var urlForPosting = citationForm.action + "&citation_format=ris" + "&citation_document_url=" + encodeURIComponent(otherUrl);
-    importSingleDocument(importer, urlForPosting);
+    importSingleDocument(risImporter, urlForPosting);
 }
 
-function importSingleDocument(importer, urlForPosting) {
+function importSingleDocument(risImporter, urlForPosting) {
     Zotero.Utilities.doPost(urlForPosting, '', function(text, obj) {
-        importer.setString(text);
-        importer.translate();
+        risImporter.setString(text);
+        risImporter.translate();
     });
 }

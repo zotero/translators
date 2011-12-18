@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-10-31 00:58:29"
+	"lastUpdated": "2011-12-13 11:18:52"
 }
 
 function detectWeb(doc, url) {
@@ -98,6 +98,9 @@ function downloadFunction(text, url) {
 				if (year && extra && extra[1].indexOf(year[0]) !== -1) {
 					item.date = extra[1];
 				}
+				// Frequently have dates like "Spring2009";
+				// need to insert space to keep Zotero happy
+				item.date = item.date.replace(/([a-z])([0-9]{4})$/,"$1 $2");
 			}
 
 			// RIS translator tries to download the link in "UR"

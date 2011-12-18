@@ -1,15 +1,15 @@
 {
-	"translatorID":"11645bd1-0420-45c1-badb-53fb41eeb753",
-	"translatorType":8,
-	"label":"CrossRef",
-	"creator":"Simon Kornblith",
-	"target":"^https?://partneraccess\\.oclc\\.org/",
-	"minVersion":"2.1.9",
-	"maxVersion":"",
-	"priority":90,
-	"browserSupport":"gcs",
-	"inRepository":true,
-	"lastUpdated":"2011-07-29 18:13:47"
+	"translatorID": "11645bd1-0420-45c1-badb-53fb41eeb753",
+	"translatorType": 8,
+	"label": "CrossRef",
+	"creator": "Simon Kornblith",
+	"target": "^https?://partneraccess\\.oclc\\.org/",
+	"minVersion": "2.1.9",
+	"maxVersion": null,
+	"priority": 90,
+	"inRepository": true,
+	"browserSupport": "gcs",
+	"lastUpdated": "2011-12-04 20:05:00"
 }
 
 /* CrossRef uses unixref; documentation at http://www.crossref.org/schema/documentation/unixref1.0/unixref.html */
@@ -107,6 +107,9 @@ function processCrossRef(xmlOutput) {
 		item.journalAbbreviation = ZU.xpathText(refXML, 'c:abbrev_title[1]', ns);
 		item.volume = ZU.xpathText(itemXML, 'c:journal_issue/c:journal_volume/c:volume', ns);
 		item.issue = ZU.xpathText(itemXML, 'c:journal_issue/c:journal_volume/c:issue', ns);
+		// Sometimes the <issue> tag is not nested inside the volume tag; see 10.1007/BF00938486
+		if (!item.issue)
+			item.issue = ZU.xpathText(itemXML, 'c:journal_issue/c:issue', ns);
    } else if((itemXML = ZU.xpath(doiRecord, 'c:crossref/c:report-paper', ns)).length) {
 		// Report Paper
 		// Example: doi: 10.4271/2010-01-0907
@@ -140,6 +143,10 @@ function processCrossRef(xmlOutput) {
 				if(!metadataXML.length) metadataXML = ZU.xpath(itemXML, 'c:book_series_metadata', ns);
 				
 				item.bookTitle = ZU.xpathText(metadataXML, 'c:titles[1]/c:title[1]', ns);
+				item.seriesTitle = ZU.xpathText(metadataXML, 'c:series_metadata/c:titles[1]/c:title[1]', ns);
+
+				var metadataSeriesXML = ZU.xpath(metadataXML, 'c:series_metadata', ns);
+				if (metadataSeriesXML.length) parseCreators(metadataSeriesXML, item, {"editor":"seriesEditor"});
 			} else {
 				metadataXML = ZU.xpath(itemXML, 'c:book_series_metadata', ns);
 				if(!metadataXML.length) metadataXML = ZU.xpath(itemXML, 'c:book_metadata', ns);
