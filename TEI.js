@@ -18,7 +18,7 @@
 		"fullTEIDocument": false,
 		"createCollections": false
 	},
-	"lastUpdated": "2011-11-22 23:20:00"
+	"lastUpdated": "2011-12-18 13:12:00"
 }
 
 // ********************************************************************
