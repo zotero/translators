@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-12-07 21:52:37"
+	"lastUpdated": "2011-12-19 21:52:37"
 }
 
 /*
@@ -233,9 +233,11 @@ function scrape (doc) {
 	// Rights: Copyright New York Times Company Dec 1, 1852
 	// Date: 1852
 	// We can improve on this, so we do, but if there's no full-text there's no item.rights, so first test for that.
-if(item.rights)	var fullerDate = item.rights.match(/([A-Z][a-z]{2} \d{1,2}, \d{4}$)/);
-	if (!item.date || 
-		(item.date.match(/^\d{4}$/) && fullerDate)) {
+	if(item.rights)	{
+		var fullerDate = item.rights.match(/([A-Z][a-z]{2} \d{1,2}, \d{4}$)/);
+	}
+	if ((!item.date || item.date.match(/^\d{4}$/))
+			 && fullerDate)) {
 		item.date = fullerDate[1];
 	}
 	
