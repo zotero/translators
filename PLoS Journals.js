@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-11-13 10:30:40"
+	"lastUpdated": "2011-12-18 10:30:40"
 }
 
 function detectWeb(doc, url) {
@@ -70,7 +70,7 @@ function processTexts(texts) {
 		doi  = doi.replace("%2F","/");//Replace %2F characters by forward slashes in doi
 		
 		// grab the UR link for a snapshot then blow it away 
-		var snapshot = text.match(/UR\s+\-\s+(.*)/)[1];
+		var snapshot = text.match(/UR\s+\-\s+(.*)/);
 		text = text.replace(/UR\s+\-(.*)/, "");
 		// PLoS has an issue where T1 is globbed onto TY:
 		// TY  - JOURT1  - Prediction of Associations between microRNAs and Gene Expression in Glioma Biology
@@ -83,7 +83,9 @@ function processTexts(texts) {
 		translator.setHandler("itemDone", function(obj, item) {
 			item.url = snapshot;
 			item.attachments.push({url:pdfURL, title:"PLoS Full Text PDF", mimeType:"application/pdf"});
-			item.attachments.push({url:snapshot, title:"PLoS Snapshot", mimeType:"text/html", snapshot:true});
+			if (snapshot) {
+				item.attachments.push({url:snapshot[1], title:"PLoS Snapshot", mimeType:"text/html", snapshot:true});
+			}
 			item.DOI = doi;
 			item.repository = item.publicationTitle;
 			item.complete();
