@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2011-12-13 10:16:31"
+	"lastUpdated": "2011-12-18 10:16:31"
 }
 
 /*
@@ -168,10 +168,10 @@ function doWeb(doc, url) {
 			
 			//remove all caps in Names and Titles
 			for (i in item.creators){
-				if (item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
+				if (item.creators[i].lastName && item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
 					item.creators[i].lastName = Zotero.Utilities.capitalizeTitle(item.creators[i].lastName.toLowerCase(),true);
 				}
-				if (item.creators[i].firstName == item.creators[i].firstName.toUpperCase()) {
+				if (item.creators[i].firstName && item.creators[i].firstName == item.creators[i].firstName.toUpperCase()) {
 					item.creators[i].firstName = Zotero.Utilities.capitalizeTitle(item.creators[i].firstName.toLowerCase(),true);
 				}
 			}
