@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-11-07 23:19:20"
+	"lastUpdated": "2011-12-23 14:08:18"
 }
 
 /*
@@ -77,7 +77,20 @@ function doWeb(doc, url) {
 			var newuri = uri.replace(/\&format=[0-9]{3}/, "&format=001");
 			if (newuri == uri) newuri += "&format=001";
 		}
-		newUris.push(newuri);
+		
+		var translator = Zotero.loadTranslator("import");
+		if(mab2Opac.test(uri)) {
+			translator.setTranslator("91acf493-0de7-4473-8b62-89fd141e6c74");
+		} else {
+			translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
+		}	
+		translator.getTranslatorObject(function (marc) {
+			Zotero.Utilities.processDocuments([newuri], function(newDoc) {
+				scrape(newDoc, marc, url);
+			}, function() {Zotero.done();});
+			Zotero.wait();
+		});
+		
 	} else {
 		var itemRegexp = '^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set.*\&format=999|func=direct|func=myshelf-full.*)'
 		var items = Zotero.Utilities.getItemArray(doc, doc, itemRegexp, '^[0-9]+$');
@@ -91,30 +104,50 @@ function doWeb(doc, url) {
 		// If we don't have any items otherwise, let us use the numbers
 		if(!haveItems) {
 			var items = Zotero.Utilities.getItemArray(doc, doc, itemRegexp);
-		}
-		
-		items = Zotero.selectItems(items);
-		Zotero.debug(items)
-		if(!items) {
-			return true;
-		}
-		
-		for(var i in items) {
-			var newUri = i.replace("&format=999", "&format=001");
-			if(newUri == i) {
-				newUri += "&format=001";
+			
+			// We try to get more text by grabbing the whole table row
+			var newItems = {};
+			for (var link in items) {
+				//Z.debug(link.match(/[A-Z0-9]{20}[A-Z0-9]*-[0-9]+\?func.*$/)[0]);
+				var text = ZU.xpathText(doc, '//a[contains(@href,"'+link.match(/[A-Z0-9]{20}[A-Z0-9]*-[0-9]+\?func.*$/)[0]+'")]/ancestor::tr[1]');
+				if (text) {
+					newItems[link]=text;
+					haveItems = true;
+				}
 			}
-			newUris.push(newUri);
+			if (haveItems) items = newItems;
 		}
+		
+		Zotero.selectItems(items, function (items) {
+			if(!items) {
+				return true;
+			}
+			
+			for(var i in items) {
+				var newUri = i.replace("&format=999", "&format=001");
+				if(newUri == i) {
+					newUri += "&format=001";
+				}
+				newUris.push(newUri);
+			}
+			
+			var translator = Zotero.loadTranslator("import");
+			if(mab2Opac.test(uri)) {
+				translator.setTranslator("91acf493-0de7-4473-8b62-89fd141e6c74");
+			} else {
+				translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
+			}	
+			translator.getTranslatorObject(function (marc) {
+				Zotero.Utilities.processDocuments(newUris, function(newDoc) {
+					scrape(newDoc, marc, url);
+				}, function() {Zotero.done();});
+				Zotero.wait();
+			});
+		});
 	}
-	var translator = Zotero.loadTranslator("import");
-	if(mab2Opac.test(uri)) {
-		translator.setTranslator("91acf493-0de7-4473-8b62-89fd141e6c74");
-	} else {
-		translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
-	}	
-	var marc = translator.getTranslatorObject();
-	Zotero.Utilities.processDocuments(newUris, function(newDoc) {
+}
+
+function scrape(newDoc, marc, url) {
 		var uri = newDoc.location.href;
 		var namespace = newDoc.documentElement.namespaceURI;
 		var nsResolver = namespace ? function(prefix) {
@@ -209,8 +242,6 @@ function doWeb(doc, url) {
 		newItem.creators = transient;
 		newItem.title = newItem.title.replace(/(<<|>>)/g, '');
 		newItem.complete();
-	}, function() {Zotero.done();});
-	Zotero.wait();
 }
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -268,6 +299,11 @@ var testCases = [
 				"libraryCatalog": "aleph.u-paris10.fr Library Catalog"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://aleph.rsl.ru/F/SS6SBK2CEQATDKKD2T9XCQ1D2HKI68RLKE7P9E89NA77SFTE3M-02079?func=find-a&find_code=WSU&request=%D0%B3%D0%BE%D1%80%D1%8C%D0%BA%D0%B8%D0%B9&request_op=AND&find_code=WAU&request=%D1%81%D0%BF%D0%B8%D1%80%D0%B8%D0%B4%D0%BE%D0%BD%D0%BE%D0%B2%D0%B0&request_op=AND&find_code=WPE&request=&request_op=AND&find_code=WTI&request=&request_op=AND&find_code=WPU&request=&request_op=AND&find_code=WRD&request=&adjacent=N&x=0&y=0&filter_code_1=WLN&filter_request_1=&filter_code_2=WYR&filter_request_2=&filter_code_4=WLC&filter_request_4=",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
