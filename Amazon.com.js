@@ -135,6 +135,8 @@ function parseXML(text) {
 		if (productGroup=="Book") {
 			var newItem = new Zotero.Item("book");
 			newItem.publisher = publisher;
+			getCreatorNodes(xml, "Author", newItem, "author");
+			getBookCreatorNodes(xml, newItem);
 		}
 		else if (productGroup == "Music") {
 			var newItem = new Zotero.Item("audioRecording");
@@ -152,12 +154,13 @@ function parseXML(text) {
 		else{
 			var newItem = new Zotero.Item("book");
 			newItem.publisher = publisher;
+			getCreatorNodes(xml, "Author", newItem, "author");
+			getBookCreatorNodes(xml, newItem);
 		}
 		
 		newItem.runningTime = getXPathNodeTrimmed(xml, "RunningTime");
 		
-		// Retrieve authors and other creators
-		getCreatorNodes(xml, "Author", newItem, "author");
+		//Retrieve Creators as Authors if no creator found above
 		if (newItem.creators.length == 0){
 			getCreatorNodes(xml, "Creator", newItem, "author");
 		}
@@ -199,6 +202,39 @@ function getCreatorNodes(xml, name, newItem, creatorType) {
 	var nodes = ZU.xpath(xml, "//"+name);
 	for(var i=0; i<nodes.length; i++) {
 		newItem.creators.push(Zotero.Utilities.cleanAuthor(nodes[i].textContent, creatorType));
+	}
+}
+function getBookCreatorNodes(xml, newItem) {
+	var roleArray = new Array;
+	var roles = ZU.xpath(xml,"//"+"Creator/@Role");
+	for(var i=0; i<roles.length; i++){
+		roleArray.push(roles[i].textContent.toLowerCase());
+		fixRoleArray(roleArray);
+	}
+	var nodes = ZU.xpath(xml, "//Creator");
+	for(var i=0; i<nodes.length; i++) {
+		if(roleArray[i] != "other"){
+			newItem.creators.push(Zotero.Utilities.cleanAuthor(nodes[i].textContent, roleArray[i]));
+		}
+	}
+}
+
+function fixRoleArray(roleArray){
+	for(var i=0; i<roleArray.length; i++){
+		switch(roleArray[i]){
+			case "author":
+				break;
+			case "translator":
+				break;
+			case "editor":
+				break;
+			case "series editor":
+				break;
+			case "contributor":
+				break;
+			default:
+				roleArray[i] = "other";
+		}
 	}
 }
 
