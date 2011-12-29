@@ -162,7 +162,7 @@ function parseXML(text) {
 		
 		//Retrieve Creators as Authors if no creator found above
 		if (newItem.creators.length == 0){
-			getCreatorNodes(xml, "Creator", newItem, "author");
+			getDefaultCreatorNodes(xml,newItem);
 		}
 		
 		newItem.date = getXPathNodeTrimmed(xml, "PublicationDate");
@@ -209,7 +209,9 @@ function getBookCreatorNodes(xml, newItem) {
 	var roles = ZU.xpath(xml,"//"+"Creator/@Role");
 	for(var i=0; i<roles.length; i++){
 		roleArray.push(roles[i].textContent.toLowerCase());
-		fixRoleArray(roleArray);
+		fixRoleArray(roleArray); /*Ensures that book editors, 
+			translators, series editors, and contributors are 
+			scraped as such and ignores other creators*/
 	}
 	var nodes = ZU.xpath(xml, "//Creator");
 	for(var i=0; i<nodes.length; i++) {
@@ -219,7 +221,20 @@ function getBookCreatorNodes(xml, newItem) {
 	}
 }
 
+function getDefaultCreatorNodes(xml, newItem) {
+	var roleArray = new Array
+	var roles = ZU.xpath(xml,"//"+"Creator/@Role");
+	for(var i=0; i<roles.length; i++){
+		roleArray.push(roles[i].textContent.toLowerCase())
+	}
+	var nodes = ZU.xpath(xml, "//Creator");
+	for(var i=0; i<nodes.length; i++) {
+		newItem.creators.push(Zotero.Utilities.cleanAuthor(nodes[i].textContent, roleArray[i]));
+	}
+}
+
 function fixRoleArray(roleArray){
+	/*used for books only*/
 	for(var i=0; i<roleArray.length; i++){
 		switch(roleArray[i]){
 			case "author":
