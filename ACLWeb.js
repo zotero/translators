@@ -9,8 +9,7 @@
 	"browserSupport": "gcs",
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2011-10-25 03:28:23"
+	"lastUpdated": "2012-01-01 01:42:16"
 }
 
 // based on ACM translator
