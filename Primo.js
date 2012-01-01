@@ -1,7 +1,7 @@
 {
 	"translatorID": "1300cd65-d23a-4bbf-93e5-a3c9e00d1066",
 	"label": "Primo",
-	"creator": "Matt Burton, Avram Lyon, Etienne Cavalié",
+	"creator": "Matt Burton, Avram Lyon, Etienne Cavalié, Rintze Zelle",
 	"target": "/primo_library/",
 	"minVersion": "2.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-11-13 11:20:47"
+	"lastUpdated": "2011-12-29 21:38:10"
 }
 
 /*
@@ -74,7 +74,7 @@ function doWeb(doc, url) {
 					
 					// create an array containing the links and add '&showPnx=true' to the end
 					var xmlLink = Zotero.Utilities.trimInternal(link.textContent)+'&showPnx=true';
-					Zotero.debug(xmlLink);
+					//Zotero.debug(xmlLink);
 					var title = Zotero.Utilities.trimInternal(title.textContent);
 					items[xmlLink] = title;
 				}
@@ -92,25 +92,32 @@ function doWeb(doc, url) {
 	}
 	
 	Zotero.Utilities.HTTP.doGet(links, function(text) {
-	
-		text = text.replace(/^<\?xml\s+version\s*=\s*(["'])[^\1]+\1[^?]*\?>/, ""); //because E4X is full of FAIL
-		var xmldoc = new XML(text);
 		
-		if (xmldoc.display.type.toString() == 'book') {
+		var parser = new DOMParser();
+		var doc = parser.parseFromString(text, "text/xml");
+		
+		itemType = ZU.xpathText(doc, '//display/type');
+		if ((itemType == 'book')) {
 			var item = new Zotero.Item("book");
-		} else if (xmldoc.display.type.toString() == 'audio') {
+		} else if (itemType == 'audio') {
 			var item = new Zotero.Item("audioRecording");
-		} else if (xmldoc.display.type.toString() == 'video') {
+		} else if (itemType == 'video') {
 			var item = new Zotero.Item("videoRecording");
 		} else {
 			var item = new Zotero.Item("document");
 		}
-		item.title = xmldoc.display.title.toString();
+		item.title = ZU.xpathText(doc, '//display/title');
 		
-		var creators = xmldoc.display.creator.toString().replace(/\d{4}-(\d{4})?/, '').split("; ");
-		var contributors = xmldoc.display.contributor.toString().replace(/\d{4}-(\d{4})?/, '').split("; ");
 		
-		if (!creators[0]) { // <contributor> not available using <contributor> as author instead
+		var creators;
+		var contributors;
+		if (ZU.xpathText(doc, '//display/creator')) {
+			creators = ZU.xpathText(doc, '//display/creator').replace(/\d{4}-(\d{4})?/, '').split("; ");
+		} else if (ZU.xpathText(doc, '//display/contributor')) {
+			creators = ZU.xpathText(doc, '//display/contributor').replace(/\d{4}-(\d{4})?/, '').split("; ");
+		}
+		
+		if (!creators[0]) { // <creator> not available using <contributor> as author instead
 			creators = contributors;
 			contributors = null;
 		}
@@ -126,43 +133,60 @@ function doWeb(doc, url) {
 			}
 		}
 		
-		var pubplace = xmldoc.display.publisher.toString().split(" : ");
+		var pubplace = ZU.xpathText(doc, '//display/publisher').split(" : ");
 		if (pubplace) {
 			item.place = pubplace[0];
 			item.publisher = pubplace[1];
 		}
 		
-		var date = xmldoc.display.creationdate.toString();
-		if (date) item.date = date.match(/\d+/)[0];
+		var date;
+		if (date = ZU.xpathText(doc, '//display/creationdate')) {
+			item.date = date.match(/\d+/)[0];
+		}
 		
-		var language = xmldoc.display.language.toString();
 		// We really hope that Primo always uses ISO 639-2
 		// This looks odd, but it just means that we're using the verbatim
 		// content if it isn't in our ISO 639-2 hash.
-		if (language)
+		var language;
+		if (language = ZU.xpathText(doc, '//display/language')) {
 			if(!(item.language = iso6392(language)))
 				item.language = language;
-
+		}
 		
-		var pages = xmldoc.display.format.toString().match(/(\d+)\sp\./);
-		if (pages) item.pages = pages[1];
+		var pages;
+		if (pages = ZU.xpathText(doc, '//display/format').match(/(\d+)\sp\./)) {
+			item.pages = pages[1];
+		}
 	
 		// The identifier field is supposed to have standardized format, but
 		// the super-tolerant idCheck should be better than a regex.
-		// (although note that it will reject invalid ISBNs)	
-		var locators = idCheck(xmldoc.display.identifier.toString());
-		if (locators.isbn10) item.ISBN = locators.isbn10;
-		if (locators.isbn13) item.ISBN = locators.isbn13;
-		if (locators.issn) item.ISSN = locators.issn;
-		
-		var edition = xmldoc.display.edition.toString();
-		if (edition) item.edition = edition;
-		
-		for each (subject in xmldoc.search.subject) {
-			item.tags.push(subject.toString());
+		// (although note that it will reject invalid ISBNs)
+		var locators;
+		if (locators = ZU.xpathText(doc, '//display/identifier')) {
+			locators = idCheck(locators);
+			if (locators.isbn10) item.ISBN = locators.isbn10;
+			if (locators.isbn13) item.ISBN = locators.isbn13;
+			if (locators.issn) item.ISSN = locators.issn;
 		}
+		
+		var edition;
+		if (edition = ZU.xpathText(doc, '//display/edition')) {
+			item.edition = edition;
+		}
+		
+		var subject, j;
+		if (subject = ZU.xpath(doc, '//search/subject')) {
+			for (var i in subject) {
+				j = parseInt(i) + 1;
+				item.tags.push(ZU.xpathText(doc, '//search/subject['+j+']'));
+			}
+		}
+
 		// does callNumber get stored anywhere else in the xml?
-		item.callNumber = xmldoc.enrichment.classificationlcc[0];
+		var callNumber;
+		if (callNumber = ZU.xpathText(doc, '//enrichment/classificationlcc')) {
+			item.callNumber = callNumber;
+		}
 		
 		item.complete();
 		
