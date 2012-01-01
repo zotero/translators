@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-12-28 12:47:14"
+	"lastUpdated": "2012-01-01 14:04:16"
 }
 
 /*
@@ -140,8 +140,8 @@ function scrape (doc) {
 			case "Title":
 					item.title = ZU.capitalizeTitle(value); 
 					if (item.title == item.title.toUpperCase()) {
-        item.title = Zotero.Utilities.capitalizeTitle(item.title.toLowerCase(),true);
-      }
+		item.title = Zotero.Utilities.capitalizeTitle(item.title.toLowerCase(),true);
+	  }
 					break;
 			case "Author":
 					item.creators = valueAArray.map(
@@ -243,7 +243,7 @@ function scrape (doc) {
 	
 	item.place = item.place.join(', ');
 	item.thesisType = item.thesisType.join(', ');
-	
+	item.URL= doc.location.href;
 	item.proceedingsTitle = item.publicationTitle;
 	
 	// On historical newspapers, we see:
