@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-11-13 11:20:47"
+	"lastUpdated": "2011-12-28 17:10:21"
 }
 
 /*
@@ -95,7 +95,7 @@ function doWeb(doc, url) {
 	
 		text = text.replace(/^<\?xml\s+version\s*=\s*(["'])[^\1]+\1[^?]*\?>/, ""); //because E4X is full of FAIL
 		var xmldoc = new XML(text);
-		
+		Z.debug(text);
 		if (xmldoc.display.type.toString() == 'book') {
 			var item = new Zotero.Item("book");
 		} else if (xmldoc.display.type.toString() == 'audio') {
@@ -109,14 +109,14 @@ function doWeb(doc, url) {
 		
 		var creators = xmldoc.display.creator.toString().replace(/\d{4}-(\d{4})?/, '').split("; ");
 		var contributors = xmldoc.display.contributor.toString().replace(/\d{4}-(\d{4})?/, '').split("; ");
-		
+		//Z.debug(contributors[0])
 		if (!creators[0]) { // <contributor> not available using <contributor> as author instead
 			creators = contributors;
 			contributors = null;
 		}
 		for (creator in creators) {
 			if (creators[creator]) {
-				item.creators.push(Zotero.Utilities.cleanAuthor(creators[creator], "author"));
+				item.creators.push(Zotero.Utilities.cleanAuthor(creators[creator], "author", true));
 			}
 		}
 		
@@ -144,8 +144,11 @@ function doWeb(doc, url) {
 				item.language = language;
 
 		
-		var pages = xmldoc.display.format.toString().match(/(\d+)\sp\./);
-		if (pages) item.pages = pages[1];
+		var pages = xmldoc.display.format.toString().match(/(\d+)/)[0];
+		if (pages) {
+			item.pages = pages;
+			item.numPages = pages;
+		}
 	
 		// The identifier field is supposed to have standardized format, but
 		// the super-tolerant idCheck should be better than a regex.
@@ -831,8 +834,8 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "Sneddon,",
-						"lastName": "Andrew",
+						"firstName": "Andrew",
+						"lastName": "Sneddon",
 						"creatorType": "author"
 					}
 				],
