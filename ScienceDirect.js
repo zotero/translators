@@ -13,12 +13,12 @@
 }
 
 function detectWeb(doc, url) {
-	if ((url.indexOf("_ob=DownloadURL") != -1) || doc.title == "ScienceDirect Login" || doc.title == "ScienceDirect - Dummy") {
+  /**	if ((url.indexOf("_ob=DownloadURL") != -1) || doc.title == "ScienceDirect Login" || doc.title == "ScienceDirect - Dummy") { */
 		return false;
-	}
-	if((url.indexOf("pdf") !== -1
-				&& url.indexOf("_ob=ArticleURL") === -1 
-				&& url.indexOf("/article/") === -1) 
+//	}
+  /**	if((url.indexOf("pdf") !== -1
+				&& url.indexOf("_ob=ArticleURL") === -1
+				&& url.indexOf("/article/") === -1)
 			|| url.indexOf("/journal/") !== -1
 			|| url.indexOf("/book/") !== -1) {
 		if (ZU.xpath(doc, '//table[@class="resultRow"]/tbody/tr/td[2]/a').length > 0
@@ -33,7 +33,7 @@ function detectWeb(doc, url) {
 			return "bookSection";
 		else
 			return "journalArticle";
-	}
+	} */
 }
 
 
@@ -43,7 +43,7 @@ function doWeb(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
-	
+
 		var articles = new Array();
 		if(detectWeb(doc, url) == "multiple") {
 			//search page
@@ -66,12 +66,12 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
-			
+
 			var sets = [];
 			for each (article in articles) {
 				sets.push({article:article});
 			}
-			
+
 		} else {
 			articles = [url];
 			var sets =[{currentdoc:doc}];
@@ -80,8 +80,8 @@ function doWeb(doc, url) {
 			Zotero.debug('no items');
 			return;
 		}
-		
-		
+
+
 		var scrape = function(newDoc, set) {
 			var PDF;
 			var tempPDF = newDoc.evaluate('//a[contains(@class, "icon_pdf")]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
@@ -122,7 +122,7 @@ function doWeb(doc, url) {
 			return set;
 
 		};
-		
+
 		var first = function(set, next) {
 				var article = set.article;
 				Zotero.Utilities.processDocuments(article, function(doc){
@@ -130,11 +130,11 @@ function doWeb(doc, url) {
 					next();
 				});
 		};
-		
+
 		var second = function(set, next) {
 			var url = set.url;
 			var get = set.get;
-			
+
 			Zotero.Utilities.HTTP.doGet(get, function(text) {
 				const postOrder = ["_ob", "_method", "_acct", "_userid", "_docType",
 					"_ArticleListID", "_uoikey", "_eidkey", "count", "md5", "JAVASCRIPT_ON",
@@ -149,42 +149,42 @@ function doWeb(doc, url) {
 					"citation-type":"RIS",
 					"Export":"Export"
 				};
-				
+
 				const re = /<input type=hidden name=(md5|_acct|_userid|_uoikey|_eidkey|_ArticleListID) value=([^>]+)>/g;
 				while((m = re.exec(text)) != null) {
 					postParams[encodeURIComponent(m[1])] = encodeURIComponent(m[2]);
 				}
-				
+
 				var post = "";
 				for(var i=0, n=postOrder.length; i<n; i++) {
 					var key = postOrder[i];
 					if(postParams[key]) post += "&"+key+"="+postParams[key];
 				}
-				
+
 				var baseurl = url.match(/https?:\/\/[^/]+\//)[0];
-				
+
 				set.post = post;
 				set.baseurl = baseurl;
-				
+
 				next();
 			});
-			
-			
+
+
 		};
-		
+
 		var third = function(set, next) {
 			var baseurl = set.baseurl;
 			var post = set.post;
 			var attachments = set.attachments;
-			
-			
-			Zotero.Utilities.HTTP.doPost(baseurl + 'science', post, function(text) { 
+
+
+			Zotero.Utilities.HTTP.doPost(baseurl + 'science', post, function(text) {
 				var translator = Zotero.loadTranslator("import");
 				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 				translator.setString(text);
 				translator.setHandler("itemDone", function(obj, item) {
 					item.attachments = attachments;
-					
+
 					if(item.notes[0]) {
 						item.abstractNote = item.notes[0].note;
 						item.notes = new Array();
@@ -193,13 +193,13 @@ function doWeb(doc, url) {
 					item.complete();
 				});
 				translator.translate();
-				
+
 				next();
 			}, false, 'utf8');
-			
-			
+
+
 		};
-		
+
 		var detectedType = detectWeb(doc, url);
 		if(detectedType == "journalArticle"
 			|| detectedType == "bookSection") {
@@ -209,12 +209,12 @@ function doWeb(doc, url) {
 					Zotero.done();
 				});
 			});
-			
+
 		} else {
 			var callbacks = [first, second, third];
 			Zotero.Utilities.processAsync(sets, callbacks, function() {Zotero.done()});
 		}
-		
+
 	Zotero.wait();
 }
 
