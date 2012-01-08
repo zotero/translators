@@ -120,6 +120,9 @@ var inputTypeMap = {
 };
 
 function processTag(item, tag, value) {
+	// Drop empty fields
+	if (value === undefined || value === null || value == "") return item;	
+
 	if (tag != "N1" && tag != "AB" && value !== undefined
 				&& Zotero.Utilities.unescapeHTML) {
 		value = Zotero.Utilities.unescapeHTML(value);
