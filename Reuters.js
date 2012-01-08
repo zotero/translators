@@ -30,12 +30,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*
-   Translator for Reuters. This is a minimal translator just to get Reuters back working after a redesign.
-   Future versions should implement multiple item saving and attend to the nits that this translator has
-   probably missed.
-*/
-
 function detectWeb(doc, url) {
 	if (url.match(/^https?:\/\/(www\.)?reuters\.com\/article/)) {
 		return "newspaperArticle";
@@ -58,7 +52,6 @@ function doWeb(doc, url) {
 
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
-				Zotero.done();
 				return true;
 			}
 			for (var i in items) {
@@ -67,9 +60,8 @@ function doWeb(doc, url) {
 			Zotero.Utilities.processDocuments(articles, scrape, function () {
 				Zotero.done();
 			});
+			Zotero.wait();
 		});
-
-
 	} else {
 		scrape(doc, url);
 	}
