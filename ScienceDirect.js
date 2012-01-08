@@ -9,10 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2011-12-10 17:21:32"
+	"lastUpdated": "2012-01-08 17:59:22"
 }
 
 function detectWeb(doc, url) {
+	// TEMP: Broken after site update
+	return false;
+	
 	if ((url.indexOf("_ob=DownloadURL") != -1) || doc.title == "ScienceDirect Login" || doc.title == "ScienceDirect - Dummy") {
 		return false;
 	}
