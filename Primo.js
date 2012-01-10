@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-12-29 21:38:10"
+	"lastUpdated": "2012-01-10 00:26:32"
 }
 
 /*
@@ -92,7 +92,7 @@ function doWeb(doc, url) {
 	}
 	
 	Zotero.Utilities.HTTP.doGet(links, function(text) {
-		
+		Z.debug(text);
 		var parser = new DOMParser();
 		var doc = parser.parseFromString(text, "text/xml");
 		
@@ -112,11 +112,13 @@ function doWeb(doc, url) {
 		var contributors;
 		if (ZU.xpathText(doc, '//display/creator')) {
 			creators = ZU.xpathText(doc, '//display/creator').replace(/\d{4}-(\d{4})?/, '').split("; ");
-		} else if (ZU.xpathText(doc, '//display/contributor')) {
-			creators = ZU.xpathText(doc, '//display/contributor').replace(/\d{4}-(\d{4})?/, '').split("; ");
 		}
 		
-		if (!creators[0]) { // <creator> not available using <contributor> as author instead
+		if (ZU.xpathText(doc, '//display/contributor')) {
+			contributors = ZU.xpathText(doc, '//display/contributor').replace(/\d{4}-(\d{4})?/, '').split("; ");
+		}
+		
+		if (!creators && contributors) { // <creator> not available using <contributor> as author instead
 			creators = contributors;
 			contributors = null;
 		}
@@ -133,9 +135,11 @@ function doWeb(doc, url) {
 		}
 		
 		var pubplace = ZU.xpathText(doc, '//display/publisher').split(" : ");
-		if (pubplace) {
+		if (pubplace && pubplace[1]) {
 			item.place = pubplace[0];
 			item.publisher = pubplace[1];
+		} else if (pubplace) {
+			item.publisher = pubplace[0];
 		}
 		
 		var date;
@@ -930,8 +934,7 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "Michel De",
-						"lastName": "Ghelderode",
+						"lastName": "Michel De Ghelderode",
 						"creatorType": "author"
 					},
 					{
@@ -956,6 +959,7 @@ var testCases = [
 				"publisher": "Labor",
 				"date": "1992",
 				"language": "French",
+				"numPages": "610",
 				"pages": "610",
 				"ISBN": "2-8040-0815-0",
 				"callNumber": "PQ 2613 .H17 A8",
