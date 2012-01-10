@@ -9,7 +9,7 @@
 	"priority":300,
 	"browserSupport":"gcs",
 	"inRepository":true,
-	"lastUpdated":"2011-06-23 08:58:22"
+	"lastUpdated":"2012-01-10 08:58:22"
 }
 
 var items = {};
@@ -49,7 +49,10 @@ function getDOIs(doc) {
 }
 
 function detectWeb(doc, url) {
-	const blacklistRe = /^https?:\/\/[^/]*google\.com/i;
+	// Blacklist the advertising iframe in ScienceDirect guest mode:
+	// http://www.sciencedirect.com/science/advertisement/options/num/264322/mainCat/general/cat/general/acct/...
+	// This can be removed from blacklist when 5c324134c636a3a3e0432f1d2f277a6bc2717c2a hits all clients (Z 3.0+)
+	const blacklistRe = /^https?:\/\/[^/]*(?:google\.com|sciencedirect\.com\/science\/advertisement\/)/i;
 	
 	if(!blacklistRe.test(url)) {
 		var DOIs = getDOIs(doc);
