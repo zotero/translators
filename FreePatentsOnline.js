@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-01-10 23:45:34"
+	"lastUpdated": "2012-01-11 00:38:57"
 }
 
 function detectWeb(doc, url) {
@@ -88,6 +88,7 @@ function scrape(doc, url) {
 	associateData (newItem, dataTags, "DocumentTypeandNumber:", "patentNumber");
 	associateData (newItem, dataTags, "ApplicationNumber:", "applicationNumber");
 	associateData (newItem, dataTags, "PublicationDate:", "issueDate");
+	associateData (newItem, dataTags, "FilingDate:", "filingDate");
 	associateData (newItem, dataTags, "Assignee:", "assignee");
 	
 	if (!newItem.patentNumber) {
