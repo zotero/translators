@@ -9,7 +9,7 @@
 	"priority":300,
 	"browserSupport":"gcs",
 	"inRepository":true,
-	"lastUpdated":"2012-01-10 08:58:22"
+	"lastUpdated":"2012-01-11 09:09:04"
 }
 
 var items = {};
