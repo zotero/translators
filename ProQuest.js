@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-01 14:04:16"
+	"lastUpdated": "2012-01-10 14:04:16"
 }
 
 /*
@@ -253,7 +253,7 @@ function scrape (doc) {
 	if(item.rights)	{
 		var fullerDate = item.rights.match(/([A-Z][a-z]{2} \d{1,2}, \d{4}$)/);
 	}
-	if ((!item.date || item.date.match(/^\d{4}$/)	&& fullerDate)) {
+	if ((!item.date || item.date.match(/^\d{4}$/)) && fullerDate) {
 		item.date = fullerDate[1];
 	}
 	
