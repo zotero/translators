@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2011-12-31 19:10:04"
+	"lastUpdated": "2012-01-10 23:10:38"
 }
 
 /*
@@ -98,7 +98,7 @@ var scrapeListing = function (doc) {
 
 	// XML fragment lists
 	var titleFrags = doc.evaluate('//div[@class="gs_r"]//h3[not(contains(a/@href,"/citations"))]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var citeletFrags = doc.evaluate('//span[@class="gs_a"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var citeletFrags = doc.evaluate('//div[@class="gs_a"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 	var  bibtexFrags = doc.evaluate('//a[contains(@href, "scholar.bib")]',
 				doc, nsResolver, XPathResult.ANY_TYPE, null);
 
