@@ -9,11 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-01-09 16:48:06"
+	"lastUpdated": "2012-01-10 16:48:06"
 }
 
 function detectWeb(doc, url) {
-  	if ((url.indexOf("_ob=DownloadURL") != -1) || doc.title == "ScienceDirect Login" || doc.title == "ScienceDirect - Dummy") { 
+  	if ((url.indexOf("_ob=DownloadURL") != -1) 
+		|| doc.title == "ScienceDirect Login" 
+		|| doc.title == "ScienceDirect - Dummy"
+		|| (url.indexOf("/science/advertisement/") !== -1)) { 
 		return false;
 	}
 	if((url.indexOf("pdf") !== -1
