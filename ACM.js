@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-01-06 16:08:09"
+	"lastUpdated": "2012-01-11 23:12:20"
 }
 
 /*
@@ -69,7 +69,6 @@ function doWeb(doc, url) {
 
 	Zotero.selectItems(items, function (items) {
 	  if (!items) {
-		Zotero.done();
 		return true;
 	  }
 	  for (var i in items) {
@@ -78,12 +77,15 @@ function doWeb(doc, url) {
 	  Zotero.Utilities.processDocuments(URIs, scrape, function () {
 		Zotero.done();
 	  });
+
+	  Zotero.wait();
 	});
   } else {
 	URIs.push(url);
 	Zotero.Utilities.processDocuments(URIs, scrape, function () {
 	  Zotero.done();
 	});
+		Zotero.wait();
   }
 }
 //get abstract where possible - this fails frequently
@@ -113,6 +115,7 @@ function scrape(doc) {
   Zotero.debug('bibtex URL: ' + bibtexURL);
   Zotero.Utilities.HTTP.doGet(bibtexURL, function (text) {
 	var translator = Zotero.loadTranslator("import");
+var incomplete = [];
 	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 	translator.setString(text);
 	//Zotero.debug('bibtex data: ' + text);
@@ -132,14 +135,11 @@ function scrape(doc) {
 	  item.archiveLocation = "";
 	  // some bibtext contains odd </kwd> tags - remove them
 	  if (item.tags) item.tags = String(item.tags).replace(/\<\/kwd\>/g, "").split(",");
-	  if (item.itemType == detectWeb(doc,url)){
-	  item.complete();
-	  }
-	  else return "false"
-	});
-
-
-	translator.translate();
+    incomplete.push(item);
+});
+translator.translate();
+// assuming the first item is the right one return just that.
+if (incomplete.length > 0) incomplete[0].complete();
   });
 }
 
@@ -332,6 +332,51 @@ var testCases = [
 				"DOI": "10.1023/A:1008286901817",
 				"publisher": "Kluwer Academic Publishers",
 				"place": "Norwell, MA, USA",
+				"libraryCatalog": "ACM Digital Library",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://dl.acm.org.turing.library.northwestern.edu/citation.cfm?id=258948.258973&coll=DL&dl=ACM",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"creators": [
+					{
+						"firstName": "Conal",
+						"lastName": "Elliott",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Paul",
+						"lastName": "Hudak",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					""
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://dl.acm.org.turing.library.northwestern.edu/ft_gateway.cfm?id=258973&type=pdf",
+						"title": "ACM Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"title": "Functional reactive animation",
+				"publicationTitle": "Proceedings of the second ACM SIGPLAN international conference on Functional programming",
+				"series": "ICFP '97",
+				"date": "1997",
+				"ISBN": "0-89791-918-1",
+				"pages": "263–273",
+				"url": "http://doi.acm.org.turing.library.northwestern.edu/10.1145/258948.258973",
+				"DOI": "10.1145/258948.258973",
+				"publisher": "ACM",
+				"place": "New York, NY, USA",
 				"libraryCatalog": "ACM Digital Library",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
