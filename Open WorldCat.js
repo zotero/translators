@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "g",
-	"lastUpdated": "2012-01-16 00:17:14"
+	"lastUpdated": "2012-01-16 00:38:52"
 }
 
 /**
@@ -29,16 +29,18 @@ function getZoteroType(iconSrc) {
 	return false;
 }
 
+
 /**
- * RIS Scraper Function *
+ * RIS Scraper Function
+ *
  */
 
 function scrape(doc, url) {
 	//we need a different replace for item displays from search results
 	if (url.match(/\?/)) {
-		var newurl = url.replace(/\&.+/, "&client=worldcat.org-detailed_record&page=endnote");
+		var newurl = url.replace(/\&[^/]*$|$/, "&client=worldcat.org-detailed_record&page=endnote");
 	} else {
-		var newurl = url.replace(/\&.+/, "?client=worldcat.org-detailed_record&page=endnote");
+		var newurl = url.replace(/\&[^/]*$|$/, "?client=worldcat.org-detailed_record&page=endnote");
 	}
 	//Z.debug(newurl)
 	Zotero.Utilities.HTTP.doGet(newurl, function (text) {
@@ -52,7 +54,7 @@ function scrape(doc, url) {
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
 			item.extra = "";
-			//some creators have period after firstName - this could theoretically interfere with name suffixes (Jr., III. etc.) but Worldcat never has these in the RIS
+			//creators have period after firstName
 			for (i in item.creators) {
 				item.creators[i].firstName = item.creators[i].firstName.replace(/\.$/, "");
 			}
@@ -79,7 +81,6 @@ function generateItem(doc, node) {
 	try {
 		type = doc.evaluate('//img[@class="icn"][contains(@src, "icon-")]/@src', doc, null, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
 	} catch (e) {}
-
 	if (type) {
 		type = getZoteroType(type);
 		if (type) item.itemType = type;
@@ -125,6 +126,7 @@ function doWeb(doc, url) {
 				Zotero.Utilities.processDocuments(articles, scrape, function () {
 					Zotero.done();
 				});
+				Zotero.wait();
 			});
 		} else { //single item in search results, don't display a select dialog
 			var title = doc.evaluate('//div[@class="name"]/a[1]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
@@ -132,11 +134,11 @@ function doWeb(doc, url) {
 			article = title.href;
 			Zotero.Utilities.processDocuments(article, scrape, function () {
 				Zotero.done();
-			})
+			});
+			Zotero.wait();
 		}
 	} else { // regular single item	view
 		scrape(doc, url);
-		Zotero.done();
 	}
 }
 
@@ -149,16 +151,13 @@ function doSearch(item) {
 			article = title.href;
 			ZU.processDocuments(article, scrape, function () {
 				Zotero.done();
-			})
+			});
 		} else {
 			scrape(doc, url);
-			Zotero.done();
 		}
 	}, null);
 	Zotero.wait();
-}
-
-/** BEGIN TEST CASES **/
+} /** BEGIN TEST CASES **/
 var testCases = [{
 	"type": "web",
 	"url": "http://www.worldcat.org/search?qt=worldcat_org_bks&q=argentina&fq=dt%3Abks",
@@ -263,5 +262,4 @@ var testCases = [{
 		"language": "English",
 		"libraryCatalog": "Open WorldCat"
 	}]
-}];
-/** END TEST CASES **/
+}] /** END TEST CASES **/
