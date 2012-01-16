@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "g",
-	"lastUpdated": "2012-01-12 15:26:54"
+	"lastUpdated": "2012-01-16 00:17:14"
 }
 
 /**
@@ -29,26 +29,33 @@ function getZoteroType(iconSrc) {
 	return false;
 }
 
-
 /**
- * RIS Scraper Function
- *
+ * RIS Scraper Function *
  */
 
 function scrape(doc, url) {
-	var newurl = url.replace(/\&.+/, "?client=worldcat.org-detailed_record&page=endnote");
+	//we need a different replace for item displays from search results
+	if (url.match(/\?/)) {
+		var newurl = url.replace(/\&.+/, "&client=worldcat.org-detailed_record&page=endnote");
+	} else {
+		var newurl = url.replace(/\&.+/, "?client=worldcat.org-detailed_record&page=endnote");
+	}
 	//Z.debug(newurl)
 	Zotero.Utilities.HTTP.doGet(newurl, function (text) {
-		//Zotero.debug("RIS: " + text)
 		//LA is not an actual RIS tag, but we like to get that information where we can
 		if (text.match(/LA  -/)) {
 			var language = text.match(/LA  -.+/)[0].replace(/LA  - /, "");
-		}
+		};
+		//Zotero.debug("RIS: " + text)
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
 			item.extra = "";
+			//some creators have period after firstName - this could theoretically interfere with name suffixes (Jr., III. etc.) but Worldcat never has these in the RIS
+			for (i in item.creators) {
+				item.creators[i].firstName = item.creators[i].firstName.replace(/\.$/, "");
+			}
 			if (language) item.language = language;
 			//We want ebooks to be treated like books, not webpages (is ISBN the best choice here?)
 			if (item.itemType == "webpage" && item.ISBN) {
@@ -60,7 +67,6 @@ function scrape(doc, url) {
 	});
 }
 
-
 /**
  * Generates a Zotero item from a single item WorldCat page, or the first item on a multiple item
  * page
@@ -68,12 +74,12 @@ function scrape(doc, url) {
 function generateItem(doc, node) {
 	var item = new Zotero.Item();
 	Zotero.Utilities.parseContextObject(node.nodeValue, item);
-
 	// if only one, first check for special types (audio & video recording)
 	var type = false;
 	try {
 		type = doc.evaluate('//img[@class="icn"][contains(@src, "icon-")]/@src', doc, null, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
 	} catch (e) {}
+
 	if (type) {
 		type = getZoteroType(type);
 		if (type) item.itemType = type;
@@ -90,7 +96,6 @@ function detectWeb(doc) {
 		multiple = true;
 		return "multiple";
 	}
-
 	// generate item and return type
 	return generateItem(doc, node).itemType;
 }
@@ -127,7 +132,7 @@ function doWeb(doc, url) {
 			article = title.href;
 			Zotero.Utilities.processDocuments(article, scrape, function () {
 				Zotero.done();
-			});
+			})
 		}
 	} else { // regular single item	view
 		scrape(doc, url);
@@ -136,16 +141,20 @@ function doWeb(doc, url) {
 }
 
 function doSearch(item) {
-	Zotero.Utilities.loadDocument("http://www.worldcat.org/search?q=isbn%3A" + item.ISBN + "&=Search&qt=results_page", function (doc) {
+	ZU.processDocuments("http://www.worldcat.org/search?q=isbn%3A" + item.ISBN + "&=Search&qt=results_page", function (doc, url) {
 		//we take the first search result and run scrape on it
-		var title = doc.evaluate('//div[@class="name"]/a[1]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-		if (!title) Zotero.done(false);
-		article = title.href;
-		Zotero.Utilities.processDocuments(article, scrape, function () {
+		if (doc.evaluate('//div[@class="name"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) { //search results view
+			var title = doc.evaluate('//div[@class="name"]/a[1]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+			if (!title) Zotero.done(false);
+			article = title.href;
+			ZU.processDocuments(article, scrape, function () {
+				Zotero.done();
+			})
+		} else {
+			scrape(doc, url);
 			Zotero.done();
-		});
+		}
 	}, null);
-
 	Zotero.wait();
 }
 
