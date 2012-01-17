@@ -2,14 +2,14 @@
 	"translatorID": "c73a4a8c-3ef1-4ec8-8229-7531ee384cc4",
 	"label": "Open WorldCat",
 	"creator": "Simon Kornblith, Sebastian Karcher",
-	"target": "^https?://(.+)\\.worldcat\\.org/",
+	"target": "^http://www\\.worldcat\\.org/",
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "g",
-	"lastUpdated": "2012-01-16 00:38:52"
+	"lastUpdated": "2012-01-17 00:55:12"
 }
 
 /**
@@ -35,8 +35,9 @@ function getZoteroType(iconSrc) {
  *
  */
 
-function scrape(doc, url) {
+function scrape(doc, url, callDoneWhenFinished) {
 	//we need a different replace for item displays from search results
+	if (!url) url = doc.location.href;
 	if (url.match(/\?/)) {
 		var newurl = url.replace(/\&[^/]*$|$/, "&client=worldcat.org-detailed_record&page=endnote");
 	} else {
@@ -66,6 +67,7 @@ function scrape(doc, url) {
 			item.complete();
 		});
 		translator.translate();
+		if(callDoneWhenFinished) Zotero.done();
 	});
 }
 
@@ -149,11 +151,9 @@ function doSearch(item) {
 			var title = doc.evaluate('//div[@class="name"]/a[1]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 			if (!title) Zotero.done(false);
 			article = title.href;
-			ZU.processDocuments(article, scrape, function () {
-				Zotero.done();
-			});
+			ZU.processDocuments(article, function(doc, url) { scrape(doc, url, true); });
 		} else {
-			scrape(doc, url);
+			scrape(doc, url, true);
 		}
 	}, null);
 	Zotero.wait();
