@@ -203,27 +203,38 @@ function generateItem(item) {
     
     // create title or monogr
     if(isAnalytic){
+        bibl.analytic = <analytic/>;
+        bibl.monogr = <monogr/>;
         if(item.title){
-            bibl.analytic.title = item.title;
+            bibl.analytic.appendChild(<title>{item.title}</title>);
         }
         else{
-            bibl.analytic.title = "";
+            bibl.analytic.appendChild(<title/>);
         }
         // there should be a publication title!
         if(item.publicationTitle){
-            bibl.monogr.title = item.publicationTitle;
+            bibl.monogr.appendChild(<title>{item.publicationTitle}</title>);
         }
         // nonetheless if the user pleases this has to be possible
-        else{
-            bibl.monogr.title = "";
+        else if(!item.conferenceName){
+            bibl.monogr.appendChild(<title/>);
         }
     }
-    else if(item.title){
-        bibl.monogr.title = item.title;
-    }
     else {
-        bibl.monogr.title = "";
+        bibl.monogr = <monogr/>;
+        if(item.title){
+            bibl.monogr.appendChild(<title>{item.title}</title>);
+        }
+        else if(!item.conferenceName){
+            bibl.monogr.appendChild(<title/>);
+        }
     }
+
+    // add name of conference
+    if(item.conferenceName){
+        bibl.monogr.appendChild(<title type="conferenceName">{item.conferenceName}</title>);
+    }
+
     // itemTypes in Database do unfortunately not match fields
     // of item
     if(item.series || item.seriesTitle){
