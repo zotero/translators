@@ -14,11 +14,12 @@
 	},
 	"displayOptions": {
 		"exportNotes": false,
+		"exportTags": false,
 		"generateXMLIds": true,
 		"fullTEIDocument": false,
 		"createCollections": false
 	},
-	"lastUpdated": "2011-12-18 13:12:00"
+	"lastUpdated": "2012-01-18 12:40:00"
 }
 
 // ********************************************************************
@@ -257,6 +258,9 @@ function generateItem(item) {
         else if (type == "seriesEditor"){
             curCreator = <editor/>;
         }
+        else if (type == "bookAuthor"){
+            curCreator = <author/>;                         
+        }
         else {
             curRespStmt = <respStmt/>;
             curRespStmt.appendChild(<resp>{type}</resp>);
@@ -285,7 +289,7 @@ function generateItem(item) {
         if(type == "seriesEditor"){
             bibl.series.editor = curCreator;
         }
-        else if(isAnalytic && (type != 'editor')){
+        else if(isAnalytic && (type != 'editor' && type != 'bookAuthor')){
             // assuming that only authors go here
             bibl.analytic.appendChild(curCreator);
         }
@@ -355,6 +359,15 @@ function generateItem(item) {
             bibl.appendChild(<note>{item.notes[n].note.replace(/<(([^>"]*)|("[^"]*"))+>/g,"")}</note>);
             // bibl.appendChild(<note>{item.notes[n].note.replace(/<\/?[a-zA-Z][a-zA-Z0-9]*( +[a-zA-Z][a-zA-Z0-9]*=\"[-_a-zA-Z0-9 ,.;:]*\")*\/?>/g,"")}</note>);
         }
+    }
+
+    //export tags, if available
+    if(Zotero.getOption("exportTags") && item.tags && item.tags.length > 0) {
+      var tags = <note type="tags"/>
+      for(var n in item.tags) {
+            tags.appendChild(<note type="tag">{item.tags[n].tag}</note>);
+        }
+      bibl.appendChild(tags);
     }
 
     // the canonical reference numbers
@@ -477,8 +490,7 @@ function doExport() {
         }
     }
 
-    // write to file. But why on earth does Zotero prepend everything
-    // with a ZERO WIDTH NO-BREAK SPACE
+    // write to file.
     Zotero.write('<?xml version="1.0"?>'+"\n");
     Zotero.write(outputDocument.toXMLString());
 }
