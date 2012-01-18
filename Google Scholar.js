@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2011-12-10 20:31:08"
+	"lastUpdated": "2012-01-11 09:09:04"
 }
 
 /*
@@ -55,10 +55,7 @@ var detectWeb = function (doc, url) {
 			return "case";
 		}
 	} else {
-		if (ZU.xpath(doc, '//div[@class="gs_r"]//h3[not(contains(a/@href,"/citations"))]').length > 0)
-			return "multiple";
-		else
-			return false;
+		return "multiple";
 	}
 };
 
@@ -101,7 +98,7 @@ var scrapeListing = function (doc) {
 
 	// XML fragment lists
 	var titleFrags = doc.evaluate('//div[@class="gs_r"]//h3[not(contains(a/@href,"/citations"))]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var citeletFrags = doc.evaluate('//span[@class="gs_a"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var citeletFrags = doc.evaluate('//div[@class="gs_a"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 	var  bibtexFrags = doc.evaluate('//a[contains(@href, "scholar.bib")]',
 				doc, nsResolver, XPathResult.ANY_TYPE, null);
 
@@ -138,12 +135,6 @@ var scrapeListing = function (doc) {
 			labels.push(titleString);
 		}
 		factories.push(factory);
-	}
-
-	// Error reports indicate that we often attempt to call selectItems without any items
-	if (!labels || labels.length == 0) {
-		Z.debug("No items on a page detected as having multiple results");
-		return false;
 	}
 
 	Zotero.selectItems(labels, function(items) {

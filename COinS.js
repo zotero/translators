@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 6,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-08-25 23:46:18"
+	"lastUpdated": "2011-12-18 15:35:05"
 }
 
 function detectWeb(doc, url) {
@@ -89,10 +89,10 @@ function completeCOinS(newItems, couldUseFullItems, doc) {
 			for(var i in selectArray) {
 				useIndices.push(i);
 			}
-			completeItems(newItems, useIndices, couldUseFullItems);
+			completeItems(newItems, useIndices, couldUseFullItems, doc);
 		});
 	} else if(newItems.length) {
-		completeItems(newItems, [0], couldUseFullItems);
+		completeItems(newItems, [0], couldUseFullItems, doc);
 	}
 }
 

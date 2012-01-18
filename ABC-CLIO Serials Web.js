@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"lastUpdated":"2011-12-18 04:31:00"
 }
 
 function detectWeb(doc, url) {
@@ -109,6 +109,8 @@ function doWeb(doc, url) {
 					
 					// fix periods
 					for(var i in item.creators) {
+						// firstName might not be defined
+						if (!item.creators[i].firstName) continue;
 						var nameLength = item.creators[i].firstName.length;
 						
 						if(item.creators[i].firstName[nameLength-1] == ".") {

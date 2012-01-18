@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gscn",
-	"lastUpdated": "2011-07-09 18:52:34"
+	"lastUpdated": "2012-01-11 09:09:04"
 }
 
 /*
@@ -49,7 +49,7 @@
 </DL>
   */
 
-const MAX_DETECT_LINES = 150;
+var MAX_DETECT_LINES = 150;
 
 function detectImport() {
 	var text = "";

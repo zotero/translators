@@ -8,7 +8,7 @@
 	"priority":100,
 	"inRepository":true,
 	"translatorType":4,
-	"lastUpdated":"2011-02-22 09:55:00"
+	"lastUpdated":"2011-12-19 09:55:00"
 }
 
 /*
@@ -425,7 +425,7 @@ var BnfClass = function() {
 	function postprocessMarc(record, newItem) {
 		//Type
 		var t = record.getFieldSubfields("200");
-		if(t  && t[0].b) {
+		if(t && t[0] && t[0].b) {
 			newItem.itemType = getItemType(t[0].b);
 		}
 

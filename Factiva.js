@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-10-16 21:51:32"
+	"lastUpdated": "2011-12-18 21:51:32"
 }
 
 function detectWeb(doc, url) {
@@ -96,6 +96,8 @@ function doWeb(doc, url) {
 		text = text.replace(/<ppsHeadlineResponse xmlns="[^"]+">/, "<ppsHeadlineResponse>");
 		// kill hlt tags; they just make parsing harder
 		text = text.replace(/<\/?hlt>/g, "");
+		// kill &nbsp; which shouldn't even be there, since it's not a legit XML entity
+		text = text.replace(/&nbsp;/g," ");
 		//Z.debug(text);
 		var xml = new XML(text);
 

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-12-07 21:52:37"
+	"lastUpdated": "2012-01-11 09:09:04"
 }
 
 /*
@@ -138,8 +138,12 @@ function scrape (doc) {
 		}
 		switch (field) {
 			case "Title":
-					item.title = value; break;
-			case "Authors":
+					item.title = ZU.capitalizeTitle(value); 
+					if (item.title == item.title.toUpperCase()) {
+		item.title = Zotero.Utilities.capitalizeTitle(item.title.toLowerCase(),true);
+	  }
+					break;
+			case "Author":
 					item.creators = valueAArray.map(
 							function(author) {
 								return Zotero.Utilities.cleanAuthor(author,
@@ -147,6 +151,16 @@ function scrape (doc) {
 									author.indexOf(',') !== -1); // useComma
 							});
 					break;
+					
+					//for me the tag is always "Author" but let's keep "Authors" to be safe.
+			case "Authors":
+					item.creators = valueAArray.map(
+							function(author) {
+								return Zotero.Utilities.cleanAuthor(author,
+									"author",
+									author.indexOf(',') !== -1); // useComma
+							});
+					break;		
 			case "Publication title":
 					item.publicationTitle = value; break;
 			case "Volume":
@@ -161,11 +175,11 @@ function scrape (doc) {
 			case "Publication year": 
 			case "Year":
 					item.date = (item.date) ? item.date : value; break;
-			case "Publication Date":
+			case "Publication date":
 					item.date = value; break;
 			case "Publisher":
 					item.publisher = value; break;
-			case "Place of Publication": // TODO Change to publisher-place when schema changes
+			case "Place of publication": // TODO Change to publisher-place when schema changes
 					item.place[0] = value; break;
 			case "Dateline":	// TODO Change to event-place when schema changes
 					item.place[0] = value; break;
@@ -189,7 +203,7 @@ function scrape (doc) {
 			case "Advisor":		// TODO Map when exists in Zotero
 					break;
 			case "Source type":
-			case "Document Type":
+			case "Document type":
 					item.itemType = (mapToZotero(value)) ? mapToZotero(value) : item.itemType; break;
 			case "Copyright":
 					item.rights = value; break;
@@ -201,9 +215,9 @@ function scrape (doc) {
 					item.attachments.push({url:value.replace(/\?accountid=[0-9]+$/,'')+"/abstract",
 								title: "ProQuest Record",
 								mimeType: "text/html"}); break;
-			case "ProQuest Document ID":
+			case "ProQuest document ID":
 					item.callNumber = value; break;
-			case "Language of Publication":
+			case "Language of publication":
 					item.language = value; break;
 			case "Section":
 					item.section = value; break;
@@ -215,27 +229,31 @@ function scrape (doc) {
 		}
 	}
 	
-	var abs = doc.evaluate('//div[@id="abstract_field" or @id="abstractSummary"]/p', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var abs = ZU.xpathText(doc, '//div[contains(@id, "abstract_field") or contains(@id, "abstractSummary")]/p');
 	if (abs) {
-		item.abstractNote = abs.textContent
+		//Z.debug(abs);
+		item.abstractNote = abs
 					.replace(/\[\s*[Ss]how all\s*\].*/,"")
 					.replace(/\[\s*[Ss]how less\s*\].*/,"")
 					.replace(/\[\s*PUBLICATION ABSTRACT\s*\]/,"")
+					.replace(/^\s*,/, "")  //remove commas at beginning and end
+					.replace(/[\s*,\s*]*$/, "")
 					.trim();
 	}
 	
 	item.place = item.place.join(', ');
 	item.thesisType = item.thesisType.join(', ');
-	
+	item.URL= doc.location.href;
 	item.proceedingsTitle = item.publicationTitle;
 	
 	// On historical newspapers, we see:
 	// Rights: Copyright New York Times Company Dec 1, 1852
 	// Date: 1852
 	// We can improve on this, so we do, but if there's no full-text there's no item.rights, so first test for that.
-if(item.rights)	var fullerDate = item.rights.match(/([A-Z][a-z]{2} \d{1,2}, \d{4}$)/);
-	if (!item.date || 
-		(item.date.match(/^\d{4}$/) && fullerDate)) {
+	if(item.rights)	{
+		var fullerDate = item.rights.match(/([A-Z][a-z]{2} \d{1,2}, \d{4}$)/);
+	}
+	if ((!item.date || item.date.match(/^\d{4}$/)) && fullerDate) {
 		item.date = fullerDate[1];
 	}
 	

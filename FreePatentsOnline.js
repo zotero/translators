@@ -3,13 +3,13 @@
 	"label": "FreePatentsOnline",
 	"creator": "Adam Crymble",
 	"target": "^https?://www\\.freepatentsonline\\.com",
-	"minVersion": "1.0.0b4.r5",
+	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-11-01 22:12:24"
+	"lastUpdated": "2012-01-11 09:33:52"
 }
 
 function detectWeb(doc, url) {
@@ -84,11 +84,20 @@ function scrape(doc, url) {
 	}
 
 	associateData (newItem, dataTags, "Title:", "title");
-	associateData (newItem, dataTags, "Abstract:", "abstract");
+	associateData (newItem, dataTags, "Abstract:", "abstractNote");
 	associateData (newItem, dataTags, "DocumentTypeandNumber:", "patentNumber");
 	associateData (newItem, dataTags, "ApplicationNumber:", "applicationNumber");
 	associateData (newItem, dataTags, "PublicationDate:", "issueDate");
+	associateData (newItem, dataTags, "FilingDate:", "filingDate");
 	associateData (newItem, dataTags, "Assignee:", "assignee");
+	
+	if (!newItem.patentNumber) {
+		newItem.patentNumber = ZU.xpathText(doc, "//input[@type='hidden' and @name='number']/@value");
+	}
+	
+	if (!newItem.country) {
+		newItem.country = ZU.xpathText(doc, "//input[@type='hidden' and @name='country']/@value");
+	}
 	
 	newItem.url = doc.location.href;
 
@@ -157,10 +166,12 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"title": "Partial encryption",
-				"abstract": "A multiple partial encryption device consistent with certain embodiments has an input for receiving a unencrypted video signal. An encryption arrangement produces a partially multiple encrypted video signal from the unencrypted video signal. An output provides the partially multiple encrypted video signal. This abstract is not to be considered limiting, since other embodiments may deviate from the features described in this abstract.",
+				"abstractNote": "A multiple partial encryption device consistent with certain embodiments has an input for receiving a unencrypted video signal. An encryption arrangement produces a partially multiple encrypted video signal from the unencrypted video signal. An output provides the partially multiple encrypted video signal. This abstract is not to be considered limiting, since other embodiments may deviate from the features described in this abstract.",
 				"applicationNumber": "12/001561",
 				"issueDate": "07/06/2010",
 				"assignee": "Sony Corporation (Tokyo, JP)\t\t\t\t\n\t\t\t\t\t\t\t\t\tSony Electronics Inc. (Park Ridge, NJ, US)",
+				"patentNumber": "7751561",
+				"country": "United States",
 				"url": "http://www.freepatentsonline.com/7751561.html",
 				"libraryCatalog": "FreePatentsOnline",
 				"accessDate": "CURRENT_TIMESTAMP"

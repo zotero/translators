@@ -9,8 +9,7 @@
 	"browserSupport": "gcs",
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2011-10-25 03:25:58"
+	"lastUpdated": "2012-01-01 01:42:16"
 }
 
 // Works for all APS journals: http://publish.aps.org/

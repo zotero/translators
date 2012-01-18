@@ -9,7 +9,7 @@
         "priority":100,
         "inRepository":true,
         "browserSupport":"g",
-        "lastUpdated":"2011-12-15 20:10:00"
+        "lastUpdated":"2011-12-20 20:10:00"
 }
 
 /*
@@ -31,6 +31,7 @@ function detectWeb(doc, url) {
     else if (url.indexOf('NewspapersDetails') !== -1) return "newspaperArticle";
     else if (url.indexOf('searchResults') !== -1) return "multiple";
     else if (url.indexOf('FullList') !== -1) return "multiple";
+    else if (url.indexOf('savedDocuments') !== -1) return "multiple";
     else if (url.indexOf('Details') !== -1) return "document";
     else
         return false;
@@ -46,7 +47,7 @@ function doWeb(doc, url) {
 
     risImporter.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 
-    var searchResults = doc.evaluate('//div[@regionid="searchResults"]  | //table[@id="searchResult"]', doc, null, XPathResult.ANY_TYPE, null)
+    var searchResults = doc.evaluate('//div[@regionid="searchResults"]  | //table[@id="searchResult"] | //table[@id="markedDocuments"]', doc, null, XPathResult.ANY_TYPE, null)
             .iterateNext();
 
     if (searchResults) {
@@ -57,8 +58,7 @@ function doWeb(doc, url) {
                 var start = item.indexOf('documentId=');
                 var end = item.indexOf('&', start);
                 var docid = item.substring(start + 11, end > -1 ? end : item.length);
-                var urlForPosting = doc.getElementById("zotero_form").action + '&doCitation=' + docid + '&citation_document_url='
-                        + encodeURIComponent(item.replace('|', '%7C'));
+                var urlForPosting = doc.getElementById("zotero_form").action + '&doCitation=' + docid + '&citation_document_url=' + encodeURIComponent(item.replace('|', '%7C'));
                 importSingleDocument(risImporter, urlForPosting);
             }
         });
