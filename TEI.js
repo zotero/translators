@@ -14,11 +14,12 @@
 	},
 	"displayOptions": {
 		"exportNotes": false,
+		"exportTags": false,
 		"generateXMLIds": true,
 		"fullTEIDocument": false,
 		"createCollections": false
 	},
-	"lastUpdated": "2011-12-18 13:12:00"
+	"lastUpdated": "2012-01-18 12:40:00"
 }
 
 // ********************************************************************
@@ -202,27 +203,38 @@ function generateItem(item) {
     
     // create title or monogr
     if(isAnalytic){
+        bibl.analytic = <analytic/>;
+        bibl.monogr = <monogr/>;
         if(item.title){
-            bibl.analytic.title = item.title;
+            bibl.analytic.appendChild(<title>{item.title}</title>);
         }
         else{
-            bibl.analytic.title = "";
+            bibl.analytic.appendChild(<title/>);
         }
         // there should be a publication title!
         if(item.publicationTitle){
-            bibl.monogr.title = item.publicationTitle;
+            bibl.monogr.appendChild(<title>{item.publicationTitle}</title>);
         }
         // nonetheless if the user pleases this has to be possible
-        else{
-            bibl.monogr.title = "";
+        else if(!item.conferenceName){
+            bibl.monogr.appendChild(<title/>);
         }
     }
-    else if(item.title){
-        bibl.monogr.title = item.title;
-    }
     else {
-        bibl.monogr.title = "";
+        bibl.monogr = <monogr/>;
+        if(item.title){
+            bibl.monogr.appendChild(<title>{item.title}</title>);
+        }
+        else if(!item.conferenceName){
+            bibl.monogr.appendChild(<title/>);
+        }
     }
+
+    // add name of conference
+    if(item.conferenceName){
+        bibl.monogr.appendChild(<title type="conferenceName">{item.conferenceName}</title>);
+    }
+
     // itemTypes in Database do unfortunately not match fields
     // of item
     if(item.series || item.seriesTitle){
@@ -257,6 +269,9 @@ function generateItem(item) {
         else if (type == "seriesEditor"){
             curCreator = <editor/>;
         }
+        else if (type == "bookAuthor"){
+            curCreator = <author/>;                         
+        }
         else {
             curRespStmt = <respStmt/>;
             curRespStmt.appendChild(<resp>{type}</resp>);
@@ -285,7 +300,7 @@ function generateItem(item) {
         if(type == "seriesEditor"){
             bibl.series.editor = curCreator;
         }
-        else if(isAnalytic && (type != 'editor')){
+        else if(isAnalytic && (type != 'editor' && type != 'bookAuthor')){
             // assuming that only authors go here
             bibl.analytic.appendChild(curCreator);
         }
@@ -355,6 +370,15 @@ function generateItem(item) {
             bibl.appendChild(<note>{item.notes[n].note.replace(/<(([^>"]*)|("[^"]*"))+>/g,"")}</note>);
             // bibl.appendChild(<note>{item.notes[n].note.replace(/<\/?[a-zA-Z][a-zA-Z0-9]*( +[a-zA-Z][a-zA-Z0-9]*=\"[-_a-zA-Z0-9 ,.;:]*\")*\/?>/g,"")}</note>);
         }
+    }
+
+    //export tags, if available
+    if(Zotero.getOption("exportTags") && item.tags && item.tags.length > 0) {
+      var tags = <note type="tags"/>
+      for(var n in item.tags) {
+            tags.appendChild(<note type="tag">{item.tags[n].tag}</note>);
+        }
+      bibl.appendChild(tags);
     }
 
     // the canonical reference numbers
@@ -477,8 +501,7 @@ function doExport() {
         }
     }
 
-    // write to file. But why on earth does Zotero prepend everything
-    // with a ZERO WIDTH NO-BREAK SPACE
+    // write to file.
     Zotero.write('<?xml version="1.0"?>'+"\n");
     Zotero.write(outputDocument.toXMLString());
 }
