@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-07-04 01:09:00"
+	"lastUpdated": "2012-01-20 17:02:41"
 }
 
 function detectWeb(doc, url) {
@@ -137,8 +137,8 @@ function scrape(doc, url) {
 		}
 	}
 	
-	// Remove pagewanted from URL in item (keeping other pieces, in case they might matter)
-	newItem.url = newItem.url.replace(/\?([^/]*)pagewanted=[^&]*/,'');
+	// Remove everything after .html from the URL - we want the canonical version
+	newItem.url = newItem.url.replace(/\?.+/,'');
 	
 	newItem.complete();
 }
@@ -189,13 +189,15 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"document": "[object]",
+						"document": {
+							"location": {}
+						},
 						"title": "New York Times Snapshot"
 					}
 				],
 				"publicationTitle": "The New York Times",
 				"ISSN": "0362-4331",
-				"url": "https://www.nytimes.com/2010/08/21/education/21harvard.html?scp=1&sq=marc%20hauser&st=cse&gwh=4B8CBC2383B24F22FED81E754DFA960B",
+				"url": "https://www.nytimes.com/2010/08/21/education/21harvard.html",
 				"date": "2010-08-20",
 				"title": "Harvard Finds Marc Hauser Guilty of Scientific Misconduct",
 				"section": "Education",
@@ -209,38 +211,6 @@ var testCases = [
 		"type": "web",
 		"url": "http://query.nytimes.com/search/query?frow=0&n=10&srcht=a&query=marc+hauser&srchst=nyt&submit.x=18&submit.y=12&hdlquery=&bylquery=&daterange=period&mon1=01&day1=01&year1=2010&mon2=01&day2=18&year2=2011",
 		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://query.nytimes.com/gst/abstract.html?res=F30D15FD3F5813738DDDAC0894DB405B828DF1D3",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"creators": [
-					{
-						"firstName": "Special To The New York",
-						"lastName": "Times",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"document": false,
-						"title": "New York Times Snapshot"
-					}
-				],
-				"publicationTitle": "The New York Times",
-				"ISSN": "0362-4331",
-				"url": "http://query.nytimes.com/gst/abstract.html?res=F30D15FD3F5813738DDDAC0894DB405B828DF1D3",
-				"date": "1912-03-05",
-				"title": "TWO MONEY INQUIRIES.; Hearings of Trust Charges and Aldrich Plan at the Same Time.",
-				"accessionNumber": "100523320",
-				"libraryCatalog": "NYTimes.com"
-			}
-		]
 	}
 ]
 /** END TEST CASES **/
