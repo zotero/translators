@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-01-07 17:16:59"
+	"lastUpdated": "2012-01-22 19:37:41"
 }
 
 /*
@@ -163,5 +163,4 @@ var testCases = [{
 		"accessDate": "CURRENT_TIMESTAMP",
 		"shortTitle": "Europe could be in worst hour since WW2"
 	}]
-},
 }] /** END TEST CASES **/
