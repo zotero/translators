@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-20 17:02:41"
+	"lastUpdated": "2012-01-21 17:28:41"
 }
 
 function detectWeb(doc, url) {
@@ -95,6 +95,13 @@ function scrape(doc, url) {
 		} else {
 			newItem.attachments.push({document:doc, title:"New York Times Snapshot"});
 		}
+	//	get pdf for archive articles
+	var pdfxpath = '//div[@class="articleAccess"]/p[@class="button"]/a[contains(@href, "/pdf")]/@href'
+	if (doc.evaluate(pdfxpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+			var pdf = ZU.xpathText(doc, pdfxpath)
+	newItem.attachments.push({url:pdf, title:"NY Times Archive PDF"});
+					 }
+		
 	}
 	
 	associateMeta(newItem, metaTags, "dat", "date");
@@ -138,7 +145,11 @@ function scrape(doc, url) {
 	}
 	
 	// Remove everything after .html from the URL - we want the canonical version
+	//but not for historical abstracts, where it's needed
+	if (!newItem.url.match(/abstract\.html/)){
+		Z.debug("text")
 	newItem.url = newItem.url.replace(/\?.+/,'');
+	}
 	
 	newItem.complete();
 }
@@ -211,6 +222,45 @@ var testCases = [
 		"type": "web",
 		"url": "http://query.nytimes.com/search/query?frow=0&n=10&srcht=a&query=marc+hauser&srchst=nyt&submit.x=18&submit.y=12&hdlquery=&bylquery=&daterange=period&mon1=01&day1=01&year1=2010&mon2=01&day2=18&year2=2011",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://query.nytimes.com/gst/abstract.html?res=F30D15FD3F5813738DDDAC0894DB405B828DF1D3",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "Special To The New York",
+						"lastName": "Times",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"document": {
+							"location": {}
+						},
+						"title": "New York Times Snapshot"
+					},
+					{
+						"url": "http://query.nytimes.com/mem/archive-free/pdf?res=F30D15FD3F5813738DDDAC0894DB405B828DF1D3",
+						"title": "NY Times Archive PDF"
+					}
+				],
+				"publicationTitle": "The New York Times",
+				"ISSN": "0362-4331",
+				"url": "http://query.nytimes.com/gst/abstract.html?res=F30D15FD3F5813738DDDAC0894DB405B828DF1D3",
+				"date": "1912-03-05",
+				"title": "TWO MONEY INQUIRIES.; Hearings of Trust Charges and Aldrich Plan at the Same Time.",
+				"accessionNumber": "100523320",
+				"libraryCatalog": "NYTimes.com",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
