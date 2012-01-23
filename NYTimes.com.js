@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-07-04 01:09:00"
+	"lastUpdated": "2012-01-22 18:08:21"
 }
 
 function detectWeb(doc, url) {
@@ -51,6 +51,7 @@ function scrape(doc, url) {
 	
 	var metaTags = new Object();
 	if(url != undefined) {
+
 		newItem.url = url;
 		var metaTagRe = /<meta[^>]*>/gi;
 		var nameRe = /name="([^"]+)"/i;
@@ -95,6 +96,7 @@ function scrape(doc, url) {
 		} else {
 			newItem.attachments.push({document:doc, title:"New York Times Snapshot"});
 		}
+		
 	}
 	
 	associateMeta(newItem, metaTags, "dat", "date");
@@ -137,10 +139,30 @@ function scrape(doc, url) {
 		}
 	}
 	
-	// Remove pagewanted from URL in item (keeping other pieces, in case they might matter)
-	newItem.url = newItem.url.replace(/\?([^/]*)pagewanted=[^&]*/,'');
-	
-	newItem.complete();
+	// Remove everything after .html from the URL - we want the canonical version
+	//but not for historical abstracts, where it's needed
+	if (!newItem.url.match(/abstract\.html/)){
+	newItem.url = newItem.url.replace(/\?.+/,'');
+	}
+
+	//	get pdf for archive articles - make sure we don't go here if we're getting multiples or regular items
+	var pdfxpath = '//div[@class="articleAccess"]/p[@class="button"]/a[contains(@href, "/pdf")]/@href'
+	if (!m && ZU.xpathText(doc, pdfxpath)!=null){
+			var pdflink = ZU.xpathText(doc, pdfxpath)
+					Zotero.Utilities.doGet(pdflink, function(text) {
+						var realpdf = text.match(/http\:\/\/article\.archive\.nytimes.+\"/)[0].replace(/\"/,"");
+						Z.debug("pdflink: " + realpdf)
+						if (realpdf) {
+						newItem.attachments.push({url:realpdf, title:"NY Times Archive PDF",
+	 								  mimeType:"application/pdf"});
+						}
+					}, function () {
+						newItem.complete();
+					});
+				} else {
+					newItem.complete();
+				}
+
 }
 
 function doWeb(doc, url) {
@@ -148,7 +170,7 @@ function doWeb(doc, url) {
 				 XPathResult.ANY_TYPE, null).iterateNext();
 	if(searchResults) {
 		var items = Zotero.Utilities.getItemArray(doc, searchResults, '^http://(?:select\.|www\.)nytimes.com/.*\.html(\\?|$)');
-		
+
 		Zotero.selectItems(items, function (items) {
 			if(!items) return true;
 		
@@ -189,13 +211,15 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"document": "[object]",
+						"document": {
+							"location": {}
+						},
 						"title": "New York Times Snapshot"
 					}
 				],
 				"publicationTitle": "The New York Times",
 				"ISSN": "0362-4331",
-				"url": "https://www.nytimes.com/2010/08/21/education/21harvard.html?scp=1&sq=marc%20hauser&st=cse&gwh=4B8CBC2383B24F22FED81E754DFA960B",
+				"url": "https://www.nytimes.com/2010/08/21/education/21harvard.html",
 				"date": "2010-08-20",
 				"title": "Harvard Finds Marc Hauser Guilty of Scientific Misconduct",
 				"section": "Education",
@@ -228,8 +252,15 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"document": false,
+						"document": {
+							"location": {}
+						},
 						"title": "New York Times Snapshot"
+					},
+					{
+						"url": "http://article.archive.nytimes.com/1912/03/05/100523320.pdf?AWSAccessKeyId=AKIAJBTN455PTTBQQNRQ&Expires=1327279930&Signature=AmK21Cp20qcYualg%2FLvaT4t7Ypw%3D",
+						"title": "NY Times Archive PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"publicationTitle": "The New York Times",
@@ -238,7 +269,8 @@ var testCases = [
 				"date": "1912-03-05",
 				"title": "TWO MONEY INQUIRIES.; Hearings of Trust Charges and Aldrich Plan at the Same Time.",
 				"accessionNumber": "100523320",
-				"libraryCatalog": "NYTimes.com"
+				"libraryCatalog": "NYTimes.com",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}
