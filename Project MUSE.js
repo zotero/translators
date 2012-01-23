@@ -9,13 +9,15 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-08-25 10:00:51"
+	"lastUpdated": "2012-01-16 10:55:46"
 }
 
 function detectWeb(doc, url) {
-	var searchRe = new RegExp("(^https?://[^/]+/search/results|/search/save|/toc/)");
+	var searchRe = new RegExp("(^https?://[^/]+/search/results|/search/save|/toc/|/results$)");
 	if(searchRe.test(url)) {
-		return "multiple";
+	//some old TOCs just display links to pdfs - don't detect those
+	if(ZU.xpath(doc, '//div[@class="article"]/h4/a|//div[@class="result_info"]/h1/a|//ul/li/a[text() = "[Access article in HTML]"]').length != 0){
+		return "multiple";}
 	} else {
 		return "journalArticle";
 	}
@@ -23,39 +25,21 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 
-	var searchRe = new RegExp("^https?://[^/]+/search/results|/search/save");
+	var searchRe = new RegExp("^https?://[^/]+/search/results|/search/save|/results$");
 	if(detectWeb(doc, url) == "multiple") {
 		var items = {};
 		var attachments = new Array();
-		var pdfRe = /PDF/;
-		var htmlRe = /HTML/;
-		if (searchRe.test(url)) { 
-			// Search results
-			var tableRows = doc.evaluate('//save_form//tr[@class="resultsrow"]',
-									 doc, null, XPathResult.ANY_TYPE, null);
-			var tableRow;
-			// Go through table rows
-			while(tableRow = tableRows.iterateNext()) {
-				var input = doc.evaluate('.//div[@class="links"]//a[last()]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext();
-				var title = doc.evaluate('.//div[@class="title"]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext();
-				if(input && input.href && title && title.textContent) {
-					items[input.href] = title.textContent;
-				}
-			}
-		} else if (url.match(/\/toc\//)) {
-			var results = doc.evaluate('//div[@class="article"]',
+			if (doc.evaluate('//div[@class="article"]/h4/a|//div[@class="result_info"]/h1/a',doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
+			var results = doc.evaluate('//div[@class="article"]/h4/a|//div[@class="result_info"]/h1/a',
 									 doc, null, XPathResult.ANY_TYPE, null);
 			var result; 
 			while(result =  results.iterateNext()) {
-				var link = doc.evaluate('.//div[@class="links"]/p//a[last()]', result, null, XPathResult.ANY_TYPE, null).iterateNext();
-				var title = doc.evaluate('.//div[@class="title"]', result, null, XPathResult.ANY_TYPE, null).iterateNext();
-				if(link && link.href && title && title.textContent) {
-					items[link.href] = title.textContent;
-				}
+				items[result.href] = result.textContent;
 			}
+									 }
+									 else {
 			// Some journals have old-style TOCs for back issues
 			// Ex. http://muse.jhu.edu/journals/eighteenth-century_studies/toc/ecs33.4.html
-			if (items.length == 0) {
 				var articles = doc.evaluate('//ul', doc, null, XPathResult.ANY_TYPE, null);
 				var article;
 				while (article = articles.iterateNext()) {
@@ -64,9 +48,9 @@ function doWeb(doc, url) {
 					if(link && link.href && title && title.textContent) {
 						items[link.href] = title.textContent;
 					}
-				} 
-			}
-		}
+				}
+			
+									 }
 		Zotero.selectItems(items, function(items) {
 			if(!items) {
 				return true;
@@ -88,12 +72,13 @@ function scrapeOne(doc) {
 		var m = hostRe.exec(url);
 		var host = m[1];
 
-		var getPDF = doc.evaluate('//a[text() = "PDF Version" or text() = "[Access article in PDF]"]', doc,
+		var getPDF = doc.evaluate('//a[text() = "PDF Version" or text() = "[Access article in PDF]" or text() = "Download PDF"]', doc,
 								  null, XPathResult.ANY_TYPE, null).iterateNext();		
-		var DOI = doc.evaluate('//div[@class="doi"]', doc,
+		var DOI = doc.evaluate('//meta[@name="citation_doi"]/@content', doc,
 								  null, XPathResult.ANY_TYPE, null).iterateNext();		
-		var abstract = doc.evaluate('//abstract', doc,
-								  null, XPathResult.ANY_TYPE, null).iterateNext();		
+		var abstract = doc.evaluate('//div[@class="abstract"]', doc,
+								  null, XPathResult.ANY_TYPE, null).iterateNext();
+		var author = ZU.xpathText(doc, '//meta[@name="citation_author"]/@content');
 
 
 		var newUrl = url.replace(host, host+"/metadata/zotero").replace("/summary/","/").replace("/login?uri=","");
@@ -107,6 +92,13 @@ function scrapeOne(doc) {
 					item.extra = item.notes[0].note;						
 					delete item.notes;
 					item.notes = undefined;
+				}
+				//Muse has authors wrong in the RIS - we get the names from google metadata and use them
+				if(author){
+				author=	author.split(",")
+					for (i in author){
+					item.creators.push(ZU.cleanAuthor(author[i], "author"));
+					}
 				}
 				item.attachments.splice(0);
 				item.attachments.push({document:doc, title:"Project MUSE Snapshot"});
@@ -125,7 +117,7 @@ function scrapeOne(doc) {
 			translator.translate();
 		});
 }
-/** BEGIN TEST CASES **/
+	/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -144,18 +136,16 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"document": false,
+						"document": {
+							"location": {}
+						},
 						"title": "Project MUSE Snapshot"
-					},
-					{
-						"title": "Project MUSE Full Text PDF",
-						"mimeType": "application/pdf",
-						"url": false
 					}
 				],
 				"title": "Terror, Trauma and the 'Young Marx' Explanation of Jacobin Politics",
 				"publicationTitle": "Past & Present",
 				"volume": "191",
+				"issue": "1",
 				"pages": "121-164",
 				"date": "2006",
 				"publisher": "Oxford University Press",
@@ -163,13 +153,19 @@ var testCases = [
 				"ISSN": "1477-464X",
 				"url": "http://muse.jhu.edu/journals/past_and_present/v191/191.1higonnet.html",
 				"extra": "<p>Number 191, May 2006</p>",
-				"libraryCatalog": "Project MUSE"
+				"libraryCatalog": "Project MUSE",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
 	{
 		"type": "web",
 		"url": "http://muse.jhu.edu/journals/journal_of_social_history/toc/jsh.44.4.html",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://muse.jhu.edu.turing.library.northwestern.edu/journals/eighteenth-century_studies/toc/ecs33.4.html",
 		"items": "multiple"
 	}
 ]
