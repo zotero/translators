@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-22 17:52:00"
+	"lastUpdated": "2012-01-22 18:08:21"
 }
 
 function detectWeb(doc, url) {
@@ -151,7 +151,7 @@ function scrape(doc, url) {
 			var pdflink = ZU.xpathText(doc, pdfxpath)
 					Zotero.Utilities.doGet(pdflink, function(text) {
 						var realpdf = text.match(/http\:\/\/article\.archive\.nytimes.+\"/)[0].replace(/\"/,"");
-						//Z.debug(realpdf)
+						Z.debug("pdflink: " + realpdf)
 						if (realpdf) {
 						newItem.attachments.push({url:realpdf, title:"NY Times Archive PDF",
 	 								  mimeType:"application/pdf"});
