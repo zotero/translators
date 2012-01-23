@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-21 17:28:41"
+	"lastUpdated": "2012-01-22 17:52:00"
 }
 
 function detectWeb(doc, url) {
@@ -51,6 +51,7 @@ function scrape(doc, url) {
 	
 	var metaTags = new Object();
 	if(url != undefined) {
+
 		newItem.url = url;
 		var metaTagRe = /<meta[^>]*>/gi;
 		var nameRe = /name="([^"]+)"/i;
@@ -95,12 +96,6 @@ function scrape(doc, url) {
 		} else {
 			newItem.attachments.push({document:doc, title:"New York Times Snapshot"});
 		}
-	//	get pdf for archive articles
-	var pdfxpath = '//div[@class="articleAccess"]/p[@class="button"]/a[contains(@href, "/pdf")]/@href'
-	if (doc.evaluate(pdfxpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
-			var pdf = ZU.xpathText(doc, pdfxpath)
-	newItem.attachments.push({url:pdf, title:"NY Times Archive PDF"});
-					 }
 		
 	}
 	
@@ -147,11 +142,27 @@ function scrape(doc, url) {
 	// Remove everything after .html from the URL - we want the canonical version
 	//but not for historical abstracts, where it's needed
 	if (!newItem.url.match(/abstract\.html/)){
-		Z.debug("text")
 	newItem.url = newItem.url.replace(/\?.+/,'');
 	}
-	
-	newItem.complete();
+
+	//	get pdf for archive articles - make sure we don't go here if we're getting multiples or regular items
+	var pdfxpath = '//div[@class="articleAccess"]/p[@class="button"]/a[contains(@href, "/pdf")]/@href'
+	if (!m && ZU.xpathText(doc, pdfxpath)!=null){
+			var pdflink = ZU.xpathText(doc, pdfxpath)
+					Zotero.Utilities.doGet(pdflink, function(text) {
+						var realpdf = text.match(/http\:\/\/article\.archive\.nytimes.+\"/)[0].replace(/\"/,"");
+						//Z.debug(realpdf)
+						if (realpdf) {
+						newItem.attachments.push({url:realpdf, title:"NY Times Archive PDF",
+	 								  mimeType:"application/pdf"});
+						}
+					}, function () {
+						newItem.complete();
+					});
+				} else {
+					newItem.complete();
+				}
+
 }
 
 function doWeb(doc, url) {
@@ -159,7 +170,7 @@ function doWeb(doc, url) {
 				 XPathResult.ANY_TYPE, null).iterateNext();
 	if(searchResults) {
 		var items = Zotero.Utilities.getItemArray(doc, searchResults, '^http://(?:select\.|www\.)nytimes.com/.*\.html(\\?|$)');
-		
+
 		Zotero.selectItems(items, function (items) {
 			if(!items) return true;
 		
@@ -247,8 +258,9 @@ var testCases = [
 						"title": "New York Times Snapshot"
 					},
 					{
-						"url": "http://query.nytimes.com/mem/archive-free/pdf?res=F30D15FD3F5813738DDDAC0894DB405B828DF1D3",
-						"title": "NY Times Archive PDF"
+						"url": "http://article.archive.nytimes.com/1912/03/05/100523320.pdf?AWSAccessKeyId=AKIAJBTN455PTTBQQNRQ&Expires=1327279930&Signature=AmK21Cp20qcYualg%2FLvaT4t7Ypw%3D",
+						"title": "NY Times Archive PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"publicationTitle": "The New York Times",
