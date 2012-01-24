@@ -89,19 +89,6 @@ function scrape(doc, url) {
 				if (newItem.title) 
 				{
 					newItem.itemType = detectWeb(doc, url);
-					// The number of pages uses COinS field : rft.pages, even if the information
-					// concerns the number of pages.
-					if (newItem.pages != undefined)
-					{
-						newItem.numPages = newItem.pages;
-						
-						var m = newItem.pages.match(/(\d*) vol\. \((.*) [pf]\./);
-						if (m)
-						{
-							newItem.numberOfVolumes	= m[1];
-							newItem.numPages				= m[2];
-						}
-					}
 
 					// 	We need to correct some informations where COinS is wrong
 					var rowXpath = '//tr[td[@class="rec_lable"]]';
@@ -183,6 +170,36 @@ function scrape(doc, url) {
 						else if ( (field == "Langue") || (field == "Language") )
 						{
 							newItem.language = value;
+						}
+						else if ( (field == "Editeur") || (field == "Publisher") )
+						{
+							var m = value.match(/(.*):(.*),(.*)/);
+							
+							if (m)
+							{
+								if (!(newItem.place))
+								{
+									newItem.place = Zotero.Utilities.trimInternal(m[1]);
+								}
+								if (!(newItem.publisher))
+								{
+									newItem.publisher = Zotero.Utilities.trimInternal(m[2]);
+								}
+							}
+							// We don't manage the date field, set in COinS (m[3])
+						}
+						else if (field == "Description")
+						{
+							// We're going to extract the number of pages from this field
+							// Known bug doesn't work when there are 2 volumes, 
+							var m = value.match(/(\d*) vol\. \((.*)\)? ?[pf]\./);
+							if (m)
+							{
+								newItem.numberOfVolumes = m[1];
+								newItem.numPages = m[2];
+								// Cleaning some remaining characters (should be made above I think but didn't debug it enough)
+								newItem.numPages = newItem.numPages.replace(/[\s\)]$/, "");
+							}
 						}
 						else if ( (field == "Résumé") || (field == "Abstract") )
 						{
