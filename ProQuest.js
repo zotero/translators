@@ -209,6 +209,13 @@ function scrape (doc) {
 					item.ISBN = value; break;
 			case "DOI":
 					item.DOI = value; break;
+			case "Patent information":
+				Zotero.debug("Patent information: " + value);
+				item.patentNumber = between(value, "Publication number: ","Publication country: ");
+				item.country = between(value, "Publication country: ", "Application number: ")
+				item.applicationNumber = between(value, "Application number: ", "Application Date: ")				
+				item.date = value.slice("Application number: ".length+value.indexOf("Application number: "))
+				break;
 			case "School":
 					item.university = value; break;
 			case "Degree":
@@ -414,6 +421,10 @@ function getItemType(sourceType, documentType, recordType){
 		return mapToZotero(value)
 	}
 	return "journalArticle"
+}
+
+function between(str, x, y) {
+		return str.slice(x.length+str.indexOf(x),str.indexOf(y));	
 }
 
 /** BEGIN TEST CASES **/
