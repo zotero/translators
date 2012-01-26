@@ -160,7 +160,9 @@ function scrape (doc) {
 									"author",
 									author.indexOf(',') !== -1); // useComma
 							});
-					break;		
+					break;
+			case "Editor":
+					getEditors(item,value);
 			case "Publication title":
 					item.publicationTitle = value; break;
 			case "Volume":
@@ -320,6 +322,18 @@ function mapToZotero (type) {
 	Zotero.debug("No mapping for type: "+type);
 	return false;
 }
+
+function getEditors(item, value) {
+    if (value.match(", ")) {
+      var editors = value.split(", ");
+      for (var i in editors) {
+        item.creators.push(Zotero.Utilities.cleanAuthor(editors[i], "editor"));
+      }
+    } else {
+      item.creators.push(Zotero.Utilities.cleanAuthor(value, "editor"));
+    }
+  }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
