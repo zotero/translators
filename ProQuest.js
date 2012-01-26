@@ -127,7 +127,7 @@ function scrape (doc) {
 		field = field.textContent.trim();
 		var value = doc.evaluate('./div[@class="display_record_indexing_data"]', record_row, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.trim();
 		// Separate values in a single field are generally wrapped in <a> nodes; pull a list of them
-		var valueAResult = doc.evaluate('./div[@class="display_record_indexing_data"]/a', record_row, nsResolver, XPathResult.ANY_TYPE, null);
+		var valueAResult = doc.evaluate('./div[@class="display_record_indexing_data"]//a', record_row, nsResolver, XPathResult.ANY_TYPE, null);
 		var valueA;
 		var valueAArray = [];
 		// We would like to get an array of the text for each <a> node
