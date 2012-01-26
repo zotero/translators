@@ -39,12 +39,25 @@ function detectWeb(doc, url) {
 	
 	var record_rows = doc.evaluate('//div[@class="display_record_indexing_row"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 	if (record_rows.iterateNext()) {
-		type = doc.evaluate('//div[@class="display_record_indexing_fieldname" and contains(text(),"Document type")]/following-sibling::div[@class="display_record_indexing_data"]',
+		var sourceType = doc.evaluate('//div[@class="display_record_indexing_fieldname" and contains(text(),"Source type")]/following-sibling::div[@class="display_record_indexing_data"]',
 							doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		var documentType = doc.evaluate('//div[@class="display_record_indexing_fieldname" and contains(text(),"Document type")]/following-sibling::div[@class="display_record_indexing_data"]',
+							doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		var recordType = doc.evaluate('//div[@class="display_record_indexing_fieldname" and contains(text(),"Record type")]/following-sibling::div[@class="display_record_indexing_data"]',
+							doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		if (sourceType) {
+			sourceType = sourceType.textContent.trim();
+		}
+		if(documentType){
+			documentType = documentType.textContent.trim();
+		}
+		if(recordType){
+			recordType = recordType.textContent.trim();
+		}
+		var type = getItemType(sourceType, documentType, recordType)
+
 		if (type) {
-			type = type.textContent.trim();
-			type = mapToZotero(type);
-			if (type) return type;
+			return type;
 		} else if (url.match(/\/dissertations\//)) {
 			return "thesis";
 		}
@@ -205,8 +218,11 @@ function scrape (doc) {
 			case "Advisor":		// TODO Map when exists in Zotero
 					break;
 			case "Source type":
+					var sourceType = value; break;
 			case "Document type":
-					item.itemType = (mapToZotero(value)) ? mapToZotero(value) : item.itemType; break;
+					var documentType = value; break;
+			case "Record type":
+					var recordType = value; break;
 			case "Copyright":
 					item.rights = value; break;
 			case "Database":
@@ -230,6 +246,7 @@ function scrape (doc) {
 			default: Zotero.debug("Discarding unknown field '"+field+"' => '" +value+ "'");
 		}
 	}
+	item.itemType = getItemType(sourceType,documentType,recordType)
 	
 	var abs = ZU.xpathText(doc, '//div[contains(@id, "abstract_field") or contains(@id, "abstractSummary")]//p');
 	if (abs) {
@@ -333,7 +350,71 @@ function getEditors(item, value) {
       item.creators.push(Zotero.Utilities.cleanAuthor(value, "editor"));
     }
   }
-
+function getItemType(sourceType, documentType, recordType){
+	switch(sourceType){
+		case "Blogs, Podcats, & Websites":
+			if(recordType == "Article In An Electronic Resource Or Web Site"){
+			return "blogPost"} else {
+			return "webpage";
+			}
+			break;
+		case "Books":
+			if (documentType == "Book Chapter") {
+			return "bookSection"} else {
+			return "book";
+			} break;
+		case "Conference Papers and Proceedings":
+			return "conferencePaper"; break;
+		case "Dissertations & Theses":
+			return "thesis"; break;
+		case "Encyclopedias & Reference Works":
+			if(documentType.indexof("book",0)){
+			return "book"} 
+			break;
+		case "Government & Official Publications":
+			if (documentType == "Patent"){
+			return "patent"} else if (documentType.indexof("report",0)){
+			return "report"} else if (documentType.indexof("statute",0)){
+			return "statute"}
+			break;
+		case "Historical Newspapers":
+			return "newspaperArticle"; break;
+		case "Historical Periodicals":
+			return "journalArticle"; break;
+		case "Magazines":
+			return "magazineArticle"; break;
+		case "Newpapers":
+			return "newspaperArticle"; break;
+		case "Pamphlets & Ephemeral Works": if (documentType == Feature) {
+			return "journalArticle"} else {
+			return "document"}
+			break;
+		case "Reports":
+			return "report"; break;
+		case "Scholarly Journals":
+			return "journalArticle"; break;
+		case "Trade Journals":
+			return "journalArticle"; break;
+		case "Wire Feeds":
+			return "newspaperArticle"; break;
+		}
+	switch(documentType){
+		case "Blog":
+			return "blogPost"; break;
+		case "Patent":
+			return "patent"; break;
+	}
+	switch(recordType){
+		case "Article In An Electronic Resource Or Web Site":
+			return "blogPost"; break;
+		case "Patent":
+			return "patent"; break;
+	}
+	if (mapToZotero(value)){
+		return mapToZotero(value)
+	}
+	return "journalArticle"
+}
 
 /** BEGIN TEST CASES **/
 var testCases = [
