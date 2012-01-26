@@ -229,12 +229,12 @@ function scrape (doc) {
 		}
 	}
 	
-	var abs = ZU.xpathText(doc, '//div[contains(@id, "abstract_field") or contains(@id, "abstractSummary")]/p');
+	var abs = ZU.xpathText(doc, '//div[contains(@id, "abstract_field") or contains(@id, "abstractSummary")]//p');
 	if (abs) {
 		//Z.debug(abs);
 		item.abstractNote = abs
-					.replace(/\[\s*[Ss]how all\s*\].*/,"")
-					.replace(/\[\s*[Ss]how less\s*\].*/,"")
+					.replace(/\[*\s*[Ss]how all\s*[\]\s{3,}].*/,"")
+					.replace(/[\[\s{3,}]\s*[Ss]how less\s*\]*.*/,"")
 					.replace(/\[\s*PUBLICATION ABSTRACT\s*\]/,"")
 					.replace(/^\s*,/, "")  //remove commas at beginning and end
 					.replace(/[\s*,\s*]*$/, "")
