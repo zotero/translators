@@ -39,7 +39,7 @@ function detectWeb(doc, url) {
 	
 	var record_rows = doc.evaluate('//div[@class="display_record_indexing_row"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 	if (record_rows.iterateNext()) {
-		type = doc.evaluate('//div[@class="display_record_indexing_fieldname" and contains(text(),"Document Type")]/following-sibling::div[@class="display_record_indexing_data"]',
+		type = doc.evaluate('//div[@class="display_record_indexing_fieldname" and contains(text(),"Document type")]/following-sibling::div[@class="display_record_indexing_data"]',
 							doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 		if (type) {
 			type = type.textContent.trim();
