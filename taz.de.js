@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2011-11-15 23:59:25"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-01-30 22:42:35"
 }
 
 /*

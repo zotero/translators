@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2011-10-25 00:21:01"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-01-30 22:52:22"
 }
 
 /* Translator for Biblioteca Online de Ciências da Comunicação (BOCC,

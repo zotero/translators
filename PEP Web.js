@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2011-11-11 14:26:09"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-01-30 22:44:31"
 }
 
 //Only works for journal articles, and only for single entries.
