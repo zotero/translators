@@ -35,13 +35,14 @@ function detectWeb(doc, url) {
 	
 	var highwiretest = false;
 	
-	highwiretest = url.match(/\.pdf\+html\?frame=header/);
-	
+	//quick test for highwire, but only for .pdf+html pages
+	highwiretest = url.match(/\.pdf\+html/);
+
 	if (!highwiretest) {
 		// lets hope this installations don't tweak this...
 		highwiretest = doc.evaluate("//link[@href = '/shared/css/hw-global.css']", doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	}
-	
+
 	if(highwiretest) {
 		
 		if (
