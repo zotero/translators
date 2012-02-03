@@ -2,7 +2,7 @@
 	"translatorID": "8c1f42d5-02fa-437b-b2b2-73afc768eb07",
 	"label": "Highwire 2.0",
 	"creator": "Matt Burton",
-	"target": "(content/([0-9]+/[0-9]+|current|firstcite|early)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
+	"target": "^[^\\?]+(content/([0-9]+/[0-9]+|current|firstcite|early)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 200,
@@ -35,7 +35,7 @@ function detectWeb(doc, url) {
 	
 	var highwiretest = false;
 	
-	highwiretest = url.match(/\.pdf+html\?frame=header/);
+	highwiretest = url.match(/\.pdf\+html\?frame=header/);
 	
 	if (!highwiretest) {
 		// lets hope this installations don't tweak this...
