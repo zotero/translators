@@ -47,6 +47,11 @@ UnAPIFormat = function(aXML) {
 	// Loop through to determine format name
 	var nodes = doc.documentElement.getElementsByTagName("format");
 	var nNodes = nodes.length;
+	if(!nNodes) {
+		// Hack to fix for Firefox 10/Zotero 3.0.1
+		var i = 0;
+		while(i in nodes) nNodes = ++i;
+	}
 	var node, name, lowerName, format;
 	for(var i=0; i<nNodes; i++) {
 		node = nodes[i];
