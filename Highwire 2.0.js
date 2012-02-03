@@ -27,6 +27,102 @@
 	   http://jcb.rupress.org/content/191/1/2.2.short
 */
 
+//detect if there are multiple articles on the page
+function hasMultiple(doc, url) {
+	return url.match("search\\?submit=") ||
+		url.match("search\\?fulltext=") ||
+		url.match("content/by/section") || 
+		doc.title.match("Table of Contents") || 
+		doc.title.match("Early Edition") || 
+		url.match("cgi/collection/.+") || 
+		url.match("content/firstcite");
+}
+
+//create a url to the PDF based on the article URL
+function getPdfUrl(url) {
+	if (url.match("cgi/content")) {
+		return url.replace(/cgi\/content\/abstract/, "content") + ".full.pdf";
+	// This is here to catch those pdf+html pages
+	} else if (url.match("\.full\.pdf")) {
+		return url.slice(0, url.lastIndexOf(".full.pdf")) + ".full.pdf";
+	} else {
+	// This is not ideal...todo: brew a regex that grabs the correct URL
+		return url.slice(0, url.lastIndexOf(".")) + ".full.pdf";
+	}
+}
+
+//get citation manager ID for the article
+function getCitMgrId(text) {
+	/* Here, we have to use three phrasings because they all occur, depending on
+	   the journal.
+			TODO We should rewrite this to not use regex! */
+	match = text.match(/=([^=]+)\">\s*Download (C|c)itation/);
+	if (!match || match.length < 1) {
+		match = text.match(/=([^=]+)\">\s*Download to citation manager/);
+		if (!match || match.length < 1) {
+			// Journal of Cell Biology
+	  		match = text.match(/=([^=]+)\">\s*Add to Citation Manager/);
+	  		if (!match || match.length < 1) {
+	  			/* apparently we can get frames */
+	  			/* but they have the ID too! */
+	  			Z.debug("Attempting to fetch ID from frameset");
+	  			match = text.match(/<meta content="([^"]+)"\s*name="citation_mjid"\s*\/>/);
+	  		}
+		}
+	}
+
+	return match[1];
+}
+
+//return the fully formatted URL to the citation manager
+function getCitMgrUrl(doc, text) {
+	var host = doc.location.protocol+'//' + doc.location.host + "/";
+
+	return host + 'citmgr?type=refman&gca=' + getCitMgrId(text);
+}
+
+//add an item from RIS text
+function addRIS(text, url) {
+	var pdfurl = getPdfUrl(url);
+
+	//Is there a way to clear translator instead of reloading it??
+	var translator = Zotero.loadTranslator("import");
+	//RIS translator
+	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+
+	translator.setString(text);
+
+	// Sometimes Highwire 2.0 has blank entries for N1
+	if (text.match(/N1\s+\-\s+(10\..*)\n/)) {
+		var doi = text.match(/N1\s+\-\s+(.*)\n/)[1];
+	}
+
+	translator.setHandler("itemDone", function(obj, item) {
+		item.attachments = [
+			{url:url, title:"Snapshot", mimeType:"text/html"},
+			{url:pdfurl, title:"Full Text PDF", mimeType:"application/pdf"}
+		];
+		if (doi) item.DOI = doi;
+		
+		//remove all caps in Names and Titles
+		for (i in item.creators){
+			if (item.creators[i].lastName && item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
+				item.creators[i].lastName = Zotero.Utilities.capitalizeTitle(item.creators[i].lastName.toLowerCase(),true);
+			}
+			if (item.creators[i].firstName && item.creators[i].firstName == item.creators[i].firstName.toUpperCase()) {
+				item.creators[i].firstName = Zotero.Utilities.capitalizeTitle(item.creators[i].firstName.toLowerCase(),true);
+			}
+		}
+		if (item.title == item.title.toUpperCase()) {
+			item.title = Zotero.Utilities.capitalizeTitle(item.title.toLowerCase(),true);
+		}
+
+		if (item.notes) item.notes = [];
+		item.complete();
+	});
+	translator.translate();
+}
+
 function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -35,29 +131,26 @@ function detectWeb(doc, url) {
 	
 	var highwiretest = false;
 	
-	//quick test for highwire, but only for .pdf+html pages
+	//quick test for highwire embedded pdf page
 	highwiretest = url.match(/\.pdf\+html/);
+
+	//only queue up the sidebar for data extraction (it seems to always be present)
+	if(highwiretest && !url.match(/\\?frame=sidebar/)) {
+		return null;
+	}
 
 	if (!highwiretest) {
 		// lets hope this installations don't tweak this...
 		highwiretest = doc.evaluate("//link[@href = '/shared/css/hw-global.css']", doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	}
-
+	
 	if(highwiretest) {
 		
-		if (
-			url.match("search\\?submit=") ||
-			url.match("search\\?fulltext=") ||
-			url.match("content/by/section") || 
-			doc.title.match("Table of Contents") || 
-			doc.title.match("Early Edition") || 
-			url.match("cgi/collection/.+") || 
-			url.match("content/firstcite") 
-		) {
+		if (hasMultiple(doc, url)) {
 			return "multiple";
 		} else if (url.match("content/(early/)?[0-9]+")) {
 			return "journalArticle";
-		} 
+		}
 	}
 }
 
@@ -66,24 +159,11 @@ function doWeb(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
-	
+
 	if (!url) url = doc.documentElement.location;
-	else if (url.match(/\?frame=header/)) {
-		// recall all this using new url
-		url = url.replace(/\?.*/,"?frame=sidebar");
-		Zotero.Utilities.processDocuments(url,
-				function(newdoc) {
-					doWeb(newdoc, url);
-				}, function() {Zotero.done()});
-		Zotero.wait();
-		return true;
-	}
 	
-	var host = doc.location.protocol+'//' + doc.location.host + "/";
-	
-	var arts = new Array();
-	if (detectWeb(doc, url) == "multiple") {
-		var items = new Object();
+	if (hasMultiple(doc, url)) {
+		//get a list of URLs to import
 		if (doc.title.match("Table of Contents")
 			|| doc.title.match("Early Edition")
 			|| url.match("content/firstcite")) {
@@ -100,93 +180,48 @@ function doWeb(doc, url) {
 		var linkx = './/a[1]';
 		var searchres = doc.evaluate(searchx, doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var next_res, title, link;
+		var items = new Object();
 		while (next_res = searchres.iterateNext()) {
 			title = doc.evaluate(titlex, next_res, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			link = doc.evaluate(linkx, next_res, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
-			items[link] = title;
+			link = doc.evaluate(linkx, next_res, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			if(link) {
+				items[link.href] = title;
+			}
 		}
-		items = Zotero.selectItems(items);
+		Zotero.selectItems(items, function(selectedItems) { items = selectedItems; });
+		var arts = new Array();
 		for (var i in items) {
 			arts.push(i);
-		} 
-	} else {
-		arts = [url];
-	}
-	var newurls = new Array();
-	for each (var i in arts) {
-		newurls.push(i);
-	}
-	if(arts.length == 0) {
-		Zotero.debug('no items');
-		return false;
-	}
-	Zotero.Utilities.HTTP.doGet(arts, function(text) {
-		var id, match, newurl, pdfurl, get;
-		/* Here, we have to use three phrasings because they all occur, depending on
-		   the journal.
-				TODO We should rewrite this to not use regex! */
-		match = text.match(/=([^=]+)\">\s*Download (C|c)itation/);
-		if (!match || match.length < 1) {
-			match = text.match(/=([^=]+)\">\s*Download to citation manager/);
-			if (!match || match.length < 1) {
-				// Journal of Cell Biology
-		  		match = text.match(/=([^=]+)\">\s*Add to Citation Manager/);
-		  		if (!match || match.length < 1) {
-		  			/* apparently we can get frames */
-		  			/* but they have the ID too! */
-		  			Z.debug("Attempting to fetch ID from frameset");
-		  			match = text.match(/<meta content="([^"]+)"\s*name="citation_mjid"\s*\/>/);
-		  		}
-			}
 		}
-		
-		id = match[1];
-		newurl = newurls.shift();		
-		if (newurl.match("cgi/content")) {
-			pdfurl = newurl.replace(/cgi\/content\/abstract/, "content") + ".full.pdf";
-		// This is here to catch those pdf+html pages
-		} else if (newurl.match("\.full\.pdf")) {
-			pdfurl = newurl.slice(0, newurl.lastIndexOf(".full.pdf")) + ".full.pdf";
-		} else {
-			// This is not ideal...todo: brew a regex that grabs the correct URL
-			pdfurl = newurl.slice(0, newurl.lastIndexOf(".")) + ".full.pdf";
+		if(arts.length == 0){
+			Zotero.debug('no items');
+			return false;
 		}
-		get = host + 'citmgr?type=refman&gca=' + id;
-		Zotero.Utilities.HTTP.doGet(get, function(text) {
-			var translator = Zotero.loadTranslator("import");
-			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-			translator.setString(text);
-			// Sometimes Highwire 2.0 has blank entries for N1
-			if (text.match(/N1\s+\-\s+(10\..*)\n/)) {
-				var doi = text.match(/N1\s+\-\s+(.*)\n/)[1];
-			}
-			translator.setHandler("itemDone", function(obj, item) {
-				item.attachments = [
-					{url:newurl, title:"Snapshot", mimeType:"text/html"},
-					{url:pdfurl, title:"Full Text PDF", mimeType:"application/pdf"}
-				];
-				if (doi) item.DOI = doi;
-			
-			//remove all caps in Names and Titles
-			for (i in item.creators){
-				if (item.creators[i].lastName && item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
-					item.creators[i].lastName = Zotero.Utilities.capitalizeTitle(item.creators[i].lastName.toLowerCase(),true);
-				}
-				if (item.creators[i].firstName && item.creators[i].firstName == item.creators[i].firstName.toUpperCase()) {
-					item.creators[i].firstName = Zotero.Utilities.capitalizeTitle(item.creators[i].firstName.toLowerCase(),true);
-				}
-			}
-			if (item.title == item.title.toUpperCase()) {
-				item.title = Zotero.Utilities.capitalizeTitle(item.title.toLowerCase(),true);
-			}
-			
-				if (item.notes) item.notes = [];
-				item.complete();
+
+		var newurls = new Array();
+		for each (var i in arts) {
+			newurls.push(i);
+		}
+
+		Zotero.Utilities.HTTP.doGet(arts, function(text) {
+			var get, newurl;
+
+			newurl = newurls.shift();
+			get = getCitMgrUrl(doc, text);
+
+			Zotero.Utilities.HTTP.doGet(get, function(text) {
+				addRIS(text, newurl);
 			});
-			translator.translate();
 		});
-	});
-	Zotero.wait();
+	}
+	else {
+		Zotero.Utilities.HTTP.doGet(
+			getCitMgrUrl(doc, doc.documentElement.innerHTML),
+			function(text) {
+				addRIS(text, url);
+			}
+		);
+	}
 }
 /** BEGIN TEST CASES **/
 var testCases = [
