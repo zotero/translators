@@ -41,15 +41,12 @@ function hasMultiple(doc, url) {
 
 //create a url to the PDF based on the article URL
 function getPdfUrl(url) {
-	if (url.match("cgi/content")) {
-		return url.replace(/cgi\/content\/abstract/, "content") + ".full.pdf";
-	// This is here to catch those pdf+html pages
-	} else if (url.match("\.full\.pdf")) {
-		return url.slice(0, url.lastIndexOf(".full.pdf")) + ".full.pdf";
-	} else {
-	// This is not ideal...todo: brew a regex that grabs the correct URL
-		return url.slice(0, url.lastIndexOf(".")) + ".full.pdf";
-	}
+	url = url.replace(/cgi\/content\/abstract/, 'content');
+
+	//trim off any .full, .short, .abstract, .pdf+html, .figures-only, etc.
+	url = url.replace(/(\/\d+)\.[^\/]*$/, '$1');
+
+	return url + '.full.pdf';
 }
 
 //get citation manager ID for the article
