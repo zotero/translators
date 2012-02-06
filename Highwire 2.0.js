@@ -3,13 +3,13 @@
 	"label": "Highwire 2.0",
 	"creator": "Matt Burton",
 	"target": "^[^\\?]+(content/([0-9]+/[0-9]+|current|firstcite|early)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
-	"minVersion": "2.1.9",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2011-12-18 10:16:31"
+	"lastUpdated": "2012-02-06 05:13:31"
 }
 
 /*
