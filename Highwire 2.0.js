@@ -39,103 +39,46 @@ function hasMultiple(doc, url) {
 		url.match("content/early/recent$");
 }
 
-//create a url to the PDF based on the article URL
-function getPdfUrl(url) {
-	url = url.replace(/cgi\/content\/abstract/, 'content');
-
-	//trim off any .full, .short, .abstract, .pdf+html, .figures-only, etc.
-	url = url.replace(/(\/\d+)\.[^\/]*$/, '$1');
-
-	url = url + '.full.pdf';
-	Zotero.debug('PDF URL: ' + url);
-
-	return url;
-}
-
-//get citation manager ID from HTML using regex
-function getCitMgrIdFromText(text) {
-	var match = text.match(/\bgca=(.+?)["&]/i);
-	if (!match) {
-		Zotero.debug('Failed to detect citation manager ID by regex');
-		return null;
-	}
-
-	return match[1];
-}
-
-//get citation manager ID through XPath
-function getCitMgrId(doc)
-{
-	var citUrl = Zotero.Utilities.xpathText(doc, '//div[@id="cb-art-svcs" or contains(@class,"sidebar-tools")]//a[contains(text(),"itation")]/@href');
-	if(citUrl) {
-		var match = citUrl.match(/\bgca=(.+?)["&]/i);
-		if(match)
-		{
-			return match[1];
-		}
-	}
-
-	//fall back to regex
-	return getCitMgrIdFromText(doc.documentElement.innerHTML);
-}
-
-//return the fully formatted URL to the citation manager
-function getCitMgrUrl(doc) {
-	var host = doc.location.protocol + '//' + doc.location.host + "/";
-	var id = getCitMgrId(doc);
-
-	if(!id) {
-		return null;
-	}
-
-	return host + 'citmgr?type=refman&gca=' + id;
-}
-
-//return the ISSNs from the head meta-data
-function getIssn(doc) {
+//get abstract
+function getAbstract(doc) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
 
-	var res = doc.evaluate('//meta[@name="citation_issn"]/@content', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var issn = new Array();
-	while (i = res.iterateNext()){
-		issn.push(i.textContent);
-	}
+	//abstract, summary
+	var abstrSections = doc.evaluate('//div[contains(@id,"abstract") or @class="abstractSection"]/*[not(contains(@class,"section-nav"))]',
+		doc, nsResolver, XPathResult.ANY_TYPE, null);
 
-	Zotero.debug('Found the following ISSN(s): ' + issn.join(', '));
-	return issn;
-}
+	var abstr = '';
+	var paragraph;
 
-//add an item from RIS text
-function addRIS(text, url, issn) {
-	var pdfurl = getPdfUrl(url);
+	while( paragraph = abstrSections.iterateNext() ) {
+		paragraph = paragraph.textContent.trim();
 
-	//Is there a way to clear translator instead of reloading it??
-	var translator = Zotero.loadTranslator("import");
-	//RIS translator
-	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-
-	translator.setString(text);
-
-	// Sometimes Highwire 2.0 has blank entries for N1
-	if (text.match(/N1\s+\-\s+(10\..*)\n/)) {
-		var doi = text.match(/N1\s+\-\s+(.*)\n/)[1];
-	}
-
-	translator.setHandler("itemDone", function(obj, item) {
-		item.attachments = [
-			{url:url, title:"Snapshot", mimeType:"text/html"},
-			{url:pdfurl, title:"Full Text PDF", mimeType:"application/pdf"}
-		];
-
-		if (doi) item.DOI = doi;
-
-		if(!item.ISSN) {
-			item.ISSN = issn.join(', ');
+		//ignore the abstract heading
+		if( paragraph.toLowerCase() == 'abstract' || paragraph.toLowerCase() == 'summary' ) {
+			continue;
 		}
 
+		//put all lines of a paragraph on a single line
+		paragraph = paragraph.replace(/\s{2,}/g,' ');
+
+		abstr += paragraph + "\n";
+	}
+
+	return abstr.trim();
+}
+
+//add using embedded metadata
+function addEmbMeta(doc) {
+	var translator = Zotero.loadTranslator("web");
+	//Embedded Metadata translator
+	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+
+	translator.setDocument(doc);
+
+	translator.setHandler("itemDone", function(obj, item) {
 		//remove all caps in Names and Titles
 		for (i in item.creators){
 			if (item.creators[i].lastName && item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
@@ -145,13 +88,18 @@ function addRIS(text, url, issn) {
 				item.creators[i].firstName = Zotero.Utilities.capitalizeTitle(item.creators[i].firstName.toLowerCase(),true);
 			}
 		}
+
 		if (item.title == item.title.toUpperCase()) {
 			item.title = Zotero.Utilities.capitalizeTitle(item.title.toLowerCase(),true);
 		}
 
+		if(!item.abstractNote) item.abstractNote = getAbstract(doc);
+
 		if (item.notes) item.notes = [];
+
 		item.complete();
 	});
+
 	translator.translate();
 }
 
@@ -173,7 +121,8 @@ function detectWeb(doc, url) {
 
 	if (!highwiretest) {
 		// lets hope this installations don't tweak this...
-		highwiretest = doc.evaluate("//link[@href = '/shared/css/hw-global.css']", doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		highwiretest = doc.evaluate("//link[@href = '/shared/css/hw-global.css']",
+			doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	}
 
 	if(highwiretest) {
@@ -186,14 +135,14 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-
-	if (!url) url = doc.documentElement.location;
-
 	if (hasMultiple(doc, url)) {
+		var namespace = doc.documentElement.namespaceURI;
+		var nsResolver = namespace ? function(prefix) {
+			if (prefix == 'x') return namespace; else return null;
+		} : null;
+
+		if (!url) url = doc.documentElement.location;
+
 		//get a list of URLs to import
 		if (doc.title.match("Table of Contents")
 			|| doc.title.match("Early Edition")
@@ -210,10 +159,12 @@ function doWeb(doc, url) {
 			var searchx = '//div[contains(@class,"results-cit cit")]';
 			var titlex = './/span[contains(@class,"cit-title")]';
 		}
+
+		var next_res, title, link;
 		var linkx = './/a[1]';
 		var searchres = doc.evaluate(searchx, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var next_res, title, link;
 		var items = new Object();
+
 		while (next_res = searchres.iterateNext()) {
 			title = doc.evaluate(titlex, next_res, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 			link = doc.evaluate(linkx, next_res, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
@@ -221,7 +172,9 @@ function doWeb(doc, url) {
 				items[link.href] = title;
 			}
 		}
+
 		var urls = new Array();
+
 		Zotero.selectItems(items, function(selectedItems) {
 			if( selectedItems == null ) return true;
 			for( var item in selectedItems ) {
@@ -234,19 +187,7 @@ function doWeb(doc, url) {
 				function() { Zotero.done(); });
 			Zotero.wait(); });
 	} else {
-		var citMgrUrl = getCitMgrUrl(doc);
-		if(!citMgrUrl) {
-			return false;
-		}
-
-		var issn = getIssn(doc);
-
-		Zotero.Utilities.HTTP.doGet(
-			citMgrUrl,
-			function(text) {
-				addRIS(text, url, issn);
-			}
-		);
+		addEmbMeta(doc);
 	}
 }
 /** BEGIN TEST CASES **/
