@@ -53,22 +53,14 @@ function getPdfUrl(url) {
 
 //get citation manager ID for the article
 function getCitMgrId(text) {
-	/* Here, we have to use three phrasings because they all occur, depending on
-	   the journal.
-			TODO We should rewrite this to not use regex! */
-	match = text.match(/=([^=]+)\">\s*Download (C|c)itation/);
-	if (!match || match.length < 1) {
-		match = text.match(/=([^=]+)\">\s*Download to citation manager/);
-		if (!match || match.length < 1) {
-			// Journal of Cell Biology
-	  		match = text.match(/=([^=]+)\">\s*Add to Citation Manager/);
-	  		if (!match || match.length < 1) {
-	  			/* apparently we can get frames */
-	  			/* but they have the ID too! */
-	  			Z.debug("Attempting to fetch ID from frameset");
-	  			match = text.match(/<meta content="([^"]+)"\s*name="citation_mjid"\s*\/>/);
-	  		}
-		}
+	/* To use XPath, we would need to create a DOM object,
+	   which is tricky on HTML, since it is not always well-formed.
+	   This regex seems to work on all Highwire 2.0 sites */
+
+	var match = text.match(/\bgca=(.+?)["&]/i);
+	if (!match) {
+		Zotero.debug('Failed to detect citation manager ID');
+		return null;
 	}
 
 	return match[1];
@@ -76,9 +68,14 @@ function getCitMgrId(text) {
 
 //return the fully formatted URL to the citation manager
 function getCitMgrUrl(doc, text) {
-	var host = doc.location.protocol+'//' + doc.location.host + "/";
+	var host = doc.location.protocol + '//' + doc.location.host + "/";
+	var id = getCitMgrId(text);
 
-	return host + 'citmgr?type=refman&gca=' + getCitMgrId(text);
+	if(!id) {
+		return null;
+	}
+
+	return host + 'citmgr?type=refman&gca=' + id;
 }
 
 //add an item from RIS text
@@ -130,7 +127,7 @@ function detectWeb(doc, url) {
 	} : null;
 	
 	var highwiretest = false;
-	
+
 	//quick test for highwire embedded pdf page
 	highwiretest = url.match(/\.pdf\+html/);
 
@@ -145,7 +142,6 @@ function detectWeb(doc, url) {
 	}
 	
 	if(highwiretest) {
-		
 		if (hasMultiple(doc, url)) {
 			return "multiple";
 		} else if (url.match("content/(early/)?[0-9]+")) {
@@ -158,7 +154,6 @@ function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
-	} : null;
 
 	if (!url) url = doc.documentElement.location;
 	
@@ -207,16 +202,24 @@ function doWeb(doc, url) {
 			var get, newurl;
 
 			newurl = newurls.shift();
-			get = getCitMgrUrl(doc, text);
+			citMgrUrl = getCitMgrUrl(doc, text);
+			if(!citMgrUrl) {
+				return false;
+			}
 
-			Zotero.Utilities.HTTP.doGet(get, function(text) {
+			Zotero.Utilities.HTTP.doGet(citMgrUrl, function(text) {
 				addRIS(text, newurl);
 			});
 		});
 	}
 	else {
+		var citMgrUrl = getCitMgrUrl(doc, doc.documentElement.innerHTML);
+		if(!citMgrUrl) {
+			return false;
+		}
+
 		Zotero.Utilities.HTTP.doGet(
-			getCitMgrUrl(doc, doc.documentElement.innerHTML),
+			citMgrUrl,
 			function(text) {
 				addRIS(text, url);
 			}
