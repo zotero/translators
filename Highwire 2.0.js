@@ -46,7 +46,10 @@ function getPdfUrl(url) {
 	//trim off any .full, .short, .abstract, .pdf+html, .figures-only, etc.
 	url = url.replace(/(\/\d+)\.[^\/]*$/, '$1');
 
-	return url + '.full.pdf';
+	url = url + '.full.pdf';
+	Zotero.debug('PDF URL: ' + url);
+
+	return url;
 }
 
 //get citation manager ID for the article
