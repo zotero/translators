@@ -34,7 +34,7 @@ function hasMultiple(doc, url) {
 		url.match("content/by/section") || 
 		doc.title.match("Table of Contents") || 
 		doc.title.match("Early Edition") || 
-		url.match("cgi/collection") || 
+		url.match("cgi/collection/.+") || 
 		url.match("content/firstcite") ||
 		url.match("content/early/recent$");
 }
