@@ -154,6 +154,7 @@ function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
+	} : null;
 
 	if (!url) url = doc.documentElement.location;
 	
