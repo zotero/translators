@@ -31,10 +31,10 @@
 function hasMultiple(doc, url) {
 	return url.match("search\\?submit=") ||
 		url.match("search\\?fulltext=") ||
-		url.match("content/by/section") || 
-		doc.title.match("Table of Contents") || 
-		doc.title.match("Early Edition") || 
-		url.match("cgi/collection/.+") || 
+		url.match("content/by/section") ||
+		doc.title.match("Table of Contents") ||
+		doc.title.match("Early Edition") ||
+		url.match("cgi/collection/.+") ||
 		url.match("content/firstcite") ||
 		url.match("content/early/recent$");
 }
@@ -52,25 +52,37 @@ function getPdfUrl(url) {
 	return url;
 }
 
-//get citation manager ID for the article
-function getCitMgrId(text) {
-	/* To use XPath, we would need to create a DOM object,
-	   which is tricky on HTML, since it is not always well-formed.
-	   This regex seems to work on all Highwire 2.0 sites */
-
+//get citation manager ID from HTML using regex
+function getCitMgrIdFromText(text) {
 	var match = text.match(/\bgca=(.+?)["&]/i);
 	if (!match) {
-		Zotero.debug('Failed to detect citation manager ID');
+		Zotero.debug('Failed to detect citation manager ID by regex');
 		return null;
 	}
 
 	return match[1];
 }
 
+//get citation manager ID through XPath
+function getCitMgrId(doc)
+{
+	var citUrl = Zotero.Utilities.xpathText(doc, '//div[@id="cb-art-svcs" or contains(@class,"sidebar-tools")]//a[contains(text(),"itation")]/@href');
+	if(citUrl) {
+		var match = citUrl.match(/\bgca=(.+?)["&]/i);
+		if(match)
+		{
+			return match[1];
+		}
+	}
+
+	//fall back to regex
+	return getCitMgrIdFromText(doc.documentElement.innerHTML);
+}
+
 //return the fully formatted URL to the citation manager
-function getCitMgrUrl(doc, text) {
+function getCitMgrUrl(doc) {
 	var host = doc.location.protocol + '//' + doc.location.host + "/";
-	var id = getCitMgrId(text);
+	var id = getCitMgrId(doc);
 
 	if(!id) {
 		return null;
@@ -80,15 +92,16 @@ function getCitMgrUrl(doc, text) {
 }
 
 //return the ISSNs from the head meta-data
-//this uses regex to avoid creating HTML DOM object from text
-function getIssn(text)
-{
-	var issnx = /meta content="([^"]+)" name="citation_issn"/gi;
-	var match;
-	var issn = new Array();
+function getIssn(doc) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == 'x') return namespace; else return null;
+	} : null;
 
-	while( match = issnx.exec(text) {
-		issn.push(match[1]);
+	var res = doc.evaluate('//meta[@name="citation_issn"]/@content', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var issn = new Array();
+	while (i = res.iterateNext()){
+		issn.push(i.textContent);
 	}
 
 	Zotero.debug('Found the following ISSN(s): ' + issn.join(', '));
@@ -147,7 +160,7 @@ function detectWeb(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
-	
+
 	var highwiretest = false;
 
 	//quick test for highwire embedded pdf page
@@ -162,7 +175,7 @@ function detectWeb(doc, url) {
 		// lets hope this installations don't tweak this...
 		highwiretest = doc.evaluate("//link[@href = '/shared/css/hw-global.css']", doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	}
-	
+
 	if(highwiretest) {
 		if (hasMultiple(doc, url)) {
 			return "multiple";
@@ -185,18 +198,18 @@ function doWeb(doc, url) {
 		if (doc.title.match("Table of Contents")
 			|| doc.title.match("Early Edition")
 			|| url.match("content/firstcite")) {
-			var searchx = '//li[contains(@class, "toc-cit") and not(ancestor::div/h2/a/text() = "Correction" or ancestor::div/h2/a/text() = "Corrections")]'; 
+			var searchx = '//li[contains(@class, "toc-cit") and not(ancestor::div/h2/a/text() = "Correction" or ancestor::div/h2/a/text() = "Corrections")]';
 			var titlex = './/h4';
 		} else if (url.match("content/early/recent")) {
 			var searchx = '//div[contains(@class, "is-early-release")]';
 			var titlex = './/span[contains(@class, "cit-title")]';
 		} else if (url.match("content/by/section") || url.match("cgi/collection/.+")) {
-			var searchx = '//li[contains(@class, "results-cit cit")]'; 
+			var searchx = '//li[contains(@class, "results-cit cit")]';
 			var titlex = './/span[contains(@class, "cit-title")]';
 		} else {
 			var searchx = '//div[contains(@class,"results-cit cit")]';
 			var titlex = './/span[contains(@class,"cit-title")]';
-		}	
+		}
 		var linkx = './/a[1]';
 		var searchres = doc.evaluate(searchx, doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var next_res, title, link;
@@ -208,46 +221,25 @@ function doWeb(doc, url) {
 				items[link.href] = title;
 			}
 		}
-		Zotero.selectItems(items, function(selectedItems) { items = selectedItems; });
-		var arts = new Array();
-		for (var i in items) {
-			arts.push(i);
-		}
-		if(arts.length == 0){
-			Zotero.debug('no items');
-			return false;
-		}
-
-		var newurls = new Array();
-		for each (var i in arts) {
-			newurls.push(i);
-		}
-
-		Zotero.Utilities.HTTP.doGet(arts, function(text) {
-			var get, newurl;
-
-			newurl = newurls.shift();
-			citMgrUrl = getCitMgrUrl(doc, text);
-			if(!citMgrUrl) {
-				return false;
+		var urls = new Array();
+		Zotero.selectItems(items, function(selectedItems) {
+			if( selectedItems == null ) return true;
+			for( var item in selectedItems ) {
+				urls.push(item);
 			}
-
-			var issn = getIssn(text);
-
-			Zotero.Utilities.HTTP.doGet(citMgrUrl, function(text) {
-				addRIS(text, newurl, issn);
-			});
-		});
-	}
-	else {
-		var text = doc.documentElement.innerHTML;
-
-		var citMgrUrl = getCitMgrUrl(doc, text);
+			Zotero.Utilities.processDocuments(urls,
+				function(newDoc) {
+					doWeb(newDoc, newDoc.location.href)
+				},
+				function() { Zotero.done(); });
+			Zotero.wait(); });
+	} else {
+		var citMgrUrl = getCitMgrUrl(doc);
 		if(!citMgrUrl) {
 			return false;
 		}
 
-		var issn = getIssn(text);
+		var issn = getIssn(doc);
 
 		Zotero.Utilities.HTTP.doGet(
 			citMgrUrl,
