@@ -79,8 +79,24 @@ function getCitMgrUrl(doc, text) {
 	return host + 'citmgr?type=refman&gca=' + id;
 }
 
+//return the ISSNs from the head meta-data
+//this uses regex to avoid creating HTML DOM object from text
+function getIssn(text)
+{
+	var issnx = /meta content="([^"]+)" name="citation_issn"/gi;
+	var match;
+	var issn = new Array();
+
+	while( match = issnx.exec(text) {
+		issn.push(match[1]);
+	}
+
+	Zotero.debug('Found the following ISSN(s): ' + issn.join(', '));
+	return issn;
+}
+
 //add an item from RIS text
-function addRIS(text, url) {
+function addRIS(text, url, issn) {
 	var pdfurl = getPdfUrl(url);
 
 	//Is there a way to clear translator instead of reloading it??
@@ -100,8 +116,13 @@ function addRIS(text, url) {
 			{url:url, title:"Snapshot", mimeType:"text/html"},
 			{url:pdfurl, title:"Full Text PDF", mimeType:"application/pdf"}
 		];
+
 		if (doi) item.DOI = doi;
-		
+
+		if(!item.ISSN) {
+			item.ISSN = issn.join(', ');
+		}
+
 		//remove all caps in Names and Titles
 		for (i in item.creators){
 			if (item.creators[i].lastName && item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
@@ -211,21 +232,27 @@ function doWeb(doc, url) {
 				return false;
 			}
 
+			var issn = getIssn(text);
+
 			Zotero.Utilities.HTTP.doGet(citMgrUrl, function(text) {
-				addRIS(text, newurl);
+				addRIS(text, newurl, issn);
 			});
 		});
 	}
 	else {
-		var citMgrUrl = getCitMgrUrl(doc, doc.documentElement.innerHTML);
+		var text = doc.documentElement.innerHTML;
+
+		var citMgrUrl = getCitMgrUrl(doc, text);
 		if(!citMgrUrl) {
 			return false;
 		}
 
+		var issn = getIssn(text);
+
 		Zotero.Utilities.HTTP.doGet(
 			citMgrUrl,
 			function(text) {
-				addRIS(text, url);
+				addRIS(text, url, issn);
 			}
 		);
 	}
