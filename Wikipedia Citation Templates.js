@@ -10,7 +10,7 @@
 	"displayOptions":{"exportCharset":"UTF-8"},
 	"browserSupport":"gcsn",
 	"inRepository":true,
-	"lastUpdated":"2011-07-08 04:51:41"
+	"lastUpdated":"2012-02-06 18:00:26"
 }
 
 var fieldMap = {
