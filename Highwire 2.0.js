@@ -70,6 +70,27 @@ function getAbstract(doc) {
 	return abstr.trim();
 }
 
+//some journals display keywords
+function getKeywords(doc) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == 'x') return namespace; else return null;
+	} : null;
+
+	//some journals are odd and don't work with this. E.g. http://jn.nutrition.org/content/130/12/3122S.abstract
+	var keywords = doc.evaluate('//ul[contains(@class,"kwd-group")]//a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+
+	var kwds = new Array();
+	var k;
+
+	while( k = keywords.iterateNext() ) {
+		kwds.push(k.textContent.trim());
+	}
+
+	return kwds;
+}
+
+
 //add using embedded metadata
 function addEmbMeta(doc) {
 	var translator = Zotero.loadTranslator("web");
@@ -94,6 +115,8 @@ function addEmbMeta(doc) {
 		}
 
 		if(!item.abstractNote) item.abstractNote = getAbstract(doc);
+
+		if( !item.tags || item.tags.length < 1 ) item.tags = getKeywords(doc);
 
 		if (item.notes) item.notes = [];
 
