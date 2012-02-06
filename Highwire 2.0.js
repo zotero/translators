@@ -34,8 +34,9 @@ function hasMultiple(doc, url) {
 		url.match("content/by/section") || 
 		doc.title.match("Table of Contents") || 
 		doc.title.match("Early Edition") || 
-		url.match("cgi/collection/.+") || 
-		url.match("content/firstcite");
+		url.match("cgi/collection") || 
+		url.match("content/firstcite") ||
+		url.match("content/early/recent$");
 }
 
 //create a url to the PDF based on the article URL
@@ -157,7 +158,7 @@ function doWeb(doc, url) {
 	} : null;
 
 	if (!url) url = doc.documentElement.location;
-	
+
 	if (hasMultiple(doc, url)) {
 		//get a list of URLs to import
 		if (doc.title.match("Table of Contents")
@@ -165,11 +166,13 @@ function doWeb(doc, url) {
 			|| url.match("content/firstcite")) {
 			var searchx = '//li[contains(@class, "toc-cit") and not(ancestor::div/h2/a/text() = "Correction" or ancestor::div/h2/a/text() = "Corrections")]'; 
 			var titlex = './/h4';
+		} else if (url.match("content/early/recent")) {
+			var searchx = '//div[contains(@class, "is-early-release")]';
+			var titlex = './/span[contains(@class, "cit-title")]';
 		} else if (url.match("content/by/section") || url.match("cgi/collection/.+")) {
 			var searchx = '//li[contains(@class, "results-cit cit")]'; 
 			var titlex = './/span[contains(@class, "cit-title")]';
-		}
-		else {
+		} else {
 			var searchx = '//div[contains(@class,"results-cit cit")]';
 			var titlex = './/span[contains(@class,"cit-title")]';
 		}	
