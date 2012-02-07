@@ -2,14 +2,14 @@
 	"translatorID": "fce388a6-a847-4777-87fb-6595e710b7e7",
 	"label": "ProQuest",
 	"creator": "Avram Lyon",
-	"target": "^https?://search\\.proquest\\.com[^/]*(/abi[a-z]*|/pqrl|/pqdt|/pqdtft|/hnp[a-z]*|dissertations)?/(docview|publication|publicationissue|results)",
+	"target": "^https?://search\\.proquest\\.com.*/(docview|results)/.*",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-28 09:09:04"
+	"lastUpdated": "2012-02-07 00:05:14"
 }
 
 /*
@@ -348,14 +348,14 @@ function mapToZotero (type) {
 }
 
 function getEditors(item, value) {
-    if (value.match(", ")) {
-      var editors = value.split(", ");
-      for (var i in editors) {
-        item.creators.push(Zotero.Utilities.cleanAuthor(editors[i], "editor"));
-      }
-    } else {
-      item.creators.push(Zotero.Utilities.cleanAuthor(value, "editor"));
-    }
+	if (value.match(", ")) {
+	  var editors = value.split(", ");
+	  for (var i in editors) {
+		item.creators.push(Zotero.Utilities.cleanAuthor(editors[i], "editor"));
+	  }
+	} else {
+	  item.creators.push(Zotero.Utilities.cleanAuthor(value, "editor"));
+	}
   }
 function getItemType(sourceType, documentType, recordType){
 	switch(sourceType){
