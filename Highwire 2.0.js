@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-02-06 05:13:31"
+	"lastUpdated": "2012-02-06 13:13:31"
 }
 
 /*
@@ -179,6 +179,8 @@ function doWeb(doc, url) {
 			var searchx = '//li[contains(@class, "results-cit cit")]';
 			var titlex = './/span[contains(@class, "cit-title")]';
 		} else {
+			//should we exclude corrections?
+			//e.g. http://jcb.rupress.org/search?submit=yes&fulltext=%22CLIP%20catches%20enzymes%20in%20the%20act%22&sortspec=date&where=fulltext&y=0&x=0&hopnum=1
 			var searchx = '//div[contains(@class,"results-cit cit")]';
 			var titlex = './/span[contains(@class,"cit-title")]';
 		}
