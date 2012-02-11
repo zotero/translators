@@ -26,6 +26,12 @@ function detectWeb(doc, url) {
 		if (items.value > 1) {
 			return "multiple";
 		} else if (items.value == 1) {
+			//try to determine if this is a book
+			//"Sections" heading only seems to show up for books
+			if(doc.evaluate('//div[@class="sections"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())
+			{
+				return "book";
+			}
 			return "journalArticle";
 		}
 	}
@@ -102,7 +108,8 @@ function doImportFromText(text) {
 	// parse XML with DOMParser
 	var parser = new DOMParser();
 	var doc = parser.parseFromString(text, "text/xml");
-	
+
+	//handle journal articles
 	var articles = ZU.xpath(doc, '/PubmedArticleSet/PubmedArticle');
 	for(var i in articles) {
 		var newItem = new Zotero.Item("journalArticle");
@@ -216,6 +223,124 @@ function doImportFromText(text) {
 		if(newItem.publicationTitle) {
 			newItem.publicationTitle = Zotero.Utilities.capitalizeTitle(newItem.publicationTitle);
 		}
+		newItem.complete();
+	}
+
+	//handle books
+	var books = ZU.xpath(doc, '/PubmedArticleSet/PubmedBookArticle');
+	for(var i in books) {
+
+		var newItem = new Zotero.Item('book');
+
+		var citation = ZU.xpath(books[i], 'BookDocument');
+		var PMID = ZU.xpathText(citation, 'PMID');
+		//url
+		newItem.url = "http://www.ncbi.nlm.nih.gov/pubmed/" + PMID;
+		//Extra:PMID
+		newItem.extra = "PMID: "+PMID;
+
+		var book = ZU.xpath(citation, 'Book');
+
+		//ISBN
+		newItem.ISBN = ZU.xpathText(book, 'Isbn');
+
+		//title
+		var title = ZU.xpathText(book, 'BookTitle');
+		if(title) {
+			//what if title ends in other punctuation marks?
+			if(title.substr(-1) == ".") {
+				title = title.substring(0, title.length-1);
+			}
+			newItem.title = title;
+		}
+
+		//date
+		//should only need year for books
+		newItem.date = ZU.xpathText(book, 'PubDate/Year');
+
+		//edition
+		newItem.edition = ZU.xpathText(book, 'Edition');
+		
+		//series
+		newItem.series = ZU.xpathText(book, 'CollectionTitle');
+		
+		//volume
+		newItem.volume = ZU.xpathText(book, 'Volume');
+
+		//place
+		newItem.place = ZU.xpathText(book, 'Publisher/PublisherLocation');
+
+		//publisher
+		newItem.publisher = ZU.xpathText(book, 'Publisher/PublisherName');
+
+		//creators
+		var authorsLists = ZU.xpath(book, 'AuthorList');
+		for(var j in authorsLists) {
+			//default to 'author' unless it's 'editor'
+			var type = "author";
+			if(ZU.xpathText(authorsLists[j], '@Type') === "editors") {
+				type = "editor";
+			}
+
+			var authors = ZU.xpath(authorsLists[j], 'Author');
+
+			for(var k in authors) {
+				var author = authors[k];
+				var lastName = ZU.xpathText(author, 'LastName');
+				var firstName = ZU.xpathText(author, 'FirstName');
+				if(!firstName) {
+					firstName = ZU.xpathText(author, 'ForeName');
+				}
+
+				var initials = ZU.xpathText(author, 'Initials');
+				if(initials)
+				{
+					initials = initials.split("").join(" ");
+					if(firstName)
+					{
+						firstName += " " + initials;
+					}
+					else
+					{
+						firstName = initials;
+					}
+				}
+
+				var suffix = ZU.xpathText(author, 'Suffix');
+				if(suffix && firstName) {
+					firstName += ", " + suffix
+				}
+
+				if(firstName || lastName) {
+					newItem.creators.push({creatorType:type, lastName:lastName, firstName:firstName});
+				}
+			}
+		}
+	
+		//language
+		var language = ZU.xpathText(citation, 'Language');
+		//PubMed presents language as a 3 letter abbreviation (e.g. eng)
+		//this will probably not work for a lot of languages, but we'll just drop the extra letters
+		newItem.language = language.substring(0,2);
+
+		//abstractNote
+		var abstractText = ZU.xpathText(citation, 'Abstract/AbstractText');
+		if(abstractText) {
+			newItem.abstractNote = abstractText;
+		}
+		
+		//rights
+		newItem.rights = ZU.xpathText(citation, 'Abstract/CopyrightInformation');
+
+		//libraryCatalog, archive, archiveLocation, callNumber
+		//what are these??
+		
+		//seriesNumber, numPages, numberOfVolumes
+		//not available
+
+		//accessDate
+		//what's the format??
+
 		newItem.complete();
 	}
 }
@@ -339,13 +464,14 @@ var testCases = [
 				"pages": "205-207",
 				"ISSN": "1538-9855",
 				"journalAbbreviation": "Nurse Educ",
-				"publicationTitle": "Nurse Educator",
+				"publicationTitle": "Nurse educator",
 				"volume": "35",
 				"issue": "5",
 				"date": "2010 Sep-Oct",
-				"abstractNote": "Zotero is a powerful free personal bibliographic manager (PBM) for writers. Use of a PBM allows the writer to focus on content, rather than the tedious details of formatting citations and references. Zotero 2.0 (http://www.zotero.org) has new features including the ability to synchronize citations with the off-site Zotero server and the ability to collaborate and share with others. An overview on how to use the software and discussion about the strengths and limitations are included.\u000a",
+				"abstractNote": "Zotero is a powerful free personal bibliographic manager (PBM) for writers. Use of a PBM allows the writer to focus on content, rather than the tedious details of formatting citations and references. Zotero 2.0 (http://www.zotero.org) has new features including the ability to synchronize citations with the off-site Zotero server and the ability to collaborate and share with others. An overview on how to use the software and discussion about the strengths and limitations are included.",
 				"DOI": "10.1097/NNE.0b013e3181ed81e4",
 				"libraryCatalog": "NCBI PubMed",
+				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Zotero"
 			}
 		]
@@ -354,6 +480,90 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.ncbi.nlm.nih.gov/pubmed?term=zotero",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.ncbi.nlm.nih.gov/pubmed/20821847",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"creatorType": "author",
+						"lastName": "Nussey",
+						"firstName": "Stephen S"
+					},
+					{
+						"creatorType": "author",
+						"lastName": "Whitehead",
+						"firstName": "Saffron S"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"url": "http://www.ncbi.nlm.nih.gov/pubmed/20821847",
+				"extra": "PMID: 20821847",
+				"ISBN": "1859962521",
+				"title": "Endocrinology: An Integrated Approach",
+				"date": "2001",
+				"place": "Oxford",
+				"publisher": "BIOS Scientific Publishers",
+				"language": "en",
+				"abstractNote": "Endocrinology has been written to meet the requirements of today's trainee doctors and the demands of an increasing number of degree courses in health and biomedical sciences, and allied subjects.  It is a truly integrated text using large numbers of real clinical cases to introduce the basic biochemistry, physiology and pathophysiology underlying endocrine disorders and also the principles of clinical diagnosis and treatment.  The increasing importance of the molecular and genetic aspects of endocrinology in relation to clinical medicine is explained.",
+				"rights": "Copyright © 2001, BIOS Scientific Publishers Limited",
+				"libraryCatalog": "NCBI PubMed",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Endocrinology"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.ncbi.nlm.nih.gov/pubmed?term=21249754",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"creatorType": "editor",
+						"lastName": "Riegert-Johnson",
+						"firstName": "Douglas L D L"
+					},
+					{
+						"creatorType": "editor",
+						"lastName": "Boardman",
+						"firstName": "Lisa A L A"
+					},
+					{
+						"creatorType": "editor",
+						"lastName": "Hefferon",
+						"firstName": "Timothy T"
+					},
+					{
+						"creatorType": "editor",
+						"lastName": "Roberts",
+						"firstName": "Maegan M"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"url": "http://www.ncbi.nlm.nih.gov/pubmed/21249754",
+				"extra": "PMID: 21249754",
+				"title": "Cancer Syndromes",
+				"date": "2009",
+				"place": "Bethesda (MD)",
+				"publisher": "National Center for Biotechnology Information (US)",
+				"language": "en",
+				"abstractNote": "Cancer Syndromes is a comprehensive multimedia resource for selected single gene cancer syndromes.  \n            Syndromes currently included are Peutz-Jeghers syndrome, juvenile polyposis, Birt-Hogg-Dubé syndrome, multiple endocrine neoplasia type 1 \n            and familial atypical multiple mole melanoma syndrome.  For each syndrome the history, epidemiology, natural history and management are reviewed.  \n            If possible the initial report in the literature of each syndrome is included as an appendix.  Chapters are extensively annotated with figures and \n            movie clips. Mission Statement: Improving the care of cancer syndrome patients.",
+				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson",
+				"libraryCatalog": "NCBI PubMed",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

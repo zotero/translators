@@ -2,14 +2,14 @@
 	"translatorID": "8c1f42d5-02fa-437b-b2b2-73afc768eb07",
 	"label": "Highwire 2.0",
 	"creator": "Matt Burton",
-	"target": "(content/([0-9]+/[0-9]+|current|firstcite|early)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
-	"minVersion": "2.1.9",
+	"target": "^[^\\?]+(content/([0-9]+/[0-9]+|current|firstcite|early)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
+	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2011-12-18 10:16:31"
+	"lastUpdated": "2012-02-06 13:13:31"
 }
 
 /*
@@ -27,165 +27,193 @@
 	   http://jcb.rupress.org/content/191/1/2.2.short
 */
 
+//detect if there are multiple articles on the page
+function hasMultiple(doc, url) {
+	return url.match("search\\?submit=") ||
+		url.match("search\\?fulltext=") ||
+		url.match("content/by/section") ||
+		doc.title.match("Table of Contents") ||
+		doc.title.match("Early Edition") ||
+		url.match("cgi/collection/.+") ||
+		url.match("content/firstcite") ||
+		url.match("content/early/recent$");
+}
+
+//get abstract
+function getAbstract(doc) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == 'x') return namespace; else return null;
+	} : null;
+
+	//abstract, summary
+	var abstrSections = doc.evaluate('//div[contains(@id,"abstract") or @class="abstractSection"]/*[not(contains(@class,"section-nav"))]',
+		doc, nsResolver, XPathResult.ANY_TYPE, null);
+
+	var abstr = '';
+	var paragraph;
+
+	while( paragraph = abstrSections.iterateNext() ) {
+		paragraph = paragraph.textContent.trim();
+
+		//ignore the abstract heading
+		if( paragraph.toLowerCase() == 'abstract' || paragraph.toLowerCase() == 'summary' ) {
+			continue;
+		}
+
+		//put all lines of a paragraph on a single line
+		paragraph = paragraph.replace(/\s{2,}/g,' ');
+
+		abstr += paragraph + "\n";
+	}
+
+	return abstr.trim();
+}
+
+//some journals display keywords
+function getKeywords(doc) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == 'x') return namespace; else return null;
+	} : null;
+
+	//some journals are odd and don't work with this. E.g. http://jn.nutrition.org/content/130/12/3122S.abstract
+	var keywords = doc.evaluate('//ul[contains(@class,"kwd-group")]//a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+
+	var kwds = new Array();
+	var k;
+
+	while( k = keywords.iterateNext() ) {
+		kwds.push(k.textContent.trim());
+	}
+
+	return kwds;
+}
+
+
+//add using embedded metadata
+function addEmbMeta(doc) {
+	var translator = Zotero.loadTranslator("web");
+	//Embedded Metadata translator
+	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+
+	translator.setDocument(doc);
+
+	translator.setHandler("itemDone", function(obj, item) {
+		//remove all caps in Names and Titles
+		for (i in item.creators){
+			if (item.creators[i].lastName && item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
+				item.creators[i].lastName = Zotero.Utilities.capitalizeTitle(item.creators[i].lastName.toLowerCase(),true);
+			}
+			if (item.creators[i].firstName && item.creators[i].firstName == item.creators[i].firstName.toUpperCase()) {
+				item.creators[i].firstName = Zotero.Utilities.capitalizeTitle(item.creators[i].firstName.toLowerCase(),true);
+			}
+		}
+
+		if (item.title == item.title.toUpperCase()) {
+			item.title = Zotero.Utilities.capitalizeTitle(item.title.toLowerCase(),true);
+		}
+
+		if(!item.abstractNote) item.abstractNote = getAbstract(doc);
+
+		if( !item.tags || item.tags.length < 1 ) item.tags = getKeywords(doc);
+
+		if (item.notes) item.notes = [];
+
+		item.complete();
+	});
+
+	translator.translate();
+}
+
 function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
-	
+
 	var highwiretest = false;
-	
-	highwiretest = url.match(/\.pdf+html\?frame=header/);
-	
+
+	//quick test for highwire embedded pdf page
+	highwiretest = url.match(/\.pdf\+html/);
+
+	//only queue up the sidebar for data extraction (it seems to always be present)
+	if(highwiretest && !url.match(/\\?frame=sidebar/)) {
+		return null;
+	}
+
 	if (!highwiretest) {
 		// lets hope this installations don't tweak this...
-		highwiretest = doc.evaluate("//link[@href = '/shared/css/hw-global.css']", doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		highwiretest = doc.evaluate("//link[@href = '/shared/css/hw-global.css']",
+			doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	}
-	
+
 	if(highwiretest) {
-		
-		if (
-			url.match("search\\?submit=") ||
-			url.match("search\\?fulltext=") ||
-			url.match("content/by/section") || 
-			doc.title.match("Table of Contents") || 
-			doc.title.match("Early Edition") || 
-			url.match("cgi/collection/.+") || 
-			url.match("content/firstcite") 
-		) {
+		if (hasMultiple(doc, url)) {
 			return "multiple";
 		} else if (url.match("content/(early/)?[0-9]+")) {
 			return "journalArticle";
-		} 
+		}
 	}
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
-	if (!url) url = doc.documentElement.location;
-	else if (url.match(/\?frame=header/)) {
-		// recall all this using new url
-		url = url.replace(/\?.*/,"?frame=sidebar");
-		Zotero.Utilities.processDocuments(url,
-				function(newdoc) {
-					doWeb(newdoc, url);
-				}, function() {Zotero.done()});
-		Zotero.wait();
-		return true;
-	}
-	
-	var host = doc.location.protocol+'//' + doc.location.host + "/";
-	
-	var arts = new Array();
-	if (detectWeb(doc, url) == "multiple") {
-		var items = new Object();
+	if (hasMultiple(doc, url)) {
+		var namespace = doc.documentElement.namespaceURI;
+		var nsResolver = namespace ? function(prefix) {
+			if (prefix == 'x') return namespace; else return null;
+		} : null;
+
+		if (!url) url = doc.documentElement.location;
+
+		//get a list of URLs to import
 		if (doc.title.match("Table of Contents")
 			|| doc.title.match("Early Edition")
 			|| url.match("content/firstcite")) {
-			var searchx = '//li[contains(@class, "toc-cit") and not(ancestor::div/h2/a/text() = "Correction" or ancestor::div/h2/a/text() = "Corrections")]'; 
+			var searchx = '//li[contains(@class, "toc-cit") and not(ancestor::div/h2/a/text() = "Correction" or ancestor::div/h2/a/text() = "Corrections")]';
 			var titlex = './/h4';
-		} else if (url.match("content/by/section") || url.match("cgi/collection/.+")) {
-			var searchx = '//li[contains(@class, "results-cit cit")]'; 
+		} else if (url.match("content/early/recent")) {
+			var searchx = '//div[contains(@class, "is-early-release")]';
 			var titlex = './/span[contains(@class, "cit-title")]';
-		}
-		else {
+		} else if (url.match("content/by/section") || url.match("cgi/collection/.+")) {
+			var searchx = '//li[contains(@class, "results-cit cit")]';
+			var titlex = './/span[contains(@class, "cit-title")]';
+		} else {
+			//should we exclude corrections?
+			//e.g. http://jcb.rupress.org/search?submit=yes&fulltext=%22CLIP%20catches%20enzymes%20in%20the%20act%22&sortspec=date&where=fulltext&y=0&x=0&hopnum=1
 			var searchx = '//div[contains(@class,"results-cit cit")]';
 			var titlex = './/span[contains(@class,"cit-title")]';
-		}	
+		}
+
+		var next_res, title, link;
 		var linkx = './/a[1]';
 		var searchres = doc.evaluate(searchx, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var next_res, title, link;
+		var items = new Object();
+
 		while (next_res = searchres.iterateNext()) {
 			title = doc.evaluate(titlex, next_res, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			link = doc.evaluate(linkx, next_res, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
-			items[link] = title;
+			link = doc.evaluate(linkx, next_res, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			if(link) {
+				items[link.href] = title;
+			}
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			arts.push(i);
-		} 
+
+		var urls = new Array();
+
+		Zotero.selectItems(items, function(selectedItems) {
+			if( selectedItems == null ) return true;
+			for( var item in selectedItems ) {
+				urls.push(item);
+			}
+			Zotero.Utilities.processDocuments(urls,
+				function(newDoc) {
+					doWeb(newDoc, newDoc.location.href)
+				},
+				function() { Zotero.done(); });
+			Zotero.wait(); });
 	} else {
-		arts = [url];
+		addEmbMeta(doc);
 	}
-	var newurls = new Array();
-	for each (var i in arts) {
-		newurls.push(i);
-	}
-	if(arts.length == 0) {
-		Zotero.debug('no items');
-		return false;
-	}
-	Zotero.Utilities.HTTP.doGet(arts, function(text) {
-		var id, match, newurl, pdfurl, get;
-		/* Here, we have to use three phrasings because they all occur, depending on
-		   the journal.
-				TODO We should rewrite this to not use regex! */
-		match = text.match(/=([^=]+)\">\s*Download (C|c)itation/);
-		if (!match || match.length < 1) {
-			match = text.match(/=([^=]+)\">\s*Download to citation manager/);
-			if (!match || match.length < 1) {
-				// Journal of Cell Biology
-		  		match = text.match(/=([^=]+)\">\s*Add to Citation Manager/);
-		  		if (!match || match.length < 1) {
-		  			/* apparently we can get frames */
-		  			/* but they have the ID too! */
-		  			Z.debug("Attempting to fetch ID from frameset");
-		  			match = text.match(/<meta content="([^"]+)"\s*name="citation_mjid"\s*\/>/);
-		  		}
-			}
-		}
-		
-		id = match[1];
-		newurl = newurls.shift();		
-		if (newurl.match("cgi/content")) {
-			pdfurl = newurl.replace(/cgi\/content\/abstract/, "content") + ".full.pdf";
-		// This is here to catch those pdf+html pages
-		} else if (newurl.match("\.full\.pdf")) {
-			pdfurl = newurl.slice(0, newurl.lastIndexOf(".full.pdf")) + ".full.pdf";
-		} else {
-			// This is not ideal...todo: brew a regex that grabs the correct URL
-			pdfurl = newurl.slice(0, newurl.lastIndexOf(".")) + ".full.pdf";
-		}
-		get = host + 'citmgr?type=refman&gca=' + id;
-		Zotero.Utilities.HTTP.doGet(get, function(text) {
-			var translator = Zotero.loadTranslator("import");
-			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-			translator.setString(text);
-			// Sometimes Highwire 2.0 has blank entries for N1
-			if (text.match(/N1\s+\-\s+(10\..*)\n/)) {
-				var doi = text.match(/N1\s+\-\s+(.*)\n/)[1];
-			}
-			translator.setHandler("itemDone", function(obj, item) {
-				item.attachments = [
-					{url:newurl, title:"Snapshot", mimeType:"text/html"},
-					{url:pdfurl, title:"Full Text PDF", mimeType:"application/pdf"}
-				];
-				if (doi) item.DOI = doi;
-			
-			//remove all caps in Names and Titles
-			for (i in item.creators){
-				if (item.creators[i].lastName && item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
-					item.creators[i].lastName = Zotero.Utilities.capitalizeTitle(item.creators[i].lastName.toLowerCase(),true);
-				}
-				if (item.creators[i].firstName && item.creators[i].firstName == item.creators[i].firstName.toUpperCase()) {
-					item.creators[i].firstName = Zotero.Utilities.capitalizeTitle(item.creators[i].firstName.toLowerCase(),true);
-				}
-			}
-			if (item.title == item.title.toUpperCase()) {
-				item.title = Zotero.Utilities.capitalizeTitle(item.title.toLowerCase(),true);
-			}
-			
-				if (item.notes) item.notes = [];
-				item.complete();
-			});
-			translator.translate();
-		});
-	});
-	Zotero.wait();
 }
 /** BEGIN TEST CASES **/
 var testCases = [
