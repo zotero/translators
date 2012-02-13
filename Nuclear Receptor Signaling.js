@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-02-13 18:13:31"
+	"lastUpdated": "2012-02-13 20:07:06"
 }
 
 /*
@@ -233,7 +233,7 @@ var testCases = [
 				"DOI": "10.1621/nrs.09002",
 				"url": "http://www.nursa.org/article.cfm?doi=10.1621/nrs.09002",
 				"ISSN": "1550-7629",
-				"rights": "Copyright © 2011, Safe et al. This is an open-access article distributed under the terms of the Creative Commons Non-Commercial Attribution License, which permits unrestricted non-commercial use distribution and reproduction in any medium, provided the original work is properly cited.",
+				"rights": "Copyright Â© 2011, Safe et al. This is an open-access article distributed under the terms of the Creative Commons Non-Commercial Attribution License, which permits unrestricted non-commercial use distribution and reproduction in any medium, provided the original work is properly cited.",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "Nuclear Receptor Signaling"
 			}
