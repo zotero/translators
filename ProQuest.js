@@ -434,8 +434,8 @@ function getItemType(sourceType, documentType, recordType){
 		case "Patent":
 			return "patent"; break;
 	}
-	if (mapToZotero(value)){
-		return mapToZotero(value)
+	if (mapToZotero(sourceType)){
+		return mapToZotero(sourceType)
 	}
 	return "journalArticle"
 }
