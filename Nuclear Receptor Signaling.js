@@ -163,3 +163,62 @@ function doWeb(doc, url) {
 		item.complete();
 	}
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.nursa.org/article.cfm?doi=10.1621/nrs.09002",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Stephen",
+						"lastName": "Safe",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kyounghyun",
+						"lastName": "Kim",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Xi",
+						"lastName": "Li",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Syng-Ook",
+						"lastName": "Lee",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.nursa.org/retrieveFile.cfm?type=NRS&file=nrs09002.pdf",
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"title": "NR4A orphan receptors and cancer",
+				"publicationTitle": "Nuclear Receptor Signaling",
+				"journalAbbreviation": "Nucl. Recept. Signaling",
+				"date": "March 18, 2011",
+				"volume": "9",
+				"pages": "e002",
+				"abstractNote": "NR4A orphan receptors are members of the nuclear receptor (NR) superfamily of transcription factors and include NR4A1 (Nur77, TR3, NGFI-B), NR4A2 (Nurr1), and NR4A3 (Nor1). NR4A receptors are immediate-early genes induced by multiple stimuli and modulate gene expression by interacting as monomers or homodimers to NGFI-B response elements (NBREs) and Nur-responsive elements (NuREs), respectively. NR4A1 and NR4A2 (but not NR4A3) also form heterodimers with the retinoic acid X receptor (RXR) that bind a DR5 motif, and there is evidence that NR4A1 can activate or deactivate gene expression in cancer cells through interactions with DNA-bound specificity protein 1(Sp1) transcription factor. NR4A receptors play important roles in cellular homeostasis and disease, and there is increasing evidence that they exhibit pro-oncogenic activity in most tumors and thereby represent novel targets for chemotherapeutic drugs. Many apoptosis-inducing drugs induce nuclear export of NR4A1 and activate apoptosis in cancer cell lines through formation of extranuclear complexes including a pro-apoptotic mitochondrial NR4A1-bcl-2 complex. 1,1-Bis(3'-indolyl)-1-(p-substituted phenyl)methane analogs exhibit structure-dependent activation or deactivation of nuclear NR4A1 to induce apoptosis, whereas cytosporone B and structural analogs activate both nuclear and extranuclear NR4A1-dependent pro-apoptotic pathways. The roles of NR4A2 and NR4A3 in carcinogenesis are less well-defined; however, there is evidence suggesting that NR4A receptors are important targets for development of new mechanism-based anticancer drugs.",
+				"DOI": "10.1621/nrs.09002",
+				"url": "http://www.nursa.org/article.cfm?doi=10.1621/nrs.09002",
+				"ISSN": "1550-7629",
+				"rights": "Copyright © 2011, Safe et al. This is an open-access article distributed under the terms of the Creative Commons Non-Commercial Attribution License, which permits unrestricted non-commercial use distribution and reproduction in any medium, provided the original work is properly cited.",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "Nuclear Receptor Signaling"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
