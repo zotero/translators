@@ -374,14 +374,15 @@ function getItemType(sourceType, documentType, recordType){
 	switch(sourceType){
 		case "Blogs, Podcats, & Websites":
 			if(recordType == "Article In An Electronic Resource Or Web Site"){
-			return "blogPost"} else {
-			return "webpage";
-			}
-			break;
+				return "blogPost"
+			} else {
+				return "webpage";
+			} break;
 		case "Books":
 			if (documentType == "Book Chapter") {
-			return "bookSection"} else {
-			return "book";
+				return "bookSection"
+			} else {
+				return "book";
 			} break;
 		case "Conference Papers and Proceedings":
 			return "conferencePaper"; break;
@@ -409,10 +410,12 @@ function getItemType(sourceType, documentType, recordType){
 			return "magazineArticle"; break;
 		case "Newpapers":
 			return "newspaperArticle"; break;
-		case "Pamphlets & Ephemeral Works": if (documentType == Feature) {
-			return "journalArticle"} else {
-			return "document"}
-			break;
+		case "Pamphlets & Ephemeral Works":
+			if (documentType == Feature) {
+				return "journalArticle"
+			} else {
+				return "document"
+			} break;
 		case "Reports":
 			return "report"; break;
 		case "Scholarly Journals":
