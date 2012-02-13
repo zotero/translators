@@ -388,9 +388,11 @@ function getItemType(sourceType, documentType, recordType){
 		case "Dissertations & Theses":
 			return "thesis"; break;
 		case "Encyclopedias & Reference Works":
-			if(documentType.indexof("book",0)){
-			return "book"} 
-			break;
+			if(documentType.indexOf("book",0) != -1){
+				return "book"
+			} else {
+				return "encyclopediaArticle"
+			} break;
 		case "Government & Official Publications":
 			if (documentType == "Patent"){
 			return "patent"} else if (documentType.indexof("report",0)){
