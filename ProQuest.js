@@ -55,13 +55,13 @@ function detectWeb(doc, url) {
 							doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 		if (sourceType) {
 			sourceType = sourceType.textContent.trim();
-		}
+		} 
 		if(documentType){
 			documentType = documentType.textContent.trim();
-		}
+		} 
 		if(recordType){
 			recordType = recordType.textContent.trim();
-		}
+		} 
 		var type = getItemType(sourceType, documentType, recordType)
 
 		if (type) {
@@ -72,7 +72,6 @@ function detectWeb(doc, url) {
 		// Fall back on journalArticle-- even if we couldn't guess the type
 		return "journalArticle";
 	}
-	
 	if (url.indexOf("/results/") === -1) {
 		var abstract_link = doc.evaluate('//a[@class="formats_base_sprite format_abstract"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		if (abstract_link.iterateNext()) {
@@ -96,7 +95,7 @@ function doWeb(doc, url) {
 		var articles = new Array();
 		var results = doc.evaluate('//a[contains(@class,"previewTitle") or contains(@class,"resultTitle")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var items = new Array();
-		var result;
+		var result;	
 		while(result = results.iterateNext()) {
 			var title = result.textContent;
 			var url = result.href;
@@ -361,14 +360,14 @@ function mapToZotero (type) {
 }
 
 function getEditors(item, value) {
-    if (value.match(", ")) {
-      var editors = value.split(", ");
-      for (var i in editors) {
-        item.creators.push(Zotero.Utilities.cleanAuthor(editors[i], "editor"));
-      }
-    } else {
-      item.creators.push(Zotero.Utilities.cleanAuthor(value, "editor"));
-    }
+	if (value.match(", ")) {
+	  var editors = value.split(", ");
+	  for (var i in editors) {
+		item.creators.push(Zotero.Utilities.cleanAuthor(editors[i], "editor"));
+	  }
+	} else {
+	  item.creators.push(Zotero.Utilities.cleanAuthor(value, "editor"));
+	}
   }
 function getItemType(sourceType, documentType, recordType){
 	switch(sourceType){
