@@ -2,14 +2,14 @@
 	"translatorID": "fce388a6-a847-4777-87fb-6595e710b7e7",
 	"label": "ProQuest",
 	"creator": "Avram Lyon",
-	"target": "^https?://search\\.proquest\\.com[^/]*(/abi[a-z]*|/pqrl|/pqdt|/pqdtft|/hnp[a-z]*|dissertations)?/(docview|publication|publicationissue|results)",
+	"target": "^https?://search\\.proquest\\.com.*\\/(docview|results|publicationissue| browseterms|browsetitles|browseresults|myresearch\\/(figtables|documents)).*",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-11 09:09:04"
+	"lastUpdated": "2012-02-13 13:14:47"
 }
 
 /*
@@ -37,6 +37,14 @@ function detectWeb(doc, url) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
 	
+//Check for multiple first
+	if (/\/(results|publicationissue|browseterms|browsetitles|browseresults|myresearch)\//.test(url)){  
+		Zotero.debug("url match")
+		var resultitem = doc.evaluate('//a[contains(@href, "/docview/")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		if (resultitem.iterateNext()) {
+			return "multiple";
+		}
+	}
 	var record_rows = doc.evaluate('//div[@class="display_record_indexing_row"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 	if (record_rows.iterateNext()) {
 		var sourceType = doc.evaluate('//div[@class="display_record_indexing_fieldname" and contains(text(),"Source type")]/following-sibling::div[@class="display_record_indexing_data"]',
@@ -71,10 +79,6 @@ function detectWeb(doc, url) {
 			return "journalArticle";	
 		}
 	}
-	var resultitem = doc.evaluate('//li[@class="resultItem" or contains(@class, "resultItem ")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	if (resultitem.iterateNext()) {
-		return "multiple";
-	}
 	return false;
 }
 
@@ -88,15 +92,24 @@ function doWeb(doc, url) {
 	if (detected && detected != "multiple") {
 		scrape(doc,url);
 	} else if (detected) {
+	// detect web returned multiple
 		var articles = new Array();
-		var results = doc.evaluate('//li[@class="resultItem" or contains(@class, "resultItem ")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var results = doc.evaluate('//a[contains(@class,"previewTitle") or contains(@class,"resultTitle")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var items = new Array();
 		var result;
 		while(result = results.iterateNext()) {
-			var link = doc.evaluate('.//a[contains(@class,"previewTitle") or contains(@class,"resultTitle")]', result, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			var title = link.textContent;
-			var url = link.href;
+			var title = result.textContent;
+			var url = result.href;
 			items[url] = title;
+		}
+	// If the above didn't get us titles, try agin with a more liberal xPath
+		if(!title){
+			results = doc.evaluate('//a[contains(@href, "/docview/")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			while(result = results.iterateNext()) {
+				var title = result.textContent;
+				var url = result.href;
+				items[url] = title;
+			}
 		}
 		Zotero.selectItems(items, function (items) {
 			if(!items) return true;
