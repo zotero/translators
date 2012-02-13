@@ -1,5 +1,5 @@
 {
-    "translatorID": "3eefa8bc-ee3d-4612-a928-b851709e49e7",
+    "translatorID": "23ba3be6-412d-4dde-9cc1-c4df0cc09378",
     "label": "Library Catalog (SIRSI eLibrary)",
     "creator": "Mang Sun",
     "target": "/uhtbin/(?:cgisirsi|quick_keyword)",

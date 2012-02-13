@@ -5,7 +5,7 @@
 	"target": "^https?://[^/]*www\\.iris\\.rutgers\\.edu[^/]*/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 90,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
