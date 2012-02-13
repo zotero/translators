@@ -395,10 +395,12 @@ function getItemType(sourceType, documentType, recordType){
 			} break;
 		case "Government & Official Publications":
 			if (documentType == "Patent"){
-			return "patent"} else if (documentType.indexof("report",0)){
-			return "report"} else if (documentType.indexof("statute",0)){
-			return "statute"}
-			break;
+				return "patent"
+			} else if (documentType.indexOf("report",0) != -1){
+				return "report"
+			} else if (documentType.indexOf("statute",0) != -1){
+				return "statute"
+			} break;
 		case "Historical Newspapers":
 			return "newspaperArticle"; break;
 		case "Historical Periodicals":
