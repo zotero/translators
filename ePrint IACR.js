@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-10-30 23:07:54"
+	"lastUpdated": "2012-02-12 21:59:39"
 }
 
 function detectWeb(doc, url) {
@@ -56,8 +56,8 @@ function scrape(doc, url) {
 	keywords = tmp[2].split(", ")
 	keywords.unshift(tmp[1]);
 
-
 	var newItem = new Zotero.Item("report");
+	
 	newItem.date = year;
 	newItem.reportNumber = no;
 	newItem.url = "http://eprint.iacr.org/"+year+"/"+no;
@@ -66,15 +66,17 @@ function scrape(doc, url) {
 	for (var i in authors) {
 		newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i], "author"));
 	}
-	for (var i = 0; i < keywords.length; i++) {
-		newItem.tags[i] = keywords[i];
+for (var i = 0; i < keywords.length; i++) {
+	//sometimes the keywords split returns an empty tag - those crash the translator if they're pushed.
+	if (keywords[i] != null){
+		newItem.tags.push(keywords[i]);}
 	}
 	newItem.attachments = [
 		{url:newItem.url, title:"ePrint IACR Snapshot", mimeType:"text/html"},
 		{url:newItem.url+".pdf", title:"ePrint IACR Full Text PDF", mimeType:"application/pdf"}
 	];
-
 	newItem.complete();
+
 }
 
 function doWeb(doc, url) {
@@ -82,7 +84,6 @@ function doWeb(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
-
 	var articles = new Array();
 	var items = new Object();
 	var nextTitle;
@@ -103,6 +104,7 @@ function doWeb(doc, url) {
 		}
 	} else {
 		articles = [url];
+		
 	}
 
 	Zotero.Utilities.processDocuments(articles, scrape, function(){Zotero.done();});
