@@ -1,5 +1,5 @@
 {
-	"translatorID": "d7a84420-56af-11e1-b86c-0800200c9a66",
+	"translatorID": "6614a99-479a-4524-8e30-686e4d66663e",
 	"label": "Nature Publishing Group",
 	"creator": "Aurimas Vinckevicius",
 	"target": "https?://[^/]*nature\\.com[^?]*(/(journal|archive|research|search)/|current_issue.htm)",
