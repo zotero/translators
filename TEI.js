@@ -14,12 +14,12 @@
 	},
 	"displayOptions": {
 		"exportNotes": false,
-		"exportTags": false,
-		"generateXMLIds": true,
-		"fullTEIDocument": false,
-		"createCollections": false
+		"Export Tags": false,
+		"Generate XML IDs": true,
+		"Full TEI Document": false,
+		"Export Collections": false
 	},
-	"lastUpdated": "2012-01-18 12:40:00"
+	"lastUpdated": "2012-02-14 07:49:05"
 }
 
 // ********************************************************************
