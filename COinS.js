@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 6,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-02-09 19:01:59"
+	"lastUpdated": "2012-02-14 07:56:13"
 }
 
 function detectWeb(doc, url) {
@@ -205,7 +205,9 @@ function doExport() {
 	
 	while (item = Zotero.nextItem()) {
 		co = Zotero.Utilities.createContextObject(item, "1.0");
-		Zotero.write("<span class='Z3988' title='"+ Zotero.Utilities.htmlSpecialChars(co) +"'></span>\n");
+		if(co) {
+			Zotero.write("<span class='Z3988' title='"+ Zotero.Utilities.htmlSpecialChars(co) +"'></span>\n");
+		}
 	}
 }
 /** BEGIN TEST CASES **/
