@@ -2,7 +2,7 @@
 	"translatorID": "2c310a37-a4dd-48d2-82c9-bd29c53c1c76",
 	"label": "APS",
 	"creator": "Eugeniy Mikhailov and Michael Berkowitz",
-	"target": "^https?://(?:www\\.)?(prola|prl|pra|prb|prc|prd|pre|prst-ab|prst-per|rmp|publish)\\.aps\\.org[^/]*/(toc|abstract|forward|showrefs|supplemental|search)/?",
+	"target": "^https?://(?:www\\.)?(prola|prl|pra|prb|prc|prd|pre|prx|prst-ab|prst-per|rmp|publish)\\.aps\\.org[^/]*/(toc|abstract|forward|showrefs|supplemental|search)/?",
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
 	"priority": 100,
