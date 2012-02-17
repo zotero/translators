@@ -1020,7 +1020,7 @@ function doExport() {
 		
 		// add fields
 		for(var field in item.uniqueFields) {
-			if(item.uniqueFields[field] == "") continue;
+			if(!item.uniqueFields[field] && item.uniqueFields[field] !== 0) continue;
 			
 			var property = new LiteralProperty(field);
 			property.mapFromItem(item, nodes);
