@@ -2,14 +2,14 @@
 	"translatorID": "6614a99-479a-4524-8e30-686e4d66663e",
 	"label": "Nature Publishing Group",
 	"creator": "Aurimas Vinckevicius",
-	"target": "https?://[^/]*nature\\.com[^?]*(/(journal|archive|research|search)/|current_issue.htm)",
+	"target": "https?://[^/]*nature\\.com(:[\\d]+)?(?=/)[^?]*(/(journal|archive|research|search|full|abs)/|current_issue.htm)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-02-14 04:15:47"
+	"lastUpdated": "2012-02-16 15:46:00"
 }
 
 //get abstract
@@ -59,7 +59,7 @@ function getKeywords(doc) {
 
 //get PDF url
 function getPdfUrl(doc) {
-	var link = Zotero.Utilities.xpath(doc, '//li[@class="download-pdf" or @class="pdf"]/a');
+	var link = Zotero.Utilities.xpath(doc, '//li[@class="download-pdf" or @class="pdf" or @class="downloading-pdf"]/a');
 	if(link.length == 1) return link[0].href;
 }
 
