@@ -2,14 +2,14 @@
 	"translatorID": "2c310a37-a4dd-48d2-82c9-bd29c53c1c76",
 	"label": "APS",
 	"creator": "Eugeniy Mikhailov and Michael Berkowitz",
-	"target": "^https?://(?:www\\.)?(prola|prl|pra|prb|prc|prd|pre|prst-ab|prst-per|rmp|publish)\\.aps\\.org[^/]*/(toc|abstract|forward|showrefs|supplemental|search)/?",
+	"target": "^https?://(?:www\\.)?(prola|prl|pra|prb|prc|prd|pre|prx|prst-ab|prst-per|rmp|publish)\\.aps\\.org[^/]*/(toc|abstract|forward|showrefs|supplemental|search)/?",
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
 	"priority": 100,
 	"browserSupport": "gcs",
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2012-01-01 01:42:16"
+	"lastUpdated": "2012-02-20 11:53:00"
 }
 
 // Works for all APS journals: http://publish.aps.org/
