@@ -41,8 +41,10 @@ var exports = { "doWeb":doWeb };
 
 var HIGHWIRE_MAPPINGS = {
 	"citation_title":"title",
-	"citation_publication_date":"date",
+	"citation_publication_date":"date",	//perhaps this is still used in some old implementations
+	"citation_date":"date",
 	"citation_journal_title":"publicationTitle",
+	"citation_journal_abbrev":"journalAbbreviation",
 	"citation_volume":"volume",
 	"citation_issue":"issue",
 	"citation_conference_title":"conferenceName",
@@ -51,7 +53,8 @@ var HIGHWIRE_MAPPINGS = {
 	"citation_issn":"ISSN",
 	"citation_isbn":"ISBN",
 	"citation_abstract":"abstractNote",
-	"citation_doi":"DOI"
+	"citation_doi":"DOI",
+	"citation_public_url":"url"
 };
 
 // Maps actual prefix in use to URI
