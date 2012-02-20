@@ -12,8 +12,8 @@
 	"lastUpdated": "2012-02-20 03:54:19"
 }
 
-//add using RIS
-function addByRIS(doi) {
+//add using BibTex
+function addByBibTex(doi) {
 	var baseUrl = 'http://www.annualreviews.org';
 	var risRequest = baseUrl + '/action/downloadCitation';
 	var articleUrl = baseUrl + '/doi/abs/' + doi;
@@ -77,13 +77,13 @@ function doWeb(doc, url) {
 		Zotero.selectItems(selectList, function(selectedItems) {
 			if(selectedItems == null) return true;
 			for(var item in selectedItems) {
-				addByRIS(item);
+				addByBibTex(item);
 			}
 		});
 	} else {
 		var match = url.match(/\/(?:abs|full|pdf)\/([^?]+)/);
 		if(match) {
-			addByRIS(match[1]);
+			addByBibTex(match[1]);
 		}
 	}
 }
