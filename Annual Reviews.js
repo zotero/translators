@@ -2,7 +2,7 @@
 	"translatorID": "5f22bd25-5b70-11e1-bb1d-c4f24aa18c1e",
 	"label": "Annual Reviews",
 	"creator": "Aurimas Vinckevicius",
-	"target": "https?://[^/]*annualreviews\\.org(:[\\d]+)?(?=/)[^?]*(/(toc|journal|doi)/|showMost(Read|Cited)Articles)",
+	"target": "https?://[^/]*annualreviews\\.org(:[\\d]+)?(?=/)[^?]*(/(toc|journal|doi)/|showMost(Read|Cited)Articles|doSearch)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 200,
@@ -35,6 +35,7 @@ function addByRIS(doi) {
 				mimeType: 'application/pdf'}];
 
 			item.complete();
+			Zotero.done();
 		});
 
 		translator.translate();
@@ -52,6 +53,7 @@ function detectWeb(doc, url) {
 		title.match('- most downloaded reviews') ||
 		title.match('- most cited reviews') ||
 		title.match('- forthcoming -') ||
+		title.match('search results') ||
 		url.match('/journal/') ) {		//individual journal home page
 
 		return 'multiple';
