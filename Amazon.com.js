@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-11 09:09:04"
+	"lastUpdated": "2012-02-20 23:41:26"
 }
 
 function detectWeb(doc, url) {
@@ -67,7 +67,7 @@ function doWeb(doc, url) {
 		} else if (doc.location.href.match(/\/lm\//)) { // Show selector for Lists
 			var xpath = '//span[@id="lm_asinlink95"]//a'
 		} else { // Show selector for Search results
-			var xpath = '//div[@class="productTitle"]/a | //a[span[@class="srTitle"]] | //div[@class="title"]/a[@class="title"]';
+			var xpath = '//div[@class="productTitle"]/a | //a[span[@class="srTitle"]] | //div[@class="title"]/a[@class="title"]| //h3[@class="title"]/a[@class="title"]';
 		}
 		var elmts = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 		var elmt = elmts.iterateNext();
@@ -661,13 +661,12 @@ var testCases = [
 						"title": "Amazon.com Link",
 						"snapshot": false,
 						"mimeType": "text/html",
-						"url": false
+						"url": "http://www.amazon.com/dp/B000002LRJ"
 					}
 				],
 				"label": "Sire / London/Rhino",
 				"audioRecordingType": "Audio CD",
 				"date": "1991-11-05",
-				"extra": "1991-11-05",
 				"title": "Loveless",
 				"libraryCatalog": "Amazon.com"
 			}
@@ -732,7 +731,6 @@ var testCases = [
 				"runningTime": "114",
 				"date": "2003-05-20",
 				"ISBN": "0767879805",
-				"extra": "2002-12-06",
 				"title": "Adaptation",
 				"libraryCatalog": "Amazon.com"
 			}
