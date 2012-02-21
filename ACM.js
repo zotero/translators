@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-01-11 23:12:20"
+	"lastUpdated": "2012-02-21 00:15:19"
 }
 
 /*
@@ -135,7 +135,7 @@ var incomplete = [];
 	  item.archiveLocation = "";
 	  // some bibtext contains odd </kwd> tags - remove them
 	  if (item.tags) item.tags = String(item.tags).replace(/\<\/kwd\>/g, "").split(",");
-    incomplete.push(item);
+	incomplete.push(item);
 });
 translator.translate();
 // assuming the first item is the right one return just that.
@@ -339,7 +339,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://dl.acm.org.turing.library.northwestern.edu/citation.cfm?id=258948.258973&coll=DL&dl=ACM",
+		"url": "http://dl.acm.org/citation.cfm?id=258948.258973&coll=DL&dl=ACM",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -362,7 +362,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://dl.acm.org.turing.library.northwestern.edu/ft_gateway.cfm?id=258973&type=pdf",
+						"url": "http://dl.acm.org/ft_gateway.cfm?id=258973&type=pdf",
 						"title": "ACM Full Text PDF",
 						"mimeType": "application/pdf"
 					}
@@ -373,7 +373,7 @@ var testCases = [
 				"date": "1997",
 				"ISBN": "0-89791-918-1",
 				"pages": "263–273",
-				"url": "http://doi.acm.org.turing.library.northwestern.edu/10.1145/258948.258973",
+				"url": "http://doi.acm.org/10.1145/258948.258973",
 				"DOI": "10.1145/258948.258973",
 				"publisher": "ACM",
 				"place": "New York, NY, USA",
