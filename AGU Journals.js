@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-30 22:53:01"
+	"lastUpdated": "2012-02-21 15:26:30"
 }
 
 function detectWeb(doc,url)
@@ -301,7 +301,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://europa.agu.org/?view=article&uri=/journals/eo/v078/i018/97EO00127.xml&t=clarke",
+		"url": "http://www.agu.org/pubs/crossref/1997/97EO00127.shtml",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -321,8 +321,13 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"url": "http://europa.agu.org/?view=article&uri=/journals/eo/v078/i018/97EO00127.xml&t=clarke",
+				"url": "http://www.agu.org/pubs/crossref/1997/97EO00127.shtml",
 				"title": "Meier receives the Horton Medal",
+				"publicationTitle": "Eos",
+				"pages": "PAGE 188",
+				"volume": "78",
+				"issue": "18",
+				"DOI": "199710.1029/97EO00127",
 				"journalAbbreviation": "Eos Trans. AGU",
 				"libraryCatalog": "AGU Journals",
 				"accessDate": "CURRENT_TIMESTAMP"
