@@ -76,9 +76,9 @@ function getKeywords(doc) {
 }
 
 //get PDF url
-function getPdfUrl(doc) {
-	var link = Zotero.Utilities.xpath(doc, '//li[@class="download-pdf" or @class="pdf" or @class="downloading-pdf"]/a');
-	if(link.length == 1) return link[0].href;
+function getPdfUrl(url) {
+	var m = url.match(/(^[^#?]+\/)(?:full|abs)(\/[^#?]+?\.)[a-zA-Z]+(?=$|\?|#)/);
+	if( m && m.length) return m[1] + 'pdf' + m[2] + 'pdf';
 }
 
 //add using embedded metadata
@@ -106,7 +106,7 @@ function scrapeEmbedMeta(doc, url) {
 
 		if(!item.abstractNote) item.abstractNote = getAbstract(doc);
 
-		var pdf = getPdfUrl(doc);
+		var pdf = getPdfUrl(url);
 		if(pdf) {
 			item.attachments = [{
 				url: pdf,
