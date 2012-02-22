@@ -32,47 +32,46 @@
 
 //get abstract
 function getAbstract(doc) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
+	var abstractLocations = [
+		//e.g. 'lead' http://www.nature.com/emboj/journal/v31/n1/full/emboj2011343a.html
+		//e.g. 'first_paragraph' http://www.nature.com/emboj/journal/vaop/ncurrent/full/emboj201239a.html
+		'//p[contains(@class,"lead") or contains(@class,"first_paragraph")]',
+		//e.g.
+		'//div[@id="abs"]/*[self::div[not(contains(@class, "keyw-abbr"))] or self::p]',
+		//e.g. 'first-paragraph' http://www.nature.com/nature/journal/v481/n7381/full/nature10669.html
+		//e.g. 'standfirst' http://www.nature.com/nature/journal/v481/n7381/full/481237a.html
+		'//div[@id="first-paragraph" or @class="standfirst"]/p',
+		//e.g. http://www.nature.com/nature/journal/v481/n7381/full/nature10728.html
+		'//div[contains(@id,"abstract")]/div[@class="content"]/p'
+	];
 
-	var paragraphs = doc.evaluate('//div[@id="abs"]/*[self::div[not(contains(@class, "keyw-abbr"))] or self::p]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var paragraphs = [];
+
+	for( var i=0, n=abstractLocations.length; i<n && !paragraphs.length; i++ ) {
+		paragraphs = Zotero.Utilities.xpath(doc, abstractLocations[i]);
+	}
+
+	if( !paragraphs.length ) return null;
+
 	var textArr = new Array();
 	var p;
-	while( p = paragraphs.iterateNext() ) {
-		textArr.push(p.textContent.trim());
+	for( var i=0, n=paragraphs.length; i<n; i++ ) {
+		p = paragraphs[i].textContent.trim();
+		if( p ) textArr.push(p);
 	}
 
-	if(textArr.length == 0) {
-		//nothing matched. Must be the new Nature style
-		paragraphs = doc.evaluate('//div[contains(@id,"abstract")]/div[@class="content"]/p', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		while( p = paragraphs.iterateNext() ) {
-			textArr.push(p.textContent.trim());
-		}
-	}
-
-	return textArr.join("\n");
+	return textArr.join("\n").trim() || null;
 }
 
 //some journals display keywords
 function getKeywords(doc) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-
-	var keywords = doc.evaluate('//div[@class="keyw-abbr"]/p', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-	if( !keywords ) {
-		//try new nature style
-		keywords = Zotero.Utilities.xpathText(doc, '//div[contains(@class,"article-keywords")]/ul/li/a', null, '; ');
-	} else {
-		keywords = keywords.textContent.trim();
-	}
+	var keywords = Zotero.Utilities.xpathText(doc, '//p[@class="keywords"]') ||	//e.g. http://www.nature.com/onc/journal/v26/n6/full/1209842a.html
+			Zotero.Utilities.xpathText(doc, '//ul[@class="keywords"]//ul/li', null, '') ||	//e.g. http://www.nature.com/emboj/journal/v31/n3/full/emboj2011459a.html
+			Zotero.Utilities.xpathText(doc, '//div[contains(@class,"article-keywords")]/ul/li/a', null, '; ');	//e.g. http://www.nature.com/nature/journal/v481/n7382/full/481433a.html
 
 	if( !keywords ) return null;
 
-	return keywords.split('; ');
+	return keywords.split(/[;,]\s+/);
 }
 
 //get PDF url
