@@ -129,18 +129,18 @@ function detectWeb(doc, url) {
 
 		return 'journalArticle';
 
-	} else if( doc.title.toLowerCase().match('table of contents') ||	//single issue ToC. e.g. http://www.nature.com/emboj/journal/v30/n1/index.html or http://www.nature.com/nature/journal/v481/n7381/index.html
-		doc.title.toLowerCase().match('current issue') ||
-		url.match('/research/') ||
-		url.match('/vaop/') ||		//advanced online publication
-		url.match('sp-q=') ) {		//search query
+	} else if( doc.title.toLowerCase().indexOf('table of contents') != -1 ||	//single issue ToC. e.g. http://www.nature.com/emboj/journal/v30/n1/index.html or http://www.nature.com/nature/journal/v481/n7381/index.html
+		doc.title.toLowerCase().indexOf('current issue') != -1 ||
+		url.indexOf('/research/') != -1 ||
+		( url.indexOf('/vaop/') != -1 && url.indexOf('index.html') != -1 ) ||		//advanced online publication
+		url.indexOf('sp-q=') != -1 ) {		//search query
 
 		return 'multiple';
 
-	} else if( url.match('/archive/') ) {
-		if( url.match('index.htm') ) return false;				//list of issues
-		if( url.match('subject.htm') ) return false;				//list of subjects
-		if( url.match('category.htm') && !url.match('code=') ) return false;	//list of categories
+	} else if( url.indexOf('/archive/') != -1 ) {
+		if( url.indexOf('index.htm') != -1 ) return false;				//list of issues
+		if( url.indexOf('subject.htm') != -1 ) return false;				//list of subjects
+		if( url.indexOf('category.htm') != -1 && url.indexOf('code=') == -1 ) return false;	//list of categories
 
 		return 'multiple';	//all else should be ok
 
@@ -153,7 +153,7 @@ function doWeb(doc, url) {
 		var nodex, titlex, linkx;
 		var nodes = [];
 
-		if( url.match('/search/') ) {
+		if( url.indexOf('/search/') != -1 ) {
 			//search
 			nodex = '//ol[@class="results-list"]/li';
 			titlex = './' + allHNodes + '/node()[not(self::span)]';
