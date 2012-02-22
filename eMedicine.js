@@ -9,9 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-10-30 21:36:06"
+	"lastUpdated": "2012-02-22 04:00:17"
 }
-
 // Emedicine.Medscape.com translator.
 // Version 1.00
 // By William Smith, see http://www.willsmith.org/contactme/
@@ -61,7 +60,6 @@ function scrape(doc, url) {
 	
 	// Authors - we only handle one.
 	authors = getMeta(doc, newItem, "authors");
-	Zotero.debug(authors)
 	if (!String(authors).match(/[a-z]/)) {
 		authors = authors.iterateNext().textContent;
 		Zotero.debug('author: <'+authors+'>');
@@ -96,7 +94,6 @@ function doWeb(doc, url) {
 
 	scrape(doc,url);
 }
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
