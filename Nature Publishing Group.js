@@ -2,7 +2,7 @@
 	"translatorID": "6614a99-479a-4524-8e30-686e4d66663e",
 	"label": "Nature Publishing Group",
 	"creator": "Aurimas Vinckevicius",
-	"target": "https?://[^/]*nature\\.com(:[\\d]+)?(?=/)[^?]*(/(journal|archive|research|search|full|abs)/|current_issue.htm)",
+	"target": "https?://[^/]*nature\\.com(:[\\d]+)?(?=/)[^?]*(/(journal|archive|research|topten|search|full|abs)/|/current_issue.htm|/most.htm)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 200,
@@ -131,6 +131,8 @@ function detectWeb(doc, url) {
 	} else if( doc.title.toLowerCase().indexOf('table of contents') != -1 ||	//single issue ToC. e.g. http://www.nature.com/emboj/journal/v30/n1/index.html or http://www.nature.com/nature/journal/v481/n7381/index.html
 		doc.title.toLowerCase().indexOf('current issue') != -1 ||
 		url.indexOf('/research/') != -1 ||
+		url.indexOf('/topten/') != -1 ||
+		url.indexOf('/most.htm') != -1 ||
 		( url.indexOf('/vaop/') != -1 && url.indexOf('index.html') != -1 ) ||		//advanced online publication
 		url.indexOf('sp-q=') != -1 ) {		//search query
 
@@ -152,9 +154,10 @@ function doWeb(doc, url) {
 		var nodex, titlex, linkx;
 		var nodes = [];
 
-		if( url.indexOf('/search/') != -1 ) {
-			//search
-			nodex = '//ol[@class="results-list"]/li';
+		if( url.indexOf('/search/') != -1 ||
+			url.indexOf('/most.htm') != -1 ) {
+			//search, "top" lists
+			nodex = '//ol[@class="results-list" or @id="content-list"]/li';
 			titlex = './' + allHNodes + '/node()[not(self::span)]';
 			linkx = './' + allHNodes + '/a';
 
