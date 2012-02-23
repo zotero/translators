@@ -76,9 +76,13 @@ function doWeb(doc, url) {
 		item.url = doc.location.href;
 		item.title = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="content"]/h3', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 		item.abstractNote = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="abstract"]/blockquote/p', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-		item.tags = doc.evaluate('//div[@id="abstract"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/Keywords:\s+([^\.]+)/)[1].split(/,\s+/);
-		
-		var pdfurl = doc.evaluate('//div[@id="rt"]/a[@class="action noarrow"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().href;
+
+		var tags = Zotero.Utilities.xpathText(doc, '//div[@id="abstract"]/h3[contains(text(),"Keywords")]/following-sibling::node()[not(self::div)]', null, '');
+		if(tags) {
+			item.tags = tags.replace(/\.\s*$/,'').split(/[,;]\s+/);
+		}
+
+		var pdfurl = doc.evaluate('//div[@id="rt"]/a[@class="action noarrow"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().href.replace(/\/view\//,'/download/');
 		item.attachments = [
 			{url:item.url, title:item.publicationTitle + " Snapshot", mimeType:"text/html"},
 			{url:pdfurl, title:item.publicationTitle + " PDF", mimeType:"application/pdf"}
