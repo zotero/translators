@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-02-23 00:14:56"
+	"lastUpdated": "2012-02-23 13:25:31"
 }
 
 function detectWeb(doc, url) {
@@ -171,7 +171,7 @@ function doWeb(doc, url) {
 	} else {
 		//make sure we always get the overview page - but only reload the page when necessary
 		var newurl;
-		if (url.match(/printsec/)) {
+		if (url.match(/printsec=|v=onepage|v=thumbnail/)) {
 			//patent pages directly naviageted to from search results have the id somewhere in the URL
 			if (url.match(/[\&\?]id=[0-9A-Za-z\-]+/)) {
 				var id = url.match(/[\&\?]id=[0-9A-Za-z\-]+/)[0].replace(/\&/, "?");
@@ -211,7 +211,13 @@ var testCases = [
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
-				"attachments": [],
+				"attachments": [
+					{
+						"url": "http://www.google.com/patents/US1065211.pdf",
+						"title": "Google Patents PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"country": "United States",
 				"extra": "U.S. Classification: 215/273",
 				"patentNumber": "1065211",
@@ -240,7 +246,13 @@ var testCases = [
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
-				"attachments": [],
+				"attachments": [
+					{
+						"url": "http://www.google.com/patents/US1120656.pdf",
+						"title": "Google Patents PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"country": "United States",
 				"extra": "U.S. Classification: 411/477",
 				"patentNumber": "1120656",
@@ -295,7 +307,13 @@ var testCases = [
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
-				"attachments": [],
+				"attachments": [
+					{
+						"url": "http://www.google.fr/patents/US7123498.pdf",
+						"title": "Google Patents PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"abstractNote": "MRAM has read word lines WLR and write word line WLW extending in the y direction, write/read bit line BLW/R and write bit line BLW extending in the x direction, and the memory cells MC disposed at the points of the intersection of these lines. The memory MC includes sub-cells SC1 and SC2. The sub-cell SC1 includes magneto resistive elements MTJ1 and MTJ2 and a selection transistor Tr1, and the sub-cell SC2 includes magneto resistive elements MTJ3 and MTJ4 and a selection transistor Tr2. The magneto resistive elements MTJ1 and MTJ2 are connected in parallel, and the magneto resistive elements MTJ3 and MTJ4 are also connected in parallel. Further, the sub-cells SC1 and SC2 are connected in series between the write/read bit line BLW/R and the ground.",
 				"country": "United States",
 				"extra": "U.S. Classification: 365/63",
@@ -327,10 +345,16 @@ var testCases = [
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
-				"attachments": [],
+				"attachments": [
+					{
+						"url": "http://www.google.com/patents/US4390992.pdf",
+						"title": "Google Patents PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"abstractNote": "A device and method for optically pumping a gaseous laser using blackbody radiation produced by a plasma channel which is formed from an electrical discharge between two electrodes spaced at opposite longitudinal ends of the laser. A preionization device which can comprise a laser or electron beam accelerator produces a preionization beam which is sufficient to cause an electrical discharge between the electrodes to initiate the plasma channel along the preionization path. The optical pumping energy is supplied by a high voltage power supply rather than by the preionization beam. High output optical intensities are produced by the laser due to the high temperature blackbody radiation produced by the plasma channel, in the same manner as an exploding wire type laser. However, unlike the exploding wire type laser, the disclosed invention can be operated in a repetitive manner by utilizing a repetitive pulsed preionization device.",
 				"country": "United States",
-				"extra": "U.S. Classification: 372/70\nInternational Classification: : H01S  3091",
+				"extra": "U.S. Classification: 372/70\nInternational Classification: : H01S  3091",
 				"patentNumber": "4390992",
 				"date": "Jun 28, 1983",
 				"filingDate": "Jul 17, 1981",
