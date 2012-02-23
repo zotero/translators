@@ -3,7 +3,7 @@
 	"translatorType":4,
 	"label":"Wildlife Biology in Practice",
 	"creator":"Michael Berkowitz",
-	"target":"http://www.socpvs.org/journals/index.php/wbp",
+	"target":"http://[^/]*socpvs\\.org/journals/index\\.php/wbp",
 	"minVersion":"1.0.0b4.r5",
 	"maxVersion":"",
 	"priority":100,
@@ -12,9 +12,14 @@
 }
 
 function detectWeb(doc, url) {
-	if (url.match(/showToc/) || url.match(/advancedResults/)) {
+	//Google adsense first loads an empty page, and then reloads the page properly
+	//discard the empty page
+	if ( !Zotero.Utilities.xpath(doc,'//body/*[not(self::iframe) and not(self::script)]').length ) return null;
+
+	if (url.indexOf('/showToc/') != -1 || 
+		( url.indexOf('/search/results') != -1 && Zotero.Utilities.xpath(doc, '//tr[td/a[2]]').length ) ) {
 		return "multiple";
-	} else if (url.match(/article/)) {
+	} else if (url.indexOf('/article/viewArticle/') != -1) {
 		return "journalArticle";
 	}
 }
@@ -29,13 +34,14 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		var xpath = '//tr[td/a[2]]';
-		if (url.match(/issue/)) {
+		if ( url.indexOf('/issue/') != -1 ) {
 			var linkx = './td[2]/a[1]';
-			var titlex = './td[1]';
-		} else if (url.match(/advanced/)) {
+			var titlex = './td[1]/em';
+		} else if (url.indexOf('/search/') != -1) {
 			var linkx = './td[3]/a[1]';
 			var titlex = './td[2]';
 		}
+
 		var results = doc.evaluate(xpath, doc, ns, XPathResult.ANY_TYPE, null);
 		var result;
 		while (result = results.iterateNext()) {
@@ -48,7 +54,7 @@ function doWeb(doc, url) {
 			arts.push(i.replace(/view/, "viewArticle"));
 		}
 	} else {
-		arts = [url.replace(/viewRST/, "viewArticle")];
+		arts = [url];
 	}
 	Zotero.Utilities.processDocuments(arts, function(doc) {
 		var item = new Zotero.Item("journalArticle");
