@@ -9,25 +9,25 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-11 09:09:04"
+	"lastUpdated": "2012-02-23 00:14:56"
 }
 
 function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
+	var nsResolver = namespace ?
+	function (prefix) {
+		if (prefix == 'x') return namespace;
+		else return null;
 	} : null;
-	
-	if(doc.location.href.match(/[?&]q=/)) {
+	if (!doc.getElementsByTagName("body")[0].hasChildNodes()) return;
+	if (doc.location.href.match(/search.*[?&]q=/)) {
 		return "multiple";
-	} else if(doc.location.href.match(/[?&]id=/)) {
+	} else if (doc.location.href.match(/[?&]id=|patents\/US/)) {
 		return "patent";
 	}
 }
 
-//Google Patents Translator. Code by Adam Crymble
-
-function associateData (newItem, dataTags, field, zoteroField) {
+function associateData(newItem, dataTags, field, zoteroField) {
 	if (dataTags[field]) {
 		newItem[zoteroField] = dataTags[field];
 	}
@@ -47,27 +47,27 @@ function scrape(doc, url) {
 	// We avoid the next node containing only :\u00A0 (colon followed by a non-breaking space),
 	// since it is a separate node when the field's value is linked (authors, assignees).
 	var xPathContents = doc.evaluate('//div[@class="patent_bibdata"]//b/following::text()[not(.=":\u00A0")][1]', doc, null, XPathResult.ANY_TYPE, null);
-	
+
 	// create an associative array of the items and their contents
 	var heading, content;
-	while( heading = xPathHeadings.iterateNext(), content = xPathContents.iterateNext()){
-		if(heading.textContent == 'Publication number'){
+	while (heading = xPathHeadings.iterateNext(), content = xPathContents.iterateNext()) {
+		if (heading.textContent == 'Publication number') {
 			content = doc.evaluate('//div[@class="patent_bibdata"]//b[text()="Publication number"]/following::nobr[1]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 		}
-		if(heading.textContent == 'Inventors'){
-			content = ZU.xpathText(doc,'//div[@class="patent_bibdata"]//b[text()="Inventors"]/following::a[contains(@href,"inventor")]');
+		if (heading.textContent == 'Inventors') {
+			content = ZU.xpathText(doc, '//div[@class="patent_bibdata"]//b[text()="Inventors"]/following::a[contains(@href,"inventor")]');
 			dataTags["Inventors"] = content;
 		} else {
 			dataTags[heading.textContent] = content.textContent.replace(": ", '');;
 		}
 		//Zotero.debug(dataTags);
 	}
-	
+
 	if (doc.evaluate('//td[3]/p', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		newItem.abstractNote = (doc.evaluate('//td[3]/p', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace("Abstract", ''));
-	}	
-	
-	
+	}
+
+
 	/*
 	for (var i =0; i < xPathCount.numberValue; i++) {
 		
@@ -80,7 +80,6 @@ function scrape(doc, url) {
 	splitContent = contents.split(/xxx/);
 	*/
 	//associate headings with contents.
-	
 	//extra field
 	newItem.extra = '';
 
@@ -96,64 +95,65 @@ function scrape(doc, url) {
 		if (dataTags[fieldTitle].match("About this patent")) {
 			dataTags[fieldTitle] = dataTags[fieldTitle].replace("About this patent", '');
 		}
-		
-	//author(s)
+
+		//author(s)
 		if (fieldTitle == "Inventors") {
-			if (dataTags[fieldTitle] && dataTags[fieldTitle].toUpperCase() == dataTags[fieldTitle])
-				dataTags[fieldTitle] = Zotero.Utilities.capitalizeTitle(dataTags[fieldTitle].toLowerCase(), true);
+			if (dataTags[fieldTitle] && dataTags[fieldTitle].toUpperCase() == dataTags[fieldTitle]) dataTags[fieldTitle] = Zotero.Utilities.capitalizeTitle(dataTags[fieldTitle].toLowerCase(), true);
 			var authors = dataTags[fieldTitle].split(", ");
 			for (var j = 0; j < authors.length; j++) {
 				newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[j], "inventor"));
 			}
 		} else if (fieldTitle == "Inventor") {
-			if (dataTags[fieldTitle] && dataTags[fieldTitle].toUpperCase() == dataTags[fieldTitle])
-				dataTags[fieldTitle] = Zotero.Utilities.capitalizeTitle(dataTags[fieldTitle].toLowerCase(), true);
+			if (dataTags[fieldTitle] && dataTags[fieldTitle].toUpperCase() == dataTags[fieldTitle]) dataTags[fieldTitle] = Zotero.Utilities.capitalizeTitle(dataTags[fieldTitle].toLowerCase(), true);
 			newItem.creators.push(Zotero.Utilities.cleanAuthor(dataTags["Inventor"], "inventor"));
 		}
-		
-		if (fieldTitle == "Current U.S. Classification"  ) {
-			newItem.extra += "U.S. Classification: " + dataTags["Current U.S. Classification"]+"\n";
-		} else if (fieldTitle == "International Classification" ) {
-			newItem.extra += "International Classification: " + dataTags["International Classification"]+"\n";
-		}	else if (fieldTitle == "Publication number" ) {
-			newItem.extra += "Publication number: " +dataTags["Publication number"]+"\n";
+
+		if (fieldTitle == "Current U.S. Classification") {
+			newItem.extra += "U.S. Classification: " + dataTags["Current U.S. Classification"] + "\n";
+		} else if (fieldTitle == "International Classification") {
+			newItem.extra += "International Classification: " + dataTags["International Classification"] + "\n";
+		} else if (fieldTitle == "Publication number") {
+			newItem.extra += "Publication number: " + dataTags["Publication number"] + "\n";
 		}
 	}
 
-	associateData (newItem, dataTags, "Patent number", "patentNumber");
-	associateData (newItem, dataTags, "Issue date", "date");
-	associateData (newItem, dataTags, "Filing date", "filingDate");
-	associateData (newItem, dataTags, "Assignees", "assignee");
-	associateData (newItem, dataTags, "Assignee", "assignee");
-	associateData (newItem, dataTags, "Original Assignee", "assignee");
-	associateData (newItem, dataTags, "Abstract", "abstractNote");
-	associateData (newItem, dataTags, "Application number", "applicationNumber");
-	
-	newItem.title = doc.evaluate('//h1[@class="gb-volume-title"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	newItem.url = doc.location.href.replace(/(^[^\?]*\?id=[a-zA-Z0-9]+).*/,"$1");
+	associateData(newItem, dataTags, "Patent number", "patentNumber");
+	associateData(newItem, dataTags, "Issue date", "date");
+	associateData(newItem, dataTags, "Filing date", "filingDate");
+	associateData(newItem, dataTags, "Assignees", "assignee");
+	associateData(newItem, dataTags, "Assignee", "assignee");
+	associateData(newItem, dataTags, "Original Assignee", "assignee");
+	associateData(newItem, dataTags, "Abstract", "abstractNote");
+	associateData(newItem, dataTags, "Application number", "applicationNumber");
+
+	newItem.title = ZU.xpathText(doc, '//h1[@class="gb-volume-title"]');
+	newItem.url = doc.location.href.replace(/(^[^\?]*\?id=[a-zA-Z0-9]+).*/, "$1");
 
 	// Fix things in uppercase
-	var toFix = [ "title", "shortTitle", "assignee" ];
-	for each (var i in toFix) {
-		if (newItem[i] && newItem[i].toUpperCase() == newItem[i])
-		newItem[i] = Zotero.Utilities.capitalizeTitle(newItem[i].toLowerCase(), true);
+	var toFix = ["title", "shortTitle", "assignee"];
+	for each(var i in toFix) {
+		if (newItem[i] && newItem[i].toUpperCase() == newItem[i]) newItem[i] = Zotero.Utilities.capitalizeTitle(newItem[i].toLowerCase(), true);
 	}
 
-	var pdf = doc.evaluate('//div[@class="g-button-basic"]//a[contains(@href,"/download/")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-	if (pdf) newItem.attachments.push({url:pdf.href, title:"Google Patents PDF", mimeType:"application/pdf"});
+	var pdf = doc.evaluate('//a[@id="appbar-download-pdf-link"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+	if (pdf) newItem.attachments.push({
+		url: pdf.href,
+		title: "Google Patents PDF",
+		mimeType: "application/pdf"
+	});
 
 	newItem.complete();
 }
 
 function doWeb(doc, url) {
 	var host = 'http://' + doc.location.host + "/";
-	
+
 	if (detectWeb(doc, url) == "multiple") {
 		var items = Zotero.Utilities.getItemArray(doc, doc, /\/patents\?id=/);
 		var trimmed = {};
 		var hit;
 		for (i in items) {
-			hit = i.match(/^https?:\/\/(?:www\.)?google\.[^/]+\/patents\?id=[0-9A-Za-z]+/);
+			hit = i.match(/^https?:\/\/(?:www\.)?google\.[^/]+\/patents\?id=[0-9A-Za-z\-]+/);
 			if (hit && !trimmed[hit[0]]) {
 				trimmed[hit[0]] = items[i];
 			}
@@ -163,11 +163,27 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
+			Zotero.Utilities.processDocuments(articles, scrape, function () {
+				Zotero.done();
+			});
 			Zotero.wait();
-		});			
+		});
 	} else {
-		scrape(doc);
+		//make sure we always get the overview page - but only reload the page when necessary
+		var newurl;
+		if (url.match(/printsec/)) {
+			//patent pages directly naviageted to from search results have the id somewhere in the URL
+			if (url.match(/[\&\?]id=[0-9A-Za-z\-]+/)) {
+				var id = url.match(/[\&\?]id=[0-9A-Za-z\-]+/)[0].replace(/\&/, "?");
+				newurl = host + "patents" + id;
+			} else {
+				//these URLs are navigated to from the patent page - they usually have the form patents/US12345
+				newurl = url.replace(/\?.*/, "");
+			}
+			ZU.processDocuments(newurl, scrape, function () {
+				Zotero.done();
+			})
+		} else scrape(doc, url);
 	}
 }
 
@@ -290,6 +306,37 @@ var testCases = [
 				"applicationNumber": "10/964,352",
 				"title": "Non-volatile memory device",
 				"url": "http://www.google.fr/patents?id=Nh17AAAAEBAJ",
+				"libraryCatalog": "Google Patents",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.google.com/patents?id=PGk-AAAAEBAJ&printsec=abstract#v=onepage&q&f=false",
+		"items": [
+			{
+				"itemType": "patent",
+				"creators": [
+					{
+						"firstName": "O'Dean P.",
+						"lastName": "Judd",
+						"creatorType": "inventor"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"abstractNote": "A device and method for optically pumping a gaseous laser using blackbody radiation produced by a plasma channel which is formed from an electrical discharge between two electrodes spaced at opposite longitudinal ends of the laser. A preionization device which can comprise a laser or electron beam accelerator produces a preionization beam which is sufficient to cause an electrical discharge between the electrodes to initiate the plasma channel along the preionization path. The optical pumping energy is supplied by a high voltage power supply rather than by the preionization beam. High output optical intensities are produced by the laser due to the high temperature blackbody radiation produced by the plasma channel, in the same manner as an exploding wire type laser. However, unlike the exploding wire type laser, the disclosed invention can be operated in a repetitive manner by utilizing a repetitive pulsed preionization device.",
+				"country": "United States",
+				"extra": "U.S. Classification: 372/70\nInternational Classification: : H01S  3091",
+				"patentNumber": "4390992",
+				"date": "Jun 28, 1983",
+				"filingDate": "Jul 17, 1981",
+				"assignee": "The United States of America as represented by the United States Department of Energy",
+				"title": "Plasma channel optical pumping device and method",
+				"url": "http://www.google.com/patents?id=PGk",
 				"libraryCatalog": "Google Patents",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
