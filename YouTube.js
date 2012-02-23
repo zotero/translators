@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-30 22:41:22"
+	"lastUpdated": "2012-02-22 03:40:51"
 }
 
 function detectWeb(doc, url){
@@ -31,7 +31,7 @@ function detectWeb(doc, url){
 		return "multiple";
 	}
 	//playlists
-	if (doc.evaluate('//div[starts-with(@class, "title")]/a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){	
+	if (doc.evaluate('//a[contains(@class,"video-tile") and contains(@href,"/watch?")][descendant::span[starts-with(@class,"title")]]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){	
 		return "multiple";
 	}
 	// still used?
@@ -57,20 +57,27 @@ function doWeb(doc, url){
 	} else {
 		// multiple videos
 		var items = new Object();
+		var isPlaylist = false;
 		// search results and community/user pages
 		if (elmt = doc.evaluate('//div[@class="result-item-main-content"]//a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 			elmts = doc.evaluate('//div[@class="result-item-main-content"]//a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		} 
 		// playlists
-		else if (doc.evaluate('//div[starts-with(@class, "title")]/a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
-			elmts = doc.evaluate('//div[starts-with(@class, "title")]/a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		else if (doc.evaluate('//a[contains(@class,"video-tile") and contains(@href,"/watch?")][descendant::span[starts-with(@class,"title")]]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+			elmts = doc.evaluate('//a[contains(@class,"video-tile") and contains(@href,"/watch?")][descendant::span[starts-with(@class,"title")]]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			isPlaylist = true;
 		} 
 		// still used?
 		else if (doc.evaluate('//div[@class="vltitle"]/div[@class="vlshortTitle"]/a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 			elmts = doc.evaluate('//div[@class="vltitle"]/div[@class="vlshortTitle"]/a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		}
 		while (elmt = elmts.iterateNext()){
-			var title = elmt.textContent;
+			var title;
+			if( isPlaylist ) {
+				title = elmt.getElementsByClassName('title video-title')[0].textContent;
+			} else {
+				var title = elmt.textContent;
+			}
 			title = Zotero.Utilities.trimInternal(title);
 			var link = elmt.href;
 			//Zotero.debug(link);
@@ -149,51 +156,57 @@ function getData(ids, host){
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.youtube.com/watch?v=ggFKLxAQBbc&feature=feedrec_grec_index",
+		"url": "http://www.youtube.com/results?search_query=zotero&oq=zotero&aq=f&aqi=g4&aql=&gs_sm=3&gs_upl=60204l61268l0l61445l6l5l0l0l0l0l247l617l1.2.1l4l0",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.youtube.com/watch?v=pq94aBrc0pY",
 		"items": [
 			{
 				"itemType": "videoRecording",
 				"creators": [
 					{
-						"lastName": "carrieannefan1",
+						"lastName": "Zoteron",
 						"creatorType": "contributor",
 						"fieldMode": 1
 					}
 				],
 				"notes": [],
 				"tags": [
-					"the",
-					"matrix",
-					"keanu",
-					"reeves",
-					"carrie",
-					"anne",
-					"moss",
-					"bullet",
-					"time",
-					"neo",
-					"trinity",
-					"help",
-					"agent",
-					"rooftop",
-					"scene",
-					"hd",
-					"hq",
-					"high",
-					"definition",
-					"quality"
+					"Reference",
+					"Research",
+					"Mozilia",
+					"Zotero",
+					"Center",
+					"for",
+					"History",
+					"and",
+					"New",
+					"Media",
+					"George",
+					"Mason",
+					"University",
+					"Web",
+					"2.0",
+					"bibliography"
 				],
 				"seeAlso": [],
 				"attachments": [],
-				"title": "The Matrix: Dodge this (HD)",
-				"date": "2010-04-12",
-				"url": "http://www.youtube.com/watch?v=ggFKLxAQBbc&feature=youtube_gdata_player",
-				"runningTime": "70 seconds",
-				"abstractNote": "Famous Matrix scene.",
+				"title": "Zotero Intro",
+				"date": "2007-01-01",
+				"url": "http://www.youtube.com/watch?v=pq94aBrc0pY&feature=youtube_gdata_player",
+				"runningTime": "171 seconds",
+				"abstractNote": "Zotero is a free, easy-to-use research tool that helps you gather and organize resources (whether bibliography or the full text of articles), and then lets you to annotate, organize, and share the results of your research. It includes the best parts of older reference manager software (like EndNote)—the ability to store full reference information in author, title, and publication fields and to export that as formatted references—and the best parts of modern software such as del.icio.us or iTunes, like the ability to sort, tag, and search in advanced ways. Using its unique ability to sense when you are viewing a book, article, or other resource on the web, Zotero will—on many major research sites—find and automatically save the full reference information for you in the correct fields.",
 				"libraryCatalog": "YouTube",
-				"shortTitle": "The Matrix"
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.youtube.com/playlist?list=PL793CABDF042A9514",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

@@ -1,14 +1,15 @@
 {
-	"translatorID":"0507797c-9bc4-4374-92ca-9e3763b6922b",
-	"translatorType":4,
-	"label":"World History Connected",
-	"creator":"Frederick Gibbs",
-	"target":"worldhistoryconnected\\.press|historycooperative.*/whc/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-05-06 08:15:00"
+	"translatorID": "0507797c-9bc4-4374-92ca-9e3763b6922b",
+	"label": "World History Connected",
+	"creator": "Frederick Gibbs",
+	"target": "worldhistoryconnected\\.press|historycooperative.*/whc/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2012-02-23 01:57:45"
 }
 
 function associateMeta(newItem, metaTags, field, zoteroField) {
@@ -19,7 +20,6 @@ function associateMeta(newItem, metaTags, field, zoteroField) {
 }
 
 function scrape(doc) {
-	
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
@@ -28,7 +28,7 @@ function scrape(doc) {
 	var newItem = new Zotero.Item("journalArticle");
 	newItem.url = doc.location.href;
 	
-	var titlePath;
+	var titlePath, title;
 	var bookTitle;
 	var month, year;
 	var metaTags = doc.getElementsByTagName("meta");
@@ -49,8 +49,11 @@ function scrape(doc) {
 
 	} else {
 		//it would be nice to grab the title from the meta tags, but quotations are properly escaped and the tags are therefore malformed.
-		titlePath = '/html/body/table[4]/tbody/tr[2]/td[1]/h2/font/b';
-		newItem.title = Zotero.Utilities.superCleanString(doc.evaluate(titlePath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		titlePath = '/html/body/table[4]/tbody/tr[2]/td[1]/h2';
+		title = doc.evaluate(titlePath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		if( title ) {
+			newItem.title = Zotero.Utilities.trimInternal(Zotero.Utilities.superCleanString(title.textContent));
+		}
 	}
 
 	var author = metaTags.namedItem("Author");
@@ -73,6 +76,17 @@ function scrape(doc) {
 	newItem.complete();
 }
 
+function detectWeb(doc, url) {
+	if(doc.title.indexOf("Contents") != -1 ) {
+		return 'multiple';
+	} else if( doc.title.indexOf("Search results") != -1 &&
+		Zotero.Utilities.xpath(doc, '/html/body/dl/dt/strong/a[starts-with(text(),"World History Connected | Vol.")]').length ) {
+		return 'multiple';
+	} else if( url.match(/\/\d+\.\d+\/[^\/]+/) ) {
+		return 'journalArticle';
+	}
+}
+
 function doWeb(doc, url) {
 	
 	var searchLinks;
@@ -84,11 +98,11 @@ function doWeb(doc, url) {
 
 	if(doc.title.indexOf("Contents") != -1 || doc.title.indexOf("Search results") != -1) {
 
-		if(doc.title.indexOf("Contents") != -1) {
-		searchLinks = doc.evaluate('//tbody/tr[2]/td[1]/table/tbody/tr/td/a', doc, nsResolver, XPathResult.ANY_TYPE, null);	
+		if(doc.title.indexOf("Contents |") != -1) {
+		searchLinks = doc.evaluate('//tbody/tr[2]/td[1]/table//a', doc, nsResolver, XPathResult.ANY_TYPE, null);	
 		} 
-		else if ( doc.title.indexOf("Search results") != -1) {
-		searchLinks = doc.evaluate('/html/body/dl/dt/strong/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		else if ( doc.title.indexOf("| Search results") != -1) {
+		searchLinks = doc.evaluate('/html/body/dl/dt/strong/a[starts-with(text(),"World History Connected | Vol.")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		}
 		
 		var link;
@@ -122,4 +136,53 @@ function doWeb(doc, url) {
 	} else {
 		scrape(doc);
 	}
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://worldhistoryconnected.press.illinois.edu/9.1/chaiklin.html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Martha",
+						"lastName": "Chaiklin",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"document": {
+							"location": {}
+						},
+						"title": "World History Connected Snapshot"
+					}
+				],
+				"url": "http://worldhistoryconnected.press.illinois.edu/9.1/chaiklin.html",
+				"publicationTitle": "World History Connected",
+				"volume": "9",
+				"issue": "1",
+				"title": "The Merchant's Ark: Live Animal Gifts in Early Modern Dutch-Japanese Relations",
+				"date": "February 2012",
+				"libraryCatalog": "World History Connected",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "The Merchant's Ark"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://worldhistoryconnected.press.illinois.edu/9.1/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://worldhistoryconnected.press.illinois.edu/cgi-bin/htsearch?method=and&format=builtin-long&sort=score&config=whc&restrict=&exclude=&words=world",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
