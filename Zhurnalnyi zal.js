@@ -1,14 +1,15 @@
 {
-	"translatorID" : "0db1c2d0-eaae-4f3d-94ef-d4b3aa61de16",
-	"label" : "Журнальный зал",
-	"creator" : "Avram Lyon",
-	"target" : "^http://magazines\\.russ\\.ru/[a-zA-Z -_]+/[0-9]+/[0-9]+/",
-	"minVersion" : "2.0",
-	"maxVersion" : "",
-	"priority" : 100,
-	"inRepository" : "true",
-	"translatorType" : 4,
-	"lastUpdated" : "2010-08-23 00:45:42"
+	"translatorID": "0db1c2d0-eaae-4f3d-94ef-d4b3aa61de16",
+	"label": "Журнальный зал",
+	"creator": "Avram Lyon",
+	"target": "^http://magazines\\.russ\\.ru/[a-zA-Z -_]+/[0-9]+/[0-9]+/",
+	"minVersion": "2.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2012-02-23 12:31:57"
 }
 
 /*
@@ -40,9 +41,9 @@
 
 function detectWeb(doc, url) {
 	var n = doc.documentElement.namespaceURI;
-        var ns = n ? function(prefix) {
-                if (prefix == 'x') return n; else return null;
-        } : null;
+		var ns = n ? function(prefix) {
+				if (prefix == 'x') return n; else return null;
+		} : null;
 
 	var results = doc.evaluate('//div[@class="opub"]', doc, ns, XPathResult.ANY_TYPE, null);
 	if (results.iterateNext()) {
@@ -52,9 +53,9 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 	var n = doc.documentElement.namespaceURI;
-        var ns = n ? function(prefix) {
-                if (prefix == 'x') return n; else return null;
-        } : null;
+		var ns = n ? function(prefix) {
+				if (prefix == 'x') return n; else return null;
+		} : null;
 
 	var publication = doc.evaluate('//div[@class="opub"]/a', doc, ns, XPathResult.ANY_TYPE, null);
 	publication = publication.iterateNext().textContent;
@@ -78,3 +79,41 @@ function doWeb(doc, url) {
 	item.complete();
 	
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://magazines.russ.ru/ra/2012/3/s11.html",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Вячеслав",
+						"lastName": "Самошкин",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://magazines.russ.ru/ra/2012/3/s11.html",
+						"title": "Дети Ра Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"publicationTitle": "Дети Ра",
+				"title": "В сторону СМОГа, или Параллели и меридианы СМОГа",
+				"date": "2012",
+				"issue": "3",
+				"url": "http://magazines.russ.ru/ra/2012/3/s11.html",
+				"libraryCatalog": "Журнальный зал",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
