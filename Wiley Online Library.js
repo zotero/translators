@@ -6,10 +6,10 @@
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
-	"browserSupport": "gcs",
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-10-14 22:42:07"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-02-23 02:42:15"
 }
 
 /*
@@ -438,7 +438,13 @@ var testCases = [
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
-				"attachments": [],
+				"attachments": [
+					{
+						"url": "http://onlinelibrary.wiley.com/store/10.1111/j.1533-6077.2008.00144.x/asset/j.1533-6077.2008.00144.x.pdf?v=1&t=gyzjmfce&s=7a157f6293ce8577ef7606d76f1120b6c5dd676d",
+						"title": "Wiley Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"url": "http://onlinelibrary.wiley.com/doi/10.1111/j.1533-6077.2008.00144.x/abstract",
 				"DOI": "10.1111/j.1533-6077.2008.00144.x",
 				"volume": "18",
@@ -450,7 +456,8 @@ var testCases = [
 				"language": "en",
 				"date": "2008/09/01",
 				"pages": "186-206",
-				"libraryCatalog": "Wiley Online Library"
+				"libraryCatalog": "Wiley Online Library",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -521,6 +528,11 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://onlinelibrary.wiley.com/advanced/search/results",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
