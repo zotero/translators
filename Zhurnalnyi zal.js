@@ -3,13 +3,13 @@
 	"label": "Журнальный зал",
 	"creator": "Avram Lyon",
 	"target": "^http://magazines\\.russ\\.ru/[a-zA-Z -_]+/[0-9]+/[0-9]+/",
-	"minVersion": "2.0",
+	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2012-02-23 12:31:57"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-02-23 15:46:18"
 }
 
 /*
@@ -40,44 +40,32 @@
  */
 
 function detectWeb(doc, url) {
-	var n = doc.documentElement.namespaceURI;
-		var ns = n ? function(prefix) {
-				if (prefix == 'x') return n; else return null;
-		} : null;
-
-	var results = doc.evaluate('//div[@class="opub"]', doc, ns, XPathResult.ANY_TYPE, null);
-	if (results.iterateNext()) {
+	var results = ZU.xpath(doc, '//div[@class="opub"]');
+	if (results.length) {
 		return "journalArticle";
 	}
 }
 
 function doWeb(doc, url) {
-	var n = doc.documentElement.namespaceURI;
-		var ns = n ? function(prefix) {
-				if (prefix == 'x') return n; else return null;
-		} : null;
-
-	var publication = doc.evaluate('//div[@class="opub"]/a', doc, ns, XPathResult.ANY_TYPE, null);
-	publication = publication.iterateNext().textContent;
-	var pieces = publication.match(/«(.*)»[\n\t ]*([0-9]+), №([0-9]+)/);
-
-	var title = doc.evaluate('//div[@class="title1"]', doc, ns, XPathResult.ANY_TYPE, null);
-	title = title.iterateNext().textContent;
-
-	var author = doc.evaluate('//*[@class="avt1"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
-	author = author.textContent;
-
 	item = new Zotero.Item("journalArticle");
-	item.publicationTitle = pieces[1];
-	item.title = title;
-	item.date = pieces[2];
-	item.issue = pieces[3];
-	item.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
+
+	var publication = ZU.xpathText(doc, '//div[@class="opub"]/a');
+	if( publication ) {
+		var pieces = publication.match(/«(.*)»[\n\t ]*([0-9]+), №([0-9]+)/);
+		item.publicationTitle = pieces[1];
+		item.date = pieces[2];
+		item.issue = pieces[3];
+	}
+
+	item.title = ZU.xpathText(doc, '//div[@class="title1"]');
+
+	var author = ZU.xpathText(doc, '//*[@class="avt1"]');
+	item.creators.push(ZU.cleanAuthor(author, "author"));
+
 	item.url = url;
 	item.attachments.push({url:url, title: (item.publicationTitle + " Snapshot"), mimeType:"text/html"});
 
 	item.complete();
-	
 }
 /** BEGIN TEST CASES **/
 var testCases = [
