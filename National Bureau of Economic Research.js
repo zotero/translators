@@ -79,7 +79,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://papers.nber.org.turing.library.northwestern.edu/papers/w17577",
+		"url": "http://papers.nber.org/papers/w17577",
 		"items": [
 			{
 				"itemType": "journalArticle",
