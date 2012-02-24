@@ -6,10 +6,10 @@
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
-	"browserSupport": "gcs",
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2012-01-01 01:42:16"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-02-23 22:41:29"
 }
 
 function detectWeb(doc, url) {
@@ -91,11 +91,13 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
+		"defer": true,
 		"url": "http://www.ams.org/journals/jams/2012-25-01/",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "http://www.ams.org/journals/jams/2012-25-01/S0894-0347-2011-00713-3/home.html",
 		"items": [
 			{
