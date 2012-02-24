@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-30 22:41:28"
+	"lastUpdated": "2012-02-23 18:21:05"
 }
 
 /*
@@ -38,7 +38,6 @@ http://www.welt.de/wirtschaft/article12962920/Krankenkassen-werfen-Aerzten-Gewin
 */
 
 function detectWeb(doc, url) {
-
 	// I use XPaths. Therefore, I need the following block.
 	
 	var namespace = doc.documentElement.namespaceURI;
@@ -160,6 +159,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.welt.de/wirtschaft/article12962920/Krankenkassen-werfen-Aerzten-Gewinnstreben-vor.html",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -200,6 +200,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.welt.de/wirtschaft/",
+		"defer": true,
 		"items": "multiple"
 	}
 ]
