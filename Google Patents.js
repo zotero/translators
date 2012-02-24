@@ -13,12 +13,6 @@
 }
 
 function detectWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ?
-	function (prefix) {
-		if (prefix == 'x') return namespace;
-		else return null;
-	} : null;
 	if (!doc.getElementsByTagName("body")[0].hasChildNodes()) return;
 	if (doc.location.href.match(/search.*[?&]q=/)) {
 		return "multiple";
