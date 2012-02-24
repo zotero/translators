@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-02-23 13:25:31"
+	"lastUpdated": "2012-02-23 20:39:19"
 }
 
 function detectWeb(doc, url) {
@@ -153,7 +153,7 @@ function doWeb(doc, url) {
 		var trimmed = {};
 		var hit;
 		for (i in items) {
-			hit = i.match(/^https?:\/\/(?:www\.)?google\.[^/]+\/patents\?id=[0-9A-Za-z\-]+/);
+			hit = i.match(/^https?:\/\/(?:www\.)?google\.[^/]+\/patents\?id=[0-9A-Za-z\-\_]+/);
 			if (hit && !trimmed[hit[0]]) {
 				trimmed[hit[0]] = items[i];
 			}
@@ -174,7 +174,7 @@ function doWeb(doc, url) {
 		if (url.match(/printsec=|v=onepage|v=thumbnail/)) {
 			//patent pages directly naviageted to from search results have the id somewhere in the URL
 			if (url.match(/[\&\?]id=[0-9A-Za-z\-]+/)) {
-				var id = url.match(/[\&\?]id=[0-9A-Za-z\-]+/)[0].replace(/\&/, "?");
+				var id = url.match(/[\&\?]id=[0-9A-Za-z\-\_]+/)[0].replace(/\&/, "?");
 				newurl = host + "patents" + id;
 			} else {
 				//these URLs are navigated to from the patent page - they usually have the form patents/US12345
