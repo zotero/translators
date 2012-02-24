@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-10-20 00:53:36"
+	"lastUpdated": "2012-02-23 21:17:50"
 }
 
 function detectWeb(doc, url) {
@@ -67,14 +67,14 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.mcu.es/webISBN/tituloDetalle.do?sidTitul=1696742&action=busquedaInicial&noValidating=true&POS=0&MAX=50&TOTAL=0&prev_layout=busquedaisbn&layout=busquedaisbn&language=es",
+		"url": "http://www.mcu.es/webISBN/tituloDetalle.do?sidTitul=1489394&action=busquedaInicial&noValidating=true&POS=0&MAX=50&TOTAL=0&prev_layout=busquedaisbn&layout=busquedaisbn&language=es",
 		"items": [
 			{
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "Adrian",
-						"lastName": "Fernández García",
+						"firstName": "Jorge",
+						"lastName": "Borges",
 						"creatorType": "author"
 					}
 				],
@@ -82,12 +82,11 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"ISBN": "978-84-9934-054-8",
-				"title": "Argentina : causas y efectos de la crisis económica",
-				"publisher": "Tutorial Formación, S.L.L.",
-				"date": "10/2009",
-				"libraryCatalog": "Agencia del ISBN",
-				"shortTitle": "Argentina"
+				"ISBN": "978-84-611-7888-9",
+				"title": "El jardín de senderos que se bifurcan",
+				"publisher": "Summa Editorial, S.L.",
+				"date": "10/2007",
+				"libraryCatalog": "Agencia del ISBN"
 			}
 		]
 	}
