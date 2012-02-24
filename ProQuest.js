@@ -2,14 +2,14 @@
 	"translatorID": "fce388a6-a847-4777-87fb-6595e710b7e7",
 	"label": "ProQuest",
 	"creator": "Avram Lyon",
-	"target": "^https?://search\\.proquest\\.com.*/(docview|results)/.*",
+	"target": "^https?://search\\.proquest\\.com.*\\/(docview|results|publicationissue| browseterms|browsetitles|browseresults|myresearch\\/(figtables|documents)).*",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-02-07 00:05:14"
+	"lastUpdated": "2012-02-13 13:14:47"
 }
 
 /*
@@ -37,6 +37,14 @@ function detectWeb(doc, url) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
 	
+//Check for multiple first
+	if (/\/(results|publicationissue|browseterms|browsetitles|browseresults|myresearch)\//.test(url)){  
+		Zotero.debug("url match")
+		var resultitem = doc.evaluate('//a[contains(@href, "/docview/")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		if (resultitem.iterateNext()) {
+			return "multiple";
+		}
+	}
 	var record_rows = doc.evaluate('//div[@class="display_record_indexing_row"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 	if (record_rows.iterateNext()) {
 		var sourceType = doc.evaluate('//div[@class="display_record_indexing_fieldname" and contains(text(),"Source type")]/following-sibling::div[@class="display_record_indexing_data"]',
@@ -47,13 +55,13 @@ function detectWeb(doc, url) {
 							doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 		if (sourceType) {
 			sourceType = sourceType.textContent.trim();
-		}
+		} 
 		if(documentType){
 			documentType = documentType.textContent.trim();
-		}
+		} 
 		if(recordType){
 			recordType = recordType.textContent.trim();
-		}
+		} 
 		var type = getItemType(sourceType, documentType, recordType)
 
 		if (type) {
@@ -64,16 +72,11 @@ function detectWeb(doc, url) {
 		// Fall back on journalArticle-- even if we couldn't guess the type
 		return "journalArticle";
 	}
-	
 	if (url.indexOf("/results/") === -1) {
 		var abstract_link = doc.evaluate('//a[@class="formats_base_sprite format_abstract"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		if (abstract_link.iterateNext()) {
 			return "journalArticle";	
 		}
-	}
-	var resultitem = doc.evaluate('//li[@class="resultItem" or contains(@class, "resultItem ")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	if (resultitem.iterateNext()) {
-		return "multiple";
 	}
 	return false;
 }
@@ -88,15 +91,24 @@ function doWeb(doc, url) {
 	if (detected && detected != "multiple") {
 		scrape(doc,url);
 	} else if (detected) {
+	// detect web returned multiple
 		var articles = new Array();
-		var results = doc.evaluate('//li[@class="resultItem" or contains(@class, "resultItem ")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var results = doc.evaluate('//a[contains(@class,"previewTitle") or contains(@class,"resultTitle")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var items = new Array();
-		var result;
+		var result;	
 		while(result = results.iterateNext()) {
-			var link = doc.evaluate('.//a[contains(@class,"previewTitle") or contains(@class,"resultTitle")]', result, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			var title = link.textContent;
-			var url = link.href;
+			var title = result.textContent;
+			var url = result.href;
 			items[url] = title;
+		}
+	// If the above didn't get us titles, try agin with a more liberal xPath
+		if(!title){
+			results = doc.evaluate('//a[contains(@href, "/docview/")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			while(result = results.iterateNext()) {
+				var title = result.textContent;
+				var url = result.href;
+				items[url] = title;
+			}
 		}
 		Zotero.selectItems(items, function (items) {
 			if(!items) return true;
@@ -361,29 +373,34 @@ function getItemType(sourceType, documentType, recordType){
 	switch(sourceType){
 		case "Blogs, Podcats, & Websites":
 			if(recordType == "Article In An Electronic Resource Or Web Site"){
-			return "blogPost"} else {
-			return "webpage";
-			}
-			break;
+				return "blogPost"
+			} else {
+				return "webpage";
+			} break;
 		case "Books":
 			if (documentType == "Book Chapter") {
-			return "bookSection"} else {
-			return "book";
+				return "bookSection"
+			} else {
+				return "book";
 			} break;
 		case "Conference Papers and Proceedings":
 			return "conferencePaper"; break;
 		case "Dissertations & Theses":
 			return "thesis"; break;
 		case "Encyclopedias & Reference Works":
-			if(documentType.indexof("book",0)){
-			return "book"} 
-			break;
+			if(documentType.indexOf("book",0) != -1){
+				return "book"
+			} else {
+				return "encyclopediaArticle"
+			} break;
 		case "Government & Official Publications":
 			if (documentType == "Patent"){
-			return "patent"} else if (documentType.indexof("report",0)){
-			return "report"} else if (documentType.indexof("statute",0)){
-			return "statute"}
-			break;
+				return "patent"
+			} else if (documentType.indexOf("report",0) != -1){
+				return "report"
+			} else if (documentType.indexOf("statute",0) != -1){
+				return "statute"
+			} break;
 		case "Historical Newspapers":
 			return "newspaperArticle"; break;
 		case "Historical Periodicals":
@@ -392,10 +409,12 @@ function getItemType(sourceType, documentType, recordType){
 			return "magazineArticle"; break;
 		case "Newpapers":
 			return "newspaperArticle"; break;
-		case "Pamphlets & Ephemeral Works": if (documentType == Feature) {
-			return "journalArticle"} else {
-			return "document"}
-			break;
+		case "Pamphlets & Ephemeral Works":
+			if (documentType == Feature) {
+				return "journalArticle"
+			} else {
+				return "document"
+			} break;
 		case "Reports":
 			return "report"; break;
 		case "Scholarly Journals":
@@ -417,8 +436,8 @@ function getItemType(sourceType, documentType, recordType){
 		case "Patent":
 			return "patent"; break;
 	}
-	if (mapToZotero(value)){
-		return mapToZotero(value)
+	if (mapToZotero(sourceType)){
+		return mapToZotero(sourceType)
 	}
 	return "journalArticle"
 }
