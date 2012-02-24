@@ -9,7 +9,35 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-02-24 03:46:01"
+	"lastUpdated": "2012-02-24 11:20:24"
+}
+
+function textToXML(text) {
+	try {
+		var parser = new DOMParser();
+		return parser.parseFromString(text, 'text/xml');
+	} catch(e) {
+		Zotero.debug(e);
+		return null;
+	}
+}
+
+function scrape(text) {
+	var xml;
+	if( ( xml = textToXML(text) ) &&
+		xml.documentElement.nodeName != 'parsererror' ) {
+
+		var itemJSON = xml.documentElement.getElementsByTagName('content')[0].textContent;
+
+		var item = JSON.parse(itemJSON);
+
+		var newItem = new Zotero.Item();
+		for(var property in item) {
+			newItem[property] = item[property];
+		}
+
+		newItem.complete();
+	}
 }
 
 function detectWeb(doc, url) {
@@ -33,19 +61,11 @@ function detectWeb(doc, url) {
 	}
 }
 
-function addByRDF(text) {
-	var translator = Zotero.loadTranslator('import');
-	translator.setTranslator('5e3ad958-ac79-463d-812b-a86a9235c28f');
-	translator.setString(text);
-	translator.translate();
-}
-
-
 function doWeb(doc, url) {
 	var libraryURI = ZU.xpathText(doc, '//link[@type="application/atom+xml" and @rel="alternate"]/@href')
 					.match(/^.+?\/(?:users|groups)\/\w+/)[0]
 					+ '/items/';
-	var apiOpts = '?format=rdf_zotero';
+	var apiOpts = '?format=atom&content=json';
 	var itemRe = /\/itemKey\/(\w+)/;
 
 	if (detectWeb(doc, url) == "multiple") {
@@ -62,12 +82,12 @@ function doWeb(doc, url) {
 				apiURIs.push(libraryURI + itemID + apiOpts);
 			}
 
-			Zotero.Utilities.HTTP.doGet(apiURIs, addByRDF);
+			Zotero.Utilities.HTTP.doGet(apiURIs, scrape);
 		});
 	} else {
 		var itemID = url.match(itemRe)[1];
 		var itemURI = libraryURI + itemID + apiOpts;
-		Zotero.Utilities.doGet(itemURI, addByRDF);
+		Zotero.Utilities.doGet(itemURI, scrape);
 	}
 }
 
@@ -81,21 +101,21 @@ var testCases = [
 			 {
          	"itemType": "journalArticle",
          	"creators": [
-         		[]
+         		{
+         			"creatorType": "author",
+         			"firstName": "Mark",
+         			"lastName": "Desirto"
+         		}
          	],
          	"notes": [],
          	"tags": [],
          	"seeAlso": [],
          	"attachments": [],
-         	"itemID": "#item_1",
          	"title": "Expert Searching, Zotero: A New Bread of Search Tool",
          	"publicationTitle": "Medical Library Association Newsletter",
-         	"reporter": "Medical Library Association Newsletter",
          	"date": "April 2007",
-         	"callNumber": "0000",
-         	"libraryCatalog": "zotero.org",
-         	"shortTitle": "Expert Searching, Zotero"
-			 }
+         	"callNumber": "0000"
+         }
 		]
 	},
 	{
@@ -103,27 +123,25 @@ var testCases = [
 		"url": "https://www.zotero.org/marksample/items/collectionKey/5RN69IBP/itemKey/58VT7DAA",
 		"defer": true,
 		"items": [
-			  {
+			 {
          	"itemType": "book",
          	"creators": [
-         		[]
+         		{
+         			"creatorType": "author",
+         			"firstName": "Mark",
+         			"lastName": "Osteen"
+         		}
          	],
          	"notes": [],
          	"tags": [],
          	"seeAlso": [],
          	"attachments": [],
-         	"itemID": "urn:isbn:0812235517",
          	"title": "American Magic and Dread: Don DeLillo’s Dialogue with Culture",
-         	"publisher": "University of Pennsylvania Press",
          	"place": "Philadelphia",
-         	"institution": "University of Pennsylvania Press",
-         	"company": "University of Pennsylvania Press",
-         	"label": "University of Pennsylvania Press",
-         	"distributor": "University of Pennsylvania Press",
+         	"publisher": "University of Pennsylvania Press",
          	"date": "2000",
          	"ISBN": "0812235517",
-         	"shortTitle": "American Magic",
-         	"libraryCatalog": "zotero.org"
+         	"shortTitle": "American Magic"
          }
 		]
 	},
