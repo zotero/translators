@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-02-23 20:39:19"
+	"lastUpdated": "2012-02-25 00:00:04"
 }
 
 function detectWeb(doc, url) {
@@ -121,7 +121,7 @@ function scrape(doc, url) {
 	associateData(newItem, dataTags, "Application number", "applicationNumber");
 
 	newItem.title = ZU.xpathText(doc, '//h1[@class="gb-volume-title"]');
-	newItem.url = doc.location.href.replace(/(^[^\?]*\?id=[a-zA-Z0-9]+).*/, "$1");
+	newItem.url = doc.location.href.replace(/(^[^\?]*\?id=[a-zA-Z0-9\-\_]+).*/, "$1");
 
 	// Fix things in uppercase
 	var toFix = ["title", "shortTitle", "assignee"];
@@ -354,7 +354,7 @@ var testCases = [
 				"filingDate": "Jul 17, 1981",
 				"assignee": "The United States of America as represented by the United States Department of Energy",
 				"title": "Plasma channel optical pumping device and method",
-				"url": "http://www.google.com/patents?id=PGk",
+				"url": "http://www.google.com/patents?id=PGk-AAAAEBAJ",
 				"libraryCatalog": "Google Patents",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
