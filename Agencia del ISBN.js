@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-02-23 21:17:50"
+	"lastUpdated": "2012-02-24 23:55:56"
 }
 
 function detectWeb(doc, url) {
@@ -64,31 +64,5 @@ function doWeb(doc, url) {
 	}, function() {Zotero.done();});
 	Zotero.wait();
 }/** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://www.mcu.es/webISBN/tituloDetalle.do?sidTitul=1489394&action=busquedaInicial&noValidating=true&POS=0&MAX=50&TOTAL=0&prev_layout=busquedaisbn&layout=busquedaisbn&language=es",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"firstName": "Jorge",
-						"lastName": "Borges",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"ISBN": "978-84-611-7888-9",
-				"title": "El jardín de senderos que se bifurcan",
-				"publisher": "Summa Editorial, S.L.",
-				"date": "10/2007",
-				"libraryCatalog": "Agencia del ISBN"
-			}
-		]
-	}
-]
+var testCases = []
 /** END TEST CASES **/
