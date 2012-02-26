@@ -1,7 +1,7 @@
 {
 	"translatorID": "fe728bc9-595a-4f03-98fc-766f1d8d0936",
 	"label": "Wiley Online Library",
-	"creator": "Sean Takats, Michael Berkowitz and Avram Lyon",
+	"creator": "Sean Takats, Michael Berkowitz, Avram Lyon and Aurimas Vinckevicius",
 	"target": "^https?://onlinelibrary\\.wiley\\.com[^\\/]*/(?:book|doi|advanced/search)",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -14,7 +14,7 @@
 
 /*
    Wiley Online Translator
-   Copyright (C) 2011 CHNM and Avram Lyon
+   Copyright (C) 2011 CHNM, Avram Lyon and Aurimas Vinckevicius
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU Affero General Public License as published by
