@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-02-23 22:41:29"
+	"lastUpdated": "2012-02-26 14:10:24"
 }
 
 function detectWeb(doc, url) {
@@ -38,28 +38,32 @@ function doWeb(doc, url) {
 		}
 		var titles = doc.evaluate(titlex, doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var links = doc.evaluate(linkx, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		Zotero.debug("Link: " + links.href);
 		var title, link;
 		while ((title = titles.iterateNext()) && (link = links.iterateNext())) {
 			items[link.href] = Zotero.Utilities.trimInternal(title.textContent);
 		}
-		items = Zotero.selectItems(items);
-	
-		for (var i in items) {
-			Zotero.wait();
-			articles.push(i);
-		}
+	Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape, function () {Zotero.done();});
+		Zotero.wait();
+	});
 	} else {
-		articles = [url];
+	scrape(doc, url)
 	}
-	Zotero.debug(articles);
-	Zotero.Utilities.processDocuments(articles, function(doc) {
+}
+
+	function scrape(doc, url){
 		var item = new Zotero.Item("journalArticle");
 		item.publicationTitle = doc.title;
-		item.ISSN = doc.evaluate('//span[@class="journalISSN"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/\(e\)\s+ISSN:?\s+(.*)\(p\)/)[1];
-		item.title = Zotero.Utilities.trimInternal(doc.evaluate('//p[@class="articleTitle"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		item.ISSN = ZU.xpathText(doc, '//span[@class="journalISSN"]').match(/\(e\)\s+ISSN:?\s+(.*)\(p\)/)[1];
+		item.title = Zotero.Utilities.trimInternal(ZU.xpathText(doc, '//p[@class="articleTitle"]'));
 		item.url = doc.location.href.replace(/\.html.+/, ".html");
-		var data = Zotero.Utilities.trimInternal(doc.evaluate('//p[span[@class="bibDataTag"]][1]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		var data = Zotero.Utilities.trimInternal(ZU.xpathText(doc, '//p[span[@class="bibDataTag"]][1]'));
 		data = data.replace(/(Journal|MSC|Posted|Retrieve)/g, "\n$1");
 		Zotero.debug(data);
 		var authors = data.match(/(Author\(s\):\s+(.*)\n|Author(s)?:\s+(.*))/)[1].replace(/Author\(s\):|Authors?:/, "").split(/;\s+| and /);
@@ -83,11 +87,9 @@ function doWeb(doc, url) {
 			{url:item.url, title:item.journalAbbreviation + " Snapshot", mimeType:"text/html"},
 			{url:pdfurl, title:item.journalAbbreviation + " PDF", mimeType:"application/pdf"}
 		];
-		item.abstract = Zotero.Utilities.trimInternal(doc.evaluate('//td[@class="bottomCell"]/p[4]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.substr(10));
+		item.abstract = ZU.trimInternal(ZU.xpathText(doc, '//td[@class="bottomCell"]/p[4]').substr(10));
 		item.complete();
-	}, function() {Zotero.done();});
-	Zotero.wait();
-}/** BEGIN TEST CASES **/
+	}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
