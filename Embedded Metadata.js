@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-02-20 22:49:00"
+	"lastUpdated": "2012-02-26 09:42:54"
 }
 
 /*
@@ -45,16 +45,19 @@ var HIGHWIRE_MAPPINGS = {
 	"citation_date":"date",
 	"citation_journal_title":"publicationTitle",
 	"citation_journal_abbrev":"journalAbbreviation",
+	"citation_book_title":"bookTitle",
 	"citation_volume":"volume",
 	"citation_issue":"issue",
 	"citation_conference_title":"conferenceName",
 	"citation_technical_report_institution":"institution",
 	"citation_technical_report_number":"number",
+	"citation_publisher":"publisher",
 	"citation_issn":"ISSN",
 	"citation_isbn":"ISBN",
 	"citation_abstract":"abstractNote",
 	"citation_doi":"DOI",
-	"citation_public_url":"url"
+	"citation_public_url":"url",
+	"citation_language":"language"
 };
 
 // Maps actual prefix in use to URI
@@ -145,6 +148,8 @@ function detectWeb(doc, url) {
 			_itemType = "report";
 		} else if(tag === "citation_conference_title") {
 			_itemType = "conferencePaper";
+		} else if(tag === "citation_book_title") {
+			_itemType = "bookSection";
 		}
 	}
 
