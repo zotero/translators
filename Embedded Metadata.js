@@ -3,13 +3,13 @@
 	"label": "Embedded Metadata",
 	"creator": "Simon Kornblith and Avram Lyon",
 	"target": "",
-	"minVersion": "2.1",
+	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 400,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-02-26 09:42:54"
+	"lastUpdated": "2012-02-27 06:35:06"
 }
 
 /*
@@ -52,12 +52,21 @@ var HIGHWIRE_MAPPINGS = {
 	"citation_technical_report_institution":"institution",
 	"citation_technical_report_number":"number",
 	"citation_publisher":"publisher",
-	"citation_issn":"ISSN",
 	"citation_isbn":"ISBN",
 	"citation_abstract":"abstractNote",
 	"citation_doi":"DOI",
 	"citation_public_url":"url",
 	"citation_language":"language"
+
+/* the following are handled separately in addHighwireMetadata()
+	"citation_author"
+	"citation_authors"
+	"citation_firstpage"
+	"citation_lastpage"
+	"citation_issn"
+	"citation_eIssn"
+	"citation_pdf_url"
+*/
 };
 
 // Maps actual prefix in use to URI
@@ -261,6 +270,14 @@ function addHighwireMetadata(doc, newItem) {
 		var lastpage = ZU.xpathText(doc, '//meta[@name="citation_lastpage"]/@content');
 		if(lastpage) pages.push(lastpage);
 		if(pages.length) newItem.pages = pages.join("-");
+	}
+
+	if(!newItem.ISSN) {
+		//prefer ISSN over eISSN
+		var issn = ZU.xpathText(doc, '//meta[@name="citation_issn"]/@content');
+		if(!issn) issn = ZU.xpathText(doc, '//meta[@name="citation_eIssn"]/@content');
+
+		if(issn) newItem.ISSN = issn;
 	}
 
 	if(!newItem.attachments.length) {

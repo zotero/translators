@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-12-16 13:58:49"
+	"lastUpdated": "2012-02-27 07:02:42"
 }
 
 /*
@@ -435,7 +435,7 @@ function importItem(newItem, node, type) {
 	newItem.artworkMedium = newItem.interviewMedium = getFirstResults(node, [n.dcterms+"medium"], true);
 	
 	// ISSN, if encoded per PRISM (DC uses "identifier")
-	newItem.ISSN = getFirstResults(node, [n.prism+"issn", n.eprints+"issn"], true);
+	newItem.ISSN = getFirstResults(node, [n.prism+"issn", n.eprints+"issn", n.prism+"eIssn"], true);
 	
 	// publisher
 	var publisher = getFirstResults(node, [n.dc+"publisher", n.dcterms+"publisher", n.vcard2+"org"]);
@@ -566,6 +566,9 @@ function importItem(newItem, node, type) {
 	
 	// accepted
 	newItem.accepted = getFirstResults(node, [n.dcterms+"dateAccepted"], true);
+
+	// language
+	newItem.language = getFirstResults(node, [n.dc+"language", n.dcterms+"language"], true);
 	
 	// see also
 	processSeeAlso(node, newItem);
