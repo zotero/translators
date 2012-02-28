@@ -6,10 +6,10 @@
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
-	"browserSupport": "gcs",
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2012-01-01 01:42:16"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-02-28 14:46:19"
 }
 
 /*
@@ -246,14 +246,13 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "3news.co.nz Snapshot",
-						"mimeType": "text/html",
-						"url": "http://www.3news.co.nz/Obama-bus-tour-Barbecue-to-Bieber/tabid/417/articleID/230090/Default.aspx"
+						"mimeType": "text/html"
 					}
 				],
 				"url": "http://www.3news.co.nz/Obama-bus-tour-Barbecue-to-Bieber/tabid/417/articleID/230090/Default.aspx",
 				"publicationTitle": "3news.co.nz",
 				"language": "English",
-				"abstractNote": "President Barack Obama said he wanted to use his bus trip through rural North Carolina and Virginia to hear directly from the American people.",
+				"abstractNote": "President Barack Obama said he wanted to use his bus trip through rural North Carolina and Virginia to hear directly from the American people. Obama bus tour: Barbecue to Bieber",
 				"title": "Obama bus tour: Barbecue to Bieber",
 				"section": "World",
 				"rights": "Copyright 2009 TV3",
@@ -261,7 +260,8 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Obama bus tour"
 			}
-		]
+		],
+		"defer":true
 	},
 	{
 		"type": "web",
@@ -282,13 +282,12 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "3news.co.nz Snapshot",
-						"mimeType": "text/html",
-						"url": "http://www.3news.co.nz/Unemployed-youth-would-fill-Eden-Park---blog/tabid/1135/articleID/222342/Default.aspx"
+						"mimeType": "text/html"
 					}
 				],
 				"url": "http://www.3news.co.nz/Unemployed-youth-would-fill-Eden-Park---blog/tabid/1135/articleID/222342/Default.aspx",
 				"language": "English",
-				"abstractNote": "58,000 young people between the ages of 15-24 are not in education, training or work - this is National's biggest first term failure.",
+				"abstractNote": "58,000 young people between the ages of 15-24 are not in education, training or work - this is National's biggest first term failure. Unemployed youth would fill Eden Park - blog",
 				"date": "Tue, 16 Aug 2011",
 				"title": "Unemployed youth would fill Eden Park - blog",
 				"section": "Politics",
@@ -296,7 +295,8 @@ var testCases = [
 				"libraryCatalog": "3news.co.nz",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
-		]
+		],
+		"defer":true
 	}
 ]
 /** END TEST CASES **/
