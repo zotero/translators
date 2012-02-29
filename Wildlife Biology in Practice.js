@@ -73,7 +73,12 @@ function doWeb(doc, url) {
 		Zotero.selectItems(items, function(selectedItems) {
 			if(!selectedItems) return true;
 
-			ZU.processDocuments(Object.keys(selectedItems), scrape);
+			var urls = new Array();
+			for(var i in selectedItems) {
+				urls.push(i);
+			}
+
+			ZU.processDocuments(urls, scrape);
 		});
 	} else {
 		scrape(doc);
