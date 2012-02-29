@@ -1,14 +1,15 @@
 {
-        "translatorID":"eb876bd2-644c-458e-8d05-bf54b10176f3",
-        "label":"Wanfang Data",
-        "creator":"Ace Strong <acestrong@gmail.com>",
-        "target":"^https?://[ds]\\.(?:g\\.)?wanfangdata\\.com\\.cn",
-        "minVersion":"2.0rc1",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":"1",
-        "translatorType":4,
-        "lastUpdated":"2010-10-12 15:45:49"
+	"translatorID": "eb876bd2-644c-458e-8d05-bf54b10176f3",
+	"label": "Wanfang Data",
+	"creator": "Ace Strong <acestrong@gmail.com>",
+	"target": "^https?://[ds]\\.(?:g\\.)?wanfangdata\\.com\\.cn",
+	"minVersion": "2.0rc1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2012-02-29 00:22:16"
 }
 
 /*
@@ -53,6 +54,21 @@
 // #### Local utility functions ####
 // #################################
 
+//sets the rs cookie value to the provided ID and returns the old value
+function setCookie(doc, rsId) {
+	if(!rsId) return null;
+
+	var matches = doc.cookie.match(/(?:$|; )rs=([^;])/);
+	var oldCookie = matches ? unescape(matches[1]) : null;
+
+	var domain = escape('wanfangdata.com.cn');
+	var id = escape( rsId );
+
+	doc.cookie = 'rs=' + id + ';domain=' + domain;
+
+	return oldCookie;
+}
+
 function detectCode(url) {
 	var pattern = /[ds]\.(?:g\.)?wanfangdata\.com\.cn\/([A-Za-z]*?)_/;
 	if (pattern.test(url)) {
@@ -63,7 +79,8 @@ function detectCode(url) {
 }
 
 function detectType(code) {
-	if (code == "Periodical") {
+	if (code == "Periodical" ||
+		code == "OAPaper") {
 		return "journalArticle";
 	} else if (code == "Thesis") {
 		return "thesis";
@@ -78,216 +95,51 @@ function detectType(code) {
 	}
 }
 
-function getResolver(doc) {
-	var namespace, resolver;
-	namespace = doc.documentElement.namespaceURI;
-	if (namespace) {
-		resolver = function(prefix) {
-			if (prefix == 'x') {
-				return namespace;
-			} else {
-				return null;
-			}
-		};
-	} else {
-		resolver = null;
-	}
-	return resolver;
-}
-
 // #############################
 // ##### Scraper functions #####
 // #############################
 
-function scrape(url) {
+function scrape(doc, id) {
+	id = '|' + id + '|';
+	var oldCookie = setCookie(doc, id);
 
-	Zotero.Utilities.HTTP.doGet(url, function(page) {
-		var pattern = /href=["'](.*?)["'] class="export"/;
-		var newurl = pattern.exec(page)[1];
-	
-		Zotero.Utilities.HTTP.doGet(newurl, function(page) {
-			// scrape from xml data of export page
-			var pattern;
-			
-			pattern = /var text='(.*?)';/;
-			if (pattern.test(page)) {
-				var xml = pattern.exec(page)[1].replace(/(\\r\\n)/g, "\n");
-//				Zotero.debug(xml);
-	
-				var newItem = new Zotero.Item();
-	
-				// 类型
-				pattern = /<ResourceCategory>(.*?)<\/ResourceCategory>/;
-				var category = pattern.exec(xml)[1];
-				var type = detectType(category);
-				
-//				Zotero.debug(type);
-				newItem.itemType = type;
-				newItem.url = url;
-				
-				// 标题
-				pattern = /<Titles>[\s\S]*?<Text>(.*?)<\/Text>[\s\S]*?(?:<Text>(.*?)<\/Text>[\s\S]*?)?<\/Titles>/;
-				var titles = pattern.exec(xml);
-		
-				newItem.title = titles[1];
-				if (titles[2]) {
-					newItem.shortTitle = titles[2];
-				}
-				
-				// 作者
-				pattern = /<Creator>\s*<Name>(.*?)<\/Name>/g;
-				var author = pattern.exec(xml)[1];
-				while (author) {
-//					Zotero.debug(author);
-		
-					var patt = /[a-zA-Z]/;
-					var useComma = true;
-					if (patt.test(author)) {
-						patt = /,/;
-						if (!patt.test(author)) {
-							useComma = false;
-						}
-					}
-					newItem.creators.push(
-						Zotero.Utilities.cleanAuthor(
-							author,
-							"author",
-							useComma));
-		
-					var res = pattern.exec(xml);
-					if (res) {
-						author = res[1];
-					} else {
-						author = null;
-					}
-				}
-				
-				// 引用页/页数
-				pattern = /<Page>([0-9,-]*?)[^0-9,-]*?<\/Page>/;
-				if (pattern.test(xml)) {
-					var pages = pattern.exec(xml)[1];
-//					Zotero.debug(pages);
-					pattern = /-/;
-					if (pattern.test(pages)) {
-						newItem.pages = pages;
-					} else {
-						newItem.numPages = pages;
-					}
-				}
-				
-				// 页数
-				pattern = /<PageCount>([0-9]*)<\/PageCount>/;
-				if (pattern.test(xml)) {
-					var pages = pattern.exec(xml)[1];
-//					Zotero.debug(pages);
-					newItem.numPages = pages;			
-				}
-				
-				// 发表时间
-				pattern = /<PublishDate>(.*?)<\/PublishDate>/;
-				if (pattern.test(xml)) {
-					newItem.date = pattern.exec(xml)[1];
-				}
-				
-				// 关键词
-				pattern = /<Keyword>(.*?)<\/Keyword>/g;
-				var res = pattern.exec(xml);
-				while (res) {
-					newItem.tags.push(res[1]);
-					res = pattern.exec(xml);
-				}
-				
-				// 摘要
-				pattern = /<Abstract>\s*?<Text>([\s\S]*?)<\/Text>/;
-				if (pattern.test(xml)) {
-					newItem.abstractNote = pattern.exec(xml)[1];
-				}
-				
-				// 硕士/博士
-				pattern = /<Degree>(.*?)<\/Degree>/;
-				if (pattern.test(xml)) {
-					newItem.thesisType = pattern.exec(xml)[1];
-				}
-				
-				// 导师
-				pattern = /<Tutor>(.*?)<\/Tutor>/g;
-				var res = pattern.exec(xml);
-				while (res) {
-					var tutor = res[1];
-					newItem.creators.push(
-						Zotero.Utilities.cleanAuthor(
-							tutor, 
-							"director",
-							true));
-					res = pattern.exec(xml);
-				}
-				
-				// 毕业学校
-				pattern = /<School>(.*?)<\/School>/;
-				if (pattern.test(xml)) {
-					newItem.publisher = pattern.exec(xml)[1];
-				}
-				
-				// 期刊名
-				pattern = /<Periodical>[\s\S]*?<Name>(.*?)<\/Name>\s*?<NameEn>(.*?)<\/NameEn>/;
-				if (pattern.test(xml)) {
-					var res = pattern.exec(xml);
-					newItem.publicationTitle = res[1];
-					newItem.journalAbbreviation = res[2];
-				}
-				
-				// 卷
-				pattern = /<Volum>([0-9]*?)<\/Volum>/;
-				if (pattern.test(xml)) {
-					newItem.volume = pattern.exec(xml)[1];
-				}
-				
-				// 期
-				pattern = /<Issue>([0-9]*?)<\/Issue>/;
-				if (pattern.test(xml)) {
-					newItem.issue = pattern.exec(xml)[1];
-				}
-				
-				// 系列
-				pattern = /<Column>(.*?)<\/Column>/;
-				if (pattern.test(xml)) {
-					newItem.series = pattern.exec(xml)[1];
-				}
-				
-				// 会议名称
-				pattern = /<Conference>[\s\S]*?<Name>(.*?)<\/Name>/;
-				if (pattern.test(xml)) {
-					newItem.conferenceName = pattern.exec(xml)[1];
-				}
-				
-				// 会议地点
-				pattern = /<Conference>[\s\S]*?<Locus>(.*?)<\/Locus>/;
-				if (pattern.test(xml)) {
-					newItem.place = pattern.exec(xml)[1];
-				}
-				
-				// 会议论文集
-				pattern = /<Source>(.*?)<\/Source>/;
-				if (pattern.test(xml)) {
-					newItem.proceedingsTitle = pattern.exec(xml)[1];
-				}
-				
-				// ISSN
-				pattern = /<ISSN>(.*?)<\/ISSN>/;
-				if (pattern.test(xml)) {
-					newItem.ISSN = pattern.exec(xml)[1];
-				}
-				
-				// 语言
-				pattern = /<Language>([a-zA-Z]*?)<\/Language>/;
-				if (pattern.test(xml)) {
-					newItem.language = Zotero.Utilities.trim(
-						pattern.exec(xml)[1]);
-				}
-				
-				newItem.complete();	
+	var exportUrl = 'http://s.wanfangdata.com.cn/Export/Export.aspx?scheme=EndNote';
+
+	ZU.doGet(exportUrl, function(text) {
+		var matches = text.match(/<div\s+id=["']export_container["']>((?:.|[\r\n])+?)<\/div>/i);
+		if(!matches) return false;
+
+		text = ZU.cleanTags( matches[1].replace(/[\r\n]/g,'') );
+
+		var translator = Zotero.loadTranslator('import');
+		translator.setTranslator('881f60f2-0802-411a-9228-ce5f47b64c7d');
+		translator.setString(text);
+		translator.setHandler('itemDone', function(obj, item) {
+			//author first and last names are mixed up
+			for(var i=0, n=item.creators.length; i<n; i++) {
+				if(!item.creators[i].firstName) continue;
+				var first = item.creators[i].lastName;
+				item.creators[i].lastName = item.creators[i].firstName;
+				item.creators[i].firstName = first;
 			}
+
+			//type is actually DOI
+			if(item.type) {
+				item.DOI = item.type;
+				delete item.type;
+			}
+
+			//tags are messed up
+			item.tags = [];
+
+			item.complete();
 		});
+
+		translator.setHandler('done', function(obj, item) {
+			setCookie(doc, oldCookie);
+		});
+
+		translator.translate();
 	});
 }
 
@@ -296,9 +148,11 @@ function scrape(url) {
 // #########################
 
 function detectWeb(doc, url) {
-	var pattern = /paper\.aspx/i;
-	if (pattern.test(url)) {
-		return "multiple"
+	if (url.toLowerCase().indexOf('paper.aspx') != -1) {
+//multiples don't work well with cookies
+//disabled for now
+//		return "multiple";
+		return false;
 	}
 	
 	pattern = /[ds]\.(?:g\.)?wanfangdata\.com\.cn/;
@@ -312,53 +166,120 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var nsResolver = getResolver(doc);
-	var urls, lis;
-
 	Zotero.debug(url);
 
 	if (detectWeb(doc, url) == "multiple") {
-//		Zotero.debug("Enter multiple.");
 		// search page
 		var items = new Array();
 
-		var xpath = '//li[@class="title_li"]';
-		lis = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		lis = ZU.xpath(doc, '//li[contains(@class,"title_li")]');
 
-		var li = lis.iterateNext();
-		var link;
-		var title;
-		while (li) {
-			var a = li.getElementsByTagName("a")[0];
-			title = Zotero.Utilities.cleanTags(a.textContent);
-			link = a.getAttribute("href");
+		var li, link, title;
+		for(var i=0, n=lis.length; i<n; i++) {
+			var a = lis[i].getElementsByTagName("a")[1];
+			title = ZU.trimInternal( ZU.cleanTags(a.textContent) );
+			link = a.getAttribute("href").match(/\/([^\/]+)\.aspx/)[1];
 			if (link) {
-				items[link] = Zotero.Utilities.trimInternal(title);
-//				Zotero.debug("title:"+title);
-//				Zotero.debug("link:"+link);
+				items[link] = title;
 			}
-			li = lis.iterateNext();
 		}
-//		Zotero.debug(items);
-		if (items.__count__) {
-			// 让用户选择要保存哪些文献
-			items = Zotero.selectItems(items);
-			if (!items) return true;
 
-			urls = new Array();
-			for (var url in items) {
-				urls.push(url);
+		Zotero.selectItems(items, function(selectedItems) {
+			if (!selectedItems) return true;
+		
+			var urls = Object.keys(selectedItems);
+
+			for (var i=0; i<urls.length; i++) {
+				scrape(doc, urls[i]);
 			}
-		}
+		});
 	} else {
-		urls = [url];
-	}
-	
-	if (urls) {
-//		Zotero.debug(urls);
-
-		for (var i=0; i<urls.length; i++) {
-			scrape(urls[i]);
-		}
+		var id = ZU.xpathText(doc, '//form[@id="aspnetForm"]/@action')
+			.match(/(?:\?|&)ID=([^&]+)/)[1];
+		scrape(doc, id);
 	}
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://d.wanfangdata.com.cn/Periodical_xdqb200902027.aspx",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "余敏",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "",
+						"lastName": "朱江",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "",
+						"lastName": "丁照蕾",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"extra": "undefined\nYu Min\nZhu Jiang\nDing Zhaolei",
+				"title": "參考文獻管理工具研究",
+				"publicationTitle": "JOURNAL OF MODERN INFORMATION",
+				"date": "2009",
+				"issue": "2",
+				"volume": "29",
+				"pages": "6",
+				"abstractNote": "介紹了參考文獻管理的基本方法,對參考文獻管理工具的主要功能進行了對比,最后分析了參考文獻管理的趨勢.",
+				"url": "http://d.wanfangdata.com.cn/Periodical_xdqb200902027.aspx",
+				"archiveLocation": "北京萬方數據股份有限公司",
+				"libraryCatalog": "Wanfang Data",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://d.wanfangdata.com.cn/NSTLQK_NSTL_QKJJ0216348353.aspx",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "JT",
+						"lastName": "Coar",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "JP",
+						"lastName": "Sewell",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Zotero: harnessing the power of a personal bibliographic manager.",
+				"publicationTitle": "Nurse educator",
+				"date": "2010",
+				"issue": "5",
+				"volume": "35",
+				"pages": "3",
+				"abstractNote": "Zotero is a powerful free personal bibliographic manager (PBM) for writers. Use of a PBM allows the writer to focus on content, rather than the tedious details of formatting citations and references. Zotero 2.0 (http://www.zotero.org) has new features including the ability to synchronize citations with the off-site Zotero server and the ability to collaborate and share with others. An overview on how to use the software and discussion about the strengths and limitations are included.",
+				"url": "http://d.wanfangdata.com.cn/NSTLQK_NSTL_QKJJ0216348353.aspx",
+				"archiveLocation": "北京萬方數據股份有限公司",
+				"DOI": "10.1038/nsmb727",
+				"libraryCatalog": "Wanfang Data",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Zotero"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
