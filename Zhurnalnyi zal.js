@@ -72,7 +72,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://magazines.russ.ru/ra/2012/3/s11.html",
-		"defer": true,
 		"items": [
 			{
 				"itemType": "journalArticle",
