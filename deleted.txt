@@ -1,4 +1,4 @@
-10  # Increment number when modifying file
+11  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -42,4 +42,4 @@ df966c80-c199-4329-ab02-fa410c8eb6dc  # UofC Journals (now JSTOR)
 04153a16-5f34-491c-9475-7f4093db8e3e  # University of Michigan (now UnAPI/Aleph)
 6bb5099b-ae1a-4a08-8f2a-3429138ec2e5  # Wikileaks/Cable (replaced by cablegatesearch)
 9c335444-a562-4f88-b291-607e8f46a9bb  # Berkeley Library Catalog (replaced by InnoPac)
-
+af1af8fa-19dc-486f-a8cc-107acb849101  # Wilson Web (merged into EBSCOhost)
