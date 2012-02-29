@@ -187,7 +187,10 @@ function doWeb(doc, url) {
 		Zotero.selectItems(items, function(selectedItems) {
 			if (!selectedItems) return true;
 		
-			var urls = Object.keys(selectedItems);
+			var urls = new Array();
+			for(var i in selectedItems) {
+				urls.push(i);
+			}
 
 			for (var i=0; i<urls.length; i++) {
 				scrape(doc, urls[i]);
