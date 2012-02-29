@@ -83,7 +83,21 @@ choices          : {
   titles :  FW.Xpath('//h4/a').text().trim(),
   urls    :  FW.Xpath('//h4/a').key("href")
 }
-});/** BEGIN TEST CASES **/
+});
+
+/*
+	The following test causes intermittent failures. When it fails, we end up trying to fetch the 
+	same page (http://search.huffingtonpost.com/false) over and over again in an infinite loop.
+	This DOSes the Huffington Post site and consumes a lot of memory until the test is finally
+	killed.
+	{
+		"type": "web",
+		"url": "http://search.huffingtonpost.com/search?o_q=labor+union&s_it=topsearchbox.search&q=labor+market",
+		"items": "multiple"
+	}
+ */
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -155,11 +169,6 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://search.huffingtonpost.com/search?o_q=labor+union&s_it=topsearchbox.search&q=labor+market",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
