@@ -12,18 +12,6 @@
 	"lastUpdated": "2012-03-01 01:54:05"
 }
 
-function fieldIsValidForType(field, type) {
-	var ignoreList = ['itemType', 'creators', 'notes', 'tags',
-						'seeAlso', 'attachments', 'complete'];
-	if(ignoreList.indexOf(field) != -1) return true;
-
-	try {
-		return ZU.fieldIsValidForType(field, type);
-	} catch(e) {
-		return false;
-	}
-}
-
 function scrape(doc) {
 	var translator = Zotero.loadTranslator("web");
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
@@ -36,13 +24,7 @@ function scrape(doc) {
 				attachment.url = attachment.url.replace(/\/view\//,'/download/');
 			}
 		}
-		//remove irrelevant fields
-		var type = item.itemType;
-		for(var field in item) {
-			if(!fieldIsValidForType(field, type)) {
-				delete item[field];
-			}
-		}
+
 		item.complete();
 	});
 	translator.translate();
