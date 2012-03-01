@@ -8,12 +8,12 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2012-02-23 01:57:45"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-03-01 03:11:08"
 }
 
 function associateMeta(newItem, metaTags, field, zoteroField) {
-	var field = metaTags.namedItem(field);
+	var field = metaTags[field];
 	if(field) {
 		newItem[zoteroField] = field.getAttribute("content");
 	}
@@ -42,7 +42,7 @@ function scrape(doc) {
 	//(though semantically it is)
 	//they use the meta tag 'FileType' to indicate Aritlce or Book Review. silly, but we can use it.
 	
-	if (metaTags.namedItem('FileType').getAttribute("content") == 'Book Review') {
+	if (metaTags['FileType'].getAttribute("content") == 'Book Review') {
 		//for a book review, title of reviewed book is
 		titlePath = '/html/body/table[4]/tbody/tr[3]/td[1]/i';	
 		newItem.title = "Review of " + doc.evaluate(titlePath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
@@ -56,7 +56,7 @@ function scrape(doc) {
 		}
 	}
 
-	var author = metaTags.namedItem("Author");
+	var author = metaTags["Author"];
 	if(author) {
 		var authors = author.getAttribute("content").split(" and ");
 		for(j in authors) {
@@ -65,8 +65,8 @@ function scrape(doc) {
 		}
 	}
 	
-	var month = metaTags.namedItem("PublicationMonth");
-	var year = metaTags.namedItem("PublicationYear");
+	var month = metaTags["PublicationMonth"];
+	var year = metaTags["PublicationYear"];
 	if(month && year) {
 		newItem.date = month.getAttribute("content")+" "+year.getAttribute("content");
 	}
@@ -110,7 +110,7 @@ function doWeb(doc, url) {
 		var items = new Object();
 		
 		while (elmt = searchLinks.iterateNext()) {
-			Zotero.debug(elmt.href);
+			//Zotero.debug(elmt.href);
 			title = Zotero.Utilities.superCleanString(elmt.textContent);
 			link = elmt.href;
 			if (title && link){
