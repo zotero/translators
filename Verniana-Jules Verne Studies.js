@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-02-29 22:24:38"
+	"lastUpdated": "2012-03-01 01:22:04"
 }
 
 /**
@@ -77,44 +77,11 @@ FW.MultiScraper({
 	}
 });/** BEGIN TEST CASES **/
 var testCases = [
-	  {
-         	"itemType": "journalArticle",
-         	"creators": [
-         		{
-         			"firstName": "Danièle",
-         			"lastName": "Chatelain",
-         			"creatorType": "author"
-         		},
-         		{
-         			"firstName": "George",
-         			"lastName": "Slusser",
-         			"creatorType": "author"
-         		}
-         	],
-         	"notes": [],
-         	"tags": [],
-         	"seeAlso": [],
-         	"attachments": [
-         		{
-         			"url": "http://www.verniana.org/volumes/02/LetterSize/Slusser.pdf",
-         			"title": "Full text PDF",
-         			"type": "application/pdf"
-         		},
-         		{
-         			"url": "http://www.verniana.org/volumes/02/HTML/Slusser.html",
-         			"title": "Snapshot",
-         			"type": "text/html"
-         		}
-         	],
-         	"url": "http://www.verniana.org/volumes/02/HTML/Slusser.html",
-         	"date": "October 20, 2009",
-         	"ISSN": "1565-8872",
-         	"pages": "89–124",
-         	"title": "Verniana — Jules Verne Studies",
-         	"volume": "2",
-         	"libraryCatalog": "Verniana-Jules Verne Studies",
-         	"accessDate": "CURRENT_TIMESTAMP"
-         },
+	{
+		"type": "web",
+		"url": "http://www.verniana.org/volumes/04/index.en.html",
+		"items": "multiple"
+	},
 	{
 		"type": "web",
 		"url": "http://www.verniana.org/volumes/03/Abstracts/Garmt.html",
@@ -123,8 +90,8 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "",
-						"lastName": "Abstract",
+						"firstName": "Garmt de",
+						"lastName": "Vries-Uiterweerd",
 						"creatorType": "author"
 					}
 				],
@@ -142,6 +109,7 @@ var testCases = [
 					}
 				],
 				"url": "http://www.verniana.org/volumes/03/Abstracts/Garmt.html",
+				"abstractNote": "The \"ultra X rays of professor Friedrich of Elbing\" that Jules Verne mentions in Le Testament d’un excentrique do not come from the\nauthor's imagination. The trace of their discovery can be followed from a meeting of the Vienna Academy of Science to an article in the Revue scientifique, which Jules\nVerne used to read.",
 				"ISSN": "1565-8872",
 				"pages": "125–130",
 				"title": "Verniana — Jules Verne Studies",
@@ -150,11 +118,6 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.verniana.org/volumes/04/index.en.html",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
