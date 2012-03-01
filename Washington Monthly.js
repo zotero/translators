@@ -211,7 +211,8 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.washingtonmonthly.com/search2.php?search=europe",
-		"items": "multiple"
+		"items": "multiple",
+		"defer": true
 	}
 ]
 /** END TEST CASES **/
