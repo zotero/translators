@@ -139,7 +139,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.washingtonpost.com/world/national-security/aulaqi-killing-reignites-debate-on-limits-of-executive-power/2011/09/30/gIQAx1bUAL_story.html?hpid=z1",
-		"defer": true,
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -176,7 +175,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.washingtonpost.com/blogs/ezra-klein/post/jack-abramoffs-guide-to-buying-congressmen/2011/08/25/gIQAoXKLvM_blog.html?wprss=ezra-klein",
-		"defer": true,
 		"items": [
 			{
 				"itemType": "blogPost",
@@ -213,7 +211,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.washingtonpost.com/newssearch/search.html?st=labor+unions&submit=Submit+Query",
-		"defer": true,
 		"items": "multiple"
 	}
 ]

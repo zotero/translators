@@ -160,14 +160,12 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://socpvs.org/journals/index.php/wbp/issue/view/1646-2742.12/showToc",
-		"items": "multiple",
-		"defer": true
+		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "http://socpvs.org/journals/index.php/wbp/search/results?query=habitat",
-		"items": "multiple",
-		"defer": true
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

@@ -126,7 +126,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.washingtonmonthly.com/magazine/mayjune_2011/features/the_information_sage029137.php?page=1",
-		"defer": true,
 		"items": [
 			{
 				"itemType": "magazineArticle",
@@ -180,7 +179,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.washingtonmonthly.com/ten-miles-square/2011/11/note_to_presenters_at_academic033586.php",
-		"defer": true,
 		"items": [
 			{
 				"itemType": "blogPost",
@@ -213,7 +211,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.washingtonmonthly.com/search2.php?search=europe",
-		"defer": true,
 		"items": "multiple"
 	}
 ]

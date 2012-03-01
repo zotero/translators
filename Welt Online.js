@@ -159,7 +159,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.welt.de/wirtschaft/article12962920/Krankenkassen-werfen-Aerzten-Gewinnstreben-vor.html",
-		"defer": true,
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -200,7 +199,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.welt.de/wirtschaft/",
-		"defer": true,
 		"items": "multiple"
 	}
 ]
