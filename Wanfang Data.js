@@ -58,7 +58,7 @@
 function setCookie(doc, rsId) {
 	if(!rsId) return null;
 
-	var matches = doc.cookie.match(/(?:$|; )rs=([^;])/);
+	var matches = doc.cookie.match(/(?:$|; )rs=([^;]*)/);
 	var oldCookie = matches ? unescape(matches[1]) : null;
 
 	var domain = escape('wanfangdata.com.cn');
@@ -149,16 +149,12 @@ function scrape(doc, id) {
 
 function detectWeb(doc, url) {
 	if (url.toLowerCase().indexOf('paper.aspx') != -1) {
-//multiples don't work well with cookies
-//disabled for now
-//		return "multiple";
-		return false;
+		return "multiple";
 	}
 	
 	pattern = /[ds]\.(?:g\.)?wanfangdata\.com\.cn/;
 	if (pattern.test(url)) {
 		var code = detectCode(url);
-//		Zotero.debug(code);
 		return detectType(code);
 	}
 
@@ -166,8 +162,6 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	Zotero.debug(url);
-
 	if (detectWeb(doc, url) == "multiple") {
 		// search page
 		var items = new Array();
@@ -192,9 +186,8 @@ function doWeb(doc, url) {
 				urls.push(i);
 			}
 
-			for (var i=0; i<urls.length; i++) {
-				scrape(doc, urls[i]);
-			}
+			var ids = '|' + urls.join('|') + '|';
+			scrape(doc, ids);
 		});
 	} else {
 		var id = ZU.xpathText(doc, '//form[@id="aspnetForm"]/@action')
@@ -283,6 +276,11 @@ var testCases = [
 				"shortTitle": "Zotero"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://s.wanfangdata.com.cn/Paper.aspx?q=zotero+DBID%3A%28NSTL_QK+OR+NSTL_HY%29&f=d.top",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
