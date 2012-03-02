@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-02-26 14:10:24"
+	"lastUpdated": "2012-03-02 14:15:58"
 }
 
 function detectWeb(doc, url) {
@@ -66,7 +66,7 @@ function doWeb(doc, url) {
 		var data = Zotero.Utilities.trimInternal(ZU.xpathText(doc, '//p[span[@class="bibDataTag"]][1]'));
 		data = data.replace(/(Journal|MSC|Posted|Retrieve)/g, "\n$1");
 		Zotero.debug(data);
-		var authors = data.match(/(Author\(s\):\s+(.*)\n|Author(s)?:\s+(.*))/)[1].replace(/Author\(s\):|Authors?:/, "").split(/;\s+| and /);
+		var authors = data.match(/(Author\(s\):\s+(.*)\n|Author(s)?:\s+(.*))/)[1].replace(/Author\(s\):|Authors?:/, "").split(/;\s+| and |, /);
 		for each (var aut in authors) {
 			item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
 		}
@@ -87,7 +87,7 @@ function doWeb(doc, url) {
 			{url:item.url, title:item.journalAbbreviation + " Snapshot", mimeType:"text/html"},
 			{url:pdfurl, title:item.journalAbbreviation + " PDF", mimeType:"application/pdf"}
 		];
-		item.abstract = ZU.trimInternal(ZU.xpathText(doc, '//td[@class="bottomCell"]/p[4]').substr(10));
+		item.abstract = ZU.trimInternal(ZU.xpathText(doc, '//td[@class="bottomCell"]/p[4]').substr(10)).replace(/^A?bstract:\s/, "");
 		item.complete();
 	}/** BEGIN TEST CASES **/
 var testCases = [
@@ -99,7 +99,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"defer": true,
 		"url": "http://www.ams.org/journals/jams/2012-25-01/S0894-0347-2011-00713-3/home.html",
 		"items": [
 			{
@@ -142,10 +141,10 @@ var testCases = [
 				"url": "http://www.ams.org/journals/jams/2012-25-01/S0894-0347-2011-00713-3/home.html",
 				"journalAbbreviation": "J. Amer. Math. Soc.",
 				"volume": "25",
-				"pages": "1-20.",
+				"pages": "1-20",
 				"issue": "01",
 				"date": "July 8, 2011",
-				"abstract": "Abstract: We prove, for certain pairs of finite groups of Lie type, that the -fusion systems and are equivalent. In other words, there is an isomorphism between a Sylow -subgroup of and one of which preserves -fusion. This occurs, for example, when and for a simple Lie ``type'' , and and are prime powers, both prime to , which generate the same closed subgroup of -adic units. Our proof uses homotopy-theoretic properties of the -completed classifying spaces of and , and we know of no purely algebraic proof of this result.",
+				"abstract": "We prove, for certain pairs of finite groups of Lie type, that the -fusion systems and are equivalent. In other words, there is an isomorphism between a Sylow -subgroup of and one of which preserves -fusion. This occurs, for example, when and for a simple Lie ``type'' , and and are prime powers, both prime to , which generate the same closed subgroup of -adic units. Our proof uses homotopy-theoretic properties of the -completed classifying spaces of and , and we know of no purely algebraic proof of this result.",
 				"libraryCatalog": "AMS Journals",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
