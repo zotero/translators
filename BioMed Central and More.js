@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-30 22:39:00"
+	"lastUpdated": "2012-03-01 20:35:17"
 }
 
 /*
@@ -165,22 +165,50 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Full Text PDF",
-						"url": false,
+						"url": "http://respiratory-research.com/content/pdf/1465-9921-11-133.pdf",
 						"mimeType": "application/pdf"
 					},
 					{
-						"document": false,
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"document": {
+							"location": {}
+						}
 					}
 				],
+				"itemID": "http://respiratory-research.com/content/11/1/133",
 				"title": "Nicotinic receptors on rat alveolar macrophages dampen ATP-induced increase in cytosolic calcium concentration",
+				"source": "Respiratory Research",
 				"publicationTitle": "Respiratory Research",
+				"rights": "http://creativecommons.org/licenses/by/2.0/",
 				"volume": "11",
 				"issue": "1",
-				"DOI": "10.1186/1465-9921-11-133",
+				"number": "1",
+				"patentNumber": "1",
 				"pages": "133",
+				"ISSN": "1465-9921",
+				"publisher": "BioMed Central Ltd",
+				"institution": "BioMed Central Ltd",
+				"company": "BioMed Central Ltd",
+				"label": "BioMed Central Ltd",
+				"distributor": "BioMed Central Ltd",
+				"date": "2010-09-29",
+				"DOI": "10.1186/1465-9921-11-133",
+				"reportType": "Research",
+				"videoRecordingType": "Research",
+				"letterType": "Research",
+				"manuscriptType": "Research",
+				"mapType": "Research",
+				"thesisType": "Research",
+				"websiteType": "Research",
+				"audioRecordingType": "Research",
+				"presentationType": "Research",
+				"postType": "Research",
+				"audioFileType": "Research",
+				"language": "en",
 				"url": "http://respiratory-research.com/content/11/1/133",
-				"libraryCatalog": "respiratory-research.com"
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "respiratory-research.com",
+				"abstractNote": "Nicotinic acetylcholine receptors (nAChR) have been identified on a variety of cells of the immune system and are generally considered to trigger anti-inflammatory events. In the present study, we determine the nAChR inventory of rat alveolar macrophages (AM), and investigate the cellular events evoked by stimulation with nicotine."
 			}
 		]
 	}
