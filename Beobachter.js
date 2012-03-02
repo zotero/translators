@@ -6,10 +6,10 @@
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
-	"browserSupport": "gcs",
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2012-01-01 01:42:16"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-03-01 20:21:22"
 }
 
 /*
@@ -209,7 +209,7 @@ var testCases = [
 				"url": "http://www.beobachter.ch/natur/natuerlich-leben/wohnen-freizeit/artikel/beleuchtung_es-werde-led/",
 				"shortTitle": "Es werde LED",
 				"title": "Beleuchtung: Es werde LED",
-				"date": "2011-10-19T14:12:05+02:00",
+				"date": "2012-01-11T15:19:21+01:00",
 				"publicationTitle": "Beobachter",
 				"abstractNote": "Die neue LED-Technologie ist sparsam und ­öffnet den Weg zum variablen Licht­design. Was ist heute schon möglich – und was sinnvoll?",
 				"language": "de",
