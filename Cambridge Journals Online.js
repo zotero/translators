@@ -156,9 +156,7 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [
-					""
-				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [
 					{
