@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 6,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-02-14 07:56:13"
+	"lastUpdated": "2012-03-02 19:28:04"
 }
 
 function detectWeb(doc, url) {
@@ -269,17 +269,23 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [
-					{}
+					{
+						"document": {
+							"location": {}
+						}
+					}
 				],
 				"publicationTitle": "Evaluation and Program Planning",
 				"volume": "34",
+				"issue": "4",
 				"ISSN": "01497189",
 				"date": "11/2011",
 				"pages": "343-352",
 				"DOI": "10.1016/j.evalprogplan.2011.04.002",
 				"url": "http://linkinghub.elsevier.com/retrieve/pii/S0149718911000449",
 				"title": "Optimizing an immersion ESL curriculum using analytic hierarchy process",
-				"libraryCatalog": "CrossRef"
+				"libraryCatalog": "CrossRef",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}
