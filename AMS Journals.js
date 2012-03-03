@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-02 14:15:58"
+	"lastUpdated": "2012-03-02 21:16:32"
 }
 
 function detectWeb(doc, url) {
@@ -87,7 +87,7 @@ function doWeb(doc, url) {
 			{url:item.url, title:item.journalAbbreviation + " Snapshot", mimeType:"text/html"},
 			{url:pdfurl, title:item.journalAbbreviation + " PDF", mimeType:"application/pdf"}
 		];
-		item.abstract = ZU.trimInternal(ZU.xpathText(doc, '//td[@class="bottomCell"]/p[4]').substr(10)).replace(/^A?bstract:\s/, "");
+		item.abstractNote = ZU.trimInternal(ZU.xpathText(doc, '//td[@class="bottomCell"]/p[4]').substr(10)).replace(/^A?bstract:\s/, "");
 		item.complete();
 	}/** BEGIN TEST CASES **/
 var testCases = [
