@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-02 21:10:57"
+	"lastUpdated": "2012-03-03 11:25:29"
 }
 
 function detectWeb(doc, url) {
@@ -36,10 +36,18 @@ function doWeb(doc, url) {
 		while (title = titles.iterateNext()) {
 			items[title.href] = title.textContent;
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			books.push(i);
-		}
+			Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				books.push(i);
+			}
+			Zotero.Utilities.processDocuments(books, scrape, function () {
+				Zotero.done();
+			});
+			Zotero.wait();	
+		});
 	} else {
 		scrape(doc, url)
 	}
@@ -70,8 +78,7 @@ function scrape(doc, url) {
 	item.date = Zotero.Utilities.trimInternal(ZU.xpathText(doc, '//span[@id="_publishDate"]'));
 	item.ISBN = Zotero.Utilities.trimInternal(ZU.xpathText(doc, '//span[@id="_isbn"]'));
 	//if there is no publisher field, assume it's published by CUP
-	var publisher = ZU.xpathText(doc, '//span[@id="_publisher"]');
-	Z.debug(publisher)
+	var publisher = ZU.xpathText(doc, '//span[@id="_publisher"]');	
 	if (publisher) item.publisher = Zotero.Utilities.trimInternal(publisher);
 	else item.publisher = "Columbia University Press"
 	item.complete();

@@ -9,8 +9,9 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-02-22 04:00:17"
+	"lastUpdated": "2012-03-03 14:12:45"
 }
+
 // Emedicine.Medscape.com translator.
 // Version 1.00
 // By William Smith, see http://www.willsmith.org/contactme/
