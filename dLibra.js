@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-10-29 15:33:44"
+	"lastUpdated": "2012-03-03 13:42:04"
 }
 
 /*
@@ -66,35 +66,36 @@ function translateType(type)
 
 function doWeb(doc, url) {
 	if(detectWeb(doc,url)=="multiple"){
-		var namespace = doc.documentElement.namespaceURI;
-		var nsResolver = namespace ?
-			function(prefix) {
-				if (prefix == 'x') return namespace; else return null;
-			}: null;
 
-
+var articles = new Array();
 		var itemsXPath = '//ol[@class="itemlist"]/li/a | //td[@class="searchhit"]/b/a | //p[@class="resultTitle"]/b/a[@class="dLSearchResultTitle"]';
-
-		var obj = doc.evaluate(itemsXPath, doc, nsResolver, XPathResult.ANY_TYPE, null); 
-		var itemHtml;
-		var items= new Object() ;
-		while(itemHtml = obj.iterateNext())
-			items[itemHtml.href] = itemHtml.textContent;
+		var titles = doc.evaluate(itemsXPath, doc, null, XPathResult.ANY_TYPE, null); 
+		var title;
+		var items= {};
+		while(title = titles.iterateNext()){
+			items[title.href] = title.textContent;}
 		
-		items = Zotero.selectItems(items);
-		for (var itemUrl in items)
-			doSingleItem(itemUrl)
+	Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+			
+				articles.push(i);
+			}
+			Zotero.Utilities.processDocuments(articles, scrape, function () {
+				Zotero.done();
+			});
+			Zotero.wait();	
+		});
 	}else
-		doSingleItem(url);
-		
-		
-	return true;		
+		scrape(doc, url);
+	
 }
 
-function doSingleItem(url)
+function scrape(doc, url)
 {
-
-	var reSingle= new RegExp("(.*/dlibra)/(?:doccontent|docmetadata|publication).*[?&]id=([0-9]*).*");
+	var reSingle= new RegExp("(.*/dlibra)/(?:doccontent|docmetadata|publication).*[?&]id=([0-9]*).*");	
 	var m = reSingle.exec(url);
 	if(!m)
 		return "";
