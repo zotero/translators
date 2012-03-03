@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-02-27 06:35:06"
+	"lastUpdated": "2012-03-01 08:29:52"
 }
 
 /*
@@ -98,6 +98,18 @@ function getPrefixes(doc) {
 				_prefixes[matches[1].toLowerCase()] = links[i].getAttribute("href");
 			}
 		}
+	}
+}
+
+function fieldIsValidForType(field, type) {
+	var ignoreList = ['itemType', 'creators', 'notes', 'tags', 
+			'seeAlso', 'attachments', 'complete'];
+	if(ignoreList.indexOf(field) != -1) return true;
+
+	try {
+		return ZU.fieldIsValidForType(field, type);
+	} catch(e) {
+		return false;
 	}
 }
 
@@ -295,6 +307,14 @@ function addHighwireMetadata(doc, newItem) {
 	newItem.accessDate = 'CURRENT_TIMESTAMP';
 
 	newItem.libraryCatalog = doc.location.host;
+
+	//clean up item
+	for(var field in newItem) {
+		if(!fieldIsValidForType(field, _itemType)) {
+			delete newItem[field];
+		}
+	}
+
 	newItem.complete();
 }
 

@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-02-27 07:02:42"
+	"lastUpdated": "2012-03-01 08:41:26"
 }
 
 /*
@@ -372,10 +372,9 @@ function importItem(newItem, node, type) {
 		if(creators) handleCreators(newItem, creators, creatorType);
 	}
 	
-	// source -- first try PRISM, then DC
-	newItem.source = getFirstResults(node, [n.prism+"publicationName", n.eprints+"publication",
+	// publicationTitle -- first try PRISM, then DC
+	newItem.publicationTitle = getFirstResults(node, [n.prism+"publicationName", n.eprints+"publication",
 		n.dc+"source", n.dcterms+"source", n.og+"site_name"], true);
-	newItem.publicationTitle = newItem.source;
 	
 	// rights
 	newItem.rights = getFirstResults(node, [n.dc+"rights", n.dcterms+"rights"], true);
@@ -500,8 +499,6 @@ function importItem(newItem, node, type) {
 					newItem.DOI = identifiers[i].substr(4);
 				} else if(identifiers[i].substr(0,3) == "10.") {
 					newItem.DOI = identifiers[i];
-				} else if(!newItem.accessionNumber) {
-					newItem.accessionNumber = identifiers[i];
 				}
 			} else {
 				// grab URLs
@@ -530,10 +527,9 @@ function importItem(newItem, node, type) {
 	// type
 	var type = getFirstResults(node, [n.dc+"type", n.dcterms+"type"], true);
 	// these all mean the same thing
-	var typeProperties = ["reportType", "videoRecordingType", "letterType",
-						"manuscriptType", "mapType", "thesisType", "websiteType",
-						"audioRecordingType", "presentationType", "postType",
-						"audioFileType"];
+	var typeProperties = ["reportType", "letterType", "manuscriptType",
+				"mapType", "thesisType", "websiteType",
+				"presentationType", "postType",	"audioFileType"];
 	for each(var property in typeProperties) {
 		newItem[property] = type;
 	}
