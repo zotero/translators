@@ -37,8 +37,6 @@
 	***** END LICENSE BLOCK *****
 */
 
-var exports = { "doWeb":doWeb };
-
 var HIGHWIRE_MAPPINGS = {
 	"citation_title":"title",
 	"citation_publication_date":"date",	//perhaps this is still used in some old implementations
@@ -86,6 +84,12 @@ var _rdfPresent = false,
 	_haveItem = false,
 	_itemType;
 
+var CUSTOM_FIELD_MAPPINGS;
+
+function addCustomFields(customFields) {
+	CUSTOM_FIELD_MAPPINGS = customFields;
+}
+
 function getPrefixes(doc) {
 	var links = doc.getElementsByTagName("link");
 	for(var i=0; i<links.length; i++) {
@@ -99,6 +103,25 @@ function getPrefixes(doc) {
 			}
 		}
 	}
+}
+
+function processFields(doc, item, fieldMap) {
+	for(var metaName in fieldMap) {
+		var zoteroName = fieldMap[metaName];
+		if(!item[zoteroName]) {
+			item[zoteroName] = ZU.xpathText(doc, '//meta[@name="'+metaName+'"]/@content');
+		}
+	}
+}
+
+function completeItem(doc, newItem) {
+	//ideally this should be done before RDF,
+	//but at least for now we'll add onto RDF data
+	if(CUSTOM_FIELD_MAPPINGS) {
+		processFields(doc, newItem, CUSTOM_FIELD_MAPPINGS);
+	}
+
+	addHighwireMetadata(doc, newItem);
 }
 
 function detectWeb(doc, url) {
@@ -178,7 +201,7 @@ function doWeb(doc, url) {
 		translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f");
 		translator.setHandler("itemDone", function(obj, newItem) {
 			_haveItem = true;
-			addHighwireMetadata(doc, newItem);
+			completeItem(doc, newItem);
 		});
 
 		translator.getTranslatorObject(function(rdf) {
@@ -213,11 +236,11 @@ function doWeb(doc, url) {
 			rdf.defaultUnknownType = _itemType;
 			rdf.doImport();
 			if(!_haveItem) {
-				addHighwireMetadata(doc, new Zotero.Item(_itemType));
+				completeItem(doc, new Zotero.Item(_itemType));
 			}
 		});
 	} else {
-		addHighwireMetadata(doc, new Zotero.Item(_itemType));
+		completeItem(doc, new Zotero.Item(_itemType));
 	}
 }
 
@@ -226,12 +249,7 @@ function doWeb(doc, url) {
  */
 function addHighwireMetadata(doc, newItem) {
 	// HighWire metadata
-	for(var metaName in HIGHWIRE_MAPPINGS) {
-		var zoteroName = HIGHWIRE_MAPPINGS[metaName];
-		if(!newItem[zoteroName]) {
-			newItem[zoteroName] = ZU.xpathText(doc, '//meta[@name="'+metaName+'"]/@content');
-		}
-	}
+	processFields(doc, newItem, HIGHWIRE_MAPPINGS);
 
 	if(!newItem.creators.length) {
 		/* Three author formats:
@@ -296,6 +314,11 @@ function addHighwireMetadata(doc, newItem) {
 
 	newItem.libraryCatalog = doc.location.host;
 	newItem.complete();
+}
+
+var exports = {
+	"doWeb":doWeb,
+	"addCustomFields": addCustomFields
 }
 
 /** BEGIN TEST CASES **/
