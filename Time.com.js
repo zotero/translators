@@ -3,31 +3,23 @@
 	"label": "Time.com",
 	"creator": "Michael Berkowitz",
 	"target": "^https?://www\\.time\\.com/time/",
-	"minVersion": "1.0.0b4.r5",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-30 22:41:45"
+	"lastUpdated": "2012-03-04 14:51:13"
 }
 
 function detectWeb(doc, url) {
-	if (url.match(/results\.html/)) {
+	if (url.indexOf('results.html') != -1) {
 		return "multiple";
-	} else {
-		var namespace = doc.documentElement.namespaceURI;
-		var nsResolver = namespace ? function(prefix) {
-			if (prefix == "x") return namespace; else return null;
-		} : null;
-		
-		var xpath = '//meta[@name="byline"]';
-		var xpath2 = '//div[@class="byline"]';
-		var xpath3 = '//div[@class="copy"]/div[@class="byline"]';
-		if ((doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate(xpath2, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate(xpath3, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) ) {
-			if (url.substr(-4,4) == "html") {
-				return "magazineArticle";
-			}
+	} else if ( ZU.xpath(doc, '//meta[@name="byline"]').length ||
+				ZU.xpath(doc, '//div[@class="byline"]').length ||
+				ZU.xpath(doc, '//div[@class="copy"]/div[@class="byline"]').length ) {
+		if (url.substr(-4,4) == "html") {
+			return "magazineArticle";
 		}
 	}
 }
@@ -43,121 +35,72 @@ function scrape(doc, url) {
 	var newItem = new Zotero.Item("magazineArticle");
 	newItem.publicationTitle = "Time";
 	newItem.ISSN = "0040-718X";
-	newItem.url = doc.location.href;
-	var metaTags = new Object();
+	newItem.url = url;
+
+	var translator = Zotero.loadTranslator('web');
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+	translator.setDocument(doc);
+
+	translator.getTranslatorObject(function(em) {
+		em.addCustomFields({
+			'description': 'abstractNote',
+			'head': 'title',
+			'date': 'date'
+		});
+	});
+
+	translator.setHandler('itemDone', function(obj, item) {
+		//authors
+		var authors = ZU.xpathText(doc, '/html/head/meta[@name="byline"]/@content');
+		if(authors && authors.trim()) {
+			var end = authors.indexOf('/');
+			if(end != -1) {
+				authors = authors.slice(0,end).trim();
+			}
+
+			authors = authors.split(/ and /i);
+			var authArr = new Array();
+			for(var i=0, n=authors.length; i<n; i++) {
+				authArr.push(ZU.cleanAuthor(authors[i], 'author'));
+			}
 	
-	var metaTagHTML = doc.getElementsByTagName("meta")
-	for (var i = 0 ; i < metaTagHTML.length ; i++) {
-		metaTags[metaTagHTML[i].getAttribute("name")] = metaTagHTML[i].getAttribute("content");
-	}
-	
-	if (metaTags["head"]) {
-		associateMeta(newItem, metaTags, "head", "title");
-	} else  if (doc.title.length > 7) {
-		newItem.title = doc.title.substr(0, doc.title.length - 7); 
-	} else {
-		newItem.title = "No Title";
-	}
-	
-	if (metaTags["description"]) {
-		associateMeta(newItem, metaTags, "description", "abstractNote");
-	}
-	
-	 if (metaTags["date"]) {
-		 var date = metaTags["date"];
-		 var months = new Object();
-		 	months["jan"] = "January";
-		 	months["feb"] = "February";
-		 	months["mar"] = "March";
-		 	months["apr"] = "April";
-		 	months["may"] = "May";
-		 	months["jun"] = "June";
-		 	months["jul"] = "July";
-		 	months["aug"] = "August";
-		 	months["sep"] = "September";
-		 	months["oct"] = "October";
-		 	months["nov"] = "November";
-		 	months["dec"] = "December";
-		 date = date.split(".").join("").split(", ").slice(1);
-		 date[0] = months[date[0].split(" ")[0].toLowerCase()] + " " + date[0].split(" ")[1];
-		 newItem.date = date.join(", ");
-	 }
-	if (metaTags["keywords"]) {
-		newItem.tags = Zotero.Utilities.trimInternal(metaTags["keywords"]).split(", ");
-		for (var i in newItem.tags) {
-			if (newItem.tags[i] == "" || newItem.tags[i] == " ") {
-				break;
-			} else {
-				var words = newItem.tags[i].split(" ");
-				for (var j = 0 ; j < words.length ; j++) {
-					Zotero.debug(words[j]);
-					if (words[j][0] == words[j][0].toLowerCase() && words[j][0]) {
-						words[j] = words[j][0].toUpperCase() + words[j].substr(1).toLowerCase();
-					}
-				}
-			} 
-			newItem.tags[i] = words.join(" ");
-		}
-	}
-	
-	if (metaTags["byline"]) {
-		var byline = Zotero.Utilities.trimInternal(metaTags["byline"]);
-		var byline1 = byline.split(" and ");
-		for (var i = 0 ; i < byline1.length ; i++) {
-			var byline2 = byline1[i].split("/");
-			for (var j = 0 ; j < byline2.length ; j++) {
-				byline2[j] = Zotero.Utilities.trimInternal(byline2[j]);
-				if (byline2[j].indexOf(" ") == -1) {
-					if (byline2[j].length == 2) {
-						newItem.extra = byline2[j];
-					} else {
-						newItem.extra = byline2[j][0].toUpperCase() + byline2[j].substr(1).toLowerCase();
-					}
-				} else {
-					byline3 = byline2[j].split(" ");
-					for (var x = 0 ; x < byline3.length ; x++) {
-						byline3[x] = byline3[x][0].toUpperCase() + byline3[x].substr(1).toLowerCase();
-					}
-					byline3 = byline3.join(" ");
-					newItem.creators.push(Zotero.Utilities.cleanAuthor(byline3, "author"));
-				}
+			if(authArr.length) {
+				item.creators = authArr;
 			}
 		}
-	}
-	newItem.attachments.push({document:doc, title:doc.title});
-	newItem.complete();
+
+		//keywords
+		var keywords = ZU.xpathText(doc, '/html/head/meta[@name="keywords"]/@content');
+		if(keywords && keywords.trim()) {
+			item.tags = ZU.capitalizeTitle(keywords).split(', ');
+		}
+
+		item.complete();
+	});
+
+	translator.translate();
 }
 
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == "x") return namespace; else return null;
-	} : null;
-	
 	var urls = new Array();
-	if (url.match(/results\.html/)) {
-		var items = new Array();
-		var items = Zotero.Utilities.getItemArray(doc, doc.getElementsByTagName("h3"), '^http://www.time.com/time/.*\.html$');
+	if (detectWeb(doc, url) == 'multiple') {
+		var items = ZU.getItemArray(doc, doc.getElementsByTagName("h3"), '^http://www.time.com/time/.*\.html$', 'covers');
 
-		items = Zotero.selectItems(items);
-	
-		if (!items) {
-			return true;
-		}
+		Zotero.selectItems(items, function(selectedItems) {
+			if (!items) return true;
 		
-		for (var i in items) {
-			if (i.match("covers") == null) {
-				urls.push(i);
+			var urls = new Array();
+			for (var i in items) {
+					urls.push(i);
 			}
-		}
-	} else if (doc.evaluate('//meta[@name="byline"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate('//div[@class="byline"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate('//div[@class="copy"]/div[@class="byline"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) {
-		urls.push(doc.location.href);
+			Zotero.Utilities.processDocuments(urls, function(newDoc) {
+				scrape(newDoc, newDoc.location.href);
+			});
+		});
+	} else {
+		scrape(doc, url);
 	}
-	Zotero.Utilities.processDocuments(urls, function(newDoc) {
-		scrape(newDoc);
-	}, function() { Zotero.done(); } );
-	Zotero.wait();
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
