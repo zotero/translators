@@ -1,7 +1,7 @@
 {
 	"translatorID": "f8765470-5ace-4a31-b4bd-4327b960ccd",
 	"label": "SpringerLink",
-	"creator": "Simon Kornblith and Michael Berkowitz",
+	"creator": "Sebastian Karcher",
 	"target": "https?://(www\\.)*springerlink\\.com|springerlink.metapress.com[^/]*/content/",
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-03-04 15:21:50"
+	"lastUpdated": "2012-03-04 15:59:29"
 }
 
 /*
@@ -51,7 +51,7 @@ function doWeb(doc, url) {
 			 if(!items) {
 			   return true;
 			 }
-			 citationurls = new Array();
+			 var citationurls = new Array();
 			 for (var itemurl in items) {
 			 	var newurl = itemurl + "export-citation";
 			   citationurls.push(newurl);
@@ -68,7 +68,7 @@ function doWeb(doc, url) {
 
 function getpages(citationurl) {
 	//we work entirely from the citations page
-		Z.debug(citationurl)
+		//Z.debug(citationurl)
   Zotero.Utilities.processDocuments(citationurl, function(doc) {
 					  scrape(doc);
 	}, function() { Zotero.done() });
@@ -94,8 +94,8 @@ function scrape (doc) {
 		item.url = absurl;
 		item.notes = [];
 		item.attachments = [
-			{url:pdfurl, title:"Springerlink PDF fulltext", mimeType:"application/pdf"},
-			{url:absurl, title:"Springerlink Snapshot", mimeType:"text/html"}
+			{url:pdfurl, title:"SpringerLink Full Text PDF", mimeType:"application/pdf"},
+			{url:absurl, title:"SpringerLink Snapshot", mimeType:"text/html"}
 		];
 		item.complete();
 	});
@@ -146,12 +146,12 @@ var testCases = [
 				"attachments": [
 					{
 						"url": "http://www.springerlink.com/content/q122682q1u2r7282/fulltext.pdf",
-						"title": "Springerlink PDF fulltext",
+						"title": "SpringerLink Full Text PDF",
 						"mimeType": "application/pdf"
 					},
 					{
 						"url": "http://www.springerlink.com/content/q122682q1u2r7282/abstract/",
-						"title": "Springerlink Snapshot",
+						"title": "SpringerLink Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -218,12 +218,12 @@ var testCases = [
 				"attachments": [
 					{
 						"url": "http://www.springerlink.com/content/n66482lu84706725/fulltext.pdf",
-						"title": "Springerlink PDF fulltext",
+						"title": "SpringerLink Full Text PDF",
 						"mimeType": "application/pdf"
 					},
 					{
 						"url": "http://www.springerlink.com/content/n66482lu84706725/abstract/",
-						"title": "Springerlink Snapshot",
+						"title": "SpringerLink Snapshot",
 						"mimeType": "text/html"
 					}
 				],
