@@ -1,19 +1,20 @@
 {
 	"translatorID": "882f70a8-b8ad-403e-bd76-cb160224999d",
 	"label": "Vanderbilt eJournals",
-	"creator": "Michael Berkowitz and Aurimas Vinckevicius",
+	"creator": "Michael Berkowitz",
 	"target": "http://ejournals.library.vanderbilt.edu/",
-	"minVersion": "2.1.9",
+	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-01 13:33:43"
+	"browserSupport": "g",
+	"lastUpdated": "2012-03-03 20:38:58"
 }
 
 function scrape(doc) {
 	var translator = Zotero.loadTranslator("web");
+	//use embedded metadata
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
 	translator.setHandler("itemDone", function(obj, item) {
@@ -97,10 +98,24 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
+				"itemID": "http://ejournals.library.vanderbilt.edu/ojs/index.php/vurj/article/view/2931",
 				"title": "Authenticating Identity: The Quest for Personal Validation through Authenticity in Music",
+				"source": "Vanderbilt Undergraduate Research Journal",
 				"publicationTitle": "Vanderbilt Undergraduate Research Journal",
 				"rights": "Copyright for articles published in this journal is retained by the authors, with first publication rights granted to Vanderbilt Undergraduate Research Journal. By virtue of their appearance in this open access journal, articles are available for wide dissemination at no cost to readers, with proper attribution, in educational and other non-commercial settings. For undergraduates jointly authoring a manuscript with a faculty member, we strongly encourage the student to discuss with the faculty mentor and the Editor if the copyright policy will constrain future publication efforts in professional journals.",
 				"date": "2011-08-05",
+				"accessionNumber": "2931",
+				"reportType": "Text.Serial.Journal",
+				"videoRecordingType": "Text.Serial.Journal",
+				"letterType": "Text.Serial.Journal",
+				"manuscriptType": "Text.Serial.Journal",
+				"mapType": "Text.Serial.Journal",
+				"thesisType": "Text.Serial.Journal",
+				"websiteType": "Text.Serial.Journal",
+				"audioRecordingType": "Text.Serial.Journal",
+				"presentationType": "Text.Serial.Journal",
+				"postType": "Text.Serial.Journal",
+				"audioFileType": "Text.Serial.Journal",
 				"language": "en",
 				"volume": "7",
 				"issue": "0",
@@ -137,9 +152,23 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
+				"itemID": "http://ejournals.library.vanderbilt.edu/ojs/index.php/lusohispanic/article/view/3283/1518",
 				"title": "¿Qué hay antes y después de la escritura?",
+				"source": "Vanderbilt e-Journal of Luso-Hispanic Studies",
 				"publicationTitle": "Vanderbilt e-Journal of Luso-Hispanic Studies",
 				"date": "2011-10-20",
+				"accessionNumber": "3283",
+				"reportType": "Text.Serial.Journal",
+				"videoRecordingType": "Text.Serial.Journal",
+				"letterType": "Text.Serial.Journal",
+				"manuscriptType": "Text.Serial.Journal",
+				"mapType": "Text.Serial.Journal",
+				"thesisType": "Text.Serial.Journal",
+				"websiteType": "Text.Serial.Journal",
+				"audioRecordingType": "Text.Serial.Journal",
+				"presentationType": "Text.Serial.Journal",
+				"postType": "Text.Serial.Journal",
+				"audioFileType": "Text.Serial.Journal",
 				"language": "en",
 				"volume": "7",
 				"issue": "0",
@@ -175,9 +204,23 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
+				"itemID": "http://ejournals.library.vanderbilt.edu/ojs/index.php/homiletic/article/view/3460",
 				"title": "Rhetorical Influences upon the Preaching of Jonathan Edwards",
+				"source": "Homiletic",
 				"publicationTitle": "Homiletic",
 				"date": "2011-12-01",
+				"accessionNumber": "3460",
+				"reportType": "Text.Serial.Journal",
+				"videoRecordingType": "Text.Serial.Journal",
+				"letterType": "Text.Serial.Journal",
+				"manuscriptType": "Text.Serial.Journal",
+				"mapType": "Text.Serial.Journal",
+				"thesisType": "Text.Serial.Journal",
+				"websiteType": "Text.Serial.Journal",
+				"audioRecordingType": "Text.Serial.Journal",
+				"presentationType": "Text.Serial.Journal",
+				"postType": "Text.Serial.Journal",
+				"audioFileType": "Text.Serial.Journal",
 				"language": "en",
 				"volume": "36",
 				"issue": "2",
@@ -214,10 +257,24 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
+				"itemID": "http://ejournals.library.vanderbilt.edu/ojs/index.php/ameriquests/article/view/220",
 				"title": "Canadian Literature in the Early Twenty-First Century:  The Emergence of an Inter-American Perspective",
+				"source": "AmeriQuests",
 				"publicationTitle": "AmeriQuests",
 				"rights": "We ask that all submissions be original to AmeriQuests, although exceptions can be made by the editor. All authors retain copyright, and are permitted to publish their work after it appears in AmeriQuests, although we ask that AmeriQuests be referenced in subsequent editions.",
 				"date": "2011-08-29",
+				"accessionNumber": "220",
+				"reportType": "Text.Serial.Journal",
+				"videoRecordingType": "Text.Serial.Journal",
+				"letterType": "Text.Serial.Journal",
+				"manuscriptType": "Text.Serial.Journal",
+				"mapType": "Text.Serial.Journal",
+				"thesisType": "Text.Serial.Journal",
+				"websiteType": "Text.Serial.Journal",
+				"audioRecordingType": "Text.Serial.Journal",
+				"presentationType": "Text.Serial.Journal",
+				"postType": "Text.Serial.Journal",
+				"audioFileType": "Text.Serial.Journal",
 				"language": "en",
 				"volume": "8",
 				"issue": "1",
