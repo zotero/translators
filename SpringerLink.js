@@ -3,13 +3,13 @@
 	"label": "SpringerLink",
 	"creator": "Sebastian Karcher",
 	"target": "https?://(www\\.)*springerlink\\.com|springerlink.metapress.com[^/]*/content/",
-	"minVersion": "1.0.0b3.r1",
+	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-03-04 15:59:29"
+	"lastUpdated": "2012-03-04 16:05:11"
 }
 
 /*
@@ -79,9 +79,10 @@ function scrape (doc) {
   var newurl = doc.location.href;
   var pdfurl = newurl.replace(/export-citation/, "fulltext.pdf");
   var absurl = newurl.replace(/export-citation/, "abstract/");
-  var viewstate = ZU.xpathText(doc, '//input[@name="__VIEWSTATE"]/@value').replace(/\//g, "%2F").replace(/\=/g, "%3D");
-  var eventvalidate = ZU.xpathText(doc, '//input[@name="__EVENTVALIDATION"]/@value').replace(/\//g, "%2F").replace(/\+/g, "%2B").replace(/\=/g, "%3D");
- //Z.debug(eventvalidate)
+ var viewstate = encodeURIComponent(ZU.xpathText(doc, '//input[@name="__VIEWSTATE"]/@value'));
+ var eventvalidate = encodeURIComponent(ZU.xpathText(doc, '//input[@name="__EVENTVALIDATION"]/@value'));
+ //Z.debug(eventvalidate);
+ //Z.debug(viewstate);
   var get = newurl;
   var post = '__VIEWSTATE=' + viewstate + '&ctl00%24ctl14%24cultureList=en-us&ctl00%24ctl14%24SearchControl%24BasicSearchForTextBox=&ctl00%24ctl14%24SearchControl%24BasicAuthorOrEditorTextBox=&ctl00%24ctl14%24SearchControl%24BasicPublicationTextBox=&ctl00%24ctl14%24SearchControl%24BasicVolumeTextBox=&ctl00%24ctl14%24SearchControl%24BasicIssueTextBox=&ctl00%24ctl14%24SearchControl%24BasicPageTextBox=&ctl00%24ContentPrimary%24ctl00%24ctl00%24Export=AbstractRadioButton&ctl00%24ContentPrimary%24ctl00%24ctl00%24CitationManagerDropDownList=ReferenceManager&ctl00%24ContentPrimary%24ctl00%24ctl00%24ExportCitationButton=Export+Citation&__EVENTVALIDATION=' + eventvalidate;
   Zotero.Utilities.HTTP.doPost(get, post, function(text) {
