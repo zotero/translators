@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-01-11 09:09:04"
+	"lastUpdated": "2012-03-05 00:57:45"
 }
 
 /*
@@ -60,21 +60,20 @@ var detectWeb = function (doc, url) {
 };
 
 function doWeb(doc, url) {
-	var haveBibTexLinks, nsResolver;
+	var haveBibTexLinks;
 	// Invoke the case or the listing scraper, as appropriate.
 	// In a listings page, this forces use of bibtex data and English page version
-	nsResolver = doc.createNSResolver(doc.documentElement);
 	if (url.match(/scholar_case/)) {
 		scrapeCase(doc, url);
 	} else {
 		haveBibTexLinks = doc.evaluate('//a[contains(@href, "scholar.bib")]',
-			doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 		if(!haveBibTexLinks) {
 			url = url.replace (/hl\=[^&]*&?/, "");
 			url = url.replace("scholar?", "scholar_setprefs?hl=en&scis=yes&scisf=4&submit=Save+Preferences&");
 			Zotero.Utilities.processDocuments(url, function(scisigDoc) {
 				var scisig = scisigDoc.evaluate('//input[@name="scisig"]',
-					scisigDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+					scisigDoc, null, XPathResult.ANY_TYPE, null).iterateNext();
 				url = url + "&scisig="+scisig.value;
 				Zotero.Utilities.processDocuments(url, function(doc) {
 					scrapeListing(doc);
@@ -94,13 +93,11 @@ function doWeb(doc, url) {
  * #########################
  */
 var scrapeListing = function (doc) {
-	var nsResolver = doc.createNSResolver(doc.documentElement);
-
 	// XML fragment lists
-	var titleFrags = doc.evaluate('//div[@class="gs_r"]//h3[not(contains(a/@href,"/citations"))]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var citeletFrags = doc.evaluate('//div[@class="gs_a"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var titleFrags = doc.evaluate('//div[@class="gs_r"]//h3[not(contains(a/@href,"/citations"))]', doc, null, XPathResult.ANY_TYPE, null);
+	var citeletFrags = doc.evaluate('//div[@class="gs_a"]', doc, null, XPathResult.ANY_TYPE, null);
 	var  bibtexFrags = doc.evaluate('//a[contains(@href, "scholar.bib")]',
-				doc, nsResolver, XPathResult.ANY_TYPE, null);
+				doc, null, XPathResult.ANY_TYPE, null);
 
 	var labels = [];
 	var factories = [];
@@ -115,7 +112,7 @@ var scrapeListing = function (doc) {
 		var citeletString = citeletFrags.iterateNext().textContent;
 		var bibtexLink = bibtexFrags.iterateNext().href;
 		var attachmentFrag = doc.evaluate('.//a',
-				titleFrag, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				titleFrag, null, XPathResult.ANY_TYPE, null).iterateNext();
 		if (attachmentFrag) {
 			var attachmentLinks = [attachmentFrag.href];
 		} else {
@@ -206,8 +203,7 @@ function processFactories(factories) {
 var scrapeCase = function (doc, url) {
 	// Citelet is identified by
 	// id="gsl_reference"
-	var nsResolver = doc.createNSResolver(doc.documentElement);
-	var refFrag = doc.evaluate('//div[@id="gsl_reference"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var refFrag = doc.evaluate('//div[@id="gsl_reference"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (refFrag) {
 		// citelet looks kind of like this
 		// Powell v. McCormack, 395 US 486 - Supreme Court 1969
@@ -386,9 +382,8 @@ ItemFactory.prototype.getDocketNumber = function (doc, callback) {
 		return;
 	}
 	
-	var nsResolver = doc.createNSResolver(doc.documentElement);
 	if (doc) {
-		var docNumFrag = doc.evaluate('//center[preceding-sibling::center//h3[@id="gsl_case_name"]]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		var docNumFrag = doc.evaluate('//center[preceding-sibling::center//h3[@id="gsl_case_name"]]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 		if (docNumFrag) {
 			this.v.docketNumber = docNumFrag.textContent.replace(/^\s*[Nn][Oo](?:.|\s+)\s*/, "").replace(/\.\s*$/, "");
 		}
