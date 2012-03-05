@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-30 22:42:54"
+	"lastUpdated": "2012-03-05 04:46:31"
 }
 
 /* TalisPrism translator.
@@ -221,7 +221,8 @@ function scrape(doc, url, item){
 
 	if (publishing.match(/(13|14|15|16|17|18|19|20)\d\d/)) {
 		var pos = publishing.search(/(13|14|15|16|17|18|19|20)\d\d/);
-		item.date = publishing.substring(pos, publishing.lastIndexOf('.')).match(/\d\d\d\d/);
+		var date = publishing.substring(pos, publishing.lastIndexOf('.')).match(/\d\d\d\d/);
+		if(date) item.date = date[0];
 		var place = publishing.substring(0, publishing.indexOf(':'));
 		item.place = place.replace(/^\s+|\s+$/g, '');
 		var publisher = publishing.substring(publishing.indexOf(':')+1, pos); 
@@ -235,7 +236,8 @@ function scrape(doc, url, item){
 	}
 	
 	isbn=isbn.replace(/^\D+|\D+$/g, "");	
-	item.ISBN = isbn.substring(0).match(/\d+/);
+	isbn = isbn.substring(0).match(/\d+/);
+	if(isbn) item.ISBN = isbn[0];
 
 	var series		  = getField(doc, 'Series');
 	var pos2 =series.lastIndexOf(';');
@@ -375,7 +377,6 @@ function doWeb(doc, url) {
 		if (prefix == "x" ) return namespace; else return null;
 	} : null;
 
-	var articles = new Array ();
 	var names = new Array ();
 	var items = new Object ();
 	var nextTitle;
@@ -408,12 +409,15 @@ function doWeb(doc, url) {
 			items[nextTitle.href] = nextTitle.textContent;
 			names.push(nextTitle.textContent);	
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
-		Zotero.Utilities.processDocuments(articles, multiscrape, function(){Zotero.done();});
-		
+		Zotero.selectItems(items, function(items) {
+			if(!items) return true;
+
+			var articles = new Array ();
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, function(doc) { multiscrape(doc, doc.location.href) });
+		});
 	} else if (doctype == "multiple") {
 		var titlePath = '//td[4]/font/span[@class="text"]/table/tbody/tr/td/font/span[@class="text"]/table/tbody/tr/td[1]/font/span[@class="text"]/a';
 		var titles = doc.evaluate(titlePath, doc, nsResolver, XPathResult.ANY_TYPE, null);
@@ -421,16 +425,20 @@ function doWeb(doc, url) {
 			items[nextTitle.href] = nextTitle.textContent;
 			names.push(nextTitle.textContent);	
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
-		Zotero.Utilities.processDocuments(articles, multiscrape, function(){Zotero.done();});
+
+		Zotero.selectItems(items, function(items) {
+			if(!items) return true;
+
+			var articles = new Array ();
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, function(doc) { multiscrape(doc, doc.location.href) });
+		});
 	} 
 	else {
 		soloscrape(doc, url);
 	}
-	Zotero.wait();
 		
 }/** BEGIN TEST CASES **/
 var testCases = [

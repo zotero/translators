@@ -2,162 +2,107 @@
 	"translatorID": "d9be934c-edb9-490c-a88d-34e2ee106cd7",
 	"label": "Time.com",
 	"creator": "Michael Berkowitz",
-	"target": "^https?://www\\.time\\.com/time/",
-	"minVersion": "1.0.0b4.r5",
+	"target": "^https?://[^/]*time\\.com/",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-30 22:41:45"
+	"lastUpdated": "2012-03-05 02:02:51"
 }
 
 function detectWeb(doc, url) {
-	if (url.match(/results\.html/)) {
+	/* Disabled because Time.com searches use search.time.com, which means
+		links are not accessible.
+	if (url.indexOf('results.html') != -1) {
 		return "multiple";
-	} else {
-		var namespace = doc.documentElement.namespaceURI;
-		var nsResolver = namespace ? function(prefix) {
-			if (prefix == "x") return namespace; else return null;
-		} : null;
-		
-		var xpath = '//meta[@name="byline"]';
-		var xpath2 = '//div[@class="byline"]';
-		var xpath3 = '//div[@class="copy"]/div[@class="byline"]';
-		if ((doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate(xpath2, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate(xpath3, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) ) {
-			if (url.substr(-4,4) == "html") {
-				return "magazineArticle";
-			}
-		}
-	}
-}
-
-
-function associateMeta(newItem, metaTags, field, zoteroField) {
-	if (metaTags[field]) {
-		newItem[zoteroField] = Zotero.Utilities.trimInternal(metaTags[field]);
+	} else */
+	if ( ZU.xpathText(doc, '//meta[@name="og:type" or @property="og:type"]/@content') == 'article') {
+		return "magazineArticle";
 	}
 }
 
 function scrape(doc, url) {
-	var newItem = new Zotero.Item("magazineArticle");
-	newItem.publicationTitle = "Time";
-	newItem.ISSN = "0040-718X";
-	newItem.url = doc.location.href;
-	var metaTags = new Object();
-	
-	var metaTagHTML = doc.getElementsByTagName("meta")
-	for (var i = 0 ; i < metaTagHTML.length ; i++) {
-		metaTags[metaTagHTML[i].getAttribute("name")] = metaTagHTML[i].getAttribute("content");
-	}
-	
-	if (metaTags["head"]) {
-		associateMeta(newItem, metaTags, "head", "title");
-	} else  if (doc.title.length > 7) {
-		newItem.title = doc.title.substr(0, doc.title.length - 7); 
-	} else {
-		newItem.title = "No Title";
-	}
-	
-	if (metaTags["description"]) {
-		associateMeta(newItem, metaTags, "description", "abstractNote");
-	}
-	
-	 if (metaTags["date"]) {
-		 var date = metaTags["date"];
-		 var months = new Object();
-		 	months["jan"] = "January";
-		 	months["feb"] = "February";
-		 	months["mar"] = "March";
-		 	months["apr"] = "April";
-		 	months["may"] = "May";
-		 	months["jun"] = "June";
-		 	months["jul"] = "July";
-		 	months["aug"] = "August";
-		 	months["sep"] = "September";
-		 	months["oct"] = "October";
-		 	months["nov"] = "November";
-		 	months["dec"] = "December";
-		 date = date.split(".").join("").split(", ").slice(1);
-		 date[0] = months[date[0].split(" ")[0].toLowerCase()] + " " + date[0].split(" ")[1];
-		 newItem.date = date.join(", ");
-	 }
-	if (metaTags["keywords"]) {
-		newItem.tags = Zotero.Utilities.trimInternal(metaTags["keywords"]).split(", ");
-		for (var i in newItem.tags) {
-			if (newItem.tags[i] == "" || newItem.tags[i] == " ") {
-				break;
-			} else {
-				var words = newItem.tags[i].split(" ");
-				for (var j = 0 ; j < words.length ; j++) {
-					Zotero.debug(words[j]);
-					if (words[j][0] == words[j][0].toLowerCase() && words[j][0]) {
-						words[j] = words[j][0].toUpperCase() + words[j].substr(1).toLowerCase();
-					}
-				}
-			} 
-			newItem.tags[i] = words.join(" ");
-		}
-	}
-	
-	if (metaTags["byline"]) {
-		var byline = Zotero.Utilities.trimInternal(metaTags["byline"]);
-		var byline1 = byline.split(" and ");
-		for (var i = 0 ; i < byline1.length ; i++) {
-			var byline2 = byline1[i].split("/");
-			for (var j = 0 ; j < byline2.length ; j++) {
-				byline2[j] = Zotero.Utilities.trimInternal(byline2[j]);
-				if (byline2[j].indexOf(" ") == -1) {
-					if (byline2[j].length == 2) {
-						newItem.extra = byline2[j];
-					} else {
-						newItem.extra = byline2[j][0].toUpperCase() + byline2[j].substr(1).toLowerCase();
-					}
+	var translator = Zotero.loadTranslator('web');
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+	translator.setDocument(doc);
+
+	translator.setHandler('itemDone', function(obj, item) {
+		item.itemType = "magazineArticle";
+		item.publicationTitle = "Time";
+		item.url = url;
+		item.ISSN = "0040-718X";
+
+		//authors
+		var authors = ZU.xpathText(doc, '/html/head/meta[@name="byline"]/@content');
+		if(!authors) authors = ZU.xpathText(doc, '//span[@class="author vcard"]/a', null, ' and ');
+		if(authors && authors.trim()) {
+			var matches = authors.match(/^\s*([^\/]+?)\s*\/\s*(.+?)\s*$/);
+			if(matches) {
+				if(matches[1] == 'AP') {
+					authors = matches[2];
 				} else {
-					byline3 = byline2[j].split(" ");
-					for (var x = 0 ; x < byline3.length ; x++) {
-						byline3[x] = byline3[x][0].toUpperCase() + byline3[x].substr(1).toLowerCase();
-					}
-					byline3 = byline3.join(" ");
-					newItem.creators.push(Zotero.Utilities.cleanAuthor(byline3, "author"));
+					authors = matches[1];
 				}
 			}
+
+			authors = authors.split(/ and /i);
+			var authArr = new Array();
+			for(var i=0, n=authors.length; i<n; i++) {
+				authArr.push(ZU.cleanAuthor(ZU.capitalizeTitle(authors[i]), 'author'));
+			}
+	
+			if(authArr.length) {
+				item.creators = authArr;
+			}
 		}
-	}
-	newItem.attachments.push({document:doc, title:doc.title});
-	newItem.complete();
+
+		//keywords
+		var keywords = ZU.xpathText(doc, '/html/head/meta[@name="keywords"]/@content');
+		if(keywords && keywords.trim()) {
+			item.tags = ZU.capitalizeTitle(keywords).split(', ');
+		}
+
+		item.complete();
+	});
+
+	translator.getTranslatorObject(function(em) {
+		em.addCustomFields({
+			'description': 'abstractNote',
+			'head': 'title',
+			'date': 'date'
+		});
+	});
+
+	translator.translate();
 }
 
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == "x") return namespace; else return null;
-	} : null;
-	
 	var urls = new Array();
-	if (url.match(/results\.html/)) {
-		var items = new Array();
-		var items = Zotero.Utilities.getItemArray(doc, doc.getElementsByTagName("h3"), '^http://www.time.com/time/.*\.html$');
+	if (detectWeb(doc, url) == 'multiple') {
+		var origin = doc.location.protocol + '//' + doc.location.host +
+			( (doc.location.port) ? ':' + doc.location.port : '' ) + '/';
 
-		items = Zotero.selectItems(items);
-	
-		if (!items) {
-			return true;
-		}
+		var items = ZU.getItemArray(doc, doc.getElementsByTagName("h3"),
+				//SOP checking
+				'(?:^' + origin + '.*\.html$|^/)', 'covers');
+
+		Zotero.selectItems(items, function(selectedItems) {
+			if (!selectedItems) return true;
 		
-		for (var i in items) {
-			if (i.match("covers") == null) {
-				urls.push(i);
+			var urls = new Array();
+			for (var i in selectedItems) {
+					urls.push(i);
 			}
-		}
-	} else if (doc.evaluate('//meta[@name="byline"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate('//div[@class="byline"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate('//div[@class="copy"]/div[@class="byline"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) {
-		urls.push(doc.location.href);
+			ZU.processDocuments(urls, function(newDoc) {
+				scrape(newDoc, newDoc.location.href);
+			});
+		});
+	} else {
+		scrape(doc, url);
 	}
-	Zotero.Utilities.processDocuments(urls, function(newDoc) {
-		scrape(newDoc);
-	}, function() { Zotero.done(); } );
-	Zotero.wait();
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -183,27 +128,206 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"document": {
-							"location": {}
-						},
-						"title": "Death of U.S. Postal Service: Many Jobs, Locations at Risk - TIME"
+						"title": "Snapshot"
 					}
 				],
-				"publicationTitle": "Time",
-				"ISSN": "0040-718X",
-				"url": "http://www.time.com/time/nation/article/0,8599,2099187,00.html",
+				"itemID": "http://www.time.com/time/nation/article/0,8599,2099187,00.html",
 				"title": "How the U.S. Postal Service Fell Apart",
+				"source": "TIME.com",
+				"publicationTitle": "Time",
+				"url": "http://www.time.com/time/nation/article/0,8599,2099187,00.html",
 				"abstractNote": "Battling debilitating congressional mandates and competition online, the USPS is closing thousands of post offices and struggling to find a place in the modern world. But there are people behind the scenes trying to save this American institution",
-				"date": "November 17, 2011",
-				"libraryCatalog": "Time.com",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"date": "Thursday, Nov. 17, 2011",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.time.com",
+				"ISSN": "0040-718X"
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://search.time.com/results.html?N=0&Nty=1&p=0&cmd=tags&srchCat=Full+Archive&Ntt=labor+union&x=0&y=0",
-		"items": "multiple"
+		"url": "http://www.time.com/time/nation/article/0,8599,2108263,00.html",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"creators": [
+					{
+						"firstName": "Cary",
+						"lastName": "Stemle",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"weather",
+					"storm",
+					"tornado",
+					"henryville",
+					"indiana",
+					"kentucky",
+					"destruction"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"itemID": "http://www.time.com/time/nation/article/0,8599,2108263,00.html",
+				"title": "On Scene in Indiana and Kentucky: When the Tornadoes Came",
+				"source": "TIME.com",
+				"publicationTitle": "Time",
+				"url": "http://www.time.com/time/nation/article/0,8599,2108263,00.html",
+				"abstractNote": "The month of March isn't really the heart of the tornado season but they have come fast and with awesome destruction.",
+				"date": "Sunday, Mar. 04, 2012",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.time.com",
+				"shortTitle": "On Scene in Indiana and Kentucky",
+				"ISSN": "0040-718X"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.time.com/time/nation/article/0,8599,2108241,00.html",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"creators": [
+					{
+						"firstName": "JIM",
+						"lastName": "SUHR",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "KEN",
+						"lastName": "KUSMER",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"weather",
+					"indiana",
+					"kentucky",
+					"missouri",
+					"tornadoes",
+					"death",
+					"medical,"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"itemID": "http://www.time.com/time/nation/article/0,8599,2108241,00.html",
+				"title": "38 Dead After Storms Pummel Midwest and South",
+				"source": "TIME.com",
+				"publicationTitle": "Time",
+				"url": "http://www.time.com/time/nation/article/0,8599,2108241,00.html",
+				"abstractNote": "From the Gulf Coast to the Great Lakes, the storms touched nearly all walks of life. A fire station was flattened. Roofs were ripped off schools",
+				"date": "Saturday, Mar. 03, 2012",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.time.com",
+				"ISSN": "0040-718X"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://swampland.time.com/2012/03/04/obama-courts-aipac-before-netanyahu-meeting/?iid=sl-main-lede",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"creators": [
+					{
+						"firstName": "Jay",
+						"lastName": "Newton-Small",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"barack obama",
+					"aipac",
+					"bibi",
+					"iran",
+					"israel",
+					"mahmoud ahamadinejad",
+					"netanyahu",
+					"obama",
+					"speech",
+					"washington"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"itemID": "http://swampland.time.com/2012/03/04/obama-courts-aipac-before-netanyahu-meeting/?iid=sl-main-lede",
+				"title": "Obama Courts AIPAC Before Netanyahu Meeting | Swampland | TIME.com",
+				"source": "TIME.com",
+				"publicationTitle": "Time",
+				"url": "http://swampland.time.com/2012/03/04/obama-courts-aipac-before-netanyahu-meeting/?iid=sl-main-lede",
+				"abstractNote": "Obama rejected any notion that his administration has not been in Israel's corner. “Over the last three years, as President of the United States, I have kept my commitments to the state of Israel.\" The President then ticked off the number of ways he has supported Israel in the last year.",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "swampland.time.com",
+				"ISSN": "0040-718X"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://moneyland.time.com/2012/03/02/struggling-to-stay-afloat-number-of-underwater-homeowners-keeps-on-rising/?iid=pf-main-lede",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"creators": [
+					{
+						"firstName": "Brad",
+						"lastName": "Tuttle",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"california real estate",
+					"economics & policy",
+					"florida real estate",
+					"mortgages",
+					"real estate & homes",
+					"real estate markets",
+					"the economy",
+					"arizona",
+					"baltimore",
+					"california",
+					"dallas",
+					"florida",
+					"georgia",
+					"nevada",
+					"sunbelt",
+					"underwater",
+					"upside-down"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"itemID": "http://moneyland.time.com/2012/03/02/struggling-to-stay-afloat-number-of-underwater-homeowners-keeps-on-rising/?iid=pf-main-lede",
+				"title": "Underwater Homeowner Numbers Keep on Rising | Moneyland | TIME.com",
+				"source": "TIME.com",
+				"publicationTitle": "Time",
+				"url": "http://moneyland.time.com/2012/03/02/struggling-to-stay-afloat-number-of-underwater-homeowners-keeps-on-rising/?iid=pf-main-lede",
+				"abstractNote": "Despite signs that some housing markets are improving, the overall trend is for home prices (and values) to keep dropping—and dropping. As values shrink, more and more homeowners find themselves underwater, the unfortunate scenario in which one owes more on the mortgage than the home is worth.",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "moneyland.time.com",
+				"ISSN": "0040-718X"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
