@@ -1,14 +1,14 @@
 {
 	"translatorID": "882f70a8-b8ad-403e-bd76-cb160224999d",
 	"label": "Vanderbilt eJournals",
-	"creator": "Michael Berkowitz",
+	"creator": "Michael Berkowitz and Aurimas Vinckevicius",
 	"target": "http://ejournals.library.vanderbilt.edu/",
-	"minVersion": "1.0.0b4.r5",
+	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
+	"browserSupport": "gcs",
 	"lastUpdated": "2012-03-03 20:38:58"
 }
 
