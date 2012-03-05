@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-05 02:02:51"
+	"lastUpdated": "2012-03-05 08:17:03"
 }
 
 function detectWeb(doc, url) {
@@ -300,16 +300,16 @@ var testCases = [
 					"real estate & homes",
 					"real estate markets",
 					"the economy",
-					"arizona",
-					"baltimore",
-					"california",
-					"dallas",
-					"florida",
 					"georgia",
-					"nevada",
-					"sunbelt",
+					"california",
+					"arizona",
+					"florida",
+					"dallas",
+					"baltimore",
 					"underwater",
-					"upside-down"
+					"nevada",
+					"upside-down",
+					"sunbelt"
 				],
 				"seeAlso": [],
 				"attachments": [

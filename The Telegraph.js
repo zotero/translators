@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-05 01:45:49"
+	"lastUpdated": "2012-03-05 08:19:20"
 }
 
 function createExcludes(url, excludeArr) {
@@ -195,7 +195,7 @@ var testCases = [
 		"url": "http://blogs.telegraph.co.uk/news/cristinaodone/100141152/putin-wins-the-russian-election-but-it-wont-be-long-before-hes-in-trouble/",
 		"items": [
 			{
-				"itemType": "newspaperArticle",
+				"itemType": "blogPost",
 				"creators": [
 					{
 						"firstName": "Cristina",
