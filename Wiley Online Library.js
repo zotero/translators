@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-04 18:15:07"
+	"lastUpdated": "2012-03-04 18:40:38"
 }
 
 /*
@@ -126,8 +126,7 @@ function scrape(doc, url) {
 			} else {
 				var keywords = ZU.xpathText(doc, '//meta[@name="citation_keywords"]/@content');
 				if(keywords) {
-					item.tags = ZU.unescapeHTML(
-									ZU.text2html(keywords)).split(', ');
+					item.tags = keywords.split(', ');
 				}
 				item.rights = ZU.xpathText(doc, '//div[@id="titleMeta"]//p[@class="copyright"]');
 				item.abstractNote = ZU.xpathText(doc, '//div[@id="abstract"]/div[@class="para"]', null, "\n");
