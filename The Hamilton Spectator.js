@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-30 22:42:12"
+	"lastUpdated": "2012-03-05 03:14:39"
 }
 
 function detectWeb(doc, url) {
-	if (doc.location.href.match("SearchResults")) {
+	if (url.indexOf("SearchResults") != -1) {
 		return "multiple";
-	} else if (doc.location.href.match("article")) {
+	} else if (url.indexOf("article") != -1) {
 		return "newspaperArticle";
 	}
 }
@@ -70,7 +70,10 @@ function scrape(doc, url) {
 	
 	var xPathTitle = '//h1';
 	newItem.title = doc.evaluate(xPathTitle, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;	
-	
+
+	newItem.abstractNote = ZU.xpathText(doc, '//meta[@name="Description"]/@content');
+	newItem.date = ZU.xpathText(doc, '//span[contains(@class,"ts-publishdate")]');
+
 	newItem.url = doc.location.href;
 	newItem.publicationTitle = "The Hamilton Spectator";
 
@@ -83,8 +86,6 @@ function doWeb(doc, url) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
 	
-	var articles = new Array();
-	
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		
@@ -94,15 +95,18 @@ function doWeb(doc, url) {
 		while (next_title = titles.iterateNext()) {
 				items[next_title.href] = next_title.textContent;
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
+		Zotero.selectItems(items, function(items) {
+			if(!items) return true;
+
+			var articles = new Array();
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, function(doc) { scrape(doc, doc.location.href) });
+		});
 	} else {
-		articles = [url];
+		scrape(doc, url);
 	}
-	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-	Zotero.wait();
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -123,6 +127,8 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"title": "Expert calls Occupy demos most important in generations",
+				"abstractNote": "The Occupy protest is the most important democratic social movement of the last two generations and demonstrators who have taken over parks and other",
+				"date": "Wed Nov 16 2011",
 				"url": "http://www.thespec.com/news/ontario/article/626278--expert-calls-occupy-demos-most-important-in-generations",
 				"publicationTitle": "The Hamilton Spectator",
 				"libraryCatalog": "The Hamilton Spectator",
