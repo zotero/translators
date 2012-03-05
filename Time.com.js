@@ -9,13 +9,16 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-04 19:56:38"
+	"lastUpdated": "2012-03-05 02:02:51"
 }
 
 function detectWeb(doc, url) {
+	/* Disabled because Time.com searches use search.time.com, which means
+		links are not accessible.
 	if (url.indexOf('results.html') != -1) {
 		return "multiple";
-	} else if ( ZU.xpathText(doc, '//meta[@name="og:type" or @property="og:type"]/@content') == 'article') {
+	} else */
+	if ( ZU.xpathText(doc, '//meta[@name="og:type" or @property="og:type"]/@content') == 'article') {
 		return "magazineArticle";
 	}
 }
@@ -79,7 +82,13 @@ function scrape(doc, url) {
 function doWeb(doc, url) {
 	var urls = new Array();
 	if (detectWeb(doc, url) == 'multiple') {
-		var items = ZU.getItemArray(doc, doc.getElementsByTagName("h3"), '^https?://[^/]*time.com/.*\.html$', 'covers');
+		var origin = doc.location.protocol + '//' + doc.location.host +
+			( (doc.location.port) ? ':' + doc.location.port : '' ) + '/';
+
+		var items = ZU.getItemArray(doc, doc.getElementsByTagName("h3"),
+				//SOP checking
+				'(?:^' + origin + '.*\.html$|^/)', 'covers');
+
 		Zotero.selectItems(items, function(selectedItems) {
 			if (!selectedItems) return true;
 		
@@ -134,11 +143,6 @@ var testCases = [
 				"ISSN": "0040-718X"
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://search.time.com/results.html?N=0&Nty=1&p=0&cmd=tags&srchCat=Full+Archive&Ntt=labor+union&x=0&y=0",
-		"items": "multiple"
 	},
 	{
 		"type": "web",
