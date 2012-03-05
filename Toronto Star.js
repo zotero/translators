@@ -3,19 +3,19 @@
 	"label": "Toronto Star",
 	"creator": "Adam Crymble, Avram Lyon",
 	"target": "^http://www\\.thestar\\.com",
-	"minVersion": "2.1.9",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsb",
-	"lastUpdated": "2011-09-05 02:15:00"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-03-03 02:27:13"
 }
 
 function detectWeb(doc, url) {
-	if (doc.location.href.match("search") && !doc.location.href.match("classifieds")) {
+	if (url.indexOf("search") != -1 && url.indexOf("classifieds") == -1) {
 		return "multiple";
-	} else if (doc.location.href.match("article")) {
+	} else if (url.indexOf("article") != -1) {
 		return "newspaperArticle";
 	}
 }
@@ -23,41 +23,32 @@ function detectWeb(doc, url) {
 //Toronto Star translator. code by Adam Crymble
 
 function scrape(doc, url) {
-	if (!ZU) ZU = Zotero.Utilities;
-
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;	
-	
 	var newItem = new Zotero.Item("newspaperArticle");
-	
-	var date = doc.evaluate('//span[@class="ts-label_published"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+
+	var date = ZU.xpathText(doc, '//span[@class="ts-label_published"]');
 	if(date) {
-		newItem.date = date.textContent.replace(/Published On/,'');
+		newItem.date = date.replace(/Published On/,'');
 	}
 	
-	var abstractNote = doc.evaluate('//meta[@property="og:description"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-	if(abstractNote) newItem.abstractNote = abstractNote.content;
-	
-	var authorNode = doc.evaluate('//div[@class="td-author"]/span[@class="ts-label"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	newItem.abstractNote = ZU.xpathText(doc, '//meta[@property="og:description"]');
+
+	var authorNode = ZU.xpath(doc, '//div[@class="td-author"]/span[@class="ts-label"]');
 	var author;
-	while (author = authorNode.iterateNext()) {
-		author = author.textContent;
-		if (author.toUpperCase() == author) author = ZU.capitalizeTitle(author.toLowerCase(),true);
+	for(var i=0, n=authorNode.length; i<n; i++) {
+		author = authorNode[i].textContent;
+		author = ZU.capitalizeTitle(author.toLowerCase(),true);
 		newItem.creators.push(ZU.cleanAuthor(author.replace(/^By\s*/,'')));
 	}
 
-	var xPathTitle = '//h1[@class="ts-article_header"]';
-	newItem.title = doc.evaluate(xPathTitle, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;	
+	newItem.title = ZU.xpathText(doc, '//h1[@class="ts-article_header"]');	
 
 	// The section is the first listed keyword
-	var keywords = doc.evaluate('//meta[@name="Keywords"][@content]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-	if (keywords) newItem.section = keywords.content.split(',').shift();
+	var keywords = ZU.xpath(doc, '//meta[@name="Keywords"][@content]')[0];
+	if (keywords) newItem.section = keywords.textContent.split(',')[0];
 
-	newItem.attachments.push({document:doc, title:"Toronto Star Snapshot"});
+	newItem.attachments.push({document:doc, title:"Toronto Star Snapshot", mimeType:'text/html'});
 
-	newItem.url = doc.location.href;
+	newItem.url = url;
 	newItem.publicationTitle = "The Toronto Star";
 	newItem.ISSN = "0319-0781";
 
@@ -65,30 +56,17 @@ function scrape(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
-	var articles = new Array();
-	
 	if (detectWeb(doc, url) == "multiple") {
-		var items = new Object();
-		
-		var titles = doc.evaluate('//a', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		
-		var next_title;
-		while (next_title = titles.iterateNext()) {
-			if (next_title.href.match("http://www.thestar.com") && next_title.href.match("article") && !next_title.href.match("generic") && !next_title.href.match("static")) {
-				items[next_title.href] = next_title.textContent;
+		var items = ZU.getItemArray(doc, ZU.xpath(doc, '//li[@class="td-search_item"]'), /thestar\.com/);
+
+		Zotero.selectItems(items, function(selectedItems) {
+			if(!selectedItems) return true;
+			var articles = new Array();
+			for (var i in selectedItems) {
+				articles.push(i);
 			}
-		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
-		Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-		Zotero.wait();
+			ZU.processDocuments(articles, function(doc) { scrape(doc, doc.location.href) });
+		});
 	} else {
 		scrape(doc, url);
 	}
@@ -108,18 +86,17 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"document": false,
-						"title": "Toronto Star Snapshot"
+						"title": "Toronto Star Snapshot",
+						"mimeType": "text/html"
 					}
 				],
-				"date": "2010/01/26 10:34:00",
-				"abstractNote": "France's National Assembly should pass a resolution denouncing full Muslim face veils and then vote the strictest law possible to ban women from wearing them, a parliamentary commission proposed on Tuesday.",
+				"date": "Tue Jan 26 2010",
 				"title": "France should ban Muslim veils, commission says",
-				"section": "News",
 				"url": "http://www.thestar.com/news/world/article/755917--france-should-ban-muslim-veils-commission-says?bn=1",
 				"publicationTitle": "The Toronto Star",
 				"ISSN": "0319-0781",
-				"libraryCatalog": "Toronto Star"
+				"libraryCatalog": "Toronto Star",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -140,21 +117,25 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"document": false,
-						"title": "Toronto Star Snapshot"
+						"title": "Toronto Star Snapshot",
+						"mimeType": "text/html"
 					}
 				],
-				"date": "2011/07/29 21:43:00",
-				"abstractNote": "There’s no reason why Ontario can’t regain the momentum it once had.",
+				"date": "Fri Jul 29 2011",
 				"title": "Hamilton: Ontario should reconsider offshore wind",
-				"section": "Business",
 				"url": "http://www.thestar.com/business/cleanbreak/article/1031551--hamilton-ontario-should-reconsider-offshore-wind",
 				"publicationTitle": "The Toronto Star",
 				"ISSN": "0319-0781",
 				"libraryCatalog": "Toronto Star",
+				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Hamilton"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.thestar.com/searchresults?AssetType=article&stype=genSearch&q=storm&r=all:1",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

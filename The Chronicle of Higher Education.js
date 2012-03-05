@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-10-23 15:18:54"
+	"lastUpdated": "2012-03-05 03:55:36"
 }
 
 /*
@@ -245,7 +245,6 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": false,
 						"title": "Chronicle of Higher Education Snapshot",
 						"mimeType": "text/html"
 					}
@@ -255,8 +254,11 @@ var testCases = [
 				"ISSN": "0009-5982",
 				"date": "June 16, 2006",
 				"title": "Grinnell's Green Secrets",
-				"section": "News",
-				"libraryCatalog": "The Chronicle of Higher Education"
+				"section": "News : Short Subjects",
+				"pages": "A9",
+				"edition": "Volume 52, Issue 41",
+				"libraryCatalog": "The Chronicle of Higher Education",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
