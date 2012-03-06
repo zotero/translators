@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-30 22:42:48"
+	"lastUpdated": "2012-03-05 04:34:44"
 }
 
 /*
@@ -59,6 +59,44 @@
  in lieu of up-to-date translator documentation.
  */
 
+function scrape(doc, url) {
+	var n = doc.documentElement.namespaceURI;
+	var ns = n ? function(prefix) {
+		if (prefix == 'x') return n; else return null;
+	} : null;
+	
+	item = new Zotero.Item("book");
+	item.title = Zotero.Utilities.trimInternal(
+		doc.evaluate('//div[@class="description"]/h1', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent
+	);
+	
+	var author = doc.evaluate('//a[@class="author_link"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	// Authors here are Last Name, First initial(s) (ФИО)
+	var spaceIndex = author.lastIndexOf(" ");
+	var firstName = author.substring(spaceIndex+1);
+	var lastName = author.substring(0, spaceIndex);
+	item.creators.push({firstName:firstName, lastName:lastName, creatorType:"author"});
+	
+	var info = doc.evaluate('//p[@class="summary"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	var pub = info.match(/(Нәшрият|Издательство): (.+)/);
+	var publisher = pub[2];
+	yr = info.match(/(Нәшрият|Издательство): (.+),\s+(\d+)\s(ел|г)\./);
+	var year = yr[3];
+
+	var pagematch = info.match(/(\d+) (бит|страница|страниц|страницы)/);
+	var pages = pagematch[1];
+	item.publisher = Zotero.Utilities.trimInternal(publisher);
+	item.date = Zotero.Utilities.trimInternal(year);
+	item.numPages = pages;
+	
+	var description = doc.evaluate('//div[@class="description"]/p[2]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	item.abstractNote = description;
+	
+	item.url = url;
+	
+	item.complete();
+}
+
 function detectWeb(doc, url) {
 	if (url.match("books/search?")) {
 		return "multiple";
@@ -73,8 +111,7 @@ function doWeb(doc, url) {
 	var ns = n ? function(prefix) {
 		if (prefix == 'x') return n; else return null;
 	} : null;
-	
-	var books = new Array();
+
 	if (detectWeb(doc, url) == "multiple") {
 		var tablerow = doc.evaluate('//table[@class="books_list"]/tbody/tr', doc, ns, XPathResult.ANY_TYPE, null);
 		var items = new Array();
@@ -85,48 +122,17 @@ function doWeb(doc, url) {
 			var url = link.href;
 			items[url] = title;
 		}
-		items = Zotero.selectItems(items);
-		if(!items) return true;
-		for (var i in items) {
-			books.push(i);
-		}
+		Zotero.selectItems(items, function(items) {
+			if(!items) return true;
+			var books = new Array();
+			for (var i in items) {
+				books.push(i);
+			}
+			ZU.processDocuments(books, function(doc){ scrape(doc, doc.location.href) });
+		});
 	} else {
-		books = [url];
+		scrape(doc, url);
 	}
-	
-	Zotero.Utilities.processDocuments(books, function(doc) {
-		item = new Zotero.Item("book");
-		item.title = Zotero.Utilities.trimInternal(
-			doc.evaluate('//div[@class="description"]/h1', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent
-		);
-		
-		var author = doc.evaluate('//a[@class="author_link"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		// Authors here are Last Name, First initial(s) (ФИО)
-		var spaceIndex = author.lastIndexOf(" ");
-		var firstName = author.substring(spaceIndex+1);
-		var lastName = author.substring(0, spaceIndex);
-		item.creators.push({firstName:firstName, lastName:lastName, creatorType:"author"});
-		
-		var info = doc.evaluate('//p[@class="summary"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		var pub = info.match(/(Нәшрият|Издательство): (.+)/);
-		var publisher = pub[2];
-		yr = info.match(/(Нәшрият|Издательство): (.+),\s+(\d+)\s(ел|г)\./);
-		var year = yr[3];
-	
-		var pagematch = info.match(/(\d+) (бит|страница|страниц|страницы)/);
-		var pages = pagematch[1];
-		item.publisher = Zotero.Utilities.trimInternal(publisher);
-		item.date = Zotero.Utilities.trimInternal(year);
-		item.numPages = pages;
-		
-		var description = doc.evaluate('//div[@class="description"]/p[2]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		item.abstractNote = description;
-		
-		item.url = url;
-		
-		item.complete();
-	}, function() {Zotero.done();});
-	Zotero.wait();
 }
 /** BEGIN TEST CASES **/
 var testCases = [

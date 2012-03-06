@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-30 22:42:35"
+	"lastUpdated": "2012-03-05 04:27:32"
 }
 
 /*
@@ -52,13 +52,13 @@ function detectWeb(doc, url) {
 	var taz_Multiple_XPath = ".//*[@id='hauptspalte']/div/ul/li/a/h3";
 	var taz_Search_XPath = ".//*[@id='hauptspalte']/div/div/ul/li/a/h3";	
 	if (doc.evaluate(taz_ArticleTitle_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
-		Zotero.debug("newspaperArticle");
+		//Zotero.debug("newspaperArticle");
 		return "newspaperArticle";
 	} else if (doc.evaluate(taz_Multiple_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
-		Zotero.debug("multiple");
+		//Zotero.debug("multiple");
 		return "multiple";
 	}  else if (doc.evaluate(taz_Search_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
-		Zotero.debug("multiple");
+		//Zotero.debug("multiple");
 		return "multiple";
 	}
 }
@@ -147,7 +147,6 @@ function doWeb(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
-	var articles = new Array();
 	
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
@@ -166,12 +165,15 @@ function doWeb(doc, url) {
 			items[next_title.href] = next_title.innerHTML;
 			items[next_title.href] = items[next_title.href].replace(/(\<h4.*?\>.*?\<\/h4\>\<h3.*?\>)(.*)\<\/h3\>.*/, '$2');
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
-		Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-		Zotero.wait();
+		items = Zotero.selectItems(items, function(items) {
+			if(!items) return true;
+
+			var articles = new Array();
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, function(doc) { scrape(doc, doc.location.href) });
+		});
 	} else {
 		scrape(doc, url);
 	}
@@ -210,6 +212,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://taz.de/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.taz.de/!s=bleibt/",
 		"items": "multiple"
 	}
 ]
