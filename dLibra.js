@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-03-03 13:42:04"
+	"lastUpdated": "2012-03-05 16:49:32"
 }
 
 /*
@@ -29,6 +29,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+//multiple test URL: http://bcul.lib.uni.lodz.pl/dlibra/results?action=SearchAction&skipSearch=true&mdirids=&server%3Atype=both&tempQueryType=-3&encode=false&isExpandable=on&isRemote=off&roleId=-3&queryType=-3&dirids=1&rootid=&query=Karte&localQueryType=-3&remoteQueryType=-2
 
 dd = Zotero.debug; // shortcut
 
@@ -170,11 +172,6 @@ function scrape(doc, url)
 }
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "http://bcul.lib.uni.lodz.pl/dlibra/results?action=SearchAction&skipSearch=true&mdirids=&server%3Atype=both&tempQueryType=-3&encode=false&isExpandable=on&isRemote=off&roleId=-3&queryType=-3&dirids=1&rootid=&query=Karte&localQueryType=-3&remoteQueryType=-2",
-		"items": "multiple"
-	},
 	{
 		"type": "web",
 		"url": "http://bcul.lib.uni.lodz.pl/dlibra/docmetadata?id=1247&from=&dirids=1&ver_id=&lp=2&QI=",
