@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2011-11-03 15:42:31"
+	"lastUpdated": "2012-03-06 16:08:03"
 }
 
 /*
@@ -251,21 +251,6 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "Nicholas",
-						"lastName": "Collins",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Nick",
-						"lastName": "Collins",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Julio",
-						"lastName": "d'Escriván",
-						"creatorType": "author"
-					},
-					{
 						"firstName": "Julio d' Escrivan",
 						"lastName": "Rincón",
 						"creatorType": "author"
@@ -273,19 +258,15 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Electronic music",
-					"Electronic music/ History and criticism",
 					"Electronic music - History and criticism",
+					"Electronic music/ History and criticism",
+					"Electronic music",
+					"Music / General",
 					"Music / Genres & Styles / Electronic",
 					"Music / History & Criticism",
-					"Music / General",
-					"Music / General",
+					"Music / Instruction & Study / Techniques",
 					"Music / Genres & Styles / Electronic",
-					"Music / History & Criticism",
-					"Music / Instruction & Study / General",
-					"Music / Musical Instruments / General",
-					"Music / Recording & Reproduction",
-					"Music / Songbooks"
+					"Music / History & Criticism"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -293,16 +274,16 @@ var testCases = [
 						"title": "Google Books Link",
 						"snapshot": false,
 						"mimeType": "text/html",
-						"url": false
+						"url": "http://books.google.com/books?id=AJbdPZv1DjgC"
 					}
 				],
-				"numPages": "313",
+				"numPages": "246",
 				"ISBN": "9780521868617",
 				"publisher": "Cambridge University Press",
 				"title": "The Cambridge companion to electronic music",
 				"language": "en",
-				"abstractNote": "Musicians are always quick to adopt and explore new technologies. The fast-paced changes wrought by electrification, from the microphone via the analogue synthesiser to the laptop computer, have led to a wide diversity of new musical styles and techniques. Electronic music has grown to a broad field of investigation, taking in historical movements such as musique concrète and elektronische musik, and contemporary trends such as electronic dance music and electronica. A fascinating array of composers and inventors have contributed to a diverse set of technologies, practices and music. This book brings together some novel threads through this scene, from the viewpoint of researchers at the forefront of the sonic explorations empowered by electronic technology. The chapters provide accessible and insightful overviews of core topic areas and uncover some hitherto less publicised corners of worldwide movements. Recent areas of intense activity such as audiovisuals, live electronic music, interactivity and network music are actively promoted.",
-				"date": "2007",
+				"abstractNote": "Musicians are always quick to adopt and explore new technologies. The fast-paced changes wrought by electrification, from the microphone via the analogue synthesiser to the laptop computer, have led to a wide diversity of new musical styles and techniques. Electronic music has grown to a broad field of investigation, taking in historical movements such as musique concrÃ¨te and elektronische musik, and contemporary trends such as electronic dance music and electronica. A fascinating array of composers and inventors have contributed to a diverse set of technologies, practices and music. This book brings together some novel threads through this scene, from the viewpoint of researchers at the forefront of the sonic explorations empowered by electronic technology. The chapters provide accessible and insightful overviews of core topic areas and uncover some hitherto less publicised corners of worldwide movements. Recent areas of intense activity such as audiovisuals, live electronic music, interactivity and network music are actively promoted.",
+				"date": "2007-12-13",
 				"libraryCatalog": "Google Books"
 			}
 		]
@@ -324,7 +305,8 @@ var testCases = [
 				"tags": [
 					"Garcia Marquez, Gabriel - Criticism and interpretation",
 					"Literary Criticism / Caribbean & Latin American",
-					"Literary Criticism / European / Spanish & Portuguese"
+					"Literary Criticism / European / Spanish & Portuguese",
+					"Literary Criticism / Caribbean & Latin American"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -369,8 +351,8 @@ var testCases = [
 					"Madison, Dolley",
 					"Monroe, Elizabeth",
 					"Washington, Martha",
-					"Women",
 					"Biography & Autobiography / General",
+					"Biography & Autobiography / Women",
 					"Biography & Autobiography / Women"
 				],
 				"seeAlso": [],
@@ -387,7 +369,7 @@ var testCases = [
 				"publisher": "Ayer Publishing",
 				"title": "Some American ladies: seven informal biographies ...",
 				"language": "en",
-				"date": "1926-06",
+				"date": "1926-06-01",
 				"libraryCatalog": "Google Books",
 				"shortTitle": "Some American ladies"
 			}

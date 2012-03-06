@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-11-03 15:36:22"
+	"lastUpdated": "2012-03-06 15:56:46"
 }
 
 /*
@@ -61,7 +61,7 @@ function doWeb(doc, url) {
 					title:"Blog Snapshot",
 					mimeType:"text/html"});
 		items[i].blogTitle = ZU.xpath(list[i], './/cite/a')[0].textContent;
-		node = ZU.xpath(list[i], './/div[@class="f kb"]')[0].textContent.match(/^(.*) by (.*)$/);
+		node = ZU.xpath(list[i], './/div[@class="f slp"]')[0].textContent.match(/^(.*) by (.*)$/);
 		if (node) {
 			items[i].date = node[1];
 			items[i].creators.push(Zotero.Utilities.cleanAuthor(node[2], "author"));
