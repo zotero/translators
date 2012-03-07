@@ -3,13 +3,13 @@
 	"label": "Sueddeutsche.de",
 	"creator": "Martin Meyerhoff",
 	"target": "^http://www\\.sueddeutsche\\.de",
-	"minVersion": "1.0",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2011-11-15 17:58:53"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-03-07 02:11:30"
 }
 
 /*
@@ -41,154 +41,108 @@ Reference article: http://www.sueddeutsche.de/wissen/embryonale-stammzellen-wo-s
 */
 
 function detectWeb(doc, url) {
-
-	// I use XPaths. Therefore, I need the following block.
-
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-
-	var SZ_ArticleTitle_XPath = ".//h2[@id='articleTitle']";
-	var SZ_Multiple_XPath = ".//*[contains(@class, 'maincolumn')]/ol/li/a|.//*[contains(@class, 'maincolumn')]/ol/li/ul/li/a";
-
-	if (doc.evaluate(SZ_ArticleTitle_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){
-		Zotero.debug("newspaperArticle");
+	if (ZU.xpathText(doc, '//*[@id="articleTitle"]')) {
 		return "newspaperArticle";
-	} else if (doc.evaluate(SZ_Multiple_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){
-		Zotero.debug("multiple");
+	} else if (ZU.xpath(doc, '//div[@id="topthemen" or @class="panoramateaser" \
+						or contains(@class,"maincolumn")]\
+						//a[starts-with(@class,"entry-title") \
+						and starts-with(@href,"http://www.sueddeutsche.de") \
+						and not(contains(@href,"/app/"))]').length){
 		return "multiple";
 	}
 }
 
-
 function scrape(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-
-	var title_XPath =".//h2[@id='articleTitle']";
-	// This is clumsy, but it excludes image galleries, which link fine but then are not articles. The closing bracket is right at the end of scrape().
-	if (doc.evaluate(title_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){
-
+	//don't parse things like image galleries
+	//e.g. http://www.sueddeutsche.de/kultur/thomas-manns-villa-in-los-angeles-weimar-am-pazifik-1.1301388
+	if(!ZU.xpathText(doc, '//*[@id="articleTitle"]')) return;
 
 	var newItem = new Zotero.Item("newspaperArticle");
-	newItem.url = doc.location.href;
+	newItem.url = url;
 
-
-	// This is for the title!
-
-	var title_XPath = '//meta[contains(@property, "og:title")]';
-	var title = doc.evaluate(title_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().content;
+	var title = ZU.xpathText(doc, '//meta[contains(@property, "og:title")]/@content');
 	newItem.title = Zotero.Utilities.trim(title.replace(/\s?–\s?/, ": "));
 
-	// Author. This is tricky, the SZ uses the author field for whatever they like. Sometimes, there is no author.
+	// Author. This is tricky, the SZ uses the author field for whatever they like.
+	// Sometimes, there is no author.
+	var author = ZU.xpathText(doc, '//span[contains(@class, "hcard fn")]');
+	// One case i've seen: A full sentence as the "author", with no author in it.
+	if (author && author.trim().charAt(author.length - 1) != '.') {
+		author = author.replace(/^Von\s/i, '')
+		// For multiple Authors, the SZ uses comma, und and u
+						.split(/\s+(?:und|u|,)\s+/);
 
-	var author_XPath = './/span[contains(@class, "hcard fn")]';
-
-	// If there is an author, use it. Otherwise: ""
-	if (doc.evaluate(author_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-		var author = doc.evaluate(author_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-
-		author = author.replace(/^Von\s/, '');
-	} else {
-		var author = "";
-	}
-
-	// One case i've seen: A full sentence as the "author", with no author in it. ""
-	if (author.match(/\.$/)){
-		author = "";
-	}
-
-	// For multiple Authors, the SZ uses comma, und and u. separate em, and put them into an array of strings.
-	author = author.split(/\sund\s|\su\.\s|\,\s/);
-	Zotero.debug(author);
-	for (var i in author) {
-		if (author[i].match(/\s/)) { // only names that contain a space!
-			newItem.creators.push(Zotero.Utilities.cleanAuthor(author[i], "author"));
+		for (var i in author) {
+			if (author[i].match(/\s/)) { // only names that contain a space!
+				newItem.creators.push(ZU.cleanAuthor(author[i], "author"));
+			}
 		}
 	}
 
-	// Now the summary
-	var summary_XPath = '//meta[contains(@property, "og:description")]';
-	var summary = doc.evaluate(summary_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().content;
-	newItem.abstractNote = summary;
+	// summary
+	newItem.abstractNote = ZU.xpathText(doc, '//meta[contains(@property, "og:description")]/@content');
 
 	// Date
-	var date_XPath = ".//*[@class='updated']/*[@class='value']";
-	var date = doc.evaluate(date_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	date = date.split(/\s/)[0];
-	newItem.date = date;
+	newItem.date = ZU.xpathText(doc, "//*[@class='updated']/*[@class='value']")
+				.split(/\s/)[0];
 
 	// Section
-	var section_XPath = "//meta[contains(@name, 'keywords')]";
-	var section= doc.evaluate(section_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().content;
-	section = section.split(",")[0];
-	newItem.section = section;
+	var section = url.match(/sueddeutsche\.de\/([^\/]+)/);
+	newItem.section = ZU.capitalizeTitle(section[1]);
 
 	// Tags
-	var tags_XPath = ".//ul[@class='themen']"
-	var tags= doc.evaluate(tags_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	tags = tags.replace(/^\s*|\s*$/g, '');
-	tags = tags.split(/\n/);
-	for (var i in tags) {
-			tags[i] = tags[i].replace(/^\s*|\s*$/g, '');
-			newItem.tags.push(tags[i]);
+	var tags = ZU.xpathText(doc, '//meta[@name="keywords"]/@content');
+	if(tags) {
+		tags = tags.split(/\s*,\s+/);
+		for (var i=0, n=tags.length; i<n; i++) {
+			newItem.tags.push(ZU.trimInternal(tags[i]));
+		}
 	}
 
-	// Publikation
+	// Publication
 	newItem.publicationTitle = "sueddeutsche.de"
 	newItem.ISSN = "0174-4917";
 	newItem.language = "de";
 
-	// Attachment. Difficult. They want something inserted into the URL.
-
-	var printurl = doc.location.href;
-	printurl = printurl.replace(/(.*\/)(.*$)/, '$12.220/$2'); //done!
-	Zotero.debug(printurl);
-	newItem.attachments.push({url:printurl, title:doc.title, mimeType:"text/html"});
+	// Attachment. inserting /2.220/ gives us a printable version
+	var printurl = url.replace(/(.*\/)(.*$)/, '$12.220/$2');
+	newItem.attachments.push( { url:printurl,
+								title:newItem.title,
+								mimeType:"text/html",
+								snapshot:true } );
 
 	newItem.complete()
-	}
-
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-
-	var articles = new Array();
-
 	if (detectWeb(doc, url) == "multiple") {
+		var links = ZU.xpath(doc,
+						'//div[@id="topthemen" or @class="panoramateaser" \
+						or contains(@class,"maincolumn")]\
+						//a[starts-with(@class,"entry-title") \
+						and starts-with(@href,"http://www.sueddeutsche.de") \
+						and not(contains(@href,"/app/"))]');
+
 		var items = new Object();
+		var title;
+		for(var i=0, n=links.length; i<n; i++) {
+			title = ZU.xpathText(links[i], './node()[not(self::div)]', null, '');
+			items[links[i].href] = ZU.trimInternal(title);
+		}
 
-		var titles = doc.evaluate(".//*[contains(@class, 'maincolumn')]/ol/li/a|.//*[contains(@class, 'maincolumn')]/ol/li/ul/li/a", doc, nsResolver, XPathResult.ANY_TYPE, null);
+		Zotero.selectItems(items, function(items) {
+			if(!items) return true;
 
-		var next_title;
-		while (next_title = titles.iterateNext()) {
-			if (next_title.href.match(/^http\:\/\/www\.sueddeutsche\.de/)) {
-				items[next_title.href] = Zotero.Utilities.trim(next_title.textContent);
-				items[next_title.href] =items[next_title.href].replace(/\n/, '');
-				items[next_title.href] =items[next_title.href].replace(/\s–|—/g, ': ');
-				items[next_title.href] =items[next_title.href].replace(/\s+/g, ' ');
+			var articles = new Array();
+			for (var i in items) {
+				articles.push(i);
 			}
-		}
-		items = Zotero.selectItems(items);
-		Zotero.debug(items);
-		for (var i in items) {
-			articles.push(i);
-		}
-		Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-		Zotero.wait();
+			ZU.processDocuments(articles, function(doc) { scrape(doc, doc.location.href) });
+		});
 	} else {
 		scrape(doc, url);
 	}
-}
-
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -210,23 +164,23 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Euro",
-					"Handy",
-					"Mein Kampf"
+					"Café",
+					"Süddeutsche Zeitung",
+					"SZ"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.sueddeutsche.de/politik/2.220/verdacht-gegen-hessischen-verfassungsschuetzer-spitzname-kleiner-adolf-1.1190178",
-						"title": "Verdacht gegen hessischen Verfassungsschützer - Spitzname \"Kleiner Adolf\" - Politik - sueddeutsche.de",
-						"mimeType": "text/html"
+						"title": "Verdacht gegen hessischen Verfassungsschützer: Spitzname \"Kleiner Adolf\"",
+						"mimeType": "text/html",
+						"snapshot": true
 					}
 				],
 				"url": "http://www.sueddeutsche.de/politik/verdacht-gegen-hessischen-verfassungsschuetzer-spitzname-kleiner-adolf-1.1190178",
 				"title": "Verdacht gegen hessischen Verfassungsschützer: Spitzname \"Kleiner Adolf\"",
 				"abstractNote": "Als die Zwickauer Zelle in einem Kasseler Internet-Café Halit Y. hinrichtet, surft ein hessischer Verfassungsschützer dort im Netz. In seiner Wohnung findet die Polizei später Hinweise auf eine rechtsradikale Gesinnung - doch die Ermittlungen gegen den Mann werden eingestellt. Dabei bleiben viele Fragen offen.",
 				"date": "2011-11-15",
-				"section": "Politik",
+				"section": "politik",
 				"publicationTitle": "sueddeutsche.de",
 				"ISSN": "0174-4917",
 				"language": "de",
