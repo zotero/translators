@@ -14,10 +14,10 @@
 
 /*
    DeGruyter (Replacing BE Press - based on BioMed Central Translator)
-   Copyright (C) 2012 Sebastian Karcher Avram Lyon, ajlyon@gmail.com
+   Copyright (C) 2012 Sebastian Karcher and Avram Lyon, ajlyon@gmail.com
 
    This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU Affer General Public License as published by
+   it under the terms of the GNU Affero General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
 
@@ -26,13 +26,10 @@
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Affero General Public License for more details.
 
-   You should have received a copy of the GNU Affer General Public License
+   You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*
-Translator completely rewritten by Avram Lyon to use RDF. Original target regex by Ben Parr.
- */
 
 function detectWeb(doc,url) {
 	var xpath='//meta[@name="citation_journal_title"]';
@@ -84,12 +81,12 @@ function doWeb(doc,url)
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.degruyter.com.turing.library.northwestern.edu/view/j/for.2011.9.issue-4/issue-files/for.2011.9.issue-4.xml",
+		"url": "http://www.degruyter.com/view/j/for.2011.9.issue-4/issue-files/for.2011.9.issue-4.xml",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.degruyter.com.turing.library.northwestern.edu/view/j/for.2011.8.4_20120105083457/for.2011.8.4/for.2011.8.4.1405/for.2011.8.4.1405.xml?format=INT",
+		"url": "http://www.degruyter.com/view/j/for.2011.8.4_20120105083457/for.2011.8.4/for.2011.8.4.1405/for.2011.8.4.1405.xml?format=INT",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -106,7 +103,7 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Full Text PDF",
-						"url": "http://www.degruyter.com.turing.library.northwestern.edu/dg/viewarticle.fullcontentlink:pdfeventlink/contentUri?format=INT&t:ac=j$002ffor.2011.8.4_20120105083457$002ffor.2011.8.4$002ffor.2011.8.4.1405$002ffor.2011.8.4.1405.xml",
+						"url": "http://www.degruyter.com/dg/viewarticle.fullcontentlink:pdfeventlink/contentUri?format=INT&t:ac=j$002ffor.2011.8.4_20120105083457$002ffor.2011.8.4$002ffor.2011.8.4.1405$002ffor.2011.8.4.1405.xml",
 						"mimeType": "application/pdf"
 					},
 					{
@@ -121,10 +118,10 @@ var testCases = [
 				"publicationTitle": "The Forum",
 				"volume": "8",
 				"issue": "4",
-				"url": "http://www.degruyter.com.turing.library.northwestern.edu/view/j/for.2011.8.4_20120105083457/for.2011.8.4/for.2011.8.4.1405/for.2011.8.4.1405.xml?format=INT",
+				"url": "http://www.degruyter.com/view/j/for.2011.8.4_20120105083457/for.2011.8.4/for.2011.8.4.1405/for.2011.8.4.1405.xml?format=INT",
 				"pages": "1-17",
 				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "www.degruyter.com.turing.library.northwestern.edu",
+				"libraryCatalog": "www.degruyter.com",
 				"abstractNote": "Democrats were trounced in the 2010 midterm elections. They lost six seats in the U.S. Senate, six governorships, and about 700 seats in state legislatures. Compared to 2008, Democrats lost 64 seats in the House and Republicans regained their House majority. The Republican majority elected in 2010 was the largest number of Republicans elected since 1946. The analysis finds that Republican seat gains resulted from the receding of the pro-Democratic waves of 2006 and 2008 as well as the incoming  pro-Republican wave of 2010. Voters rejected Democrats in 2010 for their failure to revive the economy, but also for their advancement of the national healthcare reform and other liberal policies. The analysis speculates that Democrats are likely to gain House seats and lose Senate seats in 2012. Finally, President Obama’s prospects of re-election have probably been improved because of the Republican gains in the 2010 midterm.",
 				"shortTitle": "The Midterm Landslide of 2010"
 			}
@@ -132,7 +129,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.degruyter.com.turing.library.northwestern.edu/view/j/ev.2010.7.4/ev.2010.7.4.1796/ev.2010.7.4.1796.xml?format=INT",
+		"url": "http://www.degruyter.com/view/j/ev.2010.7.4/ev.2010.7.4.1796/ev.2010.7.4.1796.xml?format=INT",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -149,7 +146,7 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Full Text PDF",
-						"url": "http://www.degruyter.com.turing.library.northwestern.edu/dg/viewarticle.fullcontentlink:pdfeventlink/contentUri?format=INT&t:ac=j$002fev.2010.7.4$002fev.2010.7.4.1796$002fev.2010.7.4.1796.xml",
+						"url": "http://www.degruyter.com/dg/viewarticle.fullcontentlink:pdfeventlink/contentUri?format=INT&t:ac=j$002fev.2010.7.4$002fev.2010.7.4.1796$002fev.2010.7.4.1796.xml",
 						"mimeType": "application/pdf"
 					},
 					{
@@ -164,10 +161,10 @@ var testCases = [
 				"publicationTitle": "The Economists' Voice",
 				"volume": "7",
 				"issue": "4",
-				"url": "http://www.degruyter.com.turing.library.northwestern.edu/view/j/ev.2010.7.4/ev.2010.7.4.1796/ev.2010.7.4.1796.xml?format=INT",
+				"url": "http://www.degruyter.com/view/j/ev.2010.7.4/ev.2010.7.4.1796/ev.2010.7.4.1796.xml?format=INT",
 				"pages": "1-2",
 				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "www.degruyter.com.turing.library.northwestern.edu",
+				"libraryCatalog": "www.degruyter.com",
 				"abstractNote": "William Nordhaus confuses the impact of a tax on carbon and a tax on carbon dioxide, according to Yoram Bauman.",
 				"shortTitle": "Comment on Nordhaus"
 			}
@@ -175,7 +172,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.degruyter.com.turing.library.northwestern.edu/searchwithinbase?source=%2Fj%2Fev.2010.7.4%2Fev.2010.7.4.1796%2Fev.2010.7.4.1796.xml&entryType=journal&q=senate&seriesSource=%2Fj%2Fev&issueSource=%2Fj%2Fev.2010.7.4%2Fissue-files%2Fev.2010.7.issue-4.xml&bookSource=&searchScope=bookseries",
+		"url": "http://www.degruyter.com/searchwithinbase?source=%2Fj%2Fev.2010.7.4%2Fev.2010.7.4.1796%2Fev.2010.7.4.1796.xml&entryType=journal&q=senate&seriesSource=%2Fj%2Fev&issueSource=%2Fj%2Fev.2010.7.4%2Fissue-files%2Fev.2010.7.issue-4.xml&bookSource=&searchScope=bookseries",
 		"items": "multiple"
 	}
 ]
