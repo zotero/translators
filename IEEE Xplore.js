@@ -9,14 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-11-04 02:26:29"
+	"lastUpdated": "2012-03-07 17:19:04"
 }
 
 function detectWeb(doc, url) {
 	var articleRe = /[?&]ar(N|n)umber=([0-9]+)/;
 	var m = articleRe.exec(url);
 
-	if(m) {
+	if (m) {
 		return "journalArticle";
 	} else {
 		return "multiple";
@@ -26,27 +26,22 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-
 	var hostRe = new RegExp("^(https?://[^/]+)/");
 	var hostMatch = hostRe.exec(url);
 
 	var articleRe = /[?&]ar(?:N|n)umber=([0-9]+)/;
 	var m = articleRe.exec(url);
 
-	if(detectWeb(doc, url) == "multiple") {
+	if (detectWeb(doc, url) == "multiple") {
 		// search page
 		var items = new Array();
 
 		var xPathRows = '//ul[@class="Results"]/li[@class="noAbstract"]/div[@class="header"]';
-		var tableRows = doc.evaluate(xPathRows, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var tableRows = doc.evaluate(xPathRows, doc, null, XPathResult.ANY_TYPE, null);
 		var tableRow;
-		while(tableRow = tableRows.iterateNext()) {
-			var linknode = doc.evaluate('.//div[@class="detail"]/h3/a', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			if(!linknode) {
+		while (tableRow = tableRows.iterateNext()) {
+			var linknode = doc.evaluate('.//div[@class="detail"]/h3/a', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext();
+			if (!linknode) {
 				// There are things like tables of contents that don't have item pages, so we'll just skip them
 				continue;
 			}
@@ -54,39 +49,46 @@ function doWeb(doc, url) {
 			var title = "";
 			var strongs = tableRow.getElementsByTagName("h3");
 			for each(var strong in strongs) {
-				if(strong.textContent) {
-					title += strong.textContent+" ";
+				if (strong.textContent) {
+					title += strong.textContent + " ";
 				}
 			}
 
 			items[link] = Zotero.Utilities.trimInternal(title);
 		}
 
-		items = Zotero.selectItems(items);
-		if(!items) return true;
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			var urls = new Array();
+			for (var i in items) {
+				// Some pages don't show the metadata we need (http://forums.zotero.org/discussion/16283)
+				// No data: http://ieeexplore.ieee.org/search/srchabstract.jsp?tp=&arnumber=1397982
+				// No data: http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1397982
+				// Data: http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1397982
+				var arnumber = i.match(/arnumber=(\d+)/)[1];
+				i = i.replace(/\/(?:search|stamp)\/.*$/, "/xpls/abs_all.jsp?arnumber=" + arnumber);
 
-		var urls = new Array();
-		for(var url in items) {
-			// Some pages don't show the metadata we need (http://forums.zotero.org/discussion/16283)
-			// No data: http://ieeexplore.ieee.org/search/srchabstract.jsp?tp=&arnumber=1397982
-			// No data: http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1397982
-			// Data: http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1397982
-			var arnumber = url.match(/arnumber=(\d+)/)[1];
-			url = url.replace(/\/(?:search|stamp)\/.*$/, "/xpls/abs_all.jsp?arnumber="+arnumber);
-			urls.push(url);
-		}
-		Zotero.Utilities.processDocuments(urls, scrape, function () { Zotero.done(); });
-		Zotero.wait();
+				urls.push(i);
+			}
+			Zotero.Utilities.processDocuments(urls, scrape, function () {
+				Zotero.done();
+			});
+			Zotero.wait();
+		});
+
 	} else {
-		if (url.indexOf("/search/") !== -1 || url.indexOf("/stamp/") !== -1
-			|| url.indexOf("/ielx4/") !== -1 || url.indexOf("/ielx5/") !== -1) {
+		if (url.indexOf("/search/") !== -1 || url.indexOf("/stamp/") !== -1 || url.indexOf("/ielx4/") !== -1 || url.indexOf("/ielx5/") !== -1) {
 			// Address the same missing metadata problem as above
 			// Also address issue of saving from PDF itself, I hope
 			// URL like http://ieeexplore.ieee.org/ielx4/78/2655/00080767.pdf?tp=&arnumber=80767&isnumber=2655
 			// Or: http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1575188&tag=1
 			var arnumber = url.match(/arnumber=(\d+)/)[1];
-			url = url.replace(/\/(?:search|stamp|ielx[45])\/.*$/, "/xpls/abs_all.jsp?arnumber="+arnumber);
-			Zotero.Utilities.processDocuments([url], scrape, function () { Zotero.done(); });
+			url = url.replace(/\/(?:search|stamp|ielx[45])\/.*$/, "/xpls/abs_all.jsp?arnumber=" + arnumber);
+			Zotero.Utilities.processDocuments([url], scrape, function () {
+				Zotero.done();
+			});
 			Zotero.wait();
 		} else {
 			scrape(doc, url);
@@ -97,18 +99,23 @@ function doWeb(doc, url) {
 function parseIdentifier(identifier) {
 	var idPieces = identifier.split(':');
 	if (idPieces.length > 1) {
-		 var prefix = idPieces.shift();
-		 switch (prefix.toLowerCase()) {
-			case "doi": return ["doi", idPieces.join(':')];
-			case "isbn": return ["isbn", idPieces.join(':')];
-			case "issn": return ["issn", idPieces.join(':')];
-			case "pmid": return ["pmid", idPieces.join(':')];
-			default: // do nothing
+		var prefix = idPieces.shift();
+		switch (prefix.toLowerCase()) {
+		case "doi":
+			return ["doi", idPieces.join(':')];
+		case "isbn":
+			return ["isbn", idPieces.join(':')];
+		case "issn":
+			return ["issn", idPieces.join(':')];
+		case "pmid":
+			return ["pmid", idPieces.join(':')];
+		default:
+			// do nothing
 		}
 		//Zotero.debug("Unknown identifier prefix '"+prefix+"'");
 		return [prefix, idPieces.join(':')];
 	}
-	if (identifer.substr(0,3) == '10.') return ["doi", identifier];
+	if (identifer.substr(0, 3) == '10.') return ["doi", identifier];
 
 	// If we're here, we have a funny number, and we don't know what to do with it.
 	var ids = idCheck(identifier);
@@ -122,96 +129,174 @@ function parseIdentifier(identifier) {
 function addIdentifier(identifier, item) {
 	var parsed = parseIdentifier(identifier);
 	switch (parsed[0]) {
-		case "doi": item.DOI = parsed[1]; break;
-		case "isbn": item.ISBN = parsed[1]; break;
-		case "isbn13": item.ISBN = parsed[1]; break;
-		case "isbn10": item.ISBN = parsed[1]; break;
-		case "issn": item.ISSN = parsed[1]; break;
-		default:
+	case "doi":
+		item.DOI = parsed[1];
+		break;
+	case "isbn":
+		item.ISBN = parsed[1];
+		break;
+	case "isbn13":
+		item.ISBN = parsed[1];
+		break;
+	case "isbn10":
+		item.ISBN = parsed[1];
+		break;
+	case "issn":
+		item.ISSN = parsed[1];
+		break;
+	default:
 	}
 }
 
-function scrape(doc,url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
+function scrape(doc, url) {
+	var newItem = new Zotero.Item("journalArticle");
+	var temp;
+	var xpath;
+	var row;
+	var rows;
 
-	   var newItem=new Zotero.Item("journalArticle");
-	   var temp;
-	   var xpath;
-	   var row;
-	   var rows;
+	newItem.attachments = [];
+	newItem.tags = [];
+	var metaTags = doc.getElementsByTagName("meta");
 
-	   newItem.attachments = [];
-	   newItem.tags = [];
-	   var metaTags = doc.getElementsByTagName("meta");
-
-	   var pages = [false, false];
-	   var doi = false;
-	   var pdf = false;
-	   var html = false;
-	for (var i = 0; i< metaTags.length; i++) {
+	var pages = [false, false];
+	var doi = false;
+	var pdf = false;
+	var html = false;
+	for (var i = 0; i < metaTags.length; i++) {
 		var tag = metaTags[i].getAttribute("name");
 		var value = metaTags[i].getAttribute("content");
 		//Zotero.debug(pages + pdf + html);
-	   		//Zotero.debug("Have meta tag: " + tag + " => " + value);
+		//Zotero.debug("Have meta tag: " + tag + " => " + value);
 		switch (tag) {
 			// PRISM
-			case "prism.publicationName": newItem.publicationTitle = value; break;
-			case "prism.issn": if (!newItem.ISSN && value != "NaN" && value != "") newItem.ISSN = value; break;
-			case "prism.eIssn": if (!newItem.ISSN && value != "NaN" && value != "") newItem.ISSN = value; break;
+		case "prism.publicationName":
+			newItem.publicationTitle = value;
+			break;
+		case "prism.issn":
+			if (!newItem.ISSN && value != "NaN" && value != "") newItem.ISSN = value;
+			break;
+		case "prism.eIssn":
+			if (!newItem.ISSN && value != "NaN" && value != "") newItem.ISSN = value;
+			break;
 			// This is often NaN for some reason
-			case "prism.publicationDate": if (!newItem.date && value != "NaN" && value !== "") newItem.date = value; break;
-			case "prism.volume": if (!newItem.volume && value != "NaN" && value != "") newItem.volume = value; break;
-			case "prism.number": if (!newItem.issue && value != "NaN" && value != "") newItem.issue = value; break;
+		case "prism.publicationDate":
+			if (!newItem.date && value != "NaN" && value !== "") newItem.date = value;
+			break;
+		case "prism.volume":
+			if (!newItem.volume && value != "NaN" && value != "") newItem.volume = value;
+			break;
+		case "prism.number":
+			if (!newItem.issue && value != "NaN" && value != "") newItem.issue = value;
+			break;
 			// These also seem bad
-			case "prism.startingPage": if(!pages[0] && value != "null" && value != "") pages[0] = value; break;
-			case "prism.endingPage": if(!pages[1] && value != "null" && value != "") pages[1] = value; break;
-			case "prism.number": newItem.issue = value; break;
+		case "prism.startingPage":
+			if (!pages[0] && value != "null" && value != "") pages[0] = value;
+			break;
+		case "prism.endingPage":
+			if (!pages[1] && value != "null" && value != "") pages[1] = value;
+			break;
+		case "prism.number":
+			newItem.issue = value;
+			break;
 			// Google.
-			case "citation_journal_title": if (!newItem.publicationTitle) newItem.publicationTitle = value; break;
-			case "citation_authors":
-			case "citation_author":
-				// I'm a little concerned we'll see multiple copies of the author names...
-				for each(var author in value.split(';'))
-					newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author", true));
-				break;
-			case "citation_title": if (!newItem.title) newItem.title = value; break;
-			case "citation_publisher": if (!newItem.publisher) newItem.publisher = value; break;
-			case "citation_date": if (!newItem.date && value != "NaN" && value != "") newItem.date = value; break;
-			case "citation_year": if (!newItem.date && value != "NaN" && value != "") newItem.date = value; break;
-			case "citation_volume": if (!newItem.volume && value != "NaN" && value != "") newItem.volume = value; break;
-			case "citation_issue": if (!newItem.issue && value != "NaN" && value != "") newItem.issue = value; break;
-			case "citation_firstpage": if (!pages[0] && value != "NaN" && value != "") pages[0] = value; break;
-			case "citation_lastpage": if (!pages[1] && value != "NaN" && value != "") pages[1] = value; break;
-			case "citation_issn": if (!newItem.ISSN && value != "NaN" && value != "") newItem.ISSN = value; break;
-			case "citation_isbn": if (!newItem.ISBN && value != "NaN" && value != "") newItem.ISBN = value; break;
+		case "citation_journal_title":
+			if (!newItem.publicationTitle) newItem.publicationTitle = value;
+			break;
+		case "citation_authors":
+		case "citation_author":
+			// I'm a little concerned we'll see multiple copies of the author names...
+			for each(var author in value.split(';'))
+			newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author", true));
+			break;
+		case "citation_title":
+			if (!newItem.title) newItem.title = value;
+			break;
+		case "citation_publisher":
+			if (!newItem.publisher) newItem.publisher = value;
+			break;
+		case "citation_date":
+			if (!newItem.date && value != "NaN" && value != "") newItem.date = value;
+			break;
+		case "citation_year":
+			if (!newItem.date && value != "NaN" && value != "") newItem.date = value;
+			break;
+		case "citation_volume":
+			if (!newItem.volume && value != "NaN" && value != "") newItem.volume = value;
+			break;
+		case "citation_issue":
+			if (!newItem.issue && value != "NaN" && value != "") newItem.issue = value;
+			break;
+		case "citation_firstpage":
+			if (!pages[0] && value != "NaN" && value != "") pages[0] = value;
+			break;
+		case "citation_lastpage":
+			if (!pages[1] && value != "NaN" && value != "") pages[1] = value;
+			break;
+		case "citation_issn":
+			if (!newItem.ISSN && value != "NaN" && value != "") newItem.ISSN = value;
+			break;
+		case "citation_isbn":
+			if (!newItem.ISBN && value != "NaN" && value != "") newItem.ISBN = value;
+			break;
 			// Prefer long language names
-			case "citation_language": if ((!newItem.language || newItem.language.length < 4)
-								&& value != "null" && value != "") newItem.language = value; break;
-			case "citation_doi": if (!newItem.DOI) newItem.DOI = value; break;
-			case "citation_conference":
-						 newItem.itemType = "conferencePaper";
-						 newItem.conferenceName = value;
-						 break;
-			case "citation_abstract": newItem.abstractNote = value; break;
-			case "citation_abstract_html_url": newItem.attachments.push({url:value, title:"IEEE Xplore Abstract Record", snapshot:false}); break;
-			case "citation_pdf_url": if(!pdf) pdf = value; break;
-			case "citation_keywords": newItem.tags.push(value); break;
-			case "citation_fulltext_html_url": if(!pdf) pdf = value; break;
-			case "fulltext_pdf": if(!pdf) pdf = value; break;
+		case "citation_language":
+			if ((!newItem.language || newItem.language.length < 4) && value != "null" && value != "") newItem.language = value;
+			break;
+		case "citation_doi":
+			if (!newItem.DOI) newItem.DOI = value;
+			break;
+		case "citation_conference":
+			newItem.itemType = "conferencePaper";
+			newItem.conferenceName = value;
+			break;
+		case "citation_abstract":
+			newItem.abstractNote = value;
+			break;
+		case "citation_abstract_html_url":
+			newItem.attachments.push({
+				url: value,
+				title: "IEEE Xplore Abstract Record",
+				snapshot: false
+			});
+			break;
+		case "citation_pdf_url":
+			if (!pdf) pdf = value;
+			break;
+		case "citation_keywords":
+			newItem.tags.push(value);
+			break;
+		case "citation_fulltext_html_url":
+			if (!pdf) pdf = value;
+			break;
+		case "fulltext_pdf":
+			if (!pdf) pdf = value;
+			break;
 			// Dublin Core
-			case "dc.publisher": if(!newItem.publisher) newItem.publisher = value; break;
-			case "dc.language": if(!newItem.language) newItem.language = value; break;
-			case "dc.rights": if(!newItem.rights) newItem.rights = value; break;
-			case "dc.title": if(!newItem.title) newItem.title = value; break;
-			case "dc.creator": if(!newItem.creators.length == 0) newItem.creators.push(Zotero.Utilities.cleanAuthor(value)); break;
+		case "dc.publisher":
+			if (!newItem.publisher) newItem.publisher = value;
+			break;
+		case "dc.language":
+			if (!newItem.language) newItem.language = value;
+			break;
+		case "dc.rights":
+			if (!newItem.rights) newItem.rights = value;
+			break;
+		case "dc.title":
+			if (!newItem.title) newItem.title = value;
+			break;
+		case "dc.creator":
+			if (!newItem.creators.length == 0) newItem.creators.push(Zotero.Utilities.cleanAuthor(value));
+			break;
 			// This is often NaN for some reason
-			case "dc.date": if (!newItem.date && value != "NaN" && value !== "") newItem.date = value; break;
-			case "dc.identifier": addIdentifier(value, newItem); break;
-			default:
-				//Zotero.debug("Ignoring meta tag: " + tag + " => " + value);
+		case "dc.date":
+			if (!newItem.date && value != "NaN" && value !== "") newItem.date = value;
+			break;
+		case "dc.identifier":
+			addIdentifier(value, newItem);
+			break;
+		default:
+			//Zotero.debug("Ignoring meta tag: " + tag + " => " + value);
 		}
 	}
 
@@ -220,7 +305,10 @@ function scrape(doc,url) {
 		newItem.tags = newItem.tags[0].split(";");
 	}
 
-	if (html) newItem.attachments.push({url:html, title:"IEEE Xplore Full Text HTML"});
+	if (html) newItem.attachments.push({
+		url: html,
+		title: "IEEE Xplore Full Text HTML"
+	});
 
 	if (pages[0] && pages[1]) newItem.pages = pages.join('-')
 	else newItem.pages = pages[0] ? pages[1] : (pages[1] ? pages[1] : "");
@@ -232,7 +320,7 @@ function scrape(doc,url) {
 
 	// Abstracts don't seem to come with
 	if (!newItem.abstractNote) {
-		var abstractNode = doc.evaluate('//a[@name="Abstract"]/following-sibling::p[1]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		var abstractNode = doc.evaluate('//a[@name="Abstract"]/following-sibling::p[1]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 		if (abstractNode) newItem.abstractNote = Zotero.Utilities.trimInternal(abstractNode.textContent);
 	}
 
@@ -240,24 +328,27 @@ function scrape(doc,url) {
 	// Rearrange titles, per http://forums.zotero.org/discussion/8056
 	// If something has a comma or a period, and the text after comma ends with
 	//"of", "IEEE", or the like, then we switch the parts. Prefer periods.
-	if (res = (newItem.publicationTitle.indexOf(".") !== -1) ?
-				 newItem.publicationTitle.trim().match(/^(.*)\.(.*(?:of|on|IEE|IEEE|IET|IRE))$/) :
-				 newItem.publicationTitle.trim().match(/^(.*),(.*(?:of|on|IEE|IEEE|IET|IRE))$/))
-		newItem.publicationTitle = res[2]+" "+res[1];
+	if (res = (newItem.publicationTitle.indexOf(".") !== -1) ? newItem.publicationTitle.trim().match(/^(.*)\.(.*(?:of|on|IEE|IEEE|IET|IRE))$/) : newItem.publicationTitle.trim().match(/^(.*),(.*(?:of|on|IEE|IEEE|IET|IRE))$/)) newItem.publicationTitle = res[2] + " " + res[1];
 	newItem.proceedingsTitle = newItem.conferenceName = newItem.publicationTitle;
 
 	if (pdf) {
 		Zotero.Utilities.processDocuments([pdf], function (doc, url) {
-				var namespace = doc.documentElement.namespaceURI;
-				var nsResolver = namespace ? function(prefix) {
-				if (prefix == 'x') return namespace; else return null;
-				} : null;
+			var namespace = doc.documentElement.namespaceURI;
+			var null = namespace ?
+			function (prefix) {
+				if (prefix == 'x') return namespace;
+				else return null;
+			} : null;
 
-				var pdfFrame = doc.evaluate('//frame[2]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-				if (pdfFrame) newItem.attachments = [{url:pdfFrame.src, title:"IEEE Xplore Full Text PDF", mimeType:"application/pdf"}];
-				newItem.complete();
+			var pdfFrame = doc.evaluate('//frame[2]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+			if (pdfFrame) newItem.attachments = [{
+				url: pdfFrame.src,
+				title: "IEEE Xplore Full Text PDF",
+				mimeType: "application/pdf"
+			}];
+			newItem.complete();
 		}, null);
-		} else {
+	} else {
 		newItem.complete();
 	}
 }
@@ -266,20 +357,15 @@ function scrape(doc,url) {
 // Based on ISBN Users' Manual (http://www.isbn.org/standards/home/isbn/international/html/usm4.htm)
 // and the Wikipedia treatment of ISBN (http://en.wikipedia.org/wiki/International_Standard_Book_Number)
 // and the Wikipedia treatment of ISSN (http://en.wikipedia.org/wiki/International_Standard_Serial_Number)
-
 // This will also check ISMN validity, although it does not distinguish from their
 // neighbors in namespace, ISBN-13. It does not handle pre-2008 M-prefixed ISMNs; see
 // http://en.wikipedia.org/wiki/International_Standard_Music_Number
-
 // This does not validate multiple identifiers in one field,
 // but it will gracefully ignore all non-number detritus,
 // such as extraneous hyphens, spaces, and comments.
-
 // It currently maintains hyphens in non-initial and non-final position,
 // discarding consecutive ones beyond the first as well.
-
 // It also adds the customary hyphen to valid ISSNs.
-
 // Takes the first 8 valid digits and tries to read an ISSN,
 // takes the first 10 valid digits and tries to read an ISBN 10,
 // and takes the first 13 valid digits to try to read an ISBN 13
@@ -289,10 +375,9 @@ function scrape(doc,url) {
 // 	"isbn13"
 // Each will be set to a valid identifier if found, and otherwise be a
 // boolean false.
-
 // There could conceivably be a valid ISBN-13 with an ISBN-10
 // substring; this should probably be interpreted as the latter, but it is a
-idCheck = function(isbn) {
+idCheck = function (isbn) {
 	// For ISBN 10, multiple by these coefficients, take the sum mod 11
 	// and subtract from 11
 	var isbn10 = [10, 9, 8, 7, 6, 5, 4, 3, 2];
@@ -309,7 +394,6 @@ idCheck = function(isbn) {
 	// first 10 valid characters as an ISBN-10, and the first 13 as an
 	// ISBN-13. We then return an array of booleans and valid detected
 	// ISBNs.
-
 	var j = 0;
 	var sum8 = 0;
 	var num8 = "";
@@ -319,16 +403,16 @@ idCheck = function(isbn) {
 	var num13 = "";
 	var chars = [];
 
-	for (var i=0; i < isbn.length; i++) {
+	for (var i = 0; i < isbn.length; i++) {
 		if (isbn.charAt(i) == " ") {
 			// Since the space character evaluates as a number,
 			// it is a special case.
-		} else if (j > 0 && isbn.charAt(i) == "-" && isbn.charAt(i-1) != "-") {
+		} else if (j > 0 && isbn.charAt(i) == "-" && isbn.charAt(i - 1) != "-") {
 			// Preserve hyphens, except in initial and final position
 			// Also discard consecutive hyphens
-			if(j < 7) num8 += "-";
-			if(j < 10) num10 += "-";
-			if(j < 13) num13 += "-";
+			if (j < 7) num8 += "-";
+			if (j < 10) num10 += "-";
+			if (j < 13) num13 += "-";
 		} else if (j < 7 && ((isbn.charAt(i) - 0) == isbn.charAt(i))) {
 			sum8 += isbn.charAt(i) * issn[j];
 			sum10 += isbn.charAt(i) * isbn10[j];
@@ -337,11 +421,9 @@ idCheck = function(isbn) {
 			num10 += isbn.charAt(i);
 			num13 += isbn.charAt(i);
 			j++;
-		} else if (j == 7 &&
-			(isbn.charAt(i) == "X" || isbn.charAt(i) == "x" ||
-				((isbn.charAt(i) - 0) == isbn.charAt(i)))) {
+		} else if (j == 7 && (isbn.charAt(i) == "X" || isbn.charAt(i) == "x" || ((isbn.charAt(i) - 0) == isbn.charAt(i)))) {
 			// In ISSN, an X represents the check digit "10".
-			if(isbn.charAt(i) == "X" || isbn.charAt(i) == "x") {
+			if (isbn.charAt(i) == "X" || isbn.charAt(i) == "x") {
 				var check8 = 10;
 				num8 += "X";
 			} else {
@@ -359,11 +441,9 @@ idCheck = function(isbn) {
 			num10 += isbn.charAt(i);
 			num13 += isbn.charAt(i);
 			j++;
-		} else if (j == 9 &&
-			(isbn.charAt(i) == "X" || isbn.charAt(i) == "x" ||
-				((isbn.charAt(i) - 0) == isbn.charAt(i)))) {
+		} else if (j == 9 && (isbn.charAt(i) == "X" || isbn.charAt(i) == "x" || ((isbn.charAt(i) - 0) == isbn.charAt(i)))) {
 			// In ISBN-10, an X represents the check digit "10".
-			if(isbn.charAt(i) == "X" || isbn.charAt(i) == "x") {
+			if (isbn.charAt(i) == "X" || isbn.charAt(i) == "x") {
 				var check10 = 10;
 				num10 += "X";
 			} else {
@@ -373,7 +453,7 @@ idCheck = function(isbn) {
 				num13 += isbn.charAt(i);
 				j++;
 			}
-		} else if(j < 12 && ((isbn.charAt(i) - 0) == isbn.charAt(i))) {
+		} else if (j < 12 && ((isbn.charAt(i) - 0) == isbn.charAt(i))) {
 			sum13 += isbn.charAt(i) * isbn13[j];
 			num13 += isbn.charAt(i);
 			j++;
@@ -382,7 +462,7 @@ idCheck = function(isbn) {
 			num13 += isbn.charAt(i);
 		}
 	}
-	var valid8  = ((11 - sum8 % 11) % 11) == check8;
+	var valid8 = ((11 - sum8 % 11) % 11) == check8;
 	var valid10 = ((11 - sum10 % 11) % 11) == check10;
 	var valid13 = (10 - sum13 % 10 == check13);
 	var matches = false;
@@ -392,78 +472,59 @@ idCheck = function(isbn) {
 		num8 = matches[1] + '-' + matches[2];
 	}
 
-	if(!valid8) {num8 = false};
-	if(!valid10) {num10 = false};
-	if(!valid13) {num13 = false};
-	return {"isbn10" : num10, "isbn13" : num13, "issn" : num8};
+	if (!valid8) {
+		num8 = false
+	};
+	if (!valid10) {
+		num10 = false
+	};
+	if (!valid13) {
+		num13 = false
+	};
+	return {
+		"isbn10": num10,
+		"isbn13": num13,
+		"issn": num8
+	};
 }
 
 /** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://ieeexplore.ieee.org/search/searchresult.jsp?newsearch=true&queryText=turing&x=0&y=0&tag=1",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://ieeexplore.ieee.org/search/freesrchabstract.jsp?tp=&arnumber=4607247&refinements%3D4294967131%26openedRefinements%3D*%26filter%3DAND%28NOT%284283010803%29%29%26searchField%3DSearch+All%26queryText%3Dturing",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"lastName": "Yongming Li",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"Deterministic fuzzy Turing machine (DFTM)",
-					"Turing machines",
-					"computational complexity",
-					"deterministic automata",
-					"deterministic fuzzy Turing machines",
-					"fixed finite subset",
-					"fuzzy computational complexity",
-					"fuzzy grammar",
-					"fuzzy languages",
-					"fuzzy polynomial time-bounded computation",
-					"fuzzy recursive language",
-					"fuzzy recursively enumerable (f.r.e.) language",
-					"fuzzy set theory",
-					"fuzzy sets",
-					"nondeterministic fuzzy Turing machine (NFTM)",
-					"nondeterministic fuzzy Turing machines",
-					"nondeterministic polynomial time-bounded computation",
-					"universal fuzzy Turing machine (FTM)",
-					""
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"url": "http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=4607247",
-						"title": "IEEE Xplore Abstract Record",
-						"snapshot": false
-					}
-				],
-				"publicationTitle": "IEEE Transactions on Fuzzy Systems",
-				"publisher": "IEEE",
-				"title": "Fuzzy Turing Machines: Variants and Universality",
-				"date": "Dec.  2008",
-				"volume": "16",
-				"issue": "6",
-				"DOI": "10.1109/TFUZZ.2008.2004990",
-				"ISSN": "1063-6706",
-				"language": "English",
-				"pages": "1491-1502",
-				"abstractNote": "In this paper, we study some variants of fuzzy Turing machines (FTMs) and universal FTM. First, we give several formulations of FTMs, including, in particular, deterministic FTMs (DFTMs) and nondeterministic FTMs (NFTMs). We then show that DFTMs and NFTMs are not equivalent as far as the power of recognizing fuzzy languages is concerned. This contrasts sharply with classical TMs. Second, we show that there is no universal FTM that can exactly simulate any FTM on it. But if the membership degrees of fuzzy sets are restricted to a fixed finite subset A of [0,1], such a universal machine exists. We also show that a universal FTM exists in some approximate sense. This means, for any prescribed accuracy, that we can construct a universal machine that simulates any FTM with the given accuracy. Finally, we introduce the notions of fuzzy polynomial time-bounded computation and nondeterministic fuzzy polynomial time-bounded computation, and investigate their connections with polynomial time-bounded computation and nondeterministic polynomial time-bounded computation.",
-				"conferenceName": "IEEE Transactions on Fuzzy Systems",
-				"proceedingsTitle": "IEEE Transactions on Fuzzy Systems",
-				"libraryCatalog": "IEEE Xplore",
-				"shortTitle": "Fuzzy Turing Machines"
-			}
-		]
-	}
-]
+var testCases = [{
+	"type": "web",
+	"url": "http://ieeexplore.ieee.org/search/searchresult.jsp?newsearch=true&queryText=turing&x=0&y=0&tag=1",
+	"items": "multiple"
+}, {
+	"type": "web",
+	"url": "http://ieeexplore.ieee.org/search/freesrchabstract.jsp?tp=&arnumber=4607247&refinements%3D4294967131%26openedRefinements%3D*%26filter%3DAND%28NOT%284283010803%29%29%26searchField%3DSearch+All%26queryText%3Dturing",
+	"items": [{
+		"itemType": "journalArticle",
+		"creators": [{
+			"lastName": "Yongming Li",
+			"creatorType": "author"
+		}],
+		"notes": [],
+		"tags": ["Deterministic fuzzy Turing machine (DFTM)", "Turing machines", "computational complexity", "deterministic automata", "deterministic fuzzy Turing machines", "fixed finite subset", "fuzzy computational complexity", "fuzzy grammar", "fuzzy languages", "fuzzy polynomial time-bounded computation", "fuzzy recursive language", "fuzzy recursively enumerable (f.r.e.) language", "fuzzy set theory", "fuzzy sets", "nondeterministic fuzzy Turing machine (NFTM)", "nondeterministic fuzzy Turing machines", "nondeterministic polynomial time-bounded computation", "universal fuzzy Turing machine (FTM)", ""],
+		"seeAlso": [],
+		"attachments": [{
+			"url": "http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=4607247",
+			"title": "IEEE Xplore Abstract Record",
+			"snapshot": false
+		}],
+		"publicationTitle": "IEEE Transactions on Fuzzy Systems",
+		"publisher": "IEEE",
+		"title": "Fuzzy Turing Machines: Variants and Universality",
+		"date": "Dec.  2008",
+		"volume": "16",
+		"issue": "6",
+		"DOI": "10.1109/TFUZZ.2008.2004990",
+		"ISSN": "1063-6706",
+		"language": "English",
+		"pages": "1491-1502",
+		"abstractNote": "In this paper, we study some variants of fuzzy Turing machines (FTMs) and universal FTM. First, we give several formulations of FTMs, including, in particular, deterministic FTMs (DFTMs) and nondeterministic FTMs (NFTMs). We then show that DFTMs and NFTMs are not equivalent as far as the power of recognizing fuzzy languages is concerned. This contrasts sharply with classical TMs. Second, we show that there is no universal FTM that can exactly simulate any FTM on it. But if the membership degrees of fuzzy sets are restricted to a fixed finite subset A of [0,1], such a universal machine exists. We also show that a universal FTM exists in some approximate sense. This means, for any prescribed accuracy, that we can construct a universal machine that simulates any FTM with the given accuracy. Finally, we introduce the notions of fuzzy polynomial time-bounded computation and nondeterministic fuzzy polynomial time-bounded computation, and investigate their connections with polynomial time-bounded computation and nondeterministic polynomial time-bounded computation.",
+		"conferenceName": "IEEE Transactions on Fuzzy Systems",
+		"proceedingsTitle": "IEEE Transactions on Fuzzy Systems",
+		"libraryCatalog": "IEEE Xplore",
+		"shortTitle": "Fuzzy Turing Machines"
+	}]
+}]
 /** END TEST CASES **/
