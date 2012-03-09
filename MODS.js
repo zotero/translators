@@ -15,7 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "g",
-	"lastUpdated": "2011-07-18 13:49:58"
+	"lastUpdated": "2012-03-09 18:23:24"
 }
 
 function detectImport() {
@@ -660,8 +660,12 @@ function doImport() {
 			}
 			
 			if(backupName && !creator.firstName && !creator.lastName) {
-				creator = Zotero.Utilities.cleanAuthor(backupName, "author", true);
-				creator.fieldMode = 1;
+				if(name.@type == 'personal') {
+					creator = Zotero.Utilities.cleanAuthor(backupName, "author", true);
+				} else {
+					creator.lastName = ZU.trimInternal(backupName);
+					creator.fieldMode = 1;
+				}
 			}
 			
 			// look for roles
