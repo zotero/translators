@@ -109,20 +109,18 @@ function getPrefixes(doc) {
 function processFields(doc, item, fieldMap) {
 	for(var metaName in fieldMap) {
 		var zoteroName = fieldMap[metaName];
-		if(!item[zoteroName]) {
-			item[zoteroName] = ZU.xpathText(doc, '//meta[@name="'+metaName+'"]/@content');
-		}
+		item[zoteroName] = ZU.xpathText(doc, '//meta[@name="'+metaName+'"]/@content');
 	}
 }
 
 function completeItem(doc, newItem) {
-	//ideally this should be done before RDF,
-	//but at least for now we'll add onto RDF data
+	addHighwireMetadata(doc, newItem);
+
 	if(CUSTOM_FIELD_MAPPINGS) {
 		processFields(doc, newItem, CUSTOM_FIELD_MAPPINGS);
 	}
 
-	addHighwireMetadata(doc, newItem);
+	newItem.complete();
 }
 
 function detectWeb(doc, url) {
@@ -252,57 +250,94 @@ function addHighwireMetadata(doc, newItem) {
 	// HighWire metadata
 	processFields(doc, newItem, HIGHWIRE_MAPPINGS);
 
-	if(!newItem.creators.length) {
-		/* Three author formats:
-		 * 1. Separate meta tags per author
-		 * 2. Authors in Doe, John format, semicolon-delimited
-		 * 3. Authors in John Doe format, comma-delimited
-		 */
+	var authorNodes = ZU.xpath(doc, '//meta[@name="citation_author" or @name="citation_authors"]/@content');
+	//save rdfCreators for later
+	var rdfCreators = newItem.creators;
+	newItem.creators = [];
 
-		var authorNodes = ZU.xpath(doc, '//meta[@name="citation_author"]/@content | //meta[@name="citation_authors"]/@content');
-		for(var i=0, n=authorNodes.length; i<n; i++) {
-		  //make sure there are no empty authors
-		  var authors = authorNodes[i].nodeValue.replace(/(;[^A-Za-z0-9]*)$/, "").split(/\s*;\s/);
-		  if (authors.length == 1) {
-		  	  /* If we get nothing when splitting by semicolon, and at least two words on
-		  	   * either side of the comma when splitting by comma, we split by comma. */
-			  var authorsByComma = authors[0].split(/\s*,\s*/);
-			  if (authorsByComma.length > 1
-			  		&& authorsByComma[0].indexOf(" ") !== -1
-			  		&& authorsByComma[1].indexOf(" ") !== -1)
-			  		authors = authorsByComma;
-		  }
-			for(var j=0, m=authors.length; j<m; j++) {
-				var author = authors[j];
-				newItem.creators.push(ZU.cleanAuthor(author, "author", author.indexOf(",") !== -1));
+	for(var i=0, n=authorNodes.length; i<n; i++) {
+		//make sure there are no empty authors
+		var authors = authorNodes[i].nodeValue.replace(/(;[^A-Za-z0-9]*)$/, "").split(/\s*;\s/);
+		if (authors.length == 1) {
+			/* If we get nothing when splitting by semicolon, and at least two words on
+			* either side of the comma when splitting by comma, we split by comma. */
+			var authorsByComma = authors[0].split(/\s*,\s*/);
+			if (authorsByComma.length > 1
+				&& authorsByComma[0].indexOf(" ") !== -1
+				&& authorsByComma[1].indexOf(" ") !== -1)
+				authors = authorsByComma;
+		}
+		for(var j=0, m=authors.length; j<m; j++) {
+			var author = authors[j];
+			newItem.creators.push(ZU.cleanAuthor(author, "author", author.indexOf(",") !== -1));
+		}
+	}
+
+	if( !newItem.creators.length ) {
+		newItem.creators = rdfCreators;
+	} else if(rdfCreators.length) {
+		//try to use RDF creator roles to update the creators we have
+		for(var i=0, n=newItem.creators.length; i<n; i++) {
+			var name = newItem.creators[i].firstName +
+				newItem.creators[i].lastName;
+			for(var j=0, m=rdfCreators.length; j<m; j++) {
+				var creator = rdfCreators[j];
+				if( name.toLowerCase() == (creator.firstName + creator.lastName).toLowerCase() ) {
+					//highwire should set all to author, so we only care about editor
+					//contributor is not always a contributor
+					if(creator.creatorType == 'editor') {
+						newItem.creators[i].creatorType == creator.creatorType;
+					}
+					delete rdfCreators[j];
+					break;
+				}
+			}
+		}
+
+		//if there are leftover creators from RDF, we should use them
+		if(rdfCreators.length) {
+			for(var i=0, n=rdfCreators.length; i<n; i++) {
+				newItem.creators.push(rdfCreators[i]);
 			}
 		}
 	}
+
+
 	//Cleanup DOI
 	if (newItem.DOI){
-		newItem.DOI =newItem.DOI.replace(/^doi:/, "");
-	}
-	if(!newItem.pages) {
-		var pages = [];
-		var firstpage = ZU.xpathText(doc, '//meta[@name="citation_firstpage"]/@content');
-		if(firstpage) pages.push(firstpage);
-		var lastpage = ZU.xpathText(doc, '//meta[@name="citation_lastpage"]/@content');
-		if(lastpage) pages.push(lastpage);
-		if(pages.length) newItem.pages = pages.join("-");
+		newItem.DOI =newItem.DOI.replace(/^doi:\s*/, "");
 	}
 
-	if(!newItem.ISSN) {
-		//prefer ISSN over eISSN
-		var issn = ZU.xpathText(doc, '//meta[@name="citation_issn"]/@content');
-		if(!issn) issn = ZU.xpathText(doc, '//meta[@name="citation_eIssn"]/@content');
 
-		if(issn) newItem.ISSN = issn;
+	var firstpage = ZU.xpathText(doc, '//meta[@name="citation_firstpage"]/@content');
+	var lastpage = ZU.xpathText(doc, '//meta[@name="citation_lastpage"]/@content');
+	if(firstpage && ( firstpage = firstpage.trim() )) {
+		newItem.pages = firstpage +
+			( lastpage && ( lastpage = lastpage.trim() ) )?'-' + lastpage : '';
 	}
 
-	if(!newItem.attachments.length) {
-		var pdfURL = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"][1]/@content');
-		if(pdfURL) newItem.attachments.push({title:"Full Text PDF", url:pdfURL, mimeType:"application/pdf"});
+
+	//prefer ISSN over eISSN
+	var issn = ZU.xpathText(doc, '//meta[@name="citation_issn"]/@content') ||
+			ZU.xpathText(doc, '//meta[@name="citation_eIssn"]/@content');
+
+	if(issn) newItem.ISSN = issn;
+
+	//This may not always yield desired results
+	//i.e. if there is more than one pdf attachment (not common)
+	var pdfURL = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"][1]/@content');
+	if(pdfURL) {
+		//delete any pdf attachments if present
+		//would it be ok to just delete all attachments??
+		for(var i=0, n=newItem.attachments.length; i<n; i++) {
+			if(newItem.attachments[i].mimeType == 'application/pdf') {
+				delete newItem.attachments[i];
+			}
+		}
+
+		newItem.attachments.push({title:"Full Text PDF", url:pdfURL, mimeType:"application/pdf"});
 	}
+
 
 	// Other last chances
 	if(!newItem.url) newItem.url = doc.location.href;
@@ -310,11 +345,11 @@ function addHighwireMetadata(doc, newItem) {
 
 	// add attachment
 	newItem.attachments.push({document:doc, title:"Snapshot"});
+
 	// add access date
 	newItem.accessDate = 'CURRENT_TIMESTAMP';
 
 	newItem.libraryCatalog = doc.location.host;
-	newItem.complete();
 }
 
 var exports = {
