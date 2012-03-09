@@ -111,12 +111,11 @@ function doExport() {
 			} else {
 				roleTerm = "ctb";
 			}
-			
-			// FIXME - currently all names are personal
+
 			if(item.creators[j].creatorType != "seriesEditor") {
 				if(isPartialItem && item.creators[j].creatorType == "editor"){
 					if(item.creators[j].fieldMode == 1) {
-						mods.relatedItem.name += <name type="personal">
+						mods.relatedItem.name += <name type="corporate">
 							<namePart>{item.creators[j].lastName}</namePart>
 							<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
 							</name>;
@@ -129,7 +128,7 @@ function doExport() {
 					}
 				} else {
 					if(item.creators[j].fieldMode == 1) {
-						mods.name += <name type="personal">
+						mods.name += <name type="corporate">
 							<namePart>{item.creators[j].lastName}</namePart>
 							<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
 							</name>;
@@ -387,7 +386,7 @@ function doExport() {
 				if(item.creators[j].creatorType == "seriesEditor") {
 					roleTerm = "pbd";
 					if(item.creators[j].fieldMode == 1) {
-						series.name += <name type="personal">
+						series.name += <name type="corporate">
 							<namePart>{item.creators[j].lastName}</namePart>
 							<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
 							</name>;
