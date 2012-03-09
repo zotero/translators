@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-12-23 14:08:18"
+	"lastUpdated": "2012-03-08 22:11:09"
 }
 
 /*
@@ -244,66 +244,5 @@ function scrape(newDoc, marc, url) {
 		newItem.complete();
 }
 /** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://babel.bu.univ-paris5.fr/F/QAP3QAEYXFR2M9FTM4GC9J8TPLLT9C1EYQILB3CCHGB9UFN19P-01386?func=full-set-set&set_number=000327&set_entry=000001&format=999",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"firstName": "Karl",
-						"lastName": "Marx ",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Le 18. Brumaire de Louis Bonaparte",
-				"place": "Paris",
-				"publisher": "Éd. Sociales",
-				"date": "1969",
-				"libraryCatalog": "babel.bu.univ-paris5.fr Library Catalog"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://aleph.u-paris10.fr/F/DLSKEBLNRQN2S2G69SQ8IPII5TSYF3JJ59AJT9UMG8SHT1PTNS-03646?func=full-set-set&set_number=000015&set_entry=000001&format=999",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"firstName": "Louis",
-						"lastName": "Althusser ",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"ISBN": "978-2-13-059079-8",
-				"language": "fre",
-				"abstractNote": "La reproduction des rapports de production, ici présenté avec d'autres écrits qui complètent le dossier, est le manuscrit, demeuré inédit, dont Althusser a tiré son célèbre texte, paru en 1971 dans La pensée, \"Idéologie et appareils idéologiques d'Etat\". L'auteur pose la question du paradoxe de la permanence des pyramides sociales dans une société libérale",
-				"title": "Sur la reproduction",
-				"place": "Paris",
-				"publisher": "PUF",
-				"date": "2011",
-				"series": "Actuel Marx-Confrontation",
-				"callNumber": "194",
-				"libraryCatalog": "aleph.u-paris10.fr Library Catalog"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://aleph.rsl.ru/F/SS6SBK2CEQATDKKD2T9XCQ1D2HKI68RLKE7P9E89NA77SFTE3M-02079?func=find-a&find_code=WSU&request=%D0%B3%D0%BE%D1%80%D1%8C%D0%BA%D0%B8%D0%B9&request_op=AND&find_code=WAU&request=%D1%81%D0%BF%D0%B8%D1%80%D0%B8%D0%B4%D0%BE%D0%BD%D0%BE%D0%B2%D0%B0&request_op=AND&find_code=WPE&request=&request_op=AND&find_code=WTI&request=&request_op=AND&find_code=WPU&request=&request_op=AND&find_code=WRD&request=&adjacent=N&x=0&y=0&filter_code_1=WLN&filter_request_1=&filter_code_2=WYR&filter_request_2=&filter_code_4=WLC&filter_request_4=",
-		"items": "multiple"
-	}
-]
+var testCases = []
 /** END TEST CASES **/

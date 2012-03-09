@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-03 11:43:41"
+	"lastUpdated": "2012-03-08 18:25:10"
 }
 
 /*
@@ -59,7 +59,7 @@ function scrape(doc, url) {
 	newItem.title = title;
 	
 	// Date
-	var date_XPath = "//span[contains(@class, 'hcf-date')]";
+	var date_XPath = "//span[contains(@class, 'date hcf')]";
 	var date= ZU.xpathText(doc, date_XPath);
 	newItem.date= date.replace(/(.{10,10}).*/, '$1');
 	
