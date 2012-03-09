@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-09 04:20:45"
+	"lastUpdated": "2012-03-09 16:29:00"
 }
 
 /*
@@ -233,7 +233,7 @@ var testCases = [
 				"company": "SAGE Publications",
 				"label": "SAGE Publications",
 				"distributor": "SAGE Publications",
-				"date": "1982-06-01",
+				"date": "06/01/1982",
 				"DOI": "10.3102/00346543052002201",
 				"language": "en",
 				"publicationTitle": "Review of Educational Research",
@@ -348,7 +348,7 @@ var testCases = [
 				"company": "Radiological Society of North America",
 				"label": "Radiological Society of North America",
 				"distributor": "Radiological Society of North America",
-				"date": "1990-01-01",
+				"date": "01/01/1990",
 				"language": "en",
 				"publicationTitle": "Radiographics",
 				"journalAbbreviation": "Radiographics",
@@ -620,12 +620,12 @@ var testCases = [
 				],
 				"itemID": "http://www.pnas.org/content/108/52/20881.full",
 				"title": "A Yeast Functional Screen Predicts New Candidate ALS Disease Genes",
-				"publisher": "National Academy of Sciences",
+				"publisher": "National Acad Sciences",
 				"institution": "National Academy of Sciences",
 				"company": "National Academy of Sciences",
 				"label": "National Academy of Sciences",
 				"distributor": "National Academy of Sciences",
-				"date": "2011-12-27",
+				"date": "12/27/2011",
 				"DOI": "10.1073/pnas.1109434108",
 				"language": "en",
 				"publicationTitle": "Proceedings of the National Academy of Sciences",
