@@ -47,6 +47,7 @@ var HIGHWIRE_MAPPINGS = {
 	"citation_volume":"volume",
 	"citation_issue":"issue",
 	"citation_conference_title":"conferenceName",
+	"citation_dissertation_institution":"university",
 	"citation_technical_report_institution":"institution",
 	"citation_technical_report_number":"number",
 	"citation_publisher":"publisher",
