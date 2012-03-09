@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-03-07 17:19:04"
+	"lastUpdated": "2012-03-09 18:05:15"
 }
 
 function detectWeb(doc, url) {
@@ -333,13 +333,6 @@ function scrape(doc, url) {
 
 	if (pdf) {
 		Zotero.Utilities.processDocuments([pdf], function (doc, url) {
-			var namespace = doc.documentElement.namespaceURI;
-			var null = namespace ?
-			function (prefix) {
-				if (prefix == 'x') return namespace;
-				else return null;
-			} : null;
-
 			var pdfFrame = doc.evaluate('//frame[2]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 			if (pdfFrame) newItem.attachments = [{
 				url: pdfFrame.src,
