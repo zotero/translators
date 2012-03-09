@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-05 17:19:09"
+	"lastUpdated": "2012-03-08 12:52:24"
 }
 
 /*
@@ -132,7 +132,7 @@ function scrape(doc, url) {
 		}
 		newItem.attachments.push({
 			url: printurl,
-			title: doc.title,
+			title: newItem.title,
 			mimeType: "text/html"
 		});
 		newItem.complete()
@@ -173,38 +173,46 @@ function doWeb(doc, url) {
 	}
 }
 /** BEGIN TEST CASES **/
-var testCases = [{
-	"type": "web",
-	"url": "http://www.fr-online.de/spezials/wikileaks---die-enthuellungsplattform,4882932,4882932.html",
-	"items": "multiple"
-}, {
-	"type": "web",
-	"url": "http://www.fr-online.de/krise/1471908,1471908.html",
-	"items": "multiple"
-}, {
-	"type": "web",
-	"url": "http://www.fr-online.de/krise/portugal-koennte-rettungspaket-benoetigen,1471908,8251842.html",
-	"items": [{
-		"itemType": "newspaperArticle",
-		"creators": [],
-		"notes": [],
-		"tags": [],
-		"seeAlso": [],
-		"attachments": [{
-			"url": "http://www.fr-online.de/krise/portugal-koennte-rettungspaket-benoetigen,1471908,8251842.html",
-			"title": "Andeutung des Finanzministers: Portugal könnte Rettungspaket benötigen | Schuldenkrise - Frankfurter Rundschau",
-			"mimeType": "text/html"
-		}],
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.fr-online.de/spezials/wikileaks---die-enthuellungsplattform,4882932,4882932.html",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.fr-online.de/krise/1471908,1471908.html",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
 		"url": "http://www.fr-online.de/krise/portugal-koennte-rettungspaket-benoetigen,1471908,8251842.html",
-		"title": "Andeutung des Finanzministers: Portugal könnte Rettungspaket benötigen",
-		"abstractNote": "Eine politische Krise in Portugal aufgrund der harten Sparvorgaben der Europäischen Union könnte ein Rettungspaket notwendig machen, fürchtet Finanzminister Fernando Teixeira dos Santos.",
-		"date": "2011-3-21",
-		"publicationTitle": "fr-online.de",
-		"section": "Schuldenkrise",
-		"language": "de",
-		"libraryCatalog": "fr-online.de",
-		"accessDate": "CURRENT_TIMESTAMP",
-		"shortTitle": "Andeutung des Finanzministers"
-	}]
-}]
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.fr-online.de/krise/portugal-koennte-rettungspaket-benoetigen,1471908,8251842.html",
+						"title": "Andeutung des Finanzministers: Portugal könnte Rettungspaket benötigen",
+						"mimeType": "text/html"
+					}
+				],
+				"url": "http://www.fr-online.de/krise/portugal-koennte-rettungspaket-benoetigen,1471908,8251842.html",
+				"title": "Andeutung des Finanzministers: Portugal könnte Rettungspaket benötigen",
+				"abstractNote": "Eine politische Krise in Portugal aufgrund der harten Sparvorgaben der Europäischen Union könnte ein Rettungspaket notwendig machen, fürchtet Finanzminister Fernando Teixeira dos Santos.",
+				"date": "2011-3-21",
+				"publicationTitle": "fr-online.de",
+				"section": "Schuldenkrise",
+				"language": "de",
+				"libraryCatalog": "fr-online.de",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Andeutung des Finanzministers"
+			}
+		]
+	}
+]
 /** END TEST CASES **/
