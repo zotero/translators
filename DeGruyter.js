@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-08 07:30:46"
+	"lastUpdated": "2012-03-10 00:00:32"
 }
 
 /*
@@ -92,7 +92,7 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "James E",
+						"firstName": "James E.",
 						"lastName": "Campbell",
 						"creatorType": "author"
 					}
