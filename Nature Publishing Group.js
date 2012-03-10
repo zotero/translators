@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-02-22 00:10:56"
+	"lastUpdated": "2012-03-09 16:32:46"
 }
 
 /**
@@ -56,7 +56,7 @@ function getAbstract(doc) {
 	var textArr = new Array();
 	var p;
 	for( var i=0, n=paragraphs.length; i<n; i++ ) {
-		p = paragraphs[i].textContent.trim();
+		p = ZU.trimInternal(paragraphs[i].textContent);
 		if( p ) textArr.push(p);
 	}
 
@@ -270,6 +270,11 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
+						"firstName": "Y.",
+						"lastName": "Zhang",
+						"creatorType": "author"
+					},
+					{
 						"firstName": "C.",
 						"lastName": "Li",
 						"creatorType": "author"
@@ -296,14 +301,12 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.nature.com/onc/journal/v31/n6/pdf/onc2011282a.pdf",
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
 				"itemID": "http://www.nature.com/onc/journal/v31/n6/full/onc2011282a.html",
 				"title": "Trastuzumab (herceptin) targets gastric cancer stem cells characterized by CD90 phenotype",
-				"source": "Oncogene",
 				"publicationTitle": "Oncogene",
 				"rights": "© 2011 Nature Publishing Group",
 				"volume": "31",
@@ -318,7 +321,7 @@ var testCases = [
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
 				"date": "2011-07-11",
-				"accessionNumber": "doi:10.1038/onc.2011.282",
+				"language": "en",
 				"DOI": "10.1038/onc.2011.282",
 				"url": "http://www.nature.com/onc/journal/v31/n6/full/onc2011282a.html",
 				"accessDate": "CURRENT_TIMESTAMP",
@@ -425,14 +428,12 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.nature.com/emboj/journal/vaop/ncurrent/pdf/emboj201217a.pdf",
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
 				"itemID": "http://www.nature.com/emboj/journal/vaop/ncurrent/full/emboj201217a.html",
 				"title": "Arginine methylation controls growth regulation by E2F-1",
-				"source": "The EMBO Journal",
 				"publicationTitle": "The EMBO Journal",
 				"rights": "© 2012 Nature Publishing Group",
 				"ISSN": "ERROR! NO ISSN",
@@ -442,7 +443,7 @@ var testCases = [
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
 				"date": "2012-02-10",
-				"accessionNumber": "doi:10.1038/emboj.2012.17",
+				"language": "en",
 				"DOI": "10.1038/emboj.2012.17",
 				"url": "http://www.nature.com/emboj/journal/vaop/ncurrent/full/emboj201217a.html",
 				"accessDate": "CURRENT_TIMESTAMP",
@@ -455,49 +456,6 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.nature.com/onc/topten/index.html",
 		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://www.nature.com/emboj/journal/vaop/ncurrent/full/emboj201239a.html",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "Christopher J",
-						"lastName": "Hutchison",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"url": "http://www.nature.com/emboj/journal/vaop/ncurrent/pdf/emboj201239a.pdf",
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"itemID": "http://www.nature.com/emboj/journal/vaop/ncurrent/full/emboj201239a.html",
-				"title": "B-type lamins and their elusive roles in metazoan cell proliferation and senescence",
-				"source": "The EMBO Journal",
-				"publicationTitle": "The EMBO Journal",
-				"rights": "© 2012 Nature Publishing Group",
-				"ISSN": "ERROR! NO ISSN",
-				"publisher": "Nature Publishing Group",
-				"institution": "Nature Publishing Group",
-				"company": "Nature Publishing Group",
-				"label": "Nature Publishing Group",
-				"distributor": "Nature Publishing Group",
-				"date": "2012-02-17",
-				"accessionNumber": "doi:10.1038/emboj.2012.39",
-				"DOI": "10.1038/emboj.2012.39",
-				"url": "http://www.nature.com/emboj/journal/vaop/ncurrent/full/emboj201239a.html",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "www.nature.com",
-				"abstractNote": "Have you seen the recent papers that question the traditional role of B-type lamins in DNA replication and transcription, but highlight an entirely novel yet fundamental role for lamin B1 (LB1) in cell proliferation and cellular senescence?"
-			}
-		]
 	},
 	{
 		"type": "web",
@@ -544,14 +502,12 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.nature.com/nature/journal/v481/n7381/pdf/nature10669.pdf",
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
 				"itemID": "http://www.nature.com/nature/journal/v481/n7381/full/nature10669.html",
 				"title": "Gravitational detection of a low-mass dark satellite galaxy at cosmological distance",
-				"source": "Nature",
 				"publicationTitle": "Nature",
 				"rights": "© 2012 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
 				"volume": "481",
@@ -563,13 +519,13 @@ var testCases = [
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
 				"date": "2012-01-18",
-				"accessionNumber": "doi:10.1038/nature10669",
+				"language": "en",
 				"issue": "7381",
 				"DOI": "10.1038/nature10669",
 				"url": "http://www.nature.com/nature/journal/v481/n7381/full/nature10669.html",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.nature.com",
-				"abstractNote": "The mass function of dwarf satellite galaxies that are observed around Local Group galaxies differs substantially from simulations1, 2, 3, 4, 5 based on cold dark matter: the simulations predict many more dwarf galaxies than are seen. The Local Group, however, may be anomalous in this regard6, 7. A massive dark satellite in an early-type lens galaxy at a redshift of 0.222 was recently found8 using a method based on gravitational lensing9, 10, suggesting that the mass fraction contained in substructure could be higher than is predicted from simulations. The lack of very low-mass detections, however, prohibited any constraint on their mass function. Here we report the presence of a (1.9 ± 0.1) × 108\t\n\t\t\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n\t\t\t\n\t\t\t\t\n\t\t\t\t\n\t\n dark satellite galaxy in the Einstein ring system JVAS B1938+666 (ref. 11) at a redshift of 0.881, where \t\n\t\t\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n\t\t\t\n\t\t\t\t\n\t\t\t\t\n\t\n denotes the solar mass. This satellite galaxy has a mass similar to that of the Sagittarius12 galaxy, which is a satellite of the Milky Way. We determine the logarithmic slope of the mass function for substructure beyond the local Universe to be \t\n\t\t\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n\t\t\t\n\t\t\t\t\n\t\t\t\t\n\t\n, with an average mass fraction of \t\n\t\t\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n\t\t\t\n\t\t\t\t\n\t\t\t\t\n\t\n per cent, by combining data on both of these recently discovered galaxies. Our results are consistent with the predictions from cold dark matter simulations13, 14, 15 at the 95 per cent confidence level, and therefore agree with the view that galaxies formed hierarchically in a Universe composed of cold dark matter."
+				"abstractNote": "The mass function of dwarf satellite galaxies that are observed around Local Group galaxies differs substantially from simulations1, 2, 3, 4, 5 based on cold dark matter: the simulations predict many more dwarf galaxies than are seen. The Local Group, however, may be anomalous in this regard6, 7. A massive dark satellite in an early-type lens galaxy at a redshift of 0.222 was recently found8 using a method based on gravitational lensing9, 10, suggesting that the mass fraction contained in substructure could be higher than is predicted from simulations. The lack of very low-mass detections, however, prohibited any constraint on their mass function. Here we report the presence of a (1.9 ± 0.1) × 108 dark satellite galaxy in the Einstein ring system JVAS B1938+666 (ref. 11) at a redshift of 0.881, where denotes the solar mass. This satellite galaxy has a mass similar to that of the Sagittarius12 galaxy, which is a satellite of the Milky Way. We determine the logarithmic slope of the mass function for substructure beyond the local Universe to be , with an average mass fraction of per cent, by combining data on both of these recently discovered galaxies. Our results are consistent with the predictions from cold dark matter simulations13, 14, 15 at the 95 per cent confidence level, and therefore agree with the view that galaxies formed hierarchically in a Universe composed of cold dark matter."
 			}
 		]
 	},
@@ -589,14 +545,12 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.nature.com/nature/journal/v481/n7381/pdf/481237a.pdf",
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
 				"itemID": "http://www.nature.com/nature/journal/v481/n7381/full/481237a.html",
 				"title": "Antarctic Treaty is cold comfort",
-				"source": "Nature",
 				"publicationTitle": "Nature",
 				"rights": "© 2012 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
 				"volume": "481",
@@ -608,7 +562,7 @@ var testCases = [
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
 				"date": "2012-01-18",
-				"accessionNumber": "doi:10.1038/481237a",
+				"language": "en",
 				"issue": "7381",
 				"DOI": "10.1038/481237a",
 				"url": "http://www.nature.com/nature/journal/v481/n7381/full/481237a.html",
@@ -654,14 +608,12 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.nature.com/nature/journal/v481/n7381/pdf/nature10728.pdf",
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
 				"itemID": "http://www.nature.com/nature/journal/v481/n7381/full/nature10728.html",
 				"title": "Structure of HDAC3 bound to co-repressor and inositol tetraphosphate",
-				"source": "Nature",
 				"publicationTitle": "Nature",
 				"rights": "© 2011 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
 				"volume": "481",
@@ -673,7 +625,7 @@ var testCases = [
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
 				"date": "2012-01-09",
-				"accessionNumber": "doi:10.1038/nature10728",
+				"language": "en",
 				"issue": "7381",
 				"DOI": "10.1038/nature10728",
 				"url": "http://www.nature.com/nature/journal/v481/n7381/full/nature10728.html",

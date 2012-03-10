@@ -8,8 +8,8 @@
 	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsib",
-	"lastUpdated": "2012-02-06 13:13:31"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-03-09 16:29:00"
 }
 
 /*
@@ -29,40 +29,36 @@
 
 //detect if there are multiple articles on the page
 function hasMultiple(doc, url) {
-	return url.match("search\\?submit=") ||
-		url.match("search\\?fulltext=") ||
-		url.match("content/by/section") ||
-		doc.title.match("Table of Contents") ||
-		doc.title.match("Early Edition") ||
-		url.match("cgi/collection/.+") ||
-		url.match("content/firstcite") ||
-		url.match("content/early/recent$");
+	return url.match(/search?(.*?&)?submit=[^&]/) ||
+		url.indexOf("content/by/section") != -1 ||
+		doc.title.indexOf("Table of Contents") != -1 ||
+		doc.title.indexOf("Early Edition") != -1 ||
+		url.match(/cgi\/collection\/./) ||
+		url.indexOf("content/firstcite") != -1 ||
+		url.match(/content\/early\/recent$/);
 }
 
 //get abstract
 function getAbstract(doc) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-
 	//abstract, summary
-	var abstrSections = doc.evaluate('//div[contains(@id,"abstract") or @class="abstractSection"]/*[not(contains(@class,"section-nav"))]',
-		doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var abstrSections = ZU.xpath(doc,
+			'//div[contains(@id,"abstract") or @class="abstractSection"]\
+			/*[not(contains(@class,"section-nav"))]');
 
 	var abstr = '';
 	var paragraph;
 
-	while( paragraph = abstrSections.iterateNext() ) {
-		paragraph = paragraph.textContent.trim();
+	for(var i=0, n=abstrSections.length; i<n; i++) {
+		paragraph = abstrSections[i].textContent.trim();
 
 		//ignore the abstract heading
-		if( paragraph.toLowerCase() == 'abstract' || paragraph.toLowerCase() == 'summary' ) {
+		if( paragraph.toLowerCase() == 'abstract' ||
+			paragraph.toLowerCase() == 'summary' ) {
 			continue;
 		}
 
 		//put all lines of a paragraph on a single line
-		paragraph = paragraph.replace(/\s{2,}/g,' ');
+		paragraph = paragraph.replace(/\s+/g,' ');
 
 		abstr += paragraph + "\n";
 	}
@@ -72,19 +68,13 @@ function getAbstract(doc) {
 
 //some journals display keywords
 function getKeywords(doc) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-
-	//some journals are odd and don't work with this. E.g. http://jn.nutrition.org/content/130/12/3122S.abstract
-	var keywords = doc.evaluate('//ul[contains(@class,"kwd-group")]//a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	//some journals are odd and don't work with this.
+	//e.g. http://jn.nutrition.org/content/130/12/3122S.abstract
+	var keywords = ZU.xpath(doc,'//ul[contains(@class,"kwd-group")]//a');
 
 	var kwds = new Array();
-	var k;
-
-	while( k = keywords.iterateNext() ) {
-		kwds.push(k.textContent.trim());
+	for(var i=0, n=keywords.length; i<n; i++) {
+		kwds.push(keywords[i].textContent.trim());
 	}
 
 	return kwds;
@@ -96,23 +86,18 @@ function addEmbMeta(doc) {
 	var translator = Zotero.loadTranslator("web");
 	//Embedded Metadata translator
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
-
 	translator.setDocument(doc);
 
 	translator.setHandler("itemDone", function(obj, item) {
 		//remove all caps in Names and Titles
 		for (i in item.creators){
-			if (item.creators[i].lastName && item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
-				item.creators[i].lastName = Zotero.Utilities.capitalizeTitle(item.creators[i].lastName.toLowerCase(),true);
-			}
-			if (item.creators[i].firstName && item.creators[i].firstName == item.creators[i].firstName.toUpperCase()) {
-				item.creators[i].firstName = Zotero.Utilities.capitalizeTitle(item.creators[i].firstName.toLowerCase(),true);
-			}
+			item.creators[i].lastName =
+				ZU.capitalizeTitle(item.creators[i].lastName, true);
+			item.creators[i].firstName =
+				ZU.capitalizeTitle(item.creators[i].firstName, true);
 		}
 
-		if (item.title == item.title.toUpperCase()) {
-			item.title = Zotero.Utilities.capitalizeTitle(item.title.toLowerCase(),true);
-		}
+		item.title = ZU.capitalizeTitle(item.title,true);
 
 		if(!item.abstractNote) item.abstractNote = getAbstract(doc);
 
@@ -127,31 +112,27 @@ function addEmbMeta(doc) {
 }
 
 function detectWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-
 	var highwiretest = false;
 
 	//quick test for highwire embedded pdf page
-	highwiretest = url.match(/\.pdf\+html/);
+	highwiretest = url.indexOf('.pdf+html') != -1;
 
 	//only queue up the sidebar for data extraction (it seems to always be present)
-	if(highwiretest && !url.match(/\\?frame=sidebar/)) {
+	if(highwiretest && url.indexOf('?frame=sidebar') == -1) {
 		return null;
 	}
 
 	if (!highwiretest) {
 		// lets hope this installations don't tweak this...
-		highwiretest = doc.evaluate("//link[@href = '/shared/css/hw-global.css']",
-			doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		highwiretest = ZU.xpath(doc,
+				"//link[@href='/shared/css/hw-global.css']").length;
 	}
 
 	if(highwiretest) {
 		if (hasMultiple(doc, url)) {
 			return "multiple";
-		} else if (url.match("content/(early/)?[0-9]+")) {
+		} else if ( url.match("content/(early/)?[0-9]+") && 
+					url.indexOf('/suppl/') == -1 ) {
 			return "journalArticle";
 		}
 	}
@@ -159,25 +140,24 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 	if (hasMultiple(doc, url)) {
-		var namespace = doc.documentElement.namespaceURI;
-		var nsResolver = namespace ? function(prefix) {
-			if (prefix == 'x') return namespace; else return null;
-		} : null;
-
 		if (!url) url = doc.documentElement.location;
 
 		//get a list of URLs to import
-		if (doc.title.match("Table of Contents")
-			|| doc.title.match("Early Edition")
-			|| url.match("content/firstcite")) {
-			var searchx = '//li[contains(@class, "toc-cit") and not(ancestor::div/h2/a/text() = "Correction" or ancestor::div/h2/a/text() = "Corrections")]';
+		if ( doc.title.indexOf("Table of Contents") != -1 ||
+			url.indexOf("content/firstcite") != -1 ) {
+			var searchx = '//li[contains(@class, "toc-cit") and \
+				not(ancestor::div/h2/a/text() = "Correction" or \
+					ancestor::div/h2/a/text() = "Corrections")]';
 			var titlex = './/h4';
-		} else if (url.match("content/early/recent")) {
-			var searchx = '//div[contains(@class, "is-early-release")]';
+		} else if ( url.indexOf("content/early/recent") != -1 ||
+					doc.title.indexOf("Early Edition") != -1) {
+			var searchx = '//div[contains(@class, "is-early-release") or \
+								contains(@class, "from-current-issue")]';
 			var titlex = './/span[contains(@class, "cit-title")]';
-		} else if (url.match("content/by/section") || url.match("cgi/collection/.+")) {
+		} else if (url.indexOf("content/by/section") != -1 ||
+					url.match(/cgi\/collection\/./)) {
 			var searchx = '//li[contains(@class, "results-cit cit")]';
-			var titlex = './/span[contains(@class, "cit-title")]';
+			var titlex = './/*[contains(@class, "cit-title")]';
 		} else {
 			//should we exclude corrections?
 			//e.g. http://jcb.rupress.org/search?submit=yes&fulltext=%22CLIP%20catches%20enzymes%20in%20the%20act%22&sortspec=date&where=fulltext&y=0&x=0&hopnum=1
@@ -186,31 +166,30 @@ function doWeb(doc, url) {
 		}
 
 		var next_res, title, link;
-		var linkx = './/a[1]';
-		var searchres = doc.evaluate(searchx, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var linkx = '(.//a)[1]/@href';
+		var searchres = ZU.xpath(doc, searchx);
 		var items = new Object();
 
-		while (next_res = searchres.iterateNext()) {
-			title = doc.evaluate(titlex, next_res, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			link = doc.evaluate(linkx, next_res, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			if(link) {
-				items[link.href] = title;
+		for(var i=0, n=searchres.length; i<n; i++) {
+			next_res = searchres[i];
+
+			title = ZU.xpathText(next_res, titlex);
+			link = ZU.xpathText(next_res, linkx);
+			if(link && title) {
+				items[link] = title.trim();
 			}
 		}
 
-		var urls = new Array();
-
 		Zotero.selectItems(items, function(selectedItems) {
 			if( selectedItems == null ) return true;
+
+			var urls = new Array();
 			for( var item in selectedItems ) {
 				urls.push(item);
 			}
-			Zotero.Utilities.processDocuments(urls,
-				function(newDoc) {
-					doWeb(newDoc, newDoc.location.href)
-				},
-				function() { Zotero.done(); });
-			Zotero.wait(); });
+
+			Zotero.Utilities.processDocuments(urls, addEmbMeta);
+		});
 	} else {
 		addEmbMeta(doc);
 	}
@@ -225,13 +204,13 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"lastName": "Hofstein",
 						"firstName": "Avi",
+						"lastName": "Hofstein",
 						"creatorType": "author"
 					},
 					{
+						"firstName": "Vincent N",
 						"lastName": "Lunetta",
-						"firstName": "Vincent N.",
 						"creatorType": "author"
 					}
 				],
@@ -240,27 +219,34 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": false,
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					},
-					{
-						"url": false,
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
 					}
 				],
+				"itemID": "http://rer.sagepub.com/content/52/2/201.abstract",
 				"title": "The Role of the Laboratory in Science Teaching: Neglected Aspects of Research",
-				"date": "Summer 1982",
+				"publisher": "SAGE Publications",
+				"institution": "SAGE Publications",
+				"company": "SAGE Publications",
+				"label": "SAGE Publications",
+				"distributor": "SAGE Publications",
+				"date": "06/01/1982",
+				"DOI": "10.3102/00346543052002201",
+				"language": "en",
 				"publicationTitle": "Review of Educational Research",
-				"pages": "201 -217",
+				"journalAbbreviation": "REVIEW OF EDUCATIONAL RESEARCH",
 				"volume": "52",
 				"issue": "2",
-				"url": "http://rer.sagepub.com/content/52/2/201.abstract",
-				"abstractNote": "The laboratory has been given a central and distinctive role in science education, and science educators have suggested that there are rich benefits in learning from using laboratory activities. At this time, however, some educators have begun to question seriously the effectiveness and the role of laboratory work, and the case for laboratory teaching is not as self-evident as it once seemed. This paper provides perspectives on these issues through a review of the history, goals, and research findings regarding the laboratory as a medium of instruction in introductory science teaching. The analysis of research culminates with suggestions for researchers who are working to clarify the role of the laboratory in science education.",
-				"DOI": "10.3102/00346543052002201",
-				"libraryCatalog": "Highwire 2.0",
-				"shortTitle": "The Role of the Laboratory in Science Teaching"
+				"url": "http://rer.sagepub.com/content/52/2/201",
+				"pages": "201-217",
+				"ISSN": "0034-6543, 1935-1046",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "rer.sagepub.com",
+				"shortTitle": "The Role of the Laboratory in Science Teaching",
+				"abstractNote": "The laboratory has been given a central and distinctive role in science education, and science educators have suggested that there are rich benefits in learning from using laboratory activities. At this time, however, some educators have begun to question seriously the effectiveness and the role of laboratory work, and the case for laboratory teaching is not as self-evident as it once seemed. This paper provides perspectives on these issues through a review of the history, goals, and research findings regarding the laboratory as a medium of instruction in introductory science teaching. The analysis of research culminates with suggestions for researchers who are working to clarify the role of the laboratory in science education."
 			}
 		]
 	},
@@ -272,8 +258,8 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"lastName": "Owens",
 						"firstName": "Trevor",
+						"lastName": "Owens",
 						"creatorType": "author"
 					}
 				],
@@ -282,47 +268,64 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": false,
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					},
-					{
-						"url": false,
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
 					}
 				],
+				"itemID": "http://sag.sagepub.com/content/early/2010/04/23/1046878110366277.abstract",
 				"title": "Modding the History of Science: Values at Play in Modder Discussions of Sid Meier’s CIVILIZATION",
-				"date": "May 27 , 2010",
-				"publicationTitle": "Simulation & Gaming",
-				"url": "http://sag.sagepub.com/content/early/2010/04/23/1046878110366277.abstract",
-				"abstractNote": "Sid Meier’s CIVILIZATION has been promoted as an educational tool, used as a platform for building educational simulations, and maligned as promoting Eurocentrism, bioimperialism, and racial superiority. This article explores the complex issues involved in interpreting a game through analysis of the ways modders (gamers who modify the game) have approached the history of science, technology, and knowledge embodied in the game. Through text analysis of modder discussion, this article explores the assumed values and tone of the community’s discourse. The study offers initial findings that CIVILIZATION modders value a variety of positive discursive practices for developing historical models. Community members value a form of historical authenticity, they prize subtlety and nuance in models for science in the game, and they communicate through civil consensus building. Game theorists, players, and scholars, as well as those interested in modeling the history, sociology, and philosophy of science, will be interested to see the ways in which CIVILIZATION III cultivates an audience of modders who spend their time reimagining how science and technology could work in the game.",
+				"publisher": "SAGE Publications",
+				"institution": "SAGE Publications",
+				"company": "SAGE Publications",
+				"label": "SAGE Publications",
+				"distributor": "SAGE Publications",
+				"date": "2010-05-27",
 				"DOI": "10.1177/1046878110366277",
-				"libraryCatalog": "Highwire 2.0",
-				"shortTitle": "Modding the History of Science"
+				"language": "en",
+				"publicationTitle": "Simulation & Gaming",
+				"journalAbbreviation": "Simulation Gaming",
+				"url": "http://sag.sagepub.com/content/early/2010/04/23/1046878110366277",
+				"ISSN": "1046-8781, 1552-826X",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "sag.sagepub.com",
+				"shortTitle": "Modding the History of Science",
+				"abstractNote": "Sid Meier’s CIVILIZATION has been promoted as an educational tool, used as a platform for building educational simulations, and maligned as promoting Eurocentrism, bioimperialism, and racial superiority. This article explores the complex issues involved in interpreting a game through analysis of the ways modders (gamers who modify the game) have approached the history of science, technology, and knowledge embodied in the game. Through text analysis of modder discussion, this article explores the assumed values and tone of the community’s discourse. The study offers initial findings that CIVILIZATION modders value a variety of positive discursive practices for developing historical models. Community members value a form of historical authenticity, they prize subtlety and nuance in models for science in the game, and they communicate through civil consensus building. Game theorists, players, and scholars, as well as those interested in modeling the history, sociology, and philosophy of science, will be interested to see the ways in which CIVILIZATION III cultivates an audience of modders who spend their time reimagining how science and technology could work in the game."
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://scx.sagepub.com/content/30/2/277.abstract",
+		"url": "http://radiographics.rsna.org/content/10/1/41.full.pdf+html?frame=sidebar",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"lastName": "Mulder",
-						"firstName": "Henk A. J.",
+						"firstName": "M L",
+						"lastName": "Giger",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Longnecker",
-						"firstName": "Nancy",
+						"firstName": "K.",
+						"lastName": "Doi",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Davis",
-						"firstName": "Lloyd S.",
+						"firstName": "H.",
+						"lastName": "MacMahon",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "C E",
+						"lastName": "Metz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "F F",
+						"lastName": "Yin",
 						"creatorType": "author"
 					}
 				],
@@ -331,26 +334,310 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": false,
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					},
-					{
-						"url": false,
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
 					}
 				],
-				"title": "The State of Science Communication Programs at Universities Around the World",
-				"date": "December 01 , 2008",
-				"publicationTitle": "Science Communication",
-				"pages": "277 -287",
-				"volume": "30",
-				"issue": "2",
-				"url": "http://scx.sagepub.com/content/30/2/277.abstract",
-				"abstractNote": "Building on discussions at two workshops held at the recent 10th International Conference on the Public Communication of Science and Technology during June 2008 in Malmö, Sweden, this article proposes specific steps toward achieving a common understanding of the essential elements for academic programs in science communication. About 40 academics, science communication professionals, and students from at least 16 countries participated in this process.",
-				"DOI": "10.1177/1075547008324878",
-				"libraryCatalog": "Highwire 2.0"
+				"itemID": "http://radiographics.rsna.org/content/10/1/41.full.pdf+html?frame=sidebar",
+				"title": "Pulmonary Nodules: Computer-Aided Detection in Digital Chest Images.",
+				"publisher": "Radiological Society of North America",
+				"institution": "Radiological Society of North America",
+				"company": "Radiological Society of North America",
+				"label": "Radiological Society of North America",
+				"distributor": "Radiological Society of North America",
+				"date": "01/01/1990",
+				"language": "en",
+				"publicationTitle": "Radiographics",
+				"journalAbbreviation": "Radiographics",
+				"volume": "10",
+				"issue": "1",
+				"url": "http://radiographics.rsna.org/content/10/1/41",
+				"pages": "41-51",
+				"ISSN": "0271-5333, 1527-1323",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "radiographics.rsna.org",
+				"shortTitle": "Pulmonary nodules"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://bjaesthetics.oxfordjournals.org/search?fulltext=art&submit=yes&x=0&y=0",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://bjaesthetics.oxfordjournals.org/content/current",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://radiographics.rsna.org/cgi/collection/professional",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://jcb.rupress.org/content/early/by/section",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://rsbl.royalsocietypublishing.org/content/early/recent",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://bloodjournal.hematologylibrary.org/content/early/recent",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.pnas.org/content/108/52/20881.full",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Julien",
+						"lastName": "Couthouis",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael P",
+						"lastName": "Hart",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "James",
+						"lastName": "Shorter",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Mariely",
+						"lastName": "DeJesus-Hernandez",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Renske",
+						"lastName": "Erion",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Rachel",
+						"lastName": "Oristano",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Annie X",
+						"lastName": "Liu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Daniel",
+						"lastName": "Ramos",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Niti",
+						"lastName": "Jethava",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Divya",
+						"lastName": "Hosangadi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "James",
+						"lastName": "Epstein",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ashley",
+						"lastName": "Chiang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Zamia",
+						"lastName": "Diaz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tadashi",
+						"lastName": "Nakaya",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Fadia",
+						"lastName": "Ibrahim",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hyung-Jun",
+						"lastName": "Kim",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jennifer A",
+						"lastName": "Solski",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kelly L",
+						"lastName": "Williams",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jelena",
+						"lastName": "Mojsilovic-Petrovic",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Caroline",
+						"lastName": "Ingre",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kevin",
+						"lastName": "Boylan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Neill R",
+						"lastName": "Graff-Radford",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Dennis W",
+						"lastName": "Dickson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Dana",
+						"lastName": "Clay-Falcone",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Lauren",
+						"lastName": "Elman",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Leo",
+						"lastName": "McCluskey",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Robert",
+						"lastName": "Greene",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Robert G",
+						"lastName": "Kalb",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Virginia M. -Y",
+						"lastName": "Lee",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "John Q",
+						"lastName": "Trojanowski",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Albert",
+						"lastName": "Ludolph",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Wim",
+						"lastName": "Robberecht",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Peter M",
+						"lastName": "Andersen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Garth A",
+						"lastName": "Nicholson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ian P",
+						"lastName": "Blair",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Oliver D",
+						"lastName": "King",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nancy M",
+						"lastName": "Bonini",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Vivianna",
+						"lastName": "Van Deerlin",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Rosa",
+						"lastName": "Rademakers",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Zissimos",
+						"lastName": "Mourelatos",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Aaron D",
+						"lastName": "Gitler",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"itemID": "http://www.pnas.org/content/108/52/20881.full",
+				"title": "A Yeast Functional Screen Predicts New Candidate ALS Disease Genes",
+				"publisher": "National Acad Sciences",
+				"institution": "National Academy of Sciences",
+				"company": "National Academy of Sciences",
+				"label": "National Academy of Sciences",
+				"distributor": "National Academy of Sciences",
+				"date": "12/27/2011",
+				"DOI": "10.1073/pnas.1109434108",
+				"language": "en",
+				"publicationTitle": "Proceedings of the National Academy of Sciences",
+				"journalAbbreviation": "PNAS",
+				"volume": "108",
+				"issue": "52",
+				"url": "http://www.pnas.org/content/108/52/20881",
+				"pages": "20881-20890",
+				"ISSN": "0027-8424, 1091-6490",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.pnas.org",
+				"abstractNote": "Amyotrophic lateral sclerosis (ALS) is a devastating and universally fatal neurodegenerative disease. Mutations in two related RNA-binding proteins, TDP-43 and FUS, that harbor prion-like domains, cause some forms of ALS. There are at least 213 human proteins harboring RNA recognition motifs, including FUS and TDP-43, raising the possibility that additional RNA-binding proteins might contribute to ALS pathogenesis. We performed a systematic survey of these proteins to find additional candidates similar to TDP-43 and FUS, followed by bioinformatics to predict prion-like domains in a subset of them. We sequenced one of these genes, TAF15, in patients with ALS and identified missense variants, which were absent in a large number of healthy controls. These disease-associated variants of TAF15 caused formation of cytoplasmic foci when expressed in primary cultures of spinal cord neurons. Very similar to TDP-43 and FUS, TAF15 aggregated in vitro and conferred neurodegeneration in Drosophila, with the ALS-linked variants having a more severe effect than wild type. Immunohistochemistry of postmortem spinal cord tissue revealed mislocalization of TAF15 in motor neurons of patients with ALS. We propose that aggregation-prone RNA-binding proteins might contribute very broadly to ALS pathogenesis and the genes identified in our yeast functional screen, coupled with prion-like domain prediction analysis, now provide a powerful resource to facilitate ALS disease gene discovery."
 			}
 		]
 	}
