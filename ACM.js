@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-02-21 00:15:19"
+	"lastUpdated": "2012-03-09 19:51:25"
 }
 
 /*
@@ -32,15 +32,12 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 
 function detectWeb(doc, url) {
-  var nsResolver = getNsResolver(doc);
-
-
   if (url.indexOf("/results.cfm") != -1) {
 	//Zotero.debug("Multiple items detected");
 	return "multiple";
   } else if (url.indexOf("/citation.cfm") != -1) {
 	//Zotero.debug("Single item detected");
-	return getArticleType(doc, url, nsResolver);
+	return getArticleType(doc, url);
 
   }
 }
@@ -48,19 +45,12 @@ function detectWeb(doc, url) {
 
 
 function doWeb(doc, url) {
-  var namespace = doc.documentElement.namespaceURI;
-  var nsResolver = namespace ?
-  function (prefix) {
-	if (prefix == 'x') return namespace;
-	else return null;
-  } : null;
-
-  var URIs = new Array();
+   var URIs = new Array();
   var items = new Object();
   if (detectWeb(doc, url) == "multiple") {
 
 	var xpath = '//tr/td/a[@target="_self"]';
-	var articles = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var articles = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 	var next_art = articles.iterateNext();
 	while (next_art) {
 	  items[next_art.href] = next_art.textContent;
@@ -72,6 +62,8 @@ function doWeb(doc, url) {
 		return true;
 	  }
 	  for (var i in items) {
+		i = i.replace(/\&preflayout\=(tabs|flat)/, "") + "&preflayout=flat"
+		//Z.debug(i)
 		URIs.push(i);
 	  }
 	  Zotero.Utilities.processDocuments(URIs, scrape, function () {
@@ -81,17 +73,16 @@ function doWeb(doc, url) {
 	  Zotero.wait();
 	});
   } else {
-	URIs.push(url);
-	Zotero.Utilities.processDocuments(URIs, scrape, function () {
-	  Zotero.done();
-	});
-		Zotero.wait();
+  	var newURL;
+  	newURL = url.replace(/\&preflayout\=(tabs|flat)/, "") + "&preflayout=flat"
+  	//Z.debug(newURL);
+	scrape(doc, newURL);
   }
 }
 //get abstract where possible - this fails frequently
 
 function scrape(doc) {
-  var xpath = '//div/div[@style="display:inline"]|//div[@id="abstract"]//div';
+  var xpath = '//div/div[@style="display:inline"]';
   var abs = getText(xpath, doc);
 
   //get genric URL
@@ -152,8 +143,8 @@ if (incomplete.length > 0) incomplete[0].complete();
  * @return a string with either "multiple", "journalArticle",  "conferencePaper", or "book" in it, depending on the type of document
  */
 
-function getArticleType(doc, url, nsResolver) {
-  //var toc = doc.evaluate(tocX, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+function getArticleType(doc, url) {
+  //var toc = doc.evaluate(tocX, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
   if (url.indexOf("results.cfm") != -1) {
 	//Zotero.debug("Type: multiple");
 	return "multiple";
@@ -162,8 +153,8 @@ function getArticleType(doc, url, nsResolver) {
   var conference = getText('//meta[@name="citation_conference"]/@content', doc);
   var journal = getText('//meta[@name="citation_journal_title"]/@content', doc);
   //Zotero.debug(conference);
-  if (conference.indexOf(" ") != -1) return "conferencePaper";
-  else if (journal.indexOf(" ") != -1) return "journalArticle";
+  if (journal.indexOf(" ") != -1) return "journalArticle";
+  else if (conference.indexOf(" ") != -1) return "conferencePaper";
   else return "book";
 
 }
@@ -176,8 +167,8 @@ function getArticleType(doc, url, nsResolver) {
  * @return the text in the defined node or "Unable to scrape text" if the node was not found or if there was no text content
  */
 
-function getText(pathString, doc, nsResolver) {
-  var path = doc.evaluate(pathString, doc, nsResolver, XPathResult.ANY_TYPE, null);
+function getText(pathString, doc) {
+  var path = doc.evaluate(pathString, doc, null, XPathResult.ANY_TYPE, null);
   var node = path.iterateNext();
 
   if (node == null || node.textContent == undefined || node.textContent == null) {
@@ -188,21 +179,7 @@ function getText(pathString, doc, nsResolver) {
   return node.textContent;
 }
 
-/**
- * Get a function for returning the namespace of a given document given its prefix
- * @param nsResolver the namespace resolver function
- */
-
-function getNsResolver(doc) {
-  var namespace = doc.documentElement.namespaceURI;
-  var nsResolver = namespace ?
-  function (prefix) {
-	if (prefix == 'x') return namespace;
-	else return null;
-  } : null;
-
-  return nsResolver;
-} /** BEGIN TEST CASES **/
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -253,7 +230,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://dl.acm.org/citation.cfm?id=1717186&coll=DL&dl=GUIDE&CFID=48452129&CFTOKEN=58065473",
+		"url": "http://dl.acm.org/citation.cfm?id=1717186&coll=DL&dl=GUIDE",
 		"items": [
 			{
 				"itemType": "book",
@@ -265,7 +242,9 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [],
+				"tags": [
+					""
+				],
 				"seeAlso": [],
 				"attachments": [
 					{
@@ -286,7 +265,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://dl.acm.org/citation.cfm?id=254650.257486&coll=DL&dl=GUIDE&CFID=48452129&CFTOKEN=58065473",
+		"url": "http://dl.acm.org/citation.cfm?id=254650.257486&coll=DL&dl=GUIDE",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -342,7 +321,7 @@ var testCases = [
 		"url": "http://dl.acm.org/citation.cfm?id=258948.258973&coll=DL&dl=ACM",
 		"items": [
 			{
-				"itemType": "conferencePaper",
+				"itemType": "journalArticle",
 				"creators": [
 					{
 						"firstName": "Conal",
@@ -368,13 +347,14 @@ var testCases = [
 					}
 				],
 				"title": "Functional reactive animation",
-				"publicationTitle": "Proceedings of the second ACM SIGPLAN international conference on Functional programming",
-				"series": "ICFP '97",
-				"date": "1997",
-				"ISBN": "0-89791-918-1",
+				"publicationTitle": "SIGPLAN Not.",
+				"volume": "32",
+				"issue": "8",
+				"date": "August 1997",
+				"ISSN": "0362-1340",
 				"pages": "263–273",
-				"url": "http://doi.acm.org/10.1145/258948.258973",
-				"DOI": "10.1145/258948.258973",
+				"url": "http://doi.acm.org/10.1145/258949.258973",
+				"DOI": "10.1145/258949.258973",
 				"publisher": "ACM",
 				"place": "New York, NY, USA",
 				"libraryCatalog": "ACM Digital Library",

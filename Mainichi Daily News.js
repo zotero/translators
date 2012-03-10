@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-11-08 21:08:22"
+	"lastUpdated": "2012-03-09 23:47:03"
 }
 
 // #################################
@@ -18,22 +18,6 @@
 
 var itemRe = new RegExp('.*/([0-9]{8})[a-z]{1}[0-9]{1}[a-z]{1}[0-9]{2}[a-z]{1}[0-9]{1}[a-z]{2}[0-9]{6}c\.html');
 
-var getResolver = function (doc) {
-	var namespace, resolver;
-	namespace = doc.documentElement.namespaceURI;
-	if (namespace) {
-		resolver = function(prefix) {
-			if (prefix == 'x') {
-				return namespace;
-			} else {
-				return null;
-			}
-		};
-	} else {
-		resolver = null;
-	}
-	return resolver;
-};
 
 var cleanUp = function (str) {
 	var ret;
@@ -58,8 +42,7 @@ var detectWeb = function (doc, url) {
 }
 
 var doWeb = function (doc, url) {
-	var type, nsResolver, availableItems, xpath, found, nodes, headline, pos, myurl, m, items, title;
-	nsResolver = getResolver(doc);
+	var type, availableItems, xpath, found, nodes, headline, pos, myurl, m, items, title;
 	type = detectWeb(doc, url);
 	if (type === "multiple") {
 		availableItems = {};
@@ -68,7 +51,7 @@ var doWeb = function (doc, url) {
 		} else {
 			xpath = '//h2[@class="NewsTitle"]/a[@href]|//ul[@class="Mark"]/li/a[@href]';
 		}
-		nodes = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		nodes = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 		found = nodes.iterateNext();
 		while (found) {
 			if (!itemRe.test(found.href)) {
@@ -81,7 +64,6 @@ var doWeb = function (doc, url) {
 			found = nodes.iterateNext();
 		}
 		if (availableItems!=null) {
-			Zotero.debug("test")
 			items = Zotero.selectItems(availableItems);
 			for (myurl in items) {
 				if (items.hasOwnProperty(myurl)) {
@@ -91,7 +73,7 @@ var doWeb = function (doc, url) {
 		}
 	} else if (type === "newspaperArticle") {
 		xpath = '//h2[@class="NewsTitle"]';
-		nodes = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		nodes = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 		title = nodes.iterateNext();
 		if (title) {
 			title = cleanUp(title.textContent);
@@ -125,7 +107,12 @@ var scrapeAndParse = function (url, title) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://mdn.mainichi.jp/mdnnews/national/news/20111108p2g00m0dm122000c.html",
+		"url": "http://search.mdn.mainichi.jp/result?p=kyoto&st=s",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://mdn.mainichi.jp/mdnnews/news/20120225p2a00m0na015000c.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -137,23 +124,19 @@ var testCases = [
 					{
 						"title": "Mainichi Daily News snapshot",
 						"mimeType": "text/html",
-						"url": "http://mdn.mainichi.jp/mdnnews/national/news/20111108p2g00m0dm122000c.html"
+						"url": "http://mdn.mainichi.jp/mdnnews/news/20120225p2a00m0na015000c.html"
 					}
 				],
-				"title": "Principals, vice principals, senior teachers seek demotion",
+				"title": "Japan's food self-sufficiency: mixture of pessimism and optimism",
 				"publicationTitle": "Mainichi Daily News",
 				"edition": "online edition",
-				"url": "http://mdn.mainichi.jp/mdnnews/national/news/20111108p2g00m0dm122000c.html",
-				"date": "2011-11-08",
+				"url": "http://mdn.mainichi.jp/mdnnews/news/20120225p2a00m0na015000c.html",
+				"date": "2012-02-25",
 				"libraryCatalog": "Mainichi Daily News",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Japan's food self-sufficiency"
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://search.mdn.mainichi.jp/result?p=kyoto&st=s",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

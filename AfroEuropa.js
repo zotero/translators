@@ -6,10 +6,10 @@
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
-	"browserSupport": "gcs",
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2012-01-01 01:42:16"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-03-09 19:53:34"
 }
 
 function detectWeb(doc, url) {
@@ -27,11 +27,6 @@ function makeExport(site, str) {
 }
 
 function doWeb(doc, url) {
-	var n = doc.documentElement.namespaceURI;
-	var ns = n ? function(prefix) {
-		if (prefix == 'x') return n; else return null;
-	} : null;
-	
 	var site = url.match(/^http:\/\/([^/]*\/)+index\.php\/[^/]*\//)[0];
 	var arts = new Array();
 	if (detectWeb(doc, url) == "multiple") {
@@ -44,11 +39,11 @@ function doWeb(doc, url) {
 			var linkx = './td[2]/a[1]';
 		}
 		var items = new Object();
-		var results = doc.evaluate(xpath, doc, ns, XPathResult.ANY_TYPE, null);
+		var results = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 		var result;
 		while (result = results.iterateNext()) {
-			var title = Zotero.Utilities.trimInternal(doc.evaluate(titlex, result, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-			var link = doc.evaluate(linkx, result, ns, XPathResult.ANY_TYPE, null).iterateNext().href;
+			var title = Zotero.Utilities.trimInternal(doc.evaluate(titlex, result, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+			var link = doc.evaluate(linkx, result, null, XPathResult.ANY_TYPE, null).iterateNext().href;
 			items[makeExport(site, link)] = title;
 		}
 		items = Zotero.selectItems(items);

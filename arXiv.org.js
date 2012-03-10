@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-01 20:17:15"
+	"lastUpdated": "2012-03-09 23:51:48"
 }
 
 function detectWeb(doc, url) {
@@ -201,22 +201,22 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "D. T",
+						"firstName": "D. T.",
 						"lastName": "O'Dea",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "C. N",
+						"firstName": "C. N.",
 						"lastName": "Clark",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "C. R",
+						"firstName": "C. R.",
 						"lastName": "Contaldi",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "C. J",
+						"firstName": "C. J.",
 						"lastName": "MacTavish",
 						"creatorType": "author"
 					}
