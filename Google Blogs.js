@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-08 07:30:59"
+	"lastUpdated": "2012-03-10 00:13:16"
 }
 
 /*
@@ -80,6 +80,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
+		"defer": true,
 		"url": "https://www.google.com/search?tbm=blg&hl=en&source=hp&biw=1024&bih=656&q=argentina&btnG=Search&gbv=2",
 		"items": "multiple"
 	}

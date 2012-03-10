@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-05 17:47:59"
+	"lastUpdated": "2012-03-10 00:00:51"
 }
 
 function detectWeb(doc, url) {
@@ -128,43 +128,52 @@ function doWeb(doc, url) {
 	}
 }
 /** BEGIN TEST CASES **/
-var testCases = [{
-	"type": "web",
-	"url": "http://www.freepatentsonline.com/result.html?query_txt=encryption&sort=relevance&srch=top&search=",
-	"items": "multiple"
-}, {
-	"type": "web",
-	"url": "http://www.freepatentsonline.com/7751561.html",
-	"items": [{
-		"itemType": "patent",
-		"creators": [{
-			"firstName": "Brant L",
-			"lastName": "Candelore",
-			"creatorType": "inventor"
-		}, {
-			"firstName": "Robert Allan",
-			"lastName": "Unger",
-			"creatorType": "inventor"
-		}, {
-			"firstName": "Leo M",
-			"lastName": "Pedlow Jr. ",
-			"creatorType": "inventor"
-		}],
-		"notes": [],
-		"tags": [],
-		"seeAlso": [],
-		"attachments": [],
-		"title": "Partial encryption",
-		"abstractNote": "A multiple partial encryption device consistent with certain embodiments has an input for receiving a unencrypted video signal. An encryption arrangement produces a partially multiple encrypted video signal from the unencrypted video signal. An output provides the partially multiple encrypted video signal. This abstract is not to be considered limiting, since other embodiments may deviate from the features described in this abstract.",
-		"applicationNumber": "12/001561",
-		"issueDate": "07/06/2010",
-		"filingDate": "12/12/2007",
-		"assignee": "Sony Corporation (Tokyo, JP) Sony Electronics Inc. (Park Ridge, NJ, US)",
-		"patentNumber": "7751561",
-		"country": "United States",
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.freepatentsonline.com/result.html?query_txt=encryption&sort=relevance&srch=top&search=",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
 		"url": "http://www.freepatentsonline.com/7751561.html",
-		"libraryCatalog": "FreePatentsOnline",
-		"accessDate": "CURRENT_TIMESTAMP"
-	}]
-}]
+		"items": [
+			{
+				"itemType": "patent",
+				"creators": [
+					{
+						"firstName": "Brant L.",
+						"lastName": "Candelore",
+						"creatorType": "inventor"
+					},
+					{
+						"firstName": "Robert Allan",
+						"lastName": "Unger",
+						"creatorType": "inventor"
+					},
+					{
+						"firstName": "Leo M.",
+						"lastName": "Pedlow Jr. ",
+						"creatorType": "inventor"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Partial encryption",
+				"abstractNote": "A multiple partial encryption device consistent with certain embodiments has an input for receiving a unencrypted video signal. An encryption arrangement produces a partially multiple encrypted video signal from the unencrypted video signal. An output provides the partially multiple encrypted video signal. This abstract is not to be considered limiting, since other embodiments may deviate from the features described in this abstract.",
+				"applicationNumber": "12/001561",
+				"issueDate": "07/06/2010",
+				"filingDate": "12/12/2007",
+				"assignee": "Sony Corporation (Tokyo, JP) Sony Electronics Inc. (Park Ridge, NJ, US)",
+				"patentNumber": "7751561",
+				"country": "United States",
+				"url": "http://www.freepatentsonline.com/7751561.html",
+				"libraryCatalog": "FreePatentsOnline",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
 /** END TEST CASES **/
