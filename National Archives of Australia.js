@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-11-09 11:28:11"
+	"lastUpdated": "2012-03-11 00:15:35"
 }
 
 function detectWeb(doc, url) {
@@ -20,10 +20,13 @@ function detectWeb(doc, url) {
 		return "manuscript";
 	}
 }
+
 function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
+	var nsResolver = namespace ?
+	function (prefix) {
+		if (prefix == 'x') return namespace;
+		else return null;
 	} : null;
 	// If it's a single page of a digitised file, then send it to be processed directly.
 	// This is because digitised pages, after the first, are retrieved via POST, thus if you feed the url to processDocuments
@@ -31,7 +34,7 @@ function doWeb(doc, url) {
 	if (url.match(/imagine.asp/i)) {
 		processFolio(doc);
 		Zotero.done();
-	// Everything else can be handled normally.
+		// Everything else can be handled normally.
 	} else {
 		// To avoid cross domain errors find baseurl
 		var baseURL = doc.location.href.match(/(http:\/\/[a-z0-9]+\.naa\.gov\.au)/)[1];
@@ -66,14 +69,19 @@ function doWeb(doc, url) {
 		} else {
 			records = [url];
 		}
-		Zotero.Utilities.processDocuments(records, scrape, function(){Zotero.done();});
+		Zotero.Utilities.processDocuments(records, scrape, function () {
+			Zotero.done();
+		});
 		Zotero.wait();
 	}
 }
+
 function processFolio(doc) {
 	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
+	var nsResolver = namespace ?
+	function (prefix) {
+		if (prefix == 'x') return namespace;
+		else return null;
 	} : null;
 	// To avoid cross-domain problems, find the base url
 	var baseURL = doc.location.href.match(/(http:\/\/[a-z0-9]+\.naa\.gov\.au)/)[1];
@@ -87,7 +95,7 @@ function processFolio(doc) {
 		barcode = RegExp.$1;
 		page = RegExp.$2;
 		numPages = Zotero.Utilities.trimInternal(doc.evaluate('//input[@id="printto"]/@value', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
-	// Using the original RS interface
+		// Using the original RS interface
 	} else {
 		barcode = Zotero.Utilities.trimInternal(doc.evaluate('//input[@id="Hidden1"]/@value', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
 		page = Zotero.Utilities.trimInternal(doc.evaluate('//input[@id="Text1"]/@value', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
@@ -107,7 +115,11 @@ function processFolio(doc) {
 	item.title = 'Page ' + page + ' of NAA: ' + refNumber;
 	item.archiveLocation = refNumber;
 	// Save a copy of the image
-	item.attachments = [{url:item.url, title:'Digital copy of NAA: ' + refNumber + ', p. ' + page, mimeType:"image/jpeg" }];
+	item.attachments = [{
+		url: item.url,
+		title: 'Digital copy of NAA: ' + refNumber + ', p. ' + page,
+		mimeType: "image/jpeg"
+	}];
 	// MACHINE TAGS
 	// The file of which this page is a part.
 	item.tags.push('dcterms:isPartOf="http://www.naa.gov.au/cgi-bin/Search?O=I&Number=' + barcode + '"');
@@ -117,10 +129,13 @@ function processFolio(doc) {
 	item.complete();
 	Zotero.wait();
 }
+
 function scrape(doc) {
 	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
+	var nsResolver = namespace ?
+	function (prefix) {
+		if (prefix == 'x') return namespace;
+		else return null;
 	} : null;
 	// To avoid cross-domain problems, find the base url
 	var baseURL = doc.location.href.match(/(http:\/\/[a-z0-9]+\.naa\.gov\.au)/)[1];
@@ -165,7 +180,11 @@ function scrape(doc) {
 		item.tags.push('xmlns:owl="http://www.w3.org/2002/07/owl#"');
 		// Attach copy of photo as attachment
 		var imgURL = "http://recordsearch.naa.gov.au/NaaMedia/ShowImage.asp?B=" + barcode + "&S=1&T=P";
-		item.attachments = [{url:imgURL, title:"Digital image of NAA: "+ item.archiveLocation, mimeType:"image/jpeg" }];
+		item.attachments = [{
+			url: imgURL,
+			title: "Digital image of NAA: " + item.archiveLocation,
+			mimeType: "image/jpeg"
+		}];
 	} else if (doc.location.href.match(/SeriesDetail.asp/i)) {
 		item.libraryCatalog = "RecordSearch";
 		item.title = Zotero.Utilities.trimInternal(doc.evaluate('//td[@class="field"][. ="Title"]/following-sibling::td', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.lastChild.textContent);
@@ -179,7 +198,10 @@ function scrape(doc) {
 		// Agencies recording into this series
 		var agencies = doc.evaluate('//div[@id="provenanceRecording"]/ul/li/div[@class="linkagesInfo"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		while (agency = agencies.iterateNext()) {
-			item.creators.push({lastName: agency.textContent, creatorType: "creator"});
+			item.creators.push({
+				lastName: agency.textContent,
+				creatorType: "creator"
+			});
 		}
 		// Save series note as abstract
 		if (doc.evaluate('//div[@id="notes"]', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue != null) {
@@ -197,7 +219,7 @@ function scrape(doc) {
 		// Quantities and locations
 		var quantities = doc.evaluate('//td[@class="field"][. ="Quantity and location"]/following-sibling::td/ul/li', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		while (quantity = quantities.iterateNext()) {
-			item.tags.push('dcterms:extent="' +quantity.textContent + '"');
+			item.tags.push('dcterms:extent="' + quantity.textContent + '"');
 		}
 		// Citation
 		item.tags.push('dcterms:bibliographicCitation="NAA: ' + refNumber + '"');
@@ -242,7 +264,7 @@ function scrape(doc) {
 			itemURL = baseURL + "/scripts/Imagine.asp?B=" + barcode;
 			// Retrieve the digitised file
 			itemDoc = Zotero.Utilities.retrieveDocument(itemURL);
-			item.numPages =Zotero.Utilities.trimInternal(itemDoc.evaluate('//input[@id="Hidden3"]/@value', itemDoc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
+			item.numPages = Zotero.Utilities.trimInternal(itemDoc.evaluate('//input[@id="Hidden3"]/@value', itemDoc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
 		}
 		// Declare dcterms namespace
 		item.tags.push('xmlns:dcterms="http://purl.org/dc/terms/"');
@@ -251,36 +273,5 @@ function scrape(doc) {
 }
 
 /** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://recordsearch.naa.gov.au/SearchNRetrieve/Interface/DetailsReports/ItemDetail.aspx?Barcode=5287511",
-		"items": [
-			{
-				"itemType": "manuscript",
-				"creators": [],
-				"notes": [],
-				"tags": [
-					"dcterms:isPartOf=\"http://www.naa.gov.au/cgi-bin/Search?Number=A3280\"",
-					"dcterms:bibliographicCitation=\"NAA: A3280, P2605\"",
-					"dcterms:identifier=\"5287511\"",
-					"dcterms:accessRights=\"Not yet examined\"",
-					"dcterms:format=\"PAPER FILES AND DOCUMENTS (allocated at series level)\"",
-					"xmlns:dcterms=\"http://purl.org/dc/terms/\""
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"archive": "National Archives of Australia",
-				"manuscriptType": "file",
-				"libraryCatalog": "RecordSearch",
-				"title": "Rifle range - Williamstown Vic - licence to erect building thereon by Melbourne Rifle Club",
-				"archiveLocation": "A3280, P2605",
-				"url": "http://www.naa.gov.au/cgi-bin/Search?O=I&Number=5287511",
-				"date": "1914 - 1914",
-				"place": "Canberra",
-				"accessDate": "CURRENT_TIMESTAMP"
-			}
-		]
-	}
-]
+var testCases = []
 /** END TEST CASES **/
