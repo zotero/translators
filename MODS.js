@@ -15,7 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "g",
-	"lastUpdated": "2012-03-11 14:34:21"
+	"lastUpdated": "2012-03-11 14:50:32"
 }
 
 function detectImport() {
@@ -1289,7 +1289,7 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "Gregory K",
+						"firstName": "Gregory K.",
 						"lastName": "Raschke",
 						"creatorType": "author"
 					}
@@ -1671,12 +1671,12 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "John R",
+						"firstName": "John R.",
 						"lastName": "Conrad",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Kumar",
+						"firstName": "Kumar.",
 						"lastName": "Sridharan",
 						"creatorType": "author"
 					},
