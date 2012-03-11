@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-07 23:16:08"
+	"lastUpdated": "2012-03-11 15:38:39"
 }
 
 function detectWeb(doc, url) {
@@ -275,7 +275,7 @@ function scrape(doc, url) {
 							newItem.type = value.split(/ ?:/)[0];
 							break;
 
-						case "identifiant\u00A0pérenne de\u00A0la\u00A0notice":
+						case "identifiant pérenne de la notice":
 						case 'persistent identifier of the record':
 						case 'persistent identifier des datensatzes':
 							newItem.url = value;
@@ -636,7 +636,7 @@ var testCases = [
 				"itemType": "audioRecording",
 				"creators": [
 					{
-						"firstName": "Ernest H",
+						"firstName": "Ernest H.",
 						"lastName": "Sanders",
 						"creatorType": "author"
 					},
