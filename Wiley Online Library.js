@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-04 18:40:38"
+	"lastUpdated": "2012-03-11 14:57:00"
 }
 
 /*
@@ -450,12 +450,12 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "John M",
+						"firstName": "John M.",
 						"lastName": "Koomen",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "David J",
+						"firstName": "David J.",
 						"lastName": "Merkler",
 						"creatorType": "author"
 					}
@@ -484,10 +484,10 @@ var testCases = [
 				"issue": "2",
 				"publisher": "WILEY‐VCH Verlag",
 				"DOI": "10.1002/pmic.201100327",
-				"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
 				"language": "en",
 				"pages": "173-182",
 				"ISSN": "1615-9861",
+				"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "onlinelibrary.wiley.com",
 				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
@@ -513,12 +513,12 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "John M",
+						"firstName": "John M.",
 						"lastName": "Koomen",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "David J",
+						"firstName": "David J.",
 						"lastName": "Merkler",
 						"creatorType": "author"
 					}
@@ -547,10 +547,10 @@ var testCases = [
 				"issue": "2",
 				"publisher": "WILEY‐VCH Verlag",
 				"DOI": "10.1002/pmic.201100327",
-				"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/full",
 				"language": "en",
 				"pages": "173-182",
 				"ISSN": "1615-9861",
+				"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/full",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "onlinelibrary.wiley.com",
 				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
@@ -576,12 +576,12 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "John M",
+						"firstName": "John M.",
 						"lastName": "Koomen",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "David J",
+						"firstName": "David J.",
 						"lastName": "Merkler",
 						"creatorType": "author"
 					}
@@ -610,10 +610,10 @@ var testCases = [
 				"issue": "2",
 				"publisher": "WILEY‐VCH Verlag",
 				"DOI": "10.1002/pmic.201100327",
-				"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
 				"language": "en",
 				"pages": "173-182",
 				"ISSN": "1615-9861",
+				"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "onlinelibrary.wiley.com",
 				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
@@ -639,12 +639,12 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "John M",
+						"firstName": "John M.",
 						"lastName": "Koomen",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "David J",
+						"firstName": "David J.",
 						"lastName": "Merkler",
 						"creatorType": "author"
 					}
@@ -673,10 +673,10 @@ var testCases = [
 				"issue": "2",
 				"publisher": "WILEY‐VCH Verlag",
 				"DOI": "10.1002/pmic.201100327",
-				"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
 				"language": "en",
 				"pages": "173-182",
 				"ISSN": "1615-9861",
+				"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "onlinelibrary.wiley.com",
 				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
