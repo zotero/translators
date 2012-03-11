@@ -15,7 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "g",
-	"lastUpdated": "2012-03-11 14:11:57"
+	"lastUpdated": "2012-03-11 14:34:21"
 }
 
 function detectImport() {
@@ -1044,7 +1044,8 @@ function doImport() {
 					newItem.date = date.text().toString();
 				} else if(!date.@point.toString()) {
 					newItem.date = date.text().toString();
-					break;
+					//prefer structured dates
+					if(date.@encoding.toString()) break;
 				}
 			}
 		}
@@ -1082,7 +1083,7 @@ function doImport() {
 					newItem.date = date.text().toString();
 				} else if(!date.@point.toString()) {
 					newItem.date = date.text().toString();
-					break;
+					if(date.@encoding.toString()) break;
 				}
 			}
 		} else if(originInfo.m::dateCreated.length()) {
