@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-05 08:19:20"
+	"lastUpdated": "2012-03-11 15:14:57"
 }
 
 function createExcludes(url, excludeArr) {
@@ -218,15 +218,14 @@ var testCases = [
 				],
 				"itemID": "http://blogs.telegraph.co.uk/news/cristinaodone/100141152/putin-wins-the-russian-election-but-it-wont-be-long-before-hes-in-trouble/",
 				"title": "Putin 'wins' the Russian election. But it won't be long before he's in trouble",
-				"source": "News - Telegraph Blogs",
 				"publicationTitle": "News - Telegraph Blogs",
 				"date": "2012-03-04",
 				"url": "http://blogs.telegraph.co.uk/news/cristinaodone/100141152/putin-wins-the-russian-election-but-it-wont-be-long-before-hes-in-trouble/",
-				"abstractNote": "Vladimir Putin looks set to win the Russian elections – no surprise there, then. Few, even in Russia, believe that today's election is anything but a stage-managed vote. Putin may have been the most popular Russian leader in decades, but the gloss has worn off. Protesters in Russia and in the West have spent the [...]",
-				"section": "Blogs",
-				"callNumber": "100141152",
+				"abstractNote": "Vladimir Putin looks set to win the Russian elections – no surprise there, then. Few, even in Russia, believe that today's election is anything bu",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "blogs.telegraph.co.uk",
+				"section": "Blogs",
+				"callNumber": "100141152",
 				"publisher": "Telegraph Media Group Limited"
 			}
 		]
