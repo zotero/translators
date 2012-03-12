@@ -12,6 +12,28 @@
 	"lastUpdated": "2012-03-12 14:29:04"
 }
 
+/*
+	***** BEGIN LICENSE BLOCK *****
+	
+	ILO Labordoc translator, Copyright © 2012 Sebastian Karcher
+	This file is part of Zotero.
+	
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+	
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+	
+	***** END LICENSE BLOCK *****
+*/
+
 function detectWeb(doc, url) {
 	if (url.match(/\/search\?/)) return "multiple";
 	else if (url.match(/\/record\//)) return "book";
