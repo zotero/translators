@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-11 14:57:00"
+	"lastUpdated": "2012-03-12 11:28:54"
 }
 
 /*
@@ -51,7 +51,7 @@ function getAuthorName(text) {
 	return text.trim();
 }
 
-function scrape(doc, url) {
+function scrape(doc, url, pdfUrl) {
 	var itemType = detectWeb(doc,url);
 
 	if( itemType == 'book' ) {
@@ -132,7 +132,34 @@ function scrape(doc, url) {
 				item.abstractNote = ZU.xpathText(doc, '//div[@id="abstract"]/div[@class="para"]', null, "\n");
 			}
 
-			item.complete();
+			//remove pdf attachments
+			for(var i=0, n=item.attachments.length; i<n; i++) {
+				if(item.attachments[i].mimeType == 'application/pdf') {
+					item.attachments.splice(i,1);
+					i--;
+					n--;
+				}
+			}
+
+			//fetch pdf url. There seems to be some magic value that must be sent
+			// with the request
+			if(!pdfUrl) {
+				var u = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
+				if(u) {
+					ZU.doGet(u, function(text) {
+						var m = text.match(/<iframe id="pdfDocument"[^>]+?src="([^"]+)"/i);
+						if(m) {
+							item.attachments.push({url: m[1], title: 'Full Text PDF', mimeType: 'application/pdf'});
+						}
+						item.complete();
+					});
+				} else {
+					item.complete();
+				}
+			} else {
+				item.attachments.push({url: pdfUrl, title: 'Full Text PDF', mimeType: 'application/pdf'});
+				item.complete();
+			}
 		});
 		translator.translate();
 	}
@@ -177,7 +204,9 @@ function doWeb(doc, url) {
 			//redirect needs to work where URL end in /pdf and where it end in /pdf/something
 			url = url.replace(/\/pdf(.+)?$/,'/abstract');
 			//Zotero.debug("Redirecting to abstract page: "+url);
-			ZU.processDocuments(url, function(doc) { scrape(doc, doc.location.href) });
+			//grab pdf url before leaving
+			var pdfUrl = ZU.xpathText(doc, '//div[@iframe="pdfDocument"]/@src');
+			ZU.processDocuments(url, function(doc) { scrape(doc, doc.location.href, pdfUrl) });
 		} else if(type != 'book' &&
 				url.indexOf('abstract') == -1 &&
 				!ZU.xpathText(doc, '//div[@id="abstract"]/div[@class="para"]')) {
@@ -217,15 +246,11 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Full Text PDF",
-						"url": "http://onlinelibrary.wiley.com/doi/10.1002/9781118269381.notes/pdf",
-						"mimeType": "application/pdf"
+						"title": "Snapshot"
 					},
 					{
-						"title": "Snapshot",
-						"document": {
-							"location": {}
-						}
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"title": "Endnotes",
@@ -233,9 +258,9 @@ var testCases = [
 				"publisher": "Jossey‐Bass",
 				"ISBN": "9781118269381",
 				"DOI": "10.1002/9781118269381.notes",
-				"url": "http://onlinelibrary.wiley.com/doi/10.1002/9781118269381.notes/summary",
 				"language": "en",
 				"pages": "427-467",
+				"url": "http://onlinelibrary.wiley.com/doi/10.1002/9781118269381.notes/summary",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "onlinelibrary.wiley.com",
 				"rights": "Copyright © 2009 Curtis J. Bonk. All rights reserved."
@@ -330,11 +355,11 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
+						"title": "Snapshot"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"title": "Silent Cinema and its Pioneers (1906–1930)",
@@ -342,9 +367,9 @@ var testCases = [
 				"publisher": "Wiley‐Blackwell",
 				"ISBN": "9781444304794",
 				"DOI": "10.1002/9781444304794.ch1",
-				"url": "http://onlinelibrary.wiley.com/doi/10.1002/9781444304794.ch1/summary",
 				"language": "en",
 				"pages": "1-20",
+				"url": "http://onlinelibrary.wiley.com/doi/10.1002/9781444304794.ch1/summary",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "onlinelibrary.wiley.com",
 				"rights": "Copyright © 2009 Tatjana Pavlović, Inmaculada Alvarez, Rosana Blanco-Cano, Anitra Grisales, Alejandra Osorio, and Alejandra Sánchez",
@@ -470,11 +495,11 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
+						"title": "Snapshot"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
@@ -533,11 +558,11 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
+						"title": "Snapshot"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
@@ -596,11 +621,11 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
+						"title": "Snapshot"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
@@ -659,11 +684,11 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
+						"title": "Snapshot"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
