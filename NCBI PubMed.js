@@ -1,16 +1,18 @@
 {
-	"translatorID":"fcf41bed-0cbc-3704-85c7-8062a0068a7a",
-	"translatorType":13,
-	"label":"NCBI PubMed",
-	"creator":"Simon Kornblith, Michael Berkowitz, Avram Lyon, and Rintze Zelle",
-	"target":"https?://[^/]*(www|preview)\\.ncbi\\.nlm\\.nih\\.gov[^/]*/(pubmed|sites/pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed)",
-	"minVersion":"2.1.9",
-	"maxVersion":"",
-	"priority":100,
-	"browserSupport":"gcs",
-	"configOptions":{"dataMode":"block"},
-	"inRepository":true,
-	"lastUpdated":"2011-07-01 04:22:03"
+	"translatorID": "fcf41bed-0cbc-3704-85c7-8062a0068a7a",
+	"label": "NCBI PubMed",
+	"creator": "Simon Kornblith, Michael Berkowitz, Avram Lyon, and Rintze Zelle",
+	"target": "https?://[^/]*(www|preview)\\.ncbi\\.nlm\\.nih\\.gov[^/]*/(pubmed|sites/pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed)",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"configOptions": {
+		"dataMode": "block"
+	},
+	"inRepository": true,
+	"translatorType": 13,
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-03-12 01:14:39"
 }
 
 function detectWeb(doc, url) {
@@ -352,7 +354,7 @@ function doWeb(doc, url) {
 		} : null;
 	var ids = new Array();
 	var uids = doc.evaluate('//input[@name="EntrezSystem2.PEntrez.Pubmed.Pubmed_ResultsPanel.Pubmed_RVDocSum.uid"]', doc, //edited for new PubMed
-			       nsResolver, XPathResult.ANY_TYPE, null);
+				   nsResolver, XPathResult.ANY_TYPE, null);
 	var uid = uids.iterateNext();
 	if(uid) {
 		if (uids.iterateNext()){
@@ -511,8 +513,8 @@ var testCases = [
 				"place": "Oxford",
 				"publisher": "BIOS Scientific Publishers",
 				"language": "en",
-				"abstractNote": "Endocrinology has been written to meet the requirements of today's trainee doctors and the demands of an increasing number of degree courses in health and biomedical sciences, and allied subjects.  It is a truly integrated text using large numbers of real clinical cases to introduce the basic biochemistry, physiology and pathophysiology underlying endocrine disorders and also the principles of clinical diagnosis and treatment.  The increasing importance of the molecular and genetic aspects of endocrinology in relation to clinical medicine is explained.",
-				"rights": "Copyright © 2001, BIOS Scientific Publishers Limited",
+				"abstractNote": "Endocrinology has been written to meet the requirements of today's trainee doctors and the demands of an increasing number of degree courses in health and biomedical sciences, and allied subjects. It is a truly integrated text using large numbers of real clinical cases to introduce the basic biochemistry, physiology and pathophysiology underlying endocrine disorders and also the principles of clinical diagnosis and treatment. The increasing importance of the molecular and genetic aspects of endocrinology in relation to clinical medicine is explained.",
+				"rights": "Copyright Â© 2001, BIOS Scientific Publishers Limited",
 				"libraryCatalog": "NCBI PubMed",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Endocrinology"
@@ -558,8 +560,8 @@ var testCases = [
 				"place": "Bethesda (MD)",
 				"publisher": "National Center for Biotechnology Information (US)",
 				"language": "en",
-				"abstractNote": "Cancer Syndromes is a comprehensive multimedia resource for selected single gene cancer syndromes.  \n            Syndromes currently included are Peutz-Jeghers syndrome, juvenile polyposis, Birt-Hogg-Dubé syndrome, multiple endocrine neoplasia type 1 \n            and familial atypical multiple mole melanoma syndrome.  For each syndrome the history, epidemiology, natural history and management are reviewed.  \n            If possible the initial report in the literature of each syndrome is included as an appendix.  Chapters are extensively annotated with figures and \n            movie clips. Mission Statement: Improving the care of cancer syndrome patients.",
-				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson",
+				"abstractNote": "Cancer Syndromes is a comprehensive multimedia resource for selected single gene cancer syndromes. Syndromes currently included are Peutz-Jeghers syndrome, juvenile polyposis, Birt-Hogg-DubÃ© syndrome, multiple endocrine neoplasia type 1 and familial atypical multiple mole melanoma syndrome. For each syndrome the history, epidemiology, natural history and management are reviewed. If possible the initial report in the literature of each syndrome is included as an appendix. Chapters are extensively annotated with figures and movie clips. Mission Statement: Improving the care of cancer syndrome patients.",
+				"rights": "Copyright Â© 2009-, Douglas L Riegert-Johnson",
 				"libraryCatalog": "NCBI PubMed",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}

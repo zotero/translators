@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-09 16:29:00"
+	"lastUpdated": "2012-03-12 01:02:45"
 }
 
 /*
@@ -209,7 +209,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Vincent N",
+						"firstName": "Vincent N.",
 						"lastName": "Lunetta",
 						"creatorType": "author"
 					}
@@ -304,7 +304,7 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "M L",
+						"firstName": "M. L.",
 						"lastName": "Giger",
 						"creatorType": "author"
 					},
@@ -319,12 +319,12 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "C E",
+						"firstName": "C. E.",
 						"lastName": "Metz",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "F F",
+						"firstName": "F. F.",
 						"lastName": "Yin",
 						"creatorType": "author"
 					}
@@ -406,7 +406,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Michael P",
+						"firstName": "Michael P.",
 						"lastName": "Hart",
 						"creatorType": "author"
 					},
@@ -431,7 +431,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Annie X",
+						"firstName": "Annie X.",
 						"lastName": "Liu",
 						"creatorType": "author"
 					},
@@ -481,12 +481,12 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Jennifer A",
+						"firstName": "Jennifer A.",
 						"lastName": "Solski",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Kelly L",
+						"firstName": "Kelly L.",
 						"lastName": "Williams",
 						"creatorType": "author"
 					},
@@ -506,12 +506,12 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Neill R",
+						"firstName": "Neill R.",
 						"lastName": "Graff-Radford",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Dennis W",
+						"firstName": "Dennis W.",
 						"lastName": "Dickson",
 						"creatorType": "author"
 					},
@@ -536,7 +536,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Robert G",
+						"firstName": "Robert G.",
 						"lastName": "Kalb",
 						"creatorType": "author"
 					},
@@ -546,7 +546,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "John Q",
+						"firstName": "John Q.",
 						"lastName": "Trojanowski",
 						"creatorType": "author"
 					},
@@ -561,27 +561,27 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Peter M",
+						"firstName": "Peter M.",
 						"lastName": "Andersen",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Garth A",
+						"firstName": "Garth A.",
 						"lastName": "Nicholson",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Ian P",
+						"firstName": "Ian P.",
 						"lastName": "Blair",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Oliver D",
+						"firstName": "Oliver D.",
 						"lastName": "King",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Nancy M",
+						"firstName": "Nancy M.",
 						"lastName": "Bonini",
 						"creatorType": "author"
 					},
@@ -601,7 +601,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Aaron D",
+						"firstName": "Aaron D.",
 						"lastName": "Gitler",
 						"creatorType": "author"
 					}

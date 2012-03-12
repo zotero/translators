@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-12-02 19:12:24"
+	"lastUpdated": "2012-03-12 01:06:01"
 }
 
 /*
@@ -97,19 +97,19 @@ function scrape(marc, newDoc) {
 		//editors get mapped as contributors - but so do many others who should be
 		// --> for books that don't have an author, turn contributors into editors.
   if (newItem.itemType=="book"){
-    var hasAuthor = false;
-    for (var i in newItem.creators) {
-      if (newItem.creators[i].creatorType=="author") {
+	var hasAuthor = false;
+	for (var i in newItem.creators) {
+	  if (newItem.creators[i].creatorType=="author") {
 	hasAuthor = true;
-      }
-    }
-    if (!hasAuthor) {
-      for (var i in newItem.creators) {
+	  }
+	}
+	if (!hasAuthor) {
+	  for (var i in newItem.creators) {
 	if (newItem.creators[i].creatorType=="contributor") {
 	  newItem.creators[i].creatorType="editor";
 	}
-      }
-    }
+	  }
+	}
   }
 
   newItem.complete();
@@ -204,12 +204,12 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "Richard C",
+						"firstName": "Richard C.",
 						"lastName": "Sweetland",
 						"creatorType": "editor"
 					},
 					{
-						"firstName": "Daniel J",
+						"firstName": "Daniel J.",
 						"lastName": "Keyser",
 						"creatorType": "editor"
 					}
@@ -244,7 +244,7 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "N. T",
+						"firstName": "N. T.",
 						"lastName": "Phillipson",
 						"creatorType": "author"
 					}
