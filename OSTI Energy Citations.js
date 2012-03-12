@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-30 22:44:49"
+	"lastUpdated": "2012-03-12 01:19:11"
 }
 
 function detectWeb(doc, url) {
@@ -63,12 +63,12 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "A.W.",
+						"firstName": "A. W.",
 						"lastName": "Thomas",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "A.G.",
+						"firstName": "A. G.",
 						"lastName": "Williams",
 						"creatorType": "author"
 					}

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-30 22:44:31"
+	"lastUpdated": "2012-03-12 01:22:21"
 }
 
 //Only works for journal articles, and only for single entries.
@@ -124,7 +124,7 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "P. J",
+						"firstName": "P. J.",
 						"lastName": "Boschan",
 						"creatorType": "author"
 					}
@@ -134,7 +134,6 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.pep-web.org/document.php?id=ajp.068.0024a",
 						"title": "PEP Web Snapshot",
 						"mimeType": "text/html"
 					}

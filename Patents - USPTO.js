@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-30 22:44:33"
+	"lastUpdated": "2012-03-12 01:20:48"
 }
 
 function detectWeb(doc, url) {
@@ -154,23 +154,18 @@ var testCases = [
 				"itemType": "patent",
 				"creators": [
 					{
-						"lastName": "Misev",
-						"firstName": "Ljubomir",
+						"lastName": "Coskun",
+						"firstName": "Risvan",
 						"creatorType": "inventor"
 					},
 					{
-						"lastName": "Valet",
-						"firstName": "Andreas",
+						"lastName": "Reza",
+						"firstName": "Areef",
 						"creatorType": "inventor"
 					},
 					{
-						"lastName": "Simmendinger",
-						"firstName": "Peter",
-						"creatorType": "inventor"
-					},
-					{
-						"lastName": "Jung",
-						"firstName": "Tunja",
+						"lastName": "Estable",
+						"firstName": "Luis",
 						"creatorType": "inventor"
 					}
 				],
@@ -179,11 +174,11 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"url": "http://patft.uspto.gov/netacgi/nph-Parser?Sect1=PTO2&Sect2=HITOFF&p=1&u=%2Fnetahtml%2FPTO%2Fsearch-bool.html&r=1&f=G&l=50&co1=AND&d=PTXT&s1=krypto&OS=krypto&RS=krypto",
-				"title": "United States Patent: 8003169 - Curing of coating induced by plasma",
-				"patentNumber": "8003169",
-				"issueDate": "August 23, 2011",
-				"assignee": "BASF SE\n (Ludwigshafen, \nDE)",
-				"abstractNote": "The Application relates to a method of curing various polymerisable\n     compositions, comprising a suitable photoinitiator, the curing being\n     effected by means of a plasma in plasma discharge chamber.",
+				"title": "United States Patent: 8112797 - System and method to provide built-in and mobile VPN connectivity",
+				"patentNumber": "8112797",
+				"issueDate": "February 7, 2012",
+				"assignee": "Research In Motion\n (Waterloo, \nCA)",
+				"abstractNote": "A system and method for facilitating the establishment of a virtual\n     private network between a network and a remote computer, the system\n     having: a mobile device connectable to the remote computer and storing a\n     user profile, virtual private network information, and password\n     information; virtual private network software being located on one of the\n     mobile device and the remote computer; an access point communicating with\n     the network; and communication means for communications between the\n     access point and one of the mobile device and the remote computer,\n     wherein the user profile, virtual private network information, and\n     password information is passed to the virtual private network software\n     upon connection of the mobile device to the remote computer, the virtual\n     private network software using the user profile, virtual private network\n     information, and password information to establish a virtual private\n     network through the communications means and the access point to the\n     network.",
 				"libraryCatalog": "Patents - USPTO",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "United States Patent"
