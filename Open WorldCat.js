@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-30 22:49:24"
+	"lastUpdated": "2012-03-12 01:16:53"
 }
 
 /**
@@ -158,108 +158,106 @@ function doSearch(item) {
 	}, null);
 	Zotero.wait();
 } /** BEGIN TEST CASES **/
-var testCases = [{
-	"type": "web",
-	"url": "http://www.worldcat.org/search?qt=worldcat_org_bks&q=argentina&fq=dt%3Abks",
-	"items": "multiple"
-}, {
-	"type": "web",
-	"url": "http://www.worldcat.org/title/argentina/oclc/489605&referer=brief_results",
-	"items": [{
-		"itemType": "book",
-		"creators": [{
-			"lastName": "Whitaker",
-			"firstName": "Arthur Preston",
-			"creatorType": "author"
-		}],
-		"notes": [],
-		"tags": [],
-		"seeAlso": [],
-		"attachments": [],
-		"itemID": "489605",
-		"title": "Argentina",
-		"publisher": "Prentice-Hall",
-		"place": "Englewood Cliffs, N.J.",
-		"date": "1964",
-		"language": "English",
-		"libraryCatalog": "Open WorldCat"
-	}]
-}, {
-	"type": "web",
-	"url": "http://www.worldcat.org/title/dynamic-systems-approach-to-the-development-of-cognition-and-action/oclc/42854423&referer=brief_results",
-	"items": [{
-		"itemType": "book",
-		"creators": [{
-			"lastName": "Thelen",
-			"firstName": "Esther.",
-			"creatorType": "author"
-		}, {
-			"lastName": "Smith",
-			"firstName": "Linda B.",
-			"creatorType": "author"
-		}],
-		"notes": [],
-		"tags": [],
-		"seeAlso": [],
-		"attachments": [{
-			"itemType": "webpage",
-			"creators": [{
-				"lastName": "Thelen",
-				"firstName": "Esther.",
-				"creatorType": "author"
-			}, {
-				"lastName": "Smith",
-				"firstName": "Linda B.",
-				"creatorType": "author"
-			}],
-			"notes": [],
-			"tags": [],
-			"seeAlso": [],
-			"attachments": [],
-			"itemID": "42854423",
-			"url": "http://search.ebscohost.com/login.aspx?direct=true&scope=site&db=nlebk&db=nlabk&AN=1712",
-			"title": "A dynamic systems approach to the development of cognition and action",
-			"publisher": "MIT Press",
-			"place": "Cambridge, Mass.",
-			"date": "1996",
-			"ISBN": "0585030154  9780585030159",
-			"ISSN": "0585030154  9780585030159"
-		}],
-		"itemID": "42854423",
-		"url": "http://search.ebscohost.com/login.aspx?direct=true&scope=site&db=nlebk&db=nlabk&AN=1712",
-		"title": "A dynamic systems approach to the development of cognition and action",
-		"publisher": "MIT Press",
-		"place": "Cambridge, Mass.",
-		"date": "1996",
-		"ISBN": "0585030154  9780585030159",
-		"ISSN": "0585030154  9780585030159",
-		"language": "English",
-		"libraryCatalog": "Open WorldCat",
-		"accessDate": "CURRENT_TIMESTAMP"
-	}]
-}, {
-	"type": "web",
-	"url": "http://melvyl.worldcat.org/title/cambridge-companion-to-adam-smith/oclc/60321422&referer=brief_results",
-	"items": [{
-		"itemType": "book",
-		"creators": [{
-			"lastName": "Haakonssen",
-			"firstName": "Knud",
-			"creatorType": "author"
-		}],
-		"notes": [],
-		"tags": [],
-		"seeAlso": [],
-		"attachments": [],
-		"itemID": "60321422",
-		"title": "The Cambridge companion to Adam Smith",
-		"publisher": "Cambridge University Press",
-		"place": "Cambridge; New York",
-		"date": "2006",
-		"ISBN": "0521770599 0521779243  9780521770590 9780521779241",
-		"ISSN": "0521770599 0521779243  9780521770590 9780521779241",
-		"abstractNote": "\"Adam Smith is best known as the founder of scientific economics and as an early proponent of the modern market economy. Political economy, however, was only one part of Smith's comprehensive intellectual system. Consisting of a theory of mind and its functions in language, arts, science, and social intercourse, Smith's system was a towering contribution to the Scottish Enlightenment. His ideas on social intercourse, in fact, also served as the basis for a moral theory that provided both historical and theoretical accounts of law, politics, and economics. This companion volume provides an up-to-date examination of all aspects of Smith's thought. Collectively, the essays take into account Smith's multiple contexts - Scottish, British, European, Atlantic, biographical, institutional, political, philosophical - and they draw on all his works, including student notes from his lectures. Pluralistic in approach, the volume provides a contextualist history of Smith, as well as direct philosophical engagement with his ideas.\"--Jacket.",
-		"language": "English",
-		"libraryCatalog": "Open WorldCat"
-	}]
-}] /** END TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.worldcat.org/search?qt=worldcat_org_bks&q=argentina&fq=dt%3Abks",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.worldcat.org/title/argentina/oclc/489605&referer=brief_results",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Whitaker",
+						"firstName": "Arthur Preston",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"itemID": "489605",
+				"title": "Argentina",
+				"publisher": "Prentice-Hall",
+				"place": "Englewood Cliffs, N.J.",
+				"date": "1964",
+				"language": "English",
+				"libraryCatalog": "Open WorldCat"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.worldcat.org/title/dynamic-systems-approach-to-the-development-of-cognition-and-action/oclc/42854423&referer=brief_results",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Thelen",
+						"firstName": "Esther",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Smith",
+						"firstName": "Linda B",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{}
+				],
+				"itemID": "42854423",
+				"url": "http://search.ebscohost.com/login.aspx?direct=true&scope=site&db=nlebk&db=nlabk&AN=1712",
+				"title": "A dynamic systems approach to the development of cognition and action",
+				"publisher": "MIT Press",
+				"place": "Cambridge, Mass.",
+				"date": "1996",
+				"ISBN": "0585030154  9780585030159",
+				"ISSN": "0585030154  9780585030159",
+				"language": "English",
+				"libraryCatalog": "Open WorldCat",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://melvyl.worldcat.org/title/cambridge-companion-to-adam-smith/oclc/60321422&referer=brief_results",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Haakonssen",
+						"firstName": "Knud",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"itemID": "60321422",
+				"title": "The Cambridge companion to Adam Smith",
+				"publisher": "Cambridge University Press",
+				"place": "Cambridge; New York",
+				"date": "2006",
+				"ISBN": "0521770599 0521779243  9780521770590 9780521779241",
+				"ISSN": "0521770599 0521779243  9780521770590 9780521779241",
+				"abstractNote": "\"Adam Smith is best known as the founder of scientific economics and as an early proponent of the modern market economy. Political economy, however, was only one part of Smith's comprehensive intellectual system. Consisting of a theory of mind and its functions in language, arts, science, and social intercourse, Smith's system was a towering contribution to the Scottish Enlightenment. His ideas on social intercourse, in fact, also served as the basis for a moral theory that provided both historical and theoretical accounts of law, politics, and economics. This companion volume provides an up-to-date examination of all aspects of Smith's thought. Collectively, the essays take into account Smith's multiple contexts - Scottish, British, European, Atlantic, biographical, institutional, political, philosophical - and they draw on all his works, including student notes from his lectures. Pluralistic in approach, the volume provides a contextualist history of Smith, as well as direct philosophical engagement with his ideas.\"--Jacket.",
+				"language": "English",
+				"libraryCatalog": "Open WorldCat"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

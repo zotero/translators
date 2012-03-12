@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-09 16:32:46"
+	"lastUpdated": "2012-03-12 01:13:24"
 }
 
 /**
@@ -363,7 +363,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Simon M",
+						"firstName": "Simon M.",
 						"lastName": "Carr",
 						"creatorType": "author"
 					},
@@ -398,7 +398,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Amanda S",
+						"firstName": "Amanda S.",
 						"lastName": "Coutts",
 						"creatorType": "author"
 					},
@@ -408,23 +408,17 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "David J",
+						"firstName": "David J.",
 						"lastName": "Kerr",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Nicholas B La",
+						"firstName": "Nicholas B. La",
 						"lastName": "Thangue",
 						"creatorType": "author"
 					}
 				],
 				"notes": [],
-				"tags": [
-					"arginine methylation",
-					"cancer",
-					"E2F-1",
-					"growth control"
-				],
 				"seeAlso": [],
 				"attachments": [
 					{

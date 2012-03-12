@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-01 20:35:17"
+	"lastUpdated": "2012-03-12 00:55:34"
 }
 
 /*
@@ -119,7 +119,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Katrin S",
+						"firstName": "Katrin S.",
 						"lastName": "Lips",
 						"creatorType": "author"
 					},
@@ -139,7 +139,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Wolfgang G",
+						"firstName": "Wolfgang G.",
 						"lastName": "Clauss",
 						"creatorType": "author"
 					},
@@ -165,19 +165,14 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Full Text PDF",
-						"url": "http://respiratory-research.com/content/pdf/1465-9921-11-133.pdf",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot",
-						"document": {
-							"location": {}
-						}
+						"title": "Snapshot"
 					}
 				],
 				"itemID": "http://respiratory-research.com/content/11/1/133",
 				"title": "Nicotinic receptors on rat alveolar macrophages dampen ATP-induced increase in cytosolic calcium concentration",
-				"source": "Respiratory Research",
 				"publicationTitle": "Respiratory Research",
 				"rights": "http://creativecommons.org/licenses/by/2.0/",
 				"volume": "11",
@@ -194,13 +189,11 @@ var testCases = [
 				"date": "2010-09-29",
 				"DOI": "10.1186/1465-9921-11-133",
 				"reportType": "Research",
-				"videoRecordingType": "Research",
 				"letterType": "Research",
 				"manuscriptType": "Research",
 				"mapType": "Research",
 				"thesisType": "Research",
 				"websiteType": "Research",
-				"audioRecordingType": "Research",
 				"presentationType": "Research",
 				"postType": "Research",
 				"audioFileType": "Research",

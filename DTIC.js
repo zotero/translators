@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-03-09 23:59:56"
+	"lastUpdated": "2012-03-12 00:59:32"
 }
 
 function detectWeb(doc, url) {
@@ -145,7 +145,7 @@ var testCases = [
 					{
 						"firstName": "Dennis M.",
 						"lastName": "DeCoste",
-						"creatorType": ""
+						"creatorType": "author"
 					}
 				],
 				"notes": [],
@@ -175,7 +175,6 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://stinet.dtic.mil/oai/oai?&verb=getRecord&metadataPrefix=html&identifier=ADA466425",
 						"title": "DTIC Snapshot",
 						"mimeType": "text/html"
 					}

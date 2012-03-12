@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-30 22:47:15"
+	"lastUpdated": "2012-03-12 01:04:22"
 }
 
 function detectWeb(doc, url) {
@@ -196,7 +196,7 @@ var testCases = [
 						"creatorType": "contributor"
 					},
 					{
-						"firstName": "Kathleen A",
+						"firstName": "Kathleen A.",
 						"lastName": "Foster",
 						"creatorType": "contributor"
 					}
@@ -224,7 +224,6 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://siris-libraries.si.edu/ipac20/ipac.jsp?uri=full=3100001~!820431~!0&profile=all",
 						"title": "Original record",
 						"mimeType": "text/html",
 						"snapshot": false

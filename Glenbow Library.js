@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-30 22:49:38"
+	"lastUpdated": "2012-03-12 01:00:30"
 }
 
 function detectWeb(doc, url) {
@@ -275,7 +275,7 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "Marlene A.D. Lynne Van",
+						"firstName": "Marlene A. D. Lynne Van",
 						"lastName": "Luven",
 						"creatorType": "author"
 					},

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-30 22:44:13"
+	"lastUpdated": "2012-03-12 01:22:48"
 }
 
 function detectWeb(doc, url) {
@@ -80,7 +80,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Tessa C J de",
+						"firstName": "Tessa C. J. de",
 						"lastName": "Wit",
 						"creatorType": "author"
 					},
@@ -95,7 +95,6 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://perceptionweb.com/abstract.cgi?id=p6018",
 						"title": "Perception Snapshot",
 						"mimeType": "text/html"
 					}
