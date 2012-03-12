@@ -3,13 +3,13 @@
 	"label": "Stuff.co.nz",
 	"creator": "Sopheak Hean (University of Waikato, Faculty of Education)",
 	"target": "^http://(www\\.)?stuff\\.co\\.nz/",
-	"minVersion": "1.0",
+	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-30 22:43:20"
+	"lastUpdated": "2012-03-08 03:21:07"
 }
 
 /*
@@ -30,7 +30,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/* Stuff.co.nz does not have an ISSN because it is not a newspaper publisher. Stuff.co.nz is a collection of newspaper articles from around the country*/
+/* Stuff.co.nz does not have an ISSN because it is not a newspaper publisher.
+   Stuff.co.nz is a collection of newspaper articles from around the country*/
 
 function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
@@ -39,39 +40,33 @@ function detectWeb(doc, url) {
 	} : null;
 	var definePath = '//div[@class="blog_content"]';
 	var XpathObject = doc.evaluate(definePath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-if  (XpathObject){
+	if(XpathObject){
 		return "blogPost";
-	}
-
-	else {
-	var definePath = '//div[@class="story_landing"]';
-	var XpathObject = doc.evaluate(definePath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-	if  (XpathObject){
-		return "newspaperArticle";
+	} else {
+		var definePath = '//div[@class="story_landing"]';
+		var XpathObject = doc.evaluate(definePath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		if  (XpathObject){
+			return "newspaperArticle";
 		}
 	}
 
 }
 
-function myUpperCaseFunction(input){
-		/*Will define one later*/
-}
-
-
 function scrape(doc, url) {
+	var type = detectWeb(doc, url);
 
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
-	var url = doc.location.href;
+
 		var splitIntoArray;
 		var fullName="";
 		var emptyString =" ";
-		var firstName; var lastName;
+		var firstName, lastName;
 	/*==========================Blog Post===========================*/
 	
-	if (detectWeb(doc, url) =="blogPost"){
+	if (type =="blogPost"){
 	
 		var newItem = new Zotero.Item('blogPost');
 		newItem.url = doc.location.href;
@@ -120,18 +115,17 @@ function scrape(doc, url) {
 	
 			}
 			
-		//Title of the Article
-		var getBlogTitle = "//span[@class='hbox_top_title headlines_title']/a";
-		var getBlogTitleObject = doc.evaluate(getBlogTitle, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-		if (getBlogTitleObject){
-			newItem.blogTitle =getBlogTitleObject.textContent.replace(/\s+\bHeadlines\b/g, '');
+		//Blog title
+		var blogTitle = url.match(/\/blogs\/([^/]+)/);
+		if (blogTitle){
+			newItem.blogTitle = ZU.capitalizeTitle(blogTitle[1].replace(/-/g,' '));
 		}
 		newItem.shortTitle = doShortTitle(doc,url);
 		newItem.title= doTitle(doc, url);
 		newItem.date = doDate(doc, url);
 		newItem.abstractNote = doAbstract(doc, url);
 		newItem.websiteType = "Newspaper";
-		newItem.attachments.push({url:url, title:"Stuff.co.nz Snapshot", mimeType:"text/html"});
+		newItem.attachments.push({document: doc, title:"Stuff.co.nz Snapshot"});
 		newItem.complete();
 	} 
 	
@@ -139,10 +133,10 @@ function scrape(doc, url) {
 	
 	/* ======================Newspaper Article========================*/
 	
-	else  if (detectWeb(doc, url) =="newspaperArticle"){
+	else  if (type =="newspaperArticle"){
 	
 		var newItem = new Zotero.Item('newspaperArticle');
-		newItem.url = doc.location.href;
+		newItem.url = url;
 		//newItem.title = "No Title Found";
 		
 		//Get extended publisher if there is any then replace with stuff.co.nz
@@ -234,16 +228,15 @@ function scrape(doc, url) {
 						}
 			}  else {
 				
-						if(authorXPathObject.match(/[\s\n\r]+/g)){
-							
-						authorXPathObject = authorXPathObject.replace(/^\s*|\s*$/g, '').replace(/\s+/g, '-');
-						newItem.creators.push(Zotero.Utilities.cleanAuthor(authorXPathObject, "author"));
-						}
-						else { newItem.creators.push(Zotero.Utilities.cleanAuthor(authorXPathObject , "author"));}
-					
+				if(authorXPathObject.match(/[\s\n\r]+/g)){
+					authorXPathObject = ZU.capitalizeTitle( authorXPathObject.trim() ); //.replace(/\s+/g, '-');
+					newItem.creators.push(ZU.cleanAuthor(authorXPathObject, "author"));
+				} else {
+					newItem.creators.push(Zotero.Utilities.cleanAuthor(authorXPathObject , "author"));
+				}
 			}
 			
-		} else{
+		} else {
 			newItem.creators ="";
 		}
 			
@@ -341,8 +334,7 @@ function scrape(doc, url) {
 			}
 		}
 		//Snapshot of  the web page.
-		newItem.attachments.push({url:url, title:"Stuff.co.nz Snapshot",
-	 							  mimeType:"text/html"});
+		newItem.attachments.push({document:doc, title:"Stuff.co.nz Snapshot"});
 	 							  
 		//Call Do date function to make it cleaner in scape. This way things are easier to follow.
 		newItem.date = doDate(doc,url);
@@ -446,26 +438,7 @@ function doDate(doc, url){
 
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
-	//var articles = new Array();
-	
-	if (detectWeb(doc, url) == "newspaperArticle") {
-		var articles = [url];
-		
-	}else if (detectWeb(doc, url) == "blogPost") {
-		var articles = [url];
-		
-	}
-
-
-	//Zotero.debug(articles);
-	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-	Zotero.wait();
-	
+	scrape(doc, url);
 }
 
 /** BEGIN TEST CASES **/
@@ -478,8 +451,8 @@ var testCases = [
 				"itemType": "newspaperArticle",
 				"creators": [
 					{
-						"firstName": "",
-						"lastName": "DANYA-LEVY",
+						"firstName": "DANYA",
+						"lastName": "LEVY",
 						"creatorType": "author"
 					}
 				],
@@ -488,9 +461,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.stuff.co.nz/national/politics/campaign-trail/5967550/Green-party-link-to-billboard-attacks",
-						"title": "Stuff.co.nz Snapshot",
-						"mimeType": "text/html"
+						"title": "Stuff.co.nz Snapshot"
 					}
 				],
 				"url": "http://www.stuff.co.nz/national/politics/campaign-trail/5967550/Green-party-link-to-billboard-attacks",
@@ -498,9 +469,43 @@ var testCases = [
 				"language": "English",
 				"abstractNote": "The man who coordinated the vandalism of 700 National billboards says it was an attempt at \"freedom of expression.\"",
 				"title": "Green party link to billboard attacks",
-				"section": "Campaign Trail",
 				"place": "New Zealand",
+				"section": "Politics",
 				"date": "Nov 15, 2011",
+				"libraryCatalog": "Stuff.co.nz",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.stuff.co.nz/national/politics/blogs/the-whip/6490948/Collins-olive-branch",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"creators": [
+					{
+						"firstName": "Andrea",
+						"lastName": "Vance",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Stuff.co.nz Snapshot"
+					}
+				],
+				"url": "http://www.stuff.co.nz/national/politics/blogs/the-whip/6490948/Collins-olive-branch",
+				"publicationTitle": "Stuff.co.nz",
+				"language": "English",
+				"blogTitle": "the whip",
+				"title": "Collins' olive branch",
+				"date": "Feb 28, 2012",
+				"abstractNote": "Judith Collins knows how to pick her battles.",
+				"websiteType": "Newspaper",
 				"libraryCatalog": "Stuff.co.nz",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
