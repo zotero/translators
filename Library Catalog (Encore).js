@@ -178,7 +178,7 @@ function scrape(marc, newDoc) {
 			}
 		}
 		if(tagValue) {
-			tagValue = tagValue.replace(/\|(.)/g, 	+"$1");
+			tagValue = tagValue.replace(/\|(.)/g, marc.subfieldDelimiter+"$1");
 			if(tagValue[0] != marc.subfieldDelimiter) {
 				tagValue = marc.subfieldDelimiter+"a"+tagValue;
 			}
