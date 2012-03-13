@@ -9,31 +9,8 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-12 17:02:29"
+	"lastUpdated": "2012-03-12 20:09:31"
 }
-
-/*
-	***** BEGIN LICENSE BLOCK *****
-	
-	MARCXML translator, Copyright © 2012 Sebastian Karcher 
-	
-	This file is part of Zotero.
-	
-	Zotero is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Affero General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-	
-	Zotero is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU Affero General Public License for more details.
-	
-	You should have received a copy of the GNU Affero General Public License
-	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
-	
-	***** END LICENSE BLOCK *****
-*/
 
 function detectImport() {
 	var line;
@@ -43,13 +20,14 @@ function detectImport() {
 			if (line.match(/<(marc\:)?collection xmlns(\:marc)?=\"http:\/\/www\.loc\.gov\/MARC21\/slim\"/)) {
 				return true;
 			} else {
-				if (i++ > 3) {
+				if (i++ > 5) {
 					return false;
 				}
 			}
 		}
 	}
 }
+
 
 function doImport() {
 	var text = "";
@@ -61,33 +39,33 @@ function doImport() {
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
 	translator.getTranslatorObject(function (marc) {
-		/**cleanup text for DOM parser. 
-Remove the (alternate) marc: in tags. Then enclose the <record> tags in vanilla collection tags. 
-Those are needed to get multiple record, but anything but the vanilla version throws off DOM parser **/
-		text = text.replace(/marc\:/g, "").replace(/.*?<record>/, "<collection><record>").replace(/<\/collection>.*/, "</collection>");
-		//Z.debug(text);
+
 		var parser = new DOMParser();
 		var xml = parser.parseFromString(text, 'text/xml');
-		var records = ZU.xpath(xml, '//record');
-
+		//define the marc namespace
+		ns = {
+			"marc": "http://www.loc.gov/MARC21/slim"
+		};
+		var records = ZU.xpath(xml, '//marc:record', ns);
 		for (var i in records) {
+
 			//create one new item per record
 			var record = new marc.record();
 			var newItem = new Zotero.Item();
-			var fields = ZU.xpath(records[i], "./datafield");
+			var fields = ZU.xpath(records[i], "./marc:datafield", ns);
 			for (var j in fields) {
 				//go through every datafield (corresponds to a MARC field)
-				var subfields = ZU.xpath(fields[j], "./subfield");
+				var subfields = ZU.xpath(fields[j], "./marc:subfield", ns);
 				for (var k in subfields) {
 					//get the subfields and their codes...
-					var code = ZU.xpathText(subfields[k], "./@code")
-					var sf = ZU.xpathText(subfields[k], "./text()")
+					var code = ZU.xpathText(subfields[k], "./@code", ns)
+					var sf = ZU.xpathText(subfields[k], "./text()", ns)
 					//set tag to an empty string if this is the first subfield
 					if (k == 0) var tag = "";
 					//concat all subfields in one datafield, with subfield delimiter and code between them
 					tag = tag + marc.subfieldDelimiter + code + sf;
 				}
-				record.addField(ZU.xpathText(fields[j], "./@tag"), ZU.xpathText(fields[j], "./@ind1") + ZU.xpathText(fields[j], "./@ind2"), tag);
+				record.addField(ZU.xpathText(fields[j], "./@tag", ns), ZU.xpathText(fields[j], "./@ind1", ns) + ZU.xpathText(fields[j], "./@ind2"), tag);
 			}
 			record.translate(newItem);
 			newItem.complete();
