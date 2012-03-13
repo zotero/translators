@@ -5,11 +5,11 @@
 	"target": "^https?://[^/]*www\\.iris\\.rutgers\\.edu[^/]*/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 90,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-30 22:48:09"
+	"lastUpdated": "2012-03-12 01:03:43"
 }
 
 function detectWeb(doc, url) {
@@ -329,18 +329,18 @@ function scrape(doc) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.iris.rutgers.edu/cgi-bin/IRISquickSearch.cgi?searchdata1=4716226{CKEY}&searchfield1=GENERAL^SUBJECT^GENERAL^^&user_id=WEBSERVER",
+		"url": "https://www-iris-rutgers-edu.proxy.libraries.rutgers.edu/uhtbin/cgisirsi/0/0/0/123?srchfield1=&searchdata1=4716226%7bCKEY%7d&library=",
 		"items": [
 			{
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "William C. ",
+						"firstName": "William C.",
 						"lastName": "Smith",
 						"creatorType": "contributor"
 					},
 					{
-						"firstName": "Carlos (Carlos H. )",
+						"firstName": "Carlos (Carlos H. ).",
 						"lastName": "Acuña",
 						"creatorType": "contributor"
 					},

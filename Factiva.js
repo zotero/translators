@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-12-18 21:51:32"
+	"lastUpdated": "2012-02-10 13:45:32"
 }
 
 function detectWeb(doc, url) {
@@ -80,7 +80,7 @@ function doWeb(doc, url) {
 	while(select = selects.iterateNext()) {
 		post = post+"&"+select.name+"="+escape(select.options[select.selectedIndex].value);
 	}
-	
+	post += "&dfd=FULR";
 	for each(var hdl in hdls) {
 		post += "&hdl="+escape(hdl);
 	}
@@ -149,6 +149,8 @@ function doWeb(doc, url) {
 			newItem.edition = article.edition.text().toString();
 			if (article.snippet.length())
 				newItem.abstractNote = article.snippet.paragraph.text().toString();
+			else if (article.leadParagraph.length())
+				newItem.abstractNote = article.leadParagraph.paragraph.text().toString();			
 			
 			if(article.pages.length()) {
 				newItem.pages = "";

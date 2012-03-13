@@ -6,10 +6,10 @@
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
-	"browserSupport": "gcs",
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2012-01-01 01:42:16"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-03-03 11:27:05"
 }
 
 function detectWeb(doc, url) {
@@ -38,31 +38,35 @@ function doWeb(doc, url) {
 		}
 		var titles = doc.evaluate(titlex, doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var links = doc.evaluate(linkx, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		Zotero.debug("Link: " + links.href);
 		var title, link;
 		while ((title = titles.iterateNext()) && (link = links.iterateNext())) {
 			items[link.href] = Zotero.Utilities.trimInternal(title.textContent);
 		}
-		items = Zotero.selectItems(items);
-	
-		for (var i in items) {
-			Zotero.wait();
-			articles.push(i);
-		}
+	Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape, function () {Zotero.done();});
+		Zotero.wait();
+	});
 	} else {
-		articles = [url];
+	scrape(doc, url)
 	}
-	Zotero.debug(articles);
-	Zotero.Utilities.processDocuments(articles, function(doc) {
+}
+
+	function scrape(doc, url){
 		var item = new Zotero.Item("journalArticle");
 		item.publicationTitle = doc.title;
-		item.ISSN = doc.evaluate('//span[@class="journalISSN"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/\(e\)\s+ISSN:?\s+(.*)\(p\)/)[1];
-		item.title = Zotero.Utilities.trimInternal(doc.evaluate('//p[@class="articleTitle"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		item.ISSN = ZU.xpathText(doc, '//span[@class="journalISSN"]').match(/\(e\)\s+ISSN:?\s+(.*)\(p\)/)[1];
+		item.title = Zotero.Utilities.trimInternal(ZU.xpathText(doc, '//p[@class="articleTitle"]'));
 		item.url = doc.location.href.replace(/\.html.+/, ".html");
-		var data = Zotero.Utilities.trimInternal(doc.evaluate('//p[span[@class="bibDataTag"]][1]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		var data = Zotero.Utilities.trimInternal(ZU.xpathText(doc, '//p[span[@class="bibDataTag"]][1]'));
 		data = data.replace(/(Journal|MSC|Posted|Retrieve)/g, "\n$1");
 		Zotero.debug(data);
-		var authors = data.match(/(Author\(s\):\s+(.*)\n|Author(s)?:\s+(.*))/)[1].replace(/Author\(s\):|Authors?:/, "").split(/;\s+| and /);
+		var authors = data.match(/(Author\(s\):\s+(.*)\n|Author(s)?:\s+(.*))/)[1].replace(/Author\(s\):|Authors?:/, "").split(/;\s+| and |, /);
 		for each (var aut in authors) {
 			item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
 		}
@@ -83,14 +87,13 @@ function doWeb(doc, url) {
 			{url:item.url, title:item.journalAbbreviation + " Snapshot", mimeType:"text/html"},
 			{url:pdfurl, title:item.journalAbbreviation + " PDF", mimeType:"application/pdf"}
 		];
-		item.abstract = Zotero.Utilities.trimInternal(doc.evaluate('//td[@class="bottomCell"]/p[4]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.substr(10));
+		item.abstractNote = ZU.trimInternal(ZU.xpathText(doc, '//td[@class="bottomCell"]/p[4]').substr(10)).replace(/^A?bstract:\s/, "");
 		item.complete();
-	}, function() {Zotero.done();});
-	Zotero.wait();
-}/** BEGIN TEST CASES **/
+	}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
+		"defer": true,
 		"url": "http://www.ams.org/journals/jams/2012-25-01/",
 		"items": "multiple"
 	},
@@ -138,10 +141,10 @@ var testCases = [
 				"url": "http://www.ams.org/journals/jams/2012-25-01/S0894-0347-2011-00713-3/home.html",
 				"journalAbbreviation": "J. Amer. Math. Soc.",
 				"volume": "25",
-				"pages": "1-20.",
+				"pages": "1-20",
 				"issue": "01",
 				"date": "July 8, 2011",
-				"abstract": "Abstract: We prove, for certain pairs of finite groups of Lie type, that the -fusion systems and are equivalent. In other words, there is an isomorphism between a Sylow -subgroup of and one of which preserves -fusion. This occurs, for example, when and for a simple Lie ``type'' , and and are prime powers, both prime to , which generate the same closed subgroup of -adic units. Our proof uses homotopy-theoretic properties of the -completed classifying spaces of and , and we know of no purely algebraic proof of this result.",
+				"abstractNote": "We prove, for certain pairs of finite groups of Lie type, that the -fusion systems and are equivalent. In other words, there is an isomorphism between a Sylow -subgroup of and one of which preserves -fusion. This occurs, for example, when and for a simple Lie ``type'' , and and are prime powers, both prime to , which generate the same closed subgroup of -adic units. Our proof uses homotopy-theoretic properties of the -completed classifying spaces of and , and we know of no purely algebraic proof of this result.",
 				"libraryCatalog": "AMS Journals",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-30 22:50:44"
+	"lastUpdated": "2012-03-03 13:47:39"
 }
 
 function detectWeb(doc,url)
@@ -116,7 +116,7 @@ var testCases = [
 				"attachments": [],
 				"url": "http://www.edweek.org/ew/articles/2011/10/28/10jobs.h31.html?tkn=PUOFjigAbQPNufjjHPxYeafVz7T5Tf16qNb4&cmp=clp-edweek",
 				"title": "Obama Using Education Issue as Political Sword",
-				"date": "2011-10-28",
+				"date": "2011-11-02",
 				"abstractNote": "The Obama administration highlights its education record, while drawing a sharp contrast with the GOP in Congress.",
 				"publicationTitle": "Education Week",
 				"libraryCatalog": "Education Week",

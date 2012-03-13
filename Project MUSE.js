@@ -165,7 +165,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://muse.jhu.edu.turing.library.northwestern.edu/journals/eighteenth-century_studies/toc/ecs33.4.html",
+		"url": "http://muse.jhu.edu/journals/eighteenth-century_studies/toc/ecs33.4.html",
 		"items": "multiple"
 	}
 ]

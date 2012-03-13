@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-10-29 15:33:44"
+	"lastUpdated": "2012-03-05 16:49:32"
 }
 
 /*
@@ -29,6 +29,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+//multiple test URL: http://bcul.lib.uni.lodz.pl/dlibra/results?action=SearchAction&skipSearch=true&mdirids=&server%3Atype=both&tempQueryType=-3&encode=false&isExpandable=on&isRemote=off&roleId=-3&queryType=-3&dirids=1&rootid=&query=Karte&localQueryType=-3&remoteQueryType=-2
 
 dd = Zotero.debug; // shortcut
 
@@ -66,35 +68,36 @@ function translateType(type)
 
 function doWeb(doc, url) {
 	if(detectWeb(doc,url)=="multiple"){
-		var namespace = doc.documentElement.namespaceURI;
-		var nsResolver = namespace ?
-			function(prefix) {
-				if (prefix == 'x') return namespace; else return null;
-			}: null;
 
-
+var articles = new Array();
 		var itemsXPath = '//ol[@class="itemlist"]/li/a | //td[@class="searchhit"]/b/a | //p[@class="resultTitle"]/b/a[@class="dLSearchResultTitle"]';
-
-		var obj = doc.evaluate(itemsXPath, doc, nsResolver, XPathResult.ANY_TYPE, null); 
-		var itemHtml;
-		var items= new Object() ;
-		while(itemHtml = obj.iterateNext())
-			items[itemHtml.href] = itemHtml.textContent;
+		var titles = doc.evaluate(itemsXPath, doc, null, XPathResult.ANY_TYPE, null); 
+		var title;
+		var items= {};
+		while(title = titles.iterateNext()){
+			items[title.href] = title.textContent;}
 		
-		items = Zotero.selectItems(items);
-		for (var itemUrl in items)
-			doSingleItem(itemUrl)
+	Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+			
+				articles.push(i);
+			}
+			Zotero.Utilities.processDocuments(articles, scrape, function () {
+				Zotero.done();
+			});
+			Zotero.wait();	
+		});
 	}else
-		doSingleItem(url);
-		
-		
-	return true;		
+		scrape(doc, url);
+	
 }
 
-function doSingleItem(url)
+function scrape(doc, url)
 {
-
-	var reSingle= new RegExp("(.*/dlibra)/(?:doccontent|docmetadata|publication).*[?&]id=([0-9]*).*");
+	var reSingle= new RegExp("(.*/dlibra)/(?:doccontent|docmetadata|publication).*[?&]id=([0-9]*).*");	
 	var m = reSingle.exec(url);
 	if(!m)
 		return "";
@@ -169,11 +172,6 @@ function doSingleItem(url)
 }
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "http://bcul.lib.uni.lodz.pl/dlibra/results?action=SearchAction&skipSearch=true&mdirids=&server%3Atype=both&tempQueryType=-3&encode=false&isExpandable=on&isRemote=off&roleId=-3&queryType=-3&dirids=1&rootid=&query=Karte&localQueryType=-3&remoteQueryType=-2",
-		"items": "multiple"
-	},
 	{
 		"type": "web",
 		"url": "http://bcul.lib.uni.lodz.pl/dlibra/docmetadata?id=1247&from=&dirids=1&ver_id=&lp=2&QI=",

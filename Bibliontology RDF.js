@@ -11,7 +11,7 @@
 	"configOptions":{"getCollections":"true", "dataMode":"rdf/xml"},
 	"displayOptions":{"exportNotes":true, "exportFileData":false},
 	"inRepository":false,
-	"lastUpdated":"2011-07-08 04:50:39"
+	"lastUpdated":"2012-02-17 05:48:39"
 }
 
 var n = {
@@ -1020,7 +1020,7 @@ function doExport() {
 		
 		// add fields
 		for(var field in item.uniqueFields) {
-			if(item.uniqueFields[field] == "") continue;
+			if(!item.uniqueFields[field] && item.uniqueFields[field] !== 0) continue;
 			
 			var property = new LiteralProperty(field);
 			property.mapFromItem(item, nodes);

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-11-09 11:44:46"
+	"lastUpdated": "2012-03-11 00:17:44"
 }
 
 function detectWeb(doc, url) {
@@ -21,19 +21,13 @@ function detectWeb(doc, url) {
 }
 
 //National Archives of South Africa Translator. Code by Adam Crymble
-
-function associateData (newItem, dataTags, field, zoteroField) {
+function associateData(newItem, dataTags, field, zoteroField) {
 	if (dataTags[field]) {
 		newItem[zoteroField] = dataTags[field];
 	}
 }
 
 function scrape(doc, url) {
-
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
 
 	var dataTags = new Object();
 	var tagsContent = new Array();
@@ -42,9 +36,9 @@ function scrape(doc, url) {
 	var newItem = new Zotero.Item("book");
 
 
-	var headers = doc.evaluate('//td[2]/pre/b', doc, nsResolver,XPathResult.ANY_TYPE, null);
-	var xPathCount = doc.evaluate('count (//td[2]/pre/b)', doc,nsResolver, XPathResult.ANY_TYPE, null);
-	var contents = doc.evaluate('//td[2]/pre', doc, nsResolver,XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	var headers = doc.evaluate('//td[2]/pre/b', doc, null, XPathResult.ANY_TYPE, null);
+	var xPathCount = doc.evaluate('count (//td[2]/pre/b)', doc, null, XPathResult.ANY_TYPE, null);
+	var contents = doc.evaluate('//td[2]/pre', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 
 	var headersArray = new Array();
 	var oneHeader = '';
@@ -61,9 +55,9 @@ function scrape(doc, url) {
 	var contentsArray = new Array();
 	var j = 0;
 
-	if (oneHeader.length<1) {
+	if (oneHeader.length < 1) {
 
-		for (var i = headersArray.length-1; i> -1; i--) {
+		for (var i = headersArray.length - 1; i > -1; i--) {
 
 			var fieldIndex = contents.indexOf(headersArray[i]);
 			var shorten = headersArray[i].length;
@@ -77,17 +71,17 @@ function scrape(doc, url) {
 		}
 	}
 
-	associateData (newItem, dataTags, "DEPOT", "repository");
-	associateData (newItem, dataTags, "REFERENCE", "callNumber");
-	associateData (newItem, dataTags, "STARTING", "date");
-	associateData (newItem, dataTags, "ENDING", "date");
-	associateData (newItem, dataTags, "VOLUME_NO", "volume");
-	associateData (newItem, dataTags, "REMARKS", "extra");
-	associateData (newItem, dataTags, "SUMMARY", "abstractNote");
-	associateData (newItem, dataTags, "SOURCE", "series");
+	associateData(newItem, dataTags, "DEPOT", "repository");
+	associateData(newItem, dataTags, "REFERENCE", "callNumber");
+	associateData(newItem, dataTags, "STARTING", "date");
+	associateData(newItem, dataTags, "ENDING", "date");
+	associateData(newItem, dataTags, "VOLUME_NO", "volume");
+	associateData(newItem, dataTags, "REMARKS", "extra");
+	associateData(newItem, dataTags, "SUMMARY", "abstractNote");
+	associateData(newItem, dataTags, "SOURCE", "series");
 	if (dataTags["DESCRIPTION"]) {
-		associateData (newItem, dataTags, "DESCRIPTION", "title");
-		newItem.title = ZU.capitalizeTitle(newItem.title, ignorePreference="true")
+		associateData(newItem, dataTags, "DESCRIPTION", "title");
+		newItem.title = ZU.capitalizeTitle(newItem.title, ignorePreference = "true")
 	} else {
 		newItem.title = "No Title Found";
 	}
@@ -95,23 +89,15 @@ function scrape(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-
 	var articles = new Array();
-
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
-
-		var titles = doc.evaluate('//td/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
-
+		var titles = doc.evaluate('//td/a', doc, null, XPathResult.ANY_TYPE, null);
 		var lastLink;
 		var next_title;
 		while (next_title = titles.iterateNext()) {
 
-			if (!next_title.textContent.match(/^\d\d\d\d/) && !next_title.textContent.match(/\\/) && next_title.textContent.length>3 && next_title.textContent.match(/\w/)) {
+			if (!next_title.textContent.match(/^\d\d\d\d/) && !next_title.textContent.match(/\\/) && next_title.textContent.length > 3 && next_title.textContent.match(/\w/)) {
 				Zotero.debug(next_title.textContent);
 				items[next_title.href] = next_title.textContent;
 			}
@@ -124,29 +110,11 @@ function doWeb(doc, url) {
 	} else {
 		articles = [url];
 	}
-	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
+	Zotero.Utilities.processDocuments(articles, scrape, function () {
+		Zotero.done();
+	});
 	Zotero.wait();
-}/** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://www.national.archsrch.gov.za/sm300cv/smws/sm30ddf0?20111109203413A6680686&DN=00000001",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"callNumber": "187",
-				"date": "19700000",
-				"volume": "1/1/1/1403",
-				"series": "CSC",
-				"title": "Record of Proceedings of Criminal Case. Criminal Session, August. the State Versus Gilbert Mandela and Thabo Mklahlo/Mhlahlo. Murder.",
-				"libraryCatalog": "KAB"
-			}
-		]
-	}
-]
+} 
+/** BEGIN TEST CASES **/
+var testCases = []
 /** END TEST CASES **/

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-10-28 11:30:27"
+	"lastUpdated": "2012-03-12 00:59:32"
 }
 
 function detectWeb(doc, url) {
@@ -36,18 +36,28 @@ function doWeb(doc, url) {
 		while( link = links.iterateNext(), title = titles.iterateNext()){
 			items[link.textContent.replace(/&metadataPrefix=html/, "&metadataPrefix=oai_dc")] = title.textContent;
 		}
-		items = Zotero.selectItems(items);
-		if(!items) {
-			return true;
-		}
-		for (url in items) {
-			newURIs.push(url);
-			Zotero.debug(url);
-		}
+		
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var url in items) {
+				newURIs.push(url);
+			}
+			Zotero.Utilities.processDocuments(newURIs, scrape, function () {
+				Zotero.done();
+			});
+			Zotero.wait();	
+		});
+		
+		
 	} else {
-		newURIs.push(url.replace(/&metadataPrefix=html/, "&metadataPrefix=oai_dc"))
+		newURIs = url.replace(/&metadataPrefix=html/, "&metadataPrefix=oai_dc");
+		scrape(doc, newURIs);
 	}
+}
 	
+	function scrape(doc, newURIs){
 	// ripped the arXiv.org code, hence the funny var names.
 	Zotero.Utilities.HTTP.doGet(newURIs, function(text) {
 		var newItem = new Zotero.Item("report");
@@ -68,7 +78,7 @@ function doWeb(doc, url) {
 			newItem.title = title;
 		}
 		Zotero.debug("article title: " + title);
-		var type = "";
+		var type = "author";
 		if(citation.dc_creator.length()) {
 		var authors = citation.dc_creator;
 			for(var j=0; j<authors.length(); j++) {
@@ -122,9 +132,8 @@ function doWeb(doc, url) {
 			newItem.notes = new Array();
 		}
 		newItem.complete();
-	}, function() {Zotero.done();}, null);
-	Zotero.wait();
-}/** BEGIN TEST CASES **/
+	})
+	}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -134,9 +143,9 @@ var testCases = [
 				"itemType": "report",
 				"creators": [
 					{
-						"firstName": "Dennis M",
+						"firstName": "Dennis M.",
 						"lastName": "DeCoste",
-						"creatorType": ""
+						"creatorType": "author"
 					}
 				],
 				"notes": [],
@@ -166,7 +175,6 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://stinet.dtic.mil/oai/oai?&verb=getRecord&metadataPrefix=html&identifier=ADA466425",
 						"title": "DTIC Snapshot",
 						"mimeType": "text/html"
 					}

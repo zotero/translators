@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-10-24 22:39:36"
+	"lastUpdated": "2012-03-01 21:14:57"
 }
 
 function detectWeb(doc, url) {
@@ -96,28 +96,5 @@ function doWeb(doc, url) {
 	}, function() {Zotero.done();});
 	Zotero.wait();
 }/** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://hip.bium.univ-paris5.fr/uPortal/tag.idempotent.render.userLayoutRootNode.target.n184.uP?showBrief=true&TITLE=&AUTHOR=&PUBLISHER=&SERIES=&CALLNUMBER=&ISBN=&ISSN=&DATE=&EDITION=&OCLC=&LCCN=&BIBLIOGRAPHICLEVEL=&iLocation=&collection=&status=&HomeLibId=&HomeLib=&Patrons-PatronKey=&Patrons-Patron=&Patrons-PatronBarcode=&Patrons-PatronEmail=&Patrons-PatronCategory=&SYSTEMNUMBER=&request=&link=full%7E%3D16%7E%21300274%7E%211%7E%2198%7E%2113195176382183371%7E%213%7E%21110%7E%21tooth%7Cawdid%3D4&currentPosition=3&searchTargetId=16&getResults=&page=&requestbib=&summary=true&responseSessionId=13195176378593369&responseResultSetId=13195176382183371&searchGroup=BIUM-13&query=.TI%3Dtooth&searchTargets=16&summary=true&jumpToPage=1&jumpToPage2=1#n184",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"ISBN": "978-0-9822928-0-8",
-				"language": "eng",
-				"title": "Aesthetic & restorative dentistry material selection & technique",
-				"place": "Stillwater, Minn",
-				"publisher": "Everest Publishing Media",
-				"date": "2009",
-				"callNumber": "WU 100 ¤2 usnlm",
-				"libraryCatalog": "BIUM"
-			}
-		]
-	}
-]
+var testCases = []
 /** END TEST CASES **/

@@ -10,7 +10,7 @@
 	"displayOptions":{"exportCharset":"UTF-8"},
 	"browserSupport":"gcsn",
 	"inRepository":true,
-	"lastUpdated":"2011-07-08 04:51:41"
+	"lastUpdated":"2012-02-06 18:00:26"
 }
 
 var fieldMap = {
@@ -186,14 +186,16 @@ function doExport() {
 				// check for an editor or translator
 				var editors = [];
 				var translators = [];
-				for(var i in item.creators) {
-					if(item.creators[i].creatorType == "translator") {
+				for(var i = 0; i < item.creators.length; i++) {
+					var creator = item.creators[i];
+					if(creator.creatorType == "translator") {
 						translators = translators.concat(item.creators.splice(i, 1));
-					} else if(item.creators[i].creatorType == "editor") {
+					} else if(creator.creatorType == "editor") {
 						editors = editors.concat(item.creators.splice(i, 1));
-					} else if(item.creators[i].creatorType == "contributor") {
+					} else if(creator.creatorType == "contributor") {
 						// drop contributors
 						item.creators.splice(i, 1);
+						i--;
 					}
 				}
 				

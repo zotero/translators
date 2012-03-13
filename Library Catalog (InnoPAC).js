@@ -5,11 +5,11 @@
 	"target": "(search~|\\/search\\?|(a|X|t|Y|w)\\?|\\?(searchtype|searchscope)|frameset&FF|record=b[0-9]+(~S[0-9])?|/search/q\\?)",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
-	"browserSupport":"gcs",
 	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-09-07 05:24:15"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-03-12 01:04:58"
 }
 
 function detectWeb(doc, url) {
@@ -238,7 +238,7 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "G. W",
+						"firstName": "G. W.",
 						"lastName": "Kimura",
 						"creatorType": "contributor"
 					},

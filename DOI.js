@@ -9,7 +9,7 @@
 	"priority":300,
 	"browserSupport":"gcs",
 	"inRepository":true,
-	"lastUpdated":"2012-01-11 09:09:04"
+	"lastUpdated":"2012-02-22 01:05:53"
 }
 
 var items = {};
@@ -80,6 +80,8 @@ function retrieveNextDOI(DOIs, doc) {
 		translate.setHandler("done", function(translate) {
 			retrieveNextDOI(DOIs, doc);
 		});
+		// Don't throw on error
+		translate.setHandler("error", function() {});
 		translate.translate();
 	} else {
 		// all DOIs retrieved now
@@ -140,6 +142,7 @@ var testCases = [
 				"publicationTitle": "Journal of Molecular Biology",
 				"volume": "248",
 				"ISSN": "00222836",
+				"issue": "3",
 				"date": "1995-5-5",
 				"pages": "507-512",
 				"DOI": "10.1006/jmbi.1995.0238",

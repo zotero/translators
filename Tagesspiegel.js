@@ -3,13 +3,13 @@
 	"label": "Der Tagesspiegel",
 	"creator": "Martin Meyerhoff",
 	"target": "^https?://www\\.tagesspiegel\\.de",
-	"minVersion": "1.0",
+	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2011-10-28 14:44:13"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-03-08 18:25:10"
 }
 
 /*
@@ -31,14 +31,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 function detectWeb(doc, url) {
-
-	// I use XPaths. Therefore, I need the following block.
-	
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
 	var tspiegel_ArticleTools_XPath = ".//div[@class='hcf-article']";
 	var tspiegel_Multiple_XPath = "//*[@id='hcf-wrapper']/div[2]/div[contains(@class, 'hcf-main-col')]/div/ul/li/h2/a|//*[@id='hcf-wrapper']/div[@class='hcf-lower-hp']/div/ul/li/ul/li/a|//ul/li[contains(@class, 'hcf-teaser')]/h2/a";
 	
@@ -55,56 +47,49 @@ function detectWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
+
 	var newItem = new Zotero.Item("newspaperArticle");
 	newItem.url = doc.location.href; 
 
 	
 	// This is for the title!
 	
-	var title_XPath = "//div[@class='hcf-article']/h1";
-	var title = doc.evaluate(title_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	var title_XPath = "//h1/span[@class='hcf-headline']";
+	var title = ZU.xpathText(doc, title_XPath);
 	newItem.title = title;
 	
 	// Date
-	var date_XPath = "//span[contains(@class, 'hcf-date')]";
-	var date= doc.evaluate(date_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	var date_XPath = "//span[contains(@class, 'date hcf')]";
+	var date= ZU.xpathText(doc, date_XPath);
 	newItem.date= date.replace(/(.{10,10}).*/, '$1');
 	
 	// Summary 
 	
 	var summary_XPath = ".//p[@class='hcf-teaser']"
-	if (doc.evaluate(summary_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){
-		var summary = doc.evaluate(summary_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;	
+		var summary = ZU.xpathText(doc,summary_XPath);	
 		newItem.abstractNote = Zotero.Utilities.trim(summary); 
-	}
 	
 	// Publication Title
 	newItem.publicationTitle = "Der Tagesspiegel Online";
 	
 	// Authors 
 	var author_XPath = "//span[contains(@class, 'hcf-author')]";
-	if (doc.evaluate(author_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){
-		var author  = doc.evaluate(author_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var author  = ZU.xpathText(doc, author_XPath);
 		Zotero.debug(author);
+		if (author != null){
 		author = author.replace(/^Von\s|Kommentar\svon\s/g, '');
 		author = author.split(/,\s/);
 		for (var i in author) {
 			newItem.creators.push(Zotero.Utilities.cleanAuthor(author[i], "author"));
 		}
-	}
-	
+		}
 	// Printurl (add "v_print," before the article ID and "?p=" at the end) 
 	var printurl = doc.location.href.replace(/^(.*\/)(\d+.html$)/, '$1v_print,$2?p=');
 	newItem.attachments.push({url:printurl, title:doc.title, mimeType:"text/html"}); 
 	
 	// Tags
 	var tags_XPath = "//meta[@name='keywords']";
-	var tags = doc.evaluate(tags_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().content;
+	var tags = doc.evaluate(tags_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().content;
 	var tags= tags.split(","); // this seems to work even if there's no |
 	for (var i in tags) {
 		tags[i] = tags[i].replace(/^\s*|\s*$/g, '') // remove whitespace around the tags
@@ -117,16 +102,11 @@ function scrape(doc, url) {
 	
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
 	var articles = new Array();
-	
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		
-		var titles = doc.evaluate("//*[@id='hcf-wrapper']/div[2]/div[contains(@class, 'hcf-main-col')]/div/ul/li/h2/a|//*[@id='hcf-wrapper']/div[@class='hcf-lower-hp']/div/ul/li/ul/li/a|//ul/li[contains(@class, 'hcf-teaser')]/h2/a", doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate("//*[@id='hcf-wrapper']/div[2]/div[contains(@class, 'hcf-main-col')]/div/ul/li/h2/a|//*[@id='hcf-wrapper']/div[@class='hcf-lower-hp']/div/ul/li/ul/li/a|//ul/li[contains(@class, 'hcf-teaser')]/h2/a", doc, null, XPathResult.ANY_TYPE, null);
 		
 		var next_title;
 		while (next_title = titles.iterateNext()) {
@@ -135,13 +115,20 @@ function doWeb(doc, url) {
 			items[next_title.href] = next_title.textContent;
 			}
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
-		Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-		Zotero.wait();
-	} else {
+Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			Zotero.Utilities.processDocuments(articles, scrape, function () {
+				Zotero.done();
+			});
+			Zotero.wait();	
+		});
+	}
+	else {
 		scrape(doc, url);
 	}
 }	
@@ -149,7 +136,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.tagesspiegel.de/berlin/radler-und-fussgaenger-leben-wieder-gefaehrlicher/5767876.html",
+		"url": "http://www.tagesspiegel.de/berlin/statistik-radler-und-fussgaenger-leben-wieder-gefaehrlicher/5767876.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -170,19 +157,18 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.tagesspiegel.de/berlin/radler-und-fussgaenger-leben-wieder-gefaehrlicher/v_print,5767876.html?p=",
+						"url": "http://www.tagesspiegel.de/berlin/statistik-radler-und-fussgaenger-leben-wieder-gefaehrlicher/v_print,5767876.html?p=",
 						"title": "Statistik: Radler und Fußgänger leben wieder gefährlicher - Berlin - Tagesspiegel",
 						"mimeType": "text/html"
 					}
 				],
-				"url": "http://www.tagesspiegel.de/berlin/radler-und-fussgaenger-leben-wieder-gefaehrlicher/5767876.html",
-				"title": "Statistik : Radler und Fußgänger leben wieder gefährlicher",
-				"date": "28.10.2011",
+				"url": "http://www.tagesspiegel.de/berlin/statistik-radler-und-fussgaenger-leben-wieder-gefaehrlicher/5767876.html",
+				"title": "Radler und Fußgänger leben wieder gefährlicher",
+				"date": "29.10.2011",
 				"abstractNote": "Die Zahl der Verkehrstoten nimmt erneut zu. Die Polizei beklagt Unachtsamkeit von Autofahrern – und hofft auf mehr Radspuren.",
 				"publicationTitle": "Der Tagesspiegel Online",
 				"libraryCatalog": "Der Tagesspiegel",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Statistik"
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},

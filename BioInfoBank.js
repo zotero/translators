@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-10-24 19:21:30"
+	"lastUpdated": "2012-03-01 20:29:57"
 }
 
 function detectWeb(doc, url) {
@@ -120,11 +120,5 @@ function doWeb(doc, url) {
 		Zotero.done();
 	});
 }/** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://lib.bioinfo.pl/find?field=Papers&query=cancer",
-		"items": "multiple"
-	}
-]
+var testCases = []
 /** END TEST CASES **/

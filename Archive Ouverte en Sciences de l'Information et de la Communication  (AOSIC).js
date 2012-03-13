@@ -8,15 +8,15 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2011-10-21 14:38:07"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-03-03 23:29:34"
 }
 
 function detectWeb(doc, url) {
 	if (doc.title.toLowerCase().match(/::\ search|::\ recherche/)) {
-	//	return "multiple";
-	return false;
-	} else if (url.match(/sic_\d+/)) {
+	return "multiple";
+	//return false;
+	} else if (url.match(/sic_\d+|tel-\d+/)) {
 		return "journalArticle";
 	}
 }
@@ -32,7 +32,7 @@ var metaTags = {
 function doWeb(doc, url) {
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		var items = Zotero.Utilities.getItemArray(doc, doc, /sic_\d+\/fr\//);
+		var items = Zotero.Utilities.getItemArray(doc, doc, /sic_\d+|tel-\d+/);
 		items = Zotero.selectItems(items) 
 		for (var i in items) {
 			articles.push(i);
@@ -78,49 +78,14 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://archivesic.ccsd.cnrs.fr/index.php?halsid=373380dfs3bra92v22084ahgg0&view_this_doc=sic_00205049&version=1",
+		"url": "http://archivesic.ccsd.cnrs.fr/sic_00665224/fr/",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "Muriel",
-						"lastName": "Foulonneau",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Anne-Marie",
-						"lastName": "Badolato",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Wolfram",
-						"lastName": "Horstmann",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Karen Van",
-						"lastName": "Godtsenhoven",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Mary",
-						"lastName": "Robinson",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Sophia",
-						"lastName": "Jones",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Martin",
-						"lastName": "Feijen",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Kasja",
-						"lastName": "Weenink",
+						"firstName": "Brigitte",
+						"lastName": "Guyot",
 						"creatorType": "author"
 					}
 				],
@@ -129,23 +94,59 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://archivesic.ccsd.cnrs.fr/sic_00205049/en/",
+						"url": "http://archivesic.ccsd.cnrs.fr/sic_00665224",
 						"title": "AOSIC Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"url": "http://archivesic.ccsd.cnrs.fr/docs/00/20/50/49/PDF/foulonneaurevision2.pdf",
+						"url": "http://archivesic.ccsd.cnrs.fr/docs/00/66/52/24/PDF/PAROSIC_BG.pdf",
 						"title": "AOSIC Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"url": "http://archivesic.ccsd.cnrs.fr/sic_00205049/en/",
-				"date": "2007-09-28",
-				"abstractNote": "Les archives institutionnelles en Europe se sont développées avec des logiques très différentes. Elles se sont structurées dans des réseaux nationaux pour partager les compétences mais aussi créer des outils et services communs. Le projet européen DRIVER (Digital Repositories Infrastructure Vision for European Research) rassemble 5 réseaux européens d'archives, en Allemagne, aux Pays-Bas, au Royaume-Uni, en Belgique et en France pour établir les bases d'une infrastructure européenne fondée sur les archives scientifiques. L'Allemagne a mis l'accent sur la promotion du libre accès et la certification d'archives institutionnelles, les Pays-Bas ont structuré un réseau efficace de collecte des documents et ont créé de nombreux services à valeur ajoutée pour tirer parti de cette masse de contenus. Le Royaume-Uni a créé un partenariat d'archives qui échange des compétences mais développe aussi de nombreux services dont bénéficient les archives britanniques et mondiales. La France a inauguré une plate-forme pluri-disciplinaire sur le modèle des archives disciplinaires telles que arXiv ou CogPrints et a intégré progressivement la problématique des archives institutionnelles avec la création d'un réseau. Enfin la Belgique tire parti du projet européen DRIVER pour inciter les établissements de recherche à créer leur propre archive. Les cultures développées dans chacun des réseaux nationaux font néanmoins apparaître des divergences sur la manière dont les archives ont été créées, mais aussi sur les acteurs qui doivent les alimenter, sur les types de documents à y intégrer, sur les stratégies à développer pour atteindre une masse critique de contenus, sur les missions qu'elles doivent remplir. Les actions visant à favoriser les dépôts par les chercheurs se sont ainsi focalisées sur des aspects différents : la création de services pour les chercheurs, les incitations auprès des établissements de recherche à créer leur propre archive, les actions dirigées vers les organismes de financement de la recherche, enfin les actions visant à mettre en valeur les bénéfices pour les chercheurs en terme de visibilité de leur production scientifique. Alors que la logique institutionnelle a permis dans certains cas d'atteindre des taux de dépôts importants dans les archives, elle se heurte à la logique des services disciplinaires basés sur la contribution par les chercheurs à un corpus collectif de type Web 2.0 qui favorise les échanges et la génération d'idées nouvelles. Cependant, les réseaux nationaux d'archives semblent converger vers des priorités et des axes de développement similaires pour l'avenir, cohérents avec l'évolution des archives disciplinaires. L'intégration des archives dans un contexte plus global, européen aujourd'hui et mondial demain permettra d'articuler des services à valeurs ajoutée basés sur des types d'archives différents, répondant à des besoins variés mais créant des corpus ouverts, sources de nouvelles pratiques scientifiques.",
-				"title": "Réseaux d'archives institutionnelles en Europe: logiques de développement et convergences",
+				"url": "http://archivesic.ccsd.cnrs.fr/sic_00665224",
+				"date": "2011",
+				"abstractNote": "s'appuyer sur des observables que sont les documents d'entreprise donne à voir à la fois une dynamique de formalisation des écrits professionnels, une activité particulière, celle d'éditorialisation, ainsi que des traces d'intervention institutionnelle ; tout cela fait du document un miroir et un porteur d'ordre.",
+				"title": "comprendre une organisation par l'analyse de ses documents",
 				"libraryCatalog": "Archive Ouverte en Sciences de l'Information et de la Communication  (AOSIC)",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Réseaux d'archives institutionnelles en Europe"
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://tel.archives-ouvertes.fr/tel-00483442/fr/",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Caroline",
+						"lastName": "Djambian",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://tel.archives-ouvertes.fr/tel-00483442",
+						"title": "AOSIC Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"url": "http://tel.archives-ouvertes.fr/docs/00/67/11/78/PDF/ThA_se_C_Djambian.pdf",
+						"title": "AOSIC Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"url": "http://tel.archives-ouvertes.fr/tel-00483442",
+				"date": "2010-04-14",
+				"abstractNote": "Le patrimoine documentaire des entreprises s'est souvent accumulé sans que ces dernières puissent s'adapter au rythme des évolutions des technologies de l'information. La mémoire collective qui ne cesse d'être produite voit sa masse croître et est devenue éparse et hétérogène. Comme nombre d'entreprises, des problématiques transverses imposent aujourd'hui à la Division Ingénierie Nucléaire (DIN) d'EDF d'être capable de mobiliser ses connaissances de façon opérationnelle. Mais la valorisation de son patrimoine informationnel dépasse largement les aspects techniques pour prendre en compte l'organisation dans sa globalité. Ce sont en effet les métiers cœurs de l'entreprise qui sont le point de départ de notre réflexion. Dans ce contexte d'ingénierie c'est par la documentation que les connaissances techniques transitent et sont exprimées par des concepts propres aux métiers. La terminologie métiers est la clé permettant de valoriser les connaissances et de mieux gérer le patrimoine de la DIN. Elle nous permet d'aller vers une représentation explicite, au sein d'une base de connaissances centrée sur le ' sens métier ' de l'organisation. Notre approche résolument empirique et qualitative aboutit à une méthode de construction d'une base de connaissances métiers appliquée à un domaine délimité de la Division Ingénierie Nucléaire d'EDF.",
+				"title": "Valorisation d'un patrimoine documentaire industriel et évolution vers un système de gestion des connaissances orienté métiers",
+				"libraryCatalog": "Archive Ouverte en Sciences de l'Information et de la Communication  (AOSIC)",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}

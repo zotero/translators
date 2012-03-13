@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2011-12-13 11:18:52"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-03-08 07:30:28"
 }
 
 function detectWeb(doc, url) {
@@ -252,58 +252,6 @@ function doDelivery(doc, nsResolver, folderData, onDone) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "http://search.ebscohost.com/login.aspx?direct=true&db=aph&AN=4370815&site=ehost-live",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"lastName": "Warren",
-						"firstName": "Karen J.",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"RECONCILIATION",
-					"WAR -- Moral & ethical aspects",
-					"SOCIAL sciences -- Philosophy",
-					"STERBA, James",
-					"JUSTICE for Here & Now (Book)"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"url": "http://search.ebscohost.com/login.aspx?direct=true&db=a9h&AN=4370815&site=ehost-live&scope=cite",
-						"title": "EBSCO Record",
-						"mimeType": "text/html",
-						"snapshot": false
-					},
-					{
-						"url": "http://content.ebscohost.com/ContentServer.asp?T=P&P=AN&K=4370815&S=R&D=a9h&EbscoContent=dGJyMMvl7ESeqa84zdnyOLCmr0meprFSs664SLSWxWXS&ContentCustomer=dGJyMPGstk%2B0qbJPuePfgeyx44Dt6fIA",
-						"title": "EBSCO Full Text",
-						"mimeType": "application/pdf"
-					}
-				],
-				"title": "Peacemaking and Philosophy: A Critique of Justice for Hero and Now",
-				"publicationTitle": "Journal of Social Philosophy",
-				"date": "Winter1999",
-				"volume": "30",
-				"issue": "3",
-				"pages": "411-423",
-				"publisher": "Wiley-Blackwell",
-				"ISBN": "00472786",
-				"ISSN": "00472786",
-				"abstractNote": "This article presents a critical analysis of James Sterba's book, Justice for Here and Now.  In the book, Sterba undertakes two distinct but interconnected objects--one primarily methodological and the other primarily ethical. The methodological project is to establish the necessity and desirability of adopting a peacemaking model of doing philosophy, that is, one that is committed to fair-mindedness, openness and self-criticalness in seeking to determine which philosophical views are most justified. Sterba contrasts the peacemaking model with a war-making model of doing philosophy. The ethical project involves establishing two related claims: rationality is required for morality, and it is possible and desirable to reconcile the practical perspectives of alternative positions on justice; welfare liberalism, libertarianism, socialism, feminism, multiculturalism, anthropocentric and nonanthropocentric environmental ethics, and pacifism and just war theory. There is an important and intimate connection between the methodological and ethical projects. In fact, at various places throughout the book Sterba suggests that the relationship is one of logical entailment: not only does appeal to a peacemaking model of doing philosophy establish the two main claims of the ethical project; by showing the rational grounds for reconciling alternative philosophical positions on justice, one establishes that a peacemaking model of philosophy ought to be adopted.",
-				"callNumber": "4370815",
-				"libraryCatalog": "EBSCOhost",
-				"shortTitle": "Peacemaking and Philosophy",
-				"checkFields": "title"
-			}
-		]
-	},
 	{
 		"type": "web",
 		"url": "http://web.ebscohost.com/ehost/detail?sid=3f8c768f-e9bd-4c06-874e-30075b5a2e43%40sessionmgr15&vid=1&hid=11&bdata=JnNpdGU9ZWhvc3QtbGl2ZQ%3d%3d#db=a9h&AN=9606204477",

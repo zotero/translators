@@ -8,12 +8,12 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2011-11-03 19:31:19"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-03-08 07:31:08"
 }
 
 /*
-	Handelszeitung Translator - Parses Handelszeitung, Bilanz and Stocks articles
+	Handelszeitung Translator - Parses Handelszeitung and Bilanz articles
 	and creates Zotero-based metadata.
 	Copyright (C) 2011 ibex
 
@@ -39,8 +39,6 @@ Reference URLs:
   Article: http://www.bilanz.ch/unternehmen/google-kauft-daily-deal
   Search: http://www.bilanz.ch/search/apachesolr_search/Google
 
-  Article: http://www.stocks.ch/unternehmen/google-kauft-daily-deal
-  Search: http://www.stocks.ch/search/apachesolr_search/Google
 */
 
 /* Zotero API */
@@ -58,23 +56,26 @@ function doWeb(doc, url) {
 	//Z.debug("ibex doWeb URL = " + url);
 	var urls = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		var items = ZU.getItemArray(doc, doc.getElementById('content-left').getElementsByClassName('buildmode-3'), 'http://.+/.+');
+		var items = ZU.getItemArray(doc, doc.getElementById('content-left').getElementsByClassName('field field-title'), 'http://.+/.+');
 		if (!items || countObjectProperties(items) == 0) {
 			return true;
 		}
-		items = Z.selectItems(items);
-		if (!items) {
-			return true;
-		}
-
-		for (var i in items) {
-			urls.push(i);
-		}
+		
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				urls.push(i);
+			}
+			Zotero.Utilities.processDocuments(urls, scrape, function () {
+				Zotero.done();
+			});
+			Zotero.wait();	
+		});	
 	} else {
-		urls.push(doc.location.href);
+	 scrape(doc, url);
 	}
-	ZU.processDocuments(urls, scrape, function() { Z.done(); } );
-	Z.wait();
 }
 
 /* Zotero API */
@@ -199,7 +200,7 @@ var testCases = [
 				"ISSN": "1022-3487",
 				"language": "de",
 				"section": "Unternehmen",
-				"libraryCatalog": "Handelszeitung, Bilanz, Stocks",
+				"libraryCatalog": "Handelszeitung",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
@@ -212,41 +213,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.bilanz.ch/search/apachesolr_search/Google",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://www.stocks.ch/unternehmen/google-kauft-daily-deal",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Stocks Article Snapshot",
-						"document": {
-							"location": {}
-						}
-					}
-				],
-				"url": "http://www.stocks.ch/unternehmen/google-kauft-daily-deal",
-				"title": "Google kauft Daily Deal",
-				"date": "19.09.2011 | 14:58",
-				"publicationTitle": "Stocks",
-				"ISSN": "1424-7739",
-				"language": "de",
-				"section": "Unternehmen",
-				"libraryCatalog": "Handelszeitung, Bilanz, Stocks",
-				"accessDate": "CURRENT_TIMESTAMP"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.stocks.ch/search/apachesolr_search/Google",
 		"items": "multiple"
 	},
 	{
@@ -275,7 +241,7 @@ var testCases = [
 				"ISSN": "1422-8971",
 				"language": "de",
 				"section": "Unternehmen",
-				"libraryCatalog": "Handelszeitung, Bilanz, Stocks",
+				"libraryCatalog": "Handelszeitung",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]

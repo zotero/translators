@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-09-20 20:24:17"
+	"lastUpdated": "2012-02-03 22:52:47"
 }
 
 var RECOGNIZABLE_FORMATS = ["rdf_zotero", "rdf_bibliontology", "mods", "marc", "unimarc", "ris",
@@ -47,6 +47,11 @@ UnAPIFormat = function(aXML) {
 	// Loop through to determine format name
 	var nodes = doc.documentElement.getElementsByTagName("format");
 	var nNodes = nodes.length;
+	if(!nNodes) {
+		// Hack to fix for Firefox 10/Zotero 3.0.1
+		var i = 0;
+		while(i in nodes) nNodes = ++i;
+	}
 	var node, name, lowerName, format;
 	for(var i=0; i<nNodes; i++) {
 		node = nodes[i];

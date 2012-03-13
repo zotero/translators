@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-30 22:49:04"
+	"lastUpdated": "2012-03-07 17:24:39"
 }
 
 /*
@@ -30,35 +30,37 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-function detectWeb(doc, url){
+function detectWeb(doc, url) {
 	if (url.match(/\/title\/tt\d+/)) {
 		return "film";
-	} else if (url.match(/\/find\?/)){
+	} else if (url.match(/\/find\?/)) {
 		return "multiple";
 	}
 }
 
-function doWeb(doc, url){
+function doWeb(doc, url) {
 	var n = doc.documentElement.namespaceURI;
-	var ns = n ? function(prefix) {
-		if (prefix == 'x') return n; else return null;
+	var ns = n ?
+	function (prefix) {
+		if (prefix == 'x') return n;
+		else return null;
 	} : null;
-	
+
 	var ids = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var results = doc.evaluate('//td[a[contains(@href,"/title/tt")]]', doc, ns, XPathResult.ANY_TYPE, null);
 		var items = new Array();
 		var result;
-		while(result = results.iterateNext()) {
+		while (result = results.iterateNext()) {
 			var link = doc.evaluate('./a[contains(@href,"/title/tt")]', result, ns, XPathResult.ANY_TYPE, null).iterateNext();
 			var title = result.textContent;
 			//Zotero.debug(link.href);
 			var url = link.href.match(/\/title\/(tt\d+)/)[1];
 			items[url] = title;
 		}
-		
-		Zotero.selectItems(items, function(items) {
-			if(!items) {
+
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
 				Zotero.done();
 				return true;
 			}
@@ -78,7 +80,9 @@ function doWeb(doc, url){
 function apiFetch(ids) {
 	var apiRoot = "http://imdbapi.com/?tomatoes=true&i=";
 	for (i in ids) ids[i] = apiRoot + ids[i];
-	Zotero.Utilities.doGet(ids, parseIMDBapi, function() {Zotero.done()});
+	Zotero.Utilities.doGet(ids, parseIMDBapi, function () {
+		Zotero.done()
+	});
 }
 
 // parse result from imdbapi.com
@@ -96,24 +100,24 @@ function parseIMDBapi(text, response, url) {
 	item.title = obj.Title;
 	item.date = obj.Released ? obj.Released : obj.Year;
 	item.genre = obj.Genre;
-	if(obj.Director) item = addCreator(item, obj.Director, "director");	
-	if(obj.Writer) item = addCreator(item, obj.Writer, "scriptwriter");
-	if(obj.Actors) item = addCreator(item, obj.Actors, "contributor");
+	if (obj.Director) item = addCreator(item, obj.Director, "director");
+	if (obj.Writer) item = addCreator(item, obj.Writer, "scriptwriter");
+	if (obj.Actors) item = addCreator(item, obj.Actors, "contributor");
 	item.abstractNote = obj.Plot;
-	item.attachments.push({url:obj.Poster, title:"Poster"});
+	item.attachments.push({
+		url: obj.Poster,
+		title: "Poster"
+	});
 	item.runningTime = obj.Runtime;
 	item.extra = "IMDB ID: " + obj.ID;
-	item.extra += "; IMDB Rating: " + obj.Rating + " ("+obj.Votes+" votes)";
-	item.extra += "; Rotten Tomatoes: " + obj.tomatoRating
-				 + " ("+obj.tomatoReviews+" reviews "
-				 +" "+obj.tomatoFresh +" fresh, "+obj.tomatoRotten+" rotten)"
-				 +", Tomato Meter: "+obj.tomatoMeter;
+	item.extra += "; IMDB Rating: " + obj.Rating + " (" + obj.Votes + " votes)";
+	item.extra += "; Rotten Tomatoes: " + obj.tomatoRating + " (" + obj.tomatoReviews + " reviews " + " " + obj.tomatoFresh + " fresh, " + obj.tomatoRotten + " rotten)" + ", Tomato Meter: " + obj.tomatoMeter;
 	item.complete();
 }
 
-function addCreator (item, creator, type) {
+function addCreator(item, creator, type) {
 	if (creator == "N/A") {
-		Zotero.debug("Discarding "+type+"="+creator);
+		Zotero.debug("Discarding " + type + "=" + creator);
 		return item;
 	}
 	var broken = creator.split(",");
@@ -123,73 +127,58 @@ function addCreator (item, creator, type) {
 	return item;
 }
 /** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://www.imdb.com/title/tt0089276/",
-		"items": [
-			{
-				"itemType": "film",
-				"creators": [
-					{
-						"firstName": "Luis",
-						"lastName": "Puenzo",
-						"creatorType": "director"
-					},
-					{
-						"firstName": "Aída",
-						"lastName": "Bortnik",
-						"creatorType": "scriptwriter"
-					},
-					{
-						"firstName": "Luis",
-						"lastName": "Puenzo",
-						"creatorType": "scriptwriter"
-					},
-					{
-						"firstName": "Norma",
-						"lastName": "Aleandro",
-						"creatorType": "contributor"
-					},
-					{
-						"firstName": "Héctor",
-						"lastName": "Alterio",
-						"creatorType": "contributor"
-					},
-					{
-						"firstName": "Chunchuna",
-						"lastName": "Villafañe",
-						"creatorType": "contributor"
-					},
-					{
-						"firstName": "Hugo",
-						"lastName": "Arana",
-						"creatorType": "contributor"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"url": "http://ia.media-imdb.com/images/M/MV5BMTMyNTc1MjIwNF5BMl5BanBnXkFtZTcwOTcyMTcyMQ@@._V1._SX320.jpg",
-						"title": "Poster"
-					}
-				],
-				"title": "The Official Story",
-				"date": "8 Nov 1985",
-				"genre": "Drama, History, Thriller, War",
-				"abstractNote": "Alicia Marnet de Ibáñez is a high school history professor and a well-to-do housewife in Buenos Aires...",
-				"runningTime": "1 hr 52 mins",
-				"extra": "IMDB ID: tt0089276; IMDB Rating: 7.8 (2693 votes); Rotten Tomatoes: 8.3 (8 reviews  8 fresh, 0 rotten), Tomato Meter: 100",
-				"libraryCatalog": "IMDb"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.imdb.com/find?q=shakespeare&s=tt",
-		"items": "multiple"
-	}
-]
+var testCases = [{
+	"type": "web",
+	"url": "http://www.imdb.com/title/tt0089276/",
+	"items": [{
+		"itemType": "film",
+		"creators": [{
+			"firstName": "Luis",
+			"lastName": "Puenzo",
+			"creatorType": "director"
+		}, {
+			"firstName": "Aída",
+			"lastName": "Bortnik",
+			"creatorType": "scriptwriter"
+		}, {
+			"firstName": "Luis",
+			"lastName": "Puenzo",
+			"creatorType": "scriptwriter"
+		}, {
+			"firstName": "Norma",
+			"lastName": "Aleandro",
+			"creatorType": "contributor"
+		}, {
+			"firstName": "Héctor",
+			"lastName": "Alterio",
+			"creatorType": "contributor"
+		}, {
+			"firstName": "Chunchuna",
+			"lastName": "Villafañe",
+			"creatorType": "contributor"
+		}, {
+			"firstName": "Hugo",
+			"lastName": "Arana",
+			"creatorType": "contributor"
+		}],
+		"notes": [],
+		"tags": [],
+		"seeAlso": [],
+		"attachments": [{
+			"url": "http://ia.media-imdb.com/images/M/MV5BMTMyNTc1MjIwNF5BMl5BanBnXkFtZTcwOTcyMTcyMQ@@._V1_SX320.jpg",
+			"title": "Poster"
+		}],
+		"title": "The Official Story",
+		"date": "8 Nov 1985",
+		"genre": "Drama, History, Thriller, War",
+		"abstractNote": "After the end of the Dirty War, a high school teacher sets out to find out who the mother of her adopted daughter is.",
+		"runningTime": "1 hr 52 mins",
+		"extra": "IMDB ID: tt0089276; IMDB Rating: 7.7 (3036 votes); Rotten Tomatoes: 8.3 (8 reviews  8 fresh, 0 rotten), Tomato Meter: 86",
+		"libraryCatalog": "IMDb"
+	}]
+}, {
+	"type": "web",
+	"url": "http://www.imdb.com/find?q=shakespeare&s=tt",
+	"items": "multiple"
+}]
 /** END TEST CASES **/

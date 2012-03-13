@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2011-10-29 13:09:31"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-03-08 07:30:36"
 }
 
 /*
@@ -44,13 +44,6 @@ http://www.zeit.de/2009/11/
 
 function detectWeb(doc, url) {
 
-	// I use XPaths. Therefore, I need the following block.
-	
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
 	var Zeit_ArticleTools_XPath = ".//*[@id='informatives']/ul[@class='tools']/li";
 	var Zeit_Archive_XPath = "//h4/a|//h2/a";
 	
@@ -63,11 +56,7 @@ function detectWeb(doc, url) {
 	}
 }
 function scrape(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
+
 	var newItem = new Zotero.Item("newspaperArticle");
 	newItem.url = doc.location.href; 
 
@@ -75,38 +64,32 @@ function scrape(doc, url) {
 	// This is for the title!
 	
 	var title_XPath = '//title'
-	var title = doc.evaluate(title_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	var title = ZU.xpathText(doc, title_XPath);
 	newItem.title = Zotero.Utilities.trim(title.split("|")[0]);
 	
 	
 	// Now for the Author
 
 	var author_XPath = '//li[contains(@class, "author first")]'; // I can't get the span selection to work. Help is appreciated.
-	if (doc.evaluate(author_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		var author  = doc.evaluate(author_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		author = author.replace(/^\s*Von\s|\s*$/g, ''); // remove whitespace around the author and the "Von "at the beginning
-	} else {
-		var author = "";
-	}
+		var author  = ZU.xpathText(doc, author_XPath);
+		if (author !=null){
+	author = author.replace(/^\s*Von\s|\s*$/g, ''); // remove whitespace around the author and the "Von "at the beginning
 	var author = author.split(" | "); // this seems to work even if there's no |
 	for (var i in author) {
 				newItem.creators.push(Zotero.Utilities.cleanAuthor(author[i], "author"));
-	}
+	}}
 	
 	// Now for the Tags
 
 	var tags_XPath = '//li[contains(@class, "tags")]'; // I can't get the span selection to work. Help is appreciated.
-	if (doc.evaluate(tags_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		var tags = doc.evaluate(tags_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var tags = ZU.xpathText(doc, tags_XPath);
 		tags = tags.replace(/^\s*Schlagworte\s|\s*$/g, ''); // remove whitespace around the author and the "Von "at the beginning
-	} else {
-		var tags = "";
-	}
+	if (tags!=null){
 	var tags= tags.split("|"); // this seems to work even if there's no |
 	for (var i in tags) {
 		tags[i] = tags[i].replace(/^\s*|\s*$/g, '') // remove whitespace around the tags
 		newItem.tags.push(tags[i]);
-	} 
+	} }
 
 	// Date
 	var date_XPath = '//meta[contains(@name, "date_first_released")]';
@@ -116,7 +99,7 @@ function scrape(doc, url) {
 		date = date.split("T")[0];
 		newItem.date = date;
 	} else if (doc.evaluate(date2_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
-		var date = doc.evaluate(date2_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var date = ZU.xpathText(doc, date2_XPath);
 		date = Zotero.Utilities.trim(date.split(/\n/)[1]);
 		date = date.replace(/Datum\s(\d\d?\.\d\d?\.\d\d\d\d).*/g, '$1');
 		newItem.date = date;
@@ -127,13 +110,13 @@ function scrape(doc, url) {
 	
 	var summary_XPath = ".//p[@class='excerpt']"
 	if (doc.evaluate(summary_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){
-		var summary = doc.evaluate(summary_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;	
+		var summary = ZU.xpathText(doc, summary_XPath);	
 		newItem.abstractNote = Zotero.Utilities.trim(summary); 
 	}
 	// Produkt (Zeit, Zeit online etc.)
 	product_XPath = '//meta[contains(@name, "zeit::product-name")]'
 	if (doc.evaluate(product_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		var product = doc.evaluate(product_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().content;
+		var product = ZU.xpath(doc, product_XPath).content();
 		newItem.publicationTitle = product;
 	} else {
 		var product = "Die Zeit";
@@ -143,7 +126,7 @@ function scrape(doc, url) {
 	
 	// Section
 	var section_XPath = '//div[@class="cap"]/a'
-	var section = doc.evaluate(section_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	var section = ZU.xpathText(doc, section_XPath);
 	newItem.section= section; 
 
 	newItem.attachments.push({url:doc.location.href+"?page=all&print=true", title:doc.title, mimeType:"text/html"}); 
@@ -170,14 +153,20 @@ function doWeb(doc, url) {
 			items[next_title.href] = next_title.textContent;
 			}
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			Zotero.debug(i);
-			articles.push(i);
-		}
-		Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-		Zotero.wait();
-	} else {
+			Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			Zotero.Utilities.processDocuments(articles, scrape, function () {
+				Zotero.done();
+			});
+			Zotero.wait();	
+		});
+	} 
+	 else {
 		scrape(doc, url);
 	}
 }	/** BEGIN TEST CASES **/
@@ -188,23 +177,18 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"creators": [
-					{
-						"firstName": "",
-						"lastName": "",
-						"creatorType": "author"
-					}
-				],
+				"creators": [],
 				"notes": [],
 				"tags": [
-					"Muammar al-Gadhafi",
 					"Libyen",
-					"Bürgerkrieg"
+					"Stadt",
+					"Tripolis",
+					"Seine"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": false,
+						"url": "http://www.zeit.de/politik/ausland/2011-09/libyen-bani-walid?page=all&print=true",
 						"title": "Libyen: Rebellen bereiten Angriff auf Bani Walid vor | Politik | ZEIT ONLINE",
 						"mimeType": "text/html"
 					}
@@ -216,6 +200,7 @@ var testCases = [
 				"publicationTitle": "Die Zeit",
 				"section": "Ausland",
 				"libraryCatalog": "Die Zeit",
+				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Libyen"
 			}
 		]
@@ -235,9 +220,16 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
+					"Philipp Lahm",
+					"Andreas Ottl",
+					"Angela Merkel",
+					"Max Frisch",
 					"Fußball",
-					"Autor",
-					"Schriftsteller"
+					"Bundesliga",
+					"Mesut Özil",
+					"FC Bayern München",
+					"SV Werder Bremen",
+					"Fifa"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -258,6 +250,11 @@ var testCases = [
 				"shortTitle": "Philipp Lahm"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.zeit.de/suche/index?q=Krise",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

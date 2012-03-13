@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-10-21 00:45:40"
+	"lastUpdated": "2012-02-23 00:03:22"
 }
 
 function detectWeb(doc, url) {
@@ -105,29 +105,24 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.ams.org.turing.library.northwestern.edu/mathscinet/search/publications.html?pg4=AUCN&s4=Karcher&co4=AND&pg5=TI&s5=&co5=AND&pg6=PC&s6=&co6=AND&pg7=ALLF&s7=&co7=AND&Submit=Search&dr=all&yrop=eq&arg3=&yearRangeFirst=&yearRangeSecond=&pg8=ET&s8=All&review_format=html",
+		"url": "http://www.ams.org/mathscinet/search/publications.html?pg4=AUCN&s4=Karcher&co4=AND&pg5=TI&s5=&co5=AND&pg6=PC&s6=&co6=AND&pg7=ALLF&s7=&co7=AND&Submit=Search&dr=all&yrop=eq&arg3=&yearRangeFirst=&yearRangeSecond=&pg8=ET&s8=All&review_format=html",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.ams.org.turing.library.northwestern.edu/mathscinet/search/publdoc.html?arg3=&co4=AND&co5=AND&co6=AND&co7=AND&dr=all&pg4=AUCN&pg5=TI&pg6=PC&pg7=ALLF&pg8=ET&review_format=html&s4=Karcher&s5=&s6=&s7=&s8=All&vfpref=html&yearRangeFirst=&yearRangeSecond=&yrop=eq&r=19&mx-pid=1129800",
+		"url": "http://www.ams.org/mathscinet/search/publdoc.html?arg3=&co4=AND&co5=AND&co6=AND&co7=AND&dr=all&pg4=AUCN&pg5=TI&pg6=PC&pg7=ALLF&pg8=ET&review_format=html&s4=karcher&s5=&s6=&s7=&s8=All&vfpref=html&yearRangeFirst=&yearRangeSecond=&yrop=eq&r=1&mx-pid=2835894",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "David",
-						"lastName": "Hoffman",
+						"firstName": "Martin A.",
+						"lastName": "Grepl",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Hermann",
-						"lastName": "Karcher",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Harold",
-						"lastName": "Rosenberg",
+						"firstName": "Mark",
+						"lastName": "Kärcher",
 						"creatorType": "author"
 					}
 				],
@@ -136,22 +131,19 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "MathSciNet Snapshot",
-						"document": {
-							"location": {}
-						}
+						"title": "MathSciNet Snapshot"
 					}
 				],
-				"title": "Embedded minimal annuli in $\\bf R^3$ bounded by a pair of straight lines",
-				"publicationTitle": "Commentarii Mathematici Helvetici",
-				"journalAbbreviation": "Commentarii Mathematici Helvetici",
-				"volume": "66",
-				"date": "1991",
-				"issue": "4",
-				"pages": "599–617",
-				"ISSN": "0010-2571",
-				"DOI": "10.1007/BF02566668",
-				"url": "http://www.ams.org/mathscinet-getitem?mr=1129800",
+				"title": "Reduced basis a posteriori error bounds for parametrized linear-quadratic elliptic optimal control problems",
+				"publicationTitle": "Comptes Rendus Mathématique. Académie des Sciences. Paris",
+				"journalAbbreviation": "Comptes Rendus Mathématique. Académie des Sciences. Paris",
+				"volume": "349",
+				"date": "2011",
+				"issue": "15-16",
+				"pages": "873–877",
+				"ISSN": "1631-073X",
+				"DOI": "10.1016/j.crma.2011.07.010",
+				"url": "http://www.ams.org/mathscinet-getitem?mr=2835894",
 				"libraryCatalog": "AMS MathSciNet",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}

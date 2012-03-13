@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 6,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-12-18 15:35:05"
+	"lastUpdated": "2012-03-02 19:28:04"
 }
 
 function detectWeb(doc, url) {
@@ -58,6 +58,8 @@ function retrieveNextCOinS(needFullItems, newItems, couldUseFullItems, doc) {
 		search.setHandler("done", function() {
 			retrieveNextCOinS(needFullItems, newItems, couldUseFullItems, doc);
 		});
+		// Don't throw on error
+		search.setHandler("error", function() {});
 		// look for translators
 		search.setHandler("translators", function(obj, translators) {
 			if(translators.length) {
@@ -125,6 +127,8 @@ function completeItems(newItems, useIndices, couldUseFullItems, doc) {
 			// call next
 			completeItems(newItems, useIndices, couldUseFullItems);
 		});
+		// Don't throw on error
+		search.setHandler("error", function() {});
 		search.setHandler("translators", function(obj, translators) {
 			if(translators.length) {
 				search.setTranslator(translators);
@@ -201,7 +205,9 @@ function doExport() {
 	
 	while (item = Zotero.nextItem()) {
 		co = Zotero.Utilities.createContextObject(item, "1.0");
-		Zotero.write("<span class='Z3988' title='"+ Zotero.Utilities.htmlSpecialChars(co) +"'></span>\n");
+		if(co) {
+			Zotero.write("<span class='Z3988' title='"+ Zotero.Utilities.htmlSpecialChars(co) +"'></span>\n");
+		}
 	}
 }
 /** BEGIN TEST CASES **/
@@ -263,17 +269,23 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [
-					{}
+					{
+						"document": {
+							"location": {}
+						}
+					}
 				],
 				"publicationTitle": "Evaluation and Program Planning",
 				"volume": "34",
+				"issue": "4",
 				"ISSN": "01497189",
 				"date": "11/2011",
 				"pages": "343-352",
 				"DOI": "10.1016/j.evalprogplan.2011.04.002",
 				"url": "http://linkinghub.elsevier.com/retrieve/pii/S0149718911000449",
 				"title": "Optimizing an immersion ESL curriculum using analytic hierarchy process",
-				"libraryCatalog": "CrossRef"
+				"libraryCatalog": "CrossRef",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}

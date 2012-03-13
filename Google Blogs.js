@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2011-11-03 15:36:22"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-03-10 00:13:16"
 }
 
 /*
@@ -61,7 +61,7 @@ function doWeb(doc, url) {
 					title:"Blog Snapshot",
 					mimeType:"text/html"});
 		items[i].blogTitle = ZU.xpath(list[i], './/cite/a')[0].textContent;
-		node = ZU.xpath(list[i], './/div[@class="f kb"]')[0].textContent.match(/^(.*) by (.*)$/);
+		node = ZU.xpath(list[i], './/div[@class="f slp"]')[0].textContent.match(/^(.*) by (.*)$/);
 		if (node) {
 			items[i].date = node[1];
 			items[i].creators.push(Zotero.Utilities.cleanAuthor(node[2], "author"));
@@ -80,6 +80,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
+		"defer": true,
 		"url": "https://www.google.com/search?tbm=blg&hl=en&source=hp&biw=1024&bih=656&q=argentina&btnG=Search&gbv=2",
 		"items": "multiple"
 	}

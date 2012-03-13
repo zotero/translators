@@ -9,32 +9,32 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-30 22:50:15"
+	"lastUpdated": "2012-03-06 16:22:46"
 }
 
 /*
-    ***** BEGIN LICENSE BLOCK *****
-    
-    Copyright © 2011 Sebastian Karcher and the Center for History and New Media
-                     George Mason University, Fairfax, Virginia, USA
-                     http://zotero.org
-    
-    This file is part of Zotero.
-    
-    Zotero is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-    
-    Zotero is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Affero General Public License for more details.
-    
-    You should have received a copy of the GNU Affero General Public License
-    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
-    
-    ***** END LICENSE BLOCK *****
+	***** BEGIN LICENSE BLOCK *****
+	
+	Copyright © 2011 Sebastian Karcher and the Center for History and New Media
+					 George Mason University, Fairfax, Virginia, USA
+					 http://zotero.org
+	
+	This file is part of Zotero.
+	
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+	
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+	
+	***** END LICENSE BLOCK *****
 */
 
 function detectWeb(doc, url) {
@@ -102,6 +102,7 @@ function scrape(doc, url){
 var testCases = [
 	{
 		"type": "web",
+		"defer": true,
 		"url": "http://catalog.hathitrust.org/Search/Home?checkspelling=true&lookfor=Cervantes&type=all&sethtftonly=true&submit=Find",
 		"items": "multiple"
 	},
@@ -137,9 +138,7 @@ var testCases = [
 				"numPages": "3 p.l., 192 p.",
 				"place": "Oxford",
 				"publisher": "The Clarendon press",
-				"url": "http://catalog.hathitrust.org/Record/001050654",
-				"libraryCatalog": "Hathi Trust",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "Hathi Trust"
 			}
 		]
 	}

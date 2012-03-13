@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-10-22 15:44:59"
+	"lastUpdated": "2012-03-09 23:51:48"
 }
 
 function detectWeb(doc, url) {
@@ -201,22 +201,22 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "D. T",
+						"firstName": "D. T.",
 						"lastName": "O'Dea",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "C. N",
+						"firstName": "C. N.",
 						"lastName": "Clark",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "C. R",
+						"firstName": "C. R.",
 						"lastName": "Contaldi",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "C. J",
+						"firstName": "C. J.",
 						"lastName": "MacTavish",
 						"creatorType": "author"
 					}
@@ -242,8 +242,10 @@ var testCases = [
 				"title": "A Model For Polarised Microwave Foreground Emission From Interstellar Dust",
 				"date": "2011-07-22",
 				"url": "http://arxiv.org/abs/1107.4612",
+				"extra": "Mon. Not. R. Astron. Soc. 419, 1795-1803 (2012)",
+				"DOI": "10.1111/j.1365-2966.2011.19851.x",
 				"publicationTitle": "arXiv:1107.4612",
-				"abstractNote": "The upcoming generation of cosmic microwave background (CMB) experiments face a major challenge in detecting the weak cosmic B-mode signature predicted as a product of primordial gravitational waves. To achieve the required sensitivity these experiments must have impressive control of systematic effects and detailed understanding of the foreground emission that will influence the signal. In this paper we describe a model of foreground dust intensity and polarisation. The model includes a 3D description of the Galactic magnetic field, examining both large and small scales. We also include in the model the details of the dust density, grain alignment and the intrinsic polarisation of the emission from an individual grain. We present here Stokes parameter maps at 150 GHz and provide an on-line repository for these and additional template maps at frequencies that will be targeted by upcoming experiments such as EBEX, Spider and SPTpol.",
+				"abstractNote": "The upcoming generation of cosmic microwave background (CMB) experiments face a major challenge in detecting the weak cosmic B-mode signature predicted as a product of primordial gravitational waves. To achieve the required sensitivity these experiments must have impressive control of systematic effects and detailed understanding of the foreground emission that will influence the signal. In this paper, we present templates of the intensity and polarisation of emission from one of the main Galactic foregrounds, interstellar dust. These are produced using a model which includes a 3D description of the Galactic magnetic field, examining both large and small scales. We also include in the model the details of the dust density, grain alignment and the intrinsic polarisation of the emission from an individual grain. We present here Stokes parameter template maps at 150GHz and provide an on-line repository (http://www.imperial.ac.uk/people/c.contaldi/fgpol) for these and additional maps at frequencies that will be targeted by upcoming experiments such as EBEX, Spider and SPTpol.",
 				"libraryCatalog": "arXiv.org",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-10-20 00:53:36"
+	"lastUpdated": "2012-02-24 23:55:56"
 }
 
 function detectWeb(doc, url) {
@@ -64,32 +64,5 @@ function doWeb(doc, url) {
 	}, function() {Zotero.done();});
 	Zotero.wait();
 }/** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://www.mcu.es/webISBN/tituloDetalle.do?sidTitul=1696742&action=busquedaInicial&noValidating=true&POS=0&MAX=50&TOTAL=0&prev_layout=busquedaisbn&layout=busquedaisbn&language=es",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"firstName": "Adrian",
-						"lastName": "Fernández García",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"ISBN": "978-84-9934-054-8",
-				"title": "Argentina : causas y efectos de la crisis económica",
-				"publisher": "Tutorial Formación, S.L.L.",
-				"date": "10/2009",
-				"libraryCatalog": "Agencia del ISBN",
-				"shortTitle": "Argentina"
-			}
-		]
-	}
-]
+var testCases = []
 /** END TEST CASES **/

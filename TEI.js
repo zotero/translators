@@ -14,12 +14,12 @@
 	},
 	"displayOptions": {
 		"exportNotes": false,
-		"exportTags": false,
-		"generateXMLIds": true,
-		"fullTEIDocument": false,
-		"createCollections": false
+		"Export Tags": false,
+		"Generate XML IDs": true,
+		"Full TEI Document": false,
+		"Export Collections": false
 	},
-	"lastUpdated": "2012-01-18 12:40:00"
+	"lastUpdated": "2012-02-14 08:03:26"
 }
 
 // ********************************************************************
@@ -177,7 +177,7 @@ function generateItem(item) {
     var isAnalytic = analyticItemTypes[item.itemType];    
     var bibl = <biblStruct type={item.itemType} xmlns="http://www.tei-c.org/ns/1.0"/>;
 
-    if(Zotero.getOption("generateXMLIds")){
+    if(Zotero.getOption("Generate XML IDs")){
         if(!generatedItems[item.itemID]){ 
             var xmlid =  genXMLId(item);
             bibl.@xml::id = xmlid;
@@ -373,7 +373,7 @@ function generateItem(item) {
     }
 
     //export tags, if available
-    if(Zotero.getOption("exportTags") && item.tags && item.tags.length > 0) {
+    if(Zotero.getOption("Export Tags") && item.tags && item.tags.length > 0) {
       var tags = <note type="tags"/>
       for(var n in item.tags) {
             tags.appendChild(<note type="tag">{item.tags[n].tag}</note>);
@@ -455,7 +455,7 @@ function doExport() {
 
     var collection = Zotero.nextCollection();
     var listBibls = new Array();
-    if(Zotero.getOption("createCollections") && collection){
+    if(Zotero.getOption("Export Collections") && collection){
         var curListBibl = generateCollection(collection);
         if(curListBibl){
             listBibls.push(curListBibl);
@@ -483,7 +483,7 @@ function doExport() {
 
     var outputDocument;
 
-    if(Zotero.getOption("fullTEIDocument")){
+    if(Zotero.getOption("Full TEI Document")){
         outputDocument = generateTEIDocument(listBibls);
     }
     else{
