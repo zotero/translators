@@ -2,14 +2,14 @@
 	"translatorID": "edd87d07-9194-42f8-b2ad-997c4c7deefd",
 	"label": "MARCXML",
 	"creator": "Sebastian Karcher",
-	"target": "",
+	"target": "xml",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-12 20:09:31"
+	"lastUpdated": "2012-03-13 14:10:14"
 }
 
 function detectImport() {
