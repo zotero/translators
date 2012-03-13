@@ -9,7 +9,7 @@
 	"priority": 90,
 	"inRepository": true,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-30 20:05:00"
+	"lastUpdated": "2011-12-04 20:05:00"
 }
 
 /* CrossRef uses unixref; documentation at http://www.crossref.org/schema/documentation/unixref1.0/unixref.html */
@@ -170,6 +170,7 @@ function processCrossRef(xmlOutput) {
 		item = new Zotero.Item("report");
 		refXML = ZU.xpath(itemXML, 'c:standard_metadata', ns);
 		metadataXML = ZU.xpath(itemXML, 'c:standard_metadata', ns);
+		seriesXML = ZU.xpath(itemXML, 'c:standard_metadata', ns);
 		
 	} else if((itemXML = ZU.xpath(doiRecord, 'c:crossref/c:conference', ns)).length) {
 		item = new Zotero.Item("conferencePaper");
