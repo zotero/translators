@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-08-16 15:07:38"
+	"lastUpdated": "2012-03-14 19:02:27"
 }
 
 function detectImport() {
@@ -1552,6 +1552,8 @@ var alwaysMap = {
 
 var strings = {};
 var keyRe = /[a-zA-Z0-9\-]/;
+var keywordSplitOnSpace = true;
+var keywordDelimRe = /,\s*/;
 
 function processField(item, field, value) {
 	if(Zotero.Utilities.trim(value) == '') return null;
@@ -1648,11 +1650,11 @@ function processField(item, field, value) {
 			}
 		}
 	} else if(field == "keywords") {
-		if(value.indexOf(",") == -1) {
+		if(!value.match(keywordDelimRe) && keywordSplitOnSpace) {
 			// keywords/tags
 			item.tags = value.split(" ");
 		} else {
-			item.tags = value.split(/, ?/g);
+			item.tags = value.split(keywordDelimRe);
 		}
 	} else if (field == "comment" || field == "annote" || field == "review") {
 		item.notes.push({note:Zotero.Utilities.text2html(value)});
@@ -2146,6 +2148,13 @@ function doExport() {
 		
 		Zotero.write("\n}");
 	}
+}
+
+var exports = {
+	"doExport": doExport,
+	"doImport": doImport,
+	"keywordDelimRe": keywordDelimRe,
+	"keywordSplitOnSpace": keywordSplitOnSpace
 }
 
 /** BEGIN TEST CASES **/
