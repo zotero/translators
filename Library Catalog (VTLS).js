@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-03-11 00:02:45"
+	"lastUpdated": "2012-03-13 17:35:04"
 }
 
 function detectWeb(doc, url) {
@@ -129,29 +129,46 @@ function scrape(doc, newUris) {
 	Zotero.wait();
 } 
 /** BEGIN TEST CASES **/
-var testCases = [{
-	"type": "web",
-	"url": "http://webvirtua.ums.edu.my/cgi-bin/gw/chameleon?sessionid=2011110906595202796&skin=ums&lng=en&inst=consortium&host=10.11.50.2%2b1111%2bDEFAULT&sourcescreen=INITREQ&scant1=Peronism%20without%20Peron%20%3a%20unions,%20parties,%20and%20democracy%20in%20Argentina%20%2f%20James%20W.%20McGuire&scanu1=4&elementcount=1&t1=Peronism%20without%20Peron%20%3a%20unions,%20parties,%20and%20democracy%20in%20Argentina%20%2f%20James%20W.%20McGuire&u1=4&op1=0&pos=1&itempos=1&rootsearch=KEYWORD&function=INITREQ&search=AUTHID&authid=428069&authidu=4",
-	"items": [{
-		"itemType": "book",
-		"creators": [{
-			"firstName": "James W",
-			"lastName": "McGuire",
-			"creatorType": "author"
-		}],
-		"notes": [],
-		"tags": ["Peronism", "Trade-unions", "Political activity History", "Argentina", "Democracy", "History", "Argentina", "Argentina", "Politics and government", "1943-"],
-		"seeAlso": [],
-		"attachments": [],
-		"ISBN": "0804728313",
-		"title": "Peronism without Peron: unions, parties, and democracy in Argentina",
-		"place": "Stanford",
-		"publisher": "Stanford University Press",
-		"date": "1997",
-		"numPages": "388",
-		"callNumber": "F2849 . M34",
-		"libraryCatalog": "webvirtua.ums.edu.my Library Catalog",
-		"shortTitle": "Peronism without Peron"
-	}]
-}]
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://webvirtua.ums.edu.my/cgi-bin/gw/chameleon?sessionid=2011110906595202796&skin=ums&lng=en&inst=consortium&host=10.11.50.2%2b1111%2bDEFAULT&sourcescreen=INITREQ&scant1=Peronism%20without%20Peron%20%3a%20unions,%20parties,%20and%20democracy%20in%20Argentina%20%2f%20James%20W.%20McGuire&scanu1=4&elementcount=1&t1=Peronism%20without%20Peron%20%3a%20unions,%20parties,%20and%20democracy%20in%20Argentina%20%2f%20James%20W.%20McGuire&u1=4&op1=0&pos=1&itempos=1&rootsearch=KEYWORD&function=INITREQ&search=AUTHID&authid=428069&authidu=4",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "James W.",
+						"lastName": "McGuire",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Peronism",
+					"Trade-unions",
+					"Political activity History",
+					"Argentina",
+					"Democracy",
+					"History",
+					"Argentina",
+					"Argentina",
+					"Politics and government",
+					"1943-"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"ISBN": "0804728313",
+				"title": "Peronism without Peron: unions, parties, and democracy in Argentina",
+				"place": "Stanford",
+				"publisher": "Stanford University Press",
+				"date": "1997",
+				"numPages": "388",
+				"callNumber": "F2849 . M34",
+				"libraryCatalog": "webvirtua.ums.edu.my Library Catalog",
+				"shortTitle": "Peronism without Peron"
+			}
+		]
+	}
+]
 /** END TEST CASES **/
