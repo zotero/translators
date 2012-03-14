@@ -1,7 +1,7 @@
 {
 	"translatorID": "cde4428-5434-437f-9cd9-2281d14dbf9",
 	"label": "Ovid",
-	"creator": "Simon Kornblith and Michael Berkowitz",
+	"creator": "Simon Kornblith, Michael Berkowitz, and Ovid Technologies",
 	"target": "(gw2|asinghal|sp)[^\\/]+/ovidweb\\.cgi",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
@@ -30,7 +30,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 /*
-   This translator will only work with http://ovidsp.ovid.com and will 
+   This translator will only work with http://ovidsp.ovid.com and will
    detect citations in the following scenarios.
 
    -- On MSP (Main search page) after performing a search and at least one search
@@ -110,7 +110,7 @@ function doWeb(doc, url) {
 			}
 
 			if (!items[id]) {
-				// We can't remove 'record_type == "record-on-msp"' form condition b/c for 
+				// We can't remove 'record_type == "record-on-msp"' form condition b/c for
 				// Books records if no title then it should pick the chapter title.
 				if (record_type == "record-on-msp" || record_type == "journal-record") { // this is MSP records
 					if (title_container = doc.evaluate('.//span[@class="titles-title"]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext()) {
