@@ -1555,6 +1555,14 @@ var keyRe = /[a-zA-Z0-9\-]/;
 var keywordSplitOnSpace = true;
 var keywordDelimRe = /,\s*/;
 
+function setKeywordSplitOnSpace( val ) {
+	keywordSplitOnSpace = val;
+}
+
+function setKeywordDelimRe( val ) {
+	keywordDelimRe = val;
+}
+
 function processField(item, field, value) {
 	if(Zotero.Utilities.trim(value) == '') return null;
 	if(fieldMap[field]) {
@@ -2153,8 +2161,8 @@ function doExport() {
 var exports = {
 	"doExport": doExport,
 	"doImport": doImport,
-	"keywordDelimRe": keywordDelimRe,
-	"keywordSplitOnSpace": keywordSplitOnSpace
+	"setKeywordDelimRe": setKeywordDelimRe,
+	"setKeywordSplitOnSpace": setKeywordSplitOnSpace
 }
 
 /** BEGIN TEST CASES **/
