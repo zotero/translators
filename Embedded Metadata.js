@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-09 15:54:23"
+	"lastUpdated": "2012-03-15 15:49:17"
 }
 
 /*
@@ -306,6 +306,29 @@ function addHighwireMetadata(doc, newItem) {
 		}*/
 	}
 
+	//Deal with tags in a string
+    //we might want to look at the citation_keyword metatag later
+    if(!newItem.tags && !newItem.tags.length)
+         newItem.tags = ZU.xpath(doc, '//meta[@name="citation_keywords"]/@content').map(function(t) { return t.textContent; });
+
+  //fall back to "keywords"
+    if(!newItem.tags.length)
+         newItem.tags = ZU.xpath(doc, '//meta[@name="keywords"]/@content').map(function(t) { return t.textContent; });
+
+    //If we already have tags - run through them one by one, split where ncessary and concat them
+    //This  will deal with multiple tags, some of them comma delimited, some semicolon, some individual
+    if (newItem.tags.length) {
+        var tags = [], t;
+        for (var i in newItem.tags) {
+            t = newItem.tags[i].split(/\s*,\s*/);
+            if (newItem.tags[i].indexOf(';') == -1 && t.length > 2) {
+                tags = tags.concat(t);
+            } else {
+                tags = tags.concat(newItem.tags[i].split(/\s*;\s*/));
+            }
+        }
+        newItem.tags = tags;
+    }
 
 	//Cleanup DOI
 	if (newItem.DOI){
@@ -424,6 +447,94 @@ var testCases = [
 				"ISSN": "1548-7083",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "tools.chass.ncsu.edu"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.ajol.info/index.php/thrb/article/view/63347",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Akinwumi A.",
+						"lastName": "Akinyede",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alade",
+						"lastName": "Akintonwa",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Charles",
+						"lastName": "Okany",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Olufunsho",
+						"lastName": "Awodele",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Duro C.",
+						"lastName": "Dolapo",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Adebimpe",
+						"lastName": "Adeyinka",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ademola",
+						"lastName": "Yusuf",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"malaria",
+					"knowledge",
+					"treatment",
+					"prevention",
+					"HIV patients",
+					"Nigeria"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"itemID": "http://www.ajol.info/index.php/thrb/article/view/63347",
+				"title": "Knowledge, treatment seeking and preventive practices in respect of malaria among patients with HIV at the Lagos University Teaching Hospital",
+				"publicationTitle": "Tanzania Journal of Health Research",
+				"rights": "Copyright for articles published in this journal is retained by the journal.",
+				"date": "17/10/2011",
+				"reportType": "Text.Serial.Journal",
+				"letterType": "Text.Serial.Journal",
+				"manuscriptType": "Text.Serial.Journal",
+				"mapType": "Text.Serial.Journal",
+				"thesisType": "Text.Serial.Journal",
+				"websiteType": "Text.Serial.Journal",
+				"presentationType": "Text.Serial.Journal",
+				"postType": "Text.Serial.Journal",
+				"audioFileType": "Text.Serial.Journal",
+				"language": "en",
+				"extra": "The synergistic interaction between Human Immunodeficiency virus (HIV) disease and Malaria makes it mandatory for patients with HIV to respond appropriately in preventing and treating malaria. Such response will help to control the two diseases. This study assessed the knowledge of 495 patients attending the HIV clinic, in Lagos University Teaching Hospital, Nigeria.&nbsp; Their treatment seeking, preventive practices with regards to malaria, as well as the impact of socio &ndash; demographic / socio - economic status were assessed. Out of these patients, 245 (49.5 %) used insecticide treated bed nets; this practice was not influenced by socio &ndash; demographic or socio &ndash; economic factors.&nbsp; However, knowledge of the cause, knowledge of prevention of malaria, appropriate use of antimalarial drugs and seeking treatment from the right source increased with increasing level of education (p &lt; 0.05). A greater proportion of the patients, 321 (64.9 %) utilized hospitals, pharmacy outlets or health centres when they perceived an attack of malaria. Educational intervention may result in these patients seeking treatment from the right place when an attack of malaria fever is perceived.",
+				"volume": "13",
+				"issue": "4",
+				"DOI": "10.4314/thrb.v13i4.63347",
+				"ISSN": "0856-6496",
+				"url": "http://www.ajol.info/index.php/thrb/article/view/63347",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.ajol.info"
 			}
 		]
 	}
