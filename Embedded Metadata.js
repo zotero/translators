@@ -145,7 +145,7 @@ function detectWeb(doc, url) {
 		if(delimIndex === -1) delimIndex = tag.indexOf(':');
 		if(delimIndex === -1) delimIndex = tag.indexOf('_');
 		if(delimIndex === -1) continue;
-		
+
 		var prefix = tag.substr(0, delimIndex).toLowerCase();
 		tag = tag.toLowerCase();
 		var prop = tag[delimIndex+1].toLowerCase()+tag.substr(delimIndex+2);
@@ -159,7 +159,7 @@ function detectWeb(doc, url) {
 			}
 
 			if (!_itemType && schema === _prefixes.og && prop === "type") {
-				switch (metaTags[i].getAttribute("content")) { 
+				switch (metaTags[i].getAttribute("content")) {
 							case "video.movie":
 					case "video.episode":
 					case "video.tv_show":
@@ -308,7 +308,7 @@ function addHighwireMetadata(doc, newItem) {
 
 	//Deal with tags in a string
     //we might want to look at the citation_keyword metatag later
-    if(!newItem.tags && !newItem.tags.length)
+    if(!newItem.tags || !newItem.tags.length)
          newItem.tags = ZU.xpath(doc, '//meta[@name="citation_keywords"]/@content').map(function(t) { return t.textContent; });
 
   //fall back to "keywords"
