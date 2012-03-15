@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-16 10:55:46"
+	"lastUpdated": "2012-03-13 17:44:44"
 }
 
 function detectWeb(doc, url) {
@@ -78,7 +78,7 @@ function scrapeOne(doc) {
 								  null, XPathResult.ANY_TYPE, null).iterateNext();		
 		var abstract = doc.evaluate('//div[@class="abstract"]', doc,
 								  null, XPathResult.ANY_TYPE, null).iterateNext();
-		var author = ZU.xpathText(doc, '//meta[@name="citation_author"]/@content');
+		var authorNodes = ZU.xpath(doc, '//meta[@name="citation_author"]/@content');
 
 
 		var newUrl = url.replace(host, host+"/metadata/zotero").replace("/summary/","/").replace("/login?uri=","");
@@ -93,12 +93,28 @@ function scrapeOne(doc) {
 					delete item.notes;
 					item.notes = undefined;
 				}
-				//Muse has authors wrong in the RIS - we get the names from google metadata and use them
-				if(author){
-				author=	author.split(",")
-					for (i in author){
-					item.creators.push(ZU.cleanAuthor(author[i], "author"));
-					}
+				//Muse has authors wrong in the RIS - we get the names from google/highwire metadata and use them
+				// they're also inconsistent about comma use, so we're using the code from the Embedded Metadata translator to distinguish
+				if(authorNodes){
+					item.creators = [];
+						for(var i=0, n=authorNodes.length; i<n; i++) {
+		//make sure there are no empty authors
+		var authors = authorNodes[i].nodeValue.replace(/(;[^A-Za-z0-9]*)$/, "").split(/\s*;\s/);
+		if (authors.length == 1) {
+			/* If we get nothing when splitting by semicolon, and at least two words on
+			* either side of the comma when splitting by comma, we split by comma. */
+			var authorsByComma = authors[0].split(/\s*,\s*/);
+			if (authorsByComma.length > 1
+				&& authorsByComma[0].indexOf(" ") !== -1
+				&& authorsByComma[1].indexOf(" ") !== -1)
+				authors = authorsByComma;
+		}
+		for(var j=0, m=authors.length; j<m; j++) {
+			var author = authors[j];
+			item.creators.push(ZU.cleanAuthor(author, "author", author.indexOf(",") !== -1));
+		}
+	}
+				
 				}
 				item.attachments.splice(0);
 				item.attachments.push({document:doc, title:"Project MUSE Snapshot"});
