@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-14 19:02:27"
+	"lastUpdated": "2012-03-15 05:26:41"
 }
 
 function detectImport() {
@@ -1553,14 +1553,22 @@ var alwaysMap = {
 var strings = {};
 var keyRe = /[a-zA-Z0-9\-]/;
 var keywordSplitOnSpace = true;
-var keywordDelimRe = /,\s*/;
+var keywordDelimRe = ',\\s*';
+var keywordDelimReFlags = '';
 
 function setKeywordSplitOnSpace( val ) {
 	keywordSplitOnSpace = val;
 }
 
-function setKeywordDelimRe( val ) {
-	keywordDelimRe = val;
+function setKeywordDelimRe( val, flags ) {
+	//expect string, but it could be RegExp
+	if(typeof(val) != 'string') {
+		keywordDelimRe = val.toString().slice(1, val.toString().lastIndexOf('/'));
+		keywordDelimReFlags = val.toString().slice(val.toString().lastIndexOf('/')+1);
+	} else {
+		keywordDelimRe = val;
+		keywordDelimReFlags = flags;
+	}
 }
 
 function processField(item, field, value) {
@@ -1658,11 +1666,12 @@ function processField(item, field, value) {
 			}
 		}
 	} else if(field == "keywords") {
-		if(!value.match(keywordDelimRe) && keywordSplitOnSpace) {
+		var re = new RegExp(keywordDelimRe, keywordDelimReFlags);
+		if(!value.match(re) && keywordSplitOnSpace) {
 			// keywords/tags
 			item.tags = value.split(" ");
 		} else {
-			item.tags = value.split(keywordDelimRe);
+			item.tags = value.split(re);
 		}
 	} else if (field == "comment" || field == "annote" || field == "review") {
 		item.notes.push({note:Zotero.Utilities.text2html(value)});
@@ -2169,7 +2178,7 @@ var exports = {
 var testCases = [
 	{
 		"type": "import",
-		"input": "@article{Adams2001,\u000aauthor = {Adams, Nancy K and DeSilva, Shanaka L and Self, Steven and Salas, Guido and Schubring, Steven and Permenter, Jason L and Arbesman, Kendra},\u000afile = {:Users/heatherwright/Documents/Scientific Papers/Adams\\_Huaynaputina.pdf:pdf;::},\u000ajournal = {Bulletin of Volcanology},\u000akeywords = {Vulcanian eruptions,breadcrust,plinian},\u000apages = {493--518},\u000atitle = {{The physical volcanology of the 1600 eruption of Huaynaputina, southern Peru}},\u000avolume = {62},\u000ayear = {2001}\u000a}",
+		"input": "@article{Adams2001,\nauthor = {Adams, Nancy K and DeSilva, Shanaka L and Self, Steven and Salas, Guido and Schubring, Steven and Permenter, Jason L and Arbesman, Kendra},\nfile = {:Users/heatherwright/Documents/Scientific Papers/Adams\\_Huaynaputina.pdf:pdf;::},\njournal = {Bulletin of Volcanology},\nkeywords = {Vulcanian eruptions,breadcrust,plinian},\npages = {493--518},\ntitle = {{The physical volcanology of the 1600 eruption of Huaynaputina, southern Peru}},\nvolume = {62},\nyear = {2001}\n}",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -2223,11 +2232,6 @@ var testCases = [
 						"mimeType": "application/pdf",
 						"title": "Attachment",
 						"downloadable": true
-					},
-					{
-						"url": "file://",
-						"title": "Attachment",
-						"downloadable": true
 					}
 				],
 				"publicationTitle": "Bulletin of Volcanology",
@@ -2240,7 +2244,7 @@ var testCases = [
 	},
 	{
 		"type": "import",
-		"input": "@Book{abramowitz+stegun,\u000a author    = \"Milton {Abramowitz} and Irene A. {Stegun}\",\u000a title     = \"Handbook of Mathematical Functions with\u000a              Formulas, Graphs, and Mathematical Tables\",\u000a publisher = \"Dover\",\u000a year      =  1964,\u000a address   = \"New York\",\u000a edition   = \"ninth Dover printing, tenth GPO printing\"\u000a}\u000a\u000a@Book{Torre2008,\u000a author    = \"Joe Torre and Tom Verducci\",\u000a publisher = \"Doubleday\",\u000a title     = \"The Yankee Years\",\u000a year      =  2008,\u000a isbn      = \"0385527403\"\u000a}\u000a",
+		"input": "@Book{abramowitz+stegun,\n author    = \"Milton {Abramowitz} and Irene A. {Stegun}\",\n title     = \"Handbook of Mathematical Functions with\n              Formulas, Graphs, and Mathematical Tables\",\n publisher = \"Dover\",\n year      =  1964,\n address   = \"New York\",\n edition   = \"ninth Dover printing, tenth GPO printing\"\n}\n\n@Book{Torre2008,\n author    = \"Joe Torre and Tom Verducci\",\n publisher = \"Doubleday\",\n title     = \"The Yankee Years\",\n year      =  2008,\n isbn      = \"0385527403\"\n}\n",
 		"items": [
 			{
 				"itemType": "book",
@@ -2293,7 +2297,7 @@ var testCases = [
 	},
 	{
 		"type": "import",
-		"input": "@INPROCEEDINGS {author:06,\u000a title    = {Some publication title},\u000a author   = {First Author and Second Author},\u000a crossref = {conference:06},\u000a pages    = {330—331},\u000a}\u000a@PROCEEDINGS {conference:06,\u000a editor    = {First Editor and Second Editor},\u000a title     = {Proceedings of the Xth Conference on XYZ},\u000a booktitle = {Proceedings of the Xth Conference on XYZ},\u000a year      = {2006},\u000a month     = oct,\u000a}",
+		"input": "@INPROCEEDINGS {author:06,\n title    = {Some publication title},\n author   = {First Author and Second Author},\n crossref = {conference:06},\n pages    = {330—331},\n}\n@PROCEEDINGS {conference:06,\n editor    = {First Editor and Second Editor},\n title     = {Proceedings of the Xth Conference on XYZ},\n booktitle = {Proceedings of the Xth Conference on XYZ},\n year      = {2006},\n month     = oct,\n}",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -2307,16 +2311,6 @@ var testCases = [
 						"firstName": "Second",
 						"lastName": "Author",
 						"creatorType": "author"
-					},
-					{
-						"firstName": "First",
-						"lastName": "Editor",
-						"creatorType": "editor"
-					},
-					{
-						"firstName": "Second",
-						"lastName": "Editor",
-						"creatorType": "editor"
 					}
 				],
 				"notes": [],
@@ -2324,8 +2318,6 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"title": "Some publication title",
-				"date": "October 2006",
-				"proceedingsTitle": "Proceedings of the Xth Conference on XYZ",
 				"pages": "330—331"
 			},
 			{
@@ -2354,7 +2346,7 @@ var testCases = [
 	},
 	{
 		"type": "import",
-		"input": "@Book{hicks2001,\u000a author    = \"von Hicks, III, Michael\",\u000a title     = \"Design of a Carbon Fiber Composite Grid Structure for the GLAST\u000a              Spacecraft Using a Novel Manufacturing Technique\",\u000a publisher = \"Stanford Press\",\u000a year      =  2001,\u000a address   = \"Palo Alto\",\u000a edition   = \"1st,\",\u000a isbn      = \"0-69-697269-4\"\u000a}",
+		"input": "@Book{hicks2001,\n author    = \"von Hicks, III, Michael\",\n title     = \"Design of a Carbon Fiber Composite Grid Structure for the GLAST\n              Spacecraft Using a Novel Manufacturing Technique\",\n publisher = \"Stanford Press\",\n year      =  2001,\n address   = \"Palo Alto\",\n edition   = \"1st,\",\n isbn      = \"0-69-697269-4\"\n}",
 		"items": [
 			{
 				"itemType": "book",
@@ -2406,7 +2398,7 @@ var testCases = [
 	},
 	{
 		"type": "import",
-		"input": "@article{test-ticket1661,\u000atitle={non-braking space: ~; accented characters: {\\~n} and \\~{n}; tilde operator: \\~},\u000a} ",
+		"input": "@article{test-ticket1661,\ntitle={non-braking space: ~; accented characters: {\\~n} and \\~{n}; tilde operator: \\~},\n} ",
 		"items": [
 			{
 				"itemType": "journalArticle",
