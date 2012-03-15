@@ -9,8 +9,26 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-14 17:16:27"
+	"lastUpdated": "2012-03-15 05:17:43"
 }
+
+/**
+	Copyright (c) 2012 Aurimas Vinckevicius
+	
+	This program is free software: you can redistribute it and/or
+	modify it under the terms of the GNU Affero General Public License
+	as published by the Free Software Foundation, either version 3 of
+	the License, or (at your option) any later version.
+	
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+	Affero General Public License for more details.
+	
+	You should have received a copy of the GNU Affero General Public
+	License along with this program. If not, see
+	<http://www.gnu.org/licenses/>.
+*/
 
 function getId(doc) {
 	var onclick = ZU.xpathText(doc,
@@ -87,12 +105,19 @@ function doWeb(doc, url) {
 					document: doc }
 			];
 
+			//some sites have tags in all caps. make those lower case
+			for(var i=0, n=item.tags.length; i<n; i++) {
+				if(!(/[a-z]/).test(item.tags[i])) {
+					item.tags[i] = item.tags[i].toLowerCase();
+				}
+			}
+
 			item.complete();
 		});
 
 		translator.getTranslatorObject(function(obj) {
 			obj.setKeywordSplitOnSpace(false);
-			obj.setKeywordDelimRe(/;\s*/);
+			obj.setKeywordDelimRe(';\\s*');
 
 			obj.doImport();
 		});
@@ -120,7 +145,19 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"EQUATIONS OF STATE; WATER; THERMODYNAMIC PROPERTIES; SPECIFIC HEAT; DATA COMPILATION; REVIEWS; MEDIUM TEMPERATURE; HIGH TEMPERATURE; VERY HIGH TEMPERATURE; SCALING LAWS; HIGH PRESSURE; VERY HIGH PRESSURE; JOULETHOMSON EFFECT"
+					"equations of state",
+					"water",
+					"thermodynamic properties",
+					"specific heat",
+					"data compilation",
+					"reviews",
+					"medium temperature",
+					"high temperature",
+					"very high temperature",
+					"scaling laws",
+					"high pressure",
+					"very high pressure",
+					"joulethomson effect"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -212,7 +249,18 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"aluminium compounds; gallium compounds; III-V semiconductors; liquid phase epitaxial growth; luminescence; molecular beam epitaxial growth; red shift; semiconductor heterojunctions; semiconductor quantum wells; silicon compounds; ultraviolet spectra; wide band gap semiconductors"
+					"aluminium compounds",
+					"gallium compounds",
+					"III-V semiconductors",
+					"liquid phase epitaxial growth",
+					"luminescence",
+					"molecular beam epitaxial growth",
+					"red shift",
+					"semiconductor heterojunctions",
+					"semiconductor quantum wells",
+					"silicon compounds",
+					"ultraviolet spectra",
+					"wide band gap semiconductors"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -260,7 +308,12 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"telerobotics; manipulators; nonlinear control systems; impedance matrix; stability; multivariable control systems"
+					"telerobotics",
+					"manipulators",
+					"nonlinear control systems",
+					"impedance matrix",
+					"stability",
+					"multivariable control systems"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -308,7 +361,13 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"circular polarisation; dual-layer square-ring microstrip antennas; axial ratio bandwidth; sequential rotation; wide axial ratio beamwidth; finite ground plane; right-hand CP gain"
+					"circular polarisation",
+					"dual-layer square-ring microstrip antennas",
+					"axial ratio bandwidth",
+					"sequential rotation",
+					"wide axial ratio beamwidth",
+					"finite ground plane",
+					"right-hand CP gain"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -375,7 +434,16 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"gigacount-second photon detection; avalanche photodiodes; telecom wavelengths; thermoelectrically-cooled semiconductor diode; photon flux; detection sensitivity; APD; high-bit-rate quantum information applications; frequency 2 GHz; InGaAs"
+					"gigacount-second photon detection",
+					"avalanche photodiodes",
+					"telecom wavelengths",
+					"thermoelectrically-cooled semiconductor diode",
+					"photon flux",
+					"detection sensitivity",
+					"apd",
+					"high-bit-rate quantum information applications",
+					"frequency 2 GHz",
+					"InGaAs"
 				],
 				"seeAlso": [],
 				"attachments": [
