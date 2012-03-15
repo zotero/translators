@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-13 17:25:28"
+	"lastUpdated": "2012-03-15 14:48:19"
 }
 
 /*
@@ -54,6 +54,10 @@ function detectWeb(doc, url) {
 		}
 		if (recordType) {
 			recordType = recordType.textContent.trim();
+		}
+		//hack for NYTs, which misses crucial data.
+		if (ZU.xpathText(doc, '//div[@class="display_record_indexing_fieldname" and contains(text(),"Database")]/following-sibling::div[@class="display_record_indexing_data"]').indexOf("The New York Times") !== -1){
+			sourceType ="Historical Newspapers";
 		}
 		var type = getItemType(sourceType, documentType, recordType)
 
@@ -185,6 +189,9 @@ function scrape(doc) {
 		case "First Page":
 			item.pages = value;
 			break;
+		case "First page":
+			item.pages = value;
+			break;
 		case "Number of pages":
 			item.numPages = value;
 			break;
@@ -254,6 +261,12 @@ function scrape(doc) {
 			item.rights = value;
 			break;
 		case "Database":
+			//NYTs hack
+			if (value.indexOf("The New York Times")!== -1){
+				item.publication = "The New York Times"
+				//hack for NYTs, which misses crucial data.
+				sourceType ="Historical Newspapers";
+			}
 			value = value.replace(/^\d\s+databasesView list\s+Hide list/, '');
 			value = value.replace(/(ProQuest.*)(ProQuest.*)/, '$1; $2');
 			item.libraryCatalog = value;
@@ -290,6 +303,7 @@ function scrape(doc) {
 			Zotero.debug("Discarding unknown field '" + field + "' => '" + value + "'");
 		}
 	}
+	Z.debug("sourceType: " + sourceType)
 	item.itemType = getItemType(sourceType, documentType, recordType)
 
 	var abs = ZU.xpathText(doc, '//div[contains(@id, "abstract_field") or contains(@id, "abstractSummary")]//p');
@@ -314,7 +328,17 @@ function scrape(doc) {
 	if ((!item.date || item.date.match(/^\d{4}$/)) && fullerDate) {
 		item.date = fullerDate[1];
 	}
-
+	//Getting authors for NYT
+	if (!item.creators.length){
+		var author = ZU.xpathText(doc, '//span[@class="titleAuthorETC small"]/a').replace(/By\s*/, "").replace(/Special\s+to.+/, "");
+		var authors = author.split(/ [Aa][Nn][Dd] /);
+		for (var i in authors){
+			if (authors[i] == authors[i].toUpperCase()) {
+				item.creators[i] = ZU.cleanAuthor(ZU.capitalizeTitle(authors[i].toLowerCase(), true), "author");
+			}
+			else item.creators[i] = ZU.cleanAuthor(authors[i], "author");
+		}
+	}
 	if (!item.itemType && item.libraryCatalog && item.libraryCatalog.match(/Historical Newspapers/)) item.itemType = "newspaperArticle";
 
 	if (!item.itemType) item.itemType = "journalArticle";
@@ -602,6 +626,56 @@ var testCases = [
 				"URL": "http://search.proquest.com/docview/213445241",
 				"proceedingsTitle": "Peace Research",
 				"shortTitle": "Peacemaking"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://search.proquest.com/hnpnewyorktimes/docview/122485317/abstract/1357D8A4FC136DF28E3/11?accountid=12861",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "F. Stephen",
+						"lastName": "Larrabee",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "R. G.",
+						"lastName": "Livingston",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "ProQuest Record",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "ProQuest PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "ProQuest PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"place": "New York, N.Y.",
+				"title": "Rethinking Policy on East Germany",
+				"pages": "A23",
+				"date": "Aug 22, 1984",
+				"publisher": "New York, N.Y.",
+				"ISSN": "03624331",
+				"callNumber": "122485317",
+				"rights": "Copyright New York Times Company Aug 22, 1984",
+				"publication": "The New York Times",
+				"libraryCatalog": "ProQuest Historical Newspapers: The New York Times (1851-2008)",
+				"abstractNote": "For some months now, a gradual thaw has been in the making between East Germany and West Germany. So far, the United States has paid scant attention -- an attitude very much in keeping with our neglect of East Germany throughout the postwar period. We should reconsider this policy before things much further -- and should in particular begin to look more closely at what is going on in East Germany.",
+				"URL": "http://search.proquest.com/hnpnewyorktimes/docview/122485317/abstract/1357D8A4FC136DF28E3/11?accountid=12861"
 			}
 		]
 	}
