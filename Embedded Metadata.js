@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-15 15:49:17"
+	"lastUpdated": "2012-03-16 01:50:38"
 }
 
 /*
@@ -46,7 +46,9 @@ var HIGHWIRE_MAPPINGS = {
 	"citation_book_title":"bookTitle",
 	"citation_volume":"volume",
 	"citation_issue":"issue",
+	"citation_series_title":"series",
 	"citation_conference_title":"conferenceName",
+	"citation_conference":"conferenceName",
 	"citation_dissertation_institution":"university",
 	"citation_technical_report_institution":"institution",
 	"citation_technical_report_number":"number",
@@ -106,10 +108,20 @@ function getPrefixes(doc) {
 	}
 }
 
+function getContentText(doc, name) {
+	return ZU.xpathText(doc, '//meta[substring(@name, string-length(@name)-'
+							+ (name.length - 1) + ')="'+ name +'"]/@content');
+}
+
+function getContent(doc, name) {
+	return ZU.xpath(doc, '//meta[substring(@name, string-length(@name)-'
+							+ (name.length - 1) + ')="'+ name +'"]/@content');
+}
+
 function processFields(doc, item, fieldMap) {
 	for(var metaName in fieldMap) {
 		var zoteroName = fieldMap[metaName];
-		var value = ZU.xpathText(doc, '//meta[@name="'+metaName+'"]/@content');
+		var value = getContentText(doc, metaName);
 		if(value && value.trim()) {
 			item[zoteroName] = ZU.trimInternal(value);
 		}
@@ -160,7 +172,7 @@ function detectWeb(doc, url) {
 
 			if (!_itemType && schema === _prefixes.og && prop === "type") {
 				switch (metaTags[i].getAttribute("content")) {
-							case "video.movie":
+					case "video.movie":
 					case "video.episode":
 					case "video.tv_show":
 					case "video.other":
@@ -176,14 +188,25 @@ function detectWeb(doc, url) {
 						return "webpage";
 				}
 			}
-		} else if(tag === "citation_journal_title") {
-			_itemType = "journalArticle";
-		} else if(tag === "citation_technical_report_institution") {
-			_itemType = "report";
-		} else if(tag === "citation_conference_title") {
-			_itemType = "conferencePaper";
-		} else if(tag === "citation_book_title") {
-			_itemType = "bookSection";
+		} else {
+			var shortTag = tag.slice(tag.lastIndexOf('citation_'));
+			switch(shortTag) {
+				case "citation_journal_title":
+					return _itemType = "journalArticle";
+				case "citation_technical_report_institution":
+					return _itemType = "report";
+				case "citation_conference_title":
+				case "citation_conference":
+					return _itemType = "conferencePaper";
+				case "citation_book_title":
+					return _itemType = "bookSection";
+				case "citation_dissertation_institution":
+					return _itemType = "thesis";
+				case "citation_title":		//fall back to journalArticle, since this is quite common
+				case "citation_series_title":	//possibly journal article, though it could be book
+					_itemType = "journalArticle";
+					break;
+			}
 		}
 	}
 
@@ -253,7 +276,8 @@ function addHighwireMetadata(doc, newItem) {
 	// HighWire metadata
 	processFields(doc, newItem, HIGHWIRE_MAPPINGS);
 
-	var authorNodes = ZU.xpath(doc, '//meta[@name="citation_author" or @name="citation_authors"]/@content');
+	var authorNodes = getContent(doc, 'citation_author')
+						.concat(getContent(doc, 'citation_authors'));
 	//save rdfCreators for later
 	var rdfCreators = newItem.creators;
 	newItem.creators = [];
@@ -307,28 +331,39 @@ function addHighwireMetadata(doc, newItem) {
 	}
 
 	//Deal with tags in a string
-    //we might want to look at the citation_keyword metatag later
-    if(!newItem.tags || !newItem.tags.length)
-         newItem.tags = ZU.xpath(doc, '//meta[@name="citation_keywords"]/@content').map(function(t) { return t.textContent; });
+	//we might want to look at the citation_keyword metatag later
+	if(!newItem.tags || !newItem.tags.length)
+		 newItem.tags = getContent(doc, 'citation_keywords')
+		 					.map(function(t) { return t.textContent; });
 
-  //fall back to "keywords"
-    if(!newItem.tags.length)
-         newItem.tags = ZU.xpath(doc, '//meta[@name="keywords"]/@content').map(function(t) { return t.textContent; });
+	//fall back to "keywords"
+	if(!newItem.tags.length)
+		 newItem.tags = ZU.xpath(doc, '//meta[@name="keywords"]/@content')
+		 					.map(function(t) { return t.textContent; });
 
-    //If we already have tags - run through them one by one, split where ncessary and concat them
-    //This  will deal with multiple tags, some of them comma delimited, some semicolon, some individual
-    if (newItem.tags.length) {
-        var tags = [], t;
-        for (var i in newItem.tags) {
-            t = newItem.tags[i].split(/\s*,\s*/);
-            if (newItem.tags[i].indexOf(';') == -1 && t.length > 2) {
-                tags = tags.concat(t);
-            } else {
-                tags = tags.concat(newItem.tags[i].split(/\s*;\s*/));
-            }
-        }
-        newItem.tags = tags;
-    }
+	/**If we already have tags - run through them one by one,
+	 * split where ncessary and concat them.
+	 * This  will deal with multiple tags, some of them comma delimited,
+	 * some semicolon, some individual
+	 */
+	if (newItem.tags.length) {
+		var tags = [], t;
+		for (var i in newItem.tags) {
+			t = newItem.tags[i].split(/\s*,\s*/);
+			if (newItem.tags[i].indexOf(';') == -1 && t.length > 2) {
+				tags = tags.concat(t);
+			} else {
+				tags = tags.concat(newItem.tags[i].split(/\s*;\s*/));
+			}
+		}
+		newItem.tags = tags;
+	}
+
+	//We can try getting abstract from 'description'
+	if(!newItem.abstractNote) {
+		newItem.abstractNote = ZU.trimInternal(
+			ZU.xpathText(doc, '//meta[@name="description"]/@content') || '');
+	}
 
 	//Cleanup DOI
 	if (newItem.DOI){
@@ -337,9 +372,9 @@ function addHighwireMetadata(doc, newItem) {
 
 	//sometimes RDF has more info, let's not drop it
 	var rdfPages = (newItem.pages)? newItem.pages.split(/\s*-\s*/) : new Array();
-	var firstpage = ZU.xpathText(doc, '//meta[@name="citation_firstpage"]/@content') ||
+	var firstpage = getContentText(doc, 'citation_firstpage') ||
 					rdfPages[0];
-	var lastpage = ZU.xpathText(doc, '//meta[@name="citation_lastpage"]/@content') ||
+	var lastpage = getContentText(doc, 'citation_lastpage') ||
 					rdfPages[1];
 	if(firstpage && ( firstpage = firstpage.trim() )) {
 		newItem.pages = firstpage +
@@ -348,15 +383,16 @@ function addHighwireMetadata(doc, newItem) {
 
 
 	//prefer ISSN over eISSN
-	var issn = ZU.xpathText(doc, '//meta[@name="citation_issn"]/@content') ||
-			ZU.xpathText(doc, '//meta[@name="citation_eIssn"]/@content');
+	var issn = getContentText(doc, 'citation_issn') ||
+			getContentText(doc, 'citation_eIssn');
 
 	if(issn) newItem.ISSN = issn;
 
 	//This may not always yield desired results
 	//i.e. if there is more than one pdf attachment (not common)
-	var pdfURL = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"][1]/@content');
-	if(pdfURL) {
+	var pdfURL = getContent(doc, 'citation_pdf_url');
+	if(pdfURL.length) {
+		pdfURL = pdfURL[0].textContent;
 		//delete any pdf attachments if present
 		//would it be ok to just delete all attachments??
 		for(var i=0, n=newItem.attachments.length; i<n; i++) {
@@ -442,9 +478,10 @@ var testCases = [
 				"extra": "Este trabajo se propone realizar un análisis de las   relaciones de género y clase a través de un estudio de caso: la “Huelga de   los Conventillos” de la fábrica textil Gratry en 1936, que se extendió por   más de tres meses, pasando casi inadvertida, sin embargo, para la   investigación histórica. Siendo la textil una rama de industria con una   mayoría de mano de obra femenina, el caso de la casa Gratry, donde el 60% de   los 800 obreros eran mujeres, aparece como ejemplar para la observación de la   actividad de las mujeres en conflicto.   En el trabajo se analiza el rol de las trabajadoras en   la huelga, su participación política, sus formas de organización y   resistencia, haciendo eje en las determinaciones de género y de clase que son   abordadas de manera complementaria e interrelacionada, así como el complejo   entramado de tensiones y solidaridades que éstas generan. De éste modo, se   pretende ahondar en la compleja conformación de una identidad obrera   femenina, a la vez que se discute con aquella mirada historiográfica tradicional   que ha restado importancia a la participación de la mujer en el conflicto   social. Esto se realizará a través de la exploración de una serie de   variables: las relaciones inter-género e inter-clase (fundamentalmente el   vínculo entre las trabajadoras y la patronal masculina), inter-género e   intra-clase (la relación entre trabajadoras y trabajadores), intra-género e   inter-clase (los lazos entre las trabajadoras y las vecinas comerciantes del   barrio), intra-género e intra-clase (relaciones de solidaridad entre   trabajadoras en huelga, y de antagonismo entre huelguistas y “carneras”).   Para ello se trabajó un corpus documental que incluye   información de tipo cuantitativa (las estadísticas del Boletín Informativo   del Departamento Nacional del Trabajo), y cualitativa: periódicos obreros   –fundamentalmente  El Obrero Textil , órgano gremial de la Unión   Obrera Textil,  Semanario de la CGT-Independencia  (órgano de   la Confederación General del Trabajo (CGT)-Independencia) y  La   Vanguardia  (periódico del Partido Socialista), entre otros, y   entrevistas orales a vecinas de Nueva Pompeya y familiares de trabajadoras de   la fábrica Gratry. Se desarrollará una metodología cuali-cuantitativa para el   cruce de estas fuentes.",
 				"volume": "9",
 				"issue": "1",
-				"url": "http://tools.chass.ncsu.edu/open_journal/index.php/acontracorriente/article/view/174",
+				"abstractNote": "\"La Huelga de los Conventillos\", Buenos Aires, Nueva Pompeya, 1936. Un aporte a los estudios sobre género y clase",
 				"pages": "1-37",
 				"ISSN": "1548-7083",
+				"url": "http://tools.chass.ncsu.edu/open_journal/index.php/acontracorriente/article/view/174",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "tools.chass.ncsu.edu"
 			}
@@ -531,10 +568,134 @@ var testCases = [
 				"volume": "13",
 				"issue": "4",
 				"DOI": "10.4314/thrb.v13i4.63347",
+				"abstractNote": "Knowledge, treatment seeking and preventive practices in respect of malaria among patients with HIV at the Lagos University Teaching Hospital",
 				"ISSN": "0856-6496",
 				"url": "http://www.ajol.info/index.php/thrb/article/view/63347",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.ajol.info"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://scholarworks.umass.edu/climate_nuclearpower/2011/nov19/34/",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"creators": [
+					{
+						"firstName": "Peter",
+						"lastName": "Somssich",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "Session F: Contributed Oral Papers – F2: Energy, Climate, Nuclear Medicine: Reducing Energy Consumption and CO2 One Street Lamp at a Time",
+				"date": "2011",
+				"conferenceName": "Climate Change and the Future of Nuclear Power",
+				"abstractNote": "Why wait for federal action on incentives to reduce energy use and address Greenhouse Gas (GHG) reductions (e.g. CO2), when we can take personal actions right now in our private lives and in our communities? One such initiative by private citizens working with Portsmouth NH officials resulted in the installation of energy reducing lighting products on Court St. and the benefits to taxpayers are still coming after over 4 years of operation. This citizen initiative to save money and reduce CO2 emissions, while only one small effort, could easily be duplicated in many towns and cities. Replacing old lamps in just one street fixture with a more energy efficient (Non-LED) lamp has resulted after 4 years of operation ($\\sim $15,000 hr. life of product) in real electrical energy savings of $>$ {\\$}43. and CO2 emission reduction of $>$ 465 lbs. The return on investment (ROI) was less than 2 years. This is much better than any financial investment available today and far safer. Our street only had 30 such lamps installed; however, the rest of Portsmouth (population 22,000) has at least another 150 street lamp fixtures that are candidates for such an upgrade. The talk will also address other energy reduction measures that green the planet and also put more green in the pockets of citizens and municipalities.",
+				"url": "http://scholarworks.umass.edu/climate_nuclearpower/2011/nov19/34/",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "scholarworks.umass.edu",
+				"shortTitle": "Session F"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://scholarworks.umass.edu/lov/vol2/iss1/2/",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Bonnie D.",
+						"lastName": "Newsom",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jamie",
+						"lastName": "Bissonette-Lewey",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Wabanaki",
+					"Bounty Proclamations",
+					"Decolonization"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "Wabanaki Resistance and Healing: An Exploration of the Contemporary Role of an Eighteenth Century Bounty Proclamation in an Indigenous Decolonization Process",
+				"date": "2012",
+				"publicationTitle": "Landscapes of Violence",
+				"volume": "2",
+				"issue": "1",
+				"abstractNote": "The purpose of this paper is to examine the contemporary role of an eighteenth century bounty proclamation issued on the Penobscot Indians of Maine. We focus specifically on how the changing cultural context of the 1755 Spencer Phips Bounty Proclamation has transformed the document from serving as a tool for sanctioned violence to a tool of decolonization for the Indigenous peoples of Maine. We explore examples of the ways indigenous and non-indigenous people use the Phips Proclamation to illustrate past violence directed against Indigenous peoples. This exploration is enhanced with an analysis of the re-introduction of the Phips Proclamation using concepts of decolonization theory.",
+				"pages": "2",
+				"ISSN": "1947-508X",
+				"url": "http://scholarworks.umass.edu/lov/vol2/iss1/2/",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "scholarworks.umass.edu",
+				"shortTitle": "Wabanaki Resistance and Healing"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://scholarworks.umass.edu/open_access_dissertations/508/",
+		"items": [
+			{
+				"itemType": "thesis",
+				"creators": [
+					{
+						"firstName": "Alan Scott",
+						"lastName": "Carlin",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Agents",
+					"Dec-POMDP",
+					"MDP",
+					"Meta-reasoning",
+					"Multiagent",
+					"Partial Observability"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "Decision-Theoretic Meta-reasoning in Partially Observable and Decentralized Settings",
+				"date": "2012",
+				"university": "University of Massachusetts - Amherst",
+				"abstractNote": "This thesis examines decentralized meta-reasoning. For a single agent or multiple agents, it may not be enough for agents to compute correct decisions if they do not do so in a timely or resource efficient fashion. The utility of agent decisions typically increases with decision quality, but decreases with computation time. The reasoning about one's computation process is referred to as meta-reasoning. Aspects of meta-reasoning considered in this thesis include the reasoning about how to allocate computational resources, including when to stop one type of computation and begin another, and when to stop all computation and report an answer. Given a computational model, this translates into computing how to schedule the basic computations that solve a problem. This thesis constructs meta-reasoning strategies for the purposes of monitoring and control in multi-agent settings, specifically settings that can be modeled by the Decentralized Partially Observable Markov Decision Process (Dec-POMDP). It uses decision theory to optimize computation for efficiency in time and space in communicative and non-communicative decentralized settings. Whereas base-level reasoning describes the optimization of actual agent behaviors, the meta-reasoning strategies produced by this thesis dynamically optimize the computational resources which lead to the selection of base-level behaviors.",
+				"url": "http://scholarworks.umass.edu/open_access_dissertations/508/",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "scholarworks.umass.edu"
 			}
 		]
 	}
