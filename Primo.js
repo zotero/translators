@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-01-11 09:09:04"
+	"lastUpdated": "2012-03-16 16:19:17"
 }
 
 /*
@@ -21,21 +21,16 @@ Oxford Libraries (http://solo.ouls.ox.ac.uk/)
 */
 
 function detectWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-			if (prefix == 'x') return namespace; else return null;
-		} : null;
-		
-		if (doc.evaluate('//span[@class="results_corner EXLResultsTitleCorner"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) { 
+		if (doc.evaluate('//span[@class="results_corner EXLResultsTitleCorner"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext() ) { 
 			 return 'multiple';
 		}
-		else if (doc.evaluate('//div[@class="EXLContent EXLBriefDisplay"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) { 
+		else if (doc.evaluate('//div[@class="EXLContent EXLBriefDisplay"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext() ) { 
 			 return 'multiple';
 		}
-		else if (doc.evaluate('//div[@class="results2 EXLFullResultsHeader"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) { 
+		else if (doc.evaluate('//div[@class="results2 EXLFullResultsHeader"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext() ) { 
 			return 'book';
 		}
-		else if (doc.evaluate('//div[@class="EXLContent EXLFullDisplay"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) { 
+		else if (doc.evaluate('//div[@class="EXLContent EXLFullDisplay"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext() ) { 
 			return 'book';
 		}
 }
@@ -43,10 +38,6 @@ function detectWeb(doc, url) {
 // There is code for handling RIS, but let's stick with PNX for now.
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-			if (prefix == 'x') return namespace; else return null;
-		} : null;
 	var links = new Array();
 	
 	if (detectWeb(doc,url) == 'multiple') {
@@ -54,17 +45,17 @@ function doWeb(doc, url) {
 			
 			var linkIterator = "";
 			var titleIterator = "";
-			if (doc.evaluate('//h2[contains(@class, "EXLResultTitle")]/a/@href', doc, nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null).snapshotLength == 0)
+			if (doc.evaluate('//h2[contains(@class, "EXLResultTitle")]/a/@href', doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null).snapshotLength == 0)
 			{
 				// Primo v2
-				linkIterator = doc.evaluate('//div[contains(@class, "title")]/a/@href', doc, nsResolver, XPathResult.ANY_TYPE, null);
-				titleIterator = doc.evaluate('//div[contains(@class, "title")]/a/span', doc, nsResolver, XPathResult.ANY_TYPE, null);
+				linkIterator = doc.evaluate('//div[contains(@class, "title")]/a/@href', doc, null, XPathResult.ANY_TYPE, null);
+				titleIterator = doc.evaluate('//div[contains(@class, "title")]/a/span', doc, null, XPathResult.ANY_TYPE, null);
 			}
 			else
 			{
 				// Primo v3
-				linkIterator = doc.evaluate('//h2[contains(@class, "EXLResultTitle")]/a/@href', doc, nsResolver, XPathResult.ANY_TYPE, null);
-				titleIterator = doc.evaluate('//h2[contains(@class, "EXLResultTitle")]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+				linkIterator = doc.evaluate('//h2[contains(@class, "EXLResultTitle")]/a/@href', doc, null, XPathResult.ANY_TYPE, null);
+				titleIterator = doc.evaluate('//h2[contains(@class, "EXLResultTitle")]/a', doc, null, XPathResult.ANY_TYPE, null);
 			}
 
 			
@@ -78,24 +69,39 @@ function doWeb(doc, url) {
 					var title = Zotero.Utilities.trimInternal(title.textContent);
 					items[xmlLink] = title;
 				}
-				items = Zotero.selectItems(items);
-				for(var link in items) {
-					links.push(link);
-				}
+				
+				Zotero.selectItems(items, function (items) {
+					if (!items) {
+						return true;
+					}
+					for (var i in items) {
+						links.push(i);
+					}
+					//Z.debug(links)
+					ZU.doGet(links, scrape, function () {
+						Zotero.done();
+					});
+					Zotero.wait();
+				});
+				
 			} catch(e) {
 				Zotero.debug("Search results contained zero items. "+e);
 				return;
 			}
 
 	} else {
-		links.push(url+'&showPnx=true');
+		links = url + '&showPnx=true';
+		Zotero.Utilities.doGet(links, scrape, function () {
+			Zotero.done();
+		});
 	}
+}
+	//Zotero.Utilities.HTTP.doGet(links, function(text) {
 	
-	Zotero.Utilities.HTTP.doGet(links, function(text) {
+	function scrape(text){
 		Z.debug(text);
 		var parser = new DOMParser();
 		var doc = parser.parseFromString(text, "text/xml");
-		
 		itemType = ZU.xpathText(doc, '//display/type');
 		if ((itemType == 'book')) {
 			var item = new Zotero.Item("book");
@@ -103,7 +109,17 @@ function doWeb(doc, url) {
 			var item = new Zotero.Item("audioRecording");
 		} else if (itemType == 'video') {
 			var item = new Zotero.Item("videoRecording");
-		} else {
+		} else if (itemType == 'report') {
+			var item = new Zotero.Item("report");
+		} else if (itemType == 'webpage') {
+			var item = new Zotero.Item("webpage");
+		} else if (itemType == 'article') {
+			var item = new Zotero.Item("articleJournal");
+		} else if (itemType == 'thesis') {
+			var item = new Zotero.Item("thesis");
+		} else if (itemType == 'map') {
+			var item = new Zotero.Item("map");
+		}else {
 			var item = new Zotero.Item("document");
 		}
 		item.title = ZU.xpathText(doc, '//display/title');
@@ -111,39 +127,56 @@ function doWeb(doc, url) {
 		var creators;
 		var contributors;
 		if (ZU.xpathText(doc, '//display/creator')) {
-			creators = ZU.xpathText(doc, '//display/creator').replace(/\d{4}-(\d{4})?/, '').split("; ");
+			creators = ZU.xpath(doc, '//display/creator'); 
 		}
 		
 		if (ZU.xpathText(doc, '//display/contributor')) {
-			contributors = ZU.xpathText(doc, '//display/contributor').replace(/\d{4}-(\d{4})?/, '').split("; ");
+			contributors = ZU.xpath(doc, '//display/contributor'); 
 		}
 		
 		if (!creators && contributors) { // <creator> not available using <contributor> as author instead
 			creators = contributors;
 			contributors = null;
 		}
-		for (creator in creators) {
-			if (creators[creator]) {
-				item.creators.push(Zotero.Utilities.cleanAuthor(creators[creator], "author", true));
+		
+		for (i in creators) {
+			if (creators[i]) {
+				var creator  = creators[i].textContent.split(/\s*;\s*/);
+				for (j in creator){
+					creator[j] = creator[j].replace(/\d{4}-(\d{4})?/g, '')
+					item.creators.push(Zotero.Utilities.cleanAuthor(creator[j], "author", true));
+				}			
 			}
 		}
 		
-		for (contributor in contributors) {
-			if (contributors[contributor]) {
-				item.creators.push(Zotero.Utilities.cleanAuthor(contributors[contributor], "contributor"));
+		for (i in contributors) {
+			if (contributors[i]) {
+				var contributor = contributors[i].textContent.split(/\s*;\s*/);
+				for (j in contributor){
+				contributor[j] = contributor[j].replace(/\d{4}-(\d{4})?/g, '')
+				item.creators.push(Zotero.Utilities.cleanAuthor(contributor[j], "contributor", true));
+				}			
+			}
+		}
+		//PNX doesn't do well with institutional authors; This isn't perfect, but it helps:
+		for (i in item.creators){
+			if (!item.creators[i].firstName){
+				item.creators[i].fieldMode=1;
 			}
 		}
 		
+		if (ZU.xpathText(doc, '//display/publisher') !== null){
 		var pubplace = ZU.xpathText(doc, '//display/publisher').split(" : ");
+		}
 		if (pubplace && pubplace[1]) {
-			item.place = pubplace[0];
-			item.publisher = pubplace[1];
+			item.place = pubplace[0].replace(/,\s*c?\d+|[\(\)\[\]]|(\.\s*)?/g, "");
+			item.publisher = pubplace[1].replace(/,\s*c?\d+|[\(\)\[\]]|(\.\s*)?/g, "");
 		} else if (pubplace) {
-			item.publisher = pubplace[0];
+			item.publisher = pubplace[0].replace(/,\s*c?\d+|[\(\)\[\]]|(\.\s*)?/g, "");
 		}
 		
 		var date;
-		if (date = ZU.xpathText(doc, '//display/creationdate')) {
+		if (date = ZU.xpathText(doc, '//display/creationdate|//search/creationdate')) {
 			item.date = date.match(/\d+/)[0];
 		}
 		
@@ -157,8 +190,11 @@ function doWeb(doc, url) {
 		}
 		
 		var pages;
-		if (pages = ZU.xpathText(doc, '//display/format').match(/(\d+)/)) {
-			item.pages = item.numPages = pages[0];
+		if (pages = ZU.xpathText(doc, '//display/format')) {
+			if (pages.match(/[0-9]+/)) {
+				pages = pages.replace(/[\(\)\[\]]/g, "").match(/[0-9]+/);
+				item.pages = item.numPages = pages[0];
+			}
 		}
 	
 		// The identifier field is supposed to have standardized format, but
@@ -193,10 +229,7 @@ function doWeb(doc, url) {
 		
 		item.complete();
 		
-	}, function() {Zotero.done();});
-	Zotero.wait();
-
-}
+	}
 
 /* The next two functions are logic that could be bundled away into the translator toolkit. */
 
@@ -849,123 +882,5 @@ MAP_ISO6391_ISO6392 = {'aar' : 'Afar',
 	return ((lang = MAP_ISO6391_ISO6392[code]) !== null) ? lang : false;
 }
 /** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://solo.bodleian.ox.ac.uk/primo_library/libweb/action/display.do?dscnt=1&elementId=0&recIdxs=0&frbrVersion=&vl(103770091UI1)=all_items&scp.scps=scope%3A(NET)%2Cscope%3A(OX)&tab=local&dstmp=1321207982311&srt=rank&mode=Basic&indx=1&tb=t&renderMode=poppedOut&vl(freeText0)=witchcraft%20and%20whigs&fn=search&vid=OXVU1&vl(105258007UI0)=any&frbg=&displayMode=full&ct=display&dum=true&recIds=oxfaleph016861820&vl(1UIStartWith0)=contains&doc=oxfaleph016861820&tabs=detailsTab&fromLogin=true",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"firstName": "Andrew",
-						"lastName": "Sneddon",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"Hutchinson, Francis, 1661-1739.",
-					"Bishops England Biography.",
-					"Bishops Ireland Biography.",
-					"Church and state England.",
-					"Church and state Ireland.",
-					"Witchcraft England History.",
-					"Witchcraft Ireland History.",
-					"England Church history 17th century.",
-					"England Church history 18th century.",
-					"Ireland Church history.",
-					"Poblacht na h'Éireann",
-					"Írország",
-					"Irlande",
-					"Irlanda",
-					"Eire",
-					"Irland",
-					"Republic of Ireland",
-					"Irish Republic",
-					"Inghilterra",
-					"Inglaterra",
-					"Anglii͡a",
-					"Engeland",
-					"Angleterre",
-					"Sorcery",
-					"Black art (Witchcraft)",
-					"State and church",
-					"Separation of church and state",
-					"Christianity and state",
-					"Orders, Major",
-					"Metropolitans",
-					"Archbishops",
-					"Clergy Major orders",
-					"Major orders",
-					"F. H., M.A. (Francis Hutchinson), 1661-1739",
-					"Francis, Bishop of Down and Connor, 1661-1739",
-					"Down and Connor, Francis, Bishop of, 1661-1739",
-					"H., F., M.A. (Francis Hutchinson), 1661-1739"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Witchcraft and whigs : the life of Bishop Francis Hutchinson, 1660-1739",
-				"place": "Manchester",
-				"publisher": "Manchester University Press",
-				"date": "2008",
-				"language": "English",
-				"pages": "219",
-				"libraryCatalog": "Primo",
-				"shortTitle": "Witchcraft and whigs"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://solo.bodleian.ox.ac.uk/primo_library/libweb/action/search.do?dscnt=0&vl(105258007UI0)=any&vl(103770091UI1)=all_items&scp.scps=scope%3A%28NET%29%2Cscope%3A%28OX%29&frbg=&tab=local&dstmp=1321208072496&srt=rank&ct=search&mode=Basic&dum=true&tb=t&indx=1&vl(1UIStartWith0)=contains&vl(freeText0)=witchcraft&fn=search&vid=OXVU1",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://catalogue.unice.fr/primo_library/libweb/action/search.do?dscnt=0&vl(14793452UI1)=all_items&frbg=&scp.scps=&tab=default_tab&dstmp=1321209523561&srt=rank&ct=search&mode=Basic&dum=true&indx=1&vl(9521613UI0)=any&vl(freeText0)=labor&vid=UNS&fn=search",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://catalogue.unice.fr/primo_library/libweb/action/display.do?tabs=detailsTab&ct=display&fn=search&doc=sc_aleph_uns01000176747&indx=1&recIds=sc_aleph_uns01000176747&recIdxs=0&elementId=0&renderMode=poppedOut&displayMode=full&frbrVersion=&fctN=facet_creator&dscnt=0&vl(14793452UI1)=all_items&scp.scps=&fctV=De%20Ghelderode%2C%20Michel%20(1898-1962)&frbg=&tab=default_tab&dstmp=1321209651462&srt=rank&mode=Basic&dum=true&vl(9521613UI0)=any&vl(freeText0)=labor&vid=UNS",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"lastName": "Michel De Ghelderode",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Beyen -",
-						"lastName": "Roland",
-						"creatorType": "contributor"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"92",
-					"920",
-					"840",
-					"De Ghelderode, Michel -- (1898-1962) -- Correspondance",
-					"Ghelderode, Michel de -- (1898-1962) -- Correspondence",
-					"Dramatists, Belgian -- Correspondence -- 20th century"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Correspondance de Michel de Ghelderode. Tome II. 1928-1931",
-				"place": "Bruxelles",
-				"publisher": "Labor",
-				"date": "1992",
-				"language": "French",
-				"numPages": "610",
-				"pages": "610",
-				"ISBN": "2-8040-0815-0",
-				"callNumber": "PQ 2613 .H17 A8",
-				"libraryCatalog": "Primo"
-			}
-		]
-	}
-]
+var testCases = []
 /** END TEST CASES **/
