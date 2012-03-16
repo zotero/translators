@@ -202,13 +202,9 @@ function detectWeb(doc, url) {
 					return _itemType = "bookSection";
 				case "citation_dissertation_institution":
 					return _itemType = "thesis";
-				case "citation_series_title":
-					//possibly journal article, though it could be book
+				case "citation_title":		//fall back to journalArticle, since this is quite common
+				case "citation_series_title":	//possibly journal article, though it could be book
 					_itemType = "journalArticle";
-					break;
-				case "citation_title":
-					//at least it's not just "webpage"
-					if(!_itemType) _itemType = "document";
 					break;
 			}
 		}
