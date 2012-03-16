@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-15 15:49:17"
+	"lastUpdated": "2012-03-16 01:39:27"
 }
 
 /*
@@ -46,7 +46,9 @@ var HIGHWIRE_MAPPINGS = {
 	"citation_book_title":"bookTitle",
 	"citation_volume":"volume",
 	"citation_issue":"issue",
+	"citation_series_title":"series",
 	"citation_conference_title":"conferenceName",
+	"citation_conference":"conferenceName",
 	"citation_dissertation_institution":"university",
 	"citation_technical_report_institution":"institution",
 	"citation_technical_report_number":"number",
@@ -106,10 +108,20 @@ function getPrefixes(doc) {
 	}
 }
 
+function getContentText(doc, name) {
+	return ZU.xpathText(doc, '//meta[substring(@name, string-length(@name)-'
+							+ (name.length - 1) + ')="'+ name +'"]/@content');
+}
+
+function getContent(doc, name) {
+	return ZU.xpath(doc, '//meta[substring(@name, string-length(@name)-'
+							+ (name.length - 1) + ')="'+ name +'"]/@content');
+}
+
 function processFields(doc, item, fieldMap) {
 	for(var metaName in fieldMap) {
 		var zoteroName = fieldMap[metaName];
-		var value = ZU.xpathText(doc, '//meta[@name="'+metaName+'"]/@content');
+		var value = getContentText(doc, metaName);
 		if(value && value.trim()) {
 			item[zoteroName] = ZU.trimInternal(value);
 		}
@@ -160,7 +172,7 @@ function detectWeb(doc, url) {
 
 			if (!_itemType && schema === _prefixes.og && prop === "type") {
 				switch (metaTags[i].getAttribute("content")) {
-							case "video.movie":
+					case "video.movie":
 					case "video.episode":
 					case "video.tv_show":
 					case "video.other":
@@ -176,14 +188,29 @@ function detectWeb(doc, url) {
 						return "webpage";
 				}
 			}
-		} else if(tag === "citation_journal_title") {
-			_itemType = "journalArticle";
-		} else if(tag === "citation_technical_report_institution") {
-			_itemType = "report";
-		} else if(tag === "citation_conference_title") {
-			_itemType = "conferencePaper";
-		} else if(tag === "citation_book_title") {
-			_itemType = "bookSection";
+		} else {
+			var shortTag = tag.slice(tag.lastIndexOf('citation_'));
+			switch(shortTag) {
+				case "citation_journal_title":
+					return _itemType = "journalArticle";
+				case "citation_technical_report_institution":
+					return _itemType = "report";
+				case "citation_conference_title":
+				case "citation_conference":
+					return _itemType = "conferencePaper";
+				case "citation_book_title":
+					return _itemType = "bookSection";
+				case "citation_dissertation_institution":
+					return _itemType = "thesis";
+				case "citation_series_title":
+					//possibly journal article, though it could be book
+					_itemType = "journalArticle";
+					break;
+				case "citation_title":
+					//at least it's not just "webpage"
+					if(!_itemType) _itemType = "document";
+					break;
+			}
 		}
 	}
 
@@ -253,7 +280,8 @@ function addHighwireMetadata(doc, newItem) {
 	// HighWire metadata
 	processFields(doc, newItem, HIGHWIRE_MAPPINGS);
 
-	var authorNodes = ZU.xpath(doc, '//meta[@name="citation_author" or @name="citation_authors"]/@content');
+	var authorNodes = getContent(doc, 'citation_author')
+						.concat(getContent(doc, 'citation_authors'));
 	//save rdfCreators for later
 	var rdfCreators = newItem.creators;
 	newItem.creators = [];
@@ -307,28 +335,39 @@ function addHighwireMetadata(doc, newItem) {
 	}
 
 	//Deal with tags in a string
-    //we might want to look at the citation_keyword metatag later
-    if(!newItem.tags || !newItem.tags.length)
-         newItem.tags = ZU.xpath(doc, '//meta[@name="citation_keywords"]/@content').map(function(t) { return t.textContent; });
+	//we might want to look at the citation_keyword metatag later
+	if(!newItem.tags || !newItem.tags.length)
+		 newItem.tags = getContent(doc, 'citation_keywords')
+		 					.map(function(t) { return t.textContent; });
 
-  //fall back to "keywords"
-    if(!newItem.tags.length)
-         newItem.tags = ZU.xpath(doc, '//meta[@name="keywords"]/@content').map(function(t) { return t.textContent; });
+	//fall back to "keywords"
+	if(!newItem.tags.length)
+		 newItem.tags = ZU.xpath(doc, '//meta[@name="keywords"]/@content')
+		 					.map(function(t) { return t.textContent; });
 
-    //If we already have tags - run through them one by one, split where ncessary and concat them
-    //This  will deal with multiple tags, some of them comma delimited, some semicolon, some individual
-    if (newItem.tags.length) {
-        var tags = [], t;
-        for (var i in newItem.tags) {
-            t = newItem.tags[i].split(/\s*,\s*/);
-            if (newItem.tags[i].indexOf(';') == -1 && t.length > 2) {
-                tags = tags.concat(t);
-            } else {
-                tags = tags.concat(newItem.tags[i].split(/\s*;\s*/));
-            }
-        }
-        newItem.tags = tags;
-    }
+	/**If we already have tags - run through them one by one,
+	 * split where ncessary and concat them.
+	 * This  will deal with multiple tags, some of them comma delimited,
+	 * some semicolon, some individual
+	 */
+	if (newItem.tags.length) {
+		var tags = [], t;
+		for (var i in newItem.tags) {
+			t = newItem.tags[i].split(/\s*,\s*/);
+			if (newItem.tags[i].indexOf(';') == -1 && t.length > 2) {
+				tags = tags.concat(t);
+			} else {
+				tags = tags.concat(newItem.tags[i].split(/\s*;\s*/));
+			}
+		}
+		newItem.tags = tags;
+	}
+
+	//We can try getting abstract from 'description'
+	if(!newItem.abstractNote) {
+		newItem.abstractNote = ZU.trimInternal(
+			ZU.xpathText(doc, '//meta[@name="description"]/@content') || '');
+	}
 
 	//Cleanup DOI
 	if (newItem.DOI){
@@ -337,9 +376,9 @@ function addHighwireMetadata(doc, newItem) {
 
 	//sometimes RDF has more info, let's not drop it
 	var rdfPages = (newItem.pages)? newItem.pages.split(/\s*-\s*/) : new Array();
-	var firstpage = ZU.xpathText(doc, '//meta[@name="citation_firstpage"]/@content') ||
+	var firstpage = getContentText(doc, 'citation_firstpage') ||
 					rdfPages[0];
-	var lastpage = ZU.xpathText(doc, '//meta[@name="citation_lastpage"]/@content') ||
+	var lastpage = getContentText(doc, 'citation_lastpage') ||
 					rdfPages[1];
 	if(firstpage && ( firstpage = firstpage.trim() )) {
 		newItem.pages = firstpage +
@@ -348,15 +387,16 @@ function addHighwireMetadata(doc, newItem) {
 
 
 	//prefer ISSN over eISSN
-	var issn = ZU.xpathText(doc, '//meta[@name="citation_issn"]/@content') ||
-			ZU.xpathText(doc, '//meta[@name="citation_eIssn"]/@content');
+	var issn = getContentText(doc, 'citation_issn') ||
+			getContentText(doc, 'citation_eIssn');
 
 	if(issn) newItem.ISSN = issn;
 
 	//This may not always yield desired results
 	//i.e. if there is more than one pdf attachment (not common)
-	var pdfURL = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"][1]/@content');
-	if(pdfURL) {
+	var pdfURL = getContent(doc, 'citation_pdf_url');
+	if(pdfURL.length) {
+		pdfURL = pdfURL[0].textContent;
 		//delete any pdf attachments if present
 		//would it be ok to just delete all attachments??
 		for(var i=0, n=newItem.attachments.length; i<n; i++) {
