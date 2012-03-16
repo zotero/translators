@@ -163,6 +163,11 @@ var testCases = [
 						"url": false,
 						"title": "Cambridge Journals Snapshot",
 						"mimeType": "text/html"
+					},
+					{
+						"url": false,
+						"title":"Cambridge Journals PDF",
+						"mimeType":"application/pdf"
 					}
 				],
 				"date": "2011",
