@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-05 04:46:31"
+	"lastUpdated": "2012-03-11 15:19:02"
 }
 
 /* TalisPrism translator.
@@ -450,7 +450,7 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "Arthur R",
+						"firstName": "Arthur R.",
 						"lastName": "Taylor",
 						"creatorType": "author"
 					}
@@ -460,7 +460,6 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://opac.staffordshire.gov.uk/TalisPrism/doOpenURLSearch.do?sid=Talis:prod_talis&pid=Key%3A324818%3BArtifactType%3AMarc21Slim%3BsearchLocation%3Atalislms",
 						"title": "Snapshot of Library Page",
 						"mimeType": "text/html"
 					}
