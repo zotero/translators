@@ -1,207 +1,157 @@
 {
 	"translatorID": "f6717cbb-2771-4043-bde9-dbae19129bb3",
 	"label": "Archeion",
-	"creator": "Adam Crymble",
-	"target": "^https?://archeion-aao",
-	"minVersion": "1.0.0b4.r5",
+	"creator": "Sebastian Karcher",
+	"target": "^https?://www\\.archeion\\.ca",
+	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
-	"browserSupport": "gcs",
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2012-01-01 01:42:16"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-03-16 11:38:44"
 }
 
+/*
+	***** BEGIN LICENSE BLOCK *****
+	
+	Copyright © 2012 Sebastian Karcher 
+	This file is part of Zotero.
+	
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+	
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+	
+	***** END LICENSE BLOCK *****
+*/
+
 function detectWeb(doc, url) {
-	if (doc.evaluate('//td[@class="full"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	if (url.match(/;search\?/)) {
 		return "multiple";
-	} else if (doc.evaluate('//div[@class="main"]/h1', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	} else if (url.match(/;rad$/)) {
 		return "book";
 	}
 }
 
-//Archeion translator. code by Adam Crymble
-//The way the site is formatted, I can't split the creators up logically. I have left them off for now.
-
-function associateData (newItem, dataTags, field, zoteroField) {
-	if (dataTags[field]) {
-		newItem[zoteroField] = dataTags[field];
-	}
-}
-
 function scrape(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
-	newItem = new Zotero.Item("book");
-	
-	var xPathHeadings = doc.evaluate('//th', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var xPathContent = doc.evaluate('//table[@class="results"]/tbody/tr/td', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var xPathCount = doc.evaluate('count (//th)', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	
-	var fieldTitle;
-	var dataTags = new Object();
-	var multiAuthorCheck = new Array();
-	
-	
-	for (var i = 0; i < xPathCount.numberValue; i++) {
-		fieldTitle=xPathHeadings.iterateNext().textContent.replace(/\s+/g, '');
-	
-		//This was Michael Berkowitz's suggested Fix.
-
-			/*var ts = doc.getElementsByTagName(("table"), 1) = ts.length, ar = [];
-			while ((i--)) {
-				if (ts[i].className&&ts[i].className.match("results")) {
-					ar[ar.length] = ts[i].getElementsByTagName("td")[0].split(/\<br\>/);
+	var dcUrl = url.replace(/;rad$/, ";dc?sf_format=xml");
+	Zotero.Utilities.doGet(dcUrl, function (text) {
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f");
+		translator.setString(text);
+		translator.setHandler("itemDone", function (obj, item) {
+			//the DC doesn't distinguish between personal and institutional authors - get them from the page and parse
+			var authors = ZU.xpath(doc, '//div[@id="archivalDescriptionArea"]//div[@class="field"]/h3[contains(text(), "Name of creator")]/following-sibling::div/a');
+			for (var i in authors) {
+				//remove location (in parentheses) from creators, since it often contains a comma that messes with author parsing
+				authors[i].textContent = authors[i].textContent.replace(/\(.+\)\s*$/, "");
+				item.creators[i] = ZU.cleanAuthor(authors[i].textContent, "author", true);
+				if (!item.creators[i].firstName) item.creators[i].fieldMode = 1;
+			}
+			//The Archive gets mapped to the relations tag - we want its name, not the description in archeion
+			for (var i in item.seeAlso) {
+				if (item.seeAlso[i].indexOf("http://") == -1) {
+					item.archive = item.seeAlso[i];
 				}
 			}
-			Zotero.debug(ar[0][0]); */
-		
-	//COULDN"T SPLIT BY ("\n") TO SEPARATE MULTIPLE CREATORS.
-		if (fieldTitle == "Creator:" | fieldTitle == "Créateur:") {
-			fieldTitle == "Creator:";
-			
-			var authorContent = xPathContent.iterateNext().textContent;
-			//Zotero.debug(authorContent);
-			
-			//if (authorContent.match(' (*) ')) {
-			//	Zotero.debug(doc.title);
-			//}
-			
-			
-			
-			//var test = authorContent.split(/\<br\>/);
-			//Zotero.debug(test);
-			
-			authors = authorContent.match(/\w+,?\s+[\w\(\)\.]+/g);
-			
-			//Zotero.debug(authors);
-			
-			
-			for (i = 0; i < authors.length; i++) {
-				
-				var author = authors[i].split(", "); 
-				
-				if (author.length < 2) {
-					
-					dataTags["Creator:"] = author[0];
-					newItem.creators.push({lastName: dataTags["Creator:"], creatorType: "creator"});
-				
-				} else {
-					
-					dataTags["Creator:"] = (author[1] + (" ") + author[0]);
-					//Zotero.debug(authorArranged);
-					newItem.creators.push(Zotero.Utilities.cleanAuthor(dataTags["Creator:"], "creator"));
-				}
-			}
-			
-		} else {
-
-
-	
-		dataTags[fieldTitle] = Zotero.Utilities.cleanTags(xPathContent.iterateNext().textContent);
-		//Zotero.debug(fieldTitle);
-		}
-	}
-	
-	associateData (newItem, dataTags, "Datesofmaterial:", "date");	
-	associateData (newItem, dataTags, "Repository:", "repository");	
-	associateData (newItem, dataTags, "ReferenceNumber:", "callNumber");	
-	associateData (newItem, dataTags, "PhysicalDescription:", "extra");	
-	associateData (newItem, dataTags, "Scopeandcontent", "abstractNote");
-	
-	associateData (newItem, dataTags, "Dates:", "date");	
-	associateData (newItem, dataTags, "Centred'archives:", "repository");	
-	associateData (newItem, dataTags, "Numéroderéférence:", "callNumber");	
-	associateData (newItem, dataTags, "Descriptionmatérielle:", "extra");	
-	associateData (newItem, dataTags, "Portéeetcontenu", "abstractNote");
-	
-	newItem.title = doc.evaluate('//h1', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	
-	newItem.url = doc.location.href;
-	newItem.complete();
+			item.seeAlso = [];
+			//the RDF translator doesn't get the full identifier - get it from the page
+			var loc = ZU.xpathText(doc, '//div[@id="titleAndStatementOfResponsibilityArea"]//div[@class="field"]/h3[contains(text(), "Reference code")]/following-sibling::div');
+			item.archiveLocation = loc;
+			item.notes = item.extra;
+			item.extra = "";
+			item.itemID = "";
+			item.complete();
+		});
+		translator.translate();
+	});
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
-	var articles = new Array();
-	
 	if (detectWeb(doc, url) == "multiple") {
+		var articles = new Array();
 		var items = new Object();
-		var xPathLinks = doc.evaluate('//td[@class="full"]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var linksCounter = doc.evaluate('count (//td[@class="full"]/a)', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var xPathTitles = doc.evaluate('//table[@class="results"]/tbody/tr[1]/td', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		
-		var next_link;
-		for (var i = 0; i < linksCounter.numberValue; i++) {
-			next_link = xPathLinks.iterateNext().href;
-			items[next_link] = xPathTitles.iterateNext().textContent;
-			
+		var titles = ZU.xpath(doc, '//div[contains(@class, "search-results")]/h2/a');
+		for (var i in titles) {
+			items[titles[i].href] = titles[i].textContent;
 		}
-			
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			Zotero.Utilities.processDocuments(articles, scrape, function () {
+				Zotero.done();
+			});
+			Zotero.wait();
+		});
 	} else {
-		articles = [url];
+		scrape(doc, url);
 	}
-	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-	Zotero.wait();
-
 }
 /** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://archeion-aao.fis.utoronto.ca/cgi-bin/ifetch?DBRootName=ON&RecordKey=375617521392&FieldKey=F&FilePath=ON00313f/ON00313-f0000180.xml",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"lastName": "Ephraim Scott",
-						"creatorType": "creator"
-					},
-					{
-						"lastName": "Memorial Presbyterian",
-						"creatorType": "creator"
-					},
-					{
-						"lastName": "Church (Montreal",
-						"creatorType": "creator"
-					},
-					{
-						"lastName": "Mount Royal",
-						"creatorType": "creator"
-					},
-					{
-						"lastName": "Vale Presbyterian",
-						"creatorType": "creator"
-					},
-					{
-						"lastName": "Church (Montreal",
-						"creatorType": "creator"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"date": "microfilmed 1992 (originally created 1919-1980)",
-				"extra": "1 reel of microfilm",
-				"title": "Ephraim Scott Memorial Presbyterian Church (Montreal, Quebec) fonds",
-				"url": "http://archeion-aao.fis.utoronto.ca/cgi-bin/ifetch?DBRootName=ON&RecordKey=375617521392&FieldKey=F&FilePath=ON00313f/ON00313-f0000180.xml",
-				"libraryCatalog": "Presbyterian Church in Canada Archives",
-				"accessDate": "CURRENT_TIMESTAMP"
-			}
-		]
-	}
-]
+var testCases = [{
+	"type": "web",
+	"url": "http://www.archeion.ca/;search?query=montreal",
+	"items": "multiple"
+}, {
+	"type": "web",
+	"url": "http://www.archeion.ca/kydd-memorial-presbyterian-church-montreal-quebec-fonds;rad",
+	"items": [{
+		"itemType": "book",
+		"creators": [{
+			"lastName": "Kydd Memorial Presbyterian Church",
+			"creatorType": "author",
+			"fieldMode": 1
+		}, {
+			"lastName": "Rosemount Presbyterian Church",
+			"creatorType": "author",
+			"fieldMode": 1
+		}, {
+			"lastName": "Fairmount-Taylor Presbyterian Church",
+			"creatorType": "author",
+			"fieldMode": 1
+		}, {
+			"lastName": "Fairmount Presbyterian Church",
+			"creatorType": "author",
+			"fieldMode": 1
+		}, {
+			"lastName": "Taylor Presbyterian Church",
+			"creatorType": "author",
+			"fieldMode": 1
+		}, {
+			"lastName": "Mount Royal Presbyterian Church",
+			"creatorType": "author",
+			"fieldMode": 1
+		}, {
+			"lastName": "Outremont Presbyterian Church",
+			"creatorType": "author",
+			"fieldMode": 1
+		}, {
+			"lastName": "Outremont-Mount Royal Presbyterian Church",
+			"creatorType": "author",
+			"fieldMode": 1
+		}],
+		"notes": "Fonds consists of registers, minutes and other records of Kydd Memorial Presbyterian Church (Montreal, Quebec) and of the records of the amalgamated Fairmount-Taylor Presbyterian Church (Montreal, Quebec) and of Outremont-Mount Royal Presbyterian Church (Montreal, Quebec). Records of Kydd Presbyterian Church consist of: Registers including Baptisms, Marriages and Burials (1927-1982); Court Orders (1982-1990); Session minutes (1928-1982); Congregational meetings (1948-1975); Communion Rolls (1927-1942, 1946-1978); Orders of Service (1928-1982); Annual Reports (1963-1981); Board of Managers Meeting minutes (1944-1978); a history (1975) and other records. Records of Fairmount Presbyterian Church consist of: Registers of Baptisms, Marriages and Burials (1910-1925); Session minutes (1910-1925); Communion Rolls (1910-1923) and Board of Managers Meeting minutes (1908-1922). Records of Fairmount-Taylor Presbyterian Church consist of: Registers of Baptisms, Marriages and Burials (1925-1969); Session minutes (1934-1962); Session Reports (1965-1968); Session Correspondence (1948-1970); Communion Rolls (1923-1966); Membership Lists (1967); Orders of Service (1967); Congregational minutes (1909-1969); Annual reports (1939); Board of Managers Reports (1964-1969); Auditor's Reports and Financial Statements (1932, 1950, 1966, 1969) and other records.",
+		"tags": [],
+		"seeAlso": [],
+		"attachments": [],
+		"title": "Kydd Memorial Presbyterian Church (Montreal, Quebec) fonds",
+		"rights": "Notes Session minutes are restricted for a period of 50 years from the date they were written.",
+		"archive": "The Presbyterian Church in Canada",
+		"archiveLocation": "CA ON00313 CONG-147",
+		"libraryCatalog": "Archeion"
+	}]
+}]
 /** END TEST CASES **/
