@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-11 15:12:32"
+	"lastUpdated": "2012-03-17 02:31:41"
 }
 
 /**
@@ -395,7 +395,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Gary W. ",
+						"firstName": "Gary W.",
 						"lastName": "Miller",
 						"creatorType": "author"
 					}

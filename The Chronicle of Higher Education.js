@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-05 03:55:36"
+	"lastUpdated": "2012-03-17 02:37:20"
 }
 
 /*
@@ -254,9 +254,7 @@ var testCases = [
 				"ISSN": "0009-5982",
 				"date": "June 16, 2006",
 				"title": "Grinnell's Green Secrets",
-				"section": "News : Short Subjects",
-				"pages": "A9",
-				"edition": "Volume 52, Issue 41",
+				"section": "News",
 				"libraryCatalog": "The Chronicle of Higher Education",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}

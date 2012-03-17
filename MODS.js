@@ -15,7 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "g",
-	"lastUpdated": "2012-03-11 14:50:32"
+	"lastUpdated": "2012-03-17 02:45:26"
 }
 
 function detectImport() {
@@ -1676,7 +1676,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Kumar.",
+						"firstName": "Kumar",
 						"lastName": "Sridharan",
 						"creatorType": "author"
 					},

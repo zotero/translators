@@ -9,9 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-13 04:04:31"
+	"lastUpdated": "2012-03-17 02:53:35"
 }
-
 
 /*
 Springer Open Translator
@@ -177,10 +176,10 @@ var testCases = [
 				"postType": "Research",
 				"audioFileType": "Research",
 				"language": "en",
+				"abstractNote": "In this paper, we prove the Hyers-Ulam stability and the superstability for cubic functional equation by using the fixed point alternative theorem. As a consequence, we show that the cubic multipliers are superstable under some conditions.",
 				"url": "http://www.journalofinequalitiesandapplications.com/content/2011/1/53",
 				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "www.journalofinequalitiesandapplications.com",
-				"abstractNote": "In this paper, we prove the Hyers-Ulam stability and the superstability for cubic functional equation by using the fixed point alternative theorem. As a consequence, we show that the cubic multipliers are superstable under some conditions."
+				"libraryCatalog": "www.journalofinequalitiesandapplications.com"
 			}
 		]
 	},
@@ -247,10 +246,10 @@ var testCases = [
 				"postType": "Nano Express",
 				"audioFileType": "Nano Express",
 				"language": "en",
+				"abstractNote": "Nanoscale potassium niobate (KNbO3) powders of orthorhombic structure were synthesized using the sol-gel method. The heat-treatment temperature of the gels had a pronounced effect on KNbO3 particle size and morphology. Field emission scanning electron microscopy and transmission electron microscopy were used to determine particle size and morphology. The average KNbO3 grain size was estimated to be less than 100 nm, and transmission electron microscopy images indicated that KNbO3 particles had a brick-like morphology. Synchrotron X-ray diffraction was used to identify the room-temperature structures using Rietveld refinement. The ferroelectric orthorhombic phase was retained even for particles smaller than 50 nm. The orthorhombic to tetragonal and tetragonal to cubic phase transitions of nanocrystalline KNbO3 were investigated using temperature-dependent powder X-ray diffraction. Differential scanning calorimetry was used to examine the temperature dependence of KNbO3 phase transition. The Curie temperature and phase transition were independent of particle size, and Rietveld analyses showed increasing distortions with decreasing particle size.",
 				"url": "http://www.nanoscalereslett.com/content/6/1/530/abstract",
 				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "www.nanoscalereslett.com",
-				"abstractNote": "Nanoscale potassium niobate (KNbO3) powders of orthorhombic structure were synthesized using the sol-gel method. The heat-treatment temperature of the gels had a pronounced effect on KNbO3 particle size and morphology. Field emission scanning electron microscopy and transmission electron microscopy were used to determine particle size and morphology. The average KNbO3 grain size was estimated to be less than 100 nm, and transmission electron microscopy images indicated that KNbO3 particles had a brick-like morphology. Synchrotron X-ray diffraction was used to identify the room-temperature structures using Rietveld refinement. The ferroelectric orthorhombic phase was retained even for particles smaller than 50 nm. The orthorhombic to tetragonal and tetragonal to cubic phase transitions of nanocrystalline KNbO3 were investigated using temperature-dependent powder X-ray diffraction. Differential scanning calorimetry was used to examine the temperature dependence of KNbO3 phase transition. The Curie temperature and phase transition were independent of particle size, and Rietveld analyses showed increasing distortions with decreasing particle size."
+				"libraryCatalog": "www.nanoscalereslett.com"
 			}
 		]
 	},
@@ -371,10 +370,10 @@ var testCases = [
 				"postType": "Research",
 				"audioFileType": "Research",
 				"language": "en",
+				"abstractNote": "Nicotinic acetylcholine receptors (nAChR) have been identified on a variety of cells of the immune system and are generally considered to trigger anti-inflammatory events. In the present study, we determine the nAChR inventory of rat alveolar macrophages (AM), and investigate the cellular events evoked by stimulation with nicotine.",
 				"url": "http://respiratory-research.com/content/11/1/133",
 				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "respiratory-research.com",
-				"abstractNote": "Nicotinic acetylcholine receptors (nAChR) have been identified on a variety of cells of the immune system and are generally considered to trigger anti-inflammatory events. In the present study, we determine the nAChR inventory of rat alveolar macrophages (AM), and investigate the cellular events evoked by stimulation with nicotine."
+				"libraryCatalog": "respiratory-research.com"
 			}
 		]
 	},
@@ -460,10 +459,10 @@ var testCases = [
 				"postType": "Research article",
 				"audioFileType": "Research article",
 				"language": "en",
+				"abstractNote": "Numerous popular media sources have developed lists of",
 				"url": "http://journal.chemistrycentral.com/content/5/1/5",
 				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "journal.chemistrycentral.com",
-				"abstractNote": "Numerous popular media sources have developed lists of"
+				"libraryCatalog": "journal.chemistrycentral.com"
 			}
 		]
 	}
