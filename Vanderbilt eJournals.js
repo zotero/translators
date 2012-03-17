@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-11 15:10:20"
+	"lastUpdated": "2012-03-17 02:30:36"
 }
 
 function scrape(doc) {
@@ -19,10 +19,8 @@ function scrape(doc) {
 	translator.setDocument(doc);
 	translator.setHandler("itemDone", function(obj, item) {
 		//extra contains the abstract
-		if(!item.abstractNote) {
-			item.abstractNote = item.extra;
-			delete item.extra;
-		}
+		item.abstractNote = item.extra;
+		delete item.extra;
 
 		//pdf link points to embedded pdf
 		for(var i=0, n=item.attachments.length; i<n; i++) {
@@ -228,7 +226,7 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "Earl E",
+						"firstName": "Earl E.",
 						"lastName": "Fitz",
 						"creatorType": "author"
 					}
@@ -262,12 +260,12 @@ var testCases = [
 				"language": "en",
 				"volume": "8",
 				"issue": "1",
+				"abstractNote": "Historically, Canadian literature has been chary of entering too far into the new discipline of inter-American literary study.  Rightly concerned about the danger of blurring its identity as a distinctive national literature (one made up, as is well known, of two great strands, the French and the English), Canadian writing has, however, come of age, both nationally and internationally.  One dramatic aspect of this transformation is that we now have mounting evidence that both English and French Canadian writers are actively engaging with the literatures and cultures of their hemispheric neighbors.  By extending the methodologies of Comparative Literature to the inter-American paradigm, Canadian writers, critics, and literary historians are finding ways to maintain their status as members of a unique and under-appreciated national literature while also entering into the kinds of comparative studies that demonstrate their New World ties as well.",
 				"ISSN": "1553-4316",
 				"url": "http://ejournals.library.vanderbilt.edu/ojs/index.php/ameriquests/article/view/220",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "ejournals.library.vanderbilt.edu",
-				"shortTitle": "Canadian Literature in the Early Twenty-First Century",
-				"abstractNote": "Historically, Canadian literature has been chary of entering too far into the new discipline of inter-American literary study.  Rightly concerned about the danger of blurring its identity as a distinctive national literature (one made up, as is well known, of two great strands, the French and the English), Canadian writing has, however, come of age, both nationally and internationally.  One dramatic aspect of this transformation is that we now have mounting evidence that both English and French Canadian writers are actively engaging with the literatures and cultures of their hemispheric neighbors.  By extending the methodologies of Comparative Literature to the inter-American paradigm, Canadian writers, critics, and literary historians are finding ways to maintain their status as members of a unique and under-appreciated national literature while also entering into the kinds of comparative studies that demonstrate their New World ties as well."
+				"shortTitle": "Canadian Literature in the Early Twenty-First Century"
 			}
 		]
 	},
