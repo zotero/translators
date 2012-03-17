@@ -3,13 +3,13 @@
 	"label": "Spiegel Online",
 	"creator": "Martin Meyerhoff",
 	"target": "^http://www\\.spiegel\\.de/",
-	"minVersion": "1.0",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-30 22:43:28"
+	"lastUpdated": "2012-03-13 05:00:25"
 }
 
 /*
@@ -50,19 +50,19 @@ function detectWeb(doc, url) {
 	var spiegel_article_XPath = ".//div[@id='spArticleFunctions']";
 	
 	if (doc.evaluate(spiegel_article_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
-		Zotero.debug("newspaperArticle");
+		//Zotero.debug("newspaperArticle");
 		return "newspaperArticle";
 	} else if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/thema/)){ 
-		Zotero.debug("multiple");
+		//Zotero.debug("multiple");
 		return "multiple";
 	}  else if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/suche/)){ 
-		Zotero.debug("multiple");
+		//Zotero.debug("multiple");
 		return "multiple";
 	}  else if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/international\/search/)){ 
-		Zotero.debug("multiple");
+		//Zotero.debug("multiple");
 		return "multiple";
 	} else if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/international\/topic/)){ 
-		Zotero.debug("multiple");
+		//Zotero.debug("multiple");
 		return "multiple";
 	} 
 }
@@ -105,10 +105,10 @@ function scrape(doc, url) {
 	var author_XPath2 =  ".//*[@id='spIntroTeaser']/strong/i"; // Sometimes, though, the author is in italics in the teaser.
 	if (doc.evaluate(author_XPath1, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		var author = doc.evaluate(author_XPath1, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		Zotero.debug(author);	 
+		//Zotero.debug(author);	 
 	} else if  (doc.evaluate(author_XPath2, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		var author = doc.evaluate(author_XPath2, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		Zotero.debug(author);	 
+		//Zotero.debug(author);	 
 	} else {
 		author = "";
 	}
@@ -140,7 +140,7 @@ function scrape(doc, url) {
 	if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/spiegel/)){
 		var printurl_xPath = ".//div[@id='spArticleFunctions']/ul/li[1]/a";
 		var printurl = doc.evaluate(printurl_xPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
-		Zotero.debug(printurl);
+		//Zotero.debug(printurl);
 		newItem.attachments.push({url:printurl, title:doc.title, mimeType:"application/pdf"});
 	} else { 
 		// Attachment. Difficult. They want something inserted into the URL.
@@ -187,7 +187,6 @@ function doWeb(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
-	var articles = new Array();
 	
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
@@ -210,12 +209,15 @@ function doWeb(doc, url) {
 			}
 		}
 
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
-		Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-		Zotero.wait();
+		Zotero.selectItems(items, function(items) {
+			if(!items) return true;
+
+			var articles = new Array();
+			for (var i in items) {
+				articles.push(i);
+			}
+			Zotero.Utilities.processDocuments(articles, function(doc) { scrape(doc, doc.location.href)});
+		});
 	} else {
 		scrape(doc, url);
 	}
@@ -267,6 +269,16 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.spiegel.de/international/topic/german_french_relations/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.spiegel.de/suche/index.html?suchbegriff=AKW",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.spiegel.de/international/search/index.html?suchbegriff=Crisis",
 		"items": "multiple"
 	}
 ]

@@ -3,15 +3,44 @@
 	"label": "Science Links Japan",
 	"creator": "Michael Berkowitz",
 	"target": "^https?://sciencelinks\\.jp/",
-	"minVersion": "1.0.0b4.r5",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-30 22:43:39"
+	"lastUpdated": "2012-03-17 00:02:38"
 }
 
+function scrape(doc) {
+	var data = ZU.xpath(doc, '//div[@id="result_detail"]/table/tbody/tr/td');
+	var item = new Zotero.Item("journalArticle");
+	var m;
+	for(var i=0, n=data.length; i<n; i++) {
+		var datum = ZU.trimInternal(data[i].textContent);
+		if (m = datum.match(/^Title;(.*)$/)) {
+			item.title = ZU.capitalizeTitle(m[1]);
+		} else if (datum.indexOf('Author;') == 0 && (m = datum.match(/\b[A-Z'\-]+\s+[A-Z'\-]+/g))) {
+			for each (var aut in m) {
+				item.creators.push(Zotero.Utilities.cleanAuthor(Zotero.Utilities.capitalizeTitle(aut, true), "author"));
+			}
+		} else if (m = datum.match(/^Journal Title;(.*)$/)) {
+			item.publicationTitle = m[1];
+		} else if (m = datum.match(/^ISSN[;:]([\d\-]+)/)) {
+			item.ISSN = m[1];
+		} else if (m = datum.match(/^VOL\.([^;]+);NO\.([^;]+);PAGE\.([^(]+)\s*.*\((\d+)\)$/)) {
+			item.volume = m[1];
+			item.issue = m[2];
+			item.pages = m[3];
+			item.date = m[4];
+		} else if (m = datum.match(/^Abstract;(.*)/)) {
+			item.abstractNote = m[1];
+		}
+	}
+	item.url = doc.location.href;
+	item.attachments = [{url:item.url, title:"Science Links Japan Snapshot", mimeType:"text/html"}];
+	item.complete();
+}
 function detectWeb(doc, url) {
 	if (url.match(/result/) || url.match(/journal/)) {
 		return "multiple";
@@ -25,56 +54,20 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var ns = doc.documentElement.namespaceURI;
-	nsR = ns ? function(prefix) {
-		if (prefix == 'x') return ns; else return null;
-	} : null;
-	
-	var arts = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		var items = Zotero.Utilities.getItemArray(doc, doc, "(article|display\.php)");
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			arts.push(i);
-		}
-	} else {
-		arts = [url];
-	}
-	Zotero.Utilities.processDocuments(arts, function(doc) {
-		var data = new Array();
-		var bits = doc.evaluate('//div[@id="result_detail"]/table/tbody/tr/td', doc, nsR, XPathResult.ANY_TYPE, null);
-		var bit;
-		while (bit = bits.iterateNext()) {
-			data.push(Zotero.Utilities.trimInternal(bit.textContent));
-		}
-		var item = new Zotero.Item("journalArticle");
-		for each (var datum in data) {
-			if (datum.match(/^Title;/)) {
-				item.title = Zotero.Utilities.capitalizeTitle(datum.match(/Title;(.*)$/)[1]);
-			} else if (datum.match(/^Author;/)) {
-				var auts = datum.match(/\b[A-Z'\-]+\s+[A-Z'\-]+/g);
-				for each (var aut in auts) {
-					item.creators.push(Zotero.Utilities.cleanAuthor(Zotero.Utilities.capitalizeTitle(aut, true), "author"));
-				}
-			} else if (datum.match(/^Journal Title;/)) {
-				item.publicationTitle = datum.match(/;(.*)$/)[1];
-			} else if (datum.match(/^ISSN/)) {
-				item.ISSN = datum.match(/[\d\-]+/)[0];
-			} else if (datum.match(/^VOL/)) {
-				var voliss = datum.match(/^VOL\.([^;]*);NO\.([^;]*);PAGE\.([^(]*)\((\d+)\)/);
-				item.volume = voliss[1];
-				item.issue = voliss[2];
-				item.pages = voliss[3];
-				item.date = voliss[4];
-			} else if (datum.match(/^Abstract/)) {
-				item.abstractNote = datum.match(/;(.*)/)[1];
+		var links = ZU.xpath(doc, '//div[@id="result"]//td[@class="title"]/strong');
+		var items = ZU.getItemArray(doc, links);
+		Zotero.selectItems(items, function(items) {
+			if(!items) return true;
+			var arts = new Array();
+			for (var i in items) {
+				arts.push(i);
 			}
-		}
-		item.url = doc.location.href;
-		item.attachments = [{url:item.url, title:"Science Links Japan Snapshot", mimeType:"text/html"}];
-		item.complete();
-	}, function() {Zotero.done();});
-	Zotero.wait();
+			ZU.processDocuments(arts, scrape);
+		});
+	} else {
+		scrape(doc);
+	}
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
