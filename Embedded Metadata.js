@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-16 01:50:38"
+	"lastUpdated": "2012-03-17 02:52:44"
 }
 
 /*
@@ -188,23 +188,30 @@ function detectWeb(doc, url) {
 						return "webpage";
 				}
 			}
+
+			if(_itemType) return _itemType;
 		} else {
 			var shortTag = tag.slice(tag.lastIndexOf('citation_'));
 			switch(shortTag) {
 				case "citation_journal_title":
-					return _itemType = "journalArticle";
+					_itemType = "journalArticle";
+					break;
 				case "citation_technical_report_institution":
-					return _itemType = "report";
+					_itemType = "report";
+					break;
 				case "citation_conference_title":
 				case "citation_conference":
-					return _itemType = "conferencePaper";
+					_itemType = "conferencePaper";
+					break;
 				case "citation_book_title":
-					return _itemType = "bookSection";
+					_itemType = "bookSection";
+					break;
 				case "citation_dissertation_institution":
-					return _itemType = "thesis";
+					_itemType = "thesis";
+					break;
 				case "citation_title":		//fall back to journalArticle, since this is quite common
 				case "citation_series_title":	//possibly journal article, though it could be book
-					_itemType = "journalArticle";
+					if(!_itemType) _itemType = "journalArticle";
 					break;
 			}
 		}
