@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-07 06:51:54"
+	"lastUpdated": "2012-03-11 15:12:32"
 }
 
 /**
@@ -148,42 +148,42 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "Richard C",
+						"firstName": "Richard C.",
 						"lastName": "Cobb",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Joao A. N",
+						"firstName": "Joao A. N.",
 						"lastName": "Filipe",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Ross K",
+						"firstName": "Ross K.",
 						"lastName": "Meentemeyer",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Christopher A",
+						"firstName": "Christopher A.",
 						"lastName": "Lee",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Yana S",
+						"firstName": "Yana S.",
 						"lastName": "Valachovic",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Alex R",
+						"firstName": "Alex R.",
 						"lastName": "Cook",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "David M",
+						"firstName": "David M.",
 						"lastName": "Rizzo",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Christopher A",
+						"firstName": "Christopher A.",
 						"lastName": "Gilligan",
 						"creatorType": "author"
 					}
@@ -223,12 +223,12 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "Todd F",
+						"firstName": "Todd F.",
 						"lastName": "Hutchinson",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Robert P",
+						"firstName": "Robert P.",
 						"lastName": "Long",
 						"creatorType": "author"
 					},
@@ -243,7 +243,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Daniel A",
+						"firstName": "Daniel A.",
 						"lastName": "Yaussy",
 						"creatorType": "author"
 					}
@@ -338,12 +338,12 @@ var testCases = [
 				"itemType": "bookSection",
 				"creators": [
 					{
-						"firstName": "Suzanne L",
+						"firstName": "Suzanne L.",
 						"lastName": "Jones",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Roger C",
+						"firstName": "Roger C.",
 						"lastName": "Anderson",
 						"creatorType": "author"
 					}
@@ -380,17 +380,17 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "John M",
+						"firstName": "John M.",
 						"lastName": "Lhotka",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Jeffrey W",
+						"firstName": "Jeffrey W.",
 						"lastName": "Stringer",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Kurt W",
+						"firstName": "Kurt W.",
 						"lastName": "Gottschalk",
 						"creatorType": "author"
 					},
@@ -434,42 +434,42 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "Richard H",
+						"firstName": "Richard H.",
 						"lastName": "Widmann",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Gregory W",
+						"firstName": "Gregory W.",
 						"lastName": "Cook",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Charles J",
+						"firstName": "Charles J.",
 						"lastName": "Barnett",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Brett J",
+						"firstName": "Brett J.",
 						"lastName": "Butler",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Douglas M",
+						"firstName": "Douglas M.",
 						"lastName": "Griffith",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Mark A",
+						"firstName": "Mark A.",
 						"lastName": "Hatfield",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Cassandra M",
+						"firstName": "Cassandra M.",
 						"lastName": "Kurtz",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Randall S",
+						"firstName": "Randall S.",
 						"lastName": "Morin",
 						"creatorType": "author"
 					},
@@ -479,12 +479,12 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Charles H",
+						"firstName": "Charles H.",
 						"lastName": "Perry",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Ronald J",
+						"firstName": "Ronald J.",
 						"lastName": "Piva",
 						"creatorType": "author"
 					},
@@ -494,7 +494,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Christopher W",
+						"firstName": "Christopher W.",
 						"lastName": "Woodall",
 						"creatorType": "author"
 					}

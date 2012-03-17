@@ -1,75 +1,121 @@
 {
-	"translatorID":"0cc8e259-106e-4793-8c26-6ec8114a9160",
-	"translatorType":4,
-	"label":"SlideShare",
-	"creator":"Michael Berkowitz",
-	"target":"http://www.slideshare.net/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":99,
-	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"translatorID": "0cc8e259-106e-4793-8c26-6ec8114a9160",
+	"label": "SlideShare",
+	"creator": "Michael Berkowitz",
+	"target": "https?://[^/]*slideshare\\.net/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-03-13 07:00:05"
+}
+
+function scrape(doc) {
+	var item = new Zotero.Item("presentation");
+	item.title = ZU.xpathText(doc, '//meta[@name="title"]/@content');
+
+	var creator = ZU.xpathText(doc, '//meta[@name="dc_creator"]/@content');
+	if(creator && creator.trim()) item.creators.push(ZU.cleanAuthor(creator, "author"));
+
+	item.abstractNote = ZU.xpathText(doc, '(//p[@class="descriptionExpanded"] |\
+					//p[@class="description" and\
+					not(following-sibling::p[@class="descriptionExpanded"])])');
+
+	var tags = ZU.xpath(doc, '//p[@class="slideshow-tags"]/a');
+	for(var i=0, n=tags.length; i<n; i++) {
+		item.tags.push(tags[i].textContent.trim());
+	}
+
+	item.rights = ZU.xpathText(doc, '//p[@class="license"]');
+
+	item.type = ZU.xpathText(doc, '//ul[@class="h-slideshow-categories"]/li[1]');
+
+	item.url = doc.location.href
+	item.repository = "SlideShare";
+
+	var loggedin = !doc.getElementById('login_link');
+	var pdfurl = ZU.xpathText(doc, '//li[@class="action-download"]/a/@href');
+	if(loggedin && pdfurl) {
+		//is this always pdf?
+		item.attachments.push({url:pdfurl, title:"SlideShare Slide Show", mimeType:"application/pdf"});
+	}
+
+	item.complete();	
 }
 
 function detectWeb(doc, url) {
-	if (url.indexOf("search") != -1) {
+	if (url.indexOf("/search/") != -1 &&
+		ZU.xpath(doc, '//ol[@id="default" and @class="searchResults"]\
+					//div[./a[@class="slideshow-title"]]').length) {
 		return "multiple";
-	} else if (doc.evaluate('//div[@class="slideProfile"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	} else if (ZU.xpathText(doc, '//meta[@name="og_type"]/@content') == 'article') {
 		return "presentation";
 	}
 }
 
 function doWeb(doc, url) {
-	var loggedin = false;
-	if (doc.evaluate('//a[@class="green_link"][text() = "logout"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		loggedin = true;
-	}
 	var shows = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		var items = new Object();
-		var links = doc.evaluate('//div[@class="search_list_box"]/div[@class="text_12"]/a', doc, null, XPathResult.ANY_TYPE, null);
-		var next_link;
-		while (next_link = links.iterateNext()) {
-			items[next_link.href] = Zotero.Utilities.trimInternal(next_link.textContent);
-		}
-		items = Zotero.selectItems(items);
-		if (!items) {
-			return true;
-		}
-		for (var i in items) {
-			shows.push(i);
-		}
+		var links = ZU.xpath(doc,'//ol[@id="default" and @class="searchResults"]\
+					//div[./a[@class="slideshow-title"]]');
+		Zotero.selectItems( ZU.getItemArray(doc, links, null,'from=download'),
+			function(items) {
+				if (!items) return true;
+	
+				var shows = new Array();
+				for (var i in items) {
+					shows.push(i);
+				}
+				ZU.processDocuments(shows, scrape)
+			});
 	} else {
-		shows = [url];
+		scrape(doc);
 	}
-	Zotero.Utilities.processDocuments(shows, function(newDoc) {
-		var downloadable = true;
-		if (newDoc.evaluate('//p[@class="upload_p_left"][contains(text(), "Download not available")]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-			downloadable = false;
-		}
-		var item = new Zotero.Item("presentation");
-		item.title = newDoc.evaluate('//div[@class="slideProfile"]//h3', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		var creator = newDoc.evaluate('//div[@class="slideProfile"]//p/a[@class="blue_link_normal"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		item.creators.push(Zotero.Utilities.cleanAuthor(creator, "author"));
-		var tags = newDoc.evaluate('//a[@class="grey_tags"]', newDoc, null, XPathResult.ANY_TYPE, null);
-		var next_tag;
-		while (next_tag = tags.iterateNext()) {
-			item.tags.push(Zotero.Utilities.trimInternal(next_tag.textContent));
-		}
-		var newurl = newDoc.location.href;
-		item.url = newurl;
-		item.repository = "SlideShare";
-		var pdfurl;
-		if (newurl.substr(-1) == "/") {
-			pdfurl = newurl + "download";
-		} else {
-			pdfurl = newurl + "/download";
-		}
-		if (loggedin) {
-			if (downloadable) {
-				item.attachments.push({url:pdfurl, title:"SlideShare Slide Show", mimeType:"application/pdf"});
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.slideshare.net/eby/zotero-and-you-or-bibliography-on-the-semantic-web",
+		"items": [
+			{
+				"itemType": "presentation",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "eby",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"libraries",
+					"code4libcon2008",
+					"zotero",
+					"code4lib",
+					"research",
+					"zotero and you",
+					"citations",
+					"semantic",
+					"citation management"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Zotero and You, or Bibliography on the Semantic Web",
+				"abstractNote": "Representatives from the Center for History and New Media will introduce Zotero, a free and open source extension for Firefox that allows you to collect, organize and archive your research materials. After a brief demo and explanation, we will discuss best practices for making your projects \"Zotero ready\" and other opportunities to integrate with your digital projects through the Zotero API.",
+				"rights": "© All Rights Reserved",
+				"type": "Business & Mgmt",
+				"url": "http://www.slideshare.net/eby/zotero-and-you-or-bibliography-on-the-semantic-web",
+				"libraryCatalog": "SlideShare",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
-		}
-		item.complete();
-	}, function() {Zotero.done();});
-}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.slideshare.net/search/slideshow?searchfrom=header&q=zotero",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

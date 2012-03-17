@@ -9,15 +9,69 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-11-15 16:56:43"
+	"lastUpdated": "2012-03-12 08:35:26"
+}
+
+function scrape(doc) {
+	if (ZU.xpath(doc, '//span[@id="knownuser"]').length) {
+		var id = doc.location.href.match(/abstract_id=(\d+)/)[1];
+		var pdfurl = ZU.xpathText(doc, '//a[@title="Download from Social Science Research Network"]/@href');
+		var newURL = 'http://papers.ssrn.com/sol3/RefExport.cfm?abstract_id=' + id + '&format=3';
+		Zotero.Utilities.HTTP.doGet(newURL, function(text) {
+			var ris=text.match(/<input type=\"Hidden\"\s+name=\"hdnContent\"\s+value=\"([^"]*)\">/)[1];
+			var trans=Zotero.loadTranslator("import");
+			trans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			trans.setString(ris);
+			trans.setHandler("itemDone", function(obj, item) {
+				item.itemType = "journalArticle";
+				var tags = new Array();
+				for each (var tag in item.tags) {
+					var newtags = tag.split(/,|;/);
+					for each (var newtag in newtags) tags.push(newtag);
+				}
+				item.tags = tags;
+				item.attachments = [{document:doc, title:"SSRN Snapshot"}];
+				if (pdfurl) item.attachments.push({url:pdfurl, title:"SSRN Full Text PDF", mimeType:"application/pdf"});
+				item.complete();
+			});
+			trans.translate();
+		});
+	} else {
+		var item = new Zotero.Item("journalArticle");
+		item.title = ZU.capitalizeTitle(ZU.trimInternal(ZU.xpathText(doc, '//div[@id="abstractTitle"]')));
+		var authors = ZU.xpath(doc, '//center/font/a[@class="textlink"]');
+		for(var i=0, n=authors.length; i<n; i++) {
+			var aut = ZU.capitalizeTitle(ZU.trimInternal(authors[i].textContent));
+			item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
+		}
+		item.abstractNote = ZU.trimInternal(ZU.xpathText(doc, '//div[@id="innerWhite"]/font[1]').replace(/^abstract/i,''));
+		var tags = ZU.xpathText(doc, '//font[contains(./b/text(), "Key")]');
+		if (tags) {
+				item.tags = ZU.trimInternal(tags).substr(10).split(/;|,/);
+		}
+		item.publicationTitle = "SSRN eLibrary";
+		
+		var date = ZU.xpathText(doc, 'id("innerWhite")/center/font[2]');	
+		if (date && date.match(/\d{4}/)) {
+			item.date = ZU.trimInternal(date);
+		}
+		item.url = doc.location.href;
+		/* Commenting out PDF downloading until we add referer capability
+		var pdfurl = doc.evaluate('//a[contains(@href,"pdf")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		if (pdfurl) {
+			pdfurl = pdfurl.href;
+		}
+		*/
+		item.attachments = [{document:doc, title:"SSRN Snapshot"}];
+		if (pdfurl) {
+			item.attachments.push({url:pdfurl, title:"SSRN Full Text PDF", mimeType:"application/pdf"});
+		}
+		item.complete();
+	}
 }
 
 function detectWeb(doc, url)	{
-	var namespace=doc.documentElement.namespaceURI;
-	var nsResolver=namespace?function(prefix)	{
-		return (prefix=="x")?namespace:null;
-	}:null;
-	if (doc.evaluate('//font/strong/a[substring(@class, 1, 4) = "text"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+	if (ZU.xpath(doc, '//font/strong/a[substring(@class, 1, 4) = "text"]').length) {
 		return "multiple";
 	} else if (url.indexOf("abstract_id") != -1) {
 		return "journalArticle";
@@ -25,91 +79,25 @@ function detectWeb(doc, url)	{
 }
 
 function doWeb(doc, url) {
-	var namespace=doc.documentElement.namespaceURI;
-	var nsResolver=namespace?function(prefix)	{
-		return (prefix=="x")?namespace:null;
-	}:null;
-	
-	var uris = new Array();
-	
-	if (doc.evaluate('//font/strong/a[substring(@class, 1, 4) = "text"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+	var titles = ZU.xpath(doc, '//font/strong/a[substring(@class, 1, 4) = "text"]');
+	if (titles.length) {
 		var items = new Object();
-		var xpath = '//font/strong/a[substring(@class, 1, 4) = "text"]';
-		var titles = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var next_title = titles.iterateNext();
-		while (next_title) {
-			items[next_title.href] = next_title.textContent;
-			next_title = titles.iterateNext();
+		for(var i=0, n=titles.length; i<n; i++) {
+			items[titles[i].href] = titles[i].textContent;
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			uris.push(i);
-		}
+
+		Zotero.selectItems(items, function(items) {
+			if(!items) return true;
+
+			var uris = new Array();
+			for (var i in items) {
+				uris.push(i);
+			}
+			ZU.processDocuments(uris, scrape);
+		});
 	} else {
-		uris.push(url);
+		scrape(doc);
 	}
-	
-	Zotero.Utilities.processDocuments(uris, function(doc) {
-		if (doc.evaluate('//span[@id="knownuser"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-			var id = doc.location.href.match(/abstract_id=(\d+)/)[1];
-			if (doc.evaluate('//a[@title="Download from Social Science Research Network"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-				var pdfurl = doc.evaluate('//a[@title="Download from Social Science Research Network"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
-			}
-			var newURL = 'http://papers.ssrn.com/sol3/RefExport.cfm?abstract_id=' + id + '&format=3';
-			Zotero.Utilities.HTTP.doGet(newURL, function(text) {
-				var ris=text.match(/<input type=\"Hidden\"\s+name=\"hdnContent\"\s+value=\"([^"]*)\">/)[1];
-				var trans=Zotero.loadTranslator("import");
-				trans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-				trans.setString(ris);
-				trans.setHandler("itemDone", function(obj, item) {
-					item.itemType = "journalArticle";
-					var tags = new Array();
-					for each (var tag in item.tags) {
-						var newtags = tag.split(/,|;/);
-						for each (var newtag in newtags) tags.push(newtag);
-					}
-					item.tags = tags;
-					item.attachments = [{url:item.url, title:"SSRN Snapshot", mimeType:"text/html"}];
-					if (pdfurl) item.attachments.push({url:pdfurl, title:"SSRN Full Text PDF", mimeType:"application/pdf"});
-					item.complete();
-				});
-				trans.translate();
-			});
-		} else {
-			var item = new Zotero.Item("journalArticle");
-			item.title = Zotero.Utilities.capitalizeTitle(Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="abstractTitle"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent));
-			var authors = doc.evaluate('//center/font/a[@class="textlink"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-			var author;
-			while (author = authors.iterateNext()) {
-				var aut = Zotero.Utilities.capitalizeTitle(Zotero.Utilities.trimInternal(author.textContent));
-				item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
-			}
-			item.abstractNote = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="innerWhite"]/font[1]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent).replace(/^abstract/i,'');
-			var tags = doc.evaluate('//font[contains(./b/text(), "Key")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			if (tags) {
-					item.tags = Zotero.Utilities.trimInternal(tags.textContent).substr(10).split(/;|,/);
-			}
-			item.publicationTitle = "SSRN eLibrary";
-			
-			var date = doc.evaluate('id("innerWhite")/center/font[2]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();			
-			if (date && date.textContent.match(/\d{4}/)) {
-				item.date = Zotero.Utilities.trimInternal(date.textContent);
-			}
-			item.url = doc.location.href;
-			/* Commenting out PDF downloading until we add referer capability
-			var pdfurl = doc.evaluate('//a[contains(@href,"pdf")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			if (pdfurl) {
-				pdfurl = pdfurl.href;
-			}
-			*/
-			item.attachments = [{url:item.url, title:"SSRN Snapshot", mimeType:"text/html"}];
-			if (pdfurl) {
-				item.attachments.push({url:pdfurl, title:"SSRN Full Text PDF", mimeType:"application/pdf"});
-			}
-			item.complete();
-		}
-	}, function() {Zotero.done();});
-	Zotero.wait();
 }
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -145,9 +133,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://papers.ssrn.com/sol3/papers.cfm?abstract_id=1450589",
-						"title": "SSRN Snapshot",
-						"mimeType": "text/html"
+						"title": "SSRN Snapshot"
 					}
 				],
 				"title": "The 'Separation Plot': A New Visual Method for Evaluating the Predictive Power of Logit/Probit Models",
@@ -160,6 +146,11 @@ var testCases = [
 				"shortTitle": "The 'Separation Plot'"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://papers.ssrn.com/sol3/results.cfm?txtKey_Words=europe",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
