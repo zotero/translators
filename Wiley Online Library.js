@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-12 11:28:54"
+	"lastUpdated": "2012-03-17 02:25:22"
 }
 
 /*
@@ -351,15 +351,25 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [],
+				"tags": [
+					"silent cinema and its pioneers (1906–1930)",
+					"Ángel García Cardona's El ciego de aldea (1906)",
+					"Ángel García Cardona and Antonio Cuesta",
+					"Ricardo Baños and Albert Marro's Don Pedro el Cruel (1911)",
+					"Fructuós Gelabert's Amor que mata (1909)",
+					"three films ‐ part of “the preliminary industrial and expressive framework for Spain's budding cinema”",
+					"Directors (Life and Works) ‐ Ángel García Cardona and Antonio Cuesta13",
+					"Ricardo Baños",
+					"Florián Rey's La aldea maldita (1930)",
+					"Florián Rey (Antonio Martínez de Castillo)",
+					"Fructuós Gelabert ‐ made the first Spanish fiction film",
+					"Riña en un café",
+					"1897"
+				],
 				"seeAlso": [],
 				"attachments": [
 					{
 						"title": "Snapshot"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"title": "Silent Cinema and its Pioneers (1906–1930)",
