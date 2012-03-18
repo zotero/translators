@@ -242,7 +242,7 @@ var testCases = [{
 		"notes": [],
 		"tags": ["mefloquine", "gap junctions", "motor behavior", "eye-blink conditioning", "cerebellum"],
 		"seeAlso": [],
-		"attachments": [],
+		"attachments": [{"title":"Full Text PDF","mimeType":"application/pdf"}],
 		"url": "http://www.frontiersin.org/neuropharmacology/10.3389/fnins.2010.00191/abstract",
 		"title": "Anti-malaria drug mefloquine induces motor learning deficits in humans",
 		"publicationTitle": "Frontiers in Neuropharmacology",
