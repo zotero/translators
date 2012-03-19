@@ -3,7 +3,7 @@
 	"label": "AustLII and NZLII",
 	"creator": "Bill McKinney and Sebastian Karcher",
 	"target": "^https?://www\\.(?:austlii\\.edu\\.au|nzlii\\.org)",
-	"minVersion": "1.0.0b4.r1",
+	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
@@ -59,7 +59,7 @@ function doWeb(doc, url) {
 			Zotero.Utilities.processDocuments(urls, scrape, function () {
 				Zotero.done();
 			});
-			Zotero.wait();	
+			Zotero.wait();
 		});
 	}
 }
