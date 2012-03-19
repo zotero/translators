@@ -1,46 +1,35 @@
 {
-	"translatorID":"5ae63913-669a-4792-9f45-e089a37de9ab",
-	"translatorType":4,
-	"label":"BAILII",
-	"creator":"Bill McKinney",
-	"target":"http:\\/\\/www\\.bailii\\.org(?:\\/cgi\\-bin\\/markup\\.cgi\\?doc\\=)?\\/\\w+\\/cases\\/.+",
-	"minVersion":"1.0.0b4.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2007-06-18 18:15:00"
+	"translatorID": "5ae63913-669a-4792-9f45-e089a37de9ab",
+	"label": "BAILII",
+	"creator": "Bill McKinney",
+	"target": "http:\\/\\/www\\.bailii\\.org(?:\\/cgi\\-bin\\/markup\\.cgi\\?doc\\=)?\\/\\w+\\/cases\\/.+",
+	"minVersion": "1.0.0b4.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-03-19 11:15:53"
 }
 
 function detectWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
-	var liiRegexp= /^http:\/\/www\.bailii\.org(?:\/cgi\-bin\/markup\.cgi\?doc\=)?\/\w+\/cases\/.+/
+	var liiRegexp= /^http:\/\/www\.bailii\.org(?:\/cgi\-bin\/markup\.cgi\?doc\=)?\/\w+\/cases\/.+\.html/
 	if(liiRegexp.test(url)) {
-		return "book";
+		return "case";
 	} else {
 		var aTags = doc.getElementsByTagName("a");
 		for(var i=0; i<aTags.length; i++) {
-			if(articleRegexp.test(aTags[i].href)) {
+			if(liiRegexp.test(aTags[i].href)) {
 				return "multiple";
 			}
 		}
 	}
 }
 
-function scrape(doc) {
-
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
+function scrape(doc, url) {
 	var newItem = new Zotero.Item("case");
 	newItem.title = doc.title;
 	newItem.url = doc.location.href;
-
 	var titleRegexp = /^(.+)\s+\[(\d+)\]\s+(.+)\s+\((\d+)\s+(\w+)\s+(\d+)\)/
 	var titleMatch = titleRegexp .exec(doc.title);
 	if (titleMatch ) {
@@ -78,29 +67,57 @@ function scrape(doc) {
 		var tmpc = cite[0].childNodes[0].innerHTML;
 		newItem.notes.push({note:tmpc});
 	}
-	
+	newItem.attachments = [{url: url, title: "BAILII Snapshot", mimeType: "text/html"}];
 	newItem.complete();
 }
 
 function doWeb(doc, url) {
-	var liiRegexp= /http:\/\/www\.bailii\.org(?:\/cgi\-bin\/markup\.cgi\?doc\=)?\/\w+\/cases\/.+/
+	var liiRegexp= /http:\/\/www\.bailii\.org(?:\/cgi\-bin\/markup\.cgi\?doc\=)?\/\w+\/cases\/.+\.html/
 	if(liiRegexp.test(url)) {
 		scrape(doc);
 	} else {
-		
 		var items = Zotero.Utilities.getItemArray(doc, doc, liiRegexp);
-		items = Zotero.selectItems(items);
-		
-		if(!items) {
-			return true;
-		}
-		
 		var urls = new Array();
-		for(var i in items) {
-			urls.push(i);
-		}
-		
-		Zotero.Utilities.processDocuments(urls, scrape, function() { Zotero.done(); });
-		Zotero.wait();
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				urls.push(i);
+			}
+			Zotero.Utilities.processDocuments(urls, scrape, function () {
+				Zotero.done();
+			});
+			Zotero.wait();	
+		});
 	}
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.bailii.org/cgi-bin/markup.cgi?doc=/eu/cases/EUECJ/2011/C40308.html&query=copyright&method=boolean",
+		"items": [
+			{
+				"itemType": "case",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Football Association Premier League & Ors (Freedom to provide services) [2011] EUECJ C-403/08 (04 October 2011)",
+				"url": "http://www.bailii.org/cgi-bin/markup.cgi?doc=/eu/cases/EUECJ/2011/C40308.html&query=copyright&method=boolean",
+				"caseName": "Football Association Premier League & Ors (Freedom to provide services) [2011] EUECJ C-403/08",
+				"dateDecided": "04 October 2011",
+				"court": "EUECJ (2011)",
+				"libraryCatalog": "BAILII",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.bailii.org/eu/cases/EUECJ/2007/",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
