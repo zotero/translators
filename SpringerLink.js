@@ -123,7 +123,13 @@ function scrapeBook(doc) {
 
 	//title
 	item.title = ZU.xpathText(doc, '//div[@id="ContentHeading"]//h1[@class="title"]');
-	if(item.title) item.title = ZU.capitalizeTitle(ZU.trimInternal(item.title));
+
+	if(!item.title) {
+		Z.debug('Could not get book title');
+		Z.debug('Page Dump: ' + doc.body.innerHTML);
+	}
+
+	item.title = ZU.capitalizeTitle(ZU.trimInternal(item.title));
 
 	//authors
 	var authors = ZU.xpath(doc, '//div[@id="ContentHeading"]//p[@class="authors"]/a');
@@ -172,7 +178,7 @@ function scrape(doc) {
 
 	Z.debug('eventvalidate: ' + eventvalidate);
 	Z.debug('viewstate: ' + viewstate);
-	if(!eventvalidate || !viewstate) Z.debug('Export Citation Page Dump: ' + doc.documentElement.body.innerHTML);
+	if(!eventvalidate || !viewstate) Z.debug('Export Citation Page Dump: ' + doc.body.innerHTML);
 
 	var get = newurl;
 	var post = '__VIEWSTATE=' + encodeURIComponent(viewstate) + '&ctl00%24ctl14%24cultureList=en-us&ctl00%24ctl14%24SearchControl%24BasicSearchForTextBox=&ctl00%24ctl14%24SearchControl%24BasicAuthorOrEditorTextBox=&ctl00%24ctl14%24SearchControl%24BasicPublicationTextBox=&ctl00%24ctl14%24SearchControl%24BasicVolumeTextBox=&ctl00%24ctl14%24SearchControl%24BasicIssueTextBox=&ctl00%24ctl14%24SearchControl%24BasicPageTextBox=&ctl00%24ContentPrimary%24ctl00%24ctl00%24Export=AbstractRadioButton&ctl00%24ContentPrimary%24ctl00%24ctl00%24CitationManagerDropDownList=ReferenceManager&ctl00%24ContentPrimary%24ctl00%24ctl00%24ExportCitationButton=Export+Citation&__EVENTVALIDATION=' + encodeURIComponent(eventvalidate);
