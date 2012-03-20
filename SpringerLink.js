@@ -167,15 +167,15 @@ function scrape(doc) {
 	var newurl = doc.location.href;
 	var pdfurl = newurl.replace(/export-citation/, "fulltext.pdf");
 	var absurl = newurl.replace(/export-citation/, "abstract/");
-	var viewstate = encodeURIComponent(ZU.xpathText(doc, '//input[@name="__VIEWSTATE"]/@value'));
-	var eventvalidate = encodeURIComponent(ZU.xpathText(doc, '//input[@name="__EVENTVALIDATION"]/@value'));
+	var viewstate = ZU.xpathText(doc, '//input[@name="__VIEWSTATE"]/@value');
+	var eventvalidate = ZU.xpathText(doc, '//input[@name="__EVENTVALIDATION"]/@value');
 
 	Z.debug('eventvalidate: ' + eventvalidate);
 	Z.debug('viewstate: ' + viewstate);
 	if(!eventvalidate || !viewstate) Z.debug('Export Citation Page Dump: ' + doc.documentElement.body.innerHTML);
 
 	var get = newurl;
-	var post = '__VIEWSTATE=' + viewstate + '&ctl00%24ctl14%24cultureList=en-us&ctl00%24ctl14%24SearchControl%24BasicSearchForTextBox=&ctl00%24ctl14%24SearchControl%24BasicAuthorOrEditorTextBox=&ctl00%24ctl14%24SearchControl%24BasicPublicationTextBox=&ctl00%24ctl14%24SearchControl%24BasicVolumeTextBox=&ctl00%24ctl14%24SearchControl%24BasicIssueTextBox=&ctl00%24ctl14%24SearchControl%24BasicPageTextBox=&ctl00%24ContentPrimary%24ctl00%24ctl00%24Export=AbstractRadioButton&ctl00%24ContentPrimary%24ctl00%24ctl00%24CitationManagerDropDownList=ReferenceManager&ctl00%24ContentPrimary%24ctl00%24ctl00%24ExportCitationButton=Export+Citation&__EVENTVALIDATION=' + eventvalidate;
+	var post = '__VIEWSTATE=' + encodeURIComponent(viewstate) + '&ctl00%24ctl14%24cultureList=en-us&ctl00%24ctl14%24SearchControl%24BasicSearchForTextBox=&ctl00%24ctl14%24SearchControl%24BasicAuthorOrEditorTextBox=&ctl00%24ctl14%24SearchControl%24BasicPublicationTextBox=&ctl00%24ctl14%24SearchControl%24BasicVolumeTextBox=&ctl00%24ctl14%24SearchControl%24BasicIssueTextBox=&ctl00%24ctl14%24SearchControl%24BasicPageTextBox=&ctl00%24ContentPrimary%24ctl00%24ctl00%24Export=AbstractRadioButton&ctl00%24ContentPrimary%24ctl00%24ctl00%24CitationManagerDropDownList=ReferenceManager&ctl00%24ContentPrimary%24ctl00%24ctl00%24ExportCitationButton=Export+Citation&__EVENTVALIDATION=' + encodeURIComponent(eventvalidate);
 	Zotero.Utilities.HTTP.doPost(get, post, function (text) {
 		Z.debug('Citation Export: ' + text);
 		var translator = Zotero.loadTranslator("import");
