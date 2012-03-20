@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-20 04:53:11"
+	"lastUpdated": "2012-03-20 05:09:22"
 }
 
 /*
@@ -948,89 +948,6 @@ var testCases = [
 				"url": "http://scholarworks.umass.edu/open_access_dissertations/508/",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "scholarworks.umass.edu"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.cabdirect.org/abstracts/20113303600.html;jsessionid=EAC5D88C979E0FF87338E0EDF2DCB90A",
-		"items": [
-			{
-				"itemType": "conferencePaper",
-				"creators": [
-					{
-						"firstName": "H. J.",
-						"lastName": "Bertschinger",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "C.",
-						"lastName": "Herbert",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "M. A. de B. V.",
-						"lastName": "Guimarães",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "T. E.",
-						"lastName": "Trigg",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "A.",
-						"lastName": "Human",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "V.",
-						"lastName": "Roberts",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"adverse effects",
-					"anoestrus",
-					"contraception",
-					"contraceptive properties",
-					"contraceptives",
-					"dinoprost",
-					"estradiol",
-					"FSH",
-					"GnRH",
-					"inbreeding",
-					"LH",
-					"oestrous cycle",
-					"ovaries",
-					"progesterone",
-					"reproduction",
-					"testes",
-					"wild animals",
-					"zoo animals"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"itemID": "http://www.cabdirect.org/abstracts/20113303600.html;jsessionid=EAC5D88C979E0FF87338E0EDF2DCB90A",
-				"title": "Managing the reproductive rate of some large carnivores using the GnRH super-agonist implant Suprelorin®.",
-				"publisher": "British Veterinary Zoological Society",
-				"institution": "British Veterinary Zoological Society",
-				"company": "British Veterinary Zoological Society",
-				"label": "British Veterinary Zoological Society",
-				"distributor": "British Veterinary Zoological Society",
-				"date": "2009",
-				"conferenceName": "British Veterinary Zoological Society Proceedings of the Autumn Meeting 2009, Park Inn, York, 7th and 8th November, 2009. Sex-aspects affecting exotics and wildlife.",
-				"language": "English",
-				"abstractNote": "CAB Direct is the most thorough and extensive source of reference in the applied life sciences, incorporating the leading bibliographic databases CAB Abstracts and Global Health",
-				"pages": "12-17",
-				"url": "http://www.cabdirect.org/abstracts/20113303600.html;jsessionid=EAC5D88C979E0FF87338E0EDF2DCB90A",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "www.cabdirect.org"
 			}
 		]
 	}
