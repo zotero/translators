@@ -1,4 +1,4 @@
-14  # Increment number when modifying file
+15  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -48,3 +48,4 @@ af1af8fa-19dc-486f-a8cc-107acb849101  # Wilson Web (merged into EBSCOhost)
 2943d7fc-3ce8-401c-afd5-ee1f70b7aae0  # Helsinki University of Technology (now Voyager 7)
 f87c10fe-2bdc-4e1e-aedd-7fd20ec4b4c2  # Getty Research Library Catalog (now Voyager 7)
 1a3e63b2-0adf-4c8e-928b-c58c2594b45d  # BioMed Central and More (handled by Springer Science+Business Media)
+c76d6c19-b4c6-4e51-bd7a-0a81752305ae  # BC Archival Network - merged with Archeion;

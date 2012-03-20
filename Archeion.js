@@ -1,15 +1,15 @@
 {
 	"translatorID": "f6717cbb-2771-4043-bde9-dbae19129bb3",
-	"label": "Archeion",
+	"label": "Archeion/MemoryBC",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://www\\.archeion\\.ca",
+	"target": "^https?://www\\.(archeion\\.ca|memorybc\\.ca)",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-16 11:38:44"
+	"browserSupport": "g",
+	"lastUpdated": "2012-03-19 13:37:28"
 }
 
 /*
@@ -101,57 +101,71 @@ function doWeb(doc, url) {
 	}
 }
 /** BEGIN TEST CASES **/
-var testCases = [{
-	"type": "web",
-	"url": "http://www.archeion.ca/;search?query=montreal",
-	"items": "multiple"
-}, {
-	"type": "web",
-	"url": "http://www.archeion.ca/kydd-memorial-presbyterian-church-montreal-quebec-fonds;rad",
-	"items": [{
-		"itemType": "book",
-		"creators": [{
-			"lastName": "Kydd Memorial Presbyterian Church",
-			"creatorType": "author",
-			"fieldMode": 1
-		}, {
-			"lastName": "Rosemount Presbyterian Church",
-			"creatorType": "author",
-			"fieldMode": 1
-		}, {
-			"lastName": "Fairmount-Taylor Presbyterian Church",
-			"creatorType": "author",
-			"fieldMode": 1
-		}, {
-			"lastName": "Fairmount Presbyterian Church",
-			"creatorType": "author",
-			"fieldMode": 1
-		}, {
-			"lastName": "Taylor Presbyterian Church",
-			"creatorType": "author",
-			"fieldMode": 1
-		}, {
-			"lastName": "Mount Royal Presbyterian Church",
-			"creatorType": "author",
-			"fieldMode": 1
-		}, {
-			"lastName": "Outremont Presbyterian Church",
-			"creatorType": "author",
-			"fieldMode": 1
-		}, {
-			"lastName": "Outremont-Mount Royal Presbyterian Church",
-			"creatorType": "author",
-			"fieldMode": 1
-		}],
-		"notes": "Fonds consists of registers, minutes and other records of Kydd Memorial Presbyterian Church (Montreal, Quebec) and of the records of the amalgamated Fairmount-Taylor Presbyterian Church (Montreal, Quebec) and of Outremont-Mount Royal Presbyterian Church (Montreal, Quebec). Records of Kydd Presbyterian Church consist of: Registers including Baptisms, Marriages and Burials (1927-1982); Court Orders (1982-1990); Session minutes (1928-1982); Congregational meetings (1948-1975); Communion Rolls (1927-1942, 1946-1978); Orders of Service (1928-1982); Annual Reports (1963-1981); Board of Managers Meeting minutes (1944-1978); a history (1975) and other records. Records of Fairmount Presbyterian Church consist of: Registers of Baptisms, Marriages and Burials (1910-1925); Session minutes (1910-1925); Communion Rolls (1910-1923) and Board of Managers Meeting minutes (1908-1922). Records of Fairmount-Taylor Presbyterian Church consist of: Registers of Baptisms, Marriages and Burials (1925-1969); Session minutes (1934-1962); Session Reports (1965-1968); Session Correspondence (1948-1970); Communion Rolls (1923-1966); Membership Lists (1967); Orders of Service (1967); Congregational minutes (1909-1969); Annual reports (1939); Board of Managers Reports (1964-1969); Auditor's Reports and Financial Statements (1932, 1950, 1966, 1969) and other records.",
-		"tags": [],
-		"seeAlso": [],
-		"attachments": [],
-		"title": "Kydd Memorial Presbyterian Church (Montreal, Quebec) fonds",
-		"rights": "Notes Session minutes are restricted for a period of 50 years from the date they were written.",
-		"archive": "The Presbyterian Church in Canada",
-		"archiveLocation": "CA ON00313 CONG-147",
-		"libraryCatalog": "Archeion"
-	}]
-}]
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.archeion.ca/;search?query=montreal",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.archeion.ca/kydd-memorial-presbyterian-church-montreal-quebec-fonds;rad",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Kydd Memorial Presbyterian Church",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Rosemount Presbyterian Church",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Fairmount-Taylor Presbyterian Church",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Fairmount Presbyterian Church",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Taylor Presbyterian Church",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Mount Royal Presbyterian Church",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Outremont Presbyterian Church",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Outremont-Mount Royal Presbyterian Church",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"notes": "Fonds consists of registers, minutes and other records of Kydd Memorial Presbyterian Church (Montreal, Quebec) and of the records of the amalgamated Fairmount-Taylor Presbyterian Church (Montreal, Quebec) and of Outremont-Mount Royal Presbyterian Church (Montreal, Quebec). Records of Kydd Presbyterian Church consist of: Registers including Baptisms, Marriages and Burials (1927-1982); Court Orders (1982-1990); Session minutes (1928-1982); Congregational meetings (1948-1975); Communion Rolls (1927-1942, 1946-1978); Orders of Service (1928-1982); Annual Reports (1963-1981); Board of Managers Meeting minutes (1944-1978); a history (1975) and other records. Records of Fairmount Presbyterian Church consist of: Registers of Baptisms, Marriages and Burials (1910-1925); Session minutes (1910-1925); Communion Rolls (1910-1923) and Board of Managers Meeting minutes (1908-1922). Records of Fairmount-Taylor Presbyterian Church consist of: Registers of Baptisms, Marriages and Burials (1925-1969); Session minutes (1934-1962); Session Reports (1965-1968); Session Correspondence (1948-1970); Communion Rolls (1923-1966); Membership Lists (1967); Orders of Service (1967); Congregational minutes (1909-1969); Annual reports (1939); Board of Managers Reports (1964-1969); Auditor's Reports and Financial Statements (1932, 1950, 1966, 1969) and other records.",
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Kydd Memorial Presbyterian Church (Montreal, Quebec) fonds",
+				"rights": "Notes Session minutes are restricted for a period of 50 years from the date they were written.",
+				"archive": "The Presbyterian Church in Canada",
+				"archiveLocation": "CA ON00313 CONG-147",
+				"libraryCatalog": "Archeion"
+			}
+		]
+	}
+]
 /** END TEST CASES **/
