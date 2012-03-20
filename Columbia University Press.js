@@ -2,14 +2,14 @@
 	"translatorID": "a75e0594-a9e8-466e-9ce8-c10560ea59fd",
 	"label": "Columbia University Press",
 	"creator": "Michael Berkowitz",
-	"target": "^https?://www\\.cup\\.columbia\\.edu/",
+	"target": "^https?://(www\\.)?cup\\.columbia\\.edu/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-03 11:25:29"
+	"lastUpdated": "2012-03-19 09:15:52"
 }
 
 function detectWeb(doc, url) {

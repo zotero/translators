@@ -1,22 +1,25 @@
 {
-	"translatorID":"60d97c99-47f0-4323-98b6-5699faf827b1",
-	"translatorType":4,
-	"label":"Blackwell Compass",
-	"creator":"Michael Berkowitz",
-	"target":"http://www.blackwell-compass.com/subject/[^/]+/.+",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"translatorID": "60d97c99-47f0-4323-98b6-5699faf827b1",
+	"label": "Blackwell Compass",
+	"creator": "Michael Berkowitz",
+	"target": "http://www.blackwell-compass.com/subject/[^/]+/.+",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2012-03-19 10:31:24"
 }
 
 function detectWeb(doc, url) {
-	if (url.indexOf("search_results") != -1 || url.indexOf("section_home") != -1) {
+	/** if (url.indexOf("search_results") != -1 || url.indexOf("section_home") != -1) {
 		return "multiple";
 	} else {
 		return "journalArticle";
-	}
+	} **/
+	
+	return false;
 }
 
 function doWeb(doc, url) {
