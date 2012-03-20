@@ -110,7 +110,7 @@ function doWeb(doc, url) {
 
 function getpages(citationurl) {
 	//we work entirely from the citations page
-	Z.debug('citationurl: ' + citationurl)
+	Z.debug('citationurl: ' + citationurl);
 	Zotero.Utilities.processDocuments(citationurl, function (doc) {
 		scrape(doc);
 	}, function () {
@@ -172,7 +172,7 @@ function scrape(doc) {
 
 	Z.debug('eventvalidate: ' + eventvalidate);
 	Z.debug('viewstate: ' + viewstate);
-	if(!eventvalidate || !viewstate) Z.debug(doc.documentElement.body.innerHTML);
+	if(!eventvalidate || !viewstate) Z.debug('Export Citation Page Dump: ' + doc.documentElement.body.innerHTML);
 
 	var get = newurl;
 	var post = '__VIEWSTATE=' + viewstate + '&ctl00%24ctl14%24cultureList=en-us&ctl00%24ctl14%24SearchControl%24BasicSearchForTextBox=&ctl00%24ctl14%24SearchControl%24BasicAuthorOrEditorTextBox=&ctl00%24ctl14%24SearchControl%24BasicPublicationTextBox=&ctl00%24ctl14%24SearchControl%24BasicVolumeTextBox=&ctl00%24ctl14%24SearchControl%24BasicIssueTextBox=&ctl00%24ctl14%24SearchControl%24BasicPageTextBox=&ctl00%24ContentPrimary%24ctl00%24ctl00%24Export=AbstractRadioButton&ctl00%24ContentPrimary%24ctl00%24ctl00%24CitationManagerDropDownList=ReferenceManager&ctl00%24ContentPrimary%24ctl00%24ctl00%24ExportCitationButton=Export+Citation&__EVENTVALIDATION=' + eventvalidate;
