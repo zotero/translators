@@ -56,8 +56,8 @@ function detectWeb(doc, url) {
 		//p[@class="title"][./a]').length)
 		return "multiple";
 
-	var container = ZU.xpathText(doc, '//div[@id="Cockpit"]//a[@href="#ui-tabs-1"]')
-						.trim().toLowerCase();
+	var container = ZU.xpathText(doc, '//div[@id="Cockpit"]//a[@href="#ui-tabs-1"]');
+	if(container) container = container.trim().toLowerCase();
 
 	switch(slContainers[container]) {
 		//journal article list should have been picked up as multiple
@@ -71,6 +71,8 @@ function detectWeb(doc, url) {
 		case 'series':
 			return 'book';
 			break;
+		default:
+			Z.debug('unknown container: ' + container);
 	}
 }
 
@@ -108,7 +110,7 @@ function doWeb(doc, url) {
 
 function getpages(citationurl) {
 	//we work entirely from the citations page
-	//Z.debug(citationurl)
+	Z.debug('citationurl: ' + citationurl)
 	Zotero.Utilities.processDocuments(citationurl, function (doc) {
 		scrape(doc);
 	}, function () {
@@ -167,12 +169,15 @@ function scrape(doc) {
 	var absurl = newurl.replace(/export-citation/, "abstract/");
 	var viewstate = encodeURIComponent(ZU.xpathText(doc, '//input[@name="__VIEWSTATE"]/@value'));
 	var eventvalidate = encodeURIComponent(ZU.xpathText(doc, '//input[@name="__EVENTVALIDATION"]/@value'));
-	//Z.debug(eventvalidate);
-	//Z.debug(viewstate);
+
+	Z.debug('eventvalidate: ' + eventvalidate);
+	Z.debug('viewstate: ' + viewstate);
+	if(!eventvalidate || !viewstate) Z.debug(doc.documentElement.body.innerHTML);
+
 	var get = newurl;
 	var post = '__VIEWSTATE=' + viewstate + '&ctl00%24ctl14%24cultureList=en-us&ctl00%24ctl14%24SearchControl%24BasicSearchForTextBox=&ctl00%24ctl14%24SearchControl%24BasicAuthorOrEditorTextBox=&ctl00%24ctl14%24SearchControl%24BasicPublicationTextBox=&ctl00%24ctl14%24SearchControl%24BasicVolumeTextBox=&ctl00%24ctl14%24SearchControl%24BasicIssueTextBox=&ctl00%24ctl14%24SearchControl%24BasicPageTextBox=&ctl00%24ContentPrimary%24ctl00%24ctl00%24Export=AbstractRadioButton&ctl00%24ContentPrimary%24ctl00%24ctl00%24CitationManagerDropDownList=ReferenceManager&ctl00%24ContentPrimary%24ctl00%24ctl00%24ExportCitationButton=Export+Citation&__EVENTVALIDATION=' + eventvalidate;
 	Zotero.Utilities.HTTP.doPost(get, post, function (text) {
-		//Z.debug(text);
+		Z.debug('Citation Export: ' + text);
 		var translator = Zotero.loadTranslator("import");
 		// Calling the RIS translator
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
