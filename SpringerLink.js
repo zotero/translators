@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-12 23:14:24"
+	"lastUpdated": "2012-03-21 02:22:01"
 }
 
 /*
@@ -56,8 +56,8 @@ function detectWeb(doc, url) {
 		//p[@class="title"][./a]').length)
 		return "multiple";
 
-	var container = ZU.xpathText(doc, '//div[@id="Cockpit"]//a[@href="#ui-tabs-1"]')
-						.trim().toLowerCase();
+	var container = ZU.xpathText(doc, '//div[@id="Cockpit"]//a[@href="#ui-tabs-1"]');
+	if(container) container = container.trim().toLowerCase();
 
 	switch(slContainers[container]) {
 		//journal article list should have been picked up as multiple
@@ -71,6 +71,8 @@ function detectWeb(doc, url) {
 		case 'series':
 			return 'book';
 			break;
+		default:
+			Z.debug('unknown container: ' + container);
 	}
 }
 
@@ -101,14 +103,14 @@ function doWeb(doc, url) {
 	} else if( type == 'book' ){
 		scrapeBook(doc)
 	} else {
-		var citationurl = url.replace(/about\/|abstract\/|fulltext\.html|references\/|#.*/, "") + "export-citation";
+		var citationurl = url.replace(/(?:(?:about|abstract|fulltext\.html|references|export-citation)\/?)?(?:[#?].*)?$/, "") + "export-citation";
 		getpages(citationurl);
 	}
 }
 
 function getpages(citationurl) {
 	//we work entirely from the citations page
-	//Z.debug(citationurl)
+	Z.debug('citationurl: ' + citationurl);
 	Zotero.Utilities.processDocuments(citationurl, function (doc) {
 		scrape(doc);
 	}, function () {
@@ -121,7 +123,13 @@ function scrapeBook(doc) {
 
 	//title
 	item.title = ZU.xpathText(doc, '//div[@id="ContentHeading"]//h1[@class="title"]');
-	if(item.title) item.title = ZU.capitalizeTitle(ZU.trimInternal(item.title));
+
+	if(!item.title) {
+		Z.debug('Could not get book title');
+		Z.debug('Page Dump: ' + doc.body.innerHTML);
+	}
+
+	item.title = ZU.capitalizeTitle(ZU.trimInternal(item.title));
 
 	//authors
 	var authors = ZU.xpath(doc, '//div[@id="ContentHeading"]//p[@class="authors"]/a');
@@ -161,18 +169,14 @@ function scrapeBook(doc) {
 	item.complete();
 }
 
-function scrape(doc) {
+function scrapeRIS(doc, viewstate, eventvalidate) {
 	var newurl = doc.location.href;
 	var pdfurl = newurl.replace(/export-citation/, "fulltext.pdf");
 	var absurl = newurl.replace(/export-citation/, "abstract/");
-	var viewstate = encodeURIComponent(ZU.xpathText(doc, '//input[@name="__VIEWSTATE"]/@value'));
-	var eventvalidate = encodeURIComponent(ZU.xpathText(doc, '//input[@name="__EVENTVALIDATION"]/@value'));
-	//Z.debug(eventvalidate);
-	//Z.debug(viewstate);
 	var get = newurl;
-	var post = '__VIEWSTATE=' + viewstate + '&ctl00%24ctl14%24cultureList=en-us&ctl00%24ctl14%24SearchControl%24BasicSearchForTextBox=&ctl00%24ctl14%24SearchControl%24BasicAuthorOrEditorTextBox=&ctl00%24ctl14%24SearchControl%24BasicPublicationTextBox=&ctl00%24ctl14%24SearchControl%24BasicVolumeTextBox=&ctl00%24ctl14%24SearchControl%24BasicIssueTextBox=&ctl00%24ctl14%24SearchControl%24BasicPageTextBox=&ctl00%24ContentPrimary%24ctl00%24ctl00%24Export=AbstractRadioButton&ctl00%24ContentPrimary%24ctl00%24ctl00%24CitationManagerDropDownList=ReferenceManager&ctl00%24ContentPrimary%24ctl00%24ctl00%24ExportCitationButton=Export+Citation&__EVENTVALIDATION=' + eventvalidate;
+	var post = '__VIEWSTATE=' + encodeURIComponent(viewstate) + '&ctl00%24ctl14%24cultureList=en-us&ctl00%24ctl14%24SearchControl%24BasicSearchForTextBox=&ctl00%24ctl14%24SearchControl%24BasicAuthorOrEditorTextBox=&ctl00%24ctl14%24SearchControl%24BasicPublicationTextBox=&ctl00%24ctl14%24SearchControl%24BasicVolumeTextBox=&ctl00%24ctl14%24SearchControl%24BasicIssueTextBox=&ctl00%24ctl14%24SearchControl%24BasicPageTextBox=&ctl00%24ContentPrimary%24ctl00%24ctl00%24Export=AbstractRadioButton&ctl00%24ContentPrimary%24ctl00%24ctl00%24CitationManagerDropDownList=ReferenceManager&ctl00%24ContentPrimary%24ctl00%24ctl00%24ExportCitationButton=Export+Citation&__EVENTVALIDATION=' + encodeURIComponent(eventvalidate);
 	Zotero.Utilities.HTTP.doPost(get, post, function (text) {
-		//Z.debug(text);
+		//Z.debug('RIS Citation Export: ' + text);
 		var translator = Zotero.loadTranslator("import");
 		// Calling the RIS translator
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -193,6 +197,32 @@ function scrape(doc) {
 		});
 		translator.translate();
 	});
+}
+
+function scrape(doc) {
+	var viewstate = ZU.xpathText(doc, '//input[@name="__VIEWSTATE"]/@value');
+	var eventvalidate = ZU.xpathText(doc, '//input[@name="__EVENTVALIDATION"]/@value');
+
+	Z.debug('eventvalidate: ' + eventvalidate);
+	Z.debug('viewstate: ' + viewstate);
+	if(!eventvalidate || !viewstate) {
+		ZU.doGet(doc.location.href, function(text) {
+			var m = text.match(/name\s*=\s*(["'])__VIEWSTATE\1[^>]+?value=(['"])(.+?)\2/i);
+			if(m) viewstate = m[3];
+			m = text.match(/name\s*=\s*(["'])__EVENTVALIDATION\1[^>]+?value=(['"])(.+?)\2/i);
+			if(m) eventvalidate = m[3];
+
+			Z.debug('doGet viewstate: ' + viewstate);
+			Z.debug('doGet eventsvalidate: ' + eventvalidate);
+			if(!eventvalidate || !viewstate) Z.debug(text);
+
+			scrapeRIS(doc, viewstate, eventvalidate);
+		})
+	} else {
+		scrapeRIS(doc, viewstate, eventvalidate);
+	}
+
+
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
