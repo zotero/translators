@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-20 05:09:22"
+	"lastUpdated": "2012-03-21 02:37:51"
 }
 
 /*
@@ -182,7 +182,7 @@ function detectWeb(doc, url) {
 						ogType = "videoRecording";
 						break;
 					case "article":
-						ogType = "newspaperArticle";
+						ogTypeGuess = "newspaperArticle";
 						break;
 					case "book":
 						ogType = "book";
@@ -319,7 +319,7 @@ function detectWeb(doc, url) {
 								prismTypeGuess = 'tvBroadcast';
 								break;
 							case 'web':
-								prismTypeGuess = 'website';
+								prismTypeGuess = 'webpage';
 								break;
 						}
 						break;
@@ -355,7 +355,6 @@ function detectWeb(doc, url) {
 						case 'journalitem':
 						case 'journalarticle':
 						case 'submittedjournalarticle':
-						case 'workingpaper':	//should this be here?
 							eprintsType = 'journalArticle';
 							break;
 						case 'newsitem':
@@ -363,6 +362,9 @@ function detectWeb(doc, url) {
 							break;
 						case 'scholarlytext':
 							eprintsTypeGuess = 'journalArticle';
+							break;
+						case 'workingpaper':
+							eprintsType = 'manuscript';
 							break;
 
 						//from http://www.idealliance.org/specifications/prism/specifications/prism-controlled-vocabularies/prism-12-controlled-vocabularies
