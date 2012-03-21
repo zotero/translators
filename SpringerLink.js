@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-20 17:35:21"
+	"lastUpdated": "2012-03-21 02:22:01"
 }
 
 /*
@@ -176,7 +176,7 @@ function scrapeRIS(doc, viewstate, eventvalidate) {
 	var get = newurl;
 	var post = '__VIEWSTATE=' + encodeURIComponent(viewstate) + '&ctl00%24ctl14%24cultureList=en-us&ctl00%24ctl14%24SearchControl%24BasicSearchForTextBox=&ctl00%24ctl14%24SearchControl%24BasicAuthorOrEditorTextBox=&ctl00%24ctl14%24SearchControl%24BasicPublicationTextBox=&ctl00%24ctl14%24SearchControl%24BasicVolumeTextBox=&ctl00%24ctl14%24SearchControl%24BasicIssueTextBox=&ctl00%24ctl14%24SearchControl%24BasicPageTextBox=&ctl00%24ContentPrimary%24ctl00%24ctl00%24Export=AbstractRadioButton&ctl00%24ContentPrimary%24ctl00%24ctl00%24CitationManagerDropDownList=ReferenceManager&ctl00%24ContentPrimary%24ctl00%24ctl00%24ExportCitationButton=Export+Citation&__EVENTVALIDATION=' + encodeURIComponent(eventvalidate);
 	Zotero.Utilities.HTTP.doPost(get, post, function (text) {
-		Z.debug('RIS Citation Export: ' + text);
+		//Z.debug('RIS Citation Export: ' + text);
 		var translator = Zotero.loadTranslator("import");
 		// Calling the RIS translator
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -206,15 +206,16 @@ function scrape(doc) {
 	Z.debug('eventvalidate: ' + eventvalidate);
 	Z.debug('viewstate: ' + viewstate);
 	if(!eventvalidate || !viewstate) {
-		Z.debug('Export Citation Page Dump: ' + doc.body.innerHTML);
 		ZU.doGet(doc.location.href, function(text) {
-			Z.debug('doGet text: ' + text);
 			var m = text.match(/name\s*=\s*(["'])__VIEWSTATE\1[^>]+?value=(['"])(.+?)\2/i);
 			if(m) viewstate = m[3];
-			Z.debug('doGet viewstate: ' + viewstate);
 			m = text.match(/name\s*=\s*(["'])__EVENTVALIDATION\1[^>]+?value=(['"])(.+?)\2/i);
 			if(m) eventvalidate = m[3];
+
+			Z.debug('doGet viewstate: ' + viewstate);
 			Z.debug('doGet eventsvalidate: ' + eventvalidate);
+			if(!eventvalidate || !viewstate) Z.debug(text);
+
 			scrapeRIS(doc, viewstate, eventvalidate);
 		})
 	} else {
