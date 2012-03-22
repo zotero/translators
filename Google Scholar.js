@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-03-22 07:14:31"
+	"lastUpdated": "2012-03-22 07:28:43"
 }
 
 /*
@@ -69,7 +69,10 @@ function setGSPCookie(doc, cookie) {
 				':CF=4';	//this is the value assigned to BibTeX on Google Scholar Preferences page
 	}
 
-	cookie += '; domain=.scholar.google.com' +
+	var domain = doc.location.href
+				.match(/https?:\/\/[^\/]*?(scholar\.google\.[^:\/]+)/i)[1];
+
+	cookie += '; domain=.' + domain +
 				'; expires=Sun, 17 Jan 2038 19:14:09 UTC';	//this is what google scholar uses
 
 	doc.cookie = cookie;
