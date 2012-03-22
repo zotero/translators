@@ -254,7 +254,7 @@ var testCases = [
 				"ISSN": "0009-5982",
 				"date": "June 16, 2006",
 				"title": "Grinnell's Green Secrets",
-				"section": "News",
+				"section": "News : Short Subjects",
 				"libraryCatalog": "The Chronicle of Higher Education",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}

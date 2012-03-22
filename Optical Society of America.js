@@ -273,7 +273,8 @@ var testCases = [
 				"itemType": "conferencePaper",
 				"creators": [
 					{
-						"lastName": "Praveen Chathnath",
+						"lastName": "Chathnath",
+						"firstName": "Praveen",
 						"creatorType": "author"
 					}
 				],

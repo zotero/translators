@@ -324,7 +324,7 @@ var testCases = [{
 		}],
 		"abstractNote": "A device and method for optically pumping a gaseous laser using blackbody radiation produced by a plasma channel which is formed from an electrical discharge between two electrodes spaced at opposite longitudinal ends of the laser. A preionization device which can comprise a laser or electron beam accelerator produces a preionization beam which is sufficient to cause an electrical discharge between the electrodes to initiate the plasma channel along the preionization path. The optical pumping energy is supplied by a high voltage power supply rather than by the preionization beam. High output optical intensities are produced by the laser due to the high temperature blackbody radiation produced by the plasma channel, in the same manner as an exploding wire type laser. However, unlike the exploding wire type laser, the disclosed invention can be operated in a repetitive manner by utilizing a repetitive pulsed preionization device.",
 		"country": "United States",
-		"extra": "U.S. Classification: 372/70\nInternational Classification: : H01S  3091",
+		"extra": "U.S. Classification: 372/70\nInternational Classification: : H01S 3091",
 		"patentNumber": "4390992",
 		"date": "Jun 28, 1983",
 		"filingDate": "Jul 17, 1981",

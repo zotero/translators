@@ -125,7 +125,7 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "Michael.",
+						"firstName": "Michael",
 						"lastName": "Dewing",
 						"creatorType": "author"
 					}

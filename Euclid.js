@@ -169,6 +169,7 @@ var testCases = [{
 		"ISSN": "0022-4812",
 		"language": "EN",
 		"libraryCatalog": "Euclid",
+		"extra":"Mathematical Reviews number (MathSciNet): MR2849259",
 		"accessDate": "CURRENT_TIMESTAMP"
 	}]
 }, {
@@ -203,6 +204,7 @@ var testCases = [{
 		"ISSN": "1932-6157",
 		"language": "EN",
 		"libraryCatalog": "Euclid",
+		"extra":"Mathematical Reviews number (MathSciNet): MR2849772; Zentralblatt MATH identifier: 1223.62160",
 		"accessDate": "CURRENT_TIMESTAMP"
 	}]
 }]

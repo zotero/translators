@@ -538,8 +538,8 @@ var testCases = [
 				"itemType": "bookSection",
 				"creators": [
 					{
-						"lastName": "Dierk",
-						"firstName": "Raabe",
+						"lastName": "Raabe",
+						"firstName": "Dierk",
 						"creatorType": "author"
 					}
 				],
