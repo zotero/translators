@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-03-05 00:57:45"
+	"lastUpdated": "2012-03-22 07:03:08"
 }
 
 /*
@@ -71,14 +71,36 @@ function doWeb(doc, url) {
 		if(!haveBibTexLinks) {
 			url = url.replace (/hl\=[^&]*&?/, "");
 			url = url.replace("scholar?", "scholar_setprefs?hl=en&scis=yes&scisf=4&submit=Save+Preferences&");
-			Zotero.Utilities.processDocuments(url, function(scisigDoc) {
-				var scisig = scisigDoc.evaluate('//input[@name="scisig"]',
-					scisigDoc, null, XPathResult.ANY_TYPE, null).iterateNext();
-				url = url + "&scisig="+scisig.value;
-				Zotero.Utilities.processDocuments(url, function(doc) {
-					scrapeListing(doc);
-				}, function() {});
-			}, function() {});
+			
+			// We can't use processDocuments here in connectors/bookmarklets because the page will 
+			// break out of the iframe, causing confusion
+			Zotero.Utilities.doGet(url, function(scisigDoc) {
+				var scisig = /<input\s+type="?hidden"?\s+name="?scisig"?\s+value="([^"]+)"/.exec(scisigDoc);
+				url = url + "&scisig="+scisig[1];
+				
+					Zotero.debug(doc.defaultView.navigator.userAgent)
+				if(Zotero.isBookmarklet || doc.defaultView && (doc.defaultView.navigator.userAgent.indexOf("AppleWebKit/") !== -1)) {
+					// Again, outside of Firefox, the page may break out of the iframe here. We
+					// don't want it to do that. In Firefox, this code causes a security error, so
+					// we don't run it there.
+					
+					Zotero.Utilities.doGet(url, function(response) {
+						// create an iframe
+						var iframe = doc.createElement("iframe");
+						iframe.style.display = "none";
+						doc.body.appendChild(iframe);
+						
+						// load page into iframe with the script tags removed
+						var newDoc = iframe.contentDocument;
+						newDoc.open();
+						newDoc.write(response.replace(/<script>[\s\S]*?<\/script>/g, ""));
+						newDoc.close();
+						scrapeListing(newDoc);
+					}, function() {});
+				} else {
+					Zotero.Utilities.processDocuments(url, scrapeListing);
+				}
+			});
 		} else {
 			scrapeListing(doc);
 		}
