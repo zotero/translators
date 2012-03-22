@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-03-22 07:03:08"
+	"lastUpdated": "2012-03-22 07:11:24"
 }
 
 /*
@@ -78,7 +78,6 @@ function doWeb(doc, url) {
 				var scisig = /<input\s+type="?hidden"?\s+name="?scisig"?\s+value="([^"]+)"/.exec(scisigDoc);
 				url = url + "&scisig="+scisig[1];
 				
-					Zotero.debug(doc.defaultView.navigator.userAgent)
 				if(Zotero.isBookmarklet || doc.defaultView && (doc.defaultView.navigator.userAgent.indexOf("AppleWebKit/") !== -1)) {
 					// Again, outside of Firefox, the page may break out of the iframe here. We
 					// don't want it to do that. In Firefox, this code causes a security error, so
