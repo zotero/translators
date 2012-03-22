@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-03-22 05:24:00"
+	"lastUpdated": "2012-03-22 07:14:31"
 }
 
 /*
@@ -45,6 +45,7 @@
  */
 
 var bogusItemID = 1;
+var __OLD_COOKIE;
 
 var detectWeb = function (doc, url) {
 	// Icon shows only for search results and law cases
@@ -55,6 +56,37 @@ var detectWeb = function (doc, url) {
 		'//div[@class="gs_r"]/div[@class="gs_fl"]/a[contains(@href,"q=related:")]')
 		.length ) {
 		return "multiple";
+	}
+}
+
+//sets Google Scholar Preference cookie and returns old value
+function setGSPCookie(doc, cookie) {
+	var m = doc.cookie.match(/\bGSP=[^;]+/);
+	var oldCookie = m[0];
+
+	if(!cookie) {
+		cookie = oldCookie.replace(/:?\s*\bCF=\d+/,'') +
+				':CF=4';	//this is the value assigned to BibTeX on Google Scholar Preferences page
+	}
+
+	cookie += '; domain=.scholar.google.com' +
+				'; expires=Sun, 17 Jan 2038 19:14:09 UTC';	//this is what google scholar uses
+
+	doc.cookie = cookie;
+	return oldCookie;
+}
+
+function prepareCookie(doc) {
+	//check if we need to change cookie
+	var m = doc.cookie.match(/\bGSP=[^;]+?\bCF=(\d+)/);
+	if(!m || m[1] != 4) {
+		__OLD_COOKIE = setGSPCookie(doc);
+	}
+}
+
+function restoreCookie(doc) {
+	if(__OLD_COOKIE) {
+		setGSPCookie(doc, __OLD_COOKIE);
 	}
 }
 
@@ -113,6 +145,8 @@ function doWeb(doc, url) {
 		Zotero.selectItems(articles, function(selectedItems) {
 			if(!selectedItems) return true;
 
+			prepareCookie(doc);
+
 			var links = new Array();
 			var selectedCases = new Array();
 			//cases are handled differently from articles
@@ -124,7 +158,7 @@ function doWeb(doc, url) {
 				}
 			}
 			if(links.length) {
-				ZU.doGet(links, scrapeBibTeX);
+				ZU.doGet(links, scrapeBibTeX, function() { restoreCookie(doc) });
 			}
 			if(selectedCases.length) {
 				scrapeCaseResults(selectedCases);
@@ -167,6 +201,7 @@ var scrapeCaseResults = function (cases) {
 
 function processFactories(factories) {
 	if(!factories.length) {
+		restoreCookie(doc);
 		Zotero.done();
 		return;
 	}
