@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-03-22 03:13:09"
+	"lastUpdated": "2012-03-22 05:24:00"
 }
 
 /*
@@ -48,126 +48,121 @@ var bogusItemID = 1;
 
 var detectWeb = function (doc, url) {
 	// Icon shows only for search results and law cases
-	if (url.match(/scholar_case/)) {
-		if (url.match(/about=/)) {
-			return false;
-		} else {
+	if (url.indexOf('/scholar_case?') != -1 &&
+		url.indexOf('about=') == -1) {
 			return "case";
-		}
-	} else {
+	} else if( ZU.xpath(doc,
+		'//div[@class="gs_r"]/div[@class="gs_fl"]/a[contains(@href,"q=related:")]')
+		.length ) {
 		return "multiple";
-	}
-};
-
-function doWeb(doc, url) {
-	var haveBibTexLinks;
-	// Invoke the case or the listing scraper, as appropriate.
-	// In a listings page, this forces use of bibtex data and English page version
-	if (url.match(/scholar_case/)) {
-		scrapeCase(doc, url);
-	} else {
-		haveBibTexLinks = doc.evaluate('//a[contains(@href, "scholar.bib")]',
-			doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-		if(!haveBibTexLinks) {
-			url = url.replace (/hl\=[^&]*&?/, "");
-			url = url.replace("scholar?", "scholar_setprefs?hl=en&scis=yes&scisf=4&submit=Save+Preferences&");
-			
-			// We can't use processDocuments here in connectors/bookmarklets because the page will 
-			// break out of the iframe, causing confusion
-			Zotero.Utilities.doGet(url, function(scisigDoc) {
-				var scisig = /<input\s+type="?hidden"?\s+name="?scisig"?\s+value="([^"]+)"/.exec(scisigDoc);
-				url = url + "&scisig="+scisig[1];
-				
-				if(Zotero.isBookmarklet || doc.defaultView && (doc.defaultView.navigator.userAgent.indexOf("AppleWebKit/") !== -1)) {
-					// Again, outside of Firefox, the page may break out of the iframe here. We
-					// don't want it to do that. In Firefox, this code causes a security error, so
-					// we don't run it there.
-					
-					Zotero.Utilities.doGet(url, function(response) {
-						// create an iframe
-						var iframe = doc.createElement("iframe");
-						iframe.style.display = "none";
-						doc.body.appendChild(iframe);
-						
-						// load page into iframe with the script tags removed
-						var newDoc = iframe.contentDocument;
-						newDoc.open();
-						newDoc.write(response.replace(/<script>[\s\S]*?<\/script>/g, ""));
-						newDoc.close();
-						scrapeListing(newDoc);
-					}, function() {});
-				} else {
-					Zotero.Utilities.processDocuments(url, scrapeListing);
-				}
-			});
-		} else {
-			scrapeListing(doc);
-		}
-		Zotero.wait();
 	}
 }
 
+function scrapeBibTeX(text) {
+	var translator = Zotero.loadTranslator('import');
+	translator.setTranslator('9cb70025-a888-4a29-a210-93ec52da40d4');
+	translator.setString(text);
+
+	translator.translate();
+}
+
+function isCase(result) {
+	if(ZU.xpath(result, './h3[@class="gs_rt"]/a[1][contains(@href,"/scholar_case?")]').length)
+		return true;
+
+	//if there is no link (i.e. [CITATION]), we can determine this by the second line
+	//cases seem to always start with a number, while articles don't
+	if(!ZU.xpath(result, './h3[@class="gs_rt"]/a').length &&
+		ZU.xpathText(result, './div[@class="gs_a"]').match(/^\s*\d/)) {
+		return true;
+	}
+}
+
+function doWeb(doc, url) {
+	// Invoke the case or the listing scraper, as appropriate.
+	// In a listings page, this forces use of bibtex data and English page version
+	if (url.indexOf('/scholar_case?') != -1) {
+		scrapeCase(doc, url);
+	} else {
+		/**Having RefWorks set in the preferences as the default citation export
+		 * producess export links, which don't work very well with our translator
+		 * We should always be able to build bibtex links from the Related articles
+		 * link.
+		 */
+		var results = ZU.xpath(doc,
+			'//div[@class="gs_r"][./div[@class="gs_fl"]/a[contains(@href,"q=related:")]]');
+
+		var articles = new Object();
+		var cases = new Object();
+		var bibtexUrl;
+		for(var i=0, n=results.length; i<n; i++) {
+			bibtexUrl = ZU.xpathText(results[i],
+				'./div[@class="gs_fl"]/a[contains(@href,"q=related:")]/@href')
+				.replace(/\/scholar\?/,'/scholar.bib?')
+				.replace(/=related:/,'=info:')
+				+ '&ct=citation&cd=1&output=citation';
+			articles[bibtexUrl] = ZU.xpathText(results[i], './h3[@class="gs_rt"]');
+
+			//Some cases don't have a link, but we can extract plenty of
+			//information from the search result
+			if(isCase(results[i])) {
+				cases[bibtexUrl] = results[i];
+			}
+		}
+
+		Zotero.selectItems(articles, function(selectedItems) {
+			if(!selectedItems) return true;
+
+			var links = new Array();
+			var selectedCases = new Array();
+			//cases are handled differently from articles
+			for(var i in selectedItems) {
+				if(cases[i]) {
+					selectedCases.push({bibtexLink: i, result: cases[i]});
+				} else {
+					links.push(i);
+				}
+			}
+			if(links.length) {
+				ZU.doGet(links, scrapeBibTeX);
+			}
+			if(selectedCases.length) {
+				scrapeCaseResults(selectedCases);
+			}
+		});
+	}
+}
 
 /*
  * #########################
  * ### Scraper Functions ###
  * #########################
  */
-var scrapeListing = function (doc) {
-	// XML fragment lists
-	var titleFrags = doc.evaluate('//div[@class="gs_r"]//h3[not(contains(a/@href,"/citations"))]', doc, null, XPathResult.ANY_TYPE, null);
-	var citeletFrags = doc.evaluate('//div[@class="gs_a"]', doc, null, XPathResult.ANY_TYPE, null);
-	var  bibtexFrags = doc.evaluate('//a[contains(@href, "scholar.bib")]',
-				doc, null, XPathResult.ANY_TYPE, null);
+var scrapeCaseResults = function (cases) {
+	var factories = new Array();
 
-	var labels = [];
-	var factories = [];
-
-	while (true) {
-		var titleFrag = titleFrags.iterateNext();
-		if (!titleFrag) {
-			break;
-		}
-		// initialize argument values
-		var titleString = titleFrag.textContent;
-		var citeletString = citeletFrags.iterateNext().textContent;
-		var bibtexLink = bibtexFrags.iterateNext().href;
-		var attachmentFrag = doc.evaluate('.//a',
-				titleFrag, null, XPathResult.ANY_TYPE, null).iterateNext();
+	for(var i=0, n=cases.length; i<n; i++) {
+		var titleString = ZU.xpathText(cases[i].result, './h3[@class="gs_rt"]');
+		var citeletString = ZU.xpathText(cases[i].result, './div[@class="gs_a"]');
+	
+		var attachmentFrag = ZU.xpathText(cases[i].result, './h3[@class="gs_rt"]/a/@href');
 		if (attachmentFrag) {
-			var attachmentLinks = [attachmentFrag.href];
+			var attachmentLinks = [attachmentFrag];
 		} else {
 			var attachmentLinks = [];
 		}
-
+	
 		// Instantiate item factory with available data
-		var factory = new ItemFactory(citeletString, attachmentLinks, titleString, bibtexLink);
-
+		var factory = new ItemFactory(citeletString, attachmentLinks, titleString, cases[i].bibtexLink);
+	
 		if (!factory.hasUsefulData()) {
 			continue;
 		}
-		// (Feed the array used in the selection list)
-		if (factory.hyphenSplit.length) {
-			labels.push(titleString + " (" + factory.trailingInfo + ")");
-		} else {
-			labels.push(titleString);
-		}
+
 		factories.push(factory);
 	}
 
-	Zotero.selectItems(labels, function(items) {
-		if(!items) {
-			return false;
-		}
-		
-		var newFactories = [];
-		for(var i in items) {
-			newFactories.push(factories[i]);
-		}
-		
-		processFactories(newFactories);
-	});
-	return true;
+	processFactories(factories);
 };
 
 function processFactories(factories) {
