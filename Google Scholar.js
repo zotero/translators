@@ -2,14 +2,14 @@
 	"translatorID": "57a00950-f0d1-4b41-b6ba-44ff0fc30289",
 	"label": "Google Scholar",
 	"creator": "Simon Kornblith, Frank Bennett",
-	"target": "^https?://scholar\\.google\\.(?:com|com?\\.[a-z]{2}|[a-z]{2}|co\\.[a-z]{2})/scholar(?:_case)*",
+	"target": "^https?://scholar\\.google\\.(?:com|cat|(?:com?\\.)?[a-z]{2})/scholar(?:_case)?\\?",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-03-22 07:11:24"
+	"lastUpdated": "2012-03-22 03:13:09"
 }
 
 /*
