@@ -9,14 +9,15 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-10 20:23:42"
+	"lastUpdated": "2012-03-22 17:35:44"
 }
 
 function detectWeb(doc, url) {
 	var export_options = ZU.xpath(doc, '//form[@name="frm"]//*[@name="RD"]|//td/select[@name="RD"]');
 	if (!export_options.length) return false;
 	export_options = export_options[0];
-	for (var i in export_options) {
+	var i = 0
+	while (i< export_options.length) {
 		if (export_options[i].text == 'Latin1 MARC' || export_options[i].text == 'Raw MARC' || export_options[i].text == 'MARC 21' || export_options[i].text == 'MARC 8' || export_options[i].text == 'MARC-8' || export_options[i].text == 'UTF-8' || export_options[i].text == 'MARC (Unicode/UTF-8)' || export_options[i].text == 'MARC UTF-8' || export_options[i].text == 'UTF-8 MARC (Unicode)' || export_options[i].text == 'UTF8-Unicode' || export_options[i].text == 'MARC (non-Unicode/MARC-8)' || export_options[i].text == 'MARC communication format' || export_options[i].text == 'MARC Record') {
 			// We have an exportable single record
 			if (ZU.xpath(doc, '//form[@name="frm"]//*[@name="RC"]').length) {
@@ -25,6 +26,7 @@ function detectWeb(doc, url) {
 				return "book";
 			}
 		}
+		i++;
 	}
 }
 
@@ -164,30 +166,43 @@ function doWeb(doc, url) {
 }
 
 /** BEGIN TEST CASES **/
-var testCases = [{
-	"type": "web",
-	"url": "https://i-share.carli.illinois.edu/nby/cgi-bin/Pwebrecon.cgi?DB=local&v1=1&BBRecID=790862",
-	"items": [{
-		"itemType": "book",
-		"creators": [{
-			"firstName": "Francisco",
-			"lastName": "Xarque",
-			"creatorType": "author"
-		}],
-		"notes": [{
-			"note": "Brunet and Graesse both mention a map of Paraguay; this copy has a map of Chile with title: Tabula geocraphica [sic] regni Chile / studio et labore P. Procuratoris Chilensis Societatis Jesu In 3 books; the first two are biographies of Jesuits, Simon Mazeta and Francisco Diaz Taño, the 3rd deals with Jesuit missions in Paraguay Head and tail pieces"
-		}],
-		"tags": ["Masseta, Simon", "Cuellar y Mosquera, Gabriel de", "Missions", "Paraguay"],
-		"seeAlso": [],
-		"attachments": [],
-		"title": "Insignes missioneros de la Compañia de Jesus en la prouincia del Paraguay: estado presente de sus missiones en Tucuman, Paraguay, y Rio de la Plata, que comprehende su distrito",
-		"place": "En Pamplona",
-		"publisher": "Por Juan Micòn, Impressor",
-		"date": "1687",
-		"numPages": "24",
-		"callNumber": "VAULT Ayer 1343 .J515 P211 X2 1687",
-		"libraryCatalog": "i-share.carli.illinois.edu Library Catalog",
-		"shortTitle": "Insignes missioneros de la Compañia de Jesus en la prouincia del Paraguay"
-	}]
-}]
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://i-share.carli.illinois.edu/nby/cgi-bin/Pwebrecon.cgi?DB=local&v1=1&BBRecID=790862",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Francisco",
+						"lastName": "Xarque",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "Brunet and Graesse both mention a map of Paraguay; this copy has a map of Chile with title: Tabula geocraphica [sic] regni Chile / studio et labore P. Procuratoris Chilensis Societatis Jesu In 3 books; the first two are biographies of Jesuits, Simon Mazeta and Francisco Diaz Taño, the 3rd deals with Jesuit missions in Paraguay Head and tail pieces"
+					}
+				],
+				"tags": [
+					"Masseta, Simon",
+					"Cuellar y Mosquera, Gabriel de",
+					"Missions",
+					"Paraguay"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Insignes missioneros de la Compañia de Jesus en la prouincia del Paraguay: estado presente de sus missiones en Tucuman, Paraguay, y Rio de la Plata, que comprehende su distrito",
+				"place": "En Pamplona",
+				"publisher": "Por Juan Micòn, Impressor",
+				"date": "1687",
+				"numPages": "24",
+				"callNumber": "VAULT Ayer 1343 .J515 P211 X2 1687",
+				"libraryCatalog": "i-share.carli.illinois.edu Library Catalog",
+				"shortTitle": "Insignes missioneros de la Compañia de Jesus en la prouincia del Paraguay"
+			}
+		]
+	}
+]
 /** END TEST CASES **/
