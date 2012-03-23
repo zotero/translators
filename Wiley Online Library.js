@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-17 02:25:22"
+	"lastUpdated": "2012-03-22 17:58:45"
 }
 
 /*
@@ -115,15 +115,22 @@ function scrape(doc, url, pdfUrl) {
 			if( itemType == 'bookSection' ) {
 				var authors = ZU.xpath(doc, '//ol[@id="authors"]/li/node()[1]');
 				for(var i=0, n=authors.length; i<n; i++) {
+						if (authors[i].textContent == authors[i].textContent.toUpperCase()) {
+							authors[i].textContent = Zotero.Utilities.capitalizeTitle(authors[i].textContent.toLowerCase(),true);}
 					item.creators.push(
 						ZU.cleanAuthor( getAuthorName(authors[i].textContent),
 											'author',false) );
 				}
 				item.rights = ZU.xpathText(doc, '//p[@id="copyright"]');
-
 				//this is not great for summary, but will do for now
 				item.abstractNote = ZU.xpathText(doc, '//div[@id="abstract"]/div[@class="para"]//p', null, "\n");
 			} else {
+				for (i in item.creators){
+					if (item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
+						item.creators[i].lastName = Zotero.Utilities.capitalizeTitle(item.creators[i].lastName.toLowerCase(),true);}
+					if (item.creators[i].firstName == item.creators[i].firstName.toUpperCase()) {
+						item.creators[i].firstName = Zotero.Utilities.capitalizeTitle(item.creators[i].firstName.toLowerCase(),true);}
+				}
 				var keywords = ZU.xpathText(doc, '//meta[@name="citation_keywords"]/@content');
 				if(keywords) {
 					item.tags = keywords.split(', ');
@@ -148,6 +155,7 @@ function scrape(doc, url, pdfUrl) {
 				if(u) {
 					ZU.doGet(u, function(text) {
 						var m = text.match(/<iframe id="pdfDocument"[^>]+?src="([^"]+)"/i);
+						Z.debug(m);
 						if(m) {
 							item.attachments.push({url: m[1], title: 'Full Text PDF', mimeType: 'application/pdf'});
 						}
@@ -370,10 +378,6 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"title": "Silent Cinema and its Pioneers (1906–1930)",
