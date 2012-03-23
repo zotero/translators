@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-17 02:25:22"
+	"lastUpdated": "2012-03-22 17:58:45"
 }
 
 /*
@@ -113,17 +113,22 @@ function scrape(doc, url, pdfUrl) {
 		translator.setDocument(doc);
 		translator.setHandler('itemDone', function(obj, item) {
 			if( itemType == 'bookSection' ) {
-				var authors = ZU.xpath(doc, '//ol[@id="authors"]/li/node()[1]');
-				for(var i=0, n=authors.length; i<n; i++) {
-					item.creators.push(
-						ZU.cleanAuthor( getAuthorName(authors[i].textContent),
-											'author',false) );
-				}
-				item.rights = ZU.xpathText(doc, '//p[@id="copyright"]');
-
-				//this is not great for summary, but will do for now
-				item.abstractNote = ZU.xpathText(doc, '//div[@id="abstract"]/div[@class="para"]//p', null, "\n");
+			  var authors = ZU.xpath(doc, '//ol[@id="authors"]/li/node()[1]');
+			  for(var i=0, n=authors.length; i<n; i++) {
+			  	if (authors[i].textContent == authors[i].textContent.toUpperCase()) {
+			 			authors[i].textContent = Zotero.Utilities.capitalizeTitle(authors[i].textContent.toLowerCase(),true);}
+			    	item.creators.push(ZU.cleanAuthor( getAuthorName(authors[i].textContent),'author',false) );
+			  }
+			  item.rights = ZU.xpathText(doc, '//p[@id="copyright"]');
+			  //this is not great for summary, but will do for now
+			  item.abstractNote = ZU.xpathText(doc, '//div[@id="abstract"]/div[@class="para"]//p', null, "\n");
 			} else {
+			  for (var i in item.creators){
+					if (item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
+						item.creators[i].lastName = Zotero.Utilities.capitalizeTitle(item.creators[i].lastName.toLowerCase(),true);}
+					if (item.creators[i].firstName == item.creators[i].firstName.toUpperCase()) {
+						item.creators[i].firstName = Zotero.Utilities.capitalizeTitle(item.creators[i].firstName.toLowerCase(),true);}
+				}
 				var keywords = ZU.xpathText(doc, '//meta[@name="citation_keywords"]/@content');
 				if(keywords) {
 					item.tags = keywords.split(', ');
@@ -148,6 +153,7 @@ function scrape(doc, url, pdfUrl) {
 				if(u) {
 					ZU.doGet(u, function(text) {
 						var m = text.match(/<iframe id="pdfDocument"[^>]+?src="([^"]+)"/i);
+						Z.debug(m);
 						if(m) {
 							item.attachments.push({url: m[1], title: 'Full Text PDF', mimeType: 'application/pdf'});
 						}
@@ -223,505 +229,505 @@ function doWeb(doc, url) {
 	}
 }/** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "http://onlinelibrary.wiley.com/advanced/search/results/reentry?scope=allContent&query=zotero&inTheLastList=6&queryStringEntered=false&searchRowCriteria[0].fieldName=all-fields&searchRowCriteria[0].booleanConnector=and&searchRowCriteria[1].fieldName=all-fields&searchRowCriteria[1].booleanConnector=and&searchRowCriteria[2].fieldName=all-fields&searchRowCriteria[2].booleanConnector=and&start=1&resultsPerPage=20&ordering=relevancy",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://onlinelibrary.wiley.com/doi/10.1002/9781118269381.notes/summary",
-		"items": [
-			{
-				"itemType": "bookSection",
-				"creators": [
-					{
-						"firstName": "Curtis J.",
-						"lastName": "Bonk",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"title": "Endnotes",
-				"bookTitle": "The World is Open",
-				"publisher": "Jossey‐Bass",
-				"ISBN": "9781118269381",
-				"DOI": "10.1002/9781118269381.notes",
-				"language": "en",
-				"pages": "427-467",
-				"url": "http://onlinelibrary.wiley.com/doi/10.1002/9781118269381.notes/summary",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "onlinelibrary.wiley.com",
-				"rights": "Copyright © 2009 Curtis J. Bonk. All rights reserved."
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://onlinelibrary.wiley.com/doi/10.1111/jgi.2004.19.issue-s1/issuetoc",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://onlinelibrary.wiley.com/book/10.1002/9783527610853",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"firstName": "Dietrich",
-						"lastName": "Papenfuß",
-						"creatorType": "editor"
-					},
-					{
-						"firstName": "Dieter",
-						"lastName": "Lüst",
-						"creatorType": "editor"
-					},
-					{
-						"firstName": "Wolfgang P.",
-						"lastName": "Schleich",
-						"creatorType": "editor"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "100 Years Werner Heisenberg: Works and Impact",
-				"date": "November 29, 2007",
-				"DOI": "10.1002/9783527610853",
-				"ISBN": "9783527403929, 9783527610853",
-				"rights": "Copyright © 2002 Wiley-VCH Verlag GmbH",
-				"url": "http://onlinelibrary.wiley.com/book/10.1002/9783527610853",
-				"abstractNote": "Over 40 renowned scientists from all around the world discuss the work and influence of Werner Heisenberg. The papers result from the symposium held by the Alexander von Humboldt-Stiftung on the occasion of the 100th anniversary of Heisenberg's birth, one of the most important physicists of the 20th century and cofounder of modern-day quantum mechanics. Taking atomic and laser physics as their starting point, the scientists illustrate the impact of Heisenberg's theories on astroparticle physics, high-energy physics and string theory right up to processing quantum information.",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "Wiley Online Library",
-				"shortTitle": "100 Years Werner Heisenberg"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://onlinelibrary.wiley.com/doi/10.1002/9781444304794.ch1/summary",
-		"items": [
-			{
-				"itemType": "bookSection",
-				"creators": [
-					{
-						"firstName": "Tatjana",
-						"lastName": "Pavlović",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Inmaculada",
-						"lastName": "Alvarez",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Rosana",
-						"lastName": "Blanco-Cano",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Anitra",
-						"lastName": "Grisales",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Alejandra",
-						"lastName": "Osorio",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Alejandra",
-						"lastName": "Sá",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"silent cinema and its pioneers (1906–1930)",
-					"Ángel García Cardona's El ciego de aldea (1906)",
-					"Ángel García Cardona and Antonio Cuesta",
-					"Ricardo Baños and Albert Marro's Don Pedro el Cruel (1911)",
-					"Fructuós Gelabert's Amor que mata (1909)",
-					"three films ‐ part of “the preliminary industrial and expressive framework for Spain's budding cinema”",
-					"Directors (Life and Works) ‐ Ángel García Cardona and Antonio Cuesta13",
-					"Ricardo Baños",
-					"Florián Rey's La aldea maldita (1930)",
-					"Florián Rey (Antonio Martínez de Castillo)",
-					"Fructuós Gelabert ‐ made the first Spanish fiction film",
-					"Riña en un café",
-					"1897"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"title": "Silent Cinema and its Pioneers (1906–1930)",
-				"bookTitle": "100 Years of Spanish Cinema",
-				"publisher": "Wiley‐Blackwell",
-				"ISBN": "9781444304794",
-				"DOI": "10.1002/9781444304794.ch1",
-				"language": "en",
-				"pages": "1-20",
-				"url": "http://onlinelibrary.wiley.com/doi/10.1002/9781444304794.ch1/summary",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "onlinelibrary.wiley.com",
-				"rights": "Copyright © 2009 Tatjana Pavlović, Inmaculada Alvarez, Rosana Blanco-Cano, Anitra Grisales, Alejandra Osorio, and Alejandra Sánchez",
-				"abstractNote": "This chapter contains sections titled: \nHistorical and Political Overview of the Period\nContext11\nFilm Scenes: Close Readings\nDirectors (Life and Works)\nCritical Commentary"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://onlinelibrary.wiley.com/book/10.1002/9781444390124",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"firstName": "Anthony C.",
-						"lastName": "Thiselton",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "John",
-						"lastName": "Sawyer",
-						"creatorType": "seriesEditor"
-					},
-					{
-						"firstName": "Christopher",
-						"lastName": "Rowland",
-						"creatorType": "seriesEditor"
-					},
-					{
-						"firstName": "Judith",
-						"lastName": "Kovacs",
-						"creatorType": "seriesEditor"
-					},
-					{
-						"firstName": "David M.",
-						"lastName": "Gunn",
-						"creatorType": "seriesEditor"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "1 & 2 Thessalonians: Through the Centuries",
-				"date": "March 24, 2011",
-				"DOI": "10.1002/9781444390124",
-				"ISBN": "9781405196826, 9781444390124",
-				"rights": "Copyright © 2011 Anthony C. Thiselton",
-				"url": "http://onlinelibrary.wiley.com/book/10.1002/9781444390124",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "Wiley Online Library",
-				"shortTitle": "1 & 2 Thessalonians"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://onlinelibrary.wiley.com/book/10.1002/9780470320419",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"firstName": "William",
-						"lastName": "Smothers",
-						"creatorType": "editor"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "14th Automotive Materials Conference: Ceramic Engineering and Science Proceedings, Volume 8, Issue 9/10",
-				"date": "March 27, 2008",
-				"DOI": "10.1002/9780470320419",
-				"series": "Ceramic Engineering and Science Proceedings",
-				"ISBN": "9780470374740, 9780470320419",
-				"rights": "Copyright © 1987 The American Ceramic Society, Inc.",
-				"url": "http://onlinelibrary.wiley.com/book/10.1002/9780470320419",
-				"abstractNote": "This volume is part of the Ceramic Engineering and Science Proceeding (CESP) series. This series contains a collection of papers dealing with issues in both traditional ceramics (i.e., glass, whitewares, refractories, and porcelain enamel) and advanced ceramics. Topics covered in the area of advanced ceramic include bioceramics, nanomaterials, composites, solid oxide fuel cells, mechanical properties and structural design, advanced ceramic coatings, ceramic armor, porous ceramics, and more.",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "Wiley Online Library",
-				"shortTitle": "14th Automotive Materials Conference"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "Zhenming",
-						"lastName": "An",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Yudan",
-						"lastName": "Chen",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "John M.",
-						"lastName": "Koomen",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "David J.",
-						"lastName": "Merkler",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"α‐Amidated peptide",
-					"Post‐translational modification",
-					"Spectral pairing",
-					"Technology"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
-				"date": "2012/01/01",
-				"publicationTitle": "PROTEOMICS",
-				"volume": "12",
-				"issue": "2",
-				"publisher": "WILEY‐VCH Verlag",
-				"DOI": "10.1002/pmic.201100327",
-				"language": "en",
-				"pages": "173-182",
-				"ISSN": "1615-9861",
-				"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "onlinelibrary.wiley.com",
-				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
-				"abstractNote": "Amidation is a post-translational modification found at the C-terminus of ∼50% of all neuropeptide hormones. Cleavage of the Cα–N bond of a C-terminal glycine yields the α-amidated peptide in a reaction catalyzed by peptidylglycine α-amidating monooxygenase (PAM). The mass of an α-amidated peptide decreases by 58 Da relative to its precursor. The amino acid sequences of an α-amidated peptide and its precursor differ only by the C-terminal glycine meaning that the peptides exhibit similar RP-HPLC properties and tandem mass spectral (MS/MS) fragmentation patterns. Growth of cultured cells in the presence of a PAM inhibitor ensured the coexistence of α-amidated peptides and their precursors. A strategy was developed for precursor and α-amidated peptide pairing (PAPP): LC-MS/MS data of peptide extracts were scanned for peptide pairs that differed by 58 Da in mass, but had similar RP-HPLC retention times. The resulting peptide pairs were validated by checking for similar fragmentation patterns in their MS/MS data prior to identification by database searching or manual interpretation. This approach significantly reduced the number of spectra requiring interpretation, decreasing the computing time required for database searching and enabling manual interpretation of unidentified spectra. Reported here are the α-amidated peptides identified from AtT-20 cells using the PAPP method."
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/full",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "Zhenming",
-						"lastName": "An",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Yudan",
-						"lastName": "Chen",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "John M.",
-						"lastName": "Koomen",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "David J.",
-						"lastName": "Merkler",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"α‐Amidated peptide",
-					"Post‐translational modification",
-					"Spectral pairing",
-					"Technology"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
-				"date": "2012/01/01",
-				"publicationTitle": "PROTEOMICS",
-				"volume": "12",
-				"issue": "2",
-				"publisher": "WILEY‐VCH Verlag",
-				"DOI": "10.1002/pmic.201100327",
-				"language": "en",
-				"pages": "173-182",
-				"ISSN": "1615-9861",
-				"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/full",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "onlinelibrary.wiley.com",
-				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
-				"abstractNote": "Amidation is a post-translational modification found at the C-terminus of ∼50% of all neuropeptide hormones. Cleavage of the Cα–N bond of a C-terminal glycine yields the α-amidated peptide in a reaction catalyzed by peptidylglycine α-amidating monooxygenase (PAM). The mass of an α-amidated peptide decreases by 58 Da relative to its precursor. The amino acid sequences of an α-amidated peptide and its precursor differ only by the C-terminal glycine meaning that the peptides exhibit similar RP-HPLC properties and tandem mass spectral (MS/MS) fragmentation patterns. Growth of cultured cells in the presence of a PAM inhibitor ensured the coexistence of α-amidated peptides and their precursors. A strategy was developed for precursor and α-amidated peptide pairing (PAPP): LC-MS/MS data of peptide extracts were scanned for peptide pairs that differed by 58 Da in mass, but had similar RP-HPLC retention times. The resulting peptide pairs were validated by checking for similar fragmentation patterns in their MS/MS data prior to identification by database searching or manual interpretation. This approach significantly reduced the number of spectra requiring interpretation, decreasing the computing time required for database searching and enabling manual interpretation of unidentified spectra. Reported here are the α-amidated peptides identified from AtT-20 cells using the PAPP method."
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/references",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "Zhenming",
-						"lastName": "An",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Yudan",
-						"lastName": "Chen",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "John M.",
-						"lastName": "Koomen",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "David J.",
-						"lastName": "Merkler",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"α‐Amidated peptide",
-					"Post‐translational modification",
-					"Spectral pairing",
-					"Technology"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
-				"date": "2012/01/01",
-				"publicationTitle": "PROTEOMICS",
-				"volume": "12",
-				"issue": "2",
-				"publisher": "WILEY‐VCH Verlag",
-				"DOI": "10.1002/pmic.201100327",
-				"language": "en",
-				"pages": "173-182",
-				"ISSN": "1615-9861",
-				"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "onlinelibrary.wiley.com",
-				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
-				"abstractNote": "Amidation is a post-translational modification found at the C-terminus of ∼50% of all neuropeptide hormones. Cleavage of the Cα–N bond of a C-terminal glycine yields the α-amidated peptide in a reaction catalyzed by peptidylglycine α-amidating monooxygenase (PAM). The mass of an α-amidated peptide decreases by 58 Da relative to its precursor. The amino acid sequences of an α-amidated peptide and its precursor differ only by the C-terminal glycine meaning that the peptides exhibit similar RP-HPLC properties and tandem mass spectral (MS/MS) fragmentation patterns. Growth of cultured cells in the presence of a PAM inhibitor ensured the coexistence of α-amidated peptides and their precursors. A strategy was developed for precursor and α-amidated peptide pairing (PAPP): LC-MS/MS data of peptide extracts were scanned for peptide pairs that differed by 58 Da in mass, but had similar RP-HPLC retention times. The resulting peptide pairs were validated by checking for similar fragmentation patterns in their MS/MS data prior to identification by database searching or manual interpretation. This approach significantly reduced the number of spectra requiring interpretation, decreasing the computing time required for database searching and enabling manual interpretation of unidentified spectra. Reported here are the α-amidated peptides identified from AtT-20 cells using the PAPP method."
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/citedby",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "Zhenming",
-						"lastName": "An",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Yudan",
-						"lastName": "Chen",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "John M.",
-						"lastName": "Koomen",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "David J.",
-						"lastName": "Merkler",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"α‐Amidated peptide",
-					"Post‐translational modification",
-					"Spectral pairing",
-					"Technology"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
-				"date": "2012/01/01",
-				"publicationTitle": "PROTEOMICS",
-				"volume": "12",
-				"issue": "2",
-				"publisher": "WILEY‐VCH Verlag",
-				"DOI": "10.1002/pmic.201100327",
-				"language": "en",
-				"pages": "173-182",
-				"ISSN": "1615-9861",
-				"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "onlinelibrary.wiley.com",
-				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
-				"abstractNote": "Amidation is a post-translational modification found at the C-terminus of ∼50% of all neuropeptide hormones. Cleavage of the Cα–N bond of a C-terminal glycine yields the α-amidated peptide in a reaction catalyzed by peptidylglycine α-amidating monooxygenase (PAM). The mass of an α-amidated peptide decreases by 58 Da relative to its precursor. The amino acid sequences of an α-amidated peptide and its precursor differ only by the C-terminal glycine meaning that the peptides exhibit similar RP-HPLC properties and tandem mass spectral (MS/MS) fragmentation patterns. Growth of cultured cells in the presence of a PAM inhibitor ensured the coexistence of α-amidated peptides and their precursors. A strategy was developed for precursor and α-amidated peptide pairing (PAPP): LC-MS/MS data of peptide extracts were scanned for peptide pairs that differed by 58 Da in mass, but had similar RP-HPLC retention times. The resulting peptide pairs were validated by checking for similar fragmentation patterns in their MS/MS data prior to identification by database searching or manual interpretation. This approach significantly reduced the number of spectra requiring interpretation, decreasing the computing time required for database searching and enabling manual interpretation of unidentified spectra. Reported here are the α-amidated peptides identified from AtT-20 cells using the PAPP method."
-			}
-		]
-	}
+{
+"type": "web",
+"url": "http://onlinelibrary.wiley.com/advanced/search/results/reentry?scope=allContent&query=zotero&inTheLastList=6&queryStringEntered=false&searchRowCriteria[0].fieldName=all-fields&searchRowCriteria[0].booleanConnector=and&searchRowCriteria[1].fieldName=all-fields&searchRowCriteria[1].booleanConnector=and&searchRowCriteria[2].fieldName=all-fields&searchRowCriteria[2].booleanConnector=and&start=1&resultsPerPage=20&ordering=relevancy",
+"items": "multiple"
+},
+{
+"type": "web",
+"url": "http://onlinelibrary.wiley.com/doi/10.1002/9781118269381.notes/summary",
+"items": [
+{
+"itemType": "bookSection",
+"creators": [
+{
+"firstName": "Curtis J.",
+"lastName": "Bonk",
+"creatorType": "author"
+}
+],
+"notes": [],
+"tags": [],
+"seeAlso": [],
+"attachments": [
+{
+"title": "Snapshot"
+},
+{
+"title": "Full Text PDF",
+"mimeType": "application/pdf"
+}
+],
+"title": "Endnotes",
+"bookTitle": "The World is Open",
+"publisher": "Jossey‐Bass",
+"ISBN": "9781118269381",
+"DOI": "10.1002/9781118269381.notes",
+"language": "en",
+"pages": "427-467",
+"url": "http://onlinelibrary.wiley.com/doi/10.1002/9781118269381.notes/summary",
+"accessDate": "CURRENT_TIMESTAMP",
+"libraryCatalog": "onlinelibrary.wiley.com",
+"rights": "Copyright © 2009 Curtis J. Bonk. All rights reserved."
+}
+]
+},
+{
+"type": "web",
+"url": "http://onlinelibrary.wiley.com/doi/10.1111/jgi.2004.19.issue-s1/issuetoc",
+"items": "multiple"
+},
+{
+"type": "web",
+"url": "http://onlinelibrary.wiley.com/book/10.1002/9783527610853",
+"items": [
+{
+"itemType": "book",
+"creators": [
+{
+"firstName": "Dietrich",
+"lastName": "Papenfuß",
+"creatorType": "editor"
+},
+{
+"firstName": "Dieter",
+"lastName": "Lüst",
+"creatorType": "editor"
+},
+{
+"firstName": "Wolfgang P.",
+"lastName": "Schleich",
+"creatorType": "editor"
+}
+],
+"notes": [],
+"tags": [],
+"seeAlso": [],
+"attachments": [],
+"title": "100 Years Werner Heisenberg: Works and Impact",
+"date": "November 29, 2007",
+"DOI": "10.1002/9783527610853",
+"ISBN": "9783527403929, 9783527610853",
+"rights": "Copyright © 2002 Wiley-VCH Verlag GmbH",
+"url": "http://onlinelibrary.wiley.com/book/10.1002/9783527610853",
+"abstractNote": "Over 40 renowned scientists from all around the world discuss the work and influence of Werner Heisenberg. The papers result from the symposium held by the Alexander von Humboldt-Stiftung on the occasion of the 100th anniversary of Heisenberg's birth, one of the most important physicists of the 20th century and cofounder of modern-day quantum mechanics. Taking atomic and laser physics as their starting point, the scientists illustrate the impact of Heisenberg's theories on astroparticle physics, high-energy physics and string theory right up to processing quantum information.",
+"accessDate": "CURRENT_TIMESTAMP",
+"libraryCatalog": "Wiley Online Library",
+"shortTitle": "100 Years Werner Heisenberg"
+}
+]
+},
+{
+"type": "web",
+"url": "http://onlinelibrary.wiley.com/doi/10.1002/9781444304794.ch1/summary",
+"items": [
+{
+"itemType": "bookSection",
+"creators": [
+{
+"firstName": "Tatjana",
+"lastName": "Pavlović",
+"creatorType": "author"
+},
+{
+"firstName": "Inmaculada",
+"lastName": "Alvarez",
+"creatorType": "author"
+},
+{
+"firstName": "Rosana",
+"lastName": "Blanco-Cano",
+"creatorType": "author"
+},
+{
+"firstName": "Anitra",
+"lastName": "Grisales",
+"creatorType": "author"
+},
+{
+"firstName": "Alejandra",
+"lastName": "Osorio",
+"creatorType": "author"
+},
+{
+"firstName": "Alejandra",
+"lastName": "Sá",
+"creatorType": "author"
+}
+],
+"notes": [],
+"tags": [
+"silent cinema and its pioneers (1906–1930)",
+"Ángel García Cardona's El ciego de aldea (1906)",
+"Ángel García Cardona and Antonio Cuesta",
+"Ricardo Baños and Albert Marro's Don Pedro el Cruel (1911)",
+"Fructuós Gelabert's Amor que mata (1909)",
+"three films ‐ part of “the preliminary industrial and expressive framework for Spain's budding cinema”",
+"Directors (Life and Works) ‐ Ángel García Cardona and Antonio Cuesta13",
+"Ricardo Baños",
+"Florián Rey's La aldea maldita (1930)",
+"Florián Rey (Antonio Martínez de Castillo)",
+"Fructuós Gelabert ‐ made the first Spanish fiction film",
+"Riña en un café",
+"1897"
+],
+"seeAlso": [],
+"attachments": [
+{
+"title": "Snapshot"
+},
+{
+"title": "Full Text PDF",
+"mimeType": "application/pdf"
+}
+],
+"title": "Silent Cinema and its Pioneers (1906–1930)",
+"bookTitle": "100 Years of Spanish Cinema",
+"publisher": "Wiley‐Blackwell",
+"ISBN": "9781444304794",
+"DOI": "10.1002/9781444304794.ch1",
+"language": "en",
+"pages": "1-20",
+"url": "http://onlinelibrary.wiley.com/doi/10.1002/9781444304794.ch1/summary",
+"accessDate": "CURRENT_TIMESTAMP",
+"libraryCatalog": "onlinelibrary.wiley.com",
+"rights": "Copyright © 2009 Tatjana Pavlović, Inmaculada Alvarez, Rosana Blanco-Cano, Anitra Grisales, Alejandra Osorio, and Alejandra Sánchez",
+"abstractNote": "This chapter contains sections titled: \nHistorical and Political Overview of the Period\nContext11\nFilm Scenes: Close Readings\nDirectors (Life and Works)\nCritical Commentary"
+}
+]
+},
+{
+"type": "web",
+"url": "http://onlinelibrary.wiley.com/book/10.1002/9781444390124",
+"items": [
+{
+"itemType": "book",
+"creators": [
+{
+"firstName": "Anthony C.",
+"lastName": "Thiselton",
+"creatorType": "author"
+},
+{
+"firstName": "John",
+"lastName": "Sawyer",
+"creatorType": "seriesEditor"
+},
+{
+"firstName": "Christopher",
+"lastName": "Rowland",
+"creatorType": "seriesEditor"
+},
+{
+"firstName": "Judith",
+"lastName": "Kovacs",
+"creatorType": "seriesEditor"
+},
+{
+"firstName": "David M.",
+"lastName": "Gunn",
+"creatorType": "seriesEditor"
+}
+],
+"notes": [],
+"tags": [],
+"seeAlso": [],
+"attachments": [],
+"title": "1 & 2 Thessalonians: Through the Centuries",
+"date": "March 24, 2011",
+"DOI": "10.1002/9781444390124",
+"ISBN": "9781405196826, 9781444390124",
+"rights": "Copyright © 2011 Anthony C. Thiselton",
+"url": "http://onlinelibrary.wiley.com/book/10.1002/9781444390124",
+"accessDate": "CURRENT_TIMESTAMP",
+"libraryCatalog": "Wiley Online Library",
+"shortTitle": "1 & 2 Thessalonians"
+}
+]
+},
+{
+"type": "web",
+"url": "http://onlinelibrary.wiley.com/book/10.1002/9780470320419",
+"items": [
+{
+"itemType": "book",
+"creators": [
+{
+"firstName": "William",
+"lastName": "Smothers",
+"creatorType": "editor"
+}
+],
+"notes": [],
+"tags": [],
+"seeAlso": [],
+"attachments": [],
+"title": "14th Automotive Materials Conference: Ceramic Engineering and Science Proceedings, Volume 8, Issue 9/10",
+"date": "March 27, 2008",
+"DOI": "10.1002/9780470320419",
+"series": "Ceramic Engineering and Science Proceedings",
+"ISBN": "9780470374740, 9780470320419",
+"rights": "Copyright © 1987 The American Ceramic Society, Inc.",
+"url": "http://onlinelibrary.wiley.com/book/10.1002/9780470320419",
+"abstractNote": "This volume is part of the Ceramic Engineering and Science Proceeding (CESP) series. This series contains a collection of papers dealing with issues in both traditional ceramics (i.e., glass, whitewares, refractories, and porcelain enamel) and advanced ceramics. Topics covered in the area of advanced ceramic include bioceramics, nanomaterials, composites, solid oxide fuel cells, mechanical properties and structural design, advanced ceramic coatings, ceramic armor, porous ceramics, and more.",
+"accessDate": "CURRENT_TIMESTAMP",
+"libraryCatalog": "Wiley Online Library",
+"shortTitle": "14th Automotive Materials Conference"
+}
+]
+},
+{
+"type": "web",
+"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
+"items": [
+{
+"itemType": "journalArticle",
+"creators": [
+{
+"firstName": "Zhenming",
+"lastName": "An",
+"creatorType": "author"
+},
+{
+"firstName": "Yudan",
+"lastName": "Chen",
+"creatorType": "author"
+},
+{
+"firstName": "John M.",
+"lastName": "Koomen",
+"creatorType": "author"
+},
+{
+"firstName": "David J.",
+"lastName": "Merkler",
+"creatorType": "author"
+}
+],
+"notes": [],
+"tags": [
+"α‐Amidated peptide",
+"Post‐translational modification",
+"Spectral pairing",
+"Technology"
+],
+"seeAlso": [],
+"attachments": [
+{
+"title": "Snapshot"
+},
+{
+"title": "Full Text PDF",
+"mimeType": "application/pdf"
+}
+],
+"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
+"date": "2012/01/01",
+"publicationTitle": "PROTEOMICS",
+"volume": "12",
+"issue": "2",
+"publisher": "WILEY‐VCH Verlag",
+"DOI": "10.1002/pmic.201100327",
+"language": "en",
+"pages": "173-182",
+"ISSN": "1615-9861",
+"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
+"accessDate": "CURRENT_TIMESTAMP",
+"libraryCatalog": "onlinelibrary.wiley.com",
+"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
+"abstractNote": "Amidation is a post-translational modification found at the C-terminus of ∼50% of all neuropeptide hormones. Cleavage of the Cα–N bond of a C-terminal glycine yields the α-amidated peptide in a reaction catalyzed by peptidylglycine α-amidating monooxygenase (PAM). The mass of an α-amidated peptide decreases by 58 Da relative to its precursor. The amino acid sequences of an α-amidated peptide and its precursor differ only by the C-terminal glycine meaning that the peptides exhibit similar RP-HPLC properties and tandem mass spectral (MS/MS) fragmentation patterns. Growth of cultured cells in the presence of a PAM inhibitor ensured the coexistence of α-amidated peptides and their precursors. A strategy was developed for precursor and α-amidated peptide pairing (PAPP): LC-MS/MS data of peptide extracts were scanned for peptide pairs that differed by 58 Da in mass, but had similar RP-HPLC retention times. The resulting peptide pairs were validated by checking for similar fragmentation patterns in their MS/MS data prior to identification by database searching or manual interpretation. This approach significantly reduced the number of spectra requiring interpretation, decreasing the computing time required for database searching and enabling manual interpretation of unidentified spectra. Reported here are the α-amidated peptides identified from AtT-20 cells using the PAPP method."
+}
+]
+},
+{
+"type": "web",
+"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/full",
+"items": [
+{
+"itemType": "journalArticle",
+"creators": [
+{
+"firstName": "Zhenming",
+"lastName": "An",
+"creatorType": "author"
+},
+{
+"firstName": "Yudan",
+"lastName": "Chen",
+"creatorType": "author"
+},
+{
+"firstName": "John M.",
+"lastName": "Koomen",
+"creatorType": "author"
+},
+{
+"firstName": "David J.",
+"lastName": "Merkler",
+"creatorType": "author"
+}
+],
+"notes": [],
+"tags": [
+"α‐Amidated peptide",
+"Post‐translational modification",
+"Spectral pairing",
+"Technology"
+],
+"seeAlso": [],
+"attachments": [
+{
+"title": "Snapshot"
+},
+{
+"title": "Full Text PDF",
+"mimeType": "application/pdf"
+}
+],
+"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
+"date": "2012/01/01",
+"publicationTitle": "PROTEOMICS",
+"volume": "12",
+"issue": "2",
+"publisher": "WILEY‐VCH Verlag",
+"DOI": "10.1002/pmic.201100327",
+"language": "en",
+"pages": "173-182",
+"ISSN": "1615-9861",
+"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/full",
+"accessDate": "CURRENT_TIMESTAMP",
+"libraryCatalog": "onlinelibrary.wiley.com",
+"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
+"abstractNote": "Amidation is a post-translational modification found at the C-terminus of ∼50% of all neuropeptide hormones. Cleavage of the Cα–N bond of a C-terminal glycine yields the α-amidated peptide in a reaction catalyzed by peptidylglycine α-amidating monooxygenase (PAM). The mass of an α-amidated peptide decreases by 58 Da relative to its precursor. The amino acid sequences of an α-amidated peptide and its precursor differ only by the C-terminal glycine meaning that the peptides exhibit similar RP-HPLC properties and tandem mass spectral (MS/MS) fragmentation patterns. Growth of cultured cells in the presence of a PAM inhibitor ensured the coexistence of α-amidated peptides and their precursors. A strategy was developed for precursor and α-amidated peptide pairing (PAPP): LC-MS/MS data of peptide extracts were scanned for peptide pairs that differed by 58 Da in mass, but had similar RP-HPLC retention times. The resulting peptide pairs were validated by checking for similar fragmentation patterns in their MS/MS data prior to identification by database searching or manual interpretation. This approach significantly reduced the number of spectra requiring interpretation, decreasing the computing time required for database searching and enabling manual interpretation of unidentified spectra. Reported here are the α-amidated peptides identified from AtT-20 cells using the PAPP method."
+}
+]
+},
+{
+"type": "web",
+"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/references",
+"items": [
+{
+"itemType": "journalArticle",
+"creators": [
+{
+"firstName": "Zhenming",
+"lastName": "An",
+"creatorType": "author"
+},
+{
+"firstName": "Yudan",
+"lastName": "Chen",
+"creatorType": "author"
+},
+{
+"firstName": "John M.",
+"lastName": "Koomen",
+"creatorType": "author"
+},
+{
+"firstName": "David J.",
+"lastName": "Merkler",
+"creatorType": "author"
+}
+],
+"notes": [],
+"tags": [
+"α‐Amidated peptide",
+"Post‐translational modification",
+"Spectral pairing",
+"Technology"
+],
+"seeAlso": [],
+"attachments": [
+{
+"title": "Snapshot"
+},
+{
+"title": "Full Text PDF",
+"mimeType": "application/pdf"
+}
+],
+"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
+"date": "2012/01/01",
+"publicationTitle": "PROTEOMICS",
+"volume": "12",
+"issue": "2",
+"publisher": "WILEY‐VCH Verlag",
+"DOI": "10.1002/pmic.201100327",
+"language": "en",
+"pages": "173-182",
+"ISSN": "1615-9861",
+"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
+"accessDate": "CURRENT_TIMESTAMP",
+"libraryCatalog": "onlinelibrary.wiley.com",
+"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
+"abstractNote": "Amidation is a post-translational modification found at the C-terminus of ∼50% of all neuropeptide hormones. Cleavage of the Cα–N bond of a C-terminal glycine yields the α-amidated peptide in a reaction catalyzed by peptidylglycine α-amidating monooxygenase (PAM). The mass of an α-amidated peptide decreases by 58 Da relative to its precursor. The amino acid sequences of an α-amidated peptide and its precursor differ only by the C-terminal glycine meaning that the peptides exhibit similar RP-HPLC properties and tandem mass spectral (MS/MS) fragmentation patterns. Growth of cultured cells in the presence of a PAM inhibitor ensured the coexistence of α-amidated peptides and their precursors. A strategy was developed for precursor and α-amidated peptide pairing (PAPP): LC-MS/MS data of peptide extracts were scanned for peptide pairs that differed by 58 Da in mass, but had similar RP-HPLC retention times. The resulting peptide pairs were validated by checking for similar fragmentation patterns in their MS/MS data prior to identification by database searching or manual interpretation. This approach significantly reduced the number of spectra requiring interpretation, decreasing the computing time required for database searching and enabling manual interpretation of unidentified spectra. Reported here are the α-amidated peptides identified from AtT-20 cells using the PAPP method."
+}
+]
+},
+{
+"type": "web",
+"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/citedby",
+"items": [
+{
+"itemType": "journalArticle",
+"creators": [
+{
+"firstName": "Zhenming",
+"lastName": "An",
+"creatorType": "author"
+},
+{
+"firstName": "Yudan",
+"lastName": "Chen",
+"creatorType": "author"
+},
+{
+"firstName": "John M.",
+"lastName": "Koomen",
+"creatorType": "author"
+},
+{
+"firstName": "David J.",
+"lastName": "Merkler",
+"creatorType": "author"
+}
+],
+"notes": [],
+"tags": [
+"α‐Amidated peptide",
+"Post‐translational modification",
+"Spectral pairing",
+"Technology"
+],
+"seeAlso": [],
+"attachments": [
+{
+"title": "Snapshot"
+},
+{
+"title": "Full Text PDF",
+"mimeType": "application/pdf"
+}
+],
+"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
+"date": "2012/01/01",
+"publicationTitle": "PROTEOMICS",
+"volume": "12",
+"issue": "2",
+"publisher": "WILEY‐VCH Verlag",
+"DOI": "10.1002/pmic.201100327",
+"language": "en",
+"pages": "173-182",
+"ISSN": "1615-9861",
+"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
+"accessDate": "CURRENT_TIMESTAMP",
+"libraryCatalog": "onlinelibrary.wiley.com",
+"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
+"abstractNote": "Amidation is a post-translational modification found at the C-terminus of ∼50% of all neuropeptide hormones. Cleavage of the Cα–N bond of a C-terminal glycine yields the α-amidated peptide in a reaction catalyzed by peptidylglycine α-amidating monooxygenase (PAM). The mass of an α-amidated peptide decreases by 58 Da relative to its precursor. The amino acid sequences of an α-amidated peptide and its precursor differ only by the C-terminal glycine meaning that the peptides exhibit similar RP-HPLC properties and tandem mass spectral (MS/MS) fragmentation patterns. Growth of cultured cells in the presence of a PAM inhibitor ensured the coexistence of α-amidated peptides and their precursors. A strategy was developed for precursor and α-amidated peptide pairing (PAPP): LC-MS/MS data of peptide extracts were scanned for peptide pairs that differed by 58 Da in mass, but had similar RP-HPLC retention times. The resulting peptide pairs were validated by checking for similar fragmentation patterns in their MS/MS data prior to identification by database searching or manual interpretation. This approach significantly reduced the number of spectra requiring interpretation, decreasing the computing time required for database searching and enabling manual interpretation of unidentified spectra. Reported here are the α-amidated peptides identified from AtT-20 cells using the PAPP method."
+}
+]
+}
 ]
 /** END TEST CASES **/
