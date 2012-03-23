@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-22 18:37:56"
+	"lastUpdated": "2012-03-22 22:30:17"
 }
 
 /*
@@ -30,6 +30,15 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+function fixCase(authorName) {
+	if(authorName.toUpperCase() == authorName ||
+		authorName.toLowerCase() == authorName) {
+		return ZU.capitalizeTitle(authorName, true);
+	}
+
+	return authorName;
+}
+
 function addCreators(item, creatorType, creators) {
 	if( typeof(creators) == 'string' ) {
 		creators = [creators];
@@ -38,7 +47,7 @@ function addCreators(item, creatorType, creators) {
 	}
 
 	for(var i=0, n=creators.length; i<n; i++) {
-		item.creators.push(ZU.cleanAuthor(ZU.capitalizeTitle(creators[i],true),
+		item.creators.push(ZU.cleanAuthor(fixCase(creators[i]),
 							creatorType, false));
 	}
 }
@@ -49,7 +58,7 @@ function getAuthorName(text) {
 
 	text = text.replace(/(^|[\s,])(PhD|MA|Prof|Dr)(\.?|(?=\s|$))/gi,'');	//remove salutations
 
-	return ZU.capitalizeTitle(text.trim(), true);
+	return fixCase(text.trim());
 }
 
 function scrape(doc, url, pdfUrl) {

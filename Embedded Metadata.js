@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-22 16:01:47"
+	"lastUpdated": "2012-03-22 22:32:52"
 }
 
 /*
@@ -116,6 +116,16 @@ function getContentText(doc, name) {
 function getContent(doc, name) {
 	return ZU.xpath(doc, '//meta[substring(@name, string-length(@name)-'
 							+ (name.length - 1) + ')="'+ name +'"]/@content');
+}
+
+function fixCase(authorName) {
+	//fix case if all upper or all lower case
+	if(authorName.toUpperCase() === authorName ||
+		authorName.toLowerCase() === authorName) {
+		return ZU.capitalizeTitle(authorName, true);
+	}
+
+	return authorName;
 }
 
 function processFields(doc, item, fieldMap) {
@@ -553,8 +563,8 @@ function addHighwireMetadata(doc, newItem) {
 			author = ZU.cleanAuthor(author, "author", author.indexOf(",") !== -1);
 			if(author.firstName) {
 				//fix case for personal names
-				author.firstName = ZU.capitalizeTitle(author.firstName, true);
-				author.lastName = ZU.capitalizeTitle(author.lastName, true);
+				author.firstName = fixCase(author.firstName);
+				author.lastName = fixCase(author.lastName);
 			}
 			newItem.creators.push(author);
 		}
