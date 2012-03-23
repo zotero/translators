@@ -550,10 +550,13 @@ function addHighwireMetadata(doc, newItem) {
 		}
 		for(var j=0, m=authors.length; j<m; j++) {
 			var author = authors[j];
-			newItem.creators.push(ZU.cleanAuthor(
-				ZU.capitalizeTitle(author,true),
-				"author",
-				author.indexOf(",") !== -1));
+			author = ZU.cleanAuthor(author, "author", author.indexOf(",") !== -1);
+			if(author.firstName) {
+				//fix case for personal names
+				author.firstName = ZU.capitalizeTitle(author.firstName, true);
+				author.lastName = ZU.capitalizeTitle(author.lastName, true);
+			}
+			newItem.creators.push(author);
 		}
 	}
 
