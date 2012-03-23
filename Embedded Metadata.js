@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-21 02:37:51"
+	"lastUpdated": "2012-03-22 16:01:47"
 }
 
 /*
@@ -550,7 +550,10 @@ function addHighwireMetadata(doc, newItem) {
 		}
 		for(var j=0, m=authors.length; j<m; j++) {
 			var author = authors[j];
-			newItem.creators.push(ZU.cleanAuthor(author, "author", author.indexOf(",") !== -1));
+			newItem.creators.push(ZU.cleanAuthor(
+				ZU.capitalizeTitle(author,true),
+				"author",
+				author.indexOf(",") !== -1));
 		}
 	}
 
