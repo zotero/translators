@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-03-22 07:28:43"
+	"lastUpdated": "2012-03-24 04:15:13"
 }
 
 /*
@@ -45,7 +45,7 @@
  */
 
 var bogusItemID = 1;
-var __OLD_COOKIE;
+var __old_cookie, __result_counter=0;
 
 var detectWeb = function (doc, url) {
 	// Icon shows only for search results and law cases
@@ -66,7 +66,7 @@ function setGSPCookie(doc, cookie) {
 
 	if(!cookie) {
 		cookie = oldCookie.replace(/:?\s*\bCF=\d+/,'') +
-				':CF=4';	//this is the value assigned to BibTeX on Google Scholar Preferences page
+				':CF=4';
 	}
 
 	var domain = doc.location.href
@@ -74,8 +74,9 @@ function setGSPCookie(doc, cookie) {
 
 	cookie += '; domain=.' + domain +
 				'; expires=Sun, 17 Jan 2038 19:14:09 UTC';	//this is what google scholar uses
-
 	doc.cookie = cookie;
+	Z.debug('Cookie set to: ' + cookie);
+
 	return oldCookie;
 }
 
@@ -83,33 +84,203 @@ function prepareCookie(doc) {
 	//check if we need to change cookie
 	var m = doc.cookie.match(/\bGSP=[^;]+?\bCF=(\d+)/);
 	if(!m || m[1] != 4) {
-		__OLD_COOKIE = setGSPCookie(doc);
+		__old_cookie = setGSPCookie(doc);
 	}
 }
 
 function restoreCookie(doc) {
-	if(__OLD_COOKIE) {
-		setGSPCookie(doc, __OLD_COOKIE);
+	if(__old_cookie) {
+		setGSPCookie(doc, __old_cookie);
 	}
 }
 
-function scrapeBibTeX(text) {
-	var translator = Zotero.loadTranslator('import');
-	translator.setTranslator('9cb70025-a888-4a29-a210-93ec52da40d4');
-	translator.setString(text);
-
-	translator.translate();
+function decrementCounter(doc) {
+	/**Possible race condition!! But there should never be any
+	 * lock-ups or detremental effects as long as only one
+	 * instance of the translator can be run at a time and
+	 * we do not change __old_cookie after setting it initially
+	 */
+	__result_counter--;
+	if(__result_counter<1) restoreCookie(doc);
 }
 
-function isCase(result) {
-	if(ZU.xpath(result, './h3[@class="gs_rt"]/a[1][contains(@href,"/scholar_case?")]').length)
-		return true;
+//determine item type from a result node
+function determineType(result) {
+	var titleHref =  ZU.xpathText(result, './h3[@class="gs_rt"]/a[1]/@href');
 
-	//if there is no link (i.e. [CITATION]), we can determine this by the second line
-	//cases seem to always start with a number, while articles don't
-	if(!ZU.xpath(result, './h3[@class="gs_rt"]/a').length &&
-		ZU.xpathText(result, './div[@class="gs_a"]').match(/^\s*\d/)) {
-		return true;
+	if(titleHref) {
+		if(titleHref.indexOf('/scholar_case?') != -1) {
+			return 'case';
+		} else if(titleHref.indexOf('/patents?') != -1) {
+			return 'patent';
+		} else if(titleHref.indexOf('/books?') != -1) {
+			return 'book';
+		} else {
+			return 'article';
+		}
+	}
+
+	/**if there is no link (i.e. [CITATION]), we can determine this by
+	 * the second line.
+	 * Patents have the word Patent here
+	 * Cases seem to always start with a number
+	 * Articles/books don't start with numbers
+	 * 
+	 * This is probably not going to work with google scholar in other languages
+	 */
+	var subTitle = ZU.xpathText(result, './div[@class="gs_a"]');
+	if(subTitle.match(/\bpatent\s+\d/)) {
+		return 'patent';
+	}
+
+	if(subTItle.match(/^\s*\d/)) {
+		return 'case';
+	}
+
+	return 'article';
+}
+
+function scrapeArticleResults(doc, articles) {
+	for(var i=0, n=articles.length; i<n; i++) {
+		//using closure so we can link a doGet response to a PDF url
+		(function(doc, article) {
+			ZU.doGet(article.bibtexUrl,
+				function(text) {
+					var translator = Zotero.loadTranslator('import');
+					translator.setTranslator('9cb70025-a888-4a29-a210-93ec52da40d4');
+					translator.setString(text);
+	
+					translator.setHandler('itemDone', function(obj, item) {
+						//clean author names
+						for(var j=0, m=item.creators.length; j<m; j++) {
+							if(!item.creators[j].firstName) continue;
+	
+							item.creators[j] = ZU.cleanAuthor(
+								item.creators[j].lastName + ', ' +
+									item.creators[j].firstName,
+								item.creators[j].creatorType,
+								true);
+						}
+
+						/**TODO: handle other types of documents (e.g. DOC)
+						 */
+						//attach PDF if available
+						var pdf = ZU.xpath(article.result,
+							'./div[contains(@class,"gs_fl")]\
+							/a[substring(@href,string-length(@href)-3)=".pdf"]');
+						if(pdf.length) {
+							item.attachments.push({
+								title: pdf[0].textContent,
+								url: pdf[0].href,
+								mimeType: 'application/pdf'
+							});
+						}
+
+						//attach linked page as snapshot if available
+						var snapshotUrl = ZU.xpathText(article.result,
+							'./h3[@class="gs_rt"]/a/@href');
+						if(snapshotUrl) {
+							item.attachments.push({
+								title: 'Snapshot',
+								url: snapshotUrl,
+								mimeType: 'text/html'
+							});
+						}
+
+						item.complete();
+					});
+	
+					translator.translate();
+				},
+				//restore cookie when the last doGet is done
+				function() {
+					decrementCounter(doc);
+				}
+			);
+		})(doc, articles[i]);
+	}
+}
+
+function scrapeCaseResults(doc, cases) {
+	for(var i=0, n=cases.length; i<n; i++) {
+		var titleString = ZU.xpathText(cases[i].result, './h3[@class="gs_rt"]');
+		var citeletString = ZU.xpathText(cases[i].result, './div[@class="gs_a"]');
+	
+		var attachmentFrag = ZU.xpathText(cases[i].result,
+								'./h3[@class="gs_rt"]/a/@href');
+		if (attachmentFrag) {
+			var attachmentLinks = [attachmentFrag];
+		} else {
+			var attachmentLinks = [];
+		}
+	
+		// Instantiate item factory with available data
+		var factory = new ItemFactory(citeletString, attachmentLinks,
+										titleString, cases[i].bibtexUrl);
+	
+		if (!factory.hasUsefulData()) {
+			decrementCounter(doc)
+			continue;
+		}
+
+		factory.getCourt();
+		factory.getVolRepPag();
+		if (factory.hasReporter()) {
+			// If we win here, we get by without fetching the BibTeX object at all.
+			factory.saveItem();
+			decrementCounter(doc);
+			continue;
+		} else {
+			//use closure since this is asynchronous
+			(function(doc, factory) {
+				ZU.doGet(factory.bibtexLink, function(text) {
+					var bibtexTranslator = Zotero.loadTranslator("import");
+					//BibTeX
+					bibtexTranslator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+					bibtexTranslator.setString(text);
+	
+					bibtexTranslator.setHandler("itemDone", function(obj, item) {
+						item.attachments = factory.getAttachments("Page");
+						item.complete();
+					});
+	
+					bibtexTranslator.translate();
+				},
+				function() {
+					//restore cookie when the last doGet is done
+					decrementCounter(doc)
+				});
+			})(doc, factory);
+		}
+	}
+}
+
+function scrapePatentResults(doc, patents) {
+	for(var i=0, n=patents.length; i<n; i++) {
+		var patentUrl = ZU.xpathText(patents[i].result,
+									'./h3[@class="gs_rt"]/a[1]/@href');
+
+		if(patentUrl) {
+			(function(doc, url) {
+				ZU.processDocuments(url, function(doc) {
+						/**This is broken. Google Patents cannot access doc,
+						 * maybe due to SOP even though we're on the same
+						 * domain.
+						 */
+						var translator = Zotero.loadTranslator('web');
+						//Google Patents
+						translator.setTranslator('d71e9b6d-2baa-44ed-acb4-13fe2fe592c0');
+						translator.setDocument(doc);
+						translator.translate();
+					},
+					function() {
+						decrementCounter(doc);
+					});
+			})(doc, patentUrl);
+		} else {
+			/**TODO: handle patents without links (if those even exist)*/
+			decrementCounter(doc);
+		}
 	}
 }
 
@@ -120,15 +291,16 @@ function doWeb(doc, url) {
 		scrapeCase(doc, url);
 	} else {
 		/**Having RefWorks set in the preferences as the default citation export
-		 * producess export links, which don't work very well with our translator
+		 * producess export links, which don't work very well with our translator.
+		 * Having no citation manager, does not generate export links at all.
 		 * We should always be able to build bibtex links from the Related articles
 		 * link.
 		 */
 		var results = ZU.xpath(doc,
 			'//div[@class="gs_r"][./div[@class="gs_fl"]/a[contains(@href,"q=related:")]]');
 
-		var articles = new Object();
-		var cases = new Object();
+		var items = new Object();
+		var resultDivs = new Object();
 		var bibtexUrl;
 		for(var i=0, n=results.length; i<n; i++) {
 			bibtexUrl = ZU.xpathText(results[i],
@@ -136,36 +308,49 @@ function doWeb(doc, url) {
 				.replace(/\/scholar\?/,'/scholar.bib?')
 				.replace(/=related:/,'=info:')
 				+ '&ct=citation&cd=1&output=citation';
-			articles[bibtexUrl] = ZU.xpathText(results[i], './h3[@class="gs_rt"]');
+			items[bibtexUrl] = ZU.xpathText(results[i], './h3[@class="gs_rt"]');
 
-			//Some cases don't have a link, but we can extract plenty of
-			//information from the search result
-			if(isCase(results[i])) {
-				cases[bibtexUrl] = results[i];
-			}
+			//keep the result div for extra information
+			resultDivs[bibtexUrl] = results[i];
 		}
 
-		Zotero.selectItems(articles, function(selectedItems) {
+		Zotero.selectItems(items, function(selectedItems) {
 			if(!selectedItems) return true;
 
 			prepareCookie(doc);
 
-			var links = new Array();
+			//different types are handled differently
+			var selectedArticles = new Array();
 			var selectedCases = new Array();
-			//cases are handled differently from articles
+			var selectedPatents = new Array();
+			var selectedBooks = new Array()
+
 			for(var i in selectedItems) {
-				if(cases[i]) {
-					selectedCases.push({bibtexLink: i, result: cases[i]});
-				} else {
-					links.push(i);
+				/**Global counter so we know when we can finally restore original
+				 * cookie.
+				 */
+				__result_counter++;
+				switch(determineType(resultDivs[i])) {
+					case 'case':
+						selectedCases.push({bibtexUrl: i, result: resultDivs[i]});
+						break;
+					case 'book':
+						selectedBooks.push({bibtexUrl: i, result: resultDivs[i]});
+						break;
+					case 'patent':
+						selectedPatents.push({bibtexUrl: i, result: resultDivs[i]});
+						break;
+					case 'article':
+					default:
+						selectedArticles.push({bibtexUrl: i, result: resultDivs[i]});
 				}
 			}
-			if(links.length) {
-				ZU.doGet(links, scrapeBibTeX, function() { restoreCookie(doc) });
-			}
-			if(selectedCases.length) {
-				scrapeCaseResults(selectedCases);
-			}
+
+			scrapeArticleResults(doc, selectedArticles);
+			scrapeCaseResults(doc, selectedCases);
+			scrapePatentResults(doc, selectedPatents);
+			//for now, handle books the same way as articles
+			scrapeArticleResults(doc, selectedBooks);
 		});
 	}
 }
@@ -175,85 +360,6 @@ function doWeb(doc, url) {
  * ### Scraper Functions ###
  * #########################
  */
-var scrapeCaseResults = function (cases) {
-	var factories = new Array();
-
-	for(var i=0, n=cases.length; i<n; i++) {
-		var titleString = ZU.xpathText(cases[i].result, './h3[@class="gs_rt"]');
-		var citeletString = ZU.xpathText(cases[i].result, './div[@class="gs_a"]');
-	
-		var attachmentFrag = ZU.xpathText(cases[i].result, './h3[@class="gs_rt"]/a/@href');
-		if (attachmentFrag) {
-			var attachmentLinks = [attachmentFrag];
-		} else {
-			var attachmentLinks = [];
-		}
-	
-		// Instantiate item factory with available data
-		var factory = new ItemFactory(citeletString, attachmentLinks, titleString, cases[i].bibtexLink);
-	
-		if (!factory.hasUsefulData()) {
-			continue;
-		}
-
-		factories.push(factory);
-	}
-
-	processFactories(factories);
-};
-
-function processFactories(factories) {
-	if(!factories.length) {
-		restoreCookie(doc);
-		Zotero.done();
-		return;
-	}
-	
-	var factory = factories.shift();
-	factory.getCourt();
-	factory.getVolRepPag();
-	if (factory.hasReporter()) {
-		// If we win here, we get by without fetching the BibTeX object at all.
-		factory.saveItem();
-		processFactories(factories);
-	} else {
-		var attachments;
-		
-		// The only supplementary translator we use is BibTeX
-		var bibtexTranslator = Zotero.loadTranslator("import");
-		bibtexTranslator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
-		bibtexTranslator.setHandler("itemDone", function(obj, item) {
-			item.attachments = attachments;
-			item.complete();
-		});
-		
-		factory.getBibtexData(function(res) {
-			if (res) {
-				// Has BibTeX data with title, pass it through to the BibTeX translator
-				attachments = factory.getAttachments("Page");
-				bibtexTranslator.setString(res);
-				bibtexTranslator.setHandler("done", function() {
-					processFactories(factories);
-				});
-				bibtexTranslator.translate();
-			} else {
-				// If BibTeX is empty, this is some kind of case, if anything.
-				// Metadata from the citelet, supplemented by the target
-				// document for the docket number, if possible.
-				if (!factory.hasReporter()) {
-					factory.getDocketNumber(null, function() {
-						factory.saveItem();
-						processFactories(factories);
-					});
-				} else {
-					factory.saveItem();
-					processFactories(factories);
-				}
-			}
-		});
-	}
-}
-
 var scrapeCase = function (doc, url) {
 	// Citelet is identified by
 	// id="gsl_reference"
@@ -318,7 +424,8 @@ ItemFactory.prototype.repairCitelet = function () {
 ItemFactory.prototype.repairTitle = function () {
 	// All-caps words of four or more characters probably need fixing.
 	if (this.v.title.match(/(?:[^a-z]|^)[A-Z]{4,}(?:[^a-z]|$)/)) {
-		this.v.title = Zotero.Utilities.capitalizeTitle(this.v.title.toLowerCase()).replace(/([^0-9a-z])V([^0-9a-z])/, "$1v$2");
+		this.v.title = ZU.capitalizeTitle(this.v.title.toLowerCase())
+						.replace(/([^0-9a-z])V([^0-9a-z])/, "$1v$2");
 	}
 };
 
@@ -426,7 +533,7 @@ ItemFactory.prototype.getTitle = function () {
 	}
 };
 
-
+/*
 ItemFactory.prototype.getDocketNumber = function (doc, callback) {
 	if (!doc) {
 		// Needs doc fetch and xpath
@@ -439,13 +546,13 @@ ItemFactory.prototype.getDocketNumber = function (doc, callback) {
 	if (doc) {
 		var docNumFrag = doc.evaluate('//center[preceding-sibling::center//h3[@id="gsl_case_name"]]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 		if (docNumFrag) {
-			this.v.docketNumber = docNumFrag.textContent.replace(/^\s*[Nn][Oo](?:.|\s+)\s*/, "").replace(/\.\s*$/, "");
-		}
+*///			this.v.docketNumber = docNumFrag.textContent.replace(/^\s*[Nn][Oo](?:.|\s+)\s*/, "").replace(/\.\s*$/, "");
+/*		}
 	}
 	
 	if(callback) callback();
 };
-
+*/
 
 ItemFactory.prototype.getAttachments = function (doctype) {
 	var i, ilen, attachments;
@@ -462,7 +569,7 @@ ItemFactory.prototype.pushAttachments = function (doctype) {
 	this.item.attachments = this.getAttachments(doctype);
 };
 
-
+/*
 ItemFactory.prototype.getBibtexData = function (callback) {
 	if (!this.bibtexData) {
 		if (this.bibtexData !== false) {
@@ -479,7 +586,7 @@ ItemFactory.prototype.getBibtexData = function (callback) {
 	}
 	callback(this.bibtexData);
 };
-
+*/
 
 ItemFactory.prototype.saveItem = function () {
 	var i, ilen, key;
