@@ -2,19 +2,20 @@
 	"translatorID": "84799379-7bc5-4e55-9817-baf297d129fe",
 	"label": "CanLII (English)",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://canlii\\.org.*/en/",
+	"target": "^https?://(www\\.)?canlii\\.org.*/en/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-03-23 00:26:50"
+	"lastUpdated": "2012-03-24 00:26:50"
 }
+
+var canLiiRegexp = /http:\/\/(www\.)?canlii\.org\/.*en\/[^\/]+\/[^\/]+\/doc\/.+/;
 
 function detectWeb(doc, url) {
 
-	var canLiiRegexp = /http:\/\/canlii\.org\/.*en\/[^\/]+\/[^\/]+\/doc\/.+/
 	if (canLiiRegexp.test(url)) {
 		return "case";
 	} else {
@@ -32,22 +33,22 @@ function scrape(doc) {
 
 	var newItem = new Zotero.Item("case");
 	var voliss = ZU.xpathText(doc, '//td[@class="label" and contains(text(), "Citation:")]/following-sibling::td');
-	//Z.debug(voliss)
+	//Z.debug("voliss: ("+voliss+")")
 	var casename = voliss.match(/.+?,/)[0].replace(/,/, "").trim();
-	//	Z.debug(casename);
+    //Z.debug("casename: ("+casename+")");
 	var court = voliss.match(/,\s*\d{4}\s*[A-Z]+/);
-	//Z.debug(court);
+	//Z.debug("court: ("+court+")");
 	var reportvl = voliss.match(/\]\s*\d+/);
-	//	Z.debug(reportvl);
+	//Z.debug("reportvl: ("+reportvl+")");
 	var reporter = voliss.match(/\]\s*\d+\s*[A-Z]+/);
-	//Z.debug(reporter);
+	//Z.debug("reporter: ("+reporter+")");
 	var reporterpg = voliss.match(/\]\s*\d+\s*[A-Z]+\s*\d+/);
-	//Z.debug(reporterpg);
+	//Z.debug("reporterpg: ("+reporterpg+")");
 	var page = voliss.match(/,\s*\d{4}\s*[A-Z]+\s*\d+/);
 	var date = ZU.xpathText(doc, '//td[@class="label" and contains(text(), "Date:")]/following-sibling::td');
-	//Z.debug(date)
+	//Z.debug("date: ("+date+")")
 	var docket = ZU.xpathText(doc, '//td[@class="label" and contains(text(), "Docket:")]/following-sibling::td');
-	//Z.debug(docket)
+	//Z.debug("docket: ("+docket+")")
 
 	newItem.caseName = newItem.title = casename;
 	if (court) newItem.court = court[0].replace(/,\s*\d{4}\s*/, "").trim();;
@@ -60,7 +61,7 @@ function scrape(doc) {
 	if (reportvl) newItem.reporterVolume = reportvl[0].replace(/\]\s*/, "");
 
 	// attach link to pdf version
-	var pdfurl = ZU.xpathText(doc, '//td/a[contains(text(), "PDF Format")]/@href')
+    var pdfurl = ZU.xpathText(doc, '//td/a[contains(text(), "PDF Format")]/@href');
 	if (pdfurl) {
 		pdfurl = "http://canlii.ca" + pdfurl;
 		newItem.attachments = [{
@@ -78,7 +79,7 @@ function scrape(doc) {
 }
 
 function doWeb(doc, url) {
-	var canLiiRegexp = /http:\/\/canlii\.org\/.*en\/[^\/]+\/[^\/]+\/doc\/.+/;
+
 	if (canLiiRegexp.test(url)) {
 		scrape(doc, url);
 	} else {
