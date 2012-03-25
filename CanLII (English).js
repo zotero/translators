@@ -9,10 +9,10 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-03-23 00:26:50"
+	"lastUpdated": "2012-03-24 00:26:50"
 }
 
-var canLiiRegexp = /http:\/\/(www\.)?canlii\.org\/.*en\/[^\/]+\/[^\/]+\/doc\/.+/
+var canLiiRegexp = /http:\/\/(www\.)?canlii\.org\/.*en\/[^\/]+\/[^\/]+\/doc\/.+/;
 
 function detectWeb(doc, url) {
 
@@ -61,7 +61,7 @@ function scrape(doc) {
 	if (reportvl) newItem.reporterVolume = reportvl[0].replace(/\]\s*/, "");
 
 	// attach link to pdf version
-	var pdfurl = ZU.xpathText(doc, '//td/a[contains(text(), "PDF Format")]/@href')
+    var pdfurl = ZU.xpathText(doc, '//td/a[contains(text(), "PDF Format")]/@href');
 	if (pdfurl) {
 		pdfurl = "http://canlii.ca" + pdfurl;
 		newItem.attachments = [{
