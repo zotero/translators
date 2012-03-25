@@ -159,11 +159,11 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"title": "Kydd Memorial Presbyterian Church (Montreal, Quebec) fonds",
 				"rights": "Notes Session minutes are restricted for a period of 50 years from the date they were written.",
 				"archive": "The Presbyterian Church in Canada",
 				"archiveLocation": "CA ON00313 CONG-147",
-				"libraryCatalog": "Archeion"
+				"libraryCatalog": "Archeion/MemoryBC",
+				"title": "Kydd Memorial Presbyterian Church (Montreal, Quebec) fonds"
 			}
 		]
 	}

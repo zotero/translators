@@ -239,30 +239,27 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Deutschland",
 					"Angela Merkel",
+					"Betreuungsgeld",
 					"CDU",
-					"Merkels schwarz-gelbe Regierung",
-					"Mindestlohn",
+					"Deutschland",
 					"Euro-Krise",
-					"Betreuungsgeld"
+					"Merkels schwarz-gelbe Regierung",
+					"Mindestlohn"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.spiegel.de/politik/deutschland/0,1518,druck-797954,00.html",
 						"title": "CDU-Parteitag: Partei im Koma - SPIEGEL ONLINE - Nachrichten - Politik",
 						"mimeType": "text/html"
 					}
 				],
 				"url": "http://www.spiegel.de/politik/deutschland/0,1518,797954,00.html",
-				"title": "Partei im Koma",
-				"section": "Politik",
 				"abstractNote": "Die CDU feiert sich in Leipzig selbst, doch in Wahrheit befindet sie sich in einem traurigen Zustand: Die Partei ist in ein kollektives Koma gefallen, politische Debatten finden kaum noch statt. Hauptverantwortlich dafür ist Angela Merkel.",
-				"date": "15.11.2011",
-				"publicationTitle": "Spiegel Online",
 				"libraryCatalog": "Spiegel Online",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"title": "Partei im Koma",
+				"date": "15.11.2011",
+				"publicationTitle": "Spiegel Online"
 			}
 		]
 	},

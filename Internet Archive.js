@@ -410,11 +410,10 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"title": "The gull's hornbook : Stultorum plena sunt omnia. Al savio mezza parola basta : Dekker, Thomas, ca. 1572-1632 : Free Download & Streaming : Internet Archive",
-				"url": "http://www.archive.org/details/gullshornbookstu00dekk",
+				"url": "http://archive.org/details/gullshornbookstu00dekk",
 				"libraryCatalog": "Internet Archive",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "The gull's hornbook"
+				"shortTitle": "The gull's hornbook",
+				"title": "The gull's hornbook : Stultorum plena sunt omnia. Al savio mezza parola basta : Dekker, Thomas, ca. 1572-1632 : Free Download & Streaming : Internet Archive"
 			}
 		]
 	},

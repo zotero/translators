@@ -230,18 +230,17 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"itemID": "1992-98221-010",
-				"title": "Catatonia: Tonic immobility: Evolutionary underpinnings of human catalepsy and catatonia",
 				"series": "A series of books in psychology.",
+				"ISBN": "0-7167-0368-8 (Hardcover); 0-7167-0367-X (Paperback)",
+				"abstractNote": "tonic immobility [animal hypnosis] might be a useful laboratory analog or research model for catatonia / we have been collaborating on an interdisciplinary program of research in an effort to pinpoint the behavioral antecedents and biological bases for tonic immobility / attempt to briefly summarize our findings, and . . . discuss the implications of these data in terms of the model characteristics of tonic immobility / hypnosis / catatonia, catalepsy, and cataplexy / tonic immobility as a model for catatonia / fear potentiation / fear alleviation / fear or arousal / learned helplessness / neurological correlates / pharmacology and neurochemistry / genetic underpinnings / evolutionary considerations / implications for human psychopathology (PsycINFO Database Record (c) 2010 APA, all rights reserved)",
+				"place": "New York, NY, US",
+				"libraryCatalog": "APA PsycNET",
+				"shortTitle": "Catatonia",
+				"title": "Catatonia: Tonic immobility: Evolutionary underpinnings of human catalepsy and catatonia",
 				"pages": "334-357",
 				"date": "1977",
 				"publisher": "W H Freeman/Times Books/ Henry Holt & Co",
-				"ISBN": "0-7167-0368-8 (Hardcover);0-7167-0367-X (Paperback)",
-				"ISSN": "0-7167-0368-8 (Hardcover);0-7167-0367-X (Paperback)",
-				"abstractNote": "tonic immobility [animal hypnosis] might be a useful laboratory analog or research model for catatonia / we have been collaborating on an interdisciplinary program of research in an effort to pinpoint the behavioral antecedents and biological bases for tonic immobility / attempt to briefly summarize our findings, and . . . discuss the implications of these data in terms of the model characteristics of tonic immobility / hypnosis / catatonia, catalepsy, and cataplexy / tonic immobility as a model for catatonia / fear potentiation / fear alleviation / fear or arousal / learned helplessness / neurological correlates / pharmacology and neurochemistry / genetic underpinnings / evolutionary considerations / implications for human psychopathology (PsycINFO Database Record (c) 2010 APA, all rights reserved)",
-				"publicationTitle": "Psychopathology: Experimental models.",
-				"place": "New York, NY, US",
-				"libraryCatalog": "APA PsycNET",
-				"shortTitle": "Catatonia"
+				"bookTitle": "Psychopathology: Experimental models."
 			}
 		]
 	},

@@ -250,13 +250,14 @@ var testCases = [
 					}
 				],
 				"url": "http://chronicle.com/article/Grinnells-Green-Secrets/2653/",
-				"publicationTitle": "The Chronicle of Higher Education",
 				"ISSN": "0009-5982",
+				"section": "News : Short Subjects",
+				"edition": "Volume 52, Issue 41",
+				"libraryCatalog": "The Chronicle of Higher Education",
+				"publicationTitle": "The Chronicle of Higher Education",
 				"date": "June 16, 2006",
 				"title": "Grinnell's Green Secrets",
-				"section": "News : Short Subjects",
-				"libraryCatalog": "The Chronicle of Higher Education",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"pages": "A9"
 			}
 		]
 	},

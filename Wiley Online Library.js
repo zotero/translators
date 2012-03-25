@@ -379,38 +379,40 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"silent cinema and its pioneers (1906–1930)",
-					"Ángel García Cardona's El ciego de aldea (1906)",
-					"Ángel García Cardona and Antonio Cuesta",
-					"Ricardo Baños and Albert Marro's Don Pedro el Cruel (1911)",
-					"Fructuós Gelabert's Amor que mata (1909)",
-					"three films ‐ part of “the preliminary industrial and expressive framework for Spain's budding cinema”",
+					"1897",
 					"Directors (Life and Works) ‐ Ángel García Cardona and Antonio Cuesta13",
-					"Ricardo Baños",
-					"Florián Rey's La aldea maldita (1930)",
 					"Florián Rey (Antonio Martínez de Castillo)",
+					"Florián Rey's La aldea maldita (1930)",
 					"Fructuós Gelabert ‐ made the first Spanish fiction film",
+					"Fructuós Gelabert's Amor que mata (1909)",
+					"Ricardo Baños",
+					"Ricardo Baños and Albert Marro's Don Pedro el Cruel (1911)",
 					"Riña en un café",
-					"1897"
+					"silent cinema and its pioneers (1906–1930)",
+					"three films ‐ part of “the preliminary industrial and expressive framework for Spain's budding cinema”",
+					"Ángel García Cardona and Antonio Cuesta",
+					"Ángel García Cardona's El ciego de aldea (1906)"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
-				"title": "Silent Cinema and its Pioneers (1906–1930)",
 				"bookTitle": "100 Years of Spanish Cinema",
-				"publisher": "Wiley‐Blackwell",
 				"ISBN": "9781444304794",
-				"DOI": "10.1002/9781444304794.ch1",
 				"language": "en",
-				"pages": "1-20",
 				"url": "http://onlinelibrary.wiley.com/doi/10.1002/9781444304794.ch1/summary",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "onlinelibrary.wiley.com",
 				"rights": "Copyright © 2009 Tatjana Pavlović, Inmaculada Alvarez, Rosana Blanco-Cano, Anitra Grisales, Alejandra Osorio, and Alejandra Sánchez",
-				"abstractNote": "This chapter contains sections titled: \nHistorical and Political Overview of the Period\nContext11\nFilm Scenes: Close Readings\nDirectors (Life and Works)\nCritical Commentary"
+				"abstractNote": "This chapter contains sections titled: \nHistorical and Political Overview of the Period\nContext11\nFilm Scenes: Close Readings\nDirectors (Life and Works)\nCritical Commentary",
+				"title": "Silent Cinema and its Pioneers (1906–1930)",
+				"publisher": "Wiley‐Blackwell",
+				"pages": "1-20"
 			}
 		]
 	},
@@ -777,20 +779,22 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
-				"title": "β‐Rezeptorenblocker",
 				"bookTitle": "Klinisch‐toxikologische Analytik",
-				"publisher": "Wiley‐VCH Verlag GmbH & Co. KGaA",
 				"ISBN": "9783527603015",
-				"DOI": "10.1002/3527603018.ch17",
 				"language": "de",
-				"pages": "365-370",
 				"url": "http://onlinelibrary.wiley.com/doi/10.1002/3527603018.ch17/summary",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "onlinelibrary.wiley.com",
 				"rights": "Copyright © 2002 Wiley-VCH Verlag GmbH",
-				"abstractNote": "Immunoassay\nHochleistungsflüssigkeitschromatographie (HPLC)\nGaschromatographie\nMedizinische Beurteilung und klinische Interpretation\nLiteratur"
+				"abstractNote": "Immunoassay\nHochleistungsflüssigkeitschromatographie (HPLC)\nGaschromatographie\nMedizinische Beurteilung und klinische Interpretation\nLiteratur",
+				"title": "β‐Rezeptorenblocker",
+				"publisher": "Wiley‐VCH Verlag GmbH & Co. KGaA",
+				"pages": "365-370"
 			}
 		]
 	},
@@ -802,7 +806,7 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "Deane‐Peter",
+						"firstName": "Deane‐peter",
 						"lastName": "Baker",
 						"creatorType": "author"
 					},
@@ -824,21 +828,19 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
+				"issue": "1",
+				"DOI": "10.1111/j.1468-5930.2011.00548.x",
+				"language": "en",
+				"ISSN": "1468-5930",
+				"url": "http://onlinelibrary.wiley.com/doi/10.1111/j.1468-5930.2011.00548.x/abstract",
+				"libraryCatalog": "onlinelibrary.wiley.com",
+				"rights": "Published 2011. This article is a U.S. Government work and is in the public domain in the USA.",
+				"abstractNote": "The possibility of using private military and security companies to bolster the capacity to undertake intervention for human rights purposes (humanitarian intervention and peacekeeping) has been increasingly debated. The focus of such discussions has, however, largely been on practical issues and the contingent problems posed by private force. By contrast, this article considers the principled case for privatising humanitarian intervention. It focuses on two central issues. First, does outsourcing humanitarian intervention to private military and security companies pose some fundamental, deeper problems in this context, such as an abdication of a state's duties? Second, on the other hand, is there a case for preferring these firms to other, state-based agents of humanitarian intervention? For instance, given a state's duties to their own military personnel, should the use of private military and security contractors be preferred to regular soldiers for humanitarian intervention?",
 				"title": "The Principled Case for Employing Private Military and Security Companies in Interventions for Human Rights Purposes",
 				"date": "2012/02/01",
 				"publicationTitle": "Journal of Applied Philosophy",
 				"volume": "29",
-				"issue": "1",
-				"publisher": "Blackwell Publishing Ltd",
-				"DOI": "10.1111/j.1468-5930.2011.00548.x",
-				"language": "en",
-				"pages": "1-18",
-				"ISSN": "1468-5930",
-				"url": "http://onlinelibrary.wiley.com/doi/10.1111/j.1468-5930.2011.00548.x/abstract",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "onlinelibrary.wiley.com",
-				"rights": "Published 2011. This article is a U.S. Government work and is in the public domain in the USA.",
-				"abstractNote": "The possibility of using private military and security companies to bolster the capacity to undertake intervention for human rights purposes (humanitarian intervention and peacekeeping) has been increasingly debated. The focus of such discussions has, however, largely been on practical issues and the contingent problems posed by private force. By contrast, this article considers the principled case for privatising humanitarian intervention. It focuses on two central issues. First, does outsourcing humanitarian intervention to private military and security companies pose some fundamental, deeper problems in this context, such as an abdication of a state's duties? Second, on the other hand, is there a case for preferring these firms to other, state-based agents of humanitarian intervention? For instance, given a state's duties to their own military personnel, should the use of private military and security contractors be preferred to regular soldiers for humanitarian intervention?"
+				"pages": "1-18"
 			}
 		]
 	}

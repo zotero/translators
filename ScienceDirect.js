@@ -363,8 +363,8 @@ var testCases = [
 				"itemType": "bookSection",
 				"creators": [
 					{
-						"lastName": "Dierk",
-						"firstName": "Raabe",
+						"lastName": "Raabe",
+						"firstName": "Dierk",
 						"creatorType": "author"
 					}
 				],
@@ -373,27 +373,23 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": false,
 						"title": "ScienceDirect Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"url": false,
 						"title": "ScienceDirect Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "8 - Introduction to discrete dislocation statics and dynamics",
 				"bookTitle": "Computational Materials Engineering",
-				"publisher": "Academic Press",
 				"place": "Burlington",
-				"date": "2007",
-				"pages": "267-316",
 				"ISBN": "978-0-12-369468-3",
-				"ISSN": "978-0-12-369468-3",
-				"DOI": "10.1016/B978-012369468-3/50008-3",
 				"url": "http://www.sciencedirect.com/science/article/pii/B9780123694683500083",
-				"libraryCatalog": "ScienceDirect"
+				"libraryCatalog": "ScienceDirect",
+				"title": "8 - Introduction to discrete dislocation statics and dynamics",
+				"publisher": "Academic Press",
+				"date": "2007",
+				"pages": "267-316"
 			}
 		]
 	}
