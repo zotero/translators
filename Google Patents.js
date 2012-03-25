@@ -193,146 +193,178 @@ function doWeb(doc, url) {
 
 
 /** BEGIN TEST CASES **/
-var testCases = [{
-	"type": "web",
-	"url": "http://www.google.com/search?tbm=pts&tbo=1&hl=en&q=book&btnG=Search+Patents",
-	"items": "multiple"
-}, {
-	"type": "web",
-	"url": "http://www.google.com/patents/about?id=j5NSAAAAEBAJ",
-	"items": [{
-		"itemType": "patent",
-		"creators": [{
-			"firstName": "T.",
-			"lastName": "Shook",
-			"creatorType": "inventor"
-		}],
-		"notes": [],
-		"tags": [],
-		"seeAlso": [],
-		"attachments": [{
-			"url": "http://www.google.com/patents/US1065211.pdf",
-			"title": "Google Patents PDF",
-			"mimeType": "application/pdf"
-		}],
-		"country": "United States",
-		"extra": "U.S. Classification: 215/273",
-		"patentNumber": "1065211",
-		"date": "Jun 17, 1913",
-		"filingDate": "Aug 3, 1912",
-		"title": "Bottle-Stopper",
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.google.com/search?tbm=pts&tbo=1&hl=en&q=book&btnG=Search+Patents",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
 		"url": "http://www.google.com/patents/about?id=j5NSAAAAEBAJ",
-		"libraryCatalog": "Google Patents",
-		"accessDate": "CURRENT_TIMESTAMP"
-	}]
-}, {
-	"type": "web",
-	"url": "http://www.google.com/patents/about?id=KchEAAAAEBAJ",
-	"items": [{
-		"itemType": "patent",
-		"creators": [{
-			"firstName": "Jonathan A.",
-			"lastName": "Hunt",
-			"creatorType": "inventor"
-		}],
-		"notes": [],
-		"tags": [],
-		"seeAlso": [],
-		"attachments": [{
-			"title": "Google Patents PDF",
-			"mimeType": "application/pdf"
-		}],
-		"country": "United States",
-		"extra": "U.S. Classification: 411/477",
-		"patentNumber": "1120656",
-		"date": "Dec 8, 1914",
-		"filingDate": "Jan 14, 1914",
-		"assignee": "Hunt Specialty Manufacturing Company",
-		"title": "A Corpobation Of",
+		"items": [
+			{
+				"itemType": "patent",
+				"creators": [
+					{
+						"firstName": "T.",
+						"lastName": "Shook",
+						"creatorType": "inventor"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.google.com/patents/US1065211.pdf",
+						"title": "Google Patents PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"country": "United States",
+				"extra": "U.S. Classification: 215/273",
+				"patentNumber": "1065211",
+				"date": "Jun 17, 1913",
+				"filingDate": "Aug 3, 1912",
+				"title": "Bottle-Stopper",
+				"url": "http://www.google.com/patents/about?id=j5NSAAAAEBAJ",
+				"libraryCatalog": "Google Patents",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
 		"url": "http://www.google.com/patents/about?id=KchEAAAAEBAJ",
-		"libraryCatalog": "Google Patents",
-		"accessDate": "CURRENT_TIMESTAMP"
-	}]
-}, {
-	"type": "web",
-	"url": "http://www.google.fr/patents?id=Nh17AAAAEBAJ",
-	"items": [{
-		"itemType": "patent",
-		"creators": [{
-			"firstName": "Hisatada",
-			"lastName": "Miyatake",
-			"creatorType": "inventor"
-		}, {
-			"firstName": "Kohki",
-			"lastName": "Noda",
-			"creatorType": "inventor"
-		}, {
-			"firstName": "Toshio",
-			"lastName": "Sunaga",
-			"creatorType": "inventor"
-		}, {
-			"firstName": "Hiroshi",
-			"lastName": "Umezaki",
-			"creatorType": "inventor"
-		}, {
-			"firstName": "Hideo",
-			"lastName": "Asano",
-			"creatorType": "inventor"
-		}, {
-			"firstName": "Koji",
-			"lastName": "Kitamura",
-			"creatorType": "inventor"
-		}],
-		"notes": [],
-		"tags": [],
-		"seeAlso": [],
-		"attachments": [{
-			"url": "http://www.google.fr/patents/US7123498.pdf",
-			"title": "Google Patents PDF",
-			"mimeType": "application/pdf"
-		}],
-		"abstractNote": "MRAM has read word lines WLR and write word line WLW extending in the y direction, write/read bit line BLW/R and write bit line BLW extending in the x direction, and the memory cells MC disposed at the points of the intersection of these lines. The memory MC includes sub-cells SC1 and SC2. The sub-cell SC1 includes magneto resistive elements MTJ1 and MTJ2 and a selection transistor Tr1, and the sub-cell SC2 includes magneto resistive elements MTJ3 and MTJ4 and a selection transistor Tr2. The magneto resistive elements MTJ1 and MTJ2 are connected in parallel, and the magneto resistive elements MTJ3 and MTJ4 are also connected in parallel. Further, the sub-cells SC1 and SC2 are connected in series between the write/read bit line BLW/R and the ground.",
-		"country": "United States",
-		"extra": "U.S. Classification: 365/63",
-		"patentNumber": "7123498",
-		"date": "17 Oct 2006",
-		"filingDate": "12 Oct 2004",
-		"assignee": "International Business Machines Corporation",
-		"applicationNumber": "10/964,352",
-		"title": "Non-volatile memory device",
+		"items": [
+			{
+				"itemType": "patent",
+				"creators": [
+					{
+						"firstName": "Jonathan A.",
+						"lastName": "Hunt",
+						"creatorType": "inventor"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Google Patents PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"country": "United States",
+				"extra": "U.S. Classification: 411/477",
+				"patentNumber": "1120656",
+				"date": "Dec 8, 1914",
+				"filingDate": "Jan 14, 1914",
+				"assignee": "Hunt Specialty Manufacturing Company",
+				"title": "A Corpobation Of",
+				"url": "http://www.google.com/patents/about?id=KchEAAAAEBAJ",
+				"libraryCatalog": "Google Patents",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
 		"url": "http://www.google.fr/patents?id=Nh17AAAAEBAJ",
-		"libraryCatalog": "Google Patents",
-		"accessDate": "CURRENT_TIMESTAMP"
-	}]
-}, {
-	"type": "web",
-	"url": "http://www.google.com/patents?id=PGk-AAAAEBAJ&printsec=abstract#v=onepage&q&f=false",
-	"items": [{
-		"itemType": "patent",
-		"creators": [{
-			"firstName": "O'Dean P.",
-			"lastName": "Judd",
-			"creatorType": "inventor"
-		}],
-		"notes": [],
-		"tags": [],
-		"seeAlso": [],
-		"attachments": [{
-			"url": "http://www.google.com/patents/US4390992.pdf",
-			"title": "Google Patents PDF",
-			"mimeType": "application/pdf"
-		}],
-		"abstractNote": "A device and method for optically pumping a gaseous laser using blackbody radiation produced by a plasma channel which is formed from an electrical discharge between two electrodes spaced at opposite longitudinal ends of the laser. A preionization device which can comprise a laser or electron beam accelerator produces a preionization beam which is sufficient to cause an electrical discharge between the electrodes to initiate the plasma channel along the preionization path. The optical pumping energy is supplied by a high voltage power supply rather than by the preionization beam. High output optical intensities are produced by the laser due to the high temperature blackbody radiation produced by the plasma channel, in the same manner as an exploding wire type laser. However, unlike the exploding wire type laser, the disclosed invention can be operated in a repetitive manner by utilizing a repetitive pulsed preionization device.",
-		"country": "United States",
-		"extra": "U.S. Classification: 372/70\nInternational Classification: : H01S 3091",
-		"patentNumber": "4390992",
-		"date": "Jun 28, 1983",
-		"filingDate": "Jul 17, 1981",
-		"assignee": "The United States of America as represented by the United States Department of Energy",
-		"title": "Plasma channel optical pumping device and method",
-		"url": "http://www.google.com/patents?id=PGk-AAAAEBAJ",
-		"libraryCatalog": "Google Patents",
-		"accessDate": "CURRENT_TIMESTAMP"
-	}]
-}]
+		"items": [
+			{
+				"itemType": "patent",
+				"creators": [
+					{
+						"firstName": "Hisatada",
+						"lastName": "Miyatake",
+						"creatorType": "inventor"
+					},
+					{
+						"firstName": "Kohki",
+						"lastName": "Noda",
+						"creatorType": "inventor"
+					},
+					{
+						"firstName": "Toshio",
+						"lastName": "Sunaga",
+						"creatorType": "inventor"
+					},
+					{
+						"firstName": "Hiroshi",
+						"lastName": "Umezaki",
+						"creatorType": "inventor"
+					},
+					{
+						"firstName": "Hideo",
+						"lastName": "Asano",
+						"creatorType": "inventor"
+					},
+					{
+						"firstName": "Koji",
+						"lastName": "Kitamura",
+						"creatorType": "inventor"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.google.fr/patents/US7123498.pdf",
+						"title": "Google Patents PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"abstractNote": "MRAM has read word lines WLR and write word line WLW extending in the y direction, write/read bit line BLW/R and write bit line BLW extending in the x direction, and the memory cells MC disposed at the points of the intersection of these lines. The memory MC includes sub-cells SC1 and SC2. The sub-cell SC1 includes magneto resistive elements MTJ1 and MTJ2 and a selection transistor Tr1, and the sub-cell SC2 includes magneto resistive elements MTJ3 and MTJ4 and a selection transistor Tr2. The magneto resistive elements MTJ1 and MTJ2 are connected in parallel, and the magneto resistive elements MTJ3 and MTJ4 are also connected in parallel. Further, the sub-cells SC1 and SC2 are connected in series between the write/read bit line BLW/R and the ground.",
+				"country": "United States",
+				"extra": "U.S. Classification: 365/63",
+				"patentNumber": "7123498",
+				"date": "17 Oct 2006",
+				"filingDate": "12 Oct 2004",
+				"assignee": "International Business Machines Corporation",
+				"applicationNumber": "10/964,352",
+				"title": "Non-volatile memory device",
+				"url": "http://www.google.fr/patents?id=Nh17AAAAEBAJ",
+				"libraryCatalog": "Google Patents",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.google.com/patents?id=PGk-AAAAEBAJ&printsec=abstract#v=onepage&q&f=false",
+		"items": [
+			{
+				"itemType": "patent",
+				"creators": [
+					{
+						"firstName": "O'Dean P.",
+						"lastName": "Judd",
+						"creatorType": "inventor"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Google Patents PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"abstractNote": "A device and method for optically pumping a gaseous laser using blackbody radiation produced by a plasma channel which is formed from an electrical discharge between two electrodes spaced at opposite longitudinal ends of the laser. A preionization device which can comprise a laser or electron beam accelerator produces a preionization beam which is sufficient to cause an electrical discharge between the electrodes to initiate the plasma channel along the preionization path. The optical pumping energy is supplied by a high voltage power supply rather than by the preionization beam. High output optical intensities are produced by the laser due to the high temperature blackbody radiation produced by the plasma channel, in the same manner as an exploding wire type laser. However, unlike the exploding wire type laser, the disclosed invention can be operated in a repetitive manner by utilizing a repetitive pulsed preionization device.",
+				"country": "United States",
+				"extra": "U.S. Classification: 372/70\nInternational Classification: : H01S  3091",
+				"patentNumber": "4390992",
+				"filingDate": "Jul 17, 1981",
+				"assignee": "The United States of America as represented by the United States Department of Energy",
+				"url": "http://www.google.com/patents?id=PGk-AAAAEBAJ",
+				"issueDate": "Jun 28, 1983",
+				"title": "Plasma channel optical pumping device and method"
+			}
+		]
+	}
+]
 /** END TEST CASES **/
