@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-03-24 04:15:13"
+	"lastUpdated": "2012-03-25 20:06:46"
 }
 
 /*
@@ -37,13 +37,6 @@
  *   http://scholar.google.co.jp/scholar_case?case=18273389148555376997&hl=en&as_sdt=2002&kqfp=13204897074208725174&kql=186&kqpfp=16170611681001262513#kq
  */
 
-
-/*
- * ###############################
- * ### detectWeb() and doWeb() ###
- * ###############################
- */
-
 var bogusItemID = 1;
 var __old_cookie, __result_counter=0;
 
@@ -58,6 +51,10 @@ var detectWeb = function (doc, url) {
 		return "multiple";
 	}
 }
+
+/*********************************
+ * Cookie manipulation functions *
+ *********************************/
 
 //sets Google Scholar Preference cookie and returns old value
 function setGSPCookie(doc, cookie) {
@@ -104,6 +101,10 @@ function decrementCounter(doc) {
 	if(__result_counter<1) restoreCookie(doc);
 }
 
+/*****************************
+ * Other accessory functions *
+ *****************************/
+
 //determine item type from a result node
 function determineType(result) {
 	var titleHref =  ZU.xpathText(result, './h3[@class="gs_rt"]/a[1]/@href');
@@ -129,16 +130,22 @@ function determineType(result) {
 	 * This is probably not going to work with google scholar in other languages
 	 */
 	var subTitle = ZU.xpathText(result, './div[@class="gs_a"]');
-	if(subTitle.match(/\bpatent\s+\d/)) {
+	if(!subTitle) return 'article';
+
+	if(subTitle.match(/\bpatent\s+\d/i)) {
 		return 'patent';
 	}
 
-	if(subTItle.match(/^\s*\d/)) {
+	if(subTitle.match(/^\s*\d/)) {
 		return 'case';
 	}
 
 	return 'article';
 }
+
+/*********************
+ * Scraper functions *
+ *********************/
 
 function scrapeArticleResults(doc, articles) {
 	for(var i=0, n=articles.length; i<n; i++) {
@@ -234,21 +241,44 @@ function scrapeCaseResults(doc, cases) {
 			//use closure since this is asynchronous
 			(function(doc, factory) {
 				ZU.doGet(factory.bibtexLink, function(text) {
-					var bibtexTranslator = Zotero.loadTranslator("import");
-					//BibTeX
-					bibtexTranslator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
-					bibtexTranslator.setString(text);
-	
-					bibtexTranslator.setHandler("itemDone", function(obj, item) {
-						item.attachments = factory.getAttachments("Page");
-						item.complete();
-					});
-	
-					bibtexTranslator.translate();
+					//check if the BibTeX file has title
+					if(!text.match(/title={{}}/i)) {
+						var bibtexTranslator = Zotero.loadTranslator("import");
+						//BibTeX
+						bibtexTranslator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+						bibtexTranslator.setString(text);
+		
+						bibtexTranslator.setHandler("itemDone", function(obj, item) {
+							item.attachments = factory.getAttachments("Page");
+							item.complete();
+						});
+		
+						bibtexTranslator.translate();
+					} else {
+						// If BibTeX is empty, this is some kind of case, if anything.
+						// Metadata from the citelet, supplemented by the target
+						// document for the docket number, if possible.
+						if (!factory.hasReporter() && factory.attachmentLinks[0]) {
+							//fetch docket from the case page
+							__result_counter++;
+							(function(doc, factory) {
+								ZU.processDocuments(factory.attachmentLinks[0], 
+									function(doc) {
+										factory.getDocketNumber(doc);
+										factory.saveItem();
+									},
+									function() {
+										decrementCounter(doc);
+									});
+							})(doc, factory);
+						} else {
+							factory.saveItem();
+						}
+					}
 				},
 				function() {
 					//restore cookie when the last doGet is done
-					decrementCounter(doc)
+					decrementCounter(doc);
 				});
 			})(doc, factory);
 		}
@@ -257,6 +287,59 @@ function scrapeCaseResults(doc, cases) {
 
 function scrapePatentResults(doc, patents) {
 	for(var i=0, n=patents.length; i<n; i++) {
+		(function(doc, bibtexUrl, result) {
+			ZU.doGet(bibtexUrl, function(text) {
+				var bibtexTranslator = Zotero.loadTranslator("import");
+				//BibTeX
+				bibtexTranslator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+				bibtexTranslator.setString(text);
+
+				bibtexTranslator.setHandler("itemDone", function(obj, item) {
+					item.itemType = 'patent';
+
+					//fix case for patent titles in all upper case
+					if(item.title.toUpperCase() == item.title) {
+						item.title = ZU.capitalizeTitle(item.title);
+					}
+
+					//authors are inventors
+					for(var i=0, n=item.creators.length; i<n; i++) {
+						item.creators[i].creatorType = 'inventor';
+					}
+
+					//country and patent number end up in extras
+					if(item.extra) {
+						var m = item.extra.split(/\s*Patent\s*/i);
+						if(m.length == 2) {
+							item.country = m[0];
+							item.patentNumber = m[1];
+							delete item.extra;
+						}
+					}
+
+					//attach google patents page
+					var patentUrl = ZU.xpathText(result,
+									'./h3[@class="gs_rt"]/a[1]/@href');
+					if(patentUrl) {
+						item.attachments.push({
+							title: 'Google Patents page',
+							url: patentUrl,
+							mimeType: 'text/html'
+						});
+					}
+
+					item.complete();
+				});
+
+				bibtexTranslator.translate();
+			},
+			function() {
+				decrementCounter(doc);
+			});
+		})(doc, patents[i].bibtexUrl, patents[i].result);
+
+/** Until SOP is "fixed" we'll scrape as much information as we can from the
+ * result block instead of using Google Patents translator
 		var patentUrl = ZU.xpathText(patents[i].result,
 									'./h3[@class="gs_rt"]/a[1]/@href');
 
@@ -264,9 +347,8 @@ function scrapePatentResults(doc, patents) {
 			(function(doc, url) {
 				ZU.processDocuments(url, function(doc) {
 						/**This is broken. Google Patents cannot access doc,
-						 * maybe due to SOP even though we're on the same
-						 * domain.
-						 */
+						 * due to SOP.
+						 * /
 						var translator = Zotero.loadTranslator('web');
 						//Google Patents
 						translator.setTranslator('d71e9b6d-2baa-44ed-acb4-13fe2fe592c0');
@@ -278,9 +360,10 @@ function scrapePatentResults(doc, patents) {
 					});
 			})(doc, patentUrl);
 		} else {
-			/**TODO: handle patents without links (if those even exist)*/
+			/**TODO: handle patents without links (if those even exist)* /
 			decrementCounter(doc);
 		}
+ */
 	}
 }
 
@@ -297,7 +380,10 @@ function doWeb(doc, url) {
 		 * link.
 		 */
 		var results = ZU.xpath(doc,
-			'//div[@class="gs_r"][./div[@class="gs_fl"]/a[contains(@href,"q=related:")]]');
+			'//div[@class="gs_r"]\
+				[./div[@class="gs_fl"]/a[contains(@href,"q=related:")]]');
+				//this would filter out patents, but we are handling them just fine
+				//[not(./h3[@class="gs_rt"]/a[contains(@href,"/patents?")])]');
 
 		var items = new Object();
 		var resultDivs = new Object();
@@ -349,7 +435,8 @@ function doWeb(doc, url) {
 			scrapeArticleResults(doc, selectedArticles);
 			scrapeCaseResults(doc, selectedCases);
 			scrapePatentResults(doc, selectedPatents);
-			//for now, handle books the same way as articles
+			//for now, handle books the same way as articles, since they are on
+			//a different domain
 			scrapeArticleResults(doc, selectedBooks);
 		});
 	}
@@ -363,7 +450,8 @@ function doWeb(doc, url) {
 var scrapeCase = function (doc, url) {
 	// Citelet is identified by
 	// id="gsl_reference"
-	var refFrag = doc.evaluate('//div[@id="gsl_reference"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+	var refFrag = doc.evaluate('//div[@id="gsl_reference"]',
+					doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (refFrag) {
 		// citelet looks kind of like this
 		// Powell v. McCormack, 395 US 486 - Supreme Court 1969
@@ -533,26 +621,17 @@ ItemFactory.prototype.getTitle = function () {
 	}
 };
 
-/*
-ItemFactory.prototype.getDocketNumber = function (doc, callback) {
-	if (!doc) {
-		// Needs doc fetch and xpath
-		var me = this;
-		Zotero.Utilities.processDocuments(this.attachmentLinks[0],
-			function(doc) { me.getDocumentNumber(doc, callback) }, function() {});
-		return;
+
+ItemFactory.prototype.getDocketNumber = function (doc) {
+	var docNumFrag = doc.evaluate(
+		'//center[preceding-sibling::center//h3[@id="gsl_case_name"]]',
+		doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+	if (docNumFrag) {
+		this.v.docketNumber = docNumFrag.textContent
+								.replace(/^\s*[Nn][Oo](?:.|\s+)\s*/, "")
+								.replace(/\.\s*$/, "");
 	}
-	
-	if (doc) {
-		var docNumFrag = doc.evaluate('//center[preceding-sibling::center//h3[@id="gsl_case_name"]]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-		if (docNumFrag) {
-*///			this.v.docketNumber = docNumFrag.textContent.replace(/^\s*[Nn][Oo](?:.|\s+)\s*/, "").replace(/\.\s*$/, "");
-/*		}
-	}
-	
-	if(callback) callback();
 };
-*/
 
 ItemFactory.prototype.getAttachments = function (doctype) {
 	var i, ilen, attachments;
