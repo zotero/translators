@@ -9,15 +9,18 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-13 07:00:05"
+	"lastUpdated": "2012-03-26 03:24:52"
 }
 
 function scrape(doc) {
 	var item = new Zotero.Item("presentation");
-	item.title = ZU.xpathText(doc, '//meta[@name="title"]/@content');
+	item.title = ZU.xpathText(doc, '(//meta[@name="title" or @property="og:title"]/@content)[1]') ||
+				ZU.xpathText(doc, '/html/head/title');
 
-	var creator = ZU.xpathText(doc, '//meta[@name="dc_creator"]/@content');
-	if(creator && creator.trim()) item.creators.push(ZU.cleanAuthor(creator, "author"));
+	var creator = ZU.xpathText(doc, '//meta[@name="dc_creator"]/@content') ||
+					ZU.xpathText(doc, '//a[contains(@class,"h-author-name")]');
+	if(creator && creator.trim())
+		item.creators.push({lastName:creator.trim(), creatorType:'author'});
 
 	item.abstractNote = ZU.xpathText(doc, '(//p[@class="descriptionExpanded"] |\
 					//p[@class="description" and\
@@ -31,6 +34,8 @@ function scrape(doc) {
 	item.rights = ZU.xpathText(doc, '//p[@class="license"]');
 
 	item.type = ZU.xpathText(doc, '//ul[@class="h-slideshow-categories"]/li[1]');
+
+	item.date = ZU.xpathText(doc, '//meta[@property="article:published_time"]/@content');
 
 	item.url = doc.location.href
 	item.repository = "SlideShare";
@@ -83,17 +88,16 @@ var testCases = [
 				"itemType": "presentation",
 				"creators": [
 					{
-						"firstName": "",
 						"lastName": "eby",
 						"creatorType": "author"
 					}
 				],
 				"notes": [],
 				"tags": [
-					"libraries",
-					"code4libcon2008",
 					"zotero",
 					"code4lib",
+					"libraries",
+					"code4libcon2008",
 					"research",
 					"zotero and you",
 					"citations",
@@ -106,6 +110,7 @@ var testCases = [
 				"abstractNote": "Representatives from the Center for History and New Media will introduce Zotero, a free and open source extension for Firefox that allows you to collect, organize and archive your research materials. After a brief demo and explanation, we will discuss best practices for making your projects \"Zotero ready\" and other opportunities to integrate with your digital projects through the Zotero API.",
 				"rights": "© All Rights Reserved",
 				"type": "Business & Mgmt",
+				"date": "2008-03-06T10:51:58-06:00",
 				"url": "http://www.slideshare.net/eby/zotero-and-you-or-bibliography-on-the-semantic-web",
 				"libraryCatalog": "SlideShare",
 				"accessDate": "CURRENT_TIMESTAMP"
