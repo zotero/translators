@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-03-22 22:32:52"
+	"lastUpdated": "2012-03-26 16:03:25"
 }
 
 /*
@@ -619,6 +619,7 @@ function addHighwireMetadata(doc, newItem) {
 	if (newItem.tags.length) {
 		var tags = [], t;
 		for (var i in newItem.tags) {
+			newItem.tags[i] = newItem.tags[i].trim();
 			t = newItem.tags[i].split(/\s*,\s*/);
 			if (newItem.tags[i].indexOf(';') == -1 && t.length > 2) {
 				tags = tags.concat(t);
