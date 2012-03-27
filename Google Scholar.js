@@ -1,15 +1,15 @@
 {
 	"translatorID": "57a00950-f0d1-4b41-b6ba-44ff0fc30289",
 	"label": "Google Scholar",
-	"creator": "Simon Kornblith, Frank Bennett",
+	"creator": "Simon Kornblith, Frank Bennett, Aurimas Vinckevicius",
 	"target": "^https?://scholar\\.google\\.(?:com|cat|(?:com?\\.)?[a-z]{2})/scholar(?:_case)?\\?",
-	"minVersion": "2.1.9",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-03-25 20:06:46"
+	"lastUpdated": "2012-03-26 20:40:24"
 }
 
 /*
@@ -366,6 +366,7 @@ function scrapePatentResults(doc, patents) {
  */
 	}
 }
+
 
 function doWeb(doc, url) {
 	// Invoke the case or the listing scraper, as appropriate.
