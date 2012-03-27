@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-03-03 23:37:03"
+	"lastUpdated": "2012-03-26 22:08:44"
 }
 
 /*
@@ -71,9 +71,7 @@ function scrape(doc, url) {
 	if (detectWeb(doc, url) == "newspaperArticle") {
 		var item = new Zotero.Item("newspaperArticle");
 
-		item.title = doc.evaluate('//meta[@property="og:title"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().content;
 		item.date = doc.evaluate('//meta[@name="REVISION_DATE"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().content;
-		item.place = ZU.xpathText(doc, '//div[@id="articleInfo"]//span[@class="location"]');
 		var byline = ZU.xpathText(doc, '//div[@id="articleInfo"]//p[@class="byline"]');
 		if (byline) {
 			var authors = byline.substr(3).split(/and |,/);
@@ -81,20 +79,12 @@ function scrape(doc, url) {
 				item.creators.push(authorFix(aut));
 			}
 		}
-		item.abstractNote = ZU.xpathText(doc, '//span[@class="focusParagraph"]/p').replace(/^.*\(Reuters\)\s+-\s+/, "");
-		item.url = doc.evaluate('//link[@rel="canonical"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
 		item.publicationTitle = "Reuters";
-		if (item.place) {
-			if (item.place == item.place.toUpperCase()) item.place = Zotero.Utilities.capitalizeTitle(item.place.toLowerCase(), true);
-		}
-		item.complete();
 	}
 	if (detectWeb(doc, url) == "blogPost") {
 		var item = new Zotero.Item("blogPost");
 
-		item.title = doc.evaluate('//meta[@property="og:title"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().content;
 		item.date = ZU.xpathText(doc, '//div[@id="single"]/div[@class="timestamp"]');
-		item.place = ZU.xpathText(doc, '//div[@id="articleInfo"]//span[@class="location"]');
 		var byline = ZU.xpathText(doc, '//div[@class="author"]');
 		if (byline) {
 			var authors = byline.split(/and |,/);
@@ -102,18 +92,32 @@ function scrape(doc, url) {
 				item.creators.push(authorFix(aut));
 			}
 		}
-		//	item.abstractNote = ZU.xpathText(doc, '//span[@class="focusParagraph"]/p').replace(/^.*\(Reuters\)\s+-\s+/,"");
-		item.url = doc.evaluate('//link[@rel="canonical"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+
 		var blogtitle = ZU.xpathText(doc, '//h1');
 		if (blogtitle) item.publicationTitle = "Reuters Blogs - " + blogtitle;
 		else item.publicationTitle = "Reuters Blogs";
+	}
+
+	//general fields
+	if(item) {
+		item.title = ZU.xpathText(doc, '//meta[@property="og:title"]/@content');
+
+		item.place = ZU.xpathText(doc, '//div[@id="articleInfo"]//span[@class="location"]');
 		if (item.place) {
 			if (item.place == item.place.toUpperCase()) item.place = Zotero.Utilities.capitalizeTitle(item.place.toLowerCase(), true);
 		}
+
+		item.url = ZU.xpathText(doc, '//link[@rel="canonical"]/@href');
+		item.abstractNote = ZU.xpathText(doc, '//meta[@name="description"]/@content');
+
+		var tags = ZU.xpathText(doc, '//meta[@name="keywords"]/@content');
+		if(tags)
+			item.tags = tags.trim().split(/\s*,\s*/);
+
+		item.attachments.push({title: 'Snapshot', document: doc});
+
 		item.complete();
 	}
-
-
 }
 
 function authorFix(author) {
@@ -135,32 +139,118 @@ function authorFix(author) {
 }
 
 /** BEGIN TEST CASES **/
-var testCases = [{
-	"type": "web",
-	"url": "http://www.reuters.com/article/2011/11/14/us-eurozone-idUSTRE7AC15K20111114",
-	"items": [{
-		"itemType": "newspaperArticle",
-		"creators": [{
-			"firstName": "James",
-			"lastName": "Mackenzie",
-			"creatorType": "author"
-		}, {
-			"firstName": "Barry",
-			"lastName": "Moody",
-			"creatorType": "author"
-		}],
-		"notes": [],
-		"tags": [],
-		"seeAlso": [],
-		"attachments": [],
-		"title": "Europe could be in worst hour since WW2: Merkel",
-		"date": "Mon Nov 14 21:16:28 UTC 2011",
-		"place": "Rome",
-		"abstractNote": "Prime Minister-designate Mario Monti meets the leaders of Italy's biggest two parties on Tuesday to discuss the \"many sacrifices\" needed to reverse a collapse in market confidence that is driving an ever deepening euro zone debt crisis.",
+var testCases = [
+	{
+		"type": "web",
 		"url": "http://www.reuters.com/article/2011/11/14/us-eurozone-idUSTRE7AC15K20111114",
-		"publicationTitle": "Reuters",
-		"libraryCatalog": "Reuters",
-		"accessDate": "CURRENT_TIMESTAMP",
-		"shortTitle": "Europe could be in worst hour since WW2"
-	}]
-}] /** END TEST CASES **/
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "James",
+						"lastName": "Mackenzie",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Barry",
+						"lastName": "Moody",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Germany",
+					"Greece",
+					"Italy",
+					"Germany",
+					"Greece",
+					"Italy",
+					"Germany",
+					"Angela Merkel",
+					"Antonis Samaras",
+					"George Papandreou",
+					"Harry Papachristou",
+					"Jens Weidmann",
+					"Lucas Papademos",
+					"Mario Monti",
+					"Olli Rehn",
+					"Philip Pullella",
+					"Silvio Berlusconi",
+					"Angela Merkel",
+					"Antonis Samaras",
+					"George Papandreou",
+					"Giorgio Napolitano",
+					"Harry Papachristou",
+					"Jack Ablin",
+					"Jens Weidmann",
+					"Kai Pfaffenbach",
+					"Lucas Papademos",
+					"Mario Monti",
+					"Olli Rehn",
+					"Philip Pullella",
+					"Silvio Berlusconi",
+					"Angela Merkel",
+					"Kai Pfaffenbach"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"date": "Mon Nov 14 21:16:28 UTC 2011",
+				"publicationTitle": "Reuters",
+				"title": "Europe could be in worst hour since WW2: Merkel",
+				"place": "Rome",
+				"url": "http://www.reuters.com/article/2011/11/14/us-eurozone-idUSTRE7AC15K20111114",
+				"abstractNote": "ROME (Reuters) - Prime Minister-designate Mario Monti meets the leaders of Italy's biggest two parties on Tuesday to discuss the many sacrifices needed to reverse a collapse in market confidence that is",
+				"libraryCatalog": "Reuters",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Europe could be in worst hour since WW2"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://blogs.reuters.com/lawrencesummers/2012/03/26/its-too-soon-to-return-to-normal-policies/",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"creators": [
+					{
+						"firstName": "Lawrence",
+						"lastName": "Summers",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"deficit",
+					"fiscal policy",
+					"housing",
+					"recovery",
+					"unemployment"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "It’s too soon to return to normal policies",
+				"abstractNote": "After years when the risks to the consensus modest-growth forecast were to the downside, they are now very much two-sided.",
+				"url": "http://blogs.reuters.com/lawrencesummers/2012/03/26/its-too-soon-to-return-to-normal-policies/",
+				"publicationTitle": "Reuters Blogs - Lawrence Summers",
+				"libraryCatalog": "Reuters",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.reuters.com/search?blob=europe",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

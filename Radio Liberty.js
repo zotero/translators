@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-11-05 13:47:39"
+	"lastUpdated": "2012-03-27 01:24:06"
 }
 
 /*
@@ -116,7 +116,7 @@ function doWeb(doc, url){
 			doc.evaluate('//h1', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent
 		);
 		
-		var author = doc.evaluate('//div[@id="article"]/div[@class="author"]', doc, ns, XPathResult.ANY_TYPE, null);
+		var author = doc.evaluate('//div[@id="article"]//div[@class="author"]', doc, ns, XPathResult.ANY_TYPE, null);
 		if ((author = author.iterateNext()) !== null) {
 			author = author.textContent;
 			// Sometimes we have "By Author"
@@ -143,7 +143,7 @@ function doWeb(doc, url){
 		// This exposes a limitation of Zotero's date handling; the Afghan services
 		// use the Hijri calendar, and mixed sorting looks funny-- I'd like to be able
 		// to mark such dates to be handled appropriately
-		var date = doc.evaluate('//div[@id="article"]/div[@class="date"]', doc, ns, XPathResult.ANY_TYPE, null);
+		var date = doc.evaluate('//div[@id="article"]//p[@class="article_date"]', doc, ns, XPathResult.ANY_TYPE, null);
 		if ((date = date.iterateNext()) !== null) {
 			// sometimes not present
 			item.date = Zotero.Utilities.trimInternal(date.textContent);
@@ -155,7 +155,7 @@ function doWeb(doc, url){
 		// 	characters that may occur in city names.
 		//	This all-caps class is borrowed from utilities.js and augmented by
 		//	the basic Cyrillic capital letters.
-		var textnode = doc.evaluate('//div[@id="article"]/div[@class="zoomMe"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
+		var textnode = doc.evaluate('//div[@id="article"]//div[@class="zoomMe"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
 		if (textnode) {
 			var text = textnode.textContent;
 			hits = text.match(/([A-ZА-Я \u0400-\u042f]+) \((.*)\) --/);
