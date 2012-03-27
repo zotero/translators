@@ -1,48 +1,100 @@
 {
 	"translatorID": "87766765-919e-4d3b-9071-3dd7efe984c8",
 	"label": "Revues.org",
-	"creator": "Pierre-Alain Mignot",
+	"creator": "Aurimas Vinckevicius",
 	"target": "^http://.*\\.revues\\.org",
-	"minVersion": "1.0.1b1.r1",
+	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 1,
+	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gb",
-	"lastUpdated": "2011-11-13 23:22:33"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-03-26 20:29:10"
 }
 
 function detectWeb(doc, url) {
 	// don't do anything on main domain, because there's nothing to fetch there
 	if(url.match(/http:\/\/(www\.)?revues\.org/)) return false;
 
-	var types = doc.evaluate('//meta[@name="DC.type"]', doc, null, XPathResult.ANY_TYPE, null);
-	var type;
-	while(type = types.iterateNext()) {
-		type = type.content.toLowerCase();
-		if('journalarticle' === type) {
-			return 'journalArticle';
-		} else if('collection' === type) {
-			return 'multiple';
-		} else if('booksection' === type) {
-			return 'bookSection';
+	var types = ZU.xpath(doc, '//meta[@name="DC.type"]/@content');
+	for(var i=0, n=types.length; i<n; i++) {
+		switch(types[i].textContent.toLowerCase()) {
+			case 'journalarticle':
+				return 'journalArticle';
+			case 'collection':
+				return 'multiple';
+			case 'booksection':
+				return 'bookSection';
 		}
 	}
 
-	if (doc.evaluate('//div[@id="inside"]/div[@class="sommaire"]/dl[@class="documents"]/dd[@class="titre"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()
-		|| doc.evaluate('//ul[@class="summary"]//div[@class="title"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	if (ZU.xpath(doc, '//div[@id="inside"]/div[@class="sommaire"]\
+			/dl[@class="documents"]/dd[@class="titre"]/a').length ||
+		ZU.xpath(doc, '//ul[@class="summary"]//div[@class="title"]/a').length) {
 		return "multiple";
-	} else if (doc.evaluate('//h1[@id="docTitle"]/span[@class="text"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext() || url.match(/document\d+/)) {
+	} else if (ZU.xpath(doc, '//h1[@id="docTitle"]/span[@class="text"]').length ||
+		url.match(/document\d+/)) {
 		return "journalArticle";
 	}
+}
 
-	return false;
+function scrape(doc, url) {
+	//is this still necessary??
+	if(url.match(/persee\-\d+/)) {
+		// the article is on Persée portal, getting it to be translated by COinS
+		var translator = Zotero.loadTranslator("web");
+		translator.setTranslator("05d07af9-105a-4572-99f6-a8e231c0daef");
+		translator.setDocument(doc);
+		translator.translate();
+	} else {
+		//use Embeded Metadata
+		var translator = Zotero.loadTranslator('web');
+		translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+		translator.setDocument(doc);
+		translator.setHandler('itemDone', function(obj, item) {
+			//set abstract and keywords based on preferred locale
+			var locale = doc.cookie.match(/\blanguage=([a-z]{2})/i);
+			//default to french if not set
+			locale = locale ? locale[1].toLowerCase() : 'fr';
+
+			//get abstract  and tags in preferred locale
+			//or the first locale available
+			item.abstractNote = ZU.xpathText(doc,
+				'//meta[@name="description" or @name="DC.description"]\
+						[lang("' + locale + '") or @lang="' + locale + '"][1]\
+						/@content') ||
+				ZU.xpathText(doc,
+					'//meta[@name="description" or @name="DC.description"][1]\
+						/@content');
+
+			var tags = ZU.xpathText(doc,
+				'//meta[@name="keywords" or @name="DC.subject"]\
+						[lang("' + locale + '") or @lang="' + locale + '"][1]\
+						/@content') ||
+				ZU.xpathText(doc,
+					'//meta[@name="keywords" or @name="DC.subject"][1]\
+						/@content');
+			if(tags) {
+				item.tags = tags.trim().split(/\s*,\s*/);
+			}
+
+			delete item.extra;
+
+			item.complete();
+		});
+		translator.translate();
+	}
 }
 
 function doWeb(doc, url) {
-	var arts = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		var items = new Object();
+		var results = ZU.xpath(doc, '//div[@id="inside"]/div[@class="sommaire"]\
+			/dl[@class="documents"]/dd[@class="titre"]');
+		if(!results.length) {
+			results = ZU.xpath(doc, '//ul[@class="summary"]//div[@class="title"]');
+		}
+
+/* When is this needed?
 		if(doc.evaluate('//meta[@name="DC.description.tableOfContents"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 			var titles = doc.evaluate('//meta[@name="DC.description.tableOfContents"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().content.split(' -- ');
 			var articles = doc.evaluate('//meta[@name="DC.relation.hasPart"]', doc, null, XPathResult.ANY_TYPE, null);
@@ -51,323 +103,101 @@ function doWeb(doc, url) {
 			while(article = articles.iterateNext()) {
 				items[article.content] = titles[i++];
 			}
-		} else {
-			if (doc.evaluate('//ul[@class="summary"]//div[@class="title"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-				var xpath = '//ul[@class="summary"]//div[@class="title"]/a';
-			} else if (doc.evaluate('//div[@id="inside"]/div[@class="sommaire"]/dl[@class="documents"]/dd[@class="titre"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-				var xpath = '//div[@id="inside"]/div[@class="sommaire"]/dl[@class="documents"]/dd[@class="titre"]/a';
-			} else {
-				return false;
-			}
-			
-			var titles = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
-			var title;
-			while(title = titles.iterateNext()) {
-				items[title.href] = title.textContent;
-			}
-		}
+		} */
 
-		items = Zotero.selectItems(items);
-		for(var i in items) {
-			arts.push(i);
-		}
+		Zotero.selectItems(ZU.getItemArray(doc, results), function(selectedItems) {
+			if(!selectedItems) return true;
+
+			var urls = new Array();
+			for(var i in selectedItems) {
+				urls.push(i);
+			}
+
+			ZU.processDocuments(urls, function(doc) {
+				scrape(doc, doc.location.href)
+			});
+		});
 	} else {
-		arts.push(url);
+		scrape(doc, url);
 	}
-
-	if(url.match(/persee\-\d+/)) {
-		// the article is on Persée portal, getting it to be translated by COinS
-		var translator = Zotero.loadTranslator("web");
-		translator.setTranslator("05d07af9-105a-4572-99f6-a8e231c0daef");
-		Zotero.Utilities.processDocuments(arts, function(doc) {
-			translator.setDocument(doc);
-			translator.translate();
-		}, function() {Zotero.done();});
-	} else {
-		Zotero.Utilities.processDocuments(arts, function(doc) {
-			var metas = doc.evaluate('//meta', doc, null, XPathResult.ANY_TYPE, null);
-			var links = doc.evaluate('//link[@rel="alternate"]', doc, null, XPathResult.ANY_TYPE, null);
-			var meta, type, link;
-			var data = new Array();
-			// those four to have unique authors, not used by Zotero
-			data['authors'] = new Array();
-			data['contrib'] = new Array();
-			data['editors'] = new Array();
-			data['translators'] = new Array();
-			// authors
-			data['creators'] = new Array();
-			// keywords
-			data['tags'] = new Array();
-			data['attachments'] = new Array();
-			data['notes'] = new Array();
-
-			while(link = links.iterateNext()) {
-				switch(link.type) {
-					case 'application/pdf':
-						data['attachments'].push({'url':link.href,'title':link.title,'mimeType':'application/pdf','downloadable':true});
-						break;
-					// maybe later, epub ...
-					default: break;
-				}
-			}
-
-			while(meta = metas.iterateNext()) { // iterate over each metas
-				switch(meta.name.toLowerCase()) {
-					case 'dc.type':
-						switch(meta.content.toLowerCase()) {
-							case 'journalarticle':
-								type = 'journalArticle';
-								break;
-							
-							case 'collection':
-							case 'book':
-								type = 'multiple';
-								break;
-							
-							case 'booksection':
-								type = 'bookSection';
-								break;
-							
-							default: break;
-						}
-						break;
-
-					case 'author':
-					case 'dc.creator':
-						var authors = meta.content.split(';');
-						for(var i in authors) {
-							if(!data['authors'][authors[i]]) {
-								data['authors'][authors[i]] = true;
-								data['creators'].push(Zotero.Utilities.cleanAuthor(ZU.capitalizeTitle(authors[i].toLowerCase()), "author", true));
-							}
-						}
-						break;
-					
-					case 'dc.contributor':
-					case 'dc.contributor.ill':
-						var contribs = meta.content.split(';');
-						for(var i in contribs) {
-							if(!data['contrib'][contribs[i]]) {
-								data['contrib'][contribs[i]] = true;
-								data['creators'].push(Zotero.Utilities.cleanAuthor(contribs[i], "contributor", true));
-							}
-						}
-						break;
-
-					case 'dc.contributor.edt':
-						var editors = meta.content.split(';');
-						for(var i in editors) {
-							if(!data['editors'][editors[i]]) {
-								data['editors'][editors[i]] = true;
-								data['creators'].push(Zotero.Utilities.cleanAuthor(editors[i], "editor", true));
-							}
-						}
-						break;
-
-					case 'dc.contributor.com':
-						var bookAuthors = meta.content.split(';');
-						for(var i in bookAuthors) {
-							if(!data['authors'][bookAuthors[i]]) {
-								data['authors'][bookAuthors[i]] = true;
-								data['creators'].push(Zotero.Utilities.cleanAuthor(bookAuthors[i], "bookAuthor", true));
-							}
-						}
-						break;
-
-					case 'dc.contributor.trl':
-						var translators = meta.content.split(';');
-						for(var i in translators) { 
-							if(!data['translators'][translators[i]]) {
-								data['translators'][translators[i]] = true;
-								data['creators'].push(Zotero.Utilities.cleanAuthor(translators[i], "translator", true));
-							}
-						}
-						break;
-
-					case 'dc.subject':
-					case 'keywords':
-						for each(var tag in meta.content.split(/,\s*/))
-							data['tags'].push(tag);
-						break;
-
-					case 'dc.identifier':
-						if(!meta.scheme || meta.scheme === 'URI') {
-							if(!data['url']) data['url'] = meta.content;
-						} else if(meta.scheme === 'ISSN' && !data['ISSN']) {
-							data['ISSN'] = meta.content;
-						}
-						break;
-					
-					case 'dc.title':
-						data['title'] = meta.content;
-						break;
-						
-					case 'dc.publisher':
-						data['publisher'] = data['publisher'] ? data['publisher'] + ';' + meta.content : meta.content;
-						break;
-					
-					case 'dc.language':
-						data['language'] = data['language'] ? data['language'] + ';' + meta.content : meta.content;
-						break;
-					
-					case 'dc.date':
-						if(!data['date']) data['date'] = meta.content;
-						break;
-					
-					case 'dc.rights':
-						data['rights'] = data['rights'] ? data['rights'] + ';' + meta.content : meta.content;
-						break;
-					
-					case 'dc.relation.ispartof':
-						if(meta.scheme && 'ISBN' === meta.scheme) {
-							data['ISBN'] = meta.content;
-						} else if(!data['publicationTitle']) {
-							data['publicationTitle'] = meta.content.replace(/(\s*,\s*)+$/, '');
-						}
-						break;
-
-					case 'dc.description.tableofcontents':
-						data['notes'].push({'note':meta.content});
-						break;
-
-					case 'dc.description':
-					case 'description':
-						if(!data['abstractNote']) {
-							data['abstractNote'] = meta.content;
-						} else if(-1 === data['abstractNote'].indexOf(meta.content)) {
-							data['abstractNote'] += ';' + meta.content;
-						}
-						break;
-
-					case 'prism.publicationname':
-						data['publicationTitle'] = meta.content;
-						break;
-
-					case 'prism.number':
-						data['issue'] = meta.content;
-						break;
-
-					case 'prism.volume':
-						data['volume'] = meta.content;
-						break;
-
-					case 'prism.issuename':
-						data['prism.series'] = meta.content;
-						break;
-
-					case 'prism.startingpage':
-						data['pagination_first'] = meta.content;
-						break;
-
-					case 'prism.endingpage':
-						data['pagination_last'] = meta.content;
-						break;
-
-					case 'prism.publicationdate':
-						// we take only the date and not the time
-						data['date'] = meta.content.substr(0,10);
-						break;
-
-					case 'prism.issn':
-						data['ISSN'] = meta.content;
-						break;
-
-					case 'prism.isbn':
-						data['ISBN'] = meta.content;
-						break;
-
-					case 'prism.elssn':
-						//if(!data['ISSN']) data['ISSN'] = meta.content;
-						break;
-
-					case 'prism.url':
-						data['url'] = meta.content;
-						break;
-
-					case 'prism.teaser':
-						data['extra'] = meta.content;
-						break;
-
-					case 'prism.section':
-						data['prism.section'] = meta.content;
-						break;
-
-					default: break;
-				}
-			}
-
-			var item = new Zotero.Item(type ? type : 'journalArticle');
-			
-			if('bookSection' === type) {
-				if(data['publicationTitle']) {
-					data['bookTitle'] = data['publicationTitle'];
-					delete data['publicationTitle'];
-				}
-				if(data['prism.series']) {
-					data['publicationTitle'] = data['prism.series'];
-				}
-			} else {
-				if(data['prism.series']) {
-					data['seriesTitle'] = data['prism.series'];
-				} else if(data['prism.section']) {
-					data['seriesTitle'] = data['prism.section'];
-				}
-				delete data['prism.section'];
-			}
-			delete data['prism.series'];
-			
-			if(data['pagination_first'] && data['pagination_last']) {
-				data['pages'] = data['pagination_first'] + '-' + data['pagination_last'];
-			} else if(data['pagination_first']) {
-				data['pages'] = data['pagination_first'];
-			} else if(data['pagination_last']) {
-				data['pages'] = data['pagination_last'];
-			}
-			delete data['pagination_first'], data['pagination_last'], data['authors'], data['contrib'];
-			
-			if(!data['title']) {
-				// if no dc.title found, Zotero will throw an error, so we get the page title
-				data['title'] = doc.evaluate('//title', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			}
-
-			data['attachments'].push({'title':data['title'],'url':data['url'],'mimeType':'text/html'});
-
-			for(var i in data) // populate
-				item[i] = data[i];
-
-			// will always be Revues.org
-			item.libraryCatalog = 'Revues.org';
-			
-			item.complete();
-		}, function() {Zotero.done();});
-	}
-	Zotero.wait();
 }
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://e-spania.revues.org/12303",
+		"url": "http://amerika.revues.org/1283",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://iheid.revues.org/412?lang=fr",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"creators": [
+					{
+						"firstName": "Fabien",
+						"lastName": "Nathan",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"itemID": "http://iheid.revues.org/412?lang=fr",
+				"title": "Chapitre 2 – L’histoire de La Paz et de la ladera ouest",
+				"publicationTitle": "Collections électroniques de l’Institut de hautes études internationales et du développement. Graduate Institute Publications Online",
+				"rights": "© The Graduate Institute | Geneva",
+				"publisher": "Institut de hautes études internationales et du développement",
+				"institution": "Institut de hautes études internationales et du développement",
+				"company": "Institut de hautes études internationales et du développement",
+				"label": "Institut de hautes études internationales et du développement",
+				"distributor": "Institut de hautes études internationales et du développement",
+				"date": "2012/02/03",
+				"DOI": "10.4000/iheid.412",
+				"reportType": "bookSection",
+				"letterType": "bookSection",
+				"manuscriptType": "bookSection",
+				"mapType": "bookSection",
+				"thesisType": "bookSection",
+				"websiteType": "bookSection",
+				"presentationType": "bookSection",
+				"postType": "bookSection",
+				"audioFileType": "bookSection",
+				"language": "fr",
+				"issue": "1",
+				"ISBN": "978-2-940415-91-5",
+				"abstractNote": "L’histoire de la ladera ouest de La Paz s’insère dans l’histoire générale de La Paz, à son tour influencée par (et influençant) l’histoire nationale bolivienne. La compréhension du processus de construction des risques, sans laquelle il est impossible de comprendre leur régulation sociale, est en grande partie le produit de l’histoire. En effet, l’approche diachronique semble être un moyen indispensable d’objectivation du social, inspiré ainsi de la sociologie « inséparablement structurale et génétique » (Wacquant 1995) de Pierre Bourdieu, et plus précisément ici, elle joue un rôle fondamental dans la recherche des causes, voire des « causes-racines » de la progression de la vulnérabilité (Wisner et al. 2004). On s’intéressera non seulement aux conditions de possibilité de l’établissement en zone à risque, mais également à la manière dont celle-ci s’est effectivement réalisée.Faire l’histoire de la ladera ouest, c’est construire l’histoire d’un espace, dans la lignée de l’école des annales (Braudel 1990), rendant solidaires l’une de l’autre l’histoire et la géographie. Mais c’est également s’intéresser à un objet inédit – l’histoire des laderas n’a jamais été écrite comme telle, et l’histoire de La Paz correspond souvent à celle du centre-ville. On peut y déceler plusieurs raisons. D’abord, le désintérêt général envers un espace peuplé par des populations indigènes, à faible capital économique, politique et culturel, et dont l’urbanisation constitue dans l’imaginaire collecti",
+				"ISSN": "2108-6419",
+				"url": "http://iheid.revues.org/412?lang=fr",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "iheid.revues.org"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://e-spania.revues.org/12303?lang=fr",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "georges",
-						"lastName": "martin",
-						"creatorType": "author"
-					},
-					{
 						"firstName": "Georges",
 						"lastName": "Martin",
-						"creatorType": "editor"
+						"creatorType": "author"
 					}
 				],
-				"notes": [
-					{
-						"note": "<h1>Plan</h1><h1>L’infantat</h1><h1>L’infante</h1><h1>Annexe</h1>"
-					}
-				],
+				"notes": [],
 				"tags": [
 					"infante Elvire",
 					"Saint-Isidore de León",
@@ -381,58 +211,64 @@ var testCases = [
 					"Alphonse VI de Castille et de León",
 					"infantat",
 					"infantaticum",
-					"XIe siècle",
+					"XIe siècle"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"itemID": "http://e-spania.revues.org/12303?lang=fr",
+				"title": "Le testament d’Elvire (Tábara, 1099)",
+				"publicationTitle": "e-Spania. Revue interdisciplinaire d’études hispaniques médiévales et modernes",
+				"rights": "© e-Spania",
+				"publisher": "CLEA (Civilisations et Littératures d’Espagne et d’Amérique du Moyen Âge aux Lumières), EA 4083",
+				"institution": "CLEA (Civilisations et Littératures d’Espagne et d’Amérique du Moyen Âge aux Lumières), EA 4083",
+				"company": "CLEA (Civilisations et Littératures d’Espagne et d’Amérique du Moyen Âge aux Lumières), EA 4083",
+				"label": "CLEA (Civilisations et Littératures d’Espagne et d’Amérique du Moyen Âge aux Lumières), EA 4083",
+				"distributor": "CLEA (Civilisations et Littératures d’Espagne et d’Amérique du Moyen Âge aux Lumières), EA 4083",
+				"date": "2011/11/13",
+				"DOI": "10.4000/e-spania.12303",
+				"reportType": "Text",
+				"letterType": "Text",
+				"manuscriptType": "Text",
+				"mapType": "Text",
+				"thesisType": "Text",
+				"websiteType": "Text",
+				"presentationType": "Text",
+				"postType": "Text",
+				"audioFileType": "Text",
+				"language": "fr",
+				"issue": "5",
+				"abstractNote": "Le testament d’Elvire livre de précieuses informations sur la réalité historique de l’infantat : son implantation, la composition de ses biens, ses évolutions, les formes de son acquisition et de sa transmission, sa fonction politique. Mais il nous renseigne aussi sur une infante de niveau moyen, sur son cadre de vie, son entourage, ses activités, les réseaux de son pouvoir et même sur sa foi.",
+				"ISSN": "1951-6169",
+				"url": "http://e-spania.revues.org/12303?lang=fr",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "e-spania.revues.org"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://e-spania.revues.org/12303?lang=es",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Georges",
+						"lastName": "Martin",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
 					"Urraca Fernández",
-					"San Isidoro de León",
-					"testamento",
-					"Infantazgo",
-					"Infanta Elvira",
-					"Infanta Urraca",
-					"Elvira Fernández",
-					"Sancha Raimundez",
-					"Infanta Sancha",
-					"Fernando I de Castilla y León",
-					"Alfonso VI de Castilla y León",
-					"siglo XI",
-					"infante Elvire",
-					"Saint-Isidore de León",
-					"testament",
-					"Elvire Fernandez",
-					"Urraque Fernandez",
-					"infante Urraque",
-					"Sancie Raimundez",
-					"infante Sancie",
-					"Ferdinand Ier de Castille et de León",
-					"Alphonse VI de Castille et de León",
-					"infantat",
-					"infantaticum",
-					"XIe siècle",
-					"Urraca Fernández",
-					"testamento",
-					"San Isidoro de León",
-					"Infantazgo",
-					"Infanta Elvira",
-					"Infanta Urraca",
-					"Elvira Fernández",
-					"Sancha Raimundez",
-					"Infanta Sancha",
-					"Fernando I de Castilla y León",
-					"Alfonso VI de Castilla y León",
-					"siglo XI",
-					"\ninfante Elvire",
-					"Saint-Isidore de León",
-					"testament",
-					"Elvire Fernandez",
-					"Urraque Fernandez",
-					"infante Urraque",
-					"Sancie Raimundez",
-					"infante Sancie",
-					"Ferdinand Ier de Castille et de León",
-					"Alphonse VI de Castille et de León",
-					"infantat",
-					"infantaticum",
-					"XIe siècle",
-					"\nUrraca Fernández",
 					"testamento",
 					"San Isidoro de León",
 					"Infantazgo",
@@ -448,42 +284,42 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://e-spania.revues.org/pdf/12303",
-						"title": "Le testament d’Elvire (Tábara, 1099)",
-						"mimeType": "application/pdf",
-						"downloadable": true
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Le testament d’Elvire (Tábara, 1099)",
-						"url": "http://e-spania.revues.org/12303",
-						"mimeType": "text/html"
+						"title": "Snapshot"
 					}
 				],
-				"authors": "",
-				"contrib": "",
-				"editors": "",
-				"translators": "",
-				"url": "http://e-spania.revues.org/12303",
-				"ISSN": "1951-6169",
+				"itemID": "http://e-spania.revues.org/12303?lang=es",
 				"title": "Le testament d’Elvire (Tábara, 1099)",
-				"publisher": "SEMH-Sorbonne",
-				"language": "fr",
-				"abstractNote": "Le testament d’Elvire livre de précieuses informations sur la réalité historique de l’infantat : son implantation, la composition de ses biens, ses évolutions, les formes de son acquisition et de sa transmission, sa fonction politique. Mais il nous renseigne aussi sur une infante de niveau moyen, sur son cadre de vie, son entourage, ses activités, les réseaux de son pouvoir et même sur sa foi. ;El testamento de Elvira brinda una preciosísima información sobre la realidad del infantazgo : su extensión, la composición de sus bienes, sus evoluciones, las formas de su adquisición y transmisión, su papel político. También nos informa sobre una infanta de nivel mediano, sobre el marco de su vida, su entorno personal, sus actividades, la red de sus influencias e incluso sobre su fe.",
-				"date": "2011-11-13",
+				"publicationTitle": "e-Spania. Revue interdisciplinaire d’études hispaniques médiévales et modernes",
 				"rights": "© e-Spania",
-				"publicationTitle": "e-Spania",
+				"publisher": "CLEA (Civilisations et Littératures d’Espagne et d’Amérique du Moyen Âge aux Lumières), EA 4083",
+				"institution": "CLEA (Civilisations et Littératures d’Espagne et d’Amérique du Moyen Âge aux Lumières), EA 4083",
+				"company": "CLEA (Civilisations et Littératures d’Espagne et d’Amérique du Moyen Âge aux Lumières), EA 4083",
+				"label": "CLEA (Civilisations et Littératures d’Espagne et d’Amérique du Moyen Âge aux Lumières), EA 4083",
+				"distributor": "CLEA (Civilisations et Littératures d’Espagne et d’Amérique du Moyen Âge aux Lumières), EA 4083",
+				"date": "2011/11/13",
+				"DOI": "10.4000/e-spania.12303",
+				"reportType": "Text",
+				"letterType": "Text",
+				"manuscriptType": "Text",
+				"mapType": "Text",
+				"thesisType": "Text",
+				"websiteType": "Text",
+				"presentationType": "Text",
+				"postType": "Text",
+				"audioFileType": "Text",
+				"language": "fr",
 				"issue": "5",
-				"extra": "Le 11 novembre 1099, dans sa ville de Tábara, non loin de Benavente, l’infante Elvire, âgée d’environ 63 ans et « prisonnière de la lourde chaîne de la maladie », ordonne son testament. Celui-ci nous a été convenablement conservé dans une copie précoce, écrite sur parchemin en lettres wisigothiques rondes. Il est signé par l’infante et souscrit par sa sœur, l’infante Urraque, ainsi que par les évêques de León, de Tuy et d’Oviedo. Elvire était la fille du roi Ferdinand Ier, mort en 1065, et la...",
-				"seriesTitle": "Alphonse X le Sage | Infantes",
-				"libraryCatalog": "Revues.org",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"abstractNote": "El testamento de Elvira brinda una preciosísima información sobre la realidad del infantazgo : su extensión, la composición de sus bienes, sus evoluciones, las formas de su adquisición y transmisión, su papel político. También nos informa sobre una infanta de nivel mediano, sobre el marco de su vida, su entorno personal, sus actividades, la red de sus influencias e incluso sobre su fe.",
+				"ISSN": "1951-6169",
+				"url": "http://e-spania.revues.org/12303?lang=es",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "e-spania.revues.org"
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://amerika.revues.org/1283",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
