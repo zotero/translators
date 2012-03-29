@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-03-26 20:40:24"
+	"lastUpdated": "2012-03-28 21:13:51"
 }
 
 /*
@@ -143,6 +143,24 @@ function determineType(result) {
 	return 'article';
 }
 
+function getAttachment(url, title) {
+	//try to determine mimeType from title
+	var m = title.match(/^\s*\[([^\]]+)\]/);
+	if(!m) return;
+
+	m = m[1].toUpperCase();
+	var mimeType = getAttachment.mimeTypes[m];
+	if(!mimeType) return;
+
+	return {title: title, url: url, mimeType: mimeType};
+}
+
+getAttachment.mimeTypes = {
+	'PDF': 'application/pdf',
+	'DOC': 'application/msword',
+	'HTML': 'text/html'
+};
+
 /*********************
  * Scraper functions *
  *********************/
@@ -169,29 +187,50 @@ function scrapeArticleResults(doc, articles) {
 								true);
 						}
 
-						/**TODO: handle other types of documents (e.g. DOC)
-						 */
-						//attach PDF if available
-						var pdf = ZU.xpath(article.result,
-							'./div[contains(@class,"gs_fl")]\
-							/a[substring(@href,string-length(@href)-3)=".pdf"]');
-						if(pdf.length) {
-							item.attachments.push({
-								title: pdf[0].textContent,
-								url: pdf[0].href,
-								mimeType: 'application/pdf'
-							});
-						}
-
 						//attach linked page as snapshot if available
 						var snapshotUrl = ZU.xpathText(article.result,
 							'./h3[@class="gs_rt"]/a/@href');
-						if(snapshotUrl) {
-							item.attachments.push({
+						var linkTitle = ZU.xpathText(article.result,
+							'./h3[@class="gs_rt"]');
+						var attachment;
+						if(linkTitle && snapshotUrl) {
+							//try to get an attachment
+							//based on google supplied tag
+							attachment = getAttachment(snapshotUrl, linkTitle);
+							if(attachment) {
+								attachment.title = "Full Text";
+							}
+						}
+
+						//take a snapshot if we didn't attach as file
+						if(snapshotUrl && !attachment) {
+							attachment = {
 								title: 'Snapshot',
 								url: snapshotUrl,
 								mimeType: 'text/html'
-							});
+							};
+						}
+
+						//attach files linked on the right
+						var pdf = ZU.xpath(article.result,
+							'./div[contains(@class,"gs_fl")]\
+							/a[./node()[starts-with(text(),"[")]]');
+						for(var i=0, n=pdf.length; i<n; i++) {
+							var attach = getAttachment(pdf[i].href,
+														pdf[i].textContent);
+							if(!attach) continue;
+
+							//drop attachment linked by the main link
+							// if it's the same url
+							if(attachment && attach.url==attachment.url) {
+								attachment = undefined;
+							}
+
+							item.attachments.push(attach);
+						}
+
+						if(attachment) {
+							item.attachments.push(attachment);
 						}
 
 						item.complete();
@@ -380,10 +419,10 @@ function doWeb(doc, url) {
 		 * We should always be able to build bibtex links from the Related articles
 		 * link.
 		 */
+		 //filter out patents, since these currently are not supported due to SOP
 		var results = ZU.xpath(doc,
 			'//div[@class="gs_r"]\
 				[./div[@class="gs_fl"]/a[contains(@href,"q=related:")]]');
-				//this would filter out patents, but we are handling them just fine
 				//[not(./h3[@class="gs_rt"]/a[contains(@href,"/patents?")])]');
 
 		var items = new Object();
@@ -425,7 +464,9 @@ function doWeb(doc, url) {
 						selectedBooks.push({bibtexUrl: i, result: resultDivs[i]});
 						break;
 					case 'patent':
+						//patents cannot be supported at this time due to SPO
 						selectedPatents.push({bibtexUrl: i, result: resultDivs[i]});
+						//__result_counter--;
 						break;
 					case 'article':
 					default:
