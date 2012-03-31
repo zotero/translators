@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-30 19:52:52"
+	"lastUpdated": "2012-03-30 20:15:34"
 }
 
 /**
@@ -216,383 +216,451 @@ function doWeb(doc, url) {
 }
 
 /** BEGIN TEST CASES **/
-var testCases = [{
-	"type": "web",
-	"url": "http://www.nature.com/onc/journal/v31/n6/index.html",
-	"items": "multiple"
-}, {
-	"type": "web",
-	"url": "http://www.nature.com/onc/journal/v31/n6/full/onc2011282a.html",
-	"items": [{
-		"itemType": "journalArticle",
-		"creators": [{
-			"firstName": "J.",
-			"lastName": "Jiang",
-			"creatorType": "author"
-		}, {
-			"firstName": "Y.",
-			"lastName": "Zhang",
-			"creatorType": "author"
-		}, {
-			"firstName": "S.",
-			"lastName": "Chuai",
-			"creatorType": "author"
-		}, {
-			"firstName": "Z.",
-			"lastName": "Wang",
-			"creatorType": "author"
-		}, {
-			"firstName": "D.",
-			"lastName": "Zheng",
-			"creatorType": "author"
-		}, {
-			"firstName": "F.",
-			"lastName": "Xu",
-			"creatorType": "author"
-		}, {
-			"firstName": "Y.",
-			"lastName": "Zhang",
-			"creatorType": "author"
-		}, {
-			"firstName": "C.",
-			"lastName": "Li",
-			"creatorType": "author"
-		}, {
-			"firstName": "Y.",
-			"lastName": "Liang",
-			"creatorType": "author"
-		}, {
-			"firstName": "Z.",
-			"lastName": "Chen",
-			"creatorType": "author"
-		}],
-		"notes": [],
-		"tags": [
-			"ONC",
-			"oncogenes",
-			"cancer",
-			"apoptosis",
-			"tumor suppressor genes",
-			"tumor viruses",
-			"molecular oncology",
-			"cell cycle",
-			"growth factors",
-			"growth factor receptors",
-			"apoptosis",
-			"growth regulatory genes"
-		],
-		"seeAlso": [],
-		"attachments": [{
-			"title": "Full Text PDF",
-			"mimeType": "application/pdf"
-		}],
-		"itemID": "http://www.nature.com/onc/journal/v31/n6/full/onc2011282a.html",
-		"title": "Trastuzumab (herceptin) targets gastric cancer stem cells characterized by CD90 phenotype",
-		"publicationTitle": "Oncogene",
-		"rights": "© 2011 Nature Publishing Group",
-		"volume": "31",
-		"issue": "6",
-		"number": "6",
-		"patentNumber": "6",
-		"pages": "671-682",
-		"ISSN": "0950-9232",
-		"publisher": "Nature Publishing Group",
-		"institution": "Nature Publishing Group",
-		"company": "Nature Publishing Group",
-		"label": "Nature Publishing Group",
-		"distributor": "Nature Publishing Group",
-		"date": "2011-07-11",
-		"language": "en",
-		"DOI": "10.1038/onc.2011.282",
-		"abstractNote": "Oncogene is one of the world’s leading cancer journals. It is published weekly and covers all aspects of the structure and function of Oncogenes.",
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.nature.com/onc/journal/v31/n6/index.html",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
 		"url": "http://www.nature.com/onc/journal/v31/n6/full/onc2011282a.html",
-		"accessDate": "CURRENT_TIMESTAMP",
-		"libraryCatalog": "www.nature.com"
-	}]
-}, {
-	"type": "web",
-	"url": "http://www.nature.com/emboj/journal/vaop/ncurrent/index.html",
-	"items": "multiple"
-}, {
-	"type": "web",
-	"url": "http://www.nature.com/emboj/journal/vaop/ncurrent/full/emboj201217a.html",
-	"items": [{
-		"itemType": "journalArticle",
-		"creators": [{
-			"firstName": "Er-Chieh",
-			"lastName": "Cho",
-			"creatorType": "author"
-		}, {
-			"firstName": "Shunsheng",
-			"lastName": "Zheng",
-			"creatorType": "author"
-		}, {
-			"firstName": "Shonagh",
-			"lastName": "Munro",
-			"creatorType": "author"
-		}, {
-			"firstName": "Geng",
-			"lastName": "Liu",
-			"creatorType": "author"
-		}, {
-			"firstName": "Simon M.",
-			"lastName": "Carr",
-			"creatorType": "author"
-		}, {
-			"firstName": "Jutta",
-			"lastName": "Moehlenbrink",
-			"creatorType": "author"
-		}, {
-			"firstName": "Yi-Chien",
-			"lastName": "Lu",
-			"creatorType": "author"
-		}, {
-			"firstName": "Lindsay",
-			"lastName": "Stimson",
-			"creatorType": "author"
-		}, {
-			"firstName": "Omar",
-			"lastName": "Khan",
-			"creatorType": "author"
-		}, {
-			"firstName": "Rebecca",
-			"lastName": "Konietzny",
-			"creatorType": "author"
-		}, {
-			"firstName": "Joanna",
-			"lastName": "McGouran",
-			"creatorType": "author"
-		}, {
-			"firstName": "Amanda S.",
-			"lastName": "Coutts",
-			"creatorType": "author"
-		}, {
-			"firstName": "Benedikt",
-			"lastName": "Kessler",
-			"creatorType": "author"
-		}, {
-			"firstName": "David J.",
-			"lastName": "Kerr",
-			"creatorType": "author"
-		}, {
-			"firstName": "Nicholas B. La",
-			"lastName": "Thangue",
-			"creatorType": "author"
-		}],
-		"notes": [],
-		"tags": [
-			"The EMBO Journal",
-			"European Molecular Biology Organization",
-			"science",
-			"scientific journal",
-			"biology articles",
-			"cell signalling",
-			"cell biology",
-			"structure",
-			"biological research",
-			"journal of cell biology",
-			"molecular and cellular biology",
-			"genetics",
-			"biochemistry",
-			"molecular cell biology",
-			"molecular biology of the cell",
-			"development",
-			"immunology",
-			"neuroscience",
-			"plant biology",
-			"structural biology",
-			"genomic and computational biology",
-			"genome stability and dynamics",
-			"chromatin and transcription",
-			"RNA",
-			"proteins",
-			"cellular metabolism",
-			"signal transduction",
-			"cell cycle",
-			"differentiation and death",
-			"membranes and transport",
-			"cell and tissue architecture",
-			"microbiology and pathogens",
-			"molecular biology of disease."
-		],
-		"seeAlso": [],
-		"attachments": [{
-			"title": "Full Text PDF",
-			"mimeType": "application/pdf"
-		}],
-		"itemID": "http://www.nature.com/emboj/journal/vaop/ncurrent/full/emboj201217a.html",
-		"title": "Arginine methylation controls growth regulation by E2F-1",
-		"publicationTitle": "The EMBO Journal",
-		"rights": "© 2012 Nature Publishing Group",
-		"ISSN": "ERROR! NO ISSN",
-		"publisher": "Nature Publishing Group",
-		"institution": "Nature Publishing Group",
-		"company": "Nature Publishing Group",
-		"label": "Nature Publishing Group",
-		"distributor": "Nature Publishing Group",
-		"date": "2012-02-10",
-		"language": "en",
-		"DOI": "10.1038/emboj.2012.17",
-		"abstractNote": "The EMBO Journal encourages and publishes articles that report novel findings of wide biological significance in the areas of development, immunology, neuroscience, plant biology, structural biology, genomic & computational biology, genome stability & dynamics, chromatin & transcription, RNA, proteins, cellular metabolism, signal transduction, cell cycle, differentiation & death, membranes & transport, cell & tissue architecture, microbiology & pathogens and molecular biology of disease.",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "J.",
+						"lastName": "Jiang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Y.",
+						"lastName": "Zhang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "S.",
+						"lastName": "Chuai",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Z.",
+						"lastName": "Wang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "D.",
+						"lastName": "Zheng",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "F.",
+						"lastName": "Xu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Y.",
+						"lastName": "Zhang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "C.",
+						"lastName": "Li",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Y.",
+						"lastName": "Liang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Z.",
+						"lastName": "Chen",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"ONC",
+					"oncogenes",
+					"cancer",
+					"apoptosis",
+					"tumor suppressor genes",
+					"tumor viruses",
+					"molecular oncology",
+					"cell cycle",
+					"growth factors",
+					"growth factor receptors",
+					"apoptosis",
+					"growth regulatory genes"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"itemID": "http://www.nature.com/onc/journal/v31/n6/full/onc2011282a.html",
+				"title": "Trastuzumab (herceptin) targets gastric cancer stem cells characterized by CD90 phenotype",
+				"publicationTitle": "Oncogene",
+				"rights": "© 2011 Nature Publishing Group",
+				"volume": "31",
+				"issue": "6",
+				"number": "6",
+				"patentNumber": "6",
+				"pages": "671-682",
+				"ISSN": "0950-9232",
+				"publisher": "Nature Publishing Group",
+				"institution": "Nature Publishing Group",
+				"company": "Nature Publishing Group",
+				"label": "Nature Publishing Group",
+				"distributor": "Nature Publishing Group",
+				"date": "2011-07-11",
+				"language": "en",
+				"DOI": "10.1038/onc.2011.282",
+				"abstractNote": "Oncogene is one of the world’s leading cancer journals. It is published weekly and covers all aspects of the structure and function of Oncogenes.",
+				"url": "http://www.nature.com/onc/journal/v31/n6/full/onc2011282a.html",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.nature.com"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.nature.com/emboj/journal/vaop/ncurrent/index.html",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
 		"url": "http://www.nature.com/emboj/journal/vaop/ncurrent/full/emboj201217a.html",
-		"accessDate": "CURRENT_TIMESTAMP",
-		"libraryCatalog": "www.nature.com"
-	}]
-}, {
-	"type": "web",
-	"url": "http://www.nature.com/onc/topten/index.html",
-	"items": "multiple"
-}, {
-	"type": "web",
-	"url": "http://www.nature.com/nature/journal/v481/n7381/full/nature10669.html",
-	"items": [{
-		"itemType": "journalArticle",
-		"creators": [{
-			"firstName": "S.",
-			"lastName": "Vegetti",
-			"creatorType": "author"
-		}, {
-			"firstName": "D. J.",
-			"lastName": "Lagattuta",
-			"creatorType": "author"
-		}, {
-			"firstName": "J. P.",
-			"lastName": "McKean",
-			"creatorType": "author"
-		}, {
-			"firstName": "M. W.",
-			"lastName": "Auger",
-			"creatorType": "author"
-		}, {
-			"firstName": "C. D.",
-			"lastName": "Fassnacht",
-			"creatorType": "author"
-		}, {
-			"firstName": "L. V. E.",
-			"lastName": "Koopmans",
-			"creatorType": "author"
-		}],
-		"notes": [],
-		"tags": [
-			"Astronomy",
-			"Astrophysics"
-		],
-		"seeAlso": [],
-		"attachments": [{
-			"title": "Full Text PDF",
-			"mimeType": "application/pdf"
-		}],
-		"itemID": "http://www.nature.com/nature/journal/v481/n7381/full/nature10669.html",
-		"title": "Gravitational detection of a low-mass dark satellite galaxy at cosmological distance",
-		"publicationTitle": "Nature",
-		"rights": "© 2012 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
-		"volume": "481",
-		"pages": "341-343",
-		"ISSN": "0028-0836",
-		"publisher": "Nature Publishing Group",
-		"institution": "Nature Publishing Group",
-		"company": "Nature Publishing Group",
-		"label": "Nature Publishing Group",
-		"distributor": "Nature Publishing Group",
-		"date": "2012-01-18",
-		"language": "en",
-		"issue": "7381",
-		"DOI": "10.1038/nature10669",
-		"abstractNote": "The mass function of dwarf satellite galaxies that are observed around Local Group galaxies differs substantially from simulations based on cold dark matter: the simulations predict many more dwarf galaxies than are seen. The Local Group, however, may be anomalous in this regard. A massive dark satellite in an early-type lens galaxy at a redshift of 0.222 was recently found using a method based on gravitational lensing, suggesting that the mass fraction contained in substructure could be higher than is predicted from simulations. The lack of very low-mass detections, however, prohibited any constraint on their mass function. Here we report the presence of a (1.9[thinsp][plusmn][thinsp]0.1)[thinsp][times][thinsp]108nature10669-m1jpg19K2716 dark satellite galaxy in the Einstein ring system JVAS B1938+666 (ref. 11) at a redshift of 0.881, where nature10669-m2jpg20K2716 denotes the solar mass. This satellite galaxy has a mass similar to that of the Sagittarius galaxy, which is a satellite of the Milky Way. We determine the logarithmic slope of the mass function for substructure beyond the local Universe to be nature10669-m3jpg21K4620, with an average mass fraction of nature10669-m4jpg21K4820 per cent, by combining data on both of these recently discovered galaxies. Our results are consistent with the predictions from cold dark matter simulations at the 95 per cent confidence level, and therefore agree with the view that galaxies formed hierarchically in a Universe composed of cold dark matter.",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Er-Chieh",
+						"lastName": "Cho",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Shunsheng",
+						"lastName": "Zheng",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Shonagh",
+						"lastName": "Munro",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Geng",
+						"lastName": "Liu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Simon M.",
+						"lastName": "Carr",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jutta",
+						"lastName": "Moehlenbrink",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yi-Chien",
+						"lastName": "Lu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Lindsay",
+						"lastName": "Stimson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Omar",
+						"lastName": "Khan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Rebecca",
+						"lastName": "Konietzny",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Joanna",
+						"lastName": "McGouran",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Amanda S.",
+						"lastName": "Coutts",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Benedikt",
+						"lastName": "Kessler",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "David J.",
+						"lastName": "Kerr",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nicholas B. La",
+						"lastName": "Thangue",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"The EMBO Journal",
+					"European Molecular Biology Organization",
+					"science",
+					"scientific journal",
+					"biology articles",
+					"cell signalling",
+					"cell biology",
+					"structure",
+					"biological research",
+					"journal of cell biology",
+					"molecular and cellular biology",
+					"genetics",
+					"biochemistry",
+					"molecular cell biology",
+					"molecular biology of the cell",
+					"development",
+					"immunology",
+					"neuroscience",
+					"plant biology",
+					"structural biology",
+					"genomic and computational biology",
+					"genome stability and dynamics",
+					"chromatin and transcription",
+					"RNA",
+					"proteins",
+					"cellular metabolism",
+					"signal transduction",
+					"cell cycle",
+					"differentiation and death",
+					"membranes and transport",
+					"cell and tissue architecture",
+					"microbiology and pathogens",
+					"molecular biology of disease."
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"itemID": "http://www.nature.com/emboj/journal/vaop/ncurrent/full/emboj201217a.html",
+				"title": "Arginine methylation controls growth regulation by E2F-1",
+				"publicationTitle": "The EMBO Journal",
+				"rights": "© 2012 Nature Publishing Group",
+				"ISSN": "ERROR! NO ISSN",
+				"publisher": "Nature Publishing Group",
+				"institution": "Nature Publishing Group",
+				"company": "Nature Publishing Group",
+				"label": "Nature Publishing Group",
+				"distributor": "Nature Publishing Group",
+				"date": "2012-02-10",
+				"language": "en",
+				"DOI": "10.1038/emboj.2012.17",
+				"abstractNote": "The EMBO Journal encourages and publishes articles that report novel findings of wide biological significance in the areas of development, immunology, neuroscience, plant biology, structural biology, genomic & computational biology, genome stability & dynamics, chromatin & transcription, RNA, proteins, cellular metabolism, signal transduction, cell cycle, differentiation & death, membranes & transport, cell & tissue architecture, microbiology & pathogens and molecular biology of disease.",
+				"url": "http://www.nature.com/emboj/journal/vaop/ncurrent/full/emboj201217a.html",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.nature.com"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.nature.com/onc/topten/index.html",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
 		"url": "http://www.nature.com/nature/journal/v481/n7381/full/nature10669.html",
-		"accessDate": "CURRENT_TIMESTAMP",
-		"libraryCatalog": "www.nature.com"
-	}]
-}, {
-	"type": "web",
-	"url": "http://www.nature.com/nature/journal/v481/n7381/full/481237a.html",
-	"items": [{
-		"itemType": "journalArticle",
-		"creators": [],
-		"notes": [],
-		"tags": [
-			"Policy",
-			"Politics",
-			"History"
-		],
-		"seeAlso": [],
-		"attachments": [{
-			"title": "Full Text PDF",
-			"mimeType": "application/pdf"
-		}],
-		"itemID": "http://www.nature.com/nature/journal/v481/n7381/full/481237a.html",
-		"title": "Antarctic Treaty is cold comfort",
-		"publicationTitle": "Nature",
-		"rights": "© 2012 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
-		"volume": "481",
-		"pages": "237-237",
-		"ISSN": "0028-0836",
-		"publisher": "Nature Publishing Group",
-		"institution": "Nature Publishing Group",
-		"company": "Nature Publishing Group",
-		"label": "Nature Publishing Group",
-		"distributor": "Nature Publishing Group",
-		"date": "2012-01-18",
-		"language": "en",
-		"issue": "7381",
-		"DOI": "10.1038/481237a",
-		"abstractNote": "Researchers need to cement the bond between science and the South Pole if the region is to remain one of peace and collaboration.",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "S.",
+						"lastName": "Vegetti",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "D. J.",
+						"lastName": "Lagattuta",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "J. P.",
+						"lastName": "McKean",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "M. W.",
+						"lastName": "Auger",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "C. D.",
+						"lastName": "Fassnacht",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "L. V. E.",
+						"lastName": "Koopmans",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Astronomy",
+					"Astrophysics"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"itemID": "http://www.nature.com/nature/journal/v481/n7381/full/nature10669.html",
+				"title": "Gravitational detection of a low-mass dark satellite galaxy at cosmological distance",
+				"publicationTitle": "Nature",
+				"rights": "© 2012 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
+				"volume": "481",
+				"pages": "341-343",
+				"ISSN": "0028-0836",
+				"publisher": "Nature Publishing Group",
+				"institution": "Nature Publishing Group",
+				"company": "Nature Publishing Group",
+				"label": "Nature Publishing Group",
+				"distributor": "Nature Publishing Group",
+				"date": "2012-01-18",
+				"language": "en",
+				"issue": "7381",
+				"DOI": "10.1038/nature10669",
+				"abstractNote": "The mass function of dwarf satellite galaxies that are observed around Local Group galaxies differs substantially from simulations based on cold dark matter: the simulations predict many more dwarf galaxies than are seen. The Local Group, however, may be anomalous in this regard. A massive dark satellite in an early-type lens galaxy at a redshift of 0.222 was recently found using a method based on gravitational lensing, suggesting that the mass fraction contained in substructure could be higher than is predicted from simulations. The lack of very low-mass detections, however, prohibited any constraint on their mass function. Here we report the presence of a (1.9[thinsp][plusmn][thinsp]0.1)[thinsp][times][thinsp]108nature10669-m1jpg19K2716 dark satellite galaxy in the Einstein ring system JVAS B1938+666 (ref. 11) at a redshift of 0.881, where nature10669-m2jpg20K2716 denotes the solar mass. This satellite galaxy has a mass similar to that of the Sagittarius galaxy, which is a satellite of the Milky Way. We determine the logarithmic slope of the mass function for substructure beyond the local Universe to be nature10669-m3jpg21K4620, with an average mass fraction of nature10669-m4jpg21K4820 per cent, by combining data on both of these recently discovered galaxies. Our results are consistent with the predictions from cold dark matter simulations at the 95 per cent confidence level, and therefore agree with the view that galaxies formed hierarchically in a Universe composed of cold dark matter.",
+				"url": "http://www.nature.com/nature/journal/v481/n7381/full/nature10669.html",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.nature.com"
+			}
+		]
+	},
+	{
+		"type": "web",
 		"url": "http://www.nature.com/nature/journal/v481/n7381/full/481237a.html",
-		"accessDate": "CURRENT_TIMESTAMP",
-		"libraryCatalog": "www.nature.com"
-	}]
-}, {
-	"type": "web",
-	"url": "http://www.nature.com/nature/journal/v481/n7381/full/nature10728.html",
-	"items": [{
-		"itemType": "journalArticle",
-		"creators": [{
-			"firstName": "Peter J.",
-			"lastName": "Watson",
-			"creatorType": "author"
-		}, {
-			"firstName": "Louise",
-			"lastName": "Fairall",
-			"creatorType": "author"
-		}, {
-			"firstName": "Guilherme M.",
-			"lastName": "Santos",
-			"creatorType": "author"
-		}, {
-			"firstName": "John W. R.",
-			"lastName": "Schwabe",
-			"creatorType": "author"
-		}],
-		"notes": [],
-		"tags": [
-			"Structural biology",
-			"Biochemistry"
-		],
-		"seeAlso": [],
-		"attachments": [{
-			"title": "Full Text PDF",
-			"mimeType": "application/pdf"
-		}],
-		"itemID": "http://www.nature.com/nature/journal/v481/n7381/full/nature10728.html",
-		"title": "Structure of HDAC3 bound to co-repressor and inositol tetraphosphate",
-		"publicationTitle": "Nature",
-		"rights": "© 2011 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
-		"volume": "481",
-		"pages": "335-340",
-		"ISSN": "0028-0836",
-		"publisher": "Nature Publishing Group",
-		"institution": "Nature Publishing Group",
-		"company": "Nature Publishing Group",
-		"label": "Nature Publishing Group",
-		"distributor": "Nature Publishing Group",
-		"date": "2012-01-09",
-		"language": "en",
-		"issue": "7381",
-		"DOI": "10.1038/nature10728",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [],
+				"notes": [],
+				"tags": [
+					"Policy",
+					"Politics",
+					"History"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"itemID": "http://www.nature.com/nature/journal/v481/n7381/full/481237a.html",
+				"title": "Antarctic Treaty is cold comfort",
+				"publicationTitle": "Nature",
+				"rights": "© 2012 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
+				"volume": "481",
+				"pages": "237-237",
+				"ISSN": "0028-0836",
+				"publisher": "Nature Publishing Group",
+				"institution": "Nature Publishing Group",
+				"company": "Nature Publishing Group",
+				"label": "Nature Publishing Group",
+				"distributor": "Nature Publishing Group",
+				"date": "2012-01-18",
+				"language": "en",
+				"issue": "7381",
+				"DOI": "10.1038/481237a",
+				"abstractNote": "Researchers need to cement the bond between science and the South Pole if the region is to remain one of peace and collaboration.",
+				"url": "http://www.nature.com/nature/journal/v481/n7381/full/481237a.html",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.nature.com"
+			}
+		]
+	},
+	{
+		"type": "web",
 		"url": "http://www.nature.com/nature/journal/v481/n7381/full/nature10728.html",
-		"accessDate": "CURRENT_TIMESTAMP",
-		"libraryCatalog": "www.nature.com",
-		"abstractNote": "Histone deacetylase enzymes (HDACs) are emerging cancer drug targets. They regulate gene expression by removing acetyl groups from lysine residues in histone tails, resulting in chromatin condensation. The enzymatic activity of most class I HDACs requires recruitment into multi-subunit co-repressor complexes, which are in turn recruited to chromatin by repressive transcription factors. Here we report the structure of a complex between an HDAC and a co-repressor, namely, human HDAC3 with the deacetylase activation domain (DAD) from the human SMRT co-repressor (also known as NCOR2). The structure reveals two remarkable features. First, the SMRT-DAD undergoes a large structural rearrangement on forming the complex. Second, there is an essential inositol tetraphosphate molecule—d-myo-inositol-(1,4,5,6)-tetrakisphosphate (Ins(1,4,5,6)P4)—acting as an ‘intermolecular glue’ between the two proteins. Assembly of the complex is clearly dependent on the Ins(1,4,5,6)P4, which may act as a regulator—potentially explaining why inositol phosphates and their kinases have been found to act as transcriptional regulators. This mechanism for the activation of HDAC3 appears to be conserved in class I HDACs from yeast to humans, and opens the way to novel therapeutic opportunities."
-	}]
-}]
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Peter J.",
+						"lastName": "Watson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Louise",
+						"lastName": "Fairall",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Guilherme M.",
+						"lastName": "Santos",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "John W. R.",
+						"lastName": "Schwabe",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Structural biology",
+					"Biochemistry"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"itemID": "http://www.nature.com/nature/journal/v481/n7381/full/nature10728.html",
+				"title": "Structure of HDAC3 bound to co-repressor and inositol tetraphosphate",
+				"publicationTitle": "Nature",
+				"rights": "© 2011 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
+				"volume": "481",
+				"pages": "335-340",
+				"ISSN": "0028-0836",
+				"publisher": "Nature Publishing Group",
+				"institution": "Nature Publishing Group",
+				"company": "Nature Publishing Group",
+				"label": "Nature Publishing Group",
+				"distributor": "Nature Publishing Group",
+				"date": "2012-01-09",
+				"language": "en",
+				"issue": "7381",
+				"DOI": "10.1038/nature10728",
+				"url": "http://www.nature.com/nature/journal/v481/n7381/full/nature10728.html",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.nature.com",
+				"abstractNote": "Histone deacetylase enzymes (HDACs) are emerging cancer drug targets. They regulate gene expression by removing acetyl groups from lysine residues in histone tails, resulting in chromatin condensation. The enzymatic activity of most class I HDACs requires recruitment into multi-subunit co-repressor complexes, which are in turn recruited to chromatin by repressive transcription factors. Here we report the structure of a complex between an HDAC and a co-repressor, namely, human HDAC3 with the deacetylase activation domain (DAD) from the human SMRT co-repressor (also known as NCOR2). The structure reveals two remarkable features. First, the SMRT-DAD undergoes a large structural rearrangement on forming the complex. Second, there is an essential inositol tetraphosphate molecule—d-myo-inositol-(1,4,5,6)-tetrakisphosphate (Ins(1,4,5,6)P4)—acting as an ‘intermolecular glue’ between the two proteins. Assembly of the complex is clearly dependent on the Ins(1,4,5,6)P4, which may act as a regulator—potentially explaining why inositol phosphates and their kinases have been found to act as transcriptional regulators. This mechanism for the activation of HDAC3 appears to be conserved in class I HDACs from yeast to humans, and opens the way to novel therapeutic opportunities."
+			}
+		]
+	}
+]
 /** END TEST CASES **/
