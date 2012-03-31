@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsb",
-	"lastUpdated": "2012-03-08 07:30:36"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-03-31 11:51:33"
 }
 
 /*
@@ -82,14 +82,15 @@ function scrape(doc, url) {
 	// Now for the Tags
 
 	var tags_XPath = '//li[contains(@class, "tags")]'; // I can't get the span selection to work. Help is appreciated.
-		var tags = ZU.xpathText(doc, tags_XPath);
-		tags = tags.replace(/^\s*Schlagworte\s|\s*$/g, ''); // remove whitespace around the author and the "Von "at the beginning
+	var tags = ZU.xpathText(doc, tags_XPath);
 	if (tags!=null){
-	var tags= tags.split("|"); // this seems to work even if there's no |
-	for (var i in tags) {
-		tags[i] = tags[i].replace(/^\s*|\s*$/g, '') // remove whitespace around the tags
-		newItem.tags.push(tags[i]);
-	} }
+		tags = tags.replace(/^\s*Schlagworte\s|\s*$/g, ''); // remove whitespace around the author and the "Von "at the beginning
+		var tags= tags.split("|"); // this seems to work even if there's no |
+		for (var i in tags) {
+			tags[i] = tags[i].replace(/^\s*|\s*$/g, '') // remove whitespace around the tags
+			newItem.tags.push(tags[i]);
+		} 	
+	}
 
 	// Date
 	var date_XPath = '//meta[contains(@name, "date_first_released")]';
