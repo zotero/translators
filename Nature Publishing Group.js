@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-30 20:15:34"
+	"lastUpdated": "2012-03-30 20:20:21"
 }
 
 /**
@@ -100,7 +100,10 @@ function scrapeEmbedMeta(doc, url) {
 			item.title = Zotero.Utilities.capitalizeTitle(item.title.toLowerCase(), true);
 		}
 
-		if (!item.abstractNote) item.abstractNote = getAbstract(doc);
+		//sometimes abstract from EM is description for the website.
+		//ours should always be better
+		var abstract = getAbstract(doc);
+		if (abstract) item.abstractNote = abstract;
 
 		var pdf = getPdfUrl(url);
 		if (pdf) {
@@ -320,7 +323,7 @@ var testCases = [
 				"date": "2011-07-11",
 				"language": "en",
 				"DOI": "10.1038/onc.2011.282",
-				"abstractNote": "Oncogene is one of the world’s leading cancer journals. It is published weekly and covers all aspects of the structure and function of Oncogenes.",
+				"abstractNote": "Identification and characterization of cancer stem cells (CSCs) in gastric cancer are difficult owing to the lack of specific markers and consensus methods. In this study, we show that cells with the CD90 surface marker in gastric tumors could be enriched under non-adherent, serum-free and sphere-forming conditions. These CD90+ cells possess a higher ability to initiate tumor in vivo and could re-establish the cellular hierarchy of tumors from single-cell implantation, demonstrating their self-renewal properties. Interestingly, higher proportion of CD90+ cells correlates with higher in vivo tumorigenicity of gastric primary tumor models. In addition, it was found that ERBB2 was overexpressed in about 25% of the gastric primary tumor models, which correlates with the higher level of CD90 expression in these tumors. Trastuzumab (humanized anti-ERBB2 antibody) treatment of high-tumorigenic gastric primary tumor models could reduce the CD90+ population in tumor mass and suppress tumor growth when combined with traditional chemotherapy. Moreover, tumorigenicity of tumor cells could also be suppressed when trastuzumab treatment starts at the same time as cell implantation. Therefore, we have identified a CSC population in gastric primary tumors characterized by their CD90 phenotype. The finding that trastuzumab targets the CSC population in gastric tumors suggests that ERBB2 signaling has a role in maintaining CSC populations, thus contributing to carcinogenesis and tumor invasion. In conclusion, the results from this study provide new insights into the gastric tumorigenic process and offer potential implications for the development of anticancer drugs as well as therapeutic treatment of gastric cancers.",
 				"url": "http://www.nature.com/onc/journal/v31/n6/full/onc2011282a.html",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.nature.com"
@@ -471,7 +474,7 @@ var testCases = [
 				"date": "2012-02-10",
 				"language": "en",
 				"DOI": "10.1038/emboj.2012.17",
-				"abstractNote": "The EMBO Journal encourages and publishes articles that report novel findings of wide biological significance in the areas of development, immunology, neuroscience, plant biology, structural biology, genomic & computational biology, genome stability & dynamics, chromatin & transcription, RNA, proteins, cellular metabolism, signal transduction, cell cycle, differentiation & death, membranes & transport, cell & tissue architecture, microbiology & pathogens and molecular biology of disease.",
+				"abstractNote": "E2F transcription factors are implicated in diverse cellular functions. The founding member, E2F-1, is endowed with contradictory activities, being able to promote cell-cycle progression and induce apoptosis. However, the mechanisms that underlie the opposing outcomes of E2F-1 activation remain largely unknown. We show here that E2F-1 is directly methylated by PRMT5 (protein arginine methyltransferase 5), and that arginine methylation is responsible for regulating its biochemical and functional properties, which impacts on E2F-1-dependent growth control. Thus, depleting PRMT5 causes increased E2F-1 protein levels, which coincides with decreased growth rate and associated apoptosis. Arginine methylation influences E2F-1 protein stability, and the enhanced transcription of a variety of downstream target genes reflects increased E2F-1 DNA-binding activity. Importantly, E2F-1 is methylated in tumour cells, and a reduced level of methylation is evident under DNA damage conditions that allow E2F-1 stabilization and give rise to apoptosis. Significantly, in a subgroup of colorectal cancer, high levels of PRMT5 frequently coincide with low levels of E2F-1 and reflect a poor clinical outcome. Our results establish that arginine methylation regulates the biological activity of E2F-1 activity, and raise the possibility that arginine methylation contributes to tumourigenesis by influencing the E2F pathway.",
 				"url": "http://www.nature.com/emboj/journal/vaop/ncurrent/full/emboj201217a.html",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.nature.com"
@@ -549,7 +552,7 @@ var testCases = [
 				"language": "en",
 				"issue": "7381",
 				"DOI": "10.1038/nature10669",
-				"abstractNote": "The mass function of dwarf satellite galaxies that are observed around Local Group galaxies differs substantially from simulations based on cold dark matter: the simulations predict many more dwarf galaxies than are seen. The Local Group, however, may be anomalous in this regard. A massive dark satellite in an early-type lens galaxy at a redshift of 0.222 was recently found using a method based on gravitational lensing, suggesting that the mass fraction contained in substructure could be higher than is predicted from simulations. The lack of very low-mass detections, however, prohibited any constraint on their mass function. Here we report the presence of a (1.9[thinsp][plusmn][thinsp]0.1)[thinsp][times][thinsp]108nature10669-m1jpg19K2716 dark satellite galaxy in the Einstein ring system JVAS B1938+666 (ref. 11) at a redshift of 0.881, where nature10669-m2jpg20K2716 denotes the solar mass. This satellite galaxy has a mass similar to that of the Sagittarius galaxy, which is a satellite of the Milky Way. We determine the logarithmic slope of the mass function for substructure beyond the local Universe to be nature10669-m3jpg21K4620, with an average mass fraction of nature10669-m4jpg21K4820 per cent, by combining data on both of these recently discovered galaxies. Our results are consistent with the predictions from cold dark matter simulations at the 95 per cent confidence level, and therefore agree with the view that galaxies formed hierarchically in a Universe composed of cold dark matter.",
+				"abstractNote": "The mass function of dwarf satellite galaxies that are observed around Local Group galaxies differs substantially from simulations1, 2, 3, 4, 5 based on cold dark matter: the simulations predict many more dwarf galaxies than are seen. The Local Group, however, may be anomalous in this regard6, 7. A massive dark satellite in an early-type lens galaxy at a redshift of 0.222 was recently found8 using a method based on gravitational lensing9, 10, suggesting that the mass fraction contained in substructure could be higher than is predicted from simulations. The lack of very low-mass detections, however, prohibited any constraint on their mass function. Here we report the presence of a (1.9 ± 0.1) × 108 dark satellite galaxy in the Einstein ring system JVAS B1938+666 (ref. 11) at a redshift of 0.881, where denotes the solar mass. This satellite galaxy has a mass similar to that of the Sagittarius12 galaxy, which is a satellite of the Milky Way. We determine the logarithmic slope of the mass function for substructure beyond the local Universe to be , with an average mass fraction of per cent, by combining data on both of these recently discovered galaxies. Our results are consistent with the predictions from cold dark matter simulations13, 14, 15 at the 95 per cent confidence level, and therefore agree with the view that galaxies formed hierarchically in a Universe composed of cold dark matter.",
 				"url": "http://www.nature.com/nature/journal/v481/n7381/full/nature10669.html",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.nature.com"
