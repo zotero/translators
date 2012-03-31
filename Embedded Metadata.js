@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-03-26 16:03:25"
+	"lastUpdated": "2012-03-30 19:39:17"
 }
 
 /*
@@ -617,14 +617,14 @@ function addHighwireMetadata(doc, newItem) {
 	 * some semicolon, some individual
 	 */
 	if (newItem.tags.length) {
-		var tags = [], t;
+		var tags = [];
 		for (var i in newItem.tags) {
 			newItem.tags[i] = newItem.tags[i].trim();
-			t = newItem.tags[i].split(/\s*,\s*/);
-			if (newItem.tags[i].indexOf(';') == -1 && t.length > 2) {
-				tags = tags.concat(t);
+			if (newItem.tags[i].indexOf(';') == -1) {
+				//split by comma, since there are no semicolons
+				tags = tags.concat( newItem.tags[i].split(/\s*,\s*/) );
 			} else {
-				tags = tags.concat(newItem.tags[i].split(/\s*;\s*/));
+				tags = tags.concat( newItem.tags[i].split(/\s*;\s*/) );
 			}
 		}
 		newItem.tags = tags;
