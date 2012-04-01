@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-03-18 14:14:07"
+	"lastUpdated": "2012-03-31 11:20:31"
 }
 
 function detectWeb(doc, url) {
@@ -144,76 +144,5 @@ function doWeb(doc, url) {
 	}
 }
 /** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://asalive.archivesalberta.org:8080/?proc=display&sess=ASALIVE-145-33bGk&item=GLEN-750&sear=.all%20all%20%60montreal%60&max=407&occ=1&dbase=archives_alberta",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"firstName": "A. E.",
-						"lastName": "Cross",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Helen",
-						"lastName": "Cross",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "J. B.",
-						"lastName": "Cross",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Sandy",
-						"lastName": "Cross",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Cross (family)",
-						"creatorType": "author",
-						"fieldMode": 1
-					},
-					{
-						"firstName": "Mary",
-						"lastName": "Dover",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"Cross, A.E.",
-					"Cross, Helen",
-					"Cross, J.B.",
-					"Cross, Sandy",
-					"Cross (family)",
-					"Dover, Mary",
-					"Commerce and industry",
-					"Family and personal life",
-					"Natural resources"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "A.E. Cross family fonds",
-				"date": "1836-1987, predominant 1890-1987",
-				"pages": "20 m of textual records and other materials.",
-				"archive": "Glenbow Archives",
-				"abstractNote": "The fonds consists of extensive correspondence between A.E. Cross and Helen Cross (1899-1928); correspondence of A.E. Cross pertaining to the brewery, ranch, personal matters, and organizations in which he was active (1890-1932); correspondence of J.B. Cross regarding the brewery, ranch and personal matters (1933-1937); A7 Ranche business correspondence (1913-1935); Calgary Brewing and Malting Company business correspondence (1892-1906); Helen's correspondence and records of organization in which she was active (1880-1944); correspondence and school records of the Cross children (1912-1948); family memorabilia (1892-1949); correspondence and business records of Sandy Cross and Rothney Farm (1935-1987); and extensive photographs of the Cross family, the A7 Ranche, and Rothney Farm.",
-				"language": "The material is in English.",
-				"archiveLocation": "M-289\n ; \nM-339-(2-6)\n ; \nM-1543\n ; \nM-1548\n ; \nM-2601\n ; \nM-3358\n ; \nM-8780\n ; \nM-9046\n ; \nM-9112\n ; \nM-9187\n ; \nM-9219\n ; \nPA-1577\n ; \nPA-3540\n ; \nPA-3674\n ; \nPA-3740\n ; \nPB-939\n ; \nPE-198\n ; \nNA-691\n ; \nNA-2787\n ; \nNA-5684\n ; \nND-23\n ; \nRCT-301\n ; \nRED-10\n ; \nS-230",
-				"url": "http://asalive.archivesalberta.org:8080/?proc=display&sess=ASALIVE-145-33bGk&item=GLEN-750&sear=.all%20all%20%60montreal%60&max=407&occ=1&dbase=archives_alberta",
-				"libraryCatalog": "Archives Network of Alberta",
-				"accessDate": "CURRENT_TIMESTAMP"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://asalive.archivesalberta.org:8080/?proc=sear&sess=ASALIVE-145-33bGk&field=.all&cond=all&val=montreal",
-		"items": "multiple"
-	}
-]
+var testCases = []
 /** END TEST CASES **/
