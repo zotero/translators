@@ -1,14 +1,15 @@
 {
-	"translatorID":"8451431a-895f-4732-8339-79eb6756d2f9",
-	"translatorType":4,
-	"label":"Civilization.ca",
-	"creator":"Adam Crymble",
-	"target":"http://collections.civilization.ca",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-09-02 13:40:00"
+	"translatorID": "8451431a-895f-4732-8339-79eb6756d2f9",
+	"label": "Civilization.ca",
+	"creator": "Adam Crymble",
+	"target": "^https?://collections\\.civilization\\.ca",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2012-03-31 19:18:49"
 }
 
 function detectWeb(doc, url) {
@@ -29,35 +30,30 @@ function associateData (newItem, dataTags, field, zoteroField) {
 
 function scrape(doc, url) {
 
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;	
-	
 	var dataTags = new Object();
 	var tagsContent = new Array();
 	var fieldTitle;
 	
 	var newItem = new Zotero.Item("artwork");
 	
-	var headers = doc.evaluate('//table[2]/tbody/tr/td[1]/span[@class="textb"]/b', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var contents = doc.evaluate('//tr[2]/td/table[2]/tbody/tr/td[2]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var xPathCount = doc.evaluate('count (//table[2]/tbody/tr/td[1]/span[@class="textb"]/b)', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var headers = doc.evaluate('//table[2]/tbody/tr/td[1]/span[@class="textb"]/b', doc, null, XPathResult.ANY_TYPE, null);
+	var contents = doc.evaluate('//tr[2]/td/table[2]/tbody/tr/td[2]', doc, null, XPathResult.ANY_TYPE, null);
+	var xPathCount = doc.evaluate('count (//table[2]/tbody/tr/td[1]/span[@class="textb"]/b)', doc, null, XPathResult.ANY_TYPE, null);
 
 	newItem.title = contents.iterateNext().textContent.replace(/^\s*|\s+$/g, '');
 	var dump = contents.iterateNext();
 
 	for (i=0; i<xPathCount.numberValue; i++) {	 	
-     			
-     		fieldTitle = headers.iterateNext().textContent.replace(/\s+/g, '');
-     		if (fieldTitle == "Artist/Maker/Manufacturer") {
-	     		fieldTitle = "	Artiste/Artisan/Fabricant";
-     		} else if (fieldTitle == "Autreaffiliationculturelle") {
-	     		fieldTitle = "OtherCulturalAffiliation";
-     		}
-     		
-     		 dataTags[fieldTitle] = Zotero.Utilities.cleanTags(contents.iterateNext().textContent.replace(/^\s*|\s*$/g, ''));
-     	}
+	 			
+	 		fieldTitle = headers.iterateNext().textContent.replace(/\s+/g, '');
+	 		if (fieldTitle == "Artist/Maker/Manufacturer") {
+		 		fieldTitle = "	Artiste/Artisan/Fabricant";
+	 		} else if (fieldTitle == "Autreaffiliationculturelle") {
+		 		fieldTitle = "OtherCulturalAffiliation";
+	 		}
+	 		
+	 		 dataTags[fieldTitle] = Zotero.Utilities.cleanTags(contents.iterateNext().textContent.replace(/^\s*|\s*$/g, ''));
+	 	}
 
 	if (dataTags["Artist/Maker/Manufacturer"]) {
 		var author = dataTags["Artist/Maker/Manufacturer"];
@@ -75,8 +71,8 @@ function scrape(doc, url) {
 		tagsContent = dataTags["OtherCulturalAffiliation"].split(/\n/);
 
 		for (var i = 0; i < tagsContent.length; i++) {
-		     		newItem.tags[i] = tagsContent[i];
-	     	}
+			 		newItem.tags[i] = tagsContent[i];
+		 	}
 	}
 	
 	if (dataTags["Collection"]) {
@@ -102,17 +98,13 @@ function scrape(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
 	
 	var articles = new Array();
 	
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 	
-		var titles = doc.evaluate('//tr/td[2]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//tr/td[2]/a', doc, null, XPathResult.ANY_TYPE, null);
 	
 		var next_title;
 		while (next_title = titles.iterateNext()) {
@@ -129,4 +121,31 @@ function doWeb(doc, url) {
 	}
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://collections.civilization.ca/public/pages/cmccpublic/emupublic/Display.php?irn=23462&QueryPage=%2Fpublic%2Fpages%2Fcmccpublic%2Femupublic%2FQuery.php&lang=0",
+		"items": [
+			{
+				"itemType": "artwork",
+				"creators": [],
+				"notes": [],
+				"tags": [
+					"Central Eskimo",
+					"Central Inuit"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "dogsled flooring",
+				"extra": "Collection: CCOP Gateway Ethnographic",
+				"callNumber": "IV-C-1866",
+				"artworkSize": "Height 0.9 cm, Length 14.8 cm, Width 3.4 cm",
+				"url": "http://collections.civilization.ca/public/pages/cmccpublic/emupublic/Display.php?irn=23462&QueryPage=%2Fpublic%2Fpages%2Fcmccpublic%2Femupublic%2FQuery.php&lang=0",
+				"libraryCatalog": "CMC",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
