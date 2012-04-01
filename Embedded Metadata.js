@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-03-30 19:39:17"
+	"lastUpdated": "2012-04-01 19:01:51"
 }
 
 /*
@@ -626,6 +626,9 @@ function addHighwireMetadata(doc, newItem) {
 			} else {
 				tags = tags.concat( newItem.tags[i].split(/\s*;\s*/) );
 			}
+		}
+		for (var i=0; i<tags.length; i++) {
+			if (tags[i] === "") tags.splice(i, 1);
 		}
 		newItem.tags = tags;
 	}
