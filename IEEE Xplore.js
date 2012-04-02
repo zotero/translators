@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-03-09 18:05:15"
+	"lastUpdated": "2012-04-02 00:37:54"
 }
 
 function detectWeb(doc, url) {
@@ -148,202 +148,38 @@ function addIdentifier(identifier, item) {
 	}
 }
 
-function scrape(doc, url) {
-	var newItem = new Zotero.Item("journalArticle");
-	var temp;
-	var xpath;
-	var row;
-	var rows;
-
-	newItem.attachments = [];
-	newItem.tags = [];
-	var metaTags = doc.getElementsByTagName("meta");
-
-	var pages = [false, false];
-	var doi = false;
-	var pdf = false;
-	var html = false;
-	for (var i = 0; i < metaTags.length; i++) {
-		var tag = metaTags[i].getAttribute("name");
-		var value = metaTags[i].getAttribute("content");
-		//Zotero.debug(pages + pdf + html);
-		//Zotero.debug("Have meta tag: " + tag + " => " + value);
-		switch (tag) {
-			// PRISM
-		case "prism.publicationName":
-			newItem.publicationTitle = value;
-			break;
-		case "prism.issn":
-			if (!newItem.ISSN && value != "NaN" && value != "") newItem.ISSN = value;
-			break;
-		case "prism.eIssn":
-			if (!newItem.ISSN && value != "NaN" && value != "") newItem.ISSN = value;
-			break;
-			// This is often NaN for some reason
-		case "prism.publicationDate":
-			if (!newItem.date && value != "NaN" && value !== "") newItem.date = value;
-			break;
-		case "prism.volume":
-			if (!newItem.volume && value != "NaN" && value != "") newItem.volume = value;
-			break;
-		case "prism.number":
-			if (!newItem.issue && value != "NaN" && value != "") newItem.issue = value;
-			break;
-			// These also seem bad
-		case "prism.startingPage":
-			if (!pages[0] && value != "null" && value != "") pages[0] = value;
-			break;
-		case "prism.endingPage":
-			if (!pages[1] && value != "null" && value != "") pages[1] = value;
-			break;
-		case "prism.number":
-			newItem.issue = value;
-			break;
-			// Google.
-		case "citation_journal_title":
-			if (!newItem.publicationTitle) newItem.publicationTitle = value;
-			break;
-		case "citation_authors":
-		case "citation_author":
-			// I'm a little concerned we'll see multiple copies of the author names...
-			for each(var author in value.split(';'))
-			newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author", true));
-			break;
-		case "citation_title":
-			if (!newItem.title) newItem.title = value;
-			break;
-		case "citation_publisher":
-			if (!newItem.publisher) newItem.publisher = value;
-			break;
-		case "citation_date":
-			if (!newItem.date && value != "NaN" && value != "") newItem.date = value;
-			break;
-		case "citation_year":
-			if (!newItem.date && value != "NaN" && value != "") newItem.date = value;
-			break;
-		case "citation_volume":
-			if (!newItem.volume && value != "NaN" && value != "") newItem.volume = value;
-			break;
-		case "citation_issue":
-			if (!newItem.issue && value != "NaN" && value != "") newItem.issue = value;
-			break;
-		case "citation_firstpage":
-			if (!pages[0] && value != "NaN" && value != "") pages[0] = value;
-			break;
-		case "citation_lastpage":
-			if (!pages[1] && value != "NaN" && value != "") pages[1] = value;
-			break;
-		case "citation_issn":
-			if (!newItem.ISSN && value != "NaN" && value != "") newItem.ISSN = value;
-			break;
-		case "citation_isbn":
-			if (!newItem.ISBN && value != "NaN" && value != "") newItem.ISBN = value;
-			break;
-			// Prefer long language names
-		case "citation_language":
-			if ((!newItem.language || newItem.language.length < 4) && value != "null" && value != "") newItem.language = value;
-			break;
-		case "citation_doi":
-			if (!newItem.DOI) newItem.DOI = value;
-			break;
-		case "citation_conference":
-			newItem.itemType = "conferencePaper";
-			newItem.conferenceName = value;
-			break;
-		case "citation_abstract":
-			newItem.abstractNote = value;
-			break;
-		case "citation_abstract_html_url":
-			newItem.attachments.push({
-				url: value,
-				title: "IEEE Xplore Abstract Record",
-				snapshot: false
-			});
-			break;
-		case "citation_pdf_url":
-			if (!pdf) pdf = value;
-			break;
-		case "citation_keywords":
-			newItem.tags.push(value);
-			break;
-		case "citation_fulltext_html_url":
-			if (!pdf) pdf = value;
-			break;
-		case "fulltext_pdf":
-			if (!pdf) pdf = value;
-			break;
-			// Dublin Core
-		case "dc.publisher":
-			if (!newItem.publisher) newItem.publisher = value;
-			break;
-		case "dc.language":
-			if (!newItem.language) newItem.language = value;
-			break;
-		case "dc.rights":
-			if (!newItem.rights) newItem.rights = value;
-			break;
-		case "dc.title":
-			if (!newItem.title) newItem.title = value;
-			break;
-		case "dc.creator":
-			if (!newItem.creators.length == 0) newItem.creators.push(Zotero.Utilities.cleanAuthor(value));
-			break;
-			// This is often NaN for some reason
-		case "dc.date":
-			if (!newItem.date && value != "NaN" && value !== "") newItem.date = value;
-			break;
-		case "dc.identifier":
-			addIdentifier(value, newItem);
-			break;
-		default:
-			//Zotero.debug("Ignoring meta tag: " + tag + " => " + value);
+function scrape (doc, url) {
+ 	var arnumber = url.match(/arnumber=\d+/)[0].replace(/arnumber=/, "");
+  	var pdf;
+  	pdf = ZU.xpathText(doc, '//ul[@id="subscription-content-controls"]/li/a/@href')
+  	Z.debug(arnumber)
+  	var get = 'http://ieeexplore.ieee.org/xpl/downloadCitations';
+  	var post = "recordIds=" + arnumber + "&fromPage=&citations-format=citation-abstract&download-format=download-bibtex";
+  	Zotero.Utilities.HTTP.doPost(get, post, function(text) {
+  		text = text.replace(/\<br\>/g, "")
+		var translator = Zotero.loadTranslator("import");
+		// Calling the BibTeX translator
+		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+		translator.setString(text);
+		translator.setHandler("itemDone", function(obj, item) {
+		item.notes = [];
+		if (pdf) {
+			Zotero.Utilities.processDocuments([pdf], function (doc, url) {
+				var pdfFrame = doc.evaluate('//frame[2]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+				if (pdfFrame) item.attachments = [{
+					url: pdfFrame.src,
+					title: "IEEE Xplore Full Text PDF",
+					mimeType: "application/pdf"
+				}, {url: url, title: "IEEE Xplore Abstract Record", mimeType: "text/html"}];
+				item.complete();
+			}, null);
+		} else {
+			item.attachments=[{url: url, title: "IEEE Xplore Abstract Record", mimeType: "text/html"}];
+			item.complete();
 		}
-	}
-
-	// Split if we have only one tag
-	if (newItem.tags.length == 1) {
-		newItem.tags = newItem.tags[0].split(";");
-	}
-
-	if (html) newItem.attachments.push({
-		url: html,
-		title: "IEEE Xplore Full Text HTML"
 	});
-
-	if (pages[0] && pages[1]) newItem.pages = pages.join('-')
-	else newItem.pages = pages[0] ? pages[1] : (pages[1] ? pages[1] : "");
-
-	// Re-assign fields if the type changed
-	if (newItem.itemType == "conferencePaper") {
-		newItem.proceedingsTitle = newItem.publicationTitle = newItem.conferenceName;
-	}
-
-	// Abstracts don't seem to come with
-	if (!newItem.abstractNote) {
-		var abstractNode = doc.evaluate('//a[@name="Abstract"]/following-sibling::p[1]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-		if (abstractNode) newItem.abstractNote = Zotero.Utilities.trimInternal(abstractNode.textContent);
-	}
-
-	var res;
-	// Rearrange titles, per http://forums.zotero.org/discussion/8056
-	// If something has a comma or a period, and the text after comma ends with
-	//"of", "IEEE", or the like, then we switch the parts. Prefer periods.
-	if (res = (newItem.publicationTitle.indexOf(".") !== -1) ? newItem.publicationTitle.trim().match(/^(.*)\.(.*(?:of|on|IEE|IEEE|IET|IRE))$/) : newItem.publicationTitle.trim().match(/^(.*),(.*(?:of|on|IEE|IEEE|IET|IRE))$/)) newItem.publicationTitle = res[2] + " " + res[1];
-	newItem.proceedingsTitle = newItem.conferenceName = newItem.publicationTitle;
-
-	if (pdf) {
-		Zotero.Utilities.processDocuments([pdf], function (doc, url) {
-			var pdfFrame = doc.evaluate('//frame[2]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-			if (pdfFrame) newItem.attachments = [{
-				url: pdfFrame.src,
-				title: "IEEE Xplore Full Text PDF",
-				mimeType: "application/pdf"
-			}];
-			newItem.complete();
-		}, null);
-	} else {
-		newItem.complete();
-	}
+	translator.translate();
+  });
 }
 
 // Implementation of ISBN and ISSN check-digit verification
@@ -482,42 +318,70 @@ idCheck = function (isbn) {
 }
 
 /** BEGIN TEST CASES **/
-var testCases = [{
-	"type": "web",
-	"url": "http://ieeexplore.ieee.org/search/searchresult.jsp?newsearch=true&queryText=turing&x=0&y=0&tag=1",
-	"items": "multiple"
-}, {
-	"type": "web",
-	"url": "http://ieeexplore.ieee.org/search/freesrchabstract.jsp?tp=&arnumber=4607247&refinements%3D4294967131%26openedRefinements%3D*%26filter%3DAND%28NOT%284283010803%29%29%26searchField%3DSearch+All%26queryText%3Dturing",
-	"items": [{
-		"itemType": "journalArticle",
-		"creators": [{
-			"lastName": "Yongming Li",
-			"creatorType": "author"
-		}],
-		"notes": [],
-		"tags": ["Deterministic fuzzy Turing machine (DFTM)", "Turing machines", "computational complexity", "deterministic automata", "deterministic fuzzy Turing machines", "fixed finite subset", "fuzzy computational complexity", "fuzzy grammar", "fuzzy languages", "fuzzy polynomial time-bounded computation", "fuzzy recursive language", "fuzzy recursively enumerable (f.r.e.) language", "fuzzy set theory", "fuzzy sets", "nondeterministic fuzzy Turing machine (NFTM)", "nondeterministic fuzzy Turing machines", "nondeterministic polynomial time-bounded computation", "universal fuzzy Turing machine (FTM)", ""],
-		"seeAlso": [],
-		"attachments": [{
-			"url": "http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=4607247",
-			"title": "IEEE Xplore Abstract Record",
-			"snapshot": false
-		}],
-		"publicationTitle": "IEEE Transactions on Fuzzy Systems",
-		"publisher": "IEEE",
-		"title": "Fuzzy Turing Machines: Variants and Universality",
-		"date": "Dec.  2008",
-		"volume": "16",
-		"issue": "6",
-		"DOI": "10.1109/TFUZZ.2008.2004990",
-		"ISSN": "1063-6706",
-		"language": "English",
-		"pages": "1491-1502",
-		"abstractNote": "In this paper, we study some variants of fuzzy Turing machines (FTMs) and universal FTM. First, we give several formulations of FTMs, including, in particular, deterministic FTMs (DFTMs) and nondeterministic FTMs (NFTMs). We then show that DFTMs and NFTMs are not equivalent as far as the power of recognizing fuzzy languages is concerned. This contrasts sharply with classical TMs. Second, we show that there is no universal FTM that can exactly simulate any FTM on it. But if the membership degrees of fuzzy sets are restricted to a fixed finite subset A of [0,1], such a universal machine exists. We also show that a universal FTM exists in some approximate sense. This means, for any prescribed accuracy, that we can construct a universal machine that simulates any FTM with the given accuracy. Finally, we introduce the notions of fuzzy polynomial time-bounded computation and nondeterministic fuzzy polynomial time-bounded computation, and investigate their connections with polynomial time-bounded computation and nondeterministic polynomial time-bounded computation.",
-		"conferenceName": "IEEE Transactions on Fuzzy Systems",
-		"proceedingsTitle": "IEEE Transactions on Fuzzy Systems",
-		"libraryCatalog": "IEEE Xplore",
-		"shortTitle": "Fuzzy Turing Machines"
-	}]
-}]
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://ieeexplore.ieee.org/search/searchresult.jsp?newsearch=true&queryText=turing&x=0&y=0&tag=1",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://ieeexplore.ieee.org/xpl/articleDetails.jsp?tp=&arnumber=4607247&refinements%3D4294967131%26openedRefinements%3D*%26filter%3DAND%28NOT%284283010803%29%29%26searchField%3DSearch+All%26queryText%3Dturing",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Yongming",
+						"lastName": "Li",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"deterministic",
+					"fuzzy",
+					"Turing",
+					"machines;fixed",
+					"finite",
+					"subset;fuzzy",
+					"languages;fuzzy",
+					"polynomial",
+					"time-bounded",
+					"computation;fuzzy",
+					"sets;nondeterministic",
+					"fuzzy",
+					"Turing",
+					"machines;nondeterministic",
+					"polynomial",
+					"time-bounded",
+					"computation;Turing",
+					"machines;computational",
+					"complexity;deterministic",
+					"automata;fuzzy",
+					"set",
+					"theory;"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "IEEE Xplore Abstract Record",
+						"mimeType": "text/html"
+					}
+				],
+				"publicationTitle": "Fuzzy Systems, IEEE Transactions on",
+				"title": "Fuzzy Turing Machines: Variants and Universality",
+				"date": "dec.  2008",
+				"volume": "16",
+				"issue": "6",
+				"pages": "1491 -1502",
+				"abstractNote": "In this paper, we study some variants of fuzzy Turing machines (FTMs) and universal FTM. First, we give several formulations of FTMs, including, in particular, deterministic FTMs (DFTMs) and nondeterministic FTMs (NFTMs). We then show that DFTMs and NFTMs are not equivalent as far as the power of recognizing fuzzy languages is concerned. This contrasts sharply with classical TMs. Second, we show that there is no universal FTM that can exactly simulate any FTM on it. But if the membership degrees of fuzzy sets are restricted to a fixed finite subset <i>A</i> of [0,1], such a universal machine exists. We also show that a universal FTM exists in some approximate sense. This means, for any prescribed accuracy, that we can construct a universal machine that simulates any FTM with the given accuracy. Finally, we introduce the notions of fuzzy polynomial time-bounded computation and nondeterministic fuzzy polynomial time-bounded computation, and investigate their connections with polynomial time-bounded computation and nondeterministic polynomial time-bounded computation.",
+				"DOI": "10.1109/TFUZZ.2008.2004990",
+				"ISSN": "1063-6706",
+				"libraryCatalog": "IEEE Xplore",
+				"shortTitle": "Fuzzy Turing Machines"
+			}
+		]
+	}
+]
 /** END TEST CASES **/
