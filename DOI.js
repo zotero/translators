@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-02 00:39:35"
+	"lastUpdated": "2012-04-02 00:58:54"
 }
 
 var items = {};
@@ -65,57 +65,72 @@ function detectWeb(doc, url) {
 	return false;
 }
 
-function retrieveNextDOI(DOIs, doc) {
-	if(DOIs.length) {
-		// retrieve DOI
-		var DOI = DOIs.shift();
-		var translate = Zotero.loadTranslator("search");
-		translate.setTranslator("11645bd1-0420-45c1-badb-53fb41eeb753");
-		var item = {"itemType":"journalArticle", "DOI":DOI};
-		translate.setSearch(item);
-		// don't save when item is done
-		translate.setHandler("itemDone", function(translate, item) {
-			item.repository = "CrossRef";
-			items[DOI] = item;
-			selectArray[DOI] = item.title;
-		});
-		translate.setHandler("done", function(translate) {
-			retrieveNextDOI(DOIs, doc);
-		});
-		// Don't throw on error
-		translate.setHandler("error", function() {});
-		translate.translate();
-	} else {
-		// all DOIs retrieved now
-		// check to see if there is more than one DOI
-		var numDOIs = 0;
-		for(var DOI in selectArray) {
-			numDOIs++;
-			if(numDOIs == 2) break;
-		}
-		if(numDOIs == 0) {
-			throw "DOI Translator: could not find DOI";
-		} else if(numDOIs == 1) {
-			// do we want to add URL of the page?
-			items[DOI].url = doc.location.href;
-			items[DOI].attachments = [{document:doc}];
-			items[DOI].complete();
-		} else {
-			Zotero.selectItems(selectArray, function(selectedDOIs) {
-				if(!selectedDOIs) return true;
+var __num_DOIs;
 
-				for(var DOI in selectedDOIs) {
-					items[DOI].complete();
+function completeDOIs(doc) {
+	// all DOIs retrieved now
+	// check to see if there is more than one DOI
+	var numDOIs = 0;
+	for(var DOI in selectArray) {
+		numDOIs++;
+		if(numDOIs == 2) break;
+	}
+	if(numDOIs == 0) {
+		throw "DOI Translator: could not find DOI";
+	} else if(numDOIs == 1) {
+		// do we want to add URL of the page?
+		items[DOI].url = doc.location.href;
+		items[DOI].attachments = [{document:doc}];
+		items[DOI].complete();
+	} else {
+		Zotero.selectItems(selectArray, function(selectedDOIs) {
+			if(!selectedDOIs) return true;
+
+			for(var DOI in selectedDOIs) {
+				items[DOI].complete();
+			}
+		});
+	}
+}
+
+function retrieveDOIs(DOIs, doc) {
+Z.debug(__num_DOIs);
+	for(var i=0, n=DOIs.length; i<n; i++) {
+		(function(doc, DOI) {
+			var translate = Zotero.loadTranslator("search");
+			translate.setTranslator("11645bd1-0420-45c1-badb-53fb41eeb753");
+	
+			var item = {"itemType":"journalArticle", "DOI":DOI};
+			translate.setSearch(item);
+	
+			// don't save when item is done
+			translate.setHandler("itemDone", function(translate, item) {
+				item.repository = "CrossRef";
+				items[DOI] = item;
+				selectArray[DOI] = item.title;
+			});
+	
+			translate.setHandler("done", function(translate) {
+				__num_DOIs--;
+				if(__num_DOIs <= 0) {
+					completeDOIs(doc);
 				}
 			});
-		}
+	
+			// Don't throw on error
+			translate.setHandler("error", function() {});
+	
+			translate.translate();
+		})(doc, DOIs[i]);
 	}
 }
 
 function doWeb(doc, url) {
 	var DOIs = getDOIs(doc);
+	__num_DOIs = DOIs.length;
+
 	// retrieve full items asynchronously
-	retrieveNextDOI(DOIs, doc);
+	retrieveDOIs(DOIs, doc);
 }
 
 
