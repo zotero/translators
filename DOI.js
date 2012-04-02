@@ -1,15 +1,15 @@
 {
-	"translatorID":"c159dcfe-8a53-4301-a499-30f6549c340d",
-	"translatorType":4,
-	"label":"DOI",
-	"creator":"Simon Kornblith",
-	"target":null,
-	"minVersion":"1.0.10",
-	"maxVersion":"",
-	"priority":300,
-	"browserSupport":"gcs",
-	"inRepository":true,
-	"lastUpdated":"2012-02-22 01:05:53"
+	"translatorID": "c159dcfe-8a53-4301-a499-30f6549c340d",
+	"label": "DOI",
+	"creator": "Simon Kornblith",
+	"target": "",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 300,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-04-02 00:39:35"
 }
 
 var items = {};
@@ -24,8 +24,10 @@ function getDOIs(doc) {
 	// by not allowing ampersands, to fix an issue with getting DOIs
 	// out of URLs.
 	// Description at: http://www.doi.org/handbook_2000/appendix_1.html#A1-4
-	const DOIre = /\b(10\.[\w.]+\/[^\s&]+)\.?\b/igm;
-	const DOIXPath = "//text()[contains(., '10.')]";
+	const DOIre = /\b10\.[0-9]+\/[^\s&]*[^\s\&\.]/g;
+	const DOIXPath = "/html/body//text()\
+						[not(ancestor::script or ancestor::style)]\
+						[contains(., '10.')]";
 	
 	DOIre.lastMatch = 0;
 	var DOIs = [];
@@ -34,7 +36,7 @@ function getDOIs(doc) {
 	var results = doc.evaluate(DOIXPath, doc, null, XPathResult.ANY_TYPE, null);
 	while(node = results.iterateNext()) {
 		while(m = DOIre.exec(node.nodeValue)) {
-			var DOI = m[1];
+			var DOI = m[0];
 			if(DOI.substr(-1) == ")" && DOI.indexOf("(") == -1) {
 				DOI = DOI.substr(0, DOI.length-1);
 			}
@@ -99,19 +101,20 @@ function retrieveNextDOI(DOIs, doc) {
 			items[DOI].attachments = [{document:doc}];
 			items[DOI].complete();
 		} else {
-			selectArray = Zotero.selectItems(selectArray);
-			for(var DOI in selectArray) {
-				items[DOI].complete();
-			}
+			Zotero.selectItems(selectArray, function(selectedDOIs) {
+				if(!selectedDOIs) return true;
+
+				for(var DOI in selectedDOIs) {
+					items[DOI].complete();
+				}
+			});
 		}
-		Zotero.done();
 	}
 }
 
 function doWeb(doc, url) {
 	var DOIs = getDOIs(doc);
 	// retrieve full items asynchronously
-	Zotero.wait();
 	retrieveNextDOI(DOIs, doc);
 }
 
