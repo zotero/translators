@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-03-13 17:44:44"
+	"lastUpdated": "2012-04-02 03:49:44"
 }
 
 function detectWeb(doc, url) {
@@ -29,28 +29,26 @@ function doWeb(doc, url) {
 	if(detectWeb(doc, url) == "multiple") {
 		var items = {};
 		var attachments = new Array();
-			if (doc.evaluate('//div[@class="article"]/h4/a|//div[@class="result_info"]/h1/a',doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
-			var results = doc.evaluate('//div[@class="article"]/h4/a|//div[@class="result_info"]/h1/a',
-									 doc, null, XPathResult.ANY_TYPE, null);
-			var result; 
-			while(result =  results.iterateNext()) {
-				items[result.href] = result.textContent;
+		var results = ZU.xpath(doc,
+			'//div[@class="article"]/h4/a|//div[@class="result_info"]/h1/a');
+		if (results.length){
+			for(var i=0, n=results.length; i<n; i++) {
+				items[results[i].href] = results[i].textContent;
 			}
-									 }
-									 else {
+		} else {
 			// Some journals have old-style TOCs for back issues
 			// Ex. http://muse.jhu.edu/journals/eighteenth-century_studies/toc/ecs33.4.html
-				var articles = doc.evaluate('//ul', doc, null, XPathResult.ANY_TYPE, null);
-				var article;
-				while (article = articles.iterateNext()) {
-					var link = doc.evaluate('./li/a[contains(@href,".html")]', article, null, XPathResult.ANY_TYPE, null).iterateNext();
-					var title = doc.evaluate('./li/i', article, null, XPathResult.ANY_TYPE, null).iterateNext();
-					if(link && link.href && title && title.textContent) {
-						items[link.href] = title.textContent;
-					}
+			var articles = doc.evaluate('//ul', doc, null, XPathResult.ANY_TYPE, null);
+			var article;
+			while (article = articles.iterateNext()) {
+				var link = doc.evaluate('./li/a[contains(@href,".html")]', article, null, XPathResult.ANY_TYPE, null).iterateNext();
+				var title = doc.evaluate('./li/i', article, null, XPathResult.ANY_TYPE, null).iterateNext();
+				if(link && link.href && title && title.textContent) {
+					items[link.href] = title.textContent;
 				}
-			
-									 }
+			}
+		}
+
 		Zotero.selectItems(items, function(items) {
 			if(!items) {
 				return true;
@@ -80,8 +78,12 @@ function scrapeOne(doc) {
 								  null, XPathResult.ANY_TYPE, null).iterateNext();
 		var authorNodes = ZU.xpath(doc, '//meta[@name="citation_author"]/@content');
 
+		if(url.indexOf('?') != -1) {
+			var m = url.match(/[?&]ur[li]=([^&]+)/i);
+			if(m) url = host + decodeURIComponent(m[1]);
+		}
 
-		var newUrl = url.replace(host, host+"/metadata/zotero").replace("/summary/","/").replace("/login?uri=","");
+		var newUrl = url.replace(host, host+"/metadata/zotero").replace("/summary/","/");
 		Zotero.Utilities.HTTP.doGet(newUrl, function(text) {
 			var translator = Zotero.loadTranslator("import");
 			//set RIS translator
@@ -95,25 +97,25 @@ function scrapeOne(doc) {
 				}
 				//Muse has authors wrong in the RIS - we get the names from google/highwire metadata and use them
 				// they're also inconsistent about comma use, so we're using the code from the Embedded Metadata translator to distinguish
-				if(authorNodes){
+				if(authorNodes.length){
 					item.creators = [];
 						for(var i=0, n=authorNodes.length; i<n; i++) {
-		//make sure there are no empty authors
-		var authors = authorNodes[i].nodeValue.replace(/(;[^A-Za-z0-9]*)$/, "").split(/\s*;\s/);
-		if (authors.length == 1) {
-			/* If we get nothing when splitting by semicolon, and at least two words on
-			* either side of the comma when splitting by comma, we split by comma. */
-			var authorsByComma = authors[0].split(/\s*,\s*/);
-			if (authorsByComma.length > 1
-				&& authorsByComma[0].indexOf(" ") !== -1
-				&& authorsByComma[1].indexOf(" ") !== -1)
-				authors = authorsByComma;
-		}
-		for(var j=0, m=authors.length; j<m; j++) {
-			var author = authors[j];
-			item.creators.push(ZU.cleanAuthor(author, "author", author.indexOf(",") !== -1));
-		}
-	}
+							//make sure there are no empty authors
+							var authors = authorNodes[i].nodeValue.replace(/(;[^A-Za-z0-9]*)$/, "").split(/\s*;\s/);
+							if (authors.length == 1) {
+								/* If we get nothing when splitting by semicolon, and at least two words on
+								* either side of the comma when splitting by comma, we split by comma. */
+								var authorsByComma = authors[0].split(/\s*,\s*/);
+								if (authorsByComma.length > 1
+									&& authorsByComma[0].indexOf(" ") !== -1
+									&& authorsByComma[1].indexOf(" ") !== -1)
+									authors = authorsByComma;
+							}
+							for(var j=0, m=authors.length; j<m; j++) {
+								var author = authors[j];
+								item.creators.push(ZU.cleanAuthor(author, "author", author.indexOf(",") !== -1));
+							}
+						}
 				
 				}
 				item.attachments.splice(0);
@@ -143,8 +145,8 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"lastName": "Higonnet",
 						"firstName": "Patrice L. R.",
+						"lastName": "Higonnet",
 						"creatorType": "author"
 					}
 				],
@@ -152,10 +154,11 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"document": {
-							"location": {}
-						},
 						"title": "Project MUSE Snapshot"
+					},
+					{
+						"title": "Project MUSE Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"title": "Terror, Trauma and the 'Young Marx' Explanation of Jacobin Politics",
@@ -169,6 +172,7 @@ var testCases = [
 				"ISSN": "1477-464X",
 				"url": "http://muse.jhu.edu/journals/past_and_present/v191/191.1higonnet.html",
 				"extra": "<p>Number 191, May 2006</p>",
+				"abstract": "In lieu of an abstract, here is a brief excerpt of the content:\n        Patrice L. R. Higonnet - Terror, Trauma and the 'Young Marx' Explanation of Jacobin Politics - Past & Present 191:1 Past & Present 191.1 (2006) 121-164 Terror, Trauma and the 'Young Marx' Explanation of Jacobin Politics* Patrice Higonnet Harvard University Tocqueville in the 1850s wrote of France in the 1780s that never had tolerance been more accepted, authority been more mild, or benevolence been so widely practised. Nonetheless, he went on, 'from the bosom of such mild mores would spring the most inhuman of revolutions'. And even for those of us who deeply admire the French Revolution's message of civic equality, the Terror of the Year II (1793–4) seems not just ominous and horrendous, but also out of place. Auschwitz, Dresden and Hiroshima — after the Great War of 1914–18 and the Great Depression of the 1930s: we can see why these wartime tragedies happened, given the awful events that preceded them. But what of the Terror after the Enlightenment — after Voltaire, Boucher, and Madame de Pompadour? Isser Woloch has rightly described the 'sequence' from 1789 to 1793, from liberalism to terror, as an eternally fascinating 'enigma'. Why the French Revolution occurred is something of a mystery. And why it failed so dramatically is also deeply perplexing. Historians have pored over the cause and nature of the Terror of the Year II ever since it occurred. And yet the many valuable (though often conflicting) explanations which have been offered to...",
 				"libraryCatalog": "Project MUSE",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
