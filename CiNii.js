@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsib",
-	"lastUpdated": "2012-01-30 22:51:54"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-04-01 23:38:58"
 }
 
 function detectWeb(doc, url) {
@@ -21,39 +21,45 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var n = doc.documentElement.namespaceURI;
-	var ns = n ? function(prefix) {
-		if (prefix == 'x') return n; else return null;
-	} : null;
 	var arts = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
-		var links = doc.evaluate('//a[contains(@href, "/naid/")]', doc, ns, XPathResult.ANY_TYPE, null);
+		var links = doc.evaluate('//a[contains(@href, "/naid/")]', doc, null, XPathResult.ANY_TYPE, null);
 		var link;
 		while (link = links.iterateNext()) {
 			items[link.href] = Zotero.Utilities.trimInternal(link.textContent);
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			arts.push(i);
-		}
+	Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				arts.push(i);
+			}
+			Zotero.Utilities.processDocuments(arts, scrape, function () {
+				Zotero.done();
+			});
+			Zotero.wait();	
+		});
 	} else {
-		arts = [url];
+		scrape(doc, url)
 	}
-	Zotero.Utilities.processDocuments(arts, function(doc) {
-		var biblink = 'http://ci.nii.ac.jp/export?fileType=2&docSelect=' + doc.evaluate('//input[@name="docSelect"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().value;
+}
+function scrape(doc, url){
 		var newurl = doc.location.href;
-		var tags = new Array();
-		if (doc.evaluate('//a[@rel="tag"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext()) {
-			var kws = doc.evaluate('//a[@rel="tag"]', doc, ns, XPathResult.ANY_TYPE, null);
+		var biblink = ZU.xpathText(doc, '//li/div/a[contains(text(), "BibTeX")]/@href');
+	//Z.debug(biblink)
+	var tags = new Array();
+		if (doc.evaluate('//a[@rel="tag"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var kws = doc.evaluate('//a[@rel="tag"]', doc, null, XPathResult.ANY_TYPE, null);
 			var kw;
 			while (kw = kws.iterateNext()) {
 				tags.push(Zotero.Utilities.trimInternal(kw.textContent));
 			}
 		}
 		var abstractNote;
-		if (doc.evaluate('//div[@class="abstract"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext()) {
-			abstractNote = doc.evaluate('//div[@class="abstract"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		if (doc.evaluate('//div[@class="abstract"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			abstractNote = doc.evaluate('//div[@class="abstract"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		}
 		Zotero.Utilities.HTTP.doGet(biblink, function(text) {
 			var trans = Zotero.loadTranslator("import");
@@ -68,9 +74,7 @@ function doWeb(doc, url) {
 			});
 			trans.translate();
 		});
-	}, function() {Zotero.done();});
-	Zotero.wait();
-}/** BEGIN TEST CASES **/
+	}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -105,7 +109,6 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://ci.nii.ac.jp/naid/110000244188",
 						"title": "<研究速報>観測用既存鉄骨造モデル構造物を用いたオンライン応答実験=Pseudo-dynamic tests on existing steel model structure for seismic monitoring Snapshot",
 						"mimeType": "text/html"
 					}
