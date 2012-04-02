@@ -261,19 +261,17 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"title": "Zotero: harnessing the power of a personal bibliographic manager.",
-				"publicationTitle": "Nurse educator",
-				"date": "2010",
 				"issue": "5",
-				"volume": "35",
-				"pages": "3",
 				"abstractNote": "Zotero is a powerful free personal bibliographic manager (PBM) for writers. Use of a PBM allows the writer to focus on content, rather than the tedious details of formatting citations and references. Zotero 2.0 (http://www.zotero.org) has new features including the ability to synchronize citations with the off-site Zotero server and the ability to collaborate and share with others. An overview on how to use the software and discussion about the strengths and limitations are included.",
 				"url": "http://d.wanfangdata.com.cn/NSTLQK_NSTL_QKJJ0216348353.aspx",
 				"archiveLocation": "北京萬方數據股份有限公司",
-				"DOI": "10.1038/nsmb727",
 				"libraryCatalog": "Wanfang Data",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Zotero"
+				"shortTitle": "Zotero",
+				"title": "Zotero: harnessing the power of a personal bibliographic manager.",
+				"publicationTitle": "Nurse educator",
+				"date": "2010",
+				"volume": "35",
+				"pages": "3"
 			}
 		]
 	},
