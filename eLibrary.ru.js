@@ -6,10 +6,10 @@
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
-	"browserSupport": "gcs",
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-08-22 22:43:15"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-04-01 21:59:07"
 }
 
 /*
@@ -143,7 +143,7 @@ function scrape (doc) {
 		
 		if (authorBlock) {
 		// Sometimes we don't have links, just bold text
-		var authorNode = doc.evaluate('.//td[2]/font/a | .//td[2]/font/b', authorBlock, ns, XPathResult.ANY_TYPE, null);
+		var authorNode = doc.evaluate('.//td[2]/center//b', authorBlock, ns, XPathResult.ANY_TYPE, null);
 		while ((author = authorNode.iterateNext()) !== null) {
 			// Remove organizations; by URL or by node name
 			if ((author.href && !author.href.match(/org_about\.asp/)
@@ -152,7 +152,18 @@ function scrape (doc) {
 				author = author.textContent;
 				var authors = author.split(",");
 				for (var i = 0; i < authors.length; i++) {
-					var cleaned = Zotero.Utilities.cleanAuthor(authors[i], "author");
+					/**Some names listed as last first_initials (no comma), so we need
+					 * to fix this by placing a comma in-between.
+					 * Also note that the space between last and first is nbsp
+					 */
+					 var cleaned = authors[i];
+					 var useComma = false;
+					 if(cleaned.match(/[\s\u00A0]([A-Z\u0400-\u042f]\.?[\s\u00A0]*)+$/)) {
+						cleaned = cleaned.replace(/[\u00A0\s]/,', ');
+						useComma = true;
+					 }
+
+					cleaned = ZU.cleanAuthor(cleaned, "author", useComma);
 					// If we have only one name, set the author to one-name mode
 					if (cleaned.firstName == "") {
 						cleaned["fieldMode"] = true;
@@ -291,7 +302,7 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "М.В",
+						"firstName": "М. В.",
 						"lastName": "Свет",
 						"creatorType": "author"
 					}
@@ -309,6 +320,65 @@ var testCases = [
 				"issue": "1",
 				"pages": "40-58",
 				"language": "русский",
+				"libraryCatalog": "eLibrary.ru"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://elibrary.ru/item.asp?id=17339044",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Супрун Иван",
+						"lastName": "Иванович",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ульяновская Елена",
+						"lastName": "Владимировна",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Седов Евгений",
+						"lastName": "Николаевич",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Седышева Галина",
+						"lastName": "Алексеевна",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Серова Зоя",
+						"lastName": "Михайловна",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"сорт",
+					"ЯБЛОНЯ",
+					"иммунитет",
+					"ПАРША",
+					"variety",
+					"apple-tree",
+					"Immunity",
+					"Scab"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Использование молекулярно-генетических методов установления закономерностей наследования для выявления доноров значимых признаков яблони",
+				"publicationTitle": "Плодоводство и виноградарство Юга России",
+				"publisher": "Северо-Кавказский зональный научно-исследовательский институт садоводства и виноградарства Россельхозакадемии",
+				"date": "2012",
+				"extra": "Цитируемость в РИНЦ: 0      УДК: 634.1:631.52",
+				"issue": "13",
+				"pages": "1-10",
+				"language": "русский",
+				"abstractNote": "На основе полученных новых знаний по формированию и проявлению ценных селекционных признаков выделены новые доноры и комплексные доноры значимых признаков яблони.",
 				"libraryCatalog": "eLibrary.ru"
 			}
 		]
