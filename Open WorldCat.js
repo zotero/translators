@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-03-12 01:16:53"
+	"lastUpdated": "2012-04-03 11:17:10"
 }
 
 /**
@@ -57,7 +57,13 @@ function scrape(doc, url, callDoneWhenFinished) {
 			item.extra = "";
 			//creators have period after firstName
 			for (i in item.creators) {
+				if (item.creators[i].firstName){
 				item.creators[i].firstName = item.creators[i].firstName.replace(/\.$/, "");
+				}
+				else {
+					item.creators[i].lastName = item.creators[i].lastName.replace(/\.$/, "");
+					item.creators[i].fieldMode=1;			
+				}
 			}
 			if (language) item.language = language;
 			//We want ebooks to be treated like books, not webpages (is ISBN the best choice here?)
