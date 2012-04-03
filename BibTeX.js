@@ -1695,13 +1695,10 @@ function processField(item, field, value) {
 			if (filetitle.length == 0) {
 				filetitle = "Attachment";
 			}
-			if (filepath[0] === "/") {
-				filepath = "file://"+filepath;
-			}
 			if (filetype.match(/pdf/i)) {
-				item.attachments.push({path:filepath, mimeType:"application/pdf", title:filetitle, downloadable:true});
+				item.attachments.push({url:"file://"+filepath, mimeType:"application/pdf", title:filetitle, downloadable:true});
 			} else {
-				item.attachments.push({path:filepath, title:filetitle, downloadable:true});
+				item.attachments.push({url:"file://"+filepath, title:filetitle, downloadable:true});
 			}
 		}
 	}
