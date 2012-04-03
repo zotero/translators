@@ -806,7 +806,7 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "Deane‐Peter",
+						"firstName": "Deane-Peter",
 						"lastName": "Baker",
 						"creatorType": "author"
 					},

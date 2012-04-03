@@ -250,18 +250,17 @@ var testCases = [
 					}
 				],
 				"url": "http://www.3news.co.nz/Obama-bus-tour-Barbecue-to-Bieber/tabid/417/articleID/230090/Default.aspx",
-				"publicationTitle": "3news.co.nz",
 				"language": "English",
-				"abstractNote": "President Barack Obama said he wanted to use his bus trip through rural North Carolina and Virginia to hear directly from the American people. Obama bus tour: Barbecue to Bieber",
-				"title": "Obama bus tour: Barbecue to Bieber",
+				"abstractNote": "President Barack Obama said he wanted to use his bus trip through rural North Carolina and Virginia to hear directly from the American people.",
 				"section": "World",
 				"rights": "Copyright 2009 TV3",
 				"libraryCatalog": "3news.co.nz",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Obama bus tour"
+				"shortTitle": "Obama bus tour",
+				"publicationTitle": "3news.co.nz",
+				"title": "Obama bus tour: Barbecue to Bieber"
 			}
 		],
-		"defer":true
+		"defer": true
 	},
 	{
 		"type": "web",
@@ -287,16 +286,13 @@ var testCases = [
 				],
 				"url": "http://www.3news.co.nz/Unemployed-youth-would-fill-Eden-Park---blog/tabid/1135/articleID/222342/Default.aspx",
 				"language": "English",
-				"abstractNote": "58,000 young people between the ages of 15-24 are not in education, training or work - this is National's biggest first term failure. Unemployed youth would fill Eden Park - blog",
-				"date": "Tue, 16 Aug 2011",
-				"title": "Unemployed youth would fill Eden Park - blog",
-				"section": "Politics",
+				"abstractNote": "58,000 young people between the ages of 15-24 are not in education, training or work - this is National's biggest first term failure.",
 				"rights": "Copyright 2009 TV3",
-				"libraryCatalog": "3news.co.nz",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"date": "Tue, 16 Aug 2011",
+				"title": "Unemployed youth would fill Eden Park - blog"
 			}
 		],
-		"defer":true
+		"defer": true
 	}
 ]
 /** END TEST CASES **/
