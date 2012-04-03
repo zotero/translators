@@ -18,10 +18,12 @@ function detectWeb(doc, url) {
 	var suffix = suffixMatch[1];
 	var searchRe = new RegExp('^https?://(?:www\.)?amazon\.' + suffix + '/(gp/search/|exec/obidos/search-handle-url/|s/|s\\?|[^/]+/lm/|gp/richpub/)');
 	if(searchRe.test(doc.location.href)) {
-		return "multiple";
+		return (Zotero.isBookmarklet ? "server" : "multiple");
 	} else {
 		var xpath = '//input[@name="ASIN"]';
 		if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			if(Zotero.isBookmarklet) return "server";
+			
 			var elmt = doc.evaluate('//input[@name="storeID"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 			if(elmt) {
 				var storeID = elmt.value;
