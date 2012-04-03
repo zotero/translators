@@ -2,14 +2,14 @@
 	"translatorID": "9346ddef-126b-47ec-afef-8809ed1972ab",
 	"label": "Institute of Physics",
 	"creator": "Michael Berkowitz and Avram Lyon",
-	"target": "^https?://iopscience\\.iop\\.org/(?:[0-9-]+/.+|search.+)",
+	"target": "^https?://iopscience\\.iop\\.org/(?:[0-9-X]+/.+|search.+)",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 99,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-07 17:27:25"
+	"lastUpdated": "2012-04-03 11:40:01"
 }
 
 function detectWeb(doc, url) {
@@ -113,55 +113,68 @@ function doWeb(doc, url) {
 	}
 }
 /** BEGIN TEST CASES **/
-var testCases = [{
-	"type": "web",
-	"url": "http://iopscience.iop.org/0022-3727/34/10/311",
-	"items": [{
-		"itemType": "journalArticle",
-		"creators": [{
-			"creatorType": "author",
-			"firstName": "J",
-			"lastName": "Batina"
-		}, {
-			"creatorType": "author",
-			"firstName": "F",
-			"lastName": "Noël"
-		}, {
-			"creatorType": "author",
-			"firstName": "S",
-			"lastName": "Lachaud"
-		}, {
-			"creatorType": "author",
-			"firstName": "R",
-			"lastName": "Peyrous"
-		}, {
-			"creatorType": "author",
-			"firstName": "J F",
-			"lastName": "Loiseau"
-		}],
-		"notes": [],
-		"tags": [],
-		"seeAlso": [],
-		"attachments": [{
-			"url": "http://iopscience.iop.org/0022-3727/34/10/311/pdf/0022-3727_34_10_311.pdf",
-			"title": "IOP Full Text PDF",
-			"mimeType": "application/pdf"
-		}],
-		"publicationTitle": "Journal of Physics D: Applied Physics",
-		"volume": "34",
-		"issue": "10",
-		"ISSN": "0022-3727, 1361-6463",
-		"date": "2001-05-21",
-		"pages": "1510-1524",
-		"DOI": "10.1088/0022-3727/34/10/311",
+var testCases = [
+	{
+		"type": "web",
 		"url": "http://iopscience.iop.org/0022-3727/34/10/311",
-		"title": "Hydrodynamical simulation of the electric wind in a cylindrical vessel with positive point-to-plane device",
-		"libraryCatalog": "Intitute of Physics",
-		"accessDate": "CURRENT_TIMESTAMP"
-	}]
-}, {
-	"type": "web",
-	"url": "http://iopscience.iop.org/search?searchType=fullText&fieldedquery=fun&f=titleabs&time=all&submit=Search&navsubmit=Search",
-	"items": "multiple"
-}]
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"creatorType": "author",
+						"firstName": "J",
+						"lastName": "Batina"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "F",
+						"lastName": "Noël"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "S",
+						"lastName": "Lachaud"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "R",
+						"lastName": "Peyrous"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "J F",
+						"lastName": "Loiseau"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://iopscience.iop.org/0022-3727/34/10/311/pdf/0022-3727_34_10_311.pdf",
+						"title": "IOP Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"publicationTitle": "Journal of Physics D: Applied Physics",
+				"volume": "34",
+				"issue": "10",
+				"ISSN": "0022-3727, 1361-6463",
+				"date": "2001-05-21",
+				"pages": "1510-1524",
+				"DOI": "10.1088/0022-3727/34/10/311",
+				"url": "http://iopscience.iop.org/0022-3727/34/10/311",
+				"title": "Hydrodynamical simulation of the electric wind in a cylindrical vessel with positive point-to-plane device",
+				"libraryCatalog": "Intitute of Physics",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://iopscience.iop.org/search?searchType=fullText&fieldedquery=fun&f=titleabs&time=all&submit=Search&navsubmit=Search",
+		"items": "multiple"
+	}
+]
 /** END TEST CASES **/
