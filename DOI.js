@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-02 02:00:23"
+	"lastUpdated": "2012-04-04 00:40:01"
 }
 
 var items = {};
@@ -26,7 +26,7 @@ function getDOIs(doc) {
 	// by not allowing ampersands, to fix an issue with getting DOIs
 	// out of URLs.
 	// Description at: http://www.doi.org/handbook_2000/appendix_1.html#A1-4
-	const DOIre = /\b10\.[0-9]+\/[^\s&]*[^\s\&\.,]/g;
+	const DOIre = /\b10\.[0-9]{4,}\/[^\s&]*[^\s\&\.,]/g;
 	const DOIXPath = "/html/body//text()\
 						[not(ancestor::script or ancestor::style)]\
 						[contains(., '10.')]";
