@@ -101,8 +101,8 @@ function doWeb(doc, url) {
 		Z.debug(text);
 		var parser = new DOMParser();
 		var doc = parser.parseFromString(text, "text/xml");
-		itemType = ZU.xpathText(doc, '//display/type');
-		if (itemType == 'book'| itemType == 'Books') {
+		var itemType = ZU.xpathText(doc, '//display/type');
+		if (itemType == 'book' || itemType == 'Books') {
 			var item = new Zotero.Item("book");
 		} else if (itemType == 'audio') {
 			var item = new Zotero.Item("audioRecording");
@@ -142,7 +142,7 @@ function doWeb(doc, url) {
 			if (creators[i]) {
 				var creator  = creators[i].textContent.split(/\s*;\s*/);
 				for (j in creator){
-					creator[j] = creator[j].replace(/\d{4}-(\d{4})?/g, '')
+					creator[j] = creator[j].replace(/\d{4}-(\d{4})?/g, '');
 					item.creators.push(Zotero.Utilities.cleanAuthor(creator[j], "author", true));
 				}			
 			}
@@ -152,7 +152,7 @@ function doWeb(doc, url) {
 			if (contributors[i]) {
 				var contributor = contributors[i].textContent.split(/\s*;\s*/);
 				for (j in contributor){
-				contributor[j] = contributor[j].replace(/\d{4}-(\d{4})?/g, '')
+				contributor[j] = contributor[j].replace(/\d{4}-(\d{4})?/g, '');
 				item.creators.push(Zotero.Utilities.cleanAuthor(contributor[j], "contributor", true));
 				}			
 			}
