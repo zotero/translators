@@ -3,13 +3,13 @@
 	"label": "Primo",
 	"creator": "Matt Burton, Avram Lyon, Etienne Cavalié, Rintze Zelle",
 	"target": "/primo_library/",
-	"minVersion": "2.0",
+	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2012-03-29 13:30:19"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-04-04 16:00:59"
 }
 
 /*
@@ -42,29 +42,28 @@ function doWeb(doc, url) {
 	
 	if (detectWeb(doc,url) == 'multiple') {
 			var items = new Object();
-			
 			var linkIterator = "";
 			var titleIterator = "";
 			if (doc.evaluate('//h2[contains(@class, "EXLResultTitle")]/a/@href', doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null).snapshotLength == 0)
 			{
 				// Primo v2
-				linkIterator = doc.evaluate('//div[contains(@class, "title")]/a/@href', doc, null, XPathResult.ANY_TYPE, null);
-				titleIterator = doc.evaluate('//div[contains(@class, "title")]/a/span', doc, null, XPathResult.ANY_TYPE, null);
+				linkIterator = ZU.xpath(doc, '//div[contains(@class, "title")]/a/@href');
+				titleIterator = ZU.xpath(doc, '//div[contains(@class, "title")]/a/span');
 			}
 			else
 			{
 				// Primo v3
-				linkIterator = doc.evaluate('//h2[contains(@class, "EXLResultTitle")]/a/@href', doc, null, XPathResult.ANY_TYPE, null);
-				titleIterator = doc.evaluate('//h2[contains(@class, "EXLResultTitle")]/a', doc, null, XPathResult.ANY_TYPE, null);
+				linkIterator = ZU.xpath(doc, '//h2[contains(@class, "EXLResultTitle")]/a/@href');
+				titleIterator = ZU.xpath(doc, '//h2[contains(@class, "EXLResultTitle")]/a');
 			}
 
-			
 			// try/catch for the case when there are no search results, let doc.evealuate fail quietly
 			try {
-				while (link = linkIterator.iterateNext(), title = titleIterator.iterateNext()) {
-					
+				for (i in linkIterator) {
+					var link = linkIterator[i];
+					var title = titleIterator[i];
 					// create an array containing the links and add '&showPnx=true' to the end
-					var xmlLink = Zotero.Utilities.trimInternal(link.textContent)+'&showPnx=true';
+					var xmlLink =  Zotero.Utilities.trimInternal(link.textContent)+'&showPnx=true';
 					//Zotero.debug(xmlLink);
 					var title = Zotero.Utilities.trimInternal(title.textContent);
 					items[xmlLink] = title;
@@ -103,7 +102,7 @@ function doWeb(doc, url) {
 		var parser = new DOMParser();
 		var doc = parser.parseFromString(text, "text/xml");
 		itemType = ZU.xpathText(doc, '//display/type');
-		if ((itemType == 'book')) {
+		if (itemType == 'book'| itemType == 'Books') {
 			var item = new Zotero.Item("book");
 		} else if (itemType == 'audio') {
 			var item = new Zotero.Item("audioRecording");
@@ -177,7 +176,7 @@ function doWeb(doc, url) {
 		
 		var date;
 		if (date = ZU.xpathText(doc, '//display/creationdate|//search/creationdate')) {
-			item.date = date.match(/\d+/)[0];
+			if (date.match(/\d+/)) item.date = date.match(/\d+/)[0];
 		}
 		
 		// the three letter ISO codes that should be in the language field work well:
