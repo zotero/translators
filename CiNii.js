@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-01 23:38:58"
+	"lastUpdated": "2012-04-02 20:18:41"
 }
 
 function detectWeb(doc, url) {
@@ -78,7 +78,12 @@ function scrape(doc, url){
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://ci.nii.ac.jp/naid/110000244188",
+		"url": "http://ci.nii.ac.jp/search?q=test&range=0&count=20&sortorder=1&type=0",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://ci.nii.ac.jp/naid/110000244188/ja/",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -121,16 +126,11 @@ var testCases = [
 				"volume": "54",
 				"issue": "6",
 				"pages": "384-387",
-				"url": "http://ci.nii.ac.jp/naid/110000244188",
+				"url": "http://ci.nii.ac.jp/naid/110000244188/ja/",
 				"libraryCatalog": "CiNii",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://ci.nii.ac.jp/search?q=test&range=0&count=20&sortorder=1&type=0",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
