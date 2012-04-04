@@ -1,15 +1,15 @@
 {
 	"translatorID": "625c6435-e235-4402-a48f-3095a9c1a09c",
 	"label": "DBLP Computer Science Bibliography",
-	"creator": "Adam Crymble",
-	"target": "^https?://(www\\.)?dblp\\.org",
+	"creator": "Adam Crymble, Sebastian Karcher",
+	"target": "^https?://(www\\.)?(dblp(\\.org|\\.uni-trier\\.de/)|informatik\\.uni-trier\\.de/\\~ley//)",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsb",
-	"lastUpdated": "2012-01-30 22:51:13"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-04-04 12:53:51"
 }
 
 function detectWeb(doc, url) {
@@ -19,6 +19,9 @@ function detectWeb(doc, url) {
 		return "conferencePaper";
 	} else if (doc.title.match("DBLP entry")) {
 		return "bookSection";
+	}
+	else if (url.match(/\/db\/(journals|conf|series|books|reference)/) && !url.match(/index\.html/)){
+		return "multiple"
 	}
 }
 
@@ -33,13 +36,7 @@ function associateData (newItem, dataTags, field, zoteroField) {
 }
 
 function scrape(doc, url) {
-
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-	} : null;	
-	
 	var dataTags = new Object();
-	
 	var mediaType = detectWeb(doc, url);
 	
 	if (mediaType == "bookSection") {
@@ -50,7 +47,7 @@ function scrape(doc, url) {
 		var newItem = new Zotero.Item("journalArticle");
 	}
 	
-	var xPathAllData = doc.evaluate('//pre', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var xPathAllData = doc.evaluate('//pre', doc, null, XPathResult.ANY_TYPE, null);
 	var allData = xPathAllData.iterateNext().textContent.split("},");
 	
 	var cleanFirstEntry = allData[0].indexOf(",");
@@ -107,67 +104,31 @@ function scrape(doc, url) {
 
 }
 
-
-
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
-	var articles = new Array();
-	
-	/* Multiple code doesn't work due to Permission denied to get property HTMLDocument.documentElement error.
-	
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
-		
-		//newer interface xPaths
-		if (doc.title.match("DEMO")) {
-			
-			var titles = doc.evaluate('//a/font', doc, nsResolver, XPathResult.ANY_TYPE, null);
-			var links = doc.evaluate('//dt/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
-			
-			var next_title;
-			while (next_title = titles.iterateNext()) {
-				items[links.iterateNext().href] = next_title.textContent;
-			}
-			
-		//older interface xPaths	
-		} else {
-				
-			var titles = doc.evaluate('//td[3]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-			var links = doc.evaluate('//td[1]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
-			
-			var next_title;
-			var split1;
-			var split2;
-			
-			while (next_title = titles.iterateNext()) {
-				
-				split1 = next_title.textContent.indexOf(":");
-				var title = next_title.textContent.substr(split1+2);
-				split2 = title.indexOf(".");
-				title = title.substr(0, split2);
-			
-				items[links.iterateNext().href] = title;
-			}
-		
+		var articles = new Array();
+		var rows  = ZU.xpath(doc, '//ul/li')	
+		for (i in rows){
+			 var title = ZU.xpathText(rows[i], './b');
+			 var link = ZU.xpathText(rows[i], './a[contains(@href, "rec/bibtex") and not(contains(@href, ".xml"))]/@href');
+			items[link] = title;
 		}
-
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
-		
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			Zotero.Utilities.processDocuments(articles, scrape, function () {
+				Zotero.done();
+			});
+			Zotero.wait();	
+		});
 	} else {
-	
-		*/
-		
-		articles = [url];
-	//}
-	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-	Zotero.wait();
+		scrape(doc, url);
+	}
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -265,6 +226,16 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.informatik.uni-trier.de/~ley/db/journals/tois/tois25.html",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://dblp.uni-trier.de/db/journals/tods/tods31.html",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
