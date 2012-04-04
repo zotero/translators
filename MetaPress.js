@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsb",
-	"lastUpdated": "2012-01-30 22:46:40"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-04-03 13:13:52"
 }
 
 function detectWeb(doc, url) {
@@ -47,7 +47,9 @@ function doWeb(doc, url) {
 						{url:pdfurl, title:"MetaPress Full Text PDF", mimeType:"application/pdf"}
 					];
 					//if (tags) item.tags = tags;
-					if (item.abstractNote.substr(0, 8) == "Abstract") item.abstractNote = Zotero.Utilities.trimInternal(item.abstractNote.substr(8));
+					if (item.abstractNote) {
+						if (item.abstractNote.substr(0, 8) == "Abstract") item.abstractNote = Zotero.Utilities.trimInternal(item.abstractNote.substr(8));
+					}
 					item.complete();
 				});
 				translator.translate();
