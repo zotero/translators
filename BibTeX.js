@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-03 04:53:03"
+	"lastUpdated": "2012-04-04 09:07:18"
 }
 
 function detectImport() {
@@ -1112,7 +1112,7 @@ var reversemappingTable = {
 	"{\\o}"                          : "\u00F8", // LATIN SMALL LETTER O WITH STROKE
 	"{\\th}"                          : "\u00FE", // LATIN SMALL LETTER THORN
 	"{\\i}"                           : "\u0131", // LATIN SMALL LETTER DOTLESS I
-	"'n"                              : "\u0149", // LATIN SMALL LETTER N PRECEDED BY APOSTROPHE
+	//"'n"                              : "\u0149", // LATIN SMALL LETTER N PRECEDED BY APOSTROPHE
 	"{\\NG}"                          : "\u014A", // LATIN CAPITAL LETTER ENG
 	"{\\ng}"                          : "\u014B", // LATIN SMALL LETTER ENG
 	"{\\OE}"                          : "\u0152", // LATIN CAPITAL LIGATURE OE
@@ -1177,11 +1177,11 @@ var reversemappingTable = {
 	"$_{(}$"                          : "\u208D", // SUBSCRIPT LEFT PARENTHESIS
 	"$_{)}$"                          : "\u208E", // SUBSCRIPT RIGHT PARENTHESIS
 	"{\\texteuro}"                    : "\u20AC", // EURO SIGN
-	"a/c"                             : "\u2100", // ACCOUNT OF
-	"a/s"                             : "\u2101", // ADDRESSED TO THE SUBJECT
+	//"a/c"                             : "\u2100", // ACCOUNT OF
+	//"a/s"                             : "\u2101", // ADDRESSED TO THE SUBJECT
 	"{\\textcelsius}"                 : "\u2103", // DEGREE CELSIUS
-	"c/o"                             : "\u2105", // CARE OF
-	"c/u"                             : "\u2106", // CADA UNA
+	//"c/o"                             : "\u2105", // CARE OF
+	//"c/u"                             : "\u2106", // CADA UNA
 	"{\\textnumero}"                  : "\u2116", // NUMERO SIGN
 	"{\\textcircledP}"                : "\u2117", // SOUND RECORDING COPYRIGHT
 	"{\\textservicemark}"             : "\u2120", // SERVICE MARK
@@ -1189,7 +1189,8 @@ var reversemappingTable = {
 	"{\\texttrademark}"               : "\u2122", // TRADE MARK SIGN
 	"{\\textohm}"                     : "\u2126", // OHM SIGN
 	"{\\textestimated}"               : "\u212E", // ESTIMATED SYMBOL
-	" 1/3"                            : "\u2153", // VULGAR FRACTION ONE THIRD
+	
+	/*" 1/3"                            : "\u2153", // VULGAR FRACTION ONE THIRD
 	" 2/3"                            : "\u2154", // VULGAR FRACTION TWO THIRDS
 	" 1/5"                            : "\u2155", // VULGAR FRACTION ONE FIFTH
 	" 2/5"                            : "\u2156", // VULGAR FRACTION TWO FIFTHS
@@ -1201,19 +1202,21 @@ var reversemappingTable = {
 	" 3/8"                            : "\u215C", // VULGAR FRACTION THREE EIGHTHS
 	" 5/8"                            : "\u215D", // VULGAR FRACTION FIVE EIGHTHS
 	" 7/8"                            : "\u215E", // VULGAR FRACTION SEVEN EIGHTHS
-	" 1/"                             : "\u215F", // FRACTION NUMERATOR ONE
+	" 1/"                             : "\u215F", // FRACTION NUMERATOR ONE */
+	
 	"{\\textleftarrow}"               : "\u2190", // LEFTWARDS ARROW
 	"{\\textuparrow}"                 : "\u2191", // UPWARDS ARROW
 	"{\\textrightarrow}"              : "\u2192", // RIGHTWARDS ARROW
 	"{\\textdownarrow}"               : "\u2193", // DOWNWARDS ARROW
-	"<->"                             : "\u2194", // LEFT RIGHT ARROW
+	/*"<->"                             : "\u2194", // LEFT RIGHT ARROW
 	"<="                              : "\u21D0", // LEFTWARDS DOUBLE ARROW
 	"=>"                              : "\u21D2", // RIGHTWARDS DOUBLE ARROW
-	"<=>"                             : "\u21D4", // LEFT RIGHT DOUBLE ARROW
+	"<=>"                             : "\u21D4", // LEFT RIGHT DOUBLE ARROW */
 	"$\\infty$"                       : "\u221E", // INFINITY
-	"||"                              : "\u2225", // PARALLEL TO
+	
+	/*"||"                              : "\u2225", // PARALLEL TO
 	"/="                              : "\u2260", // NOT EQUAL TO
-//    "<="                              : "\u2264", // LESS-THAN OR EQUAL TO
+	"<="                              : "\u2264", // LESS-THAN OR EQUAL TO
 	">="                              : "\u2265", // GREATER-THAN OR EQUAL TO
 	"<<"                              : "\u226A", // MUCH LESS-THAN
 	">>"                              : "\u226B", // MUCH GREATER-THAN
@@ -1223,27 +1226,28 @@ var reversemappingTable = {
 	"(/)"                             : "\u2298", // CIRCLED DIVISION SLASH
 	"|-"                              : "\u22A2", // RIGHT TACK
 	"-|"                              : "\u22A3", // LEFT TACK
-//    "|-"                              : "\u22A6", // ASSERTION
+	"|-"                              : "\u22A6", // ASSERTION
 	"|="                              : "\u22A7", // MODELS
-//    "|="                              : "\u22A8", // TRUE
-	"||-"                             : "\u22A9", // FORCES
+	"|="                              : "\u22A8", // TRUE
+	"||-"                             : "\u22A9", // FORCES */
+	
 	"$\\#$"                           : "\u22D5", // EQUAL AND PARALLEL TO
-	"<<<"                             : "\u22D8", // VERY MUCH LESS-THAN
-	">>>"                             : "\u22D9", // VERY MUCH GREATER-THAN
+	//"<<<"                             : "\u22D8", // VERY MUCH LESS-THAN
+	//">>>"                             : "\u22D9", // VERY MUCH GREATER-THAN
 	"{\\textlangle}"                  : "\u2329", // LEFT-POINTING ANGLE BRACKET
 	"{\\textrangle}"                  : "\u232A", // RIGHT-POINTING ANGLE BRACKET
 	"{\\textvisiblespace}"            : "\u2423", // OPEN BOX
-	"///"                             : "\u2425", // SYMBOL FOR DELETE FORM TWO
+	//"///"                             : "\u2425", // SYMBOL FOR DELETE FORM TWO
 	"{\\textopenbullet}"              : "\u25E6", // WHITE BULLET
-	":-("                             : "\u2639", // WHITE FROWNING FACE
-	":-)"                             : "\u263A", // WHITE SMILING FACE
-	"(-: "                            : "\u263B", // BLACK SMILING FACE
-//    "$\\#$"                           : "\u266F", // MUSIC SHARP SIGN
+	//":-("                             : "\u2639", // WHITE FROWNING FACE
+	//":-)"                             : "\u263A", // WHITE SMILING FACE
+	//"(-: "                            : "\u263B", // BLACK SMILING FACE
+	//    "$\\#$"                           : "\u266F", // MUSIC SHARP SIGN
 	"$\\%<$"                          : "\u2701", // UPPER BLADE SCISSORS
-/*    "$\\%<$"                          : "\u2702", // BLACK SCISSORS
+	/*    "$\\%<$"                          : "\u2702", // BLACK SCISSORS
 	"$\\%<$"                          : "\u2703", // LOWER BLADE SCISSORS
 	"$\\%<$"                          : "\u2704", // WHITE SCISSORS */
-/* Derived accented characters */
+	/* Derived accented characters */
 	"\\`{A}"                          : "\u00C0", // LATIN CAPITAL LETTER A WITH GRAVE
 	"\\'{A}"                          : "\u00C1", // LATIN CAPITAL LETTER A WITH ACUTE
 	"\\^{A}"                          : "\u00C2", // LATIN CAPITAL LETTER A WITH CIRCUMFLEX
