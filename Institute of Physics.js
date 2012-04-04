@@ -9,25 +9,28 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-03 11:40:01"
+	"lastUpdated": "2012-04-04 14:45:46"
 }
 
 function detectWeb(doc, url) {
-	if (url.indexOf("search") == -1) {
+	if (ZU.xpathText(doc, '//meta[contains(@name, "citation_")]/@content')) {
 		return "journalArticle";
 	} else {
 		return "multiple";
 	}
 }
 
-function fetchDOIs(DOIs) {
+function fetchDOIs(DOIs, pdfs) {
 	var DOI = DOIs.shift();
 	if (!DOI) {
 		Zotero.done();
 		return true;
 	}
+	if (pdfs) var pdfURL = pdfs.shift();
 	var articleID = DOI.slice(DOI.indexOf('/') + 1);
-	var pdfURL = "http://iopscience.iop.org/" + articleID + "/pdf/" + articleID.replace("/", "_", "g") + ".pdf";
+	if (!pdfURL){
+		var pdfURL = "http://iopscience.iop.org/" + articleID + "/pdf/" + articleID.replace("/", "_", "g") + ".pdf";
+	}
 	var doitranslate = Zotero.loadTranslator("search");
 	doitranslate.setTranslator("11645bd1-0420-45c1-badb-53fb41eeb753");
 	var item = {
@@ -81,34 +84,52 @@ function fetchDOIs(DOIs) {
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ?
-	function (prefix) {
-		if (prefix == "x") return namespace;
-		else return null;
-	} : null;
-
-	var arts = new Array();
 	if (detectWeb(doc, url) == "multiple") {
+		var host = url.match(/http:\/\/.+?\//)[0].replace(/\/$/, "");
+		var arts = new Array();
+		var pdfs = new Array();
 		var items = new Object();
-		var results = doc.evaluate('//div[@class="searchResCol1"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var result;
-		while (result = results.iterateNext()) {
-			var title = doc.evaluate('.//h4/a', result, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			var doi = doc.evaluate('.//span[@class="doi"]/strong/a', result, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			items[doi] = title.trim();
+		var atts = new Object();
+		//search results
+		if (ZU.xpathText(doc, '//div[@class="searchResCol1"]')){
+			var results = ZU.xpath(doc, '//div[@class="searchResCol1"]');
+			var fulltexts = ZU.xpath(doc, '//div[@class="searchResCol2"]');
+			for (var i in results) {
+				var title = ZU.xpathText(results[i], './/h4/a');
+				var doi = ZU.xpathText(results[i], './/span[@class="doi"]/strong/a');
+				var pdf =  ZU.xpathText(fulltexts[i], './/a[@class="icon pdf"]/@href');
+				items[doi] = title.trim();
+				atts[doi] = host + pdf;
+			}
+		}
+		//jounral TOC
+		else if (ZU.xpathText(doc, '//div[@class="paperEntry"]')){
+			var results = ZU.xpath(doc, '//div[@class="paperEntry"]');
+			for (var i in results) {
+				var title = ZU.xpathText(results[i], './/a[@class="title"]');
+				var doi = ZU.xpathText(results[i], './/span[@class="doi"]/a[contains(text(), "doi:")]');
+				var pdf =  ZU.xpathText(results[i], './/a[@class="icon pdf"]/@href');
+				items[doi] = title.trim();
+				atts[doi] = host + pdf;
+		}
+
 		}
 		Zotero.selectItems(items, function (items) {
 			if (!items) return true;
 			for (var i in items) {
 				arts.push(i);
+				pdfs.push(atts[i])
 			}
-			fetchDOIs(arts);
+			fetchDOIs(arts, pdfs);
 			Zotero.wait();
 		});
 	} else {
-		var doi = doc.evaluate('//meta[@name="citation_doi"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().content;
-		fetchDOIs([doi]);
+		var doi = doc.evaluate('//meta[@name="citation_doi"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().content;
+		if (ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content').indexOf(".pdf") != -1){
+	 		var pdfs = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
+			fetchDOIs([doi], [pdfs]);
+		}
+		else fetchDOIs([doi]);
 		Zotero.wait();
 	}
 }
@@ -174,6 +195,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://iopscience.iop.org/search?searchType=fullText&fieldedquery=fun&f=titleabs&time=all&submit=Search&navsubmit=Search",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://iopscience.iop.org.turing.library.northwestern.edu/0004-637X/536/2",
 		"items": "multiple"
 	}
 ]
