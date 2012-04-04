@@ -1,20 +1,21 @@
 {
-	"translatorID":"a326fc49-60c2-405b-8f44-607e5d18b9ad",
-	"translatorType":4,
-	"label":"Code4Lib Journal",
-	"creator":"Michael Berkowitz",
-	"target":"http://journal.code4lib.org/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"translatorID": "a326fc49-60c2-405b-8f44-607e5d18b9ad",
+	"label": "Code4Lib Journal",
+	"creator": "Michael Berkowitz",
+	"target": "http://journal.code4lib.org/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2012-04-02 20:50:45"
 }
 
 function detectWeb(doc, url) {
 	if (doc.evaluate('//h2[@class="articletitle"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
-	} else if (doc.evaluate('//h1[@class="articletitle"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	} else if (doc.evaluate('//h1[@class="articletitle"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "journalArticle";
 	}
 }
@@ -31,38 +32,96 @@ function doWeb(doc, url) {
 			items[next_title.href] = next_title.textContent;
 			next_title = titles.iterateNext();
 		}
-		
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			Zotero.Utilities.processDocuments(articles, scrape, function () {
+				Zotero.done();
+			});
+			Zotero.wait();	
+		});
 	} else {
-		articles.push(url);
+		scrape(doc, url);
 	}
+}
 	
-	Zotero.Utilities.processDocuments(articles, function(newDoc, url) {
+function scrape(doc, url){
 		var newItem = new Zotero.Item("journalArticle");
 		newItem.repository = "Code4Lib Journal";
 		newItem.publicationTitle = "The Code4Lib Journal";
 		newItem.ISSN = "1940-5758";
-		newItem.url = newDoc.location.href;
-		newItem.title = newDoc.evaluate('//div[@class="article"]/h1[@class="articletitle"]/a', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		newItem.abstractNote = newDoc.evaluate('//div[@class="article"]/div[@class="abstract"]/p', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		var issdate = newDoc.evaluate('//p[@id="issueDesignation"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		newItem.url = doc.location.href;
+		newItem.title = ZU.xpathText(doc, '//div[@class="article"]/h1[@class="articletitle"]');
+		newItem.abstractNote = ZU.xpathText(doc, '//div[@class="article"]/div[@class="abstract"]/p');
+		var issdate = ZU.xpathText(doc, '//p[@id="issueDesignation"]');
 		newItem.issue = issdate.match(/([^,]*)/)[0].match(/\d+/)[0];
 		newItem.date = issdate.match(/,\s+(.*)$/)[1];
 		
 		
-		var axpath = '//div[@class="article"]/div[@class="entry"]/p[1]/a';
-		var authors = newDoc.evaluate(axpath, newDoc, null, XPathResult.ANY_TYPE, null);
-		var next_author = authors.iterateNext();
-		while (next_author) {
-			newItem.creators.push(Zotero.Utilities.cleanAuthor(next_author.textContent, "author"));
-			next_author = authors.iterateNext();
+		var axpath = '//div[@class="article"]/div[@class="entry"]/p[1]';
+		var authors = ZU.xpathText(doc, axpath).replace(/By\s+/i, "");
+		var next_author = authors.split(/\s*and\s*|\s*,\s*/);
+		for (var i in next_author) {
+			newItem.creators.push(Zotero.Utilities.cleanAuthor(next_author[i], "author"));
 		}
 		
-		newItem.attachments.push({url:newDoc.location.href, title:"Code4Lib Journal Snapshot", mimeType:"text/html"});
+		newItem.attachments.push({url:doc.location.href, title:"Code4Lib Journal Snapshot", mimeType:"text/html"});
 		newItem.complete();
-	}, function() {Zotero.done();});
-	Zotero.wait();
-}
+	}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://journal.code4lib.org/articles/5001",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Joe",
+						"lastName": "Ryan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Josh",
+						"lastName": "Boyer",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Code4Lib Journal Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"publicationTitle": "The Code4Lib Journal",
+				"ISSN": "1940-5758",
+				"url": "http://journal.code4lib.org/articles/5001",
+				"title": "GroupFinder: A Hyper-Local Group Study Coordination System",
+				"abstractNote": "GroupFinder is a system designed to help users working in groups let each other know where they are, what they are working on, and when they started. Students can use the GroupFinder system to arrange meetings within the library.  GroupFinder also works with the phpScheduleIt room reservation system used to reserve group study rooms at the D.H. Hill Library at NCSU.  Information from GroupFinder is presented on the GroupFinder web site, the mobile web site and on electronic bulletin boards within the library.  How GroupFinder was developed from the initial concept through the implementation is covered in the article.",
+				"issue": "13",
+				"date": "2011-04-11",
+				"libraryCatalog": "Code4Lib Journal",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "GroupFinder"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://journal.code4lib.org/?s=zotero",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://journal.code4lib.org/issues/issue14",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
