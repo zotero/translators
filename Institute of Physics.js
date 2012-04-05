@@ -199,7 +199,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://iopscience.iop.org.turing.library.northwestern.edu/0004-637X/536/2",
+		"url": "http://iopscience.iop.org/0004-637X/536/2",
 		"items": "multiple"
 	}
 ]
