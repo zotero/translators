@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-03-28 21:13:51"
+	"lastUpdated": "2012-04-06 12:09:46"
 }
 
 /*
@@ -77,11 +77,34 @@ function setGSPCookie(doc, cookie) {
 	return oldCookie;
 }
 
-function prepareCookie(doc) {
-	//check if we need to change cookie
-	var m = doc.cookie.match(/\bGSP=[^;]+?\bCF=(\d+)/);
-	if(!m || m[1] != 4) {
-		__old_cookie = setGSPCookie(doc);
+//set cookie using Googles Scholar preferences page
+function setCookieThroughPrefs(doc, callback) {
+	url = doc.location.href.replace(/hl\=[^&]*&?/, "")
+			.replace("scholar?",
+				"scholar_setprefs?hl=en&scis=yes&scisf=4&submit=Save+Preferences&");
+	ZU.doGet(url, function(scisigDoc) {
+		var scisig = /<input\s+type="?hidden"?\s+name="?scisig"?\s+value="([^"]+)"/
+					.exec(scisigDoc);
+		url = url + "&scisig="+scisig[1];
+		//set prefernces
+		Z.debug('Submitting settings to Google Scholar: ' + url);
+		ZU.doGet(url, function(response) { callback(doc); });
+	});
+}
+
+function prepareCookie(doc, callback) {
+	// Google Scholar always sets GSP
+	if(doc.cookie.match(/\bGSP=/)) {
+		//check if we need to change cookie
+		var m = doc.cookie.match(/\bGSP=[^;]*?\bCF=(\d+)/);
+		if(!m || m[1] != 4) {
+			__old_cookie = setGSPCookie(doc);
+		}
+		callback(doc);
+	} else {
+		//some proxies do not pass cookies through, so we need to set this by
+		//going to the preferences page
+		setCookieThroughPrefs(doc, callback);
 	}
 }
 
@@ -419,11 +442,9 @@ function doWeb(doc, url) {
 		 * We should always be able to build bibtex links from the Related articles
 		 * link.
 		 */
-		 //filter out patents, since these currently are not supported due to SOP
 		var results = ZU.xpath(doc,
 			'//div[@class="gs_r"]\
 				[./div[@class="gs_fl"]/a[contains(@href,"q=related:")]]');
-				//[not(./h3[@class="gs_rt"]/a[contains(@href,"/patents?")])]');
 
 		var items = new Object();
 		var resultDivs = new Object();
@@ -442,8 +463,6 @@ function doWeb(doc, url) {
 
 		Zotero.selectItems(items, function(selectedItems) {
 			if(!selectedItems) return true;
-
-			prepareCookie(doc);
 
 			//different types are handled differently
 			var selectedArticles = new Array();
@@ -474,14 +493,25 @@ function doWeb(doc, url) {
 				}
 			}
 
-			scrapeArticleResults(doc, selectedArticles);
-			scrapeCaseResults(doc, selectedCases);
-			scrapePatentResults(doc, selectedPatents);
-			//for now, handle books the same way as articles, since they are on
-			//a different domain
-			scrapeArticleResults(doc, selectedBooks);
+			prepareCookie(doc, function(){
+				scrapeAll(doc, {
+					articles: selectedArticles,
+					cases: selectedCases,
+					patents: selectedPatents,
+					books: selectedBooks
+				});
+			});
 		});
 	}
+}
+
+function scrapeAll(doc, selected) {
+	scrapeArticleResults(doc, selected.articles);
+	scrapeCaseResults(doc, selected.cases);
+	scrapePatentResults(doc, selected.patents);
+	//for now, handle books the same way as articles, since they are on
+	//a different domain
+	scrapeArticleResults(doc, selected.books);
 }
 
 /*
