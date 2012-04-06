@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2011-12-10 15:53:22"
+	"lastUpdated": "2012-04-06 17:41:47"
 }
 
 /*
@@ -86,6 +86,14 @@ function scrape (doc) {
   var get = 'http://www.tandfonline.com/action/downloadCitation';
   var post = 'doi=' + doi + '&downloadFileName=' + filename + '&format=ris&direct=true&include=abs';
   Zotero.Utilities.HTTP.doPost(get, post, function(text) {
+  	//check if we have both AB and N2 defined. If these are identical,
+  	//we need to remove them
+  	var ab = text.match(/^AB  - ([\s\S]*?)^[A-Z]{2}  -/m);
+  	if(ab) var n2 = text.match(/^N2  - ([\s\S]*?)^[A-Z]{2}  -/m);
+  	if(n2 && ab[1] == n2[1]) {
+  		text = text.replace(/^N2  - [\s\S]*?^([A-Z]{2}  -)/m, '$1');
+  	}
+
 	var translator = Zotero.loadTranslator("import");
 	// Calling the RIS translator
 	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -118,18 +126,18 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"lastName": "Chong",
 						"firstName": "Alberto",
+						"lastName": "Chong",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Galdo",
 						"firstName": "Jose",
+						"lastName": "Galdo",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Saavedra",
 						"firstName": "Jaime",
+						"lastName": "Saavedra",
 						"creatorType": "author"
 					}
 				],
@@ -138,12 +146,10 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.tandfonline.com/doi/pdf/10.1080/17487870802543480",
 						"title": "T&F PDF fulltext",
 						"mimeType": "application/pdf"
 					},
 					{
-						"url": "http://www.tandfonline.com/doi/abs/10.1080/17487870802543480",
 						"title": "T&F Snapshot",
 						"mimeType": "text/html"
 					}
@@ -156,11 +162,12 @@ var testCases = [
 				"volume": "11",
 				"issue": "4",
 				"publisher": "Routledge",
-				"abstractNote": "This article analyzes the evolution of informal employment in Peru from 1986 to 2001. Contrary to what one would expect, the informality rates increased steadily during the 1990s despite the introduction of flexible contracting mechanisms, a healthy macroeconomic recovery, and tighter tax codes and regulation. We explore different factors that may explain this upward trend including the role of labor legislation and labor allocation between/within sectors of economic activity. Finally, we illustrate the negative correlation between productivity and informality by evaluating the impacts of the Youth Training PROJOVEN Program that offers vocational training to disadvantaged young individuals. We find significant training impacts on the probability of formal employment for both males and females.\nThis article analyzes the evolution of informal employment in Peru from 1986 to 2001. Contrary to what one would expect, the informality rates increased steadily during the 1990s despite the introduction of flexible contracting mechanisms, a healthy macroeconomic recovery, and tighter tax codes and regulation. We explore different factors that may explain this upward trend including the role of labor legislation and labor allocation between/within sectors of economic activity. Finally, we illustrate the negative correlation between productivity and informality by evaluating the impacts of the Youth Training PROJOVEN Program that offers vocational training to disadvantaged young individuals. We find significant training impacts on the probability of formal employment for both males and females.",
+				"abstractNote": "This article analyzes the evolution of informal employment in Peru from 1986 to 2001. Contrary to what one would expect, the informality rates increased steadily during the 1990s despite the introduction of flexible contracting mechanisms, a healthy macroeconomic recovery, and tighter tax codes and regulation. We explore different factors that may explain this upward trend including the role of labor legislation and labor allocation between/within sectors of economic activity. Finally, we illustrate the negative correlation between productivity and informality by evaluating the impacts of the Youth Training PROJOVEN Program that offers vocational training to disadvantaged young individuals. We find significant training impacts on the probability of formal employment for both males and females.",
 				"ISBN": "1748-7870",
 				"ISSN": "1748-7870",
 				"url": "http://www.tandfonline.com/doi/abs/10.1080/17487870802543480",
-				"accessDate": "2011/12/05",
+				"accessDate": "2012/04/06",
+				"bookTitle": "Journal of Economic Policy Reform",
 				"libraryCatalog": "Taylor&Francis"
 			}
 		]
@@ -178,18 +185,18 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"lastName": "Chong",
 						"firstName": "Alberto",
+						"lastName": "Chong",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Galdo",
 						"firstName": "Jose",
+						"lastName": "Galdo",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Saavedra",
 						"firstName": "Jaime",
+						"lastName": "Saavedra",
 						"creatorType": "author"
 					}
 				],
@@ -198,12 +205,10 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.tandfonline.com/doi/pdf/10.1080/17487870802543480",
 						"title": "T&F PDF fulltext",
 						"mimeType": "application/pdf"
 					},
 					{
-						"url": "http://www.tandfonline.com/doi/abs/10.1080/17487870802543480",
 						"title": "T&F Snapshot",
 						"mimeType": "text/html"
 					}
@@ -216,11 +221,12 @@ var testCases = [
 				"volume": "11",
 				"issue": "4",
 				"publisher": "Routledge",
-				"abstractNote": "This article analyzes the evolution of informal employment in Peru from 1986 to 2001. Contrary to what one would expect, the informality rates increased steadily during the 1990s despite the introduction of flexible contracting mechanisms, a healthy macroeconomic recovery, and tighter tax codes and regulation. We explore different factors that may explain this upward trend including the role of labor legislation and labor allocation between/within sectors of economic activity. Finally, we illustrate the negative correlation between productivity and informality by evaluating the impacts of the Youth Training PROJOVEN Program that offers vocational training to disadvantaged young individuals. We find significant training impacts on the probability of formal employment for both males and females.\nThis article analyzes the evolution of informal employment in Peru from 1986 to 2001. Contrary to what one would expect, the informality rates increased steadily during the 1990s despite the introduction of flexible contracting mechanisms, a healthy macroeconomic recovery, and tighter tax codes and regulation. We explore different factors that may explain this upward trend including the role of labor legislation and labor allocation between/within sectors of economic activity. Finally, we illustrate the negative correlation between productivity and informality by evaluating the impacts of the Youth Training PROJOVEN Program that offers vocational training to disadvantaged young individuals. We find significant training impacts on the probability of formal employment for both males and females.",
+				"abstractNote": "This article analyzes the evolution of informal employment in Peru from 1986 to 2001. Contrary to what one would expect, the informality rates increased steadily during the 1990s despite the introduction of flexible contracting mechanisms, a healthy macroeconomic recovery, and tighter tax codes and regulation. We explore different factors that may explain this upward trend including the role of labor legislation and labor allocation between/within sectors of economic activity. Finally, we illustrate the negative correlation between productivity and informality by evaluating the impacts of the Youth Training PROJOVEN Program that offers vocational training to disadvantaged young individuals. We find significant training impacts on the probability of formal employment for both males and females.",
 				"ISBN": "1748-7870",
 				"ISSN": "1748-7870",
 				"url": "http://www.tandfonline.com/doi/abs/10.1080/17487870802543480",
-				"accessDate": "2011/12/10",
+				"accessDate": "2012/04/06",
+				"bookTitle": "Journal of Economic Policy Reform",
 				"libraryCatalog": "Taylor&Francis"
 			}
 		]
