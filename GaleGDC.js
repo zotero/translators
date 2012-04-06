@@ -9,7 +9,7 @@
         "priority":100,
         "inRepository":true,
         "browserSupport":"g",
-        "lastUpdated":"2011-12-20 20:10:00"
+        "lastUpdated":"2011-04-04 13:12:00"
 }
 
 /*
@@ -38,7 +38,6 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-
     var risImporter = Zotero.loadTranslator("import");
     risImporter.setHandler("itemDone", function(obj, item) {
 		item.attachments = [];
@@ -58,7 +57,7 @@ function doWeb(doc, url) {
                 var start = item.indexOf('documentId=');
                 var end = item.indexOf('&', start);
                 var docid = item.substring(start + 11, end > -1 ? end : item.length);
-                var urlForPosting = doc.getElementById("zotero_form").action + '&doCitation=' + docid + '&citation_document_url=' + encodeURIComponent(item.replace('|', '%7C'));
+                var urlForPosting = doc.getElementById("zotero_form").action + '&citation_document_id=' + docid + '&citation_document_url=' + encodeURIComponent(item.replace('|', '%7C'));
                 importSingleDocument(risImporter, urlForPosting);
             }
         });
@@ -69,11 +68,12 @@ function doWeb(doc, url) {
 
 function processSingleDocument(risImporter, doc) {
     var citationForm = doc.getElementById("citation_form");
-    var otherUrl;
+    var otherUrl, docId;
     for ( var i = 0; i < citationForm.length; i++) {
-        if (citationForm.elements[i].name === 'citation_document_url') otherUrl = citationForm.elements[i].value;
+        if (citationForm.elements[i].name === 'citation_document_url') { otherUrl = citationForm.elements[i].value; }
+		if (citationForm.elements[i].name === 'citation_document_id') { docId = citationForm.elements[i].value; }
     }
-    var urlForPosting = citationForm.action + "&citation_format=ris" + "&citation_document_url=" + encodeURIComponent(otherUrl);
+    var urlForPosting = citationForm.action + "&citation_format=ris" + "&citation_document_url=" + encodeURIComponent(otherUrl) + "&citation_document_id=" + encodeURIComponent(docId);
     importSingleDocument(risImporter, urlForPosting);
 }
 
