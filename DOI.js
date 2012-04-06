@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-04 00:40:01"
+	"lastUpdated": "2012-04-04 05:29:41"
 }
 
 var items = {};
@@ -28,8 +28,8 @@ function getDOIs(doc) {
 	// Description at: http://www.doi.org/handbook_2000/appendix_1.html#A1-4
 	const DOIre = /\b10\.[0-9]{4,}\/[^\s&]*[^\s\&\.,]/g;
 	const DOIXPath = "/html/body//text()\
-						[not(ancestor::script or ancestor::style)]\
-						[contains(., '10.')]";
+						[contains(., '10.')]\
+						[not(parent::script or parent::style)]";
 
 	var DOIs = [];
 
