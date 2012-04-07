@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-04-06 23:13:36"
+	"lastUpdated": "2012-04-06 23:24:26"
 }
 
 /**
@@ -47,13 +47,22 @@ function doWeb(doc, url) {
 	item.encyclopediaTitle = 'Wikipedia, The Free Encyclopedia';
 	item.rights = 'Creative Commons Attribution-ShareAlike License';
 
-	item.URL = ZU.xpathText(doc, '//li[@id="t-permalink"]/a/@href');
-	if(item.URL) {
+	item.url = ZU.xpathText(doc, '//li[@id="t-permalink"]/a/@href');
+	if(item.url) {
 		item.extra = 'Page Version ID: ' + 
-						item.URL.match(/[&?]oldid=(\d+)/)[1];
-		item.URL = doc.location.protocol + '//' + doc.location.hostname
-					+ item.URL;
+						item.url.match(/[&?]oldid=(\d+)/)[1];
+		item.url = doc.location.protocol + '//' + doc.location.hostname
+					+ item.url;
+	} else {
+		item.url = url
 	}
+
+	item.attachments.push({
+		url: item.url,
+		title: 'Snapshot',
+		mimeType: 'text/html',
+		snapshot: true
+	});
 
 	item.language = doc.documentElement.lang;
 
@@ -90,19 +99,30 @@ var testCases = [
 					{
 						"lastName": "Wikipedia contributors",
 						"fieldMode": 1,
-						"cteatorType": "author"
+						"creatorType": "author"
 					}
 				],
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
 				"title": "Россия",
-				"publisher": "Wikipedia, The Free Encyclopedia",
-				"URL": "http://ru.wikipedia.org/w/index.php?title=%D0%A0%D0%BE%D1%81%D1%81%D0%B8%D1%8F&oldid=43336101",
+				"publisher": "Wikimedia Foundation, Inc.",
+				"encyclopediaTitle": "Wikipedia, The Free Encyclopedia",
+				"rights": "Creative Commons Attribution-ShareAlike License",
+				"url": "http://ru.wikipedia.org/w/index.php?title=%D0%A0%D0%BE%D1%81%D1%81%D0%B8%D1%8F&oldid=43336101",
 				"extra": "Page Version ID: 43336101",
+				"language": "ru",
+				"abstractNote": "Росси́я (от греч. Ρωσία — Русь[1]; официально — Росси́йская Федера́ция или Росси́я[2], на практике используется также сокращение — РФ[3]) — страна, расположенная в Восточной Европе и Северной Азии. Является самым большим государством мира (17 098 246 км²[4], что составляет 11,46 % (~1 / 9 часть, равная 11,11 %) площади всей суши Земли, или 12,65 % (~1 / 8 часть, равная 12,5 %) заселённой человеком суши, что почти вдвое больше, чем у занимающей второе место Канады). Население на 2012 год составляет 143 030 106 человек[5], в настоящее время страна занимает девятое место в мире по этому показателю. Государственный язык на всей территории страны — русский. В 23 субъектах федерации наряду с русским используются другие государственные языки. Столица — город Москва. Всего в России 13 городов с населением более миллиона человек: Москва, Санкт-Петербург, Новосибирск, Екатеринбург, Нижний Новгород, Самара, Омск, Казань, Челябинск, Ростов-на-Дону, Уфа, Волгоград[6], Пермь[7].",
 				"date": "2012-04-06T20:11:33Z",
-				"libraryCatalog": "Wikipedia"
+				"libraryCatalog": "Wikipedia",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -116,19 +136,30 @@ var testCases = [
 					{
 						"lastName": "Wikipedia contributors",
 						"fieldMode": 1,
-						"cteatorType": "author"
+						"creatorType": "author"
 					}
 				],
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
 				"title": "Zotero",
-				"publisher": "Wikipedia, The Free Encyclopedia",
-				"URL": "http://en.wikipedia.org/w/index.php?title=Zotero&oldid=485342619",
+				"publisher": "Wikimedia Foundation, Inc.",
+				"encyclopediaTitle": "Wikipedia, The Free Encyclopedia",
+				"rights": "Creative Commons Attribution-ShareAlike License",
+				"url": "http://en.wikipedia.org/w/index.php?title=Zotero&oldid=485342619",
 				"extra": "Page Version ID: 485342619",
+				"language": "en",
+				"abstractNote": "Zotero ( /zoʊˈtɛroʊ/) is free, open source reference management software to manage bibliographic data and related research materials (such as PDFs). Notable features include web browser integration, online syncing, generation of in-text citations, footnotes and bibliographies, as well as integration with the word processors Microsoft Word, LibreOffice, OpenOffice.org Writer and NeoOffice. It is produced by the Center for History and New Media of George Mason University (GMU).",
 				"date": "2012-04-06T20:27:51Z",
-				"libraryCatalog": "Wikipedia"
+				"libraryCatalog": "Wikipedia",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}
