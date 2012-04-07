@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-04-06 23:24:26"
+	"lastUpdated": "2012-04-06 23:47:01"
 }
 
 /**
@@ -44,8 +44,20 @@ function doWeb(doc, url) {
 	});
 
 	item.publisher = 'Wikimedia Foundation, Inc.';
-	item.encyclopediaTitle = 'Wikipedia, The Free Encyclopedia';
 	item.rights = 'Creative Commons Attribution-ShareAlike License';
+
+	//turns out it's not that trivial to get the localized title for Wikipedia
+	//we can try to strip it from the page title though
+	//test for all sorts of dashes to account for different locales
+	/**TODO: there's probably a better way to do this, since sometimes page
+	 * title only says "- Wikipedia" (in some other language)
+	 */
+	var m = doc.title.match(/[\u002D\u00AD\u2010-\u2015\u2212\u2E3A\u2E3B]\s*([^\u002D\u00AD\u2010-\u2015\u2212\u2E3A\u2E3B]+)$/);
+	if(m) {
+		item.encyclopediaTitle = m[1];
+	} else {
+		item.encyclopediaTitle = 'Wikipedia, the free encyclopedia';
+	}
 
 	item.url = ZU.xpathText(doc, '//li[@id="t-permalink"]/a/@href');
 	if(item.url) {
@@ -114,8 +126,8 @@ var testCases = [
 				],
 				"title": "Россия",
 				"publisher": "Wikimedia Foundation, Inc.",
-				"encyclopediaTitle": "Wikipedia, The Free Encyclopedia",
 				"rights": "Creative Commons Attribution-ShareAlike License",
+				"encyclopediaTitle": "Википедия",
 				"url": "http://ru.wikipedia.org/w/index.php?title=%D0%A0%D0%BE%D1%81%D1%81%D0%B8%D1%8F&oldid=43336101",
 				"extra": "Page Version ID: 43336101",
 				"language": "ru",
@@ -151,8 +163,8 @@ var testCases = [
 				],
 				"title": "Zotero",
 				"publisher": "Wikimedia Foundation, Inc.",
-				"encyclopediaTitle": "Wikipedia, The Free Encyclopedia",
 				"rights": "Creative Commons Attribution-ShareAlike License",
+				"encyclopediaTitle": "Wikipedia, the free encyclopedia",
 				"url": "http://en.wikipedia.org/w/index.php?title=Zotero&oldid=485342619",
 				"extra": "Page Version ID: 485342619",
 				"language": "en",
