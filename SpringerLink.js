@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-21 02:22:01"
+	"lastUpdated": "2012-04-07 01:29:47"
 }
 
 /*
@@ -103,7 +103,8 @@ function doWeb(doc, url) {
 	} else if( type == 'book' ){
 		scrapeBook(doc)
 	} else {
-		var citationurl = url.replace(/(?:(?:about|abstract|fulltext\.html|references|export-citation)\/?)?(?:[#?].*)?$/, "") + "export-citation";
+		var citationurl = url.replace(/\/?(?:(?:about|abstract|fulltext\.html|references|export-citation)\/?)?(?:[#?].*)?$/, "")
+							 + "/export-citation";
 		getpages(citationurl);
 	}
 }
@@ -620,6 +621,85 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.springerlink.com/protocols/",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.springerlink.com/content/905u225mu8rr70m2",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"creators": [
+					{
+						"firstName": "Jia",
+						"lastName": "Yu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Shie",
+						"lastName": "Mannor",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nahum",
+						"lastName": "Shimkin",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sertan",
+						"lastName": "Girgin",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Manuel",
+						"lastName": "Loth",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Rémi",
+						"lastName": "Munos",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Philippe",
+						"lastName": "Preux",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Daniil",
+						"lastName": "Ryabko",
+						"creatorType": "contributor"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Computer Science"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "SpringerLink Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "SpringerLink Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Recent Advances in Reinforcement Learning",
+				"series": "Lecture Notes in Computer Science",
+				"date": "2008",
+				"publisher": "Springer Berlin / Heidelberg",
+				"ISBN": "978-3-540-89721-7",
+				"ISSN": "978-3-540-89721-7",
+				"pages": "268-281",
+				"volume": "5323",
+				"url": "http://www.springerlink.com/content/905u225mu8rr70m2/abstract/",
+				"DOI": "10.1007/978-3-540-89722-4_21",
+				"abstractNote": "We consider a control problem where the decision maker interacts with a standard Markov decision process with the exception that the reward functions vary arbitrarily over time. We extend the notion of Hannan consistency to this setting, showing that, in hindsight, the agent can perform almost as well as every deterministic policy. We present efficient online algorithms in the spirit of reinforcement learning that ensure that the agent’s performance loss, or regret, vanishes over time, provided that the environment is oblivious to the agent’s actions. However, counterexamples indicate that the regret does not vanish if the environment is not oblivious.",
+				"libraryCatalog": "SpringerLink",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
