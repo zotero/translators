@@ -1,0 +1,109 @@
+{
+	"translatorID": "e5dc9733-f8fc-4c00-8c40-e53e0bb14664",
+	"label": "Wikipedia",
+	"creator": "Aurimas Vinckevicius",
+	"target": "https?://[^/]*wikipedia\\.org/",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsib",
+	"lastUpdated": "2012-04-06 22:52:02"
+}
+
+function detectWeb(doc, url) {
+	return 'encyclopediaArticle';
+}
+
+function doWeb(doc, url) {
+	var item = new Zotero.Item('encyclopediaArticle');
+	item.title = ZU.xpathText(doc, '//h1[@id="firstHeading"]/span');
+	item.creators.push({
+		lastName: 'Wikipedia contributors',
+		fieldMode: 1,
+		cteatorType: 'author'
+	});
+	item.publisher = 'Wikipedia, The Free Encyclopedia';
+	item.URL = ZU.xpathText(doc, '//li[@id="t-permalink"]/a/@href');
+	if(item.URL) {
+		item.extra = 'Page Version ID: ' + 
+						item.URL.match(/[&?]oldid=(\d+)/)[1];
+		item.URL = doc.location.protocol + '//' + doc.location.hostname
+					+ item.URL;
+	}
+
+	//last modified date is hard to get from the page because it is localized
+	var pageInfoURL = '/w/api.php?action=query&prop=info&format=json&' + 
+						'inprop=url%7Cdisplaytitle&titles=' +
+						item.title;
+	ZU.doGet(pageInfoURL, function(text) {
+		var retObj = JSON.parse(text);
+		if(retObj && !retObj.query.pages['-1']) {
+			var pages = retObj.query.pages;
+			for(var i in pages) {
+				item.date = pages[i].touched;
+				item.title = pages[i].displaytitle;
+				//we should never have more than one page returned,
+				//but break just in case
+				break;
+			}
+		}
+		item.complete();
+	});
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://ru.wikipedia.org/w/index.php?title=%D0%A0%D0%BE%D1%81%D1%81%D0%B8%D1%8F&oldid=43336101",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"creators": [
+					{
+						"lastName": "Wikipedia contributors",
+						"fieldMode": 1,
+						"cteatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Россия",
+				"publisher": "Wikipedia, The Free Encyclopedia",
+				"URL": "http://ru.wikipedia.org/w/index.php?title=%D0%A0%D0%BE%D1%81%D1%81%D0%B8%D1%8F&oldid=43336101",
+				"extra": "Page Version ID: 43336101",
+				"date": "2012-04-06T20:11:33Z",
+				"libraryCatalog": "Wikipedia"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://en.wikipedia.org/w/index.php?title=Zotero&oldid=485342619",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"creators": [
+					{
+						"lastName": "Wikipedia contributors",
+						"fieldMode": 1,
+						"cteatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Zotero",
+				"publisher": "Wikipedia, The Free Encyclopedia",
+				"URL": "http://en.wikipedia.org/w/index.php?title=Zotero&oldid=485342619",
+				"extra": "Page Version ID: 485342619",
+				"date": "2012-04-06T20:27:51Z",
+				"libraryCatalog": "Wikipedia"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
