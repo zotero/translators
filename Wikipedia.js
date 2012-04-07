@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-04-06 22:52:02"
+	"lastUpdated": "2012-04-06 23:13:36"
 }
 
 /**
@@ -40,9 +40,13 @@ function doWeb(doc, url) {
 	item.creators.push({
 		lastName: 'Wikipedia contributors',
 		fieldMode: 1,
-		cteatorType: 'author'
+		creatorType: 'author'
 	});
-	item.publisher = 'Wikipedia, The Free Encyclopedia';
+
+	item.publisher = 'Wikimedia Foundation, Inc.';
+	item.encyclopediaTitle = 'Wikipedia, The Free Encyclopedia';
+	item.rights = 'Creative Commons Attribution-ShareAlike License';
+
 	item.URL = ZU.xpathText(doc, '//li[@id="t-permalink"]/a/@href');
 	if(item.URL) {
 		item.extra = 'Page Version ID: ' + 
@@ -50,6 +54,11 @@ function doWeb(doc, url) {
 		item.URL = doc.location.protocol + '//' + doc.location.hostname
 					+ item.URL;
 	}
+
+	item.language = doc.documentElement.lang;
+
+	var abs = ZU.xpathText(doc, '//div[@id="mw-content-text"]/p[1]', null, '');
+	item.abstractNote = ZU.trimInternal(abs);
 
 	//last modified date is hard to get from the page because it is localized
 	var pageInfoURL = '/w/api.php?action=query&prop=info&format=json&' + 
