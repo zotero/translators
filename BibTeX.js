@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-04 09:07:18"
+	"lastUpdated": "2012-04-08 05:42:00"
 }
 
 function detectImport() {
@@ -1556,24 +1556,17 @@ var alwaysMap = {
 
 var strings = {};
 var keyRe = /[a-zA-Z0-9\-]/;
-var keywordSplitOnSpace = true;
-var keywordDelimRe = ',\\s*';
-var keywordDelimReFlags = '';
 
-function setKeywordSplitOnSpace( val ) {
-	keywordSplitOnSpace = val;
+//properties (exported)
+var props = {
+	keywordSplitOnSpace: true,
+	keywordDelimReString: ',\\s*',
+	keywordDelimReFlags: '',
+	capitalizeTitle: false
 }
-
-function setKeywordDelimRe( val, flags ) {
-	//expect string, but it could be RegExp
-	if(typeof(val) != 'string') {
-		keywordDelimRe = val.toString().slice(1, val.toString().lastIndexOf('/'));
-		keywordDelimReFlags = val.toString().slice(val.toString().lastIndexOf('/')+1);
-	} else {
-		keywordDelimRe = val;
-		keywordDelimReFlags = flags;
-	}
-}
+//the RegExp object we will build
+//from the strings above before we start
+var keywordDelimRe;
 
 function processField(item, field, value) {
 	if(Zotero.Utilities.trim(value) == '') return null;
@@ -1582,12 +1575,14 @@ function processField(item, field, value) {
 	} else if(inputFieldMap[field]) {
 		item[inputFieldMap[field]] = value;
 	} else if(field == "journal") {
+		if(props.capitalizeTitle) value = ZU.capitalizeTitle(value);
 		if(item.publicationTitle) {
 			item.journalAbbreviation = value;
 		} else {
 			item.publicationTitle = value;
 		}
 	} else if(field == "fjournal") {
+		if(props.capitalizeTitle) value = ZU.capitalizeTitle(value);
 		if(item.publicationTitle) {
 			// move publicationTitle to abbreviation
 			item.journalAbbreviation = value;
@@ -1670,12 +1665,11 @@ function processField(item, field, value) {
 			}
 		}
 	} else if(field == "keywords") {
-		var re = new RegExp(keywordDelimRe, keywordDelimReFlags);
-		if(!value.match(re) && keywordSplitOnSpace) {
+		if(!value.match(keywordDelimRe) && props.keywordSplitOnSpace) {
 			// keywords/tags
 			item.tags = value.split(" ");
 		} else {
-			item.tags = value.split(re);
+			item.tags = value.split(keywordDelimRe);
 		}
 	} else if (field == "comment" || field == "annote" || field == "review") {
 		item.notes.push({note:Zotero.Utilities.text2html(value)});
@@ -1845,6 +1839,7 @@ function beginRecord(type, closeChar) {
 		} else if(read == closeChar) {
 			if(item) {
 				if(item.extra) item.extra = item.extra.substr(1); // chop \n
+				if(props.capitalizeTitle) item.title = ZU.capitalizeTitle(item.title);
 				item.complete();
 			}
 			return;
@@ -1857,7 +1852,10 @@ function beginRecord(type, closeChar) {
 function doImport() {
 	var read = "", text = "", recordCloseElement = false;
 	var type = false;
-	
+
+	//prepare keywordDelimRe
+	keywordDelimRe = new RegExp(props.keywordDelimReString, props.keywordDelimReFlags);
+
 	while(read = Zotero.read(1)) {
 		if(read == "@") {
 			type = "";
@@ -2170,8 +2168,7 @@ function doExport() {
 var exports = {
 	"doExport": doExport,
 	"doImport": doImport,
-	"setKeywordDelimRe": setKeywordDelimRe,
-	"setKeywordSplitOnSpace": setKeywordSplitOnSpace
+	"props": props
 }
 
 /** BEGIN TEST CASES **/
