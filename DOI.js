@@ -27,8 +27,7 @@ function getDOIs(doc) {
 	// out of URLs.
 	// Description at: http://www.doi.org/handbook_2000/appendix_1.html#A1-4
 	const DOIre = /\b10\.[0-9]{4,}\/[^\s&]*[^\s\&\.,]/g;
-	const DOIXPath = "/html/body//text()\
-						[contains(., '10.')]\
+	const DOIXPath = "//text()[contains(., '10.')]\
 						[not(parent::script or parent::style)]";
 
 	var DOIs = [];
