@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-04 09:07:18"
+	"lastUpdated": "2012-04-09 04:29:35"
 }
 
 function detectImport() {
@@ -1669,7 +1669,7 @@ function processField(item, field, value) {
 				item.extra += "\nPublished: "+value;
 			}
 		}
-	} else if(field == "keywords") {
+	} else if(field == "keywords" || field == "keyword") {
 		var re = new RegExp(keywordDelimRe, keywordDelimReFlags);
 		if(!value.match(re) && keywordSplitOnSpace) {
 			// keywords/tags
