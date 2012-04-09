@@ -1669,7 +1669,7 @@ function processField(item, field, value) {
 				item.extra += "\nPublished: "+value;
 			}
 		}
-	} else if(field == "keywords") {
+	} else if(field == "keywords" || field == "keyword") {
 		var re = new RegExp(keywordDelimRe, keywordDelimReFlags);
 		if(!value.match(re) && keywordSplitOnSpace) {
 			// keywords/tags

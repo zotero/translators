@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-07 23:23:29"
+	"lastUpdated": "2012-04-08 23:24:50"
 }
 
 /*
@@ -192,8 +192,6 @@ function scrapeExport(doc, viewstate, eventvalidate) {
 			'ExportCitationButton=Export+Citation' +
 		'&__EVENTVALIDATION=' + encodeURIComponent(eventvalidate);
 	Zotero.Utilities.HTTP.doPost(get, post, function (text) {
-		// SpringerLink uses keyword instead of keywords in the BibTeX export
-		text = text.replace(/^(\s+keyword)(\s+=)/mg, '$1s$2');
 		//Z.debug('Citation Export: ' + text);
 		var translator = Zotero.loadTranslator("import");
 		// Calling the RIS translator
