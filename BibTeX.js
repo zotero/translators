@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-09 21:35:24"
+	"lastUpdated": "2012-04-09 23:17:40"
 }
 
 function detectImport() {
@@ -2153,8 +2153,10 @@ function doExport() {
 				
 				for(var i in item.attachments) {
 					var attachment = item.attachments[i];
-					attachment.saveFile(attachment.defaultPath, true);
-					attachmentString += ";" + attachment.title + ":" + attachment.defaultPath + ":" + attachment.mimeType;
+					if(attachment.saveFile) {
+						attachment.saveFile(attachment.defaultPath, true);
+						attachmentString += ";" + attachment.title + ":" + attachment.defaultPath + ":" + attachment.mimeType;
+					}
 				}
 				
 				if(attachmentString) {
