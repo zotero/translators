@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-07 01:29:47"
+	"lastUpdated": "2012-04-08 23:24:50"
 }
 
 /*
@@ -170,19 +170,38 @@ function scrapeBook(doc) {
 	item.complete();
 }
 
-function scrapeRIS(doc, viewstate, eventvalidate) {
+function scrapeExport(doc, viewstate, eventvalidate) {
 	var newurl = doc.location.href;
 	var pdfurl = newurl.replace(/export-citation/, "fulltext.pdf");
 	var absurl = newurl.replace(/export-citation/, "abstract/");
 	var get = newurl;
-	var post = '__VIEWSTATE=' + encodeURIComponent(viewstate) + '&ctl00%24ctl14%24cultureList=en-us&ctl00%24ctl14%24SearchControl%24BasicSearchForTextBox=&ctl00%24ctl14%24SearchControl%24BasicAuthorOrEditorTextBox=&ctl00%24ctl14%24SearchControl%24BasicPublicationTextBox=&ctl00%24ctl14%24SearchControl%24BasicVolumeTextBox=&ctl00%24ctl14%24SearchControl%24BasicIssueTextBox=&ctl00%24ctl14%24SearchControl%24BasicPageTextBox=&ctl00%24ContentPrimary%24ctl00%24ctl00%24Export=AbstractRadioButton&ctl00%24ContentPrimary%24ctl00%24ctl00%24CitationManagerDropDownList=ReferenceManager&ctl00%24ContentPrimary%24ctl00%24ctl00%24ExportCitationButton=Export+Citation&__EVENTVALIDATION=' + encodeURIComponent(eventvalidate);
+	var post = '__VIEWSTATE=' + encodeURIComponent(viewstate) +
+		'&ctl00%24ctl14%24cultureList=en-us' +
+		'&ctl00%24ctl14%24SearchControl%24BasicSearchForTextBox=' +
+		'&ctl00%24ctl14%24SearchControl%24BasicAuthorOrEditorTextBox=' +
+		'&ctl00%24ctl14%24SearchControl%24BasicPublicationTextBox=' +
+		'&ctl00%24ctl14%24SearchControl%24BasicVolumeTextBox=' +
+		'&ctl00%24ctl14%24SearchControl%24BasicIssueTextBox=' +
+		'&ctl00%24ctl14%24SearchControl%24BasicPageTextBox=' +
+		'&ctl00%24ContentPrimary%24ctl00%24ctl00%24' +
+			'Export=AbstractRadioButton' + 
+		'&ctl00%24ContentPrimary%24ctl00%24ctl00%24' +
+		//	'CitationManagerDropDownList=ReferenceManager' +
+			'CitationManagerDropDownList=BibTex' +
+		'&ctl00%24ContentPrimary%24ctl00%24ctl00%24' +
+			'ExportCitationButton=Export+Citation' +
+		'&__EVENTVALIDATION=' + encodeURIComponent(eventvalidate);
 	Zotero.Utilities.HTTP.doPost(get, post, function (text) {
-		//Z.debug('RIS Citation Export: ' + text);
+		//Z.debug('Citation Export: ' + text);
 		var translator = Zotero.loadTranslator("import");
 		// Calling the RIS translator
-		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+		//translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+		// Calling the BibTeX translator
+		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
+			item.DOI = item.extra;
+			delete item.extra;
 			item.url = absurl;
 			item.notes = [];
 			item.attachments = [{
@@ -196,7 +215,11 @@ function scrapeRIS(doc, viewstate, eventvalidate) {
 			}];
 			item.complete();
 		});
-		translator.translate();
+
+		translator.getTranslatorObject(function(trans) {
+			trans.setKeywordSplitOnSpace(false);
+			trans.doImport();
+		});
 	});
 }
 
@@ -217,10 +240,10 @@ function scrape(doc) {
 			Z.debug('doGet eventsvalidate: ' + eventvalidate);
 			if(!eventvalidate || !viewstate) Z.debug(text);
 
-			scrapeRIS(doc, viewstate, eventvalidate);
+			scrapeExport(doc, viewstate, eventvalidate);
 		})
 	} else {
-		scrapeRIS(doc, viewstate, eventvalidate);
+		scrapeExport(doc, viewstate, eventvalidate);
 	}
 
 
@@ -304,29 +327,29 @@ var testCases = [
 				"itemType": "bookSection",
 				"creators": [
 					{
-						"lastName": "Herold",
 						"firstName": "H.",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Pchennikov",
-						"firstName": "A.",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Streitenberger",
-						"firstName": "M.",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Böllinghaus",
-						"firstName": "Thomas",
-						"creatorType": "contributor"
-					},
-					{
 						"lastName": "Herold",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "A.",
+						"lastName": "Pchennikov",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "M.",
+						"lastName": "Streitenberger",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Thomas",
+						"lastName": "Böllinghaus",
+						"creatorType": "editor"
+					},
+					{
 						"firstName": "Horst",
-						"creatorType": "contributor"
+						"lastName": "Herold",
+						"creatorType": "editor"
 					}
 				],
 				"notes": [],
@@ -336,25 +359,23 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.springerlink.com/content/n66482lu84706725/fulltext.pdf",
 						"title": "SpringerLink Full Text PDF",
 						"mimeType": "application/pdf"
 					},
 					{
-						"url": "http://www.springerlink.com/content/n66482lu84706725/abstract/",
 						"title": "SpringerLink Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Hot Cracking Phenomena in Welds",
-				"date": "2005",
+				"title": "Influence of the Deformation Rate of Different Tests on Hot Cracking Formation",
+				"publicationTitle": "Hot Cracking Phenomena in Welds",
 				"publisher": "Springer Berlin Heidelberg",
 				"ISBN": "978-3-540-27460-5",
-				"ISSN": "978-3-540-27460-5",
 				"pages": "328-346",
 				"url": "http://www.springerlink.com/content/n66482lu84706725/abstract/",
-				"DOI": "10.1007/3-540-27460-X_17",
 				"abstractNote": "Referring to the ISO standardization of hot cracking test procedures with externally loaded specimens, three different and fundamental test procedures are assessed with the help of experiments and finite element analyses to find out the influence of different deformation rates on the test results of three well known stainless steels.",
+				"date": "2005",
+				"DOI": "10.1007/3-540-27460-X_17",
 				"libraryCatalog": "SpringerLink",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
@@ -394,14 +415,14 @@ var testCases = [
 				"itemType": "bookSection",
 				"creators": [
 					{
-						"lastName": "Budd",
 						"firstName": "Aidan",
+						"lastName": "Budd",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Anisimova",
 						"firstName": "Maria",
-						"creatorType": "contributor"
+						"lastName": "Anisimova",
+						"creatorType": "editor"
 					}
 				],
 				"notes": [],
@@ -419,17 +440,17 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Evolutionary Genomics",
+				"title": "Diversity of Genome Organisation",
+				"publicationTitle": "Evolutionary Genomics",
 				"series": "Methods in Molecular Biology",
-				"date": "2012",
 				"publisher": "Humana Press",
 				"ISBN": "978-1-61779-582-4",
-				"ISSN": "978-1-61779-582-4",
 				"pages": "51-76",
 				"volume": "855",
 				"url": "http://www.springerlink.com/content/u0lh124733784407/abstract/",
-				"DOI": "10.1007/978-1-61779-582-4_2",
 				"abstractNote": "Genomes can be organised in different ways. Understanding the extent of the diversity of genome organisation, the processes that create it, and its consequences is particularly important for two key reasons. Firstly, it is relevant for our understanding of the genetic basis for the astounding diversity of life on Earth. Elucidating the mechanisms and processes underlying such diversity has been, and remains, one of the central goals of biological research. Secondly, it helps prepare us for our analysis of new genomes. For example, knowing that plasmids can be circular or linear, we know to check for circularity or linearity in a plasmid we encounter for the first time (if this is relevant for our analysis). This article provides an overview of variation and diversity in several aspects of genome organisation and architecture, including the number, size, ploidy, composition (RNA or DNA), packaging, and topology of the molecules encoding the genome. Additionally, it reviews differences in selected genomic features, i.e. telomeres, centromeres, DNA replication origins, and sex chromosomes. To put this in context, it incorporates a brief survey of organism diversity and the tree of life, and ends with a discussion of mutation mechanisms and inheritance, and explanations of key terms used to describe genomic variation.",
+				"date": "2012",
+				"DOI": "10.1007/978-1-61779-582-4_2",
 				"libraryCatalog": "SpringerLink",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
@@ -443,54 +464,54 @@ var testCases = [
 				"itemType": "bookSection",
 				"creators": [
 					{
-						"lastName": "Allalouf",
 						"firstName": "Miriam",
+						"lastName": "Allalouf",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Shavitt",
 						"firstName": "Yuval",
+						"lastName": "Shavitt",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Solé-Pareta",
 						"firstName": "Josep",
-						"creatorType": "contributor"
+						"lastName": "Solé-Pareta",
+						"creatorType": "editor"
 					},
 					{
-						"lastName": "Smirnov",
 						"firstName": "Michael",
-						"creatorType": "contributor"
+						"lastName": "Smirnov",
+						"creatorType": "editor"
 					},
 					{
-						"lastName": "Van Mieghem",
 						"firstName": "Piet",
-						"creatorType": "contributor"
+						"lastName": "Van Mieghem",
+						"creatorType": "editor"
 					},
 					{
-						"lastName": "Domingo-Pascual",
 						"firstName": "Jordi",
-						"creatorType": "contributor"
+						"lastName": "Domingo-Pascual",
+						"creatorType": "editor"
 					},
 					{
-						"lastName": "Monteiro",
 						"firstName": "Edmundo",
-						"creatorType": "contributor"
+						"lastName": "Monteiro",
+						"creatorType": "editor"
 					},
 					{
-						"lastName": "Reichl",
 						"firstName": "Peter",
-						"creatorType": "contributor"
+						"lastName": "Reichl",
+						"creatorType": "editor"
 					},
 					{
-						"lastName": "Stiller",
 						"firstName": "Burkhard",
-						"creatorType": "contributor"
+						"lastName": "Stiller",
+						"creatorType": "editor"
 					},
 					{
-						"lastName": "Gibbens",
 						"firstName": "Richard",
-						"creatorType": "contributor"
+						"lastName": "Gibbens",
+						"creatorType": "editor"
 					}
 				],
 				"notes": [],
@@ -508,17 +529,17 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Quality of Service in the Emerging Networking Panorama",
+				"title": "Maximum Flow Routing with Weighted Max-Min Fairness",
+				"publicationTitle": "Quality of Service in the Emerging Networking Panorama",
 				"series": "Lecture Notes in Computer Science",
-				"date": "2004",
 				"publisher": "Springer Berlin / Heidelberg",
 				"ISBN": "978-3-540-23238-4",
-				"ISSN": "978-3-540-23238-4",
 				"pages": "278-287",
 				"volume": "3266",
 				"url": "http://www.springerlink.com/content/7xqan2jybdv837y9/abstract/",
-				"DOI": "10.1007/978-3-540-30193-6_28",
 				"abstractNote": "Max-min is an established fairness criterion for allocating bandwidth for flows. In this work we look at the combined problem of multi-path routing and bandwidth allocation such that the flow allocation for each connection will be maximized and fairness will be maintained. We use the weighted extension of the max-min criterion to allocate bandwidth in proportion to the flows’ demand. Our contribution is an algorithm which, for the first time, solves the combined routing and bandwidth allocation problem for the case where flows are allowed to be splitted along several paths. We use multi commodity flow (MCF) formulation which is solved using linear programming (LP) techniques. These building blocks are used by our algorithm to derive the required optimal routing and allocation.",
+				"date": "2004",
+				"DOI": "10.1007/978-3-540-30193-6_28",
 				"libraryCatalog": "SpringerLink",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
@@ -647,27 +668,27 @@ var testCases = [
 					{
 						"firstName": "Sertan",
 						"lastName": "Girgin",
-						"creatorType": "contributor"
+						"creatorType": "editor"
 					},
 					{
 						"firstName": "Manuel",
 						"lastName": "Loth",
-						"creatorType": "contributor"
+						"creatorType": "editor"
 					},
 					{
 						"firstName": "Rémi",
 						"lastName": "Munos",
-						"creatorType": "contributor"
+						"creatorType": "editor"
 					},
 					{
 						"firstName": "Philippe",
 						"lastName": "Preux",
-						"creatorType": "contributor"
+						"creatorType": "editor"
 					},
 					{
 						"firstName": "Daniil",
 						"lastName": "Ryabko",
-						"creatorType": "contributor"
+						"creatorType": "editor"
 					}
 				],
 				"notes": [],
@@ -685,17 +706,17 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Recent Advances in Reinforcement Learning",
+				"title": "Markov Decision Processes with Arbitrary Reward Processes",
+				"publicationTitle": "Recent Advances in Reinforcement Learning",
 				"series": "Lecture Notes in Computer Science",
-				"date": "2008",
 				"publisher": "Springer Berlin / Heidelberg",
 				"ISBN": "978-3-540-89721-7",
-				"ISSN": "978-3-540-89721-7",
 				"pages": "268-281",
 				"volume": "5323",
 				"url": "http://www.springerlink.com/content/905u225mu8rr70m2/abstract/",
-				"DOI": "10.1007/978-3-540-89722-4_21",
 				"abstractNote": "We consider a control problem where the decision maker interacts with a standard Markov decision process with the exception that the reward functions vary arbitrarily over time. We extend the notion of Hannan consistency to this setting, showing that, in hindsight, the agent can perform almost as well as every deterministic policy. We present efficient online algorithms in the spirit of reinforcement learning that ensure that the agent’s performance loss, or regret, vanishes over time, provided that the environment is oblivious to the agent’s actions. However, counterexamples indicate that the regret does not vanish if the environment is not oblivious.",
+				"date": "2008",
+				"DOI": "10.1007/978-3-540-89722-4_21",
 				"libraryCatalog": "SpringerLink",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
