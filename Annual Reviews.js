@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-04-08 00:40:44"
+	"lastUpdated": "2012-02-20 03:54:19"
 }
 
 /**
@@ -31,7 +31,7 @@
 */
 
 //add using BibTex
-function addByBibTex(doi, tags) {
+function addByBibTex(doi) {
 	var baseUrl = 'http://www.annualreviews.org';
 	var risRequest = baseUrl + '/action/downloadCitation';
 	var articleUrl = baseUrl + '/doi/abs/' + doi;
@@ -46,26 +46,17 @@ function addByBibTex(doi, tags) {
 		translator.setTranslator('9cb70025-a888-4a29-a210-93ec52da40d4');	//bibtex
 		translator.setString(text);
 		translator.setHandler('itemDone', function(obj, item) {
-			//add tags
-			if(tags) {
-				item.tags = tags;
-			}
-
 			//set PDF file
 			item.attachments = [{
 				url: pdfUrl,
 				title: 'Full Text PDF',
-				mimeType: 'application/pdf'
-			}];
+				mimeType: 'application/pdf'}];
 
 			item.complete();
 			Zotero.done();
 		});
 
-		translator.getTranslatorObject(function(trans) {
-			trans.props.capitalizeTitle = true;
-			trans.doImport();
-		});
+		translator.translate();
 	});
 }
 
@@ -110,19 +101,7 @@ function doWeb(doc, url) {
 	} else {
 		var match = url.match(/\/(?:abs|full|pdf)\/([^?]+)/);
 		if(match) {
-			//get keywords before we leave
-			var tags, keywords = ZU.xpath(doc,
-				'//form[@id="frmQuickSearch"]\
-				/div[@class="pageTitle" and contains(text(), "KEYWORD")]\
-				/following-sibling::div/span[@class="data"]');
-			if(keywords.length) {
-				tags = new Array();
-				for(var i=0, n=keywords.length; i<n; i++) {
-					tags.push(keywords[i].textContent.trim());
-				}
-			}
-
-			addByBibTex(match[1], tags);
+			addByBibTex(match[1]);
 		}
 	}
 }
@@ -183,16 +162,11 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [
-					"cell motility",
-					"WASp",
-					"Arp2/3 complex",
-					"ADF/cofilins",
-					"profilin"
-				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [
 					{
+						"url": "http://www.annualreviews.org/doi/pdf/10.1146/annurev.biophys.29.1.545",
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}

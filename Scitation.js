@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-08 00:40:22"
+	"lastUpdated": "2012-03-15 05:17:43"
 }
 
 /**
@@ -116,8 +116,8 @@ function doWeb(doc, url) {
 		});
 
 		translator.getTranslatorObject(function(obj) {
-			obj.props.keywordSplitOnSpace = false;
-			obj.props.keywordDelimReString = ';\\s*';
+			obj.setKeywordSplitOnSpace(false);
+			obj.setKeywordDelimRe(';\\s*');
 
 			obj.doImport();
 		});
