@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsib",
-	"lastUpdated": "2012-04-10 21:58:36"
+	"browserSupport": "gcsb",
+	"lastUpdated": "2012-04-11 00:40:43"
 }
 
 function getSearchResults(doc) {
@@ -28,22 +28,43 @@ function scrape(doc, url) {
 			'.bib?type=2&format=0';
 
 	//fetch attachments
-	var attachments = ZU.xpath(doc, '//ul[@id="downloadList"]//a[./img]');
-	var type, att = new Array();
+	var attachments = ZU.xpath(doc, '//ul[@id="downloadList"]//li');
+	var type, location, link, att = new Array();
+	var pdffound = false;
 	for(var i=0, n=attachments.length; i<n; i++) {
-		type = ZU.xpathText(attachments[i], './img/@src') || '';
+		type = attachments[i].getElementsByTagName('img');
+		if(type.length) {
+			type = type[0].src;
+		} else {
+			type = '';
+		}
 		type = type.match(/\/([a-z]+)_small\.png$/i);
 		if(!type) continue;
 
+		location = attachments[i].getElementsByTagName('a');
+		if(!location.length) continue;
+		link = location[1].href;
+		location = location[1].textContent.trim();
+
 		switch(type[1].toLowerCase()) {
 			case 'pdf':
-				att.push({
-					title: 'Full Text PDF',
-					url: attachments[i].href,
-					mimeType: 'application/pdf'
-				});
+				if(!pdffound) {
+					att.push({
+						title: 'PDF from ' + location,
+						url: link,
+						mimeType: 'application/pdf'
+					});
+					pdffound = true;
+				} else {
+					att.push({
+						title: 'Link to PDF at ' + location,
+						url: link,
+						mimeType: 'text/html',
+						snapshot: false
+					});
+				}
 			break;
-			case 'downloadpage':
+		/*	case 'downloadpage':
 				att.push({
 					title: 'Snapshot',
 					url: attachments[i].href,
@@ -51,10 +72,10 @@ function scrape(doc, url) {
 					snapshot: true
 				});
 			break;
-			default:
+		*/	default:
 				att.push({
-					title: 'Web Link',
-					url: attachments[i].href,
+					title: 'Link to page at ' + location,
+					url: link,
 					mimeType: 'text/html',
 					snapshot: false
 				});
@@ -91,6 +112,7 @@ function detectWeb(doc, url) {
 		getSearchResults(doc).length) {
 		return 'multiple';
 	}
+
 	if(url.match(/\/Publication\/(\d+)/)) {
 		return 'journalArticle';
 	}
@@ -146,12 +168,12 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Snapshot",
+						"title": "Link to page at www.journals.cambridge.org",
 						"mimeType": "text/html",
-						"snapshot": true
+						"snapshot": false
 					},
 					{
-						"title": "Full Text PDF",
+						"title": "PDF from www.bsos.umd.edu",
 						"mimeType": "application/pdf"
 					}
 				],
