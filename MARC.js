@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsn",
-	"lastUpdated": "2011-11-30 23:29:49"
+	"lastUpdated": "2012-04-11 14:15:49"
 }
 
 function detectImport() {
@@ -496,6 +496,9 @@ record.prototype.translate = function(item) {
 		this._associateDBField(item, "090", "ab", "callNumber");
 		this._associateDBField(item, "099", "a", "callNumber");
 		this._associateDBField(item, "852", "khim", "callNumber");
+		// Extract URL for electronic resources
+		this._associateDBField(item, "245", "h", "medium")
+		if (item.medium == "electronic resource") this._associateDBField(item, "856", "u", "url");
 		
 		//German
 		if (!item.place) this._associateDBField(item, "410", "a", "place");
