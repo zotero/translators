@@ -496,11 +496,11 @@ record.prototype.translate = function(item) {
 		this._associateDBField(item, "090", "ab", "callNumber");
 		this._associateDBField(item, "099", "a", "callNumber");
 		this._associateDBField(item, "852", "khim", "callNumber");
-	  // Extract URL for electronic resources
-    this._associateDBField(item, "245", "h",item "medium");
-    if (item.medium == "electronic resource") this._associateDBField(item, "856", "u", "url");	
+		// Extract URL for electronic resources
+		this._associateDBField(item, "245", "h", "medium")
+		if (item.medium == "electronic resource") this._associateDBField(item, "856", "u", "url");
 		
-    //German
+		//German
 		if (!item.place) this._associateDBField(item, "410", "a", "place");
 		if (!item.publisher) this._associateDBField(item, "412", "a", "publisher");
 		if (!item.title) this._associateDBField(item, "331", "a", "title");
