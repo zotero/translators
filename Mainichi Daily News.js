@@ -2,21 +2,21 @@
 	"translatorID": "b56f856e-934e-4b46-bc58-d61dccc9f32f",
 	"label": "Mainichi Daily News",
 	"creator": "Frank Bennett",
-	"target": "^http://(?:search\\.)*mdn\\.mainichi\\.jp/(?:$|result\\?|mdnnews/|perspectives/|features/|arts/|travel/)",
+	"target": "^http://((?:search\\.)*mdn\\.)?mainichi\\.jp/(?:$|result\\?|mdnnews/|perspectives/|features?/|arts/|travel/|search/|english/)",
 	"minVersion": "2.0b7",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-03-13 17:14:18"
+	"lastUpdated": "2012-04-11 03:30:19"
 }
 
 // #################################
 // #### Local utility functions ####
 // #################################
 
-var itemRe = new RegExp('.*/([0-9]{8})[a-z]{1}[0-9]{1}[a-z]{1}[0-9]{2}[a-z]{1}[0-9]{1}[a-z]{2}[0-9]{6}c\.html');
+var itemRe = new RegExp('.*\/([0-9]{8})[a-z]{1}[a-z0-9]{2}[0-9]{2}[a-z]{1}[0-9a-z]{3}[0-9]{6}c(\/[0-9]*)?\.html');
 
 
 var cleanUp = function (str) {
@@ -46,10 +46,10 @@ var doWeb = function (doc, url) {
 	type = detectWeb(doc, url);
 	if (type === "multiple") {
 		availableItems = {};
-		if (url.match(/^http:\/\/search\.mdn\.mainichi\.jp\/result\?/)){
-			xpath = '//div[@class="ResultTitle"]/a[contains(@href, "mdn.mainichi.jp")]';
+		if (url.match(/^http:\/\/search\.mdn\.mainichi\.jp\/result\?|mainichi.jp\/search/)){
+			xpath = '//div[@class="ResultTitle"]/a[contains(@href, "mdn.mainichi.jp")] | //div[@class="popIn_ArticleTitle"]/a[@class="popInLink"]';
 		} else {
-			xpath = '//h2[@class="NewsTitle"]/a[@href]|//ul[@class="Mark"]/li/a[@href]';
+			xpath = '//h1[@class="NewsTitle"]/a[@href]|//ul[@class="Mark"]/li/a[@href]';
 		}
 		nodes = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 		found = nodes.iterateNext();
@@ -59,6 +59,7 @@ var doWeb = function (doc, url) {
 				continue;
 			}
 			headline = found.textContent;
+			//Z.debug(headline)
 			headline = cleanUp(headline);
 			availableItems[found.href] = headline;
 			found = nodes.iterateNext();
@@ -72,7 +73,7 @@ var doWeb = function (doc, url) {
 			}
 		}
 	} else if (type === "newspaperArticle") {
-		xpath = '//h2[@class="NewsTitle"]';
+		xpath = '//h1[@class="NewsTitle"]';
 		nodes = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 		title = nodes.iterateNext();
 		if (title) {
@@ -112,7 +113,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://mdn.mainichi.jp/mdnnews/news/20120225p2a00m0na015000c.html",
+		"url": "http://mainichi.jp/feature/news/20120410org00m040006000c.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -123,20 +124,50 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Mainichi Daily News snapshot",
-						"mimeType": "text/html",
-						"url": "http://mdn.mainichi.jp/mdnnews/news/20120225p2a00m0na015000c.html"
+						"mimeType": "text/html"
 					}
 				],
-				"title": "Japan's food self-sufficiency: mixture of pessimism and optimism",
+				"title": "サンデーらいぶらりぃ:小林 照幸・評『日本の「人魚」像』九頭見和夫・著",
 				"publicationTitle": "Mainichi Daily News",
 				"edition": "online edition",
-				"url": "http://mdn.mainichi.jp/mdnnews/news/20120225p2a00m0na015000c.html",
-				"date": "2012-02-25",
+				"url": "http://mainichi.jp/feature/news/20120410org00m040006000c.html",
+				"date": "2012-04-10",
 				"libraryCatalog": "Mainichi Daily News",
 				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Japan's food self-sufficiency"
+				"shortTitle": "サンデーらいぶらりぃ"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://mainichi.jp/english/english/newsselect/news/20120411p2a00m0na013000c.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Mainichi Daily News snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "About 1,400 households on waiting list for temporary housing in disaster-hit region",
+				"publicationTitle": "Mainichi Daily News",
+				"edition": "online edition",
+				"url": "http://mainichi.jp/english/english/newsselect/news/20120411p2a00m0na013000c.html",
+				"date": "2012-04-11",
+				"libraryCatalog": "Mainichi Daily News",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://mainichi.jp/search/index.html?q=bank&imgsearch=off",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
