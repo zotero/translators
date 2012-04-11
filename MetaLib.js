@@ -2,14 +2,14 @@
 	"translatorID": "b06d2609-ebca-4125-ac67-6d7a0dba274e",
 	"label": "MetaLib",
 	"creator": "Aurimas Vinckevicius",
-	"target": "https?://[^/]*metalib4\\.exlibrisgroup\\.com(:\\d+)?/",
+	"target": "https?://[^/]*/V/",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-04-11 04:41:56"
+	"lastUpdated": "2012-04-11 05:03:56"
 }
 
 /**
@@ -73,6 +73,12 @@ function scrapeExport(basketLinks) {
 }
 
 function detectWeb(doc, url) {
+	if(!ZU.xpath(doc, 
+		'//head/link[substring(@href,string-length(@href)-11)="/metalib.css"]')
+		.length) {
+		return;
+	}
+
 	var baskets = getBasketLinks(doc).length;
 	if(baskets == 1) {
 		return 'journalArticle';
