@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-03-06 16:08:03"
+	"lastUpdated": "2012-04-10 11:53:10"
 }
 
 /*
@@ -245,7 +245,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://books.google.com/books/about/The_Cambridge_companion_to_electronic_mu.html?id=AJbdPZv1DjgC",
+		"url": "http://books.google.de/books/about/The_Cambridge_companion_to_electronic_mu.html?id=AJbdPZv1DjgC&redir_esc=y",
 		"items": [
 			{
 				"itemType": "book",
@@ -264,23 +264,20 @@ var testCases = [
 					"Music / General",
 					"Music / Genres & Styles / Electronic",
 					"Music / History & Criticism",
-					"Music / Instruction & Study / Techniques",
-					"Music / Genres & Styles / Electronic",
-					"Music / History & Criticism"
+					"Music / Instruction & Study / Techniques"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
 						"title": "Google Books Link",
 						"snapshot": false,
-						"mimeType": "text/html",
-						"url": "http://books.google.com/books?id=AJbdPZv1DjgC"
+						"mimeType": "text/html"
 					}
 				],
 				"numPages": "246",
 				"ISBN": "9780521868617",
 				"publisher": "Cambridge University Press",
-				"title": "The Cambridge companion to electronic music",
+				"title": "The Cambridge Companion to Electronic Music",
 				"language": "en",
 				"abstractNote": "Musicians are always quick to adopt and explore new technologies. The fast-paced changes wrought by electrification, from the microphone via the analogue synthesiser to the laptop computer, have led to a wide diversity of new musical styles and techniques. Electronic music has grown to a broad field of investigation, taking in historical movements such as musique concrÃ¨te and elektronische musik, and contemporary trends such as electronic dance music and electronica. A fascinating array of composers and inventors have contributed to a diverse set of technologies, practices and music. This book brings together some novel threads through this scene, from the viewpoint of researchers at the forefront of the sonic explorations empowered by electronic technology. The chapters provide accessible and insightful overviews of core topic areas and uncover some hitherto less publicised corners of worldwide movements. Recent areas of intense activity such as audiovisuals, live electronic music, interactivity and network music are actively promoted.",
 				"date": "2007-12-13",
@@ -290,7 +287,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://books.google.com/books?id=skf3LSyV_kEC&source=gbs_navlinks_s",
+		"url": "http://books.google.de/books?id=skf3LSyV_kEC&source=gbs_navlinks_s&redir_esc=y",
 		"items": [
 			{
 				"itemType": "book",
@@ -305,22 +302,20 @@ var testCases = [
 				"tags": [
 					"Garcia Marquez, Gabriel - Criticism and interpretation",
 					"Literary Criticism / Caribbean & Latin American",
-					"Literary Criticism / European / Spanish & Portuguese",
-					"Literary Criticism / Caribbean & Latin American"
+					"Literary Criticism / European / Spanish & Portuguese"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
 						"title": "Google Books Link",
 						"snapshot": false,
-						"mimeType": "text/html",
-						"url": "http://books.google.com/books?id=skf3LSyV_kEC"
+						"mimeType": "text/html"
 					}
 				],
 				"numPages": "208",
 				"ISBN": "9780313312601",
 				"publisher": "Greenwood Publishing Group",
-				"title": "Gabriel García Márquez: a critical companion",
+				"title": "Gabriel García Márquez: A Critical Companion",
 				"language": "en",
 				"abstractNote": "Winner of the Nobel Prize for Literature in 1982 for his masterpiece One Hundred Years of Solitude, Gabriel Garc^D'ia M^D'arquez had already earned tremendous respect and popularity in the years leading up to that honor, and remains, to date, an active and prolific writer. Readers are introduced to Garc^D'ia M^D'arquez with a vivid account of his fascinating life; from his friendships with poets and presidents, to his distinguished career as a journalist, novelist, and chronicler of the quintessential Latin American experience. This companion also helps students situate Garc^D'ia M^D'arquez within the canon of Western literature, exploring his contributions to the modern novel in general, and his forging of literary techniques, particularly magic realism, that have come to distinguish Latin American fiction. Full literary analysis is given for One Hundred Years of Solitude, as well as Chronicle of a Death Foretold (1981), Love in the Time of Cholera (1985), two additional novels, and five of Garc^D'ia M^D'arquez's best short stories. Students are given guidance in understanding the historical contexts, as well as the characters and themes that recur in these interrelated works. Narrative technique and alternative critical perspectives are also explored for each work, helping readers fully appreciate the literary accomplishments of Gabriel Garc^D'ia M^D'arquez.",
 				"date": "2001",
@@ -331,7 +326,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://books.google.com/books?hl=en&lr=&id=Ct6FKwHhBSQC&oi=fnd&pg=PP9&dq=%22Peggy+Eaton%22&ots=KN-Z0-HAcv&sig=snBNf7bilHi9GFH4-6-3s1ySI9Q#v=onepage&q=%22Peggy%20Eaton%22&f=false",
+		"url": "http://books.google.de/books?hl=en&lr=&id=Ct6FKwHhBSQC&oi=fnd&pg=PP9&dq=%22Peggy+Eaton%22&ots=KN-Z0-HAcv&sig=snBNf7bilHi9GFH4-6-3s1ySI9Q&redir_esc=y#v=onepage&q=%22Peggy%20Eaton%22&f=false",
 		"items": [
 			{
 				"itemType": "book",
@@ -352,7 +347,6 @@ var testCases = [
 					"Monroe, Elizabeth",
 					"Washington, Martha",
 					"Biography & Autobiography / General",
-					"Biography & Autobiography / Women",
 					"Biography & Autobiography / Women"
 				],
 				"seeAlso": [],
@@ -360,24 +354,23 @@ var testCases = [
 					{
 						"title": "Google Books Link",
 						"snapshot": false,
-						"mimeType": "text/html",
-						"url": "http://books.google.com/books?id=Ct6FKwHhBSQC"
+						"mimeType": "text/html"
 					}
 				],
 				"numPages": "332",
 				"ISBN": "9780836913620",
 				"publisher": "Ayer Publishing",
-				"title": "Some American ladies: seven informal biographies ...",
+				"title": "Some American Ladies: Seven Informal Biographies ...",
 				"language": "en",
 				"date": "1926-06-01",
 				"libraryCatalog": "Google Books",
-				"shortTitle": "Some American ladies"
+				"shortTitle": "Some American Ladies"
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://books.google.com/books?printsec=frontcover&vid=ISBN0684181355&vid=ISBN0684183951&vid=LCCN84026715#v=onepage&q&f=false",
+		"url": "http://books.google.de/books?printsec=frontcover&vid=LCCN84026715&redir_esc=y#v=onepage&q&f=false",
 		"items": [
 			{
 				"itemType": "book",
@@ -386,33 +379,40 @@ var testCases = [
 						"firstName": "Thomas B.",
 						"lastName": "Holmes",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "Thom",
+						"lastName": "Holmes",
+						"creatorType": "author"
 					}
 				],
 				"notes": [],
 				"tags": [
-					"Electronic music/ History and criticism",
+					"Avant-garde (Music)",
+					"Electronic books",
+					"Electronic music History and criticism",
 					"Electronic music",
-					"History and criticism",
 					"Music / General",
-					"Music / Genres & Styles / Electronic"
+					"Music / History & Criticism",
+					"Music / Genres & Styles / New Age"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
 						"title": "Google Books Link",
 						"snapshot": false,
-						"mimeType": "text/html",
-						"url": "http://books.google.com/books?id=0OoXAQAAIAAJ"
+						"mimeType": "text/html"
 					}
 				],
-				"numPages": "294",
-				"ISBN": "9780684181356",
-				"publisher": "Scribner's",
-				"title": "Electronic and experimental music",
+				"numPages": "340",
+				"ISBN": "9780415936446",
+				"publisher": "Routledge",
+				"title": "Electronic and Experimental Music: Pioneers in Technology and Composition",
 				"language": "en",
-				"abstractNote": "This aspect of modern music is dealt with regardless of the type of music involved; therefore, the range is from John Cage to the Talking Heads.",
-				"date": "1985-06",
-				"libraryCatalog": "Google Books"
+				"abstractNote": "Electronic and Experimental Music details the history of electronic music throughout the world, and the people who created it. From the theory of sound production to key composers and instrument designers, this is a complete introduction to the genre from its early roots to the present technological explosion. This new edition, includes a thoroughgly updated and enlarged theoretical and historical sections and includes new material on using home computers (PCs) and the many resources now available in software and the Internet.",
+				"date": "2002",
+				"libraryCatalog": "Google Books",
+				"shortTitle": "Electronic and Experimental Music"
 			}
 		]
 	}
