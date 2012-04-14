@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-03-07 19:09:49"
+	"lastUpdated": "2012-04-13 23:09:29"
 }
 
 function detectWeb(doc, url) {
@@ -48,62 +48,67 @@ function doWeb(doc, url) {
 	// If this is a view page, find the link to the citation
 	var xpath = '//a[@id="favorites"]';
 	var elmt = doc.evaluate(xpath, doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-	var allJids = new Array();
-	if (elmt && /jid=10\.2307%2F(\d+)/.test(elmt.href)) {
-	allJids.push(RegExp.$1);
-	var jid = RegExp.$1;
-	Zotero.debug("JID found 1 " + jid);
+	var allJids = [], m;
+	if (elmt && (m = /jid=(10\.([0-9]{4,})%2F(\d+))/.exec(elmt.href))) {
+		if(m[2] == "2307") {
+			allJids.push(m[3]);
+			var jid = m[3];
+		} else {
+			allJids.push(m[1]);
+			var jid = m[1];
+		}
+		Zotero.debug("JID found 1 " + jid);
 	}
 	// Sometimes JSTOR uses DOIs as JID; here we exclude "?" characters, since it's a URL
 	// And exclude TOC for journal issues that have their own DOI
 	else if (/(?:pss|stable)\/(10\.\d+\/[^?]+)(?:\?.*)?/.test(url)
 		 && !doc.evaluate('//form[@id="toc"]', doc, nsResolver,
 			XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue) {
-	Zotero.debug("URL " + url);
-	jid = RegExp.$1;
-	allJids.push(jid);
-	Zotero.debug("JID found 2 " + jid);
+		Zotero.debug("URL " + url);
+		jid = RegExp.$1;
+		allJids.push(jid);
+		Zotero.debug("JID found 2 " + jid);
 	} 
 	else if (/(?:pss|stable)\/(\d+)/.test(url)
 		 && !doc.evaluate('//form[@id="toc"]', doc, nsResolver,
 			XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue) {
-	Zotero.debug("URL " + url);
-	jid = RegExp.$1;
-	allJids.push(jid);
-	Zotero.debug("JID found 2 " + jid);
-	} 
+		Zotero.debug("URL " + url);
+		jid = RegExp.$1;
+		allJids.push(jid);
+		Zotero.debug("JID found 3 " + jid);
+	}
 	else {
-	// We have multiple results
-	var resultsBlock = doc.evaluate('//fieldset[@id="results"]', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-	if (! resultsBlock) {
-		return true;
-	}
-
-	var allTitlesElmts = doc.evaluate('//li//a[@class="title"]', resultsBlock, nsResolver,  XPathResult.ANY_TYPE, null);
-	var currTitleElmt;
-	var availableItems = new Object();
-	while (currTitleElmt = allTitlesElmts.iterateNext()) {
-		var title = currTitleElmt.textContent;
-		// Sometimes JSTOR uses DOIs as JID; here we exclude "?" characters, since it's a URL
-		if (/(?:pss|stable)\/(10\.\d+\/[^?]+)(?:\?.*)?/.test(currTitleElmt.href))
-			var jid = RegExp.$1;
-		else
-			var jid = currTitleElmt.href.match(/(?:stable|pss)\/([a-z]*?\d+)/)[1];
-		if (jid) {
-			availableItems[jid] = title;
+		// We have multiple results
+		var resultsBlock = doc.evaluate('//fieldset[@id="results"]', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+		if (! resultsBlock) {
+			return true;
 		}
-		Zotero.debug("Found title " + title+jid);
-	}
-	Zotero.debug("End of titles");
 	
-	var selectedItems = Zotero.selectItems(availableItems);
-	if (!selectedItems) {
-		return true;
-	}
-	for (var j in selectedItems) {
-		Zotero.debug("Pushing " + j);
-		allJids.push(j);
-	}
+		var allTitlesElmts = doc.evaluate('//li//a[@class="title"]', resultsBlock, nsResolver,  XPathResult.ANY_TYPE, null);
+		var currTitleElmt;
+		var availableItems = new Object();
+		while (currTitleElmt = allTitlesElmts.iterateNext()) {
+			var title = currTitleElmt.textContent;
+			// Sometimes JSTOR uses DOIs as JID; here we exclude "?" characters, since it's a URL
+			if (/(?:pss|stable)\/(10\.\d+\/[^?]+)(?:\?.*)?/.test(currTitleElmt.href))
+				var jid = RegExp.$1;
+			else
+				var jid = currTitleElmt.href.match(/(?:stable|pss)\/([a-z]*?\d+)/)[1];
+			if (jid) {
+				availableItems[jid] = title;
+			}
+			Zotero.debug("Found title " + title+jid);
+		}
+		Zotero.debug("End of titles");
+		
+		var selectedItems = Zotero.selectItems(availableItems);
+		if (!selectedItems) {
+			return true;
+		}
+		for (var j in selectedItems) {
+			Zotero.debug("Pushing " + j);
+			allJids.push(j);
+		}
 	}
 	
 	var sets = [];
@@ -289,6 +294,45 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Not by Bread Alone",
 				"checkFields": "title"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.jstor.org.libproxy.mit.edu/stable/4122159",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Satz",
+						"firstName": "Debra",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "JSTOR Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"publicationTitle": "Signs",
+				"title": "Remaking Families: A Review Essay",
+				"volume": "32",
+				"issue": "2",
+				"publisher": "The University of Chicago Press",
+				"ISBN": "00979740",
+				"ISSN": "0097-9740",
+				"url": "http://www.jstor.org/stable/10.1086/508232",
+				"date": "January 01, 2007",
+				"pages": "523-538",
+				"extra": "ArticleType: research-article / Full publication date: Winter 2007 / Copyright © 2007 The University of Chicago Press",
+				"libraryCatalog": "JSTOR",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Remaking Families"
 			}
 		]
 	}
