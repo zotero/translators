@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-01 08:41:26"
+	"lastUpdated": "2012-04-13 13:21:27"
 }
 
 /*
@@ -69,7 +69,14 @@ var n = {
 	book:"http://ogp.me/ns/book#"
 };
 
-var callNumberTypes = [n.dcterms+"LCC", n.dcterms+"DDC", n.dcterms+"UDC"];
+// allows another translator to override and set the namespaces
+function setNamespacePrefixes(newNS) {
+	for(var i in newNS) {
+		n[i] = newNS[i];
+	}
+}
+
+var callNumberTypes;
 
 // gets the first result set for a property that can be encoded in multiple
 // ontologies
@@ -660,7 +667,10 @@ function doImport() {
 	if(!nodes) {
 		return false;
 	}
-	
+
+	//initialize call numbers
+	callNumberTypes = [n.dcterms+"LCC", n.dcterms+"DDC", n.dcterms+"UDC"];
+
 	// keep track of collections while we're looping through
 	var collections = new Array();
 	
@@ -717,5 +727,6 @@ function doImport() {
  */
 var exports = {
 	"doImport":doImport,
-	"defaultUnknownType":"book"
+	"defaultUnknownType":"book",
+	"setNamespacePrefixes":setNamespacePrefixes
 };

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-04-01 19:01:51"
+	"lastUpdated": "2012-04-13 13:21:35"
 }
 
 /*
@@ -523,6 +523,7 @@ function doWeb(doc, url) {
 			}
 
 			rdf.defaultUnknownType = _itemType;
+			rdf.setNamespacePrefixes(_prefixes);
 			rdf.doImport();
 			if(!_haveItem) {
 				completeItem(doc, new Zotero.Item(_itemType));
