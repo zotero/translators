@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-04-13 23:09:29"
+	"lastUpdated": "2012-04-14 03:12:00"
 }
 
 function detectWeb(doc, url) {
@@ -299,7 +299,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.jstor.org.libproxy.mit.edu/stable/4122159",
+		"url": "http://www.jstor.org/stable/4122159",
 		"items": [
 			{
 				"itemType": "journalArticle",
