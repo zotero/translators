@@ -13,7 +13,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-10 14:52:41"
+	"lastUpdated": "2012-04-14 14:56:09"
 }
 
 function detectImport() {
@@ -773,7 +773,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
+				"notes": [
+					{
+						"note": "RP - Not In File"
+					}
+				],
 				"tags": [
 					"cortical contusion",
 					"blood-brain barrier",
@@ -811,7 +815,11 @@ var testCases = [
 						"creatorType": "inventor"
 					}
 				],
-				"notes": [],
+				"notes": [
+					{
+						"note": "RP - Not In File"
+					}
+				],
 				"tags": [
 					"AIDS",
 					"virus",
