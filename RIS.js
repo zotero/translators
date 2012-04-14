@@ -163,13 +163,13 @@ var inputTypeMap = {
 
 function processTag(item, tag, value) {
 	// Drop empty fields
-	if (value === undefined || value === null || value == "") return item;	
+	if (value === undefined || value === null || value == "") return item;
 
 	if (tag != "N1" && tag != "AB" && value !== undefined
 				&& Zotero.Utilities.unescapeHTML) {
 		value = Zotero.Utilities.unescapeHTML(value);
 	}
-	
+
 	if(fieldMap[tag]) {
 		item[fieldMap[tag]] = value;
 	} else if(inputFieldMap[tag]) {
@@ -178,7 +178,7 @@ function processTag(item, tag, value) {
 		switch(tag) {
 		case "TY":
 			// look for type
-			
+
 			// trim the whitespace that some providers (e.g. ProQuest) include
 			value = Zotero.Utilities.trim(value);
 
@@ -276,12 +276,12 @@ function processTag(item, tag, value) {
 		case "Y2":
 			// the secondary date field can mean two things, a secondary date, or an
 			// invalid EndNote-style date. let's see which one this is.
-			// patent: application (filing) date -- do not append to date field 
+			// patent: application (filing) date -- do not append to date field
 			// Secondary dates could be access dates-- they don't need to be appended
 			// to the existing date
 			var dateParts = value.split("/");
 			if(dateParts.length != 4 && item.itemType != "patent") {
-				// an invalid date and not a patent. 
+				// an invalid date and not a patent.
 				item.accessDate = value;
 			} else if (item.itemType == "patent") {
 				// Date-handling code copied from above
@@ -330,7 +330,7 @@ function processTag(item, tag, value) {
 									  day:dateParts[2],
 									  part:dateParts[3]});
 				}
-			} 
+			}
 			// ToDo: Handle correctly formatted Y2 fields (secondary date)
 		break;
 		case "N1":
@@ -360,7 +360,7 @@ function processTag(item, tag, value) {
 		break;
 		case "KW":
 			// keywords/tags
-			
+
 			// technically, treating newlines as new tags breaks the RIS spec, but
 			// it's required to work with EndNote
 			item.tags = item.tags.concat(value.split("\n"));
@@ -618,12 +618,12 @@ function doExport() {
 
 			addTag(risTag, names.join(","));
 		}
-		
+
 		// assignee (patent)
 		if(item.assignee) {
 			addTag("A2", item.assignee);
 		}
-		
+
 		// volume (patent: applicationNumber, report: reportNumber)
 		if(item.volume || item.applicationNumber || item.reportNumber) {
 			if (item.volume) {
@@ -635,7 +635,7 @@ function doExport() {
 			}
 			addTag("VL", value);
 		}
-		
+
 		// issue (patent: patentNumber)
 		if(item.issue || item.patentNumber) {
 			var value = (item.issue) ? item.issue : item.patentNumber;
@@ -670,7 +670,7 @@ function doExport() {
 			}
 			addTag("PY", string);
 		}
-		
+
 		// filingDate (patents)
 		if(item.filingDate) {
 			var date = Zotero.Utilities.strToDate(item.filingDate);
