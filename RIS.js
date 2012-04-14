@@ -13,7 +13,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-01-07 20:43:17"
+	"lastUpdated": "2012-04-10 14:52:41"
 }
 
 function detectImport() {
@@ -90,7 +90,7 @@ var typeMap = {
 	forumPost:"ICOMM",
 	email:"ICOMM",
 	audioRecording:"SOUND",
-	presentation:"GEN",
+	presentation:"SLIDE",
 	videoRecording:"VIDEO",
 	tvBroadcast:"GEN",
 	radioBroadcast:"GEN",
@@ -100,23 +100,65 @@ var typeMap = {
 	document:"GEN"
 };
 
-// supplements outputTypeMap for importing
-// TODO: DATA, MUSIC
+// type map for input
 var inputTypeMap = {
 	ABST:"journalArticle",
 	ADVS:"film",
+	AGGR:"document",	//how can we handle "database" citations?
+	ANCIENT:"document",
+	ART:"artwork",
+	BILL:"bill",
+	BLOG:"blogPost",
+	BOOK:"book",
+	CASE:"case",
+	CHAP:"bookSection",
+	CHART:"artwork",
+	CLSWK:"document",	//what is classical work??
+	COMP:"computerProgram",
+	CONF:"conferencePaper",
+	CPAPER:"conferencePaper",
 	CTLG:"magazineArticle",
+	DATA:"document",	//dataset
+	DBASE:"document",	//database
+	DICT:"book",		//or is this meant to be a dictionary entry
+	EBOOK:"book",
+	ECHAP:"bookSection",
+	EDBOOK:"book",
+	EJOUR:"journalArticle",
+	ELEC:"webpage",
+	ENCYC:"book",		//or is this an encyclopedia article
+	EQUA:"document",	//what's a good way to handle this?
+	FIGURE:"artwork",
+	GEN:"journalArticle",
+	GOVDOC:"document",
+	GRNT:"document",
+	HEAR:"hearing",
+	ICOMM:"email",
 	INPR:"manuscript",
 	JFULL:"journalArticle",
-	PAMP:"manuscript",
-	SER:"book",
-	SLIDE:"artwork",
-	UNBILL:"manuscript",
-	CPAPER:"conferencePaper",
-	WEB:"webpage",
-	EDBOOK:"book",
+	JOUR:"journalArticle",
+	LEGAL:"case",		//is this what they mean?
 	MANSCPT:"manuscript",
-	GOVDOC:"document"
+	MAP:"map",
+	MGZN:"magazineArticle",
+	MPCT:"film",
+	MULTI:"videoRecording",	//maybe?
+	MUSIC:"audioRecording",
+	NEWS:"newspaperArticle",
+	PAMP:"manuscript",
+	PAT:"patent",
+	PCOMM:"letter",
+	RPRT:"report",
+	SER:"book",
+	SLIDE:"presentation",
+	SOUND:"audioRecording",
+	STAND:"document",
+	STAT:"statute",
+	THES:"thesis",
+	UNBILL:"manuscript",
+	UNPD:"manuscript",
+	VIDEO:"videoRecording",
+	WEB:"webpage"
 };
 
 function processTag(item, tag, value) {
@@ -139,21 +181,16 @@ function processTag(item, tag, value) {
 			
 			// trim the whitespace that some providers (e.g. ProQuest) include
 			value = Zotero.Utilities.trim(value);
-			
-			// first check typeMap
-			for(var i in typeMap) {
-				if(value.toUpperCase() == typeMap[i]) {
-					item.itemType = i;
+
+			// check inputTypeMap
+			if(inputTypeMap[value]) {
+				item.itemType = inputTypeMap[value];
+				if(value == 'GEN') {
+					item.tags.push('__IMPORTED_FROM_GEN__');
 				}
-			}
-			// then check inputTypeMap
-			if(!item.itemType) {
-				if(inputTypeMap[value]) {
-					item.itemType = inputTypeMap[value];
-				} else {
-					// default to document
-					item.itemType = "document";
-				}
+			} else {
+				// default to document
+				item.itemType = "document";
 			}
 		break;
 		case "JO":
@@ -312,9 +349,9 @@ function processTag(item, tag, value) {
 					item.notes.push({note:value});
 				} else item.notes.push({note:value});
 			}
+		break;
 		// The RIS spec insanely claims that AB == N1, but other software seems
 		// to overlook or ignore this, so we will too on import
-		break;
 		case "N2":
 		case "AB":
 			// abstract
