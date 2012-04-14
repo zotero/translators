@@ -132,116 +132,94 @@ function processTag(item, tag, value) {
 		item[fieldMap[tag]] = value;
 	} else if(inputFieldMap[tag]) {
 		item[inputFieldMap[tag]] = value;
-	} else if(tag == "TY") {
-		// look for type
-		
-		// trim the whitespace that some providers (e.g. ProQuest) include
-		value = Zotero.Utilities.trim(value);
-		
-		// first check typeMap
-		for(var i in typeMap) {
-			if(value.toUpperCase() == typeMap[i]) {
-				item.itemType = i;
+	} else {
+		switch(tag) {
+		case "TY":
+			// look for type
+			
+			// trim the whitespace that some providers (e.g. ProQuest) include
+			value = Zotero.Utilities.trim(value);
+			
+			// first check typeMap
+			for(var i in typeMap) {
+				if(value.toUpperCase() == typeMap[i]) {
+					item.itemType = i;
+				}
 			}
-		}
-		// then check inputTypeMap
-		if(!item.itemType) {
-			if(inputTypeMap[value]) {
-				item.itemType = inputTypeMap[value];
+			// then check inputTypeMap
+			if(!item.itemType) {
+				if(inputTypeMap[value]) {
+					item.itemType = inputTypeMap[value];
+				} else {
+					// default to document
+					item.itemType = "document";
+				}
+			}
+		break;
+		case "JO":
+			if (item.itemType == "conferencePaper"){
+				item.conferenceName = value;
 			} else {
-				// default to document
-				item.itemType = "document";
+				item.publicationTitle = value;
 			}
-		}
-	} else if(tag == "JO") {
-		if (item.itemType == "conferencePaper"){
-			item.conferenceName = value;
-		} else {
-			item.publicationTitle = value;
-		}
-	} else if(tag == "BT") {
-		// ignore, unless this is a book or unpublished work, as per spec
-		if(item.itemType == "book" || item.itemType == "manuscript") {
-			item.title = value;
-		// allow for book sections as well, since it makes sense
-		} else if(item.itemType == "bookSection") {
-			item.bookTitle = value;
-		} else {
+		break;
+		case "BT":
+			// ignore, unless this is a book or unpublished work, as per spec
+			if(item.itemType == "book" || item.itemType == "manuscript") {
+				item.title = value;
+			// allow for book sections as well, since it makes sense
+			} else if(item.itemType == "bookSection") {
+				item.bookTitle = value;
+			} else {
+				item.backupPublicationTitle = value;
+			}
+		break;
+		case "T2":
 			item.backupPublicationTitle = value;
-		}
-	} else if(tag == "T2") {
-		item.backupPublicationTitle = value;
-	} else if(tag == "A1" || tag == "AU") {
-		// primary author (patent: inventor)
-		// store Zotero "creator type" in temporary variable
-		var tempType;
-		if (item.itemType == "patent") {
-			tempType = "inventor";
-		} else {
-			tempType = "author";
-		}
-		var names = value.split(/, ?/);
-		item.creators.push({lastName:names[0], firstName:names[1], creatorType:tempType});
-	} else if(tag == "ED") {
-		var names = value.split(/, ?/);
-		item.creators.push({lastName:names[0], firstName:names[1], creatorType:"editor"});
-	} else if(tag == "A2") {
-		// contributing author (patent: assignee)
-		if (item.itemType == "patent") {
-			if (item.assignee) {
-				// Patents can have multiple assignees (applicants) but Zotero only allows a single
-				// assignee field, so we  have to concatenate them together
-				item.assignee += ", "+value;
+		break;
+		case "A1":
+		case "AU":
+			// primary author (patent: inventor)
+			// store Zotero "creator type" in temporary variable
+			var tempType;
+			if (item.itemType == "patent") {
+				tempType = "inventor";
 			} else {
-				item.assignee =  value;
+				tempType = "author";
 			}
-		} else {
 			var names = value.split(/, ?/);
-			item.creators.push({lastName:names[0], firstName:names[1], creatorType:"contributor"});
-		}
-	} else if(tag == "Y1" || tag == "PY") {
-		// year or date
-		var dateParts = value.split("/");
-
-		if(dateParts.length == 1) {
-			// technically, if there's only one date part, the file isn't valid
-			// RIS, but EndNote writes this, so we have to too
-			// Nick: RIS spec example records also only contain a single part
-			// even though it says the slashes are not optional (?)
-			item.date = value;
-		} else {
-			// in the case that we have a year and other data, format that way
-
-			var month = parseInt(dateParts[1]);
-			if(month) {
-				month--;
+			item.creators.push({lastName:names[0], firstName:names[1], creatorType:tempType});
+		break;
+		case "ED":
+			var names = value.split(/, ?/);
+			item.creators.push({lastName:names[0], firstName:names[1], creatorType:"editor"});
+		break;
+		case "A2":
+			// contributing author (patent: assignee)
+			if (item.itemType == "patent") {
+				if (item.assignee) {
+					// Patents can have multiple assignees (applicants) but Zotero only allows a single
+					// assignee field, so we  have to concatenate them together
+					item.assignee += ", "+value;
+				} else {
+					item.assignee =  value;
+				}
 			} else {
-				month = undefined;
+				var names = value.split(/, ?/);
+				item.creators.push({lastName:names[0], firstName:names[1], creatorType:"contributor"});
 			}
+		break;
+		case "Y1":
+		case "PY":
+			// year or date
+			var dateParts = value.split("/");
 
-			item.date = Zotero.Utilities.formatDate({year:dateParts[0],
-								  month:month,
-								  day:dateParts[2],
-								  part:dateParts[3]});
-		}
-	} else if(tag == "Y2") {
-		// the secondary date field can mean two things, a secondary date, or an
-		// invalid EndNote-style date. let's see which one this is.
-		// patent: application (filing) date -- do not append to date field 
-		// Secondary dates could be access dates-- they don't need to be appended
-		// to the existing date
-		var dateParts = value.split("/");
-		if(dateParts.length != 4 && item.itemType != "patent") {
-			// an invalid date and not a patent. 
-			item.accessDate = value;
-		} else if (item.itemType == "patent") {
-			// Date-handling code copied from above
 			if(dateParts.length == 1) {
 				// technically, if there's only one date part, the file isn't valid
 				// RIS, but EndNote writes this, so we have to too
 				// Nick: RIS spec example records also only contain a single part
 				// even though it says the slashes are not optional (?)
-				item.filingDate = value;
+				item.date = value;
 			} else {
 				// in the case that we have a year and other data, format that way
 
@@ -252,145 +230,197 @@ function processTag(item, tag, value) {
 					month = undefined;
 				}
 
-				item.filingDate = Zotero.Utilities.formatDate({year:dateParts[0],
-								  month:month,
-								  day:dateParts[2],
-								  part:dateParts[3]});
+				item.date = Zotero.Utilities.formatDate({year:dateParts[0],
+									  month:month,
+									  day:dateParts[2],
+									  part:dateParts[3]});
 			}
-		} else {
-			// Consensus is that Y2 can be treated as accessDate
-			// Date-handling code copied from above
-			if(dateParts.length == 1) {
-				// technically, if there's only one date part, the file isn't valid
-				// RIS, but EndNote writes this, so we have to too
-				// Nick: RIS spec example records also only contain a single part
-				// even though it says the slashes are not optional (?)
+		break;
+		case "Y2":
+			// the secondary date field can mean two things, a secondary date, or an
+			// invalid EndNote-style date. let's see which one this is.
+			// patent: application (filing) date -- do not append to date field 
+			// Secondary dates could be access dates-- they don't need to be appended
+			// to the existing date
+			var dateParts = value.split("/");
+			if(dateParts.length != 4 && item.itemType != "patent") {
+				// an invalid date and not a patent. 
 				item.accessDate = value;
-			} else {
-				// in the case that we have a year and other data, format that way
-
-				var month = parseInt(dateParts[1]);
-				if(month) {
-					month--;
+			} else if (item.itemType == "patent") {
+				// Date-handling code copied from above
+				if(dateParts.length == 1) {
+					// technically, if there's only one date part, the file isn't valid
+					// RIS, but EndNote writes this, so we have to too
+					// Nick: RIS spec example records also only contain a single part
+					// even though it says the slashes are not optional (?)
+					item.filingDate = value;
 				} else {
-					month = undefined;
-				}
+					// in the case that we have a year and other data, format that way
 
-				item.accessDate = Zotero.Utilities.formatDate({year:dateParts[0],
-								  month:month,
-								  day:dateParts[2],
-								  part:dateParts[3]});
+					var month = parseInt(dateParts[1]);
+					if(month) {
+						month--;
+					} else {
+						month = undefined;
+					}
+
+					item.filingDate = Zotero.Utilities.formatDate({year:dateParts[0],
+									  month:month,
+									  day:dateParts[2],
+									  part:dateParts[3]});
+				}
+			} else {
+				// Consensus is that Y2 can be treated as accessDate
+				// Date-handling code copied from above
+				if(dateParts.length == 1) {
+					// technically, if there's only one date part, the file isn't valid
+					// RIS, but EndNote writes this, so we have to too
+					// Nick: RIS spec example records also only contain a single part
+					// even though it says the slashes are not optional (?)
+					item.accessDate = value;
+				} else {
+					// in the case that we have a year and other data, format that way
+
+					var month = parseInt(dateParts[1]);
+					if(month) {
+						month--;
+					} else {
+						month = undefined;
+					}
+
+					item.accessDate = Zotero.Utilities.formatDate({year:dateParts[0],
+									  month:month,
+									  day:dateParts[2],
+									  part:dateParts[3]});
+				}
+			} 
+			// ToDo: Handle correctly formatted Y2 fields (secondary date)
+		break;
+		case "N1":
+			// notes
+			if(value != item.title) {       // why does EndNote do this!?
+				var clean = Zotero.Utilities.cleanTags(value);
+				if (clean == value) {
+					// \n\n => <p>, \n => <br/>
+					//str = Zotero.Utilities.htmlSpecialChars(str);
+					value = '<p>'
+						+ value.replace(/\n\n/g, '</p><p>')
+							.replace(/\n/g, '<br/>')
+							.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
+							.replace(/  /g, '&nbsp;&nbsp;')
+						+ '</p>';
+					item.notes.push({note:value});
+				} else item.notes.push({note:value});
 			}
-		} 
-		// ToDo: Handle correctly formatted Y2 fields (secondary date)
-	} else if(tag == "N1") {
-		// notes
-		if(value != item.title) {       // why does EndNote do this!?
-			var clean = Zotero.Utilities.cleanTags(value);
-			if (clean == value) {
-				// \n\n => <p>, \n => <br/>
-				//str = Zotero.Utilities.htmlSpecialChars(str);
-				value = '<p>'
-					+ value.replace(/\n\n/g, '</p><p>')
-						.replace(/\n/g, '<br/>')
-						.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
-						.replace(/  /g, '&nbsp;&nbsp;')
-					+ '</p>';
-				item.notes.push({note:value});
-			} else item.notes.push({note:value});
-		}
-	// The RIS spec insanely claims that AB == N1, but other software seems
-	// to overlook or ignore this, so we will too on import
-	} else if(tag == "N2" || tag == "AB") {
-		// abstract
-		if (item.abstractNote) item.abstractNote += "\n" + value;
-		else item.abstractNote = value;
-	} else if(tag == "KW") {
-		// keywords/tags
-		
-		// technically, treating newlines as new tags breaks the RIS spec, but
-		// it's required to work with EndNote
-		item.tags = item.tags.concat(value.split("\n"));
-	} else if(tag == "SP") {
-		// start page
-		if(!item.pages) {
-			item.pages = value;
-			// EndNote uses SP without EP for number of pages
-			// Save as numPages only if there were no previous pages tags
-			if (item.itemType == "book") item.numPages = value;
-		} else if(item.pages[0] == "-") {       // already have ending page
-			item.pages = value + item.pages;
-		} else {	// multiple ranges? hey, it's a possibility
-			item.pages += ", "+value;
-		}
-	} else if(tag == "EP") {
-		// end page
-		if(value) {
+		// The RIS spec insanely claims that AB == N1, but other software seems
+		// to overlook or ignore this, so we will too on import
+		break;
+		case "N2":
+		case "AB":
+			// abstract
+			if (item.abstractNote) item.abstractNote += "\n" + value;
+			else item.abstractNote = value;
+		break;
+		case "KW":
+			// keywords/tags
+			
+			// technically, treating newlines as new tags breaks the RIS spec, but
+			// it's required to work with EndNote
+			item.tags = item.tags.concat(value.split("\n"));
+		break;
+		case "SP":
+			// start page
 			if(!item.pages) {
 				item.pages = value;
-			} else if(value != item.pages) {
-				item.pages += "-"+value;
 				// EndNote uses SP without EP for number of pages
-				// Here, clear numPages if we have an EP != SP
-				if (item.itemType == "book") item.numPages = undefined;
+				// Save as numPages only if there were no previous pages tags
+				if (item.itemType == "book") item.numPages = value;
+			} else if(item.pages[0] == "-") {       // already have ending page
+				item.pages = value + item.pages;
+			} else {	// multiple ranges? hey, it's a possibility
+				item.pages += ", "+value;
 			}
-		}
-	} else if(tag == "SN") {
-		// ISSN/ISBN - just add both
-		// TODO We should be able to tell these apart
-		if(!item.ISBN) {
-			item.ISBN = value;
-		}
-		if(!item.ISSN) {
-			item.ISSN = value;
-		}
-	} else if(tag == "UR" || tag == "L1" || tag == "L2" || tag == "L4") {
-		// URL
-		if(!item.url) {
-			item.url = value;
-		}
-		if(tag == "UR") {
-			item.attachments.push({url:value});
-		} else if(tag == "L1") {
-			item.attachments.push({url:value, mimeType:"application/pdf",
-				title:"Full Text (PDF)", downloadable:true});
-		} else if(tag == "L2") {
-			item.attachments.push({url:value, mimeType:"text/html",
-				title:"Full Text (HTML)", downloadable:true});
-		} else if(tag == "L4") {
-			item.attachments.push({url:value,
-				title:"Image", downloadable:true});
-		}
-	} else if (tag == "IS") {
-		// Issue Number (patent: patentNumber)
-		if (item.itemType == "patent") {
-			item.patentNumber = value;
-		} else {
-			item.issue = value;
-		}
-	} else if (tag == "VL") {
-		// Volume Number (patent: applicationNumber)
-		if (item.itemType == "patent") {
-			item.applicationNumber = value;
-		// Report Number (report: reportNumber)
-		} else if(item.itemType == "report") {
-			item.reportNumber = value;
-		} else {
-			item.volume = value;
-		}
-	} else if (tag == "PB") {
-		// publisher (patent: references)
-		if (item.itemType == "patent") {
-			item.references = value;
-		} else {
-			item.publisher = value;
-		}
-	} else if (tag == "M1" || tag == "M2") {
-		// Miscellaneous fields
-		if (!item.extra) {
-			item.extra = value;
-		} else {
-			item.extra += "; "+value;
+		break;
+		case "EP":
+			// end page
+			if(value) {
+				if(!item.pages) {
+					item.pages = value;
+				} else if(value != item.pages) {
+					item.pages += "-"+value;
+					// EndNote uses SP without EP for number of pages
+					// Here, clear numPages if we have an EP != SP
+					if (item.itemType == "book") item.numPages = undefined;
+				}
+			}
+		break;
+		case "SN":
+			// ISSN/ISBN - just add both
+			// TODO We should be able to tell these apart
+			if(!item.ISBN) {
+				item.ISBN = value;
+			}
+			if(!item.ISSN) {
+				item.ISSN = value;
+			}
+		break;
+		case "UR":
+		case "L1":
+		case "L2":
+		case "L4":
+			// URL
+			if(!item.url) {
+				item.url = value;
+			}
+			if(tag == "UR") {
+				item.attachments.push({url:value});
+			} else if(tag == "L1") {
+				item.attachments.push({url:value, mimeType:"application/pdf",
+					title:"Full Text (PDF)", downloadable:true});
+			} else if(tag == "L2") {
+				item.attachments.push({url:value, mimeType:"text/html",
+					title:"Full Text (HTML)", downloadable:true});
+			} else if(tag == "L4") {
+				item.attachments.push({url:value,
+					title:"Image", downloadable:true});
+			}
+		break;
+		case "IS":
+			// Issue Number (patent: patentNumber)
+			if (item.itemType == "patent") {
+				item.patentNumber = value;
+			} else {
+				item.issue = value;
+			}
+		break;
+		case "VL":
+			// Volume Number (patent: applicationNumber)
+			if (item.itemType == "patent") {
+				item.applicationNumber = value;
+			// Report Number (report: reportNumber)
+			} else if(item.itemType == "report") {
+				item.reportNumber = value;
+			} else {
+				item.volume = value;
+			}
+		break;
+		case "PB":
+			// publisher (patent: references)
+			if (item.itemType == "patent") {
+				item.references = value;
+			} else {
+				item.publisher = value;
+			}
+		break;
+		case "M1":
+		case "M2":
+			// Miscellaneous fields
+			if (!item.extra) {
+				item.extra = value;
+			} else {
+				item.extra += "; "+value;
+			}
+		break;
 		}
 	}
 }
