@@ -458,6 +458,9 @@ function processTag(item, tag, value) {
 				item.extra += "; "+value;
 			}
 		break;
+		default:
+			//store whatever we can't parse inside a note
+			item.notes.push( {note: tag + ' - ' + value } );
 		}
 	}
 }
