@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-04-01 19:01:51"
+	"lastUpdated": "2012-04-5 22:50:00"
 }
 
 /*
@@ -95,14 +95,14 @@ function addCustomFields(customFields) {
 
 function getPrefixes(doc) {
 	var links = doc.getElementsByTagName("link");
-	for(var i=0; i<links.length; i++) {
+	for(var i=0, link; link = links[i]; i++) {
 		// Look for the schema's URI in our known schemata
-		var rel = links[i].getAttribute("rel");
+		var rel = link.getAttribute("rel");
 		if(rel) {
 			var matches = rel.match(/^schema\.([a-zA-Z]+)/);
 			if(matches) {
 				//Zotero.debug("Prefix '" + matches[1].toLowerCase() +"' => '" + links[i].getAttribute("href") + "'");
-				_prefixes[matches[1].toLowerCase()] = links[i].getAttribute("href");
+				_prefixes[matches[1].toLowerCase()] = link.getAttribute("href");
 			}
 		}
 	}
@@ -155,15 +155,15 @@ function detectWeb(doc, url) {
 	//itemTypes as determined from various schemas
 	var dcType, dcTypeGuess, eprintsType, eprintsTypeGuess, prismType,
 		prismTypeGuess, ogType, ogTypeGuess, hwType, hwTypeGuess;
-	for(var i=0; i<metaTags.length; i++) {
+	for(var i=0, metaTag; metaTag = metaTags[i]; i++) {
 		// Two formats allowed:
 		// 	<meta name="..." content="..." />
 		//	<meta property="..." content="..." />
 		// The first is more common; the second is recommended by Facebook
 		// for their OpenGraph vocabulary
-		var tag = metaTags[i].getAttribute("name");
-		if (!tag) tag = metaTags[i].getAttribute("property");
-		var value = metaTags[i].getAttribute("content");
+		var tag = metaTag.getAttribute("name");
+		if (!tag) tag = metaTag.getAttribute("property");
+		var value = metaTag.getAttribute("content");
 		if(!tag || !value) continue;
 
 		// We allow three delimiters between the namespace and the property
@@ -496,15 +496,15 @@ function doWeb(doc, url) {
 		translator.getTranslatorObject(function(rdf) {
 			var metaTags = doc.getElementsByTagName("meta");
 
-			for(var i=0; i<metaTags.length; i++) {
+			for(var i=0, metaTag; metaTag = metaTags[i]; i++) {
 				// Two formats allowed:
 				// 	<meta name="..." content="..." />
 				//	<meta property="..." content="..." />
 				// The first is more common; the second is recommended by Facebook
 				// for their OpenGraph vocabulary
-				var tag = metaTags[i].getAttribute("name");
-				if (!tag) tag = metaTags[i].getAttribute("property");
-				var value = metaTags[i].getAttribute("content");
+				var tag = metaTag.getAttribute("name");
+				if (!tag) tag = metaTag.getAttribute("property");
+				var value = metaTag.getAttribute("content");
 				if(!tag || !value) continue;
 				// We allow three delimiters between the namespace and the property
 				var delimIndex = tag.indexOf('.');
