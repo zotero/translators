@@ -154,18 +154,23 @@ var testCases = [
 				"itemType": "patent",
 				"creators": [
 					{
-						"lastName": "Coskun",
-						"firstName": "Risvan",
+						"lastName": "Poo",
+						"firstName": "Tze Lei",
 						"creatorType": "inventor"
 					},
 					{
-						"lastName": "Reza",
-						"firstName": "Areef",
+						"lastName": "Tang",
+						"firstName": "Heng",
 						"creatorType": "inventor"
 					},
 					{
-						"lastName": "Estable",
-						"firstName": "Luis",
+						"lastName": "Fred Au",
+						"firstName": "Siu-Hung",
+						"creatorType": "inventor"
+					},
+					{
+						"lastName": "Burd",
+						"firstName": "Gregory",
 						"creatorType": "inventor"
 					}
 				],
@@ -174,14 +179,12 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"url": "http://patft.uspto.gov/netacgi/nph-Parser?Sect1=PTO2&Sect2=HITOFF&p=1&u=%2Fnetahtml%2FPTO%2Fsearch-bool.html&r=1&f=G&l=50&co1=AND&d=PTXT&s1=krypto&OS=krypto&RS=krypto",
-				"title": "United States Patent: 8112797 - System and method to provide built-in and mobile VPN connectivity",
-				"patentNumber": "8112797",
-				"issueDate": "February 7, 2012",
-				"assignee": "Research In Motion\n (Waterloo, \nCA)",
-				"abstractNote": "A system and method for facilitating the establishment of a virtual\n     private network between a network and a remote computer, the system\n     having: a mobile device connectable to the remote computer and storing a\n     user profile, virtual private network information, and password\n     information; virtual private network software being located on one of the\n     mobile device and the remote computer; an access point communicating with\n     the network; and communication means for communications between the\n     access point and one of the mobile device and the remote computer,\n     wherein the user profile, virtual private network information, and\n     password information is passed to the virtual private network software\n     upon connection of the mobile device to the remote computer, the virtual\n     private network software using the user profile, virtual private network\n     information, and password information to establish a virtual private\n     network through the communications means and the access point to the\n     network.",
-				"libraryCatalog": "Patents - USPTO",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "United States Patent"
+				"patentNumber": "8155308",
+				"issueDate": "April 10, 2012",
+				"assignee": "Marvell International Ltd.\n (Hamilton, \nBM)",
+				"abstractNote": "A cryptographic device comprises a first pipeline stage, a pipeline\n     register, and a second pipeline stage. The first pipeline stage comprises\n     a first byte substitution module that performs mathematical operations on\n     a received byte and outputs an intermediate value based on the\n     mathematical operations. The pipeline register stores the intermediate\n     value. The second pipeline stage comprises a second byte substitution\n     module and a column mixing module. The second byte substitution module\n     generates a replacement byte corresponding to the received byte based on\n     mathematical operations performed on the stored intermediate value. The\n     column mixing module transforms groups of four bytes of a plurality of\n     replacement bytes including the replacement byte.",
+				"shortTitle": "United States Patent",
+				"title": "United States Patent: 8155308 - Advanced encryption system hardware architecture"
 			}
 		]
 	},

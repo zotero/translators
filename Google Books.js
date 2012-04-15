@@ -390,11 +390,11 @@ var testCases = [
 				"tags": [
 					"Avant-garde (Music)",
 					"Electronic books",
-					"Electronic music History and criticism",
 					"Electronic music",
+					"Electronic music History and criticism",
 					"Music / General",
-					"Music / History & Criticism",
-					"Music / Genres & Styles / New Age"
+					"Music / Genres & Styles / New Age",
+					"Music / History & Criticism"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -404,15 +404,15 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"numPages": "340",
+				"numPages": "332",
 				"ISBN": "9780415936446",
-				"publisher": "Routledge",
-				"title": "Electronic and Experimental Music: Pioneers in Technology and Composition",
 				"language": "en",
 				"abstractNote": "Electronic and Experimental Music details the history of electronic music throughout the world, and the people who created it. From the theory of sound production to key composers and instrument designers, this is a complete introduction to the genre from its early roots to the present technological explosion. This new edition, includes a thoroughgly updated and enlarged theoretical and historical sections and includes new material on using home computers (PCs) and the many resources now available in software and the Internet.",
-				"date": "2002",
 				"libraryCatalog": "Google Books",
-				"shortTitle": "Electronic and Experimental Music"
+				"shortTitle": "Electronic and Experimental Music",
+				"publisher": "Psychology Press",
+				"title": "Electronic and Experimental Music: Pioneers in Technology and Composition",
+				"date": "2002"
 			}
 		]
 	}

@@ -250,24 +250,25 @@ var testCases = [
 				"notes": [],
 				"tags": [
 					"Alaska",
-					"History",
+					"Alaska",
+					"Alaska",
 					"Alaska",
 					"Anniversaries, etc",
-					"Alaska",
-					"Social conditions",
-					"Alaska",
 					"Economic conditions",
-					"Electronic books"
+					"Electronic books",
+					"History",
+					"Social conditions"
 				],
 				"seeAlso": [],
 				"attachments": [],
-				"title": "Alaska at 50 the past, present, and next fifty years of statehood",
 				"place": "Fairbanks",
-				"publisher": "University of Alaska Press",
-				"date": "2009",
 				"numPages": "285",
 				"callNumber": "F904 .A477 2009eb",
-				"libraryCatalog": "books.luther.edu Library Catalog"
+				"url": "http://site.ebrary.com/lib/luthercollege/Doc?id=10397770",
+				"libraryCatalog": "books.luther.edu Library Catalog",
+				"title": "Alaska at 50 the past, present, and next fifty years of statehood",
+				"publisher": "University of Alaska Press",
+				"date": "2009"
 			}
 		]
 	},
