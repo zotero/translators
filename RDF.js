@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-16 07:43:33"
+	"lastUpdated": "2012-04-16 08:05:03"
 }
 
 /*
@@ -53,6 +53,7 @@ var rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 
 var n = {
 	bib:"http://purl.org/net/biblio#",
+	bibo:"http://purl.org/ontology/bibo/",
 	dc:"http://purl.org/dc/elements/1.1/",
 	dcterms:"http://purl.org/dc/terms/",
 	prism:"http://prismstandard.org/namespaces/1.2/basic/",
@@ -413,29 +414,38 @@ function importItem(newItem, node, type) {
 	
 	// volume
 	newItem.volume = getFirstResults((container ? container : node), [n.prism+"volume", n.prism2_0+"volume", n.prism2_1+"volume",
-		n.eprints+"volume", n.dcterms+"citation.volume"], true);
+		n.eprints+"volume", n.bibo+"volume", n.dcterms+"citation.volume"], true);
 	
 	// issue
 	newItem.issue = getFirstResults((container ? container : node), [n.prism+"number", n.prism2_0+"number", n.prism2_1+"number",
-		n.eprints+"number", n.dcterms+"citation.issue"], true);
+		n.eprints+"number", n.bibo+"issue", n.dcterms+"citation.issue"], true);
 	// these mean the same thing
 	newItem.patentNumber = newItem.number = newItem.issue;
 	
 	// edition
-	newItem.edition = getFirstResults(node, [n.prism+"edition", n.prism2_0+"edition", n.prism2_1+"edition"], true);
+	newItem.edition = getFirstResults(node, [n.prism+"edition", n.prism2_0+"edition", n.prism2_1+"edition", n.bibo+"edition"], true);
 	// these fields mean the same thing
 	newItem.version = newItem.edition;
 	
 	// pages
-	newItem.pages = getFirstResults(node, [n.bib+"pages", n.eprints+"pagerange", n.prism2_0+"pageRange", n.prism2_1+"pageRange"], true);
+	newItem.pages = getFirstResults(node, [n.bib+"pages", n.eprints+"pagerange", n.prism2_0+"pageRange", n.prism2_1+"pageRange", n.bibo+"pages"], true);
 	if(!newItem.pages) {
 		var pages = [];
-		var spage = getFirstResults(node, [n.prism+"startingPage", n.prism2_0+"startingPage", n.prism2_1+"startingPage", n.dcterms+"relation.spage"], true),
-			epage = getFirstResults(node, [n.prism+"endingPage", n.prism2_0+"endingPage", n.prism2_1+"endingPage", n.dcterms+"relation.epage"], true);
+		var spage = getFirstResults(node, [n.prism+"startingPage", n.prism2_0+"startingPage", n.prism2_1+"startingPage", n.bibo+"pageStart", n.dcterms+"relation.spage"], true),
+			epage = getFirstResults(node, [n.prism+"endingPage", n.prism2_0+"endingPage", n.prism2_1+"endingPage", n.bibo+"pageEnd", n.dcterms+"relation.epage"], true);
 		if(spage) pages.push(spage);
 		if(epage) pages.push(epage);
 		if(pages.length) newItem.pages = pages.join("-");
 	}
+
+	// numPages
+	newItem.numPages = getFirstResults(node, [n.bibo+"numPages"], true);
+
+	// numberOfVolumes
+	newItem.numberOfVolumes = getFirstResults(node, [n.bibo+"numVolumes"], true);
+
+	// short title
+	newItem.shortTitle = getFirstResults(node, [n.bibo+"shortTitle"], true);
 	
 	// mediums
 	newItem.artworkMedium = newItem.interviewMedium = getFirstResults(node, [n.dcterms+"medium"], true);
@@ -515,15 +525,15 @@ function importItem(newItem, node, type) {
 	}
 
 	// ISSN, if encoded per PRISM (DC uses "identifier")
-	newItem.ISSN = getFirstResults(node, [n.prism+"issn", n.prism2_0+"issn", n.prism2_1+"issn", n.eprints+"issn",
-		n.prism+"eIssn", n.prism2_0+"eIssn", n.prism2_1+"eIssn"], true) || newItem.ISSN;
+	newItem.ISSN = getFirstResults(node, [n.prism+"issn", n.prism2_0+"issn", n.prism2_1+"issn", n.eprints+"issn", n.bibo+"issn",
+		n.prism+"eIssn", n.prism2_0+"eIssn", n.prism2_1+"eIssn", n.bibo+"eissn"], true) || newItem.ISSN;
 	// ISBN from PRISM
-	newItem.ISBN = getFirstResults(node, [n.prism2_1+"isbn"], true) || newItem.ISBN;
+	newItem.ISBN = getFirstResults(node, [n.prism2_1+"isbn", n.bibo+"isbn", n.bibo+"isbn13", n.bibo+"isbn10"], true) || newItem.ISBN;
 	// DOI from PRISM
-	newItem.DOI = getFirstResults(node, [n.prism2_0+"doi", n.prism2_1+"doi"], true) || newItem.DOI;
+	newItem.DOI = getFirstResults(node, [n.prism2_0+"doi", n.prism2_1+"doi", n.bibo+"doi"], true) || newItem.DOI;
 	
 	if(!newItem.url) {
-		var url = getFirstResults(node, [n.eprints+"official_url", n.vcard2+"url", n.og+"url", n.prism2_0+"url", n.prism2_1+"url"]);
+		var url = getFirstResults(node, [n.eprints+"official_url", n.vcard2+"url", n.og+"url", n.prism2_0+"url", n.prism2_1+"url", n.bibo+"uri"]);
 		if(url) {
 			newItem.url = Zotero.RDF.getResourceURI(url[0]);
 		}
@@ -534,7 +544,7 @@ function importItem(newItem, node, type) {
 	
 	// abstract
 	newItem.abstractNote = getFirstResults(node, [n.eprints+"abstract", n.prism+"teaser", n.prism2_0+"teaser", n.prism2_1+"teaser", n.og+"description",
-		n.dcterms+"abstract", n.dc+"description.abstract", n.dcterms+"description.abstract"], true);
+		n.bibo+"abstract", n.dcterms+"abstract", n.dc+"description.abstract", n.dcterms+"description.abstract"], true);
 	
 	// type
 	var type = getFirstResults(node, [n.dc+"type", n.dcterms+"type"], true);
