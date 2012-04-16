@@ -113,24 +113,24 @@ var inputTypeMap = {
 	CASE:"case",
 	CHAP:"bookSection",
 	CHART:"artwork",
-	CLSWK:"document",	//what is classical work??
+	CLSWK:"book",
 	COMP:"computerProgram",
 	CONF:"conferencePaper",
 	CPAPER:"conferencePaper",
 	CTLG:"magazineArticle",
 	DATA:"document",	//dataset
 	DBASE:"document",	//database
-	DICT:"book",		//or is this meant to be a dictionary entry
+	DICT:"dictionaryEntry",
 	EBOOK:"book",
 	ECHAP:"bookSection",
 	EDBOOK:"book",
 	EJOUR:"journalArticle",
 	ELEC:"webpage",
-	ENCYC:"book",		//or is this an encyclopedia article
+	ENCYC:"encyclopediaArticle",
 	EQUA:"document",	//what's a good way to handle this?
 	FIGURE:"artwork",
 	GEN:"journalArticle",
-	GOVDOC:"document",
+	GOVDOC:"report",
 	GRNT:"document",
 	HEAR:"hearing",
 	ICOMM:"email",
@@ -152,7 +152,7 @@ var inputTypeMap = {
 	SER:"book",
 	SLIDE:"presentation",
 	SOUND:"audioRecording",
-	STAND:"document",
+	STAND:"report",
 	STAT:"statute",
 	THES:"thesis",
 	UNBILL:"manuscript",
