@@ -413,13 +413,13 @@ function processTag(item, tag, value) {
 				item.attachments.push({url:value});
 			} else if(tag == "L1") {
 				item.attachments.push({url:value, mimeType:"application/pdf",
-					title:"Full Text (PDF)", downloadable:true});
+					title:"Full Text (PDF)"});
 			} else if(tag == "L2") {
 				item.attachments.push({url:value, mimeType:"text/html",
-					title:"Full Text (HTML)", downloadable:true});
+					title:"Full Text (HTML)"});
 			} else if(tag == "L4") {
 				item.attachments.push({url:value,
-					title:"Image", downloadable:true});
+					title:"Image"});
 			}
 		break;
 		case "IS":
