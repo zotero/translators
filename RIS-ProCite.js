@@ -709,12 +709,32 @@ function completeItem(item) {
 	var titles = completeItem.titles.T1.concat(
 					completeItem.titles.T2.concat(
 						completeItem.titles.T3));
-	if(!item.title) item.title = titles.shift();
+	var i;
+	if(!item.title) {
+		item.title = titles.shift();
+	//in case there are duplicate entries, remove them
+	} else {
+		i = titles.indexOf(item.title);
+		while(i != -1) {
+			titles.splice(i, 1);
+			i = titles.indexOf(item.title);
+		}
+	}
+	
 
 	if(ZU.fieldIsValidForType('bookTitle', item.itemType) ||
 		ZU.fieldIsValidForType('publicationTitle', item.itemType)) {
 		if(!item.bookTitle) item.bookTitle = item.publicationTitle;
-		if(!item.bookTitle) item.bookTitle = titles.shift();
+		if(!item.bookTitle) {
+			item.bookTitle = titles.shift();
+		//in case there are duplicate entries, remove them
+		} else {
+			i = titles.indexOf(item.bookTitle);
+			while(i != -1) {
+				titles.splice(i, 1);
+				i = titles.indexOf(item.bookTitle);
+			}
+		}
 		item.publicationTitle = item.bookTitle;
 	}
 
