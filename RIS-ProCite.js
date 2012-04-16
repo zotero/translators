@@ -313,14 +313,28 @@ function parseProCiteNote(item, value, props) {
 	}
 }
 
-//we can parse some note fields
+/**we can parse some note fields
+ * can be bool, string, or func
+ * if bool, true means skip, false means attach as note
+ * if string, place the contents of the note into the indicated field
+ * if func, arguments are item object, note (without the label),
+ *		and the properties object
+ * 		func should return a boolean with the same meaning
+ *		as the bool value above.
+ */
 parseProCiteNote.noteFieldMap = {
 	'Record ID': false,	//skip this
 	'Record Number': false,
 	'Place of Publication': 'place',
 	'Place of Meeting': 'place',
 	'Call Number': 'callNumber',
-	'Connective Phrase': false,
+	'Connective Phrase': function(item, note) {
+		if(note.trim().toUpperCase() == 'IN') {
+			return true;
+		} else {
+			return false;
+		}
+	},
 	'Notes': function(item, note) {
 			addNote(item, note);
 			return true;
