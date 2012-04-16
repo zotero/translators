@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcs",
+	"browserSupport": "gcsv",
 	"lastUpdated": "2012-04-10 12:00:29"
 }
 
@@ -193,7 +193,7 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "James R",
+						"firstName": "James R.",
 						"lastName": "Otteson",
 						"creatorType": "author"
 					}

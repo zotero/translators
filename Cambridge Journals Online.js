@@ -6,7 +6,7 @@
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
-	"browserSupport": "gcsib",
+	"browserSupport": "gcsibv",
 	"inRepository": true,
 	"translatorType": 4,
 	"lastUpdated": "2011-08-22 22:29:49"
