@@ -8,7 +8,7 @@
 	"maxVersion": null,
 	"priority": 90,
 	"inRepository": true,
-	"browserSupport": "gcs",
+	"browserSupport": "gcsv",
 	"lastUpdated": "2012-01-30 20:05:00"
 }
 

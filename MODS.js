@@ -14,7 +14,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"browserSupport": "g",
+	"browserSupport": "gv",
 	"lastUpdated": "2012-03-17 02:45:26"
 }
 
