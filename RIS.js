@@ -13,7 +13,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-14 14:56:09"
+	"lastUpdated": "2012-04-15 19:57:37"
 }
 
 function detectImport() {
@@ -186,7 +186,7 @@ function processTag(item, tag, value) {
 			if(inputTypeMap[value]) {
 				item.itemType = inputTypeMap[value];
 				if(value == 'GEN') {
-					item.tags.push('__IMPORTED_FROM_GEN__');
+					item.tags.push({name:'*Verify imported item type*', type:1});
 				}
 			} else {
 				// default to document
