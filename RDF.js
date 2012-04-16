@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-01 08:41:26"
+	"lastUpdated": "2012-04-16 07:43:33"
 }
 
 /*
@@ -57,6 +57,7 @@ var n = {
 	dcterms:"http://purl.org/dc/terms/",
 	prism:"http://prismstandard.org/namespaces/1.2/basic/",
 	prism2_0:"http://prismstandard.org/namespaces/basic/2.0/",
+	prism2_1:"http://prismstandard.org/namespaces/basic/2.1/",
 	foaf:"http://xmlns.com/foaf/0.1/",
 	vcard:"http://nwalsh.com/rdf/vCard#",
 	vcard2:"http://www.w3.org/2006/vcard/ns#",	// currently used only for NSF, but is probably
@@ -379,11 +380,11 @@ function importItem(newItem, node, type) {
 	}
 	
 	// publicationTitle -- first try PRISM, then DC
-	newItem.publicationTitle = getFirstResults(node, [n.prism+"publicationName", n.prism2_0+"publicationName", n.eprints+"publication",
+	newItem.publicationTitle = getFirstResults(node, [n.prism+"publicationName", n.prism2_0+"publicationName", n.prism2_1+"publicationName", n.eprints+"publication",
 		n.dc+"source", n.dcterms+"source", n.og+"site_name"], true);
 	
 	// rights
-	newItem.rights = getFirstResults(node, [n.prism+"copyright", n.prism2_0+"copyright", n.dc+"rights", n.dcterms+"rights"], true);
+	newItem.rights = getFirstResults(node, [n.prism+"copyright", n.prism2_0+"copyright", n.prism2_1+"copyright", n.dc+"rights", n.dcterms+"rights"], true);
 	
 	// section
 	var section = getNodeByType(isPartOf, n.bib+"Part");
@@ -411,26 +412,26 @@ function importItem(newItem, node, type) {
 	}
 	
 	// volume
-	newItem.volume = getFirstResults((container ? container : node), [n.prism+"volume", n.prism2_0+"volume",
+	newItem.volume = getFirstResults((container ? container : node), [n.prism+"volume", n.prism2_0+"volume", n.prism2_1+"volume",
 		n.eprints+"volume", n.dcterms+"citation.volume"], true);
 	
 	// issue
-	newItem.issue = getFirstResults((container ? container : node), [n.prism+"number", n.prism2_0+"number",
+	newItem.issue = getFirstResults((container ? container : node), [n.prism+"number", n.prism2_0+"number", n.prism2_1+"number",
 		n.eprints+"number", n.dcterms+"citation.issue"], true);
 	// these mean the same thing
 	newItem.patentNumber = newItem.number = newItem.issue;
 	
 	// edition
-	newItem.edition = getFirstResults(node, [n.prism+"edition", n.prism2_0+"edition"], true);
+	newItem.edition = getFirstResults(node, [n.prism+"edition", n.prism2_0+"edition", n.prism2_1+"edition"], true);
 	// these fields mean the same thing
 	newItem.version = newItem.edition;
 	
 	// pages
-	newItem.pages = getFirstResults(node, [n.bib+"pages", n.eprints+"pagerange", n.prism2_0+"pageRange"], true);
+	newItem.pages = getFirstResults(node, [n.bib+"pages", n.eprints+"pagerange", n.prism2_0+"pageRange", n.prism2_1+"pageRange"], true);
 	if(!newItem.pages) {
 		var pages = [];
-		var spage = getFirstResults(node, [n.prism+"startingPage", n.prism2_0+"startingPage", n.dcterms+"relation.spage"], true),
-			epage = getFirstResults(node, [n.prism+"endingPage", n.prism2_0+"endingPage", n.dcterms+"relation.epage"], true);
+		var spage = getFirstResults(node, [n.prism+"startingPage", n.prism2_0+"startingPage", n.prism2_1+"startingPage", n.dcterms+"relation.spage"], true),
+			epage = getFirstResults(node, [n.prism+"endingPage", n.prism2_0+"endingPage", n.prism2_1+"endingPage", n.dcterms+"relation.epage"], true);
 		if(spage) pages.push(spage);
 		if(epage) pages.push(epage);
 		if(pages.length) newItem.pages = pages.join("-");
@@ -465,7 +466,7 @@ function importItem(newItem, node, type) {
 	newItem.distributor = newItem.label = newItem.company = newItem.institution = newItem.publisher;
 	
 	// date
-	newItem.date = getFirstResults(node, [n.eprints+"date", n.prism+"publicationDate", n.prism2_0+"publicationDate", n.og+"published_time",
+	newItem.date = getFirstResults(node, [n.eprints+"date", n.prism+"publicationDate", n.prism2_0+"publicationDate", n.prism2_1+"publicationDate", n.og+"published_time",
 		n.dc+"date.issued", n.dcterms+"date.issued", n.dcterms+"issued", n.dc+"date", n.dcterms+"date",
 		n.dcterms+"dateSubmitted", n.eprints+"datestamp"], true);
 	// accessDate
@@ -514,13 +515,15 @@ function importItem(newItem, node, type) {
 	}
 
 	// ISSN, if encoded per PRISM (DC uses "identifier")
-	newItem.ISSN = getFirstResults(node, [n.prism+"issn", n.prism2_0+"issn", n.eprints+"issn",
-		n.prism+"eIssn", n.prism2_0+"eIssn"], true) || newItem.ISSN;
+	newItem.ISSN = getFirstResults(node, [n.prism+"issn", n.prism2_0+"issn", n.prism2_1+"issn", n.eprints+"issn",
+		n.prism+"eIssn", n.prism2_0+"eIssn", n.prism2_1+"eIssn"], true) || newItem.ISSN;
+	// ISBN from PRISM
+	newItem.ISBN = getFirstResults(node, [n.prism2_1+"isbn"], true) || newItem.ISBN;
 	// DOI from PRISM
-	newItem.DOI = getFirstResults(node, [n.prism2_0+"doi"], true) || newItem.DOI;
+	newItem.DOI = getFirstResults(node, [n.prism2_0+"doi", n.prism2_1+"doi"], true) || newItem.DOI;
 	
 	if(!newItem.url) {
-		var url = getFirstResults(node, [n.eprints+"official_url", n.vcard2+"url", n.og+"url", n.prism2_0+"url"]);
+		var url = getFirstResults(node, [n.eprints+"official_url", n.vcard2+"url", n.og+"url", n.prism2_0+"url", n.prism2_1+"url"]);
 		if(url) {
 			newItem.url = Zotero.RDF.getResourceURI(url[0]);
 		}
@@ -530,7 +533,7 @@ function importItem(newItem, node, type) {
 	newItem.archiveLocation = getFirstResults(node, [n.dc+"coverage", n.dcterms+"coverage"], true);
 	
 	// abstract
-	newItem.abstractNote = getFirstResults(node, [n.eprints+"abstract", n.prism+"teaser", n.prism2_0+"teaser", n.og+"description",
+	newItem.abstractNote = getFirstResults(node, [n.eprints+"abstract", n.prism+"teaser", n.prism2_0+"teaser", n.prism2_1+"teaser", n.og+"description",
 		n.dcterms+"abstract", n.dc+"description.abstract", n.dcterms+"description.abstract"], true);
 	
 	// type
@@ -614,7 +617,7 @@ function importItem(newItem, node, type) {
 	/** TAGS **/
 	
 	var subjects = getFirstResults(node, [n.dc+"subject", n.dcterms+"subject", n.article+"tag",
-		n.prism2_0+"keyword", n.prism2_0+"object", n.prism2_0+"organization", n.prism2_0+"person"]);
+		n.prism2_0+"keyword", n.prism2_1+"keyword", n.prism2_0+"object", n.prism2_1+"object", n.prism2_0+"organization", n.prism2_1+"organization", n.prism2_0+"person", n.prism2_1+"person"]);
 	for each(var subject in subjects) {
 		if(typeof(subject) == "string") {	// a regular tag
 			newItem.tags.push(subject);
