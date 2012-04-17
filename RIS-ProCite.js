@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-16 20:31:57"
+	"lastUpdated": "2012-04-16 21:24:21"
 }
 
 function detectImport() {
@@ -479,6 +479,7 @@ function processTag(item, tag, value, properties) {
 			addAuthor(item, value, ['editor']);
 		break;
 		case "A2":
+			var tempType = ['editor'];
 		case "A3":
 			// contributing author (patent: assignee)
 			if (item.itemType == "patent") {
@@ -490,7 +491,8 @@ function processTag(item, tag, value, properties) {
 					item.assignee =  value;
 				}
 			} else {
-				var tempType = getProperty(properties, 'creatorType') || ['contributor'];
+				var tempType = getProperty(properties, 'creatorType') || 
+					tempType || ['contributor'];
 				addAuthor(item, value, tempType);
 			}
 		break;
