@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-14 15:52:01"
+	"lastUpdated": "2012-04-16 20:31:57"
 }
 
 function detectImport() {
@@ -66,24 +66,24 @@ var inputTypeMap = {
 	CASE:"case",
 	CHAP:"bookSection",
 	CHART:"artwork",
-	CLSWK:"document",	//what is classical work??
+	CLSWK:"book",
 	COMP:"computerProgram",
 	CONF:"conferencePaper",
 	CPAPER:"conferencePaper",
 	CTLG:"magazineArticle",
 	DATA:"document",	//dataset
 	DBASE:"document",	//database
-	DICT:"book",		//or is this meant to be a dictionary entry
+	DICT:"dictionaryEntry",
 	EBOOK:"book",
 	ECHAP:"bookSection",
 	EDBOOK:"book",
 	EJOUR:"journalArticle",
 	ELEC:"webpage",
-	ENCYC:"book",		//or is this an encyclopedia article
+	ENCYC:"encyclopediaArticle",
 	EQUA:"document",	//what's a good way to handle this?
 	FIGURE:"artwork",
 	GEN:"journalArticle",
-	GOVDOC:"document",
+	GOVDOC:"report",
 	GRNT:"document",
 	HEAR:"hearing",
 	ICOMM:"email",
@@ -105,7 +105,7 @@ var inputTypeMap = {
 	SER:"book",
 	SLIDE:"presentation",
 	SOUND:"audioRecording",
-	STAND:"document",
+	STAND:"report",
 	STAT:"statute",
 	THES:"thesis",
 	UNBILL:"manuscript",
@@ -429,7 +429,7 @@ function processTag(item, tag, value, properties) {
 			if(inputTypeMap[value]) {
 				item.itemType = inputTypeMap[value];
 				if(value == 'GEN') {
-					item.tags.push('__IMPORTED_FROM_GEN__');
+					item.tags.push({name:'*Verify imported item type*', type:1});
 				}
 			} else {
 				// default to document
@@ -653,13 +653,13 @@ function processTag(item, tag, value, properties) {
 				item.attachments.push({url:value});
 			} else if(tag == "L1") {
 				item.attachments.push({url:value, mimeType:"application/pdf",
-					title:"Full Text (PDF)", downloadable:true});
+					title:"Full Text (PDF)"});
 			} else if(tag == "L2") {
 				item.attachments.push({url:value, mimeType:"text/html",
-					title:"Full Text (HTML)", downloadable:true});
+					title:"Full Text (HTML)"});
 			} else if(tag == "L4") {
 				item.attachments.push({url:value,
-					title:"Image", downloadable:true});
+					title:"Image"});
 			}
 		break;
 		case "IS":
