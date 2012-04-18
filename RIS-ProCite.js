@@ -1084,6 +1084,10 @@ var testCases = [
 					}
 				],
 				"tags": [
+					{
+						"name": "*Some fields not mapped*",
+						"type": 1
+					},
 					"cortical contusion",
 					"blood-brain barrier",
 					"horseradish peroxidase",
@@ -1127,6 +1131,10 @@ var testCases = [
 					}
 				],
 				"tags": [
+					{
+						"name": "*Some fields not mapped*",
+						"type": 1
+					},
 					"AIDS",
 					"virus",
 					"infection",
@@ -1134,7 +1142,7 @@ var testCases = [
 				],
 				"seeAlso": [],
 				"attachments": [],
-				"date": "February 27, 1990",
+				"issueDate": "February 27, 1990",
 				"applicationNumber": "877609",
 				"patentNumber": "4,904,581",
 				"assignee": "Epitope,I.",
@@ -1241,15 +1249,18 @@ var testCases = [
 					{
 						"firstName": "Bryan",
 						"lastName": "Hanks",
-						"creatorType": "contributor"
+						"creatorType": "editor"
 					},
 					{
 						"firstName": "Kathy",
 						"lastName": "Linduff",
-						"creatorType": "contributor"
+						"creatorType": "editor"
 					}
 				],
 				"notes": [
+					{
+						"note": "<p>Place of Meeting: University of Pittsburgh</p>"
+					},
 					{
 						"note": "<p>have, seen<br/>Allard 2006</p><p>1.&nbsp;&nbsp;&nbsp;&nbsp;Herders in the Khanuy valley move their camps 2 to 4 times per year. 1<br/>2.&nbsp;&nbsp;&nbsp;&nbsp;A few families cultivate vegetables on small plots. 1<br/>3.&nbsp;&nbsp;&nbsp;&nbsp;Herders in the valley move camp 2 to 4 times per year, “with maximum movements not exceeding 10 km. 6<br/>4.&nbsp;&nbsp;&nbsp;&nbsp;Russian ethnographer A.D. Simukov identified a mobility pattern he called “Hangai”.&nbsp;&nbsp;Considering the productivity of the region camps did not move far in response to drought. 6<br/>5.&nbsp;&nbsp;&nbsp;&nbsp;Simukov “estimated the diameter of the annual movement cycle to be no more than 7-8 km.” 6<br/>6.&nbsp;&nbsp;&nbsp;&nbsp;“Nomadic pastoralism is politically centrifugal, militating against central and hierarchical power… Nomadic mobility, in consequence, has a dampening effect on hierarchy and centralization and on chiefly coercion and oppression…. Chiefships arise in nomadic tribes in confrontation with powerful external populations (Irons 1979). Thus, acephalous, egalitarian, decentralized, nomadic tribes are more likely to be found in remote regions far from centers of power, population, and trade, and nomadic tribal chiefdoms are more likely to be found in proximity to agricultural settlements, cities, state agencies, and major markets” (2004).” 7 [we need to deal with this perspective within the household model]</p>"
 					}
@@ -1261,7 +1272,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"proceedingsTitle": "New Research Directions in Eurasian Steppe Archaeology: The Emergence of Complex Societies in the Third to First Millennia BCE",
-				"accessDate": "2006/02/10-2006/02/10",
+				"accessDate": "2006-02-10",
 				"place": "Pittsburgh",
 				"publisher": "Department of Anthropology & Center for Russian and East European Studies",
 				"date": "2006",
@@ -1312,6 +1323,50 @@ var testCases = [
 				"title": "Contexts of Civilizational Collapse: A Mesopotamian View",
 				"bookTitle": "The Collapse of Ancient States and Civilizations",
 				"publicationTitle": "The Collapse of Ancient States and Civilizations"
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "TY - CONF\nN1 - Record Number: 320\nA1 - Barfield, Thomas J.\nT1 - Political centralization on the Mongolian steppe: dueling models of the past\nN1 - Connective Phrase: In\nA2 - Hanks, Bryan\nA2 - Linduff, Kathy\nN1 - Proceedings Title: New Research Directions in Eurasian Steppe Archaeology: The Emergence of Complex Societies in the Third to First Millennia BCE\nY2 - 2006/02/10-2006/02/10\nN1 - Place of Meeting: University of Pittsburgh\nCY - Pittsburgh\nPB - Department of Anthropology & Center for Russian and East European Studies\nPY - 2006\nKW - Mongolia\nKW - political organization\nKW - pastoralism\nER - ",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"creators": [
+					{
+						"firstName": "Thomas J.",
+						"lastName": "Barfield",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Bryan",
+						"lastName": "Hanks",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Kathy",
+						"lastName": "Linduff",
+						"creatorType": "editor"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Place of Meeting: University of Pittsburgh</p>"
+					}
+				],
+				"tags": [
+					"Mongolia",
+					"political organization",
+					"pastoralism"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"proceedingsTitle": "New Research Directions in Eurasian Steppe Archaeology: The Emergence of Complex Societies in the Third to First Millennia BCE",
+				"accessDate": "2006-02-10",
+				"place": "Pittsburgh",
+				"publisher": "Department of Anthropology & Center for Russian and East European Studies",
+				"date": "2006",
+				"title": "Political centralization on the Mongolian steppe: dueling models of the past"
 			}
 		]
 	}
