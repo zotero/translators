@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-16 21:24:21"
+	"lastUpdated": "2012-04-17 23:27:18"
 }
 
 function detectImport() {
@@ -199,6 +199,9 @@ resolveField.dataToValMaps = {
 			switch(val[i].trim()) {
 				case 'actor':
 					types.push('cast-member');
+					break;
+				case 'author':
+					types.push('author');
 					break;
 				case 'cartographer':
 					types.push('cartographer');
