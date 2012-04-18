@@ -439,6 +439,37 @@ function assign(item, field, value, raw) {
 	}
 }
 
+//parse dates and date ranges
+function parseDate(value) {
+	//check if it's a range
+	var m = value.replace(/[\u002D\u00AD\u2010-\u2015\u2212\u2E3A\u2E3B]/g,'-')
+		.split('-');
+	if(m.length == 2 && m[0].match(/\d{4}|\d\/\d/) && m[1].match(/\d{4}|\d\/\d/)) {
+		var d = ZU.strToDate(m[0]);
+		var d2 = ZU.strToDate(m[1]);
+		var date = {
+			d: ZU.formatDate(d),
+			dSQL: [(d.year || '0000'),(d.month || 0) + 1,(d.day || '01')]
+				.join('-').replace(/-(\d)(?=[^\d])/, '-0$1'),
+			d2: ZU.formatDate(d2)
+		};
+		//check if from and to are the same
+		if(date.d2 && date.d.day == date.d2.day &&
+			date.d.month == date.d2.month && date.d.year == date.d2.year &&
+			date.d.part == date.d2.part) {
+			delete date.d2;
+		}
+		return date;
+	} else {
+		var d = ZU.strToDate(value);
+		return {
+			d: ZU.formatDate(d),
+			dSQL: [(d.year || '0000'),(d.month || 0) + 1,(d.day || '01')]
+				.join('-').replace(/-(\d)(?=[^\d])/, '-0$1')
+		};
+	}
+}
+
 function processTag(item, tag, value, properties) {
 	// Drop empty fields
 	if (value === undefined || value === null || value == "") return item;	
@@ -533,90 +564,38 @@ function processTag(item, tag, value, properties) {
 		break;
 		case "Y1":
 		case "PY":
-			// year or date
-			var dateParts = value.split("/");
-	
-			if(dateParts.length == 1) {
-				// technically, if there's only one date part, the file isn't valid
-				// RIS, but EndNote writes this, so we have to too
-				// Nick: RIS spec example records also only contain a single part
-				// even though it says the slashes are not optional (?)
-				item.date = value;
-			} else {
-				// in the case that we have a year and other data, format that way
-	
-				var month = parseInt(dateParts[1]);
-				if(month) {
-					month--;
-				} else {
-					month = undefined;
-				}
-	
-				item.date = Zotero.Utilities.formatDate({year:dateParts[0],
-									  month:month,
-									  day:dateParts[2],
-									  part:dateParts[3]});
+			var field;
+			switch(item.itemType) {
+				case 'patent':
+					field = 'issueDate';
+				break;
+				default:
+					field = 'date';
 			}
-		break;
 		case "Y2":
-			// the secondary date field can mean two things, a secondary date, or an
-			// invalid EndNote-style date. let's see which one this is.
-			// patent: application (filing) date -- do not append to date field 
-			// Secondary dates could be access dates-- they don't need to be appended
-			// to the existing date
-			var dateParts = value.split("/");
-			if(dateParts.length != 4 && item.itemType != "patent") {
-				// an invalid date and not a patent. 
-				item.accessDate = value;
-			} else if (item.itemType == "patent") {
-				// Date-handling code copied from above
-				if(dateParts.length == 1) {
-					// technically, if there's only one date part, the file isn't valid
-					// RIS, but EndNote writes this, so we have to too
-					// Nick: RIS spec example records also only contain a single part
-					// even though it says the slashes are not optional (?)
-					item.filingDate = value;
-				} else {
-					// in the case that we have a year and other data, format that way
-	
-					var month = parseInt(dateParts[1]);
-					if(month) {
-						month--;
+			var date = parseDate(value);
+
+			switch(item.itemType) {
+				case 'patent':
+					if(!field) var field = 'filingDate';
+					date = date.d;
+				break;
+				default:
+					if(!field) {
+						var field = 'accessDate';
+						date = date.dSQL;
+						//a small hack so we don't drop Y2 fields that cannot
+						//be formatted into an SQL date
+						if(date == '0000-01-01') {
+							//this will cause the RIS line to be attached as note
+							field = false;
+						}
 					} else {
-						month = undefined;
+						date = date.d;
 					}
-	
-					item.filingDate = Zotero.Utilities.formatDate({year:dateParts[0],
-									  month:month,
-									  day:dateParts[2],
-									  part:dateParts[3]});
-				}
-			} else {
-				// Consensus is that Y2 can be treated as accessDate
-				// Date-handling code copied from above
-				if(dateParts.length == 1) {
-					// technically, if there's only one date part, the file isn't valid
-					// RIS, but EndNote writes this, so we have to too
-					// Nick: RIS spec example records also only contain a single part
-					// even though it says the slashes are not optional (?)
-					item.accessDate = value;
-				} else {
-					// in the case that we have a year and other data, format that way
-	
-					var month = parseInt(dateParts[1]);
-					if(month) {
-						month--;
-					} else {
-						month = undefined;
-					}
-	
-					item.accessDate = Zotero.Utilities.formatDate({year:dateParts[0],
-									  month:month,
-									  day:dateParts[2],
-									  part:dateParts[3]});
-				}
-			} 
-			// ToDo: Handle correctly formatted Y2 fields (secondary date)
+			}
+			/**TODO: handle date ranges*/
+			assign(item, field, date, raw);
 		break;
 		case "N1":
 			// notes
@@ -710,6 +689,8 @@ function processTag(item, tag, value, properties) {
 			// Issue Number (patent: patentNumber)
 			if (item.itemType == "patent") {
 				item.patentNumber = value;
+			} else if(item.itemType == "computerProgram") {
+				if(!item.version) item.version = value;
 			} else {
 				assign(item, 'issue', value, raw);
 			}
