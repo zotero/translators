@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-17 23:27:18"
+	"lastUpdated": "2012-04-18 00:13:37"
 }
 
 function detectImport() {
@@ -620,6 +620,11 @@ function processTag(item, tag, value, properties) {
 					if(!field) var field = 'filingDate';
 					date = date.d;
 				break;
+				case 'conferencePaper':
+					/**TODO: fix this when there's an actual field to map this to*/
+					if(!field) var field = false;
+					date = date.d + (date.d2?' - ' + date.d2:'');
+				break;
 				default:
 					if(!field) {
 						var field = 'accessDate';
@@ -643,6 +648,7 @@ function processTag(item, tag, value, properties) {
 				//some software (e.g. ProCite) adds labels to notes
 				if(!parseProCiteNote(item, value, properties)) {
 					addNote(item, value);
+					markUnmapped(item);
 				}
 			}
 		break;
@@ -805,6 +811,8 @@ function completeItem(item) {
 	}
 
 	if(!item.series) item.series = titles.shift();
+	//There's no way to distinguish these in RIS anyway
+	item.seriesTitle = item.series;
 
 	completeItem.titles.T1 = [];
 	completeItem.titles.T2 = [];
@@ -1259,6 +1267,9 @@ var testCases = [
 				],
 				"notes": [
 					{
+						"note": "Y2  - 2006/02/10-2006/02/10"
+					},
+					{
 						"note": "<p>Place of Meeting: University of Pittsburgh</p>"
 					},
 					{
@@ -1266,13 +1277,16 @@ var testCases = [
 					}
 				],
 				"tags": [
+					{
+						"name": "*Some fields not mapped*",
+						"type": 1
+					},
 					"Mongolia",
 					"pastoralism"
 				],
 				"seeAlso": [],
 				"attachments": [],
 				"proceedingsTitle": "New Research Directions in Eurasian Steppe Archaeology: The Emergence of Complex Societies in the Third to First Millennia BCE",
-				"accessDate": "2006-02-10",
 				"place": "Pittsburgh",
 				"publisher": "Department of Anthropology & Center for Russian and East European Studies",
 				"date": "2006",
@@ -1334,8 +1348,8 @@ var testCases = [
 				"itemType": "conferencePaper",
 				"creators": [
 					{
-						"firstName": "Thomas J.",
-						"lastName": "Barfield",
+						"firstName": "Francis",
+						"lastName": "Allard",
 						"creatorType": "author"
 					},
 					{
@@ -1351,22 +1365,66 @@ var testCases = [
 				],
 				"notes": [
 					{
+						"note": "Y2  - 2006/02/10-2006/02/10"
+					},
+					{
 						"note": "<p>Place of Meeting: University of Pittsburgh</p>"
+					},
+					{
+						"note": "<p>have, seen<br/>Allard 2006</p><p>1.&nbsp;&nbsp;&nbsp;&nbsp;Herders in the Khanuy valley move their camps 2 to 4 times per year. 1<br/>2.&nbsp;&nbsp;&nbsp;&nbsp;A few families cultivate vegetables on small plots. 1<br/>3.&nbsp;&nbsp;&nbsp;&nbsp;Herders in the valley move camp 2 to 4 times per year, “with maximum movements not exceeding 10 km. 6<br/>4.&nbsp;&nbsp;&nbsp;&nbsp;Russian ethnographer A.D. Simukov identified a mobility pattern he called “Hangai”.&nbsp;&nbsp;Considering the productivity of the region camps did not move far in response to drought. 6<br/>5.&nbsp;&nbsp;&nbsp;&nbsp;Simukov “estimated the diameter of the annual movement cycle to be no more than 7-8 km.” 6<br/>6.&nbsp;&nbsp;&nbsp;&nbsp;“Nomadic pastoralism is politically centrifugal, militating against central and hierarchical power… Nomadic mobility, in consequence, has a dampening effect on hierarchy and centralization and on chiefly coercion and oppression…. Chiefships arise in nomadic tribes in confrontation with powerful external populations (Irons 1979). Thus, acephalous, egalitarian, decentralized, nomadic tribes are more likely to be found in remote regions far from centers of power, population, and trade, and nomadic tribal chiefdoms are more likely to be found in proximity to agricultural settlements, cities, state agencies, and major markets” (2004).” 7 [we need to deal with this perspective within the household model]</p>"
 					}
 				],
 				"tags": [
+					{
+						"name": "*Some fields not mapped*",
+						"type": 1
+					},
 					"Mongolia",
-					"political organization",
 					"pastoralism"
 				],
 				"seeAlso": [],
 				"attachments": [],
 				"proceedingsTitle": "New Research Directions in Eurasian Steppe Archaeology: The Emergence of Complex Societies in the Third to First Millennia BCE",
-				"accessDate": "2006-02-10",
 				"place": "Pittsburgh",
 				"publisher": "Department of Anthropology & Center for Russian and East European Studies",
 				"date": "2006",
-				"title": "Political centralization on the Mongolian steppe: dueling models of the past"
+				"title": "Investigating the Bronze Age of Khanuy Valley, Central Mongolia"
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "TY - RPRT\nN1 - Record Number: 13663\nA1 - Cooper, Louise\nN1 - Connective Phrase: in\nT1 - Wealth and Poverty in the Mongolian Pastoral Economy\nCY - University of Sussex: Institute of Development Studies\nPY - 1995\nT3 - PALD Research Report\nN1 - Series Issue ID: No. II\nKW - Mongolia\nKW - pastoralism\nER - ",
+		"items": [
+			{
+				"itemType": "report",
+				"creators": [
+					{
+						"firstName": "Louise",
+						"lastName": "Cooper",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Series Issue ID: No. II</p>"
+					}
+				],
+				"tags": [
+					{
+						"name": "*Some fields not mapped*",
+						"type": 1
+					},
+					"Mongolia",
+					"pastoralism"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"place": "University of Sussex: Institute of Development Studies",
+				"date": "1995",
+				"title": "Wealth and Poverty in the Mongolian Pastoral Economy",
+				"series": "PALD Research Report",
+				"seriesTitle": "PALD Research Report"
 			}
 		]
 	}
