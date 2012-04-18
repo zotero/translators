@@ -530,10 +530,24 @@ function processTag(item, tag, value, properties) {
 			// primary author (patent: inventor)
 			// store Zotero "creator type" in temporary variable
 			var tempType;
-			if (item.itemType == "patent") {
-				tempType = "inventor";
-			} else {
-				tempType = "author";
+			switch(item.itemType) {
+				case "artwork":
+					tempType = "artist";
+				break;
+				case "audioRecording":
+					tempType = "performer";
+				break;
+				case 'bill':
+					tempType = "sponsor";
+				break;
+				case "patent":
+					tempType = "inventor";
+				break;
+				case "computerProgram":
+					tempType = 'programmer';
+				break;
+				default:
+					tempType = "author";
 			}
 	
 			//this could have been supplied in the properties
@@ -545,8 +559,21 @@ function processTag(item, tag, value, properties) {
 			addAuthor(item, value, ['editor']);
 		break;
 		case "A2":
-			var tempType = ['editor'];
+			var tempType;
+			switch(item.itemType) {
+				case 'bill':
+					tempType = 'sponsor';
+				break;
+				case 'case':
+					tempType = 'contributor';
+				break;
+				default:
+					tempType = 'editor';
+			}
+			tempType = [tempType]
 		case "A3":
+		/**TODO: split these up*/
+		case "A4":
 			// contributing author (patent: assignee)
 			if (item.itemType == "patent") {
 				if (item.assignee) {
@@ -557,8 +584,21 @@ function processTag(item, tag, value, properties) {
 					item.assignee =  value;
 				}
 			} else {
+				if(!tempType) {
+					var tempType;
+					switch(item.itemType) {
+						case 'book':
+						case 'bookSection':
+						case 'conferencePaper':
+							tempType = 'series-editor';
+						break;
+						default:
+							tempType = 'contributor';
+					}
+					tempType = [tempType];
+				}
 				var tempType = getProperty(properties, 'creatorType') || 
-					tempType || ['contributor'];
+					tempType;
 				addAuthor(item, value, tempType);
 			}
 		break;
