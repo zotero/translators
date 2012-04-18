@@ -305,7 +305,7 @@ function parseProCiteNote(item, value, props) {
 	if(split) {
 		var func = parseProCiteNote.noteFieldMap[split[1]];
 		if(typeof(func) == 'string') {
-			item[func] = split[2];
+			assign(item, func, split[2], 'N1  - ' + value);
 			return true;
 		} else if(func === false) {
 			//skip note
@@ -329,7 +329,7 @@ parseProCiteNote.noteFieldMap = {
 	'Record ID': false,	//skip this
 	'Record Number': false,
 	'Place of Publication': 'place',
-	'Place of Meeting': 'place',
+	//'Place of Meeting': 'place',
 	'Call Number': 'callNumber',
 	'Connective Phrase': function(item, note) {
 		if(note.trim().toUpperCase() == 'IN') {
@@ -360,7 +360,9 @@ parseProCiteNote.noteFieldMap = {
 		//we reuse the function above
 		return parseProCiteNote.noteFieldMap['Author, Monographic'](item, note, properties);
 	},
-	'Extent of Work': function(item, note, properties) {
+	'Extent of Work': function(item, note, properties, field) {
+		field = field?field:'Extent of Work';
+		var raw = 'N1  - ' + field + ': ' + note;
 		//grab the first number
 		note = note.match(/\d+/);
 		if(!note) return false;
@@ -368,33 +370,39 @@ parseProCiteNote.noteFieldMap = {
 		note = note[0];
 		switch(getProperty(properties, 'packagingMethod')) {
 			case 'volumes':
-				item.numberOfVolumes = note;
+				assign(item, 'numberOfVolumes', note, raw + ' vols');
 				return true;
 			case 'pages':
-				item.numPages = note;
+				assign(item, 'numPages', note, raw + ' pages');
 				return true;
 			default:
 				return false;
 			
 		}
 	},
-	'Copyright Date': function(item, note, properties) {
-		item.rights = '© ' + note;
+	'Copyright Date': function(item, note, properties, field) {
+		field = field?field:'Copyright Date';
+		var raw = 'N1  - ' + field + ': ' + note;
+		assign(item, 'rights', '© ' + note, raw);
 		return true;
 	},
 	'Date of Copyright': function(item, note, properties) {
-		return parseProCiteNote.noteFieldMap['Copyright Date'](item, note, properties);
+		return parseProCiteNote.noteFieldMap
+			['Copyright Date'](item, note, properties, 'Date of Copyright');
 	},
-	'Issue ID': function(item, note, properties) {
+	'Issue ID': function(item, note, properties, field) {
+		field = field?field:'Issue ID';
+		var raw = 'N1  - ' + field + ': ' + note;
 		//we expect a number (may be preceded by no.)
 		var m = note.replace(/no?\.?\s+\d+/i).trim().match(/^\d+$/);
 		if(!m) return false;
 
-		item.issue = m[0];
+		assign(item, 'issue', m[0], raw);
 		return true;
 	},
 	'Issue Identification': function(item, note, properties) {
-		return parseProCiteNote.noteFieldMap['Issue ID'](item, note, properties);
+		return parseProCiteNote.noteFieldMap
+			['Issue ID'](item, note, properties, 'Issue Identification');
 	},
 	'Page(s)': 'pages',
 	'Volume ID': 'volume',
@@ -409,6 +417,28 @@ function addAuthor(item, author, creatorTypes) {
 	}
 }
 
+//mark an item with "unmapped" tag if something cannot be mapped to a field
+function markUnmapped(item) {
+	if(!completeItem.unmapped) {
+		item.tags.push({
+			name: '*Some fields not mapped*',
+			type: 1
+		});
+		completeItem.unmapped = true;
+	}
+}
+
+//assign value to item if it's a valid field for that item type
+//otherwise attach it as note
+function assign(item, field, value, raw) {
+	if(field !== false && ZU.fieldIsValidForType(field, item.itemType)) {
+		item[field] = value;
+	} else {
+		item.notes.push({note: raw});
+		markUnmapped(item);
+	}
+}
+
 function processTag(item, tag, value, properties) {
 	// Drop empty fields
 	if (value === undefined || value === null || value == "") return item;	
@@ -417,6 +447,8 @@ function processTag(item, tag, value, properties) {
 				&& Zotero.Utilities.unescapeHTML) {
 		value = Zotero.Utilities.unescapeHTML(value);
 	}
+
+	var raw = tag + '  - ' + value;
 	
 	if(inputFieldMap[tag]) {
 		item[inputFieldMap[tag]] = value;
@@ -443,7 +475,7 @@ function processTag(item, tag, value, properties) {
 			if (item.itemType == "conferencePaper"){
 				item.conferenceName = value;
 			} else {
-				item.publicationTitle = value;
+				assign(item, 'publicationTitle', value, raw);
 			}
 		break;
 		case "BT":
@@ -611,6 +643,7 @@ function processTag(item, tag, value, properties) {
 			item.tags = item.tags.concat(value.split("\n"));
 		break;
 		case "SP":
+			/**TODO: make sure these are never dropped*/
 			// start page
 			if(!item.pages) {
 				item.pages = value;
@@ -645,6 +678,12 @@ function processTag(item, tag, value, properties) {
 			if(!item.ISSN) {
 				item.ISSN = value;
 			}
+
+			if(!ZU.fieldIsValidForType(item.itemType, 'ISBN') ||
+				!ZU.fieldIsValidForType(item.itemType, 'ISSN')) {
+				item.notes.push({note:raw});
+				markUnmapped(item);
+			}
 		break;
 		case "UR":
 		case "L1":
@@ -672,7 +711,7 @@ function processTag(item, tag, value, properties) {
 			if (item.itemType == "patent") {
 				item.patentNumber = value;
 			} else {
-				item.issue = value;
+				assign(item, 'issue', value, raw);
 			}
 		break;
 		case "VL":
@@ -683,7 +722,7 @@ function processTag(item, tag, value, properties) {
 			} else if(item.itemType == "report") {
 				item.reportNumber = value;
 			} else {
-				item.volume = value;
+				assign(item, 'volume', value, raw);
 			}
 		break;
 		case "PB":
@@ -691,7 +730,7 @@ function processTag(item, tag, value, properties) {
 			if (item.itemType == "patent") {
 				item.references = value;
 			} else {
-				item.publisher = value;
+				assign(item, 'publisher', value, raw);
 			}
 		break;
 		case "M1":
@@ -706,6 +745,7 @@ function processTag(item, tag, value, properties) {
 		default:
 			//store whatever we can't parse inside a note
 			item.notes.push( {note: tag + ' - ' + value } );
+			markUnmapped(item);
 		}
 	}
 }
@@ -748,6 +788,8 @@ function completeItem(item) {
 	completeItem.titles.T1 = [];
 	completeItem.titles.T2 = [];
 	completeItem.titles.T3 = [];
+
+	delete completeItem.unmapped;
 
 	// fix for doi: prefixed to DOI
 	if(item.DOI) {
