@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-04-15 22:50:00"
+	"lastUpdated": "2012-04-18 05:03:32"
 }
 
 /*
@@ -108,14 +108,29 @@ function getPrefixes(doc) {
 	}
 }
 
+function unique(arr) {
+	for(var j=0, m=arr.length; j<m; j++) {
+		var a = arr[j];
+		//remove duplicates
+		var k;
+		while((k = arr.indexOf(a, j+1)) != -1) {
+			arr.splice(k,1);
+			m--;
+		}
+	}
+	return arr;
+}
+
 function getContentText(doc, name) {
 	return ZU.xpathText(doc, '//meta[substring(@name, string-length(@name)-'
-							+ (name.length - 1) + ')="'+ name +'"]/@content');
+							+ (name.length - 1) + ')="'+ name +'"][1]/@content');
 }
 
 function getContent(doc, name) {
-	return ZU.xpath(doc, '//meta[substring(@name, string-length(@name)-'
-							+ (name.length - 1) + ')="'+ name +'"]/@content');
+	return unique( ZU.xpath(doc, '//meta[substring(@name, string-length(@name)-'
+							+ (name.length - 1) + ')="'+ name
+							+ '"]/@content')
+					.map(function(t) { return t.textContent; }));
 }
 
 function fixCase(authorName) {
@@ -546,9 +561,10 @@ function addHighwireMetadata(doc, newItem) {
 	var rdfCreators = newItem.creators;
 	newItem.creators = [];
 
+	var allAuthors = [];
 	for(var i=0, n=authorNodes.length; i<n; i++) {
 		//make sure there are no empty authors
-		var authors = authorNodes[i].nodeValue.replace(/(;[^A-Za-z0-9]*)$/, "").split(/\s*;\s/);
+		var authors = authorNodes[i].replace(/(;[^A-Za-z0-9]*)$/, "").split(/\s*;\s/);
 		if (authors.length == 1) {
 			/* If we get nothing when splitting by semicolon, and at least two words on
 			* either side of the comma when splitting by comma, we split by comma. */
@@ -558,16 +574,21 @@ function addHighwireMetadata(doc, newItem) {
 				&& authorsByComma[1].indexOf(" ") !== -1)
 				authors = authorsByComma;
 		}
-		for(var j=0, m=authors.length; j<m; j++) {
-			var author = authors[j];
-			author = ZU.cleanAuthor(author, "author", author.indexOf(",") !== -1);
-			if(author.firstName) {
-				//fix case for personal names
-				author.firstName = fixCase(author.firstName);
-				author.lastName = fixCase(author.lastName);
-			}
-			newItem.creators.push(author);
+		allAuthors = allAuthors.concat(authors);
+	}
+
+	allAuthors = unique(allAuthors);
+
+	for(var j=0, m=allAuthors.length; j<m; j++) {
+		var author = allAuthors[j];
+
+		author = ZU.cleanAuthor(author, "author", author.indexOf(",") !== -1);
+		if(author.firstName) {
+			//fix case for personal names
+			author.firstName = fixCase(author.firstName);
+			author.lastName = fixCase(author.lastName);
 		}
+		newItem.creators.push(author);
 	}
 
 	if( !newItem.creators.length ) {
@@ -603,13 +624,11 @@ function addHighwireMetadata(doc, newItem) {
 	//Deal with tags in a string
 	//we might want to look at the citation_keyword metatag later
 	if(!newItem.tags || !newItem.tags.length)
-		 newItem.tags = getContent(doc, 'citation_keywords')
-		 					.map(function(t) { return t.textContent; });
+		 newItem.tags = getContent(doc, 'citation_keywords');
 
 	//fall back to "keywords"
 	if(!newItem.tags.length)
-		 newItem.tags = ZU.xpath(doc, '//meta[@name="keywords"]/@content')
-		 					.map(function(t) { return t.textContent; });
+		 newItem.tags = getContent(doc, 'keywords');
 
 	/**If we already have tags - run through them one by one,
 	 * split where ncessary and concat them.
@@ -666,7 +685,7 @@ function addHighwireMetadata(doc, newItem) {
 	//i.e. if there is more than one pdf attachment (not common)
 	var pdfURL = getContent(doc, 'citation_pdf_url');
 	if(pdfURL.length) {
-		pdfURL = pdfURL[0].textContent;
+		pdfURL = pdfURL[0];
 		//delete any pdf attachments if present
 		//would it be ok to just delete all attachments??
 		for(var i=0, n=newItem.attachments.length; i<n; i++) {
@@ -970,6 +989,92 @@ var testCases = [
 				"url": "http://scholarworks.umass.edu/open_access_dissertations/508/",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "scholarworks.umass.edu"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://onlinelibrary.wiley.com/doi/10.1002/ijc.26279/abstract;jsessionid=E690DEE54D73A5A84FF9A1A64D959A72.d01t03",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Ryoko",
+						"lastName": "Okamoto",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Remi",
+						"lastName": "Delansorne",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Naoki",
+						"lastName": "Wakimoto",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ngan B.",
+						"lastName": "Doan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tadayuki",
+						"lastName": "Akagi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michelle",
+						"lastName": "Shen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Quoc H.",
+						"lastName": "Ho",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jonathan W.",
+						"lastName": "Said",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "H. Phillip",
+						"lastName": "Koeffler",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"vitamin D",
+					"inecalcitol",
+					"prostate cancer",
+					"antiproliferative effects"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "Inecalcitol, an analog of 1α,25(OH)2D3, induces growth arrest of androgen‐dependent prostate cancer cells",
+				"date": "2012/05/15",
+				"publicationTitle": "International Journal of Cancer",
+				"volume": "130",
+				"issue": "10",
+				"publisher": "Wiley Subscription Services, Inc., A Wiley Company",
+				"DOI": "10.1002/ijc.26279",
+				"language": "en",
+				"pages": "2464-2473",
+				"ISSN": "1097-0215",
+				"url": "http://onlinelibrary.wiley.com/doi/10.1002/ijc.26279/abstract;jsessionid=E690DEE54D73A5A84FF9A1A64D959A72.d01t03",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "onlinelibrary.wiley.com"
 			}
 		]
 	}

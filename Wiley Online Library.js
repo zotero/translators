@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-03-22 22:30:17"
+	"lastUpdated": "2012-04-18 05:04:32"
 }
 
 /*
@@ -146,10 +146,6 @@ function scrape(doc, url, pdfUrl) {
 				//this is not great for summary, but will do for now
 				item.abstractNote = ZU.xpathText(doc, '//div[@id="abstract"]/div[@class="para"]//p', null, "\n");
 			} else {
-				var keywords = ZU.xpathText(doc, '//meta[@name="citation_keywords"]/@content');
-				if(keywords) {
-					item.tags = keywords.split(', ');
-				}
 				item.rights = ZU.xpathText(doc, '//div[@id="titleMeta"]//p[@class="copyright"]');
 				item.abstractNote = ZU.xpathText(doc, '//div[@id="abstract"]/div[@class="para"]', null, "\n");
 			}
@@ -166,8 +162,9 @@ function scrape(doc, url, pdfUrl) {
 			//fetch pdf url. There seems to be some magic value that must be sent
 			// with the request
 			if(!pdfUrl) {
-				var u = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
+				var u = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"][1]/@content');
 				if(u) {
+					Z.debug("Looking for PDF at " + u);
 					ZU.doGet(u, function(text) {
 						var m = text.match(/<iframe id="pdfDocument"[^>]+?src="([^"]+)"/i);
 						if(m) {
@@ -281,7 +278,8 @@ var testCases = [
 					}
 				],
 				"title": "Endnotes",
-				"bookTitle": "The World is Open",
+				"date": "2012/01/11",
+				"bookTitle": "The World is Open: How Web Technology is Revolutionizing Education",
 				"publisher": "Jossey‐Bass",
 				"ISBN": "9781118269381",
 				"DOI": "10.1002/9781118269381.notes",
@@ -358,7 +356,7 @@ var testCases = [
 					},
 					{
 						"firstName": "Rosana",
-						"lastName": "Blanco-Cano",
+						"lastName": "Blanco‐Cano",
 						"creatorType": "author"
 					},
 					{
@@ -379,19 +377,19 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"1897",
-					"Directors (Life and Works) ‐ Ángel García Cardona and Antonio Cuesta13",
-					"Florián Rey (Antonio Martínez de Castillo)",
-					"Florián Rey's La aldea maldita (1930)",
-					"Fructuós Gelabert ‐ made the first Spanish fiction film",
-					"Fructuós Gelabert's Amor que mata (1909)",
-					"Ricardo Baños",
-					"Ricardo Baños and Albert Marro's Don Pedro el Cruel (1911)",
-					"Riña en un café",
 					"silent cinema and its pioneers (1906–1930)",
-					"three films ‐ part of “the preliminary industrial and expressive framework for Spain's budding cinema”",
+					"Ángel García Cardona's El ciego de aldea (1906)",
 					"Ángel García Cardona and Antonio Cuesta",
-					"Ángel García Cardona's El ciego de aldea (1906)"
+					"Ricardo Baños and Albert Marro's Don Pedro el Cruel (1911)",
+					"Fructuós Gelabert's Amor que mata (1909)",
+					"three films ‐ part of “the preliminary industrial and expressive framework for Spain's budding cinema”",
+					"Directors (Life and Works) ‐ Ángel García Cardona and Antonio Cuesta13",
+					"Ricardo Baños",
+					"Florián Rey's La aldea maldita (1930)",
+					"Florián Rey (Antonio Martínez de Castillo)",
+					"Fructuós Gelabert ‐ made the first Spanish fiction film",
+					"Riña en un café",
+					"1897"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -403,16 +401,19 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
+				"title": "Silent Cinema and its Pioneers (1906–1930)",
+				"date": "2009/03/09",
 				"bookTitle": "100 Years of Spanish Cinema",
+				"publisher": "Wiley‐Blackwell",
 				"ISBN": "9781444304794",
+				"DOI": "10.1002/9781444304794.ch1",
 				"language": "en",
+				"pages": "1-20",
 				"url": "http://onlinelibrary.wiley.com/doi/10.1002/9781444304794.ch1/summary",
+				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "onlinelibrary.wiley.com",
 				"rights": "Copyright © 2009 Tatjana Pavlović, Inmaculada Alvarez, Rosana Blanco-Cano, Anitra Grisales, Alejandra Osorio, and Alejandra Sánchez",
-				"abstractNote": "This chapter contains sections titled: \nHistorical and Political Overview of the Period\nContext11\nFilm Scenes: Close Readings\nDirectors (Life and Works)\nCritical Commentary",
-				"title": "Silent Cinema and its Pioneers (1906–1930)",
-				"publisher": "Wiley‐Blackwell",
-				"pages": "1-20"
+				"abstractNote": "This chapter contains sections titled: \nHistorical and Political Overview of the Period\nContext11\nFilm Scenes: Close Readings\nDirectors (Life and Works)\nCritical Commentary"
 			}
 		]
 	},
@@ -779,22 +780,21 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
-				"bookTitle": "Klinisch‐toxikologische Analytik",
+				"title": "β‐Rezeptorenblocker",
+				"date": "2005/01/28",
+				"bookTitle": "Klinisch-toxikologische Analytik: Verfahren, Befunde, Interpretation",
+				"publisher": "Wiley‐VCH Verlag GmbH & Co. KGaA",
 				"ISBN": "9783527603015",
+				"DOI": "10.1002/3527603018.ch17",
 				"language": "de",
+				"pages": "365-370",
 				"url": "http://onlinelibrary.wiley.com/doi/10.1002/3527603018.ch17/summary",
+				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "onlinelibrary.wiley.com",
 				"rights": "Copyright © 2002 Wiley-VCH Verlag GmbH",
-				"abstractNote": "Immunoassay\nHochleistungsflüssigkeitschromatographie (HPLC)\nGaschromatographie\nMedizinische Beurteilung und klinische Interpretation\nLiteratur",
-				"title": "β‐Rezeptorenblocker",
-				"publisher": "Wiley‐VCH Verlag GmbH & Co. KGaA",
-				"pages": "365-370"
+				"abstractNote": "Immunoassay\nHochleistungsflüssigkeitschromatographie (HPLC)\nGaschromatographie\nMedizinische Beurteilung und klinische Interpretation\nLiteratur"
 			}
 		]
 	},
