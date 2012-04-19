@@ -108,26 +108,13 @@ function getPrefixes(doc) {
 	}
 }
 
-function unique(arr) {
-	for(var j=0, m=arr.length; j<m; j++) {
-		var a = arr[j];
-		//remove duplicates
-		var k;
-		while((k = arr.indexOf(a, j+1)) != -1) {
-			arr.splice(k,1);
-			m--;
-		}
-	}
-	return arr;
-}
-
 function getContentText(doc, name) {
 	return ZU.xpathText(doc, '//meta[substring(@name, string-length(@name)-'
 							+ (name.length - 1) + ')="'+ name +'"][1]/@content');
 }
 
 function getContent(doc, name) {
-	return unique( ZU.xpath(doc, '//meta[substring(@name, string-length(@name)-'
+	return ZU.arrayUnique( ZU.xpath(doc, '//meta[substring(@name, string-length(@name)-'
 							+ (name.length - 1) + ')="'+ name
 							+ '"]/@content')
 					.map(function(t) { return t.textContent; }));
@@ -577,7 +564,7 @@ function addHighwireMetadata(doc, newItem) {
 		allAuthors = allAuthors.concat(authors);
 	}
 
-	allAuthors = unique(allAuthors);
+	allAuthors = ZU.arrayUnique(allAuthors);
 
 	for(var j=0, m=allAuthors.length; j<m; j++) {
 		var author = allAuthors[j];
