@@ -5,7 +5,7 @@
 	"target": "",
 	"minVersion": "1.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 80,
 	"inRepository": true,
 	"translatorType": 8,
 	"browserSupport": "gcsi",
@@ -111,9 +111,9 @@ function  doSearch(searchItem) {
 		//running time
 		var time = getValue(base,'ApproximateLength')
 					.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/i);
-		item.runningTime = (time[1] || 0) * 3600 +
+		item.runningTime = ((time[1] || 0) * 3600 +
 							(time[2] || 0) * 60 +
-							(time[3] || 0);
+							(time[3] || 0)) + 's';
 
 		//creators
 		var creators = base.getElementsByTagName('Credits')[0];
