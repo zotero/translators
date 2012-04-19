@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-18 00:13:37"
+	"lastUpdated": "2012-04-19 07:36:18"
 }
 
 function detectImport() {
@@ -43,6 +43,7 @@ var inputFieldMap = {
 	CY:"place",
 	JA:"journalAbbreviation",
 	M3:"DOI",
+	LA:"language",
 	// Accounting for input fields that we don't export the same way;
 	// mainly for common abuses of the spec
 	TI:"title",
@@ -704,8 +705,8 @@ function processTag(item, tag, value, properties) {
 				item.ISSN = value;
 			}
 
-			if(!ZU.fieldIsValidForType(item.itemType, 'ISBN') ||
-				!ZU.fieldIsValidForType(item.itemType, 'ISSN')) {
+			if(!ZU.fieldIsValidForType('ISBN', item.itemType) ||
+				!ZU.fieldIsValidForType('ISSN', item.itemType)) {
 				item.notes.push({note:raw});
 				markUnmapped(item);
 			}
