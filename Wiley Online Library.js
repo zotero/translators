@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-04-19 06:09:44"
+	"lastUpdated": "2012-04-19 06:25:12"
 }
 
 /*
@@ -118,7 +118,8 @@ function scrape(doc, url, pdfUrl) {
 		newItem.complete();
 	} else {
 		//remove duplicate meta tags
-		var metas = ZU.xpath(doc, '//head/meta[not(following::link)]');
+		var metas = ZU.xpath(doc,
+			'//head/link[@media="screen,print"]/following-sibling::meta');
 		for(var i=0, n=metas.length; i<n; i++) {
 			metas[i].parentNode.removeChild(metas[i]);
 		}
