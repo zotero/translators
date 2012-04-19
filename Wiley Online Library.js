@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-04-18 05:04:32"
+	"lastUpdated": "2012-04-18 21:32:53"
 }
 
 /*
@@ -395,10 +395,6 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"title": "Silent Cinema and its Pioneers (1906–1930)",
@@ -536,10 +532,6 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
@@ -599,10 +591,6 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
@@ -615,7 +603,7 @@ var testCases = [
 				"language": "en",
 				"pages": "173-182",
 				"ISSN": "1615-9861",
-				"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/full",
+				"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "onlinelibrary.wiley.com",
 				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
@@ -662,10 +650,6 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
@@ -725,10 +709,6 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
