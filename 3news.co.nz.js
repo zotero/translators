@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-02-28 14:46:19"
+	"browserSupport": "gcsib",
+	"lastUpdated": "2012-04-21 16:24:49"
 }
 
 /*
@@ -66,7 +66,7 @@ function scrape (doc, url) {
 		if (doAbstract(doc, url) != null) {
 		newItem.abstractNote= doAbstract(doc, url);
 		}
-		var au = '//div[@id="newsbody"]/p/strong';
+		var au = '//div[@id="newsbody"]/div/p/strong';
 		var author = doAuthor(doc, url, au);
 		var title = '//h1';
 		if (doTitle(doc, url, title) !=null){
@@ -103,7 +103,7 @@ function scrape (doc, url) {
 		if (doTitle(doc, url, title) !=null){
 			newItem.title = doTitle(doc, url, title);
 		}
-		var author ='//div[@class="news"]/p/strong';
+		var author ='//div[@id="newsbody"]/div/p/strong';
 		if (doAuthor(doc, url, author) != null){
 			newItem.creators.push(Zotero.Utilities.cleanAuthor(doAuthor(doc, url, author), "author"));
 		}
@@ -120,26 +120,16 @@ function scrape (doc, url) {
 }
 
 function doSection (doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-
-	var section = '//div[@id="newsBreadCrumb"]/span/a[1]';
-	var sectionObject =doc.evaluate(section, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var section = '//div[@id="menu"]/ul/li/a[@class="SelectedItem"]';
+	var sectionObject =doc.evaluate(section, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if(sectionObject){
 		return sectionObject.textContent;
 	} else return null;
 }
 
 function dodate ( doc, url ) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-
 	var date='//div[@class="ModArticleDisplayC"]/div/div[@class="news"]/span';
-	var dateObject = doc.evaluate(date, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var dateObject = doc.evaluate(date, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (dateObject){
 			dateObject = dateObject.textContent.replace(/\s(\d:{0,9})+:(\d{0,9})+([a-zA-Z.]{1,4})/, '');
 			return dateObject;
@@ -161,13 +151,8 @@ function doTitle(doc, url, title){
 
 
 function doAuthor(doc, url, author){
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-
 	var author2 = author;
-	var authorObject = doc.evaluate(author2, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var authorObject = doc.evaluate(author2, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (authorObject){
 		authorObject= authorObject.textContent.replace(/By\s/, '');
 		return authorObject;
@@ -250,17 +235,17 @@ var testCases = [
 					}
 				],
 				"url": "http://www.3news.co.nz/Obama-bus-tour-Barbecue-to-Bieber/tabid/417/articleID/230090/Default.aspx",
+				"publicationTitle": "3news.co.nz",
 				"language": "English",
 				"abstractNote": "President Barack Obama said he wanted to use his bus trip through rural North Carolina and Virginia to hear directly from the American people.",
+				"title": "Obama bus tour: Barbecue to Bieber",
 				"section": "World",
 				"rights": "Copyright 2009 TV3",
 				"libraryCatalog": "3news.co.nz",
-				"shortTitle": "Obama bus tour",
-				"publicationTitle": "3news.co.nz",
-				"title": "Obama bus tour: Barbecue to Bieber"
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Obama bus tour"
 			}
-		],
-		"defer": true
+		]
 	},
 	{
 		"type": "web",
@@ -287,12 +272,13 @@ var testCases = [
 				"url": "http://www.3news.co.nz/Unemployed-youth-would-fill-Eden-Park---blog/tabid/1135/articleID/222342/Default.aspx",
 				"language": "English",
 				"abstractNote": "58,000 young people between the ages of 15-24 are not in education, training or work - this is National's biggest first term failure.",
+				"title": "Unemployed youth would fill Eden Park - blog",
+				"section": "Politics",
 				"rights": "Copyright 2009 TV3",
-				"date": "Tue, 16 Aug 2011",
-				"title": "Unemployed youth would fill Eden Park - blog"
+				"libraryCatalog": "3news.co.nz",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
-		],
-		"defer": true
+		]
 	}
 ]
 /** END TEST CASES **/
