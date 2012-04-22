@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-04-06 12:09:46"
+	"lastUpdated": "2012-04-22 00:50:18"
 }
 
 /*
@@ -444,15 +444,15 @@ function doWeb(doc, url) {
 		 */
 		var results = ZU.xpath(doc,
 			'//div[@class="gs_r"]\
-				[./div[@class="gs_fl"]/a[contains(@href,"q=related:")]]');
+				[./div[@class="gs_fl"]/a[contains(@href,"q=info:") or contains(@href,"q=related:")]]');
 
 		var items = new Object();
 		var resultDivs = new Object();
 		var bibtexUrl;
 		for(var i=0, n=results.length; i<n; i++) {
 			bibtexUrl = ZU.xpathText(results[i],
-				'./div[@class="gs_fl"]/a[contains(@href,"q=related:")]/@href')
-				.replace(/\/scholar\?/,'/scholar.bib?')
+				'./div[@class="gs_fl"]/a[contains(@href,"q=info:") or contains(@href,"q=related:")][1]/@href')
+				.replace(/\/scholar.*?\?/,'/scholar.bib?')
 				.replace(/=related:/,'=info:')
 				+ '&ct=citation&cd=1&output=citation';
 			items[bibtexUrl] = ZU.xpathText(results[i], './h3[@class="gs_rt"]');
