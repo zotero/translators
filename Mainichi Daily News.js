@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-04-11 03:30:19"
+	"lastUpdated": "2012-04-21 16:56:12"
 }
 
 // #################################
@@ -42,7 +42,8 @@ var detectWeb = function (doc, url) {
 }
 
 var doWeb = function (doc, url) {
-	var type, availableItems, xpath, found, nodes, headline, pos, myurl, m, items, title;
+	var type, availableItems, xpath, found, nodes, headline, pos, myurl, m, title;
+	var articles = [];
 	type = detectWeb(doc, url);
 	if (type === "multiple") {
 		availableItems = {};
@@ -64,14 +65,16 @@ var doWeb = function (doc, url) {
 			availableItems[found.href] = headline;
 			found = nodes.iterateNext();
 		}
-		if (availableItems!=null) {
-			items = Zotero.selectItems(availableItems);
-			for (myurl in items) {
-				if (items.hasOwnProperty(myurl)) {
-					scrapeAndParse(myurl, availableItems[myurl]);
-				}
+		Zotero.selectItems(availableItems, function (availableItems) {
+			if (!availableItems) {
+				return true;
 			}
-		}
+			for (var i in availableItems) {
+			scrapeAndParse(i, availableItems[i]);
+			}
+			Zotero.wait();	
+		});
+
 	} else if (type === "newspaperArticle") {
 		xpath = '//h1[@class="NewsTitle"]';
 		nodes = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
