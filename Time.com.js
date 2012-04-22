@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2012-03-05 08:17:03"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-04-22 00:04:37"
 }
 
 function detectWeb(doc, url) {
@@ -183,53 +183,6 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.time.com",
 				"shortTitle": "On Scene in Indiana and Kentucky",
-				"ISSN": "0040-718X"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.time.com/time/nation/article/0,8599,2108241,00.html",
-		"items": [
-			{
-				"itemType": "magazineArticle",
-				"creators": [
-					{
-						"firstName": "JIM",
-						"lastName": "SUHR",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "KEN",
-						"lastName": "KUSMER",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"weather",
-					"indiana",
-					"kentucky",
-					"missouri",
-					"tornadoes",
-					"death",
-					"medical,"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"itemID": "http://www.time.com/time/nation/article/0,8599,2108241,00.html",
-				"title": "38 Dead After Storms Pummel Midwest and South",
-				"source": "TIME.com",
-				"publicationTitle": "Time",
-				"url": "http://www.time.com/time/nation/article/0,8599,2108241,00.html",
-				"abstractNote": "From the Gulf Coast to the Great Lakes, the storms touched nearly all walks of life. A fire station was flattened. Roofs were ripped off schools",
-				"date": "Saturday, Mar. 03, 2012",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "www.time.com",
 				"ISSN": "0040-718X"
 			}
 		]

@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-03-17 02:31:41"
+	"browserSupport": "gcsb",
+	"lastUpdated": "2012-04-22 00:02:36"
 }
 
 /**
@@ -148,13 +148,13 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "Richard C.",
-						"lastName": "Cobb",
+						"firstName": "Joao A. N.",
+						"lastName": "Filipe",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Joao A. N.",
-						"lastName": "Filipe",
+						"firstName": "Richard C.",
+						"lastName": "Cobb",
 						"creatorType": "author"
 					},
 					{

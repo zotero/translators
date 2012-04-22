@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2012-03-13 05:00:25"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-04-22 00:25:02"
 }
 
 /*
@@ -40,13 +40,6 @@ http://www.spiegel.de/international/europe/0,1518,700530,00.html
 
 function detectWeb(doc, url) {
 
-	// I use XPaths. Therefore, I need the following block.
-	
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
 	var spiegel_article_XPath = ".//div[@id='spArticleFunctions']";
 	
 	if (doc.evaluate(spiegel_article_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
@@ -68,10 +61,6 @@ function detectWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
 
 	var newItem = new Zotero.Item("newspaperArticle");
 	newItem.url = doc.location.href; 
@@ -80,17 +69,17 @@ function scrape(doc, url) {
 	
 	var title_xPath = ".//*[@id='spArticleColumn']/h2|.//*[@id='spArticleColumn ']/h2";
 	if (doc.evaluate(title_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
-		var title = doc.evaluate(title_xPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var title = doc.evaluate(title_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		newItem.title = title;
 	} else {
-		var title = doc.evaluate('//title', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var title = doc.evaluate('//title', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		title = title.split(" - ")[0];
 		newItem.title = title;
 	}
 
 	// Tags
 	var tags_xPath = '//meta[contains(@name, "keywords")]';
-	var tags= doc.evaluate(tags_xPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().content;
+	var tags= doc.evaluate(tags_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().content;
 	tags = tags.split(/,/);
 	tags = tags.slice(5); // The first six 5 Tags are generic or section info.
 	if (tags[0] != "" ) {
@@ -104,16 +93,15 @@ function scrape(doc, url) {
 	var author_XPath1 = ".//p[contains(@class, 'spAuthor')]"; // Most of the time, the author has its own tag. Easy Case, really.
 	var author_XPath2 =  ".//*[@id='spIntroTeaser']/strong/i"; // Sometimes, though, the author is in italics in the teaser.
 	if (doc.evaluate(author_XPath1, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		var author = doc.evaluate(author_XPath1, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var author = doc.evaluate(author_XPath1, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		//Zotero.debug(author);	 
 	} else if  (doc.evaluate(author_XPath2, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		var author = doc.evaluate(author_XPath2, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var author = doc.evaluate(author_XPath2, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		//Zotero.debug(author);	 
 	} else {
 		author = "";
 	}
-	
-	author = author.replace(/^\s*By\s|^\s*Von\s|\s*$/g, ''); // remove whitespace around the author and the "Von "at the beginning
+	author = author.replace(/^\s*By\s|^\s*(Ein.+?)?[Vv]on\s|\s*$/g, ''); // remove whitespace around the author and the "Von "at the beginning
 	if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/spiegel/)){ // Spiegel Online and the Spiegel Archive have different formatting for the author line
 		author = author.split(/\sund\s|\su\.\s|\;\s|\sand\s/); 
 		for (var i in author) {
@@ -121,7 +109,7 @@ function scrape(doc, url) {
 		}
 	} else {
 	
-		author = author.replace(/,\s|in\s\S*$/, ""); //remove ", location" or "in location"
+		author = author.replace(/(,\s|in\s)\S*$|^\s*Aus.+?berichtet\s*/g, ""); //remove ", location" or "in location"
 		author = author.split(/\sund\s|\su\.\s|\,\s|\sand\s/); 
 	}
 	for (var i in author) {
@@ -133,13 +121,13 @@ function scrape(doc, url) {
 	// Section
 	var section_xPath = ".//ul[contains(@id, 'spChannel')]/li/ul/li/a[contains(@class, 'spActive')]";
 	 if (doc.evaluate(section_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
-		var section = doc.evaluate(section_xPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var section = doc.evaluate(section_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		newItem.section = section;
 	} 
 
 	if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/spiegel/)){
 		var printurl_xPath = ".//div[@id='spArticleFunctions']/ul/li[1]/a";
-		var printurl = doc.evaluate(printurl_xPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+		var printurl = doc.evaluate(printurl_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
 		//Zotero.debug(printurl);
 		newItem.attachments.push({url:printurl, title:doc.title, mimeType:"application/pdf"});
 	} else { 
@@ -154,7 +142,7 @@ function scrape(doc, url) {
 	// Summary
 	var summary_xPath = ".//p[@id='spIntroTeaser']";
 	if (doc.evaluate(summary_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
-		var summary= doc.evaluate(summary_xPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var summary= doc.evaluate(summary_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		newItem.abstractNote = Zotero.Utilities.trim(summary);
 	}
 	
@@ -162,12 +150,12 @@ function scrape(doc, url) {
 	var date1_xPath = ".//h5[contains(@id, 'ShortDate')]"; 
 	var date2_xPath = "//meta[@name='date']";
 	if (doc.evaluate(date1_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
-		var date= doc.evaluate(date1_xPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var date= doc.evaluate(date1_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		if (date.match('/')) {
 			date = date.replace(/(\d\d)\/(\d\d)\/(\d\d\d\d)/, "$2.$1.$3");
 		}
 	} else if (doc.evaluate(date2_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
-		var date= doc.evaluate(date2_xPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().content;
+		var date= doc.evaluate(date2_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().content;
 		date=date.replace(/(\d\d\d\d)-(\d\d)-(\d\d)/, '$3.$2.$1');
 	}
 	newItem.date = Zotero.Utilities.trim(date);
@@ -183,22 +171,18 @@ function scrape(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
+
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		
 		 if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/thema/)){ 
-			var titles = doc.evaluate(".//*[@id='spTeaserColumn']/div/h3/a", doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var titles = doc.evaluate(".//*[@id='spTeaserColumn']/div/h3/a", doc, null, XPathResult.ANY_TYPE, null);
 		} else  if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/suche/)){ 
-			var titles = doc.evaluate(".//*[@id='spTeaserColumn']/div/a", doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var titles = doc.evaluate(".//*[@id='spTeaserColumn']/div/a", doc, null, XPathResult.ANY_TYPE, null);
 		} else  if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/international\/search/)){ 
-			var titles = doc.evaluate("//*[@id='spTeaserColumn']/div/a", doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var titles = doc.evaluate("//*[@id='spTeaserColumn']/div/a", doc, null, XPathResult.ANY_TYPE, null);
 		} else  if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/international\/topic/)){ 
-			var titles = doc.evaluate(".//*[@id='spTeaserColumn']/div/h3/a", doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var titles = doc.evaluate(".//*[@id='spTeaserColumn']/div/h3/a", doc, null, XPathResult.ANY_TYPE, null);
 		} 
 	
 		var next_title;
@@ -232,34 +216,31 @@ var testCases = [
 				"itemType": "newspaperArticle",
 				"creators": [
 					{
-						"firstName": "Ein Kommentar von Peter",
-						"lastName": "MüllerLeipzig",
+						"firstName": "Peter",
+						"lastName": "Müller",
 						"creatorType": "author"
 					}
 				],
 				"notes": [],
 				"tags": [
-					"Angela Merkel",
-					"Betreuungsgeld",
-					"CDU",
-					"Deutschland",
+					"Mindestlohn",
 					"Euro-Krise",
-					"Merkels schwarz-gelbe Regierung",
-					"Mindestlohn"
+					"Betreuungsgeld"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "CDU-Parteitag: Partei im Koma - SPIEGEL ONLINE - Nachrichten - Politik",
+						"title": "CDU-Parteitag: Partei im Koma - SPIEGEL ONLINE",
 						"mimeType": "text/html"
 					}
 				],
 				"url": "http://www.spiegel.de/politik/deutschland/0,1518,797954,00.html",
-				"abstractNote": "Die CDU feiert sich in Leipzig selbst, doch in Wahrheit befindet sie sich in einem traurigen Zustand: Die Partei ist in ein kollektives Koma gefallen, politische Debatten finden kaum noch statt. Hauptverantwortlich dafür ist Angela Merkel.",
-				"libraryCatalog": "Spiegel Online",
 				"title": "Partei im Koma",
+				"abstractNote": "Die CDU feiert sich in Leipzig selbst, doch in Wahrheit befindet sie sich in einem traurigen Zustand: Die Partei ist in ein kollektives Koma gefallen, politische Debatten finden kaum noch statt. Hauptverantwortlich dafür ist Angela Merkel.",
 				"date": "15.11.2011",
-				"publicationTitle": "Spiegel Online"
+				"publicationTitle": "Spiegel Online",
+				"libraryCatalog": "Spiegel Online",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},

@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-01-30 22:48:43"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-04-22 00:05:53"
 }
 
 /*
@@ -44,15 +44,11 @@ function detectWeb(doc, url) {
 	
 
 function doWeb(doc, url){
-var namespace = doc.documentElement.namespaceURI;
-var nsResolver = namespace ? function(prefix) {
-if (prefix == 'x') return namespace; else return null;
-} : null; 
-	
+
 	var articles = new Array();
 	if(detectWeb(doc, url) == "multiple") { 
 		var items = {};
-		var titles = doc.evaluate('//a[@class="l"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//a[@class="l"]', doc, null, XPathResult.ANY_TYPE, null);
 		var title;
 		while (title = titles.iterateNext()) {
 			items[title.href] = title.textContent;
@@ -142,17 +138,16 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://plato.stanford.edu/archives/fall2011/entries/plato/",
 						"title": "SEP - Snapshot",
 						"mimeType": "text/html"
 					}
 				],
 				"title": "Plato",
 				"publicationTitle": "The Stanford Encyclopedia of Philosophy",
-				"url": "http://plato.stanford.edu/archives/fall2011/entries/plato/",
-				"date": "2011",
-				"edition": "Fall 2011",
-				"abstractNote": "Plato (429–347 B.C.E.) is, by any reckoning, one of the mostdazzling writers in the Western literary tradition and one of the mostpenetrating, wide-ranging, and influential authors in the history ofphilosophy. An Athenian citizen of high status, he displays in hisworks his absorption in the political events and intellectual movementsof his time, but the questions he raises are so profound and thestrategies he uses for tackling them so richly suggestive andprovocative that educated readers of nearly every period have in someway been influenced by him, and in practically every age there havebeen philosophers who count themselves Platonists in some importantrespects. He was not the first thinker or writer to whom the word“philosopher” should be applied. But he was soself-conscious about how philosophy should be conceived, and what itsscope and ambitions properly are, and he so transformed theintellectual currents with which he grappled, that the subject ofphilosophy, as it is often conceived—a rigorous and systematicexamination of ethical, political, metaphysical, and epistemologicalissues, armed with a distinctive method—can be called hisinvention. Few other authors in the history of philosophy approximatehim in depth and range: perhaps only Aristotle (who studied with him),Aquinas, and Kant would be generally agreed to be of the same rank.",
+				"url": "http://plato.stanford.edu/archives/sum2012/entries/plato/",
+				"date": "2012",
+				"edition": "Summer 2012",
+				"abstractNote": "Plato (429–347 B.C.E.) is, by any reckoning, one of the mostdazzling writers in the Western literary tradition and one of the mostpenetrating, wide-ranging, and influential authors in the history ofphilosophy. An Athenian citizen of high status, he displays in hisworks his absorption in the political events and intellectual movementsof his time, but the questions he raises are so profound and thestrategies he uses for tackling them so richly suggestive andprovocative that educated readers of nearly every period have in someway been influenced by him, and in practically every age there havebeen philosophers who count themselves Platonists in some importantrespects. He was not the first thinker or writer to whom the word“philosopher” should be applied. But he was soself-conscious about how philosophy should be conceived, and what itsscope and ambitions properly are, and he so transformed theintellectual currents with which he grappled, that the subject ofphilosophy, as it is often conceived—a rigorous and systematicexamination of ethical, political, metaphysical, and epistemologicalissues, armed with a distinctive method—can be called hisinvention. Few other authors in the history of Western philosophy approximatehim in depth and range: perhaps only Aristotle (who studied with him),Aquinas, and Kant would be generally agreed to be of the same rank.",
 				"libraryCatalog": "Stanford Encyclopedia of Philosophy",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
