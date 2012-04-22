@@ -8,13 +8,13 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2012-03-13 14:01:46"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-04-21 17:03:21"
 }
 
 function detectWeb(doc, url) {
 	// Check for search results
-	var searchResults = doc.evaluate('//div[@id="search_results"] | //div[@id="srchContent"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+	var searchResults = doc.evaluate('//div[@id="search_results"] |//div[@id="searchResults"] |//div[@id="srchContent"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (searchResults) return "multiple";
 
 	// Check for article meta tags
@@ -181,7 +181,7 @@ function scrape(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var searchResults = doc.evaluate('//div[@id="search_results"] | //div[@id="srchContent"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+	var searchResults = doc.evaluate('//div[@id="search_results"] |//div[@id="searchResults"]| //div[@id="srchContent"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (searchResults) {
 		var items = Zotero.Utilities.getItemArray(doc, searchResults, '^http://(?:select\.|www\.)nytimes.com/.*\.html(\\?|$)');
 
@@ -204,67 +204,90 @@ function doWeb(doc, url) {
 }
 
 /** BEGIN TEST CASES **/
-var testCases = [{
-	"type": "web",
-	"url": "http://query.nytimes.com/search/query?frow=0&n=10&srcht=a&query=marc+hauser&srchst=nyt&submit.x=18&submit.y=12&hdlquery=&bylquery=&daterange=period&mon1=01&day1=01&year1=2010&mon2=01&day2=18&year2=2011",
-	"items": "multiple"
-}, {
-	"type": "web",
-	"url": "http://query.nytimes.com/gst/abstract.html?res=F30D15FD3F5813738DDDAC0894DB405B828DF1D3",
-	"items": [{
-		"itemType": "newspaperArticle",
-		"creators": [{
-			"firstName": "Special To The New York",
-			"lastName": "Times",
-			"creatorType": "author"
-		}],
-		"notes": [],
-		"tags": [],
-		"seeAlso": [],
-		"attachments": [{
-			"document": {
-				"location": {}
-			},
-			"title": "New York Times Snapshot"
-		}, {
-			"url": "http://article.archive.nytimes.com/1912/03/05/100523320.pdf?AWSAccessKeyId=AKIAJBTN455PTTBQQNRQ&Expires=1327279930&Signature=AmK21Cp20qcYualg%2FLvaT4t7Ypw%3D",
-			"title": "NY Times Archive PDF",
-			"mimeType": "application/pdf"
-		}],
-		"publicationTitle": "The New York Times",
-		"ISSN": "0362-4331",
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://query.nytimes.com/search/query?frow=0&n=10&srcht=a&query=marc+hauser&srchst=nyt&submit.x=18&submit.y=12&hdlquery=&bylquery=&daterange=period&mon1=01&day1=01&year1=2010&mon2=01&day2=18&year2=2011",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
 		"url": "http://query.nytimes.com/gst/abstract.html?res=F30D15FD3F5813738DDDAC0894DB405B828DF1D3",
-		"date": "1912-03-05",
-		"title": "TWO MONEY INQUIRIES.; Hearings of Trust Charges and Aldrich Plan at the Same Time.",
-		"accessionNumber": "100523320",
-		"libraryCatalog": "NYTimes.com",
-		"accessDate": "CURRENT_TIMESTAMP"
-	}]
-}, {
-	"type": "web",
-	"url": "http://www.nytimes.com/2010/08/21/education/21harvard.html?_r=1&scp=1&sq=marc%20hauser&st=cse",
-	"items": [{
-		"itemType": "newspaperArticle",
-		"creators": [{
-			"firstName": "Nicholas",
-			"lastName": "Wade",
-			"creatorType": "author"
-		}],
-		"notes": [],
-		"tags": ["Science and Technology", "Research", "Ethics", "Hauser, Marc D", "Harvard University"],
-		"seeAlso": [],
-		"attachments": [{
-			"title": "New York Times Snapshot"
-		}],
-		"publicationTitle": "The New York Times",
-		"ISSN": "0362-4331",
-		"url": "http://www.nytimes.com/2010/08/21/education/21harvard.html",
-		"date": "2010-08-20",
-		"title": "Harvard Finds Marc Hauser Guilty of Scientific Misconduct",
-		"section": "Education",
-		"accessionNumber": "1248068890906",
-		"libraryCatalog": "NYTimes.com",
-		"accessDate": "CURRENT_TIMESTAMP"
-	}]
-}]
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "Special To The New York",
+						"lastName": "Times",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"document": {
+							"location": {}
+						},
+						"title": "New York Times Snapshot"
+					},
+					{
+						"url": "http://article.archive.nytimes.com/1912/03/05/100523320.pdf?AWSAccessKeyId=AKIAJBTN455PTTBQQNRQ&Expires=1327279930&Signature=AmK21Cp20qcYualg%2FLvaT4t7Ypw%3D",
+						"title": "NY Times Archive PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"publicationTitle": "The New York Times",
+				"ISSN": "0362-4331",
+				"url": "http://query.nytimes.com/gst/abstract.html?res=F30D15FD3F5813738DDDAC0894DB405B828DF1D3",
+				"date": "1912-03-05",
+				"title": "TWO MONEY INQUIRIES.; Hearings of Trust Charges and Aldrich Plan at the Same Time.",
+				"accessionNumber": "100523320",
+				"libraryCatalog": "NYTimes.com",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.nytimes.com/2010/08/21/education/21harvard.html?_r=1&scp=1&sq=marc%20hauser&st=cse",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "Nicholas",
+						"lastName": "Wade",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Science and Technology",
+					"Research",
+					"Ethics",
+					"Hauser, Marc D",
+					"Harvard University"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "New York Times Snapshot"
+					}
+				],
+				"publicationTitle": "The New York Times",
+				"ISSN": "0362-4331",
+				"url": "http://www.nytimes.com/2010/08/21/education/21harvard.html",
+				"date": "2010-08-20",
+				"title": "Harvard Finds Marc Hauser Guilty of Scientific Misconduct",
+				"section": "Education",
+				"accessionNumber": "1248068890906",
+				"libraryCatalog": "NYTimes.com",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
 /** END TEST CASES **/
