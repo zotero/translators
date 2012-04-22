@@ -3,13 +3,13 @@
 	"label": "Welt Online",
 	"creator": "Martin Meyerhoff",
 	"target": "^http://www\\.welt\\.de",
-	"minVersion": "1.0",
+	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-02-23 18:21:05"
+	"lastUpdated": "2012-04-11 06:52:44"
 }
 
 /*
@@ -39,29 +39,19 @@ http://www.welt.de/wirtschaft/article12962920/Krankenkassen-werfen-Aerzten-Gewin
 
 function detectWeb(doc, url) {
 	// I use XPaths. Therefore, I need the following block.
-	
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
 	var welt_article_XPath = ".//meta[contains(@property, 'og:type')]";
-	var welt_multiple_XPath = ".//div[contains(@class, 'h2')]/a";
-	if (doc.evaluate(welt_article_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
-		Zotero.debug("newspaperArticle");
-		return "newspaperArticle";
-	} else if (doc.evaluate(welt_multiple_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
+	var welt_multiple_XPath = "//h4[contains(@class, 'headline')]/a";
+	if (doc.evaluate(welt_multiple_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
 		Zotero.debug("multiple");
 		return "multiple";
-	} 
+	 
+	} else if (doc.evaluate(welt_article_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
+		Zotero.debug("newspaperArticle");
+		return "newspaperArticle";
+	}
 }
 
 function scrape(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
 	var newItem = new Zotero.Item("newspaperArticle");
 	newItem.url = doc.location.href; 
 
@@ -69,45 +59,50 @@ function scrape(doc, url) {
 	// This is for the title! Welt's titles are ok without their "supertitles". They seem to convey - nothing. 
 	
 	var xPath = ".//meta[contains(@property, 'og:title')]";
-	var title = doc.evaluate(xPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().content;
+	var title = doc.evaluate(xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().content;
 	newItem.title = title;
 
 	// Authors
 	
-	var xPath = ".//meta[contains(@name, 'author')]";
-	var author= doc.evaluate(xPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().content;
+	var xPath = ".//meta[contains(@name, 'author')]/@content";
+	var author= ZU.xpathText(doc, xPath);
 	if (author == "WELT ONLINE") {
 		author = "";
 	}
-	author = author.split(/\sund\s|\su\.\s|\,\s|\&|Und/); 
-	for (var i in author) {
-		if (author[i].match(/\s/)) { // only names that contain a space!
-			author[i] = author[i].replace(/^\s*|\s*$/g, '');
-			newItem.creators.push(Zotero.Utilities.cleanAuthor(author[i], "author"));
-		}
+	if (author){ 
+		author = author.split(/\sund\s|\su\.\s|\,\s|\&|Und/)
+		for (var i in author) {
+			if (author[i].match(/\s/)) { // only names that contain a space!
+				author[i] = author[i].replace(/^\s*|\s*$/g, '');
+				newItem.creators.push(Zotero.Utilities.cleanAuthor(author[i], "author"));
+			}
+		}	
 	}
 	
 	// Summary
 	
 	var xPath = '//meta[contains(@name, "description")]';
-	var summary = doc.evaluate(xPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().content;
+	var summary = doc.evaluate(xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().content;
 	newItem.abstractNote = summary;
 
 	// Tags
-	var xPath = '//meta[contains(@name, "keywords")]';
-	var tags= doc.evaluate(xPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().content;
+	var xPath = '//meta[contains(@name, "keywords")]/@content';
+	var tags= ZU.xpathText(doc, xPath);
+	Z.debug(tags)
+	if (tags){
 	tags = tags.split(/,\s/);
-	if (tags[0] != "" ) {
-		for (var i in tags) {
-			tags[i] = tags[i].replace(/^\s*|\s*$/g, '');
-			newItem.tags.push(tags[i]);
+		if (tags[0] != "" ) {
+			for (var i in tags) {
+				tags[i] = tags[i].replace(/^\s*|\s*$/g, '');
+				newItem.tags.push(tags[i]);
+			}
 		}
 	}
-	
 	// Date 
-	var xPath = ".//span[contains(@class, 'date')][last()]";
-	var date= doc.evaluate(xPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	newItem.date = date;
+	var xPath = ".//span[contains(@class, 'time')][last()]";
+	var date= doc.evaluate(xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	if(date.match(/\d{2}\.\d{2}\.\d{2}/))	newItem.date = date;
+	else newItem.date = ZU.xpathText(doc, '//meta[@http-equiv="Last-modified"]/@content').replace(/[A-Za-z]{2},\s*|\d{2}\:\d{2}\:.+/g, "");
 
 	// Publikation (I can only distinguish some articles from Welt am Sonntag by their URL, otherwise its all mishmash)
 	if (doc.location.href.match(/.*wams_print.*/)) {
@@ -117,8 +112,8 @@ function scrape(doc, url) {
 	}
 	
 	// Section
-	var xPath = ".//*[@id='mainNavi']/ul/li[contains(@class, 'menAc')]/a";
-	var section= doc.evaluate(xPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	var xPath = ".//*[@id='mainMenu']/ul/li[contains(@class, 'active')]/a";
+	var section= doc.evaluate(xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	newItem.section = section;
 
 	// Attachment
@@ -129,16 +124,12 @@ function scrape(doc, url) {
 
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
 	var articles = new Array();
 	
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		
-		var titles = doc.evaluate(".//div[contains(@class, 'h2')]/a", doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate("//h4[contains(@class, 'headline')]/a", doc, null, XPathResult.ANY_TYPE, null);
 		
 		var next_title;
 		while (next_title = titles.iterateNext()) {
@@ -180,7 +171,6 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.welt.de/wirtschaft/article12962920/Krankenkassen-werfen-Aerzten-Gewinnstreben-vor.html?print=true",
 						"title": "Gesundheit: Krankenkassen werfen Ärzten Gewinnstreben vor - Nachrichten Wirtschaft - WELT ONLINE",
 						"mimeType": "text/html"
 					}
@@ -188,7 +178,7 @@ var testCases = [
 				"url": "http://www.welt.de/wirtschaft/article12962920/Krankenkassen-werfen-Aerzten-Gewinnstreben-vor.html",
 				"title": "Krankenkassen werfen Ärzten Gewinnstreben vor",
 				"abstractNote": "Die Chefin des Krankenkassenverbands Doris Pfeiffer fordert den Gesundheitsminister auf, überschüssiges Geld im Gesundheitsfonds zurückzugegeben.",
-				"date": "26.03.2011",
+				"date": "26.03.11",
 				"publicationTitle": "Welt Online",
 				"section": "Wirtschaft",
 				"libraryCatalog": "Welt Online",
