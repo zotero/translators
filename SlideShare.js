@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2012-03-26 03:24:52"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-04-22 00:32:12"
 }
 
 function scrape(doc) {
@@ -22,11 +22,11 @@ function scrape(doc) {
 	if(creator && creator.trim())
 		item.creators.push({lastName:creator.trim(), creatorType:'author'});
 
-	item.abstractNote = ZU.xpathText(doc, '(//p[@class="descriptionExpanded"] |\
-					//p[@class="description" and\
-					not(following-sibling::p[@class="descriptionExpanded"])])');
+	item.abstractNote = ZU.xpathText(doc, '(//p[contains(@class, "descriptionExpanded")] |\
+					//p[contains(@class, "description") and\
+					not(following-sibling::p[contains(@class, "descriptionExpanded")])])');
 
-	var tags = ZU.xpath(doc, '//p[@class="slideshow-tags"]/a');
+	var tags = ZU.xpath(doc, '//p[contains(@class, "slideshow-tags")]/a');
 	for(var i=0, n=tags.length; i<n; i++) {
 		item.tags.push(tags[i].textContent.trim());
 	}
