@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-19 07:36:18"
+	"lastUpdated": "2012-04-24 15:51:20"
 }
 
 function detectImport() {
@@ -811,9 +811,17 @@ function completeItem(item) {
 		item.publicationTitle = item.bookTitle;
 	}
 
-	if(!item.series) item.series = titles.shift();
+	var st = titles.shift()
+	if(st && !item.series) assign(item, 'series', st, 'Series Title: ' + st);
 	//There's no way to distinguish these in RIS anyway
 	item.seriesTitle = item.series;
+
+	//store left-over titles in notes
+	st = titles.join('; ');
+	if(st) {
+		item.notes.push({note: "Unmapped titles: " + st});
+		markUnmapped(item);
+	}
 
 	completeItem.titles.T1 = [];
 	completeItem.titles.T2 = [];
@@ -1409,6 +1417,9 @@ var testCases = [
 				"notes": [
 					{
 						"note": "<p>Series Issue ID: No. II</p>"
+					},
+					{
+						"note": "Series Title: PALD Research Report"
 					}
 				],
 				"tags": [
@@ -1423,9 +1434,7 @@ var testCases = [
 				"attachments": [],
 				"place": "University of Sussex: Institute of Development Studies",
 				"date": "1995",
-				"title": "Wealth and Poverty in the Mongolian Pastoral Economy",
-				"series": "PALD Research Report",
-				"seriesTitle": "PALD Research Report"
+				"title": "Wealth and Poverty in the Mongolian Pastoral Economy"
 			}
 		]
 	}
