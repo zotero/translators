@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-15 14:48:19"
+	"lastUpdated": "2012-04-25 09:42:53"
 }
 
 /*
@@ -56,8 +56,9 @@ function detectWeb(doc, url) {
 			recordType = recordType.textContent.trim();
 		}
 		//hack for NYTs, which misses crucial data.
-		if (ZU.xpathText(doc, '//div[@class="display_record_indexing_fieldname" and contains(text(),"Database")]/following-sibling::div[@class="display_record_indexing_data"]').indexOf("The New York Times") !== -1){
-			sourceType ="Historical Newspapers";
+		var nytpath = '//div[@class="display_record_indexing_fieldname" and contains(text(),"Database")]/following-sibling::div[@class="display_record_indexing_data"]'
+		if (ZU.xpathText(doc, nytpath) !=null){
+			if (ZU.xpathText(doc, nytpath).indexOf("The New York Times") !== -1) sourceType ="Historical Newspapers";
 		}
 		var type = getItemType(sourceType, documentType, recordType)
 
@@ -159,11 +160,22 @@ function scrape(doc) {
 			}
 			break;
 		case "Author":
+			if (value.indexOf(' and ')!=-1 || value.indexOf(' AND ')!=-1){
+				//sometimes we do have multiple authors in one node
+				author = value.replace(/By\s*/, "").replace(/Special\s+to.+/, "");
+				var authors = author.split(/ [Aa][Nn][Dd] /);
+				for (var i in authors){
+					if (authors[i] == authors[i].toUpperCase()) {
+						item.creators[i] = ZU.cleanAuthor(ZU.capitalizeTitle(authors[i].toLowerCase(), true), "author");
+					}	
+				else item.creators[i] = ZU.cleanAuthor(authors[i], "author");
+				}
+			}
+			else{
 			item.creators = valueAArray.map(
-
 			function (author) {
 				return Zotero.Utilities.cleanAuthor(author, "author", author.indexOf(',') !== -1); // useComma
-			});
+			});}
 			break;
 
 			//for me the tag is always "Author" but let's keep "Authors" to be safe.
@@ -330,14 +342,17 @@ function scrape(doc) {
 	}
 	//Getting authors for NYT
 	if (!item.creators.length){
-		var author = ZU.xpathText(doc, '//span[@class="titleAuthorETC small"]/a').replace(/By\s*/, "").replace(/Special\s+to.+/, "");
-		var authors = author.split(/ [Aa][Nn][Dd] /);
-		for (var i in authors){
-			if (authors[i] == authors[i].toUpperCase()) {
-				item.creators[i] = ZU.cleanAuthor(ZU.capitalizeTitle(authors[i].toLowerCase(), true), "author");
+		var author = ZU.xpathText(doc, '//span[@class="titleAuthorETC small"]/a');
+		if (author!=null) {
+			author = author.replace(/By\s*/, "").replace(/Special\s+to.+/, "");
+			var authors = author.split(/ [Aa][Nn][Dd] /);
+			for (var i in authors){
+				if (authors[i] == authors[i].toUpperCase()) {
+					item.creators[i] = ZU.cleanAuthor(ZU.capitalizeTitle(authors[i].toLowerCase(), true), "author");
+				}	
+				else item.creators[i] = ZU.cleanAuthor(authors[i], "author");
 			}
-			else item.creators[i] = ZU.cleanAuthor(authors[i], "author");
-		}
+		}	
 	}
 	if (!item.itemType && item.libraryCatalog && item.libraryCatalog.match(/Historical Newspapers/)) item.itemType = "newspaperArticle";
 
