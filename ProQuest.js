@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-25 09:42:53"
+	"lastUpdated": "2012-04-25 11:53:22"
 }
 
 /*
@@ -691,6 +691,48 @@ var testCases = [
 				"libraryCatalog": "ProQuest Historical Newspapers: The New York Times (1851-2008)",
 				"abstractNote": "For some months now, a gradual thaw has been in the making between East Germany and West Germany. So far, the United States has paid scant attention -- an attitude very much in keeping with our neglect of East Germany throughout the postwar period. We should reconsider this policy before things much further -- and should in particular begin to look more closely at what is going on in East Germany.",
 				"URL": "http://search.proquest.com/hnpnewyorktimes/docview/122485317/abstract/1357D8A4FC136DF28E3/11?accountid=12861"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://search.proquest.com/docview/129023293/abstract?accountid=12861",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "ProQuest Record",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "ProQuest PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "ProQuest PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"place": "New York, N.Y.",
+				"title": "THE PRESIDENT AND ALDRICH.: Railway Age Relates Happenings Behind the Scenes Regarding Rate Regulation.",
+				"publicationTitle": "Wall Street Journal (1889-1922)",
+				"pages": "7",
+				"numPages": "1",
+				"date": "Dec 5, 1905",
+				"publisher": "Dow Jones & Company Inc",
+				"language": "English",
+				"callNumber": "129023293",
+				"rights": "Copyright Dow Jones & Company Inc Dec 5, 1905",
+				"libraryCatalog": "ProQuest Historical Newspapers: The Wall Street Journal (1889-1994)",
+				"abstractNote": "The Railway Age says: \"The history of the affair (railroad rate question) as it has gone on behind the scenes, is about as follows.",
+				"URL": "http://search.proquest.com/docview/129023293/abstract?accountid=12861",
+				"proceedingsTitle": "Wall Street Journal (1889-1922)",
+				"shortTitle": "THE PRESIDENT AND ALDRICH."
 			}
 		]
 	}
