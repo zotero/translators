@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-03-03 05:47:52"
+	"browserSupport": "gcsb",
+	"lastUpdated": "2012-04-25 23:32:31"
 }
 
 function detectWeb(doc, url) {
@@ -69,7 +69,7 @@ function doWeb(doc, url) {
 		} else if (doc.location.href.match(/\/lm\//)) { // Show selector for Lists
 			var xpath = '//span[@id="lm_asinlink95"]//a'
 		} else { // Show selector for Search results
-			var xpath = '//div[@class="productTitle"]/a | //a[span[@class="srTitle"]] | //div[@class="title"]/a[@class="title"]| //h3[@class="title"]/a[@class="title"]';
+			var xpath = '//div[@class="productTitle"]/a | //a[span[@class="srTitle"]] | //div[@class="title"]/a[@class="title"]| //h3[@class="title"]/a[@class="title"] | //h3[@class="newaps"]/a';
 		}
 		var elmts = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 		var elmt = elmts.iterateNext();
