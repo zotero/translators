@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-21 17:03:21"
+	"lastUpdated": "2012-04-27 13:47:01"
 }
 
 function detectWeb(doc, url) {
@@ -207,6 +207,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
+		"defer": true,
 		"url": "http://query.nytimes.com/search/query?frow=0&n=10&srcht=a&query=marc+hauser&srchst=nyt&submit.x=18&submit.y=12&hdlquery=&bylquery=&daterange=period&mon1=01&day1=01&year1=2010&mon2=01&day2=18&year2=2011",
 		"items": "multiple"
 	},

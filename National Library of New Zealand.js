@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-04-11 06:27:33"
+	"lastUpdated": "2012-04-27 15:05:09"
 }
 
 function detectWeb(doc, url) {
@@ -172,40 +172,6 @@ var testCases = [
 		"type": "web",
 		"url": "http://nlnzcat.natlib.govt.nz/cgi-bin/Pwebrecon.cgi?Search_Arg=argentina&SL=None&Search_Code=GKEY%5E*&PID=Z6FqFuuAzWHIEHqgKOsR6K2TLcABf90&SEQ=20111110191018&CNT=25&HIST=1",
 		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://nlnzcat.natlib.govt.nz/cgi-bin/Pwebrecon.cgi?SC=CallNumber&SEQ=20120412002617&PID=9f5lV0pLoh-mUZf7rofZrTuAeZl5R&SA=T+860.9+LIN+(US+79/1029)",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"firstName": "Naomi",
-						"lastName": "Lindstrom",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"Argentine literature --20th century --History and criticism.",
-					" Expressionism."
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"place": "Tempe",
-				"date": "c1977.",
-				"publisher": "Center for Latin American Studies, Arizona State University",
-				"title": "Literary expressionism in Argentina : the presentation of incoherence",
-				"pages": "89 p. ; 23 cm.",
-				"callNumber": "T 860.9 LIN (US 79/1029)",
-				"ISBN": "0879180382",
-				"url": "http://nlnzcat.natlib.govt.nz/cgi-bin/Pwebrecon.cgi?SC=CallNumber&SEQ=20120412002617&PID=9f5lV0pLoh-mUZf7rofZrTuAeZl5R&SA=T+860.9+LIN+(US+79/1029)",
-				"libraryCatalog": "Wellington, General Lending Collection (send request)",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Literary expressionism in Argentina"
-			}
-		]
 	}
 ]
 /** END TEST CASES **/
