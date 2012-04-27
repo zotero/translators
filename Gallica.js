@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcs",
+	"browserSupport": "gcsbv",
 	"lastUpdated": "2012-04-27 13:03:31"
 }
 
@@ -179,7 +179,6 @@ function scrapeGallica(doc, nsResolver, div, type, direct_url)
 			}
 			else
 			{
-				Z.debug(contenu)
 				item.creators.push(Zotero.Utilities.cleanAuthor(contenu, "author", true));	
 			}
 		}
