@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-04-21 16:56:12"
+	"lastUpdated": "2012-04-27 13:08:03"
 }
 
 // #################################
@@ -169,6 +169,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "http://mainichi.jp/search/index.html?q=bank&imgsearch=off",
 		"items": "multiple"
 	}

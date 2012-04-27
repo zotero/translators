@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-01-30 22:49:41"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-04-27 13:03:31"
 }
 
 function detectWeb(doc, url) {
@@ -172,13 +172,14 @@ function scrapeGallica(doc, nsResolver, div, type, direct_url)
 		}
 		else if ( contenu = text.split(/^(Auteur|Author|Autor) : /)[2])
 		{
-			contenu = contenu.replace(/(See only the results matching this author|Ne voir que les résultats de cet auteur)/, '');
+			contenu = contenu.replace(/(See only the results matching this author|Ne voir que les résultats de cet auteur)/, '').replace(/\(.+?\)/, "");
 			if (type == 'artwork')
 			{
 				 item.creators.push(Zotero.Utilities.cleanAuthor(contenu, "artist", true));	
 			}
 			else
 			{
+				Z.debug(contenu)
 				item.creators.push(Zotero.Utilities.cleanAuthor(contenu, "author", true));	
 			}
 		}

@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2012-04-10 12:00:29"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-04-27 13:06:22"
 }
 
 /*
@@ -182,6 +182,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "http://nypl.bibliocommons.com/search?t=smart&search_category=keyword&q=tatar&commit=Search&searchOpt=catalogue",
 		"items": "multiple"
 	},
