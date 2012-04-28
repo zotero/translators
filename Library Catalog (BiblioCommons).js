@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2012-04-27 13:06:22"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-04-28 00:35:01"
 }
 
 /*
@@ -182,12 +182,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"defer": true,
-		"url": "http://nypl.bibliocommons.com/search?t=smart&search_category=keyword&q=tatar&commit=Search&searchOpt=catalogue",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "http://bostonpl.bibliocommons.com/item/show/3679347042_adam_smith",
 		"items": [
 			{
@@ -215,7 +209,7 @@ var testCases = [
 				"numPages": "179",
 				"series": "Major conservative and libertarian thinkers",
 				"seriesNumber": "v. 16",
-				"callNumber": "HB103.S6",
+				"callNumber": "HB103.S6 O88 2011",
 				"libraryCatalog": "bostonpl Library Catalog"
 			}
 		]

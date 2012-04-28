@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2012-03-07 17:24:39"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-04-28 00:33:00"
 }
 
 /*
@@ -127,58 +127,72 @@ function addCreator(item, creator, type) {
 	return item;
 }
 /** BEGIN TEST CASES **/
-var testCases = [{
-	"type": "web",
-	"url": "http://www.imdb.com/title/tt0089276/",
-	"items": [{
-		"itemType": "film",
-		"creators": [{
-			"firstName": "Luis",
-			"lastName": "Puenzo",
-			"creatorType": "director"
-		}, {
-			"firstName": "Aída",
-			"lastName": "Bortnik",
-			"creatorType": "scriptwriter"
-		}, {
-			"firstName": "Luis",
-			"lastName": "Puenzo",
-			"creatorType": "scriptwriter"
-		}, {
-			"firstName": "Norma",
-			"lastName": "Aleandro",
-			"creatorType": "contributor"
-		}, {
-			"firstName": "Héctor",
-			"lastName": "Alterio",
-			"creatorType": "contributor"
-		}, {
-			"firstName": "Chunchuna",
-			"lastName": "Villafañe",
-			"creatorType": "contributor"
-		}, {
-			"firstName": "Hugo",
-			"lastName": "Arana",
-			"creatorType": "contributor"
-		}],
-		"notes": [],
-		"tags": [],
-		"seeAlso": [],
-		"attachments": [{
-			"url": "http://ia.media-imdb.com/images/M/MV5BMTMyNTc1MjIwNF5BMl5BanBnXkFtZTcwOTcyMTcyMQ@@._V1_SX320.jpg",
-			"title": "Poster"
-		}],
-		"title": "The Official Story",
-		"date": "8 Nov 1985",
-		"genre": "Drama, History, Thriller, War",
-		"abstractNote": "After the end of the Dirty War, a high school teacher sets out to find out who the mother of her adopted daughter is.",
-		"runningTime": "1 hr 52 mins",
-		"extra": "IMDB ID: tt0089276; IMDB Rating: 7.7 (3036 votes); Rotten Tomatoes: 8.3 (8 reviews  8 fresh, 0 rotten), Tomato Meter: 86",
-		"libraryCatalog": "IMDb"
-	}]
-}, {
-	"type": "web",
-	"url": "http://www.imdb.com/find?q=shakespeare&s=tt",
-	"items": "multiple"
-}]
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.imdb.com/title/tt0089276/",
+		"items": [
+			{
+				"itemType": "film",
+				"creators": [
+					{
+						"firstName": "Luis",
+						"lastName": "Puenzo",
+						"creatorType": "director"
+					},
+					{
+						"firstName": "Aída",
+						"lastName": "Bortnik",
+						"creatorType": "scriptwriter"
+					},
+					{
+						"firstName": "Luis",
+						"lastName": "Puenzo",
+						"creatorType": "scriptwriter"
+					},
+					{
+						"firstName": "Norma",
+						"lastName": "Aleandro",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Héctor",
+						"lastName": "Alterio",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Chunchuna",
+						"lastName": "Villafañe",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Hugo",
+						"lastName": "Arana",
+						"creatorType": "contributor"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Poster"
+					}
+				],
+				"title": "The Official Story",
+				"date": "8 Nov 1985",
+				"genre": "Drama, History, Thriller, War",
+				"abstractNote": "After the end of the Dirty War, a high school teacher sets out to find out who the mother of her adopted daughter is.",
+				"runningTime": "1 hr 52 mins",
+				"extra": "IMDB ID: tt0089276; IMDB Rating: 7.7 (3036 votes); Rotten Tomatoes: N/A (N/A reviews  N/A fresh, N/A rotten), Tomato Meter: N/A",
+				"libraryCatalog": "IMDb"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.imdb.com/find?q=shakespeare&s=tt",
+		"items": "multiple"
+	}
+]
 /** END TEST CASES **/
