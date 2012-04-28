@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 5,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2012-03-23 04:26:44"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-04-27 19:42:46"
 }
 
 function detectWeb(doc, url) {
@@ -109,6 +109,18 @@ function fetchIds(ids, url) {
 				importer.setString(text);
 				importer.setHandler("itemDone", function (obj, item) {
 					item.attachments = [{url: url, type: "text/html", title: "ISI Web of Knowledge Record"}];
+					//remove all caps from titles and authors.
+					for (i in item.creators){
+						if (item.creators[i].lastName && item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
+							item.creators[i].lastName = Zotero.Utilities.capitalizeTitle(item.creators[i].lastName.toLowerCase(),true);
+						}
+						if (item.creators[i].firstName && item.creators[i].firstName == item.creators[i].firstName.toUpperCase()) {
+							item.creators[i].firstName = Zotero.Utilities.capitalizeTitle(item.creators[i].firstName.toLowerCase(),true);
+						}
+					}
+					if (item.title == item.title.toUpperCase()) {
+						item.title = Zotero.Utilities.capitalizeTitle(item.title.toLowerCase(),true);
+					}					
 					//Z.debug(item.title);
 					item.complete();
 				});
@@ -150,7 +162,7 @@ function processTag(item, field, content) {
 			Zotero.debug("Unknown type: " + content);
 		}
 	} else if ((field == "AF" || field == "AU")) {
-		//Z.debug(content);
+		Z.debug("author: " + content);
 		authors = content.split("\n");
 		for each (var i in authors) {
 			var author = i.split(",");
@@ -291,14 +303,15 @@ function doImport(text) {
 	while((rawLine = Zotero.read()) !== false) {    // until EOF
 		// trim leading space if this line is not part of a note
 		line = rawLine.replace(/^\s+/, "");
-		var split = line.match(/^([A-Z0-9]{2}) (?:([^\n]*))?/);
+		Z.debug("line: " + line);
+		var split = line.match(/^([A-Z0-9]{2})\s(?:([^\n]*))?/);
 		// Force a match for ER
-		if (line.substr(0,2) == "ER") split = ["","ER",""];
+		if (line == "ER") split = ["","ER",""];
 		if(split) {
 			// if this line is a tag, take a look at the previous line to map
 			// its tag
 			if(tag) {
-				//Zotero.debug("tag: '"+tag+"'; data: '"+data+"'");
+				Zotero.debug("tag: '"+tag+"'; data: '"+data+"'");
 				processTag(item, tag, data);
 			}
 
@@ -321,7 +334,7 @@ function doImport(text) {
 		} else {
 			// otherwise, assume this is data from the previous line continued
 			if(tag == "AU" || tag == "AF" || tag == "BE") {
-				//Z.debug(rawLine);
+				Z.debug(rawLine);
 				// preserve line endings for AU fields
 				data += rawLine.replace(/^  /,"\n");
 			} else if(tag) {
