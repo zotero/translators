@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
+	"browserSupport": "gbv",
 	"lastUpdated": "2012-04-28 23:36:59"
 }
 
@@ -68,7 +68,7 @@ function detectWeb(doc, url) {
  * @param b : string to use for replacing @a
  */
 function Remplace(expr,a,b) {
-	var i=0
+	var i=0;
 	while (i!=-1) {
 		i=expr.indexOf(a,i);
 		if (i>=0) {
@@ -76,7 +76,7 @@ function Remplace(expr,a,b) {
 			i+=b.length;
 		}
 	}
-	return expr
+	return expr;
 }
 
 /**
