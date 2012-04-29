@@ -113,7 +113,7 @@ var testCases = [
 				"attachments": [],
 				"publication": "Medscape - eMedicine",
 				"title": "Brugada Syndrome",
-				"date": "2012-01-09-05:00",
+				"date": false,
 				"abstractNote": "Brugada Syndrome. Brugada syndrome is a disorder characterized by sudden death associated with one of several electrocardiographic (ECG) patterns characterized by incomplete right bundle-branch block and ST elevations in the anterior precordial leads.",
 				"url": "http://emedicine.medscape.com/article/163751-overview",
 				"libraryCatalog": "eMedicine",

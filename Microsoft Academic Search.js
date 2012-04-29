@@ -186,22 +186,23 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Link to page at www.journals.cambridge.org",
+						"title": "Link to page at www.bsos.umd.edu",
 						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
-						"title": "PDF from www.bsos.umd.edu",
-						"mimeType": "application/pdf"
+						"title": "Link to page at www.journals.cambridge.org",
+						"mimeType": "text/html",
+						"snapshot": false
 					}
 				],
+				"issue": "01",
+				"DOI": "10.1017/S1049096509090337",
+				"libraryCatalog": "Microsoft Academic Search",
 				"title": "Out of Cite! How Reference Managers Are Taking Research to the Next Level",
 				"publicationTitle": "Ps-political Science & Politics",
 				"volume": "42",
-				"date": "2009",
-				"issue": "01",
-				"DOI": "10.1017/S1049096509090337",
-				"libraryCatalog": "Microsoft Academic Search"
+				"date": "2009"
 			}
 		]
 	},

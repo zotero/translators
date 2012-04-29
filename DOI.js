@@ -144,28 +144,36 @@ var testCases = [
 				"creators": [
 					{
 						"creatorType": "author",
-						"firstName": "J",
+						"firstName": "Jianxun",
 						"lastName": "Mou"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Jie",
+						"lastName": "Yang"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Zhifeng",
+						"lastName": "Shao"
 					}
 				],
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [
-					{
-						"document": false
-					}
+					{}
 				],
-				"publicationTitle": "Journal of Molecular Biology",
-				"volume": "248",
-				"ISSN": "00222836",
 				"issue": "3",
-				"date": "1995-5-5",
-				"pages": "507-512",
+				"ISSN": "00222836",
 				"DOI": "10.1006/jmbi.1995.0238",
 				"url": "http://www.crossref.org/help/Content/01_About_DOIs/What_is_a_DOI.htm",
-				"title": "Atomic Force Microscopy of Cholera Toxin B-oligomers Bound to Bilayers of Biologically Relevant Lipids",
-				"libraryCatalog": "CrossRef"
+				"libraryCatalog": "CrossRef",
+				"publicationTitle": "Journal of Molecular Biology",
+				"volume": "248",
+				"date": "5/1995",
+				"pages": "507-512",
+				"title": "Atomic Force Microscopy of Cholera Toxin B-oligomers Bound to Bilayers of Biologically Relevant Lipids"
 			}
 		]
 	},
