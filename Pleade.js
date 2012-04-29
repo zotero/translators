@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gbv",
-	"lastUpdated": "2011-10-30 21:15:14"
+	"browserSupport": "g",
+	"lastUpdated": "2012-04-28 23:36:59"
 }
 
 /*
@@ -266,7 +266,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://gael.gironde.fr/pleade/ead.html?id=FRAD033_IR_11AV#!{%22content%22:[%22FRAD033_IR_11AV_e0000023%22,true,%22%22]}",
+		"url": "http://gael.gironde.fr/ead.html?id=FRAD033_IR_11AV#!{%22content%22:[%22FRAD033_IR_11AV_e0000023%22,true,%22%22]}",
 		"items": [
 			{
 				"itemType": "book",
@@ -300,12 +300,15 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"url": "http://jubilotheque.upmc.fr//ead.html?id=GM_000001_014",
-				"language": "fre",
-				"rights": "Utilisation libre dans le cadre d'un usage non commercial, en mentionnant la source et sans dénaturer l'oeuvre Free use for non-commercial purposes with mandatory acknowledgement of the source and without adulterating the work",
-				"libraryCatalog": "Pleade",
 				"title": "Journal d'un voyage géologique fait à travers toute la chaîne des Carpathes, en Bukowine, en Transylvanie et dans le Marmarosch / par feu M. Lill de Lilienbach. Observations remises en ordre et accompagnées de notes par M.A. Boué",
 				"date": "1834",
-				"publisher": "F.-G. Levrault. Paris ; Strasbourg"
+				"publisher": "F.-G. Levrault. Paris ; Strasbourg",
+				"language": "fre",
+				"rights": "Utilisation libre dans le cadre d'un usage non commercial, en mentionnant la source et sans dénaturer l'oeuvre Free use for non-commercial purposes with mandatory acknowledgement of the source and without adulterating the work",
+				"callNumber": "260",
+				"libraryCatalog": "Pleade",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"checkFields": "title"
 			}
 		]
 	},
