@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 5,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-30 08:30:58"
+	"lastUpdated": "2012-04-30 08:40:58"
 }
 
 function detectWeb(doc, url) {
@@ -328,7 +328,7 @@ function doImport(text) {
 		} else {
 			// otherwise, assume this is data from the previous line continued
 			if(tag == "AU" || tag == "AF" || tag == "BE") {
-				Z.debug(rawLine);
+				//Z.debug(rawLine);
 				// preserve line endings for AU fields
 				data += rawLine.replace(/^  /,"\n");
 			} else if(tag) {
@@ -698,54 +698,76 @@ var testCases = [
 		"input": "﻿FN Thomson Reuters Web of Knowledge\nVR 1.0\nPT S\nAU McCormick, MC\n   Litt, JS\n   Smith, VC\n   Zupancic, JAF\nAF McCormick, Marie C.\n   Litt, Jonathan S.\n   Smith, Vincent C.\n   Zupancic, John A. F.\nBE Fielding, JE\n   Brownson, RC\n   Green, LW\nTI Prematurity: An Overview and Public Health Implications\nSO ANNUAL REVIEW OF PUBLIC HEALTH, VOL 32\nSE Annual Review of Public Health\nLA English\nDT Review\nDE infant mortality; childhood morbidity; prevention\nID LOW-BIRTH-WEIGHT; NEONATAL INTENSIVE-CARE; QUALITY-OF-LIFE; EXTREMELY\n   PRETERM BIRTH; YOUNG-ADULTS BORN; AGE 8 YEARS; CHILDREN BORN;\n   BRONCHOPULMONARY DYSPLASIA; LEARNING-DISABILITIES; EXTREME PREMATURITY\nAB The high rate of premature births in the United States remains a public\n   health concern. These infants experience substantial morbidity and\n   mortality in the newborn period, which translate into significant\n   medical costs. In early childhood, survivors are characterized by a\n   variety of health problems, including motor delay and/or cerebral palsy,\n   lower IQs, behavior problems, and respiratory illness, especially\n   asthma. Many experience difficulty with school work, lower\n   health-related quality of life, and family stress. Emerging information\n   in adolescence and young adulthood paints a more optimistic picture,\n   with persistence of many problems but with better adaptation and more\n   positive expectations by the young adults. Few opportunities for\n   prevention have been identified; therefore, public health approaches to\n   prematurity include assurance of delivery in a facility capable of\n   managing neonatal complications, quality improvement to minimize\n   interinstitutional variations, early developmental support for such\n   infants, and attention to related family health issues.\nC1 [McCormick, MC] Harvard Univ, Dept Soc Human Dev & Hlth, Sch Publ Hlth, Boston, MA 02115 USA\n   [McCormick, MC; Litt, JS; Smith, VC; Zupancic, JAF] Beth Israel Deaconess Med Ctr, Dept Neonatol, Boston, MA 02215 USA\n   [Litt, JS] Childrens Hosp Boston, Div Newborn Med, Boston, MA 02115 USA\nRP McCormick, MC (reprint author), Harvard Univ, Dept Soc Human Dev & Hlth, Sch Publ Hlth, Boston, MA 02115 USA\nEM mmccormi@hsph.harvard.edu\n   vsmith1@bidmc.harvard.edu\n   jzupanci@bidmc.harvard.edu\n   Jonathan.Litt@childrens.harvard.edu\nNR 91\nTC 1\nZ9 1\nPU ANNUAL REVIEWS\nPI PALO ALTO\nPA 4139 EL CAMINO WAY, PO BOX 10139, PALO ALTO, CA 94303-0897 USA\nSN 0163-7525\nBN 978-0-8243-2732-3\nJ9 ANNU REV PUBL HEALTH\nJI Annu. Rev. Public Health\nPY 2011\nVL 32\nBP 367\nEP 379\nDI 10.1146/annurev-publhealth-090810-182459\nPG 13\nGA BUZ33\nUT WOS:000290776200020\nER\n\nEF",
 		"items": [
 			{
-				"itemType": "journalArticle",
+				"itemType": "bookSection",
 				"creators": [
 					{
-						"firstName": "",
-						"lastName": "OPPENHEI.BE",
+						"firstName": "Marie C.",
+						"lastName": "McCormick",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "Jonathan S.",
+						"lastName": "Litt",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Vincent C.",
+						"lastName": "Smith",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "John A. F.",
+						"lastName": "Zupancic",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "J. E.",
+						"lastName": "Fielding",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "R. C.",
+						"lastName": "Brownson",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "L. W.",
+						"lastName": "Green",
+						"creatorType": "editor"
 					}
 				],
 				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"extra": "WOS:A1974T572300004",
-				"title": "MORE ACCURATE ALGORITHMS FOR ITERATIVE 3-DIMENSIONAL RECONSTRUCTION",
-				"publicationTitle": "Ieee Transactions on Nuclear Science",
-				"language": "English",
-				"place": "New York",
-				"publisher": "Ieee-Inst Electrical Electronics Engineers Inc",
-				"ISSN": "0018-9499",
-				"journalAbbreviation": "IEEE Trans. Nucl. Sci.",
-				"date": "1974",
-				"volume": "NS21",
-				"issue": "3",
-				"pages": "72-77"
-			},
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "",
-						"lastName": "SCHMIDLI.P",
-						"creatorType": "author"
-					}
+				"tags": [
+					"infant mortality",
+					"childhood morbidity",
+					"prevention",
+					"low-birth-weight",
+					"neonatal intensive-care",
+					"quality-of-life",
+					"extremely   preterm birth",
+					"young-adults born",
+					"age 8 years",
+					"children born",
+					"bronchopulmonary dysplasia",
+					"learning-disabilities",
+					"extreme prematurity"
 				],
-				"notes": [],
-				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"extra": "WOS:A1972M610800001",
-				"title": "ITERATIVE SEPARATION OF SECTIONS IN TOMOGRAPHIC SCINTIGRAMS",
-				"publicationTitle": "Nuclear-Medizin",
+				"extra": "WOS:000290776200020",
+				"title": "Prematurity: An Overview and Public Health Implications",
+				"publicationTitle": "Annual Review of Public Health, Vol 32",
 				"language": "English",
-				"publisher": "F K Schattauer Verlag Gmbh",
-				"place": "Stuttgart",
-				"date": "1972",
-				"volume": "11",
-				"issue": "1",
-				"pages": "1-&"
+				"abstractNote": "The high rate of premature births in the United States remains a public   health concern. These infants experience substantial morbidity and   mortality in the newborn period, which translate into significant   medical costs. In early childhood, survivors are characterized by a   variety of health problems, including motor delay and/or cerebral palsy,   lower IQs, behavior problems, and respiratory illness, especially   asthma. Many experience difficulty with school work, lower   health-related quality of life, and family stress. Emerging information   in adolescence and young adulthood paints a more optimistic picture,   with persistence of many problems but with better adaptation and more   positive expectations by the young adults. Few opportunities for   prevention have been identified; therefore, public health approaches to   prematurity include assurance of delivery in a facility capable of   managing neonatal complications, quality improvement to minimize   interinstitutional variations, early developmental support for such   infants, and attention to related family health issues.",
+				"place": "Palo Alto",
+				"publisher": "Annual Reviews",
+				"ISSN": "0163-7525",
+				"ISBN": "978-0-8243-2732-3",
+				"journalAbbreviation": "Annu. Rev. Public Health",
+				"date": "2011",
+				"volume": "32",
+				"pages": "367-379",
+				"DOI": "10.1146/annurev-publhealth-090810-182459"
 			}
 		]
 	},
