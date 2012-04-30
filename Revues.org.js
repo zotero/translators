@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-04-19 20:35:00"
+	"lastUpdated": "2012-04-30 17:44:22"
 }
 
 function detectWeb(doc, url) {
