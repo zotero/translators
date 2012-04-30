@@ -1,14 +1,15 @@
 {
-        "translatorID":"fc353b26-8911-4c34-9196-f6f567c93901",
-        "label":"Douban",
-        "creator":"Ace Strong<acestrong@gmail.com>",
-        "target":"^https?://(?:www|book).douban.com/(?:subject|doulist|people/[a-zA-Z._]*/(?:do|wish|collect)|.*?status=(?:do|wish|collect)|group/[0-9]*?/collection|tag)",
-        "minVersion":"2.0rc1",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":"1",
-        "translatorType":4,
-        "lastUpdated":"2010-12-19 20:09:43"
+	"translatorID": "fc353b26-8911-4c34-9196-f6f567c93901",
+	"label": "Douban",
+	"creator": "Ace Strong<acestrong@gmail.com>",
+	"target": "^https?://(?:www|book).douban.com/(?:subject|doulist|people/[a-zA-Z._]*/(?:do|wish|collect)|.*?status=(?:do|wish|collect)|group/[0-9]*?/collection|tag)",
+	"minVersion": "2.0rc1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2012-04-29 23:16:19"
 }
 
 /*
@@ -63,8 +64,9 @@ function trimMultispace(text) {
 // ##### Scraper functions #####
 // ############################# 
 
-function scrapeAndParse(url) {
-	var page = Zotero.Utilities.retrieveSource(url);
+function scrapeAndParse(doc, url) {
+Zotero.Utilities.HTTP.doGet(url, function(page){
+	//Z.debug(page)
 	var pattern;
 
 	// 类型 & URL
@@ -239,10 +241,9 @@ function scrapeAndParse(url) {
 //			Zotero.debug(label);
 		}
 	}
-
 	newItem.complete();
+});
 }
-
 // #########################
 // ##### API functions #####
 // #########################
@@ -260,88 +261,78 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var page = Zotero.Utilities.retrieveSource(url);
-	var pattern, urls;
-
-	if(detectWeb(doc, url) == "multiple") {
-//		Zotero.debug("Enter multiple.");
-		// selected results
-		var items = new Array();
-
-		pattern = /doulist/;
-		if (pattern.test(url)) {
-			// fetch items from doulist
-			pattern = /<table ([\s\S]*?)<\/table>/g;
-			if (pattern.test(page)) {
-				var result = page.match(pattern);
-//				Zotero.debug(result.length);
-//				Zotero.debug(result[1]);
-	
-				pattern = /<div (?:[\s\S]*?)<a href="(.*?)">(.*?)<\/a>\s*?<\/div>/;
-				for (var i=0; i<result.length; i++) {
-					var res = pattern.exec(result[i]);
-					if(res[1]) {
-						items[res[1]] = res[2];
-					}
-				}
-			}
-		} else {
-			pattern = /(?:do|wish|collect)$/;
-			
-			if (pattern.test(url)) {
-				// fetch items from do/wish/collect list
-				pattern = /<a href="(?:.*?)">\s*<em>(?:.*?)<\/em>\s*<\/a>/g;
-				if (pattern.test(page)) {
-					var result = page.match(pattern);
-//					Zotero.debug(result.length);
-//					Zotero.debug(result[0]);
-		
-					pattern = /<a href="(.*?)">\s*<em>(.*?)<\/em>\s*<\/a>/;
-					for (var i=0; i<result.length; i++) {
-						var res = pattern.exec(result[i]);
-						if(res[1]) {
-							items[res[1]] = res[2];
-						}
-					}
-				}
-			} else {
-				// fetch items from search result or collection or tag
-				pattern = /<a class="nbg"\s*([^>]*?)>/g;
-				if (pattern.test(page)) {
-					var result = page.match(pattern);
-//					Zotero.debug(result.length);
-//					Zotero.debug(result[1]);
-		
-					pattern = /href="(.*?)".*?title="(.*?)"/;
-					for (var i=0; i<result.length; i++) {
-						var res = pattern.exec(result[i]);
-						if(res[1]) {
-							items[res[1]] = res[2];
-						}
-					}
-				}
-			}
-			
-
+	var articles = new Array();
+	if(detectWeb(doc, url) == "multiple") { 
+		var items = {};
+		var titles = doc.evaluate('//td/div/a[contains(@onclick, "moreurl")]', doc, null, XPathResult.ANY_TYPE, null);
+		var title;
+		while (title = titles.iterateNext()) {
+			items[title.href] = title.textContent;
 		}
-
-		// 让用户选择要保存哪些文献
-		items = Zotero.selectItems(items);
-		if (!items) return true;
-
-		urls = new Array();
-		for(var url in items) {
-			urls.push(url);
-		}
-	} else {
-		urls = [url];
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			Zotero.Utilities.processDocuments(articles, scrapeAndParse, function () {
+			});
+		});
 	}
-
-	if (urls) {
-//		Zotero.debug(urls);
-
-		for (var i=0; i<urls.length; i++) {
-			scrapeAndParse(urls[i]);
-		}
+ 	else {
+		scrapeAndParse(doc, url);
 	}
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://book.douban.com/subject_search?search_text=Murakami&cat=1001",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://book.douban.com/subject/1355643/",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Haruki",
+						"lastName": "Murakami",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jay",
+						"lastName": "Rubin",
+						"creatorType": "translator"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"村上春树",
+					"HarukiMurakami",
+					"日本",
+					"小说",
+					"英文原版",
+					"英文版",
+					"Norwegian",
+					"挪威森林英文版"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"url": "http://book.douban.com/subject/1355643/",
+				"title": "Norwegian Wood",
+				"ISBN": "9780099448822",
+				"numPages": "400",
+				"publisher": "Vintage",
+				"date": "2000",
+				"abstractNote": "图书简介：\n\nNorwegian Wood (ノルウェイの森, Noruwei no Mori?) is a 1987 novel by Japanese author Haruki Murakami.\nThe novel is a nostalgic story of loss and sexuality. The story's protagonist and narrator is Toru Watanabe, who looks back on his days as a freshman university student living in Tokyo. Through Toru's reminiscences we see him develop relationships with two very different women — the beautiful yet emotionally troubled Naoko, and the outgoing, lively Midori.\nThe novel is set in Tokyo during the late 1960s, a time when Japanese students, like those of many other nations, were protesting against the established order. While it serves as the backdrop against which the events of the novel unfold, Murakami (through the eyes of Toru and Midori) portrays the student movement as largely weak-willed and hypocritical.\nNorwegian Wood was hugely popular with Japanese youth and made Murakami somewhat of a superstar in his native country (apparently much to his dismay at the time). In translation it is also one of the most-read Japanese novels in the Western Hemisphere.[citation needed]\nDespite its mainstream popularity in Japan, Murakami's contemporary readership saw Norwegian Wood as an unwelcome departure[citation needed] from his by-then established style of energetic prose flavoured with the unexpected and supernatural (as exemplified by Hard-Boiled Wonderland and the End of the World, released two years earlier). Yet, as translator Jay Rubin observes in the translator's note to the 2000 English edition, Norwegian Wood retains much of the complexity and symbolism characteristic of Murakami's work and is thus &quot;by no means just a love story.&quot;　　\n\n作者简介：\n　　Haruki Murakami (村上春樹, Murakami Haruki?, born January 12, 1949) is a popular contemporary Japanese writer and translator.[1] His work has been described by the Virginia Quarterly Review as &quot;easily accessible, yet profoundly complex.&quot;",
+				"libraryCatalog": "Douban",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
