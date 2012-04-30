@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 5,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-27 19:42:46"
+	"lastUpdated": "2012-04-30 08:40:58"
 }
 
 function detectWeb(doc, url) {
@@ -162,22 +162,16 @@ function processTag(item, field, content) {
 			Zotero.debug("Unknown type: " + content);
 		}
 	} else if ((field == "AF" || field == "AU")) {
-		Z.debug("author: " + content);
+		//Z.debug("author: " + content);
 		authors = content.split("\n");
-		for each (var i in authors) {
-			var author = i.split(",");
-			item.creators[0][field].push({firstName:author[1].trim(),
-					lastName:author[0].trim(),
-					creatorType:"author"});
+		for each (var author in authors) {
+			item.creators[0][field].push(ZU.cleanAuthor(author, "author", author.match(/,/)));
 		}
 	} else if ((field == "BE")) {
 		//Z.debug(content);
 		authors = content.split("\n");
-		for each (var i in authors) {
-			var author = i.split(",");
-			item.creators[1].push({firstName:author[1].trim(),
-					lastName:author[0].trim(),
-					creatorType:"editor"});
+			for each (var author in authors) {
+			item.creators[1].push(ZU.cleanAuthor(author, "editor", author.match(/,/)));
 		}
 	} else if (field == "TI") {
 		item.title = content;
@@ -303,7 +297,7 @@ function doImport(text) {
 	while((rawLine = Zotero.read()) !== false) {    // until EOF
 		// trim leading space if this line is not part of a note
 		line = rawLine.replace(/^\s+/, "");
-		Z.debug("line: " + line);
+		//Z.debug("line: " + line);
 		var split = line.match(/^([A-Z0-9]{2})\s(?:([^\n]*))?/);
 		// Force a match for ER
 		if (line == "ER") split = ["","ER",""];
@@ -311,7 +305,7 @@ function doImport(text) {
 			// if this line is a tag, take a look at the previous line to map
 			// its tag
 			if(tag) {
-				Zotero.debug("tag: '"+tag+"'; data: '"+data+"'");
+				//Zotero.debug("tag: '"+tag+"'; data: '"+data+"'");
 				processTag(item, tag, data);
 			}
 
@@ -334,7 +328,7 @@ function doImport(text) {
 		} else {
 			// otherwise, assume this is data from the previous line continued
 			if(tag == "AU" || tag == "AF" || tag == "BE") {
-				Z.debug(rawLine);
+				//Z.debug(rawLine);
 				// preserve line endings for AU fields
 				data += rawLine.replace(/^  /,"\n");
 			} else if(tag) {
@@ -727,17 +721,17 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "JE",
+						"firstName": "J. E.",
 						"lastName": "Fielding",
 						"creatorType": "editor"
 					},
 					{
-						"firstName": "RC",
+						"firstName": "R. C.",
 						"lastName": "Brownson",
 						"creatorType": "editor"
 					},
 					{
-						"firstName": "LW",
+						"firstName": "L. W.",
 						"lastName": "Green",
 						"creatorType": "editor"
 					}
