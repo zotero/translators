@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-04-09 23:17:40"
+	"lastUpdated": "2012-04-28 03:18:01"
 }
 
 function detectImport() {
@@ -1680,13 +1680,9 @@ function processField(item, field, value) {
 	} else if (field == "comment" || field == "annote" || field == "review") {
 		item.notes.push({note:Zotero.Utilities.text2html(value)});
 	} else if (field == "pdf") {
-		if (/:\/\//.test(value)) { // a full uri is given
-			item.attachments = [{url:value, mimeType:"application/pdf", downloadable:true}];
-		} else { // if no uri is given, assume that it is an absolute path to the PDF
-			item.attachments = [{url:"file://"+value, mimeType:"application/pdf"}];
-		}
+		item.attachments = [{path:value, mimeType:"application/pdf"}];
 	} else if (field == "sentelink") { // the reference manager 'Sente' has a unique file scheme in exported BibTeX
-			item.attachments = [{url:value.split(",")[0], mimeType:"application/pdf", downloadable:true}];
+		item.attachments = [{path:value.split(",")[0], mimeType:"application/pdf"}];
 	} else if (field == "file") {
 		var attachments = value.split(";");
 		for(var i in attachments){
@@ -1700,9 +1696,9 @@ function processField(item, field, value) {
 				filetitle = "Attachment";
 			}
 			if (filetype.match(/pdf/i)) {
-				item.attachments.push({url:"file://"+filepath, mimeType:"application/pdf", title:filetitle, downloadable:true});
+				item.attachments.push({path:filepath, mimeType:"application/pdf", title:filetitle});
 			} else {
-				item.attachments.push({url:"file://"+filepath, title:filetitle, downloadable:true});
+				item.attachments.push({path:filepath, title:filetitle});
 			}
 		}
 	}
@@ -2147,21 +2143,21 @@ function doExport() {
 			}
 		}		
 		
-		if(Zotero.getOption("exportFileData")) {
-			if(item.attachments) {
-				var attachmentString = "";
-				
-				for(var i in item.attachments) {
-					var attachment = item.attachments[i];
-					if(attachment.saveFile) {
-						attachment.saveFile(attachment.defaultPath, true);
-						attachmentString += ";" + attachment.title + ":" + attachment.defaultPath + ":" + attachment.mimeType;
-					}
+		if(item.attachments) {
+			var attachmentString = "";
+			
+			for(var i in item.attachments) {
+				var attachment = item.attachments[i];
+				if(Zotero.getOption("exportFileData") && attachment.saveFile) {
+					attachment.saveFile(attachment.defaultPath, true);
+					attachmentString += ";" + attachment.title + ":" + attachment.defaultPath + ":" + attachment.mimeType;
+				} else if(attachment.localPath) {
+					attachmentString += ";" + attachment.title + ":" + attachment.localPath + ":" + attachment.mimeType;
 				}
-				
-				if(attachmentString) {
-					writeField("file", attachmentString.substr(1));
-				}
+			}
+			
+			if(attachmentString) {
+				writeField("file", attachmentString.substr(1));
 			}
 		}
 		
