@@ -184,18 +184,7 @@ var testCases = [
 					"Time Change"
 				],
 				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Link to page at www.bsos.umd.edu",
-						"mimeType": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Link to page at www.journals.cambridge.org",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"attachments": false,
 				"issue": "01",
 				"DOI": "10.1017/S1049096509090337",
 				"libraryCatalog": "Microsoft Academic Search",
