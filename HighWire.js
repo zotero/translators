@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2011-12-18 21:11:01"
+	"lastUpdated": "2012-04-23 08:14:11"
 }
 
 function detectWeb(doc, url) {
@@ -63,10 +63,10 @@ function handleRequests(requests) {
 			if(snapshot) {
 				if(typeof(snapshot) == "string") {
 					// string snapshot (from search)
-					item.attachments.push({title:"HighWire Snapshot", mimeType:"text/html", url:snapshot});
+					item.attachments.push({title:"HighWire Snapshot", mimeType:"text/html", url:snapshot, snapshot: true});
 				} else {
 					// document object
-					item.attachments.push({title:"HighWire Snapshot", document:snapshot});
+					item.attachments.push({title:"HighWire Snapshot", document:snapshot, snapshot: true});
 				}
 			}
 			if(pdf) {

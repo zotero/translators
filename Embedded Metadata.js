@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-04-19 05:17:34"
+	"lastUpdated": "2012-04-23 20:47:14"
 }
 
 /*
@@ -684,7 +684,7 @@ function addHighwireMetadata(doc, newItem) {
 	if(!newItem.title) newItem.title = doc.title;
 
 	// add attachment
-	newItem.attachments.push({document:doc, title:"Snapshot"});
+	newItem.attachments.push({document:doc, title:"Snapshot", snapshot: true});
 
 	// add access date
 	newItem.accessDate = 'CURRENT_TIMESTAMP';
