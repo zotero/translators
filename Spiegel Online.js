@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-05-02 20:15:21"
+	"lastUpdated": "2012-05-03 09:08:01"
 }
 
 /*
@@ -182,7 +182,7 @@ function doWeb(doc, url) {
 		} else  if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/international\/search/)){ 
 			var titles = doc.evaluate("//*[@id='spTeaserColumn']/div/a", doc, null, XPathResult.ANY_TYPE, null);
 		} else  if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/international\/topic/)){ 
-			var titles = doc.evaluate(".//*[@id='spTeaserColumn']/div/h3/a", doc, null, XPathResult.ANY_TYPE, null);
+			var titles = doc.evaluate(".//*[@id='spTeaserColumn']/div/h2/a", doc, null, XPathResult.ANY_TYPE, null);
 		} 
 	
 		var next_title;
