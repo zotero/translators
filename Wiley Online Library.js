@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2012-04-19 06:25:12"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-05-02 20:30:24"
 }
 
 /*
@@ -404,6 +404,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"title": "Silent Cinema and its Pioneers (1906–1930)",
@@ -541,6 +545,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
@@ -600,6 +608,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
@@ -612,7 +624,7 @@ var testCases = [
 				"language": "en",
 				"pages": "173-182",
 				"ISSN": "1615-9861",
-				"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
+				"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/full",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "onlinelibrary.wiley.com",
 				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
@@ -659,6 +671,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
@@ -718,6 +734,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
@@ -769,6 +789,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"title": "β‐Rezeptorenblocker",
