@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-22 00:25:02"
+	"lastUpdated": "2012-05-03 09:08:01"
 }
 
 /*
@@ -67,7 +67,7 @@ function scrape(doc, url) {
 
 	// This is for the title 
 	
-	var title_xPath = ".//*[@id='spArticleColumn']/h2|.//*[@id='spArticleColumn ']/h2";
+	var title_xPath = '//h2[@itemprop="headline"]/span[@class="spArticleHeadLine"]';
 	if (doc.evaluate(title_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
 		var title = doc.evaluate(title_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		newItem.title = title;
@@ -152,11 +152,11 @@ function scrape(doc, url) {
 	if (doc.evaluate(date1_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
 		var date= doc.evaluate(date1_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		if (date.match('/')) {
-			date = date.replace(/(\d\d)\/(\d\d)\/(\d\d\d\d)/, "$2.$1.$3");
+			date = date.replace(/(\d\d)\/(\d\d)\/(\d\d\d\d)/, "$2.$1.$3").replace(/T.+/,"");
 		}
 	} else if (doc.evaluate(date2_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
 		var date= doc.evaluate(date2_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().content;
-		date=date.replace(/(\d\d\d\d)-(\d\d)-(\d\d)/, '$3.$2.$1');
+		date=date.replace(/(\d\d\d\d)-(\d\d)-(\d\d)/, '$3.$2.$1').replace(/T.+/,"");
 	}
 	newItem.date = Zotero.Utilities.trim(date);
 	
@@ -182,7 +182,7 @@ function doWeb(doc, url) {
 		} else  if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/international\/search/)){ 
 			var titles = doc.evaluate("//*[@id='spTeaserColumn']/div/a", doc, null, XPathResult.ANY_TYPE, null);
 		} else  if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/international\/topic/)){ 
-			var titles = doc.evaluate(".//*[@id='spTeaserColumn']/div/h3/a", doc, null, XPathResult.ANY_TYPE, null);
+			var titles = doc.evaluate(".//*[@id='spTeaserColumn']/div/h2/a", doc, null, XPathResult.ANY_TYPE, null);
 		} 
 	
 		var next_title;
