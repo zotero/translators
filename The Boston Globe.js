@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-01-30 22:42:30"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-05-06 16:00:45"
 }
 
 /*
@@ -256,19 +256,19 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://articles.boston.com/2011-05-03/news/29500032_1_bouncer-assault-local-restaurant",
+		"url": "http://www.boston.com/news/nation/articles/2012/05/06/2_ny_cooperators_give_firsthand_look_at_al_qaida/",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
 				"creators": [
 					{
-						"firstName": "Andrea",
-						"lastName": "Estes",
+						"firstName": "Tom",
+						"lastName": "Hays",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Sean P.",
-						"lastName": "Murphy",
+						"firstName": "Larry",
+						"lastName": "Neumeister",
 						"creatorType": "author"
 					}
 				],
@@ -277,15 +277,15 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://articles.boston.com/2011-05-03/news/29500032_1_bouncer-assault-local-restaurant",
 						"mimetype": "text/html",
 						"snapshot": true,
 						"title": "Boston.com page"
 					}
 				],
 				"publicationTitle": "Boston.com",
-				"url": "http://articles.boston.com/2011-05-03/news/29500032_1_bouncer-assault-local-restaurant",
-				"title": "Vocal critic of mayor of Lawrence is beaten",
+				"url": "http://www.boston.com/news/nation/articles/2012/05/06/2_ny_cooperators_give_firsthand_look_at_al_qaida/",
+				"title": "2 NY cooperators give firsthand look at al-Qaida",
+				"date": "May 6, 2012",
 				"libraryCatalog": "The Boston Globe",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
