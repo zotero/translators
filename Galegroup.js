@@ -12,6 +12,28 @@
 	"lastUpdated": "2012-05-07 13:01:00"
 }
 
+/*
+	***** BEGIN LICENSE BLOCK *****
+	
+	Galegroup Translator - Copyright © 2012 Sebastian Karcher 
+	This file is part of Zotero.
+	
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+	
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+	
+	***** END LICENSE BLOCK *****
+*/
+
 function detectWeb(doc, url) {
 	if (url.match(/\/retrieve\.do|\/i\.do|\/infomark\.do/)) {
 		if (url.match(/\/ecco\//)) return "book";
@@ -58,8 +80,6 @@ function parseRIS(url) {
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
-			var pdfUrl = "test"
-			var fullTextUrl = "test"
 			//make sure the attachment URL gets proxied
 			for (i in item.attachments) {
 				item.attachments[i].url = item.attachments[i].url.replace(/^https?:\/\/.+?\//, host);
@@ -72,14 +92,10 @@ function parseRIS(url) {
 }
 
 function doWeb(doc, url) {
-
 	var articles = new Array();
-
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
-
 		var titles = doc.evaluate('//span[@class="title"]/a|//div[contains(@class, "Title")]/a', doc, null, XPathResult.ANY_TYPE, null);
-
 		var next_title;
 		while (next_title = titles.iterateNext()) {
 			items[next_title.href] = next_title.textContent;
@@ -105,9 +121,10 @@ function doWeb(doc, url) {
 			url = host + ZU.xpathText(doc, '//li/a[contains(@title, "Download")]/@href');
 		}
 		var RISurl = composeURL(url);
-		parseRIS(RISurl)
+		parseRIS(RISurl);
 	}
-}/** BEGIN TEST CASES **/
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
