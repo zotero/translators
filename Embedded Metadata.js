@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-04-19 05:17:34"
+	"lastUpdated": "2012-05-08 12:52:05"
 }
 
 /*
@@ -109,13 +109,17 @@ function getPrefixes(doc) {
 }
 
 function getContentText(doc, name) {
-	return ZU.xpathText(doc, '//meta[substring(@name, string-length(@name)-'
-							+ (name.length - 1) + ')="'+ name +'"]/@content');
+	var xpath = '//meta[substring(@name, string-length(@name)-'
+							+ (name.length - 1) + ')="'+ name +'"]/';
+	return ZU.xpathText(doc, xpath + '@content | '
+													+ xpath + '@contents');
 }
 
 function getContent(doc, name) {
-	return ZU.xpath(doc, '//meta[substring(@name, string-length(@name)-'
-							+ (name.length - 1) + ')="'+ name +'"]/@content');
+	var xpath = '//meta[substring(@name, string-length(@name)-'
+							+ (name.length - 1) + ')="'+ name +'"]/';
+	return ZU.xpath(doc, xpath + '@content | '
+											+ xpath + '@contents');
 }
 
 function fixCase(authorName) {
