@@ -1,4 +1,4 @@
-15  # Increment number when modifying file
+16  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -49,3 +49,5 @@ af1af8fa-19dc-486f-a8cc-107acb849101  # Wilson Web (merged into EBSCOhost)
 f87c10fe-2bdc-4e1e-aedd-7fd20ec4b4c2  # Getty Research Library Catalog (now Voyager 7)
 1a3e63b2-0adf-4c8e-928b-c58c2594b45d  # BioMed Central and More (handled by Springer Science+Business Media)
 c76d6c19-b4c6-4e51-bd7a-0a81752305ae  # BC Archival Network - merged with Archeion;
+00ce0d68-9205-40e6-91f4-c96f7ab296c2  # ECCO - merged into Galegroups
+84564450-d633-4de2-bbcc-451ea580f0d6  # Gale LRC - merged into Galegroups
