@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-08 07:31:08"
+	"browserSupport": "gcsib",
+	"lastUpdated": "2012-05-08 00:57:58"
 }
 
 /*
@@ -60,7 +60,12 @@ function doWeb(doc, url) {
 		if (!items || countObjectProperties(items) == 0) {
 			return true;
 		}
-		
+		// Bildergalerien are not supported - don't show them in the results
+		for (var i in items) {
+ 			if (i.match(/\/bildergalerie\//)) {
+ 				delete items[i];
+ 			}
+		}
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
 				return true;
