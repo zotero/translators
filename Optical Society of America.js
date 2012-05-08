@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2012-03-12 01:18:35"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-05-08 00:04:27"
 }
 
 /*
@@ -31,33 +31,19 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 function detectWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ?
-	function (prefix) {
-		if (prefix == 'x') return namespace;
-		else return null;
-	} : null;
-
-
 	if (url.indexOf("search2.cfm") != -1) {
 		return "multiple";
 	} else if (url.indexOf("abstract.cfm") != -1) {
-		return getArticleType(doc, url, nsResolver);
+		return getArticleType(doc, url, null);
 	}
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ?
-	function (prefix) {
-		if (prefix == 'x') return namespace;
-		else return null;
-	} : null;
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		var xpath = '//div[@id="section-article_info"]';
-		var rows = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var rows = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 		var row;
 		while (row = rows.iterateNext()) {
 			var title = Zotero.Utilities.trimInternal(doc.evaluate('.//label', row, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
@@ -88,18 +74,14 @@ function doWeb(doc, url) {
 }
 
 function scrape(newDoc) {
-	var namespace = newDoc.documentElement.namespaceURI;
-	var nsResolver = namespace ?
-	function (prefix) {
-		if (prefix == 'x') return namespace;
-		else return null;
-	} : null;
 	var host = newDoc.location.host;
 
-	var osalink = newDoc.evaluate('//div[@id="abstract-header"]/p/a[contains(text(), "opticsinfobase")]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+	var osalink = newDoc.location.href;  
+	//I'm leaving this in commented out bc I'm not sure what this used to do
+	//ZU.xpathText(newDoc, '//div[@id="abstract-header"]/p/a[contains(text(), "opticsinfobase")]/@href');
 
-	var abstractblock = newDoc.evaluate('//meta[@name="dc.description"]', newDoc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-	var identifierblock = newDoc.evaluate('//meta[@name="dc.identifier"]', newDoc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+	var abstractblock = newDoc.evaluate('//meta[@name="dc.description"]', newDoc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+	var identifierblock = newDoc.evaluate('//meta[@name="dc.identifier"]', newDoc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 	Zotero.Utilities.HTTP.doGet(osalink, function (text) {
 		var action = text.match(/select\s+name=\"([^"]+)\"/)[1];
 		var id = text.match(/input\s+type=\"hidden\"\s+name=\"articles\"\s+value=\"([^"]+)\"/)[1];
