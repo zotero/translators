@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-03-13 14:46:48"
+	"lastUpdated": "2012-05-08 19:54:28"
 }
 
 function detectWeb(doc, url) {
@@ -65,7 +65,7 @@ function processTexts(texts) {
 		var risLink = texts.shift();
 		var pdfURL = risLink.replace("info", "fetchObjectAttachment.action?uri=info") + '&representation=PDF';
 		var doi = risLink.match(/doi(\/|%2F)(.*)$/)[2];
-		text = text.replace(text.match(/(ER[^\n]*)([^\0]*)/)[2], ""); //Remove stray M3-tag at the end of the RIS record
+		text = text.replace(text.match(/(ER  -[^\n]*)([^\0]*)/)[2], ""); //Remove stray M3-tag at the end of the RIS record
 		text = text.replace("%2F", "/"); //Replace %2F characters by forward slashes in url
 		doi = doi.replace("%2F", "/"); //Replace %2F characters by forward slashes in doi
 		// grab the UR link for a snapshot then blow it away 
