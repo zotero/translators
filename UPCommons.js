@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-04-30 00:09:48"
+	"lastUpdated": "2012-05-08 00:15:34"
 }
 
 function detectWeb(doc, url) {
@@ -36,7 +36,7 @@ function doWeb(doc,url)
 	if (detectWeb(doc, url) == "multiple") {
 		var hits = {};
 		var urls = [];
-		var results = ZU.xpath(doc,"//tr/td[@headers='t1']/a");
+		var results = ZU.xpath(doc,"//tr/td[contains(@headers, 't')]/a");
 	
 		for (var i in results) {
 			hits[results[i].href] = results[i].textContent;
@@ -70,42 +70,76 @@ function doWeb(doc,url)
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://upcommons.upc.edu/browse?type=author&order=ASC&rpp=20&value=Sabat%C3%A9+Garriga%2C+Ferran",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://upcommons.upc.edu/handle/2117/12974",
+		"url": "http://upcommons.upc.edu/e-prints/handle/2117/14979",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "Judit",
-						"lastName": "Coromina",
+						"firstName": "ANTONIO",
+						"lastName": "CRUZADO",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Ferran",
-						"lastName": "Sabaté Garriga",
+						"firstName": "NIXON",
+						"lastName": "BAHAMON RIVERA",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jacopo",
+						"lastName": "Aguzzi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "RAFFAELE",
+						"lastName": "BERNARDELLO",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Miguel Angel",
+						"lastName": "Ahumada Sempoal",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Joan",
+						"lastName": "Puigdefàbregas Sagristà",
 						"creatorType": "author"
 					},
 					{
 						"firstName": "Jordi",
-						"lastName": "Romeu Robert",
+						"lastName": "Cateura Sabrí",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Ferran",
-						"lastName": "Ruiz",
+						"firstName": "Eduardo",
+						"lastName": "Muñoz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "ZOILA",
+						"lastName": "VELASQUEZ FORERO",
 						"creatorType": "author"
 					}
 				],
 				"notes": [],
 				"tags": [
-					"Àrees temàtiques de la UPC::Ensenyament i aprenentatge::Didàctica::Organització de la docència",
-					"Electronic portfolios in education",
-					"Portafolis electrònics en educació"
+					"Àrees temàtiques de la UPC::Enginyeria civil::Geologia::Oceanografia",
+					"Àrees temàtiques de la UPC::Enginyeria agroalimentària::Ciències de la terra i de la vida::Climatologia i meteorologia",
+					"Àrees temàtiques de la UPC::Enginyeria electrònica i telecomunicacions::Instrumentació i mesura::Sensors i actuadors",
+					"Sensors",
+					"Climatology",
+					"pelagic observatory",
+					"oceanographic buoy",
+					"multisensor coordinated monitoring",
+					"PAR",
+					"operational oceanography",
+					"submarine canyons",
+					"numerical multiparametric modelling",
+					"ocean forecast",
+					"Western Mediterranean Sea",
+					"Oceanografia -- Mesurament",
+					"Climatologia -- Mesurament",
+					"Catalunya -- Oceanografia"
 				],
 				"seeAlso": [
 					"Open Access"
@@ -115,10 +149,11 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"itemID": "http://upcommons.upc.edu/handle/2117/12974",
-				"title": "Digital portfolio for learning: A new communication channel for education",
-				"date": "2011-07-21",
-				"DOI": "10.3926/ic.2011.v7n1.p116-142",
+				"itemID": "http://upcommons.upc.edu/e-prints/handle/2117/14979",
+				"title": "The new pelagic operational observatory of the catalan sea (OOCS) for the multisensor coordinated measurement of atmospheric and oceanographic conditions",
+				"date": "2011-12",
+				"DOI": "10.3390/s111211251",
+				"abstractNote": "Postprint (published version)",
 				"reportType": "Article",
 				"letterType": "Article",
 				"manuscriptType": "Article",
@@ -128,15 +163,18 @@ var testCases = [
 				"presentationType": "Article",
 				"postType": "Article",
 				"audioFileType": "Article",
-				"accepted": "2011-07-21T12:45:25Z",
-				"language": "es",
-				"url": "http://upcommons.upc.edu/handle/2117/12974",
+				"accepted": "2012-02-06T15:06:01Z",
+				"language": "en",
+				"url": "http://upcommons.upc.edu/e-prints/handle/2117/14979",
 				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "upcommons.upc.edu",
-				"abstractNote": "Propósito: La Generalitat de Catalunya tiene previsto introducir antes del año 2017 el portafolio digital, una iniciativa vinculada con los nuevos métodos de aprendizaje. Constatado el creciente interés por el portafolio digital como medio de comunicación en la educación, este artículo tiene por objetivos describir detalladamente su funcionamiento e identificar una lista de criterios, útiles a los centros educativos, para seleccionar la aplicación de gestión del portafolio digital que mejor se adapte a sus necesidades.\nDiseño/metodología/enfoque: En primer lugar se fija el marco teórico de funcionamiento del portafolio digital. Luego se tipifican las aplicaciones que son usadas comúnmente para su implementación. A continuación se realiza un análisis de requisitos de una aplicación ideal con acuerdo a las fases de creación del portafolio identificados en el marco teórico. Finalmente, a partir de estos requisitos se identifica una lista de criterios útiles para seleccionar la aplicación de soporte al portafolio.\nResultados y originalidad/valor: El artículo aporta un proceso estructurado en etapas y fases para la creación del portafolio digital que va más allá de los existentes en la literatura. Además, define una lista de criterios útiles para seleccionar la aplicación de soporte al portafolio digital\nPortafolio digital de aprendizaje: Un nuevo medio de comunicación en la educación 117\nJ. Coromina, F. Sabate, J. Romeu, F. Ruiz\nque más convenga a un centro educativo, obtenidos con una metodología bastante exhaustiva.\nLimitaciones/implicaciones de investigación: Para poner en práctica los criterios identificados se propone completar, en un nuevo estudio, el modelo de decisión multicriterio, especificando los procesos para pesar los criterios y normalizarlos. Después se podría analizar la validez del modelo estudiando la satisfacción obtenida por su uso en una muestra de centros educativos.\nImplicaciones prácticas: La lista de criterios se espera facilite la selección de la aplicación informática de soporte al portafolio de aprendizaje a los centros educativos, con acuerdo a sus necesidades específicas.",
-				"shortTitle": "Digital portfolio for learning"
+				"libraryCatalog": "upcommons.upc.edu"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://upcommons.upc.edu/e-prints/handle/2117/5301",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
