@@ -275,16 +275,14 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"url": "http://gael.gironde.fr/ead.html?id=FRAD033_IR_11AV",
-				"title": "Archives sonores et audiovisuelles de l'association Gric de Prat",
-				"date": "2010",
-				"publisher": "Archives départementales de la Gironde",
+				"url": "http://gael.gironde.fr/pleade-test/ead.html?id=FRAD033_IR_11AV",
 				"place": "Bordeaux",
 				"language": "français",
 				"callNumber": "11 AV 1-14",
 				"libraryCatalog": "Pleade",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"checkFields": "title"
+				"title": "Archives sonores et audiovisuelles de l'association Gric de Prat",
+				"date": "2010",
+				"publisher": "Archives départementales de la Gironde"
 			}
 		]
 	},
@@ -299,16 +297,13 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"url": "http://jubilotheque.upmc.fr//ead.html?id=GM_000001_014",
-				"title": "Journal d'un voyage géologique fait à travers toute la chaîne des Carpathes, en Bukowine, en Transylvanie et dans le Marmarosch / par feu M. Lill de Lilienbach. Observations remises en ordre et accompagnées de notes par M.A. Boué",
-				"date": "1834",
-				"publisher": "F.-G. Levrault. Paris ; Strasbourg",
+				"url": "http://jubilotheque.upmc.fr/upmc-front//ead.html?id=GM_000001_014",
 				"language": "fre",
 				"rights": "Utilisation libre dans le cadre d'un usage non commercial, en mentionnant la source et sans dénaturer l'oeuvre Free use for non-commercial purposes with mandatory acknowledgement of the source and without adulterating the work",
-				"callNumber": "260",
 				"libraryCatalog": "Pleade",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"checkFields": "title"
+				"title": "Journal d'un voyage géologique fait à travers toute la chaîne des Carpathes, en Bukowine, en Transylvanie et dans le Marmarosch / par feu M. Lill de Lilienbach. Observations remises en ordre et accompagnées de notes par M.A. Boué",
+				"date": "1834",
+				"publisher": "F.-G. Levrault. Paris ; Strasbourg"
 			}
 		]
 	},

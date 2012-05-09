@@ -423,6 +423,11 @@ var testCases = [
 						"firstName": "Maria",
 						"lastName": "Anisimova",
 						"creatorType": "editor"
+					},
+					{
+						"firstName": "John M.",
+						"lastName": "Walker",
+						"creatorType": "editor"
 					}
 				],
 				"notes": [],
@@ -440,19 +445,17 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Diversity of Genome Organisation",
-				"publicationTitle": "Evolutionary Genomics",
 				"series": "Methods in Molecular Biology",
-				"publisher": "Humana Press",
 				"ISBN": "978-1-61779-582-4",
-				"pages": "51-76",
-				"volume": "855",
 				"url": "http://www.springerlink.com/content/u0lh124733784407/abstract/",
 				"abstractNote": "Genomes can be organised in different ways. Understanding the extent of the diversity of genome organisation, the processes that create it, and its consequences is particularly important for two key reasons. Firstly, it is relevant for our understanding of the genetic basis for the astounding diversity of life on Earth. Elucidating the mechanisms and processes underlying such diversity has been, and remains, one of the central goals of biological research. Secondly, it helps prepare us for our analysis of new genomes. For example, knowing that plasmids can be circular or linear, we know to check for circularity or linearity in a plasmid we encounter for the first time (if this is relevant for our analysis). This article provides an overview of variation and diversity in several aspects of genome organisation and architecture, including the number, size, ploidy, composition (RNA or DNA), packaging, and topology of the molecules encoding the genome. Additionally, it reviews differences in selected genomic features, i.e. telomeres, centromeres, DNA replication origins, and sex chromosomes. To put this in context, it incorporates a brief survey of organism diversity and the tree of life, and ends with a discussion of mutation mechanisms and inheritance, and explanations of key terms used to describe genomic variation.",
-				"date": "2012",
-				"DOI": "10.1007/978-1-61779-582-4_2",
 				"libraryCatalog": "SpringerLink",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"title": "Diversity of Genome Organisation",
+				"bookTitle": "Evolutionary Genomics",
+				"publisher": "Humana Press",
+				"pages": "51-76",
+				"volume": "855",
+				"date": "2012"
 			}
 		]
 	},

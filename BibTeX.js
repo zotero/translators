@@ -2226,10 +2226,9 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "file://Users/heatherwright/Documents/Scientific Papers/Adams_Huaynaputina.pdf",
+						"path": "Users/heatherwright/Documents/Scientific Papers/Adams_Huaynaputina.pdf",
 						"mimeType": "application/pdf",
-						"title": "Attachment",
-						"downloadable": true
+						"title": "Attachment"
 					}
 				],
 				"publicationTitle": "Bulletin of Volcanology",

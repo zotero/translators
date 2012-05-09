@@ -184,7 +184,17 @@ var testCases = [
 					"Time Change"
 				],
 				"seeAlso": [],
-				"attachments": false,
+				"attachments": [
+					{
+						"title": false,
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": false,
+						"mimeType": "application/pdf"
+					}
+				],
 				"issue": "01",
 				"DOI": "10.1017/S1049096509090337",
 				"libraryCatalog": "Microsoft Academic Search",
