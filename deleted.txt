@@ -1,4 +1,4 @@
-16  # Increment number when modifying file
+17  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -51,3 +51,6 @@ f87c10fe-2bdc-4e1e-aedd-7fd20ec4b4c2  # Getty Research Library Catalog (now Voya
 c76d6c19-b4c6-4e51-bd7a-0a81752305ae  # BC Archival Network - merged with Archeion;
 00ce0d68-9205-40e6-91f4-c96f7ab296c2  # ECCO - merged into Galegroups
 84564450-d633-4de2-bbcc-451ea580f0d6  # Gale LRC - merged into Galegroups
+60d97c99-47f0-4323-98b6-5699faf827b1  # Blackwell Compass - site no longer functional
+138de272-0d2a-4ab5-8cfb-0fd879958d04 # AdvoCAT - new catalog based on Voyager7
+a07bb62a-4d2d-4d43-ba08-d9679a0122f8 # ABL-CLIO no longer exists

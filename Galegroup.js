@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-05-07 13:01:00"
+	"lastUpdated": "2012-05-10 13:23:58"
 }
 
 /*
@@ -128,7 +128,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://go.galegroup.com/ps/i.do?action=interpret&id=GALE%7CH1420025063&v=2.1&it=r&p=LitRG&sw=w&authCount=1",
+		"url": "http://go.galegroup.com/ps/i.do?action=interpret&id=GALE%7CH1420025063&v=2.1&u=viva_gmu&it=r&p=LitRG&sw=w&authCount=1",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -168,7 +168,7 @@ var testCases = [
 					}
 				],
 				"publicationTitle": "Chasqui",
-				"url": "http://go.galegroup.com/ps/i.do?id=GALE%7CH1420025063&v=2.1&it=r&p=LitRG&sw=w",
+				"url": "http://go.galegroup.com/ps/i.do?id=GALE%7CH1420025063&v=2.1&u=viva_gmu&it=r&p=LitRG&sw=w",
 				"issue": "1",
 				"extra": "19",
 				"DOI": "Critical essay",
@@ -185,7 +185,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://go.galegroup.com/ps/i.do?action=interpret&id=GALE%7CA221274499&v=2.1&it=r&p=AONE&sw=w&authCount=1",
+		"url": "http://go.galegroup.com/ps/i.do?action=interpret&id=GALE%7CA221274499&v=2.1&u=viva_gmu&it=r&p=AONE&sw=w&authCount=1",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -216,7 +216,7 @@ var testCases = [
 					}
 				],
 				"publicationTitle": "Economic Perspectives",
-				"url": "http://go.galegroup.com/ps/i.do?id=GALE%7CA221274499&v=2.1&it=r&p=AONE&sw=w",
+				"url": "http://go.galegroup.com/ps/i.do?id=GALE%7CA221274499&v=2.1&u=viva_gmu&it=r&p=AONE&sw=w",
 				"issue": "4",
 				"extra": "2",
 				"DOI": "Article",
@@ -234,7 +234,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://go.galegroup.com/ps/i.do?action=interpret&id=GALE%7CA286390464&v=2.1&it=r&p=EAIM&sw=w&authCount=1",
+		"url": "http://go.galegroup.com/ps/i.do?action=interpret&id=GALE%7CA286390464&v=2.1&u=viva_gmu&it=r&p=EAIM&sw=w&authCount=1",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -273,7 +273,7 @@ var testCases = [
 					}
 				],
 				"publicationTitle": "Science",
-				"url": "http://go.galegroup.com/ps/i.do?id=GALE%7CA286390464&v=2.1&it=r&p=EAIM&sw=w",
+				"url": "http://go.galegroup.com/ps/i.do?id=GALE%7CA286390464&v=2.1&u=viva_gmu&it=r&p=EAIM&sw=w",
 				"issue": "6075",
 				"extra": "1486",
 				"DOI": "Report",
@@ -291,7 +291,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://find.galegroup.com/ecco/infomark.do?&source=gale&prodId=ECCO&tabID=T001&docId=CW3325179878&type=multipage&contentSet=ECCOArticles&version=1.0&docLevel=FASCIMILE",
+		"url": "http://find.galegroup.com/ecco/infomark.do?&source=gale&prodId=ECCO&u=viva_gmu&tabID=T001&docId=CW3325179878&type=multipage&contentSet=ECCOArticles&version=1.0&docLevel=FASCIMILE",
 		"items": [
 			{
 				"itemType": "book",
@@ -308,7 +308,7 @@ var testCases = [
 				],
 				"title": "A digest of the law of actions and trials at nisi prius. By Isaac 'espinasse, of Gray's Inn, Esq. Barrister at Law. The third edition, corrected, with considerable additions from printed and manuscript cases. In two volumes. ...",
 				"place": "London",
-				"url": "http://find.galegroup.com/ecco/infomark.do?&source=gale&prodId=ECCO&tabID=T001&docId=CW3325179878&type=multipage&contentSet=ECCOArticles&version=1.0",
+				"url": "http://find.galegroup.com/ecco/infomark.do?&source=gale&prodId=ECCO&u=viva_gmu&tabID=T001&docId=CW3325179878&type=multipage&contentSet=ECCOArticles&version=1.0",
 				"pages": "469",
 				"numPages": "469",
 				"DOI": "Monograph",
