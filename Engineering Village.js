@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-05-06 15:19:55"
+	"lastUpdated": "2012-05-10 13:07:42"
 }
 
 function detectWeb(doc, url)
@@ -117,65 +117,5 @@ function doWeb(doc, url) {
 		});
 	}
 }/** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://www.engineeringvillage.com/controller/servlet/Controller?SEARCHID=2798213711862696607bprod3data2&CID=quickSearchAbstractFormat&DOCINDEX=1&database=131073&format=quickSearchAbstractFormat",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"lastName": "Chino",
-						"firstName": "Yasumasa",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Dimond",
-						"firstName": "David C.",
-						"creatorType": "author"
-					}
-				],
-				"notes": [
-					{
-						"note": "<p>Compilation and indexing terms, Copyright 2012 Elsevier Inc.</p>"
-					}
-				],
-				"tags": [
-					"Titanium",
-					"Naphthalene",
-					"Powders",
-					"Preforming",
-					"Scanning electron microscopy",
-					"Sintering",
-					"Swaging",
-					"Titanium powder metallurgy"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"mimeType": "text/html",
-						"title": "Full Text (HTML)",
-						"downloadable": true
-					}
-				],
-				"title": "Creating aligned, elongated pores in Titanium foams by swaging of preforms with Ductile space-holder",
-				"publicationTitle": "Advanced Engineering Materials",
-				"volume": "11",
-				"issue": "1-2",
-				"date": "2009",
-				"pages": "52-55",
-				"ISBN": "14381656",
-				"ISSN": "14381656",
-				"place": "P.O. Box 101161, Weinheim, D-69451, Germany",
-				"publisher": "Wiley-VCH Verlag",
-				"abstractNote": "The fugitive space-holder method was used to create aligned and elongated pores in titanium foams. Naphthalene was used as a space-holder in titanium powder preform to conduct the investigations. Naphthalene was selected as a space-holder, as it showed rapid creep at room temperature. The room-temperature swaging of a titanium powder preform with naphthalene inclusions was expected to align and elongate into an ellipsoidal shape that resulted in aligned and elongated pores in the titanium preform and the sintered foam after sublimation. Unalloyed titanium powders were used to conduct the investigations, showing irregular shapes of the hydride-dehydride process. Metallographic investigation of the sintered samples was performed by scanning electron microscopy (SEM) on ground and polished samples whose porosity was filled with epoxy. The micrographs revealed that there were two types of pores in the titanium foams, such as small and large pores.",
-				"DOI": "10.1002/adem.200800232",
-				"url": "http://dx.doi.org/10.1002/adem.200800232",
-				"libraryCatalog": "Engineering Village",
-				"accessDate": "CURRENT_TIMESTAMP"
-			}
-		]
-	}
-]
+var testCases = []
 /** END TEST CASES **/
