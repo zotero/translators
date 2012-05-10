@@ -43,7 +43,7 @@ function detectWeb(doc, url) {
 }
 	
 function makeURL(url){
-	http://ptp.ipap.jp/cgi-bin/dumparticle?mode=bibtex&journal=PTP&volume=127&page=209
+	// http://ptp.ipap.jp/cgi-bin/dumparticle?mode=bibtex&journal=PTP&volume=127&page=209
 	var volume = url.match(/(PTP\/)(\d+)/)[2];
 	var page = url.match(/(PTP\/\d+\/)(\d+)/)[2];
 	var bibtexurl = "http://ptp.ipap.jp/cgi-bin/dumparticle?mode=bibtex&journal=PTP&volume=" + volume + "&page=" + page;
@@ -94,7 +94,8 @@ function scrape(doc, url){
 		});	
 		translator.translate();
 	});
-}/** BEGIN TEST CASES **/
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
