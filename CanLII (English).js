@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gv",
-	"lastUpdated": "2012-03-24 00:26:50"
+	"browserSupport": "gcsv",
+	"lastUpdated": "2012-05-11 06:22:36"
 }
 
 var canLiiRegexp = /http:\/\/(www\.)?canlii\.org\/.*en\/[^\/]+\/[^\/]+\/doc\/.+/;
