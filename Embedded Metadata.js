@@ -8,8 +8,8 @@
 	"priority": 400,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsb",
-	"lastUpdated": "2012-04-01 19:01:51"
+	"browserSupport": "gcsbv",
+	"lastUpdated": "2012-05-12 05:19:44"
 }
 
 /*
@@ -87,6 +87,8 @@ var _rdfPresent = false,
 	_haveItem = false,
 	_itemType;
 
+var RDF;
+
 var CUSTOM_FIELD_MAPPINGS;
 
 function addCustomFields(customFields) {
@@ -149,333 +151,85 @@ function completeItem(doc, newItem) {
 }
 
 function detectWeb(doc, url) {
+	if(RDF) return;
+
 	getPrefixes(doc);
 
-	var metaTags = doc.getElementsByTagName("meta");
-	//itemTypes as determined from various schemas
-	var dcType, dcTypeGuess, eprintsType, eprintsTypeGuess, prismType,
-		prismTypeGuess, ogType, ogTypeGuess, hwType, hwTypeGuess;
-	for(var i=0; i<metaTags.length; i++) {
-		// Two formats allowed:
-		// 	<meta name="..." content="..." />
-		//	<meta property="..." content="..." />
-		// The first is more common; the second is recommended by Facebook
-		// for their OpenGraph vocabulary
-		var tag = metaTags[i].getAttribute("name");
-		if (!tag) tag = metaTags[i].getAttribute("property");
-		var value = metaTags[i].getAttribute("content");
-		if(!tag || !value) continue;
+	// load RDF translator, so that we don't need to replicate import code
+	var translator = Zotero.loadTranslator("import");
+	translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f");
+	translator.setHandler("itemDone", function(obj, newItem) {
+		_haveItem = true;
+		completeItem(doc, newItem);
+	});
 
-		// We allow three delimiters between the namespace and the property
-		var delimIndex = tag.indexOf('.');
-		if(delimIndex === -1) delimIndex = tag.indexOf(':');
-		if(delimIndex === -1) delimIndex = tag.indexOf('_');
-		if(delimIndex === -1) continue;
+	translator.getTranslatorObject(function(rdf) {
+		var metaTags = doc.getElementsByTagName("meta");
+		var hwType, hwTypeGuess;
 
-		//process everything in lower case
-		tag = tag.toLowerCase();
-		value = value.toLowerCase();
+		for(var i=0; i<metaTags.length; i++) {
+			// Two formats allowed:
+			// 	<meta name="..." content="..." />
+			//	<meta property="..." content="..." />
+			// The first is more common; the second is recommended by Facebook
+			// for their OpenGraph vocabulary
+			var tag = metaTags[i].getAttribute("name") ||
+				metaTags[i].getAttribute("property");
+			var value = metaTags[i].getAttribute("content") || 
+				metaTags[i].getAttribute("contents");
+			if(!tag || !value) continue;
 
-		var prefix = tag.substr(0, delimIndex);
-		var prop = tag.substr(delimIndex+1);
+			// We allow three delimiters between the namespace and the property
+			var delimIndex = tag.indexOf('.');
+			if(delimIndex === -1) delimIndex = tag.indexOf(':');
+			if(delimIndex === -1) delimIndex = tag.indexOf('_');
+			if(delimIndex === -1) continue;
 
-		var schema = _prefixes[prefix];
-		if(schema) {
-			_rdfPresent = true;
+			var prefix = tag.substr(0, delimIndex).toLowerCase();
 
-			if (!ogType && prop === 'type' && schema === _prefixes.og) {
-				switch (value) {
-					case "video.movie":
-					case "video.episode":
-					case "video.tv_show":
-					case "video.other":
-						ogType = "videoRecording";
+			if(_prefixes[prefix]) {
+				var prop = tag[delimIndex+1].toLowerCase()+tag.substr(delimIndex+2);
+				//currently we can't handle qnames containing some invalid characters
+				if(prop.indexOf('.') != -1)
+					continue;
+				// This debug is for seeing what is being sent to RDF
+				//Zotero.debug(_prefixes[prefix]+prop +"=>"+value);
+				rdf.Zotero.RDF.addStatement(url, _prefixes[prefix] + prop, value, true);
+			} else {
+				var shortTag = tag.slice(tag.lastIndexOf('citation_'));
+				switch(shortTag) {
+					case "citation_journal_title":
+						hwType = "journalArticle";
 						break;
-					case "article":
-						ogTypeGuess = "newspaperArticle";
+					case "citation_technical_report_institution":
+						hwType = "report";
 						break;
-					case "book":
-						ogType = "book";
+					case "citation_conference_title":
+					case "citation_conference":
+						hwType = "conferencePaper";
 						break;
-					case "music.song":
-					case "music.album":
-						ogType = "audioRecording";
+					case "citation_book_title":
+						hwType = "bookSection";
 						break;
-					case "website":
-						ogType = "webpage";
+					case "citation_dissertation_institution":
+						hwType = "thesis";
 						break;
-				}
-
-			} else if(!prismType && schema === _prefixes.prism) {
-				// see http://www.idealliance.org/specifications/prism/specifications/prism-controlled-vocabularies/prism-version-20-controlled-vocabu
-				switch(prop) {
-					//try to guess based on container
-					case 'aggregationtype':
-						switch(value) {
-							case 'book':
-								prismType = 'bookSection';
-								break;
-							case 'feed':
-								//could also be email
-								prismTypeGuess = 'blogPost';
-								break;
-							case 'journal':
-								prismType = 'journalArticle';
-								break;
-							case 'magazine':
-								prismType = 'magazineArticle';
-								break;
-							case 'newsletter':
-								prismType = 'newsArticle';
-								break;
-							//case 'pamphlet':
-							//case 'other':
-							//case 'manual':
-							//case 'catalog':
-						}
-						break;
-					/**This should tell us exactly what it is.
-					 * Very long list. only including things we can handle.
-					 * Also, multiple can be specified. Spec. recommends listing 
-					 * from most to least inclusive. We should probably only 
-					 * handle the latter.
-					 */
-					case 'genre':
-						switch(value) {
-							case 'abstract':
-							case 'acknowledgements':
-							case 'authorbio':
-							case 'bibliography':
-							case 'index':
-							case 'tableofcontents':
-								prismType = 'bookSection';
-								break;
-							case 'autobiography':
-							case 'biography':
-								prismType = 'book';
-								break;
-							case 'blogentry':
-								prismType = 'blogPost';
-								break;
-							case 'homepage':
-							case 'webliography':
-								prismType = 'webpage';
-								break;
-							case 'interview':
-								prismType = 'interview';
-								break;
-							case 'letters':
-								prismType = 'letter';
-								break;
-							case 'adaptation':
-							case 'analysis':
-								prismTypeGuess = 'journalArticle';
-								break;
-							case 'column':
-							case 'newsbulletin':
-							case 'opinion':
-								//magazine or newspaper
-								prismTypeGuess = 'newspaperArticle';
-								break;
-							case 'coverstory':
-							case 'essay':
-							case 'feature':
-							case 'insidecover':
-								//journal or magazine
-								prismTypeGuess = 'magazineArticle';
-								break;
-							//case 'advertorial':
-							//case 'advertisement':
-							//case 'brief':
-							//case 'chronology':
-							//case 'classifiedad':
-							//case 'correction':
-							//case 'cover':
-							//case 'coverpackage':
-							//case 'electionresults':
-							//case 'eventscalendar':
-							//case 'excerpt':
-							//case 'photoshoot':
-							//case 'featurepackage':
-							//case 'financialstatement':
-							//case 'interactivecontent':
-							//case 'legaldocument':
-							//case 'masthead':
-							//case 'notice':
-							//case 'obituary':
-							//case 'photoessay':
-							//case 'poem':
-							//case 'poll':
-							//case 'pressrelease':
-							//case 'productdescription':
-							//case 'profile':
-							//case 'quotation':
-							//case 'ranking':
-							//case 'recipe':
-							//case 'reprint':
-							//case 'response':
-							//case 'review':
-							//case 'schedule':
-							//case 'sidebar':
-							//case 'stockquote':
-							//case 'sectiontableofcontents':
-							//case 'transcript':
-							//case 'wirestory':
-						}
-						break;
-					case 'platform':
-						switch(value) {
-							case 'broadcast':
-								prismTypeGuess = 'tvBroadcast';
-								break;
-							case 'web':
-								prismTypeGuess = 'webpage';
-								break;
-						}
+					case "citation_title":		//fall back to journalArticle, since this is quite common
+					case "citation_series_title":	//possibly journal article, though it could be book
+						hwTypeGuess = "journalArticle";
 						break;
 				}
-				//at least pretend we're a journalArticle if we have prism data
-				if(!prismTypeGuess) prismTypeGuess = 'journalArticle';
-
-			/** EPrints and PRISM use dc:type tags, so we handle those here as well */
-			} else if (schema === _prefixes.dc) {
-				/** It may be desirable in the future to try to determine
-				 * itemType by 'format', but for now we just look at 'type'
-				 * http://dublincore.org/documents/dcmi-terms/#terms-format
-				 * mimeType http://www.iana.org/assignments/media-types/
-				 */
-				if(prop === 'type') {
-					switch (value) {
-						//from http://www.ukoln.ac.uk/repositories/digirep/index/Eprints_Type_Vocabulary_Encoding_Scheme
-						case 'book':
-						case 'patent':
-						case 'report':
-						case 'thesis':
-							eprintsType = value;
-							break;
-						case 'bookitem':
-							eprintsType = 'bookSection';
-							break;
-						//case 'bookreview':
-						case 'conferenceitem':
-						case 'conferencepaper':
-						case 'conferenceposter':
-							eprintsType = 'conferencePaper';
-							break;
-						case 'journalitem':
-						case 'journalarticle':
-						case 'submittedjournalarticle':
-							eprintsType = 'journalArticle';
-							break;
-						case 'newsitem':
-							eprintsType = 'newspaperArticle';
-							break;
-						case 'scholarlytext':
-							eprintsTypeGuess = 'journalArticle';
-							break;
-						case 'workingpaper':
-							eprintsType = 'manuscript';
-							break;
-
-						//from http://www.idealliance.org/specifications/prism/specifications/prism-controlled-vocabularies/prism-12-controlled-vocabularies
-						//some are the same as eprints and are handled above
-						case 'article':
-							prismTypeGuess = 'journalArticle';
-							break;
-						case 'electronicbook':
-							prismType = 'book';
-							break;
-						case 'homepage':
-						case 'webpage':
-							prismType = 'webpage';
-							break;
-						case 'illustration':
-							prismType = 'artwork';
-							break;
-						case 'map':
-							prismType = 'map';
-							break;
-
-						//from http://dublincore.org/documents/dcmi-type-vocabulary/
-						//this vocabulary is much broader
-						case 'event':
-							//very broad, but has an associated location
-							dcTypeGuess = 'presentation';
-						case 'image':
-							//this includes almost any graphic, moving or not
-							dcTypeGuess = 'artwork';
-							break;
-						case 'movingimage':
-							//could be either film, tvBroadcast, or videoRecording
-							dcTypeGuess = 'videoRecording';
-							break;
-						case 'software':
-							dcTypeGuess = 'computerProgram';
-							break;
-						case 'sound':
-							//could be podcast, radioBroadcast, or audioRecording
-							dcTypeGuess = 'audioRecording';
-							break;
-						case 'stillimage':
-							//could be map or artwork
-							dcTypeGuess = 'artwork';
-							break;
-						case 'text':
-							//very broad
-							dcTypeGuess = 'journalArticle';
-							break;
-						//case 'collection':
-						//case 'dataset':
-						//case 'interactiveresource':
-						//case 'physicalobject':
-						//case 'service':
-					}
-				}
-			}
-			//at least pretend we're a journalArticle if we have eprints data
-			if(schema === _prefixes.eprint && !eprintTypeGuess) eprintTypeGuess = 'journalArticle';
-
-		//try to find some highwire metadata
-		} else if(!hwType) {
-			var shortTag = tag.slice(tag.lastIndexOf('citation_'));
-			switch(shortTag) {
-				case "citation_journal_title":
-					hwType = "journalArticle";
-					break;
-				case "citation_technical_report_institution":
-					hwType = "report";
-					break;
-				case "citation_conference_title":
-				case "citation_conference":
-					hwType = "conferencePaper";
-					break;
-				case "citation_book_title":
-					hwType = "bookSection";
-					break;
-				case "citation_dissertation_institution":
-					hwType = "thesis";
-					break;
-				case "citation_title":		//fall back to journalArticle, since this is quite common
-				case "citation_series_title":	//possibly journal article, though it could be book
-					hwTypeGuess = "journalArticle";
-					break;
 			}
 		}
 
-		/**try to terminate loop early if we have an item type we are sure about
-		 * but keep trying until we encounter some RDF data (if any), so we know
-		 * if we need to call the RDF translator
-		 */
-		 //we're confident with HW, OG, PRISM, and EPrints types
-		if(_rdfPresent && (hwType || ogType || prismType || eprintsType)) break;
-	}
+		var nodes = rdf.getNodes(true);
+		rdf.defaultUnknownType = hwType || hwTypeGuess ||
+			//if we have RDF data, then default to webpage
+			(nodes.length ? "webpage":false);
 
-	//set item type in order of confidence in data
-	_itemType = hwType || ogType || eprintsType || prismType || dcType ||
-				hwTypeGuess || ogTypeGuess || eprintsTypeGuess ||
-				prismTypeGuess || dcTypeGuess ||
-				//if we have RDF data, but nothing, then pretend it's webpage
-				(_rdfPresent? 'webpage' : false);
+		_itemType = nodes.length ? rdf.detectType({},nodes[0],{}) : rdf.defaultUnknownType;
+		RDF = rdf;
+	});
 
 	return _itemType;
 }
@@ -484,51 +238,8 @@ function doWeb(doc, url) {
 	// populate _rdfPresent, _itemType, and _prefixes
 	detectWeb(doc, url);
 
-	if(_rdfPresent) {
-		// load RDF translator, so that we don't need to replicate import code
-		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f");
-		translator.setHandler("itemDone", function(obj, newItem) {
-			_haveItem = true;
-			completeItem(doc, newItem);
-		});
-
-		translator.getTranslatorObject(function(rdf) {
-			var metaTags = doc.getElementsByTagName("meta");
-
-			for(var i=0; i<metaTags.length; i++) {
-				// Two formats allowed:
-				// 	<meta name="..." content="..." />
-				//	<meta property="..." content="..." />
-				// The first is more common; the second is recommended by Facebook
-				// for their OpenGraph vocabulary
-				var tag = metaTags[i].getAttribute("name");
-				if (!tag) tag = metaTags[i].getAttribute("property");
-				var value = metaTags[i].getAttribute("content");
-				if(!tag || !value) continue;
-				// We allow three delimiters between the namespace and the property
-				var delimIndex = tag.indexOf('.');
-				if(delimIndex === -1) delimIndex = tag.indexOf(':');
-				if(delimIndex === -1) delimIndex = tag.indexOf('_');
-				if(delimIndex === -1) continue;
-
-				var prefix = tag.substr(0, delimIndex).toLowerCase();
-
-				if(_prefixes[prefix]) {
-					var prop = tag[delimIndex+1].toLowerCase()+tag.substr(delimIndex+2);
-					// This debug is for seeing what is being sent to RDF
-					//Zotero.debug(_prefixes[prefix]+prop +"=>"+value);
-					rdf.Zotero.RDF.addStatement(url, _prefixes[prefix] + prop, value, true);
-				}
-			}
-
-			rdf.defaultUnknownType = _itemType;
-			rdf.doImport();
-			if(!_haveItem) {
-				completeItem(doc, new Zotero.Item(_itemType));
-			}
-		});
-	} else {
+	RDF.doImport();
+	if(!_haveItem) {
 		completeItem(doc, new Zotero.Item(_itemType));
 	}
 }
@@ -545,7 +256,6 @@ function addHighwireMetadata(doc, newItem) {
 	//save rdfCreators for later
 	var rdfCreators = newItem.creators;
 	newItem.creators = [];
-
 	for(var i=0, n=authorNodes.length; i<n; i++) {
 		//make sure there are no empty authors
 		var authors = authorNodes[i].nodeValue.replace(/(;[^A-Za-z0-9]*)$/, "").split(/\s*;\s/);
