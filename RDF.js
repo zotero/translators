@@ -11,8 +11,8 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-16 08:05:03"
+	"browserSupport": "gcsv",
+	"lastUpdated": "2012-05-12 05:09:39"
 }
 
 /*
@@ -85,6 +85,8 @@ function getFirstResults(node, properties, onlyOneString) {
 				// actual literals
 				if(typeof(result[0]) != "object") {
 					return result[0];
+				} else {
+					return result[0].value;
 				}
 			} else {
 				return result;
@@ -103,8 +105,11 @@ function handleCreators(newItem, creators, creatorType) {
 	
 	if(typeof(creators[0]) != "string") {	// see if creators are in a container
 		try {
-			var creators = Zotero.RDF.getContainerElements(creators[0]);
+			var c = Zotero.RDF.getContainerElements(creators[0]);
 		} catch(e) {}
+		if(c && c.length) {
+			creators = c;
+		}
 	}
 	
 	if(typeof(creators[0]) == "string") {	// support creators encoded as strings
@@ -124,11 +129,13 @@ function handleCreators(newItem, creators, creatorType) {
 			if(type) {
 				type = Zotero.RDF.getResourceURI(type[0]);
 				if(type == n.foaf+"Person") {	// author is FOAF type person
-					var creator = new Array();
+					var creator = new Object();
 					creator.lastName = getFirstResults(creators[i],
-						[n.foaf+"surname", n.foaf+"family_name"], true);
+						[n.foaf+"familyName", n.foaf+"lastName",
+						n.foaf+"surname", n.foaf+"family_name"], true); //unofficial
 					creator.firstName = getFirstResults(creators[i],
-						[n.foaf+"givenname", n.foaf+"firstName"], true);
+						[n.foaf+"givenName", n.foaf+"firstName",
+						n.foaf+"givenname"], true);	//unofficial
 					creator.creatorType = creatorType;
 					newItem.creators.push(creator);
 				}
@@ -207,12 +214,16 @@ function getNodeByType(nodes, type) {
 	if(!nodes) {
 		return false;
 	}
+
+	if(typeof(type) == "string") {
+		type = [type];
+	}
 	
 	for each(var node in nodes) {
 		var nodeType = Zotero.RDF.getTargets(node, rdf+"type");
 		if(nodeType) {
 			nodeType = Zotero.RDF.getResourceURI(nodeType[0]);
-			if(nodeType == type) {	// we have a node of the correct type
+			if(type.indexOf(nodeType) != -1) {	// we have a node of the correct type
 				return node;
 			}
 		}
@@ -237,9 +248,9 @@ function isPart(node) {
 	return skip;
 }
 
-function importItem(newItem, node, type) {
-	var container = undefined;
-	
+function detectType(newItem, node, ret) {
+	if(!node) return false;
+
 	// also deal with type detection based on parts, so we can differentiate
 	// magazine and journal articles, and find container elements
 	var isPartOf = getFirstResults(node, [n.dcterms+"isPartOf"]);
@@ -253,107 +264,328 @@ function importItem(newItem, node, type) {
 			}
 		}
 	}
-	
+
+	var container;
+	var t = new Object();
+	// rdf:type
+	var type = getFirstResults(node, [rdf+"type"], true);
 	if(type) {
-		if(type == n.bib+"Book") {
-			newItem.itemType = "book";
-		} else if(type == n.bib+"BookSection") {
-			newItem.itemType = "bookSection";
-			container = getNodeByType(isPartOf, n.bib+"Book");
-		} else if(type == n.bib+"Article") {	// choose between journal,
-							// newspaper, and magazine
-							// articles
-			// use of container = (not container ==) is intentional
-			if(container = getNodeByType(isPartOf, n.bib+"Journal")) {
-				newItem.itemType = "journalArticle";
-			} else if(container = getNodeByType(isPartOf, n.bib+"Periodical")) {
-				newItem.itemType = "magazineArticle";
-			} else if(container = getNodeByType(isPartOf, n.bib+"Newspaper")) {
-				newItem.itemType = "newspaperArticle";
-			}
-		} else if(type == n.bib+"Thesis") {
-			newItem.itemType = "thesis";
-		} else if(type == n.bib+"Letter") {
-			newItem.itemType = "letter";
-		} else if(type == n.bib+"Manuscript") {
-			newItem.itemType = "manuscript";
-		} else if(type == n.bib+"Interview") {
-			newItem.itemType = "interview";
-		} else if(type == n.bib+"MotionPicture") {
-			newItem.itemType = "film";
-		} else if(type == n.bib+"Illustration") {
-			newItem.itemType = "artwork";
-		} else if(type == n.bib+"Document") {
-			if(container = getNodeByType(isPartOf, n.bib+"CourtReporter")) {
-				newItem.itemType = "case";
-			} else {
-				newItem.itemType = "webpage";
-			}
-		} else if(type == n.bib+"Memo") {
-			newItem.itemType = "note";
+		var pref = '';
+		if(type.substr(0,n.bib.length) == n.bib) {
+			pref = n.bib;
+		} else if(type.substr(0,n.bibo.length) == n.bibo) {
+			pref = n.bibo;
 		} else if(type == n.z+"Attachment") {
+			pref = n.z;
+		}
+		type = type.substr(pref.length);
+		switch(type) {
+			case "BookSection":
+				container = getNodeByType(isPartOf, n.bib+"Book");
+			case "Book":
+			case "Thesis":
+			case "Letter":
+			case "Manuscript":
+			case "Interview":
+			case "Report":
+			case "Patent":
+				//these are the same as zotero types,
+				//just start with lower case
+				t.bib = type[0].toLowerCase() + type.substr(1);
+			break;
+			case "MotionPicture":
+				t.bib = "film";
+			break;
+			case "Image":
+			case "Illustration":
+				t.bib = "artwork";
+			break;
+			case "Legislation":
+				t.bib = "statute";
+			break;
+			case "Recording":
+				t.bib = "audioRecording";
+			break;
+			case "Memo":
+				t.bib = "note";
+			break;
+			case "Document":
+				if(container = getNodeByType(isPartOf,
+						[n.bib+"CourtReporter", n.bibo+"CourtReporter"])) {
+					t.bib = "case";
+				} else {
+					t.bib = "webpage";
+				}
+			break;
+			case "Article":
+				// choose between journal, newspaper, and magazine articles
+				// use of container = (not container ==) is intentional
+				if(container = getNodeByType(isPartOf,
+						[n.bib+"Journal", n.bibo+"Journal"])) {
+					t.bib = "journalArticle";
+				} else if(container = getNodeByType(isPartOf,
+						[n.bib+"Periodical", n.bibo+"Periodical"])) {
+					t.bib = "magazineArticle";
+				} else if(container = getNodeByType(isPartOf,
+						[n.bib+"Newspaper", n.bibo+"Newspaper"])) {
+					t.bib = "newspaperArticle";
+				}
+			break;
+			//zotero
+			case "Attachment":
 			// unless processing of independent attachment is intended, don't
 			// process
 			
 			// process as file
-			newItem.itemType = "attachment";
-
+			t.zotero = "attachment";
+	
 			var path = getFirstResults(node, [rdf+"resource"]);
 			if(path) {
 				newItem.path = Zotero.RDF.getResourceURI(path[0]);
 			}
 			newItem.charset = getFirstResults(node, [n.link+"charset"], true);
 			newItem.mimeType = getFirstResults(node, [n.link+"type"], true);
-		} else if(type == n.bib+"Report") {
-			newItem.itemType = "report";
-		} else if(type == n.bib+"Legislation") {
-			newItem.itemType = "statute";
-		} else if(type == n.bib+"Patent") {
-			newItem.itemType = "patent";
-		} else if(type == n.bib+"Image") {
-			newItem.itemType = "artwork";
-		} else if(type == n.bib+"Recording") {
-			newItem.itemType = "audioRecording";
 		}
 	}
-	
-	// check to see if we recognize the type in the fs or dc namespaces
-	var zoteroType = getFirstResults(node, [n.z+"itemType", n.z+"type", n.dc+"type", n.dcterms+"type"], true);
-	if(zoteroType && Zotero.Utilities.itemTypeExists(zoteroType)) {
-		newItem.itemType = zoteroType;
+
+	// zotero:itemType, zotero:type
+	type = getFirstResults(node, [n.z+"itemType", n.z+"type"], true);
+	if(type && Zotero.Utilities.itemTypeExists(type)) {
+		t.zotero = type;
 	}
 
-	// do type handling for OGP
-	var ogType = getFirstResults(node, [n.og+"type"], true);
-	switch (ogType) {
+	// dc:type, dcterms:type
+	type = getFirstResults(node, [n.dc+"type", n.dcterms+"type"], true);
+	if(type) {
+		if(Zotero.Utilities.itemTypeExists(type)) {
+			t.dc = type;
+		} else {
+			switch (type) {
+				//eprints
+				//from http://www.ukoln.ac.uk/repositories/digirep/index/Eprints_Type_Vocabulary_Encoding_Scheme
+				case 'book':
+				case 'patent':
+				case 'report':
+				case 'thesis':
+					t.dc = value;
+					break;
+				case 'bookitem':
+					t.dc = 'bookSection';
+					break;
+				//case 'bookreview':
+				case 'conferenceitem':
+				case 'conferencepaper':
+				case 'conferenceposter':
+					t.dc = 'conferencePaper';
+					break;
+				case 'journalitem':
+				case 'journalarticle':
+				case 'submittedjournalarticle':
+					t.dc = 'journalArticle';
+					break;
+				case 'newsitem':
+					t.dc = 'newspaperArticle';
+					break;
+				case 'scholarlytext':
+					t.dc = 'journalArticle';
+					break;
+				case 'workingpaper':
+					t.dc = 'manuscript';
+					break;
+
+				//from http://www.idealliance.org/specifications/prism/specifications/prism-controlled-vocabularies/prism-12-controlled-vocabularies
+				//some are the same as eprints and are handled above
+				case 'article':
+					t.dcGuess = 'journalArticle';
+					break;
+				case 'electronicbook':
+					t.dc = 'book';
+					break;
+				case 'homepage':
+				case 'webpage':
+					t.dc = 'webpage';
+					break;
+				case 'illustration':
+					t.dc = 'artwork';
+					break;
+				case 'map':
+					t.dc = 'map';
+					break;
+
+				//from http://dublincore.org/documents/dcmi-type-vocabulary/
+				//this vocabulary is much broader
+				case 'event':
+					//very broad, but has an associated location
+					t.dcGuess = 'presentation';
+					break;
+				case 'image':
+					//this includes almost any graphic, moving or not
+					t.dcGuess = 'artwork';
+					break;
+				case 'movingimage':
+					//could be either film, tvBroadcast, or videoRecording
+					t.dcGuess = 'videoRecording';
+					break;
+				case 'software':
+					t.dcGuess = 'computerProgram';
+					break;
+				case 'sound':
+					//could be podcast, radioBroadcast, or audioRecording
+					t.dcGuess = 'audioRecording';
+					break;
+				case 'stillimage':
+					//could be map or artwork
+					t.dcGuess = 'artwork';
+					break;
+				case 'text':
+					//very broad
+					t.dcGuess = 'journalArticle';
+					break;
+				//collection, dataset, interactiveresource, physicalobject,
+				//service
+			}
+		}
+	}
+
+	// og:type
+	type = getFirstResults(node, [n.og+"type"], true);
+	switch (type) {
 		case "video.movie":
 		case "video.episode":
 		case "video.tv_show":
 		case "video.other":
-			newItem.itemType = "videoRecording"; break;
+			t.og = "videoRecording";
+		break;
 		case "article":
-			newItem.itemType = "newspaperArticle"; break;
+			t.ogGuess = "journalArticle";
+		break;
 		case "book":
-			newItem.itemType = "book"; break;
+			t.og = "book";
+		break;
 		case "music.song":
 		case "music.album":
-			newItem.itemType = "audioRecording"; break;
+			t.og = "audioRecording";
+		break;
 		case "website":
-			newItem.itemType = "webpage"; break;
+			t.og = "webpage";
+		break;
 	}
 
-	/**TODO: use the logic in Embeded Metadata to determine itemType
-	 * from PRISM genre and aggregationType
-	 */
-	
-	if(newItem.itemType == "blogPost") {
+	// PRISM:aggregationtype
+	/**is this actually inside container?*/
+	type = getFirstResults(node, [n.prism+"aggregationtype",
+		n.prism2_0+"aggregationtype", n.prism2_1+"aggregationtype"]);
+	switch(type) {
+		case 'book':
+			t.prism = 'bookSection';
+		break;
+		case 'feed':
+			//could also be email
+			t.prismGuess = 'blogPost';
+		break;
+		case 'journal':
+			t.prism = 'journalArticle';
+		break;
+		case 'magazine':
+			t.prism = 'magazineArticle';
+		break;
+		case 'newsletter':
+			t.prism = 'newspaperArticle';
+		break;
+		//pamphlet, other, manual, catalog
+	}
+
+	//PRISM:genre
+	type = getFirstResults(node, [n.prism+"genre", n.prism2_0+"genre",
+		n.prism2_1+"genre"]);
+	switch(type) {
+		case 'abstract':
+		case 'acknowledgements':
+		case 'authorbio':
+		case 'bibliography':
+		case 'index':
+		case 'tableofcontents':
+			t.prism = 'bookSection';
+		break;
+		case 'autobiography':
+		case 'biography':
+			t.prism = 'book';
+		break;
+		case 'blogentry':
+			t.prism = 'blogPost';
+		break;
+		case 'homepage':
+		case 'webliography':
+			t.prism = 'webpage';
+		break;
+		case 'interview':
+			t.prism = 'interview';
+		break;
+		case 'letters':
+			t.prism = 'letter';
+		break;
+		case 'adaptation':
+		case 'analysis':
+			t.prismGuess = 'journalArticle';
+		break;
+		case 'column':
+		case 'newsbulletin':
+		case 'opinion':
+			//magazine or newspaper
+			t.prismGuess = 'newspaperArticle';
+		break;
+		case 'coverstory':
+		case 'essay':
+		case 'feature':
+		case 'insidecover':
+			//journal or magazine
+			t.prismGuess = 'magazineArticle';
+		break;
+		//advertorial; advertisement; brief; chronology; classifiedad;
+		//correction; cover; coverpackage; electionresults; eventscalendar;
+		//excerpt; photoshoot; featurepackage; financialstatement;
+		//interactivecontent; legaldocument; masthead; notice; obituary;
+		//photoessay; poem; poll; pressrelease; productdescription; profile;
+		//quotation; ranking; recipe; reprint; response; review; schedule;
+		//sidebar; stockquote; sectiontableofcontents; transcript; wirestory
+	}
+
+	//PRISM:platform
+	type = getFirstResults(node, [n.prism+"platform", n.prism2_0+"platform",
+		n.prism2_1+"platform"]);
+	switch(type) {
+		case 'broadcast':
+			t.prismGuess = 'tvBroadcast';
+		break;
+		case 'web':
+			t.prismGuess = 'webpage';
+		break;
+	}
+
+	var itemType = t.zotero || t.bib || t.prism || t.og || t.dc ||
+		exports.defaultUnknownType || t.zoteroGuess || t.bibGuess || 
+		t.prismGuess || t.ogGuess || t.dcGuess
+
+	if(itemType == "blogPost") {
 		container = getNodeByType(isPartOf, n.z+"Blog");
-	} else if(newItem.itemType == "forumPost") {
+	} else if(itemType == "forumPost") {
 		container = getNodeByType(isPartOf, n.z+"Forum");
-	} else if(newItem.itemType == "webpage") {
+	} else if(itemType == "webpage") {
 		container = getNodeByType(isPartOf, n.z+"Website");
 	}
+
+	ret.container = container;
+	ret.isPartOf = isPartOf;
+
+	return 	itemType;
+}
 	
+function importItem(newItem, node) {
+	var ret = new Object();
+	newItem.itemType = detectType(newItem, node, ret) || 'journalArticle';
+	var container = ret.container;
+	var isPartOf = ret.isPartOf;
+
 	// title
 	newItem.title = getFirstResults(node, [n.dc+"title", n.dcterms+"title",
 		n.eprints+"title", n.vcard2+"fn", n.og+"title"], true);
@@ -361,20 +593,19 @@ function importItem(newItem, node, type) {
 							// (if not a known type)
 		return false;
 	}
-	
-	if(!newItem.itemType) {
-		newItem.itemType = exports.defaultUnknownType;
-	}
-	
+
 	// regular author-type creators
 	var possibleCreatorTypes = Zotero.Utilities.getCreatorsForType(newItem.itemType);
+	var creators;
 	for each(var creatorType in possibleCreatorTypes) {
 		if(creatorType == "author") {
-			var creators = getFirstResults(node, [n.bib+"authors", n.dc+"creator", n.dcterms+"creator", n.eprints+"creators_name"]);
+			creators = getFirstResults(node, [n.bib+"authors", n.dc+"creator",
+				n.dcterms+"creator", n.eprints+"creators_name",
+				n.dc+"contributor", n.dcterms+"contributor"]);
 		} else if(creatorType == "editor" || creatorType == "contributor") {
-			var creators = getFirstResults(node, [n.bib+creatorType+"s"]);
+			creators = getFirstResults(node, [n.bib+creatorType+"s"]);
 		} else {
-			var creators = getFirstResults(node, [n.z+creatorType+"s"]);
+			creators = getFirstResults(node, [n.z+creatorType+"s"]);
 		}
 		
 		if(creators) handleCreators(newItem, creators, creatorType);
@@ -402,7 +633,7 @@ function importItem(newItem, node, type) {
 		// these fields mean the same thing
 		newItem.reporter = newItem.publicationTitle;
 	}
-	
+
 	// series
 	var series = getNodeByType(isPartOf, n.bib+"Series");
 	if(series) {
@@ -471,7 +702,7 @@ function importItem(newItem, node, type) {
 			}
 		}
 	}
-	
+
 	// these fields mean the same thing
 	newItem.distributor = newItem.label = newItem.company = newItem.institution = newItem.publisher;
 	
@@ -525,10 +756,10 @@ function importItem(newItem, node, type) {
 	}
 
 	// ISSN, if encoded per PRISM (DC uses "identifier")
-	newItem.ISSN = getFirstResults(node, [n.prism+"issn", n.prism2_0+"issn", n.prism2_1+"issn", n.eprints+"issn", n.bibo+"issn",
+	newItem.ISSN = getFirstResults((container ? container : node), [n.prism+"issn", n.prism2_0+"issn", n.prism2_1+"issn", n.eprints+"issn", n.bibo+"issn",
 		n.prism+"eIssn", n.prism2_0+"eIssn", n.prism2_1+"eIssn", n.bibo+"eissn"], true) || newItem.ISSN;
 	// ISBN from PRISM
-	newItem.ISBN = getFirstResults(node, [n.prism2_1+"isbn", n.bibo+"isbn", n.bibo+"isbn13", n.bibo+"isbn10"], true) || newItem.ISBN;
+	newItem.ISBN = getFirstResults((container ? container : node), [n.prism2_1+"isbn", n.bibo+"isbn", n.bibo+"isbn13", n.bibo+"isbn10"], true) || newItem.ISBN;
 	// DOI from PRISM
 	newItem.DOI = getFirstResults(node, [n.prism2_0+"doi", n.prism2_1+"doi", n.bibo+"doi"], true) || newItem.DOI;
 	
@@ -677,26 +908,17 @@ function importItem(newItem, node, type) {
 	return true;
 }
 
-function doImport() {
-	Zotero.setProgress(null);
+function getNodes(skipCollections) {
 	var nodes = Zotero.RDF.getAllResources();
-	if(!nodes) {
-		return false;
-	}
-	
-	// keep track of collections while we're looping through
-	var collections = new Array();
-	
-	var i = 0;
+
+	var goodNodes = new Array();
 	for each(var node in nodes) {
-		var newItem = new Zotero.Item();
-		newItem.itemID = Zotero.RDF.getResourceURI(node);
-		
 		// figure out if this is a part of another resource, or a linked
-		// attachment
+		// attachment, or a creator
 		if(Zotero.RDF.getSources(node, n.dcterms+"isPartOf") ||
 		   Zotero.RDF.getSources(node, n.bib+"presentedAt") ||
-		   Zotero.RDF.getSources(node, n.link+"link")) {
+		   Zotero.RDF.getSources(node, n.link+"link") ||
+		   Zotero.RDF.getSources(node, n.dcterms+"creator")) {
 			continue;
 		}
 		
@@ -704,20 +926,48 @@ function doImport() {
 		var type = Zotero.RDF.getTargets(node, rdf+"type");
 		if(type) {
 			type = Zotero.RDF.getResourceURI(type[0]);
-			
+
 			// skip if this is not an independent attachment,
 			if((type == n.z+"Attachment" || type == n.bib+"Memo") && isPart(node)) {
 				continue;
-			} else if(type == n.bib+"Collection" || type == n.z+"Collection") {
+			} else if(skipCollections &&
+				(type == n.bib+"Collection" || type == n.z+"Collection")) {
+				continue;
+			}
+		}
+		goodNodes.push(node);
+	}
+	return goodNodes;
+}
+
+function doImport() {
+	Zotero.setProgress(null);
+	var nodes = getNodes();
+	if(!nodes.length) {
+		return false;
+	}
+
+	// keep track of collections while we're looping through
+	var collections = new Array();
+
+	var i = 0;
+	for each(var node in nodes) {
+		var newItem = new Zotero.Item();
+		newItem.itemID = Zotero.RDF.getResourceURI(node);
+
+		// type
+		var type = Zotero.RDF.getTargets(node, rdf+"type");
+		if(type) {
+			type = Zotero.RDF.getResourceURI(type[0]);
+
+			if(type == n.bib+"Collection" || type == n.z+"Collection") {
 				// skip collections until all the items are done
 				collections.push(node);
 				continue;
 			}
-		} else {
-			type = false;
 		}
-		
-		if(importItem(newItem, node, type)) {
+
+		if(importItem(newItem, node)) {
 			newItem.complete();
 		}
 		
@@ -740,5 +990,7 @@ function doImport() {
  */
 var exports = {
 	"doImport":doImport,
-	"defaultUnknownType":"book"
+	"detectType":detectType,
+	"getNodes":getNodes,
+	"defaultUnknownType":false
 };
