@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-05-12 05:19:44"
+	"lastUpdated": "2012-05-12 13:59:30"
 }
 
 /*
@@ -192,9 +192,6 @@ function detectWeb(doc, url) {
 
 			if(_prefixes[prefix]) {
 				var prop = tag[delimIndex+1].toLowerCase()+tag.substr(delimIndex+2);
-				//currently we can't handle qnames containing some invalid characters
-				if(prop.indexOf('.') != -1)
-					continue;
 				// This debug is for seeing what is being sent to RDF
 				//Zotero.debug(_prefixes[prefix]+prop +"=>"+value);
 				rdf.Zotero.RDF.addStatement(url, _prefixes[prefix] + prop, value, true);
