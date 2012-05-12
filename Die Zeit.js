@@ -183,26 +183,23 @@ var testCases = [
 				"tags": [
 					"Libyen",
 					"Stadt",
-					"Tripolis",
-					"Seine"
+					"Tripolis"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.zeit.de/politik/ausland/2011-09/libyen-bani-walid?page=all&print=true",
 						"title": "Libyen: Rebellen bereiten Angriff auf Bani Walid vor | Politik | ZEIT ONLINE",
 						"mimeType": "text/html"
 					}
 				],
 				"url": "http://www.zeit.de/politik/ausland/2011-09/libyen-bani-walid",
-				"title": "Libyen: Rebellen bereiten Angriff auf Bani Walid vor",
-				"date": "15:12 Uhr",
 				"abstractNote": "Die von Gadhafi-Anhängern geführte Stadt ist von Rebellentruppen eingekreist. Gespräche über eine friedliche Übergabe sind gescheitert, ein Angriff steht offenbar bevor.",
-				"publicationTitle": "Die Zeit",
 				"section": "Ausland",
 				"libraryCatalog": "Die Zeit",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Libyen"
+				"shortTitle": "Libyen",
+				"title": "Libyen: Rebellen bereiten Angriff auf Bani Walid vor",
+				"date": "15:12 Uhr",
+				"publicationTitle": "Die Zeit"
 			}
 		]
 	},

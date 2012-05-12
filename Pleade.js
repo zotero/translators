@@ -275,7 +275,7 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"url": "http://gael.gironde.fr/pleade-test/ead.html?id=FRAD033_IR_11AV",
+				"url": "http://gael.gironde.fr/ead.html?id=FRAD033_IR_11AV",
 				"place": "Bordeaux",
 				"language": "français",
 				"callNumber": "11 AV 1-14",

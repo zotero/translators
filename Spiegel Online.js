@@ -223,9 +223,9 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Mindestlohn",
+					"Betreuungsgeld",
 					"Euro-Krise",
-					"Betreuungsgeld"
+					"Mindestlohn"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -234,13 +234,12 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"url": "http://www.spiegel.de/politik/deutschland/0,1518,797954,00.html",
-				"title": "Partei im Koma",
+				"url": "http://www.spiegel.de/politik/deutschland/cdu-parteitag-partei-im-koma-a-797954.html",
 				"abstractNote": "Die CDU feiert sich in Leipzig selbst, doch in Wahrheit befindet sie sich in einem traurigen Zustand: Die Partei ist in ein kollektives Koma gefallen, politische Debatten finden kaum noch statt. Hauptverantwortlich dafür ist Angela Merkel.",
-				"date": "15.11.2011",
-				"publicationTitle": "Spiegel Online",
 				"libraryCatalog": "Spiegel Online",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"title": "Partei im Koma",
+				"date": "15.11.2011",
+				"publicationTitle": "Spiegel Online"
 			}
 		]
 	},
