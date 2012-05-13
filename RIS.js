@@ -1,7 +1,7 @@
 {
 	"translatorID": "32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7",
 	"label": "RIS",
-	"creator": "Simon Kornblith",
+	"creator": "Simon Kornblith and Aurimas Vinckevicius",
 	"target": "ris",
 	"minVersion": "2.1.3",
 	"maxVersion": "",
@@ -13,7 +13,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-04-19 05:42:41"
+	"lastUpdated": "2012-04-24 15:51:20"
 }
 
 function detectImport() {
@@ -64,8 +64,11 @@ var inputFieldMap = {
 	DO:"DOI"
 };
 
-// TODO: figure out if these are the best types for letter, interview, webpage
-var typeMap = {
+/************************
+ * TY <-> itemType maps *
+ ************************/
+
+var exportTypeMap = {
 	book:"BOOK",
 	bookSection:"CHAP",
 	journalArticle:"JOUR",
@@ -74,7 +77,6 @@ var typeMap = {
 	thesis:"THES",
 	letter:"PCOMM",
 	manuscript:"PAMP",
-	interview:"PCOMM",
 	film:"MPCT",
 	artwork:"ART",
 	report:"RPRT",
@@ -84,40 +86,75 @@ var typeMap = {
 	patent:"PAT",
 	statute:"STAT",
 	map:"MAP",
+	webpage:"WEB",
 	blogPost:"ELEC",
-	webpage:"ELEC",
-	instantMessage:"ICOMM",
-	forumPost:"ICOMM",
 	email:"ICOMM",
 	audioRecording:"SOUND",
-	presentation:"GEN",
+	presentation:"SLIDE",
 	videoRecording:"VIDEO",
+	computerProgram:"COMP",
+	conferencePaper:"CONF"
+};
+
+//These export type maps are degenerate
+//They will cause loss of information when exported and reimported
+var degenerateExportTypeMap = {
+	interview:"PCOMM",
+	instantMessage:"ICOMM",
+	forumPost:"ICOMM",
 	tvBroadcast:"GEN",
 	radioBroadcast:"GEN",
 	podcast:"GEN",
-	computerProgram:"COMP",
-	conferencePaper:"CONF",
 	document:"GEN"
 };
 
-// supplements outputTypeMap for importing
-// TODO: DATA, MUSIC
-var inputTypeMap = {
+//These are degenerate types that are not exported as the same TY value
+//We add the rest from exportTypeMap
+var importTypeMap = {
 	ABST:"journalArticle",
 	ADVS:"film",
+	AGGR:"document",	//how can we handle "database" citations?
+	ANCIENT:"document",
+	BLOG:"blogPost",
+	CHART:"artwork",
+	CLSWK:"book",
+	CPAPER:"conferencePaper",
 	CTLG:"magazineArticle",
+	DATA:"document",	//dataset
+	DBASE:"document",	//database
+	DICT:"dictionaryEntry",
+	EBOOK:"book",
+	ECHAP:"bookSection",
+	EDBOOK:"book",
+	EJOUR:"journalArticle",
+	ENCYC:"encyclopediaArticle",
+	EQUA:"document",	//what's a good way to handle this?
+	FIGURE:"artwork",
+	GEN:"journalArticle",
+	GOVDOC:"report",
+	GRNT:"document",
 	INPR:"manuscript",
 	JFULL:"journalArticle",
-	PAMP:"manuscript",
-	SER:"book",
-	SLIDE:"artwork",
-	UNBILL:"manuscript",
-	CPAPER:"conferencePaper",
-	WEB:"webpage",
-	EDBOOK:"book",
+	LEGAL:"case",		//is this what they mean?
 	MANSCPT:"manuscript",
-	GOVDOC:"document"
+	MULTI:"videoRecording",	//maybe?
+	MUSIC:"audioRecording",
+	SER:"book",
+	STAND:"report",
+	UNBILL:"manuscript",
+	UNPD:"manuscript"
 };
+
+//supplement input map with export
+var ty;
+for(ty in exportTypeMap) {
+	importTypeMap[exportTypeMap[ty]] = ty;
+}
+
+//merge degenerate export type map into main list
+for(ty in degenerateExportTypeMap) {
+	exportTypeMap[ty] = degenerateExportTypeMap[ty];
+}
 
 function processTag(item, tag, value) {
 	// Drop empty fields
@@ -127,7 +164,7 @@ function processTag(item, tag, value) {
 				&& Zotero.Utilities.unescapeHTML) {
 		value = Zotero.Utilities.unescapeHTML(value);
 	}
-	
+
 	if(fieldMap[tag]) {
 		item[fieldMap[tag]] = value;
 	} else if(inputFieldMap[tag]) {
@@ -138,21 +175,13 @@ function processTag(item, tag, value) {
 		// trim the whitespace that some providers (e.g. ProQuest) include
 		value = Zotero.Utilities.trim(value);
 		
-		// first check typeMap
-		for(var i in typeMap) {
-			if(value.toUpperCase() == typeMap[i]) {
-				item.itemType = i;
-			}
-		}
-		// then check inputTypeMap
-		if(!item.itemType) {
-			if(inputTypeMap[value]) {
-				item.itemType = inputTypeMap[value];
+			// check importTypeMap
+			if(importTypeMap[value]) {
+				item.itemType = importTypeMap[value];
 			} else {
 				// default to document
 				item.itemType = "document";
 			}
-		}
 	} else if(tag == "JO") {
 		if (item.itemType == "conferencePaper"){
 			item.conferenceName = value;
@@ -516,7 +545,7 @@ function doExport() {
 		}
 
 		// type
-		addTag("TY", typeMap[item.itemType] ? typeMap[item.itemType] : "GEN");
+		addTag("TY", exportTypeMap[item.itemType] ? exportTypeMap[item.itemType] : "GEN");
 
 		// use field map
 		if (item.itemType == "bookSection" || item.itemType == "conferencePaper") {
