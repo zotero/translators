@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-04-28 03:18:01"
+	"lastUpdated": "2012-05-12 16:15:11"
 }
 
 function detectImport() {
@@ -1747,14 +1747,14 @@ function getFieldValue(read) {
 		value = value.replace(/{?(\\[`"'^~=a-z]){?\\?([A-Za-z])}/g, "$1{$2}");
 		for (var mapped in reversemappingTable) { // really really slow!
 			var unicode = reversemappingTable[mapped];
-			if (value.indexOf(mapped) != -1) {
+			while(value.indexOf(mapped) !== -1) {
 				Zotero.debug("Replace " + mapped + " in " + value + " with " + unicode);
-				value = value.replace(mapped, unicode, "g");
+				value = value.replace(mapped, unicode);
 			}
 			mapped = mapped.replace(/[{}]/g, "");
-			if (value.indexOf(mapped) != -1) {
+			while(value.indexOf(mapped) !== -1) {
 				Zotero.debug("Replace(2) " + mapped + " in " + value + " with " + unicode);
-				value = value.replace(mapped, unicode, "g");
+				value = value.replace(mapped, unicode);
 			}
 		}
 		
