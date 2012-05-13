@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-05-12 05:09:39"
+	"lastUpdated": "2012-05-13 00:07:03"
 }
 
 /*
@@ -278,38 +278,40 @@ function detectType(newItem, node, ret) {
 		} else if(type == n.z+"Attachment") {
 			pref = n.z;
 		}
-		type = type.substr(pref.length);
+		type = type.substr(pref.length).toLowerCase();
 		switch(type) {
-			case "BookSection":
-				container = getNodeByType(isPartOf, n.bib+"Book");
-			case "Book":
-			case "Thesis":
-			case "Letter":
-			case "Manuscript":
-			case "Interview":
-			case "Report":
-			case "Patent":
+			case "book":
+			case "thesis":
+			case "letter":
+			case "manuscript":
+			case "interview":
+			case "report":
+			case "patent":
 				//these are the same as zotero types,
 				//just start with lower case
-				t.bib = type[0].toLowerCase() + type.substr(1);
+				t.bib = type;
 			break;
-			case "MotionPicture":
+			case "booksection":
+				t.bib = 'bookSection';
+				container = getNodeByType(isPartOf, n.bib+"Book");
+			break;
+			case "motionpicture":
 				t.bib = "film";
 			break;
-			case "Image":
-			case "Illustration":
+			case "image":
+			case "illustration":
 				t.bib = "artwork";
 			break;
-			case "Legislation":
+			case "legislation":
 				t.bib = "statute";
 			break;
-			case "Recording":
+			case "recording":
 				t.bib = "audioRecording";
 			break;
-			case "Memo":
+			case "memo":
 				t.bib = "note";
 			break;
-			case "Document":
+			case "document":
 				if(container = getNodeByType(isPartOf,
 						[n.bib+"CourtReporter", n.bibo+"CourtReporter"])) {
 					t.bib = "case";
@@ -317,7 +319,7 @@ function detectType(newItem, node, ret) {
 					t.bib = "webpage";
 				}
 			break;
-			case "Article":
+			case "article":
 				// choose between journal, newspaper, and magazine articles
 				// use of container = (not container ==) is intentional
 				if(container = getNodeByType(isPartOf,
@@ -332,7 +334,7 @@ function detectType(newItem, node, ret) {
 				}
 			break;
 			//zotero
-			case "Attachment":
+			case "attachment":
 			// unless processing of independent attachment is intended, don't
 			// process
 			
