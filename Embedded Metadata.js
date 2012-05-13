@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-05-12 13:59:30"
+	"lastUpdated": "2012-05-13 00:33:42"
 }
 
 /*
@@ -57,6 +57,8 @@ var HIGHWIRE_MAPPINGS = {
 	"citation_abstract":"abstractNote",
 	"citation_doi":"DOI",
 	"citation_public_url":"url",
+	"citation_abstract_html_url":"url",
+	"citation_fulltext_html_url":"url",
 	"citation_language":"language"
 
 /* the following are handled separately in addHighwireMetadata()
