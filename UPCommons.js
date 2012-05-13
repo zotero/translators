@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-05-08 00:15:34"
+	"lastUpdated": "2012-05-13 00:15:58"
 }
 
 function detectWeb(doc, url) {
@@ -76,13 +76,13 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "ANTONIO",
-						"lastName": "CRUZADO",
+						"firstName": "Antonio",
+						"lastName": "Cruzado",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "NIXON",
-						"lastName": "BAHAMON RIVERA",
+						"firstName": "Nixon",
+						"lastName": "Bahamon Rivera",
 						"creatorType": "author"
 					},
 					{
@@ -91,8 +91,8 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "RAFFAELE",
-						"lastName": "BERNARDELLO",
+						"firstName": "Raffaele",
+						"lastName": "Bernardello",
 						"creatorType": "author"
 					},
 					{
@@ -116,8 +116,8 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "ZOILA",
-						"lastName": "VELASQUEZ FORERO",
+						"firstName": "Zoila",
+						"lastName": "Velasquez Forero",
 						"creatorType": "author"
 					}
 				],
@@ -128,14 +128,14 @@ var testCases = [
 					"Àrees temàtiques de la UPC::Enginyeria electrònica i telecomunicacions::Instrumentació i mesura::Sensors i actuadors",
 					"Sensors",
 					"Climatology",
-					"pelagic observatory",
-					"oceanographic buoy",
-					"multisensor coordinated monitoring",
+					"Pelagic observatory",
+					"Oceanographic buoy",
+					"Multisensor coordinated monitoring",
 					"PAR",
-					"operational oceanography",
-					"submarine canyons",
-					"numerical multiparametric modelling",
-					"ocean forecast",
+					"Operational oceanography",
+					"Submarine canyons",
+					"Numerical multiparametric modelling",
+					"Ocean forecast",
 					"Western Mediterranean Sea",
 					"Oceanografia -- Mesurament",
 					"Climatologia -- Mesurament",
@@ -145,6 +145,10 @@ var testCases = [
 					"Open Access"
 				],
 				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
 					{
 						"title": "Snapshot"
 					}
@@ -165,6 +169,7 @@ var testCases = [
 				"audioFileType": "Article",
 				"accepted": "2012-02-06T15:06:01Z",
 				"language": "en",
+				"ISSN": "1424-8220",
 				"url": "http://upcommons.upc.edu/e-prints/handle/2117/14979",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "upcommons.upc.edu"

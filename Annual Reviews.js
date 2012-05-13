@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-04-10 00:10:21"
+	"lastUpdated": "2012-05-12 23:59:00"
 }
 
 /**
@@ -142,11 +142,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.annualreviews.org/toc/biophys/forthcoming",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "http://www.annualreviews.org/toc/biophys/40/1",
 		"items": "multiple"
 	},
@@ -211,6 +206,11 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.annualreviews.org/toc/anchem/forthcoming",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
