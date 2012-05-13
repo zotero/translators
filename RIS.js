@@ -33,37 +33,6 @@ function detectImport() {
 	}
 }
 
-var fieldMap = {
-	ID:"itemID",
-	T1:"title",
-	T3:"series",
-	JF:"publicationTitle",
-	CY:"place",
-	JA:"journalAbbreviation",
-	M3:"DOI"
-};
-
-var bookSectionFieldMap = {
-	ID:"itemID",
-	T1:"title",
-	T2:"publicationTitle",
-	T3:"series",
-	T2:"bookTitle",
-	CY:"place",
-	JA:"journalAbbreviation",
-	M3:"DOI"
-};
-
-// Accounting for input fields that we don't export the same way;
-// mainly for common abuses of the spec
-var inputFieldMap = {
-	TI:"title",
-	CT:"title",
-	CY:"place",
-	ST:"shortTitle",
-	DO:"DOI"
-};
-
 /************************
  * TY <-> itemType maps *
  ************************/
@@ -156,6 +125,56 @@ for(ty in degenerateExportTypeMap) {
 	exportTypeMap[ty] = degenerateExportTypeMap[ty];
 }
 
+/*****************************
+ * Tag <-> zotero field maps *
+ *****************************/
+
+var importFieldMap = {
+	//AB:"abstractNote",	//In case of multiple notes these need to be concatenated
+	ID:"itemID",	//is this still a zotero field?
+	CY:"place",
+	DO:"DOI",
+	TI:"title",
+	LA:"language",
+	ST:"shortTitle"
+};
+
+//non-standard or degenerate field maps
+//these are not exported the same way
+var degenerateImportFieldMap = {
+	JF:"publicationTitle",
+	JA:"journalAbbreviation",
+	M3:"DOI",
+	CT:"title",
+};
+
+var exportFieldMap = {
+	ISBN:"SN",
+	ISSN:"SN"
+};
+
+//supplement exportFieldMap with importFieldMap
+var field;
+for(field in importFieldMap) {
+	exportFieldMap[importFieldMap[field]] = field;
+}
+
+//combine importFieldMaps
+for(field in degenerateImportFieldMap) {
+	importFieldMap[type] = degenerateImportFieldMap[type];
+}
+
+var bookSectionFieldMap = {
+	ID:"itemID",
+	T1:"title",
+	T2:"publicationTitle",
+	T3:"series",
+	T2:"bookTitle",
+	CY:"place",
+	JA:"journalAbbreviation",
+	M3:"DOI"
+};
+
 function processTag(item, tag, value) {
 	// Drop empty fields
 	if (value === undefined || value === null || value == "") return item;	
@@ -165,10 +184,8 @@ function processTag(item, tag, value) {
 		value = Zotero.Utilities.unescapeHTML(value);
 	}
 
-	if(fieldMap[tag]) {
-		item[fieldMap[tag]] = value;
-	} else if(inputFieldMap[tag]) {
-		item[inputFieldMap[tag]] = value;
+	if(importFieldMap[tag]) {
+		item[importFieldMap[tag]] = value;
 	} else if(tag == "TY") {
 		// look for type
 		
@@ -553,8 +570,8 @@ function doExport() {
 				if(item[bookSectionFieldMap[j]]) addTag(j, item[bookSectionFieldMap[j]]);
 			}
 		} else {
-			for(var j in fieldMap) {
-				if(item[fieldMap[j]]) addTag(j, item[fieldMap[j]]);
+			for(var j in exportFieldMap) {
+				if(item[j]) addTag(exportFieldMap[j], item[j]);
 			}
 		}
 
@@ -594,7 +611,7 @@ function doExport() {
 			}
 			addTag("VL", value);
 		}
-		
+
 		// issue (patent: patentNumber)
 		if(item.issue || item.patentNumber) {
 			var value = (item.issue) ? item.issue : item.patentNumber;
@@ -682,10 +699,6 @@ function doExport() {
 				addTag("EP", range[1]);
 			}
 		}
-
-		// ISBN/ISSN
-		addTag("SN", item.ISBN);
-		addTag("SN", item.ISSN);
 
 		// URL
 		if(item.url) {
