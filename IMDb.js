@@ -179,13 +179,13 @@ var testCases = [
 						"title": "Poster"
 					}
 				],
-				"title": "The Official Story",
-				"date": "8 Nov 1985",
-				"genre": "Drama, History, Thriller, War",
+				"genre": "Drama, History, War",
 				"abstractNote": "After the end of the Dirty War, a high school teacher sets out to find out who the mother of her adopted daughter is.",
-				"runningTime": "1 hr 52 mins",
-				"extra": "IMDB ID: tt0089276; IMDB Rating: 7.7 (3036 votes); Rotten Tomatoes: N/A (N/A reviews  N/A fresh, N/A rotten), Tomato Meter: N/A",
-				"libraryCatalog": "IMDb"
+				"runningTime": "1 h 52 min",
+				"extra": "IMDB ID: undefined; IMDB Rating: undefined (undefined votes); Rotten Tomatoes: undefined (undefined reviews  undefined fresh, undefined rotten), Tomato Meter: undefined",
+				"libraryCatalog": "IMDb",
+				"title": "The Official Story",
+				"date": "08 Nov 1985"
 			}
 		]
 	},

@@ -286,13 +286,14 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"bookTitle": "The World is Open",
+				"bookTitle": "The World is Open: How Web Technology is Revolutionizing Education",
 				"ISBN": "9781118269381",
 				"language": "en",
 				"url": "http://onlinelibrary.wiley.com/doi/10.1002/9781118269381.notes/summary",
 				"libraryCatalog": "onlinelibrary.wiley.com",
 				"rights": "Copyright © 2009 Curtis J. Bonk. All rights reserved.",
 				"title": "Endnotes",
+				"date": "2012/01/11",
 				"publisher": "Jossey‐Bass",
 				"pages": "427-467"
 			}
@@ -362,7 +363,7 @@ var testCases = [
 					},
 					{
 						"firstName": "Rosana",
-						"lastName": "Blanco-Cano",
+						"lastName": "Blanco‐Cano",
 						"creatorType": "author"
 					},
 					{
@@ -415,6 +416,7 @@ var testCases = [
 				"rights": "Copyright © 2009 Tatjana Pavlović, Inmaculada Alvarez, Rosana Blanco-Cano, Anitra Grisales, Alejandra Osorio, and Alejandra Sánchez",
 				"abstractNote": "This chapter contains sections titled: \nHistorical and Political Overview of the Period\nContext11\nFilm Scenes: Close Readings\nDirectors (Life and Works)\nCritical Commentary",
 				"title": "Silent Cinema and its Pioneers (1906–1930)",
+				"date": "2009/03/09",
 				"publisher": "Wiley‐Blackwell",
 				"pages": "1-20"
 			}
@@ -554,7 +556,7 @@ var testCases = [
 				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
 				"abstractNote": "Amidation is a post-translational modification found at the C-terminus of ∼50% of all neuropeptide hormones. Cleavage of the Cα–N bond of a C-terminal glycine yields the α-amidated peptide in a reaction catalyzed by peptidylglycine α-amidating monooxygenase (PAM). The mass of an α-amidated peptide decreases by 58 Da relative to its precursor. The amino acid sequences of an α-amidated peptide and its precursor differ only by the C-terminal glycine meaning that the peptides exhibit similar RP-HPLC properties and tandem mass spectral (MS/MS) fragmentation patterns. Growth of cultured cells in the presence of a PAM inhibitor ensured the coexistence of α-amidated peptides and their precursors. A strategy was developed for precursor and α-amidated peptide pairing (PAPP): LC-MS/MS data of peptide extracts were scanned for peptide pairs that differed by 58 Da in mass, but had similar RP-HPLC retention times. The resulting peptide pairs were validated by checking for similar fragmentation patterns in their MS/MS data prior to identification by database searching or manual interpretation. This approach significantly reduced the number of spectra requiring interpretation, decreasing the computing time required for database searching and enabling manual interpretation of unidentified spectra. Reported here are the α-amidated peptides identified from AtT-20 cells using the PAPP method.",
 				"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
-				"date": "2012/01/01",
+				"date": "2011/12/14",
 				"publicationTitle": "PROTEOMICS",
 				"volume": "12",
 				"pages": "173-182"
@@ -615,7 +617,7 @@ var testCases = [
 				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
 				"abstractNote": "Amidation is a post-translational modification found at the C-terminus of ∼50% of all neuropeptide hormones. Cleavage of the Cα–N bond of a C-terminal glycine yields the α-amidated peptide in a reaction catalyzed by peptidylglycine α-amidating monooxygenase (PAM). The mass of an α-amidated peptide decreases by 58 Da relative to its precursor. The amino acid sequences of an α-amidated peptide and its precursor differ only by the C-terminal glycine meaning that the peptides exhibit similar RP-HPLC properties and tandem mass spectral (MS/MS) fragmentation patterns. Growth of cultured cells in the presence of a PAM inhibitor ensured the coexistence of α-amidated peptides and their precursors. A strategy was developed for precursor and α-amidated peptide pairing (PAPP): LC-MS/MS data of peptide extracts were scanned for peptide pairs that differed by 58 Da in mass, but had similar RP-HPLC retention times. The resulting peptide pairs were validated by checking for similar fragmentation patterns in their MS/MS data prior to identification by database searching or manual interpretation. This approach significantly reduced the number of spectra requiring interpretation, decreasing the computing time required for database searching and enabling manual interpretation of unidentified spectra. Reported here are the α-amidated peptides identified from AtT-20 cells using the PAPP method.",
 				"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
-				"date": "2012/01/01",
+				"date": "2011/12/14",
 				"publicationTitle": "PROTEOMICS",
 				"volume": "12",
 				"pages": "173-182"
@@ -676,7 +678,7 @@ var testCases = [
 				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
 				"abstractNote": "Amidation is a post-translational modification found at the C-terminus of ∼50% of all neuropeptide hormones. Cleavage of the Cα–N bond of a C-terminal glycine yields the α-amidated peptide in a reaction catalyzed by peptidylglycine α-amidating monooxygenase (PAM). The mass of an α-amidated peptide decreases by 58 Da relative to its precursor. The amino acid sequences of an α-amidated peptide and its precursor differ only by the C-terminal glycine meaning that the peptides exhibit similar RP-HPLC properties and tandem mass spectral (MS/MS) fragmentation patterns. Growth of cultured cells in the presence of a PAM inhibitor ensured the coexistence of α-amidated peptides and their precursors. A strategy was developed for precursor and α-amidated peptide pairing (PAPP): LC-MS/MS data of peptide extracts were scanned for peptide pairs that differed by 58 Da in mass, but had similar RP-HPLC retention times. The resulting peptide pairs were validated by checking for similar fragmentation patterns in their MS/MS data prior to identification by database searching or manual interpretation. This approach significantly reduced the number of spectra requiring interpretation, decreasing the computing time required for database searching and enabling manual interpretation of unidentified spectra. Reported here are the α-amidated peptides identified from AtT-20 cells using the PAPP method.",
 				"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
-				"date": "2012/01/01",
+				"date": "2011/12/14",
 				"publicationTitle": "PROTEOMICS",
 				"volume": "12",
 				"pages": "173-182"
@@ -737,7 +739,7 @@ var testCases = [
 				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
 				"abstractNote": "Amidation is a post-translational modification found at the C-terminus of ∼50% of all neuropeptide hormones. Cleavage of the Cα–N bond of a C-terminal glycine yields the α-amidated peptide in a reaction catalyzed by peptidylglycine α-amidating monooxygenase (PAM). The mass of an α-amidated peptide decreases by 58 Da relative to its precursor. The amino acid sequences of an α-amidated peptide and its precursor differ only by the C-terminal glycine meaning that the peptides exhibit similar RP-HPLC properties and tandem mass spectral (MS/MS) fragmentation patterns. Growth of cultured cells in the presence of a PAM inhibitor ensured the coexistence of α-amidated peptides and their precursors. A strategy was developed for precursor and α-amidated peptide pairing (PAPP): LC-MS/MS data of peptide extracts were scanned for peptide pairs that differed by 58 Da in mass, but had similar RP-HPLC retention times. The resulting peptide pairs were validated by checking for similar fragmentation patterns in their MS/MS data prior to identification by database searching or manual interpretation. This approach significantly reduced the number of spectra requiring interpretation, decreasing the computing time required for database searching and enabling manual interpretation of unidentified spectra. Reported here are the α-amidated peptides identified from AtT-20 cells using the PAPP method.",
 				"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
-				"date": "2012/01/01",
+				"date": "2011/12/14",
 				"publicationTitle": "PROTEOMICS",
 				"volume": "12",
 				"pages": "173-182"
@@ -781,7 +783,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"bookTitle": "Klinisch‐toxikologische Analytik",
+				"bookTitle": "Klinisch-toxikologische Analytik: Verfahren, Befunde, Interpretation",
 				"ISBN": "9783527603015",
 				"language": "de",
 				"url": "http://onlinelibrary.wiley.com/doi/10.1002/3527603018.ch17/summary",
@@ -789,6 +791,7 @@ var testCases = [
 				"rights": "Copyright © 2002 Wiley-VCH Verlag GmbH",
 				"abstractNote": "Immunoassay\nHochleistungsflüssigkeitschromatographie (HPLC)\nGaschromatographie\nMedizinische Beurteilung und klinische Interpretation\nLiteratur",
 				"title": "β‐Rezeptorenblocker",
+				"date": "2005/01/28",
 				"publisher": "Wiley‐VCH Verlag GmbH & Co. KGaA",
 				"pages": "365-370"
 			}
@@ -833,7 +836,7 @@ var testCases = [
 				"rights": "Published 2011. This article is a U.S. Government work and is in the public domain in the USA.",
 				"abstractNote": "The possibility of using private military and security companies to bolster the capacity to undertake intervention for human rights purposes (humanitarian intervention and peacekeeping) has been increasingly debated. The focus of such discussions has, however, largely been on practical issues and the contingent problems posed by private force. By contrast, this article considers the principled case for privatising humanitarian intervention. It focuses on two central issues. First, does outsourcing humanitarian intervention to private military and security companies pose some fundamental, deeper problems in this context, such as an abdication of a state's duties? Second, on the other hand, is there a case for preferring these firms to other, state-based agents of humanitarian intervention? For instance, given a state's duties to their own military personnel, should the use of private military and security contractors be preferred to regular soldiers for humanitarian intervention?",
 				"title": "The Principled Case for Employing Private Military and Security Companies in Interventions for Human Rights Purposes",
-				"date": "2012/02/01",
+				"date": "2011/12/16",
 				"publicationTitle": "Journal of Applied Philosophy",
 				"volume": "29",
 				"pages": "1-18"
