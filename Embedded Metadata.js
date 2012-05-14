@@ -8,8 +8,8 @@
 	"priority": 400,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-05-08 12:52:05"
+	"browserSupport": "gcsb",
+	"lastUpdated": "2012-05-13 23:44:30"
 }
 
 /*
@@ -494,6 +494,8 @@ function doWeb(doc, url) {
 		translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f");
 		translator.setHandler("itemDone", function(obj, newItem) {
 			_haveItem = true;
+			if (_itemType) newItem.itemType = _itemType;
+			newItem.url = doc.location.href;
 			completeItem(doc, newItem);
 		});
 

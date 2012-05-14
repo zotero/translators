@@ -1,15 +1,15 @@
 {
 	"translatorID": "1f245496-4c1b-406a-8641-d286b3888231",
 	"label": "The Boston Globe",
-	"creator": "Adam Crymble and Frank Bennett",
+	"creator": "Adam Crymble, Frank Bennett, Sebastian Karcher",
 	"target": "^http://(www|search|articles)\\.boston\\.com/",
-	"minVersion": "1.0.0b4.r5",
+	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-05-06 16:00:45"
+	"lastUpdated": "2012-05-14 00:01:12"
 }
 
 /*
@@ -27,14 +27,11 @@
  */
 
 function detectWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-	}: null;
-	
+
 	if (url.match("search.boston.com")) {
 		// Search disabled until cross-domain can be dealt with
 		return false;
-		var results =  doc.evaluate('//div[@class="resultsMain"]//div[@class="regTZ"]/a[@class="titleLink"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var results =  doc.evaluate('//div[@class="resultsMain"]//div[@class="regTZ"]/a[@class="titleLink"]', doc, null, XPathResult.ANY_TYPE, null);
 		if (results.iterateNext()) {
 			return "multiple";
 		} else {
@@ -160,6 +157,7 @@ function scrape (doc, url) {
 		}
 
 		// Authors
+		/*
 		for (var i = 0, ilen = infoElem.childNodes.length; i < ilen; i += 1) {
 			var node = infoElem.childNodes.item(i);
 			if (node.nodeName === 'SPAN') {
@@ -173,6 +171,13 @@ function scrape (doc, url) {
 					}
 				}
 			}
+		}*/
+		
+		var authors = ZU.xpathText(infoElem, './span[@class="separator"]/following-sibling::span')
+		authors = authors.replace(/^\s*[Bb]y|,.+?$/g, "").trim();
+		author = authors.split(/ and |\s*,\s*/)
+		for (var i in author){
+			newItem.creators.push(ZU.cleanAuthor(author[i], "author"));
 		}
 		
 		// Title	
@@ -189,15 +194,12 @@ function scrape (doc, url) {
 
 
 function doWeb (doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-	}: null;
-	
+
 	var uris= new Array();
 
 	if (detectWeb(doc, url) == "multiple") {
 		var items = {};
-		var result =  doc.evaluate('//div[@class="regTZ"]/a[@class="titleLink"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var result =  doc.evaluate('//div[@class="regTZ"]/a[@class="titleLink"]', doc, null, XPathResult.ANY_TYPE, null);
 		var elmt = result.iterateNext();
 		while (elmt) {
 			//items.push(elmt.href);
@@ -256,7 +258,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.boston.com/news/nation/articles/2012/05/06/2_ny_cooperators_give_firsthand_look_at_al_qaida/",
+		"url": "http://articles.boston.com/2012-05-06/news/31599524_1_qaida-khalid-sheik-mohammed-medunjanin",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -283,9 +285,8 @@ var testCases = [
 					}
 				],
 				"publicationTitle": "Boston.com",
-				"url": "http://www.boston.com/news/nation/articles/2012/05/06/2_ny_cooperators_give_firsthand_look_at_al_qaida/",
-				"title": "2 NY cooperators give firsthand look at al-Qaida",
-				"date": "May 6, 2012",
+				"url": "http://articles.boston.com/2012-05-06/news/31599524_1_qaida-khalid-sheik-mohammed-medunjanin",
+				"title": "Cooperators give firsthand look at al-Qaida",
 				"libraryCatalog": "The Boston Globe",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}

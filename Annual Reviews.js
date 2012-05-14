@@ -8,8 +8,8 @@
 	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-04-10 00:10:21"
+	"browserSupport": "gcsib",
+	"lastUpdated": "2012-05-13 22:55:57"
 }
 
 /**
@@ -138,11 +138,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.annualreviews.org/journal/biophys",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://www.annualreviews.org/toc/biophys/forthcoming",
 		"items": "multiple"
 	},
 	{
