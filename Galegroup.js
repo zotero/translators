@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-05-10 13:23:58"
+	"lastUpdated": "2012-05-13 23:17:56"
 }
 
 /*
@@ -185,112 +185,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://go.galegroup.com/ps/i.do?action=interpret&id=GALE%7CA221274499&v=2.1&u=viva_gmu&it=r&p=AONE&sw=w&authCount=1",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"lastName": "Aaronson",
-						"firstName": "Daniel",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Meckel",
-						"firstName": "Katherine",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"Baby boom generation",
-					"Labor market",
-					"Labour market"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"mimeType": "text/html",
-						"title": "Full Text (HTML)",
-						"downloadable": true
-					}
-				],
-				"publicationTitle": "Economic Perspectives",
-				"url": "http://go.galegroup.com/ps/i.do?id=GALE%7CA221274499&v=2.1&u=viva_gmu&it=r&p=AONE&sw=w",
-				"issue": "4",
-				"extra": "2",
-				"DOI": "Article",
-				"date": "2009",
-				"ISBN": "1048115X",
-				"ISSN": "1048115X",
-				"pages": "2+",
-				"title": "How will baby boomer retirements affect teacher labor markets?",
-				"volume": "33",
-				"accessDate": "May 7, 2012",
-				"language": "English",
-				"libraryCatalog": "Galegroup"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://go.galegroup.com/ps/i.do?action=interpret&id=GALE%7CA286390464&v=2.1&u=viva_gmu&it=r&p=EAIM&sw=w&authCount=1",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"lastName": "Aizen",
-						"firstName": "Marcelo A.",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Sabatino",
-						"firstName": "Matena",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Tylianakis",
-						"firstName": "Jason M.",
-						"creatorType": "author"
-					}
-				],
-				"notes": [
-					{
-						"note": "<p>American Association for the Advancement of Science. Due to publisher request, Science cannot be reproduced until 360 days after the original publication date.</p>"
-					}
-				],
-				"tags": [
-					"Ecological restoration",
-					"Extinction (Biology)"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"mimeType": "text/html",
-						"title": "Full Text (HTML)",
-						"downloadable": true
-					}
-				],
-				"publicationTitle": "Science",
-				"url": "http://go.galegroup.com/ps/i.do?id=GALE%7CA286390464&v=2.1&u=viva_gmu&it=r&p=EAIM&sw=w",
-				"issue": "6075",
-				"extra": "1486",
-				"DOI": "Report",
-				"date": "2012",
-				"ISBN": "00368075",
-				"ISSN": "00368075",
-				"pages": "1486+",
-				"title": "Specialization and rarity predict nonrandom loss of interactions from mutualist networks",
-				"volume": "335",
-				"accessDate": "May 7, 2012",
-				"language": "English",
-				"libraryCatalog": "Galegroup"
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "http://find.galegroup.com/ecco/infomark.do?&source=gale&prodId=ECCO&u=viva_gmu&tabID=T001&docId=CW3325179878&type=multipage&contentSet=ECCOArticles&version=1.0&docLevel=FASCIMILE",
 		"items": [
 			{
@@ -308,7 +202,7 @@ var testCases = [
 				],
 				"title": "A digest of the law of actions and trials at nisi prius. By Isaac 'espinasse, of Gray's Inn, Esq. Barrister at Law. The third edition, corrected, with considerable additions from printed and manuscript cases. In two volumes. ...",
 				"place": "London",
-				"url": "http://find.galegroup.com/ecco/infomark.do?&source=gale&prodId=ECCO&u=viva_gmu&tabID=T001&docId=CW3325179878&type=multipage&contentSet=ECCOArticles&version=1.0",
+				"url": "http://find.galegroup.com/ecco/infomark.do?&source=gale&prodId=ECCO&userGroupName=viva_gmu&tabID=T001&docId=CW3325179878&type=multipage&contentSet=ECCOArticles&version=1.0",
 				"pages": "469",
 				"numPages": "469",
 				"DOI": "Monograph",
