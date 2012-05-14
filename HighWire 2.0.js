@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-03-12 01:02:45"
+	"lastUpdated": "2012-05-14 12:23:47"
 }
 
 /*
@@ -619,19 +619,25 @@ var testCases = [
 					}
 				],
 				"itemID": "http://www.pnas.org/content/108/52/20881.full",
+				"title": "A Yeast Functional Screen Predicts New Candidate ALS Disease Genes",
+				"publisher": "National Acad Sciences",
+				"institution": "National Academy of Sciences",
+				"company": "National Academy of Sciences",
+				"label": "National Academy of Sciences",
+				"distributor": "National Academy of Sciences",
+				"date": "12/27/2011",
 				"DOI": "10.1073/pnas.1109434108",
 				"language": "en",
+				"publicationTitle": "Proceedings of the National Academy of Sciences",
 				"journalAbbreviation": "PNAS",
+				"volume": "108",
 				"issue": "52",
 				"url": "http://www.pnas.org/content/108/52/20881",
+				"pages": "20881-20890",
 				"ISSN": "0027-8424, 1091-6490",
+				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.pnas.org",
-				"abstractNote": "Amyotrophic lateral sclerosis (ALS) is a devastating and universally fatal neurodegenerative disease. Mutations in two related RNA-binding proteins, TDP-43 and FUS, that harbor prion-like domains, cause some forms of ALS. There are at least 213 human proteins harboring RNA recognition motifs, including FUS and TDP-43, raising the possibility that additional RNA-binding proteins might contribute to ALS pathogenesis. We performed a systematic survey of these proteins to find additional candidates similar to TDP-43 and FUS, followed by bioinformatics to predict prion-like domains in a subset of them. We sequenced one of these genes, TAF15, in patients with ALS and identified missense variants, which were absent in a large number of healthy controls. These disease-associated variants of TAF15 caused formation of cytoplasmic foci when expressed in primary cultures of spinal cord neurons. Very similar to TDP-43 and FUS, TAF15 aggregated in vitro and conferred neurodegeneration in Drosophila, with the ALS-linked variants having a more severe effect than wild type. Immunohistochemistry of postmortem spinal cord tissue revealed mislocalization of TAF15 in motor neurons of patients with ALS. We propose that aggregation-prone RNA-binding proteins might contribute very broadly to ALS pathogenesis and the genes identified in our yeast functional screen, coupled with prion-like domain prediction analysis, now provide a powerful resource to facilitate ALS disease gene discovery.",
-				"title": "A Yeast Functional Screen Predicts New Candidate ALS Disease Genes",
-				"date": "12/27/2011",
-				"publicationTitle": "Proceedings of the National Academy of Sciences",
-				"volume": "108",
-				"pages": "20881-20890"
+				"abstractNote": "Amyotrophic lateral sclerosis (ALS) is a devastating and universally fatal neurodegenerative disease. Mutations in two related RNA-binding proteins, TDP-43 and FUS, that harbor prion-like domains, cause some forms of ALS. There are at least 213 human proteins harboring RNA recognition motifs, including FUS and TDP-43, raising the possibility that additional RNA-binding proteins might contribute to ALS pathogenesis. We performed a systematic survey of these proteins to find additional candidates similar to TDP-43 and FUS, followed by bioinformatics to predict prion-like domains in a subset of them. We sequenced one of these genes, TAF15, in patients with ALS and identified missense variants, which were absent in a large number of healthy controls. These disease-associated variants of TAF15 caused formation of cytoplasmic foci when expressed in primary cultures of spinal cord neurons. Very similar to TDP-43 and FUS, TAF15 aggregated in vitro and conferred neurodegeneration in Drosophila, with the ALS-linked variants having a more severe effect than wild type. Immunohistochemistry of postmortem spinal cord tissue revealed mislocalization of TAF15 in motor neurons of patients with ALS. We propose that aggregation-prone RNA-binding proteins might contribute very broadly to ALS pathogenesis and the genes identified in our yeast functional screen, coupled with prion-like domain prediction analysis, now provide a powerful resource to facilitate ALS disease gene discovery."
 			}
 		]
 	}

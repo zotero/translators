@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-05-13 00:33:42"
+	"lastUpdated": "2012-05-14 12:22:04"
 }
 
 /*
@@ -57,8 +57,6 @@ var HIGHWIRE_MAPPINGS = {
 	"citation_abstract":"abstractNote",
 	"citation_doi":"DOI",
 	"citation_public_url":"url",
-	"citation_abstract_html_url":"url",
-	"citation_fulltext_html_url":"url",
 	"citation_language":"language"
 
 /* the following are handled separately in addHighwireMetadata()
@@ -69,6 +67,8 @@ var HIGHWIRE_MAPPINGS = {
 	"citation_issn"
 	"citation_eIssn"
 	"citation_pdf_url"
+	"citation_abstract_html_url"
+	"citation_fulltext_html_url"
 */
 };
 
@@ -392,7 +392,10 @@ function addHighwireMetadata(doc, newItem) {
 
 
 	// Other last chances
-	if(!newItem.url) newItem.url = doc.location.href;
+	if(!newItem.url)
+		newItem.url = getContentText(doc, "citation_abstract_html_url") ||
+			getContentText(doc, "citation_fulltext_html_url") ||
+			doc.location.href;
 	if(!newItem.title) newItem.title = doc.title;
 
 	// add attachment
@@ -586,8 +589,8 @@ var testCases = [
 				"title": "Session F: Contributed Oral Papers – F2: Energy, Climate, Nuclear Medicine: Reducing Energy Consumption and CO2 One Street Lamp at a Time",
 				"date": "2011",
 				"conferenceName": "Climate Change and the Future of Nuclear Power",
+				"url": "http://scholarworks.umass.edu/climate_nuclearpower/2011/nov19/34",
 				"abstractNote": "Why wait for federal action on incentives to reduce energy use and address Greenhouse Gas (GHG) reductions (e.g. CO2), when we can take personal actions right now in our private lives and in our communities? One such initiative by private citizens working with Portsmouth NH officials resulted in the installation of energy reducing lighting products on Court St. and the benefits to taxpayers are still coming after over 4 years of operation. This citizen initiative to save money and reduce CO2 emissions, while only one small effort, could easily be duplicated in many towns and cities. Replacing old lamps in just one street fixture with a more energy efficient (Non-LED) lamp has resulted after 4 years of operation ($\\sim $15,000 hr. life of product) in real electrical energy savings of $>$ {\\$}43. and CO2 emission reduction of $>$ 465 lbs. The return on investment (ROI) was less than 2 years. This is much better than any financial investment available today and far safer. Our street only had 30 such lamps installed; however, the rest of Portsmouth (population 22,000) has at least another 150 street lamp fixtures that are candidates for such an upgrade. The talk will also address other energy reduction measures that green the planet and also put more green in the pockets of citizens and municipalities.",
-				"url": "http://scholarworks.umass.edu/climate_nuclearpower/2011/nov19/34/",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "scholarworks.umass.edu",
 				"shortTitle": "Session F"
@@ -633,10 +636,10 @@ var testCases = [
 				"publicationTitle": "Landscapes of Violence",
 				"volume": "2",
 				"issue": "1",
+				"url": "http://scholarworks.umass.edu/lov/vol2/iss1/2",
 				"abstractNote": "The purpose of this paper is to examine the contemporary role of an eighteenth century bounty proclamation issued on the Penobscot Indians of Maine. We focus specifically on how the changing cultural context of the 1755 Spencer Phips Bounty Proclamation has transformed the document from serving as a tool for sanctioned violence to a tool of decolonization for the Indigenous peoples of Maine. We explore examples of the ways indigenous and non-indigenous people use the Phips Proclamation to illustrate past violence directed against Indigenous peoples. This exploration is enhanced with an analysis of the re-introduction of the Phips Proclamation using concepts of decolonization theory.",
 				"pages": "2",
 				"ISSN": "1947-508X",
-				"url": "http://scholarworks.umass.edu/lov/vol2/iss1/2/",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "scholarworks.umass.edu",
 				"shortTitle": "Wabanaki Resistance and Healing"
@@ -678,8 +681,8 @@ var testCases = [
 				"title": "Decision-Theoretic Meta-reasoning in Partially Observable and Decentralized Settings",
 				"date": "2012",
 				"university": "University of Massachusetts - Amherst",
+				"url": "http://scholarworks.umass.edu/open_access_dissertations/508",
 				"abstractNote": "This thesis examines decentralized meta-reasoning. For a single agent or multiple agents, it may not be enough for agents to compute correct decisions if they do not do so in a timely or resource efficient fashion. The utility of agent decisions typically increases with decision quality, but decreases with computation time. The reasoning about one's computation process is referred to as meta-reasoning. Aspects of meta-reasoning considered in this thesis include the reasoning about how to allocate computational resources, including when to stop one type of computation and begin another, and when to stop all computation and report an answer. Given a computational model, this translates into computing how to schedule the basic computations that solve a problem. This thesis constructs meta-reasoning strategies for the purposes of monitoring and control in multi-agent settings, specifically settings that can be modeled by the Decentralized Partially Observable Markov Decision Process (Dec-POMDP). It uses decision theory to optimize computation for efficiency in time and space in communicative and non-communicative decentralized settings. Whereas base-level reasoning describes the optimization of actual agent behaviors, the meta-reasoning strategies produced by this thesis dynamically optimize the computational resources which lead to the selection of base-level behaviors.",
-				"url": "http://scholarworks.umass.edu/open_access_dissertations/508/",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "scholarworks.umass.edu"
 			}
