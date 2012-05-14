@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-04-30 17:44:22"
+	"lastUpdated": "2012-05-13 00:56:40"
 }
 
 function detectWeb(doc, url) {
@@ -95,6 +95,9 @@ function scrape(doc, url) {
 			}
 
 			delete item.extra;
+
+			//store the language-specific url
+			item.url = url;
 
 			item.complete();
 		});
@@ -183,6 +186,9 @@ var testCases = [
 				"title": "Chapitre 2 – L’histoire de La Paz et de la ladera ouest",
 				"publicationTitle": "Collections électroniques de l’Institut de hautes études internationales et du développement. Graduate Institute Publications Online",
 				"rights": "© The Graduate Institute | Geneva",
+				"issue": "1",
+				"number": "1",
+				"patentNumber": "1",
 				"publisher": "Institut de hautes études internationales et du développement",
 				"institution": "Institut de hautes études internationales et du développement",
 				"company": "Institut de hautes études internationales et du développement",
@@ -190,6 +196,8 @@ var testCases = [
 				"distributor": "Institut de hautes études internationales et du développement",
 				"date": "2012/02/03",
 				"DOI": "10.4000/iheid.412",
+				"url": "http://iheid.revues.org/412?lang=fr",
+				"abstractNote": "L’histoire de la ladera ouest de La Paz s’insère dans l’histoire générale de La Paz, à son tour influencée par (et influençant) l’histoire nationale bolivienne. La compréhension du processus de construction des risques, sans laquelle il est impossible de comprendre leur régulation sociale, est en grande partie le produit de l’histoire. En effet, l’approche diachronique semble être un moyen indispensable d’objectivation du social, inspiré ainsi de la sociologie « inséparablement structurale et génétique » (Wacquant 1995) de Pierre Bourdieu, et plus précisément ici, elle joue un rôle fondamental dans la recherche des causes, voire des « causes-racines » de la progression de la vulnérabilité (Wisner et al. 2004). On s’intéressera non seulement aux conditions de possibilité de l’établissement en zone à risque, mais également à la manière dont celle-ci s’est effectivement réalisée.Faire l’histoire de la ladera ouest, c’est construire l’histoire d’un espace, dans la lignée de l’école des annales (Braudel 1990), rendant solidaires l’une de l’autre l’histoire et la géographie. Mais c’est également s’intéresser à un objet inédit – l’histoire des laderas n’a jamais été écrite comme telle, et l’histoire de La Paz correspond souvent à celle du centre-ville. On peut y déceler plusieurs raisons. D’abord, le désintérêt général envers un espace peuplé par des populations indigènes, à faible capital économique, politique et culturel, et dont l’urbanisation constitue dans l’imaginaire collecti",
 				"reportType": "bookSection",
 				"letterType": "bookSection",
 				"manuscriptType": "bookSection",
@@ -200,11 +208,8 @@ var testCases = [
 				"postType": "bookSection",
 				"audioFileType": "bookSection",
 				"language": "fr",
-				"issue": "1",
 				"ISBN": "978-2-940415-91-5",
-				"abstractNote": "L’histoire de la ladera ouest de La Paz s’insère dans l’histoire générale de La Paz, à son tour influencée par (et influençant) l’histoire nationale bolivienne. La compréhension du processus de construction des risques, sans laquelle il est impossible de comprendre leur régulation sociale, est en grande partie le produit de l’histoire. En effet, l’approche diachronique semble être un moyen indispensable d’objectivation du social, inspiré ainsi de la sociologie « inséparablement structurale et génétique » (Wacquant 1995) de Pierre Bourdieu, et plus précisément ici, elle joue un rôle fondamental dans la recherche des causes, voire des « causes-racines » de la progression de la vulnérabilité (Wisner et al. 2004). On s’intéressera non seulement aux conditions de possibilité de l’établissement en zone à risque, mais également à la manière dont celle-ci s’est effectivement réalisée.Faire l’histoire de la ladera ouest, c’est construire l’histoire d’un espace, dans la lignée de l’école des annales (Braudel 1990), rendant solidaires l’une de l’autre l’histoire et la géographie. Mais c’est également s’intéresser à un objet inédit – l’histoire des laderas n’a jamais été écrite comme telle, et l’histoire de La Paz correspond souvent à celle du centre-ville. On peut y déceler plusieurs raisons. D’abord, le désintérêt général envers un espace peuplé par des populations indigènes, à faible capital économique, politique et culturel, et dont l’urbanisation constitue dans l’imaginaire collecti",
 				"ISSN": "2108-6419",
-				"url": "http://iheid.revues.org/412?lang=fr",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "iheid.revues.org"
 			}
@@ -230,8 +235,8 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Saint-Isidore de León",
 					"infante Elvire",
+					"Saint-Isidore de León",
 					"testament",
 					"Elvire Fernandez",
 					"Urraque Fernandez",
@@ -258,6 +263,9 @@ var testCases = [
 				"title": "Le testament d’Elvire (Tábara, 1099)",
 				"publicationTitle": "e-Spania. Revue interdisciplinaire d’études hispaniques médiévales et modernes",
 				"rights": "© e-Spania",
+				"issue": "5",
+				"number": "5",
+				"patentNumber": "5",
 				"publisher": "CLEA (Civilisations et Littératures d’Espagne et d’Amérique du Moyen Âge aux Lumières), EA 4083",
 				"institution": "CLEA (Civilisations et Littératures d’Espagne et d’Amérique du Moyen Âge aux Lumières), EA 4083",
 				"company": "CLEA (Civilisations et Littératures d’Espagne et d’Amérique du Moyen Âge aux Lumières), EA 4083",
@@ -265,6 +273,8 @@ var testCases = [
 				"distributor": "CLEA (Civilisations et Littératures d’Espagne et d’Amérique du Moyen Âge aux Lumières), EA 4083",
 				"date": "2012/03/31",
 				"DOI": "10.4000/e-spania.12303",
+				"url": "http://e-spania.revues.org/12303?lang=fr",
+				"abstractNote": "Le testament d’Elvire livre de précieuses informations sur la réalité historique de l’infantat : son implantation, la composition de ses biens, ses évolutions, les formes de son acquisition et de sa transmission, sa fonction politique. Mais il nous renseigne aussi sur une infante de niveau moyen, sur son cadre de vie, son entourage, ses activités, les réseaux de son pouvoir et même sur sa foi.",
 				"reportType": "Text",
 				"letterType": "Text",
 				"manuscriptType": "Text",
@@ -275,10 +285,7 @@ var testCases = [
 				"postType": "Text",
 				"audioFileType": "Text",
 				"language": "fr",
-				"issue": "5",
-				"abstractNote": "Le testament d’Elvire livre de précieuses informations sur la réalité historique de l’infantat : son implantation, la composition de ses biens, ses évolutions, les formes de son acquisition et de sa transmission, sa fonction politique. Mais il nous renseigne aussi sur une infante de niveau moyen, sur son cadre de vie, son entourage, ses activités, les réseaux de son pouvoir et même sur sa foi.",
 				"ISSN": "1951-6169",
-				"url": "http://e-spania.revues.org/12303?lang=fr",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "e-spania.revues.org"
 			}
@@ -331,6 +338,9 @@ var testCases = [
 				"title": "Le testament d’Elvire (Tábara, 1099)",
 				"publicationTitle": "e-Spania. Revue interdisciplinaire d’études hispaniques médiévales et modernes",
 				"rights": "© e-Spania",
+				"issue": "5",
+				"number": "5",
+				"patentNumber": "5",
 				"publisher": "CLEA (Civilisations et Littératures d’Espagne et d’Amérique du Moyen Âge aux Lumières), EA 4083",
 				"institution": "CLEA (Civilisations et Littératures d’Espagne et d’Amérique du Moyen Âge aux Lumières), EA 4083",
 				"company": "CLEA (Civilisations et Littératures d’Espagne et d’Amérique du Moyen Âge aux Lumières), EA 4083",
@@ -338,6 +348,8 @@ var testCases = [
 				"distributor": "CLEA (Civilisations et Littératures d’Espagne et d’Amérique du Moyen Âge aux Lumières), EA 4083",
 				"date": "2012/03/31",
 				"DOI": "10.4000/e-spania.12303",
+				"url": "http://e-spania.revues.org/12303?lang=es",
+				"abstractNote": "El testamento de Elvira brinda una preciosísima información sobre la realidad del infantazgo : su extensión, la composición de sus bienes, sus evoluciones, las formas de su adquisición y transmisión, su papel político. También nos informa sobre una infanta de nivel mediano, sobre el marco de su vida, su entorno personal, sus actividades, la red de sus influencias e incluso sobre su fe.",
 				"reportType": "Text",
 				"letterType": "Text",
 				"manuscriptType": "Text",
@@ -348,10 +360,7 @@ var testCases = [
 				"postType": "Text",
 				"audioFileType": "Text",
 				"language": "fr",
-				"issue": "5",
-				"abstractNote": "El testamento de Elvira brinda una preciosísima información sobre la realidad del infantazgo : su extensión, la composición de sus bienes, sus evoluciones, las formas de su adquisición y transmisión, su papel político. También nos informa sobre una infanta de nivel mediano, sobre el marco de su vida, su entorno personal, sus actividades, la red de sus influencias e incluso sobre su fe.",
 				"ISSN": "1951-6169",
-				"url": "http://e-spania.revues.org/12303?lang=es",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "e-spania.revues.org"
 			}
