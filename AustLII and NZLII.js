@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gbv",
-	"lastUpdated": "2012-03-19 00:44:41"
+	"lastUpdated": "2012-05-15 05:30:19"
 }
 
 function detectWeb(doc, url) {
@@ -38,7 +38,7 @@ function scrape(doc) {
 	newItem.court = court.match(/[^0-9]+/)[0]
 	newItem.docketNumber=court.match(/\d+/)[0]
 	newItem.dateDecided = voliss.match(/\(\d[^\)]+\d{4}\)/)[0].replace(/[\(\)]/g, "");
-	newItem.attachments = [{ object:doc, title:"AustLII/NZLII snapshort", mimeType:"text/html"}];
+	newItem.attachments = [{ document:doc, title:"AustLII/NZLII snapshort", mimeType:"text/html"}];
 	newItem.complete();
 }
 
@@ -77,9 +77,6 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"object": {
-							"location": {}
-						},
 						"title": "AustLII/NZLII snapshort",
 						"mimeType": "text/html"
 					}
@@ -107,9 +104,6 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"object": {
-							"location": {}
-						},
 						"title": "AustLII/NZLII snapshort",
 						"mimeType": "text/html"
 					}
@@ -137,9 +131,6 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"object": {
-							"location": {}
-						},
 						"title": "AustLII/NZLII snapshort",
 						"mimeType": "text/html"
 					}
