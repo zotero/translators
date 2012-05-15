@@ -8,12 +8,12 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-01-30 22:51:14"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-05-14 23:43:53"
 }
 
 function detectWeb(doc, url) {
-	if (doc.evaluate('//a[@class="searchBoldBlue"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate('//a[@class="linkjournal"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	if (doc.evaluate('//a[@class="searchBoldBlue"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate('//a[@class="linkjournal"]|//a[@class="journal_title"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
 	} else if (url.indexOf("/view/journals/") != -1 || url.indexOf("paper") != -1) {
 		return "journalArticle";
@@ -21,7 +21,7 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var links = new Array();
+	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		if (doc.evaluate('//a[@class="searchBoldBlue"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
@@ -39,17 +39,35 @@ function doWeb(doc, url) {
 			while ((art = arts.iterateNext()) && (title = titles.iterateNext())) {
 				items[art.href] = title.textContent;
 			}
+		} else if (doc.evaluate('//a[@class="journal_title"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var arts = doc.evaluate('//a[@class="journal_title"]', doc, null, XPathResult.ANY_TYPE, null);
+			while (art = arts.iterateNext()){
+				items[art.href] = art.textContent;
+			}
+		
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			links.push(i.match(/([^/=.htm]*)(.htm)?$/)[1]);
-		}
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i.match(/([^/=.htm]*)(.htm)?$/)[1]);
+			}
+		    scrape(articles, function () {
+				Zotero.done();
+			});
+		});
 	} else {
-		links.push(url.match(/([^/=.htm]*)(.htm)?$/)[1]);
+		articles.push(url.match(/([^/=.htm]*)(.htm)?$/)[1]);
+		scrape(articles);
 	}
-	for (var i in links) {
-		var newURL = 'http://www.publish.csiro.au/view/journals/dsp_journal_retrieve_citation.cfm?ct=' + links[i] + '.ris';
-		var pdfURL = 'http://www.publish.csiro.au/?act=view_file&file_id=' + links[i] + '.pdf';
+}	
+	
+	
+function scrape (link)	{
+	for (i in link){
+		var newURL = 'http://www.publish.csiro.au/view/journals/dsp_journal_retrieve_citation.cfm?ct=' + link[i] + '.ris';
+		var pdfURL = 'http://www.publish.csiro.au/?act=view_file&file_id=' + link[i] + '.pdf';
 		Zotero.Utilities.HTTP.doGet(newURL, function(text) {
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -59,6 +77,7 @@ function doWeb(doc, url) {
 				if (item.notes[0]) {
 					item.abstractNote = item.notes[0].note;
 				}
+				if (item.abstractNote) item.abstractNote = item.abstractNote.replace(/[\n\t]/g, " ")
 				item.attachments = [
 					{url:pdfURL, title:"CSIRO Publishing PDF", mimeType:"application/pdf"},
 					{url:newURL, title:"CSIRO Publishing Snaphost", mimeType:"text/html"}
@@ -68,7 +87,6 @@ function doWeb(doc, url) {
 			translator.translate();
 		});
 	}
-	Zotero.wait();
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -89,19 +107,17 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.publish.csiro.au/?act=view_file&file_id=BT04151.pdf",
 						"title": "CSIRO Publishing PDF",
 						"mimeType": "application/pdf"
 					},
 					{
-						"url": "http://www.publish.csiro.au/view/journals/dsp_journal_retrieve_citation.cfm?ct=BT04151.ris",
 						"title": "CSIRO Publishing Snaphost",
 						"mimeType": "text/html"
 					}
 				],
 				"title": "Aquifers: the ultimate groundwater-dependent ecosystems",
 				"publicationTitle": "Aust. J. Bot.",
-				"date": "April 06, 2006",
+				"date": "2006",
 				"volume": "54",
 				"issue": "2",
 				"pages": "115-132",
@@ -112,6 +128,11 @@ var testCases = [
 				"shortTitle": "Aquifers"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.publish.csiro.au/nid/65/issue/2496.htm",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
