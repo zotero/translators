@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-05-14 12:22:04"
+	"lastUpdated": "2012-05-15 12:38:01"
 }
 
 /*
@@ -73,16 +73,23 @@ var HIGHWIRE_MAPPINGS = {
 };
 
 // Maps actual prefix in use to URI
+// The defaults are set to help out in case a namespace is not declared
+// Copied from RDF translator
 var _prefixes = {
-	"dc":"http://purl.org/dc/terms/",
-	"dcterms":"http://purl.org/dc/terms/",
-	"prism":"http://prismstandard.org/namespaces/1.2/basic/",
-	"foaf":"http://xmlns.com/foaf/0.1/",
-	"eprint":"http://purl.org/eprint/terms/",
-	"eprints":"http://purl.org/eprint/terms/",
-	"og":"http://ogp.me/ns#",
-	"article":"http://ogp.me/ns/article#",
-	"book":"http://ogp.me/ns/book#"
+	bib:"http://purl.org/net/biblio#",
+	bibo:"http://purl.org/ontology/bibo/",
+	dc:"http://purl.org/dc/elements/1.1/",
+	dcterms:"http://purl.org/dc/terms/",
+	prism:"http://prismstandard.org/namespaces/1.2/basic/",
+	foaf:"http://xmlns.com/foaf/0.1/",
+	vcard:"http://nwalsh.com/rdf/vCard#",
+	link:"http://purl.org/rss/1.0/modules/link/",
+	z:"http://www.zotero.org/namespaces/export#",
+	eprint:"http://purl.org/eprint/terms/",
+	eprints:"http://purl.org/eprint/terms/",
+	og:"http://ogp.me/ns#",				// Used for Facebook's OpenGraph Protocol
+	article:"http://ogp.me/ns/article#",
+	book:"http://ogp.me/ns/book#"
 };
 
 var _rdfPresent = false,
