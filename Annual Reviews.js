@@ -8,7 +8,7 @@
 	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsib",
+	"browserSupport": "gcsibv",
 	"lastUpdated": "2012-05-13 22:55:57"
 }
 
@@ -206,6 +206,11 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.annualreviews.org/toc/anchem/forthcoming",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
