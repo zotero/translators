@@ -1781,6 +1781,7 @@ function getFieldValue(read) {
 }
 
 function beginRecord(type, closeChar) {
+	var isCiteKey=false;
 	type = Zotero.Utilities.trimInternal(type.toLowerCase());
 	if(type != "string") {
 		var zoteroType = bibtex2zoteroTypeMap[type];
@@ -1789,6 +1790,7 @@ function beginRecord(type, closeChar) {
 			return;
 		}
 		var item = new Zotero.Item(zoteroType);
+		isCiteKey=true;
 		
 		item.extra = "";
 	}
@@ -1837,6 +1839,10 @@ function beginRecord(type, closeChar) {
 			}
 			field = "";
 		} else if(read == ",") {						// commas reset
+			 if( isCiteKey ) {
+				 item.tags.push('bibtex:'+field);
+				 isCiteKey=false;
+			 }
 			field = "";
 		} else if(read == closeChar) {
 			if(item) {
@@ -1968,6 +1974,11 @@ var citeKeyConversions = {
 
 
 function buildCiteKey (item,citekeys) {
+	for( t in item.tags ) {
+		if( item.tags[t].tag.substr(0,7)=='bibtex:' ) {
+			return item.tags[t].tag.substr(7);
+		}
+	}
 	var basekey = "";
 	var counter = 0;
 	citeKeyFormatRemaining = citeKeyFormat;
