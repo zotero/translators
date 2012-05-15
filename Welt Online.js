@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-04-11 06:52:44"
+	"lastUpdated": "2012-05-14 23:17:39"
 }
 
 /*
@@ -38,7 +38,6 @@ http://www.welt.de/wirtschaft/article12962920/Krankenkassen-werfen-Aerzten-Gewin
 */
 
 function detectWeb(doc, url) {
-	// I use XPaths. Therefore, I need the following block.
 	var welt_article_XPath = ".//meta[contains(@property, 'og:type')]";
 	var welt_multiple_XPath = "//h4[contains(@class, 'headline')]/a";
 	if (doc.evaluate(welt_multiple_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
@@ -99,10 +98,10 @@ function scrape(doc, url) {
 		}
 	}
 	// Date 
-	var xPath = ".//span[contains(@class, 'time')][last()]";
-	var date= doc.evaluate(xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	if(date.match(/\d{2}\.\d{2}\.\d{2}/))	newItem.date = date;
-	else newItem.date = ZU.xpathText(doc, '//meta[@http-equiv="Last-modified"]/@content').replace(/[A-Za-z]{2},\s*|\d{2}\:\d{2}\:.+/g, "");
+	var xPath = "//span[contains(@class, 'time')][last()]";
+	var date= ZU.xpathText(doc, xPath);
+	if(date && date.match(/\d{2}\.\d{2}\.\d{2}/))	newItem.date = date;
+	else newItem.date = ZU.xpathText(doc, '//meta[@name="date"]/@content').replace(/T.+/, "");
 
 	// Publikation (I can only distinguish some articles from Welt am Sonntag by their URL, otherwise its all mishmash)
 	if (doc.location.href.match(/.*wams_print.*/)) {
@@ -135,12 +134,17 @@ function doWeb(doc, url) {
 		while (next_title = titles.iterateNext()) {
 			items[next_title.href] = next_title.textContent;
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
-		Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-		Zotero.wait();
+Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			Zotero.Utilities.processDocuments(articles, scrape, function () {
+				Zotero.done();
+			});
+		});
 	} else {
 		scrape(doc, url);
 	}
