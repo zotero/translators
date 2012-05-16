@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-05-16 02:56:09"
+	"lastUpdated": "2012-05-16 09:18:22"
 }
 
 function scrape(doc) {
@@ -127,7 +127,6 @@ var testCases = [
 				"number": "2",
 				"patentNumber": "2",
 				"pages": "95-107-107",
-				"ISSN": "1646-1509",
 				"publisher": "Portuguese Wildlife Society",
 				"institution": "Portuguese Wildlife Society",
 				"company": "Portuguese Wildlife Society",
@@ -135,6 +134,7 @@ var testCases = [
 				"distributor": "Portuguese Wildlife Society",
 				"date": "2005-12-27",
 				"DOI": "10.2461/wbp.2005.1.12",
+				"ISSN": "1646-1509",
 				"reportType": "Peer-reviewed Article",
 				"letterType": "Peer-reviewed Article",
 				"manuscriptType": "Peer-reviewed Article",
@@ -145,7 +145,7 @@ var testCases = [
 				"postType": "Peer-reviewed Article",
 				"audioFileType": "Peer-reviewed Article",
 				"language": "en",
-				"url": "http://socpvs.org/journals/index.php/wbp/article/viewArticle/10.2461-wbp.2005.1.12",
+				"url": "http://socpvs.org/journals/index.php/wbp/article/view/10.2461-wbp.2005.1.12",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "socpvs.org",
 				"shortTitle": "The Enigma of the Establishment of Quercus ithaburensis Park Forest in Northern Israel",

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-05-16 02:56:09"
+	"lastUpdated": "22012-05-16 09:18:47"
 }
 
 /*
@@ -67,25 +67,36 @@ var HIGHWIRE_MAPPINGS = {
 	"citation_issn"
 	"citation_eIssn"
 	"citation_pdf_url"
+	"citation_abstract_html_url"
+	"citation_fulltext_html_url"
 */
 };
 
 // Maps actual prefix in use to URI
+// The defaults are set to help out in case a namespace is not declared
+// Copied from RDF translator
 var _prefixes = {
-	"dc":"http://purl.org/dc/terms/",
-	"dcterms":"http://purl.org/dc/terms/",
-	"prism":"http://prismstandard.org/namespaces/1.2/basic/",
-	"foaf":"http://xmlns.com/foaf/0.1/",
-	"eprint":"http://purl.org/eprint/terms/",
-	"eprints":"http://purl.org/eprint/terms/",
-	"og":"http://ogp.me/ns#",
-	"article":"http://ogp.me/ns/article#",
-	"book":"http://ogp.me/ns/book#"
+	bib:"http://purl.org/net/biblio#",
+	bibo:"http://purl.org/ontology/bibo/",
+	dc:"http://purl.org/dc/elements/1.1/",
+	dcterms:"http://purl.org/dc/terms/",
+	prism:"http://prismstandard.org/namespaces/1.2/basic/",
+	foaf:"http://xmlns.com/foaf/0.1/",
+	vcard:"http://nwalsh.com/rdf/vCard#",
+	link:"http://purl.org/rss/1.0/modules/link/",
+	z:"http://www.zotero.org/namespaces/export#",
+	eprint:"http://purl.org/eprint/terms/",
+	eprints:"http://purl.org/eprint/terms/",
+	og:"http://ogp.me/ns#",				// Used for Facebook's OpenGraph Protocol
+	article:"http://ogp.me/ns/article#",
+	book:"http://ogp.me/ns/book#"
 };
 
 var _rdfPresent = false,
 	_haveItem = false,
 	_itemType;
+
+var RDF;
 
 var CUSTOM_FIELD_MAPPINGS;
 
@@ -153,12 +164,24 @@ function completeItem(doc, newItem) {
 }
 
 function detectWeb(doc, url) {
+	init(doc, url, Zotero.done);
+}
+
+function init(doc, url, callback) {
 	getPrefixes(doc);
 
+	// load RDF translator, so that we don't need to replicate import code
+	var translator = Zotero.loadTranslator("import");
+	translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f");
+	translator.setHandler("itemDone", function(obj, newItem) {
+		_haveItem = true;
+		completeItem(doc, newItem);
+	});
+
+	translator.getTranslatorObject(function(rdf) {
 	var metaTags = doc.getElementsByTagName("meta");
-	//itemTypes as determined from various schemas
-	var dcType, dcTypeGuess, eprintsType, eprintsTypeGuess, prismType,
-		prismTypeGuess, ogType, ogTypeGuess, hwType, hwTypeGuess;
+		var hwType, hwTypeGuess;
+
 	for(var i=0, metaTag; metaTag = metaTags[i]; i++) {
 		// Two formats allowed:
 		// 	<meta name="..." content="..." />
@@ -176,271 +199,14 @@ function detectWeb(doc, url) {
 		if(delimIndex === -1) delimIndex = tag.indexOf('_');
 		if(delimIndex === -1) continue;
 
-		//process everything in lower case
-		tag = tag.toLowerCase();
-		value = value.toLowerCase();
+			var prefix = tag.substr(0, delimIndex).toLowerCase();
 
-		var prefix = tag.substr(0, delimIndex);
-		var prop = tag.substr(delimIndex+1);
-
-		var schema = _prefixes[prefix];
-		if(schema) {
-			_rdfPresent = true;
-
-			if (!ogType && prop === 'type' && schema === _prefixes.og) {
-				switch (value) {
-					case "video.movie":
-					case "video.episode":
-					case "video.tv_show":
-					case "video.other":
-						ogType = "videoRecording";
-						break;
-					case "article":
-						ogTypeGuess = "newspaperArticle";
-						break;
-					case "book":
-						ogType = "book";
-						break;
-					case "music.song":
-					case "music.album":
-						ogType = "audioRecording";
-						break;
-					case "website":
-						ogType = "webpage";
-						break;
-				}
-
-			} else if(!prismType && schema === _prefixes.prism) {
-				// see http://www.idealliance.org/specifications/prism/specifications/prism-controlled-vocabularies/prism-version-20-controlled-vocabu
-				switch(prop) {
-					//try to guess based on container
-					case 'aggregationtype':
-						switch(value) {
-							case 'book':
-								prismType = 'bookSection';
-								break;
-							case 'feed':
-								//could also be email
-								prismTypeGuess = 'blogPost';
-								break;
-							case 'journal':
-								prismType = 'journalArticle';
-								break;
-							case 'magazine':
-								prismType = 'magazineArticle';
-								break;
-							case 'newsletter':
-								prismType = 'newsArticle';
-								break;
-							//case 'pamphlet':
-							//case 'other':
-							//case 'manual':
-							//case 'catalog':
-						}
-						break;
-					/**This should tell us exactly what it is.
-					 * Very long list. only including things we can handle.
-					 * Also, multiple can be specified. Spec. recommends listing 
-					 * from most to least inclusive. We should probably only 
-					 * handle the latter.
-					 */
-					case 'genre':
-						switch(value) {
-							case 'abstract':
-							case 'acknowledgements':
-							case 'authorbio':
-							case 'bibliography':
-							case 'index':
-							case 'tableofcontents':
-								prismType = 'bookSection';
-								break;
-							case 'autobiography':
-							case 'biography':
-								prismType = 'book';
-								break;
-							case 'blogentry':
-								prismType = 'blogPost';
-								break;
-							case 'homepage':
-							case 'webliography':
-								prismType = 'webpage';
-								break;
-							case 'interview':
-								prismType = 'interview';
-								break;
-							case 'letters':
-								prismType = 'letter';
-								break;
-							case 'adaptation':
-							case 'analysis':
-								prismTypeGuess = 'journalArticle';
-								break;
-							case 'column':
-							case 'newsbulletin':
-							case 'opinion':
-								//magazine or newspaper
-								prismTypeGuess = 'newspaperArticle';
-								break;
-							case 'coverstory':
-							case 'essay':
-							case 'feature':
-							case 'insidecover':
-								//journal or magazine
-								prismTypeGuess = 'magazineArticle';
-								break;
-							//case 'advertorial':
-							//case 'advertisement':
-							//case 'brief':
-							//case 'chronology':
-							//case 'classifiedad':
-							//case 'correction':
-							//case 'cover':
-							//case 'coverpackage':
-							//case 'electionresults':
-							//case 'eventscalendar':
-							//case 'excerpt':
-							//case 'photoshoot':
-							//case 'featurepackage':
-							//case 'financialstatement':
-							//case 'interactivecontent':
-							//case 'legaldocument':
-							//case 'masthead':
-							//case 'notice':
-							//case 'obituary':
-							//case 'photoessay':
-							//case 'poem':
-							//case 'poll':
-							//case 'pressrelease':
-							//case 'productdescription':
-							//case 'profile':
-							//case 'quotation':
-							//case 'ranking':
-							//case 'recipe':
-							//case 'reprint':
-							//case 'response':
-							//case 'review':
-							//case 'schedule':
-							//case 'sidebar':
-							//case 'stockquote':
-							//case 'sectiontableofcontents':
-							//case 'transcript':
-							//case 'wirestory':
-						}
-						break;
-					case 'platform':
-						switch(value) {
-							case 'broadcast':
-								prismTypeGuess = 'tvBroadcast';
-								break;
-							case 'web':
-								prismTypeGuess = 'webpage';
-								break;
-						}
-						break;
-				}
-				//at least pretend we're a journalArticle if we have prism data
-				if(!prismTypeGuess) prismTypeGuess = 'journalArticle';
-
-			/** EPrints and PRISM use dc:type tags, so we handle those here as well */
-			} else if (schema === _prefixes.dc) {
-				/** It may be desirable in the future to try to determine
-				 * itemType by 'format', but for now we just look at 'type'
-				 * http://dublincore.org/documents/dcmi-terms/#terms-format
-				 * mimeType http://www.iana.org/assignments/media-types/
-				 */
-				if(prop === 'type') {
-					switch (value) {
-						//from http://www.ukoln.ac.uk/repositories/digirep/index/Eprints_Type_Vocabulary_Encoding_Scheme
-						case 'book':
-						case 'patent':
-						case 'report':
-						case 'thesis':
-							eprintsType = value;
-							break;
-						case 'bookitem':
-							eprintsType = 'bookSection';
-							break;
-						//case 'bookreview':
-						case 'conferenceitem':
-						case 'conferencepaper':
-						case 'conferenceposter':
-							eprintsType = 'conferencePaper';
-							break;
-						case 'journalitem':
-						case 'journalarticle':
-						case 'submittedjournalarticle':
-							eprintsType = 'journalArticle';
-							break;
-						case 'newsitem':
-							eprintsType = 'newspaperArticle';
-							break;
-						case 'scholarlytext':
-							eprintsTypeGuess = 'journalArticle';
-							break;
-						case 'workingpaper':
-							eprintsType = 'manuscript';
-							break;
-
-						//from http://www.idealliance.org/specifications/prism/specifications/prism-controlled-vocabularies/prism-12-controlled-vocabularies
-						//some are the same as eprints and are handled above
-						case 'article':
-							prismTypeGuess = 'journalArticle';
-							break;
-						case 'electronicbook':
-							prismType = 'book';
-							break;
-						case 'homepage':
-						case 'webpage':
-							prismType = 'webpage';
-							break;
-						case 'illustration':
-							prismType = 'artwork';
-							break;
-						case 'map':
-							prismType = 'map';
-							break;
-
-						//from http://dublincore.org/documents/dcmi-type-vocabulary/
-						//this vocabulary is much broader
-						case 'event':
-							//very broad, but has an associated location
-							dcTypeGuess = 'presentation';
-						case 'image':
-							//this includes almost any graphic, moving or not
-							dcTypeGuess = 'artwork';
-							break;
-						case 'movingimage':
-							//could be either film, tvBroadcast, or videoRecording
-							dcTypeGuess = 'videoRecording';
-							break;
-						case 'software':
-							dcTypeGuess = 'computerProgram';
-							break;
-						case 'sound':
-							//could be podcast, radioBroadcast, or audioRecording
-							dcTypeGuess = 'audioRecording';
-							break;
-						case 'stillimage':
-							//could be map or artwork
-							dcTypeGuess = 'artwork';
-							break;
-						case 'text':
-							//very broad
-							dcTypeGuess = 'journalArticle';
-							break;
-						//case 'collection':
-						//case 'dataset':
-						//case 'interactiveresource':
-						//case 'physicalobject':
-						//case 'service':
-					}
-				}
-			}
-			//at least pretend we're a journalArticle if we have eprints data
-			if(schema === _prefixes.eprint && !eprintTypeGuess) eprintTypeGuess = 'journalArticle';
-
-		//try to find some highwire metadata
-		} else if(!hwType) {
+			if(_prefixes[prefix]) {
+				var prop = tag[delimIndex+1].toLowerCase()+tag.substr(delimIndex+2);
+				// This debug is for seeing what is being sent to RDF
+				//Zotero.debug(_prefixes[prefix]+prop +"=>"+value);
+				rdf.Zotero.RDF.addStatement(url, _prefixes[prefix] + prop, value, true);
+			} else {
 			var shortTag = tag.slice(tag.lastIndexOf('citation_'));
 			switch(shortTag) {
 				case "citation_journal_title":
@@ -465,76 +231,29 @@ function detectWeb(doc, url) {
 					break;
 			}
 		}
-
-		/**try to terminate loop early if we have an item type we are sure about
-		 * but keep trying until we encounter some RDF data (if any), so we know
-		 * if we need to call the RDF translator
-		 */
-		 //we're confident with HW, OG, PRISM, and EPrints types
-		if(_rdfPresent && (hwType || ogType || prismType || eprintsType)) break;
 	}
 
-	//set item type in order of confidence in data
-	_itemType = hwType || ogType || eprintsType || prismType || dcType ||
-				hwTypeGuess || ogTypeGuess || eprintsTypeGuess ||
-				prismTypeGuess || dcTypeGuess ||
-				//if we have RDF data, but nothing, then pretend it's webpage
-				(_rdfPresent? 'webpage' : false);
+		var nodes = rdf.getNodes(true);
+		rdf.defaultUnknownType = hwType || hwTypeGuess ||
+			//if we have RDF data, then default to webpage
+			(nodes.length ? "webpage":false);
 
-	return _itemType;
+		_itemType = nodes.length ? rdf.detectType({},nodes[0],{}) : rdf.defaultUnknownType;
+		RDF = rdf;
+		callback(_itemType);
+	});
 }
 
 function doWeb(doc, url) {
 	// populate _rdfPresent, _itemType, and _prefixes
-	detectWeb(doc, url);
+	if(!RDF) init(doc, url, function() { importRDF(doc, url) });
+	else importRDF(doc, url);
+}
 
-	if(_rdfPresent) {
-		// load RDF translator, so that we don't need to replicate import code
-		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f");
-		translator.setHandler("itemDone", function(obj, newItem) {
-			_haveItem = true;
-			if (_itemType) newItem.itemType = _itemType;
-			newItem.url = doc.location.href;
-			completeItem(doc, newItem);
-		});
-
-		translator.getTranslatorObject(function(rdf) {
-			var metaTags = doc.getElementsByTagName("meta");
-
-			for(var i=0, metaTag; metaTag = metaTags[i]; i++) {
-				// Two formats allowed:
-				// 	<meta name="..." content="..." />
-				//	<meta property="..." content="..." />
-				// The first is more common; the second is recommended by Facebook
-				// for their OpenGraph vocabulary
-				var tag = metaTag.getAttribute("name");
-				if (!tag) tag = metaTag.getAttribute("property");
-				var value = metaTag.getAttribute("content");
-				if(!tag || !value) continue;
-				// We allow three delimiters between the namespace and the property
-				var delimIndex = tag.indexOf('.');
-				if(delimIndex === -1) delimIndex = tag.indexOf(':');
-				if(delimIndex === -1) delimIndex = tag.indexOf('_');
-				if(delimIndex === -1) continue;
-
-				var prefix = tag.substr(0, delimIndex).toLowerCase();
-
-				if(_prefixes[prefix]) {
-					var prop = tag[delimIndex+1].toLowerCase()+tag.substr(delimIndex+2);
-					// This debug is for seeing what is being sent to RDF
-					//Zotero.debug(_prefixes[prefix]+prop +"=>"+value);
-					rdf.Zotero.RDF.addStatement(url, _prefixes[prefix] + prop, value, true);
-				}
-			}
-
-			rdf.defaultUnknownType = _itemType;
-			rdf.doImport();
-			if(!_haveItem) {
-				completeItem(doc, new Zotero.Item(_itemType));
-			}
-		});
-	} else {
+//perform RDF import
+function importRDF(doc, url) {
+	RDF.doImport();
+	if(!_haveItem) {
 		completeItem(doc, new Zotero.Item(_itemType));
 	}
 }
@@ -551,7 +270,6 @@ function addHighwireMetadata(doc, newItem) {
 	//save rdfCreators for later
 	var rdfCreators = newItem.creators;
 	newItem.creators = [];
-
 	for(var i=0, n=authorNodes.length; i<n; i++) {
 		//make sure there are no empty authors
 		var authors = authorNodes[i].nodeValue.replace(/(;[^A-Za-z0-9]*)$/, "").split(/\s*;\s/);
@@ -686,7 +404,10 @@ function addHighwireMetadata(doc, newItem) {
 
 
 	// Other last chances
-	if(!newItem.url) newItem.url = doc.location.href;
+	if(!newItem.url)
+		newItem.url = getContentText(doc, "citation_abstract_html_url") ||
+			getContentText(doc, "citation_fulltext_html_url") ||
+			doc.location.href;
 	if(!newItem.title) newItem.title = doc.title;
 
 	// add attachment
@@ -880,8 +601,8 @@ var testCases = [
 				"title": "Session F: Contributed Oral Papers – F2: Energy, Climate, Nuclear Medicine: Reducing Energy Consumption and CO2 One Street Lamp at a Time",
 				"date": "2011",
 				"conferenceName": "Climate Change and the Future of Nuclear Power",
+				"url": "http://scholarworks.umass.edu/climate_nuclearpower/2011/nov19/34",
 				"abstractNote": "Why wait for federal action on incentives to reduce energy use and address Greenhouse Gas (GHG) reductions (e.g. CO2), when we can take personal actions right now in our private lives and in our communities? One such initiative by private citizens working with Portsmouth NH officials resulted in the installation of energy reducing lighting products on Court St. and the benefits to taxpayers are still coming after over 4 years of operation. This citizen initiative to save money and reduce CO2 emissions, while only one small effort, could easily be duplicated in many towns and cities. Replacing old lamps in just one street fixture with a more energy efficient (Non-LED) lamp has resulted after 4 years of operation ($\\sim $15,000 hr. life of product) in real electrical energy savings of $>$ {\\$}43. and CO2 emission reduction of $>$ 465 lbs. The return on investment (ROI) was less than 2 years. This is much better than any financial investment available today and far safer. Our street only had 30 such lamps installed; however, the rest of Portsmouth (population 22,000) has at least another 150 street lamp fixtures that are candidates for such an upgrade. The talk will also address other energy reduction measures that green the planet and also put more green in the pockets of citizens and municipalities.",
-				"url": "http://scholarworks.umass.edu/climate_nuclearpower/2011/nov19/34/",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "scholarworks.umass.edu",
 				"shortTitle": "Session F"
@@ -927,10 +648,10 @@ var testCases = [
 				"publicationTitle": "Landscapes of Violence",
 				"volume": "2",
 				"issue": "1",
+				"url": "http://scholarworks.umass.edu/lov/vol2/iss1/2",
 				"abstractNote": "The purpose of this paper is to examine the contemporary role of an eighteenth century bounty proclamation issued on the Penobscot Indians of Maine. We focus specifically on how the changing cultural context of the 1755 Spencer Phips Bounty Proclamation has transformed the document from serving as a tool for sanctioned violence to a tool of decolonization for the Indigenous peoples of Maine. We explore examples of the ways indigenous and non-indigenous people use the Phips Proclamation to illustrate past violence directed against Indigenous peoples. This exploration is enhanced with an analysis of the re-introduction of the Phips Proclamation using concepts of decolonization theory.",
 				"pages": "2",
 				"ISSN": "1947-508X",
-				"url": "http://scholarworks.umass.edu/lov/vol2/iss1/2/",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "scholarworks.umass.edu",
 				"shortTitle": "Wabanaki Resistance and Healing"
@@ -972,8 +693,8 @@ var testCases = [
 				"title": "Decision-Theoretic Meta-reasoning in Partially Observable and Decentralized Settings",
 				"date": "2012",
 				"university": "University of Massachusetts - Amherst",
+				"url": "http://scholarworks.umass.edu/open_access_dissertations/508",
 				"abstractNote": "This thesis examines decentralized meta-reasoning. For a single agent or multiple agents, it may not be enough for agents to compute correct decisions if they do not do so in a timely or resource efficient fashion. The utility of agent decisions typically increases with decision quality, but decreases with computation time. The reasoning about one's computation process is referred to as meta-reasoning. Aspects of meta-reasoning considered in this thesis include the reasoning about how to allocate computational resources, including when to stop one type of computation and begin another, and when to stop all computation and report an answer. Given a computational model, this translates into computing how to schedule the basic computations that solve a problem. This thesis constructs meta-reasoning strategies for the purposes of monitoring and control in multi-agent settings, specifically settings that can be modeled by the Decentralized Partially Observable Markov Decision Process (Dec-POMDP). It uses decision theory to optimize computation for efficiency in time and space in communicative and non-communicative decentralized settings. Whereas base-level reasoning describes the optimization of actual agent behaviors, the meta-reasoning strategies produced by this thesis dynamically optimize the computational resources which lead to the selection of base-level behaviors.",
-				"url": "http://scholarworks.umass.edu/open_access_dissertations/508/",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "scholarworks.umass.edu"
 			}
