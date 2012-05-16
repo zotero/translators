@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-05-13 00:31:15"
+	"lastUpdated": "2012-03-17 02:53:35"
 }
 
 /*
@@ -51,12 +51,6 @@ function scrape(doc) {
 	translator.setHandler("itemDone", function(obj, item) {
 		item.abstractNote = item.extra;
 		delete item.extra;
-
-		//sometimes there's no url specified in the meta tags,
-		//only og:url, which is for the website.
-		//In that case, include current url
-		if(!item.url.match(/[^\/]\/[^\/]/))
-			item.url = doc.location.href;
 
 		//keywords
 		var keywords = ZU.xpathText(doc, '//*[@id="keywords"]/text()', null, '; ');
@@ -158,12 +152,13 @@ var testCases = [
 				"itemID": "http://www.journalofinequalitiesandapplications.com/content/2011/1/53",
 				"title": "Approximately cubic functional equations and cubic multipliers",
 				"publicationTitle": "Journal of Inequalities and Applications",
-				"rights": "2011 Bodaghi et al; licensee Springer.",
+				"rights": "http://creativecommons.org/licenses/by/2.0/",
 				"volume": "2011",
 				"issue": "1",
 				"number": "1",
 				"patentNumber": "1",
 				"pages": "53",
+				"ISSN": "1029-242X",
 				"publisher": "Springer",
 				"institution": "Springer",
 				"company": "Springer",
@@ -171,9 +166,6 @@ var testCases = [
 				"distributor": "Springer",
 				"date": "2011-09-13",
 				"DOI": "10.1186/1029-242X-2011-53",
-				"ISSN": "1029-242X",
-				"url": "http://www.journalofinequalitiesandapplications.com/content/2011/1/53",
-				"abstractNote": "In this paper, we prove the Hyers-Ulam stability and the superstability for cubic functional equation by using the fixed point alternative theorem. As a consequence, we show that the cubic multipliers are superstable under some conditions.",
 				"reportType": "Research",
 				"letterType": "Research",
 				"manuscriptType": "Research",
@@ -184,6 +176,8 @@ var testCases = [
 				"postType": "Research",
 				"audioFileType": "Research",
 				"language": "en",
+				"abstractNote": "In this paper, we prove the Hyers-Ulam stability and the superstability for cubic functional equation by using the fixed point alternative theorem. As a consequence, we show that the cubic multipliers are superstable under some conditions.",
+				"url": "http://www.journalofinequalitiesandapplications.com/content/2011/1/53",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.journalofinequalitiesandapplications.com"
 			}
@@ -228,12 +222,13 @@ var testCases = [
 				"itemID": "http://www.nanoscalereslett.com/content/6/1/530/abstract",
 				"title": "Nanoscale potassium niobate crystal structure and phase transition",
 				"publicationTitle": "Nanoscale Research Letters",
-				"rights": "2011 Chen et al; licensee Springer.",
+				"rights": "http://creativecommons.org/licenses/by/2.0/",
 				"volume": "6",
 				"issue": "1",
 				"number": "1",
 				"patentNumber": "1",
 				"pages": "530",
+				"ISSN": "1556-276X",
 				"publisher": "Springer",
 				"institution": "Springer",
 				"company": "Springer",
@@ -241,9 +236,6 @@ var testCases = [
 				"distributor": "Springer",
 				"date": "2011-09-23",
 				"DOI": "10.1186/1556-276X-6-530",
-				"ISSN": "1556-276X",
-				"url": "http://www.nanoscalereslett.com/content/6/1/530/abstract",
-				"abstractNote": "Nanoscale potassium niobate (KNbO3) powders of orthorhombic structure were synthesized using the sol-gel method. The heat-treatment temperature of the gels had a pronounced effect on KNbO3 particle size and morphology. Field emission scanning electron microscopy and transmission electron microscopy were used to determine particle size and morphology. The average KNbO3 grain size was estimated to be less than 100 nm, and transmission electron microscopy images indicated that KNbO3 particles had a brick-like morphology. Synchrotron X-ray diffraction was used to identify the room-temperature structures using Rietveld refinement. The ferroelectric orthorhombic phase was retained even for particles smaller than 50 nm. The orthorhombic to tetragonal and tetragonal to cubic phase transitions of nanocrystalline KNbO3 were investigated using temperature-dependent powder X-ray diffraction. Differential scanning calorimetry was used to examine the temperature dependence of KNbO3 phase transition. The Curie temperature and phase transition were independent of particle size, and Rietveld analyses showed increasing distortions with decreasing particle size.",
 				"reportType": "Nano Express",
 				"letterType": "Nano Express",
 				"manuscriptType": "Nano Express",
@@ -254,6 +246,8 @@ var testCases = [
 				"postType": "Nano Express",
 				"audioFileType": "Nano Express",
 				"language": "en",
+				"abstractNote": "Nanoscale potassium niobate (KNbO3) powders of orthorhombic structure were synthesized using the sol-gel method. The heat-treatment temperature of the gels had a pronounced effect on KNbO3 particle size and morphology. Field emission scanning electron microscopy and transmission electron microscopy were used to determine particle size and morphology. The average KNbO3 grain size was estimated to be less than 100 nm, and transmission electron microscopy images indicated that KNbO3 particles had a brick-like morphology. Synchrotron X-ray diffraction was used to identify the room-temperature structures using Rietveld refinement. The ferroelectric orthorhombic phase was retained even for particles smaller than 50 nm. The orthorhombic to tetragonal and tetragonal to cubic phase transitions of nanocrystalline KNbO3 were investigated using temperature-dependent powder X-ray diffraction. Differential scanning calorimetry was used to examine the temperature dependence of KNbO3 phase transition. The Curie temperature and phase transition were independent of particle size, and Rietveld analyses showed increasing distortions with decreasing particle size.",
+				"url": "http://www.nanoscalereslett.com/content/6/1/530/abstract",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.nanoscalereslett.com"
 			}
@@ -352,12 +346,13 @@ var testCases = [
 				"itemID": "http://respiratory-research.com/content/11/1/133",
 				"title": "Nicotinic receptors on rat alveolar macrophages dampen ATP-induced increase in cytosolic calcium concentration",
 				"publicationTitle": "Respiratory Research",
-				"rights": "2010 Mikulski et al; licensee BioMed Central Ltd.",
+				"rights": "http://creativecommons.org/licenses/by/2.0/",
 				"volume": "11",
 				"issue": "1",
 				"number": "1",
 				"patentNumber": "1",
 				"pages": "133",
+				"ISSN": "1465-9921",
 				"publisher": "BioMed Central Ltd",
 				"institution": "BioMed Central Ltd",
 				"company": "BioMed Central Ltd",
@@ -365,7 +360,6 @@ var testCases = [
 				"distributor": "BioMed Central Ltd",
 				"date": "2010-09-29",
 				"DOI": "10.1186/1465-9921-11-133",
-				"ISSN": "1465-9921",
 				"reportType": "Research",
 				"letterType": "Research",
 				"manuscriptType": "Research",
@@ -441,12 +435,13 @@ var testCases = [
 				"itemID": "http://journal.chemistrycentral.com/content/5/1/5",
 				"title": "Cacao seeds are a",
 				"publicationTitle": "Chemistry Central Journal",
-				"rights": "2011 Crozier et al",
+				"rights": "http://creativecommons.org/licenses/by/2.0/",
 				"volume": "5",
 				"issue": "1",
 				"number": "1",
 				"patentNumber": "1",
 				"pages": "5",
+				"ISSN": "1752-153X",
 				"publisher": "Chemistry Central Ltd",
 				"institution": "Chemistry Central Ltd",
 				"company": "Chemistry Central Ltd",
@@ -454,7 +449,6 @@ var testCases = [
 				"distributor": "Chemistry Central Ltd",
 				"date": "2011-02-07",
 				"DOI": "10.1186/1752-153X-5-5",
-				"ISSN": "1752-153X",
 				"reportType": "Research article",
 				"letterType": "Research article",
 				"manuscriptType": "Research article",
