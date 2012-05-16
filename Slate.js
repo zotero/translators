@@ -8,7 +8,7 @@
 	"maxVersion": null,
 	"priority": 100,
 	"inRepository": true,
-	"browserSupport": "gcsbv",
+	"browserSupport": "gcsibv",
 	"lastUpdated": "2011-10-14 20:45:00"
 }
 

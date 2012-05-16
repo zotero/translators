@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsv",
+	"browserSupport": "gcsbv",
 	"lastUpdated": "2012-03-27 01:24:06"
 }
 
