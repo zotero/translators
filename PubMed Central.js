@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-04-13 19:44:54"
+	"browserSupport": "gcsb",
+	"lastUpdated": "2012-05-16 23:35:57"
 }
 
 function detectWeb(doc, url) {
@@ -181,7 +181,8 @@ function doWeb(doc, url) {
 	} catch(e) {}
 	if (pmcid) {
 		try {
-			var formatLinks = doc.evaluate('//td[@class="format-menu"]//a/@href', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var formatLinks = doc.evaluate('//td[@class="format-menu"]//a/@href|//div[@class="format-menu"]//a/@href', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			Z.debug(formatLinks)
 			while (formatLink = formatLinks.iterateNext().textContent) {
 				if(pdfLink = formatLink.match(/\/pdf\/([^\/]*\.pdf$)/)) {
 					pdfLink = pdfLink[1];

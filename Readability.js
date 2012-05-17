@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-01-30 22:43:43"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-05-16 23:40:37"
 }
 
 /*
@@ -31,27 +31,20 @@
  */
 
 function detectWeb(doc, url){
-	var n = doc.documentElement.namespaceURI;
-	var ns = n ? function(prefix) {
-		if (prefix == 'x') return n; else return null;
-	} : null;
-	var title = doc.evaluate('//h1[@id="article-entry-title"]', doc, ns, XPathResult.ANY_TYPE, null);
+
+	var title = doc.evaluate('//h1[@id="article-entry-title"]', doc, null, XPathResult.ANY_TYPE, null);
 	if (title) return "webpage";
 	else return false;
 }
 
 function doWeb(doc, url){
-	var n = doc.documentElement.namespaceURI;
-	var ns = n ? function(prefix) {
-		if (prefix == 'x') return n; else return null;
-	} : null;
-	
+
 	// Since we don't know much about the site, we have to assume that
 	// it is a webpage
 	var item = new Zotero.Item("webpage");
-	var title = doc.evaluate('//h1[@id="article-entry-title"]', doc, ns, XPathResult.ANY_TYPE, null);
+	var title = doc.evaluate('//h1[contains(@class, "entry-title")]', doc, null, XPathResult.ANY_TYPE, null);
 	item.title = title.iterateNext().textContent;
-	var rurl = doc.evaluate('//a[@id="article-url"]', doc, ns, XPathResult.ANY_TYPE, null);
+	var rurl = doc.evaluate('//a[@id="article-url"]', doc, null, XPathResult.ANY_TYPE, null);
 	rurl = rurl.iterateNext();
 	item.url = rurl.href;
 
@@ -61,7 +54,7 @@ function doWeb(doc, url){
 
 	// It is possible that Readability sometimes has multiple authors,
 	// in which case this will have to be slightly amended
-	var author = doc.evaluate('//span[@id="article-author"]/span[@class="fn"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
+	var author = doc.evaluate('//li[contains(@class, "byline")]/span[@class="fn"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (author) {
 		var auts = author.textContent.split(" and ");
 		for (var i in auts) {
@@ -74,7 +67,7 @@ function doWeb(doc, url){
 
 	// There is also a standardized timestamp, but we're ignoring that
 	// in favor of the nice-looking time.
-	var time = doc.evaluate('//time[@id="article-timestamp"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
+	var time = doc.evaluate('//time[@class="updated"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if(time) item.date = time.textContent;
 
 	// We snapshot the page, using the existing document

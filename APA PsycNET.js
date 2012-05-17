@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-25 23:26:26"
+	"lastUpdated": "2012-05-16 23:19:39"
 }
 
 function detectWeb(doc, url) {
@@ -124,7 +124,15 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [],
+				"tags": [
+					"attention-deficit/hyperactivity disorder",
+					"adults",
+					"behavioral inhibition",
+					"neuropsychological performance",
+					"developmental considerations",
+					"neuropsychological deficits",
+					"empirical methods"
+				],
 				"seeAlso": [],
 				"attachments": [],
 				"itemID": "2004-16644-010",
@@ -164,7 +172,13 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [],
+				"tags": [
+					"factor analysis",
+					"evaluation",
+					"potency",
+					"activity",
+					"semantic"
+				],
 				"seeAlso": [],
 				"attachments": [],
 				"itemID": "1956-05944-001",
@@ -200,10 +214,16 @@ var testCases = [
 						"lastName": "Maser",
 						"firstName": "Jack D.",
 						"creatorType": "author"
+					},
+					{
+						"lastName": "J. D. Maser  M. E. P. Seligman",
+						"creatorType": "editor"
 					}
 				],
 				"notes": [],
-				"tags": [],
+				"tags": [
+					"discusses tonic immobility as an animal model for catatonia & catalepsy"
+				],
 				"seeAlso": [],
 				"attachments": [],
 				"itemID": "1992-98221-010",
@@ -236,7 +256,11 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [],
+				"tags": [
+					"abnormal personality",
+					"abnormal psychology",
+					"personality disorders"
+				],
 				"seeAlso": [],
 				"attachments": [],
 				"itemID": "2004-16329-000",
