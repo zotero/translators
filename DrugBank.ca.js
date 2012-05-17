@@ -94,25 +94,28 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "MOL file download",
-						"type": "text/plain"
+						"title": "Drugbank.ca Snapshot",
+						"type": "text/html"
+					},
+					{
+						"title": "MOL file",
+						"type": "chemical/x-mdl-molfile"
 					},
 					{
 						"title": "SDF Molecule file",
-						"type": "text/plain"
+						"type": "chemical/x-mdl-sdfile"
 					},
 					{
 						"title": "SMILE file",
-						"type": "text/plain"
+						"type": "chemical/x-daylight-smiles"
 					}
 				],
 				"url": "http://www.drugbank.ca/drugs/DB00381",
 				"abstractNote": "Amlodipine is a long-acting 1,4-dihydropyridine calcium channel blocker. It acts primarily on vascular smooth muscle cells by stabilizing voltage-gated L-type calcium channels in their inactive conformation. By inhibiting the influx of calcium in smooth muscle cells, amlodipine prevents calcium-dependent myocyte contraction and vasoconstriction. A second proposed mechanism for the drug’s vasodilatory effects involves pH-dependent inhibition of calcium influx via inhibition of smooth muscle carbonic anhydrase. Some studies have shown that amlodipine also exerts inhibitory effects on voltage-gated N-type calcium channels. N-type calcium channels located in the central nervous system may be involved in nociceptive signaling and pain sensation. Amlodipine is used to treat hypertension and chronic stable angina.",
-				"date": "February 14, 2012",
 				"encyclopediaTitle": "DrugBank",
-				"title": "Amlodipine (DB00381)",
 				"libraryCatalog": "DrugBank.ca",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"date": "February 14, 2012",
+				"title": "Amlodipine (DB00381)"
 			}
 		]
 	},
@@ -134,25 +137,28 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "MOL file download",
-						"type": "text/plain"
+						"title": "Drugbank.ca Snapshot",
+						"type": "text/html"
+					},
+					{
+						"title": "MOL file",
+						"type": "chemical/x-mdl-molfile"
 					},
 					{
 						"title": "SDF Molecule file",
-						"type": "text/plain"
+						"type": "chemical/x-mdl-sdfile"
 					},
 					{
 						"title": "SMILE file",
-						"type": "text/plain"
+						"type": "chemical/x-daylight-smiles"
 					}
 				],
 				"url": "http://www.drugbank.ca/drugs/DB00599",
 				"abstractNote": "A barbiturate that is administered intravenously for the induction of general anesthesia or for the production of complete anesthesia of short duration. It is also used for hypnosis and for the control of convulsive states. It has been used in neurosurgical patients to reduce increased intracranial pressure. It does not produce any excitation but has poor analgesic and muscle relaxant properties. Small doses have been shown to be anti-analgesic and lower the pain threshold. (From Martindale, The Extra Pharmacopoeia, 30th ed, p920)",
-				"date": "February 14, 2012",
 				"encyclopediaTitle": "DrugBank",
-				"title": "Thiopental (DB00599)",
 				"libraryCatalog": "DrugBank.ca",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"date": "February 14, 2012",
+				"title": "Thiopental (DB00599)"
 			}
 		]
 	},
@@ -174,24 +180,27 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "MOL file download",
-						"type": "text/plain"
+						"title": "Drugbank.ca Snapshot",
+						"type": "text/html"
+					},
+					{
+						"title": "MOL file",
+						"type": "chemical/x-mdl-molfile"
 					},
 					{
 						"title": "SDF Molecule file",
-						"type": "text/plain"
+						"type": "chemical/x-mdl-sdfile"
 					},
 					{
 						"title": "SMILE file",
-						"type": "text/plain"
+						"type": "chemical/x-daylight-smiles"
 					}
 				],
 				"url": "http://www.drugbank.ca/drugs/DB01323",
-				"date": "February 14, 2012",
 				"encyclopediaTitle": "DrugBank",
-				"title": "St. John's Wort (DB01323)",
 				"libraryCatalog": "DrugBank.ca",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"date": "February 14, 2012",
+				"title": "St. John's Wort (DB01323)"
 			}
 		]
 	}
