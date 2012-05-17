@@ -189,9 +189,13 @@ function doExport() {
 				for(var i = 0; i < item.creators.length; i++) {
 					var creator = item.creators[i];
 					if(creator.creatorType == "translator") {
-						translators = translators.concat(item.creators.splice(i, 1));
+						item.creators.splice(i, 1)
+						i--;
+						translators = translators.concat();
 					} else if(creator.creatorType == "editor") {
-						editors = editors.concat(item.creators.splice(i, 1));
+						item.creators.splice(i, 1);
+						i--;
+						editors = editors.concat(creator);
 					} else if(creator.creatorType == "contributor") {
 						// drop contributors
 						item.creators.splice(i, 1);
@@ -324,6 +328,33 @@ function doExport() {
 				properties.chapterurl = item.url;
 			} else {
 				properties.url = item.url;
+			}
+		}
+		
+		if(properties["pages"]) {
+			properties["pages"]=properties["pages"].replace(/[^0-9]/,"–")//separate page numbers with en dash
+		}
+		
+		if(item.extra || item.url){// automatically fill pmc, pmid and jstor fields in template.
+			var ExtraFields={ pmid:/PMID\s*\:\s*([0-9]+)\s*/ ,// FIXME : what about non numeric ids? like jstor=10.1086/383618
+			pmc:/PMCID\s*\:\s*([0-9]+)\s*/ ,
+			jstor:/JSTOR\s*\:\s*([0-9]+)\s*/
+			};
+			
+			for(var f in ExtraFields){
+				var match=item.extra.match(ExtraFields[f]);
+				if( match && match.length>1) properties[f]=match[1];//search for non empty matches with a ID and assign to template
+			}
+			var libraryURLs={ 
+				pmid:/www\.ncbi\.nlm\.nih\.gov\/pubmed\/([0-9]+)/ ,
+				 pmc:/www\.ncbi\.nlm\.nih\.gov\/pmc\/articles\/PMC([0-9]+)/ ,
+				 jstor:/www\.jstor\.org\/stable\/(.+)/ // FIXME : what about non numeric ids? like jstor=10.1086/383618
+				 };
+			for(var f in libraryURLs){
+				var match=item.url.match(libraryURLs[f]);
+				if( match && match.length>1){
+					properties[f]=match[1];
+				}
 			}
 		}
 		
