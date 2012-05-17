@@ -182,7 +182,6 @@ function doWeb(doc, url) {
 	if (pmcid) {
 		try {
 			var formatLinks = doc.evaluate('//td[@class="format-menu"]//a/@href|//div[@class="format-menu"]//a/@href', doc, nsResolver, XPathResult.ANY_TYPE, null);
-			Z.debug(formatLinks)
 			while (formatLink = formatLinks.iterateNext().textContent) {
 				if(pdfLink = formatLink.match(/\/pdf\/([^\/]*\.pdf$)/)) {
 					pdfLink = pdfLink[1];
