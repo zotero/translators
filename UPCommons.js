@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-05-16 23:48:05"
+	"lastUpdated": "2012-05-25 03:51:40"
 }
 
 function detectWeb(doc, url) {
@@ -126,16 +126,14 @@ var testCases = [
 					"Catalunya -- Oceanografia",
 					"Climatologia -- Mesurament",
 					"Climatology",
+					"Pelagic observatory",
+					"Oceanographic buoy",
 					"Multisensor coordinated monitoring",
+					"PAR",
+					"Operational oceanography",
+					"Submarine canyons",
 					"Numerical multiparametric modelling",
 					"Ocean forecast",
-					"Oceanografia -- Mesurament",
-					"Oceanographic buoy",
-					"Operational oceanography",
-					"PAR",
-					"Pelagic observatory",
-					"Sensors",
-					"Submarine canyons",
 					"Western Mediterranean Sea",
 					"Àrees temàtiques de la UPC::Enginyeria agroalimentària::Ciències de la terra i de la vida::Climatologia i meteorologia",
 					"Àrees temàtiques de la UPC::Enginyeria civil::Geologia::Oceanografia",

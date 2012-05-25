@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-05-18 14:11:30"
+	"lastUpdated": "2012-05-25 03:53:20"
 }
 
 /*
@@ -292,16 +292,19 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"bookTitle": "The World is Open: How Web Technology is Revolutionizing Education",
-				"ISBN": "9781118269381",
-				"language": "en",
-				"url": "http://onlinelibrary.wiley.com/doi/10.1002/9781118269381.notes/summary",
-				"libraryCatalog": "onlinelibrary.wiley.com",
-				"rights": "Copyright © 2009 Curtis J. Bonk. All rights reserved.",
+				"itemID": "http://onlinelibrary.wiley.com/doi/10.1002/9781118269381.notes/summary",
 				"title": "Endnotes",
 				"date": "2012/01/11",
+				"bookTitle": "The World is Open: How Web Technology is Revolutionizing Education",
 				"publisher": "Jossey‐Bass",
-				"pages": "427-467"
+				"ISBN": "9781118269381",
+				"DOI": "10.1002/9781118269381.notes",
+				"language": "en",
+				"pages": "427-467",
+				"url": "http://onlinelibrary.wiley.com/doi/10.1002/9781118269381.notes/summary",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "onlinelibrary.wiley.com",
+				"rights": "Copyright © 2009 Curtis J. Bonk. All rights reserved."
 			}
 		]
 	},
@@ -390,41 +393,40 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"1897",
-					"Directors (Life and Works) ‐ Ángel García Cardona and Antonio Cuesta13",
-					"Florián Rey (Antonio Martínez de Castillo)",
-					"Florián Rey's La aldea maldita (1930)",
-					"Fructuós Gelabert ‐ made the first Spanish fiction film",
-					"Fructuós Gelabert's Amor que mata (1909)",
-					"Ricardo Baños",
-					"Ricardo Baños and Albert Marro's Don Pedro el Cruel (1911)",
-					"Riña en un café",
 					"silent cinema and its pioneers (1906–1930)",
-					"three films ‐ part of “the preliminary industrial and expressive framework for Spain's budding cinema”",
+					"Ángel García Cardona's El ciego de aldea (1906)",
 					"Ángel García Cardona and Antonio Cuesta",
-					"Ángel García Cardona's El ciego de aldea (1906)"
+					"Ricardo Baños and Albert Marro's Don Pedro el Cruel (1911)",
+					"Fructuós Gelabert's Amor que mata (1909)",
+					"three films ‐ part of “the preliminary industrial and expressive framework for Spain's budding cinema”",
+					"Directors (Life and Works) ‐ Ángel García Cardona and Antonio Cuesta13",
+					"Ricardo Baños",
+					"Florián Rey's La aldea maldita (1930)",
+					"Florián Rey (Antonio Martínez de Castillo)",
+					"Fructuós Gelabert ‐ made the first Spanish fiction film",
+					"Riña en un café",
+					"1897"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
 						"title": "Snapshot"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
-				"bookTitle": "100 Years of Spanish Cinema",
-				"ISBN": "9781444304794",
-				"language": "en",
-				"url": "http://onlinelibrary.wiley.com/doi/10.1002/9781444304794.ch1/summary",
-				"libraryCatalog": "onlinelibrary.wiley.com",
-				"rights": "Copyright © 2009 Tatjana Pavlović, Inmaculada Alvarez, Rosana Blanco-Cano, Anitra Grisales, Alejandra Osorio, and Alejandra Sánchez",
-				"abstractNote": "This chapter contains sections titled: \nHistorical and Political Overview of the Period\nContext11\nFilm Scenes: Close Readings\nDirectors (Life and Works)\nCritical Commentary",
+				"itemID": "http://onlinelibrary.wiley.com/doi/10.1002/9781444304794.ch1/summary",
 				"title": "Silent Cinema and its Pioneers (1906–1930)",
 				"date": "2009/03/09",
+				"bookTitle": "100 Years of Spanish Cinema",
 				"publisher": "Wiley‐Blackwell",
-				"pages": "1-20"
+				"ISBN": "9781444304794",
+				"DOI": "10.1002/9781444304794.ch1",
+				"language": "en",
+				"pages": "1-20",
+				"url": "http://onlinelibrary.wiley.com/doi/10.1002/9781444304794.ch1/summary",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "onlinelibrary.wiley.com",
+				"rights": "Copyright © 2009 Tatjana Pavlović, Inmaculada Alvarez, Rosana Blanco-Cano, Anitra Grisales, Alejandra Osorio, and Alejandra Sánchez",
+				"abstractNote": "This chapter contains sections titled: \nHistorical and Political Overview of the Period\nContext11\nFilm Scenes: Close Readings\nDirectors (Life and Works)\nCritical Commentary"
 			}
 		]
 	},
@@ -547,14 +549,11 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
+				"itemID": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
 				"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
-				"date": "2012/01/01",
+				"date": "2011/12/14",
 				"publicationTitle": "PROTEOMICS",
 				"volume": "12",
 				"issue": "2",
@@ -610,14 +609,11 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
+				"itemID": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
 				"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
-				"date": "2012/01/01",
+				"date": "2011/12/14",
 				"publicationTitle": "PROTEOMICS",
 				"volume": "12",
 				"issue": "2",
@@ -626,7 +622,7 @@ var testCases = [
 				"language": "en",
 				"pages": "173-182",
 				"ISSN": "1615-9861",
-				"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/full",
+				"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "onlinelibrary.wiley.com",
 				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
@@ -673,14 +669,11 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
+				"itemID": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
 				"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
-				"date": "2012/01/01",
+				"date": "2011/12/14",
 				"publicationTitle": "PROTEOMICS",
 				"volume": "12",
 				"issue": "2",
@@ -736,14 +729,11 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
+				"itemID": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
 				"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
-				"date": "2012/01/01",
+				"date": "2011/12/14",
 				"publicationTitle": "PROTEOMICS",
 				"volume": "12",
 				"issue": "2",
@@ -793,6 +783,7 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
+				"itemID": "http://onlinelibrary.wiley.com/doi/10.1002/3527603018.ch17/summary",
 				"title": "β‐Rezeptorenblocker",
 				"date": "2005/01/28",
 				"bookTitle": "Klinisch-toxikologische Analytik: Verfahren, Befunde, Interpretation",
@@ -839,8 +830,9 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
+				"itemID": "http://onlinelibrary.wiley.com/doi/10.1111/j.1468-5930.2011.00548.x/abstract",
 				"title": "The Principled Case for Employing Private Military and Security Companies in Interventions for Human Rights Purposes",
-				"date": "2012/02/01",
+				"date": "2011/12/16",
 				"publicationTitle": "Journal of Applied Philosophy",
 				"volume": "29",
 				"issue": "1",
