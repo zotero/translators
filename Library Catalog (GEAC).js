@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2006-12-15 15:11:00"
+	"lastUpdated":"2012-05-25 03:37:22"
 }
 
 function detectWeb(doc, url) {
@@ -46,60 +46,58 @@ function doWeb(doc, url) {
 	
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
-	var marc = translator.getTranslatorObject();
-	
-	Zotero.Utilities.processDocuments(uris, function(newDoc) {
-		var uri = newDoc.location.href;
-		
-		var namespace = newDoc.documentElement.namespaceURI;
-		var nsResolver = namespace ? function(prefix) {
-		  if (prefix == 'x') return namespace; else return null;
-		} : null;
-		
-		var record = new marc.record();
-		
-		var elmts = newDoc.evaluate('//pre/text()', newDoc, nsResolver,
-		                            XPathResult.ANY_TYPE, null);
-		var elmt, tag, content;
-		var ind = "";
-		
-		while(elmt = elmts.iterateNext()) {
-			var line = elmt.nodeValue;
+	translator.getTranslatorObject(function(marc) {	
+		Zotero.Utilities.processDocuments(uris, function(newDoc) {
+			var uri = newDoc.location.href;
 			
-			if(line.substring(0, 6) == "       ") {
-				content += " "+line.substring(6);
-				continue;
-			} else {
-				if(tag) {
-					record.addField(tag, ind, content);
-				}
-			}
+			var namespace = newDoc.documentElement.namespaceURI;
+			var nsResolver = namespace ? function(prefix) {
+			  if (prefix == 'x') return namespace; else return null;
+			} : null;
 			
-			line = line.replace(/[_\t\xA0]/g," "); // nbsp
+			var record = new marc.record();
 			
-			tag = line.substr(0, 3);
-			if(tag[0] != "0" || tag[1] != "0") {
-				ind = line.substr(4, 2);
-				content = line.substr(7).replace(/\$([a-z])(?: |$)/g, marc.subfieldDelimiter+"$1");
-			} else {
-				if(tag == "000") {
-					tag = undefined;
-					record.leader = "00000"+line.substr(4);
+			var elmts = newDoc.evaluate('//pre/text()', newDoc, nsResolver,
+										XPathResult.ANY_TYPE, null);
+			var elmt, tag, content;
+			var ind = "";
+			
+			while(elmt = elmts.iterateNext()) {
+				var line = elmt.nodeValue;
+				
+				if(line.substring(0, 6) == "       ") {
+					content += " "+line.substring(6);
+					continue;
 				} else {
-					content = line.substr(4);
+					if(tag) {
+						record.addField(tag, ind, content);
+					}
 				}
+				
+				line = line.replace(/[_\t\xA0]/g," "); // nbsp
+				
+				tag = line.substr(0, 3);
+				if(tag[0] != "0" || tag[1] != "0") {
+					ind = line.substr(4, 2);
+					content = line.substr(7).replace(/\$([a-z])(?: |$)/g, marc.subfieldDelimiter+"$1");
+				} else {
+					if(tag == "000") {
+						tag = undefined;
+						record.leader = "00000"+line.substr(4);
+					} else {
+						content = line.substr(4);
+					}
+				}
+				
 			}
 			
-		}
-		
-		var newItem = new Zotero.Item();
-		record.translate(newItem);
-		
-		var domain = url.match(/https?:\/\/([^/]+)/);
-		newItem.repository = domain[1]+" Library Catalog";
-		
-		newItem.complete();
-	}, function() { Zotero.done(); }, null);
-	
-	Zotero.wait();
+			var newItem = new Zotero.Item();
+			record.translate(newItem);
+			
+			var domain = url.match(/https?:\/\/([^/]+)/);
+			newItem.repository = domain[1]+" Library Catalog";
+			
+			newItem.complete();
+		});
+	});
 }

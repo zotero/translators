@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-07-25 13:01:08"
+	"lastUpdated": "2012-05-25 03:37:22"
 }
 
 function detectWeb(doc, url) {
@@ -326,51 +326,50 @@ function doWeb(doc, url){
 		}
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
-		var marc = translator.getTranslatorObject();
-		Zotero.Utilities.loadDocument(newUri+'?marks='+recNumbers.join(",")+'&shadow=NO&format=FLAT+ASCII&sort=TITLE&vopt_elst=ALL&library=ALL&display_rule=ASCENDING&duedate_code=l&holdcount_code=t&DOWNLOAD_x=22&DOWNLOAD_y=12&address=&form_type=', function(doc) {
-			var pre = doc.getElementsByTagName("pre");
-			var text = pre[0].textContent;
-			var documents = text.split("*** DOCUMENT BOUNDARY ***");
-			for(var j=1; j<documents.length; j++) {
-				var uri = newUri+"?marks="+recNumbers[j]+"&shadow=NO&format=FLAT+ASCII&sort=TITLE&vopt_elst=ALL&library=ALL&display_rule=ASCENDING&duedate_code=l&holdcount_code=t&DOWNLOAD_x=22&DOWNLOAD_y=12&address=&form_type=";
-				var lines = documents[j].split("\n");
-				var record = new marc.record();
-				var tag, content;
-				var ind = "";
-				for(var i=0; i<lines.length; i++) {
-					var line = lines[i];
-					if(line[0] == "." && line.substr(4,2) == ". ") {
-						if(tag) {
-							content = content.replace(/\|([a-z])/g, marc.subfieldDelimiter+"$1");
-							record.addField(tag, ind, content);
+		translator.getTranslatorObject(function(marc) {
+			Zotero.Utilities.loadDocument(newUri+'?marks='+recNumbers.join(",")+'&shadow=NO&format=FLAT+ASCII&sort=TITLE&vopt_elst=ALL&library=ALL&display_rule=ASCENDING&duedate_code=l&holdcount_code=t&DOWNLOAD_x=22&DOWNLOAD_y=12&address=&form_type=', function(doc) {
+				var pre = doc.getElementsByTagName("pre");
+				var text = pre[0].textContent;
+				var documents = text.split("*** DOCUMENT BOUNDARY ***");
+				for(var j=1; j<documents.length; j++) {
+					var uri = newUri+"?marks="+recNumbers[j]+"&shadow=NO&format=FLAT+ASCII&sort=TITLE&vopt_elst=ALL&library=ALL&display_rule=ASCENDING&duedate_code=l&holdcount_code=t&DOWNLOAD_x=22&DOWNLOAD_y=12&address=&form_type=";
+					var lines = documents[j].split("\n");
+					var record = new marc.record();
+					var tag, content;
+					var ind = "";
+					for(var i=0; i<lines.length; i++) {
+						var line = lines[i];
+						if(line[0] == "." && line.substr(4,2) == ". ") {
+							if(tag) {
+								content = content.replace(/\|([a-z])/g, marc.subfieldDelimiter+"$1");
+								record.addField(tag, ind, content);
+							}
+						} else {
+							content += " "+line.substr(6);
+							continue;
 						}
-					} else {
-						content += " "+line.substr(6);
-						continue;
-					}
-					tag = line.substr(1, 3);	
-					if(tag[0] != "0" || tag[1] != "0") {
-						ind = line.substr(6, 2);
-						content = line.substr(8);
-					} else {
-						content = line.substr(7);
-						if(tag == "000") {
-							tag = undefined;
-							record.leader = "00000"+content;
-							Zotero.debug("the leader is: "+record.leader);
+						tag = line.substr(1, 3);	
+						if(tag[0] != "0" || tag[1] != "0") {
+							ind = line.substr(6, 2);
+							content = line.substr(8);
+						} else {
+							content = line.substr(7);
+							if(tag == "000") {
+								tag = undefined;
+								record.leader = "00000"+content;
+								Zotero.debug("the leader is: "+record.leader);
+							}
 						}
-					}
-				}	
-				var newItem = new Zotero.Item();
-				record.translate(newItem);
-				
-				var domain = url.match(/https?:\/\/([^/]+)/);
-				newItem.repository = domain[1]+" Library Catalog";
-
-				newItem.complete();
-			}
-			Zotero.done();
-		});
-		Zotero.wait();	
+					}	
+					var newItem = new Zotero.Item();
+					record.translate(newItem);
+					
+					var domain = url.match(/https?:\/\/([^/]+)/);
+					newItem.repository = domain[1]+" Library Catalog";
+	
+					newItem.complete();
+				}
+			});
+		}
 	}
 }

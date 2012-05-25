@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-03-01 21:14:57"
+	"lastUpdated": "2012-05-25 03:37:22"
 }
 
 function detectWeb(doc, url) {
@@ -57,44 +57,44 @@ function doWeb(doc, url) {
 	}
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
-	var marc = translator.getTranslatorObject();
-	Zotero.Utilities.processDocuments(books, function(doc) {
-		var rows = doc.evaluate('//center/table/tbody/tr', doc, ns, XPathResult.ANY_TYPE, null);
-		var row;
-		var record = new marc.record();
-		while (row = rows.iterateNext()) {
-			var field = Zotero.Utilities.trimInternal(doc.evaluate('./td[1]', row, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(":", ""));
-			if (field) {
-				var value = doc.evaluate('./td[2]', row, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-				if (value.split(/\n/)[1]) value = Zotero.Utilities.trimInternal(value.split(/\n/)[1]);
-				if (field == "LDR") {
-					record.leader = value;
-				} else if (field != "FMT") {
-					value = value.replace(/\¤([a-z])/g, marc.subfieldDelimiter+ "$1");
-					var code = field.substring(0, 3);
-					var ind = "";
-					if (field.length > 3) {
-						ind = field[3];
-						if (field.length > 4) {
-							ind += field[4];
+	translator.getTranslatorObject(function(marc) {
+		Zotero.Utilities.processDocuments(books, function(doc) {
+			var rows = doc.evaluate('//center/table/tbody/tr', doc, ns, XPathResult.ANY_TYPE, null);
+			var row;
+			var record = new marc.record();
+			while (row = rows.iterateNext()) {
+				var field = Zotero.Utilities.trimInternal(doc.evaluate('./td[1]', row, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(":", ""));
+				if (field) {
+					var value = doc.evaluate('./td[2]', row, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+					if (value.split(/\n/)[1]) value = Zotero.Utilities.trimInternal(value.split(/\n/)[1]);
+					if (field == "LDR") {
+						record.leader = value;
+					} else if (field != "FMT") {
+						value = value.replace(/\¤([a-z])/g, marc.subfieldDelimiter+ "$1");
+						var code = field.substring(0, 3);
+						var ind = "";
+						if (field.length > 3) {
+							ind = field[3];
+							if (field.length > 4) {
+								ind += field[4];
+							}
 						}
+						record.addField(code, ind, value);
 					}
-					record.addField(code, ind, value);
 				}
 			}
-		}
-		var item = new Zotero.Item();
-		record.translate(item);
-		
-		var oldauthors = item.creators;
-		var newauthors = new Array();
-		for each (var aut in oldauthors) {
-			if (aut.lastName.match(/^[A-Z][^\s]+\s[^\s]+/)) newauthors.push(Zotero.Utilities.cleanAuthor(aut.lastName.match(/^[A-Z][^\s]+\s[^\s]+/)[0].replace(/^([^\s]+)\s+(.*)$/, "$2 $1"), "author"));
-		}
-		item.creators = newauthors;
-		item.complete();
-	}, function() {Zotero.done();});
-	Zotero.wait();
+			var item = new Zotero.Item();
+			record.translate(item);
+			
+			var oldauthors = item.creators;
+			var newauthors = new Array();
+			for each (var aut in oldauthors) {
+				if (aut.lastName.match(/^[A-Z][^\s]+\s[^\s]+/)) newauthors.push(Zotero.Utilities.cleanAuthor(aut.lastName.match(/^[A-Z][^\s]+\s[^\s]+/)[0].replace(/^([^\s]+)\s+(.*)$/, "$2 $1"), "author"));
+			}
+			item.creators = newauthors;
+			item.complete();
+		});
+	});
 }/** BEGIN TEST CASES **/
 var testCases = []
 /** END TEST CASES **/

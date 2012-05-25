@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gv",
-	"lastUpdated": "2012-03-13 17:29:56"
+	"lastUpdated": "2012-05-25 03:37:22"
 }
 
 function detectWeb(doc, url) {
@@ -43,55 +43,51 @@ function doWeb(doc, url) {
 
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
-	var marc = translator.getTranslatorObject();
-
-	Zotero.Utilities.processDocuments(newUris, function (newDoc) {
-		var uri = newDoc.location.href;
-		var record = new marc.record();
-		var elmts = newDoc.evaluate('/html/body/table/tbody/tr[td[4]]', newDoc, null, XPathResult.ANY_TYPE, null);
-		var tag, ind, content, elmt;
-
-		while (elmt = elmts.iterateNext()) {
-			tag = newDoc.evaluate('./td[2]', elmt, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			var inds = newDoc.evaluate('./td[3]', elmt, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-
-			tag = tag.replace(/[\r\n]/g, "");
-			inds = inds.replace(/[\r\n\xA0]/g, "");
-
-			var children = newDoc.evaluate('./td[4]//text()', elmt, null, XPathResult.ANY_TYPE, null);
-			var subfield = children.iterateNext();
-			var fieldContent = children.iterateNext();
-
-			if (tag == "LDR") {
-				record.leader = "00000" + subfield.nodeValue;
-			} else {
-				content = "";
-				if (!fieldContent) {
-					content = subfield.nodeValue;
+	translator.getTranslatorObject(function(marc) {
+		Zotero.Utilities.processDocuments(newUris, function (newDoc) {
+			var uri = newDoc.location.href;
+			var record = new marc.record();
+			var elmts = newDoc.evaluate('/html/body/table/tbody/tr[td[4]]', newDoc, null, XPathResult.ANY_TYPE, null);
+			var tag, ind, content, elmt;
+	
+			while (elmt = elmts.iterateNext()) {
+				tag = newDoc.evaluate('./td[2]', elmt, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+				var inds = newDoc.evaluate('./td[3]', elmt, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	
+				tag = tag.replace(/[\r\n]/g, "");
+				inds = inds.replace(/[\r\n\xA0]/g, "");
+	
+				var children = newDoc.evaluate('./td[4]//text()', elmt, null, XPathResult.ANY_TYPE, null);
+				var subfield = children.iterateNext();
+				var fieldContent = children.iterateNext();
+	
+				if (tag == "LDR") {
+					record.leader = "00000" + subfield.nodeValue;
 				} else {
-					while (subfield && fieldContent) {
-						content += marc.subfieldDelimiter + subfield.nodeValue.substr(1, 1) + fieldContent.nodeValue;
-						var subfield = children.iterateNext();
-						var fieldContent = children.iterateNext();
+					content = "";
+					if (!fieldContent) {
+						content = subfield.nodeValue;
+					} else {
+						while (subfield && fieldContent) {
+							content += marc.subfieldDelimiter + subfield.nodeValue.substr(1, 1) + fieldContent.nodeValue;
+							var subfield = children.iterateNext();
+							var fieldContent = children.iterateNext();
+						}
 					}
+	
+					record.addField(tag, inds, content);
 				}
-
-				record.addField(tag, inds, content);
 			}
-		}
-
-		var newItem = new Zotero.Item();
-		record.translate(newItem);
-
-		var domain = url.match(/https?:\/\/([^/]+)/);
-		newItem.repository = domain[1] + " Library Catalog";
-
-		newItem.complete();
-	}, function () {
-		Zotero.done();
-	}, null);
-
-	Zotero.wait();
+	
+			var newItem = new Zotero.Item();
+			record.translate(newItem);
+	
+			var domain = url.match(/https?:\/\/([^/]+)/);
+			newItem.repository = domain[1] + " Library Catalog";
+	
+			newItem.complete();
+		});
+	});
 } 
 /** BEGIN TEST CASES **/
 var testCases = [

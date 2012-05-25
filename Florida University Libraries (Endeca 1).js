@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"lastUpdated":"2012-05-25 03:37:22"
 }
 
 function detectWeb(doc, url){
@@ -61,44 +61,44 @@ function doWeb(doc, url){
 	}
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
-	var marc = translator.getTranslatorObject();
-	Zotero.Utilities.processDocuments(newUris, function(newDoc) {
-		var uri = newDoc.location.href;
-		var xpath = '//tr[@class="trGenContent"][td[3]]';
-		var elmts = newDoc.evaluate(xpath, newDoc, nsResolver, XPathResult.ANY_TYPE, null);
-		var elmt;
-		
-		var record = new marc.record();
-		while(elmt = elmts.iterateNext()) {
-			var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./TD[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-			var value = newDoc.evaluate('./TD[3]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	translator.getTranslatorObject(function(marc) {
+		Zotero.Utilities.processDocuments(newUris, function(newDoc) {
+			var uri = newDoc.location.href;
+			var xpath = '//tr[@class="trGenContent"][td[3]]';
+			var elmts = newDoc.evaluate(xpath, newDoc, nsResolver, XPathResult.ANY_TYPE, null);
+			var elmt;
 			
-			if(field == "LDR") {
-				record.leader = value;
-			} else if(field != "FMT") {
+			var record = new marc.record();
+			while(elmt = elmts.iterateNext()) {
+				var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./TD[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+				var value = newDoc.evaluate('./TD[3]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 				
-				value = value.replace(/\|([a-z]) /g, marc.subfieldDelimiter+"$1");
-				
-				var code = field.substring(0, 3);
-				var ind = "";
-				if(field.length > 3) {
-					ind = field[3];
-					if(field.length > 4) {
-						ind += field[4];
+				if(field == "LDR") {
+					record.leader = value;
+				} else if(field != "FMT") {
+					
+					value = value.replace(/\|([a-z]) /g, marc.subfieldDelimiter+"$1");
+					
+					var code = field.substring(0, 3);
+					var ind = "";
+					if(field.length > 3) {
+						ind = field[3];
+						if(field.length > 4) {
+							ind += field[4];
+						}
 					}
+					
+					record.addField(code, ind, value);
 				}
-				
-				record.addField(code, ind, value);
 			}
-		}
-		
-		var newItem = new Zotero.Item();
-		record.translate(newItem);
-		
-		var domain = url.match(/https?:\/\/([^/]+)/);
-		newItem.repository = domain[1]+" Library Catalog";
-		
-		newItem.complete();
-	}, function() { Zotero.done(); }, null);
-	Zotero.wait();	
+			
+			var newItem = new Zotero.Item();
+			record.translate(newItem);
+			
+			var domain = url.match(/https?:\/\/([^/]+)/);
+			newItem.repository = domain[1]+" Library Catalog";
+			
+			newItem.complete();
+		});
+	}
 }
