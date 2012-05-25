@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-01-30 22:46:33"
+	"lastUpdated": "2012-05-25 23:57:46"
 }
 
 // #######################
@@ -289,12 +289,11 @@ function doWeb(doc, url) {
 			var m = u.match(/.*document\.catsrhform\.pkey\.value=\'([^\']+)\'.*/);
 			items[itemUrlBase+"?pkey="+m[1]+"&initFlg=_RESULT_SET_NOTBIB"] = true;
 		}
-		if (items.__count__){
-			for (var u in items){
-				var d = Zotero.Utilities.retrieveDocument(u);
-				scrapeAndParse(d, u);
-			}
+		var urls = [];
+		for (var u in items){
+			urls.push(u);
 		}
+		ZU.processDocuments(u, scrapeAndParse);
 	} else if (format == "book"){
 		scrapeAndParse(doc, url);
 	}
