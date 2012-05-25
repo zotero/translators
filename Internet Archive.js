@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gbv",
-	"lastUpdated": "2011-11-05 16:29:13"
+	"lastUpdated": "2012-05-25 23:57:06"
 }
 
 function detectWeb(doc, url) {
@@ -227,13 +227,14 @@ function scrape(doc, url) {
 
 function processBuckets(doc, url, ids) {
 	var httpLink = doc.evaluate('//a[text()="HTTP"]/@href', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-
+	
+	rdfURLs = [];
 	for (var i=0; i<ids.length; i++) {
 		var id = ids[i];
-		var rdfURL = downloadURL + '/' + id + '/' + id + '.rdf';
-		
-		var text = Zotero.Utilities.retrieveSource(rdfURL);
-		
+		rdfURLs.push(downloadURL + '/' + id + '/' + id + '.rdf');
+	}
+	
+	ZU.doGet(rdfURLs, function(text) {
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f"); // RDF
 		translator.setString(text);
@@ -256,71 +257,70 @@ function processBuckets(doc, url, ids) {
 			
 			var itemURL = downloadURL + '/' + id + '/' + id + '_files.xml';
 			
-			var xmlstr = Zotero.Utilities.retrieveSource(itemURL);
-			Zotero.debug(xmlstr);
-			
-			// Strip XML declaration and convert to E4X
-			var xml = new XML(xmlstr.replace(/<\?xml.*\?>/, ''));
-			var files = xml.file;
-			
-			var attachments = [];
-			var titles = [];
-			// loop through files listed in bucket contents file
-			for each(var f in files) {
-				var fileName = f.@name.toString();
+			ZU.doGet(itemURL, function(xmlstr) {
+				// Strip XML declaration and convert to E4X
+				var xml = new XML(xmlstr.replace(/<\?xml.*\?>/, ''));
+				var files = xml.file;
 				
-				// Skip derivative files other than OCRed PDFs
-				if (f.@source.toString() != 'original' && !fileName.match(/_text\.pdf$/)) {
-					Zotero.debug("Skipping " + fileName);
-					continue;
-				}
-				
-				// Skip default files
-				if (fileName.indexOf(id) == 0) {
-					continue;
-				}
-				
-				// TEMP -- shouldn't be necessary after IA changes
-				if (fileName.match(/\.zip(_meta\.txt)?$/)) {
-					Zotero.debug("Skipping " + fileName);
-					continue;
-				}
-				
-				var title = f.title.toString();
-				if (!title) {
-					title = fileName;
-				}
-				
-				attachments.push(fileName);
-				titles.push(title);
-			}
-			
-			for (var i=0; i<attachments.length; i++) {
-				var fileName = attachments[i];
-				var title = titles[i];
-				
-				// Skip PDF if there's an OCRed version
-				if (fileName.match(/\.pdf$/) && !fileName.match(/_text\.pdf$/)) {
-					var n = fileName.replace(".pdf", "_text.pdf");
-					if (fileName.indexOf(n) != -1) {
-						Zotero.debug("Skipping " + fileName + " in favor of _text version");
+				var attachments = [];
+				var titles = [];
+				// loop through files listed in bucket contents file
+				for each(var f in files) {
+					var fileName = f.@name.toString();
+					
+					// Skip derivative files other than OCRed PDFs
+					if (f.@source.toString() != 'original' && !fileName.match(/_text\.pdf$/)) {
+						Zotero.debug("Skipping " + fileName);
 						continue;
 					}
+					
+					// Skip default files
+					if (fileName.indexOf(id) == 0) {
+						continue;
+					}
+					
+					// TEMP -- shouldn't be necessary after IA changes
+					if (fileName.match(/\.zip(_meta\.txt)?$/)) {
+						Zotero.debug("Skipping " + fileName);
+						continue;
+					}
+					
+					var title = f.title.toString();
+					if (!title) {
+						title = fileName;
+					}
+					
+					attachments.push(fileName);
+					titles.push(title);
 				}
 				
-				var resourceURL = downloadURL + '/' + id + '/' + fileName;
-				item.attachments.push({url:resourceURL, title:title});
-			}
-			
-			// item.DOI = item.url.match(/\.org\/(.*)$/)[1];
-			//item.url = doc.location.href;
-			
-			item.attachments.push({url:detailsURL + '/' + id, title:"Internet Archive Details Page", snapshot:false});
-			
-			item.complete();
+				for (var i=0; i<attachments.length; i++) {
+					var fileName = attachments[i];
+					var title = titles[i];
+					
+					// Skip PDF if there's an OCRed version
+					if (fileName.match(/\.pdf$/) && !fileName.match(/_text\.pdf$/)) {
+						var n = fileName.replace(".pdf", "_text.pdf");
+						if (fileName.indexOf(n) != -1) {
+							Zotero.debug("Skipping " + fileName + " in favor of _text version");
+							continue;
+						}
+					}
+					
+					var resourceURL = downloadURL + '/' + id + '/' + fileName;
+					item.attachments.push({url:resourceURL, title:title});
+				}
+				
+				// item.DOI = item.url.match(/\.org\/(.*)$/)[1];
+				//item.url = doc.location.href;
+				
+				item.attachments.push({url:detailsURL + '/' + id, title:"Internet Archive Details Page", snapshot:false});
+				
+				item.complete();
+			});
 		});
 		translator.translate();
-	}
+	});
 }
 
 
@@ -393,8 +393,6 @@ function doWeb(doc, url) {
 	}
 
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-	
-	Zotero.wait();
 }
 
 /** BEGIN TEST CASES **/
