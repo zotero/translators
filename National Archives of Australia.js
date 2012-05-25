@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2012-03-11 00:15:35"
+	"browserSupport": "gcsbv",
+	"lastUpdated": "2012-05-25 23:53:48"
 }
 
 function detectWeb(doc, url) {
@@ -108,26 +108,26 @@ function processFolio(doc) {
 	item.url = 'http://recordsearch.naa.gov.au/NaaMedia/ShowImage.asp?B=' + barcode + '&S=' + item.pages + '&T=P';
 	// Retrieve file details and extract reference details
 	var itemURL = baseURL + '/SearchNRetrieve/Interface/DetailsReports/ItemDetail.aspx?Barcode=' + barcode;
-	var itemDoc = Zotero.Utilities.retrieveDocument(itemURL);
-	var series = Zotero.Utilities.trimInternal(itemDoc.evaluate('//td[@class="field"][. ="Series number"]/following-sibling::td/a', itemDoc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.lastChild.textContent);
-	var control = Zotero.Utilities.trimInternal(itemDoc.evaluate('//td[@class="field"][. ="Control symbol"]/following-sibling::td', itemDoc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.lastChild.textContent);
-	var refNumber = series + ", " + control;
-	item.title = 'Page ' + page + ' of NAA: ' + refNumber;
-	item.archiveLocation = refNumber;
-	// Save a copy of the image
-	item.attachments = [{
-		url: item.url,
-		title: 'Digital copy of NAA: ' + refNumber + ', p. ' + page,
-		mimeType: "image/jpeg"
-	}];
-	// MACHINE TAGS
-	// The file of which this page is a part.
-	item.tags.push('dcterms:isPartOf="http://www.naa.gov.au/cgi-bin/Search?O=I&Number=' + barcode + '"');
-	// Citation
-	item.tags.push('dcterms:bibliographicCitation="NAA: ' + refNumber + ', p. ' + page + '"');
-	item.tags.push('xmlns:dcterms="http://purl.org/dc/terms/"');
-	item.complete();
-	Zotero.wait();
+	Zotero.Utilities.doGet(itemURL, function(itemDoc) {
+		var series = Zotero.Utilities.trimInternal(itemDoc.evaluate('//td[@class="field"][. ="Series number"]/following-sibling::td/a', itemDoc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.lastChild.textContent);
+		var control = Zotero.Utilities.trimInternal(itemDoc.evaluate('//td[@class="field"][. ="Control symbol"]/following-sibling::td', itemDoc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.lastChild.textContent);
+		var refNumber = series + ", " + control;
+		item.title = 'Page ' + page + ' of NAA: ' + refNumber;
+		item.archiveLocation = refNumber;
+		// Save a copy of the image
+		item.attachments = [{
+			url: item.url,
+			title: 'Digital copy of NAA: ' + refNumber + ', p. ' + page,
+			mimeType: "image/jpeg"
+		}];
+		/*// MACHINE TAGS
+		// The file of which this page is a part.
+		item.tags.push('dcterms:isPartOf="http://www.naa.gov.au/cgi-bin/Search?O=I&Number=' + barcode + '"');
+		// Citation
+		item.tags.push('dcterms:bibliographicCitation="NAA: ' + refNumber + ', p. ' + page + '"');
+		item.tags.push('xmlns:dcterms="http://purl.org/dc/terms/"');*/
+		item.complete();
+	});
 }
 
 function scrape(doc) {
@@ -167,7 +167,7 @@ function scrape(doc) {
 				item.tags.push(subjects[i]);
 			}
 		}
-		// Citation
+		/*// Citation
 		item.tags.push('dcterms:bibliographicCitation="NAA: ' + refNumber + '"');
 		// Save barcode as identifier
 		item.tags.push('dcterms:identifier="' + barcode + '"');
@@ -177,7 +177,7 @@ function scrape(doc) {
 		item.tags.push('owl:sameAs="http://www.naa.gov.au/cgi-bin/Search?O=I&Number=' + barcode + '"');
 		// Namespace declarations
 		item.tags.push('xmlns:dcterms="http://purl.org/dc/terms/"');
-		item.tags.push('xmlns:owl="http://www.w3.org/2002/07/owl#"');
+		item.tags.push('xmlns:owl="http://www.w3.org/2002/07/owl#"');*/
 		// Attach copy of photo as attachment
 		var imgURL = "http://recordsearch.naa.gov.au/NaaMedia/ShowImage.asp?B=" + barcode + "&S=1&T=P";
 		item.attachments = [{
@@ -185,6 +185,7 @@ function scrape(doc) {
 			title: "Digital image of NAA: " + item.archiveLocation,
 			mimeType: "image/jpeg"
 		}];
+		item.complete();
 	} else if (doc.location.href.match(/SeriesDetail.asp/i)) {
 		item.libraryCatalog = "RecordSearch";
 		item.title = Zotero.Utilities.trimInternal(doc.evaluate('//td[@class="field"][. ="Title"]/following-sibling::td', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.lastChild.textContent);
@@ -207,7 +208,7 @@ function scrape(doc) {
 		if (doc.evaluate('//div[@id="notes"]', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue != null) {
 			item.abstractNote = Zotero.Utilities.cleanTags(Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="notes"]', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent));
 		}
-		// MACHINE TAGS
+		/*// MACHINE TAGS
 		// Format
 		if (doc.evaluate('//td[@class="field"][div="Predominant physical format"]/following-sibling::td', doc, nsResolver, XPathResult.FIRST_ANY_TYPE, null) != null) {
 			item.tags.push('dcterms:format="' + Zotero.Utilities.trimInternal(doc.evaluate('//td[@class="field"][div="Predominant physical format"]/following-sibling::td', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.lastChild.textContent) + '"');
@@ -224,7 +225,8 @@ function scrape(doc) {
 		// Citation
 		item.tags.push('dcterms:bibliographicCitation="NAA: ' + refNumber + '"');
 		// Declare dcterms namespace
-		item.tags.push('xmlns:dcterms="http://purl.org/dc/terms/"');
+		item.tags.push('xmlns:dcterms="http://purl.org/dc/terms/"');*/
+		item.complete();
 	} else if (doc.location.href.match(/ItemDetail.asp/i)) {
 		item.manuscriptType = 'file';
 		item.libraryCatalog = "RecordSearch";
@@ -246,7 +248,7 @@ function scrape(doc) {
 		if (doc.evaluate('//div[@id="notes"]', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue != null) {
 			item.abstractNote = Zotero.Utilities.cleanTags(Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="notes"]', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent));
 		}
-		// MACHINE TAGS
+		/*// MACHINE TAGS
 		// The series this item belongs to
 		item.tags.push('dcterms:isPartOf="http://www.naa.gov.au/cgi-bin/Search?Number=' + series + '"');
 		// Citation
@@ -259,17 +261,20 @@ function scrape(doc) {
 		if (doc.evaluate('//td[@class="field"][div="Physical format"]/following-sibling::td', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue != null) {
 			item.tags.push('dcterms:format="' + Zotero.Utilities.trimInternal(doc.evaluate('//td[@class="field"][div="Physical format"]/following-sibling::td', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.lastChild.textContent) + '"');
 		}
+		// Declare dcterms namespace
+		item.tags.push('xmlns:dcterms="http://purl.org/dc/terms/"');*/
 		// Is there a digital copy? - if so find the number of pages in the digitised file
 		if (doc.evaluate('//a[. ="View digital copy "]', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue != null) {
 			itemURL = baseURL + "/scripts/Imagine.asp?B=" + barcode;
 			// Retrieve the digitised file
-			itemDoc = Zotero.Utilities.retrieveDocument(itemURL);
-			item.numPages = Zotero.Utilities.trimInternal(itemDoc.evaluate('//input[@id="Hidden3"]/@value', itemDoc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
+			Zotero.Utilities.doGet(itemURL, function(itemDoc) {
+				item.numPages = Zotero.Utilities.trimInternal(itemDoc.evaluate('//input[@id="Hidden3"]/@value', itemDoc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
+				item.complete();
+			});
+		} else {
+			item.complete();
 		}
-		// Declare dcterms namespace
-		item.tags.push('xmlns:dcterms="http://purl.org/dc/terms/"');
 	}
-	item.complete();
 }
 
 /** BEGIN TEST CASES **/
