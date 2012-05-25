@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-04-27 13:08:03"
+	"lastUpdated": "2012-05-25 20:42:12"
 }
 
 // #################################
@@ -21,7 +21,7 @@ var itemRe = new RegExp('.*\/([0-9]{8})[a-z]{1}[a-z0-9]{2}[0-9]{2}[a-z]{1}[0-9a-
 
 var cleanUp = function (str) {
 	var ret;
-	ret = str.replace("\u00a0", " ", "g").replace("\n", " ", "g");
+	ret = str.replace(/[\u00a0\n]/g, " ");
 	ret = ret.replace(/^\s+/, "").replace(/\s+$/, "").replace(/\s+/g, " ");
 	ret = ret.replace(/\|.*/, "").replace(/<[^>]+>/g, "");;
 	ret = Zotero.Utilities.unescapeHTML(ret);

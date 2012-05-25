@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-04-22 00:50:18"
+	"lastUpdated": "2012-05-25 20:42:12"
 }
 
 /*
@@ -650,7 +650,7 @@ ItemFactory.prototype.getCourt = function () {
 	s = this.hyphenSplit.pop().replace(/,\s*$/, "").replace(/\u2026\s*$/, "Court");
 	m = s.match(/(?:([a-zA-Z]+):\s*)*(.*)/);
 	if (m) {
-		this.v.court = m[2].replace("_", " ", "g");
+		this.v.court = m[2].replace(/_/g, " ");
 		if (m[1]) {
 			this.v.extra = "{:jurisdiction: " + m[1] + "}";
 		}

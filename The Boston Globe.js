@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-05-14 00:01:12"
+	"lastUpdated": "2012-05-25 20:43:12"
 }
 
 /*
@@ -82,7 +82,7 @@ function findAuthorString (doc, newItem) {
 	}
 	if (bylineElem) {
 		authors = bylineElem.textContent;
-		authors = authors.replace("\n", " ", "g");
+		authors = authors.replace(/\n/g, " ");
 		if (authors.match(/[Pp]osted\s+by\s+/)) {
 			newItem.itemType = "blogPost";
 		}

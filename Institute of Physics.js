@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-04-04 14:45:46"
+	"lastUpdated": "2012-05-24 20:42:12"
 }
 
 function detectWeb(doc, url) {
@@ -29,7 +29,7 @@ function fetchDOIs(DOIs, pdfs) {
 	if (pdfs) var pdfURL = pdfs.shift();
 	var articleID = DOI.slice(DOI.indexOf('/') + 1);
 	if (!pdfURL){
-		var pdfURL = "http://iopscience.iop.org/" + articleID + "/pdf/" + articleID.replace("/", "_", "g") + ".pdf";
+		var pdfURL = "http://iopscience.iop.org/" + articleID + "/pdf/" + articleID.replace(/\//g, "_") + ".pdf";
 	}
 	var doitranslate = Zotero.loadTranslator("search");
 	doitranslate.setTranslator("11645bd1-0420-45c1-badb-53fb41eeb753");
@@ -45,7 +45,7 @@ function fetchDOIs(DOIs, pdfs) {
 			title: "IOP Full Text PDF",
 			mimeType: "application/pdf"
 		});
-		item.libraryCatalog = "Intitute of Physics";
+		item.libraryCatalog = "Institute of Physics";
 		item.complete();
 		fetchDOIs(DOIs);
 	});
@@ -61,7 +61,7 @@ function fetchDOIs(DOIs, pdfs) {
 				ristranslator.setString(text);
 				ristranslator.setHandler("itemDone", function (obj, item) {
 					item.url = "http://iopscience.iop.org/" + articleID;
-					item.libraryCatalog = "Intitute of Physics";
+					item.libraryCatalog = "Institute of Physics";
 					item.attachments.push({
 						url: pdfURL,
 						title: "IOP Full Text PDF",
