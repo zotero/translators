@@ -269,6 +269,10 @@ var testCases = [
 						"title": "PubMed Central Link",
 						"mimeType": "text/html",
 						"snapshot": false
+					},
+					{
+						"title": "PubMed Central Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"journalAbbreviation": "Respir Res",

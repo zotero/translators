@@ -341,13 +341,14 @@ var testCases = [
 				"tags": [
 					"Adams, Abigail",
 					"Adams, Louisa Catherine",
+					"Biography & Autobiography / General",
+					"Biography & Autobiography / Women",
 					"Eaton, Peggy",
 					"Jackson, Rachel",
 					"Madison, Dolley",
 					"Monroe, Elizabeth",
-					"Washington, Martha",
-					"Biography & Autobiography / General",
-					"Biography & Autobiography / Women"
+					"Presidents' spouses",
+					"Washington, Martha"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -359,12 +360,12 @@ var testCases = [
 				],
 				"numPages": "332",
 				"ISBN": "9780836913620",
+				"language": "en",
+				"libraryCatalog": "Google Books",
+				"shortTitle": "Some American Ladies",
 				"publisher": "Ayer Publishing",
 				"title": "Some American Ladies: Seven Informal Biographies ...",
-				"language": "en",
-				"date": "1926-06-01",
-				"libraryCatalog": "Google Books",
-				"shortTitle": "Some American Ladies"
+				"date": "1926"
 			}
 		]
 	},

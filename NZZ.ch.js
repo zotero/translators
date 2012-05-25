@@ -161,20 +161,18 @@ var testCases = [
 					{
 						"title": "NZZ Online Article Snapshot",
 						"mimeType": "text/html",
-						"url": "http://www.nzz.ch/nachrichten/wirtschaft/aktuell/kuoni_gta-uebernahme_1.13276960.html",
 						"snapshot": true
 					}
 				],
-				"url": "http://www.nzz.ch/nachrichten/wirtschaft/aktuell/kuoni_gta-uebernahme_1.13276960.html",
-				"title": "Kuoni profitiert von der GTA-Übernahme: Deutliches Umsatzplus in den ersten neun Monaten",
-				"date": "10. November 2011",
-				"publicationTitle": "NZZ Online",
+				"url": "http://www.nzz.ch/aktuell/wirtschaft/uebersicht/kuoni_gta-uebernahme_1.13276960.html",
 				"shortTitle": "Kuoni profitiert von der GTA-Übernahme",
 				"abstractNote": "Der Reisekonzern Kuoni hat in den ersten neun Monaten von der Übernahme des Reisekonzerns Gullivers Travel Associates (GTA) profitiert. Der Umsatz stieg, und der Konzern machte Gewinn.",
 				"section": "Wirtschaft",
 				"extra": "sda",
 				"libraryCatalog": "nzz.ch",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"title": "Kuoni profitiert von der GTA-Übernahme: Deutliches Umsatzplus in den ersten neun Monaten",
+				"date": "10. November 2011",
+				"publicationTitle": "NZZ Online"
 			}
 		]
 	},
