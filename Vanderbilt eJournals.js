@@ -147,25 +147,15 @@ var testCases = [
 					}
 				],
 				"itemID": "http://ejournals.library.vanderbilt.edu/ojs/index.php/lusohispanic/article/view/3283/1518",
+				"language": "en",
+				"issue": "0",
+				"ISSN": "1547-5743",
+				"url": "http://ejournals.library.vanderbilt.edu/ojs/index.php/lusohispanic/article/view/3283",
+				"libraryCatalog": "ejournals.library.vanderbilt.edu",
 				"title": "¿Qué hay antes y después de la escritura?",
 				"publicationTitle": "Vanderbilt e-Journal of Luso-Hispanic Studies",
 				"date": "20/10/2011",
-				"reportType": "Text.Serial.Journal",
-				"letterType": "Text.Serial.Journal",
-				"manuscriptType": "Text.Serial.Journal",
-				"mapType": "Text.Serial.Journal",
-				"thesisType": "Text.Serial.Journal",
-				"websiteType": "Text.Serial.Journal",
-				"presentationType": "Text.Serial.Journal",
-				"postType": "Text.Serial.Journal",
-				"audioFileType": "Text.Serial.Journal",
-				"language": "en",
-				"volume": "7",
-				"issue": "0",
-				"ISSN": "1547-5743",
-				"url": "http://ejournals.library.vanderbilt.edu/ojs/index.php/lusohispanic/article/view/3283/1518",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "ejournals.library.vanderbilt.edu"
+				"volume": "7"
 			}
 		]
 	},

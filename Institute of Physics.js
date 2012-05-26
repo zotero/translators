@@ -173,22 +173,20 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://iopscience.iop.org/0022-3727/34/10/311/pdf/0022-3727_34_10_311.pdf",
 						"title": "IOP Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"publicationTitle": "Journal of Physics D: Applied Physics",
-				"volume": "34",
 				"issue": "10",
 				"ISSN": "0022-3727, 1361-6463",
-				"date": "2001-05-21",
-				"pages": "1510-1524",
 				"DOI": "10.1088/0022-3727/34/10/311",
 				"url": "http://iopscience.iop.org/0022-3727/34/10/311",
-				"title": "Hydrodynamical simulation of the electric wind in a cylindrical vessel with positive point-to-plane device",
-				"libraryCatalog": "Intitute of Physics",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "Institute of Physics",
+				"publicationTitle": "Journal of Physics D: Applied Physics",
+				"volume": "34",
+				"date": "2001-05-21",
+				"pages": "1510-1524",
+				"title": "Hydrodynamical simulation of the electric wind in a cylindrical vessel with positive point-to-plane device"
 			}
 		]
 	},
