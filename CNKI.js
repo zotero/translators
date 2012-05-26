@@ -8,7 +8,7 @@
         "priority":100,
         "inRepository":"1",
         "translatorType":4,
-        "lastUpdated":"2010-12-10 14:32:46"
+        "lastUpdated":"2010-05-26 00:03:48"
 }
 
 /*
@@ -55,24 +55,26 @@
 // #### Local utility functions ####
 // #################################
 
-function detectCode(url) {
+function detectCode(url, callback) {
 	var pattern = /(?:dbcode|dbname)=([A-Za-z]{4})/i;
 	if (pattern.test(url)) {
 		var code = pattern.exec(url)[1];
-		return code;
+		callback(code);
 	} else {
 		// parse from source page
-		var page = Zotero.Utilities.retrieveSource(url);
-		pattern = /id="nowdbname"[^>]*?>(.*?)<\/SPAN>/i;
-		if (pattern.test(page)) {
-			var dbname = pattern.exec(page)[1];
-//			Zotero.debug(dbname);
-			if (dbname == "中国期刊全文数据库") {
-				return "CJFD";
+		var page = Zotero.Utilities.doGet(url, function(code) {
+			pattern = /id="nowdbname"[^>]*?>(.*?)<\/SPAN>/i;
+			if (pattern.test(page)) {
+				var dbname = pattern.exec(page)[1];
+	//			Zotero.debug(dbname);
+				if (dbname == "中国期刊全文数据库") {
+					callback("CJFD");
+					return;
+				}
 			}
-		}
+			callback("NONE");
+		});
 	}
-	return "NONE";
 }
 
 function getResolver(doc) {
@@ -278,176 +280,177 @@ function scrapeAndParse2(url) {
 		var newItem = new Zotero.Item(itemType);
 //		Zotero.debug(url);
 		newItem.url = url;
-		var code = detectCode(url);
-		if (code == "CDFD") {
-			newItem.thesisType = "博士论文"
-		} else {
-			newItem.thesisType = "硕士论文"
-		}
-//		Zotero.debug(newItem.thesisType);
-		
-	
-		// 标题/Title
-		pattern = /<span (?:id="chTitle"|class='datatitle')>(.*?)<\/span>/;
-		if (pattern.test(page)) {
-			var title = pattern.exec(page)[1];
-			pattern = /(<.*?>)/g;
-			title = title.replace(pattern, "");
-			newItem.title = title;
-//			Zotero.debug("title: "+title);
-		}
-		
-		// 作者/Author
-		pattern = /【作者】([\s\S]*?)<\/a>/;
-		if (pattern.test(page)) {
-			var authorNames = trimTags(pattern.exec(page)[1]).split(";");
-			for (var i=0; i<authorNames.length; i++) {
-				newItem.creators.push(
-					Zotero.Utilities.cleanAuthor(authorNames[i], 
-					"author", true));
+		detectCode(url, function(code) {
+			if (code == "CDFD") {
+				newItem.thesisType = "博士论文"
+			} else {
+				newItem.thesisType = "硕士论文"
 			}
-//			Zotero.debug("authorNames:\n"+authorNames);
-		}
+	//		Zotero.debug(newItem.thesisType);
+			
 		
-		// 导师/Tutors
-		pattern = /【导师】([\s\S]*?)<\/a>/;
-		if (pattern.test(page)) {
-			var directors = trimTags(pattern.exec(page)[1]).split(";");
-			for (var i=0; i<directors.length; i++) {
-				newItem.creators.push(
-					Zotero.Utilities.cleanAuthor(trimTags(directors[i]), 
-					"director", true));
+			// 标题/Title
+			pattern = /<span (?:id="chTitle"|class='datatitle')>(.*?)<\/span>/;
+			if (pattern.test(page)) {
+				var title = pattern.exec(page)[1];
+				pattern = /(<.*?>)/g;
+				title = title.replace(pattern, "");
+				newItem.title = title;
+	//			Zotero.debug("title: "+title);
 			}
-//			Zotero.debug("directors: "+directors);
-		}
-	
-		// 摘要/Abstract
-		var abst;
-		pattern = /ReplaceFont\('ChDivSummary','(.*?)(?='\);ReplaceFont)/;
-		if (pattern.test(page)) {
-			abst = trimTags(pattern.exec(page)[1]);
-		} else {
-			pattern = /【中文摘要】([\s\S]*?)<\/tr>/;
+			
+			// 作者/Author
+			pattern = /【作者】([\s\S]*?)<\/a>/;
+			if (pattern.test(page)) {
+				var authorNames = trimTags(pattern.exec(page)[1]).split(";");
+				for (var i=0; i<authorNames.length; i++) {
+					newItem.creators.push(
+						Zotero.Utilities.cleanAuthor(authorNames[i], 
+						"author", true));
+				}
+	//			Zotero.debug("authorNames:\n"+authorNames);
+			}
+			
+			// 导师/Tutors
+			pattern = /【导师】([\s\S]*?)<\/a>/;
+			if (pattern.test(page)) {
+				var directors = trimTags(pattern.exec(page)[1]).split(";");
+				for (var i=0; i<directors.length; i++) {
+					newItem.creators.push(
+						Zotero.Utilities.cleanAuthor(trimTags(directors[i]), 
+						"director", true));
+				}
+	//			Zotero.debug("directors: "+directors);
+			}
+		
+			// 摘要/Abstract
+			var abst;
+			pattern = /ReplaceFont\('ChDivSummary','(.*?)(?='\);ReplaceFont)/;
 			if (pattern.test(page)) {
 				abst = trimTags(pattern.exec(page)[1]);
+			} else {
+				pattern = /【中文摘要】([\s\S]*?)<\/tr>/;
+				if (pattern.test(page)) {
+					abst = trimTags(pattern.exec(page)[1]);
+				}
 			}
-		}
-		if (abst) {
-//			Zotero.debug("abstract:\n"+abst);
-			newItem.abstractNote = trimMultiline(abst);
-		}
-		pattern = /ReplaceFont\('EnDivSummary','(.*?)(?='\);if)/;
-		if (pattern.test(page)) {
-			abst = trimTags(pattern.exec(page)[1]);
-		} else {
-			pattern = /【英文摘要】([\s\S]*?)<\/tr>/;
+			if (abst) {
+	//			Zotero.debug("abstract:\n"+abst);
+				newItem.abstractNote = trimMultiline(abst);
+			}
+			pattern = /ReplaceFont\('EnDivSummary','(.*?)(?='\);if)/;
 			if (pattern.test(page)) {
 				abst = trimTags(pattern.exec(page)[1]);
-			}
-		}
-		if (abst) {
-//			Zotero.debug("abstract:\n"+abst);
-			if (newItem.abstractNote===undefined) {
-				newItem.abstractNote = Zotero.Utilities.trim(abst);
 			} else {
-				newItem.abstractNote = newItem.abstractNote + "\n" 
-					+ trimMultiline(abst);
-			}
-		}
-//		Zotero.debug(newItem.abstractNote);
-		
-		// 关键词/Keywords
-		var tags;
-		pattern = /【关键词】\s*<span[^>]*>(.*?)<\/a>*<\/span>/;
-		if (pattern.test(page)) {
-			tags = trimTags(pattern.exec(page)[1]).split(";");
-		} else {
-			pattern = /【关键词】([\s\S]*?)<\/tr>/;
-			if (pattern.test(page)) {
-				tags = trimTags(pattern.exec(page)[1]).split(";");
-			}
-		}
-		if (tags) {
-			for (var i=0; i<tags.length; i++) {
-				var tag = Zotero.Utilities.trim(tags[i]);
-				if (tag.length>0 && newItem.tags.indexOf(tag)<0) {
-					newItem.tags.push(tag);
+				pattern = /【英文摘要】([\s\S]*?)<\/tr>/;
+				if (pattern.test(page)) {
+					abst = trimTags(pattern.exec(page)[1]);
 				}
 			}
-//			Zotero.debug("tags:\n"+tags);
-		}
-		pattern = /【Key words】\s*<span[^>]*>(.*?)<\/a>*<\/span>/;
-		if (pattern.test(page)) {
-			tags = trimTags(pattern.exec(page)[1]).split(";");
-		} else {
-			pattern = /【英文关键词】([\s\S]*?)<\/tr>/;
-			if (pattern.test(page)) {
-				tags = trimTags(pattern.exec(page)[1]).split(";");
-			}
-		}
-		if (tags) {
-			for (var i=0; i<tags.length; i++) {
-				var tag = Zotero.Utilities.trim(tags[i]);
-				if (tag.length>0 && newItem.tags.indexOf(tag)<0) {
-					newItem.tags.push(tag);
+			if (abst) {
+	//			Zotero.debug("abstract:\n"+abst);
+				if (newItem.abstractNote===undefined) {
+					newItem.abstractNote = Zotero.Utilities.trim(abst);
+				} else {
+					newItem.abstractNote = newItem.abstractNote + "\n" 
+						+ trimMultiline(abst);
 				}
 			}
-//			Zotero.debug("tags:\n"+tags);
-		}
-//		Zotero.debug(newItem.tags);
-		
-		// 出版学校 & DOI & 出版时间
-		var university;
-		pattern = /【网络出版投稿人】\s*<a[^>]*>(.*?)<\/a>/;
-		if (pattern.test(page)) {
-			university = pattern.exec(page)[1];
-		} else {
-			pattern = /【网络出版投稿人】([\s\S]*?)<\/tr>/;
+	//		Zotero.debug(newItem.abstractNote);
+			
+			// 关键词/Keywords
+			var tags;
+			pattern = /【关键词】\s*<span[^>]*>(.*?)<\/a>*<\/span>/;
 			if (pattern.test(page)) {
-				university = Zotero.Utilities.trim(
-					trimTags(pattern.exec(page)[1]));
-			}
-		}
-		if (university) {
-			pattern = /(.*?)（(.*?)）/;
-			if (pattern.test(university)) {
-				newItem.university = pattern.exec(university)[1];
-				newItem.place = pattern.exec(university)[2];
+				tags = trimTags(pattern.exec(page)[1]).split(";");
 			} else {
-				newItem.publisher = university;
+				pattern = /【关键词】([\s\S]*?)<\/tr>/;
+				if (pattern.test(page)) {
+					tags = trimTags(pattern.exec(page)[1]).split(";");
+				}
 			}
-//			Zotero.debug("university: "+university);
-		}
-		var doi;
-		pattern = /【DOI】(.*?)<\/li>/;
-		if (pattern.test(page)) {
-			doi= pattern.exec(page)[1];
-		} else {
-			pattern = /【DOI】([\s\S]*?)<\/tr>/;
+			if (tags) {
+				for (var i=0; i<tags.length; i++) {
+					var tag = Zotero.Utilities.trim(tags[i]);
+					if (tag.length>0 && newItem.tags.indexOf(tag)<0) {
+						newItem.tags.push(tag);
+					}
+				}
+	//			Zotero.debug("tags:\n"+tags);
+			}
+			pattern = /【Key words】\s*<span[^>]*>(.*?)<\/a>*<\/span>/;
 			if (pattern.test(page)) {
-				var doi= trimTags(pattern.exec(page)[1]);
+				tags = trimTags(pattern.exec(page)[1]).split(";");
+			} else {
+				pattern = /【英文关键词】([\s\S]*?)<\/tr>/;
+				if (pattern.test(page)) {
+					tags = trimTags(pattern.exec(page)[1]).split(";");
+				}
 			}
-		}
-		if (doi) {
-			newItem.DOI = Zotero.Utilities.trim(doi);
-//			Zotero.debug("doi: "+doi);
-		}
-		var date;
-		pattern = /【网络出版投稿时间】(.*?)\s*<\/li>/;
-		if (pattern.test(page)) {
-			date = pattern.exec(page)[1];
-		} else {
-			pattern = /【网络出版投稿时间】([\s\S]*?)\s*<\/tr>/;
+			if (tags) {
+				for (var i=0; i<tags.length; i++) {
+					var tag = Zotero.Utilities.trim(tags[i]);
+					if (tag.length>0 && newItem.tags.indexOf(tag)<0) {
+						newItem.tags.push(tag);
+					}
+				}
+	//			Zotero.debug("tags:\n"+tags);
+			}
+	//		Zotero.debug(newItem.tags);
+			
+			// 出版学校 & DOI & 出版时间
+			var university;
+			pattern = /【网络出版投稿人】\s*<a[^>]*>(.*?)<\/a>/;
 			if (pattern.test(page)) {
-				date = trimTags(pattern.exec(page)[1]);
+				university = pattern.exec(page)[1];
+			} else {
+				pattern = /【网络出版投稿人】([\s\S]*?)<\/tr>/;
+				if (pattern.test(page)) {
+					university = Zotero.Utilities.trim(
+						trimTags(pattern.exec(page)[1]));
+				}
 			}
-		}
-		if (date) {
-			newItem.date = Zotero.Utilities.trim(date);
-//			Zotero.debug("date: "+date);
-		}
-	
-		newItem.complete();
+			if (university) {
+				pattern = /(.*?)（(.*?)）/;
+				if (pattern.test(university)) {
+					newItem.university = pattern.exec(university)[1];
+					newItem.place = pattern.exec(university)[2];
+				} else {
+					newItem.publisher = university;
+				}
+	//			Zotero.debug("university: "+university);
+			}
+			var doi;
+			pattern = /【DOI】(.*?)<\/li>/;
+			if (pattern.test(page)) {
+				doi= pattern.exec(page)[1];
+			} else {
+				pattern = /【DOI】([\s\S]*?)<\/tr>/;
+				if (pattern.test(page)) {
+					var doi= trimTags(pattern.exec(page)[1]);
+				}
+			}
+			if (doi) {
+				newItem.DOI = Zotero.Utilities.trim(doi);
+	//			Zotero.debug("doi: "+doi);
+			}
+			var date;
+			pattern = /【网络出版投稿时间】(.*?)\s*<\/li>/;
+			if (pattern.test(page)) {
+				date = pattern.exec(page)[1];
+			} else {
+				pattern = /【网络出版投稿时间】([\s\S]*?)\s*<\/tr>/;
+				if (pattern.test(page)) {
+					date = trimTags(pattern.exec(page)[1]);
+				}
+			}
+			if (date) {
+				newItem.date = Zotero.Utilities.trim(date);
+	//			Zotero.debug("date: "+date);
+			}
+		
+			newItem.complete();
+		});
 	});
 }
 
@@ -659,37 +662,52 @@ function scrapeAndParse4(url) {
 	});
 }
 
+function scrapeURLs(urls) {
+	for (var i=0; i<urls.length; i++) {
+		var type = detectWeb(null, urls[i]);
+//			Zotero.debug(type);
+		if (type == "journalArticle") {
+			scrapeAndParse1(urls[i]);
+		} else if (type == "thesis") {
+			scrapeAndParse2(urls[i]);
+		} else if (type == "conferencePaper") {
+			scrapeAndParse3(urls[i]);
+		} else if (type == "newspaperArticle") {
+			scrapeAndParse4(urls[i]);
+		} else {
+			Zotero.debug("Not supported type.");
+		}
+	}
+}
+
 // #########################
 // ##### API functions #####
 // #########################
 
 function detectWeb(doc, url) {
-	var pattern = /detail.aspx/;
-
-	if (pattern.test(url)) {
-		var code = detectCode(url).toUpperCase();
-//		Zotero.debug(code);
-		if (code == "CJFQ" || code == "CJFD") {
-			return "journalArticle";
-		} else if (code == "CDFD") {
-			return "thesis";
-		} else if (code == "CMFD" || code == "CLKM") {
-			return "thesis";
-		} else if (code == "CPFD") {
-			return "conferencePaper";
-		} else if (code == "CCND") {
-			return "newspaperArticle";
-		} else if (code == "NONE") {
-			Zotero.debug("Not support yet.");
-		}
+	if (/detail.aspx/.test(url)) {
+		detectCode(url, function(code) {
+			code = code.toUpperCase();
+	//		Zotero.debug(code);
+			if (code == "CJFQ" || code == "CJFD") {
+				Zotero.done("journalArticle");
+			} else if (code == "CDFD") {
+				Zotero.done("thesis");
+			} else if (code == "CMFD" || code == "CLKM") {
+				Zotero.done("thesis");
+			} else if (code == "CPFD") {
+				Zotero.done("conferencePaper");
+			} else if (code == "CCND") {
+				Zotero.done("newspaperArticle");
+			} else if (code == "NONE") {
+				Zotero.debug("Not support yet.");
+			}
+		});
+	} else if (/brief/.test(url)) {
+		return "multiple";
 	}
 
-	pattern = /brief/;
-	if (pattern.test(url)) {
-		return "multiple"
-	}
-
-	return false;
+	return undefined;
 }
 
 function doWeb(doc, url) {
@@ -706,52 +724,43 @@ function doWeb(doc, url) {
 		var xpath = '//iframe[@id="iframeResult"]';
 		var iframe = doc.evaluate(xpath, doc, nsResolver,
 			XPathResult.ANY_TYPE, null).iterateNext();
-		if (iframe) {
-			// fetch iframe's element
-//			Zotero.debug(iframe.src);
-			pages = Zotero.Utilities.retrieveSource(iframe.src);
-		} else {
-			// already in iframe
-//			Zotero.debug("url:"+url);
-			pages = Zotero.Utilities.retrieveSource(url);
-		}
-
-		pattern = /<tr class=["']GTContentTitle["']>[\s\S]*?<\/tr>([\s\S]*?)<table class=["']pageBar_bottom["']/;
-		var content;
-		try {
-			content = pattern.exec(pages)[1];
-//			Zotero.debug(content);
-			pattern = /<\/table>[\s\S]*?<a href=["'](.*?)["'][^>]*?><script[\s\S]*?(?:Replace[^\(]*?\()'(.*?)'\)/g;
-		} catch (err) {
-			content = pages;
-			pattern = /<div class=["']GridTitleDiv["']>.*?<a href=["'](.*?)["'][^>]*?><script[\s\S]*?(?:Replace[^\(]*?\()'(.*?)'\)/g;
-		}
-		var res = pattern.exec(content);
-		if (!res) {
-			pattern = /<div class=["']GridTitleDiv["']>.*?<a href=["'](.*?)["'][^>]*?>(.*?)<\/a>/g;
-			res = pattern.exec(content);
+		
+		ZU.doGet(iframe ? iframe.src : url, function(pages) {
+			pattern = /<tr class=["']GTContentTitle["']>[\s\S]*?<\/tr>([\s\S]*?)<table class=["']pageBar_bottom["']/;
+			var content;
+			try {
+				content = pattern.exec(pages)[1];
+	//			Zotero.debug(content);
+				pattern = /<\/table>[\s\S]*?<a href=["'](.*?)["'][^>]*?><script[\s\S]*?(?:Replace[^\(]*?\()'(.*?)'\)/g;
+			} catch (err) {
+				content = pages;
+				pattern = /<div class=["']GridTitleDiv["']>.*?<a href=["'](.*?)["'][^>]*?><script[\s\S]*?(?:Replace[^\(]*?\()'(.*?)'\)/g;
+			}
+			var res = pattern.exec(content);
 			if (!res) {
-				pattern = /<\/table>[\s\S]*?<a href=["'](.*?)["'][^>]*?>(.*?)<\/a>/g;
+				pattern = /<div class=["']GridTitleDiv["']>.*?<a href=["'](.*?)["'][^>]*?>(.*?)<\/a>/g;
+				res = pattern.exec(content);
+				if (!res) {
+					pattern = /<\/table>[\s\S]*?<a href=["'](.*?)["'][^>]*?>(.*?)<\/a>/g;
+					res = pattern.exec(content);
+				}
+			}
+			var link;
+			var title;
+			while (res) {
+	
+				title = Zotero.Utilities.cleanTags(res[2]);
+				link = res[1];
+	
+				patt = /^(http:\/\/.*?)\//;
+				link = patt.exec(url)[1] + link;
+				items[link] = trimTags(title);
+	//			Zotero.debug("title:"+title);
+	//			Zotero.debug("link:"+link);
+	
 				res = pattern.exec(content);
 			}
-		}
-		var link;
-		var title;
-		while (res) {
-
-			title = Zotero.Utilities.cleanTags(res[2]);
-			link = res[1];
-
-			patt = /^(http:\/\/.*?)\//;
-			link = patt.exec(url)[1] + link;
-			items[link] = trimTags(title);
-//			Zotero.debug("title:"+title);
-//			Zotero.debug("link:"+link);
-
-			res = pattern.exec(content);
-		}
-//		Zotero.debug(items);
-		if (items.__count__) {
+	//		Zotero.debug(items);
 			// 让用户选择要保存哪些文献
 			items = Zotero.selectItems(items);
 			if (!items) return true;
@@ -760,28 +769,13 @@ function doWeb(doc, url) {
 			for (var url in items) {
 				urls.push(url);
 			}
-		}
+			scrapeURLs(urls);
+		});
 	} else {
-		urls = [url];
+		scrapeURLs([url]);
 	}
 	
-	if (urls) {
 //		Zotero.debug(urls);
 
-		for (var i=0; i<urls.length; i++) {
-			var type = detectWeb(null, urls[i]);
-//			Zotero.debug(type);
-			if (type == "journalArticle") {
-				scrapeAndParse1(urls[i]);
-			} else if (type == "thesis") {
-				scrapeAndParse2(urls[i]);
-			} else if (type == "conferencePaper") {
-				scrapeAndParse3(urls[i]);
-			} else if (type == "newspaperArticle") {
-				scrapeAndParse4(urls[i]);
-			} else {
-				Zotero.debug("Not supported type.");
-			}
-		}
-	}
+
 }
