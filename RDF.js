@@ -859,7 +859,9 @@ function importItem(newItem, node) {
 	if(newItem.itemType == "note") {
 		// add note for standalone
 		var note = getFirstResults(node, [rdf+"value", n.dc+"description", n.dcterms+"description"], true);
-		newItem.note = note ? note : "";
+		// temporary fix for Zotero 3.0.7: set note to " " if it would otherwise be
+		// empty to avoid an error
+		newItem.note = note ? note : " ";
 	}
 	
 	/** TAGS **/
