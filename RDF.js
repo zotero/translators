@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-05-16 09:19:18"
+	"lastUpdated": "2012-05-27 01:38:43"
 }
 
 /*
@@ -584,16 +584,21 @@ function detectType(newItem, node, ret) {
 	
 function importItem(newItem, node) {
 	var ret = new Object();
-	newItem.itemType = detectType(newItem, node, ret) || 'journalArticle';
+	newItem.itemType = detectType(newItem, node, ret);
 	var container = ret.container;
 	var isPartOf = ret.isPartOf;
 
 	// title
 	newItem.title = getFirstResults(node, [n.dc+"title", n.dcterms+"title",
 		n.eprints+"title", n.vcard2+"fn", n.og+"title"], true);
-	if(!newItem.itemType && !newItem.title) {	// require the title
-							// (if not a known type)
-		return false;
+	if(!newItem.itemType) {
+		if(!newItem.title) {	// require the title
+								// (if not a known type)
+			return false;
+		} else {
+			// default to journalArticle
+			newItem.itemType = "journalArticle";
+		}
 	}
 	
 	// regular author-type creators
