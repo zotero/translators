@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-03-05 16:54:28"
+	"lastUpdated": "2012-05-31 02:01:07"
 }
 
 function detectWeb(doc, url) {
@@ -40,10 +40,10 @@ function doWeb(doc, url) {
 	var elmt;
 
 	// single result
-	if (elmt = doc.evaluate('//h1[@property="dc:title" and starts-with(@id, "title_div")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-		var photo_id = elmt.id;
-		photo_id = photo_id.substr(9);
-		items[photo_id] = "title";
+	if (elmt = ZU.xpathText(doc, '//meta[@property="og:image"]/@content')) {
+		var photo_id = elmt.substr(elmt.lastIndexOf('/')+1).match(/^[0-9]+/);
+		if(!photo_id) return;
+		items[photo_id[0]] = "title";
 		fetchForIds(items);
 	} else { //multiple results
 		var photoRe = /\/photos\/[^\/]*\/([0-9]+)\//;
@@ -152,41 +152,100 @@ function parseResponse(text, parser) {
 	return newItem;
 }
 /** BEGIN TEST CASES **/
-var testCases = [{
-	"type": "web",
-	"url": "http://www.flickr.com/photos/doug88888/3122503680/in/set-72157624194059533",
-	"items": [{
-		"itemType": "artwork",
-		"creators": [{
-			"firstName": "",
-			"lastName": "@Doug88888",
-			"creatorType": "artist"
-		}],
-		"notes": [],
-		"tags": ["nature", "plant", "living", "green", "frosty", "blue", "bokeh", "canon", "eos", "400d", "18mm", "55mm", "gimp", "pretty", "beautiful", "tones", "ham", "house", "richmond", "south", "west", "bloom", "flower", "grass", "strand", "lone", "isolated", "isolation", "uk", "england", "doug88888", "southwest", "leaf", "fall", "bright", "blossom", "fresh", "december", "dec07", "buy", "purchase", "picture", "pictures", "image", "images", "creative", "commons"],
-		"seeAlso": [],
-		"attachments": [{
-			"title": "The blues and the greens EXPLORED",
-			"url": "http://farm4.staticflickr.com/3123/3122503680_739103322d_o.jpg"
-		}],
-		"title": "The blues and the greens EXPLORED",
-		"date": "2008-12-07",
-		"url": "http://www.flickr.com/photos/doug88888/3122503680/",
-		"abstractNote": "More xmas shopping today - gulp.\n\nCheck out my  <a href=\"http://doug88888.blogspot.com/\">blog</a> if you like.",
-		"libraryCatalog": "Flickr",
-		"accessDate": "CURRENT_TIMESTAMP"
-	}]
-}, {
-	"type": "web",
-	"url": "http://www.flickr.com/search/?q=test",
-	"items": "multiple"
-}, {
-	"type": "web",
-	"url": "http://www.flickr.com/photos/lomokev/with/4952001059/",
-	"items": "multiple"
-}, {
-	"type": "web",
-	"url": "http://www.flickr.com/photos/tags/bmw/",
-	"items": "multiple"
-}]
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.flickr.com/photos/doug88888/3122503680/in/set-72157624194059533",
+		"items": [
+			{
+				"itemType": "artwork",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "@Doug88888",
+						"creatorType": "artist"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"nature",
+					"plant",
+					"living",
+					"green",
+					"frosty",
+					"blue",
+					"bokeh",
+					"canon",
+					"eos",
+					"400d",
+					"18mm",
+					"55mm",
+					"gimp",
+					"pretty",
+					"beautiful",
+					"tones",
+					"ham",
+					"house",
+					"richmond",
+					"south",
+					"west",
+					"bloom",
+					"flower",
+					"grass",
+					"strand",
+					"lone",
+					"isolated",
+					"isolation",
+					"uk",
+					"england",
+					"doug88888",
+					"southwest",
+					"leaf",
+					"fall",
+					"bright",
+					"blossom",
+					"fresh",
+					"december",
+					"dec07",
+					"buy",
+					"purchase",
+					"picture",
+					"pictures",
+					"image",
+					"images",
+					"creative",
+					"commons"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "The blues and the greens EXPLORED",
+						"url": "http://farm4.staticflickr.com/3123/3122503680_739103322d_o.jpg"
+					}
+				],
+				"title": "The blues and the greens EXPLORED",
+				"date": "2008-12-07",
+				"url": "http://www.flickr.com/photos/doug88888/3122503680/",
+				"abstractNote": "More xmas shopping today - gulp.\n\nCheck out my  <a href=\"http://doug88888.blogspot.com/\">blog</a> if you like.",
+				"libraryCatalog": "Flickr",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.flickr.com/search/?q=test",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.flickr.com/photos/lomokev/with/4952001059/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.flickr.com/photos/tags/bmw/",
+		"items": "multiple"
+	}
+]
 /** END TEST CASES **/
