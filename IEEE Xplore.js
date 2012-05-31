@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-05-11 06:22:36"
+	"lastUpdated": "2012-05-31 17:47:01"
 }
 
 function detectWeb(doc, url) {
@@ -162,24 +162,29 @@ function scrape (doc, url) {
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 		translator.setString(text);
 		translator.setHandler("itemDone", function(obj, item) {
-		item.notes = [];
-		if (pdf) {
-			Zotero.Utilities.processDocuments([pdf], function (doc, url) {
-				var pdfFrame = doc.evaluate('//frame[2]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-				if (pdfFrame) item.attachments = [{
-					url: pdfFrame.src,
-					title: "IEEE Xplore Full Text PDF",
-					mimeType: "application/pdf"
-				}, {url: url, title: "IEEE Xplore Abstract Record", mimeType: "text/html"}];
+			item.notes = [];
+			if (pdf) {
+				Zotero.Utilities.processDocuments([pdf], function (doc, url) {
+					var pdfFrame = doc.evaluate('//frame[2]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+					if (pdfFrame) item.attachments = [{
+						url: pdfFrame.src,
+						title: "IEEE Xplore Full Text PDF",
+						mimeType: "application/pdf"
+					}, {url: url, title: "IEEE Xplore Abstract Record", mimeType: "text/html"}];
+					item.complete();
+				}, null);
+			} else {
+				item.attachments=[{url: url, title: "IEEE Xplore Abstract Record", mimeType: "text/html"}];
 				item.complete();
-			}, null);
-		} else {
-			item.attachments=[{url: url, title: "IEEE Xplore Abstract Record", mimeType: "text/html"}];
-			item.complete();
-		}
+			}
+		});
+
+		translator.getTranslatorObject(function(trans) {
+			trans.setKeywordSplitOnSpace(false);
+			trans.setKeywordDelimRe('\\s*;\\s*','');
+			trans.doImport();
+		});
 	});
-	translator.translate();
-  });
 }
 
 // Implementation of ISBN and ISSN check-digit verification
@@ -339,28 +344,18 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"deterministic",
-					"fuzzy",
-					"Turing",
-					"machines;fixed",
-					"finite",
-					"subset;fuzzy",
-					"languages;fuzzy",
-					"polynomial",
-					"time-bounded",
-					"computation;fuzzy",
-					"sets;nondeterministic",
-					"fuzzy",
-					"Turing",
-					"machines;nondeterministic",
-					"polynomial",
-					"time-bounded",
-					"computation;Turing",
-					"machines;computational",
-					"complexity;deterministic",
-					"automata;fuzzy",
-					"set",
-					"theory;"
+					"deterministic fuzzy Turing machines",
+					"fixed finite subset",
+					"fuzzy languages",
+					"fuzzy polynomial time-bounded computation",
+					"fuzzy sets",
+					"nondeterministic fuzzy Turing machines",
+					"nondeterministic polynomial time-bounded computation",
+					"Turing machines",
+					"computational complexity",
+					"deterministic automata",
+					"fuzzy set theory",
+					""
 				],
 				"seeAlso": [],
 				"attachments": [
