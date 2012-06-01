@@ -8,7 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-11-21 14:06:10"
+	"browserSupport": "g",
+	"lastUpdated": "2012-05-31 19:52:38"
 }
 
 /*
@@ -30,7 +31,8 @@
  */
 
 function detectWeb(doc, url) {
-	if (url.indexOf("/results/") !== -1) {
+	if (url.indexOf("/results/") !== -1 &&
+		getBoxes(doc).iterateNext()) {
 		return "multiple";
 	} else if (url.indexOf("/record/") !== -1) {
 		return "journalArticle";
@@ -39,6 +41,17 @@ function detectWeb(doc, url) {
 
 function getEID(url) {
 	return url.match(/eid=([^&]+)/)[1];
+}
+
+function getBoxes(doc) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == 'x') return namespace; else return null;
+	} : null;
+
+	return doc.evaluate('//div[@id="resultsBody"]/table/tbody/\
+		tr[@class and (not(@id) or not(contains(@id,"previewabstractrow")))]/\
+		td[@class="fldtextPad"][1]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 }
 
 function returnURL(eid) {
@@ -54,7 +67,7 @@ function doWeb(doc, url) {
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		items = new Object();
-		var boxes = doc.evaluate('//div[@id="resultsBody"]/table/tbody/tr[@class and (not(@id) or not(contains(@id,"previewabstractrow")))]/td[@class="fldtextPad"][1]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var boxes = getBoxes(doc);
 		var box;
 		while (box = boxes.iterateNext()) {
 			var link = doc.evaluate('.//a', box, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
