@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-05-25 03:53:20"
+	"lastUpdated": "2012-05-31 16:32:07"
 }
 
 /*
@@ -61,146 +61,266 @@ function getAuthorName(text) {
 	return fixCase(text.trim());
 }
 
+function scrapeBook(doc, url, pdfUrl) {
+	var title = doc.getElementById('productTitle');
+	if( !title ) return false;
+
+	var newItem = new Zotero.Item('book');
+	newItem.title = ZU.capitalizeTitle(title.textContent);
+
+	var data = ZU.xpath(doc, '//div[@id="metaData"]/p');
+	var dataRe = /^(.+?):\s*(.+?)\s*$/;
+	var match;
+	var isbn = new Array();
+	for( var i=0, n=data.length; i<n; i++) {
+		match = dataRe.exec(data[i].textContent);
+		if(!match) continue;
+
+		switch(match[1].trim().toLowerCase()) {
+			case 'author(s)':
+				addCreators(newItem, 'author', match[2].split(', '));
+				break;
+			case 'series editor(s)':
+				addCreators(newItem, 'seriesEditor', match[2].split(', '));
+				break;
+			case 'editor(s)':
+				addCreators(newItem, 'editor', match[2].split(', '));
+				break;
+			case 'published online':
+				var date = ZU.strToDate(match[2]);
+				date.part = null;
+				newItem.date = ZU.formatDate(date);
+				break;
+			case 'print isbn':
+			case 'online isbn':
+				isbn.push(match[2]);
+				break;
+			case 'doi':
+				newItem.DOI = match[2];
+				break;
+			case 'book series':
+				newItem.series = match[2];
+		}
+	}
+
+	newItem.ISBN = isbn.join(', ');
+	newItem.rights = ZU.xpathText(doc, '//div[@id="titleMeta"]/p[@class="copyright"]');
+	newItem.url = url;
+	newItem.abstractNote = ZU.trimInternal(
+			ZU.xpathText(doc, '//div[@id="homepageContent"]\
+				/h6[normalize-space(text())="About The Product"]\
+				/following-sibling::p', null, "\n") || "");
+	newItem.accessDate = 'CURRENT_TIMESTAMP';
+
+	newItem.complete();
+}
+
+function scrapeEM(doc, url, pdfUrl) {
+	//fetch print publication date
+	var date = ZU.xpathText(doc, '//meta[@name="citation_date"]/@content');
+
+	//remove duplicate meta tags
+	var metas = ZU.xpath(doc,
+		'//head/link[@media="screen,print"]/following-sibling::meta');
+	for(var i=0, n=metas.length; i<n; i++) {
+		metas[i].parentNode.removeChild(metas[i]);
+	}
+	var translator = Zotero.loadTranslator('web');
+	//use Embedded Metadata
+	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+	translator.setDocument(doc);
+	translator.setHandler('itemDone', function(obj, item) {
+		if( itemType == 'bookSection' ) {
+			//add authors if we didn't get them from embedded metadata
+			if(!item.creators.length) {
+				var authors = ZU.xpath(doc, '//ol[@id="authors"]/li/node()[1]');
+				for(var i=0, n=authors.length; i<n; i++) {
+					item.creators.push(
+						ZU.cleanAuthor( getAuthorName(authors[i].textContent),
+											'author',false) );
+				}
+			}
+
+			//editors
+			var editors = ZU.xpath(doc, '//ol[@id="editors"]/li/node()[1]');
+			for(var i=0, n=editors.length; i<n; i++) {
+				item.creators.push(
+					ZU.cleanAuthor( getAuthorName(editors[i].textContent),
+										'editor',false) );
+			}
+
+			item.rights = ZU.xpathText(doc, '//p[@id="copyright"]');
+
+			//this is not great for summary, but will do for now
+			item.abstractNote = ZU.xpathText(doc, '//div[@id="abstract"]/div[@class="para"]//p', null, "\n");
+		} else {
+			var keywords = ZU.xpathText(doc, '//meta[@name="citation_keywords"]/@content');
+			if(keywords) {
+				item.tags = keywords.split(', ');
+			}
+			item.rights = ZU.xpathText(doc, '//div[@id="titleMeta"]//p[@class="copyright"]');
+			item.abstractNote = ZU.xpathText(doc, '//div[@id="abstract"]/div[@class="para"]', null, "\n");
+		}
+
+		//set correct print publication date
+		if(date) item.date = date;
+
+		//remove pdf attachments
+		for(var i=0, n=item.attachments.length; i<n; i++) {
+			if(item.attachments[i].mimeType == 'application/pdf') {
+				item.attachments.splice(i,1);
+				i--;
+				n--;
+			}
+		}
+
+		//fetch pdf url. There seems to be some magic value that must be sent
+		// with the request
+		if(!pdfUrl) {
+			var u = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
+			if(u) {
+				ZU.doGet(u, function(text) {
+					var m = text.match(/<iframe id="pdfDocument"[^>]+?src="([^"]+)"/i);
+					if(m) {
+						Z.debug(m[1]);
+						item.attachments.push({url: m[1], title: 'Full Text PDF', mimeType: 'application/pdf'});
+					} else {
+						Z.debug('Could not determine PDF URL.');
+						m = text.match(/<iframe[^>]*>/i);
+						if(m) Z.debug(m[0]);
+					}
+					item.complete();
+				});
+			} else {
+				item.complete();
+			}
+		} else {
+			item.attachments.push({url: pdfUrl, title: 'Full Text PDF', mimeType: 'application/pdf'});
+			item.complete();
+		}
+	});
+	translator.translate();
+}
+
+function scrapeBibTeX(doc, url, pdfUrl) {
+	var doi = ZU.xpathText(doc, '//meta[@name="citation_doi"][1]/@content');
+	if(!doi) {
+		scrapeEM(doc, url, pdfUrl);
+		return;
+	}
+
+	var baseUrl = url.match(/https?:\/\/[^\/]+/);
+	var postUrl = baseUrl[0] + '/documentcitationdownloadformsubmit';
+	var body = 'doi=' + encodeURIComponent(doi) + 
+				'&fileFormat=BIBTEX' +
+				'&hasAbstract=CITATION_AND_ABSTRACT';
+	ZU.doPost(postUrl, body, function(text) {
+		var translator = Zotero.loadTranslator('import');
+		//use BibTeX
+		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+		translator.setString(text);
+
+		translator.setHandler('itemDone', function(obj, item) {
+			//fix author case
+			for(var i=0, n=item.creators.length; i<n; i++) {
+				item.creators[i].firstName = fixCase(item.creators[i].firstName);
+				item.creators[i].lastName = fixCase(item.creators[i].lastName);
+			}
+
+			//editors
+			var editors = ZU.xpath(doc, '//ol[@id="editors"]/li/node()[1]');
+			for(var i=0, n=editors.length; i<n; i++) {
+				item.creators.push(
+					ZU.cleanAuthor( getAuthorName(editors[i].textContent),
+										'editor',false) );
+			}
+
+			//tags
+			if(!item.tags.length) {
+				var keywords = ZU.xpathText(doc,
+					'//meta[@name="citation_keywords"][1]/@content');
+				if(keywords) {
+					item.tags = keywords.split(', ');
+				}
+			}
+
+			//url in bibtex is invalid
+			item.url =
+				ZU.xpathText(doc,
+					'//meta[@name="citation_summary_html_url"][1]/@content') ||
+				ZU.xpathText(doc,
+					'//meta[@name="citation_abstract_html_url"][1]/@content') ||
+				ZU.xpathText(doc,
+					'//meta[@name="citation_fulltext_html_url"][1]/@content') ||
+				url;
+
+			//bookTitle
+			if(!item.bookTitle) {
+				item.bookTitle = item.publicationTitle ||
+					ZU.xpathText(doc,
+						'//meta[@name="citation_book_title"][1]/@content');
+			}
+
+			//language
+			if(!item.language) {
+				item.language = ZU.xpathText(doc,
+					'//meta[@name="citation_language"][1]/@content');
+			}
+
+			//rights
+			item.rights = ZU.xpathText(doc,
+				'//p[@class="copyright" or @id="copyright"]');
+
+			//attachments
+			item.attachments = [{
+				title: 'Snapshot',
+				document: doc,
+				mimeType: 'text/html'
+			}];
+
+			//fetch pdf url. There seems to be some magic value that must be sent
+			// with the request
+			if(!pdfUrl &&
+				(pdfUrl = ZU.xpathText(doc,
+					'//meta[@name="citation_pdf_url"]/@content'))) {
+
+				ZU.doGet(pdfUrl, function(text) {
+					var m = text.match(
+						/<iframe id="pdfDocument"[^>]+?src="([^"]+)"/i);
+					if(m) {
+						Z.debug('PDF url: ' + m[1]);
+						item.attachments.push({url: m[1],
+							title: 'Full Text PDF',
+							mimeType: 'application/pdf'});
+					} else {
+						Z.debug('Could not determine PDF URL.');
+						m = text.match(/<iframe[^>]*>/i);
+						if(m) Z.debug(m[0]);
+						else Z.debug('No iframe found');
+					}
+					item.complete();
+				});
+			} else {
+				if(pdfUrl)
+					item.attachments.push({url: pdfUrl,
+						title: 'Full Text PDF',
+						mimeType: 'application/pdf'});
+				item.complete();
+			}
+		});
+
+		translator.translate();
+	});
+}
+
 function scrape(doc, url, pdfUrl) {
 	var itemType = detectWeb(doc,url);
 
 	if( itemType == 'book' ) {
-		var title = doc.getElementById('productTitle');
-		if( !title ) return false;
-
-		var newItem = new Zotero.Item('book');
-		newItem.title = ZU.capitalizeTitle(title.textContent);
-
-		var data = ZU.xpath(doc, '//div[@id="metaData"]/p');
-		var dataRe = /^(.+?):\s*(.+?)\s*$/;
-		var match;
-		var isbn = new Array();
-		for( var i=0, n=data.length; i<n; i++) {
-			match = dataRe.exec(data[i].textContent);
-			if(!match) continue;
-
-			switch(match[1].trim().toLowerCase()) {
-				case 'author(s)':
-					addCreators(newItem, 'author', match[2].split(', '));
-					break;
-				case 'series editor(s)':
-					addCreators(newItem, 'seriesEditor', match[2].split(', '));
-					break;
-				case 'editor(s)':
-					addCreators(newItem, 'editor', match[2].split(', '));
-					break;
-				case 'published online':
-					var date = ZU.strToDate(match[2]);
-					date.part = null;
-					newItem.date = ZU.formatDate(date);
-					break;
-				case 'print isbn':
-				case 'online isbn':
-					isbn.push(match[2]);
-					break;
-				case 'doi':
-					newItem.DOI = match[2];
-					break;
-				case 'book series':
-					newItem.series = match[2];
-			}
-		}
-
-		newItem.ISBN = isbn.join(', ');
-		newItem.rights = ZU.xpathText(doc, '//div[@id="titleMeta"]/p[@class="copyright"]');
-		newItem.url = url;
-		newItem.abstractNote = ZU.trimInternal(
-				ZU.xpathText(doc, '//div[@id="homepageContent"]\
-					/h6[normalize-space(text())="About The Product"]\
-					/following-sibling::p', null, "\n") || "");
-		newItem.accessDate = 'CURRENT_TIMESTAMP';
-
-		newItem.complete();
+		scrapeBook(doc, url, pdfUrl);
 	} else {
-		//fetch print publication date
-		var date = ZU.xpathText(doc, '//meta[@name="citation_date"]/@content');
-
-		//remove duplicate meta tags
-		var metas = ZU.xpath(doc,
-			'//head/link[@media="screen,print"]/following-sibling::meta');
-		for(var i=0, n=metas.length; i<n; i++) {
-			metas[i].parentNode.removeChild(metas[i]);
-		}
-		var translator = Zotero.loadTranslator('web');
-		//use Embedded Metadata
-		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
-		translator.setDocument(doc);
-		translator.setHandler('itemDone', function(obj, item) {
-			if( itemType == 'bookSection' ) {
-				//only add authors if we didn't get them from embedded metadata
-				if(!item.creators.length) {
-					var authors = ZU.xpath(doc, '//ol[@id="authors"]/li/node()[1]');
-					for(var i=0, n=authors.length; i<n; i++) {
-						item.creators.push(
-							ZU.cleanAuthor( getAuthorName(authors[i].textContent),
-												'author',false) );
-					}
-				}
-
-				//editors
-				var editors = ZU.xpath(doc, '//ol[@id="editors"]/li/node()[1]');
-				for(var i=0, n=editors.length; i<n; i++) {
-					item.creators.push(
-						ZU.cleanAuthor( getAuthorName(editors[i].textContent),
-											'editor',false) );
-				}
-
-				item.rights = ZU.xpathText(doc, '//p[@id="copyright"]');
-
-				//this is not great for summary, but will do for now
-				item.abstractNote = ZU.xpathText(doc, '//div[@id="abstract"]/div[@class="para"]//p', null, "\n");
-			} else {
-				var keywords = ZU.xpathText(doc, '//meta[@name="citation_keywords"]/@content');
-				if(keywords) {
-					item.tags = keywords.split(', ');
-				}
-				item.rights = ZU.xpathText(doc, '//div[@id="titleMeta"]//p[@class="copyright"]');
-				item.abstractNote = ZU.xpathText(doc, '//div[@id="abstract"]/div[@class="para"]', null, "\n");
-			}
-
-			//set correct print publication date
-			if(date) item.date = date;
-
-			//remove pdf attachments
-			for(var i=0, n=item.attachments.length; i<n; i++) {
-				if(item.attachments[i].mimeType == 'application/pdf') {
-					item.attachments.splice(i,1);
-					i--;
-					n--;
-				}
-			}
-
-			//fetch pdf url. There seems to be some magic value that must be sent
-			// with the request
-			if(!pdfUrl) {
-				var u = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
-				if(u) {
-					ZU.doGet(u, function(text) {
-						var m = text.match(/<iframe id="pdfDocument"[^>]+?src="([^"]+)"/i);
-						if(m) {
-							Z.debug(m[1]);
-							item.attachments.push({url: m[1], title: 'Full Text PDF', mimeType: 'application/pdf'});
-						} else {
-							Z.debug('Could not determine PDF URL.');
-							m = text.match(/<iframe[^>]*>/i);
-							if(m) Z.debug(m[0]);
-						}
-						item.complete();
-					});
-				} else {
-					item.complete();
-				}
-			} else {
-				item.attachments.push({url: pdfUrl, title: 'Full Text PDF', mimeType: 'application/pdf'});
-				item.complete();
-			}
-		});
-		translator.translate();
+		//scrapeEM(doc, url, pdfUrl);
+		scrapeBibTeX(doc, url, pdfUrl);
 	}
 }
 
@@ -285,26 +405,27 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					},
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"itemID": "http://onlinelibrary.wiley.com/doi/10.1002/9781118269381.notes/summary",
 				"title": "Endnotes",
-				"date": "2012/01/11",
-				"bookTitle": "The World is Open: How Web Technology is Revolutionizing Education",
-				"publisher": "Jossey‐Bass",
+				"publisher": "Jossey-Bass",
 				"ISBN": "9781118269381",
-				"DOI": "10.1002/9781118269381.notes",
-				"language": "en",
-				"pages": "427-467",
 				"url": "http://onlinelibrary.wiley.com/doi/10.1002/9781118269381.notes/summary",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "onlinelibrary.wiley.com",
-				"rights": "Copyright © 2009 Curtis J. Bonk. All rights reserved."
+				"DOI": "10.1002/9781118269381.notes",
+				"pages": "427–467",
+				"publicationTitle": "The World is Open",
+				"date": "2011",
+				"bookTitle": "The World is Open",
+				"language": "en",
+				"rights": "Copyright © 2009 Curtis J. Bonk. All rights reserved.",
+				"libraryCatalog": "Wiley Online Library",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -372,7 +493,7 @@ var testCases = [
 					},
 					{
 						"firstName": "Rosana",
-						"lastName": "Blanco‐Cano",
+						"lastName": "Blanco-Cano",
 						"creatorType": "author"
 					},
 					{
@@ -393,42 +514,45 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"1897",
-					"Directors (Life and Works) ‐ Ángel García Cardona and Antonio Cuesta13",
-					"Florián Rey (Antonio Martínez de Castillo)",
-					"Florián Rey's La aldea maldita (1930)",
-					"Fructuós Gelabert ‐ made the first Spanish fiction film",
-					"Fructuós Gelabert's Amor que mata (1909)",
-					"Ricardo Baños",
-					"Ricardo Baños and Albert Marro's Don Pedro el Cruel (1911)",
-					"Riña en un café",
 					"silent cinema and its pioneers (1906–1930)",
-					"three films ‐ part of “the preliminary industrial and expressive framework for Spain's budding cinema”",
+					"Ángel García Cardona's El ciego de aldea (1906)",
 					"Ángel García Cardona and Antonio Cuesta",
-					"Ángel García Cardona's El ciego de aldea (1906)"
+					"Ricardo Baños and Albert Marro's Don Pedro el Cruel (1911)",
+					"Fructuós Gelabert's Amor que mata (1909)",
+					"three films - part of “the preliminary industrial and expressive framework for Spain's budding cinema”",
+					"Directors (Life and Works) - Ángel García Cardona and Antonio Cuesta13",
+					"Ricardo Baños",
+					"Florián Rey's La aldea maldita (1930)",
+					"Florián Rey (Antonio Martínez de Castillo)",
+					"Fructuós Gelabert - made the first Spanish fiction film",
+					"Riña en un café",
+					"1897"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					},
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"itemID": "http://onlinelibrary.wiley.com/doi/10.1002/9781444304794.ch1/summary",
-				"bookTitle": "100 Years of Spanish Cinema",
-				"ISBN": "9781444304794",
-				"language": "en",
-				"url": "http://onlinelibrary.wiley.com/doi/10.1002/9781444304794.ch1/summary",
-				"libraryCatalog": "onlinelibrary.wiley.com",
-				"rights": "Copyright © 2009 Tatjana Pavlović, Inmaculada Alvarez, Rosana Blanco-Cano, Anitra Grisales, Alejandra Osorio, and Alejandra Sánchez",
-				"abstractNote": "This chapter contains sections titled: \nHistorical and Political Overview of the Period\nContext11\nFilm Scenes: Close Readings\nDirectors (Life and Works)\nCritical Commentary",
 				"title": "Silent Cinema and its Pioneers (1906–1930)",
-				"date": "2009/03/09",
-				"publisher": "Wiley‐Blackwell",
-				"pages": "1-20"
+				"publisher": "Wiley-Blackwell",
+				"ISBN": "9781444304794",
+				"url": "http://onlinelibrary.wiley.com/doi/10.1002/9781444304794.ch1/summary",
+				"DOI": "10.1002/9781444304794.ch1",
+				"pages": "1–20",
+				"publicationTitle": "100 Years of Spanish Cinema",
+				"date": "2009",
+				"abstractNote": "This chapter contains sections titled: * Historical and Political Overview of the Period * Context11 * Film Scenes: Close Readings * Directors (Life and Works) * Critical Commentary",
+				"bookTitle": "100 Years of Spanish Cinema",
+				"language": "en",
+				"rights": "Copyright © 2009 Tatjana Pavlović, Inmaculada Alvarez, Rosana Blanco-Cano, Anitra Grisales, Alejandra Osorio, and Alejandra Sánchez",
+				"libraryCatalog": "Wiley Online Library",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -542,35 +666,38 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Post‐translational modification",
+					"α-Amidated peptide",
+					"Post-translational modification",
 					"Spectral pairing",
-					"Technology",
-					"α‐Amidated peptide"
+					"Technology"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					},
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"itemID": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
-				"issue": "2",
-				"DOI": "10.1002/pmic.201100327",
-				"language": "en",
-				"ISSN": "1615-9861",
-				"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
-				"libraryCatalog": "onlinelibrary.wiley.com",
-				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
-				"abstractNote": "Amidation is a post-translational modification found at the C-terminus of ∼50% of all neuropeptide hormones. Cleavage of the Cα–N bond of a C-terminal glycine yields the α-amidated peptide in a reaction catalyzed by peptidylglycine α-amidating monooxygenase (PAM). The mass of an α-amidated peptide decreases by 58 Da relative to its precursor. The amino acid sequences of an α-amidated peptide and its precursor differ only by the C-terminal glycine meaning that the peptides exhibit similar RP-HPLC properties and tandem mass spectral (MS/MS) fragmentation patterns. Growth of cultured cells in the presence of a PAM inhibitor ensured the coexistence of α-amidated peptides and their precursors. A strategy was developed for precursor and α-amidated peptide pairing (PAPP): LC-MS/MS data of peptide extracts were scanned for peptide pairs that differed by 58 Da in mass, but had similar RP-HPLC retention times. The resulting peptide pairs were validated by checking for similar fragmentation patterns in their MS/MS data prior to identification by database searching or manual interpretation. This approach significantly reduced the number of spectra requiring interpretation, decreasing the computing time required for database searching and enabling manual interpretation of unidentified spectra. Reported here are the α-amidated peptides identified from AtT-20 cells using the PAPP method.",
-				"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
-				"date": "2011/12/14",
+				"title": "A mass spectrometry-based method to screen for α-amidated peptides",
 				"publicationTitle": "PROTEOMICS",
 				"volume": "12",
-				"pages": "173-182"
+				"issue": "2",
+				"publisher": "WILEY-VCH Verlag",
+				"ISSN": "1615-9861",
+				"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
+				"DOI": "10.1002/pmic.201100327",
+				"pages": "173–182",
+				"date": "2012",
+				"abstractNote": "Amidation is a post-translational modification found at the C-terminus of ∼50% of all neuropeptide hormones. Cleavage of the Cα–N bond of a C-terminal glycine yields the α-amidated peptide in a reaction catalyzed by peptidylglycine α-amidating monooxygenase (PAM). The mass of an α-amidated peptide decreases by 58 Da relative to its precursor. The amino acid sequences of an α-amidated peptide and its precursor differ only by the C-terminal glycine meaning that the peptides exhibit similar RP-HPLC properties and tandem mass spectral (MS/MS) fragmentation patterns. Growth of cultured cells in the presence of a PAM inhibitor ensured the coexistence of α-amidated peptides and their precursors. A strategy was developed for precursor and α-amidated peptide pairing (PAPP): LC-MS/MS data of peptide extracts were scanned for peptide pairs that differed by 58 Da in mass, but had similar RP-HPLC retention times. The resulting peptide pairs were validated by checking for similar fragmentation patterns in their MS/MS data prior to identification by database searching or manual interpretation. This approach significantly reduced the number of spectra requiring interpretation, decreasing the computing time required for database searching and enabling manual interpretation of unidentified spectra. Reported here are the α-amidated peptides identified from AtT-20 cells using the PAPP method.",
+				"bookTitle": "PROTEOMICS",
+				"language": "en",
+				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
+				"libraryCatalog": "Wiley Online Library",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -604,35 +731,38 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Post‐translational modification",
+					"α-Amidated peptide",
+					"Post-translational modification",
 					"Spectral pairing",
-					"Technology",
-					"α‐Amidated peptide"
+					"Technology"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					},
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"itemID": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/full",
-				"issue": "2",
-				"DOI": "10.1002/pmic.201100327",
-				"language": "en",
-				"ISSN": "1615-9861",
-				"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
-				"libraryCatalog": "onlinelibrary.wiley.com",
-				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
-				"abstractNote": "Amidation is a post-translational modification found at the C-terminus of ∼50% of all neuropeptide hormones. Cleavage of the Cα–N bond of a C-terminal glycine yields the α-amidated peptide in a reaction catalyzed by peptidylglycine α-amidating monooxygenase (PAM). The mass of an α-amidated peptide decreases by 58 Da relative to its precursor. The amino acid sequences of an α-amidated peptide and its precursor differ only by the C-terminal glycine meaning that the peptides exhibit similar RP-HPLC properties and tandem mass spectral (MS/MS) fragmentation patterns. Growth of cultured cells in the presence of a PAM inhibitor ensured the coexistence of α-amidated peptides and their precursors. A strategy was developed for precursor and α-amidated peptide pairing (PAPP): LC-MS/MS data of peptide extracts were scanned for peptide pairs that differed by 58 Da in mass, but had similar RP-HPLC retention times. The resulting peptide pairs were validated by checking for similar fragmentation patterns in their MS/MS data prior to identification by database searching or manual interpretation. This approach significantly reduced the number of spectra requiring interpretation, decreasing the computing time required for database searching and enabling manual interpretation of unidentified spectra. Reported here are the α-amidated peptides identified from AtT-20 cells using the PAPP method.",
-				"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
-				"date": "2011/12/14",
+				"title": "A mass spectrometry-based method to screen for α-amidated peptides",
 				"publicationTitle": "PROTEOMICS",
 				"volume": "12",
-				"pages": "173-182"
+				"issue": "2",
+				"publisher": "WILEY-VCH Verlag",
+				"ISSN": "1615-9861",
+				"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
+				"DOI": "10.1002/pmic.201100327",
+				"pages": "173–182",
+				"date": "2012",
+				"abstractNote": "Amidation is a post-translational modification found at the C-terminus of ∼50% of all neuropeptide hormones. Cleavage of the Cα–N bond of a C-terminal glycine yields the α-amidated peptide in a reaction catalyzed by peptidylglycine α-amidating monooxygenase (PAM). The mass of an α-amidated peptide decreases by 58 Da relative to its precursor. The amino acid sequences of an α-amidated peptide and its precursor differ only by the C-terminal glycine meaning that the peptides exhibit similar RP-HPLC properties and tandem mass spectral (MS/MS) fragmentation patterns. Growth of cultured cells in the presence of a PAM inhibitor ensured the coexistence of α-amidated peptides and their precursors. A strategy was developed for precursor and α-amidated peptide pairing (PAPP): LC-MS/MS data of peptide extracts were scanned for peptide pairs that differed by 58 Da in mass, but had similar RP-HPLC retention times. The resulting peptide pairs were validated by checking for similar fragmentation patterns in their MS/MS data prior to identification by database searching or manual interpretation. This approach significantly reduced the number of spectra requiring interpretation, decreasing the computing time required for database searching and enabling manual interpretation of unidentified spectra. Reported here are the α-amidated peptides identified from AtT-20 cells using the PAPP method.",
+				"bookTitle": "PROTEOMICS",
+				"language": "en",
+				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
+				"libraryCatalog": "Wiley Online Library",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -666,35 +796,38 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Post‐translational modification",
+					"α-Amidated peptide",
+					"Post-translational modification",
 					"Spectral pairing",
-					"Technology",
-					"α‐Amidated peptide"
+					"Technology"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					},
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"itemID": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
-				"issue": "2",
-				"DOI": "10.1002/pmic.201100327",
-				"language": "en",
-				"ISSN": "1615-9861",
-				"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
-				"libraryCatalog": "onlinelibrary.wiley.com",
-				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
-				"abstractNote": "Amidation is a post-translational modification found at the C-terminus of ∼50% of all neuropeptide hormones. Cleavage of the Cα–N bond of a C-terminal glycine yields the α-amidated peptide in a reaction catalyzed by peptidylglycine α-amidating monooxygenase (PAM). The mass of an α-amidated peptide decreases by 58 Da relative to its precursor. The amino acid sequences of an α-amidated peptide and its precursor differ only by the C-terminal glycine meaning that the peptides exhibit similar RP-HPLC properties and tandem mass spectral (MS/MS) fragmentation patterns. Growth of cultured cells in the presence of a PAM inhibitor ensured the coexistence of α-amidated peptides and their precursors. A strategy was developed for precursor and α-amidated peptide pairing (PAPP): LC-MS/MS data of peptide extracts were scanned for peptide pairs that differed by 58 Da in mass, but had similar RP-HPLC retention times. The resulting peptide pairs were validated by checking for similar fragmentation patterns in their MS/MS data prior to identification by database searching or manual interpretation. This approach significantly reduced the number of spectra requiring interpretation, decreasing the computing time required for database searching and enabling manual interpretation of unidentified spectra. Reported here are the α-amidated peptides identified from AtT-20 cells using the PAPP method.",
-				"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
-				"date": "2011/12/14",
+				"title": "A mass spectrometry-based method to screen for α-amidated peptides",
 				"publicationTitle": "PROTEOMICS",
 				"volume": "12",
-				"pages": "173-182"
+				"issue": "2",
+				"publisher": "WILEY-VCH Verlag",
+				"ISSN": "1615-9861",
+				"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
+				"DOI": "10.1002/pmic.201100327",
+				"pages": "173–182",
+				"date": "2012",
+				"abstractNote": "Amidation is a post-translational modification found at the C-terminus of ∼50% of all neuropeptide hormones. Cleavage of the Cα–N bond of a C-terminal glycine yields the α-amidated peptide in a reaction catalyzed by peptidylglycine α-amidating monooxygenase (PAM). The mass of an α-amidated peptide decreases by 58 Da relative to its precursor. The amino acid sequences of an α-amidated peptide and its precursor differ only by the C-terminal glycine meaning that the peptides exhibit similar RP-HPLC properties and tandem mass spectral (MS/MS) fragmentation patterns. Growth of cultured cells in the presence of a PAM inhibitor ensured the coexistence of α-amidated peptides and their precursors. A strategy was developed for precursor and α-amidated peptide pairing (PAPP): LC-MS/MS data of peptide extracts were scanned for peptide pairs that differed by 58 Da in mass, but had similar RP-HPLC retention times. The resulting peptide pairs were validated by checking for similar fragmentation patterns in their MS/MS data prior to identification by database searching or manual interpretation. This approach significantly reduced the number of spectra requiring interpretation, decreasing the computing time required for database searching and enabling manual interpretation of unidentified spectra. Reported here are the α-amidated peptides identified from AtT-20 cells using the PAPP method.",
+				"bookTitle": "PROTEOMICS",
+				"language": "en",
+				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
+				"libraryCatalog": "Wiley Online Library",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -728,35 +861,38 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Post‐translational modification",
+					"α-Amidated peptide",
+					"Post-translational modification",
 					"Spectral pairing",
-					"Technology",
-					"α‐Amidated peptide"
+					"Technology"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					},
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"itemID": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
-				"issue": "2",
-				"DOI": "10.1002/pmic.201100327",
-				"language": "en",
-				"ISSN": "1615-9861",
-				"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
-				"libraryCatalog": "onlinelibrary.wiley.com",
-				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
-				"abstractNote": "Amidation is a post-translational modification found at the C-terminus of ∼50% of all neuropeptide hormones. Cleavage of the Cα–N bond of a C-terminal glycine yields the α-amidated peptide in a reaction catalyzed by peptidylglycine α-amidating monooxygenase (PAM). The mass of an α-amidated peptide decreases by 58 Da relative to its precursor. The amino acid sequences of an α-amidated peptide and its precursor differ only by the C-terminal glycine meaning that the peptides exhibit similar RP-HPLC properties and tandem mass spectral (MS/MS) fragmentation patterns. Growth of cultured cells in the presence of a PAM inhibitor ensured the coexistence of α-amidated peptides and their precursors. A strategy was developed for precursor and α-amidated peptide pairing (PAPP): LC-MS/MS data of peptide extracts were scanned for peptide pairs that differed by 58 Da in mass, but had similar RP-HPLC retention times. The resulting peptide pairs were validated by checking for similar fragmentation patterns in their MS/MS data prior to identification by database searching or manual interpretation. This approach significantly reduced the number of spectra requiring interpretation, decreasing the computing time required for database searching and enabling manual interpretation of unidentified spectra. Reported here are the α-amidated peptides identified from AtT-20 cells using the PAPP method.",
-				"title": "A mass spectrometry‐based method to screen for α‐amidated peptides",
-				"date": "2011/12/14",
+				"title": "A mass spectrometry-based method to screen for α-amidated peptides",
 				"publicationTitle": "PROTEOMICS",
 				"volume": "12",
-				"pages": "173-182"
+				"issue": "2",
+				"publisher": "WILEY-VCH Verlag",
+				"ISSN": "1615-9861",
+				"url": "http://onlinelibrary.wiley.com/doi/10.1002/pmic.201100327/abstract",
+				"DOI": "10.1002/pmic.201100327",
+				"pages": "173–182",
+				"date": "2012",
+				"abstractNote": "Amidation is a post-translational modification found at the C-terminus of ∼50% of all neuropeptide hormones. Cleavage of the Cα–N bond of a C-terminal glycine yields the α-amidated peptide in a reaction catalyzed by peptidylglycine α-amidating monooxygenase (PAM). The mass of an α-amidated peptide decreases by 58 Da relative to its precursor. The amino acid sequences of an α-amidated peptide and its precursor differ only by the C-terminal glycine meaning that the peptides exhibit similar RP-HPLC properties and tandem mass spectral (MS/MS) fragmentation patterns. Growth of cultured cells in the presence of a PAM inhibitor ensured the coexistence of α-amidated peptides and their precursors. A strategy was developed for precursor and α-amidated peptide pairing (PAPP): LC-MS/MS data of peptide extracts were scanned for peptide pairs that differed by 58 Da in mass, but had similar RP-HPLC retention times. The resulting peptide pairs were validated by checking for similar fragmentation patterns in their MS/MS data prior to identification by database searching or manual interpretation. This approach significantly reduced the number of spectra requiring interpretation, decreasing the computing time required for database searching and enabling manual interpretation of unidentified spectra. Reported here are the α-amidated peptides identified from AtT-20 cells using the PAPP method.",
+				"bookTitle": "PROTEOMICS",
+				"language": "en",
+				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
+				"libraryCatalog": "Wiley Online Library",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -785,30 +921,29 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"β‐Rezeptorenblocker"
+					"β-Rezeptorenblocker"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
-				"itemID": "http://onlinelibrary.wiley.com/doi/10.1002/3527603018.ch17/summary",
-				"bookTitle": "Klinisch-toxikologische Analytik: Verfahren, Befunde, Interpretation",
+				"title": "β-Rezeptorenblocker",
+				"publisher": "Wiley-VCH Verlag GmbH & Co. KGaA",
 				"ISBN": "9783527603015",
-				"language": "de",
 				"url": "http://onlinelibrary.wiley.com/doi/10.1002/3527603018.ch17/summary",
-				"libraryCatalog": "onlinelibrary.wiley.com",
+				"DOI": "10.1002/3527603018.ch17",
+				"pages": "365–370",
+				"publicationTitle": "Klinisch-toxikologische Analytik",
+				"date": "2005",
+				"abstractNote": "* Immunoassay * Hochleistungsflüssigkeitschromatographie (HPLC) * Gaschromatographie * Medizinische Beurteilung und klinische Interpretation * Literatur",
+				"bookTitle": "Klinisch-toxikologische Analytik",
+				"language": "de",
 				"rights": "Copyright © 2002 Wiley-VCH Verlag GmbH",
-				"abstractNote": "Immunoassay\nHochleistungsflüssigkeitschromatographie (HPLC)\nGaschromatographie\nMedizinische Beurteilung und klinische Interpretation\nLiteratur",
-				"title": "β‐Rezeptorenblocker",
-				"date": "2005/01/28",
-				"publisher": "Wiley‐VCH Verlag GmbH & Co. KGaA",
-				"pages": "365-370"
+				"libraryCatalog": "Wiley Online Library",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -835,29 +970,30 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					},
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"itemID": "http://onlinelibrary.wiley.com/doi/10.1111/j.1468-5930.2011.00548.x/abstract",
 				"title": "The Principled Case for Employing Private Military and Security Companies in Interventions for Human Rights Purposes",
-				"date": "2011/12/16",
 				"publicationTitle": "Journal of Applied Philosophy",
 				"volume": "29",
 				"issue": "1",
 				"publisher": "Blackwell Publishing Ltd",
-				"DOI": "10.1111/j.1468-5930.2011.00548.x",
-				"language": "en",
-				"pages": "1-18",
 				"ISSN": "1468-5930",
 				"url": "http://onlinelibrary.wiley.com/doi/10.1111/j.1468-5930.2011.00548.x/abstract",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "onlinelibrary.wiley.com",
+				"DOI": "10.1111/j.1468-5930.2011.00548.x",
+				"pages": "1–18",
+				"date": "2012",
+				"abstractNote": "The possibility of using private military and security companies to bolster the capacity to undertake intervention for human rights purposes (humanitarian intervention and peacekeeping) has been increasingly debated. The focus of such discussions has, however, largely been on practical issues and the contingent problems posed by private force. By contrast, this article considers the principled case for privatising humanitarian intervention. It focuses on two central issues. First, does outsourcing humanitarian intervention to private military and security companies pose some fundamental, deeper problems in this context, such as an abdication of a state's duties? Second, on the other hand, is there a case for preferring these firms to other, state-based agents of humanitarian intervention? For instance, given a state's duties to their own military personnel, should the use of private military and security contractors be preferred to regular soldiers for humanitarian intervention?",
+				"bookTitle": "Journal of Applied Philosophy",
+				"language": "en",
 				"rights": "Published 2011. This article is a U.S. Government work and is in the public domain in the USA.",
-				"abstractNote": "The possibility of using private military and security companies to bolster the capacity to undertake intervention for human rights purposes (humanitarian intervention and peacekeeping) has been increasingly debated. The focus of such discussions has, however, largely been on practical issues and the contingent problems posed by private force. By contrast, this article considers the principled case for privatising humanitarian intervention. It focuses on two central issues. First, does outsourcing humanitarian intervention to private military and security companies pose some fundamental, deeper problems in this context, such as an abdication of a state's duties? Second, on the other hand, is there a case for preferring these firms to other, state-based agents of humanitarian intervention? For instance, given a state's duties to their own military personnel, should the use of private military and security contractors be preferred to regular soldiers for humanitarian intervention?"
+				"libraryCatalog": "Wiley Online Library",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -884,24 +1020,27 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
-				"itemID": "http://onlinelibrary.wiley.com/doi/10.1111/j.1540-6261.1986.tb04559.x/abstract",
-				"issue": "4",
-				"DOI": "10.1111/j.1540-6261.1986.tb04559.x",
-				"language": "en",
-				"ISSN": "1540-6261",
-				"url": "http://onlinelibrary.wiley.com/doi/10.1111/j.1540-6261.1986.tb04559.x/abstract",
-				"libraryCatalog": "onlinelibrary.wiley.com",
-				"shortTitle": "Volume for Winners and Losers",
-				"rights": "1986 The American Finance Association",
-				"abstractNote": "Capital gains taxes create incentives to trade. Our major finding is that turnover is higher for winners (stocks, the prices of which have increased) than for losers, which is not consistent with the tax prediction. However, the turnover in December and January is evidence of tax-motivated trading; there is a relatively high turnover for losers in December and for winners in January. We conclude that taxes influence turnover, but other motives for trading are more important. We were unable to find evidence that changing the length of the holding period required to qualify for long-term capital gains treatment affected turnover.",
 				"title": "Volume for Winners and Losers: Taxation and Other Motives for Stock Trading",
-				"date": "2012/04/30",
 				"publicationTitle": "The Journal of Finance",
 				"volume": "41",
-				"pages": "951-974"
+				"issue": "4",
+				"publisher": "Blackwell Publishing Ltd",
+				"ISSN": "1540-6261",
+				"url": "http://onlinelibrary.wiley.com/doi/10.1111/j.1540-6261.1986.tb04559.x/abstract",
+				"DOI": "10.1111/j.1540-6261.1986.tb04559.x",
+				"pages": "951–974",
+				"date": "1986",
+				"abstractNote": "Capital gains taxes create incentives to trade. Our major finding is that turnover is higher for winners (stocks, the prices of which have increased) than for losers, which is not consistent with the tax prediction. However, the turnover in December and January is evidence of tax-motivated trading; there is a relatively high turnover for losers in December and for winners in January. We conclude that taxes influence turnover, but other motives for trading are more important. We were unable to find evidence that changing the length of the holding period required to qualify for long-term capital gains treatment affected turnover.",
+				"bookTitle": "The Journal of Finance",
+				"language": "en",
+				"rights": "1986 The American Finance Association",
+				"libraryCatalog": "Wiley Online Library",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Volume for Winners and Losers"
 			}
 		]
 	}
