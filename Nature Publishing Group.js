@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-30 20:20:21"
+	"lastUpdated": "2012-05-31 17:01:41"
 }
 
 /**
@@ -98,6 +98,17 @@ function scrapeEmbedMeta(doc, url) {
 
 		if (item.title == item.title.toUpperCase()) {
 			item.title = Zotero.Utilities.capitalizeTitle(item.title.toLowerCase(), true);
+		}
+
+		//the date in EM is usually online publication date
+		//If we can find a publication year, that's better
+		var year = ZU.xpathText(doc,
+			'//dd[preceding-sibling::dt[1][text()="Year published:" or text()="Date published:"]]');
+		if(year && ( year = year.match(/\(\s*(.*?)\s*\)/) )) {
+			item.date = year[1];
+		} else if( (year = ZU.xpathText(doc,'//p[@id="cite"]')) &&
+			(year = year.match(/\((\d{4})\)/)) ) {
+			item.date = year[1];
 		}
 
 		//sometimes abstract from EM is description for the website.
@@ -314,13 +325,13 @@ var testCases = [
 				"number": "6",
 				"patentNumber": "6",
 				"pages": "671-682",
-				"ISSN": "0950-9232",
 				"publisher": "Nature Publishing Group",
 				"institution": "Nature Publishing Group",
 				"company": "Nature Publishing Group",
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
-				"date": "2011-07-11",
+				"date": "2012",
+				"ISSN": "0950-9232",
 				"language": "en",
 				"DOI": "10.1038/onc.2011.282",
 				"abstractNote": "Identification and characterization of cancer stem cells (CSCs) in gastric cancer are difficult owing to the lack of specific markers and consensus methods. In this study, we show that cells with the CD90 surface marker in gastric tumors could be enriched under non-adherent, serum-free and sphere-forming conditions. These CD90+ cells possess a higher ability to initiate tumor in vivo and could re-establish the cellular hierarchy of tumors from single-cell implantation, demonstrating their self-renewal properties. Interestingly, higher proportion of CD90+ cells correlates with higher in vivo tumorigenicity of gastric primary tumor models. In addition, it was found that ERBB2 was overexpressed in about 25% of the gastric primary tumor models, which correlates with the higher level of CD90 expression in these tumors. Trastuzumab (humanized anti-ERBB2 antibody) treatment of high-tumorigenic gastric primary tumor models could reduce the CD90+ population in tumor mass and suppress tumor growth when combined with traditional chemotherapy. Moreover, tumorigenicity of tumor cells could also be suppressed when trastuzumab treatment starts at the same time as cell implantation. Therefore, we have identified a CSC population in gastric primary tumors characterized by their CD90 phenotype. The finding that trastuzumab targets the CSC population in gastric tumors suggests that ERBB2 signaling has a role in maintaining CSC populations, thus contributing to carcinogenesis and tumor invasion. In conclusion, the results from this study provide new insights into the gastric tumorigenic process and offer potential implications for the development of anticancer drugs as well as therapeutic treatment of gastric cancers.",
@@ -539,13 +550,13 @@ var testCases = [
 				"rights": "© 2012 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
 				"volume": "481",
 				"pages": "341-343",
-				"ISSN": "0028-0836",
 				"publisher": "Nature Publishing Group",
 				"institution": "Nature Publishing Group",
 				"company": "Nature Publishing Group",
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
-				"date": "2012-01-18",
+				"date": "19 January 2012",
+				"ISSN": "0028-0836",
 				"language": "en",
 				"issue": "7381",
 				"DOI": "10.1038/nature10669",
@@ -582,13 +593,13 @@ var testCases = [
 				"rights": "© 2012 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
 				"volume": "481",
 				"pages": "237-237",
-				"ISSN": "0028-0836",
 				"publisher": "Nature Publishing Group",
 				"institution": "Nature Publishing Group",
 				"company": "Nature Publishing Group",
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
-				"date": "2012-01-18",
+				"date": "19 January 2012",
+				"ISSN": "0028-0836",
 				"language": "en",
 				"issue": "7381",
 				"DOI": "10.1038/481237a",
@@ -645,13 +656,13 @@ var testCases = [
 				"rights": "© 2011 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
 				"volume": "481",
 				"pages": "335-340",
-				"ISSN": "0028-0836",
 				"publisher": "Nature Publishing Group",
 				"institution": "Nature Publishing Group",
 				"company": "Nature Publishing Group",
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
-				"date": "2012-01-09",
+				"date": "19 January 2012",
+				"ISSN": "0028-0836",
 				"language": "en",
 				"issue": "7381",
 				"DOI": "10.1038/nature10728",
