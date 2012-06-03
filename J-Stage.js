@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-05-04 14:48:17"
+	"browserSupport": "gcsb",
+	"lastUpdated": "2012-06-03 17:03:02"
 }
 
 /*
@@ -45,7 +45,7 @@ function doWeb(doc, url) {
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = {};
-		var titles = doc.evaluate('//div[contains(@class, "contents_detail")]/a|//h3[@class="mod-item-heading"]/a', doc, null, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//div[contains(@class, "contents_detail")]/div/a|//h3[@class="mod-item-heading"]/a', doc, null, XPathResult.ANY_TYPE, null);
 		var title;
 		while (title = titles.iterateNext()) {
 			items[title.href] = title.textContent;
@@ -75,9 +75,12 @@ function scrape(doc, url) {
 	pdfurl = "https://www.jstage.jst.go.jp" + pdfurl[1].textContent;
 	Z.debug(pdfurl)
 	var abs = ZU.xpathText(doc, '//div[@class="mod-section"]/p[@class="normal"]') //.replace(/\n/g, "")
-	var tags = ZU.xpathText(doc, '//p[contains(@class, "keywords")]').replace(/Keywords:/, "").split(/\s*,\s*/);
+	var tags = ZU.xpathText(doc, '//p[contains(@class, "keywords")]')
+	if (tags){
+	tags = tags.replace(/Keywords:/, "").split(/\s*,\s*/);
 	for (i in tags) {
 		tags[i] = ZU.trimInternal(tags[i]);
+	}
 	}
 	//get BibTex Link
 	var bibtexurl = ZU.xpathText(doc, '//li/a[contains(text(), "BibTeX")]/@href');

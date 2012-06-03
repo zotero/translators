@@ -1,4 +1,4 @@
-17  # Increment number when modifying file
+18  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -54,3 +54,4 @@ c76d6c19-b4c6-4e51-bd7a-0a81752305ae  # BC Archival Network - merged with Archei
 60d97c99-47f0-4323-98b6-5699faf827b1  # Blackwell Compass - site no longer functional
 138de272-0d2a-4ab5-8cfb-0fd879958d04 # AdvoCAT - new catalog based on Voyager7
 a07bb62a-4d2d-4d43-ba08-d9679a0122f8 # ABL-CLIO no longer exists
+232903bc-7307-4058-bb1a-27cfe3e4e655 # SPIRES - replaced (and redirects to) INSPIRE which has unAPI
