@@ -1,15 +1,15 @@
 {
 	"translatorID": "dac476e4-401d-430a-8571-a97c31c3b65e",
-	"label": "Taylor&Francis",
+	"label": "Taylor and Francis",
 	"creator": "Sebastian Karcher",
 	"target": "^http://www\\.tandfonline\\.com",
-	"minVersion": "2.1",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-04-06 17:41:47"
+	"lastUpdated": "2012-06-02 21:43:12"
 }
 
 /*
@@ -30,85 +30,113 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+function getTitles(doc) {
+	return ZU.xpath(doc, '//label[@class="resultTitle"]/a\
+						|//a[@class="entryTitle"]');
+}
 
 function detectWeb(doc, url) {
-  if (url.match(/\/doi\/abs\/10\.|\/doi\/full\/10\./))	return "journalArticle";
-  else if(url.match(/\/action\/doSearch\?|\/toc\//))	return "multiple";
+	if (url.match(/\/doi\/abs\/10\.|\/doi\/full\/10\./)) {
+		return "journalArticle";
+	} else if(url.match(/\/action\/doSearch\?|\/toc\//) &&
+		getTitles(doc).length) {
+		return "multiple";
+	}
 }
 
 
 function doWeb(doc, url) {
-  var namespace = doc.documentElement.namespaceURI;
-  var nsResolver = namespace ? function(prefix) {
-	if (prefix == 'x') return namespace; else return null;
-		} : null;
-  var arts = new Array();
-  if (detectWeb(doc, url) == "multiple") {
-	var items = new Object();
-	var titles = doc.evaluate('//label[@class="resultTitle"]/a|//a[@class="entryTitle"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var title;
-	while (title = titles.iterateNext()) {
-	  items[title.href] = title.textContent;
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var titles = getTitles(doc);
+		var doi;
+		for(var i=0, n=titles.length; i<n; i++) {
+			doi = titles[i].href.match(/\/doi\/(?:abs|full)\/(10\.[^?#]+)/);
+			if(doi) {
+				items[doi[1]] = titles[i].textContent;
+			}
 		}
-	Zotero.selectItems(items, function(items){
-			 if(!items) {
-			   return true;
-			 }
-			 citationurls = new Array();
-			 for (var itemurl in items) {
-			   citationurls.push(itemurl.replace(/\/doi\/abs\/|\/doi\/full\//, "/action/showCitFormats?doi="));
-			 }
-			 getpages(citationurls);
-			   });
 
-  } else {
-	var citationurl = url.replace(/\/doi\/abs\/|\/doi\/full\//, "/action/showCitFormats?doi=");
-	getpages(citationurl);
-  }
-  Zotero.wait();
+		Zotero.selectItems(items, function(selectedItems){
+			if(!selectedItems) return true;
+			
+			var dois = new Array();
+			for (var i in selectedItems) {
+				dois.push(i);
+			}
+			scrape(null, url,dois);
+		});
+	} else {
+		var doi = url.match(/\/doi\/(?:abs|full)\/(10\.[^?#]+)/);
+		scrape(doc, url,[doi[1]]);
+	}
 }
 
-function getpages(citationurl) {
-	//we work entirely from the citations page
-  Zotero.Utilities.processDocuments(citationurl, function(doc) {
-					  scrape(doc);
-	}, function() { Zotero.done() });
+function finalizeItem(item, doc, doi, baseUrl) {
+	var pdfurl = baseUrl + '/doi/pdf/';
+	var absurl = baseUrl + '/doi/abs/';
+
+	//add attachments
+	item.attachments = [{
+		title: 'Full Text PDF',
+		url: pdfurl + doi,
+		mimeType: 'application/pdf'
+	}];
+	if(doc) {
+		item.attachments.push({
+			title: 'Snapshot',
+			document: doc
+		});
+	} else {
+		item.attachments.push({
+			title: 'Snapshot',
+			url: item.url || absurl + doi,
+			mimeType: 'text/html'
+		});
+	}
+
+	item.complete();
 }
 
+function scrape(doc, url, dois) {
+	var baseUrl = url.match(/https?:\/\/[^\/]+/)[0]
+	var postUrl = baseUrl + '/action/downloadCitation';
+	var postBody = 	'downloadFileName=citation&' +
+					'direct=true&' +
+					'include=abs&' +
+					'doi=';
+	var risFormat = '&format=ris';
+	var bibtexFormat = '&format=bibtex';
 
-function scrape (doc) {
-  var newurl = doc.location.href;
-  var pdfurl = newurl.replace(/\/action\/showCitFormats\?doi=/, "/doi/pdf/");
-  var absurl = newurl.replace(/\/action\/showCitFormats\?doi=/, "/doi/abs/");
-  var doi = doc.evaluate('//form[@target="_self"]/input[@name="doi"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
-  var filename = doc.evaluate('//form[@target="_self"]/input[@name="downloadFileName"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
-  //	Z.debug(filename);
-  var get = 'http://www.tandfonline.com/action/downloadCitation';
-  var post = 'doi=' + doi + '&downloadFileName=' + filename + '&format=ris&direct=true&include=abs';
-  Zotero.Utilities.HTTP.doPost(get, post, function(text) {
-  	//check if we have both AB and N2 defined. If these are identical,
-  	//we need to remove them
-  	var ab = text.match(/^AB  - ([\s\S]*?)^[A-Z]{2}  -/m);
-  	if(ab) var n2 = text.match(/^N2  - ([\s\S]*?)^[A-Z]{2}  -/m);
-  	if(n2 && ab[1] == n2[1]) {
-  		text = text.replace(/^N2  - [\s\S]*?^([A-Z]{2}  -)/m, '$1');
-  	}
+	for(var i=0, n=dois.length; i<n; i++) {
+		(function(doi) {
+			ZU.doPost(postUrl, postBody + doi + bibtexFormat, function(text) {
+				var translator = Zotero.loadTranslator("import");
+				// Use BibTeX translator
+				translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+				translator.setString(text);
+				translator.setHandler("itemDone", function(obj, item) {
+					item.bookTitle = item.publicationTitle;
 
-	var translator = Zotero.loadTranslator("import");
-	// Calling the RIS translator
-	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-	translator.setString(text);
-	translator.setHandler("itemDone", function(obj, item) {
-		item.url = absurl;
-		item.notes = [];
-		item.attachments = [
-			{url:pdfurl, title:"T&F PDF fulltext", mimeType:"application/pdf"},
-			{url:absurl, title:"T&F Snapshot", mimeType:"text/html"}
-		];
-		item.complete();
-	});
-	translator.translate();
-  });
+					//unfortunately, bibtex is missing some data
+					//publisher, ISSN/ISBN
+					ZU.doPost(postUrl, postBody + doi + risFormat, function(text) {
+						risTrans = Zotero.loadTranslator("import");
+						risTrans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+						risTrans.setString(text);
+						risTrans.setHandler("itemDone", function(obj, risItem) {
+							item.publisher = risItem.publisher;
+							item.ISSN = risItem.ISSN;
+							item.ISBN = risItem.ISBN;
+							finalizeItem(item, doc, doi, baseUrl);
+						});
+						risTrans.translate();
+					});
+				});
+				translator.translate();
+			});
+		})(dois[i]);
+	}
 }
 
 /** BEGIN TEST CASES **/
@@ -146,29 +174,28 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "T&F PDF fulltext",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "T&F Snapshot",
-						"mimeType": "text/html"
+						"title": "Snapshot"
 					}
 				],
 				"title": "Informality and productivity in the labor market in Peru",
-				"date": "2008",
-				"DOI": "10.1080/17487870802543480",
 				"publicationTitle": "Journal of Economic Policy Reform",
-				"pages": "229-245",
 				"volume": "11",
 				"issue": "4",
-				"publisher": "Routledge",
-				"abstractNote": "This article analyzes the evolution of informal employment in Peru from 1986 to 2001. Contrary to what one would expect, the informality rates increased steadily during the 1990s despite the introduction of flexible contracting mechanisms, a healthy macroeconomic recovery, and tighter tax codes and regulation. We explore different factors that may explain this upward trend including the role of labor legislation and labor allocation between/within sectors of economic activity. Finally, we illustrate the negative correlation between productivity and informality by evaluating the impacts of the Youth Training PROJOVEN Program that offers vocational training to disadvantaged young individuals. We find significant training impacts on the probability of formal employment for both males and females.",
-				"ISBN": "1748-7870",
-				"ISSN": "1748-7870",
+				"pages": "229-245",
+				"date": "2008",
+				"DOI": "10.1080/17487870802543480",
 				"url": "http://www.tandfonline.com/doi/abs/10.1080/17487870802543480",
-				"accessDate": "2012/04/06",
+				"abstractNote": "This article analyzes the evolution of informal employment in Peru from 1986 to 2001. Contrary to what one would expect, the informality rates increased steadily during the 1990s despite the introduction of flexible contracting mechanisms, a healthy macroeconomic recovery, and tighter tax codes and regulation. We explore different factors that may explain this upward trend including the role of labor legislation and labor allocation between/within sectors of economic activity. Finally, we illustrate the negative correlation between productivity and informality by evaluating the impacts of the Youth Training PROJOVEN Program that offers vocational training to disadvantaged young individuals. We find significant training impacts on the probability of formal employment for both males and females.",
 				"bookTitle": "Journal of Economic Policy Reform",
-				"libraryCatalog": "Taylor&Francis"
+				"publisher": "Routledge",
+				"ISSN": "1748-7870",
+				"ISBN": "1748-7870",
+				"libraryCatalog": "Taylor and Francis",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -205,29 +232,76 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "T&F PDF fulltext",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "T&F Snapshot",
-						"mimeType": "text/html"
+						"title": "Snapshot"
 					}
 				],
 				"title": "Informality and productivity in the labor market in Peru",
-				"date": "2008",
-				"DOI": "10.1080/17487870802543480",
 				"publicationTitle": "Journal of Economic Policy Reform",
-				"pages": "229-245",
 				"volume": "11",
 				"issue": "4",
-				"publisher": "Routledge",
-				"abstractNote": "This article analyzes the evolution of informal employment in Peru from 1986 to 2001. Contrary to what one would expect, the informality rates increased steadily during the 1990s despite the introduction of flexible contracting mechanisms, a healthy macroeconomic recovery, and tighter tax codes and regulation. We explore different factors that may explain this upward trend including the role of labor legislation and labor allocation between/within sectors of economic activity. Finally, we illustrate the negative correlation between productivity and informality by evaluating the impacts of the Youth Training PROJOVEN Program that offers vocational training to disadvantaged young individuals. We find significant training impacts on the probability of formal employment for both males and females.",
-				"ISBN": "1748-7870",
-				"ISSN": "1748-7870",
+				"pages": "229-245",
+				"date": "2008",
+				"DOI": "10.1080/17487870802543480",
 				"url": "http://www.tandfonline.com/doi/abs/10.1080/17487870802543480",
-				"accessDate": "2012/04/06",
+				"abstractNote": "This article analyzes the evolution of informal employment in Peru from 1986 to 2001. Contrary to what one would expect, the informality rates increased steadily during the 1990s despite the introduction of flexible contracting mechanisms, a healthy macroeconomic recovery, and tighter tax codes and regulation. We explore different factors that may explain this upward trend including the role of labor legislation and labor allocation between/within sectors of economic activity. Finally, we illustrate the negative correlation between productivity and informality by evaluating the impacts of the Youth Training PROJOVEN Program that offers vocational training to disadvantaged young individuals. We find significant training impacts on the probability of formal employment for both males and females.",
 				"bookTitle": "Journal of Economic Policy Reform",
-				"libraryCatalog": "Taylor&Francis"
+				"publisher": "Routledge",
+				"ISSN": "1748-7870",
+				"ISBN": "1748-7870",
+				"libraryCatalog": "Taylor and Francis",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.tandfonline.com/doi/abs/10.1080/00036846.2011.568404",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Joo Heon",
+						"lastName": "Park",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Douglas L.",
+						"lastName": "MacLachlan",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "Estimating willingness to pay by risk adjustment mechanism",
+				"publicationTitle": "Applied Economics",
+				"volume": "45",
+				"issue": "1",
+				"pages": "37-46",
+				"date": "2013",
+				"DOI": "10.1080/00036846.2011.568404",
+				"url": "http://www.tandfonline.com/doi/abs/10.1080/00036846.2011.568404",
+				"abstractNote": "Measuring consumers’ Willingness To Pay (WTP) without considering the level of uncertainty in valuation and the consequent risk premiums will result in estimates that are biased toward lower values. This research proposes a model and method for correctly assessing WTP in cases involving valuation uncertainty. The new method, called Risk Adjustment Mechanism (RAM), is presented theoretically and demonstrated empirically. It is shown that the RAM outperforms the traditional method for assessing WTP, especially in a context of a nonmarket good such as a totally new product.",
+				"bookTitle": "Applied Economics",
+				"publisher": "Routledge",
+				"ISSN": "0003-6846",
+				"ISBN": "0003-6846",
+				"libraryCatalog": "Taylor and Francis",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}
