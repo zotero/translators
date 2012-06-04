@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-08 03:21:07"
+	"browserSupport": "gcsib",
+	"lastUpdated": "2012-06-03 17:42:37"
 }
 
 /*
@@ -34,31 +34,21 @@
    Stuff.co.nz is a collection of newspaper articles from around the country*/
 
 function detectWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-	if (prefix == "x" ) return namespace; else return null;
-	} : null;
 	var definePath = '//div[@class="blog_content"]';
-	var XpathObject = doc.evaluate(definePath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var XpathObject = doc.evaluate(definePath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if(XpathObject){
 		return "blogPost";
 	} else {
 		var definePath = '//div[@class="story_landing"]';
-		var XpathObject = doc.evaluate(definePath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		var XpathObject = doc.evaluate(definePath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 		if  (XpathObject){
 			return "newspaperArticle";
 		}
 	}
-
 }
 
 function scrape(doc, url) {
 	var type = detectWeb(doc, url);
-
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
 
 		var splitIntoArray;
 		var fullName="";
@@ -78,7 +68,7 @@ function scrape(doc, url) {
 		try { /*Try and Catch if encounter erro */
 		
 			var blogAuthor = "//div[@id='left_col']/span";
-			var blogAuthorObject = doc.evaluate(blogAuthor, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			var blogAuthorObject = doc.evaluate(blogAuthor, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 				if (blogAuthorObject) {
 					
 					if (blogAuthorObject.textContent.replace(/\s*/g,'') ==""){
@@ -142,7 +132,7 @@ function scrape(doc, url) {
 		//Get extended publisher if there is any then replace with stuff.co.nz
 		var myPublisher = '//span[@class="storycredit"]';
 	
-		var myPublisherObject = doc.evaluate(myPublisher , doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		var myPublisherObject = doc.evaluate(myPublisher , doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 		if (myPublisherObject) {
 			var realPublisher = myPublisherObject.textContent;
 			if (realPublisher.match(/\bBy[\s\n\r\t]+[a-zA-Z\s\r\t\n]*-[\s\n\r\t]*/g)){
@@ -166,7 +156,7 @@ function scrape(doc, url) {
 		newItem.abstractNote = doAbstract(doc, url);
 		var authorXPath = '//span[@class="storycredit"]';
 		
-		var authorXPathObject = doc.evaluate(authorXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		var authorXPathObject = doc.evaluate(authorXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 		if (authorXPathObject){
 			var authorArray = new Array("NZPA", "The Press", "The Dominion Post");
 			authorXPathObject = authorXPathObject.textContent;
@@ -247,12 +237,12 @@ function scrape(doc, url) {
 		//Section of the Article 
 	
 		var current = '//li/a[@class="current"]';
-		var currentObject = doc.evaluate(current, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		var currentObject = doc.evaluate(current, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 		if (currentObject){
 			currentObject = currentObject.textContent;
 	
 			var articleSection = '//li[@class="mid_nav_item"]/a';
-			var articleSectionObject = doc.evaluate(articleSection , doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			var articleSectionObject = doc.evaluate(articleSection , doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 			if (articleSectionObject){
 				articleSectionObject = articleSectionObject .textContent;
 				switch (articleSectionObject){
@@ -273,7 +263,7 @@ function scrape(doc, url) {
 				}
 			} 
 			var SectionType = '//li[@class="current_nav_item"]/a';
-			var SectionTypeObject = doc.evaluate(SectionType, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			var SectionTypeObject = doc.evaluate(SectionType, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 			if (SectionType){
 				
 					SectionTypeObject = SectionTypeObject.textContent;
@@ -311,7 +301,7 @@ function scrape(doc, url) {
 		}
 		else {
 			var SectionType = '//li[@class="current_nav_item"]/a';
-			var SectionTypeObject = doc.evaluate(SectionType, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			var SectionTypeObject = doc.evaluate(SectionType, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 			if (SectionType){
 				
 					SectionTypeObject = SectionTypeObject.textContent;
@@ -346,50 +336,32 @@ function scrape(doc, url) {
 
 
 function doShortTitle(doc, url){
-	
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
 	var shortTitle="";
 	var subTitle = '//div[@id="left_col"]/h2';
-	var subTitleObject = doc.evaluate(subTitle, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var subTitleObject = doc.evaluate(subTitle, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (subTitleObject){
 		 shortTitle= subTitleObject.textContent.replace(/^\s*|\s*$/g, '');
 		return shortTitle;
 	} else {
 		return shortTitle;
 	}
-	
 }
 
 function doAbstract(doc, url){
-	
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
 	var abstractString=""; 
 	var a= "//meta[@name='description']";
-	var abs= doc.evaluate(a, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var abs= doc.evaluate(a, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (abs){
 		 abstractString = abs.content;
 		 return abstractString;
-		
 	}
 	return abstractString;
-	
 }
 
 function doTitle(doc, url){
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
 	var temp="";
-	var getTitle = '//div[@id="left_col"]/h1';
-	var getTitleObject = doc.evaluate(getTitle, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var getTitle = '//div[@id="left_col"]//h1';
+	var getTitleObject = doc.evaluate(getTitle, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (getTitleObject) {
 		var temp=getTitleObject.textContent.replace(/^\s*|\s*$/g, '');
 		return temp;

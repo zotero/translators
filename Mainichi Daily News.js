@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-05-25 20:42:12"
+	"lastUpdated": "2012-06-03 17:31:43"
 }
 
 // #################################
@@ -109,11 +109,6 @@ var scrapeAndParse = function (url, title) {
 };
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "http://search.mdn.mainichi.jp/result?p=kyoto&st=s",
-		"items": "multiple"
-	},
 	{
 		"type": "web",
 		"url": "http://mainichi.jp/feature/news/20120410org00m040006000c.html",

@@ -1,15 +1,15 @@
 {
 	"translatorID": "c436f3c7-4246-4ed3-a227-a538c8113a0e",
 	"label": "fishpond.co.nz",
-	"creator": "Sopheak Hean",
+	"creator": "Sopheak Hean, Sebastian Karcher",
 	"target": "^https?://www\\.fishpond\\.co\\.nz/",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-03 23:31:46"
+	"browserSupport": "gcsib",
+	"lastUpdated": "2012-06-03 17:18:42"
 }
 
 /*
@@ -33,49 +33,41 @@
 
 
 function detectWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == "x" ) return namespace; else return null;
-	} : null;
-	var definePath = '//td[@class="main hproduct"]//h1';
-	var XpathObject = doc.evaluate(definePath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var definePath = '//td[contains(@class, "product_info")]//h1';
+	var XpathObject = doc.evaluate(definePath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if  (XpathObject) {
 		return "book";
 	} else {
 		var definePath = '//td[@id="page_title"]/h1';
-		var XpathObject = doc.evaluate(definePath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		var XpathObject = doc.evaluate(definePath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 		if  (XpathObject) {
 			return "multiple";
 		}
 	}
-
 }
 
 function scrape(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
+
 	var newItem = new Zotero.Item("book");
 	var title = '//span[@class="fn"]';
-	var titleObject = doc.evaluate(title, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var titleObject = doc.evaluate(title, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (titleObject){
 		newItem.title = titleObject.textContent;
 	}
-		
 	var author = '//p[@id="product_author"]';
-	var authorObject = doc.evaluate(author, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var authorObject = doc.evaluate(author, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (authorObject){
 			authorObject = authorObject.textContent;
 			if (( authorObject.match(/By\s/)) && (authorObject.match(/\([A-Za-z]+\W[a-zA-Z]+\)/)  )){
-				authorObject = authorObject.replace(/By\s/, '').replace(/\([A-Za-z]+\W[a-zA-Z]+\)/, '').split(",");
-				newItem.creators.push(Zotero.Utilities.cleanAuthor(authorObject, "author"));   
-			} 
+				authorObject = ZU.trimInternal(authorObject).replace(/By\s/, '').replace(/\([A-Za-z]+\W[a-zA-Z]+\)/, '').split(",");
+				var i = 0;
+				while (authorObject[i]){
+					newItem.creators.push(Zotero.Utilities.cleanAuthor(authorObject[i], "author"));   
+					i++;
+				}
 			else if (authorObject.match(/By\W/)) {
 				authorObject = authorObject.replace(/By\s/, '').split(",");
-				
-				var i = 0
+				var i = 0;
 				while (authorObject[i]){
 				newItem.creators.push(Zotero.Utilities.cleanAuthor(authorObject[i], "author"));   
 				i++;
@@ -84,7 +76,7 @@ function scrape(doc, url) {
 			
 		}
 	var date = '//table[@class="product_info_text"]/tbody/tr[3]';
-	var dateObject = doc.evaluate(date, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var dateObject = doc.evaluate(date, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (dateObject){
 		dateObject = dateObject.textContent;
 		if (dateObject.match(/Release Date:\s/)){
@@ -93,7 +85,7 @@ function scrape(doc, url) {
 			
 			var d = new Date();
 			date ='//span[@class="arrival_time"]';
-			dateObject = doc.evaluate(date, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			dateObject = doc.evaluate(date, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 				if(dateObject){
 					newItem.date = dateObject.textContent.replace(/Available\s/, '')+ " " +d.getFullYear()
 					;
@@ -101,19 +93,19 @@ function scrape(doc, url) {
 		}
 	}
 	var abstract = '//table[@class="product_info_text"]/tbody/tr/td/p[@class="description"]';
-	var abstractObject = doc.evaluate(abstract, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var abstractObject = doc.evaluate(abstract, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (abstractObject){
 		abstractObject = abstractObject.textContent;
 		newItem.abstractNote = abstractObject;
 	}
 	
 	var isbn = "//table/tbody/tr/td[2]/table[4]/tbody/tr[2]/td[2]";
-	var isbnObject = doc.evaluate(isbn, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var isbnObject = doc.evaluate(isbn, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (isbnObject){
 		newItem.ISBN = isbnObject.textContent;
 	}
 	var publisher = "//table/tbody/tr/td[2]/table[4]/tbody/tr[1]/td[2]/a";
-	var publisherObject = doc.evaluate(publisher, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var publisherObject = doc.evaluate(publisher, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (publisherObject) {
 	 	newItem.publisher= publisherObject.textContent;
 	}
@@ -124,28 +116,27 @@ function scrape(doc, url) {
 
 
 function doWeb(doc, url) {
-		var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		
 		var titles = '//div[@style="padding-bottom:1em;"]/a';
-		var titleObject = doc.evaluate(titles, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titleObject = doc.evaluate(titles, doc, null, XPathResult.ANY_TYPE, null);
 		var next_title; 
 		while ( next_title = titleObject.iterateNext()) {
 			items[next_title.href] = next_title.textContent;
 		}
-		items = Zotero.selectItems(items);
-	
-		for (var i in items) {
-			articles.push(i);
-		}
-		Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-		Zotero.wait();
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			Zotero.Utilities.processDocuments(articles, scrape, function () {
+				Zotero.done();
+			});	
+		});
 	} else {
 		scrape(doc, url);
 	}
@@ -180,6 +171,44 @@ var testCases = [
 				"libraryCatalog": "fishpond.co.nz"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.fishpond.co.nz/Books/Best-of-Pippi-Longstocking-Astrid-Lindgren-Tony-Ross-Illustrated-by/9780192753373",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Astrid",
+						"lastName": "Lindgren",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tony",
+						"lastName": "Ross",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "FishPond Record",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "The Best of Pippi Longstocking",
+				"abstractNote": "Pippi Longstocking is as popular as ever, with dedicated fans all over the world. She's funny, feisty, and incredibly strong and has the most amazing adventures ever! Here's a chance to read three books about Pippi in one volume - Pippi Longstocking, Pippi Goes Aboard, and Pippi in the South Seas. * Pippi Longstocking has phenomenal sales and has been in print continuously for over forty years * Illustrated throughout by best-selling artist, Tony Ross, who has illustrated a new cover for this edition * Astrid Lindgren has won numerous awards including the Hans Christian Andersen Award and the International Book Award.",
+				"libraryCatalog": "fishpond.co.nz"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.fishpond.co.nz/c/Books/a/Astrid+Lindgren",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
