@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-05-25 20:42:12"
+	"lastUpdated": "2012-06-04 20:34:19"
 }
 
 /*
@@ -522,7 +522,7 @@ function scrapeAll(doc, selected) {
 var scrapeCase = function (doc, url) {
 	// Citelet is identified by
 	// id="gsl_reference"
-	var refFrag = doc.evaluate('//div[@id="gsl_reference"]',
+	var refFrag = doc.evaluate('//div[@id="gsl_reference"] | //div[@id="gs_reference"]',
 					doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (refFrag) {
 		// citelet looks kind of like this
