@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-06-03 17:18:42"
+	"lastUpdated": "2012-06-06 11:57:27"
 }
 
 /*
@@ -65,6 +65,7 @@ function scrape(doc, url) {
 					newItem.creators.push(Zotero.Utilities.cleanAuthor(authorObject[i], "author"));   
 					i++;
 				}
+			}
 			else if (authorObject.match(/By\W/)) {
 				authorObject = authorObject.replace(/By\s/, '').split(",");
 				var i = 0;
