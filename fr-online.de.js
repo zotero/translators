@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-08 12:52:24"
+	"browserSupport": "gcsb",
+	"lastUpdated": "2012-06-06 11:55:19"
 }
 
 /*
@@ -39,8 +39,8 @@ http://www.fr-online.de/wirtschaft/krise/portugal-koennte-rettungspaket-benoetig
 */
 
 function detectWeb(doc, url) {
-	var FR_article_XPath = ".//div[contains(@class, 'ArticleToolBoxIcons')]";
-	var FR_multiple_XPath = ".//*[@id='ContainerContent']/div/div[contains(@class, 'Headline2')]/a"
+	var FR_article_XPath = ".//h2[contains(@class, 'Title')]";
+	var FR_multiple_XPath = ".//*[@id='ContainerContent']/div//div[contains(@class, 'ItemHeadline')]/a"
 
 
 	if (doc.evaluate(FR_article_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
@@ -66,9 +66,8 @@ function authorCase(author) { // Turns All-Uppercase-Authors to normally cased A
 }
 
 function scrape(doc, url) {
-	var FR_article_XPath = ".//div[contains(@class, 'ArticleToolBoxIcons')]"; // this protects against galleries...
-	if (doc.evaluate(FR_article_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-
+	if (detectWeb(doc, url) =="newspaperArticle"){
+		Z.debug("here")
 		var newItem = new Zotero.Item("newspaperArticle");
 		newItem.url = doc.location.href;
 
@@ -101,13 +100,9 @@ function scrape(doc, url) {
 		}
 
 		//Date	
-		var date_XPath = ".//div[contains(@class, 'TB_Date')]";
+		var date_XPath = ".//div[contains(@class, 'Date')]";
 		var date = doc.evaluate(date_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		date = date.replace(/^\s*Datum\:\s|\s/g, ''); // remove "Datum: " and " "
-		date = date.split("|");
-		var realdate = "";
-		realdate = realdate.concat(date[2], "-", date[1], "-", date[0]);
-		newItem.date = realdate;
+		newItem.date = date.trim();
 
 		// No Tags. FR does not provide consistently meaningful ones.
 		// Publikation
@@ -196,7 +191,6 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.fr-online.de/krise/portugal-koennte-rettungspaket-benoetigen,1471908,8251842.html",
 						"title": "Andeutung des Finanzministers: Portugal könnte Rettungspaket benötigen",
 						"mimeType": "text/html"
 					}
@@ -204,7 +198,7 @@ var testCases = [
 				"url": "http://www.fr-online.de/krise/portugal-koennte-rettungspaket-benoetigen,1471908,8251842.html",
 				"title": "Andeutung des Finanzministers: Portugal könnte Rettungspaket benötigen",
 				"abstractNote": "Eine politische Krise in Portugal aufgrund der harten Sparvorgaben der Europäischen Union könnte ein Rettungspaket notwendig machen, fürchtet Finanzminister Fernando Teixeira dos Santos.",
-				"date": "2011-3-21",
+				"date": "21. März 2011",
 				"publicationTitle": "fr-online.de",
 				"section": "Schuldenkrise",
 				"language": "de",
