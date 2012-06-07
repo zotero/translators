@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-05-27 01:38:43"
+	"lastUpdated": "2012-06-07 01:42:52"
 }
 
 /*
@@ -335,18 +335,18 @@ function detectType(newItem, node, ret) {
 			break;
 			//zotero
 			case "attachment":
-			// unless processing of independent attachment is intended, don't
-			// process
-			
-			// process as file
-			t.zotero = "attachment";
+				// unless processing of independent attachment is intended, don't
+				// process
 
-			var path = getFirstResults(node, [rdf+"resource"]);
-			if(path) {
-				newItem.path = Zotero.RDF.getResourceURI(path[0]);
-			}
-			newItem.charset = getFirstResults(node, [n.link+"charset"], true);
-			newItem.mimeType = getFirstResults(node, [n.link+"type"], true);
+				// process as file
+				t.zotero = "attachment";
+	
+				var path = getFirstResults(node, [rdf+"resource"]);
+				if(path) {
+					newItem.path = Zotero.RDF.getResourceURI(path[0]);
+				}
+				newItem.charset = getFirstResults(node, [n.link+"charset"], true);
+				newItem.mimeType = getFirstResults(node, [n.link+"type"], true);
 		}
 	}
 	
@@ -961,25 +961,30 @@ function doImport() {
 	
 	var i = 0;
 	for each(var node in nodes) {
-		var newItem = new Zotero.Item();
-		newItem.itemID = Zotero.RDF.getResourceURI(node);
-		
 		// type
 		var type = Zotero.RDF.getTargets(node, rdf+"type");
 		if(type) {
 			type = Zotero.RDF.getResourceURI(type[0]);
-			
+
+			// skip if this is not an independent attachment,
+			if((type == n.z+"Attachment" || type == n.bib+"Memo") && isPart(node)) {
+				continue;
+			}
+
+			// skip collections until all the items are done
 			if(type == n.bib+"Collection" || type == n.z+"Collection") {
-				// skip collections until all the items are done
 				collections.push(node);
 				continue;
 			}
 		}
-		
+
+		var newItem = new Zotero.Item();
+		newItem.itemID = Zotero.RDF.getResourceURI(node);
+
 		if(importItem(newItem, node)) {
 			newItem.complete();
 		}
-		
+
 		Zotero.setProgress(i++/nodes.length*100);
 	}
 	
