@@ -86,7 +86,7 @@ function getFirstResults(node, properties, onlyOneString) {
 				if(typeof(result[0]) != "object") {
 					return result[0];
 				} else {
-					return result[0].value;
+					return result[0].uri;
 				}
 			} else {
 				return result;
