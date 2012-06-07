@@ -172,20 +172,18 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"url": "http://jbjs.org/article.aspx?articleid=178197",
-				"publicationTitle": "The Journal of Bone and Joint Surgery (American)",
-				"journalAbbreviation": "JBJS",
-				"title": "Differentiating Between Methicillin-Resistant and Methicillin-Sensitive Staphylococcus aureus Osteomyelitis in Children: An Evidence-Based Clinical Prediction Algorithm",
-				"volume": "93",
+				"journalAbbreviation": "J Bone Joint Surg Am",
 				"issue": "18",
-				"date": "2011/09/21",
 				"ISSN": "0021-9355",
 				"DOI": "10.2106/JBJS.J.01154",
-				"publisher": "The Journal of Bone and Joint Surgery",
-				"pages": "1693-1701",
 				"abstractNote": "Background: \n  Although osteomyelitis was once commonly due to methicillin-sensitive Staphylococcus aureus (MSSA), methicillin-resistant Staphylococcus aureus (MRSA)—which causes more virulent and invasive infections—has emerged as an increasingly important cause. Differentiating clinically between MRSA and MSSA can be challenging, but is necessary in order to promptly administer appropriate antibiotics and maintain vigilance against possible sequelae of MRSA osteomyelitis. The purpose of our study was to develop a clinical prediction algorithm to distinguish between MRSA and MSSA osteomyelitis in children.Methods: \n  A retrospective review of 129 children presenting with culture-proven Staphylococcus aureus osteomyelitis between 2000 and 2009 was performed. The demographics, symptoms, vital signs, and laboratory test values in the MSSA group (n = 118) and the MRSA group (n = 11) were compared with use of univariate analysis. Multivariate logistic regression with backward stepwise selection was then used to identify independent multivariate predictors of MRSA osteomyelitis, and each of these predictors was subjected to receiver operating characteristic curve analysis to determine the optimal cutoff value. Finally, a prediction algorithm for differentiating between MRSA and MSSA osteomyelitis on the basis of these independent predictors was constructed.Results: \n  Patients with MRSA osteomyelitis differed significantly from those with MSSA osteomyelitis with regard to non-weight-bearing status, antibiotic use at presentation, body temperature, hematocrit value, heart rate, white blood-cell count, platelet count, C-reactive protein level, and erythrocyte sedimentation rate. Four significant independent multivariate predictors were identified: a temperature of >38°C, a hematocrit value of <34%, a white blood-cell count of >12,000 cells/μL, and a C-reactive protein level of >13 mg/L. The predicted probability of MRSA osteomyelitis, determined on the basis of the number of these predictors that a child satisfied, was 92% for all four predictors, 45% for three, 10% for two, 1% for one, and 0% for zero predictors. Receiver operating characteristic curve analysis was used to evaluate the predictive accuracy of the number of multivariate predictors, and this analysis revealed a steep shoulder and an area under the curve of 0.94 (95% confidence interval, 0.88 to 1.00).Conclusions: \n  Our proposed set of four predictors provided excellent diagnostic performance in differentiating between MRSA and MSSA osteomyelitis in children, and thus would be able to guide patient management and facilitate timely antibiotic selection.Level of Evidence: \n  Diagnostic Level IV. See Instructions to Authors for a complete description of levels of evidence.",
 				"libraryCatalog": "JBJS Am",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Differentiating Between Methicillin-Resistant and Methicillin-Sensitive Staphylococcus aureus Osteomyelitis in Children"
+				"shortTitle": "Differentiating Between Methicillin-Resistant and Methicillin-Sensitive Staphylococcus aureus Osteomyelitis in Children",
+				"publicationTitle": "The Journal of Bone and Joint Surgery (American)",
+				"title": "Differentiating Between Methicillin-Resistant and Methicillin-Sensitive Staphylococcus aureus Osteomyelitis in Children: An Evidence-Based Clinical Prediction Algorithm",
+				"volume": "93",
+				"date": "2011/09/21",
+				"pages": "1693-1701"
 			}
 		]
 	}

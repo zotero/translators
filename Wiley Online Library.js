@@ -928,22 +928,23 @@ var testCases = [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
-				"title": "β-Rezeptorenblocker",
-				"publisher": "Wiley-VCH Verlag GmbH & Co. KGaA",
 				"ISBN": "9783527603015",
 				"url": "http://onlinelibrary.wiley.com/doi/10.1002/3527603018.ch17/summary",
-				"DOI": "10.1002/3527603018.ch17",
-				"pages": "365–370",
-				"publicationTitle": "Klinisch-toxikologische Analytik",
-				"date": "2005",
 				"abstractNote": "* Immunoassay * Hochleistungsflüssigkeitschromatographie (HPLC) * Gaschromatographie * Medizinische Beurteilung und klinische Interpretation * Literatur",
 				"bookTitle": "Klinisch-toxikologische Analytik",
 				"language": "de",
 				"rights": "Copyright © 2002 Wiley-VCH Verlag GmbH",
 				"libraryCatalog": "Wiley Online Library",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"title": "β-Rezeptorenblocker",
+				"publisher": "Wiley-VCH Verlag GmbH & Co. KGaA",
+				"pages": "365–370",
+				"date": "2005"
 			}
 		]
 	},

@@ -103,19 +103,17 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [
-					{
-						"url": "http://adsabs.harvard.edu/abs/1955ApJ...121..161S"
-					}
+					{}
 				],
+				"url": "http://adsabs.harvard.edu/abs/1955ApJ...121..161S",
+				"abstractNote": "Abstract image available at: \nhttp://adsabs.harvard.edu/abs/1955ApJ...121..161S",
+				"DOI": "DOI: 10.1086/145971",
+				"libraryCatalog": "NASA ADS",
 				"title": "The Luminosity Function and Stellar Evolution.",
 				"publicationTitle": "The Astrophysical Journal",
 				"volume": "121",
 				"date": "January 1, 1955",
-				"pages": "161",
-				"url": "http://adsabs.harvard.edu/abs/1955ApJ...121..161S",
-				"abstractNote": "Abstract image available at: \nhttp://adsabs.harvard.edu/abs/1955ApJ...121..161S",
-				"libraryCatalog": "NASA ADS",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"pages": "161"
 			}
 		]
 	}

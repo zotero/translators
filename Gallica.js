@@ -286,14 +286,13 @@ var testCases = [
 				],
 				"seeAlso": [],
 				"attachments": [],
-				"title": "Miguel Cervantès / par É. Cat,...",
-				"publisher": "Gedalge (Paris)",
-				"date": "1892",
-				"language": "French",
+				"language": "Français",
 				"rights": "domaine public",
 				"url": "http://gallica.bnf.fr/ark:/12148/bpt6k58121413",
 				"libraryCatalog": "Gallica",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"title": "Miguel Cervantès / par É. Cat,...",
+				"publisher": "Gedalge (Paris)",
+				"date": "1892"
 			}
 		]
 	},

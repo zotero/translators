@@ -154,23 +154,8 @@ var testCases = [
 				"itemType": "patent",
 				"creators": [
 					{
-						"lastName": "Poo",
-						"firstName": "Tze Lei",
-						"creatorType": "inventor"
-					},
-					{
-						"lastName": "Tang",
-						"firstName": "Heng",
-						"creatorType": "inventor"
-					},
-					{
-						"lastName": "Fred Au",
-						"firstName": "Siu-Hung",
-						"creatorType": "inventor"
-					},
-					{
-						"lastName": "Burd",
-						"firstName": "Gregory",
+						"lastName": "Roskind",
+						"firstName": "James",
 						"creatorType": "inventor"
 					}
 				],
@@ -179,12 +164,12 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"url": "http://patft.uspto.gov/netacgi/nph-Parser?Sect1=PTO2&Sect2=HITOFF&p=1&u=%2Fnetahtml%2FPTO%2Fsearch-bool.html&r=1&f=G&l=50&co1=AND&d=PTXT&s1=krypto&OS=krypto&RS=krypto",
-				"patentNumber": "8155308",
-				"issueDate": "April 10, 2012",
-				"assignee": "Marvell International Ltd.\n (Hamilton, \nBM)",
-				"abstractNote": "A cryptographic device comprises a first pipeline stage, a pipeline\n     register, and a second pipeline stage. The first pipeline stage comprises\n     a first byte substitution module that performs mathematical operations on\n     a received byte and outputs an intermediate value based on the\n     mathematical operations. The pipeline register stores the intermediate\n     value. The second pipeline stage comprises a second byte substitution\n     module and a column mixing module. The second byte substitution module\n     generates a replacement byte corresponding to the received byte based on\n     mathematical operations performed on the stored intermediate value. The\n     column mixing module transforms groups of four bytes of a plurality of\n     replacement bytes including the replacement byte.",
+				"patentNumber": "8196189",
+				"issueDate": "June 5, 2012",
+				"assignee": "AOL LLC\n (Dulles, \nVA)",
+				"abstractNote": "A secure distributed single-login authentication system comprises a\n     client and a server. The client collects authentication credentials from\n     a user and tests credentials at a variety of potential authentication\n     servers to check where the login is valid. It combines a password with a\n     time-varying salt and a service-specific seed in a message digesting\n     hash, generating a first hash value. The client sends the hash value with\n     a user name and the time-varying salt to a selected server. The server\n     extracts the user name and looks up the user name in the server's\n     database. If an entry is found, it retrieves the password, performing the\n     same hash function on the combination of user name, service-specific\n     seed, and password to generate a second hash value, comparing the values.\n     If the values match, the user is authenticated. Thus, the system never\n     reveals the password to authentication agents that might abuse the\n     information.",
 				"shortTitle": "United States Patent",
-				"title": "United States Patent: 8155308 - Advanced encryption system hardware architecture"
+				"title": "United States Patent: 8196189 - Simple, secure login with multiple authentication providers"
 			}
 		]
 	},
