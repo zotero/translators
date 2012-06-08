@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-05-31 17:47:01"
+	"lastUpdated": "2012-06-08 16:55:56"
 }
 
 function detectWeb(doc, url) {
@@ -151,7 +151,7 @@ function addIdentifier(identifier, item) {
 function scrape (doc, url) {
  	var arnumber = url.match(/arnumber=\d+/)[0].replace(/arnumber=/, "");
   	var pdf;
-  	pdf = ZU.xpathText(doc, '//ul[@id="subscription-content-controls"]/li/a/@href')
+  	pdf = ZU.xpathText(doc, '//ul[@id="subscription-content-controls"]/li[1]/a/@href')
   	Z.debug(arnumber)
   	var get = 'http://ieeexplore.ieee.org/xpl/downloadCitations';
   	var post = "recordIds=" + arnumber + "&fromPage=&citations-format=citation-abstract&download-format=download-bibtex";
