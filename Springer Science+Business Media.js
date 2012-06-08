@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-06-08 03:38:29"
+	"lastUpdated": "2012-06-08 13:12:56"
 }
 
 /*
@@ -57,21 +57,17 @@ function scrape(doc) {
 		for(var i=0, n=item.attachments.length; !havePdf && i<n; i++) {
 			havePdf = item.attachments[i].mimeType == 'application/pdf';
 		}
-		var pdfUrl;
-		if(!havePdf &&
-			(pdfUrl = ZU.xpathText(doc, 
-				'//div[@id="viewing-options-links"]//a[text()="PDF"]/@href') )) {
 
-			/** TODO: This should be taken care of by Zotero itself */
-			if(pdfUrl[0] == '/') {
-				pdfUrl = doc.location.href.match(/https?:\/\/[^\/]+/)[0] + pdfUrl;
+		if(!havePdf) {
+			var pdfUrl = ZU.xpath(doc, 
+				'//div[@id="viewing-options-links"]//a[text()="PDF"]/@href');
+			if(pdfUrl.length) {
+				item.attachments.push({
+					title: 'Full Text PDF',
+					url: pdfUrl[0].href,
+					mimeType: 'application/pdf'
+				});
 			}
-
-			item.attachments.push({
-				title: 'Full Text PDF',
-				url: pdfUrl,
-				mimeType: 'application/pdf'
-			});
 		}
 
 		//sometimes there's no url specified in the meta tags,
