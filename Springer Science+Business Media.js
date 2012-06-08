@@ -2,14 +2,14 @@
 	"translatorID": "dfec8317-9b59-4cc5-8771-cdcef719d171",
 	"label": "Springer Science+Business Media",
 	"creator": "Aurimas Vinckevicius",
-	"target": "^https?://[^/]+/(content/\\d+/\\d+/\\d+|search/results)",
+	"target": "^https?://[^/]+/((content|\\d+)/\\d+/\\d+/\\d+|search/results)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-05-16 09:17:55"
+	"lastUpdated": "2012-06-08 13:12:56"
 }
 
 /*
@@ -51,6 +51,24 @@ function scrape(doc) {
 	translator.setHandler("itemDone", function(obj, item) {
 		item.abstractNote = item.extra;
 		delete item.extra;
+
+		//if there is no pdf link in the meta tags, try to find it in the body
+		var havePdf = false;
+		for(var i=0, n=item.attachments.length; !havePdf && i<n; i++) {
+			havePdf = item.attachments[i].mimeType == 'application/pdf';
+		}
+
+		if(!havePdf) {
+			var pdfUrl = ZU.xpath(doc, 
+				'//div[@id="viewing-options-links"]//a[text()="PDF"]/@href');
+			if(pdfUrl.length) {
+				item.attachments.push({
+					title: 'Full Text PDF',
+					url: pdfUrl[0].href,
+					mimeType: 'application/pdf'
+				});
+			}
+		}
 
 		//sometimes there's no url specified in the meta tags,
 		//only og:url, which is for the website.
@@ -223,6 +241,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"itemID": "http://www.nanoscalereslett.com/content/6/1/530/abstract",
@@ -435,6 +457,75 @@ var testCases = [
 				"volume": "5",
 				"pages": "5",
 				"date": "2011-02-07"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://genomebiology.com/2003/4/7/223/abstract",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "David A.",
+						"lastName": "Mangus",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Matthew C.",
+						"lastName": "Evans",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Allan",
+						"lastName": "Jacobson",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"itemID": "http://genomebiology.com/2003/4/7/223/abstract",
+				"title": "Poly(A)-binding proteins: multifunctional scaffolds for the post-transcriptional control of gene expression",
+				"publicationTitle": "Genome Biology",
+				"rights": "2003 BioMed Central Ltd",
+				"volume": "4",
+				"issue": "7",
+				"number": "7",
+				"patentNumber": "7",
+				"pages": "223",
+				"publisher": "BioMed Central Ltd",
+				"institution": "BioMed Central Ltd",
+				"company": "BioMed Central Ltd",
+				"label": "BioMed Central Ltd",
+				"distributor": "BioMed Central Ltd",
+				"date": "2003-07-01",
+				"DOI": "10.1186/gb-2003-4-7-223",
+				"ISSN": "1465-6906",
+				"reportType": "Protein family review",
+				"letterType": "Protein family review",
+				"manuscriptType": "Protein family review",
+				"mapType": "Protein family review",
+				"thesisType": "Protein family review",
+				"websiteType": "Protein family review",
+				"presentationType": "Protein family review",
+				"postType": "Protein family review",
+				"audioFileType": "Protein family review",
+				"language": "en",
+				"url": "http://genomebiology.com/2003/4/7/223/abstract",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "genomebiology.com",
+				"shortTitle": "Poly(A)-binding proteins"
 			}
 		]
 	}
