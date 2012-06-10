@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-06-09 11:45:11"
+	"lastUpdated": "2012-06-10 00:01:42"
 }
 
 /*
@@ -82,7 +82,7 @@ function scrape(doc) {
 	newItem.title = Zotero.Utilities.trimInternal(getXPath('//hgroup/h3', doc).textContent);
 	var date = ZU.xpathText(doc, '//hgroup/time/@datetime');
 	if (date) newItem.date = date.replace(/\d\d\:\d\d:\d\d/, "").trim();
-	newItem.publicationTitle == "Neue Zürcher Zeitung";
+	newItem.publicationTitle = "Neue Zürcher Zeitung";
 	newItem.ISSN = "0376-6829";
 	//The old translator used to differentiate between online, regular and Sunday paper. 
 	//I don't think that's possible with the new webpage.
@@ -111,9 +111,7 @@ function scrape(doc) {
 		var authors = authorline.split(/,|und/);
 		for (var i = 0; i < authors.length && authorline.length > 0; i++) {
 			newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i], "author"));
-		}
-		for (i in newItem.creators){
-			if (newItem.creators[i].firstName.length<1){
+			if (!newItem.creators[i].firstName){
 				newItem.creators[i].fieldMode = 1;
 			}
 		}
@@ -171,6 +169,7 @@ var testCases = [
 				"url": "http://www.nzz.ch/aktuell/wirtschaft/uebersicht/kuoni-gta-uebernahme-1.13276960",
 				"title": "Kuoni profitiert von der GTA-Übernahme: Deutliches Umsatzplus in den ersten neun Monaten",
 				"date": "2011-11-10",
+				"publicationTitle": "Neue Zürcher Zeitung",
 				"ISSN": "0376-6829",
 				"shortTitle": "Kuoni profitiert von der GTA-Übernahme",
 				"section": "Aktuell",
@@ -205,6 +204,7 @@ var testCases = [
 				"url": "http://www.nzz.ch/aktuell/international/wie-ein-mexikanisches-staedtchen-die-boesewichte-vertrieb-1.17091747",
 				"title": "Wie ein mexikanisches Städtchen die Bösewichte vertrieb: Landsgemeinde als Mittel gegen das organisierte Verbrechen und korrupte Behörden",
 				"date": "2012-05-30",
+				"publicationTitle": "Neue Zürcher Zeitung",
 				"ISSN": "0376-6829",
 				"shortTitle": "Wie ein mexikanisches Städtchen die Bösewichte vertrieb",
 				"section": "International",
