@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-05-25 20:43:12"
+	"browserSupport": "gcsib",
+	"lastUpdated": "2012-06-10 11:09:24"
 }
 
 /*
@@ -258,19 +258,19 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://articles.boston.com/2012-05-06/news/31599524_1_qaida-khalid-sheik-mohammed-medunjanin",
+		"url": "http://articles.boston.com/2012-06-06/news/32082155_1_bargaining-for-public-employees-collective-bargaining-exit-polls",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
 				"creators": [
 					{
-						"firstName": "Tom",
-						"lastName": "Hays",
+						"firstName": "Jennifer",
+						"lastName": "Agiesta",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Larry",
-						"lastName": "Neumeister",
+						"firstName": "Thomas",
+						"lastName": "Beaumont",
 						"creatorType": "author"
 					}
 				],
@@ -285,8 +285,8 @@ var testCases = [
 					}
 				],
 				"publicationTitle": "Boston.com",
-				"url": "http://articles.boston.com/2012-05-06/news/31599524_1_qaida-khalid-sheik-mohammed-medunjanin",
-				"title": "Cooperators give firsthand look at al-Qaida",
+				"url": "http://articles.boston.com/2012-06-06/news/32082155_1_bargaining-for-public-employees-collective-bargaining-exit-polls",
+				"title": "Wisconsin voters divided on bargaining, governor",
 				"libraryCatalog": "The Boston Globe",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
