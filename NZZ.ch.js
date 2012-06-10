@@ -1,20 +1,20 @@
 {
 	"translatorID": "61ffe600-55e0-11df-bed9-0002a5d5c51b",
 	"label": "nzz.ch",
-	"creator": "ibex",
-	"target": "^http://((www\\.)?nzz\\.ch/.)",
-	"minVersion": "2.0",
+	"creator": "ibex, Sebastian Karcher",
+	"target": "^https?://(www\\.)?nzz\\.ch/.",
+	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-01-30 22:45:11"
+	"lastUpdated": "2012-06-10 00:01:42"
 }
 
 /*
 	NZZ Translator - Parses NZZ articles and creates Zotero-based metadata.
-	Copyright (C) 2010 ibex
+	Copyright (C) 2010&2012 ibex and Sebastian Karcher
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -32,20 +32,16 @@
 
 /* Get the first xpath element from doc, if not found return null. */
 function getXPath(xpath, doc) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == "x") return namespace; else return null;
-	} : null;
 
-	return doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	return doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 }
 
 /* Zotero API */
 function detectWeb(doc, url) {
 	//Zotero.debug("ibex detectWeb URL= " + url);
-	if (doc.title.substr(0, 6) == "Suche " && getXPath('//ul[@class = "berichte"]', doc)) {
+	if (url.match(/search\?form/)) {
 		return "multiple";
-	} else if (doc.location.href.match(/\.\d+\.html/) && getXPath('/html/body[@class = "artikel"]', doc)) {
+	} else if (getXPath('//article[@class = "article-full"]', doc)) {
 		return "newspaperArticle";
 	}
 }
@@ -53,25 +49,29 @@ function detectWeb(doc, url) {
 /* Zotero API */
 function doWeb(doc, url) {
 	//Zotero.debug("ibex doWeb URL= " + url);
+	var articles = new Array();
 	var urls = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		var items = Zotero.Utilities.getItemArray(doc, doc.getElementById("content").getElementsByClassName('berichte'), '\\.\\d+\\.html');
-		if (!items || countObjectProperties(items) == 0) {
-			return true;
+	var items = {};
+		var titles = doc.evaluate('//hgroup/h3/a', doc, null, XPathResult.ANY_TYPE, null);
+		var title;
+		while (title = titles.iterateNext()) {
+			items[title.href] = title.textContent;
 		}
-		items = Zotero.selectItems(items);
-		if (!items) {
-			return true;
-		}
-
-		for (var i in items) {
-			urls.push(i);
-		}
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			Zotero.Utilities.processDocuments(articles, scrape, function () {
+				Zotero.done();
+			});
+		});
 	} else {
-		urls.push(doc.location.href);
+		scrape(doc, url);
 	}
-	Zotero.Utilities.processDocuments(urls, scrape, function() { Zotero.done(); } );
-	Zotero.wait();
 }
 
 /* Three types of articles: "Neue Zürcher Zeitung", "NZZ Online" and "NZZ am Sonntag" */
@@ -79,34 +79,26 @@ function scrape(doc) {
 	//Zotero.debug("ibex scrape URL = " + doc.location.href);
 	var newItem = new Zotero.Item('newspaperArticle');
 	newItem.url = doc.location.href;
-	newItem.title = Zotero.Utilities.trimInternal(getXPath('//div[@id = "content"]//h1', doc).textContent);
+	newItem.title = Zotero.Utilities.trimInternal(getXPath('//hgroup/h3', doc).textContent);
+	var date = ZU.xpathText(doc, '//hgroup/time/@datetime');
+	if (date) newItem.date = date.replace(/\d\d\:\d\d:\d\d/, "").trim();
+	newItem.publicationTitle = "Neue Zürcher Zeitung";
+	newItem.ISSN = "0376-6829";
+	//The old translator used to differentiate between online, regular and Sunday paper. 
+	//I don't think that's possible with the new webpage.
 
-	var publ = Zotero.Utilities.trimInternal(getXPath('//div[@id = "content"]//p[@class = "dachzeile"]', doc).textContent);
-	publ = publ.split(',');
-	newItem.date = Zotero.Utilities.trimInternal(publ[0]);
-
-	newItem.publicationTitle = Zotero.Utilities.trimInternal(publ[publ.length - 1]);
-	if (newItem.publicationTitle.match(/^\d/)) {
-		//set a publication title if there is only a number (date)
-		newItem.publicationTitle = "NZZ";
-	} else if (newItem.publicationTitle == "Neue Zürcher Zeitung") {
-		newItem.ISSN = "0376-6829";
-	} else if (newItem.publicationTitle == "NZZ am Sonntag") {
-		newItem.ISSN = "1660-0851";
-	}
-
-	var subtitle = getXPath('//div[@id = "content"]//h2', doc);
+	var subtitle = getXPath('//hgroup/h4', doc);
 	if ((subtitle != null) && (Zotero.Utilities.trimInternal(subtitle.textContent) != "")) {
 		newItem.shortTitle = newItem.title;
 		newItem.title += ": " + Zotero.Utilities.trimInternal(subtitle.textContent);
 	}
 
-	var teaser = getXPath('//div[@id = "content"]//h3', doc);
+	var teaser = getXPath('//article/p[@class = "leader"]', doc);
 	if ((teaser != null) && (Zotero.Utilities.trimInternal(teaser.textContent) != "")) {
 		newItem.abstractNote = Zotero.Utilities.trimInternal(teaser.textContent);
 	}
 
-	var authorline = getXPath('//div[@id = "content"]//p[@class = "autor"]', doc);
+	var authorline = getXPath('//article/address/span', doc);
 	if (authorline != null) {
 		authorline = Zotero.Utilities.trimInternal(authorline.textContent);
 		//assumption of authorline: "[Interview:|Von ]name1[, name2] [und Name3][, location]"
@@ -119,10 +111,13 @@ function scrape(doc) {
 		var authors = authorline.split(/,|und/);
 		for (var i = 0; i < authors.length && authorline.length > 0; i++) {
 			newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i], "author"));
+			if (!newItem.creators[i].firstName){
+				newItem.creators[i].fieldMode = 1;
+			}
 		}
 	}
 
-	var section = getXPath('//ul[@id="navi"]//ul[@id="submenu1"]/li[@class="selected"]/a', doc);
+	var section = getXPath('//hgroup/h6/a', doc);
 	if (section != null) {
 		newItem.section = Zotero.Utilities.trimInternal(section.textContent);
 	}
@@ -149,11 +144,18 @@ function countObjectProperties(obj) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.nzz.ch/nachrichten/wirtschaft/aktuell/kuoni_gta-uebernahme_1.13276960.html",
+		"url": "http://www.nzz.ch/aktuell/wirtschaft/uebersicht/kuoni-gta-uebernahme-1.13276960",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"creators": [],
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "sda",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
@@ -164,21 +166,56 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"url": "http://www.nzz.ch/aktuell/wirtschaft/uebersicht/kuoni_gta-uebernahme_1.13276960.html",
-				"shortTitle": "Kuoni profitiert von der GTA-Übernahme",
-				"abstractNote": "Der Reisekonzern Kuoni hat in den ersten neun Monaten von der Übernahme des Reisekonzerns Gullivers Travel Associates (GTA) profitiert. Der Umsatz stieg, und der Konzern machte Gewinn.",
-				"section": "Wirtschaft",
-				"extra": "sda",
-				"libraryCatalog": "nzz.ch",
+				"url": "http://www.nzz.ch/aktuell/wirtschaft/uebersicht/kuoni-gta-uebernahme-1.13276960",
 				"title": "Kuoni profitiert von der GTA-Übernahme: Deutliches Umsatzplus in den ersten neun Monaten",
-				"date": "10. November 2011",
-				"publicationTitle": "NZZ Online"
+				"date": "2011-11-10",
+				"publicationTitle": "Neue Zürcher Zeitung",
+				"ISSN": "0376-6829",
+				"shortTitle": "Kuoni profitiert von der GTA-Übernahme",
+				"section": "Aktuell",
+				"libraryCatalog": "nzz.ch",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.nzz.ch/search?q=arbeitsmarkt",
+		"url": "http://www.nzz.ch/aktuell/international/wie-ein-mexikanisches-staedtchen-die-boesewichte-vertrieb-1.17091747",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "Matthias",
+						"lastName": "Knecht",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "NZZ Online Article Snapshot",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"url": "http://www.nzz.ch/aktuell/international/wie-ein-mexikanisches-staedtchen-die-boesewichte-vertrieb-1.17091747",
+				"title": "Wie ein mexikanisches Städtchen die Bösewichte vertrieb: Landsgemeinde als Mittel gegen das organisierte Verbrechen und korrupte Behörden",
+				"date": "2012-05-30",
+				"publicationTitle": "Neue Zürcher Zeitung",
+				"ISSN": "0376-6829",
+				"shortTitle": "Wie ein mexikanisches Städtchen die Bösewichte vertrieb",
+				"section": "International",
+				"libraryCatalog": "nzz.ch",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.nzz.ch/search?form%5Bq%5D=arbeitsmarkt",
 		"items": "multiple"
 	}
 ]
