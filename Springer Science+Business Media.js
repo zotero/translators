@@ -2,14 +2,14 @@
 	"translatorID": "dfec8317-9b59-4cc5-8771-cdcef719d171",
 	"label": "Springer Science+Business Media",
 	"creator": "Aurimas Vinckevicius",
-	"target": "^https?://[^/]+/((content|\\d+)/\\d+/\\d+/\\d+|search/results)",
+	"target": "^https?://[^/]+/(((content|\\d+)/)?[-\\d]+/\\d+/\\d+|search/results)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-06-08 13:12:56"
+	"lastUpdated": "2012-06-10 15:10:59"
 }
 
 /*
@@ -526,6 +526,100 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "genomebiology.com",
 				"shortTitle": "Poly(A)-binding proteins"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.biomedcentral.com/1752-0509/4/170",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Fei",
+						"lastName": "Gu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hang-Kai",
+						"lastName": "Hsu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Pei-Yin",
+						"lastName": "Hsu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jiejun",
+						"lastName": "Wu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yilin",
+						"lastName": "Ma",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jeffrey",
+						"lastName": "Parvin",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tim H.-M.",
+						"lastName": "Huang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Victor X.",
+						"lastName": "Jin",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"itemID": "http://www.biomedcentral.com/1752-0509/4/170",
+				"title": "Inference of hierarchical regulatory network of estrogen-dependent breast cancer through ChIP-based data",
+				"publicationTitle": "BMC Systems Biology",
+				"rights": "2010 Gu et al; licensee BioMed Central Ltd.",
+				"volume": "4",
+				"issue": "1",
+				"number": "1",
+				"patentNumber": "1",
+				"pages": "170",
+				"publisher": "BioMed Central Ltd",
+				"institution": "BioMed Central Ltd",
+				"company": "BioMed Central Ltd",
+				"label": "BioMed Central Ltd",
+				"distributor": "BioMed Central Ltd",
+				"date": "2010-12-17",
+				"DOI": "10.1186/1752-0509-4-170",
+				"ISSN": "1752-0509",
+				"reportType": "Research article",
+				"letterType": "Research article",
+				"manuscriptType": "Research article",
+				"mapType": "Research article",
+				"thesisType": "Research article",
+				"websiteType": "Research article",
+				"presentationType": "Research article",
+				"postType": "Research article",
+				"audioFileType": "Research article",
+				"language": "en",
+				"abstractNote": "Global profiling of in vivo protein-DNA interactions using ChIP-based technologies has evolved rapidly in recent years. Although many genome-wide studies have identified thousands of ERα binding sites and have revealed the associated transcription factor (TF) partners, such as AP1, FOXA1 and CEBP, little is known about ERα associated hierarchical transcriptional regulatory networks.",
+				"url": "http://www.biomedcentral.com/1752-0509/4/170/abstract",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.biomedcentral.com"
 			}
 		]
 	}
