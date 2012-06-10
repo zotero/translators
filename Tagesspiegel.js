@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-03-08 18:25:10"
+	"lastUpdated": "2012-06-10 09:27:00"
 }
 
 /*
@@ -77,7 +77,7 @@ function scrape(doc, url) {
 		var author  = ZU.xpathText(doc, author_XPath);
 		Zotero.debug(author);
 		if (author != null){
-		author = author.replace(/^Von\s|Kommentar\svon\s/g, '');
+		author = author.replace(/^[Vv]on\s|Kommentar\svon\s/g, '');
 		author = author.split(/,\s/);
 		for (var i in author) {
 			newItem.creators.push(Zotero.Utilities.cleanAuthor(author[i], "author"));
@@ -157,14 +157,13 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.tagesspiegel.de/berlin/statistik-radler-und-fussgaenger-leben-wieder-gefaehrlicher/v_print,5767876.html?p=",
 						"title": "Statistik: Radler und Fußgänger leben wieder gefährlicher - Berlin - Tagesspiegel",
 						"mimeType": "text/html"
 					}
 				],
 				"url": "http://www.tagesspiegel.de/berlin/statistik-radler-und-fussgaenger-leben-wieder-gefaehrlicher/5767876.html",
 				"title": "Radler und Fußgänger leben wieder gefährlicher",
-				"date": "29.10.2011",
+				"date": "28.10.2011",
 				"abstractNote": "Die Zahl der Verkehrstoten nimmt erneut zu. Die Polizei beklagt Unachtsamkeit von Autofahrern – und hofft auf mehr Radspuren.",
 				"publicationTitle": "Der Tagesspiegel Online",
 				"libraryCatalog": "Der Tagesspiegel",
