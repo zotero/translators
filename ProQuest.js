@@ -64,6 +64,9 @@ function detectWeb(doc, url) {
 	if(lang && lang.trim() != "English") {
 		language = lang.trim();
 		L = fieldNames[language];
+	} else {
+		language = 'English';
+		L = {};
 	}
 
 	//Check for multiple first
