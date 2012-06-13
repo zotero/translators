@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-03 11:27:05"
+	"lastUpdated": "2012-06-13 15:35:32"
 }
 
 function detectWeb(doc, url) {
@@ -81,7 +81,10 @@ function doWeb(doc, url) {
 		else {
 			var journalabr = data.match(/Journal:\s+(.*)/);
 			item.journalAbbreviation = Zotero.Utilities.trimInternal(journalinfo[1]); }
-		item.date = Zotero.Utilities.trimInternal(data.match(/Posted:\s+(.*)(\n|Full)/)[1]);
+		item.date = Zotero.Utilities.trimInternal(data.match(/Posted:\s+(.*)(\n|Full)/)[1]).replace(/MathSci.+$/, "");
+		if (data.match(/MathSciNet/)){
+			item.extra= Zotero.Utilities.trimInternal(data.match(/MathSci.+\d+/)[0]);
+		}
 		var pdfurl = item.url.replace(/([^/]+)\/home.html$/, "$1/$1.pdf");
 		item.attachments = [
 			{url:item.url, title:item.journalAbbreviation + " Snapshot", mimeType:"text/html"},
@@ -93,7 +96,6 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"defer": true,
 		"url": "http://www.ams.org/journals/jams/2012-25-01/",
 		"items": "multiple"
 	},
@@ -125,12 +127,10 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.ams.org/journals/jams/2012-25-01/S0894-0347-2011-00713-3/home.html",
 						"title": "J. Amer. Math. Soc. Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"url": "http://www.ams.org/journals/jams/2012-25-01/S0894-0347-2011-00713-3/S0894-0347-2011-00713-3.pdf",
 						"title": "J. Amer. Math. Soc. PDF",
 						"mimeType": "application/pdf"
 					}
@@ -144,6 +144,7 @@ var testCases = [
 				"pages": "1-20",
 				"issue": "01",
 				"date": "July 8, 2011",
+				"extra": "MathSciNet review: 2833477",
 				"abstractNote": "We prove, for certain pairs of finite groups of Lie type, that the -fusion systems and are equivalent. In other words, there is an isomorphism between a Sylow -subgroup of and one of which preserves -fusion. This occurs, for example, when and for a simple Lie ``type'' , and and are prime powers, both prime to , which generate the same closed subgroup of -adic units. Our proof uses homotopy-theoretic properties of the -completed classifying spaces of and , and we know of no purely algebraic proof of this result.",
 				"libraryCatalog": "AMS Journals",
 				"accessDate": "CURRENT_TIMESTAMP"

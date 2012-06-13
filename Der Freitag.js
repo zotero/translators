@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-01-30 22:51:09"
+	"lastUpdated": "2012-06-13 15:07:20"
 }
 
 /*
@@ -39,13 +39,6 @@ http://www.freitag.de/guardian-world
 
 function detectWeb(doc, url) {
 
-	// I use XPaths. Therefore, I need the following block.
-	
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
 	var Freitag_Artikel_XPath = '//div[contains(@class, "artikel_content")]/h2';
 	var Freitag_multiple_XPath = ".//h3[contains(@class, 'listing')]/a";
 	
@@ -59,11 +52,7 @@ function detectWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
+
 	var newItem = new Zotero.Item("newspaperArticle");
 	newItem.url = doc.location.href; 
 
@@ -71,7 +60,8 @@ function scrape(doc, url) {
 	// This is for the author and date
 	
 	var meta_XPath = "//div[contains(@class, 'article-heading-meta-left')]"
-	var meta = doc.evaluate(meta_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	var meta = doc.evaluate(meta_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	//Z.debug(meta)
 	meta = meta.split("|");
 	for (var i in meta) {
 		meta[i] = meta[i].replace(/^\s*|\s*$/g, '');
@@ -89,7 +79,7 @@ function scrape(doc, url) {
 	
 	// title 
 	var title_XPath = '//title';
-	var title = doc.evaluate(title_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	var title = doc.evaluate(title_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	title = title.split(/\:|\—/);
 	for (var i in title) {
 		title[i] = title[i].replace(/^\s*|\s*$/g, '');
@@ -100,19 +90,19 @@ function scrape(doc, url) {
 
 	// Summary	
 	var summary_XPath = "//div[@class='artikel_content']/h3";
-	var summary = doc.evaluate(summary_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	var summary = doc.evaluate(summary_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	newItem.abstractNote = Zotero.Utilities.trim(summary);
 
 	// no Tags, because Der Freitag doesn't supply any.
 	// Section
 	var section_XPath = "//h1";
-	var section= doc.evaluate(section_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	var section= doc.evaluate(section_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	newItem.section= section;
 
 	
 	// Snapshot
 	var printurl_XPath = ".//a[@id='article-drucken']"
-	var printurl= doc.evaluate(printurl_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+	var printurl= doc.evaluate(printurl_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
 	newItem.attachments.push({url:printurl, title:doc.title, mimeType:"text/html"});
 	newItem.complete()
 
@@ -120,27 +110,28 @@ function scrape(doc, url) {
 
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
 	var articles = new Array();
-	
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		
-		var titles = doc.evaluate(".//h3[contains(@class, 'listing')]/a", doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate(".//h3[contains(@class, 'listing')]/a", doc, null, XPathResult.ANY_TYPE, null);
 		
 		var next_title;
 		while (next_title = titles.iterateNext()) {
 			items[next_title.href] = next_title.textContent;
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
-		Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-		Zotero.wait();
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			Zotero.Utilities.processDocuments(articles, scrape, function () {
+				Zotero.done();
+			});
+			Zotero.wait();
+		});
 	} else {
 		scrape(doc, url);
 	}
