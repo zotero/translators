@@ -2,14 +2,14 @@
 	"translatorID": "fce388a6-a847-4777-87fb-6595e710b7e7",
 	"label": "ProQuest",
 	"creator": "Avram Lyon",
-	"target": "^https?://search\\.proquest\\.com.*\\/(docview|results|publicationissue|browseterms|browsetitles|browseresults|myresearch\\/(figtables|documents))",
+	"target": "^https?://search\\.proquest\\.com.*\\/(docview|pagepdf|results|publicationissue|browseterms|browsetitles|browseresults|myresearch\\/(figtables|documents))",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-12 21:04:27"
+	"lastUpdated": "2012-06-12 22:48:48"
 }
 
 /*
@@ -33,13 +33,22 @@
 var language="English";
 var L={};
 
+var followLink;
+
 //returns an array of values for a given field or array of fields
 //the values are in the same order as the field names
 function getTextValue(doc, fields) {
 	if(typeof(fields) != 'object') fields = [fields];
 
 	//localize fields
-	fields = fields.map(function(field) { return L[field] || field; });
+	fields = fields.map(
+		function(field) {
+			if(fieldNames[language]) {
+				return fieldNames[language][field] || field;
+			} else {
+				return field;
+			}
+		});
 
 	var allValues = [], values;
 	for(var i=0, n=fields.length; i<n; i++) {
@@ -80,11 +89,43 @@ function initLang(doc, url) {
 	L = {};
 }
 
+function fetchEmbeddedPdf(url, item, callback) {
+	ZU.processDocuments(url, function(doc) {
+		var pdfLink = ZU.xpath(doc, '//span[@class="pdfReader_link"]/a');
+		var attr = 'href';
+
+		//try to fall back to the URL of the embedded PDF
+		if(!pdfLink.length) {
+			Zotero.debug('PDF link not found. Falling back to embedded PDF.');
+			pdfLink = ZU.xpath(doc, '//embed');
+			attr = 'src';
+		}
+
+		if(!pdfLink.length) {
+			Zotero.debug('Could not determine PDF url.');
+			Zotero.debug('Will try to use supplied url: ' + url);
+		} else {
+			url = pdfLink[0][attr];
+		}
+
+		if(pdfLink.length) {
+			item.attachments.push({
+				title: 'Full Text PDF',
+				url: url,
+				mimeType: 'application/pdf'
+			});
+		}
+	}, callback);
+}
+
 function detectWeb(doc, url) {
 	initLang(doc, url);
 
+	followLink = false;
+
 	//Check for multiple first
-	if (url.indexOf('docview') == -1) {
+	if (url.indexOf('docview') == -1 &&
+		url.indexOf('pagepdf') == -1) {
 		var resultitem = ZU.xpath(doc, '//a[contains(@href, "/docview/")]');
 		if (resultitem.length) {
 			return "multiple";
@@ -101,24 +142,31 @@ function detectWeb(doc, url) {
 		return "newspaperArticle";
 	}
 
-	if (url.indexOf('/dissertations/') != -1) return "thesis";
-
 	// Fall back on journalArticle-- even if we couldn't guess the type
 	if(types.length) return "journalArticle";
 
 	if (url.indexOf("/results/") === -1) {
+		//we might be on a page with a link to the abstract/metadata
+		//e.g. pdf view
 		var abstract_link = ZU.xpath(doc, '//a[@class="formats_base_sprite format_abstract"]');
-		if (abstract_link.length) return "journalArticle";
+		if (abstract_link.length == 1) {
+			//let the tranlator know that, instead of scraping this page,
+			//we need to follow the link
+			followLink = true;
+			return (url.indexOf('/dissertations/') != -1)? "thesis" : "journalArticle";
+		}
 	}
 
 	return false;
 }
 
-function doWeb(doc, url) {
+//we can pass pdfUrl to doWeb if we're coming to abstract/metadata page
+//from full text pdf view
+function doWeb(doc, url, pdfUrl) {
 	var type = detectWeb(doc, url);
-	if (type != "multiple") {
-		scrape(doc, url, type);
-	} else {
+	if (type != "multiple" && !followLink) {	//see detectWeb
+		scrape(doc, url, type, pdfUrl);
+	} else if(type == "multiple") {
 		// detect web returned multiple
 		var results = ZU.xpath(doc, '//a[contains(@class,"previewTitle") or\
 									contains(@class,"resultTitle")]');
@@ -140,12 +188,35 @@ function doWeb(doc, url) {
 				articles.push(i);
 			}
 			ZU.processDocuments(articles,
+				//call doWeb so that we rerun detectWeb to get type and
+				//initialize translations
 				function(doc) { doWeb(doc, doc.location.href) });
 		});
+	//pdfUrl should be undefined unless we are calling doWeb from the following
+	//block, where it is set to false or an actual value
+	} else if(followLink && pdfUrl === undefined) {
+		pdfUrl = false;
+		var link = ZU.xpathText(doc,
+			'//a[@class="formats_base_sprite format_abstract"]/@href');
+		if(!link) return;
+
+		//see if we can get the full text PDF link before we go
+		//the logic here is actually slightly different from fetchEmbeddedPdf
+		if(url.indexOf('fulltextPDF') != -1) {
+			pdfUrl = ZU.xpath(doc, '//embed');
+			if(pdfUrl.length) {
+				pdfUrl = pdfUrl[0].src;
+			} else {
+				pdfUrl = false;
+			}
+		}
+
+		ZU.processDocuments(link, function(doc) {
+			doWeb(doc, doc.location.href, pdfUrl) });
 	}
 }
 
-function scrape(doc, url, type) {
+function scrape(doc, url, type, pdfUrl) {
 	var item = new Zotero.Item(type);
 
 	//get all rows
@@ -305,17 +376,25 @@ function scrape(doc, url, type) {
 		document: doc
 	});
 
-	var pdfUrl = ZU.xpath(doc, '//div[@id="side_panel"]//\
-		a[contains(@class,"format_pdf") and contains(@href,"fulltext")][1]');
-	if(pdfUrl.length) {
+	//we may already have a link to the full length PDF
+	if(pdfUrl) {
 		item.attachments.push({
 			title: 'Full Text PDF',
-			url: pdfUrl[0].href,
+			url: pdfUrl,
 			mimeType: 'application/pdf'
 		});
+	} else {
+		var pdfLink = ZU.xpath(doc, '//div[@id="side_panel"]//\
+			a[contains(@class,"format_pdf") and contains(@href,"fulltext")][1]');
+		if(pdfLink.length) {
+			fetchEmbeddedPdf(pdfLink[0].href, item,
+				function() { item.complete(); });
+		}
 	}
 
-	item.complete();
+	if(pdfUrl || !pdfLink.length) {
+		item.complete();
+	}
 }
 
 function getItemType(types) {
@@ -1169,6 +1248,110 @@ var testCases = [
 				"libraryCatalog": "ProQuest",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "THE PRESIDENT AND ALDRICH."
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://search.proquest.com/dissertations/pagepdf/251755786/fulltextPDF",
+		"items": [
+			{
+				"itemType": "thesis",
+				"creators": [
+					{
+						"firstName": "Valleri Jane",
+						"lastName": "Robinson",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Communication and the arts",
+					"Stanislavsky",
+					"Konstantin",
+					"Konstantin Stanislavsky",
+					"Russian",
+					"Modernism",
+					"Theater"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"title": "Beyond Stanislavsky: The influence of Russian modernism on the American theatre",
+				"pages": "233 p.",
+				"section": "0168",
+				"ISBN": "9780493440408, 0493440402",
+				"university": "The Ohio State University",
+				"thesisType": "Ph.D.",
+				"language": "English",
+				"rights": "Copyright UMI - Dissertations Publishing 2001",
+				"url": "http://search.proquest.com/dissertations/docview/251755786/abstract?accountid=12861",
+				"place": "United States -- Ohio",
+				"date": "2001",
+				"numPages": "233 p.",
+				"abstractNote": "Russian modernist theatre greatly influenced the development of American theatre during the first three decades of the twentieth century. Several developments encouraged the relationships between Russian artists and their American counterparts, including key tours by Russian artists in America, the advent of modernism in the American theatre, the immigration of Eastern Europeans to the United States, American advertising and consumer culture, and the Bolshevik Revolution and all of its domestic and international ramifications. Within each of these major and overlapping developments, Russian culture became increasingly acknowledged and revered by American artists and thinkers, who were seeking new art forms to express new ideas. This study examines some of the most significant contributions of Russian theatre and its artists in the early decades of the twentieth century. Looking beyond the important visit of the Moscow Art Theatre in 1923, this study charts the contributions of various Russian artists and their American supporters.\nCertainly, the influence of Stanislavsky and the Moscow Art Theatre on the modern American theatre has been significant, but theatre historians' attention to his influence has overshadowed the contributions of other Russian artists, especially those who provided non-realistic approaches to theatre. In order to understand the extent to which Russian theatre influenced the American stage, this study focuses on the critics, intellectuals, producers, and touring artists who encouraged interaction between Russians and Americans, and in the process provided the catalyst for American theatrical experimentation. The key figures in this study include some leaders in the Yiddish intellectual and theatrical communities in New York City, Morris Gest and Otto H. Kahn, who imported many important Russian performers for American audiences, and a number of Russian émigré artists, including Jacob Gordin, Jacob Ben-Ami, Benno Schneider, Boris Aronson, and Michel Fokine, who worked in the American theatre during the first three decades of the twentieth century.",
+				"libraryCatalog": "ProQuest",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Beyond Stanislavsky"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://search.proquest.com/dissertations/docview/251755786/previewPDF",
+		"items": [
+			{
+				"itemType": "thesis",
+				"creators": [
+					{
+						"firstName": "Valleri Jane",
+						"lastName": "Robinson",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Communication and the arts",
+					"Stanislavsky",
+					"Konstantin",
+					"Konstantin Stanislavsky",
+					"Russian",
+					"Modernism",
+					"Theater"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"title": "Beyond Stanislavsky: The influence of Russian modernism on the American theatre",
+				"pages": "233 p.",
+				"section": "0168",
+				"ISBN": "9780493440408, 0493440402",
+				"university": "The Ohio State University",
+				"thesisType": "Ph.D.",
+				"language": "English",
+				"rights": "Copyright UMI - Dissertations Publishing 2001",
+				"url": "http://search.proquest.com/dissertations/docview/251755786/abstract?accountid=12861",
+				"place": "United States -- Ohio",
+				"date": "2001",
+				"numPages": "233 p.",
+				"abstractNote": "Russian modernist theatre greatly influenced the development of American theatre during the first three decades of the twentieth century. Several developments encouraged the relationships between Russian artists and their American counterparts, including key tours by Russian artists in America, the advent of modernism in the American theatre, the immigration of Eastern Europeans to the United States, American advertising and consumer culture, and the Bolshevik Revolution and all of its domestic and international ramifications. Within each of these major and overlapping developments, Russian culture became increasingly acknowledged and revered by American artists and thinkers, who were seeking new art forms to express new ideas. This study examines some of the most significant contributions of Russian theatre and its artists in the early decades of the twentieth century. Looking beyond the important visit of the Moscow Art Theatre in 1923, this study charts the contributions of various Russian artists and their American supporters.\nCertainly, the influence of Stanislavsky and the Moscow Art Theatre on the modern American theatre has been significant, but theatre historians' attention to his influence has overshadowed the contributions of other Russian artists, especially those who provided non-realistic approaches to theatre. In order to understand the extent to which Russian theatre influenced the American stage, this study focuses on the critics, intellectuals, producers, and touring artists who encouraged interaction between Russians and Americans, and in the process provided the catalyst for American theatrical experimentation. The key figures in this study include some leaders in the Yiddish intellectual and theatrical communities in New York City, Morris Gest and Otto H. Kahn, who imported many important Russian performers for American audiences, and a number of Russian émigré artists, including Jacob Gordin, Jacob Ben-Ami, Benno Schneider, Boris Aronson, and Michel Fokine, who worked in the American theatre during the first three decades of the twentieth century.",
+				"libraryCatalog": "ProQuest",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Beyond Stanislavsky"
 			}
 		]
 	}
