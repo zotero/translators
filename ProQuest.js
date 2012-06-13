@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-10 22:02:58"
+	"lastUpdated": "2012-06-12 21:04:27"
 }
 
 /*
@@ -35,39 +35,53 @@ var L={};
 
 //returns an array of values for a given field or array of fields
 //the values are in the same order as the field names
-function getValue(doc, fields) {
-	if(typeof(fields) != 'object') fields = [fields];
-
-	var values = [];
-	for(var i=0, n=fields.length; i<n; i++) {
-		values = values.concat(ZU.xpath(doc,
-			'//div[@class="display_record_indexing_fieldname" and\
-				normalize-space(text())="' +
-			fields[i] +
-			'"]/following-sibling::div[@class="display_record_indexing_data"][1]'));
-	}
-
-	return values;
-}
-
 function getTextValue(doc, fields) {
 	if(typeof(fields) != 'object') fields = [fields];
 
 	//localize fields
 	fields = fields.map(function(field) { return L[field] || field; });
 
-	return getValue(doc, fields).map(function(e) { return e.textContent });
+	var allValues = [], values;
+	for(var i=0, n=fields.length; i<n; i++) {
+		values = ZU.xpath(doc,
+			'//div[@class="display_record_indexing_fieldname" and\
+				normalize-space(text())="' + fields[i] +
+			'"]/following-sibling::div[@class="display_record_indexing_data"][1]');
+
+		if(values.length) values = [values[0].textContent];
+
+		allValues = allValues.concat(values);
+	}
+
+	return allValues;
+}
+
+//initializes field map translations
+function initLang(doc, url) {
+	var lang = ZU.xpathText(doc, '//a[@id="changeLanguageLink"]/text()');
+	if(lang && lang.trim() != "English") {
+		lang = lang.trim();
+
+		//if already initialized, don't need to do anything else
+		if(lang == language) return;
+
+		language = lang;
+
+		//build reverse field map
+		L = {};
+		for(var i in fieldNames[language]) {
+			L[fieldNames[language][i]] = i;
+		}
+
+		return;
+	}
+
+	language = 'English';
+	L = {};
 }
 
 function detectWeb(doc, url) {
-	var lang = ZU.xpathText(doc, '//a[@id="changeLanguageLink"]/text()');
-	if(lang && lang.trim() != "English") {
-		language = lang.trim();
-		L = fieldNames[language];
-	} else {
-		language = 'English';
-		L = {};
-	}
+	initLang(doc, url);
 
 	//Check for multiple first
 	if (url.indexOf('docview') == -1) {
@@ -134,51 +148,144 @@ function doWeb(doc, url) {
 function scrape(doc, url, type) {
 	var item = new Zotero.Item(type);
 
-	//title
-	item.title = getTextValue(doc, "Title")[0];
-	if(item.title && (item.title == item.title.toUpperCase())) {
-		item.title = item.title.capitalizeTitle(item.title, true);
+	//get all rows
+	var rows = ZU.xpath(doc, '//div[@class="display_record_indexing_row"]');
+
+	var label, value, enLabel;
+	var dates = [], place = {}, altKeywords = [];
+
+	for(var i=0, n=rows.length; i<n; i++) {
+		label = rows[i].childNodes[0];
+		value = rows[i].childNodes[1];
+
+		if(!label || !value) continue;
+
+		label = label.textContent.trim();
+		value = value.textContent.trim();	//trimInternal?
+
+		//translate label
+		enLabel = L[label] || label;
+
+		switch(enLabel) {
+			case 'Title':
+				if(value == value.toUpperCase()) value = ZU.capitalizeTitle(value, true);
+				item.title = value;
+			break;
+			case 'Author':
+			case 'Editor':	//test case?
+				var type = (enLabel == 'Author')? 'author' : 'editor';
+
+				value = value.replace(/^by\s+/i,'')	//sometimes the authors begin with "By"
+							.split(/\s*;\s*|\s+and\s+/i);
+
+				for(var j=0, m=value.length; j<m; j++) {
+					/**TODO: might have to detect proper creator type from item type*/
+					item.creators.push(
+						ZU.cleanAuthor(value[j], type, value[j].indexOf(',') != -1));
+				}
+			break;
+			case 'Publication title':
+				item.publicationTitle = value;
+			break;
+			case 'Volume':
+				item.volume = value;
+			break;
+			case 'Issue':
+				item.issue = value;
+			break;
+			case 'Number of pages':
+				item.numPages = value;
+			break;
+			case 'ISSN':
+				item.ISSN = value;
+			break;
+			case 'ISBN':
+				item.ISBN = value;
+			break;
+			case 'DOI':	//test case?
+				item.DOI = value;
+			break;
+			case 'Copyright':
+				item.rights = value;
+			break;
+			case 'Language of publication':
+				if(item.language) break;
+			case 'Language':
+				item.language = value;
+			break;
+			case 'Section':
+				item.section = value;
+			break;
+			case 'Pages':
+				item.pages = value;
+			break;
+			case 'School':
+				item.university = value;
+			break;
+			case 'Degree':
+				item.thesisType = value;
+			break;
+			case 'Publisher':
+				item.publisher = value;
+			break;
+
+			case 'Identifier / keyword':
+				item.tags = value.split(/\s*(?:,|;)\s*/);
+			break;
+			//alternative tags
+			case 'Subject':
+			case 'Journal subject':
+				altKeywords.push(value);
+			break;
+
+			//we'll figure out proper location later
+			case 'School location':
+				place.schoolLocation = value;
+			break;
+			case 'Place of publication':
+				place.publicationPlace = value;
+			break;
+			case 'Country of publication':
+				place.publicationCountry = value;
+			break;
+			
+
+			//multiple dates are provided
+			//more complete dates are preferred
+			case 'Publication date':
+				dates[2] = value;
+			break;
+			case 'Publication year':
+				dates[1] = value;
+			break;
+			case 'Year':
+				dates[0] = value;
+			break;
+
+			//we know about these, skip
+			case 'Source type':
+			case 'Document type':
+			case 'Record type':
+			case 'Database':
+			break;
+
+			default:
+				Z.debug('Unhandled field: "' + label + '"');
+		}
 	}
 
-	//authors
-	var creators = getTextValue(doc, "Author").join(';')
-		.replace(/(?:^|;)by\s+/i,'')	//sometimes the authors begin with "By"
-		.split(/\s*;\s*|\s+and\s+/i);
-	for(var i=0, n=creators.length; i<n; i++) {
-		/**TODO: might have to detect proper creator type from item type*/
-		item.creators.push(
-			ZU.cleanAuthor(creators[i], 'author', creators[i].indexOf(',') != -1));
-	}
-	
-	//editors
-	var creators = getTextValue(doc, "Editor").join(';').split(/\s*(;|and)\s*/i);
-	for(var i=0, n=creators.length; i<n; i++) {
-		if(!creators[i]) continue;
-		item.creators.push(ZU.cleanAuthor(creators[i], 'editor', true));
-	}
-
-	item.publicationTitle = getTextValue(doc, "Publication title")[0];
-	item.volume = getTextValue(doc, "Volume")[0];
-	item.issue = getTextValue(doc, "Issue")[0];
-	item.numPages = getTextValue(doc, "Number of pages")[0];
-	item.ISSN = getTextValue(doc, "ISSN")[0];
-	item.ISBN = getTextValue(doc, "ISBN")[0];
-	item.DOI = getTextValue(doc, "DOI")[0];
-	item.rights = getTextValue(doc, "Copyright")[0];
-	item.language = getTextValue(doc, ["Language", "Language of publication"])[0];
-	item.section = getTextValue(doc, "Section")[0];
-	item.date = getTextValue(doc, ["Publication date", "Publication year", "Year"])[0];
-	item.pages = getTextValue(doc, "Pages")[0];
-	item.university = getTextValue(doc, "School")[0];
-	item.thesisType = getTextValue(doc, "Degree")[0];
-	item.publisher = getTextValue(doc, "Publisher")[0];
-	item.place = getTextValue(doc, ["Place of publication", "School location"])[0];
 	item.url = url;
 
-	var country = getTextValue(doc, "Country of publication")[0];
-	if(country) {
-		item.place = item.place ? item.place + ', ' + country : country;
+	if(place.publicationPlace) {
+		item.place = place.publicationPlace;
+		if(place.publicationCountry) {
+			item.place = item.place + ', ' + place.publicationCountry;
+		}
+	} else if(place.schoolLocation) {
+		item.place = place.schoolLocation;
 	}
+
+	item.date = dates.pop();
 
 	//sometimes number of pages ends up in pages
 	if(!item.numPages) item.numPages = item.pages;
@@ -188,6 +295,10 @@ function scrape(doc, url, type) {
 			p[normalize-space(text())]')
 		.map(function(p) { return ZU.trimInternal(p.textContent) })
 		.join('\n');
+
+	if(!item.tags.length && altKeywords.length) {
+		item.tags = altKeywords.join(',').split(/\s*(?:,|;)\s*/);
+	}
 
 	item.attachments.push({
 		title: 'Snapshot',
@@ -203,10 +314,6 @@ function scrape(doc, url, type) {
 			mimeType: 'application/pdf'
 		});
 	}
-
-	var keywords = getTextValue(doc, "Identifier / keyword").join(',') ||
-					getTextValue(doc, ["Subject", "Journal subject"]).join(',');
-	if(keywords) item.tags = keywords.split(/\s*(?:,|;)\s*/);
 
 	item.complete();
 }
@@ -432,7 +539,7 @@ var fieldNames = {
 		"Degree":'Diplôme',
 		"Publisher":'Éditeur',
 		"Place of publication":'Lieu de publication',
-		"School location":'Localisation de l'école',
+		"School location":"Localisation de l'école",
 		"Country of publication":'Pays de publication',
 		"Identifier / keyword":'Identificateur / mot-clé',
 		"Subject":'Sujet',
@@ -905,17 +1012,17 @@ var testCases = [
 					}
 				],
 				"title": "Beyond Stanislavsky: The influence of Russian modernism on the American theatre",
-				"numPages": "233 p.",
-				"ISBN": "9780493440408, 0493440402",
-				"rights": "Copyright UMI - Dissertations Publishing 2001",
-				"language": "English",
-				"section": "0168",
-				"date": "2001",
 				"pages": "233 p.",
+				"section": "0168",
+				"ISBN": "9780493440408, 0493440402",
 				"university": "The Ohio State University",
 				"thesisType": "Ph.D.",
-				"place": "United States -- Ohio",
+				"language": "English",
+				"rights": "Copyright UMI - Dissertations Publishing 2001",
 				"url": "http://search.proquest.com/dissertations/docview/251755786/abstract/132B8A749B71E82DBA1/1",
+				"place": "United States -- Ohio",
+				"date": "2001",
+				"numPages": "233 p.",
 				"abstractNote": "Russian modernist theatre greatly influenced the development of American theatre during the first three decades of the twentieth century. Several developments encouraged the relationships between Russian artists and their American counterparts, including key tours by Russian artists in America, the advent of modernism in the American theatre, the immigration of Eastern Europeans to the United States, American advertising and consumer culture, and the Bolshevik Revolution and all of its domestic and international ramifications. Within each of these major and overlapping developments, Russian culture became increasingly acknowledged and revered by American artists and thinkers, who were seeking new art forms to express new ideas. This study examines some of the most significant contributions of Russian theatre and its artists in the early decades of the twentieth century. Looking beyond the important visit of the Moscow Art Theatre in 1923, this study charts the contributions of various Russian artists and their American supporters.\nCertainly, the influence of Stanislavsky and the Moscow Art Theatre on the modern American theatre has been significant, but theatre historians' attention to his influence has overshadowed the contributions of other Russian artists, especially those who provided non-realistic approaches to theatre. In order to understand the extent to which Russian theatre influenced the American stage, this study focuses on the critics, intellectuals, producers, and touring artists who encouraged interaction between Russians and Americans, and in the process provided the catalyst for American theatrical experimentation. The key figures in this study include some leaders in the Yiddish intellectual and theatrical communities in New York City, Morris Gest and Otto H. Kahn, who imported many important Russian performers for American audiences, and a number of Russian émigré artists, including Jacob Gordin, Jacob Ben-Ami, Benno Schneider, Boris Aronson, and Michel Fokine, who worked in the American theatre during the first three decades of the twentieth century.",
 				"libraryCatalog": "ProQuest",
 				"accessDate": "CURRENT_TIMESTAMP",
@@ -1033,13 +1140,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"creators": [
-					{
-						"firstName": "",
-						"lastName": "",
-						"creatorType": "author"
-					}
-				],
+				"creators": [],
 				"notes": [],
 				"tags": [
 					"Business And Economics--Banking And Finance"
@@ -1056,14 +1157,14 @@ var testCases = [
 				],
 				"title": "THE PRESIDENT AND ALDRICH.: Railway Age Relates Happenings Behind the Scenes Regarding Rate Regulation.",
 				"publicationTitle": "Wall Street Journal (1889-1922)",
-				"numPages": "1",
-				"rights": "Copyright Dow Jones & Company Inc Dec 5, 1905",
-				"language": "English",
-				"date": "Dec 5, 1905",
 				"pages": "7",
+				"numPages": "1",
 				"publisher": "Dow Jones & Company Inc",
-				"place": "New York, N.Y., United States",
+				"language": "English",
+				"rights": "Copyright Dow Jones & Company Inc Dec 5, 1905",
 				"url": "http://search.proquest.com/docview/129023293/abstract?accountid=12861",
+				"place": "New York, N.Y., United States",
+				"date": "Dec 5, 1905",
 				"abstractNote": "The Railway Age says: \"The history of the affair (railroad rate question) as it has gone on behind the scenes, is about as follows.",
 				"libraryCatalog": "ProQuest",
 				"accessDate": "CURRENT_TIMESTAMP",
