@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-04-22 00:04:37"
+	"lastUpdated": "2012-06-14 01:58:28"
 }
 
 function detectWeb(doc, url) {
@@ -69,7 +69,6 @@ function scrape(doc, url) {
 
 	translator.getTranslatorObject(function(em) {
 		em.addCustomFields({
-			'description': 'abstractNote',
 			'head': 'title',
 			'date': 'date'
 		});
