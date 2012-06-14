@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-05-20 20:10:45"
+	"lastUpdated": "2012-06-14 01:57:37"
 }
 
 /*
@@ -119,18 +119,20 @@ function getPrefixes(doc) {
 	}
 }
 
-function getContentText(doc, name) {
-	var xpath = '//meta[substring(@name, string-length(@name)-'
-							+ (name.length - 1) + ')="'+ name +'"]/';
-	return ZU.xpathText(doc, xpath + '@content | '
-													+ xpath + '@contents');
+function getContentText(doc, name, strict) {
+	var xpath = '//meta[' +
+		(strict?'@name':
+			'substring(@name, string-length(@name)-' + (name.length - 1) + ')') +
+		'="'+ name +'"]/';
+	return ZU.xpathText(doc, xpath + '@content | ' + xpath + '@contents');
 }
 
-function getContent(doc, name) {
-	var xpath = '//meta[substring(@name, string-length(@name)-'
-							+ (name.length - 1) + ')="'+ name +'"]/';
-	return ZU.xpath(doc, xpath + '@content | '
-											+ xpath + '@contents');
+function getContent(doc, name, strict) {
+	var xpath = '//meta[' +
+		(strict?'@name':
+			'substring(@name, string-length(@name)-' + (name.length - 1) + ')') +
+		'="'+ name +'"]/';
+	return ZU.xpath(doc, xpath + '@content | ' + xpath + '@contents');
 }
 
 function fixCase(authorName) {
@@ -143,10 +145,10 @@ function fixCase(authorName) {
 	return authorName;
 }
 
-function processFields(doc, item, fieldMap) {
+function processFields(doc, item, fieldMap, strict) {
 	for(var metaName in fieldMap) {
 		var zoteroName = fieldMap[metaName];
-		var value = getContentText(doc, metaName);
+		var value = getContentText(doc, metaName, strict);
 		if(value && value.trim()) {
 			item[zoteroName] = ZU.trimInternal(value);
 		}
@@ -157,7 +159,7 @@ function completeItem(doc, newItem) {
 	addHighwireMetadata(doc, newItem);
 
 	if(CUSTOM_FIELD_MAPPINGS) {
-		processFields(doc, newItem, CUSTOM_FIELD_MAPPINGS);
+		processFields(doc, newItem, CUSTOM_FIELD_MAPPINGS, true);
 	}
 
 	newItem.complete();
