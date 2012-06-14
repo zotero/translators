@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-03-31 11:51:33"
+	"lastUpdated": "2012-06-13 15:19:17"
 }
 
 /*
@@ -94,15 +94,16 @@ function scrape(doc, url) {
 
 	// Date
 	var date_XPath = '//meta[contains(@name, "date_first_released")]';
-	var date2_XPath = ".//li[@class='date']";	
+	var date2_XPath = '//ul[@class="tools"]/li[contains(@class, "date")]/@content';	
 	if (doc.evaluate(date_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
-		var date = doc.evaluate(date_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().content;
+		var date = doc.evaluate(date_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().content;
 		date = date.split("T")[0];
 		newItem.date = date;
 	} else if (doc.evaluate(date2_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
-		var date = ZU.xpathText(doc, date2_XPath);
-		date = Zotero.Utilities.trim(date.split(/\n/)[1]);
-		date = date.replace(/Datum\s(\d\d?\.\d\d?\.\d\d\d\d).*/g, '$1');
+
+	var date = ZU.xpathText(doc, date2_XPath);
+		Z.debug(date)
+		date = date.match(/\d\d?\.\d\d?\.\d\d\d\d/)[0];
 		newItem.date = date;
 	}
 
@@ -182,7 +183,11 @@ var testCases = [
 				"notes": [],
 				"tags": [
 					"Libyen",
+					"Mustafa Abdel Dschalil",
+					"Bani Walid",
+					"Paris",
 					"Stadt",
+					"Europa",
 					"Tripolis"
 				],
 				"seeAlso": [],
@@ -193,13 +198,14 @@ var testCases = [
 					}
 				],
 				"url": "http://www.zeit.de/politik/ausland/2011-09/libyen-bani-walid",
+				"title": "Libyen: Rebellen bereiten Angriff auf Bani Walid vor",
+				"date": "04.09.2011",
 				"abstractNote": "Die von Gadhafi-Anhängern geführte Stadt ist von Rebellentruppen eingekreist. Gespräche über eine friedliche Übergabe sind gescheitert, ein Angriff steht offenbar bevor.",
+				"publicationTitle": "Die Zeit",
 				"section": "Ausland",
 				"libraryCatalog": "Die Zeit",
-				"shortTitle": "Libyen",
-				"title": "Libyen: Rebellen bereiten Angriff auf Bani Walid vor",
-				"date": "15:12 Uhr",
-				"publicationTitle": "Die Zeit"
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Libyen"
 			}
 		]
 	},
@@ -218,28 +224,27 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
+					"Angela Merkel",
 					"Philipp Lahm",
 					"Andreas Ottl",
-					"Angela Merkel",
-					"Max Frisch",
-					"Fußball",
-					"Bundesliga",
-					"Mesut Özil",
 					"FC Bayern München",
+					"Robert Enke",
+					"Bundesliga",
+					"Maxim Gorkij",
+					"Fußball",
 					"SV Werder Bremen",
 					"Fifa"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.zeit.de/2011/36/Interview-Lahm-Rinke?page=all&print=true",
 						"title": "Philipp Lahm: \"Hast du elf Freunde?\" | Sport | ZEIT ONLINE",
 						"mimeType": "text/html"
 					}
 				],
 				"url": "http://www.zeit.de/2011/36/Interview-Lahm-Rinke",
 				"title": "Philipp Lahm: \"Hast du elf Freunde?\"",
-				"date": "17:12 Uhr",
+				"date": "04.09.2011",
 				"abstractNote": "Tschechow und Robben, Drama im Flutlicht und Wahrhaftigkeit bei der Arbeit. Der Fußballprofi und Autor Philipp Lahm im Gespräch mit dem Schriftsteller und Fußballer Moritz Rinke",
 				"publicationTitle": "Die Zeit",
 				"section": "sport",

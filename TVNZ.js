@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-03-03 01:28:48"
+	"lastUpdated": "2012-06-13 23:47:38"
 }
 
 function detectWeb(doc, url) {
@@ -103,7 +103,7 @@ function scrape(doc, url){
 					.replace(/\W\bPublished:\W\d{1,2}:\d{1,2}(AM|PM) (\w)+ /g, ''));			
 		}
 
-		var myTitle= ZU.xpathText(doc, '//meta[@name="title"]');
+		var myTitle= ZU.xpathText(doc, '//meta[@name="title" or @name="og:title"]/@content');
 		if (myTitle){
 			myTitle = myTitle.replace(/\b[)]+/g, '');
 			var TitleResult= myTitle.split(" (");
