@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-04-22 00:32:12"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-06-13 23:37:14"
 }
 
 function scrape(doc) {
@@ -35,7 +35,7 @@ function scrape(doc) {
 
 	item.type = ZU.xpathText(doc, '//ul[@class="h-slideshow-categories"]/li[1]');
 
-	item.date = ZU.xpathText(doc, '//meta[@property="article:published_time"]/@content');
+	item.date = ZU.xpathText(doc, '//meta[contains(@property, "published")]/@content');
 
 	item.url = doc.location.href
 	item.repository = "SlideShare";
@@ -55,7 +55,7 @@ function detectWeb(doc, url) {
 		ZU.xpath(doc, '//ol[@id="default" and @class="searchResults"]\
 					//div[./a[@class="slideshow-title"]]').length) {
 		return "multiple";
-	} else if (ZU.xpathText(doc, '//meta[@name="og_type"]/@content') == 'article') {
+	} else if (ZU.xpathText(doc, '//meta[@name="og_type"]/@content') == 'article' || ZU.xpathText(doc, '//meta[@name="og_type"]/@content').match(/presentation/)) {
 		return "presentation";
 	}
 }

@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-04-03 13:56:46"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-06-13 15:22:11"
 }
 
 /*
@@ -140,65 +140,87 @@ function scrape(doc, url) {
 	newItem.abstractNote = ZU.xpathText(doc, '//div[@id="bookpagedescription"]');
 	newItem.complete();
 } /** BEGIN TEST CASES **/
-var testCases = [{
-	"type": "web",
-	"url": "http://www.cornellpress.cornell.edu/book/?GCOI=80140100486370",
-	"items": [{
-		"itemType": "book",
-		"creators": [{
-			"firstName": "Jenny",
-			"lastName": "Edkins",
-			"creatorType": "author"
-		}],
-		"notes": [],
-		"tags": ["History & Theory", "Human Rights", "Demography"],
-		"seeAlso": [],
-		"attachments": [],
-		"title": "Missing: Persons and Politics",
-		"ISBN": "978-0-8014-5029-7",
-		"date": "September 2011",
-		"numPages": "280",
-		"publisher": "Cornell University Press",
-		"place": "Ithaca, NY",
-		"abstractNote": "Stories of the missing offer profound insights into the tension between how political systems see us and how we see each other. The search for people who go missing as a result of war, political violence, genocide, or natural disaster reveals how forms of governance that objectify the person are challenged. Contemporary political systems treat persons instrumentally, as objects to be administered rather than as singular beings: the apparatus of government recognizes categories, not people. In contrast, relatives of the missing demand that authorities focus on a particular person: families and friends are looking for someone who to them is unique and irreplaceable.  In Missing, Jenny Edkins highlights stories from a range of circumstances that shed light on this critical tension: the aftermath of World War II, when millions in Europe were displaced; the period following the fall of the World Trade Center towers in Manhattan in 2001 and the bombings in London in 2005; searches for military personnel missing in action; the thousands of political \"disappearances\" in Latin America; and in more quotidian circumstances where people walk out on their families and disappear of their own volition. When someone goes missing we often find that we didn't know them as well as we thought: there is a sense in which we are \"missing\" even to our nearest and dearest and even when we are present, not absent. In this thought-provoking book, Edkins investigates what this more profound \"missingness\" might mean in political terms.",
-		"libraryCatalog": "Cornell University Press",
-		"shortTitle": "Missing"
-	}]
-}, {
-	"type": "web",
-	"url": "http://www.cornellpress.cornell.edu/book/?GCOI=80140100195440",
-	"items": [{
-		"itemType": "book",
-		"creators": [{
-			"firstName": "Hans",
-			"lastName": "Blumenberg",
-			"creatorType": "author"
-		}, {
-			"firstName": "Robert L.",
-			"lastName": "Savage",
-			"creatorType": "translator"
-		}],
-		"notes": [],
-		"tags": ["Methodology", "Criticism", "Semiotics & Theory"],
-		"seeAlso": [],
-		"attachments": [],
-		"title": "Paradigms for a Metaphorology",
-		"publisher": "Cornell University Press",
-		"place": "Ithaca, NY",
-		"ISBN": "978-0-8014-4925-3",
-		"date": "August 2010",
-		"series": "Signale: Modern German Letters, Cultures, and Thought",
-		"numPages": "160",
-		"abstractNote": "\"Paradigms for a Metaphorology may be read as a kind of beginner's guide to Blumenberg, a programmatic introduction to his vast and multifaceted oeuvre. Its brevity makes it an ideal point of entry for readers daunted by the sheer bulk of Blumenberg's later writings, or distracted by their profusion of historical detail. Paradigms expresses many of Blumenberg’s key ideas with a directness, concision, and clarity he would rarely match elsewhere. What is more, because it served as a beginner’s guide for its author as well, allowing him to undertake an initial survey of problems that would preoccupy him for the remainder of his life, it has the additional advantage that it can offer us a glimpse into what might be called the 'genesis of the Blumenbergian world.’\"—from the Afterword by Robert Savage  What role do metaphors play in philosophical language? Are they impediments to clear thinking and clear expression, rhetorical flourishes that may well help to make philosophy more accessible to a lay audience, but that ought ideally to be eradicated in the interests of terminological exactness? Or can the images used by philosophers tell us more about the hopes and cares, attitudes and indifferences that regulate an epoch than their carefully elaborated systems of thought?  In Paradigms for a Metaphorology, originally published in 1960 and here made available for the first time in English translation, Hans Blumenberg (1920–1996) approaches these questions by examining the relationship between metaphors and concepts. Blumenberg argues for the existence of \"absolute metaphors\" that cannot be translated back into conceptual language. These metaphors answer the supposedly naïve, theoretically unanswerable questions whose relevance lies quite simply in the fact that they cannot be brushed aside, since we do not pose them ourselves but find them already posed in the ground of our existence. They leap into a void that concepts are unable to fill.  An afterword by the translator, Robert Savage, positions the book in the intellectual context of its time and explains its continuing importance for work in the history of ideas.",
-		"libraryCatalog": "Cornell University Press"
-	}]
-}, {
-	"type": "web",
-	"url": "http://www.cornellpress.cornell.edu/catalog/?category_id=19",
-	"items": "multiple"
-}, {
-	"type": "web",
-	"url": "http://www.cornellpress.cornell.edu/search/?fa=rechercheA&keyType=all&keywords=translated&title=&author=&isbnORissn=&Collection_ID=&Format_id=&Editeur=&LanguageCode=&StartYear=----&EndYear=2012&formfield1234567893=39860609%2C19953448&formfield1234567894=",
-	"items": "multiple"
-}]
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.cornellpress.cornell.edu/book/?GCOI=80140100486370",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Jenny",
+						"lastName": "Edkins",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"History & Theory",
+					"Human Rights",
+					"Demography"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Missing: Persons and Politics",
+				"publisher": "Cornell University Press",
+				"place": "Ithaca, NY",
+				"ISBN": "978-0-8014-5029-7",
+				"date": "September 2011",
+				"numPages": "280",
+				"abstractNote": "Stories of the missing offer profound insights into the tension between how political systems see us and how we see each other. The search for people who go missing as a result of war, political violence, genocide, or natural disaster reveals how forms of governance that objectify the person are challenged. Contemporary political systems treat persons instrumentally, as objects to be administered rather than as singular beings: the apparatus of government recognizes categories, not people. In contrast, relatives of the missing demand that authorities focus on a particular person: families and friends are looking for someone who to them is unique and irreplaceable.    \tIn Missing, Jenny Edkins highlights stories from a range of circumstances that shed light on this critical tension: the aftermath of World War II, when millions in Europe were displaced; the period following the fall of the World Trade Center towers in Manhattan in 2001 and the bombings in London in 2005; searches for military personnel missing in action; the thousands of political \"disappearances\" in Latin America; and in more quotidian circumstances where people walk out on their families and disappear of their own volition. When someone goes missing we often find that we didn't know them as well as we thought: there is a sense in which we are \"missing\" even to our nearest and dearest and even when we are present, not absent. In this thought-provoking book, Edkins investigates what this more profound \"missingness\" might mean in political terms.",
+				"libraryCatalog": "Cornell University Press",
+				"shortTitle": "Missing"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.cornellpress.cornell.edu/book/?GCOI=80140100195440",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Hans",
+						"lastName": "Blumenberg",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Robert L.",
+						"lastName": "Savage",
+						"creatorType": "translator"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Methodology",
+					"Criticism",
+					"Semiotics & Theory"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Paradigms for a Metaphorology",
+				"publisher": "Cornell University Press",
+				"place": "Ithaca, NY",
+				"ISBN": "978-0-8014-4925-3",
+				"date": "August 2010",
+				"series": "Signale: Modern German Letters, Cultures, and Thought",
+				"numPages": "160",
+				"abstractNote": "\"Paradigms for a Metaphorology may be read as a kind of beginner's guide to Blumenberg, a programmatic introduction to his vast and multifaceted oeuvre. Its brevity makes it an ideal point of entry for readers daunted by the sheer bulk of Blumenberg's later writings, or distracted by their profusion of historical detail. Paradigms expresses many of Blumenberg’s key ideas with a directness, concision, and clarity he would rarely match elsewhere. What is more, because it served as a beginner’s guide for its author as well, allowing him to undertake an initial survey of problems that would preoccupy him for the remainder of his life, it has the additional advantage that it can offer us a glimpse into what might be called the 'genesis of the Blumenbergian world.’\"—from the Afterword by Robert Savage  What role do metaphors play in philosophical language? Are they impediments to clear thinking and clear expression, rhetorical flourishes that may well help to make philosophy more accessible to a lay audience, but that ought ideally to be eradicated in the interests of terminological exactness? Or can the images used by philosophers tell us more about the hopes and cares, attitudes and indifferences that regulate an epoch than their carefully elaborated systems of thought?  In Paradigms for a Metaphorology, originally published in 1960 and here made available for the first time in English translation, Hans Blumenberg (1920–1996) approaches these questions by examining the relationship between metaphors and concepts. Blumenberg argues for the existence of \"absolute metaphors\" that cannot be translated back into conceptual language. These metaphors answer the supposedly naïve, theoretically unanswerable questions whose relevance lies quite simply in the fact that they cannot be brushed aside, since we do not pose them ourselves but find them already posed in the ground of our existence. They leap into a void that concepts are unable to fill.  An afterword by the translator, Robert Savage, positions the book in the intellectual context of its time and explains its continuing importance for work in the history of ideas.",
+				"libraryCatalog": "Cornell University Press"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.cornellpress.cornell.edu/catalog/?category_id=19",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.cornellpress.cornell.edu/search/?fa=rechercheA&keyType=all&keywords=translated&title=&author=&isbnORissn=&Collection_ID=&Format_id=&Editeur=&LanguageCode=&StartYear=----&EndYear=2012&formfield1234567893=39860609%2C19953448&formfield1234567894=",
+		"items": "multiple"
+	}
+]
 /** END TEST CASES **/

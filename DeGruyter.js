@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsib",
-	"lastUpdated": "2012-04-11 03:54:48"
+	"browserSupport": "gcsb",
+	"lastUpdated": "2012-06-13 23:20:07"
 }
 
 /*
@@ -67,10 +67,12 @@ function doWeb(doc,url)
 		});
 	} else {
 		// We call the Embedded Metadata translator to do the actual work
+		var altdate = ZU.xpathText( doc, '//meta[@name="citation_online_date"]/@content')
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 		translator.setHandler("itemDone", function(obj, item) {
 				item.abstractNote = ZU.xpathText(doc, '//div[@class="articleBody_abstract"]');
+				if (!item.date) item.date=altdate;
 				item.complete();
 				});
 		translator.getTranslatorObject(function (obj) {

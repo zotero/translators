@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-06-13 14:48:39"
+	"lastUpdated": "2012-06-13 23:03:15"
 }
 
 /*
@@ -160,11 +160,6 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://hal.archives-ouvertes.fr/index.php?submit=1&b_type=browse_domain&which_domain=QFIN:CP",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
