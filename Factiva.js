@@ -96,7 +96,7 @@ function doWeb(doc, url) {
 	}
 
 	url = url.replace(/\/ha\//, '/pps/');
-
+Z.debug(url);
 	Zotero.Utilities.HTTP.doPost(url, post, function(text) {
 		// Remove xml parse instruction and doctype
 		text = text.replace(/<!DOCTYPE[^>]*>/, "").replace(/<\?xml[^>]*\?>/, "");
