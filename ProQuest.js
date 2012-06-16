@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-12 22:48:48"
+	"lastUpdated": "2012-06-15 20:04:43"
 }
 
 /*
@@ -137,7 +137,7 @@ function detectWeb(doc, url) {
 	if(zoteroType) return zoteroType;
 
 	//hack for NYTs, which misses crucial data.
-	var db = getTextValue(doc, "Database");
+	var db = getTextValue(doc, "Database")[0];
 	if (db && db.indexOf("The New York Times") !== -1) {
 		return "newspaperArticle";
 	}
@@ -1091,17 +1091,18 @@ var testCases = [
 					}
 				],
 				"title": "Beyond Stanislavsky: The influence of Russian modernism on the American theatre",
+				"publicationTitle": "ProQuest Dissertations and Theses",
 				"pages": "233 p.",
+				"numPages": "233",
 				"section": "0168",
 				"ISBN": "9780493440408, 0493440402",
 				"university": "The Ohio State University",
 				"thesisType": "Ph.D.",
-				"language": "English",
+				"language": "English; EN",
 				"rights": "Copyright UMI - Dissertations Publishing 2001",
 				"url": "http://search.proquest.com/dissertations/docview/251755786/abstract/132B8A749B71E82DBA1/1",
 				"place": "United States -- Ohio",
 				"date": "2001",
-				"numPages": "233 p.",
 				"abstractNote": "Russian modernist theatre greatly influenced the development of American theatre during the first three decades of the twentieth century. Several developments encouraged the relationships between Russian artists and their American counterparts, including key tours by Russian artists in America, the advent of modernism in the American theatre, the immigration of Eastern Europeans to the United States, American advertising and consumer culture, and the Bolshevik Revolution and all of its domestic and international ramifications. Within each of these major and overlapping developments, Russian culture became increasingly acknowledged and revered by American artists and thinkers, who were seeking new art forms to express new ideas. This study examines some of the most significant contributions of Russian theatre and its artists in the early decades of the twentieth century. Looking beyond the important visit of the Moscow Art Theatre in 1923, this study charts the contributions of various Russian artists and their American supporters.\nCertainly, the influence of Stanislavsky and the Moscow Art Theatre on the modern American theatre has been significant, but theatre historians' attention to his influence has overshadowed the contributions of other Russian artists, especially those who provided non-realistic approaches to theatre. In order to understand the extent to which Russian theatre influenced the American stage, this study focuses on the critics, intellectuals, producers, and touring artists who encouraged interaction between Russians and Americans, and in the process provided the catalyst for American theatrical experimentation. The key figures in this study include some leaders in the Yiddish intellectual and theatrical communities in New York City, Morris Gest and Otto H. Kahn, who imported many important Russian performers for American audiences, and a number of Russian émigré artists, including Jacob Gordin, Jacob Ben-Ami, Benno Schneider, Boris Aronson, and Michel Fokine, who worked in the American theatre during the first three decades of the twentieth century.",
 				"libraryCatalog": "ProQuest",
 				"accessDate": "CURRENT_TIMESTAMP",
@@ -1197,16 +1198,13 @@ var testCases = [
 					}
 				],
 				"title": "Rethinking Policy on East Germany",
-				"publicationTitle": "New York Times (1923-Current file)",
-				"numPages": "1",
+				"pages": "A23",
 				"ISSN": "03624331",
 				"rights": "Copyright New York Times Company Aug 22, 1984",
-				"language": "English",
-				"date": "Aug 22, 1984",
-				"pages": "A23",
-				"publisher": "New York Times Company",
-				"place": "New York, N.Y., United States",
 				"url": "http://search.proquest.com/hnpnewyorktimes/docview/122485317/abstract/1357D8A4FC136DF28E3/11?accountid=12861",
+				"place": "New York, N.Y., United States",
+				"date": "1984",
+				"numPages": "A23",
 				"abstractNote": "For some months now, a gradual thaw has been in the making between East Germany and West Germany. So far, the United States has paid scant attention -- an attitude very much in keeping with our neglect of East Germany throughout the postwar period. We should reconsider this policy before things much further -- and should in particular begin to look more closely at what is going on in East Germany.",
 				"libraryCatalog": "ProQuest",
 				"accessDate": "CURRENT_TIMESTAMP"
@@ -1285,17 +1283,18 @@ var testCases = [
 					}
 				],
 				"title": "Beyond Stanislavsky: The influence of Russian modernism on the American theatre",
+				"publicationTitle": "ProQuest Dissertations and Theses",
 				"pages": "233 p.",
+				"numPages": "233",
 				"section": "0168",
 				"ISBN": "9780493440408, 0493440402",
 				"university": "The Ohio State University",
 				"thesisType": "Ph.D.",
-				"language": "English",
+				"language": "English; EN",
 				"rights": "Copyright UMI - Dissertations Publishing 2001",
 				"url": "http://search.proquest.com/dissertations/docview/251755786/abstract?accountid=12861",
 				"place": "United States -- Ohio",
 				"date": "2001",
-				"numPages": "233 p.",
 				"abstractNote": "Russian modernist theatre greatly influenced the development of American theatre during the first three decades of the twentieth century. Several developments encouraged the relationships between Russian artists and their American counterparts, including key tours by Russian artists in America, the advent of modernism in the American theatre, the immigration of Eastern Europeans to the United States, American advertising and consumer culture, and the Bolshevik Revolution and all of its domestic and international ramifications. Within each of these major and overlapping developments, Russian culture became increasingly acknowledged and revered by American artists and thinkers, who were seeking new art forms to express new ideas. This study examines some of the most significant contributions of Russian theatre and its artists in the early decades of the twentieth century. Looking beyond the important visit of the Moscow Art Theatre in 1923, this study charts the contributions of various Russian artists and their American supporters.\nCertainly, the influence of Stanislavsky and the Moscow Art Theatre on the modern American theatre has been significant, but theatre historians' attention to his influence has overshadowed the contributions of other Russian artists, especially those who provided non-realistic approaches to theatre. In order to understand the extent to which Russian theatre influenced the American stage, this study focuses on the critics, intellectuals, producers, and touring artists who encouraged interaction between Russians and Americans, and in the process provided the catalyst for American theatrical experimentation. The key figures in this study include some leaders in the Yiddish intellectual and theatrical communities in New York City, Morris Gest and Otto H. Kahn, who imported many important Russian performers for American audiences, and a number of Russian émigré artists, including Jacob Gordin, Jacob Ben-Ami, Benno Schneider, Boris Aronson, and Michel Fokine, who worked in the American theatre during the first three decades of the twentieth century.",
 				"libraryCatalog": "ProQuest",
 				"accessDate": "CURRENT_TIMESTAMP",
@@ -1337,17 +1336,18 @@ var testCases = [
 					}
 				],
 				"title": "Beyond Stanislavsky: The influence of Russian modernism on the American theatre",
+				"publicationTitle": "ProQuest Dissertations and Theses",
 				"pages": "233 p.",
+				"numPages": "233",
 				"section": "0168",
 				"ISBN": "9780493440408, 0493440402",
 				"university": "The Ohio State University",
 				"thesisType": "Ph.D.",
-				"language": "English",
+				"language": "English; EN",
 				"rights": "Copyright UMI - Dissertations Publishing 2001",
 				"url": "http://search.proquest.com/dissertations/docview/251755786/abstract?accountid=12861",
 				"place": "United States -- Ohio",
 				"date": "2001",
-				"numPages": "233 p.",
 				"abstractNote": "Russian modernist theatre greatly influenced the development of American theatre during the first three decades of the twentieth century. Several developments encouraged the relationships between Russian artists and their American counterparts, including key tours by Russian artists in America, the advent of modernism in the American theatre, the immigration of Eastern Europeans to the United States, American advertising and consumer culture, and the Bolshevik Revolution and all of its domestic and international ramifications. Within each of these major and overlapping developments, Russian culture became increasingly acknowledged and revered by American artists and thinkers, who were seeking new art forms to express new ideas. This study examines some of the most significant contributions of Russian theatre and its artists in the early decades of the twentieth century. Looking beyond the important visit of the Moscow Art Theatre in 1923, this study charts the contributions of various Russian artists and their American supporters.\nCertainly, the influence of Stanislavsky and the Moscow Art Theatre on the modern American theatre has been significant, but theatre historians' attention to his influence has overshadowed the contributions of other Russian artists, especially those who provided non-realistic approaches to theatre. In order to understand the extent to which Russian theatre influenced the American stage, this study focuses on the critics, intellectuals, producers, and touring artists who encouraged interaction between Russians and Americans, and in the process provided the catalyst for American theatrical experimentation. The key figures in this study include some leaders in the Yiddish intellectual and theatrical communities in New York City, Morris Gest and Otto H. Kahn, who imported many important Russian performers for American audiences, and a number of Russian émigré artists, including Jacob Gordin, Jacob Ben-Ami, Benno Schneider, Boris Aronson, and Michel Fokine, who worked in the American theatre during the first three decades of the twentieth century.",
 				"libraryCatalog": "ProQuest",
 				"accessDate": "CURRENT_TIMESTAMP",
