@@ -72,21 +72,27 @@ function scrape(marcurl) {
 		translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
-			//fix the odd MARC quirk that sets editors=contributors
-			if (item.itemType == "book") {
-				for (var i in item.creators) {
-					if (item.creators[i].creatorType == "author") var t = "author";
-					if (!t) {
-						if (item.creators[i].creatorType == "contributor") {
-							item.creators[i].creatorType = "editor";
-						}
-					}
-				}
+		//editors get mapped as contributors - but so do many others who should be
+		// --> for books that don't have an author, turn contributors into editors.
+		if (newItem.itemType=="book"){
+		    var hasAuthor = false;
+		    for (var i in newItem.creators) {
+			if (newItem.creators[i].creatorType=="author") {
+				hasAuthor = true;
 			}
+		    }
+		    if (!hasAuthor) {
+			for (var i in newItem.creators) {
+			    if (newItem.creators[i].creatorType=="contributor") {
+				newItem.creators[i].creatorType="editor";
+			    }
+			}
+		    }
+		}
 			item.complete();
 		});
 		translator.translate();
-	}) //doGet end
+	});
 }
 
 function marcURL(url) {
