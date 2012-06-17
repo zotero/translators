@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-06-04 20:34:19"
+	"lastUpdated": "2012-06-17 00:27:03"
 }
 
 /*
@@ -254,6 +254,11 @@ function scrapeArticleResults(doc, articles) {
 
 						if(attachment) {
 							item.attachments.push(attachment);
+						}
+
+						//add linked url to the URL field
+						if(snapshotUrl) {
+							item.url = snapshotUrl;
 						}
 
 						item.complete();
