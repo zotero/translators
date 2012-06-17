@@ -1,15 +1,15 @@
 {
 	"translatorID": "caecaea0-5d06-11df-a08a-0800200c9a66",
-	"label": "tagesanzeiger.ch/Newsnetz",
+	"label": "Newsnet/Tamedia",
 	"creator": "ibex",
-	"target": "^http://((www\\.)?(tagesanzeiger|bernerzeitung|bazonline|derbund|thurgauerzeitung)\\.ch/.)",
+	"target": "^http://((www\\.)?(tagesanzeiger|(bo\\.)?bernerzeitung|bazonline|derbund|thurgauerzeitung|24heures)\\.ch/.)",
 	"minVersion": "2.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-05 04:49:07"
+	"lastUpdated": "2012-06-17 04:49:07"
 }
 
 /*
@@ -34,12 +34,7 @@
 
 /* Get the first xpath element from doc, if not found return null. */
 function getXPath(xpath, doc) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == "x") return namespace; else return null;
-	} : null;
-
-	return doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	return doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 }
 
 /* Zotero API */
@@ -81,6 +76,12 @@ function scrape(doc) {
 	newArticle.url = doc.location.href;
 	newArticle.title = Zotero.Utilities.trimInternal(getXPath('//div[@id = "singleLeft"]/h2', doc).textContent);
 
+	var titleprefix = getXPath('//div[@id = "singleLeft"]/h6', doc);
+	if ((titleprefix != null) && (Zotero.Utilities.trimInternal(titleprefix.textContent) != "")) {
+		newArticle.shortTitle = newArticle.title;
+		newArticle.title = Zotero.Utilities.trimInternal(titleprefix.textContent) + ": " + newArticle.title;
+	}
+
 	var date = Zotero.Utilities.trimInternal(getXPath('//div[@id = "singleLeft"]/p[@class = "publishedDate"]', doc).textContent);
 	newArticle.date = Zotero.Utilities.trimInternal(date.split(/[:,] */)[1]);
 
@@ -93,6 +94,8 @@ function scrape(doc) {
 		authorline = authorline.replace(/Von /, "");
 		authorline = authorline.replace(/Interview: /, "");
 		authorline = authorline.replace(/Aktualisiert .*$/, "");
+		authorline = authorline.replace(/Mis à jour le .*$/, "");
+		authorline = authorline.replace(/Mis à jour à .*$/, "");
 		authorline = authorline.replace(/, .*$/, "");
 		authorline = Zotero.Utilities.trim(authorline.replace(/\. .*$/, ""));
 
@@ -116,6 +119,11 @@ function scrape(doc) {
 			newArticle.publicationTitle = "Tages-Anzeiger";
 			newArticle.ISSN = "1422-9994";
 		}
+	}
+	if (doc.location.host.indexOf("24heures.ch") > -1) {
+		newArticle.language = "fr";
+	} else {
+		newArticle.language = "de";
 	}
 
 	var section = getXPath('//div[@id = "singleHeader"]/h1/span', doc);
