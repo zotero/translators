@@ -1,6 +1,6 @@
 {
 	"translatorID": "61ffe600-55e0-11df-bed9-0002a5d5c51b",
-	"label": "nzz.ch",
+	"label": "NZZ",
 	"creator": "ibex, Sebastian Karcher",
 	"target": "^https?://(www\\.)?nzz\\.ch/.",
 	"minVersion": "2.1.9",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-10 00:01:42"
+	"lastUpdated": "2012-06-17 00:01:42"
 }
 
 /*
@@ -32,7 +32,6 @@
 
 /* Get the first xpath element from doc, if not found return null. */
 function getXPath(xpath, doc) {
-
 	return doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 }
 
@@ -84,8 +83,13 @@ function scrape(doc) {
 	if (date) newItem.date = date.replace(/\d\d\:\d\d:\d\d/, "").trim();
 	newItem.publicationTitle = "Neue Zürcher Zeitung";
 	newItem.ISSN = "0376-6829";
-	//The old translator used to differentiate between online, regular and Sunday paper. 
-	//I don't think that's possible with the new webpage.
+	newItem.language = "de";
+
+	var titleprefix = getXPath('//hgroup/h5', doc);
+	if ((titleprefix != null) && (Zotero.Utilities.trimInternal(titleprefix.textContent) != "")) {
+		newItem.shortTitle = newItem.title;
+		newItem.title = Zotero.Utilities.trimInternal(titleprefix.textContent) + ": " + newItem.title;
+	}
 
 	var subtitle = getXPath('//hgroup/h4', doc);
 	if ((subtitle != null) && (Zotero.Utilities.trimInternal(subtitle.textContent) != "")) {
@@ -93,7 +97,7 @@ function scrape(doc) {
 		newItem.title += ": " + Zotero.Utilities.trimInternal(subtitle.textContent);
 	}
 
-	var teaser = getXPath('//article/p[@class = "leader"]', doc);
+	var teaser = getXPath('//article/p[@class = "lead"]', doc);
 	if ((teaser != null) && (Zotero.Utilities.trimInternal(teaser.textContent) != "")) {
 		newItem.abstractNote = Zotero.Utilities.trimInternal(teaser.textContent);
 	}
@@ -119,7 +123,14 @@ function scrape(doc) {
 
 	var section = getXPath('//hgroup/h6/a', doc);
 	if (section != null) {
-		newItem.section = Zotero.Utilities.trimInternal(section.textContent);
+		var sectionText = Zotero.Utilities.trimInternal(section.textContent);
+		if (sectionText.indexOf("NZZ am Sonntag") > -1 ) {
+			newItem.publicationTitle = "NZZ am Sonntag";
+			newItem.ISSN = "1660-0851";
+			newItem.section = "";
+		} else {
+			newItem.section = sectionText;
+		}
 	}
 
 	var source = getXPath('//div[@id = "content"]//span[@class="quelle"]', doc);
@@ -132,14 +143,6 @@ function scrape(doc) {
 	newItem.complete();
 }
 
-/* There is no built-in function to count object properties which often are used as associative arrays.*/
-function countObjectProperties(obj) {
-	var size = 0;
-	for (var key in obj) {
-		if (obj.hasOwnProperty(key)) size++;
-	}
-	return size;
-}
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
