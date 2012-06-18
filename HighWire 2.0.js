@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-05-16 09:19:06"
+	"lastUpdated": "2012-06-17 23:51:53"
 }
 
 /*
@@ -586,8 +586,8 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Vivianna",
-						"lastName": "Van Deerlin",
+						"firstName": "Vivianna Van",
+						"lastName": "Deerlin",
 						"creatorType": "author"
 					},
 					{

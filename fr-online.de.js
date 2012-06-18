@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-06 11:55:19"
+	"lastUpdated": "2012-06-17 23:32:44"
 }
 
 /*
@@ -39,7 +39,7 @@ http://www.fr-online.de/wirtschaft/krise/portugal-koennte-rettungspaket-benoetig
 */
 
 function detectWeb(doc, url) {
-	var FR_article_XPath = ".//h2[contains(@class, 'Title')]";
+	var FR_article_XPath = "//h2[contains(@class, 'Title')]|//h1[contains(@class, 'Title')]";
 	var FR_multiple_XPath = ".//*[@id='ContainerContent']/div//div[contains(@class, 'ItemHeadline')]/a"
 
 

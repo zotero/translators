@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-04-10 11:53:10"
+	"lastUpdated": "2012-06-17 23:49:04"
 }
 
 /*
@@ -302,7 +302,8 @@ var testCases = [
 				"tags": [
 					"Garcia Marquez, Gabriel - Criticism and interpretation",
 					"Literary Criticism / Caribbean & Latin American",
-					"Literary Criticism / European / Spanish & Portuguese"
+					"Literary Criticism / European / Spanish & Portuguese",
+					"Literary Criticism / Caribbean & Latin American"
 				],
 				"seeAlso": [],
 				"attachments": [

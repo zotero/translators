@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-06-13 15:19:17"
+	"lastUpdated": "2012-06-17 23:35:42"
 }
 
 /*
@@ -228,12 +228,12 @@ var testCases = [
 					"Philipp Lahm",
 					"Andreas Ottl",
 					"FC Bayern München",
+					"Mesut Özil",
 					"Robert Enke",
 					"Bundesliga",
 					"Maxim Gorkij",
 					"Fußball",
-					"SV Werder Bremen",
-					"Fifa"
+					"SV Werder Bremen"
 				],
 				"seeAlso": [],
 				"attachments": [
