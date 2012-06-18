@@ -1,15 +1,15 @@
 {
 	"translatorID": "488fe1e0-b7d2-406f-8257-5060418ce9b2",
+	"translatorType": 4,
 	"label": "fr-online.de",
 	"creator": "Martin Meyerhoff",
 	"target": "^http://www\\.fr-online\\.de",
 	"minVersion": "2.1.9",
-	"maxVersion": "",
+	"maxVersion": null,
 	"priority": 100,
 	"inRepository": true,
-	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-06 11:55:19"
+	"lastUpdated": "2012-06-18 06:20:00"
 }
 
 /*
@@ -39,7 +39,7 @@ http://www.fr-online.de/wirtschaft/krise/portugal-koennte-rettungspaket-benoetig
 */
 
 function detectWeb(doc, url) {
-	var FR_article_XPath = ".//h2[contains(@class, 'Title')]";
+	var FR_article_XPath = "//h2[contains(@class, 'Title')]|//h1[contains(@class, 'Title')]";
 	var FR_multiple_XPath = ".//*[@id='ContainerContent']/div//div[contains(@class, 'ItemHeadline')]/a"
 
 

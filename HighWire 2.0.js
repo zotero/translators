@@ -1,15 +1,15 @@
 {
 	"translatorID": "8c1f42d5-02fa-437b-b2b2-73afc768eb07",
+	"translatorType": 4,
 	"label": "HighWire 2.0",
 	"creator": "Matt Burton",
 	"target": "^[^\\?]+(content/([0-9]+/[0-9]+|current|firstcite|early)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
 	"minVersion": "3.0",
-	"maxVersion": "",
+	"maxVersion": null,
 	"priority": 200,
 	"inRepository": true,
-	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-05-16 09:19:06"
+	"lastUpdated": "2012-06-18 06:20:00"
 }
 
 /*
@@ -586,8 +586,8 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Vivianna",
-						"lastName": "Van Deerlin",
+						"firstName": "Vivianna Van",
+						"lastName": "Deerlin",
 						"creatorType": "author"
 					},
 					{

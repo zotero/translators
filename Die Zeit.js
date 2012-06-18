@@ -1,15 +1,15 @@
 {
 	"translatorID": "312bbb0e-bfb6-4563-a33c-085445d391ed",
+	"translatorType": 4,
 	"label": "Die Zeit",
 	"creator": "Martin Meyerhoff",
 	"target": "^http://www\\.zeit\\.de/",
 	"minVersion": "1.0",
-	"maxVersion": "",
+	"maxVersion": null,
 	"priority": 100,
 	"inRepository": true,
-	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-06-13 15:19:17"
+	"lastUpdated": "2012-06-18 06:20:00"
 }
 
 /*
@@ -228,12 +228,12 @@ var testCases = [
 					"Philipp Lahm",
 					"Andreas Ottl",
 					"FC Bayern München",
+					"Mesut Özil",
 					"Robert Enke",
 					"Bundesliga",
 					"Maxim Gorkij",
 					"Fußball",
-					"SV Werder Bremen",
-					"Fifa"
+					"SV Werder Bremen"
 				],
 				"seeAlso": [],
 				"attachments": [

@@ -1,15 +1,15 @@
 {
 	"translatorID": "3e684d82-73a3-9a34-095f-19b112d88bbf",
+	"translatorType": 4,
 	"label": "Google Books",
 	"creator": "Simon Kornblith, Michael Berkowitz and Rintze Zelle",
 	"target": "^http://(books|www)\\.google\\.[a-z]+(\\.[a-z]+)?/books(?:\\/.*)?\\?(.*id=.*|.*q=.*)",
 	"minVersion": "2.1.9",
-	"maxVersion": "",
+	"maxVersion": null,
 	"priority": 100,
 	"inRepository": true,
-	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-04-10 11:53:10"
+	"lastUpdated": "2012-06-18 06:20:00"
 }
 
 /*
@@ -302,7 +302,8 @@ var testCases = [
 				"tags": [
 					"Garcia Marquez, Gabriel - Criticism and interpretation",
 					"Literary Criticism / Caribbean & Latin American",
-					"Literary Criticism / European / Spanish & Portuguese"
+					"Literary Criticism / European / Spanish & Portuguese",
+					"Literary Criticism / Caribbean & Latin American"
 				],
 				"seeAlso": [],
 				"attachments": [

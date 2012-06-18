@@ -1,15 +1,15 @@
 {
 	"translatorID": "2a5dc3ed-ee5e-4bfb-baad-36ae007e40ce",
+	"translatorType": 4,
 	"label": "DeGruyter",
 	"creator": "Sebastian Karcher",
 	"target": "^https?://www\\.degruyter\\.com",
 	"minVersion": "2.1.9",
-	"maxVersion": "",
+	"maxVersion": null,
 	"priority": 100,
 	"inRepository": true,
-	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-06-13 23:20:07"
+	"lastUpdated": "2012-06-18 06:20:00"
 }
 
 /*

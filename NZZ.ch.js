@@ -122,8 +122,8 @@ function scrape(doc) {
 	}
 
 	var section = getXPath('//hgroup/h6/a', doc);
-	var sectionText = Zotero.Utilities.trimInternal(section.textContent);
 	if (section != null) {
+		var sectionText = Zotero.Utilities.trimInternal(section.textContent);
 		if (sectionText.indexOf("NZZ am Sonntag") > -1 ) {
 			newItem.publicationTitle = "NZZ am Sonntag";
 			newItem.ISSN = "1660-0851";
