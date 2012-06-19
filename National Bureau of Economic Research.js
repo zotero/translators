@@ -3,13 +3,13 @@
 	"label": "National Bureau of Economic Research",
 	"creator": "Michael Berkowitz",
 	"target": "^https?://(?:papers\\.|www\\.)?nber\\.org/(papers|s|new)",
-	"minVersion": "3.0",
+	"minVersion": "1.0.0b4.r1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-15 20:33:32"
+	"browserSupport": "gcsib",
+	"lastUpdated": "2012-06-18 23:47:46"
 }
 
 function detectWeb(doc, url) {
@@ -21,7 +21,6 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-
 	var arts = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
@@ -35,24 +34,26 @@ function doWeb(doc, url) {
 				return true;
 			}
 			for (var i in items) {
-				i = cleanup(i);
-			arts.push(i + '.bib');
+				i = bibURL(i);
+				arts.push(i);
 			}
-			Zotero.Utilities.processDocuments(arts, scrape, function () {
+			scrape(arts, function () {
 				Zotero.done();
 			});
 		});
 	} else {
-		url = cleanup(url);
-		var pdfurl = url+ ".pdf"
-		arts = [url + '.bib'];
+		url = bibURL(url);
+		scrape(url);
 	}
-	Z.debug(arts)
-	Zotero.Utilities.HTTP.doGet(arts, function(text) {
+}
+
+function scrape(url){
+	Zotero.Utilities.HTTP.doGet(url, function(text) {
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 		translator.setString(text);
 		translator.setHandler("itemDone", function(obj, item) {
+			var pdfurl = item.url + ".pdf"
 			item.attachments = []
 			item.attachments.push({url:pdfurl, title: "NBER Full Text PDF", mimeType:"application/pdf"});
 			item.complete();	
@@ -62,11 +63,11 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }
 
-function cleanup(url){
+function bibURL(url){
 	url = url.replace(/\?.+/, "");
+	url = url + ".bib";
 	return url;
-}
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -122,46 +123,6 @@ var testCases = [
 		"type": "web",
 		"url": "http://papers.nber.org/new.html",
 		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://papers.nber.org/papers/w18130?utm_campaign=ntw&utm_medium=email&utm_source=ntw",
-		"items": [
-			{
-				"itemType": "report",
-				"creators": [
-					{
-						"firstName": "Enrico",
-						"lastName": "Spolaore",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Romain",
-						"lastName": "Wacziarg",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "NBER Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"title": "How Deep Are the Roots of Economic Development?",
-				"publisher": "National Bureau of Economic Research",
-				"type": "Working Paper",
-				"series": "Working Paper Series",
-				"reportNumber": "18130",
-				"date": "June 2012",
-				"url": "http://www.nber.org/papers/w18130",
-				"abstractNote": "The empirical literature on economic growth and development has moved from the study of proximate determinants to the analysis of ever deeper, more fundamental factors, rooted in long-term history. A growing body of new empirical work focuses on the measurement and estimation of the effects of historical variables on contemporary income by explicitly taking into account the ancestral composition of current populations. The evidence suggests that economic development is affected by traits that have been transmitted across generations over the very long run. This article surveys this new literature and provides a framework to discuss different channels through which intergenerationally transmitted characteristics may impact economic development, biologically (via genetic or epigenetic transmission) and culturally (via behavioral or symbolic transmission). An important issue is whether historically transmitted traits have affected development through their direct impact on productivity, or have operated indirectly as barriers to the diffusion of productivity-enhancing innovations across populations.",
-				"libraryCatalog": "National Bureau of Economic Research",
-				"accessDate": "CURRENT_TIMESTAMP"
-			}
-		]
 	}
 ]
 /** END TEST CASES **/
