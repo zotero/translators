@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-17 00:01:42"
+	"lastUpdated": "2012-06-18 23:15:20"
 }
 
 /*
@@ -174,9 +174,11 @@ var testCases = [
 				"date": "2011-11-10",
 				"publicationTitle": "Neue Zürcher Zeitung",
 				"ISSN": "0376-6829",
+				"language": "de",
 				"shortTitle": "Kuoni profitiert von der GTA-Übernahme",
+				"abstractNote": "Der Reisekonzern Kuoni hat in den ersten neun Monaten von der Übernahme des Reisekonzerns Gullivers Travel Associates (GTA) profitiert. Der Umsatz stieg, und der Konzern machte Gewinn.",
 				"section": "Aktuell",
-				"libraryCatalog": "nzz.ch",
+				"libraryCatalog": "NZZ",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
@@ -209,9 +211,11 @@ var testCases = [
 				"date": "2012-05-30",
 				"publicationTitle": "Neue Zürcher Zeitung",
 				"ISSN": "0376-6829",
+				"language": "de",
 				"shortTitle": "Wie ein mexikanisches Städtchen die Bösewichte vertrieb",
+				"abstractNote": "Mit einem Aufstand haben die Einwohner der mexikanischen Gemeinde Cherán die Holzfällermafia vertrieben. Sie haben eine Landsgemeinde gegründet und entdeckt, dass direktdemokratische Institutionen Korruption verhindern.",
 				"section": "International",
-				"libraryCatalog": "nzz.ch",
+				"libraryCatalog": "NZZ",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-17 04:49:07"
+	"lastUpdated": "2012-06-18 23:15:52"
 }
 
 /*
@@ -159,7 +159,6 @@ var testCases = [
 					{
 						"title": "tagesanzeiger.ch Article Snapshot",
 						"mimeType": "text/html",
-						"url": "http://www.tagesanzeiger.ch/wissen/natur/Duestere-Fakten-zum-Klimawandel/story/13137025/print.html",
 						"snapshot": true
 					}
 				],
@@ -168,8 +167,9 @@ var testCases = [
 				"date": "09.11.2011",
 				"abstractNote": "Der neueste Bericht der Internationalen Energieagentur ist besorgniserregend. Das Klima könnte sich noch viel stärker erwärmen als bisher erwartet.",
 				"publicationTitle": "tagesanzeiger.ch: (kle/dapd)",
+				"language": "de",
 				"section": "Wissen",
-				"libraryCatalog": "tagesanzeiger.ch/Newsnetz",
+				"libraryCatalog": "Newsnet/Tamedia",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
