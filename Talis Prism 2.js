@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsib",
-	"lastUpdated": "2012-06-18 23:13:58"
+	"browserSupport": "g",
+	"lastUpdated": "2012-06-19 23:20:05"
 }
 
 /*
@@ -55,16 +55,12 @@ function doWeb(doc, url){
 				return true;
 			}
 			for (var i in items) {
-				i = referURL(i)
-				articles.push(i);
+				articles.push(referURL(i));
 			}
-			scrape(articles, function () {
-				Zotero.done();
-			});
+			scrape(articles);
 		});
 	} else {
-		url = referURL(url)
-		scrape(url);
+		scrape(referURL(url));
 	}
 }
 
