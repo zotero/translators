@@ -302,8 +302,7 @@ var testCases = [
 				"tags": [
 					"Garcia Marquez, Gabriel - Criticism and interpretation",
 					"Literary Criticism / Caribbean & Latin American",
-					"Literary Criticism / European / Spanish & Portuguese",
-					"Literary Criticism / Caribbean & Latin American"
+					"Literary Criticism / European / Spanish & Portuguese"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -315,13 +314,13 @@ var testCases = [
 				],
 				"numPages": "208",
 				"ISBN": "9780313312601",
-				"publisher": "Greenwood Publishing Group",
-				"title": "Gabriel García Márquez: A Critical Companion",
 				"language": "en",
 				"abstractNote": "Winner of the Nobel Prize for Literature in 1982 for his masterpiece One Hundred Years of Solitude, Gabriel Garc^D'ia M^D'arquez had already earned tremendous respect and popularity in the years leading up to that honor, and remains, to date, an active and prolific writer. Readers are introduced to Garc^D'ia M^D'arquez with a vivid account of his fascinating life; from his friendships with poets and presidents, to his distinguished career as a journalist, novelist, and chronicler of the quintessential Latin American experience. This companion also helps students situate Garc^D'ia M^D'arquez within the canon of Western literature, exploring his contributions to the modern novel in general, and his forging of literary techniques, particularly magic realism, that have come to distinguish Latin American fiction. Full literary analysis is given for One Hundred Years of Solitude, as well as Chronicle of a Death Foretold (1981), Love in the Time of Cholera (1985), two additional novels, and five of Garc^D'ia M^D'arquez's best short stories. Students are given guidance in understanding the historical contexts, as well as the characters and themes that recur in these interrelated works. Narrative technique and alternative critical perspectives are also explored for each work, helping readers fully appreciate the literary accomplishments of Gabriel Garc^D'ia M^D'arquez.",
-				"date": "2001",
 				"libraryCatalog": "Google Books",
-				"shortTitle": "Gabriel García Márquez"
+				"shortTitle": "Gabriel García Márquez",
+				"publisher": "Greenwood Publishing Group",
+				"title": "Gabriel García Márquez: A Critical Companion",
+				"date": "2001"
 			}
 		]
 	},

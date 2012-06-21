@@ -1073,11 +1073,11 @@ var testCases = [
 				"notes": [],
 				"tags": [
 					"Communication and the arts",
-					"Stanislavsky",
 					"Konstantin",
 					"Konstantin Stanislavsky",
-					"Russian",
 					"Modernism",
+					"Russian",
+					"Stanislavsky",
 					"Theater"
 				],
 				"seeAlso": [],
@@ -1090,23 +1090,18 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "Beyond Stanislavsky: The influence of Russian modernism on the American theatre",
-				"publicationTitle": "ProQuest Dissertations and Theses",
-				"pages": "233 p.",
-				"numPages": "233",
-				"section": "0168",
-				"ISBN": "9780493440408, 0493440402",
 				"university": "The Ohio State University",
 				"thesisType": "Ph.D.",
-				"language": "English; EN",
+				"language": "English",
 				"rights": "Copyright UMI - Dissertations Publishing 2001",
 				"url": "http://search.proquest.com/dissertations/docview/251755786/abstract/132B8A749B71E82DBA1/1",
 				"place": "United States -- Ohio",
-				"date": "2001",
+				"numPages": "233 p.",
 				"abstractNote": "Russian modernist theatre greatly influenced the development of American theatre during the first three decades of the twentieth century. Several developments encouraged the relationships between Russian artists and their American counterparts, including key tours by Russian artists in America, the advent of modernism in the American theatre, the immigration of Eastern Europeans to the United States, American advertising and consumer culture, and the Bolshevik Revolution and all of its domestic and international ramifications. Within each of these major and overlapping developments, Russian culture became increasingly acknowledged and revered by American artists and thinkers, who were seeking new art forms to express new ideas. This study examines some of the most significant contributions of Russian theatre and its artists in the early decades of the twentieth century. Looking beyond the important visit of the Moscow Art Theatre in 1923, this study charts the contributions of various Russian artists and their American supporters.\nCertainly, the influence of Stanislavsky and the Moscow Art Theatre on the modern American theatre has been significant, but theatre historians' attention to his influence has overshadowed the contributions of other Russian artists, especially those who provided non-realistic approaches to theatre. In order to understand the extent to which Russian theatre influenced the American stage, this study focuses on the critics, intellectuals, producers, and touring artists who encouraged interaction between Russians and Americans, and in the process provided the catalyst for American theatrical experimentation. The key figures in this study include some leaders in the Yiddish intellectual and theatrical communities in New York City, Morris Gest and Otto H. Kahn, who imported many important Russian performers for American audiences, and a number of Russian émigré artists, including Jacob Gordin, Jacob Ben-Ami, Benno Schneider, Boris Aronson, and Michel Fokine, who worked in the American theatre during the first three decades of the twentieth century.",
 				"libraryCatalog": "ProQuest",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Beyond Stanislavsky"
+				"shortTitle": "Beyond Stanislavsky",
+				"title": "Beyond Stanislavsky: The influence of Russian modernism on the American theatre",
+				"date": "2001"
 			}
 		]
 	},
@@ -1135,11 +1130,11 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Peace",
 					"Book reviews",
+					"Peace",
+					"Political Science--International Relations",
 					"Sciences: Comprehensive Works",
-					"Sociology",
-					"Political Science--International Relations"
+					"Sociology"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -1147,23 +1142,18 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
+				"issue": "2",
+				"ISSN": "00084697",
+				"language": "English",
+				"rights": "Copyright Peace Research May 1995",
+				"url": "http://search.proquest.com/docview/213445241",
+				"libraryCatalog": "ProQuest",
+				"shortTitle": "Peacemaking",
 				"title": "Peacemaking: moral & policy challenges for a new world // Review",
 				"publicationTitle": "Peace Research",
 				"volume": "27",
-				"issue": "2",
-				"numPages": "0",
-				"ISSN": "00084697",
-				"rights": "Copyright Peace Research May 1995",
-				"language": "English",
-				"date": "May 1995",
 				"pages": "90-100",
-				"publisher": "Menno Simons College",
-				"place": "Winnipeg, Canada",
-				"url": "http://search.proquest.com/docview/213445241",
-				"abstractNote": "In his \"Introduction\" to the book entitled Peacemaking: Moral and Policy Challenges for a New World, Rev. Drew Christiansen points out that the Roman Catholic bishops of the United States have made a clear distinction between the social teachings of the Church--comprising universally binding moral and ethical principles--and the particular positions they have taken on public policy issues--such as those relating to war, peace, justice, human rights and other socio-political matters. While the former are not to be mitigated under any circumstances, the latter, being particular applications, observations and recommendations, can allow for plurality of opinion and diversity of focus in the case of specific social, political and opinion and diversity of focus in the case of specific social, political and moral issues.(f.1) Peacemaking aligns itself with this second category. The objectives of this review essay are the following: to summarize the main topics and themes, of some of the recently-published documents on Catholic political thought, relating to peacemaking and peacekeeping; and to provide a brief critique of their main contents, recommendations and suggestions.\nThe Directions of Peacemaking: As in the earlier documents, so too are the virtues of faith, hope, courage, compassion, humility, kindness, patience, perseverance, civility and charity emphasized, in The Harvest of Justice, as definite aids in peacemaking and peacekeeping. The visions of global common good, social and economic development consistent with securing and nurturing conditions for justice and peace, solidarity among people, as well as cooperation among the industrial rich and the poor developing nations are also emphasized as positive enforcements in the peacemaking and peacekeeping processes. All of these are laudable commitments, so long as they are pursued through completely pacifist perspectives. The Harvest of Justice also emphasizes that, \"as far as possible, justice should be sought through nonviolent means;\" however, \"when sustained attempt at nonviolent action fails, then legitimate political authorities are permitted as a last resort to employ limited force to rescue the innocent and establish justice.\"(f.13) The document also frankly admits that \"the vision of Christian nonviolence is not passive.\"(f.14) Such a position may disturb many pacifists. Even though some restrictive conditions--such as a \"just cause,\" \"comparative justice,\" legitimate authority\" to pursue justice issues, \"right intentions,\" probability of success, proportionality of gains and losses in pursuing justice, and the use of force as last resort--are indicated and specified in the document, the use of violence and devastation are sanctioned, nevertheless, by its reaffirmation of the use of force in setting issues and by its support of the validity of the \"just war\" tradition.\nThe first section, entitled \"Theology, Morality, and Foreign Policy in A New World,\" contains four essays. These deal with the new challenges of peace, the illusion of control, creating peace conditions through a theological framework, as well as moral reasoning and foreign policy after the containment. The second, comprising six essays, is entitled \"Human Rights, Self-Determination, and Sustainable Development.\" These essays deal with effective human rights agenda, religious nationalism and human rights, identity, sovereignty, and self-determination, peace and the moral imperatives of democracy, and political economy of peace. The two essays which comprise the third section, entitled \"Global Institutions,\" relate the strengthening of the global institutions and action for the future. The fourth, entitled \"The Use of Force After the Cold War,\" is both interesting and controversial. Its six essays discuss ethical dilemmas in the use of force, development of the just-war tradition, in a multicultural world, casuistry, pacifism, and the just-war tradition, possibilities and limits of humanitarian intervention, and the challenge of peace and stability in a new international order. The last section, devoted to \"Education and Action for Peace,\" contains three essays, which examine the education for peacemaking, the challenge of conscience and the pastoral response to ongoing challenge of peace.",
-				"libraryCatalog": "ProQuest",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Peacemaking"
+				"date": "May 1995"
 			}
 		]
 	},
@@ -1197,17 +1187,17 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "Rethinking Policy on East Germany",
-				"pages": "A23",
 				"ISSN": "03624331",
+				"language": "English",
 				"rights": "Copyright New York Times Company Aug 22, 1984",
 				"url": "http://search.proquest.com/hnpnewyorktimes/docview/122485317/abstract/1357D8A4FC136DF28E3/11?accountid=12861",
 				"place": "New York, N.Y., United States",
-				"date": "1984",
-				"numPages": "A23",
 				"abstractNote": "For some months now, a gradual thaw has been in the making between East Germany and West Germany. So far, the United States has paid scant attention -- an attitude very much in keeping with our neglect of East Germany throughout the postwar period. We should reconsider this policy before things much further -- and should in particular begin to look more closely at what is going on in East Germany.",
 				"libraryCatalog": "ProQuest",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"title": "Rethinking Policy on East Germany",
+				"publicationTitle": "New York Times (1923-Current file)",
+				"pages": "A23",
+				"date": "Aug 22, 1984"
 			}
 		]
 	},
@@ -1265,11 +1255,11 @@ var testCases = [
 				"notes": [],
 				"tags": [
 					"Communication and the arts",
-					"Stanislavsky",
 					"Konstantin",
 					"Konstantin Stanislavsky",
-					"Russian",
 					"Modernism",
+					"Russian",
+					"Stanislavsky",
 					"Theater"
 				],
 				"seeAlso": [],
@@ -1282,23 +1272,18 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "Beyond Stanislavsky: The influence of Russian modernism on the American theatre",
-				"publicationTitle": "ProQuest Dissertations and Theses",
-				"pages": "233 p.",
-				"numPages": "233",
-				"section": "0168",
-				"ISBN": "9780493440408, 0493440402",
 				"university": "The Ohio State University",
 				"thesisType": "Ph.D.",
-				"language": "English; EN",
+				"language": "English",
 				"rights": "Copyright UMI - Dissertations Publishing 2001",
-				"url": "http://search.proquest.com/dissertations/docview/251755786/abstract?accountid=12861",
+				"url": "http://search.proquest.com/dissertations/docview/251755786/abstract?accountid=14541",
 				"place": "United States -- Ohio",
-				"date": "2001",
+				"numPages": "233 p.",
 				"abstractNote": "Russian modernist theatre greatly influenced the development of American theatre during the first three decades of the twentieth century. Several developments encouraged the relationships between Russian artists and their American counterparts, including key tours by Russian artists in America, the advent of modernism in the American theatre, the immigration of Eastern Europeans to the United States, American advertising and consumer culture, and the Bolshevik Revolution and all of its domestic and international ramifications. Within each of these major and overlapping developments, Russian culture became increasingly acknowledged and revered by American artists and thinkers, who were seeking new art forms to express new ideas. This study examines some of the most significant contributions of Russian theatre and its artists in the early decades of the twentieth century. Looking beyond the important visit of the Moscow Art Theatre in 1923, this study charts the contributions of various Russian artists and their American supporters.\nCertainly, the influence of Stanislavsky and the Moscow Art Theatre on the modern American theatre has been significant, but theatre historians' attention to his influence has overshadowed the contributions of other Russian artists, especially those who provided non-realistic approaches to theatre. In order to understand the extent to which Russian theatre influenced the American stage, this study focuses on the critics, intellectuals, producers, and touring artists who encouraged interaction between Russians and Americans, and in the process provided the catalyst for American theatrical experimentation. The key figures in this study include some leaders in the Yiddish intellectual and theatrical communities in New York City, Morris Gest and Otto H. Kahn, who imported many important Russian performers for American audiences, and a number of Russian émigré artists, including Jacob Gordin, Jacob Ben-Ami, Benno Schneider, Boris Aronson, and Michel Fokine, who worked in the American theatre during the first three decades of the twentieth century.",
 				"libraryCatalog": "ProQuest",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Beyond Stanislavsky"
+				"shortTitle": "Beyond Stanislavsky",
+				"title": "Beyond Stanislavsky: The influence of Russian modernism on the American theatre",
+				"date": "2001"
 			}
 		]
 	},
@@ -1318,11 +1303,11 @@ var testCases = [
 				"notes": [],
 				"tags": [
 					"Communication and the arts",
-					"Stanislavsky",
 					"Konstantin",
 					"Konstantin Stanislavsky",
-					"Russian",
 					"Modernism",
+					"Russian",
+					"Stanislavsky",
 					"Theater"
 				],
 				"seeAlso": [],
@@ -1335,23 +1320,18 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "Beyond Stanislavsky: The influence of Russian modernism on the American theatre",
-				"publicationTitle": "ProQuest Dissertations and Theses",
-				"pages": "233 p.",
-				"numPages": "233",
-				"section": "0168",
-				"ISBN": "9780493440408, 0493440402",
 				"university": "The Ohio State University",
 				"thesisType": "Ph.D.",
-				"language": "English; EN",
+				"language": "English",
 				"rights": "Copyright UMI - Dissertations Publishing 2001",
-				"url": "http://search.proquest.com/dissertations/docview/251755786/abstract?accountid=12861",
+				"url": "http://search.proquest.com/dissertations/docview/251755786/abstract?accountid=14541",
 				"place": "United States -- Ohio",
-				"date": "2001",
+				"numPages": "233 p.",
 				"abstractNote": "Russian modernist theatre greatly influenced the development of American theatre during the first three decades of the twentieth century. Several developments encouraged the relationships between Russian artists and their American counterparts, including key tours by Russian artists in America, the advent of modernism in the American theatre, the immigration of Eastern Europeans to the United States, American advertising and consumer culture, and the Bolshevik Revolution and all of its domestic and international ramifications. Within each of these major and overlapping developments, Russian culture became increasingly acknowledged and revered by American artists and thinkers, who were seeking new art forms to express new ideas. This study examines some of the most significant contributions of Russian theatre and its artists in the early decades of the twentieth century. Looking beyond the important visit of the Moscow Art Theatre in 1923, this study charts the contributions of various Russian artists and their American supporters.\nCertainly, the influence of Stanislavsky and the Moscow Art Theatre on the modern American theatre has been significant, but theatre historians' attention to his influence has overshadowed the contributions of other Russian artists, especially those who provided non-realistic approaches to theatre. In order to understand the extent to which Russian theatre influenced the American stage, this study focuses on the critics, intellectuals, producers, and touring artists who encouraged interaction between Russians and Americans, and in the process provided the catalyst for American theatrical experimentation. The key figures in this study include some leaders in the Yiddish intellectual and theatrical communities in New York City, Morris Gest and Otto H. Kahn, who imported many important Russian performers for American audiences, and a number of Russian émigré artists, including Jacob Gordin, Jacob Ben-Ami, Benno Schneider, Boris Aronson, and Michel Fokine, who worked in the American theatre during the first three decades of the twentieth century.",
 				"libraryCatalog": "ProQuest",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Beyond Stanislavsky"
+				"shortTitle": "Beyond Stanislavsky",
+				"title": "Beyond Stanislavsky: The influence of Russian modernism on the American theatre",
+				"date": "2001"
 			}
 		]
 	}

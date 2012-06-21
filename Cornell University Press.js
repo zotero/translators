@@ -194,21 +194,21 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Methodology",
 					"Criticism",
+					"Methodology",
 					"Semiotics & Theory"
 				],
 				"seeAlso": [],
 				"attachments": [],
-				"title": "Paradigms for a Metaphorology",
-				"publisher": "Cornell University Press",
 				"place": "Ithaca, NY",
 				"ISBN": "978-0-8014-4925-3",
-				"date": "August 2010",
 				"series": "Signale: Modern German Letters, Cultures, and Thought",
 				"numPages": "160",
-				"abstractNote": "\"Paradigms for a Metaphorology may be read as a kind of beginner's guide to Blumenberg, a programmatic introduction to his vast and multifaceted oeuvre. Its brevity makes it an ideal point of entry for readers daunted by the sheer bulk of Blumenberg's later writings, or distracted by their profusion of historical detail. Paradigms expresses many of Blumenberg’s key ideas with a directness, concision, and clarity he would rarely match elsewhere. What is more, because it served as a beginner’s guide for its author as well, allowing him to undertake an initial survey of problems that would preoccupy him for the remainder of his life, it has the additional advantage that it can offer us a glimpse into what might be called the 'genesis of the Blumenbergian world.’\"—from the Afterword by Robert Savage  What role do metaphors play in philosophical language? Are they impediments to clear thinking and clear expression, rhetorical flourishes that may well help to make philosophy more accessible to a lay audience, but that ought ideally to be eradicated in the interests of terminological exactness? Or can the images used by philosophers tell us more about the hopes and cares, attitudes and indifferences that regulate an epoch than their carefully elaborated systems of thought?  In Paradigms for a Metaphorology, originally published in 1960 and here made available for the first time in English translation, Hans Blumenberg (1920–1996) approaches these questions by examining the relationship between metaphors and concepts. Blumenberg argues for the existence of \"absolute metaphors\" that cannot be translated back into conceptual language. These metaphors answer the supposedly naïve, theoretically unanswerable questions whose relevance lies quite simply in the fact that they cannot be brushed aside, since we do not pose them ourselves but find them already posed in the ground of our existence. They leap into a void that concepts are unable to fill.  An afterword by the translator, Robert Savage, positions the book in the intellectual context of its time and explains its continuing importance for work in the history of ideas.",
-				"libraryCatalog": "Cornell University Press"
+				"abstractNote": "\"Paradigms for a Metaphorology may be read as a kind of beginner's guide to Blumenberg, a programmatic introduction to his vast and multifaceted oeuvre. Its brevity makes it an ideal point of entry for readers daunted by the sheer bulk of Blumenberg's later writings, or distracted by their profusion of historical detail. Paradigms expresses many of Blumenberg's key ideas with a directness, concision, and clarity he would rarely match elsewhere. What is more, because it served as a beginner’s guide for its author as well, allowing him to undertake an initial survey of problems that would preoccupy him for the remainder of his life, it has the additional advantage that it can offer us a glimpse into what might be called the 'genesis of the Blumenbergian world.’\"—from the Afterword by Robert Savage    \tWhat role do metaphors play in philosophical language? Are they impediments to clear thinking and clear expression, rhetorical flourishes that may well help to make philosophy more accessible to a lay audience, but that ought ideally to be eradicated in the interests of terminological exactness? Or can the images used by philosophers tell us more about the hopes and cares, attitudes and indifferences that regulate an epoch than their carefully elaborated systems of thought?    \tIn Paradigms for a Metaphorology, originally published in 1960 and here made available for the first time in English translation, Hans Blumenberg (1920–1996) approaches these questions by examining the relationship between metaphors and concepts. Blumenberg argues for the existence of \"absolute metaphors\" that cannot be translated back into conceptual language. These metaphors answer the supposedly naïve, theoretically unanswerable questions whose relevance lies quite simply in the fact that they cannot be brushed aside, since we do not pose them ourselves but find them already posed in the ground of our existence. They leap into a void that concepts are unable to fill.    \tAn afterword by the translator, Robert Savage, positions the book in the intellectual context of its time and explains its continuing importance for work in the history of ideas.",
+				"libraryCatalog": "Cornell University Press",
+				"title": "Paradigms for a Metaphorology",
+				"publisher": "Cornell University Press",
+				"date": "August 2010"
 			}
 		]
 	},
