@@ -1,6 +1,6 @@
 {
 	"translatorID": "dc024bfc-2252-4257-b10e-cb95a0f213aa",
-	"label": "Talis Prism 2",
+	"label": "Library Catalog (Talis Prism 2)",
 	"creator": "Sebastian Karcher",
 	"target": "/items(/\\d+|\\?query=)",
 	"minVersion": "2.1.9",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-06-19 23:20:05"
+	"lastUpdated": "2012-06-22 23:25:34"
 }
 
 /*
@@ -85,9 +85,9 @@ function scrape(url){
 }
 
 function referURL(url){
-	newURL= url.replace(/\?.+/, "") + ".enw";
-	return newURL;
-}/** BEGIN TEST CASES **/
+	return url.replace(/\?.+/, "") + ".enw";
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -126,7 +126,7 @@ var testCases = [
 				"date": "1969",
 				"url": "http://prism.talis.com/cityoflondon/items/169754",
 				"language": "English",
-				"libraryCatalog": "Talis Prism 2",
+				"libraryCatalog": "Library Catalog (Talis Prism 2)",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
@@ -176,7 +176,7 @@ var testCases = [
 				"ISBN": "0521307864",
 				"url": "http://catalogue.library.manchester.ac.uk/items/710564",
 				"language": "English",
-				"libraryCatalog": "Talis Prism 2",
+				"libraryCatalog": "Library Catalog (Talis Prism 2)",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
