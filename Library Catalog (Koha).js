@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-06-16 12:37:00"
+	"lastUpdated": "2012-06-22 23:15:46"
 }
 
 /*
@@ -53,16 +53,12 @@ function doWeb(doc, url) {
 				return true;
 			}
 			for (var i in items) {
-				marcurl = marcURL(i);
-				articles.push(marcurl);
+				articles.push(marcURL(i));
 			}
-			scrape(articles, function () {
-				Zotero.done();
-			});
+			scrape(articles);
 		});
 	} else {
-		var marcurl = marcURL(url);
-		scrape(marcurl);
+		scrape(marcURL(url));
 	}
 }
 
@@ -75,20 +71,20 @@ function scrape(marcurl) {
 			//editors get mapped as contributors - but so do many others who should be
 			// --> for books that don't have an author, turn contributors into editors.
 			if (item.itemType=="book"){
-		    	var hasAuthor = false;
-		    	for (var i in item.creators) {
+				var hasAuthor = false;
+				for (var i in item.creators) {
 					if (item.creators[i].creatorType=="author") {
 						hasAuthor = true;
 						break;
 					}
-		    	}
-		    	if (!hasAuthor) {
+				}
+				if (!hasAuthor) {
 					for (var i in item.creators) {
-			    		if (item.creators[i].creatorType=="contributor") {
+						if (item.creators[i].creatorType=="contributor") {
 						item.creators[i].creatorType="editor";
-			    		}
+						}
 					}
-		    	}
+				}
 			}
 			item.complete();
 		});
