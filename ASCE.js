@@ -8,17 +8,15 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2012-03-09 23:51:18"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-06-24 14:22:53"
 }
-
-/* FW LINE 55:0c9acb56c864 */ function flatten(c){var b=new Array();for(var d in c){var e=c[d];if(e instanceof Array){b=b.concat(flatten(e))}else{b.push(e)}}return b}var FW={_scrapers:new Array()};FW._Base=function(){this.callHook=function(b,c,e,a){if(typeof this["hooks"]==="object"){var d=this["hooks"][b];if(typeof d==="function"){d(c,e,a)}}};this.evaluateThing=function(f,e,c){var b=typeof f;if(b==="object"){if(f instanceof Array){var d=this.evaluateThing;var a=f.map(function(g){return d(g,e,c)});return flatten(a)}else{return f.evaluate(e,c)}}else{if(b==="function"){return f(e,c)}else{return f}}}};FW.Scraper=function(a){FW._scrapers.push(new FW._Scraper(a))};FW._Scraper=function(a){for(x in a){this[x]=a[x]}this._singleFieldNames=["abstractNote","applicationNumber","archive","archiveLocation","artworkMedium","artworkSize","assignee","audioFileType","audioRecordingType","billNumber","blogTitle","bookTitle","callNumber","caseName","code","codeNumber","codePages","codeVolume","committee","company","conferenceName","country","court","date","dateDecided","dateEnacted","dictionaryTitle","distributor","docketNumber","documentNumber","DOI","edition","encyclopediaTitle","episodeNumber","extra","filingDate","firstPage","forumTitle","genre","history","institution","interviewMedium","ISBN","ISSN","issue","issueDate","issuingAuthority","journalAbbreviation","label","language","legalStatus","legislativeBody","letterType","libraryCatalog","manuscriptType","mapType","medium","meetingName","nameOfAct","network","number","numberOfVolumes","numPages","pages","patentNumber","place","postType","presentationType","priorityNumbers","proceedingsTitle","programTitle","programmingLanguage","publicLawNumber","publicationTitle","publisher","references","reportNumber","reportType","reporter","reporterVolume","rights","runningTime","scale","section","series","seriesNumber","seriesText","seriesTitle","session","shortTitle","studio","subject","system","thesisType","title","type","university","url","version","videoRecordingType","volume","websiteTitle","websiteType"];this._makeAttachments=function(p,b,g,t){if(g instanceof Array){g.forEach(function(k){this._makeAttachments(p,b,k,t)},this)}else{if(typeof g==="object"){var o=g.urls||g.url;var m=g.types||g.type;var f=g.titles||g.title;var q=g.snapshots||g.snapshot;var j=this.evaluateThing(o,p,b);var n=this.evaluateThing(f,p,b);var s=this.evaluateThing(m,p,b);var d=this.evaluateThing(q,p,b);if(!(j instanceof Array)){j=[j]}for(var l in j){var c=j[l];var h;var e;var r;if(s instanceof Array){h=s[l]}else{h=s}if(n instanceof Array){e=n[l]}else{e=n}if(d instanceof Array){r=d[l]}else{r=d}t.attachments.push({url:c,title:e,type:h,snapshot:r})}}}};if(this.itemTrans!==undefined){this.makeItems=this.itemTrans.makeItems}else{this.makeItems=function(o,b,m,c,l){var q=new Zotero.Item(this.itemType);q.url=b;for(var h in this._singleFieldNames){var n=this._singleFieldNames[h];if(this[n]){var g=this.evaluateThing(this[n],o,b);if(g instanceof Array){q[n]=g[0]}else{q[n]=g}}}var r=["creators","tags"];for(var f in r){var p=r[f];var d=this.evaluateThing(this[p],o,b);if(d){for(var e in d){q[p].push(d[e])}}}this._makeAttachments(o,b,this["attachments"],q);c(q,this,o,b);l([q])}}};FW._Scraper.prototype=new FW._Base;FW.MultiScraper=function(a){FW._scrapers.push(new FW._MultiScraper(a))};FW._MultiScraper=function(a){for(x in a){this[x]=a[x]}this._mkSelectItems=function(e,d){var b=new Object;for(var c in e){b[d[c]]=e[c]}return b};this._selectItems=function(d,c,e){var b=new Array();Zotero.selectItems(this._mkSelectItems(d,c),function(f){for(var g in f){b.push(g)}e(b)})};this._mkAttachments=function(g,d,f){var b=this.evaluateThing(this["attachments"],g,d);var c=new Object();if(b){for(var e in f){c[f[e]]=b[e]}}return c};this._makeChoices=function(f,p,c,d,h){if(f instanceof Array){f.forEach(function(k){this._makeTitlesUrls(k,p,c,d,h)},this)}else{if(typeof f==="object"){var m=f.urls||f.url;var e=f.titles||f.title;var n=this.evaluateThing(m,p,c);var j=this.evaluateThing(e,p,c);var l=(j instanceof Array);if(!(n instanceof Array)){n=[n]}for(var g in n){var b=n[g];var o;if(l){o=j[g]}else{o=j}h.push(b);d.push(o)}}}};this.makeItems=function(j,b,g,c,f){if(this.beforeFilter){var k=this.beforeFilter(j,b);if(k!=b){this.makeItems(j,k,g,c,f);return}}var e=[];var h=[];this._makeChoices(this["choices"],j,b,e,h);var d=this._mkAttachments(j,b,h);this._selectItems(e,h,function(m){if(!m){f([])}else{var l=[];var n=this.itemTrans;Zotero.Utilities.processDocuments(m,function(q){var p=q.documentURI;var o=n;if(o===undefined){o=FW.getScraper(q,p)}if(o===undefined){}else{o.makeItems(q,p,d[p],function(r){l.push(r);c(r,o,q,p)},function(){})}},function(){f(l)})}})}};FW._MultiScraper.prototype=new FW._Base;FW.DelegateTranslator=function(a){return new FW._DelegateTranslator(a)};FW._DelegateTranslator=function(a){for(x in a){this[x]=a[x]}this._translator=Zotero.loadTranslator(this.translatorType);this._translator.setTranslator(this.translatorId);this.makeItems=function(g,d,b,f,c){var e;Zotero.Utilities.HTTP.doGet(d,function(h){this._translator.setHandler("itemDone",function(k,j){e=j;if(b){j.attachments=b}});if(this.preProcess){h=this.preProcess(h)}this._translator.setString(h);this._translator.translate();f(e)},function(){c([e])})}};FW.DelegateTranslator.prototype=new FW._Scraper;FW._StringMagic=function(){this._filters=new Array();this.addFilter=function(a){this._filters.push(a);return this};this.split=function(a){return this.addFilter(function(b){return b.split(a).filter(function(c){return(c!="")})})};this.replace=function(c,b,a){return this.addFilter(function(d){if(d.match(c)){return d.replace(c,b,a)}else{return d}})};this.prepend=function(a){return this.replace(/^/,a)};this.append=function(a){return this.replace(/$/,a)};this.remove=function(b,a){return this.replace(b,"",a)};this.trim=function(){return this.addFilter(function(a){return Zotero.Utilities.trim(a)})};this.trimInternal=function(){return this.addFilter(function(a){return Zotero.Utilities.trimInternal(a)})};this.match=function(a,b){if(!b){b=0}return this.addFilter(function(d){var c=d.match(a);if(c===undefined||c===null){return undefined}else{return c[b]}})};this.cleanAuthor=function(b,a){return this.addFilter(function(c){return Zotero.Utilities.cleanAuthor(c,b,a)})};this.key=function(a){return this.addFilter(function(b){return b[a]})};this.capitalizeTitle=function(){if(arguments.length>0&&arguments[0]==true){return this.addFilter(function(a){return Zotero.Utilities.capitalizeTitle(a,true)})}else{return this.addFilter(function(a){return Zotero.Utilities.capitalizeTitle(a)})}};this.unescapeHTML=function(){return this.addFilter(function(a){return Zotero.Utilities.unescapeHTML(a)})};this.unescape=function(){return this.addFilter(function(a){return unescape(a)})};this._applyFilters=function(c,e){for(i in this._filters){c=flatten(c);c=c.filter(function(a){return((a!==undefined)&&(a!==null))});for(var d=0;d<c.length;d++){try{if((c[d]===undefined)||(c[d]===null)){continue}else{c[d]=this._filters[i](c[d],e)}}catch(b){c[d]=undefined;Zotero.debug("Caught exception "+b+"on filter: "+this._filters[i])}}c=c.filter(function(a){return((a!==undefined)&&(a!==null))})}return c}};FW.PageText=function(){return new FW._PageText()};FW._PageText=function(){this._filters=new Array();this.evaluate=function(c){var b=[c.documentElement.innerHTML];b=this._applyFilters(b,c);if(b.length==0){return false}else{return b}}};FW._PageText.prototype=new FW._StringMagic();FW.Url=function(){return new FW._Url()};FW._Url=function(){this._filters=new Array();this.evaluate=function(d,c){var b=[c];b=this._applyFilters(b,d);if(b.length==0){return false}else{return b}}};FW._Url.prototype=new FW._StringMagic();FW.Xpath=function(a){return new FW._Xpath(a)};FW._Xpath=function(a){this._xpath=a;this._filters=new Array();this.text=function(){var b=function(c){if(typeof c==="object"&&c.textContent){return c.textContent}else{return c}};this.addFilter(b);return this};this.sub=function(b){var c=function(f,e){var d=e.evaluate(b,f,null,XPathResult.ANY_TYPE,null);if(d){return d.iterateNext()}else{return undefined}};this.addFilter(c);return this};this.evaluate=function(f){var e=f.evaluate(this._xpath,f,null,XPathResult.ANY_TYPE,null);var d=e.resultType;var c=new Array();if(d==XPathResult.STRING_TYPE){c.push(e.stringValue)}else{if(d==XPathResult.ORDERED_NODE_ITERATOR_TYPE||d==XPathResult.UNORDERED_NODE_ITERATOR_TYPE){var b;while((b=e.iterateNext())){c.push(b)}}}c=this._applyFilters(c,f);if(c.length==0){return false}else{return c}}};FW._Xpath.prototype=new FW._StringMagic();FW.detectWeb=function(e,b){for(var c in FW._scrapers){var d=FW._scrapers[c];var f=d.evaluateThing(d.itemType,e,b);var a=d.evaluateThing(d.detect,e,b);if(a.length>0&&a[0]){return f}}return undefined};FW.getScraper=function(b,a){var c=FW.detectWeb(b,a);return FW._scrapers.filter(function(d){return(d.evaluateThing(d.itemType,b,a)==c)&&(d.evaluateThing(d.detect,b,a))})[0]};FW.doWeb=function(c,a){var b=FW.getScraper(c,a);b.makeItems(c,a,[],function(f,e,g,d){e.callHook("scraperDone",f,g,d);if(!f.title){f.title=""}f.complete()},function(){Zotero.done()});Zotero.wait()};
-
 
 
 /*
-ASCE Translator
-Copyright (C) 2011 Sebastian Karcher
+ASCE Translator 
+Copyright (C) 2012 Sebastian Karcher
+Based on Taylor and Francis Translator
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -35,109 +33,179 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 
-
-
-
-function detectWeb(doc, url) { return FW.detectWeb(doc, url); }
-function doWeb(doc, url) { return FW.doWeb(doc, url); }
-
-/** Articles */
-FW.Scraper({
-itemType : 'journalArticle',
-detect : FW.Xpath('//meta[@name="citation_journal_title"]'),
-title : FW.Xpath('//meta[@name="citation_title"]').key("content").text().trim(),
-
-attachments : [{ url: FW.Xpath('//meta[@name="citation_pdf_url"]').key("content").text().trim(),
-  title: "ASCE Journal PDF",
-  type: "application/pdf" }],
-
-creators : FW.Xpath('//meta[@name="citation_author"]').key("content").text().cleanAuthor("author", useComma="true"),
-date : FW.Xpath('//meta[@name="citation_date"]').key("content").text(),
-issue : FW.Xpath('//meta[@name="citation_issue"]').key("content").text(),
-volume : FW.Xpath('//meta[@name="citation_volume"]').key("content").text(),
-pages : FW.Xpath('concat(//meta[@name="citation_firstpage"]/@content, "-", //meta[@name="citation_lastpage"]/@content)').remove(/-$|^-/),
-ISSN : FW.Xpath('//meta[@name="citation_issn"]').key("content").text(),
-abstractNote: FW.Xpath('//meta[@name="description"]').key("content").text(),
-journalAbbreviation : FW.Xpath('//meta[@name="citation_journal_abbrev"]').key("content").text(),
-DOI : FW.Xpath('//meta[@name="citation_doi"]').key("content").text().remove(/^doi\:/),
-language : FW.Xpath('//meta[@name="citation_language"]').key("content").text(),
-tags	: FW.Xpath('//meta[@name="citation_keywords"]').key("content").text().split(/;/),
-publicationTitle : FW.Xpath('//meta[@name="citation_journal_title"]').key("content").text()
-});
-
- 
-FW.MultiScraper({
-itemType : 'multiple',
-detect : FW.Xpath('//p[@class="dbttitle"]/a'),
-choices : {
-  titles : FW.Xpath('//p[@class="dbttitle"]/a').text().trim(),
-  urls : FW.Xpath('//p[@class="dbttitle"]/a').key("href")
+function getTitles(doc) {
+	return ZU.xpath(doc, '//table[@class="articleEntry"]//td[@valign="top"]/a[1]');
 }
-});
+
+function detectWeb(doc, url) {
+	if (url.match(/\/doi\/abs\/10\.|\/doi\/full\/10\./)) {
+		return "journalArticle";
+	} else if(url.match(/\/action\/doSearch\?|\/toc\//))
+		{
+		return "multiple";
+	}
+}
+
+
+function doWeb(doc, url) {
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var titles = getTitles(doc);
+		var doi;
+		for(var i=0, n=titles.length; i<n; i++) {
+			doi = titles[i].href.match(/\/doi\/(?:abs|full)\/(10\.[^?#]+)/);
+			if(doi) {
+				items[doi[1]] = titles[i].textContent;
+			}
+		}
+
+		Zotero.selectItems(items, function(selectedItems){
+			if(!selectedItems) return true;
+			
+			var dois = new Array();
+			for (var i in selectedItems) {
+				dois.push(i);
+			}
+			scrape(null, url,dois);
+		});
+	} else {
+		var doi = url.match(/\/doi\/(?:abs|full)\/(10\.[^?#]+)/);
+		scrape(doc, url,[doi[1]]);
+	}
+}
+
+function finalizeItem(item, doc, doi, baseUrl) {
+	var pdfurl = baseUrl + '/doi/pdf/';
+	var absurl = baseUrl + '/doi/abs/';
+
+	//add attachments
+	item.attachments = [{
+		title: 'Full Text PDF',
+		url: pdfurl + doi,
+		mimeType: 'application/pdf'
+	}];
+	if(doc) {
+		item.attachments.push({
+			title: 'Snapshot',
+			document: doc
+		});
+	} else {
+		item.attachments.push({
+			title: 'Snapshot',
+			url: item.url || absurl + doi,
+			mimeType: 'text/html'
+		});
+	}
+
+	item.complete();
+}
+
+function scrape(doc, url, dois) {
+	var baseUrl = url.match(/https?:\/\/[^\/]+/)[0]
+	var postUrl = baseUrl + '/action/downloadCitation';
+	var postBody = 	'downloadFileName=citation&' +
+					'direct=true&' +
+					'include=abs&' +
+					'doi=';
+	var risFormat = '&format=ris';
+	var bibtexFormat = '&format=bibtex';
+
+	for(var i=0, n=dois.length; i<n; i++) {
+		(function(doi) {
+			ZU.doPost(postUrl, postBody + doi + bibtexFormat, function(text) {
+				var translator = Zotero.loadTranslator("import");
+				// Use BibTeX translator
+				translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+				translator.setString(text);
+				translator.setHandler("itemDone", function(obj, item) {
+					item.bookTitle = item.publicationTitle;
+
+					//unfortunately, bibtex is missing some data
+					//publisher, ISSN/ISBN
+					ZU.doPost(postUrl, postBody + doi + risFormat, function(text) {
+						risTrans = Zotero.loadTranslator("import");
+						risTrans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+						risTrans.setString(text);
+						risTrans.setHandler("itemDone", function(obj, risItem) {
+							item.publisher = risItem.publisher;
+							item.ISSN = risItem.ISSN;
+							item.ISBN = risItem.ISBN;
+							finalizeItem(item, doc, doi, baseUrl);
+						});
+						risTrans.translate();
+					});
+				});
+				translator.translate();
+			});
+		})(dois[i]);
+	}
+}
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://ascelibrary.org/search?key=ASCE_ALL&societykey=ASCE&coden=JENMDT&q=test&displayid=ASCE&sortby=newestdate&faceted=faceted&sortby=newestdate&CP_Style=true&alias=%2Femo&searchzone=2",
+		"url": "http://ascelibrary.org/action/doSearch?type=advanced&displaySummary=true&text1=test&field1=all&logicalOpe1=AND&text2=&field2=all&logicalOpe2=NOT&text3=&field3=all&logicalOpe3=AND&text4=&field4=all&logicalOpe4=AND&text5=&field5=all&logicalOpe5=AND&text6=&field6=all&logicalOpe6=AND&text7=&field7=all&categoryId=&filter=multiple&AfterMonth=&AfterYear=&BeforeMonth=&BeforeYear=",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://ascelibrary.org/emo/resource/1/jenmdt/v137/i7/p475_s1?isAuthorized=no",
+		"url": "http://ascelibrary.org/doi/abs/10.1061/%28ASCE%290887-381X%282003%2917%3A1%2837%29",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "Jian",
-						"lastName": "Ye",
+						"firstName": "A.",
+						"lastName": "Bergström",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Gongkang",
-						"lastName": "Fu",
+						"firstName": "H.",
+						"lastName": "Åström",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Upendra P.",
-						"lastName": "Poudel",
+						"firstName": "R.",
+						"lastName": "Magnusson",
 						"creatorType": "author"
 					}
 				],
 				"notes": [],
-				"tags": [
-					[
-						"Photogrammetry",
-						"Digital techniques",
-						"Deformation",
-						"Measurement",
-						"Signal processing"
-					]
-				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://link.aip.org/link/?JENMDT/137/475/1/pdf",
-						"title": "ASCE Journal PDF",
-						"type": "application/pdf"
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
 					}
 				],
-				"url": "http://ascelibrary.org/emo/resource/1/jenmdt/v137/i7/p475_s1?isAuthorized=no",
-				"abstractNote": "This paper proposes a close-range digital photogrammetric system based on edge detection for structural deformation measurement. Different from traditional photogrammetric applications using discrete points, continuous edges in digital images are used here as the controlling feature in this new system. This makes it possible to acquire spatially intensive information. The system uses several digital images of the structure, taken from a number of different stations before and after the deformation is induced. Then, an image-matching algorithm based on the coplanarity condition developed here is applied to establish spatial relationships of the interested edges, identified by using a new high-precision method. These relationships are subsequently employed to acquire full-field deformation measurement of the structure. A series of experiments was conducted in the laboratory to investigate the capability of the new photogrammetric system. Results show that the system is highly accurate and suitable for structural deformation measurement. It offers noncontact, full-field, and spatially intensive measurement, in contrast with conventional contact and point-measurement.",
-				"date": "2011-01-20",
-				"DOI": "10.1061/(ASCE)EM.1943-7889.0000251",
-				"ISSN": "07339399",
-				"issue": "7",
-				"language": "en",
-				"pages": "475-483",
-				"publicationTitle": "Journal of Engineering Mechanics",
-				"title": "Edge-Based Close-Range Digital Photogrammetry for Structural Deformation Measurement",
-				"volume": "137",
+				"title": "Friction Measurement on Cycleways Using a Portable Friction Tester",
+				"publicationTitle": "Journal of Cold Regions Engineering",
+				"volume": "17",
+				"issue": "1",
+				"pages": "37-57",
+				"date": "2003",
+				"DOI": "10.1061/(ASCE)0887-381X(2003)17:1(37)",
+				"url": "http://ascelibrary.org/doi/abs/10.1061/%28ASCE%290887-381X%282003%2917%3A1%2837%29",
+				"abstractNote": "In seeking to promote cycling in wintertime, it is desirable to understand how important the winter maintenance service level is in people’s decision to cycle or not, and methods to compare different road conditions on cycleways are therefore needed. By measuring friction, an assessment of the service level can be achieved, but methods available often involve the use of large vehicles, which can lead to overloading damage on cycleways, and constitute a safety risk for cyclists and pedestrians. A portable friction tester (PFT), originally designed to measure friction on road markings, was thought to be an appropriate instrument for cycleways and was, therefore, tested on different winter road conditions, and on different cycleway pavement materials. In this study, it was found that the PFT is a valuable tool for measuring friction on cycleways. Different winter road conditions, as well as different pavement materials, can be distinguished from each other through PFT measurements. The PFT provides a good complement to visual inspections of cycleways in winter maintenance evaluation and can, for example, be used to determine if desired service levels have been achieved.",
+				"bookTitle": "Journal of Cold Regions Engineering",
+				"publisher": "American Society of Civil Engineers",
+				"ISSN": "0887-381X",
+				"ISBN": "0887-381X",
 				"libraryCatalog": "ASCE",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://ascelibrary.org/toc/jcemd4/138/5",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
