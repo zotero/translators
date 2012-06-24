@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-05-16 09:19:41"
+	"lastUpdated": "2012-06-24 13:39:52"
 }
 
 /**
@@ -209,7 +209,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.annualreviews.org/toc/anchem/forthcoming",
+		"url": "http://www.annualreviews.org/toc/anchem/5/1",
 		"items": "multiple"
 	}
 ]
