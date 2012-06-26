@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-05-31 17:01:41"
+	"lastUpdated": "2012-06-25 21:32:02"
 }
 
 /**
@@ -29,6 +29,22 @@
 	License along with this program. If not, see
 	<http://www.gnu.org/licenses/>.
 */
+
+//unescape Highwire's special html characters
+function unescapeHTML(str) {
+	if(!str || str.indexOf('|[') == -1) return str;
+
+	return ZU.unescapeHTML(str.replace(/\|\[([^\]]+)\]\|/g, '&$1;'));
+}
+
+//fix capitalization if all in upper case
+function fixCaps(str) {
+	if (str && str == str.toUpperCase()) {
+		return ZU.capitalizeTitle(str.toLowerCase(), true);
+	} else {
+		return str;
+	}
+}
 
 //get abstract
 function getAbstract(doc) {
@@ -86,19 +102,17 @@ function scrapeEmbedMeta(doc, url) {
 	translator.setDocument(doc);
 
 	translator.setHandler("itemDone", function (obj, item) {
-		//remove all caps in Names and Titles
+		//Replace HTML special characters with proper characters
+		//also remove all caps in Names and Titles
 		for (i in item.creators) {
-			if (item.creators[i].lastName && item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
-				item.creators[i].lastName = Zotero.Utilities.capitalizeTitle(item.creators[i].lastName.toLowerCase(), true);
-			}
-			if (item.creators[i].firstName && item.creators[i].firstName == item.creators[i].firstName.toUpperCase()) {
-				item.creators[i].firstName = Zotero.Utilities.capitalizeTitle(item.creators[i].firstName.toLowerCase(), true);
-			}
+			item.creators[i].lastName = unescapeHTML(item.creators[i].lastName);
+			item.creators[i].firstName = unescapeHTML(item.creators[i].firstName);
+
+			item.creators[i].lastName = fixCaps(item.creators[i].lastName);
+			item.creators[i].firstName = fixCaps(item.creators[i].firstName);
 		}
 
-		if (item.title == item.title.toUpperCase()) {
-			item.title = Zotero.Utilities.capitalizeTitle(item.title.toLowerCase(), true);
-		}
+		item.title = fixCaps(unescapeHTML(item.title));
 
 		//the date in EM is usually online publication date
 		//If we can find a publication year, that's better
@@ -108,6 +122,12 @@ function scrapeEmbedMeta(doc, url) {
 			item.date = year[1];
 		} else if( (year = ZU.xpathText(doc,'//p[@id="cite"]')) &&
 			(year = year.match(/\((\d{4})\)/)) ) {
+			item.date = year[1];
+		} else if(
+			(year = ZU.xpathText(doc, '//a[contains(@href,"publicationDate")]/@href')) &&
+			(year = year.match(/publicationDate=([^&]+)/)) &&
+			//check that we at least have a year
+			year[1].match(/\d{4}/)) {
 			item.date = year[1];
 		}
 
@@ -330,7 +350,7 @@ var testCases = [
 				"company": "Nature Publishing Group",
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
-				"date": "2012",
+				"date": "02/09/2012",
 				"ISSN": "0950-9232",
 				"language": "en",
 				"DOI": "10.1038/onc.2011.282",
@@ -348,7 +368,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.nature.com/emboj/journal/vaop/ncurrent/full/emboj201217a.html",
+		"url": "http://www.nature.com/emboj/journal/v31/n7/full/emboj201217a.html",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -431,39 +451,39 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"European Molecular Biology Organization",
-					"RNA",
 					"The EMBO Journal",
-					"biochemistry",
-					"biological research",
-					"biology articles",
-					"cell and tissue architecture",
-					"cell biology",
-					"cell cycle",
-					"cell signalling",
-					"cellular metabolism",
-					"chromatin and transcription",
-					"development",
-					"differentiation and death",
-					"genetics",
-					"genome stability and dynamics",
-					"genomic and computational biology",
-					"immunology",
-					"journal of cell biology",
-					"membranes and transport",
-					"microbiology and pathogens",
-					"molecular and cellular biology",
-					"molecular biology of disease.",
-					"molecular biology of the cell",
-					"molecular cell biology",
-					"neuroscience",
-					"plant biology",
-					"proteins",
+					"European Molecular Biology Organization",
 					"science",
 					"scientific journal",
-					"signal transduction",
+					"biology articles",
+					"cell signalling",
+					"cell biology",
+					"structure",
+					"biological research",
+					"journal of cell biology",
+					"molecular and cellular biology",
+					"genetics",
+					"biochemistry",
+					"molecular cell biology",
+					"molecular biology of the cell",
+					"development",
+					"immunology",
+					"neuroscience",
+					"plant biology",
 					"structural biology",
-					"structure"
+					"genomic and computational biology",
+					"genome stability and dynamics",
+					"chromatin and transcription",
+					"RNA",
+					"proteins",
+					"cellular metabolism",
+					"signal transduction",
+					"cell cycle",
+					"differentiation and death",
+					"membranes and transport",
+					"cell and tissue architecture",
+					"microbiology and pathogens",
+					"molecular biology of disease."
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -473,19 +493,27 @@ var testCases = [
 					}
 				],
 				"itemID": "http://www.nature.com/emboj/journal/v31/n7/full/emboj201217a.html",
+				"title": "Arginine methylation controls growth regulation by E2F-1",
+				"publicationTitle": "The EMBO Journal",
 				"rights": "© 2012 Nature Publishing Group",
+				"volume": "31",
 				"issue": "7",
+				"number": "7",
+				"patentNumber": "7",
+				"pages": "1785-1797",
+				"publisher": "Nature Publishing Group",
+				"institution": "Nature Publishing Group",
+				"company": "Nature Publishing Group",
+				"label": "Nature Publishing Group",
+				"distributor": "Nature Publishing Group",
+				"date": "04/04/2012",
 				"ISSN": "ERROR! NO ISSN",
 				"language": "en",
 				"DOI": "10.1038/emboj.2012.17",
 				"abstractNote": "E2F transcription factors are implicated in diverse cellular functions. The founding member, E2F-1, is endowed with contradictory activities, being able to promote cell-cycle progression and induce apoptosis. However, the mechanisms that underlie the opposing outcomes of E2F-1 activation remain largely unknown. We show here that E2F-1 is directly methylated by PRMT5 (protein arginine methyltransferase 5), and that arginine methylation is responsible for regulating its biochemical and functional properties, which impacts on E2F-1-dependent growth control. Thus, depleting PRMT5 causes increased E2F-1 protein levels, which coincides with decreased growth rate and associated apoptosis. Arginine methylation influences E2F-1 protein stability, and the enhanced transcription of a variety of downstream target genes reflects increased E2F-1 DNA-binding activity. Importantly, E2F-1 is methylated in tumour cells, and a reduced level of methylation is evident under DNA damage conditions that allow E2F-1 stabilization and give rise to apoptosis. Significantly, in a subgroup of colorectal cancer, high levels of PRMT5 frequently coincide with low levels of E2F-1 and reflect a poor clinical outcome. Our results establish that arginine methylation regulates the biological activity of E2F-1 activity, and raise the possibility that arginine methylation contributes to tumourigenesis by influencing the E2F pathway.",
 				"url": "http://www.nature.com/emboj/journal/v31/n7/full/emboj201217a.html",
-				"libraryCatalog": "www.nature.com",
-				"title": "Arginine methylation controls growth regulation by E2F-1",
-				"publicationTitle": "The EMBO Journal",
-				"volume": "31",
-				"pages": "1785-1797",
-				"date": "2012-02-10"
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.nature.com"
 			}
 		]
 	},
@@ -670,6 +698,436 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.nature.com",
 				"abstractNote": "Histone deacetylase enzymes (HDACs) are emerging cancer drug targets. They regulate gene expression by removing acetyl groups from lysine residues in histone tails, resulting in chromatin condensation. The enzymatic activity of most class I HDACs requires recruitment into multi-subunit co-repressor complexes, which are in turn recruited to chromatin by repressive transcription factors. Here we report the structure of a complex between an HDAC and a co-repressor, namely, human HDAC3 with the deacetylase activation domain (DAD) from the human SMRT co-repressor (also known as NCOR2). The structure reveals two remarkable features. First, the SMRT-DAD undergoes a large structural rearrangement on forming the complex. Second, there is an essential inositol tetraphosphate molecule—d-myo-inositol-(1,4,5,6)-tetrakisphosphate (Ins(1,4,5,6)P4)—acting as an ‘intermolecular glue’ between the two proteins. Assembly of the complex is clearly dependent on the Ins(1,4,5,6)P4, which may act as a regulator—potentially explaining why inositol phosphates and their kinases have been found to act as transcriptional regulators. This mechanism for the activation of HDAC3 appears to be conserved in class I HDACs from yeast to humans, and opens the way to novel therapeutic opportunities."
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.nature.com/ng/journal/v38/n11/full/ng1901.html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Jason S.",
+						"lastName": "Carroll",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Clifford A.",
+						"lastName": "Meyer",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jun",
+						"lastName": "Song",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Wei",
+						"lastName": "Li",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Timothy R.",
+						"lastName": "Geistlinger",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jérôme",
+						"lastName": "Eeckhoute",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alexander S.",
+						"lastName": "Brodsky",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Erika Krasnickas",
+						"lastName": "Keeton",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kirsten C.",
+						"lastName": "Fertuck",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Giles F.",
+						"lastName": "Hall",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Qianben",
+						"lastName": "Wang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Stefan",
+						"lastName": "Bekiranov",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Victor",
+						"lastName": "Sementchenko",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Edward A.",
+						"lastName": "Fox",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Pamela A.",
+						"lastName": "Silver",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Thomas R.",
+						"lastName": "Gingeras",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "X. Shirley",
+						"lastName": "Liu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Myles",
+						"lastName": "Brown",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"itemID": "http://www.nature.com/ng/journal/v38/n11/full/ng1901.html",
+				"title": "Genome-wide analysis of estrogen receptor binding sites",
+				"publicationTitle": "Nature Genetics",
+				"rights": "© 2006 Nature Publishing Group",
+				"volume": "38",
+				"issue": "11",
+				"number": "11",
+				"patentNumber": "11",
+				"pages": "1289-1297",
+				"publisher": "Nature Publishing Group",
+				"institution": "Nature Publishing Group",
+				"company": "Nature Publishing Group",
+				"label": "Nature Publishing Group",
+				"distributor": "Nature Publishing Group",
+				"date": "2006",
+				"ISSN": "1061-4036",
+				"language": "en",
+				"DOI": "10.1038/ng1901",
+				"url": "http://www.nature.com/ng/journal/v38/n11/full/ng1901.html",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.nature.com",
+				"abstractNote": "The estrogen receptor is the master transcriptional regulator of breast cancer phenotype and the archetype of a molecular therapeutic target. We mapped all estrogen receptor and RNA polymerase II binding sites on a genome-wide scale, identifying the authentic cis binding sites and target genes, in breast cancer cells. Combining this unique resource with gene expression data demonstrates distinct temporal mechanisms of estrogen-mediated gene regulation, particularly in the case of estrogen-suppressed genes. Furthermore, this resource has allowed the identification of cis-regulatory sites in previously unexplored regions of the genome and the cooperating transcription factors underlying estrogen signaling in breast cancer."
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.nature.com/nature/journal/v462/n7269/full/nature08497.html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Melissa J.",
+						"lastName": "Fullwood",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Mei Hui",
+						"lastName": "Liu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "You Fu",
+						"lastName": "Pan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jun",
+						"lastName": "Liu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Han",
+						"lastName": "Xu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yusoff Bin",
+						"lastName": "Mohamed",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yuriy L.",
+						"lastName": "Orlov",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Stoyan",
+						"lastName": "Velkov",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Andrea",
+						"lastName": "Ho",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Poh Huay",
+						"lastName": "Mei",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Elaine G. Y.",
+						"lastName": "Chew",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Phillips Yao Hui",
+						"lastName": "Huang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Willem-Jan",
+						"lastName": "Welboren",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yuyuan",
+						"lastName": "Han",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hong Sain",
+						"lastName": "Ooi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Pramila N.",
+						"lastName": "Ariyaratne",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Vinsensius B.",
+						"lastName": "Vega",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yanquan",
+						"lastName": "Luo",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Peck Yean",
+						"lastName": "Tan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Pei Ye",
+						"lastName": "Choy",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "K. D. Senali Abayratna",
+						"lastName": "Wansa",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Bing",
+						"lastName": "Zhao",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kar Sian",
+						"lastName": "Lim",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Shi Chi",
+						"lastName": "Leow",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jit Sin",
+						"lastName": "Yow",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Roy",
+						"lastName": "Joseph",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Haixia",
+						"lastName": "Li",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kartiki V.",
+						"lastName": "Desai",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jane S.",
+						"lastName": "Thomsen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yew Kok",
+						"lastName": "Lee",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "R. Krishna Murthy",
+						"lastName": "Karuturi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Thoreau",
+						"lastName": "Herve",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Guillaume",
+						"lastName": "Bourque",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hendrik G.",
+						"lastName": "Stunnenberg",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Xiaoan",
+						"lastName": "Ruan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Valere",
+						"lastName": "Cacheux-Rataboul",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Wing-Kin",
+						"lastName": "Sung",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Edison T.",
+						"lastName": "Liu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Chia-Lin",
+						"lastName": "Wei",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Edwin",
+						"lastName": "Cheung",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yijun",
+						"lastName": "Ruan",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Nature",
+					"science",
+					"science news",
+					"biology",
+					"physics",
+					"genetics",
+					"astronomy",
+					"astrophysics",
+					"quantum physics",
+					"evolution",
+					"evolutionary biology",
+					"geophysics",
+					"climate change",
+					"earth science",
+					"materials science",
+					"interdisciplinary science",
+					"science policy",
+					"medicine",
+					"systems biology",
+					"genomics",
+					"transcriptomics",
+					"palaeobiology",
+					"ecology",
+					"molecular biology",
+					"cancer",
+					"immunology",
+					"pharmacology",
+					"development",
+					"developmental biology",
+					"structural biology",
+					"biochemistry",
+					"bioinformatics",
+					"computational biology",
+					"nanotechnology",
+					"proteomics",
+					"metabolomics",
+					"biotechnology",
+					"drug discovery",
+					"environmental science",
+					"life",
+					"marine biology",
+					"medical research",
+					"neuroscience",
+					"neurobiology",
+					"functional genomics",
+					"molecular interactions",
+					"RNA",
+					"DNA",
+					"cell cycle",
+					"signal transduction",
+					"cell signalling"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"itemID": "http://www.nature.com/nature/journal/v462/n7269/full/nature08497.html",
+				"title": "An oestrogen-receptor-&agr;-bound human chromatin interactome",
+				"publicationTitle": "Nature",
+				"rights": "© 2009 Nature Publishing Group",
+				"volume": "462",
+				"issue": "7269",
+				"number": "7269",
+				"patentNumber": "7269",
+				"pages": "58-64",
+				"publisher": "Nature Publishing Group",
+				"institution": "Nature Publishing Group",
+				"company": "Nature Publishing Group",
+				"label": "Nature Publishing Group",
+				"distributor": "Nature Publishing Group",
+				"date": "2009-11-05",
+				"ISSN": "0028-0836",
+				"language": "en",
+				"DOI": "10.1038/nature08497",
+				"abstractNote": "Genomes are organized into high-level three-dimensional structures, and DNA elements separated by long genomic distances can in principle interact functionally. Many transcription factors bind to regulatory DNA elements distant from gene promoters. Although distal binding sites have been shown to regulate transcription by long-range chromatin interactions at a few loci, chromatin interactions and their impact on transcription regulation have not been investigated in a genome-wide manner. Here we describe the development of a new strategy, chromatin interaction analysis by paired-end tag sequencing (ChIA-PET) for the de novo detection of global chromatin interactions, with which we have comprehensively mapped the chromatin interaction network bound by oestrogen receptor α (ER-α) in the human genome. We found that most high-confidence remote ER-α-binding sites are anchored at gene promoters through long-range chromatin interactions, suggesting that ER-α functions by extensive chromatin looping to bring genes together for coordinated transcriptional regulation. We propose that chromatin interactions constitute a primary mechanism for regulating transcription in mammalian genomes.",
+				"url": "http://www.nature.com/nature/journal/v462/n7269/full/nature08497.html",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.nature.com"
 			}
 		]
 	}
