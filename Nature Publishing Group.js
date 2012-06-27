@@ -77,8 +77,10 @@ function getAbstract(doc) {
 	var textArr = new Array();
 	var p;
 	for (var i = 0, n = paragraphs.length; i < n; i++) {
-		p = ZU.trimInternal(paragraphs[i].textContent);
-		if (p) textArr.push(p);
+		//remove superscript references
+		p = ZU.xpathText(paragraphs[i], "./node()[not(self::sup and ./a)]", null, '');
+		if(p) p = ZU.trimInternal(p);
+		if(p) textArr.push(p);
 	}
 
 	return textArr.join("\n").trim() || null;
@@ -141,7 +143,13 @@ function scrapeEmbedMeta(doc, url) {
 		//sometimes abstract from EM is description for the website.
 		//ours should always be better
 		var abstract = getAbstract(doc);
-		if (abstract) item.abstractNote = abstract;
+		if (abstract
+			//maybe the abstract from meta tags is more complete
+			&& !(item.abstractNote
+				&& item.abstractNote.substr(0,10) == abstract.substr(0,10)
+				&& item.abstractNote.length > abstract.length)) {
+			item.abstractNote = abstract;
+		}
 
 		var pdf = getPdfUrl(url);
 		if (pdf) {
@@ -930,7 +938,7 @@ var testCases = [
 				"language": "en",
 				"issue": "7381",
 				"DOI": "10.1038/nature10669",
-				"abstractNote": "The mass function of dwarf satellite galaxies that are observed around Local Group galaxies differs substantially from simulations1, 2, 3, 4, 5 based on cold dark matter: the simulations predict many more dwarf galaxies than are seen. The Local Group, however, may be anomalous in this regard6, 7. A massive dark satellite in an early-type lens galaxy at a redshift of 0.222 was recently found8 using a method based on gravitational lensing9, 10, suggesting that the mass fraction contained in substructure could be higher than is predicted from simulations. The lack of very low-mass detections, however, prohibited any constraint on their mass function. Here we report the presence of a (1.9 ± 0.1) × 108 dark satellite galaxy in the Einstein ring system JVAS B1938+666 (ref. 11) at a redshift of 0.881, where denotes the solar mass. This satellite galaxy has a mass similar to that of the Sagittarius12 galaxy, which is a satellite of the Milky Way. We determine the logarithmic slope of the mass function for substructure beyond the local Universe to be , with an average mass fraction of per cent, by combining data on both of these recently discovered galaxies. Our results are consistent with the predictions from cold dark matter simulations13, 14, 15 at the 95 per cent confidence level, and therefore agree with the view that galaxies formed hierarchically in a Universe composed of cold dark matter.",
+				"abstractNote": "The mass function of dwarf satellite galaxies that are observed around Local Group galaxies differs substantially from simulations based on cold dark matter: the simulations predict many more dwarf galaxies than are seen. The Local Group, however, may be anomalous in this regard. A massive dark satellite in an early-type lens galaxy at a redshift of 0.222 was recently found using a method based on gravitational lensing, suggesting that the mass fraction contained in substructure could be higher than is predicted from simulations. The lack of very low-mass detections, however, prohibited any constraint on their mass function. Here we report the presence of a (1.9 ± 0.1) × 108nature10669-m1jpg19K2716 dark satellite galaxy in the Einstein ring system JVAS B1938+666 (ref. 11) at a redshift of 0.881, where nature10669-m2jpg20K2716 denotes the solar mass. This satellite galaxy has a mass similar to that of the Sagittarius galaxy, which is a satellite of the Milky Way. We determine the logarithmic slope of the mass function for substructure beyond the local Universe to be nature10669-m3jpg21K4620, with an average mass fraction of nature10669-m4jpg21K4820 per cent, by combining data on both of these recently discovered galaxies. Our results are consistent with the predictions from cold dark matter simulations at the 95 per cent confidence level, and therefore agree with the view that galaxies formed hierarchically in a Universe composed of cold dark matter.",
 				"url": "http://www.nature.com/nature/journal/v481/n7381/full/nature10669.html",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.nature.com"
@@ -1449,7 +1457,7 @@ var testCases = [
 					}
 				],
 				"itemID": "http://www.nature.com/nature/journal/v462/n7269/full/nature08497.html",
-				"title": "An oestrogen-receptor-&agr;-bound human chromatin interactome",
+				"title": "An oestrogen-receptor-α-bound human chromatin interactome",
 				"publicationTitle": "Nature",
 				"rights": "© 2009 Nature Publishing Group",
 				"volume": "462",
