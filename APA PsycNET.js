@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-06-28 19:34:52"
+	"lastUpdated": "2012-06-28 20:33:16"
 }
 
 function detectWeb(doc, url) {
@@ -41,12 +41,22 @@ function detectWeb(doc, url) {
 	}
 
 	if(url.match(/\/books\/\d+/)) {
+		fields.title = '(//h3[@id="bwcBookTitle"])[1]';
+		fields.authors = '(//div[@id="bwcBookAuthors"])[1]';
+		fields.voliss = '(//div[@id="bwcBookSource"])[1]';
+		fields.abstract = '(//div[@id="bwcAbstract"])[1]';
+
 		return "book";
 	}
 
 	if(url.indexOf('buy.optionToBuy') != -1
 		&& url.indexOf('id=') != -1
 		&& (type = doc.getElementById('obArticleHeaderText')) ) {
+
+		fields.title = '(//div[@id="obArticleTitleHighlighted"])[1]';
+		fields.authors = '(//div[@id="obAuthor"])[1]';
+		fields.voliss = '(//div[@id="obSource"])[1]';
+		fields.abstract = '(//div[@id="obAbstract"])[1]';
 
 		if(type.textContent.indexOf('Article') != -1) {
 			return 'journalArticle';
@@ -69,8 +79,16 @@ function detectWeb(doc, url) {
 	}
 }
 
+//default field xpath
+var fields = {
+	title: '(//div[@id="rdcTitle"])[1]',
+	authors: '(//div[@id="rdcAuthors"])[1]',
+	voliss: '(//div[@id="rdcSource"])[1]',
+	abstract: '//div[@id="rdRecord"]/div[@class="rdRecordSection"][2]'
+}
+
 function getField(field, doc) {
-	var val = ZU.xpathText(doc, '(//div[@id="' + field + '"])[1]');
+	var val = ZU.xpathText(doc, field);
 	if(val) val = ZU.trimInternal(val);
 	return val;
 }
@@ -78,11 +96,11 @@ function getField(field, doc) {
 //for scraping publication information directly from pages
 var volissRe = {
 	journalArticle: 
-		/^(.+?)(?:,\sVol\s(\d+)\((\d+)\))?,\s(\w+\s(?:\d+\s*,\s)?\d{4}),\s(?:(\d+-\d+)|No Pagination Specified).\sdoi:\s(.+)$/i,
+		/^(.+?)(?:,\sVol\s(\d+)\((\d+)\))?,\s(\w+\s(?:\d+\s*,\s)?\d{4}),\s(?:(\d+-\d+)|No Pagination Specified).(?:\sdoi:\s(.+))?$/i,
 	bookSection:
 		/^(.+?),\s\((\d{4})\)\.\s(.+?),\s\(pp\.\s(\d+-\d+)\)\.\s(.+?):\s(.+?),\s(?:(\w+))?,\s(\d+)\spp\.(?:\sdoi:\s(.+))?/i,
 	book:
-		/^(.+?):\s(.+?)\.\s\((\d{4})\)\.\s(\w+)\s(\d+)\spp\.\sdoi:\s(.+)/i
+		/^(.+?):\s(.+?)(?:\.\s\((\d{4})\)\.\s(\w+)\s(\d+)\spp\.\sdoi:\s(.+))?$/i
 };
 
 var creatorMap = {
@@ -196,7 +214,7 @@ function finalizeItem(item, doc) {
 	}
 
 	//for books, volume is in the same field as numPages
-	if(item.itemType == 'book') {
+	if(item.itemType == 'book' && item.numPages) {
 		var m = item.numPages.match(/^(\w+)\s*,\s*(\d+)$/);
 		if(m) {
 			item.volume = m[1];
@@ -227,11 +245,11 @@ function scrape (doc, type) {
 		fetchRIS(url, post, item, doc, 1);
 	} else {
 		var item = new Zotero.Item(type);
-		item.title = getField('rdcTitle', doc);
+		item.title = getField(fields.title, doc);
 
-		var authors = getField('rdcAuthors', doc);
+		var authors = getField(fields.authors, doc);
 		if(authors) {
-			authors = authors.split(/\s*;\s+/);
+			authors = authors.replace(/^by\s+/i, '').split(/\s*;\s+/);
 			var m, creatorType, name;
 			for(var i=0, n=authors.length; i<n; i++) {
 				m = authors[i].match(/^(.+?)\s?\((\w+)\)$/);
@@ -246,7 +264,7 @@ function scrape (doc, type) {
 			}
 		}
 
-		var voliss = getField('rdcSource', doc);
+		var voliss = getField(fields.voliss, doc);
 		if(voliss
 			&& (voliss = voliss.match(volissRe[type]))) {
 			switch(type) {
@@ -290,11 +308,7 @@ function scrape (doc, type) {
 			}
 		}
 
-		item.abstractNote = ZU.xpathText(doc,
-			'//div[@id="rdRecord"]/div[@class="rdRecordSection"][2]');
-		if(item.abstractNote) {
-			item.abstractNote = ZU.trimInternal(item.abstractNote);
-		}
+		item.abstractNote = getField(fields.abstract, doc);
 
 		finalizeItem(item, doc);
 	}
