@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-06-28 20:33:16"
+	"lastUpdated": "2012-06-28 20:44:17"
 }
 
 function detectWeb(doc, url) {
@@ -174,7 +174,7 @@ function getIds(doc, url) {
 
 //retrieve RIS data
 //retry n times
-function fetchRIS(url, post, item, doc, retry) {
+function fetchRIS(url, post, itemType, doc, retry) {
 	ZU.doPost(url, post, function(text) {
 		//There's some cookie/session magic going on
 		//our first request for RIS might not succeed
@@ -182,10 +182,11 @@ function fetchRIS(url, post, item, doc, retry) {
 		if(!foundRIS && retry) {
 			//retry
 			Z.debug('No RIS data. Retrying (' + retry + ').');
-			fetchRIS(url, post, item, doc, --retry);
+			fetchRIS(url, post, itemType, doc, --retry);
 			return;
 		} else if(!foundRIS) {
-			throw 'No RIS data. Will not retry.';
+			Z.debug('No RIS data. Falling back to scraping the page directly.');
+			scrapePage(doc, itemType);
 		}
 
 		var translator = Zotero.loadTranslator("import");
@@ -201,6 +202,80 @@ function fetchRIS(url, post, item, doc, retry) {
 		});
 		translator.translate();
 	});
+}
+
+//scrape directly from page
+function scrapePage(doc, type) {
+	Z.debug('Attempting to scrape directly from page');
+	var item = new Zotero.Item(type);
+	item.title = getField(fields.title, doc);
+	if(!item.title) item.title = getField('obArticleTitleHighlighted', doc);
+	if(!item.title) item.title = getField('bwcBookTitle', doc);
+
+	var authors = getField(fields.authors, doc);
+	if(authors) {
+		authors = authors.replace(/^by\s+/i, '').split(/\s*;\s+/);
+		var m, creatorType, name;
+		for(var i=0, n=authors.length; i<n; i++) {
+			m = authors[i].match(/^(.+?)\s?\((\w+)\)$/);
+			if(m) {
+				creatorType = creatorMap[m[2]];
+				name = m[1];
+			} else {
+				creatorType = 'author';
+				name = authors[i];
+			}
+			item.creators.push(ZU.cleanAuthor(name, creatorType, true));
+		}
+	}
+
+	var voliss = getField(fields.voliss, doc);
+	if(voliss
+		&& (voliss = voliss.match(volissRe[type]))) {
+		switch(type) {
+			case 'journalArticle':
+				item.publicationTitle = voliss[1];
+				item.volume = voliss[2];
+				item.issue = voliss[3];
+				item.date = voliss[4];
+				item.pages = voliss[5];
+				item.DOI = voliss[6];
+			break;
+			case 'bookSection':
+				var eds = voliss[1].split(/\s*;\s*/);
+				var m, name, creatorType;
+				for(var i=0, n=eds.length; i<n; i++) {
+					m = eds[i].match(/^(.+?)(?:\s\((\w+)\))?$/);
+					if(m) {
+						creatorType = creatorMap[m[2]] || 'editor';
+						item.creators.push(
+							ZU.cleanAuthor(m[1], creatorType, true)
+						);
+					}
+				}
+				item.date = voliss[2];
+				item.bookTitle = voliss[3];
+				item.pages = voliss[4];
+				item.place = voliss[5];
+				item.publisher = voliss[6];
+				item.volume = voliss[7];
+				item.numPages = voliss[8];
+				item.DOI = voliss[9];
+			break;
+			case 'book':
+				item.place = voliss[1];
+				item.publisher = voliss[2];
+				item.date = voliss[3];
+				item.volume = voliss[4];
+				item.numPages = voliss[5];
+				item.DOI = voliss[6];
+			break;
+		}
+	}
+
+	item.abstractNote = getField(fields.abstract, doc);
+
+	finalizeItem(item, doc);
 }
 
 function finalizeItem(item, doc) {
@@ -242,75 +317,9 @@ function scrape (doc, type) {
 			+ '&records=records&exportFormat=referenceSoftware';
 		Zotero.debug("Url: " + url);
 		Zotero.debug("Post: " + post);
-		fetchRIS(url, post, item, doc, 1);
+		fetchRIS(url, post, type, doc, 1);
 	} else {
-		var item = new Zotero.Item(type);
-		item.title = getField(fields.title, doc);
-
-		var authors = getField(fields.authors, doc);
-		if(authors) {
-			authors = authors.replace(/^by\s+/i, '').split(/\s*;\s+/);
-			var m, creatorType, name;
-			for(var i=0, n=authors.length; i<n; i++) {
-				m = authors[i].match(/^(.+?)\s?\((\w+)\)$/);
-				if(m) {
-					creatorType = creatorMap[m[2]];
-					name = m[1];
-				} else {
-					creatorType = 'author';
-					name = authors[i];
-				}
-				item.creators.push(ZU.cleanAuthor(name, creatorType, true));
-			}
-		}
-
-		var voliss = getField(fields.voliss, doc);
-		if(voliss
-			&& (voliss = voliss.match(volissRe[type]))) {
-			switch(type) {
-				case 'journalArticle':
-					item.publicationTitle = voliss[1];
-					item.volume = voliss[2];
-					item.issue = voliss[3];
-					item.date = voliss[4];
-					item.pages = voliss[5];
-					item.DOI = voliss[6];
-				break;
-				case 'bookSection':
-					var eds = voliss[1].split(/\s*;\s*/);
-					var m, name, creatorType;
-					for(var i=0, n=eds.length; i<n; i++) {
-						m = eds[i].match(/^(.+?)(?:\s\((\w+)\))?$/);
-						if(m) {
-							creatorType = creatorMap[m[2]] || 'editor';
-							item.creators.push(
-								ZU.cleanAuthor(m[1], creatorType, true)
-							);
-						}
-					}
-					item.date = voliss[2];
-					item.bookTitle = voliss[3];
-					item.pages = voliss[4];
-					item.place = voliss[5];
-					item.publisher = voliss[6];
-					item.volume = voliss[7];
-					item.numPages = voliss[8];
-					item.DOI = voliss[9];
-				break;
-				case 'book':
-					item.place = voliss[1];
-					item.publisher = voliss[2];
-					item.date = voliss[3];
-					item.volume = voliss[4];
-					item.numPages = voliss[5];
-					item.DOI = voliss[6];
-				break;
-			}
-		}
-
-		item.abstractNote = getField(fields.abstract, doc);
-
-		finalizeItem(item, doc);
+		scrapePage(doc, type);
 	}
 }/** BEGIN TEST CASES **/
 var testCases = [
