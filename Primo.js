@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-04 16:00:59"
+	"lastUpdated": "2012-06-28 22:41:46"
 }
 
 /*
@@ -113,7 +113,7 @@ function doWeb(doc, url) {
 		} else if (itemType == 'webpage') {
 			var item = new Zotero.Item("webpage");
 		} else if (itemType == 'article') {
-			var item = new Zotero.Item("articleJournal");
+			var item = new Zotero.Item("journalArticle");
 		} else if (itemType == 'thesis') {
 			var item = new Zotero.Item("thesis");
 		} else if (itemType == 'map') {
