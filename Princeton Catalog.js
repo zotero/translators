@@ -4,12 +4,12 @@
 	"creator": "Jeremy Darrington, Kevin Reiss",
 	"target": "https?://[^/]+princeton\\.edu/primo_library/",
 	"minVersion": "2.1.9",
-	"maxVersion": null,
+	"maxVersion": "",
 	"priority": 1,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-04-12 17:13:11"
+	"lastUpdated": "2012-06-29 00:02:50"
 }
 
 //
@@ -122,7 +122,7 @@ function doWeb(doc, url) {
 		} else if (itemType == 'webpage') {
 			var item = new Zotero.Item("webpage");
 		} else if (itemType == 'article') {
-			var item = new Zotero.Item("articleJournal");
+			var item = new Zotero.Item("journalArticle");
 		} else if (itemType == 'thesis') {
 			var item = new Zotero.Item("thesis");
 		} else if (itemType == 'map') {
