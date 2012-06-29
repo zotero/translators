@@ -3,13 +3,13 @@
 	"label": "APA PsycNET",
 	"creator": "Michael Berkowitz and Aurimas Vinckevicius",
 	"target": "^https?://psycnet\\.apa\\.org/",
-	"minVersion": "2.1",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-06-28 19:10:35"
+	"lastUpdated": "2012-06-28 19:34:52"
 }
 
 function detectWeb(doc, url) {
@@ -192,6 +192,15 @@ function finalizeItem(item, doc) {
 		if(m) {
 			item.abstractNote = m[1];
 			item.rights = m[2];
+		}
+	}
+
+	//for books, volume is in the same field as numPages
+	if(item.itemType == 'book') {
+		var m = item.numPages.match(/^(\w+)\s*,\s*(\d+)$/);
+		if(m) {
+			item.volume = m[1];
+			item.numPages = m[2];
 		}
 	}
 
@@ -475,13 +484,14 @@ var testCases = [
 				"itemID": "2004-16329-000",
 				"title": "The abnormal personality: A textbook",
 				"pages": "x, 617",
-				"numPages": "x, 617",
+				"numPages": "617",
 				"date": "1948",
 				"place": "New York,  NY,  US",
 				"publisher": "Ronald Press Company",
 				"abstractNote": "The author's intent is to write about abnormal people in a way that will be valuable and interesting to students new to the subject. A first course in abnormal psychology is not intended to train specialists. Its goal is more general: it should provide the student with the opportunity to whet his interest, expand his horizons, register a certain body of new facts, and relate this to the rest of his knowledge about mankind. I have tried to present the subject in such a way as to emphasize its usefulness to all students of human nature. I have tried the experiment of writing two introductory chapters, one historical and the other clinical. This reflects my desire to set the subject-matter in a broad perspective and at the same time to anchor it in concrete fact. Next comes a block of six chapters designed to set forth the topics of maladjustment and neurosis. The two chapters on psychotherapy complete the more purely psychological or developmental part of the work. In the final chapter the problem of disordered personalities is allowed to expand to its full social dimensions. Treatment, care, and prevention call for social effort and social organization. I have sought to show some of the lines, both professional and nonprofessional, along which this effort can be expended.",
 				"DOI": "10.1037/10023-000",
 				"rights": "(c) 2012 APA, all rights reserved",
+				"volume": "x",
 				"libraryCatalog": "APA PsycNET",
 				"shortTitle": "The abnormal personality"
 			}
@@ -515,13 +525,14 @@ var testCases = [
 				"itemID": "2004-16329-000",
 				"title": "The abnormal personality: A textbook",
 				"pages": "x, 617",
-				"numPages": "x, 617",
+				"numPages": "617",
 				"date": "1948",
 				"place": "New York,  NY,  US",
 				"publisher": "Ronald Press Company",
 				"abstractNote": "The author's intent is to write about abnormal people in a way that will be valuable and interesting to students new to the subject. A first course in abnormal psychology is not intended to train specialists. Its goal is more general: it should provide the student with the opportunity to whet his interest, expand his horizons, register a certain body of new facts, and relate this to the rest of his knowledge about mankind. I have tried to present the subject in such a way as to emphasize its usefulness to all students of human nature. I have tried the experiment of writing two introductory chapters, one historical and the other clinical. This reflects my desire to set the subject-matter in a broad perspective and at the same time to anchor it in concrete fact. Next comes a block of six chapters designed to set forth the topics of maladjustment and neurosis. The two chapters on psychotherapy complete the more purely psychological or developmental part of the work. In the final chapter the problem of disordered personalities is allowed to expand to its full social dimensions. Treatment, care, and prevention call for social effort and social organization. I have sought to show some of the lines, both professional and nonprofessional, along which this effort can be expended.",
 				"DOI": "10.1037/10023-000",
 				"rights": "(c) 2012 APA, all rights reserved",
+				"volume": "x",
 				"libraryCatalog": "APA PsycNET",
 				"shortTitle": "The abnormal personality"
 			}
