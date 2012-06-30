@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-06-17 23:51:53"
+	"lastUpdated": "2012-06-25 22:01:04"
 }
 
 /*
@@ -91,13 +91,19 @@ function addEmbMeta(doc) {
 	translator.setHandler("itemDone", function(obj, item) {
 		//remove all caps in Names and Titles
 		for (i in item.creators){
-			item.creators[i].lastName =
-				ZU.capitalizeTitle(item.creators[i].lastName, true);
-			item.creators[i].firstName =
-				ZU.capitalizeTitle(item.creators[i].firstName, true);
+			if(item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
+				item.creators[i].lastName =
+					ZU.capitalizeTitle(item.creators[i].lastName, true);
+			}
+			if(item.creators[i].firstName == item.creators[i].firstName.toUpperCase()) {
+				item.creators[i].firstName =
+					ZU.capitalizeTitle(item.creators[i].firstName, true);
+			}
 		}
 
-		item.title = ZU.capitalizeTitle(item.title,true);
+		if(item.title == item.title.toUpperCase()) {
+			item.title = ZU.capitalizeTitle(item.title,true);
+		}
 
 		if(!item.abstractNote) item.abstractNote = getAbstract(doc);
 
@@ -342,7 +348,7 @@ var testCases = [
 					}
 				],
 				"itemID": "http://radiographics.rsna.org/content/10/1/41.full.pdf+html?frame=sidebar",
-				"title": "Pulmonary Nodules: Computer-Aided Detection in Digital Chest Images.",
+				"title": "Pulmonary nodules: computer-aided detection in digital chest images.",
 				"publisher": "Radiological Society of North America",
 				"institution": "Radiological Society of North America",
 				"company": "Radiological Society of North America",
@@ -619,7 +625,7 @@ var testCases = [
 					}
 				],
 				"itemID": "http://www.pnas.org/content/108/52/20881.full",
-				"title": "A Yeast Functional Screen Predicts New Candidate ALS Disease Genes",
+				"title": "A yeast functional screen predicts new candidate ALS disease genes",
 				"publisher": "National Acad Sciences",
 				"institution": "National Academy of Sciences",
 				"company": "National Academy of Sciences",

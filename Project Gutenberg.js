@@ -9,15 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-13 17:51:30"
+	"lastUpdated": "2012-06-30 14:19:59"
 }
 
 function detectWeb(doc, url) {
-	if (doc.location.href.match("catalog")) {
+	if (url.match(/ebooks\/search\/\?/)) {
 		return "multiple";
-	} else if ((doc.location.href.match("etext") || doc.location.href.match("ebooks")) && !doc.location.href.match("/search")) {
-		//search results pages currently don't seem to work
-		return "book";
+	} else if (doc.location.href.match("etext") || doc.location.href.match("ebooks")){
+		return "book";	
 	}
 }
 
@@ -29,14 +28,6 @@ function associateData(newItem, dataTags, field, zoteroField) {
 }
 
 function scrape(doc, url) {
-
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ?
-	function (prefix) {
-		if (prefix == 'x') return namespace;
-		else return null;
-	} : null;
-
 	var dataTags = new Object();
 	var creatorType = new Array();
 	var creatorField = new Array();
@@ -44,9 +35,9 @@ function scrape(doc, url) {
 
 	var newItem = new Zotero.Item("book");
 
-	var headings = doc.evaluate('//table[@class="bibrec"]//tr/th', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var headings = doc.evaluate('//table[@class="bibrec"]//tr/th', doc, null, XPathResult.ANY_TYPE, null);
 
-	var content = doc.evaluate('//table[@class="bibrec"]//tr/td', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var content = doc.evaluate('//table[@class="bibrec"]//tr/td', doc, null, XPathResult.ANY_TYPE, null);
 
 	var i;
 
@@ -133,37 +124,25 @@ function scrape(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ?
-	function (prefix) {
-		if (prefix == 'x') return namespace;
-		else return null;
-	} : null;
-
 	var articles = new Array();
-
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
-
-		var allLinks = doc.evaluate('//td/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var xPathCount = doc.evaluate('count(//td/a)', doc, nsResolver, XPathResult.ANY_TYPE, null);
-
-		var next_title;
-		for (var i = 0; i < xPathCount.numberValue; i++) {
-			next_title = allLinks.iterateNext();
-			if (next_title.href.match("etext")) {
-				items[next_title.href] = next_title.textContent;
+		var links = doc.evaluate('//ul[@class="results"]/li[@class="booklink"]/a[@class="link"]', doc, null, XPathResult.ANY_TYPE, null);
+	    var link;
+		while (link = links.iterateNext()){
+			items[link.href] = ZU.xpathText(link, './span/span[@class="title"]')
+		}
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
 			}
-		}
-
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
-		Zotero.Utilities.processDocuments(articles, scrape, function () {
-			Zotero.done();
+			for (var i in items) {
+				articles.push(i);
+			}
+			Zotero.Utilities.processDocuments(articles, scrape, function () {
+				Zotero.done();
+			});
 		});
-		Zotero.wait();
 	} else {
 		scrape(doc, url);
 	}
@@ -202,6 +181,11 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.gutenberg.org/ebooks/search/?query=grimm",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

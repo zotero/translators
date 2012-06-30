@@ -86,7 +86,7 @@ var testCases = [
 				],
 				"url": "http://www.digitalhumanities.org/dhq/vol/5/2/000094/000094.html",
 				"title": "Network Narration in John Dos Passos’s U.S.A. Trilogy",
-				"date": "Spring 2011",
+				"date": "2011",
 				"volume": "5",
 				"issue": "2",
 				"libraryCatalog": "Digital Humanities Quarterly",

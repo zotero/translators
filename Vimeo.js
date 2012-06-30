@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-13 22:18:31"
+	"lastUpdated": "2012-06-30 13:44:34"
 }
 
 /*
@@ -69,12 +69,14 @@ function doWeb(doc, url) {
 	} else {
 		// We call the Embedded Metadata translator to do the actual work
 		var creator = ZU.xpathText(doc, '//div[@class="byline"]/a[1]');
-		var date = ZU.xpathText(doc, '//meta[@property="video:release_date"]/@content')
+		var date = ZU.xpathText(doc, '//meta[@itemprop="dateCreated"]/@content');
+		var duration = ZU.xpathText(doc, '//meta[@itemprop="duration"]/@content');
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 		translator.setHandler("itemDone", function (obj, item) {
 			item.creators = ZU.cleanAuthor(creator, "author");
-			item.date = date;
+			if (date) item.date = date.replace(/T.+/, "");
+			if (duration) item.runningTime = duration;
 			item.extra = '';
 			item.complete();
 		});
@@ -84,35 +86,43 @@ function doWeb(doc, url) {
 	}
 }
 /** BEGIN TEST CASES **/
-var testCases = [{
-	"type": "web",
-	"url": "http://vimeo.com/search?q=cello",
-	"items": "multiple"
-}, {
-	"type": "web",
-	"url": "http://vimeo.com/31179423",
-	"items": [{
-		"itemType": "videoRecording",
-		"creators": {
-			"firstName": "Alexander",
-			"lastName": "Chen",
-			"creatorType": "author"
-		},
-		"notes": [],
-		"tags": [],
-		"seeAlso": [],
-		"attachments": [{
-			"title": "Snapshot"
-		}],
-		"itemID": "http://vimeo.com/31179423",
-		"title": "Baroque.me: J.S. Bach - Cello Suite No. 1 - Prelude",
-		"publicationTitle": "Vimeo",
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://vimeo.com/search?q=cello",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
 		"url": "http://vimeo.com/31179423",
-		"abstractNote": "Baroque.me (2011) by Alexander Chen. Video capture. http://www.baroque.me visualizes the first Prelude from Bach's Cello Suites. Using the math behind string length and pitch, it came from a simple idea: what if all the notes were drawn as strings? Instead…",
-		"accessDate": "CURRENT_TIMESTAMP",
-		"libraryCatalog": "vimeo.com",
-		"date": "2011-10-26T22:29:03-04:00",
-		"shortTitle": "Baroque.me"
-	}]
-}]
+		"items": [
+			{
+				"itemType": "videoRecording",
+				"creators": {
+					"firstName": "Alexander",
+					"lastName": "Chen",
+					"creatorType": "author"
+				},
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"itemID": "http://vimeo.com/31179423",
+				"title": "Baroque.me: J.S. Bach - Cello Suite No. 1 - Prelude",
+				"publicationTitle": "Vimeo",
+				"url": "http://vimeo.com/31179423",
+				"abstractNote": "Baroque.me (2011) by Alexander Chen. Video capture. http://www.baroque.me visualizes the first Prelude from Bach's Cello Suites. Using the math behind string length and pitch, it came from a simple idea: what if all the notes were drawn as strings? Instead…",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "vimeo.com",
+				"date": "2011-10-26",
+				"runningTime": "PT00H02M57S",
+				"shortTitle": "Baroque.me"
+			}
+		]
+	}
+]
 /** END TEST CASES **/
