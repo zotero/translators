@@ -8,27 +8,23 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2012-05-25 03:37:22"
+	"browserSupport": "g",
+	"lastUpdated": "2012-06-30 14:44:22"
 }
 
 function detectWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
-	
+
 	var xpath = '//tr[th[@class="viewmarctags"]][td[@class="viewmarctags"]]';
-	if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		Zotero.debug("SIRSI detectWeb: viewmarctags");
 		return "book";
 	}
 	var xpath = '//input[@name="VOPTIONS"]';
-	if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		Zotero.debug("SIRSI detectWeb: VOPTIONS");
 		return "book";
 	}
-	var elmts = doc.evaluate('/html/body/form//text()', doc, nsResolver,
+	var elmts = doc.evaluate('/html/body/form//text()', doc, null,
 					 XPathResult.ANY_TYPE, null);
 	while(elmt = elmts.iterateNext()) {
 		if(Zotero.Utilities.superCleanString(elmt.nodeValue) == "Viewing record") {
@@ -38,25 +34,21 @@ function detectWeb(doc, url) {
 	}
 	
 	var xpath = '//td[@class="searchsum"]/table';
-	if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		Zotero.debug("SIRSI detectWeb: searchsum");
 		return "multiple";
 	}
 	var xpath = '//form[@name="hitlist"]/table/tbody/tr';
-	if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		Zotero.debug("SIRSI detectWeb: hitlist");
 		return "multiple";
 	}
 }
 
 function scrape(doc) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
+
 	var xpath = '//tr[th[@class="viewmarctags"]][td[@class="viewmarctags"]]';
-	var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var elmts = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 	var elmt = elmts.iterateNext();
 	if(!elmt) {
 		return false;
@@ -68,13 +60,13 @@ function scrape(doc) {
 	authors = [];
 	while(elmt) {
 		try {
-			var node = doc.evaluate('./TD[1]/A[1]/text()[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			var node = doc.evaluate('./TD[1]/A[1]/text()[1]', elmt, null, XPathResult.ANY_TYPE, null).iterateNext();
 			if(!node) {
-				var node = doc.evaluate('./TD[1]/text()[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				var node = doc.evaluate('./TD[1]/text()[1]', elmt, null, XPathResult.ANY_TYPE, null).iterateNext();
 			}
 			
 			if(node) {
-				var casedField = Zotero.Utilities.superCleanString(doc.evaluate('./TH[1]/text()[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
+				var casedField = Zotero.Utilities.superCleanString(doc.evaluate('./TH[1]/text()[1]', elmt, null, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
 				field = casedField.toLowerCase();
  				field = field.replace(/:./,"");
 				var value = Zotero.Utilities.superCleanString(node.nodeValue);
@@ -166,14 +158,14 @@ function scrape(doc) {
 		newItem.extra = newItem.extra.substr(0, newItem.extra.length-1);
 	}
 
-	var callNumber = doc.evaluate('//tr/td[1][@class="holdingslist"]/text()', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var callNumber = doc.evaluate('//tr/td[1][@class="holdingslist"]/text()', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if(callNumber && callNumber.nodeValue) {
 		newItem.callNumber = callNumber.nodeValue.trim();
 	}
 	
 	// UVA has the call number separately, in the next field
 	// http://virgo.lib.virginia.edu
-	callNumber = doc.evaluate('//tr/td[2][@class="holdingslist"]/text()', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	callNumber = doc.evaluate('//tr/td[2][@class="holdingslist"]/text()', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	// The regex here is looking for something like an LOC call number
 	if(callNumber && callNumber.nodeValue.trim().match(/^[A-Z]{1,2}[0-9]+/)) {
 		newItem.callNumber += " " + callNumber.nodeValue.trim();
@@ -187,27 +179,22 @@ function scrape(doc) {
 }
 
 function doWeb(doc, url){
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
 	var sirsiNew = true; //toggle between SIRSI -2003 and SIRSI 2003+
 	var xpath = '//td[@class="searchsum"]/table';
-	if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		Zotero.debug("SIRSI doWeb: searchsum");
 		sirsiNew = true;	
-	} else if (doc.evaluate('//form[@name="hitlist"]/table/tbody/tr', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+	} else if (doc.evaluate('//form[@name="hitlist"]/table/tbody/tr', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		Zotero.debug("SIRSI doWeb: hitlist");
 		sirsiNew = false;
-	} else if (doc.evaluate('//tr[th[@class="viewmarctags"]][td[@class="viewmarctags"]]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+	} else if (doc.evaluate('//tr[th[@class="viewmarctags"]][td[@class="viewmarctags"]]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		Zotero.debug("SIRSI doWeb: viewmarctags");
 		sirsiNew = true;
-	} else if (doc.evaluate('//input[@name="VOPTIONS"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+	} else if (doc.evaluate('//input[@name="VOPTIONS"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		Zotero.debug("SIRSI doWeb: VOPTIONS");
 		sirsiNew = false;
 	} else {
-	var elmts = doc.evaluate('/html/body/form//text()', doc, nsResolver,
+	var elmts = doc.evaluate('/html/body/form//text()', doc, null,
 							 XPathResult.ANY_TYPE, null);
 		while(elmt = elmts.iterateNext()) {
 			if(Zotero.Utilities.superCleanString(elmt.nodeValue) == "Viewing record") {
@@ -229,20 +216,20 @@ function doWeb(doc, url){
 			var iu = iuRe.exec(url);
 			//IUCAT fix 1 of 2
 			if (iu){
-				var tableRows = doc.evaluate('//td[@class="searchsum"]/table[//input[@class="submitLink"]]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+				var tableRows = doc.evaluate('//td[@class="searchsum"]/table[//input[@class="submitLink"]]', doc, null, XPathResult.ANY_TYPE, null);
 			} else{
-				var tableRows = doc.evaluate('//td[@class="searchsum"]/table[//input[@value="Details"]]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+				var tableRows = doc.evaluate('//td[@class="searchsum"]/table[//input[@value="Details"]]', doc, null, XPathResult.ANY_TYPE, null);
 			}
 			var tableRow = tableRows.iterateNext();		// skip first row
 			// Go through table rows
 			while(tableRow = tableRows.iterateNext()) {
 				//IUCAT fix 2 of 2
 				if (iu){
-					var input = doc.evaluate('.//input[@class="submitLink"]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-					var text = doc.evaluate('.//label/span', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+					var input = doc.evaluate('.//input[@class="submitLink"]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext();
+					var text = doc.evaluate('.//label/span', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 				} else {
-					var input = doc.evaluate('.//input[@value="Details"]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();					
-					var text = doc.evaluate('.//label/strong', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;					
+					var input = doc.evaluate('.//input[@value="Details"]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext();					
+					var text = doc.evaluate('.//label/strong', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;					
 				}
 			//end IUCAT fixes by Andrew Smith
 				if(text) {
@@ -271,7 +258,7 @@ function doWeb(doc, url){
 		var uri = doc.location.href;
 		var recNumbers = new Array();
 		var xpath = '//form[@name="hitlist"]/table/tbody/tr';
-		var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var elmts = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 		var elmt = elmts.iterateNext();
 		if(elmt) {	// Search results page
 			var uriRegexp = /^http:\/\/[^\/]+/;
@@ -281,10 +268,10 @@ function doWeb(doc, url){
 			var titleRe = /<br>\s*(.*[^\s])\s*<br>/i;
 			var items = new Array();
 			do {
-				var checkbox = doc.evaluate('.//input[@type="checkbox"]', elmt, nsResolver,
+				var checkbox = doc.evaluate('.//input[@type="checkbox"]', elmt, null,
 											XPathResult.ANY_TYPE, null).iterateNext();
 				// Collect title
-				var title = doc.evaluate("./td[2]", elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+				var title = doc.evaluate("./td[2]", elmt, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 				if(checkbox && title) {
 					items[checkbox.name] = Zotero.Utilities.trimInternal(title);
 				}
@@ -304,17 +291,17 @@ function doWeb(doc, url){
 			var m = uriRegexp.exec(uri);
 			var newUri = m[1]+"/40";
 			
-			var elmts = doc.evaluate('/html/body/form', doc, nsResolver,
+			var elmts = doc.evaluate('/html/body/form', doc, null,
 									 XPathResult.ANY_TYPE, null);
 			while(elmt = elmts.iterateNext()) {
-				var initialText = doc.evaluate('.//text()[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				var initialText = doc.evaluate('.//text()[1]', elmt, null, XPathResult.ANY_TYPE, null).iterateNext();
 				if(initialText && initialText.nodeValue && Zotero.Utilities.superCleanString(initialText.nodeValue) == "Viewing record") {
-					recNumbers.push(doc.evaluate('./b[1]/text()[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
+					recNumbers.push(doc.evaluate('./b[1]/text()[1]', elmt, null, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
 					break;
 				}
 			}	
 			// begin Emory compatibility
-			var elmts = doc.evaluate('//input[@name="first_hit"]', doc, nsResolver,
+			var elmts = doc.evaluate('//input[@name="first_hit"]', doc, null,
 									 XPathResult.ANY_TYPE, null);
 			while (elmt = elmts.iterateNext()) {
 				recNumbers.length = 0;
@@ -370,6 +357,7 @@ function doWeb(doc, url){
 					newItem.complete();
 				}
 			});
-		}
+		});
 	}
 }
+
