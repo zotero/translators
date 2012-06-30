@@ -8,8 +8,8 @@
 	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-03-12 01:06:01"
+	"browserSupport": "gcsvb",
+	"lastUpdated": "2012-06-30 10:12:52"
 }
 
 /*
@@ -218,7 +218,9 @@ var testCases = [
 				"tags": [
 					"Psychological tests",
 					"Educational tests and measurements",
-					"Occupational aptitude tests"
+					"Occupational aptitude tests",
+					"Educational Measurement",
+					"Psychological Tests"
 				],
 				"seeAlso": [],
 				"attachments": [],
@@ -259,12 +261,12 @@ var testCases = [
 				"attachments": [],
 				"ISBN": "9780300169270",
 				"title": "Adam Smith: an enlightened life",
-				"place": "New Haven [Conn.] ; London",
+				"place": "New Haven, CT ; London",
 				"publisher": "Yale University Press",
 				"date": "2010",
 				"numPages": "345",
 				"callNumber": "HB103.S6 P45 2010",
-				"extra": "A Kirkcaldy upbringing -- Glasgow, Glasgow University and Francis Hutcheson's enlightenment -- Private study 1740-46 : Oxford and David Hume -- Edinburgh's early enlightenment -- Smith's Edinburgh lectures : a conjectural history -- Professor of moral philosophy at Glasgow, I. 1751-9 -- The 'Theory of moral sentiments' and the civilizing powers of commerce -- Professor of moral philosophy at Glasgow, 2. 1759-63 -- Smith and the Duke of Buccleuch in Europe 1764-6 -- London, Kirkcaldy and the making of the 'Wealth of nations' 1766-76 -- The 'Wealth of nations' and Smith's \"very violent attack ... upon the whole commercial system of Great Britain\" -- Hume's death -- Last years in Edinburgh 1778-90\nNicholas Phillipson's intellectual biography of Adam Smith shows that Smith saw himself as philosopher rather than an economist. Phillipson shows Smith's famous works were a part of a larger scheme to establish a \"Science of Man,\" which was to encompass law, history, and aesthetics as well as economics and ethics. Phillipson explains Adam Smith's part in the rapidly changing intellectual and commercial cultures of Glasgow and Edinburgh at the time of the Scottish Enlightenment. Above all Phillipson explains how far Smith's ideas developed in dialog with his closest friend David Hume. --Publisher's description",
+				"extra": "1. A Kirkcaldy upbringing -- 2. Glasgow, Glasgow University and Francis Hutcheson's enlightenment -- 3. Private study 1740-46: Oxford and David Hume -- 4. Edinburgh's early enlightenment -- 5. Smith's Edinburgh lectures: a conjectural history -- 6. Professor of moral philosophy at Glasgow, I. 1751-9 -- 7. The 'Theory of moral sentiments' and the civilizing powers of commerce -- 8. Professor of moral philosophy at Glasgow, 2. 1759-63 -- 9. Smith and the Duke of Buccleuch in Europe 1764-6 -- 10. London, Kirkcaldy and the making of the 'Wealth of nations' 1766-76 -- 11. The 'Wealth of nations' and Smith's \"very violent attack ... upon the whole commercial system of Great Britain\" -- 12. Hume's death -- 13. Last years in Edinburgh 1778-90 A Kirkcaldy upbringing -- Glasgow, Glasgow University and Francis Hutcheson's enlightenment -- Private study 1740-46 : Oxford and David Hume -- Edinburgh's early enlightenment -- Smith's Edinburgh lectures : a conjectural history -- Professor of moral philosophy at Glasgow, I. 1751-9 -- The 'Theory of moral sentiments' and the civilizing powers of commerce -- Professor of moral philosophy at Glasgow, 2. 1759-63 -- Smith and the Duke of Buccleuch in Europe 1764-6 -- London, Kirkcaldy and the making of the 'Wealth of nations' 1766-76 -- The 'Wealth of nations' and Smith's \"very violent attack ... upon the whole commercial system of Great Britain\" -- Hume's death -- Last years in Edinburgh 1778-90\nNicholas Phillipson's intellectual biography of Adam Smith shows that Smith saw himself as philosopher rather than an economist. Phillipson shows Smith's famous works were a part of a larger scheme to establish a \"Science of Man,\" which was to encompass law, history, and aesthetics as well as economics and ethics. Phillipson explains Adam Smith's part in the rapidly changing intellectual and commercial cultures of Glasgow and Edinburgh at the time of the Scottish Enlightenment. Above all Phillipson explains how far Smith's ideas developed in dialog with his closest friend David Hume. --Publisher's description",
 				"libraryCatalog": "Library Catalog (Mango)",
 				"shortTitle": "Adam Smith"
 			}

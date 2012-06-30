@@ -39,8 +39,6 @@
 	TODO: LAP provides book chapters as to separate RIS files - the chapter and the book
 	the former doesn't have the editors or the book title. Ideally we should merge those,
 	but that requires a rather elaborate hack, so it'll have to wait for another day
-
-	Test may fail - not sure if it's tied to a session
 */
 
 
@@ -115,53 +113,4 @@ function scrape(doc, url) {
 		translator.translate();
 	});
 }
-/** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://www.annee-philologique.com/index.php?do=notice&num=5",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"lastName": "Diderot",
-						"creatorType": "author",
-						"firstName": " Denis"
-					},
-					{
-						"lastName": "Carpanetto",
-						"creatorType": "author",
-						"firstName": " Secondo"
-					},
-					{
-						"lastName": "Guerci",
-						"creatorType": "author",
-						"firstName": " Luciano"
-					},
-					{
-						"lastName": "Canfora",
-						"creatorType": "author",
-						"firstName": " Luciano"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "L'Année Philologique Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"itemID": "59-11596",
-				"title": "Saggio sui regni di Claudio e Nerone, e sui costumi e gli scritti di Seneca / trad. di Carpanetto Secondo& Guerci Luciano ;con una nota di Canfora Luciano",
-				"date": "1987",
-				"publisher": "Sellerio",
-				"place": "Palermo",
-				"libraryCatalog": "L'Année Philologique"
-			}
-		]
-	}
-]
-/** END TEST CASES **/
+//no permalinks --> no test

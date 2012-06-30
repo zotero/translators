@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-18 23:15:20"
+	"lastUpdated": "2012-06-30 10:32:22"
 }
 
 /*
@@ -147,18 +147,11 @@ function scrape(doc) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.nzz.ch/aktuell/wirtschaft/uebersicht/kuoni-gta-uebernahme-1.13276960",
+		"url": "http://www.nzz.ch/nachrichten/wirtschaft/aktuell/kuoni-gta-uebernahme-1.13276960",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"creators": [
-					{
-						"firstName": "",
-						"lastName": "sda",
-						"creatorType": "author",
-						"fieldMode": 1
-					}
-				],
+				"creators": [],
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
@@ -169,7 +162,7 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"url": "http://www.nzz.ch/aktuell/wirtschaft/uebersicht/kuoni-gta-uebernahme-1.13276960",
+				"url": "http://www.nzz.ch/nachrichten/wirtschaft/aktuell/kuoni-gta-uebernahme-1.13276960",
 				"title": "Kuoni profitiert von der GTA-Übernahme: Deutliches Umsatzplus in den ersten neun Monaten",
 				"date": "2011-11-10",
 				"publicationTitle": "Neue Zürcher Zeitung",
@@ -189,13 +182,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"creators": [
-					{
-						"firstName": "Matthias",
-						"lastName": "Knecht",
-						"creatorType": "author"
-					}
-				],
+				"creators": [],
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
