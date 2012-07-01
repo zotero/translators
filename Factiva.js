@@ -2,14 +2,14 @@
 	"translatorID": "7bdb79e-a47f-4e3d-b317-ccd5a0a74456",
 	"label": "Factiva",
 	"creator": "Simon Kornblith",
-	"target": "https?://[^/]*global\\.factiva\\.com[^/]*/ha/default\\.aspx$",
+	"target": "^https?://global\\.factiva\\.com/ha/default\\.aspx",
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-02-10 13:45:32"
+	"lastUpdated": "2012-07-01 00:32:37"
 }
 
 function detectWeb(doc, url) {
@@ -86,8 +86,8 @@ function doWeb(doc, url) {
 	}
 	post = post.substr(1);
 	post = post.replace(/\//g,"%2F");
-
-	Zotero.Utilities.HTTP.doPost("http://global.factiva.com/pps/default.aspx?pp=XML", post, function(text) {
+	
+	Zotero.Utilities.HTTP.doPost("/pps/default.aspx?pp=XML", post, function(text) {
 		// Remove xml parse instruction and doctype
 		text = text.replace(/<!DOCTYPE[^>]*>/, "").replace(/<\?xml[^>]*\?>/, "");
 		// kill the XML namespace, too, because we have no way of knowing what it will be, which presents a problem
