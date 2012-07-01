@@ -2,18 +2,18 @@
 	"translatorID": "fb342bae-7727-483b-a871-c64c663c2fae",
 	"label": "BusinessWeek",
 	"creator": "Michael Berkowitz",
-	"target": "^https?://(www\\.)?businessweek\\.com",
+	"target": "^https?://(www\\.|search\\.)?businessweek\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-06-30 09:46:05"
+	"lastUpdated": "2012-06-30 23:54:08"
 }
 
 function detectWeb(doc, url) {
-	if (doc.evaluate('//body[contains(@class, "searchResults")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	if (doc.evaluate('//body[contains(@class, "searchResults")]|//div[contains(@class, "search_result")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
 	} else if (doc.evaluate('//h1[@id="article_headline"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "magazineArticle";
@@ -23,7 +23,12 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		var results = doc.evaluate('//h3[@class="story"]/a', doc, null, XPathResult.ANY_TYPE, null);
+		if (ZU.xpathText(doc, '//h3[@class="story"]/a')){
+			var results = doc.evaluate('//h3[@class="story"]/a', doc, null, XPathResult.ANY_TYPE, null);
+		}
+		else if (ZU.xpathText(doc, '//div[@class="search_result"]/a')){
+				var results = doc.evaluate('//div[@class="search_result"]/a', doc, null, XPathResult.ANY_TYPE, null);
+		}
 		var result;
 		var items = new Object();
 		while (result = results.iterateNext()) {
@@ -55,10 +60,15 @@ var metaTags = new Object();
 		Zotero.debug(metaTags);
 		var item = new Zotero.Item("magazineArticle");
 		item.title = ZU.xpathText(doc, '//h1[@id="article_headline"]');
-		item.abstractNote = metaTags['description'];
-		item.tags = metaTags['keywords'].split(/\s*,\s*/);
+		if (metaTags['description']) item.abstractNote = metaTags['description'];
+		if (metaTags['keywords']) item.tags = metaTags['keywords'].split(/\s*,\s*/);
 		//some articles don't have author tags - prevent this from failing
-		if (metaTags['author']) item.creators.push(Zotero.Utilities.cleanAuthor(metaTags['author'], "author"));
+		if (metaTags['author']) {
+			var authors = metaTags['author'].split(/\s*and\s*|\s*,\s*/);
+			for (i in authors){
+				item.creators.push(Zotero.Utilities.cleanAuthor(authors[i], "author"));
+			}
+		}
 		item.publicationTitle = "BusinessWeek: " + metaTags['channel'];
 		item.url = url;
 		item.date = metaTags['pub_date'].replace(/(\d{4})(\d{2})(\d{2})/, "$2/$3/$1").replace(/T.+/, "");
@@ -102,7 +112,12 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://search.businessweek.com/Search?searchTerm=linux&resultsPerPage=20",
+		"url": "http://search.businessweek.com/Search?i=1&resultsperpage=20&searchterm=linux&sortby=date&u1=searchterm",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.businessweek.com/search?q=linux&resultsPerPage=20&sort=date",
 		"items": "multiple"
 	}
 ]
