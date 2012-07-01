@@ -1,37 +1,31 @@
 {
-	"translatorID":"6871e8c5-f935-4ba1-8305-0ba563ce3941",
-	"translatorType":4,
-	"label":"PEI Archival Information Network",
-	"creator":"Adam Crymble",
-	"target":"http://www.archives.pe.ca",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-08-11 20:40:00"
+	"translatorID": "6871e8c5-f935-4ba1-8305-0ba563ce3941",
+	"label": "PEI Archival Information Network",
+	"creator": "Adam Crymble, Sebastian Karcher",
+	"target": "^https?://www\\.archives\\.pe\\.ca",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2012-07-01 10:59:38"
 }
 
 function detectWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
-	if (doc.evaluate('//td[2]/table/tbody/tr/td/p', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.match("Search")) {
+	if (url.match(/dosearch\.php/)) {
 		return "multiple";
-	
-	} else if (doc.evaluate('//td[2]/table/tbody/tr/td/p', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.match("Display")){
+	} else if (url.match(/fondsdetail\.php/)){
 		return "book";
-	}
+	} 
 }
 
 //PEI Archival Information Network translator: Code by Adam Crymble
 
 var authors;
-
 function associateData (newItem, dataTags, field, zoteroField) {
-	if (dataTags[field]) {
-		newItem[zoteroField] = dataTags[field];
+if (dataTags[field]) {
+	newItem[zoteroField] = dataTags[field];
 	}
 }
 
@@ -51,10 +45,6 @@ function authors1() {
 }
 
 function scrape(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
 	
 	var dataTags = new Object();
 	var fieldTitle;
@@ -63,29 +53,26 @@ function scrape(doc, url) {
 	
 	newItem = new Zotero.Item("book");
 
-	var xPathHeadings = doc.evaluate('//small/b', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var xPathContents = doc.evaluate('//dd', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var xPathCount = doc.evaluate('count (//small/b)', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	
+	var xPathHeadings = doc.evaluate('//strong/small', doc, null, XPathResult.ANY_TYPE, null);
+	var xPathContents = doc.evaluate('//td/ul|//td/pre/ul', doc, null, XPathResult.ANY_TYPE, null);
+	var xPathCount = doc.evaluate('count(//strong/small)', doc, null, XPathResult.ANY_TYPE, null);
 	for (i=0; i<xPathCount.numberValue; i++) {	 
 			
-		fieldTitle  = xPathHeadings.iterateNext().textContent.replace(/\s+/g, '');
+		fieldTitle  = xPathHeadings.iterateNext().textContent.replace(/\s+/g, "");
 		contents = xPathContents.iterateNext().textContent;
 		
 		if (fieldTitle == "AccessPoints") {
 			
 		//creates Author
-			dataTags["Author"] = (contents.substr(11).replace(/^\s*|\s*$/g, ''));
+			dataTags["Author"] = (contents.trim());
 			contents = xPathContents.iterateNext().textContent;
-			
 				authors = dataTags["Author"].split(/\n/);
 				authors1();		
 				
 		//creates Other Authors (if any)				
-			dataTags["OtherAuthor"] = (contents.substr(13).replace(/^\s*|\s*$/g, ''));
+			dataTags["OtherAuthor"] = (contents.trim());
 			contents = xPathContents.iterateNext().textContent;
-			
-				if (dataTags["OtherAuthor"].match("no Other Author access points found")) {
+				if (dataTags["OtherAuthor"].match("No Other Author access points found")) {
 					
 				} else {
 					
@@ -97,8 +84,8 @@ function scrape(doc, url) {
 			dataTags["subject"] = (contents);
 			var tags;
 			
-			var tagLinks = doc.evaluate('//dd/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
-			var tagsLinksCount = doc.evaluate('count (//dd/a)', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var tagLinks = doc.evaluate('//ul/a', doc, null, XPathResult.ANY_TYPE, null);
+			var tagsLinksCount = doc.evaluate('count (//ul/a)', doc, null, XPathResult.ANY_TYPE, null);
 
 				for (j = 0; j < tagsLinksCount.numberValue; j++) {
 			
@@ -108,15 +95,15 @@ function scrape(doc, url) {
 				 	 }
 				}		
 		} else {
-			
 			dataTags[fieldTitle] = (contents.replace(/^\s*|\s*$/g, ''));
 		}	
+	//	Z.debug(fieldTitle + ": " + dataTags[fieldTitle])
 	}	
 
 	for (var i = 0; i < tagsContent.length; i++) {
 		newItem.tags[i] = tagsContent[i];
 	}
-	
+
 	associateData (newItem, dataTags, "NameofRepository", "repository");
 	associateData (newItem, dataTags, "DatesofCreation", "date");
 	associateData (newItem, dataTags, "Identifier", "callNumber");
@@ -129,45 +116,91 @@ function scrape(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
 	var articles = new Array();
-	
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
-		
-		var xPathTitles = doc.evaluate('//td/ul', doc, nsResolver, XPathResult.ANY_TYPE, null);
-
-		var linkContent = xPathTitles.iterateNext().textContent.split(/\n/);	
-		
-
-		var linkContent1;
-		var linkHref = new Array();
-
-		var xPathLinks= doc.evaluate('//ul/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var xPathLinksCount = doc.evaluate('count (//ul/a)', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		
-		for (i=0; i< xPathLinksCount.numberValue; i++) {
-			linkHref.push(xPathLinks.iterateNext().href);
-	
-			var y = (i + 1);
-			linkContent1 = linkContent[y].split("- ");
-			
-			
-			items[linkHref[i]] = linkContent1[1];
+		var titles = ZU.xpath(doc, '//tbody/tr/td/ul/li');
+		var links = ZU.xpath(doc, '//tbody/tr/td/ul/li/a');
+		for(var i in titles) {
+			items[links[i].href] = titles[i].textContent;
 		}
-	
-			
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			Zotero.Utilities.processDocuments(articles, scrape, function () {
+				Zotero.done();
+			});
+		});
 	} else {
-		articles = [url];
+		scrape(doc, url);
 	}
-	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-	Zotero.wait();
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.archives.pe.ca/peiain/fondsdetail.php3?fonds=Acc2286",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Charlottetown Gas Light Company",
+						"creatorType": "creator"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Charlottetown Gas Light Company",
+					"Corporations",
+					"Day books",
+					"Gas lighting"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"date": "1855-1858,1870, 1896",
+				"callNumber": "Acc2286",
+				"extra": ".03 m. of textual records",
+				"title": "Charlottetown Gas Light Company fonds",
+				"url": "http://www.archives.pe.ca/peiain/fondsdetail.php3?fonds=Acc2286",
+				"libraryCatalog": "Public Archives and Records Office of Prince Edward Island",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.archives.pe.ca/peiain/fondsdetail.php3?fonds=Acc2626",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Carrie Ellen",
+						"lastName": "Holman",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Holman, Carrie Ellen, 1877-1972",
+					"Radio broadcasting"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"date": "1895-1972",
+				"callNumber": "Acc2626",
+				"extra": ".06 m of textual records",
+				"title": "Carrie Holman collection",
+				"url": "http://www.archives.pe.ca/peiain/fondsdetail.php3?fonds=Acc2626",
+				"libraryCatalog": "Public Archives and Records Office of Prince Edward Island",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

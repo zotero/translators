@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-04-28 00:33:00"
+	"lastUpdated": "2012-07-01 12:27:55"
 }
 
 /*
@@ -78,7 +78,7 @@ function doWeb(doc, url) {
 
 // Takes IMDB IDs and makes items
 function apiFetch(ids) {
-	var apiRoot = "http://imdbapi.com/?tomatoes=true&i=";
+	var apiRoot = "http://imdbapi.com/?i="; //&tomatoes=true removed as it often breaks the API
 	for (i in ids) ids[i] = apiRoot + ids[i];
 	Zotero.Utilities.doGet(ids, parseIMDBapi, function () {
 		Zotero.done()
@@ -111,7 +111,8 @@ function parseIMDBapi(text, response, url) {
 	item.runningTime = obj.Runtime;
 	item.extra = "IMDB ID: " + obj.ID;
 	item.extra += "; IMDB Rating: " + obj.Rating + " (" + obj.Votes + " votes)";
-	item.extra += "; Rotten Tomatoes: " + obj.tomatoRating + " (" + obj.tomatoReviews + " reviews " + " " + obj.tomatoFresh + " fresh, " + obj.tomatoRotten + " rotten)" + ", Tomato Meter: " + obj.tomatoMeter;
+	//rotten tomatoes ranking break the API frequently
+	//item.extra += "; Rotten Tomatoes: " + obj.tomatoRating + " (" + obj.tomatoReviews + " reviews " + " " + obj.tomatoFresh + " fresh, " + obj.tomatoRotten + " rotten)" + ", Tomato Meter: " + obj.tomatoMeter;
 	item.complete();
 }
 
@@ -179,13 +180,13 @@ var testCases = [
 						"title": "Poster"
 					}
 				],
+				"title": "The Official Story",
+				"date": "08 Nov 1985",
 				"genre": "Drama, History, War",
 				"abstractNote": "After the end of the Dirty War, a high school teacher sets out to find out who the mother of her adopted daughter is.",
 				"runningTime": "1 h 52 min",
-				"extra": "IMDB ID: undefined; IMDB Rating: undefined (undefined votes); Rotten Tomatoes: 8.3 (8 reviews  8 fresh, 0 rotten), Tomato Meter: 86",
-				"libraryCatalog": "IMDb",
-				"title": "The Official Story",
-				"date": "08 Nov 1985"
+				"extra": "IMDB ID: undefined; IMDB Rating: undefined (undefined votes)",
+				"libraryCatalog": "IMDb"
 			}
 		]
 	},
@@ -193,6 +194,67 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.imdb.com/find?q=shakespeare&s=tt",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.imdb.com/title/tt0060613/",
+		"items": [
+			{
+				"itemType": "film",
+				"creators": [
+					{
+						"firstName": "Mikko",
+						"lastName": "Niskanen",
+						"creatorType": "director"
+					},
+					{
+						"firstName": "Robert",
+						"lastName": "Alfthan",
+						"creatorType": "scriptwriter"
+					},
+					{
+						"firstName": "Marja-Leena",
+						"lastName": "Mikkola",
+						"creatorType": "scriptwriter"
+					},
+					{
+						"firstName": "Eero",
+						"lastName": "Melasniemi",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Kristiina",
+						"lastName": "Halkola",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Pekka",
+						"lastName": "Autiovuori",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Kirsti",
+						"lastName": "Wallasvaara",
+						"creatorType": "contributor"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Poster"
+					}
+				],
+				"title": "Skin, Skin",
+				"date": "21 Oct 1966",
+				"genre": "Drama",
+				"abstractNote": "N/A",
+				"runningTime": "1 h 29 min",
+				"extra": "IMDB ID: undefined; IMDB Rating: undefined (undefined votes)",
+				"libraryCatalog": "IMDb"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
