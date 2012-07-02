@@ -286,7 +286,7 @@ var testCases = [
 				],
 				"seeAlso": [],
 				"attachments": [],
-				"language": "French",
+				"language": "Français",
 				"rights": "domaine public",
 				"url": "http://gallica.bnf.fr/ark:/12148/bpt6k58121413",
 				"libraryCatalog": "Gallica",

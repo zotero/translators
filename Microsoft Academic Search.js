@@ -187,12 +187,12 @@ var testCases = [
 				"attachments": [
 					{
 						"title": false,
-						"mimeType": "text/html",
+						"mimeType": false,
 						"snapshot": false
 					},
 					{
 						"title": false,
-						"mimeType": "application/pdf"
+						"mimeType": false
 					}
 				],
 				"issue": "01",
