@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-13 23:37:14"
+	"lastUpdated": "2012-07-04 00:32:09"
 }
 
 function scrape(doc) {
@@ -26,9 +26,10 @@ function scrape(doc) {
 					//p[contains(@class, "description") and\
 					not(following-sibling::p[contains(@class, "descriptionExpanded")])])');
 
-	var tags = ZU.xpath(doc, '//p[contains(@class, "slideshow-tags")]/a');
+	var tags = ZU.xpathText(doc, '//meta[contains(@name, "slideshow_tag")]/@content');
+	if (tags) tags = tags.split(/\s*,\s*/);
 	for(var i=0, n=tags.length; i<n; i++) {
-		item.tags.push(tags[i].textContent.trim());
+		item.tags.push(tags[i].trim());
 	}
 
 	item.rights = ZU.xpathText(doc, '//p[@class="license"]');
