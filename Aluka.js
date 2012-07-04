@@ -1,28 +1,28 @@
 {
 	"translatorID": "e8fc7ebc-b63d-4eb3-a16c-91da232f7220",
 	"label": "Aluka",
-	"creator": "Sean Takats",
+	"creator": "Sean Takats,Sebastian Karcher",
 	"target": "^https?://(?:www\\.)aluka\\.org/action/(?:showMetadata\\?doi=[^&]+|doSearch\\?|doBrowseResults\\?)",
-	"minVersion": "1.0.0b4.r5",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gbv",
-	"lastUpdated": "2011-10-20 11:35:02"
+	"lastUpdated": "2012-07-04 13:19:58"
 }
 
 function detectWeb(doc, url){
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-		
 	var xpath = '//a[@class="title"]';
-
-	if (url.match(/showMetadata\?doi=[^&]+/)){
+	var type = ZU.xpathText(doc, '//tr/td[contains(text(), "Resource type")]/following-sibling::td');
+	Z.debug(type);
+	var itemType = typeMap[type]
+	if (itemType){
+		return itemType
+	}
+	else if (url.match(/showMetadata\?doi=[^&]+/)){
 		return "document";
-	} else if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+	} else if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
 	}
 }
@@ -35,10 +35,13 @@ var typeMap = {
 	"Aluka Essays":"report",
 	"photograph":"artwork",
 	"Photographs":"artwork",
+	"Slides (Photographs)": "artwork",
 	"Panoramas":"artwork",
 	"Journals (Periodicals)":"journalArticle",
+	"Magazines (Periodicals)" : "magazineArticle",
 	"Articles":"journalArticle",
 	"Correspondence":"letter",
+	"Letters (Correspondence)" : "letter",
 	"Interviews":"interview",
 	"Reports":"report"
 }
@@ -48,16 +51,12 @@ function doWeb(doc, url){
 	var uris = new Array();
 	var m = url.match(/showMetadata\?doi=([^&]+)/);
 	if (m) { //single page
-		uris.push(urlString+ m[1]);
+		scrape(urlString+ m[1]);
 	} else { //search results page
-		var namespace = doc.documentElement.namespaceURI;
-		var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-		} : null;
-			
+	
 		var xpath = '//a[@class="title"]';
 		var items = new Object();
-		var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var elmts = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 		var elmt;
 		while (elmt = elmts.iterateNext()) {
 			var title = elmt.textContent;
@@ -67,28 +66,35 @@ function doWeb(doc, url){
 				items[m[1]] = title;
 			}
 		}
-		
-		var items = Zotero.selectItems(items);
-		if(!items) {
-			return true;
-		}
-		
-		for(var i in items) {
-			uris.push(urlString + i);
-		}
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				uris.push(urlString + i);
+			}
+			scrape(uris, function () {
+				Zotero.done();
+			});
+		});
 	}
+}
+	
+function scrape(uris){
 	// http://www.aluka.org/action/showPrimeXML?doi=10.5555/AL.SFF.DOCUMENT.cbp1008
-
 	Zotero.Utilities.HTTP.doGet(uris, function(text) {
 		text = text.replace(/<\?xml[^>]*\?>/, ""); // strip xml header
 		text = text.replace(/(<[^>\.]*)\.([^>]*>)/g, "$1_$2");	// replace dots in tags with underscores
-		var xml = new XML(text);
-		var metadata = xml..MetadataDC;
+		//Z.debug(text)
+		var parser = new DOMParser();
+		var xml = parser.parseFromString(text, "text/xml");
+		//var xml = new XML(text);
+		var metadata = ZU.xpath(xml, '//MetadataDC');
 		var itemType = "Unknown";
-		if (metadata.length()){
+		if (ZU.xpathText(metadata[0], './Type')){
 			itemType = "document";
-			if (metadata[0].Type.length()){
-				var value = metadata[0].Type[0].text().toString();
+			if (ZU.xpathText(metadata[0], './Type')){
+				var value =ZU.xpathText(metadata[0], './Type[1]');
 				if(typeMap[value]) {
 					itemType = typeMap[value];
 				} else {
@@ -97,98 +103,96 @@ function doWeb(doc, url){
 			}
 			var newItem = new Zotero.Item(itemType);
 			var title = "";
-			if (metadata[0].Title.length()){
-				var title = Zotero.Utilities.trimInternal(metadata[0].Title[0].text().toString());
-				if (title == ""){
+			if (ZU.xpathText(metadata[0], './Title')){
+				var title = Zotero.Utilities.trimInternal(ZU.xpathText(metadata[0], './Title[1]'));
+			if (title == ""){
 					title = " ";
 				}
 				newItem.title = title;
 			}
-			if (metadata[0].Title_Alternative.length()){
-				newItem.extra = Zotero.Utilities.trimInternal(metadata[0].Title_Alternative[0].text().toString());
+			if (ZU.xpathText(metadata[0], './Title_Alternative')){
+				newItem.extra = Zotero.Utilities.trimInternal(ZU.xpathText(metadata[0], './Title_Alternative[1]'));
 			}
-			for(var i=0; i<metadata[0].Subject_Enriched.length(); i++) {
-				newItem.tags.push(Zotero.Utilities.trimInternal(metadata[0].Subject_Enriched[i].text().toString()));
+			var subjects = ZU.xpath(metadata[0], './Subject_Enriched');
+			for(var i in subjects) {
+			newItem.tags.push(Zotero.Utilities.trimInternal(subjects[i].textContent));
 			}
-			for(var i=0; i<metadata[0].Coverage_Spatial.length(); i++) {
-				newItem.tags.push(Zotero.Utilities.trimInternal(metadata[0].Coverage_Spatial[i].text().toString()));
+			var coverage = ZU.xpath(metadata[0], './Coverage_Spatial');
+			for(var i in coverage) {
+				newItem.tags.push(Zotero.Utilities.trimInternal(coverage[i].textContent));
 			}
-			for(var i=0; i<metadata[0].Coverage_Temporal.length(); i++) {
-				newItem.tags.push(Zotero.Utilities.trimInternal(metadata[0].Coverage_Temporal[i].text().toString()));
+			var coverage_temp = ZU.xpath(metadata[0], './Coverage_Temporal');
+			for(var i in coverage_temp) {
+				newItem.tags.push(Zotero.Utilities.trimInternal(coverage_temp[i].textContent));
 			}
-//	TODO: decide whether to uncomment below code to import species data as tags
-//			for(var i=0; i<xml..TopicName.length(); i++) {
-//				newItem.tags.push(Zotero.Utilities.trimInternal(xml..TopicName[i].text().toString()));
-//			}
 
-			if (metadata[0].Date.length()){
-				var date = metadata[0].Date[0].text().toString();
+			if (ZU.xpathText(metadata[0], './Date')){
+				var date = ZU.xpathText(metadata[0], './Date[1]');
 				if (date.match(/^\d{8}$/)){
 					date = date.substr(0, 4) + "-" + date.substr(4, 2) + "-" + date.substr(6, 2);
 				}
 				newItem.date = date;
 			}
-			if (metadata[0].Creator.length()){
-				var authors = metadata[0].Creator;
+			if (ZU.xpathText(metadata[0], './Creator')){
+				var authors = ZU.xpath(metadata[0], './Creator');
 				var type = "author";
-				for(var j=0; j<authors.length(); j++) {
-					Zotero.debug("author: " + authors[j]);
-					newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[j].text().toString(),type,true));
+				for(var i in authors) {
+					Zotero.debug("author: " + authors[i].textContent);
+					newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i].textContent,type,true));
 				}
 			}
-			if (metadata[0].Contributor.length()){
-				var authors = metadata[0].Contributor;
+			if (ZU.xpathText(metadata[0], './Contributor')){
+				var authors = ZU.xpath(metadata[0], './Contributor');
 				var type = "contributor";
-				for(var j=0; j<authors.length(); j++) {
-					Zotero.debug("author: " + authors[j]);
-					newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[j].text().toString(),type,true));
+				for(var i in authors) {
+					Zotero.debug("author: " + authors[i].textContent);
+					newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i].textContent,type,true));
 				}
 			}
-			if (metadata[0].Publisher.length()){
-				newItem.publisher = Zotero.Utilities.trimInternal(metadata[0].Publisher[0].text().toString());
+
+			if (ZU.xpathText(metadata[0], './Publisher')){
+				newItem.publisher = Zotero.Utilities.trimInternal(ZU.xpathText(metadata[0], './Publisher[1]'));
 			}
-			if (metadata[0].Format_Medium.length()){
-				newItem.medium = Zotero.Utilities.trimInternal(metadata[0].Format_Medium[0].text().toString());
+			if (ZU.xpathText(metadata[0], './Format_Medium')){
+				newItem.medium = Zotero.Utilities.trimInternal(ZU.xpathText(metadata[0], './Format_Medium[1]'));
 			}
-			if (metadata[0].Language.length()){
-				newItem.language = Zotero.Utilities.trimInternal(metadata[0].Language[0].text().toString());
-			}	
-			if (metadata[0].Description.length()){
-				newItem.abstractNote = metadata[0].Description[0].text().toString();
+			if (ZU.xpathText(metadata[0], './Language')){
+				newItem.language = Zotero.Utilities.trimInternal(ZU.xpathText(metadata[0], './Language[1]'));
 			}
-			if (metadata[0].Format_Extent.length()){
-				newItem.pages = Zotero.Utilities.trimInternal(metadata[0].Format_Extent[0].text().toString());
+			if (ZU.xpathText(metadata[0], './Description')){
+				newItem.abstractNote = Zotero.Utilities.trimInternal(ZU.xpathText(metadata[0], './Description[1]'));
 			}
-			var doi = xml..DOI;
-			if (doi.length()){
-				newItem.DOI = doi[0];
-				var newUrl = "http://www.aluka.org/action/showMetadata?doi=" + doi[0];
+			if (ZU.xpathText(metadata[0], './Format_Extent')){
+				newItem.numPages = Zotero.Utilities.trimInternal(ZU.xpathText(metadata[0], './Format_Extent[1]'));
+			}
+			var doi = ZU.xpathText(xml, '//DOI[1]');
+			if (doi){
+				newItem.DOI = doi;
+				var newUrl = "http://www.aluka.org/action/showMetadata?doi=" + doi;
 				newItem.attachments.push({title:"Aluka Link", snapshot:false, mimeType:"text/html", url:newUrl});
-				var pdfUrl = "http://ts-den.aluka.org/delivery/aluka-contentdelivery/pdf/" + doi[0] + "?type=img&q=high";
-				newItem.attachments.push({url:pdfUrl});
+				var pdfUrl = "http://ts-den.aluka.org/delivery/aluka-contentdelivery/pdf/" + doi + "?type=img&q=high";
+				newItem.attachments.push({title: "Aluka PDF", url:pdfUrl});
 				newItem.url = newUrl;
 			}
-			var rights = xml..Rights.Attribution;
-			if (rights.length()){
-				newItem.rights = rights[0];
+			var rights =   ZU.xpathText(xml, '//Rights/Attribution[1]');
+			if (rights){
+				newItem.rights = rights;
 			}
-			if (metadata[0].Rights.length()){
-				newItem.rights = Zotero.Utilities.trimInternal(metadata[0].Rights[0].text().toString());
+			if  (ZU.xpathText(metadata[0], './Rights[1]')){
+				newItem.rights = Zotero.Utilities.trimInternal(ZU.xpathText(metadata[0], './Rights[1]'));
 			}
-			if (metadata[0].Source.length()){
-				newItem.repository = "Aluka: " + Zotero.Utilities.trimInternal(metadata[0].Source[0].text().toString());
+			if (ZU.xpathText(metadata[0], './Source')){
+				newItem.repository = "Aluka: " + Zotero.Utilities.trimInternal(ZU.xpathText(metadata[0], './Source[1]'));
 			}
-			if (metadata[0].Relation.length()){
-				newItem.callNumber = Zotero.Utilities.trimInternal(metadata[0].Relation[0].text().toString());
+			if (ZU.xpathText(metadata[0], './Relation')){
+				newItem.callNumber = Zotero.Utilities.trimInternal(ZU.xpathText(metadata[0], './Relation[1]'));
 			}
 			newItem.complete();
 		} else {
 			Zotero.debug("No Dublin Core XML data");
 			return false;
 		}
-		Zotero.done();
 	});
-	Zotero.wait();
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -201,7 +205,7 @@ var testCases = [
 		"url": "http://www.aluka.org/action/showMetadata?doi=10.5555/AL.SFF.DOCUMENT.ydlwcc0342",
 		"items": [
 			{
-				"itemType": "document",
+				"itemType": "letter",
 				"creators": [
 					{
 						"firstName": "Programme to Combat Racism",
@@ -229,18 +233,17 @@ var testCases = [
 					{
 						"title": "Aluka Link",
 						"snapshot": false,
-						"mimeType": "text/html",
-						"url": "http://www.aluka.org/action/showMetadata?doi=10.5555/AL.SFF.DOCUMENT.ydlwcc0342"
+						"mimeType": "text/html"
 					},
 					{
-						"url": "http://ts-den.aluka.org/delivery/aluka-contentdelivery/pdf/10.5555/AL.SFF.DOCUMENT.ydlwcc0342?type=img&q=high"
+						"title": "Aluka PDF"
 					}
 				],
 				"title": "[Letter from P. Abrecht (WCC, Geneva) to L. Nillus, Buenos Aires]",
 				"date": "1968-12-13",
 				"medium": "image/tiff",
 				"language": "English",
-				"pages": "1 page(s)",
+				"numPages": "1 page(s)",
 				"DOI": "10.5555/AL.SFF.DOCUMENT.ydlwcc0342",
 				"url": "http://www.aluka.org/action/showMetadata?doi=10.5555/AL.SFF.DOCUMENT.ydlwcc0342",
 				"rights": "By kind permission of the World Council of Churches (WCC).",
