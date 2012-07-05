@@ -299,7 +299,7 @@ function detectImport() {
 
 /**
  * If property is defined, this function adds an appropriate XML element as a child of
- * contextElement.
+ * parentElement.
  * @param {Element} parentElement The parent of the new element to be created.
  * @param {String} elementName The name of the new element to be created.
  * @param {Any} property The property to inspect. If this property is defined and not
@@ -1224,7 +1224,6 @@ function doImport() {
 		newItem.language = languages.join('; ');
 		
 		Zotero.setProgress(iModsElements/nModsElements*100);
-		Zotero.debug(newItem);
 		newItem.complete();
 	}
 }
