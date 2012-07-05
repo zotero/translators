@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-05 15:25:17"
+	"lastUpdated": "2012-07-05 15:54:45"
 }
 
 /*
@@ -47,10 +47,11 @@ function makeURL(url){
 	// http://ptp.ipap.jp/cgi-bin/dumparticle?mode=bibtex&journal=PTP&volume=127&page=209
 	var journal = url.match (/([a-z]+)\.(ipap|jsap)\.jp/)[1];
 	var institute = url.match (/([a-z]+)\.(ipap|jsap)\.jp/)[2];
-	var volume = url.match(/([A-Za-z]+\/)(\d+)/)[2];
-	var page = url.match(/([A-Za-z]+\/\d+\/)([\dA-Za-z]+)/)[2];
+	var volume = url.match(/([A-Z]+\/)([\dA-Za-z]+)/)[2];
+	var page = url.match(/([A-Z]+\/[\dA-Za-z]+\/)([\dA-Za-z]+)/)[2];
 	//In some cases the abbreviations in the domain and further down are not the same...
 	var journal2 = url.match(/(link\?)([A-Z]+)/)[2];
+	
 	var bibtexurl = "http://" + journal + "." + institute + ".jp/cgi-bin/dumparticle?mode=bibtex&journal=" +journal2 + "&volume=" + volume + "&page=" + page;
 	Z.debug(bibtexurl)
 	return bibtexurl;
@@ -61,7 +62,7 @@ function doWeb(doc, url){
 	if(detectWeb(doc, url) == "multiple") { 
 		var items = {};
 		//we have to deal with some different search pages. This should capture most of them and avoid false positives
-		var titles = doc.evaluate('//td/div/a[1][contains(@href, "/link?")]|//ul/li/a[contains(@href, "/link?")]|//ol/li/a[contains(@href, "/link?")]', doc, null, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//dl/dd/a[1][contains(@href, "/link?")]|//td/div/a[1][contains(@href, "/link?")]|//ul/li/a[contains(@href, "/link?")]|//ol/li/a[contains(@href, "/link?")]', doc, null, XPathResult.ANY_TYPE, null);
 		var title;
 		while (title = titles.iterateNext()) {
 			items[title.href] = title.textContent;
@@ -74,7 +75,6 @@ function doWeb(doc, url){
 				articles.push(i);
 			}
 			Zotero.Utilities.processDocuments(articles, scrape, function () {
-				Zotero.done();
 			});
 		});
 	} else {
@@ -157,25 +157,23 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://jjap.jsap.jp/link?JJAP/50/01AA01/",
-						"title": "IPAP Snapshot",
+						"title": "IPAP - Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"url": "http://jjap.jsap.jp/link?JJAP/50/01AA01/pdf",
-						"title": "Full Text PDF",
+						"title": "IPAP - Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"url": "http://jjap.jsap.jp/link?JJAP/50/01AA01/",
-				"publicationTitle": "Japanese Journal of Applied Physics",
-				"ISSN": "0021-4922",
 				"title": "Electrical Extractions of One Dimensional Doping Profile and Effective Mobility for Metal–Oxide–Semiconductor Field-Effect Transistors",
-				"journalAbbreviation": "Jpn. J. Appl. Phys.",
+				"publicationTitle": "Japanese Journal of Applied Physics",
 				"volume": "50",
+				"issue": "1",
+				"pages": "01AA01",
 				"date": "2011",
-				"pages": "01",
+				"url": "http://jjap.jsap.jp/link?JJAP/50/01AA01/",
 				"DOI": "10.1143/JJAP.50.01AA01",
+				"publisher": "The Japan Society of Applied Physics",
 				"abstractNote": "In this study, an attempt is made to provide a framework to assess and improve metal–oxide–semiconductor field-effect transistor (MOSFET) reliability from the early stage of the design to the completion of the product. A small gate area has very small capacitances that are difficult to measure, making capacitance–voltage (C–V) based techniques difficult or impossible. In view of these experimental difficulties, we tried electrical doping profiling measurement for MOSFET with short gate length, ultra thin oxide thickness and asymmetric source/drain structure and checked the agreement with simulation result. We could get the effective mobility by simple drain current versus drain bias voltage measurement. The calculated effective mobility was smaller than expected value and we explained some reasons. An accurate effective mobility for asymmetric source–drain junction transistor was successfully extracted by using the split C–V technique, with the capacitance measured between the gate and source–drain and between the gate and the substrate.",
 				"libraryCatalog": "Institute of Pure and Applied Physics",
 				"accessDate": "CURRENT_TIMESTAMP"
@@ -215,26 +213,140 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://jpsj.ipap.jp/link?JPSJ/80/053703/",
-						"title": "IPAP Snapshot",
+						"title": "IPAP - Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"url": "http://jpsj.ipap.jp/link?JPSJ/80/053703/pdf",
-						"title": "Full Text PDF",
+						"title": "IPAP - Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"url": "http://jpsj.ipap.jp/link?JPSJ/80/053703/",
+				"title": "Disorder-Induced Multiple Transition Involving $\\mathbbZ_2$ Topological Insulator",
 				"publicationTitle": "Journal of the Physical Society of Japan",
-				"ISSN": "0031-9015",
-				"title": "Disorder-Induced Multiple Transition Involving Z2 Topological Insulator",
-				"journalAbbreviation": "J. Phys. Soc. Jpn.",
 				"volume": "80",
-				"date": "2011",
+				"issue": "5",
 				"pages": "053703",
+				"date": "2011",
+				"url": "http://jpsj.ipap.jp/link?JPSJ/80/053703/",
 				"DOI": "10.1143/JPSJ.80.053703",
-				"abstractNote": "Effects of disorder on two-dimensional Z2 topological insulator are studied numerically by the transfer matrix method. Based on the scaling analysis, the phase diagram is derived for a model of HgTe quantum well as a function of disorder strength and magnitude of the energy gap. In the presence of sz non-conserving spin–orbit coupling, a finite metallic region is found that partitions the two topologically distinct insulating phases. As disorder increases, a narrow-gap topologically trivial insulator undergoes a series of transitions; first to metal, second to topological insulator, third to metal, and finally back to trivial insulator. We show that this multiple transition is a consequence of two disorder effects; renormalization of the band gap, and Anderson localization. The metallic region found in the scaling analysis corresponds roughly to the region of finite density of states at the Fermi level evaluated in the self-consistent Born approximation. ©2011 The Physical Society of Japan",
+				"publisher": "The Physical Society of Japan",
+				"abstractNote": "Effects of disorder on two-dimensional Z2 topological insulator are studied numerically by the transfer matrix method. Based on the scaling analysis, the phase diagram is derived for a model of HgTe quantum well as a function of disorder strength and magnitude of the energy gap. In the presence of sz non-conserving spin–orbit coupling, a finite metallic region is found that partitions the two topologically distinct insulating phases. As disorder increases, a narrow-gap topologically trivial insulator undergoes a series of transitions; first to metal, second to topological insulator, third to metal, and finally back to trivial insulator. We show that this multiple transition is a consequence of two disorder effects; renormalization of the band gap, and Anderson localization. The metallic region found in the scaling analysis corresponds roughly to the region of finite density of states at the Fermi level evaluated in the self-consistent Born approximation.©2011 The Physical Society of Japan",
+				"libraryCatalog": "Institute of Pure and Applied Physics",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://jpsj.ipap.jp/journal/JPSJS-78SA.html",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://ptp.ipap.jp/journal/PTPS-160.html",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://ptp.ipap.jp/link?PTPS/160/15",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "J. Y.",
+						"lastName": "Gan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yan",
+						"lastName": "Chen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Z. B.",
+						"lastName": "Su",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "F. C.",
+						"lastName": "Zhang",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "IPAP - Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "IPAP - Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"title": "Gossamer Superconductivity in Layered Organic Compounds $ąppa$-(BEDT-TTF)₂X",
+				"publicationTitle": "Progress of Theoretical Physics Supplement",
+				"volume": "160",
+				"pages": "15-27",
+				"date": "2005",
+				"url": "http://ptp.ipap.jp/link?PTPS/160/15/",
+				"DOI": "10.1143/PTPS.160.15",
+				"publisher": "Progress of Theoretical Physics",
+				"abstractNote": "The layered organic superconductors κ-(BEDT-TTF)2Xexhibit similar normal and superconducting state properties withthose of the high temperature cuprate superconductors. Manyexperimental measurements support the version that thesuperconducting state is on the verge of the Mott insulator. Usingthe strong-coupling approach, we employ the Gutzwiller variationalmethod to study a two-dimensional Hubbard model including a spinexchange coupling term on an anisotropic triangular lattice as aminimal model for the compounds. The ground state is found to be aGossamer superconductor at a small on-site Coulomb repulsion U andan antiferromagnetic Mott insulator at large U, separated by afirst order phase transition. The lattice structure anisotropy, orthe ratio of the hopping integrals along different latticeorientation t′/t plays an important role in determining thehighly non-trivial phase diagram. Our theory is qualitativelyconsistent with major experiments reported in organicsuperconductors.",
+				"libraryCatalog": "Institute of Pure and Applied Physics",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://jpsj.ipap.jp/cgi-bin/getarticle?journal=JPSJ&volume=70&page=1604",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Tomoya",
+						"lastName": "Isoshima",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kazushige",
+						"lastName": "Machida",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tetsuo",
+						"lastName": "Ohmi",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "IPAP - Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "IPAP - Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"title": "Quantum Vortex in a Spinor Bose-Einstein Condensate",
+				"publicationTitle": "Journal of the Physical Society of Japan",
+				"volume": "70",
+				"issue": "6",
+				"pages": "1604-1610",
+				"date": "2001",
+				"url": "http://jpsj.ipap.jp/link?JPSJ/70/1604/",
+				"DOI": "10.1143/JPSJ.70.1604",
+				"publisher": "The Physical Society of Japan",
+				"abstractNote": "Quantum vortices in the multi-component Bose-Einstein condensation (BEC) are investigated theoretically. It is found that three kinds of the vortex configurations are possible and their physical properties are discussed in details, including the density distribution and the spin texture. By using the Bogoliubov theory extended to the three component BEC, the collective modes for these vortices are evaluated. The local vortex stability for these vortices are examined in light of the existence of the negative eigenvalue, yielding a narrow magnetization window for the local intrinsic stable region where the multi-components work together to stabilize a vortex in a self-organized way.©2001 The Physical Society of Japan",
 				"libraryCatalog": "Institute of Pure and Applied Physics",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
