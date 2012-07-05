@@ -1,7 +1,7 @@
 {
 	"translatorID": "e8fc7ebc-b63d-4eb3-a16c-91da232f7220",
 	"label": "Aluka",
-	"creator": "Sean Takats,Sebastian Karcher",
+	"creator": "Sean Takats, Sebastian Karcher",
 	"target": "^https?://(?:www\\.)aluka\\.org/action/(?:showMetadata\\?doi=[^&]+|doSearch\\?|doBrowseResults\\?)",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gbv",
-	"lastUpdated": "2012-07-04 13:19:58"
+	"lastUpdated": "2012-07-04 23:46:17"
 }
 
 function detectWeb(doc, url){
@@ -79,22 +79,25 @@ function doWeb(doc, url){
 		});
 	}
 }
+
+function xpathTextTrimmed(contextElement, xpath) {
+    var text = ZU.xpathText(contextElement, xpath);
+    return text ? ZU.trimInternal(text) : undefined;
+}
 	
 function scrape(uris){
 	// http://www.aluka.org/action/showPrimeXML?doi=10.5555/AL.SFF.DOCUMENT.cbp1008
 	Zotero.Utilities.HTTP.doGet(uris, function(text) {
-		text = text.replace(/<\?xml[^>]*\?>/, ""); // strip xml header
-		text = text.replace(/(<[^>\.]*)\.([^>]*>)/g, "$1_$2");	// replace dots in tags with underscores
 		//Z.debug(text)
 		var parser = new DOMParser();
 		var xml = parser.parseFromString(text, "text/xml");
 		//var xml = new XML(text);
 		var metadata = ZU.xpath(xml, '//MetadataDC');
 		var itemType = "Unknown";
-		if (ZU.xpathText(metadata[0], './Type')){
+		if (metadata.length){
 			itemType = "document";
-			if (ZU.xpathText(metadata[0], './Type')){
-				var value =ZU.xpathText(metadata[0], './Type[1]');
+			var value = ZU.xpathText(metadata[0], 'Type');
+			if (value){
 				if(typeMap[value]) {
 					itemType = typeMap[value];
 				} else {
@@ -102,69 +105,65 @@ function scrape(uris){
 				}		
 			}
 			var newItem = new Zotero.Item(itemType);
-			var title = "";
-			if (ZU.xpathText(metadata[0], './Title')){
-				var title = Zotero.Utilities.trimInternal(ZU.xpathText(metadata[0], './Title[1]'));
-			if (title == ""){
+			var title = ZU.xpathText(metadata[0], 'Title');
+			if (title){
+				var title = Zotero.Utilities.trimInternal(title);}
+			else {
 					title = " ";
 				}
-				newItem.title = title;
-			}
-			if (ZU.xpathText(metadata[0], './Title_Alternative')){
-				newItem.extra = Zotero.Utilities.trimInternal(ZU.xpathText(metadata[0], './Title_Alternative[1]'));
-			}
-			var subjects = ZU.xpath(metadata[0], './Subject_Enriched');
+			newItem.title = title;
+			
+			var subjects = ZU.xpath(metadata[0], 'Subject.Enriched');
 			for(var i in subjects) {
 			newItem.tags.push(Zotero.Utilities.trimInternal(subjects[i].textContent));
 			}
-			var coverage = ZU.xpath(metadata[0], './Coverage_Spatial');
+			var coverage = ZU.xpath(metadata[0], 'Coverage.Spatial');
 			for(var i in coverage) {
 				newItem.tags.push(Zotero.Utilities.trimInternal(coverage[i].textContent));
 			}
-			var coverage_temp = ZU.xpath(metadata[0], './Coverage_Temporal');
+			var coverage_temp = ZU.xpath(metadata[0], 'Coverage.Temporal');
 			for(var i in coverage_temp) {
 				newItem.tags.push(Zotero.Utilities.trimInternal(coverage_temp[i].textContent));
 			}
 
-			if (ZU.xpathText(metadata[0], './Date')){
-				var date = ZU.xpathText(metadata[0], './Date[1]');
-				if (date.match(/^\d{8}$/)){
+			var date = ZU.xpathText(metadata[0], 'Date[1]');
+			if (date){
+			 	if (date.match(/^\d{8}$/)){
 					date = date.substr(0, 4) + "-" + date.substr(4, 2) + "-" + date.substr(6, 2);
 				}
 				newItem.date = date;
 			}
-			if (ZU.xpathText(metadata[0], './Creator')){
-				var authors = ZU.xpath(metadata[0], './Creator');
-				var type = "author";
-				for(var i in authors) {
-					Zotero.debug("author: " + authors[i].textContent);
-					newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i].textContent,type,true));
-				}
+			
+			var authors = ZU.xpath(metadata[0], 'Creator');
+			var type = "author";
+			for(var i in authors) {
+				Zotero.debug("author: " + authors[i].textContent);
+				newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i].textContent,type,true));
 			}
-			if (ZU.xpathText(metadata[0], './Contributor')){
-				var authors = ZU.xpath(metadata[0], './Contributor');
-				var type = "contributor";
-				for(var i in authors) {
-					Zotero.debug("author: " + authors[i].textContent);
-					newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i].textContent,type,true));
-				}
+			var authors = ZU.xpath(metadata[0], 'Contributor');
+			var type = "contributor";
+			for(var i in authors) {
+				Zotero.debug("author: " + authors[i].textContent);
+				newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i].textContent,type,true));
 			}
-
-			if (ZU.xpathText(metadata[0], './Publisher')){
-				newItem.publisher = Zotero.Utilities.trimInternal(ZU.xpathText(metadata[0], './Publisher[1]'));
+			
+		
+			newItem.extra = xpathTextTrimmed(metadata[0], 'Title.Alternative[1]');
+			newItem.publisher = xpathTextTrimmed(metadata[0], 'Publisher[1]');
+			newItem.medium =xpathTextTrimmed(metadata[0], 'Format.Medium[1]');
+			newItem.language = xpathTextTrimmed(metadata[0], 'Language[1]');
+			newItem.abstractNote = xpathTextTrimmed(metadata[0], 'Description[1]');
+			newItem.numPages = xpathTextTrimmed(metadata[0], 'Format.Extent[1]');
+			newItem.rights = xpathTextTrimmed(metadata[0], 'Rights[1]');
+			newItem.repository = "Aluka: " + xpathTextTrimmed(metadata[0], 'Source[1]');
+			newItem.callNumber = xpathTextTrimmed(metadata[0], 'Relation[1]');
+			
+			//If the rights aren't in the DC metadata try to get them otherwise
+			var rights =   ZU.xpathText(xml, '//Rights/Attribution[1]');
+			if (rights && !newItem.rights){
+				newItem.rights = rights;
 			}
-			if (ZU.xpathText(metadata[0], './Format_Medium')){
-				newItem.medium = Zotero.Utilities.trimInternal(ZU.xpathText(metadata[0], './Format_Medium[1]'));
-			}
-			if (ZU.xpathText(metadata[0], './Language')){
-				newItem.language = Zotero.Utilities.trimInternal(ZU.xpathText(metadata[0], './Language[1]'));
-			}
-			if (ZU.xpathText(metadata[0], './Description')){
-				newItem.abstractNote = Zotero.Utilities.trimInternal(ZU.xpathText(metadata[0], './Description[1]'));
-			}
-			if (ZU.xpathText(metadata[0], './Format_Extent')){
-				newItem.numPages = Zotero.Utilities.trimInternal(ZU.xpathText(metadata[0], './Format_Extent[1]'));
-			}
+			
 			var doi = ZU.xpathText(xml, '//DOI[1]');
 			if (doi){
 				newItem.DOI = doi;
@@ -174,19 +173,7 @@ function scrape(uris){
 				newItem.attachments.push({title: "Aluka PDF", url:pdfUrl});
 				newItem.url = newUrl;
 			}
-			var rights =   ZU.xpathText(xml, '//Rights/Attribution[1]');
-			if (rights){
-				newItem.rights = rights;
-			}
-			if  (ZU.xpathText(metadata[0], './Rights[1]')){
-				newItem.rights = Zotero.Utilities.trimInternal(ZU.xpathText(metadata[0], './Rights[1]'));
-			}
-			if (ZU.xpathText(metadata[0], './Source')){
-				newItem.repository = "Aluka: " + Zotero.Utilities.trimInternal(ZU.xpathText(metadata[0], './Source[1]'));
-			}
-			if (ZU.xpathText(metadata[0], './Relation')){
-				newItem.callNumber = Zotero.Utilities.trimInternal(ZU.xpathText(metadata[0], './Relation[1]'));
-			}
+			
 			newItem.complete();
 		} else {
 			Zotero.debug("No Dublin Core XML data");
