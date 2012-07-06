@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-06-28 22:41:46"
+	"lastUpdated": "2012-07-06 17:21:08"
 }
 
 /*
@@ -50,11 +50,18 @@ function doWeb(doc, url) {
 				linkIterator = ZU.xpath(doc, '//div[contains(@class, "title")]/a/@href');
 				titleIterator = ZU.xpath(doc, '//div[contains(@class, "title")]/a/span');
 			}
-			else
+			else if (ZU.xpath(doc, '//h2[contains(@class, "EXLResultTitle")]/a[contains(@href, "display.do")]/@href').length>0)
 			{
 				// Primo v3
 				linkIterator = ZU.xpath(doc, '//h2[contains(@class, "EXLResultTitle")]/a/@href');
 				titleIterator = ZU.xpath(doc, '//h2[contains(@class, "EXLResultTitle")]/a');
+			}
+			
+			//for translators that don't have link on the titles like Northwestern's Primo
+			else if(ZU.xpath(doc, '//div[contains(@class, "EXLTabsRibbon")]//li[contains(@class,"EXLDetailsTab")]/a').length >0){
+				Z.debug("here")
+					linkIterator = ZU.xpath(doc, '//div[contains(@class, "EXLTabsRibbon")]//li[contains(@class,"EXLDetailsTab")]/a/@href');
+					titleIterator = ZU.xpath(doc, '//h2[contains(@class, "EXLResultTitle")]');
 			}
 
 			// try/catch for the case when there are no search results, let doc.evealuate fail quietly
@@ -68,7 +75,7 @@ function doWeb(doc, url) {
 					var title = Zotero.Utilities.trimInternal(title.textContent);
 					items[xmlLink] = title;
 				}
-				
+
 				Zotero.selectItems(items, function (items) {
 					if (!items) {
 						return true;
@@ -76,7 +83,7 @@ function doWeb(doc, url) {
 					for (var i in items) {
 						links.push(i);
 					}
-					//Z.debug(links)
+					Z.debug(links)
 					ZU.doGet(links, scrape, function () {
 						Zotero.done();
 					});
@@ -136,6 +143,10 @@ function doWeb(doc, url) {
 		if (!creators && contributors) { // <creator> not available using <contributor> as author instead
 			creators = contributors;
 			contributors = null;
+		}
+		
+		if (!creators && ! contributors){
+			creators = ZU.xpath(doc, '//addata/addau')
 		}
 		
 		for (i in creators) {
