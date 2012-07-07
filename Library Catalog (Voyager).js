@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-03-22 17:35:44"
+	"lastUpdated": "2012-07-07 11:19:50"
 }
 
 function detectWeb(doc, url) {
@@ -32,8 +32,8 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 	var postString = '';
-	var form = ZU.xpath(doc, '//form[@name="frm"]')[0];
-	var newUri = form.action;
+	var form = ZU.xpath(doc, '//form[@name="frm"]');
+	var newUri = form[0].action;
 	var multiple = false;
 
 	if (ZU.xpath(form, '//*[@name="RC"]').length) {
@@ -103,11 +103,11 @@ function doWeb(doc, url) {
 
 	var raw, unicode, latin1;
 
-	for (var i = 0; i < form.elements.length; i++) {
-		if (form.elements[i].type && form.elements[i].type.toLowerCase() == 'hidden') {
-			postString += escape(form.elements[i].name) + '=' + escape(form.elements[i].value) + '&';
+	for (var i = 0; i < form[0].elements.length; i++) {
+		if (form[0].elements[i].type && form[0].elements[i].type.toLowerCase() == 'hidden') {
+				postString += escape(form[0].elements[i].name) + '=' + escape(form[0].elements[i].value) + '&';
 		}
-	}
+	} 
 
 	var export_options = ZU.xpath(form, '//select[@name="RD"]/option');
 	for (var i = 0; i < export_options.length; i++) {
@@ -134,7 +134,6 @@ function doWeb(doc, url) {
 	} else {
 		return false;
 	}
-
 	postString += 'RD=' + rd + '&MAILADDY=&SAVE=Press+to+SAVE+or+PRINT';
 
 	// No idea why this doesn't work as post
