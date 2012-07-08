@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-15 20:04:43"
+	"lastUpdated": "2012-07-08 12:40:00"
 }
 
 /*
@@ -245,6 +245,10 @@ function scrape(doc, url, type, pdfUrl) {
 			case 'Author':
 			case 'Editor':	//test case?
 				var type = (enLabel == 'Author')? 'author' : 'editor';
+				
+				// Use titles of a tags if they exist, since these don't include
+				// affiliations
+				value = ZU.xpathText(rows[i].childNodes[1], "a/@title", null, "; ") || value;
 
 				value = value.replace(/^by\s+/i,'')	//sometimes the authors begin with "By"
 							.split(/\s*;\s*|\s+and\s+/i);
@@ -1332,6 +1336,80 @@ var testCases = [
 				"shortTitle": "Beyond Stanislavsky",
 				"title": "Beyond Stanislavsky: The influence of Russian modernism on the American theatre",
 				"date": "2001"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://search.proquest.com/docview/925553601/137CCF69B9E7916BDCF/1?accountid=14541",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Lian",
+						"lastName": "Chen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Shixia",
+						"lastName": "Xu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kaiya",
+						"lastName": "Zhou",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Guang",
+						"lastName": "Yang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael W.",
+						"lastName": "Bruford",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"CABSCLASS",
+					"84.5.22",
+					"GENETICS AND MOLECULAR BIOLOGY",
+					"EUKARYOTIC GENETICS",
+					"Ecological and Population Genetics",
+					"CABSCLASS",
+					"84.5.34",
+					"GENETICS AND MOLECULAR BIOLOGY",
+					"EUKARYOTIC GENETICS",
+					"Mammalian Genetics",
+					"CABSCLASS",
+					"92.7.2",
+					"PLANT SCIENCE",
+					"DEVELOPMENT",
+					"Growth Regulators"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "Microsatellite variation and significant population genetic structure of endangered finless porpoises (Neophocaena phocaenoides) in Chinese coastal waters and the Yangtze River",
+				"publicationTitle": "Marine Biology",
+				"volume": "157",
+				"issue": "7",
+				"pages": "1453-1462",
+				"numPages": "10",
+				"ISSN": "0025-3162",
+				"language": "English",
+				"DOI": "http://dx.doi.org/10.1007/s00227-010-1420-x",
+				"url": "http://search.proquest.com/docview/925553601/137CCF69B9E7916BDCF/1?accountid=14541",
+				"date": "2020",
+				"abstractNote": "The finless porpoise (Neophocaena phocaenoides) inhabits a wide range of tropical and temperate waters of the Indo-Pacific region. Genetic structure of finless porpoises in Chinese waters in three regions (Yangtze River, Yellow Sea, and South China Sea) was analyzed, including the Yangtze finless porpoise which is widely known because of its highly endangered status and unusual adaptation to freshwater. To assist in conservation and management of this species, ten microsatellite loci were used to genotype 125 individuals from the three regions. Contrary to the low genetic diversity revealed in previous mtDNA control region sequence analyses, relatively high levels of genetic variation in microsatellite profiles (HE= 0.732-0.795) were found. Bayesian clustering analysis suggested that finless porpoises in Chinese waters could be described as three distinct genetic groups, which corresponded well to population \"units\" (populations, subspecies, or species) delimited in earlier studies, based on morphological variation, distribution, and genetic analyses. Genetic differentiation between regions was significant, with FST values ranging from 0.07 to 0.137. Immigration rates estimated using a Bayesian method and population ancestry analyses suggested no or very limited gene flow among regional types, even in the area of overlap between types. These results strongly support the classification of porpoises in these regions into distinct evolutionarily significant units, including at least two separate species, and therefore they should be treated as different management units in the design and implementation of conservation programmes. © 2010 Springer-Verlag.",
+				"libraryCatalog": "ProQuest",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}
