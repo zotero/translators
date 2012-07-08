@@ -14,15 +14,22 @@
 
 var parsedData;
 function detectImport() {
-	const CSL_TYPES = ["article", "article-journal", "article-magazine", "article-newspaper",
-		"bill", "book", "broadcast", "chapter", "dataset", "entry", "entry-dictionary",
-		"entry-encyclopedia", "figure", "graphic", "interview", "legal_case", "legislation",
-		"manuscript", "map", "motion_picture", "musical_score", "pamphlet",
-		"paper-conference", "patent", "personal_communication", "post", "post-weblog",
-		"report", "review", "review-book", "song", "speech", "thesis", "treaty", "webpage"];
+	const CSL_TYPES = {"article":true, "article-journal":true, "article-magazine":true,
+		"article-newspaper":true, "bill":true, "book":true, "broadcast":true,
+		"chapter":true, "dataset":true, "entry":true, "entry-dictionary":true,
+		"entry-encyclopedia":true, "figure":true, "graphic":true, "interview":true,
+		"legal_case":true, "legislation":true, "manuscript":true, "map":true,
+		"motion_picture":true, "musical_score":true, "pamphlet":true,
+		"paper-conference":true, "patent":true, "personal_communication":true,
+		"post":true, "post-weblog":true, "report":true, "review":true, "review-book":true,
+		"song":true, "speech":true, "thesis":true, "treaty":true, "webpage":true};
 		
 	var str, json = "";
-	while((str = Z.read(32768)) !== false) json += str;
+	
+	// Read in the whole file at once, since we can't easily parse a JSON stream. The 
+	// chunk size here is pretty arbitrary, although larger chunk sizes may be marginally
+	// faster. We set it to 1MB.
+	while((str = Z.read(1048576)) !== false) json += str;
 	
 	try {
 		parsedData = JSON.parse(json);	
@@ -36,7 +43,7 @@ function detectImport() {
 	
 	for(var i=0; i<parsedData.length; i++) {
 		var item = parsedData[i];
-		if(typeof item !== "object" || !item.type || CSL_TYPES.indexOf(item.type) === -1) {
+		if(typeof item !== "object" || !item.type || !(item.type in CSL_TYPES)) {
 			return false;
 		}
 	}
