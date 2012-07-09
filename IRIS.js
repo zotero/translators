@@ -2,27 +2,27 @@
 	"translatorID": "8381bf68-11fa-418c-8530-2e00284d3efd",
 	"label": "IRIS",
 	"creator": "Chad Mills and Michael Berkowitz",
-	"target": "^https?://[^/]*www\\.iris\\.rutgers\\.edu[^/]*/",
+	"target": "^https?://[^/]*www[\\.\\-]iris[\\.\\-]rutgers[\\.\\-]edu[^/]*/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 90,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-13 13:43:21"
+	"lastUpdated": "2012-07-09 01:13:19"
 }
 
 function detectWeb(doc, url) {
-	if (doc.evaluate('/html/body/div[@class="columns_container"]/div[contains(@class, "left_column")]/div[@class="content_container"]/div[@class="content"]/form[@id="hitlist"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	if (doc.evaluate('//div[@class="content_container"]/div[@class="content"]/form[@id="hitlist"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
-	} else if (doc.evaluate('/html/body/div[@class="columns_container"]/div[contains(@class, "left_column")]/form[@name="item_view"]/div[@class="content_container item_details"]/div[@class="content"]/ul[contains(@class, "detail_page")]/li/div/table', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	} else if (doc.evaluate('//div[@class="content_container item_details"]/div[@class="content"]/ul[contains(@class, "detail_page")]/li/div/table', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "book";
 	}
 }
 
 function scrape(doc) {
 
-	var xpath = '/html/body/div[@class="columns_container"]/div[contains(@class, "left_column")]/form[@name="item_view"]/div[@class="content_container item_details"]/div[@class="content"]/ul[contains(@class, "detail_page")]/li/div/table//tr[th[@class="viewmarctags1"]][td[@class="viewmarctags"]]';
+	var xpath = '//div[@class="content_container item_details"]/div[@class="content"]/ul[contains(@class, "detail_page")]/li/div/table//tr[th[@class="viewmarctags1"]][td[@class="viewmarctags"]]';
 
 	var elmts = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 
@@ -317,37 +317,50 @@ function doWeb(doc, url) {
 	} //END while
 } //END scrape function
 /** BEGIN TEST CASES **/
-var testCases = [{
-	"type": "web",
-	"url": "https://www-iris-rutgers-edu.proxy.libraries.rutgers.edu/uhtbin/cgisirsi/0/0/0/123?srchfield1=&searchdata1=4716226%7bCKEY%7d&library=",
-	"items": [{
-		"itemType": "book",
-		"creators": [{
-			"firstName": "William C.",
-			"lastName": "Smith",
-			"creatorType": "contributor"
-		}, {
-			"firstName": "Carlos (Carlos H. )",
-			"lastName": "Acuña",
-			"creatorType": "contributor"
-		}, {
-			"firstName": "Eduardo",
-			"lastName": "Gamarra",
-			"creatorType": "contributor"
-		}],
-		"notes": [],
-		"tags": ["Democracy", "Latin America", "Latin America", "Economic conditions", "1982", "Latin America", "Economic policy", "Latin America", "Politics and government", "1980"],
-		"seeAlso": [],
-		"attachments": [],
-		"extra": "Contents: Future politico-economic scenarios for Latin America / William C. Smith and Carlos H. Acuña -- Politics and economics in the Argentina of the nineties (or, why the future no longer is what it used to be) / Carlos H. Acuña -- Crisis and transformation of the Argentine state (1978-1992) / Adolfo Canitrot -- Crafting political support for stabilization : political pacts and the new economic policy in Bolivia / Eduardo A. Gamarra -- Democracy, economic liberalism, and structural reform in Bolivia / Juan Antonio Morales -- The state, structural reform, and democratization in Brazil / Lourdes Sola -- Renegade development : rise and demise of state-led development in Brazil / Antônio Barros de Castro -- The political dimension of processes of transformation in Chile / Manuel Antonio Garretón -- Market economy, social welfare, and democratic consolidation in Chile / Pilar Vergara -- Making economic reform politically viable : the Mexican experience / Blanca Heredia -- On the political economy of market and state reform in Mexico / Jaime Ros\nSecondary subject: Democracia--América Latina\nSecondary subject: Democracia--Hispanoamérica\nSecondary subject: Démocratie--Amérique latine\nSecondary subject: Wirtschaftspolitik\nSecondary subject: Kongress\nSecondary subject: América Latina--Condiciones económicas--1982\nSecondary subject: América Latina--Política económica\nSecondary subject: América Latina--Gobierno\nSecondary subject: América Latina--Política\nSecondary subject: Hispanoamérica--Política económica\nSecondary subject: Hispanoamérica--Política--1980\nSecondary subject: Amérique latine--Conditions économiques--1982\nSecondary subject: Amérique latine--Politique économique\nSecondary subject: Amérique latine--Politique et gouvernement--1980\nSecondary subject: Lateinamerika",
-		"title": "Democracy, markets, and structural reform in Latin America: Argentina, Bolivia, Brazil, Chile, and Mexico",
-		"place": "New Brunswick, N.J.",
-		"publisher": "Transaction Publishers",
-		"date": "1994",
-		"numPages": "331",
-		"callNumber": "HC125.D444 1993",
-		"libraryCatalog": "IRIS",
-		"shortTitle": "Democracy, markets, and structural reform in Latin America"
-	}]
-}]
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://www-iris-rutgers-edu.proxy.libraries.rutgers.edu/cgi-bin/IRISquickSearch2.cgi?searchdata1=4835224{CKEY}&searchfield1=GENERAL^SUBJECT^GENERAL^^&user_id=WEBSERVER",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "K¯oz¯o",
+						"lastName": "Yamamura",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Wolfgang",
+						"lastName": "Streeck",
+						"creatorType": "contributor"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Capitalism",
+					"Germany",
+					"Capitalism",
+					"Japan",
+					"Germany",
+					"Economic policy",
+					"Japan",
+					"Economic policy"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"extra": "Contents: Convergence or diversity? : stability and change in German and Japanese capitalism / Wolfgang Streeck and Kozo Yamamura -- Germany and Japan : binding versus autonomy / Erica R. Gould and Stephen D. Krasner -- Regional states : Japan and Asia,  Germany in Europe / Peter J. Katzenstein -- Germany and Japan in a new phase of capitalism / Kozo Yamamura -- The embedded innovation systems of Germany and Japan / Robert Boyer -- The future of nationally embedded capitalism / Kathleen Thelen and Ikuo Kume -- Transformation and interaction / Ulrich Jürgens -- From banks to markets / Sigurt Vitols -- Corporate governance in Germany and Japan / Gregory Jackson -- The re-organization of organized capitalism / Steven K. Vogel -- Competitive party democracy and political-economic reform in Germany and Japan / Herbert Kitschelt\nSecondary subject: Capitalisme--Allemagne\nSecondary subject: Capitalisme--Japon\nSecondary subject: Allemagne--Politique économique\nSecondary subject: Japon--Politique économique\nElectronic access: Book review (H-Net) http://www.h-net.org/review/hrev-a0e5q7-aa",
+				"series": "Cornell studies in political economy",
+				"title": "The end of diversity?: prospects for German and Japanese capitalism",
+				"place": "Ithaca",
+				"publisher": "Cornell University Press",
+				"date": "2003",
+				"numPages": "401",
+				"callNumber": "HC286.8.E39 2003",
+				"libraryCatalog": "IRIS",
+				"shortTitle": "The end of diversity?"
+			}
+		]
+	}
+]
 /** END TEST CASES **/
