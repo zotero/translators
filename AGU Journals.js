@@ -9,11 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-07-05 21:00:25"
+	"lastUpdated": "2012-07-05 23:16:10"
 }
 
 /*
-   AGU Translator
+	Translator
    Copyright (C) 2012 Sebastian Karcher and Ben Parr
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU Affero General Public License as published by
@@ -28,11 +28,15 @@
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 function detectWeb(doc, url) {
 	var xpath = '//meta[@name="citation_journal_title"]';
 
 	if (ZU.xpath(doc, xpath).length > 0) {
+		return "journalArticle";
+	}
+	//for old frames display: http://www.agu.org/journals/gl/gl0420/2004GL020398/
+	xpath = '//meta[@name="doi"]/@content';
+	if (url.match(/journal/) && ZU.xpath(doc, xpath).length > 0) {
 		return "journalArticle";
 	}
 
@@ -91,26 +95,37 @@ function doWeb(doc, url) {
 		});
 
 	} else {
-		// We call the Embedded Metadata translator to do the actual work
-		var year = ZU.xpathText(doc, '//meta[@name="citation_year"]/@content')
-		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
-		translator.setHandler("itemDone", function (obj, item) {
-			//for older translators AGU put NaN into the date fiel, but has the year
-			if (item.title == item.title.toUpperCase()) {
-				Z.debug("here")
-				item.title = ZU.capitalizeTitle(item.title.toLowerCase(), true);
-			}
-			if (item.date.indexOf("NaN") != -1  && year) {
-				item.date = year;
-			}
-			//the keywords are nonsense
-			item.tags = [];
-			item.complete();
-		});
-		translator.getTranslatorObject(function (obj) {
-			obj.doWeb(doc, url);
-		});
+		//detect and redirect the old frames display
+		xpath = '//meta[@name="doi"]/@content';
+		if (url.match(/agu\.org\/journals\//) && ZU.xpath(doc, xpath).length > 0) {
+			var doi = ZU.xpathText(doc, xpath);
+			var newurl = "http://dx.doi.org/" + doi;
+			Z.debug(newurl)
+			ZU.processDocuments(newurl, function (myDoc) {
+				doWeb(myDoc, myDoc.location.href)
+			}, function () {});
+		} else {
+			// We call the Embedded Metadata translator to do the actual work
+			var year = ZU.xpathText(doc, '//meta[@name="citation_year"]/@content')
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+			translator.setHandler("itemDone", function (obj, item) {
+				//for older translators AGU put NaN into the date fiel, but has the year
+				if (item.title == item.title.toUpperCase()) {
+					Z.debug("here")
+					item.title = ZU.capitalizeTitle(item.title.toLowerCase(), true);
+				}
+				if (item.date.indexOf("NaN") != -1 && year) {
+					item.date = year;
+				}
+				//the keywords are nonsense
+				item.tags = [];
+				item.complete();
+			});
+			translator.getTranslatorObject(function (obj) {
+				obj.doWeb(doc, url);
+			});
+		}
 	}
 }/** BEGIN TEST CASES **/
 var testCases = [
@@ -234,6 +249,66 @@ var testCases = [
 		"type": "web",
 		"url": "http://europa.agu.org/?view=results&simp=1&q=test",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.agu.org/journals/gl/gl0420/2004GL020398/body.shtml",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "C. D.",
+						"lastName": "Nevison",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "D. E.",
+						"lastName": "Kinnison",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "R. F.",
+						"lastName": "Weiss",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"itemID": "http://www.agu.org/pubs/crossref/2004/2004GL020398.shtml",
+				"title": "Stratospheric influences on the tropospheric seasonal cycles of nitrous oxide and chlorofluorocarbons",
+				"publicationTitle": "Geophysical Research Letters",
+				"rights": "© 2008 American Geophysical Union",
+				"volume": "31",
+				"issue": "20",
+				"number": "20",
+				"patentNumber": "20",
+				"pages": "L20103",
+				"publisher": "American Geophysical Union",
+				"institution": "American Geophysical Union",
+				"company": "American Geophysical Union",
+				"label": "American Geophysical Union",
+				"distributor": "American Geophysical Union",
+				"date": "21 October 2004",
+				"ISSN": "0094-8276",
+				"language": "English",
+				"abstractNote": "The stratospheric influence on the tropospheric seasonal cycles of N2O, CFC-11 (CCl3F), CFC-12 (CCl2F2) and CFC-113 (CCl2FCClF2) is investigated using observations from the AGAGE global trace gas monitoring network and the results of the Whole Atmosphere Community Climate Model (WACCM). WACCM provides the basis for a number of predictions about the relative amplitudes of N2O and CFC seasonal cycles and about the relative magnitude and phasing of seasonal cycles in the northern and southern hemispheres. These predictions are generally consistent with observations, suggesting that the stratosphere exerts a coherent influence on the tropospheric seasonal cycles of trace gases whose primary sinks are in the stratosphere. This stratospheric influence may complicate efforts to validate estimated source distributions of N2O, an important greenhouse gas, in atmospheric transport model studies.",
+				"DOI": "10.1029/2004GL020398",
+				"url": "http://www.agu.org/pubs/crossref/2004/2004GL020398.shtml",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.agu.org"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
