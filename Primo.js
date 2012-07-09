@@ -9,12 +9,12 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-06-28 22:41:46"
+	"lastUpdated": "2012-07-07 10:04:11"
 }
 
 /*
 Supports Primo 2:
-Université de Nice, France (http://catalogue.unice.fr/)
+Université de Nice, France (http://catalogue.unice.fr/)  (looks like this is Primo3 now, too)
 Supports Primo 3
 Boston College (http://www.bc.edu/supersleuth),
 Oxford Libraries (http://solo.ouls.ox.ac.uk/)
@@ -23,7 +23,7 @@ Oxford Libraries (http://solo.ouls.ox.ac.uk/)
 function detectWeb(doc, url) {
 		if (doc.evaluate('//span[contains(@class, "results_corner EXLResultsTitleCorner")]|//div[contains(@class, "EXLContent EXLBriefDisplay")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext() ) { 
 			//make sure there is a way to get to individual items:
-			if (doc.evaluate('//h2[contains(@class, "EXLResultTitle")]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) { 
+			if (doc.evaluate('//h2[contains(@class, "EXLResultTitle")]/a/@href|//div[contains(@class, "EXLTabsRibbon")]//li[contains(@class,"EXLDetailsTab")]/a/@href', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) { 
 				return 'multiple';
 			}
 		}
@@ -44,17 +44,23 @@ function doWeb(doc, url) {
 			var items = new Object();
 			var linkIterator = "";
 			var titleIterator = "";
-			if (doc.evaluate('//h2[contains(@class, "EXLResultTitle")]/a/@href', doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null).snapshotLength == 0)
+			if (doc.evaluate('//h2[contains(@class, "EXLResultTitle")]/a/@href', doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null).snapshotLength == 0 && ZU.xpath(doc, '//div[contains(@class, "title")]/a/@href').length>0)
 			{
 				// Primo v2
+				Z.debug("primo2")
 				linkIterator = ZU.xpath(doc, '//div[contains(@class, "title")]/a/@href');
 				titleIterator = ZU.xpath(doc, '//div[contains(@class, "title")]/a/span');
 			}
-			else
+			else if (ZU.xpath(doc, '//h2[contains(@class, "EXLResultTitle")]/a|//div[contains(@class, "EXLTabsRibbon")]//li[contains(@class,"EXLDetailsTab")]/a').length>0)
 			{
 				// Primo v3
-				linkIterator = ZU.xpath(doc, '//h2[contains(@class, "EXLResultTitle")]/a/@href');
-				titleIterator = ZU.xpath(doc, '//h2[contains(@class, "EXLResultTitle")]/a');
+			 	Z.debug("primo3")
+				linkIterator = ZU.xpath(doc, '//h2[contains(@class, "EXLResultTitle")]/a[contains(@href, "display.do")]/@href');
+				titleIterator = ZU.xpath(doc, '//h2[contains(@class, "EXLResultTitle")]');
+			    //if none or not all of the titles have valid links, we move to the details tab.
+			 	if (titleIterator.length > linkIterator.length){
+			    	linkIterator = ZU.xpath(doc, '//div[contains(@class, "EXLTabsRibbon")]//li[contains(@class,"EXLDetailsTab")]/a/@href'); 
+			    }
 			}
 
 			// try/catch for the case when there are no search results, let doc.evealuate fail quietly
@@ -68,7 +74,7 @@ function doWeb(doc, url) {
 					var title = Zotero.Utilities.trimInternal(title.textContent);
 					items[xmlLink] = title;
 				}
-				
+
 				Zotero.selectItems(items, function (items) {
 					if (!items) {
 						return true;
@@ -76,7 +82,7 @@ function doWeb(doc, url) {
 					for (var i in items) {
 						links.push(i);
 					}
-					//Z.debug(links)
+					Z.debug(links)
 					ZU.doGet(links, scrape, function () {
 						Zotero.done();
 					});
@@ -98,6 +104,13 @@ function doWeb(doc, url) {
 	//Zotero.Utilities.HTTP.doGet(links, function(text) {
 	
 	function scrape(text){
+	/* 
+	some articles don't return data. I'm still trying to figure this out
+	but in the meantime, might make sense to include something like:
+	e.g. http://agama.bc.edu:1701/primo_library/libweb/action/display.do?tabs=detailsTab&ct=display&fn=search&doc=TN_jstor10.2307%2f20587179&indx=2&recIds=TN_jstor10.2307%2f20587179&recIdxs=1&elementId=1&renderMode=poppedOut&displayMode=full&frbrVersion=2&dscnt=1&vl%281UI0%29=contains&vl%28135627558UI0%29=any&scp.scps=scope%3A%28BCL%29%2Cprimo_central_multiple_fe&frbg=&tab=bclib_tab&dstmp=1341676297278&vl%28135627556UI1%29=all_items&srt=rank&mode=Basic&dum=true&vl%28freeText0%29=witch&vid=CLEAN
+		if (text.length<10){
+			return "false"
+		}  */
 		Z.debug(text);
 		var parser = new DOMParser();
 		var doc = parser.parseFromString(text, "text/xml");
@@ -136,6 +149,10 @@ function doWeb(doc, url) {
 		if (!creators && contributors) { // <creator> not available using <contributor> as author instead
 			creators = contributors;
 			contributors = null;
+		}
+		
+		if (!creators && ! contributors){
+			creators = ZU.xpath(doc, '//addata/addau')
 		}
 		
 		for (i in creators) {

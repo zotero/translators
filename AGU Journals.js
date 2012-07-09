@@ -8,12 +8,12 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcs",
-	"lastUpdated": "2012-07-05 23:16:10"
+	"browserSupport": "gcsv",
+	"lastUpdated": "2012-07-05 21:00:25"
 }
 
 /*
-	Translator
+   AGU Translator
    Copyright (C) 2012 Sebastian Karcher and Ben Parr
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU Affero General Public License as published by
@@ -28,6 +28,7 @@
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
 function detectWeb(doc, url) {
 	var xpath = '//meta[@name="citation_journal_title"]';
 
@@ -105,27 +106,27 @@ function doWeb(doc, url) {
 				doWeb(myDoc, myDoc.location.href)
 			}, function () {});
 		} else {
-			// We call the Embedded Metadata translator to do the actual work
-			var year = ZU.xpathText(doc, '//meta[@name="citation_year"]/@content')
-			var translator = Zotero.loadTranslator("import");
-			translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
-			translator.setHandler("itemDone", function (obj, item) {
-				//for older translators AGU put NaN into the date fiel, but has the year
-				if (item.title == item.title.toUpperCase()) {
-					Z.debug("here")
-					item.title = ZU.capitalizeTitle(item.title.toLowerCase(), true);
-				}
-				if (item.date.indexOf("NaN") != -1 && year) {
-					item.date = year;
-				}
-				//the keywords are nonsense
-				item.tags = [];
-				item.complete();
-			});
-			translator.getTranslatorObject(function (obj) {
-				obj.doWeb(doc, url);
-			});
-		}
+		// We call the Embedded Metadata translator to do the actual work
+		var year = ZU.xpathText(doc, '//meta[@name="citation_year"]/@content')
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+		translator.setHandler("itemDone", function (obj, item) {
+			//for older translators AGU put NaN into the date fiel, but has the year
+			if (item.title == item.title.toUpperCase()) {
+				Z.debug("here")
+				item.title = ZU.capitalizeTitle(item.title.toLowerCase(), true);
+			}
+			if (item.date.indexOf("NaN") != -1  && year) {
+				item.date = year;
+			}
+			//the keywords are nonsense
+			item.tags = [];
+			item.complete();
+		});
+		translator.getTranslatorObject(function (obj) {
+			obj.doWeb(doc, url);
+		});
+	}
 	}
 }/** BEGIN TEST CASES **/
 var testCases = [
