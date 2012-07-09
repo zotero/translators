@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gbv",
-	"lastUpdated": "2012-07-08 16:55:11"
+	"lastUpdated": "2012-07-08 18:53:12"
 }
 
 function detectWeb(doc, url) {
@@ -27,13 +27,13 @@ function detectWeb(doc, url) {
 
 	if (mediaType == "The Item") {
 		return "artwork";
-	} else if (mediaType.match("Spotlight")) {
+	} else if (mediaType.indexOf("Spotlight") != -1) {
 		return "book";
-	} else if (mediaType.match("book")) {
+	} else if (mediaType.indexOf("book") != -1) {
 		return "book";
-	} else if (mediaType.match("movie")) {
+	} else if (mediaType.indexOf("movie") != -1) {
 		return "film";
-	} else if (mediaType.match("audio")) {
+	} else if (mediaType.indexOf("audio") != -1) {
 		return "audioRecording";
 	} else if (doc.location.href.match("search") && mediaType == "1") {
 		return "multiple";
@@ -48,6 +48,11 @@ var typemap = {
 	"software": "computerProgram"
 }
 
+function test(data){
+	var clean = data ? data[0] : undefined;
+	return clean;
+}
+
 function scrape(apiurl) {
 		ZU.doGet(apiurl, function (text) {
 			Z.debug(text)
@@ -57,7 +62,7 @@ function scrape(apiurl) {
 				Zotero.debug("JSON parse error");
 				throw e;
 			}
-			var type = obj.mediatype;
+			var type = obj.mediatype[0];
 			var itemType = typemap[type];
 
 			if (itemType) var newItem = new Zotero.Item(itemType);
@@ -68,7 +73,7 @@ function scrape(apiurl) {
 			if (creators && creators[0].match(/;/)) {
 				creators = creators[0].split(/\s*;\s*/);
 			}
-			for (i in creators) {
+			for (var i in creators) {
 				//authors are lastname, firsname, additional info - only use the first two.
 				var author = creators[i].replace(/(\,[^\,]+)(\,.+)/, "$1");
 				newItem.creators[i] = ZU.cleanAuthor(author, "author", true);
@@ -86,30 +91,23 @@ function scrape(apiurl) {
 				}
 			}
 			//abstracts can be in multiple fields;
-			var abstracts = obj.description;
-			var abstract = "";
-			for (i in abstracts) {
-				abstract += abstracts[i] + "; ";
-			}
-			newItem.abstractNote = abstract;
+			if(obj.description) newItem.abstractNote = obj.description.join("; ");
 
 			var date = obj.date;
 			if (!date) date = obj.year;
-			var tags = obj.subject;
-			if (tags) {
-				tags = tags[0].split(/\s*;\s*/);
-				for (i in tags) {
-					newItem.tags.push(tags[i]);
-				}
+			var tags = test(obj.subject);
+			if (tags) tags = tags.split(/\s*;\s*/);
+			for (i in tags) {
+				newItem.tags.push(tags[i]);
 			}
-			newItem.date = date;
-			newItem.publisher = obj.publisher;
-			newItem.language = obj.language;
-			newItem.callNumber = obj.call_number;
-			newItem.numPages = obj.imagecount;
-			newItem.runningTime = obj.runtime;
-			newItem.rights = obj.licenseurl;
-			newItem.url = "http://archive.org/details/" + obj.identifier;
+			newItem.date = test(date);
+			newItem.publisher = test(obj.publisher);
+			newItem.language = test(obj.language);
+			newItem.callNumber = test(obj.call_number);
+			newItem.numPages = test(obj.imagecount);
+			newItem.runningTime = test(obj.runtime);
+			newItem.rights = test(obj.licenseurl);
+			newItem.url = "http://archive.org/details/" + test(obj.identifier);
 
 			newItem.complete();
 		});
@@ -119,10 +117,6 @@ function scrape(apiurl) {
 
 		var items = {};
 		var articles = new Array();
-		var itemCount = 0;
-
-		// iterate through links under item/bucket name to check for zoterocommons (the collection name)
-		var links = doc.evaluate('//div/p/span/a', doc, null, XPathResult.ANY_TYPE, null);
 
 		if (detectWeb(doc, url) == "multiple") {
 			Zotero.debug("multiple");
@@ -176,7 +170,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"title": "The gull's hornbook : Stultorum plena sunt omnia. Al savio mezza parola basta",
-				"abstractNote": "Notes by John Nott; Bibliography of Dekker: p. iii-ix;",
+				"abstractNote": "Notes by John Nott; Bibliography of Dekker: p. iii-ix",
 				"date": "1812",
 				"publisher": "Bristol, Reprinted for J.M. Gutch and Sold in London by R. Baldwin, and R. Triphook",
 				"language": "eng",
@@ -227,7 +221,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"title": "Allen Ginsberg, Anne Waldman, Steven Taylor and Bobbi Louise Hawkins performance, July, 1989.",
-				"abstractNote": "Second half of a reading with Allen Ginsberg, Bobbie Louise Hawkins, Anne Waldman, and Steven Taylor.  This portion of the reading features Waldman and Ginsberg. (Continued from 89P045);",
+				"abstractNote": "Second half of a reading with Allen Ginsberg, Bobbie Louise Hawkins, Anne Waldman, and Steven Taylor.  This portion of the reading features Waldman and Ginsberg. (Continued from 89P045)",
 				"date": "1989-07-08 00:00:00",
 				"publisher": "Jack Kerouac School of Disembodied Poetics",
 				"runningTime": "1:30:05",
@@ -259,7 +253,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"title": "About Bananas",
-				"abstractNote": "Complete presentation of the banana industry from the clearing of the jungle and the planting to the shipment of the fruit to the American markets.;",
+				"abstractNote": "Complete presentation of the banana industry from the clearing of the jungle and the planting to the shipment of the fruit to the American markets.",
 				"date": "1935",
 				"runningTime": "11:03",
 				"rights": "http://creativecommons.org/licenses/publicdomain/",
