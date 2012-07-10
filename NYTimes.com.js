@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-04-27 13:47:01"
+	"lastUpdated": "2012-07-10 00:23:21"
 }
 
 function detectWeb(doc, url) {
@@ -162,11 +162,11 @@ function scrape(doc, url) {
 	if (!m && ZU.xpathText(doc, pdfxpath) != null) {
 		var pdflink = ZU.xpathText(doc, pdfxpath)
 		Zotero.Utilities.doGet(pdflink, function (text) {
-			var realpdf = text.match(/http\:\/\/article\.archive\.nytimes.+\"/)[0].replace(/\"/, "");
+			var realpdf = text.match(/http\:\/\/article\.archive\.nytimes.+\"/);
 			Z.debug("pdflink: " + realpdf)
 			if (realpdf) {
 				newItem.attachments.push({
-					url: realpdf,
+					url: realpdf[0].replace(/\"/, ""),
 					title: "NY Times Archive PDF",
 					mimeType: "application/pdf"
 				});

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-10 11:09:24"
+	"lastUpdated": "2012-07-10 00:36:42"
 }
 
 /*
@@ -258,19 +258,19 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://articles.boston.com/2012-06-06/news/32082155_1_bargaining-for-public-employees-collective-bargaining-exit-polls",
+		"url": "http://www.boston.com/news/nation/washington/articles/2011/05/08/bin_laden_occupied_shrunken_dark_world/",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
 				"creators": [
 					{
-						"firstName": "Jennifer",
-						"lastName": "Agiesta",
+						"firstName": "Elisabeth",
+						"lastName": "Bumiller",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Thomas",
-						"lastName": "Beaumont",
+						"firstName": "Carlotta",
+						"lastName": "Gall",
 						"creatorType": "author"
 					}
 				],
@@ -285,10 +285,12 @@ var testCases = [
 					}
 				],
 				"publicationTitle": "Boston.com",
-				"url": "http://articles.boston.com/2012-06-06/news/32082155_1_bargaining-for-public-employees-collective-bargaining-exit-polls",
-				"title": "Wisconsin voters divided on bargaining, governor",
+				"url": "http://www.boston.com/news/nation/washington/articles/2011/05/08/bin_laden_occupied_shrunken_dark_world/",
+				"title": "A peek inside bin Laden’s world: isolation, vanity, power",
+				"date": "May 8, 2011",
 				"libraryCatalog": "The Boston Globe",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "A peek inside bin Laden’s world"
 			}
 		]
 	}

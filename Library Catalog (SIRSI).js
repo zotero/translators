@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-06-30 14:44:22"
+	"lastUpdated": "2012-07-10 00:12:28"
 }
 
 function detectWeb(doc, url) {
@@ -361,3 +361,110 @@ function doWeb(doc, url){
 	}
 }
 
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.cible.ulb.ac.be/uhtbin/cgisirsi/x/S.HUMAINES/0/5?searchdata1=915050{ckey}",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Susan",
+						"lastName": "Sellers",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Bloomsbury / Andrew McNeillie ",
+					" Virginia Woolf's early novels : finding a voice / Suzanne Raitt ",
+					" From Mrs. Dalloway to The waves : new elegy and lyric experimentalism / Jane Goldman ",
+					" The novels of the 1930s and the impact of history / Julia Briggs ",
+					" Virginia Woolf's essays / Hermione Lee ",
+					" Virginia Woolf, modernism and modernity / Michael H. Whitworth ",
+					" The socio-political vision of the novels / David Bradshaw ",
+					" Woolf's feminism and feminism's Woolf / Laura Marcus ",
+					" Virginia Woolf and sexuality / Patricia Morgne Cramer ",
+					" Virginia Woolf, empire and race / Helen Carr ",
+					" Virginia Woolf and visual culture / Maggie Humm ",
+					" Virginia Woolf and the public sphere / Melba Cuddy-Keane"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"extra": "Personne sujet: Woolf, Virginia, 1882-1941--Criticism and interpretation",
+				"title": "The Cambridge companion to Virginia Woolf",
+				"edition": "2nd ed",
+				"place": "Cambridge, UK ; New York",
+				"date": "2010",
+				"publisher": "Cambridge University Press",
+				"physicaldescription": "xxi, 272 p. ; 24 cm",
+				"seriestitle": "Cambridge companions to literature",
+				"generalnote": "Index",
+				"ISBN": "0521896940",
+				"libraryCatalog": "www.cible.ulb.ac.be Library Catalog"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://main.library.utoronto.ca/webcat/goto_catalogue_url.cfm?where=ckey&what=7990078",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Harry E.",
+						"lastName": "Vanden",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Gary",
+						"lastName": "Prevost",
+						"creatorType": "contributor"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"1. An introduction to twenty-first century Latin America ",
+					" 2. Early history ",
+					" 3. Democracy and dictators: a historical overview from independence to the present day ",
+					" 4. The other Americans ",
+					" 5. Society, family, and gender ",
+					" 6. Religion in Latin America ",
+					" 7. The political economy of Latin America ",
+					" 8. Democracy and authoritarianism: Latin American political culture ",
+					" 9. Politics, power, institutions, and actors ",
+					" 10. Struggling for change: revolution, social and political movements in Latin America ",
+					" 11. U.S.-Latin American relations ",
+					" 12. Guatemala / Susanne Jonas ",
+					" 13. Mexico / Nora Hamilton ",
+					" 14. Cuba / Gary Prevost ",
+					" 15. Brazil / Wilber Albert Chaffee ",
+					" 16. Argentina / Aldo C. Vacs ",
+					" 17. Chile / Eduardo Silva ",
+					" 18. Venezuela / Daniel Hellinger ",
+					" 19. Colombia / John C. Dugas ",
+					" 20. Nicaragua / Gary Prevost and Harry E. Vanden ",
+					" 21. Bolivia / Waltraud Q. Morales ",
+					" Appendix 1: Presidential elections ",
+					" Appendix 2: Recent Legislative elections"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"extra": "Physical description: xxi, 633 p. : ill., maps ; 24 cm\nSubject, geographic: Latin America--Politics and government\nBibliography note: Includes bibliographical references and index\nkey: 7990078",
+				"title": "Politics of Latin America: the power game",
+				"edition": "4th ed",
+				"place": "New York",
+				"date": "2012",
+				"publisher": "Oxford University Press",
+				"ISBN": "0199797145",
+				"callNumber": "JL960 .V36 2012X",
+				"libraryCatalog": "toroprod.library.utoronto.ca Library Catalog",
+				"shortTitle": "Politics of Latin America"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

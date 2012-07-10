@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-04 00:32:09"
+	"lastUpdated": "2012-07-10 00:27:06"
 }
 
 function scrape(doc) {
@@ -28,7 +28,7 @@ function scrape(doc) {
 
 	var tags = ZU.xpathText(doc, '//meta[contains(@name, "slideshow_tag")]/@content');
 	if (tags) tags = tags.split(/\s*,\s*/);
-	for(var i=0, n=tags.length; i<n; i++) {
+	for(var i in tags) {
 		item.tags.push(tags[i].trim());
 	}
 
@@ -94,17 +94,7 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [
-					"zotero",
-					"code4lib",
-					"libraries",
-					"code4libcon2008",
-					"research",
-					"zotero and you",
-					"citations",
-					"semantic",
-					"citation management"
-				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
 				"title": "Zotero and You, or Bibliography on the Semantic Web",
