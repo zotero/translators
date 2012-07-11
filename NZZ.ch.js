@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-30 10:32:22"
+	"lastUpdated": "2012-07-11 09:03:16"
 }
 
 /*
@@ -78,7 +78,7 @@ function scrape(doc) {
 	//Zotero.debug("ibex scrape URL = " + doc.location.href);
 	var newItem = new Zotero.Item('newspaperArticle');
 	newItem.url = doc.location.href;
-	newItem.title = Zotero.Utilities.trimInternal(getXPath('//hgroup/h3', doc).textContent);
+	newItem.title = Zotero.Utilities.trimInternal(getXPath('//hgroup/h1', doc).textContent);
 	var date = ZU.xpathText(doc, '//hgroup/time/@datetime');
 	if (date) newItem.date = date.replace(/\d\d\:\d\d:\d\d/, "").trim();
 	newItem.publicationTitle = "Neue Zürcher Zeitung";
@@ -91,13 +91,13 @@ function scrape(doc) {
 		newItem.title = Zotero.Utilities.trimInternal(titleprefix.textContent) + ": " + newItem.title;
 	}
 
-	var subtitle = getXPath('//hgroup/h4', doc);
+	var subtitle = getXPath('//hgroup/h2', doc);
 	if ((subtitle != null) && (Zotero.Utilities.trimInternal(subtitle.textContent) != "")) {
 		newItem.shortTitle = newItem.title;
 		newItem.title += ": " + Zotero.Utilities.trimInternal(subtitle.textContent);
 	}
 
-	var teaser = getXPath('//article/p[@class = "lead"]', doc);
+	var teaser = getXPath('//article/h5', doc);
 	if ((teaser != null) && (Zotero.Utilities.trimInternal(teaser.textContent) != "")) {
 		newItem.abstractNote = Zotero.Utilities.trimInternal(teaser.textContent);
 	}
@@ -182,7 +182,13 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"creators": [],
+				"creators": [
+					{
+						"firstName": "Matthias",
+						"lastName": "Knecht",
+						"creatorType": "author"
+					}
+				],
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
