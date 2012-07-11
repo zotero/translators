@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-03-08 07:30:28"
+	"lastUpdated": "2012-07-11 13:49:31"
 }
 
 function detectWeb(doc, url) {
@@ -81,11 +81,11 @@ function downloadFunction(text, url) {
 
 			// Strip final period from title if present
 			item.title = item.title.replace(/\.$/,'');
-
 			// Get the accession number from URL or elsewhere
 			if (an) {
 				an = an[1];
 				item.callNumber = an;
+					
 			} else {
 				an = item.url.match(/AN=([0-9]+)/);
 				if (an) an = an[1];
@@ -116,10 +116,16 @@ function downloadFunction(text, url) {
 							snapshot: false});
 				item.url = "";
 			}
+	
 			// A lot of extra info is jammed into notes by the RIS translator
 			item.notes = [];
-			// Since order of requests might matter, let's grab the stable link, then the PDF
-			Zotero.Utilities.doGet(item.url, function (doc) { Zotero.Utilities.doGet(pdf, function (text) {
+		
+		//not all items have a permalink if they don't we use the temporary URL
+		if (item.url) var stablelink= item.url;
+		else stablelink = url;
+		
+		// Since order of requests might matter, let's grab the stable link, then the PDF
+		Zotero.Utilities.doGet(stablelink, function (doc) { Zotero.Utilities.doGet(pdf, function (text) {
 				var realpdf = text.match(/<embed id="pdfEmbed"[^>]*>/);
 				if(realpdf) {
 					realpdf = text.match(/<embed[^>]*src="([^"]+)"/);
@@ -133,7 +139,10 @@ function downloadFunction(text, url) {
 					}
 				}
 			}, function () { item.complete(); }); }, function () { return true; });
-		});
+		//	item.complete()
+		}); 
+		
+		
 		translator.translate();
 }
 
@@ -167,9 +176,10 @@ function doWeb(doc, url) {
 		/* load up urls, title text and records keys (DB, AN, tag) */
 		while (title = titles.iterateNext()) {
 			items[title.href] = title.textContent;
-
+//Z.debug(items[title.href])
 			folderInfo = folderData.iterateNext();
 			folderInfos[title.href] = folderInfo.textContent;
+			//Z.debug(folderInfos[title.href])
 		}
 
 		Zotero.selectItems(items, function (items) {
