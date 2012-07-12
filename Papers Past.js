@@ -2,14 +2,14 @@
 	"translatorID": "1b052690-16dd-431d-9828-9dc675eb55f6",
 	"label": "Papers Past",
 	"creator": "staplegun",
-	"target": "^http://paperspast\\.natlib\\.govt\\.nz",
+	"target": "^https?://(www\\.)paperspast\\.natlib\\.govt\\.nz",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-01-30 22:44:38"
+	"lastUpdated": "2012-07-12 08:41:41"
 }
 
 /*
@@ -35,20 +35,14 @@ function detectWeb(doc, url) {
   // a results parameter in URL means search hitlist
   if (url.match(/results=/) ) {
 	return "multiple";
-
   } else {
-
 	// init variables
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-	  if (prefix == "x" ) return namespace; else return null;
-	} : null;
 	var myXPath;
 	var myXPathObject;
 
 	// publication title in meta tags means have an article
 	myXPath          = '//meta[@name="newsarticle_publication"]/@content';
-	myXPathObject    = doc.evaluate(myXPath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+	myXPathObject    = doc.evaluate(myXPath, doc, null, XPathResult.ANY_TYPE, null);
 	var meta = myXPathObject.iterateNext().textContent;
 	if (meta.length > 0) {
 	  return "newspaperArticle";
@@ -58,47 +52,39 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 
-  // init variables
-  var namespace = doc.documentElement.namespaceURI;
-  var nsResolver = namespace ? function(prefix) {
-	if (prefix == "x" ) return namespace; else return null;
-  } : null;
-
   // hitlist page: compile hitlist titles, user selects which are wanted 
   // (add &zto=1 to URL for usage tracking)
   var articles = new Array();
   if (detectWeb(doc, url) == "multiple") {
 	var titlesXPath = '//div[@class="search-results"]/p/a';
-	var titles      = doc.evaluate(titlesXPath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var titles      = doc.evaluate(titlesXPath, doc, null, XPathResult.ANY_TYPE, null);
 	var nextTitle;
 	var items       = new Array();
 	while (nextTitle = titles.iterateNext()) {
 	  items[nextTitle.href+"&zto=1"] = nextTitle.textContent;
 	}
 	// presented to user - who reduces list to those selected
-	items = Zotero.selectItems(items);
-	// transfer this list to articles array
-	for (var i in items) {
-	  articles.push(i);
-	}
+	Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			Zotero.Utilities.processDocuments(articles, scrape, function () {
+			});
+		});
 
   // article page: just continue with single (current) page URL
   } else {
 	articles = [url+"&zto=1"];
+  	Zotero.Utilities.processDocuments(articles, scrape, function(){});
   }
-
-  // process each selected article page URL
-  Zotero.Utilities.processDocuments(articles, scrape, function(){Zotero.done();});
-  Zotero.wait();
 }
 
 function scrape(doc) {
 
   // init variables
-  var namespace = doc.documentElement.namespaceURI;
-  var nsResolver = namespace ? function(prefix) {
-	if (prefix == "x" ) return namespace; else return null;
-  } : null;
   var myXPath;
   var myXPathObject;
   
@@ -109,14 +95,14 @@ function scrape(doc) {
 
   // publication title
   myXPath       = '//meta[@name="newsarticle_publication"]/@content';
-  myXPathObject = doc.evaluate(myXPath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+  myXPathObject = doc.evaluate(myXPath, doc, null, XPathResult.ANY_TYPE, null);
   newItem.publicationTitle = myXPathObject.iterateNext().textContent;
   Zotero.debug(newItem.publicationTitle);
 
   // article title (convert to sentence case)
   // NB: THE CONVERSION SEEMS TO FAIL IF HAS SPECIAL CHARS
   myXPath          = '//meta[@name="newsarticle_headline"]/@content';
-  myXPathObject    = doc.evaluate(myXPath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+  myXPathObject    = doc.evaluate(myXPath, doc, null, XPathResult.ANY_TYPE, null);
   var title   = myXPathObject.iterateNext().textContent;
   var words = title.split(/\s/);
   var titleFixed = '';
@@ -129,16 +115,16 @@ function scrape(doc) {
 
   // publication date (is preformatted to ISO 8601)
   myXPath          = '//meta[@name="dc_date"]/@content';
-  myXPathObject    = doc.evaluate(myXPath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+  myXPathObject    = doc.evaluate(myXPath, doc, null, XPathResult.ANY_TYPE, null);
   newItem.date = myXPathObject.iterateNext().textContent;
 
   // pagination
   myXPath          = '//meta[@name="newsarticle_firstpage"]/@content';
-  myXPathObject    = doc.evaluate(myXPath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+  myXPathObject    = doc.evaluate(myXPath, doc, null, XPathResult.ANY_TYPE, null);
   var pages = myXPathObject.iterateNext().textContent;
 
   myXPath          = '//meta[@name="newsarticle_otherpages"]/@content';
-  myXPathObject    = doc.evaluate(myXPath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+  myXPathObject    = doc.evaluate(myXPath, doc, null, XPathResult.ANY_TYPE, null);
   pages = pages + ' ' + myXPathObject.iterateNext().textContent;
 
   newItem.pages = Zotero.Utilities.trim(pages);
@@ -153,7 +139,7 @@ function scrape(doc) {
 
   // find image scans and add as attachments
   myXPath       = '//img[@class="veridianimage"]/@src';
-  myXPathObject = doc.evaluate(myXPath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+  myXPathObject = doc.evaluate(myXPath, doc, null, XPathResult.ANY_TYPE, null);
   var imgSrc;
   var imgUrl;
   var imgNo = 0;
@@ -166,7 +152,6 @@ function scrape(doc) {
 	});
   }
   newItem.attachments = attachments;
-
   // finish
   newItem.complete();
 }
