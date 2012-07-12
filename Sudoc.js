@@ -87,8 +87,6 @@ function scrape(doc, url) {
 			newItem.repository = "SUDOC";	// do not save repository
 			if(Zotero.Utilities.parseContextObject(coins, newItem)) 
 			{
-				var permalink = "";
-
 				newItem.itemType = detectWeb(doc, url);
 
 				// 	We need to correct some informations where COinS is wrong
@@ -278,7 +276,11 @@ function scrape(doc, url) {
 						case "identifiant pérenne de la notice":
 						case 'persistent identifier of the record':
 						case 'persistent identifier des datensatzes':
-							newItem.url = value;
+              var permalink = value;
+              if (permalink)
+              {
+                newItem.attachments.push( { url: permalink, title: 'SUDOC Snapshot', mimeType: 'text/html' } );
+              }
 							break;
 
 						case 'worldcat':
@@ -290,7 +292,6 @@ function scrape(doc, url) {
 					}
 				}
 
-				newItem.attachments.push({document: doc, title: 'SUDOC Snapshot'});
 				newItem.complete();
 			}
 		}
@@ -347,7 +348,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=147745608",
+		"url": "http://www.sudoc.fr/147745608",
 		"items": [
 			{
 				"itemType": "book",
@@ -369,17 +370,17 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Worldcat Link",
+						"title": "SUDOC Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"title": "SUDOC Snapshot"
+						"title": "Worldcat Link",
+						"mimeType": "text/html"
 					}
 				],
 				"date": "2010",
 				"ISBN": "978-2-7472-1729-3",
 				"title": "Souffrance au travail dans les grandes entreprises",
-				"url": "http://www.sudoc.fr/147745608",
 				"language": "français",
 				"place": "Paris",
 				"publisher": "Eska",
@@ -410,13 +411,13 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "SUDOC Snapshot"
+						"title": "SUDOC Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"date": "2011",
 				"ISBN": "978-0-83898589-2",
 				"title": "Zotero : a guide for librarians, researchers and educators",
-				"url": "http://www.sudoc.fr/156726319",
 				"language": "anglais",
 				"place": "Chicago",
 				"publisher": "Association of College and Research Libraries",
@@ -461,16 +462,16 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Worldcat Link",
+						"title": "SUDOC Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"title": "SUDOC Snapshot"
-					}
+						"title": "Worldcat Link",
+						"mimeType": "text/html"
+					}					
 				],
 				"date": "2004",
 				"title": "Facteurs pronostiques des lymphomes diffus lymphocytiques",
-				"url": "http://www.sudoc.fr/093838956",
 				"university": "Université du droit et de la santé",
 				"language": "français",
 				"place": "[S.l.]",
@@ -509,14 +510,14 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "SUDOC Snapshot"
+						"title": "SUDOC Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"date": "2008",
 				"pages": "p. [515]-534",
 				"issue": "3",
 				"volume": "14",
-				"url": "http://www.sudoc.fr/127261664",
 				"title": "Mobile technology in the village : ICTs, culture, and social logistics in India",
 				"language": "anglais",
 				"place": "London",
@@ -571,17 +572,17 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Worldcat Link",
+						"title": "SUDOC Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"title": "SUDOC Snapshot"
+						"title": "Worldcat Link",
+						"mimeType": "text/html"
 					}
 				],
 				"date": "2006",
 				"ISBN": "0-8153-4223-3",
 				"title": "Exploring the living cell",
-				"url": "http://www.sudoc.fr/128661828",
 				"language": "anglais",
 				"place": "[Meudon] : CNRS Images [prod., éd.] ; New York",
 				"publisher": "Garland Science [distrib.]",
@@ -608,18 +609,18 @@ var testCases = [
 				],
 				"seeAlso": [],
 				"attachments": [
-					{
-						"title": "Worldcat Link",
+          {
+						"title": "SUDOC Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"title": "SUDOC Snapshot"
+						"title": "Worldcat Link",
+						"mimeType": "text/html"
 					}
 				],
 				"date": "2004",
 				"ISBN": "2-11-095674-7",
 				"title": "Wind and wave atlas of the Mediterranean sea",
-				"url": "http://www.sudoc.fr/098846663",
 				"language": "anglais",
 				"place": "[S.l.]",
 				"publisher": "Western European Union, Western European armaments organisation research cell",
@@ -662,17 +663,17 @@ var testCases = [
 				],
 				"seeAlso": [],
 				"attachments": [
-					{
-						"title": "Worldcat Link",
+          {
+						"title": "SUDOC Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"title": "SUDOC Snapshot"
+						"title": "Worldcat Link",
+						"mimeType": "text/html"
 					}
 				],
 				"date": "1986",
 				"title": "English music for mass and offices (II) and music for other ceremonies",
-				"url": "http://www.sudoc.fr/05625248X",
 				"language": "latin",
 				"place": "Monoco",
 				"publisher": "Éditions de l'oiseau-lyre",
