@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-09 01:13:19"
+	"lastUpdated": "2012-07-13 04:09:40"
 }
 
 function detectWeb(doc, url) {
@@ -225,96 +225,7 @@ function doWeb(doc, url) {
 			}, null);
 			Zotero.wait();
 		} //END if not scrape(doc)
-	} else { //executes Simon's SIRSI -2003 translator code
-		Zotero.debug("Running SIRSI -2003 code");
-		var uri = doc.location.href;
-		var recNumbers = new Array();
-		var xpath = '//form[@name="hitlist"]/table/tbody/tr';
-		var elmts = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
-		var elmt = elmts.iterateNext();
-		if (elmt) { // Search results page
-			var uriRegexp = /^http:\/\/[^\/]+/;
-			var m = uriRegexp.exec(uri);
-			var postAction = doc.forms.namedItem("hitlist").getAttribute("action");
-			var newUri = m[0] + postAction.substr(0, postAction.length - 1) + "40";
-			var titleRe = /<br>\s*(.*[^\s])\s*<br>/i;
-			var items = new Array();
-			do {
-				var checkbox = doc.evaluate('.//input[@type="checkbox"]', elmt, null, XPathResult.ANY_TYPE, null).iterateNext();
-				// Collect title
-				var title = doc.evaluate("./td[2]", elmt, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-				if (checkbox && title) {
-					items[checkbox.name] = Zotero.Utilities.trimInternal(title);
-				}
-			} while (elmt = elmts.iterateNext());
-			items = Zotero.selectItems(items);
-			if (!items) {
-				return true;
-			}
-			for (var i in items) {
-				recNumbers.push(i);
-			}
-		} else { // Normal page
-			// this regex will fail about 1/100,000,000 tries
-			var uriRegexp = /^((.*?)\/([0-9]+?))\//;
-			var m = uriRegexp.exec(uri);
-			var newUri = m[1] + "/40"
-			var elmts = doc.evaluate('/html/body/form', doc, null, XPathResult.ANY_TYPE, null);
-			while (elmt = elmts.iterateNext()) {
-				var initialText = doc.evaluate('.//text()[1]', elmt, null, XPathResult.ANY_TYPE, null).iterateNext();
-				if (initialText && initialText.nodeValue && Zotero.Utilities.superCleanString(initialText.nodeValue) == "Viewing record") {
-					recNumbers.push(doc.evaluate('./b[1]/text()[1]', elmt, null, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
-					break;
-				}
-			}
-		}
-		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
-		var marc = translator.getTranslatorObject();
-		Zotero.Utilities.loadDocument(newUri + '?marks=' + recNumbers.join(",") + '&shadow=NO&format=FLAT+ASCII&sort=TITLE&vopt_elst=ALL&library=ALL&display_rule=ASCENDING&duedate_code=l&holdcount_code=t&DOWNLOAD_x=22&DOWNLOAD_y=12&address=&form_type=', function (doc) {
-			var pre = doc.getElementsByTagName("pre");
-			var text = pre[0].textContent;
-			var documents = text.split("*** DOCUMENT BOUNDARY ***");
-			for (var j = 1; j < documents.length; j++) {
-				var uri = newUri + "?marks=" + recNumbers[j] + "&shadow=NO&format=FLAT+ASCII&sort=TITLE&vopt_elst=ALL&library=ALL&display_rule=ASCENDING&duedate_code=l&holdcount_code=t&DOWNLOAD_x=22&DOWNLOAD_y=12&address=&form_type=";
-				var lines = documents[j].split("\n");
-				var record = new marc.record();
-				var tag, content;
-				var ind = "";
-				for (var i = 0; i < lines.length; i++) {
-					var line = lines[i];
-					if (line[0] == "." && line.substr(4, 2) == ". ") {
-						if (tag) {
-							content = content.replace(/\|([a-z])/g, marc.subfieldDelimiter + "$1");
-							record.addField(tag, ind, content);
-						}
-					} else {
-						content += " " + line.substr(6);
-						continue;
-					}
-					tag = line.substr(1, 3);
-					if (tag[0] != "0" || tag[1] != "0") {
-						ind = line.substr(6, 2);
-						content = line.substr(8);
-					} else {
-						content = line.substr(7);
-						if (tag == "000") {
-							tag = undefined;
-							record.leader = "00000" + content;
-							Zotero.debug("the leader is: " + record.leader);
-						}
-					}
-				} //end FOR
-				var newItem = new Zotero.Item();
-				record.translate(newItem);
-
-				newItem.libraryCatalog = "IRIS";
-				newItem.complete();
-			} //end FOR
-			Zotero.done();
-		});
-		Zotero.wait();
-	} //END while
+	}
 } //END scrape function
 /** BEGIN TEST CASES **/
 var testCases = [
