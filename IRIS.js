@@ -163,69 +163,41 @@ function scrape(doc) {
 	return true;
 } //END try
 function doWeb(doc, url) {
+	if (!scrape(doc)) {
+		var checkboxes = new Array();
+		var urls = new Array();
+		var availableItems = new Array();
+		//pull items
+		var tableRows = doc.evaluate('//ul[@class="hit_list"]/li/ul[contains(@class, "hit_list_row")][//input[@value="Details"]]', doc, null, XPathResult.ANY_TYPE, null);
 
-	var sirsiNew = true; //toggle between SIRSI -2003 and SIRSI 2003+
-	var xpath = '/html/body/div[@class="columns_container"]/div[contains(@class, "left_column")]/div[@class="content_container"]/div[@class="content"]/form[@id="hitlist"]/ul[@class="hit_list"]/li/ul[starts-with(@class, "hit_list_row")]/li[@class="hit_list_item_info"]/dl';
-
-	if (doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		Zotero.debug("SIRSI doWeb: searchsum");
-		sirsiNew = true;
-	} else if (doc.evaluate('//form[@name="hitlist"]/table/tbody/tr', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		Zotero.debug("SIRSI doWeb: hitlist");
-		sirsiNew = false;
-	} else if (doc.evaluate('//tr[th[@class="viewmarctags"]][td[@class="viewmarctags"]]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		Zotero.debug("SIRSI doWeb: viewmarctags");
-		sirsiNew = true;
-	} else if (doc.evaluate('//input[@name="VOPTIONS"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		Zotero.debug("SIRSI doWeb: VOPTIONS");
-		sirsiNew = false;
-	} else {
-		var elmts = doc.evaluate('/html/body/form//text()', doc, null, XPathResult.ANY_TYPE, null);
-		//var elmts = doc.evaluate(' ', doc, null, XPathResult.ANY_TYPE, null);
-		while (elmt = elmts.iterateNext()) {
-			if (Zotero.Utilities.superCleanString(elmt.nodeValue) == "Viewing record") {
-				Zotero.debug("SIRSI doWeb: Viewing record");
-				sirsiNew = false;
+		// Go through table rows
+		while (tableRow = tableRows.iterateNext()) {
+			var input = doc.evaluate('.//input[@value="Details"]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext();
+			var text = doc.evaluate('.//strong', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			if (text) {
+				availableItems[input.name] = text;
 			}
-		} //END while elmts
-	} //END FUNCTION doWeb
-	if (sirsiNew) { //executes Simon's SIRSI 2003+ scraper code
-		if (!scrape(doc)) {
-			var checkboxes = new Array();
-			var urls = new Array();
-			var availableItems = new Array();
-			//pull items
-			var tableRows = doc.evaluate('//ul[@class="hit_list"]/li/ul[contains(@class, "hit_list_row")][//input[@value="Details"]]', doc, null, XPathResult.ANY_TYPE, null);
-
-			// Go through table rows
-			while (tableRow = tableRows.iterateNext()) {
-				var input = doc.evaluate('.//input[@value="Details"]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext();
-				var text = doc.evaluate('.//strong', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-				if (text) {
-					availableItems[input.name] = text;
-				}
-			} //END while
-			var items = Zotero.selectItems(availableItems);
-			if (!items) {
-				return true;
-			}
-			var hostRe = new RegExp("^http(?:s)?://[^/]+");
-			var m = hostRe.exec(doc.location.href);
-			Zotero.debug("href: " + doc.location.href);
-			var hitlist = doc.forms.namedItem("hitlist");
-			var baseUrl = m[0] + hitlist.getAttribute("action") + "?first_hit=" + hitlist.elements.namedItem("first_hit").value + "&last_hit=" + hitlist.elements.namedItem("last_hit").value;
-			var uris = new Array();
-			for (var i in items) {
-				uris.push(baseUrl + "&" + i + "=Details");
-			}
-			Zotero.Utilities.processDocuments(uris, function (doc) {
-				scrape(doc)
-			}, function () {
-				Zotero.done()
-			}, null);
-			Zotero.wait();
-		} //END if not scrape(doc)
-	}
+		} //END while
+		var items = Zotero.selectItems(availableItems);
+		if (!items) {
+			return true;
+		}
+		var hostRe = new RegExp("^http(?:s)?://[^/]+");
+		var m = hostRe.exec(doc.location.href);
+		Zotero.debug("href: " + doc.location.href);
+		var hitlist = doc.forms.namedItem("hitlist");
+		var baseUrl = m[0] + hitlist.getAttribute("action") + "?first_hit=" + hitlist.elements.namedItem("first_hit").value + "&last_hit=" + hitlist.elements.namedItem("last_hit").value;
+		var uris = new Array();
+		for (var i in items) {
+			uris.push(baseUrl + "&" + i + "=Details");
+		}
+		Zotero.Utilities.processDocuments(uris, function (doc) {
+			scrape(doc)
+		}, function () {
+			Zotero.done()
+		}, null);
+		Zotero.wait();
+	} //END if not scrape(doc)
 } //END scrape function
 /** BEGIN TEST CASES **/
 var testCases = [
