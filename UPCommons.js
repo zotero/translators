@@ -141,9 +141,7 @@ var testCases = [
 					"Àrees temàtiques de la UPC::Enginyeria civil::Geologia::Oceanografia",
 					"Àrees temàtiques de la UPC::Enginyeria electrònica i telecomunicacions::Instrumentació i mesura::Sensors i actuadors"
 				],
-				"seeAlso": [
-					"Open Access"
-				],
+				"seeAlso": [],
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -154,6 +152,7 @@ var testCases = [
 					}
 				],
 				"itemID": "http://upcommons.upc.edu/e-prints/handle/2117/14979",
+				"rights": "Open Access",
 				"DOI": "10.3390/s111211251",
 				"abstractNote": "Postprint (published version)",
 				"language": "en",

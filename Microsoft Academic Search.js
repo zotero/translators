@@ -192,7 +192,8 @@ var testCases = [
 					},
 					{
 						"title": false,
-						"mimeType": false
+						"mimeType": false,
+						"snapshot": false
 					}
 				],
 				"issue": "01",

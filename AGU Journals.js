@@ -287,27 +287,20 @@ var testCases = [
 					}
 				],
 				"itemID": "http://www.agu.org/pubs/crossref/2004/2004GL020398.shtml",
-				"title": "Stratospheric influences on the tropospheric seasonal cycles of nitrous oxide and chlorofluorocarbons",
-				"publicationTitle": "Geophysical Research Letters",
 				"rights": "© 2008 American Geophysical Union",
-				"volume": "31",
 				"issue": "20",
-				"number": "20",
-				"patentNumber": "20",
-				"pages": "L20103",
-				"publisher": "American Geophysical Union",
-				"institution": "American Geophysical Union",
-				"company": "American Geophysical Union",
-				"label": "American Geophysical Union",
-				"distributor": "American Geophysical Union",
-				"date": "21 October 2004",
 				"ISSN": "0094-8276",
 				"language": "English",
+				"journalAbbreviation": "Geophys. Res. Lett.",
 				"abstractNote": "The stratospheric influence on the tropospheric seasonal cycles of N2O, CFC-11 (CCl3F), CFC-12 (CCl2F2) and CFC-113 (CCl2FCClF2) is investigated using observations from the AGAGE global trace gas monitoring network and the results of the Whole Atmosphere Community Climate Model (WACCM). WACCM provides the basis for a number of predictions about the relative amplitudes of N2O and CFC seasonal cycles and about the relative magnitude and phasing of seasonal cycles in the northern and southern hemispheres. These predictions are generally consistent with observations, suggesting that the stratosphere exerts a coherent influence on the tropospheric seasonal cycles of trace gases whose primary sinks are in the stratosphere. This stratospheric influence may complicate efforts to validate estimated source distributions of N2O, an important greenhouse gas, in atmospheric transport model studies.",
 				"DOI": "10.1029/2004GL020398",
 				"url": "http://www.agu.org/pubs/crossref/2004/2004GL020398.shtml",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "www.agu.org"
+				"libraryCatalog": "www.agu.org",
+				"title": "Stratospheric influences on the tropospheric seasonal cycles of nitrous oxide and chlorofluorocarbons",
+				"publicationTitle": "Geophysical Research Letters",
+				"volume": "31",
+				"pages": "L20103",
+				"date": "21 October 2004"
 			}
 		]
 	}

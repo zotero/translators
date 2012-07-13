@@ -106,24 +106,22 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "www.foreignaffairs.com/print/58931",
+						"url": false,
 						"title": "Foreign Affairs Printable",
 						"type": "text/html"
 					},
 					{
-						"url": "http://www.foreignaffairs.com/articles/58931/kenneth-maxwell/a-history-of-argentina-in-the-twentieth-century",
 						"title": "Foreign Affairs Snapshot",
 						"type": "text/html"
 					}
 				],
 				"url": "http://www.foreignaffairs.com/articles/58931/kenneth-maxwell/a-history-of-argentina-in-the-twentieth-century",
-				"date": "2003-05-01",
 				"ISSN": "0015-7120",
 				"issue": "May/June 2003",
-				"publicationTitle": "Foreign Affairs",
-				"title": "A History of Argentina in the Twentieth Century",
 				"libraryCatalog": "Foreign Affairs",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"date": "2003-05-01",
+				"publicationTitle": "Foreign Affairs",
+				"title": "A History of Argentina in the Twentieth Century"
 			}
 		]
 	},
