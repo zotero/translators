@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-07-10 00:23:21"
+	"lastUpdated": "2012-07-12 23:21:02"
 }
 
 function detectWeb(doc, url) {
@@ -207,12 +207,6 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"defer": true,
-		"url": "http://query.nytimes.com/search/query?frow=0&n=10&srcht=a&query=marc+hauser&srchst=nyt&submit.x=18&submit.y=12&hdlquery=&bylquery=&daterange=period&mon1=01&day1=01&year1=2010&mon2=01&day2=18&year2=2011",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "http://query.nytimes.com/gst/abstract.html?res=F30D15FD3F5813738DDDAC0894DB405B828DF1D3",
 		"items": [
 			{
@@ -289,6 +283,12 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"defer": true,
+		"url": "http://query.nytimes.com/search/sitesearch/#/marc+hauser",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

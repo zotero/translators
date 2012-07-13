@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-06-03 17:31:43"
+	"lastUpdated": "2012-07-12 23:02:38"
 }
 
 // #################################
@@ -138,7 +138,13 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://mainichi.jp/english/english/newsselect/news/20120411p2a00m0na013000c.html",
+		"defer": true,
+		"url": "http://mainichi.jp/search/index.html?q=bank&imgsearch=off",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://mainichi.jp/english/english/newsselect/news/20120713p2g00m0dm036000c.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -152,21 +158,15 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"title": "About 1,400 households on waiting list for temporary housing in disaster-hit region",
+				"title": "Japan to push Tomioka silk mill as World Cultural Heritage candidate",
 				"publicationTitle": "Mainichi Daily News",
 				"edition": "online edition",
-				"url": "http://mainichi.jp/english/english/newsselect/news/20120411p2a00m0na013000c.html",
-				"date": "2012-04-11",
+				"url": "http://mainichi.jp/english/english/newsselect/news/20120713p2g00m0dm036000c.html",
+				"date": "2012-07-13",
 				"libraryCatalog": "Mainichi Daily News",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
-	},
-	{
-		"type": "web",
-		"defer": true,
-		"url": "http://mainichi.jp/search/index.html?q=bank&imgsearch=off",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
