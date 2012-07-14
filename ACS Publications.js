@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-14 10:33:31"
+	"lastUpdated": "2012-07-14 11:23:04"
 }
 
 function detectWeb(doc, url) {
@@ -61,7 +61,7 @@ function doWeb(doc, url){
 		}
 		Zotero.debug("DOI= "+doi);
 		dois.push(doi);
-     var setupSets= setup(dois, host);
+	 var setupSets= setup(dois, host);
 	scrape(setupSets)
 	}
 }
@@ -96,7 +96,9 @@ function processCallback(doi, host, downloadFileName) {
 		Zotero.Utilities.HTTP.doPost(baseurl, post,function(text){
 			// Fix the RIS doi mapping
 			text = text.replace("N1  - doi:","M3  - ");
-			//Zotero.debug("ris= "+ text);
+			//Fix the wrong mapping for journal abbreviations
+			text = text.replace("JO  -", "JA  -");
+			Zotero.debug("ris= "+ text);
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			translator.setString(text);
