@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-05-12 16:15:11"
+	"lastUpdated": "2012-07-14 12:46:55"
 }
 
 function detectImport() {
@@ -1886,7 +1886,8 @@ function writeField(field, value, isMacro) {
 		// I hope these are all the escape characters!
 		value = value.replace(/[|\<\>\~\^\\]/g, mapEscape).replace(/([\#\$\%\&\_])/g, "\\$1");
 		// Case of words with uppercase characters in non-initial positions is preserved with braces.
-		if(!isMacro&&field != "pages") value = value.replace(/([^\s]+[A-Z][^\s,]*)/g, "{$1}");
+		// treat hyphen as whitespace for this purpose so that Large-scale etc. don't get enclosed
+		if(!isMacro&&field != "pages") value = value.replace(/([^\s-]+[A-Z][^\s,]*)/g, "{$1}");
 	}
 	if (Zotero.getOption("exportCharset") != "UTF-8") {
 		value = value.replace(/[\u0080-\uFFFF]/g, mapAccent);
