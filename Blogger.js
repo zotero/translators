@@ -3,13 +3,13 @@
 	"label": "Blogger",
 	"creator": "Adam Crymble",
 	"target": "\\.blogspot\\.com",
-	"minVersion": "1.0.0b4.r5",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-01-30 22:52:25"
+	"lastUpdated": "2012-07-13 18:16:50"
 }
 
 function detectWeb(doc, url) {
@@ -28,28 +28,22 @@ function detectWeb(doc, url) {
 
 function scrape(doc, url) {
 
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;	
-	
 	var tagsContent = new Array();
 	
 	var newItem = new Zotero.Item("blogPost");
 	
 	//title
-		if (doc.evaluate('//h3[@class="post-title entry-title"]/a', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		if (doc.evaluate('//h3[@class="post-title entry-title"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		
-			newItem.title = doc.evaluate('//h3[@class="post-title entry-title"]/a', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			newItem.title = doc.evaluate('//h3[@class="post-title entry-title"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		} else {
 			newItem.title = doc.title;
 		}
 	
 	//author, if available
-		if (doc.evaluate('//span[@class="post-author vcard"]', doc,  nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-			var author = doc.evaluate('//span[@class="post-author vcard"]', doc,  nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/^\s*|\s*$/g, '');
+		if (doc.evaluate('//span[@class="post-author vcard"]', doc,  null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var author = doc.evaluate('//span[@class="post-author vcard"]/span[@class="fn"]', doc,  null, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/^\s*|\s*$/g, '');
 			var author = author.toLowerCase();
-			
 			if (author.match(/\sby\s/)) {
 				var shortenAuthor = author.indexOf(" by");
 				author = author.substr(shortenAuthor + 3).replace(/^\s*|\s$/g, '');
@@ -63,14 +57,14 @@ function scrape(doc, url) {
 		}
 	
 	//date, if available
-		if (doc.evaluate('//h2[@class="date-header"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-			newItem.date = doc.evaluate('//h2[@class="date-header"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		if (doc.evaluate('//h2[@class="date-header"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			newItem.date = doc.evaluate('//h2[@class="date-header"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 			
 		}
 		
 	//tags, if available
-		if (doc.evaluate('//span[@class="post-labels"]/a', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-			var tags = doc.evaluate('//span[@class="post-labels"]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		if (doc.evaluate('//span[@class="post-labels"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var tags = doc.evaluate('//span[@class="post-labels"]/a', doc, null, XPathResult.ANY_TYPE, null);
 			
 			var tags1;
 			while (tags1 = tags.iterateNext()) {
@@ -92,18 +86,13 @@ function scrape(doc, url) {
 
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
 	var articles = new Array();
 	
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 				
-		var titles = doc.evaluate('//h3[@class="post-title entry-title"]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var titles1 = doc.evaluate('//li[@class="archivedate expanded"]/ul[@class="posts"]/li/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//h3[@class="post-title entry-title"]/a', doc, null, XPathResult.ANY_TYPE, null);
+		var titles1 = doc.evaluate('//li[@class="archivedate expanded"]/ul[@class="posts"]/li/a', doc, null, XPathResult.ANY_TYPE, null);
 				
 		var next_title;
 		while (next_title = titles.iterateNext()) {
@@ -113,16 +102,18 @@ function doWeb(doc, url) {
 		while (next_title = titles1.iterateNext()) {
 			items[next_title.href] = next_title.textContent;
 		}
-		
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			Zotero.Utilities.processDocuments(articles, scrape, function () {});
+		});
 	} else {
-		articles = [url];
+		scrape(doc, url);
 	}
-	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-	Zotero.wait();
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -157,6 +148,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://observationalepidemiology.blogspot.com/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://argentina-politica.blogspot.com/2012/05/el-sentimiento-de-inseguridad-y-la_20.html",
 		"items": "multiple"
 	}
 ]
