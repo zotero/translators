@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-14 01:57:37"
+	"lastUpdated": "2012-07-14 00:49:46"
 }
 
 /*
@@ -169,20 +169,11 @@ function detectWeb(doc, url) {
 	init(doc, url, Zotero.done);
 }
 
-function init(doc, url, callback) {
+function init(doc, url, callback, forceLoadRDF) {
 	getPrefixes(doc);
 
-	// load RDF translator, so that we don't need to replicate import code
-	var translator = Zotero.loadTranslator("import");
-	translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f");
-	translator.setHandler("itemDone", function(obj, newItem) {
-		_haveItem = true;
-		completeItem(doc, newItem);
-	});
-
-	translator.getTranslatorObject(function(rdf) {
 	var metaTags = doc.getElementsByTagName("meta");
-		var hwType, hwTypeGuess;
+	var hwType, hwTypeGuess, statements = [];
 
 	for(var i=0, metaTag; metaTag = metaTags[i]; i++) {
 		// Two formats allowed:
@@ -207,7 +198,7 @@ function init(doc, url, callback) {
 				var prop = tag[delimIndex+1].toLowerCase()+tag.substr(delimIndex+2);
 				// This debug is for seeing what is being sent to RDF
 				//Zotero.debug(_prefixes[prefix]+prop +"=>"+value);
-				rdf.Zotero.RDF.addStatement(url, _prefixes[prefix] + prop, value, true);
+				statements.push([url, _prefixes[prefix]+prop, value]);
 			} else {
 			var shortTag = tag.slice(tag.lastIndexOf('citation_'));
 			switch(shortTag) {
@@ -234,21 +225,38 @@ function init(doc, url, callback) {
 			}
 		}
 	}
-
-		var nodes = rdf.getNodes(true);
-		rdf.defaultUnknownType = hwType || hwTypeGuess ||
-			//if we have RDF data, then default to webpage
-			(nodes.length ? "webpage":false);
-
-		_itemType = nodes.length ? rdf.detectType({},nodes[0],{}) : rdf.defaultUnknownType;
-		RDF = rdf;
-		callback(_itemType);
-	});
+	
+	if(statements.length || forceLoadRDF) {
+		// load RDF translator, so that we don't need to replicate import code
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f");
+		translator.setHandler("itemDone", function(obj, newItem) {
+			_haveItem = true;
+			completeItem(doc, newItem);
+		});
+		
+		translator.getTranslatorObject(function(rdf) {
+			for(var i=0; i<statements.length; i++) {
+				var statement = statements[i];			
+				rdf.Zotero.RDF.addStatement(statement[0], statement[1], statement[2], true);
+			}
+			var nodes = rdf.getNodes(true);
+			rdf.defaultUnknownType = hwType || hwTypeGuess ||
+				//if we have RDF data, then default to webpage
+				(nodes.length ? "webpage":false);
+	
+			_itemType = nodes.length ? rdf.detectType({},nodes[0],{}) : rdf.defaultUnknownType;
+			RDF = rdf;
+			callback(_itemType);
+		});
+	} else {
+		callback(hwType || hwTypeGuess);
+	}
 }
 
 function doWeb(doc, url) {
 	// populate _rdfPresent, _itemType, and _prefixes
-	if(!RDF) init(doc, url, function() { importRDF(doc, url) });
+	if(!RDF) init(doc, url, function() { importRDF(doc, url) }, true);
 	else importRDF(doc, url);
 }
 
