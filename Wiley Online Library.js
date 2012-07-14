@@ -2,14 +2,14 @@
 	"translatorID": "fe728bc9-595a-4f03-98fc-766f1d8d0936",
 	"label": "Wiley Online Library",
 	"creator": "Sean Takats, Michael Berkowitz, Avram Lyon and Aurimas Vinckevicius",
-	"target": "^https?://onlinelibrary\\.wiley\\.com[^\\/]*/(?:book|doi|advanced/search)",
+	"target": "^https?://onlinelibrary\\.wiley\\.com[^\\/]*/(?:book|doi|advanced/search|search-web/cochrane)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-05-31 16:32:07"
+	"lastUpdated": "2012-07-14 11:59:58"
 }
 
 /*
@@ -326,7 +326,8 @@ function scrape(doc, url, pdfUrl) {
 
 function detectWeb(doc, url) {	
 	if( url.indexOf('/issuetoc') != -1 ||
-		url.indexOf('/results') != -1 ) {
+		url.indexOf('/results') != -1 ||
+		url.indexOf('/mainSearch?') != -1) {
 		return 'multiple';
 	} else {
 		if( url.indexOf('/book/') != -1 ) {
@@ -343,6 +344,10 @@ function doWeb(doc, url) {
 	var type = detectWeb(doc, url);
 	if(type == "multiple") {
 		var articles = ZU.xpath(doc, '//li//div[@class="citation article" or starts-with(@class,"citation")]/a');
+		if (articles.length ==0){
+			Z.debug("Cochrane Library");
+			var articles =ZU.xpath(doc, '//div[@class="listingContent"]//td/strong/a[contains(@href, "/doi/")]');
+		}
 		var availableItems = new Object();
 		for(var i=0, n=articles.length; i<n; i++) {
 			availableItems[articles[i].href] = ZU.trimInternal(articles[i].textContent.trim());
@@ -514,38 +519,45 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"1897",
-					"Directors (Life and Works) - Ángel García Cardona and Antonio Cuesta13",
-					"Florián Rey (Antonio Martínez de Castillo)",
-					"Florián Rey's La aldea maldita (1930)",
-					"Fructuós Gelabert - made the first Spanish fiction film",
-					"Fructuós Gelabert's Amor que mata (1909)",
-					"Ricardo Baños",
-					"Ricardo Baños and Albert Marro's Don Pedro el Cruel (1911)",
-					"Riña en un café",
 					"silent cinema and its pioneers (1906–1930)",
-					"three films - part of “the preliminary industrial and expressive framework for Spain's budding cinema”",
+					"Ángel García Cardona's El ciego de aldea (1906)",
 					"Ángel García Cardona and Antonio Cuesta",
-					"Ángel García Cardona's El ciego de aldea (1906)"
+					"Ricardo Baños and Albert Marro's Don Pedro el Cruel (1911)",
+					"Fructuós Gelabert's Amor que mata (1909)",
+					"three films - part of “the preliminary industrial and expressive framework for Spain's budding cinema”",
+					"Directors (Life and Works) - Ángel García Cardona and Antonio Cuesta13",
+					"Ricardo Baños",
+					"Florián Rey's La aldea maldita (1930)",
+					"Florián Rey (Antonio Martínez de Castillo)",
+					"Fructuós Gelabert - made the first Spanish fiction film",
+					"Riña en un café",
+					"1897"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
+				"title": "Silent Cinema and its Pioneers (1906–1930)",
+				"publisher": "Wiley-Blackwell",
 				"ISBN": "9781444304794",
 				"url": "http://onlinelibrary.wiley.com/doi/10.1002/9781444304794.ch1/summary",
+				"DOI": "10.1002/9781444304794.ch1",
+				"pages": "1–20",
+				"publicationTitle": "100 Years of Spanish Cinema",
+				"date": "2009",
 				"abstractNote": "This chapter contains sections titled: * Historical and Political Overview of the Period * Context11 * Film Scenes: Close Readings * Directors (Life and Works) * Critical Commentary",
 				"bookTitle": "100 Years of Spanish Cinema",
 				"language": "en",
 				"rights": "Copyright © 2009 Tatjana Pavlović, Inmaculada Alvarez, Rosana Blanco-Cano, Anitra Grisales, Alejandra Osorio, and Alejandra Sánchez",
 				"libraryCatalog": "Wiley Online Library",
-				"title": "Silent Cinema and its Pioneers (1906–1930)",
-				"publisher": "Wiley-Blackwell",
-				"pages": "1–20",
-				"date": "2009"
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -921,6 +933,10 @@ var testCases = [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"ISBN": "9783527603015",
@@ -1033,6 +1049,11 @@ var testCases = [
 				"shortTitle": "Volume for Winners and Losers"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://onlinelibrary.wiley.com/search-web/cochrane/mainSearch?uuid=a64d3e12-92c6-413c-8064-3aa95d6f7f9c&searchKey=a64d3e12-92c6-413c-8064-3aa95d6f7f9c&clearHistory=&mode=startsearch&products=all&Query5=&Query4=&FromYear=&Query3=&Query2=&Query1=alcohol+health+promotion&ToYear=&zones5=tables&zones4=abstract&zones3=author&zones2=article-title&zones1=%28article-title%2Cabstract%2Ckeywords%29&opt4=AND&opt3=AND&opt2=AND&unitstatus=none&opt1=OR&",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
