@@ -6,98 +6,98 @@
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
 	"priority": 100,
-	"browserSupport": "gcsibv",
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2012-01-01 01:42:16"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2012-07-14 11:23:04"
 }
 
 function detectWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-
-	if(doc.evaluate('//input[@id="articleListHeader_selectAllToc"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+	if(doc.evaluate('//input[@id="articleListHeader_selectAllToc"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		Zotero.debug("multiple");
 		return "multiple";
-	} else if (doc.evaluate('//div[@id="articleHead"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+	} else if (doc.evaluate('//div[@id="articleHead"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "journalArticle";
 	}
 	return false;
 }
 
 function doWeb(doc, url){
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
 	var host = 'http://' + doc.location.host + "/";
-	Zotero.debug(host);
-	var m = url.match(/https?:\/\/[^\/]*\/doi\/(abs|full)\/([^\?]+)/);
+	var m = url.match(/https?:\/\/[^\/]*\/doi\/(abs|full)\/([^\?#]+)/);
 	var dois = new Array();
 	if(detectWeb(doc, url) == "multiple") { //search
 		var doi;
 		var title;
-		var availableItems = new Array();
+		var items = new Array();
 		var xpath = '//div[@class="articleBox" or @class="articleBox "]';
-		if (doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-			elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		if (doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			elmts = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 			var elmt = elmts.iterateNext();
 			do {
-				title = doc.evaluate('.//div[@class="titleAndAuthor"]/h2/a', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-				doi = doc.evaluate('.//div[@class="titleAndAuthor"]/h2/a/@href', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace("/doi/abs/","");
+				title = doc.evaluate('.//div[@class="titleAndAuthor"]/h2/a', elmt, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+				doi = doc.evaluate('.//div[@class="titleAndAuthor"]/h2/a/@href', elmt, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace("/doi/abs/","");
 				if (doi.indexOf("prevSearch") != -1){
 					doi = doi.substring(0,doi.indexOf("?"));
 				}
-				availableItems[doi] = title;
+				items[doi] = title;
 			} while (elmt = elmts.iterateNext())
 		}
-		var items = Zotero.selectItems(availableItems);
-		if(!items) {
-			return true;
-		}
-		for(var i in items) {
-			dois.push(i);
-		}
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				dois.push(i);
+			}
+			var setupSets = setup(dois, host);
+			scrape(setupSets, function () {	});
+		});		
 	} else if (m){ //single article
 		var doi = m[2];
-		Zotero.debug('DOI: ' + doi);
+		//Zotero.debug('DOI: ' + doi);
 		if (doi.match("prevSearch")) {
 			doi = doi.substring(0,doi.indexOf("?"));
 		}
 		Zotero.debug("DOI= "+doi);
 		dois.push(doi);
+	 var setupSets= setup(dois, host);
+	scrape(setupSets)
 	}
+}
 
-	var setupSets = [];
+function setup(dois, host){
+		var setupSets = [];
 	for each (doi in dois) {
 		var citUrl = host + 'action/showCitFormats?doi=' + doi;
 		Zotero.debug("citUrl= " + citUrl);
 		setupSets.push({ doi: doi, citUrl: citUrl });
 	}
+	return setupSets
+}
 
-	var setupCallback = function () {
-		//get citation export page's source code;
-		if (setupSets.length) {
-			var set = setupSets.shift();
-			Zotero.Utilities.HTTP.doGet(set.citUrl, function(text){
-				//get the exported RIS file name;
-				var downloadFileName = text.match(/name=\"downloadFileName\" value=\"([A-Za-z0-9_]+)\"/)[1];
-				Zotero.debug("downloadfilename= "+downloadFileName);
-				processCallback(set.doi,downloadFileName);
-			});
-		}
-		else {
-			Zotero.done();
-		}
+function scrape(setupSets){
+	//get citation export page's source code;
+	for (var i in setupSets){
+		var set = setupSets[i];
+		Zotero.Utilities.HTTP.doGet(set.citUrl, function(text){
+			//get the exported RIS file name;
+			var downloadFileName = text.match(/name=\"downloadFileName\" value=\"([A-Za-z0-9_]+)\"/)[1];
+			Zotero.debug("downloadfilename= "+downloadFileName);
+			var host = set.citUrl.replace(/action\/showCitFormats\?doi=.+/, "")
+			processCallback(set.doi, host, downloadFileName);
+		});
 	}
-	var processCallback = function (doi,downloadFileName) {
+}
+
+function processCallback(doi, host, downloadFileName) {
 		var baseurl = "http://pubs.acs.org/action/downloadCitation";
 		var post = "doi=" + doi + "&downloadFileName=" + downloadFileName + "&include=abs&format=refman&direct=on&submit=Download+article+citation+data";
 		Zotero.Utilities.HTTP.doPost(baseurl, post,function(text){
 			// Fix the RIS doi mapping
 			text = text.replace("N1  - doi:","M3  - ");
+			//Fix the wrong mapping for journal abbreviations
+			text = text.replace("JO  -", "JA  -");
 			Zotero.debug("ris= "+ text);
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -108,16 +108,12 @@ function doWeb(doc, url){
 				item.attachments.push(
 					{title:"ACS Full Text PDF",url:pdfUrl, mimeType:"application/pdf"},
 					{title:"ACS Full Text Snapshot",url:fullTextUrl, mimeType:"text/html"}
-				);
+				); 
 				item.complete();
 			});
 			translator.translate();
-			setupCallback();
 		});
 	}
-	setupCallback();
-	Zotero.wait();
-}
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -177,6 +173,11 @@ var testCases = [
 				"libraryCatalog": "ACS Publications"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://pubs.acs.org/toc/nalefd/12/6",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
