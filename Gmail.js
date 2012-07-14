@@ -3,13 +3,13 @@
 	"label": "Gmail",
 	"creator": "Michael Berkowitz",
 	"target": "https?://mail.google.com/",
-	"minVersion": "1.0.0b4.r5",
+	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-07-13 21:07:27"
+	"lastUpdated": "2012-07-13 21:14:37"
 }
 
 function detectWeb(doc, url) {
