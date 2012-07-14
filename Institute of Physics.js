@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-05-24 20:42:12"
+	"lastUpdated": "2012-07-14 11:04:35"
 }
 
 function detectWeb(doc, url) {
 	if (ZU.xpathText(doc, '//meta[contains(@name, "citation_")]/@content')) {
 		return "journalArticle";
-	} else {
+	} else if (!url.match(/\/pdf\//)){
 		return "multiple";
 	}
 }
@@ -106,7 +106,7 @@ function doWeb(doc, url) {
 		else if (ZU.xpathText(doc, '//div[@class="paperEntry"]')){
 			var results = ZU.xpath(doc, '//div[@class="paperEntry"]');
 			for (var i in results) {
-				var title = ZU.xpathText(results[i], './/a[@class="title"]');
+				var title = ZU.xpathText(results[i], './/a[contains(@class, "title")]');
 				var doi = ZU.xpathText(results[i], './/span[@class="doi"]/a[contains(text(), "doi:")]');
 				var pdf =  ZU.xpathText(results[i], './/a[@class="icon pdf"]/@href');
 				items[doi] = title.trim();
