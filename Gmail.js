@@ -1,14 +1,14 @@
 {
 	"translatorID": "58a778cc-25e2-4884-95b3-6b22d7571183",
 	"label": "Gmail",
-	"creator": "Michael Berkowitz",
+	"creator": "Aurimas Vinckevicius",
 	"target": "https?://mail.google.com/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
+	"browserSupport": "gcsb",
 	"lastUpdated": "2012-07-13 21:14:37"
 }
 
