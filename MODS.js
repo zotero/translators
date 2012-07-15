@@ -15,7 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gv",
-	"lastUpdated": "2012-07-14 21:48:54"
+	"lastUpdated": "2012-07-15 01:57:05"
 }
 
 var fromMarcGenre = {
@@ -1137,14 +1137,19 @@ function doImport() {
 		// attachments and url
 		var urlNodes = ZU.xpath(modsElement, 'm:location/m:url', xns);
 		for(var i=0; i<urlNodes.length; i++) {
-			var urlNode = urlNodes[0];
-			if(urlNode.getAttribute("access") === "raw object") {
+			var urlNode = urlNodes[0],
+				access = urlNode.getAttribute("access"),
+				usage = urlNode.getAttribute("usage");
+			if(access === "raw object") {
 				var attachment = {url:urlNode.textContent,
 						title:(urlNode.getAttribute("displayLabel") || "Attachment"),
 						downloadable:true};
 				if (attachment.url.substr(-4) === ".pdf") attachment.mimeType = "application/pdf";
 				newItem.attachments.push(attachment);
-			} else if(!newItem.url) {
+			}
+			
+			if((!newItem.url || usage === "primary" || usage === "primary display")
+					&& access !== "preview") {
 				newItem.url = urlNode.textContent;
 			}
 			
