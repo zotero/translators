@@ -15,7 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gv",
-	"lastUpdated": "2012-07-15 01:44:33"
+	"lastUpdated": "2012-07-14 21:48:54"
 }
 
 var fromMarcGenre = {
@@ -1475,7 +1475,6 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "",
 						"lastName": "Good, Thomas L.",
 						"fieldMode": 1,
 						"creatorType": "editor"
@@ -1614,7 +1613,6 @@ var testCases = [
 				"itemType": "document",
 				"creators": [
 					{
-						"firstName": null,
 						"lastName": "Center for Computer Assisted Research in the Humanities",
 						"fieldMode": 1,
 						"creatorType": "author"
@@ -1662,13 +1660,11 @@ var testCases = [
 				"itemType": "computerProgram",
 				"creators": [
 					{
-						"firstName": null,
 						"lastName": "Library of Congress: Music Division.",
 						"fieldMode": 1,
 						"creatorType": "author"
 					},
 					{
-						"firstName": null,
 						"lastName": "Library of Congress: National Digital Library Program.",
 						"fieldMode": 1,
 						"creatorType": "author"
@@ -1711,7 +1707,6 @@ var testCases = [
 				"itemType": "bookSection",
 				"creators": [
 					{
-						"firstName": null,
 						"lastName": "International Workshop on Plasma-Based Ion Implantation 1993 : University of Wisconsin--Madison)",
 						"fieldMode": 1,
 						"creatorType": "author"
@@ -1727,7 +1722,6 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": null,
 						"lastName": "Applied Science and Technology (ASTeX), Inc",
 						"fieldMode": 1,
 						"creatorType": "author"
@@ -1876,7 +1870,6 @@ var testCases = [
 				"itemType": "audioRecording",
 				"creators": [
 					{
-						"firstName": "",
 						"lastName": "Roustabouts (Musical group)",
 						"fieldMode": 1,
 						"creatorType": "author"
