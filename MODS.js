@@ -15,7 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gv",
-	"lastUpdated": "2012-07-04 19:45:50"
+	"lastUpdated": "2012-07-15 01:44:33"
 }
 
 var fromMarcGenre = {
@@ -746,10 +746,9 @@ function processItemType(contextElement) {
 }
 
 function processCreator(name, itemType, defaultCreatorType) {
-	// TODO: institutional authors
 	var creator = {};
 	var backupName = new Array();
-	creator.firstName = ZU.xpathText(name, 'm:namePart[@type="given"]', xns, " ");
+	creator.firstName = ZU.xpathText(name, 'm:namePart[@type="given"]', xns, " ") || undefined;
 	creator.lastName = ZU.xpathText(name, 'm:namePart[@type="family"]', xns, " ");
 	
 	if(!creator.lastName) {
@@ -955,7 +954,6 @@ function getFirstResult(contextNode, xpaths) {
 }
 
 function doImport() {
-	// parse with E4X
 	var xml = Zotero.getXML();
 	
 	var modsElements = ZU.xpath(xml, "/m:mods | /m:modsCollection/m:mods", xns);
