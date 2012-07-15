@@ -2,43 +2,32 @@
 	"translatorID": "930d49bc-44a1-4c22-9dde-aa6f72fb11e5",
 	"label": "Cornell LII",
 	"creator": "Bill McKinney",
-	"target": "^http://www\\.law\\.cornell\\.edu/supct/html/.+",
-	"minVersion": "1.0.0b4.r1",
+	"target": "^https?://www\\.law\\.cornell\\.edu/supct/.+",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gbv",
-	"lastUpdated": "2011-10-27 23:57:31"
+	"browserSupport": "gcbv",
+	"lastUpdated": "2012-07-15 00:21:55"
 }
 
 function detectWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
-	var liiRegexp = /http:\/\/www\.law\.cornell\.edu\/supct\/html\/.+/
+	var liiRegexp = /\/supct\/html\/.+/
 	if(liiRegexp.test(url)) {
 		return "case";
 	} else {
 		var aTags = doc.getElementsByTagName("a");
 		for(var i=0; i<aTags.length; i++) {
-			if(articleRegexp.test(aTags[i].href)) {
+			if(liiRegexp.test(aTags[i].href)) { 
 				return "multiple";
 			}
 		}
 	}
 }
 
-function associateMeta(newItem, metaTags, field, zoteroField) {
-	var field = metaTags.namedItem(field);
-	if(field) {
-		newItem[zoteroField] = field.getAttribute("content");
-	}
-}
 
-function scrape(doc) {
+function scrape(doc, url) {
 
 	var caselawCourt = "U.S. Supreme Court";
 	var caselawJurisdiction = "Federal";
@@ -56,46 +45,50 @@ function scrape(doc) {
 	newItem.court = "U.S. Supreme Court";
 	newItem.reporter = "U.S.";
 	
-	// LII provides a bunch of meta tags to harvest
-	var metaTags = doc.getElementsByTagName("meta");
-	associateMeta(newItem, metaTags, "CASENAME", "title");
-	associateMeta(newItem, metaTags, "CASENAME", "caseName");
+	/*
+	// LII provides a bunch of meta tags to harvest - left this here for future use
 	//associateMeta(newItem, metaTags, "DOCKET", "caselawDocket");
 	//associateMeta(newItem, metaTags, "PARTY1", "caselawParty1");
 	//associateMeta(newItem, metaTags, "PARTY2", "caselawParty2");
 	//associateMeta(newItem, metaTags, "ARGDATE", "caselawArguedDate");
 	//associateMeta(newItem, metaTags, "DECDATE", "dateDecided");
-	associateMeta(newItem, metaTags, "COURTBELOW", "history");
 	//associateMeta(newItem, metaTags, "ACTION", "caselawCourtAction");
-
-
+	*/
+	var casename;
+	if (casename = ZU.xpathText(doc, '//meta[@name="CASENAME"]/@content')){
+	newItem.title = casename;
+	newItem.caseName= casename;
 	var tmpCasename = newItem.caseName;
-	tmpCasename = Zotero.Utilities.capitalizeTitle(tmpCasename.toLowerCase());
+	tmpCasename = Zotero.Utilities.capitalizeTitle(tmpCasename.toLowerCase(), true);
 	tmpCasename = tmpCasename.replace("V.", "v.");
 	newItem.caseName = tmpCasename;
-	newItem.shortTitle = tmpCasename;
+	newItem.shortTitle = tmpCasename; 
+	}
 	
+	var history;
+	if (history = ZU.xpathText(doc, '//meta[@name="COURTBELOW"]/@content')){
+		newItem.history = history;
+	}
+
 	// judge
-	var j = metaTags.namedItem("AUTHOR");
+	var j = ZU.xpathText(doc, '//meta[contains(@name,"AUTHOR")]/@content');
 	if(j) {
 		// Some entries the AUTHOR meta tag content is empty, this makes zotero unhappy, adding a default
-		newItem.creators.push({lastName:j.getAttribute("content") ? j.getAttribute("content") : "Author Not Provided", creatorType:"judge", fieldMode:true});
+		newItem.creators.push({lastName:j ? j : "Author Not Provided", creatorType:"judge", fieldMode:true});
 	}
 
 	// group meta tags
-	for(var i=0; i<metaTags.length; i++) {
-		var key = metaTags[i].getAttribute("name");
-		var value = metaTags[i].getAttribute("content");
-		if (key == "GROUP") {
+	var tags = ZU.xpath(doc, '//meta[contains(@name,"GROUP")]/@content');
+	for(var i in tags) {
+		var value =tags[i].textContent;
 			newItem.tags.push(value);		
-		}
 	}
 	
 	// parse year out of decision date
-	var decdateField = metaTags.namedItem("DECDATE");
+	var decdateField =  ZU.xpathText(doc, '//meta[contains(@name,"DECDATE")]/@content');   
 	if(decdateField ) {
 		var decisionYearRegex = /(\w+)\s+(\d+),\s+(\d+)/
-		var decisionDateMatch = decisionYearRegex.exec(decdateField.getAttribute("content"));
+		var decisionDateMatch = decisionYearRegex.exec(decdateField);
 		var dy;
 		var dm;
 		var dd;
@@ -123,9 +116,7 @@ function scrape(doc) {
 		tmpDis = tmpDis.replace(/\s+/g, " ");
 		newItem.title = newItem.title + " (" +	tmpDis + ")";	
 		newItem.caseName= newItem.caseName + " (" +	tmpDis + ")";	
-		
 	}
-	
 	
 	// parse citation into parts so that bluebook can be constructed
 	var cite = doc.getElementsByTagName("CASENUMBER");
@@ -187,26 +178,26 @@ function scrape(doc) {
 }
 
 function doWeb(doc, url) {
-	var liiRegexp = /http:\/\/www\.law\.cornell\.edu\/supct\/html\/.+/
+	//sample search result URL:
+	//http://www.law.cornell.edu/supct/search/display.html?terms=citizens&url=/supct/html/94-1340.ZS.html
+	var liiRegexp = /\/supct\/html\/.+/
 	if(liiRegexp.test(url)) {
-		scrape(doc);
+		scrape(doc, url);
 	} else {
 		
 		var items = Zotero.Utilities.getItemArray(doc, doc, liiRegexp);
-		items = Zotero.selectItems(items);
-		
-		if(!items) {
-			return true;
-		}
-		
 		var urls = new Array();
-		for(var i in items) {
-			urls.push(i);
-		}
-		
-		Zotero.Utilities.processDocuments(urls, scrape, function() { Zotero.done(); });
-		Zotero.wait();
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				urls.push(i);
+			}
+			Zotero.Utilities.processDocuments(urls, scrape, function () {});
+		});
 	}
+		
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -224,14 +215,13 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "Bluebook citation: eldred v. ashcroft, 537 U.S. 186 (2003)."
+						"note": "Bluebook citation: Eldred v. Ashcroft, 537 U.S. 186 (2003)."
 					}
 				],
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.law.cornell.edu/supct/pdf/01-618P.ZD1",
 						"title": "PDF version",
 						"mimeType": "application/pdf",
 						"downloadable": true
@@ -242,9 +232,9 @@ var testCases = [
 				"court": "U.S. Supreme Court",
 				"reporter": "U.S.",
 				"title": "ELDRED V. ASHCROFT (Breyer, J., dissenting)",
-				"caseName": "eldred v. ashcroft (Breyer, J., dissenting)",
+				"caseName": "Eldred v. Ashcroft (Breyer, J., dissenting)",
+				"shortTitle": "Eldred v. Ashcroft",
 				"history": "ON WRIT OF CERTIORARI TO THE UNITED STATES COURT OF APPEALS FOR THE DISTRICT OF COLUMBIA CIRCUIT",
-				"shortTitle": "eldred v. ashcroft",
 				"dateDecided": "2003 January 15",
 				"reporterVolume": "537",
 				"firstPage": "186",
@@ -252,6 +242,11 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.law.cornell.edu/supct/search/index.html?query=animals&scope=onlysyllabi",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
