@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gv",
-	"lastUpdated": "2012-03-09 19:51:25"
+	"lastUpdated": "2012-07-15 22:12:22"
 }
 
 /*
@@ -29,110 +29,108 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-
-
 function detectWeb(doc, url) {
-  if (url.indexOf("/results.cfm") != -1) {
-	//Zotero.debug("Multiple items detected");
-	return "multiple";
-  } else if (url.indexOf("/citation.cfm") != -1) {
-	//Zotero.debug("Single item detected");
-	return getArticleType(doc, url);
+	if (url.indexOf("/results.cfm") != -1) {
+		//Zotero.debug("Multiple items detected");
+		return "multiple";
+	} else if (url.indexOf("/citation.cfm") != -1) {
+		//Zotero.debug("Single item detected");
+		return getArticleType(doc, url);
 
-  }
+	}
 }
 
 
 
 function doWeb(doc, url) {
-   var URIs = new Array();
-  var items = new Object();
-  if (detectWeb(doc, url) == "multiple") {
+	var URIs = new Array();
+	var items = new Object();
+	if (detectWeb(doc, url) == "multiple") {
 
-	var xpath = '//tr/td/a[@target="_self"]';
-	var articles = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
-	var next_art = articles.iterateNext();
-	while (next_art) {
-	  items[next_art.href] = next_art.textContent;
-	  next_art = articles.iterateNext();
+		var xpath = '//tr/td/a[@target="_self"]';
+		var articles = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
+		var next_art = articles.iterateNext();
+		while (next_art) {
+			items[next_art.href] = next_art.textContent;
+			next_art = articles.iterateNext();
+		}
+
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				i = i.replace(/\&preflayout\=(tabs|flat)/, "") + "&preflayout=flat"
+				//Z.debug(i)
+				URIs.push(i);
+			}
+			Zotero.Utilities.processDocuments(URIs, scrape, function () {
+				Zotero.done();
+			});
+
+			Zotero.wait();
+		});
+	} else {
+		var newURL;
+		newURL = url.replace(/\&preflayout\=(tabs|flat)/, "") + "&preflayout=flat"
+		//Z.debug(newURL);
+		scrape(doc, newURL);
 	}
-
-	Zotero.selectItems(items, function (items) {
-	  if (!items) {
-		return true;
-	  }
-	  for (var i in items) {
-		i = i.replace(/\&preflayout\=(tabs|flat)/, "") + "&preflayout=flat"
-		//Z.debug(i)
-		URIs.push(i);
-	  }
-	  Zotero.Utilities.processDocuments(URIs, scrape, function () {
-		Zotero.done();
-	  });
-
-	  Zotero.wait();
-	});
-  } else {
-  	var newURL;
-  	newURL = url.replace(/\&preflayout\=(tabs|flat)/, "") + "&preflayout=flat"
-  	//Z.debug(newURL);
-	scrape(doc, newURL);
-  }
 }
 //get abstract where possible - this fails frequently
 
 function scrape(doc) {
-  var xpath = '//div/div[@style="display:inline"]';
-  var abs = getText(xpath, doc);
+	var xpath = '//div/div[@style="display:inline"]';
+	var abs = getText(xpath, doc);
 
-  //get genric URL
-  var url = getText('//meta[@name="citation_abstract_html_url"]/@content', doc);
-  //Zotero.debug('generic URL: ' + url);
-  var matchtest = url.match(/[0-9]+\.[0-9]+/);
+	//get genric URL
+	var url = getText('//meta[@name="citation_abstract_html_url"]/@content', doc);
+	//Zotero.debug('generic URL: ' + url);
+	var matchtest = url.match(/[0-9]+\.[0-9]+/);
 
-  //get item ID and parent ID
-  //Some items have no parent ID - set the parent ID for them to empty
-  if (url.match(/[0-9]+\.[0-9]/) != null) {
-	var itemid = String(url.match(/\.[0-9]+/)).replace(/\./, '');
-	var parentid = String(url.match(/id\=[0-9]+/)).replace(/id\=/, "");
-  } else {
-	var itemid = String(url.match(/id\=[0-9]+/)).replace(/id\=/, "");
-	var parentid = "";
-  }
+	//get item ID and parent ID
+	//Some items have no parent ID - set the parent ID for them to empty
+	if (url.match(/[0-9]+\.[0-9]/) != null) {
+		var itemid = String(url.match(/\.[0-9]+/)).replace(/\./, '');
+		var parentid = String(url.match(/id\=[0-9]+/)).replace(/id\=/, "");
+	} else {
+		var itemid = String(url.match(/id\=[0-9]+/)).replace(/id\=/, "");
+		var parentid = "";
+	}
 
-  //compose bibtex URL
-  var bibtexstring = 'id=' + itemid + '&parent_id=' + parentid + '&expformat=bibtex';
-  var bibtexURL = url.replace(/citation\.cfm/, "exportformats.cfm").replace(/id\=.+/, bibtexstring);
-  Zotero.debug('bibtex URL: ' + bibtexURL);
-  Zotero.Utilities.HTTP.doGet(bibtexURL, function (text) {
-	var translator = Zotero.loadTranslator("import");
-	var haveImported = false;
-	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
-	translator.setString(text);
-	//Zotero.debug('bibtex data: ' + text);
-	translator.setHandler("itemDone", function (obj, item) {
-	  // Only return one item
-	  if(haveImported) return;
-	  //get the URL for the pdf fulltext from the metadata
-	  var pdfURL = getText('//meta[@name="citation_pdf_url"]/@content', doc);
-	  item.attachments = [{
-		url: pdfURL,
-		title: "ACM Full Text PDF",
-		mimeType: "application/pdf"
-	  }];
-	  //fix DOIs if they're in URL form
-	  if (item.DOI) item.DOI = item.DOI.replace(/^.*\/10\./, "10.");
-	  //The Abstract from above - may or may not work
-	  if (abs) item.abstractNote = abs;
-	  //Conference Locations shouldn't go int Loc in Archive (nor should anything else)
-	  item.archiveLocation = "";
-	  // some bibtext contains odd </kwd> tags - remove them
-	  if (item.tags) item.tags = String(item.tags).replace(/\<\/kwd\>/g, "").split(",");
-	  item.complete();
-	  haveImported = true;
-});
-translator.translate();
-  });
+	//compose bibtex URL
+	var bibtexstring = 'id=' + itemid + '&parent_id=' + parentid + '&expformat=bibtex';
+	var bibtexURL = url.replace(/citation\.cfm/, "exportformats.cfm").replace(/id\=.+/, bibtexstring);
+	Zotero.debug('bibtex URL: ' + bibtexURL);
+	Zotero.Utilities.HTTP.doGet(bibtexURL, function (text) {
+		var translator = Zotero.loadTranslator("import");
+		var haveImported = false;
+		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+		translator.setString(text);
+		//Zotero.debug('bibtex data: ' + text);
+		translator.setHandler("itemDone", function (obj, item) {
+			// Only return one item
+			if (haveImported) return;
+			//get the URL for the pdf fulltext from the metadata
+			var pdfURL = getText('//meta[@name="citation_pdf_url"]/@content', doc);
+			item.attachments = [{
+				url: pdfURL,
+				title: "ACM Full Text PDF",
+				mimeType: "application/pdf"
+			}];
+			//fix DOIs if they're in URL form
+			if (item.DOI) item.DOI = item.DOI.replace(/^.*\/10\./, "10.");
+			//The Abstract from above - may or may not work
+			if (abs) item.abstractNote = abs;
+			//Conference Locations shouldn't go int Loc in Archive (nor should anything else)
+			item.archiveLocation = "";
+			// some bibtext contains odd </kwd> tags - remove them
+			if (item.tags) item.tags = String(item.tags).replace(/\<\/kwd\>/g, "").split(",");
+			item.complete();
+			haveImported = true;
+		});
+		translator.translate();
+	});
 }
 
 //Simon's helper funcitons.
@@ -145,18 +143,18 @@ translator.translate();
  */
 
 function getArticleType(doc, url) {
-  //var toc = doc.evaluate(tocX, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-  if (url.indexOf("results.cfm") != -1) {
-	//Zotero.debug("Type: multiple");
-	return "multiple";
-  }
+	//var toc = doc.evaluate(tocX, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+	if (url.indexOf("results.cfm") != -1) {
+		//Zotero.debug("Type: multiple");
+		return "multiple";
+	}
 
-  var conference = getText('//meta[@name="citation_conference"]/@content', doc);
-  var journal = getText('//meta[@name="citation_journal_title"]/@content', doc);
-  //Zotero.debug(conference);
-  if (journal.indexOf(" ") != -1) return "journalArticle";
-  else if (conference.indexOf(" ") != -1) return "conferencePaper";
-  else return "book";
+	var conference = getText('//meta[@name="citation_conference"]/@content', doc);
+	var journal = getText('//meta[@name="citation_journal_title"]/@content', doc);
+	//Zotero.debug(conference);
+	if (journal.indexOf(" ") != -1) return "journalArticle";
+	else if (conference.indexOf(" ") != -1) return "conferencePaper";
+	else return "book";
 
 }
 
@@ -169,15 +167,15 @@ function getArticleType(doc, url) {
  */
 
 function getText(pathString, doc) {
-  var path = doc.evaluate(pathString, doc, null, XPathResult.ANY_TYPE, null);
-  var node = path.iterateNext();
+	var path = doc.evaluate(pathString, doc, null, XPathResult.ANY_TYPE, null);
+	var node = path.iterateNext();
 
-  if (node == null || node.textContent == undefined || node.textContent == null) {
-	//Zotero.debug("Unable to retrieve text for XPath: " + pathString);
-	return "";
-  }
+	if (node == null || node.textContent == undefined || node.textContent == null) {
+		//Zotero.debug("Unable to retrieve text for XPath: " + pathString);
+		return "";
+	}
 
-  return node.textContent;
+	return node.textContent;
 }
 
 /** BEGIN TEST CASES **/
