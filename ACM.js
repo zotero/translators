@@ -106,11 +106,13 @@ function scrape(doc) {
   Zotero.debug('bibtex URL: ' + bibtexURL);
   Zotero.Utilities.HTTP.doGet(bibtexURL, function (text) {
 	var translator = Zotero.loadTranslator("import");
-var incomplete = [];
+	var haveImported = false;
 	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 	translator.setString(text);
 	//Zotero.debug('bibtex data: ' + text);
 	translator.setHandler("itemDone", function (obj, item) {
+	  // Only return one item
+	  if(haveImported) return;
 	  //get the URL for the pdf fulltext from the metadata
 	  var pdfURL = getText('//meta[@name="citation_pdf_url"]/@content', doc);
 	  item.attachments = [{
@@ -126,11 +128,10 @@ var incomplete = [];
 	  item.archiveLocation = "";
 	  // some bibtext contains odd </kwd> tags - remove them
 	  if (item.tags) item.tags = String(item.tags).replace(/\<\/kwd\>/g, "").split(",");
-	incomplete.push(item);
+	  item.complete();
+	  haveImported = true;
 });
 translator.translate();
-// assuming the first item is the right one return just that.
-if (incomplete.length > 0) incomplete[0].complete();
   });
 }
 
