@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-07-13 21:14:37"
+	"lastUpdated": "2012-07-15 16:10:24"
 }
 
 function detectWeb(doc, url) {
@@ -49,6 +49,8 @@ function doWeb(doc, url) {
 		'//div[@class="maincontent"]/table[@class="message"][1]//tr[1]/td[2]');
 	if(item.date) item.date = ZU.trimInternal(item.date);
 
+	//clear the automatic Print popup
+	doc.body.attributes.removeNamedItem('onload');
 	item.attachments.push({
 		title:"Email Snapshot",
 		document: doc
