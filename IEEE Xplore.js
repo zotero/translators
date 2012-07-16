@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-08 16:55:56"
+	"lastUpdated": "2012-07-16 16:04:35"
 }
 
 function detectWeb(doc, url) {
@@ -163,6 +163,15 @@ function scrape (doc, url) {
 		translator.setString(text);
 		translator.setHandler("itemDone", function(obj, item) {
 			item.notes = [];
+			var res;
+			// Rearrange titles, per http://forums.zotero.org/discussion/8056
+			// If something has a comma or a period, and the text after comma ends with
+			//"of", "IEEE", or the like, then we switch the parts. Prefer periods.
+			if (res = (item.publicationTitle.indexOf(".") !== -1) ?
+				item.publicationTitle.trim().match(/^(.*)\.(.*(?:of|on|IEE|IEEE|IET|IRE))$/) :
+				item.publicationTitle.trim().match(/^(.*),(.*(?:of|on|IEE|IEEE|IET|IRE))$/))
+			item.publicationTitle = res[2]+" "+res[1];
+			item.proceedingsTitle = item.conferenceName = item.publicationTitle;
 			if (pdf) {
 				Zotero.Utilities.processDocuments([pdf], function (doc, url) {
 					var pdfFrame = doc.evaluate('//frame[2]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
@@ -364,7 +373,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"publicationTitle": "Fuzzy Systems, IEEE Transactions on",
+				"publicationTitle": "IEEE Transactions on Fuzzy Systems",
 				"title": "Fuzzy Turing Machines: Variants and Universality",
 				"date": "dec.  2008",
 				"volume": "16",
@@ -373,6 +382,8 @@ var testCases = [
 				"abstractNote": "In this paper, we study some variants of fuzzy Turing machines (FTMs) and universal FTM. First, we give several formulations of FTMs, including, in particular, deterministic FTMs (DFTMs) and nondeterministic FTMs (NFTMs). We then show that DFTMs and NFTMs are not equivalent as far as the power of recognizing fuzzy languages is concerned. This contrasts sharply with classical TMs. Second, we show that there is no universal FTM that can exactly simulate any FTM on it. But if the membership degrees of fuzzy sets are restricted to a fixed finite subset <i>A</i> of [0,1], such a universal machine exists. We also show that a universal FTM exists in some approximate sense. This means, for any prescribed accuracy, that we can construct a universal machine that simulates any FTM with the given accuracy. Finally, we introduce the notions of fuzzy polynomial time-bounded computation and nondeterministic fuzzy polynomial time-bounded computation, and investigate their connections with polynomial time-bounded computation and nondeterministic polynomial time-bounded computation.",
 				"DOI": "10.1109/TFUZZ.2008.2004990",
 				"ISSN": "1063-6706",
+				"conferenceName": "IEEE Transactions on Fuzzy Systems",
+				"proceedingsTitle": "IEEE Transactions on Fuzzy Systems",
 				"libraryCatalog": "IEEE Xplore",
 				"shortTitle": "Fuzzy Turing Machines"
 			}
