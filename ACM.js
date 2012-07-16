@@ -225,7 +225,8 @@ var testCases = [
 				"libraryCatalog": "ACM Digital Library",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
-		]
+		],
+		"defer":true
 	},
 	{
 		"type": "web",
@@ -260,7 +261,8 @@ var testCases = [
 				"libraryCatalog": "ACM Digital Library",
 				"shortTitle": "Version Control with Git"
 			}
-		]
+		],
+		"defer":true
 	},
 	{
 		"type": "web",
@@ -313,7 +315,8 @@ var testCases = [
 				"libraryCatalog": "ACM Digital Library",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
-		]
+		],
+		"defer":true
 	},
 	{
 		"type": "web",
@@ -359,7 +362,8 @@ var testCases = [
 				"libraryCatalog": "ACM Digital Library",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
-		]
+		],
+		"defer":true
 	}
 ]
 /** END TEST CASES **/
