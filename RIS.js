@@ -155,7 +155,7 @@ var fieldMap = {
 	//type specific
 	//tag => field:itemTypes
 	//if itemType not explicitly given, __default field is used
-	//	unless itemType is excluded in __excludes
+	//	unless itemType is excluded in __exclude
 	TI: {
 		"__default":"title",
 		subject:["email"],
@@ -729,6 +729,47 @@ var exportOrder = {
 
 var newLineChar = "\r\n";		//from spec
 
+//get item fields to export for a given tag
+//cache previous requests so that this is much faster if multiple items are exported
+function getExportFields(itemType, tag) {
+	if(!getExportFields.cache[itemType]) getExportFields.cache[itemType] = {};
+
+	//retrieve from cache if available
+	if(getExportFields.cache[itemType][tag]) {
+		return getExportFields.cache[itemType][tag];
+	}
+
+	var fields = [];
+	if(typeof(fieldMap[tag]) == 'object') {
+		var def, exclude = false;
+		for(var f in fieldMap[tag]) {
+			if(f == "__default") {
+				def = fieldMap[tag][f];
+				continue;
+			}
+			if(f == "__exclude") {
+				if(fieldMap[tag][f].indexOf(itemType) != -1) {
+					exclude = true;
+				}
+				continue;
+			}
+	
+			if(fieldMap[tag][f].indexOf(itemType) != -1) {
+				fields.push(f);
+			}
+		}
+
+		if(!fields.length && def && !exclude) fields.push(def);
+	} else if(typeof(fieldMap[tag]) == 'string') {
+		fields.push(fieldMap[tag];
+	}
+
+	getExportFields.cache[itemType][tag] = fields;
+
+	return fields;
+}
+getExportFields.cache = {};
+
 function addTag(tag, value) {
 	if((!value && value !== 0 && value !== "0")
 	  || (typeof(value) == 'string' && value.trim()==='')) return;
@@ -737,7 +778,7 @@ function addTag(tag, value) {
 		for(var i=0, n=value.length; i<n; i++) {
 			if((!value[i] && value[i] !== 0 && value[i] !== "0")
 	      || (typeof(value[i]) == 'string' && value[i].trim()==='')) continue;
-Z.debug(value[i]);
+
 			Zotero.write(tag + "  - " + value[i] + newLineChar);
 		}
 	} else {
@@ -746,7 +787,7 @@ Z.debug(value[i]);
 }
 
 function doExport() {
-	var item, def, exclude, fieldArr, order, tag, fields, field, value;
+	var item, order, tag, fields, field, value;
 
 	while(item = Zotero.nextItem()) {
 		// can't store independent notes in RIS
@@ -761,45 +802,13 @@ function doExport() {
 		for(var i=0, n=order.length; i<n; i++) {
 			tag = order[i];
 			//find the appropriate field to export for this item type
-			fields = fieldMap[tag];
-			if(typeof(fields) == "object") {
-				exclude = false;
-				fieldArr = [];
-				def = undefined;
-				for(var f in fields) {
-					if(f == "__exclude") {
-						if(fields[f].indexOf(item.itemType) != -1) {
-							exclude = true;
-						}
-						continue;
-					}
-
-					if(f == "__default") {
-						def = fields[f];
-						continue;
-					}
-
-					if(fields[f].indexOf(item.itemType) != -1) {
-						fieldArr.push(f);
-					}
-				}
-
-				if(fieldArr.length) {
-					fields = fieldArr;
-				} else if(!exclude && def) {
-					fields = [def];
-				} else {
-					fields = undefined;
-				}
-			} else if(fields) {
-				fields = [fields];
-			}
+			fields = getExportFields(item.itemType, tag);
 
 			//if we didn't get anything, we don't need to export this tag for this item type
-			if(!fields) continue;
+			if(!fields.length) continue;
 
-      value = '';
 			for(var k=0, p=fields.length; k<p; k++) {
+	      value = undefined;
   			//we can define fields that are nested (i.e. creators) using slashes
   			field = fields[k].split(/\//);
   
