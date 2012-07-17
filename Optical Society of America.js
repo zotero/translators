@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-05-08 00:04:27"
+	"lastUpdated": "2012-07-17 06:34:17"
 }
 
 /*
@@ -31,6 +31,13 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 function detectWeb(doc, url) {
+	// Prevent inner frames from getting detected
+	try {
+		if(doc.defaultView !== doc.defaultView.top) return;
+	} catch(e) {
+		return;
+	};
+	
 	if (url.indexOf("search2.cfm") != -1) {
 		return "multiple";
 	} else if (url.indexOf("abstract.cfm") != -1) {
@@ -67,8 +74,7 @@ function doWeb(doc, url) {
 
 
 	} else {
-		articles = [url];
-	Zotero.Utilities.processDocuments(articles, scrape, function () {Zotero.done(); });
+		scrape(doc);
 	}
 
 }
@@ -80,8 +86,9 @@ function scrape(newDoc) {
 	//I'm leaving this in commented out bc I'm not sure what this used to do
 	//ZU.xpathText(newDoc, '//div[@id="abstract-header"]/p/a[contains(text(), "opticsinfobase")]/@href');
 
-	var abstractblock = newDoc.evaluate('//meta[@name="dc.description"]', newDoc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-	var identifierblock = newDoc.evaluate('//meta[@name="dc.identifier"]', newDoc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+	var abstractblock = ZU.xpathText(newDoc, '//meta[@name="dc.description"]/@content', null, "\n\n");
+	Zotero.debug(abstractblock);
+	var identifierblock = ZU.xpathText(newDoc, '//meta[@name="dc.identifier"]/@content');
 	Zotero.Utilities.HTTP.doGet(osalink, function (text) {
 		var action = text.match(/select\s+name=\"([^"]+)\"/)[1];
 		var id = text.match(/input\s+type=\"hidden\"\s+name=\"articles\"\s+value=\"([^"]+)\"/)[1];
@@ -99,42 +106,40 @@ function scrape(newDoc) {
 					pubName = item.publicationTitle;
 				}
 				if (identifierblock) {
-					if (/doi:(.*)$/.test(identifierblock.getAttribute('content'))) {
+					if (/doi:(.*)$/.test(identifierblock)) {
 						item.DOI = RegExp.$1;
 					}
 				}
-				if (abstractblock) {
-					item.abstractNote = abstractblock.getAttribute('content');
-					var pdfpath = '//meta[@name="citation_pdf_url"]/@content';
-					item.attachments = [{
-						url: osalink,
-						title: pubName + " Snapshot",
-						mimeType: "text/html"
-					}];
+				item.abstractNote = abstractblock;
+			
+				var pdfpath = '//meta[@name="citation_pdf_url"]/@content';
+				item.attachments = [{
+					url: osalink,
+					title: pubName + " Snapshot",
+					mimeType: "text/html"
+				}];
 
-					var pdflink = getText(pdfpath, newDoc);
-					Zotero.debug('pdflink: ' + pdflink);
+				var pdflink = ZU.xpathText(newDoc, pdfpath);
+				Zotero.debug('pdflink: ' + pdflink);
 
-					if (pdflink) {
+				if (pdflink) {
 
-						Zotero.Utilities.doGet(pdflink, function (text) {
-							Zotero.debug('try to get realpdf');
-							var realpdf = String(text.match(/"https?:.*?"/)).replace(/\"/g, "");
-							Zotero.debug('realpdf: ' + realpdf);
-							if (realpdf) {
-								item.attachments.push({
-									url: realpdf,
-									title: pubName + ' Full Text PDF',
-									mimeType: "application/pdf"
-								});
-							}
-						}, function () {
-							item.complete();
-						});
-					} else {
+					Zotero.Utilities.doGet(pdflink, function (text) {
+						Zotero.debug('try to get realpdf');
+						var realpdf = String(text.match(/"https?:.*?"/)).replace(/\"/g, "");
+						Zotero.debug('realpdf: ' + realpdf);
+						if (realpdf) {
+							item.attachments.push({
+								url: realpdf,
+								title: pubName + ' Full Text PDF',
+								mimeType: "application/pdf"
+							});
+						}
+					}, function () {
 						item.complete();
-					}
-
+					});
+				} else {
+					item.complete();
 				}
 			});
 			translator.translate();
@@ -158,32 +163,13 @@ function getArticleType(doc, url, nsResolver) {
 		return "multiple";
 	}
 
-	var conference = getText('//meta[@name="citation_conference"]/@content', doc);
-	var journal = getText('//meta[@name="citation_journal_title"]/@content', doc);
-	if (conference.indexOf(" ") != -1) return "conferencePaper";
-	else if (journal.indexOf(" ") != -1) return "journalArticle";
+	var conference = ZU.xpathText(doc, '//meta[@name="citation_conference"]/@content');
+	var journal = ZU.xpathText(doc, '//meta[@name="citation_journal_title"]/@content');
+	Zotero.debug(journal);
+	if (conference && conference.indexOf(" ") != -1) return "conferencePaper";
+	else if (journal && journal.indexOf(" ") != -1) return "journalArticle";
 	else return "book";
 
-}
-
-/**
- * Get the text from the first node defined by the given xPathString
- * @param pathString the XPath indicating which node to get the text from
- * @param doc The XML document describing the page
- * @param nsResolver the namespace resolver function
- * @return the text in the defined node or "Unable to scrape text" if the node was not found or if there was no text content
- */
-
-function getText(pathString, doc, nsResolver) {
-	var path = doc.evaluate(pathString, doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var node = path.iterateNext();
-
-	if (node == null || node.textContent == undefined || node.textContent == null) {
-		Zotero.debug("Unable to retrieve text for XPath: " + pathString);
-		return "";
-	}
-
-	return node.textContent;
 }
 
 /** BEGIN TEST CASES **/
