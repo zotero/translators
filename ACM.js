@@ -207,26 +207,25 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://dl.acm.org/ft_gateway.cfm?id=1596682&type=pdf",
 						"title": "ACM Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "Tracking performance across software revisions",
-				"publicationTitle": "Proceedings of the 7th International Conference on Principles and Practice of Programming in Java",
 				"series": "PPPJ '09",
-				"date": "2009",
 				"ISBN": "978-1-60558-598-7",
-				"pages": "162–171",
 				"url": "http://doi.acm.org/10.1145/1596655.1596682",
 				"DOI": "10.1145/1596655.1596682",
-				"publisher": "ACM",
 				"place": "New York, NY, USA",
+				"abstractNote": "Repository-based revision control systems such as CVS, RCS, Subversion, and GIT, are extremely useful tools that enable software developers to concurrently modify source code, manage conflicting changes, and commit updates as new revisions. Such systems facilitate collaboration with and concurrent contribution to shared source code by large developer bases. In this work, we investigate a framework for \"performance-aware\" repository and revision control for Java programs. Our system automatically tracks behavioral differences across revisions to provide developers with feedback as to how their change impacts performance of the application. It does so as part of the repository commit process by profiling the performance of the program or component, and performing automatic analyses that identify differences in the dynamic behavior or performance between two code revisions. In this paper, we present our system that is based upon and extends prior work on calling context tree (CCT) profiling and performance differencing. Our framework couples the use of precise CCT information annotated with performance metrics and call-site information, with a simple tree comparison technique and novel heuristics that together target the cause of performance differences between code revisions without knowledge of program semantics. We evaluate the efficacy of the framework using a number of open source Java applications and present a case study in which we use the framework to distinguish two revisions of the popular FindBugs application.",
 				"libraryCatalog": "ACM Digital Library",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"title": "Tracking performance across software revisions",
+				"proceedingsTitle": "Proceedings of the 7th International Conference on Principles and Practice of Programming in Java",
+				"date": "2009",
+				"pages": "162–171",
+				"publisher": "ACM"
 			}
 		],
-		"defer":true
+		"defer": true
 	},
 	{
 		"type": "web",
@@ -253,16 +252,17 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "Version Control with Git: Powerful Tools and Techniques for Collaborative Software Development",
-				"date": "2009",
 				"ISBN": "0596520123, 9780596520120",
 				"edition": "1st",
-				"publisher": "O'Reilly Media, Inc.",
+				"abstractNote": "Version Control with Git takes you step-by-step through ways to track, merge, and manage software projects, using this highly flexible, open source version control system. Git permits virtually an infinite variety of methods for development and collaboration. Created by Linus Torvalds to manage development of the Linux kernel, it's become the principal tool for distributed version control. But Git's flexibility also means that some users don't understand how to use it to their best advantage. Version Control with Git offers tutorials on the most effective ways to use it, as well as friendly yet rigorous advice to help you navigate Git's many functions. With this book, you will: Learn how to use Git in several real-world development environments Gain insight into Git's common-use cases, initial tasks, and basic functions Understand how to use Git for both centralized and distributed version control Use Git to manage patches, diffs, merges, and conflicts Acquire advanced techniques such as rebasing, hooks, and ways to handle submodules (subprojects) Learn how to use Git with Subversion Git has earned the respect of developers around the world. Find out how you can benefit from this amazing tool with Version Control with Git.",
 				"libraryCatalog": "ACM Digital Library",
-				"shortTitle": "Version Control with Git"
+				"shortTitle": "Version Control with Git",
+				"title": "Version Control with Git: Powerful Tools and Techniques for Collaborative Software Development",
+				"date": "2009",
+				"publisher": "O'Reilly Media, Inc."
 			}
 		],
-		"defer":true
+		"defer": true
 	},
 	{
 		"type": "web",
@@ -296,27 +296,24 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://dl.acm.org/ft_gateway.cfm?id=257486&type=pdf",
 						"title": "ACM Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
+				"issue": "1-2",
+				"ISSN": "0923-8174",
+				"url": "http://dx.doi.org/10.1023/A:1008286901817",
+				"DOI": "10.1023/A:1008286901817",
+				"abstractNote": "Simulation techniques used in the Manufacturing Test SIMulator\n(MTSIM) are described. MTSIM is a Concurrent Engineering tool used to\nsimulate the manufacturing test and\nrepair aspects of boards and MCMs from design concept \nthrough manufacturing release. MTSIM helps designers select assembly\nprocess, specify Design For Test (DFT) features, select board test\ncoverage, specify ASIC defect level goals, establish product\nfeasibility, and predict manufacturing quality and cost goals. A new\nyield model for boards and MCMs which accounts for the\nclustering of solder defects is introduced and used to\npredict the yield at each test step. In addition, MTSIM\nestimates the average number of defects per board detected at each\ntest step, and estimates costs incurred in test execution, fault\nisolation and repair. MTSIM models were validated with\nhigh performance assemblies at Hewlett-Packard (HP).",
+				"libraryCatalog": "ACM Digital Library",
 				"title": "Simulation Techniques for the Manufacturing Test of MCMs",
 				"publicationTitle": "J. Electron. Test.",
 				"volume": "10",
-				"issue": "1-2",
 				"date": "February 1997",
-				"ISSN": "0923-8174",
-				"pages": "137–149",
-				"url": "http://dx.doi.org/10.1023/A:1008286901817",
-				"DOI": "10.1023/A:1008286901817",
-				"publisher": "Kluwer Academic Publishers",
-				"place": "Norwell, MA, USA",
-				"libraryCatalog": "ACM Digital Library",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"pages": "137–149"
 			}
 		],
-		"defer":true
+		"defer": true
 	},
 	{
 		"type": "web",
@@ -343,27 +340,24 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://dl.acm.org/ft_gateway.cfm?id=258973&type=pdf",
 						"title": "ACM Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
+				"issue": "8",
+				"ISSN": "0362-1340",
+				"url": "http://doi.acm.org/10.1145/258949.258973",
+				"DOI": "10.1145/258949.258973",
+				"abstractNote": "Fran (Functional Reactive Animation) is a collection of data types and functions for composing richly interactive, multimedia animations. The key ideas in Fran are its notions of behaviors and events. Behaviors are time-varying, reactive values, while events are sets of arbitrarily complex conditions, carrying possibly rich information. Most traditional values can be treated as behaviors, and when images are thus treated, they become animations. Although these notions are captured as data types rather than a programming language, we provide them with a denotational semantics, including a proper treatment of real time, to guide reasoning and implementation. A method to effectively and efficiently perform event detection using interval analysis is also described, which relies on the partial information structure on the domain of event times. Fran has been implemented in Hugs, yielding surprisingly good performance for an interpreter-based system. Several examples are given, including the ability to describe physical phenomena involving gravity, springs, velocity, acceleration, etc. using ordinary differential equations.",
+				"libraryCatalog": "ACM Digital Library",
 				"title": "Functional reactive animation",
 				"publicationTitle": "SIGPLAN Not.",
 				"volume": "32",
-				"issue": "8",
 				"date": "August 1997",
-				"ISSN": "0362-1340",
-				"pages": "263–273",
-				"url": "http://doi.acm.org/10.1145/258949.258973",
-				"DOI": "10.1145/258949.258973",
-				"publisher": "ACM",
-				"place": "New York, NY, USA",
-				"libraryCatalog": "ACM Digital Library",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"pages": "263–273"
 			}
 		],
-		"defer":true
+		"defer": true
 	}
 ]
 /** END TEST CASES **/
