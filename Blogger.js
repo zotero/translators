@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-07-13 18:16:50"
+	"lastUpdated": "2012-07-18 15:54:35"
 }
 
 function detectWeb(doc, url) {
@@ -27,9 +27,7 @@ function detectWeb(doc, url) {
 //Blogger translator. Code by Adam Crymble
 
 function scrape(doc, url) {
-
 	var tagsContent = new Array();
-	
 	var newItem = new Zotero.Item("blogPost");
 	
 	//title
@@ -77,9 +75,10 @@ function scrape(doc, url) {
 		}
 		
 	var blogTitle1 = doc.title.split(":");
+	var cleanurl = url.replace(/[\?#].+/, "");
 	newItem.blogTitle = blogTitle1[0];
-
-	newItem.url = doc.location.href;
+	newItem.url=cleanurl;
+	newItem.attachments = [{url:cleanurl, title:"Blogspot Snapshot", mimeType: "text/html"}];
 
 	newItem.complete();
 }
@@ -135,7 +134,12 @@ var testCases = [
 					"Matthew Yglesias"
 				],
 				"seeAlso": [],
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Blogspot Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"title": "A tweet from Matt Yglesias",
 				"date": "Monday, October 24, 2011",
 				"blogTitle": "Observational Epidemiology",
