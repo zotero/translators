@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-05 17:54:38"
+	"lastUpdated": "2012-07-19 16:56:17"
 }
 
 /*
@@ -34,10 +34,11 @@
 /* Zotero API */
 
 function detectWeb(doc, url) {
+
 	//Zotero.debug("ibex detectWeb URL= "+ url);
 	if (doc.title == "Suche und Suchergebnisse - FAZ" && doc.evaluate('//div[@class = "SuchergebnisListe"]', doc, null, XPathResult.ANY_TYPE, null)) {
 		return "multiple";
-	} else if (ZU.xpath(doc, '//div[@class = "FAZArtikelEinleitung"]')) {
+	} else if (ZU.xpathText(doc, '//div[@class = "FAZArtikelEinleitung"]')) {
 		return "newspaperArticle";
 	}
 }
@@ -130,43 +131,53 @@ function countObjectProperties(obj) {
 	return size;
 };
 /** BEGIN TEST CASES **/
-var testCases = [{
-	"type": "web",
-	"url": "http://www.faz.net/aktuell/wissen/mensch-gene/wissenschaftsphilosophie-krumme-wege-der-vernunft-1654864.html",
-	"items": [{
-		"itemType": "newspaperArticle",
-		"creators": [{
-			"firstName": "Fynn Ole",
-			"lastName": "Engler",
-			"creatorType": "author"
-		}, {
-			"firstName": "Jürgen",
-			"lastName": "Renn",
-			"creatorType": "author"
-		}],
-		"notes": [],
-		"tags": [],
-		"seeAlso": [],
-		"attachments": [{
-			"title": "FAZ.NET Article Snapshot",
-			"mimeType": "text/html",
-			"url": "http://www.faz.net/aktuell/wissen/mensch-gene/wissenschaftsphilosophie-krumme-wege-der-vernunft-1654864.html",
-			"snapshot": true
-		}],
+var testCases = [
+	{
+		"type": "web",
 		"url": "http://www.faz.net/aktuell/wissen/mensch-gene/wissenschaftsphilosophie-krumme-wege-der-vernunft-1654864.html",
-		"title": "Wissenschaftsphilosophie Krumme Wege der Vernunft",
-		"date": "13.06.2011",
-		"abstractNote": "13.06.2011 · Wissenschaft hat eine Geschichte, wie kann sie dann aber rational sein? Im Briefwechsel zwischen Ludwik Fleck und Moritz Schlick deuteten sich bereits Antworten an.",
-		"publicationTitle": "FAZ.NET",
-		"section": "Wissen",
-		"language": "Deutsch",
-		"ISSN": "0174-4909",
-		"libraryCatalog": "FAZ.NET",
-		"accessDate": "CURRENT_TIMESTAMP"
-	}]
-}, {
-	"type": "web",
-	"url": "http://www.faz.net/suche/?query=argentinien&suchbegriffImage.x=0&suchbegriffImage.y=0&resultsPerPage=20",
-	"items": "multiple"
-}]
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "Fynn Ole",
+						"lastName": "Engler",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jürgen",
+						"lastName": "Renn",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "FAZ.NET Article Snapshot",
+						"mimeType": "text/html",
+						"url": "http://www.faz.net/aktuell/wissen/mensch-gene/wissenschaftsphilosophie-krumme-wege-der-vernunft-1654864.html",
+						"snapshot": true
+					}
+				],
+				"url": "http://www.faz.net/aktuell/wissen/mensch-gene/wissenschaftsphilosophie-krumme-wege-der-vernunft-1654864.html",
+				"title": "Wissenschaftsphilosophie Krumme Wege der Vernunft",
+				"date": "13.06.2011",
+				"abstractNote": "13.06.2011 · Wissenschaft hat eine Geschichte, wie kann sie dann aber rational sein? Im Briefwechsel zwischen Ludwik Fleck und Moritz Schlick deuteten sich bereits Antworten an.",
+				"publicationTitle": "FAZ.NET",
+				"section": "Wissen",
+				"language": "Deutsch",
+				"ISSN": "0174-4909",
+				"libraryCatalog": "FAZ.NET",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.faz.net/suche/?query=argentinien&suchbegriffImage.x=0&suchbegriffImage.y=0&resultsPerPage=20",
+		"items": "multiple"
+	}
+]
 /** END TEST CASES **/
