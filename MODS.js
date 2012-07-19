@@ -7,7 +7,7 @@
 	"maxVersion": "",
 	"priority": 50,
 	"configOptions": {
-		"dataMode": "xml/e4x"
+		"dataMode": "xml/dom"
 	},
 	"displayOptions": {
 		"exportNotes": true
@@ -15,132 +15,395 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gv",
-	"lastUpdated": "2012-03-17 02:45:26"
+	"lastUpdated": "2012-07-15 01:57:05"
 }
+
+var fromMarcGenre = {
+//		"abstract or summary":XXX,
+//		"abstract":XXX,
+//		"summary":XXX,
+	"art reproduction":"artwork",
+	"article":"journalArticle",
+	"autobiography":"book",
+	"bibliography":"bookSection",
+	"biography":"book",
+	"book":"book",
+//		"calendar":XXX,
+//		"catalog":XXX,
+	"chart":"artwork",
+	"comic or graphic novel":"book",
+	"comic":"book",
+	"graphic novel":"book",
+	"comic strip":"artwork",
+	"conference publication":"conferencePaper",
+//		"database":XXX,
+	"dictionary":"dictionaryEntry",
+	"diorama":"artwork",
+//		"directory":XXX,
+	"drama":"book",
+	"encyclopedia":"encyclopediaArticle",
+//		"essay":XXX,
+	"festschrift":"book",
+	"fiction":"book",
+//		"filmography":XXX,
+	"filmstrip":"videoRecording",
+//		"findingaid":XXX,
+//		"flash card":XXX,
+	"folktale":"book",
+//		"font":XXX,
+//		"game":XXX,
+	"government publication":"book",
+	"graphic":"artwork",
+	"globe":"map",
+	"handbook":"book",
+	"history":"book",
+	"hymnal":"book",
+	"humor,satire":"book",
+	"humor":"book",
+	"satire":"book",
+//		"index":XXX,
+//		"instruction":XXX,
+//		"interview":XXX,
+//		"issue":XXX,
+	"journal":"journalArticle",
+	"kit":"artwork",
+//		"language instruction":XXX,
+	"law report or digest":"journalArticle",
+	"law report":"journalArticle",
+	"digest":"journalArticle",
+	"law digest":"journalArticle",
+	"legal article":"journalArticle",
+	"legal case and case notes":"case",
+	"legal case":"case",
+	"case notes":"case",
+	"legislation":"statute",
+	"loose-leaf":"manuscript",
+	"map":"map",
+	"memoir":"book",
+	"microscope slide":"artwork",
+	"model":"artwork",
+//		"multivolume monograph":XXX,
+	"novel":"book",
+//		"numeric data":XXX,
+//		"offprint":XXX,
+	"online system or service":"webpage",
+	"online system":"webpage",
+	"service":"webpage",
+	"online service":"webpage",
+	"patent":"patent",
+	"periodical":"journalArticle",
+	"picture":"artwork",
+//		"poetry":XXX,
+//		"programmed text":XXX,
+	"realia":"artwork",
+//		"rehearsal":XXX,
+//		"remote sensing image":XXX,
+//		"reporting":XXX,
+//		"review":XXX,
+	"script":"book",
+//		"series":XXX,
+//		"short story":XXX,
+	"slide":"artwork",
+	"sound":"audioRecording",
+	"speech":"audioRecording",
+	"standard or specification":"report",
+	"standard":"report",
+//		"specification":XXX,
+//		"statistics":XXX,
+//		"survey of literature":XXX,
+	"technical report":"report",
+	"newspaper":"newspaperArticle",
+	"theses":"thesis",
+	"thesis":"thesis",
+//		"toy":XXX,
+	"transparency":"artwork",
+//		"treaty":XXX,
+	"videorecording":"videoRecording",
+	"letter":"letter",
+	"motion picture":"film",
+	"art original":"artwork",
+	"web site":"webpage",
+	"yearbook":"book"
+};
+
+var toMarcGenre = {
+	"artwork":"art original",
+	"audioRecording":"sound",
+	"bill":"legislation",
+	"blogPost":"web site",
+	"book":"book",
+	"bookSection":"book",
+	"case":"legal case and case notes",
+	//"computerProgram":XXX,
+	"conferencePaper":"conference publication",
+	"dictionaryEntry":"dictionary",
+	//"document":XXX,
+	"email":"letter",
+	"encyclopediaArticle":"encyclopedia",
+	"film":"motion picture",
+	"forumPost":"web site",
+	//"hearing":XXX,
+	"instantMessage":"letter",
+	"interview":"interview",
+	"journalArticle":"journal",
+	"letter":"letter",
+	"magazineArticle":"periodical",
+	//"manuscript":XXX,
+	"map":"map",
+	"newspaperArticle":"newspaper",
+	"patent":"patent",
+	"podcast":"speech",
+	//"presentation":XXX,
+	"radioBroadcast":"sound",
+	"report":"technical report",
+	"statute":"legislation",
+	"thesis":"thesis",
+	//"tvBroadcast":XXX,
+	"videoRecording":"videorecording",
+	"webpage":"web site"
+};
+
+var dctGenres = {
+	//"collection":XXX,
+	//"dataset":XXX,
+	//"event":XXX,
+	"image":"artwork",
+	"interactiveresource":"webpage",
+	//"model":XXX,
+	"movingimage":"videoRecording",
+	//"physical object":XXX,
+	//"place":XXX,
+	//"resource":XXX,
+	//"service":XXX,
+	"software":"computerProgram",
+	"sound":"audioRecording",
+	"stillimage":"artwork"
+	//"text":XXX
+};
+
+var fromTypeOfResource = {
+	//"text":XXX,
+	"cartographic":"map",
+	//"notated music":XXX,
+	"sound recording-musical":"audioRecording",
+	"sound recording-nonmusical":"audioRecording",
+	"sound recording":"audioRecording",
+	"still image":"artwork",
+	"moving image":"videoRecording",
+	//"three dimensional object":XXX,
+	"software, multimedia":"computerProgram"
+};
+
+var toTypeOfResource = {
+	"artwork":"still image",
+	"audioRecording":"sound recording",
+	"bill":"text",
+	"blogPost":"software, multimedia",
+	"book":"text",
+	"bookSection":"text",
+	"case":"text",
+	"computerProgram":"software, multimedia",
+	"conferencePaper":"text",
+	"dictionaryEntry":"text",
+	"document":"text",
+	"email":"text",
+	"encyclopediaArticle":"text",
+	"film":"moving image",
+	"forumPost":"text",
+	"hearing":"text",
+	"instantMessage":"text",
+	"interview":"text",
+	"journalArticle":"text",
+	"letter":"text",
+	"magazineArticle":"text",
+	"manuscript":"text",
+	"map":"cartographic",
+	"newspaperArticle":"text",
+	"patent":"text",
+	"podcast":"sound recording-nonmusical",
+	"presentation":"mixed material",
+	"radioBroadcast":"sound recording-nonmusical",
+	"report":"text",
+	"statute":"text",
+	"thesis":"text",
+	"tvBroadcast":"moving image",
+	"videoRecording":"moving image",
+	"webpage":"software, multimedia"
+};
+
+var modsTypeRegex = {
+//	'artwork': 
+//	'audioRecording': /\bmusic/i,
+//	'bill': 
+	'blogPost': /\bblog/i,
+//	'book': 
+//	'bookSection': 
+//	'case': 
+//	'computerProgram': 
+//	'conferencePaper': 
+//	'dictionaryEntry': 
+//	'email': 
+//	'encyclopediaArticle': 
+//	'film': 
+//	'forumPost': 
+//	'hearing': 
+//	'instantMessage': 
+//	'interview': 
+	'journalArticle': /journal\s*article/i,
+//	'letter': 
+	'magazineArticle': /magazine\s*article/i,
+//	'manuscript': 
+//	'map': 
+	'newspaperArticle': /newspaper\*article/i
+//	'patent': 
+//	'podcast': 
+//	'presentation': 
+//	'radioBroadcast': 
+//	'report': 
+//	'statute': 
+//	'thesis': 
+//	'tvBroadcast': 
+//	'videoRecording': 
+//	'webpage': 
+};
+
+var modsInternetMediaTypes = {
+	//a ton of types listed at http://www.iana.org/assignments/media-types/index.html
+	'text/html': 'webpage'
+};
+
+var marcRelators = {
+	"aut":"author",
+	"edt":"editor",
+	"ctb":"contributor",
+	"pbd":"seriesEditor",
+	"trl":"translator"
+};
+
+// Item types that are part of a larger work
+var partialItemTypes = ["blogPost", "bookSection", "conferencePaper", "dictionaryEntry",
+	"encyclopediaArticle", "forumPost", "journalArticle", "magazineArticle",
+	"newspaperArticle", "webpage"];
+
+// Namespace array for using ZU.xpath
+var ns = "http://www.loc.gov/mods/v3",
+	xns = {"m":ns};
 
 function detectImport() {
-	var name = Zotero.getXML().name();
-	if (!name) {
+	var doc = Zotero.getXML().documentElement;
+	if (!doc) {
 		return false;
 	}
-	return name.uri == "http://www.loc.gov/mods/v3" && (name.localName == "modsCollection" || name.localName == "mods");
+	return doc.namespaceURI === "http://www.loc.gov/mods/v3" && (doc.tagName === "modsCollection" || doc.tagName === "mods");
 }
 
-var partialItemTypes = ["bookSection", "journalArticle", "magazineArticle", "newspaperArticle"];
+/**
+ * If property is defined, this function adds an appropriate XML element as a child of
+ * parentElement.
+ * @param {Element} parentElement The parent of the new element to be created.
+ * @param {String} elementName The name of the new element to be created.
+ * @param {Any} property The property to inspect. If this property is defined and not
+ *     null, false, or empty, a new element is created whose textContent is its value.
+ * @param {Object} [attributes] If defined, this object defines attributes to be added
+ *     to the new element.
+ */
+function mapProperty(parentElement, elementName, property, attributes) {
+	if(!property && property !== 0) return null;
+	var doc = parentElement.ownerDocument,
+		newElement = doc.createElementNS(ns, elementName);
+	if(attributes) {
+		for(var i in attributes) {
+			newElement.setAttribute(i, attributes[i]);
+		}
+	}
+	newElement.appendChild(doc.createTextNode(property));
+	parentElement.appendChild(newElement);
+	return newElement;
+}
 
 function doExport() {
 	Zotero.setCharacterSet("utf-8");
-	var modsCollection = <modsCollection xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-2.xsd" />;
+	var parser = new DOMParser();
+	var doc = parser.parseFromString('<modsCollection xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-2.xsd" />', 'application/xml');
 	
 	var item;
 	while(item = Zotero.nextItem()) {
-		var isPartialItem = partialItemTypes.indexOf(item.itemType) !== -1;
+		// Don't export notes or standalone attachments
+		if(item.itemType === "note" || item.itemType === "attachment") continue;
 		
-		var mods = <mods />;
+		var mods = doc.createElementNS(ns, "mods"),
+			isPartialItem = partialItemTypes.indexOf(item.itemType) !== -1,
+			recordInfo = doc.createElementNS(ns, "recordInfo"),
+			host = doc.createElementNS(ns, "relatedItem"),
+			series = doc.createElementNS(ns, "relatedItem"),
+			topOrHost = (isPartialItem ? host : mods);
 		
 		/** CORE FIELDS **/
 		
 		// XML tag titleInfo; object field title
 		if(item.title) {
-			mods.titleInfo.title = item.title;
+			var titleInfo = doc.createElementNS(ns, "titleInfo");
+			mapProperty(titleInfo, "title", item.title);
+			mods.appendChild(titleInfo);
 		}
+		
 		if(item.shortTitle) {
-			mods.titleInfo += <titleInfo type="abbreviated"><title>{item.shortTitle}</title></titleInfo>;
+			var titleInfo = doc.createElementNS(ns, "titleInfo");
+			titleInfo.setAttribute("type", "abbreviated");
+			mapProperty(titleInfo, "title", item.shortTitle);
+			mods.appendChild(titleInfo);
 		}
 		
 		// XML tag typeOfResource/genre; object field type
-		// 
-		// The exact marcGenre of a book section can, perhaps, be debated;
-		// But it should have 'book' as the host's genre.
-		var modsType, marcGenre;
-		if(item.itemType == "book" || item.itemType == "bookSection") {
-			modsType = "text";
-			marcGenre = "book";
-		} else if(item.itemType == "journalArticle" || item.itemType == "magazineArticle") {
-			modsType = "text";
-			marcGenre = "periodical";
-		} else if(item.itemType == "newspaperArticle") {
-			modsType = "text";
-			marcGenre = "newspaper";
-		} else if(item.itemType == "thesis") {
-			modsType = "text";
-			marcGenre = "thesis";
-		} else if(item.itemType == "letter") {
-			modsType = "text";
-			marcGenre = "letter";
-		} else if(item.itemType == "manuscript") {
-			modsType = "text";
-			mods.typeOfResource.@manuscript = "yes";
-		} else if(item.itemType == "interview") {
-			modsType = "text";
-			marcGenre = "interview";
-		} else if(item.itemType == "film") {
-			modsType = "moving image";
-			marcGenre = "motion picture";
-		} else if(item.itemType == "artwork") {
-			modsType = "still image";
-			marcGenre = "art original";
-		} else if(item.itemType == "webpage") {
-			modsType = "multimedia";
-			marcGenre = "web site";
-		} else if(item.itemType == "note" || item.itemType == "attachment") {
-			continue;
-		}
-		mods.typeOfResource = modsType;
-		mods.genre += <genre authority="local">{item.itemType}</genre>;
-		if(marcGenre) {
-			mods.genre += <genre authority="marcgt">{marcGenre}</genre>;
-		}
+		mapProperty(mods, "typeOfResource", toTypeOfResource[item.itemType]);
+		mapProperty(mods, "genre", item.itemType, {"authority":"local"});
+		mapProperty(topOrHost, "genre", toMarcGenre[item.itemType], {"authority":"marcgt"});
 		
 		// XML tag genre; object field thesisType, type
 		if(item.thesisType) {
-			mods.genre += <genre>{item.thesisType}</genre>;
+			mapProperty(mods, "genre", item.thesisType);
 		} else if(item.type) {
-			mods.genre += <genre>{item.type}</genre>;
+			mapProperty(mods, "genre", item.type);
 		}
 		
 		// XML tag name; object field creators
-		for(var j in item.creators) {
-			var roleTerm = "";
-			if(item.creators[j].creatorType == "author") {
+		for(var j=0; j<item.creators.length; j++) {
+			var creator = item.creators[j],
+				roleTerm = "";
+			if(creator.creatorType == "author") {
 				roleTerm = "aut";
-			} else if(item.creators[j].creatorType == "editor") {
+			} else if(creator.creatorType == "editor") {
 				roleTerm = "edt";
-			} else if(item.creators[j].creatorType == "translator") {
+			} else if(creator.creatorType == "translator") {
 				roleTerm = "trl";
+			} else if(creator.creatorType == "seriesEditor") {
+				roleTerm = "pbd";
 			} else {
 				roleTerm = "ctb";
 			}
 
-			if(item.creators[j].creatorType != "seriesEditor") {
-				if(isPartialItem && item.creators[j].creatorType == "editor"){
-					if(item.creators[j].fieldMode == 1) {
-						mods.relatedItem.name += <name type="corporate">
-							<namePart>{item.creators[j].lastName}</namePart>
-							<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
-							</name>;
-					} else {
-						mods.relatedItem.name += <name type="personal">
-							<namePart type="family">{item.creators[j].lastName}</namePart>
-							<namePart type="given">{item.creators[j].firstName}</namePart>
-							<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
-							</name>;
-					}
-				} else {
-					if(item.creators[j].fieldMode == 1) {
-						mods.name += <name type="corporate">
-							<namePart>{item.creators[j].lastName}</namePart>
-							<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
-							</name>;
-					} else {
-						mods.name += <name type="personal">
-							<namePart type="family">{item.creators[j].lastName}</namePart>
-							<namePart type="given">{item.creators[j].firstName}</namePart>
-							<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
-							</name>;
-					}
-				}
+			var name = doc.createElementNS(ns, "name"), namePart;
+			
+			if(creator.fieldMode == 1) {
+				name.setAttribute("type", "corporate");
+				
+				mapProperty(name, "namePart", creator.lastName);
+			} else {
+				name.setAttribute("type", "personal");
+				
+				mapProperty(name, "namePart", creator.lastName, {"type":"family"});
+				mapProperty(name, "namePart", creator.firstName, {"type":"given"});
 			}
+			
+			var role = doc.createElementNS(ns, "role");
+			mapProperty(role, "roleTerm", roleTerm,
+				{"type":"code", "authority":"marcrelator"});
+			name.appendChild(role);
+			
+			var creatorParent = creator.creatorType === "seriesEditor" ? series
+				: creator.creatorType === "editor" ? topOrHost
+				: mods;
+			creatorParent.appendChild(name);
 		}
 		
 		// XML tag recordInfo.recordOrigin; used to store our generator note
@@ -149,67 +412,60 @@ function doExport() {
 		/** FIELDS ON NEARLY EVERYTHING BUT NOT A PART OF THE CORE **/
 		
 		// XML tag recordInfo.recordContentSource; object field source
-		if(item.source) {
-			mods.recordInfo.recordContentSource = item.source;
-		}
-		// XML tag recordInfo.recordIdentifier; object field accessionNumber
-		if(item.accessionNumber) {
-			mods.recordInfo.recordIdentifier = item.accessionNumber;
-		}
+		mapProperty(recordInfo, "recordContentSource", item.libraryCatalog);
 		
 		// XML tag accessCondition; object field rights
-		if(item.rights) {
-			mods.accessCondition = item.rights;
-		}
+		mapProperty(mods, "accessCondition", item.rights);
 		
 		/** SUPPLEMENTAL FIELDS **/
 		
-		// Make part its own tag so we can figure out where it goes later
-		var part = new XML();
+		var part = doc.createElementNS(ns, "part");
 		
 		// XML tag detail; object field volume
-		if(item.volume) {
-			part += <detail type="volume"><number>{item.volume}</number></detail>;
-		}
-		
-		// XML tag detail; object field number
-		if(item.issue) {
-			part += <detail type="issue"><number>{item.issue}</number></detail>;
-		}
-		
-		// XML tag detail; object field section
-		if(item.section) {
-			part += <detail type="section"><number>{item.section}</number></detail>;
+		const details = ["volume", "issue", "section"];
+		for(var i=0; i<details.length; i++) {
+			if(item[details[i]] || item[details[i]] === 0) {
+				var detail = doc.createElementNS(ns, "detail"),
+					number = doc.createElementNS(ns, "number");
+				detail.setAttribute("type", details[i]);
+				number.appendChild(doc.createTextNode(item[details[i]]));
+				detail.appendChild(number);
+				part.appendChild(detail);
+			}
 		}
 		
 		// XML tag detail; object field pages
 		if(item.pages) {
-			var range = Zotero.Utilities.getPageRange(item.pages);
-			part += <extent unit="pages"><start>{range[0]}</start><end>{range[1]}</end></extent>;
+			var range = Zotero.Utilities.getPageRange(item.pages),
+				extent = doc.createElementNS(ns, "extent");
+			extent.setAttribute("unit", "pages");
+			mapProperty(extent, "start", range[0]);
+			mapProperty(extent, "end", range[1]);
+			part.appendChild(extent);
 		}
 		
 		// Assign part if something was assigned
-		if(part.length() != 1) {
-			if(isPartialItem) {
-				// For a journal article, bookSection, etc., the part is the host
-				mods.relatedItem.part += <part>{part}</part>;
-			} else {
-				mods.part += <part>{part}</part>;
-			}
+		if(part.hasChildNodes()) {
+			// For a journal article, bookSection, etc., the part is the host
+			topOrHost.appendChild(part);
 		}
 		
+		var originInfo = doc.createElementNS(ns, "originInfo")
+		
 		// XML tag originInfo; object fields edition, place, publisher, year, date
-		var originInfo = new XML();
-		if(item.edition) {
-			originInfo += <edition>{item.edition}</edition>;
-		}
+		mapProperty(originInfo, "edition", item.edition);
 		if(item.place) {
-			originInfo += <place><placeTerm type="text">{item.place}</placeTerm></place>;
+			var place = doc.createElementNS(ns, "place"),
+				placeTerm = doc.createElementNS(ns, "placeTerm");
+			placeTerm.setAttribute("type", "text");
+			placeTerm.appendChild(doc.createTextNode(item.place));
+			place.appendChild(placeTerm);
+			originInfo.appendChild(place);
 		}
 		if(item.publisher) {
-			originInfo += <publisher>{item.publisher}</publisher>;
+			mapProperty(originInfo, "publisher", item.publisher);
 		} else if(item.distributor) {
-			originInfo += <publisher>{item.distributor}</publisher>;
+			mapProperty(originInfo, "distributor", item.publisher);
 		}
 		if(item.date) {
 			if(["book", "bookSection"].indexOf(item.itemType) !== -1) {
@@ -222,289 +478,331 @@ function doExport() {
 				// Assume date is date created
 				var dateType = "dateCreated";
 			}
-			var tag = <{dateType}>{item.date}</{dateType}>;
-			originInfo += tag;
+			mapProperty(originInfo, dateType, item.date);
 		}
 
 		if(item.numPages) {
-			mods.physicalDescription = <physicalDescription><extent unit="pages"><total>{item.numPages}</total></extent></physicalDescription>;
- 		}
-
-		if(originInfo.length() != 1) {
-			if(isPartialItem) {
-				// For a journal article, bookSection, etc., this goes under the host
-				mods.relatedItem.originInfo += <originInfo>{originInfo}</originInfo>;
-			} else {
-				mods.originInfo += <originInfo>{originInfo}</originInfo>;
-			}
+			var physicalDescription = doc.createElementNS(ns, "physicalDescription");
+			mapProperty(physicalDescription, "extent", item.numPages+" p.");
+			mods.appendChild(physicalDescription);
 		}
-
-		// eXist Solutions points out that most types are more often
-		// monographic than not & will use this internally.
-		// Perhaps comment this out in the main distribution, though.
-		mods.originInfo.issuance = "monographic";
 
 		if(isPartialItem) {
 			// eXist Solutions points out that these types are more often
 			// continuing than not & will use this internally.
 			// Perhaps comment this out in the main distribution, though.
-			if(item.itemType == "journalArticle" || item.itemType == "magazineArticle" || item.itemType == "newspaperArticle") {
-				mods.relatedItem.originInfo.issuance = "continuing";
-				if(item.itemType == "journalArticle" || item.itemType == "magazineArticle") {
-					mods.relatedItem.genre += <genre authority="marcgt">periodical</genre>;
-				} else if (item.itemType == "newspaperArticle") {
-					mods.relatedItem.genre += <genre authority="marcgt">newspaper</genre>;
-				}
+			if(["journalArticle", "magazineArticle", "newspaperArticle"].indexOf(item.itemType) !== -1) {
+				mapProperty(originInfo, "issuance", "continuing");
 			}
-			else if (item.itemType == "bookSection" || item.itemType == "conferencePaper" || item.itemType == "encyclopediaArticle") {
-				mods.relatedItem.originInfo.issuance = "monographic";
-				if (item.itemType == "bookSection") {
-					mods.relatedItem.genre += <genre authority="marcgt">book</genre>;
-				} else if (item.itemType == "conferencePaper") {
-					mods.relatedItem.genre += <genre authority="marcgt">conference publication</genre>;
-					if (item.conferenceName) {
-						mods.relatedItem.name += <name type="conference">
-							<namePart>{item.conferenceName}</namePart>
-							</name>;
-					}
-				} else if (item.itemType == "encyclopediaArticle") {
-					mods.relatedItem.genre += <genre authority="marcgt">encyclopedia</genre>;
-				}
+			else if (["bookSection", "conferencePaper", "dictionaryEntry",
+					"encyclopediaArticle"].indexOf(item.itemType) !== -1) {
+				mapProperty(originInfo, "issuance", "monographic");
 			}
+		} else {
+			// eXist Solutions points out that most types are more often
+			// monographic than not & will use this internally.
+			// Perhaps comment this out in the main distribution, though.
+			mapProperty(originInfo, "issuance", "monographic");
+		}
+
+		if(originInfo.hasChildNodes()) {
+			// For a journal article, bookSection, etc., the part is the host
+			topOrHost.appendChild(originInfo);
 		}
 		
 		// XML tag identifier; object fields ISBN, ISSN
-		if(isPartialItem) {
-			var identifier = mods.relatedItem;
-		} else {
-			var identifier = mods;
-		}
-		if(item.ISBN) {
-			identifier.identifier += <identifier type="isbn">{item.ISBN}</identifier>;
-		}
-		if(item.ISSN) {
-			identifier.identifier += <identifier type="issn">{item.ISSN}</identifier>;
-		}
-		if(item.DOI) {
-			mods.identifier += <identifier type="doi">{item.DOI}</identifier>;
+		mapProperty(topOrHost, "identifier", item.ISBN, {"type":"isbn"});
+		mapProperty(topOrHost, "identifier", item.ISSN, {"type":"issn"});
+		mapProperty(mods, "identifier", item.DOI, {"type":"doi"});
+		
+		// XML tag relatedItem.name; object field conferenceName
+		if(item.conferenceName) {
+			var name = doc.createElementNS(ns, "name");
+			name.setAttribute("type", "conference");
+			mapProperty(name, "namePart", item.conferenceName);
 		}
 		
 		// XML tag relatedItem.titleInfo; object field publication
 		if(item.publicationTitle) {
-			mods.relatedItem.titleInfo += <titleInfo><title>{item.publicationTitle}</title></titleInfo>;
+			var titleInfo = doc.createElementNS(ns, "titleInfo");
+			mapProperty(titleInfo, "title", item.publicationTitle);
+			host.appendChild(titleInfo);
+		}
+		
+		// XML tag relatedItem.titleInfo; object field journalAbbreviation
+		if(item.journalAbbreviation) {
+			var titleInfo = doc.createElementNS(ns, "titleInfo");
+			titleInfo.setAttribute("type", "abbreviated");
+			mapProperty(titleInfo, "title", item.journalAbbreviation);
+			host.appendChild(titleInfo);
 		}
 		
 		// XML tag classification; object field callNumber
-		if(item.callNumber) {
-			mods.classification = item.callNumber;
-		}
+		mapProperty(topOrHost, "classification", item.callNumber);
 
-		// XML tag location.url; object field archiveLocation
+		// XML tag location.url; object field url
 		if(item.url) {
-			mods.location.url += item.url;
-			if(item.accessDate) {
-				mods.location.url.@dateLastAccessed = item.accessDate;
-			}
+			var location = doc.createElementNS(ns, "location");
+			var url = mapProperty(location, "url", item.url, {"usage":"primary display"});
+			if(url && item.accessDate) url.setAttribute("dateLastAccessed", item.accessDate);
+			mods.appendChild(location);
 		}
-
-		
+				
 		// XML tag location.physicalLocation; object field archiveLocation
 		if(item.archiveLocation) {
-			mods.location += <location><physicalLocation>{item.archiveLocation}</physicalLocation></location>;
-		}
-		
-		// XML tag title.titleInfo; object field journalAbbreviation
-		if(item.journalAbbreviation) {
-			mods.relatedItem.titleInfo += <titleInfo type="abbreviated"><title>{item.journalAbbreviation}</title></titleInfo>;
+			var location = doc.createElementNS(ns, "location");
+			mapProperty(location, "physicalLocation", item.archiveLocation);
+			topOrHost.appendChild(location);
 		}
 		
 		// XML tag abstract; object field abstractNote
-		if(item.abstractNote) {
-			mods.abstract = item.abstractNote;
-		}
+		mapProperty(mods, "abstract", item.abstractNote);
 		
-		if(mods.relatedItem.length() == 1 && isPartialItem) {
-			mods.relatedItem.@type = "host";
+		// XML tag series/titleInfo; object field series, seriesTitle, seriesText, seriesNumber
+		var titleInfo = doc.createElementNS(ns, "titleInfo");
+		mapProperty(titleInfo, "title", item.series);
+		mapProperty(titleInfo, "title", item.seriesTitle);
+		mapProperty(titleInfo, "subTitle", item.seriesText);
+		if(titleInfo.hasChildNodes()) series.appendChild(titleInfo);
+		
+		if(item.seriesNumber) {
+			var seriesPart = doc.createElementNS(ns, "part"),
+				detail = doc.createElementNS(ns, "detail"),
+				number = doc.createElementNS(ns, "number");
+			detail.setAttribute("type", "volume");
+			number.appendChild(doc.createTextNode(item.seriesNumber));
+			detail.appendChild(number);
+			seriesPart.appendChild(detail);
+			series.appendChild(seriesPart);
 		}
 		
 		/** NOTES **/
 		
 		if(Zotero.getOption("exportNotes")) {
-			for(var j in item.notes) {
-				// Add note tag
-				var note = <note type="content">{item.notes[j].note}</note>;
-				mods.note += note;
+			for(var j=0; j<item.notes.length; j++) {
+				mapProperty(mods, "note", item.notes[j].note);
 			}
 		}
 		
 		/** TAGS **/
 		
-		for(var j in item.tags) {
-			mods.subject += <subject><topic>{item.tags[j].tag}</topic></subject>;
+		for(var j=0; j<item.tags.length; j++) {
+			var subject = doc.createElementNS(ns, "subject"),
+				topic = doc.createElementNS(ns, "topic");
+			topic.appendChild(doc.createTextNode(item.tags[j].tag));
+			subject.appendChild(topic);
+			mods.appendChild(subject);
 		}
 
 		/** LANGUAGE **/
-
+		
 		if(item.language) {
-			mods.language.languageTerm = <languageTerm type="text">{item.language}</languageTerm>;
+			var language = doc.createElementNS(ns, "language");
+			mapProperty(language, "languageTerm", item.language, {"type":"text"});
+			mods.appendChild(language);
 		}
 
 		/** EXTRA->NOTE **/
-		if(item.extra) {
-			mods.note += <note>{item.extra}</note>;
+		mapProperty(mods, "note", item.extra);
+		
+		if(recordInfo.hasChildNodes()) mods.appendChild(recordInfo);
+		if(host.hasChildNodes()) {
+			host.setAttribute("type", "host");
+			mods.appendChild(host);
 		}
-		
-		
-		// XML tag relatedItem.titleInfo; object field series
-		if(item.seriesTitle || item.series || item.seriesNumber || item.seriesText) {
-			var series = <relatedItem type="series"/>;
-
-			// eXist Solutions points out that these types are more often
-			// continuing than not & will use this internally.
-			// Perhaps comment this out in the main distribution, though.
-			series.originInfo.issuance = "continuing";
-			
-			if(item.series) {
-				series.titleInfo.title = item.series;
-			}
-			
-			if(item.seriesTitle) {
-				series.titleInfo.title += <title>{item.seriesTitle}</title>;
-			}
-			
-			if(item.seriesText) {
-				series.titleInfo.subTitle = item.seriesText;
-			}
-			
-			if(item.seriesNumber) {
-				series.part.detail = <detail type="volume"><number>{item.seriesNumber}</number></detail>;
-			}
-
-			// handle series editors
-			for(var j in item.creators) {
-				var roleTerm = "";
-				if(item.creators[j].creatorType == "seriesEditor") {
-					roleTerm = "pbd";
-					if(item.creators[j].fieldMode == 1) {
-						series.name += <name type="corporate">
-							<namePart>{item.creators[j].lastName}</namePart>
-							<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
-							</name>;
-					} else {
-						series.name += <name type="personal">
-							<namePart type="family">{item.creators[j].lastName}</namePart>
-							<namePart type="given">{item.creators[j].firstName}</namePart>
-							<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
-							</name>;
-					}
-				}
-			}
-			
-			// TODO: make this work in import
-			//
-			if(isPartialItem) {
-				mods.relatedItem.relatedItem = series;
-			} else {
-				mods.relatedItem += series;
-			}
+		if(series.hasChildNodes()) {
+			series.setAttribute("type", "series");
+			topOrHost.appendChild(series);
 		}
-		
-		modsCollection.mods += mods;
+		doc.documentElement.appendChild(mods);
 	}
 	
 	Zotero.write('<?xml version="1.0"?>'+"\n");
-	Zotero.write(modsCollection.toXMLString());
+	var serializer = new XMLSerializer();
+	Zotero.write(serializer.serializeToString(doc));
 }
 
-function processIdentifiers(newItem, identifier) {
-	for each(var myIdentifier in identifier) {
-		if(myIdentifier.@type == "isbn") {
-			var m = myIdentifier.text().toString()
-					.replace(/\s*-\s*/g,'').match(/(?:[\dX]{10}|\d{13})/i);
-			if(m) newItem.ISBN = m[0];
-		} else if(myIdentifier.@type == "issn") {
-			var m = myIdentifier.text().toString().match(/\b\d{4}\s*-?\s*\d{4}\b/);
-			if(m) newItem.ISSN = m[0];
-		} else if(myIdentifier.@type == "doi") {
-			newItem.DOI = myIdentifier.text().toString();
-		}
-	}
-}
-
-function processTitle(titleInfo, m) {
-	var title = titleInfo.m::title.text().toString().trim();
-
-	if(titleInfo.m::subTitle.length()) {
-		title = title.replace(/:$/,'') + ': ' + titleInfo.m::subTitle.text().toString().trim();
-	}
-
-	if(titleInfo.m::nonSort.length()) {
-		title = titleInfo.m::nonSort.text().toString().trim() + ' ' + title;
-	}
-
+function processTitleInfo(titleInfo) {
+	var title = ZU.xpathText(titleInfo, "m:title[1]", xns).trim();
+	var subtitle = ZU.xpathText(titleInfo, "m:subTitle[1]", xns);
+	if(subtitle) title = title.replace(/:$/,'') + ": "+ subtitle.trim();
+	var nonSort = ZU.xpathText(titleInfo, "m:nonSort[1]", xns);
+	if(nonSort) title = nonSort.trim() + " " + title;
 	return title;
 }
 
-function processCreator(name, m) {
-	// TODO: institutional authors
-	var creator = {};
-	var backupName = new Array();
-	creator.firstName = "";
-	for each(var namePart in name.m::namePart) {
-		if(namePart.@type == "given") {
-			if(creator.firstName != "")
-				creator.firstName = creator.firstName + " ";
-			creator.firstName = creator.firstName + namePart.text().toString();
-		} else if(namePart.@type == "family") {
-			creator.lastName = namePart.text().toString();
-		} else if(namePart.@type == "date" || namePart.@type == "termsOfAddress") {
-			// ignore these non name types for now
-		} else {
-			backupName.push(namePart.text().toString());
+function processTitle(contextElement) {
+	// Try to find a titleInfo element with no type specified and a title element as a
+	// child
+	var titleElements = ZU.xpath(contextElement, "m:titleInfo[not(@type)][m:title][1]", xns);
+	if(titleElements.length) return processTitleInfo(titleElements[0]);
+	
+	// That failed, so look for any titleInfo element without no type secified
+	var title = ZU.xpathText(contextElement, "m:titleInfo[not(@type)][1]", xns);
+	if(title) return title;
+	
+	// That failed, so just go for the first title
+	return ZU.xpathText(contextElement, "m:titleInfo[1]", xns);
+}
+
+function processGenre(contextElement) {
+	// Try to get itemType by treating local genre as Zotero item type
+	var genre = ZU.xpath(contextElement, 'm:genre[@authority="local"]', xns);
+	for(var i=0; i<genre.length; i++) {
+		var genreStr = genre[i].textContent;
+		if(Zotero.Utilities.itemTypeExists(genreStr)) return genreStr;
+	}
+	
+	// Try to get MARC genre and convert to an item type
+	genre = ZU.xpath(contextElement, 'm:genre[@authority="marcgt"] | m:genre[@authority="marc"]', xns);
+	for(var i=0; i<genre.length; i++) {
+		var genreStr = genre[i].textContent;
+		if(fromMarcGenre[genreStr]) return fromMarcGenre[genreStr];
+	}
+	
+	// Try to get DCT genre and convert to an item type
+	genre = ZU.xpath(contextElement, 'm:genre[@authority="dct"]', xns);
+	for(var i=0; i<genre.length; i++) {
+		var genreStr = genre[i].textContent.replace(/\s+/g, "");
+		if(dctGenres[genreStr]) return dctGenres[genreStr];
+	}
+	
+	// Try unlabeled genres
+	genre = ZU.xpath(contextElement, 'm:genre', xns);
+	for(var i=0; i<genre.length; i++) {
+		var genreStr = genre[i].textContent;
+		
+		// Zotero
+		if(Zotero.Utilities.itemTypeExists(genreStr)) return genreStr;
+		
+		// MARC
+		if(fromMarcGenre[genreStr]) return fromMarcGenre[genreStr];
+		
+		// DCT
+		var dctGenreStr = genreStr.replace(/\s+/g, "");
+		if(dctGenres[dctGenreStr]) return dctGenres[dctGenreStr];
+		
+		// Try regexps
+		for(var type in modsTypeRegex) {
+			if(modsTypeRegex[type].exec(genreStr)) return type;
 		}
 	}
 	
-	if(backupName.length && !creator.firstName && !creator.lastName) {
-		if(name.@type == 'personal') {
-			backupName = backupName.join(' ');
-			//remove any possible dates
-			backupName = backupName.replace(/[\[\(][^A-Za-z]*[\]\)]/g,'');
-			creator = ZU.cleanAuthor(backupName, "author", true);
+	return undefined;
+}
+
+function processItemType(contextElement) {
+	var type = processGenre(contextElement);
+	if(type) return type;
+	
+	// Try to get type information from typeOfResource
+	var typeOfResource = ZU.xpath(contextElement, 'm:typeOfResource', xns);
+	for(var i=0; i<typeOfResource.length; i++) {
+		var typeOfResourceStr = typeOfResource[i].textContent.trim();
+		
+		// Try list
+		if(fromTypeOfResource[typeOfResourceStr]) {
+			return fromTypeOfResource[typeOfResourceStr];
+		}
+		
+		// Try regexps
+		for(var type in modsTypeRegex) {
+			if(modsTypeRegex[type].exec(typeOfResourceStr)) return type;
+		}
+	}
+	
+	var hasHost = false;
+	var periodical = false;
+	
+	// Try to get genre data from host
+	var hosts = ZU.xpath(contextElement, 'm:relatedItem[@type="host"]', xns);
+	for(var i=0; i<hosts.length; i++) {
+		type = processGenre(hosts[i]);
+		if(type) return type;
+	}
+		
+	// Figure out if it's a periodical
+	var periodical = ZU.xpath(contextElement, 
+		'm:relatedItem[@type="host"]/m:originInfo/m:issuance[text()="continuing" or text()="serial"]',
+		xns).length;
+
+	// Try physicalDescription/internetMediaType
+	var internetMediaTypes = ZU.xpath(contextElement, 'm:physicalDescription/m:internetMediaType', xns);
+	for(var i=0; i<internetMediaTypes.length; i++) {
+		var internetMediaTypeStr = internetMediaTypes[i].textContent.trim();
+		if(modsInternetMediaTypes[internetMediaTypeStr]) {
+			return modsInternetMediaTypes[internetMediaTypeStr];
+		};
+	}
+
+	// As a last resort, if it has a host, let's set it to book chapter, so we can import
+	// more info. Otherwise default to document
+	if(hosts.length) {
+		if(periodical) return 'journalArticle';
+		return 'bookSection';
+	}
+	
+	return "document";
+}
+
+function processCreator(name, itemType, defaultCreatorType) {
+	var creator = {};
+	var backupName = new Array();
+	creator.firstName = ZU.xpathText(name, 'm:namePart[@type="given"]', xns, " ") || undefined;
+	creator.lastName = ZU.xpathText(name, 'm:namePart[@type="family"]', xns, " ");
+	
+	if(!creator.lastName) {
+		var isPersonalName = name.getAttribute("type") === "personal",
+			backupName = ZU.xpathText(name, 'm:namePart[not(@type="date")][not(@type="termsOfAddress")]', xns, (isPersonalName ? " " : ": "));
+		
+		if(!backupName) return null;
+		
+		if(isPersonalName) {
+			creator = ZU.cleanAuthor(backupName.replace(/[\[\(][^A-Za-z]*[\]\)]/g, ''),
+				"author", true);
+			delete creator.creatorType;
 		} else {
-			backupName = backupName.join(': ');
 			creator.lastName = ZU.trimInternal(backupName);
 			creator.fieldMode = 1;
 		}
 	}
+	
+	if(!creator.lastName) return null;
 
-	// look for roles
-	for each(var role in name.m::role.m::roleTerm) {
-		if(role.@type == 'text' || !role.@type.toString()) {
-			switch(role.toLowerCase()) {
-				case 'author':
-				case 'editor':
-				case 'contributor':
-				case 'translator':
-					creator.creatorType = role.toLowerCase();
-					break;
-			}
-		} else if(role.@type == "code" && role.@authority == "marcrelator") {
-			if(role == "edt") {
-				creator.creatorType = "editor";
-			} else if(role == "ctb") {
-				creator.creatorType = "contributor";
-			} else if(role == "trl") {
-				creator.creatorType = "translator";
-			}
+	// Look for roles
+	var roles = ZU.xpath(name, 'm:role/m:roleTerm[@type="text" or not(@type)]', xns);
+	var validCreatorsForItemType = ZU.getCreatorsForType(itemType);
+	for(var i=0; i<roles.length; i++) {
+		var roleStr = roles[i].textContent.toLowerCase();
+		if(validCreatorsForItemType.indexOf(roleStr) !== -1) {
+			creator.creatorType = roleStr;
 		}
 	}
+	
+	if(!creator.creatorType) {
+		// Look for MARC roles
+		var roles = ZU.xpath(name, 'm:role/m:roleTerm[@type="code"][@authority="marcrelator"]', xns);
+		for(var i=0; i<roles.length; i++) {
+			var roleStr = roles[i].textContent.toLowerCase();
+			if(marcRelators[roleStr]) creator.creatorType = marcRelators[roleStr];
+		}
+		
+		// Default to author
+		if(!creator.creatorType) creator.creatorType = defaultCreatorType;
+	}
 
-	if(!creator.creatorType) creator.creatorType = "author";
-
-	return creator.lastName ? creator : null;
+	return creator;
 }
 
-function processExtent(newItem, extent) {
+function processCreators(contextElement, newItem, defaultCreatorType) {
+	var names = ZU.xpath(contextElement, 'm:name', xns);
+	for(var i=0; i<names.length; i++) {
+		var creator = processCreator(names[i], newItem.itemType, defaultCreatorType);
+		if(creator) newItem.creators.push(creator);
+	}
+}
+
+function processExtent(extent, newItem) {
 	//try to parse extent according to
 	//http://www.loc.gov/standards/mods/v3/mods-userguide-elements.html#extent
 	//i.e. http://www.loc.gov/marc/bibliographic/bd300.html
@@ -516,7 +814,7 @@ function processExtent(newItem, extent) {
 		'$'							//make sure to capture the rest of the line
 		);
 
-	var ma = extentRe.exec(extent.text().toString());
+	var ma = extentRe.exec(extent);
 	if(ma && ma[1]) {
 		//drop supplemental info (i.e. everything after +)
 		if(ma[1].indexOf('+') >= 0) {
@@ -532,7 +830,7 @@ function processExtent(newItem, extent) {
 		}
 
 		// volume
-		if(ZU.fieldIsValidForType('volume', newItem.itemType)) {
+		if(!newItem.volume && ZU.fieldIsValidForType('volume', newItem.itemType)) {
 			var volume = ma[1].match(/\bv(?:ol(?:ume)?)?\.?\s+(\d+)/i);
 			if(volume) {
 				newItem.volume = volume[1];
@@ -540,7 +838,7 @@ function processExtent(newItem, extent) {
 		}
 
 		//issue
-		if(ZU.fieldIsValidForType('issue', newItem.itemType)) {
+		if(!newItem.issue && ZU.fieldIsValidForType('issue', newItem.itemType)) {
 			var issue = ma[1].match(/\b(?:no?|iss(?:ue)?)\.?\s+(\d+)/i);
 			if(issue) {
 				newItem.issue = issue[1];
@@ -548,7 +846,7 @@ function processExtent(newItem, extent) {
 		}
 
 		// numPages
-		if(ZU.fieldIsValidForType('numPages', newItem.itemType)) {
+		if(!newItem.numPages && ZU.fieldIsValidForType('numPages', newItem.itemType)) {
 			var pages = ma[1].match(/(\d+)\s*p(?:ages?)?\b/i);
 			if(pages) {
 				newItem.numPages = pages[1];
@@ -556,7 +854,7 @@ function processExtent(newItem, extent) {
 		}
 
 		// numberOfVolumes
-		if(ZU.fieldIsValidForType('numberOfVolumes', newItem.itemType)) {
+		if(!newItem.numberOfVolumes && ZU.fieldIsValidForType('numberOfVolumes', newItem.itemType)) {
 			//includes volumes, scores, sound (discs, but I think there could be others)
 			//video (cassette, but could have others)
 			var nVol = ma[1].match(/(\d+)\s+(?:v(?:olumes?)?|scores?|sound|video)\b/i);
@@ -566,7 +864,7 @@ function processExtent(newItem, extent) {
 		}
 
 		// runningTime
-		if(ZU.fieldIsValidForType('runningTime', newItem.itemType)) {
+		if(!newItem.runningTime && ZU.fieldIsValidForType('runningTime', newItem.itemType)) {
 			//several possible formats:
 			var rt;
 			// 002016 = 20 min., 16 sec.
@@ -617,413 +915,159 @@ function processExtent(newItem, extent) {
 
 	// dimensions: artworkSize
 	// only part of artwork right now, but maybe will be in other types in the future
-	if(ma && ma[2] && ZU.fieldIsValidForType('artworkSize', newItem.itemType)) {
+	if(!newItem.artworkSize && ma && ma[2] && ZU.fieldIsValidForType('artworkSize', newItem.itemType)) {
 		//drop supplemental info (i.e. everything after +)
 		if(ma[2].indexOf('+') >= 0) {
 			ma[2] = ma[2].slice(0, ma[2].indexOf('+'));
 		}
 		//26 cm. or 33 x 15 cm. or 1/2 in. or 1 1/2 x 15/16 in.
 		var dim = ma[2].match(/(?:(?:(?:\d+\s+)?\d+\/)?\d+\s*x\s*)?(?:(?:\d+\s+)?\d+\/)?\d+\s*(?:cm|mm|m|in|ft)\./i);
-		if(dim) newItem.dimensions = dim[0];
+		if(dim) newItem.artworkSize = dim[0];
+	}
+}
+
+function processIdentifiers(contextElement, newItem) {
+	var isbnNodes = ZU.xpath(contextElement, './/m:identifier[@type="isbn"]', xns),
+		isbns = [];
+	for(var i=0; i<isbnNodes.length; i++) {		
+		var m = isbnNodes[i].textContent.replace(/\s*-\s*/g,'').match(/(?:[\dX]{10}|\d{13})/i);
+		if(m) isbns.push(m[0]);
+	}
+	if(isbns.length) newItem.ISBN = isbns.join(", ");
+	
+	var issnNodes = ZU.xpath(contextElement, './/m:identifier[@type="issn"]', xns),
+		issns = [];
+	for(var i=0; i<issnNodes.length; i++) {		
+		var m = issnNodes[i].textContent.match(/\b\d{4}\s*-?\s*\d{4}\b/i);
+		if(m) issns.push(m[0]);
+	}
+	if(issns.length) newItem.ISSN = issns.join(", ");
+	
+	newItem.DOI = ZU.xpathText(contextElement, 'm:identifier[@type="doi"]', xns);
+}
+
+function getFirstResult(contextNode, xpaths) {
+	for(var i=0; i<xpaths.length; i++) {
+		var results = ZU.xpath(contextNode, xpaths[i], xns);
+		if(results.length) return results[0].textContent;
 	}
 }
 
 function doImport() {
-	var marcGenres = {
-//		"abstract or summary":XXX,
-//		"abstract":XXX,
-//		"summary":XXX,
-		"art reproduction":"artwork",
-		"article":"journalArticle",
-		"autobiography":"book",
-		"bibliography":"bookSection",
-		"biography":"book",
-		"book":"book",
-//		"calendar":XXX,
-//		"catalog":XXX,
-		"chart":"artwork",
-		"comic or graphic novel":"book",
-		"comic":"book",
-		"graphic novel":"book",
-		"comic strip":"artwork",
-		"conference publication":"conferencePaper",
-//		"database":XXX,
-		"dictionary":"dictionaryEntry",
-		"diorama":"artwork",
-//		"directory":XXX,
-		"drama":"book",
-		"encyclopedia":"encyclopediaArticle",
-//		"essay":XXX,
-		"festschrift":"book",
-		"fiction":"book",
-//		"filmography":XXX,
-		"filmstrip":"videoRecording",
-//		"findingaid":XXX,
-//		"flash card":XXX,
-		"folktale":"book",
-//		"font":XXX,
-//		"game":XXX,
-		"government publication":"book",
-		"graphic":"artwork",
-		"globe":"map",
-		"handbook":"book",
-		"history":"book",
-		"hymnal":"book",
-		"humor,satire":"book",
-		"humor":"book",
-		"satire":"book",
-//		"index":XXX,
-//		"instruction":XXX,
-//		"interview":XXX,
-//		"issue":XXX,
-		"journal":"journalArticle",
-		"kit":"artwork",
-//		"language instruction":XXX,
-		"law report or digest":"journalArticle",
-		"law report":"journalArticle",
-		"digest":"journalArticle",
-		"law digest":"journalArticle",
-		"legal article":"journalArticle",
-		"legal case and case notes":"case",
-		"legal case":"case",
-		"case notes":"case",
-		"legislation":"statute",
-		"loose-leaf":"manuscript",
-		"map":"map",
-		"memoir":"book",
-		"microscope slide":"artwork",
-		"model":"artwork",
-//		"multivolume monograph":XXX,
-		"novel":"book",
-//		"numeric data":XXX,
-//		"offprint":XXX,
-		"online system or service":"webpage",
-		"online system":"webpage",
-		"service":"webpage",
-		"online service":"webpage",
-		"patent":"patent",
-		"periodical":"journalArticle",
-		"picture":"artwork",
-//		"poetry":XXX,
-//		"programmed text":XXX,
-		"realia":"artwork",
-//		"rehearsal":XXX,
-//		"remote sensing image":XXX,
-//		"reporting":XXX,
-//		"review":XXX,
-		"script":"book",
-//		"series":XXX,
-//		"short story":XXX,
-		"slide":"artwork",
-		"sound":"audioRecording",
-		"speech":"audioRecording",
-//		"standard or specification":XXX,
-//		"standard":XXX,
-//		"specification":XXX,
-//		"statistics":XXX,
-//		"survey of literature":XXX,
-		"technical report":"report",
-		"newspaper":"newspaperArticle",
-		"theses":"thesis",
-		"thesis":"thesis",
-//		"toy":XXX,
-		"transparency":"artwork",
-//		"treaty":XXX,
-		"videorecording":"videoRecording",
-		"letter":"letter",
-		"motion picture":"film",
-		"art original":"artwork",
-		"web site":"webpage",
-		"yearbook":"book"
-	};
-	
-	var dctGenres = {
-		//"collection":XXX,
-		//"dataset":XXX,
-		//"event":XXX,
-		"image":"artwork",
-		"interactiveresource":"webpage",
-		//"model":XXX,
-		"movingimage":"videoRecording",
-		//"physical object":XXX,
-		//"place":XXX,
-		//"resource":XXX,
-		//"service":XXX,
-		"software":"computerProgram",
-		"sound":"audioRecording",
-		"stillimage":"artwork"
-		//"text":XXX
-	};
-
-	var modsTypeOfResources = {
-		//"text":XXX,
-		"cartographic":"map",
-		//"notated music":XXX,
-		"sound recording-musical":"audioRecording",
-		"sound recording-nonmusical":"audioRecording",
-		"sound recording":"audioRecording",
-		"still image":"artwork",
-		"moving image":"videoRecording",
-		//"three dimensional object":XXX,
-		"software, multimedia":"computerProgram"
-	};
-
-	var modsTypeRegex = {
-	//	'artwork': 
-	//	'audioRecording': /\bmusic/i,
-	//	'bill': 
-		'blogPost': /\bblog/i,
-	//	'book': 
-	//	'bookSection': 
-	//	'case': 
-	//	'computerProgram': 
-	//	'conferencePaper': 
-	//	'dictionaryEntry': 
-	//	'email': 
-	//	'encyclopediaArticle': 
-	//	'film': 
-	//	'forumPost': 
-	//	'hearing': 
-	//	'instantMessage': 
-	//	'interview': 
-		'journalArticle': /journal\s*article/i,
-	//	'letter': 
-		'magazineArticle': /magazine\s*article/i,
-	//	'manuscript': 
-	//	'map': 
-		'newspaperArticle': /newspaper\*article/i
-	//	'patent': 
-	//	'podcast': 
-	//	'presentation': 
-	//	'radioBroadcast': 
-	//	'report': 
-	//	'statute': 
-	//	'thesis': 
-	//	'tvBroadcast': 
-	//	'videoRecording': 
-	//	'webpage': 
-	}
-
-	var modsInternetMediaTypes = {
-		//a ton of types listed at http://www.iana.org/assignments/media-types/index.html
-		'text/html': 'webpage'
-	}
-
-	// parse with E4X
-	var m = new Namespace("http://www.loc.gov/mods/v3");
-	// why does this default namespace declaration not work!?
-	default xml namespace = m;
 	var xml = Zotero.getXML();
 	
-	if(xml.m::mods.length()) {
-		var modsElements = xml.m::mods;
-		var nModsElements = modsElements.length();
-	} else {
-		var modsElements = [xml];
-		var nModsElements = 1;
-	}
+	var modsElements = ZU.xpath(xml, "/m:mods | /m:modsCollection/m:mods", xns);
 	
-	var i = 0;
-	for each(var mods in modsElements) {
-		var newItem = new Zotero.Item();
+	for(var iModsElements=0, nModsElements=modsElements.length;
+			iModsElements<nModsElements; iModsElements++) {
+		var modsElement = modsElements[iModsElements],
+			newItem = new Zotero.Item();
 		
 		// title
-		for each(var titleInfo in mods.m::titleInfo) {
-			// dropping other title types so they don't overwrite the main title
-			// we have same behaviour in the MARC translator
-			if(!titleInfo.@type.toString()) { 
-				if(titleInfo.m::title.length()) {
-					newItem.title = processTitle(titleInfo, m);
-				} else {
-					newItem.title = titleInfo.*.text(); // including text from sub elements
-				}
-			}
+		newItem.title = processTitle(modsElement);
+		
+		// shortTitle
+		var abbreviatedTitle = ZU.xpath(modsElement, 'm:titleInfo[@type="abbreviated"]', xns);
+		if(abbreviatedTitle.length) {
+			newItem.shortTitle = processTitleInfo(abbreviatedTitle[0]);
 		}
-		// try to get genre from local genre
-		for each(var genre in mods.m::genre) {
-			var genreStr = genre.text().toString().trim().toLowerCase();
-			if(genre.@authority == "local" && Zotero.Utilities.itemTypeExists(genre.text().toString())) {
-				newItem.itemType = genre.text().toString();
-			} else if(!newItem.itemType && (genre.@authority == "marcgt" || genre.@authority == "marc")) {
-				// otherwise, look at the marc genre
-				newItem.itemType = marcGenres[genreStr];
-			} else if(!newItem.itemType && (genre.@authority == "dct")) {
-				// otherwise, look at the dct genre
-				newItem.itemType = dctGenres[genreStr.replace(/\s+/g,"")];
-			} else {
-				// in case authority was not defined, go through all of the lists anyway
-				newItem.itemType = marcGenres[genreStr] ||
-									dctGenres[genreStr];
-			}
-
-			// try some regex matching
-			if(!newItem.itemType) {
-				for(var type in modsTypeRegex) {
-					if(modsTypeRegex[type].exec(genreStr)) {
-						newItem.itemType = type;
-						break;
-					}
-				}
-			}
-
-			if(newItem.itemType) {
-				break;
-			}
-		}
-
-		if(!newItem.itemType) {
-			//try to get type information from typeOfResource
-			for each(var typeOfResource in mods.m::typeOfResource) {
-				newItem.itemType = modsTypeOfResources[typeOfResource.text().toString()];
-				//try some regex matching
-				if(!newItem.itemType) {
-					for(var type in modsTypeRegex) {
-						if(modsTypeRegex[type].exec(typeOfResource.text().toString().trim())) {
-							newItem.itemType = type;
-							break;
-						}
-					}
-				}
-
-				if(newItem.itemType) break;
-			}
-			var hasHost = false;
-			var periodical = false;
-			if(!newItem.itemType) {
-				// try to get genre data from host
-				for each(var relatedItem in mods.m::relatedItem) {
-					if(relatedItem.@type == "host") {
-						hasHost = true;
-						for each(var genre in relatedItem.m::genre) {
-							if(genre.@authority == "marcgt" || genre.@authority == "marc") {
-								newItem.itemType = marcGenres[genre.text().toString()];
-								break;
-							}
-						}
-						//figure out if it's a periodical
-						for each(var issuance in relatedItem.m::originInfo.m::issuance) {
-							switch(issuance.text().toString().trim().toLowerCase()) {
-								case 'continuing':
-								case 'serial':
-									periodical = true;
-							}
-						}
-					}
-				}
-			}
-
-			if(!newItem.itemType) {
-				//try physicalDescription/internetMediaType
-				for each(var type in mods.m::physicalDescription.m::internetMediaType) {
-					newItem.itemType = modsInternetMediaTypes[type.text().toString().trim().toLowerCase()];
-					if(newItem.itemType) break;
-				}
-			}
-
-			//as a last resort, if it has a host, let's set it to book chapter,
-			//so we can import more info. Otherwise default to document
-			if(!newItem.itemType) {
-				if(hasHost) {
-					if(periodical) newItem.itemType = 'journalArticle';
-					else newItem.itemType = 'bookSection';
-				} else {
-					newItem.itemType = "document";
-				}
-			}
-		}
+		
+		// itemType
+		newItem.itemType = processItemType(modsElement);
 		
 		var isPartialItem = partialItemTypes.indexOf(newItem.itemType) !== -1;
 		
 		// TODO: thesisType, type
 		
-		for each(var name in mods.m::name) {
-			var creator = processCreator(name, m);
-			if(creator) {
-				newItem.creators.push(creator);
-			}
-		}
-		
+		// creators
+		processCreators(modsElement, newItem, "author");
 		// source
-		newItem.source = mods.m::recordInfo.m::recordContentSource.text().toString();
+		newItem.source = ZU.xpathText(modsElement, 'm:recordInfo/m:recordContentSource', xns);
 		// accessionNumber
-		newItem.accessionNumber = mods.m::recordInfo.m::recordIdentifier.text().toString();
+		newItem.accessionNumber = ZU.xpathText(modsElement, 'm:recordInfo/m:recordIdentifier', xns);
 		// rights
-		newItem.rights = mods.m::accessCondition.text().toString();
+		newItem.rights = ZU.xpathText(modsElement, 'm:accessCondition', xns);
 		
 		/** SUPPLEMENTAL FIELDS **/
 		
-		var part = false, originInfo = false;
+		var part = [], originInfo = [];
+		
+		// host
+		var hostNodes = ZU.xpath(modsElement, 'm:relatedItem[@type="host"]', xns)
+		for(var i=0; i<hostNodes.length; i++) {
+			var host = hostNodes[i];
+			
+			// publicationTitle
+			if(!newItem.publicationTitle) newItem.publicationTitle = processTitle(host);
+			
+			// journalAbbreviation
+			if(!newItem.journalAbbreviation) {
+				var titleInfo = ZU.xpath(host, 'm:titleInfo[@type="abbreviated"]', xns);
+				if(titleInfo.length) {
+					newItem.journalAbbreviation = processTitleInfo(titleInfo[0]);
+				}
+			}
+			
+			// creators (might be editors)
+			processCreators(host, newItem, "editor");
+			
+			// identifiers
+			processIdentifiers(host, newItem);
+			
+			part = part.concat(ZU.xpath(host, 'm:part', xns));
+			originInfo = originInfo.concat(ZU.xpath(host, 'm:originInfo', xns));
+		}
+		
+		if(!newItem.publicationTitle) newItem.publicationTitle = newItem.journalAbbreviation;		
 		
 		// series
-		for each(var relatedItem in mods.m::relatedItem) {
-			if(relatedItem.@type == "host") {
-				for each(var titleInfo in relatedItem.m::titleInfo) {
-					if(titleInfo.@type == "abbreviated") {
-						newItem.journalAbbreviation = processTitle(titleInfo, m);
-						if(!newItem.publicationTitle) newItem.publicationTitle = newItem.journalAbbreviation;
-					} else {
-						newItem.publicationTitle = processTitle(titleInfo, m);
-					}
-				}
-				//possible editors
-				for each(var editor in relatedItem.m::name) {
-					var creator = processCreator(editor, m);
-					if(creator) {
-						newItem.creators.push(creator);
-					}
-				}
-
-				part = relatedItem.m::part;
-				originInfo = relatedItem.m::originInfo;
-				processIdentifiers(newItem, relatedItem.m::identifier);
-			} else if(relatedItem.@type == "series") {
-				newItem.series = relatedItem.m::titleInfo.m::title.text().toString();
-				newItem.seriesTitle = relatedItem.m::titleInfo.m::partTitle.text().toString();
-				newItem.seriesText = relatedItem.m::titleInfo.m::subTitle.text().toString();
-				newItem.seriesNumber = relatedItem.m::titleInfo.m::partNumber.text().toString();
+		var seriesNodes = ZU.xpath(modsElement, './/m:relatedItem[@type="series"]', xns);
+		for(var i=0; i<seriesNodes.length; i++) {
+			var seriesNode = seriesNodes[i];
+			var series = ZU.xpathText(seriesNode, 'm:titleInfo/m:title', xns);
+			
+			if(ZU.fieldIsValidForType('series', newItem.itemType)) {
+				newItem.series = series;
+			} else if(ZU.fieldIsValidForType('seriesTitle', newItem.itemType)) {
+				newItem.seriesTitle = series;
 			}
+			
+			if(!newItem.seriesText) {
+				newItem.seriesText = ZU.xpathText(seriesNode, 'm:titleInfo/m:subTitle', xns);
+			}
+			
+			if(!newItem.seriesNumber) {
+				newItem.seriesNumber = getFirstResult(seriesNode,
+					['m:part/m:detail[@type="volume"]/m:number', 'm:titleInfo/m:partNumber']);
+			}
+			
+			processCreators(seriesNode, newItem, "seriesEditor");
 		}
 		
-		// get part
-		if(!part || !part.length()) {
-			part = mods.m::part;
-			originInfo = mods.m::originInfo;
-		} else if(!originInfo.length()) {
-			originInfo = mods.m::originInfo;
-		}
+		// Add part and originInfo from main entry
+		part = part.concat(ZU.xpath(modsElement, 'm:part', xns));
+		originInfo = originInfo.concat(ZU.xpath(modsElement, 'm:originInfo', xns));
 		
-		if(part) {
-			for each(var detail in part.m::detail) {
-				// volume
-				if(detail.@type == "volume") {
-					newItem.volume = detail.m::number.text().toString();
-					if(!newItem.volume) {
-						newItem.volume = detail.m::text.text().toString();
-					}
-				}
+		if(part.length) {
+			// volume, issue, section
+			var details = ["volume", "issue", "section"];
+			for(var i=0; i<details.length; i++) {
+				var detail = details[i];
 				
-				// number
-				if(detail.@type == "issue") {
-					newItem.issue = detail.m::number.text().toString();
-					if(!newItem.issue) {
-						newItem.issue = detail.m::text.text().toString();
-					}
-				}
-				
-				// section
-				if(detail.@type == "section") {
-					newItem.section = detail.m::number.text().toString();
-					if(!newItem.section) {
-						newItem.section = detail.m::text.text().toString();
-					}
-				}
+				newItem[detail] = getFirstResult(part, ['m:detail[@type="'+detail+'"]/m:number',
+					'm:detail[@type="'+detail+'"]']);
 			}
 
-			// pages
-			for each(var extent in part.m::extent) {
-				if(extent.@unit == "pages" || extent.@unit == "page") {
-					var pagesStart = extent.m::start.text().toString();
-					var pagesEnd = extent.m::end.text().toString();
+			// pages and other extent information
+			var extents = ZU.xpath(part, "m:extent", xns);
+			for(var i=0; i<extents.length; i++) {
+				var extent = extents[i],
+					unit = extent.getAttribute("unit");
+				
+				if(unit === "pages" || unit === "page") {
+					if(newItem.pages) continue;
+					var pagesStart = ZU.xpathText(extent, "m:start[1]", xns);
+					var pagesEnd = ZU.xpathText(extent, "m:end[1]", xns);
 					if(pagesStart || pagesEnd) {
 						if(pagesStart == pagesEnd) {
 							newItem.pages = pagesStart;
@@ -1034,150 +1078,155 @@ function doImport() {
 						}
 					}
 				} else {
-					processExtent(newItem, extent);
+					processExtent(extent.textContent, newItem);
 				}
 			}
-
-			// date
-			for each(var date in part.m::date) {
-				if(date.@point == 'end' && !newItem.date) {
-					newItem.date = date.text().toString();
-				} else if(!date.@point.toString()) {
-					newItem.date = date.text().toString();
-					//prefer structured dates
-					if(date.@encoding.toString()) break;
-				}
-			}
+			
+			newItem.date = getFirstResult(part, ['m:date[not(@point="end")][@encoding]',
+				'm:date[not(@point="end")]', 'm:date']);
 		}
 
-		//physical description
-		if(mods.m::physicalDescription.length()) {
-			for each(var extent in mods.m::physicalDescription.m::extent) {
-				processExtent(newItem, extent);
-			}
+		// physical description
+		var extents = ZU.xpath(modsElement, "m:physicalDescription/m:extent", xns);
+		for(var i=0; i<extents.length; i++) {
+			processExtent(extents[i].textContent, newItem);
 		}
 
 		// identifier
-		processIdentifiers(newItem, mods.m::identifier);
-		// edition
-		newItem.edition = originInfo.m::edition.text().toString();
-		// place
-		for each(var placeTerm in originInfo.m::place.m::placeTerm) {
-			if(placeTerm.@type == "text") {
-				newItem.place = placeTerm.text().toString();
-			}
-		}
-		// publisher/distributor
-		if(originInfo.m::publisher.length()) {
-			newItem.publisher = originInfo.m::publisher[0].text().toString();
-			if(newItem.itemType == "webpage" && !newItem.publicationTitle) {
-				newItem.publicationTitle = newItem.publisher;
-			}
-		}
-		// date
-		if(originInfo.m::copyrightDate.length()) {
-			newItem.date = originInfo.m::copyrightDate[0].text().toString();
-		} else if(originInfo.m::dateIssued.length()) {
-			for each(var date in originInfo.m::dateIssued) {
-				if(date.@point == 'end' && !newItem.date) {
-					newItem.date = date.text().toString();
-				} else if(!date.@point.toString()) {
-					newItem.date = date.text().toString();
-					if(date.@encoding.toString()) break;
+		processIdentifiers(modsElement, newItem);
+		
+		if(originInfo.length) {
+			// edition
+			var editionNodes = ZU.xpath(originInfo, 'm:edition', xns);
+			if(editionNodes.length) newItem.edition = editionNodes[0].textContent;
+			
+			// place
+			var placeNodes = ZU.xpath(originInfo, 'm:place/m:placeTerm[@type="text"]', xns);
+			if(placeNodes.length) newItem.place = placeNodes[0].textContent;
+			
+			// publisher/distributor
+			var publisherNodes = ZU.xpath(originInfo, 'm:publisher', xns);
+			if(publisherNodes.length) {
+				newItem.publisher = publisherNodes[0].textContent;
+				if(newItem.itemType == "webpage" && !newItem.publicationTitle) {
+					newItem.publicationTitle = newItem.publisher;
 				}
 			}
-		} else if(originInfo.m::dateCreated.length()) {
-			newItem.date = originInfo.m::dateCreated[0].text().toString();
+			
+			// date
+			newItem.date = getFirstResult(originInfo, ['m:copyrightDate[@encoding]',
+				'm:copyrightDate', 'm:dateIssued[not(@point="end")][@encoding]',
+				'm:dateIssued[not(@point="end")]', 'm:dateIssued',
+				'm:dateCreated[@encoding]',	'm:dateCreated']) || newItem.date;
+			
+			// lastModified
+			newItem.lastModified = getFirstResult(originInfo, ['m:dateModified[@encoding]',
+				'm:dateModified']);
+			
+			// accessDate
+			newItem.accessDate = getFirstResult(originInfo, ['m:dateCaptured[@encoding]',
+				'm:dateCaptured[not(@encoding)]']);
 		}
-		// lastModified
-		newItem.lastModified = originInfo.m::dateModified.text().toString();
-		// accessDate
-		newItem.accessDate = originInfo.m::dateCaptured.text().toString();
 		
 		// call number
-		newItem.callNumber = mods.m::classification.text().toString();
+		newItem.callNumber = ZU.xpathText(modsElement, 'm:classification', xns);
+		
 		// archiveLocation
-		var loc = new Array();
-		for each(var location in mods.m::location.m::physicalLocation) {
-			loc.push(location.text().toString());
-		}
-		if(loc.length) newItem.archiveLocation = loc.join('; ');
+		newItem.archiveLocation = ZU.xpathText(modsElement, './/m:location/m:physicalLocation', xns, "; ");
 
 		// attachments and url
-		for each(var url in mods.m::location.m::url) {
-			var value = url.text().toString();
-			if (url.@access == "raw object") {
-				var filetitle;
-				if (url.@displayLabel){
-					filetitle = url.@displayLabel.toString();
-				} else {
-					filetitle = "Attachment";
-				}
-				if (value.substr(-4,4)==".pdf") {
-					newItem.attachments.push({url:value, mimeType:"application/pdf", title:filetitle, downloadable:true});
-				} else {
-					newItem.attachments.push({url:value, title:filetitle, downloadable:true});
-				}
-			} else {
-				newItem.url = value;
+		var urlNodes = ZU.xpath(modsElement, 'm:location/m:url', xns);
+		for(var i=0; i<urlNodes.length; i++) {
+			var urlNode = urlNodes[0],
+				access = urlNode.getAttribute("access"),
+				usage = urlNode.getAttribute("usage");
+			if(access === "raw object") {
+				var attachment = {url:urlNode.textContent,
+						title:(urlNode.getAttribute("displayLabel") || "Attachment"),
+						downloadable:true};
+				if (attachment.url.substr(-4) === ".pdf") attachment.mimeType = "application/pdf";
+				newItem.attachments.push(attachment);
+			}
+			
+			if((!newItem.url || usage === "primary" || usage === "primary display")
+					&& access !== "preview") {
+				newItem.url = urlNode.textContent;
+			}
+			
+			if(!newItem.accessDate) {
+				newItem.accessDate = urlNode.getAttribute("dateLastAccessed");
 			}
 		}
+
 		// abstract
-		newItem.abstractNote = mods.m::abstract.text().toString();
+		newItem.abstractNote = ZU.xpathText(modsElement, 'm:abstract', xns, "\n\n");
 		
 		/** NOTES **/
-		for each(var note in mods.m::note) {
+		var noteNodes = ZU.xpath(modsElement, 'm:note', xns);
+		for(var i=0; i<noteNodes.length; i++) {
+			var note = noteNodes[i];
 			newItem.notes.push({ note:
-				(note.@type.toString()?note.@type.toString() + ': ':'') +
-				note.text().toString()
+				(note.hasAttribute("type") ? note.getAttribute("type") + ': ':'') +
+				note.textContent
 			});
 		}
 
 		// ToC - goes into notes
-		for each(var toc in mods.m::tableOfContents) {
-			newItem.notes.push({note:'Table of Contents: ' + toc.text().toString()});
+		var tocNodes = ZU.xpath(modsElement, 'm:tableOfContents', xns);
+		for(var i=0; i<tocNodes.length; i++) {
+			newItem.notes.push({note:'Table of Contents: ' + tocNodes[i].textContent});
 		}
 
 		/** TAGS **/
-		for each(var subject in mods.m::subject.m::topic) {
-			newItem.tags.push(ZU.trimInternal(subject.text().toString()));
+		var tagNodes = ZU.xpath(modsElement, 'm:subject/m:topic', xns);
+		for(var i=0; i<tagNodes.length; i++) {
+			newItem.tags.push(ZU.trimInternal(tagNodes[i].textContent));
 		}
 
 		// scale
 		if(ZU.fieldIsValidForType('scale', newItem.itemType)) {
-			var scale = mods.m::subject.m::cartographics.m::scale.text()
-						.toString().match(/1\s*:\s*\d+(?:,\d+)/);
+			var scale = ZU.xpathText(modsElement, 'm:subject/m:cartographics/m:scale', xns);
 			if(scale) {
-				newItem.scale = scale[0];
+				var m = scale.match(/1\s*:\s*\d+(?:,\d+)/);
+				if(m) newItem.scale = m[0];
 			}
 		}
 		
 		// Language
 		// create an array of languages
-		var languages = new Array();
-		for each(var language in mods.m::language) {
-			var code = false;
-			for each(var term in language.m::languageTerm) {
-				if (term.@type == "text") {
-					languages.push(term.text().toString());
+		var languages = [];
+		var languageNodes = ZU.xpath(modsElement, 'm:language', xns);
+		for(var i=0; i<languageNodes.length; i++) {
+			var code = false,
+				languageNode = languageNodes[i],
+				languageTerms = ZU.xpath(languageNode, 'm:languageTerm', xns);
+				
+			for(var j=0; j<languageTerms.length; j++) {
+				var term = languageTerms[j],
+					termType = term.getAttribute("type");
+				
+				if (termType === "text") {
+					languages.push(term.textContent);
 					code = false;
 					break;
 				// code authorities should be used, not ignored
 				// but we ignore them for now
-				} else if (term.@type == "code" || term.@authority) {
-					code = term.text().toString();
+				} else if (termType === "code" || term.hasAttribute("authority")) {
+					code = term.textContent;
 				}
 			}
 			// If we have a code or text content of the node
 			// (prefer the former), then we add that
-			if (code || (code = language.text().toString())) {
+			if (code || (languageNode.childNodes.length === 1
+					&& languageNode.firstChild.nodeType === 3 /* Node.TEXT_NODE*/
+					&& (code = languageNode.firstChild.nodeValue))) {
 				languages.push(code);
 			}
 		}
 		// join the list separated by semicolons & add it to zotero item
 		newItem.language = languages.join('; ');
 		
-		Zotero.setProgress(i++/nModsElements*100);
+		Zotero.setProgress(iModsElements/nModsElements*100);
 		newItem.complete();
 	}
 }
@@ -1209,8 +1258,8 @@ var testCases = [
 				"attachments": [],
 				"title": "FranUlmer.com -- Home Page",
 				"publicationTitle": "Election 2002 Web Archive",
-				"accessDate": "20020702  20021203",
-				"url": "http://wayback-cgi1.alexa.com/e2002/*/http://www.franulmer.com/",
+				"accessDate": "20020702",
+				"url": "http://www.franulmer.com/",
 				"abstractNote": "Web site promoting the candidacy of Fran Ulmer, Democratic candidate for Governor, Alaska, 2002. Includes candidate biography, issue position statements, campaign contact information, privacy policy and campaign news press releases. Site features enable visitors to sign up for campaign email list, volunteer, make campaign contributions and follow links to other internet locations.",
 				"language": "eng"
 			}
@@ -1277,7 +1326,8 @@ var testCases = [
 				"rights": "Copyright and reproduction rights for all Charles W. Cushman photographs are held by Indiana University and administered by the University Archives, Indiana University, Bloomington, IN 47405",
 				"publicationTitle": "Indiana University Digital Library Program: Charles W. Cushman Photograph Collection",
 				"date": "2003",
-				"url": "http://quod.lib.umich.edu/m/mods/thumbs/Indiana/oai.dlib.indiana.edu/ archives/cushman/oai_3Aoai.dlib.indiana.edu_3Aarchives_5Ccushman_5CP07803.png"
+				"archiveLocation": "Indiana University, Bloomington. University Archives P07803",
+				"url": "http://purl.dlib.indiana.edu/iudl/archives/cushman/P07803"
 			}
 		]
 	},
@@ -1355,7 +1405,7 @@ var testCases = [
 				"place": "Ithaca, N.Y",
 				"publisher": "Cornell University Press",
 				"date": "1999",
-				"callNumber": "PN4888.P6 A48 1999071/.3",
+				"callNumber": "PN4888.P6 A48 1999, 071/.3",
 				"language": "eng"
 			}
 		]
@@ -1430,7 +1480,6 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "",
 						"lastName": "Good, Thomas L.",
 						"fieldMode": 1,
 						"creatorType": "editor"
@@ -1569,7 +1618,6 @@ var testCases = [
 				"itemType": "document",
 				"creators": [
 					{
-						"firstName": "",
 						"lastName": "Center for Computer Assisted Research in the Humanities",
 						"fieldMode": 1,
 						"creatorType": "author"
@@ -1600,10 +1648,11 @@ var testCases = [
 				"title": "Directory of computer assisted research in musicology",
 				"source": "DLC",
 				"accessionNumber": "11315879",
+				"ISSN": "1057-9478",
 				"place": "Menlo Park, CA",
 				"publisher": "Center for Computer Assisted Research in the Humanities",
-				"date": "-1988",
-				"callNumber": "ML73 .D57780/.01/02584",
+				"date": "1985",
+				"callNumber": "ML73 .D57, 780/.01/02584",
 				"language": "eng"
 			}
 		]
@@ -1616,13 +1665,11 @@ var testCases = [
 				"itemType": "computerProgram",
 				"creators": [
 					{
-						"firstName": "",
 						"lastName": "Library of Congress: Music Division.",
 						"fieldMode": 1,
 						"creatorType": "author"
 					},
 					{
-						"firstName": "",
 						"lastName": "Library of Congress: National Digital Library Program.",
 						"fieldMode": 1,
 						"creatorType": "author"
@@ -1649,8 +1696,8 @@ var testCases = [
 				"accessionNumber": "5004836",
 				"place": "Washington, D.C",
 				"publisher": "Library of Congress",
-				"date": "1998-]",
-				"callNumber": "GV1623793.3",
+				"date": "1998",
+				"callNumber": "GV1623, 793.3",
 				"url": "http://hdl.loc.gov/loc.music/collmus.mu000010",
 				"abstractNote": "Presents over two hundred social dance manuals, pocket-sized books with diagrams used by itinerant dancing masters to teach the American gentry the latest dance steps. Includes anti-dance manuals as well as treatises on etiquette. Offered as part of the American Memory online resource compiled by the National Digital Library Program of the Library of Congress.",
 				"language": "eng"
@@ -1665,7 +1712,6 @@ var testCases = [
 				"itemType": "bookSection",
 				"creators": [
 					{
-						"firstName": "",
 						"lastName": "International Workshop on Plasma-Based Ion Implantation 1993 : University of Wisconsin--Madison)",
 						"fieldMode": 1,
 						"creatorType": "author"
@@ -1681,7 +1727,6 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "",
 						"lastName": "Applied Science and Technology (ASTeX), Inc",
 						"fieldMode": 1,
 						"creatorType": "author"
@@ -1706,12 +1751,12 @@ var testCases = [
 				"accessionNumber": "4968605",
 				"publicationTitle": "Journal of vacuum science & technology. B, Microelectronics and nanometer structures processing, measurement and phenomena",
 				"ISSN": "1071-1023",
+				"date": "1994",
 				"pages": "813-998",
 				"ISBN": "1563963442",
 				"place": "New York",
 				"publisher": "Published for the American Vacuum Society by the American Institute of Physics",
-				"date": "1994",
-				"callNumber": "TS695.25 .I57 1993621.3815/2",
+				"callNumber": "TS695.25 .I57 1993, 621.3815/2",
 				"language": "eng"
 			}
 		]
@@ -1830,7 +1875,6 @@ var testCases = [
 				"itemType": "audioRecording",
 				"creators": [
 					{
-						"firstName": "",
 						"lastName": "Roustabouts (Musical group)",
 						"fieldMode": 1,
 						"creatorType": "author"
