@@ -9,12 +9,12 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-01-30 22:48:55"
+	"lastUpdated": "2012-07-20 11:18:46"
 }
 
 function detectWeb(doc, url) {
 	if (doc.evaluate('/html/body/table/tbody/tr/td[2]/table[tbody/tr/td[3]][2]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()
-		|| doc.evaluate('//td[1][@class="textcontent"]/table/tbody/tr/td[2]/b/u/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		|| doc.evaluate('//table/tbody/tr/td[2]/a/b', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
 	} else if (url.indexOf("rec_id") != -1) {
 		return "journalArticle";
@@ -25,13 +25,13 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "journalArticle") {
 		scrape(url);
 	} else if ((detectWeb(doc, url) == "multiple")) {
-		if (doc.evaluate('/html/body/table/tbody/tr/td[2]/table[tbody/tr/td[3]]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		if (doc.evaluate('//table/tbody/tr/td/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 			var items = new Object();
-			var results = doc.evaluate('/html/body/table/tbody/tr/td[2]/table[tbody/tr/td[3]]', doc, null, XPathResult.ANY_TYPE, null);
+			var results = doc.evaluate('//table/tbody/tr/td/a[contains(@href, "artid")]', doc, null, XPathResult.ANY_TYPE, null);
 			var result;
 			while (result = results.iterateNext()) {
-				var title = Zotero.Utilities.trimInternal(doc.evaluate('.//tr[1]/td[3]', result, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-				var id = doc.evaluate('.//tr[8]/td[2]/a[2]', result, null, XPathResult.ANY_TYPE, null).iterateNext().href.match(/rec_id=([^&]+)/)[1];
+				var title = result.textContent;
+				var id = result.href.match(/artid=(\d+)/)[1];
 				items[id] = title;
 			}
 			items = Zotero.selectItems(items);
@@ -47,7 +47,6 @@ function doWeb(doc, url) {
 			}
 		}
 	}
-	Zotero.wait();
 }
 
 function scrape(link) {
