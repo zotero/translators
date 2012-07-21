@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-06-17 00:27:03"
+	"lastUpdated": "2012-07-21 15:04:45"
 }
 
 /*
@@ -46,7 +46,7 @@ var detectWeb = function (doc, url) {
 		url.indexOf('about=') == -1) {
 			return "case";
 	} else if( ZU.xpath(doc,
-		'//div[@class="gs_r"]/div[@class="gs_fl"]/a[contains(@href,"q=related:")]')
+		'//div[@class="gs_r"]//div[@class="gs_fl"]/a[contains(@href,"q=related:")]')
 		.length ) {
 		return "multiple";
 	}
@@ -236,7 +236,7 @@ function scrapeArticleResults(doc, articles) {
 
 						//attach files linked on the right
 						var pdf = ZU.xpath(article.result,
-							'./div[contains(@class,"gs_fl")]\
+							'.//div[contains(@class,"gs_fl")]\
 							/a[./node()[starts-with(text(),"[")]]');
 						for(var i=0, n=pdf.length; i<n; i++) {
 							var attach = getAttachment(pdf[i].href,
@@ -449,18 +449,18 @@ function doWeb(doc, url) {
 		 */
 		var results = ZU.xpath(doc,
 			'//div[@class="gs_r"]\
-				[./div[@class="gs_fl"]/a[contains(@href,"q=info:") or contains(@href,"q=related:")]]');
+				[.//div[@class="gs_fl"]/a[contains(@href,"q=info:") or contains(@href,"q=related:")]]');
 
 		var items = new Object();
 		var resultDivs = new Object();
 		var bibtexUrl;
 		for(var i=0, n=results.length; i<n; i++) {
 			bibtexUrl = ZU.xpathText(results[i],
-				'./div[@class="gs_fl"]/a[contains(@href,"q=info:") or contains(@href,"q=related:")][1]/@href')
+				'.//div[@class="gs_fl"]/a[contains(@href,"q=info:") or contains(@href,"q=related:")][1]/@href')
 				.replace(/\/scholar.*?\?/,'/scholar.bib?')
 				.replace(/=related:/,'=info:')
 				+ '&ct=citation&cd=1&output=citation';
-			items[bibtexUrl] = ZU.xpathText(results[i], './h3[@class="gs_rt"]');
+			items[bibtexUrl] = ZU.xpathText(results[i], './/h3[@class="gs_rt"]');
 
 			//keep the result div for extra information
 			resultDivs[bibtexUrl] = results[i];
