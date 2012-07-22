@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-07-21 15:04:45"
+	"lastUpdated": "2012-07-21 22:55:01"
 }
 
 /*
@@ -212,9 +212,10 @@ function scrapeArticleResults(doc, articles) {
 
 						//attach linked page as snapshot if available
 						var snapshotUrl = ZU.xpathText(article.result,
-							'./h3[@class="gs_rt"]/a/@href');
+							'.//h3[@class="gs_rt"]/a/@href');
 						var linkTitle = ZU.xpathText(article.result,
-							'./h3[@class="gs_rt"]');
+							'.//h3[@class="gs_rt"]');
+
 						var attachment;
 						if(linkTitle && snapshotUrl) {
 							//try to get an attachment
@@ -236,11 +237,11 @@ function scrapeArticleResults(doc, articles) {
 
 						//attach files linked on the right
 						var pdf = ZU.xpath(article.result,
-							'.//div[contains(@class,"gs_fl")]\
-							/a[./node()[starts-with(text(),"[")]]');
+							'./div[contains(@class,"gs_fl")]\
+								/a[.//span[@class="gs_ctg2"]]');
 						for(var i=0, n=pdf.length; i<n; i++) {
 							var attach = getAttachment(pdf[i].href,
-														pdf[i].textContent);
+											pdf[i].childNodes[0].textContent);
 							if(!attach) continue;
 
 							//drop attachment linked by the main link
