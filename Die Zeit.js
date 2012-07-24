@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-06-17 23:35:42"
+	"lastUpdated": "2012-07-24 00:09:35"
 }
 
 /*
@@ -185,9 +185,8 @@ var testCases = [
 					"Libyen",
 					"Mustafa Abdel Dschalil",
 					"Bani Walid",
-					"Paris",
-					"Stadt",
 					"Europa",
+					"Paris",
 					"Tripolis"
 				],
 				"seeAlso": [],
@@ -224,15 +223,15 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Angela Merkel",
 					"Philipp Lahm",
+					"Angela Merkel",
 					"Andreas Ottl",
 					"FC Bayern München",
-					"Mesut Özil",
 					"Robert Enke",
+					"Mesut Özil",
 					"Bundesliga",
-					"Maxim Gorkij",
 					"Fußball",
+					"Fifa",
 					"SV Werder Bremen"
 				],
 				"seeAlso": [],

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-03-27 01:24:06"
+	"lastUpdated": "2012-07-24 00:40:23"
 }
 
 /*
@@ -219,7 +219,7 @@ function doWeb(doc, url){
 
 function addAudio(text) {
 	// http://realaudio.rferl.org/TB/2011/03/29/20110329-183936-TB-clip.mp3
-	var audio = text.match(/http:\/\/realaudio\.rferl\.org[^"]*\.mp3/);
+	var audio = text.match(/http:\/\/(realaudio|audioarchive)\.rferl\.org[^"]*\.mp3/);
 	if (audio) item.attachments.push({url:audio[0], mimeType:"application/octet-stream", title:"RFE/RL Audio"})
 	item.complete();
 }

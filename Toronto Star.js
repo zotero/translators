@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-04 00:52:35"
+	"lastUpdated": "2012-07-24 00:53:59"
 }
 
 function detectWeb(doc, url) {
@@ -31,13 +31,17 @@ function scrape(doc, url) {
 	}
 	
 	newItem.abstractNote = ZU.xpathText(doc, '//meta[@property="og:description"]');
-
-	var authorNode = ZU.xpathText(doc, '//div[@class="td-author"]/strong|//span[@class="columnistLabel"]/a');
+    var comma = false;
+	var authorNode = ZU.xpathText(doc, '//div[@class="td-author"]/strong');
 	if (authorNode) authorNode = authorNode.split(/\s*,\s*/);
+	var authorNode2 =ZU.xpathText(doc, '//span[@class="columnistLabel"]/a');
+	if (authorNode2) {
+		authorNode = authorNode2.split(/\s*;\s*/);
+		 comma = true;}
 	var author;
 	for(var i=0, n=authorNode.length; i<n; i++) {
 		author = authorNode[i];
-		newItem.creators.push(ZU.cleanAuthor(author.replace(/^By\s*/,'')));
+		newItem.creators.push(ZU.cleanAuthor(author, "author", comma));
 	}
 
 	newItem.title = ZU.xpathText(doc, '//h1[contains(@class, "Article")]');	
@@ -108,7 +112,8 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "Tyler",
-						"lastName": "Hamilton"
+						"lastName": "Hamilton",
+						"creatorType": "author"
 					}
 				],
 				"notes": [],
@@ -140,11 +145,13 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "Joanna",
-						"lastName": "Smith"
+						"lastName": "Smith",
+						"creatorType": "author"
 					},
 					{
 						"firstName": "Allan",
-						"lastName": "Woods"
+						"lastName": "Woods",
+						"creatorType": "author"
 					}
 				],
 				"notes": [],
