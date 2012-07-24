@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-30 10:38:44"
+	"lastUpdated": "2012-07-23 22:23:07"
 }
 
 /**
@@ -160,7 +160,17 @@ function scrapeEmbedMeta(doc, url) {
 			}];
 		}
 
-		if (!item.tags || item.tags.length < 1) item.tags = getKeywords(doc);
+		var keywords = getKeywords(doc);
+		if(keywords) item.tags = keywords;
+		else if(item.tags) {
+			keywords = [];
+			//sometimes keywords inside meta tags are not split properly
+			//they have both semicolon and comma. We will also split by comma
+			for(var i=0, n=item.tags.length; i<n; i++) {
+				keywords = keywords.concat(item.tags[i].split(/\s*,\s*/));
+			}
+			item.tags = keywords;
+		}
 
 		if (item.notes) item.notes = [];
 
@@ -700,7 +710,7 @@ var testCases = [
 				"company": "Nature Publishing Group",
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
-				"date": "2012",
+				"date": "02/09/2012",
 				"ISSN": "0950-9232",
 				"language": "en",
 				"DOI": "10.1038/onc.2011.282",
@@ -912,8 +922,7 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Astronomy",
-					"Astrophysics"
+					"Astronomy"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -1150,6 +1159,7 @@ var testCases = [
 					}
 				],
 				"notes": [],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [
 					{
@@ -1171,13 +1181,14 @@ var testCases = [
 				"company": "Nature Publishing Group",
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
-				"date": "11/01/2006",
-				"ISSN": "ERROR! NO ISSN",
+				"date": "2006",
+				"ISSN": "1061-4036",
 				"language": "en",
 				"DOI": "10.1038/ng1901",
 				"url": "http://www.nature.com/ng/journal/v38/n11/full/ng1901.html",
 				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "www.nature.com"
+				"libraryCatalog": "www.nature.com",
+				"abstractNote": "The estrogen receptor is the master transcriptional regulator of breast cancer phenotype and the archetype of a molecular therapeutic target. We mapped all estrogen receptor and RNA polymerase II binding sites on a genome-wide scale, identifying the authentic cis binding sites and target genes, in breast cancer cells. Combining this unique resource with gene expression data demonstrates distinct temporal mechanisms of estrogen-mediated gene regulation, particularly in the case of estrogen-suppressed genes. Furthermore, this resource has allowed the identification of cis-regulatory sites in previously unexplored regions of the genome and the cooperating transcription factors underlying estrogen signaling in breast cancer."
 			}
 		]
 	},
