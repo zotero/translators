@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-05-16 09:18:22"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2012-07-27 22:28:21"
 }
 
 function scrape(doc) {
