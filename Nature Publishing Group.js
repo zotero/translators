@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-23 22:23:07"
+	"lastUpdated": "2012-07-27 18:34:44"
 }
 
 /**
@@ -173,6 +173,8 @@ function scrapeEmbedMeta(doc, url) {
 		}
 
 		if (item.notes) item.notes = [];
+		
+		if(item.ISSN === "ERROR! NO ISSN") delete item.ISSN;
 
 		item.complete();
 	});
@@ -676,18 +678,11 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"ONC",
-					"oncogenes",
-					"cancer",
-					"apoptosis",
-					"tumor suppressor genes",
-					"tumor viruses",
-					"molecular oncology",
-					"cell cycle",
-					"growth factors",
-					"growth factor receptors",
-					"apoptosis",
-					"growth regulatory genes"
+					"gastric cancer",
+					"cancer stem cells",
+					"CD90",
+					"ERBB2",
+					"trastuzumab (herceptin)"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -710,7 +705,7 @@ var testCases = [
 				"company": "Nature Publishing Group",
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
-				"date": "02/09/2012",
+				"date": "2012",
 				"ISSN": "0950-9232",
 				"language": "en",
 				"DOI": "10.1038/onc.2011.282",
@@ -811,39 +806,10 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"The EMBO Journal",
-					"European Molecular Biology Organization",
-					"science",
-					"scientific journal",
-					"biology articles",
-					"cell signalling",
-					"cell biology",
-					"structure",
-					"biological research",
-					"journal of cell biology",
-					"molecular and cellular biology",
-					"genetics",
-					"biochemistry",
-					"molecular cell biology",
-					"molecular biology of the cell",
-					"development",
-					"immunology",
-					"neuroscience",
-					"plant biology",
-					"structural biology",
-					"genomic and computational biology",
-					"genome stability and dynamics",
-					"chromatin and transcription",
-					"RNA",
-					"proteins",
-					"cellular metabolism",
-					"signal transduction",
-					"cell cycle",
-					"differentiation and death",
-					"membranes and transport",
-					"cell and tissue architecture",
-					"microbiology and pathogens",
-					"molecular biology of disease."
+					"arginine methylation",
+					"cancer",
+					"E2F-1",
+					"growth control"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -867,7 +833,6 @@ var testCases = [
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
 				"date": "04/04/2012",
-				"ISSN": "ERROR! NO ISSN",
 				"language": "en",
 				"DOI": "10.1038/emboj.2012.17",
 				"abstractNote": "E2F transcription factors are implicated in diverse cellular functions. The founding member, E2F-1, is endowed with contradictory activities, being able to promote cell-cycle progression and induce apoptosis. However, the mechanisms that underlie the opposing outcomes of E2F-1 activation remain largely unknown. We show here that E2F-1 is directly methylated by PRMT5 (protein arginine methyltransferase 5), and that arginine methylation is responsible for regulating its biochemical and functional properties, which impacts on E2F-1-dependent growth control. Thus, depleting PRMT5 causes increased E2F-1 protein levels, which coincides with decreased growth rate and associated apoptosis. Arginine methylation influences E2F-1 protein stability, and the enhanced transcription of a variety of downstream target genes reflects increased E2F-1 DNA-binding activity. Importantly, E2F-1 is methylated in tumour cells, and a reduced level of methylation is evident under DNA damage conditions that allow E2F-1 stabilization and give rise to apoptosis. Significantly, in a subgroup of colorectal cancer, high levels of PRMT5 frequently coincide with low levels of E2F-1 and reflect a poor clinical outcome. Our results establish that arginine methylation regulates the biological activity of E2F-1 activity, and raise the possibility that arginine methylation contributes to tumourigenesis by influencing the E2F pathway.",
@@ -1181,14 +1146,12 @@ var testCases = [
 				"company": "Nature Publishing Group",
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
-				"date": "2006",
-				"ISSN": "1061-4036",
+				"date": "11/01/2006",
 				"language": "en",
 				"DOI": "10.1038/ng1901",
 				"url": "http://www.nature.com/ng/journal/v38/n11/full/ng1901.html",
 				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "www.nature.com",
-				"abstractNote": "The estrogen receptor is the master transcriptional regulator of breast cancer phenotype and the archetype of a molecular therapeutic target. We mapped all estrogen receptor and RNA polymerase II binding sites on a genome-wide scale, identifying the authentic cis binding sites and target genes, in breast cancer cells. Combining this unique resource with gene expression data demonstrates distinct temporal mechanisms of estrogen-mediated gene regulation, particularly in the case of estrogen-suppressed genes. Furthermore, this resource has allowed the identification of cis-regulatory sites in previously unexplored regions of the genome and the cooperating transcription factors underlying estrogen signaling in breast cancer."
+				"libraryCatalog": "www.nature.com"
 			}
 		]
 	},
