@@ -423,6 +423,11 @@ var testCases = [
 						"firstName": "Maria",
 						"lastName": "Anisimova",
 						"creatorType": "editor"
+					},
+					{
+						"firstName": "John M.",
+						"lastName": "Walker",
+						"creatorType": "editor"
 					}
 				],
 				"notes": [],
