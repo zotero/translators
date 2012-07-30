@@ -9,7 +9,7 @@
 	"browserSupport": "gcsibv",
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-08-22 22:29:49"
+	"lastUpdated": "2012-07-30 18:47:38"
 }
 
 function detectWeb(doc, url)	{
@@ -38,7 +38,7 @@ function doWeb(doc, url){
 		var xpath = '//div[@class="tableofcontents-row"][div/input[@type="checkbox"][@name="toView"]]';
 		var tableRows = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var tableRow;
-		var items=new Array();
+		var items={};
 		while (tableRow = tableRows.iterateNext()){
 			var id = doc.evaluate('./div/input[@type="checkbox"][@name="toView"]/@value', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			var title = doc.evaluate('.//h3', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
