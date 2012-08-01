@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-07-11 13:49:31"
+	"lastUpdated": "2012-08-01 18:22:49"
 }
 
 function detectWeb(doc, url) {
@@ -223,7 +223,7 @@ function doDelivery(doc, nsResolver, folderData, onDone) {
 	if(folderData === null)	{
 		/* Get the db, AN, and tag from ep.clientData instead */
 		var script;
-		var scripts = doc.evaluate('//script[@type="text/javascript"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var scripts = doc.evaluate('//script', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		while (script = scripts.iterateNext().textContent) {
 			var clientData = script.match(/var ep\s*=\s*({[^;]*});/);
 			if (clientData) break;
