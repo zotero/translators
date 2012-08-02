@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-14 00:49:46"
+	"lastUpdated": "2012-08-02 21:39:42"
 }
 
 /*
@@ -195,7 +195,7 @@ function init(doc, url, callback, forceLoadRDF) {
 			var prefix = tag.substr(0, delimIndex).toLowerCase();
 
 			if(_prefixes[prefix]) {
-				var prop = tag[delimIndex+1].toLowerCase()+tag.substr(delimIndex+2);
+				var prop = tag.substr(delimIndex+1, 1).toLowerCase()+tag.substr(delimIndex+2);
 				// This debug is for seeing what is being sent to RDF
 				//Zotero.debug(_prefixes[prefix]+prop +"=>"+value);
 				statements.push([url, _prefixes[prefix]+prop, value]);
