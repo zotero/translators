@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-08-01 18:22:49"
+	"lastUpdated": "2012-08-02 14:17:12"
 }
 
 function detectWeb(doc, url) {
@@ -222,19 +222,14 @@ function doWeb(doc, url) {
 function doDelivery(doc, nsResolver, folderData, onDone) {
 	if(folderData === null)	{
 		/* Get the db, AN, and tag from ep.clientData instead */
-		var script;
-		var scripts = doc.evaluate('//script', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		while (script = scripts.iterateNext().textContent) {
-			var clientData = script.match(/var ep\s*=\s*({[^;]*});/);
+		var script, clientData;
+		var scripts = doc.getElementsByTagName("script");
+		for(var i=0; i<scripts.length; i++) {
+			clientData = scripts[i].textContent.match(/var ep\s*=\s*({[^;]*})(?:;|\s*$)/);
 			if (clientData) break;
 		}
 		if (!clientData) {return false;}
-			/* We now have the script containing ep.clientData */
-
-		/* The JSON is technically invalid, since it doesn't quote the
-		   attribute names-- we pull out the valid bit inside it. */
-		var clientData = script.match(/var ep\s*=\s*({[^;]*});/);
-		if (!clientData) { return false; }
+		/* We now have the script containing ep.clientData */
 		clientData = clientData[1].match(/"currentRecord"\s*:\s*({[^}]*})/);
 		/* If this starts throwing exceptions, we should probably start try-elsing it */
 		folderData = JSON.parse(clientData[1]);
