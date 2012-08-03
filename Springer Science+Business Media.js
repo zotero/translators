@@ -2,14 +2,14 @@
 	"translatorID": "dfec8317-9b59-4cc5-8771-cdcef719d171",
 	"label": "Springer Science+Business Media",
 	"creator": "Aurimas Vinckevicius",
-	"target": "^https?://[^/]+/(((content|\\d+)/)?[-\\d]+/\\d+/\\d+|search/results)",
+	"target": "^https?://[^/]+/(((content|\\d+)/)?[-\\d]+/\\d+/S?\\d+|search/results)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-06-10 15:10:59"
+	"lastUpdated": "2012-08-01 01:47:04"
 }
 
 /*
