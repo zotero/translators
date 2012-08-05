@@ -13,7 +13,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-04-19 05:42:41"
+	"lastUpdated": "2012-08-05 22:57:58"
 }
 
 function detectImport() {
@@ -208,7 +208,9 @@ function processTag(item, tag, value) {
 			// RIS, but EndNote writes this, so we have to too
 			// Nick: RIS spec example records also only contain a single part
 			// even though it says the slashes are not optional (?)
-			item.date = value;
+			// Some RIS files contain both a year and a full date, so we only use this
+			// date if there is not already a date specified
+			if(!item.date) item.date = value;
 		} else {
 			// in the case that we have a year and other data, format that way
 
