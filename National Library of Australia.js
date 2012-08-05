@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"lastUpdated":"2012-08-05 08:09:33"
 }
 
 function detectWeb(doc, url) {
@@ -43,7 +43,7 @@ function doWeb(doc, url) {
 			var value = doc.evaluate('./td[2]', row, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 			data[Zotero.Utilities.trimInternal(heading)] = value;
 		}
-		item = new Zotero.Item("book");
+		var item = new Zotero.Item("book");
 		item.title = Zotero.Utilities.trimInternal(data['Title:'].match(/^[^/]+/)[0]);
 		if (data['Author:']) item.creators.push(Zotero.Utilities.cleanAuthor(data['Author:'], "author", true));
 		if (data['Published:'].match(/\w+/)) {

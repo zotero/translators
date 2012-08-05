@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-02-23 15:46:18"
+	"lastUpdated": "2012-08-05 08:09:33"
 }
 
 /*
@@ -47,7 +47,7 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	item = new Zotero.Item("journalArticle");
+	var item = new Zotero.Item("journalArticle");
 
 	var publication = ZU.xpathText(doc, '//div[@class="opub"]/a');
 	if( publication ) {

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-03-17 02:37:20"
+	"lastUpdated": "2012-08-05 08:09:33"
 }
 
 /*
@@ -76,7 +76,7 @@ function doWeb (doc, url) {
 	
 	Zotero.Utilities.processDocuments(articles, function(doc) {
 		var type = detectWeb(doc, doc.location.href);
-		item = new Zotero.Item(type);
+		var item = new Zotero.Item(type);
 
 		item.url = doc.location.href;
 		item.publicationTitle = "The Chronicle of Higher Education";
