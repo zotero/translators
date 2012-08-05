@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-08-05 07:55:59"
+	"lastUpdated": "2012-08-05 08:00:59"
 }
 
 /*
@@ -74,6 +74,7 @@
  information and the translator does not load it.
 */
 
+var item;
 function detectWeb(doc, url){
 	if (url.match(/\/content\/|\/archive\/news|\/archive\/ru_news_zone/)) {
 		// The translator uses this type because RFE/RL generally has a place of publication
@@ -111,7 +112,7 @@ function doWeb(doc, url){
 	}
 	
 	Zotero.Utilities.processDocuments(articles, function(doc) {
-		var item = new Zotero.Item("newspaperArticle");
+		item = new Zotero.Item("newspaperArticle");
 		item.title = Zotero.Utilities.trimInternal(
 			doc.evaluate('//h1', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent
 		);
