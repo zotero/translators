@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-07-18 15:54:35"
+	"lastUpdated": "2012-08-05 08:26:46"
 }
 
 function detectWeb(doc, url) {
@@ -48,7 +48,7 @@ function scrape(doc, url) {
 			}
 			var words = author.split(/\s/);
 				for (var i in words) {
-					words[i] = words[i][0].toUpperCase() + words[i].substr(1).toLowerCase();
+					words[i] = words[i].substr(0, 1).toUpperCase() + words[i].substr(1).toLowerCase();
 				}
 			author = words.join(" ");
 			newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
