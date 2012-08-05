@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-14 11:23:04"
+	"lastUpdated": "2012-08-05 23:03:28"
 }
 
 function detectWeb(doc, url) {
@@ -95,9 +95,13 @@ function processCallback(doi, host, downloadFileName) {
 		var post = "doi=" + doi + "&downloadFileName=" + downloadFileName + "&include=abs&format=refman&direct=on&submit=Download+article+citation+data";
 		Zotero.Utilities.HTTP.doPost(baseurl, post,function(text){
 			// Fix the RIS doi mapping
-			text = text.replace("N1  - doi:","M3  - ");
-			//Fix the wrong mapping for journal abbreviations
-			text = text.replace("JO  -", "JA  -");
+			text = text.replace("\nN1  - doi:", "\nM3  - ");
+			// Fix the wrong mapping for journal abbreviations
+			text = text.replace("\nJO  -", "\nJA  -");
+			// Use publication date when available
+			if(text.indexOf("\nDA  -") !== -1) {
+				text = text.replace(/\nY1  - [^\n]*/, "").replace("\nDA  -", "\nY1  -");
+			}
 			Zotero.debug("ris= "+ text);
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -105,10 +109,10 @@ function processCallback(doi, host, downloadFileName) {
 			translator.setHandler("itemDone", function(obj, item) {
 				var pdfUrl = host + 'doi/pdf/' + doi;
 				var fullTextUrl = host + 'doi/full/' + doi;
-				item.attachments.push(
+				item.attachments = [
 					{title:"ACS Full Text PDF",url:pdfUrl, mimeType:"application/pdf"},
 					{title:"ACS Full Text Snapshot",url:fullTextUrl, mimeType:"text/html"}
-				); 
+				]; 
 				item.complete();
 			});
 			translator.translate();
