@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-07-24 00:40:23"
+	"lastUpdated": "2012-08-05 07:55:59"
 }
 
 /*
@@ -111,7 +111,7 @@ function doWeb(doc, url){
 	}
 	
 	Zotero.Utilities.processDocuments(articles, function(doc) {
-		item = new Zotero.Item("newspaperArticle");
+		var item = new Zotero.Item("newspaperArticle");
 		item.title = Zotero.Utilities.trimInternal(
 			doc.evaluate('//h1', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent
 		);
