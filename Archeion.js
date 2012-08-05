@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-05-16 09:18:57"
+	"lastUpdated": "2012-08-05 08:24:20"
 }
 
 /*
@@ -53,8 +53,7 @@ function scrape(doc, url) {
 			var authors = ZU.xpath(doc, '//div[@id="archivalDescriptionArea"]//div[@class="field"]/h3[contains(text(), "Name of creator")]/following-sibling::div/a');
 			for (var i in authors) {
 				//remove location (in parentheses) from creators, since it often contains a comma that messes with author parsing
-				authors[i].textContent = authors[i].textContent.replace(/\(.+\)\s*$/, "");
-				item.creators[i] = ZU.cleanAuthor(authors[i].textContent, "author", true);
+				item.creators[i] = ZU.cleanAuthor(authors[i].textContent.replace(/\(.+\)\s*$/, ""), "author", true);
 				if (!item.creators[i].firstName) item.creators[i].fieldMode = 1;
 			}
 			//The Archive gets mapped to the relations tag - we want its name, not the description in archeion
