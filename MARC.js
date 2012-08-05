@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-04-11 14:15:49"
+	"lastUpdated": "2012-08-05 08:20:39"
 }
 
 function detectImport() {
@@ -97,8 +97,8 @@ record.prototype.importBinary = function(record) {
 	var directory = directory.substr(24);
 	
 	// get various data
-	this.indicatorLength = parseInt(this.leader[10], 10);
-	this.subfieldCodeLength = parseInt(this.leader[11], 10);
+	this.indicatorLength = parseInt(this.leader.substr(10, 1), 10);
+	this.subfieldCodeLength = parseInt(this.leader.substr(11, 1), 10);
 	var baseAddress = parseInt(this.leader.substr(12, 5), 10);
 	
 	// get record data
@@ -109,7 +109,7 @@ record.prototype.importBinary = function(record) {
 	// can strip the nulls later.
 	this.content = "";
 	for(i=0; i<contentTmp.length; i++) {
-		this.content += contentTmp[i];
+		this.content += contentTmp.substr(i, 1);
 		if(contentTmp.charCodeAt(i) > 0x00FFFF) {
 			this.content += "\x00\x00\x00";
 		} else if(contentTmp.charCodeAt(i) > 0x0007FF) {
@@ -280,7 +280,7 @@ record.prototype._associateTags = function(item, fieldNo, part) {
 record.prototype.translate = function(item) {
 	// get item type
 	if(this.leader) {
-		var marcType = this.leader[6];
+		var marcType = this.leader.substr(6, 1);
 		if(marcType == "g") {
 			item.itemType = "film";
 		} else if(marcType == "e" || marcType == "f") {
