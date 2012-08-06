@@ -13,7 +13,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-08-06 02:27:06"
+	"lastUpdated": "2012-08-06 02:30:04"
 }
 
 function detectImport() {
@@ -223,7 +223,7 @@ function processTag(item, tag, value) {
 
 			item.date = Zotero.Utilities.formatDate({year:dateParts[0],
 								  month:month,
-								  day:parseInt(dateParts[2], 10),
+								  day:(parseInt(dateParts[2], 10) || undefined),
 								  part:dateParts[3]});
 		}
 	} else if(tag == "Y2") {
