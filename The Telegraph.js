@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsb",
-	"lastUpdated": "2012-03-11 15:14:57"
+	"browserSupport": "gcsib",
+	"lastUpdated": "2012-08-06 19:23:07"
 }
 
 function createExcludes(url, excludeArr) {

@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsb",
-	"lastUpdated": "2012-03-03 23:34:50"
+	"browserSupport": "gcsib",
+	"lastUpdated": "2012-08-06 19:23:07"
 }
 
 // Emedicine.Medscape.com translator.
