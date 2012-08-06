@@ -147,7 +147,6 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [
-					{},
 					{
 						"title": "ACS Full Text PDF",
 						"mimeType": "application/pdf"
@@ -165,7 +164,7 @@ var testCases = [
 				"url": "http://dx.doi.org/10.1021/es103607c",
 				"libraryCatalog": "ACS Publications",
 				"title": "Life Cycle Environmental Assessment of Lithium-Ion and Nickel Metal Hydride Batteries for Plug-In Hybrid and Battery Electric Vehicles",
-				"date": "2011",
+				"date": "May 15, 2011",
 				"publicationTitle": "Environmental Science & Technology",
 				"pages": "4548-4554",
 				"volume": "45"

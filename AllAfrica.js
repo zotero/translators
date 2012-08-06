@@ -78,26 +78,29 @@ var testCases = [
 				"notes": [],
 				"tags": [
 					"Angola",
+					"Angola",
+					"Central Africa",
 					"Central Africa",
 					"Governance",
+					"Governance",
 					"Human Rights",
+					"Human Rights",
+					"Southern Africa",
 					"Southern Africa"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://allafrica.com/stories/printable/201110180002.html",
 						"title": "AllAfrica Printable",
 						"type": "text/html"
 					}
 				],
 				"url": "http://allafrica.com/stories/201110180002.html",
+				"libraryCatalog": "allAfrica.com",
+				"shortTitle": "Angola",
 				"date": "17 October 2011",
 				"publicationTitle": "Institute for Security Studies",
-				"title": "Angola: Political Upheaval Ahead of 2012 Polls",
-				"libraryCatalog": "allAfrica.com",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Angola"
+				"title": "Angola: Political Upheaval Ahead of 2012 Polls"
 			}
 		]
 	},
@@ -117,25 +120,27 @@ var testCases = [
 				"notes": [],
 				"tags": [
 					"Angola",
+					"Angola",
+					"Central Africa",
 					"Central Africa",
 					"Governance",
+					"Governance",
+					"Southern Africa",
 					"Southern Africa"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://allafrica.com/stories/printable/201110040606.html",
 						"title": "AllAfrica Printable",
 						"type": "text/html"
 					}
 				],
 				"url": "http://allafrica.com/stories/201110040606.html",
+				"libraryCatalog": "allAfrica.com",
+				"shortTitle": "Angola",
 				"date": "3 October 2011",
 				"publicationTitle": "Angola Press Agency (Luanda)",
-				"title": "Angola: Justice Minister On Voter's Registration Update",
-				"libraryCatalog": "allAfrica.com",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Angola"
+				"title": "Angola: Justice Minister On Voter's Registration Update"
 			}
 		]
 	},

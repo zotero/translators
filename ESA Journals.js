@@ -120,64 +120,74 @@ function scrape(doc) {
 }
 
 /** BEGIN TEST CASES **/
-var testCases = [{
-	"type": "web",
-	"url": "http://www.esajournals.org/doi/abs/10.1890/09-1234.1",
-	"items": [{
-		"itemType": "journalArticle",
-		"creators": [{
-			"lastName": "Gao",
-			"firstName": "Chao",
-			"creatorType": "author"
-		}, {
-			"lastName": "Wang",
-			"firstName": "Han",
-			"creatorType": "author"
-		}, {
-			"lastName": "Weng",
-			"firstName": "Ensheng",
-			"creatorType": "author"
-		}, {
-			"lastName": "Lakshmivarahan",
-			"firstName": "S.",
-			"creatorType": "author"
-		}, {
-			"lastName": "Zhang",
-			"firstName": "Yanfen",
-			"creatorType": "author"
-		}, {
-			"lastName": "Luo",
-			"firstName": "Yiqi",
-			"creatorType": "author"
-		}],
-		"notes": [],
-		"tags": [],
-		"seeAlso": [],
-		"attachments": [{
-			"url": "http://www.esajournals.org/doi/pdf/10.1890/09-1234.1",
-			"title": "ESA PDF fulltext",
-			"mimeType": "application/pdf"
-		}, {
-			"url": "http://www.esajournals.org/doi/abs/10.1890/09-1234.1",
-			"title": "ESA Snapshot",
-			"mimeType": "text/html"
-		}],
-		"title": "Assimilation of multiple data sets with the ensemble Kalman filter to improve forecasts of forest carbon dynamics",
-		"date": "2011",
-		"DOI": "10.1890/09-1234.1",
-		"publicationTitle": "Ecological Applications",
-		"pages": "1461-1473",
-		"volume": "21",
-		"issue": "5",
-		"publisher": "Ecological Society of America",
-		"ISBN": "1051-0761",
-		"ISSN": "1051-0761",
+var testCases = [
+	{
+		"type": "web",
 		"url": "http://www.esajournals.org/doi/abs/10.1890/09-1234.1",
-		"accessDate": "2011/12/13",
-		"libraryCatalog": "ESA Journals"
-	}]
-}, {
-	"type": "web",
-	"url": "http://www.esajournals.org/toc/ecap/21/5",
-	"items": "multiple"
-}] /** END TEST CASES **/
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Gao",
+						"firstName": "Chao",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wang",
+						"firstName": "Han",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Weng",
+						"firstName": "Ensheng",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Lakshmivarahan",
+						"firstName": "S.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Zhang",
+						"firstName": "Yanfen",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Luo",
+						"firstName": "Yiqi",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "ESA PDF fulltext",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "ESA Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"DOI": "10.1890/09-1234.1",
+				"issue": "5",
+				"ISSN": "1051-0761",
+				"url": "http://www.esajournals.org/doi/abs/10.1890/09-1234.1",
+				"libraryCatalog": "ESA Journals",
+				"title": "Assimilation of multiple data sets with the ensemble Kalman filter to improve forecasts of forest carbon dynamics",
+				"date": "February 22, 2011",
+				"publicationTitle": "Ecological Applications",
+				"pages": "1461-1473",
+				"volume": "21"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.esajournals.org/toc/ecap/21/5",
+		"items": "multiple"
+	}
+] /** END TEST CASES **/

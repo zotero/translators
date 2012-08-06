@@ -143,30 +143,25 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.bioone.org/doi/pdf/10.4202/app.2010.0005",
 						"title": "BioOne PDF fulltext",
 						"mimeType": "application/pdf"
 					},
 					{
-						"url": "http://www.bioone.org/doi/abs/10.4202/app.2010.0005",
 						"title": "BioOne Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Body Mass Estimation in Amphicyonid Carnivoran Mammals: A Multiple Regression Approach from the Skull and Skeleton",
-				"date": "2011",
 				"DOI": "10.4202/app.2010.0005",
-				"publicationTitle": "Acta Palaeontologica Polonica",
-				"pages": "225-246",
-				"volume": "56",
 				"issue": "2",
-				"publisher": "Institute of Paleobiology, Polish Academy of Sciences",
-				"ISBN": "0567-7920",
 				"ISSN": "0567-7920",
 				"url": "http://www.bioone.org/doi/abs/10.4202/app.2010.0005",
-				"accessDate": "2011/12/10",
 				"libraryCatalog": "BioOne",
-				"shortTitle": "Body Mass Estimation in Amphicyonid Carnivoran Mammals"
+				"shortTitle": "Body Mass Estimation in Amphicyonid Carnivoran Mammals",
+				"title": "Body Mass Estimation in Amphicyonid Carnivoran Mammals: A Multiple Regression Approach from the Skull and Skeleton",
+				"date": "June 01, 2011",
+				"publicationTitle": "Acta Palaeontologica Polonica",
+				"pages": "225-246",
+				"volume": "56"
 			}
 		]
 	},
@@ -203,27 +198,22 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.bioone.org/doi/pdf/10.1896/020.011.0101",
 						"title": "BioOne PDF fulltext",
 						"mimeType": "application/pdf"
 					},
 					{
-						"url": "http://www.bioone.org/doi/abs/10.1896/020.011.0101",
 						"title": "BioOne Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Albinismo Total em Preguiças-de-Garganta-Marrom Bradypus variegatus (Schinz, 1825) no Estado de Pernambuco, Brasil",
-				"date": "2010",
 				"DOI": "10.1896/020.011.0101",
-				"publicationTitle": "Edentata",
-				"pages": "1-3",
-				"publisher": "IUCN/SSC Anteater, Sloth and Armadillo Specialist Group",
-				"ISBN": "1413-4411",
 				"ISSN": "1413-4411",
 				"url": "http://www.bioone.org/doi/abs/10.1896/020.011.0101",
-				"accessDate": "2011/12/10",
-				"libraryCatalog": "BioOne"
+				"libraryCatalog": "BioOne",
+				"title": "Albinismo Total em Preguiças-de-Garganta-Marrom Bradypus variegatus (Schinz, 1825) no Estado de Pernambuco, Brasil",
+				"date": "November 01, 2010",
+				"publicationTitle": "Edentata",
+				"pages": "1-3"
 			}
 		]
 	},

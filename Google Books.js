@@ -251,19 +251,15 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "Julio d' Escrivan",
-						"lastName": "Rincón",
+						"firstName": "Julio",
+						"lastName": "d'Escrivan",
 						"creatorType": "author"
 					}
 				],
 				"notes": [],
 				"tags": [
-					"Electronic music - History and criticism",
-					"Electronic music/ History and criticism",
-					"Electronic music",
 					"Music / General",
 					"Music / Genres & Styles / Electronic",
-					"Music / History & Criticism",
 					"Music / Instruction & Study / Techniques"
 				],
 				"seeAlso": [],
@@ -276,12 +272,12 @@ var testCases = [
 				],
 				"numPages": "246",
 				"ISBN": "9780521868617",
+				"language": "en",
+				"abstractNote": "Musicians are always quick to adopt and explore new technologies. The fast-paced changes wrought by electrification, from the microphone via the analogue synthesiser to the laptop computer, have led to a wide diversity of new musical styles and techniques. Electronic music has grown to a broad field of investigation, taking in historical movements such as musique concrète and elektronische musik, and contemporary trends such as electronic dance music and electronica. A fascinating array of composers and inventors have contributed to a diverse set of technologies, practices and music. This book brings together some novel threads through this scene, from the viewpoint of researchers at the forefront of the sonic explorations empowered by electronic technology. The chapters provide accessible and insightful overviews of core topic areas and uncover some hitherto less publicised corners of worldwide movements. Recent areas of intense activity such as audiovisuals, live electronic music, interactivity and network music are actively promoted.",
+				"libraryCatalog": "Google Books",
 				"publisher": "Cambridge University Press",
 				"title": "The Cambridge Companion to Electronic Music",
-				"language": "en",
-				"abstractNote": "Musicians are always quick to adopt and explore new technologies. The fast-paced changes wrought by electrification, from the microphone via the analogue synthesiser to the laptop computer, have led to a wide diversity of new musical styles and techniques. Electronic music has grown to a broad field of investigation, taking in historical movements such as musique concrÃ¨te and elektronische musik, and contemporary trends such as electronic dance music and electronica. A fascinating array of composers and inventors have contributed to a diverse set of technologies, practices and music. This book brings together some novel threads through this scene, from the viewpoint of researchers at the forefront of the sonic explorations empowered by electronic technology. The chapters provide accessible and insightful overviews of core topic areas and uncover some hitherto less publicised corners of worldwide movements. Recent areas of intense activity such as audiovisuals, live electronic music, interactivity and network music are actively promoted.",
-				"date": "2007-12-13",
-				"libraryCatalog": "Google Books"
+				"date": "2007-12-13"
 			}
 		]
 	},
