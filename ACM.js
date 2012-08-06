@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-07-18 18:52:28"
+	"lastUpdated": "2012-08-06 01:33:37"
 }
 
 /*
@@ -125,7 +125,9 @@ function scrape(doc) {
 			//Conference Locations shouldn't go int Loc in Archive (nor should anything else)
 			item.archiveLocation = "";
 			// some bibtext contains odd </kwd> tags - remove them
-			if (item.tags) item.tags = String(item.tags).replace(/\<\/kwd\>/g, "").split(",");
+			for(var i=0; i<item.tags.length; i++) {
+				item.tags[i].replace("</kwd>", "");
+			}
 			item.complete();
 			haveImported = true;
 		});
@@ -241,9 +243,7 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [
-					""
-				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [
 					{
@@ -334,9 +334,7 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [
-					""
-				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [
 					{
