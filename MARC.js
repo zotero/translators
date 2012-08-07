@@ -9,7 +9,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-08-07 03:39:27"
+	"lastUpdated": "2012-08-07 22:26:11"
 }
 
 function detectImport() {
@@ -251,7 +251,7 @@ record.prototype._associateNotes = function(item, fieldNo, part) {
 
 	for(var i in field) {
 		for(var j=0; j<part.length; j++) {
-			var myPart = part[j];
+			var myPart = part.substr(j, 1);
 			if(field[i][myPart]) {
 				texts.push(clean(field[i][myPart]));
 			}
@@ -268,7 +268,7 @@ record.prototype._associateTags = function(item, fieldNo, part) {
 	
 	for(var i in field) {
 		for(var j=0; j<part.length; j++) {
-			var myPart = part[j];
+			var myPart = part.substr(j, 1);
 			if(field[i][myPart]) {
 				item.tags.push(clean(field[i][myPart]));
 			}
