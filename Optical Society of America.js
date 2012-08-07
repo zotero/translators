@@ -201,30 +201,26 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.opticsinfobase.org/josaa/abstract.cfm?URI=josaa-16-1-191",
 						"title": "J. Opt. Soc. Am. A Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"url": "http://www.opticsinfobase.org/DirectPDFAccess/CF32D459-E4D0-7718-BCDD5C79C05EFB4B_1091.pdf?da=1&id=1091&seq=0&mobile=no",
 						"title": "J. Opt. Soc. Am. A Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "Lens axicons: systems composed of a diverging aberrated lens and a converging aberrated lens",
-				"publisher": "OSA",
-				"date": "January 01, 1999",
-				"publicationTitle": "Journal of the Optical Society of America A",
+				"abstractNote": "This paper is a continuation of our previous publication on the stationary-phase-method analysis of lens axicons [J. Opt. Soc. Am. A 15 2383 (1998)]. Systems with spherical aberration up to the fifth order are studied. Such lens axicons in their simplest versions can be made either as a setup composed of two separated third-order spherical-aberration lenses of opposite powers or as a doublet consisting of one third-order diverging element and one fifth-order converging element. The axial intensity distribution and the central core width turn out to be improved and become almost constant. The results obtained are compared with the numerical evaluation of the corresponding diffraction integral.",
 				"journalAbbreviation": "J. Opt. Soc. Am. A",
-				"volume": "16",
 				"issue": "1",
-				"pages": "191-197",
 				"url": "http://josaa.osa.org/abstract.cfm?URI=josaa-16-1-191",
 				"DOI": "10.1364/JOSAA.16.000191",
-				"abstractNote": "This paper is a continuation of our previous publication on the stationary-phase-method analysis of lens axicons [J. Opt. Soc. Am. A 15 2383 (1998)]. Systems with spherical aberration up to the fifth order are studied. Such lens axicons in their simplest versions can be made either as a setup composed of two separated third-order spherical-aberration lenses of opposite powers or as a doublet consisting of one third-order diverging element and one fifth-order converging element. The axial intensity distribution and the central core width turn out to be improved and become almost constant. The results obtained are compared with the numerical evaluation of the corresponding diffraction integral.",
 				"libraryCatalog": "Optical Society of America",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Lens axicons"
+				"shortTitle": "Lens axicons",
+				"title": "Lens axicons: systems composed of a diverging aberrated lens and a converging aberrated lens",
+				"date": "January 1, 1999",
+				"publicationTitle": "Journal of the Optical Society of America A",
+				"volume": "16",
+				"pages": "191-197"
 			}
 		]
 	},
@@ -261,17 +257,16 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
+				"abstractNote": "Resilient packet ring ( IEEE 802.17) is a metropolitan area network technology for data transfer based on ring configuration.The paper provides guidelines for generation of recommends simulated environments for RPR testing ,discusses ways to test complex areas of RPR( e.g Fairness),provides guidelines for generating standard compliant test suite, and puts forward a strategy for automation of RPR testing.This paper is based on development of a RPR solution based on a Network processor.RPR specifies 39 state machines which implement the functionalities Topology Discovery, Protection, Datapath, OAM, Fairness and Shapers. The specification of the functionalities as well as the interaction between them makes RPR a complex protocol to validate. Lack of RPR test generator and inter dependency of control plane on data plane adds to the challenges of RPR testing. Careful planning, execution of testing in phases, building simulators and identifying the areas of challenges will guarantee success.Table of Contents Test Suite generationSimulators for RPR testingTest Sets for RPR testingTesting of RPR areasAutomation possibilities Test Suite generation Protocol Implementation Conformance Statements (PICs) provide a guidelines but it falls short of complete testing if you want to achieve the 'carrier grade' performance of the RPR. The test suite generation demands complete knowledge of the RPR Standard (IEEE 802.17, 802.17a, 802.17b).Simulators for RPR testing Simulator testing is a crucial part of RPR validation. Two types of simulators are recommended. Control plane simulator and the dataplane simulator The control plane functionality can be tested by building a stand alone simulator which can act as a frame work to exchange packets between the control plane instances.Pipeline integration stage is the integration of different modules of the packet processing modules. Pipeline integration testing is performed in the simulated environment with all the data path components treated as one single block. The packet headers are created and injected to the Receiver block and the packets from the pipeline are captured and analyzed at the transmit block. Most of the Network Processor development workbenches (e.g. transactor of IXP) support packet generators. More than 60% of the test cases can be executed in the pipeline integration stage using packet streams generated.Test Sets for RPR testingNo single test set has features required for RPR testing .The paper compares the capabilities of various test sets including Agilent and Ixia and proposes a combination of test sets for achieving RPR test coverage.Testing of RPR areasThe paper suggests methods to validate the following areas of RPR[1] 255 node testing [2] Fairness and Shaper testing [3] 50 milliseconds protection switch time[4] Testing of strict order frames [5] Jitter measurement [6] Performance monitoring testing[7] RPR-RPR BridgingSpatially Aware Sublayer (IEEE802.17b) introduces new challenge for validation of RPR. The paper discusses the complexities involved for validation of IEEE 802.17b.Automation possibilitiesThe paper discusses the areas of automation for RPR testing and methods for the same. RPR test automation can be achieved for the pipeline integration stage, On board integration and system testing phases",
+				"conferenceName": "Optical Fiber Communication Conference and Exposition and The National Fiber Optic Engineers Conference",
+				"series": "Technical Digest (CD)",
+				"url": "http://www.opticsinfobase.org/abstract.cfm?URI=OFC-2006-JThB89",
+				"libraryCatalog": "Optical Society of America",
 				"title": "Challenges in Testing Resilient Packet Ring",
 				"publisher": "Optical Society of America",
-				"date": "March 05, 2006",
-				"conferenceName": "Optical Fiber Communication Conference and Exposition and The National Fiber Optic Engineers Conference",
-				"publicationTitle": "Optical Fiber Communication Conference and Exposition and The National Fiber Optic Engineers Conference",
-				"series": "Technical Digest (CD)",
-				"pages": "JThB89",
-				"url": "http://www.opticsinfobase.org/abstract.cfm?URI=OFC-2006-JThB89",
-				"abstractNote": "Resilient packet ring ( IEEE 802.17) is a metropolitan area network technology for data transfer based on ring configuration.The paper provides guidelines for generation of recommends simulated environments for RPR testing ,discusses ways to test complex areas of RPR( e.g Fairness),provides guidelines for generating standard compliant test suite, and puts forward a strategy for automation of RPR testing.This paper is based on development of a RPR solution based on a Network processor.RPR specifies 39 state machines which implement the functionalities Topology Discovery, Protection, Datapath, OAM, Fairness and Shapers. The specification of the functionalities as well as the interaction between them makes RPR a complex protocol to validate. Lack of RPR test generator and inter dependency of control plane on data plane adds to the challenges of RPR testing. Careful planning, execution of testing in phases, building simulators and identifying the areas of challenges will guarantee success.Table of Contents Test Suite generationSimulators for RPR testingTest Sets for RPR testingTesting of RPR areasAutomation possibilities Test Suite generation Protocol Implementation Conformance Statements (PICs) provide a guidelines but it falls short of complete testing if you want to achieve the 'carrier grade' performance of the RPR. The test suite generation demands complete knowledge of the RPR Standard (IEEE 802.17, 802.17a, 802.17b).Simulators for RPR testing Simulator testing is a crucial part of RPR validation. Two types of simulators are recommended. Control plane simulator and the dataplane simulator The control plane functionality can be tested by building a stand alone simulator which can act as a frame work to exchange packets between the control plane instances.Pipeline integration stage is the integration of different modules of the packet processing modules. Pipeline integration testing is performed in the simulated environment with all the data path components treated as one single block. The packet headers are created and injected to the Receiver block and the packets from the pipeline are captured and analyzed at the transmit block. Most of the Network Processor development workbenches (e.g. transactor of IXP) support packet generators. More than 60% of the test cases can be executed in the pipeline integration stage using packet streams generated.Test Sets for RPR testingNo single test set has features required for RPR testing .The paper compares the capabilities of various test sets including Agilent and Ixia and proposes a combination of test sets for achieving RPR test coverage.Testing of RPR areasThe paper suggests methods to validate the following areas of RPR[1] 255 node testing [2] Fairness and Shaper testing [3] 50 milliseconds protection switch time[4] Testing of strict order frames [5] Jitter measurement [6] Performance monitoring testing[7] RPR-RPR BridgingSpatially Aware Sublayer (IEEE802.17b) introduces new challenge for validation of RPR. The paper discusses the complexities involved for validation of IEEE 802.17b.Automation possibilitiesThe paper discusses the areas of automation for RPR testing and methods for the same. RPR test automation can be achieved for the pipeline integration stage, On board integration and system testing phases",
-				"libraryCatalog": "Optical Society of America",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"date": "March 5, 2006",
+				"proceedingsTitle": "Optical Fiber Communication Conference and Exposition and The National Fiber Optic Engineers Conference",
+				"pages": "JThB89"
 			}
 		]
 	}

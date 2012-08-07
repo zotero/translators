@@ -156,36 +156,33 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Cultural Influences",
-					"Therapy",
-					"Play Therapy",
-					"Parent Participation",
 					"Cooperative Planning",
 					"Counseling Techniques",
-					"Guidelines",
-					"Cultural Relevance",
 					"Counselor Role",
-					"Interpersonal Relationship"
+					"Cultural Influences",
+					"Cultural Relevance",
+					"Guidelines",
+					"Interpersonal Relationship",
+					"Parent Participation",
+					"Play Therapy",
+					"Therapy"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{}
 				],
 				"itemID": "EJ956651",
-				"title": "Collaborating with Parents to Establish Behavioral Goals in Child-Centered Play Therapy",
-				"date": "January 00, 2012",
-				"volume": "20",
 				"issue": "1",
-				"pages": "51-57",
 				"journalAbbreviation": "Family Journal: Counseling and Therapy for Couples and Families",
-				"publisher": "SAGE Publications. 2455 Teller Road, Thousand Oaks, CA 91320. Tel: 800-818-7243; Tel: 805-499-9774; Fax: 800-583-2665; e-mail: journals@sagepub.com; Web site: http://sagepub.com",
-				"ISBN": "ISSN-1066-4807",
 				"ISSN": "1066-4807",
 				"abstractNote": "The purpose of this article is to provide specific guidelines for child-centered play therapists to set behavioral outcome goals to effectively work with families and to meet the demands for accountability in the managed care environment. The child-centered play therapy orientation is the most widely practiced approach among play therapists who identify a specific theoretical orientation. While information about setting broad objectives is addressed using this approach to therapy, explicit guidelines for setting behavioral goals, while maintaining the integrity of the child-centered theoretical orientation, are needed. The guidelines are presented in three phases of parent consultation: (a) the initial engagement with parents, (b) the ongoing parent consultations, and (c) the termination phase. In keeping with the child-centered approach, the authors propose to work with parents from a person-centered orientation and seek to appreciate how cultural influences relate to parents' concerns and goals for their children. A case example is provided to demonstrate how child-centered play therapists can accomplish the aforementioned goals.",
 				"url": "http://www.eric.ed.gov/ERICWebPortal/detail?accno=EJ956651",
-				"publicationTitle": "Family Journal: Counseling and Therapy for Couples and Families",
 				"libraryCatalog": "ERIC",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"title": "Collaborating with Parents to Establish Behavioral Goals in Child-Centered Play Therapy",
+				"date": "January 2012",
+				"volume": "20",
+				"pages": "51-57",
+				"publicationTitle": "Family Journal: Counseling and Therapy for Couples and Families"
 			}
 		]
 	}

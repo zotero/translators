@@ -158,7 +158,7 @@ var testCases = [
 				"libraryCatalog": "BioOne",
 				"shortTitle": "Body Mass Estimation in Amphicyonid Carnivoran Mammals",
 				"title": "Body Mass Estimation in Amphicyonid Carnivoran Mammals: A Multiple Regression Approach from the Skull and Skeleton",
-				"date": "June 01, 2011",
+				"date": "June 1, 2011",
 				"publicationTitle": "Acta Palaeontologica Polonica",
 				"pages": "225-246",
 				"volume": "56"
@@ -211,7 +211,7 @@ var testCases = [
 				"url": "http://www.bioone.org/doi/abs/10.1896/020.011.0101",
 				"libraryCatalog": "BioOne",
 				"title": "Albinismo Total em Preguiças-de-Garganta-Marrom Bradypus variegatus (Schinz, 1825) no Estado de Pernambuco, Brasil",
-				"date": "November 01, 2010",
+				"date": "November 1, 2010",
 				"publicationTitle": "Edentata",
 				"pages": "1-3"
 			}

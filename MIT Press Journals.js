@@ -107,7 +107,7 @@ var testCases = [
 				"url": "http://dx.doi.org/10.1162/afar.2010.43.4.60",
 				"libraryCatalog": "MIT Press Journals",
 				"title": "Removable Hair Caps of Karamoja (Uganda)",
-				"date": "November 08, 2010",
+				"date": "November 8, 2010",
 				"publicationTitle": "African Arts",
 				"pages": "60-71",
 				"volume": "43"

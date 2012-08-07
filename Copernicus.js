@@ -97,30 +97,25 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.adv-geosci.net/30/1/2011/",
 						"title": "Adv. Geosci. Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"url": "http://www.adv-geosci.net/30/1/2011/adgeo-30-1-2011.pdf",
 						"mimeType": "application/pdf",
 						"title": "Adv. Geosci. PDF",
 						"downloadable": true
 					}
 				],
-				"title": "Preface ''Precipitation: Measurement, Climatology, Remote Sensing, and Modeling (EGU 2010)''",
-				"publicationTitle": "Adv. Geosci.",
-				"volume": "30",
-				"pages": "1-2",
-				"date": "May 09, 2011",
-				"publisher": "Copernicus Publications",
-				"ISBN": "1680-7359",
 				"ISSN": "1680-7359",
 				"url": "http://www.adv-geosci.net/30/1/2011/",
 				"DOI": "10.5194/adgeo-30-1-2011",
 				"libraryCatalog": "Copernicus Online Journals",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Preface ''Precipitation"
+				"shortTitle": "Preface ''Precipitation",
+				"title": "Preface ''Precipitation: Measurement, Climatology, Remote Sensing, and Modeling (EGU 2010)''",
+				"publicationTitle": "Adv. Geosci.",
+				"volume": "30",
+				"pages": "1-2",
+				"date": "May 9, 2011"
 			}
 		]
 	},
