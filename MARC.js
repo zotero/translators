@@ -1,15 +1,15 @@
 {
 	"translatorID": "a6ee60df-1ddc-4aae-bb25-45e0537be973",
+	"translatorType": 1,
 	"label": "MARC",
 	"creator": "Simon Kornblith, Sylvain Machefert",
 	"target": "marc",
 	"minVersion": "2.1.9",
-	"maxVersion": "",
+	"maxVersion": null,
 	"priority": 100,
 	"inRepository": true,
-	"translatorType": 1,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-08-05 08:20:39"
+	"lastUpdated": "2012-08-07 03:39:27"
 }
 
 function detectImport() {
@@ -37,8 +37,8 @@ function clean(value) {
 	value = value.replace(/[\s\.\,\/\:;]+$/, '');
 	value = value.replace(/ +/g, ' ');
 	
-	var char1 = value[0];
-	var char2 = value[value.length-1];
+	var char1 = value.substr(0, 1);
+	var char2 = value.substr(value.length-1);
 	if((char1 == "[" && char2 == "]") || (char1 == "(" && char2 == ")")) {
 		// chop of extraneous characters
 		return value.substr(1, value.length-2);
@@ -217,7 +217,7 @@ record.prototype._associateDBField = function(item, fieldNo, part, fieldName, ex
 		for(var i in field) {
 			var value = false;
 			for(var j=0; j<part.length; j++) {
-				var myPart = part[j];
+				var myPart = part.substr(j, 1);
 				if(field[i][myPart]) {
 					if(value) {
 						value += " "+field[i][myPart];
