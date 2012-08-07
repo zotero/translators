@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-08-06 01:33:37"
+	"lastUpdated": "2012-08-06 03:01:19"
 }
 
 /*
@@ -126,7 +126,7 @@ function scrape(doc) {
 			item.archiveLocation = "";
 			// some bibtext contains odd </kwd> tags - remove them
 			for(var i=0; i<item.tags.length; i++) {
-				item.tags[i].replace("</kwd>", "");
+				item.tags[i] = item.tags[i].replace("</kwd>", "");
 			}
 			item.complete();
 			haveImported = true;
