@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-02-24 11:20:24"
+	"lastUpdated": "2012-08-06 23:15:32"
 }
 
 function textToXML(text) {
@@ -35,6 +35,7 @@ function scrape(text) {
 		for(var property in item) {
 			newItem[property] = item[property];
 		}
+		if(!newItem.title) newItem.title = "[Untitled]";
 
 		newItem.complete();
 	}
@@ -65,6 +66,9 @@ function doWeb(doc, url) {
 	var libraryURI = ZU.xpathText(doc, '//link[@type="application/atom+xml" and @rel="alternate"]/@href')
 					.match(/^.+?\/(?:users|groups)\/\w+/)[0]
 					+ '/items/';
+	if(Zotero.isBookmarklet) {
+		libraryURI = libraryURI.replace("https://api.zotero.org", "https://www.zotero.org/api");
+	}
 	var apiOpts = '?format=atom&content=json';
 	var itemRe = /\/itemKey\/(\w+)/;
 
@@ -78,7 +82,6 @@ function doWeb(doc, url) {
 			var apiURIs = [], itemID;
 			for (var url in selectedItems) {
 				itemID = url.match(itemRe)[1];
-				//export using zotero rdf to preserve as much information as possible
 				apiURIs.push(libraryURI + itemID + apiOpts);
 			}
 
@@ -98,24 +101,24 @@ var testCases = [
 		"url": "https://www.zotero.org/groups/all_things_zotero/items/itemKey/HXTTNJGD",
 		"defer": true,
 		"items": [
-			 {
-         	"itemType": "journalArticle",
-         	"creators": [
-         		{
-         			"creatorType": "author",
-         			"firstName": "Mark",
-         			"lastName": "Desirto"
-         		}
-         	],
-         	"notes": [],
-         	"tags": [],
-         	"seeAlso": [],
-         	"attachments": [],
-         	"title": "Expert Searching, Zotero: A New Bread of Search Tool",
-         	"publicationTitle": "Medical Library Association Newsletter",
-         	"date": "April 2007",
-         	"callNumber": "0000"
-         }
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"creatorType": "author",
+						"firstName": "Mark",
+						"lastName": "Desirto"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Expert Searching, Zotero: A New Bread of Search Tool",
+				"publicationTitle": "Medical Library Association Newsletter",
+				"date": "April 2007",
+				"callNumber": "0000"
+			}
 		]
 	},
 	{
@@ -123,26 +126,26 @@ var testCases = [
 		"url": "https://www.zotero.org/marksample/items/collectionKey/5RN69IBP/itemKey/58VT7DAA",
 		"defer": true,
 		"items": [
-			 {
-         	"itemType": "book",
-         	"creators": [
-         		{
-         			"creatorType": "author",
-         			"firstName": "Mark",
-         			"lastName": "Osteen"
-         		}
-         	],
-         	"notes": [],
-         	"tags": [],
-         	"seeAlso": [],
-         	"attachments": [],
-         	"title": "American Magic and Dread: Don DeLillo’s Dialogue with Culture",
-         	"place": "Philadelphia",
-         	"publisher": "University of Pennsylvania Press",
-         	"date": "2000",
-         	"ISBN": "0812235517",
-         	"shortTitle": "American Magic"
-         }
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"creatorType": "author",
+						"firstName": "Mark",
+						"lastName": "Osteen"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "American Magic and Dread: Don DeLillo’s Dialogue with Culture",
+				"place": "Philadelphia",
+				"publisher": "University of Pennsylvania Press",
+				"date": "2000",
+				"ISBN": "0812235517",
+				"shortTitle": "American Magic"
+			}
 		]
 	},
 	{
