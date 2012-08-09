@@ -112,15 +112,13 @@ var testCases = [
 					}
 				],
 				"itemID": "http://vimeo.com/31179423",
-				"title": "Baroque.me: J.S. Bach - Cello Suite No. 1 - Prelude",
-				"publicationTitle": "Vimeo",
 				"url": "http://vimeo.com/31179423",
-				"abstractNote": "Baroque.me (2011) by Alexander Chen. Video capture. http://www.baroque.me visualizes the first Prelude from Bach's Cello Suites. Using the math behind string length and pitch, it came from a simple idea: what if all the notes were drawn as strings? Instead…",
-				"accessDate": "CURRENT_TIMESTAMP",
+				"abstractNote": "Baroque.me (2011) by Alexander Chen. Video capture. http://www.baroque.me visualizes the first Prelude from Bach's Cello Suites. Using the math behind string length…",
 				"libraryCatalog": "vimeo.com",
-				"date": "2011-10-26",
 				"runningTime": "PT00H02M57S",
-				"shortTitle": "Baroque.me"
+				"shortTitle": "Baroque.me",
+				"title": "Baroque.me: J.S. Bach - Cello Suite No. 1 - Prelude",
+				"date": "2011-10-26"
 			}
 		]
 	}

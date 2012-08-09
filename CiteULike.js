@@ -101,24 +101,21 @@ var testCases = [
 				],
 				"seeAlso": [],
 				"attachments": [
-					{
-						"url": "http://dx.doi.org/10.1109/TSE.2006.22"
-					}
+					{}
 				],
 				"itemID": "citeulike:567475",
+				"issue": "3",
+				"ISSN": "0098-5589",
+				"abstractNote": "Use cases are believed to be a good basis for system testing. Yet, to automate the test generation process, there is a large gap to bridge between high-level use cases and concrete test cases. We propose a new approach for automating the generation of system test scenarios in the context of object-oriented embedded software, taking into account traceability problems between high-level views and concrete test case execution. Starting from a formalization of the requirements based on use cases extended with contracts, we automatically build a transition system from which we synthesize test cases. Our objective is to cover the system in terms of statement coverage with those generated tests: an empirical evaluation of our approach is given based on this objective and several case studies. We briefly discuss the experimental deployment of our approach in the field at Thales Airborne Systems.",
+				"url": "http://dx.doi.org/10.1109/TSE.2006.22",
+				"DOI": "10.1109/TSE.2006.22",
+				"libraryCatalog": "CiteULike",
+				"shortTitle": "Automatic test generation",
 				"title": "Automatic test generation: a use case driven approach",
 				"publicationTitle": "IEEE Transactions on Software Engineering",
 				"volume": "32",
-				"issue": "3",
 				"pages": "140-155",
-				"ISBN": "0098-5589",
-				"ISSN": "0098-5589",
-				"abstractNote": "Use cases are believed to be a good basis for system testing. Yet, to automate the test generation process, there is a large gap to bridge between high-level use cases and concrete test cases. We propose a new approach for automating the generation of system test scenarios in the context of object-oriented embedded software, taking into account traceability problems between high-level views and concrete test case execution. Starting from a formalization of the requirements based on use cases extended with contracts, we automatically build a transition system from which we synthesize test cases. Our objective is to cover the system in terms of statement coverage with those generated tests: an empirical evaluation of our approach is given based on this objective and several case studies. We briefly discuss the experimental deployment of our approach in the field at Thales Airborne Systems.",
-				"date": "March 2006",
-				"url": "http://dx.doi.org/10.1109/TSE.2006.22",
-				"libraryCatalog": "CiteULike",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Automatic test generation"
+				"date": "March 2006"
 			}
 		]
 	}
