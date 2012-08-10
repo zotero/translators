@@ -9,7 +9,8 @@
 	"displayOptions": {
 		"exportCharset": "UTF-8",
 		"exportNotes": true,
-		"exportFileData": false
+		"exportFileData": false,
+		"useJournalAbbreviation": false
 	},
 	"inRepository": true,
 	"translatorType": 3,
@@ -2051,6 +2052,8 @@ function doExport() {
 		if(item.publicationTitle) {
 			if(item.itemType == "bookSection" || item.itemType == "conferencePaper") {
 				writeField("booktitle", item.publicationTitle);
+			} else if(Zotero.getOption("useJournalAbbreviation")){
+				writeField("journal", item.journalAbbreviation);
 			} else {
 				writeField("journal", item.publicationTitle);
 			}
