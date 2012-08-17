@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-08-16 08:56:00"
+	"lastUpdated": "2012-08-17 08:56:00"
 }
 
 /*
@@ -32,9 +32,9 @@
 
 function detectWeb(doc, url) {
     //RecordSearch - items and series - or Photosearch results
-    if (url.match(/SeriesListing.asp/i) || url.match(/ItemsListing.asp/i) || url.match(/PhotoSearchSearchResults.asp/i)) {
+    if (url.match(/SeriesListing\.asp/i) || url.match(/ItemsListing\.asp/i) || url.match(/PhotoSearchSearchResults\.asp/i)) {
             return "multiple";
-    } else if (url.match(/SeriesDetail.asp/i) || url.match(/ItemDetail.asp/i) || url.match(/PhotoSearchItemDetail.asp/i) || url.match(/imagine.asp/i)) {
+    } else if (url.match(/SeriesDetail\.asp/i) || url.match(/ItemDetail\.asp/i) || url.match(/PhotoSearchItemDetail\.asp/i) || url.match(/imagine\.asp/i)) {
             return "manuscript";
     }
 }
@@ -54,7 +54,7 @@ function doWeb(doc, url) {
             var item = new Zotero.Item("manuscript");
             item.archive = "National Archives of Australia";
             var tags = new Array();
-            if (record.match(/Imagine.asp/i)) {
+            if (record.match(/Imagine\.asp/i)) {
                 var postString, barcode, page, numPages;
                 item.libraryCatalog = "RecordSearch";
                 if (doc.body.innerHTML.match(/Digital copy of NAA:/)) {
@@ -88,14 +88,14 @@ function doWeb(doc, url) {
                     item.attachments = [{url:item.url, title:'Digital copy of NAA: ' + refNumber + ', p. ' + page, mimeType:"image/jpeg" }];
                     // MACHINE TAGS
                     // The file of which this page is a part.
-                    item.tags.push('dcterms:isPartOf="http://www.naa.gov.au/cgi-bin/Search?O=I&Number=' + barcode + '"');
+                    // item.tags.push('dcterms:isPartOf="http://www.naa.gov.au/cgi-bin/Search?O=I&Number=' + barcode + '"');
                     // Citation
-                    item.tags.push('dcterms:bibliographicCitation="NAA: ' + refNumber + ', p. ' + page + '"');
-                    item.tags.push('xmlns:dcterms="http://purl.org/dc/terms/"');
+                    // item.tags.push('dcterms:bibliographicCitation="NAA: ' + refNumber + ', p. ' + page + '"');
+                    // item.tags.push('xmlns:dcterms="http://purl.org/dc/terms/"');
                     item.complete();
                     setupCallback();
                 });
-            } else if (record.match(/PhotoSearchItemDetail.asp/i)) {
+            } else if (record.match(/PhotoSearchItemDetail\.asp/i)) {
 		item.libraryCatalog = "PhotoSearch";
                 Zotero.Utilities.processDocuments(record, function (doc) {
                     item.title = Zotero.Utilities.trimInternal(doc.evaluate('//b[. ="Title :"]/following-sibling::text()[1]', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
@@ -121,23 +121,23 @@ function doWeb(doc, url) {
                             }
                     }
                     // Citation
-                    item.tags.push('dcterms:bibliographicCitation="NAA: ' + refNumber + '"');
+                    // item.tags.push('dcterms:bibliographicCitation="NAA: ' + refNumber + '"');
                     // Save barcode as identifier
-                    item.tags.push('dcterms:identifier="' + barcode + '"');
+                    // item.tags.push('dcterms:identifier="' + barcode + '"');
                     // Series of which this is a member
-                    item.tags.push('dcterms:isPartOf="http://www.naa.gov.au/cgi-bin/Search?Number=' + series + '"');
+                    // item.tags.push('dcterms:isPartOf="http://www.naa.gov.au/cgi-bin/Search?Number=' + series + '"');
                     // Same file in RecordSearch
-                    item.tags.push('owl:sameAs="http://www.naa.gov.au/cgi-bin/Search?O=I&Number=' + barcode + '"');
+                    // item.tags.push('owl:sameAs="http://www.naa.gov.au/cgi-bin/Search?O=I&Number=' + barcode + '"');
                     // Namespace declarations
-                    item.tags.push('xmlns:dcterms="http://purl.org/dc/terms/"');
-                    item.tags.push('xmlns:owl="http://www.w3.org/2002/07/owl#"');
+                    // item.tags.push('xmlns:dcterms="http://purl.org/dc/terms/"');
+                    // item.tags.push('xmlns:owl="http://www.w3.org/2002/07/owl#"');
                     // Attach copy of photo as attachment
                     var imgURL = "http://recordsearch.naa.gov.au/NaaMedia/ShowImage.asp?B=" + barcode + "&S=1&T=P";
                     item.attachments = [{url:imgURL, title:"Digital image of NAA: "+ item.archiveLocation, mimeType:"image/jpeg" }];
                     item.complete();
 		    setupCallback();
                 });
-            } else if (record.match(/SeriesDetail.asp/i)) {
+            } else if (record.match(/SeriesDetail\.asp/i)) {
                 item.libraryCatalog = "RecordSearch";
                 Zotero.Utilities.processDocuments(record, function (doc) {
                     item.title = Zotero.Utilities.trimInternal(doc.evaluate('//td[@class="field"][contains(.,"Title")]/following-sibling::td', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.lastChild.textContent);
@@ -169,7 +169,7 @@ function doWeb(doc, url) {
                     // Format
                     try {
                         var format = Zotero.Utilities.trimInternal(doc.evaluate('//td[@class="field"][div="Predominant physical format"]/following-sibling::td', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.lastChild.textContent);
-                        item.tags.push('dcterms:format="' + format + '"');
+                        // item.tags.push('dcterms:format="' + format + '"');
                         item.extra = "Format: " + format + "\n";
                     } catch(e) {
                         // Not sure if all series have formats
@@ -177,7 +177,7 @@ function doWeb(doc, url) {
                     // Number of items described on RecordSearch
                     try {
                         var described = doc.evaluate('//td[@class="field"][contains(.,"Items in this series on RecordSearch")]/following-sibling::td/a', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent;
-                        item.tags.push('dcterms:extent="' + described + ' items described"');
+                        // item.tags.push('dcterms:extent="' + described + ' items described"');
                         item.extra += "Items on RecordSearch: " + described + "\n";
                     } catch(e) {
                         // Not all series have items described
@@ -185,17 +185,17 @@ function doWeb(doc, url) {
                     // Quantities and locations
                     var quantities = doc.evaluate('//td[@class="field"][contains(.,"Quantity and location")]/following-sibling::td/ul/li', doc, nsResolver, XPathResult.ANY_TYPE, null);
                     while (quantity = quantities.iterateNext()) {
-                        item.tags.push('dcterms:extent="' + quantity.textContent + '"');
+                        // item.tags.push('dcterms:extent="' + quantity.textContent + '"');
                         item.extra += "Quantity and location: " + quantity.textContent + "\n";
                     }
                     // Citation
                     item.tags.push('dcterms:bibliographicCitation="NAA: ' + refNumber + '"');
                     // Declare dcterms namespace
-                    item.tags.push('xmlns:dcterms="http://purl.org/dc/terms/"');
+                    // item.tags.push('xmlns:dcterms="http://purl.org/dc/terms/"');
                     item.complete();
 		    setupCallback();
                 });
-            } else if (record.match(/ItemDetail.asp/i)) {
+            } else if (record.match(/ItemDetail\.asp/i)) {
                 item.manuscriptType = 'file';
                 item.libraryCatalog = "RecordSearch";
                 Zotero.Utilities.processDocuments(record, function (doc) {
@@ -219,25 +219,25 @@ function doWeb(doc, url) {
                     }
                     // MACHINE TAGS
                     // The series this item belongs to
-                    item.tags.push('dcterms:isPartOf="http://www.naa.gov.au/cgi-bin/Search?Number=' + series + '"');
+                    // item.tags.push('dcterms:isPartOf="http://www.naa.gov.au/cgi-bin/Search?Number=' + series + '"');
                     // Citation
-                    item.tags.push('dcterms:bibliographicCitation="NAA: ' + refNumber + '"');
+                    // item.tags.push('dcterms:bibliographicCitation="NAA: ' + refNumber + '"');
                     // Save the barcode as an identifier
-                    item.tags.push('dcterms:identifier="' + barcode + '"');
+                    // item.tags.push('dcterms:identifier="' + barcode + '"');
                     // Access status
                     var access = Zotero.Utilities.trimInternal(doc.evaluate('//td[@class="field"][contains(.,"Access status")]/following-sibling::td', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.lastChild.textContent);
-                    item.tags.push('dcterms:accessRights="' + access + '"');
+                    // item.tags.push('dcterms:accessRights="' + access + '"');
                     item.extra = "Access: " + access + "\n";
                     // Format
                     try {
                         var format = Zotero.Utilities.trimInternal(doc.evaluate('//td[@class="field"][div="Physical format"]/following-sibling::td', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.lastChild.textContent);
-                        item.tags.push('dcterms:format="' + format + '"');
+                        // item.tags.push('dcterms:format="' + format + '"');
                         item.extra += "Format: " + format + "\n";
                     } catch(e) {
                         // Not sure if there's always a format
                     }
                     // Declare dcterms namespace
-                    item.tags.push('xmlns:dcterms="http://purl.org/dc/terms/"');
+                    // item.tags.push('xmlns:dcterms="http://purl.org/dc/terms/"');
                     // Is there a digital copy? - if so find the number of pages in the digitised file
                     if (doc.evaluate('//a[. ="View digital copy "]', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue != null) {
                         item.extra += "Digitised\n";
@@ -262,20 +262,20 @@ function doWeb(doc, url) {
         var titles, links, title, link;
         var items = new Object();
         // Files
-        if (url.match(/ItemsListing.asp/i)) {
+        if (url.match(/ItemsListing\.asp/i)) {
                 titles = doc.evaluate('//td[4][@title="Go to Item details"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
                 links = doc.evaluate('//td[3][@title="Go to Item details"]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
                 // Photos
-        } else if (url.match(/PhotoSearchSearchResults.asp/i)) {
+        } else if (url.match(/PhotoSearchSearchResults\.asp/i)) {
                 titles = doc.evaluate('//td[b="Title :"]/a[1]', doc, nsResolver, XPathResult.ANY_TYPE, null);
                 links = doc.evaluate('//td[b="Title :"]/a[1]', doc, nsResolver, XPathResult.ANY_TYPE, null);
                 //Series
-        } else if (url.match(/SeriesListing.asp/i)) {
+        } else if (url.match(/SeriesListing\.asp/i)) {
                 titles = doc.evaluate('//td[3][@title="Go to Series details"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
                 links = doc.evaluate('//td[2][@title="Go to Series details"]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
         }
         while ((title = titles.iterateNext()) && (link = links.iterateNext())) {
-                if (url.match(/PhotoSearchSearchResults.asp/i)) {
+                if (url.match(/PhotoSearchSearchResults\.asp/i)) {
                         items[link.href] = Zotero.Utilities.trimInternal(title.lastChild.textContent);
                 } else {
                         items[link.href] = Zotero.Utilities.trimInternal(title.firstChild.textContent);
