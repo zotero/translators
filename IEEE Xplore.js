@@ -9,10 +9,12 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-08-18 12:50:19"
+	"lastUpdated": "2012-08-18 17:30:00"
 }
 
 function detectWeb(doc, url) {
+	if(doc.defaultView !== doc.defaultView.top) return false;
+	
 	var articleRe = /[?&]ar(N|n)umber=([0-9]+)/;
 	var m = articleRe.exec(url);
 
@@ -173,10 +175,10 @@ function scrape (doc, url) {
 			item.publicationTitle = res[2]+" "+res[1];
 			item.proceedingsTitle = item.conferenceName = item.publicationTitle;
 			if (pdf) {
-				Zotero.Utilities.processDocuments([pdf], function (doc, url) {
-					var pdfFrame = doc.evaluate('//frame[2]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-					if (pdfFrame) item.attachments = [{
-						url: pdfFrame.src,
+				Zotero.Utilities.doGet(pdf, function (src) {
+					var m = /<frame src="(.*\.pdf.*)"/.exec(src);
+					if (m) item.attachments = [{
+						url: m[1],
 						title: "IEEE Xplore Full Text PDF",
 						mimeType: "application/pdf"
 					}, {url: url, title: "IEEE Xplore Abstract Record", mimeType: "text/html"}];
