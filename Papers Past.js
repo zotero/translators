@@ -2,14 +2,14 @@
 	"translatorID": "1b052690-16dd-431d-9828-9dc675eb55f6",
 	"label": "Papers Past",
 	"creator": "staplegun",
-	"target": "^https?://(www\\.)paperspast\\.natlib\\.govt\\.nz",
+	"target": "^https?://(www\\.)?paperspast\\.natlib\\.govt\\.nz",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-07-12 08:41:41"
+	"lastUpdated": "2012-08-18 14:13:34"
 }
 
 /*
