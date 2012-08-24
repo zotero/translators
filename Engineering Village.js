@@ -1,30 +1,29 @@
 {
 	"translatorID": "1f40baef-eece-43e4-a1cc-27d20c0ce086",
 	"label": "Engineering Village",
-	"creator": "Ben Parr",
+	"creator": "Ben Parr, Sebastian Karcher",
 	"target": "^https?://(?:www\\.)?engineeringvillage(2)?\\.(?:com|org)",
-	"minVersion": "1.0.0b4.r1",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-08-18 15:18:45"
+	"lastUpdated": "2012-08-23 18:10:33"
 }
 
 function detectWeb(doc, url)
 {
-	/*var xpath='//span/a[@id="downloadlink"][@href]';
+	var xpath='//span/a[@id="downloadlink"][@href]';
 	if(doc.evaluate(xpath, doc,
 		null,XPathResult.ANY_TYPE,null).iterateNext())
 		{  return "journalArticle";}
 		
-	xpath='//input[@name="cbresult"]/@onclick';
+	xpath='//div[@id="resultslist"]';
 	if(doc.evaluate(xpath, doc,
 		null,XPathResult.ANY_TYPE,null).iterateNext())
 		{  return "multiple";}		
-	return null; */
-	return "multiple";
+	return null; 
 }
 
 function parseRIS(uris)
