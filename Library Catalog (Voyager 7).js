@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-10 19:27:43"
+	"lastUpdated": "2012-08-23 19:55:26"
 }
 
 function detectWeb(doc, url) {
@@ -17,6 +17,9 @@ function detectWeb(doc, url) {
 	if (bibIdRe.test(url)) {
 		return "book";
 	}
+	//for single search results such as
+	//http://catalog.loc.gov/vwebv/search?searchArg=bynum+holy+feast+holy+fast&searchCode=GKEY^*&searchType=0&recCount=100&sk=en_US
+	else if(ZU.xpathText(doc, '//div[@class="bibliographicData"]')) return "book";
 
 
 	var titles = doc.evaluate('//div[@class="resultListTextCell"]//a', doc, null, XPathResult.ANY_TYPE, null);
@@ -28,6 +31,13 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 	var bibIdRe = new RegExp("bibId=([0-9]+)");
 	var m = bibIdRe.exec(url);
+	//for single search results
+	if (detectWeb(doc, url)== "book" && !m){
+		var host = url.match("^(https?://[^/]+)/")[0];
+		url = host + "vwebv/" + ZU.xpathText(doc, '//div[@class="recordContent"]//li[@class="first active"]/a/@href')
+	    var m = bibIdRe.exec(url);
+	}
+	Z.debug(url)
 	var hostRegexp = new RegExp("^(https?://[^/]+)/");
 	var hMatch = hostRegexp.exec(url);
 	var host = hMatch[1];
@@ -96,38 +106,51 @@ function scrape(doc, url) {
 	Zotero.wait();
 }
 /** BEGIN TEST CASES **/
-var testCases = [{
-	"type": "web",
-	"url": "http://groucho.lib.rochester.edu/vwebv/search?searchArg=argentina&searchCode=GKEY%5E*&limitTo=none&recCount=50&searchType=1&page.search.search.button=Search",
-	"items": "multiple"
-}, {
-	"type": "web",
-	"url": "http://groucho.lib.rochester.edu/vwebv/holdingsInfo?searchId=3544&recCount=50&recPointer=1&bibId=78520",
-	"items": [{
-		"itemType": "book",
-		"creators": [{
-			"firstName": "Mildred Anna",
-			"lastName": "Phoebus",
-			"creatorType": "author"
-		}, {
-			"lastName": "United States",
-			"fieldMode": true
-		}],
-		"notes": [{
-			"note": "Supplement to Commerce reports. Published by the Bureau of foreign and domestic commerce. October 29, 1923"
-		}],
-		"tags": ["Argentina", "Economic conditions"],
-		"seeAlso": [],
-		"attachments": [],
-		"title": "Economic development in Argentina since 1921",
-		"place": "Washington",
-		"publisher": "Govt. print. off",
-		"date": "1923",
-		"numPages": "14",
-		"series": "U. S. Bureau of foreign and domestic commerce (Dept. of commerce) Trade information bulletin",
-		"seriesNumber": "no. 156",
-		"callNumber": "HF105 .F71tr no.156",
-		"libraryCatalog": "groucho.lib.rochester.edu Library Catalog"
-	}]
-}]
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://groucho.lib.rochester.edu/vwebv/search?searchArg=argentina&searchCode=GKEY%5E*&limitTo=none&recCount=50&searchType=1&page.search.search.button=Search",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://groucho.lib.rochester.edu/vwebv/holdingsInfo?searchId=3544&recCount=50&recPointer=1&bibId=78520",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Mildred Anna",
+						"lastName": "Phoebus",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "United States",
+						"fieldMode": true
+					}
+				],
+				"notes": [
+					{
+						"note": "Supplement to Commerce reports. Published by the Bureau of foreign and domestic commerce. October 29, 1923"
+					}
+				],
+				"tags": [
+					"Argentina",
+					"Economic conditions"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Economic development in Argentina since 1921",
+				"place": "Washington",
+				"publisher": "Govt. print. off",
+				"date": "1923",
+				"numPages": "14",
+				"series": "U. S. Bureau of foreign and domestic commerce (Dept. of commerce) Trade information bulletin",
+				"seriesNumber": "no. 156",
+				"callNumber": "HF105 .F71tr no.156",
+				"libraryCatalog": "groucho.lib.rochester.edu Library Catalog"
+			}
+		]
+	}
+]
 /** END TEST CASES **/
