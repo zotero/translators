@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-08-23 19:55:26"
+	"lastUpdated": "2012-08-24 04:45:35"
 }
 
 function detectWeb(doc, url) {
@@ -54,7 +54,9 @@ function doWeb(doc, url) {
 
 		while (title = titles.iterateNext()) {
 			var bibId = title.href.match(/bibId=([0-9]+)/)[1];
-			items[bibId] = title.textContent;
+			// Chrome ignores the order in which properties are added if they are numbers
+			// See http://code.google.com/p/v8/issues/detail?id=164
+			items["_"+bibId] = title.textContent;
 		}
 
 		Zotero.selectItems(items, function (items) {
@@ -62,7 +64,7 @@ function doWeb(doc, url) {
 				return true;
 			}
 			for (var i in items) {
-				newUris.push(urlPrefix + i + "&format=utf-8");
+				newUris.push(urlPrefix + i.substr(1) + "&format=utf-8");
 			}
 
 			Zotero.Utilities.HTTP.doGet(newUris, function (text) {
