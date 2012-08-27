@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-25 22:28:07"
+	"lastUpdated": "2012-08-27 04:30:05"
 }
 
 /*
@@ -36,7 +36,11 @@
 
 function detectWeb(doc, url) {
 	if (url.match(/\/items\?query=/) && ZU.xpathText(doc, '//div[@id="searchResults"]//h2[@class="title"]/a')!=null ) return "multiple";
-	if (url.match(/\/items\/\d+/) && ZU.xpathText(doc, '//link/@type').indexOf("application/x-endnote-refer")!=-1) return "book";
+	if (url.match(/\/items\/\d+/)) {
+		var test = ZU.xpathText(doc, '//link/@type');
+		if(test && test.indexOf("application/x-endnote-refer")!=-1)
+			return "book";
+	}
 }
 	
 
