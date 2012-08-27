@@ -57,7 +57,7 @@ attachments : [
  
 FW.MultiScraper({
 itemType         : 'multiple',
-detect           : FW.Url().match(/\/archives\/naa\/items\/\d+/),
+detect           : FW.Xpath('//div[@id="wall"]/a'),
 choices          : {
   titles  :  FW.Xpath('//div[@id="wall"]/a').key('title').text(),
   urls    :  FW.Xpath('//div[@id="wall"]/a').key('href').replace(/images/, 'items')
