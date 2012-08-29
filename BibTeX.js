@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-07-14 12:46:55"
+	"lastUpdated": "2012-08-29 12:17:48"
 }
 
 function detectImport() {
@@ -80,7 +80,11 @@ var fieldMap = {
 	shorttitle:"shortTitle",
 	url:"url",
 	doi:"DOI",
-	"abstract":"abstractNote"
+	abstract:"abstractNote",
+  	nationality: "country",
+  	language:"language",
+  	assignee:"assignee"
+
 };
 
 var inputFieldMap = {
@@ -100,6 +104,7 @@ var zotero2bibtexTypeMap = {
 	"thesis":"phdthesis",
 	"letter":"misc",
 	"manuscript":"unpublished",
+	"patent" :"patent",
 	"interview":"misc",
 	"film":"misc",
 	"artwork":"misc",
@@ -113,6 +118,7 @@ var bibtex2zoteroTypeMap = {
 	"inbook":"bookSection",
 	"incollection":"bookSection",
 	"article":"journalArticle", // or magazineArticle or newspaperArticle
+	"patent" :"patent",
 	"phdthesis":"thesis",
 	"unpublished":"manuscript",
 	"inproceedings":"conferencePaper", // check for conference also
@@ -1554,6 +1560,7 @@ var alwaysMap = {
 	"\\":"{\\textbackslash}"
 };
 
+
 var strings = {};
 var keyRe = /[a-zA-Z0-9\-]/;
 var keywordSplitOnSpace = true;
@@ -1621,6 +1628,8 @@ function processField(item, field, value) {
 			item.reportNumber = value;
 		} else if (item.itemType == "book" || item.itemType == "bookSection") {
 			item.seriesNumber = value;
+		} else if (item.itemType == "patent"){
+			item.patentNumber = value;
 		} else {
 			item.issue = value;
 		}
@@ -1745,6 +1754,8 @@ function getFieldValue(read) {
 	if(value.length > 1) {
 		// replace accented characters (yucky slow)
 		value = value.replace(/{?(\\[`"'^~=a-z]){?\\?([A-Za-z])}/g, "$1{$2}");
+		//convert tex markup into permitted HTML
+		value = mapTeXmarkup(value);
 		for (var mapped in reversemappingTable) { // really really slow!
 			var unicode = reversemappingTable[mapped];
 			while(value.indexOf(mapped) !== -1) {
@@ -1883,11 +1894,14 @@ function writeField(field, value, isMacro) {
 	// url field is preserved, for use with \href and \url
 	// Other fields (DOI?) may need similar treatment
 	if(!((field == "url") || (field == "doi") | (field == "file"))) {
+
 		// I hope these are all the escape characters!
 		value = value.replace(/[|\<\>\~\^\\]/g, mapEscape).replace(/([\#\$\%\&\_])/g, "\\$1");
 		// Case of words with uppercase characters in non-initial positions is preserved with braces.
 		// treat hyphen as whitespace for this purpose so that Large-scale etc. don't get enclosed
 		if(!isMacro&&field != "pages") value = value.replace(/([^\s-]+[A-Z][^\s,]*)/g, "{$1}");
+		//convert the HTML markup allowed in Zotero for rich text to TeX
+		value = mapHTMLmarkup(value);
 	}
 	if (Zotero.getOption("exportCharset") != "UTF-8") {
 		value = value.replace(/[\u0080-\uFFFF]/g, mapAccent);
@@ -1895,6 +1909,34 @@ function writeField(field, value, isMacro) {
 	Zotero.write(value);
 	if(!isMacro) Zotero.write("}");
 }
+
+
+function mapHTMLmarkup(characters){
+	//converts the HTML markup allowed in Zotero for rich text to TeX
+	//since  < and > have already been escaped, we need this rather hideous code - I couldn't see a way around it though.
+	//italics and bold
+	characters = characters.replace(/\{\\textless\}i\{\\textgreater\}(((?!\{\\textless\}\/i{\\textgreater\}).)+)\{\\textless\}\/i{\\textgreater\}/g, "\\textit{$1}").replace(/\{\\textless\}b\{\\textgreater\}(((?!\{\\textless\}\/b{\\textgreater\}).)+)\{\\textless\}\/b{\\textgreater\}/g, "\\textbf{$1}");
+	//sub and superscript
+	characters = characters.replace(/\{\\textless\}sup\{\\textgreater\}(((?!\{\\textless\}\/sup\{\\textgreater\}).)+)\{\\textless\}\/sup{\\textgreater\}/g, "\$^{\\textrm{$1}}\$").replace(/\{\\textless\}sub\{\\textgreater\}(((?!\{\\textless\}\/sub\{\\textgreater\}).)+)\{\\textless\}\/sub\{\\textgreater\}/g, "\$_{\\textrm{$1}}\$");
+	//two variants of small caps
+	characters = characters.replace(/\{\\textless\}span\sstyle=\"small\-caps\"\{\\textgreater\}(((?!\{\\textless\}\/span\{\\textgreater\}).)+)\{\\textless\}\/span{\\textgreater\}/g, "\\textsc{$1}").replace(/\{\\textless\}sc\{\\textgreater\}(((?!\{\\textless\}\/sc\{\\textgreater\}).)+)\{\\textless\}\/sc\{\\textgreater\}/g, "\\textsc{$1}");
+	return characters;
+}
+
+
+function mapTeXmarkup(tex){
+	//reverse of the above - converts tex mark-up into html mark-up permitted by Zotero
+	//italics and bold
+	tex = tex.replace(/\\textit\{([^\}]+\})/g, "<i>$1</i>").replace(/\\textbf\{([^\}]+\})/g, "<b>$1</b>");
+	//two versions of subscript
+	tex = tex.replace(/\$_\{([^\}]+\}\$)/g, "<sub>$1</sub>").replace(/\$_\{\\textrm\{([^\}]+\}\})/g, "<sub>$1</sub>");	
+	//two version of superscript
+	tex = tex.replace(/\$\^\{([^\}]+\}\$)/g, "<sup>$1</sup>").replace(/\$\^\{\\textrm\{([^\}]+\}\})/g, "<sup>$1</sup>");	
+	//small caps
+	tex = tex.replace(/\\textsc\{([^\}]+)/g, "<span style=\"small-caps\">$1</span>");
+	return tex;
+}
+
 
 function mapEscape(character) {
 	return alwaysMap[character];
@@ -2044,8 +2086,8 @@ function doExport() {
 			}
 		}
 
-		if(item.reportNumber || item.issue || item.seriesNumber) {
-			writeField("number", item.reportNumber || item.issue || item.seriesNumber);
+		if(item.reportNumber || item.issue || item.seriesNumber || item.patentNumber) {
+			writeField("number", item.reportNumber || item.issue || item.seriesNumber|| item.patentNumber);
 		}
 
 		if(item.publicationTitle) {
