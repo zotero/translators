@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-08-29 12:17:48"
+	"lastUpdated": "2012-08-29 15:56:22"
 }
 
 function detectImport() {
@@ -1928,10 +1928,10 @@ function mapTeXmarkup(tex){
 	//reverse of the above - converts tex mark-up into html mark-up permitted by Zotero
 	//italics and bold
 	tex = tex.replace(/\\textit\{([^\}]+\})/g, "<i>$1</i>").replace(/\\textbf\{([^\}]+\})/g, "<b>$1</b>");
-	//two versions of subscript
-	tex = tex.replace(/\$_\{([^\}]+\}\$)/g, "<sub>$1</sub>").replace(/\$_\{\\textrm\{([^\}]+\}\})/g, "<sub>$1</sub>");	
+	//two versions of subscript the .* after $ is necessary because people m
+	tex = tex.replace(/\$[^\{]*_\{([^\}]+\}\$)/g, "<sub>$1</sub>").replace(/\$[^\{]*_\{\\textrm\{([^\}]+\}\})/g, "<sub>$1</sub>");	
 	//two version of superscript
-	tex = tex.replace(/\$\^\{([^\}]+\}\$)/g, "<sup>$1</sup>").replace(/\$\^\{\\textrm\{([^\}]+\}\})/g, "<sup>$1</sup>");	
+	tex = tex.replace(/\$[^\{]*\^\{([^\}]+\}\$)/g, "<sup>$1</sup>").replace(/\$[^\{]*\^\{\\textrm\{([^\}]+\}\})/g, "<sup>$1</sup>");	
 	//small caps
 	tex = tex.replace(/\\textsc\{([^\}]+)/g, "<span style=\"small-caps\">$1</span>");
 	return tex;
@@ -2448,6 +2448,42 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"title": "non-braking space: ; accented characters: ñ and ñ; tilde operator: ∼"
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@ARTICLE{Frit2,\n  author = {Fritz, U. and Corti, C. and P\\\"{a}ckert, M.},\n  title = {Test of markupconversion: Italics, bold, superscript, subscript, and small caps: Mitochondrial DNA$_{\\textrm{2}}$ sequences suggest unexpected phylogenetic position\n        of Corso-Sardinian grass snakes (\\textit{Natrix cetti}) and \\textbf{do not}\n        support their \\textsc{species status}, with notes on phylogeography and subspecies\n        delineation of grass snakes.},\n  journal = {Actes du $4^{\\textrm{ème}}$ Congrès Français d'Acoustique},\n  year = {2012},\n  volume = {12},\n  pages = {71-80},\n  doi = {10.1007/s13127-011-0069-8}\n}\n",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "U.",
+						"lastName": "Fritz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "C.",
+						"lastName": "Corti",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "M.",
+						"lastName": "Päckert",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Test of markupconversion: Italics, bold, superscript, subscript, and small caps: Mitochondrial DNA<sub>2</sub>$ sequences suggest unexpected phylogenetic position of Corso-Sardinian grass snakes (<i>Natrix cetti</i>) and <b>do not</b> support their <span style=\"small-caps\">species status</span>, with notes on phylogeography and subspecies delineation of grass snakes.",
+				"publicationTitle": "Actes du <sup>ème</sup>$ Congrès Français d'Acoustique",
+				"date": "2012",
+				"volume": "12",
+				"pages": "71-80",
+				"DOI": "10.1007/s13127-011-0069-8"
 			}
 		]
 	}
