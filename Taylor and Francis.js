@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-04-06 17:41:47"
+	"lastUpdated": "2012-08-31 17:23:55"
 }
 
 /*
@@ -126,18 +126,18 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "Alberto",
 						"lastName": "Chong",
+						"firstName": "Alberto",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Jose",
 						"lastName": "Galdo",
+						"firstName": "Jose",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Jaime",
 						"lastName": "Saavedra",
+						"firstName": "Jaime",
 						"creatorType": "author"
 					}
 				],
@@ -155,19 +155,18 @@ var testCases = [
 					}
 				],
 				"title": "Informality and productivity in the labor market in Peru",
-				"date": "2008",
+				"date": "December 01, 2008",
 				"DOI": "10.1080/17487870802543480",
 				"publicationTitle": "Journal of Economic Policy Reform",
+				"journalAbbreviation": "Journal of Economic Policy Reform",
 				"pages": "229-245",
 				"volume": "11",
 				"issue": "4",
 				"publisher": "Routledge",
 				"abstractNote": "This article analyzes the evolution of informal employment in Peru from 1986 to 2001. Contrary to what one would expect, the informality rates increased steadily during the 1990s despite the introduction of flexible contracting mechanisms, a healthy macroeconomic recovery, and tighter tax codes and regulation. We explore different factors that may explain this upward trend including the role of labor legislation and labor allocation between/within sectors of economic activity. Finally, we illustrate the negative correlation between productivity and informality by evaluating the impacts of the Youth Training PROJOVEN Program that offers vocational training to disadvantaged young individuals. We find significant training impacts on the probability of formal employment for both males and females.",
-				"ISBN": "1748-7870",
 				"ISSN": "1748-7870",
 				"url": "http://www.tandfonline.com/doi/abs/10.1080/17487870802543480",
-				"accessDate": "2012/04/06",
-				"bookTitle": "Journal of Economic Policy Reform",
+				"accessDate": "August 31, 2012",
 				"libraryCatalog": "Taylor&Francis"
 			}
 		]
@@ -185,18 +184,18 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "Alberto",
 						"lastName": "Chong",
+						"firstName": "Alberto",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Jose",
 						"lastName": "Galdo",
+						"firstName": "Jose",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Jaime",
 						"lastName": "Saavedra",
+						"firstName": "Jaime",
 						"creatorType": "author"
 					}
 				],
@@ -214,19 +213,18 @@ var testCases = [
 					}
 				],
 				"title": "Informality and productivity in the labor market in Peru",
-				"date": "2008",
+				"date": "December 01, 2008",
 				"DOI": "10.1080/17487870802543480",
 				"publicationTitle": "Journal of Economic Policy Reform",
+				"journalAbbreviation": "Journal of Economic Policy Reform",
 				"pages": "229-245",
 				"volume": "11",
 				"issue": "4",
 				"publisher": "Routledge",
 				"abstractNote": "This article analyzes the evolution of informal employment in Peru from 1986 to 2001. Contrary to what one would expect, the informality rates increased steadily during the 1990s despite the introduction of flexible contracting mechanisms, a healthy macroeconomic recovery, and tighter tax codes and regulation. We explore different factors that may explain this upward trend including the role of labor legislation and labor allocation between/within sectors of economic activity. Finally, we illustrate the negative correlation between productivity and informality by evaluating the impacts of the Youth Training PROJOVEN Program that offers vocational training to disadvantaged young individuals. We find significant training impacts on the probability of formal employment for both males and females.",
-				"ISBN": "1748-7870",
 				"ISSN": "1748-7870",
 				"url": "http://www.tandfonline.com/doi/abs/10.1080/17487870802543480",
-				"accessDate": "2012/04/06",
-				"bookTitle": "Journal of Economic Policy Reform",
+				"accessDate": "August 31, 2012",
 				"libraryCatalog": "Taylor&Francis"
 			}
 		]

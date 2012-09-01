@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-01-30 22:48:52"
+	"lastUpdated": "2012-08-31 16:23:56"
 }
 
 function detectWeb(doc, url) {
@@ -108,22 +108,16 @@ var testCases = [
 					"K2"
 				],
 				"seeAlso": [],
-				"attachments": [
-					{
-						"url": "http://www.ingentaconnect.com/content/klu/10436/2007/00000003/00000001/00000064"
-					},
-					{
-						"url": "http://dx.doi.org/10.1007/s10436-006-0064-9  "
-					}
-				],
+				"attachments": [],
 				"title": "Devaluation with contract redenomination in Argentina",
-				"publicationTitle": "Annals of Finance",
-				"date": "2007",
+				"journalAbbreviation": "Annals of Finance",
 				"volume": "3",
 				"issue": "1",
 				"pages": "155-192",
 				"abstractNote": "This study offers the first empirical microeconomic analysis of the effectiveness of dollar debt and contract redenomination policies to mitigate adverse financial and relative price consequences from a large devaluation. An analysis of Argentina's policy of devaluation with redenomination in 2002, in contrast to Mexico's policy of devaluation without debt redenomination in 1994-1995, shows that devaluation benefited tradables firms, and that dollar debt redenomination in Argentina benefited high-dollar debtors, as shown in these firms' investment behavior, especially non-tradables firms whose revenues in dollar terms were adversely affected by devaluation. That investment behavior contrasts with the experience of Mexican firms in the aftermath of Mexico's large devaluation, in which non-tradables producers with high dollar debt displayed significant relative reductions in investment. Stock return reactions to Argentine debt redenomination indicate large, positive, unanticipated effects on high-dollar debtors from debt redenomination. Energy concession contract redenomination likewise increased investment by high energy users in Argentina, and that benefit was apparent also in positive stock returns of those firms.",
 				"DOI": "10.1007/s10436-006-0064-9",
+				"date": "2007",
+				"publicationTitle": "Annals of Finance",
 				"libraryCatalog": "IngentaConnect"
 			}
 		]

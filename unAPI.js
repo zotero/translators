@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-02-03 22:52:47"
+	"lastUpdated": "2012-08-31 17:25:40"
 }
 
 var RECOGNIZABLE_FORMATS = ["rdf_zotero", "rdf_bibliontology", "mods", "marc", "unimarc", "ris",
@@ -352,7 +352,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://search8.library.utoronto.ca/UTL/index?N=0&Ntk=Anywhere&Ntt=nimni+challenge+of+post-zionism&Ntx=mode%2Bmatchallpartial&Nu=p_work_normalized&Np=1&formName=search_form_simple",
+		"url": "http://search.library.utoronto.ca/UTL/index?N=0&Ntk=Anywhere&Ntt=nimni+challenge+of+post-zionism&Ntx=mode%252Bmatchallpartial&Nu=p_work_normalized&Np=1&formName=search_form_simple",
 		"items": [
 			{
 				"itemType": "book",
@@ -360,7 +360,7 @@ var testCases = [
 					{
 						"lastName": "Nimni",
 						"firstName": "Ephraim.",
-						"creatorType": "contributor"
+						"creatorType": "editor"
 					}
 				],
 				"notes": [],
@@ -371,20 +371,15 @@ var testCases = [
 					"Israel -- Politics and government."
 				],
 				"seeAlso": [],
-				"attachments": [
-					{
-						"url": false
-					}
-				],
-				"itemID": "4908720  (UTL catalogue ckey)",
+				"attachments": [],
 				"title": "The challenge of Post-Zionism : alternatives to Israeli fundamentalist politics",
-				"date": "2003",
 				"publisher": "Zed Books",
 				"place": "New York",
 				"ISBN": "185649893X",
-				"ISSN": "185649893X",
 				"url": "http://www.loc.gov/catdir/description/hol032/2002190908.html",
-				"libraryCatalog": "search8.library.utoronto.ca",
+				"date": "2003",
+				"libraryCatalog": "search.library.utoronto.ca",
+				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "The challenge of Post-Zionism"
 			}
 		]

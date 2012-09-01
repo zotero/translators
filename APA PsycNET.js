@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-25 23:26:26"
+	"lastUpdated": "2012-08-31 15:14:58"
 }
 
 function detectWeb(doc, url) {
@@ -124,19 +124,23 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [],
+				"tags": [
+					"attention-deficit/hyperactivity disorder",
+					"adults",
+					"behavioral inhibition",
+					"neuropsychological performance",
+					"developmental considerations",
+					"neuropsychological deficits",
+					"empirical methods"
+				],
 				"seeAlso": [],
 				"attachments": [],
-				"itemID": "2004-16644-010",
 				"title": "Neuropsychology of Adults With Attention-Deficit/Hyperactivity Disorder: A Meta-Analytic Review",
 				"publicationTitle": "Neuropsychology",
 				"volume": "18",
 				"issue": "3",
 				"pages": "485-503",
 				"date": "2004",
-				"place": "US",
-				"publisher": "American Psychological Association",
-				"ISBN": "1931-1559(Electronic);0894-4105(Print)",
 				"ISSN": "1931-1559(Electronic);0894-4105(Print)",
 				"abstractNote": "A comprehensive, empirically based review of the published studies addressing neuropsychological performance in adults diagnosed with attention-deficit/hyperactivity disorder (ADHD) was conducted to identify patterns of performance deficits. Findings from 33 published studies were submitted to a meta-analytic procedure producing sample-size-weighted mean effect sizes across test measures. Results suggest that neuropsychological deficits are expressed in adults with ADHD across multiple domains of functioning, with notable impairments in attention, behavioral inhibition, and memory, whereas normal performance is noted in simple reaction time. Theoretical and developmental considerations are discussed, including the role of behavioral inhibition and working memory impairment. Future directions for research based on these findings are highlighted, including further exploration of specific impairments and an emphasis on particular tests and testing conditions. (PsycINFO Database Record (c) 2012 APA, all rights reserved)",
 				"DOI": "10.1037/0894-4105.18.3.485",
@@ -164,19 +168,21 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [],
+				"tags": [
+					"factor analysis",
+					"evaluation",
+					"potency",
+					"activity",
+					"semantic"
+				],
 				"seeAlso": [],
 				"attachments": [],
-				"itemID": "1956-05944-001",
 				"title": "Factor analysis of meaning",
 				"publicationTitle": "Journal of Experimental Psychology",
 				"volume": "50",
 				"issue": "5",
 				"pages": "325-338",
 				"date": "1955",
-				"place": "US",
-				"publisher": "American Psychological Association",
-				"ISBN": "0022-1015(Print)",
 				"ISSN": "0022-1015(Print)",
 				"abstractNote": "Two factor analytic studies of meaningful judgments based upon the same sample of 50 bipolar descriptive scales are reported. Both analyses reveal three major connotative factors: evaluation, potency, and activity. These factors appear to be independent dimensions of the semantic space within which the meanings of concepts may be specified. (PsycINFO Database Record (c) 2012 APA, all rights reserved)",
 				"DOI": "10.1037/h0043965",
@@ -200,23 +206,27 @@ var testCases = [
 						"lastName": "Maser",
 						"firstName": "Jack D.",
 						"creatorType": "author"
+					},
+					{
+						"lastName": "J. D. Maser  M. E. P. Seligman",
+						"creatorType": "editor"
 					}
 				],
 				"notes": [],
-				"tags": [],
+				"tags": [
+					"discusses tonic immobility as an animal model for catatonia & catalepsy"
+				],
 				"seeAlso": [],
 				"attachments": [],
-				"itemID": "1992-98221-010",
 				"title": "Catatonia: Tonic immobility: Evolutionary underpinnings of human catalepsy and catatonia",
+				"bookTitle": "Psychopathology: Experimental models",
 				"series": "A series of books in psychology.",
 				"pages": "334-357",
 				"date": "1977",
 				"place": "New York,  NY,  US",
 				"publisher": "W H Freeman/Times Books/ Henry Holt & Co",
 				"ISBN": "0-7167-0368-8 (Hardcover); 0-7167-0367-X (Paperback)",
-				"ISSN": "0-7167-0368-8 (Hardcover); 0-7167-0367-X (Paperback)",
 				"abstractNote": "tonic immobility [animal hypnosis] might be a useful laboratory analog or research model for catatonia / we have been collaborating on an interdisciplinary program of research in an effort to pinpoint the behavioral antecedents and biological bases for tonic immobility / attempt to briefly summarize our findings, and . . . discuss the implications of these data in terms of the model characteristics of tonic immobility / hypnosis / catatonia, catalepsy, and cataplexy / tonic immobility as a model for catatonia / fear potentiation / fear alleviation / fear or arousal / learned helplessness / neurological correlates / pharmacology and neurochemistry / genetic underpinnings / evolutionary considerations / implications for human psychopathology (PsycINFO Database Record (c) 2012 APA, all rights reserved)",
-				"publicationTitle": "Psychopathology: Experimental models",
 				"libraryCatalog": "APA PsycNET",
 				"shortTitle": "Catatonia"
 			}
@@ -236,18 +246,19 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [],
+				"tags": [
+					"abnormal personality",
+					"abnormal psychology",
+					"personality disorders"
+				],
 				"seeAlso": [],
 				"attachments": [],
-				"itemID": "2004-16329-000",
 				"title": "The abnormal personality: A textbook",
-				"pages": "x, 617",
 				"numPages": "x, 617",
 				"date": "1948",
 				"place": "New York,  NY,  US",
 				"publisher": "Ronald Press Company",
 				"abstractNote": "The author's intent is to write about abnormal people in a way that will be valuable and interesting to students new to the subject. A first course in abnormal psychology is not intended to train specialists. Its goal is more general: it should provide the student with the opportunity to whet his interest, expand his horizons, register a certain body of new facts, and relate this to the rest of his knowledge about mankind. I have tried to present the subject in such a way as to emphasize its usefulness to all students of human nature. I have tried the experiment of writing two introductory chapters, one historical and the other clinical. This reflects my desire to set the subject-matter in a broad perspective and at the same time to anchor it in concrete fact. Next comes a block of six chapters designed to set forth the topics of maladjustment and neurosis. The two chapters on psychotherapy complete the more purely psychological or developmental part of the work. In the final chapter the problem of disordered personalities is allowed to expand to its full social dimensions. Treatment, care, and prevention call for social effort and social organization. I have sought to show some of the lines, both professional and nonprofessional, along which this effort can be expended. (PsycINFO Database Record (c) 2012 APA, all rights reserved)",
-				"DOI": "10.1037/10023-000",
 				"libraryCatalog": "APA PsycNET",
 				"shortTitle": "The abnormal personality"
 			}

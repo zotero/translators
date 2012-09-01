@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2011-12-18 21:11:01"
+	"lastUpdated": "2012-08-31 16:22:37"
 }
 
 function detectWeb(doc, url) {
@@ -242,7 +242,8 @@ var testCases = [
 				],
 				"title": "Essential Roles of Her2/erbB2 in Cardiac Development and Function",
 				"date": "January 1, 2004",
-				"publicationTitle": "Recent Prog Horm Res",
+				"publicationTitle": "Recent Progress in Hormone Research",
+				"journalAbbreviation": "Recent Prog Horm Res",
 				"pages": "1-12",
 				"volume": "59",
 				"issue": "1",

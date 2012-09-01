@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-05-11 06:22:36"
+	"lastUpdated": "2012-08-31 16:17:17"
 }
 
 function detectWeb(doc, url) {
@@ -125,8 +125,7 @@ var testCases = [
 				"title": "The clerks guide leading into three parts, viz. I. Of indentures, leases, &c., II. Letters of attorney, warrants of attorney, mortgages, licences, charter-parties, &c., III. Bills, answers, replications, rejoynders in chancery, &c., under which are comprehended the most unusual forms of clerkship : to which is added, a fourth part of fines, recoveries, statutes, recognisances, judgements, &c. distresses and replevins : illustrated with cases, and the statutes relating to the same / by Tho. Manley of the Middle Temple, London, Esq.",
 				"publisher": "London : Printed by John Streater, Henry Twyford, and E. Flesher, assigns of Richard Atkins and Edward Atkins, Esquires, 1672.",
 				"date": "1672",
-				"series": "Early English Books Online",
-				"publicationTitle": "Early English Books, 1641-1700 / 744:51",
+				"series": "Early English Books, 1641-1700 / 744:51",
 				"libraryCatalog": "Early English Books Online",
 				"shortTitle": "The clerks guide leading into three parts, viz. I. Of indentures, leases, &c., II. Letters of attorney, warrants of attorney, mortgages, licences, charter-parties, &c., III. Bills, answers, replications, rejoynders in chancery, &c., under which are comprehended the most unusual forms of clerkship"
 			}

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-05-11 06:22:36"
+	"lastUpdated": "2012-08-31 15:41:58"
 }
 
 /*
@@ -123,7 +123,10 @@ function scrape(doc, url) {
 			}];
 			item.complete();
 		});
-		translator.translate();
+		translator.getTranslatorObject(function(trans) {
+			trans.options.itemType = type;
+			trans.doImport();
+		});
 	});
 }
 /** BEGIN TEST CASES **/

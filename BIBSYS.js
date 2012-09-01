@@ -6,10 +6,10 @@
 	"minVersion": "1.0.0b4.r1",
 	"maxVersion": "",
 	"priority": 100,
-	"browserSupport": "gcsbv",
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2012-03-13 17:13:15"
+	"browserSupport": "gcsbv",
+	"lastUpdated": "2012-08-31 15:26:41"
 }
 
 function detectWeb(doc, url)	{
@@ -101,15 +101,12 @@ var testCases = [
 				],
 				"seeAlso": [],
 				"attachments": [],
-				"itemID": "042152526",
 				"title": "How institutions evolve: the political economy of skills in Germany, Britain, the United States, and Japan",
 				"date": "2004",
-				"pages": "XV, 333 s.",
 				"numPages": "XV, 333 s.",
 				"place": "Cambridge",
 				"publisher": "Cambridge University Press",
 				"ISBN": "0-521-83768-5",
-				"ISSN": "0-521-83768-5",
 				"libraryCatalog": "BIBSYS",
 				"shortTitle": "How institutions evolve"
 			}

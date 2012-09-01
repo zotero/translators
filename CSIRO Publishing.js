@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-01-30 22:51:14"
+	"lastUpdated": "2012-08-31 16:15:26"
 }
 
 function detectWeb(doc, url) {
@@ -80,7 +80,7 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Humphreys",
-						"firstName": "W.F. ",
+						"firstName": "W.F.",
 						"creatorType": "author"
 					}
 				],
@@ -89,19 +89,18 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.publish.csiro.au/?act=view_file&file_id=BT04151.pdf",
 						"title": "CSIRO Publishing PDF",
 						"mimeType": "application/pdf"
 					},
 					{
-						"url": "http://www.publish.csiro.au/view/journals/dsp_journal_retrieve_citation.cfm?ct=BT04151.ris",
 						"title": "CSIRO Publishing Snaphost",
 						"mimeType": "text/html"
 					}
 				],
 				"title": "Aquifers: the ultimate groundwater-dependent ecosystems",
-				"publicationTitle": "Aust. J. Bot.",
-				"date": "April 06, 2006",
+				"publicationTitle": "Australian Journal of Botany",
+				"journalAbbreviation": "Aust. J. Bot.",
+				"date": "2006",
 				"volume": "54",
 				"issue": "2",
 				"pages": "115-132",

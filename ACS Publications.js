@@ -6,10 +6,10 @@
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
 	"priority": 100,
-	"browserSupport": "gcsibv",
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2012-01-01 01:42:16"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2012-08-31 15:04:59"
 }
 
 function detectWeb(doc, url) {
@@ -148,32 +148,26 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://dx.doi.org/10.1021/es103607c"
-					},
-					{
 						"title": "ACS Full Text PDF",
-						"url": "http://pubs.acs.org/doi/pdf/10.1021/es103607c",
 						"mimeType": "application/pdf"
 					},
 					{
 						"title": "ACS Full Text Snapshot",
-						"url": "http://pubs.acs.org/doi/full/10.1021/es103607c",
 						"mimeType": "text/html"
 					}
 				],
 				"title": "Life Cycle Environmental Assessment of Lithium-Ion and Nickel Metal Hydride Batteries for Plug-In Hybrid and Battery Electric Vehicles",
-				"date": "2011",
+				"date": "April 20, 2011",
 				"DOI": "10.1021/es103607c",
-				"publicationTitle": "Environ. Sci. Technol.",
+				"publicationTitle": "Environmental Science & Technology",
+				"journalAbbreviation": "Environ. Sci. Technol.",
 				"pages": "4548-4554",
 				"volume": "45",
 				"issue": "10",
-				"publisher": "American Chemical Society",
-				"abstractNote": "This study presents the life cycle assessment (LCA) of three batteries for plug-in hybrid and full performance battery electric vehicles. A transparent life cycle inventory (LCI) was compiled in a component-wise manner for nickel metal hydride (NiMH), nickel cobalt manganese lithium-ion (NCM), and iron phosphate lithium-ion (LFP) batteries. The battery systems were investigated with a functional unit based on energy storage, and environmental impacts were analyzed using midpoint indicators. On a per-storage basis, the NiMH technology was found to have the highest environmental impact, followed by NCM and then LFP, for all categories considered except ozone depletion potential. We found higher life cycle global warming emissions than have been previously reported. Detailed contribution and structural path analyses allowed for the identification of the different processes and value-chains most directly responsible for these emissions. This article contributes a public and detailed inventory, which can be easily be adapted to any powertrain, along with readily usable environmental performance assessments.\nThis study presents the life cycle assessment (LCA) of three batteries for plug-in hybrid and full performance battery electric vehicles. A transparent life cycle inventory (LCI) was compiled in a component-wise manner for nickel metal hydride (NiMH), nickel cobalt manganese lithium-ion (NCM), and iron phosphate lithium-ion (LFP) batteries. The battery systems were investigated with a functional unit based on energy storage, and environmental impacts were analyzed using midpoint indicators. On a per-storage basis, the NiMH technology was found to have the highest environmental impact, followed by NCM and then LFP, for all categories considered except ozone depletion potential. We found higher life cycle global warming emissions than have been previously reported. Detailed contribution and structural path analyses allowed for the identification of the different processes and value-chains most directly responsible for these emissions. This article contributes a public and detailed inventory, which can be easily be adapted to any powertrain, along with readily usable environmental performance assessments.",
-				"ISBN": "0013-936X",
+				"abstractNote": "This study presents the life cycle assessment (LCA) of three batteries for plug-in hybrid and full performance battery electric vehicles. A transparent life cycle inventory (LCI) was compiled in a component-wise manner for nickel metal hydride (NiMH), nickel cobalt manganese lithium-ion (NCM), and iron phosphate lithium-ion (LFP) batteries. The battery systems were investigated with a functional unit based on energy storage, and environmental impacts were analyzed using midpoint indicators. On a per-storage basis, the NiMH technology was found to have the highest environmental impact, followed by NCM and then LFP, for all categories considered except ozone depletion potential. We found higher life cycle global warming emissions than have been previously reported. Detailed contribution and structural path analyses allowed for the identification of the different processes and value-chains most directly responsible for these emissions. This article contributes a public and detailed inventory, which can be easily be adapted to any powertrain, along with readily usable environmental performance assessments.",
 				"ISSN": "0013-936X",
 				"url": "http://dx.doi.org/10.1021/es103607c",
-				"accessDate": "2011/10/19",
+				"accessDate": "January 31, 2012",
 				"libraryCatalog": "ACS Publications"
 			}
 		]
