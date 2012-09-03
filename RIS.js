@@ -13,7 +13,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-09-03 06:19:24"
+	"lastUpdated": "2012-09-03 07:03:55"
 }
 
 function detectImport() {
@@ -541,7 +541,25 @@ function processTag(item, entry) {
 			break;
 			case "tags":
 				//allow new lines or semicolons. Commas, might be more problematic
-				value = value.split(/\s*(?:[\r\n]+\s*)+|\s*;\s*/);
+				value = value.split(/\s*(?:[\r\n]+\s*)+|\s*(?:;\s*)+/);
+
+				//the regex will take care of double semicolons and newlines
+				//but it will still allow a blank tag if there is a newline or
+				//semicolon at the begining or the end
+				if(!value[0]) value.shift();
+				if(value.length && !value[value.length-1]) value.pop();
+
+				//split by comma if we couldn't split by semicolon or new line
+				//odds of this this backfiring are pretty low
+				if(value.length == 1) {
+					value = value[0].split(/\s*(,\s*)+/);
+					if(!value[0]) value.shift();
+					if(value.length && !value[value.length-1]) value.pop();
+				}
+
+				if(!value.length) {
+					value = undefined;
+				}
 			break;
 			case "notes":
 				value = {note:value};
