@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-08-29 15:56:22"
+	"lastUpdated": "2012-09-02 18:58:36"
 }
 
 function detectImport() {
@@ -84,7 +84,6 @@ var fieldMap = {
   	nationality: "country",
   	language:"language",
   	assignee:"assignee"
-
 };
 
 var inputFieldMap = {
@@ -1678,7 +1677,14 @@ function processField(item, field, value) {
 				item.extra += "\nPublished: "+value;
 			}
 		}
-	} else if(field == "keywords" || field == "keyword") {
+	
+	} 
+	//accept lastchecked or urldate for access date. These should never both occur. 
+	//If they do we don't know which is better so we might as well just take the second one
+	else if (field == "lastchecked"|| field == "urldate"){
+		item.accessDate = value;
+	}
+	else if(field == "keywords" || field == "keyword") {
 		var re = new RegExp(keywordDelimRe, keywordDelimReFlags);
 		if(!value.match(re) && keywordSplitOnSpace) {
 			// keywords/tags
@@ -1734,6 +1740,7 @@ function getFieldValue(read) {
 				value += read;
 			}
 		}
+		
 	} else if(read == '"') {
 		var openBraces = 0;
 		while(read = Zotero.read(1)) {
@@ -1787,7 +1794,7 @@ function getFieldValue(read) {
 		value = value.replace(/\\\\/g, "\\");
 		value = value.replace(/\s+/g, " ");
 	}
-	
+
 	return value;
 }
 
@@ -2089,7 +2096,12 @@ function doExport() {
 		if(item.reportNumber || item.issue || item.seriesNumber || item.patentNumber) {
 			writeField("number", item.reportNumber || item.issue || item.seriesNumber|| item.patentNumber);
 		}
-
+		
+		if (item.accessDate){
+			var accessYMD = item.accessDate.replace(/\s*\d+:\d+:\d+/, "");
+			writeField("urldate", accessYMD);
+		}
+		
 		if(item.publicationTitle) {
 			if(item.itemType == "bookSection" || item.itemType == "conferencePaper") {
 				writeField("booktitle", item.publicationTitle);
@@ -2484,6 +2496,30 @@ var testCases = [
 				"volume": "12",
 				"pages": "71-80",
 				"DOI": "10.1007/s13127-011-0069-8"
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@misc{american_rights_at_work_public_2012,\n    title = {Public Service Research Foundation},\n\turl = {http://www.americanrightsatwork.org/blogcategory-275/},\n\turldate = {2012-07-27},\n\tauthor = {American Rights at Work},\n\tyear = {2012},\n\thowpublished = {http://www.americanrightsatwork.org/blogcategory-275/},\n}",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "American Rights at",
+						"lastName": "Work",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Public Service Research Foundation",
+				"url": "http://www.americanrightsatwork.org/blogcategory-275/",
+				"accessDate": "2012-07-27",
+				"date": "2012"
 			}
 		]
 	}
