@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-08-31 16:50:53"
+	"lastUpdated": "2012-09-03 02:01:28"
 }
 
 function detectWeb(doc, url) {
@@ -110,7 +110,7 @@ var testCases = [
 				"pages": "161",
 				"url": "http://adsabs.harvard.edu/abs/1955ApJ...121..161S",
 				"abstractNote": "Abstract image available at: \r\nhttp://adsabs.harvard.edu/abs/1955ApJ...121..161S",
-				"DOI": "DOI: 10.1086/145971",
+				"DOI": "10.1086/145971",
 				"publicationTitle": "The Astrophysical Journal",
 				"libraryCatalog": "NASA ADS",
 				"accessDate": "CURRENT_TIMESTAMP"

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-08-31 15:14:58"
+	"lastUpdated": "2012-09-03 01:48:23"
 }
 
 function detectWeb(doc, url) {
@@ -71,8 +71,31 @@ function scrape (doc) {
 				// http://psycnet.apa.org/index.cfm?fa=search.export
 				var translator = Zotero.loadTranslator("import");
 				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+
+				//Some authors are not entered according to spec
+				//We try to fix places where multiple authors are entered in one entry
+				text = text.replace(/^((?:A[U123]|ED)  ?- )(.+?)$/mg,
+					function(match, tag, authors) {
+						var authorRE = /((?:[A-Z](?:\.?\s|\.))+)([-A-Za-z]+)/g;
+						var author, newStr='';
+						while(author = authorRE.exec(authors)) {
+							if(newStr) {	//not the first author
+								newStr += '\r\n';
+							}
+
+							newStr += tag + author[2] + ', ' + author[1].trim();
+						}
+
+						if(newStr) {
+							return newStr;
+						} else {	//we didn't find any authors
+							return match;
+						}
+					});
+
 				//A2s should be editors here for all practical purposes
-				text = text.replace(/A2  -/g, "ED  -");
+				//text = text.replace(/A2  -/g, "ED  -");
+				//Already covered in RIS translator
 				translator.setString(text);
 				translator.setHandler("itemDone", function(obj, item) {
 					//item.url = newurl;
@@ -208,7 +231,13 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"lastName": "J. D. Maser  M. E. P. Seligman",
+						"lastName": "Maser",
+						"firstName": "J. D.",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Seligman",
+						"firstName": "M. E. P.",
 						"creatorType": "editor"
 					}
 				],

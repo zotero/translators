@@ -13,7 +13,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-08-31 19:07:54"
+	"lastUpdated": "2012-09-03 02:38:20"
 }
 
 function detectImport() {
@@ -159,7 +159,6 @@ var fieldMap = {
 	M2:"extra", //not in spec
 	N1:"notes",
 	NV:"numberOfVolumes",
-	SE:"section",
 	ST:"shortTitle",
 	UR:"url",
 	Y2:"accessDate",
@@ -317,6 +316,10 @@ var fieldMap = {
 		studio:["videoRecording"],
 		network:["radioBroadcast", "tvBroadcast"]
 	},
+	SE: {
+		"__default": "section",	//though this can refer to pages, start page, etc. for some types. Zotero does not support any of those combinations, however.
+		"__exclude": ["case"]
+	},
 	SN: {
 		"__default":"ISBN",
 		ISSN:["journalArticle", "magazineArticle", "newspaperArticle"],
@@ -334,7 +337,7 @@ var fieldMap = {
 		codeNumber:["statute"],
 		codeVolume:["bill"],
 		reporterVolume:["case"],
-		"notes/Patent Version Number":['patent']
+		"__exclude":["patent"]
 	}
 };
 
@@ -361,10 +364,16 @@ var degenerateImportFieldMap = {
 	M1: "extra",
 	M3: "DOI",
 	N2: "abstractNote",
+	SE: {
+		"notes/File Date": ["case"]	//we might want to export from notes
+	},
 	T1: fieldMap["TI"],
 	T2: "backupPublicationTitle", //most item types should be covered above
 	T3: {
 		series: ["book"]
+	},
+	VL: {
+		"notes/Patent Version Number":['patent']
 	},
 	Y1: fieldMap["PY"]
 };
@@ -471,6 +480,9 @@ function processTag(item, entry) {
 					item.backupNumPages = value;
 				}
 				value = undefined;
+			} else {
+				item.backupEndPage = value;	//store this for an odd case where SP comes after EP
+				value = undefined;
 			}
 		break;
 		case "L1":
@@ -516,7 +528,8 @@ function processTag(item, entry) {
 				value = dateRIStoZotero(value);
 			break;
 			case "tags":
-				value = value.split(/\s*([\r\n]+\s*)+/);
+				//allow new lines or semicolons. Commas, might be more problematic
+				value = value.split(/\s*([\r\n]+\s*)+|\s*;\s*/);
 			break;
 			case "notes":
 				value = {note:value};
@@ -619,6 +632,17 @@ function completeItem(item) {
 		item.backupNumPages = undefined;
 	}
 
+	if(item.backupEndPage) {
+		if(!item.pages) {
+			item.pages = item.backupEndPage;
+		} else if(item.pages.indexOf('-') == -1) {
+			item.pages += '-' + item.backupEndPage;
+		} else if(!item.numPages) {	//should we do this?
+			item.numPages = item.backupEndPage;
+		}
+		item.backupEndPage = undefined;
+	}
+
 	//see if we have a backup date
 	if(item.backupDate) {
 		if(!item[item.backupDate[0]]) {
@@ -627,9 +651,9 @@ function completeItem(item) {
 		item.backupDate = undefined;
 	}
 
-	// fix for doi: prefixed to DOI
+	// Clean up DOI
 	if(item.DOI) {
-		item.DOI = item.DOI.replace(/\s*doi:\s*/,'');
+		item.DOI = ZU.cleanDOI(item.DOI);
 	}
 
 	// hack for sites like Nature, which only use JA, journal abbreviation
