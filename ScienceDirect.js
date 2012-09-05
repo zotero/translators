@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-01-11 09:09:04"
+	"lastUpdated": "2012-09-04 23:28:08"
 }
 
 function detectWeb(doc, url) {
@@ -183,6 +183,9 @@ function doWeb(doc, url) {
 
 
 			Zotero.Utilities.HTTP.doPost(baseurl + 'science', post, function(text) {
+				//short title is stored in T2. Fix it to ST.
+				text = text.replace(/^T2\s/mg, 'ST ');
+
 				var translator = Zotero.loadTranslator("import");
 				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 				translator.setString(text);
@@ -221,8 +224,6 @@ function doWeb(doc, url) {
 
 	Zotero.wait();
 }
-
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -248,28 +249,27 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": false,
 						"title": "ScienceDirect Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"url": false,
 						"title": "ScienceDirect Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
 				"title": "Solving the Autism Puzzle a Few Pieces at a Time",
-				"publicationTitle": "Neuron",
+				"journalAbbreviation": "Neuron",
 				"volume": "70",
 				"issue": "5",
 				"pages": "806-808",
-				"date": "June 9, 2011",
-				"ISBN": "0896-6273",
 				"ISSN": "0896-6273",
 				"DOI": "10.1016/j.neuron.2011.05.025",
 				"url": "http://www.sciencedirect.com/science/article/pii/S0896627311004430",
 				"abstractNote": "In this issue, a pair of studies (Levy et al. and Sanders et al.) identify several de novo copy-number variants that together account for 5%–8% of cases of simplex autism spectrum disorders. These studies suggest that several hundreds of loci are likely to contribute to the complex genetic heterogeneity of this group of disorders. An accompanying study in this issue (Gilman et al.), presents network analysis implicating these CNVs in neural processes related to synapse development, axon targeting, and neuron motility.",
-				"libraryCatalog": "ScienceDirect"
+				"date": "June 9, 2011",
+				"publicationTitle": "Neuron",
+				"libraryCatalog": "ScienceDirect",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -323,30 +323,28 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": false,
 						"title": "ScienceDirect Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"url": false,
 						"title": "ScienceDirect Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
 				"title": "Mitochondria-dependent apoptosis in yeast",
-				"publicationTitle": "Biochimica et Biophysica Acta (BBA) - Molecular Cell Research",
+				"journalAbbreviation": "Biochimica et Biophysica Acta (BBA) - Molecular Cell Research",
 				"volume": "1783",
 				"issue": "7",
 				"pages": "1286-1302",
-				"date": "July 2008",
-				"ISBN": "0167-4889",
+				"shortTitle": "Apoptosis in yeast",
 				"ISSN": "0167-4889",
 				"DOI": "10.1016/j.bbamcr.2008.03.010",
 				"url": "http://www.sciencedirect.com/science/article/pii/S016748890800116X",
 				"abstractNote": "Mitochondrial involvement in yeast apoptosis is probably the most unifying feature in the field. Reports proposing a role for mitochondria in yeast apoptosis present evidence ranging from the simple observation of ROS accumulation in the cell to the identification of mitochondrial proteins mediating cell death. Although yeast is unarguably a simple model it reveals an elaborate regulation of the death process involving distinct proteins and most likely different pathways, depending on the insult, growth conditions and cell metabolism. This complexity may be due to the interplay between the death pathways and the major signalling routes in the cell, contributing to a whole integrated response. The elucidation of these pathways in yeast has been a valuable help in understanding the intricate mechanisms of cell death in higher eukaryotes, and of severe human diseases associated with mitochondria-dependent apoptosis. In addition, the absence of obvious orthologues of mammalian apoptotic regulators, namely of the Bcl-2 family, favours the use of yeast to assess the function of such proteins. In conclusion, yeast with its distinctive ability to survive without respiration-competent mitochondria is a powerful model to study the involvement of mitochondria and mitochondria interacting proteins in cell death.",
+				"date": "July 2008",
+				"publicationTitle": "Biochimica et Biophysica Acta (BBA) - Molecular Cell Research",
 				"libraryCatalog": "ScienceDirect",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"checkFields": "title"
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -381,15 +379,17 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"bookTitle": "Computational Materials Engineering",
-				"place": "Burlington",
-				"ISBN": "978-0-12-369468-3",
-				"url": "http://www.sciencedirect.com/science/article/pii/B9780123694683500083",
-				"libraryCatalog": "ScienceDirect",
 				"title": "8 - Introduction to discrete dislocation statics and dynamics",
+				"bookTitle": "Computational Materials Engineering",
 				"publisher": "Academic Press",
+				"place": "Burlington",
+				"pages": "267-316",
+				"ISBN": "978-0-12-369468-3",
+				"DOI": "10.1016/B978-012369468-3/50008-3",
+				"url": "http://www.sciencedirect.com/science/article/pii/B9780123694683500083",
 				"date": "2007",
-				"pages": "267-316"
+				"libraryCatalog": "ScienceDirect",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}

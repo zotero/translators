@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-06-09 23:36:31"
+	"lastUpdated": "2012-09-04 23:26:27"
 }
 
 /**
@@ -54,7 +54,13 @@ function scrape(doc, url, callDoneWhenFinished) {
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
-			item.extra = "";
+			item.extra = undefined;
+			item.archive = undefined;
+
+			if(item.libraryCatalog == "http://worldcat.org") {
+				item.libraryCatalog = "Open WorldCat";
+			}
+
 			//creators have period after firstName
 			for (i in item.creators) {
 				if (item.creators[i].firstName){
@@ -187,13 +193,12 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"itemID": "489605",
+				"libraryCatalog": "Open WorldCat",
+				"language": "English",
 				"title": "Argentina",
 				"publisher": "Prentice-Hall",
 				"place": "Englewood Cliffs, N.J.",
-				"date": "1964",
-				"language": "English",
-				"libraryCatalog": "Open WorldCat"
+				"date": "1964"
 			}
 		]
 	},
@@ -218,19 +223,15 @@ var testCases = [
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
-				"attachments": [
-					{}
-				],
-				"itemID": "42854423",
+				"attachments": [],
+				"libraryCatalog": "Open WorldCat",
+				"language": "English",
 				"url": "http://search.ebscohost.com/login.aspx?direct=true&scope=site&db=nlebk&db=nlabk&AN=1712",
 				"title": "A dynamic systems approach to the development of cognition and action",
 				"publisher": "MIT Press",
 				"place": "Cambridge, Mass.",
 				"date": "1996",
 				"ISBN": "0585030154  9780585030159",
-				"ISSN": "0585030154  9780585030159",
-				"language": "English",
-				"libraryCatalog": "Open WorldCat",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
@@ -252,16 +253,14 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"itemID": "60321422",
+				"libraryCatalog": "Open WorldCat",
+				"language": "English",
 				"title": "The Cambridge companion to Adam Smith",
 				"publisher": "Cambridge University Press",
 				"place": "Cambridge; New York",
 				"date": "2006",
 				"ISBN": "0521770599 0521779243  9780521770590 9780521779241",
-				"ISSN": "0521770599 0521779243  9780521770590 9780521779241",
-				"abstractNote": "\"Adam Smith is best known as the founder of scientific economics and as an early proponent of the modern market economy. Political economy, however, was only one part of Smith's comprehensive intellectual system. Consisting of a theory of mind and its functions in language, arts, science, and social intercourse, Smith's system was a towering contribution to the Scottish Enlightenment. His ideas on social intercourse, in fact, also served as the basis for a moral theory that provided both historical and theoretical accounts of law, politics, and economics. This companion volume provides an up-to-date examination of all aspects of Smith's thought. Collectively, the essays take into account Smith's multiple contexts - Scottish, British, European, Atlantic, biographical, institutional, political, philosophical - and they draw on all his works, including student notes from his lectures. Pluralistic in approach, the volume provides a contextualist history of Smith, as well as direct philosophical engagement with his ideas.\"--Jacket.",
-				"language": "English",
-				"libraryCatalog": "Open WorldCat"
+				"abstractNote": "\"Adam Smith is best known as the founder of scientific economics and as an early proponent of the modern market economy. Political economy, however, was only one part of Smith's comprehensive intellectual system. Consisting of a theory of mind and its functions in language, arts, science, and social intercourse, Smith's system was a towering contribution to the Scottish Enlightenment. His ideas on social intercourse, in fact, also served as the basis for a moral theory that provided both historical and theoretical accounts of law, politics, and economics. This companion volume provides an up-to-date examination of all aspects of Smith's thought. Collectively, the essays take into account Smith's multiple contexts - Scottish, British, European, Atlantic, biographical, institutional, political, philosophical - and they draw on all his works, including student notes from his lectures. Pluralistic in approach, the volume provides a contextualist history of Smith, as well as direct philosophical engagement with his ideas.\"--Jacket."
 			}
 		]
 	}
