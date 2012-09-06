@@ -2,14 +2,14 @@
 	"translatorID": "3e684d82-73a3-9a34-095f-19b112d88bbf",
 	"label": "Google Books",
 	"creator": "Simon Kornblith, Michael Berkowitz and Rintze Zelle",
-	"target": "^http://(books|www)\\.google\\.[a-z]+(\\.[a-z]+)?/books(?:\\/.*)?\\?(.*id=.*|.*q=.*)",
+	"target": "^https?://(books|www)\\.google\\.[a-z]+(\\.[a-z]+)?/(books(?:\\/.*)?\\?(.*id=.*|.*q=.*)|search\\?.*?btnG=Search\\+Books)",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-06-17 23:49:04"
+	"lastUpdated": "2012-09-05 00:49:07"
 }
 
 /*
@@ -51,7 +51,7 @@ function doWeb(doc, url) {
 	var psRe = new RegExp("https?://(books|www)\.google\.([^/]+)/");
 	var psMatch = psRe.exec(url);
 	var suffix = psMatch[2];
-	var prefix = psMatch[1];
+	var prefix = "books"; //Where is it not books? psMatch[1];
 	itemUrlBase = "http://"+prefix+".google."+suffix+"/books?id=";
 	
 	var m = singleRe.exec(url);
@@ -157,6 +157,19 @@ function getItemArrayGB (doc, inHere, urlRe, rejectRe) {
 		} : null;
 	
 	var availableItems = new Object();	// Technically, associative arrays are objects
+
+	//quick check for new format
+	var bookList = ZU.xpath(doc, '//ol[@id="rso"]/li');
+	if(bookList.length) {
+		for(var i=0, n=bookList.length; i<n; i++) {
+			var link = ZU.xpathText(bookList[i], './/h3[@class="r"]/a/@href');
+			var title = ZU.xpathText(bookList[i], './/h3[@class="r"]/a');
+			if(link && title) {
+				availableItems[link] = title;
+			}
+		}
+		return availableItems;
+	}
 	
 	// Require link to match this
 	if(urlRe) {
@@ -412,6 +425,11 @@ var testCases = [
 				"date": "2002"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.google.com/search?q=asimov&btnG=Search+Books&tbm=bks&tbo=1#q=asimov&hl=en&tbo=1&tbm=bks&ei=guBGUIDOCJP8qQG7u4DYCg&start=10&sa=N&fp=1&biw=1352&bih=588&bav=on.2,or.r_gc.r_pw.r_qf.&cad=b&sei=guBGUIDOCJP8qQG7u4DYCg",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
