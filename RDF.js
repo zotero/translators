@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-06-07 01:42:52"
+	"lastUpdated": "2012-09-06 04:04:09"
 }
 
 /*
@@ -651,12 +651,25 @@ function importItem(newItem, node) {
 	}
 	
 	// volume
-	newItem.volume = getFirstResults((container ? container : node), [n.prism+"volume", n.prism2_0+"volume", n.prism2_1+"volume",
-		n.eprints+"volume", n.bibo+"volume", n.dcterms+"citation.volume"], true);
+	if(container) {
+		newItem.volume = getFirstResults(container, [n.prism+"volume", n.prism2_0+"volume", n.prism2_1+"volume",
+			n.eprints+"volume", n.bibo+"volume", n.dcterms+"citation.volume"], true);
+	}
+	if(!newItem.volume) {
+		 newItem.volume = getFirstResults(node, [n.prism+"volume", n.prism2_0+"volume", n.prism2_1+"volume",
+			n.eprints+"volume", n.bibo+"volume", n.dcterms+"citation.volume"], true);
+	}
 	
 	// issue
-	newItem.issue = getFirstResults((container ? container : node), [n.prism+"number", n.prism2_0+"number", n.prism2_1+"number",
-		n.eprints+"number", n.bibo+"issue", n.dcterms+"citation.issue"], true);
+	if(container) {
+		newItem.issue = getFirstResults(container, [n.prism+"number", n.prism2_0+"number", n.prism2_1+"number",
+			n.eprints+"number", n.bibo+"issue", n.dcterms+"citation.issue"], true);
+	}
+	if(!newItem.issue) {
+		newItem.issue = getFirstResults(node, [n.prism+"number", n.prism2_0+"number", n.prism2_1+"number",
+			n.eprints+"number", n.bibo+"issue", n.dcterms+"citation.issue"], true);
+	}
+
 	// these mean the same thing
 	newItem.patentNumber = newItem.number = newItem.issue;
 	
