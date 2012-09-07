@@ -557,7 +557,7 @@ function processTag(item, entry) {
 				value = {note:value};
 				//we can specify note title in the field mapping table. See VL for patent
 				if(zField[1]) {
-					value.title = zField[1];
+					value.note = zField[1] + ': ' + value.note;
 				}
 			break;
 		}
@@ -1039,8 +1039,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "877609",
-						"title": "Patent Version Number"
+						"note": "Patent Version Number: 877609"
 					},
 					{
 						"note": "IS  - 4,904,581"
@@ -1059,7 +1058,6 @@ var testCases = [
 				"attachments": [],
 				"title": "Method of detecting AIDS virus infection",
 				"issueDate": "February 27, 1990",
-				"issue": "4,904,581",
 				"issuingAuthority": "Epitope,I.",
 				"place": "OR",
 				"assignee": "4,629,783",
@@ -1913,8 +1911,7 @@ var testCases = [
 						"note": "RN  - ResearchNotes"
 					},
 					{
-						"note": "Filed Date",
-						"title": "File Date"
+						"note": "File Date: Filed Date"
 					},
 					{
 						"note": "T3  - Decision"
@@ -3996,8 +3993,7 @@ var testCases = [
 						"note": "RN  - Research Notes"
 					},
 					{
-						"note": "Section Number",
-						"title": "File Date"
+						"note": "File Date: Section Number"
 					},
 					{
 						"note": "SN  - ISSN/ISBN"
@@ -4820,8 +4816,7 @@ var testCases = [
 						"note": "TT  - Translated Title"
 					},
 					{
-						"note": "Patent Version Number",
-						"title": "Patent Version Number"
+						"note": "Patent Version Number: Patent Version Number"
 					},
 					{
 						"note": "ID  - 41"
