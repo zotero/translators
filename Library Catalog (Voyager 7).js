@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-08-24 04:45:35"
+	"lastUpdated": "2012-09-08 13:30:54"
 }
 
 function detectWeb(doc, url) {
@@ -31,11 +31,12 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 	var bibIdRe = new RegExp("bibId=([0-9]+)");
 	var m = bibIdRe.exec(url);
-	//for single search results
+	//for single search results 
 	if (detectWeb(doc, url)== "book" && !m){
 		var host = url.match("^(https?://[^/]+)/")[0];
-		url = host + "vwebv/" + ZU.xpathText(doc, '//div[@class="recordContent"]//li[@class="first active"]/a/@href')
-	    var m = bibIdRe.exec(url);
+		//we get the URL from the print view of the item, which looks like it exists for all Voyager 7 catalogs
+		url = host + "vwebv/" + ZU.xpathText(doc, '//div[@class="actionBox"]//a[contains(@href, "printDialog.do")]/@href')
+		var m = bibIdRe.exec(url);
 	}
 	Z.debug(url)
 	var hostRegexp = new RegExp("^(https?://[^/]+)/");
@@ -117,6 +118,46 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://groucho.lib.rochester.edu/vwebv/holdingsInfo?searchId=3544&recCount=50&recPointer=1&bibId=78520",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Mildred Anna",
+						"lastName": "Phoebus",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "United States",
+						"fieldMode": true
+					}
+				],
+				"notes": [
+					{
+						"note": "Supplement to Commerce reports. Published by the Bureau of foreign and domestic commerce. October 29, 1923"
+					}
+				],
+				"tags": [
+					"Argentina",
+					"Economic conditions"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Economic development in Argentina since 1921",
+				"place": "Washington",
+				"publisher": "Govt. print. off",
+				"date": "1923",
+				"numPages": "14",
+				"series": "U. S. Bureau of foreign and domestic commerce (Dept. of commerce) Trade information bulletin",
+				"seriesNumber": "no. 156",
+				"callNumber": "HF105 .F71tr no.156",
+				"libraryCatalog": "groucho.lib.rochester.edu Library Catalog"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://groucho.lib.rochester.edu/vwebv/search?searchArg=Economic+development+in+Argentina+since+1921&submit=+&searchCode=TALL&limitTo=none&recCount=50&searchType=1",
 		"items": [
 			{
 				"itemType": "book",
