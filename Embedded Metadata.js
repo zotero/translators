@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-08-02 21:39:42"
+	"lastUpdated": "2012-09-06 22:17:42"
 }
 
 /*
@@ -281,8 +281,7 @@ function addHighwireMetadata(doc, newItem) {
 	var rdfCreators = newItem.creators;
 	newItem.creators = [];
 	for(var i=0, n=authorNodes.length; i<n; i++) {
-		//make sure there are no empty authors
-		var authors = authorNodes[i].nodeValue.replace(/(;[^A-Za-z0-9]*)$/, "").split(/\s*;\s/);
+		var authors = authorNodes[i].nodeValue.split(/\s*;\s*/);
 		if (authors.length == 1) {
 			/* If we get nothing when splitting by semicolon, and at least two words on
 			* either side of the comma when splitting by comma, we split by comma. */
@@ -293,7 +292,11 @@ function addHighwireMetadata(doc, newItem) {
 				authors = authorsByComma;
 		}
 		for(var j=0, m=authors.length; j<m; j++) {
-			var author = authors[j];
+			var author = authors[j].trim();
+
+			//skip empty authors. Try to match something other than punctuation
+			if(!author || !author.match(/[^\s,-.;]/)) continue;
+
 			author = ZU.cleanAuthor(author, "author", author.indexOf(",") !== -1);
 			if(author.firstName) {
 				//fix case for personal names
@@ -707,6 +710,59 @@ var testCases = [
 				"abstractNote": "This thesis examines decentralized meta-reasoning. For a single agent or multiple agents, it may not be enough for agents to compute correct decisions if they do not do so in a timely or resource efficient fashion. The utility of agent decisions typically increases with decision quality, but decreases with computation time. The reasoning about one's computation process is referred to as meta-reasoning. Aspects of meta-reasoning considered in this thesis include the reasoning about how to allocate computational resources, including when to stop one type of computation and begin another, and when to stop all computation and report an answer. Given a computational model, this translates into computing how to schedule the basic computations that solve a problem. This thesis constructs meta-reasoning strategies for the purposes of monitoring and control in multi-agent settings, specifically settings that can be modeled by the Decentralized Partially Observable Markov Decision Process (Dec-POMDP). It uses decision theory to optimize computation for efficiency in time and space in communicative and non-communicative decentralized settings. Whereas base-level reasoning describes the optimization of actual agent behaviors, the meta-reasoning strategies produced by this thesis dynamically optimize the computational resources which lead to the selection of base-level behaviors.",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "scholarworks.umass.edu"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.scielosp.org/scielo.php?script=sci_abstract&pid=S0034-89102007000900015&lng=en&nrm=iso&tlng=en",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "P. R.",
+						"lastName": "Telles-Dias",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "S.",
+						"lastName": "Westman",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "A. E.",
+						"lastName": "Fernandez",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "M.",
+						"lastName": "Sanchez",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "Impressões sobre o teste rápido para o HIV entre usuários de drogas injetáveis no Brasil",
+				"date": "12/2007",
+				"publicationTitle": "Revista de Saúde Pública",
+				"volume": "41",
+				"DOI": "10.1590/S0034-89102007000900015",
+				"pages": "94-100",
+				"ISSN": "0034-8910",
+				"url": "http://www.scielosp.org/scielo.php?script=sci_abstract&pid=S0034-89102007000900015&lng=en&nrm=iso&tlng=pt",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.scielosp.org"
 			}
 		]
 	}
