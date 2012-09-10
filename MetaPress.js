@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-19 06:10:54"
+	"lastUpdated": "2012-09-10 16:20:44"
 }
 
 function detectWeb(doc, url) {
@@ -37,6 +37,9 @@ function doWeb(doc, url) {
 			}
 			Zotero.Utilities.HTTP.doPost('http://' + host + '/export.mpx', 'code=' + artids[i] + '&mode=ris', function(text) {
 				// load translator for RIS
+				//some entries have empty author fields, or fields with just a comma. Delete those.
+				text = text.replace(/AU  - [\s,]+\n/g, "");
+				//Z.debug(text);
 				var translator = Zotero.loadTranslator("import");
 				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 				translator.setString(text);
@@ -87,24 +90,27 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
+						"url": "http://dx.doi.org/10.1007/BF00143081",
 						"title": "MetaPress Snapshot",
 						"mimeType": "text/html"
 					},
 					{
+						"url": "http://metapress.com/content/hh83064822430454/fulltext.pdf",
 						"title": "MetaPress Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
+				"publicationTitle": "Documenta Ophthalmologica",
+				"title": "Hyperosmolarity response of ocular standing potential as a clinical test for retinal pigment epithelium activity rhegmatogenous retinal detachment",
+				"volume": "57",
 				"issue": "3",
+				"pages": "175-180",
+				"date": "May 01, 1984",
 				"url": "http://dx.doi.org/10.1007/BF00143081",
 				"DOI": "10.1007/BF00143081",
 				"abstractNote": "The hyperosmolarity response of the ocular standing potential was recorded in unilateral rhegmatogenous retinal detachment (8 eyes) and in the fellow ‘healthy’ eye (8 eyes). The hyperosmolarity response was greatly suppressed (M-4 SD: M and SD indicate respectively the mean and the standard deviation in normal subjects) in all affected eyes (p < 0.005), and slightly abnormal in 2 fellow eyes. The L/D ratio was normal in 2 affected eyes and in all fellow eyes. The hyperosmolarity response in the affected eyes was still greatly suppressed 14 months after successful surgical treatment.",
 				"libraryCatalog": "MetaPress",
-				"publicationTitle": "Documenta Ophthalmologica",
-				"title": "Hyperosmolarity response of ocular standing potential as a clinical test for retinal pigment epithelium activity rhegmatogenous retinal detachment",
-				"volume": "57",
-				"pages": "175-180",
-				"date": "May 1, 1984"
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}
