@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-15 06:29:50"
+	"lastUpdated": "2012-09-10 00:01:31"
 }
 
 /*
@@ -46,7 +46,7 @@ function doWeb(doc, url){
 	var ids = new Array();
 	if(detectWeb(doc, url) == "multiple") { 
 		var items = {};
-		var titles = ZU.xpath(doc, '//li/span[@class="citation"]/a[@class="articleTitle"]');
+		var titles = ZU.xpath(doc, '//li/span[@class="citation"]//a[@class="articleTitle"]');
 		var identifiers = ZU.xpath(doc, '//ol[@class="entryList"]/li/@id');
 		for (var i in titles) {
 			items[identifiers[i].textContent] = titles[i].textContent;
