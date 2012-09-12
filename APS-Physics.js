@@ -3,7 +3,7 @@
 	"label": "APS-Physics",
 	"creator": "Will Shanks",
 	"target": "^https?://(?:www\\.)?(physics)\\.aps\\.org[^/]*/(articles)/?",
-	"minVersion": "1.0.0b3.r1",
+	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
