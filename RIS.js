@@ -8,12 +8,13 @@
 	"priority": 100,
 	"displayOptions": {
 		"exportCharset": "UTF-8",
-		"exportNotes": true
+		"exportNotes": true,
+		"exportFileData": true
 	},
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-09-05 00:02:59"
+	"lastUpdated": "2012-09-15 21:15:44"
 }
 
 function detectImport() {
@@ -156,7 +157,9 @@ var fieldMap = {
 	IS:"issue",
 	J2:"journalAbbreviation",
 	KW:"tags",
-	M2:"extra", //not in spec
+	L1:"attachments/PDF",
+	L2:"attachments/HTML",
+	L4:"attachments/other",
 	N1:"notes",
 	NV:"numberOfVolumes",
 	ST:"shortTitle",
@@ -195,7 +198,8 @@ var fieldMap = {
 		seriesTitle:["audioRecording"]
 	},
 	//NOT HANDLED: reviewedAuthor, scriptwriter, contributor, guest
-	AU: {			"__default":"creators/author",
+	AU: {
+		"__default":"creators/author",
 		"creators/artist":["artwork"],
 		"creators/cartographer":["map"],
 		"creators/composer":["audioRecording"],
@@ -371,6 +375,7 @@ var degenerateImportFieldMap = {
 		"__default":"extra",
 		numberOfVolumes: ["bookSection"]	//EndNote exports here instead of IS
 	},
+	M2: "extra", //not in spec
 	M3: "DOI",
 	N2: "abstractNote",
 	SE: {
@@ -494,21 +499,6 @@ function processTag(item, entry) {
 				value = undefined;
 			}
 		break;
-		case "L1":
-			item.attachments.push({url:value, mimeType:"application/pdf",
-			title:"Full Text (PDF)", downloadable:true});
-			value = undefined;
-		break;
-		case "L2":
-			item.attachments.push({url:value, mimeType:"text/html",
-			title:"Full Text (HTML)", downloadable:true});
-			value = undefined;
-		break;
-		case "L4":
-			item.attachments.push({url:value,
-			title:"Image", downloadable:true});
-			value = undefined;
-		break;
 		//PY is typically less complete than other dates. We'll store it as backup
 		case "PY":
 			item.backupDate = {
@@ -560,6 +550,32 @@ function processTag(item, entry) {
 					value.note = zField[1] + ': ' + value.note;
 				}
 			break;
+			case "attachments":
+				switch(zField[1]) {
+					case 'PDF':
+						value = {
+							url: value,
+							mimeType: "application/pdf",
+							title:"Full Text (PDF)",
+							downloadable:true
+						};
+					break;
+					case 'HTML':
+						value = {
+							url: value,
+							mimeType: "text/html",
+							title: "Full Text (HTML)",
+							downloadable:true
+						};
+					break;
+					default:
+						value = {
+							url:value,
+							title:"Image",	//maybe just Attachment?
+							downloadable:true
+						};
+				}
+			break;
 		}
 	}
 
@@ -579,6 +595,7 @@ function applyValue(item, zField, value, rawLine) {
 
 	//check if field is valid for item type
 	if(zField != 'creators' && zField != 'tags' && zField != 'notes'
+		&& zField != 'attachments'
 		&& !ZU.fieldIsValidForType(zField, item.itemType)) {
 		Z.debug("Invalid field '" + zField + "' for item type '" + item.itemType + "'.");
 		if(!Zotero.parentTranslator) {
@@ -592,12 +609,12 @@ function applyValue(item, zField, value, rawLine) {
 	//special processing for certain fields
 	switch(zField) {
 		case 'notes':
+		case 'attachments':
+		case 'creators':
+		case 'tags':
 			if(!(value instanceof Array)) {
 				value = [value];
 			}
-		//intentional omission of break
-		case 'creators':
-		case 'tags':
 			item[zField] = item[zField].concat(value);
 		break;
 		case 'extra':
@@ -827,12 +844,12 @@ var exportOrder = {
 	"__default": ["TI", "AU", "T2", "A2", "T3", "A3", "A4", "AB", "C1", "C2", "C3",
 	"C4", "C5", "C6", "CN", "CY", "DA", "PY", "DO", "DP", "ET", "VL", "IS", "SP",
 	"J2", "LA", "M1", "M3", "NV", "OP", "PB", "SE", "SN", "ST", "UR", "AN", "DB",
-	"Y2", "N1", "KW"],
+	"Y2", "L1", "L2", "L4", "N1", "KW"],
 	//in bill sponsor (A2) and cosponsor (A3) should be together and not split by legislativeBody (T3)
 	"bill": ["TI", "AU", "T2", "A2", "A3", "T3", "A4", "AB", "C1", "C2", "C3",
 	"C4", "C5", "C6", "CN", "CY", "DA", "PY", "DO", "DP", "ET", "VL", "IS", "SP",
 	"J2", "LA", "M1", "M3", "NV", "OP", "PB", "SE", "SN", "ST", "UR", "AN", "DB",
-	"Y2", "N1", "KW"]
+	"Y2", "L1", "L2", "L4", "N1", "KW"]
 };
 
 var newLineChar = "\r\n"; //from spec
@@ -844,18 +861,15 @@ exportFields.cache = {};
 exportFields.mapList = [fieldMap];
 
 function addTag(tag, value) {
-	if(value instanceof Array) {
-		for(var i=0, n=value.length; i<n; i++) {
-			var v = (value[i] + '').trim();
-			if(!v) continue;
+	if(!(value instanceof Array)) value = [value];
 
-			Zotero.write(tag + "  - " + v + newLineChar);
-		}
-	} else {
-		value = (value + '').trim();
-		if(!value) return;
+	for(var i=0, n=value.length; i<n; i++) {
+		if(value[i] === undefined) return;
+		//don't export empty strings
+		var v = (value[i] + '').trim();
+		if(!v) continue;
 
-		Zotero.write(tag + "  - " + value + newLineChar);
+		Zotero.write(tag + "  - " + v + newLineChar);
 	}
 }
 
@@ -876,11 +890,31 @@ function doExport() {
 		}
 		addTag("TY", type);
 
+		//before we begin, pre-sort attachments based on type
+		var attachments = {
+			PDF: [],
+			HTML: [],
+			other: []
+		};
+
+		for(var i=0, n=item.attachments.length; i<n; i++) {
+			switch(item.attachments[i].mimeType) {
+				case 'application/pdf':
+					attachments.PDF.push(item.attachments[i]);
+				break;
+				case 'text/html':
+					attachments.HTML.push(item.attachments[i]);
+				break;
+				default:
+					attachments.other.push(item.attachments[i]);
+			}
+		}
+
 		order = exportOrder[item.itemType] || exportOrder["__default"];
 		for(var i=0, n=order.length; i<n; i++) {
 			tag = order[i];
 			//find the appropriate field to export for this item type
-			field = exportFields.getField(item.itemType, tag);
+			field = exportFields.getField(item.itemType, tag)[0];
 
 			//if we didn't get anything, we don't need to export this tag for this item type
 			if(!field) continue;
@@ -897,12 +931,12 @@ function doExport() {
 					value = [];
 					var name;
 					for(var j=0, m=item.creators.length; j<m; j++) {
-					name = [];
-					if(item.creators[j].creatorType == field[1]) {
-					name.push(item.creators[j].lastName);
-					if(item.creators[j].firstName) name.push(item.creators[j].firstName);
-					value.push(name.join(', '));
-					}
+						name = [];
+						if(item.creators[j].creatorType == field[1]) {
+							name.push(item.creators[j].lastName);
+							if(item.creators[j].firstName) name.push(item.creators[j].firstName);
+							value.push(name.join(', '));
+						}
 					}
 					if(!value.length) value = undefined;
 				break;
@@ -912,14 +946,26 @@ function doExport() {
 				case "tags":
 					value = item.tags.map(function(t) { return t.tag; });
 				break;
+				case "attachments":
+					value = [];
+					var att = attachments[field[1]];
+					for(var j=0, m=att.length; j<m; j++) {
+						if(att[j].saveFile) {	//local file
+							value.push(att[j].defaultPath);
+							att[j].saveFile(att[j].defaultPath);
+						} else {	//link to remote file
+							value.push(att[j].url);
+						}
+					}
+				break;
 				case "pages":
 					if(tag == "SP" && item.pages) {
-					var m = item.pages.trim().match(/(.+?)[\u002D\u00AD\u2010-\u2015\u2212\u2E3A\u2E3B\s]+(.+)/);
-					if(m) {
-					addTag(tag, m[1]);
-					tag = "EP";
-					value = m[2];
-					}
+						var m = item.pages.trim().match(/(.+?)[\u002D\u00AD\u2010-\u2015\u2212\u2E3A\u2E3B\s]+(.+)/);
+						if(m) {
+							addTag(tag, m[1]);
+							tag = "EP";
+							value = m[2];
+						}
 					}
 				break;
 				default:
@@ -930,19 +976,25 @@ function doExport() {
 			switch(tag) {
 				case "PY":
 					var date = ZU.strToDate(item[field]);
-					if(!date.year) continue;
-					value = ('000' + date.year).substr(-4); //since this is in export, this should not be a problem with MS JavaScript implementation of substr
+					if(date.year) {
+						value = ('000' + date.year).substr(-4); //since this is in export, this should not be a problem with MS JavaScript implementation of substr
+					} else {
+						value = item[field];
+					} 
 				break;
 				case "Y2":
 				case "DA":
 					var date = ZU.strToDate(item[field]);
-					if(!date.year) continue;
-					date.year = ('000' + date.year).substr(-4);
-					date.month = (date.month || date.month===0 || date.month==="0")?('0' + (date.month+1)).substr(-2):'';
-					date.day = date.day?('0' + date.day).substr(-2):'';
-					if(!date.part) date.part = '';
-
-					value = date.year + '/' + date.month + '/' + date.day + '/'; //+ date.part; //part is probably a mess of day of the week and time
+					if(date.year) {
+						date.year = ('000' + date.year).substr(-4);
+						date.month = (date.month || date.month===0 || date.month==="0")?('0' + (date.month+1)).substr(-2):'';
+						date.day = date.day?('0' + date.day).substr(-2):'';
+						if(!date.part) date.part = '';
+	
+						value = date.year + '/' + date.month + '/' + date.day + '/'; //+ date.part; //part is probably a mess of day of the week and time
+					} else {
+						value = item[field];
+					}
 				break;
 			}
 
