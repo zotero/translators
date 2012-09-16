@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-08 12:40:00"
+	"lastUpdated": "2012-09-15 19:32:52"
 }
 
 /*
@@ -364,6 +364,27 @@ function scrape(doc, url, type, pdfUrl) {
 
 	//sometimes number of pages ends up in pages
 	if(!item.numPages) item.numPages = item.pages;
+
+	//parse some data from the byline in case we're missing publication title
+	// or the date is not complete
+	var byline = ZU.xpath(doc, '//span[contains(@class, "titleAuthorETC")][last()]');
+	//add publication title if we don't already have it
+	if(!item.publicationTitle
+		&& ZU.fieldIsValidForType('publicationTitle', item.itemType)) {
+		var pubTitle = ZU.xpathText(byline, './/a[@id="lateralSearch"]');
+		//remove date range
+		if(pubTitle) item.publicationTitle = pubTitle.replace(/\s*\(.+/, '');
+	}
+
+	var date = ZU.xpathText(byline, './text()');
+	if(date) date = date.match(/]\s+(.+?):/);
+	if(date) date = date[1];
+	//add date if we only have a year and date is longer in the byline
+	if(date
+		&& (!item.date
+			|| (item.date.length <= 4 && date.length > item.date.length))) {
+		item.date = date;
+	}
 
 	item.abstractNote = ZU.xpath(doc,
 		'//div[@id="abstractZone" or contains(@id,"abstractFull")]/\
