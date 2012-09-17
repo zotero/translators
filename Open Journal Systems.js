@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-09-17 03:10:28"
+	"lastUpdated": "2012-09-17 03:20:01"
 }
 
 function detectWeb(doc, url) {
@@ -29,6 +29,11 @@ function doWeb(doc, url) {
 		//abstractNote is pulled from description, which is same as title
 		item.abstractNote = item.extra;
 		item.extra = undefined;
+
+		//if we still don't have abstract, we can try scraping from page
+		if(!item.abstractNote) {
+			item.abstractNote = ZU.xpathText(doc, '//div[@id="articleAbstract"]/div[1]');
+		}
 
 		item.complete();
 	});
@@ -153,6 +158,78 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "epress.lib.uts.edu.au",
 				"shortTitle": "Pre-capacity building in loosely-coupled collaborations"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://elanguage.net/journals/index.php/dad/article/view/362",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Christine",
+						"lastName": "Howes",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Matthew",
+						"lastName": "Purver",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Patrick G. T.",
+						"lastName": "Healey",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Gregory",
+						"lastName": "Mills",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Eleni",
+						"lastName": "Gregoromichelaki",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"itemID": "http://elanguage.net/journals/index.php/dad/article/view/362",
+				"title": "On Incrementality in Dialogue: Evidence from Compound Contributions",
+				"publicationTitle": "Dialogue & Discourse",
+				"date": "2011/05/11",
+				"reportType": "Text.Serial.Journal",
+				"letterType": "Text.Serial.Journal",
+				"manuscriptType": "Text.Serial.Journal",
+				"mapType": "Text.Serial.Journal",
+				"thesisType": "Text.Serial.Journal",
+				"websiteType": "Text.Serial.Journal",
+				"presentationType": "Text.Serial.Journal",
+				"postType": "Text.Serial.Journal",
+				"audioFileType": "Text.Serial.Journal",
+				"language": "en",
+				"volume": "2",
+				"issue": "1",
+				"DOI": "10.5087/d&d.v2i1.362",
+				"abstractNote": "Spoken contributions in dialogue often continue or complete earlier contributions by either the same or a different speaker. These compound contributions (CCs) thus provide a natural context for investigations of incremental processing in dialogue.\n\nWe present a corpus study which confirms that CCs are a key dialogue phenomenon: almost 20% of contributions fit our general definition of CCs, with nearly 3% being the cross-person case most often studied. The results suggest that processing is word-by-word incremental, as splits can occur within syntactic constituents; however, some systematic differences between same- and cross-person cases indicate important dialogue-specific pragmatic effects. An experimental study then investigates these effects by artificially introducing CCs into multi-party text dialogue. Results suggest that CCs affect peoples expectations about who will speak next and whether other participants have formed a coalition or party.\n\nTogether, these studies suggest that CCs require an incremental processing mechanism that can provide a resource for constructing linguistic constituents that span multiple contributions and multiple participants. They also suggest the need to model higher-level dialogue units that have consequences for the organisation of turn-taking and for the development of a shared context.",
+				"pages": "279-311",
+				"ISSN": "2152-9620",
+				"url": "http://elanguage.net/journals/dad/article/view/362",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "elanguage.net",
+				"shortTitle": "On Incrementality in Dialogue"
 			}
 		]
 	}
