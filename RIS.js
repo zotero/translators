@@ -21,16 +21,16 @@ function detectImport() {
 	var line;
 	var i = 0;
 	while((line = Zotero.read()) !== false) {
-	line = line.replace(/^\s+/, "");
-	if(line != "") {
-		if(line.substr(0, 6).match(/^TY {1,2}- /)) {
-		return true;
-		} else {
-		if(i++ > 3) {
-			return false;
+		line = line.replace(/^\s+/, "");
+		if(line != "") {
+			if(line.substr(0, 6).match(/^TY {1,2}- /)) {
+				return true;
+			} else {
+				if(i++ > 3) {
+					return false;
+				}
+			}
 		}
-		}
-	}
 	}
 }
 
@@ -392,9 +392,14 @@ var degenerateImportFieldMap = {
 	Y1: fieldMap["PY"]
 };
 
-//generic tag mapping function with caching
+//generic tag mapping object with caching
 //not intended to be used directly
-function mapTag(itemType, tag) {
+var TagMapper = function(mapList) {
+	this.cache = {};
+	this.mapList = mapList;
+};
+
+TagMapper.prototype.getFields = function(itemType, tag) {
 	if(!this.cache[itemType]) this.cache[itemType] = {};
 
 	//retrieve from cache if available
@@ -437,24 +442,21 @@ function mapTag(itemType, tag) {
 	this.cache[itemType][tag] = fields;
 
 	return fields;
-}
+};
 
 /********************
  * Import Functions *
  ********************/
 
 //set up import field mapping
-var importFields = {};
-importFields.getField = mapTag;
-importFields.cache = {};
-importFields.mapList = [fieldMap, degenerateImportFieldMap];
+var importFields = new TagMapper([fieldMap, degenerateImportFieldMap]);
 
 function processTag(item, entry) {
 	var tag = entry[1];
 	var value = entry[2].trim();
 	var rawLine = entry[0];
 
-	var zField = importFields.getField(item.itemType, tag)[0];
+	var zField = importFields.getFields(item.itemType, tag)[0];
 	if(!zField) {
 		Z.debug("Unknown field " + tag + " in entry :\n" + rawLine);
 		zField = 'unknown'; //this will result in the value being added as note
@@ -647,7 +649,7 @@ function dateRIStoZotero(risDate) {
 	//sometimes unknown parts of date are given as 0. Drop these and anything that follows
 	var i;
 	for(i=0; i<3; i++) {
-		if(!value[i] || !parseInt(value[i])) {
+		if(!value[i] || !parseInt(value[i], 10)) {
 			break;
 		}
 	}
@@ -657,7 +659,7 @@ function dateRIStoZotero(risDate) {
 
 	//adjust month (it's 0 based)
 	if(value[1]) {
-		value[1] = parseInt(value[1]);
+		value[1] = parseInt(value[1], 10);
 		if(value[1]) value[1]--;
 	}
 
@@ -782,7 +784,7 @@ function getLine() {
 			}
 
 			//check if we need to add a space
-			if(entry[2].substr(-1) != ' ') {
+			if(entry[2].substr(entry[2].length-1) != ' ') {
 				nextLine = ' ' + nextLine;
 			}
 
@@ -855,10 +857,7 @@ var exportOrder = {
 var newLineChar = "\r\n"; //from spec
 
 //set up export field mapping
-var exportFields = {};
-exportFields.getField = mapTag;
-exportFields.cache = {};
-exportFields.mapList = [fieldMap];
+var exportFields = new TagMapper([fieldMap]);
 
 function addTag(tag, value) {
 	if(!(value instanceof Array)) value = [value];
@@ -914,14 +913,14 @@ function doExport() {
 		for(var i=0, n=order.length; i<n; i++) {
 			tag = order[i];
 			//find the appropriate field to export for this item type
-			field = exportFields.getField(item.itemType, tag)[0];
+			field = exportFields.getFields(item.itemType, tag)[0];
 
 			//if we didn't get anything, we don't need to export this tag for this item type
 			if(!field) continue;
 
 			value = undefined;
 			//we can define fields that are nested (i.e. creators) using slashes
-			field = field.split(/\//);
+			field = field.split('/');
 
 			//handle special cases based on item field
 			switch(field[0]) {
@@ -991,7 +990,7 @@ function doExport() {
 						date.day = date.day?('0' + date.day).substr(-2):'';
 						if(!date.part) date.part = '';
 	
-						value = date.year + '/' + date.month + '/' + date.day + '/'; //+ date.part; //part is probably a mess of day of the week and time
+						value = date.year + '/' + date.month + '/' + date.day + '/' + date.part;
 					} else {
 						value = item[field];
 					}
@@ -1001,7 +1000,7 @@ function doExport() {
 			addTag(tag, value);
 		}
 
-		Zotero.write("ER  - ," + newLineChar + newLineChar);
+		Zotero.write("ER  - " + newLineChar + newLineChar);
 	}
 }
 
