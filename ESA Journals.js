@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-01-30 22:39:06"
+	"lastUpdated": "2012-09-04 23:04:16"
 }
 
 /*
@@ -172,16 +172,19 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"DOI": "10.1890/09-1234.1",
-				"issue": "5",
-				"ISSN": "1051-0761",
-				"url": "http://www.esajournals.org/doi/abs/10.1890/09-1234.1",
-				"libraryCatalog": "ESA Journals",
 				"title": "Assimilation of multiple data sets with the ensemble Kalman filter to improve forecasts of forest carbon dynamics",
 				"date": "February 22, 2011",
+				"DOI": "10.1890/09-1234.1",
 				"publicationTitle": "Ecological Applications",
+				"journalAbbreviation": "Ecological Applications",
 				"pages": "1461-1473",
-				"volume": "21"
+				"volume": "21",
+				"issue": "5",
+				"publisher": "Ecological Society of America",
+				"ISSN": "1051-0761",
+				"url": "http://www.esajournals.org/doi/abs/10.1890/09-1234.1",
+				"accessDate": "September 4, 2012",
+				"libraryCatalog": "ESA Journals"
 			}
 		]
 	},
@@ -190,4 +193,5 @@ var testCases = [
 		"url": "http://www.esajournals.org/toc/ecap/21/5",
 		"items": "multiple"
 	}
-] /** END TEST CASES **/
+]
+/** END TEST CASES **/

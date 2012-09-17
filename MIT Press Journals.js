@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-19 06:10:54"
+	"lastUpdated": "2012-09-04 23:18:59"
 }
 
 function detectWeb(doc, url) {
@@ -101,16 +101,19 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"DOI": "10.1162/afar.2010.43.4.60",
-				"issue": "4",
-				"ISSN": "0001-9933",
-				"url": "http://dx.doi.org/10.1162/afar.2010.43.4.60",
-				"libraryCatalog": "MIT Press Journals",
 				"title": "Removable Hair Caps of Karamoja (Uganda)",
 				"date": "November 8, 2010",
+				"DOI": "10.1162/afar.2010.43.4.60",
 				"publicationTitle": "African Arts",
+				"journalAbbreviation": "African Arts",
 				"pages": "60-71",
-				"volume": "43"
+				"volume": "43",
+				"issue": "4",
+				"publisher": "MIT Press",
+				"ISSN": "0001-9933",
+				"url": "http://dx.doi.org/10.1162/afar.2010.43.4.60",
+				"accessDate": "September 4, 2012",
+				"libraryCatalog": "MIT Press Journals"
 			}
 		]
 	},
