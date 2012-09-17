@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2011-10-27 21:45:47"
+	"lastUpdated": "2012-09-04 21:59:35"
 }
 
 function detectWeb(doc, url) {
@@ -27,9 +27,16 @@ function getRIS(link) {
 		translator.setString(text);
 		translator.setHandler("itemDone", function(obj, item) {
 			item.repository = "Copernicus Online Journals";
-			item.attachments[0].title = item.publicationTitle + " Snapshot";
-			item.attachments[0].mimeType = "text/html";
-			item.attachments[1].title = item.publicationTitle + " PDF";
+			if(item.attachments[0]) {
+				item.attachments[0].title = item.publicationTitle + " PDF";
+			}
+
+			item.attachments.push({
+				title: item.publicationTitle + " Snapshot",
+				url: item.url,
+				mimeType: "text/html",
+				snapshot: true
+			})
 			item.complete();
 		});
 		translator.translate();
@@ -97,25 +104,29 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Adv. Geosci. Snapshot",
-						"mimeType": "text/html"
-					},
-					{
 						"mimeType": "application/pdf",
 						"title": "Adv. Geosci. PDF",
 						"downloadable": true
+					},
+					{
+						"title": "Adv. Geosci. Snapshot",
+						"mimeType": "text/html",
+						"snapshot": true
 					}
 				],
+				"title": "Preface ''Precipitation: Measurement, Climatology, Remote Sensing, and Modeling (EGU 2010)''",
+				"journalAbbreviation": "Adv. Geosci.",
+				"volume": "30",
+				"pages": "1-2",
+				"date": "May 9, 2011",
+				"publisher": "Copernicus Publications",
 				"ISSN": "1680-7359",
 				"url": "http://www.adv-geosci.net/30/1/2011/",
 				"DOI": "10.5194/adgeo-30-1-2011",
-				"libraryCatalog": "Copernicus Online Journals",
-				"shortTitle": "Preface ''Precipitation",
-				"title": "Preface ''Precipitation: Measurement, Climatology, Remote Sensing, and Modeling (EGU 2010)''",
 				"publicationTitle": "Adv. Geosci.",
-				"volume": "30",
-				"pages": "1-2",
-				"date": "May 9, 2011"
+				"libraryCatalog": "Copernicus Online Journals",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Preface ''Precipitation"
 			}
 		]
 	},
@@ -152,27 +163,25 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.adv-radio-sci.net/6/1/2008/",
-						"title": "Adv. Radio Sci. Snapshot",
-						"mimeType": "text/html"
-					},
-					{
-						"url": "http://www.adv-radio-sci.net/6/1/2008/ars-6-1-2008.pdf",
 						"mimeType": "application/pdf",
 						"title": "Adv. Radio Sci. PDF",
 						"downloadable": true
+					},
+					{
+						"title": "Adv. Radio Sci. Snapshot",
+						"mimeType": "text/html",
+						"snapshot": true
 					}
 				],
 				"title": "Time domain reflectrometry measurements using a movable obstacle for the determination of dielectric profiles",
-				"publicationTitle": "Adv. Radio Sci.",
+				"journalAbbreviation": "Adv. Radio Sci.",
 				"volume": "6",
 				"pages": "1-4",
 				"date": "May 26, 2008",
-				"publisher": "Copernicus Publications",
-				"ISBN": "1684-9965",
 				"ISSN": "1684-9965",
 				"url": "http://www.adv-radio-sci.net/6/1/2008/",
 				"DOI": "10.5194/ars-6-1-2008",
+				"publicationTitle": "Adv. Radio Sci.",
 				"libraryCatalog": "Copernicus Online Journals",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}

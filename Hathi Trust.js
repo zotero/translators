@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-06 16:22:46"
+	"lastUpdated": "2012-09-04 23:09:05"
 }
 
 /*
@@ -88,9 +88,9 @@ function scrape(doc, url){
 		translator.setHandler("itemDone", function(obj, item) {
 			item.extra="";
 			if (item.place)	item.place = item.place.replace(/\[/, "").replace(/\]/, "");
-			if (item.tags) item.tags = item.tags.join("/").split("/")
+			if (item.tags.length) item.tags = item.tags.join("/").split("/")
 			item.attachments = [{url:item.url, title: "Hathi Trust Record", mimeType: "text/html"}];
-			item.url = "";
+			//item.url = "";
 			item.complete();
 		});	
 		translator.translate();
@@ -120,25 +120,22 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [
-					""
-				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://catalog.hathitrust.org/Record/001050654",
 						"title": "Hathi Trust Record",
 						"mimeType": "text/html"
 					}
 				],
-				"itemID": "001050654",
 				"title": "Cervantes",
-				"date": "1940",
-				"pages": "3 p.l., 192 p.",
 				"numPages": "3 p.l., 192 p.",
 				"place": "Oxford",
 				"publisher": "The Clarendon press",
-				"libraryCatalog": "Hathi Trust"
+				"url": "http://catalog.hathitrust.org/Record/001050654",
+				"date": "1940",
+				"libraryCatalog": "Hathi Trust",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}

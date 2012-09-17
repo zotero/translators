@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-06-28 20:44:17"
+	"lastUpdated": "2012-09-04 21:59:01"
 }
 
 function detectWeb(doc, url) {
@@ -191,8 +191,28 @@ function fetchRIS(url, post, itemType, doc, retry) {
 
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-		//A2s should be editors here for all practical purposes
-		text = text.replace(/A2  -/g, "ED  -");
+
+		//Some authors are not entered according to spec
+		//We try to fix places where multiple authors are entered in one entry
+		text = text.replace(/^((?:A[U123]|ED)  ?- )(.+?)$/mg,
+			function(match, tag, authors) {
+				var authorRE = /((?:[A-Z](?:\.?\s|\.))+)([-A-Za-z]+)/g;
+				var author, newStr='';
+				while(author = authorRE.exec(authors)) {
+					if(newStr) {	//not the first author
+						newStr += '\r\n';
+					}
+
+					newStr += tag + author[2] + ', ' + author[1].trim();
+				}
+
+				if(newStr) {
+					return newStr;
+				} else {	//we didn't find any authors
+					return match;
+				}
+			});
+
 		translator.setString(text);
 		translator.setHandler("itemDone", function(obj, item) {
 			//item.url = newurl;
@@ -362,7 +382,6 @@ var testCases = [
 						"title": "APA PsycNET Snapshot"
 					}
 				],
-				"itemID": "2004-16644-010",
 				"title": "Neuropsychology of Adults With Attention-Deficit/Hyperactivity Disorder: A Meta-Analytic Review",
 				"publicationTitle": "Neuropsychology",
 				"volume": "18",
@@ -371,7 +390,6 @@ var testCases = [
 				"date": "2004",
 				"place": "US",
 				"publisher": "American Psychological Association",
-				"ISBN": "1931-1559(Electronic);0894-4105(Print)",
 				"ISSN": "1931-1559(Electronic);0894-4105(Print)",
 				"abstractNote": "A comprehensive, empirically based review of the published studies addressing neuropsychological performance in adults diagnosed with attention-deficit/hyperactivity disorder (ADHD) was conducted to identify patterns of performance deficits. Findings from 33 published studies were submitted to a meta-analytic procedure producing sample-size-weighted mean effect sizes across test measures. Results suggest that neuropsychological deficits are expressed in adults with ADHD across multiple domains of functioning, with notable impairments in attention, behavioral inhibition, and memory, whereas normal performance is noted in simple reaction time. Theoretical and developmental considerations are discussed, including the role of behavioral inhibition and working memory impairment. Future directions for research based on these findings are highlighted, including further exploration of specific impairments and an emphasis on particular tests and testing conditions.",
 				"DOI": "10.1037/0894-4105.18.3.485",
@@ -413,7 +431,6 @@ var testCases = [
 						"title": "APA PsycNET Snapshot"
 					}
 				],
-				"itemID": "1956-05944-001",
 				"title": "Factor analysis of meaning",
 				"publicationTitle": "Journal of Experimental Psychology",
 				"volume": "50",
@@ -422,7 +439,6 @@ var testCases = [
 				"date": "1955",
 				"place": "US",
 				"publisher": "American Psychological Association",
-				"ISBN": "0022-1015(Print)",
 				"ISSN": "0022-1015(Print)",
 				"abstractNote": "Two factor analytic studies of meaningful judgments based upon the same sample of 50 bipolar descriptive scales are reported. Both analyses reveal three major connotative factors: evaluation, potency, and activity. These factors appear to be independent dimensions of the semantic space within which the meanings of concepts may be specified.",
 				"DOI": "10.1037/h0043965",
@@ -449,7 +465,13 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"lastName": "J. D. Maser  M. E. P. Seligman",
+						"lastName": "Maser",
+						"firstName": "J. D.",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Seligman",
+						"firstName": "M. E. P.",
 						"creatorType": "editor"
 					}
 				],
@@ -463,17 +485,16 @@ var testCases = [
 						"title": "APA PsycNET Snapshot"
 					}
 				],
-				"itemID": "1992-98221-010",
 				"title": "Catatonia: Tonic immobility: Evolutionary underpinnings of human catalepsy and catatonia",
+				"bookTitle": "Psychopathology: Experimental models",
 				"series": "A series of books in psychology.",
 				"pages": "334-357",
 				"date": "1977",
 				"place": "New York,  NY,  US",
 				"publisher": "W H Freeman/Times Books/ Henry Holt & Co",
 				"ISBN": "0-7167-0368-8 (Hardcover); 0-7167-0367-X (Paperback)",
-				"ISSN": "0-7167-0368-8 (Hardcover); 0-7167-0367-X (Paperback)",
-				"abstractNote": "tonic immobility [animal hypnosis] might be a useful laboratory analog or research model for catatonia / we have been collaborating on an interdisciplinary program of research in an effort to pinpoint the behavioral antecedents and biological bases for tonic immobility / attempt to briefly summarize our findings, and . . . discuss the implications of these data in terms of the model \n\n characteristics of tonic immobility / hypnosis / catatonia, catalepsy, and cataplexy / tonic immobility as a model for catatonia / fear potentiation / fear alleviation / fear or arousal / learned helplessness / neurological correlates / pharmacology and neurochemistry / genetic underpinnings / evolutionary considerations / implications for human psychopathology (PsycINFO Database Record (c) 2012 APA, all rights reserved)",
-				"publicationTitle": "Psychopathology: Experimental models",
+				"abstractNote": "tonic immobility [animal hypnosis] might be a useful laboratory analog or research model for catatonia / we have been collaborating on an interdisciplinary program of research in an effort to pinpoint the behavioral antecedents and biological bases for tonic immobility / attempt to briefly summarize our findings, and . . . discuss the implications of these data in terms of the model characteristics of tonic immobility / hypnosis / catatonia, catalepsy, and cataplexy / tonic immobility as a model for catatonia / fear potentiation / fear alleviation / fear or arousal / learned helplessness / neurological correlates / pharmacology and neurochemistry / genetic underpinnings / evolutionary considerations / implications for human psychopathology",
+				"rights": "(c) 2012 APA, all rights reserved",
 				"libraryCatalog": "APA PsycNET",
 				"shortTitle": "Catatonia"
 			}
@@ -504,9 +525,7 @@ var testCases = [
 						"title": "APA PsycNET Snapshot"
 					}
 				],
-				"itemID": "2004-16329-000",
 				"title": "The abnormal personality: A textbook",
-				"pages": "x, 617",
 				"numPages": "617",
 				"date": "1948",
 				"place": "New York,  NY,  US",
@@ -545,9 +564,7 @@ var testCases = [
 						"title": "APA PsycNET Snapshot"
 					}
 				],
-				"itemID": "2004-16329-000",
 				"title": "The abnormal personality: A textbook",
-				"pages": "x, 617",
 				"numPages": "617",
 				"date": "1948",
 				"place": "New York,  NY,  US",
@@ -585,15 +602,14 @@ var testCases = [
 						"title": "APA PsycNET Snapshot"
 					}
 				],
-				"itemID": "2004-16329-002",
 				"title": "Clinical introduction: Examples of disordered personalities",
+				"bookTitle": "The abnormal personality: A textbook",
 				"pages": "54-101",
 				"date": "1948",
 				"place": "New York,  NY,  US",
 				"publisher": "Ronald Press Company",
 				"abstractNote": "This chapter examines some representative examples of disordered personalities. The reader should be forewarned that the five cases described here will be frequently referred to in later chapters of the book. They display to advantage many of the problems and principles that will occupy us when we undertake to build up a systematic account of abnormal psychology. It will be assumed that the cases given in this chapter are well remembered, and with this in mind the reader should not only go through them but study and compare them rather carefully. The main varieties of disordered personalities and student attitudes toward abnormality are discussed before the case histories are presented.",
 				"DOI": "10.1037/10023-002",
-				"publicationTitle": "The abnormal personality: A textbook",
 				"rights": "(c) 2012 APA, all rights reserved",
 				"libraryCatalog": "APA PsycNET",
 				"shortTitle": "Clinical introduction"
@@ -648,7 +664,6 @@ var testCases = [
 						"title": "APA PsycNET Snapshot"
 					}
 				],
-				"itemID": "2010-19350-001",
 				"title": "Predicting behavior in economic games by looking through the eyes of the players",
 				"publicationTitle": "Journal of Experimental Psychology: General",
 				"volume": "139",
@@ -657,7 +672,6 @@ var testCases = [
 				"date": "2010",
 				"place": "US",
 				"publisher": "American Psychological Association",
-				"ISBN": "1939-2222(Electronic);0096-3445(Print)",
 				"ISSN": "1939-2222(Electronic);0096-3445(Print)",
 				"abstractNote": "Social scientists often rely on economic experiments such as ultimatum and dictator games to understand human cooperation. Systematic deviations from economic predictions have inspired broader conceptions of self-interest that incorporate concerns for fairness. Yet no framework can describe all of the major results. We take a different approach by asking players directly about their self-interest—defined as what they want to do (pleasure-maximizing options). We also ask players directly about their sense of fairness—defined as what they think they ought to do (fairness-maximizing options). Player-defined measures of self-interest and fairness predict (a) the majority of ultimatum-game and dictator-game offers, (b) ultimatum-game rejections, (c) exiting behavior (i.e., escaping social expectations to cooperate) in the dictator game, and (d) who cooperates more after a positive mood induction. Adopting the players' perspectives of self-interest and fairness permits better predictions about who cooperates, why they cooperate, and when they punish noncooperators.",
 				"DOI": "10.1037/a0020280",
