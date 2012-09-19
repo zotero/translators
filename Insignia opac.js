@@ -43,7 +43,6 @@ var xpathDescription = '//table[@id="tbDetailInfo_Summary"]/tbody/tr/td/label[@n
 var xpathPageNumber = '//table[@id="tbDetailInfo_Publication"]/tbody/tr/td/label[@name="Collation"]';
 
 	var title = ZU.xpathText(doc, xPathTitle);
-	Zotero.debug(title);
 	if(title!=null && title.length>0){
 		
 		var item  = new Zotero.Item();
