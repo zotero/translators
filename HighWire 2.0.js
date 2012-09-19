@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-06-25 22:01:04"
+	"lastUpdated": "2012-09-19 04:36:08"
 }
 
 /*
@@ -43,7 +43,8 @@ function getAbstract(doc) {
 	//abstract, summary
 	var abstrSections = ZU.xpath(doc,
 			'//div[contains(@id,"abstract") or @class="abstractSection"]\
-			/*[not(contains(@class,"section-nav"))]');
+			/*[not(contains(@class,"section-nav"))\
+				and not(contains(@class,"kwd"))]');
 
 	var abstr = '';
 	var paragraph;
@@ -105,9 +106,11 @@ function addEmbMeta(doc) {
 			item.title = ZU.capitalizeTitle(item.title,true);
 		}
 
-		if(!item.abstractNote) item.abstractNote = getAbstract(doc);
+		var abs = getAbstract(doc);
+		if(abs) item.abstractNote = abs;
 
-		if( !item.tags || item.tags.length < 1 ) item.tags = getKeywords(doc);
+		var kwds = getKeywords(doc);
+		if(kwds) item.tags = kwds;
 
 		if (item.notes) item.notes = [];
 
@@ -644,6 +647,111 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.pnas.org",
 				"abstractNote": "Amyotrophic lateral sclerosis (ALS) is a devastating and universally fatal neurodegenerative disease. Mutations in two related RNA-binding proteins, TDP-43 and FUS, that harbor prion-like domains, cause some forms of ALS. There are at least 213 human proteins harboring RNA recognition motifs, including FUS and TDP-43, raising the possibility that additional RNA-binding proteins might contribute to ALS pathogenesis. We performed a systematic survey of these proteins to find additional candidates similar to TDP-43 and FUS, followed by bioinformatics to predict prion-like domains in a subset of them. We sequenced one of these genes, TAF15, in patients with ALS and identified missense variants, which were absent in a large number of healthy controls. These disease-associated variants of TAF15 caused formation of cytoplasmic foci when expressed in primary cultures of spinal cord neurons. Very similar to TDP-43 and FUS, TAF15 aggregated in vitro and conferred neurodegeneration in Drosophila, with the ALS-linked variants having a more severe effect than wild type. Immunohistochemistry of postmortem spinal cord tissue revealed mislocalization of TAF15 in motor neurons of patients with ALS. We propose that aggregation-prone RNA-binding proteins might contribute very broadly to ALS pathogenesis and the genes identified in our yeast functional screen, coupled with prion-like domain prediction analysis, now provide a powerful resource to facilitate ALS disease gene discovery."
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://genesdev.cshlp.org/content/16/14/1779",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Makoto",
+						"lastName": "Tachibana",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kenji",
+						"lastName": "Sugimoto",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Masami",
+						"lastName": "Nozaki",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jun",
+						"lastName": "Ueda",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tsutomu",
+						"lastName": "Ohta",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Misao",
+						"lastName": "Ohki",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Mikiko",
+						"lastName": "Fukuda",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Naoki",
+						"lastName": "Takeda",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hiroyuki",
+						"lastName": "Niida",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hiroyuki",
+						"lastName": "Kato",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yoichi",
+						"lastName": "Shinkai",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Euchromatin",
+					"heterochromatin",
+					"histone H3-K9 methylation",
+					"G9a HMTase",
+					"mammalian development",
+					"transcriptional regulation"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"itemID": "http://genesdev.cshlp.org/content/16/14/1779",
+				"title": "G9a histone methyltransferase plays a dominant role in euchromatic histone H3 lysine 9 methylation and is essential for early embryogenesis",
+				"publisher": "Cold Spring Harbor Lab",
+				"institution": "Cold Spring Harbor Laboratory Press",
+				"company": "Cold Spring Harbor Laboratory Press",
+				"label": "Cold Spring Harbor Laboratory Press",
+				"distributor": "Cold Spring Harbor Laboratory Press",
+				"date": "07/15/2002",
+				"DOI": "10.1101/gad.989402",
+				"language": "en",
+				"publicationTitle": "Genes & Development",
+				"journalAbbreviation": "Genes Dev.",
+				"volume": "16",
+				"issue": "14",
+				"url": "http://genesdev.cshlp.org/content/16/14/1779",
+				"abstractNote": "Covalent modification of histone tails is crucial for transcriptional regulation, mitotic chromosomal condensation, and heterochromatin formation. Histone H3 lysine 9 (H3-K9) methylation catalyzed by the Suv39h family proteins is essential for establishing the architecture of pericentric heterochromatin. We recently identified a mammalian histone methyltransferase (HMTase), G9a, which has strong HMTase activity towards H3-K9 in vitro. To investigate the in vivo functions of G9a, we generated G9a-deficient mice and embryonic stem (ES) cells. We found that H3-K9 methylation was drastically decreased in G9a-deficient embryos, which displayed severe growth retardation and early lethality. G9a-deficient ES cells also exhibited reduced H3-K9 methylation compared to wild-type cells, indicating that G9a is a dominant H3-K9 HMTase in vivo. Importantly, the loss of G9a abolished methylated H3-K9 mostly in euchromatic regions. Finally, G9a exerted a transcriptionally suppressive function that depended on its HMTase activity. Our results indicate that euchromatic H3-K9 methylation regulated by G9a is essential for early embryogenesis and is involved in the transcriptional repression of developmental genes.",
+				"pages": "1779-1791",
+				"ISSN": "0890-9369, 1549-5477",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "genesdev.cshlp.org"
 			}
 		]
 	}
