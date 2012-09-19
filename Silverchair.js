@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-09-18 21:07:31"
+	"lastUpdated": "2012-09-18 23:48:05"
 }
 
 /*
@@ -36,14 +36,17 @@
 
 function detectWeb(doc, url) {
 	//concerned about false positives - make sure this is actualy Silverchair.
-	if (ZU.xpathText(doc, '//body/@class|//script/@src').indexOf("SCM6")!=-1){
-		if (url.match(/\/(article|proceeding)\.aspx\?articleid=\d+/i)) return "journalArticle";
-		else if (url.indexOf("/searchresults.aspx?q=")!=-1) return "multiple";
-		else if (url.indexOf("/issue.aspx")) return "multiple";
+	var scm6 = ZU.xpathText(doc, '//body/@class|//script/@src');
+	var multxpath = '//div[contains(@class, "resultBlock")]/a|//div[contains(@class, "articleTitle") or contains(@class, "articleSection")]/a[contains(@href, "articleid")]';
+	if (scm6){
+		if (scm6.indexOf("SCM6")!=-1){
+			if (url.search(/\/(article|proceeding)\.aspx\?articleid=\d+/i)!=-1) return "journalArticle";
+			else if(url.indexOf("/searchresults.aspx?q=")!=-1 || url.indexOf("/issue.aspx")!=1  && ZU.xpathText(doc, multxpath)!=null) return "multiple";
 	}
-	else return false;
-}
-	
+	}
+	return false;
+	}
+
 
 function doWeb(doc, url){
 
