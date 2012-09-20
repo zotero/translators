@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-04-06 23:47:01"
+	"lastUpdated": "2012-09-20 17:34:29"
 }
 
 /**
@@ -37,6 +37,13 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 	var item = new Zotero.Item('encyclopediaArticle');
 	item.title = ZU.xpathText(doc, '//h1[@id="firstHeading"]/span');
+	
+	/* Removing the creator and publisher. Wikipedia is pushing the creator in their own
+  	directions on how to cite http://en.wikipedia.org/w/index.php?title=Special%3ACite&page=Psychology
+  	but style guides - including Chicago and APA disagree and prefer just using titles.
+  	cf. e.g. http://blog.apastyle.org/apastyle/2009/10/how-to-cite-wikipedia-in-apa-style.html
+  	For Publisher, not even Wikipedia suggests citing the Foundation as a Publisher.
+
 	item.creators.push({
 		lastName: 'Wikipedia contributors',
 		fieldMode: 1,
@@ -44,6 +51,7 @@ function doWeb(doc, url) {
 	});
 
 	item.publisher = 'Wikimedia Foundation, Inc.';
+	*/
 	item.rights = 'Creative Commons Attribution-ShareAlike License';
 
 	//turns out it's not that trivial to get the localized title for Wikipedia
