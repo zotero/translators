@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-09-12 18:58:36"
+	"lastUpdated": "2012-09-20 23:57:14"
 }
 
 function detectImport() {
@@ -1760,9 +1760,12 @@ function getFieldValue(read) {
 	
 	if(value.length > 1) {
 		// replace accented characters (yucky slow)
-		value = value.replace(/{?(\\[`"'^~=a-z]){?\\?([A-Za-z])}/g, "$1{$2}");
+		Z.debug(value)
+		value = value.replace(/{?(\\[`"'^~=a-z]){?\\?([A-Za-z])}/g, "{$1$2}");
+		Z.debug(value)
 		//convert tex markup into permitted HTML
 		value = mapTeXmarkup(value);
+		Z.debug(value)
 		for (var mapped in reversemappingTable) { // really really slow!
 			var unicode = reversemappingTable[mapped];
 			while(value.indexOf(mapped) !== -1) {
@@ -1771,6 +1774,7 @@ function getFieldValue(read) {
 			}
 			mapped = mapped.replace(/[{}]/g, "");
 			while(value.indexOf(mapped) !== -1) {
+				//Z.debug(value)
 				Zotero.debug("Replace(2) " + mapped + " in " + value + " with " + unicode);
 				value = value.replace(mapped, unicode);
 			}
@@ -1906,7 +1910,8 @@ function writeField(field, value, isMacro) {
 		value = value.replace(/[|\<\>\~\^\\]/g, mapEscape).replace(/([\#\$\%\&\_])/g, "\\$1");
 		// Case of words with uppercase characters in non-initial positions is preserved with braces.
 		// treat hyphen as whitespace for this purpose so that Large-scale etc. don't get enclosed
-		if(!isMacro&&field != "pages") value = value.replace(/([^\s-]+[A-Z][^\s,]*)/g, "{$1}");
+		// treat curly bracket as whitespace because of mark-up immediately preceding word
+		if(!isMacro&&field != "pages") value = value.replace(/([^\s-\}]+[A-Z][^\s,]*)/g, "{$1}");
 		//convert the HTML markup allowed in Zotero for rich text to TeX
 		value = mapHTMLmarkup(value);
 	}
@@ -1922,7 +1927,7 @@ function mapHTMLmarkup(characters){
 	//converts the HTML markup allowed in Zotero for rich text to TeX
 	//since  < and > have already been escaped, we need this rather hideous code - I couldn't see a way around it though.
 	//italics and bold
-	characters = characters.replace(/\{\\textless\}i\{\\textgreater\}(((?!\{\\textless\}\/i{\\textgreater\}).)+)\{\\textless\}\/i{\\textgreater\}/g, "\\textit{$1}").replace(/\{\\textless\}b\{\\textgreater\}(((?!\{\\textless\}\/b{\\textgreater\}).)+)\{\\textless\}\/b{\\textgreater\}/g, "\\textbf{$1}");
+	characters = characters.replace(/\{\\textless\}i\{\\textgreater\}(((?!\{\\textless\}\/i{\\textgreater\}).)+)\{\\textless\}\/i{\\textgreater\}/, "\\textit{$1}").replace(/\{\\textless\}b\{\\textgreater\}(((?!\{\\textless\}\/b{\\textgreater\}).)+)\{\\textless\}\/b{\\textgreater\}/g, "\\textbf{$1}");
 	//sub and superscript
 	characters = characters.replace(/\{\\textless\}sup\{\\textgreater\}(((?!\{\\textless\}\/sup\{\\textgreater\}).)+)\{\\textless\}\/sup{\\textgreater\}/g, "\$^{\\textrm{$1}}\$").replace(/\{\\textless\}sub\{\\textgreater\}(((?!\{\\textless\}\/sub\{\\textgreater\}).)+)\{\\textless\}\/sub\{\\textgreater\}/g, "\$_{\\textrm{$1}}\$");
 	//two variants of small caps
