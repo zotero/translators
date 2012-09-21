@@ -2,14 +2,14 @@
 	"translatorID": "bbad0221-134b-495a-aa56-d77cfaa67ab5",
 	"label": "Digital Humanities Quarterly",
 	"creator": "Michael Berkowitz",
-	"target": "^https?://www\\.digitalhumanities\\.org/(dhq)?",
+	"target": "^https?://(www\\.)?digitalhumanities\\.org/(dhq)?",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-01-30 22:50:51"
+	"lastUpdated": "2012-09-20 20:46:53"
 }
 
 function detectWeb(doc, url) {
@@ -20,7 +20,7 @@ function detectWeb(doc, url) {
 	}
 }
 
-function scrape(doc, xpath, xdoc) {
+function xpathtext(doc, xpath, xdoc) {
 	return Zotero.Utilities.trimInternal(doc.evaluate(xpath, xdoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 }
 
@@ -33,20 +33,30 @@ function doWeb(doc, url) {
 		while (art = arts.iterateNext()) {
 			items[art.href] = art.textContent;
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i)
-		}
-	} else {
+		
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			scrape(articles, function () {
+			});
+		});
+	}	
+	else {
 		articles = [url];
+		scrape(articles);
 	}
-	Zotero.debug(articles);
+	Zotero.debug(articles);}
 
+function scrape(articles){
 	Zotero.Utilities.processDocuments(articles, function(newDoc) {
 		var item = new Zotero.Item("journalArticle");
 		item.url = newDoc.location.href;
-		item.title = scrape(newDoc, '//h1[@class="articleTitle"]', newDoc);
-		var voliss = scrape(newDoc, '//div[@id="pubInfo"]', newDoc);
+		item.title = xpathtext(newDoc, '//h1[@class="articleTitle"]', newDoc);
+		var voliss = xpathtext(newDoc, '//div[@id="pubInfo"]', newDoc);
 		voliss = voliss.match(/(.*)Volume\s+(\d+)\s+Number\s+(\d+)/);
 		item.date = voliss[1];
 		item.volume = voliss[2];
@@ -54,12 +64,11 @@ function doWeb(doc, url) {
 		var authors = newDoc.evaluate('//div[@class="author"]', newDoc, null, XPathResult.ANY_TYPE, null);
 		var aut;
 		while (aut = authors.iterateNext()) {
-			item.creators.push(Zotero.Utilities.cleanAuthor(scrape(newDoc, './a[1]', aut), "author"));
+			item.creators.push(Zotero.Utilities.cleanAuthor(xpathtext(newDoc, './a[1]', aut), "author"));
 		}
 		item.attachments = [{url:item.url, title:"DHQ Snapshot", mimeType:"text/html"}];
 		item.complete();
-	}, function() {Zotero.done();});
-}/** BEGIN TEST CASES **/
+	}, function() {});}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
