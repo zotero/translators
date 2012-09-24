@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-05-11 06:22:36"
+	"lastUpdated": "2012-09-23 14:56:49"
 }
 
 /*
@@ -327,8 +327,8 @@ var testCases = [
 				"ISBN": "9780099448822",
 				"numPages": "400",
 				"publisher": "Vintage",
-				"date": "2000",
-				"abstractNote": "图书简介：\n\nNorwegian Wood (ノルウェイの森, Noruwei no Mori?) is a 1987 novel by Japanese author Haruki Murakami.\nThe novel is a nostalgic story of loss and sexuality. The story's protagonist and narrator is Toru Watanabe, who looks back on his days as a freshman university student living in Tokyo. Through Toru's reminiscences we see him develop relationships with two very different women — the beautiful yet emotionally troubled Naoko, and the outgoing, lively Midori.\nThe novel is set in Tokyo during the late 1960s, a time when Japanese students, like those of many other nations, were protesting against the established order. While it serves as the backdrop against which the events of the novel unfold, Murakami (through the eyes of Toru and Midori) portrays the student movement as largely weak-willed and hypocritical.\nNorwegian Wood was hugely popular with Japanese youth and made Murakami somewhat of a superstar in his native country (apparently much to his dismay at the time). In translation it is also one of the most-read Japanese novels in the Western Hemisphere.[citation needed]\nDespite its mainstream popularity in Japan, Murakami's contemporary readership saw Norwegian Wood as an unwelcome departure[citation needed] from his by-then established style of energetic prose flavoured with the unexpected and supernatural (as exemplified by Hard-Boiled Wonderland and the End of the World, released two years earlier). Yet, as translator Jay Rubin observes in the translator's note to the 2000 English edition, Norwegian Wood retains much of the complexity and symbolism characteristic of Murakami's work and is thus &quot;by no means just a love story.&quot;　　\n\n作者简介：\n　　Haruki Murakami (村上春樹, Murakami Haruki?, born January 12, 1949) is a popular contemporary Japanese writer and translator.[1] His work has been described by the Virginia Quarterly Review as &quot;easily accessible, yet profoundly complex.&quot;",
+				"date": "2003-06-30",
+				"abstractNote": "图书简介：\n\nWhen he hears her favourite Beatles song, Toru Watanabe recalls his first love Naoko, the girlfriend of his best friend Kizuki. Immediately he is transported back almost twenty years to his student days in Tokyo, adrift in a world of uneasy friendships, casual sex, passion, loss and desire - to a time when an impetuous young woman called Midori marches into his life and he has to choose between the future and the past. (20021018)\n点击链接进入中文版： \n挪威的森林　　 \n\n作者简介：\n　　Haruki Murakami (村上春樹, Murakami Haruki, born January 12, 1949) is a popular contemporary Japanese writer and translator.His work has been described by the Virginia Quarterly Review as &quot;easily accessible, yet profoundly complex.&quot;",
 				"libraryCatalog": "Douban",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}

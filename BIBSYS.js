@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-09-04 21:21:08"
+	"lastUpdated": "2012-09-23 14:26:52"
 }
 
 function detectWeb(doc, url)	{
@@ -54,8 +54,9 @@ function doWeb(doc, url)	{
 	var singlereg=new RegExp("http://ask\.bibsys\.no/ask/action/show");
 	if(singlereg.test(url))	{
 		var urlstring="http://ask.bibsys.no/ask/action/show";
-		var data="visningsformat=fortekst_m_eksemplarer&eksportFormat=refmanager&eksportEpostAdresse=&eksportEpostFormat=fortekst&cmd=sendtil";
+		var data="visningsformat=ris&eksportFormat=refmanager&eksportEpostAdresse=&eksportEpostFormat=fortekst&cmd=sendtil";
 		Zotero.Utilities.HTTP.doPost(urlstring, data, function(text)	{
+			//Z.debug(text)
 			var trans=Zotero.loadTranslator("import");
 			trans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			trans.setString(text);
@@ -89,26 +90,16 @@ var testCases = [
 						"note": "<p>Bibliografi: s. 297-322</p>"
 					}
 				],
-				"tags": [
-					"faglærte",
-					"yrkesopplæring",
-					"arbeidstakere",
-					"opplæring",
-					"Storbritannia",
-					"USA",
-					"Tyskland",
-					"Japan"
-				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"title": "How institutions evolve: the political economy of skills in Germany, Britain, the United States, and Japan",
+				"title": "How institutions evolve",
 				"date": "2004",
 				"numPages": "XV, 333 s.",
-				"place": "Cambridge",
 				"publisher": "Cambridge University Press",
+				"place": "Cambridge",
 				"ISBN": "0-521-83768-5",
-				"libraryCatalog": "BIBSYS",
-				"shortTitle": "How institutions evolve"
+				"libraryCatalog": "BIBSYS"
 			}
 		]
 	}

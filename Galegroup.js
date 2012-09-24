@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-05-13 23:17:56"
+	"lastUpdated": "2012-09-23 15:27:49"
 }
 
 /*
@@ -70,12 +70,10 @@ function parseRIS(url) {
 	}
 
 	Zotero.Utilities.HTTP.doGet(url, function (text) {
+		text = text.trim();
 		//gale puts issue numbers in M1
 		text = text.replace(/M1\s*\-/, "IS  -");
 		//get the LA tag content until we introduce this in the RIS translator
-		if (text.match(/LA\s*\-/)) {
-			var language = text.match(/(?:LA\s*\-)(.+)/)[1];
-		}
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
@@ -84,7 +82,6 @@ function parseRIS(url) {
 			for (i in item.attachments) {
 				item.attachments[i].url = item.attachments[i].url.replace(/^https?:\/\/.+?\//, host);
 			}
-			item.language = language;
 			item.complete();
 		});
 		translator.translate();

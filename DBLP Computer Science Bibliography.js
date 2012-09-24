@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-04-04 12:53:51"
+	"lastUpdated": "2012-09-23 14:45:40"
 }
 
 function detectWeb(doc, url) {
@@ -108,7 +108,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		var articles = new Array();
-		var rows  = ZU.xpath(doc, '//ul/li')	
+		var rows  = ZU.xpath(doc, '//body/ul/li')	
 		for (i in rows){
 			 var title = ZU.xpathText(rows[i], './b');
 			 var link = ZU.xpathText(rows[i], './a[contains(@href, "rec/bibtex") and not(contains(@href, ".xml"))]/@href');
