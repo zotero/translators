@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-09-20 23:57:14"
+	"lastUpdated": "2012-09-24 01:05:06"
 }
 
 function detectImport() {
@@ -1760,12 +1760,9 @@ function getFieldValue(read) {
 	
 	if(value.length > 1) {
 		// replace accented characters (yucky slow)
-		Z.debug(value)
 		value = value.replace(/{?(\\[`"'^~=a-z]){?\\?([A-Za-z])}/g, "{$1$2}");
-		Z.debug(value)
 		//convert tex markup into permitted HTML
 		value = mapTeXmarkup(value);
-		Z.debug(value)
 		for (var mapped in reversemappingTable) { // really really slow!
 			var unicode = reversemappingTable[mapped];
 			while(value.indexOf(mapped) !== -1) {
@@ -1941,7 +1938,7 @@ function mapTeXmarkup(tex){
 	//italics and bold
 	tex = tex.replace(/\\textit\{([^\}]+\})/g, "<i>$1</i>").replace(/\\textbf\{([^\}]+\})/g, "<b>$1</b>");
 	//two versions of subscript the .* after $ is necessary because people m
-	tex = tex.replace(/\$[^\{]*_\{([^\}]+\}\$)/g, "<sub>$1</sub>").replace(/\$[^\{]*_\{\\textrm\{([^\}]+\}\})/g, "<sub>$1</sub>");	
+	tex = tex.replace(/\$[^\{\$]*_\{([^\}]+\})\$/g, "<sub>$1</sub>").replace(/\$[^\{]*_\{\\textrm\{([^\}]+\}\})/g, "<sub>$1</sub>");	
 	//two version of superscript
 	tex = tex.replace(/\$[^\{]*\^\{([^\}]+\}\$)/g, "<sup>$1</sup>").replace(/\$[^\{]*\^\{\\textrm\{([^\}]+\}\})/g, "<sup>$1</sup>");	
 	//small caps

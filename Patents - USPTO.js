@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-03-12 01:20:48"
+	"lastUpdated": "2012-09-24 13:03:54"
 }
 
 function detectWeb(doc, url) {
@@ -148,14 +148,34 @@ if(detectWeb(doc, url) == "patent") {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://patft.uspto.gov/netacgi/nph-Parser?Sect1=PTO2&Sect2=HITOFF&p=1&u=%2Fnetahtml%2FPTO%2Fsearch-bool.html&r=1&f=G&l=50&co1=AND&d=PTXT&s1=krypto&OS=krypto&RS=krypto",
+		"url": "http://patft.uspto.gov/netacgi/nph-Parser?Sect1=PTO2&Sect2=HITOFF&p=1&u=%2Fnetahtml%2FPTO%2Fsearch-bool.html&r=0&f=S&l=50&TERM1=krypto&FIELD1=&co1=AND&TERM2=&FIELD2=&d=PTXT",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://patft.uspto.gov/netacgi/nph-Parser?Sect2=PTO1&Sect2=HITOFF&p=1&u=%2Fnetahtml%2FPTO%2Fsearch-bool.html&r=1&f=G&l=50&d=PALL&RefSrch=yes&Query=PN%2F7360954",
 		"items": [
 			{
 				"itemType": "patent",
 				"creators": [
 					{
-						"lastName": "Roskind",
-						"firstName": "James",
+						"lastName": "Seaver",
+						"firstName": "Terry R.",
+						"creatorType": "inventor"
+					},
+					{
+						"lastName": "Tooyserkani",
+						"firstName": "Pirooz",
+						"creatorType": "inventor"
+					},
+					{
+						"lastName": "Stone",
+						"firstName": "Donald B.",
+						"creatorType": "inventor"
+					},
+					{
+						"lastName": "Prasad",
+						"firstName": "Sharat",
 						"creatorType": "inventor"
 					}
 				],
@@ -163,20 +183,17 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"url": "http://patft.uspto.gov/netacgi/nph-Parser?Sect1=PTO2&Sect2=HITOFF&p=1&u=%2Fnetahtml%2FPTO%2Fsearch-bool.html&r=1&f=G&l=50&co1=AND&d=PTXT&s1=krypto&OS=krypto&RS=krypto",
-				"patentNumber": "8196189",
-				"issueDate": "June 5, 2012",
-				"assignee": "AOL LLC\n (Dulles, \nVA)",
-				"abstractNote": "A secure distributed single-login authentication system comprises a\n     client and a server. The client collects authentication credentials from\n     a user and tests credentials at a variety of potential authentication\n     servers to check where the login is valid. It combines a password with a\n     time-varying salt and a service-specific seed in a message digesting\n     hash, generating a first hash value. The client sends the hash value with\n     a user name and the time-varying salt to a selected server. The server\n     extracts the user name and looks up the user name in the server's\n     database. If an entry is found, it retrieves the password, performing the\n     same hash function on the combination of user name, service-specific\n     seed, and password to generate a second hash value, comparing the values.\n     If the values match, the user is authenticated. Thus, the system never\n     reveals the password to authentication agents that might abuse the\n     information.",
-				"shortTitle": "United States Patent",
-				"title": "United States Patent: 8196189 - Simple, secure login with multiple authentication providers"
+				"url": "http://patft.uspto.gov/netacgi/nph-Parser?Sect2=PTO1&Sect2=HITOFF&p=1&u=%2Fnetahtml%2FPTO%2Fsearch-bool.html&r=1&f=G&l=50&d=PALL&RefSrch=yes&Query=PN%2F7360954",
+				"title": "United States Patent: 7360954 - Low speed data path for SFP-MSA interface",
+				"patentNumber": "7360954",
+				"issueDate": "April 22, 2008",
+				"assignee": "Cisco Technology, Inc.\n (San Jose, \nCA)",
+				"abstractNote": "Methods and apparatus for enabling a protected circuit path to be created\n     efficiently are disclosed. In accordance with one embodiment of the\n     present invention, a method for creating a protected circuit path within\n     an optical network system includes identifying a first node, a second\n     node, and a third node. Once the nodes are identified, a pseudo link or a\n     virtual link may be created between the second node and the third node. A\n     first circuit path is then routed between the first node and the second\n     node, and a second circuit path which protects that first circuit path is\n     routed between the first node and the third node using the pseudo link.",
+				"libraryCatalog": "Patents - USPTO",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "United States Patent"
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://patft.uspto.gov/netacgi/nph-Parser?Sect1=PTO2&Sect2=HITOFF&p=1&u=%2Fnetahtml%2FPTO%2Fsearch-bool.html&r=0&f=S&l=50&TERM1=krypto&FIELD1=&co1=AND&TERM2=&FIELD2=&d=PTXT",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

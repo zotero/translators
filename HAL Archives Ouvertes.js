@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-13 23:03:15"
+	"lastUpdated": "2012-09-23 23:44:54"
 }
 
 /*
@@ -151,6 +151,7 @@ var testCases = [
 				"url": "http://hal.archives-ouvertes.fr/hal-00328427",
 				"title": "Tropopause referenced ozone climatology and inter-annual variability (1994–2003) from the MOZAIC programme",
 				"abstractNote": "The MOZAIC programme collects ozone and water vapour data using automatic equipment installed on board five long-range Airbus A340 aircraft flying regularly all over the world since August 1994. Those measurements made between September 1994 and August 1996 allowed the first accurate ozone climatology at 9–12 km altitude to be generated. The seasonal variability of the tropopause height has always provided a problem when constructing climatologies in this region. To remove any signal from the seasonal and synoptic scale variability in tropopause height we have chosen in this further study of these and subsequent data to reference our climatology to the altitude of the tropopause. We define the tropopause as a mixing zone 30 hPa thick across the 2 pvu potential vorticity surface. A new ozone climatology is now available for levels characteristic of the upper troposphere (UT) and the lower stratosphere (LS) regardless of the seasonal variations of the tropopause over the period 1994–2003. Moreover, this new presentation has allowed an estimation of the monthly mean climatological ozone concentration at the tropopause showing a sine seasonal variation with a maximum in May (120 ppbv) and a minimum in November (65 ppbv). Besides, we present a first assessment of the inter-annual variability of ozone in this particular critical region. The overall increase in the UTLS is about 1%/yr for the 9 years sampled. However, enhanced concentrations about 10–15 % higher than the other years were recorded in 1998 and 1999 in both the UT and the LS. This so-called \"1998–1999 anomaly\" may be attributed to a combination of different processes involving large scale modes of atmospheric variability, circulation features and local or global pollution, but the most dominant one seems to involve the variability of the North Atlantic Oscillation (NAO) as we find a strong positive correlation (above 0.60) between ozone recorded in the upper troposphere and the NAO index. A strong anti-correlation is also found between ozone and the extremes of the Northern Annular Mode (NAM) index, attributing the lower stratospheric variability to dynamical anomalies. Finally this analysis highlights the coupling between the troposphere, at least the upper one, and the stratosphere, at least the lower one.",
+				"language": "Anglais",
 				"pages": "1051",
 				"publicationTitle": "Atmospheric Chemistry and Physics",
 				"volume": "6",

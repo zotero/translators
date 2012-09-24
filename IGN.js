@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-01-30 22:49:06"
+	"lastUpdated": "2012-09-24 00:23:58"
 }
 
 /*
@@ -40,7 +40,7 @@ function scrape(doc, url) {
 	var newItem = new Zotero.Item("webpage");
 	newItem.publicationTitle = "IGN";
 	newItem.url = doc.location.href;
-	newItem.title = doc.title.replace(/ - [^-]+ at IGN/, "");
+	newItem.title = doc.title.replace(/ -[^-]+IGN/, "");
 	
 	// pages
 	var pages = doc.evaluate('//div[@class="ui-page-list clear"]/ul/li[last()-1]', doc, null, XPathResult.ANY_TYPE, null);
@@ -48,12 +48,12 @@ function scrape(doc, url) {
 		newItem.pages = p.textContent;
 	
 	// date
-	var dates = doc.evaluate('//h2[@class="publish-date"]/text()', doc, null, XPathResult.ANY_TYPE, null);
+	var dates = doc.evaluate('//div[@class="article_pub_date"]/text()', doc, null, XPathResult.ANY_TYPE, null);
 	newItem.date = dates.iterateNext().textContent.replace(/^\s+|\s+$/g,'');
 	
 	//authors
-	var byline = doc.evaluate('//div[@class="hdr-sub byline"]/a/text()', doc, null, XPathResult.ANY_TYPE, null);
-	var authors = byline.iterateNext().textContent.split(" and ");
+	var byline = doc.evaluate('//div[@class="article_author"]', doc, null, XPathResult.ANY_TYPE, null);
+	var authors = byline.iterateNext().textContent.replace(/^by\s*/, "").split(" and ");
 	for each(var a in authors) {
 		newItem.creators.push(Zotero.Utilities.cleanAuthor(a, "author"));
 	}
@@ -71,7 +71,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://xbox360.ign.com/articles/121/1211332p1.html",
+		"url": "http://www.ign.com/articles/2011/11/04/5-reasons-modern-warfare-3-wont-disappoint",
 		"items": [
 			{
 				"itemType": "webpage",
@@ -87,15 +87,13 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "IGN Article Snapshot",
-						"document": {
-							"location": {}
-						}
+						"title": "IGN Article Snapshot"
 					}
 				],
 				"publicationTitle": "IGN",
-				"url": "http://xbox360.ign.com/articles/121/1211332p1.html",
+				"url": "http://www.ign.com/articles/2011/11/04/5-reasons-modern-warfare-3-wont-disappoint",
 				"title": "5 Reasons Modern Warfare 3 Won't Disappoint",
+				"date": "November 3, 2011",
 				"libraryCatalog": "IGN",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}

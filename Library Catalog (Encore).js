@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-01-30 22:50:39"
+	"lastUpdated": "2012-09-24 12:31:33"
 }
 
 /*
@@ -220,82 +220,6 @@ function pageByPage(marc, urls) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://encore.tulsalibrary.org/iii/encore/record/C__Rb1951305__Sthelen__P0%2C8__Orightresult__X3?lang=eng&suite=cobalt",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"firstName": "Scott Douglas",
-						"lastName": "Gerber",
-						"creatorType": "editor"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"United States",
-					"Politics and government",
-					"1775-1783",
-					"United States",
-					"Politics and government",
-					"1783-1865",
-					"United States",
-					"Politics and government Philosophy"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"ISBN": "1568027052",
-				"title": "The Declaration of Independence: origins and impact",
-				"place": "Washington, D.C",
-				"publisher": "CQ Press",
-				"date": "2002",
-				"numPages": "347",
-				"series": "Landmark events in U.S. history series",
-				"callNumber": "E221 .D35 2002",
-				"libraryCatalog": "tulsalibrary.org Library Catalog",
-				"shortTitle": "The Declaration of Independence"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://encore.tulsalibrary.org/iii/encore/record/C__Rb1653320__Sthelen__P0%2C2__Orightresult__X4?lang=eng&suite=cobalt",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"firstName": "Sherry",
-						"lastName": "Shahan",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Mary",
-						"lastName": "Thelen",
-						"creatorType": "contributor"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"Jazz",
-					"Musical instruments",
-					"Alphabet"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"ISBN": "0399234535",
-				"title": "The jazzy alphabet",
-				"place": "New York",
-				"publisher": "Philomel Books",
-				"date": "2002",
-				"numPages": "1",
-				"callNumber": "Sha",
-				"libraryCatalog": "tulsalibrary.org Library Catalog"
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "http://encore.colorado.edu/iii/encore/search?formids=target&lang=eng&suite=def&reservedids=lang%2Csuite&submitmode=&submitname=&target=thelen&Search.x=0&Search.y=0",
 		"items": "multiple"
 	},
@@ -303,6 +227,44 @@ var testCases = [
 		"type": "web",
 		"url": "http://encore.coalliance.org/iii/encore/search/C|Sthelen|Orightresult|U1?lang=eng",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://encore.colorado.edu/iii/encore/record/C__Rb5910060__Sthelen__P0%2C3__Orightresult__X4?lang=eng&suite=cobalt",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Marcel",
+						"lastName": "Thelen",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "F.",
+						"lastName": "Steurs",
+						"creatorType": "editor"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Language and languages",
+					"Terms and phrases"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"ISBN": "9789027223371",
+				"title": "Terminology in everyday life",
+				"place": "Amsterdam, The Netherlands : Philadelphia, Pa",
+				"publisher": "John Benjamins Pub. Co",
+				"date": "2010",
+				"numPages": "271",
+				"series": "Terminology and lexicography research and practice",
+				"seriesNumber": "v. 13",
+				"callNumber": "P305 .T4437 2010",
+				"libraryCatalog": "colorado.edu Library Catalog"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

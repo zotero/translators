@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-08-08 22:38:57"
+	"lastUpdated": "2012-09-24 12:32:34"
 }
 
 /*
@@ -259,7 +259,7 @@ var testCases = [
 				],
 				"seeAlso": [],
 				"attachments": [],
-				"ISBN": "9780300169270",
+				"ISBN": "0300169272",
 				"title": "Adam Smith: an enlightened life",
 				"place": "New Haven, CT ; London",
 				"publisher": "Yale University Press",
