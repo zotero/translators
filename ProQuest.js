@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-15 19:32:52"
+	"lastUpdated": "2012-09-24 16:01:03"
 }
 
 /*
@@ -1201,7 +1201,9 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [],
+				"tags": [
+					"General Interest Periodicals--United States"
+				],
 				"seeAlso": [],
 				"attachments": [
 					{

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-05-14 23:17:39"
+	"lastUpdated": "2012-09-24 18:39:28"
 }
 
 /*
@@ -166,16 +166,12 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Krankenkassen",
-					"Verband",
-					"Doris Pfeiffer",
-					"Gesundheit",
-					"Kliniken"
+					"Pfeiffer Doris,Krankenkassen,Kliniken"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Gesundheit: Krankenkassen werfen Ärzten Gewinnstreben vor - Nachrichten Wirtschaft - WELT ONLINE",
+						"title": "Gesundheit: Krankenkassen werfen Ärzten Gewinnstreben vor - Nachrichten Wirtschaft - DIE WELT",
 						"mimeType": "text/html"
 					}
 				],

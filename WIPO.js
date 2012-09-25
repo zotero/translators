@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-09-17 21:40:56"
+	"lastUpdated": "2012-09-24 18:42:31"
 }
 
 /*
@@ -166,7 +166,7 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"METHODS AND MICROORGANISMS FOR PRODUCTION OF C4-DICARBOXYLIC ACIDS"
+					"Methods and Microorganisms for Production of C4-Dicarboxylic Acids"
 				],
 				"seeAlso": [],
 				"attachments": [

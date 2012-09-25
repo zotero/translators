@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-10 00:27:06"
+	"lastUpdated": "2012-09-24 16:46:42"
 }
 
 function scrape(doc) {
@@ -53,7 +53,7 @@ function scrape(doc) {
 
 function detectWeb(doc, url) {
 	if (url.indexOf("/search/") != -1 &&
-		ZU.xpath(doc, '//ol[@id="default" and @class="searchResults"]\
+		ZU.xpath(doc, '//ol[@id="default" and contains(@class, "searchResults")]\
 					//div[./a[@class="slideshow-title"]]').length) {
 		return "multiple";
 	} else if (ZU.xpathText(doc, '//meta[@name="og_type"]/@content') == 'article' || ZU.xpathText(doc, '//meta[@name="og_type"]/@content').match(/presentation/)) {
@@ -64,7 +64,7 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 	var shows = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		var links = ZU.xpath(doc,'//ol[@id="default" and @class="searchResults"]\
+		var links = ZU.xpath(doc,'//ol[@id="default" and contains(@class, "searchResults")]\
 					//div[./a[@class="slideshow-title"]]');
 		Zotero.selectItems( ZU.getItemArray(doc, links, null,'from=download'),
 			function(items) {

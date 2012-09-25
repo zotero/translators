@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-30 13:44:34"
+	"lastUpdated": "2012-09-24 18:35:19"
 }
 
 /*
@@ -74,6 +74,7 @@ function doWeb(doc, url) {
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 		translator.setHandler("itemDone", function (obj, item) {
+			item.itemType= "videoRecording";
 			item.creators = ZU.cleanAuthor(creator, "author");
 			if (date) item.date = date.replace(/T.+/, "");
 			if (duration) item.runningTime = duration;
@@ -112,13 +113,15 @@ var testCases = [
 					}
 				],
 				"itemID": "http://vimeo.com/31179423",
+				"title": "Baroque.me: J.S. Bach - Cello Suite No. 1 - Prelude",
+				"publicationTitle": "Vimeo",
 				"url": "http://vimeo.com/31179423",
 				"abstractNote": "Baroque.me (2011) by Alexander Chen. Video capture. http://www.baroque.me visualizes the first Prelude from Bach's Cello Suites. Using the math behind string length…",
+				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "vimeo.com",
+				"date": "2011-10-26",
 				"runningTime": "PT00H02M57S",
-				"shortTitle": "Baroque.me",
-				"title": "Baroque.me: J.S. Bach - Cello Suite No. 1 - Prelude",
-				"date": "2011-10-26"
+				"shortTitle": "Baroque.me"
 			}
 		]
 	}

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-08-01 01:47:04"
+	"lastUpdated": "2012-09-24 17:52:55"
 }
 
 /*
@@ -146,12 +146,12 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Idham A.",
+						"firstName": "Idham",
 						"lastName": "Alias",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Mohammad H.",
+						"firstName": "Mohammad",
 						"lastName": "Ghahramani",
 						"creatorType": "author"
 					}
@@ -319,7 +319,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Katrin S.",
+						"firstName": "Katrin",
 						"lastName": "Lips",
 						"creatorType": "author"
 					},
@@ -339,7 +339,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Wolfgang G.",
+						"firstName": "Wolfgang",
 						"lastName": "Clauss",
 						"creatorType": "author"
 					},
@@ -372,19 +372,36 @@ var testCases = [
 					}
 				],
 				"itemID": "http://respiratory-research.com/content/11/1/133",
+				"title": "Nicotinic receptors on rat alveolar macrophages dampen ATP-induced increase in cytosolic calcium concentration",
+				"publicationTitle": "Respiratory Research",
 				"rights": "2010 Mikulski et al; licensee BioMed Central Ltd.",
+				"volume": "11",
 				"issue": "1",
+				"number": "1",
+				"patentNumber": "1",
+				"pages": "133",
+				"publisher": "BioMed Central Ltd",
+				"institution": "BioMed Central Ltd",
+				"company": "BioMed Central Ltd",
+				"label": "BioMed Central Ltd",
+				"distributor": "BioMed Central Ltd",
+				"date": "2010-09-29",
 				"DOI": "10.1186/1465-9921-11-133",
 				"ISSN": "1465-9921",
+				"reportType": "Research",
+				"letterType": "Research",
+				"manuscriptType": "Research",
+				"mapType": "Research",
+				"thesisType": "Research",
+				"websiteType": "Research",
+				"presentationType": "Research",
+				"postType": "Research",
+				"audioFileType": "Research",
 				"language": "en",
 				"abstractNote": "Nicotinic acetylcholine receptors (nAChR) have been identified on a variety of cells of the immune system and are generally considered to trigger anti-inflammatory events. In the present study, we determine the nAChR inventory of rat alveolar macrophages (AM), and investigate the cellular events evoked by stimulation with nicotine.",
 				"url": "http://respiratory-research.com/content/11/1/133/abstract",
-				"libraryCatalog": "respiratory-research.com",
-				"title": "Nicotinic receptors on rat alveolar macrophages dampen ATP-induced increase in cytosolic calcium concentration",
-				"publicationTitle": "Respiratory Research",
-				"volume": "11",
-				"pages": "133",
-				"date": "2010-09-29"
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "respiratory-research.com"
 			}
 		]
 	},
@@ -396,22 +413,22 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "Stephen J.",
+						"firstName": "Stephen",
 						"lastName": "Crozier",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Amy G.",
+						"firstName": "Amy",
 						"lastName": "Preston",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Jeffrey W.",
+						"firstName": "Jeffrey",
 						"lastName": "Hurst",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Mark J.",
+						"firstName": "Mark",
 						"lastName": "Payne",
 						"creatorType": "author"
 					},
@@ -426,7 +443,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Debra L.",
+						"firstName": "Debra",
 						"lastName": "Miller",
 						"creatorType": "author"
 					}
@@ -444,19 +461,36 @@ var testCases = [
 					}
 				],
 				"itemID": "http://journal.chemistrycentral.com/content/5/1/5",
+				"title": "Cacao seeds are a",
+				"publicationTitle": "Chemistry Central Journal",
 				"rights": "2011 Crozier et al",
+				"volume": "5",
 				"issue": "1",
+				"number": "1",
+				"patentNumber": "1",
+				"pages": "5",
+				"publisher": "Chemistry Central Ltd",
+				"institution": "Chemistry Central Ltd",
+				"company": "Chemistry Central Ltd",
+				"label": "Chemistry Central Ltd",
+				"distributor": "Chemistry Central Ltd",
+				"date": "2011-02-07",
 				"DOI": "10.1186/1752-153X-5-5",
 				"ISSN": "1752-153X",
+				"reportType": "Research article",
+				"letterType": "Research article",
+				"manuscriptType": "Research article",
+				"mapType": "Research article",
+				"thesisType": "Research article",
+				"websiteType": "Research article",
+				"presentationType": "Research article",
+				"postType": "Research article",
+				"audioFileType": "Research article",
 				"language": "en",
 				"abstractNote": "Numerous popular media sources have developed lists of",
 				"url": "http://journal.chemistrycentral.com/content/5/1/5/abstract",
-				"libraryCatalog": "journal.chemistrycentral.com",
-				"title": "Cacao seeds are a",
-				"publicationTitle": "Chemistry Central Journal",
-				"volume": "5",
-				"pages": "5",
-				"date": "2011-02-07"
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "journal.chemistrycentral.com"
 			}
 		]
 	},
@@ -468,12 +502,12 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "David A.",
+						"firstName": "David",
 						"lastName": "Mangus",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Matthew C.",
+						"firstName": "Matthew",
 						"lastName": "Evans",
 						"creatorType": "author"
 					},
@@ -567,12 +601,12 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Tim H.-M.",
+						"firstName": "Tim",
 						"lastName": "Huang",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Victor X.",
+						"firstName": "Victor",
 						"lastName": "Jin",
 						"creatorType": "author"
 					}

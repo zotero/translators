@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-02-23 16:47:56"
+	"lastUpdated": "2012-09-24 18:50:47"
 }
 
 function detectWeb(doc, url){
@@ -163,24 +163,7 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [
-					"Reference",
-					"Research",
-					"Mozilia",
-					"Zotero",
-					"Center",
-					"for",
-					"History",
-					"and",
-					"New",
-					"Media",
-					"George",
-					"Mason",
-					"University",
-					"Web",
-					"2.0",
-					"bibliography"
-				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
 				"title": "Zotero Intro",

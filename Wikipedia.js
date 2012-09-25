@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-20 17:34:29"
+	"lastUpdated": "2012-09-24 18:40:17"
 }
 
 /**
@@ -115,13 +115,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "encyclopediaArticle",
-				"creators": [
-					{
-						"lastName": "Wikipedia contributors",
-						"fieldMode": 1,
-						"creatorType": "author"
-					}
-				],
+				"creators": [],
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
@@ -133,14 +127,13 @@ var testCases = [
 					}
 				],
 				"title": "Россия",
-				"publisher": "Wikimedia Foundation, Inc.",
 				"rights": "Creative Commons Attribution-ShareAlike License",
 				"encyclopediaTitle": "Википедия",
 				"url": "http://ru.wikipedia.org/w/index.php?title=%D0%A0%D0%BE%D1%81%D1%81%D0%B8%D1%8F&oldid=43336101",
 				"extra": "Page Version ID: 43336101",
 				"language": "ru",
 				"abstractNote": "Росси́я (от греч. Ρωσία — Русь[1]; официально — Росси́йская Федера́ция или Росси́я[2], на практике используется также сокращение — РФ[3]) — страна, расположенная в Восточной Европе и Северной Азии. Является самым большим государством мира (17 098 246 км²[4], что составляет 11,46 % (~1 / 9 часть, равная 11,11 %) площади всей суши Земли, или 12,65 % (~1 / 8 часть, равная 12,5 %) заселённой человеком суши, что почти вдвое больше, чем у занимающей второе место Канады). Население на 2012 год составляет 143 030 106 человек[5], в настоящее время страна занимает девятое место в мире по этому показателю. Государственный язык на всей территории страны — русский. В 23 субъектах федерации наряду с русским используются другие государственные языки. Столица — город Москва. Всего в России 13 городов с населением более миллиона человек: Москва, Санкт-Петербург, Новосибирск, Екатеринбург, Нижний Новгород, Самара, Омск, Казань, Челябинск, Ростов-на-Дону, Уфа, Волгоград[6], Пермь[7].",
-				"date": false,
+				"date": "2012-09-24T20:44:15Z",
 				"libraryCatalog": "Wikipedia",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
@@ -152,13 +145,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "encyclopediaArticle",
-				"creators": [
-					{
-						"lastName": "Wikipedia contributors",
-						"fieldMode": 1,
-						"creatorType": "author"
-					}
-				],
+				"creators": [],
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
@@ -170,14 +157,13 @@ var testCases = [
 					}
 				],
 				"title": "Zotero",
-				"publisher": "Wikimedia Foundation, Inc.",
 				"rights": "Creative Commons Attribution-ShareAlike License",
 				"encyclopediaTitle": "Wikipedia, the free encyclopedia",
 				"url": "http://en.wikipedia.org/w/index.php?title=Zotero&oldid=485342619",
 				"extra": "Page Version ID: 485342619",
 				"language": "en",
 				"abstractNote": "Zotero ( /zoʊˈtɛroʊ/) is free, open source reference management software to manage bibliographic data and related research materials (such as PDFs). Notable features include web browser integration, online syncing, generation of in-text citations, footnotes and bibliographies, as well as integration with the word processors Microsoft Word, LibreOffice, OpenOffice.org Writer and NeoOffice. It is produced by the Center for History and New Media of George Mason University (GMU).",
-				"date": false,
+				"date": "2012-09-20T13:28:03Z",
 				"libraryCatalog": "Wikipedia",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-03-17 00:02:38"
+	"lastUpdated": "2012-09-24 16:11:51"
 }
 
 function scrape(doc) {
@@ -72,12 +72,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://sciencelinks.jp/j-east/result.php?combine=and&field1=keyword&keyword1=mechanics&combine2=and&field2=keyword&keyword2=&combine3=and&field3=keyword&keyword3=&submit.x=0&submit.y=0&language=All&from=&to=&fulltext=&view=20&sort=desc",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://sciencelinks.jp/j-east/display.php?id=000020070407A0083452",
+		"url": "http://sciencelinks.jp/j-east/article/200704/000020070407A0083452.php",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -118,7 +113,6 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://sciencelinks.jp/j-east/display.php?id=000020070407A0083452",
 						"title": "Science Links Japan Snapshot",
 						"mimeType": "text/html"
 					}
@@ -131,7 +125,7 @@ var testCases = [
 				"pages": "013001.1-013001.4",
 				"date": "2007",
 				"abstractNote": "We present a new methodology for analyzing complicated multiphysics simulations by introducing a fictitious parameter. Using the method, we study the quantum mechanical aspects of an organic molecule in water. The simulation is variationally constructed from the ab initio molecular orbital method and classical statistical mechanics, with the fictitious parameter representing the coupling strength between solute and solvent. We obtain a number of one-electron orbital energies of the solute molecule derived from the Hartree-Fock approximation, and eigenvalue statistical analysis developed in the study of nonintegrable systems is applied to them. On the basis of the results, we analyze the localization properties of the electronic wavefunctions under the influence of the solvent. (author abst.)",
-				"url": "http://sciencelinks.jp/j-east/display.php?id=000020070407A0083452",
+				"url": "http://sciencelinks.jp/j-east/article/200704/000020070407A0083452.php",
 				"libraryCatalog": "Science Links Japan",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Interaction and Localization of One-Electron Orbitals in an Organic Molecule"
