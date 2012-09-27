@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-09-27 12:38:28"
+	"lastUpdated": "2012-09-27 15:19:28"
 }
 
 
@@ -18,9 +18,13 @@
 function detectWeb(doc, url) {
 	var type =  ZU.xpathText(doc, '//input[@id="__ZoteroType"]/@value');
 	
-	if(type=="book")
-	{
-		return "book";
+	if(type=="book"){
+		
+		var xPathTitle = '//table[@id="tbDetailInfo_Basic"]/tbody/tr/td/label[@name="Title"]';
+		var title = ZU.xpathText(doc, xPathTitle);
+		if(title!=null && title.length>0){
+			return "book";
+		}
 	}
 	return false;
 }
