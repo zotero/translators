@@ -2,14 +2,14 @@
 	"translatorID": "8c1f42d5-02fa-437b-b2b2-73afc768eb07",
 	"label": "HighWire 2.0",
 	"creator": "Matt Burton",
-	"target": "^[^\\?]+(content/([0-9]+/[0-9]+|current|firstcite|early)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
+	"target": "^[^\\?]+(content/([0-9]+[A-Z\\-]*/[0-9]+|current|firstcite|early)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-09-19 04:36:08"
+	"lastUpdated": "2012-09-27 15:22:10"
 }
 
 /*
@@ -754,6 +754,81 @@ var testCases = [
 				"libraryCatalog": "genesdev.cshlp.org"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.bjj.boneandjoint.org.uk/content/94-B/1/10.abstract",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "B.",
+						"lastName": "Ollivere",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "J. A.",
+						"lastName": "Wimhurst",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "I. M.",
+						"lastName": "Clark",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "S. T.",
+						"lastName": "Donell",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Osteolysis",
+					"Hip",
+					"Arthroplasty",
+					"Knee",
+					"Loosening",
+					"Revision"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"itemID": "http://www.bjj.boneandjoint.org.uk/content/94-B/1/10.abstract",
+				"title": "Current concepts in osteolysis",
+				"publisher": "British Editorial Society of Bone and Joint Surgery",
+				"institution": "British Editorial Society of Bone and Joint Surgery",
+				"company": "British Editorial Society of Bone and Joint Surgery",
+				"label": "British Editorial Society of Bone and Joint Surgery",
+				"distributor": "British Editorial Society of Bone and Joint Surgery",
+				"date": "01/01/2012",
+				"DOI": "10.1302/0301-620X.94B1.28047",
+				"language": "en",
+				"publicationTitle": "Journal of Bone & Joint Surgery, British Volume",
+				"journalAbbreviation": "J Bone Joint Surg Br",
+				"volume": "94-B",
+				"issue": "1",
+				"url": "http://www.bjj.boneandjoint.org.uk/content/94-B/1/10",
+				"pages": "10-15",
+				"ISSN": "0301-620X, 2044-5377",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.bjj.boneandjoint.org.uk",
+				"abstractNote": "The most frequent cause of failure after total hip replacement in all reported arthroplasty registries is peri-prosthetic osteolysis. Osteolysis is an active biological process initiated in response to wear debris. The eventual response to this process is the activation of macrophages and loss of bone.\nActivation of macrophages initiates a complex biological cascade resulting in the final common pathway of an increase in osteolytic activity. The biological initiators, mechanisms for and regulation of this process are beginning to be understood. This article explores current concepts in the causes of, and underlying biological mechanism resulting in peri-prosthetic osteolysis, reviewing the current basic science and clinical literature surrounding the topic."
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.bjj.boneandjoint.org.uk/content/94-B/1.toc",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
