@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-09-19 12:38:28"
+	"lastUpdated": "2012-09-27 12:38:28"
 }
 
 
@@ -57,7 +57,9 @@ function doWeb(doc, url) {
 		tem.notes = ZU.xpathText(doc, xpathDescription);
 		
 		
+		//112 p. : col. ill. ; 15 cm..
 		var textContent = ZU.xpathText(doc, xpathPageNumber);
+		
 		if(textContent.match(/\w/) && textContent.match(" p.")){
 			item.numPages= textContent.split("p.")[0]+"p";
 		}
