@@ -1,15 +1,15 @@
 {
 	"translatorID": "dac476e4-401d-430a-8571-a97c31c3b65e",
-	"label": "Taylor and Francis",
+	"label": "Taylor and Francis+NEJM",
 	"creator": "Sebastian Karcher",
-	"target": "^http://www\\.tandfonline\\.com",
+	"target": "^https?://(www\\.)?(tandfonline\\.com|nejm\\.org)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-02 21:43:12"
+	"lastUpdated": "2012-09-27 08:57:16"
 }
 
 /*
@@ -31,8 +31,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 function getTitles(doc) {
+	//Z.debug(ZU.xpath(doc, '//div[contains(@class="articleLink")]/a').length)
 	return ZU.xpath(doc, '//label[@class="resultTitle"]/a\
-						|//a[@class="entryTitle"]');
+						|//a[@class="entryTitle"]|//div[contains(@class, "articleLink")]/a');
 }
 
 function detectWeb(doc, url) {
@@ -193,8 +194,7 @@ var testCases = [
 				"bookTitle": "Journal of Economic Policy Reform",
 				"publisher": "Routledge",
 				"ISSN": "1748-7870",
-				"ISBN": "1748-7870",
-				"libraryCatalog": "Taylor and Francis",
+				"libraryCatalog": "Taylor and Francis-NEJM",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
@@ -251,8 +251,7 @@ var testCases = [
 				"bookTitle": "Journal of Economic Policy Reform",
 				"publisher": "Routledge",
 				"ISSN": "1748-7870",
-				"ISBN": "1748-7870",
-				"libraryCatalog": "Taylor and Francis",
+				"libraryCatalog": "Taylor and Francis-NEJM",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
@@ -299,8 +298,69 @@ var testCases = [
 				"bookTitle": "Applied Economics",
 				"publisher": "Routledge",
 				"ISSN": "0003-6846",
-				"ISBN": "0003-6846",
-				"libraryCatalog": "Taylor and Francis",
+				"libraryCatalog": "Taylor and Francis-NEJM",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.nejm.org/toc/nejm/medical-journal",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.nejm.org/doi/full/10.1056/NEJMp1207920",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Kari",
+						"lastName": "White",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Daniel",
+						"lastName": "Grossman",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kristine",
+						"lastName": "Hopkins",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Joseph E.",
+						"lastName": "Potter",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "Cutting Family Planning in Texas",
+				"publicationTitle": "New England Journal of Medicine",
+				"volume": "367",
+				"issue": "13",
+				"pages": "1179-1181",
+				"date": "2012",
+				"DOI": "10.1056/NEJMp1207920",
+				"url": "http://www.nejm.org/doi/full/10.1056/NEJMp1207920",
+				"abstractNote": "Four fundamental principles drive public funding for family planning. First, unintended pregnancy is associated with negative health consequences, including reduced use of prenatal care, lower breast-feeding rates, and poor maternal and neonatal outcomes.1,2 Second, governments realize substantial cost savings by investing in family planning, which reduces the rate of unintended pregnancies and the costs of prenatal, delivery, postpartum, and infant care.3 Third, all Americans have the right to choose the timing and number of their children. And fourth, family planning enables women to attain their educational and career goals and families to provide for their children. These principles led . . .",
+				"bookTitle": "New England Journal of Medicine",
+				"publisher": "Massachusetts Medical Society",
+				"ISSN": "0028-4793",
+				"libraryCatalog": "Taylor and Francis-NEJM",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
