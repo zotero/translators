@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-27 08:57:16"
+	"lastUpdated": "2012-09-28 00:40:20"
 }
 
 /*
@@ -194,7 +194,7 @@ var testCases = [
 				"bookTitle": "Journal of Economic Policy Reform",
 				"publisher": "Routledge",
 				"ISSN": "1748-7870",
-				"libraryCatalog": "Taylor and Francis-NEJM",
+				"libraryCatalog": "Taylor and Francis+NEJM",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
@@ -251,7 +251,7 @@ var testCases = [
 				"bookTitle": "Journal of Economic Policy Reform",
 				"publisher": "Routledge",
 				"ISSN": "1748-7870",
-				"libraryCatalog": "Taylor and Francis-NEJM",
+				"libraryCatalog": "Taylor and Francis+NEJM",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
@@ -298,7 +298,7 @@ var testCases = [
 				"bookTitle": "Applied Economics",
 				"publisher": "Routledge",
 				"ISSN": "0003-6846",
-				"libraryCatalog": "Taylor and Francis-NEJM",
+				"libraryCatalog": "Taylor and Francis+NEJM",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
@@ -360,7 +360,7 @@ var testCases = [
 				"bookTitle": "New England Journal of Medicine",
 				"publisher": "Massachusetts Medical Society",
 				"ISSN": "0028-4793",
-				"libraryCatalog": "Taylor and Francis-NEJM",
+				"libraryCatalog": "Taylor and Francis+NEJM",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]

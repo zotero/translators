@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-19 16:56:17"
+	"lastUpdated": "2012-09-27 23:59:07"
 }
 
 /*
@@ -134,7 +134,7 @@ function countObjectProperties(obj) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.faz.net/aktuell/wissen/mensch-gene/wissenschaftsphilosophie-krumme-wege-der-vernunft-1654864.html",
+		"url": "http://www.faz.net/aktuell/wissen/mensch-gene/wissenschaftsphilosophie-ludwik-fleck-moritz-schlick-und-die-vernunft-1654864.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -157,11 +157,10 @@ var testCases = [
 					{
 						"title": "FAZ.NET Article Snapshot",
 						"mimeType": "text/html",
-						"url": "http://www.faz.net/aktuell/wissen/mensch-gene/wissenschaftsphilosophie-krumme-wege-der-vernunft-1654864.html",
 						"snapshot": true
 					}
 				],
-				"url": "http://www.faz.net/aktuell/wissen/mensch-gene/wissenschaftsphilosophie-krumme-wege-der-vernunft-1654864.html",
+				"url": "http://www.faz.net/aktuell/wissen/mensch-gene/wissenschaftsphilosophie-ludwik-fleck-moritz-schlick-und-die-vernunft-1654864.html",
 				"title": "Wissenschaftsphilosophie Krumme Wege der Vernunft",
 				"date": "13.06.2011",
 				"abstractNote": "13.06.2011 · Wissenschaft hat eine Geschichte, wie kann sie dann aber rational sein? Im Briefwechsel zwischen Ludwik Fleck und Moritz Schlick deuteten sich bereits Antworten an.",

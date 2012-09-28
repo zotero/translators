@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-09-23 15:27:49"
+	"lastUpdated": "2012-09-28 00:01:46"
 }
 
 /*
@@ -169,13 +169,14 @@ var testCases = [
 				"issue": "1",
 				"extra": "19",
 				"DOI": "Critical essay",
-				"date": "1974",
+				"date": "November 1974",
 				"pages": "19-33",
 				"title": "Borges: His Recent Poetry",
 				"volume": "4",
 				"accessDate": "May 7, 2012",
 				"language": "English",
-				"libraryCatalog": "Galegroup",
+				"libraryCatalog": "Gale",
+				"archive": "Literature Resources from Gale",
 				"shortTitle": "Borges"
 			}
 		]
@@ -203,10 +204,12 @@ var testCases = [
 				"pages": "469",
 				"numPages": "469",
 				"DOI": "Monograph",
-				"date": "1798",
+				"date": "1798.",
 				"volume": "Volume 1",
 				"accessDate": "2012/05/07",
-				"libraryCatalog": "Galegroup"
+				"archive": "Eighteenth Century Collection Online",
+				"numberOfVolumes": "2",
+				"libraryCatalog": "Gale"
 			}
 		]
 	}

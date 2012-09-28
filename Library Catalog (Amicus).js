@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-08-08 22:38:57"
+	"lastUpdated": "2012-09-28 00:29:30"
 }
 
 /*
@@ -45,7 +45,6 @@ function scrape(marc, newDoc) {
 	var nsResolver = namespace ? function(prefix) {
 	  if (prefix == 'x') return namespace; else return null;
 	} : null;
-	
 	var xpath = '//pre';
 	var elmts = newDoc.evaluate(xpath, newDoc, null, XPathResult.ANY_TYPE, null);
 	var elmt;
@@ -134,6 +133,7 @@ function scrape(marc, newDoc) {
 }
 
 function pageByPage(marc, urls) {
+	Z.debug(urls)
 	Zotero.Utilities.processDocuments(urls, function(newDoc) {
 		scrape(marc, newDoc);
 	}, function() { Zotero.done() });
@@ -152,7 +152,8 @@ function doWeb(doc, url) {
 		} : null;
 		
 		if (detectWeb(doc, url) == "book") {
-			newUri = url+"&d=3"
+			if (url.search(/\&d=\d/)!= -1) newUri = url.replace(/\&d=\d/, "&d=3")
+			else newUri = url+"&d=3"
 			//Z.debug(newUri);
 			pageByPage(marc, [newUri]);
 		} 
@@ -214,46 +215,32 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://amicus.collectionscanada.ca/aaweb-bin/aamain/itemdisp?sessionKey=1322662685049_142_78_200_11&l=0&v=1&lvl=1&rt=1&itm=24266276&rsn=S_WWWdba2jqBrX&all=1&dt=%22Suspended+conversations+%3A+the+afterlife+of+memory+in+photographic+albums+%2F+Martha+Langford%22&spi=-",
+		"url": "http://collectionscanada.gc.ca/ourl/res.php?url_ver=Z39.88-2004&url_tim=2012-09-28T06%3A28%3A22Z&url_ctx_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Actx&rft_dat=10442013&rfr_id=info%3Asid%2Fcollectionscanada.gc.ca%3Aamicus&lang=eng",
 		"items": [
 			{
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "Martha",
-						"lastName": "Langford",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "McCord Museum of Canadian History",
-						"fieldMode": true
+						"firstName": "Heinz-Dieter",
+						"lastName": "Kurz",
+						"creatorType": "editor"
 					}
 				],
 				"notes": [],
 				"tags": [
-					"Photograph albums",
-					"Social aspects",
-					"Oral tradition",
-					"Photographs in genealogy",
-					"Photography in historiography",
-					"Photographies",
-					"Albums Aspect social",
-					"Tradition orale",
-					"Photographies en généalogie",
-					"Photographie en historiographie"
+					"Smith, Adam"
 				],
 				"seeAlso": [],
 				"attachments": [],
-				"ISBN": "0773521747",
-				"title": "Suspended conversations: the afterlife of memory in photographic albums",
-				"place": "Montreal",
-				"publisher": "McGill-Queen's University Press",
-				"date": "2001",
-				"numPages": "241",
-				"callNumber": "907/.2",
-				"extra": "Based on a collection of albums, compiled 1860-1960, held by the McCord Museum of Canadian History",
+				"ISBN": "3926570261",
+				"title": "Adam Smith (1723-1790): ein Werk und seine Wirkungsgeschichte",
+				"place": "Marburg",
+				"publisher": "Metropolis",
+				"date": "1990",
+				"numPages": "297",
+				"callNumber": "HB103.S6 A6223 1990",
 				"libraryCatalog": "Library Catalog (Amicus)",
-				"shortTitle": "Suspended conversations"
+				"shortTitle": "Adam Smith (1723-1790)"
 			}
 		]
 	}

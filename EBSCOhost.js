@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-08-02 14:17:12"
+	"lastUpdated": "2012-09-27 23:05:53"
 }
 
 function detectWeb(doc, url) {
@@ -295,6 +295,8 @@ var testCases = [
 				"volume": "17",
 				"issue": "1",
 				"pages": "112",
+				"journalAbbreviation": "Wilson Quarterly", 
+				"archive": "a9h",
 				"publisher": "Woodrow Wilson International Center for Scholars",
 				"ISBN": "03633276",
 				"ISSN": "03633276",
