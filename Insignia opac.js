@@ -1,5 +1,5 @@
 {
-	"translatorID": "c159dcfe-8a53-4301-a499-30f6549c340d",
+	"translatorID": "abd7c626-6913-42d4-a05f-acc6683c69da",
 	"label": "Insignia opac",
 	"creator": "Niko",
 	"target": "http://www.insigniasoftware.com/library",
