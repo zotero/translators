@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-09-15 21:15:44"
+	"lastUpdated": "2012-10-01 00:42:39"
 }
 
 function detectImport() {
@@ -37,6 +37,7 @@ function detectImport() {
 /********************
  * Exported options *
  ********************/
+ //exported as translatorObject.options
  var exportedOptions = {
 	itemType: false //allows translators to supply item type
 };
@@ -125,7 +126,8 @@ var importTypeMap = {
 	SER:"book",
 	STAND:"report",
 	UNBILL:"manuscript",
-	UNPD:"manuscript"
+	UNPD:"manuscript",
+	WEB:"webpage"	//not in spec, but used by EndNote
 };
 
 //supplement input map with export
@@ -165,6 +167,7 @@ var fieldMap = {
 	ST:"shortTitle",
 	UR:"url",
 	Y2:"accessDate",
+//	ID:"__ignore",
 
 	//type specific
 	//tag => field:itemTypes
@@ -264,7 +267,7 @@ var fieldMap = {
 		"__default":"place",
 		"__exclude":["conferencePaper"] //should be exported as C1
 	},
-	DA: {
+	DA: { //also see PY when editing
 		"__default":"date",
 		dateEnacted:["statute"],
 		dateDecided:["case"],
@@ -272,6 +275,7 @@ var fieldMap = {
 	},
 	ET: {
 		"__default":"edition",
+//		"__ignore":["journalArticle"], //EPubDate
 		session:["bill", "hearing", "statute"],
 		version:["computerProgram"]
 	},
@@ -285,7 +289,8 @@ var fieldMap = {
 		documentNumber:["hearing"],
 		applicationNumber:["patent"],
 		publicLawNumber:["statute"],
-		episodeNumber:["podcast", "radioBroadcast", "tvBroadcast"]
+		episodeNumber:["podcast", "radioBroadcast", "tvBroadcast"],
+		"__exclude": ["webpage"]
 	},
 	M3: {
 		manuscriptType:["manuscript"],
@@ -347,7 +352,7 @@ var fieldMap = {
 		codeNumber:["statute"],
 		codeVolume:["bill"],
 		reporterVolume:["case"],
-		"__exclude":["patent"]
+		"__exclude":["patent", "webpage"]
 	}
 };
 
@@ -373,7 +378,8 @@ var degenerateImportFieldMap = {
 	},
 	M1: {
 		"__default":"extra",
-		numberOfVolumes: ["bookSection"]	//EndNote exports here instead of IS
+		numberOfVolumes: ["bookSection"],	//EndNote exports here instead of IS
+		accessDate: ["webpage"]		//this is access date when coming from EndNote
 	},
 	M2: "extra", //not in spec
 	M3: "DOI",
@@ -387,7 +393,8 @@ var degenerateImportFieldMap = {
 		series: ["book"]
 	},
 	VL: {
-		"notes/Patent Version Number":['patent']
+		"notes/Patent Version Number":['patent'],
+		accessDate: ["webpage"]	//technically access year according to EndNote
 	},
 	Y1: fieldMap["PY"]
 };
@@ -478,6 +485,7 @@ function processTag(item, entry) {
 			//seems that EndNote duplicates title in the note field sometimes
 			if(item.title == value) {
 				value = undefined;
+				processFields = false;
 			//do some HTML formatting in non-HTML notes
 			} else if(!value.match(/<[^>]+>/)) { //from cleanTags
 				value = '<p>'
@@ -501,11 +509,37 @@ function processTag(item, entry) {
 				value = undefined;
 			}
 		break;
+		case "M1":
+			//Endnote exports access date for webpages to M1
+			//It makes much more sense to export to Y2
+			//We should make sure that M1 does not overwrite whatever may be in Y2
+			if(zField == "accessDate") {
+				item.backupAccessDate = {
+					field: zField,
+					value: dateRIStoZotero(value, zField)
+				}
+				value = undefined;
+				processFields = false;
+			}
+		break;
+		case "VL":
+			if(zField == "accessDate") {
+				//EndNote screws up webpage entries. VL is access year, but access date is available
+				if(!item.backupAccessDate) {	//make sure we don't replace the M1 data
+					item.backupAccessDate = {
+						field: zField,
+						value: dateRIStoZotero(value, zField)
+					};
+				}
+				value = undefined;
+				processFields = false;
+			}
+		break;
 		//PY is typically less complete than other dates. We'll store it as backup
 		case "PY":
 			item.backupDate = {
 				field: zField,
-				value: dateRIStoZotero(value)
+				value: dateRIStoZotero(value, zField)
 			};
 			value = undefined;
 			processFields = false;
@@ -515,6 +549,9 @@ function processTag(item, entry) {
 	//zField based manipulations
 	if(processFields){
 		switch(zField[0]) {
+			case "__ignore":
+				value = undefined;
+			break;
 			case "backupPublicationTitle":
 				item.backupPublicationTitle = value;
 				value = undefined;
@@ -529,7 +566,7 @@ function processTag(item, entry) {
 			case "issueDate":
 			case "dateEnacted":
 			case "dateDecided":
-				value = dateRIStoZotero(value);
+				value = dateRIStoZotero(value, zField);
 			break;
 			case "tags":
 				//allow new lines or semicolons. Commas, might be more problematic
@@ -556,7 +593,7 @@ function processTag(item, entry) {
 				switch(zField[1]) {
 					case 'PDF':
 						value = {
-							url: value,
+							url: value.replace(/^internal-pdf:\/\//i,'PDF/'),	//support for EndNote's relative paths
 							mimeType: "application/pdf",
 							title:"Full Text (PDF)",
 							downloadable:true
@@ -573,7 +610,7 @@ function processTag(item, entry) {
 					default:
 						value = {
 							url:value,
-							title:"Image",	//maybe just Attachment?
+							title:"Attachment",
 							downloadable:true
 						};
 				}
@@ -639,36 +676,114 @@ function applyValue(item, zField, value, rawLine) {
 	}
 }
 
-function dateRIStoZotero(risDate) {
-	var value = risDate.split(/\s*\/\s*(?:0*(?=\d))?/);	//and also drop leading 0s
+function dateRIStoZotero(risDate, zField) {
+	var date = [];
+	//we'll be very lenient about formatting
+	//First, YYYY/MM/DD/other with everything but year optional
+	var m = risDate.match(/^(\d+)(?:\/(\d{0,2})\/(\d{0,2})(?:\/?(.*))?)?/);
+	var timeCheck, part;
+	if(m) {
+		date[0] = m[1];	//year
+		date[1] = m[2];	//month
+		date[2] = m[3]; //day
+		timeCheck = m[4];
+		part = m[4];
+	} else {
+		//EndNote suggests entering only Month and Day in the date field
+		//We'll return this, but also add 0000 as a placeholder for year
+		//This will come from PY at some point and we'll let Zotero figure out the date
+		//This will NOT work with access date, but there's only so much we can do
+		var y = risDate.match(/\b\d{4}\b/);
+		var d = risDate.match(/\b(?:[1-3]\d|[1-9])\b/);
+		m = risDate.match(/[A-Za-z]+/);
+		if(!y && m) {
+			return '0000 ' + m[0] + (d ? ' ' + d[0] : '');
+		}
 
-	if(value.length == 1) {
+		//TODO: add more formats
 		return risDate;
 	}
 
 	//sometimes unknown parts of date are given as 0. Drop these and anything that follows
-	var i;
-	for(i=0; i<3; i++) {
-		if(!value[i] || !parseInt(value[i], 10)) {
+	for(var i=0; i<3; i++) {
+		if(date[i] !== undefined) date[i] = date[i].replace(/^0+/,'');	//drop leading 0s
+
+		if(!date[i]) {
+			date.splice(i);
 			break;
 		}
 	}
-	for(; i<3; i++) {
-		value[i] = undefined;
-	}
 
-	//adjust month (it's 0 based)
-	if(value[1]) {
-		value[1] = parseInt(value[1], 10);
-		if(value[1]) value[1]--;
-	}
+	if(zField == "accessDate") {	//format this as SQL date
+		if(!date[0]) return risDate;	//this should never happed
 
-	return ZU.formatDate({
-			'year': value[0],
-			'month': value[1],
-			'day': value[2],
-			'part': value[3]
-		});
+		//adjust month to be 0 based
+		if(date[1]) {
+			date[1] = parseInt(date[1], 10);
+			if(date[1]) date[1] = '' + (date[1] - 1);	//make it a string again to keep things simpler
+			else date[1] = '0';	//the regex above should ensure this never happens. We don't even test the day
+		}
+
+		//make sure we have a month and day
+		if(!date[1]) date[1] = '0';	//0 based months
+		if(!date[2]) date[2] = '1';
+
+		var time;
+		if(timeCheck) {
+			time = timeCheck.match(/\b([0-2]?[1-9]):(\d{2})(?::(\d{2}))\s*(am|pm)?/i);
+			if(time) {
+				if(!time[3]) time[3] = '0';
+
+				if(time[4]) {
+					var hour = parseInt(time[1],10);	//this should not fail
+					if(time[4].toLowerCase() == 'pm' && hour < 12) {
+						time[1] = '' + (hour + 12);
+					} else if(time[4].toLowerCase() == 'am' && hour == 12) {
+						time[1] = '0';
+					}
+				}
+			}
+		}
+
+		//assume this is local time and convert it to UTC
+		var d = new Date();
+		/** We intentionally avoid passing parameters in the constructor,
+		 * because it interprets dates with 2 digits or less as 1900+ dates.
+		 * This is clearly not a problem with accessDate, but maybe this will
+		 * end up being used for something else later.
+		 */
+		d.setFullYear(date[0], date[1], date[2]);
+		if(time) {
+			d.setHours(time[1], time[2], time[3]);
+		}
+
+		var pad = function(n, width) {
+			n = '000' + n;	//that should be sufficient for our purposes here
+			return n.substr(n.length-width);
+		}
+
+		var sqlDate
+
+		return pad(d.getUTCFullYear(), 4) + '-' + pad(d.getUTCMonth() + 1, 2)
+			+ '-' + pad(d.getUTCDate(), 2)
+			+ (time ? ' '	+ pad(d.getUTCHours(), 2) + ':'
+							+ pad(d.getUTCMinutes(), 2) + ':'
+							+ pad(d.getUTCSeconds(), 2)
+					: '');
+	} else {
+		//adjust month (it's 0 based)
+		if(date[1]) {
+			date[1] = parseInt(date[1], 10);
+			if(date[1]) date[1]--;
+		}
+
+		return ZU.formatDate({
+				'year': date[0],
+				'month': date[1],
+				'day': date[2],
+				'part': part
+			});
+	}
 }
 
 function completeItem(item) {
@@ -703,8 +818,19 @@ function completeItem(item) {
 	if(item.backupDate) {
 		if(!item[item.backupDate.field]) {
 			item[item.backupDate.field] = item.backupDate.value;
+		} else {
+			item[item.backupDate.field] = item[item.backupDate.field]
+				.replace(/\b0000\b/, item.backupDate.value);
 		}
 		item.backupDate = undefined;
+	}
+
+	//same for access date
+	if(item.backupAccessDate) {
+		if(!item[item.backupAccessDate.field]) {
+			item[item.backupAccessDate.field] = item.backupAccessDate.value;
+		}
+		item.backupAccessDate = undefined;
 	}
 
 	// Clean up DOI
@@ -5528,13 +5654,8 @@ var testCases = [
 				"accessDate": "Access Date"
 			},
 			{
-				"itemType": "journalArticle",
+				"itemType": "webpage",
 				"creators": [
-					{
-						"lastName": "Editor",
-						"firstName": "Series",
-						"creatorType": "editor"
-					},
 					{
 						"lastName": "Name1",
 						"firstName": "Author",
@@ -5548,7 +5669,13 @@ var testCases = [
 				],
 				"notes": [
 					{
+						"note": "A2  - Editor, Series"
+					},
+					{
 						"note": "AD  - Author Address"
+					},
+					{
+						"note": "AN  - Accession Number"
 					},
 					{
 						"note": "C1  - Year Cited"
@@ -5560,16 +5687,28 @@ var testCases = [
 						"note": "CA  - Caption"
 					},
 					{
+						"note": "CN  - Call Number"
+					},
+					{
 						"note": "CY  - Place Published"
+					},
+					{
+						"note": "DB  - Name of Database"
+					},
+					{
+						"note": "DO  - DOI"
+					},
+					{
+						"note": "DP  - Database Provider"
 					},
 					{
 						"note": "ET  - Edition"
 					},
 					{
-						"note": "LB  - Label"
+						"note": "J2  - Periodical Title"
 					},
 					{
-						"note": "M3  - Type of Medium"
+						"note": "LB  - Label"
 					},
 					{
 						"note": "<p>Notes</p>"
@@ -5582,6 +5721,12 @@ var testCases = [
 					},
 					{
 						"note": "RN  - Research Notes"
+					},
+					{
+						"note": "SN  - ISBN"
+					},
+					{
+						"note": "SP  - Description"
 					},
 					{
 						"note": "TA  - Author, Translated"
@@ -5601,21 +5746,14 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"callNumber": "Call Number",
 				"date": "Last Update Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"journalAbbreviation": "Periodical Title",
 				"language": "Language",
-				"extra": "Access Date",
-				"ISSN": "ISBN",
-				"pages": "Description",
+				"websiteType": "Type of Medium",
 				"shortTitle": "Short Title",
-				"publicationTitle": "Series Title",
+				"websiteTitle": "Series Title",
 				"title": "Title",
 				"url": "URL",
-				"volume": "Access Year"
+				"accessDate": "Access Date"
 			}
 		]
 	}
