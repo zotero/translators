@@ -1,6 +1,6 @@
 {
 	"translatorID": "86168097-0ce0-4c77-ba34-8bd57f47a3d3",
-	"label": "Juricaf2",
+	"label": "Juricaf",
 	"creator": "Guillaume Adreani",
 	"target": "^https?://www\.juricaf\.org/(arret|recherche)/",
 	"minVersion": "1.0",
