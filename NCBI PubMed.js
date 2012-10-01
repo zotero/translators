@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 13,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-03-12 01:14:39"
+	"lastUpdated": "2012-10-01 10:55:04"
 }
 
 function detectWeb(doc, url) {
@@ -117,8 +117,16 @@ function doImportFromText(text) {
 		var newItem = new Zotero.Item("journalArticle");
 
 		var citation = ZU.xpath(articles[i], 'MedlineCitation');
+
+		//store link as attachment, since this is a catalog
 		var PMID = ZU.xpathText(citation, 'PMID');
-		newItem.url = "http://www.ncbi.nlm.nih.gov/pubmed/" + PMID;
+		newItem.attachments.push({
+			title: "PubMed Link",
+			url: "http://www.ncbi.nlm.nih.gov/pubmed/" + PMID,
+			mimeType: "text/html",
+			snapshot: false
+		});
+
 		newItem.extra = "PMID: "+PMID;
 
 		var article = ZU.xpath(citation, 'Article');
@@ -236,8 +244,15 @@ function doImportFromText(text) {
 
 		var citation = ZU.xpath(books[i], 'BookDocument');
 		var PMID = ZU.xpathText(citation, 'PMID');
-		//url
-		newItem.url = "http://www.ncbi.nlm.nih.gov/pubmed/" + PMID;
+
+		//store as attachment, since this is a catalog
+		newItem.attachments.push({
+			title: "PubMed Link",
+			url: "http://www.ncbi.nlm.nih.gov/pubmed/" + PMID,
+			mimetype: "text/html",
+			snapshot: false
+		});
+
 		//Extra:PMID
 		newItem.extra = "PMID: "+PMID;
 
@@ -459,8 +474,13 @@ var testCases = [
 					"Humans"
 				],
 				"seeAlso": [],
-				"attachments": [],
-				"url": "http://www.ncbi.nlm.nih.gov/pubmed/20729678",
+				"attachments": [
+					{
+						"title": "PubMed Link",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
 				"extra": "PMID: 20729678",
 				"title": "Zotero: harnessing the power of a personal bibliographic manager",
 				"pages": "205-207",
@@ -473,7 +493,6 @@ var testCases = [
 				"abstractNote": "Zotero is a powerful free personal bibliographic manager (PBM) for writers. Use of a PBM allows the writer to focus on content, rather than the tedious details of formatting citations and references. Zotero 2.0 (http://www.zotero.org) has new features including the ability to synchronize citations with the off-site Zotero server and the ability to collaborate and share with others. An overview on how to use the software and discussion about the strengths and limitations are included.",
 				"DOI": "10.1097/NNE.0b013e3181ed81e4",
 				"libraryCatalog": "NCBI PubMed",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Zotero"
 			}
 		]
@@ -504,8 +523,13 @@ var testCases = [
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
-				"attachments": [],
-				"url": "http://www.ncbi.nlm.nih.gov/pubmed/20821847",
+				"attachments": [
+					{
+						"title": "PubMed Link",
+						"mimetype": "text/html",
+						"snapshot": false
+					}
+				],
 				"extra": "PMID: 20821847",
 				"ISBN": "1859962521",
 				"title": "Endocrinology: An Integrated Approach",
@@ -516,7 +540,6 @@ var testCases = [
 				"abstractNote": "Endocrinology has been written to meet the requirements of today's trainee doctors and the demands of an increasing number of degree courses in health and biomedical sciences, and allied subjects. It is a truly integrated text using large numbers of real clinical cases to introduce the basic biochemistry, physiology and pathophysiology underlying endocrine disorders and also the principles of clinical diagnosis and treatment. The increasing importance of the molecular and genetic aspects of endocrinology in relation to clinical medicine is explained.",
 				"rights": "Copyright © 2001, BIOS Scientific Publishers Limited",
 				"libraryCatalog": "NCBI PubMed",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Endocrinology"
 			}
 		]
@@ -552,8 +575,13 @@ var testCases = [
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
-				"attachments": [],
-				"url": "http://www.ncbi.nlm.nih.gov/pubmed/21249754",
+				"attachments": [
+					{
+						"title": "PubMed Link",
+						"mimetype": "text/html",
+						"snapshot": false
+					}
+				],
 				"extra": "PMID: 21249754",
 				"title": "Cancer Syndromes",
 				"date": "2009",
@@ -562,8 +590,7 @@ var testCases = [
 				"language": "en",
 				"abstractNote": "Cancer Syndromes is a comprehensive multimedia resource for selected single gene cancer syndromes. Syndromes currently included are Peutz-Jeghers syndrome, juvenile polyposis, Birt-Hogg-Dubé syndrome, multiple endocrine neoplasia type 1 and familial atypical multiple mole melanoma syndrome. For each syndrome the history, epidemiology, natural history and management are reviewed. If possible the initial report in the literature of each syndrome is included as an appendix. Chapters are extensively annotated with figures and movie clips. Mission Statement: Improving the care of cancer syndrome patients.",
 				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson",
-				"libraryCatalog": "NCBI PubMed",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "NCBI PubMed"
 			}
 		]
 	}
