@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-09-04 21:59:01"
+	"lastUpdated": "2012-10-05 15:13:44"
 }
 
 function detectWeb(doc, url) {
@@ -52,7 +52,6 @@ function detectWeb(doc, url) {
 	if(url.indexOf('buy.optionToBuy') != -1
 		&& url.indexOf('id=') != -1
 		&& (type = doc.getElementById('obArticleHeaderText')) ) {
-
 		fields.title = '(//div[@id="obArticleTitleHighlighted"])[1]';
 		fields.authors = '(//div[@id="obAuthor"])[1]';
 		fields.voliss = '(//div[@id="obSource"])[1]';
@@ -216,9 +215,11 @@ function fetchRIS(url, post, itemType, doc, retry) {
 		translator.setString(text);
 		translator.setHandler("itemDone", function(obj, item) {
 			//item.url = newurl;
+		
 			item.title = item.title.replace(/\.$/,'');
-
-			finalizeItem(item, doc);
+		finalizeItem(item, doc);
+			
+		
 		});
 		translator.translate();
 	});
@@ -299,6 +300,8 @@ function scrapePage(doc, type) {
 }
 
 function finalizeItem(item, doc) {
+	var pdfurl = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
+	if (!pdfurl) pdfurl = ZU.xpathText(doc, '//li[contains(@class, "PDF") and contains(@href, ".pdf")]/@href');
 	//clean up abstract and get copyright info
 	if(item.abstractNote) {
 		var m = item.abstractNote.match(/^(.+)\([^)]+(\(c\)[^)]+)\)$/i);
@@ -316,12 +319,9 @@ function finalizeItem(item, doc) {
 			item.numPages = m[2];
 		}
 	}
-
-	item.attachments = [{
-		title:"APA PsycNET Snapshot",
-		document:doc
-	}];
-
+	if (pdfurl) item.attachments =[{url: pdfurl, title: "APA Psycnet Fulltext PDF", mimeType: "application/pdf"}]
+	else item.attachments = [{title:"APA PsycNET Snapshot",	document:doc}] 
+	
 	item.complete();
 }
 
@@ -379,7 +379,8 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "APA PsycNET Snapshot"
+						"title": "APA Psycnet Fulltext PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"title": "Neuropsychology of Adults With Attention-Deficit/Hyperactivity Disorder: A Meta-Analytic Review",
@@ -428,7 +429,8 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "APA PsycNET Snapshot"
+						"title": "APA Psycnet Fulltext PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"title": "Factor analysis of meaning",
@@ -522,7 +524,8 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "APA PsycNET Snapshot"
+						"title": "APA Psycnet Fulltext PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"title": "The abnormal personality: A textbook",
