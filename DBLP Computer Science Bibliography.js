@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-09-23 14:45:40"
+	"lastUpdated": "2012-10-06 11:58:01"
 }
 
 function detectWeb(doc, url) {
@@ -108,10 +108,10 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		var articles = new Array();
-		var rows  = ZU.xpath(doc, '//body/ul/li')	
+		var rows  = ZU.xpath(doc, '//body/ul/li|//li[@class="entry article"]')	
 		for (i in rows){
-			 var title = ZU.xpathText(rows[i], './b');
-			 var link = ZU.xpathText(rows[i], './a[contains(@href, "rec/bibtex") and not(contains(@href, ".xml"))]/@href');
+			 var title = ZU.xpathText(rows[i], './b|./div/span[@class="title"]');
+			 var link = ZU.xpathText(rows[i], './a[contains(@href, "rec/bibtex") and not(contains(@href, ".xml"))]/@href|./nav//div/a[contains(@href, "rec/bibtex") and not(contains(@href, ".xml"))]/@href');
 			items[link] = title;
 		}
 		Zotero.selectItems(items, function (items) {
