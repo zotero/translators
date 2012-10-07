@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-24 18:02:43"
+	"lastUpdated": "2012-10-07 15:26:43"
 }
 
 function detectWeb(doc, url) {
@@ -65,7 +65,7 @@ function scrape(doc, url) {
 	var xPathTitle = '//h1';
 	newItem.title = doc.evaluate(xPathTitle, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;	
 
-	newItem.abstractNote = ZU.xpathText(doc, '//meta[@name="d`escription"]/@content');
+	newItem.abstractNote = ZU.xpathText(doc, '//meta[@name="description"]/@content');
 	newItem.date = ZU.xpathText(doc, '//span[contains(@class,"td_page_date")]');
 
 	newItem.url = doc.location.href;

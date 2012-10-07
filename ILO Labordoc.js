@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-08-06 19:23:07"
+	"lastUpdated": "2012-10-06 13:32:12"
 }
 
 /*
@@ -173,43 +173,43 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "Theme: Population and social conditions Mode of access : World Wide Web (available in electronic format only) Description based on the Internet version on the World Wide Web"
+						"note": "Theme: Population and social conditions"
 					},
 					{
 						"note": "Provides details in relation to population ageing and setting the scene as regards the dynamics of demographic change, and details the past, present and projected future structure of the EU's population. Presents information in relation to the demand for healthcare services, as well as the budgetary implications facing governments as their populations continue to age. Contains information relating to the active participation of older generations within society, with a particular focus on inter-generational issues and also includes information on the leisure pursuits and social activities undertaken by older persons"
 					}
 				],
 				"tags": [
-					"EU countries",
-					"EU pub",
-					"ageing population",
-					"calidad de la vida",
-					"cuadros estadísticos",
-					"employment opportunity",
-					"envejecimiento de la población",
-					"jubilado",
 					"older people",
 					"older worker",
-					"oportunidades de empleo",
-					"países de la UE",
-					"pays de l'UE",
-					"personas de edad avanzada",
-					"personnes âgées",
-					"possibilités d'emploi",
-					"pub UE",
-					"pub UE",
-					"qualité de la vie",
-					"quality of life",
 					"retired worker",
-					"seguridad social",
-					"sécurité sociale",
+					"ageing population",
+					"employment opportunity",
 					"social security",
-					"statistical table",
-					"tableau statistique",
-					"trabajador de edad avanzada",
+					"quality of life",
+					"EU countries",
+					"personnes âgées",
 					"travailleur âgé",
 					"travailleur retraité",
-					"vieillissement de la population"
+					"vieillissement de la population",
+					"possibilités d'emploi",
+					"sécurité sociale",
+					"qualité de la vie",
+					"pays de l'UE",
+					"personas de edad avanzada",
+					"trabajador de edad avanzada",
+					"jubilado",
+					"envejecimiento de la población",
+					"oportunidades de empleo",
+					"seguridad social",
+					"calidad de la vida",
+					"países de la UE",
+					"statistical table",
+					"EU pub",
+					"tableau statistique",
+					"pub UE",
+					"cuadros estadísticos",
+					"pub UE"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -219,16 +219,16 @@ var testCases = [
 					}
 				],
 				"ISBN": "9789279215070",
+				"title": "Active ageing and solidarity between generations: a statistical portrait of the European Union 2012",
 				"edition": "2012 ed",
 				"place": "Luxembourg",
+				"publisher": "Publications Office of the European Union",
+				"date": "2012",
 				"numPages": "141",
 				"series": "Statistical books",
-				"callNumber": "WWW ACCESS ONLY",
-				"url": "http://www.ilo.org/public/libdoc/igo/2011/468303.pdf",
+				"callNumber": "112B26/3 engl",
 				"libraryCatalog": "ILO Labordoc",
-				"title": "Active ageing and solidarity between generations a statistical portrait of the European Union 2012",
-				"publisher": "Publications Office of the European Union",
-				"date": "2012"
+				"shortTitle": "Active ageing and solidarity between generations"
 			}
 		]
 	}

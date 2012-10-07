@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-24 16:01:03"
+	"lastUpdated": "2012-10-07 15:35:34"
 }
 
 /*
@@ -294,6 +294,7 @@ function scrape(doc, url, type, pdfUrl) {
 			case 'Pages':
 				item.pages = value;
 			break;
+			case 'University/institution':
 			case 'School':
 				item.university = value;
 			break;
@@ -314,6 +315,7 @@ function scrape(doc, url, type, pdfUrl) {
 			break;
 
 			//we'll figure out proper location later
+			case 'University location':
 			case 'School location':
 				place.schoolLocation = value;
 			break;

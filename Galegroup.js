@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-09-28 00:01:46"
+	"lastUpdated": "2012-10-06 13:20:14"
 }
 
 /*
@@ -165,10 +165,8 @@ var testCases = [
 					}
 				],
 				"publicationTitle": "Chasqui",
-				"url": "http://go.galegroup.com/ps/i.do?id=GALE%7CH1420025063&v=2.1&u=viva_gmu&it=r&p=LitRG&sw=w",
 				"issue": "1",
 				"extra": "19",
-				"DOI": "Critical essay",
 				"date": "November 1974",
 				"pages": "19-33",
 				"title": "Borges: His Recent Poetry",
@@ -195,16 +193,14 @@ var testCases = [
 				],
 				"tags": [],
 				"seeAlso": [],
-				"attachments": [
-					{}
-				],
+				"attachments": [],
 				"title": "A digest of the law of actions and trials at nisi prius. By Isaac 'espinasse, of Gray's Inn, Esq. Barrister at Law. The third edition, corrected, with considerable additions from printed and manuscript cases. In two volumes. ...",
 				"place": "London",
 				"url": "http://find.galegroup.com/ecco/infomark.do?&source=gale&prodId=ECCO&userGroupName=viva_gmu&tabID=T001&docId=CW3325179878&type=multipage&contentSet=ECCOArticles&version=1.0",
 				"pages": "469",
 				"numPages": "469",
 				"DOI": "Monograph",
-				"date": "1798.",
+				"date": "1798",
 				"volume": "Volume 1",
 				"accessDate": "2012/05/07",
 				"archive": "Eighteenth Century Collection Online",
