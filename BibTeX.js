@@ -1908,7 +1908,12 @@ function writeField(field, value, isMacro) {
 		// Case of words with uppercase characters in non-initial positions is preserved with braces.
 		// treat hyphen as whitespace for this purpose so that Large-scale etc. don't get enclosed
 		// treat curly bracket as whitespace because of mark-up immediately preceding word
-		if(!isMacro&&field != "pages") value = value.replace(/([^\s-\}]+[A-Z][^\s,]*)/g, "{$1}");
+		// for the "title" field, preserve all capitalized words with braces
+		if(field == "title") { 
+    		if(!isMacro&&field != "pages") value = value.replace(/([A-Z][a-zA-Z0-9]*)/g, "{$1}");
+    	} else {
+    		if(!isMacro&&field != "pages") value = value.replace(/([^\s-\}]+[A-Z][^\s,]*)/g, "{$1}");
+        }
 		//convert the HTML markup allowed in Zotero for rich text to TeX
 		value = mapHTMLmarkup(value);
 	}
