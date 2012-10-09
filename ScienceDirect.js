@@ -3,186 +3,110 @@
 	"label": "ScienceDirect",
 	"creator": "Michael Berkowitz",
 	"target": "^https?://[^/]*science-?direct\\.com[^/]*/science(\\/article)?(\\?(?:.+\\&|)ob=(?:ArticleURL|ArticleListURL|PublicationURL))?",
-	"minVersion": "2.1",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-09-28 00:38:19"
+	"lastUpdated": "2012-10-09 05:12:55"
 }
 
 function detectWeb(doc, url) {
-  	if ((url.indexOf("_ob=DownloadURL") != -1) 
+  	if ((url.indexOf("_ob=DownloadURL") !== -1) 
 		|| doc.title == "ScienceDirect Login" 
 		|| doc.title == "ScienceDirect - Dummy"
 		|| (url.indexOf("/science/advertisement/") !== -1)) { 
 		return false;
 	}
-	if((url.indexOf("pdf") !== -1
-				&& url.indexOf("_ob=ArticleURL") === -1
-				&& url.indexOf("/article/") === -1)
-			|| url.indexOf("/journal/") !== -1
-			|| url.indexOf("_ob=ArticleListURL") !== -1
-			|| url.indexOf("/book/") !== -1) {
-		if (ZU.xpath(doc, '//table[@class="resultRow"]/tbody/tr/td[2]/a').length > 0
-			|| ZU.xpath(doc, '//table[@class="resultRow"]/tbody/tr/td[2]/h3/a').length > 0
-			|| ZU.xpath(doc, '//td[@class="nonSerialResultsList"]/h3/a').length > 0
 
-			//not sure if this fourth one is still necessary.
-			|| ZU.xpath(doc, '//div[@class="font3"][@id="bodyMainResults"]//td[@class="pubBody"]/div/table/tbody/tr/td[3]/a').length > 0
-			) {
+	if((url.indexOf("pdf") !== -1
+			&& url.indexOf("_ob=ArticleURL") === -1
+			&& url.indexOf("/article/") === -1)
+		|| url.indexOf("/journal/") !== -1
+		|| url.indexOf("_ob=ArticleListURL") !== -1
+		|| url.indexOf("/book/") !== -1) {
+		if (getArticleList(doc).length > 0) {
 			return "multiple";
 		} else {
 			return false;
 		}
-	} else if (!url.match("pdf")) {
+	} else if(url.indexOf("pdf") === -1) {
 		// Book sections have the ISBN in the URL
-		if (url.indexOf("/B978") !== -1)
+		if (url.indexOf("/B978") !== -1) {
 			return "bookSection";
-		else
+		} else if(getISBN(doc)) {
+			if(getArticleList(doc).length) {
+				return "multiple";
+			} else {
+				return "book";
+			}
+		} else {
 			return "journalArticle";
+		}
 	} 
 }
 
+function getExportLink(doc) {
+	var link = ZU.xpath(doc, '//div[@class="icon_exportarticlesci_dir"]/a/@href');
+	return link.length ? link[0].textContent : false;
+}
 
+function getPDFLink(doc) {
+	return ZU.xpathText(doc,
+		'//div[@id="articleNav"]//div[@class="icon_pdf"]\
+			/a[not(@title="Purchase PDF")]/@href[1]');
+}
 
-function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
+function getISBN(doc) {
+	var isbn = ZU.xpathText(doc, '//td[@class="tablePubHead-Info"]\
+		//span[@class="txtSmall"]');
+	if(!isbn) return;
 
-		var articles = new Array();
-		if(detectWeb(doc, url) == "multiple") {
-			//search page
-			var items = new Object();
-			var xpath;
-				xpath = '//table[@class="resultRow"]/tbody/tr/td[2]/a|//table[@class="resultRow"]/tbody/tr/td[2]/h3/a|//td[@class="nonSerialResultsList"]/h3/a';
-			var rows = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-			var next_row;
-			while (next_row = rows.iterateNext()) {
-				var title = next_row.textContent;
-				var link = next_row.href;
-				if (!title.match(/PDF \(/) && !title.match(/Related Articles/)) items[link] = title;
-			}
-			items = Zotero.selectItems(items);
-			for (var i in items) {
-				articles.push(i);
-			}
+	isbn = isbn.match(/ISBN:\s*([-\d]+)/);
+	if(!isbn) return;
 
-			var sets = [];
-			for each (article in articles) {
-				sets.push({article:article});
-			}
+	return isbn[1].replace(/[-\s]/g, '');
+}
 
-		} else {
-			articles = [url];
-			var sets =[{currentdoc:doc}];
+function getFormValues(text, inputs) {
+	var re = new RegExp("<input[^>]+name=(['\"]?)("
+			+ inputs.join('|')
+			+ ")\\1[^>]*>", 'g');
+
+	var input, val, params = {};
+	while(input = re.exec(text)) {
+		val = input[0].match(/value=(['"]?)(.*?)\1[\s>]/);
+		if(!val) continue;
+
+		params[encodeURIComponent(input[2])] = encodeURIComponent(val[2]);
+	}
+
+	return params;
+}
+
+function scrapeByExport(doc) {
+	var url = getExportLink(doc);
+	var pdfLink = getPDFLink(doc);
+	ZU.doGet(url, function(text) {
+		//select the correct form
+		text = text.match(/<form[^>]+name=(['"])exportCite\1[\s\S]+?<\/form>/)[0];
+
+		var postParams = getFormValues(text, [
+						//'_ArticleListID',	//do we still need this?
+						'_acct', '_docType', '_eidkey',
+						'_method', '_ob', '_uoikey', '_userid', 'count',
+						'Export', 'JAVASCRIPT_ON', 'md5'
+						]);
+		postParams["format"] = "cite-abs";
+		postParams["citation-type"] = "RIS";
+
+		var post = '';
+		for(var key in postParams) {
+			post += key + '=' + postParams[key] + "&";
 		}
-		if(articles.length == 0) {
-			Zotero.debug('no items');
-			return;
-		}
 
-
-		var scrape = function(newDoc, set) {
-			var PDF;
-			var tempPDF = newDoc.evaluate('//div[@class="icon_pdf"]/a', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			if (!tempPDF) { // PDF xpath failed, lets try another
-				// TODO: others?
-				//tempPDF = newDoc.evaluate('//a[@class="noul" and contains(text(), "PDF")]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-				if (!tempPDF) { // second PDF xpath failed set PDF to null to avoid item.attachments
-					PDF = null;
-				} else {
-					PDF = tempPDF.href; // second xpath succeeded, use that link
-				}
-			} else {
-				PDF = tempPDF.href; // first xpath succeeded, use that link
-			}
-			var url = newDoc.location.href;
-			var get = newDoc.evaluate('//div[@class="icon_exportarticlesci_dir"]/a', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
-			// if the PDF is available make it an attachment otherwise only use snapshot.
-			var attachments;
-			if (PDF) {
-				attachments = [
-					{url:url, title:"ScienceDirect Snapshot", mimeType:"text/html"},
-					{url:PDF, title:"ScienceDirect Full Text PDF", mimeType:"application/pdf"} // Sometimes PDF is null...I hope that is ok
-				];
-			} else {
-				attachments = [
-					{url:url, title:"ScienceDirect Snapshot", mimeType:"text/html"}
-				];
-			}
-			// This does not work, not sure why.
-			//var doi = newDoc.evaluate('//a[contains(text(), "doi")]/text()', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			//Zotero.debug(doi);
-			//doi = doi.textContent.substr(4);
-			// pass these values to the next function
-			//set.doi = doi;
-			set.url = url;
-			set.get = get;
-			set.attachments = attachments;
-			return set;
-
-		};
-
-		var first = function(set, next) {
-				var article = set.article;
-				Zotero.Utilities.processDocuments(article, function(doc){
-					set = scrape(doc, set);
-					next();
-				});
-		};
-
-		var second = function(set, next) {
-			var url = set.url;
-			var get = set.get;
-
-			Zotero.Utilities.HTTP.doGet(get, function(text) {
-				const postOrder = ["_ob", "_method", "_acct", "_userid", "_docType",
-					"_ArticleListID", "_uoikey", "_eidkey", "count", "md5", "JAVASCRIPT_ON",
-					"format", "citation-type", "Export"];
-				var postParams = {
-					"_ob":"DownloadURL",
-					"_method":"finish",
-					"_docType":"FLA",
-					"count":"1",
-					"JAVASCRIPT_ON":"Y",
-					"format":"cite-abs",
-					"citation-type":"RIS",
-					"Export":"Export"
-				};
-
-				const re = /<input type=hidden name=(md5|_acct|_userid|_uoikey|_eidkey|_ArticleListID) value=([^>]+)>/g;
-				while((m = re.exec(text)) != null) {
-					postParams[encodeURIComponent(m[1])] = encodeURIComponent(m[2]);
-				}
-
-				var post = "";
-				for(var i=0, n=postOrder.length; i<n; i++) {
-					var key = postOrder[i];
-					if(postParams[key]) post += "&"+key+"="+postParams[key];
-				}
-
-				var baseurl = url.match(/https?:\/\/[^/]+\//)[0];
-
-				set.post = post;
-				set.baseurl = baseurl;
-
-				next();
-			});
-
-
-		};
-
-		var third = function(set, next) {
-			var baseurl = set.baseurl;
-			var post = set.post;
-			var attachments = set.attachments;
-
-
-			Zotero.Utilities.HTTP.doPost(baseurl + 'science', post, function(text) {
+		ZU.doPost('/science', post, function(text) {
 				//short title is stored in T2. Fix it to ST.
 				text = text.replace(/^T2\s/mg, 'ST ');
 
@@ -190,7 +114,16 @@ function doWeb(doc, url) {
 				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 				translator.setString(text);
 				translator.setHandler("itemDone", function(obj, item) {
-					item.attachments = attachments;
+					item.attachments.push({
+						title: "ScienceDirect Snapshot",
+						document: doc
+					});
+
+					if(pdfLink) item.attachments.push({
+						title: 'ScienceDirect Full Text PDF',
+						url: pdfLink,
+						mimeType: 'application/pdf'
+					});
 
 					if(item.notes[0]) {
 						item.abstractNote = item.notes[0].note;
@@ -200,29 +133,56 @@ function doWeb(doc, url) {
 					item.complete();
 				});
 				translator.translate();
-
-				next();
-			}, false, 'utf8');
-
-
-		};
-
-		var detectedType = detectWeb(doc, url);
-		if(detectedType == "journalArticle"
-			|| detectedType == "bookSection") {
-			var set = scrape(doc, {});
-			second(set, function(){
-				third(set, function(){
-					Zotero.done();
-				});
 			});
+	});
+}
 
-		} else {
-			var callbacks = [first, second, third];
-			Zotero.Utilities.processAsync(sets, callbacks, function() {Zotero.done()});
+function scrapeByISBN(doc) {
+	var isbn = getISBN(doc);
+	var translator = Zotero.loadTranslator("search");
+	translator.setTranslator("c73a4a8c-3ef1-4ec8-8229-7531ee384cc4");
+	translator.setSearch({ISBN: isbn});
+	translator.translate();
+}
+
+function getArticleList(doc) {
+	return ZU.xpath(doc,
+		'(//table[@class="resultRow"]/tbody/tr/td[2]/a\
+		|//table[@class="resultRow"]/tbody/tr/td[2]/h3/a\
+		|//td[@class="nonSerialResultsList"]/h3/a)\
+		[not(contains(text(),"PDF (") or contains(text(), "Related Articles"))]');
+}
+
+function doWeb(doc, url) {
+	if(detectWeb(doc, url) == "multiple") {
+		//search page
+		var itemList = getArticleList(doc);
+		var items = {};
+		for(var i=0, n=itemList.length; i<n; i++) {
+			items[itemList[i].href] = itemList[i].textContent;
 		}
 
-	Zotero.wait();
+		Zotero.selectItems(items, function(selectedItems) {
+			if(!selectedItems) return true;
+
+			var articles = [];
+			for (var i in selectedItems) {
+				articles.push(i);
+			}
+
+			ZU.processDocuments(articles, scrape);
+		});
+	} else {
+		scrape(doc);
+	}
+}
+
+function scrape(doc) {
+	if(getExportLink(doc)) {
+		scrapeByExport(doc);
+	} else if(getISBN(doc)) {
+		scrapeByISBN(doc);
+	}
 }
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -249,8 +209,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "ScienceDirect Snapshot",
-						"mimeType": "text/html"
+						"title": "ScienceDirect Snapshot"
 					},
 					{
 						"title": "ScienceDirect Full Text PDF",
@@ -323,12 +282,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "ScienceDirect Snapshot",
-						"mimeType": "text/html"
-					},
-					{
-						"title": "ScienceDirect Full Text PDF",
-						"mimeType": "application/pdf"
+						"title": "ScienceDirect Snapshot"
 					}
 				],
 				"title": "Mitochondria-dependent apoptosis in yeast",
@@ -371,12 +325,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "ScienceDirect Snapshot",
-						"mimeType": "text/html"
-					},
-					{
-						"title": "ScienceDirect Full Text PDF",
-						"mimeType": "application/pdf"
+						"title": "ScienceDirect Snapshot"
 					}
 				],
 				"title": "8 - Introduction to discrete dislocation statics and dynamics",
@@ -393,6 +342,41 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.sciencedirect.com/science?_ob=RefWorkIndexURL&_idxType=AU&_cid=277739&_acct=C000228598&_version=1&_userid=10&md5=a27159035e8b2b8e216c551de9cedefd",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Likens",
+						"firstName": "Gene E",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"libraryCatalog": "Open WorldCat",
+				"language": "English",
+				"url": "http://public.eblib.com/EBLPublic/PublicView.do?ptiID=634856",
+				"title": "Encyclopedia of inland waters",
+				"publisher": "Elsevier",
+				"place": "Amsterdam; Boston",
+				"date": "2009",
+				"ISBN": "9780123706263  0123706262",
+				"abstractNote": "Contains over 240 individual articles covering various broad topics including properties of water hydrologic cycles, surface and groundwater hydrology, hydrologic balance, lakes of the world, rivers of the world, light and heat in aquatic ecosystems, hydrodynamics and mixing in rivers, reservoirs, and lakes, biological integration among inland aquatic ecosystems, pollution and remediation, and conservation and management of inland aquatic ecosystems.",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.sciencedirect.com/science?_ob=RefWorkIndexURL&_idxType=AR&_cid=277739&_acct=C000228598&_version=1&_userid=10&md5=54bf1ed459ae10ac5ad1a2dc11c873b9",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
