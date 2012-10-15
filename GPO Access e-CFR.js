@@ -1,19 +1,19 @@
 {
 	"translatorID": "dede653d-d1f8-411e-911c-44a0219bbdad",
 	"label": "GPO Access e-CFR",
-	"creator": "Bill McKinney",
-	"target": "^http://ecfr\\.gpoaccess\\.gov/cgi/t/text/text-idx.+",
-	"minVersion": "1.0.0b4.r1",
+	"creator": "Bill McKinney, Sebastian Karcher",
+	"target": "^https?://(www\\.)?ecfr\\.gov/cgi-bin/",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-01-30 22:49:29"
+	"lastUpdated": "2012-10-14 22:25:57"
 }
 
 function detectWeb(doc, url) {
-	var re = new RegExp("^http://ecfr\.gpoaccess\.gov/cgi/t/text/text-idx");
+	var re = new RegExp("^http://(www\.)?ecfr\.gov/cgi-bin/(text-idx|retrieveECFR\?)");
 	if(re.test(doc.location.href)) {
 		return "statute";
 	} else {
@@ -34,84 +34,63 @@ function scrape(doc) {
 
 	var newItem = new Zotero.Item("statute");
 	newItem.url = doc.location.href;
-	var extraText = new String();
-	var tmpSection = "";
 	newItem.code = "Electronic Code of Federal Regulations";
-	newItem.language = "en-us";
+	newItem.language = "en-US";
 
 	var spanTags = doc.getElementsByTagName("span");
-	for(var i=0; i<spanTags.length; i++) {
-		if (spanTags[i].className == "mainheader") {
-			var tmpStr = spanTags[i].innerHTML;
-			tmpStr = tmpStr.replace(/\&nbsp;/g, " ");
-			tmpStr = tmpStr.replace(/\&\#167;/g, "Sec.");
-			newItem.codeNumber = tmpStr;
-			newItem.title = "e-CFR: " + tmpStr;
-		}
-		if (spanTags[i].className == "div5head") {
-			var tmpStr = spanTags[i].childNodes[0].innerHTML;
-			tmpStr = tmpStr.replace(/\&nbsp;/g, " ");
-			tmpStr = tmpStr.replace(/\&\#167;/g, "Sec.");
-			tmpSection = tmpStr;
-		}
+	var title;
+	if (title = ZU.xpathText(doc, '//p[@class="title"]')){
+		var type1 = true;
 	}
-
-	var heading5Tags = doc.getElementsByTagName("h5");
-	for(var i=0; i<heading5Tags.length; i++) {
-		var tmpStr = heading5Tags[0].innerHTML;
-		tmpStr = tmpStr.replace(/\&nbsp;/g, " ");
-		tmpStr = tmpStr.replace(/\&\#167;/g, "Sec.");
-		if (tmpSection != "") {
-			tmpSection = tmpSection + " - ";
-		}
-		newItem.section = tmpSection + tmpStr;
-		break;
+	else{
+		var type2 = true;
+	 	title = ZU.xpathText(doc, '//p[@class="fp"][2]')
 	}
-
-	// statutory source
-	var boldTags = doc.getElementsByTagName("b");
-	for(var i=0; i<boldTags.length; i++) {
-		var s = new String(boldTags[i].innerHTML);
-		if (s.indexOf("Source:") > -1) {
-			newItem.history = "Source: " + boldTags[i].nextSibling.nodeValue;
-		}
-		if (s.indexOf("Authority:") > -1) {
-			newItem.extra = "Authority: " + boldTags[i].nextSibling.nodeValue;
-		}
-	}
-
+	 	newItem.title = "e-CFR: " + title.trim();
+	 	newItem.codeNumber = title.trim();
+	 
+	 if (type1){
+	  	newItem.section = ZU.xpathText(doc, '//p[@class="part"]/a')
+	 }
+	 else if (type2){
+	 	newItem.section = ZU.xpathText(doc, '//h2[contains(text(), "PART ")]')
+	 	newItem.history = ZU.xpathText(doc, '//p[@class="source"]');
+	 	newItem.extra = ZU.xpathText(doc, '//p[@class="auth"]')
+		 
+	 }
+	 if (newItem.section) newItem.section = ZU.capitalizeTitle(newItem.section.toLowerCase(), true);
 	newItem.complete();
 }
 
 function doWeb(doc, url) {
-	var re = new RegExp("http://ecfr\.gpoaccess\.gov/cgi/t/text/text-idx.+");
-	if(re.test(doc.location.href)) {
+	var items = {};
+	if(detectWeb(doc, url)=="statute") {
 		scrape(doc);
 	} else {
-		var items = Zotero.Utilities.getItemArray(doc, doc,"http://ecfr\.gpoaccess\.gov/cgi/t/text/text-idx.+");
-		items = Zotero.selectItems(items);
-
-		if(!items) {
-			return true;
+		var links = doc.evaluate('//td/a[./span[contains(@style, "font-weight:bold")]]', doc, null, XPathResult.ANY_TYPE, null);
+		var link;
+		while (link = links.iterateNext()) {
+			//Z.debug(link.textContent + ": " + link.href)
+			items[link.href] = link.textContent;
 		}
-
-		var uris = new Array();
-		for(var i in items) {
-			uris.push(i);
-		}
-
-		Zotero.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
-			function() { Zotero.done(); }, null);
-
-		Zotero.wait();
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			Zotero.Utilities.processDocuments(articles, scrape, function () {
+				Zotero.done();
+			});
+		});
 	}
 }
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://ecfr.gpoaccess.gov/cgi/t/text/text-idx?c=ecfr&sid=6744a4d5abb497d7b81f2f27a5248db6&rgn=div5&view=text&node=13:1.0.1.1.2&idno=13",
+		"url": "http://www.ecfr.gov/cgi-bin/retrieveECFR?gp=&SID=26a49dfbb6ed6cce629ec44a19c7fe94&r=PART&n=13y1.0.1.1.2",
 		"items": [
 			{
 				"itemType": "statute",
@@ -120,14 +99,37 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"url": "http://ecfr.gpoaccess.gov/cgi/t/text/text-idx?c=ecfr&sid=6744a4d5abb497d7b81f2f27a5248db6&rgn=div5&view=text&node=13:1.0.1.1.2&idno=13",
+				"url": "http://www.ecfr.gov/cgi-bin/retrieveECFR?gp=&SID=26a49dfbb6ed6cce629ec44a19c7fe94&r=PART&n=13y1.0.1.1.2",
 				"code": "Electronic Code of Federal Regulations",
-				"language": "en-us",
-				"codeNumber": "Title 13: Business Credit and Assistance",
+				"language": "en-US",
 				"title": "e-CFR: Title 13: Business Credit and Assistance",
-				"section": "PART 101—ADMINISTRATION",
-				"extra": "Authority: \n  5 U.S.C. 552 and App. 3, secs. 2, 4(a), 6(a), and 9(a)(1)(T); 15 U.S.C. 633, 634, 687; 31 U.S.C. 6506; 44 U.S.C. 3512; 42 U.S.C. 6307(d); 15 U.S.C. 657h; E.O. 12372 (July 14, 1982), 47 FR 30959, 3 CFR, 1982 Comp., p. 197, as amended by E.O. 12416 (April 8, 1983), 48 FR 15887, 3 CFR, 1983 Comp., p. 186.",
-				"history": "Source: \n  61 FR 2394, Jan. 26, 1996, unless otherwise noted.",
+				"codeNumber": "Title 13: Business Credit and Assistance",
+				"section": "Part 101—Administration",
+				"history": "Source: 61 FR 2394, Jan. 26, 1996, unless otherwise noted.",
+				"extra": "Authority: 5 U.S.C. 552 and App. 3, secs. 2, 4(a), 6(a), and 9(a)(1)(T); 15 U.S.C. 633, 634, 687; 31 U.S.C. 6506; 44 U.S.C. 3512; 42 U.S.C. 6307(d); 15 U.S.C. 657h; E.O. 12372 (July 14, 1982), 47 FR 30959, 3 CFR, 1982 Comp., p. 197, as amended by E.O. 12416 (April 8, 1983), 48 FR 15887, 3 CFR, 1983 Comp., p. 186.",
+				"libraryCatalog": "GPO Access e-CFR",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "e-CFR"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.ecfr.gov/cgi-bin/text-idx?c=ecfr&SID=26a49dfbb6ed6cce629ec44a19c7fe94&tpl=/ecfrbrowse/Title02/2cfr376_main_02.tpl",
+		"items": [
+			{
+				"itemType": "statute",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"url": "http://www.ecfr.gov/cgi-bin/text-idx?c=ecfr&SID=26a49dfbb6ed6cce629ec44a19c7fe94&tpl=/ecfrbrowse/Title02/2cfr376_main_02.tpl",
+				"code": "Electronic Code of Federal Regulations",
+				"language": "en-US",
+				"title": "e-CFR: TITLE 2--Grants and Agreements",
+				"codeNumber": "TITLE 2--Grants and Agreements",
+				"section": "Part 376--Nonprocurement Debarment and Suspension",
 				"libraryCatalog": "GPO Access e-CFR",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "e-CFR"
