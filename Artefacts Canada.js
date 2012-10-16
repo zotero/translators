@@ -6,10 +6,10 @@
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
-	"browserSupport": "gcsibv",
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2012-01-01 01:42:16"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2012-10-14 18:54:00"
 }
 
 function detectWeb(doc, url) {
@@ -42,19 +42,14 @@ function associateData (newItem, dataTags, field, zoteroField) {
 
 function scrape(doc, url) {
 
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;	
-	
 	var dataTags = new Object();
 	var tagsContent = new Array();
 	var fieldTitle;
 	
 	var newItem = new Zotero.Item("artwork");
 
-	var headers = doc.evaluate('//td[1][@class="leftResTitle"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var contents = doc.evaluate('//td[2][@class="pageText"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var headers = doc.evaluate('//td[1][@class="leftResTitle"]', doc, null, XPathResult.ANY_TYPE, null);
+	var contents = doc.evaluate('//td[2][@class="pageText"]', doc, null, XPathResult.ANY_TYPE, null);
 	
 	while (fieldTitle = headers.iterateNext()) {
 		fieldTitle = fieldTitle.textContent.replace(/\s+/g, '');
@@ -131,33 +126,32 @@ function scrape(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
 	
 	var articles = new Array();
 	
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		
-		var titles = doc.evaluate('//tr[1]/td[2][@class="pageText"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var links = doc.evaluate('//td/a[@class="moreInfoink"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//tr[1]/td[2][@class="pageText"]', doc, null, XPathResult.ANY_TYPE, null);
+		var links = doc.evaluate('//td/a[@class="moreInfoink"]', doc, null, XPathResult.ANY_TYPE, null);
 		
 		var next_title;
 		while (next_title = titles.iterateNext()) {
 		
 			items[links.iterateNext().href] = next_title.textContent;
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			Zotero.Utilities.processDocuments(articles, scrape, function (){});
+		});
 	} else {
-		articles = [url];
+		scrape(doc, url)
 	}
-	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-	Zotero.wait();
 }
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -168,7 +162,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.pro.rcip-chin.gc.ca/bd-dl/artefacts-eng.jsp?emu=en.artefacts:/Proxac/ws/human/user/www/Record&upp=0&m=12&w=NATIVE%28%27%28WAT+ph+is+%27%27montreal%27%27+or+WHAIR+ph+is+%27%27montreal%27%27+or+WHOO+ph+is+%27%27montreal%27%27+or+WEN+ph+is+%27%27montreal%27%27+or+HOUU+ph+is+%27%27montreal%27%27%29%27%29",
+		"url": "http://www.pro.rcip-chin.gc.ca/bd-dl/artefacts-eng.jsp?emu=en.artefacts:/Proxac/ws/human/user/www/Record;jsessionid=hb7jhiecd1&upp=0&m=13&w=NATIVE%28%27%28WAT%20ph%20is%20%27%27montreal%27%27%20or%20WHAIR%20ph%20is%20%27%27montreal%27%27%20or%20WHOO%20ph%20is%20%27%27montreal%27%27%20or%20WEN%20ph%20is%20%27%27montreal%27%27%20or%20HOUU%20ph%20is%20%27%27montreal%27%27%29%27%29",
 		"items": [
 			{
 				"itemType": "artwork",
@@ -188,7 +182,7 @@ var testCases = [
 				"medium": "porte-clefs",
 				"date": "1976",
 				"description": "Porte-clefs en métal doré décoré d'un médaillon en acrylique clair présentant le logo des Jeux olympiques de Montréal.",
-				"url": "http://www.pro.rcip-chin.gc.ca/bd-dl/artefacts-eng.jsp?emu=en.artefacts:/Proxac/ws/human/user/www/Record&upp=0&m=12&w=NATIVE%28%27%28WAT+ph+is+%27%27montreal%27%27+or+WHAIR+ph+is+%27%27montreal%27%27+or+WHOO+ph+is+%27%27montreal%27%27+or+WEN+ph+is+%27%27montreal%27%27+or+HOUU+ph+is+%27%27montreal%27%27%29%27%29",
+				"url": "http://www.pro.rcip-chin.gc.ca/bd-dl/artefacts-eng.jsp?emu=en.artefacts:/Proxac/ws/human/user/www/Record;jsessionid=hb7jhiecd1&upp=0&m=13&w=NATIVE%28%27%28WAT%20ph%20is%20%27%27montreal%27%27%20or%20WHAIR%20ph%20is%20%27%27montreal%27%27%20or%20WHOO%20ph%20is%20%27%27montreal%27%27%20or%20WEN%20ph%20is%20%27%27montreal%27%27%20or%20HOUU%20ph%20is%20%27%27montreal%27%27%29%27%29",
 				"libraryCatalog": "Centre d'histoire de Montréal",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}

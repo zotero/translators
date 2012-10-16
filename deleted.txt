@@ -1,4 +1,4 @@
-19  # Increment number when modifying file
+20  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -57,3 +57,4 @@ a07bb62a-4d2d-4d43-ba08-d9679a0122f8 # ABL-CLIO no longer exists
 232903bc-7307-4058-bb1a-27cfe3e4e655 # SPIRES - replaced (and redirects to) INSPIRE which has unAPI
 0b356cb6-7fa1-4662-b6e8-7ffc9ca2cd4a # Progress of Theoretical Physics - merged with Institute of Pure and Applied Physics
 8a325571-c2a8-417a-8a25-b1dca65154c3 # JBJS AM - merged into new Silverchair translator
+e85a3134-8c1a-8644-6926-584c8565f23e # History Cooperative - site discontinued
