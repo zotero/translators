@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-10-06 13:20:14"
+	"lastUpdated": "2012-10-15 23:04:21"
 }
 
 /*
@@ -35,11 +35,12 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.match(/\/retrieve\.do|\/i\.do|\/infomark\.do/)) {
+	if (url.match(/\/retrieve\.do|\/i\.do|\/infomark\.do|newspaperRetrieve\.do/)) {
 		if (url.match(/\/ecco\//)) return "book";
+		else if (url.indexOf("newspaperRetrieve.do"!=-1)) return "newspaperArticle";
 		else return "journalArticle";
 
-	} else if (url.match(/\/basicSearch\.do|\/subjectguide\.do|\/limitExpandSearchResults\.do/)) {
+	} else if (url.match(/\/basicSearch\.do|\/advancedSearch\.do|\/subjectguide\.do|\/limitExpandSearchResults\.do/)) {
 		return "multiple";
 	}
 }
@@ -92,7 +93,7 @@ function doWeb(doc, url) {
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
-		var titles = doc.evaluate('//span[@class="title"]/a|//div[contains(@class, "Title")]/a', doc, null, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//span[@class="title"]/a|//div[contains(@class, "Title")]/a|//li[@class="resultInfo"]/p/b/a', doc, null, XPathResult.ANY_TYPE, null);
 		var next_title;
 		while (next_title = titles.iterateNext()) {
 			items[next_title.href] = next_title.textContent;
