@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-10-01 00:42:39"
+	"lastUpdated": "2012-10-16 00:42:39"
 }
 
 function detectImport() {
@@ -936,7 +936,7 @@ function doImport(attachments) {
 			//new item
 			case 'TY':
 				if(item) completeItem(item);
-				var type = exportedOptions.itemType || importTypeMap[entry[2].trim()];
+				var type = exportedOptions.itemType || importTypeMap[entry[2].trim().toUpperCase()];
 				if(!type) {
 					type = DEFAULT_IMPORT_TYPE;
 					Z.debug("Unknown RIS item type: " + entry[2] + ". Defaulting to " + type);
