@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-10-15 23:04:21"
+	"lastUpdated": "2012-10-17 10:15:26"
 }
 
 /*
@@ -36,8 +36,8 @@
 
 function detectWeb(doc, url) {
 	if (url.match(/\/retrieve\.do|\/i\.do|\/infomark\.do|newspaperRetrieve\.do/)) {
-		if (url.match(/\/ecco\//)) return "book";
-		else if (url.indexOf("newspaperRetrieve.do"!=-1)) return "newspaperArticle";
+		if (url.match(/\/ecco\//)) return "book"
+		else if (url.indexOf("newspaperRetrieve.do")!= -1) return "newspaperArticle"
 		else return "journalArticle";
 
 	} else if (url.match(/\/basicSearch\.do|\/advancedSearch\.do|\/subjectguide\.do|\/limitExpandSearchResults\.do/)) {

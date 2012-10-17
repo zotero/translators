@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-09-04 22:00:57"
+	"lastUpdated": "2012-10-17 11:07:28"
 }
 
 function detectWeb(doc, url)	{
@@ -120,7 +120,10 @@ function doWeb(doc, url)	{
 				var linkpath='//tr/td/p[img/@alt="PDF"]/a';
 				var link=doc.evaluate(linkpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 				if(link)
-					newItem.attachments.push({url:link.href, title:newItem.title, mimeType:"application/pdf"});
+					var pdfid = link.href.match(/accno=([A-Z0-9]+)/)[1];
+					Z.debug(pdfid)
+					var pdfurl = "http://www.eric.ed.gov/PDFS/"+ pdfid +".pdf";
+					newItem.attachments.push({url:pdfurl, title:newItem.title, mimeType:"application/pdf"});
 				if (newItem.ISSN) newItem.ISSN = newItem.ISSN.replace(/ISSN-?/,"");
 				if (newItem.ISBN) newItem.ISBN = newItem.ISBN.replace(/ISBN-?/,"");
 				newItem.complete();
