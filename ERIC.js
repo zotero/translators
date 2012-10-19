@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-10-17 11:07:28"
+	"lastUpdated": "2012-10-18 16:28:37"
 }
 
 function detectWeb(doc, url)	{
@@ -171,7 +171,12 @@ var testCases = [
 					"Interpersonal Relationship"
 				],
 				"seeAlso": [],
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Collaborating with Parents to Establish Behavioral Goals in Child-Centered Play Therapy",
+						"mimeType": "application/pdf"
+					}
+				],
 				"title": "Collaborating with Parents to Establish Behavioral Goals in Child-Centered Play Therapy",
 				"volume": "20",
 				"issue": "1",
