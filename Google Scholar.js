@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-07-21 22:55:01"
+	"lastUpdated": "2012-10-21 19:22:41"
 }
 
 /*
@@ -45,9 +45,7 @@ var detectWeb = function (doc, url) {
 	if (url.indexOf('/scholar_case?') != -1 &&
 		url.indexOf('about=') == -1) {
 			return "case";
-	} else if( ZU.xpath(doc,
-		'//div[@class="gs_r"]//div[@class="gs_fl"]/a[contains(@href,"q=related:")]')
-		.length ) {
+	} else if( getViableResults(doc).length ) {
 		return "multiple";
 	}
 }
@@ -187,6 +185,11 @@ getAttachment.mimeTypes = {
 /*********************
  * Scraper functions *
  *********************/
+
+function getViableResults(doc) {
+ return ZU.xpath(doc, '//div[@class="gs_r"]\
+				[.//div[@class="gs_fl"]/a[contains(@href,"q=info:") or contains(@href,"q=related:")]]');
+}
 
 function scrapeArticleResults(doc, articles) {
 	for(var i=0, n=articles.length; i<n; i++) {
@@ -448,16 +451,14 @@ function doWeb(doc, url) {
 		 * We should always be able to build bibtex links from the Related articles
 		 * link.
 		 */
-		var results = ZU.xpath(doc,
-			'//div[@class="gs_r"]\
-				[.//div[@class="gs_fl"]/a[contains(@href,"q=info:") or contains(@href,"q=related:")]]');
+		var results = getViableResults(doc);
 
 		var items = new Object();
 		var resultDivs = new Object();
 		var bibtexUrl;
 		for(var i=0, n=results.length; i<n; i++) {
 			bibtexUrl = ZU.xpathText(results[i],
-				'.//div[@class="gs_fl"]/a[contains(@href,"q=info:") or contains(@href,"q=related:")][1]/@href')
+					'.//div[@class="gs_fl"]/a[contains(@href,"q=info:") or contains(@href,"q=related:")][1]/@href')
 				.replace(/\/scholar.*?\?/,'/scholar.bib?')
 				.replace(/=related:/,'=info:')
 				+ '&ct=citation&cd=1&output=citation';
