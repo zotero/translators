@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-10-21 19:22:41"
+	"lastUpdated": "2012-10-23 07:39:08"
 }
 
 /*
@@ -241,7 +241,7 @@ function scrapeArticleResults(doc, articles) {
 						//attach files linked on the right
 						var pdf = ZU.xpath(article.result,
 							'./div[contains(@class,"gs_fl")]\
-								/a[.//span[@class="gs_ctg2"]]');
+								//a[.//span[@class="gs_ctg2"]]');
 						for(var i=0, n=pdf.length; i<n; i++) {
 							var attach = getAttachment(pdf[i].href,
 											pdf[i].childNodes[0].textContent);
