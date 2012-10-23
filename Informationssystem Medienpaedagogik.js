@@ -9,9 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-07-18 18:52:28"
+	"lastUpdated": "2012-10-22 15:44:03"
 }
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -115,6 +114,9 @@ function scrape(doc, url) {
 
 				}
 			}
+			if (fieldTitle.indexOf("ISBN:")!=-1){
+				newItem.ISBN = fieldContent.match(/[\d\-]+/)[0];
+			}
 			if (fieldTitle.indexOf("Schlagworte") != -1) {
 				var tags = fieldContent.split(/\s*;\s*/);
 				for (var i in tags) {
@@ -129,7 +131,6 @@ function scrape(doc, url) {
 		associateData(newItem, dataTags, "Abstract:", "abstractNote");
 		associateData(newItem, dataTags, "Sprache:", "language");
 		associateData(newItem, dataTags, "Link zum Volltext:", "url");
-		associateData(newItem, dataTags, "ISBN:", "ISBN");
 		associateData(newItem, dataTags, "Reihe:", "series");
 		newItem.complete();
 	}
@@ -159,75 +160,146 @@ function scrape(doc, url) {
 			scrape(doc, url);
 		}
 	} /** BEGIN TEST CASES **/
-var testCases = [{
-	"type": "web",
-	"url": "http://www.ism-info.de/ism-info.html?qdb=ism&a=eb2799e28b9ab145",
-	"items": [{
-		"itemType": "journalArticle",
-		"creators": [{
-			"firstName": "Olaf",
-			"lastName": "Jandura",
-			"creatorType": "author"
-		}],
-		"notes": [],
-		"tags": ["Politik", "Medien", "Publizistik", "Wahl", "Bundestag", "Berichterstattung", "Chancengleichheit", "Partei", "Analyse", "Vergleich", "Empirische Untersuchung"],
-		"seeAlso": [],
-		"attachments": [],
-		"date": "2011",
-		"publicationTitle": "Publizistik",
-		"pages": "181-197",
-		"volume": "56",
-		"issue": "2",
-		"title": "Publizistische Chancengleichheit in der Wahlkampfberichterstattung?: eine Untersuchung zur medialen Repräsentation der im Bundestag vertretenen Parteien",
-		"abstractNote": "Demokratie basiert auf politischem Wettbewerb. Parteien entwickeln Programme und Lösungsvorschläge für drängende Probleme und stellen diese dann zur Wahl. Ein fairer Wettbewerb um die Herrschaftspositionen von morgen setzt dabei die Chancengleichheit der Parteien heute voraus. Der Gesetzgeber hat eine Reihe von Regelungen erlassen, die die Chancengleichheit der Parteien in diesem Wettbewerb gewährleisten sollen. Da Medienberichterstattung für die politische Kommunikation immer bedeutender wird, geht dieser Beitrag der Frage nach, ob es neben der politischen auch eine publizistische Chancengleichheit gibt und an welchen Indikatoren diese festgemacht werden kann. Nach einer umfassenden theoretischen Auseinandersetzung wird diese Frage empirisch anhand der Analyse der Berichterstattung in der heißen Wahlkampfphase dreier Bundestagswahlkämpfe (1998, 2002, 2009) untersucht. Dabei zeigt sich, dass eine publizistische Chancengleichheit für die im Bundestag vertretenen Parteien quantitativ durchaus gegeben ist. Die Zugangschancen zu den Medien sind gerade für die kleinen Parteien besser als die Abstufung der Chancengleichheit bei der staatlichen Leistungsgewährung. (DIPF/Orig.)",
-		"language": "Deutsch",
-		"libraryCatalog": "Informationssystem Medienpaedagogik",
-		"shortTitle": "Publizistische Chancengleichheit in der Wahlkampfberichterstattung?"
-	}]
-}, {
-	"type": "web",
-	"url": "http://www.ism-info.de/ism-info.html?qdb=ism&a=0f97836d7dbbb1fb",
-	"items": [{
-		"itemType": "book",
-		"creators": [{
-			"firstName": "Klaus-Dieter",
-			"lastName": "Felsmann",
-			"creatorType": "editor"
-		}],
-		"notes": [],
-		"tags": ["Fotografie", "Unterhaltung", "Massenmedien", "Beeinflussung", "Politik", "Wahrnehmung", "Gesellschaft", "Politisches Bewusstsein", "Freiheit", "Begriff", "Lebenswelt", "Fernsehen", "Rezeption", "Digitale Medien", "Öffentlichkeit", "Bildung", "Medienkompetenz", "Medienangebot", "Postman, Neil", "Bildungsangebot", "Gestaltung", "Bildungsprozess", "Urheberrecht", "Unterhaltungssendung", "Terrorismus", "Bundestag", "Wahl", "Fernsehserie", "Demokratie", "Rundfunk", "Dokumentarfilm", "Hörfunk", "Kino", "Fernsehsendung", "Propaganda", "Deutschland-DDR"],
-		"seeAlso": [],
-		"attachments": [],
-		"date": "2010",
-		"publisher": "kopaed",
-		"place": "München",
-		"numPages": "208",
-		"title": "Die Bedeutung der Unterhaltungsmedien für die Konstruktion des Politikbildes: erweiterte Dokumentation zu den 13. Buckower Mediengesprächen 2009",
-		"abstractNote": "Gemeinhin trennen wir bei der Frage, wodurch Menschen ihre politische Meinung herausbilden, zwischen dem Informationsangebot der Medien, das wir hier für relevant halten, auf der einen und dem Unterhaltungsangebot, dem wir keine Bedeutung für das Politikverständnis unterstellen, auf der anderen Seite. Eine solche strikte Trennung erscheint angesichts der weitgehenden Medialisierung unseres Alltags für ein konstruktives Handeln inzwischen nicht mehr ausreichend bzw. angemessen. Der vorliegende Band stellt zunächst die Frage nach Politikbildern, die sich aus Unterhaltungsmedien ableiten lassen, und stellt diese in einen komplexen historischen, philosophischen sowie wirkungsrelevanten Zusammenhang. Einzelne genrespezifische Fallstudien belegen darüber hinaus sehr anschaulich die These, dass Unterhaltungsmedien zunehmend eine bestimmende Bedeutung bei der Konstruktion von Politikbildern zukommt. Für den Bildungsprozess stellen diese Angebote einen reichhaltigen informell erworbenen Wissens- und Kompetenzfundus dar, den es zu nutzen gilt. (DIPF/Orig.)",
-		"language": "Deutsch",
-		"ISBN": "ISBN 978-3-86736-013-5 EUR 13.8",
-		"series": "Buckower Mediengespräche; 13",
-		"libraryCatalog": "Informationssystem Medienpaedagogik",
-		"shortTitle": "Die Bedeutung der Unterhaltungsmedien für die Konstruktion des Politikbildes"
-	}]
-}, {
-	"type": "web",
-	"url": "http://www.ism-info.de/ism-info.html?qdb=ism&a=e9931f71c58b60fa",
-	"items": [{
-		"itemType": "film",
-		"creators": [],
-		"notes": [],
-		"tags": ["Graf Schenk von Stauffenberg", "20. Jahrhundert (bis 1945)", "Persönlichkeitsbilder", "Attentat", "Widerstand", "Nationalsozialismus"],
-		"seeAlso": [],
-		"attachments": [],
-		"date": "2001",
-		"title": "Vom Untertan zum Attentäter",
-		"abstractNote": "Die Zwanzigerjahre in Deutschland: Zeit der Weimarer Republik. Der Kaiser weilte im holländischen Exil, neue Autoritäten fehlten, das Volk probte die Demokratie, soziale Spannungen wuchsen. Der Dichter Stefan George träumte währenddessen von einem neuen, edlen Deutschland. Er nahm die Brüder Stauffenberg in seinen Bund auf. Carl Schenk von Stauffenberg, der nach dem Abitur eine militärische Laufbahn eingeschlagen hatte, stimmte für Hitler als Reichskanzler, da er die Parteien der Weimarer Republik verabscheute. Trotzdem war Hitler in seinen Augen ein Kleinbürger, dessen Untertan er schon aus Familientradition nicht sein konnte. Als die deutschen Soldaten völlig unzureichend ausgerüstet in den Russlandfeldzug geschickt wurden, erkannte Stauffenberg den Größenwahn Hitlers und drängte bei Gesprächen mit Offizieren auf Hitlers Ermordung. Am 20. Juli 1944 übernahm Stauffenberg die Rolle des Attentäters. Hitler überlebte den Anschlag und konnte schon wenige Stunden danach den italienischen Diktator Mussolini empfangen. Um Mitternacht bildete Generaloberst Fromm ein Standgericht und verurteilte Stauffenberg und drei weitere Offiziere zum Tode.",
-		"libraryCatalog": "Informationssystem Medienpaedagogik"
-	}]
-}, {
-	"type": "web",
-	"url": "http://www.ism-info.de/ism-info.html?feldname1=Freitext&feldinhalt1=Demokratie&bool1=and&BoolSelect_2=AND&feldname2=Schlagworte&feldinhalt2=&bool2=and&BoolSelect_3=AND&feldname3=Personen&feldinhalt3=&bool3=and&BoolSelect_4=AND&feldname4=Titel&feldinhalt4=&bool4=and&BoolSelect_5=AND&feldname5=Jahr&feldinhalt5=&bool5=and&dokumenttyp%5B%5D=1&dokumenttyp%5B%5D=2&dokumenttyp%5B%5D=4&dokumenttyp%5B%5D=8&dokumenttyp%5B%5D=32&dokumenttyp%5B%5D=16&sprache%5B%5D=1&sprache%5B%5D=2&sprache%5B%5D=4&Suchen=Suchen&t=Suchen&ckd=yes&qdb=ism&kontrast=",
-	"items": "multiple"
-}]
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.ism-info.de/ism-info.html?qdb=ism&a=eb2799e28b9ab145",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Olaf",
+						"lastName": "Jandura",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Politik",
+					"Medien",
+					"Publizistik",
+					"Wahl",
+					"Bundestag",
+					"Berichterstattung",
+					"Chancengleichheit",
+					"Partei",
+					"Analyse",
+					"Vergleich",
+					"Empirische Untersuchung"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"date": "2011",
+				"publicationTitle": "Publizistik",
+				"pages": "181-197",
+				"volume": "56",
+				"issue": "2",
+				"title": "Publizistische Chancengleichheit in der Wahlkampfberichterstattung?: eine Untersuchung zur medialen Repräsentation der im Bundestag vertretenen Parteien",
+				"abstractNote": "Demokratie basiert auf politischem Wettbewerb. Parteien entwickeln Programme und Lösungsvorschläge für drängende Probleme und stellen diese dann zur Wahl. Ein fairer Wettbewerb um die Herrschaftspositionen von morgen setzt dabei die Chancengleichheit der Parteien heute voraus. Der Gesetzgeber hat eine Reihe von Regelungen erlassen, die die Chancengleichheit der Parteien in diesem Wettbewerb gewährleisten sollen. Da Medienberichterstattung für die politische Kommunikation immer bedeutender wird, geht dieser Beitrag der Frage nach, ob es neben der politischen auch eine publizistische Chancengleichheit gibt und an welchen Indikatoren diese festgemacht werden kann. Nach einer umfassenden theoretischen Auseinandersetzung wird diese Frage empirisch anhand der Analyse der Berichterstattung in der heißen Wahlkampfphase dreier Bundestagswahlkämpfe (1998, 2002, 2009) untersucht. Dabei zeigt sich, dass eine publizistische Chancengleichheit für die im Bundestag vertretenen Parteien quantitativ durchaus gegeben ist. Die Zugangschancen zu den Medien sind gerade für die kleinen Parteien besser als die Abstufung der Chancengleichheit bei der staatlichen Leistungsgewährung. (DIPF/Orig.)",
+				"language": "Deutsch",
+				"libraryCatalog": "Informationssystem Medienpaedagogik",
+				"shortTitle": "Publizistische Chancengleichheit in der Wahlkampfberichterstattung?"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.ism-info.de/ism-info.html?qdb=ism&a=0f97836d7dbbb1fb",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Klaus-Dieter",
+						"lastName": "Felsmann",
+						"creatorType": "editor"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Fotografie",
+					"Unterhaltung",
+					"Massenmedien",
+					"Beeinflussung",
+					"Politik",
+					"Wahrnehmung",
+					"Gesellschaft",
+					"Politisches Bewusstsein",
+					"Freiheit",
+					"Begriff",
+					"Lebenswelt",
+					"Fernsehen",
+					"Rezeption",
+					"Digitale Medien",
+					"Öffentlichkeit",
+					"Bildung",
+					"Medienkompetenz",
+					"Medienangebot",
+					"Postman, Neil",
+					"Bildungsangebot",
+					"Gestaltung",
+					"Bildungsprozess",
+					"Urheberrecht",
+					"Unterhaltungssendung",
+					"Terrorismus",
+					"Bundestag",
+					"Wahl",
+					"Fernsehserie",
+					"Demokratie",
+					"Rundfunk",
+					"Dokumentarfilm",
+					"Hörfunk",
+					"Kino",
+					"Fernsehsendung",
+					"Propaganda",
+					"Deutschland-DDR"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"date": "2010",
+				"publisher": "kopaed",
+				"place": "München",
+				"numPages": "208",
+				"title": "Die Bedeutung der Unterhaltungsmedien für die Konstruktion des Politikbildes: erweiterte Dokumentation zu den 13. Buckower Mediengesprächen 2009",
+				"abstractNote": "Gemeinhin trennen wir bei der Frage, wodurch Menschen ihre politische Meinung herausbilden, zwischen dem Informationsangebot der Medien, das wir hier für relevant halten, auf der einen und dem Unterhaltungsangebot, dem wir keine Bedeutung für das Politikverständnis unterstellen, auf der anderen Seite. Eine solche strikte Trennung erscheint angesichts der weitgehenden Medialisierung unseres Alltags für ein konstruktives Handeln inzwischen nicht mehr ausreichend bzw. angemessen. Der vorliegende Band stellt zunächst die Frage nach Politikbildern, die sich aus Unterhaltungsmedien ableiten lassen, und stellt diese in einen komplexen historischen, philosophischen sowie wirkungsrelevanten Zusammenhang. Einzelne genrespezifische Fallstudien belegen darüber hinaus sehr anschaulich die These, dass Unterhaltungsmedien zunehmend eine bestimmende Bedeutung bei der Konstruktion von Politikbildern zukommt. Für den Bildungsprozess stellen diese Angebote einen reichhaltigen informell erworbenen Wissens- und Kompetenzfundus dar, den es zu nutzen gilt. (DIPF/Orig.)",
+				"language": "Deutsch",
+				"ISBN": "ISBN 978-3-86736-013-5 EUR 13.8",
+				"series": "Buckower Mediengespräche; 13",
+				"libraryCatalog": "Informationssystem Medienpaedagogik",
+				"shortTitle": "Die Bedeutung der Unterhaltungsmedien für die Konstruktion des Politikbildes"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.ism-info.de/ism-info.html?qdb=ism&a=e9931f71c58b60fa",
+		"items": [
+			{
+				"itemType": "film",
+				"creators": [],
+				"notes": [],
+				"tags": [
+					"Graf Schenk von Stauffenberg",
+					"20. Jahrhundert (bis 1945)",
+					"Persönlichkeitsbilder",
+					"Attentat",
+					"Widerstand",
+					"Nationalsozialismus"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"date": "2001",
+				"title": "Vom Untertan zum Attentäter",
+				"abstractNote": "Die Zwanzigerjahre in Deutschland: Zeit der Weimarer Republik. Der Kaiser weilte im holländischen Exil, neue Autoritäten fehlten, das Volk probte die Demokratie, soziale Spannungen wuchsen. Der Dichter Stefan George träumte währenddessen von einem neuen, edlen Deutschland. Er nahm die Brüder Stauffenberg in seinen Bund auf. Carl Schenk von Stauffenberg, der nach dem Abitur eine militärische Laufbahn eingeschlagen hatte, stimmte für Hitler als Reichskanzler, da er die Parteien der Weimarer Republik verabscheute. Trotzdem war Hitler in seinen Augen ein Kleinbürger, dessen Untertan er schon aus Familientradition nicht sein konnte. Als die deutschen Soldaten völlig unzureichend ausgerüstet in den Russlandfeldzug geschickt wurden, erkannte Stauffenberg den Größenwahn Hitlers und drängte bei Gesprächen mit Offizieren auf Hitlers Ermordung. Am 20. Juli 1944 übernahm Stauffenberg die Rolle des Attentäters. Hitler überlebte den Anschlag und konnte schon wenige Stunden danach den italienischen Diktator Mussolini empfangen. Um Mitternacht bildete Generaloberst Fromm ein Standgericht und verurteilte Stauffenberg und drei weitere Offiziere zum Tode.",
+				"libraryCatalog": "Informationssystem Medienpaedagogik"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.ism-info.de/ism-info.html?feldname1=Freitext&feldinhalt1=Demokratie&bool1=and&BoolSelect_2=AND&feldname2=Schlagworte&feldinhalt2=&bool2=and&BoolSelect_3=AND&feldname3=Personen&feldinhalt3=&bool3=and&BoolSelect_4=AND&feldname4=Titel&feldinhalt4=&bool4=and&BoolSelect_5=AND&feldname5=Jahr&feldinhalt5=&bool5=and&dokumenttyp%5B%5D=1&dokumenttyp%5B%5D=2&dokumenttyp%5B%5D=4&dokumenttyp%5B%5D=8&dokumenttyp%5B%5D=32&dokumenttyp%5B%5D=16&sprache%5B%5D=1&sprache%5B%5D=2&sprache%5B%5D=4&Suchen=Suchen&t=Suchen&ckd=yes&qdb=ism&kontrast=",
+		"items": "multiple"
+	}
+]
 /** END TEST CASES **/

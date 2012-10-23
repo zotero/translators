@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-09-23 14:56:49"
+	"lastUpdated": "2012-10-22 15:38:16"
 }
 
 /*
@@ -92,7 +92,10 @@ Zotero.Utilities.HTTP.doGet(url, function(page){
 	}
 
 	// 作者
-	pattern = /<span><span [^>]*?>作者<\/span>:(.*?)<\/span>/;
+	
+	page = page.replace(/\n/g, "")
+	//Z.debug(page)
+	pattern = /<span>\s*<span[^>]*?>\s*作者<\/span>:(.*?)<\/span>/;
 	if (pattern.test(page)) {
 		var authorNames = trimTags(pattern.exec(page)[1]);
 		pattern = /(\[.*?\]|\(.*?\)|（.*?）)/g;
@@ -115,7 +118,7 @@ Zotero.Utilities.HTTP.doGet(url, function(page){
 	}
 	
 	// 译者
-	pattern = /<span><span [^>]*?>译者<\/span>:(.*?)<\/span>/;
+	pattern = /<span>\s*<span [^>]*?>\s*译者<\/span>:(.*?)<\/span>/;
 	if (pattern.test(page)) {
 		var translatorNames = trimTags(pattern.exec(page)[1]);
 		pattern = /(\[.*?\])/g;
@@ -175,72 +178,12 @@ Zotero.Utilities.HTTP.doGet(url, function(page){
 	}
 	
 	// 简介
-	pattern = /<h2[^>]*?>(?:内容)?简介[\s\S]*?<\/h2>([\s\S]*?)<\/div>/;
-	if (pattern.test(page)) {
-		var intro = pattern.exec(page)[1];
-		intro = trimTags(intro.replace(/(<br\/>)/g, "\n"));
-		pattern = /\(展开全部\)([\s\S]*)/;
-		if (pattern.test(intro)) {
-			intro = pattern.exec(intro)[1];
-		}
-		pattern = /\S/;
-		if (pattern.test(intro)) {
-			newItem.abstractNote = "图书简介：\n"
-				+ trimMultispace(intro);
-		}
-//		Zotero.debug("abstractNote: "+newItem.abstractNote);
+	var tags = ZU.xpath(doc, '//div[@id="db-tags-section"]/div/a');
+	for (i in tags){
+		newItem.tags.push(tags[i].textContent)
 	}
+	newItem.abstractNote = ZU.xpathText(doc, '//span[@class="short"]/div[@class="intro"]/p')
 	
-	// 作者简介
-	pattern = /<h2[^>]*?>作者简介[\s\S]*?<\/h2>([\s\S]*?)<\/div>/;
-	if (pattern.test(page)) {
-		var intro = pattern.exec(page)[1];
-		intro = trimTags(intro.replace(/(<br\/>)/g, "\n"));
-		pattern = /\(展开全部\)([\s\S]*)/;
-		if (pattern.test(intro)) {
-			intro = pattern.exec(intro)[1];
-		}
-		
-		if (newItem.abstractNote === undefined) {
-			newItem.abstractNote = "作者简介：\n"
-				+ trimMultispace(intro);
-		} else {
-			newItem.abstractNote += "\n作者简介：\n"
-				+ trimMultispace(intro);
-		}
-//		Zotero.debug("abstractNote: "+newItem.abstractNote);
-	}
-	
-	// 丛书信息
-	pattern = /<h2>丛书信息<\/h2>([\s\S]*?)<\/div>/;
-	if (pattern.test(page)) {
-		var intro = pattern.exec(page)[1];
-		intro = Zotero.Utilities.trimInternal(trimTags(intro));
-
-		if (newItem.abstractNote === undefined) {
-			newItem.abstractNote = "丛书信息：\n" + intro;
-		} else {
-			newItem.abstractNote += "\n丛书信息：\n" + intro;
-		}
-//		Zotero.debug("abstractNote: "+newItem.abstractNote);
-	}
-	
-	// 标签
-	pattern = /<h2\s*?>豆瓣成员常用的标签([\s\S]*?)<\/div>/;
-	if (pattern.test(page)) {
-		var labels = pattern.exec(page)[1];
-		pattern = /<a [^>]*?>(.*?)<\/a>/g;
-
-		var result = labels.match(pattern);
-		for (var i=0; i<result.length; i++) {
-			var label = trimTags(result[i]);
-			
-			if (label) {
-				newItem.tags.push(label);
-			}
-//			Zotero.debug(label);
-		}
-	}
 	newItem.complete();
 });
 }
@@ -328,7 +271,7 @@ var testCases = [
 				"numPages": "400",
 				"publisher": "Vintage",
 				"date": "2003-06-30",
-				"abstractNote": "图书简介：\n\nWhen he hears her favourite Beatles song, Toru Watanabe recalls his first love Naoko, the girlfriend of his best friend Kizuki. Immediately he is transported back almost twenty years to his student days in Tokyo, adrift in a world of uneasy friendships, casual sex, passion, loss and desire - to a time when an impetuous young woman called Midori marches into his life and he has to choose between the future and the past. (20021018)\n点击链接进入中文版： \n挪威的森林　　 \n\n作者简介：\n　　Haruki Murakami (村上春樹, Murakami Haruki, born January 12, 1949) is a popular contemporary Japanese writer and translator.His work has been described by the Virginia Quarterly Review as &quot;easily accessible, yet profoundly complex.&quot;",
+				"abstractNote": "When he hears her favourite Beatles song, Toru Watanabe recalls his first love Naoko, the girlfriend of his best friend Kizuki. Immediately he is transported back almost twenty years to his student days in Tokyo, adrift in a world of uneasy friendships, casual sex, passion, loss and desire - to a time when an impetuous young woman called Midori marches into his life and he has ..., (展开全部)",
 				"libraryCatalog": "Douban",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-07 02:11:30"
+	"lastUpdated": "2012-10-22 16:26:28"
 }
 
 /*
@@ -179,7 +179,7 @@ var testCases = [
 				"url": "http://www.sueddeutsche.de/politik/verdacht-gegen-hessischen-verfassungsschuetzer-spitzname-kleiner-adolf-1.1190178",
 				"title": "Verdacht gegen hessischen Verfassungsschützer: Spitzname \"Kleiner Adolf\"",
 				"abstractNote": "Als die Zwickauer Zelle in einem Kasseler Internet-Café Halit Y. hinrichtet, surft ein hessischer Verfassungsschützer dort im Netz. In seiner Wohnung findet die Polizei später Hinweise auf eine rechtsradikale Gesinnung - doch die Ermittlungen gegen den Mann werden eingestellt. Dabei bleiben viele Fragen offen.",
-				"date": "2011-11-15",
+				"date": "2011-11-16",
 				"section": "politik",
 				"publicationTitle": "sueddeutsche.de",
 				"ISSN": "0174-4917",

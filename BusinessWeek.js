@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-06-30 23:54:08"
+	"lastUpdated": "2012-10-21 22:38:34"
 }
 
 function detectWeb(doc, url) {
@@ -26,8 +26,8 @@ function doWeb(doc, url) {
 		if (ZU.xpathText(doc, '//h3[@class="story"]/a')){
 			var results = doc.evaluate('//h3[@class="story"]/a', doc, null, XPathResult.ANY_TYPE, null);
 		}
-		else if (ZU.xpathText(doc, '//div[@class="search_result"]/a')){
-				var results = doc.evaluate('//div[@class="search_result"]/a', doc, null, XPathResult.ANY_TYPE, null);
+		else if (ZU.xpathText(doc, '//div[@class="search_result"]/a[./h4]')){
+				var results = doc.evaluate('//div[@class="search_result"]/a[./h4]', doc, null, XPathResult.ANY_TYPE, null);
 		}
 		var result;
 		var items = new Object();
@@ -109,11 +109,6 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://search.businessweek.com/Search?i=1&resultsperpage=20&searchterm=linux&sortby=date&u1=searchterm",
-		"items": "multiple"
 	},
 	{
 		"type": "web",
