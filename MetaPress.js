@@ -1,83 +1,80 @@
 {
 	"translatorID": "62c0e36a-ee2f-4aa0-b111-5e2cbd7bb5ba",
 	"label": "MetaPress",
-	"creator": "Michael Berkowitz",
+	"creator": "Michael Berkowitz, Sebastian Karcher",
 	"target": "https?://(.*)metapress\\.com/",
-	"minVersion": "1.0.0b4.r5",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-10-22 16:16:29"
+	"lastUpdated": "2012-10-22 23:40:09"
 }
 
 function detectWeb(doc, url) {
-    if (ZU.xpath(doc, '//div[@class="primitive article"]/h2').length > 0) {
-        return "multiple";
-    } else if (url.match(/content\/[^?/]/)) {
-        return "journalArticle";
-    }
+	if (ZU.xpath(doc, '//div[@class="primitive article"]/h2/a[1]').length > 0) {
+		return "multiple";
+	} else if (url.match(/content\/[^?/]/)) {
+		return "journalArticle";
+	}
 }
 
 function doWeb(doc, url) {
-    var host = doc.location.host;
-    var artids = new Array();
-    if (detectWeb(doc, url) == "multiple") {
-
-        var hits = {};
-        var urls = [];
-        var results = ZU.xpath(doc, '//div[@class="primitive article"]/h2/a[1]');
-        for (var i in results) {
-            hits[results[i].href] = results[i].textContent;
-        }
-        Z.selectItems(hits, function (items) {
-            if (items == null) return true;
-            for (var j in items) {
-                urls.push(j);
-            }
-            ZU.processDocuments(urls, scrape, function () {});
-        })
-    } else {
-        scrape(doc, url)
-    }
+	if (detectWeb(doc, url) == "multiple") {
+		var hits = {};
+		var urls = [];
+		var results = ZU.xpath(doc, '//div[@class="primitive article"]/h2/a[1]');
+		for (var i in results) {
+			hits[results[i].href] = results[i].textContent;
+		}
+		Z.selectItems(hits, function (items) {
+			if (items == null) return true;
+			for (var j in items) {
+				urls.push(j);
+			}
+			ZU.processDocuments(urls, scrape);
+		})
+	} else {
+		scrape(doc, url)
+	}
 }
 
 function scrape(doc, url) {
-    var host = doc.location.host;
-    var tagsx = '//td[@class="mainPageContent"]/div[3]';
-    var artid = url.match(/content\/([^\/]+)/)[1]
-    if (doc.evaluate(tagsx, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-        var tags = Zotero.Utilities.trimInternal(doc.evaluate(tagsx, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent).split(",");
-    }
-    Zotero.Utilities.HTTP.doPost('http://' + host + '/export.mpx', 'code=' + artid + '&mode=ris', function (text) {
-        // load translator for RIS
-        //some entries have empty author fields, or fields with just a comma. Delete those.
-        text = text.replace(/AU  - [\s,]+\n/g, "");
-        //Z.debug(text);
-        var translator = Zotero.loadTranslator("import");
-        translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-        translator.setString(text);
-        translator.setHandler("itemDone", function (obj, item) {
-            var pdfurl = 'http://' + host + '/content/' + artid + '/fulltext.pdf';
-            item.attachments = [{
-                url: item.url,
-                title: "MetaPress Snapshot",
-                mimeType: "text/html"
-            }, {
-                url: pdfurl,
-                title: "MetaPress Full Text PDF",
-                mimeType: "application/pdf"
-            }];
-            //if (tags) item.tags = tags;
-            if (item.abstractNote) {
-                if (item.abstractNote.substr(0, 8) == "Abstract") item.abstractNote = Zotero.Utilities.trimInternal(item.abstractNote.substr(8));
-            }
-            item.complete();
-        });
-        translator.translate();
-        Zotero.done();
-    });
+	var host = doc.location.host;
+	var tagsx = '//td[@class="mainPageContent"]/div[3]';
+	var artid = url.match(/content\/([^\/]+)/)[1]
+	if (doc.evaluate(tagsx, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		var tags = Zotero.Utilities.trimInternal(doc.evaluate(tagsx, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent).split(",");
+	}
+	Zotero.Utilities.HTTP.doPost('/export.mpx', 'code=' + artid + '&mode=ris', function (text) {
+		// load translator for RIS
+		//some entries have empty author fields, or fields with just a comma. Delete those.
+		text = text.replace(/AU  - [\s,]+\n/g, "");
+		//Z.debug(text);
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+		translator.setString(text);
+		translator.setHandler("itemDone", function (obj, item) {
+			var pdfurl = 'http://' + host +'/content/' + artid + '/fulltext.pdf';
+			item.attachments = [{
+				url: item.url,
+				title: "MetaPress Snapshot",
+				mimeType: "text/html"
+			}, {
+				url: pdfurl,
+				title: "MetaPress Full Text PDF",
+				mimeType: "application/pdf"
+			}];
+			//if (tags) item.tags = tags;
+			if (item.abstractNote) {
+				if (item.abstractNote.substr(0, 8) == "Abstract") item.abstractNote = Zotero.Utilities.trimInternal(item.abstractNote.substr(8));
+			}
+			item.complete();
+		});
+		translator.translate();
+		Zotero.done();
+	});
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
