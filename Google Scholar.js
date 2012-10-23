@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-10-23 07:39:08"
+	"lastUpdated": "2012-10-23 08:09:50"
 }
 
 /*
@@ -128,7 +128,7 @@ function decrementCounter(doc) {
 
 //determine item type from a result node
 function determineType(result) {
-	var titleHref =  ZU.xpathText(result, './h3[@class="gs_rt"]/a[1]/@href');
+	var titleHref =  ZU.xpathText(result, './/h3[@class="gs_rt"]/a[1]/@href');
 
 	if(titleHref) {
 		if(titleHref.indexOf('/scholar_case?') != -1) {
@@ -412,7 +412,7 @@ function scrapePatentResults(doc, patents) {
 /** Until SOP is "fixed" we'll scrape as much information as we can from the
  * result block instead of using Google Patents translator
 		var patentUrl = ZU.xpathText(patents[i].result,
-									'./h3[@class="gs_rt"]/a[1]/@href');
+									'.//h3[@class="gs_rt"]/a[1]/@href');
 
 		if(patentUrl) {
 			(function(doc, url) {
