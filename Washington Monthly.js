@@ -209,12 +209,16 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
-	},
+	}
+]
+/** END TEST CASES **/
+/*
+	This test commented out because it intermittently results in very high memory use and
+	crashes.
 	{
 		"type": "web",
 		"url": "http://www.washingtonmonthly.com/search2.php?search=europe",
 		"items": "multiple",
 		"defer": true
 	}
-]
-/** END TEST CASES **/
+*/
