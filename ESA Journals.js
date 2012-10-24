@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-10-24 00:49:44"
+	"lastUpdated": "2012-10-24 16:51:03"
 }
 
 /*
@@ -68,6 +68,7 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
+	url = url.replace(/\?prev.+/, "")
 	var pdfurl = url.replace(/\/doi\/abs\/|\/doi\/full\//, "/doi/pdf/");
 	var doi = url.match(/10\.[^?]+/)[0]
 	var citationurl = url.replace(/\/doi\/abs\/|\/doi\/full\//, "/action/showCitFormats?doi=");
