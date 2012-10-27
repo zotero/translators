@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-10-22 15:44:03"
+	"lastUpdated": "2012-10-26 14:20:02"
 }
 
 /*
@@ -261,10 +261,10 @@ var testCases = [
 				"publisher": "kopaed",
 				"place": "München",
 				"numPages": "208",
+				"ISBN": "978-3-86736-013-5",
 				"title": "Die Bedeutung der Unterhaltungsmedien für die Konstruktion des Politikbildes: erweiterte Dokumentation zu den 13. Buckower Mediengesprächen 2009",
 				"abstractNote": "Gemeinhin trennen wir bei der Frage, wodurch Menschen ihre politische Meinung herausbilden, zwischen dem Informationsangebot der Medien, das wir hier für relevant halten, auf der einen und dem Unterhaltungsangebot, dem wir keine Bedeutung für das Politikverständnis unterstellen, auf der anderen Seite. Eine solche strikte Trennung erscheint angesichts der weitgehenden Medialisierung unseres Alltags für ein konstruktives Handeln inzwischen nicht mehr ausreichend bzw. angemessen. Der vorliegende Band stellt zunächst die Frage nach Politikbildern, die sich aus Unterhaltungsmedien ableiten lassen, und stellt diese in einen komplexen historischen, philosophischen sowie wirkungsrelevanten Zusammenhang. Einzelne genrespezifische Fallstudien belegen darüber hinaus sehr anschaulich die These, dass Unterhaltungsmedien zunehmend eine bestimmende Bedeutung bei der Konstruktion von Politikbildern zukommt. Für den Bildungsprozess stellen diese Angebote einen reichhaltigen informell erworbenen Wissens- und Kompetenzfundus dar, den es zu nutzen gilt. (DIPF/Orig.)",
 				"language": "Deutsch",
-				"ISBN": "ISBN 978-3-86736-013-5 EUR 13.8",
 				"series": "Buckower Mediengespräche; 13",
 				"libraryCatalog": "Informationssystem Medienpaedagogik",
 				"shortTitle": "Die Bedeutung der Unterhaltungsmedien für die Konstruktion des Politikbildes"

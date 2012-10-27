@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-04-27 13:03:31"
+	"lastUpdated": "2012-10-26 14:14:51"
 }
 
 function detectWeb(doc, url) {
@@ -286,13 +286,14 @@ var testCases = [
 				],
 				"seeAlso": [],
 				"attachments": [],
+				"title": "Miguel Cervantès / par É. Cat,...",
+				"publisher": "Gedalge (Paris)",
+				"date": "1892",
 				"language": "French",
 				"rights": "domaine public",
 				"url": "http://gallica.bnf.fr/ark:/12148/bpt6k58121413",
 				"libraryCatalog": "Gallica",
-				"title": "Miguel Cervantès / par É. Cat,...",
-				"publisher": "Gedalge (Paris)",
-				"date": "1892"
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},

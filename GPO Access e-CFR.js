@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-10-14 22:25:57"
+	"lastUpdated": "2012-10-26 14:19:04"
 }
 
 function detectWeb(doc, url) {
@@ -44,7 +44,7 @@ function scrape(doc) {
 	}
 	else{
 		var type2 = true;
-	 	title = ZU.xpathText(doc, '//p[@class="fp"][2]')
+	 	title = ZU.xpathText(doc, '//td/div/p[@class="fp"]')
 	}
 	 	newItem.title = "e-CFR: " + title.trim();
 	 	newItem.codeNumber = title.trim();

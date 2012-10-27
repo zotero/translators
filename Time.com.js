@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-10-22 16:40:56"
+	"lastUpdated": "2012-10-26 17:03:50"
 }
 
 function detectWeb(doc, url) {
@@ -230,7 +230,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://moneyland.time.com/2012/03/02/struggling-to-stay-afloat-number-of-underwater-homeowners-keeps-on-rising/?iid=pf-main-lede",
+		"url": "http://business.time.com/2012/03/02/struggling-to-stay-afloat-number-of-underwater-homeowners-keeps-on-rising/?iid=pf-main-lede/",
 		"items": [
 			{
 				"itemType": "magazineArticle",
@@ -268,15 +268,15 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"itemID": "http://moneyland.time.com/2012/03/02/struggling-to-stay-afloat-number-of-underwater-homeowners-keeps-on-rising/?iid=pf-main-lede",
+				"itemID": "http://business.time.com/2012/03/02/struggling-to-stay-afloat-number-of-underwater-homeowners-keeps-on-rising/?iid=pf-main-lede/",
 				"title": "Struggling to Stay Afloat: Number of Underwater Homeowners Keeps on Rising",
 				"publicationTitle": "Time",
-				"url": "http://moneyland.time.com/2012/03/02/struggling-to-stay-afloat-number-of-underwater-homeowners-keeps-on-rising/?iid=pf-main-lede",
+				"url": "http://business.time.com/2012/03/02/struggling-to-stay-afloat-number-of-underwater-homeowners-keeps-on-rising/?iid=pf-main-lede/",
 				"abstractNote": "Despite signs that some housing markets are improving, the overall trend is for home prices (and values) to keep dropping—and dropping. As values shrink, more and more homeowners find themselves underwater, the unfortunate scenario in which one owes more on the mortgage than the home is worth.",
 				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "moneyland.time.com",
-				"ISSN": "0040-718X",
-				"shortTitle": "Struggling to Stay Afloat"
+				"libraryCatalog": "business.time.com",
+				"shortTitle": "Struggling to Stay Afloat",
+				"ISSN": "0040-718X"
 			}
 		]
 	}
