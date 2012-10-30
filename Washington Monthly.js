@@ -123,7 +123,8 @@ choices : { titles : FW.Xpath('//div[@id="content"]//div[@class="gs-title"]/a[no
 urls : FW.Xpath('//div[@id="content"]//div[@class="gs-title"]/a[not(contains(@href, "search.php?"))]').key('href').text() }
 });
 
-/** BEGIN TEST CASES **/
+/** BEGIN TEST CASES **
+These currently seem to intermittently crash the unit tester
 var testCases = [
 	{
 		"type": "web",
@@ -209,16 +210,12 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
-	}
-]
-/** END TEST CASES **/
-/*
-	This test commented out because it intermittently results in very high memory use and
-	crashes.
+	},
 	{
 		"type": "web",
 		"url": "http://www.washingtonmonthly.com/search2.php?search=europe",
 		"items": "multiple",
 		"defer": true
 	}
-*/
+]
+** END TEST CASES **/
