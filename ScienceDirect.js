@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-10-09 05:12:55"
+	"lastUpdated": "2012-10-30 03:46:04"
 }
 
 function detectWeb(doc, url) {
@@ -167,10 +167,9 @@ function doWeb(doc, url) {
 
 			var articles = [];
 			for (var i in selectedItems) {
-				articles.push(i);
+				//articles.push(i);
+				ZU.processDocuments(i, scrape);	//move this out of the loop when ZU.processDocuments is fixed
 			}
-
-			ZU.processDocuments(articles, scrape);
 		});
 	} else {
 		scrape(doc);
@@ -283,6 +282,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "ScienceDirect Snapshot"
+					},
+					{
+						"title": "ScienceDirect Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"title": "Mitochondria-dependent apoptosis in yeast",
