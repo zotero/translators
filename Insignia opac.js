@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-09-27 15:19:28"
+	"lastUpdated": "2012-10-31 15:45:00"
 }
 
 
@@ -58,7 +58,7 @@ function doWeb(doc, url) {
 		item.callNumber = ZU.xpathText(doc, xpathCallNumber);
 		item.edition = ZU.xpathText(doc, xpathEdition);
 		item.publisher = ZU.xpathText(doc, xpathPublisher);
-		tem.notes = ZU.xpathText(doc, xpathDescription);
+		item.notes = ZU.xpathText(doc, xpathDescription);
 		
 		
 		//112 p. : col. ill. ; 15 cm..
