@@ -21,7 +21,7 @@ function detectWeb(doc, url) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
 	
-	var items = doc.evaluate('//input[@name="EntrezSystem2.PEntrez.Pubmed.Pubmed_ResultsPanel.Pubmed_ResultsController.ResultCount"]', doc,
+	var items = doc.evaluate('//input[@name="EntrezSystem2.PEntrez.PubMed.Pubmed_ResultsPanel.Pubmed_ResultsController.ResultCount"]', doc,
 			nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if (items) {
 		Zotero.debug("Have ResultCount " + items.value);
