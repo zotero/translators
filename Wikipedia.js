@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-24 18:40:17"
+	"lastUpdated": "2012-11-01 15:59:50"
 }
 
 /**
@@ -31,7 +31,8 @@
 */
 
 function detectWeb(doc, url) {
-	return 'encyclopediaArticle';
+	if(ZU.xpathText(doc, '//h1[@id="firstHeading"]/span'))
+		return 'encyclopediaArticle';
 }
 
 function doWeb(doc, url) {
@@ -87,7 +88,7 @@ function doWeb(doc, url) {
 	item.language = doc.documentElement.lang;
 
 	var abs = ZU.xpathText(doc, '//div[@id="mw-content-text"]/p[1]', null, '');
-	item.abstractNote = ZU.trimInternal(abs);
+	if(abs) item.abstractNote = ZU.trimInternal(abs);
 
 	//last modified date is hard to get from the page because it is localized
 	var pageInfoURL = '/w/api.php?action=query&prop=info&format=json&' + 
@@ -133,7 +134,7 @@ var testCases = [
 				"extra": "Page Version ID: 43336101",
 				"language": "ru",
 				"abstractNote": "Росси́я (от греч. Ρωσία — Русь[1]; официально — Росси́йская Федера́ция или Росси́я[2], на практике используется также сокращение — РФ[3]) — страна, расположенная в Восточной Европе и Северной Азии. Является самым большим государством мира (17 098 246 км²[4], что составляет 11,46 % (~1 / 9 часть, равная 11,11 %) площади всей суши Земли, или 12,65 % (~1 / 8 часть, равная 12,5 %) заселённой человеком суши, что почти вдвое больше, чем у занимающей второе место Канады). Население на 2012 год составляет 143 030 106 человек[5], в настоящее время страна занимает девятое место в мире по этому показателю. Государственный язык на всей территории страны — русский. В 23 субъектах федерации наряду с русским используются другие государственные языки. Столица — город Москва. Всего в России 13 городов с населением более миллиона человек: Москва, Санкт-Петербург, Новосибирск, Екатеринбург, Нижний Новгород, Самара, Омск, Казань, Челябинск, Ростов-на-Дону, Уфа, Волгоград[6], Пермь[7].",
-				"date": "2012-09-24T20:44:15Z",
+				"date": "2012-10-31T19:07:35Z",
 				"libraryCatalog": "Wikipedia",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
@@ -163,9 +164,39 @@ var testCases = [
 				"extra": "Page Version ID: 485342619",
 				"language": "en",
 				"abstractNote": "Zotero ( /zoʊˈtɛroʊ/) is free, open source reference management software to manage bibliographic data and related research materials (such as PDFs). Notable features include web browser integration, online syncing, generation of in-text citations, footnotes and bibliographies, as well as integration with the word processors Microsoft Word, LibreOffice, OpenOffice.org Writer and NeoOffice. It is produced by the Center for History and New Media of George Mason University (GMU).",
-				"date": "2012-09-20T13:28:03Z",
+				"date": "2012-10-24T08:29:51Z",
 				"libraryCatalog": "Wikipedia",
 				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://en.wikipedia.org/wiki/Wikipedia:Article_wizard",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"title": "Wikipedia:Article wizard",
+				"rights": "Creative Commons Attribution-ShareAlike License",
+				"encyclopediaTitle": "Wikipedia, the free encyclopedia",
+				"url": "http://en.wikipedia.org/w/index.php?title=Wikipedia:Article_wizard&oldid=520004817",
+				"extra": "Page Version ID: 520004817",
+				"language": "en",
+				"date": "2012-10-26T19:30:45Z",
+				"libraryCatalog": "Wikipedia",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Wikipedia"
 			}
 		]
 	}
