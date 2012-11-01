@@ -12,40 +12,51 @@
 	"inRepository": true,
 	"translatorType": 13,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-10-31 20:31:24"
+	"lastUpdated": "2012-11-01 17:15:07"
 }
 
 function detectWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
-	var items = doc.evaluate('//input[@name="EntrezSystem2.PEntrez.PubMed.Pubmed_ResultsPanel.Pubmed_ResultsController.ResultCount"]', doc,
-			nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-	if (items) {
-		Zotero.debug("Have ResultCount " + items.value);
-		if (items.value > 1) {
-			return "multiple";
-		} else if (items.value == 1) {
-			//try to determine if this is a book
-			//"Sections" heading only seems to show up for books
-			if(doc.evaluate('//div[@class="sections"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())
-			{
-				return "book";
-			}
-			return "journalArticle";
-		}
+	var items = getResultList(doc);
+	if (items.length > 0) {
+		return "multiple";
 	}
 
-	var uids = doc.evaluate('//input[@type="checkbox" and @name="EntrezSystem2.PEntrez.Pubmed.Pubmed_ResultsPanel.Pubmed_RVDocSum.uid"]', doc,
-			nsResolver, XPathResult.ANY_TYPE, null);
-	if(uids.iterateNext()) {
-		if (uids.iterateNext()){
-			return "multiple";
-		}
-		return "journalArticle";
+	if(!getUID(doc)) {
+		return;
 	}
+
+	//try to determine if this is a book
+	//"Sections" heading only seems to show up for books
+	if(ZU.xpath(doc, '//div[@class="sections"]').length)
+	{
+		return "book";
+	}
+	return "journalArticle";
+}
+
+//retrieves a list of result nodes from a search results page (perhaps others too)
+function getResultList(doc) {
+	return ZU.xpath(doc, '//div[@class="rprt"][.//p[@class="title"]]');
+}
+
+//retrieves the UID from an item page. Returns false if there is more than one.
+function getUID(doc) {
+	var uid = ZU.xpath(doc, '/head/meta[@name="ncbi_uidlist"]/@content');
+	if(!uid.length) {
+		uid = ZU.xpath(doc, '//input[@id="absid"]/@value');
+	}
+
+	if(uid.length == 1 && uid[0].textContent.search(/^\d+$/) != -1) {
+		return uid[0].textContent;
+	}
+
+	uid = ZU.xpath(doc, '/head/link[@media="handheld"]/@href');
+	if(uid.length == 1) {
+		uid = uid[0].textContetn.match(/\/(\d+)(?:\/|$)/);
+		if(uid) return uid[1];
+	}
+
+	return false;
 }
 
 function getPMID(co) {
@@ -73,8 +84,7 @@ function detectSearch(item) {
 function lookupPMIDs(ids, doc) {
 	var newUri = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=PubMed&tool=Zotero&retmode=xml&rettype=citation&id="+ids.join(",");
 	Zotero.debug(newUri);
-	Zotero.Utilities.HTTP.doGet(newUri, doImportFromText, function () {Zotero.done()});
-	Zotero.wait();
+	Zotero.Utilities.HTTP.doGet(newUri, doImportFromText);
 }
 
 function doImport() {
@@ -363,84 +373,73 @@ function doImportFromText(text) {
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-		} : null;
-	var ids = new Array();
-	var uids = doc.evaluate('//input[@name="EntrezSystem2.PEntrez.Pubmed.Pubmed_ResultsPanel.Pubmed_RVDocSum.uid"]', doc, //edited for new PubMed
-				   nsResolver, XPathResult.ANY_TYPE, null);
-	var uid = uids.iterateNext();
-	if(uid) {
-		if (uids.iterateNext()){
-			var items = {};
-			var tablex = '//div[@class="rprt"]';
-			if (!doc.evaluate(tablex, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-				var tablex = '//div[@class="ResultSet"]/dl';
-				var other = true;
-			}
-			var tableRows = doc.evaluate(tablex, doc, nsResolver, XPathResult.ANY_TYPE, null);
-			var tableRow;
-			// Go through table rows
-			while(tableRow = tableRows.iterateNext()) {
-				uid = doc.evaluate('.//input[@type="checkbox"]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-				if (other) {
-					var article = doc.evaluate('.//h2', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-				} else {
-					var article = doc.evaluate('.//p[@class="title"]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-				}
-				items[uid.value] = article.textContent;
+	if(detectWeb(doc, url) == "multiple") {
+		var results = getResultList(doc);
+		var items = {};
+		var title, uid;
+		for(var i=0, n=results.length; i<n; i++) {
+			title = ZU.xpathText(results[i], './/p[@class="title"]');
+			uid = ZU.xpathText(results[i], './/input[starts-with(@id,"UidCheckBox")]/@value')
+				|| ZU.xpathText(results[i], './/dl[@class="rprtid"]/dd[preceding-sibling::*[1][text()="PMID:"]]');
+			if(!uid) {
+				uid = ZU.xpathText(results[i], './/p[@class="title"]/a/@href');
+				if(uid) uid = uid.match(/\/(\d+)/);
+				if(uid) uid = uid[1];
 			}
 
-			Zotero.selectItems(items, function(items) {
-				if(!items) {
-					return true;
-				}
-	
-				for(var i in items) {
-					ids.push(i);
-				}
-	
-				lookupPMIDs(ids);
-			});
-		} else {
-			ids.push(uid.value);
-			lookupPMIDs(ids, doc);
-		}
-	} else {
-		// Here, account for some articles and search results using spans for PMID
-		var uids= doc.evaluate('//p[@class="pmid"]', doc,
-				nsResolver, XPathResult.ANY_TYPE, null);
-		var uid = uids.iterateNext();
-		if (!uid) {
-			// Fall back on span 
-			uids = doc.evaluate('//span[@class="pmid"]', doc,
-					nsResolver, XPathResult.ANY_TYPE, null);
-			uid = uids.iterateNext();
-		}
-		if (!uid) {
-			// Fall back on <dl class="rprtid"> 
-			// See http://www.ncbi.nlm.nih.gov/pubmed?term=1173[page]+AND+1995[pdat]+AND+Morton[author]&cmd=detailssearch
-			// Discussed http://forums.zotero.org/discussion/17662
-			uids = doc.evaluate('//dl[@class="rprtid"]/dd[1]', doc,
-					nsResolver, XPathResult.ANY_TYPE, null);
-			uid = uids.iterateNext();
-		}
-		if (uid) {
-			ids.push(uid.textContent.match(/\d+/)[0]);
-			Zotero.debug("Found PMID: " + ids[ids.length - 1]);
-			lookupPMIDs(ids, doc);
-		} else {
-			var uids= doc.evaluate('//meta[@name="ncbi_uidlist"]', doc,
-					nsResolver, XPathResult.ANY_TYPE, null);
-			var uid = uids.iterateNext()["content"].split(' ');
-			if (uid) {
-				ids.push(uid);
-				Zotero.debug("Found PMID: " + ids[ids.length - 1]);
-				lookupPMIDs(ids, doc);
+			if(uid && title) {
+				items[uid] = title;
 			}
 		}
+
+		Zotero.selectItems(items, function(selectedItems) {
+			if(!selectedItems) return true;
+
+			var uids = [];
+			for(var i in selectedItems) {
+				uids.push(i);
+			}
+			lookupPMIDs(uids);
+		})
+	} else {
+		lookupPMIDs([getUID(doc)]);
 	}
+/*
+		} else {
+			// Here, account for some articles and search results using spans for PMID
+			var uids= doc.evaluate('//p[@class="pmid"]', doc,
+					nsResolver, XPathResult.ANY_TYPE, null);
+			var uid = uids.iterateNext();
+			if (!uid) {
+				// Fall back on span 
+				uids = doc.evaluate('//span[@class="pmid"]', doc,
+						nsResolver, XPathResult.ANY_TYPE, null);
+				uid = uids.iterateNext();
+			}
+			if (!uid) {
+				// Fall back on <dl class="rprtid"> 
+				// See http://www.ncbi.nlm.nih.gov/pubmed?term=1173[page]+AND+1995[pdat]+AND+Morton[author]&cmd=detailssearch
+				// Discussed http://forums.zotero.org/discussion/17662
+				uids = doc.evaluate('//dl[@class="rprtid"]/dd[1]', doc,
+						nsResolver, XPathResult.ANY_TYPE, null);
+				uid = uids.iterateNext();
+			}
+			if (uid) {
+				ids.push(uid.textContent.match(/\d+/)[0]);
+				Zotero.debug("Found PMID: " + ids[ids.length - 1]);
+				lookupPMIDs(ids, doc);
+			} else {
+				var uids= doc.evaluate('//meta[@name="ncbi_uidlist"]', doc,
+						nsResolver, XPathResult.ANY_TYPE, null);
+				var uid = uids.iterateNext()["content"].split(' ');
+				if (uid) {
+					ids.push(uid);
+					Zotero.debug("Found PMID: " + ids[ids.length - 1]);
+					lookupPMIDs(ids, doc);
+				}
+			}
+		}
+*/
 }
 
 function doSearch(item) {
