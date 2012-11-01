@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-10-23 08:09:50"
+	"lastUpdated": "2012-11-01 08:10:06"
 }
 
 /*
@@ -202,6 +202,14 @@ function scrapeArticleResults(doc, articles) {
 					translator.setString(text);
 	
 					translator.setHandler('itemDone', function(obj, item) {
+						if(item.creators.length) {
+							var lastCreatorIndex = item.creators.length-1,
+								lastCreator = item.creators[lastCreatorIndex];
+							if(lastCreator.lastName === "others" && lastCreator.firstName === "") {
+								item.creators.splice(lastCreatorIndex, 1);
+							}
+						}
+						
 						//clean author names
 						for(var j=0, m=item.creators.length; j<m; j++) {
 							if(!item.creators[j].firstName) continue;
