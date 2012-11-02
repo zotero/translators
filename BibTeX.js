@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-09-24 01:05:06"
+	"lastUpdated": "2012-11-02 09:12:35"
 }
 
 function detectImport() {
@@ -2077,6 +2077,9 @@ function doExport() {
 	var citekeys = new Object();
 	var item;
 	while(item = Zotero.nextItem()) {
+		//don't export standalone notes and attachments
+		if(item.itemType == "note" || item.itemType == "attachment") continue;
+
 		// determine type
 		var type = zotero2bibtexTypeMap[item.itemType];
 		if (typeof(type) == "function") { type = type(item); }
