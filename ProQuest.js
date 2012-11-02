@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-10-07 15:35:34"
+	"lastUpdated": "2012-11-02 06:45:39"
 }
 
 /*
@@ -185,12 +185,11 @@ function doWeb(doc, url, pdfUrl) {
 
 			var articles = new Array();
 			for (var i in items) {
-				articles.push(i);
+				ZU.processDocuments(i,
+					//call doWeb so that we rerun detectWeb to get type and
+					//initialize translations
+					function(doc) { doWeb(doc, doc.location.href) });
 			}
-			ZU.processDocuments(articles,
-				//call doWeb so that we rerun detectWeb to get type and
-				//initialize translations
-				function(doc) { doWeb(doc, doc.location.href) });
 		});
 	//pdfUrl should be undefined unless we are calling doWeb from the following
 	//block, where it is set to false or an actual value
