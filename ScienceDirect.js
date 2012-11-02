@@ -1,7 +1,7 @@
 {
 	"translatorID": "b6d0a7a-d076-48ae-b2f0-b6de28b194e",
 	"label": "ScienceDirect",
-	"creator": "Michael Berkowitz",
+	"creator": "Michael Berkowitz and Aurimas Vinckevicius",
 	"target": "^https?://[^/]*science-?direct\\.com[^/]*/science(\\/article)?(\\?(?:.+\\&|)ob=(?:ArticleURL|ArticleListURL|PublicationURL))?",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-10-30 03:46:04"
+	"lastUpdated": "2012-11-02 08:46:55"
 }
 
 function detectWeb(doc, url) {
@@ -109,6 +109,10 @@ function scrapeByExport(doc) {
 		ZU.doPost('/science', post, function(text) {
 				//short title is stored in T2. Fix it to ST.
 				text = text.replace(/^T2\s/mg, 'ST ');
+
+				//Certain authors sometimes have "role" prefixes
+				text = text.replace(
+					/^((?:A[U\d]|ED)\s+-\s+)Editor-in-Chief:\s+/mg, '$1');
 
 				var translator = Zotero.loadTranslator("import");
 				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -380,6 +384,55 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.sciencedirect.com/science?_ob=RefWorkIndexURL&_idxType=AR&_cid=277739&_acct=C000228598&_version=1&_userid=10&md5=54bf1ed459ae10ac5ad1a2dc11c873b9",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.sciencedirect.com/science/article/pii/B9780123706263000508",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"creators": [
+					{
+						"lastName": "Meybeck",
+						"firstName": "M.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Gene E. Likens",
+						"creatorType": "editor"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Africa",
+					"Damming",
+					"Endorheism",
+					"Human impacts",
+					"River quality",
+					"River regimes",
+					"Sediment fluxes",
+					"Tropical rivers"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "ScienceDirect Snapshot"
+					}
+				],
+				"title": "Africa",
+				"bookTitle": "Encyclopedia of Inland Waters",
+				"publisher": "Academic Press",
+				"place": "Oxford",
+				"pages": "295-305",
+				"ISBN": "978-0-12-370626-3",
+				"DOI": "10.1016/B978-012370626-3.00050-8",
+				"url": "http://www.sciencedirect.com/science/article/pii/B9780123706263000508",
+				"abstractNote": "The African continent (30.1 million km2) extends from 37°17′N to 34°52 S and covers a great variety of climates except the polar climate. Although Africa is often associated to extended arid areas as the Sahara (7 million km2) and Kalahari (0.9 million km2), it is also characterized by a humid belt in its equatorial part and by few very wet regions as in Cameroon and in Sierra Leone. Some of the largest river basins are found in this continent such as the Congo, also termed Zaire, Nile, Zambezi, Orange, and Niger basins. Common features of Africa river basins are (i) warm temperatures, (ii) general smooth relief due to the absence of recent mountain ranges, except in North Africa and in the Rift Valley, (iii) predominance of old shields and metamorphic rocks with very developed soil cover, and (iv) moderate human impacts on river systems except for the recent spread of river damming. African rivers are characterized by very similar hydrochemical and physical features (ionic contents, suspended particulate matter, or SPM) but differ greatly by their hydrological regimes, which are more developed in this article.",
+				"date": "2009",
+				"libraryCatalog": "ScienceDirect",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
