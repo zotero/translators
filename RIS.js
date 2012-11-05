@@ -9,12 +9,12 @@
 	"displayOptions": {
 		"exportCharset": "UTF-8",
 		"exportNotes": true,
-		"exportFileData": true
+		"exportFileData": false
 	},
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-10-16 00:42:39"
+	"lastUpdated": "2012-11-05 19:49:03"
 }
 
 function detectImport() {
