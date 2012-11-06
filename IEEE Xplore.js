@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-11-06 08:06:19"
+	"lastUpdated": "2012-11-06 08:34:31"
 }
 
 function detectWeb(doc, url) {
@@ -36,7 +36,7 @@ function doWeb(doc, url) {
 
 	if (detectWeb(doc, url) == "multiple") {
 		// search page
-		var items = new Array();
+		var items = new Object();
 
 		var xPathRows = '//ul[@class="Results"]/li[@class="noAbstract"]/div[@class="header"]';
 		var tableRows = doc.evaluate(xPathRows, doc, null, XPathResult.ANY_TYPE, null);
@@ -158,7 +158,7 @@ function scrape (doc, url) {
   	var get = 'http://ieeexplore.ieee.org/xpl/downloadCitations';
   	var post = "recordIds=" + arnumber + "&fromPage=&citations-format=citation-abstract&download-format=download-bibtex";
   	Zotero.Utilities.HTTP.doPost(get, post, function(text) {
-  		text = ZU.unescapeHTML(text.replace(/(&\S+) and/g, '$1;'));
+  		text = ZU.unescapeHTML(text.replace(/(&[^\s;]+) and/g, '$1;'));
 		var translator = Zotero.loadTranslator("import");
 		// Calling the BibTeX translator
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
