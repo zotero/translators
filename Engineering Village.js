@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-08-23 18:10:33"
+	"lastUpdated": "2012-11-06 11:21:09"
 }
 
 function detectWeb(doc, url)
@@ -61,8 +61,11 @@ function doWeb(doc, url) {
 	{
 		xpath='//span/a[@id="downloadlink"]/@href';
 		var temp=ZU.xpathText(doc, xpath);
+		Z.debug(temp)
 		var docidlist=temp.match(/\&docidlist=[^&]+/)[0];
-	    var EISESSION=temp.match(/\?EISESSION=[^&]+/)[0];
+		//Session ID can have a question mark or an ampersand at beginning. If the latter, 
+		//change to question mark
+		var EISESSION=temp.match(/(\?|\&)EISESSION=[^&]+/)[0].replace(/^\&/, "?");
 		url=createURL(EISESSION,docidlist,doc.location.href);
 		parseRIS(url);
 	}
