@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-08-08 22:38:57"
+	"lastUpdated": "2012-11-06 10:55:28"
 }
 
 function detectWeb(doc, url) {
@@ -17,7 +17,7 @@ function detectWeb(doc, url) {
 	if (node) {
 		return "multiple";
 	}
-	var node = doc.evaluate('//a[text()="marc"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+	var node = doc.evaluate('//a[text()="marc"]|//a[text()="marc view"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (node) {
 		return "book";
 	}
@@ -26,7 +26,7 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 	var uri = doc.location.href;
 	var newUris = new Array();
-	var marcs = doc.evaluate('//a[text()="marc"]', doc, null, XPathResult.ANY_TYPE, null);
+	var marcs = doc.evaluate('//a[text()="marc"]|//a[text()="marc view"]', doc, null, XPathResult.ANY_TYPE, null);
 	var record = marcs.iterateNext();
 
 	if (record && !marcs.iterateNext()) {
@@ -45,6 +45,7 @@ function doWeb(doc, url) {
 			var links = tableRow.getElementsByTagName("a");
 			// Go through links
 			var url;
+
 			for (var j = 0; j < links.length; j++) {
 				if (tagRegexp.test(links[j].href)) {
 					url = links[j].href;
@@ -57,7 +58,7 @@ function doWeb(doc, url) {
 				var field;
 				while (field = fields.iterateNext()) {
 					var header = doc.evaluate('./th/text()', field, null, XPathResult.ANY_TYPE, null).iterateNext();
-					if (header.nodeValue == "Title") {
+					if (header.nodeValue == "Title"|| header.nodeValue == "Tytuł") {
 						var value = doc.evaluate('./td', field, null, XPathResult.ANY_TYPE, null).iterateNext();
 						if (value) {
 							items[url] = Zotero.Utilities.trimInternal(value.textContent);
