@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-11-02 09:12:35"
+	"lastUpdated": "2012-11-09 09:18:28"
 }
 
 function detectImport() {
@@ -1584,9 +1584,9 @@ function setKeywordDelimRe( val, flags ) {
 function processField(item, field, value) {
 	if(Zotero.Utilities.trim(value) == '') return null;
 	if(fieldMap[field]) {
-		item[fieldMap[field]] = value;
+		applyValue(item, fieldMap[field], value);
 	} else if(inputFieldMap[field]) {
-		item[inputFieldMap[field]] = value;
+		applyValue(item, inputFieldMap[field], value);
 	} else if(field == "journal") {
 		if(item.publicationTitle) {
 			item.journalAbbreviation = value;
@@ -1624,13 +1624,13 @@ function processField(item, field, value) {
 		item.backupPublisher = value;
 	} else if(field == "number"){ // fix for techreport
 		if (item.itemType == "report") {
-			item.reportNumber = value;
+			applyValue(item, 'reportNumber', value);
 		} else if (item.itemType == "book" || item.itemType == "bookSection") {
-			item.seriesNumber = value;
+			applyValue(item, 'seriesNumber', value);
 		} else if (item.itemType == "patent"){
-			item.patentNumber = value;
+			applyValue(item, 'patentNumber', value);
 		} else {
-			item.issue = value;
+			applyValue(item, 'issue', value);
 		}
 	} else if(field == "month") {
 		var monthIndex = months.indexOf(value.toLowerCase());
@@ -1661,10 +1661,10 @@ function processField(item, field, value) {
 		}
 	} else if(field == "pages") {
 		if (item.itemType == "book" || item.itemType == "thesis" || item.itemType == "manuscript") {
-			item.numPages = value;
+			applyValue(item, 'numPages', value);
 		}
 		else {
-			item.pages = value.replace(/--/g, "-");
+			applyValue(item, 'pages', value.replace(/--/g, "-"));
 		}
 	} else if(field == "note") {
 		item.extra += "\n"+value;
@@ -1672,7 +1672,7 @@ function processField(item, field, value) {
 		if(value.length >= 7) {
 			var str = value.substr(0, 7);
 			if(str == "http://" || str == "https:/" || str == "mailto:") {
-				item.url = value;
+				applyValue(item, 'url', value);
 			} else {
 				item.extra += "\nPublished: "+value;
 			}
@@ -1682,15 +1682,18 @@ function processField(item, field, value) {
 	//accept lastchecked or urldate for access date. These should never both occur. 
 	//If they do we don't know which is better so we might as well just take the second one
 	else if (field == "lastchecked"|| field == "urldate"){
-		item.accessDate = value;
+		applyValue(item, 'accessDate', value);
 	}
 	else if(field == "keywords" || field == "keyword") {
-		var re = new RegExp(keywordDelimRe, keywordDelimReFlags);
-		if(!value.match(re) && keywordSplitOnSpace) {
-			// keywords/tags
-			item.tags = value.split(" ");
-		} else {
-			item.tags = value.split(re);
+		//ignore if we already set keywords
+		if(!item.tags.length) {
+			var re = new RegExp(keywordDelimRe, keywordDelimReFlags);
+			if(!value.match(re) && keywordSplitOnSpace) {
+				// keywords/tags
+				item.tags = value.split(" ");
+			} else {
+				item.tags = value.split(re);
+			}
 		}
 	} else if (field == "comment" || field == "annote" || field == "review") {
 		item.notes.push({note:Zotero.Utilities.text2html(value)});
@@ -1717,6 +1720,17 @@ function processField(item, field, value) {
 			}
 		}
 	}
+}
+
+function applyValue(item, field, value) {
+	//do not overwrite values
+	if(item[field]) {
+		Zotero.debug("'" + field + "' already set." +
+			" Ignoring additional value '" + value + "'");
+		return;
+	}
+
+	item[field] = value;
 }
 
 function getFieldValue(read) {
