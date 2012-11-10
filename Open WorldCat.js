@@ -1,7 +1,7 @@
 {
 	"translatorID": "c73a4a8c-3ef1-4ec8-8229-7531ee384cc4",
 	"label": "Open WorldCat",
-	"creator": "Simon Kornblith, Sebastian Karcher",
+	"creator": "Simon Kornblith, Sebastian Karcher, and Aurimas Vinckevicius",
 	"target": "^https?://(.+).worldcat\\.org/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-09-04 23:26:27"
+	"lastUpdated": "2012-11-10 03:22:39"
 }
 
 /**
@@ -29,146 +29,148 @@ function getZoteroType(iconSrc) {
 	return false;
 }
 
-
 /**
- * RIS Scraper Function
- *
+ * Generates a Zotero item from a single item WorldCat page,
+ * or the first item on a multiple item page
  */
-
-function scrape(doc, url, callDoneWhenFinished) {
-	//we need a different replace for item displays from search results
-	if (!url) url = doc.location.href;
-	if (url.match(/\?/)) {
-		var newurl = url.replace(/\&[^/]*$|$/, "&client=worldcat.org-detailed_record&page=endnote");
-	} else {
-		var newurl = url.replace(/\&[^/]*$|$/, "?client=worldcat.org-detailed_record&page=endnote");
-	}
-	//Z.debug(newurl)
-	Zotero.Utilities.HTTP.doGet(newurl, function (text) {
-		//LA is not an actual RIS tag, but we like to get that information where we can
-		if (text.match(/LA  -/)) {
-			var language = text.match(/LA  -.+/)[0].replace(/LA  - /, "");
-		};
-		//Zotero.debug("RIS: " + text)
-		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-		translator.setString(text);
-		translator.setHandler("itemDone", function (obj, item) {
-			item.extra = undefined;
-			item.archive = undefined;
-
-			if(item.libraryCatalog == "http://worldcat.org") {
-				item.libraryCatalog = "Open WorldCat";
-			}
-
-			//creators have period after firstName
-			for (i in item.creators) {
-				if (item.creators[i].firstName){
-				item.creators[i].firstName = item.creators[i].firstName.replace(/\.$/, "");
-				}
-				else {
-					item.creators[i].lastName = item.creators[i].lastName.replace(/\.$/, "");
-					item.creators[i].fieldMode=1;			
-				}
-			}
-			if (language) item.language = language;
-			//We want ebooks to be treated like books, not webpages (is ISBN the best choice here?)
-			if (item.itemType == "webpage" && item.ISBN) {
-				item.itemType = "book";
-			}
-			item.complete();
-		});
-		translator.translate();
-		if(callDoneWhenFinished) Zotero.done();
-	});
-}
-
-/**
- * Generates a Zotero item from a single item WorldCat page, or the first item on a multiple item
- * page
- */
-function generateItem(doc, node) {
+function generateItem(doc, co) {
 	var item = new Zotero.Item();
-	Zotero.Utilities.parseContextObject(node.nodeValue, item);
+	ZU.parseContextObject(co, item);
 	// if only one, first check for special types (audio & video recording)
-	var type = false;
-	try {
-		type = doc.evaluate('//img[@class="icn"][contains(@src, "icon-")]/@src', doc, null, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
-	} catch (e) {}
+	var type = ZU.xpathText(doc,
+		'//img[@class="icn"][contains(@src, "icon-")][1]/@src');
 	if (type) {
 		type = getZoteroType(type);
 		if (type) item.itemType = type;
 	}
+
 	return item;
 }
 
-function detectWeb(doc) {
-	var xpath = doc.evaluate('//span[@class="Z3988"]/@title', doc, null, XPathResult.ANY_TYPE, null);
-	var node = xpath.iterateNext();
-	if (!node) return false;
-	// see if there is more than one
-	if (xpath.iterateNext()) {
-		multiple = true;
-		return "multiple";
-	}
-	// generate item and return type
-	return generateItem(doc, node).itemType;
+function getSearchResults(doc) {
+	return ZU.xpath(doc, '//div[@class="name"]/a');
 }
 
-function detectSearch(item) {
-	return !!item.ISBN;
+function getFirstContextObj(doc) {
+	return ZU.xpathText(doc, '//span[@class="Z3988"][1]/@title');
+}
+
+function detectWeb(doc, url) {
+	var results = getSearchResults(doc);
+
+	//single result
+	if(results.length > 1) {
+		return "multiple";
+	}
+
+	var co = getFirstContextObj(doc);
+	if(!co) return false;
+
+	// generate item and return type
+	return generateItem(doc, co).itemType;
+}
+
+/**
+ * Given an item URL, extract Open WorldCat ID
+ */
+function extractWCID(url) {
+	var id = url.match(/\d+(?=[&?]|$)/);
+	if(!id) return false;
+	return id[0];
+}
+
+/**
+ * RIS Scraper Function
+ */
+function scrape(wcID) {
+	var risURL = "http://www.worldcat.org/oclc/" + wcID
+		+ "?page=endnote&client=worldcat.org-detailed_record";
+
+	ZU.HTTP.doGet(risURL, function(text) {
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+
+		//ebooks are supplied as TY - ELEC, change it to BOOK
+		text = text.replace(/^TY\s\s?-\sELEC\s*$/m, 'TY  - BOOK');
+		translator.setString(text);
+
+		translator.setHandler("itemDone", function (obj, item) {
+			if(item.libraryCatalog == "http://worldcat.org") {
+				item.libraryCatalog = "Open WorldCat";
+			}
+
+			item.archive = undefined;
+
+			//creators have period after firstName
+			for (i in item.creators) {
+				if (item.creators[i].firstName){
+					item.creators[i].firstName =
+						item.creators[i].firstName.trim().replace(/\.$/, "");
+				} else {
+					item.creators[i].lastName =
+						item.creators[i].lastName.trim().replace(/\.$/, "");
+					item.creators[i].fieldMode=1;			
+				}
+			}
+
+			item.complete();
+		});
+
+		translator.translate();
+	});
 }
 
 function doWeb(doc, url) {
-	var articles = [];
-	if (doc.evaluate('//div[@class="name"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) { //search results view
-		if (detectWeb(doc) == "multiple") {
-			var titles = doc.evaluate('//div[@class="name"]/a', doc, null, XPathResult.ANY_TYPE, null);
-			var items = {};
-			var title;
-			while (title = titles.iterateNext()) {
-				items[title.href] = title.textContent;
-			}
-			Zotero.selectItems(items, function (items) {
-				if (!items) {
-					return true;
-				}
-				for (var i in items) {
-					articles.push(i);
-				}
-				//Z.debug(articles)
-				Zotero.Utilities.processDocuments(articles, scrape, function () {
-					Zotero.done();
-				});
-				Zotero.wait();
-			});
-		} else { //single item in search results, don't display a select dialog
-			var title = doc.evaluate('//div[@class="name"]/a[1]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-			if (!title) Zotero.done(false);
-			article = title.href;
-			Zotero.Utilities.processDocuments(article, scrape, function () {
-				Zotero.done();
-			});
-			Zotero.wait();
+	var results = getSearchResults(doc);
+	if(results.length > 1) {
+		var items = {};
+		for(var i=0, n=results.length; i<n; i++) {
+			items[extractWCID(results[i].href)] = results[i].textContent;
 		}
-	} else { // regular single item	view
-		scrape(doc, url);
+
+		Zotero.selectItems(items, function(items) {
+			if (!items) return true;
+
+			var articles = [];
+			for (var i in items) {
+				scrape(i);
+			}
+		});
+	} else {
+		var wcID;
+		//could be a single result on a search results page
+		if(results.length == 1) {
+			wcID = extractWCID(results[0].href);
+		} else {	//single item page
+			wcID = extractWCID(url);
+		}
+
+		scrape(wcID);
+	}
+}
+
+function cleanISBN(isbn) {
+	return isbn.replace(/[^0-9]/g, "");
+}
+
+function detectSearch(item) {
+	if(item.ISBN && typeof(item.ISBN) == 'string') {
+		return !!cleanISBN(item.ISBN);
+	} else {
+		return false;
 	}
 }
 
 function doSearch(item) {
-	ZU.processDocuments("http://www.worldcat.org/search?q=isbn%3A" + item.ISBN.replace(/[^0-9]/g, "") + "&=Search&qt=results_page", function (doc, url) {
+	var url = "htp://www.worldcat.org/search?qt=results_page&q=bn%3A"
+		+ cleanISBN(item.ISBN);
+	ZU.processDocuments(url, function (doc, url) {
 		//we take the first search result and run scrape on it
-		if (doc.evaluate('//div[@class="name"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) { //search results view
-			var title = doc.evaluate('//div[@class="name"]/a[1]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-			if (!title) Zotero.done(false);
-			article = title.href;
-			ZU.processDocuments(article, function(doc, url) { scrape(doc, url, true); });
-		} else {
-			scrape(doc, url, true);
+		var results = getSearchResults(doc);
+		if (results.length > 0) {
+			scrape(extractWCID(results[0].href));
 		}
-	}, null);
-	Zotero.wait();
+	});
 } /** BEGIN TEST CASES **/
 var testCases = [
 	{
