@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-11-05 03:34:15"
+	"lastUpdated": "2012-11-11 11:39:09"
 }
 
 function detectWeb(doc, url) {
@@ -118,12 +118,18 @@ function doWeb(doc, url) {
 	
 	function first(set, next) {
 		var jid = set.jid;
-		var downloadString = "suffix=" + jid;
-		
-		Zotero.Utilities.HTTP.doPost("http://"+host+"/action/downloadSingleCitation?format=refman&direct=true&singleCitation=true", downloadString, function(text) {
+		//distinguish JID from DOI
+		if (jid.search(/^10\./)!=-1){
+			var doi = jid
+		}
+		else var doi = "10.2307/" + jid;
+		var downloadString = "redirectUri=%2Faction%2FexportSingleCitation%3FsingleCitation%3Dtrue%26doi%3D" + doi + "&noDoi=yesDoi&doi=" + doi;
+		//Z.debug(downloadString)
+		Zotero.Utilities.HTTP.doPost("http://"+host+"/action/downloadSingleCitation?userAction=export&format=refman&direct=true&singleCitation=true", downloadString, function(text) {
 			// load translator for RIS
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			//Z.debug(text)
 			translator.setString(text);
 			translator.setHandler("itemDone", function(obj, item) {
 				//author names are not supplied as lasName, firstName in RIS
@@ -256,6 +262,7 @@ var testCases = [
 				"publisher": "American Association of Avian Pathologists",
 				"ISSN": "0005-2086",
 				"url": "http://www.jstor.org/stable/1593514",
+				"DOI": "10.2307/1593514",
 				"date": "September 1, 2004",
 				"pages": "617-624",
 				"abstractNote": "A reproducible and original method for the preparation of chicken intestine epithelial cells from 18-day-old embryos for long-term culture was obtained by using a mechanical isolation procedure, as opposed to previous isolation methods using relatively high concentrations of trypsin, collagenase, or EDTA. Chicken intestine epithelial cells typically expressed keratin and chicken E-cadherin, in contrast to chicken embryo fibroblasts, and they increased cell surface MHC II after activation with crude IFN-γ containing supernatants, obtained from chicken spleen cells stimulated with concanavalin A or transformed by reticuloendotheliosis virus. Eimeria tenella was shown to be able to develop until the schizont stage after 46 hr of culture in these chicken intestinal epithelial cells, but it was not able to develop further. However, activation with IFN-γ containing supernatants resulted in strong inhibition of parasite replication, as shown by incorporation of [3 H]uracil. Thus, chicken enterocytes, which are the specific target of Eimeria development in vivo, could be considered as potential local effector cells involved in the protective response against this parasite. /// Se desarrolló un método reproducible y original para la preparación de células epiteliales de intestino de embriones de pollo de 18 días de edad para ser empleadas como cultivo primario de larga duración. Las células epiteliales de intestino fueron obtenidas mediante un procedimiento de aislamiento mecánico, opuesto a métodos de aislamientos previos empleando altas concentraciones de tripsina, colagenasa o EDTA. Las células epiteliales de intestino expresaron típicamente keratina y caderina E, a diferencia de los fibroblastos de embrión de pollo, e incrementaron el complejo mayor de histocompatibilidad tipo II en la superficie de la célula posterior a la activación con sobrenadantes de interferón gamma. Los sobrenadantes de interferón gamma fueron obtenidos a partir de células de bazos de pollos estimuladas con concanavalina A o transformadas con el virus de reticuloendoteliosis. Se observó el desarrollo de la Eimeria tenella hasta la etapa de esquizonte después de 46 horas de cultivo en las células intestinales epiteliales de pollo pero no se observó un desarrollo posterior. Sin embargo, la activación de los enterocitos con los sobrenadantes con interferón gamma resultó en una inhibición fuerte de la replicación del parásito, comprobada mediante la incorporación de uracilo [3 H]. Por lo tanto, los enterocitos de pollo, blanco específico del desarrollo in vivo de la Eimeria, podrían ser considerados como células efectoras locales, involucradas en la respuesta protectora contra este parásito.",
@@ -297,6 +304,7 @@ var testCases = [
 				"publisher": "The University of Chicago Press",
 				"ISSN": "0022-2801",
 				"url": "http://www.jstor.org/stable/10.1086/245591",
+				"DOI": "10.1086/245591",
 				"date": "December 1, 1997",
 				"pages": "696-721",
 				"rights": "Copyright © 1997 The University of Chicago Press",
@@ -337,6 +345,7 @@ var testCases = [
 				"publisher": "The University of Chicago Press",
 				"ISSN": "0097-9740",
 				"url": "http://www.jstor.org/stable/10.1086/508232",
+				"DOI": "10.1086/508232",
 				"date": "January 1, 2007",
 				"pages": "523-538",
 				"rights": "Copyright © 2007 The University of Chicago Press",
