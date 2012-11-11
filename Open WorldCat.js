@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-11-10 03:22:39"
+	"lastUpdated": "2012-11-11 09:33:33"
 }
 
 /**
@@ -162,7 +162,7 @@ function detectSearch(item) {
 }
 
 function doSearch(item) {
-	var url = "htp://www.worldcat.org/search?qt=results_page&q=bn%3A"
+	var url = "http://www.worldcat.org/search?qt=results_page&q=bn%3A"
 		+ cleanISBN(item.ISBN);
 	ZU.processDocuments(url, function (doc, url) {
 		//we take the first search result and run scrape on it
