@@ -1,6 +1,6 @@
 {
 	"translatorID": "f8765470-5ace-4a31-b4bd-4327b960ccd",
-	"label": "SpringerLink",
+	"label": "Springer Link (old)",
 	"creator": "Sebastian Karcher",
 	"target": "https?://[^/]*springerlink\\.(metapress\\.)?com/.+/",
 	"minVersion": "3.0",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-08-08 22:38:57"
+	"lastUpdated": "2012-11-12 12:09:49"
 }
 
 /*
@@ -251,34 +251,34 @@ function scrape(doc) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.springerlink.com/content/q122682q1u2r7282/abstract/",
+		"url": "http://www.springerlink.com/content/q122682q1u2r7282/abstract/?MUD=MP",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"lastName": "Schmer",
 						"firstName": "Marty",
+						"lastName": "Schmer",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Mitchell",
 						"firstName": "Robert",
+						"lastName": "Mitchell",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Vogel",
 						"firstName": "Kenneth",
+						"lastName": "Vogel",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Schacht",
 						"firstName": "Walter",
+						"lastName": "Schacht",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Marx",
 						"firstName": "David",
+						"lastName": "Marx",
 						"creatorType": "author"
 					}
 				],
@@ -299,17 +299,16 @@ var testCases = [
 				],
 				"title": "Efficient Methods of Estimating Switchgrass Biomass Supplies",
 				"publicationTitle": "BioEnergy Research",
-				"date": "2010",
 				"publisher": "Springer New York",
-				"ISBN": "1939-1234",
 				"ISSN": "1939-1234",
 				"pages": "243-250",
 				"volume": "3",
 				"issue": "3",
 				"url": "http://www.springerlink.com/content/q122682q1u2r7282/abstract/",
-				"DOI": "10.1007/s12155-009-9070-x",
 				"abstractNote": "Switchgrass ( Panicum virgatum L.) is being developed as a biofuel feedstock for the United States. Efficient and accurate methods to estimate switchgrass biomass feedstock supply within a production area will be required by biorefineries. Our main objective was to determine the effectiveness of indirect methods for estimating biomass yields and composition of switchgrass fields. Indirect measurements were conducted in eastern Nebraska from 2003 to 2007 in which switchgrass biomass yields were manipulated using three nitrogen rates (0 kg N ha -1 , 60 kg N ha -1 , and 120 kg N ha -1 ) and two harvest periods (August and post-killing frost). A modified Robel pole was used to determine visual obstruction, elongated leaf height, and canopy height measurements. Prediction models from the study showed that elongated leaf height, visual obstruction, and canopy height measurements accounted for &gt; 91%, &gt; 90%, and &gt; 82% of the variation in switchgrass biomass, respectively. Regression slopes were similar by cultivar (“Cave-in-Rock” and “Trailblazer”), harvest period, and across years indicating that a single model is applicable for determining biomass feedstock supply within a region, assuming similar harvesting methods. Sample numbers required to receive the same level of precision were as follows: elongated leaf height&lt;canopy height&lt;visual obstruction. Twenty to 30 elongated leaf height measurements in a field could predict switchgrass biomass yield within 10% of the mean with 95% confidence. Visual obstruction is recommended on switchgrass fields with low to variable stand densities while elongated leaf height measurements would be recommended on switchgrass fields with high, uniform stand densities. Incorporating an ocular device with a Robel pole provided reasonable frequency estimates of switchgrass, broadleaf weeds, and grassy weeds at the field scale.",
-				"libraryCatalog": "SpringerLink",
+				"date": "2010",
+				"DOI": "10.1007/s12155-009-9070-x",
+				"libraryCatalog": "Springer Link (old)",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
@@ -376,7 +375,7 @@ var testCases = [
 				"abstractNote": "Referring to the ISO standardization of hot cracking test procedures with externally loaded specimens, three different and fundamental test procedures are assessed with the help of experiments and finite element analyses to find out the influence of different deformation rates on the test results of three well known stainless steels.",
 				"date": "2005",
 				"DOI": "10.1007/3-540-27460-X_17",
-				"libraryCatalog": "SpringerLink",
+				"libraryCatalog": "Springer Link (old)",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
@@ -402,7 +401,7 @@ var testCases = [
 				"series": "Lecture Notes in Mathematics",
 				"extra": "DOI: 10.1007/BFb0094594",
 				"url": "http://www.springerlink.com/content/978-3-540-60427-3",
-				"libraryCatalog": "SpringerLink",
+				"libraryCatalog": "Springer Link (old)",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
@@ -423,11 +422,6 @@ var testCases = [
 						"firstName": "Maria",
 						"lastName": "Anisimova",
 						"creatorType": "editor"
-					},
-					{
-						"firstName": "John M.",
-						"lastName": "Walker",
-						"creatorType": "editor"
 					}
 				],
 				"notes": [],
@@ -445,17 +439,19 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"series": "Methods in Molecular Biology",
-				"ISBN": "978-1-61779-582-4",
-				"url": "http://www.springerlink.com/content/u0lh124733784407/abstract/",
-				"abstractNote": "Genomes can be organised in different ways. Understanding the extent of the diversity of genome organisation, the processes that create it, and its consequences is particularly important for two key reasons. Firstly, it is relevant for our understanding of the genetic basis for the astounding diversity of life on Earth. Elucidating the mechanisms and processes underlying such diversity has been, and remains, one of the central goals of biological research. Secondly, it helps prepare us for our analysis of new genomes. For example, knowing that plasmids can be circular or linear, we know to check for circularity or linearity in a plasmid we encounter for the first time (if this is relevant for our analysis). This article provides an overview of variation and diversity in several aspects of genome organisation and architecture, including the number, size, ploidy, composition (RNA or DNA), packaging, and topology of the molecules encoding the genome. Additionally, it reviews differences in selected genomic features, i.e. telomeres, centromeres, DNA replication origins, and sex chromosomes. To put this in context, it incorporates a brief survey of organism diversity and the tree of life, and ends with a discussion of mutation mechanisms and inheritance, and explanations of key terms used to describe genomic variation.",
-				"libraryCatalog": "SpringerLink",
 				"title": "Diversity of Genome Organisation",
-				"bookTitle": "Evolutionary Genomics",
+				"publicationTitle": "Evolutionary Genomics",
+				"series": "Methods in Molecular Biology",
 				"publisher": "Humana Press",
+				"ISBN": "978-1-61779-582-4",
 				"pages": "51-76",
 				"volume": "855",
-				"date": "2012"
+				"url": "http://www.springerlink.com/content/u0lh124733784407/abstract/",
+				"abstractNote": "Genomes can be organised in different ways. Understanding the extent of the diversity of genome organisation, the processes that create it, and its consequences is particularly important for two key reasons. Firstly, it is relevant for our understanding of the genetic basis for the astounding diversity of life on Earth. Elucidating the mechanisms and processes underlying such diversity has been, and remains, one of the central goals of biological research. Secondly, it helps prepare us for our analysis of new genomes. For example, knowing that plasmids can be circular or linear, we know to check for circularity or linearity in a plasmid we encounter for the first time (if this is relevant for our analysis). This article provides an overview of variation and diversity in several aspects of genome organisation and architecture, including the number, size, ploidy, composition (RNA or DNA), packaging, and topology of the molecules encoding the genome. Additionally, it reviews differences in selected genomic features, i.e. telomeres, centromeres, DNA replication origins, and sex chromosomes. To put this in context, it incorporates a brief survey of organism diversity and the tree of life, and ends with a discussion of mutation mechanisms and inheritance, and explanations of key terms used to describe genomic variation.",
+				"date": "2012",
+				"DOI": "10.1007/978-1-61779-582-4_2",
+				"libraryCatalog": "Springer Link (old)",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -543,7 +539,7 @@ var testCases = [
 				"abstractNote": "Max-min is an established fairness criterion for allocating bandwidth for flows. In this work we look at the combined problem of multi-path routing and bandwidth allocation such that the flow allocation for each connection will be maximized and fairness will be maintained. We use the weighted extension of the max-min criterion to allocate bandwidth in proportion to the flows’ demand. Our contribution is an algorithm which, for the first time, solves the combined routing and bandwidth allocation problem for the case where flows are allowed to be splitted along several paths. We use multi commodity flow (MCF) formulation which is solved using linear programming (LP) techniques. These building blocks are used by our algorithm to derive the required optimal routing and allocation.",
 				"date": "2004",
 				"DOI": "10.1007/978-3-540-30193-6_28",
-				"libraryCatalog": "SpringerLink",
+				"libraryCatalog": "Springer Link (old)",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
@@ -556,18 +552,18 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"lastName": "Hilaire",
 						"firstName": "Denis",
+						"lastName": "Hilaire",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Rotach",
 						"firstName": "Mathias",
+						"lastName": "Rotach",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Clot",
 						"firstName": "Bernard",
+						"lastName": "Clot",
 						"creatorType": "author"
 					}
 				],
@@ -589,13 +585,15 @@ var testCases = [
 				"title": "Building models for daily pollen concentrations",
 				"publicationTitle": "Aerobiologia",
 				"publisher": "Springer Netherlands",
-				"ISBN": "0393-5965",
 				"ISSN": "0393-5965",
-				"pages": "1-15",
+				"pages": "499-513",
+				"volume": "28",
+				"issue": "4",
 				"url": "http://www.springerlink.com/content/q01x257j47005462/abstract/",
-				"DOI": "10.1007/s10453-012-9252-4",
 				"abstractNote": "We describe a method for constructing prediction models for daily pollen concentrations of several pollen taxa in different measurement sites in Switzerland. The method relies on daily pollen concentration time series that were measured with Hirst samplers. Each prediction is based on the weather conditions observed near the pollen measurement site. For each prediction model, we do model assessment with a test data set spanning several years.",
-				"libraryCatalog": "SpringerLink",
+				"date": "2012",
+				"DOI": "10.1007/s10453-012-9252-4",
+				"libraryCatalog": "Springer Link (old)",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
@@ -626,7 +624,7 @@ var testCases = [
 				"series": "Signals and Communication Technology",
 				"extra": "DOI: 10.1007/978-1-4020-5066-4",
 				"url": "http://www.springerlink.com/content/978-1-4020-5065-7/#section=476416&page=1",
-				"libraryCatalog": "SpringerLink",
+				"libraryCatalog": "Springer Link (old)",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
@@ -720,7 +718,7 @@ var testCases = [
 				"abstractNote": "We consider a control problem where the decision maker interacts with a standard Markov decision process with the exception that the reward functions vary arbitrarily over time. We extend the notion of Hannan consistency to this setting, showing that, in hindsight, the agent can perform almost as well as every deterministic policy. We present efficient online algorithms in the spirit of reinforcement learning that ensure that the agent’s performance loss, or regret, vanishes over time, provided that the environment is oblivious to the agent’s actions. However, counterexamples indicate that the regret does not vanish if the environment is not oblivious.",
 				"date": "2008",
 				"DOI": "10.1007/978-3-540-89722-4_21",
-				"libraryCatalog": "SpringerLink",
+				"libraryCatalog": "Springer Link (old)",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
