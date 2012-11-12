@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-11-11 09:33:33"
+	"lastUpdated": "2012-11-11 10:21:50"
 }
 
 /**
@@ -92,6 +92,10 @@ function scrape(wcID) {
 
 		//ebooks are supplied as TY - ELEC, change it to BOOK
 		text = text.replace(/^TY\s\s?-\sELEC\s*$/m, 'TY  - BOOK');
+
+		//some items don't have a TY field at all. We'll treat them as books
+		if(text.search(/^TY  -/m) == -1) text = 'TY  - BOOK\n' + text;
+
 		translator.setString(text);
 
 		translator.setHandler("itemDone", function (obj, item) {
@@ -149,8 +153,13 @@ function doWeb(doc, url) {
 	}
 }
 
+/**TODO: we don't validate the checksum yet*/
 function cleanISBN(isbn) {
-	return isbn.replace(/[^0-9]/g, "");
+	isbn = isbn.replace(/[^0-9x]/ig, '');
+	if(isbn.length == 10) return isbn;
+	isbn = isbn.replace(/x/ig, '');
+	if(isbn.length == 13) return isbn;
+	return false;
 }
 
 function detectSearch(item) {
@@ -263,6 +272,44 @@ var testCases = [
 				"date": "2006",
 				"ISBN": "0521770599 0521779243  9780521770590 9780521779241",
 				"abstractNote": "\"Adam Smith is best known as the founder of scientific economics and as an early proponent of the modern market economy. Political economy, however, was only one part of Smith's comprehensive intellectual system. Consisting of a theory of mind and its functions in language, arts, science, and social intercourse, Smith's system was a towering contribution to the Scottish Enlightenment. His ideas on social intercourse, in fact, also served as the basis for a moral theory that provided both historical and theoretical accounts of law, politics, and economics. This companion volume provides an up-to-date examination of all aspects of Smith's thought. Collectively, the essays take into account Smith's multiple contexts - Scottish, British, European, Atlantic, biographical, institutional, political, philosophical - and they draw on all his works, including student notes from his lectures. Pluralistic in approach, the volume provides a contextualist history of Smith, as well as direct philosophical engagement with his ideas.\"--Jacket."
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.worldcat.org/title/cahokia-mounds-replicas/oclc/48394842&referer=brief_results",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Grimont",
+						"firstName": "Martha LeeAnn",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Mink",
+						"firstName": "Claudia Gellman",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Cahokia Mounds Museum Society",
+						"firstName": "",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"libraryCatalog": "Open WorldCat",
+				"language": "English",
+				"title": "[Cahokia Mounds replicas]",
+				"publisher": "Cahokia Mounds Museum Society]",
+				"place": "Collinsville, Ill.",
+				"date": "2000",
+				"ISBN": "1881563022  9781881563020"
 			}
 		]
 	}
