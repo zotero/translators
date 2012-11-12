@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-11-02 09:12:35"
+	"lastUpdated": "2012-11-12 09:12:35"
 }
 
 function detectImport() {
@@ -1908,7 +1908,7 @@ function writeField(field, value, isMacro) {
 		// Case of words with uppercase characters in non-initial positions is preserved with braces.
 		// treat hyphen as whitespace for this purpose so that Large-scale etc. don't get enclosed
 		// treat curly bracket as whitespace because of mark-up immediately preceding word
-		if(!isMacro&&field != "pages") value = value.replace(/([^\s-\}]+[A-Z][^\s,]*)/g, "{$1}");
+		if(!isMacro&&field != "pages") value = value.replace(/([^\s-\{}]+[A-Z][^\s,]*)/g, "{$1}");
 		//convert the HTML markup allowed in Zotero for rich text to TeX
 		value = mapHTMLmarkup(value);
 	}
