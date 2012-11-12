@@ -1,6 +1,6 @@
 {
 	"translatorID": "d6c6210a-297c-4b2c-8c43-48cb503cc49e",
-	"label": "Springer Link (New)",
+	"label": "Springer Link",
 	"creator": "Aurimas Vinckevicius",
 	"target": "https?://link\\.springer\\.com/(search\\?|(article|chapter|book|referenceworkentry|protocol|journal|referencework)/.+)",
 	"minVersion": "3.0",
@@ -9,11 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-11-02 01:15:06"
+	"lastUpdated": "2012-11-12 12:04:35"
 }
 
 function detectWeb(doc, url) {
-	var action = url.match(/^https?:\/\/.+?\/([^\/?#]+)/);
+	var action = url.match(/^https?:\/\/[^\/]+\/([^\/?#]+)/);
 	if(!action) return;
 
 	switch(action[1]) {
@@ -43,7 +43,7 @@ function getResultList(doc) {
 		'//ol[@class="content-item-list"]/li/*[self::h3 or self::h2]/a');
 	if(!results.length) {
 		results = ZU.xpath(doc,
-			'//div[@class="toc"]/ol//div[@class="toc-item"]/h3/a');
+			'//div[@class="toc"]/ol//div[contains(@class,"toc-item")]/h3/a');
 	}
 	if(!results.length) {
 		results = ZU.xpath(doc, '//div[@class="toc"]/ol\
