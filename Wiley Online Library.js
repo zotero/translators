@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-09-24 18:41:54"
+	"lastUpdated": "2012-11-13 08:51:15"
 }
 
 /*
@@ -66,8 +66,8 @@ function scrapeBook(doc, url, pdfUrl) {
 	if( !title ) return false;
 
 	var newItem = new Zotero.Item('book');
-	newItem.title = ZU.capitalizeTitle(title.textContent);
-
+	newItem.title = ZU.capitalizeTitle(title.textContent, true);
+	
 	var data = ZU.xpath(doc, '//div[@id="metaData"]/p');
 	var dataRe = /^(.+?):\s*(.+?)\s*$/;
 	var match;
@@ -234,7 +234,12 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 					ZU.cleanAuthor( getAuthorName(editors[i].textContent),
 										'editor',false) );
 			}
-
+			
+			//title
+			if(item.title && item.title.toUpperCase() == item.title) {
+				item.title = ZU.capitalizeTitle(item.title, true);
+			}
+			
 			//tags
 			if(!item.tags.length) {
 				var keywords = ZU.xpathText(doc,
