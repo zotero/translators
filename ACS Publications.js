@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-04 23:35:03"
+	"lastUpdated": "2012-11-13 17:55:40"
 }
 
 function detectWeb(doc, url) {
@@ -102,12 +102,12 @@ function processCallback(doi, host, downloadFileName) {
 			if(text.indexOf("\nDA  -") !== -1) {
 				text = text.replace(/\nY1  - [^\n]*/, "").replace("\nDA  -", "\nY1  -");
 			}
-			Zotero.debug("ris= "+ text);
+			//Zotero.debug("ris= "+ text);
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			translator.setString(text);
 			translator.setHandler("itemDone", function(obj, item) {
-				var pdfUrl = host + 'doi/pdf/' + doi;
+				var pdfUrl = host + 'doi/pdfplus/' + doi;
 				var fullTextUrl = host + 'doi/full/' + doi;
 				item.attachments = [
 					{title:"ACS Full Text PDF",url:pdfUrl, mimeType:"application/pdf"},
