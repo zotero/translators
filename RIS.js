@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-11-05 19:49:03"
+	"lastUpdated": "2012-11-14 06:44:57"
 }
 
 function detectImport() {
@@ -385,7 +385,7 @@ var degenerateImportFieldMap = {
 	M3: "DOI",
 	N2: "abstractNote",
 	SE: {
-		"notes/File Date": ["case"]	//we might want to export from notes
+		"unsupported/File Date": ["case"]
 	},
 	T1: fieldMap["TI"],
 	T2: "backupPublicationTitle", //most item types should be covered above
@@ -393,7 +393,7 @@ var degenerateImportFieldMap = {
 		series: ["book"]
 	},
 	VL: {
-		"notes/Patent Version Number":['patent'],
+		"unsupported/Patent Version Number":['patent'],
 		accessDate: ["webpage"]	//technically access year according to EndNote
 	},
 	Y1: fieldMap["PY"]
@@ -584,7 +584,7 @@ function processTag(item, entry) {
 			break;
 			case "notes":
 				value = {note:value};
-				//we can specify note title in the field mapping table. See VL for patent
+				//we can specify note title in the field mapping table
 				if(zField[1]) {
 					value.note = zField[1] + ': ' + value.note;
 				}
@@ -615,6 +615,12 @@ function processTag(item, entry) {
 						};
 				}
 			break;
+			case "unsupported":	//unsupported fields
+				//we can convert a RIS tag to something more useful though
+				if(zField[1]) {
+					value = zField[1] + ': ' + value;
+				}
+			break;
 		}
 	}
 
@@ -626,20 +632,26 @@ function applyValue(item, zField, value, rawLine) {
 
 	if(!zField || zField == 'unknown') {
 		if(!Zotero.parentTranslator) {
-			Z.debug("Entry stored as note");
-			item.notes.push({note:rawLine});
+			Z.debug("Entry stored in note: " + rawLine);
+			item.unknownFields.push(rawLine);
 		}
 		return;
 	}
 
+	if(zField == 'unsupported') {
+		Z.debug("Unsupported field will be stored in note: " + value);
+		item.unsupportedFields.push(value);
+		return;
+	}
+
 	//check if field is valid for item type
-	if(zField != 'creators' && zField != 'tags' && zField != 'notes'
-		&& zField != 'attachments'
+	if(zField != 'creators' && zField != 'tags'
+		&& zField != 'notes' && zField != 'attachments'
 		&& !ZU.fieldIsValidForType(zField, item.itemType)) {
 		Z.debug("Invalid field '" + zField + "' for item type '" + item.itemType + "'.");
 		if(!Zotero.parentTranslator) {
-			Z.debug("Entry stored as note");
-			item.notes.push({note:rawLine});
+			Z.debug("Entry stored in note: " + rawLine);
+			item.unknownFields.push(rawLine);
 			return;
 		}
 		//otherwise, we can still store them and they will get dropped automatically
@@ -664,11 +676,11 @@ function applyValue(item, zField, value, rawLine) {
 			}
 		break;
 		default:
-			//check if value already exists
+			//check if value already exists. Don't overwrite existing values
 			if(item[zField]) {
-				//if it's not the new value is not the same as existing value, store it as note
+				//if the new value is not the same as existing value, store it as note
 				if(!Zotero.parentTranslator && item[zField] != value) {
-					item.notes.push({note:rawLine});
+					item.unsupportedFields.push(zField + ': ' + value);
 				}
 			} else {
 				item[zField] = value;
@@ -861,6 +873,22 @@ function completeItem(item) {
 		item.accessDate = undefined;
 	}
 
+	//store unsupported and unknown fields in a single note
+	var note = '';
+	for(var i=0, n=item.unsupportedFields.length; i<n; i++) {
+		note += item.unsupportedFields[i] + '\n';
+	}
+	for(var i=0, n=item.unknownFields.length; i<n; i++) {
+		note += item.unknownFields[i] + '\n';
+	}
+	item.unsupportedFields = undefined;
+	item.unknownFields = undefined;
+
+	if(note) {
+		note = "<**Unsupported Fields**> The following values were not imported\n" + note;
+		item.notes.push({note: note.trim()});
+	}
+
 	item.complete();
 }
 
@@ -922,6 +950,14 @@ function getLine() {
 	return entry;
 }
 
+//creates a new item of specified type
+function getNewItem(type) {
+	var item = new Zotero.Item(type);
+	item.unknownFields = [];
+	item.unsupportedFields = [];
+	return item;
+}
+
 function doImport(attachments) {
 	var entry;
 	//skip to the first TY entry
@@ -941,7 +977,7 @@ function doImport(attachments) {
 					type = DEFAULT_IMPORT_TYPE;
 					Z.debug("Unknown RIS item type: " + entry[2] + ". Defaulting to " + type);
 				}
-				var item = new Zotero.Item(type);
+				var item = getNewItem(type);
 				//add attachments
 				i++;
 				if(attachments && attachments[i]) {
@@ -1173,7 +1209,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "RP  - Not In File"
+						"note": "<**Unsupported Fields**> The following values were not imported\nRP  - Not In File"
 					}
 				],
 				"tags": [
@@ -1216,13 +1252,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "Patent Version Number: 877609"
-					},
-					{
-						"note": "IS  - 4,904,581"
-					},
-					{
-						"note": "RP  - Not In File"
+						"note": "<**Unsupported Fields**> The following values were not imported\nPatent Version Number: 877609\nIS  - 4,904,581\nRP  - Not In File"
 					}
 				],
 				"tags": [
@@ -1238,7 +1268,7 @@ var testCases = [
 				"issuingAuthority": "Epitope,I.",
 				"place": "OR",
 				"assignee": "4,629,783",
-				"accessDate": "June 23, 1986",
+				"accessDate": "1986-06-23",
 				"applicationNumber": "G01N 33/569 G01N 33/577",
 				"extra": "435/5 424/3 424/7.1 435/7 435/29 435/32 435/70.21 435/240.27 435/172.2 530/387 530/808 530/809 935/110",
 				"abstractNote": "A method is disclosed for detecting the presence of HTLV III infected cells in a medium. The method comprises contacting the medium with monoclonal antibodies against an antigen produced as a result of the infection and detecting the binding of the antibodies to the antigen. The antigen may be a gene product of the HTLV III virus or may be bound to such gene product. On the other hand the antigen may not be a viral gene product but may be produced as a result of the infection and may further be bound to a lymphocyte. The medium may be a human body fluid or a culture medium. A particular embodiment of the present method involves a method for determining the presence of a AIDS virus in a person. The method comprises combining a sample of a body fluid from the person with a monoclonal antibody that binds to an antigen produced as a result of the infection and detecting the binding of the monoclonal antibody to the antigen. The presence of the binding indicates the presence of a AIDS virus infection. Also disclosed are novel monoclonal antibodies, noval compositions of matter, and novel diagnostic kits"
@@ -1265,58 +1295,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "CY  - Place Published"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "ET  - Date Published"
-					},
-					{
-						"note": "J2  - Periodical Title"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "M3  - Type of Work"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "OP  - Original Publication"
-					},
-					{
-						"note": "RN  - ResearchNotes"
-					},
-					{
-						"note": "SE  - Screens"
-					},
-					{
-						"note": "SN  - ISSN/ISBN"
-					},
-					{
-						"note": "SP  - Pages"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "VL  - Volume"
-					},
-					{
-						"note": "ID  - 2"
+						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nCA  - Caption\nCY  - Place Published\nDO  - DOI\nET  - Date Published\nJ2  - Periodical Title\nLB  - Label\nM3  - Type of Work\nOP  - Original Publication\nRN  - ResearchNotes\nSE  - Screens\nSN  - ISSN/ISBN\nSP  - Pages\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Volume\nID  - 2"
 					}
 				],
 				"tags": [
@@ -1328,7 +1310,7 @@ var testCases = [
 				"attachments": [],
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
-				"date": "Date Accessed",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
@@ -1363,67 +1345,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "CY  - Place Published"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "ET  - Edition"
-					},
-					{
-						"note": "J2  - Abbreviated Publication"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "M3  - Type of Work"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "NV  - Number of Volumes"
-					},
-					{
-						"note": "OP  - Original Publication"
-					},
-					{
-						"note": "RI  - Reviewed Item"
-					},
-					{
-						"note": "RN  - ResearchNotes"
-					},
-					{
-						"note": "RP  - Reprint Edition"
-					},
-					{
-						"note": "SN  - ISBN"
-					},
-					{
-						"note": "SP  - Pages"
-					},
-					{
-						"note": "T3  - Volume Title"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "VL  - Volume"
-					},
-					{
-						"note": "ID  - 3"
+						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nCA  - Caption\nCY  - Place Published\nDO  - DOI\nET  - Edition\nJ2  - Abbreviated Publication\nLB  - Label\nM3  - Type of Work\nNV  - Number of Volumes\nOP  - Original Publication\nRI  - Reviewed Item\nRN  - ResearchNotes\nRP  - Reprint Edition\nSN  - ISBN\nSP  - Pages\nT3  - Volume Title\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Volume\nID  - 3"
 					}
 				],
 				"tags": [
@@ -1436,7 +1361,7 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
-				"date": "Date",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
@@ -1445,7 +1370,7 @@ var testCases = [
 				"shortTitle": "Short Title",
 				"title": "Title",
 				"url": "URL",
-				"accessDate": "Access Date",
+				"accessDate": "0000 Access",
 				"publicationTitle": "Publication Title"
 			},
 			{
@@ -1458,46 +1383,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "CY  - Place Published"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "ET  - Edition"
-					},
-					{
-						"note": "J2  - Periodical Title"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "PB  - Publisher"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "SP  - Description"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "ID  - 4"
+						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nCA  - Caption\nCY  - Place Published\nDO  - DOI\nET  - Edition\nJ2  - Periodical Title\nLB  - Label\nPB  - Publisher\nRN  - Research Notes\nSP  - Description\nTT  - Translated Title\nTA  - Author, Translated\nID  - 4"
 					}
 				],
 				"tags": [
@@ -1511,7 +1400,7 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"artworkSize": "Size/Length",
 				"callNumber": "Call Number",
-				"date": "Date",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
@@ -1520,7 +1409,7 @@ var testCases = [
 				"shortTitle": "Short Title",
 				"title": "Title",
 				"url": "URL",
-				"accessDate": "Access Date"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "film",
@@ -1543,70 +1432,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "A2  - Performers"
-					},
-					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "C1  - Cast"
-					},
-					{
-						"note": "C2  - Credits"
-					},
-					{
-						"note": "C3  - Size/Length"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "CY  - Place Published"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "ET  - Edition"
-					},
-					{
-						"note": "J2  - Periodical Title"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "M3  - Type"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "NV  - Extent of Work"
-					},
-					{
-						"note": "OP  - Contents"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "SN  - ISBN"
-					},
-					{
-						"note": "T3  - Series Title"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "VL  - Volume"
-					},
-					{
-						"note": "ID  - 5"
+						"note": "<**Unsupported Fields**> The following values were not imported\nA2  - Performers\nAD  - Author Address\nC1  - Cast\nC2  - Credits\nC3  - Size/Length\nCA  - Caption\nCY  - Place Published\nDO  - DOI\nET  - Edition\nJ2  - Periodical Title\nLB  - Label\nM3  - Type\nNV  - Extent of Work\nOP  - Contents\nRN  - Research Notes\nSN  - ISBN\nT3  - Series Title\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Volume\nID  - 5"
 					}
 				],
 				"tags": [
@@ -1620,7 +1449,7 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"videoRecordingFormat": "Format",
 				"callNumber": "Call Number",
-				"date": "Date",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
@@ -1629,7 +1458,7 @@ var testCases = [
 				"shortTitle": "Short Title",
 				"title": "Title",
 				"url": "URL",
-				"accessDate": "Access Date"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "bill",
@@ -1641,43 +1470,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "AN  - Accession Number"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "CN  - Call Number"
-					},
-					{
-						"note": "DB  - Name of Database"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "DP  - Database Provider"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 6"
+						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nAN  - Accession Number\nCA  - Caption\nCN  - Call Number\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nLB  - Label\nRN  - Research Notes\nTA  - Author, Translated\nTT  - Translated Title\nID  - 6"
 					}
 				],
 				"tags": [
@@ -1688,7 +1484,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"abstractNote": "Abstract",
-				"date": "Date",
+				"date": "0000 Year Date",
 				"session": "Session",
 				"language": "Language",
 				"billNumber": "Bill Number",
@@ -1701,7 +1497,7 @@ var testCases = [
 				"title": "Title",
 				"url": "URL",
 				"codeVolume": "Code Volume",
-				"accessDate": "Access Date"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "blogPost",
@@ -1719,82 +1515,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "A2  - Editor"
-					},
-					{
-						"note": "A3  - Illustrator"
-					},
-					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "AN  - Accession Number"
-					},
-					{
-						"note": "C1  - Author Affiliation"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "CN  - Call Number"
-					},
-					{
-						"note": "CY  - Place Published"
-					},
-					{
-						"note": "DB  - Name of Database"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "DP  - Database Provider"
-					},
-					{
-						"note": "ET  - Edition"
-					},
-					{
-						"note": "J2  - Periodical Title"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "OP  - Contents"
-					},
-					{
-						"note": "PB  - Publisher"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "SE  - Message Number"
-					},
-					{
-						"note": "SN  - ISBN"
-					},
-					{
-						"note": "SP  - Description"
-					},
-					{
-						"note": "T3  - Institution"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "VL  - Access Year"
-					},
-					{
-						"note": "ID  - 7"
+						"note": "<**Unsupported Fields**> The following values were not imported\nA2  - Editor\nA3  - Illustrator\nAD  - Author Address\nAN  - Accession Number\nC1  - Author Affiliation\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nLB  - Label\nOP  - Contents\nPB  - Publisher\nRN  - Research Notes\nSE  - Message Number\nSN  - ISBN\nSP  - Description\nT3  - Institution\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Access Year\nID  - 7"
 					}
 				],
 				"tags": [
@@ -1805,14 +1529,14 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"abstractNote": "Abstract",
-				"date": "Last Update Date",
+				"date": "0000 Year Last",
 				"language": "Language",
 				"websiteType": "Type of Medium",
 				"shortTitle": "Short Title",
 				"blogTitle": "Title of WebLog",
 				"title": "Title of Entry",
 				"url": "URL",
-				"accessDate": "Number"
+				"accessDate": "0000 Number"
 			},
 			{
 				"itemType": "book",
@@ -1843,52 +1567,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "C3  - Title Prefix"
-					},
-					{
-						"note": "C4  - Reviewer"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "J2  - Abbreviation"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "M3  - Type of Work"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "OP  - Original Publication"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "RP  - Reprint Edition"
-					},
-					{
-						"note": "SE  - Pages"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 8"
+						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nC3  - Title Prefix\nC4  - Reviewer\nCA  - Caption\nDO  - DOI\nJ2  - Abbreviation\nLB  - Label\nM3  - Type of Work\nOP  - Original Publication\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Pages\nTA  - Author, Translated\nTT  - Translated Title\nID  - 8"
 					}
 				],
 				"tags": [
@@ -1902,7 +1584,7 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
 				"place": "Place Published",
-				"date": "Date",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"edition": "Edition",
@@ -1917,7 +1599,7 @@ var testCases = [
 				"title": "Title",
 				"url": "URL",
 				"volume": "Volume",
-				"accessDate": "Access Date"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "bookSection",
@@ -1948,61 +1630,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "C1  - Section"
-					},
-					{
-						"note": "C3  - Title Prefix"
-					},
-					{
-						"note": "C4  - Reviewer"
-					},
-					{
-						"note": "C5  - Packaging Method"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "J2  - Abbreviation"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "OP  - Original Publication"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "RI  - Reviewed Item"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "RP  - Reprint Edition"
-					},
-					{
-						"note": "SE  - Chapter"
-					},
-					{
-						"note": "SV  - Series Volume"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 9"
+						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nC1  - Section\nC3  - Title Prefix\nC4  - Reviewer\nC5  - Packaging Method\nCA  - Caption\nDO  - DOI\nJ2  - Abbreviation\nLB  - Label\nOP  - Original Publication\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Chapter\nSV  - Series Volume\nTA  - Author, Translated\nTT  - Translated Title\nID  - 9"
 					}
 				],
 				"tags": [
@@ -2030,8 +1661,8 @@ var testCases = [
 				"title": "Title",
 				"url": "URL",
 				"volume": "Volume",
-				"accessDate": "Access Date",
-				"date": "Year"
+				"accessDate": "0000 Access",
+				"date": "0000 Year"
 			},
 			{
 				"itemType": "case",
@@ -2043,64 +1674,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "A3  - Court, Higher"
-					},
-					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "AN  - Accession Number"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "CN  - Call Number"
-					},
-					{
-						"note": "DB  - Name of Database"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "DP  - Database Provider"
-					},
-					{
-						"note": "ET  - Action of Higher Court"
-					},
-					{
-						"note": "J2  - Parallel Citation"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "M3  - Citation of Reversal"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "NV  - Reporter Abbreviation"
-					},
-					{
-						"note": "RN  - ResearchNotes"
-					},
-					{
-						"note": "File Date: Filed Date"
-					},
-					{
-						"note": "T3  - Decision"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 10"
+						"note": "<**Unsupported Fields**> The following values were not imported\nFile Date: Filed Date\nA3  - Court, Higher\nAD  - Author Address\nAN  - Accession Number\nCA  - Caption\nCN  - Call Number\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Action of Higher Court\nJ2  - Parallel Citation\nLB  - Label\nM3  - Citation of Reversal\nNV  - Reporter Abbreviation\nRN  - ResearchNotes\nT3  - Decision\nTA  - Author, Translated\nTT  - Translated Title\nID  - 10"
 					}
 				],
 				"tags": [
@@ -2112,7 +1689,7 @@ var testCases = [
 				"attachments": [],
 				"reporter": "Reporter",
 				"abstractNote": "Abstract",
-				"dateDecided": "Date Accessed",
+				"dateDecided": "0000 Year Date",
 				"language": "Language",
 				"history": "History",
 				"court": "Court",
@@ -2144,64 +1721,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "A2  - Institution"
-					},
-					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "C5  - Packaging Method"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "CY  - Place Published"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "ET  - Edition"
-					},
-					{
-						"note": "J2  - Abbreviation"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "M3  - Type of Work"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "NV  - Catalog Number"
-					},
-					{
-						"note": "OP  - Original Publication"
-					},
-					{
-						"note": "PB  - Publisher"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "RP  - Reprint Edition"
-					},
-					{
-						"note": "SE  - Number of Pages"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 11"
+						"note": "<**Unsupported Fields**> The following values were not imported\nA2  - Institution\nAD  - Author Address\nC5  - Packaging Method\nCA  - Caption\nCY  - Place Published\nDO  - DOI\nET  - Edition\nJ2  - Abbreviation\nLB  - Label\nM3  - Type of Work\nNV  - Catalog Number\nOP  - Original Publication\nPB  - Publisher\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Number of Pages\nTA  - Author, Translated\nTT  - Translated Title\nID  - 11"
 					}
 				],
 				"tags": [
@@ -2214,7 +1737,7 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
-				"date": "Date",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
@@ -2226,7 +1749,7 @@ var testCases = [
 				"title": "Title",
 				"url": "URL",
 				"volume": "Volume",
-				"accessDate": "Access Date"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "artwork",
@@ -2239,49 +1762,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "A2  - File, Name of"
-					},
-					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "CY  - Place Published"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "ET  - Version"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "PB  - Publisher"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "SP  - Description"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "VL  - Image Size"
-					},
-					{
-						"note": "ID  - 12"
+						"note": "<**Unsupported Fields**> The following values were not imported\nA2  - File, Name of\nAD  - Author Address\nCA  - Caption\nCY  - Place Published\nDO  - DOI\nET  - Version\nLB  - Label\nPB  - Publisher\nRN  - Research Notes\nSP  - Description\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Image Size\nID  - 12"
 					}
 				],
 				"tags": [
@@ -2294,7 +1778,7 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
-				"date": "Date",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
@@ -2302,7 +1786,7 @@ var testCases = [
 				"artworkMedium": "Type of Image",
 				"title": "Title",
 				"url": "URL",
-				"accessDate": "Access Date",
+				"accessDate": "0000 Access",
 				"publicationTitle": "Image Source Program"
 			},
 			{
@@ -2324,43 +1808,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "J2  - Periodical Title"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "M3  - Type"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "OP  - Original Publication"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "RP  - Reprint Edition"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 23"
+						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nCA  - Caption\nDO  - DOI\nJ2  - Periodical Title\nLB  - Label\nM3  - Type\nOP  - Original Publication\nRN  - Research Notes\nRP  - Reprint Edition\nTA  - Author, Translated\nTT  - Translated Title\nID  - 23"
 					}
 				],
 				"tags": [
@@ -2388,8 +1839,8 @@ var testCases = [
 				"title": "Title",
 				"url": "URL",
 				"volume": "Volume",
-				"accessDate": "Access Date",
-				"date": "Year"
+				"accessDate": "0000 Access",
+				"date": "0000 Year"
 			},
 			{
 				"itemType": "computerProgram",
@@ -2401,52 +1852,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "A2  - Editor, Series"
-					},
-					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "C1  - Computer"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "J2  - Periodical Title"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "M3  - Type"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "OP  - Contents"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "SP  - Description"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "VL  - Edition"
-					},
-					{
-						"note": "ID  - 14"
+						"note": "<**Unsupported Fields**> The following values were not imported\nA2  - Editor, Series\nAD  - Author Address\nC1  - Computer\nCA  - Caption\nDO  - DOI\nJ2  - Periodical Title\nLB  - Label\nM3  - Type\nOP  - Contents\nRN  - Research Notes\nSP  - Description\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Edition\nID  - 14"
 					}
 				],
 				"tags": [
@@ -2470,8 +1879,8 @@ var testCases = [
 				"seriesTitle": "Series Title",
 				"title": "Title",
 				"url": "URL",
-				"accessDate": "Access Date",
-				"date": "Year"
+				"accessDate": "0000 Access",
+				"date": "0000 Year"
 			},
 			{
 				"itemType": "conferencePaper",
@@ -2493,34 +1902,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "CY  - Conference Location"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "M3  - Type"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 15"
+						"note": "<**Unsupported Fields**> The following values were not imported\nDOI: Type\nAD  - Author Address\nCA  - Caption\nCY  - Conference Location\nLB  - Label\nRN  - Research Notes\nTA  - Author, Translated\nTT  - Translated Title\nID  - 15"
 					}
 				],
 				"tags": [
@@ -2533,7 +1918,7 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
 				"place": "Place Published",
-				"date": "Date",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
@@ -2544,7 +1929,7 @@ var testCases = [
 				"title": "Title",
 				"url": "URL",
 				"volume": "Volume",
-				"accessDate": "Access Date"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "conferencePaper",
@@ -2575,46 +1960,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "C2  - Year Published"
-					},
-					{
-						"note": "C5  - Packaging Method"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "CY  - Conference Location"
-					},
-					{
-						"note": "ET  - Edition"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "NV  - Number of Volumes"
-					},
-					{
-						"note": "OP  - Source"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 16"
+						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nC2  - Year Published\nC5  - Packaging Method\nCA  - Caption\nCY  - Conference Location\nET  - Edition\nLB  - Label\nNV  - Number of Volumes\nOP  - Source\nRN  - Research Notes\nTA  - Author, Translated\nTT  - Translated Title\nID  - 16"
 					}
 				],
 				"tags": [
@@ -2629,7 +1978,7 @@ var testCases = [
 				"place": "Place Published",
 				"proceedingsTitle": "Proceedings Title",
 				"callNumber": "Call Number",
-				"date": "Date",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
@@ -2643,7 +1992,7 @@ var testCases = [
 				"title": "Title",
 				"url": "URL",
 				"volume": "Volume",
-				"accessDate": "Access Date"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "document",
@@ -2664,70 +2013,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "C1  - Time Period"
-					},
-					{
-						"note": "C2  - Unit of Observation"
-					},
-					{
-						"note": "C3  - Data Type"
-					},
-					{
-						"note": "C4  - Dataset(s)"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "CY  - Place Published"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "ET  - Version"
-					},
-					{
-						"note": "J2  - Abbreviation"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "NV  - Study Number"
-					},
-					{
-						"note": "OP  - Version History"
-					},
-					{
-						"note": "RI  - Geographic Coverage"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "SE  - Original Release Date"
-					},
-					{
-						"note": "SN  - ISSN"
-					},
-					{
-						"note": "T3  - Series Title"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 17"
+						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nC1  - Time Period\nC2  - Unit of Observation\nC3  - Data Type\nC4  - Dataset(s)\nCA  - Caption\nCY  - Place Published\nDO  - DOI\nET  - Version\nJ2  - Abbreviation\nLB  - Label\nNV  - Study Number\nOP  - Version History\nRI  - Geographic Coverage\nRN  - Research Notes\nSE  - Original Release Date\nSN  - ISSN\nT3  - Series Title\nTA  - Author, Translated\nTT  - Translated Title\nID  - 17"
 					}
 				],
 				"tags": [
@@ -2740,7 +2029,7 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
-				"date": "Date of Collection",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
@@ -2748,7 +2037,7 @@ var testCases = [
 				"shortTitle": "Short Title",
 				"title": "Title",
 				"url": "URL",
-				"accessDate": "Access Date"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "dictionaryEntry",
@@ -2774,52 +2063,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "C1  - Term"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "J2  - Abbreviation"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "M3  - Type of Work"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "OP  - Original Publication"
-					},
-					{
-						"note": "RI  - Reviewed Item"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "RP  - Reprint Edition"
-					},
-					{
-						"note": "SE  - Version"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 13"
+						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nC1  - Term\nCA  - Caption\nDO  - DOI\nJ2  - Abbreviation\nLB  - Label\nM3  - Type of Work\nOP  - Original Publication\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Version\nTA  - Author, Translated\nTT  - Translated Title\nID  - 13"
 					}
 				],
 				"tags": [
@@ -2847,8 +2094,8 @@ var testCases = [
 				"title": "Title",
 				"url": "URL",
 				"volume": "Volume",
-				"accessDate": "Access Date",
-				"date": "Year"
+				"accessDate": "0000 Access",
+				"date": "0000 Year"
 			},
 			{
 				"itemType": "book",
@@ -2869,43 +2116,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "AD  - Editor Address"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "J2  - Periodical Title"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "M3  - Type of Work"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "OP  - Original Publication"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "RP  - Reprint Edition"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 19"
+						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Editor Address\nCA  - Caption\nDO  - DOI\nJ2  - Periodical Title\nLB  - Label\nM3  - Type of Work\nOP  - Original Publication\nRN  - Research Notes\nRP  - Reprint Edition\nTA  - Author, Translated\nTT  - Translated Title\nID  - 19"
 					}
 				],
 				"tags": [
@@ -2919,7 +2133,7 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
 				"place": "Place Published",
-				"date": "Date",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"edition": "Edition",
@@ -2934,7 +2148,7 @@ var testCases = [
 				"title": "Title",
 				"url": "URL",
 				"volume": "Volume",
-				"accessDate": "Access Date"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "journalArticle",
@@ -2952,76 +2166,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "C1  - Year Cited"
-					},
-					{
-						"note": "C2  - Date Cited"
-					},
-					{
-						"note": "C3  - PMCID"
-					},
-					{
-						"note": "C4  - Reviewer"
-					},
-					{
-						"note": "C5  - Issue Title"
-					},
-					{
-						"note": "C6  - NIHMSID"
-					},
-					{
-						"note": "C7  - Article Number"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "CY  - Place Published"
-					},
-					{
-						"note": "ET  - Edition"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "M3  - Type of Work"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "NV  - Document Number"
-					},
-					{
-						"note": "PB  - Publisher"
-					},
-					{
-						"note": "RI  - Reviewed Item"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "RP  - Reprint Edition"
-					},
-					{
-						"note": "SE  - E-Pub Date"
-					},
-					{
-						"note": "T3  - Website Title"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 20"
+						"note": "<**Unsupported Fields**> The following values were not imported\nDOI: Type of Work\nAD  - Author Address\nC1  - Year Cited\nC2  - Date Cited\nC3  - PMCID\nC4  - Reviewer\nC5  - Issue Title\nC6  - NIHMSID\nC7  - Article Number\nCA  - Caption\nCY  - Place Published\nET  - Edition\nLB  - Label\nNV  - Document Number\nPB  - Publisher\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - E-Pub Date\nT3  - Website Title\nTA  - Author, Translated\nTT  - Translated Title\nID  - 20"
 					}
 				],
 				"tags": [
@@ -3033,7 +2181,7 @@ var testCases = [
 				"attachments": [],
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
-				"date": "Date Accessed",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"journalAbbreviation": "Periodical Title",
@@ -3072,67 +2220,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "C1  - Year Cited"
-					},
-					{
-						"note": "C2  - Date Cited"
-					},
-					{
-						"note": "C3  - Title Prefix"
-					},
-					{
-						"note": "C4  - Reviewer"
-					},
-					{
-						"note": "C5  - Last Update Date"
-					},
-					{
-						"note": "C6  - NIHMSID"
-					},
-					{
-						"note": "C7  - PMCID"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "M3  - Type of Medium"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "OP  - Original Publication"
-					},
-					{
-						"note": "RI  - Reviewed Item"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "RP  - Reprint Edition"
-					},
-					{
-						"note": "T3  - Series Title"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 21"
+						"note": "<**Unsupported Fields**> The following values were not imported\nseries: Series Title\nAD  - Author Address\nC1  - Year Cited\nC2  - Date Cited\nC3  - Title Prefix\nC4  - Reviewer\nC5  - Last Update Date\nC6  - NIHMSID\nC7  - PMCID\nCA  - Caption\nDO  - DOI\nLB  - Label\nM3  - Type of Medium\nOP  - Original Publication\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nTA  - Author, Translated\nTT  - Translated Title\nID  - 21"
 					}
 				],
 				"tags": [
@@ -3146,7 +2237,7 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
 				"place": "Place Published",
-				"date": "Date Accessed",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"edition": "Edition",
@@ -3189,64 +2280,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "C1  - Section"
-					},
-					{
-						"note": "C3  - Title Prefix"
-					},
-					{
-						"note": "C4  - Reviewer"
-					},
-					{
-						"note": "C5  - Packaging Method"
-					},
-					{
-						"note": "C6  - NIHMSID"
-					},
-					{
-						"note": "C7  - PMCID"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "M3  - Type of Work"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "NV  - Number of Volumes"
-					},
-					{
-						"note": "OP  - Original Publication"
-					},
-					{
-						"note": "RI  - Reviewed Item"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "RP  - Reprint Edition"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 22"
+						"note": "<**Unsupported Fields**> The following values were not imported\nnumberOfVolumes: Number of Volumes\nAD  - Author Address\nC1  - Section\nC3  - Title Prefix\nC4  - Reviewer\nC5  - Packaging Method\nC6  - NIHMSID\nC7  - PMCID\nCA  - Caption\nDO  - DOI\nLB  - Label\nM3  - Type of Work\nOP  - Original Publication\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nTA  - Author, Translated\nTT  - Translated Title\nID  - 22"
 					}
 				],
 				"tags": [
@@ -3260,7 +2297,7 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
 				"place": "Place Published",
-				"date": "Date",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"edition": "Edition",
@@ -3275,7 +2312,7 @@ var testCases = [
 				"title": "Title",
 				"url": "URL",
 				"volume": "Volume",
-				"accessDate": "Access Date"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "encyclopediaArticle",
@@ -3301,46 +2338,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "C1  - Term"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "J2  - Abbreviation"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "OP  - Original Publication"
-					},
-					{
-						"note": "RI  - Reviewed Item"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "RP  - Reprint Edition"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 18"
+						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nC1  - Term\nCA  - Caption\nDO  - DOI\nJ2  - Abbreviation\nLB  - Label\nOP  - Original Publication\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nTA  - Author, Translated\nTT  - Translated Title\nID  - 18"
 					}
 				],
 				"tags": [
@@ -3354,7 +2355,7 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
 				"place": "Place Published",
-				"date": "Date",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"edition": "Edition",
@@ -3368,7 +2369,7 @@ var testCases = [
 				"title": "Title",
 				"url": "URL",
 				"volume": "Volume",
-				"accessDate": "Access Date"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "document",
@@ -3386,46 +2387,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "CY  - Place Published"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "ET  - Version"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "M3  - Type of Image"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "SP  - Description"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "VL  - Image Size"
-					},
-					{
-						"note": "ID  - 24"
+						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nCA  - Caption\nCY  - Place Published\nDO  - DOI\nET  - Version\nLB  - Label\nM3  - Type of Image\nRN  - Research Notes\nSP  - Description\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Image Size\nID  - 24"
 					}
 				],
 				"tags": [
@@ -3438,7 +2403,7 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
-				"date": "Date",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
@@ -3446,7 +2411,7 @@ var testCases = [
 				"publisher": "Publisher",
 				"title": "Title",
 				"url": "URL",
-				"accessDate": "Access Date",
+				"accessDate": "0000 Access",
 				"publicationTitle": "Image Source Program"
 			},
 			{
@@ -3460,49 +2425,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "A2  - File, Name of"
-					},
-					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "CY  - Place Published"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "ET  - Version"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "PB  - Publisher"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "SP  - Description"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "VL  - Image Size"
-					},
-					{
-						"note": "ID  - 25"
+						"note": "<**Unsupported Fields**> The following values were not imported\nA2  - File, Name of\nAD  - Author Address\nCA  - Caption\nCY  - Place Published\nDO  - DOI\nET  - Version\nLB  - Label\nPB  - Publisher\nRN  - Research Notes\nSP  - Description\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Image Size\nID  - 25"
 					}
 				],
 				"tags": [
@@ -3515,7 +2441,7 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
-				"date": "Date",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
@@ -3523,7 +2449,7 @@ var testCases = [
 				"artworkMedium": "Type of Image",
 				"title": "Title",
 				"url": "URL",
-				"accessDate": "Access Date",
+				"accessDate": "0000 Access",
 				"publicationTitle": "Image Source Program"
 			},
 			{
@@ -3544,55 +2470,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "A2  - Director, Series"
-					},
-					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "C1  - Cast"
-					},
-					{
-						"note": "C2  - Credits"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "CY  - Place Published"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "ET  - Edition"
-					},
-					{
-						"note": "J2  - Periodical Title"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "M3  - Medium"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "RP  - Reprint Edition"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 26"
+						"note": "<**Unsupported Fields**> The following values were not imported\nA2  - Director, Series\nAD  - Author Address\nC1  - Cast\nC2  - Credits\nCA  - Caption\nCY  - Place Published\nDO  - DOI\nET  - Edition\nJ2  - Periodical Title\nLB  - Label\nM3  - Medium\nRN  - Research Notes\nRP  - Reprint Edition\nTA  - Author, Translated\nTT  - Translated Title\nID  - 26"
 					}
 				],
 				"tags": [
@@ -3607,7 +2488,7 @@ var testCases = [
 				"genre": "Genre",
 				"videoRecordingFormat": "Format",
 				"callNumber": "Call Number",
-				"date": "Date Released",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
@@ -3616,7 +2497,7 @@ var testCases = [
 				"shortTitle": "Short Title",
 				"title": "Title",
 				"url": "URL",
-				"accessDate": "Access Date",
+				"accessDate": "0000 Access",
 				"publicationTitle": "Series Title"
 			},
 			{
@@ -3645,85 +2526,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "A3  - Author, Tertiary"
-					},
-					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "C1  - Custom 1"
-					},
-					{
-						"note": "C2  - Custom 2"
-					},
-					{
-						"note": "C3  - Custom 3"
-					},
-					{
-						"note": "C4  - Custom 4"
-					},
-					{
-						"note": "C5  - Custom 5"
-					},
-					{
-						"note": "C6  - Custom 6"
-					},
-					{
-						"note": "C7  - Custom 7"
-					},
-					{
-						"note": "C8  - Custom 8"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "CY  - Place Published"
-					},
-					{
-						"note": "ET  - Edition"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "M3  - Type of Work"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "NV  - Number of Volumes"
-					},
-					{
-						"note": "OP  - Original Publication"
-					},
-					{
-						"note": "PB  - Publisher"
-					},
-					{
-						"note": "RI  - Reviewed Item"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "RP  - Reprint Edition"
-					},
-					{
-						"note": "SE  - Section"
-					},
-					{
-						"note": "T3  - Tertiary Title"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 27"
+						"note": "<**Unsupported Fields**> The following values were not imported\nDOI: Type of Work\nA3  - Author, Tertiary\nAD  - Author Address\nC1  - Custom 1\nC2  - Custom 2\nC3  - Custom 3\nC4  - Custom 4\nC5  - Custom 5\nC6  - Custom 6\nC7  - Custom 7\nC8  - Custom 8\nCA  - Caption\nCY  - Place Published\nET  - Edition\nLB  - Label\nNV  - Number of Volumes\nOP  - Original Publication\nPB  - Publisher\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Section\nT3  - Tertiary Title\nTA  - Author, Translated\nTT  - Translated Title\nID  - 27"
 					}
 				],
 				"tags": [
@@ -3736,7 +2542,7 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
-				"date": "Date",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"journalAbbreviation": "Periodical Title",
@@ -3749,7 +2555,7 @@ var testCases = [
 				"title": "Title",
 				"url": "URL",
 				"volume": "Volume",
-				"accessDate": "Access Date"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "report",
@@ -3767,55 +2573,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "A2  - Department"
-					},
-					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "C1  - Government Body"
-					},
-					{
-						"note": "C2  - Congress Number"
-					},
-					{
-						"note": "C3  - Congress Session"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "ET  - Edition"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "SE  - Section"
-					},
-					{
-						"note": "T3  - Series Title"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "VL  - Volume"
-					},
-					{
-						"note": "ID  - 28"
+						"note": "<**Unsupported Fields**> The following values were not imported\nA2  - Department\nAD  - Author Address\nC1  - Government Body\nC2  - Congress Number\nC3  - Congress Session\nCA  - Caption\nDO  - DOI\nET  - Edition\nLB  - Label\nRN  - Research Notes\nSE  - Section\nT3  - Series Title\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Volume\nID  - 28"
 					}
 				],
 				"tags": [
@@ -3837,8 +2598,8 @@ var testCases = [
 				"pages": "Pages",
 				"title": "Title",
 				"url": "URL",
-				"accessDate": "Access Date",
-				"date": "Year"
+				"accessDate": "0000 Access",
+				"date": "0000 Year"
 			},
 			{
 				"itemType": "journalArticle",
@@ -3854,73 +2615,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "C1  - Contact Name"
-					},
-					{
-						"note": "C2  - Contact Address"
-					},
-					{
-						"note": "C3  - Contact Phone"
-					},
-					{
-						"note": "C4  - Contact Fax"
-					},
-					{
-						"note": "C5  - Funding Number"
-					},
-					{
-						"note": "C6  - CFDA Number"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "CY  - Activity Location"
-					},
-					{
-						"note": "ET  - Requirements"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "M3  - Funding Type"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "NV  - Amount Received"
-					},
-					{
-						"note": "OP  - Original Grant Number"
-					},
-					{
-						"note": "PB  - Sponsoring Agency"
-					},
-					{
-						"note": "RI  - Reviewed Item"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "RP  - Review Date"
-					},
-					{
-						"note": "SE  - Duration of Grant"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 29"
+						"note": "<**Unsupported Fields**> The following values were not imported\nDOI: Funding Type\nAD  - Author Address\nC1  - Contact Name\nC2  - Contact Address\nC3  - Contact Phone\nC4  - Contact Fax\nC5  - Funding Number\nC6  - CFDA Number\nCA  - Caption\nCY  - Activity Location\nET  - Requirements\nLB  - Label\nNV  - Amount Received\nOP  - Original Grant Number\nPB  - Sponsoring Agency\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Review Date\nSE  - Duration of Grant\nTA  - Author, Translated\nTT  - Translated Title\nID  - 29"
 					}
 				],
 				"tags": [
@@ -3933,7 +2631,7 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
-				"date": "Deadline",
+				"date": "0000 Year Deadline",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"journalAbbreviation": "Periodical Title",
@@ -3944,7 +2642,7 @@ var testCases = [
 				"title": "Title of Grant",
 				"url": "URL",
 				"volume": "Amount Requested",
-				"accessDate": "Access Date",
+				"accessDate": "0000 Access",
 				"publicationTitle": "Periodical Title"
 			},
 			{
@@ -3952,49 +2650,10 @@ var testCases = [
 				"creators": [],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "AN  - Accession Number"
-					},
-					{
-						"note": "C2  - Congress Number"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "CN  - Call Number"
-					},
-					{
-						"note": "DB  - Name of Database"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "DP  - Database Provider"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "SN  - ISBN"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 30"
+						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nAN  - Accession Number\nC2  - Congress Number\nCA  - Caption\nCN  - Call Number\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nLB  - Label\nRN  - Research Notes\nSN  - ISBN\nTA  - Author, Translated\nTT  - Translated Title\nID  - 30"
 					}
 				],
 				"tags": [
@@ -4006,7 +2665,7 @@ var testCases = [
 				"attachments": [],
 				"abstractNote": "Abstract",
 				"place": "Place Published",
-				"date": "Date",
+				"date": "0000 Year Date",
 				"session": "Session",
 				"language": "Language",
 				"documentNumber": "Document Number",
@@ -4019,7 +2678,7 @@ var testCases = [
 				"legislativeBody": "Legislative Body",
 				"title": "Title",
 				"url": "URL",
-				"accessDate": "Access Date"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "journalArticle",
@@ -4037,55 +2696,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "C1  - Legal Note"
-					},
-					{
-						"note": "C2  - PMCID"
-					},
-					{
-						"note": "C6  - NIHMSID"
-					},
-					{
-						"note": "C7  - Article Number"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "ET  - Epub Date"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "M3  - Type of Article"
-					},
-					{
-						"note": "OP  - Original Publication"
-					},
-					{
-						"note": "RI  - Reviewed Item"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "RP  - Reprint Edition"
-					},
-					{
-						"note": "SE  - Start Page"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 31"
+						"note": "<**Unsupported Fields**> The following values were not imported\nDOI: Type of Article\nAD  - Author Address\nC1  - Legal Note\nC2  - PMCID\nC6  - NIHMSID\nC7  - Article Number\nCA  - Caption\nET  - Epub Date\nLB  - Label\nOP  - Original Publication\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Start Page\nTA  - Author, Translated\nTT  - Translated Title\nID  - 31"
 					}
 				],
 				"tags": [],
@@ -4094,7 +2705,7 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
-				"date": "Date",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"journalAbbreviation": "Periodical Title",
@@ -4107,7 +2718,7 @@ var testCases = [
 				"title": "Title",
 				"url": "URL",
 				"volume": "Volume",
-				"accessDate": "Access Date"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "case",
@@ -4125,67 +2736,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "AN  - Accession Number"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "CN  - Call Number"
-					},
-					{
-						"note": "CY  - Place Published"
-					},
-					{
-						"note": "DB  - Name of Database"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "DP  - Database Provider"
-					},
-					{
-						"note": "ET  - Edition"
-					},
-					{
-						"note": "J2  - Periodical Title"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "M3  - Type of Work"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "NV  - Session Number"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "File Date: Section Number"
-					},
-					{
-						"note": "SN  - ISSN/ISBN"
-					},
-					{
-						"note": "T3  - Supplement No."
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 32"
+						"note": "<**Unsupported Fields**> The following values were not imported\nFile Date: Section Number\nAD  - Author Address\nAN  - Accession Number\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nLB  - Label\nM3  - Type of Work\nNV  - Session Number\nRN  - Research Notes\nSN  - ISSN/ISBN\nT3  - Supplement No.\nTA  - Author, Translated\nTT  - Translated Title\nID  - 32"
 					}
 				],
 				"tags": [
@@ -4197,7 +2751,7 @@ var testCases = [
 				"attachments": [],
 				"reporter": "Organization, Issuing",
 				"abstractNote": "Abstract",
-				"dateDecided": "Date of Code Edition",
+				"dateDecided": "0000 Year Date",
 				"language": "Language",
 				"extra": "Start Page",
 				"history": "History",
@@ -4206,7 +2760,7 @@ var testCases = [
 				"caseName": "Title",
 				"url": "URL",
 				"reporterVolume": "Rule Number",
-				"accessDate": "Access Date",
+				"accessDate": "0000 Access",
 				"publicationTitle": "Title Number"
 			},
 			{
@@ -4225,61 +2779,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "CY  - Place Published"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "ET  - Edition"
-					},
-					{
-						"note": "J2  - Periodical Title"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "M3  - Type of Article"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "NV  - Frequency"
-					},
-					{
-						"note": "OP  - Original Publication"
-					},
-					{
-						"note": "PB  - Publisher"
-					},
-					{
-						"note": "RI  - Reviewed Item"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "RP  - Reprint Edition"
-					},
-					{
-						"note": "SE  - Start Page"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 33"
+						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nCA  - Caption\nCY  - Place Published\nDO  - DOI\nET  - Edition\nJ2  - Periodical Title\nLB  - Label\nM3  - Type of Article\nNV  - Frequency\nOP  - Original Publication\nPB  - Publisher\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Start Page\nTA  - Author, Translated\nTT  - Translated Title\nID  - 33"
 					}
 				],
 				"tags": [
@@ -4292,7 +2795,7 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
-				"date": "Date",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
@@ -4304,7 +2807,7 @@ var testCases = [
 				"title": "Title",
 				"url": "URL",
 				"volume": "Volume",
-				"accessDate": "Access Date"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "manuscript",
@@ -4322,52 +2825,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "ET  - Description of Material"
-					},
-					{
-						"note": "J2  - Periodical Title"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "NV  - Manuscript Number"
-					},
-					{
-						"note": "PB  - Library/Archive"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "RP  - Reprint Edition"
-					},
-					{
-						"note": "SE  - Start Page"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "VL  - Volume/Storage Container"
-					},
-					{
-						"note": "ID  - 34"
+						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nCA  - Caption\nDO  - DOI\nET  - Description of Material\nJ2  - Periodical Title\nLB  - Label\nNV  - Manuscript Number\nPB  - Library/Archive\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Start Page\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Volume/Storage Container\nID  - 34"
 					}
 				],
 				"tags": [
@@ -4381,7 +2842,7 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
 				"place": "Place Published",
-				"date": "Date",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
@@ -4391,7 +2852,7 @@ var testCases = [
 				"shortTitle": "Short Title",
 				"title": "Title",
 				"url": "URL",
-				"accessDate": "Access Date",
+				"accessDate": "0000 Access",
 				"publicationTitle": "Collection Title"
 			},
 			{
@@ -4404,52 +2865,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "A2  - Editor, Series"
-					},
-					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "C2  - Area"
-					},
-					{
-						"note": "C3  - Size"
-					},
-					{
-						"note": "C5  - Packaging Method"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "J2  - Periodical Title"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "RP  - Reprint Edition"
-					},
-					{
-						"note": "SP  - Description"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 35"
+						"note": "<**Unsupported Fields**> The following values were not imported\nA2  - Editor, Series\nAD  - Author Address\nC2  - Area\nC3  - Size\nC5  - Packaging Method\nCA  - Caption\nDO  - DOI\nJ2  - Periodical Title\nLB  - Label\nRN  - Research Notes\nRP  - Reprint Edition\nSP  - Description\nTA  - Author, Translated\nTT  - Translated Title\nID  - 35"
 					}
 				],
 				"tags": [
@@ -4464,7 +2883,7 @@ var testCases = [
 				"scale": "Scale",
 				"callNumber": "Call Number",
 				"place": "Place Published",
-				"date": "Date",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"edition": "Edition",
@@ -4476,7 +2895,7 @@ var testCases = [
 				"seriesTitle": "Series Title",
 				"title": "Title",
 				"url": "URL",
-				"accessDate": "Access Date"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "audioRecording",
@@ -4500,61 +2919,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "A3  - Editor, Series"
-					},
-					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "C1  - Format of Music"
-					},
-					{
-						"note": "C2  - Form of Composition"
-					},
-					{
-						"note": "C3  - Music Parts"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "ET  - Edition"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "M3  - Form of Item"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "OP  - Original Publication"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "RP  - Reprint Edition"
-					},
-					{
-						"note": "SE  - Section"
-					},
-					{
-						"note": "SP  - Pages"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 36"
+						"note": "<**Unsupported Fields**> The following values were not imported\nA3  - Editor, Series\nAD  - Author Address\nC1  - Format of Music\nC2  - Form of Composition\nC3  - Music Parts\nCA  - Caption\nDO  - DOI\nET  - Edition\nLB  - Label\nM3  - Form of Item\nOP  - Original Publication\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Section\nSP  - Pages\nTA  - Author, Translated\nTT  - Translated Title\nID  - 36"
 					}
 				],
 				"tags": [
@@ -4569,7 +2937,7 @@ var testCases = [
 				"audioRecordingFormat": "Accompanying Matter",
 				"callNumber": "Call Number",
 				"place": "Place Published",
-				"date": "Date",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
@@ -4581,7 +2949,7 @@ var testCases = [
 				"title": "Title",
 				"url": "URL",
 				"volume": "Volume",
-				"accessDate": "Access Date",
+				"accessDate": "0000 Access",
 				"publicationTitle": "Album Title"
 			},
 			{
@@ -4594,58 +2962,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "C1  - Column"
-					},
-					{
-						"note": "C2  - Issue"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "M3  - Type of Article"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "NV  - Frequency"
-					},
-					{
-						"note": "OP  - Original Publication"
-					},
-					{
-						"note": "PB  - Publisher"
-					},
-					{
-						"note": "RI  - Reviewed Item"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "RP  - Reprint Edition"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "VL  - Volume"
-					},
-					{
-						"note": "ID  - 37"
+						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nC1  - Column\nC2  - Issue\nCA  - Caption\nDO  - DOI\nLB  - Label\nM3  - Type of Article\nNV  - Frequency\nOP  - Original Publication\nPB  - Publisher\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Volume\nID  - 37"
 					}
 				],
 				"tags": [
@@ -4659,7 +2979,7 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
 				"place": "Place Published",
-				"date": "Issue Date",
+				"date": "0000 Year Issue",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"edition": "Edition",
@@ -4672,7 +2992,7 @@ var testCases = [
 				"publicationTitle": "Newspaper",
 				"title": "Title",
 				"url": "URL",
-				"accessDate": "Access Date"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "document",
@@ -4690,49 +3010,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "CY  - Place Published"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "ET  - Date Published"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "M3  - Type of Work"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "SN  - Report Number"
-					},
-					{
-						"note": "SP  - Pages"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "VL  - Volume"
-					},
-					{
-						"note": "ID  - 38"
+						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nCA  - Caption\nCY  - Place Published\nDO  - DOI\nET  - Date Published\nLB  - Label\nM3  - Type of Work\nRN  - Research Notes\nSN  - Report Number\nSP  - Pages\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Volume\nID  - 38"
 					}
 				],
 				"tags": [
@@ -4744,7 +3025,7 @@ var testCases = [
 				"attachments": [],
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
-				"date": "Date Accessed",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
@@ -4768,40 +3049,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "A2  - Editor, Series"
-					},
-					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "C2  - Date Cited"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "M3  - Type of Work"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 39"
+						"note": "<**Unsupported Fields**> The following values were not imported\nA2  - Editor, Series\nAD  - Author Address\nC2  - Date Cited\nCA  - Caption\nDO  - DOI\nLB  - Label\nM3  - Type of Work\nRN  - Research Notes\nTA  - Author, Translated\nTT  - Translated Title\nID  - 39"
 					}
 				],
 				"tags": [
@@ -4814,7 +3065,7 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
 				"videoRecordingFormat": "Format/Length",
-				"date": "Date Accessed",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
@@ -4844,58 +3095,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "A2  - Institution"
-					},
-					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "C5  - Packaging Method"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "ET  - Edition"
-					},
-					{
-						"note": "J2  - Abbreviation"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "OP  - Original Publication"
-					},
-					{
-						"note": "PB  - Publisher"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "RP  - Reprint Edition"
-					},
-					{
-						"note": "SN  - ISBN"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "VL  - Number"
-					},
-					{
-						"note": "ID  - 40"
+						"note": "<**Unsupported Fields**> The following values were not imported\nA2  - Institution\nAD  - Author Address\nC5  - Packaging Method\nCA  - Caption\nDO  - DOI\nET  - Edition\nJ2  - Abbreviation\nLB  - Label\nOP  - Original Publication\nPB  - Publisher\nRN  - Research Notes\nRP  - Reprint Edition\nSN  - ISBN\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Number\nID  - 40"
 					}
 				],
 				"tags": [
@@ -4909,7 +3112,7 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
 				"place": "Place Published",
-				"date": "Date",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
@@ -4919,7 +3122,7 @@ var testCases = [
 				"shortTitle": "Short Title",
 				"title": "Title",
 				"url": "URL",
-				"accessDate": "Access Date",
+				"accessDate": "0000 Access",
 				"publicationTitle": "Published Source"
 			},
 			{
@@ -4936,67 +3139,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "A3  - International Author"
-					},
-					{
-						"note": "AD  - Inventor Address"
-					},
-					{
-						"note": "AN  - Accession Number"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "CN  - Call Number"
-					},
-					{
-						"note": "DA  - Date"
-					},
-					{
-						"note": "DB  - Name of Database"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "DP  - Database Provider"
-					},
-					{
-						"note": "ET  - International Patent Classification"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "M3  - Patent Type"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "NV  - US Patent Classification"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "SE  - International Patent Number"
-					},
-					{
-						"note": "T3  - Title, International"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "Patent Version Number: Patent Version Number"
-					},
-					{
-						"note": "ID  - 41"
+						"note": "<**Unsupported Fields**> The following values were not imported\nissueDate: 0000 Date\nPatent Version Number: Patent Version Number\nA3  - International Author\nAD  - Inventor Address\nAN  - Accession Number\nCA  - Caption\nCN  - Call Number\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - International Patent Classification\nLB  - Label\nM3  - Patent Type\nNV  - US Patent Classification\nRN  - Research Notes\nSE  - International Patent Number\nT3  - Title, International\nTA  - Author, Translated\nTT  - Translated Title\nID  - 41"
 					}
 				],
 				"tags": [
@@ -5008,7 +3154,7 @@ var testCases = [
 				"attachments": [],
 				"issuingAuthority": "Organization, Issuing",
 				"abstractNote": "Abstract",
-				"issueDate": "Issue Date",
+				"issueDate": "0000 Year Issue",
 				"country": "Designated States",
 				"references": "References",
 				"legalStatus": "Legal Status",
@@ -5022,7 +3168,7 @@ var testCases = [
 				"shortTitle": "Short Title",
 				"title": "Title",
 				"url": "URL",
-				"accessDate": "Access Date",
+				"accessDate": "0000 Access",
 				"publicationTitle": "Published Source"
 			},
 			{
@@ -5045,55 +3191,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "C1  - Senders E-Mail"
-					},
-					{
-						"note": "C2  - Recipients E-Mail"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "CY  - Place Published"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "ET  - Description"
-					},
-					{
-						"note": "J2  - Abbreviation"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "NV  - Communication Number"
-					},
-					{
-						"note": "PB  - Publisher"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "SP  - Pages"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 42"
+						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nC1  - Senders E-Mail\nC2  - Recipients E-Mail\nCA  - Caption\nCY  - Place Published\nDO  - DOI\nET  - Description\nJ2  - Abbreviation\nLB  - Label\nNV  - Communication Number\nPB  - Publisher\nRN  - Research Notes\nSP  - Pages\nTA  - Author, Translated\nTT  - Translated Title\nID  - 42"
 					}
 				],
 				"tags": [
@@ -5106,7 +3207,7 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
-				"date": "Date",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
@@ -5115,7 +3216,7 @@ var testCases = [
 				"shortTitle": "Short Title",
 				"title": "Title",
 				"url": "URL",
-				"accessDate": "Access Date"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "report",
@@ -5141,55 +3242,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "A2  - Editor, Series"
-					},
-					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "C6  - Issue"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "ET  - Edition"
-					},
-					{
-						"note": "J2  - Periodical Title"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "NV  - Series Volume"
-					},
-					{
-						"note": "OP  - Contents"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "RP  - Notes"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "VL  - Volume"
-					},
-					{
-						"note": "ID  - 43"
+						"note": "<**Unsupported Fields**> The following values were not imported\nA2  - Editor, Series\nAD  - Author Address\nC6  - Issue\nCA  - Caption\nDO  - DOI\nET  - Edition\nJ2  - Periodical Title\nLB  - Label\nNV  - Series Volume\nOP  - Contents\nRN  - Research Notes\nRP  - Notes\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Volume\nID  - 43"
 					}
 				],
 				"tags": [
@@ -5203,7 +3259,7 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
 				"place": "Place Published",
-				"date": "Date",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
@@ -5216,7 +3272,7 @@ var testCases = [
 				"seriesTitle": "Series Title",
 				"title": "Title",
 				"url": "URL",
-				"accessDate": "Access Date"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "book",
@@ -5248,61 +3304,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "C1  - Section"
-					},
-					{
-						"note": "C2  - Report Number"
-					},
-					{
-						"note": "C5  - Packaging Method"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "J2  - Abbreviation"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "M3  - Type of Work"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "OP  - Original Publication"
-					},
-					{
-						"note": "RI  - Reviewed Item"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "RP  - Reprint Edition"
-					},
-					{
-						"note": "SE  - Chapter"
-					},
-					{
-						"note": "T3  - Series Title"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 44"
+						"note": "<**Unsupported Fields**> The following values were not imported\nseries: Series Title\nAD  - Author Address\nC1  - Section\nC2  - Report Number\nC5  - Packaging Method\nCA  - Caption\nDO  - DOI\nJ2  - Abbreviation\nLB  - Label\nM3  - Type of Work\nOP  - Original Publication\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Chapter\nTA  - Author, Translated\nTT  - Translated Title\nID  - 44"
 					}
 				],
 				"tags": [
@@ -5316,7 +3321,7 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
 				"place": "Place Published",
-				"date": "Date",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"edition": "Edition",
@@ -5331,7 +3336,7 @@ var testCases = [
 				"title": "Title",
 				"url": "URL",
 				"volume": "Volume",
-				"accessDate": "Access Date"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "report",
@@ -5343,46 +3348,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "J2  - Abbreviation"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "NV  - Session Number"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "SE  - Section Number"
-					},
-					{
-						"note": "T3  - Paper Number"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "VL  - Rule Number"
-					},
-					{
-						"note": "ID  - 45"
+						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nCA  - Caption\nDO  - DOI\nJ2  - Abbreviation\nLB  - Label\nNV  - Session Number\nRN  - Research Notes\nSE  - Section Number\nT3  - Paper Number\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Rule Number\nID  - 45"
 					}
 				],
 				"tags": [
@@ -5396,7 +3365,7 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
 				"place": "Place Published",
-				"date": "Date",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
@@ -5408,74 +3377,17 @@ var testCases = [
 				"seriesTitle": "Section Title",
 				"title": "Title",
 				"url": "URL",
-				"accessDate": "Access Date"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "statute",
 				"creators": [],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "AN  - Accession Number"
-					},
-					{
-						"note": "C5  - Publisher"
-					},
-					{
-						"note": "C6  - Volume"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "CN  - Call Number"
-					},
-					{
-						"note": "CY  - Country"
-					},
-					{
-						"note": "DB  - Name of Database"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "DP  - Database Provider"
-					},
-					{
-						"note": "J2  - Abbreviation"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "NV  - Statute Number"
-					},
-					{
-						"note": "PB  - Source"
-					},
-					{
-						"note": "RI  - Article Number"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "T3  - International Source"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 46"
+						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nAN  - Accession Number\nC5  - Publisher\nC6  - Volume\nCA  - Caption\nCN  - Call Number\nCY  - Country\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nJ2  - Abbreviation\nLB  - Label\nNV  - Statute Number\nPB  - Source\nRI  - Article Number\nRN  - Research Notes\nT3  - International Source\nTA  - Author, Translated\nTT  - Translated Title\nID  - 46"
 					}
 				],
 				"tags": [
@@ -5486,7 +3398,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"abstractNote": "Abstract",
-				"dateEnacted": "Date Enacted",
+				"dateEnacted": "0000 Year Date",
 				"session": "Session",
 				"language": "Language",
 				"publicLawNumber": "Public Law Number",
@@ -5498,7 +3410,7 @@ var testCases = [
 				"nameOfAct": "Name of Act",
 				"url": "URL",
 				"codeNumber": "Code Number",
-				"accessDate": "Access Date",
+				"accessDate": "0000 Access",
 				"title": "Short Title"
 			},
 			{
@@ -5517,37 +3429,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "A3  - Advisor"
-					},
-					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "VL  - Degree"
-					},
-					{
-						"note": "ID  - 47"
+						"note": "<**Unsupported Fields**> The following values were not imported\nA3  - Advisor\nAD  - Author Address\nCA  - Caption\nDO  - DOI\nLB  - Label\nRN  - Research Notes\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Degree\nID  - 47"
 					}
 				],
 				"tags": [
@@ -5561,7 +3446,7 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
 				"place": "Place Published",
-				"date": "Date",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
@@ -5572,7 +3457,7 @@ var testCases = [
 				"shortTitle": "Short Title",
 				"title": "Title",
 				"url": "URL",
-				"accessDate": "Access Date",
+				"accessDate": "0000 Access",
 				"publicationTitle": "Academic Department"
 			},
 			{
@@ -5596,40 +3481,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "CY  - Place Published"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
-						"note": "M3  - Type of Work"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "PB  - Institution"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "T3  - Department"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 48"
+						"note": "<**Unsupported Fields**> The following values were not imported\nDOI: Type of Work\nAD  - Author Address\nCA  - Caption\nCY  - Place Published\nLB  - Label\nPB  - Institution\nRN  - Research Notes\nT3  - Department\nTA  - Author, Translated\nTT  - Translated Title\nID  - 48"
 					}
 				],
 				"tags": [
@@ -5640,7 +3495,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"abstractNote": "Abstract",
-				"date": "Date",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"journalAbbreviation": "Abbreviation",
@@ -5651,7 +3506,7 @@ var testCases = [
 				"publicationTitle": "Series Title",
 				"title": "Title of Work",
 				"url": "URL",
-				"accessDate": "Access Date"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "webpage",
@@ -5669,73 +3524,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "A2  - Editor, Series"
-					},
-					{
-						"note": "AD  - Author Address"
-					},
-					{
-						"note": "AN  - Accession Number"
-					},
-					{
-						"note": "C1  - Year Cited"
-					},
-					{
-						"note": "C2  - Date Cited"
-					},
-					{
-						"note": "CA  - Caption"
-					},
-					{
-						"note": "CN  - Call Number"
-					},
-					{
-						"note": "CY  - Place Published"
-					},
-					{
-						"note": "DB  - Name of Database"
-					},
-					{
-						"note": "DO  - DOI"
-					},
-					{
-						"note": "DP  - Database Provider"
-					},
-					{
-						"note": "ET  - Edition"
-					},
-					{
-						"note": "J2  - Periodical Title"
-					},
-					{
-						"note": "LB  - Label"
-					},
-					{
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "OP  - Contents"
-					},
-					{
-						"note": "PB  - Publisher"
-					},
-					{
-						"note": "RN  - Research Notes"
-					},
-					{
-						"note": "SN  - ISBN"
-					},
-					{
-						"note": "SP  - Description"
-					},
-					{
-						"note": "TA  - Author, Translated"
-					},
-					{
-						"note": "TT  - Translated Title"
-					},
-					{
-						"note": "ID  - 49"
+						"note": "<**Unsupported Fields**> The following values were not imported\nA2  - Editor, Series\nAD  - Author Address\nAN  - Accession Number\nC1  - Year Cited\nC2  - Date Cited\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nLB  - Label\nOP  - Contents\nPB  - Publisher\nRN  - Research Notes\nSN  - ISBN\nSP  - Description\nTA  - Author, Translated\nTT  - Translated Title\nID  - 49"
 					}
 				],
 				"tags": [
@@ -5746,14 +3538,14 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"abstractNote": "Abstract",
-				"date": "Last Update Date",
+				"date": "0000 Year Last",
 				"language": "Language",
 				"websiteType": "Type of Medium",
 				"shortTitle": "Short Title",
 				"websiteTitle": "Series Title",
 				"title": "Title",
 				"url": "URL",
-				"accessDate": "Access Date"
+				"accessDate": "0000 Access"
 			}
 		]
 	}
