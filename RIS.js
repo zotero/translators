@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-11-14 06:44:57"
+	"lastUpdated": "2012-11-14 06:55:56"
 }
 
 function detectImport() {
@@ -876,16 +876,16 @@ function completeItem(item) {
 	//store unsupported and unknown fields in a single note
 	var note = '';
 	for(var i=0, n=item.unsupportedFields.length; i<n; i++) {
-		note += item.unsupportedFields[i] + '\n';
+		note += item.unsupportedFields[i] + '<br/>';
 	}
 	for(var i=0, n=item.unknownFields.length; i<n; i++) {
-		note += item.unknownFields[i] + '\n';
+		note += item.unknownFields[i] + '<br/>';
 	}
 	item.unsupportedFields = undefined;
 	item.unknownFields = undefined;
 
 	if(note) {
-		note = "<**Unsupported Fields**> The following values were not imported\n" + note;
+		note = "<**Unsupported Fields**> The following values were not imported<br/>" + note;
 		item.notes.push({note: note.trim()});
 	}
 
@@ -1209,7 +1209,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nRP  - Not In File"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>RP  - Not In File<br/>"
 					}
 				],
 				"tags": [
@@ -1252,7 +1252,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nPatent Version Number: 877609\nIS  - 4,904,581\nRP  - Not In File"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>Patent Version Number: 877609<br/>IS  - 4,904,581<br/>RP  - Not In File<br/>"
 					}
 				],
 				"tags": [
@@ -1298,7 +1298,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nCA  - Caption\nCY  - Place Published\nDO  - DOI\nET  - Date Published\nJ2  - Periodical Title\nLB  - Label\nM3  - Type of Work\nOP  - Original Publication\nRN  - ResearchNotes\nSE  - Screens\nSN  - ISSN/ISBN\nSP  - Pages\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Volume\nID  - 2"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Date Published<br/>J2  - Periodical Title<br/>LB  - Label<br/>M3  - Type of Work<br/>OP  - Original Publication<br/>RN  - ResearchNotes<br/>SE  - Screens<br/>SN  - ISSN/ISBN<br/>SP  - Pages<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Volume<br/>ID  - 2<br/>"
 					}
 				],
 				"tags": [
@@ -1348,7 +1348,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nCA  - Caption\nCY  - Place Published\nDO  - DOI\nET  - Edition\nJ2  - Abbreviated Publication\nLB  - Label\nM3  - Type of Work\nNV  - Number of Volumes\nOP  - Original Publication\nRI  - Reviewed Item\nRN  - ResearchNotes\nRP  - Reprint Edition\nSN  - ISBN\nSP  - Pages\nT3  - Volume Title\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Volume\nID  - 3"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Abbreviated Publication<br/>LB  - Label<br/>M3  - Type of Work<br/>NV  - Number of Volumes<br/>OP  - Original Publication<br/>RI  - Reviewed Item<br/>RN  - ResearchNotes<br/>RP  - Reprint Edition<br/>SN  - ISBN<br/>SP  - Pages<br/>T3  - Volume Title<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Volume<br/>ID  - 3<br/>"
 					}
 				],
 				"tags": [
@@ -1386,7 +1386,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nCA  - Caption\nCY  - Place Published\nDO  - DOI\nET  - Edition\nJ2  - Periodical Title\nLB  - Label\nPB  - Publisher\nRN  - Research Notes\nSP  - Description\nTT  - Translated Title\nTA  - Author, Translated\nID  - 4"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Periodical Title<br/>LB  - Label<br/>PB  - Publisher<br/>RN  - Research Notes<br/>SP  - Description<br/>TT  - Translated Title<br/>TA  - Author, Translated<br/>ID  - 4<br/>"
 					}
 				],
 				"tags": [
@@ -1435,7 +1435,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nA2  - Performers\nAD  - Author Address\nC1  - Cast\nC2  - Credits\nC3  - Size/Length\nCA  - Caption\nCY  - Place Published\nDO  - DOI\nET  - Edition\nJ2  - Periodical Title\nLB  - Label\nM3  - Type\nNV  - Extent of Work\nOP  - Contents\nRN  - Research Notes\nSN  - ISBN\nT3  - Series Title\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Volume\nID  - 5"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>A2  - Performers<br/>AD  - Author Address<br/>C1  - Cast<br/>C2  - Credits<br/>C3  - Size/Length<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Periodical Title<br/>LB  - Label<br/>M3  - Type<br/>NV  - Extent of Work<br/>OP  - Contents<br/>RN  - Research Notes<br/>SN  - ISBN<br/>T3  - Series Title<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Volume<br/>ID  - 5<br/>"
 					}
 				],
 				"tags": [
@@ -1473,7 +1473,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nAN  - Accession Number\nCA  - Caption\nCN  - Call Number\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nLB  - Label\nRN  - Research Notes\nTA  - Author, Translated\nTT  - Translated Title\nID  - 6"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>AN  - Accession Number<br/>CA  - Caption<br/>CN  - Call Number<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>LB  - Label<br/>RN  - Research Notes<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 6<br/>"
 					}
 				],
 				"tags": [
@@ -1518,7 +1518,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nA2  - Editor\nA3  - Illustrator\nAD  - Author Address\nAN  - Accession Number\nC1  - Author Affiliation\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nLB  - Label\nOP  - Contents\nPB  - Publisher\nRN  - Research Notes\nSE  - Message Number\nSN  - ISBN\nSP  - Description\nT3  - Institution\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Access Year\nID  - 7"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>A2  - Editor<br/>A3  - Illustrator<br/>AD  - Author Address<br/>AN  - Accession Number<br/>C1  - Author Affiliation<br/>CA  - Caption<br/>CN  - Call Number<br/>CY  - Place Published<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>ET  - Edition<br/>J2  - Periodical Title<br/>LB  - Label<br/>OP  - Contents<br/>PB  - Publisher<br/>RN  - Research Notes<br/>SE  - Message Number<br/>SN  - ISBN<br/>SP  - Description<br/>T3  - Institution<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Access Year<br/>ID  - 7<br/>"
 					}
 				],
 				"tags": [
@@ -1570,7 +1570,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nC3  - Title Prefix\nC4  - Reviewer\nCA  - Caption\nDO  - DOI\nJ2  - Abbreviation\nLB  - Label\nM3  - Type of Work\nOP  - Original Publication\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Pages\nTA  - Author, Translated\nTT  - Translated Title\nID  - 8"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>C3  - Title Prefix<br/>C4  - Reviewer<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Abbreviation<br/>LB  - Label<br/>M3  - Type of Work<br/>OP  - Original Publication<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Pages<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 8<br/>"
 					}
 				],
 				"tags": [
@@ -1633,7 +1633,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nC1  - Section\nC3  - Title Prefix\nC4  - Reviewer\nC5  - Packaging Method\nCA  - Caption\nDO  - DOI\nJ2  - Abbreviation\nLB  - Label\nOP  - Original Publication\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Chapter\nSV  - Series Volume\nTA  - Author, Translated\nTT  - Translated Title\nID  - 9"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>C1  - Section<br/>C3  - Title Prefix<br/>C4  - Reviewer<br/>C5  - Packaging Method<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Abbreviation<br/>LB  - Label<br/>OP  - Original Publication<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Chapter<br/>SV  - Series Volume<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 9<br/>"
 					}
 				],
 				"tags": [
@@ -1677,7 +1677,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nFile Date: Filed Date\nA3  - Court, Higher\nAD  - Author Address\nAN  - Accession Number\nCA  - Caption\nCN  - Call Number\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Action of Higher Court\nJ2  - Parallel Citation\nLB  - Label\nM3  - Citation of Reversal\nNV  - Reporter Abbreviation\nRN  - ResearchNotes\nT3  - Decision\nTA  - Author, Translated\nTT  - Translated Title\nID  - 10"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>File Date: Filed Date<br/>A3  - Court, Higher<br/>AD  - Author Address<br/>AN  - Accession Number<br/>CA  - Caption<br/>CN  - Call Number<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>ET  - Action of Higher Court<br/>J2  - Parallel Citation<br/>LB  - Label<br/>M3  - Citation of Reversal<br/>NV  - Reporter Abbreviation<br/>RN  - ResearchNotes<br/>T3  - Decision<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 10<br/>"
 					}
 				],
 				"tags": [
@@ -1724,7 +1724,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nA2  - Institution\nAD  - Author Address\nC5  - Packaging Method\nCA  - Caption\nCY  - Place Published\nDO  - DOI\nET  - Edition\nJ2  - Abbreviation\nLB  - Label\nM3  - Type of Work\nNV  - Catalog Number\nOP  - Original Publication\nPB  - Publisher\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Number of Pages\nTA  - Author, Translated\nTT  - Translated Title\nID  - 11"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>A2  - Institution<br/>AD  - Author Address<br/>C5  - Packaging Method<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Abbreviation<br/>LB  - Label<br/>M3  - Type of Work<br/>NV  - Catalog Number<br/>OP  - Original Publication<br/>PB  - Publisher<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Number of Pages<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 11<br/>"
 					}
 				],
 				"tags": [
@@ -1765,7 +1765,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nA2  - File, Name of\nAD  - Author Address\nCA  - Caption\nCY  - Place Published\nDO  - DOI\nET  - Version\nLB  - Label\nPB  - Publisher\nRN  - Research Notes\nSP  - Description\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Image Size\nID  - 12"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>A2  - File, Name of<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Version<br/>LB  - Label<br/>PB  - Publisher<br/>RN  - Research Notes<br/>SP  - Description<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Image Size<br/>ID  - 12<br/>"
 					}
 				],
 				"tags": [
@@ -1811,7 +1811,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nCA  - Caption\nDO  - DOI\nJ2  - Periodical Title\nLB  - Label\nM3  - Type\nOP  - Original Publication\nRN  - Research Notes\nRP  - Reprint Edition\nTA  - Author, Translated\nTT  - Translated Title\nID  - 23"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Periodical Title<br/>LB  - Label<br/>M3  - Type<br/>OP  - Original Publication<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 23<br/>"
 					}
 				],
 				"tags": [
@@ -1855,7 +1855,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nA2  - Editor, Series\nAD  - Author Address\nC1  - Computer\nCA  - Caption\nDO  - DOI\nJ2  - Periodical Title\nLB  - Label\nM3  - Type\nOP  - Contents\nRN  - Research Notes\nSP  - Description\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Edition\nID  - 14"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>A2  - Editor, Series<br/>AD  - Author Address<br/>C1  - Computer<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Periodical Title<br/>LB  - Label<br/>M3  - Type<br/>OP  - Contents<br/>RN  - Research Notes<br/>SP  - Description<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Edition<br/>ID  - 14<br/>"
 					}
 				],
 				"tags": [
@@ -1905,7 +1905,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nDOI: Type\nAD  - Author Address\nCA  - Caption\nCY  - Conference Location\nLB  - Label\nRN  - Research Notes\nTA  - Author, Translated\nTT  - Translated Title\nID  - 15"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>DOI: Type<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Conference Location<br/>LB  - Label<br/>RN  - Research Notes<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 15<br/>"
 					}
 				],
 				"tags": [
@@ -1963,7 +1963,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nC2  - Year Published\nC5  - Packaging Method\nCA  - Caption\nCY  - Conference Location\nET  - Edition\nLB  - Label\nNV  - Number of Volumes\nOP  - Source\nRN  - Research Notes\nTA  - Author, Translated\nTT  - Translated Title\nID  - 16"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>C2  - Year Published<br/>C5  - Packaging Method<br/>CA  - Caption<br/>CY  - Conference Location<br/>ET  - Edition<br/>LB  - Label<br/>NV  - Number of Volumes<br/>OP  - Source<br/>RN  - Research Notes<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 16<br/>"
 					}
 				],
 				"tags": [
@@ -2016,7 +2016,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nC1  - Time Period\nC2  - Unit of Observation\nC3  - Data Type\nC4  - Dataset(s)\nCA  - Caption\nCY  - Place Published\nDO  - DOI\nET  - Version\nJ2  - Abbreviation\nLB  - Label\nNV  - Study Number\nOP  - Version History\nRI  - Geographic Coverage\nRN  - Research Notes\nSE  - Original Release Date\nSN  - ISSN\nT3  - Series Title\nTA  - Author, Translated\nTT  - Translated Title\nID  - 17"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>C1  - Time Period<br/>C2  - Unit of Observation<br/>C3  - Data Type<br/>C4  - Dataset(s)<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Version<br/>J2  - Abbreviation<br/>LB  - Label<br/>NV  - Study Number<br/>OP  - Version History<br/>RI  - Geographic Coverage<br/>RN  - Research Notes<br/>SE  - Original Release Date<br/>SN  - ISSN<br/>T3  - Series Title<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 17<br/>"
 					}
 				],
 				"tags": [
@@ -2066,7 +2066,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nC1  - Term\nCA  - Caption\nDO  - DOI\nJ2  - Abbreviation\nLB  - Label\nM3  - Type of Work\nOP  - Original Publication\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Version\nTA  - Author, Translated\nTT  - Translated Title\nID  - 13"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>C1  - Term<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Abbreviation<br/>LB  - Label<br/>M3  - Type of Work<br/>OP  - Original Publication<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Version<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 13<br/>"
 					}
 				],
 				"tags": [
@@ -2119,7 +2119,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Editor Address\nCA  - Caption\nDO  - DOI\nJ2  - Periodical Title\nLB  - Label\nM3  - Type of Work\nOP  - Original Publication\nRN  - Research Notes\nRP  - Reprint Edition\nTA  - Author, Translated\nTT  - Translated Title\nID  - 19"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Editor Address<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Periodical Title<br/>LB  - Label<br/>M3  - Type of Work<br/>OP  - Original Publication<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 19<br/>"
 					}
 				],
 				"tags": [
@@ -2169,7 +2169,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nDOI: Type of Work\nAD  - Author Address\nC1  - Year Cited\nC2  - Date Cited\nC3  - PMCID\nC4  - Reviewer\nC5  - Issue Title\nC6  - NIHMSID\nC7  - Article Number\nCA  - Caption\nCY  - Place Published\nET  - Edition\nLB  - Label\nNV  - Document Number\nPB  - Publisher\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - E-Pub Date\nT3  - Website Title\nTA  - Author, Translated\nTT  - Translated Title\nID  - 20"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>DOI: Type of Work<br/>AD  - Author Address<br/>C1  - Year Cited<br/>C2  - Date Cited<br/>C3  - PMCID<br/>C4  - Reviewer<br/>C5  - Issue Title<br/>C6  - NIHMSID<br/>C7  - Article Number<br/>CA  - Caption<br/>CY  - Place Published<br/>ET  - Edition<br/>LB  - Label<br/>NV  - Document Number<br/>PB  - Publisher<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - E-Pub Date<br/>T3  - Website Title<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 20<br/>"
 					}
 				],
 				"tags": [
@@ -2223,7 +2223,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nseries: Series Title\nAD  - Author Address\nC1  - Year Cited\nC2  - Date Cited\nC3  - Title Prefix\nC4  - Reviewer\nC5  - Last Update Date\nC6  - NIHMSID\nC7  - PMCID\nCA  - Caption\nDO  - DOI\nLB  - Label\nM3  - Type of Medium\nOP  - Original Publication\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nTA  - Author, Translated\nTT  - Translated Title\nID  - 21"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>series: Series Title<br/>AD  - Author Address<br/>C1  - Year Cited<br/>C2  - Date Cited<br/>C3  - Title Prefix<br/>C4  - Reviewer<br/>C5  - Last Update Date<br/>C6  - NIHMSID<br/>C7  - PMCID<br/>CA  - Caption<br/>DO  - DOI<br/>LB  - Label<br/>M3  - Type of Medium<br/>OP  - Original Publication<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 21<br/>"
 					}
 				],
 				"tags": [
@@ -2283,7 +2283,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nnumberOfVolumes: Number of Volumes\nAD  - Author Address\nC1  - Section\nC3  - Title Prefix\nC4  - Reviewer\nC5  - Packaging Method\nC6  - NIHMSID\nC7  - PMCID\nCA  - Caption\nDO  - DOI\nLB  - Label\nM3  - Type of Work\nOP  - Original Publication\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nTA  - Author, Translated\nTT  - Translated Title\nID  - 22"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>numberOfVolumes: Number of Volumes<br/>AD  - Author Address<br/>C1  - Section<br/>C3  - Title Prefix<br/>C4  - Reviewer<br/>C5  - Packaging Method<br/>C6  - NIHMSID<br/>C7  - PMCID<br/>CA  - Caption<br/>DO  - DOI<br/>LB  - Label<br/>M3  - Type of Work<br/>OP  - Original Publication<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 22<br/>"
 					}
 				],
 				"tags": [
@@ -2341,7 +2341,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nC1  - Term\nCA  - Caption\nDO  - DOI\nJ2  - Abbreviation\nLB  - Label\nOP  - Original Publication\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nTA  - Author, Translated\nTT  - Translated Title\nID  - 18"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>C1  - Term<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Abbreviation<br/>LB  - Label<br/>OP  - Original Publication<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 18<br/>"
 					}
 				],
 				"tags": [
@@ -2390,7 +2390,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nCA  - Caption\nCY  - Place Published\nDO  - DOI\nET  - Version\nLB  - Label\nM3  - Type of Image\nRN  - Research Notes\nSP  - Description\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Image Size\nID  - 24"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Version<br/>LB  - Label<br/>M3  - Type of Image<br/>RN  - Research Notes<br/>SP  - Description<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Image Size<br/>ID  - 24<br/>"
 					}
 				],
 				"tags": [
@@ -2428,7 +2428,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nA2  - File, Name of\nAD  - Author Address\nCA  - Caption\nCY  - Place Published\nDO  - DOI\nET  - Version\nLB  - Label\nPB  - Publisher\nRN  - Research Notes\nSP  - Description\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Image Size\nID  - 25"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>A2  - File, Name of<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Version<br/>LB  - Label<br/>PB  - Publisher<br/>RN  - Research Notes<br/>SP  - Description<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Image Size<br/>ID  - 25<br/>"
 					}
 				],
 				"tags": [
@@ -2473,7 +2473,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nA2  - Director, Series\nAD  - Author Address\nC1  - Cast\nC2  - Credits\nCA  - Caption\nCY  - Place Published\nDO  - DOI\nET  - Edition\nJ2  - Periodical Title\nLB  - Label\nM3  - Medium\nRN  - Research Notes\nRP  - Reprint Edition\nTA  - Author, Translated\nTT  - Translated Title\nID  - 26"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>A2  - Director, Series<br/>AD  - Author Address<br/>C1  - Cast<br/>C2  - Credits<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Periodical Title<br/>LB  - Label<br/>M3  - Medium<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 26<br/>"
 					}
 				],
 				"tags": [
@@ -2529,7 +2529,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nDOI: Type of Work\nA3  - Author, Tertiary\nAD  - Author Address\nC1  - Custom 1\nC2  - Custom 2\nC3  - Custom 3\nC4  - Custom 4\nC5  - Custom 5\nC6  - Custom 6\nC7  - Custom 7\nC8  - Custom 8\nCA  - Caption\nCY  - Place Published\nET  - Edition\nLB  - Label\nNV  - Number of Volumes\nOP  - Original Publication\nPB  - Publisher\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Section\nT3  - Tertiary Title\nTA  - Author, Translated\nTT  - Translated Title\nID  - 27"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>DOI: Type of Work<br/>A3  - Author, Tertiary<br/>AD  - Author Address<br/>C1  - Custom 1<br/>C2  - Custom 2<br/>C3  - Custom 3<br/>C4  - Custom 4<br/>C5  - Custom 5<br/>C6  - Custom 6<br/>C7  - Custom 7<br/>C8  - Custom 8<br/>CA  - Caption<br/>CY  - Place Published<br/>ET  - Edition<br/>LB  - Label<br/>NV  - Number of Volumes<br/>OP  - Original Publication<br/>PB  - Publisher<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Section<br/>T3  - Tertiary Title<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 27<br/>"
 					}
 				],
 				"tags": [
@@ -2576,7 +2576,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nA2  - Department\nAD  - Author Address\nC1  - Government Body\nC2  - Congress Number\nC3  - Congress Session\nCA  - Caption\nDO  - DOI\nET  - Edition\nLB  - Label\nRN  - Research Notes\nSE  - Section\nT3  - Series Title\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Volume\nID  - 28"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>A2  - Department<br/>AD  - Author Address<br/>C1  - Government Body<br/>C2  - Congress Number<br/>C3  - Congress Session<br/>CA  - Caption<br/>DO  - DOI<br/>ET  - Edition<br/>LB  - Label<br/>RN  - Research Notes<br/>SE  - Section<br/>T3  - Series Title<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Volume<br/>ID  - 28<br/>"
 					}
 				],
 				"tags": [
@@ -2618,7 +2618,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nDOI: Funding Type\nAD  - Author Address\nC1  - Contact Name\nC2  - Contact Address\nC3  - Contact Phone\nC4  - Contact Fax\nC5  - Funding Number\nC6  - CFDA Number\nCA  - Caption\nCY  - Activity Location\nET  - Requirements\nLB  - Label\nNV  - Amount Received\nOP  - Original Grant Number\nPB  - Sponsoring Agency\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Review Date\nSE  - Duration of Grant\nTA  - Author, Translated\nTT  - Translated Title\nID  - 29"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>DOI: Funding Type<br/>AD  - Author Address<br/>C1  - Contact Name<br/>C2  - Contact Address<br/>C3  - Contact Phone<br/>C4  - Contact Fax<br/>C5  - Funding Number<br/>C6  - CFDA Number<br/>CA  - Caption<br/>CY  - Activity Location<br/>ET  - Requirements<br/>LB  - Label<br/>NV  - Amount Received<br/>OP  - Original Grant Number<br/>PB  - Sponsoring Agency<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Review Date<br/>SE  - Duration of Grant<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 29<br/>"
 					}
 				],
 				"tags": [
@@ -2653,7 +2653,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nAN  - Accession Number\nC2  - Congress Number\nCA  - Caption\nCN  - Call Number\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nLB  - Label\nRN  - Research Notes\nSN  - ISBN\nTA  - Author, Translated\nTT  - Translated Title\nID  - 30"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>AN  - Accession Number<br/>C2  - Congress Number<br/>CA  - Caption<br/>CN  - Call Number<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>LB  - Label<br/>RN  - Research Notes<br/>SN  - ISBN<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 30<br/>"
 					}
 				],
 				"tags": [
@@ -2696,7 +2696,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nDOI: Type of Article\nAD  - Author Address\nC1  - Legal Note\nC2  - PMCID\nC6  - NIHMSID\nC7  - Article Number\nCA  - Caption\nET  - Epub Date\nLB  - Label\nOP  - Original Publication\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Start Page\nTA  - Author, Translated\nTT  - Translated Title\nID  - 31"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>DOI: Type of Article<br/>AD  - Author Address<br/>C1  - Legal Note<br/>C2  - PMCID<br/>C6  - NIHMSID<br/>C7  - Article Number<br/>CA  - Caption<br/>ET  - Epub Date<br/>LB  - Label<br/>OP  - Original Publication<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Start Page<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 31<br/>"
 					}
 				],
 				"tags": [],
@@ -2739,7 +2739,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nFile Date: Section Number\nAD  - Author Address\nAN  - Accession Number\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nLB  - Label\nM3  - Type of Work\nNV  - Session Number\nRN  - Research Notes\nSN  - ISSN/ISBN\nT3  - Supplement No.\nTA  - Author, Translated\nTT  - Translated Title\nID  - 32"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>File Date: Section Number<br/>AD  - Author Address<br/>AN  - Accession Number<br/>CA  - Caption<br/>CN  - Call Number<br/>CY  - Place Published<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>ET  - Edition<br/>J2  - Periodical Title<br/>LB  - Label<br/>M3  - Type of Work<br/>NV  - Session Number<br/>RN  - Research Notes<br/>SN  - ISSN/ISBN<br/>T3  - Supplement No.<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 32<br/>"
 					}
 				],
 				"tags": [
@@ -2782,7 +2782,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nCA  - Caption\nCY  - Place Published\nDO  - DOI\nET  - Edition\nJ2  - Periodical Title\nLB  - Label\nM3  - Type of Article\nNV  - Frequency\nOP  - Original Publication\nPB  - Publisher\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Start Page\nTA  - Author, Translated\nTT  - Translated Title\nID  - 33"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Periodical Title<br/>LB  - Label<br/>M3  - Type of Article<br/>NV  - Frequency<br/>OP  - Original Publication<br/>PB  - Publisher<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Start Page<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 33<br/>"
 					}
 				],
 				"tags": [
@@ -2828,7 +2828,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nCA  - Caption\nDO  - DOI\nET  - Description of Material\nJ2  - Periodical Title\nLB  - Label\nNV  - Manuscript Number\nPB  - Library/Archive\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Start Page\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Volume/Storage Container\nID  - 34"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>CA  - Caption<br/>DO  - DOI<br/>ET  - Description of Material<br/>J2  - Periodical Title<br/>LB  - Label<br/>NV  - Manuscript Number<br/>PB  - Library/Archive<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Start Page<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Volume/Storage Container<br/>ID  - 34<br/>"
 					}
 				],
 				"tags": [
@@ -2868,7 +2868,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nA2  - Editor, Series\nAD  - Author Address\nC2  - Area\nC3  - Size\nC5  - Packaging Method\nCA  - Caption\nDO  - DOI\nJ2  - Periodical Title\nLB  - Label\nRN  - Research Notes\nRP  - Reprint Edition\nSP  - Description\nTA  - Author, Translated\nTT  - Translated Title\nID  - 35"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>A2  - Editor, Series<br/>AD  - Author Address<br/>C2  - Area<br/>C3  - Size<br/>C5  - Packaging Method<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Periodical Title<br/>LB  - Label<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SP  - Description<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 35<br/>"
 					}
 				],
 				"tags": [
@@ -2922,7 +2922,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nA3  - Editor, Series\nAD  - Author Address\nC1  - Format of Music\nC2  - Form of Composition\nC3  - Music Parts\nCA  - Caption\nDO  - DOI\nET  - Edition\nLB  - Label\nM3  - Form of Item\nOP  - Original Publication\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Section\nSP  - Pages\nTA  - Author, Translated\nTT  - Translated Title\nID  - 36"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>A3  - Editor, Series<br/>AD  - Author Address<br/>C1  - Format of Music<br/>C2  - Form of Composition<br/>C3  - Music Parts<br/>CA  - Caption<br/>DO  - DOI<br/>ET  - Edition<br/>LB  - Label<br/>M3  - Form of Item<br/>OP  - Original Publication<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Section<br/>SP  - Pages<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 36<br/>"
 					}
 				],
 				"tags": [
@@ -2965,7 +2965,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nC1  - Column\nC2  - Issue\nCA  - Caption\nDO  - DOI\nLB  - Label\nM3  - Type of Article\nNV  - Frequency\nOP  - Original Publication\nPB  - Publisher\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Volume\nID  - 37"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>C1  - Column<br/>C2  - Issue<br/>CA  - Caption<br/>DO  - DOI<br/>LB  - Label<br/>M3  - Type of Article<br/>NV  - Frequency<br/>OP  - Original Publication<br/>PB  - Publisher<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Volume<br/>ID  - 37<br/>"
 					}
 				],
 				"tags": [
@@ -3013,7 +3013,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nCA  - Caption\nCY  - Place Published\nDO  - DOI\nET  - Date Published\nLB  - Label\nM3  - Type of Work\nRN  - Research Notes\nSN  - Report Number\nSP  - Pages\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Volume\nID  - 38"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Date Published<br/>LB  - Label<br/>M3  - Type of Work<br/>RN  - Research Notes<br/>SN  - Report Number<br/>SP  - Pages<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Volume<br/>ID  - 38<br/>"
 					}
 				],
 				"tags": [
@@ -3052,7 +3052,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nA2  - Editor, Series\nAD  - Author Address\nC2  - Date Cited\nCA  - Caption\nDO  - DOI\nLB  - Label\nM3  - Type of Work\nRN  - Research Notes\nTA  - Author, Translated\nTT  - Translated Title\nID  - 39"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>A2  - Editor, Series<br/>AD  - Author Address<br/>C2  - Date Cited<br/>CA  - Caption<br/>DO  - DOI<br/>LB  - Label<br/>M3  - Type of Work<br/>RN  - Research Notes<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 39<br/>"
 					}
 				],
 				"tags": [
@@ -3098,7 +3098,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nA2  - Institution\nAD  - Author Address\nC5  - Packaging Method\nCA  - Caption\nDO  - DOI\nET  - Edition\nJ2  - Abbreviation\nLB  - Label\nOP  - Original Publication\nPB  - Publisher\nRN  - Research Notes\nRP  - Reprint Edition\nSN  - ISBN\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Number\nID  - 40"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>A2  - Institution<br/>AD  - Author Address<br/>C5  - Packaging Method<br/>CA  - Caption<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Abbreviation<br/>LB  - Label<br/>OP  - Original Publication<br/>PB  - Publisher<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SN  - ISBN<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Number<br/>ID  - 40<br/>"
 					}
 				],
 				"tags": [
@@ -3142,7 +3142,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nissueDate: 0000 Date\nPatent Version Number: Patent Version Number\nA3  - International Author\nAD  - Inventor Address\nAN  - Accession Number\nCA  - Caption\nCN  - Call Number\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - International Patent Classification\nLB  - Label\nM3  - Patent Type\nNV  - US Patent Classification\nRN  - Research Notes\nSE  - International Patent Number\nT3  - Title, International\nTA  - Author, Translated\nTT  - Translated Title\nID  - 41"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>issueDate: 0000 Date<br/>Patent Version Number: Patent Version Number<br/>A3  - International Author<br/>AD  - Inventor Address<br/>AN  - Accession Number<br/>CA  - Caption<br/>CN  - Call Number<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>ET  - International Patent Classification<br/>LB  - Label<br/>M3  - Patent Type<br/>NV  - US Patent Classification<br/>RN  - Research Notes<br/>SE  - International Patent Number<br/>T3  - Title, International<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 41<br/>"
 					}
 				],
 				"tags": [
@@ -3194,7 +3194,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nC1  - Senders E-Mail\nC2  - Recipients E-Mail\nCA  - Caption\nCY  - Place Published\nDO  - DOI\nET  - Description\nJ2  - Abbreviation\nLB  - Label\nNV  - Communication Number\nPB  - Publisher\nRN  - Research Notes\nSP  - Pages\nTA  - Author, Translated\nTT  - Translated Title\nID  - 42"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>C1  - Senders E-Mail<br/>C2  - Recipients E-Mail<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Description<br/>J2  - Abbreviation<br/>LB  - Label<br/>NV  - Communication Number<br/>PB  - Publisher<br/>RN  - Research Notes<br/>SP  - Pages<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 42<br/>"
 					}
 				],
 				"tags": [
@@ -3245,7 +3245,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nA2  - Editor, Series\nAD  - Author Address\nC6  - Issue\nCA  - Caption\nDO  - DOI\nET  - Edition\nJ2  - Periodical Title\nLB  - Label\nNV  - Series Volume\nOP  - Contents\nRN  - Research Notes\nRP  - Notes\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Volume\nID  - 43"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>A2  - Editor, Series<br/>AD  - Author Address<br/>C6  - Issue<br/>CA  - Caption<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Periodical Title<br/>LB  - Label<br/>NV  - Series Volume<br/>OP  - Contents<br/>RN  - Research Notes<br/>RP  - Notes<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Volume<br/>ID  - 43<br/>"
 					}
 				],
 				"tags": [
@@ -3307,7 +3307,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nseries: Series Title\nAD  - Author Address\nC1  - Section\nC2  - Report Number\nC5  - Packaging Method\nCA  - Caption\nDO  - DOI\nJ2  - Abbreviation\nLB  - Label\nM3  - Type of Work\nOP  - Original Publication\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Chapter\nTA  - Author, Translated\nTT  - Translated Title\nID  - 44"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>series: Series Title<br/>AD  - Author Address<br/>C1  - Section<br/>C2  - Report Number<br/>C5  - Packaging Method<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Abbreviation<br/>LB  - Label<br/>M3  - Type of Work<br/>OP  - Original Publication<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Chapter<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 44<br/>"
 					}
 				],
 				"tags": [
@@ -3351,7 +3351,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nCA  - Caption\nDO  - DOI\nJ2  - Abbreviation\nLB  - Label\nNV  - Session Number\nRN  - Research Notes\nSE  - Section Number\nT3  - Paper Number\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Rule Number\nID  - 45"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Abbreviation<br/>LB  - Label<br/>NV  - Session Number<br/>RN  - Research Notes<br/>SE  - Section Number<br/>T3  - Paper Number<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Rule Number<br/>ID  - 45<br/>"
 					}
 				],
 				"tags": [
@@ -3387,7 +3387,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nAD  - Author Address\nAN  - Accession Number\nC5  - Publisher\nC6  - Volume\nCA  - Caption\nCN  - Call Number\nCY  - Country\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nJ2  - Abbreviation\nLB  - Label\nNV  - Statute Number\nPB  - Source\nRI  - Article Number\nRN  - Research Notes\nT3  - International Source\nTA  - Author, Translated\nTT  - Translated Title\nID  - 46"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>AN  - Accession Number<br/>C5  - Publisher<br/>C6  - Volume<br/>CA  - Caption<br/>CN  - Call Number<br/>CY  - Country<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>J2  - Abbreviation<br/>LB  - Label<br/>NV  - Statute Number<br/>PB  - Source<br/>RI  - Article Number<br/>RN  - Research Notes<br/>T3  - International Source<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 46<br/>"
 					}
 				],
 				"tags": [
@@ -3432,7 +3432,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nA3  - Advisor\nAD  - Author Address\nCA  - Caption\nDO  - DOI\nLB  - Label\nRN  - Research Notes\nTA  - Author, Translated\nTT  - Translated Title\nVL  - Degree\nID  - 47"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>A3  - Advisor<br/>AD  - Author Address<br/>CA  - Caption<br/>DO  - DOI<br/>LB  - Label<br/>RN  - Research Notes<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Degree<br/>ID  - 47<br/>"
 					}
 				],
 				"tags": [
@@ -3484,7 +3484,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nDOI: Type of Work\nAD  - Author Address\nCA  - Caption\nCY  - Place Published\nLB  - Label\nPB  - Institution\nRN  - Research Notes\nT3  - Department\nTA  - Author, Translated\nTT  - Translated Title\nID  - 48"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>DOI: Type of Work<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Place Published<br/>LB  - Label<br/>PB  - Institution<br/>RN  - Research Notes<br/>T3  - Department<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 48<br/>"
 					}
 				],
 				"tags": [
@@ -3527,7 +3527,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported\nA2  - Editor, Series\nAD  - Author Address\nAN  - Accession Number\nC1  - Year Cited\nC2  - Date Cited\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nLB  - Label\nOP  - Contents\nPB  - Publisher\nRN  - Research Notes\nSN  - ISBN\nSP  - Description\nTA  - Author, Translated\nTT  - Translated Title\nID  - 49"
+						"note": "<**Unsupported Fields**> The following values were not imported<br/>A2  - Editor, Series<br/>AD  - Author Address<br/>AN  - Accession Number<br/>C1  - Year Cited<br/>C2  - Date Cited<br/>CA  - Caption<br/>CN  - Call Number<br/>CY  - Place Published<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>ET  - Edition<br/>J2  - Periodical Title<br/>LB  - Label<br/>OP  - Contents<br/>PB  - Publisher<br/>RN  - Research Notes<br/>SN  - ISBN<br/>SP  - Description<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 49<br/>"
 					}
 				],
 				"tags": [
