@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-11-14 06:55:56"
+	"lastUpdated": "2012-11-15 06:49:29"
 }
 
 function detectImport() {
@@ -639,8 +639,10 @@ function applyValue(item, zField, value, rawLine) {
 	}
 
 	if(zField == 'unsupported') {
-		Z.debug("Unsupported field will be stored in note: " + value);
-		item.unsupportedFields.push(value);
+		if(!Zotero.parentTranslator) {
+			Z.debug("Unsupported field will be stored in note: " + value);
+			item.unsupportedFields.push(value);
+		}
 		return;
 	}
 
@@ -874,20 +876,22 @@ function completeItem(item) {
 	}
 
 	//store unsupported and unknown fields in a single note
-	var note = '';
-	for(var i=0, n=item.unsupportedFields.length; i<n; i++) {
-		note += item.unsupportedFields[i] + '<br/>';
-	}
-	for(var i=0, n=item.unknownFields.length; i<n; i++) {
-		note += item.unknownFields[i] + '<br/>';
+	if(!Zotero.parentTranslator) {
+		var note = '';
+		for(var i=0, n=item.unsupportedFields.length; i<n; i++) {
+			note += item.unsupportedFields[i] + '<br/>';
+		}
+		for(var i=0, n=item.unknownFields.length; i<n; i++) {
+			note += item.unknownFields[i] + '<br/>';
+		}
+	
+		if(note) {
+			note = "The following values have no corresponding Zotero field:<br/>" + note;
+			item.notes.push({note: note.trim(), tags: ['_RIS import']});
+		}
 	}
 	item.unsupportedFields = undefined;
 	item.unknownFields = undefined;
-
-	if(note) {
-		note = "<**Unsupported Fields**> The following values were not imported<br/>" + note;
-		item.notes.push({note: note.trim()});
-	}
 
 	item.complete();
 }
@@ -1003,17 +1007,17 @@ function doImport(attachments) {
  ********************/
 
 //RIS files have a certain structure, which is often meaningful
-//Records always start with TY and ER. This is hardcoded below
+//Records always start with TY and end with ER. This is hardcoded below
 var exportOrder = {
 	"__default": ["TI", "AU", "T2", "A2", "T3", "A3", "A4", "AB", "C1", "C2", "C3",
 	"C4", "C5", "C6", "CN", "CY", "DA", "PY", "DO", "DP", "ET", "VL", "IS", "SP",
-	"J2", "LA", "M1", "M3", "NV", "OP", "PB", "SE", "SN", "ST", "UR", "AN", "DB",
-	"Y2", "L1", "L2", "L4", "N1", "KW"],
+	"J2", "LA", "M1", "M3", "NV", "OP", "PB", "SE", "SN", "ST", "SV", "UR", "AN",
+	"DB", "Y2", "L1", "L2", "L4", "N1", "KW"],
 	//in bill sponsor (A2) and cosponsor (A3) should be together and not split by legislativeBody (T3)
 	"bill": ["TI", "AU", "T2", "A2", "A3", "T3", "A4", "AB", "C1", "C2", "C3",
 	"C4", "C5", "C6", "CN", "CY", "DA", "PY", "DO", "DP", "ET", "VL", "IS", "SP",
-	"J2", "LA", "M1", "M3", "NV", "OP", "PB", "SE", "SN", "ST", "UR", "AN", "DB",
-	"Y2", "L1", "L2", "L4", "N1", "KW"]
+	"J2", "LA", "M1", "M3", "NV", "OP", "PB", "SE", "SN", "ST", "SV", "UR", "AN",
+	"DB", "Y2", "L1", "L2", "L4", "N1", "KW"]
 };
 
 var newLineChar = "\r\n"; //from spec
@@ -1209,7 +1213,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>RP  - Not In File<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Not In File<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -1252,7 +1259,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>Patent Version Number: 877609<br/>IS  - 4,904,581<br/>RP  - Not In File<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>Patent Version Number: 877609<br/>IS  - 4,904,581<br/>RP  - Not In File<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -1298,7 +1308,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Date Published<br/>J2  - Periodical Title<br/>LB  - Label<br/>M3  - Type of Work<br/>OP  - Original Publication<br/>RN  - ResearchNotes<br/>SE  - Screens<br/>SN  - ISSN/ISBN<br/>SP  - Pages<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Volume<br/>ID  - 2<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Date Published<br/>J2  - Periodical Title<br/>LB  - Label<br/>M3  - Type of Work<br/>OP  - Original Publication<br/>RN  - ResearchNotes<br/>SE  - Screens<br/>SN  - ISSN/ISBN<br/>SP  - Pages<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Volume<br/>ID  - 2<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -1348,7 +1361,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Abbreviated Publication<br/>LB  - Label<br/>M3  - Type of Work<br/>NV  - Number of Volumes<br/>OP  - Original Publication<br/>RI  - Reviewed Item<br/>RN  - ResearchNotes<br/>RP  - Reprint Edition<br/>SN  - ISBN<br/>SP  - Pages<br/>T3  - Volume Title<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Volume<br/>ID  - 3<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Abbreviated Publication<br/>LB  - Label<br/>M3  - Type of Work<br/>NV  - Number of Volumes<br/>OP  - Original Publication<br/>RI  - Reviewed Item<br/>RN  - ResearchNotes<br/>RP  - Reprint Edition<br/>SN  - ISBN<br/>SP  - Pages<br/>T3  - Volume Title<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Volume<br/>ID  - 3<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -1386,7 +1402,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Periodical Title<br/>LB  - Label<br/>PB  - Publisher<br/>RN  - Research Notes<br/>SP  - Description<br/>TT  - Translated Title<br/>TA  - Author, Translated<br/>ID  - 4<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Periodical Title<br/>LB  - Label<br/>PB  - Publisher<br/>RN  - Research Notes<br/>SP  - Description<br/>TT  - Translated Title<br/>TA  - Author, Translated<br/>ID  - 4<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -1435,7 +1454,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>A2  - Performers<br/>AD  - Author Address<br/>C1  - Cast<br/>C2  - Credits<br/>C3  - Size/Length<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Periodical Title<br/>LB  - Label<br/>M3  - Type<br/>NV  - Extent of Work<br/>OP  - Contents<br/>RN  - Research Notes<br/>SN  - ISBN<br/>T3  - Series Title<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Volume<br/>ID  - 5<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>A2  - Performers<br/>AD  - Author Address<br/>C1  - Cast<br/>C2  - Credits<br/>C3  - Size/Length<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Periodical Title<br/>LB  - Label<br/>M3  - Type<br/>NV  - Extent of Work<br/>OP  - Contents<br/>RN  - Research Notes<br/>SN  - ISBN<br/>T3  - Series Title<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Volume<br/>ID  - 5<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -1473,7 +1495,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>AN  - Accession Number<br/>CA  - Caption<br/>CN  - Call Number<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>LB  - Label<br/>RN  - Research Notes<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 6<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>AD  - Author Address<br/>AN  - Accession Number<br/>CA  - Caption<br/>CN  - Call Number<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>LB  - Label<br/>RN  - Research Notes<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 6<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -1518,7 +1543,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>A2  - Editor<br/>A3  - Illustrator<br/>AD  - Author Address<br/>AN  - Accession Number<br/>C1  - Author Affiliation<br/>CA  - Caption<br/>CN  - Call Number<br/>CY  - Place Published<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>ET  - Edition<br/>J2  - Periodical Title<br/>LB  - Label<br/>OP  - Contents<br/>PB  - Publisher<br/>RN  - Research Notes<br/>SE  - Message Number<br/>SN  - ISBN<br/>SP  - Description<br/>T3  - Institution<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Access Year<br/>ID  - 7<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>A2  - Editor<br/>A3  - Illustrator<br/>AD  - Author Address<br/>AN  - Accession Number<br/>C1  - Author Affiliation<br/>CA  - Caption<br/>CN  - Call Number<br/>CY  - Place Published<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>ET  - Edition<br/>J2  - Periodical Title<br/>LB  - Label<br/>OP  - Contents<br/>PB  - Publisher<br/>RN  - Research Notes<br/>SE  - Message Number<br/>SN  - ISBN<br/>SP  - Description<br/>T3  - Institution<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Access Year<br/>ID  - 7<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -1570,7 +1598,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>C3  - Title Prefix<br/>C4  - Reviewer<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Abbreviation<br/>LB  - Label<br/>M3  - Type of Work<br/>OP  - Original Publication<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Pages<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 8<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>AD  - Author Address<br/>C3  - Title Prefix<br/>C4  - Reviewer<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Abbreviation<br/>LB  - Label<br/>M3  - Type of Work<br/>OP  - Original Publication<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Pages<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 8<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -1633,7 +1664,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>C1  - Section<br/>C3  - Title Prefix<br/>C4  - Reviewer<br/>C5  - Packaging Method<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Abbreviation<br/>LB  - Label<br/>OP  - Original Publication<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Chapter<br/>SV  - Series Volume<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 9<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>AD  - Author Address<br/>C1  - Section<br/>C3  - Title Prefix<br/>C4  - Reviewer<br/>C5  - Packaging Method<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Abbreviation<br/>LB  - Label<br/>OP  - Original Publication<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Chapter<br/>SV  - Series Volume<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 9<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -1677,7 +1711,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>File Date: Filed Date<br/>A3  - Court, Higher<br/>AD  - Author Address<br/>AN  - Accession Number<br/>CA  - Caption<br/>CN  - Call Number<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>ET  - Action of Higher Court<br/>J2  - Parallel Citation<br/>LB  - Label<br/>M3  - Citation of Reversal<br/>NV  - Reporter Abbreviation<br/>RN  - ResearchNotes<br/>T3  - Decision<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 10<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>File Date: Filed Date<br/>A3  - Court, Higher<br/>AD  - Author Address<br/>AN  - Accession Number<br/>CA  - Caption<br/>CN  - Call Number<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>ET  - Action of Higher Court<br/>J2  - Parallel Citation<br/>LB  - Label<br/>M3  - Citation of Reversal<br/>NV  - Reporter Abbreviation<br/>RN  - ResearchNotes<br/>T3  - Decision<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 10<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -1724,7 +1761,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>A2  - Institution<br/>AD  - Author Address<br/>C5  - Packaging Method<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Abbreviation<br/>LB  - Label<br/>M3  - Type of Work<br/>NV  - Catalog Number<br/>OP  - Original Publication<br/>PB  - Publisher<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Number of Pages<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 11<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>A2  - Institution<br/>AD  - Author Address<br/>C5  - Packaging Method<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Abbreviation<br/>LB  - Label<br/>M3  - Type of Work<br/>NV  - Catalog Number<br/>OP  - Original Publication<br/>PB  - Publisher<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Number of Pages<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 11<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -1765,7 +1805,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>A2  - File, Name of<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Version<br/>LB  - Label<br/>PB  - Publisher<br/>RN  - Research Notes<br/>SP  - Description<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Image Size<br/>ID  - 12<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>A2  - File, Name of<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Version<br/>LB  - Label<br/>PB  - Publisher<br/>RN  - Research Notes<br/>SP  - Description<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Image Size<br/>ID  - 12<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -1811,7 +1854,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Periodical Title<br/>LB  - Label<br/>M3  - Type<br/>OP  - Original Publication<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 23<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>AD  - Author Address<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Periodical Title<br/>LB  - Label<br/>M3  - Type<br/>OP  - Original Publication<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 23<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -1855,7 +1901,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>A2  - Editor, Series<br/>AD  - Author Address<br/>C1  - Computer<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Periodical Title<br/>LB  - Label<br/>M3  - Type<br/>OP  - Contents<br/>RN  - Research Notes<br/>SP  - Description<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Edition<br/>ID  - 14<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>A2  - Editor, Series<br/>AD  - Author Address<br/>C1  - Computer<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Periodical Title<br/>LB  - Label<br/>M3  - Type<br/>OP  - Contents<br/>RN  - Research Notes<br/>SP  - Description<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Edition<br/>ID  - 14<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -1905,7 +1954,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>DOI: Type<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Conference Location<br/>LB  - Label<br/>RN  - Research Notes<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 15<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>DOI: Type<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Conference Location<br/>LB  - Label<br/>RN  - Research Notes<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 15<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -1963,7 +2015,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>C2  - Year Published<br/>C5  - Packaging Method<br/>CA  - Caption<br/>CY  - Conference Location<br/>ET  - Edition<br/>LB  - Label<br/>NV  - Number of Volumes<br/>OP  - Source<br/>RN  - Research Notes<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 16<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>AD  - Author Address<br/>C2  - Year Published<br/>C5  - Packaging Method<br/>CA  - Caption<br/>CY  - Conference Location<br/>ET  - Edition<br/>LB  - Label<br/>NV  - Number of Volumes<br/>OP  - Source<br/>RN  - Research Notes<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 16<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -2016,7 +2071,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>C1  - Time Period<br/>C2  - Unit of Observation<br/>C3  - Data Type<br/>C4  - Dataset(s)<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Version<br/>J2  - Abbreviation<br/>LB  - Label<br/>NV  - Study Number<br/>OP  - Version History<br/>RI  - Geographic Coverage<br/>RN  - Research Notes<br/>SE  - Original Release Date<br/>SN  - ISSN<br/>T3  - Series Title<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 17<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>AD  - Author Address<br/>C1  - Time Period<br/>C2  - Unit of Observation<br/>C3  - Data Type<br/>C4  - Dataset(s)<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Version<br/>J2  - Abbreviation<br/>LB  - Label<br/>NV  - Study Number<br/>OP  - Version History<br/>RI  - Geographic Coverage<br/>RN  - Research Notes<br/>SE  - Original Release Date<br/>SN  - ISSN<br/>T3  - Series Title<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 17<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -2066,7 +2124,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>C1  - Term<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Abbreviation<br/>LB  - Label<br/>M3  - Type of Work<br/>OP  - Original Publication<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Version<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 13<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>AD  - Author Address<br/>C1  - Term<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Abbreviation<br/>LB  - Label<br/>M3  - Type of Work<br/>OP  - Original Publication<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Version<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 13<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -2119,7 +2180,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Editor Address<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Periodical Title<br/>LB  - Label<br/>M3  - Type of Work<br/>OP  - Original Publication<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 19<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>AD  - Editor Address<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Periodical Title<br/>LB  - Label<br/>M3  - Type of Work<br/>OP  - Original Publication<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 19<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -2169,7 +2233,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>DOI: Type of Work<br/>AD  - Author Address<br/>C1  - Year Cited<br/>C2  - Date Cited<br/>C3  - PMCID<br/>C4  - Reviewer<br/>C5  - Issue Title<br/>C6  - NIHMSID<br/>C7  - Article Number<br/>CA  - Caption<br/>CY  - Place Published<br/>ET  - Edition<br/>LB  - Label<br/>NV  - Document Number<br/>PB  - Publisher<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - E-Pub Date<br/>T3  - Website Title<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 20<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>DOI: Type of Work<br/>AD  - Author Address<br/>C1  - Year Cited<br/>C2  - Date Cited<br/>C3  - PMCID<br/>C4  - Reviewer<br/>C5  - Issue Title<br/>C6  - NIHMSID<br/>C7  - Article Number<br/>CA  - Caption<br/>CY  - Place Published<br/>ET  - Edition<br/>LB  - Label<br/>NV  - Document Number<br/>PB  - Publisher<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - E-Pub Date<br/>T3  - Website Title<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 20<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -2223,7 +2290,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>series: Series Title<br/>AD  - Author Address<br/>C1  - Year Cited<br/>C2  - Date Cited<br/>C3  - Title Prefix<br/>C4  - Reviewer<br/>C5  - Last Update Date<br/>C6  - NIHMSID<br/>C7  - PMCID<br/>CA  - Caption<br/>DO  - DOI<br/>LB  - Label<br/>M3  - Type of Medium<br/>OP  - Original Publication<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 21<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>series: Series Title<br/>AD  - Author Address<br/>C1  - Year Cited<br/>C2  - Date Cited<br/>C3  - Title Prefix<br/>C4  - Reviewer<br/>C5  - Last Update Date<br/>C6  - NIHMSID<br/>C7  - PMCID<br/>CA  - Caption<br/>DO  - DOI<br/>LB  - Label<br/>M3  - Type of Medium<br/>OP  - Original Publication<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 21<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -2283,7 +2353,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>numberOfVolumes: Number of Volumes<br/>AD  - Author Address<br/>C1  - Section<br/>C3  - Title Prefix<br/>C4  - Reviewer<br/>C5  - Packaging Method<br/>C6  - NIHMSID<br/>C7  - PMCID<br/>CA  - Caption<br/>DO  - DOI<br/>LB  - Label<br/>M3  - Type of Work<br/>OP  - Original Publication<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 22<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>numberOfVolumes: Number of Volumes<br/>AD  - Author Address<br/>C1  - Section<br/>C3  - Title Prefix<br/>C4  - Reviewer<br/>C5  - Packaging Method<br/>C6  - NIHMSID<br/>C7  - PMCID<br/>CA  - Caption<br/>DO  - DOI<br/>LB  - Label<br/>M3  - Type of Work<br/>OP  - Original Publication<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 22<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -2341,7 +2414,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>C1  - Term<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Abbreviation<br/>LB  - Label<br/>OP  - Original Publication<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 18<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>AD  - Author Address<br/>C1  - Term<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Abbreviation<br/>LB  - Label<br/>OP  - Original Publication<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 18<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -2390,7 +2466,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Version<br/>LB  - Label<br/>M3  - Type of Image<br/>RN  - Research Notes<br/>SP  - Description<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Image Size<br/>ID  - 24<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Version<br/>LB  - Label<br/>M3  - Type of Image<br/>RN  - Research Notes<br/>SP  - Description<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Image Size<br/>ID  - 24<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -2428,7 +2507,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>A2  - File, Name of<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Version<br/>LB  - Label<br/>PB  - Publisher<br/>RN  - Research Notes<br/>SP  - Description<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Image Size<br/>ID  - 25<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>A2  - File, Name of<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Version<br/>LB  - Label<br/>PB  - Publisher<br/>RN  - Research Notes<br/>SP  - Description<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Image Size<br/>ID  - 25<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -2473,7 +2555,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>A2  - Director, Series<br/>AD  - Author Address<br/>C1  - Cast<br/>C2  - Credits<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Periodical Title<br/>LB  - Label<br/>M3  - Medium<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 26<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>A2  - Director, Series<br/>AD  - Author Address<br/>C1  - Cast<br/>C2  - Credits<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Periodical Title<br/>LB  - Label<br/>M3  - Medium<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 26<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -2529,7 +2614,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>DOI: Type of Work<br/>A3  - Author, Tertiary<br/>AD  - Author Address<br/>C1  - Custom 1<br/>C2  - Custom 2<br/>C3  - Custom 3<br/>C4  - Custom 4<br/>C5  - Custom 5<br/>C6  - Custom 6<br/>C7  - Custom 7<br/>C8  - Custom 8<br/>CA  - Caption<br/>CY  - Place Published<br/>ET  - Edition<br/>LB  - Label<br/>NV  - Number of Volumes<br/>OP  - Original Publication<br/>PB  - Publisher<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Section<br/>T3  - Tertiary Title<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 27<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>DOI: Type of Work<br/>A3  - Author, Tertiary<br/>AD  - Author Address<br/>C1  - Custom 1<br/>C2  - Custom 2<br/>C3  - Custom 3<br/>C4  - Custom 4<br/>C5  - Custom 5<br/>C6  - Custom 6<br/>C7  - Custom 7<br/>C8  - Custom 8<br/>CA  - Caption<br/>CY  - Place Published<br/>ET  - Edition<br/>LB  - Label<br/>NV  - Number of Volumes<br/>OP  - Original Publication<br/>PB  - Publisher<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Section<br/>T3  - Tertiary Title<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 27<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -2576,7 +2664,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>A2  - Department<br/>AD  - Author Address<br/>C1  - Government Body<br/>C2  - Congress Number<br/>C3  - Congress Session<br/>CA  - Caption<br/>DO  - DOI<br/>ET  - Edition<br/>LB  - Label<br/>RN  - Research Notes<br/>SE  - Section<br/>T3  - Series Title<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Volume<br/>ID  - 28<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>A2  - Department<br/>AD  - Author Address<br/>C1  - Government Body<br/>C2  - Congress Number<br/>C3  - Congress Session<br/>CA  - Caption<br/>DO  - DOI<br/>ET  - Edition<br/>LB  - Label<br/>RN  - Research Notes<br/>SE  - Section<br/>T3  - Series Title<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Volume<br/>ID  - 28<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -2618,7 +2709,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>DOI: Funding Type<br/>AD  - Author Address<br/>C1  - Contact Name<br/>C2  - Contact Address<br/>C3  - Contact Phone<br/>C4  - Contact Fax<br/>C5  - Funding Number<br/>C6  - CFDA Number<br/>CA  - Caption<br/>CY  - Activity Location<br/>ET  - Requirements<br/>LB  - Label<br/>NV  - Amount Received<br/>OP  - Original Grant Number<br/>PB  - Sponsoring Agency<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Review Date<br/>SE  - Duration of Grant<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 29<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>DOI: Funding Type<br/>AD  - Author Address<br/>C1  - Contact Name<br/>C2  - Contact Address<br/>C3  - Contact Phone<br/>C4  - Contact Fax<br/>C5  - Funding Number<br/>C6  - CFDA Number<br/>CA  - Caption<br/>CY  - Activity Location<br/>ET  - Requirements<br/>LB  - Label<br/>NV  - Amount Received<br/>OP  - Original Grant Number<br/>PB  - Sponsoring Agency<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Review Date<br/>SE  - Duration of Grant<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 29<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -2653,7 +2747,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>AN  - Accession Number<br/>C2  - Congress Number<br/>CA  - Caption<br/>CN  - Call Number<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>LB  - Label<br/>RN  - Research Notes<br/>SN  - ISBN<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 30<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>AD  - Author Address<br/>AN  - Accession Number<br/>C2  - Congress Number<br/>CA  - Caption<br/>CN  - Call Number<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>LB  - Label<br/>RN  - Research Notes<br/>SN  - ISBN<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 30<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -2696,7 +2793,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>DOI: Type of Article<br/>AD  - Author Address<br/>C1  - Legal Note<br/>C2  - PMCID<br/>C6  - NIHMSID<br/>C7  - Article Number<br/>CA  - Caption<br/>ET  - Epub Date<br/>LB  - Label<br/>OP  - Original Publication<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Start Page<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 31<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>DOI: Type of Article<br/>AD  - Author Address<br/>C1  - Legal Note<br/>C2  - PMCID<br/>C6  - NIHMSID<br/>C7  - Article Number<br/>CA  - Caption<br/>ET  - Epub Date<br/>LB  - Label<br/>OP  - Original Publication<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Start Page<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 31<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [],
@@ -2739,7 +2839,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>File Date: Section Number<br/>AD  - Author Address<br/>AN  - Accession Number<br/>CA  - Caption<br/>CN  - Call Number<br/>CY  - Place Published<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>ET  - Edition<br/>J2  - Periodical Title<br/>LB  - Label<br/>M3  - Type of Work<br/>NV  - Session Number<br/>RN  - Research Notes<br/>SN  - ISSN/ISBN<br/>T3  - Supplement No.<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 32<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>File Date: Section Number<br/>AD  - Author Address<br/>AN  - Accession Number<br/>CA  - Caption<br/>CN  - Call Number<br/>CY  - Place Published<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>ET  - Edition<br/>J2  - Periodical Title<br/>LB  - Label<br/>M3  - Type of Work<br/>NV  - Session Number<br/>RN  - Research Notes<br/>SN  - ISSN/ISBN<br/>T3  - Supplement No.<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 32<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -2782,7 +2885,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Periodical Title<br/>LB  - Label<br/>M3  - Type of Article<br/>NV  - Frequency<br/>OP  - Original Publication<br/>PB  - Publisher<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Start Page<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 33<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Periodical Title<br/>LB  - Label<br/>M3  - Type of Article<br/>NV  - Frequency<br/>OP  - Original Publication<br/>PB  - Publisher<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Start Page<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 33<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -2828,7 +2934,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>CA  - Caption<br/>DO  - DOI<br/>ET  - Description of Material<br/>J2  - Periodical Title<br/>LB  - Label<br/>NV  - Manuscript Number<br/>PB  - Library/Archive<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Start Page<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Volume/Storage Container<br/>ID  - 34<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>AD  - Author Address<br/>CA  - Caption<br/>DO  - DOI<br/>ET  - Description of Material<br/>J2  - Periodical Title<br/>LB  - Label<br/>NV  - Manuscript Number<br/>PB  - Library/Archive<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Start Page<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Volume/Storage Container<br/>ID  - 34<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -2868,7 +2977,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>A2  - Editor, Series<br/>AD  - Author Address<br/>C2  - Area<br/>C3  - Size<br/>C5  - Packaging Method<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Periodical Title<br/>LB  - Label<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SP  - Description<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 35<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>A2  - Editor, Series<br/>AD  - Author Address<br/>C2  - Area<br/>C3  - Size<br/>C5  - Packaging Method<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Periodical Title<br/>LB  - Label<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SP  - Description<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 35<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -2922,7 +3034,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>A3  - Editor, Series<br/>AD  - Author Address<br/>C1  - Format of Music<br/>C2  - Form of Composition<br/>C3  - Music Parts<br/>CA  - Caption<br/>DO  - DOI<br/>ET  - Edition<br/>LB  - Label<br/>M3  - Form of Item<br/>OP  - Original Publication<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Section<br/>SP  - Pages<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 36<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>A3  - Editor, Series<br/>AD  - Author Address<br/>C1  - Format of Music<br/>C2  - Form of Composition<br/>C3  - Music Parts<br/>CA  - Caption<br/>DO  - DOI<br/>ET  - Edition<br/>LB  - Label<br/>M3  - Form of Item<br/>OP  - Original Publication<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Section<br/>SP  - Pages<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 36<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -2965,7 +3080,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>C1  - Column<br/>C2  - Issue<br/>CA  - Caption<br/>DO  - DOI<br/>LB  - Label<br/>M3  - Type of Article<br/>NV  - Frequency<br/>OP  - Original Publication<br/>PB  - Publisher<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Volume<br/>ID  - 37<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>AD  - Author Address<br/>C1  - Column<br/>C2  - Issue<br/>CA  - Caption<br/>DO  - DOI<br/>LB  - Label<br/>M3  - Type of Article<br/>NV  - Frequency<br/>OP  - Original Publication<br/>PB  - Publisher<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Volume<br/>ID  - 37<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -3013,7 +3131,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Date Published<br/>LB  - Label<br/>M3  - Type of Work<br/>RN  - Research Notes<br/>SN  - Report Number<br/>SP  - Pages<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Volume<br/>ID  - 38<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Date Published<br/>LB  - Label<br/>M3  - Type of Work<br/>RN  - Research Notes<br/>SN  - Report Number<br/>SP  - Pages<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Volume<br/>ID  - 38<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -3052,7 +3173,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>A2  - Editor, Series<br/>AD  - Author Address<br/>C2  - Date Cited<br/>CA  - Caption<br/>DO  - DOI<br/>LB  - Label<br/>M3  - Type of Work<br/>RN  - Research Notes<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 39<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>A2  - Editor, Series<br/>AD  - Author Address<br/>C2  - Date Cited<br/>CA  - Caption<br/>DO  - DOI<br/>LB  - Label<br/>M3  - Type of Work<br/>RN  - Research Notes<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 39<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -3098,7 +3222,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>A2  - Institution<br/>AD  - Author Address<br/>C5  - Packaging Method<br/>CA  - Caption<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Abbreviation<br/>LB  - Label<br/>OP  - Original Publication<br/>PB  - Publisher<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SN  - ISBN<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Number<br/>ID  - 40<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>A2  - Institution<br/>AD  - Author Address<br/>C5  - Packaging Method<br/>CA  - Caption<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Abbreviation<br/>LB  - Label<br/>OP  - Original Publication<br/>PB  - Publisher<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SN  - ISBN<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Number<br/>ID  - 40<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -3142,7 +3269,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>issueDate: 0000 Date<br/>Patent Version Number: Patent Version Number<br/>A3  - International Author<br/>AD  - Inventor Address<br/>AN  - Accession Number<br/>CA  - Caption<br/>CN  - Call Number<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>ET  - International Patent Classification<br/>LB  - Label<br/>M3  - Patent Type<br/>NV  - US Patent Classification<br/>RN  - Research Notes<br/>SE  - International Patent Number<br/>T3  - Title, International<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 41<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>issueDate: 0000 Date<br/>Patent Version Number: Patent Version Number<br/>A3  - International Author<br/>AD  - Inventor Address<br/>AN  - Accession Number<br/>CA  - Caption<br/>CN  - Call Number<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>ET  - International Patent Classification<br/>LB  - Label<br/>M3  - Patent Type<br/>NV  - US Patent Classification<br/>RN  - Research Notes<br/>SE  - International Patent Number<br/>T3  - Title, International<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 41<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -3194,7 +3324,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>C1  - Senders E-Mail<br/>C2  - Recipients E-Mail<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Description<br/>J2  - Abbreviation<br/>LB  - Label<br/>NV  - Communication Number<br/>PB  - Publisher<br/>RN  - Research Notes<br/>SP  - Pages<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 42<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>AD  - Author Address<br/>C1  - Senders E-Mail<br/>C2  - Recipients E-Mail<br/>CA  - Caption<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Description<br/>J2  - Abbreviation<br/>LB  - Label<br/>NV  - Communication Number<br/>PB  - Publisher<br/>RN  - Research Notes<br/>SP  - Pages<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 42<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -3245,7 +3378,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>A2  - Editor, Series<br/>AD  - Author Address<br/>C6  - Issue<br/>CA  - Caption<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Periodical Title<br/>LB  - Label<br/>NV  - Series Volume<br/>OP  - Contents<br/>RN  - Research Notes<br/>RP  - Notes<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Volume<br/>ID  - 43<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>A2  - Editor, Series<br/>AD  - Author Address<br/>C6  - Issue<br/>CA  - Caption<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Periodical Title<br/>LB  - Label<br/>NV  - Series Volume<br/>OP  - Contents<br/>RN  - Research Notes<br/>RP  - Notes<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Volume<br/>ID  - 43<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -3307,7 +3443,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>series: Series Title<br/>AD  - Author Address<br/>C1  - Section<br/>C2  - Report Number<br/>C5  - Packaging Method<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Abbreviation<br/>LB  - Label<br/>M3  - Type of Work<br/>OP  - Original Publication<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Chapter<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 44<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>series: Series Title<br/>AD  - Author Address<br/>C1  - Section<br/>C2  - Report Number<br/>C5  - Packaging Method<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Abbreviation<br/>LB  - Label<br/>M3  - Type of Work<br/>OP  - Original Publication<br/>RI  - Reviewed Item<br/>RN  - Research Notes<br/>RP  - Reprint Edition<br/>SE  - Chapter<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 44<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -3351,7 +3490,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Abbreviation<br/>LB  - Label<br/>NV  - Session Number<br/>RN  - Research Notes<br/>SE  - Section Number<br/>T3  - Paper Number<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Rule Number<br/>ID  - 45<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>AD  - Author Address<br/>CA  - Caption<br/>DO  - DOI<br/>J2  - Abbreviation<br/>LB  - Label<br/>NV  - Session Number<br/>RN  - Research Notes<br/>SE  - Section Number<br/>T3  - Paper Number<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Rule Number<br/>ID  - 45<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -3387,7 +3529,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>AD  - Author Address<br/>AN  - Accession Number<br/>C5  - Publisher<br/>C6  - Volume<br/>CA  - Caption<br/>CN  - Call Number<br/>CY  - Country<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>J2  - Abbreviation<br/>LB  - Label<br/>NV  - Statute Number<br/>PB  - Source<br/>RI  - Article Number<br/>RN  - Research Notes<br/>T3  - International Source<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 46<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>AD  - Author Address<br/>AN  - Accession Number<br/>C5  - Publisher<br/>C6  - Volume<br/>CA  - Caption<br/>CN  - Call Number<br/>CY  - Country<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>J2  - Abbreviation<br/>LB  - Label<br/>NV  - Statute Number<br/>PB  - Source<br/>RI  - Article Number<br/>RN  - Research Notes<br/>T3  - International Source<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 46<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -3432,7 +3577,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>A3  - Advisor<br/>AD  - Author Address<br/>CA  - Caption<br/>DO  - DOI<br/>LB  - Label<br/>RN  - Research Notes<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Degree<br/>ID  - 47<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>A3  - Advisor<br/>AD  - Author Address<br/>CA  - Caption<br/>DO  - DOI<br/>LB  - Label<br/>RN  - Research Notes<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>VL  - Degree<br/>ID  - 47<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -3484,7 +3632,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>DOI: Type of Work<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Place Published<br/>LB  - Label<br/>PB  - Institution<br/>RN  - Research Notes<br/>T3  - Department<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 48<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>DOI: Type of Work<br/>AD  - Author Address<br/>CA  - Caption<br/>CY  - Place Published<br/>LB  - Label<br/>PB  - Institution<br/>RN  - Research Notes<br/>T3  - Department<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 48<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
@@ -3527,7 +3678,10 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "<**Unsupported Fields**> The following values were not imported<br/>A2  - Editor, Series<br/>AD  - Author Address<br/>AN  - Accession Number<br/>C1  - Year Cited<br/>C2  - Date Cited<br/>CA  - Caption<br/>CN  - Call Number<br/>CY  - Place Published<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>ET  - Edition<br/>J2  - Periodical Title<br/>LB  - Label<br/>OP  - Contents<br/>PB  - Publisher<br/>RN  - Research Notes<br/>SN  - ISBN<br/>SP  - Description<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 49<br/>"
+						"note": "The following values have no corresponding Zotero field:<br/>A2  - Editor, Series<br/>AD  - Author Address<br/>AN  - Accession Number<br/>C1  - Year Cited<br/>C2  - Date Cited<br/>CA  - Caption<br/>CN  - Call Number<br/>CY  - Place Published<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>ET  - Edition<br/>J2  - Periodical Title<br/>LB  - Label<br/>OP  - Contents<br/>PB  - Publisher<br/>RN  - Research Notes<br/>SN  - ISBN<br/>SP  - Description<br/>TA  - Author, Translated<br/>TT  - Translated Title<br/>ID  - 49<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"tags": [
