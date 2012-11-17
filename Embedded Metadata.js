@@ -3,13 +3,13 @@
 	"label": "Embedded Metadata",
 	"creator": "Simon Kornblith and Avram Lyon",
 	"target": "",
-	"minVersion": "2.1.9",
+	"minVersion": "3.0.4",
 	"maxVersion": "",
 	"priority": 400,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-06 22:17:42"
+	"lastUpdated": "2012-11-17 04:36:32"
 }
 
 /*
@@ -422,6 +422,8 @@ function addHighwireMetadata(doc, newItem) {
 			getContentText(doc, "citation_fulltext_html_url") ||
 			doc.location.href;
 	if(!newItem.title) newItem.title = doc.title;
+	//worst case, if this is not called from another translator, use URL for title
+	if(!newItem.title && !Zotero.parentTranslator) newItem.title = newItem.url;
 
 	// add attachment
 	newItem.attachments.push({document:doc, title:"Snapshot"});
