@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-11-13 08:51:15"
+	"lastUpdated": "2012-11-19 11:07:31"
 }
 
 /*
@@ -182,6 +182,7 @@ function scrapeEM(doc, url, pdfUrl) {
 				ZU.doGet(u, function(text) {
 					var m = text.match(/<iframe id="pdfDocument"[^>]+?src="([^"]+)"/i);
 					if(m) {
+						m[1] = ZU.unescapeHTML(m[1]);
 						Z.debug(m[1]);
 						item.attachments.push({url: m[1], title: 'Full Text PDF', mimeType: 'application/pdf'});
 					} else {
@@ -293,6 +294,7 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 					var m = text.match(
 						/<iframe id="pdfDocument"[^>]+?src="([^"]+)"/i);
 					if(m) {
+						m[1] = ZU.unescapeHTML(m[1]);
 						Z.debug('PDF url: ' + m[1]);
 						item.attachments.push({url: m[1],
 							title: 'Full Text PDF',
@@ -1041,6 +1043,62 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Volume for Winners and Losers"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://onlinelibrary.wiley.com/doi/10.1002/(SICI)1521-3773(20000103)39:1%3C165::AID-ANIE165%3E3.0.CO;2-B/abstract",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Manfred T.",
+						"lastName": "Reetz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Elke",
+						"lastName": "Westermann",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"C−C coupling",
+					"colloids",
+					"palladium",
+					"transmission electron microscopy"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"title": "Phosphane-Free Palladium-Catalyzed Coupling Reactions: The Decisive Role of Pd Nanoparticles",
+				"publicationTitle": "Angewandte Chemie International Edition",
+				"volume": "39",
+				"issue": "1",
+				"publisher": "WILEY-VCH Verlag GmbH",
+				"ISSN": "1521-3773",
+				"url": "http://onlinelibrary.wiley.com/doi/10.1002/(SICI)1521-3773(20000103)39:1<165::AID-ANIE165>3.0.CO;2-B/abstract",
+				"DOI": "10.1002/(SICI)1521-3773(20000103)39:1<165::AID-ANIE165>3.0.CO;2-B",
+				"pages": "165–168",
+				"date": "2000",
+				"abstractNote": "Nanosized palladium colloids, generated in situ by reduction of PdII to Pd0 [Eq. (a)], are involved in the catalysis of phosphane-free Heck and Suzuki reactions with simple palladium salts such as PdCl2 or Pd(OAc)2, as demonstrated by transmission electron microscopic investigations.",
+				"bookTitle": "Angewandte Chemie International Edition",
+				"language": "en",
+				"rights": "© 2000 WILEY-VCH Verlag GmbH, Weinheim, Fed. Rep. of Germany",
+				"libraryCatalog": "Wiley Online Library",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Phosphane-Free Palladium-Catalyzed Coupling Reactions"
 			}
 		]
 	}
