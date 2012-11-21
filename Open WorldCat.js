@@ -3,13 +3,13 @@
 	"label": "Open WorldCat",
 	"creator": "Simon Kornblith, Sebastian Karcher, and Aurimas Vinckevicius",
 	"target": "^https?://(.+).worldcat\\.org/",
-	"minVersion": "3.0",
+	"minVersion": "3.0.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-11-11 10:21:50"
+	"lastUpdated": "2012-11-21 04:49:43"
 }
 
 /**
@@ -153,26 +153,20 @@ function doWeb(doc, url) {
 	}
 }
 
-/**TODO: we don't validate the checksum yet*/
-function cleanISBN(isbn) {
-	isbn = isbn.replace(/[^0-9x]/ig, '');
-	if(isbn.length == 10) return isbn;
-	isbn = isbn.replace(/x/ig, '');
-	if(isbn.length == 13) return isbn;
-	return false;
-}
-
 function detectSearch(item) {
 	if(item.ISBN && typeof(item.ISBN) == 'string') {
-		return !!cleanISBN(item.ISBN);
+		return !!ZU.cleanISBN(item.ISBN);
 	} else {
 		return false;
 	}
 }
 
 function doSearch(item) {
+	var ISBN = ZU.cleanISBN(item.ISBN);
+	if(!ISBN) return;
+
 	var url = "http://www.worldcat.org/search?qt=results_page&q=bn%3A"
-		+ cleanISBN(item.ISBN);
+		+ ISBN;
 	ZU.processDocuments(url, function (doc, url) {
 		//we take the first search result and run scrape on it
 		var results = getSearchResults(doc);
