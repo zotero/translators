@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-11-23 00:29:09"
+	"lastUpdated": "2012-11-23 02:12:24"
 }
 
 var typeMap = {
@@ -33,7 +33,7 @@ function detectWeb(doc, url) {
 	if(getSearchResults(doc).length) return "multiple";
 
 	var type = ZU.xpathText(doc, '//meta[@name="DC.type"]/@content');
-	if(type) return typeMap[type];
+	if(type) return typeMap[type] || 'journalArticle';	//default to journalArticle if we can't recognize it
 }
 
 function doWeb(doc, url) {
@@ -66,6 +66,7 @@ function doWeb(doc, url) {
 
 function scrape(doc, url, type) {
 	if(!type) type = detectWeb(doc, url);
+	if(!type) return;	//this should not happen, but if it does, allow to proceed importing remaining items
 
 	var translator = Zotero.loadTranslator("web");
 	//use embedded metadata
