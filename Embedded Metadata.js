@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-11-17 04:36:32"
+	"lastUpdated": "2012-11-21 04:28:27"
 }
 
 /*
@@ -166,6 +166,8 @@ function completeItem(doc, newItem) {
 }
 
 function detectWeb(doc, url) {
+	if(exports.itemType) return exports.itemType;
+
 	init(doc, url, Zotero.done);
 }
 
@@ -192,14 +194,14 @@ function init(doc, url, callback, forceLoadRDF) {
 		if(delimIndex === -1) delimIndex = tag.indexOf('_');
 		if(delimIndex === -1) continue;
 
-			var prefix = tag.substr(0, delimIndex).toLowerCase();
+		var prefix = tag.substr(0, delimIndex).toLowerCase();
 
-			if(_prefixes[prefix]) {
-				var prop = tag.substr(delimIndex+1, 1).toLowerCase()+tag.substr(delimIndex+2);
-				// This debug is for seeing what is being sent to RDF
-				//Zotero.debug(_prefixes[prefix]+prop +"=>"+value);
-				statements.push([url, _prefixes[prefix]+prop, value]);
-			} else {
+		if(_prefixes[prefix]) {
+			var prop = tag.substr(delimIndex+1, 1).toLowerCase()+tag.substr(delimIndex+2);
+			// This debug is for seeing what is being sent to RDF
+			//Zotero.debug(_prefixes[prefix]+prop +"=>"+value);
+			statements.push([url, _prefixes[prefix]+prop, value]);
+		} else {
 			var shortTag = tag.slice(tag.lastIndexOf('citation_'));
 			switch(shortTag) {
 				case "citation_journal_title":
@@ -240,17 +242,25 @@ function init(doc, url, callback, forceLoadRDF) {
 				var statement = statements[i];			
 				rdf.Zotero.RDF.addStatement(statement[0], statement[1], statement[2], true);
 			}
+
 			var nodes = rdf.getNodes(true);
 			rdf.defaultUnknownType = hwType || hwTypeGuess ||
 				//if we have RDF data, then default to webpage
 				(nodes.length ? "webpage":false);
-	
-			_itemType = nodes.length ? rdf.detectType({},nodes[0],{}) : rdf.defaultUnknownType;
+
+			//if itemType is overridden, no reason to run RDF.detectWeb
+			if(exports.itemType) {
+				rdf.itemType = exports.itemType;
+				_itemType = exports.itemType;
+			} else {
+				_itemType = nodes.length ? rdf.detectType({},nodes[0],{}) : rdf.defaultUnknownType;
+			}
+
 			RDF = rdf;
 			callback(_itemType);
 		});
 	} else {
-		callback(hwType || hwTypeGuess);
+		callback(exports.itemType || hwType || hwTypeGuess);
 	}
 }
 
@@ -435,8 +445,10 @@ function addHighwireMetadata(doc, newItem) {
 }
 
 var exports = {
-	"doWeb":doWeb,
-	"addCustomFields": addCustomFields
+	"doWeb": doWeb,
+	"detectWeb": detectWeb,
+	"addCustomFields": addCustomFields,
+	"itemType": false
 }
 
 /** BEGIN TEST CASES **/

@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-09-06 04:04:09"
+	"lastUpdated": "2012-11-21 04:16:53"
 }
 
 /*
@@ -584,7 +584,8 @@ function detectType(newItem, node, ret) {
 	
 function importItem(newItem, node) {
 	var ret = new Object();
-	newItem.itemType = detectType(newItem, node, ret);
+	var itemType = detectType(newItem, node, ret);
+	newItem.itemType = exports.itemType || itemType;
 	var container = ret.container;
 	var isPartOf = ret.isPartOf;
 
@@ -1019,5 +1020,6 @@ var exports = {
 	"doImport":doImport,
 	"detectType":detectType,
 	"getNodes":getNodes,
-	"defaultUnknownType":false
+	"defaultUnknownType":false,
+	"itemType": false
 };
