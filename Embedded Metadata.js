@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-11-21 04:28:27"
+	"lastUpdated": "2012-11-23 01:51:00"
 }
 
 /*
@@ -92,6 +92,12 @@ var _prefixes = {
 	book:"http://ogp.me/ns/book#"
 };
 
+_prefixRemap = {
+	//DC should be in lower case
+	"http://purl.org/DC/elements/1.0/": "http://purl.org/dc/elements/1.0/",
+	"http://purl.org/DC/elements/1.1/": "http://purl.org/dc/elements/1.1/"
+};
+
 var _rdfPresent = false,
 	_haveItem = false,
 	_itemType;
@@ -104,6 +110,15 @@ function addCustomFields(customFields) {
 	CUSTOM_FIELD_MAPPINGS = customFields;
 }
 
+function setPrefixRemap(map) {
+	_prefixRemap = map;
+}
+
+function remapPrefix(uri) {
+	if(_prefixRemap[uri]) return _prefixRemap[uri];
+	return uri;
+}
+
 function getPrefixes(doc) {
 	var links = doc.getElementsByTagName("link");
 	for(var i=0, link; link = links[i]; i++) {
@@ -113,7 +128,7 @@ function getPrefixes(doc) {
 			var matches = rel.match(/^schema\.([a-zA-Z]+)/);
 			if(matches) {
 				//Zotero.debug("Prefix '" + matches[1].toLowerCase() +"' => '" + links[i].getAttribute("href") + "'");
-				_prefixes[matches[1].toLowerCase()] = link.getAttribute("href");
+				_prefixes[matches[1].toLowerCase()] = remapPrefix(link.getAttribute("href"));
 			}
 		}
 	}
@@ -448,7 +463,8 @@ var exports = {
 	"doWeb": doWeb,
 	"detectWeb": detectWeb,
 	"addCustomFields": addCustomFields,
-	"itemType": false
+	"itemType": false,
+	"fixSchemaURI": setPrefixRemap
 }
 
 /** BEGIN TEST CASES **/
