@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-11-17 04:36:32"
+	"lastUpdated": "2012-11-23 01:51:00"
 }
 
 /*
@@ -92,6 +92,12 @@ var _prefixes = {
 	book:"http://ogp.me/ns/book#"
 };
 
+var _prefixRemap = {
+	//DC should be in lower case
+	"http://purl.org/DC/elements/1.0/": "http://purl.org/dc/elements/1.0/",
+	"http://purl.org/DC/elements/1.1/": "http://purl.org/dc/elements/1.1/"
+};
+
 var _rdfPresent = false,
 	_haveItem = false,
 	_itemType;
@@ -104,6 +110,15 @@ function addCustomFields(customFields) {
 	CUSTOM_FIELD_MAPPINGS = customFields;
 }
 
+function setPrefixRemap(map) {
+	_prefixRemap = map;
+}
+
+function remapPrefix(uri) {
+	if(_prefixRemap[uri]) return _prefixRemap[uri];
+	return uri;
+}
+
 function getPrefixes(doc) {
 	var links = doc.getElementsByTagName("link");
 	for(var i=0, link; link = links[i]; i++) {
@@ -113,7 +128,7 @@ function getPrefixes(doc) {
 			var matches = rel.match(/^schema\.([a-zA-Z]+)/);
 			if(matches) {
 				//Zotero.debug("Prefix '" + matches[1].toLowerCase() +"' => '" + links[i].getAttribute("href") + "'");
-				_prefixes[matches[1].toLowerCase()] = link.getAttribute("href");
+				_prefixes[matches[1].toLowerCase()] = remapPrefix(link.getAttribute("href"));
 			}
 		}
 	}
@@ -166,6 +181,8 @@ function completeItem(doc, newItem) {
 }
 
 function detectWeb(doc, url) {
+	if(exports.itemType) return exports.itemType;
+
 	init(doc, url, Zotero.done);
 }
 
@@ -192,14 +209,14 @@ function init(doc, url, callback, forceLoadRDF) {
 		if(delimIndex === -1) delimIndex = tag.indexOf('_');
 		if(delimIndex === -1) continue;
 
-			var prefix = tag.substr(0, delimIndex).toLowerCase();
+		var prefix = tag.substr(0, delimIndex).toLowerCase();
 
-			if(_prefixes[prefix]) {
-				var prop = tag.substr(delimIndex+1, 1).toLowerCase()+tag.substr(delimIndex+2);
-				// This debug is for seeing what is being sent to RDF
-				//Zotero.debug(_prefixes[prefix]+prop +"=>"+value);
-				statements.push([url, _prefixes[prefix]+prop, value]);
-			} else {
+		if(_prefixes[prefix]) {
+			var prop = tag.substr(delimIndex+1, 1).toLowerCase()+tag.substr(delimIndex+2);
+			// This debug is for seeing what is being sent to RDF
+			//Zotero.debug(_prefixes[prefix]+prop +"=>"+value);
+			statements.push([url, _prefixes[prefix]+prop, value]);
+		} else {
 			var shortTag = tag.slice(tag.lastIndexOf('citation_'));
 			switch(shortTag) {
 				case "citation_journal_title":
@@ -240,17 +257,25 @@ function init(doc, url, callback, forceLoadRDF) {
 				var statement = statements[i];			
 				rdf.Zotero.RDF.addStatement(statement[0], statement[1], statement[2], true);
 			}
+
 			var nodes = rdf.getNodes(true);
 			rdf.defaultUnknownType = hwType || hwTypeGuess ||
 				//if we have RDF data, then default to webpage
 				(nodes.length ? "webpage":false);
-	
-			_itemType = nodes.length ? rdf.detectType({},nodes[0],{}) : rdf.defaultUnknownType;
+
+			//if itemType is overridden, no reason to run RDF.detectWeb
+			if(exports.itemType) {
+				rdf.itemType = exports.itemType;
+				_itemType = exports.itemType;
+			} else {
+				_itemType = nodes.length ? rdf.detectType({},nodes[0],{}) : rdf.defaultUnknownType;
+			}
+
 			RDF = rdf;
 			callback(_itemType);
 		});
 	} else {
-		callback(hwType || hwTypeGuess);
+		callback(exports.itemType || hwType || hwTypeGuess);
 	}
 }
 
@@ -435,8 +460,11 @@ function addHighwireMetadata(doc, newItem) {
 }
 
 var exports = {
-	"doWeb":doWeb,
-	"addCustomFields": addCustomFields
+	"doWeb": doWeb,
+	"detectWeb": detectWeb,
+	"addCustomFields": addCustomFields,
+	"itemType": false,
+	"fixSchemaURI": setPrefixRemap
 }
 
 /** BEGIN TEST CASES **/
