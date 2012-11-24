@@ -92,7 +92,7 @@ var _prefixes = {
 	book:"http://ogp.me/ns/book#"
 };
 
-_prefixRemap = {
+var _prefixRemap = {
 	//DC should be in lower case
 	"http://purl.org/DC/elements/1.0/": "http://purl.org/dc/elements/1.0/",
 	"http://purl.org/DC/elements/1.1/": "http://purl.org/dc/elements/1.1/"
