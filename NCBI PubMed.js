@@ -2,7 +2,7 @@
 	"translatorID": "fcf41bed-0cbc-3704-85c7-8062a0068a7a",
 	"label": "NCBI PubMed",
 	"creator": "Simon Kornblith, Michael Berkowitz, Avram Lyon, and Rintze Zelle",
-	"target": "https?://[^/]*(www|preview)(\\.\\-)ncbi(\\.\\-)nlm(\\.\\-)nih(\\.\\-)gov[^/]*/(pubmed|sites/pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed)",
+	"target": "https?://[^/]*(www|preview)[\\.\\-]ncbi[\\.\\-]nlm[\\.\\-]nih[\\.\\-]gov[^/]*/(pubmed|sites/pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed)",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
