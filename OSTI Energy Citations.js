@@ -9,46 +9,99 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-12 01:19:11"
+	"lastUpdated": "2012-11-24 11:36:35"
 }
 
-function detectWeb(doc, url) {
-	if (doc.evaluate('//table[@class="searchresults"]//a[@class="citation"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		return "multiple";
-	} else if (url.indexOf("product.biblio.jsp") != -1) {
+/*
+    Translator
+   Copyright (C) 2012 Sebastian Karcher an Avram Lyon
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+function detectWeb(doc,url) {
+	var xpathreport='//meta[@name="citation_technical_report_number"]';
+	var xpath='//meta[@name="citation_journal_title"]'; 
+	if (ZU.xpath(doc, xpath).length > 0) {
 		return "journalArticle";
 	}
+	if (ZU.xpath(doc, xpathreport).length > 0) {
+		return "report";
+	}
+			
+	if (url.indexOf("search.jsp")!=-1){
+		return "multiple";
+	}
+
+	return false;
 }
 
-function doWeb(doc, url) {
-	var urls = new Array();
+
+function doWeb(doc,url)
+{
 	if (detectWeb(doc, url) == "multiple") {
-		var items = new Object();
-		var xpath = '//table[@class="searchresults"]//a[@class="citation"]';
-		var links = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
-		var next_link;
-		while (next_link = links.iterateNext()) {
-			items[next_link.href] = next_link.textContent;
+		var hits = {};
+		var urls = [];
+		var results = ZU.xpath(doc,"//table[@class='searchresults']//a[@class='citation']");
+	
+		for (var i in results) {
+			hits[results[i].href] = results[i].textContent;
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			urls.push(i.match(/osti_id=\d+/)[0]);
-		}
-	} else {
-		urls = [url.match(/osti_id=\d+/)[0]];
-	}
-	for (var i = 0 ; i < urls.length ; i++) {
-		var getstr = 'http://www.osti.gov/energycitations/endnote?' + urls[i];
-		Zotero.Utilities.HTTP.doGet(getstr, function(text) {
-			//Zotero.debug(text);
-			text = text.replace(/(%.)/g, "$1 ");
-			var trans = Zotero.loadTranslator("import");
-			trans.setTranslator("881f60f2-0802-411a-9228-ce5f47b64c7d");
-			trans.setString(text);
-			trans.translate();
+		Z.selectItems(hits, function(items) {
+			if (items == null) return true;
+			for (var j in items) {
+				urls.push(j);
+			}
+			ZU.processDocuments(urls, function (myDoc) { 
+				doWeb(myDoc, myDoc.location.href) } );
+
 		});
+	} else {
+		var pageno = ZU.xpathText(doc, '//table[@class="productDetails"]/tbody/tr/th[contains(text(), "Format")]/following-sibling::td')
+		if (pageno && pageno.indexOf("Pages")!=-1) pageno = pageno.match(/Pages:\s*(\d+)/)
+		var type = ZU.xpathText(doc, '//table[@class="productDetails"]/tbody/tr/th[contains(text(), "Resource Type")]/following-sibling::td');
+		var itemtype;
+		//Currently journal articles and reports work through metadata, thesis was an easy call
+		//It's be easy to add other item types.
+		if (type.indexOf("Thesis")!=-1) itemtype = "thesis";
+		
+		// We call the Embedded Metadata translator to do the actual work
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+		translator.setHandler("itemDone", function(obj, item) {
+				if (item.institution){
+					var place = item.institution.match(/[A-Za-z]+,\s*[A-Z]{2}$/)
+					if (place){
+						item.place = place[0]
+						item.institution = item.institution.replace(/[A-Za-z]+,\s*[A-Z]{2}$/, "")
+					}
+				}
+				if (item.title = item.title.toUpperCase()) {
+					item.title = ZU.capitalizeTitle(item.title.toLowerCase(), true)
+				}
+				if (pageno) item.numPages = pageno[1];
+				
+				if (itemtype) item.itemType = itemtype;
+				item.complete();
+				});
+				
+		translator.getTranslatorObject(function (obj) {
+				obj.doWeb(doc, url);
+				});
 	}
-}/** BEGIN TEST CASES **/
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -75,20 +128,95 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"72 PHYSICS OF ELEMENTARY PARTICLES AND FIELDS; NUCLEAR MATTER; QUARK MATTER; QUARKS; SUPERCONDUCTIVITY"
+					"physics of elementary particles and fields",
+					"nuclear matter",
+					"quark matter",
+					"quarks",
+					"superconductivity"
 				],
 				"seeAlso": [],
-				"attachments": [],
-				"publicationTitle": "Journal Name: Phys.Rev.C; Journal Volume: 75",
-				"date": "2007%J Journal Name: Phys.Rev.C; Journal Volume: 75",
-				"accessionNumber": "OSTI ID: 893699",
-				"pages": "Medium: ED; Size: 045202",
-				"title": "Phase transition from hadronic matter to quark matter",
-				"url": "http://www.osti.gov/energycitations/servlets/purl/893699-1FG1xr/",
-				"abstractNote": "We study the phase transition from nuclear matter to quark matter within the SU(3) quark mean field model and NJL model. The SU(3) quark mean field model is used to give the equation of state for nuclear matter, while the equation of state for color superconducting quark matter is calculated within the NJL model. It is found that at low temperature, the phase transition from nuclear to color superconducting quark matter will take place when the density is of order 2.5?0 - 5?0. At zero density, the quark phase will appear when the temperature is larger than about 148 MeV. The phase transition from nuclear matter to quark matter is always first order, whereas the transition between color superconducting quark matter and normal quark matter is second order.",
-				"ISBN": "JLAB-THY-06-545; DOE/ER/40150-4072; TRN: US200625%% 471\nUnited States10.1103/PhysRevC.75.045202TRN: US200625%% 471Wed Dec 16 13:51:22 EST 2009TJNAF; RN06149680; INS-US0606064English",
-				"libraryCatalog": "OSTI Energy Citations",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "Phase Transition from Hadronic Matter to Quark Matter",
+				"date": "04/01/2007",
+				"publicationTitle": "Phys.Rev.C",
+				"volume": "75",
+				"institution": "Thomas Jefferson National Accelerator Facility, Newport",
+				"number": "JLAB-THY-06-545; DOE/ER/40150-4072",
+				"DOI": "10.1103/PhysRevC.75.045202",
+				"language": "English",
+				"url": "http://www.osti.gov/energycitations/product.biblio.jsp?query_id=0&page=0&osti_id=893699",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.osti.gov",
+				"place": "News, VA",
+				"numPages": "S"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.osti.gov/energycitations/product.biblio.jsp?query_id=0&page=0&osti_id=900531",
+		"items": [
+			{
+				"itemType": "report",
+				"creators": [
+					{
+						"firstName": "Joseph",
+						"lastName": "Gambogi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Stephen J.",
+						"lastName": "Gerdemann",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"materials science",
+					"chlorination",
+					"corrosion resistance",
+					"economics",
+					"machining",
+					"magnesium",
+					"mining",
+					"physical properties",
+					"production",
+					"purification",
+					"rutile",
+					"titanium",
+					"titanium",
+					"titanium metal",
+					"kroll process"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "Titanium Metal: Extraction to Application",
+				"date": "09/01/2002",
+				"institution": "Albany Research Center (ARC),",
+				"number": "DOE/ARC-1999-060",
+				"publisher": "TMS (The Minerals, Metals & Materials Society), Warrendale, PA",
+				"language": "English",
+				"url": "http://www.osti.gov/energycitations/product.biblio.jsp?query_id=0&page=0&osti_id=900531",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.osti.gov",
+				"place": "Albany, OR",
+				"shortTitle": "Titanium Metal"
 			}
 		]
 	}
