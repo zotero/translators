@@ -9,15 +9,10 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-12 01:04:58"
+	"lastUpdated": "2012-11-11 17:35:08"
 }
 
 function detectWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-
 
 //***********
 // URL MATCHING - translator should detect the following urls...
@@ -39,7 +34,7 @@ function detectWeb(doc, url) {
 
 // Central Michigan University fix
 	var xpath = '//div[@class="bibRecordLink"]';
-	var elmt = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var elmt = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if(elmt) {
 		return "book";
 	}
@@ -55,7 +50,7 @@ function detectWeb(doc, url) {
 	}
 	// Next, look for the MARC button	
 	xpath = '//a[img[@src="/screens/marc_display.gif" or @src="/screens/ico_marc.gif" or @src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]] | //a[span/img[@src="/screens/marc_display.gif" or @src="/screens/ico_marc.gif" or @src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]';
-	elmt = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	elmt = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if(elmt) {
 		return "book";
 	}
@@ -71,17 +66,13 @@ function detectWeb(doc, url) {
 }
 
 function scrape(marc, newDoc) {
-	var namespace = newDoc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-	  if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
+		
 	var xpath = '//pre/text()';
-	if (newDoc.evaluate(xpath, newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+	if (newDoc.evaluate(xpath, newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		var elmts = newDoc.evaluate(xpath, newDoc, null, XPathResult.ANY_TYPE, null);
 		var useNodeValue = true;
 	} else {
-		var elmts = newDoc.evaluate('//pre', newDoc, nsResolver, XPathResult.ANY_TYPE, null);
+		var elmts = newDoc.evaluate('//pre', newDoc, null, XPathResult.ANY_TYPE, null);
 		var useNodeValue = false;
 	}
 	var elmt;
@@ -159,10 +150,6 @@ function doWeb(doc, url) {
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
 	translator.getTranslatorObject(function(marc) {
-		var namespace = doc.documentElement.namespaceURI;
-		var nsResolver = namespace ? function(prefix) {
-			if (prefix == 'x') return namespace; else return null;
-		} : null;
 		
 		if (detectWeb(doc, url) == "book") {
 			var matchRegexp = new RegExp('^(.*)frameset(.+)$');
@@ -171,7 +158,7 @@ function doWeb(doc, url) {
 				newUri = uri.replace(/frameset/, "marc");
 			} else {
 				var xpath = '//a[img[@src="/screens/marc_display.gif" or @src="/screens/ico_marc.gif" or @src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]] | //a[span/img[@src="/screens/marc_display.gif" or @src="/screens/ico_marc.gif" or @src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]';
-				newUri = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href.replace(/frameset/, "marc");
+				newUri = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().href.replace(/frameset/, "marc");
 			}
 			pageByPage(marc, [newUri]);
 		} else {	// Search results page
@@ -184,15 +171,16 @@ function doWeb(doc, url) {
 			var firstURL = false;
 			
 			var tableRows = doc.evaluate('//table//tr[@class="browseEntry" or @class="briefCitRow" or td/input[@type="checkbox"] or td[contains(@class,"briefCitRow") or contains(@class,"briefcitCell")]]',
-										 doc, nsResolver, XPathResult.ANY_TYPE, null);
+										 doc, null, XPathResult.ANY_TYPE, null);
 			// Go through table rows
 			var i = 0;
 			while(tableRow = tableRows.iterateNext()) {
 				// get link
-				var links = doc.evaluate('.//*[@class="briefcitTitle"]/a', tableRow, nsResolver, XPathResult.ANY_TYPE, null);
+				var links = doc.evaluate('.//*[@class="briefcitTitle"]//a', tableRow, null, XPathResult.ANY_TYPE, null);
 				var link = links.iterateNext();
 				if(!link) {
-					var links = doc.evaluate(".//a[@href]", tableRow, nsResolver, XPathResult.ANY_TYPE, null);
+			
+					var links = doc.evaluate(".//a[@href]", tableRow, null, XPathResult.ANY_TYPE, null);
 					link = links.iterateNext();
 				}
 				
@@ -209,22 +197,20 @@ function doWeb(doc, url) {
 					i++;
 				}
 			};
+
 			
-			var items = Zotero.selectItems(availableItems);
-			
-			if(!items) {
-				return true;
-			}
-			
-			var newUrls = new Array();
-			for(var itemURL in items) {
-				newUrls.push(itemURL.replace("frameset", "marc"));
-			}
-			pageByPage(marc, newUrls);
+			Zotero.selectItems(availableItems, function (items) {
+				if (!items) {
+					return true;
+				}
+				var newUrls = new Array();
+				for (var i in items) {
+					newUrls.push(i.replace("frameset", "marc"));
+				}
+				pageByPage(marc, newUrls);
+			});
 		}
 	});
-	
-	Zotero.wait();
 }
 
 

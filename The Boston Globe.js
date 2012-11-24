@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-10 00:36:42"
+	"lastUpdated": "2012-10-22 16:27:03"
 }
 
 /*
@@ -226,7 +226,7 @@ function doWeb (doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://articles.boston.com/2011-04-28/lifestyle/29483639_1_galleries-flower-easter-egg-hunt",
+		"url": "http://www.boston.com/lifestyle/articles/2011/04/28/anticipation_grows_for_mfas_art_in_bloom_festival/?camp=pm",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -242,15 +242,15 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://articles.boston.com/2011-04-28/lifestyle/29483639_1_galleries-flower-easter-egg-hunt",
 						"mimetype": "text/html",
 						"snapshot": true,
 						"title": "Boston.com page"
 					}
 				],
 				"publicationTitle": "Boston.com",
-				"url": "http://articles.boston.com/2011-04-28/lifestyle/29483639_1_galleries-flower-easter-egg-hunt",
+				"url": "http://www.boston.com/lifestyle/articles/2011/04/28/anticipation_grows_for_mfas_art_in_bloom_festival/?camp=pm",
 				"title": "Anticipation grows for MFA’s spring flower festival",
+				"date": "April 28, 2011",
 				"libraryCatalog": "The Boston Globe",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}

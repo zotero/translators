@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-07-15 16:18:18"
+	"lastUpdated": "2012-10-19 02:56:34"
 }
 
 function detectWeb(doc, url) {
@@ -33,7 +33,7 @@ function doWeb(doc, url) {
 	//To, CC, and BCC(?) fields
 	var to = ZU.xpath(doc,
 		'//div[@class="maincontent"]/table[@class="message"][1]\
-			//font[@class="recipient"]/div');
+			//font[@class="recipient"]/div[not(@class="replyto")]');
 	for(var j=0, m=to.length; j<m; j++) {
 		var rec = to[j].textContent
 			.replace(/^[\s\S]+?:\s*/,'')	// remove "To:", "CC:", etc.,
@@ -46,7 +46,7 @@ function doWeb(doc, url) {
 	}
 
 	item.date = ZU.xpathText(doc,
-		'//div[@class="maincontent"]/table[@class="message"][1]//tr[1]/td[2]');
+		'(//div[@class="maincontent"]/table[@class="message"][1]//tr[1]/td[2])[1]');
 	if(item.date) item.date = ZU.trimInternal(item.date);
 
 	//clear the automatic Print popup

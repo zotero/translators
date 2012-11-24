@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-07-24 00:06:53"
+	"lastUpdated": "2012-09-24 16:39:22"
 }
 
 /**
@@ -465,56 +465,6 @@ var testCases = [
 				"url": "http://link.aip.org/link/?ELL/48/111/1",
 				"DOI": "10.1049/el.2011.3265",
 				"abstractNote": "High count rate single photon detection at telecom wavelengths has been demonstrated using a thermoelectrically-cooled semiconductor diode. The device consists of a single InGaAs avalanche photodiode driven by a 2 GHz gating frequency signal and coupled to a tunable self-differencing circuit for enhanced detection sensitivity. The count rate is linear with the photon flux in the single photon detection regime over approximately four orders of magnitude, and saturates at 1 gigacount/s at high photon fluxes. This result highlights promising potential for APDs in high-bit-rate quantum information applications.",
-				"libraryCatalog": "Scitation",
-				"accessDate": "CURRENT_TIMESTAMP"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://spiedigitallibrary.org/jnp/resource/1/jnoacq/v6/i1/p064501_s1",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "Traian",
-						"lastName": "Dumitrica",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Suneel",
-						"lastName": "Kodambaka",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Sukky",
-						"lastName": "Jun",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					}
-				],
-				"title": "Synthesis, electromechanical characterization, and applications of graphene nanostructures",
-				"publisher": "SPIE",
-				"date": "2012",
-				"publicationTitle": "Journal of Nanophotonics",
-				"volume": "6",
-				"pages": "064501",
-				"url": "http://link.aip.org/link/?JNP/6/064501/1",
-				"DOI": "10.1117/1.JNP.6.064501",
-				"abstractNote": "The emerging field of graphene brings together scientists and engineers as the discovered fundamental properties and effects encountered in this new material can be rapidly exploited for practical applications. There is potential for a two-dimensional graphene-based technology and recent works have already demonstrated the utility of graphene in building nanoelectromechanical systems, complex electronic circuits, photodetectors and ultrafast lasers. The state-of-the-art of substrate-suported graphene growth, and the current fundamental understanding of the electromechanical properties of graphene and graphene nanoribbons, represent important knowledge for developing new applications.",
-				"rights": "© 2012 Society of Photo-Optical Instrumentation Engineers",
 				"libraryCatalog": "Scitation",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}

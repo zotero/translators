@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-05-13 23:17:56"
+	"lastUpdated": "2012-10-17 10:15:26"
 }
 
 /*
@@ -35,11 +35,12 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.match(/\/retrieve\.do|\/i\.do|\/infomark\.do/)) {
-		if (url.match(/\/ecco\//)) return "book";
+	if (url.match(/\/retrieve\.do|\/i\.do|\/infomark\.do|newspaperRetrieve\.do/)) {
+		if (url.match(/\/ecco\//)) return "book"
+		else if (url.indexOf("newspaperRetrieve.do")!= -1) return "newspaperArticle"
 		else return "journalArticle";
 
-	} else if (url.match(/\/basicSearch\.do|\/subjectguide\.do|\/limitExpandSearchResults\.do/)) {
+	} else if (url.match(/\/basicSearch\.do|\/advancedSearch\.do|\/subjectguide\.do|\/limitExpandSearchResults\.do/)) {
 		return "multiple";
 	}
 }
@@ -70,12 +71,10 @@ function parseRIS(url) {
 	}
 
 	Zotero.Utilities.HTTP.doGet(url, function (text) {
+		text = text.trim();
 		//gale puts issue numbers in M1
 		text = text.replace(/M1\s*\-/, "IS  -");
 		//get the LA tag content until we introduce this in the RIS translator
-		if (text.match(/LA\s*\-/)) {
-			var language = text.match(/(?:LA\s*\-)(.+)/)[1];
-		}
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
@@ -84,7 +83,6 @@ function parseRIS(url) {
 			for (i in item.attachments) {
 				item.attachments[i].url = item.attachments[i].url.replace(/^https?:\/\/.+?\//, host);
 			}
-			item.language = language;
 			item.complete();
 		});
 		translator.translate();
@@ -95,7 +93,7 @@ function doWeb(doc, url) {
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
-		var titles = doc.evaluate('//span[@class="title"]/a|//div[contains(@class, "Title")]/a', doc, null, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//span[@class="title"]/a|//div[contains(@class, "Title")]/a|//li[@class="resultInfo"]/p/b/a', doc, null, XPathResult.ANY_TYPE, null);
 		var next_title;
 		while (next_title = titles.iterateNext()) {
 			items[next_title.href] = next_title.textContent;
@@ -168,17 +166,16 @@ var testCases = [
 					}
 				],
 				"publicationTitle": "Chasqui",
-				"url": "http://go.galegroup.com/ps/i.do?id=GALE%7CH1420025063&v=2.1&u=viva_gmu&it=r&p=LitRG&sw=w",
 				"issue": "1",
 				"extra": "19",
-				"DOI": "Critical essay",
-				"date": "1974",
+				"date": "November 1974",
 				"pages": "19-33",
 				"title": "Borges: His Recent Poetry",
 				"volume": "4",
 				"accessDate": "May 7, 2012",
 				"language": "English",
-				"libraryCatalog": "Galegroup",
+				"libraryCatalog": "Gale",
+				"archive": "Literature Resources from Gale",
 				"shortTitle": "Borges"
 			}
 		]
@@ -197,9 +194,7 @@ var testCases = [
 				],
 				"tags": [],
 				"seeAlso": [],
-				"attachments": [
-					{}
-				],
+				"attachments": [],
 				"title": "A digest of the law of actions and trials at nisi prius. By Isaac 'espinasse, of Gray's Inn, Esq. Barrister at Law. The third edition, corrected, with considerable additions from printed and manuscript cases. In two volumes. ...",
 				"place": "London",
 				"url": "http://find.galegroup.com/ecco/infomark.do?&source=gale&prodId=ECCO&userGroupName=viva_gmu&tabID=T001&docId=CW3325179878&type=multipage&contentSet=ECCOArticles&version=1.0",
@@ -209,7 +204,9 @@ var testCases = [
 				"date": "1798",
 				"volume": "Volume 1",
 				"accessDate": "2012/05/07",
-				"libraryCatalog": "Galegroup"
+				"archive": "Eighteenth Century Collection Online",
+				"numberOfVolumes": "2",
+				"libraryCatalog": "Gale"
 			}
 		]
 	}

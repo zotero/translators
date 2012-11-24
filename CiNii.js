@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-04-02 20:18:41"
+	"lastUpdated": "2012-10-07 14:05:00"
 }
 
 function detectWeb(doc, url) {
@@ -89,23 +89,23 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "大井 謙一=Kenichi",
-						"lastName": "Ohi",
+						"firstName": "謙一=Kenichi Ohi",
+						"lastName": "大井",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "嶋脇 輿助=Yosuke",
-						"lastName": "Shimawaki",
+						"firstName": "輿助=Yosuke Shimawaki",
+						"lastName": "嶋脇",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "伊藤 拓海=Takumi",
-						"lastName": "Ito",
+						"firstName": "拓海=Takumi Ito",
+						"lastName": "伊藤",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Yushun",
-						"lastName": "Li",
+						"firstName": "Li",
+						"lastName": "Yushun",
 						"creatorType": "author"
 					}
 				],
@@ -122,7 +122,7 @@ var testCases = [
 				"publicationTitle": "生産研究",
 				"ISSN": "0037105X",
 				"publisher": "東京大学",
-				"date": "2002-11",
+				"date": "2002",
 				"volume": "54",
 				"issue": "6",
 				"pages": "384-387",

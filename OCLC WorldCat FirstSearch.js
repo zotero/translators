@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-12-12 19:24:10"
+	"lastUpdated": "2012-10-23 16:44:16"
 }
 
 function detectWeb(doc, url) {
@@ -29,8 +29,8 @@ function processURLs(urls, url) {
 		Zotero.done();
 		return;
 	}
-	//Z.debug(url)
 	var newUrl = urls.shift();
+
 	//if non-roman characters are shown, shift the charset to utf-8,
 	//else move it to iso8859 so that accented roman letters work
 	if (url.match(/dfltcharset\=UTF\-8/)) var charset="utf-8";
@@ -148,7 +148,7 @@ function processURLs(urls, url) {
 		}
 
 		newItem.complete();
-		processURLs(urls);
+		processURLs(urls, url);
 	}, false, charset);
 }
 
@@ -186,28 +186,25 @@ function doWeb(doc, url) {
 		}
 
 		urls = [host+'/WebZ/DirectExport?numrecs=10:smartpage=directexport:entityexportnumrecs=10:entityexportresultset=' + resultset + ':entityexportrecno=' + number + ':sessionid=' + sessionid + ':entitypagenum=35:0'];
+		processURLs(urls, url);
 	} else {
 		var items = Zotero.Utilities.getItemArray(doc, doc, '/WebZ/FSFETCH\\?fetchtype=fullrecord', '^(See more details for locating this item|Detailed Record)$');
-		items = Zotero.selectItems(items);
-
-		if(!items) {
-			return true;
-		}
-
-		var urls = new Array();
-
-		for(var i in items) {
-			var nMatch = numberRegexp.exec(i);
-			var rMatch = resultsetRegexp.exec(i);
-			if(rMatch && nMatch) {
-				var number = nMatch[1];
-				var resultset = rMatch[1];
-				urls.push(host+'/WebZ/DirectExport?numrecs=10:smartpage=directexport:entityexportnumrecs=10:entityexportresultset=' + resultset + ':entityexportrecno=' + number + ':sessionid=' + sessionid + ':entitypagenum=35:0');
+		var urls = []
+		
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
 			}
-		}
-	}
-	//we need to pass on the original url to get at the charset
-	processURLs(urls, url);
-	Zotero.wait();
+			for (var i in items) {
+				var nMatch = numberRegexp.exec(i);
+				var rMatch = resultsetRegexp.exec(i);
+				if(rMatch && nMatch) {
+					var number = nMatch[1];
+					var resultset = rMatch[1];
+					urls.push(host+'/WebZ/DirectExport?numrecs=10:smartpage=directexport:entityexportnumrecs=10:entityexportresultset=' + resultset + ':entityexportrecno=' + number + ':sessionid=' + sessionid + ':entitypagenum=35:0');
+				}	
+			}
+			processURLs(urls, url);
+		});
+	}	
 }
-

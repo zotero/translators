@@ -2,14 +2,14 @@
 	"translatorID": "92d4ed84-8d0-4d3c-941f-d4b9124cfbb",
 	"label": "IEEE Xplore",
 	"creator": "Simon Kornblith, Michael Berkowitz, Bastian Koenings, and Avram Lyon",
-	"target": "^https?://[^/]*ieeexplore\\.ieee\\.org[^/]*/(?:[^\\?]+\\?(?:|.*&)arnumber=[0-9]+|search/(?:searchresult.jsp|selected.jsp)|xpl\\/mostRecentIssue.jsp\\?)",
+	"target": "^https?://[^/]*ieeexplore\\.ieee\\.org[^/]*/(?:[^\\?]+\\?(?:|.*&)arnumber=[0-9]+|search/(?:searchresult.jsp|selected.jsp)|xpl\\/(mostRecentIssue|tocresult).jsp\\?)",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-08-18 17:30:00"
+	"lastUpdated": "2012-11-06 08:34:31"
 }
 
 function detectWeb(doc, url) {
@@ -36,7 +36,7 @@ function doWeb(doc, url) {
 
 	if (detectWeb(doc, url) == "multiple") {
 		// search page
-		var items = new Array();
+		var items = new Object();
 
 		var xPathRows = '//ul[@class="Results"]/li[@class="noAbstract"]/div[@class="header"]';
 		var tableRows = doc.evaluate(xPathRows, doc, null, XPathResult.ANY_TYPE, null);
@@ -158,7 +158,7 @@ function scrape (doc, url) {
   	var get = 'http://ieeexplore.ieee.org/xpl/downloadCitations';
   	var post = "recordIds=" + arnumber + "&fromPage=&citations-format=citation-abstract&download-format=download-bibtex";
   	Zotero.Utilities.HTTP.doPost(get, post, function(text) {
-  		text = text.replace(/\<br\>/g, "")
+  		text = ZU.unescapeHTML(text.replace(/(&[^\s;]+) and/g, '$1;'));
 		var translator = Zotero.loadTranslator("import");
 		// Calling the BibTeX translator
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
@@ -381,13 +381,65 @@ var testCases = [
 				"volume": "16",
 				"issue": "6",
 				"pages": "1491 -1502",
-				"abstractNote": "In this paper, we study some variants of fuzzy Turing machines (FTMs) and universal FTM. First, we give several formulations of FTMs, including, in particular, deterministic FTMs (DFTMs) and nondeterministic FTMs (NFTMs). We then show that DFTMs and NFTMs are not equivalent as far as the power of recognizing fuzzy languages is concerned. This contrasts sharply with classical TMs. Second, we show that there is no universal FTM that can exactly simulate any FTM on it. But if the membership degrees of fuzzy sets are restricted to a fixed finite subset <i>A</i> of [0,1], such a universal machine exists. We also show that a universal FTM exists in some approximate sense. This means, for any prescribed accuracy, that we can construct a universal machine that simulates any FTM with the given accuracy. Finally, we introduce the notions of fuzzy polynomial time-bounded computation and nondeterministic fuzzy polynomial time-bounded computation, and investigate their connections with polynomial time-bounded computation and nondeterministic polynomial time-bounded computation.",
+				"abstractNote": "In this paper, we study some variants of fuzzy Turing machines (FTMs) and universal FTM. First, we give several formulations of FTMs, including, in particular, deterministic FTMs (DFTMs) and nondeterministic FTMs (NFTMs). We then show that DFTMs and NFTMs are not equivalent as far as the power of recognizing fuzzy languages is concerned. This contrasts sharply with classical TMs. Second, we show that there is no universal FTM that can exactly simulate any FTM on it. But if the membership degrees of fuzzy sets are restricted to a fixed finite subset A of [0,1], such a universal machine exists. We also show that a universal FTM exists in some approximate sense. This means, for any prescribed accuracy, that we can construct a universal machine that simulates any FTM with the given accuracy. Finally, we introduce the notions of fuzzy polynomial time-bounded computation and nondeterministic fuzzy polynomial time-bounded computation, and investigate their connections with polynomial time-bounded computation and nondeterministic polynomial time-bounded computation.",
 				"DOI": "10.1109/TFUZZ.2008.2004990",
 				"ISSN": "1063-6706",
 				"conferenceName": "IEEE Transactions on Fuzzy Systems",
 				"proceedingsTitle": "IEEE Transactions on Fuzzy Systems",
 				"libraryCatalog": "IEEE Xplore",
 				"shortTitle": "Fuzzy Turing Machines"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://ieeexplore.ieee.org/xpl/articleDetails.jsp?arnumber=6221978",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "D.",
+						"lastName": "Tuia",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "J.",
+						"lastName": "Muñoz-Marí",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "L.",
+						"lastName": "Gómez-Chova",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "J.",
+						"lastName": "Malo",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "IEEE Xplore Abstract Record",
+						"mimeType": "text/html"
+					}
+				],
+				"publicationTitle": "IEEE Transactions on Geoscience and Remote Sensing",
+				"title": "Graph Matching for Adaptation in Remote Sensing",
+				"date": "2012",
+				"volume": "PP",
+				"issue": "99",
+				"pages": "1 -13",
+				"abstractNote": "We present an adaptation algorithm focused on the description of the data changes under different acquisition conditions. When considering a source and a destination domain, the adaptation is carried out by transforming one data set to the other using an appropriate nonlinear deformation. The eventually nonlinear transform is based on vector quantization and graph matching. The transfer learning mapping is defined in an unsupervised manner. Once this mapping has been defined, the samples in one domain are projected onto the other, thus allowing the application of any classifier or regressor in the transformed domain. Experiments on challenging remote sensing scenarios, such as multitemporal very high resolution image classification and angular effects compensation, show the validity of the proposed method to match-related domains and enhance the application of cross-domains image processing techniques.",
+				"DOI": "10.1109/TGRS.2012.2200045",
+				"ISSN": "0196-2892",
+				"conferenceName": "IEEE Transactions on Geoscience and Remote Sensing",
+				"proceedingsTitle": "IEEE Transactions on Geoscience and Remote Sensing",
+				"libraryCatalog": "IEEE Xplore"
 			}
 		]
 	}

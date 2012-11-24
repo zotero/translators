@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-06-14 01:58:28"
+	"lastUpdated": "2012-10-26 17:03:50"
 }
 
 function detectWeb(doc, url) {
@@ -18,7 +18,7 @@ function detectWeb(doc, url) {
 	if (url.indexOf('results.html') != -1) {
 		return "multiple";
 	} else */
-	if ( ZU.xpathText(doc, '//meta[@name="og:type" or @property="og:type"]/@content') == 'article') {
+	if (url.search(/\/article\/|\d{4}\/\d{2}\/\d{2}\/./)) {
 		return "magazineArticle";
 	}
 }
@@ -33,10 +33,12 @@ function scrape(doc, url) {
 		item.publicationTitle = "Time";
 		item.url = url;
 		item.ISSN = "0040-718X";
-
+		item.title = ZU.xpathText(doc, '//h1[@class="entry-title"]')
+		if(!item.title) item.title = ZU.xpathText(doc, '//meta[@property="og:title"]/@content')
 		//authors
 		var authors = ZU.xpathText(doc, '/html/head/meta[@name="byline"]/@content');
 		if(!authors) authors = ZU.xpathText(doc, '//span[@class="author vcard"]/a', null, ' and ');
+		if(!authors) authors = ZU.xpathText(doc, '//span[@class="entry-byline"]')
 		if(authors && authors.trim()) {
 			var matches = authors.match(/^\s*([^\/]+?)\s*\/\s*(.+?)\s*$/);
 			if(matches) {
@@ -47,7 +49,7 @@ function scrape(doc, url) {
 				}
 			}
 
-			authors = authors.split(/ and /i);
+			authors = authors.replace(/^By\s+|\sBy\s+/, "").split(/ and /i);
 			var authArr = new Array();
 			for(var i=0, n=authors.length; i<n; i++) {
 				authArr.push(ZU.cleanAuthor(ZU.capitalizeTitle(authors[i]), 'author'));
@@ -69,7 +71,6 @@ function scrape(doc, url) {
 
 	translator.getTranslatorObject(function(em) {
 		em.addCustomFields({
-			'head': 'title',
 			'date': 'date'
 		});
 	});
@@ -132,13 +133,12 @@ var testCases = [
 				],
 				"itemID": "http://www.time.com/time/nation/article/0,8599,2099187,00.html",
 				"title": "How the U.S. Postal Service Fell Apart",
-				"source": "TIME.com",
 				"publicationTitle": "Time",
 				"url": "http://www.time.com/time/nation/article/0,8599,2099187,00.html",
 				"abstractNote": "Battling debilitating congressional mandates and competition online, the USPS is closing thousands of post offices and struggling to find a place in the modern world. But there are people behind the scenes trying to save this American institution",
-				"date": "Thursday, Nov. 17, 2011",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.time.com",
+				"date": "Thursday, Nov. 17, 2011",
 				"ISSN": "0040-718X"
 			}
 		]
@@ -174,15 +174,14 @@ var testCases = [
 				],
 				"itemID": "http://www.time.com/time/nation/article/0,8599,2108263,00.html",
 				"title": "On Scene in Indiana and Kentucky: When the Tornadoes Came",
-				"source": "TIME.com",
 				"publicationTitle": "Time",
 				"url": "http://www.time.com/time/nation/article/0,8599,2108263,00.html",
 				"abstractNote": "The month of March isn't really the heart of the tornado season but they have come fast and with awesome destruction.",
-				"date": "Sunday, Mar. 04, 2012",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.time.com",
-				"shortTitle": "On Scene in Indiana and Kentucky",
-				"ISSN": "0040-718X"
+				"date": "Sunday, Mar. 04, 2012",
+				"ISSN": "0040-718X",
+				"shortTitle": "On Scene in Indiana and Kentucky"
 			}
 		]
 	},
@@ -219,8 +218,7 @@ var testCases = [
 					}
 				],
 				"itemID": "http://swampland.time.com/2012/03/04/obama-courts-aipac-before-netanyahu-meeting/?iid=sl-main-lede",
-				"title": "Obama Courts AIPAC Before Netanyahu Meeting | Swampland | TIME.com",
-				"source": "TIME.com",
+				"title": "Obama Courts AIPAC Before Netanyahu Meeting",
 				"publicationTitle": "Time",
 				"url": "http://swampland.time.com/2012/03/04/obama-courts-aipac-before-netanyahu-meeting/?iid=sl-main-lede",
 				"abstractNote": "Obama rejected any notion that his administration has not been in Israel's corner. “Over the last three years, as President of the United States, I have kept my commitments to the state of Israel.\" The President then ticked off the number of ways he has supported Israel in the last year.",
@@ -232,7 +230,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://moneyland.time.com/2012/03/02/struggling-to-stay-afloat-number-of-underwater-homeowners-keeps-on-rising/?iid=pf-main-lede",
+		"url": "http://business.time.com/2012/03/02/struggling-to-stay-afloat-number-of-underwater-homeowners-keeps-on-rising/?iid=pf-main-lede/",
 		"items": [
 			{
 				"itemType": "magazineArticle",
@@ -249,19 +247,20 @@ var testCases = [
 					"economics & policy",
 					"florida real estate",
 					"mortgages",
+					"personal finance",
 					"real estate & homes",
 					"real estate markets",
 					"the economy",
-					"georgia",
-					"california",
 					"arizona",
-					"florida",
-					"dallas",
 					"baltimore",
-					"underwater",
+					"california",
+					"dallas",
+					"florida",
+					"georgia",
 					"nevada",
-					"upside-down",
-					"sunbelt"
+					"sunbelt",
+					"underwater",
+					"upside-down"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -269,14 +268,14 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"itemID": "http://moneyland.time.com/2012/03/02/struggling-to-stay-afloat-number-of-underwater-homeowners-keeps-on-rising/?iid=pf-main-lede",
-				"title": "Underwater Homeowner Numbers Keep on Rising | Moneyland | TIME.com",
-				"source": "TIME.com",
+				"itemID": "http://business.time.com/2012/03/02/struggling-to-stay-afloat-number-of-underwater-homeowners-keeps-on-rising/?iid=pf-main-lede/",
+				"title": "Struggling to Stay Afloat: Number of Underwater Homeowners Keeps on Rising",
 				"publicationTitle": "Time",
-				"url": "http://moneyland.time.com/2012/03/02/struggling-to-stay-afloat-number-of-underwater-homeowners-keeps-on-rising/?iid=pf-main-lede",
+				"url": "http://business.time.com/2012/03/02/struggling-to-stay-afloat-number-of-underwater-homeowners-keeps-on-rising/?iid=pf-main-lede/",
 				"abstractNote": "Despite signs that some housing markets are improving, the overall trend is for home prices (and values) to keep dropping—and dropping. As values shrink, more and more homeowners find themselves underwater, the unfortunate scenario in which one owes more on the mortgage than the home is worth.",
 				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "moneyland.time.com",
+				"libraryCatalog": "business.time.com",
+				"shortTitle": "Struggling to Stay Afloat",
 				"ISSN": "0040-718X"
 			}
 		]

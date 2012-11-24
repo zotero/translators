@@ -2,7 +2,7 @@
 	"translatorID": "fcf41bed-0cbc-3704-85c7-8062a0068a7a",
 	"label": "NCBI PubMed",
 	"creator": "Simon Kornblith, Michael Berkowitz, Avram Lyon, and Rintze Zelle",
-	"target": "https?://[^/]*(www|preview)\\.ncbi\\.nlm\\.nih\\.gov[^/]*/(pubmed|sites/pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed)",
+	"target": "https?://[^/]*(www|preview)[\\.\\-]ncbi[\\.\\-]nlm[\\.\\-]nih[\\.\\-]gov[^/]*/(pubmed|sites/pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed)",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
@@ -12,40 +12,51 @@
 	"inRepository": true,
 	"translatorType": 13,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-03-12 01:14:39"
+	"lastUpdated": "2012-11-23 17:51:53"
 }
 
 function detectWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
-	var items = doc.evaluate('//input[@name="EntrezSystem2.PEntrez.Pubmed.Pubmed_ResultsPanel.Pubmed_ResultsController.ResultCount"]', doc,
-			nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-	if (items) {
-		Zotero.debug("Have ResultCount " + items.value);
-		if (items.value > 1) {
-			return "multiple";
-		} else if (items.value == 1) {
-			//try to determine if this is a book
-			//"Sections" heading only seems to show up for books
-			if(doc.evaluate('//div[@class="sections"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())
-			{
-				return "book";
-			}
-			return "journalArticle";
-		}
+	var items = getResultList(doc);
+	if (items.length > 0) {
+		return "multiple";
 	}
 
-	var uids = doc.evaluate('//input[@type="checkbox" and @name="EntrezSystem2.PEntrez.Pubmed.Pubmed_ResultsPanel.Pubmed_RVDocSum.uid"]', doc,
-			nsResolver, XPathResult.ANY_TYPE, null);
-	if(uids.iterateNext()) {
-		if (uids.iterateNext()){
-			return "multiple";
-		}
-		return "journalArticle";
+	if(!getUID(doc)) {
+		return;
 	}
+
+	//try to determine if this is a book
+	//"Sections" heading only seems to show up for books
+	if(ZU.xpath(doc, '//div[@class="sections"]').length)
+	{
+		return "book";
+	}
+	return "journalArticle";
+}
+
+//retrieves a list of result nodes from a search results page (perhaps others too)
+function getResultList(doc) {
+	return ZU.xpath(doc, '//div[@class="rprt"][.//p[@class="title"]]');
+}
+
+//retrieves the UID from an item page. Returns false if there is more than one.
+function getUID(doc) {
+	var uid = ZU.xpath(doc, '/head/meta[@name="ncbi_uidlist"]/@content');
+	if(!uid.length) {
+		uid = ZU.xpath(doc, '//input[@id="absid"]/@value');
+	}
+
+	if(uid.length == 1 && uid[0].textContent.search(/^\d+$/) != -1) {
+		return uid[0].textContent;
+	}
+
+	uid = ZU.xpath(doc, '/head/link[@media="handheld"]/@href');
+	if(uid.length == 1) {
+		uid = uid[0].textContetn.match(/\/(\d+)(?:\/|$)/);
+		if(uid) return uid[1];
+	}
+
+	return false;
 }
 
 function getPMID(co) {
@@ -73,8 +84,7 @@ function detectSearch(item) {
 function lookupPMIDs(ids, doc) {
 	var newUri = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=PubMed&tool=Zotero&retmode=xml&rettype=citation&id="+ids.join(",");
 	Zotero.debug(newUri);
-	Zotero.Utilities.HTTP.doGet(newUri, doImportFromText, function () {Zotero.done()});
-	Zotero.wait();
+	Zotero.Utilities.HTTP.doGet(newUri, doImportFromText);
 }
 
 function doImport() {
@@ -117,8 +127,16 @@ function doImportFromText(text) {
 		var newItem = new Zotero.Item("journalArticle");
 
 		var citation = ZU.xpath(articles[i], 'MedlineCitation');
+
+		//store link as attachment, since this is a catalog
 		var PMID = ZU.xpathText(citation, 'PMID');
-		newItem.url = "http://www.ncbi.nlm.nih.gov/pubmed/" + PMID;
+		newItem.attachments.push({
+			title: "PubMed Link",
+			url: "http://www.ncbi.nlm.nih.gov/pubmed/" + PMID,
+			mimeType: "text/html",
+			snapshot: false
+		});
+
 		newItem.extra = "PMID: "+PMID;
 
 		var article = ZU.xpath(citation, 'Article');
@@ -236,8 +254,15 @@ function doImportFromText(text) {
 
 		var citation = ZU.xpath(books[i], 'BookDocument');
 		var PMID = ZU.xpathText(citation, 'PMID');
-		//url
-		newItem.url = "http://www.ncbi.nlm.nih.gov/pubmed/" + PMID;
+
+		//store as attachment, since this is a catalog
+		newItem.attachments.push({
+			title: "PubMed Link",
+			url: "http://www.ncbi.nlm.nih.gov/pubmed/" + PMID,
+			mimetype: "text/html",
+			snapshot: false
+		});
+
 		//Extra:PMID
 		newItem.extra = "PMID: "+PMID;
 
@@ -348,84 +373,73 @@ function doImportFromText(text) {
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-		} : null;
-	var ids = new Array();
-	var uids = doc.evaluate('//input[@name="EntrezSystem2.PEntrez.Pubmed.Pubmed_ResultsPanel.Pubmed_RVDocSum.uid"]', doc, //edited for new PubMed
-				   nsResolver, XPathResult.ANY_TYPE, null);
-	var uid = uids.iterateNext();
-	if(uid) {
-		if (uids.iterateNext()){
-			var items = {};
-			var tablex = '//div[@class="rprt"]';
-			if (!doc.evaluate(tablex, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-				var tablex = '//div[@class="ResultSet"]/dl';
-				var other = true;
-			}
-			var tableRows = doc.evaluate(tablex, doc, nsResolver, XPathResult.ANY_TYPE, null);
-			var tableRow;
-			// Go through table rows
-			while(tableRow = tableRows.iterateNext()) {
-				uid = doc.evaluate('.//input[@type="checkbox"]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-				if (other) {
-					var article = doc.evaluate('.//h2', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-				} else {
-					var article = doc.evaluate('.//p[@class="title"]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-				}
-				items[uid.value] = article.textContent;
+	if(detectWeb(doc, url) == "multiple") {
+		var results = getResultList(doc);
+		var items = {};
+		var title, uid;
+		for(var i=0, n=results.length; i<n; i++) {
+			title = ZU.xpathText(results[i], './/p[@class="title"]');
+			uid = ZU.xpathText(results[i], './/input[starts-with(@id,"UidCheckBox")]/@value')
+				|| ZU.xpathText(results[i], './/dl[@class="rprtid"]/dd[preceding-sibling::*[1][text()="PMID:"]]');
+			if(!uid) {
+				uid = ZU.xpathText(results[i], './/p[@class="title"]/a/@href');
+				if(uid) uid = uid.match(/\/(\d+)/);
+				if(uid) uid = uid[1];
 			}
 
-			Zotero.selectItems(items, function(items) {
-				if(!items) {
-					return true;
-				}
-	
-				for(var i in items) {
-					ids.push(i);
-				}
-	
-				lookupPMIDs(ids);
-			});
-		} else {
-			ids.push(uid.value);
-			lookupPMIDs(ids, doc);
-		}
-	} else {
-		// Here, account for some articles and search results using spans for PMID
-		var uids= doc.evaluate('//p[@class="pmid"]', doc,
-				nsResolver, XPathResult.ANY_TYPE, null);
-		var uid = uids.iterateNext();
-		if (!uid) {
-			// Fall back on span 
-			uids = doc.evaluate('//span[@class="pmid"]', doc,
-					nsResolver, XPathResult.ANY_TYPE, null);
-			uid = uids.iterateNext();
-		}
-		if (!uid) {
-			// Fall back on <dl class="rprtid"> 
-			// See http://www.ncbi.nlm.nih.gov/pubmed?term=1173[page]+AND+1995[pdat]+AND+Morton[author]&cmd=detailssearch
-			// Discussed http://forums.zotero.org/discussion/17662
-			uids = doc.evaluate('//dl[@class="rprtid"]/dd[1]', doc,
-					nsResolver, XPathResult.ANY_TYPE, null);
-			uid = uids.iterateNext();
-		}
-		if (uid) {
-			ids.push(uid.textContent.match(/\d+/)[0]);
-			Zotero.debug("Found PMID: " + ids[ids.length - 1]);
-			lookupPMIDs(ids, doc);
-		} else {
-			var uids= doc.evaluate('//meta[@name="ncbi_uidlist"]', doc,
-					nsResolver, XPathResult.ANY_TYPE, null);
-			var uid = uids.iterateNext()["content"].split(' ');
-			if (uid) {
-				ids.push(uid);
-				Zotero.debug("Found PMID: " + ids[ids.length - 1]);
-				lookupPMIDs(ids, doc);
+			if(uid && title) {
+				items[uid] = title;
 			}
 		}
+
+		Zotero.selectItems(items, function(selectedItems) {
+			if(!selectedItems) return true;
+
+			var uids = [];
+			for(var i in selectedItems) {
+				uids.push(i);
+			}
+			lookupPMIDs(uids);
+		})
+	} else {
+		lookupPMIDs([getUID(doc)]);
 	}
+/*
+		} else {
+			// Here, account for some articles and search results using spans for PMID
+			var uids= doc.evaluate('//p[@class="pmid"]', doc,
+					nsResolver, XPathResult.ANY_TYPE, null);
+			var uid = uids.iterateNext();
+			if (!uid) {
+				// Fall back on span 
+				uids = doc.evaluate('//span[@class="pmid"]', doc,
+						nsResolver, XPathResult.ANY_TYPE, null);
+				uid = uids.iterateNext();
+			}
+			if (!uid) {
+				// Fall back on <dl class="rprtid"> 
+				// See http://www.ncbi.nlm.nih.gov/pubmed?term=1173[page]+AND+1995[pdat]+AND+Morton[author]&cmd=detailssearch
+				// Discussed http://forums.zotero.org/discussion/17662
+				uids = doc.evaluate('//dl[@class="rprtid"]/dd[1]', doc,
+						nsResolver, XPathResult.ANY_TYPE, null);
+				uid = uids.iterateNext();
+			}
+			if (uid) {
+				ids.push(uid.textContent.match(/\d+/)[0]);
+				Zotero.debug("Found PMID: " + ids[ids.length - 1]);
+				lookupPMIDs(ids, doc);
+			} else {
+				var uids= doc.evaluate('//meta[@name="ncbi_uidlist"]', doc,
+						nsResolver, XPathResult.ANY_TYPE, null);
+				var uid = uids.iterateNext()["content"].split(' ');
+				if (uid) {
+					ids.push(uid);
+					Zotero.debug("Found PMID: " + ids[ids.length - 1]);
+					lookupPMIDs(ids, doc);
+				}
+			}
+		}
+*/
 }
 
 function doSearch(item) {
@@ -459,8 +473,13 @@ var testCases = [
 					"Humans"
 				],
 				"seeAlso": [],
-				"attachments": [],
-				"url": "http://www.ncbi.nlm.nih.gov/pubmed/20729678",
+				"attachments": [
+					{
+						"title": "PubMed Link",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
 				"extra": "PMID: 20729678",
 				"title": "Zotero: harnessing the power of a personal bibliographic manager",
 				"pages": "205-207",
@@ -473,7 +492,6 @@ var testCases = [
 				"abstractNote": "Zotero is a powerful free personal bibliographic manager (PBM) for writers. Use of a PBM allows the writer to focus on content, rather than the tedious details of formatting citations and references. Zotero 2.0 (http://www.zotero.org) has new features including the ability to synchronize citations with the off-site Zotero server and the ability to collaborate and share with others. An overview on how to use the software and discussion about the strengths and limitations are included.",
 				"DOI": "10.1097/NNE.0b013e3181ed81e4",
 				"libraryCatalog": "NCBI PubMed",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Zotero"
 			}
 		]
@@ -504,8 +522,13 @@ var testCases = [
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
-				"attachments": [],
-				"url": "http://www.ncbi.nlm.nih.gov/pubmed/20821847",
+				"attachments": [
+					{
+						"title": "PubMed Link",
+						"mimetype": "text/html",
+						"snapshot": false
+					}
+				],
 				"extra": "PMID: 20821847",
 				"ISBN": "1859962521",
 				"title": "Endocrinology: An Integrated Approach",
@@ -516,7 +539,6 @@ var testCases = [
 				"abstractNote": "Endocrinology has been written to meet the requirements of today's trainee doctors and the demands of an increasing number of degree courses in health and biomedical sciences, and allied subjects. It is a truly integrated text using large numbers of real clinical cases to introduce the basic biochemistry, physiology and pathophysiology underlying endocrine disorders and also the principles of clinical diagnosis and treatment. The increasing importance of the molecular and genetic aspects of endocrinology in relation to clinical medicine is explained.",
 				"rights": "Copyright © 2001, BIOS Scientific Publishers Limited",
 				"libraryCatalog": "NCBI PubMed",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Endocrinology"
 			}
 		]
@@ -552,8 +574,13 @@ var testCases = [
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
-				"attachments": [],
-				"url": "http://www.ncbi.nlm.nih.gov/pubmed/21249754",
+				"attachments": [
+					{
+						"title": "PubMed Link",
+						"mimetype": "text/html",
+						"snapshot": false
+					}
+				],
 				"extra": "PMID: 21249754",
 				"title": "Cancer Syndromes",
 				"date": "2009",
@@ -562,8 +589,7 @@ var testCases = [
 				"language": "en",
 				"abstractNote": "Cancer Syndromes is a comprehensive multimedia resource for selected single gene cancer syndromes. Syndromes currently included are Peutz-Jeghers syndrome, juvenile polyposis, Birt-Hogg-Dubé syndrome, multiple endocrine neoplasia type 1 and familial atypical multiple mole melanoma syndrome. For each syndrome the history, epidemiology, natural history and management are reviewed. If possible the initial report in the literature of each syndrome is included as an appendix. Chapters are extensively annotated with figures and movie clips. Mission Statement: Improving the care of cancer syndrome patients.",
 				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson",
-				"libraryCatalog": "NCBI PubMed",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "NCBI PubMed"
 			}
 		]
 	}

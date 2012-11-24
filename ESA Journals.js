@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-01-30 22:39:06"
+	"lastUpdated": "2012-11-12 20:51:45"
 }
 
 /*
@@ -38,12 +38,6 @@ function detectWeb(doc, url) {
 
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ?
-	function (prefix) {
-		if (prefix == 'x') return namespace;
-		else return null;
-	} : null;
 	var arts = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
@@ -59,42 +53,32 @@ function doWeb(doc, url) {
 			if (!items) {
 				return true;
 			}
-			citationurls = new Array();
+			urls = new Array();
 			for (var itemurl in items) {
 				//Z.debug(itemurl)
 				//some search results have some "baggage" at the end - remove
-				citationurls.push(itemurl.replace(/\?prev.+/, "").replace(/\/doi\/abs\//, "/action/showCitFormats?doi="));
+				urls.push(itemurl.replace(/\?prev.+/, ""));
 			}
-			getpages(citationurls);
+			ZU.processDocuments(urls, scrape)
 		});
 
 	} else {
-		var citationurl = url.replace(/\/doi\/abs\/|\/doi\/full\//, "/action/showCitFormats?doi=");
-		//Z.debug(citationurl)
-		getpages(citationurl);
+		scrape(doc, url)
 	}
-	Zotero.wait();
 }
 
-function getpages(citationurl) {
-	//we work entirely from the citations page
-	Zotero.Utilities.processDocuments(citationurl, function (doc) {
-		scrape(doc);
-	}, function () {
-	  Zotero.done();
-	});
-}
-
-
-function scrape(doc) {
-	var newurl = doc.location.href;
-	//Z.debug(newurl);
-	var pdfurl = newurl.replace(/\/action\/showCitFormats\?doi=/, "/doi/pdf/");
-	var absurl = newurl.replace(/\/action\/showCitFormats\?doi=/, "/doi/abs/");
-	var doi = doc.evaluate('//form[@target="_self"]/input[@name="doi"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
+function scrape(doc, url) {
+	url = url.replace(/\?.+/, "")
+	var pdfurl = url.replace(/\/doi\/abs\/|\/doi\/full\//, "/doi/pdf/");
+	var doi = url.match(/10\.[^?]+/)[0]
+	var citationurl = url.replace(/\/doi\/abs\/|\/doi\/full\//, "/action/showCitFormats?doi=");
+	var abstract = ZU.xpathText(doc, '//div[@class="abstractSection"]')
+	var tags = ZU.xpath(doc, '//p[@class="fulltext"]//a[contains(@href, "keywordsfield")]')
+	//Z.debug(citationurl)	
+	ZU.processDocuments(citationurl, function(doc){
 	var filename = doc.evaluate('//form[@target="_self"]/input[@name="downloadFileName"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
-	//	Z.debug(filename);
-	var get = 'http://www.esajournals.org/action/downloadCitation';
+	//Z.debug(filename);
+	var get = '/action/downloadCitation';
 	var post = 'doi=' + doi + '&downloadFileName=' + filename + '&format=ris&direct=true&include=cit';
 	Zotero.Utilities.HTTP.doPost(get, post, function (text) {
 		var translator = Zotero.loadTranslator("import");
@@ -102,14 +86,18 @@ function scrape(doc) {
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
-			item.url = absurl;
+			item.url = url;
 			item.notes = [];
+			for (var i in tags){
+				item.tags.push(tags[i].textContent)
+			}
+			item.abstractNote = abstract;
 			item.attachments = [{
 				url: pdfurl,
 				title: "ESA PDF fulltext",
 				mimeType: "application/pdf"
 			}, {
-				url: absurl,
+				document: doc,
 				title: "ESA Snapshot",
 				mimeType: "text/html"
 			}];
@@ -117,6 +105,7 @@ function scrape(doc) {
 		});
 		translator.translate();
 	});
+	})
 }
 
 /** BEGIN TEST CASES **/
@@ -160,7 +149,14 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [],
+				"tags": [
+					"carbon cycle",
+					"data assimilation",
+					"ecological forecast",
+					"ensemble Kalman filter (EnKF)",
+					"parameter estimation",
+					"uncertainty analysis"
+				],
 				"seeAlso": [],
 				"attachments": [
 					{
@@ -172,16 +168,20 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"DOI": "10.1890/09-1234.1",
-				"issue": "5",
-				"ISSN": "1051-0761",
-				"url": "http://www.esajournals.org/doi/abs/10.1890/09-1234.1",
-				"libraryCatalog": "ESA Journals",
 				"title": "Assimilation of multiple data sets with the ensemble Kalman filter to improve forecasts of forest carbon dynamics",
 				"date": "February 22, 2011",
+				"DOI": "10.1890/09-1234.1",
 				"publicationTitle": "Ecological Applications",
+				"journalAbbreviation": "Ecological Applications",
 				"pages": "1461-1473",
-				"volume": "21"
+				"volume": "21",
+				"issue": "5",
+				"publisher": "Ecological Society of America",
+				"ISSN": "1051-0761",
+				"url": "http://www.esajournals.org/doi/abs/10.1890/09-1234.1",
+				"abstractNote": "The ensemble Kalman filter (EnKF) has been used in weather forecasting to assimilate observations into weather models. In this study, we examine how effectively forecasts of a forest carbon cycle can be improved by assimilating observations with the EnKF. We used the EnKF to assimilate into the terrestrial ecosystem (TECO) model eight data sets collected at the Duke Forest between 1996 and 2004 (foliage biomass, fine root biomass, woody biomass, litterfall, microbial biomass, forest floor carbon, soil carbon, and soil respiration). We then used the trained model to forecast changes in carbon pools from 2004 to 2012. Our daily analysis of parameters indicated that all the exit rates were well constrained by the EnKF, with the exception of the exit rates controlling the loss of metabolic litter and passive soil organic matter. The poor constraint of these two parameters resulted from the low sensitivity of TECO predictions to their values and the poor correlation between these parameters and the observed variables. Using the estimated parameters, the model predictions and observations were in agreement. Model forecasts indicate 15 380–15 660 g C/m2 stored in Duke Forest by 2012 (a 27% increase since 2004). Parameter uncertainties decreased as data were sequentially assimilated into the model using the EnKF. Uncertainties in forecast carbon sinks increased over time for the long-term carbon pools (woody biomass, structure litter, slow and passive SOM) but remained constant over time for the short-term carbon pools (foliage, fine root, metabolic litter, and microbial carbon). Overall, EnKF can effectively assimilate multiple data sets into an ecosystem model to constrain parameters, forecast dynamics of state variables, and evaluate uncertainty.",
+				"libraryCatalog": "ESA Journals",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -190,4 +190,5 @@ var testCases = [
 		"url": "http://www.esajournals.org/toc/ecap/21/5",
 		"items": "multiple"
 	}
-] /** END TEST CASES **/
+]
+/** END TEST CASES **/

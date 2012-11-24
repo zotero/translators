@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-01-30 22:43:41"
+	"lastUpdated": "2012-09-24 16:36:50"
 }
 
 /*
@@ -77,19 +77,21 @@ function doWeb(doc, url) {
 		if (!items || countObjectProperties(items) == 0) {
 			return true;
 		}
-		items = Z.selectItems(items);
-		if (!items) {
-			return true;
-		}
-
-		for (var i in items) {
-			urls.push(i);
-		}
+	Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				urls.push(i);
+			}
+			Zotero.Utilities.processDocuments(urls, scrape, function () {
+				Zotero.done();
+			});
+			Zotero.wait();	
+		});
 	} else {
-		urls.push(doc.location.href);
+		scrape(doc,url)
 	}
-	ZU.processDocuments(urls, scrape, function() { Z.done(); } );
-	Z.wait();
 }
 
 /* Zotero API */
@@ -227,6 +229,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "http://www.drs1.ch/www/suche?query=Google",
 		"items": "multiple"
 	},

@@ -9,17 +9,18 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-07-10 06:51:49"
+	"lastUpdated": "2012-10-19 00:28:12"
 }
 
 /* Based on the SIRSI translator by Simon Kornblith and Michael Berkowitz,
    and the modifications for Rutgers (IRIS) by Chad Mills.
+   Includes code for Spanish version, e.g. PUCP: http://biblioteca.pucp.edu.pe/ (no permalink)
  */
 
 function detectWeb(doc, url) {
 	if (doc.evaluate('//div[@class="columns_container"]/div[contains(@class, "left_column")]/div[@class="content_container"]/div[@class="content"]/form[@id="hitlist"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
-	} else if (doc.evaluate('//div[@class="columns_container"]/div[contains(@class, "left_column")]/form[@name="item_view"]/div[@class="content_container item_details"]/div[@class="content"]/h3[.="Item Details"] ', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	} else if (doc.evaluate('//div[@class="columns_container"]/div[contains(@class, "left_column")]/form[@name="item_view"]/div[@class="content_container item_details"]/div[@class="content"]/h3[.="Item Details" or .="Detalles del ítem"] ', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "book";
 	}
 }
@@ -65,7 +66,7 @@ function scrape(doc, url) {
 				casedField = Zotero.Utilities.superCleanString(node.nodeValue);
 				field = casedField.toLowerCase();
 
-
+				//Z.debug(field)
 				if (field == "publisher") {
 					newItem.publisher = value;
 				} else if (field == "pub date") {
@@ -76,7 +77,7 @@ function scrape(doc, url) {
 					var re = /^[0-9](?:[0-9X]+)/;
 					var m = re.exec(value);
 					newItem.ISBN = m[0];
-				} else if (field == "title") {
+				} else if (field == "title" || field =="titulo") {
 					var titleParts = value.split(" / ");
 					re = /\[(.+)\]/i;
 					if (re.test(titleParts[0])) {
@@ -94,7 +95,7 @@ function scrape(doc, url) {
 					}
 					newItem.title = Zotero.Utilities.capitalizeTitle(titleParts[0]);
 
-				} else if (field == "series") { //push onto item, delimit with semicolon when needed
+				} else if (field == "series"|| field =="serie"||field == "series title") { //push onto item, delimit with semicolon when needed
 					if (seriesItemCount != 0) {
 						newItem.series += "; " + value;
 					} else if (seriesItemCount == 0) {
@@ -107,18 +108,17 @@ function scrape(doc, url) {
 					var uniDate = thesisParts[1].split(", ");
 					newItem.university = uniDate[0];
 					newItem.date = uniDate[1];
-				} else if (field == "edition") {
+				} else if (field == "edition"|| field =="edicion") {
 					newItem.edition = value;
-				} else if (field == "physical description") {
-
+				} else if (field == "physical description" || field =="descripcion") {
 					var physParts = value.split(" : ");
 					var physParts = physParts[0].split(" ; ");
 					//determine pages, split on " p."
-					var physPages = value.split(" p.");
+					var physPages = value.split(/ p.*/);
 					//break off anything in the beginning before the numbers
 					var pageParts = physPages[0].split(" ");
 					newItem.numPages = pageParts[pageParts.length - 1];
-				} else if (field == "publication info") {
+				} else if (field == "publication info" || field =="pie de imprenta") {
 					var pubParts = value.split(" : ");
 					newItem.place = pubParts[0];
 					//drop off first part of array and recombine
@@ -143,8 +143,7 @@ function scrape(doc, url) {
 					} else {
 						newItem.date = publisherParts[1];
 					}
-				} else if (field == "personal author") {
-
+				} else if (field == "personal author" || field=="autor personal")  {
 					newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "author", true));
 				} else if (field == "performer") {
 					newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "performer", true));
@@ -158,7 +157,7 @@ function scrape(doc, url) {
 
 					//The following line is included by Rice to handle corporate or conference author
 					newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "author", true));
-				} else if (field == "subject" || field == "corporate subject" || field == "geographic term") {
+				} else if (field == "subject" || field == "corporate subject" || field == "geographic term" || field=="tema") {
 					var subjects = value.split("--");
 					newItem.tags = newItem.tags.concat(subjects);
 				} else if (field == "personal subject") {
@@ -176,7 +175,7 @@ function scrape(doc, url) {
 		newItem.extra = newItem.extra.substr(0, newItem.extra.length - 1);
 	}
 
-	var callNumber = doc.evaluate('//tr/td[1][@class="holdingslist"]/strong/text()', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+	var callNumber = doc.evaluate('//tr/td[1][@class="holdingslist"]/strong/text()|//tr/td[1][@class="holdingslist"]/b/text()', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 
 	if (callNumber && callNumber.nodeValue) {
 		newItem.callNumber = callNumber.nodeValue;
@@ -185,7 +184,6 @@ function scrape(doc, url) {
 	newItem.libraryCatalog = "Library Catalog";
 
 	newItem.complete();
-	//Zotero.debug('hi');
 	return true;
 }
 
@@ -195,7 +193,6 @@ function doWeb(doc, url) {
 	var sirsiNew = true; //toggle between SIRSI -2003 and SIRSI 2003+
 	//Adapted to catch the hitlist page of Rice Catalog
 	var xpath = '/html/body/div[@class="columns_container"]/div[contains(@class, "left_column")]/div[@class="content_container"]/div[@class="content"]/form[@id="hitlist"]/ul[@class="hit_list"]/li/ul[starts-with(@class, "hit_list_row")]/li[@class="hit_list_item_info"]/dl';
-
 	if (doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		Zotero.debug("SIRSI doWeb: searchsum");
 		sirsiNew = true;
@@ -226,17 +223,18 @@ function doWeb(doc, url) {
 			var urls = new Array();
 			var availableItems = new Array();
 			//pull items
-			var tableRows = doc.evaluate('//ul[@class="hit_list"]/li/ul[contains(@class, "hit_list_row")][//input[@value="Details"]]', doc, null, XPathResult.ANY_TYPE, null);
-
+			var tableRows = doc.evaluate('//ul[@class="hit_list"]/li/ul[contains(@class, "hit_list_row")][//input[@value="Details" or @value="Detalles"]]', doc, null, XPathResult.ANY_TYPE, null);
+			Z.debug(ZU.xpath(doc, '//ul[@class="hit_list"]/li/ul[contains(@class, "hit_list_row")][//input[@value="Details" or @value="Detalles"]]').length)
 
 			// Go through table rows
 			while (tableRow = tableRows.iterateNext()) {
-				var input = doc.evaluate('.//input[@value="Details"]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext();
+				Z.debug("here")
+				var input = doc.evaluate('.//input[@value="Details" or @value="Detalles"]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext();
 
 				//var text = doc.evaluate('.//strong', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 				var text = doc.evaluate('.//dd[@class="title"]/a', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 				if (text) {
-					availableItems[input.name] = text;
+					availableItems[input.name] = text.trim();
 				}
 			} //END while
 			var items = Zotero.selectItems(availableItems);

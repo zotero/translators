@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-08-06 19:23:07"
+	"lastUpdated": "2012-09-24 18:16:10"
 }
 
 function createExcludes(url, excludeArr) {
@@ -138,8 +138,7 @@ function doWeb(doc, url) {
 				urls.push(i);
 			}
 
-			ZU.processDocuments(urls, function(doc) {
-				scrape(doc, doc.location.href);
+			ZU.processDocuments(urls, scrape, function() {
 			});
 		});
 	} else {

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-06 11:57:27"
+	"lastUpdated": "2012-10-07 14:06:56"
 }
 
 /*
@@ -93,7 +93,7 @@ function scrape(doc, url) {
 				}
 		}
 	}
-	var abstract = '//table[@class="product_info_text"]/tbody/tr/td/p[@class="description"]';
+	var abstract = '//table[@class="product_info_text"]/tbody/tr/td/div[@class="description"]';
 	var abstractObject = doc.evaluate(abstract, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (abstractObject){
 		abstractObject = abstractObject.textContent;

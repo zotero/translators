@@ -9,14 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-06-04 22:47:56"
+	"lastUpdated": "2012-08-28 16:26:18"
 }
 
 function detectWeb(doc, url) {
 	var suffixRe = new RegExp("https?://(?:www\.)?amazon\.([^/]+)/");
 	var suffixMatch = suffixRe.exec(url);
 	var suffix = suffixMatch[1];
-	var searchRe = new RegExp('^https?://(?:www\.)?amazon\.' + suffix + '/(gp/search/|exec/obidos/search-handle-url/|s/|s\\?|[^/]+/lm/|gp/richpub/)');
+	var searchRe = new RegExp('^https?://(?:www\.)?amazon\.' + suffix + '/(gp/search/|(gp/)?registry/(wishlist|registry)|exec/obidos/search-handle-url/|s/|s\\?|[^/]+/lm/|gp/richpub/)');
 	if(searchRe.test(doc.location.href)) {
 		return (Zotero.isBookmarklet ? "server" : "multiple");
 	} else {
@@ -53,7 +53,7 @@ function doWeb(doc, url) {
 	var suffixMatch = suffixRe.exec(url);
 	suffix = suffixMatch[1];
 
-	var searchRe = new RegExp('^https?://(?:www\.)?amazon\.' + suffix + '/(gp/search/|exec/obidos/search-handle-url/|s/|s\\?|[^/]+/lm/|gp/richpub/)');
+	var searchRe = new RegExp('^https?://(?:www\.)?amazon\.' + suffix + '/(gp/search/|(gp/)?registry/(wishlist|registry)|exec/obidos/search-handle-url/|s/|s\\?|[^/]+/lm/|gp/richpub/)');
 	var m = searchRe.exec(doc.location.href);
 	var uris = new Array();
 	if (suffix == "co.jp"){
@@ -69,7 +69,7 @@ function doWeb(doc, url) {
 		} else if (doc.location.href.match(/\/lm\//)) { // Show selector for Lists
 			var xpath = '//span[@id="lm_asinlink95"]//a'
 		} else { // Show selector for Search results
-			var xpath = '//div[@class="productTitle"]/a | //a[span[@class="srTitle"]] | //div[@class="title"]/a[@class="title"]| //h3[@class="title"]/a[@class="title"] | //h3[@class="newaps"]/a';
+			var xpath = '//div[@class="productTitle"]/a |//div[@id="init-container"]//span[@class="small productTitle"]//a | //div[@class="wedding"]//span[@class="small productTitle"]//a |//a[span[@class="srTitle"]] | //div[@class="title"]/a[@class="title"]| //h3[@class="title"]/a[@class="title"] | //h3[@class="newaps"]/a';
 		}
 		var elmts = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 		var elmt = elmts.iterateNext();
@@ -737,6 +737,11 @@ var testCases = [
 				"libraryCatalog": "Amazon.com"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.amazon.com/gp/registry/registry.html?ie=UTF8&id=1Q7ELHV59D7N&type=wishlist",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

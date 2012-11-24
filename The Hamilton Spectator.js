@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-05 03:14:39"
+	"lastUpdated": "2012-10-07 15:26:43"
 }
 
 function detectWeb(doc, url) {
@@ -23,12 +23,6 @@ function detectWeb(doc, url) {
 //Hamilton Spectator translator. code by Adam Crymble
 
 function scrape(doc, url) {
-
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;	
-	
 	var newItem = new Zotero.Item("newspaperArticle");
 
 	if (doc.title.match("TheSpec.com - ")) {
@@ -37,13 +31,13 @@ function scrape(doc, url) {
 	}
 
 	var xPathAbstract = '//span[@class="subhead1"][@id="ctl00_ContentPlaceHolder_article_NavWebPart_Article_ctl00___SubTitle1__"]';
-	if (doc.evaluate(xPathAbstract, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-		newItem.abstractNote = doc.evaluate(xPathAbstract, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	if (doc.evaluate(xPathAbstract, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		newItem.abstractNote = doc.evaluate(xPathAbstract, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	}
 	
 	var xPathAuthor1 = '//span[@class="articleAuthor"][@id="ctl00_ContentPlaceHolder_article_NavWebPart_Article_ctl00___Author1__"]';
-	if (doc.evaluate(xPathAuthor1, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-		var author1 = doc.evaluate(xPathAuthor1, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	if (doc.evaluate(xPathAuthor1, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		var author1 = doc.evaluate(xPathAuthor1, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		if (author1.match(", ")) {
 			author1 = author1.split(", ");
 			author1 = author1[0];
@@ -59,8 +53,8 @@ function scrape(doc, url) {
 	}
 	
 	var xPathAuthor2 = '//span[@class="td_page_author"]';
-	if (doc.evaluate(xPathAuthor2, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-		var author2 = doc.evaluate(xPathAuthor2, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	if (doc.evaluate(xPathAuthor2, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		var author2 = doc.evaluate(xPathAuthor2, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		if (author2.match(", ")) {
 			author2 = author2.split(", ");
 			author2 = author2[0];
@@ -69,10 +63,10 @@ function scrape(doc, url) {
 	}
 	
 	var xPathTitle = '//h1';
-	newItem.title = doc.evaluate(xPathTitle, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;	
+	newItem.title = doc.evaluate(xPathTitle, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;	
 
-	newItem.abstractNote = ZU.xpathText(doc, '//meta[@name="Description"]/@content');
-	newItem.date = ZU.xpathText(doc, '//span[contains(@class,"ts-publishdate")]');
+	newItem.abstractNote = ZU.xpathText(doc, '//meta[@name="description"]/@content');
+	newItem.date = ZU.xpathText(doc, '//span[contains(@class,"td_page_date")]');
 
 	newItem.url = doc.location.href;
 	newItem.publicationTitle = "The Hamilton Spectator";
@@ -81,15 +75,11 @@ function scrape(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
+
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		
-		var titles = doc.evaluate('//span[@class="td_tsr_title"]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//span[@class="td_tsr_title"]/a', doc, null, XPathResult.ANY_TYPE, null);
 		
 		var next_title;
 		while (next_title = titles.iterateNext()) {
@@ -127,8 +117,8 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"title": "Expert calls Occupy demos most important in generations",
-				"abstractNote": "The Occupy protest is the most important democratic social movement of the last two generations and demonstrators who have taken over parks and other",
-				"date": "Wed Nov 16 2011",
+				"abstractNote": "The Occupy protest is the most important democratic social movement of the last two generations and demonstrators who have taken over parks and other...",
+				"date": "Wed Nov 16 2011 21:54:00",
 				"url": "http://www.thespec.com/news/ontario/article/626278--expert-calls-occupy-demos-most-important-in-generations",
 				"publicationTitle": "The Hamilton Spectator",
 				"libraryCatalog": "The Hamilton Spectator",

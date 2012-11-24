@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-24 00:53:59"
+	"lastUpdated": "2012-09-24 18:24:30"
 }
 
 function detectWeb(doc, url) {
@@ -27,17 +27,17 @@ function scrape(doc, url) {
 
 	var date = ZU.xpathText(doc, '//div[@class="tdShareTools"]/text()');
 	if(date) {
-		newItem.date = date.replace(/Published on/,'').trim();
+		newItem.date = date.replace(/Published on/,'').replace(/[,\n\t\s]*$/, "").trim();
 	}
 	
 	newItem.abstractNote = ZU.xpathText(doc, '//meta[@property="og:description"]');
-    var comma = false;
+	var comma = false;
 	var authorNode = ZU.xpathText(doc, '//div[@class="td-author"]/strong');
 	if (authorNode) authorNode = authorNode.split(/\s*,\s*/);
 	var authorNode2 =ZU.xpathText(doc, '//span[@class="columnistLabel"]/a');
 	if (authorNode2) {
-		authorNode = authorNode2.split(/\s*;\s*/);
-		 comma = true;}
+		authorNode = authorNode2.split(/\s*[;,]\s*/);
+		 comma = false;}
 	var author;
 	for(var i=0, n=authorNode.length; i<n; i++) {
 		author = authorNode[i];
@@ -93,7 +93,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"date": "Tuesday January 26, 2010\n\t,",
+				"date": "Tuesday January 26, 2010",
 				"title": "France should ban Muslim veils, commission says",
 				"url": "http://www.thestar.com/news/world/article/755917--france-should-ban-muslim-veils-commission-says?bn=1",
 				"publicationTitle": "The Toronto Star",
@@ -125,7 +125,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"date": "Friday July 29, 2011\n\t,",
+				"date": "Friday July 29, 2011",
 				"title": "Hamilton: Ontario should reconsider offshore wind",
 				"url": "http://www.thestar.com/business/cleanbreak/article/1031551--hamilton-ontario-should-reconsider-offshore-wind",
 				"publicationTitle": "The Toronto Star",
@@ -163,7 +163,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"date": "Tuesday July 03, 2012\n\t,",
+				"date": "Tuesday July 03, 2012",
 				"title": "Bev Oda resigns as International Co-operation minister, Conservative MP for Durham",
 				"url": "http://www.thestar.com/news/canada/article/1221066--bev-oda-resigns-as-international-co-operation-minister-conservative-mp-for-durham",
 				"publicationTitle": "The Toronto Star",

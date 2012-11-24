@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-17 02:30:36"
+	"lastUpdated": "2012-09-24 18:32:27"
 }
 
 function scrape(doc) {
@@ -100,7 +100,7 @@ var testCases = [
 				"title": "Authenticating Identity: The Quest for Personal Validation through Authenticity in Music",
 				"publicationTitle": "Vanderbilt Undergraduate Research Journal",
 				"rights": "Copyright for articles published in this journal is retained by the authors, with first publication rights granted to Vanderbilt Undergraduate Research Journal. By virtue of their appearance in this open access journal, articles are available for wide dissemination at no cost to readers, with proper attribution, in educational and other non-commercial settings. For undergraduates jointly authoring a manuscript with a faculty member, we strongly encourage the student to discuss with the faculty mentor and the Editor if the copyright policy will constrain future publication efforts in professional journals.",
-				"date": "05/08/2011",
+				"date": "2011/08/05",
 				"reportType": "Text.Serial.Journal",
 				"letterType": "Text.Serial.Journal",
 				"manuscriptType": "Text.Serial.Journal",
@@ -113,11 +113,11 @@ var testCases = [
 				"language": "en",
 				"volume": "7",
 				"issue": "0",
+				"abstractNote": "“Music City, U.S.A.” celebrates many cultures and music, but often Nashville is identified with singing cowboys with southern drawls. Some are quick to call this country-western image “inauthentic,” pointing out that middle Tennessee’s forested hills were never home to cattle ranches or Gene Autry. Indeed, the labels of “authentic” or “inauthentic” have become widely used in contemporary society to denote whether a thing is essentially true or untrue. In his evaluation of the 1960s music “myth” in which folk music was deemed authentic and pop music inauthentic, sociologist Simon Frith argues that the central issue was less about the music itself and more about the communication of a person’s identity through that music. An examination of the concept of authenticity as it has evolved through history and presented itself in recent scholarship and a survey of Nashville residents and college students reveal that the quest for authenticity in tourism and consumerism is closely linked to the construction of identity. While the concept of authenticity is demonstrably problematic, it retains its power because it provides a framework against which individuals can define themselves in an increasingly global world. The quest for authenticity in music, then, becomes a quest for truth about oneself for which there is no objective answer. Authenticity is fundamentally a question of perspective. Who can say whether Nashville is authentic or not? All that can be said is simply that Nashville is.",
 				"url": "http://ejournals.library.vanderbilt.edu/ojs/index.php/vurj/article/view/2931",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "ejournals.library.vanderbilt.edu",
-				"shortTitle": "Authenticating Identity",
-				"abstractNote": "“Music City, U.S.A.” celebrates many cultures and music, but often Nashville is identified with singing cowboys with southern drawls. Some are quick to call this country-western image “inauthentic,” pointing out that middle Tennessee’s forested hills were never home to cattle ranches or Gene Autry. Indeed, the labels of “authentic” or “inauthentic” have become widely used in contemporary society to denote whether a thing is essentially true or untrue. In his evaluation of the 1960s music “myth” in which folk music was deemed authentic and pop music inauthentic, sociologist Simon Frith argues that the central issue was less about the music itself and more about the communication of a person’s identity through that music. An examination of the concept of authenticity as it has evolved through history and presented itself in recent scholarship and a survey of Nashville residents and college students reveal that the quest for authenticity in tourism and consumerism is closely linked to the construction of identity. While the concept of authenticity is demonstrably problematic, it retains its power because it provides a framework against which individuals can define themselves in an increasingly global world. The quest for authenticity in music, then, becomes a quest for truth about oneself for which there is no objective answer. Authenticity is fundamentally a question of perspective. Who can say whether Nashville is authentic or not? All that can be said is simply that Nashville is."
+				"shortTitle": "Authenticating Identity"
 			}
 		]
 	},
@@ -147,15 +147,25 @@ var testCases = [
 					}
 				],
 				"itemID": "http://ejournals.library.vanderbilt.edu/ojs/index.php/lusohispanic/article/view/3283/1518",
+				"title": "¿Qué hay antes y después de la escritura?",
+				"publicationTitle": "Vanderbilt e-Journal of Luso-Hispanic Studies",
+				"date": "2011/10/20",
+				"reportType": "Text.Serial.Journal",
+				"letterType": "Text.Serial.Journal",
+				"manuscriptType": "Text.Serial.Journal",
+				"mapType": "Text.Serial.Journal",
+				"thesisType": "Text.Serial.Journal",
+				"websiteType": "Text.Serial.Journal",
+				"presentationType": "Text.Serial.Journal",
+				"postType": "Text.Serial.Journal",
+				"audioFileType": "Text.Serial.Journal",
 				"language": "en",
+				"volume": "7",
 				"issue": "0",
 				"ISSN": "1547-5743",
 				"url": "http://ejournals.library.vanderbilt.edu/ojs/index.php/lusohispanic/article/view/3283",
-				"libraryCatalog": "ejournals.library.vanderbilt.edu",
-				"title": "¿Qué hay antes y después de la escritura?",
-				"publicationTitle": "Vanderbilt e-Journal of Luso-Hispanic Studies",
-				"date": "20/10/2011",
-				"volume": "7"
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "ejournals.library.vanderbilt.edu"
 			}
 		]
 	},
@@ -187,7 +197,7 @@ var testCases = [
 				"itemID": "http://ejournals.library.vanderbilt.edu/ojs/index.php/homiletic/article/view/3460",
 				"title": "Rhetorical Influences upon the Preaching of Jonathan Edwards",
 				"publicationTitle": "Homiletic",
-				"date": "01/12/2011",
+				"date": "2011/12/01",
 				"reportType": "Text.Serial.Journal",
 				"letterType": "Text.Serial.Journal",
 				"manuscriptType": "Text.Serial.Journal",
@@ -200,11 +210,11 @@ var testCases = [
 				"language": "en",
 				"volume": "36",
 				"issue": "2",
+				"abstractNote": "Much has been written concerning the New England Puritan Jonathan Edwards, addressing his multifaceted activities as a theologian, preacher, revivalist, pastor, polemicist and missionary. In particular this study focuses upon the rhetorical influences that shaped his preaching ministry: his personal faith experiences, the preaching of his father and grandfather, the Puritan preaching tradition, and the rhetoric of Peter Ramus. While he preached within the sometimes narrow constraints of his New England Puritan tradition, Edwards nonetheless found some freedom to experiment with the classic inherited Puritan tripartite sermon form. Although he never truly departed from this sermon format, his attempts at innovation within his tradition serves as a model for preachers today. Such a legacy may well inspire preachers operating within the confines of hermeneutical or denominational tradition, but who seek to reconfigure elements of their inherited preaching influences.",
 				"ISSN": "2152-6923",
 				"url": "http://ejournals.library.vanderbilt.edu/ojs/index.php/homiletic/article/view/3460",
 				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "ejournals.library.vanderbilt.edu",
-				"abstractNote": "Much has been written concerning the New England Puritan Jonathan Edwards, addressing his multifaceted activities as a theologian, preacher, revivalist, pastor, polemicist and missionary. In particular this study focuses upon the rhetorical influences that shaped his preaching ministry: his personal faith experiences, the preaching of his father and grandfather, the Puritan preaching tradition, and the rhetoric of Peter Ramus. While he preached within the sometimes narrow constraints of his New England Puritan tradition, Edwards nonetheless found some freedom to experiment with the classic inherited Puritan tripartite sermon form. Although he never truly departed from this sermon format, his attempts at innovation within his tradition serves as a model for preachers today. Such a legacy may well inspire preachers operating within the confines of hermeneutical or denominational tradition, but who seek to reconfigure elements of their inherited preaching influences."
+				"libraryCatalog": "ejournals.library.vanderbilt.edu"
 			}
 		]
 	},
@@ -237,7 +247,7 @@ var testCases = [
 				"title": "Canadian Literature in the Early Twenty-First Century: The Emergence of an Inter-American Perspective",
 				"publicationTitle": "AmeriQuests",
 				"rights": "We ask that all submissions be original to AmeriQuests, although exceptions can be made by the editor. All authors retain copyright, and are permitted to publish their work after it appears in AmeriQuests, although we ask that AmeriQuests be referenced in subsequent editions.",
-				"date": "28/07/2011",
+				"date": "2011/07/28",
 				"reportType": "Text.Serial.Journal",
 				"letterType": "Text.Serial.Journal",
 				"manuscriptType": "Text.Serial.Journal",
@@ -266,17 +276,17 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://ejournals.library.vanderbilt.edu/ojs/index.php/lusohispanic/search/results?query=hay",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "http://ejournals.library.vanderbilt.edu/ojs/index.php/homiletic/search/results?query=dialogue",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "http://ejournals.library.vanderbilt.edu/ojs/index.php/ameriquests/search/advancedResults?query=americas",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://ejournals.library.vanderbilt.edu/ojs/index.php/lusohispanic/search/results?query=Lope+de+Vega&searchField=",
 		"items": "multiple"
 	}
 ]

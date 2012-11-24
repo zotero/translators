@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-13 15:35:32"
+	"lastUpdated": "2012-10-14 22:38:40"
 }
 
 function detectWeb(doc, url) {
@@ -22,10 +22,6 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
@@ -36,8 +32,8 @@ function doWeb(doc, url) {
 			var titlex = '//div[@class="contentList"]/dl/dt[@class="articleTitleInAbstract"]';
 			var linkx = '//div[@class="contentList"]/dl/dd/a[contains(text(), "Abstract")]'
 		}
-		var titles = doc.evaluate(titlex, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var links = doc.evaluate(linkx, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate(titlex, doc, null, XPathResult.ANY_TYPE, null);
+		var links = doc.evaluate(linkx, doc, null, XPathResult.ANY_TYPE, null);
 		var title, link;
 		while ((title = titles.iterateNext()) && (link = links.iterateNext())) {
 			items[link.href] = Zotero.Utilities.trimInternal(title.textContent);
@@ -60,7 +56,7 @@ function doWeb(doc, url) {
 	function scrape(doc, url){
 		var item = new Zotero.Item("journalArticle");
 		item.publicationTitle = doc.title;
-		item.ISSN = ZU.xpathText(doc, '//span[@class="journalISSN"]').match(/\(e\)\s+ISSN:?\s+(.*)\(p\)/)[1];
+		item.ISSN = ZU.xpathText(doc, '//span[@class="journalISSN"]').replace(/(ISSN:?|\(print\))/g, "").replace(/\(online\)\s*/, ", ").trim();
 		item.title = Zotero.Utilities.trimInternal(ZU.xpathText(doc, '//p[@class="articleTitle"]'));
 		item.url = doc.location.href.replace(/\.html.+/, ".html");
 		var data = Zotero.Utilities.trimInternal(ZU.xpathText(doc, '//p[span[@class="bibDataTag"]][1]'));
@@ -136,7 +132,7 @@ var testCases = [
 					}
 				],
 				"publicationTitle": "Journal of the American Mathematical Society",
-				"ISSN": "0894-0347",
+				"ISSN": "1088-6834, 0894-0347",
 				"title": "Equivalences between fusion systems of finite groups of Lie type",
 				"url": "http://www.ams.org/journals/jams/2012-25-01/S0894-0347-2011-00713-3/home.html",
 				"journalAbbreviation": "J. Amer. Math. Soc.",

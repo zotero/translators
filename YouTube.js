@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-02-23 16:47:56"
+	"lastUpdated": "2012-10-22 16:49:38"
 }
 
 function detectWeb(doc, url){
@@ -25,7 +25,7 @@ function detectWeb(doc, url){
 		return "multiple";
 	}
 	//playlists
-	if ( ZU.xpath(doc, '//a[contains(@class,"video-tile") and contains(@href,"/watch?")][descendant::span[starts-with(@class,"title")]]').length ){	
+	if ( ZU.xpath(doc, '//a[contains(@class,"tile-link") and contains(@href,"/watch?")][descendant::span[starts-with(@class,"title")]]').length ){	
 		return "multiple";
 	}
 	// still used?
@@ -52,7 +52,7 @@ function doWeb(doc, url){
 		var elmts = ZU.xpath(doc, '//div[@class="result-item-main-content"]//a[contains(@href, "/watch?v=")]')
 		if (!elmts.length) {
 			//playlists
-			elmts = ZU.xpath(doc, '//a[contains(@class,"video-tile") and contains(@href,"/watch?")][descendant::span[starts-with(@class,"title")]]');
+			elmts = ZU.xpath(doc, '//a[contains(@class,"tile-link") and contains(@href,"/watch?")][descendant::span[starts-with(@class,"title")]]');
 			if( !elmts ) {
 				// still used?
 				elmts = ZU.xpath(doc, '//div[@class="vltitle"]/div[@class="vlshortTitle"]/a[contains(@href, "/watch?v=")]');
@@ -163,24 +163,7 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [
-					"Reference",
-					"Research",
-					"Mozilia",
-					"Zotero",
-					"Center",
-					"for",
-					"History",
-					"and",
-					"New",
-					"Media",
-					"George",
-					"Mason",
-					"University",
-					"Web",
-					"2.0",
-					"bibliography"
-				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
 				"title": "Zotero Intro",

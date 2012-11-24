@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-08-19 22:48:04"
+	"lastUpdated": "2012-11-24 07:33:08"
 }
 
 /*
@@ -66,8 +66,8 @@ function scrapeBook(doc, url, pdfUrl) {
 	if( !title ) return false;
 
 	var newItem = new Zotero.Item('book');
-	newItem.title = ZU.capitalizeTitle(title.textContent);
-
+	newItem.title = ZU.capitalizeTitle(title.textContent, true);
+	
 	var data = ZU.xpath(doc, '//div[@id="metaData"]/p');
 	var dataRe = /^(.+?):\s*(.+?)\s*$/;
 	var match;
@@ -211,7 +211,12 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 					ZU.cleanAuthor( getAuthorName(editors[i].textContent),
 										'editor',false) );
 			}
-
+			
+			//title
+			if(item.title && item.title.toUpperCase() == item.title) {
+				item.title = ZU.capitalizeTitle(item.title, true);
+			}
+			
 			//tags
 			if(!item.tags.length) {
 				var keywords = ZU.xpathText(doc,
@@ -292,8 +297,11 @@ function addPDFAndComplete(item, doc, pdfUrl) {
 				ZU.doGet(u, function(text) {
 					var m = text.match(/<iframe id="pdfDocument"[^>]+?src="([^"]+)"/i);
 					if(m) {
-						Z.debug(m[1]);
-						item.attachments.push({url: m[1], title: 'Full Text PDF', mimeType: 'application/pdf'});
+						m[1] = ZU.unescapeHTML(m[1]);
+						Z.debug('PDF url: ' + m[1]);
+						item.attachments.push({url: m[1],
+							title: 'Full Text PDF',
+							mimeType: 'application/pdf'});
 					} else {
 						Z.debug('Could not determine PDF URL.');
 						m = text.match(/<iframe[^>]*>/i);
@@ -1036,8 +1044,59 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://onlinelibrary.wiley.com/search-web/cochrane/mainSearch?uuid=a64d3e12-92c6-413c-8064-3aa95d6f7f9c&searchKey=a64d3e12-92c6-413c-8064-3aa95d6f7f9c&clearHistory=&mode=startsearch&products=all&Query5=&Query4=&FromYear=&Query3=&Query2=&Query1=alcohol+health+promotion&ToYear=&zones5=tables&zones4=abstract&zones3=author&zones2=article-title&zones1=%28article-title%2Cabstract%2Ckeywords%29&opt4=AND&opt3=AND&opt2=AND&unitstatus=none&opt1=OR&",
-		"items": "multiple"
+		"url": "http://onlinelibrary.wiley.com/doi/10.1002/(SICI)1521-3773(20000103)39:1%3C165::AID-ANIE165%3E3.0.CO;2-B/abstract",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Manfred T.",
+						"lastName": "Reetz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Elke",
+						"lastName": "Westermann",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"C−C coupling",
+					"colloids",
+					"palladium",
+					"transmission electron microscopy"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"title": "Phosphane-Free Palladium-Catalyzed Coupling Reactions: The Decisive Role of Pd Nanoparticles",
+				"publicationTitle": "Angewandte Chemie International Edition",
+				"volume": "39",
+				"issue": "1",
+				"publisher": "WILEY-VCH Verlag GmbH",
+				"ISSN": "1521-3773",
+				"url": "http://onlinelibrary.wiley.com/doi/10.1002/(SICI)1521-3773(20000103)39:1<165::AID-ANIE165>3.0.CO;2-B/abstract",
+				"DOI": "10.1002/(SICI)1521-3773(20000103)39:1<165::AID-ANIE165>3.0.CO;2-B",
+				"pages": "165–168",
+				"date": "2000",
+				"abstractNote": "Nanosized palladium colloids, generated in situ by reduction of PdII to Pd0 [Eq. (a)], are involved in the catalysis of phosphane-free Heck and Suzuki reactions with simple palladium salts such as PdCl2 or Pd(OAc)2, as demonstrated by transmission electron microscopic investigations.",
+				"bookTitle": "Angewandte Chemie International Edition",
+				"language": "en",
+				"rights": "© 2000 WILEY-VCH Verlag GmbH, Weinheim, Fed. Rep. of Germany",
+				"libraryCatalog": "Wiley Online Library",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Phosphane-Free Palladium-Catalyzed Coupling Reactions"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

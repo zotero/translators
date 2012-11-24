@@ -9,8 +9,17 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-08-14 19:51:41"
+	"lastUpdated": "2012-09-26 00:53:41"
 }
+
+/*Spanish Libraries:
+No Permalinks, so no tests
+Biblioteca Nacional (Spanish National Library): http://catalogo.bne.es/uhtbin/webcat
+Universidad Carlos III de madrid: http://www.uc3m.es/portal/page/portal/library
+Universidad Autonoma de Madrid: http://biblos.uam.es/uhtbin/webcat
+UNED: http://biblio15.uned.es/
+*/
+
 
 function detectWeb(doc, url) {
 
@@ -46,17 +55,15 @@ function detectWeb(doc, url) {
 }
 
 function scrape(doc) {
-
 	var xpath = '//tr[th[@class="viewmarctags"]][td[@class="viewmarctags"]]';
 	var elmts = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 	var elmt = elmts.iterateNext();
 	if(!elmt) {
 		return false;
 	}
-
 	var newItem = new Zotero.Item("book");
 	newItem.extra = "";
-	
+	var note;
 	authors = [];
 	while(elmt) {
 		try {
@@ -66,15 +73,19 @@ function scrape(doc) {
 			}
 			
 			if(node) {
-				var casedField = Zotero.Utilities.superCleanString(doc.evaluate('./TH[1]/text()[1]', elmt, null, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
+				var casedField = Zotero.Utilities.superCleanString(ZU.xpathText(elmt, './th[1]/text()'));
+				
 				field = casedField.toLowerCase();
- 				field = field.replace(/:./,"");
+				//Z.debug(field)
+ 				field = field.replace(/:./,"").trim();
 				var value = Zotero.Utilities.superCleanString(node.nodeValue);
+				//Z.debug(value)
 				if(field == "publisher" || field == "éditeur" ) {
 					newItem.publisher = value;
-				} else if(field == "physical descrip" || field == "description physique" ) {
-					newItem.physicaldescription = value;
-				} else if(field == "pub date" || field == "année") {
+				} else if(field == "physical description" || field == "description physique" ||field== "descripción física" ||field== "descripcion fisica" || field == "descr. física") {
+					value = value.match(/([\d\sxvi]+)p/)[1];
+					if (value) newItem.numPages = value;
+				} else if(field == "pub date" || field == "année" || field =="fecha de pub") {
 					var re = /[0-9]+/;
 					var m = re.exec(value);
 					newItem.date = m[0];
@@ -84,30 +95,42 @@ function scrape(doc) {
 					newItem.ISBN = m[0];
 				} else if(field == "issn") {
 					newItem.ISSN = value;
-				} else if(field == "title" || field == "titre") {
+				} else if(field == "title" || field == "titre" ||field == "titulo" || field =="título") {
 					var titleParts = value.split(" / ");
 					newItem.title = Zotero.Utilities.capitalizeTitle(titleParts[0]);
+				} else if (field == "serie"){
+					newItem.series = value;	
 				} else if(field == "series title" || field == "titre de série" || field == "collection") {
-					newItem.seriestitle = value.substr(1, value.length-2);
-				} else if(field == "publication info" || field == "publication") {
-					var pubParts = value.split(" : ");
-					newItem.place = pubParts[0];
-					if (pubParts[1].match(/\d+/)) {
-						newItem.date = pubParts[1].match(/\d+/)[0];
-						newItem.publisher = pubParts[1].match(/(.*),/)[1];
+					newItem.series = value.substr(1, value.length-2);
+				} else if(field == "publication info" || field == "publication" || field =="publicación" ||field =="publicacion") {
+				//this is a bit tricky - can be in the form Place : Publisher; Place : Publisher, Year
+				//or Place; Place : Publisher - the code` should get all cases and produce uniform output
+				var places = [];
+					var publishers = [];
+					var pubParts = value.split(/\s*;\s*/);
+					for (var i in pubParts){
+						var pubPart = pubParts[i].split(/\s*:\s*/);
+						places.push(pubPart[0]);
+					 	if (pubPart[1]){
+					 	if (pubPart[1].match(/\d+/)) newItem.date = pubPart[1].match(/\d+/)[0];
+						publishers.push(pubPart[1].match(/[^,]+/)[0])
+					 	}
 					}
+					newItem.publisher = publishers.join("; ");
+					newItem.place = places.join("; ");
 				} else if(field == "personal author" || field == "autor personal" || field == "auteur") {
 					if(authors.indexOf(value) == -1) {
 						value = value.replace(/(\(|\)|\d+|\-)/g, "");
 						newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "author", true));
 						authors.push(value);
 					}
-				} else if(field == "author" || field == "auteur"){
+				} else if(field == "author" || field == "auteur" || field == "autor"){
 					if(authors.indexOf(value) == -1) { 
+							value = value.replace(/(\(|\)|\d+|\-)/g, "");
 						newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "author", true));
 						authors.push(value);
 					}
-				} else if(field == "added author" || field == "organisme") {
+				} else if(field == "added author" || field == "organisme" || field == "autor secundario") {
 					if(authors.indexOf(value) == -1) {
 						newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "contributor", true));
 						authors.push(value);
@@ -117,36 +140,32 @@ function scrape(doc) {
 						newItem.creators.push({lastName:value, fieldMode:true});
 						authors.push(value);
 					}
-				} else if(field == "general note" || field == "note") {
-					newItem.generalnote = value;
-				} else if(field == "edition" || field == "édition") {
+				} else if(field == "general note" || field == "note" || field =="nota general") {
+					newItem.notes.push(value);
+				} else if(field == "edition" || field == "édition" ||field =="edición" ||field =="edicion") {
 					newItem.edition = value;
 				} else if(field == "additional formats" || field == "autres supports") {
 					newItem.additionalformats = value;
 				} else if(field == "continued by" || field == "devient") {
 					newItem.continuedby = value;
-				} else if(field == "subject term" || field == "corporate subject" || field == "geographic term" || field == "subject" || field == "sujet" || field == "sujet géographique") {
+				} else if(field == "subject term" || field == "corporate subject" || field == "geographic term" || field == "subject" || field == "sujet" || field == "sujet géographique" || field == "materia-autor personal" || field == "materia") {
 					var subjects = value.split("--");
 					for(var i=0; i<subjects.length; i++) {
 						if(newItem.tags.indexOf(subjects[i]) == -1) {
 							newItem.tags.push(subjects[i]);
 						}
 					}
-				} else if(field == "personal subject" || field == " personne sujet") {
+				} else if(field == "personal subject" || field == "personne sujet" || field== "index term") {
 					var subjects = value.split(", ");
 					var tag = value[0]+", "+value[1];
 					if(newItems.tag.indexOf(tag) == -1) {
 						newItem.tags.push(tag);
 					}
 				} else if(field == "contents" || field == "contient") {
-					var contents = value.split("--");
-					for(var i=0; i<contents.length; i++) {
-						if(newItem.tags.indexOf(contents[i]) == -1) {
-							newItem.tags.push(contents[i]);
-						}
-					}
+						newItem.notes.push(value);
 				} else if(value && field != "http") {
-					newItem.extra += casedField+": "+value+"\n";
+					if (note)	note += casedField+": "+value+"\n";
+					else note = casedField+": "+value+"\n";
 				}
 			}
 		} catch (e) {}
@@ -154,8 +173,8 @@ function scrape(doc) {
 		elmt = elmts.iterateNext();
 	}
 	
-	if(newItem.extra) {
-		newItem.extra = newItem.extra.substr(0, newItem.extra.length-1);
+	if(note) {
+		newItem.notes.push(note);
 	}
 
 	var callNumber = doc.evaluate('//tr/td[1][@class="holdingslist"]/text()', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
@@ -206,8 +225,9 @@ function doWeb(doc, url){
 	
 	if (sirsiNew) { //executes Simon's SIRSI 2003+ scraper code
 		Zotero.debug("Running SIRSI 2003+ code");
+	
 		if(!scrape(doc)) {
-			
+				
 			var checkboxes = new Array();
 			var urls = new Array();
 			var availableItems = new Array();			
@@ -249,6 +269,7 @@ function doWeb(doc, url){
 			for(var i in items) {
 				uris.push(baseUrl+"&"+i+"=Details");
 			}
+		
 			Zotero.Utilities.processDocuments(uris, function(doc) { scrape(doc); },
 				function() { Zotero.done(); }, null);
 			Zotero.wait();
@@ -376,32 +397,20 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Bloomsbury / Andrew McNeillie ",
-					" Virginia Woolf's early novels : finding a voice / Suzanne Raitt ",
-					" From Mrs. Dalloway to The waves : new elegy and lyric experimentalism / Jane Goldman ",
-					" The novels of the 1930s and the impact of history / Julia Briggs ",
-					" Virginia Woolf's essays / Hermione Lee ",
-					" Virginia Woolf, modernism and modernity / Michael H. Whitworth ",
-					" The socio-political vision of the novels / David Bradshaw ",
-					" Woolf's feminism and feminism's Woolf / Laura Marcus ",
-					" Virginia Woolf and sexuality / Patricia Morgne Cramer ",
-					" Virginia Woolf, empire and race / Helen Carr ",
-					" Virginia Woolf and visual culture / Maggie Humm ",
-					" Virginia Woolf and the public sphere / Melba Cuddy-Keane"
+				"notes": [
+					"Index",
+					"Bloomsbury / Andrew McNeillie -- Virginia Woolf's early novels : finding a voice / Suzanne Raitt -- From Mrs. Dalloway to The waves : new elegy and lyric experimentalism / Jane Goldman -- The novels of the 1930s and the impact of history / Julia Briggs -- Virginia Woolf's essays / Hermione Lee -- Virginia Woolf, modernism and modernity / Michael H. Whitworth -- The socio-political vision of the novels / David Bradshaw -- Woolf's feminism and feminism's Woolf / Laura Marcus -- Virginia Woolf and sexuality / Patricia Morgne Cramer -- Virginia Woolf, empire and race / Helen Carr -- Virginia Woolf and visual culture / Maggie Humm -- Virginia Woolf and the public sphere / Melba Cuddy-Keane"
 				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"extra": "Personne sujet: Woolf, Virginia, 1882-1941--Criticism and interpretation",
 				"title": "The Cambridge companion to Virginia Woolf",
 				"edition": "2nd ed",
-				"place": "Cambridge, UK ; New York",
 				"date": "2010",
 				"publisher": "Cambridge University Press",
-				"physicaldescription": "xxi, 272 p. ; 24 cm",
-				"seriestitle": "Cambridge companions to literature",
-				"generalnote": "Index",
+				"place": "Cambridge, UK; New York",
+				"numPages": "272",
+				"series": "Cambridge companions to literature",
 				"ISBN": "0521896940",
 				"libraryCatalog": "www.cible.ulb.ac.be Library Catalog"
 			}
@@ -409,7 +418,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://main.library.utoronto.ca/webcat/goto_catalogue_url.cfm?where=ckey&what=7990078",
+		"url": "http://toroprod.library.utoronto.ca/uhtbin/cgisirsi/x/x/0/123?searchdata1=7990078&srchfield1=CKEY^SUBJECT^GENERAL^^words+or+phrase&searchoper1=AND&thesaurus1=GENERAL&search_entries1=CKEY&search_type1=SUBJECT&special_proc1=&CFID=756596&CFTOKEN=78921104",
 		"items": [
 			{
 				"itemType": "book",
@@ -425,40 +434,19 @@ var testCases = [
 						"creatorType": "contributor"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"1. An introduction to twenty-first century Latin America ",
-					" 2. Early history ",
-					" 3. Democracy and dictators: a historical overview from independence to the present day ",
-					" 4. The other Americans ",
-					" 5. Society, family, and gender ",
-					" 6. Religion in Latin America ",
-					" 7. The political economy of Latin America ",
-					" 8. Democracy and authoritarianism: Latin American political culture ",
-					" 9. Politics, power, institutions, and actors ",
-					" 10. Struggling for change: revolution, social and political movements in Latin America ",
-					" 11. U.S.-Latin American relations ",
-					" 12. Guatemala / Susanne Jonas ",
-					" 13. Mexico / Nora Hamilton ",
-					" 14. Cuba / Gary Prevost ",
-					" 15. Brazil / Wilber Albert Chaffee ",
-					" 16. Argentina / Aldo C. Vacs ",
-					" 17. Chile / Eduardo Silva ",
-					" 18. Venezuela / Daniel Hellinger ",
-					" 19. Colombia / John C. Dugas ",
-					" 20. Nicaragua / Gary Prevost and Harry E. Vanden ",
-					" 21. Bolivia / Waltraud Q. Morales ",
-					" Appendix 1: Presidential elections ",
-					" Appendix 2: Recent Legislative elections"
+				"notes": [
+					"1. An introduction to twenty-first century Latin America -- 2. Early history -- 3. Democracy and dictators: a historical overview from independence to the present day -- 4. The other Americans -- 5. Society, family, and gender -- 6. Religion in Latin America -- 7. The political economy of Latin America -- 8. Democracy and authoritarianism: Latin American political culture -- 9. Politics, power, institutions, and actors -- 10. Struggling for change: revolution, social and political movements in Latin America -- 11. U.S.-Latin American relations -- 12. Guatemala / Susanne Jonas -- 13. Mexico / Nora Hamilton -- 14. Cuba / Gary Prevost -- 15. Brazil / Wilber Albert Chaffee -- 16. Argentina / Aldo C. Vacs -- 17. Chile / Eduardo Silva -- 18. Venezuela / Daniel Hellinger -- 19. Colombia / John C. Dugas -- 20. Nicaragua / Gary Prevost and Harry E. Vanden -- 21. Bolivia / Waltraud Q. Morales -- Appendix 1: Presidential elections -- Appendix 2: Recent Legislative elections",
+					"Subject, geographic: Latin America--Politics and government\nBibliography note: Includes bibliographical references and index\nkey: 7990078\n"
 				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"extra": "Physical description: xxi, 633 p. : ill., maps ; 24 cm\nSubject, geographic: Latin America--Politics and government\nBibliography note: Includes bibliographical references and index\nkey: 7990078",
 				"title": "Politics of Latin America: the power game",
 				"edition": "4th ed",
-				"place": "New York",
 				"date": "2012",
 				"publisher": "Oxford University Press",
+				"place": "New York",
+				"numPages": "633",
 				"ISBN": "0199797145",
 				"callNumber": "JL960 .V36 2012X",
 				"libraryCatalog": "toroprod.library.utoronto.ca Library Catalog",

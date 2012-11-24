@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-07-21 22:55:01"
+	"lastUpdated": "2012-11-01 08:10:06"
 }
 
 /*
@@ -45,9 +45,7 @@ var detectWeb = function (doc, url) {
 	if (url.indexOf('/scholar_case?') != -1 &&
 		url.indexOf('about=') == -1) {
 			return "case";
-	} else if( ZU.xpath(doc,
-		'//div[@class="gs_r"]//div[@class="gs_fl"]/a[contains(@href,"q=related:")]')
-		.length ) {
+	} else if( getViableResults(doc).length ) {
 		return "multiple";
 	}
 }
@@ -130,7 +128,7 @@ function decrementCounter(doc) {
 
 //determine item type from a result node
 function determineType(result) {
-	var titleHref =  ZU.xpathText(result, './h3[@class="gs_rt"]/a[1]/@href');
+	var titleHref =  ZU.xpathText(result, './/h3[@class="gs_rt"]/a[1]/@href');
 
 	if(titleHref) {
 		if(titleHref.indexOf('/scholar_case?') != -1) {
@@ -188,6 +186,11 @@ getAttachment.mimeTypes = {
  * Scraper functions *
  *********************/
 
+function getViableResults(doc) {
+ return ZU.xpath(doc, '//div[@class="gs_r"]\
+				[.//div[@class="gs_fl"]/a[contains(@href,"q=info:") or contains(@href,"q=related:")]]');
+}
+
 function scrapeArticleResults(doc, articles) {
 	for(var i=0, n=articles.length; i<n; i++) {
 		//using closure so we can link a doGet response to a PDF url
@@ -199,6 +202,14 @@ function scrapeArticleResults(doc, articles) {
 					translator.setString(text);
 	
 					translator.setHandler('itemDone', function(obj, item) {
+						if(item.creators.length) {
+							var lastCreatorIndex = item.creators.length-1,
+								lastCreator = item.creators[lastCreatorIndex];
+							if(lastCreator.lastName === "others" && lastCreator.firstName === "") {
+								item.creators.splice(lastCreatorIndex, 1);
+							}
+						}
+						
 						//clean author names
 						for(var j=0, m=item.creators.length; j<m; j++) {
 							if(!item.creators[j].firstName) continue;
@@ -238,7 +249,7 @@ function scrapeArticleResults(doc, articles) {
 						//attach files linked on the right
 						var pdf = ZU.xpath(article.result,
 							'./div[contains(@class,"gs_fl")]\
-								/a[.//span[@class="gs_ctg2"]]');
+								//a[.//span[@class="gs_ctg2"]]');
 						for(var i=0, n=pdf.length; i<n; i++) {
 							var attach = getAttachment(pdf[i].href,
 											pdf[i].childNodes[0].textContent);
@@ -409,7 +420,7 @@ function scrapePatentResults(doc, patents) {
 /** Until SOP is "fixed" we'll scrape as much information as we can from the
  * result block instead of using Google Patents translator
 		var patentUrl = ZU.xpathText(patents[i].result,
-									'./h3[@class="gs_rt"]/a[1]/@href');
+									'.//h3[@class="gs_rt"]/a[1]/@href');
 
 		if(patentUrl) {
 			(function(doc, url) {
@@ -448,16 +459,14 @@ function doWeb(doc, url) {
 		 * We should always be able to build bibtex links from the Related articles
 		 * link.
 		 */
-		var results = ZU.xpath(doc,
-			'//div[@class="gs_r"]\
-				[.//div[@class="gs_fl"]/a[contains(@href,"q=info:") or contains(@href,"q=related:")]]');
+		var results = getViableResults(doc);
 
 		var items = new Object();
 		var resultDivs = new Object();
 		var bibtexUrl;
 		for(var i=0, n=results.length; i<n; i++) {
 			bibtexUrl = ZU.xpathText(results[i],
-				'.//div[@class="gs_fl"]/a[contains(@href,"q=info:") or contains(@href,"q=related:")][1]/@href')
+					'.//div[@class="gs_fl"]/a[contains(@href,"q=info:") or contains(@href,"q=related:")][1]/@href')
 				.replace(/\/scholar.*?\?/,'/scholar.bib?')
 				.replace(/=related:/,'=info:')
 				+ '&ct=citation&cd=1&output=citation';

@@ -1,7 +1,7 @@
 {
 	"translatorID": "374ac2a5-dd45-461e-bf1f-bf90c2eb7085",
-	"label": "Der Tagesspiegel",
-	"creator": "Martin Meyerhoff",
+	"label": "Tagesspiegel",
+	"creator": "Martin Meyerhoff, Sebastian Karcher",
 	"target": "^https?://www\\.tagesspiegel\\.de",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-06-10 09:27:00"
+	"lastUpdated": "2012-10-06 13:16:15"
 }
 
 /*
@@ -61,6 +61,8 @@ function scrape(doc, url) {
 	// Date
 	var date_XPath = "//span[contains(@class, 'date hcf')]";
 	var date= ZU.xpathText(doc, date_XPath);
+	//Today's articles just have a time. For these, we set the date to "today", which Zotero will interpret correctly
+	if (date.search(/\d{2}\.\d{4}/)==-1) date = "today";
 	newItem.date= date.replace(/(.{10,10}).*/, '$1');
 	
 	// Summary 
@@ -78,7 +80,7 @@ function scrape(doc, url) {
 		Zotero.debug(author);
 		if (author != null){
 		author = author.replace(/^[Vv]on\s|Kommentar\svon\s/g, '');
-		author = author.split(/,\s/);
+		author = author.split(/,\s|\sund\s/);
 		for (var i in author) {
 			newItem.creators.push(Zotero.Utilities.cleanAuthor(author[i], "author"));
 		}
@@ -89,13 +91,14 @@ function scrape(doc, url) {
 	
 	// Tags
 	var tags_XPath = "//meta[@name='keywords']";
-	var tags = doc.evaluate(tags_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().content;
-	var tags= tags.split(","); // this seems to work even if there's no |
+	var tags = ZU.xpathText(doc, tags_XPath);
+	if (tags) var tags= tags.split(","); // this seems to work even if there's no |
 	for (var i in tags) {
 		tags[i] = tags[i].replace(/^\s*|\s*$/g, '') // remove whitespace around the tags
 		newItem.tags.push(tags[i]);
 	} 
-	
+	newItem.language = "de-DE";
+	newItem.ISSN = "1865-2263";
 	newItem.complete();
 	
 }
@@ -136,45 +139,42 @@ Zotero.selectItems(items, function (items) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.tagesspiegel.de/berlin/statistik-radler-und-fussgaenger-leben-wieder-gefaehrlicher/5767876.html",
+		"url": "http://www.tagesspiegel.de/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.tagesspiegel.de/meinung/ddr-drama-der-turm-ich-leb-mein-leben/7216226.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
 				"creators": [
 					{
-						"firstName": "Christoph",
-						"lastName": "Stollowsky",
+						"firstName": "Robert",
+						"lastName": "Ide",
 						"creatorType": "author"
 					}
 				],
 				"notes": [],
-				"tags": [
-					"Verkehr",
-					"Statistik",
-					"Radfahrer",
-					"Fahrrad"
-				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Statistik: Radler und Fußgänger leben wieder gefährlicher - Berlin - Tagesspiegel",
+						"title": "DDR-Drama \"Der Turm\": Ich leb’ mein Leben - Meinung - Tagesspiegel",
 						"mimeType": "text/html"
 					}
 				],
-				"url": "http://www.tagesspiegel.de/berlin/statistik-radler-und-fussgaenger-leben-wieder-gefaehrlicher/5767876.html",
-				"title": "Radler und Fußgänger leben wieder gefährlicher",
-				"date": "28.10.2011",
-				"abstractNote": "Die Zahl der Verkehrstoten nimmt erneut zu. Die Polizei beklagt Unachtsamkeit von Autofahrern – und hofft auf mehr Radspuren.",
+				"url": "http://www.tagesspiegel.de/meinung/ddr-drama-der-turm-ich-leb-mein-leben/7216226.html",
+				"title": "Ich leb’ mein Leben",
+				"date": "05.10.2012",
+				"abstractNote": "Das DDR-Familiendrama \"Der Turm\" hat zwei Abende lang Deutschlands Fernsehzuschauer bewegt, die Gedanken flogen zurück in die gemeinsam geteilte Vergangenheit. 17 Millionen Menschen sind irgendwann einmal mit der Frage konfrontiert worden: Dafür oder dagegen? Verrat an Freunden oder der eigenen Karriere?",
 				"publicationTitle": "Der Tagesspiegel Online",
-				"libraryCatalog": "Der Tagesspiegel",
+				"language": "de-DE",
+				"ISSN": "1865-2263",
+				"libraryCatalog": "Tagesspiegel",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.tagesspiegel.de/",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

@@ -1,19 +1,19 @@
 {
 	"translatorID": "62c0e36a-ee2f-4aa0-b111-5e2cbd7bb5ba",
 	"label": "MetaPress",
-	"creator": "Michael Berkowitz",
-	"target": "https?://(.*)metapress.com/",
-	"minVersion": "1.0.0b4.r5",
+	"creator": "Michael Berkowitz, Sebastian Karcher",
+	"target": "https?://(.*)metapress\\.com/",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-19 06:10:54"
+	"lastUpdated": "2012-10-22 23:40:09"
 }
 
 function detectWeb(doc, url) {
-	if (doc.title.indexOf("Search Results") != -1) {
+	if (ZU.xpath(doc, '//div[@class="primitive article"]/h2/a[1]').length > 0) {
 		return "multiple";
 	} else if (url.match(/content\/[^?/]/)) {
 		return "journalArticle";
@@ -21,64 +21,72 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var host = doc.location.host;
-	var artids = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		
-	} else {
-		artids.push(url.match(/content\/([^/]+)/)[1]);
-	}
-	for (var i in artids) {
-		var newurl = 'http://' + host + '/content/' + artids[i];
-		Zotero.Utilities.processDocuments([newurl], function(newDoc) {
-			var tagsx = '//td[@class="mainPageContent"]/div[3]';
-			if (doc.evaluate(tagsx, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-				var tags = Zotero.Utilities.trimInternal(doc.evaluate(tagsx, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent).split(",");
+		var hits = {};
+		var urls = [];
+		var results = ZU.xpath(doc, '//div[@class="primitive article"]/h2/a[1]');
+		for (var i in results) {
+			hits[results[i].href] = results[i].textContent;
+		}
+		Z.selectItems(hits, function (items) {
+			if (items == null) return true;
+			for (var j in items) {
+				urls.push(j);
 			}
-			Zotero.Utilities.HTTP.doPost('http://' + host + '/export.mpx', 'code=' + artids[i] + '&mode=ris', function(text) {
-				// load translator for RIS
-				var translator = Zotero.loadTranslator("import");
-				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-				translator.setString(text);
-				translator.setHandler("itemDone", function(obj, item) {
-					var pdfurl = 'http://' + host + '/content/' + artids[i] + '/fulltext.pdf';
-					item.attachments = [
-						{url:item.url, title:"MetaPress Snapshot", mimeType:"text/html"},
-						{url:pdfurl, title:"MetaPress Full Text PDF", mimeType:"application/pdf"}
-					];
-					//if (tags) item.tags = tags;
-					if (item.abstractNote) {
-						if (item.abstractNote.substr(0, 8) == "Abstract") item.abstractNote = Zotero.Utilities.trimInternal(item.abstractNote.substr(8));
-					}
-					item.complete();
-				});
-				translator.translate();
-				Zotero.done();
-			});
-		}, function() {});
+			ZU.processDocuments(urls, scrape);
+		})
+	} else {
+		scrape(doc, url)
 	}
+}
+
+function scrape(doc, url) {
+	var host = doc.location.host;
+	var tagsx = '//td[@class="mainPageContent"]/div[3]';
+	var artid = url.match(/content\/([^\/]+)/)[1]
+	if (doc.evaluate(tagsx, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		var tags = Zotero.Utilities.trimInternal(doc.evaluate(tagsx, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent).split(",");
+	}
+	Zotero.Utilities.HTTP.doPost('/export.mpx', 'code=' + artid + '&mode=ris', function (text) {
+		// load translator for RIS
+		//some entries have empty author fields, or fields with just a comma. Delete those.
+		text = text.replace(/AU  - [\s,]+\n/g, "");
+		//Z.debug(text);
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+		translator.setString(text);
+		translator.setHandler("itemDone", function (obj, item) {
+			var pdfurl = 'http://' + host +'/content/' + artid + '/fulltext.pdf';
+			item.attachments = [{
+				url: item.url,
+				title: "MetaPress Snapshot",
+				mimeType: "text/html"
+			}, {
+				url: pdfurl,
+				title: "MetaPress Full Text PDF",
+				mimeType: "application/pdf"
+			}];
+			//if (tags) item.tags = tags;
+			if (item.abstractNote) {
+				if (item.abstractNote.substr(0, 8) == "Abstract") item.abstractNote = Zotero.Utilities.trimInternal(item.abstractNote.substr(8));
+			}
+			item.complete();
+		});
+		translator.translate();
+		Zotero.done();
+	});
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://metapress.com/content/hh83064822430454/?p=0cf49d882cc547049b49cfba468cc263&pi=0",
+		"url": "http://metapress.com/content/y737165n6x0q1455/",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"lastName": "Kawasaki",
-						"firstName": "K.",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Madachi-Yamamoto",
-						"firstName": "S.",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Yonemura",
-						"firstName": "D.",
+						"lastName": "Yabuuchi",
+						"firstName": "Shigemi",
 						"creatorType": "author"
 					}
 				],
@@ -95,18 +103,28 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"issue": "3",
-				"url": "http://dx.doi.org/10.1007/BF00143081",
-				"DOI": "10.1007/BF00143081",
-				"abstractNote": "The hyperosmolarity response of the ocular standing potential was recorded in unilateral rhegmatogenous retinal detachment (8 eyes) and in the fellow ‘healthy’ eye (8 eyes). The hyperosmolarity response was greatly suppressed (M-4 SD: M and SD indicate respectively the mean and the standard deviation in normal subjects) in all affected eyes (p < 0.005), and slightly abnormal in 2 fellow eyes. The L/D ratio was normal in 2 affected eyes and in all fellow eyes. The hyperosmolarity response in the affected eyes was still greatly suppressed 14 months after successful surgical treatment.",
+				"publicationTitle": "Journal of Economic Integration",
+				"title": "Immigration and Unemployment of Skilled and Unskilled Labor",
+				"volume": "23",
+				"issue": "2",
+				"pages": "331-345",
+				"url": "http://www.metapress.com/content/Y737165N6X0Q1455",
+				"abstractNote": "This paper discusses the problem of unemployment in developed countries that faces international labor movement. There are two types of unemployment. The first traditional type of unemployment exists simply because the common wage rate is fixed and higher than the equilibrium level. The second one may exist when the wage rate in one sector is high and fixed, while that in the other is flexible. On the other hand, an extensive movement of labor among countries has been observed. Thus, this paper investigates the effects of immigration and other policies on the two types of unemployment. JEL classification : F16, F22, J64, R23",
+				"date": "June 1, 2008",
 				"libraryCatalog": "MetaPress",
-				"publicationTitle": "Documenta Ophthalmologica",
-				"title": "Hyperosmolarity response of ocular standing potential as a clinical test for retinal pigment epithelium activity rhegmatogenous retinal detachment",
-				"volume": "57",
-				"pages": "175-180",
-				"date": "May 1, 1984"
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://metapress.com/content/?k=labor+market",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://metapress.com/content/j99677822343/?v=editorial",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

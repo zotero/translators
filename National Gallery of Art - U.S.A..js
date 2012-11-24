@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-01-30 22:46:27"
+	"lastUpdated": "2012-09-24 12:54:54"
 }
 
 function detectWeb(doc, url) {
@@ -41,11 +41,6 @@ function detectWeb(doc, url) {
 //National Gallery USA translator. Code by Adam Crymble
 
 function scrape(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
 	var style = 0;
 	var title1;
 	var newItem = new Zotero.Item("artwork");
@@ -53,15 +48,15 @@ function scrape(doc, url) {
 	//determines page layout type
 
 	//single entry with thumbnail
-	if (doc.evaluate('//div[@class="BodyText"]/table/tbody/tr/td[2]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+	if (doc.evaluate('//div[@class="BodyText"]/table/tbody/tr/td[2]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 
-		var content = doc.evaluate('//div[@class="BodyText"]/table/tbody/tr/td[2]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(/\n/);
+		var content = doc.evaluate('//div[@class="BodyText"]/table/tbody/tr/td[2]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(/\n/);
 		style = 1;
 		
 	//single entry without thumbnail (2 variations)		
-	} else if  (doc.evaluate('//div[@class="BodyText"]/table/tbody/tr/td', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+	} else if  (doc.evaluate('//div[@class="BodyText"]/table/tbody/tr/td', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 	
-		var content = doc.evaluate('//div[@class="BodyText"]/table/tbody/tr/td', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(/\n/);
+		var content = doc.evaluate('//div[@class="BodyText"]/table/tbody/tr/td', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(/\n/);
 		
 		if (content[1].match("Rendered")) {
 			style = 3;
@@ -70,15 +65,15 @@ function scrape(doc, url) {
 		}
 
 	//single entry with large image.		
-	} else if (doc.evaluate('//tr[2]/td[1]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+	} else if (doc.evaluate('//tr[2]/td[1]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 	
-		var content = doc.evaluate('//tr[2]/td[1]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(/\n/);
+		var content = doc.evaluate('//tr[2]/td[1]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(/\n/);
 		style = 2;
 	}
 
 	if (style == 1) {
-		
-		newItem.creators.push(Zotero.Utilities.cleanAuthor(content[1], "artist"));
+		var artist = content[1].replace(/\s*\(.+/, "");
+		newItem.creators.push(Zotero.Utilities.cleanAuthor(artist, "artist"));
 	
 	
 		var titleDate = content[3].split(", ");
@@ -99,6 +94,7 @@ function scrape(doc, url) {
 		newItem.callNumber = content[content.length-2];
 		
 	} else if (style == 2) {
+		Z.debug("style2")
 		newItem.creators.push(Zotero.Utilities.cleanAuthor(content[0], "artist"));
 		
 		var date = content[1].split(", ");
@@ -134,10 +130,7 @@ function scrape(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
+
 	
 	var articles = new Array();
 	
@@ -145,10 +138,10 @@ function doWeb(doc, url) {
 		var items = new Object();
 		
 		if (doc.location.href.match("artistid")) {
-			var titles = doc.evaluate('//ul/li/b/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var titles = doc.evaluate('//ul/li/b/a[contains(@href, "object=")]', doc, null, XPathResult.ANY_TYPE, null);
 			
 		} else {
-			var titles = doc.evaluate('//ul/li/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var titles = doc.evaluate('//ul/li/a[contains(@href, "object=")]', doc, null, XPathResult.ANY_TYPE, null);
 		}
 		
 		var next_title;
@@ -158,15 +151,19 @@ function doWeb(doc, url) {
 			}
 			items[next_title.href] = next_title.textContent;
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			Zotero.Utilities.processDocuments(articles, scrape, function () {
+			});
+		});
 	} else {
-		articles = [url];
+		scrape(doc, url)
 	}
-	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-	Zotero.wait();
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{

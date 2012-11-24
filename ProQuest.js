@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-08 12:40:00"
+	"lastUpdated": "2012-11-02 06:45:39"
 }
 
 /*
@@ -185,12 +185,11 @@ function doWeb(doc, url, pdfUrl) {
 
 			var articles = new Array();
 			for (var i in items) {
-				articles.push(i);
+				ZU.processDocuments(i,
+					//call doWeb so that we rerun detectWeb to get type and
+					//initialize translations
+					function(doc) { doWeb(doc, doc.location.href) });
 			}
-			ZU.processDocuments(articles,
-				//call doWeb so that we rerun detectWeb to get type and
-				//initialize translations
-				function(doc) { doWeb(doc, doc.location.href) });
 		});
 	//pdfUrl should be undefined unless we are calling doWeb from the following
 	//block, where it is set to false or an actual value
@@ -294,6 +293,7 @@ function scrape(doc, url, type, pdfUrl) {
 			case 'Pages':
 				item.pages = value;
 			break;
+			case 'University/institution':
 			case 'School':
 				item.university = value;
 			break;
@@ -314,6 +314,7 @@ function scrape(doc, url, type, pdfUrl) {
 			break;
 
 			//we'll figure out proper location later
+			case 'University location':
 			case 'School location':
 				place.schoolLocation = value;
 			break;
@@ -364,6 +365,27 @@ function scrape(doc, url, type, pdfUrl) {
 
 	//sometimes number of pages ends up in pages
 	if(!item.numPages) item.numPages = item.pages;
+
+	//parse some data from the byline in case we're missing publication title
+	// or the date is not complete
+	var byline = ZU.xpath(doc, '//span[contains(@class, "titleAuthorETC")][last()]');
+	//add publication title if we don't already have it
+	if(!item.publicationTitle
+		&& ZU.fieldIsValidForType('publicationTitle', item.itemType)) {
+		var pubTitle = ZU.xpathText(byline, './/a[@id="lateralSearch"]');
+		//remove date range
+		if(pubTitle) item.publicationTitle = pubTitle.replace(/\s*\(.+/, '');
+	}
+
+	var date = ZU.xpathText(byline, './text()');
+	if(date) date = date.match(/]\s+(.+?):/);
+	if(date) date = date[1];
+	//add date if we only have a year and date is longer in the byline
+	if(date
+		&& (!item.date
+			|| (item.date.length <= 4 && date.length > item.date.length))) {
+		item.date = date;
+	}
 
 	item.abstractNote = ZU.xpath(doc,
 		'//div[@id="abstractZone" or contains(@id,"abstractFull")]/\
@@ -1180,7 +1202,9 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [],
+				"tags": [
+					"General Interest Periodicals--United States"
+				],
 				"seeAlso": [],
 				"attachments": [
 					{

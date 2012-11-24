@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-19 06:10:54"
+	"lastUpdated": "2012-09-04 21:24:38"
 }
 
 function detectWeb(doc, url) {
@@ -53,7 +53,7 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i.match(/([^/=.htm]*)(.htm)?$/)[1]);
 			}
-		    scrape(articles, function () {
+			scrape(articles, function () {
 				Zotero.done();
 			});
 		});
@@ -98,7 +98,7 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Humphreys",
-						"firstName": "W.F. ",
+						"firstName": "W.F.",
 						"creatorType": "author"
 					}
 				],
@@ -116,7 +116,8 @@ var testCases = [
 					}
 				],
 				"title": "Aquifers: the ultimate groundwater-dependent ecosystems",
-				"publicationTitle": "Aust. J. Bot.",
+				"publicationTitle": "Australian Journal of Botany",
+				"journalAbbreviation": "Aust. J. Bot.",
 				"date": "2006",
 				"volume": "54",
 				"issue": "2",

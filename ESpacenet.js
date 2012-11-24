@@ -1,7 +1,7 @@
 {
 	"translatorID": "176948f7-9df8-4afc-ace7-4c1c7318d426",
 	"label": "ESpacenet",
-	"creator": "Sebastian Karcher",
+	"creator": "Sebastian Karcher and Aurimas Vinckevicius",
 	"target": "^https?://worldwide\\.espacenet\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-05-02 18:57:58"
+	"lastUpdated": "2012-11-19 21:46:13"
 }
 
 /*
@@ -36,94 +36,192 @@
 */
 
 function detectWeb(doc, url) {
-	if(url.match("searchResults\?")) {
+	if(url.indexOf("searchResults?") !== -1
+		&& getSearchResults(doc).length) {
 			return "multiple";
-		} else if (doc.location.href.match("biblio")) {
-			return "patent";
-		}
-  }
+	}
 
-function associateData(newItem, dataTags, field, zoteroField) {
-	if (dataTags[field]) {
-		newItem[zoteroField] = dataTags[field];
+	if (url.indexOf("biblio") !== -1
+		&& getTitle(doc)) {
+		return "patent";
 	}
 }
 
-function scrape(doc, url) {
-	var dataTags = new Object();
-	var newItem = new Zotero.Item("patent");
-	var fields = ZU.xpath(doc, '//table[contains(@class, "tableType")]/tbody/tr/th[contains(@class, "Table")]');
-	var contents = ZU.xpath(doc, '//table[contains(@class, "tableType")]/tbody/tr/td[contains(@class, "Table")]');
-	var count = fields.length;
+function getSearchResults(doc) {
+	return ZU.xpath(doc,'//span[@class="resNumber"]/a[starts-with(@id,"publicationId")]');
+}
 
-	newItem.title = ZU.xpathText(doc, '//div[@id="pagebody"]/h3');
-
-		// In the very common case of all-caps, fix them!
-		if (newItem.title == newItem.title.toUpperCase()) {
-			newItem.title = Zotero.Utilities.capitalizeTitle(newItem.title.toLowerCase(), true);
+function getTitle(doc) {
+	var title = ZU.xpathText(doc, '//div[@id="pagebody"]/h3[1]');
+	if(title) {
+		if(title.toUpperCase() == title) {
+			title = ZU.capitalizeTitle(title, true);
 		}
-	newItem.attachments = [{url:doc.location.href, title:"Espacenet patent record"}];	
-	newItem.date = ZU.xpathText(doc, '//h1').match(/(?:―)(.+)/)[1];
-	newItem.abstractNote = ZU.xpathText(doc, '//p[@class="printAbstract"]');
-	for (i=0; i<count; i++){
-		var field = fields[i].textContent.trim();
-		var content = contents[i].textContent.trim();
-		//Z.debug("field: " + field + " content: " + content)
-		dataTags[field] = content;
-		if (field == "Inventor(s):"){
-		  var inventors= ZU.xpathText(contents[i], './span').replace(/\(|\)/g, "").trim();
-		  	if (inventors == inventors.toUpperCase()) {
-				inventors = Zotero.Utilities.capitalizeTitle(inventors.toLowerCase(), true);
-			}
-		  	if (inventors){
-		  		var inventor = inventors.split(/\s*;\s*/);
-				for (i in inventor)	{
-					inventor[i] = inventor[i].replace(/,$/, "");
-					newItem.creators[i] = ZU.cleanAuthor(inventor[i], "inventor", inventor[i].match(/,/));
-				}	  
-		  	}
-		}
-		
-		if (field == "Applicant(s):"){
-			newItem.assignee = ZU.trimInternal(ZU.xpathText(contents[i], './text()[1]').trim());		
-			if (newItem.assignee == newItem.assignee.toUpperCase()) {
-				newItem.assignee = Zotero.Utilities.capitalizeTitle(newItem.assignee.toLowerCase(), true);
-			}		
-		}
-		
-		if (field =="Classification:"){
-			var	CIB = ZU.trimInternal(content).match(/(?:international:)(.*?)\-/)[1];
-			var ECLA = ZU.trimInternal(content).match(/(?:European:)(.*)/)[1];    
-		}
-		//Z.debug("field: " + field + " content: " + dataTags[field])
+		return title.trim();
 	}
-	newItem.extra= "CIB: " + CIB + "\nECLA: " + ECLA;
-   //these might not be complete - it's pretty straightforward to add more
-	associateData(newItem, dataTags, "Application number:", "applicationNumber");
-	associateData(newItem, dataTags, "Priority number(s):", "priorityNumbers");
+}
+
+//locale labels from URL
+var i18n = {
+	/** German **/
+	de_EP: {
+		"Erfinder:": "Inventor(s):",
+		"Anmelder:": "Applicant(s):",
+		"Klassifikation:": "Classification:",
+		"Internationale": "international",
+		"Europäische": "Euro",
+		"Anmeldenummer:": "Application number:",
+		"Prioritätsnummer(n):": "Priority number(s):"
+	},
+	/** French **/
+	fr_EP: {
+		"Inventeur(s)": "Inventor(s):",
+		"Demandeur(s)": "Applicant(s):",
+		"Classification:": "Classification:",
+		"internationale": "international",
+		"européenne": "Euro",
+		"Numéro de demande": "Application number:",
+		"Numéro(s) de priorité:": "Priority number(s):"
+	}
+}
+
+function initLocale(url) {
+	var m = url.match(/[?&]locale=([^&]+)/);
+	if(m && i18n[m[1]]) {
+		i18n = i18n[m[1]];
+	} else {
+		i18n = {};	//English
+	}
+}
+
+function L(label, fromEN) {
+	if(fromEN) {
+		for(var l in i18n) {
+			if(i18n[l] == label) {
+				return l;
+			}
+		}
+		return label;
+	}
+
+	return i18n[label] || label;
+}
+
+var labelMap = {
+	"Application number:": "applicationNumber",
+	"Priority number(s):": "priorityNumbers",
+};
+
+function applyValue(newItem, label, value) {
+	if (value && labelMap[label]) {
+		newItem[labelMap[label]] = value;
+	}
+}
+
+//clean up names list and call callback with a clean name
+function cleanNames(names, callback) {
+	if(names) {
+		names = names.replace(/[()]/g, "").trim();
+
+		if(names == names.toUpperCase()) {
+			names = ZU.capitalizeTitle(names, true);
+		}
+
+		names = names.split(/\s*;\s*/);
+		for(var j=0, m=names.length; j<m; j++) {
+			callback(names[j].replace(/\s*,$/, ''));
+		}
+	}
+}
+
+function scrape(doc) {
+	var newItem = new Zotero.Item("patent");
+	newItem.title = getTitle(doc);
+
+	var rows = ZU.xpath(doc,
+		'//tr[./th[@class="printTableText"]]');
+
+	for (var i=0, n=rows.length; i<n; i++) {
+		var label = L(ZU.xpathText(rows[i], './th[@class="printTableText"]').trim());
+		var value = ZU.xpath(rows[i], './td[@class="printTableText" or @class="containsTable"]')[0];
+		if(!value) continue;
+		//Z.debug("label: " + label);
+		//Z.debug("value: " + value.textContent);
+
+		switch(label) {
+			case "Inventor(s):":
+				cleanNames(ZU.xpathText(value, './span[@id="secondaryInventors"]'),
+					function(name) {
+						newItem.creators.push(
+							ZU.cleanAuthor(name.replace(/,?\s/, ', '),	//format displayed is LAST FIRST MIDDLE, so we add a comma after LAST
+								"inventor", true));
+					});
+			break;
+			case "Applicant(s):":
+				var assignees = [];
+				cleanNames(ZU.xpathText(value, './span[@id="secondaryApplicants"]'),
+				  	function(name) {
+				  		assignees.push(name);
+				  	});
+				newItem.assignee = assignees.join('; ');
+			break;
+			case "Classification:":
+				var	CIB = ZU.trimInternal(
+					ZU.xpathText(value,
+						'.//td[preceding-sibling::th[contains(text(),"'
+						+ L("international", true) + '")]]') || '');
+				var ECLA = ZU.trimInternal(ZU.xpathText(value,
+						'.//td[preceding-sibling::th[contains(text(),"'
+						+ L("Euro", true) + '")]]/a', null, '; ') || '');
+				if(CIB || ECLA) {
+					newItem.extra = [];
+					if(CIB) newItem.extra.push('CIB: ' + CIB);
+					if(ECLA) newItem.extra.push('ECLA: ' + ECLA);
+					newItem.extra = newItem.extra.join('\n');
+				}
+			break;
+			default:
+				applyValue(newItem, label, ZU.trimInternal(value.textContent));
+		}
+	}
+
+	var date = ZU.xpathText(doc, '//div[@id="pagebody"]/h1[1]');
+	if(date && (date = date.match(/\d{4}-\d{2}-\d{2}/))) {
+		newItem.date = date[0];
+	}
+
+	newItem.abstractNote = ZU.trimInternal(
+		ZU.xpathText(doc, '//p[@class="printAbstract"]') || '');
+
+	newItem.attachments.push({
+		title:"Espacenet patent record",
+		document: doc
+	});
+
 	newItem.complete();
 }
 
 function doWeb(doc, url) {
-	if (detectWeb(doc, url)=="multiple"){
+	initLocale(url);
+
+	if (detectWeb(doc, url) == "multiple"){
 		var hits = {};
-		var urls = [];
-		var results = ZU.xpath(doc,"//span[@class='resNumber']/a");
-		for (var i in results) {
+		var results = getSearchResults(doc);
+		for (var i=0, n=results.length; i<n; i++) {
 			hits[results[i].href] = results[i].textContent.trim();
 		}
+
 		Z.selectItems(hits, function(items) {
-			if (items == null) return true;
+			if (!items) return true;
+
+			var urls = [];
 			for (var j in items) {
 				urls.push(j);
 			}
-			Zotero.Utilities.processDocuments(urls, scrape, function () {
-				Zotero.done();
-			});
+			ZU.processDocuments(urls, scrape);
 		});
-	}
-	else{
-	scrape(doc, url);	
+	} else {
+		scrape(doc);	
 	}
 }   
   /** BEGIN TEST CASES **/
@@ -155,12 +253,12 @@ var testCases = [
 					}
 				],
 				"title": "Electronic Control Glove",
+				"assignee": "Blue Infusion Technologies, Llc; Blount, Willie, Lee, Jr",
+				"extra": "CIB: G06F3/033; G09G5/08",
+				"applicationNumber": "WO2011US56657 20111018",
+				"priorityNumbers": "US20100394879P 20101020; US20100394013P 20101018",
 				"date": "2012-04-26",
 				"abstractNote": "Many people active and inactive can't readily control their audio experience without reaching into a pocket or some other location to change a setting or answer the phone. The problem is the lack of convenience and the inaccessibility when the user is riding his motorcycle, skiing, bicycling, jogging, or even walking with winter gloves on, etc. The electronic control glove described here enables enhanced control over electronic devices wirelessly at all times from the user's fingertips. The glove is manufactured with electrical conducive materials along the fingers and the thumb, where contact with the thumb and finger conductive materials creates a closed circuit which is transmitted to a control device on the glove that can then wirelessly transmit messages to remote electronic devices such as cell phones, audio players, garage door openers, military hardware and software, in work environments, and so forth.",
-				"assignee": "Blue Infusion Technologies Llc [us]; Blount Willie Lee Jr [us]",
-				"extra": "CIB:  G06F3/033; G09G5/08 \nECLA:",
-				"applicationNumber": "WO2011US56657 20111018",
-				"priorityNumbers": "US20100394879P 20101020;\n                \n                    US20100394013P 20101018",
 				"libraryCatalog": "ESpacenet"
 			}
 		]
@@ -173,18 +271,18 @@ var testCases = [
 				"itemType": "patent",
 				"creators": [
 					{
-						"firstName": "Li",
-						"lastName": "Michael",
+						"firstName": "Michael",
+						"lastName": "Li",
 						"creatorType": "inventor"
 					},
 					{
-						"firstName": "Shakula",
-						"lastName": "Yuri",
+						"firstName": "Yuri",
+						"lastName": "Shakula",
 						"creatorType": "inventor"
 					},
 					{
-						"firstName": "Rodriguez",
-						"lastName": "Martin",
+						"firstName": "Martin",
+						"lastName": "Rodriguez",
 						"creatorType": "inventor"
 					}
 				],
@@ -197,11 +295,73 @@ var testCases = [
 					}
 				],
 				"title": "Method and System for Secure Financial Transactions Using Mobile Communications Devices",
+				"extra": "CIB: G06Q20/00\nECLA: G06Q20/3223; G06Q20/3829",
+				"applicationNumber": "US201113172170 20110629",
+				"priorityNumbers": "US201113172170 20110629; US20100406097P 20101022",
 				"date": "2012-04-26",
 				"abstractNote": "The present invention employs public key infrastructure to electronically sign and encrypt important personal information on a mobile communications device (MCD), without disclosing private, personal information to the transaction counterparts and middleman, thus preserving highly elevated and enhanced security and fraud protection. In one embodiment, the present invention can use a mobile device identifier, such as a cell phone number or email address, for example, as an index/reference during the entire transaction, so that only the account holder and the account issuer know the underlying account number and other private information.",
-				"extra": "CIB: undefined\nECLA: undefined",
-				"applicationNumber": "US201113172170 20110629",
-				"priorityNumbers": "US201113172170 20110629;\n                \n                    US20100406097P 20101022",
+				"libraryCatalog": "ESpacenet"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://worldwide.espacenet.com/publicationDetails/biblio?locale=de_EP&II=9&FT=D&CC=AU&DB=EPODOC&NR=2814389A&date=19890601&ND=3&KC=A&adjacent=true",
+		"items": [
+			{
+				"itemType": "patent",
+				"creators": [
+					{
+						"firstName": "S. Filler",
+						"lastName": "William",
+						"creatorType": "inventor"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Espacenet patent record"
+					}
+				],
+				"title": "Eswl Employing Non-Focused Spherical-Sector Shock Waves",
+				"assignee": "William S. Filler",
+				"extra": "CIB: A61B17/22; A61B17/225; G10K11/32; G10K15/04; (IPC1-7): A61B17/22\nECLA: A61B17/225; G10K11/32; G10K15/04B",
+				"applicationNumber": "AU19890028143D 19891108",
+				"priorityNumbers": "US19870118325 19871109",
+				"date": "1989-06-01",
+				"libraryCatalog": "ESpacenet"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://worldwide.espacenet.com/publicationDetails/biblio?locale=fr_EP&II=9&FT=D&CC=AU&DB=EPODOC&NR=2814389A&date=19890601&ND=3&KC=A&adjacent=true",
+		"items": [
+			{
+				"itemType": "patent",
+				"creators": [
+					{
+						"firstName": "S. Filler",
+						"lastName": "William",
+						"creatorType": "inventor"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Espacenet patent record"
+					}
+				],
+				"title": "Eswl Employing Non-Focused Spherical-Sector Shock Waves",
+				"assignee": "William S. Filler",
+				"extra": "CIB: A61B17/22; A61B17/225; G10K11/32; G10K15/04; (IPC1-7): A61B17/22\nECLA: A61B17/225; G10K11/32; G10K15/04B",
+				"applicationNumber": "AU19890028143D 19891108",
+				"priorityNumbers": "US19870118325 19871109",
+				"date": "1989-06-01",
 				"libraryCatalog": "ESpacenet"
 			}
 		]

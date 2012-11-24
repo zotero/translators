@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-05-14 23:17:39"
+	"lastUpdated": "2012-10-15 22:17:34"
 }
 
 /*
@@ -98,9 +98,9 @@ function scrape(doc, url) {
 		}
 	}
 	// Date 
-	var xPath = "//span[contains(@class, 'time')][last()]";
+	var xPath = "//div[@id='main']/div/span[contains(@class, 'time')][last()]";
 	var date= ZU.xpathText(doc, xPath);
-	if(date && date.match(/\d{2}\.\d{2}\.\d{2}/))	newItem.date = date;
+	if(date && date.match(/\d{2}\.\d{2}\.\d{2}/)) newItem.date = date;
 	else newItem.date = ZU.xpathText(doc, '//meta[@name="date"]/@content').replace(/T.+/, "");
 
 	// Publikation (I can only distinguish some articles from Welt am Sonntag by their URL, otherwise its all mishmash)
@@ -166,16 +166,12 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Krankenkassen",
-					"Verband",
-					"Doris Pfeiffer",
-					"Gesundheit",
-					"Kliniken"
+					"Pfeiffer Doris,Krankenkassen,Kliniken"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Gesundheit: Krankenkassen werfen Ärzten Gewinnstreben vor - Nachrichten Wirtschaft - WELT ONLINE",
+						"title": "Gesundheit: Krankenkassen werfen Ärzten Gewinnstreben vor - Nachrichten Wirtschaft - DIE WELT",
 						"mimeType": "text/html"
 					}
 				],

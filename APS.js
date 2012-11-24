@@ -6,10 +6,10 @@
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
 	"priority": 100,
-	"browserSupport": "gcsibv",
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2012-02-20 11:53:00"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2012-08-31 15:26:06"
 }
 
 // Works for all APS journals: http://publish.aps.org/
@@ -45,14 +45,13 @@ function doWeb(doc, url) {
 		var snapurl = newDoc.location.href;
 		var pdfurl = snapurl.replace(/(abstract|forward|showrefs|supplemental)/, "pdf");
 		Zotero.Utilities.HTTP.doPost(urlRIS, post, function(text) {
+			//DOI is stored in ID field. Fix it.
+			text = text.replace(/^ID\s\s?-\s/mg, 'DO  - ');
 			// load translator for RIS
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			translator.setString(text);
 			translator.setHandler("itemDone", function(obj, item) {
-				if (item.itemID) {
-					item.DOI = item.itemID;
-				}
 				item.attachments = [
 					{url:snapurl, title:"APS Snapshot", mimeType:"text/html"},
 					{url:pdfurl, title:"APS Full Text PDF", mimeType:"application/pdf"}
@@ -89,27 +88,23 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://prd.aps.org/abstract/PRD/v84/i7/e077701",
 						"title": "APS Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"url": "http://prd.aps.org/pdf/PRD/v84/i7/e077701",
 						"title": "APS Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"publisher": "American Physical Society",
-				"itemID": "10.1103/PhysRevD.84.077701",
+				"DOI": "10.1103/PhysRevD.84.077701",
 				"title": "Hints for a nonstandard Higgs boson from the LHC",
 				"publicationTitle": "Physical Review D",
 				"journalAbbreviation": "Phys. Rev. D",
 				"volume": "84",
 				"issue": "7",
 				"pages": "077701",
-				"date": "October 21, 2011",
 				"url": "http://link.aps.org/doi/10.1103/PhysRevD.84.077701",
-				"DOI": "10.1103/PhysRevD.84.077701",
+				"date": "October 21, 2011",
 				"abstractNote": "We reconsider Higgs boson invisible decays into Dark Matter in the light of recent Higgs searches at the LHC. Present hints in the Compact Muon Solenoid and ATLAS data favor a nonstandard Higgs boson with approximately 50% invisible branching ratio, and mass around 143 GeV. This situation can be realized within the simplest thermal scalar singlet Dark Matter model, predicting a Dark Matter mass around 50 GeV and direct detection cross section just below present bound. The present runs of the Xenon100 and LHC experiments can test this possibility.",
 				"libraryCatalog": "APS",
 				"accessDate": "CURRENT_TIMESTAMP"

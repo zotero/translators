@@ -1,14 +1,15 @@
 {
-	"translatorID":"cee0cca2-e82a-4618-b6cf-16327970169d",
-	"translatorType":4,
-	"label":"Gene Ontology",
-	"creator":"Amelia Ireland",
-	"target":"^https?:\/\/.*\\.geneontology\\.org",
-	"minVersion":"2.0",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":false,
-	"lastUpdated":"2011-01-27 21:28:58"
+	"translatorID": "cee0cca2-e82a-4618-b6cf-16327970169d",
+	"label": "Gene Ontology",
+	"creator": "Amelia Ireland",
+	"target": "^https?://.*\\.geneontology\\.org",
+	"minVersion": "2.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2012-10-15 23:31:32"
 }
 
 /*
@@ -40,13 +41,8 @@ var selectArray = {};
 
 
 function detectWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == "x" ) return namespace; else return null;
-	} : null;
-
 	var xPath = '//cite//*[@class="pmid"] | //cite//a[contains (@href, "pubmed")]';
-	var cites = doc.evaluate(xPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var cites = doc.evaluate(xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 
 	if (cites)
 	{	Zotero.debug("Found some cites!");
@@ -55,13 +51,9 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
 
 	var myPMID = '//cite//*[@class="pmid"] | //cite//a[contains (@href, "pubmed")]';
-	var pmids = doc.evaluate(myPMID, doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var pmids = doc.evaluate(myPMID, doc, null, XPathResult.ANY_TYPE, null);
 	var pmid_list = new Array();
 	var unknown_list = new Array();
 	var x;
@@ -103,12 +95,23 @@ function doWeb(doc, url) {
 		translator.translate();
 
 		// all pmids retrieved now
-		selectArray = Zotero.selectItems(selectArray);
-		for(var PMID in selectArray) {
-			items[PMID].complete();
-		}
-
-		Zotero.done();
+		
+		Zotero.selectItems(selectArray, function (selectArray) {
+			if (!selectArray) {
+				return true;
+			}
+			for (var PMID in selectArray) {
+				items[PMID].complete();
+			}
+		});
 	});
-	Zotero.wait();
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.geneontology.org/GO.cite.shtml",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

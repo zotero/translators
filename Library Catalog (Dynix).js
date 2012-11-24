@@ -9,21 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-03-12 01:04:22"
+	"lastUpdated": "2012-09-13 12:55:50"
 }
 
 function detectWeb(doc, url) {
-  var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
 	// make sure there are multiple results, check to see if the search results number exists
-	var xpath = '/html/body/table[4]/tbody/tr[2]/td[1]/table/tbody/tr[2]/td/a/b[1]';
-	//issue: currently wrongly detects "browse" results as single items
-	var detailsRe = new RegExp('ipac\.jsp\?.*uri=(?:full|link)=[0-9]');
-	if(detailsRe.test(doc.location.href)) {
-		return "book";
-	} else if(!doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) { // this hack catches search results w/ single items
+	var xpath = '/html/body/table[4]/tbody/tr[2]/td[1]/table/tbody/tr[2]/td/a/b[1]|//tbody/tr/td/a[@class="mediumBoldAnchor" and contains(@href, "javascript:buildNewList")]';
+	//the target regex is sufficiently restrictive so that everything that's not a multiple is a book.
+	if (!doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) { // this hack catches search results w/ single items
 	  return "book";
 	} else { 
 		return "multiple";
@@ -31,11 +24,6 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-
 	var uri = doc.location.href;
 	var detailsRe = new RegExp('ipac\.jsp\?.*uri=(?:full|link)=[0-9]');
 	
@@ -45,64 +33,61 @@ function doWeb(doc, url) {
 			uris.push(uri.replace(/#/,'&fullmarc=true#'));
 		else
 			uris.push(uri+'&fullmarc=true');
+		marcscrape(uris);
 	} else {
 		var items = Zotero.Utilities.getItemArray(doc, doc, "ipac\.jsp\?.*uri=(?:full|link)=[0-9]|^javascript:buildNewList\\('.*uri%3Dfull%3D[0-9]", "Show details");
-		items = Zotero.selectItems(items);
-		
-		if(!items) {
-			return true;
-		}
-		
-		var buildNewList = new RegExp("^javascript:buildNewList\\('([^']+)");
-		
-		var uris = new Array();
-		for(var i in items) {
-			var m = buildNewList.exec(i);
-			if(m) {
-				uris.push(unescape(m[1]+'&fullmarc=true'));
-			} else {
-				uris.push(i+'&fullmarc=true');
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
 			}
-		}
+			var buildNewList = new RegExp("^javascript:buildNewList\\('([^']+)");
+			var uris = new Array();
+			for(var i in items) {
+				var m = buildNewList.exec(i);
+				if(m) {
+					uris.push(unescape(m[1]+'&fullmarc=true'));
+				} else {
+					uris.push(i+'&fullmarc=true');
+				}
+			}
+			marcscrape(uris);
+		});
 	}
-	
+}
+
+function marcscrape(uris){
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
 	translator.getTranslatorObject(function (marc) {
 		Zotero.Utilities.processDocuments(uris, function (newDoc) {
 			scrape(newDoc, marc);
-			}, function() { Zotero.done() }, null);
+			}, function() {}, null);
 	});
-	Zotero.wait();
 }   
 
 function scrape(newDoc, marc) {
 		var uri = newDoc.location.href;
 		
-		var namespace = newDoc.documentElement.namespaceURI;
-		var nsResolver = namespace ? function(prefix) {
-		  if (prefix == 'x') return namespace; else return null;
-		} : null;
-		
+	
 		var xpath = '//form/table[@class="tableBackground"]/tbody/tr/td/table[@class="tableBackground"]/tbody/tr[td[1]/a[@class="normalBlackFont1"]]';
-		var elmts = newDoc.evaluate(xpath, newDoc, nsResolver, XPathResult.ANY_TYPE, null);
+		var elmts = newDoc.evaluate(xpath, newDoc, null, XPathResult.ANY_TYPE, null);
 		if (!elmts.iterateNext()) {
 			var xpath2 = '//form/table[@class="tableBackground"]/tbody/tr/td/table[@class="tableBackground"]/tbody/tr[td[1]/a[@class="boldBlackFont1"]]';
-			var elmts = newDoc.evaluate(xpath2, newDoc, nsResolver, XPathResult.ANY_TYPE, null);
+			var elmts = newDoc.evaluate(xpath2, newDoc, null, XPathResult.ANY_TYPE, null);
 		}
 		else
 		{
 			// Added to restart the evaluation. Otherwise, because of the iteratenext 
 			// used 5 lines above to test the xpath, we miss the first line (LDR) 
-			elmts = newDoc.evaluate(xpath, newDoc, nsResolver, XPathResult.ANY_TYPE, null);
+			elmts = newDoc.evaluate(xpath, newDoc, null, XPathResult.ANY_TYPE, null);
 		}
 
 		var elmt;
 
 		var record = new marc.record();		
 		while(elmt = elmts.iterateNext()) {
-			var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./TD[1]/A[1]/text()[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
-			var value = newDoc.evaluate('./TD[2]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/A[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./TD[1]/A[1]/text()[1]', elmt, null, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
+			var value = newDoc.evaluate('./TD[2]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/A[1]', elmt, null, XPathResult.ANY_TYPE, null).iterateNext();
 
 			// value = null for non-marc table entries w/ that xpath
 			if (!value) {
@@ -243,6 +228,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://siris-libraries.si.edu/ipac20/ipac.jsp?session=Y3X077P415286.52120&menu=search&aspect=Keyword&npp=20&ipp=20&spp=20&profile=liball&ri=&term=&index=GW&x=0&y=0&aspect=Keyword&term=smith&index=AW&term=&index=TW&term=&index=SW&term=&index=.JW",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://ipac.kings.edu/ipac20/ipac.jsp?menu=search&aspect=basic_search&npp=30&ipp=20&spp=20&profile=kc&ri=&index=.GW&term=test&x=0&y=0&aspect=basic_search",
 		"items": "multiple"
 	}
 ]

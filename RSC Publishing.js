@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-03-26 15:00:31"
+	"lastUpdated": "2012-10-20 09:32:44"
 }
 
 /*
@@ -42,16 +42,16 @@ function getResults(doc) {
 }
 
 function detectWeb(doc, url) {
-	if(url.match(/\/results[?\/]/i) || url.indexOf('/ebook/') != -1 &&
+	if(url.search(/\/results[?\/]/i) != -1 || url.indexOf('/ebook/') != -1  &&
 		getResults(doc).length) {
 		return 'multiple';
 	}
-
-	if(url.indexOf('/content/articlelanding/') != -1) {
+	//apparently URLs sometimes have upper case as in /Content/ArticleLanding/
+	if(url.search(/\/content\/articlelanding\//i) != -1) {
 		return 'journalArticle';
 	}
 
-	if(url.indexOf('/content/chapter/') != -1) {
+	if(url.search(/\/content\/chapter\//i) != -1) {
 		return 'bookSection';
 	}
 }

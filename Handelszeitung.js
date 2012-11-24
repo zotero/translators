@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-05-08 00:57:58"
+	"lastUpdated": "2012-10-08 20:50:41"
 }
 
 /*
@@ -191,10 +191,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Bilanz Article Snapshot",
-						"document": {
-							"location": {}
-						}
+						"title": "Bilanz Article Snapshot"
 					}
 				],
 				"url": "http://www.bilanz.ch/unternehmen/google-kauft-daily-deal",

@@ -1,15 +1,15 @@
 {
 	"translatorID": "e04e4bab-64c2-4b9a-b6c2-7fb186281969",
 	"label": "L'Annee Philologique",
-	"creator": "Sebsatian Karcher",
-	"target": "^https?://www\\.annee-philologique\\.com/index\\.php",
+	"creator": "Sebastian Karcher",
+	"target": "^https?://www\\.annee-philologique\\.com/(aph)?/?index\\.php",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-06-25 12:12:43"
+	"lastUpdated": "2012-09-23 13:59:39"
 }
 
 /*
@@ -80,6 +80,7 @@ function scrape(doc, url) {
 	var num = url.match(/&num=\d+/)[0].replace(/^&/, "");
 	var critere = encodeURIComponent(ZU.xpathText(doc, '//input[@id="critere"]/@value'));
 	var get = 'http://www.annee-philologique.com/index.php?do=export_ris&' + num;
+	//Z.debug(get)
 	var post = num + '&js_actif=1&critere=' + critere + '&noticesformat=noticesformat3&mailExport=&inputnbselect=0&inputnbnotselect=4&inputumcourant=1';
 	//Z.debug(post);
 	Zotero.Utilities.HTTP.doPost(get, post, function (text) {
@@ -114,3 +115,37 @@ function scrape(doc, url) {
 	});
 }
 //no permalinks --> no test
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "www.annee-philologique.com/aph/index.php?do=uneNotice&id=31-02979",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Shedd",
+						"creatorType": "author",
+						"firstName": " R. P."
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "L'Année Philologique Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Man in community. A study of St. Paul's application of Old Testament and early Jewish conceptions of human solidarity",
+				"date": "1958",
+				"publisher": "Epworth Pr.",
+				"place": "London",
+				"libraryCatalog": "L'Annee Philologique"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-03-11 15:38:39"
+	"lastUpdated": "2012-10-01 12:55:07"
 }
 
 function detectWeb(doc, url) {
@@ -112,11 +112,12 @@ function scrape(doc, url) {
 							{
 								var authorText = author.textContent;
 								
-								var authorFields = authorText.match(/^\s*(.+?)\s*(?:\(.+?\)\s*)?\.\s*([^\.]+)\s*$/);
+								var authorFields = authorText.match(/^\s*(.+?)\s*(?:\((.+?)\)\s*)?\.\s*([^\.]+)\s*$/);
 								var authorFunction = '';
 								if(authorFields) {
-									authorFunction = authorFields[2];
+									authorFunction = authorFields[3];
 									authorText = authorFields[1];
+									var extra = authorFields[2];
 								}
 								if (authorFunction)
 								{
@@ -143,10 +144,11 @@ function scrape(doc, url) {
 									zoteroFunction = 'author';
 								}
 
-								if (authorFunction == "Université de soutenance")
+								if (authorFunction == "Université de soutenance" || authorFunction == "Organisme de soutenance")
 								{
 									// If the author function is "université de soutenance"	it means that this author has to be in "university" field
 									newItem.university = authorText;
+									newItem.city = extra;	//store for later
 								}
 								else
 								{
@@ -212,13 +214,16 @@ function scrape(doc, url) {
 							break;
 						case 'editeur':
 						case 'publisher':	//en = de
+							//ignore publisher for thesis, so that it does not overwrite university
+							if(newItem.itemType == 'thesis' && newItem.university) break;
+
 							var m = value.match(/(.*):(.*),(.*)/);
 
 							if (m)
 							{
-								if (!(newItem.place))
+								if (!(newItem.city))
 								{
-									newItem.place = Zotero.Utilities.trimInternal(m[1]);
+									newItem.city = Zotero.Utilities.trimInternal(m[1]);
 								}
 								if (!(newItem.publisher))
 								{
@@ -226,7 +231,12 @@ function scrape(doc, url) {
 								}
 							}
 							break;
-
+						case 'pays':
+						case 'country':
+							if(!newItem.country) {
+								newItem.country = value;
+							}
+							break;
 						case 'description':
 							// We're going to extract the number of pages from this field
 							// Known bug doesn't work when there are 2 volumes, 
@@ -276,11 +286,10 @@ function scrape(doc, url) {
 						case "identifiant pérenne de la notice":
 						case 'persistent identifier of the record':
 						case 'persistent identifier des datensatzes':
-              var permalink = value;
-              if (permalink)
-              {
-                newItem.attachments.push( { url: permalink, title: 'SUDOC Snapshot', mimeType: 'text/html' } );
-              }
+							var permalink = value;
+							if (permalink) {
+								newItem.attachments.push( { url: permalink, title: 'SUDOC Snapshot', mimeType: 'text/html' } );
+							}
 							break;
 
 						case 'worldcat':
@@ -291,6 +300,13 @@ function scrape(doc, url) {
 							break;
 					}
 				}
+
+				var location = [];
+				if(newItem.city) location.push(newItem.city);
+				newItem.city = undefined;
+				if(newItem.country) location.push(newItem.country);
+				newItem.country = undefined;
+				newItem.place = location.join(', ');
 
 				newItem.complete();
 			}
@@ -348,7 +364,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sudoc.fr/147745608",
+		"url": "http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=147745608",
 		"items": [
 			{
 				"itemType": "book",
@@ -382,18 +398,17 @@ var testCases = [
 				"ISBN": "978-2-7472-1729-3",
 				"title": "Souffrance au travail dans les grandes entreprises",
 				"language": "français",
-				"place": "Paris",
 				"publisher": "Eska",
 				"numberOfVolumes": "1",
 				"numPages": "290",
-				"libraryCatalog": "SUDOC",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"place": "Paris, France",
+				"libraryCatalog": "SUDOC"
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.sudoc.fr/156726319",
+		"url": "http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=156726319",
 		"items": [
 			{
 				"itemType": "book",
@@ -413,25 +428,28 @@ var testCases = [
 					{
 						"title": "SUDOC Snapshot",
 						"mimeType": "text/html"
+					},
+					{
+						"title": "Worldcat Link",
+						"mimeType": "text/html"
 					}
 				],
 				"date": "2011",
 				"ISBN": "978-0-83898589-2",
 				"title": "Zotero : a guide for librarians, researchers and educators",
 				"language": "anglais",
-				"place": "Chicago",
 				"publisher": "Association of College and Research Libraries",
 				"numberOfVolumes": "1",
 				"numPages": "159",
+				"place": "Chicago, Etats-Unis",
 				"libraryCatalog": "SUDOC",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Zotero"
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.sudoc.fr/093838956",
+		"url": "http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=093838956",
 		"items": [
 			{
 				"itemType": "thesis",
@@ -468,19 +486,17 @@ var testCases = [
 					{
 						"title": "Worldcat Link",
 						"mimeType": "text/html"
-					}					
+					}
 				],
 				"date": "2004",
 				"title": "Facteurs pronostiques des lymphomes diffus lymphocytiques",
 				"university": "Université du droit et de la santé",
 				"language": "français",
-				"place": "[S.l.]",
-				"publisher": "[s.n.]",
 				"numberOfVolumes": "1",
 				"numPages": "87",
 				"type": "Thèse d'exercice",
-				"libraryCatalog": "SUDOC",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"place": "Lille, France",
+				"libraryCatalog": "SUDOC"
 			}
 		]
 	},
@@ -609,7 +625,7 @@ var testCases = [
 				],
 				"seeAlso": [],
 				"attachments": [
-          {
+					{
 						"title": "SUDOC Snapshot",
 						"mimeType": "text/html"
 					},
@@ -631,7 +647,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sudoc.fr/05625248X",
+		"url": "http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=05625248X",
 		"items": [
 			{
 				"itemType": "audioRecording",
@@ -663,7 +679,7 @@ var testCases = [
 				],
 				"seeAlso": [],
 				"attachments": [
-          {
+					{
 						"title": "SUDOC Snapshot",
 						"mimeType": "text/html"
 					},
@@ -675,12 +691,11 @@ var testCases = [
 				"date": "1986",
 				"title": "English music for mass and offices (II) and music for other ceremonies",
 				"language": "latin",
-				"place": "Monoco",
 				"publisher": "Éditions de l'oiseau-lyre",
 				"numPages": "243",
 				"series": "Polyphonic music of the fourteenth century ; v. 17",
-				"libraryCatalog": "SUDOC",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"place": "Monoco, Monaco",
+				"libraryCatalog": "SUDOC"
 			}
 		]
 	}

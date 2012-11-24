@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-05-03 09:08:01"
+	"lastUpdated": "2012-08-24 00:04:03"
 }
 
 /*
@@ -41,8 +41,12 @@ http://www.spiegel.de/international/europe/0,1518,700530,00.html
 function detectWeb(doc, url) {
 
 	var spiegel_article_XPath = ".//div[@id='spArticleFunctions']";
-	
-	if (doc.evaluate(spiegel_article_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
+	//the print edition is a magazine. Since the online edition is updated constantly it
+	//makes sense to treat it like a newspaper.
+	if (url.match(/\/print\//) && ZU.xpathText(doc, spiegel_article_XPath)){
+		return "magazineArticle";
+	}
+	else if (doc.evaluate(spiegel_article_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
 		//Zotero.debug("newspaperArticle");
 		return "newspaperArticle";
 	} else if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/thema/)){ 
@@ -61,8 +65,13 @@ function detectWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-
-	var newItem = new Zotero.Item("newspaperArticle");
+	
+ 	if (detectWeb(doc, url)=="magazineArticle") {
+ 			var newItem = new Zotero.Item("magazineArticle");
+ 	}
+ 	else{
+		var newItem = new Zotero.Item("newspaperArticle");
+ 	}
 	newItem.url = doc.location.href; 
 
 	// This is for the title 
@@ -71,6 +80,8 @@ function scrape(doc, url) {
 	if (doc.evaluate(title_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
 		var title = doc.evaluate(title_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		newItem.title = title;
+	} else if (ZU.xpathText(doc, '//div[@id="spArticleColumn"]/h2')) {
+		newItem.title = ZU.xpathText(doc, '//div[@id="spArticleColumn"]/h2');
 	} else {
 		var title = doc.evaluate('//title', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		title = title.split(" - ")[0];
@@ -137,7 +148,10 @@ function scrape(doc, url) {
 		newItem.attachments.push({url:printurl, title:doc.title, mimeType:"text/html"});
 	}
 	
-
+	//Ausgabe/Volume für Print
+	if (ZU.xpathText(doc, '//div[@class="spAssetHdln"]') && newItem.itemType == "magazineArticle"){
+		newItem.volume = ZU.xpathText(doc, '//div[@class="spAssetHdln"]').match(/(\d+)\/\d{4}/)[1];
+	}
 	
 	// Summary
 	var summary_xPath = ".//p[@id='spIntroTeaser']";
@@ -149,6 +163,7 @@ function scrape(doc, url) {
 	// Date - sometimes xpath1 doesn't yield anything. Fortunately, there's another possibility...
 	var date1_xPath = ".//h5[contains(@id, 'ShortDate')]"; 
 	var date2_xPath = "//meta[@name='date']";
+	var date3_xPath = "//div[@id='spShortDate']"
 	if (doc.evaluate(date1_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
 		var date= doc.evaluate(date1_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		if (date.match('/')) {
@@ -157,7 +172,10 @@ function scrape(doc, url) {
 	} else if (doc.evaluate(date2_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
 		var date= doc.evaluate(date2_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().content;
 		date=date.replace(/(\d\d\d\d)-(\d\d)-(\d\d)/, '$3.$2.$1').replace(/T.+/,"");
+	} else	if (doc.evaluate(date3_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
+		var date= doc.evaluate(date3_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	}
+	
 	newItem.date = Zotero.Utilities.trim(date);
 	
 	if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/spiegel/)){
@@ -257,6 +275,51 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.spiegel.de/international/search/index.html?suchbegriff=Crisis",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.spiegel.de/spiegel/print/d-84789653.html",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"creators": [
+					{
+						"firstName": "Alexander",
+						"lastName": "Neubacher",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Conny",
+						"lastName": "Neumann",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Steffen",
+						"lastName": "Winter",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"DER SPIEGEL"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "DER SPIEGEL 15/2012 - VEB Energiewende",
+						"mimeType": "application/pdf"
+					}
+				],
+				"url": "http://www.spiegel.de/spiegel/print/d-84789653.html",
+				"title": "VEB Energiewende",
+				"volume": "15",
+				"abstractNote": "Der Atomausstieg wird zur Subventionsmaschine für Industriebosse, Elektrokonzerne und findige Geschäftemacher. Die Kosten und Risiken sollen andere tragen - die Bürger.",
+				"date": "07.04.2012",
+				"publicationTitle": "Der Spiegel",
+				"libraryCatalog": "Spiegel Online",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
