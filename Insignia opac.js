@@ -2,14 +2,14 @@
 	"translatorID": "abd7c626-6913-42d4-a05f-acc6683c69da",
 	"label": "Insignia opac",
 	"creator": "Niko",
-	"target": "http://www.insigniasoftware.com/library",
+	"target": "https?://[^/]+/library/[^/?#]+\.aspx",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-10-31 15:45:00"
+	"lastUpdated": "2012-11-26 15:49:00"
 }
 
 
