@@ -2,14 +2,14 @@
 	"translatorID": "b1c90b99-2e1a-4374-a03b-92e45f1afc55",
 	"label": "Radio Free Europe / Radio Liberty",
 	"creator": "Avram Lyon",
-	"target": "^http://www\\.rferl\\.org/|^http://www\\.azatliq\\.org/|^http://www\\.azattyq\\.org/|^http://rus\\.azattyq\\.org/|^http://da\\.azadiradio\\.org/|^http://pa\\.azadiradio\\.org/|^http://www\\.azattyk\\.org/|^http://www\\.ozodi\\.org/|^http://www\\.ozodlik\\.org/|^http://www\\.evropaelire\\.org/|^http://www\\.slobodnaevropa\\.org/|^http://www\\.makdenes\\.org/|^http://www\\.iraqhurr\\.org/|^http://www\\.radiofarda\\.com/|^http://www\\.azatutyun\\.am/|^http://www\\.azadliq\\.org/|^http://www\\.svaboda\\.org/|^http://www\\.tavisupleba\\.org/|^http://www\\.azathabar\\.com/|^http://www\\.svobodanews\\.ru/|^http://www\\.europalibera\\.org/|^http://www\\.radiosvoboda\\.org/",
+	"target": "^http://www\\.rferl\\.org/|^http://www\\.azatliq\\.org/|^http://www\\.azattyq\\.org/|^http://rus\\.azattyq\\.org/|^http://da\\.azadiradio\\.org/|^http://pa\\.azadiradio\\.org/|^http://www\\.azattyk\\.org/|^http://www\\.ozodi\\.org/|^http://www\\.ozodlik\\.org/|^http://www\\.evropaelire\\.org/|^http://www\\.slobodnaevropa\\.org/|^http://www\\.makdenes\\.org/|^http://www\\.iraqhurr\\.org/|^http://www\\.radiofarda\\.com/|^http://www\\.azatutyun\\.am/|^http://www\\.azadliq\\.org/|^http://www\\.svaboda\\.org/|^http://www\\.svoboda\\.org/|^http://www\\.tavisupleba\\.org/|^http://www\\.azathabar\\.com/|^http://www\\.svobodanews\\.ru/|^http://www\\.europalibera\\.org/|^http://www\\.radiosvoboda\\.org/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-08-05 08:00:59"
+	"lastUpdated": "2012-11-26 22:36:39"
 }
 
 /*
@@ -56,7 +56,7 @@
 	Belarus:	http://www.svaboda.org/
 	Georgian:	http://www.tavisupleba.org/
 	Turkmen:	http://www.azathabar.com/
-	Russian:	http://www.svobodanews.ru/
+	Russian:	http://www.svobodanews.ru/ and svoboda.org
 	Moldovan:	http://www.europalibera.org/ (Romanian)
 	Ukrainian:	http://www.radiosvoboda.org/
  
@@ -196,6 +196,7 @@ function doWeb(doc, url){
 			"www.tavisupleba.org" : "Georgian",
 			"www.azathabar.com" : "Turkmen",
 			"www.svobodanews.ru" : "Russian",
+			"www.svoboda.org"	 : "Russian",
 			"www.europalibera.org" : "Romanian",
 			"www.radiosvoboda.org" : "Ukrainian"
 		}
@@ -267,7 +268,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.svobodanews.ru/archive/ru_news_zone/20111105/17/17.html?id=24382010",
+		"url": "http://www.svoboda.org/archive/ru_news_zone/20111105/17/17.html?id=24382010",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -277,17 +278,17 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": false,
 						"title": " Радио Свобода  Snapshot",
 						"mimeType": "text/html"
 					}
 				],
 				"title": "Партия \"Яблоко\" перевела свою предвыборную программу на 18 языков",
 				"section": "Новости",
-				"url": "http://www.svobodanews.ru/archive/ru_news_zone/20111105/17/17.html?id=24382010",
+				"url": "http://www.svoboda.org/archive/ru_news_zone/20111105/17/17.html?id=24382010",
 				"publicationTitle": "Радио Свобода",
 				"language": "Russian",
-				"libraryCatalog": "Radio Free Europe / Radio Liberty"
+				"libraryCatalog": "Radio Free Europe / Radio Liberty",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}

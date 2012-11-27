@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-04-01 21:59:07"
+	"lastUpdated": "2012-11-26 22:08:06"
 }
 
 /*
@@ -39,43 +39,35 @@ function detectWeb(doc, url){
 }
 
 function doWeb(doc, url){
-	var n = doc.documentElement.namespaceURI;
-	var ns = n ? function(prefix) {
-		if (prefix == 'x') return n; else return null;
-	} : null;
-	
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		var results = doc.evaluate('//table[@id="restab"]//tr[@bgcolor = "#f5f5f5"]/td[2]', doc, ns, XPathResult.ANY_TYPE, null);
+		var results = doc.evaluate('//table[@id="restab"]//tr[@bgcolor = "#f5f5f5"]/td[2]', doc, null,XPathResult.ANY_TYPE, null);
 		var items = new Array();
 		var result;
 		while(result = results.iterateNext()) {
-			var link = doc.evaluate('./a', result, ns, XPathResult.ANY_TYPE, null).iterateNext();
+			var link = doc.evaluate('./a', result, null,XPathResult.ANY_TYPE, null).iterateNext();
 			var title = link.textContent;
 			var url = link.href;
 			items[url] = title;
 		}
-		items = Zotero.selectItems(items);
-		if(!items) return true;
-		for (var i in items) {
-			articles.push(i);
+		Zotero.selectItems(items, function (items) {
+				if (!items) {
+					return true;
+				}
+				for (i in items) {
+					articles.push(i);
+				}
+				Zotero.Utilities.processDocuments(articles, scrape);
+		});
+		} else {
+			scrape(doc);
 		}
-		Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-	} else {
-		scrape(doc);
-	}
-	
-	Zotero.wait();
 }
 
 function scrape (doc) {
-	var n = doc.documentElement.namespaceURI;
-	var ns = n ? function(prefix) {
-		if (prefix == 'x') return n; else return null;
-	} : null;
-		var datablock = doc.evaluate('//td[@align="right" and @width="100%" and @valign="top"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
+		var datablock = doc.evaluate('//td[@align="right" and @width="100%" and @valign="top"]', doc, null,XPathResult.ANY_TYPE, null).iterateNext();
 		
-		var tableLabels = doc.evaluate('./table/tbody/tr[1]/td[@bgcolor="#dddddd"][1]|./table//table[1]//tr[1]/td[@bgcolor="#dddddd"][1]', datablock, ns, XPathResult.ANY_TYPE, null);
+		var tableLabels = doc.evaluate('./table/tbody/tr[1]/td[@bgcolor="#dddddd"][1]|./table//table[1]//tr[1]/td[@bgcolor="#dddddd"][1]', datablock, null,XPathResult.ANY_TYPE, null);
 
 		var titleBlock, authorBlock, publicationBlock, metaBlock, codeBlock, keywordBlock,  abstractBlock, referenceBlock;
 		var t = 0,  label;	// Table number and label
@@ -85,32 +77,32 @@ function scrape (doc) {
 
 			switch (label) {
 				case "Названиепубликации":
-					titleBlock = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					titleBlock = doc.evaluate('./table['+t+']',  datablock, null,XPathResult.ANY_TYPE, null).iterateNext();
 					Zotero.debug("have titleBlock");
 					break;
 				case "Авторы":
-					authorBlock  = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					authorBlock  = doc.evaluate('./table['+t+']',  datablock, null,XPathResult.ANY_TYPE, null).iterateNext();
 					Zotero.debug("have authorBlock");
 					break;
 				case "Журнал":
 				case "Издательство":
-					metaBlock = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					metaBlock = doc.evaluate('./table['+t+']',  datablock, null,XPathResult.ANY_TYPE, null).iterateNext();
 					Zotero.debug("have metaBlock");
 					break;
 				case "Коды":
-					codeBlock  = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					codeBlock  = doc.evaluate('./table['+t+']',  datablock, null,XPathResult.ANY_TYPE, null).iterateNext();
 					Zotero.debug("have codeBlock");
 					break;
 				case "Ключевыеслова":
-					keywordBlock  = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					keywordBlock  = doc.evaluate('./table['+t+']',  datablock, null,XPathResult.ANY_TYPE, null).iterateNext();
 					Zotero.debug("have keywordBlock");
 					break;
 				case "Аннотация":
-					abstractBlock  = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					abstractBlock  = doc.evaluate('./table['+t+']',  datablock, null,XPathResult.ANY_TYPE, null).iterateNext();
 					Zotero.debug("have abstractBlock");
 					break;
 				case "Списоклитературы":
-					referenceBlock  = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					referenceBlock  = doc.evaluate('./table['+t+']',  datablock, null,XPathResult.ANY_TYPE, null).iterateNext();
 					Zotero.debug("have referenceBlock");
 					break;
 				case "Переводнаяверсия":
@@ -123,11 +115,11 @@ function scrape (doc) {
 		var item = new Zotero.Item();
 		/*var pdf = false;
 		// Now see if we have a free PDF to download
-		var pdfImage = doc.evaluate('//a/img[@src="/images/pdf_green.gif"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
+		var pdfImage = doc.evaluate('//a/img[@src="/images/pdf_green.gif"]', doc, null,XPathResult.ANY_TYPE, null).iterateNext();
 		if (pdfImage) {
 			// A green PDF is a free one. We need to construct the POST request
 			var postData = [], postField;
-			var postNode = doc.evaluate('//form[@name="results"]/input', doc, ns, XPathResult.ANY_TYPE, null);
+			var postNode = doc.evaluate('//form[@name="results"]/input', doc, null,XPathResult.ANY_TYPE, null);
 			while ((postField = postNode.iterateNext()) !== null) {
 				postData.push(postField.name + "=" +postField.value);
 			}
@@ -143,7 +135,7 @@ function scrape (doc) {
 		
 		if (authorBlock) {
 		// Sometimes we don't have links, just bold text
-		var authorNode = doc.evaluate('.//td[2]/center//b', authorBlock, ns, XPathResult.ANY_TYPE, null);
+		var authorNode = doc.evaluate('.//td[2]/center//b', authorBlock, null,XPathResult.ANY_TYPE, null);
 		while ((author = authorNode.iterateNext()) !== null) {
 			// Remove organizations; by URL or by node name
 			if ((author.href && !author.href.match(/org_about\.asp/)
@@ -200,7 +192,7 @@ function scrape (doc) {
 		}
 		if (item.extra) item.extra = "Цитируемость в РИНЦ: " + item.extra;
 		if (abstractBlock)
-			item.abstractNote = doc.evaluate('./tbody/tr/td[2]/table/tbody/tr/td/font', abstractBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			item.abstractNote = doc.evaluate('./tbody/tr/td[2]/table/tbody/tr/td/font', abstractBlock, null,XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		
 		// Set type
 		switch (item.itemType) {
@@ -223,14 +215,14 @@ function scrape (doc) {
 		
 		/*if (referenceBlock) {
 			var note = Zotero.Utilities.trimInternal(
-							doc.evaluate('./tbody/tr/td[2]/table', referenceBlock, ns, XPathResult.ANY_TYPE, null)
+							doc.evaluate('./tbody/tr/td[2]/table', referenceBlock, null,XPathResult.ANY_TYPE, null)
 							.iterateNext().textContent);
 			Zotero.debug(note);
 			item.notes.push(note);
 		}*/
 		
 		if (codeBlock) {
-			item.extra += ' '+ doc.evaluate('.//td[2]', codeBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			item.extra += ' '+ doc.evaluate('.//td[2]', codeBlock, null,XPathResult.ANY_TYPE, null).iterateNext().textContent;
  			var doi = item.extra.match(/DOI: (10\.[^\s]+)/);
  			if (doi) {
 	 			item.DOI = doi[1];
@@ -239,7 +231,7 @@ function scrape (doc) {
  		}
 		
 		if (keywordBlock) {
-			var tag, tagNode = doc.evaluate('.//td[2]/a', keywordBlock, ns, XPathResult.ANY_TYPE, null);
+			var tag, tagNode = doc.evaluate('.//td[2]/a', keywordBlock, null,XPathResult.ANY_TYPE, null);
 			while ((tag = tagNode.iterateNext()) !== null)
 					item.tags.push(tag.textContent);
 		}
@@ -259,6 +251,7 @@ function mapper (from, to, block, doc) {
 	var value = doc.evaluate(to, block, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (!name || !value) return false;
 	var key = false;
+	//Z.debug(name.textContent.trim())
 	switch (name.textContent.trim()) {
 		case "Журнал":
 			key = "publicationTitle"; break;
@@ -279,7 +272,7 @@ function mapper (from, to, block, doc) {
 			key = "language"; break;
 		case "Место издания":
 			key = "place"; break;
-		case "Цит. в РИНЦ":
+		case "Цит. в РИНЦ®":
 			key = "extra"; break;
 		case "Тип":
 			key = "itemType"; break;

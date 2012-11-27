@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-10-22 16:26:28"
+	"lastUpdated": "2012-11-26 23:22:04"
 }
 
 /*
@@ -41,7 +41,7 @@ Reference article: http://www.sueddeutsche.de/wissen/embryonale-stammzellen-wo-s
 */
 
 function detectWeb(doc, url) {
-	if (ZU.xpathText(doc, '//*[@id="articleTitle"]')) {
+	if (ZU.xpathText(doc, '//h2/strong')) {
 		return "newspaperArticle";
 	} else if (ZU.xpath(doc, '//div[@id="topthemen" or @class="panoramateaser" \
 						or contains(@class,"maincolumn")]\
@@ -55,7 +55,7 @@ function detectWeb(doc, url) {
 function scrape(doc, url) {
 	//don't parse things like image galleries
 	//e.g. http://www.sueddeutsche.de/kultur/thomas-manns-villa-in-los-angeles-weimar-am-pazifik-1.1301388
-	if(!ZU.xpathText(doc, '//*[@id="articleTitle"]')) return;
+	if(!ZU.xpathText(doc, '//h2/strong')) return;
 
 	var newItem = new Zotero.Item("newspaperArticle");
 	newItem.url = url;
@@ -65,7 +65,8 @@ function scrape(doc, url) {
 
 	// Author. This is tricky, the SZ uses the author field for whatever they like.
 	// Sometimes, there is no author.
-	var author = ZU.xpathText(doc, '//span[contains(@class, "hcard fn")]');
+	var author =  ZU.xpathText(doc, '//section[@class="authors"]//span[@class="moreInfo"]/strong')
+
 	// One case i've seen: A full sentence as the "author", with no author in it.
 	if (author && author.trim().charAt(author.length - 1) != '.') {
 		author = author.replace(/^Von\s/i, '')
@@ -83,8 +84,7 @@ function scrape(doc, url) {
 	newItem.abstractNote = ZU.xpathText(doc, '//meta[contains(@property, "og:description")]/@content');
 
 	// Date
-	newItem.date = ZU.xpathText(doc, "//*[@class='updated']/*[@class='value']")
-				.split(/\s/)[0];
+	newItem.date = ZU.xpathText(doc, "//time[@class='timeformat']").replace(/\d{2}:\d{2}/, "");
 
 	// Section
 	var section = url.match(/sueddeutsche\.de\/([^\/]+)/);
@@ -179,7 +179,7 @@ var testCases = [
 				"url": "http://www.sueddeutsche.de/politik/verdacht-gegen-hessischen-verfassungsschuetzer-spitzname-kleiner-adolf-1.1190178",
 				"title": "Verdacht gegen hessischen Verfassungsschützer: Spitzname \"Kleiner Adolf\"",
 				"abstractNote": "Als die Zwickauer Zelle in einem Kasseler Internet-Café Halit Y. hinrichtet, surft ein hessischer Verfassungsschützer dort im Netz. In seiner Wohnung findet die Polizei später Hinweise auf eine rechtsradikale Gesinnung - doch die Ermittlungen gegen den Mann werden eingestellt. Dabei bleiben viele Fragen offen.",
-				"date": "2011-11-16",
+				"date": "16. November 2011",
 				"section": "politik",
 				"publicationTitle": "sueddeutsche.de",
 				"ISSN": "0174-4917",

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-10-26 14:13:44"
+	"lastUpdated": "2012-11-26 22:13:25"
 }
 
 function detectWeb(doc, url) {
@@ -189,7 +189,11 @@ var testCases = [
 						"creatorType": "contributor"
 					},
 					{
-						"firstName": "",
+						"firstName": "Domaine Chandon",
+						"lastName": "Cookbook",
+						"creatorType": "contributor"
+					},
+					{
 						"lastName": "étoile",
 						"creatorType": "contributor",
 						"fieldMode": 1

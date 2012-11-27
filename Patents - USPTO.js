@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-09-24 13:03:54"
+	"lastUpdated": "2012-11-26 22:27:21"
 }
 
 function detectWeb(doc, url) {
@@ -57,6 +57,7 @@ function scrape(doc) {
 	for(var i=0; i<cellTags.length; i++) {
 
 		var s = new String(cellTags[i].innerHTML);
+		//Z.debug(s)
 		if (s.indexOf("United States Patent") > -1) {
 			
 			tmpStr = cellTags[i+1].childNodes[0].innerHTML;
@@ -69,36 +70,7 @@ function scrape(doc) {
 			newItem.issueDate = tmpStr;
 			continue;
 		}
-		if (s.indexOf("Assignee") > -1) {
-			tmpStr = cellTags[i+1].innerHTML;
-			tmpStr = tmpStr.replace(/<\/?\w+>/gi, "");
-			newItem.assignee = tmpStr;
-			continue;
-		}
-		if (s.indexOf("Inventors") > -1) {
-			tmpStr = cellTags[i+1].innerHTML;
-			
-			var inventors = tmpStr.split(/<b>,/ig);
-			for (var j=0; j<inventors.length; j++) {
-				var tmpInventor = inventors[j];
-				tmpInventor = tmpInventor.replace(/<\/?\w+>/gi, "");
-				tmpInventor = tmpInventor.replace(/\([^\)]+\)/gi, "");
-				tmpInventor = tmpInventor.replace(/^\s+/gi, "");
-				
-				var names = tmpInventor.split(";");
-				if (names) {
-					var lname = names[0];
-					var fname = names[1];
-					lname = lname.replace(/^\s+/gi, "");
-					lname = lname.replace(/\s+$/gi, "");
-					fname= fname.replace(/^\s+/gi, "");
-					fname= fname.replace(/\s+$/gi, "");
-					newItem.creators.push({lastName:lname, firstName:fname, creatorType:"inventor"});
-				}
-			}
-			continue;
-		}
-		
+	
 		// references
 		if (s.indexOf("<a href=\"/netacgi/nph-Parser?Sect2") > -1) {
 				tmpRefs = tmpRefs + cellTags[i].childNodes[0].innerHTML + " ";
@@ -118,6 +90,15 @@ function scrape(doc) {
 		}
 	
 	}
+	var inventors = ZU.xpath(doc, '//th[contains(text(), "Inventors")]/following-sibling::td/b');
+ 	var inventor;
+	for (i in inventors){
+		var inventor = inventors[i].textContent.replace(/;/, ",")
+		newItem.creators.push(ZU.cleanAuthor(inventor, "inventor", true))
+	}
+	
+	var assignee = ZU.xpathText(doc, '//th[contains(text(), "Assignee")]/following-sibling::td/b');
+	newItem.assignee = assignee;
 //References currenlty broken
 	//newItem.references = tmpRefs;
 	newItem.complete();
@@ -159,23 +140,23 @@ var testCases = [
 				"itemType": "patent",
 				"creators": [
 					{
-						"lastName": "Seaver",
 						"firstName": "Terry R.",
+						"lastName": "Seaver",
 						"creatorType": "inventor"
 					},
 					{
-						"lastName": "Tooyserkani",
 						"firstName": "Pirooz",
+						"lastName": "Tooyserkani",
 						"creatorType": "inventor"
 					},
 					{
-						"lastName": "Stone",
 						"firstName": "Donald B.",
+						"lastName": "Stone",
 						"creatorType": "inventor"
 					},
 					{
-						"lastName": "Prasad",
 						"firstName": "Sharat",
+						"lastName": "Prasad",
 						"creatorType": "inventor"
 					}
 				],
@@ -187,8 +168,8 @@ var testCases = [
 				"title": "United States Patent: 7360954 - Low speed data path for SFP-MSA interface",
 				"patentNumber": "7360954",
 				"issueDate": "April 22, 2008",
-				"assignee": "Cisco Technology, Inc.\n (San Jose, \nCA)",
 				"abstractNote": "Methods and apparatus for enabling a protected circuit path to be created\n     efficiently are disclosed. In accordance with one embodiment of the\n     present invention, a method for creating a protected circuit path within\n     an optical network system includes identifying a first node, a second\n     node, and a third node. Once the nodes are identified, a pseudo link or a\n     virtual link may be created between the second node and the third node. A\n     first circuit path is then routed between the first node and the second\n     node, and a second circuit path which protects that first circuit path is\n     routed between the first node and the third node using the pseudo link.",
+				"assignee": "Cisco Technology, Inc.",
 				"libraryCatalog": "Patents - USPTO",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "United States Patent"

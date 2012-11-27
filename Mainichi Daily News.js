@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-07-12 23:02:38"
+	"lastUpdated": "2012-11-26 22:15:10"
 }
 
 // #################################
@@ -144,7 +144,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://mainichi.jp/english/english/newsselect/news/20120713p2g00m0dm036000c.html",
+		"url": "http://mainichi.jp/english/english/features/news/20120707p2g00m0et049000c.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -158,11 +158,11 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Japan to push Tomioka silk mill as World Cultural Heritage candidate",
+				"title": "Works of cartoonist Leiji Matsumoto to be celebrated at Gunma summit",
 				"publicationTitle": "Mainichi Daily News",
 				"edition": "online edition",
-				"url": "http://mainichi.jp/english/english/newsselect/news/20120713p2g00m0dm036000c.html",
-				"date": "2012-07-13",
+				"url": "http://mainichi.jp/english/english/features/news/20120707p2g00m0et049000c.html",
+				"date": "2012-07-07",
 				"libraryCatalog": "Mainichi Daily News",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
