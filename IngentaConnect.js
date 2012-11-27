@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-04 23:13:51"
+	"lastUpdated": "2012-11-26 19:15:13"
 }
 
 function detectWeb(doc, url) {
@@ -43,8 +43,8 @@ function doWeb(doc, url) {
 		if (newDoc.evaluate('//div[@id="abstract"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 			abs = Zotero.Utilities.trimInternal(newDoc.evaluate('//div[@id="abstract"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent).substr(10);
 		}
-		if (newDoc.evaluate('//div[@id="purchaseexpand"]//a[contains(@title,"download")]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-			pdf = newDoc.evaluate('//div[@id="purchaseexpand"]//a[contains(@title,"download")]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+		if (newDoc.evaluate('//div[@id="purchaseexpand"]//a[contains(@title,"PDF download")]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			pdf = newDoc.evaluate('//div[@id="purchaseexpand"]//a[contains(@title,"PDF download")]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
 		}
 		if (newDoc.evaluate('//div[@id="info"]/p[1]/a', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 			var keywords = newDoc.evaluate('//div[@id="info"]/p[1]/a', newDoc, null, XPathResult.ANY_TYPE, null);
