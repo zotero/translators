@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-06-18 23:17:07"
+	"lastUpdated": "2012-11-27 20:46:32"
 }
 
 /*
@@ -32,26 +32,28 @@
 
 
 function detectWeb(doc,url) {
-	var xpath='//meta[@name="citation_journal_title"]';
-		
-	if (ZU.xpath(doc, xpath).length > 0) {
+	if(ZU.xpath(doc, '//meta[@name="citation_journal_title"]').length) {
 		return "journalArticle";
 	}
 			
-	if (url.match(/searchwithinbase\?|\/issue-files\//)) {
+	if((url.indexOf("searchwithinbase?") != -1
+			|| url.indexOf("/issue-files/") != -1)
+		&& getSearchResults(doc).length) {
 		return "multiple";
 	}
 
 	return false;
 }
 
+function getSearchResults(doc) {
+	return ZU.xpath(doc,'//h2[@class="itemTitle"]/a|//div[@class="contentItem"]/h3/a');
+}
 
-function doWeb(doc,url)
-{
+function doWeb(doc,url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var hits = {};
 		var urls = [];
-		var results = ZU.xpath(doc,'//h2[@class="itemTitle"]/a|//div[@class="contentItem"]/h3/a');
+		var results = getSearchResults(doc);
 		for (var i in results) {
 			hits[results[i].href] = results[i].textContent;
 		}
