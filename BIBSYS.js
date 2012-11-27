@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-09-23 14:26:52"
+	"lastUpdated": "2012-11-24 13:21:37"
 }
 
 function detectWeb(doc, url)	{
@@ -22,16 +22,12 @@ function detectWeb(doc, url)	{
 }
 
 function doWeb(doc, url)	{
-	var namespace=doc.documentElement.namespaceURI;
-	var nsResolver=namespace?function(prefix)	{
-		return (prefix=="x")?namespace:null;
-	}:null;
 	var multireg=new RegExp("http://ask\.bibsys\.no/ask/action/result");
 	if(multireg.test(url))	{
 		var titlpath='//tr/td[@width="49%"][@align="left"][@valign="top"]/a/text()';
-		var titles=doc.evaluate(titlpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titles=doc.evaluate(titlpath, doc, null, XPathResult.ANY_TYPE, null);
 		var codepath='//tr/td/input[@type="checkbox"][@name="valg"]/@value';
-		var codes=doc.evaluate(codepath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var codes=doc.evaluate(codepath, doc, null, XPathResult.ANY_TYPE, null);
 		var items=new Array();
 		var title;
 		titles.iterateNext();
@@ -46,10 +42,12 @@ function doWeb(doc, url)	{
 			var trans=Zotero.loadTranslator("import");
 			trans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			trans.setString(text);
+			trans.setHandler("itemDone", function(obj, item) {
+				item.title = item.title.replace(/\s\s+/, " ").replace(/\s:/, ":");
+				item.complete();
+			});	
 			trans.translate();
-			Zotero.done();
 		});
-		Zotero.wait();
 	}
 	var singlereg=new RegExp("http://ask\.bibsys\.no/ask/action/show");
 	if(singlereg.test(url))	{
@@ -60,10 +58,13 @@ function doWeb(doc, url)	{
 			var trans=Zotero.loadTranslator("import");
 			trans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			trans.setString(text);
+			trans.setHandler("itemDone", function(obj, item) {
+				item.title = item.title.replace(/\s\s+/, " ").replace(/\s:/, ":");
+				item.complete();
+			});	
 			trans.translate();
-			Zotero.done();
 		});
-		Zotero.wait();
+
 	}
 }/** BEGIN TEST CASES **/
 var testCases = [
@@ -93,13 +94,14 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"title": "How institutions evolve",
+				"title": "How institutions evolve: the political economy of skills in Germany, Britain, the United States, and Japan",
 				"date": "2004",
 				"numPages": "XV, 333 s.",
 				"publisher": "Cambridge University Press",
 				"place": "Cambridge",
 				"ISBN": "0-521-83768-5",
-				"libraryCatalog": "BIBSYS"
+				"libraryCatalog": "BIBSYS",
+				"shortTitle": "How institutions evolve"
 			}
 		]
 	}

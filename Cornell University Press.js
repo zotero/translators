@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-10-26 11:35:57"
+	"lastUpdated": "2012-11-24 13:08:11"
 }
 
 /*
@@ -134,7 +134,8 @@ function scrape(doc, url) {
 
 	}
 	associateData(newItem, dataTags, "ISBN-13", "ISBN");
-	associateData(newItem, dataTags, "First Published", "date");
+	associateData(newItem, dataTags, "Publication Date", "date");
+	associateData(newItem, dataTags, "Title First Published", "date");
 	associateData(newItem, dataTags, "Publication Date", "date");
 	associateData(newItem, dataTags, "Collection", "series");
 	associateData(newItem, dataTags, "Language", "language");

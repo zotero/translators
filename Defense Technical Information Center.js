@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gbv",
-	"lastUpdated": "2012-10-21 11:19:11"
+	"lastUpdated": "2012-11-24 13:08:38"
 }
 
 function detectWeb(doc, url) {
@@ -151,11 +151,6 @@ var testCases = [
 				"shortTitle": "Dynamic Across-Time Measurement Interpretation"
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://oai.dtic.mil/oai/20070613_3_docs.html",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
