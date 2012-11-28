@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-10-18 07:23:19"
+	"lastUpdated": "2012-11-28 21:59:37"
 }
 
 function detectWeb(doc, url) {
@@ -29,8 +29,6 @@ function detectWeb(doc, url) {
  * given the text of the delivery page, downloads an item
  */
 function downloadFunction(text, url, prefs) {
-//Z.debug("(" + prefs.id + ") Got RIS for '" + url + "'");
-//Z.debug(text);
 	if (text.search(/^TY\s\s?-/m) == -1) {
 		text = "\nTY  - JOUR\n" + text;	//this is probably not going to work if there is garbage text in the begining
 	}
@@ -139,14 +137,15 @@ function downloadFunction(text, url, prefs) {
 
 
 		if(prefs.fetchPDF) {
-//Z.debug("(" + prefs.id + ") Will try to fetch PDF for '" + item.title + "' (" + (item.callNumber || '') + ")");
 			var arguments = urlToArgs(url);
 			var pdf = "/ehost/pdfviewer/pdfviewer?"
 				+ "sid=" + arguments["sid"]
 				+ "&vid=" + arguments["vid"];
-	
+			Z.debug("Fetching PDF from " + pdf);
+
 			ZU.doGet(pdf, function (text) {
-					var realpdf = text.match(/<embed\s+id="pdfEmbed"[^>]+\bsrc="([^"]+)"/);
+					var realpdf = text.match(/<iframe\s+id="pdfIframe"[^>]+\bsrc="([^"]+)"/i)
+						|| text.match(/<embed\s+id="pdfEmbed"[^>]+\bsrc="([^"]+)"/i);	//this is probably no longer used
 					if(realpdf) {
 						realpdf = realpdf[1].replace(/&amp;/g, "&")	//that's & amp; (Scaffold parses it)
 											.replace(/#.*$/,'');
@@ -156,28 +155,30 @@ function downloadFunction(text, url, prefs) {
 						} else {
 							Z.debug("Don't have an accession number. PDF might fail.");
 						}
-//Z.debug("(" + prefs.id + ") PDF for " + item.title + " (" + (item.callNumber || '') + ") is at " + realpdf);
-						//Zotero.debug("PDF for "+item.title+": "+realpdf);
+
 						item.attachments.push({
 								url:realpdf,
 								title: "EBSCO Full Text",
 								mimeType:"application/pdf"
 						});
+					} else {
+						Z.debug("Could not detect embedded pdf.");
+						var m = text.match(/<iframe[^>]+>/i) || text.match(/<embed[^>]+>/i);
+						if(m) Z.debug(m[0]);
 					}
 				},
 				function () {
-//Z.debug("(" + prefs.id + ") Done trying to fetch PDF for '" + item.title + "' (" + (item.callNumber || '') + ")");
+					Z.debug("PDF retrieval done.");
 					item.complete(); }
 			);
 		} else {
-//Z.debug("(" + prefs.id + ") Not trying to fetch PDF for " + item.title + "' (" + (item.callNumber || '') + ")");
+			Z.debug("Not attempting to retrieve PDF.");
 			item.complete();
 		}
 	});
 
 	translator.getTranslatorObject(function(trans) {
 		trans.options.itemType = itemType;
-//Z.debug("(" + prefs.id + ") Calling RIS translator with:" + text);
 		trans.doImport();
 	});
 }
@@ -328,9 +329,7 @@ function doDelivery(doc, itemInfo) {
 		+ "&vid=" + arguments["vid"]
 		+ "&bdata="+arguments["bdata"]
 		+ "&theExportFormat=1";	//RIS file
-//prefs.id = ++counter;
-//Z.debug("(" + prefs.id + ") Fetching RIS from '" + postURL + "' with prefs:");
-//Z.debug(prefs);
+
 	ZU.doGet(postURL, function (text) {
 		downloadFunction(text, postURL, prefs);
 	});
@@ -376,7 +375,7 @@ var testCases = [
 				"volume": "17",
 				"issue": "1",
 				"pages": "112",
-				"journalAbbreviation": "Wilson Quarterly", 
+				"journalAbbreviation": "Wilson Quarterly",
 				"archive": "a9h",
 				"publisher": "Woodrow Wilson International Center for Scholars",
 				"ISBN": "03633276",
