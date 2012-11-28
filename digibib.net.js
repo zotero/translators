@@ -2,14 +2,14 @@
 	"translatorID": "e99bd723-39e6-418c-9524-390dbc583e08",
 	"label": "digibib.net",
 	"creator": "Heiko Jansen (hbz), Ingolf Kuss (hbz), Bernhard Assmann (hbz)",
-	"target": "https?://.*\\.digibib\\.net/(Digibib|jumpto|opensearch)",
+	"target": "https?://.*\\.digibib\\.net/(Digibib|jumpto|metasearch|opensearch|template)",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-03-12 17:43:06"
+	"lastUpdated": "2012-11-27 22:51:37"
 }
 
 /*
@@ -81,7 +81,7 @@ function doWeb(doc, url) {
 			conf["item_title_xpath"] = './a';
 			conf["item_url_xpath"] = 'following-sibling::dd[contains(@class,"func")]//a[contains(@class,"js_formatExport")]';
 			conf["url_trnsfrm"] = function (hitUrl) {
-				return hitUrl.replace(/SUBSERVICE=DIRECT_EXPORT/, 'SUBSERVICE=FORMAT_EXPORT').replace(/FORMAT=TXT/, 'FORMAT=MODS');
+				return hitUrl.replace(/\/direct-export/, '/format-export').replace(/FORMAT=TXT/, 'FORMAT=MODS');
 			};
 		} else if (indicator_class.match(/z_ezb_multi/)) {
 			conf["lists_xpath"] = '//div[contains(@class,"listcontainer")]';
@@ -89,7 +89,7 @@ function doWeb(doc, url) {
 			conf["item_title_xpath"] = './a[contains(@class,"js_getFull")]';
 			conf["item_url_xpath"] = './ul/li/a[contains(@class,"js_formatExport")]';
 			conf["url_trnsfrm"] = function (hitUrl) {
-				return hitUrl.replace(/SUBSERVICE=DIRECT_EXPORT/, 'SUBSERVICE=FORMAT_EXPORT').replace(/FORMAT=TXT/, 'FORMAT=MODS');
+				return hitUrl.replace(/\/direct-export/, '/format-export').replace(/FORMAT=TXT/, 'FORMAT=MODS');
 			};
 		} else if (indicator_class.match(/z_digilink_multi/)) {
 			conf["lists_xpath"] = '//div[contains(@class,"listcontainer")]';
@@ -97,7 +97,7 @@ function doWeb(doc, url) {
 			conf["item_title_xpath"] = './strong';
 			conf["item_url_xpath"] = 'following-sibling::dd[2]/ul/li/a[contains(@class,"js_formatExport")]';
 			conf["url_trnsfrm"] = function (hitUrl) {
-				return hitUrl.replace(/SUBSERVICE=DIRECT_EXPORT/, 'SUBSERVICE=FORMAT_EXPORT').replace(/FORMAT=TXT/, 'FORMAT=MODS');
+				return hitUrl.replace(/\/direct-export/, '/format-export').replace(/FORMAT=TXT/, 'FORMAT=MODS');
 			};
 		} else if (indicator_class.match(/z_dbis_multi/)) {
 			conf["lists_xpath"] = '//div[contains(@class,"listcontainer")]';
@@ -105,15 +105,15 @@ function doWeb(doc, url) {
 			conf["item_title_xpath"] = './a[contains(@class,"js_getFull")]';
 			conf["item_url_xpath"] = './/a[contains(@class,"js_formatExport")]';
 			conf["url_trnsfrm"] = function (hitUrl) {
-				return hitUrl.replace(/SUBSERVICE=DIRECT_EXPORT/, 'SUBSERVICE=FORMAT_EXPORT').replace(/FORMAT=TXT/, 'FORMAT=MODS');
+				return hitUrl.replace(/\/direct-export/, '/format-export').replace(/FORMAT=TXT/, 'FORMAT=MODS');
 			};
 		} else if (indicator_class.match(/z_cart_multi/)) {
 			conf["lists_xpath"] = '//div[contains(@class,"listcontainer")]';
 			conf["item_xpath"] = './dl[contains(@class,"list")]/dt';
 			conf["item_title_xpath"] = 'child::*[2]';
-			conf["item_url_xpath"] = 'following-sibling::dd[3]//a[contains(@class,"js_formatExport")]';
+			conf["item_url_xpath"] = 'following-sibling::dd[contains(@class,"last")][1]//a[contains(@class,"js_formatExport")]';
 			conf["url_trnsfrm"] = function (hitUrl) {
-				return hitUrl.replace(/SUBSERVICE=DIRECT_EXPORT/, 'SUBSERVICE=FORMAT_EXPORT').replace(/FORMAT=TXT/, 'FORMAT=MODS');
+				return hitUrl.replace(/\/direct-export/, '/format-export').replace(/FORMAT=TXT/, 'FORMAT=MODS');
 			};
 		}
 		availableItems = _get_items_multi(doc, url, namespace, conf);
@@ -132,7 +132,7 @@ function doWeb(doc, url) {
 	} else if (indicator_class.match(/z_[a-z]*_single/)) {
 		var urlNode = doc.evaluate('/html/body/div/div/div[@id="main"]//a[contains(@class,"js_formatExport")]', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
 		if (urlNode) {
-			var hitUrl = urlNode.singleNodeValue.href.replace(/SUBSERVICE=DIRECT_EXPORT/, 'SUBSERVICE=FORMAT_EXPORT').replace(/FORMAT=TXT/, 'FORMAT=MODS');
+			var hitUrl = urlNode.singleNodeValue.href.replace(/\/direct-export/, '/format-export').replace(/FORMAT=TXT/, 'FORMAT=MODS');
 			Zotero.Utilities.doGet(hitUrl, importItem);
 			Zotero.wait();
 		}
