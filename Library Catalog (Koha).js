@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-11-29 21:35:55"
+	"lastUpdated": "2012-11-29 21:40:17"
 }
 
 /*
@@ -66,8 +66,7 @@ function scrape(marcurl) {
 	Zotero.Utilities.HTTP.doGet(marcurl, function (text) {
 		//Z.debug(text)
 		//this removes commas at the end of subfields
-		//note that there is an invisible MARC subfield delimiter in the regex
-		text = text.replace(/,\u001Fb/g, "b")
+		text = text.replace(/,\u001Fb/g, "\u001Fb")
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
 		translator.setString(text);
