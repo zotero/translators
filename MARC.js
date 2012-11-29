@@ -1,15 +1,15 @@
 {
 	"translatorID": "a6ee60df-1ddc-4aae-bb25-45e0537be973",
-	"translatorType": 1,
 	"label": "MARC",
 	"creator": "Simon Kornblith, Sylvain Machefert",
 	"target": "marc",
 	"minVersion": "2.1.9",
-	"maxVersion": null,
+	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
+	"translatorType": 1,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-08-07 22:26:11"
+	"lastUpdated": "2012-11-28 16:07:26"
 }
 
 function detectImport() {
@@ -330,8 +330,8 @@ record.prototype.translate = function(item) {
 				{
 					authorText = aut['a'];
 				}
-				
-				item.creators.push(Zotero.Utilities.cleanAuthor(authorText, "author", true));
+				//prevent this from crashing with empty author tags 
+				if(authorText) item.creators.push(Zotero.Utilities.cleanAuthor(authorText, "author", true));
 			}
 		}
 		

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-25 22:28:07"
+	"lastUpdated": "2012-11-29 00:28:22"
 }
 
 /*
@@ -43,10 +43,10 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var articles = [];
 		var items = {};
-		var titles = doc.evaluate('//span[@class="results_summary"]/span[@class="label"]/a|//span[@class="results_summary"]/preceding-sibling::a', doc, null, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//span[@class="results_summary"]/span[@class="label"]/a[contains(@href, "opac-detail.pl")]|//span[@class="results_summary"]/preceding-sibling::a[contains(@href, "opac-detail.pl")]', doc, null, XPathResult.ANY_TYPE, null);
 		var title;
 		while (title = titles.iterateNext()) {
-			items[title.href] = title.textContent;
+			items[title.href] = title.textContent.trim();
 		}
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
@@ -64,6 +64,10 @@ function doWeb(doc, url) {
 
 function scrape(marcurl) {
 	Zotero.Utilities.HTTP.doGet(marcurl, function (text) {
+		//Z.debug(text)
+		//this removes commas at the end of subfields
+		//note that there is an invisible MARC subfield delimiter in the regex
+		text = text.replace(/,\b/g, "b")
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
 		translator.setString(text);
@@ -190,6 +194,130 @@ var testCases = [
 				"callNumber": "HQ 27 J485",
 				"libraryCatalog": "Library Catalog (Koha)",
 				"shortTitle": "Les jeunes et la sexualité"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://biblio.esd.ipl.pt/cgi-bin/koha/opac-detail.pl?biblionumber=2367",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Úxia",
+						"lastName": "Vaello",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Inês",
+						"lastName": "Oliveira",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Catarina",
+						"lastName": "undefined",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Bruno",
+						"lastName": "undefined",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Maria",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Célia",
+						"lastName": "C",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ricardo",
+						"lastName": "undefined",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "As",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Catarina",
+						"lastName": "Lei",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ana Sofia",
+						"lastName": "Silv",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Alves",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Campos",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Mauríc",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Guida",
+						"lastName": "Pitalúa",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Saraiva",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Fra",
+						"lastName": "Pedro",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jo",
+						"lastName": "Andrade",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Mi",
+						"lastName": "Oliveira",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Luí",
+						"lastName": "Taveira",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Escola Superio",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Escola Vocacio",
+						"creatorType": "contributor",
+						"fieldMode": true
+					},
+					{
+						"lastName": "PT",
+						"creatorType": "contributor",
+						"fieldMode": true
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"language": "por",
+				"title": "Dia Mundial da Dança Dança Caldas 21h30",
+				"place": "Lisboa",
+				"publisher": "ESD",
+				"date": "2005",
+				"libraryCatalog": "Library Catalog (Koha)"
 			}
 		]
 	}
