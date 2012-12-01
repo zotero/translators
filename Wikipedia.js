@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-11-01 15:59:50"
+	"lastUpdated": "2012-11-28 22:10:10"
 }
 
 /**
@@ -190,10 +190,10 @@ var testCases = [
 				"title": "Wikipedia:Article wizard",
 				"rights": "Creative Commons Attribution-ShareAlike License",
 				"encyclopediaTitle": "Wikipedia, the free encyclopedia",
-				"url": "http://en.wikipedia.org/w/index.php?title=Wikipedia:Article_wizard&oldid=520004817",
-				"extra": "Page Version ID: 520004817",
+				"url": "http://en.wikipedia.org/w/index.php?title=Wikipedia:Article_wizard&oldid=521878824",
+				"extra": "Page Version ID: 521878824",
 				"language": "en",
-				"date": "2012-10-26T19:30:45Z",
+				"date": "2012-11-07T20:23:45Z",
 				"libraryCatalog": "Wikipedia",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Wikipedia"
