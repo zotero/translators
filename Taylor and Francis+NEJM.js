@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-28 00:40:20"
+	"browserSupport": "gcsib",
+	"lastUpdated": "2012-12-04 01:03:52"
 }
 
 /*
@@ -129,6 +129,9 @@ function scrape(doc, url, dois) {
 							item.publisher = risItem.publisher;
 							item.ISSN = risItem.ISSN;
 							item.ISBN = risItem.ISBN;
+							if(item.title.toUpperCase() == item.title) {
+								item.title = ZU.capitalizeTitle(item.title, true);
+							}
 							finalizeItem(item, doc, doi, baseUrl);
 						});
 						risTrans.translate();
