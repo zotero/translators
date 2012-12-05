@@ -53,54 +53,61 @@ choices          : {
 }
 });
 /** BEGIN TEST CASES **/
-var testCases = [ 
-	//Actualités
-	           {
-         	"itemType": "newspaperArticle",
-         	"creators": [],
-         	"notes": [],
-         	"tags": [],
-         	"seeAlso": [],
-         	"attachments": [],
-         	"url": "http://bofip.impots.gouv.fr/bofip/8000-PGP?branch=2",
-         	"date": "30/11/2012",
-         	"ISSN": "2262-1954",
-         	"publicationTitle": "Bulletin officiel des Finances Publiques-Impôts",
-         	"rights": "public",
-         	"title": "IS - Charges financières afférentes à l'acquisition de certains titres de participation",
-         	"libraryCatalog": "BOFiP-Impôts",
-         	"accessDate": "CURRENT_TIMESTAMP"
-         }, 
-         //BOFIP
-   			           {
-         	"itemType": "journalArticle",
-         	"creators": [
-         		{
-         			"lastName": "Ministère de l'Économie et des Finances",
-         			"creatorType": "author"
-         		}
-         	],
-         	"notes": [],
-         	"tags": [],
-         	"seeAlso": [],
-         	"attachments": [],
-         	"url": "http://bofip.impots.gouv.fr/bofip/7999-PGP/version/15",
-         	"callNumber": "BOI-IS-BASE-30-50-20121130",
-         	"date": "30/11/2012",
-         	"ISSN": "2262-1954",
-         	"publicationTitle": "Bulletin officiel des Finances Publiques-Impôts",
-         	"rights": "public",
-         	"title": "IS – Base d'imposition – Charges financières afférentes à l'acquisition de certains titres de participation",
-         	"libraryCatalog": "BOFiP-Impôts",
-         	"accessDate": "CURRENT_TIMESTAMP"
-         },
-	 
-{
-//Recherche simple 
-// Impossibilité de tester les autres recherches par l'URL
+var testCases = [
+	{
 		"type": "web",
-		"url": "http://bofip.impots.gouv.fr/bofip/simple/recherche-simple-facet?chunkLength=10&chunkOffset=1&ftsq=droits+de+timbre",
+		"url": "http://bofip.impots.gouv.fr/bofip/8000-PGP?branch=2",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"url": "http://bofip.impots.gouv.fr/bofip/8000-PGP?branch=2",
+				"date": "30/11/2012",
+				"ISSN": "2262-1954",
+				"publicationTitle": "Bulletin officiel des Finances Publiques-Impôts",
+				"rights": "public",
+				"title": "IS - Charges financières afférentes à l'acquisition de certains titres de participation",
+				"libraryCatalog": "BOFiP-Impôts",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://bofip.impots.gouv.fr/bofip/7999-PGP/version/15",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Ministère de l'Économie et des Finances",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"url": "http://bofip.impots.gouv.fr/bofip/7999-PGP/version/15",
+				"callNumber": "BOI-IS-BASE-30-50-20121130",
+				"date": "30/11/2012",
+				"ISSN": "2262-1954",
+				"publicationTitle": "Bulletin officiel des Finances Publiques-Impôts",
+				"rights": "public",
+				"title": "IS – Base d'imposition – Charges financières afférentes à l'acquisition de certains titres de participation",
+				"libraryCatalog": "BOFiP-Impôts",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://bofip.impots.gouv.fr/bofip/simple/recherche-simple-facet?chunkLength=10&chunkOffset=1&ftsq=droit",
 		"items": "multiple"
 	}
-		 ]
+]
 /** END TEST CASES **/
