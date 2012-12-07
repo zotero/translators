@@ -2,7 +2,7 @@
 	"translatorID": "abd7c626-6913-42d4-a05f-acc6683c69da",
 	"label": "Insignia opac",
 	"creator": "Niko",
-	"target": "https?://[^/]+/library/[^/?#]+\.aspx",
+	"target": "https?://[^/]+/library/[^/?#]+\\.aspx",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
