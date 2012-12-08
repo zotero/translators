@@ -9,18 +9,29 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-09-13 12:55:50"
+	"lastUpdated": "2012-12-03 05:12:02"
 }
 
 function detectWeb(doc, url) {
-	// make sure there are multiple results, check to see if the search results number exists
-	var xpath = '/html/body/table[4]/tbody/tr[2]/td[1]/table/tbody/tr[2]/td/a/b[1]|//tbody/tr/td/a[@class="mediumBoldAnchor" and contains(@href, "javascript:buildNewList")]';
-	//the target regex is sufficiently restrictive so that everything that's not a multiple is a book.
-	if (!doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) { // this hack catches search results w/ single items
-	  return "book";
-	} else { 
-		return "multiple";
+	// make sure there are multiple results
+	if (getSearchResults(doc).length) {
+	  return "multiple";
+	} else if(url.match(/[&?]uri=[^&#]+/)) {	//single item entries have a ui parameter
+		return "book";
 	}
+}
+
+function getSearchResults(doc) {
+	//search result
+	var res = ZU.xpath(doc, '(//center[1])/table/tbody/tr/td\
+					/table//td[1]/a[starts-with(@href,"javascript:buildNewList")]');
+	//search results, different format (see porbase.bnportugal.pt test cases)
+	if(!res.length) {
+		res = ZU.xpath(doc, 'html/body/table/tbody/tr[1]/td/table[5]/tbody/tr/td\
+								/table/tbody/tr/td[2]/a[@href]');
+	}
+
+	return res;
 }
 
 function doWeb(doc, url) {
@@ -29,23 +40,30 @@ function doWeb(doc, url) {
 	
 	var uris = new Array();
 	if(detectWeb(doc,uri) == "book") {
-		if (uri.indexOf("#") !== -1)
+		if (uri.indexOf("#") !== -1) {
 			uris.push(uri.replace(/#/,'&fullmarc=true#'));
-		else
+		} else {
 			uris.push(uri+'&fullmarc=true');
+		}
 		marcscrape(uris);
 	} else {
-		var items = Zotero.Utilities.getItemArray(doc, doc, "ipac\.jsp\?.*uri=(?:full|link)=[0-9]|^javascript:buildNewList\\('.*uri%3Dfull%3D[0-9]", "Show details");
+		var results = getSearchResults(doc);
+		var items = {};
+		for(var i=0, n=results.length; i<n; i++) {
+			items[results[i].href] = results[i].textContent;
+		}
+
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
 				return true;
 			}
-			var buildNewList = new RegExp("^javascript:buildNewList\\('([^']+)");
+
+			var uriRe = new RegExp("^javascript:buildNewList\\('([^']+)");
 			var uris = new Array();
 			for(var i in items) {
-				var m = buildNewList.exec(i);
+				var m = uriRe.exec(i);
 				if(m) {
-					uris.push(unescape(m[1]+'&fullmarc=true'));
+					uris.push(unescape(m[1]) + '&fullmarc=true');
 				} else {
 					uris.push(i+'&fullmarc=true');
 				}
@@ -60,92 +78,70 @@ function marcscrape(uris){
 	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
 	translator.getTranslatorObject(function (marc) {
 		Zotero.Utilities.processDocuments(uris, function (newDoc) {
-			scrape(newDoc, marc);
+				scrape(newDoc, marc);
 			}, function() {}, null);
 	});
 }   
 
 function scrape(newDoc, marc) {
-		var uri = newDoc.location.href;
-		
-	
-		var xpath = '//form/table[@class="tableBackground"]/tbody/tr/td/table[@class="tableBackground"]/tbody/tr[td[1]/a[@class="normalBlackFont1"]]';
-		var elmts = newDoc.evaluate(xpath, newDoc, null, XPathResult.ANY_TYPE, null);
-		if (!elmts.iterateNext()) {
-			var xpath2 = '//form/table[@class="tableBackground"]/tbody/tr/td/table[@class="tableBackground"]/tbody/tr[td[1]/a[@class="boldBlackFont1"]]';
-			var elmts = newDoc.evaluate(xpath2, newDoc, null, XPathResult.ANY_TYPE, null);
-		}
-		else
-		{
-			// Added to restart the evaluation. Otherwise, because of the iteratenext 
-			// used 5 lines above to test the xpath, we miss the first line (LDR) 
-			elmts = newDoc.evaluate(xpath, newDoc, null, XPathResult.ANY_TYPE, null);
-		}
+	var elmts = ZU.xpath(newDoc, '//form/table[@class="tableBackground"]/tbody/tr/td/table[@class="tableBackground"]/tbody/tr[td[1]/a[@class="normalBlackFont1"]]');
+	if(!elmts.length) elmts = ZU.xpath(newDoc, '//form/table[@class="tableBackground"]/tbody/tr/td/table[@class="tableBackground"]/tbody/tr[td[1]/a[@class="boldBlackFont1"]]');
 
-		var elmt;
+	var record = new marc.record();		
+	for(var i=0, n=elmts.length; i<n; i++) {
+		var elmt = elmts[i];
+		var field = ZU.superCleanString(ZU.xpathText(elmt, './TD[1]/A[1]/text()[1]') || '');
+		var value = (ZU.xpathText(elmt, './TD[2]/TABLE[1]/TBODY[1]/TR[1]/TD/A[1]', null, '') || '').trim();
 
-		var record = new marc.record();		
-		while(elmt = elmts.iterateNext()) {
-			var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./TD[1]/A[1]/text()[1]', elmt, null, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
-			var value = newDoc.evaluate('./TD[2]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/A[1]', elmt, null, XPathResult.ANY_TYPE, null).iterateNext();
-
-			// value = null for non-marc table entries w/ that xpath
-			if (!value) {
-				value = '';
-			} else {
-				value = value.textContent;
-			}
-			
-			// Sometimes, the field contains "LDR: ", "001: ". We can delete these extra characters
-			field = field.replace(/[\s:]/g, "");
-			
-			if (field == "LDR"){
+		// Sometimes, the field contains "LDR: ", "001: ". We can delete these extra characters
+		field = field.replace(/[\s:]/g, "");
+		if (field == "LDR"){
   			record.leader = value;
-			} else if(field != "FMT") {
-				// In french catalogs (in unimarc), the delimiter isn't the $ but \xA4 is used. Added there
-				// Also added the fact that subfield codes can be numerics
-				value = value.replace(/[\xA4\$]([a-z0-9]) /g, marc.subfieldDelimiter+"$1");
-				
-				var code = field.substring(0, 3);
-				var ind = "";
-				if(field.length > 3) {
-					ind = field[3];
-					if(field.length > 4) {
-						ind += field[4];
-					}
+		} else if(field != "FMT") {
+			// In french catalogs (in unimarc), the delimiter isn't the $ but \xA4 is used. Added there
+			// Also added the fact that subfield codes can be numerics
+			value = value.replace(/[\xA4\$]([a-z0-9]) ?/g, marc.subfieldDelimiter+"$1");
+			var code = field.substring(0, 3);
+			var ind = "";
+			if(field.length > 3) {
+				ind = field[3];
+				if(field.length > 4) {
+					ind += field[4];
 				}
-				record.addField(code, ind, value);
 			}
+			record.addField(code, ind, value);
 		}
-	
-		
-		var newItem = new Zotero.Item();
-		record.translate(newItem);
-		
-		var domain = uri.match(/https?:\/\/([^/]+)/);
-		newItem.repository = domain[1]+" Library Catalog";
-
-		// 20091210 : We try to get a permalink on the record
-		var perma = uri.match(/(https?:\/\/[^/]+.*ipac\.jsp\?).*(uri\=[^&]*)/);
-		var profile = uri.match(/(profile\=[^&]*)/);
-		if (perma && perma[1] && perma[2])
-		{
-			var permalink = perma[1] + perma[2];
-			// Sometimes, for libraries with multiple profiles, it can be useful
-			// to store the permalink with the profile used
-			if (profile)
-			{
-				permalink = permalink + "&" + profile[1];
-			}
-			newItem.attachments = [{url:permalink, title:"Original record", mimeType:"text/html", snapshot:false}];
-		}
-		else
-		{
-			Zotero.debug("Unable to create permalink on " + uri);
-		}
-
-		newItem.complete();
 	}
+
+	
+	var newItem = new Zotero.Item();
+	record.translate(newItem);
+
+	var uri = newDoc.location.href;
+	var domain = uri.match(/https?:\/\/([^/]+)/);
+	newItem.libraryCatalog = domain[1]+" Library Catalog";
+
+	// 20091210 : We try to get a permalink on the record
+	var perma = uri.match(/(https?:\/\/[^/]+.*ipac\.jsp\?).*(uri\=[^&]*)/);
+	var profile = uri.match(/(profile\=[^&]*)/);
+	if (perma && perma[1] && perma[2])
+	{
+		var permalink = perma[1] + perma[2];
+		// Sometimes, for libraries with multiple profiles, it can be useful
+		// to store the permalink with the profile used
+		if (profile)
+		{
+			permalink = permalink + "&" + profile[1];
+		}
+		newItem.attachments = [{url:permalink, title:"Original record", mimeType:"text/html", snapshot:false}];
+	}
+	else
+	{
+		Zotero.debug("Unable to create permalink on " + uri);
+	}
+
+	newItem.complete();
+}
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -233,6 +229,16 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://ipac.kings.edu/ipac20/ipac.jsp?menu=search&aspect=basic_search&npp=30&ipp=20&spp=20&profile=kc&ri=&index=.GW&term=test&x=0&y=0&aspect=basic_search",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://porbase.bnportugal.pt/ipac20/ipac.jsp?session=13544929K8D9M.93320&profile=porbase&uindex=TL&term=La%20exportaci%C3%B3n%20del%20jam%C3%B3n%20y%20otros%20derivados%20c%C3%A1rnicos%20:%20requisitos%20t%C3%A9cnicos&aspect=subtab11&menu=search&source=~!bnp",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://porbase.bnportugal.pt/ipac20/ipac.jsp?session=13544Q6S70C55.90629&menu=search&aspect=subtab11&npp=20&ipp=20&spp=20&profile=porbase&ri=&term=jamon&index=.GW&x=0&y=0&aspect=subtab11",
 		"items": "multiple"
 	}
 ]
