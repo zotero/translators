@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-09-26 00:53:41"
+	"lastUpdated": "2012-12-08 13:28:00"
 }
 
 /*Spanish Libraries:
@@ -24,6 +24,12 @@ UNED: http://biblio15.uned.es/
 function detectWeb(doc, url) {
 
 	var xpath = '//tr[th[@class="viewmarctags"]][td[@class="viewmarctags"]]';
+	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		Zotero.debug("SIRSI detectWeb: viewmarctags");
+		return "book";
+	}
+	
+	var xpath = '//dl[dt[@class="viewmarctags"]][dd[@class="viewmarctags"]]';
 	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		Zotero.debug("SIRSI detectWeb: viewmarctags");
 		return "book";
@@ -55,7 +61,8 @@ function detectWeb(doc, url) {
 }
 
 function scrape(doc) {
-	var xpath = '//tr[th[@class="viewmarctags"]][td[@class="viewmarctags"]]';
+//second xpath version for http://catalogue-bibliotheques.upmc.fr
+	var xpath = '//tr[th[@class="viewmarctags"]][td[@class="viewmarctags"]]|//dl/dt[@class="viewmarctags"]';
 	var elmts = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 	var elmt = elmts.iterateNext();
 	if(!elmt) {
@@ -65,24 +72,24 @@ function scrape(doc) {
 	newItem.extra = "";
 	var note;
 	authors = [];
+	
 	while(elmt) {
 		try {
-			var node = doc.evaluate('./TD[1]/A[1]/text()[1]', elmt, null, XPathResult.ANY_TYPE, null).iterateNext();
+			var node = ZU.xpathText(elmt, './TD[1]/A[1]/text()[1]|./following-sibling::dd[1]/a[1]/text()');
 			if(!node) {
-				var node = doc.evaluate('./TD[1]/text()[1]', elmt, null, XPathResult.ANY_TYPE, null).iterateNext();
+				var node = ZU.xpathText(elmt, './TD[1]/text()[1]|./following-sibling::dd[1]/text()')
 			}
 			
 			if(node) {
-				var casedField = Zotero.Utilities.superCleanString(ZU.xpathText(elmt, './th[1]/text()'));
-				
+				var casedField = Zotero.Utilities.superCleanString(ZU.xpathText(elmt, './th[1]/text()|./text()'));
 				field = casedField.toLowerCase();
 				//Z.debug(field)
  				field = field.replace(/:./,"").trim();
-				var value = Zotero.Utilities.superCleanString(node.nodeValue);
+				var value = Zotero.Utilities.superCleanString(node);
 				//Z.debug(value)
 				if(field == "publisher" || field == "éditeur" ) {
 					newItem.publisher = value;
-				} else if(field == "physical description" || field == "description physique" ||field== "descripción física" ||field== "descripcion fisica" || field == "descr. física") {
+				} else if(field == "physical description" || field == "desc. matérielle" ||field == "description physique" ||field== "descripción física" ||field== "descripcion fisica" || field == "descr. física") {
 					value = value.match(/([\d\sxvi]+)p/)[1];
 					if (value) newItem.numPages = value;
 				} else if(field == "pub date" || field == "année" || field =="fecha de pub") {
@@ -90,7 +97,7 @@ function scrape(doc) {
 					var m = re.exec(value);
 					newItem.date = m[0];
 				} else if(field == "isbn") {
-					var re = /^[0-9](?:[0-9X]+)/;
+					var re = /^[0-9\-](?:[0-9X\-]+)/;
 					var m = re.exec(value);
 					newItem.ISBN = m[0];
 				} else if(field == "issn") {
@@ -100,8 +107,10 @@ function scrape(doc) {
 					newItem.title = Zotero.Utilities.capitalizeTitle(titleParts[0]);
 				} else if (field == "serie"){
 					newItem.series = value;	
+				} else if (field == "langue" || field == "language"){
+					newItem.language = value;	
 				} else if(field == "series title" || field == "titre de série" || field == "collection") {
-					newItem.series = value.substr(1, value.length-2);
+					newItem.series = value.replace(/^\(|\)$/g, "");
 				} else if(field == "publication info" || field == "publication" || field =="publicación" ||field =="publicacion") {
 				//this is a bit tricky - can be in the form Place : Publisher; Place : Publisher, Year
 				//or Place; Place : Publisher - the code` should get all cases and produce uniform output
@@ -190,6 +199,22 @@ function scrape(doc) {
 		newItem.callNumber += " " + callNumber.nodeValue.trim();
 	}
 	
+	//sometimes we're missing the publication date - see if it's in the publisher:
+	if (!newItem.date){
+		var year = newItem.publisher.match(/\d{4}/)[0];
+		if (year) newItem.publisher = newItem.publisher.replace(/[,;:]\s*\d{4}/, "");
+		newItem.date = year;
+	}
+	
+	//sometimes the place is in the publisher field
+	if (!newItem.place){
+		var place = newItem.publisher.match(/(.[^:]+):/)[1];
+		if (place){
+			newItem.place = place.trim();
+			newItem.publisher = newItem.publisher.replace(/.[^:]+:/, "")
+		}
+	}
+	
 	var domain = doc.location.href.match(/https?:\/\/([^/]+)/);
 	newItem.repository = domain[1]+" Library Catalog";
 	
@@ -206,7 +231,7 @@ function doWeb(doc, url){
 	} else if (doc.evaluate('//form[@name="hitlist"]/table/tbody/tr', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		Zotero.debug("SIRSI doWeb: hitlist");
 		sirsiNew = false;
-	} else if (doc.evaluate('//tr[th[@class="viewmarctags"]][td[@class="viewmarctags"]]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	} else if (doc.evaluate('//tr[th[@class="viewmarctags"]][td[@class="viewmarctags"]]|//dl[dt[@class="viewmarctags"]][dd[@class="viewmarctags"]]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		Zotero.debug("SIRSI doWeb: viewmarctags");
 		sirsiNew = true;
 	} else if (doc.evaluate('//input[@name="VOPTIONS"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
@@ -339,23 +364,23 @@ function doWeb(doc, url){
 				var pre = doc.getElementsByTagName("pre");
 				var text = pre[0].textContent;
 				var documents = text.split("*** DOCUMENT BOUNDARY ***");
-				for(var j=1; j<documents.length; j++) {
-					var uri = newUri+"?marks="+recNumbers[j]+"&shadow=NO&format=FLAT+ASCII&sort=TITLE&vopt_elst=ALL&library=ALL&display_rule=ASCENDING&duedate_code=l&holdcount_code=t&DOWNLOAD_x=22&DOWNLOAD_y=12&address=&form_type=";
-					var lines = documents[j].split("\n");
-					var record = new marc.record();
-					var tag, content;
-					var ind = "";
-					for(var i=0; i<lines.length; i++) {
-						var line = lines[i];
-						if(line[0] == "." && line.substr(4,2) == ". ") {
-							if(tag) {
-								content = content.replace(/\|([a-z])/g, marc.subfieldDelimiter+"$1");
-								record.addField(tag, ind, content);
+					for(var j=1; j<documents.length; j++) {
+						var uri = newUri+"?marks="+recNumbers[j]+"&shadow=NO&format=FLAT+ASCII&sort=TITLE&vopt_elst=ALL&library=ALL&display_rule=ASCENDING&duedate_code=l&holdcount_code=t&DOWNLOAD_x=22&DOWNLOAD_y=12&address=&form_type=";
+						var lines = documents[j].split("\n");
+						var record = new marc.record();
+						var tag, content;
+						var ind = "";
+						for(var i=0; i<lines.length; i++) {
+							var line = lines[i];
+							if(line[0] == "." && line.substr(4,2) == ". ") {
+								if(tag) {
+									content = content.replace(/\|([a-z])/g, marc.subfieldDelimiter+"$1");
+									record.addField(tag, ind, content);
+								}
+							} else {
+								content += " "+line.substr(6);
+								continue;
 							}
-						} else {
-							content += " "+line.substr(6);
-							continue;
-						}
 						tag = line.substr(1, 3);	
 						if(tag[0] != "0" || tag[1] != "0") {
 							ind = line.substr(6, 2);
@@ -380,9 +405,7 @@ function doWeb(doc, url){
 			});
 		});
 	}
-}
-
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
