@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-12-03 05:12:02"
+	"lastUpdated": "2012-12-08 07:34:35"
 }
 
 function detectWeb(doc, url) {
@@ -240,6 +240,80 @@ var testCases = [
 		"type": "web",
 		"url": "http://porbase.bnportugal.pt/ipac20/ipac.jsp?session=13544Q6S70C55.90629&menu=search&aspect=subtab11&npp=20&ipp=20&spp=20&profile=porbase&ri=&term=jamon&index=.GW&x=0&y=0&aspect=subtab11",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://catalogolx.cm-lisboa.pt/ipac20/ipac.jsp?uri=full=3100024~!135303~!415&ri=6",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Jorge",
+						"lastName": "Calado",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Fundação Eugénio de Almeida",
+						"creatorType": "contributor",
+						"fieldMode": true
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Original record",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"ISBN": "972-8517-13-0",
+				"language": "por eng",
+				"title": "Terra bendita: fotografias da FSA e afins",
+				"place": "Évora",
+				"publisher": "Fundação Eugénio de Almeida",
+				"date": "2000",
+				"callNumber": "908(73)(084.121)",
+				"libraryCatalog": "catalogolx.cm-lisboa.pt Library Catalog",
+				"shortTitle": "Terra bendita"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://catalogolx.cm-lisboa.pt/ipac20/ipac.jsp?uri=full=3100024~!73588~!2",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Luther S.",
+						"lastName": "Luedtke",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Original record",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"language": "eng",
+				"title": "Making America: the society and culture of the United States",
+				"place": "Washington",
+				"publisher": "United States Information Agency",
+				"date": "1987",
+				"callNumber": "316.7(73)",
+				"libraryCatalog": "catalogolx.cm-lisboa.pt Library Catalog",
+				"shortTitle": "Making America"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
