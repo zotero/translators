@@ -2,210 +2,333 @@
 	"translatorID": "d71e9b6d-2baa-44ed-acb4-13fe2fe592c0",
 	"label": "Google Patents",
 	"creator": "Adam Crymble, Avram Lyon",
-	"target": "^https?://(www\\.)?google\\.[^/]*/(?:patents|(search|#q)[^/]*[\\&\\?]tbm=pts)",
-	"minVersion": "2.1.9",
+	"target": "^https?://(www\\.)?google\\.[^/]+/(?:patents|[^/]*[&?#]tbm=pts)",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-23 23:39:06"
+	"lastUpdated": "2012-12-08 08:58:37"
 }
 
 function detectWeb(doc, url) {
 	if (!doc.getElementsByTagName("body")[0].hasChildNodes()) return;
-	if (doc.location.href.match(/(search.*[?&]q=|#q=.+tbm=pts)/)) {
+
+	if (getSearchResults(doc).length) {
 		return "multiple";
-	} else if (doc.location.href.match(/[?&]id=|patents\/US/)) {
+	} else if(getScraper(doc)) {
 		return "patent";
 	}
 }
 
-function associateData(newItem, dataTags, field, zoteroField) {
-	if (dataTags[field]) {
-		newItem[zoteroField] = dataTags[field];
+function getSearchResults(doc) {
+	return ZU.xpath(doc, '//div[@id="ires"]//li[@class="g"]//h3/a');
+}
+
+function fixAuthorCase(name) {
+	if(name.toUpperCase() == name) {
+		return ZU.capitalizeTitle(name, true).replace(/\sa(\.?)\s/,' A$1 ');
+	} else {
+		return name;
 	}
 }
 
-function scrape(doc, url) {
-	//Z.debug(url)
-	var dataTags = new Object();
-	var newItem = new Zotero.Item("patent");
-
-
-	newItem.abstractNote = ZU.xpathText(doc, '//p[@class="patent_abstract_text"]');
-	// XXX This is temporary, but Google Patents currently covers only US patents
-	newItem.country = "United States";
-
-	//Grab the patent_bibdata items and the text node directly next to them 
-	var xPathHeadings = doc.evaluate('//div[@class="patent_bibdata"]//b', doc, null, XPathResult.ANY_TYPE, null);
-	// We avoid the next node containing only :\u00A0 (colon followed by a non-breaking space),
-	// since it is a separate node when the field's value is linked (authors, assignees).
-	var xPathContents = doc.evaluate('//div[@class="patent_bibdata"]//b/following::text()[not(.=":\u00A0")][1]', doc, null, XPathResult.ANY_TYPE, null);
-
-	// create an associative array of the items and their contents
-	var heading, content;
-	while (heading = xPathHeadings.iterateNext(), content = xPathContents.iterateNext()) {
-		if (heading.textContent == 'Publication number') {
-			content = doc.evaluate('//div[@class="patent_bibdata"]//b[text()="Publication number"]/following::nobr[1]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-		}
-		if (heading.textContent == 'Inventors') {
-			content = ZU.xpathText(doc, '//div[@class="patent_bibdata"]//b[text()="Inventors"]/following::a[contains(@href,"inventor")]');
-			dataTags["Inventors"] = content;
-		} else {
-			dataTags[heading.textContent] = content.textContent.replace(": ", '');;
-		}
-		//Zotero.debug(dataTags);
-	}
-
-	if (doc.evaluate('//td[3]/p', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		newItem.abstractNote = (doc.evaluate('//td[3]/p', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace("Abstract", ''));
-	}
-
-
-	/*
-	for (var i =0; i < xPathCount.numberValue; i++) {
-		
-		headings.push(xPathHeadings.iterateNext().textContent);	
-		contents = contents.replace(headings[i], "xxx");	
-	}
-	
-	
-	var splitContent = new Array();
-	splitContent = contents.split(/xxx/);
-	*/
-	//associate headings with contents.
-	//extra field
-	newItem.extra = '';
-
-	for (fieldTitle in dataTags) {
-		//fieldTitle = item.replace(/\s+|\W*/g, '');
-		/*
-		if (fieldTitle == "US Classification" | fieldTitle == "International Classification" | fieldTitle == "Abstract") {
-			dataTags[fieldTitle] = splitContent[i+1];
-		} else {
-			dataTags[fieldTitle] = splitContent[i+1].replace(": ", '');
-		}
+var scrapers = [
+	//U.S. (?) patent page. E.g. http://www.google.com/patents/US20090289560
+	{
+		getBoxes: function(doc) {
+			return ZU.xpath(doc, '(//div[@class="patent_bibdata"]//*[./b]|//div[@class="patent_bibdata"][./b])');
+		},
+		detect: function(doc) {
+			return this.getBoxes(doc).length;
+		},
+		fieldMap: {
+			'PATENT NUMBER': 'patentNumber',
+			'FILING DATE': 'filingDate',
+			'ISSUE DATE': 'date',
+			'APPLICATION NUMBER': 'applicationNumber',
+			'ORIGINAL ASSIGNEE': 'assignee',
+			'INVENTORS': 'creators',
+			'INVENTOR': 'creators',
+			'CURRENT U.S. CLASSIFICATION': 'extra/U.S. Classification',
+			'INTERNATIONAL CLASSIFICATION': 'extra/International Classification'
+		/*	'PRIMARY EXAMINER':
+			'SECONDARY EXAMINER':
+			'ATTORNEY':
+			'ATTORNEYS':
 		*/
-		if (dataTags[fieldTitle].match("About this patent")) {
-			dataTags[fieldTitle] = dataTags[fieldTitle].replace("About this patent", '');
+		},
+		addField: function(fields, label, value) {
+			if(!value.length) return;
+			var zField = this.fieldMap[label];
+			if(value.length && zField) {
+				zField = zField.split('/');
+				switch(zField[0]) {
+					case 'creators':
+						if(!fields.creators) fields.creators = [];
+						fields.creators = fields.creators.concat(value);
+					break;
+					case 'extra':
+						if(fields.extra) fields.extra += '\n';
+						else fields.extra = '';
+
+						if(zField[1]) fields.extra += zField[1] + ': ';
+						fields.extra += value.join('; ');
+					break;
+					default:
+						if(fields[zField[0]]) return;	//do not overwrite previous fields
+						fields[zField[0]] = value.join('; ');
+				}
+			}
+		},
+		addValue: function(label, value, node) {
+			switch(label) {
+				case 'PATENT NUMBER':
+				case 'FILING DATE':
+				case 'ISSUE DATE':
+				case 'APPLICATION NUMBER':
+				case 'PRIMARY EXAMINER':
+				case 'SECONDARY EXAMINER':
+					value[0] = node.textContent.trim().replace(/^:\s*/,'');
+				break;
+				case 'ATTORNEY':
+				case 'ATTORNEYS':
+					value = value.concat(
+						fixAuthorCase(
+							node.textContent.trim()
+									.replace(/^:\s*/,'')
+						).split(/\s*,\s*(?=\S)(?!(?:LLC|LLP|Esq)\b)/i));
+				break;
+				case 'ORIGINAL ASSIGNEE':
+					if(node.nodeName.toUpperCase() != 'A') break;
+					value[0] = fixAuthorCase(node.textContent.trim());
+				break;
+				case 'INVENTORS':
+				case 'INVENTOR':
+					if(node.nodeName.toUpperCase() != 'A') break;
+					var name = node.textContent.trim().split(/\s*,\s*/);	//look for suffix
+					var inv = ZU.cleanAuthor(fixAuthorCase(name[0]), 'inventor');
+					if(name[1]) {	//re-add suffix if we had one
+						inv.firstName += ', ' + name[1];
+					}
+					value.push(inv);
+				break;
+				case 'CURRENT U.S. CLASSIFICATION':
+					if(node.nodeName.toUpperCase() != 'A') break;
+					value.push(node.textContent.trim());
+				break;
+				case 'INTERNATIONAL CLASSIFICATION':
+					value = value.concat(node.textContent.trim()
+									.replace(/^:\s*/,'')
+									.split(/\s*;\s*/));
+				break;
+			}
+			return value;
+		},
+		getMetadata: function(doc) {
+			var fieldBoxes = this.getBoxes(doc);
+			var fields = {};
+			for(var i=0, n=fieldBoxes.length; i<n; i++) {
+				//within each box, the fields are labeled in bold and separated by a <br/>
+				var box = fieldBoxes[i];
+				var node = box.firstChild;
+				var label, value = [];
+				while(node) {
+					switch(node.nodeName.toUpperCase()) {
+						case 'B':
+							if(!label) {
+								label = node.textContent.trim().toUpperCase();
+							} else {
+								value = this.addValue(label, value, node);
+							}
+						break;
+						case 'BR':
+							if(label) {
+								if(value.length) {
+									this.addField(fields, label, value);
+								}
+								label = undefined;
+								value = [];
+							}
+						break;
+						default:
+							if(!label) break;
+							value = this.addValue(label, value, node);
+					}
+					node = node.nextSibling;
+				}
+				if(label && value.length) {
+					this.addField(fields, label, value);
+				}
+			}
+
+			//add some other fields
+			fields.abstractNote = ZU.xpathText(doc, '//p[@class="patent_abstract_text"]');
+			fields.title = ZU.xpathText(doc, '//h1[@class="gb-volume-title"]');
+			if(fields.title.toUpperCase() == fields.title) {
+				fields.title = ZU.capitalizeTitle(fields.title, true);
+			}
+
+			if(fields.extra.indexOf('U.S. Classification') != -1) {
+				fields.country = "United States";
+			}
+
+			var url = doc.location.href;
+			fields.url = 'http://' + doc.location.host + doc.location.pathname;
+			var m;
+			if(m = url.match(/[?&](id=[^&]+)/)) fields.url += '?' + m[1];
+
+			fields.attachments = [
+				{
+					url: ZU.xpathText(doc, '//a[@id="appbar-download-pdf-link"]/@href'),
+					title: "Google Patents PDF",
+					mimeType: "application/pdf"
+				}
+			];
+
+			return fields;
 		}
+	},
+	//European (?) patent page. E.g. http://www.google.com/patents/EP0011951A1
+	{
+		detect: function(doc) { return this.getRows(doc).length; },
+		getRows: function(doc) {
+			return ZU.xpath(doc, '//table[contains(@class,"patent-bibdata")]//tr[not(@class)][./td[@class="patent-bibdata-heading"]]');
+		},
+		getMetadata: function(doc) {
+			var rows = this.getRows(doc);
+			var label, values, zField;
+			var fields = {};
+			for(var i=0, n=rows.length; i<n; i++) {
+				label = ZU.xpathText(rows[i], './td[@class="patent-bibdata-heading"]');
+				values = ZU.xpath(rows[i], './td[@class="single-patent-bibdata"]|.//div[@class="patent-bibdata-value"]');
+				if(!values.length) continue;
 
-		//author(s)
-		if (fieldTitle == "Inventors") {
-			if (dataTags[fieldTitle] && dataTags[fieldTitle].toUpperCase() == dataTags[fieldTitle]) {
-				dataTags[fieldTitle] = Zotero.Utilities.capitalizeTitle(dataTags[fieldTitle].toLowerCase(), true);
-				//deal with the quirk that a single "a" remains lowercase with capitalizeTitle
-				dataTags[fieldTitle] = dataTags[fieldTitle].replace(/\sa.?\s/, " A. ");
+				switch(label.trim().toUpperCase()) {
+					case 'PUBLICATION NUMBER':
+						if(!zField) zField = 'patentNumber';
+					case 'PUBLICATION DATE':
+						if(!zField) zField = 'date';
+					case 'FILING DATE':
+						if(!zField) zField = 'filingDate';
+					case 'APPLICANT':
+						if(!zField) zField = 'assignee';
+						fields[zField] = values[0].textContent.trim();
+					break;
+					//case 'PRIORITY DATE':
+					//case 'ALSO PUBLISHED AS':
+					case 'INVENTORS':
+						fields.creators = [];
+						for(var j=0, m=values.length; j<m; j++) {
+							fields.creators.push(
+								ZU.cleanAuthor(values[j].textContent.trim(), 'inventor')
+							);
+						}
+					break;
+					case 'INTERNATIONAL CLASSIFICATION':
+						if(!zField) zField = 'International Classification';
+					case 'EUROPEAN CLASSIFICATION':
+						if(!zField) zField = 'U.S. Classification';
+
+						if(fields.extra) fields.extra += '\n';
+						else fields.extra = '';
+
+						fields.extra += zField + ': '
+							+ values.map(function(v) { 
+									return v.textContent.trim();
+								}).join('; ');
+					break;
+					default:
+				}
+				zField = undefined;
 			}
-			var authors = dataTags[fieldTitle].split(", ");
-			for (var j = 0; j < authors.length; j++) {
 
-				newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[j], "inventor"));
+			//add other data
+			fields.title = ZU.xpathText(doc, '//invention-title');
+			var abs = ZU.xpath(doc, '//p[@class="abstract"]');
+			fields.abstractNote = '';
+			for(var i=0, n=abs.length; i<n; i++) {
+				fields.abstractNote += ZU.trimInternal(abs[i].textContent) + '\n';
 			}
-		} else if (fieldTitle == "Inventor") {
+			fields.abstractNote = fields.abstractNote.trim();
 
-			if (dataTags[fieldTitle] && dataTags[fieldTitle].toUpperCase() == dataTags[fieldTitle]) {
-				dataTags[fieldTitle] = Zotero.Utilities.capitalizeTitle(dataTags[fieldTitle].toLowerCase(), true);
-				//deal with the quirk that a single "a" remains lowercase with capitalizeTitle
-				dataTags[fieldTitle] = dataTags[fieldTitle].replace(/\sa.?\s/, " A. ");
+			if(fields.patentNumber && fields.patentNumber.indexOf('EP') === 0) {
+				fields.country = 'European Union';
 			}
-			newItem.creators.push(Zotero.Utilities.cleanAuthor(dataTags["Inventor"], "inventor"));
-		}
 
-		if (fieldTitle == "Current U.S. Classification") {
-			newItem.extra += "U.S. Classification: " + dataTags["Current U.S. Classification"] + "\n";
-		} else if (fieldTitle == "International Classification") {
-			newItem.extra += "International Classification: " + dataTags["International Classification"] + "\n";
-		} else if (fieldTitle == "Publication number") {
-			newItem.extra += "Publication number: " + dataTags["Publication number"] + "\n";
+			return fields;
 		}
 	}
+];
 
-	associateData(newItem, dataTags, "Patent number", "patentNumber");
-	associateData(newItem, dataTags, "Issue date", "date");
-	associateData(newItem, dataTags, "Filing date", "filingDate");
-	associateData(newItem, dataTags, "Assignees", "assignee");
-	associateData(newItem, dataTags, "Assignee", "assignee");
-	associateData(newItem, dataTags, "Original Assignee", "assignee");
-	associateData(newItem, dataTags, "Abstract", "abstractNote");
-	associateData(newItem, dataTags, "Application number", "applicationNumber");
+function getScraper(doc) {
+	for(var i=0, n=scrapers.length; i<n; i++) {
+		if(scrapers[i].detect(doc)) return scrapers[i];
+	}
+}
 
-	newItem.title = ZU.xpathText(doc, '//h1[@class="gb-volume-title"]');
-	newItem.url = doc.location.href.replace(/(^[^\?]*\?id=[a-zA-Z0-9\-\_]+).*/, "$1");
+function scrape(doc) {
+	var scraper = getScraper(doc);
+	if(!scraper) return;
 
-	// Fix things in uppercase
-	var toFix = ["title", "shortTitle", "assignee"];
-	for each(var i in toFix) {
-		if (newItem[i] && newItem[i].toUpperCase() == newItem[i]) newItem[i] = Zotero.Utilities.capitalizeTitle(newItem[i].toLowerCase(), true);
+	//go through all the fields and add them to an item
+	var item = new Zotero.Item("patent");
+	var fields = scraper.getMetadata(doc);
+	var f;
+	for(f in fields) {
+		item[f] = fields[f];
 	}
 
-	var pdf = doc.evaluate('//a[@id="appbar-download-pdf-link"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-	if (pdf) newItem.attachments.push({
-		url: pdf.href,
-		title: "Google Patents PDF",
-		mimeType: "application/pdf"
-	});
+	item.complete();
+}
 
-	newItem.complete();
+//Fix url so it leads us to the right page
+function fixUrl(url) {
+	if (url.match(/printsec=|v=onepage|v=thumbnail|google\.(?!com\/)|[&?]hl=(?!en)(?:&|$)/)) {
+		var id;
+		var cLang = url.match(/[&?#]cl=([^&#]+)/);	//content language
+		var cleanUrl = url.replace(/[#?].*/, '')
+			+ '?hl=en'		//interface language
+			+ (cLang?'&cl=' + cLang[1]:'');	//content language
+
+		//patent pages directly navigated to from search results have the id somewhere in the URL
+		if (id = url.match(/[&?#]id=([^&#]+)/)) {
+			cleanUrl += '&id=' + id[1];
+		}
+		return cleanUrl;
+	}
+	return url;
 }
 
 function doWeb(doc, url) {
 	var host = 'http://' + doc.location.host + "/";
 
 	if (detectWeb(doc, url) == "multiple") {
-		var items = Zotero.Utilities.getItemArray(doc, doc, /\/patents(\?id=|\/US.+&ei=)/);
-		var trimmed = {};
-		var hit;
-		for (i in items) {
-			hit = i.match(/^https?:\/\/(?:www\.)?google\.[^/]+\/patents\/US.+&ei=/);
-			if (hit && !trimmed[hit[0]]) {
-				trimmed[hit[0]] = items[i];
-			}
+		var res = getSearchResults(doc);
+		var items = {};
+		for (var i=0, n=res.length; i<n; i++) {
+			items[fixUrl(res[i].href)] = res[i].textContent;
 		}
-		Zotero.selectItems(trimmed, function (items) {
+
+		Zotero.selectItems(items, function (items) {
+			if(!items) return true;
+
 			var articles = new Array();
 			for (var i in items) {
-				//remove anything that could redirect, make sure language is English
-				i = i.replace(/\?.+/, "?hl=en");
 				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(articles, scrape, function () {
-				Zotero.done();
-			});
-			Zotero.wait();
+			ZU.processDocuments(articles, scrape);
 		});
 	} else {
-		//make sure we always get the overview page - but only reload the page when necessary
-		var newurl;
-		if (url.match(/printsec=|v=onepage|v=thumbnail|google\.[^(com)]|hl=[^(en)]/)) {
-			//patent pages directly naviageted to from search results have the id somewhere in the URL
-			if (url.match(/[\&\?]id=[0-9A-Za-z\-]+/)) {
-				var id = url.match(/[\&\?]id=[0-9A-Za-z\-\_]+/)[0].replace(/\&/, "?");
-				newurl = host + "patents" + id;
-			} else {
-				//these URLs are navigated to from the patent page - they usually have the form patents/US12345
-				newurl = url.replace(/\?.*/, "");
-			}
-		//convert the page to the English version so scraping works
-		//do this by either changing the language to hl=en
-		if (newurl.match(/google\.[^(com)]|hl=[^(en)]/)){
-			if (newurl.search(/hl=[^(en)]/)!=-1){
-				newurl = newurl.replace(/hl=[a-z]+/, "hl=en")
-			}
-			else{
-				newurl = newurl + "&hl=en";
-			}
+		var newurl = fixUrl(url);
+		if(newurl != url) {
+			ZU.processDocuments(newurl, scrape)
+		} else {
+			scrape(doc, url);
 		}
-			ZU.processDocuments(newurl, scrape, function () {
-				Zotero.done();
-			})
-		} else scrape(doc, url);
 	}
-}
-
-
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -269,13 +392,13 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"country": "United States",
-				"extra": "U.S. Classification: 411/477",
 				"patentNumber": "1120656",
-				"date": "Dec 8, 1914",
 				"filingDate": "Jan 14, 1914",
+				"date": "Dec 8, 1914",
 				"assignee": "Hunt Specialty Manufacturing Company",
+				"extra": "U.S. Classification: 411/477; 24/711.4",
 				"title": "A Corpobation Of",
+				"country": "United States",
 				"url": "http://www.google.com/patents/about?id=KchEAAAAEBAJ",
 				"libraryCatalog": "Google Patents",
 				"accessDate": "CURRENT_TIMESTAMP"
@@ -325,20 +448,19 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.google.fr/patents/US7123498.pdf",
 						"title": "Google Patents PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"abstractNote": "MRAM has read word lines WLR and write word line WLW extending in the y direction, write/read bit line BLW/R and write bit line BLW extending in the x direction, and the memory cells MC disposed at the points of the intersection of these lines. The memory MC includes sub-cells SC1 and SC2. The sub-cell SC1 includes magneto resistive elements MTJ1 and MTJ2 and a selection transistor Tr1, and the sub-cell SC2 includes magneto resistive elements MTJ3 and MTJ4 and a selection transistor Tr2. The magneto resistive elements MTJ1 and MTJ2 are connected in parallel, and the magneto resistive elements MTJ3 and MTJ4 are also connected in parallel. Further, the sub-cells SC1 and SC2 are connected in series between the write/read bit line BLW/R and the ground.",
-				"country": "United States",
-				"extra": "U.S. Classification: 365/63",
 				"patentNumber": "7123498",
-				"date": "17 Oct 2006",
 				"filingDate": "12 Oct 2004",
-				"assignee": "International Business Machines Corporation",
+				"date": "17 Oct 2006",
 				"applicationNumber": "10/964,352",
+				"assignee": "International Business Machines Corporation",
+				"extra": "U.S. Classification: 365/63; 365/33; 365/46; 365/55; 365/66; 365/97; 365/100; 365/158",
+				"abstractNote": "MRAM has read word lines WLR and write word line WLW extending in the y direction, write/read bit line BLW/R and write bit line BLW extending in the x direction, and the memory cells MC disposed at the points of the intersection of these lines. The memory MC includes sub-cells SC1 and SC2. The sub-cell SC1 includes magneto resistive elements MTJ1 and MTJ2 and a selection transistor Tr1, and the sub-cell SC2 includes magneto resistive elements MTJ3 and MTJ4 and a selection transistor Tr2. The magneto resistive elements MTJ1 and MTJ2 are connected in parallel, and the magneto resistive elements MTJ3 and MTJ4 are also connected in parallel. Further, the sub-cells SC1 and SC2 are connected in series between the write/read bit line BLW/R and the ground.",
 				"title": "Non-volatile memory device",
+				"country": "United States",
 				"url": "http://www.google.fr/patents?id=Nh17AAAAEBAJ",
 				"libraryCatalog": "Google Patents",
 				"accessDate": "CURRENT_TIMESTAMP"
@@ -367,15 +489,17 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"abstractNote": "A device and method for optically pumping a gaseous laser using blackbody radiation produced by a plasma channel which is formed from an electrical discharge between two electrodes spaced at opposite longitudinal ends of the laser. A preionization device which can comprise a laser or electron beam accelerator produces a preionization beam which is sufficient to cause an electrical discharge between the electrodes to initiate the plasma channel along the preionization path. The optical pumping energy is supplied by a high voltage power supply rather than by the preionization beam. High output optical intensities are produced by the laser due to the high temperature blackbody radiation produced by the plasma channel, in the same manner as an exploding wire type laser. However, unlike the exploding wire type laser, the disclosed invention can be operated in a repetitive manner by utilizing a repetitive pulsed preionization device.",
-				"country": "United States",
-				"extra": "U.S. Classification: 372/70\nInternational Classification: : H01S  3091",
 				"patentNumber": "4390992",
 				"filingDate": "Jul 17, 1981",
+				"date": "Jun 28, 1983",
 				"assignee": "The United States of America as represented by the United States Department of Energy",
+				"extra": "U.S. Classification: 372/70; 372/78\nInternational Classification: H01S  3091",
+				"abstractNote": "A device and method for optically pumping a gaseous laser using blackbody radiation produced by a plasma channel which is formed from an electrical discharge between two electrodes spaced at opposite longitudinal ends of the laser. A preionization device which can comprise a laser or electron beam accelerator produces a preionization beam which is sufficient to cause an electrical discharge between the electrodes to initiate the plasma channel along the preionization path. The optical pumping energy is supplied by a high voltage power supply rather than by the preionization beam. High output optical intensities are produced by the laser due to the high temperature blackbody radiation produced by the plasma channel, in the same manner as an exploding wire type laser. However, unlike the exploding wire type laser, the disclosed invention can be operated in a repetitive manner by utilizing a repetitive pulsed preionization device.",
+				"title": "Plasma channel optical pumping device and method",
+				"country": "United States",
 				"url": "http://www.google.com/patents?id=PGk-AAAAEBAJ",
-				"issueDate": "Jun 28, 1983",
-				"title": "Plasma channel optical pumping device and method"
+				"libraryCatalog": "Google Patents",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -384,6 +508,135 @@ var testCases = [
 		"defer": true,
 		"url": "http://www.google.fr/#q=ordinateur&hl=fr&prmd=imvns&source=lnms&tbm=pts&sa=X&ei=oJJfUJKgBOiU2gWqwIHYCg&ved=0CBIQ_AUoBQ&tbo=1&prmdo=1&bav=on.2,or.r_gc.r_pw.r_qf.&fp=ec5bd0c9391b4cc0&biw=1024&bih=589",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.google.com/patents/EP1808414A1?cl=en&dq=water&hl=en&sa=X&ei=fLS-UL-FIcTY2gXcg4CABw&ved=0CDcQ6AEwAQ",
+		"items": [
+			{
+				"itemType": "patent",
+				"creators": [
+					{
+						"firstName": "Michel",
+						"lastName": "Billon",
+						"creatorType": "inventor"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"patentNumber": "EP1808414 A1",
+				"date": "Jul 18, 2007",
+				"filingDate": "Jan 16, 2006",
+				"assignee": "Billon, Michel",
+				"extra": "International Classification: C02F 1/00\nU.S. Classification: E03B 1/04; E03D 5/00B",
+				"title": "Device for recycling sanitary water",
+				"abstractNote": "The installation for recycling used water originating from sanitary equipment and re-use of water for rinsing a water closet bowl, comprises a control system having an electronic terminal with a micro controller, and an additional drain to pour an overflow of a tank directly in an evacuation pipe of the water closet bowl. The water closet bowl is equipped with a flush water saver system, which surmounts the bowl. The saver system comprises tank (3) with a water reserve, and a water-flushing device placed in the tank to supply the flush water to the water closet bowl. The installation for recycling used water originating from sanitary equipment and re-use of water for rinsing a water closet bowl, comprises a control system having an electronic terminal with a micro controller, and an additional drain to pour an overflow of a tank directly in an evacuation pipe of the water closet bowl. The water closet bowl is equipped with a flush water saver system, which surmounts the bowl. The saver system comprises tank (3) with a water reserve, and a water-flushing device placed in the tank to supply the flush water to the water closet bowl, water supply pipes, a filter and a raising pump are arranged in one of the pipes, a water level detector to control the water reserve level contained in the tank, and a flapper valve to control the arrival of running water. The flapper valve is normally closed and temporarily opened when quantity of water contained in the tank is lower than a predetermined quantity detected by the detector. The water-flushing device comprises a drain valve (25A) with a vertical actuation inside a flow regulation tube, which extends on all the height of the tank and communicates with the rest of the tank by openings in lateral surface of the tube. The drain valve is operated automatically by a motor reducer, which is connected to the valve by a rod and a chain. The drain valve is equipped with a cam and limit switch. The level detector comprises a probe connected to the flapper valve. One of the water supply pipes comprises a flow regulator in which the pipe is bent so as to present an outlet opening in the bottom of the tank. The sanitary equipment generates used water comprises bathtub, shower and/or washbasin. The capacity of the tank is higher than 150 liters. The used water path is traversed between the sanitary equipment and the tank. The filter is placed in an upstream of the pump. The filter comprises a basket filter for a coarse filtration, a float sensor and reed contact, and an outlet towards the overflow discharge. The basket filter contains a solid preference product for the used water treatment, which dissolves gradually during draining by sanitary equipment. The raising pump is equipped with a plunger of automatic startup when water is reached a predetermined level, a non-return valve, and a venting device. The control system comprises a device to regulate/modify the volume of water supplied by the actuation of the flushing water, and a device to- control the flow of the water in the tank, and check and display the electronic installation, the pump and the filter. The terminal comprises display board e.g. liquid crystals, which allows message display. The control system is programmed to operate the actuator periodically in the drain valve. Another water supply pipe in the tank is connected by an upstream of the flapper valve with a rainwater collection device. The water closet bowl is connected to a forced ventilation device.",
+				"country": "European Union",
+				"libraryCatalog": "Google Patents"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.google.com/patents/EP0011951A1?dq=water&ei=fLS-UL-FIcTY2gXcg4CABw&cl=en",
+		"items": [
+			{
+				"itemType": "patent",
+				"creators": [
+					{
+						"firstName": "Joseph S.",
+						"lastName": "Racciato",
+						"creatorType": "inventor"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"patentNumber": "EP0011951 A1",
+				"date": "Jun 11, 1980",
+				"filingDate": "Nov 6, 1979",
+				"assignee": "Merck & Co., Inc.",
+				"extra": "International Classification: D06M 15/01; C08L 5/00; C08B 37/00\nU.S. Classification: D06M 15/01; C08B 37/00P6",
+				"title": "Cold-water soluble tamarind gum, process for its preparation and its application in sizing textile warp",
+				"abstractNote": "A novel composition of crude tamarind kernel powder (TKP) is disclosed. The novel composition results from a process which makes TKP soluble in cold water; this process is not dependent on purification of TKP, but involves dissolving it in hot water and evaporating the resulting solution. The novel TKP composition has utility in textile, paper, and oilfield applications.",
+				"country": "European Union",
+				"libraryCatalog": "Google Patents"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.google.com/patents/US4748058",
+		"items": [
+			{
+				"itemType": "patent",
+				"creators": [
+					{
+						"firstName": "Chester L., Jr.",
+						"lastName": "Craig",
+						"creatorType": "inventor"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Google Patents PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"patentNumber": "4748058",
+				"filingDate": "Feb 10, 1987",
+				"date": "May 31, 1988",
+				"extra": "U.S. Classification: 428/9; 428/18; D11/118\nInternational Classification: A47G 3306",
+				"abstractNote": "An artificial tree assembly, and a tree constructed therefrom, are provided. The assembly comprises a collapsible three-piece pole; a base member formed by the bottom of a box for storing the tree assembly and including a pole support member secured thereto for supporting the pole; and a plurality of limb sections and interconnecting garlands. The limb-sections each comprise a central ring portion and a plurality of limb members extending radially outwardly from the central ring portions. The ring portions of the limb sections are stacked, when not in use, on the pole support member and are disposed, in use, along the length of pole in spaced relationship therealong. The garlands interconnect the limb portions so that as the ring portions are lifted, from the top, from the stacked positions thereof on the pole support member and slid along the pole, the garlands between adjacent limb section are tensioned, in turn, and thus serve to lift the next adjacent limb section until the tree...",
+				"title": "Artificial tree",
+				"country": "United States",
+				"url": "http://www.google.com/patents/US4748058",
+				"libraryCatalog": "Google Patents",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.google.com/patents/US5979603?dq=tree&hl=en&sa=X&ei=ILS-UOOfLYXu2QXxyYC4Dw&ved=0CDoQ6AEwAQ",
+		"items": [
+			{
+				"itemType": "patent",
+				"creators": [
+					{
+						"firstName": "Ronald R.",
+						"lastName": "Woller",
+						"creatorType": "inventor"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Google Patents PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"patentNumber": "5979603",
+				"filingDate": "Jan 6, 1995",
+				"date": "Nov 9, 1999",
+				"assignee": "Summit Specialties, Inc.",
+				"extra": "U.S. Classification: 182/187; 182/46; 182/135\nInternational Classification: A45F  300",
+				"abstractNote": "A climbing device for a tree or other vertical columnar member having a platform fashioned from fiber-reinforced composite material. The platform is a one-piece structure having a peripheral skin with bi-directionally oriented reinforcing fibers and longitudinally extending reinforcing fibers. The back bar is also fashioned from fiber-reinforced composite material having a peripheral skin with bi-directionally oriented reinforcing fibers and longitudinally extending reinforcing fibers. Fiber-reinforced members include a foam core for shape retention. The manufacturing process permits use of T-shaped joints in fiber-reinforced structures.",
+				"title": "Portable tree stand having fiber composite platform",
+				"country": "United States",
+				"url": "http://www.google.com/patents/US5979603",
+				"libraryCatalog": "Google Patents",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
