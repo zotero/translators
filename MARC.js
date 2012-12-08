@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-11-28 16:07:26"
+	"lastUpdated": "2012-12-08 07:22:47"
 }
 
 function detectImport() {
@@ -178,31 +178,40 @@ record.prototype.getField = function(field) {
 	return fields;
 }
 
+//given a field string, split it into subfields
+record.prototype.extractSubfields = function(fieldStr, tag /*for error message only*/) {
+	if(!tag) tag = '<no tag>';
+
+	returnSubfields = new Object();
+
+	var subfields = fieldStr.split(subfieldDelimiter);
+	if (subfields.length == 1) {
+		returnSubfields["?"] = fieldStr;
+	} else {
+		for(var j in subfields) {
+			if(subfields[j]) {
+				var subfieldIndex = subfields[j].substr(0, this.subfieldCodeLength-1);
+				if(!returnSubfields[subfieldIndex]) {
+					returnSubfields[subfieldIndex] = subfields[j].substr(this.subfieldCodeLength-1);
+				} else {
+					// Duplicate subfield
+					Zotero.debug("Duplicate subfield '"+tag+" "+subfieldIndex+"="+subfields[j]);
+					returnSubfields[subfieldIndex] = returnSubfields[subfieldIndex] + " " + subfields[j].substr(this.subfieldCodeLength-1);
+				}
+			}
+		}
+	}
+
+	return returnSubfields;
+}
+
 // get subfields from a field
 record.prototype.getFieldSubfields = function(tag) { // returns a two-dimensional array of values
 	var fields = this.getField(tag);
 	var returnFields = new Array();
 	
-	for(var i in fields) {
-		returnFields[i] = new Object();
-		
-		var subfields = fields[i][1].split(subfieldDelimiter);
-		if (subfields.length == 1) {
-			returnFields[i]["?"] = fields[i][1];
-		} else {
-			for(var j in subfields) {
-				if(subfields[j]) {
-					var subfieldIndex = subfields[j].substr(0, this.subfieldCodeLength-1);
-					if(!returnFields[i][subfieldIndex]) {
-						returnFields[i][subfieldIndex] = subfields[j].substr(this.subfieldCodeLength-1);
-					} else {
-						// Duplicate subfield
-						Zotero.debug("Duplicate subfield '"+tag+" "+subfieldIndex+"="+subfields[j]);
-						returnFields[i][subfieldIndex] = returnFields[i][subfieldIndex] + " " + subfields[j].substr(this.subfieldCodeLength-1);
-					}
-				}
-			}
-		}
+	for(var i=0, n=fields.length; i<n; i++) {
+		returnFields[i] = this.extractSubfields(fields[i][1], tag);
 	}
 	
 	return returnFields;
@@ -324,7 +333,7 @@ record.prototype.translate = function(item) {
 				var aut = authorTab[j];
 				var authorText = "";
 				if (aut.b) {
-					authorText = aut['a'] + ", " + aut['b'];
+					authorText = aut['a'].replace(/,\s*$/,'') + ", " + aut['b'];
 				} 
 				else
 				{
@@ -365,7 +374,19 @@ record.prototype.translate = function(item) {
 		this._associateDBField(item, "206", "a", "scale");
 		
 		// Extract title
-		this._associateDBField(item, "200", "ae", "title");
+		var title = this.getField("200")[0][1]	//non-repeatable
+						.replace(	//chop off any translations, since they may have repeated $e fields
+							new RegExp('\\' + subfieldDelimiter + 'd.+'), '');
+		title = this.extractSubfields(title, '200');
+		item.title = title.a;
+		if(title.e) {
+			//If the title proper did not end in a punctuation mark, we should add a colon
+			if(item.title.search(/[A-Za-z0-9]\s*/) != -1) {
+				item.title += ':';
+			}
+
+			item.title += ' ' + title.e;
+		}
 		
 		// Extract edition
 		this._associateDBField(item, "205", "a", "edition");
