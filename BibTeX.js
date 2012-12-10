@@ -15,7 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-11-24 03:18:04"
+	"lastUpdated": "2012-12-09 18:01:55"
 }
 
 function detectImport() {
@@ -1564,7 +1564,7 @@ var alwaysMap = {
 var strings = {};
 var keyRe = /[a-zA-Z0-9\-]/;
 var keywordSplitOnSpace = true;
-var keywordDelimRe = ',\\s*';
+var keywordDelimRe = '\\s*[,;]\\s*';
 var keywordDelimReFlags = '';
 
 function setKeywordSplitOnSpace( val ) {
@@ -1689,7 +1689,7 @@ function processField(item, field, value) {
 		var re = new RegExp(keywordDelimRe, keywordDelimReFlags);
 		if(!value.match(re) && keywordSplitOnSpace) {
 			// keywords/tags
-			item.tags = value.split(" ");
+			item.tags = value.split(/\s+/);
 		} else {
 			item.tags = value.split(re);
 		}
@@ -1905,7 +1905,7 @@ function writeField(field, value, isMacro) {
 	if(!((field == "url") || (field == "doi") | (field == "file"))) {
 
 		// I hope these are all the escape characters!
-		value = value.replace(/[|\<\>\~\^\\]/g, mapEscape).replace(/([\#\$\%\&\_])/g, "\\$1");
+		value = value.replace(/[|\<\>\~\^\\]/g, mapEscape).replace(/([\#\$\%\&\_{}])/g, "\\$1");
 		// Case of words with uppercase characters in non-initial positions is preserved with braces.
 		// treat hyphen as whitespace for this purpose so that Large-scale etc. don't get enclosed
 		// treat curly bracket as whitespace because of mark-up immediately preceding word
