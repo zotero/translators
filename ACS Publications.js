@@ -3,18 +3,17 @@
 	"label": "ACS Publications",
 	"creator": "Sean Takats and Michael Berkowitz and Santawort",
 	"target": "^https?://[^/]*pubs3?\\.acs\\.org[^/]*/(?:wls/journals/query/(?:subscriberResults|query)\\.html|acs/journals/toc\\.page|cgi-bin/(?:article|abstract|sample|asap)\\.cgi)?",
-	"minVersion": "1.0.0b3.r1",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-11-13 17:55:40"
+	"lastUpdated": "2012-12-10 01:15:13"
 }
 
 function detectWeb(doc, url) {
 	if(doc.evaluate('//input[@id="articleListHeader_selectAllToc"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		Zotero.debug("multiple");
 		return "multiple";
 	} else if (doc.evaluate('//div[@id="articleHead"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "journalArticle";
@@ -79,14 +78,15 @@ function setup(dois, host){
 function scrape(setupSets){
 	//get citation export page's source code;
 	for (var i in setupSets){
-		var set = setupSets[i];
-		Zotero.Utilities.HTTP.doGet(set.citUrl, function(text){
-			//get the exported RIS file name;
-			var downloadFileName = text.match(/name=\"downloadFileName\" value=\"([A-Za-z0-9_]+)\"/)[1];
-			Zotero.debug("downloadfilename= "+downloadFileName);
-			var host = set.citUrl.replace(/action\/showCitFormats\?doi=.+/, "")
-			processCallback(set.doi, host, downloadFileName);
-		});
+		(function(set) {
+			Zotero.Utilities.HTTP.doGet(set.citUrl, function(text){
+				//get the exported RIS file name;
+				var downloadFileName = text.match(/name=\"downloadFileName\" value=\"([A-Za-z0-9_]+)\"/)[1];
+				Zotero.debug("downloadfilename= "+downloadFileName);
+				var host = set.citUrl.replace(/action\/showCitFormats\?doi=.+/, "")
+				processCallback(set.doi, host, downloadFileName);
+			});
+		})(setupSets[i]);
 	}
 }
 
