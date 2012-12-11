@@ -1,7 +1,7 @@
 {
     "translatorID": "c070e5a2-4bfd-44bb-9b3c-4be20c50d0d9",
     "label": "Library of Congress ISBN",
-    "creator": "Simon Kornblith, Sebastian Karcher",
+    "creator": "Sebastian Karcher",
     "target": "",
     "minVersion": "3.0",
     "maxVersion": "",
