@@ -13,8 +13,8 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2012-09-27 18:09:22"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-12-10 17:06:06"
 }
 
 /*This Translator mirrors closely Aurimas Vinckevicius' RIS translator
@@ -426,7 +426,7 @@ function processTag(item, entry) {
 	var processFields = true; //whether we should continue processing by zField
 	switch(tag) {
 		case "NO":
-			//seems that EndNote duplicates title in the note field sometimes
+			//EndNote duplicates title in the note field sometimes maybe so does RW
 			if(item.title == value) {
 				value = undefined;
 			//do some HTML formatting in non-HTML notes
@@ -529,6 +529,12 @@ function processTag(item, entry) {
 						};
 				}
 			break;
+			case "unsupported":	//unsupported fields
+				//we can convert a RIS tag to something more useful though
+				if(zField[1]) {
+					value = zField[1] + ': ' + value;
+				}
+			break;
 		}
 	}
 
@@ -540,8 +546,16 @@ function applyValue(item, zField, value, rawLine) {
 
 	if(!zField || zField == 'unknown') {
 		if(!Zotero.parentTranslator) {
-			Z.debug("Entry stored as note");
-			item.notes.push({note:rawLine});
+			Z.debug("Entry stored as note: " + rawLine);
+			item.unknownFields.push(rawLine);
+		}
+		return;
+	}
+
+	if(zField == 'unsupported') {
+		if(!Zotero.parentTranslator) {
+			Z.debug("Unsupported field will be stored in note: " + value);
+			item.unsupportedFields.push(value);
 		}
 		return;
 	}
@@ -552,8 +566,8 @@ function applyValue(item, zField, value, rawLine) {
 		&& !ZU.fieldIsValidForType(zField, item.itemType)) {
 		Z.debug("Invalid field '" + zField + "' for item type '" + item.itemType + "'.");
 		if(!Zotero.parentTranslator) {
-			Z.debug("Entry stored as note");
-			item.notes.push({note:rawLine});
+			Z.debug("Entry stored in note: " + rawLine);
+			item.unknownFields.push(rawLine);
 			return;
 		}
 		//otherwise, we can still store them and they will get dropped automatically
@@ -688,6 +702,24 @@ function completeItem(item) {
 		item.accessDate = undefined;
 	}
 
+//store unsupported and unknown fields in a single note
+	if(!Zotero.parentTranslator) {
+		var note = '';
+		for(var i=0, n=item.unsupportedFields.length; i<n; i++) {
+			note += item.unsupportedFields[i] + '<br/>';
+		}
+		for(var i=0, n=item.unknownFields.length; i<n; i++) {
+			note += item.unknownFields[i] + '<br/>';
+		}
+	
+		if(note) {
+			note = "The following values have no corresponding Zotero field:<br/>" + note;
+			item.notes.push({note: note.trim(), tags: ['_RW import']});
+		}
+	}
+	item.unsupportedFields = undefined;
+	item.unknownFields = undefined;
+	
 	item.complete();
 }
 
@@ -749,7 +781,15 @@ function getLine() {
 	return entry;
 }
 
-function doImport(attachments) {
+//creates a new item of specified type
+function getNewItem(type) {
+	var item = new Zotero.Item(type);
+			item.unknownFields = [];
+			item.unsupportedFields = [];
+	return item;
+}
+
+function doImport(attachments){
 	var entry;
 	//skip to the first RT entry
 	do {
@@ -768,7 +808,7 @@ function doImport(attachments) {
 					type = DEFAULT_IMPORT_TYPE;
 					Z.debug("Unknown RW item type: " + entry[2] + ". Defaulting to " + type);
 				}
-				var item = new Zotero.Item(type);
+				var item = getNewItem(type);
 				//add attachments
 				i++;
 				if(attachments && attachments[i]) {
@@ -960,7 +1000,7 @@ var testCases = [
 		"input": "RT Book, Section\nSR Electronic(1)\nID 206\nA1 Stansfeld,Stephen\nA1 Fuhrer,Rebecca\nT1 Depression and coronary heart disease\nYR 2002\nVO 1\nIS 3\nSP 101\nOP 123\nK1 Etiology\nK1 Heart Disorders\nK1 Major Depression\nK1 Psychosocial Factors\nK1 Risk Factors\nK1 Anxiety\nK1 Prediction\nK1 coronary heart disease\nK1 psychosocial risk factors\nK1 Plants Red Blue\nAB (From the chapter) This chapter discusses the evidence for the proposition that depression is an aetiological factor in coronary heart disease, and 2 of the possible pathways by which this might occur: 1 in which social factors predict coronary heart disease, and depression and its associated psychophysiological changes are an intervening step; and the 2nd in which social factors predict coronary heart disease and depression, but depression is not on the pathway. This is followed by a discussion of anxiety as an aetiological factor in coronary heart disease. ( PsycINFO Database Record ( c) 2002 APA, all rights reserved)\nNO Williston, VT, US: BMJ Books. xi, 304 pp.; PO: Human; FE: References; TA: Psychology: Professional & Research; UD: 20020306; A1: 20020306\nA2 Gulford, C.T.\nT2 Stress and the heart: Psychosocial pathways to coronary heart disease\nPB BMJ Books\nPP Williston, VT, US\nSN 0727912771 (paperback)\nAD U London, Queen Mary's School of Medicine & Dentistry, London, England\nAN 2002-00714-006\nLA English\nCL 3200 Psychological & Physical Disorders\nOL English (30)",
 		"items": [
 			{
-				"itemType": "encyclopediaArticle",
+				"itemType": "bookSection",
 				"creators": [
 					{
 						"lastName": "Stansfeld",
@@ -980,28 +1020,13 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "SR Electronic(1)"
-					},
-					{
-						"note": "ID 206"
-					},
-					{
-						"note": "IS 3"
-					},
-					{
 						"note": "<p>Williston, VT, US: BMJ Books. xi, 304 pp.; PO: Human; FE: References; TA: Psychology: Professional & Research; UD: 20020306; A1: 20020306</p>"
 					},
 					{
-						"note": "AD U London, Queen Mary's School of Medicine & Dentistry, London, England"
-					},
-					{
-						"note": "AN 2002-00714-006"
-					},
-					{
-						"note": "CL 3200 Psychological & Physical Disorders"
-					},
-					{
-						"note": "OL English (30)"
+						"note": "The following values have no corresponding Zotero field:<br/>SR Electronic(1)<br/>ID 206<br/>IS 3<br/>AD U London, Queen Mary's School of Medicine & Dentistry, London, England<br/>AN 2002-00714-006<br/>CL 3200 Psychological & Physical Disorders<br/>OL English (30)<br/>",
+						"tags": [
+							"_RW import"
+						]
 					}
 				],
 				"tags": [
@@ -1022,7 +1047,7 @@ var testCases = [
 				"volume": "1",
 				"pages": "101-123",
 				"abstractNote": "(From the chapter) This chapter discusses the evidence for the proposition that depression is an aetiological factor in coronary heart disease, and 2 of the possible pathways by which this might occur: 1 in which social factors predict coronary heart disease, and depression and its associated psychophysiological changes are an intervening step; and the 2nd in which social factors predict coronary heart disease and depression, but depression is not on the pathway. This is followed by a discussion of anxiety as an aetiological factor in coronary heart disease. ( PsycINFO Database Record ( c) 2002 APA, all rights reserved)",
-				"encyclopediaTitle": "Stress and the heart: Psychosocial pathways to coronary heart disease",
+				"bookTitle": "Stress and the heart: Psychosocial pathways to coronary heart disease",
 				"publisher": "BMJ Books",
 				"place": "Williston, VT, US",
 				"ISBN": "0727912771 (paperback)",
@@ -1036,49 +1061,59 @@ var testCases = [
 		"input": "RT Dissertation\nSR Electronic(1)\nID 2118\nA1 Catrambone, C.D.\nT1 Effect of a case management intervention on symptoms of asthma in high risk children\nYR 2000\nSP 141\nK1 Case Management Asthma -- Therapy -- In Infancy and Childhood Treatment Outcomes -- In Infancy and Childhood (Minor): Prospective Studies Comparative Studies Infant Child Adolescence Outpatients Asthma -- Symptoms\nAB Statement of the problem. One approach to addressing the health care needs of patients with chronic medical problems is case management. Little is known about the effectiveness of case management in the treatment of children with asthma. Few randomized controlled studies of asthma case management have been conducted. In these studies, follow-up was limited to a one-year period. The purpose of this study was to determine the effectiveness of a one-year primary-care based asthma case management (ACM) strategy on symptoms of asthma in high risk children at 15 and 18 months post-intervention. Methods. Twenty-eight parent caregivers of children with asthma aged 1 to 15 years, who participated in the ACM intervention the year prior to the start of this study, agreed to participate. The ACM group ( n = 15) received one year of asthma case management and the usual care ( UC) group ( n = 13) received one year of routine outpatient care. Results. Child asthma symptoms, affects on parent lifestyle, and health system utilization were assessed. Based on caregiver four-week recall, the ACM group experienced fewer annual wheezing days compared to the UC group. 25.17 (36.55) versus 71.61 (80.01) that was statistically significant (p = 0.03). There were no statistically significant differences between the ACM and UC groups in the cumulative 18-month estimate of child night-time coughing and awakening, parent night-time awakening due to the child's asthma symptoms and worrying, parent change in plans and missed work, and asthma-related physician office visits, emergency department visits, and hospitalizations. Conclusion. A primary-care based asthma case management intervention was effective in reducing annual wheezing days in high-risk children with asthma when followed up to 18 months.\nNO Update Code: 20011116\nPB Rush University, College of Nursing\nPP Oceanside, CA, USA\nSN 0-599-73664-X\nAN 2001107680\nLA English\nSF CINAHL; doctoral dissertation; research\nOL English (30)",
 		"items": [
 			{
-				"itemType": "thesis",
+				"itemType": "bookSection",
 				"creators": [
 					{
-						"lastName": "Catrambone",
-						"firstName": "C.D.",
+						"lastName": "Stansfeld",
+						"firstName": "Stephen",
 						"creatorType": "author"
+					},
+					{
+						"lastName": "Fuhrer",
+						"firstName": "Rebecca",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Gulford",
+						"firstName": "C.T.",
+						"creatorType": "editor"
 					}
 				],
 				"notes": [
 					{
-						"note": "SR Electronic(1)"
+						"note": "<p>Williston, VT, US: BMJ Books. xi, 304 pp.; PO: Human; FE: References; TA: Psychology: Professional & Research; UD: 20020306; A1: 20020306</p>"
 					},
 					{
-						"note": "ID 2118"
-					},
-					{
-						"note": "<p>Update Code: 20011116</p>"
-					},
-					{
-						"note": "SN 0-599-73664-X"
-					},
-					{
-						"note": "AN 2001107680"
-					},
-					{
-						"note": "SF CINAHL; doctoral dissertation; research"
-					},
-					{
-						"note": "OL English (30)"
+						"note": "The following values have no corresponding Zotero field:<br/>SR Electronic(1)<br/>ID 206<br/>IS 3<br/>AD U London, Queen Mary's School of Medicine & Dentistry, London, England<br/>AN 2002-00714-006<br/>CL 3200 Psychological & Physical Disorders<br/>OL English (30)<br/>",
+						"tags": [
+							"_RW import"
+						]
 					}
 				],
 				"tags": [
-					"Case Management Asthma -- Therapy -- In Infancy and Childhood Treatment Outcomes -- In Infancy and Childhood (Minor): Prospective Studies Comparative Studies Infant Child Adolescence Outpatients Asthma -- Symptoms"
+					"Etiology",
+					"Heart Disorders",
+					"Major Depression",
+					"Psychosocial Factors",
+					"Risk Factors",
+					"Anxiety",
+					"Prediction",
+					"coronary heart disease",
+					"psychosocial risk factors",
+					"Plants Red Blue"
 				],
 				"seeAlso": [],
 				"attachments": [],
-				"title": "Effect of a case management intervention on symptoms of asthma in high risk children",
-				"numPages": "141",
-				"abstractNote": "Statement of the problem. One approach to addressing the health care needs of patients with chronic medical problems is case management. Little is known about the effectiveness of case management in the treatment of children with asthma. Few randomized controlled studies of asthma case management have been conducted. In these studies, follow-up was limited to a one-year period. The purpose of this study was to determine the effectiveness of a one-year primary-care based asthma case management (ACM) strategy on symptoms of asthma in high risk children at 15 and 18 months post-intervention. Methods. Twenty-eight parent caregivers of children with asthma aged 1 to 15 years, who participated in the ACM intervention the year prior to the start of this study, agreed to participate. The ACM group ( n = 15) received one year of asthma case management and the usual care ( UC) group ( n = 13) received one year of routine outpatient care. Results. Child asthma symptoms, affects on parent lifestyle, and health system utilization were assessed. Based on caregiver four-week recall, the ACM group experienced fewer annual wheezing days compared to the UC group. 25.17 (36.55) versus 71.61 (80.01) that was statistically significant (p = 0.03). There were no statistically significant differences between the ACM and UC groups in the cumulative 18-month estimate of child night-time coughing and awakening, parent night-time awakening due to the child's asthma symptoms and worrying, parent change in plans and missed work, and asthma-related physician office visits, emergency department visits, and hospitalizations. Conclusion. A primary-care based asthma case management intervention was effective in reducing annual wheezing days in high-risk children with asthma when followed up to 18 months.",
-				"university": "Rush University, College of Nursing",
-				"place": "Oceanside, CA, USA",
+				"title": "Depression and coronary heart disease",
+				"volume": "1",
+				"pages": "101-123",
+				"abstractNote": "(From the chapter) This chapter discusses the evidence for the proposition that depression is an aetiological factor in coronary heart disease, and 2 of the possible pathways by which this might occur: 1 in which social factors predict coronary heart disease, and depression and its associated psychophysiological changes are an intervening step; and the 2nd in which social factors predict coronary heart disease and depression, but depression is not on the pathway. This is followed by a discussion of anxiety as an aetiological factor in coronary heart disease. ( PsycINFO Database Record ( c) 2002 APA, all rights reserved)",
+				"bookTitle": "Stress and the heart: Psychosocial pathways to coronary heart disease",
+				"publisher": "BMJ Books",
+				"place": "Williston, VT, US",
+				"ISBN": "0727912771 (paperback)",
 				"language": "English",
-				"date": "2000"
+				"date": "2002"
 			}
 		]
 	},
@@ -1087,77 +1122,59 @@ var testCases = [
 		"input": "RT Journal Article\nSR Electronic(1)\nID 271\nA1 Allan,Steven\nA1 Gilbert,Paul\nT1 Anger and anger expression in relation to perceptions of social rank, entrapment and depressive symptoms\nJF Personality & Individual Differences\nYR 2002\nFD Feb\nVO 32\nIS 3\nSP 551\nOP 565\nK1 Anger\nK1 Self Report\nK1 Status\nK1 Depression (Emotion)\nK1 Symptoms\nK1 self-report measures\nK1 anger expression\nK1 social rank\nK1 entrapment\nK1 depressive symptoms\nAB Explored the relationship between self-report measures of anger and anger expression with those of social rank (unfavorable social comparison and submissive behavior) and feelings of entrapment in a student population (197 Ss, mean age 23.4 yrs). The authors further investigated if the social rank/status of the target of one's anger affects anger experience and expression. Students were given C. D. Spielberger's (1988) State-Trait Anger Expression Inventory measure of anger and asked to complete it in 3 ways. First, in the normal way, and then 2 further times after reading 2 scenarios that involved lending an important and needed book which the lender fails to return, where the lender was either an up rank/authority figure (one's tutor) or a down rank, fellow student. It was found that self-perceptions of unfavorable rank (inferior self-perceptions and submissive behavior) and feeling trapped significantly affect anger suppression. It was also found that the rank of the target significantly affects anger expression and that people who respond angrily to criticism tend to show more down rank-anger when they are frustrated by a lower rank target and modulate their anger according to the rank of the person they are angry with. ( PsycINFO Database Record ( c) 2002 APA, all rights reserved)\nNO PO: Human; Male; Female; Adulthood (18 yrs & older); FE: References; Peer Reviewed; UD: 20020227; F1: 0191-8869,32,3,551-565,2002; A1: 20020227\nPB Elsevier Science, England, [URL:http:// www.elsevier.nl]\nSN 0191-8869\nAD Kingsway Hosp, Dept of Clinical Psychology, Derby, United Kingdom; [mailto: stev.allan@hotmail.com]\nAN 2002-00282-017\nLA English\nCL 3120 Personality Traits & Processes\nSF Print (Paper); Journal Article; Empirical Study\nLK http:// bmj.com/content/vol325/issue7371/twib.shtml#325/7371/0\nOL English (30)",
 		"items": [
 			{
-				"itemType": "journalArticle",
+				"itemType": "bookSection",
 				"creators": [
 					{
-						"lastName": "Allan",
-						"firstName": "Steven",
+						"lastName": "Stansfeld",
+						"firstName": "Stephen",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Gilbert",
-						"firstName": "Paul",
+						"lastName": "Fuhrer",
+						"firstName": "Rebecca",
 						"creatorType": "author"
+					},
+					{
+						"lastName": "Gulford",
+						"firstName": "C.T.",
+						"creatorType": "editor"
 					}
 				],
 				"notes": [
 					{
-						"note": "SR Electronic(1)"
+						"note": "<p>Williston, VT, US: BMJ Books. xi, 304 pp.; PO: Human; FE: References; TA: Psychology: Professional & Research; UD: 20020306; A1: 20020306</p>"
 					},
 					{
-						"note": "ID 271"
-					},
-					{
-						"note": "<p>PO: Human; Male; Female; Adulthood (18 yrs & older); FE: References; Peer Reviewed; UD: 20020227; F1: 0191-8869,32,3,551-565,2002; A1: 20020227</p>"
-					},
-					{
-						"note": "PB Elsevier Science, England, [URL:http:// www.elsevier.nl]"
-					},
-					{
-						"note": "AD Kingsway Hosp, Dept of Clinical Psychology, Derby, United Kingdom; [mailto: stev.allan@hotmail.com]"
-					},
-					{
-						"note": "AN 2002-00282-017"
-					},
-					{
-						"note": "CL 3120 Personality Traits & Processes"
-					},
-					{
-						"note": "SF Print (Paper); Journal Article; Empirical Study"
-					},
-					{
-						"note": "OL English (30)"
+						"note": "The following values have no corresponding Zotero field:<br/>SR Electronic(1)<br/>ID 206<br/>IS 3<br/>AD U London, Queen Mary's School of Medicine & Dentistry, London, England<br/>AN 2002-00714-006<br/>CL 3200 Psychological & Physical Disorders<br/>OL English (30)<br/>",
+						"tags": [
+							"_RW import"
+						]
 					}
 				],
 				"tags": [
-					"Anger",
-					"Self Report",
-					"Status",
-					"Depression (Emotion)",
-					"Symptoms",
-					"self-report measures",
-					"anger expression",
-					"social rank",
-					"entrapment",
-					"depressive symptoms"
+					"Etiology",
+					"Heart Disorders",
+					"Major Depression",
+					"Psychosocial Factors",
+					"Risk Factors",
+					"Anxiety",
+					"Prediction",
+					"coronary heart disease",
+					"psychosocial risk factors",
+					"Plants Red Blue"
 				],
 				"seeAlso": [],
-				"attachments": [
-					{
-						"url": "http:// bmj.com/content/vol325/issue7371/twib.shtml#325/7371/0",
-						"title": "Image",
-						"downloadable": true
-					}
-				],
-				"title": "Anger and anger expression in relation to perceptions of social rank, entrapment and depressive symptoms",
-				"publicationTitle": "Personality & Individual Differences",
-				"date": "Feb 2002",
-				"volume": "32",
-				"issue": "3",
-				"pages": "551-565",
-				"abstractNote": "Explored the relationship between self-report measures of anger and anger expression with those of social rank (unfavorable social comparison and submissive behavior) and feelings of entrapment in a student population (197 Ss, mean age 23.4 yrs). The authors further investigated if the social rank/status of the target of one's anger affects anger experience and expression. Students were given C. D. Spielberger's (1988) State-Trait Anger Expression Inventory measure of anger and asked to complete it in 3 ways. First, in the normal way, and then 2 further times after reading 2 scenarios that involved lending an important and needed book which the lender fails to return, where the lender was either an up rank/authority figure (one's tutor) or a down rank, fellow student. It was found that self-perceptions of unfavorable rank (inferior self-perceptions and submissive behavior) and feeling trapped significantly affect anger suppression. It was also found that the rank of the target significantly affects anger expression and that people who respond angrily to criticism tend to show more down rank-anger when they are frustrated by a lower rank target and modulate their anger according to the rank of the person they are angry with. ( PsycINFO Database Record ( c) 2002 APA, all rights reserved)",
-				"ISSN": "0191-8869",
-				"language": "English"
+				"attachments": [],
+				"title": "Depression and coronary heart disease",
+				"volume": "1",
+				"pages": "101-123",
+				"abstractNote": "(From the chapter) This chapter discusses the evidence for the proposition that depression is an aetiological factor in coronary heart disease, and 2 of the possible pathways by which this might occur: 1 in which social factors predict coronary heart disease, and depression and its associated psychophysiological changes are an intervening step; and the 2nd in which social factors predict coronary heart disease and depression, but depression is not on the pathway. This is followed by a discussion of anxiety as an aetiological factor in coronary heart disease. ( PsycINFO Database Record ( c) 2002 APA, all rights reserved)",
+				"bookTitle": "Stress and the heart: Psychosocial pathways to coronary heart disease",
+				"publisher": "BMJ Books",
+				"place": "Williston, VT, US",
+				"ISBN": "0727912771 (paperback)",
+				"language": "English",
+				"date": "2002"
 			}
 		]
 	}
