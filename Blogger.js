@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-08-06 19:23:07"
+	"browserSupport": "gcsib",
+	"lastUpdated": "2012-12-10 21:03:42"
 }
 
 function detectWeb(doc, url) {
@@ -142,7 +142,7 @@ var testCases = [
 				],
 				"title": "A tweet from Matt Yglesias",
 				"date": "Monday, October 24, 2011",
-				"blogTitle": "Observational Epidemiology",
+				"blogTitle": "West Coast Stat Views (on Observational Epidemiology and more)",
 				"url": "http://observationalepidemiology.blogspot.com/2011/10/tweet-from-matt-yglesias.html",
 				"libraryCatalog": "Blogger",
 				"accessDate": "CURRENT_TIMESTAMP"

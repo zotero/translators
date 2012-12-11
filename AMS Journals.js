@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-10-14 22:38:40"
+	"browserSupport": "gcsib",
+	"lastUpdated": "2012-12-10 20:55:57"
 }
 
 function detectWeb(doc, url) {
@@ -97,6 +97,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "http://www.ams.org/journals/jams/2012-25-01/S0894-0347-2011-00713-3/home.html",
 		"items": [
 			{

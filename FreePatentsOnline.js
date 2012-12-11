@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-10 00:00:51"
+	"browserSupport": "gcsib",
+	"lastUpdated": "2012-12-11 00:15:25"
 }
 
 function detectWeb(doc, url) {
@@ -30,18 +30,15 @@ function scrape(doc, url) {
 
 	var dataTags = new Object();
 	var fieldTitle;
-	var contents;
+	var content;
 
 	var newItem = new Zotero.Item("patent");
+	var fieldtitles = ZU.xpath(doc, '//div[@class="disp_doc2"]/div[@class="disp_elm_title"]')
 
-	var pageContent = doc.evaluate('//div[@class="disp_doc2"]/div', doc, null, XPathResult.ANY_TYPE, null);
-	var xPathCount = doc.evaluate('count (//div[@class="disp_doc2"]/div)', doc, null, XPathResult.ANY_TYPE, null);
-
-
-	for (i = 0; i < xPathCount.numberValue / 2; i++) {
-
-		fieldTitle = pageContent.iterateNext().textContent.replace(/\s+/g, '');
-		content = pageContent.iterateNext().textContent.replace(/^\s*|\s*$/g, '');
+	for (var i in fieldtitles) {
+		fieldTitle = fieldtitles[i].textContent;
+		content = ZU.xpathText(fieldtitles[i], './following-sibling::div').trim();
+		//Z.debug(fieldTitle + ": " + content)
 		dataTags[fieldTitle] = (content);
 	}
 
@@ -54,7 +51,7 @@ function scrape(doc, url) {
 			for (var i = 0; i < inventors.length; i++) {
 				parenthesis = inventors[i].indexOf("(");
 				inventors[i] = inventors[i].substr(0, parenthesis).replace(/^\s*|\s*$/g, '');
-				if (inventors[i].match(", ")) {
+				if (inventors[i].match(",")) {
 					newItem.creators.push(Zotero.Utilities.cleanAuthor(inventors[i], "inventor", true));
 				} else {
 					newItem.creators.push(Zotero.Utilities.cleanAuthor(inventors[i], "inventor"));
@@ -77,10 +74,10 @@ function scrape(doc, url) {
 
 	associateData(newItem, dataTags, "Title:", "title");
 	associateData(newItem, dataTags, "Abstract:", "abstractNote");
-	associateData(newItem, dataTags, "DocumentTypeandNumber:", "patentNumber");
-	associateData(newItem, dataTags, "ApplicationNumber:", "applicationNumber");
-	associateData(newItem, dataTags, "PublicationDate:", "issueDate");
-	associateData(newItem, dataTags, "FilingDate:", "filingDate");
+	associateData(newItem, dataTags, "Document Type and Number:", "patentNumber");
+	associateData(newItem, dataTags, "Application Number:", "applicationNumber");
+	associateData(newItem, dataTags, "Publication Date:", "issueDate");
+	associateData(newItem, dataTags, "Filing Date:", "filingDate");
 	associateData(newItem, dataTags, "Assignee:", "assignee");
 
 	if (newItem.assignee) newItem.assignee = ZU.trimInternal(newItem.assignee);

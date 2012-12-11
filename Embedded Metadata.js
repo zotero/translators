@@ -8,8 +8,8 @@
 	"priority": 400,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-11-23 01:51:00"
+	"browserSupport": "gcsib",
+	"lastUpdated": "2012-12-10 23:37:54"
 }
 
 /*
@@ -597,7 +597,7 @@ var testCases = [
 				"title": "Knowledge, treatment seeking and preventive practices in respect of malaria among patients with HIV at the Lagos University Teaching Hospital",
 				"publicationTitle": "Tanzania Journal of Health Research",
 				"rights": "Copyright for articles published in this journal is retained by the journal.",
-				"date": "17/10/2011",
+				"date": "2011/10/17",
 				"reportType": "Text.Serial.Journal",
 				"letterType": "Text.Serial.Journal",
 				"manuscriptType": "Text.Serial.Journal",

@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-09-05 00:49:07"
+	"browserSupport": "gcsb",
+	"lastUpdated": "2012-12-11 00:16:35"
 }
 
 /*
@@ -309,7 +309,6 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Garcia Marquez, Gabriel - Criticism and interpretation",
 					"Literary Criticism / Caribbean & Latin American",
 					"Literary Criticism / European / Spanish & Portuguese"
 				],
@@ -323,13 +322,13 @@ var testCases = [
 				],
 				"numPages": "208",
 				"ISBN": "9780313312601",
-				"language": "en",
-				"abstractNote": "Winner of the Nobel Prize for Literature in 1982 for his masterpiece One Hundred Years of Solitude, Gabriel Garc^D'ia M^D'arquez had already earned tremendous respect and popularity in the years leading up to that honor, and remains, to date, an active and prolific writer. Readers are introduced to Garc^D'ia M^D'arquez with a vivid account of his fascinating life; from his friendships with poets and presidents, to his distinguished career as a journalist, novelist, and chronicler of the quintessential Latin American experience. This companion also helps students situate Garc^D'ia M^D'arquez within the canon of Western literature, exploring his contributions to the modern novel in general, and his forging of literary techniques, particularly magic realism, that have come to distinguish Latin American fiction. Full literary analysis is given for One Hundred Years of Solitude, as well as Chronicle of a Death Foretold (1981), Love in the Time of Cholera (1985), two additional novels, and five of Garc^D'ia M^D'arquez's best short stories. Students are given guidance in understanding the historical contexts, as well as the characters and themes that recur in these interrelated works. Narrative technique and alternative critical perspectives are also explored for each work, helping readers fully appreciate the literary accomplishments of Gabriel Garc^D'ia M^D'arquez.",
-				"libraryCatalog": "Google Books",
-				"shortTitle": "Gabriel García Márquez",
 				"publisher": "Greenwood Publishing Group",
 				"title": "Gabriel García Márquez: A Critical Companion",
-				"date": "2001"
+				"language": "en",
+				"abstractNote": "Winner of the Nobel Prize for Literature in 1982 for his masterpiece One Hundred Years of Solitude, Gabriel Garc^D'ia M^D'arquez had already earned tremendous respect and popularity in the years leading up to that honor, and remains, to date, an active and prolific writer. Readers are introduced to Garc^D'ia M^D'arquez with a vivid account of his fascinating life; from his friendships with poets and presidents, to his distinguished career as a journalist, novelist, and chronicler of the quintessential Latin American experience. This companion also helps students situate Garc^D'ia M^D'arquez within the canon of Western literature, exploring his contributions to the modern novel in general, and his forging of literary techniques, particularly magic realism, that have come to distinguish Latin American fiction.Full literary analysis is given for One Hundred Years of Solitude, as well as Chronicle of a Death Foretold (1981), Love in the Time of Cholera (1985), two additional novels, and five of Garc^D'ia M^D'arquez's best short stories. Students are given guidance in understanding the historical contexts, as well as the characters and themes that recur in these interrelated works. Narrative technique and alternative critical perspectives are also explored for each work, helping readers fully appreciate the literary accomplishments of Gabriel Garc^D'ia M^D'arquez.",
+				"date": "2001",
+				"libraryCatalog": "Google Books",
+				"shortTitle": "Gabriel García Márquez"
 			}
 		]
 	},
@@ -348,16 +347,8 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Adams, Abigail",
-					"Adams, Louisa Catherine",
 					"Biography & Autobiography / General",
-					"Biography & Autobiography / Women",
-					"Eaton, Peggy",
-					"Jackson, Rachel",
-					"Madison, Dolley",
-					"Monroe, Elizabeth",
-					"Presidents' spouses",
-					"Washington, Martha"
+					"Biography & Autobiography / Women"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -369,12 +360,12 @@ var testCases = [
 				],
 				"numPages": "332",
 				"ISBN": "9780836913620",
-				"language": "en",
-				"libraryCatalog": "Google Books",
-				"shortTitle": "Some American Ladies",
-				"publisher": "Ayer Publishing",
+				"publisher": "Ayer Company Pub",
 				"title": "Some American Ladies: Seven Informal Biographies ...",
-				"date": "1926"
+				"language": "en",
+				"date": "1926",
+				"libraryCatalog": "Google Books",
+				"shortTitle": "Some American Ladies"
 			}
 		]
 	},
@@ -391,20 +382,16 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Thom",
-						"lastName": "Holmes",
+						"firstName": "THOM AUTOR",
+						"lastName": "HOLMES",
 						"creatorType": "author"
 					}
 				],
 				"notes": [],
 				"tags": [
-					"Avant-garde (Music)",
-					"Electronic books",
-					"Electronic music",
-					"Electronic music History and criticism",
 					"Music / General",
-					"Music / Genres & Styles / New Age",
-					"Music / History & Criticism"
+					"Music / History & Criticism",
+					"Music / Genres & Styles / New Age"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -416,18 +403,19 @@ var testCases = [
 				],
 				"numPages": "332",
 				"ISBN": "9780415936446",
-				"language": "en",
-				"abstractNote": "Electronic and Experimental Music details the history of electronic music throughout the world, and the people who created it. From the theory of sound production to key composers and instrument designers, this is a complete introduction to the genre from its early roots to the present technological explosion. This new edition, includes a thoroughgly updated and enlarged theoretical and historical sections and includes new material on using home computers (PCs) and the many resources now available in software and the Internet.",
-				"libraryCatalog": "Google Books",
-				"shortTitle": "Electronic and Experimental Music",
 				"publisher": "Psychology Press",
-				"title": "Electronic and Experimental Music: Pioneers in Technology and Composition",
-				"date": "2002"
+				"title": "Electronic and Experimental Music: A History of a New Sound",
+				"language": "en",
+				"abstractNote": "Electronic and Experimental Music details the history of electronic music throughout the world, and the people who created it. From the theory of sound production to key composers and instrument designers, this is a complete introduction to the genre from its early roots to the present technological explosion. Every major figure is covered including: Thaddeus Cahill, Peire Henry, Gorden Mumma, Pauline Oliveros, Brian Eno, and D.J. Spooky. The vast array of forms and instruments that these innovators introduced and expanded are also included--tape composition, the synthesizer, \"live\" electronic performance, the ONCE festivals, ambient music, and turntablism. This new edition, includes a thoroughly updated and enlarged theoretical and historical sections and includes new material on using home computers (PCs) and the many resources now available in software and the Internet.",
+				"date": "2002",
+				"libraryCatalog": "Google Books",
+				"shortTitle": "Electronic and Experimental Music"
 			}
 		]
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "https://www.google.com/search?q=asimov&btnG=Search+Books&tbm=bks&tbo=1#q=asimov&hl=en&tbo=1&tbm=bks&ei=guBGUIDOCJP8qQG7u4DYCg&start=10&sa=N&fp=1&biw=1352&bih=588&bav=on.2,or.r_gc.r_pw.r_qf.&cad=b&sei=guBGUIDOCJP8qQG7u4DYCg",
 		"items": "multiple"
 	}

@@ -8,8 +8,8 @@
 	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2012-09-27 15:22:10"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-12-11 00:47:48"
 }
 
 /*
@@ -160,8 +160,10 @@ function doWeb(doc, url) {
 			var titlex = './/h4';
 		} else if ( url.indexOf("content/early/recent") != -1 ||
 					doc.title.indexOf("Early Edition") != -1) {
+						
 			var searchx = '//div[contains(@class, "is-early-release") or \
-								contains(@class, "from-current-issue")]';
+								contains(@class, "from-current-issue")] \
+								|//div[contains(@class, "toc-level level3")]//ul[@class="cit-list"]/div';
 			var titlex = './/span[contains(@class, "cit-title")]';
 		} else if (url.indexOf("content/by/section") != -1 ||
 					url.match(/cgi\/collection\/./)) {
@@ -178,10 +180,9 @@ function doWeb(doc, url) {
 		var linkx = '(.//a)[1]/@href';
 		var searchres = ZU.xpath(doc, searchx);
 		var items = new Object();
-
+		//Z.debug(searchres.length)
 		for(var i=0, n=searchres.length; i<n; i++) {
 			next_res = searchres[i];
-
 			title = ZU.xpathText(next_res, titlex);
 			link = ZU.xpathText(next_res, linkx);
 			if(link && title) {

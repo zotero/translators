@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-11-28 21:59:37"
+	"lastUpdated": "2012-12-10 21:28:32"
 }
 
 function detectWeb(doc, url) {
@@ -134,6 +134,9 @@ function downloadFunction(text, url, prefs) {
 
 		// A lot of extra info is jammed into notes
 		item.notes = [];
+		
+		//the archive field is pretty useless:
+		item.archive = "";
 
 
 		if(prefs.fetchPDF) {
@@ -339,7 +342,7 @@ function doDelivery(doc, itemInfo) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://web.ebscohost.com/ehost/detail?sid=3f8c768f-e9bd-4c06-874e-30075b5a2e43%40sessionmgr15&vid=1&hid=11&bdata=JnNpdGU9ZWhvc3QtbGl2ZQ%3d%3d#db=a9h&AN=9606204477",
+		"url": "http://web.ebscohost.com/ehost/detail?sid=750e1ab3-1dfd-4145-9060-759a43da0ead%40sessionmgr104&vid=1&hid=107&bdata=JnNpdGU9ZWhvc3QtbGl2ZQ%3d%3d#db=aph&AN=9606204477",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -358,32 +361,23 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://search.ebscohost.com/login.aspx?direct=true&db=a9h&AN=9606204477&site=ehost-live&scope=cite",
 						"title": "EBSCO Record",
 						"mimeType": "text/html",
 						"snapshot": false
-					},
-					{
-						"url": "http://content.ebscohost.com/ContentServer.asp?T=P&P=AN&K=9606204477&S=R&D=a9h&EbscoContent=dGJyMMvl7ESeqa84zdnyOLCmr0meprFSs664SLaWxWXS&ContentCustomer=dGJyMPGstk%2B0qbJPuePfgeyx44Dt6fIA",
-						"title": "EBSCO Full Text",
-						"mimeType": "application/pdf"
 					}
 				],
 				"title": "Zbigniew Herbert",
+				"journalAbbreviation": "Wilson Quarterly",
 				"publicationTitle": "Wilson Quarterly",
 				"date": "Winter93 1993",
 				"volume": "17",
 				"issue": "1",
 				"pages": "112",
-				"journalAbbreviation": "Wilson Quarterly",
-				"archive": "a9h",
 				"publisher": "Woodrow Wilson International Center for Scholars",
-				"ISBN": "03633276",
 				"ISSN": "03633276",
 				"abstractNote": "Introduces the poetry of Polish poet Zbigniew Herbert. Impression of difficulty in modern poetry; Polish poet Czeslaw Milosz; Herbert's 1980 Nobel Prize; Translations into English; Use of vers libre; Sample poems.",
-				"callNumber": "9606204477",
 				"libraryCatalog": "EBSCOhost",
-				"checkFields": "title"
+				"callNumber": "9606204477"
 			}
 		]
 	}

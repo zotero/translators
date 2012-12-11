@@ -1,15 +1,15 @@
 {
 	"translatorID": "5e684d82-73a3-9a34-095f-19b112d77bbe",
 	"label": "Digital Medievalist",
-	"creator": "Fred Gibbs",
+	"creator": "Fred Gibbs, Sebastian Karcher",
 	"target": "digitalmedievalist\\.org/(index\\.html)?($|journal/?$|(journal/[3-9]))",
-	"minVersion": "2.0b7",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gbv",
-	"lastUpdated": "2011-10-29 14:28:27"
+	"browserSupport": "gb",
+	"lastUpdated": "2012-12-10 23:29:08"
 }
 
 function detectWeb(doc, url) {
@@ -25,11 +25,6 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 	var links =[];
 	var articles = [];
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-		} : null;
-	
 	// if on single article
 	if (detectWeb(doc, url) == "journalArticle") {
 
@@ -42,21 +37,24 @@ function doWeb(doc, url) {
 	}
 
 	// if multiple, collect article titles 
-	else if (doc.evaluate('//div[@class="issue"]/div/ul/li/a', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+	else if (doc.evaluate('//div[@class="issue"]/div/ul/li/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 
-		var titles = doc.evaluate('//div[@class="issue"]/div/ul/li/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//div[@class="issue"]/div/ul/li/a', doc, null, XPathResult.ANY_TYPE, null);
 		 
 		while (title = titles.iterateNext()) { 
 			links[title.href] = Zotero.Utilities.trimInternal(title.textContent);
 		}
 
-		var items = Zotero.selectItems(links);
-		for (var i in items) {
-			articles.push(i);
-		}
+	Zotero.selectItems(links, function (items) {
+				if (!items) {
+					return true;
+				}
+				for (var i in items) {
+					articles.push(i);
+				}
+				Zotero.Utilities.processDocuments(articles, doWeb);
+			});
 
-		Zotero.Utilities.processDocuments(articles, doWeb, function() {Zotero.done();});
-		Zotero.wait();	
 	}
 }
 
@@ -64,45 +62,38 @@ function doWeb(doc, url) {
 function parseXML(text, itemUrlBase, doc) {
 	// Remove xml parse instruction and doctype
 	text = text.replace(/<\?oxygen[^>]*\?>/, "").replace(/<\?xml[^>]*\?>/, "").replace(/<TEI[^>]*>/, "<TEI>");
-	var xml = new XML(text);
+	//Z.debug(text)
+	
+	var parser = new DOMParser();
+	var doc = parser.parseFromString(text, "text/xml");
 	var newItem = new Zotero.Item("journalArticle");
-	var fullTitle = '';
-	var title = xml..titleStmt.title;
-	var len = title.children().length();
-	for (i=0; i < len; i++) { 
-		fullTitle += title.children()[i]; 
+	var header = ZU.xpath(doc, '//teiHeader')	
+	newItem.title = ZU.xpathText(header, './/titleStmt/title');
+	if (ZU.xpathText(header, './/textClass/keywords/term[@type="DMType"]') == "Review") {
+		newItem.title = "Review of " + newItem.title;
 	}
-	
-	// modify title if review article
-	if (xml..textClass.keywords.term.(@type == "DMType").text() == "Review") {
-		fullTitle = "Review of " + fullTitle;
-	}
-	
-	newItem.title = Zotero.Utilities.trimInternal(fullTitle);
-	
-	var authors = xml..titleStmt.author.name;
+	var authors = ZU.xpath(header, './/titleStmt/author/name')
 	for (var i in authors) {
-		newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i].toString(), "author"));
+		newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i].textContent, "author"));
 	}
-	
 	newItem.publicationTitle = "Digital Medievalist";
-	newItem.volume = xml..seriesStmt.idno.(@type == "volume").toString();
-	newItem.issue = xml..seriesStmt.idno.(@type == "issue").toString();
-	newItem.date = xml..seriesStmt.idno.(@type == "date").toString();
+	newItem.ISSN = " 1715-0736";
+	newItem.volume = ZU.xpathText(header, './/seriesStmt/idno[@type="volume"]');
+	newItem.issue = ZU.xpathText(header, './/seriesStmt/idno[@type="issue"]');
+	newItem.date = ZU.xpathText(header, './/seriesStmt/idno[@type="date"]');
+	newItem.language = ZU.xpathText(header, './/language');
+	newItem.rights = ZU.xpathText(header, './/availability');
 	newItem.url = itemUrlBase;
-
-	/** save keywords - this doesn't work & breaks translator
-	kwords = xml..textClass.keywords.term.(@type == "keyword");
-	Zotero.debug(kwords)
-	for (var i = 0; i < kwords.length(); i++) {
-	//	Zotero.debug(kwords[i].text());
-	//	newItem.tags[i] = kwords[i]; 
-	} */
-
-	newItem.abstractNote = Zotero.Utilities.trimInternal(xml..text.front.argument.(@n == "abstract").p.text().toString());
-	newItem.attachments.push({url:itemUrlBase, title:doc.title, mimeType:"text/html"});
 	
-	newItem.complete();
+	newItem.attachments.push({url:itemUrlBase, title: "Digital Medievalist Snapshot", mimeType:"text/html"});
+	var keywords = ZU.xpath(header, './/textClass/keywords/term[@type="keyword"]');
+	for (var i in keywords){
+		newItem.tags[i] = keywords[i].textContent;
+	}
+	var abstract = ZU.xpathText(doc, '//text/front/argument[@n="abstract"]');
+	if (abstract) newItem.abstractNote = ZU.trimInternal(abstract);
+	
+	newItem.complete(); 
 }
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -135,19 +126,33 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [],
+				"tags": [
+					"Image Acquisition",
+					"Processing",
+					"Manuscripts",
+					"Codicology",
+					"Palaeography",
+					"Multi-Spectral Imaging",
+					"Foreground-Background Separation",
+					"Graphemic Character Segmentation",
+					"Damaged Manuscripts",
+					"Palimpsests",
+					"Digital Palaeography"
+				],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://digitalmedievalist.org/journal/6/gau/",
-						"title": "DM 6 (2010) Image Acquisition & Processing Routines for Damaged Manuscripts",
+						"title": "Digital Medievalist Snapshot",
 						"mimeType": "text/html"
 					}
 				],
 				"title": "Image Acquisition & Processing Routines for Damaged Manuscripts",
 				"publicationTitle": "Digital Medievalist",
+				"ISSN": "1715-0736",
 				"issue": "6",
 				"date": "2010",
+				"language": "en-GB",
+				"rights": "© Melanie Gau, Heinz Miklas, Martin Lettner, and Robert Sablatnig, 2010. Creative\n                  Commons Attribution-NonCommercial licence",
 				"url": "http://digitalmedievalist.org/journal/6/gau/",
 				"abstractNote": "This paper presents an overview of data acquisition and processing procedures of an interdisciplinary project of philologists and image processing experts aiming at the decipherment and reconstruction of damaged manuscripts. The digital raw image data was acquired via multi-spectral imaging. As a preparatory step we developed a method of foreground-background separation (binarisation) especially designed for multi-spectral images of degraded documents. On the basis of the binarised images further applications were developed: an automatic character decomposition and primitive extraction dissects the scriptural elements into analysable pieces that are necessary for palaeographic and graphemic analyses, writing tool recognition, text restoration, and optical character recognition. The results of the relevant procedures can be stored and interrogated in a database application. Furthermore, a semi-automatic page layout analysis provides codicological information on latent page contents (script, ruling, decorations).",
 				"libraryCatalog": "Digital Medievalist",
