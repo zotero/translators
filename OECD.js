@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-12-10 17:06:56"
+	"lastUpdated": "2012-12-11 01:21:03"
 }
 
 /*
@@ -35,11 +35,12 @@
 */
 
 function detectWeb(doc, url) {
+	var menuitem = ZU.xpathText(doc, '//li[@class="menuitem"]/a[@class="on"]');
 	if (ZU.xpathText(doc, '//ul[@class="sidebar-list"]//a[contains(@title, "Cite this")]')){		
 		if (ZU.xpathText(doc, '//li[@class="editorial-board"]')){
 			return "journalArticle";
 		}
-		else if (ZU.xpathText(doc, '//li[@class="menuitem"]/a[@class="on"]').indexOf("BOOKS")!=-1) {
+		else if (menuitem && menuitem.indexOf("BOOK")!=-1) {
 			return "book";
 		}
 		else return "report"
@@ -66,7 +67,7 @@ function doWeb(doc, url){
 			for (var i in items) {
 				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(articles, scrape, function () {});
+			Zotero.Utilities.processDocuments(articles, scrape);
 		});
 	} else {
 		scrape(doc, url);
