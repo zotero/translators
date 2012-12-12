@@ -14,7 +14,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"browserSupport": "gcs",
+	"browserSupport": "gcsv",
 	"lastUpdated": "2012-12-12 14:50:41"
 }
 
@@ -1911,7 +1911,7 @@ function writeField(field, value, isMacro) {
 		// treat hyphen as whitespace for this purpose so that Large-scale etc. don't get enclosed
 		// treat curly bracket as whitespace because of mark-up immediately preceding word
 		if(field == "title" || field == "type" || field == "shortTitle" || field == "seriesTitle" || field == "publicationTitle") {
-     	 	Z.debug(isTitleCase(value))
+     	 	//Z.debug(isTitleCase(value))
      	 	if (!isTitleCase(value)){
      	 		if(!isMacro) value = value.replace(/([A-Z]+)/g, "{$1}");
      	 	}
