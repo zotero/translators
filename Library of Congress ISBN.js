@@ -1,22 +1,24 @@
 {
 	"translatorID": "c070e5a2-4bfd-44bb-9b3c-4be20c50d0d9",
 	"label": "Library of Congress ISBN",
-	"creator": "Simon Kornblith, Sebastian Karcher",
+	"creator": "Sebastian Karcher",
 	"target": "",
-	"minVersion": "3.0",
+	"minVersion": "3.0.9",
 	"maxVersion": "",
 	"priority": 99,
 	"inRepository": true,
 	"translatorType": 8,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-12-11 16:10:34"
+	"lastUpdated": "2012-12-12 16:10:34"
 }
 
 
 function detectSearch(item) {
-	if (item.ISBN) {
+	//re-enable once 
+	/*if (item.ISBN) {
 		return !!ZU.cleanISBN(item.ISBN)
-	} else return false;
+	} else return false; */
+	return !!item.ISBN;
 }
 
 
