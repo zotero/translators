@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-11-24 13:08:11"
+	"lastUpdated": "2012-12-13 16:46:17"
 }
 
 /*
@@ -60,10 +60,7 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				books.push(i);
 			}
-			Zotero.Utilities.processDocuments(books, scrape, function () {
-				Zotero.done();
-			});
-			Zotero.wait();
+			Zotero.Utilities.processDocuments(books, scrape);
 		});
 	} else {
 		scrape(doc, url);
@@ -115,7 +112,6 @@ function scrape(doc, url) {
 		} else if (!fulltitle) newItem.title = dataTags["Title"];
 
 		if (field == "BISAC Subject Heading") {
-			Z.debug("here")
 			var tags = dataTags[field].split(/\n/)
 			for (var j in tags) {
 				newItem.tags[j] = tags[j].replace(/.+\//, "").trim();

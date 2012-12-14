@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-02-29 01:37:12"
+	"lastUpdated": "2012-12-13 20:42:35"
 }
 
 /*

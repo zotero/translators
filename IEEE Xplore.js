@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-11-06 08:34:31"
+	"lastUpdated": "2012-12-13 17:42:57"
 }
 
 function detectWeb(doc, url) {
@@ -71,13 +71,9 @@ function doWeb(doc, url) {
 				// Data: http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1397982
 				var arnumber = i.match(/arnumber=(\d+)/)[1];
 				i = i.replace(/\/(?:search|stamp)\/.*$/, "/xpls/abs_all.jsp?arnumber=" + arnumber);
-
 				urls.push(i);
 			}
-			Zotero.Utilities.processDocuments(urls, scrape, function () {
-				Zotero.done();
-			});
-			Zotero.wait();
+			Zotero.Utilities.processDocuments(urls, scrape);
 		});
 
 	} else {
@@ -88,9 +84,7 @@ function doWeb(doc, url) {
 			// Or: http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1575188&tag=1
 			var arnumber = url.match(/arnumber=(\d+)/)[1];
 			url = url.replace(/\/(?:search|stamp|ielx[45])\/.*$/, "/xpls/abs_all.jsp?arnumber=" + arnumber);
-			Zotero.Utilities.processDocuments([url], scrape, function () {
-				Zotero.done();
-			});
+			Zotero.Utilities.processDocuments([url], scrape);
 			Zotero.wait();
 		} else {
 			scrape(doc, url);
@@ -337,11 +331,6 @@ idCheck = function (isbn) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://ieeexplore.ieee.org/search/searchresult.jsp?newsearch=true&queryText=turing&x=0&y=0&tag=1",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "http://ieeexplore.ieee.org/xpl/articleDetails.jsp?tp=&arnumber=4607247&refinements%3D4294967131%26openedRefinements%3D*%26filter%3DAND%28NOT%284283010803%29%29%26searchField%3DSearch+All%26queryText%3Dturing",
 		"items": [
 			{
@@ -405,12 +394,12 @@ var testCases = [
 					},
 					{
 						"firstName": "J.",
-						"lastName": "Muñoz-Marí",
+						"lastName": "Munoz-Mari",
 						"creatorType": "author"
 					},
 					{
 						"firstName": "L.",
-						"lastName": "Gómez-Chova",
+						"lastName": "Gomez-Chova",
 						"creatorType": "author"
 					},
 					{
@@ -424,12 +413,16 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
+						"title": "IEEE Xplore Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
 						"title": "IEEE Xplore Abstract Record",
 						"mimeType": "text/html"
 					}
 				],
 				"publicationTitle": "IEEE Transactions on Geoscience and Remote Sensing",
-				"title": "Graph Matching for Adaptation in Remote Sensing",
+				"title": "Graph matching for adaptation in remote sensing",
 				"date": "2012",
 				"volume": "PP",
 				"issue": "99",

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-24 13:02:10"
+	"lastUpdated": "2012-12-13 19:10:06"
 }
 
 function detectWeb(doc, url) {
@@ -170,6 +170,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "http://www.nzherald.co.nz/labor/search/results.cfm?kw1=labor&kw2=&st=gsa",
 		"items": "multiple"
 	}

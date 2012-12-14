@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-12-10 21:28:32"
+	"lastUpdated": "2012-12-13 16:47:51"
 }
 
 function detectWeb(doc, url) {
@@ -342,7 +342,7 @@ function doDelivery(doc, itemInfo) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://web.ebscohost.com/ehost/detail?sid=750e1ab3-1dfd-4145-9060-759a43da0ead%40sessionmgr104&vid=1&hid=107&bdata=JnNpdGU9ZWhvc3QtbGl2ZQ%3d%3d#db=aph&AN=9606204477",
+		"url": "http://search.ebscohost.com/login.aspx?direct=true&db=aph&AN=9606204477&site=ehost-live",
 		"items": [
 			{
 				"itemType": "journalArticle",

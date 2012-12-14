@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-11-23 02:12:24"
+	"lastUpdated": "2012-12-13 17:43:18"
 }
 
 var typeMap = {
@@ -565,56 +565,6 @@ var testCases = [
 				"url": "http://www.ird.fr/index.php/toute-l-actualite/evenements-et-manifestations/colloques/seminaire-quand-la-sante-questionne-le-couple-correspondances-sud-et-nord",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "rechercheisidore.fr"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://rechercheisidore.fr/search/resource/?uri=ark:/12148/btv1b53031751n",
-		"items": [
-			{
-				"itemType": "artwork",
-				"creators": [],
-				"notes": [],
-				"tags": [
-					"rue",
-					"Société",
-					"société",
-					"géographie",
-					"Géographie"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "Isidore Record",
-						"snapshot": false
-					}
-				],
-				"itemID": "http://rechercheisidore.fr/search/resource/?uri=ark:/12148/btv1b53031751n",
-				"title": "Colombo, une rue : Inde anglaise / H[enri] Duval ; [photogr. reprod. par] A. Cintract [pour la] Société de géographie",
-				"publisher": "Bibliothèque nationale de France",
-				"institution": "Bibliothèque nationale de France",
-				"company": "Bibliothèque nationale de France",
-				"label": "Bibliothèque nationale de France",
-				"distributor": "Bibliothèque nationale de France",
-				"date": "1921",
-				"reportType": "Photos et images",
-				"letterType": "Photos et images",
-				"manuscriptType": "Photos et images",
-				"mapType": "Photos et images",
-				"thesisType": "Photos et images",
-				"websiteType": "Photos et images",
-				"presentationType": "Photos et images",
-				"postType": "Photos et images",
-				"audioFileType": "Photos et images",
-				"language": "Français",
-				"url": "http://gallica.bnf.fr/ark:/12148/btv1b53031751n",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "rechercheisidore.fr",
-				"shortTitle": "Colombo, une rue"
 			}
 		]
 	},

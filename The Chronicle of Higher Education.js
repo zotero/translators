@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-08-05 08:09:33"
+	"lastUpdated": "2012-12-13 20:15:03"
 }
 
 /*
@@ -279,18 +279,18 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": false,
 						"title": "Chronicle of Higher Education Snapshot",
 						"mimeType": "text/html"
 					}
 				],
 				"url": "http://chronicle.com/blogPost/humanities-cyberinfrastructure-project-bamboo/6138",
-				"publicationTitle": "Brainstorm",
+				"publicationTitle": "From the Archives: Brainstorm",
 				"ISSN": "0009-5982",
 				"date": "July 17, 2008, 01:29 PM ET",
 				"title": "Humanities Cyberinfrastructure: Project Bamboo",
 				"websiteType": "The Chronicle of Higher Education",
 				"libraryCatalog": "The Chronicle of Higher Education",
+				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Humanities Cyberinfrastructure"
 			}
 		]

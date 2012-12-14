@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-11-29 21:40:17"
+	"lastUpdated": "2012-12-13 18:14:13"
 }
 
 /*
@@ -64,9 +64,6 @@ function doWeb(doc, url) {
 
 function scrape(marcurl) {
 	Zotero.Utilities.HTTP.doGet(marcurl, function (text) {
-		//Z.debug(text)
-		//this removes commas at the end of subfields
-		text = text.replace(/,\u001Fb/g, "\u001Fb")
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
 		translator.setString(text);
@@ -215,94 +212,96 @@ var testCases = [
 					},
 					{
 						"firstName": "Catarina",
-						"lastName": "undefined",
+						"lastName": "Câmara",
 						"creatorType": "author"
 					},
 					{
 						"firstName": "Bruno",
-						"lastName": "undefined",
+						"lastName": "Alexandre",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Maria",
+						"firstName": "Maria",
+						"lastName": "Cerveira",
 						"creatorType": "author"
 					},
 					{
 						"firstName": "Célia",
-						"lastName": "C",
+						"lastName": "Cardoso",
 						"creatorType": "author"
 					},
 					{
 						"firstName": "Ricardo",
-						"lastName": "undefined",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "As",
+						"lastName": "Carmona",
 						"creatorType": "author"
 					},
 					{
 						"firstName": "Catarina",
-						"lastName": "Lei",
+						"lastName": "Ascensão",
 						"creatorType": "author"
 					},
 					{
 						"firstName": "Ana Sofia",
-						"lastName": "Silv",
+						"lastName": "Leite",
 						"creatorType": "author"
 					},
 					{
+						"firstName": "Claúdia",
+						"lastName": "Silva",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Diana",
 						"lastName": "Alves",
 						"creatorType": "author"
 					},
 					{
+						"firstName": "Eliana",
 						"lastName": "Campos",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Mauríc",
+						"firstName": "Guida",
+						"lastName": "Maurício",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Guida",
+						"firstName": "Lib",
 						"lastName": "Pitalúa",
 						"creatorType": "author"
 					},
 					{
+						"firstName": "Mariana",
 						"lastName": "Saraiva",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Fra",
+						"firstName": "Francisco",
 						"lastName": "Pedro",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Jo",
+						"firstName": "João Carlos",
 						"lastName": "Andrade",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Mi",
+						"firstName": "Miguel",
 						"lastName": "Oliveira",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Luí",
+						"firstName": "Luísa",
 						"lastName": "Taveira",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Escola Superio",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Escola Vocacio",
+						"lastName": "Escola Superior de Dança",
 						"creatorType": "contributor",
 						"fieldMode": true
 					},
 					{
-						"lastName": "PT",
+						"lastName": "Escola Vocacional de Dança",
 						"creatorType": "contributor",
 						"fieldMode": true
 					}
@@ -312,11 +311,12 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"language": "por",
-				"title": "Dia Mundial da Dança Dança Caldas 21h30",
+				"title": "Dia Mundial da Dança: Dança Caldas 21h30",
 				"place": "Lisboa",
 				"publisher": "ESD",
 				"date": "2005",
-				"libraryCatalog": "Library Catalog (Koha)"
+				"libraryCatalog": "Library Catalog (Koha)",
+				"shortTitle": "Dia Mundial da Dança"
 			}
 		]
 	}

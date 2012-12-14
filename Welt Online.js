@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-10-15 22:17:34"
+	"lastUpdated": "2012-12-13 20:25:03"
 }
 
 /*
@@ -171,7 +171,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Gesundheit: Krankenkassen werfen Ärzten Gewinnstreben vor - Nachrichten Wirtschaft - DIE WELT",
+						"title": "Gesundheit : Krankenkassen werfen Ärzten Gewinnstreben vor - Nachrichten Wirtschaft - DIE WELT",
 						"mimeType": "text/html"
 					}
 				],

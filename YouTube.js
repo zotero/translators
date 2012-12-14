@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-10-22 16:49:38"
+	"lastUpdated": "2012-12-13 20:41:19"
 }
 
 function detectWeb(doc, url){
@@ -21,11 +21,15 @@ function detectWeb(doc, url){
 		return "videoRecording";
 	}
 	//Search results
-	if ( ZU.xpath(doc, '//div[@class="result-item-main-content"]//a[contains(@href, "/watch?v=")]').length ){
+	if ( ZU.xpath(doc, '//ol[@id="search-results"]//a[contains(@href, "/watch?v=")]').length ){
 		return "multiple";
 	}
 	//playlists
 	if ( ZU.xpath(doc, '//a[contains(@class,"tile-link") and contains(@href,"/watch?")][descendant::span[starts-with(@class,"title")]]').length ){	
+		return "multiple";
+	}
+	//user page
+	if ( ZU.xpath(doc, '//div[@class="feed-item-content"]//a[contains(@href, "/watch?v=")]').length ){
 		return "multiple";
 	}
 	// still used?
@@ -49,7 +53,7 @@ function doWeb(doc, url){
 		var items = new Object();
 		var isPlaylist = false;
 		// search results and community/user pages
-		var elmts = ZU.xpath(doc, '//div[@class="result-item-main-content"]//a[contains(@href, "/watch?v=")]')
+		var elmts = ZU.xpath(doc, '//ol[@id="search-results"]//a[contains(@href, "/watch?v=")]|//div[@class="feed-item-content"]//a[contains(@href, "/watch?v=")]')
 		if (!elmts.length) {
 			//playlists
 			elmts = ZU.xpath(doc, '//a[contains(@class,"tile-link") and contains(@href,"/watch?")][descendant::span[starts-with(@class,"title")]]');
@@ -179,6 +183,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.youtube.com/playlist?list=PL793CABDF042A9514",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.youtube.com/user/Zoteron",
 		"items": "multiple"
 	}
 ]

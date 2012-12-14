@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-11-02 08:46:55"
+	"lastUpdated": "2012-12-13 20:07:25"
 }
 
 function detectWeb(doc, url) {
@@ -333,6 +333,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "ScienceDirect Snapshot"
+					},
+					{
+						"title": "ScienceDirect Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"title": "8 - Introduction to discrete dislocation statics and dynamics",
@@ -417,6 +421,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "ScienceDirect Snapshot"
+					},
+					{
+						"title": "ScienceDirect Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"title": "Africa",
