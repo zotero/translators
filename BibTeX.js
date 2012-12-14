@@ -2002,8 +2002,8 @@ function writeField(field, value, isMacro) {
 				/** TODO: non-latin letters. Also see below **/
 				value = value.replace(/(.)([A-Z]+)/g, "$1{$2}");
 			} else {	//protect all-caps vords and initials
-				value = value.replace(/([\s.-])([A-Z]+)(?=\.)/g, "$1{$2}");	//protect initials
-				if(value.toUpperCase() != value) value = value.replace(/(\s)([A-Z]{2,})(?=[\.,\s]|$)/g, "$1{$2}");
+				value = value.replace(/([\s.->])([A-Z]+)(?=\.)/g, "$1{$2}");	//protect initials
+				if(value.toUpperCase() != value) value = value.replace(/([\s>])([A-Z]{2,})(?=[\.,\s<]|$)/g, "$1{$2}");
 			}
 		} else if (field != "pages") {
 			value = value.replace(/[^\s-\}\(\[]+[A-Z][^\s,]*/g, "{$0}");
@@ -2057,7 +2057,7 @@ const skipWords = ["but", "or", "yet", "so", "for", "and", "nor",
 	"within", "without"];
 
 function isTitleCase(string) {
-	const wordRE = /[\s[(]([^\s,\.:?!\])]+)/g;
+	const wordRE = /[\s[(>]([^\s,\.:?!\])<]+)/g;
 
 	var word;
 	while (word = wordRE.exec(string)) {
