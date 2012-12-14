@@ -14,8 +14,8 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2012-12-12 17:21:54"
+	"browserSupport": "gcs",
+	"lastUpdated": "2012-12-13 23:00:11"
 }
 
 function detectImport() {
@@ -1983,13 +1983,13 @@ function doImport() {
 // some fields are, in fact, macros.  If that is the case then we should not put the
 // data in the braces as it will cause the macros to not expand properly
 function writeField(field, value, isMacro) {
-	if(!value && typeof value != "number") return;
+	if (!value && typeof value != "number") return;
 	value = value + ""; // convert integers to strings
-	Zotero.write(",\n\t"+field+" = ");
-	if(!isMacro) Zotero.write("{");
+	Zotero.write(",\n\t" + field + " = ");
+	if (!isMacro) Zotero.write("{");
 	// url field is preserved, for use with \href and \url
 	// Other fields (DOI?) may need similar treatment
-	if(!((field == "url") || (field == "doi") || (field == "file") || (field == "callNumber"))) {
+	if (!((field == "url") || (field == "doi") || (field == "file") || (field == "lccn"))) {
 
 		// I hope these are all the escape characters!
 		//First escape all curly brackets in the Zotero fields, then do the mapping/replacing of other characters
@@ -1997,25 +1997,25 @@ function writeField(field, value, isMacro) {
 		// Case of words with uppercase characters in non-initial positions is preserved with braces.
 		// treat hyphen as whitespace for this purpose so that Large-scale etc. don't get enclosed
 		// treat curly bracket as whitespace because of mark-up immediately preceding word
-		if(field == "title" || field == "type" || field == "shortTitle" || field == "seriesTitle" || field == "publicationTitle") {
-	 		//Z.debug(isTitleCase(value))
-	 		if (!isTitleCase(value)  && !isMacro){
-	 			//protect caps for everything but the first letter
-	 	 		value = value.replace(/.([A-Z]+)/g, "{$1}");
-	 	 	}
-	 	} else if(!isMacro&&field != "pages"){
-	 		value = value.replace(/([^\s-\}]+[A-Z][^\s,]*)/g, "{$1}");
-		}				
+		// treat opening parentheses &brackets as whitespace
+		if (field == "title" || field == "type" || field == "shorttitle" || field == "booktitle" || field == "series") {
+			//Z.debug(isTitleCase(value))
+			if (!isTitleCase(value) && !isMacro) {
+				//protect caps for everything but the first letter
+				value = value.replace(/(.)([A-Z]+)/g, "$1{$2}");
+			}
+		} else if (!isMacro && field != "pages") {
+			value = value.replace(/([^\s-\}\(\[]+[A-Z][^\s,]*)/g, "{$1}");
+		}
 	}
 	if (Zotero.getOption("exportCharset") != "UTF-8") {
 		value = value.replace(/[\u0080-\uFFFF]/g, mapAccent);
 	}
 	//convert the HTML markup allowed in Zotero for rich text to TeX; excluding doi/url/file shouldn't be necessary, but better to be safe;
-	if(!((field == "url") || (field == "doi") || (field == "file"))) value = mapHTMLmarkup(value);
+	if (!((field == "url") || (field == "doi") || (field == "file"))) value = mapHTMLmarkup(value);
 	Zotero.write(value);
-	if(!isMacro) Zotero.write("}");
+	if (!isMacro) Zotero.write("}");
 }
-
 
 function mapHTMLmarkup(characters){
 	//converts the HTML markup allowed in Zotero for rich text to TeX
@@ -2043,55 +2043,29 @@ function mapTeXmarkup(tex){
 	return tex;
 }
 
-
 function isTitleCase(string) {
-	//returns true if the string is in title case, false otherwise. Based on capitalizeTitle with expanded list of skipWords
-	const skipWords = ["but", "or", "yet", "so", "for", "and", "nor", "a", "an", "the", "at", "by", "from", "in", "into", "of", "on", "to", "with", "up", "down", "as", "while", "aboard", "about", "above", "across", "after", "against", "along", "amid", "among", "anti", "around", "as", "before", "behind", "below", "beneath", "beside", "besides", "between", "beyond", "but", "despite", "down", "during", "except", "for", "inside", "like", "near", "off", "onto", "over", "past", "per", "plus", "round", "save", "since", "than", "through", "toward", "towards", "under", "underneath", "unlike", "until", "upon", "versus", "via", "within", "without"];
+	const skipWords = ["but", "or", "yet", "so", "for", "and", "nor",
+		"a", "an", "the", "at", "by", "from", "in", "into", "of", "on",
+		"to", "with", "up", "down", "as", "while", "aboard", "about",
+		"above", "across", "after", "against", "along", "amid", "among",
+		"anti", "around", "as", "before", "behind", "below", "beneath",
+		"beside", "besides", "between", "beyond", "but", "despite",
+		"down", "during", "except", "for", "inside", "like", "near",
+		"off", "onto", "over", "past", "per", "plus", "round", "save",
+		"since", "than", "through", "toward", "towards", "under",
+		"underneath", "unlike", "until", "upon", "versus", "via",
+		"within", "without"];
 
-	// this may only match a single character
-	const delimiterRegexp = /([ \/\u002D\u00AD\u2010-\u2015\u2212\u2E3A\u2E3B])/;
-	if (!string) return false;
+	const wordRE = /\s([^\s,\.:?!]+)/g;
 
-	// split words
-	var words = string.split(delimiterRegexp);
-	var isUpperCase = string.toUpperCase() == string;
+	var word;
+	while (word = wordRE.exec(string)) {
+		word = word[1];
+		if (skipWords.indexOf(word.toLowerCase()) != -1) continue;
 
-	var newString = "";
-	var delimiterOffset = words[0].length;
-	var lastWordIndex = words.length - 1;
-	var previousWordIndex = -1;
-	for (var i = 0; i <= lastWordIndex; i++) {
-		// only do manipulation if not a delimiter character
-		if (words[i].length != 0 && (words[i].length != 1 || !delimiterRegexp.test(words[i]))) {
-			var upperCaseVariant = words[i].toUpperCase();
-			var lowerCaseVariant = words[i].toLowerCase();
-
-			// only use if word does not already possess some capitalization
-			if (isUpperCase || words[i] == lowerCaseVariant) {
-				if (
-				// a skip word
-				skipWords.indexOf(lowerCaseVariant.replace(/[^a-zA-Z]+/, "")) != -1
-				// not first or last word
-				&&
-				i != 0 && i != lastWordIndex
-				// does not follow a colon
-				&&
-				(previousWordIndex == -1 || words[previousWordIndex][words[previousWordIndex].length - 1] != ":")) {
-					words[i] = lowerCaseVariant;
-				} else {
-					// this is not a skip word or comes after a colon;
-					// we must capitalize
-					words[i] = upperCaseVariant.substr(0, 1) + lowerCaseVariant.substr(1);
-				}
-			}
-
-			previousWordIndex = i;
-		}
-
-		newString += words[i];
+		if (word.toLowerCase() == word) return false;
 	}
-	if (newString == string) return true
-	else return false
+	return true;
 }
 
 function mapEscape(character) {
