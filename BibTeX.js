@@ -1989,23 +1989,24 @@ function writeField(field, value, isMacro) {
 	if (!isMacro) Zotero.write("{");
 	// url field is preserved, for use with \href and \url
 	// Other fields (DOI?) may need similar treatment
-	if (!((field == "url") || (field == "doi") || (field == "file") || (field == "lccn"))) {
-
+	if (!isMacro && !(field == "url" || field == "doi" || field == "file" || field == "lccn")) {
 		// I hope these are all the escape characters!
-		//First escape all curly brackets in the Zotero fields, then do the mapping/replacing of other characters
 		value = value.replace(/[|\<\>\~\^\\\{\}]/g, mapEscape).replace(/[\#\$\%\&\_]/g, "\\$0");
 		// Case of words with uppercase characters in non-initial positions is preserved with braces.
 		// treat hyphen as whitespace for this purpose so that Large-scale etc. don't get enclosed
 		// treat curly bracket as whitespace because of mark-up immediately preceding word
 		// treat opening parentheses &brackets as whitespace
 		if (field == "title" || field == "type" || field == "shorttitle" || field == "booktitle" || field == "series") {
-			//Z.debug(isTitleCase(value))
-			if (!isTitleCase(value) && !isMacro) {
+			if (!isTitleCase(value)) {
 				//protect caps for everything but the first letter
+				/** TODO: non-latin letters. Also see below **/
 				value = value.replace(/(.)([A-Z]+)/g, "$1{$2}");
+			} else {	//protect all-caps vords and initials
+				value = value.replace(/([\s.-])([A-Z]+)(?=\.)/g, "$1{$2}");	//protect initials
+				if(value.toUpperCase() != value) value = value.replace(/(\s)([A-Z]{2,})(?=[\.,\s]|$)/g, "$1{$2}");
 			}
-		} else if (!isMacro && field != "pages") {
-			value = value.replace(/([^\s-\}\(\[]+[A-Z][^\s,]*)/g, "{$1}");
+		} else if (field != "pages") {
+			value = value.replace(/[^\s-\}\(\[]+[A-Z][^\s,]*/g, "{$0}");
 		}
 	}
 	if (Zotero.getOption("exportCharset") != "UTF-8") {
@@ -2043,27 +2044,30 @@ function mapTeXmarkup(tex){
 	return tex;
 }
 
-function isTitleCase(string) {
-	const skipWords = ["but", "or", "yet", "so", "for", "and", "nor",
-		"a", "an", "the", "at", "by", "from", "in", "into", "of", "on",
-		"to", "with", "up", "down", "as", "while", "aboard", "about",
-		"above", "across", "after", "against", "along", "amid", "among",
-		"anti", "around", "as", "before", "behind", "below", "beneath",
-		"beside", "besides", "between", "beyond", "but", "despite",
-		"down", "during", "except", "for", "inside", "like", "near",
-		"off", "onto", "over", "past", "per", "plus", "round", "save",
-		"since", "than", "through", "toward", "towards", "under",
-		"underneath", "unlike", "until", "upon", "versus", "via",
-		"within", "without"];
+const skipWords = ["but", "or", "yet", "so", "for", "and", "nor",
+	"a", "an", "the", "at", "by", "from", "in", "into", "of", "on",
+	"to", "with", "up", "down", "as", "while", "aboard", "about",
+	"above", "across", "after", "against", "along", "amid", "among",
+	"anti", "around", "as", "before", "behind", "below", "beneath",
+	"beside", "besides", "between", "beyond", "but", "despite",
+	"down", "during", "except", "for", "inside", "like", "near",
+	"off", "onto", "over", "past", "per", "plus", "round", "save",
+	"since", "than", "through", "toward", "towards", "under",
+	"underneath", "unlike", "until", "upon", "versus", "via",
+	"within", "without"];
 
-	const wordRE = /\s([^\s,\.:?!]+)/g;
+function isTitleCase(string) {
+	const wordRE = /[\s[(]([^\s,\.:?!\])]+)/g;
 
 	var word;
 	while (word = wordRE.exec(string)) {
 		word = word[1];
-		if (skipWords.indexOf(word.toLowerCase()) != -1) continue;
+		if(word.search(/\d/) != -1	//ignore words with numbers (including just numbers)
+			|| skipWords.indexOf(word.toLowerCase()) != -1) {
+			continue;
+		}
 
-		if (word.toLowerCase() == word) return false;
+		if(word.toLowerCase() == word) return false;
 	}
 	return true;
 }
