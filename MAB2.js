@@ -1,14 +1,15 @@
 {
-	"translatorID":"91acf493-0de7-4473-8b62-89fd141e6c74",
-	"translatorType":1,
-	"label":"MAB2",
-	"creator":"Simon Kornblith. Adaptions for MAB2: Leon Krauthausen (FUB)",
-	"target":"mab2",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-06-12 19:00:00"
+	"translatorID": "91acf493-0de7-4473-8b62-89fd141e6c74",
+	"label": "MAB2",
+	"creator": "Simon Kornblith. Adaptions for MAB2: Leon Krauthausen (FUB)",
+	"target": "mab2",
+	"minVersion": "1.0.0b3.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 1,
+	"browserSupport": "g",
+	"lastUpdated": "2012-12-15 17:57:47"
 }
 
 function detectImport() {
@@ -184,8 +185,8 @@ record.prototype.getField = function(field) {
 		
 		// add to array, replacing null characters
 		fields.push([this.content.substr(location[0], this.indicatorLength),
-		             this.content.substr(location[0]+this.indicatorLength,
-	                     location[1]-this.indicatorLength-1).replace(/\x00/g, "")]);
+					 this.content.substr(location[0]+this.indicatorLength,
+						 location[1]-this.indicatorLength-1).replace(/\x00/g, "")]);
 	}
 	
 	return fields;
@@ -287,9 +288,15 @@ record.prototype.translate = function(item) {
 	// FUB Added language, edition, pages, url, edition, series, ISBN, url
 	for (var i = 100; i <= 196; i++) {
 		if (this.getFieldSubfields(i)[0]) {
+			var authorfield = "a"
 			var field = this.getFieldSubfields(i)[0]['a'];
+			if (!field){
+ 			//sometimes (or always?) the author is in p not a
+				var field = this.getFieldSubfields(i)[0]['p'];
+				authorfield = "p";
+			}
 			var authType = this.getFieldSubfields(i)[0]['b'];
-			this._associateDBField(item, i, "a", "creator", authorMab, authType, true);
+			this._associateDBField(item, i, authorfield, "creator", authorMab, authType, true);
 		}
 	}
 

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-09-16 20:33:41"
+	"lastUpdated": "2012-12-15 18:26:53"
 }
 
 /*
@@ -38,6 +38,10 @@ http://mediatheque.sigdci76.fr/
 http://opac.biu-montpellier.fr/
 Japanese Diet Library:
 https://ndlopac.ndl.go.jp
+Germany:
+http://aleph-www.ub.fu-berlin.de
+http://opac.hu-berlin.de
+http://alephdai.ub.hu-berlin.de
 */
 
 function detectWeb(doc, url) {
@@ -57,7 +61,7 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 	var detailRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set|func=direct|func=myshelf-full|func=myself_full.*)");
-	var mab2Opac = new RegExp("^https?://[^/]+berlin|193\.30\.112\.134|duisburg-essen/F/[A-Z0-9\-]+\?.*");
+	var mab2Opac = new RegExp("^https?://(?!alephdai)[^/]+berlin|193\.30\.112\.134|duisburg-essen/F/[A-Z0-9\-]+\?.*");
 	var uri = doc.location.href;
 	var newUris = new Array();
 	
@@ -89,8 +93,7 @@ function doWeb(doc, url) {
 		translator.getTranslatorObject(function (marc) {
 			Zotero.Utilities.processDocuments([newuri], function(newDoc) {
 				scrape(newDoc, marc, url);
-			}, function() {Zotero.done();});
-			Zotero.wait();
+			});
 		});
 		
 	} else {
@@ -142,8 +145,7 @@ function doWeb(doc, url) {
 			translator.getTranslatorObject(function (marc) {
 				Zotero.Utilities.processDocuments(newUris, function(newDoc) {
 					scrape(newDoc, marc, url);
-				}, function() {Zotero.done();});
-				Zotero.wait();
+				});
 			});
 		});
 	}
