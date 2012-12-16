@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-12-08 08:58:37"
+	"lastUpdated": "2012-12-16 00:42:36"
 }
 
 function detectWeb(doc, url) {
@@ -170,7 +170,7 @@ var scrapers = [
 				fields.title = ZU.capitalizeTitle(fields.title, true);
 			}
 
-			if(fields.extra.indexOf('U.S. Classification') != -1) {
+			if(fields.extra && fields.extra.indexOf('U.S. Classification') != -1) {
 				fields.country = "United States";
 			}
 
