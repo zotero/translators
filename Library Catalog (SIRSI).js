@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-12-08 13:28:00"
+	"lastUpdated": "2012-12-16 17:55:02"
 }
 
 /*Spanish Libraries:
@@ -172,12 +172,20 @@ function scrape(doc) {
 					}
 				} else if(field == "contents" || field == "contient") {
 						newItem.notes.push(value);
+				} else if(field == "texto publicado en") {
+					 	//Z.debug(value)
+						newItem.itemType = "journalArticle";
+						newItem.publication = value.match(/En:\s*([^-.]+)/)[1]
+						newItem.issue = value.match(/Nº\s*([^\(,]+)/)[1]
+						newItem.volume = value.match(/\(([^\)]+)/)[1]
+						newItem.page = value.match(/p\.\s*([\d\-]+)/)[1]
+						
 				} else if(value && field != "http") {
 					if (note)	note += casedField+": "+value+"\n";
 					else note = casedField+": "+value+"\n";
 				}
 			}
-		} catch (e) {}
+		} catch (e) {}newItem
 		
 		elmt = elmts.iterateNext();
 	}
@@ -200,14 +208,14 @@ function scrape(doc) {
 	}
 	
 	//sometimes we're missing the publication date - see if it's in the publisher:
-	if (!newItem.date){
+	if (!newItem.date && newItem.publisher){
 		var year = newItem.publisher.match(/\d{4}/)[0];
 		if (year) newItem.publisher = newItem.publisher.replace(/[,;:]\s*\d{4}/, "");
 		newItem.date = year;
 	}
 	
 	//sometimes the place is in the publisher field
-	if (!newItem.place){
+	if (!newItem.place && newItem.publisher){
 		var place = newItem.publisher.match(/(.[^:]+):/)[1];
 		if (place){
 			newItem.place = place.trim();
@@ -250,9 +258,7 @@ function doWeb(doc, url){
 	
 	if (sirsiNew) { //executes Simon's SIRSI 2003+ scraper code
 		Zotero.debug("Running SIRSI 2003+ code");
-	
-		if(!scrape(doc)) {
-				
+		if(!scrape(doc)) {				
 			var checkboxes = new Array();
 			var urls = new Array();
 			var availableItems = new Array();			
@@ -263,7 +269,7 @@ function doWeb(doc, url){
 			if (iu){
 				var tableRows = doc.evaluate('//td[@class="searchsum"]/table[//input[@class="submitLink"]]', doc, null, XPathResult.ANY_TYPE, null);
 			} else{
-				var tableRows = doc.evaluate('//td[@class="searchsum"]/table[//input[@value="Details"]]', doc, null, XPathResult.ANY_TYPE, null);
+				var tableRows = doc.evaluate('//td[@class="searchsum"]/table[//input[@value="Details" or @value="Detalles"]]', doc, null, XPathResult.ANY_TYPE, null);
 			}
 			var tableRow = tableRows.iterateNext();		// skip first row
 			// Go through table rows
@@ -273,7 +279,7 @@ function doWeb(doc, url){
 					var input = doc.evaluate('.//input[@class="submitLink"]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext();
 					var text = doc.evaluate('.//label/span', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 				} else {
-					var input = doc.evaluate('.//input[@value="Details"]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext();					
+					var input = doc.evaluate('.//input[@value="Details" or @value="Detalles"]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext();					
 					var text = doc.evaluate('.//label/strong', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;					
 				}
 			//end IUCAT fixes by Andrew Smith
@@ -281,23 +287,23 @@ function doWeb(doc, url){
 					availableItems[input.name] = text;
 				}
 			}		
-			var items = Zotero.selectItems(availableItems);		
-			if(!items) {
-				return true;
-			}
-			var hostRe = new RegExp("^http(?:s)?://[^/]+");
-			var m = hostRe.exec(doc.location.href);
-			Zotero.debug("href: " + doc.location.href);
-			var hitlist = doc.forms.namedItem("hitlist");
-			var baseUrl = m[0]+hitlist.getAttribute("action")+"?first_hit="+hitlist.elements.namedItem("first_hit").value+"&last_hit="+hitlist.elements.namedItem("last_hit").value;
-			var uris = new Array();
-			for(var i in items) {
-				uris.push(baseUrl+"&"+i+"=Details");
-			}
 		
-			Zotero.Utilities.processDocuments(uris, function(doc) { scrape(doc); },
-				function() { Zotero.done(); }, null);
-			Zotero.wait();
+			Zotero.selectItems(availableItems, function (items) {
+				if (!items) {
+					return true;
+				}
+				var hostRe = new RegExp("^http(?:s)?://[^/]+");
+				var m = hostRe.exec(doc.location.href);
+				Zotero.debug("href: " + doc.location.href);
+				var hitlist = doc.forms.namedItem("hitlist");
+				var baseUrl = m[0]+hitlist.getAttribute("action")+"?first_hit="+hitlist.elements.namedItem("first_hit").value+"&last_hit="+hitlist.elements.namedItem("last_hit").value;
+				var uris = new Array();
+				for(var i in items) {
+					uris.push(baseUrl+"&"+i+"=Details");
+				}
+		 		//Z.debug(uris)
+				Zotero.Utilities.processDocuments(uris, scrape)
+			});
 		}	
 	} else{  //executes Simon's SIRSI -2003 translator code
 		Zotero.debug("Running SIRSI -2003 code");
@@ -407,38 +413,6 @@ function doWeb(doc, url){
 	}
 }/** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "http://www.cible.ulb.ac.be/uhtbin/cgisirsi/x/S.HUMAINES/0/5?searchdata1=915050{ckey}",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"firstName": "Susan",
-						"lastName": "Sellers",
-						"creatorType": "author"
-					}
-				],
-				"notes": [
-					"Index",
-					"Bloomsbury / Andrew McNeillie -- Virginia Woolf's early novels : finding a voice / Suzanne Raitt -- From Mrs. Dalloway to The waves : new elegy and lyric experimentalism / Jane Goldman -- The novels of the 1930s and the impact of history / Julia Briggs -- Virginia Woolf's essays / Hermione Lee -- Virginia Woolf, modernism and modernity / Michael H. Whitworth -- The socio-political vision of the novels / David Bradshaw -- Woolf's feminism and feminism's Woolf / Laura Marcus -- Virginia Woolf and sexuality / Patricia Morgne Cramer -- Virginia Woolf, empire and race / Helen Carr -- Virginia Woolf and visual culture / Maggie Humm -- Virginia Woolf and the public sphere / Melba Cuddy-Keane"
-				],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "The Cambridge companion to Virginia Woolf",
-				"edition": "2nd ed",
-				"date": "2010",
-				"publisher": "Cambridge University Press",
-				"place": "Cambridge, UK; New York",
-				"numPages": "272",
-				"series": "Cambridge companions to literature",
-				"ISBN": "0521896940",
-				"libraryCatalog": "www.cible.ulb.ac.be Library Catalog"
-			}
-		]
-	},
 	{
 		"type": "web",
 		"url": "http://toroprod.library.utoronto.ca/uhtbin/cgisirsi/x/x/0/123?searchdata1=7990078&srchfield1=CKEY^SUBJECT^GENERAL^^words+or+phrase&searchoper1=AND&thesaurus1=GENERAL&search_entries1=CKEY&search_type1=SUBJECT&special_proc1=&CFID=756596&CFTOKEN=78921104",
