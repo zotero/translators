@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-09-24 16:39:22"
+	"lastUpdated": "2012-12-18 00:18:12"
 }
 
 /**
@@ -67,7 +67,7 @@ function doWeb(doc, url) {
 
 	var url = 'http://scitation.aip.org/getabs/servlet/GetCitation?'+
 				'source=scitation&fn=open_bibtex2&SelectCheck=' + id;
-
+Z.debug(url)
 	ZU.doGet(url, function(text) {
 		// use BibTeX translator
 		var translator = Zotero.loadTranslator("import");
@@ -336,135 +336,6 @@ var testCases = [
 				"DOI": "10.1115/1.2229251",
 				"abstractNote": "This paper presents an architecture and control methodology for obtaining transparency and stability robustness in a multivariable bilateral teleoperator system. The work presented here extends a previously published single-input, single-output approach to accommodate multivariable systems. The extension entails the use of impedance control techniques, which are introduced to render linear the otherwise nonlinear dynamics of the master and slave manipulators, in addition to a diagonalization multivariable loop shaping technique, used to render tractable the multivariable compensator design. A multivariable measure of transparency is proposed based on the relative singular values of the environment and transmitted impedance matrices. The approach is experimentally demonstrated on a three degree-of-freedom scaled telemanipulator pair with a highly coupled environment. Using direct measurement of the power delivered to the operator to assess the system's stability robustness, along with the proposed measure of multivariable transparency, the loop-shaping compensation is shown to improve the stability robustness by a factor of two and the transparency by more than a factor of five.",
 				"rights": "©2006 American Society of Mechanical Engineers",
-				"libraryCatalog": "Scitation",
-				"accessDate": "CURRENT_TIMESTAMP"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://digital-library.theiet.org/getabs/servlet/GetabsServlet?prog=normal&id=IMAPCH000006000001000001000001&idtype=cvips&gifs=Yes&ref=no",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "S. I.",
-						"lastName": "Latif",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "L.",
-						"lastName": "Shafai",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"circular polarisation",
-					"dual-layer square-ring microstrip antennas",
-					"axial ratio bandwidth",
-					"sequential rotation",
-					"wide axial ratio beamwidth",
-					"finite ground plane",
-					"right-hand CP gain"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					}
-				],
-				"title": "Circular polarisation from dual-layer square-ring microstrip antennas",
-				"publisher": "IET",
-				"date": "2012",
-				"publicationTitle": "IET Microwaves, Antennas & Propagation",
-				"volume": "6",
-				"issue": "1",
-				"pages": "1-9",
-				"url": "http://link.aip.org/link/?MAP/6/1/1",
-				"DOI": "10.1049/iet-map.2011.0273",
-				"abstractNote": "Stacked microstrip square-ring antennas are investigated for circular polarisation (CP). Enhancement of axial ratio bandwidth is obtained using stacked square rings and applying corner perturbations to both parasitic and driven rings. Both negative and positive corner perturbations are used and wide axial ratio bandwidths are demonstrated. A novel approach is presented, where a combination of positive and negative perturbations is adopted in the driven and parasitic rings, respectively, which resembles a sequential rotation and offers broad axial ratio bandwidth, along with a wide axial ratio beamwidth. The effects of finite ground plane on the CP performance of this antenna are studied, and methods are presented to overcome the problems associated with the degradation of the CP performance because of the finite ground plane. The effect of positioning the antenna asymmetrically on the ground plane is also studied, which shows that the ground plane symmetry is important for the CP antenna. The measured 3 dB axial ratio bandwidth of approximately 5.15% is achieved for dual-layer square-ring antennas. The measured right-hand CP (RHCP) gain is in excess of 7 dBic for a wide frequency range. The simulation results are in good agreement with the measured data.",
-				"libraryCatalog": "Scitation",
-				"accessDate": "CURRENT_TIMESTAMP"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://scitation.aip.org/getabs/servlet/GetabsServlet?prog=normal&id=VIRT04000012000002000021000001&idtype=cvips&gifs=yes&ref=no",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "K. A.",
-						"lastName": "Patel",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "J. F.",
-						"lastName": "Dynes",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "A. W.",
-						"lastName": "Sharpe",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Z. L.",
-						"lastName": "Yuan",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "R. V.",
-						"lastName": "Penty",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "A. J.",
-						"lastName": "Shields",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"gigacount-second photon detection",
-					"avalanche photodiodes",
-					"telecom wavelengths",
-					"thermoelectrically-cooled semiconductor diode",
-					"photon flux",
-					"detection sensitivity",
-					"apd",
-					"high-bit-rate quantum information applications",
-					"frequency 2 GHz",
-					"InGaAs"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					}
-				],
-				"title": "Gigacount/second photon detection with InGaAs avalanche photodiodes",
-				"publisher": "IEE",
-				"date": "2012",
-				"publicationTitle": "Electronics Letters",
-				"volume": "48",
-				"issue": "2",
-				"pages": "111-113",
-				"url": "http://link.aip.org/link/?ELL/48/111/1",
-				"DOI": "10.1049/el.2011.3265",
-				"abstractNote": "High count rate single photon detection at telecom wavelengths has been demonstrated using a thermoelectrically-cooled semiconductor diode. The device consists of a single InGaAs avalanche photodiode driven by a 2 GHz gating frequency signal and coupled to a tunable self-differencing circuit for enhanced detection sensitivity. The count rate is linear with the photon flux in the single photon detection regime over approximately four orders of magnitude, and saturates at 1 gigacount/s at high photon fluxes. This result highlights promising potential for APDs in high-bit-rate quantum information applications.",
 				"libraryCatalog": "Scitation",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
