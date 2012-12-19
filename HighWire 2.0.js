@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-12-11 00:47:48"
+	"lastUpdated": "2012-12-19 01:27:39"
 }
 
 /*
@@ -819,7 +819,7 @@ var testCases = [
 				"issue": "1",
 				"url": "http://www.bjj.boneandjoint.org.uk/content/94-B/1/10",
 				"pages": "10-15",
-				"ISSN": "0301-620X, 2044-5377",
+				"ISSN": "2049-4394, 2049-4408",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.bjj.boneandjoint.org.uk",
 				"abstractNote": "The most frequent cause of failure after total hip replacement in all reported arthroplasty registries is peri-prosthetic osteolysis. Osteolysis is an active biological process initiated in response to wear debris. The eventual response to this process is the activation of macrophages and loss of bone.\nActivation of macrophages initiates a complex biological cascade resulting in the final common pathway of an increase in osteolytic activity. The biological initiators, mechanisms for and regulation of this process are beginning to be understood. This article explores current concepts in the causes of, and underlying biological mechanism resulting in peri-prosthetic osteolysis, reviewing the current basic science and clinical literature surrounding the topic."

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-09-24 17:52:55"
+	"lastUpdated": "2012-12-19 01:40:13"
 }
 
 /*
@@ -60,7 +60,7 @@ function scrape(doc) {
 
 		if(!havePdf) {
 			var pdfUrl = ZU.xpath(doc, 
-				'//div[@id="viewing-options-links"]//a[text()="PDF"]/@href');
+			'//div[@id="viewing-options-links"]//a[text()="PDF" or text()="View PDF"]/@href');				
 			if(pdfUrl.length) {
 				item.attachments.push({
 					title: 'Full Text PDF',
@@ -146,12 +146,12 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Idham",
+						"firstName": "Idham A.",
 						"lastName": "Alias",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Mohammad",
+						"firstName": "Mohammad H.",
 						"lastName": "Ghahramani",
 						"creatorType": "author"
 					}
@@ -190,8 +190,6 @@ var testCases = [
 				"date": "2011-09-13",
 				"DOI": "10.1186/1029-242X-2011-53",
 				"ISSN": "1029-242X",
-				"url": "http://www.journalofinequalitiesandapplications.com/content/2011/1/53",
-				"abstractNote": "In this paper, we prove the Hyers-Ulam stability and the superstability for cubic functional equation by using the fixed point alternative theorem. As a consequence, we show that the cubic multipliers are superstable under some conditions.",
 				"reportType": "Research",
 				"letterType": "Research",
 				"manuscriptType": "Research",
@@ -202,6 +200,8 @@ var testCases = [
 				"postType": "Research",
 				"audioFileType": "Research",
 				"language": "en",
+				"abstractNote": "In this paper, we prove the Hyers-Ulam stability and the superstability for cubic functional equation by using the fixed point alternative theorem. As a consequence, we show that the cubic multipliers are superstable under some conditions.",
+				"url": "http://www.journalofinequalitiesandapplications.com/content/2011/1/53/abstract",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.journalofinequalitiesandapplications.com"
 			}
@@ -319,7 +319,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Katrin",
+						"firstName": "Katrin S.",
 						"lastName": "Lips",
 						"creatorType": "author"
 					},
@@ -339,7 +339,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Wolfgang",
+						"firstName": "Wolfgang G.",
 						"lastName": "Clauss",
 						"creatorType": "author"
 					},
@@ -413,22 +413,22 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "Stephen",
+						"firstName": "Stephen J.",
 						"lastName": "Crozier",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Amy",
+						"firstName": "Amy G.",
 						"lastName": "Preston",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Jeffrey",
+						"firstName": "Jeffrey W.",
 						"lastName": "Hurst",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Mark",
+						"firstName": "Mark J.",
 						"lastName": "Payne",
 						"creatorType": "author"
 					},
@@ -443,7 +443,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Debra",
+						"firstName": "Debra L.",
 						"lastName": "Miller",
 						"creatorType": "author"
 					}
@@ -502,12 +502,12 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "David",
+						"firstName": "David A.",
 						"lastName": "Mangus",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Matthew",
+						"firstName": "Matthew C.",
 						"lastName": "Evans",
 						"creatorType": "author"
 					},
@@ -601,12 +601,12 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Tim",
+						"firstName": "Tim H.-M.",
 						"lastName": "Huang",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Victor",
+						"firstName": "Victor X.",
 						"lastName": "Jin",
 						"creatorType": "author"
 					}
