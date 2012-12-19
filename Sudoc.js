@@ -1,360 +1,377 @@
 {
 	"translatorID": "1b9ed730-69c7-40b0-8a06-517a89a3a278",
-	"label": "Sudoc",
-	"creator": "Sean Takats, Michael Berkowitz, Sylvain Machefert",
-	"target": "^http://(www|corail)\\.sudoc\\.abes\\.fr",
+	"label": "Library Catalog (PICA)",
+	"creator": "Sean Takats, Michael Berkowitz, Sylvain Machefert, Sebastian Karcher",
+	"target": "^http://[^/]+/DB=\\d",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-10-01 12:55:07"
+	"lastUpdated": "2012-12-18 23:55:08"
 }
 
+/*Works for many, but not all PICA versions. Tested with:
+http://opc4.kb.nl/
+http://catalogue.rug.nl/
+http://www.sudoc.abes.fr/
+http://gso.gbv.de
+*/
 function detectWeb(doc, url) {
-		var namespace = doc.documentElement.namespaceURI;
-		var nsResolver = namespace ? function(prefix) {
-				if (prefix == 'x') return namespace; else return null;
-		} : null;
-
-		var multxpath = "//span[@class='tab1']";
-		if (elt = doc.evaluate(multxpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-				var content = elt.textContent;
-				if ( (content == "Liste des résultats") ||
-					(content == "shortlist") ||
-					(content == 'Kurzliste') )
-				{
-					return "multiple";	
-				}
-				else if ( (content == "Notice détaillée") ||
-							(content == "title data") ||
-							(content == 'Titeldaten') )
-				{
-					var xpathimage = "//span[@class='rec_mat_long']/img";
-					if (elt = doc.evaluate(xpathimage, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())
-					{
-						var type = elt.getAttribute('src');
-						if (type.indexOf('article.') > 0)
-						{
-							return "journalArticle";
-						}
-						else if (type.indexOf('audiovisual.') > 0)
-						{
-							return "film";
-						}
-						else if (type.indexOf('book.') > 0)
-						{
-							return "book";
-						}
-						else if (type.indexOf('handwriting.') > 0)
-						{
-							return "manuscript";
-						}
-						else if (type.indexOf('sons.') > 0 ||
-								type.indexOf('sound.') > 0 ||
-								type.indexOf('score') > 0 )
-						{
-							return "audioRecording";
-						}
-						else if (type.indexOf('thesis.') > 0)
-						{
-							return "thesis";
-						}
-						else if (type.indexOf('map.') > 0)
-						{
-							return "map";
-						}
-					}
+	var multxpath = "//span[@class='tab1']";
+	if (elt = doc.evaluate(multxpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		var content = elt.textContent;
+		if ((content == "Liste des résultats") || (content == "shortlist") || (content == 'Kurzliste') || content == 'titellijst') {
+			return "multiple";
+		} else if ((content == "Notice détaillée") || (content == "title data") || (content == 'Titeldaten') || (content == 'full title') || (content == 'Titelanzeige' || (content == 'titelgegevens'))) {
+			var xpathimage = "//span[@class='rec_mat_long']/img";
+			if (elt = doc.evaluate(xpathimage, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+				var type = elt.getAttribute('src');
+				//Z.debug(type);
+				if (type.indexOf('article.') > 0) {
+					return "journalArticle";
+				} else if (type.indexOf('audiovisual.') > 0) {
+					return "film";
+				} else if (type.indexOf('book.') > 0) {
 					return "book";
+				} else if (type.indexOf('handwriting.') > 0) {
+					return "manuscript";
+				} else if (type.indexOf('sons.') > 0 || type.indexOf('sound.') > 0 || type.indexOf('score') > 0) {
+					return "audioRecording";
+				} else if (type.indexOf('thesis.') > 0) {
+					return "thesis";
+				} else if (type.indexOf('map.') > 0) {
+					return "map";
 				}
+			}
+			return "book";
 		}
+	}
 }
 
 function scrape(doc, url) {
-		var namespace = doc.documentElement.namespaceURI;
-		var nsResolver = namespace ? function(prefix) {
-				if (prefix == 'x') return namespace; else return null;
-		} : null;
+	var zXpath = '//span[@class="Z3988"]';
+	var eltCoins = doc.evaluate(zXpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+	if (eltCoins) {
+		var coins = eltCoins.getAttribute('title');
 
-		var zXpath = '//span[@class="Z3988"]';
-		var eltCoins = doc.evaluate(zXpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-		if (eltCoins)
-		{
-			var coins = eltCoins.getAttribute('title');
+		var newItem = new Zotero.Item();
+		//newItem.repository = "SUDOC"; // do not save repository
+		Zotero.Utilities.parseContextObject(coins, newItem)
+	} else var newItem = new Zotero.Item();
 
-			var newItem = new Zotero.Item();
-			newItem.repository = "SUDOC";	// do not save repository
-			if(Zotero.Utilities.parseContextObject(coins, newItem)) 
-			{
-				newItem.itemType = detectWeb(doc, url);
 
-				// 	We need to correct some informations where COinS is wrong
-				var rowXpath = '//tr[td[@class="rec_lable"]]';
-				var tableRows = doc.evaluate(rowXpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-				var tableRow;
-				
-				while (tableRow = tableRows.iterateNext())
-				{
-					var field = doc.evaluate('./td[1]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-					var value = doc.evaluate('./td[2]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-					field = ZU.trimInternal( ZU.superCleanString(field.trim()) )
-								.toLowerCase().replace(/\(s\)/g,'');
+	newItem.itemType = detectWeb(doc, url);
+	newItem.libraryCatalog = "Library Catalog - " + doc.location.host;
+	// 	We need to correct some informations where COinS is wrong
+	var rowXpath = '//tr[td[@class="rec_lable"]]';
+	var tableRows = doc.evaluate(rowXpath, doc, null, XPathResult.ANY_TYPE, null);
+	var tableRow;
+	var role = "author";
+	while (tableRow = tableRows.iterateNext()) {
+		var field = doc.evaluate('./td[@class="rec_lable"]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var value = doc.evaluate('./td[@class="rec_title"]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		field = ZU.trimInternal(ZU.superCleanString(field.trim()))
+			.toLowerCase().replace(/\(s\)/g, '');
 
-					//french, english, and german interface
-					switch(field) {
-						case 'auteur':
-						case 'author':	//en = de
-							// With COins, only one author is taken, changed.
-							var authors = doc.evaluate('./td[2]/div', tableRow, nsResolver, XPathResult.ANY_TYPE, null);
-							newItem.creators = new Array();
-							while (author = authors.iterateNext())
-							{
-								var authorText = author.textContent;
-								
-								var authorFields = authorText.match(/^\s*(.+?)\s*(?:\((.+?)\)\s*)?\.\s*([^\.]+)\s*$/);
-								var authorFunction = '';
-								if(authorFields) {
-									authorFunction = authorFields[3];
-									authorText = authorFields[1];
-									var extra = authorFields[2];
-								}
-								if (authorFunction)
-								{
-									authorFunction = Zotero.Utilities.superCleanString(authorFunction);
-								}
+		//Z.debug(field + ": " + value)
+		//french, english, german, and dutch interface
+		switch (field) {
+			case 'auteur':
+			case 'author':
+			case 'medewerker':
+			case 'verfasser':
+			case 'other persons':
+			case 'sonst. personen':
+				if (field == 'other persons' || field == 'sonst. personen' || field == 'medewerker') role = "editor";
+				// With COins, we only get one author - so we start afresh.
+				newItem.creators = new Array();
+				//sudoc has authors on separate lines and with different format - use this
+				if (url.search(/sudoc\.(abes\.)?fr/) != -1) {
 
-								var zoteroFunction = '';
-								
-								// TODO : Add other authotiry types
-								if (authorFunction == 'Traduction')
-								{
-									zoteroFunction = 'translator';
-								}
-								else if ( (authorFunction.substr(0,7) == 'Éditeur') )
-								{
-									zoteroFunction = 'editor';
-								}
-								else if ( (newItem.itemType == "thesis") && (authorFunction != 'Auteur') )
-								{
-									zoteroFunction = "contributor";
-								}
-								else
-								{
-									zoteroFunction = 'author';
-								}
+					var authors = ZU.xpath(tableRow, './td[2]/div');
+					for (var i in authors) {
+						var authorText = authors[i].textContent;
+						var authorFields = authorText.match(/^\s*(.+?)\s*(?:\((.+?)\)\s*)?\.\s*([^\.]+)\s*$/);
+						var authorFunction = '';
+						if (authorFields) {
+							authorFunction = authorFields[3];
+							authorText = authorFields[1];
+							var extra = authorFields[2];
+						}
+						if (authorFunction) {
+							authorFunction = Zotero.Utilities.superCleanString(authorFunction);
+						}
+						var zoteroFunction = '';
+						// TODO : Add other author types
+						if (authorFunction == 'Traduction') {
+							zoteroFunction = 'translator';
+						} else if ((authorFunction.substr(0, 7) == 'Éditeur')) {
+							zoteroFunction = 'editor';
+						} else if ((newItem.itemType == "thesis") && (authorFunction != 'Auteur')) {
+							zoteroFunction = "contributor";
+						} else {
+							zoteroFunction = 'author';
+						}
 
-								if (authorFunction == "Université de soutenance" || authorFunction == "Organisme de soutenance")
-								{
-									// If the author function is "université de soutenance"	it means that this author has to be in "university" field
-									newItem.university = authorText;
-									newItem.city = extra;	//store for later
-								}
-								else
-								{
-									newItem.creators.push(Zotero.Utilities.cleanAuthor(authorText, zoteroFunction, true));
-								}
-							}
-							break;
+						if (authorFunction == "Université de soutenance" || authorFunction == "Organisme de soutenance") {
+							// If the author function is "université de soutenance"	it means that this author has to be in "university" field
+							newItem.university = authorText;
+							newItem.city = extra; //store for later
+						} else {
 
-						case 'dans':
-						case 'in':
-							var m = value.split(/\s*;\s*/);
-							newItem.publicationTitle = ZU.superCleanString( m[0].split(/,/)[0] );
-							var n = m[0].match(/\bissn\s+(\d+\s*-\s*\d+)/i);
-							if(!newItem.ISSN && n) newItem.ISSN = n[1];
+							var author = authorText.replace(/[\*\(].+[\)\*]/, "");
+							newItem.creators.push(Zotero.Utilities.cleanAuthor(author, zoteroFunction, true));
+						}
+					}
 
-							if(m[1]) {
-								//this varies a lot
-								//year (can be in parentheses or not)
-								//try not to match 4 digit page numbers
-								//not preceeded by a p or hyphen and not followed by hyphen
-								n = m[1].match(/[^-p]\.?\s+(\d{4})\b\s*[^-]/i);
-								if(!newItem.date && n) newItem.date = n[1];
-
-								//volume
-								n = m[1].match(/\bv(?:ol)?\.?\s+(\d+)/i);
-								if(!newItem.volume && n) newItem.volume = n[1];
-
-								//issue
-								n = m[1].match(/\bno?\.?\s+(\d+(?:\s*-\s*\d+)?)/i);
-								if(!newItem.issue && n) newItem.issue = n[1];
-
-								//pages
-								n = m[1].match(/\bp\.?\s+(\d+(?:\s*-\s*\d+))/i);
-								if(!newItem.pages && n) newItem.pages = n[1].replace(/\s+/g,'');
-							}
-							break;
-						case 'serie':	//en = de
-						case 'collection':
-							// The serie isn't in COinS
-							newItem.series = value;	
-							break;
-
-						case 'titre':
-						case 'title':	//en = de
-							// When there's a subtitle, only main title is used !
-							var title = '';
-							var titles = doc.evaluate('./td[2]/div/span', tableRow, nsResolver, XPathResult.ANY_TYPE, null);
-							while (partTitle = titles.iterateNext())
-							{
-								partTitle = partTitle.textContent;
-								partTitle = partTitle.replace(/(\[[^\]]+\] ?)/g,"");
-								title = title + partTitle;
-							}
-							// Remove the author
-							title = title.split(" / ")[0];
-							newItem.title = title;
-							break;
-
-						case 'language':	//en = de
-						case 'langue':
-							// Language not defined in COinS
-							newItem.language = value;
-							break;
-						case 'editeur':
-						case 'publisher':	//en = de
-							//ignore publisher for thesis, so that it does not overwrite university
-							if(newItem.itemType == 'thesis' && newItem.university) break;
-
-							var m = value.match(/(.*):(.*),(.*)/);
-
-							if (m)
-							{
-								if (!(newItem.city))
-								{
-									newItem.city = Zotero.Utilities.trimInternal(m[1]);
-								}
-								if (!(newItem.publisher))
-								{
-									newItem.publisher = Zotero.Utilities.trimInternal(m[2]);
-								}
-							}
-							break;
-						case 'pays':
-						case 'country':
-							if(!newItem.country) {
-								newItem.country = value;
-							}
-							break;
-						case 'description':
-							// We're going to extract the number of pages from this field
-							// Known bug doesn't work when there are 2 volumes, 
-							var m = value.match(/(\d+) vol\./);
-							if (m)
-							{
-								newItem.numberOfVolumes = m[1];
-							}
-
-							m = value.match(/(\d+)\s+[fp]\W/);
-							if(m) {
-								newItem.numPages = m[1];
-							}
-							break;
-
-						case 'résumé':
-						case 'abstract':
-							newItem.abstractNote = value;
-							break;
-
-						case 'notes':	//fr = en = de
-							newItem.notes.push({note: value});
-							break;
-
-						case 'sujets':
-						case 'subjects':	//en = de
-							var subjects = doc.evaluate('./td[2]/div', tableRow, nsResolver, XPathResult.ANY_TYPE, null);
-							var subject_out = "";
-							
-							while (subject = subjects.iterateNext())
-							{
-								var subject_content = subject.textContent;
-								subject_content = subject_content.replace(/^\s*/, "");
-								subject_content = subject_content.replace(/\s*$/, "");
-								if (subject_content != "")
-								{
-									newItem.tags.push(Zotero.Utilities.trimInternal(subject_content));
-								}
-							}
-							break;
-
-						case 'thèse':
-						case 'dissertation':	//en = de
-							newItem.type = value.split(/ ?:/)[0];
-							break;
-
-						case "identifiant pérenne de la notice":
-						case 'persistent identifier of the record':
-						case 'persistent identifier des datensatzes':
-							var permalink = value;
-							if (permalink) {
-								newItem.attachments.push( { url: permalink, title: 'SUDOC Snapshot', mimeType: 'text/html' } );
-							}
-							break;
-
-						case 'worldcat':
-							var worldcatLink = doc.evaluate('./td[2]//a', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-							if(worldcatLink) {
-								newItem.attachments.push( { url: worldcatLink.href, title: 'Worldcat Link', mimeType: 'text/html' } );
-							}
-							break;
+				} else {
+					//all non SUDOC catalogs separate authors by semicolon
+					var authors = value.split(/\s*;\s*/);
+					for (var i in authors) {
+						var author = authors[i].replace(/[\*\(].+[\)\*]/, "");
+						var comma = author.indexOf(",") != -1;
+						newItem.creators.push(Zotero.Utilities.cleanAuthor(author, role, comma));
 					}
 				}
+				break;
 
-				var location = [];
-				if(newItem.city) location.push(newItem.city);
-				newItem.city = undefined;
-				if(newItem.country) location.push(newItem.country);
-				newItem.country = undefined;
-				newItem.place = location.join(', ');
+			case 'dans':
+			case 'in':
+				var m = value.split(/\s*;\s*/);
+				newItem.publicationTitle = ZU.superCleanString(m[0].split(/[,\-]/)[0]);
+				var n = m[0].match(/\bissn\s+(\d+\s*-\s*\d+)/i);
+				if (!newItem.ISSN && n) newItem.ISSN = n[1];
+				var volume;
+				if (volume = value.match(/\b(v(?:ol)?|bd)\.?\s+(\d+)/i)) {
+					newItem.volume = volume[2];
+				}
+				var issue;
+				//not working yet - finetune at some point, but it's tricky.
+				if (issue = value.match(/\bno?\.?\s+(\d+(?:\s*-\s*\d+)?)/i)) {
+					newItem.issue = issue[1];
+				}
+				var page;
+				if (page = value.match(/\b(p|s)\.?\s+(\d+(?:\s*-\s*\d+))/i)) {
+					newItem.page = page[2];
+				}
+				break;
+			case 'serie':
+			case 'collection':
+			case 'schriftenreihe':
+			case 'reeks':
+				// The serie isn't in COinS
+				newItem.series = value;
+				break;
 
-				newItem.complete();
-			}
+			case 'titre':
+			case 'title':
+			case 'titel':
+			case 'title of article':
+			case 'aufsatztitel':
+				if (!newItem.title) {
+					title = value.split(" / ");
+					if (title[1]) {
+						//store this to convert authors to editors. 
+						//Run separate if in case we'll do this for more languages
+						//this assumes title precedes author - need to make sure that's the case
+						if (title[1].match(/^\s*(ed. by|edited by)/)) role = "editor";
+					}
+					newItem.title = title[0];
+				}
+				newItem.title = newItem.title.replace(/\s+:/, ":").replace(/\s*\[[^\]]+\]/g, "");
+				break;
+
+			case 'year':
+			case 'jahr':
+			case 'jaar':
+				newItem.date = value;
+				break;
+
+			case 'language':
+			case 'langue':
+			case 'sprache':
+				// Language not defined in COinS
+				newItem.language = value;
+				break;
+
+			case 'editeur':
+			case 'published':
+			case 'publisher':
+			case 'ort/jahr':
+			case 'uitgever':
+				//ignore publisher for thesis, so that it does not overwrite university
+				if (newItem.itemType == 'thesis' && newItem.university) break;
+				var m = value.match(/(.*):([^,]*)(,.+)?/);
+				if (m) {
+					if (!newItem.city) {
+						//keep the square brackets if they're the only location (i.e. at the beginning of the line)
+						newItem.city = m[1].replace(/(.)[\[,].+/, "$1");
+					}
+					if (!(newItem.publisher)) {
+						newItem.publisher = Zotero.Utilities.trimInternal(m[2]);
+					}
+					if (m[3] && !newItem.date) newItem.date = m[3].replace(/,\s*/, "");
+				}
+				break;
+
+			case 'pays':
+			case 'country':
+			case 'land':
+				if (!newItem.country) {
+					newItem.country = value;
+				}
+				break;
+
+			case 'description':
+			case 'extent':
+			case 'umfang':
+			case 'omvang':
+				// We're going to extract the number of pages from this field
+				// Known bug doesn't work when there are 2 volumes, 
+				var m = value.match(/(\d+) vol\./);
+				if (m) {
+					newItem.numberOfVolumes = m[1];
+				}
+				m = value.match(/(\d+)\s+[fpS]/);
+				if (m) {
+					newItem.numPages = m[1];
+				}
+				break;
+
+			case 'résumé':
+			case 'abstract':
+			case 'inhalt':
+			case 'samenvatting':
+				newItem.abstractNote = value;
+				break;
+
+			case 'notes':
+			case 'note':
+			case 'anmerkung':
+			case 'snnotatie':
+				newItem.notes.push({
+					note: value
+				});
+				break;
+
+			case 'sujets':
+			case 'subjects':
+			case 'subject heading':
+			case 'trefwoord':
+			case 'schlagwörter':
+
+				var subjects = doc.evaluate('./td[2]/div', tableRow, null, XPathResult.ANY_TYPE, null);
+				//subjects on separate div lines
+				if (ZU.xpath(tableRow, './td[2]/div').length > 1) {
+					var subject_out = "";
+					while (subject = subjects.iterateNext()) {
+						var subject_content = subject.textContent;
+						subject_content = subject_content.replace(/^\s*/, "");
+						subject_content = subject_content.replace(/\s*$/, "");
+						subject_content = subject_content.split(/\s*;\s*/)
+						for (var i in subject_content) {
+							if (subject_content != "") {
+								newItem.tags.push(Zotero.Utilities.trimInternal(subject_content[i]));
+							}
+						}
+					}
+				} else {
+					//subjects separated by newline or ; in same div.
+					var subjects = value.trim().split(/\s*[;\n]\s*/)
+					for (var i in subjects) {
+						newItem.tags.push(Zotero.Utilities.trimInternal(subjects[i].replace(/\*/g, "")))
+					}
+				}
+				break;
+
+			case 'thèse':
+			case 'dissertation':
+				newItem.type = value.split(/ ?:/)[0];
+				break;
+
+			case "identifiant pérenne de la notice":
+			case 'persistent identifier of the record':
+			case 'persistent identifier des datensatzes':
+				//only SUDOC has permalink
+				var permalink = value;
+				if (permalink) {
+					newItem.attachments.push({
+						url: permalink,
+						title: 'SUDOC Snapshot',
+						mimeType: 'text/html'
+					});
+				}
+				break;
+
+			case 'isbn':
+				var isbns = value.trim().split(/[\n,]/);
+				var isbn = [];
+				for (var i in isbns) {
+					isbn.push(ZU.cleanISBN(isbns[i].match(/[\d\-X]+/)[0]));
+				}
+				//we should eventually check for duplicates, but right now this seems fine;
+				newItem.ISBN = isbn.join(", ");
+				break;
+
+			case 'worldcat':
+				//SUDOC only
+				var worldcatLink = doc.evaluate('./td[2]//a', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext();
+				if (worldcatLink) {
+					newItem.attachments.push({
+						url: worldcatLink.href,
+						title: 'Worldcat Link',
+						mimeType: 'text/html'
+					});
+				}
+				break;
 		}
+	}
+
+	//merge city & country where they're separate
+	var location = [];
+	if (newItem.city) location.push(newItem.city.trim());
+	newItem.city = undefined;
+	if (newItem.country) location.push(newItem.country.trim());
+	newItem.country = undefined;
+	newItem.place = location.join(', ');
+
+	newItem.complete();
 }
 
 function doWeb(doc, url) {
-		var namespace = doc.documentElement.namespaceURI;
-		var nsResolver = namespace ? function(prefix) {
-				if (prefix == 'x') return namespace; else return null;
-		} : null;
-		
-		var type = detectWeb(doc, url);
-		if (type == "multiple")
-		{
-			// On va lister les titres
-			var newUrl = doc.evaluate('//base/@href', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
-			var xpath = "//table[@summary='short title presentation']/tbody/tr//td[@class='rec_title']";
-			var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-			var elmt = elmts.iterateNext();
-			var links = new Array();
-			var availableItems = new Array();
-			
-			var i = 0;
-			do
-			{
-				var link = doc.evaluate(".//a/@href", elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
-				var searchTitle  = doc.evaluate(".//a", elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-				
-				availableItems[i] = searchTitle ;
-				links[i] = link;
-				i++;
-			} while (elmt = elmts.iterateNext());
-			Zotero.selectItems(availableItems, function(items) {
-				if(!items) {
-					return true;
-				}
-				var uris = new Array();
-				for(var i in items) {
-						uris.push(newUrl + links[i]);
-				}
-				ZU.processDocuments(uris, function(doc) { scrape(doc, doc.location.href) });
+	var type = detectWeb(doc, url);
+	if (type == "multiple") {
+		var newUrl = doc.evaluate('//base/@href', doc, null, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
+		var xpath = "//table[@summary='short title presentation']/tbody/tr//td[contains(@class, 'rec_title')]";
+		var elmts = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
+		var elmt = elmts.iterateNext();
+		var links = new Array();
+		var availableItems = new Array();
+		var i = 0;
+		do {
+			var link = doc.evaluate(".//a/@href", elmt, null, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
+			var searchTitle = doc.evaluate(".//a", elmt, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			availableItems[i] = searchTitle;
+			links[i] = link;
+			i++;
+		} while (elmt = elmts.iterateNext());
+		Zotero.selectItems(availableItems, function (items) {
+			if (!items) {
+				return true;
+			}
+			var uris = new Array();
+			for (var i in items) {
+				uris.push(newUrl + links[i]);
+			}
+			ZU.processDocuments(uris, function (doc) {
+				scrape(doc, doc.location.href)
 			});
-		}
-		else if (type != "")
-		{
-			scrape(doc, url);
-		}
+		});
+	} else if (type != "") {
+		scrape(doc, url);
+	}
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -395,14 +412,14 @@ var testCases = [
 					}
 				],
 				"date": "2010",
-				"ISBN": "978-2-7472-1729-3",
+				"ISBN": "9782747217293",
 				"title": "Souffrance au travail dans les grandes entreprises",
+				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
 				"language": "français",
 				"publisher": "Eska",
 				"numberOfVolumes": "1",
 				"numPages": "290",
-				"place": "Paris, France",
-				"libraryCatalog": "SUDOC"
+				"place": "Paris, France"
 			}
 		]
 	},
@@ -435,14 +452,14 @@ var testCases = [
 					}
 				],
 				"date": "2011",
-				"ISBN": "978-0-83898589-2",
-				"title": "Zotero : a guide for librarians, researchers and educators",
+				"ISBN": "9780838985892",
+				"title": "Zotero: a guide for librarians, researchers and educators",
+				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
 				"language": "anglais",
 				"publisher": "Association of College and Research Libraries",
 				"numberOfVolumes": "1",
 				"numPages": "159",
 				"place": "Chicago, Etats-Unis",
-				"libraryCatalog": "SUDOC",
 				"shortTitle": "Zotero"
 			}
 		]
@@ -490,19 +507,19 @@ var testCases = [
 				],
 				"date": "2004",
 				"title": "Facteurs pronostiques des lymphomes diffus lymphocytiques",
+				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
 				"university": "Université du droit et de la santé",
 				"language": "français",
 				"numberOfVolumes": "1",
 				"numPages": "87",
 				"type": "Thèse d'exercice",
-				"place": "Lille, France",
-				"libraryCatalog": "SUDOC"
+				"place": "Lille, France"
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.sudoc.fr/127261664",
+		"url": "http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=127261664",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -534,21 +551,20 @@ var testCases = [
 				"pages": "p. [515]-534",
 				"issue": "3",
 				"volume": "14",
-				"title": "Mobile technology in the village : ICTs, culture, and social logistics in India",
+				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
+				"title": "Mobile technology in the village: ICTs, culture, and social logistics in India",
 				"language": "anglais",
-				"place": "London",
 				"publisher": "Royal Anthropological Institute",
 				"publicationTitle": "Journal of the Royal Anthropological Institute",
 				"ISSN": "1359-0987",
-				"libraryCatalog": "SUDOC",
-				"accessDate": "CURRENT_TIMESTAMP",
+				"place": "London, Royaume-Uni",
 				"shortTitle": "Mobile technology in the village"
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.sudoc.fr/128661828",
+		"url": "http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=128661828",
 		"items": [
 			{
 				"itemType": "film",
@@ -597,20 +613,19 @@ var testCases = [
 					}
 				],
 				"date": "2006",
-				"ISBN": "0-8153-4223-3",
+				"ISBN": "0815342233",
 				"title": "Exploring the living cell",
+				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
 				"language": "anglais",
-				"place": "[Meudon] : CNRS Images [prod., éd.] ; New York",
 				"publisher": "Garland Science [distrib.]",
 				"abstractNote": "Ensemble de 20 films permettant de découvrir les protagonistes de la découverte de la théorie cellulaire, l'évolution, la diversité, la structure et le fonctionnement des cellules. Ce DVD aborde aussi en images les recherches en cours dans des laboratoires internationaux et les débats que ces découvertes sur la cellule provoquent. Les films sont regroupés en 5 chapitres complétés de fiches informatives et de liens Internet.",
-				"libraryCatalog": "SUDOC",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"place": "[Meudon] : CNRS Images, France"
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.sudoc.fr/098846663",
+		"url": "http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=098846663",
 		"items": [
 			{
 				"itemType": "map",
@@ -635,13 +650,12 @@ var testCases = [
 					}
 				],
 				"date": "2004",
-				"ISBN": "2-11-095674-7",
+				"ISBN": "2110956747",
 				"title": "Wind and wave atlas of the Mediterranean sea",
+				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
 				"language": "anglais",
-				"place": "[S.l.]",
-				"publisher": "Western European Union, Western European armaments organisation research cell",
-				"libraryCatalog": "SUDOC",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"publisher": "Western European Union",
+				"place": "[S.l.]"
 			}
 		]
 	},
@@ -658,7 +672,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Frank Llewellyn (1905-)",
+						"firstName": "Frank Llewellyn",
 						"lastName": "Harrison",
 						"creatorType": "author"
 					},
@@ -690,12 +704,12 @@ var testCases = [
 				],
 				"date": "1986",
 				"title": "English music for mass and offices (II) and music for other ceremonies",
+				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
 				"language": "latin",
 				"publisher": "Éditions de l'oiseau-lyre",
-				"numPages": "243",
+				"numPages": "1",
 				"series": "Polyphonic music of the fourteenth century ; v. 17",
-				"place": "Monoco, Monaco",
-				"libraryCatalog": "SUDOC"
+				"place": "Monoco, Monaco"
 			}
 		]
 	}
