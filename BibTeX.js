@@ -1990,46 +1990,105 @@ function writeField(field, value, isMacro) {
 	// url field is preserved, for use with \href and \url
 	// Other fields (DOI?) may need similar treatment
 	if (!isMacro && !(field == "url" || field == "doi" || field == "file" || field == "lccn")) {
-		// I hope these are all the escape characters!
-		value = value.replace(/[|\<\>\~\^\\\{\}]/g, mapEscape).replace(/[\#\$\%\&\_]/g, "\\$0");
+		var titleCase = isTitleCase(value);	//figure this out before escaping all the characters
+		// I hope these are all the escape characters! (except for < > which are handled later)
+		value = value.replace(/[|\~\^\\\{\}]/g, mapEscape).replace(/[\#\$\%\&\_]/g, "\\$&");
+		//convert the HTML markup allowed in Zotero for rich text to TeX
+		value = mapHTMLmarkup(value);
+		//escape < > if mapHTMLmarkup did not convert some
+		value = value.replace(/[<>]/g, mapEscape);
 		// Case of words with uppercase characters in non-initial positions is preserved with braces.
 		// treat hyphen as whitespace for this purpose so that Large-scale etc. don't get enclosed
 		// treat curly bracket as whitespace because of mark-up immediately preceding word
 		// treat opening parentheses &brackets as whitespace
 		if (field == "title" || field == "type" || field == "shorttitle" || field == "booktitle" || field == "series") {
-			if (!isTitleCase(value)) {
+			if (!titleCase) {
 				//protect caps for everything but the first letter
 				/** TODO: non-latin letters. Also see below **/
 				value = value.replace(/(.)([A-Z]+)/g, "$1{$2}");
 			} else {	//protect all-caps vords and initials
-				value = value.replace(/([\s.-])([A-Z]+)(?=\.)/g, "$1{$2}");	//protect initials
-				if(value.toUpperCase() != value) value = value.replace(/(\s)([A-Z]{2,})(?=[\.,\s]|$)/g, "$1{$2}");
+				value = value.replace(/([\s.->])([A-Z]+)(?=\.)/g, "$1{$2}");	//protect initials
+				if(value.toUpperCase() != value) value = value.replace(/([\s>])([A-Z]{2,})(?=[\.,\s<]|$)/g, "$1{$2}");
 			}
 		} else if (field != "pages") {
-			value = value.replace(/[^\s-\}\(\[]+[A-Z][^\s,]*/g, "{$0}");
+			value = value.replace(/[^\s-\}\(\[]+[A-Z][^\s,]*/g, "{$&}");
 		}
 	}
+
 	if (Zotero.getOption("exportCharset") != "UTF-8") {
 		value = value.replace(/[\u0080-\uFFFF]/g, mapAccent);
 	}
-	//convert the HTML markup allowed in Zotero for rich text to TeX; excluding doi/url/file shouldn't be necessary, but better to be safe;
-	if (!((field == "url") || (field == "doi") || (field == "file"))) value = mapHTMLmarkup(value);
+
 	Zotero.write(value);
 	if (!isMacro) Zotero.write("}");
 }
 
-function mapHTMLmarkup(characters){
-	//converts the HTML markup allowed in Zotero for rich text to TeX
-	//since  < and > have already been escaped, we need this rather hideous code - I couldn't see a way around it though.
-	//italics and bold
-	characters = characters.replace(/\{\\textless\}i\{\\textgreater\}(((?!\{\\textless\}\/i{\\textgreater\}).)+)\{\\textless\}\/i{\\textgreater\}/, "\\textit{$1}").replace(/\{\\textless\}b\{\\textgreater\}(((?!\{\\textless\}\/b{\\textgreater\}).)+)\{\\textless\}\/b{\\textgreater\}/g, "\\textbf{$1}");
-	//sub and superscript
-	characters = characters.replace(/\{\\textless\}sup\{\\textgreater\}(((?!\{\\textless\}\/sup\{\\textgreater\}).)+)\{\\textless\}\/sup{\\textgreater\}/g, "\$^{\\textrm{$1}}\$").replace(/\{\\textless\}sub\{\\textgreater\}(((?!\{\\textless\}\/sub\{\\textgreater\}).)+)\{\\textless\}\/sub\{\\textgreater\}/g, "\$_{\\textrm{$1}}\$");
-	//two variants of small caps
-	characters = characters.replace(/\{\\textless\}span\sstyle=\"small\-caps\"\{\\textgreater\}(((?!\{\\textless\}\/span\{\\textgreater\}).)+)\{\\textless\}\/span{\\textgreater\}/g, "\\textsc{$1}").replace(/\{\\textless\}sc\{\\textgreater\}(((?!\{\\textless\}\/sc\{\\textgreater\}).)+)\{\\textless\}\/sc\{\\textgreater\}/g, "\\textsc{$1}");
-	return characters;
+const HTMLtoTeXMap = {
+	i: {
+		open: "\\textit{",
+		close: "}"
+	},
+	b: {
+		open: "\\textbf{",
+		close: "}"
+	},
+	sup: {
+		open: "\$^{\\textrm{",
+		close: "}}\$"
+	},
+	sub: {
+		open: "\$_{\\textrm{",
+		close: "}}\$"
+	},
+	span: {
+		open: "\\textsc{",
+		close: "}"
+	},
+	sc: {
+		open: "\\textsc{",
+		close: "}"
+	}
 }
 
+function mapHTMLmarkup(characters) {
+	//convert string to DOM
+	var dom = (new DOMParser()).parseFromString(characters, 'text/html');
+	return DOMtoTeX(dom.body);
+}
+
+function DOMtoTeX(element) {
+	var str = "";
+	var node = element.firstChild;
+	if(!node) return str;
+
+	do {
+		var nodeName = node.nodeName.toLowerCase();
+		//nodes we can handle
+		if(HTMLtoTeXMap[nodeName]) {
+			//span element must have style="small-caps"
+			if(nodeName != 'span'
+				|| (node.style && node.style.fontVariant == 'small-caps')) {
+				str += HTMLtoTeXMap[nodeName].open
+							+ DOMtoTeX(node)
+							+ HTMLtoTeXMap[nodeName].close;
+				continue;
+			}
+		}
+
+		//text nodes get appended directly
+		if(nodeName == '#text') {
+			str += node.textContent;
+			continue;
+		}
+
+		//otherwise we dig deeper, but we don't mess with the node tags
+		var outerHTML = node.outerHTML;
+		var openningTag = outerHTML.substring(0, outerHTML.indexOf(node.innerHTML));
+		var closingTag = outerHTML.substring(openningTag.length + node.innerHTML.length);
+		str += openningTag + DOMtoTeX(node) + closingTag;
+	} while(node = node.nextSibling);
+	return str;
+}
 
 function mapTeXmarkup(tex){
 	//reverse of the above - converts tex mark-up into html mark-up permitted by Zotero
@@ -2057,11 +2116,20 @@ const skipWords = ["but", "or", "yet", "so", "for", "and", "nor",
 	"within", "without"];
 
 function isTitleCase(string) {
-	const wordRE = /[\s[(]([^\s,\.:?!\])]+)/g;
+	const wordRE = /([\s[(><])([^\s,\.:?!\])><\/&]+)/g;
 
 	var word;
 	while (word = wordRE.exec(string)) {
-		word = word[1];
+		if(word[1] == '<' && word[2].search(/^[a-z]+$/i) != -1) { //skip HTML markup
+			var startIndex = wordRE.lastIndex - word[0].length;
+			var lastIndex = string.indexOf('>', startIndex);
+			if(lastIndex != -1) {
+				wordRE.lastIndex = lastIndex;	//we don't want to move to the character after >
+				continue;
+			}
+		}
+
+		word = word[2];
 		if(word.search(/\d/) != -1	//ignore words with numbers (including just numbers)
 			|| skipWords.indexOf(word.toLowerCase()) != -1) {
 			continue;
