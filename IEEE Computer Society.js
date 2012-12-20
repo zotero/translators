@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-12-19 13:17:16"
+	"lastUpdated": "2012-12-20 11:08:15"
 }
 
 function detectWeb(doc, url) {
@@ -177,7 +177,7 @@ function scrape(doc, url) {
 			if (abstractText) item.abstractNote = abstractText;
 			if (keywords) item.tags = keywords;
 			if (notes) item.notes = notes;
-			if (item.DOI) item.DOI = item.DOI.replace(/^.+10\./, "10.")
+			if (item.DOI) item.DOI = item.DOI.replace(/^.*?10\./, "10.")
 			item.complete();
 		});
 		translator.translate();
@@ -196,7 +196,7 @@ function scrape(doc, url) {
 				if (abstractText) item.abstractNote = abstractText;
 				if (keywords) item.tags = keywords;
 				if (notes) item.notes = notes;
-				if (item.DOI) item.DOI = item.DOI.replace(/^.+10\./, "10.")
+				if (item.DOI) item.DOI = item.DOI.replace(/^.*?10\./, "10.")
 				item.complete();
 			});
 			translator.translate();
@@ -514,7 +514,7 @@ var testCases = [
 				"date": "2010",
 				"ISBN": "978-0-7695-4083-2",
 				"pages": "1-6",
-				"DOI": "10.10",
+				"DOI": "10.1109/BIBE.2010.10",
 				"publisher": "IEEE Computer Society",
 				"place": "Los Alamitos, CA, USA",
 				"abstractNote": "We present a global clustering approach to identify putative intergenic non-coding RNAs based on the RNA polymerase II and Histone 3 lysine 4 trimethylation signatures. Both of these signatures are processed from the digital sequencing tags produced by chromatin immunoprecipitation, a high-throughput massively parallel sequencing (ChIP-Seq) technology. Our method compares favorably to the comparison method. We characterize the intergenic non-coding RNAs to have conservative promoters. We predict that these nc-RNAs are related to metabolic process without lipopolysaccharides (LPS) treatment, but shift towards developmental and immune-related functions with LPS treatment. We demonstrate that more intergenic nc-RNAs respond positively to LPS treatment, rather than negatively. Using QPCR, we experimentally validate 8 out of 11 nc-RNA regions respond to LPS treatment as predicted by the computational method.",
