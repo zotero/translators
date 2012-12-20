@@ -15,7 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-12-09 18:01:55"
+	"lastUpdated": "2012-12-13 23:00:11"
 }
 
 function detectImport() {
@@ -212,6 +212,48 @@ var mappingTable = {
 	"\u0374":"'", // GREEK NUMERAL SIGN
 	"\u0375":",", // GREEK LOWER NUMERAL SIGN
 	"\u037E":";", // GREEK QUESTION MARK
+	//Greek letters courtesy of spartanroc
+	"\u0393":"$\\Gamma$", // GREEK Gamma
+	"\u0394":"$\\Delta$", // GREEK Delta
+	"\u0398":"$\\Theta$", // GREEK Theta
+	"\u039B":"$\\Lambda$", // GREEK Lambda
+	"\u039E":"$\\Xi$", // GREEK Xi
+	"\u03A0":"$\\Pi$", // GREEK Pi
+	"\u03A3":"$\\Sigma$", // GREEK Sigma
+	"\u03A6":"$\\Phi$", // GREEK Phi
+	"\u03A8":"$\\Psi$", // GREEK Psi
+	"\u03A9":"$\\Omega$", // GREEK Omega
+	"\u03B1":"$\\alpha$", // GREEK alpha
+	"\u03B2":"$\\beta$", // GREEK beta
+	"\u03B3":"$\\gamma$", // GREEK gamma
+	"\u03B4":"$\\delta$", // GREEK delta
+	"\u03B5":"$\\varepsilon$", // GREEK var-epsilon
+	"\u03B6":"$\\zeta$", // GREEK zeta
+	"\u03B7":"$\\eta$", // GREEK eta
+	"\u03B8":"$\\theta$", // GREEK theta
+	"\u03B9":"$\\iota$", // GREEK iota
+	"\u03BA":"$\\kappa$", // GREEK kappa
+	"\u03BB":"$\\lambda$", // GREEK lambda
+	"\u03BC":"$\\mu$", // GREEK mu
+	"\u03BD":"$\\nu$", // GREEK nu
+	"\u03BE":"$\\xi$", // GREEK xi
+	"\u03C0":"$\\pi$", // GREEK pi
+	"\u03C1":"$\\rho$", // GREEK rho
+	"\u03C2":"$\\varsigma$", // GREEK var-sigma
+	"\u03C3":"$\\sigma$", // GREEK sigma
+	"\u03C4":"$\\tau$", // GREEK tau
+	"\u03C5":"$\\upsilon$", // GREEK upsilon
+	"\u03C6":"$\\varphi$", // GREEK var-phi
+	"\u03C7":"$\\chi$", // GREEK chi
+	"\u03C8":"$\\psi$", // GREEK psi
+	"\u03C9":"$\\omega$", // GREEK omega
+	"\u03D1":"$\\vartheta$", // GREEK var-theta
+	"\u03D2":"$\\Upsilon$", // GREEK Upsilon
+	"\u03D5":"$\\phi$", // GREEK phi
+	"\u03D6":"$\\varpi$", // GREEK var-pi
+	"\u03F1":"$\\varrho$", // GREEK var-rho
+	"\u03F5":"$\\epsilon$", // GREEK epsilon
+	//Greek letters end
 	"\u2000":" ", // EN QUAD
 	"\u2001":"  ", // EM QUAD
 	"\u2002":" ", // EN SPACE
@@ -1109,7 +1151,7 @@ var reversemappingTable = {
 	"{\\AE}"                          : "\u00C6", // LATIN CAPITAL LETTER AE
 	"{\\DH}"                          : "\u00D0", // LATIN CAPITAL LETTER ETH
 	"{\\texttimes}"                   : "\u00D7", // MULTIPLICATION SIGN
-	"{\\O}"                          : "\u00D8", // LATIN SMALL LETTER O WITH STROKE
+	"{\\O}"                          : 	"\u00D8", // LATIN SMALL LETTER O WITH STROKE
 	"{\\TH}"                          : "\u00DE", // LATIN CAPITAL LETTER THORN
 	"{\\ss}"                          : "\u00DF", // LATIN SMALL LETTER SHARP S
 	"{\\ae}"                          : "\u00E6", // LATIN SMALL LETTER AE
@@ -1126,6 +1168,49 @@ var reversemappingTable = {
 	"{\\textasciicircum}"             : "\u02C6", // MODIFIER LETTER CIRCUMFLEX ACCENT
 //    "\\~{}"                           : "\u02DC", // SMALL TILDE
 	"{\\textacutedbl}"                : "\u02DD", // DOUBLE ACUTE ACCENT
+	
+	//Greek Letters Courtesy of Spartanroc
+	"$\\Gamma$" : "\u0393", // GREEK Gamma
+	"$\\Delta$" : "\u0394", // GREEK Delta
+	"$\\Theta$" : "\u0398", // GREEK Theta
+	"$\\Lambda$" : "\u039B", // GREEK Lambda
+	"$\\Xi$" : "\u039E", // GREEK Xi
+	"$\\Pi$" : "\u03A0", // GREEK Pi
+	"$\\Sigma$" : "\u03A3", // GREEK Sigma
+	"$\\Phi$" : "\u03A6", // GREEK Phi
+	"$\\Psi$" : "\u03A8", // GREEK Psi
+	"$\\Omega$" : "\u03A9", // GREEK Omega
+	"$\\alpha$" : "\u03B1", // GREEK alpha
+	"$\\beta$" : "\u03B2", // GREEK beta
+	"$\\gamma$" : "\u03B3", // GREEK gamma
+	"$\\delta$" : "\u03B4", // GREEK delta
+	"$\\varepsilon$": "\u03B5", // GREEK var-epsilon
+	"$\\zeta$" : "\u03B6", // GREEK zeta
+	"$\\eta$" : "\u03B7", // GREEK eta
+	"$\\theta$" : "\u03B8", // GREEK theta
+	"$\\iota$" : "\u03B9", // GREEK iota
+	"$\\kappa$" : "\u03BA", // GREEK kappa
+	"$\\lambda$" : "\u03BB", // GREEK lambda
+	"$\\mu$" : "\u03BC", // GREEK mu
+	"$\\nu$" : "\u03BD", // GREEK nu
+	"$\\xi$" : "\u03BE", // GREEK xi
+	"$\\pi$" : "\u03C0", // GREEK pi
+	"$\\rho$" : "\u03C1", // GREEK rho
+	"$\\varsigma$" : "\u03C2", // GREEK var-sigma
+	"$\\sigma$" : "\u03C3", // GREEK sigma
+	"$\\tau$" : "\u03C4", // GREEK tau
+	"$\\upsilon$" : "\u03C5", // GREEK upsilon
+	"$\\varphi$" : "\u03C6", // GREEK var-phi
+	"$\\chi$" : "\u03C7", // GREEK chi
+	"$\\psi$" : "\u03C8", // GREEK psi
+	"$\\omega$" : "\u03C9", // GREEK omega
+	"$\\vartheta$" : "\u03D1", // GREEK var-theta
+	"$\\Upsilon$" : "\u03D2", // GREEK Upsilon
+	"$\\phi$" : "\u03D5", // GREEK phi
+	"$\\varpi$" : "\u03D6", // GREEK var-pi
+	"$\\varrho$" : "\u03F1", // GREEK var-rho
+	"$\\epsilon$" : "\u03F5", // GREEK epsilon
+	//Greek letters end
 	"{\\textendash}"                  : "\u2013", // EN DASH
 	"{\\textemdash}"                  : "\u2014", // EM DASH
 	"---"                             : "\u2014", // EM DASH
@@ -1557,7 +1642,9 @@ var alwaysMap = {
 	">":"{\\textgreater}",
 	"~":"{\\textasciitilde}",
 	"^":"{\\textasciicircum}",
-	"\\":"{\\textbackslash}"
+	"\\":"{\\textbackslash}",
+	"{" : "\\{",
+	"}" : "\\}"
 };
 
 
@@ -1896,43 +1983,112 @@ function doImport() {
 // some fields are, in fact, macros.  If that is the case then we should not put the
 // data in the braces as it will cause the macros to not expand properly
 function writeField(field, value, isMacro) {
-	if(!value && typeof value != "number") return;
+	if (!value && typeof value != "number") return;
 	value = value + ""; // convert integers to strings
-	Zotero.write(",\n\t"+field+" = ");
-	if(!isMacro) Zotero.write("{");
+	Zotero.write(",\n\t" + field + " = ");
+	if (!isMacro) Zotero.write("{");
 	// url field is preserved, for use with \href and \url
 	// Other fields (DOI?) may need similar treatment
-	if(!((field == "url") || (field == "doi") | (field == "file"))) {
-
-		// I hope these are all the escape characters!
-		value = value.replace(/[|\<\>\~\^\\]/g, mapEscape).replace(/([\#\$\%\&\_{}])/g, "\\$1");
+	if (!isMacro && !(field == "url" || field == "doi" || field == "file" || field == "lccn")) {
+		var titleCase = isTitleCase(value);	//figure this out before escaping all the characters
+		// I hope these are all the escape characters! (except for < > which are handled later)
+		value = value.replace(/[|\~\^\\\{\}]/g, mapEscape).replace(/[\#\$\%\&\_]/g, "\\$&");
+		//convert the HTML markup allowed in Zotero for rich text to TeX
+		value = mapHTMLmarkup(value);
+		//escape < > if mapHTMLmarkup did not convert some
+		value = value.replace(/[<>]/g, mapEscape);
 		// Case of words with uppercase characters in non-initial positions is preserved with braces.
 		// treat hyphen as whitespace for this purpose so that Large-scale etc. don't get enclosed
 		// treat curly bracket as whitespace because of mark-up immediately preceding word
-		if(!isMacro&&field != "pages") value = value.replace(/([^\s-\{}]+[A-Z][^\s,]*)/g, "{$1}");
-		//convert the HTML markup allowed in Zotero for rich text to TeX
-		value = mapHTMLmarkup(value);
+		// treat opening parentheses &brackets as whitespace
+		if (field == "title" || field == "type" || field == "shorttitle" || field == "booktitle" || field == "series") {
+			if (!titleCase) {
+				//protect caps for everything but the first letter
+				/** TODO: non-latin letters. Also see below **/
+				value = value.replace(/(.)([A-Z]+)/g, "$1{$2}");
+			} else {	//protect all-caps vords and initials
+				value = value.replace(/([\s.->])([A-Z]+)(?=\.)/g, "$1{$2}");	//protect initials
+				if(value.toUpperCase() != value) value = value.replace(/([\s>])([A-Z]{2,})(?=[\.,\s<]|$)/g, "$1{$2}");
+			}
+		} else if (field != "pages") {
+			value = value.replace(/[^\s-\}\(\[]+[A-Z][^\s,]*/g, "{$&}");
+		}
 	}
+
 	if (Zotero.getOption("exportCharset") != "UTF-8") {
 		value = value.replace(/[\u0080-\uFFFF]/g, mapAccent);
 	}
+
 	Zotero.write(value);
-	if(!isMacro) Zotero.write("}");
+	if (!isMacro) Zotero.write("}");
 }
 
-
-function mapHTMLmarkup(characters){
-	//converts the HTML markup allowed in Zotero for rich text to TeX
-	//since  < and > have already been escaped, we need this rather hideous code - I couldn't see a way around it though.
-	//italics and bold
-	characters = characters.replace(/\{\\textless\}i\{\\textgreater\}(((?!\{\\textless\}\/i{\\textgreater\}).)+)\{\\textless\}\/i{\\textgreater\}/, "\\textit{$1}").replace(/\{\\textless\}b\{\\textgreater\}(((?!\{\\textless\}\/b{\\textgreater\}).)+)\{\\textless\}\/b{\\textgreater\}/g, "\\textbf{$1}");
-	//sub and superscript
-	characters = characters.replace(/\{\\textless\}sup\{\\textgreater\}(((?!\{\\textless\}\/sup\{\\textgreater\}).)+)\{\\textless\}\/sup{\\textgreater\}/g, "\$^{\\textrm{$1}}\$").replace(/\{\\textless\}sub\{\\textgreater\}(((?!\{\\textless\}\/sub\{\\textgreater\}).)+)\{\\textless\}\/sub\{\\textgreater\}/g, "\$_{\\textrm{$1}}\$");
-	//two variants of small caps
-	characters = characters.replace(/\{\\textless\}span\sstyle=\"small\-caps\"\{\\textgreater\}(((?!\{\\textless\}\/span\{\\textgreater\}).)+)\{\\textless\}\/span{\\textgreater\}/g, "\\textsc{$1}").replace(/\{\\textless\}sc\{\\textgreater\}(((?!\{\\textless\}\/sc\{\\textgreater\}).)+)\{\\textless\}\/sc\{\\textgreater\}/g, "\\textsc{$1}");
-	return characters;
+const HTMLtoTeXMap = {
+	i: {
+		open: "\\textit{",
+		close: "}"
+	},
+	b: {
+		open: "\\textbf{",
+		close: "}"
+	},
+	sup: {
+		open: "\$^{\\textrm{",
+		close: "}}\$"
+	},
+	sub: {
+		open: "\$_{\\textrm{",
+		close: "}}\$"
+	},
+	span: {
+		open: "\\textsc{",
+		close: "}"
+	},
+	sc: {
+		open: "\\textsc{",
+		close: "}"
+	}
 }
 
+function mapHTMLmarkup(characters) {
+	//convert string to DOM
+	var dom = (new DOMParser()).parseFromString(characters, 'text/html');
+	return DOMtoTeX(dom.body);
+}
+
+function DOMtoTeX(element) {
+	var str = "";
+	var node = element.firstChild;
+	if(!node) return str;
+
+	do {
+		var nodeName = node.nodeName.toLowerCase();
+		//nodes we can handle
+		if(HTMLtoTeXMap[nodeName]) {
+			//span element must have style="small-caps"
+			if(nodeName != 'span'
+				|| (node.style && node.style.fontVariant == 'small-caps')) {
+				str += HTMLtoTeXMap[nodeName].open
+							+ DOMtoTeX(node)
+							+ HTMLtoTeXMap[nodeName].close;
+				continue;
+			}
+		}
+
+		//text nodes get appended directly
+		if(nodeName == '#text') {
+			str += node.textContent;
+			continue;
+		}
+
+		//otherwise we dig deeper, but we don't mess with the node tags
+		var outerHTML = node.outerHTML;
+		var openningTag = outerHTML.substring(0, outerHTML.indexOf(node.innerHTML));
+		var closingTag = outerHTML.substring(openningTag.length + node.innerHTML.length);
+		str += openningTag + DOMtoTeX(node) + closingTag;
+	} while(node = node.nextSibling);
+	return str;
+}
 
 function mapTeXmarkup(tex){
 	//reverse of the above - converts tex mark-up into html mark-up permitted by Zotero
@@ -1947,6 +2103,42 @@ function mapTeXmarkup(tex){
 	return tex;
 }
 
+const skipWords = ["but", "or", "yet", "so", "for", "and", "nor",
+	"a", "an", "the", "at", "by", "from", "in", "into", "of", "on",
+	"to", "with", "up", "down", "as", "while", "aboard", "about",
+	"above", "across", "after", "against", "along", "amid", "among",
+	"anti", "around", "as", "before", "behind", "below", "beneath",
+	"beside", "besides", "between", "beyond", "but", "despite",
+	"down", "during", "except", "for", "inside", "like", "near",
+	"off", "onto", "over", "past", "per", "plus", "round", "save",
+	"since", "than", "through", "toward", "towards", "under",
+	"underneath", "unlike", "until", "upon", "versus", "via",
+	"within", "without"];
+
+function isTitleCase(string) {
+	const wordRE = /([\s[(><])([^\s,\.:?!\])><\/&]+)/g;
+
+	var word;
+	while (word = wordRE.exec(string)) {
+		if(word[1] == '<' && word[2].search(/^[a-z]+$/i) != -1) { //skip HTML markup
+			var startIndex = wordRE.lastIndex - word[0].length;
+			var lastIndex = string.indexOf('>', startIndex);
+			if(lastIndex != -1) {
+				wordRE.lastIndex = lastIndex;	//we don't want to move to the character after >
+				continue;
+			}
+		}
+
+		word = word[2];
+		if(word.search(/\d/) != -1	//ignore words with numbers (including just numbers)
+			|| skipWords.indexOf(word.toLowerCase()) != -1) {
+			continue;
+		}
+
+		if(word.toLowerCase() == word) return false;
+	}
+	return true;
+}
 
 function mapEscape(character) {
 	return alwaysMap[character];
