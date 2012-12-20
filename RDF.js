@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-11-21 04:16:53"
+	"lastUpdated": "2012-12-20 07:30:34"
 }
 
 /*
@@ -87,7 +87,7 @@ function getFirstResults(node, properties, onlyOneString) {
 				if(typeof(result[0]) != "object") {
 					return result[0];
 				} else {
-					return result[0].uri;
+					return Zotero.RDF.getResourceURI(result[0]);
 				}
 			} else {
 				return result;
@@ -295,7 +295,7 @@ function detectType(newItem, node, ret) {
 			break;
 			case "booksection":
 				t.bib = 'bookSection';
-			container = getNodeByType(isPartOf, n.bib+"Book");
+				container = getNodeByType(isPartOf, n.bib+"Book");
 			break;
 			case "motionpicture":
 				t.bib = "film";
@@ -333,7 +333,7 @@ function detectType(newItem, node, ret) {
 				} else if(container = getNodeByType(isPartOf,
 						[n.bib+"Newspaper", n.bibo+"Newspaper"])) {
 					t.bib = "newspaperArticle";
-			}
+				}
 			break;
 			//zotero
 			case "attachment":
@@ -570,12 +570,35 @@ function detectType(newItem, node, ret) {
 		exports.defaultUnknownType || t.zoteroGuess || t.bibGuess || 
 		t.prismGuess || t.ogGuess || t.dcGuess
 
-	if(itemType == "blogPost") {
-		container = getNodeByType(isPartOf, n.z+"Blog");
-	} else if(itemType == "forumPost") {
-		container = getNodeByType(isPartOf, n.z+"Forum");
-	} else if(itemType == "webpage") {
-		container = getNodeByType(isPartOf, n.z+"Website");
+	//in case we still don't have a container, double-check
+	//some are copied from above
+	if(!container) {
+		switch(itemType) {
+			case "blogPost":
+				container = getNodeByType(isPartOf, n.z+"Blog");
+			break;
+			case "forumPost":
+				container = getNodeByType(isPartOf, n.z+"Forum");
+			break;
+			case "webpage":
+				container = getNodeByType(isPartOf, n.z+"Website");
+			break;
+			case "bookSection":
+				container = getNodeByType(isPartOf, n.bib+"Book");
+			break;
+			case "case":
+				container = getNodeByType(isPartOf,[n.bib+"CourtReporter", n.bibo+"CourtReporter"]);
+			break;
+			case "journalArticle":
+				container = getNodeByType(isPartOf, [n.bib+"Journal", n.bibo+"Journal"]);
+			break;
+			case "magazineArticle":
+				container = getNodeByType(isPartOf, [n.bib+"Periodical", n.bibo+"Periodical"]);
+			break;
+			case "newspaperArticle":
+				container = getNodeByType(isPartOf, [n.bib+"Newspaper", n.bibo+"Newspaper"]);
+			break;
+		}
 	}
 	
 	ret.container = container;
