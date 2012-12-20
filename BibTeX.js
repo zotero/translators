@@ -15,7 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-12-20 00:46:26"
+	"lastUpdated": "2012-12-20 09:36:51"
 }
 
 function detectImport() {
@@ -2033,8 +2033,8 @@ function mapHTMLmarkup(characters) {
 	return DOMtoTeX(dom.body);
 }
 
-function DOMtoTeX(element) {
-	const HTMLtoTeXMap = {
+
+var HTMLtoTeXMap = {
 	i: {
 		open: "\\textit{",
 		close: "}"
@@ -2060,6 +2060,9 @@ function DOMtoTeX(element) {
 		close: "}"
 	}
 }
+
+function DOMtoTeX(element) {
+	
 	
 	
 	var str = "";
@@ -2112,7 +2115,7 @@ function mapTeXmarkup(tex){
 }
 
 /*
-const skipWords = ["but", "or", "yet", "so", "for", "and", "nor",
+var skipWords = ["but", "or", "yet", "so", "for", "and", "nor",
 	"a", "an", "the", "at", "by", "from", "in", "into", "of", "on",
 	"to", "with", "up", "down", "as", "while", "aboard", "about",
 	"above", "across", "after", "against", "along", "amid", "among",
