@@ -2108,17 +2108,6 @@ function mapTeXmarkup(tex){
 		if (i>3) tex = tex.replace(/\{([^\{\}]*[^\\])\}/g, "$1"); 
 		i++;
 	}
-/*	
-	//reverse of the above - converts tex mark-up into html mark-up permitted by Zotero
-	//italics and bold
-	//currently does not support nested mark-up
-	
-	//two versions of subscript the .* after $ is necessary because people m
-	tex = tex.replace(/\$[^\{\$]*_\{([^\}]+\})\$/g, "<sub>$1</sub>").replace(/\$[^\{]*_\{\\textrm\{([^\}]+\}\})/g, "<sub>$1</sub>");	
-	//two version of superscript
-	tex = tex.replace(/\$[^\{]*\^\{([^\}]+\}\$)/g, "<sup>$1</sup>").replace(/\$[^\{]*\^\{\\textrm\{([^\}]+\}\})/g, "<sup>$1</sup>");	
-	//small caps
-	tex = tex.replace(/\\textsc\{([^\}]+)/g, "<span style=\"small-caps\">$1</span>"); */
 	return tex;
 }
 
