@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-12-19 01:19:47"
+	"lastUpdated": "2012-12-19 13:17:16"
 }
 
 function detectWeb(doc, url) {
@@ -112,7 +112,9 @@ function scrape(doc, url) {
 	var attachments = new Array();
 	var notes = new Array();
 	attachments.push({
-		document: doc
+		document: doc,
+		mimeType: "text/html",
+		title: "IEEE Computer Snapshot"
 	});
 
 	var htmls = doc.evaluate('//img[@src="/plugins/images/digitalLibrary/dl_html_icon.gif"]/ancestor::a', doc, null, XPathResult.ANY_TYPE, null);
@@ -130,7 +132,7 @@ function scrape(doc, url) {
 		}
 		urlField = "http://www2.computer.org" + urlField;
 		var mimeTypeField = "text/html";
-		var titleField = "Complete HTML document";
+		var titleField = "IEEE Computer Full Text Snapshot";
 		var attachment = {
 			url: urlField,
 			mimeType: mimeTypeField,
@@ -142,7 +144,7 @@ function scrape(doc, url) {
 	var pdfurl = ZU.xpathText(doc, '//div[@class="abs-pdf"]/a/@href')
 	if (pdfurl) {
 		var mimeTypeField = "application/pdf";
-		var titleField = "Complete PDF document";
+		var titleField = "IEEE Computer Full Text PDF";
 		var attachment = {
 			url: pdfurl,
 			mimeType: mimeTypeField,
@@ -163,7 +165,6 @@ function scrape(doc, url) {
 		//workaround as bibtex translator obviously needs a whitespace following the first curly brace
 		bibtex = Zotero.Utilities.cleanTags(bibtex);
 		bibtex = Zotero.Utilities.trimInternal(bibtex);
-
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 		translator.setString(bibtex);
@@ -176,13 +177,13 @@ function scrape(doc, url) {
 			if (abstractText) item.abstractNote = abstractText;
 			if (keywords) item.tags = keywords;
 			if (notes) item.notes = notes;
-
+			if (item.DOI) item.DOI = item.DOI.replace(/^.+10\./, "10.")
 			item.complete();
 		});
 		translator.translate();
+		
 	} else if (bibtexlink) {
 		ZU.doGet(bibtexlink, function (text) {
-			//Z.debug(text)
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 			translator.setString(text);
@@ -195,11 +196,10 @@ function scrape(doc, url) {
 				if (abstractText) item.abstractNote = abstractText;
 				if (keywords) item.tags = keywords;
 				if (notes) item.notes = notes;
-
+				if (item.DOI) item.DOI = item.DOI.replace(/^.+10\./, "10.")
 				item.complete();
 			});
 			translator.translate();
-
 		})
 	} else {
 		throw "No BibTeX found!";
@@ -233,10 +233,13 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [
-					{},
+					{
+						"mimeType": "text/html",
+						"title": "IEEE Computer Snapshot"
+					},
 					{
 						"mimeType": "application/pdf",
-						"title": "Complete PDF document"
+						"title": "IEEE Computer Full Text PDF"
 					}
 				],
 				"title": "Guest Editorial: Special Section on Naturalistic Affect Resources for System Building and Evaluation",
@@ -246,7 +249,7 @@ var testCases = [
 				"ISSN": "1949-3045",
 				"date": "2012",
 				"pages": "3-4",
-				"DOI": "http://doi.ieeecomputersociety.org/10.1109/T-AFFC.2012.10",
+				"DOI": "10.1109/T-AFFC.2012.10",
 				"publisher": "IEEE Computer Society",
 				"place": "Los Alamitos, CA, USA",
 				"libraryCatalog": "IEEE Computer Society",
@@ -288,7 +291,10 @@ var testCases = [
 				],
 				"seeAlso": [],
 				"attachments": [
-					{}
+					{
+						"mimeType": "text/html",
+						"title": "IEEE Computer Snapshot"
+					}
 				],
 				"title": "A Case for Hybrid Discrete-Continuous Architectures",
 				"publicationTitle": "IEEE Computer Architecture Letters",
@@ -297,7 +303,7 @@ var testCases = [
 				"ISSN": "1556-6056",
 				"date": "2012",
 				"pages": "1-4",
-				"DOI": "http://doi.ieeecomputersociety.org/10.1109/L-CA.2011.22",
+				"DOI": "10.1109/L-CA.2011.22",
 				"publisher": "IEEE Computer Society",
 				"place": "Los Alamitos, CA, USA",
 				"abstractNote": "Current technology trends indicate that power- and energyefficiency will limit chip throughput in the future. Current solutions to these problems, either in the way of programmable or fixed-function digital accelerators will soon reach their limits as microarchitectural overheads are successively trimmed. A significant departure from current computing methods is required to carry forward computing advances beyond digital accelerators. In this paper we describe how the energy-efficiency of a large class of problems can be improved by employing a hybrid of the discrete and continuous models of computation instead of the ubiquitous, traditional discrete model of computation. We present preliminary analysis of domains and benchmarks that can be accelerated with the new model. Analysis shows that machine learning, physics and up to one-third of SPEC, RMS and Berkeley suite of applications can be accelerated with the new hybrid model.",
@@ -338,7 +344,10 @@ var testCases = [
 				],
 				"seeAlso": [],
 				"attachments": [
-					{}
+					{
+						"mimeType": "text/html",
+						"title": "IEEE Computer Snapshot"
+					}
 				],
 				"title": "Introducing Google Chart Tools and Google Maps API in Data Visualization Courses",
 				"publicationTitle": "IEEE Computer Graphics and Applications",
@@ -347,7 +356,7 @@ var testCases = [
 				"ISSN": "0272-1716",
 				"date": "2012",
 				"pages": "6-9",
-				"DOI": "http://doi.ieeecomputersociety.org/10.1109/MCG.2012.114",
+				"DOI": "10.1109/MCG.2012.114",
 				"publisher": "IEEE Computer Society",
 				"place": "Los Alamitos, CA, USA",
 				"abstractNote": "This article reports the experience of using Google Chart Tools and Google Maps in a data visualization course at Georgia State University. These visualization toolkits have many benefits but haven&amp;rsquo;t been widely used in such courses. Students found them easy to use for creating a variety of interactive data visualizations.",
@@ -436,7 +445,10 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [
-					{}
+					{
+						"mimeType": "text/html",
+						"title": "IEEE Computer Snapshot"
+					}
 				],
 				"title": "Beaming: An Asymmetric Telepresence System",
 				"publicationTitle": "IEEE Computer Graphics and Applications",
@@ -445,7 +457,7 @@ var testCases = [
 				"ISSN": "0272-1716",
 				"date": "2012",
 				"pages": "10-17",
-				"DOI": "http://doi.ieeecomputersociety.org/10.1109/MCG.2012.110",
+				"DOI": "10.1109/MCG.2012.110",
 				"publisher": "IEEE Computer Society",
 				"place": "Los Alamitos, CA, USA",
 				"libraryCatalog": "IEEE Computer Society",
@@ -491,7 +503,10 @@ var testCases = [
 				],
 				"seeAlso": [],
 				"attachments": [
-					{}
+					{
+						"mimeType": "text/html",
+						"title": "IEEE Computer Snapshot"
+					}
 				],
 				"title": "A Clustering Approach to Identify Intergenic Non-coding RNA in Mouse Macrophages",
 				"publicationTitle": "Bioinformatic and Bioengineering, IEEE International Symposium on",
@@ -499,7 +514,7 @@ var testCases = [
 				"date": "2010",
 				"ISBN": "978-0-7695-4083-2",
 				"pages": "1-6",
-				"DOI": "http://doi.ieeecomputersociety.org/10.1109/BIBE.2010.10",
+				"DOI": "10.10",
 				"publisher": "IEEE Computer Society",
 				"place": "Los Alamitos, CA, USA",
 				"abstractNote": "We present a global clustering approach to identify putative intergenic non-coding RNAs based on the RNA polymerase II and Histone 3 lysine 4 trimethylation signatures. Both of these signatures are processed from the digital sequencing tags produced by chromatin immunoprecipitation, a high-throughput massively parallel sequencing (ChIP-Seq) technology. Our method compares favorably to the comparison method. We characterize the intergenic non-coding RNAs to have conservative promoters. We predict that these nc-RNAs are related to metabolic process without lipopolysaccharides (LPS) treatment, but shift towards developmental and immune-related functions with LPS treatment. We demonstrate that more intergenic nc-RNAs respond positively to LPS treatment, rather than negatively. Using QPCR, we experimentally validate 8 out of 11 nc-RNA regions respond to LPS treatment as predicted by the computational method.",

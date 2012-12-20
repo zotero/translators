@@ -9,11 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-05-08 19:54:28"
+	"lastUpdated": "2012-12-20 01:15:45"
 }
 
 function detectWeb(doc, url) {
-	if (url.indexOf("Search.action") != -1 || url.indexOf("browse.action") != -1 || url.indexOf("browseIssue.action") != -1) {
+	if (url.indexOf("Search.action") != -1 || url.indexOf("browse.action") != -1 || url.indexOf("browseIssue.action") != -1 || url.indexOf("/search/") !=-1) {
 		return "multiple";
 	} else if (url.indexOf("article/info") != -1) {
 		return "journalArticle";
@@ -27,7 +27,7 @@ function getSelectedItems(doc, articleRegEx) {
 	var articles = doc.evaluate(articleRegEx, doc, null, XPathResult.ANY_TYPE, null);
 	var next_art = articles.iterateNext();
 	while (next_art) {
-		items[next_art.href] = next_art.textContent;
+		items[next_art.href] = next_art.textContent.trim();
 		next_art = articles.iterateNext();
 	}
 	Zotero.selectItems(items, function (items) {
@@ -39,11 +39,11 @@ function getSelectedItems(doc, articleRegEx) {
 }
 
 function doWeb(doc, url) {
-	if (url.indexOf("Search.action") != -1 || url.indexOf("browse.action") != -1) {
+	if (url.indexOf("Search.action") != -1 || url.indexOf("browse.action") != -1 || url.indexOf(/search/)!=-1) {
 		var articlex = '//span[@class="article"]/a';
 		getSelectedItems(doc, articlex);
 	} else if (url.indexOf("browseIssue.action") != -1) {
-		var articlex = '//div[@class="article"]/h3/a';
+		var articlex = '//div[@class="header"]/h3/a';
 		getSelectedItems(doc, articlex);
 	} else {
 		processTexts([url]);
@@ -214,11 +214,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.plosbiology.org/search/simpleSearch.action?from=globalSimpleSearch&filterJournals=PLoSBiology&query=amygdala&x=0&y=0",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "http://www.plosmedicine.org/article/info%3Adoi%2F10.1371%2Fjournal.pmed.1000098",
 		"items": [
 			{
@@ -273,12 +268,12 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.plosmedicine.org/search/simpleSearch.action?from=globalSimpleSearch&filterJournals=PLoSMedicine&query=hematoma&x=0&y=0",
+		"url": "http://www.plosmedicine.org/article/browseIssue.action",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.plosmedicine.org/article/browseIssue.action",
+		"url": "http://www.plosbiology.org/search/simple?from=globalSimpleSearch&filterJournals=PLoSBiology&query=amygdala&x=0&y=0",
 		"items": "multiple"
 	}
 ]
