@@ -15,7 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-12-19 19:03:06"
+	"lastUpdated": "2012-12-20 00:46:26"
 }
 
 function detectImport() {
@@ -1990,7 +1990,7 @@ function writeField(field, value, isMacro) {
 	// url field is preserved, for use with \href and \url
 	// Other fields (DOI?) may need similar treatment
 	if (!isMacro && !(field == "url" || field == "doi" || field == "file" || field == "lccn")) {
-		var titleCase = isTitleCase(value);	//figure this out before escaping all the characters
+		//var titleCase = isTitleCase(value);	//figure this out before escaping all the characters
 		// I hope these are all the escape characters! (except for < > which are handled later)
 		value = value.replace(/[|\~\^\\\{\}]/g, mapEscape).replace(/[\#\$\%\&\_]/g, "\\$&");
 		//convert the HTML markup allowed in Zotero for rich text to TeX
@@ -2015,7 +2015,7 @@ function writeField(field, value, isMacro) {
 		// treat curly bracket as whitespace because of mark-up immediately preceding word
 		// treat opening parentheses &brackets as whitespace	
 		 if (field != "pages") {
-			value = value.replace(/[^\s-\}\(\[]+[A-Z][^\s,]*/g, "{$&}");
+			value = value .replace(/[^\s-\}\{\(\[]+[A-Z][^\s,]*/g, "{$&}");
 		}
 	}
 
@@ -2027,7 +2027,14 @@ function writeField(field, value, isMacro) {
 	if (!isMacro) Zotero.write("}");
 }
 
-const HTMLtoTeXMap = {
+function mapHTMLmarkup(characters) {
+	//convert string to DOM
+	var dom = (new DOMParser()).parseFromString(characters, 'text/html');
+	return DOMtoTeX(dom.body);
+}
+
+function DOMtoTeX(element) {
+	const HTMLtoTeXMap = {
 	i: {
 		open: "\\textit{",
 		close: "}"
@@ -2053,14 +2060,8 @@ const HTMLtoTeXMap = {
 		close: "}"
 	}
 }
-
-function mapHTMLmarkup(characters) {
-	//convert string to DOM
-	var dom = (new DOMParser()).parseFromString(characters, 'text/html');
-	return DOMtoTeX(dom.body);
-}
-
-function DOMtoTeX(element) {
+	
+	
 	var str = "";
 	var node = element.firstChild;
 	if(!node) return str;
@@ -2095,18 +2096,33 @@ function DOMtoTeX(element) {
 }
 
 function mapTeXmarkup(tex){
+	//put in a safeguard against infinite loop and to deal with capital escaping.
+	var i = 0;
+	while(tex.search(/[^\\]\{.*[^\\]\}/)!=-1  && i<10 ){
+		tex = tex.replace(/\\textit\{([^\{\}]*)\}/g, "<i>$1</i>").replace(/\\textbf\{([^\{\}]*)\}/g, "<b>$1</b>");	
+		tex = tex.replace(/\$[^\{\$\}]*_\{([^\{\}]*)\}\$/g, "<sub>$1</sub>").replace(/\$[^\{\}\$]*_\{\\textrm\{([^\{\}]+)\}\}\$/g, "<sub>$1</sub>");	
+		tex = tex.replace(/\$[^\{\}\$]*\^\{([^\{\}]*\})\$/g, "<sup>$1</sup>").replace(/\$[^\{\}\$]*\^\{\\textrm\{([^\{\}]*)\}\}\$/g, "<sup>$1</sup>");
+		tex = tex.replace(/\\textsc\{([^\{\}]+)/g, "<span style=\"small-caps\">$1</span>");
+		//we go for a minimum of 4 levels of nesting before getting rid of additional brackets
+		//we do need to remove the brackets here for the code above to work with preserved caps
+		if (i>3) tex = tex.replace(/\{([^\{\}]*[^\\])\}/g, "$1"); 
+		i++;
+	}
+/*	
 	//reverse of the above - converts tex mark-up into html mark-up permitted by Zotero
 	//italics and bold
-	tex = tex.replace(/\\textit\{([^\}]+\})/g, "<i>$1</i>").replace(/\\textbf\{([^\}]+\})/g, "<b>$1</b>");
+	//currently does not support nested mark-up
+	
 	//two versions of subscript the .* after $ is necessary because people m
 	tex = tex.replace(/\$[^\{\$]*_\{([^\}]+\})\$/g, "<sub>$1</sub>").replace(/\$[^\{]*_\{\\textrm\{([^\}]+\}\})/g, "<sub>$1</sub>");	
 	//two version of superscript
 	tex = tex.replace(/\$[^\{]*\^\{([^\}]+\}\$)/g, "<sup>$1</sup>").replace(/\$[^\{]*\^\{\\textrm\{([^\}]+\}\})/g, "<sup>$1</sup>");	
 	//small caps
-	tex = tex.replace(/\\textsc\{([^\}]+)/g, "<span style=\"small-caps\">$1</span>");
+	tex = tex.replace(/\\textsc\{([^\}]+)/g, "<span style=\"small-caps\">$1</span>"); */
 	return tex;
 }
 
+/*
 const skipWords = ["but", "or", "yet", "so", "for", "and", "nor",
 	"a", "an", "the", "at", "by", "from", "in", "into", "of", "on",
 	"to", "with", "up", "down", "as", "while", "aboard", "about",
@@ -2143,6 +2159,8 @@ function isTitleCase(string) {
 	}
 	return true;
 }
+
+*/
 
 function mapEscape(character) {
 	return alwaysMap[character];
@@ -2694,8 +2712,8 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"title": "Test of markupconversion: Italics, bold, superscript, subscript, and small caps: Mitochondrial DNA<sub>2</sub>$ sequences suggest unexpected phylogenetic position of Corso-Sardinian grass snakes (<i>Natrix cetti</i>) and <b>do not</b> support their <span style=\"small-caps\">species status</span>, with notes on phylogeography and subspecies delineation of grass snakes.",
-				"publicationTitle": "Actes du <sup>ème</sup>$ Congrès Français d'Acoustique",
+				"title": "Test of markupconversion: Italics, bold, superscript, subscript, and small caps: Mitochondrial DNA<sub>2</sub> sequences suggest unexpected phylogenetic position of Corso-Sardinian grass snakes (<i>Natrix cetti</i>) and <b>do not</b> support their <span style=\"small-caps\">species status</span>, with notes on phylogeography and subspecies delineation of grass snakes.",
+				"publicationTitle": "Actes du <sup>ème</sup> Congrès Français d'Acoustique",
 				"date": "2012",
 				"volume": "12",
 				"pages": "71-80",
@@ -2724,6 +2742,35 @@ var testCases = [
 				"url": "http://www.americanrightsatwork.org/blogcategory-275/",
 				"accessDate": "2012-07-27",
 				"date": "2012"
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@article{ekman_constant_1971,\n    title = {Test \\textit{Italics with {Propernames} and nested $_{\\textrm{subscript with \\textbf{bold}}}$ and} escaped curly brackets in abstract},\n\tabstract = {This study addresses \\{ the question \\} of whether any facial expressions of emotion are unniversal. Recent studies showing that members of literate cultures associated the same emotion concepts withe the same facial behaviors could not demonstrate that at least some facial expressions of emotion are universal; the cultures compared had all been exposed to some of the same mass media presentations of facial expression and these may have taught the people in each culture to recognize the unique facial expressions of other cultures. To show that members of a preliterate culture who had minimal exposure to literate cultures would associate the same emotion concepts with the same facial behaviors as do members of Western and Eastern literate cultures, data were gathered in New Guinea by telling subjects a story, showing them a set of three faces, and asking them to select the face which showed the emotion appropriate to \\{the\\} story. The results provide evidence in support of the hypothesis that the association between particular facial muscular patterns and discrete emotions is universal},\n\tauthor = {Ekman, Paul and Wallace, V. Friesen},\n\tyear = {1971},\n\tpages = {124--129}\n}",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Paul",
+						"lastName": "Ekman",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "V. Friesen",
+						"lastName": "Wallace",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Test <i>Italics with Propernames and nested <sub>subscript with <b>bold</b></sub> and</i> escaped curly brackets in abstract",
+				"abstractNote": "This study addresses { the question } of whether any facial expressions of emotion are unniversal. Recent studies showing that members of literate cultures associated the same emotion concepts withe the same facial behaviors could not demonstrate that at least some facial expressions of emotion are universal; the cultures compared had all been exposed to some of the same mass media presentations of facial expression and these may have taught the people in each culture to recognize the unique facial expressions of other cultures. To show that members of a preliterate culture who had minimal exposure to literate cultures would associate the same emotion concepts with the same facial behaviors as do members of Western and Eastern literate cultures, data were gathered in New Guinea by telling subjects a story, showing them a set of three faces, and asking them to select the face which showed the emotion appropriate to {the} story. The results provide evidence in support of the hypothesis that the association between particular facial muscular patterns and discrete emotions is universal",
+				"date": "1971",
+				"pages": "124–129"
 			}
 		]
 	}
