@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-11-19 11:07:31"
+	"lastUpdated": "2012-11-24 07:33:08"
 }
 
 /*
@@ -174,31 +174,7 @@ function scrapeEM(doc, url, pdfUrl) {
 			}
 		}
 
-		//fetch pdf url. There seems to be some magic value that must be sent
-		// with the request
-		if(!pdfUrl) {
-			var u = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
-			if(u) {
-				ZU.doGet(u, function(text) {
-					var m = text.match(/<iframe id="pdfDocument"[^>]+?src="([^"]+)"/i);
-					if(m) {
-						m[1] = ZU.unescapeHTML(m[1]);
-						Z.debug(m[1]);
-						item.attachments.push({url: m[1], title: 'Full Text PDF', mimeType: 'application/pdf'});
-					} else {
-						Z.debug('Could not determine PDF URL.');
-						m = text.match(/<iframe[^>]*>/i);
-						if(m) Z.debug(m[0]);
-					}
-					item.complete();
-				});
-			} else {
-				item.complete();
-			}
-		} else {
-			item.attachments.push({url: pdfUrl, title: 'Full Text PDF', mimeType: 'application/pdf'});
-			item.complete();
-		}
+		addPDFAndComplete(item, doc, pdfUrl);
 	});
 	translator.translate();
 }
@@ -283,16 +259,43 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 				document: doc,
 				mimeType: 'text/html'
 			}];
+			
+			addPDFAndComplete(item, doc, pdfUrl);
+		});
 
-			//fetch pdf url. There seems to be some magic value that must be sent
-			// with the request
-			if(!pdfUrl &&
-				(pdfUrl = ZU.xpathText(doc,
-					'//meta[@name="citation_pdf_url"]/@content'))) {
+		translator.translate();
+	});
+}
 
-				ZU.doGet(pdfUrl, function(text) {
-					var m = text.match(
-						/<iframe id="pdfDocument"[^>]+?src="([^"]+)"/i);
+/**
+ * Add PDF to item and complete.
+ * @param {Zotero.Item} item
+ * @param {Document} doc
+ * @param {String} [pdfurl] PDF URL, if already known
+ */
+function addPDFAndComplete(item, doc, pdfUrl) {
+	if(pdfUrl) {
+		item.attachments.push({url: pdfUrl,
+			title: 'Full Text PDF',
+			mimeType: 'application/pdf'});
+		item.complete();
+	} else {
+		var u = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
+		if(u) {
+			Zotero.debug("Testing for Safari");
+			if(doc.defaultView.navigator.userAgent.indexOf("Safari/") !== -1) {
+				Zotero.debug("Safari found");
+				// For some reason, Wiley serves PDFs to users with Safari/ in the 
+				// user agent without a frame. This seems pretty weird, since Safari
+				// >=5.1 can handle PDFs in frames, and the vast majority of users
+				// with Safari/ in the user agent are Chrome users. But, we need to
+				// handle this case.
+				item.attachments.push({url: u, title: 'Full Text PDF',
+					mimeType: 'application/pdf'});
+				item.complete();
+			} else {
+				ZU.doGet(u, function(text) {
+					var m = text.match(/<iframe id="pdfDocument"[^>]+?src="([^"]+)"/i);
 					if(m) {
 						m[1] = ZU.unescapeHTML(m[1]);
 						Z.debug('PDF url: ' + m[1]);
@@ -303,21 +306,14 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 						Z.debug('Could not determine PDF URL.');
 						m = text.match(/<iframe[^>]*>/i);
 						if(m) Z.debug(m[0]);
-						else Z.debug('No iframe found');
 					}
 					item.complete();
 				});
-			} else {
-				if(pdfUrl)
-					item.attachments.push({url: pdfUrl,
-						title: 'Full Text PDF',
-						mimeType: 'application/pdf'});
-				item.complete();
 			}
-		});
-
-		translator.translate();
-	});
+		} else {
+			item.complete();
+		}
+	}
 }
 
 function scrape(doc, url, pdfUrl) {
