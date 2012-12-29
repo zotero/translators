@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-12-01 07:46:24"
+	"lastUpdated": "2012-12-29 01:31:27"
 }
 
 function detectWeb(doc, url) {
@@ -53,7 +53,7 @@ function getResultList(doc) {
 	return results;
 }
 
-function doWeb(doc, url) {
+function doWeb(doc, url){ 
 	var type = detectWeb(doc, url);
 	if(type == "multiple") {
 		var list = getResultList(doc);
@@ -70,18 +70,19 @@ function doWeb(doc, url) {
 			}
 		})
 	} else {
-		scrape(doc, type)
+		scrape(doc)
 	}
 }
 
-function scrape(doc, itemType) {
+function scrape(doc) {
+	itemType = detectWeb(doc, doc.location.href);
 	//use Embeded Metadata translator
 	var translator = Zotero.loadTranslator("web");
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
-
+		
 	translator.setHandler("itemDone", function(obj, item) {
-		item.itemType = itemType;
+		if(!itemType.match(/^http:/)) item.itemType = itemType;
 
 		//in case we're missing something, we can try supplementing it from page
 		if(!item.DOI) {
