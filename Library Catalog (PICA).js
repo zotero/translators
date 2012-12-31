@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-12-31 08:05:08"
+	"lastUpdated": "2012-12-31 10:03:31"
 }
 
 /*Works for many, but not all PICA versions. Tested with:
@@ -30,6 +30,11 @@ function detectWeb(doc, url) {
 				var type = elt.getAttribute('src');
 				//Z.debug(type);
 				if (type.indexOf('article.') > 0) {
+					//book section and journal article have the same icon
+					//we can check if there is an ISBN
+					if(ZU.xpath(doc, '//tr/td[@class="rec_lable" and .//span[starts-with(text(), "ISBN")]]').length) {
+						return 'bookSection';
+					}
 					return "journalArticle";
 				} else if (type.indexOf('audiovisual.') > 0) {
 					return "film";
@@ -908,7 +913,7 @@ var testCases = [
 		"url": "http://gso.gbv.de/DB=2.1/PPNSET?PPN=731519299",
 		"items": [
 			{
-				"itemType": "journalArticle",
+				"itemType": "bookSection",
 				"creators": [
 					{
 						"firstName": "Carl",
@@ -961,7 +966,7 @@ var testCases = [
 		"url": "http://gso.gbv.de/DB=2.1/PPNSET?PPN=729937798",
 		"items": [
 			{
-				"itemType": "journalArticle",
+				"itemType": "bookSection",
 				"creators": [
 					{
 						"firstName": "Tommy",
