@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-12-31 07:47:49"
+	"lastUpdated": "2012-12-31 08:05:08"
 }
 
 /*Works for many, but not all PICA versions. Tested with:
@@ -383,15 +383,7 @@ function scrape(doc, url) {
 			case "identifiant pérenne de la notice":
 			case 'persistent identifier of the record':
 			case 'persistent identifier des datensatzes':
-				//only SUDOC has permalink
-				var permalink = value;
-				if (permalink) {
-					newItem.attachments.push({
-						url: permalink,
-						title: 'SUDOC Snapshot',
-						mimeType: 'text/html'
-					});
-				}
+				var permalink = value;	//we handle this at the end
 				break;
 
 			case 'isbn':
@@ -412,7 +404,8 @@ function scrape(doc, url) {
 					newItem.attachments.push({
 						url: worldcatLink.href,
 						title: 'Worldcat Link',
-						mimeType: 'text/html'
+						mimeType: 'text/html',
+						snapshot: false
 					});
 				}
 				break;
@@ -426,6 +419,25 @@ function scrape(doc, url) {
 	if (newItem.country) location.push(newItem.country.trim());
 	newItem.country = undefined;
 	if(location.length) newItem.place = location.join(', ');
+
+	//if we didn't get a permalink, look for it in the entire page
+	if(!permalink) {
+		var permalink = ZU.xpathText(doc, '//a[./img[contains(@src,"/permalink.gif") or contains(@src,"/zitierlink.gif")]][1]/@href');
+	}
+	if(permalink) {
+		newItem.attachments.push({
+			title: 'Link to Library Catalog Entry',
+			url: permalink,
+			type: 'text/html',
+			snapshot: false
+		});
+	}
+
+	//add snapshot
+	newItem.attachments.push({
+		title: 'Library Catalog Entry Snapshot',
+		document: doc
+	});
 
 	newItem.complete();
 }
@@ -493,12 +505,17 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "SUDOC Snapshot",
-						"mimeType": "text/html"
+						"title": "Worldcat Link",
+						"mimeType": "text/html",
+						"snapshot": false
 					},
 					{
-						"title": "Worldcat Link",
-						"mimeType": "text/html"
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot"
 					}
 				],
 				"date": "2010",
@@ -533,12 +550,17 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "SUDOC Snapshot",
-						"mimeType": "text/html"
+						"title": "Worldcat Link",
+						"mimeType": "text/html",
+						"snapshot": false
 					},
 					{
-						"title": "Worldcat Link",
-						"mimeType": "text/html"
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot"
 					}
 				],
 				"date": "2011",
@@ -587,12 +609,17 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "SUDOC Snapshot",
-						"mimeType": "text/html"
+						"title": "Worldcat Link",
+						"mimeType": "text/html",
+						"snapshot": false
 					},
 					{
-						"title": "Worldcat Link",
-						"mimeType": "text/html"
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot"
 					}
 				],
 				"date": "2004",
@@ -633,8 +660,12 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "SUDOC Snapshot",
-						"mimeType": "text/html"
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot"
 					}
 				],
 				"date": "2008",
@@ -694,12 +725,17 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "SUDOC Snapshot",
-						"mimeType": "text/html"
+						"title": "Worldcat Link",
+						"mimeType": "text/html",
+						"snapshot": false
 					},
 					{
-						"title": "Worldcat Link",
-						"mimeType": "text/html"
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot"
 					}
 				],
 				"date": "2006",
@@ -731,12 +767,17 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "SUDOC Snapshot",
-						"mimeType": "text/html"
+						"title": "Worldcat Link",
+						"mimeType": "text/html",
+						"snapshot": false
 					},
 					{
-						"title": "Worldcat Link",
-						"mimeType": "text/html"
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot"
 					}
 				],
 				"date": "2004",
@@ -784,12 +825,17 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "SUDOC Snapshot",
-						"mimeType": "text/html"
+						"title": "Worldcat Link",
+						"mimeType": "text/html",
+						"snapshot": false
 					},
 					{
-						"title": "Worldcat Link",
-						"mimeType": "text/html"
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot"
 					}
 				],
 				"date": "1986",
@@ -834,7 +880,16 @@ var testCases = [
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot"
+					}
+				],
 				"title": "A new method to obtain a consensus ranking of a region",
 				"date": "2012",
 				"pages": "88-107",
@@ -879,7 +934,16 @@ var testCases = [
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot"
+					}
+				],
 				"date": "2013",
 				"pages": "70-83",
 				"ISBN": "9780415628686, 9780415628693, 9780203080184",
@@ -928,7 +992,16 @@ var testCases = [
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot"
+					}
+				],
 				"title": "Noise reduction potential of an engine oil pan",
 				"date": "2013",
 				"pages": "291-304",
@@ -937,13 +1010,14 @@ var testCases = [
 				"publicationTitle": "Proceedings of the FISITA 2012 World Automotive Congress; Vol. 13: Noise, vibration and harshness (NVH)",
 				"place": "Berlin",
 				"publisher": "Springer Berlin",
-				"libraryCatalog": "Library Catalog - gso.gbv.de"
+				"libraryCatalog": "Library Catalog - gso.gbv.de",
+				"series": "Lecture notes in electrical engineering ; 201"
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.sudoc.fr/013979922",
+		"url": "http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=013979922",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -965,24 +1039,29 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "SUDOC Snapshot",
-						"mimeType": "text/html"
+						"title": "Worldcat Link",
+						"mimeType": "text/html",
+						"snapshot": false
 					},
 					{
-						"title": "Worldcat Link",
-						"mimeType": "text/html"
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot"
 					}
 				],
 				"date": "1992-1993",
 				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
 				"title": "Health promotion by the family, the role of the family in enhancing healthy behavior, symposium 23-25 March 1992, Brussels",
-				"language": "French",
+				"language": "français",
 				"publicationTitle": "Archives belges de médecine sociale, hygiène, médecine du travail et médecine légale",
 				"ISSN": "0003-9578",
 				"pages": "3-232",
 				"volume": "51",
 				"issue": "1/4",
-				"place": "Belgium"
+				"place": "Belgique"
 			}
 		]
 	},
@@ -1005,14 +1084,23 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"(GTR) Second world war",
-					"(GTR) Freedom of education",
-					"(GTR) Roman Catholic education",
-					"(GTR) Conflicts",
-					"(GTR) 4.220 Belgium"
+					"(GTR) Tweede Wereldoorlog",
+					"(GTR) Vrijheid van onderwijs",
+					"(GTR) Katholiek onderwijs",
+					"(GTR) Conflicten",
+					"(GTR) 4.220 België"
 				],
 				"seeAlso": [],
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot"
+					}
+				],
 				"libraryCatalog": "Library Catalog - catalogue.rug.nl",
 				"title": "Naar een nieuwe 'onderwijsvrede': de onderhandelingen tussen kardinaal Van Roey en de Duitse bezetter over de toekomst van het vrij katholiek onderwijs, 1942-1943",
 				"date": "2010",
