@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-12-18 23:55:08"
+	"lastUpdated": "2012-12-31 10:03:31"
 }
 
 /*Works for many, but not all PICA versions. Tested with:
@@ -30,6 +30,11 @@ function detectWeb(doc, url) {
 				var type = elt.getAttribute('src');
 				//Z.debug(type);
 				if (type.indexOf('article.') > 0) {
+					//book section and journal article have the same icon
+					//we can check if there is an ISBN
+					if(ZU.xpath(doc, '//tr/td[@class="rec_lable" and .//span[starts-with(text(), "ISBN")]]').length) {
+						return 'bookSection';
+					}
 					return "journalArticle";
 				} else if (type.indexOf('audiovisual.') > 0) {
 					return "film";
@@ -139,26 +144,114 @@ function scrape(doc, url) {
 
 			case 'dans':
 			case 'in':
-				var m = value.split(/\s*;\s*/);
-				newItem.publicationTitle = ZU.superCleanString(m[0].split(/[,\-]/)[0]);
-				var n = m[0].match(/\bissn\s+(\d+\s*-\s*\d+)/i);
-				if (!newItem.ISSN && n) newItem.ISSN = n[1];
-				var volume;
-				if (volume = value.match(/\b(v(?:ol)?|bd)\.?\s+(\d+)/i)) {
-					newItem.volume = volume[2];
+				//Looks like we can do better with titles than COinS
+				//journal/book title are always first
+				//Several different formts for ending a title
+				// end with "/" http://gso.gbv.de/DB=2.1/PPNSET?PPN=732386977
+				//              http://gso.gbv.de/DB=2.1/PPNSET?PPN=732443563
+				// end with ". -" followed by publisher information http://gso.gbv.de/DB=2.1/PPNSET?PPN=729937798
+				// end with ", ISSN" (maybe also ISBN?) http://www.sudoc.abes.fr/DB=2.1/SET=6/TTL=1/SHW?FRST=10
+				newItem.publicationTitle = ZU.superCleanString(
+					value.substring(0,value.search(/(?:\/|,\s*IS[SB]N\b|\.\s*-)/i)));
+				//ISSN/ISBN are easyto find
+				//http://gso.gbv.de/DB=2.1/PPNSET?PPN=732386977
+				//http://gso.gbv.de/DB=2.1/PPNSET?PPN=732443563
+				var issnRE = /\b(is[sb]n)\s+([-\d\sx]+)/i;	//this also matches ISBN
+				var m = value.match(issnRE);
+				if(m) {
+					if(m[1].toUpperCase() == 'ISSN' && !newItem.ISSN) {
+						newItem.ISSN = m[2].replace(/\s+/,'');
+					} else if(m[1].toUpperCase() == 'ISBN' && !newItem.ISBN) {
+						newItem.ISBN = ZU.cleanISBN(m[2]);
+					}
 				}
-				var issue;
-				//not working yet - finetune at some point, but it's tricky.
-				if (issue = value.match(/\bno?\.?\s+(\d+(?:\s*-\s*\d+)?)/i)) {
-					newItem.issue = issue[1];
+				//publisher information can preceeded ISSN/ISBN
+				// typically / ed. by ****. - city, country : publisher
+				//http://gso.gbv.de/DB=2.1/PPNSET?PPN=732386977
+				var n = value;
+				if(m) {
+					n = value.split(m[0])[0];
+					//first editors
+					var ed = n.split('/');	//editors only appear after /
+					if(ed.length > 1) {
+						n = n.substr(ed[0].length+1);	//trim off title
+						ed = ed[1].split('-',1)[0];
+						n = n.substr(ed.length+1);	//trim off editors
+						if(ed.indexOf('ed. by') != -1) {	//not http://gso.gbv.de/DB=2.1/PPNSET?PPN=732443563
+							ed = ed.replace(/^\s*ed\.\s*by\s*|[.\s]+$/g,'')
+									.split(/\s*(?:,|and)\s*/);	//http://gso.gbv.de/DB=2.1/PPNSET?PPN=731519299
+							for(var i=0, m=ed.length; i<m; i++) {
+								newItem.creators.push(ZU.cleanAuthor(ed[i], 'editor', false));
+							}
+						}
+					}
+					var loc = n.split(':');
+					if(loc.length == 2) {
+						if(!newItem.publisher) newItem.publisher = loc[1].replace(/^\s+|[\s,]+$/,'');
+						if(!newItem.place) newItem.place = loc[0].replace(/\s*\[.+?\]\s*/, '').trim();
+					}
+
+					//we can now drop everything up through the last ISSN/ISBN
+					n = value.split(issnRE).pop();
 				}
-				var page;
-				if (page = value.match(/\b(p|s)\.?\s+(\d+(?:\s*-\s*\d+))/i)) {
-					newItem.page = page[2];
+				//For the rest, we have trouble with some articles, like
+				//http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=013979922
+				//we'll only take the last set of year, volume, issue
+
+				//There are also some other problems, like
+				//"How to cook a russian goose / by Robert Cantwell" at http://opc4.kb.nl
+
+				//page ranges are last
+				//but they can be indicated by p. or page (or s?)
+				//http://www.sudoc.abes.fr/DB=2.1/SET=6/TTL=1/SHW?FRST=10
+				//http://opc4.kb.nl/DB=1/SET=2/TTL=1/SHW?FRST=7
+				//we'll just assume there are always pages at the end and ignore the indicator
+				n = n.split(',');
+				var pages = n.pop().match(/\d+(?:\s*-\s*\d+)/);
+				if(pages && !newItem.pages) {
+					newItem.pages = pages[0];
+				}
+				n = n.join(',');	//there might be empty values that we're joining here
+									//could filter them out, but IE <9 does not support Array.filter, so we won't bother
+				//we're left possibly with some sort of formatted volume year issue string
+				//it's very unlikely that we will have 4 digit volumes starting with 19 or 20, so we'll just grab the year first
+				var dateRE = /\b(?:19|20)\d{2}\b/g;
+				var date, lastDate;
+				while(date = dateRE.exec(n)) {
+					lastDate = date[0]
+					n = n.replace(lastDate,'');	//get rid of year
+				}
+				if(lastDate) {
+					if(!newItem.date) newItem.date = lastDate;
+				} else {	//if there's no year, panic and stop trying
+					break;
+				}
+				//volume comes before issue
+				//but there can sometimes be other numeric stuff that we have
+				//not filtered out yet, so we just take the last two numbers
+				//e.g. http://gso.gbv.de/DB=2.1/PPNSET?PPN=732443563
+				var issvolRE = /[\d\/]+/g;	//in French, issues can be 1/4 (e.g. http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=013979922)
+				var num, vol, issue;
+				while(num = issvolRE.exec(n)) {
+					if(issue != undefined) {
+						vol = issue;
+						issue = num[0];
+					} else if(vol != undefined) {
+						issue = num[0];
+					} else {
+						vol = num[0];
+					}
+				}
+				if(vol != undefined && !newItem.volume) {
+					newItem.volume = vol;
+				}
+				if(issue != undefined && !newItem.issue) {
+					newItem.issue = issue;
 				}
 				break;
 			case 'serie':
 			case 'collection':
+			case 'series':
 			case 'schriftenreihe':
 			case 'reeks':
 				// The serie isn't in COinS
@@ -251,6 +344,7 @@ function scrape(doc, url) {
 			case 'note':
 			case 'anmerkung':
 			case 'snnotatie':
+			case 'annotatie':
 				newItem.notes.push({
 					note: value
 				});
@@ -294,22 +388,15 @@ function scrape(doc, url) {
 			case "identifiant pérenne de la notice":
 			case 'persistent identifier of the record':
 			case 'persistent identifier des datensatzes':
-				//only SUDOC has permalink
-				var permalink = value;
-				if (permalink) {
-					newItem.attachments.push({
-						url: permalink,
-						title: 'SUDOC Snapshot',
-						mimeType: 'text/html'
-					});
-				}
+				var permalink = value;	//we handle this at the end
 				break;
 
 			case 'isbn':
 				var isbns = value.trim().split(/[\n,]/);
-				var isbn = [];
+				var isbn = [], s;
 				for (var i in isbns) {
-					isbn.push(ZU.cleanISBN(isbns[i].match(/[\d\-X]+/)[0]));
+					s = ZU.cleanISBN(isbns[i]);
+					if(s) isbn.push(s);
 				}
 				//we should eventually check for duplicates, but right now this seems fine;
 				newItem.ISBN = isbn.join(", ");
@@ -322,7 +409,8 @@ function scrape(doc, url) {
 					newItem.attachments.push({
 						url: worldcatLink.href,
 						title: 'Worldcat Link',
-						mimeType: 'text/html'
+						mimeType: 'text/html',
+						snapshot: false
 					});
 				}
 				break;
@@ -335,7 +423,26 @@ function scrape(doc, url) {
 	newItem.city = undefined;
 	if (newItem.country) location.push(newItem.country.trim());
 	newItem.country = undefined;
-	newItem.place = location.join(', ');
+	if(location.length) newItem.place = location.join(', ');
+
+	//if we didn't get a permalink, look for it in the entire page
+	if(!permalink) {
+		var permalink = ZU.xpathText(doc, '//a[./img[contains(@src,"/permalink.gif") or contains(@src,"/zitierlink.gif")]][1]/@href');
+	}
+	if(permalink) {
+		newItem.attachments.push({
+			title: 'Link to Library Catalog Entry',
+			url: permalink,
+			type: 'text/html',
+			snapshot: false
+		});
+	}
+
+	//add snapshot
+	newItem.attachments.push({
+		title: 'Library Catalog Entry Snapshot',
+		document: doc
+	});
 
 	newItem.complete();
 }
@@ -403,12 +510,17 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "SUDOC Snapshot",
-						"mimeType": "text/html"
+						"title": "Worldcat Link",
+						"mimeType": "text/html",
+						"snapshot": false
 					},
 					{
-						"title": "Worldcat Link",
-						"mimeType": "text/html"
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot"
 					}
 				],
 				"date": "2010",
@@ -443,12 +555,17 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "SUDOC Snapshot",
-						"mimeType": "text/html"
+						"title": "Worldcat Link",
+						"mimeType": "text/html",
+						"snapshot": false
 					},
 					{
-						"title": "Worldcat Link",
-						"mimeType": "text/html"
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot"
 					}
 				],
 				"date": "2011",
@@ -497,12 +614,17 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "SUDOC Snapshot",
-						"mimeType": "text/html"
+						"title": "Worldcat Link",
+						"mimeType": "text/html",
+						"snapshot": false
 					},
 					{
-						"title": "Worldcat Link",
-						"mimeType": "text/html"
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot"
 					}
 				],
 				"date": "2004",
@@ -543,8 +665,12 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "SUDOC Snapshot",
-						"mimeType": "text/html"
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot"
 					}
 				],
 				"date": "2008",
@@ -604,12 +730,17 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "SUDOC Snapshot",
-						"mimeType": "text/html"
+						"title": "Worldcat Link",
+						"mimeType": "text/html",
+						"snapshot": false
 					},
 					{
-						"title": "Worldcat Link",
-						"mimeType": "text/html"
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot"
 					}
 				],
 				"date": "2006",
@@ -641,12 +772,17 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "SUDOC Snapshot",
-						"mimeType": "text/html"
+						"title": "Worldcat Link",
+						"mimeType": "text/html",
+						"snapshot": false
 					},
 					{
-						"title": "Worldcat Link",
-						"mimeType": "text/html"
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot"
 					}
 				],
 				"date": "2004",
@@ -694,12 +830,17 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "SUDOC Snapshot",
-						"mimeType": "text/html"
+						"title": "Worldcat Link",
+						"mimeType": "text/html",
+						"snapshot": false
 					},
 					{
-						"title": "Worldcat Link",
-						"mimeType": "text/html"
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot"
 					}
 				],
 				"date": "1986",
@@ -710,6 +851,270 @@ var testCases = [
 				"numPages": "1",
 				"series": "Polyphonic music of the fourteenth century ; v. 17",
 				"place": "Monoco, Monaco"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://gso.gbv.de/DB=2.1/PPNSET?PPN=732443563",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "José",
+						"lastName": "Borges",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "António C.",
+						"lastName": "Real",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "J. Sarsfield",
+						"lastName": "Cabral",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Gregory V.",
+						"lastName": "Jones",
+						"creatorType": "editor"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot"
+					}
+				],
+				"title": "A new method to obtain a consensus ranking of a region",
+				"date": "2012",
+				"pages": "88-107",
+				"ISSN": "1931-4361",
+				"issue": "1",
+				"publicationTitle": "Journal of wine economics",
+				"volume": "7",
+				"place": "Walla Walla, Wash.",
+				"publisher": "AAWE",
+				"libraryCatalog": "Library Catalog - gso.gbv.de"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://gso.gbv.de/DB=2.1/PPNSET?PPN=731519299",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"creators": [
+					{
+						"firstName": "Carl",
+						"lastName": "Phillips",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marion",
+						"lastName": "Gibson",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Shelley",
+						"lastName": "Trower",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Garry",
+						"lastName": "Tregidga",
+						"creatorType": "editor"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot"
+					}
+				],
+				"date": "2013",
+				"pages": "70-83",
+				"ISBN": "9780415628686, 9780415628693, 9780203080184",
+				"publicationTitle": "Mysticism myth and Celtic identity",
+				"libraryCatalog": "Library Catalog - gso.gbv.de",
+				"title": "'The truth against the world': spectrality and the mystic past in late twentieth-century Cornwall",
+				"publisher": "Routledge ,",
+				"place": "London",
+				"shortTitle": "'The truth against the world'"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://gso.gbv.de/DB=2.1/PPNSET?PPN=729937798",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"creators": [
+					{
+						"firstName": "Tommy",
+						"lastName": "Luft",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Stefan",
+						"lastName": "Ringwelski",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ulrich",
+						"lastName": "Gabbert",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Wilfried",
+						"lastName": "Henze",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Helmut",
+						"lastName": "Tschöke",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot"
+					}
+				],
+				"title": "Noise reduction potential of an engine oil pan",
+				"date": "2013",
+				"pages": "291-304",
+				"ISBN": "9783642338328",
+				"journalAbbreviation": "Lecture Notes in Electrical Engineering",
+				"publicationTitle": "Proceedings of the FISITA 2012 World Automotive Congress; Vol. 13: Noise, vibration and harshness (NVH)",
+				"place": "Berlin",
+				"publisher": "Springer Berlin",
+				"libraryCatalog": "Library Catalog - gso.gbv.de",
+				"series": "Lecture notes in electrical engineering ; 201"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=013979922",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Organisation mondiale de la santé",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Congrès",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Famille -- Congrès",
+					"Santé publique -- Congrès"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Worldcat Link",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot"
+					}
+				],
+				"date": "1992-1993",
+				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
+				"title": "Health promotion by the family, the role of the family in enhancing healthy behavior, symposium 23-25 March 1992, Brussels",
+				"language": "français",
+				"publicationTitle": "Archives belges de médecine sociale, hygiène, médecine du travail et médecine légale",
+				"ISSN": "0003-9578",
+				"pages": "3-232",
+				"volume": "51",
+				"issue": "1/4",
+				"place": "Belgique"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://catalogue.rug.nl/DB=1/XMLPRS=Y/PPN?PPN=33112484X",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Sarah Van",
+						"lastName": "Ruyskensvelde",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "Met lit. opgMet samenvattingen in het Engels en Frans"
+					}
+				],
+				"tags": [
+					"(GTR) Tweede Wereldoorlog",
+					"(GTR) Vrijheid van onderwijs",
+					"(GTR) Katholiek onderwijs",
+					"(GTR) Conflicten",
+					"(GTR) 4.220 België"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot"
+					}
+				],
+				"libraryCatalog": "Library Catalog - catalogue.rug.nl",
+				"title": "Naar een nieuwe 'onderwijsvrede': de onderhandelingen tussen kardinaal Van Roey en de Duitse bezetter over de toekomst van het vrij katholiek onderwijs, 1942-1943",
+				"date": "2010",
+				"publicationTitle": "Revue belge d'histoire contemporaine",
+				"ISSN": "0035-0869",
+				"pages": "603-643",
+				"volume": "40",
+				"issue": "4",
+				"shortTitle": "Naar een nieuwe 'onderwijsvrede'"
 			}
 		]
 	}
