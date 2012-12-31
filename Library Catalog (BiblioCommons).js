@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-04-28 00:35:01"
+	"lastUpdated": "2012-12-19 01:24:23"
 }
 
 /*
@@ -161,15 +161,15 @@ var testCases = [
 					}
 				],
 				"tags": [
+					"Educational tests and measurements",
 					"Education",
-					"Immigrants",
-					"Conspiracies",
 					"Political corruption",
-					"Educational tests and measurements"
+					"Immigrants",
+					"Conspiracies"
 				],
 				"seeAlso": [],
 				"attachments": [],
-				"ISBN": "0810993562",
+				"ISBN": "9780810993563",
 				"title": "Test",
 				"place": "New York",
 				"publisher": "Amulet Books",

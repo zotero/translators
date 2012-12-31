@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-09-23 15:23:14"
+	"lastUpdated": "2012-12-19 01:23:45"
 }
 
 /*
@@ -259,7 +259,12 @@ var testCases = [
 					"cerebellum"
 				],
 				"seeAlso": [],
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"url": "http://www.frontiersin.org/neuropharmacology/10.3389/fnins.2010.00191/abstract",
 				"title": "Anti-malaria drug mefloquine induces motor learning deficits in humans",
 				"publicationTitle": "Frontiers in Neuropharmacology",

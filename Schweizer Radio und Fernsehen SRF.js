@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-12-17 23:58:24"
+	"lastUpdated": "2012-12-19 01:28:48"
 }
 
 /*
@@ -51,10 +51,10 @@ function doWeb(doc, url) {
 	var urls = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = {}
-    var titles = ZU.xpath(doc, '//div[@class="module-content"]/h3/a');
-    for (var i in titles){
-    	items[titles[i].href] = titles[i].textContent.trim();	
-    }
+	var titles = ZU.xpath(doc, '//div[@class="module-content"]/h3/a');
+	for (var i in titles){
+		items[titles[i].href] = titles[i].textContent.trim();	
+	}
 	Zotero.selectItems(items, function (items) {
 			if (!items) {
 				return true;
@@ -133,7 +133,7 @@ var testCases = [
 				"language": "de-CH",
 				"programTitle": "Echo der Zeit",
 				"network": "Schweizer Radio und Fernsehen SRF",
-				"libraryCatalog": "Schweizer Radio DRS",
+				"libraryCatalog": "Schweizer Radio und Fernsehen SRF",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
