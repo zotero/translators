@@ -2,14 +2,14 @@
 	"translatorID": "1b9ed730-69c7-40b0-8a06-517a89a3a278",
 	"label": "Library Catalog (PICA)",
 	"creator": "Sean Takats, Michael Berkowitz, Sylvain Machefert, Sebastian Karcher",
-	"target": "^http://[^/]+/DB=\\d",
+	"target": "^https?://[^/]+/DB=\\d",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-12-31 10:03:31"
+	"lastUpdated": "2012-12-31 16:01:12"
 }
 
 /*Works for many, but not all PICA versions. Tested with:
@@ -89,7 +89,7 @@ function scrape(doc, url) {
 			case 'verfasser':
 			case 'other persons':
 			case 'sonst. personen':
-				if (field == 'other persons' || field == 'sonst. personen' || field == 'medewerker') role = "editor";
+				if (field == 'medewerker') role = "editor";
 				// With COins, we only get one author - so we start afresh.
 				newItem.creators = new Array();
 				//sudoc has authors on separate lines and with different format - use this
@@ -327,7 +327,7 @@ function scrape(doc, url) {
 				if (m) {
 					newItem.numberOfVolumes = m[1];
 				}
-				m = value.match(/(\d+)\s+[fpS]/);
+				m = value.match(/(\d+)\s+[fpS][\s\.]/);
 				if (m) {
 					newItem.numPages = m[1];
 				}
@@ -392,11 +392,13 @@ function scrape(doc, url) {
 				break;
 
 			case 'isbn':
+				Z.debug(value)
 				var isbns = value.trim().split(/[\n,]/);
 				var isbn = [], s;
 				for (var i in isbns) {
-					s = ZU.cleanISBN(isbns[i]);
-					if(s) isbn.push(s);
+					//we can remove the match once cleanISBN becomes less aggressive on long strings including other numbers
+					s = isbns[i].match(/[\d\-Xx]+/);
+					if(s) isbn.push(ZU.cleanISBN(s[0]));
 				}
 				//we should eventually check for duplicates, but right now this seems fine;
 				newItem.ISBN = isbn.join(", ");
@@ -443,7 +445,7 @@ function scrape(doc, url) {
 		title: 'Library Catalog Entry Snapshot',
 		document: doc
 	});
-
+Z.debug(newItem)
 	newItem.complete();
 }
 
@@ -848,7 +850,7 @@ var testCases = [
 				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
 				"language": "latin",
 				"publisher": "Éditions de l'oiseau-lyre",
-				"numPages": "1",
+				"numPages": "243",
 				"series": "Polyphonic music of the fourteenth century ; v. 17",
 				"place": "Monoco, Monaco"
 			}
@@ -864,22 +866,22 @@ var testCases = [
 					{
 						"firstName": "José",
 						"lastName": "Borges",
-						"creatorType": "editor"
+						"creatorType": "author"
 					},
 					{
 						"firstName": "António C.",
 						"lastName": "Real",
-						"creatorType": "editor"
+						"creatorType": "author"
 					},
 					{
 						"firstName": "J. Sarsfield",
 						"lastName": "Cabral",
-						"creatorType": "editor"
+						"creatorType": "author"
 					},
 					{
 						"firstName": "Gregory V.",
 						"lastName": "Jones",
-						"creatorType": "editor"
+						"creatorType": "author"
 					}
 				],
 				"notes": [],
