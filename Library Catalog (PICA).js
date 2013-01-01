@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-12-31 16:01:12"
+	"lastUpdated": "2013-01-01 20:13:38"
 }
 
 /*Works for many, but not all PICA versions. Tested with:
@@ -276,6 +276,13 @@ function scrape(doc, url) {
 				newItem.title = newItem.title.replace(/\s+:/, ":").replace(/\s*\[[^\]]+\]/g, "");
 				break;
 
+			case 'periodical':
+			case 'zeitschrift':
+			//for whole journals
+			var journaltitle =  value.split(" / ")[0];
+				break;
+
+			
 			case 'year':
 			case 'jahr':
 			case 'jaar':
@@ -322,14 +329,21 @@ function scrape(doc, url) {
 			case 'umfang':
 			case 'omvang':
 				// We're going to extract the number of pages from this field
-				// Known bug doesn't work when there are 2 volumes, 
+				// Known bug doesn't work when there are 2 volumes (maybe fixed?), 
 				var m = value.match(/(\d+) vol\./);
 				if (m) {
 					newItem.numberOfVolumes = m[1];
 				}
-				m = value.match(/(\d+)\s+[fpS][\s\.]/);
+				//make sure things like 2 partition don't match, but 2 p at the end of the field do:
+				m = value.match(/\[?(\d+)\]?\s+[fpS]([^A-Za-z]|$)/);
 				if (m) {
 					newItem.numPages = m[1];
+				}
+				
+				//running time for movies:
+				m = value.match(/\d+\s*min/);
+				if (m){
+					newItem.runningTime = m[0];
 				}
 				break;
 
@@ -392,7 +406,6 @@ function scrape(doc, url) {
 				break;
 
 			case 'isbn':
-				Z.debug(value)
 				var isbns = value.trim().split(/[\n,]/);
 				var isbn = [], s;
 				for (var i in isbns) {
@@ -445,7 +458,7 @@ function scrape(doc, url) {
 		title: 'Library Catalog Entry Snapshot',
 		document: doc
 	});
-Z.debug(newItem)
+	if (!newItem.title) newItem.title = journaltitle;
 	newItem.complete();
 }
 
@@ -751,6 +764,7 @@ var testCases = [
 				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
 				"language": "anglais",
 				"publisher": "Garland Science [distrib.]",
+				"runningTime": "180 min",
 				"abstractNote": "Ensemble de 20 films permettant de découvrir les protagonistes de la découverte de la théorie cellulaire, l'évolution, la diversité, la structure et le fonctionnement des cellules. Ce DVD aborde aussi en images les recherches en cours dans des laboratoires internationaux et les débats que ces découvertes sur la cellule provoquent. Les films sont regroupés en 5 chapitres complétés de fiches informatives et de liens Internet.",
 				"place": "[Meudon] : CNRS Images, France"
 			}
@@ -1117,6 +1131,52 @@ var testCases = [
 				"volume": "40",
 				"issue": "4",
 				"shortTitle": "Naar een nieuwe 'onderwijsvrede'"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://catalogue.rug.nl/DB=1/XMLPRS=Y/PPN?PPN=339552697",
+		"items": [
+			{
+				"itemType": "film",
+				"creators": [
+					{
+						"firstName": "Gustavo",
+						"lastName": "Taretto",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Pilar López de",
+						"lastName": "Ayala",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "Spaans gesproken, Nederlands en Frans ondertiteld"
+					}
+				],
+				"tags": [
+					"(GTR) 7.655 Argentinië"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot"
+					}
+				],
+				"libraryCatalog": "Library Catalog - catalogue.rug.nl",
+				"title": "Medianeras",
+				"date": "[2012]",
+				"publisher": "Homescreen",
+				"runningTime": "92 min",
+				"place": "[Amsterdam]"
 			}
 		]
 	}
