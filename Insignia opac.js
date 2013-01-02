@@ -64,8 +64,8 @@ function doWeb(doc, url) {
 		//112 p. : col. ill. ; 15 cm..
 		var textContent = ZU.xpathText(doc, xpathPageNumber);
 		
-		if(textContent.match(/\w/) && textContent.match(" p.")){
-			item.numPages= textContent.split("p.")[0]+"p";
+		if(textContent.match(/\w/) && textContent.indexOf(" p") != -1 ){
+			item.numPages= textContent.split(" p")[0];
 		}
 		saveAuthor(item,xpathAuthor,doc);
 		item.complete();
