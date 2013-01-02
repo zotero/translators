@@ -77,29 +77,19 @@ function doWeb(doc, url) {
 }
 
 
-function saveAuthor(item,xpathAuthor,doc)
-{
+function saveAuthor(item,xpathAuthor,doc) {
 	var contents = doc.evaluate(xpathAuthor, doc, null, XPathResult.ANY_TYPE, null);
-
-	var j = 0;
-	var n = 0;
-	var Authors = new Array();
 	var author;
-	
+
 	while (author = contents.iterateNext()) {
-		// author like :Howe, James, 1946-    Donner, Andrea K., 1967-   Grant, Joan, 1931-curtis neitl, 1950-
-		var newAuthor = Zotero.Utilities.cleanAuthor(author.textContent, "author");
-		if(newAuthor.lastName.match(/^[0-9]/))
-		{
-			item.creators.push(Zotero.Utilities.cleanAuthor(newAuthor.firstName, "author"));
-		}
-		else
-		{
-			item.creators.push(Zotero.Utilities.cleanAuthor(author.textContent, "author"));
-		}
-	}     	
-	 	
- 
+		item.creators.push(
+			ZU.cleanAuthor(
+				author.textContent.replace(/[\s\d-\.]+$/, ''),
+				"author",
+				true
+			)
+		);
+	}
 }
 /** BEGIN TEST CASES **/
 var testCases = []
