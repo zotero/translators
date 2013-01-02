@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-01-01 20:13:38"
+	"lastUpdated": "2013-01-02 02:12:39"
 }
 
 /*Works for many, but not all PICA versions. Tested with:
@@ -18,11 +18,19 @@ http://catalogue.rug.nl/
 http://www.sudoc.abes.fr/
 http://gso.gbv.de
 */
+
+function getSearchResults(doc) {
+	return doc.evaluate(
+		"//table[@summary='short title presentation']/tbody/tr//td[contains(@class, 'rec_title')]",
+		doc, null, XPathResult.ANY_TYPE, null);
+}
+
 function detectWeb(doc, url) {
 	var multxpath = "//span[@class='tab1']";
 	if (elt = doc.evaluate(multxpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		var content = elt.textContent;
 		if ((content == "Liste des résultats") || (content == "shortlist") || (content == 'Kurzliste') || content == 'titellijst') {
+			if(!getSearchResults(doc).iterateNext()) return;	//no results. Does not seem to be necessary, but just in case.
 			return "multiple";
 		} else if ((content == "Notice détaillée") || (content == "title data") || (content == 'Titeldaten') || (content == 'full title') || (content == 'Titelanzeige' || (content == 'titelgegevens'))) {
 			var xpathimage = "//span[@class='rec_mat_long']/img";
@@ -63,7 +71,13 @@ function scrape(doc, url) {
 
 		var newItem = new Zotero.Item();
 		//newItem.repository = "SUDOC"; // do not save repository
-		Zotero.Utilities.parseContextObject(coins, newItem)
+		Zotero.Utilities.parseContextObject(coins, newItem);
+
+		/** we need to clean up the results a bit **/
+		//pages should not contain any extra characters like p. or brackets (what about supplementary pages?)
+		if(newItem.pages) newItem.pages = newItem.pages.replace(/[^\d-]+/g, '');
+		
+		
 	} else var newItem = new Zotero.Item();
 
 
@@ -72,8 +86,7 @@ function scrape(doc, url) {
 	// 	We need to correct some informations where COinS is wrong
 	var rowXpath = '//tr[td[@class="rec_lable"]]';
 	var tableRows = doc.evaluate(rowXpath, doc, null, XPathResult.ANY_TYPE, null);
-	var tableRow;
-	var role = "author";
+	var tableRow, role;
 	while (tableRow = tableRows.iterateNext()) {
 		var field = doc.evaluate('./td[@class="rec_lable"]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		var value = doc.evaluate('./td[@class="rec_title"]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
@@ -90,6 +103,7 @@ function scrape(doc, url) {
 			case 'other persons':
 			case 'sonst. personen':
 				if (field == 'medewerker') role = "editor";
+				else role = "author";
 				// With COins, we only get one author - so we start afresh.
 				newItem.creators = new Array();
 				//sudoc has authors on separate lines and with different format - use this
@@ -254,8 +268,19 @@ function scrape(doc, url) {
 			case 'series':
 			case 'schriftenreihe':
 			case 'reeks':
-				// The serie isn't in COinS
-				newItem.series = value;
+				// The series isn't in COinS
+				var series = value;
+				var m;
+				var volRE = /;[^;]*?(\d+)\s*$/;
+				if(m = series.match(volRE)) {
+					if(ZU.fieldIsValidForType('seriesNumber', newItem.itemType)) { //e.g. http://gso.gbv.de/DB=2.1/PPNSET?PPN=729937798
+						if(!newItem.seriesNumber) newItem.seriesNumber = m[1];
+					} else {	//e.g. http://www.sudoc.fr/05625248X
+						if(!newItem.volume) newItem.volume = m[1];
+					}
+					series = series.replace(volRE, '').trim();
+				}
+				newItem.seriesTitle = newItem.series = series;	//see http://forums.zotero.org/discussion/18322/series-vs-series-title/
 				break;
 
 			case 'titre':
@@ -278,15 +303,14 @@ function scrape(doc, url) {
 
 			case 'periodical':
 			case 'zeitschrift':
-			//for whole journals
-			var journaltitle =  value.split(" / ")[0];
+				//for whole journals
+				var journaltitle =  value.split(" / ")[0];
 				break;
 
-			
 			case 'year':
 			case 'jahr':
 			case 'jaar':
-				newItem.date = value;
+				newItem.date = value.replace(/[[\]]+/g, '');
 				break;
 
 			case 'language':
@@ -303,16 +327,30 @@ function scrape(doc, url) {
 			case 'uitgever':
 				//ignore publisher for thesis, so that it does not overwrite university
 				if (newItem.itemType == 'thesis' && newItem.university) break;
-				var m = value.match(/(.*):([^,]*)(,.+)?/);
-				if (m) {
-					if (!newItem.city) {
-						//keep the square brackets if they're the only location (i.e. at the beginning of the line)
-						newItem.city = m[1].replace(/(.)[\[,].+/, "$1");
+
+				var m = value.split(';')[0];	//hopefully publisher is always first (e.g. http://www.sudoc.fr/128661828)
+				var place = m.split(':', 1)[0];
+				var pub = m.substring(place.length+1); //publisher and maybe year
+				if(!newItem.city) {
+					place = place.replace(/[[\]]/g, '').trim();
+					if(place.toUpperCase() != 'S.L.') {	//place is not unknown
+						newItem.city = place;
 					}
-					if (!(newItem.publisher)) {
-						newItem.publisher = Zotero.Utilities.trimInternal(m[2]);
+				}
+
+				if(!newItem.publisher) {
+					if(!pub) break; //not sure what this would be or look like without publisher
+					pub = pub.replace(/\[.*?\]/g,'')	//drop bracketted info, which looks to be publisher role
+									.split(',');
+					if(pub[pub.length-1].search(/\D\d{4}\b/) != -1) {	//this is most likely year, we can drop it
+						pub.pop();
 					}
-					if (m[3] && !newItem.date) newItem.date = m[3].replace(/,\s*/, "");
+					if(pub.length) newItem.publisher = pub.join(',');	//in case publisher contains commas
+				}
+
+				if(!newItem.date) {	//date is always (?) last on the line
+					m = value.match(/\D(\d{4})\b[^,;]*$/);	//could be something like c1986
+					if(m) newItem.date = m[1];
 				}
 				break;
 
@@ -360,7 +398,7 @@ function scrape(doc, url) {
 			case 'snnotatie':
 			case 'annotatie':
 				newItem.notes.push({
-					note: value
+					note: doc.evaluate('./td[@class="rec_title"]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext().innerHTML
 				});
 				break;
 
@@ -409,9 +447,8 @@ function scrape(doc, url) {
 				var isbns = value.trim().split(/[\n,]/);
 				var isbn = [], s;
 				for (var i in isbns) {
-					//we can remove the match once cleanISBN becomes less aggressive on long strings including other numbers
-					s = isbns[i].match(/[\d\-Xx]+/);
-					if(s) isbn.push(ZU.cleanISBN(s[0]));
+					s = ZU.cleanISBN(isbns[i]);
+					if(s) isbn.push(s);
 				}
 				//we should eventually check for duplicates, but right now this seems fine;
 				newItem.ISBN = isbn.join(", ");
@@ -466,18 +503,14 @@ function doWeb(doc, url) {
 	var type = detectWeb(doc, url);
 	if (type == "multiple") {
 		var newUrl = doc.evaluate('//base/@href', doc, null, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
-		var xpath = "//table[@summary='short title presentation']/tbody/tr//td[contains(@class, 'rec_title')]";
-		var elmts = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
+		var elmts = getSearchResults(doc);
 		var elmt = elmts.iterateNext();
 		var links = new Array();
 		var availableItems = new Array();
-		var i = 0;
 		do {
 			var link = doc.evaluate(".//a/@href", elmt, null, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
 			var searchTitle = doc.evaluate(".//a", elmt, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			availableItems[i] = searchTitle;
-			links[i] = link;
-			i++;
+			availableItems[newUrl + link] = searchTitle;
 		} while (elmt = elmts.iterateNext());
 		Zotero.selectItems(availableItems, function (items) {
 			if (!items) {
@@ -485,13 +518,11 @@ function doWeb(doc, url) {
 			}
 			var uris = new Array();
 			for (var i in items) {
-				uris.push(newUrl + links[i]);
+				uris.push(i);
 			}
-			ZU.processDocuments(uris, function (doc) {
-				scrape(doc, doc.location.href)
-			});
+			ZU.processDocuments(uris, scrape);
 		});
-	} else if (type != "") {
+	} else {
 		scrape(doc, url);
 	}
 }/** BEGIN TEST CASES **/
@@ -616,7 +647,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "Publication autorisée par le jury"
+						"note": "<div><span>Publication autorisée par le jury</span></div>"
 					}
 				],
 				"tags": [
@@ -669,7 +700,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "Contient un résumé en anglais et en français. - in Journal of the Royal Anthropological Institute, vol. 14, no. 3 (Septembre 2008)"
+						"note": "<div><span>Contient un résumé en anglais et en français. - in Journal of the Royal Anthropological Institute, vol. 14, no. 3 (Septembre 2008)</span></div>"
 					}
 				],
 				"tags": [
@@ -689,7 +720,7 @@ var testCases = [
 					}
 				],
 				"date": "2008",
-				"pages": "p. [515]-534",
+				"pages": "515-534",
 				"issue": "3",
 				"volume": "14",
 				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
@@ -723,7 +754,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "Les différents films qui composent ce DVD sont réalisés avec des prises de vue réelles, ou des images microcinématographiques ou des images de synthèse, ou des images fixes tirées de livres. La bande son est essentiellement constituée de commentaires en voix off et d'interviews (les commentaires sont en anglais et les interviews sont en langue originales : anglais, français ou allemand, sous-titrée en anglais). - Discovering the cell : participation de Paul Nurse (Rockefeller university, New York), Claude Debru (ENS : Ecole normale supérieure, Paris) et Werner Franke (DKFZ : Deutsches Krebsforschungszentrum, Heidelberg) ; Membrane : participation de Kai Simons, Soizig Le Lay et Lucas Pelkmans (MPI-CBG : Max Planck institute of molecular cell biology and genetics, Dresden) ; Signals and calcium : participation de Christian Sardet et Alex Mc Dougall (CNRS / UPMC : Centre national de la recherche scientifique / Université Pierre et Marie Curie, Villefrance-sur-Mer) ; Membrane traffic : participation de Thierry Galli et Phillips Alberts (Inserm = Institut national de la santé et de la recherche médicale, Paris) ; Mitochondria : participation de Michael Duchen, Rémi Dumollard et Sean Davidson (UCL : University college of London) ; Microfilaments : participation de Cécile Gauthier Rouvière et Alexandre Philips (CNRS-CRBM : CNRS-Centre de recherche de biochimie macromoléculaire, Montpellier) ; Microtubules : participation de Johanna Höög, Philip Bastiaens et Jonne Helenius (EMBL : European molecular biology laboratory, Heidelberg) ; Centrosome : participation de Michel Bornens et Manuel Théry (CNRS-Institut Curie, Paris) ; Proteins : participation de Dino Moras et Natacha Rochel-Guiberteau (IGBMC : Institut de génétique et biologie moléculaire et cellulaire, Strasbourg) ; Nocleolus and nucleus : participation de Daniele Hernandez-Verdun, Pascal Rousset, Tanguy Lechertier (CNRS-UPMC / IJM : Institut Jacques Monod, Paris) ; The cell cycle : participation de Paul Nurse (Rockefeller university, New York) ; Mitosis and chromosomes : participation de Jan Ellenberg, Felipe Mora-Bermudez et Daniel Gerlich (EMBL, Heidelberg) ; Mitosis and spindle : participation de Eric Karsenti, Maiwen Caudron et François Nedelec (EMBL, Heidelberg) ; Cleavage : participation de Pierre Gönczy, Marie Delattre et Tu Nguyen Ngoc (Isrec : Institut suisse de recherche expérimentale sur le cancer, Lausanne) ; Cellules souches : participation de Göran Hermerén (EGE : European group on ethics in science and new technologies, Brussels) ; Cellules libres : participation de Jean-Jacques Kupiec (ENS, Paris) ; Cellules et évolution : participation de Paule Nurse (Rockefeller university, New York)"
+						"note": "<div><span>Les différents films qui composent ce DVD sont réalisés avec des prises de vue réelles, ou des images microcinématographiques ou des images de synthèse, ou des images fixes tirées de livres. La bande son est essentiellement constituée de commentaires en voix off et d'interviews (les commentaires sont en anglais et les interviews sont en langue originales : anglais, français ou allemand, sous-titrée en anglais). - Discovering the cell : participation de Paul Nurse (Rockefeller university, New York), Claude Debru (ENS : Ecole normale supérieure, Paris) et Werner Franke (DKFZ : Deutsches Krebsforschungszentrum, Heidelberg) ; Membrane : participation de Kai Simons, Soizig Le Lay et Lucas Pelkmans (MPI-CBG : Max Planck institute of molecular cell biology and genetics, Dresden) ; Signals and calcium : participation de Christian Sardet et Alex Mc Dougall (CNRS / UPMC : Centre national de la recherche scientifique / Université Pierre et Marie Curie, Villefrance-sur-Mer) ; Membrane traffic : participation de Thierry Galli et Phillips Alberts (Inserm = Institut national de la santé et de la recherche médicale, Paris) ; Mitochondria : participation de Michael Duchen, Rémi Dumollard et Sean Davidson (UCL : University college of London) ; Microfilaments : participation de Cécile Gauthier Rouvière et Alexandre Philips (CNRS-CRBM : CNRS-Centre de recherche de biochimie macromoléculaire, Montpellier) ; Microtubules : participation de Johanna Höög, Philip Bastiaens et Jonne Helenius (EMBL : European molecular biology laboratory, Heidelberg) ; Centrosome : participation de Michel Bornens et Manuel Théry (CNRS-Institut Curie, Paris) ; Proteins : participation de Dino Moras et Natacha Rochel-Guiberteau (IGBMC : Institut de génétique et biologie moléculaire et cellulaire, Strasbourg) ; Nocleolus and nucleus : participation de Daniele Hernandez-Verdun, Pascal Rousset, Tanguy Lechertier (CNRS-UPMC / IJM : Institut Jacques Monod, Paris) ; The cell cycle : participation de Paul Nurse (Rockefeller university, New York) ; Mitosis and chromosomes : participation de Jan Ellenberg, Felipe Mora-Bermudez et Daniel Gerlich (EMBL, Heidelberg) ; Mitosis and spindle : participation de Eric Karsenti, Maiwen Caudron et François Nedelec (EMBL, Heidelberg) ; Cleavage : participation de Pierre Gönczy, Marie Delattre et Tu Nguyen Ngoc (Isrec : Institut suisse de recherche expérimentale sur le cancer, Lausanne) ; Cellules souches : participation de Göran Hermerén (EGE : European group on ethics in science and new technologies, Brussels) ; Cellules libres : participation de Jean-Jacques Kupiec (ENS, Paris) ; Cellules et évolution : participation de Paule Nurse (Rockefeller university, New York)</span></div>"
 					}
 				],
 				"tags": [
@@ -763,10 +794,10 @@ var testCases = [
 				"title": "Exploring the living cell",
 				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
 				"language": "anglais",
-				"publisher": "Garland Science [distrib.]",
+				"publisher": "CNRS Images",
 				"runningTime": "180 min",
 				"abstractNote": "Ensemble de 20 films permettant de découvrir les protagonistes de la découverte de la théorie cellulaire, l'évolution, la diversité, la structure et le fonctionnement des cellules. Ce DVD aborde aussi en images les recherches en cours dans des laboratoires internationaux et les débats que ces découvertes sur la cellule provoquent. Les films sont regroupés en 5 chapitres complétés de fiches informatives et de liens Internet.",
-				"place": "[Meudon] : CNRS Images, France"
+				"place": "Meudon, France"
 			}
 		]
 	},
@@ -806,8 +837,7 @@ var testCases = [
 				"title": "Wind and wave atlas of the Mediterranean sea",
 				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
 				"language": "anglais",
-				"publisher": "Western European Union",
-				"place": "[S.l.]"
+				"publisher": "Western European Union, Western European armaments organisation research cell"
 			}
 		]
 	},
@@ -836,7 +866,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "Modern notation. - \"Critical apparatus\": p. 174-243"
+						"note": "<div><span>Modern notation. - \"Critical apparatus\": p. 174-243</span></div>"
 					}
 				],
 				"tags": [
@@ -865,7 +895,9 @@ var testCases = [
 				"language": "latin",
 				"publisher": "Éditions de l'oiseau-lyre",
 				"numPages": "243",
-				"series": "Polyphonic music of the fourteenth century ; v. 17",
+				"volume": "17",
+				"series": "Polyphonic music of the fourteenth century",
+				"seriesTitle": "Polyphonic music of the fourteenth century",
 				"place": "Monoco, Monaco"
 			}
 		]
@@ -1032,7 +1064,9 @@ var testCases = [
 				"place": "Berlin",
 				"publisher": "Springer Berlin",
 				"libraryCatalog": "Library Catalog - gso.gbv.de",
-				"series": "Lecture notes in electrical engineering ; 201"
+				"seriesNumber": "201",
+				"series": "Lecture notes in electrical engineering",
+				"seriesTitle": "Lecture notes in electrical engineering"
 			}
 		]
 	},
@@ -1101,7 +1135,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "Met lit. opgMet samenvattingen in het Engels en Frans"
+						"note": "<div><span>Met lit. opg</span></div><div><span>Met samenvattingen in het Engels en Frans</span></div>"
 					}
 				],
 				"tags": [
@@ -1154,7 +1188,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "Spaans gesproken, Nederlands en Frans ondertiteld"
+						"note": "<div><span>Spaans gesproken, Nederlands en Frans ondertiteld</span></div>"
 					}
 				],
 				"tags": [
@@ -1173,10 +1207,10 @@ var testCases = [
 				],
 				"libraryCatalog": "Library Catalog - catalogue.rug.nl",
 				"title": "Medianeras",
-				"date": "[2012]",
+				"date": "2012",
 				"publisher": "Homescreen",
 				"runningTime": "92 min",
-				"place": "[Amsterdam]"
+				"place": "Amsterdam"
 			}
 		]
 	}
