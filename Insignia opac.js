@@ -43,6 +43,7 @@ function doWeb(doc, url) {
 	var xpathISBN = '//table[@id="tbDetailInfo_Publication"]/tbody/tr/td/label[@name="ISBN"]';
 	var xpathPublisher = '//table[@id="tbDetailInfo_Publication"]/tbody/tr/td/label[@name="Publication"]';
 	var xpathDescription = '//table[@id="tbDetailInfo_Summary"]/tbody/tr/td/label[@name="Summary"]';
+	var xpathDescription2 = '//table[@id="tbDetailInfo_Summary"]/tbody/tr/td/label[@name="Content"]';
 
 	var xpathPageNumber = '//table[@id="tbDetailInfo_Publication"]/tbody/tr/td/label[@name="Collation"]';
 
@@ -58,8 +59,12 @@ function doWeb(doc, url) {
 		item.callNumber = ZU.xpathText(doc, xpathCallNumber);
 		item.edition = ZU.xpathText(doc, xpathEdition);
 		item.publisher = ZU.xpathText(doc, xpathPublisher);
-		item.notes = ZU.xpathText(doc, xpathDescription);
-		
+		var note = ZU.xpathText(doc, xpathDescription);
+		if(note)
+			item.notes.push(note);
+		note = ZU.xpathText(doc, xpathDescription2);
+		if(note)
+			item.notes.push(note);
 		
 		//112 p. : col. ill. ; 15 cm..
 		var textContent = ZU.xpathText(doc, xpathPageNumber);
