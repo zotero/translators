@@ -11,7 +11,7 @@
 	"configOptions":{"getCollections":"true", "dataMode":"rdf/xml"},
 	"displayOptions":{"exportNotes":true, "exportFileData":false},
 	"inRepository":false,
-	"lastUpdated":"2012-11-26 15:52:17"
+	"lastUpdated":"2013-01-09 03:28:17"
 }
 
 var n = {
@@ -404,7 +404,7 @@ Type.prototype._scoreNodeRelationship = function(node, definition, score) {
 				// +2 for each match, -1 for each nonmatch
 				var testScore = -definition.pairs.length;
 				for each(var pair in definition.pairs) {
-					if(Zotero.RDF.getStatementsMatching(statement[2], pair[0], pair[1])) score += 3;
+					if(Zotero.RDF.getStatementsMatching(statement[2], pair[0], pair[1])) testScore += 3;
 				}
 				
 				if(testScore > bestScore) {
