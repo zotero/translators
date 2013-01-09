@@ -14,8 +14,8 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"browserSupport": "gv",
-	"lastUpdated": "2012-11-22 19:00:23"
+	"browserSupport": "gcsv",
+	"lastUpdated": "2013-01-09 15:36:32"
 }
 
 var fromMarcGenre = {
