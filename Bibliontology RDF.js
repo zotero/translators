@@ -9,9 +9,9 @@
 	"priority":50,
 	"browserSupport":"gcs",
 	"configOptions":{"getCollections":"true", "dataMode":"rdf/xml"},
-	"displayOptions":{"exportNotes":true, "exportFileData":false},
+	"displayOptions":{"exportNotes":true},
 	"inRepository":false,
-	"lastUpdated":"2013-01-09 03:28:17"
+	"lastUpdated":"2013-01-10 02:12:42"
 }
 
 var n = {
