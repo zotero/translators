@@ -1,102 +1,83 @@
 {
 	"translatorID": "b61c224b-34b6-4bfd-8a76-a476e7092d43",
 	"label": "SSRN",
-	"creator": "Michael Berkowitz",
-	"target": "http://papers\\.ssrn\\.com/",
-	"minVersion": "1.0.0b4.r5",
+	"creator": "Sebastian Karcher",
+	"target": "^https?://papers\\.ssrn\\.com/",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gbv",
-	"lastUpdated": "2012-03-12 08:35:26"
+	"lastUpdated": "2013-01-12 09:31:28"
 }
 
-function scrape(doc) {
-	if (ZU.xpath(doc, '//span[@id="knownuser"]').length) {
-		var id = doc.location.href.match(/abstract_id=(\d+)/)[1];
-		var pdfurl = ZU.xpathText(doc, '//a[@title="Download from Social Science Research Network"]/@href');
-		var newURL = 'http://papers.ssrn.com/sol3/RefExport.cfm?abstract_id=' + id + '&format=3';
-		Zotero.Utilities.HTTP.doGet(newURL, function(text) {
-			var ris=text.match(/<input type=\"Hidden\"\s+name=\"hdnContent\"\s+value=\"([^"]*)\">/)[1];
-			var trans=Zotero.loadTranslator("import");
-			trans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-			trans.setString(ris);
-			trans.setHandler("itemDone", function(obj, item) {
-				item.itemType = "journalArticle";
-				var tags = new Array();
-				for each (var tag in item.tags) {
-					var newtags = tag.split(/,|;/);
-					for each (var newtag in newtags) tags.push(newtag);
-				}
-				item.tags = tags;
-				item.attachments = [{document:doc, title:"SSRN Snapshot"}];
-				if (pdfurl) item.attachments.push({url:pdfurl, title:"SSRN Full Text PDF", mimeType:"application/pdf"});
-				item.complete();
-			});
-			trans.translate();
-		});
-	} else {
-		var item = new Zotero.Item("journalArticle");
-		item.title = ZU.capitalizeTitle(ZU.trimInternal(ZU.xpathText(doc, '//div[@id="abstractTitle"]')));
-		var authors = ZU.xpath(doc, '//center/font/a[@class="textlink"]');
-		for(var i=0, n=authors.length; i<n; i++) {
-			var aut = ZU.capitalizeTitle(ZU.trimInternal(authors[i].textContent));
-			item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
-		}
-		item.abstractNote = ZU.trimInternal(ZU.xpathText(doc, '//div[@id="innerWhite"]/font[1]').replace(/^abstract/i,''));
-		var tags = ZU.xpathText(doc, '//font[contains(./b/text(), "Key")]');
-		if (tags) {
-				item.tags = ZU.trimInternal(tags).substr(10).split(/;|,/);
-		}
-		item.publicationTitle = "SSRN eLibrary";
-		
-		var date = ZU.xpathText(doc, 'id("innerWhite")/center/font[2]');	
-		if (date && date.match(/\d{4}/)) {
-			item.date = ZU.trimInternal(date);
-		}
-		item.url = doc.location.href;
-		/* Commenting out PDF downloading until we add referer capability
-		var pdfurl = doc.evaluate('//a[contains(@href,"pdf")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-		if (pdfurl) {
-			pdfurl = pdfurl.href;
-		}
-		*/
-		item.attachments = [{document:doc, title:"SSRN Snapshot"}];
-		if (pdfurl) {
-			item.attachments.push({url:pdfurl, title:"SSRN Full Text PDF", mimeType:"application/pdf"});
-		}
-		item.complete();
+/*
+	SSRN Translator
+   Copyright (C) 2013 Sebastian Karcher
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+function detectWeb(doc,url) {
+	var xpath='//meta[@name="citation_title"]';		
+	if (ZU.xpath(doc, xpath).length > 0) {
+		return "report";
 	}
-}
-
-function detectWeb(doc, url)	{
-	if (ZU.xpath(doc, '//font/strong/a[substring(@class, 1, 4) = "text"]').length) {
+	if (url.search(/AbsByAuth\.cfm\?|results\.cfm\?/i)!=-1) {
 		return "multiple";
-	} else if (url.indexOf("abstract_id") != -1) {
-		return "journalArticle";
 	}
+
+	return false;
 }
 
-function doWeb(doc, url) {
-	var titles = ZU.xpath(doc, '//font/strong/a[substring(@class, 1, 4) = "text"]');
-	if (titles.length) {
-		var items = new Object();
-		for(var i=0, n=titles.length; i<n; i++) {
-			items[titles[i].href] = titles[i].textContent;
+
+function doWeb(doc,url)
+{
+	if (detectWeb(doc, url) == "multiple") {
+		var hits = {};
+		var urls = [];
+		//this one is for searches and publication series:
+		var results = ZU.xpath(doc, "//tr/td//strong/a[(@class='textlink' or @class='textLink') and contains(@href, 'papers.cfm?abstract_id')]");
+		//otherwise, this is an author page
+		if(results.length<1){
+			results = ZU.xpath(doc,"//tr[contains(@id, 'row_') or contains(@id, '_version')]//a[@class='textlink' and contains(@href, 'ssrn.com/abstract=')]");
 		}
-
-		Zotero.selectItems(items, function(items) {
-			if(!items) return true;
-
-			var uris = new Array();
-			for (var i in items) {
-				uris.push(i);
+		for (var i in results) {
+			hits[results[i].href] = results[i].textContent;
+		}
+		Z.selectItems(hits, function(items) {
+			if (items == null) return true;
+			for (var j in items) {
+				urls.push(j);
 			}
-			ZU.processDocuments(uris, scrape);
+			ZU.processDocuments(urls, function (myDoc) { 
+				doWeb(myDoc, myDoc.location.href) });
 		});
 	} else {
-		scrape(doc);
+		// We call the Embedded Metadata translator to do the actual work
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+		translator.setHandler("itemDone", function(obj, item) {
+				item.itemType = "report";
+				item.type = "SSRN Working Paper"
+				//we could scrape the number from the URL - do we want it though?
+				item.complete();
+				});
+		translator.getTranslatorObject(function (obj) {
+				obj.doWeb(doc, url);
+				});
 	}
 }
 /** BEGIN TEST CASES **/
@@ -106,10 +87,10 @@ var testCases = [
 		"url": "http://papers.ssrn.com/sol3/papers.cfm?abstract_id=1450589",
 		"items": [
 			{
-				"itemType": "journalArticle",
+				"itemType": "report",
 				"creators": [
 					{
-						"firstName": "Brian D.",
+						"firstName": "Brian",
 						"lastName": "Greenhill",
 						"creatorType": "author"
 					},
@@ -119,7 +100,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Audrey E.",
+						"firstName": "Audrey",
 						"lastName": "Sacks",
 						"creatorType": "author"
 					}
@@ -127,22 +108,26 @@ var testCases = [
 				"notes": [],
 				"tags": [
 					"Visual Evidence",
-					" Logistic Regression",
-					" Fit"
+					"Logistic Regression",
+					"Fit"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "SSRN Snapshot"
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
 					}
 				],
 				"title": "The 'Separation Plot': A New Visual Method for Evaluating the Predictive Power of Logit/Probit Models",
-				"abstractNote": "We present a new visual method for assessing the predictive power of models with binary outcomes. This technique allows the analyst to quickly and easily choose among alternative model specifications based upon the models' ability to consistently match high-probability predictions to actual occurrences of the event of interest, and low-probability predictions to non-occurrences of the event of interest. Unlike existing methods for assessing predictive power for logit and probit models such as the use of \"percent correctly predicted\" statistics, Brier scores and the ROC plot, our \"separation plot\" has the advantage of producing a visual display that is more informative and easier to explain to a general audience than a ROC plot, while also remaining insensitive to the user's often arbitrary choice of threshold for distinguishing between events and non-events. We show how to implement this technique in R and demonstrate its effectiveness in building predictive models in four different areas of political research.",
-				"publicationTitle": "SSRN eLibrary",
-				"date": "2009",
-				"url": "http://papers.ssrn.com/sol3/papers.cfm?abstract_id=1450589",
-				"libraryCatalog": "SSRN",
+				"date": "August 13, 2009",
+				"abstractNote": "We present a new visual method for assessing the predictive power of models with binary outcomes. This technique allows the analyst to quickly and easily choos",
+				"url": "http://papers.ssrn.com/abstract=1450589",
 				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "papers.ssrn.com",
+				"type": "SSRN Working Paper",
 				"shortTitle": "The 'Separation Plot'"
 			}
 		]
@@ -150,6 +135,16 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://papers.ssrn.com/sol3/results.cfm?txtKey_Words=europe",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://papers.ssrn.com/sol3/JELJOUR_Results.cfm?form_name=journalBrowse&journal_id=1747960",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://papers.ssrn.com/sol3/cf_dev/AbsByAuth.cfm?per_id=16042",
 		"items": "multiple"
 	}
 ]
