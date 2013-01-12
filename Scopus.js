@@ -2,19 +2,19 @@
 	"translatorID": "a14ac3eb-64a0-4179-970c-92ecc2fec992",
 	"label": "Scopus",
 	"creator": "Michael Berkowitz, Rintze Zelle and Avram Lyon",
-	"target": "^http://www\\.scopus\\.com[^/]*",
+	"target": "^https?://www\\.scopus\\.com[^/]*",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-05-31 19:52:38"
+	"lastUpdated": "2013-01-12 11:24:01"
 }
 
 /*
    Scopus Translator
-   Copyright (C) 2008-2011 Center for History and New Media
+   Copyright (C) 2008-2013 Center for History and New Media and Sebastian Karcher
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU Affero General Public License as published by
@@ -44,14 +44,7 @@ function getEID(url) {
 }
 
 function getBoxes(doc) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-
-	return doc.evaluate('//div[@id="resultsBody"]/table/tbody/\
-		tr[@class and (not(@id) or not(contains(@id,"previewabstractrow")))]/\
-		td[@class="fldtextPad"][1]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	return doc.evaluate('//div[@id="resultsBody"]//div[@class="fldtextPad"][1]', doc, null, XPathResult.ANY_TYPE, null);
 }
 
 function returnURL(eid) {
@@ -59,34 +52,34 @@ function returnURL(eid) {
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-	if (prefix == 'x') return namespace; else return null;
-	} : null;
-
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		items = new Object();
 		var boxes = getBoxes(doc);
 		var box;
 		while (box = boxes.iterateNext()) {
-			var link = doc.evaluate('.//a', box, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			var link = doc.evaluate('.//a', box, null, XPathResult.ANY_TYPE, null).iterateNext();
 			items[link.href] = Zotero.Utilities.trimInternal(link.textContent);
 		}
 		Zotero.selectItems(items, function (items) {
 			for (var i in items) {
-				articles.push(returnURL(getEID(i)));
+				articles.push(i);
 			}
-			scrape(articles);
+			Zotero.Utilities.processDocuments(articles, scrape);
 		});
 	} else {
-		articles = [returnURL(getEID(url))];
-		scrape(articles);
+		scrape(doc, url);
 	}
 	Zotero.wait();
 }
 
-function scrape(articles) {
+function scrape(doc, url) {
+	//DOI, ISBN, language, and ISSN are not in the export data - get them from the page
+	var doi = ZU.xpathText(doc, '//div[contains(@class, "formatSourceExtended")]/span[strong[contains(text(), "DOI:")]]');
+	var ISSN = ZU.xpathText(doc, '//div[contains(@class, "formatSourceExtended")]/span[strong[contains(text(), "ISSN:")]]');
+	var ISBN = ZU.xpathText(doc, '//div[contains(@class, "formatSourceExtended")]/span[strong[contains(text(), "ISBN:")]]');
+	var language = ZU.xpathText(doc, '//div[contains(@class, "formatSourceExtended")]/span[strong[contains(text(), "Original language:")]]');
+	articles = [returnURL(getEID(url))];
 	var article = articles.shift();
 	Zotero.Utilities.doGet(article, function(text, obj) {
 		var stateKey = text.match(/<input[^>]*name="stateKey"[^>]*>/);
@@ -112,6 +105,10 @@ function scrape(articles) {
 				}
 				item.notes = notes;
 				item.url = "";
+				if (doi) item.DOI = doi.replace(/DOI:/, "").trim();
+				if (ISSN) item.ISSN = ISSN.replace(/ISSN:/, "").trim();
+				if (ISBN) item.ISBN = ISBN.replace(/ISBN:/, "").trim();
+				if (language) item.language = language.replace(/Original language:/, "").trim();
 				item.complete();
 			});
 			translator.translate();
