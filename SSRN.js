@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gbv",
-	"lastUpdated": "2013-01-12 09:31:28"
+	"lastUpdated": "2013-01-14 17:13:01"
 }
 
 /*
@@ -71,12 +71,16 @@ function doWeb(doc,url)
 		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 		translator.setHandler("itemDone", function(obj, item) {
 				item.itemType = "report";
-				item.type = "SSRN Working Paper"
+				item.type = "SSRN Scholarly Paper";
+				item.institution = "Social Science Research Network";
+				var number = url.match(/abstract_id=(\d+)/)[1];
+				if (number) item.reportNumber= "ID " + number;				
+				item.place = "Rochester, NY";
 				//we could scrape the number from the URL - do we want it though?
 				item.complete();
 				});
-		translator.getTranslatorObject(function (obj) {
-				obj.doWeb(doc, url);
+				translator.getTranslatorObject(function (obj) {
+					obj.doWeb(doc, url);
 				});
 	}
 }
@@ -127,7 +131,10 @@ var testCases = [
 				"url": "http://papers.ssrn.com/abstract=1450589",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "papers.ssrn.com",
-				"type": "SSRN Working Paper",
+				"type": "SSRN Scholarly Paper",
+				"institution": "Social Science Research Network",
+				"reportNumber": "ID 1450589",
+				"place": "Rochester, NY",
 				"shortTitle": "The 'Separation Plot'"
 			}
 		]
