@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-01-01 20:13:38"
+	"lastUpdated": "2013-01-15 18:38:01"
 }
 
 /*Works for many, but not all PICA versions. Tested with:
@@ -446,18 +446,18 @@ function scrape(doc, url) {
 	}
 	if(permalink) {
 		newItem.attachments.push({
-			title: 'Link to Library Catalog Entry',
+			title: 'Library Catalog Entry Snapshot',
 			url: permalink,
 			type: 'text/html',
-			snapshot: false
 		});
 	}
-
-	//add snapshot
-	newItem.attachments.push({
-		title: 'Library Catalog Entry Snapshot',
-		document: doc
-	});
+	else {
+		//add snapshot
+		newItem.attachments.push({
+			title: 'Library Catalog Entry Snapshot',
+			document: doc
+		});
+	}
 	if (!newItem.title) newItem.title = journaltitle;
 	newItem.complete();
 }
@@ -530,12 +530,8 @@ var testCases = [
 						"snapshot": false
 					},
 					{
-						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Library Catalog Entry Snapshot"
+						"title": "Library Catalog Entry Snapshot",
+						"type": "text/html"
 					}
 				],
 				"date": "2010",
@@ -575,12 +571,8 @@ var testCases = [
 						"snapshot": false
 					},
 					{
-						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Library Catalog Entry Snapshot"
+						"title": "Library Catalog Entry Snapshot",
+						"type": "text/html"
 					}
 				],
 				"date": "2011",
@@ -634,12 +626,8 @@ var testCases = [
 						"snapshot": false
 					},
 					{
-						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Library Catalog Entry Snapshot"
+						"title": "Library Catalog Entry Snapshot",
+						"type": "text/html"
 					}
 				],
 				"date": "2004",
@@ -680,12 +668,8 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Library Catalog Entry Snapshot"
+						"title": "Library Catalog Entry Snapshot",
+						"type": "text/html"
 					}
 				],
 				"date": "2008",
@@ -723,7 +707,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "Les différents films qui composent ce DVD sont réalisés avec des prises de vue réelles, ou des images microcinématographiques ou des images de synthèse, ou des images fixes tirées de livres. La bande son est essentiellement constituée de commentaires en voix off et d'interviews (les commentaires sont en anglais et les interviews sont en langue originales : anglais, français ou allemand, sous-titrée en anglais). - Discovering the cell : participation de Paul Nurse (Rockefeller university, New York), Claude Debru (ENS : Ecole normale supérieure, Paris) et Werner Franke (DKFZ : Deutsches Krebsforschungszentrum, Heidelberg) ; Membrane : participation de Kai Simons, Soizig Le Lay et Lucas Pelkmans (MPI-CBG : Max Planck institute of molecular cell biology and genetics, Dresden) ; Signals and calcium : participation de Christian Sardet et Alex Mc Dougall (CNRS / UPMC : Centre national de la recherche scientifique / Université Pierre et Marie Curie, Villefrance-sur-Mer) ; Membrane traffic : participation de Thierry Galli et Phillips Alberts (Inserm = Institut national de la santé et de la recherche médicale, Paris) ; Mitochondria : participation de Michael Duchen, Rémi Dumollard et Sean Davidson (UCL : University college of London) ; Microfilaments : participation de Cécile Gauthier Rouvière et Alexandre Philips (CNRS-CRBM : CNRS-Centre de recherche de biochimie macromoléculaire, Montpellier) ; Microtubules : participation de Johanna Höög, Philip Bastiaens et Jonne Helenius (EMBL : European molecular biology laboratory, Heidelberg) ; Centrosome : participation de Michel Bornens et Manuel Théry (CNRS-Institut Curie, Paris) ; Proteins : participation de Dino Moras et Natacha Rochel-Guiberteau (IGBMC : Institut de génétique et biologie moléculaire et cellulaire, Strasbourg) ; Nocleolus and nucleus : participation de Daniele Hernandez-Verdun, Pascal Rousset, Tanguy Lechertier (CNRS-UPMC / IJM : Institut Jacques Monod, Paris) ; The cell cycle : participation de Paul Nurse (Rockefeller university, New York) ; Mitosis and chromosomes : participation de Jan Ellenberg, Felipe Mora-Bermudez et Daniel Gerlich (EMBL, Heidelberg) ; Mitosis and spindle : participation de Eric Karsenti, Maiwen Caudron et François Nedelec (EMBL, Heidelberg) ; Cleavage : participation de Pierre Gönczy, Marie Delattre et Tu Nguyen Ngoc (Isrec : Institut suisse de recherche expérimentale sur le cancer, Lausanne) ; Cellules souches : participation de Göran Hermerén (EGE : European group on ethics in science and new technologies, Brussels) ; Cellules libres : participation de Jean-Jacques Kupiec (ENS, Paris) ; Cellules et évolution : participation de Paule Nurse (Rockefeller university, New York)"
+						"note": "Les différents films qui composent ce DVD sont réalisés avec des prises de vue réelles, ou des images microcinématographiques ou des images de synthèse, ou des images fixes tirées de livres. La bande son est essentiellement constituée de commentaires en voix off et d'interviews (les commentaires sont en anglais et les interviews sont en langue originales : anglais, français ou allemand, sous-titrée en anglais). - Discovering the cell : participation de Paul Nurse (Rockefeller university, New York), Claude Debru (ENS : Ecole normale supérieure, Paris) et Werner Franke (DKFZ : Deutsches Krebsforschungszentrum, Heidelberg) ; Membrane : participation de Kai Simons, Soizig Le Lay et Lucas Pelkmans (MPI-CBG : Max Planck institute of molecular cell biology and genetics, Dresden) ; Signals and calcium : participation de Christian Sardet et Alex Mc Dougall (CNRS / UPMC : Centre national de la recherche scientifique / Université Pierre et Marie Curie, Villefrance-sur-Mer) ; Membrane traffic : participation de Thierry Galli et Phillips Alberts (Inserm = Institut national de la santé et de la recherche médicale, Paris) ; Mitochondria : participation de Michael Duchen, Rémi Dumollard et Sean Davidson (UCL : University college of London) ; Microfilaments : participation de Cécile Gauthier Rouvière et Alexandre Philips (CNRS-CRBM : CNRS-Centre de recherche de biochimie macromoléculaire, Montpellier) ; Microtubules : participation de Johanna Höög, Philip Bastiaens et Jonne Helenius (EMBL : European molecular biology laboratory, Heidelberg) ; Centrosome : participation de Michel Bornens et Manuel Théry (CNRS-Institut Curie, Paris) ; Proteins : participation de Dino Moras et Natacha Rochel-Guiberteau (IGBMC : Institut de génétique et biologie moléculaire et cellulaire, Strasbourg) ; Nocleolus and nucleus : participation de Daniele Hernandez-Verdun, Pascal Rousset, Tanguy Lechertier (CNRS-UPMC / IJM : Institut Jacques Monod, Paris) ; The cell cycle : participation de Paul Nurse (Rockefeller university, New York) ; Mitosis and chromosomes : participation de Jan Ellenberg, Felipe Mora-Bermudez et Daniel Gerlich (EMBL, Heidelberg) ; Mitosis and spindle : participation de Eric Karsenti, Maiwen Caudron et François Nedelec (EMBL, Heidelberg) ; Cleavage : participation de Pierre Gönczy, Marie Delattre et Tu Nguyen Ngoc (Isrec : Institut suisse de recherche expérimentale sur le cancer, Lausanne) ; Cellules souches : participation de Göran Hermerén (EGE : European group on ethics in science and new technologies, Brussels) ; Cellules libres : participation de Jean-Jacques Kupiec (ENS, Paris) ; Cellules et évolution : participation de Paule Nurse (Rockefeller university, New York) "
 					}
 				],
 				"tags": [
@@ -750,12 +734,8 @@ var testCases = [
 						"snapshot": false
 					},
 					{
-						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Library Catalog Entry Snapshot"
+						"title": "Library Catalog Entry Snapshot",
+						"type": "text/html"
 					}
 				],
 				"date": "2006",
@@ -793,12 +773,8 @@ var testCases = [
 						"snapshot": false
 					},
 					{
-						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Library Catalog Entry Snapshot"
+						"title": "Library Catalog Entry Snapshot",
+						"type": "text/html"
 					}
 				],
 				"date": "2004",
@@ -836,7 +812,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "Modern notation. - \"Critical apparatus\": p. 174-243"
+						"note": "Modern notation. - \"Critical apparatus\": p. 174-243 "
 					}
 				],
 				"tags": [
@@ -851,12 +827,8 @@ var testCases = [
 						"snapshot": false
 					},
 					{
-						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Library Catalog Entry Snapshot"
+						"title": "Library Catalog Entry Snapshot",
+						"type": "text/html"
 					}
 				],
 				"date": "1986",
@@ -903,12 +875,8 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Library Catalog Entry Snapshot"
+						"title": "Library Catalog Entry Snapshot",
+						"type": "text/html"
 					}
 				],
 				"title": "A new method to obtain a consensus ranking of a region",
@@ -957,12 +925,8 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Library Catalog Entry Snapshot"
+						"title": "Library Catalog Entry Snapshot",
+						"type": "text/html"
 					}
 				],
 				"date": "2013",
@@ -1015,12 +979,8 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Library Catalog Entry Snapshot"
+						"title": "Library Catalog Entry Snapshot",
+						"type": "text/html"
 					}
 				],
 				"title": "Noise reduction potential of an engine oil pan",
@@ -1065,12 +1025,8 @@ var testCases = [
 						"snapshot": false
 					},
 					{
-						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Library Catalog Entry Snapshot"
+						"title": "Library Catalog Entry Snapshot",
+						"type": "text/html"
 					}
 				],
 				"date": "1992-1993",
@@ -1114,12 +1070,8 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Library Catalog Entry Snapshot"
+						"title": "Library Catalog Entry Snapshot",
+						"type": "text/html"
 					}
 				],
 				"libraryCatalog": "Library Catalog - catalogue.rug.nl",
@@ -1163,12 +1115,8 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Library Catalog Entry Snapshot"
+						"title": "Library Catalog Entry Snapshot",
+						"type": "text/html"
 					}
 				],
 				"libraryCatalog": "Library Catalog - catalogue.rug.nl",
