@@ -332,7 +332,7 @@ record.prototype.translate = function(item) {
 			{
 				var aut = authorTab[j];
 				var authorText = "";
-				if (aut.b) {
+				if ( (aut.b) && (aut.a) ){
 					authorText = aut['a'].replace(/,\s*$/,'') + ", " + aut['b'];
 				} 
 				else
