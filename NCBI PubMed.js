@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 13,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-11-23 17:51:53"
+	"lastUpdated": "2013-01-21 07:56:02"
 }
 
 function detectWeb(doc, url) {
@@ -388,7 +388,8 @@ function doWeb(doc, url) {
 			}
 
 			if(uid && title) {
-				items[uid] = title;
+				// Keys must be strings. Otherwise, Chrome sorts numerically instead of by insertion order.
+				items["u"+uid] = title;
 			}
 		}
 
@@ -397,7 +398,7 @@ function doWeb(doc, url) {
 
 			var uids = [];
 			for(var i in selectedItems) {
-				uids.push(i);
+				uids.push(i.substr(1));
 			}
 			lookupPMIDs(uids);
 		})
