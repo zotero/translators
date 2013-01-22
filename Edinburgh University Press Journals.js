@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-01-20 10:55:53"
+	"lastUpdated": "2013-01-21 19:01:52"
 }
 
 /*
@@ -67,7 +67,7 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	url = url.replace(/\?.+/, "")
-	var pdfurl = url.replace(/\/doi\/abs\/|\/doi\/full\//, "/doi/pdf/");
+	var pdfurl = url.replace(/\/doi\/abs\/|\/doi\/full\//, "/doi/pdfplus/");
 	var doi = url.match(/10\.[^?]+/)[0]
 	var citationurl = url.replace(/\/doi\/abs\/|\/doi\/full\//, "/action/showCitFormats?doi=");
 	var abstract = ZU.xpathText(doc, '//meta[@name="dc.Description"]/@content')
