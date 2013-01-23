@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-01-30 22:52:15"
+	"lastUpdated": "2013-01-23 12:41:08"
 }
 
 function detectWeb(doc, url) {
@@ -67,7 +67,6 @@ function doWeb(doc, url) {
 		var splitRe = new RegExp(title);
 		var authors = data.split(splitRe)[0].replace(/\([^)]+\)/, "").split(/(,|and)\s+/);
 		Zotero.debug(authors);
-		Zotero.debug(authors);
 		for each (var aut in authors) {
 			if (aut.match(/\w/) && (aut != "and")) {
 				item.creators.push(Zotero.Utilities.cleanAuthor(aut, "reviewedAuthor"));
@@ -75,14 +74,13 @@ function doWeb(doc, url) {
 		}
 		item.url = doc.location.href;
 		item.attachments = [{url:item.url, title:item.title, mimeType:"text/html"}];
-		if (doc.evaluate('/html/body/center/table/tbody/tr/td/center/table/tbody/tr/td/center/font', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-			item.date = Zotero.Utilities.trimInternal(doc.evaluate('/html/body/center/table/tbody/tr/td/center/table/tbody/tr/td/center/font', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace("Bryn Mawr Classical Review ", "").replace(/\./g, "/"));
+		if (doc.evaluate('/html/body/center/table/tbody/tr/td/center/table/tbody/tr/td//font', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+			item.date = Zotero.Utilities.trimInternal(doc.evaluate('/html/body/center/table/tbody/tr/td/center/table/tbody/tr/td//font', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace("Bryn Mawr Classical Review ", "").replace(/\./g, "/"));
 		} else {
 			item.date = Zotero.Utilities.trimInternal(doc.evaluate('/html/body/h3', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace("Bryn Mawr Classical Review ", "").replace(/\./g, "/"))
 		}
 		item.complete();
-	}, function() {Zotero.done();});
-	Zotero.wait();
+	});
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -121,6 +119,52 @@ var testCases = [
 				"title": "Review of: Sallust: The War Against Jugurtha. Aris and Phillips Classical Texts",
 				"url": "http://bmcr.brynmawr.edu/2010/2010-01-02.html",
 				"date": "2010/01/02",
+				"libraryCatalog": "Bryn Mawr Classical Review",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Review of"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://bmcr.brynmawr.edu/2013/2013-01-44.html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Christina S.",
+						"lastName": "Kraus",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Anthony",
+						"lastName": "Grafton",
+						"creatorType": "reviewedAuthor"
+					},
+					{
+						"firstName": "Glenn W.",
+						"lastName": "Most",
+						"creatorType": "reviewedAuthor"
+					},
+					{
+						"firstName": "Salvatore",
+						"lastName": "Settis",
+						"creatorType": "reviewedAuthor"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Review of: The Classical Tradition",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Review of: The Classical Tradition",
+				"url": "http://bmcr.brynmawr.edu/2013/2013-01-44.html",
+				"date": "2013/01/44",
 				"libraryCatalog": "Bryn Mawr Classical Review",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Review of"
