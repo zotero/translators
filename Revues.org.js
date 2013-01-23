@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-05-16 09:19:28"
+	"lastUpdated": "2013-01-16 22:56:50"
 }
 
 function detectWeb(doc, url) {
@@ -95,8 +95,17 @@ function scrape(doc, url) {
 			}
 
 			delete item.extra;
-
-			//store the language-specific url
+		
+			//The site lists all editor of journals as editor in the header. Turn them into contributors. 
+			//I don't think there is a use case for editors for journal articles
+			if (item.itemType === "journalArticle"){
+				for (i in item.creators){
+					if (item.creators[i].creatorType === "editor"){
+						item.creators[i].creatorType = "contributor";
+					}
+				}
+			}
+				//store the language-specific url
 			item.url = url;
 
 			item.complete();
@@ -230,7 +239,7 @@ var testCases = [
 					{
 						"firstName": "Georges",
 						"lastName": "Martin",
-						"creatorType": "editor"
+						"creatorType": "contributor"
 					}
 				],
 				"notes": [],
@@ -271,7 +280,7 @@ var testCases = [
 				"company": "CLEA (Civilisations et Littératures d’Espagne et d’Amérique du Moyen Âge aux Lumières), EA 4083",
 				"label": "CLEA (Civilisations et Littératures d’Espagne et d’Amérique du Moyen Âge aux Lumières), EA 4083",
 				"distributor": "CLEA (Civilisations et Littératures d’Espagne et d’Amérique du Moyen Âge aux Lumières), EA 4083",
-				"date": "2012/03/31",
+				"date": "2012/12/16",
 				"DOI": "10.4000/e-spania.12303",
 				"url": "http://e-spania.revues.org/12303?lang=fr",
 				"abstractNote": "Le testament d’Elvire livre de précieuses informations sur la réalité historique de l’infantat : son implantation, la composition de ses biens, ses évolutions, les formes de son acquisition et de sa transmission, sa fonction politique. Mais il nous renseigne aussi sur une infante de niveau moyen, sur son cadre de vie, son entourage, ses activités, les réseaux de son pouvoir et même sur sa foi.",
@@ -306,7 +315,7 @@ var testCases = [
 					{
 						"firstName": "Georges",
 						"lastName": "Martin",
-						"creatorType": "editor"
+						"creatorType": "contributor"
 					}
 				],
 				"notes": [],
@@ -346,7 +355,7 @@ var testCases = [
 				"company": "CLEA (Civilisations et Littératures d’Espagne et d’Amérique du Moyen Âge aux Lumières), EA 4083",
 				"label": "CLEA (Civilisations et Littératures d’Espagne et d’Amérique du Moyen Âge aux Lumières), EA 4083",
 				"distributor": "CLEA (Civilisations et Littératures d’Espagne et d’Amérique du Moyen Âge aux Lumières), EA 4083",
-				"date": "2012/03/31",
+				"date": "2012/12/16",
 				"DOI": "10.4000/e-spania.12303",
 				"url": "http://e-spania.revues.org/12303?lang=es",
 				"abstractNote": "El testamento de Elvira brinda una preciosísima información sobre la realidad del infantazgo : su extensión, la composición de sus bienes, sus evoluciones, las formas de su adquisición y transmisión, su papel político. También nos informa sobre una infanta de nivel mediano, sobre el marco de su vida, su entorno personal, sus actividades, la red de sus influencias e incluso sobre su fe.",
@@ -458,8 +467,12 @@ var testCases = [
 				],
 				"itemID": "http://poldev.revues.org/135",
 				"title": "Développement économique et legs coloniaux en Afrique",
-				"publicationTitle": "Revue internationale de politique de développement. International Development Policy series",
+				"publicationTitle": "International Development Policy | Revue internationale de politique de développement",
 				"rights": "© The Graduate Institute|Geneva",
+				"issue": "1",
+				"number": "1",
+				"patentNumber": "1",
+				"pages": "11-36",
 				"publisher": "Institut de hautes études internationales et du développement",
 				"institution": "Institut de hautes études internationales et du développement",
 				"company": "Institut de hautes études internationales et du développement",
@@ -467,6 +480,9 @@ var testCases = [
 				"distributor": "Institut de hautes études internationales et du développement",
 				"date": "2010/03/11",
 				"DOI": "10.4000/poldev.135",
+				"ISSN": "1663-9375",
+				"url": "http://poldev.revues.org/135",
+				"abstractNote": "Cet article étudie les effets du gouvernement colonial et de l’action des Africains pendant la période coloniale sur le contexte institutionnel et la situation en matière de ressources qui ont posé le cadre du futur développement économique au sud du Sahara. Cette question est placée dans la perspective de la dynamique du développement dans une région qui était, en 1900, extrêmement riche en terres et caractérisée par un manque de main-d’œuvre et de capital, par des activités marchandes indigènes dont l’ampleur peut étonner et par des degrés variables mais souvent peu élevés de centralisation politique. L’article explore la différence entre les effets des gouvernements français et britannique, mais il affirme que la différence visible dans l’évolution de la pauvreté, du bien-être et du changement structurel a davantage été déterminée par l’opposition entre économies « de peuplement » et « d’exploitation ».",
 				"reportType": "Text",
 				"letterType": "Text",
 				"manuscriptType": "Text",
@@ -477,11 +493,6 @@ var testCases = [
 				"postType": "Text",
 				"audioFileType": "Text",
 				"language": "fr",
-				"issue": "1",
-				"abstractNote": "Cet article étudie les effets du gouvernement colonial et de l’action des Africains pendant la période coloniale sur le contexte institutionnel et la situation en matière de ressources qui ont posé le cadre du futur développement économique au sud du Sahara. Cette question est placée dans la perspective de la dynamique du développement dans une région qui était, en 1900, extrêmement riche en terres et caractérisée par un manque de main-d’œuvre et de capital, par des activités marchandes indigènes dont l’ampleur peut étonner et par des degrés variables mais souvent peu élevés de centralisation politique. L’article explore la différence entre les effets des gouvernements français et britannique, mais il affirme que la différence visible dans l’évolution de la pauvreté, du bien-être et du changement structurel a davantage été déterminée par l’opposition entre économies « de peuplement » et « d’exploitation ».",
-				"pages": "11-36",
-				"ISSN": "1663-9375",
-				"url": "http://poldev.revues.org/135",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "poldev.revues.org"
 			}

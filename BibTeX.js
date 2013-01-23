@@ -15,7 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-12-20 09:36:51"
+	"lastUpdated": "2013-01-18 11:51:53"
 }
 
 function detectImport() {
@@ -1989,133 +1989,66 @@ function writeField(field, value, isMacro) {
 	if (!isMacro) Zotero.write("{");
 	// url field is preserved, for use with \href and \url
 	// Other fields (DOI?) may need similar treatment
-	if (!isMacro && !(field == "url" || field == "doi" || field == "file" || field == "lccn")) {
-		//var titleCase = isTitleCase(value);	//figure this out before escaping all the characters
-		// I hope these are all the escape characters! (except for < > which are handled later)
-		value = value.replace(/[|\~\^\\\{\}]/g, mapEscape).replace(/[\#\$\%\&\_]/g, "\\$&");
-		//convert the HTML markup allowed in Zotero for rich text to TeX
-		value = mapHTMLmarkup(value);
-		//escape < > if mapHTMLmarkup did not convert some
-		value = value.replace(/[<>]/g, mapEscape);
-		
-		/*
-		if (field == "title" || field == "type" || field == "shorttitle" || field == "booktitle" || field == "series") {
-			if (!titleCase) {
+	if (!isMacro && !(field == "url" || field == "doi" || field == "file" || field == "lccn" )) {
+		// I hope these are all the escape characters!
+		value = value.replace(/[|\<\>\~\^\\\{\}]/g, mapEscape).replace(/[\#\$\%\&\_]/g, "\\$0");
+
+		//disable 
+		/** if (field == "title" || field == "type" || field == "shorttitle" || field == "booktitle" || field == "series") {
+			if (!isTitleCase(value)) {
 				//protect caps for everything but the first letter
-					value = value.replace(/(.)([A-Z]+)/g, "$1{$2}");
+				value = value.replace(/(.)([A-Z]+)/g, "$1{$2}");
 			} else {	//protect all-caps vords and initials
-				value = value.replace(/([\s.->])([A-Z]+)(?=\.)/g, "$1{$2}");	//protect initials
-				if(value.toUpperCase() != value) value = value.replace(/([\s>])([A-Z]{2,})(?=[\.,\s<]|$)/g, "$1{$2}");
+				value = value.replace(/([\s.-])([A-Z]+)(?=\.)/g, "$1{$2}");	//protect initials
+				if(value.toUpperCase() != value) value = value.replace(/(\s)([A-Z]{2,})(?=[\.,\s]|$)/g, "$1{$2}");
 			}
-		}
-		*/	
-			
+		} 
+		**/
+
 		// Case of words with uppercase characters in non-initial positions is preserved with braces.
 		// treat hyphen as whitespace for this purpose so that Large-scale etc. don't get enclosed
 		// treat curly bracket as whitespace because of mark-up immediately preceding word
-		// treat opening parentheses &brackets as whitespace	
-		 if (field != "pages") {
-			value = value .replace(/[^\s-\}\{\(\[]+[A-Z][^\s,]*/g, "{$&}");
+		// treat opening parentheses &brackets as whitespace
+		if (field != "pages") {
+			value = value.replace(/([^\s-\}\(\[]+[A-Z][^\s,]*)/g, "{$1}");
 		}
 	}
-
 	if (Zotero.getOption("exportCharset") != "UTF-8") {
 		value = value.replace(/[\u0080-\uFFFF]/g, mapAccent);
 	}
-
+	//convert the HTML markup allowed in Zotero for rich text to TeX; excluding doi/url/file shouldn't be necessary, but better to be safe;
+	if (!((field == "url") || (field == "doi") || (field == "file"))) value = mapHTMLmarkup(value);
 	Zotero.write(value);
 	if (!isMacro) Zotero.write("}");
 }
 
-function mapHTMLmarkup(characters) {
-	//convert string to DOM
-	var dom = (new DOMParser()).parseFromString(characters, 'text/html');
-	return DOMtoTeX(dom.body);
+function mapHTMLmarkup(characters){
+	//converts the HTML markup allowed in Zotero for rich text to TeX
+	//since  < and > have already been escaped, we need this rather hideous code - I couldn't see a way around it though.
+	//italics and bold
+	characters = characters.replace(/\{\\textless\}i\{\\textgreater\}(((?!\{\\textless\}\/i{\\textgreater\}).)+)\{\\textless\}\/i{\\textgreater\}/, "\\textit{$1}").replace(/\{\\textless\}b\{\\textgreater\}(((?!\{\\textless\}\/b{\\textgreater\}).)+)\{\\textless\}\/b{\\textgreater\}/g, "\\textbf{$1}");
+	//sub and superscript
+	characters = characters.replace(/\{\\textless\}sup\{\\textgreater\}(((?!\{\\textless\}\/sup\{\\textgreater\}).)+)\{\\textless\}\/sup{\\textgreater\}/g, "\$^{\\textrm{$1}}\$").replace(/\{\\textless\}sub\{\\textgreater\}(((?!\{\\textless\}\/sub\{\\textgreater\}).)+)\{\\textless\}\/sub\{\\textgreater\}/g, "\$_{\\textrm{$1}}\$");
+	//two variants of small caps
+	characters = characters.replace(/\{\\textless\}span\sstyle=\"small\-caps\"\{\\textgreater\}(((?!\{\\textless\}\/span\{\\textgreater\}).)+)\{\\textless\}\/span{\\textgreater\}/g, "\\textsc{$1}").replace(/\{\\textless\}sc\{\\textgreater\}(((?!\{\\textless\}\/sc\{\\textgreater\}).)+)\{\\textless\}\/sc\{\\textgreater\}/g, "\\textsc{$1}");
+	return characters;
 }
 
-
-var HTMLtoTeXMap = {
-	i: {
-		open: "\\textit{",
-		close: "}"
-	},
-	b: {
-		open: "\\textbf{",
-		close: "}"
-	},
-	sup: {
-		open: "\$^{\\textrm{",
-		close: "}}\$"
-	},
-	sub: {
-		open: "\$_{\\textrm{",
-		close: "}}\$"
-	},
-	span: {
-		open: "\\textsc{",
-		close: "}"
-	},
-	sc: {
-		open: "\\textsc{",
-		close: "}"
-	}
-}
-
-function DOMtoTeX(element) {
-	
-	
-	
-	var str = "";
-	var node = element.firstChild;
-	if(!node) return str;
-
-	do {
-		var nodeName = node.nodeName.toLowerCase();
-		//nodes we can handle
-		if(HTMLtoTeXMap[nodeName]) {
-			//span element must have style="small-caps"
-			if(nodeName != 'span'
-				|| (node.style && node.style.fontVariant == 'small-caps')) {
-				str += HTMLtoTeXMap[nodeName].open
-							+ DOMtoTeX(node)
-							+ HTMLtoTeXMap[nodeName].close;
-				continue;
-			}
-		}
-
-		//text nodes get appended directly
-		if(nodeName == '#text') {
-			str += node.textContent;
-			continue;
-		}
-
-		//otherwise we dig deeper, but we don't mess with the node tags
-		var outerHTML = node.outerHTML;
-		var openningTag = outerHTML.substring(0, outerHTML.indexOf(node.innerHTML));
-		var closingTag = outerHTML.substring(openningTag.length + node.innerHTML.length);
-		str += openningTag + DOMtoTeX(node) + closingTag;
-	} while(node = node.nextSibling);
-	return str;
-}
 
 function mapTeXmarkup(tex){
-	//put in a safeguard against infinite loop and to deal with capital escaping.
-	var i = 0;
-	while(tex.search(/[^\\]\{.*[^\\]\}/)!=-1  && i<10 ){
-		tex = tex.replace(/\\textit\{([^\{\}]*)\}/g, "<i>$1</i>").replace(/\\textbf\{([^\{\}]*)\}/g, "<b>$1</b>");	
-		tex = tex.replace(/\$[^\{\$\}]*_\{([^\{\}]*)\}\$/g, "<sub>$1</sub>").replace(/\$[^\{\}\$]*_\{\\textrm\{([^\{\}]+)\}\}\$/g, "<sub>$1</sub>");	
-		tex = tex.replace(/\$[^\{\}\$]*\^\{([^\{\}]*\})\$/g, "<sup>$1</sup>").replace(/\$[^\{\}\$]*\^\{\\textrm\{([^\{\}]*)\}\}\$/g, "<sup>$1</sup>");
-		tex = tex.replace(/\\textsc\{([^\{\}]+)/g, "<span style=\"small-caps\">$1</span>");
-		//we go for a minimum of 4 levels of nesting before getting rid of additional brackets
-		//we do need to remove the brackets here for the code above to work with preserved caps
-		if (i>3) tex = tex.replace(/\{([^\{\}]*[^\\])\}/g, "$1"); 
-		i++;
-	}
+	//reverse of the above - converts tex mark-up into html mark-up permitted by Zotero
+	//italics and bold
+	tex = tex.replace(/\\textit\{([^\}]+\})/g, "<i>$1</i>").replace(/\\textbf\{([^\}]+\})/g, "<b>$1</b>");
+	//two versions of subscript the .* after $ is necessary because people m
+	tex = tex.replace(/\$[^\{\$]*_\{([^\}]+\})\$/g, "<sub>$1</sub>").replace(/\$[^\{]*_\{\\textrm\{([^\}]+\}\})/g, "<sub>$1</sub>");	
+	//two version of superscript
+	tex = tex.replace(/\$[^\{]*\^\{([^\}]+\}\$)/g, "<sup>$1</sup>").replace(/\$[^\{]*\^\{\\textrm\{([^\}]+\}\})/g, "<sup>$1</sup>");	
+	//small caps
+	tex = tex.replace(/\\textsc\{([^\}]+)/g, "<span style=\"small-caps\">$1</span>");
 	return tex;
 }
-
-/*
-var skipWords = ["but", "or", "yet", "so", "for", "and", "nor",
+//Disable the isTitleCase function until we decide what to do with it.
+/* const skipWords = ["but", "or", "yet", "so", "for", "and", "nor",
 	"a", "an", "the", "at", "by", "from", "in", "into", "of", "on",
 	"to", "with", "up", "down", "as", "while", "aboard", "about",
 	"above", "across", "after", "against", "along", "amid", "among",
@@ -2128,20 +2061,11 @@ var skipWords = ["but", "or", "yet", "so", "for", "and", "nor",
 	"within", "without"];
 
 function isTitleCase(string) {
-	const wordRE = /([\s[(><])([^\s,\.:?!\])><\/&]+)/g;
+	const wordRE = /[\s[(]([^\s,\.:?!\])]+)/g;
 
 	var word;
 	while (word = wordRE.exec(string)) {
-		if(word[1] == '<' && word[2].search(/^[a-z]+$/i) != -1) { //skip HTML markup
-			var startIndex = wordRE.lastIndex - word[0].length;
-			var lastIndex = string.indexOf('>', startIndex);
-			if(lastIndex != -1) {
-				wordRE.lastIndex = lastIndex;	//we don't want to move to the character after >
-				continue;
-			}
-		}
-
-		word = word[2];
+		word = word[1];
 		if(word.search(/\d/) != -1	//ignore words with numbers (including just numbers)
 			|| skipWords.indexOf(word.toLowerCase()) != -1) {
 			continue;
@@ -2151,7 +2075,6 @@ function isTitleCase(string) {
 	}
 	return true;
 }
-
 */
 
 function mapEscape(character) {
@@ -2704,8 +2627,8 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"title": "Test of markupconversion: Italics, bold, superscript, subscript, and small caps: Mitochondrial DNA<sub>2</sub> sequences suggest unexpected phylogenetic position of Corso-Sardinian grass snakes (<i>Natrix cetti</i>) and <b>do not</b> support their <span style=\"small-caps\">species status</span>, with notes on phylogeography and subspecies delineation of grass snakes.",
-				"publicationTitle": "Actes du <sup>ème</sup> Congrès Français d'Acoustique",
+				"title": "Test of markupconversion: Italics, bold, superscript, subscript, and small caps: Mitochondrial DNA<sub>2</sub>$ sequences suggest unexpected phylogenetic position of Corso-Sardinian grass snakes (<i>Natrix cetti</i>) and <b>do not</b> support their <span style=\"small-caps\">species status</span>, with notes on phylogeography and subspecies delineation of grass snakes.",
+				"publicationTitle": "Actes du <sup>ème</sup>$ Congrès Français d'Acoustique",
 				"date": "2012",
 				"volume": "12",
 				"pages": "71-80",
@@ -2734,35 +2657,6 @@ var testCases = [
 				"url": "http://www.americanrightsatwork.org/blogcategory-275/",
 				"accessDate": "2012-07-27",
 				"date": "2012"
-			}
-		]
-	},
-	{
-		"type": "import",
-		"input": "@article{ekman_constant_1971,\n    title = {Test \\textit{Italics with {Propernames} and nested $_{\\textrm{subscript with \\textbf{bold}}}$ and} escaped curly brackets in abstract},\n\tabstract = {This study addresses \\{ the question \\} of whether any facial expressions of emotion are unniversal. Recent studies showing that members of literate cultures associated the same emotion concepts withe the same facial behaviors could not demonstrate that at least some facial expressions of emotion are universal; the cultures compared had all been exposed to some of the same mass media presentations of facial expression and these may have taught the people in each culture to recognize the unique facial expressions of other cultures. To show that members of a preliterate culture who had minimal exposure to literate cultures would associate the same emotion concepts with the same facial behaviors as do members of Western and Eastern literate cultures, data were gathered in New Guinea by telling subjects a story, showing them a set of three faces, and asking them to select the face which showed the emotion appropriate to \\{the\\} story. The results provide evidence in support of the hypothesis that the association between particular facial muscular patterns and discrete emotions is universal},\n\tauthor = {Ekman, Paul and Wallace, V. Friesen},\n\tyear = {1971},\n\tpages = {124--129}\n}",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "Paul",
-						"lastName": "Ekman",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "V. Friesen",
-						"lastName": "Wallace",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Test <i>Italics with Propernames and nested <sub>subscript with <b>bold</b></sub> and</i> escaped curly brackets in abstract",
-				"abstractNote": "This study addresses { the question } of whether any facial expressions of emotion are unniversal. Recent studies showing that members of literate cultures associated the same emotion concepts withe the same facial behaviors could not demonstrate that at least some facial expressions of emotion are universal; the cultures compared had all been exposed to some of the same mass media presentations of facial expression and these may have taught the people in each culture to recognize the unique facial expressions of other cultures. To show that members of a preliterate culture who had minimal exposure to literate cultures would associate the same emotion concepts with the same facial behaviors as do members of Western and Eastern literate cultures, data were gathered in New Guinea by telling subjects a story, showing them a set of three faces, and asking them to select the face which showed the emotion appropriate to {the} story. The results provide evidence in support of the hypothesis that the association between particular facial muscular patterns and discrete emotions is universal",
-				"date": "1971",
-				"pages": "124–129"
 			}
 		]
 	}

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-11-19 21:46:13"
+	"lastUpdated": "2013-01-21 19:54:38"
 }
 
 /*
@@ -147,7 +147,6 @@ function scrape(doc) {
 		if(!value) continue;
 		//Z.debug("label: " + label);
 		//Z.debug("value: " + value.textContent);
-
 		switch(label) {
 			case "Inventor(s):":
 				cleanNames(ZU.xpathText(value, './span[@id="secondaryInventors"]'),
@@ -189,7 +188,9 @@ function scrape(doc) {
 	if(date && (date = date.match(/\d{4}-\d{2}-\d{2}/))) {
 		newItem.date = date[0];
 	}
-
+	
+	var patentnumber = ZU.xpathText(doc, '//div[@class="application article clearfix"]/h3');
+	if (patentnumber) newItem.patentNumber = ZU.trimInternal(patentnumber.replace(/Abstract (not available )?(of|for)|Abrégé (non disponible )?pour|(Keine )?Zusammenfassung (verfügbar )?(von|für)/, ""));
 	newItem.abstractNote = ZU.trimInternal(
 		ZU.xpathText(doc, '//p[@class="printAbstract"]') || '');
 
@@ -256,8 +257,9 @@ var testCases = [
 				"assignee": "Blue Infusion Technologies, Llc; Blount, Willie, Lee, Jr",
 				"extra": "CIB: G06F3/033; G09G5/08",
 				"applicationNumber": "WO2011US56657 20111018",
-				"priorityNumbers": "US20100394879P 20101020; US20100394013P 20101018",
+				"priorityNumbers": "US20100394879P 20101020 ; US20100394013P 20101018",
 				"date": "2012-04-26",
+				"patentNumber": "WO2012054443 (A1)",
 				"abstractNote": "Many people active and inactive can't readily control their audio experience without reaching into a pocket or some other location to change a setting or answer the phone. The problem is the lack of convenience and the inaccessibility when the user is riding his motorcycle, skiing, bicycling, jogging, or even walking with winter gloves on, etc. The electronic control glove described here enables enhanced control over electronic devices wirelessly at all times from the user's fingertips. The glove is manufactured with electrical conducive materials along the fingers and the thumb, where contact with the thumb and finger conductive materials creates a closed circuit which is transmitted to a control device on the glove that can then wirelessly transmit messages to remote electronic devices such as cell phones, audio players, garage door openers, military hardware and software, in work environments, and so forth.",
 				"libraryCatalog": "ESpacenet"
 			}
@@ -295,10 +297,11 @@ var testCases = [
 					}
 				],
 				"title": "Method and System for Secure Financial Transactions Using Mobile Communications Devices",
-				"extra": "CIB: G06Q20/00\nECLA: G06Q20/3223; G06Q20/3829",
+				"extra": "CIB: G06Q20/00",
 				"applicationNumber": "US201113172170 20110629",
-				"priorityNumbers": "US201113172170 20110629; US20100406097P 20101022",
+				"priorityNumbers": "US201113172170 20110629 ; US20100406097P 20101022",
 				"date": "2012-04-26",
+				"patentNumber": "US2012101951 (A1)",
 				"abstractNote": "The present invention employs public key infrastructure to electronically sign and encrypt important personal information on a mobile communications device (MCD), without disclosing private, personal information to the transaction counterparts and middleman, thus preserving highly elevated and enhanced security and fraud protection. In one embodiment, the present invention can use a mobile device identifier, such as a cell phone number or email address, for example, as an index/reference during the entire transaction, so that only the account holder and the account issuer know the underlying account number and other private information.",
 				"libraryCatalog": "ESpacenet"
 			}
@@ -327,10 +330,11 @@ var testCases = [
 				],
 				"title": "Eswl Employing Non-Focused Spherical-Sector Shock Waves",
 				"assignee": "William S. Filler",
-				"extra": "CIB: A61B17/22; A61B17/225; G10K11/32; G10K15/04; (IPC1-7): A61B17/22\nECLA: A61B17/225; G10K11/32; G10K15/04B",
+				"extra": "CIB: A61B17/22; A61B17/225; G10K11/32; G10K15/04; (IPC1-7): A61B17/22",
 				"applicationNumber": "AU19890028143D 19891108",
 				"priorityNumbers": "US19870118325 19871109",
 				"date": "1989-06-01",
+				"patentNumber": "AU2814389 (A)",
 				"libraryCatalog": "ESpacenet"
 			}
 		]
@@ -358,10 +362,11 @@ var testCases = [
 				],
 				"title": "Eswl Employing Non-Focused Spherical-Sector Shock Waves",
 				"assignee": "William S. Filler",
-				"extra": "CIB: A61B17/22; A61B17/225; G10K11/32; G10K15/04; (IPC1-7): A61B17/22\nECLA: A61B17/225; G10K11/32; G10K15/04B",
+				"extra": "CIB: A61B17/22; A61B17/225; G10K11/32; G10K15/04; (IPC1-7): A61B17/22",
 				"applicationNumber": "AU19890028143D 19891108",
 				"priorityNumbers": "US19870118325 19871109",
 				"date": "1989-06-01",
+				"patentNumber": "AU2814389 (A)",
 				"libraryCatalog": "ESpacenet"
 			}
 		]
