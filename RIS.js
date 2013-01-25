@@ -811,8 +811,7 @@ function dateRIStoZotero(risDate, zField) {
 		return ZU.formatDate({
 				'year': date[0],
 				'month': date[1],
-				'day': date[2],
-				'part': part
+				'day': date[2]
 			});
 	}
 }

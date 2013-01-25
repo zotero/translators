@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-27 18:34:44"
+	"lastUpdated": "2013-01-24 20:55:29"
 }
 
 /**
@@ -102,7 +102,7 @@ function getPdfUrl(url) {
 }
 
 //add using embedded metadata
-function scrapeEmbedMeta(doc, url) {
+function scrapeEM(doc, url, next) {
 	var translator = Zotero.loadTranslator("web");
 	//Embedded Metadata translator
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
@@ -151,15 +151,6 @@ function scrapeEmbedMeta(doc, url) {
 			item.abstractNote = abstract;
 		}
 
-		var pdf = getPdfUrl(url);
-		if (pdf) {
-			item.attachments = [{
-				url: pdf,
-				title: 'Full Text PDF',
-				mimeType: 'application/pdf'
-			}];
-		}
-
 		var keywords = getKeywords(doc);
 		if(keywords) item.tags = keywords;
 		else if(item.tags) {
@@ -176,10 +167,44 @@ function scrapeEmbedMeta(doc, url) {
 		
 		if(item.ISSN === "ERROR! NO ISSN") delete item.ISSN;
 
-		item.complete();
+		next(item);
 	});
 
 	translator.translate();
+}
+
+function scrapeRIS(doc, url, next) {
+	var navBar = doc.getElementById('articlenav') || doc.getElementById('extranav');
+	var risURL
+	if(navBar) {
+		risURL = doc.evaluate('//li[@class="export"]/a', navBar, null, XPathResult.ANY_TYPE, null).iterateNext();
+		if(!risURL) risURL = doc.evaluate('//a[normalize-space(text())="Export citation"]', navBar, null, XPathResult.ANY_TYPE, null).iterateNext();
+	}
+	
+	if(!risURL) risURL = doc.evaluate('//li[@class="download-citation"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+	if(!risURL) risURL = doc.evaluate('//a[normalize-space(text())="Export citation"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+
+	if(risURL) {
+		risURL = risURL.href;
+		ZU.doGet(risURL, function(text) {
+			if(text.search(/^TY /m) != -1) {
+				var translator = Zotero.loadTranslator('import');
+				translator.setTranslator('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7');
+				translator.setString(text);
+				translator.setHandler('itemDone', function(obj, newItem) {
+					newItem.notes = [];
+					next(newItem);
+				})
+				translator.setHandler('error', function() { next() });
+				translator.translate();
+			} else {
+				next();
+			}
+		});
+	} else {
+		Z.debug('Could not find RIS export');
+		next();
+	}
 }
 
 function detectWeb(doc, url) {
@@ -198,6 +223,75 @@ function detectWeb(doc, url) {
 		if (url.indexOf('category.htm') != -1 && url.indexOf('code=') == -1) return false; //list of categories
 		return 'multiple'; //all else should be ok
 	}
+}
+
+function supplementItem(item, supp, prefer) {
+	for(var i in supp) {
+		if(!supp.hasOwnProperty(i)
+			|| (item.hasOwnProperty(i) && prefer.indexOf(i) == -1)) {
+			continue;	//this also skips creators, tags, notes, and related
+		}
+
+		Z.debug('Supplementing item.' + i);
+		item[i] = supp[i];
+	}
+
+	return item;
+}
+
+function runScrapers(scrapers, done) {
+	
+	var items = [];
+	var args = Array.prototype.splice.call(arguments, 2); //remove scrapers and done handler
+
+	var run = function(item) {
+		items.push(item);
+		if(scrapers.length) {
+			(scrapers.shift()).apply(null, args);
+		}
+	};
+
+	args.push(run);
+	args.push(items);
+
+	scrapers.push(function() {
+		done(items);
+	});
+
+	(scrapers.shift()).apply(null, args);
+}
+
+function scrape(doc, url) {
+	runScrapers([scrapeEM, scrapeRIS], function(items) {
+		var item = items[0];
+		if(!item) {
+			item = items[1];
+		} else if(items[1]) {
+			item = supplementItem(item, items[1], ['journalAbbreviation', 'date']);
+			if(items[1].tags.length) item.tags = items[1].tags;
+		}
+
+		if(!item) {
+			Z.debug('Could not retrieve metadata.');
+			return;	//both translators failed
+		}
+
+		item.attachments = [{
+			document: doc,
+			title: 'Snapshot'
+		}];
+
+		var pdf = getPdfUrl(url);
+		if (pdf) {
+			item.attachments.push({
+				url: pdf,
+				title: 'Full Text PDF',
+				mimeType: 'application/pdf'
+			});
+		}
+
+		item.complete();
+	}, doc, url);
 }
 
 function doWeb(doc, url) {
@@ -260,19 +354,14 @@ function doWeb(doc, url) {
 		var urls = new Array();
 
 		Zotero.selectItems(items, function (selectedItems) {
-			if (selectedItems == null) return true;
+			if (!selectedItems) return true;
 			for (var item in selectedItems) {
 				urls.push(item);
 			}
-			Zotero.Utilities.processDocuments(urls, function (newDoc) {
-				doWeb(newDoc, newDoc.location.href)
-			}, function () {
-				Zotero.done();
-			});
-			Zotero.wait();
+			Zotero.Utilities.processDocuments(urls, scrape);
 		});
 	} else {
-		scrapeEmbedMeta(doc, url);
+		scrape(doc, url);
 	}
 }
 
@@ -687,6 +776,9 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
+						"title": "Snapshot"
+					},
+					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
@@ -705,14 +797,15 @@ var testCases = [
 				"company": "Nature Publishing Group",
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
-				"date": "2012",
+				"date": "February 9, 2012",
 				"ISSN": "0950-9232",
 				"language": "en",
 				"DOI": "10.1038/onc.2011.282",
 				"abstractNote": "Identification and characterization of cancer stem cells (CSCs) in gastric cancer are difficult owing to the lack of specific markers and consensus methods. In this study, we show that cells with the CD90 surface marker in gastric tumors could be enriched under non-adherent, serum-free and sphere-forming conditions. These CD90+ cells possess a higher ability to initiate tumor in vivo and could re-establish the cellular hierarchy of tumors from single-cell implantation, demonstrating their self-renewal properties. Interestingly, higher proportion of CD90+ cells correlates with higher in vivo tumorigenicity of gastric primary tumor models. In addition, it was found that ERBB2 was overexpressed in about 25% of the gastric primary tumor models, which correlates with the higher level of CD90 expression in these tumors. Trastuzumab (humanized anti-ERBB2 antibody) treatment of high-tumorigenic gastric primary tumor models could reduce the CD90+ population in tumor mass and suppress tumor growth when combined with traditional chemotherapy. Moreover, tumorigenicity of tumor cells could also be suppressed when trastuzumab treatment starts at the same time as cell implantation. Therefore, we have identified a CSC population in gastric primary tumors characterized by their CD90 phenotype. The finding that trastuzumab targets the CSC population in gastric tumors suggests that ERBB2 signaling has a role in maintaining CSC populations, thus contributing to carcinogenesis and tumor invasion. In conclusion, the results from this study provide new insights into the gastric tumorigenic process and offer potential implications for the development of anticancer drugs as well as therapeutic treatment of gastric cancers.",
 				"url": "http://www.nature.com/onc/journal/v31/n6/full/onc2011282a.html",
 				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "www.nature.com"
+				"libraryCatalog": "www.nature.com",
+				"journalAbbreviation": "Oncogene"
 			}
 		]
 	},
@@ -814,6 +907,9 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
+						"title": "Snapshot"
+					},
+					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
@@ -832,13 +928,15 @@ var testCases = [
 				"company": "Nature Publishing Group",
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
-				"date": "04/04/2012",
+				"date": "April 4, 2012",
 				"language": "en",
 				"DOI": "10.1038/emboj.2012.17",
 				"abstractNote": "E2F transcription factors are implicated in diverse cellular functions. The founding member, E2F-1, is endowed with contradictory activities, being able to promote cell-cycle progression and induce apoptosis. However, the mechanisms that underlie the opposing outcomes of E2F-1 activation remain largely unknown. We show here that E2F-1 is directly methylated by PRMT5 (protein arginine methyltransferase 5), and that arginine methylation is responsible for regulating its biochemical and functional properties, which impacts on E2F-1-dependent growth control. Thus, depleting PRMT5 causes increased E2F-1 protein levels, which coincides with decreased growth rate and associated apoptosis. Arginine methylation influences E2F-1 protein stability, and the enhanced transcription of a variety of downstream target genes reflects increased E2F-1 DNA-binding activity. Importantly, E2F-1 is methylated in tumour cells, and a reduced level of methylation is evident under DNA damage conditions that allow E2F-1 stabilization and give rise to apoptosis. Significantly, in a subgroup of colorectal cancer, high levels of PRMT5 frequently coincide with low levels of E2F-1 and reflect a poor clinical outcome. Our results establish that arginine methylation regulates the biological activity of E2F-1 activity, and raise the possibility that arginine methylation contributes to tumourigenesis by influencing the E2F pathway.",
 				"url": "http://www.nature.com/emboj/journal/v31/n7/full/emboj201217a.html",
 				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "www.nature.com"
+				"libraryCatalog": "www.nature.com",
+				"journalAbbreviation": "EMBO J",
+				"ISSN": "0261-4189"
 			}
 		]
 	},
@@ -892,6 +990,9 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
+						"title": "Snapshot"
+					},
+					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
@@ -907,7 +1008,7 @@ var testCases = [
 				"company": "Nature Publishing Group",
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
-				"date": "19 January 2012",
+				"date": "January 19, 2012",
 				"ISSN": "0028-0836",
 				"language": "en",
 				"issue": "7381",
@@ -915,7 +1016,8 @@ var testCases = [
 				"abstractNote": "The mass function of dwarf satellite galaxies that are observed around Local Group galaxies differs substantially from simulations based on cold dark matter: the simulations predict many more dwarf galaxies than are seen. The Local Group, however, may be anomalous in this regard. A massive dark satellite in an early-type lens galaxy at a redshift of 0.222 was recently found using a method based on gravitational lensing, suggesting that the mass fraction contained in substructure could be higher than is predicted from simulations. The lack of very low-mass detections, however, prohibited any constraint on their mass function. Here we report the presence of a (1.9 ± 0.1) × 108nature10669-m1jpg19K2716 dark satellite galaxy in the Einstein ring system JVAS B1938+666 (ref. 11) at a redshift of 0.881, where nature10669-m2jpg20K2716 denotes the solar mass. This satellite galaxy has a mass similar to that of the Sagittarius galaxy, which is a satellite of the Milky Way. We determine the logarithmic slope of the mass function for substructure beyond the local Universe to be nature10669-m3jpg21K4620, with an average mass fraction of nature10669-m4jpg21K4820 per cent, by combining data on both of these recently discovered galaxies. Our results are consistent with the predictions from cold dark matter simulations at the 95 per cent confidence level, and therefore agree with the view that galaxies formed hierarchically in a Universe composed of cold dark matter.",
 				"url": "http://www.nature.com/nature/journal/v481/n7381/full/nature10669.html",
 				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "www.nature.com"
+				"libraryCatalog": "www.nature.com",
+				"journalAbbreviation": "Nature"
 			}
 		]
 	},
@@ -935,6 +1037,9 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
+						"title": "Snapshot"
+					},
+					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
@@ -950,7 +1055,7 @@ var testCases = [
 				"company": "Nature Publishing Group",
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
-				"date": "19 January 2012",
+				"date": "January 19, 2012",
 				"ISSN": "0028-0836",
 				"language": "en",
 				"issue": "7381",
@@ -958,7 +1063,8 @@ var testCases = [
 				"abstractNote": "Researchers need to cement the bond between science and the South Pole if the region is to remain one of peace and collaboration.",
 				"url": "http://www.nature.com/nature/journal/v481/n7381/full/481237a.html",
 				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "www.nature.com"
+				"libraryCatalog": "www.nature.com",
+				"journalAbbreviation": "Nature"
 			}
 		]
 	},
@@ -998,6 +1104,9 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
+						"title": "Snapshot"
+					},
+					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
@@ -1013,7 +1122,7 @@ var testCases = [
 				"company": "Nature Publishing Group",
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
-				"date": "19 January 2012",
+				"date": "January 19, 2012",
 				"ISSN": "0028-0836",
 				"language": "en",
 				"issue": "7381",
@@ -1021,7 +1130,8 @@ var testCases = [
 				"url": "http://www.nature.com/nature/journal/v481/n7381/full/nature10728.html",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.nature.com",
-				"abstractNote": "Histone deacetylase enzymes (HDACs) are emerging cancer drug targets. They regulate gene expression by removing acetyl groups from lysine residues in histone tails, resulting in chromatin condensation. The enzymatic activity of most class I HDACs requires recruitment into multi-subunit co-repressor complexes, which are in turn recruited to chromatin by repressive transcription factors. Here we report the structure of a complex between an HDAC and a co-repressor, namely, human HDAC3 with the deacetylase activation domain (DAD) from the human SMRT co-repressor (also known as NCOR2). The structure reveals two remarkable features. First, the SMRT-DAD undergoes a large structural rearrangement on forming the complex. Second, there is an essential inositol tetraphosphate molecule—d-myo-inositol-(1,4,5,6)-tetrakisphosphate (Ins(1,4,5,6)P4)—acting as an ‘intermolecular glue’ between the two proteins. Assembly of the complex is clearly dependent on the Ins(1,4,5,6)P4, which may act as a regulator—potentially explaining why inositol phosphates and their kinases have been found to act as transcriptional regulators. This mechanism for the activation of HDAC3 appears to be conserved in class I HDACs from yeast to humans, and opens the way to novel therapeutic opportunities."
+				"abstractNote": "Histone deacetylase enzymes (HDACs) are emerging cancer drug targets. They regulate gene expression by removing acetyl groups from lysine residues in histone tails, resulting in chromatin condensation. The enzymatic activity of most class I HDACs requires recruitment into multi-subunit co-repressor complexes, which are in turn recruited to chromatin by repressive transcription factors. Here we report the structure of a complex between an HDAC and a co-repressor, namely, human HDAC3 with the deacetylase activation domain (DAD) from the human SMRT co-repressor (also known as NCOR2). The structure reveals two remarkable features. First, the SMRT-DAD undergoes a large structural rearrangement on forming the complex. Second, there is an essential inositol tetraphosphate molecule—d-myo-inositol-(1,4,5,6)-tetrakisphosphate (Ins(1,4,5,6)P4)—acting as an ‘intermolecular glue’ between the two proteins. Assembly of the complex is clearly dependent on the Ins(1,4,5,6)P4, which may act as a regulator—potentially explaining why inositol phosphates and their kinases have been found to act as transcriptional regulators. This mechanism for the activation of HDAC3 appears to be conserved in class I HDACs from yeast to humans, and opens the way to novel therapeutic opportunities.",
+				"journalAbbreviation": "Nature"
 			}
 		]
 	},
@@ -1128,6 +1238,9 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
+						"title": "Snapshot"
+					},
+					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
@@ -1146,12 +1259,14 @@ var testCases = [
 				"company": "Nature Publishing Group",
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
-				"date": "11/01/2006",
+				"date": "November 2006",
 				"language": "en",
 				"DOI": "10.1038/ng1901",
 				"url": "http://www.nature.com/ng/journal/v38/n11/full/ng1901.html",
 				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "www.nature.com"
+				"libraryCatalog": "www.nature.com",
+				"journalAbbreviation": "Nat Genet",
+				"ISSN": "1061-4036"
 			}
 		]
 	},
@@ -1425,6 +1540,9 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
+						"title": "Snapshot"
+					},
+					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
@@ -1443,14 +1561,15 @@ var testCases = [
 				"company": "Nature Publishing Group",
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
-				"date": "2009-11-05",
+				"date": "November 5, 2009",
 				"ISSN": "0028-0836",
 				"language": "en",
 				"DOI": "10.1038/nature08497",
 				"abstractNote": "Genomes are organized into high-level three-dimensional structures, and DNA elements separated by long genomic distances can in principle interact functionally. Many transcription factors bind to regulatory DNA elements distant from gene promoters. Although distal binding sites have been shown to regulate transcription by long-range chromatin interactions at a few loci, chromatin interactions and their impact on transcription regulation have not been investigated in a genome-wide manner. Here we describe the development of a new strategy, chromatin interaction analysis by paired-end tag sequencing (ChIA-PET) for the de novo detection of global chromatin interactions, with which we have comprehensively mapped the chromatin interaction network bound by oestrogen receptor α (ER-α) in the human genome. We found that most high-confidence remote ER-α-binding sites are anchored at gene promoters through long-range chromatin interactions, suggesting that ER-α functions by extensive chromatin looping to bring genes together for coordinated transcriptional regulation. We propose that chromatin interactions constitute a primary mechanism for regulating transcription in mammalian genomes.",
 				"url": "http://www.nature.com/nature/journal/v462/n7269/full/nature08497.html",
 				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "www.nature.com"
+				"libraryCatalog": "www.nature.com",
+				"journalAbbreviation": "Nature"
 			}
 		]
 	}
