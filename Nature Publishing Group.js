@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-01-24 20:55:29"
+	"lastUpdated": "2013-01-25 17:55:13"
 }
 
 /**
@@ -64,7 +64,9 @@ function getAbstract(doc) {
 	//e.g. 'standfirst' http://www.nature.com/nature/journal/v481/n7381/full/481237a.html
 	'//div[@id="first-paragraph" or @class="standfirst"]/p',
 	//e.g. http://www.nature.com/nature/journal/v481/n7381/full/nature10728.html
-	'//div[contains(@id,"abstract")]/div[@class="content"]/p'];
+	'//div[contains(@id,"abstract")]/div[@class="content"]/p',
+	//e.g. http://www.nature.com/ng/journal/v38/n8/abs/ng1845.html
+	'//span[@class="articletext" and ./preceding-sibling::*[1][name()="a" or name()="A"][@name="abstract"]]'];
 
 	var paragraphs = [];
 
@@ -165,7 +167,13 @@ function scrapeEM(doc, url, next) {
 
 		if (item.notes) item.notes = [];
 		
-		if(item.ISSN === "ERROR! NO ISSN") delete item.ISSN;
+		if(ZU.cleanISSN) {	//introduced in 3.0.12
+			var issn = ZU.cleanISSN(item.ISSN);
+			if(!issn) delete item.ISSN;
+			else item.ISSN = issn;
+		} else {
+			if(item.ISSN === "ERROR! NO ISSN") delete item.ISSN;
+		}
 
 		next(item);
 	});
@@ -264,16 +272,49 @@ function runScrapers(scrapers, done) {
 function scrape(doc, url) {
 	runScrapers([scrapeEM, scrapeRIS], function(items) {
 		var item = items[0];
-		if(!item) {
+		if(!item) {	//EM failed (unlikely)
 			item = items[1];
 		} else if(items[1]) {
 			item = supplementItem(item, items[1], ['journalAbbreviation', 'date']);
-			if(items[1].tags.length) item.tags = items[1].tags;
+			if(items[1].tags.length) item.tags = items[1].tags;	//RIS doesn't seem to have tags, but we check just in case
+
+			//RIS can properly split first and last name
+			//but it does not (sometimes?) include accented letters
+			//We try to get best of both worlds
+			//hopefully the authors match up
+			for(var i=0, n=item.creators.length; i<n; i++) {
+				//check if last names match, then we don't need to worry
+				var emLName = ZU.removeDiacritics(item.creators[i].lastName.toUpperCase());
+				var risLName = ZU.removeDiacritics(items[1].creators[i].lastName.toUpperCase());
+				if(emLName == risLName ||
+					!item.creators[i].firstName ||
+					!items[1].creators[i].firstName ||
+					risLName.length <= emLName.length) {	//in this case the names are probably not the same anyway
+					continue;
+				}
+
+				var fullName = item.creators[i].firstName + ' ' + item.creators[i].lastName;
+				emLName = fullName.substring(fullName.length - risLName.length);
+				if(ZU.removeDiacritics(emLName.toUpperCase()) != risLName) {
+					Z.debug(emLName + ' and ' + risLName + ' do not match');
+					continue; //we failed
+				}
+
+				item.creators[i].firstName = fullName.substring(0, fullName.length - emLName.length).trim();
+				item.creators[i].lastName = emLName;
+
+				Z.debug(fullName + ' was split into ' +
+					item.creators[i].lastName + ', ' + item.creators[i].firstName);
+			}
 		}
 
 		if(!item) {
 			Z.debug('Could not retrieve metadata.');
 			return;	//both translators failed
+		}
+
+		if(item.journalAbbreviation == 'Nature') {
+			item.publicationTitle = 'Nature';	//old articles mess this up
 		}
 
 		item.attachments = [{
@@ -699,6 +740,8 @@ var ISO8879CharMap = {
   "b.piv":"\uD835\uDEE1", "fflig":"\uFB00", "filig":"\uFB01", "fllig":"\uFB02",
   "ffilig":"\uFB03", "ffllig":"\uFB04", "sbsol":"\uFE68"
 };
+//Some unofficial aliases
+ISO8879CharMap.prime = "\u2032";	//same as vprime
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -1570,6 +1613,118 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.nature.com",
 				"journalAbbreviation": "Nature"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.nature.com/nsmb/journal/v15/n2/full/nsmb.1371.html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Sunny D.",
+						"lastName": "Gilbert",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Robert P.",
+						"lastName": "Rambo",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Daria",
+						"lastName": "Van Tyne",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Robert T.",
+						"lastName": "Batey",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"structure and function of proteins",
+					"nucleic acids",
+					"proteins",
+					"nature structural molecular biology",
+					"nature publishing group",
+					"content",
+					"journal",
+					"macromolecules",
+					"multi-component complexes",
+					"DNA replication",
+					"DNA repair",
+					"DNA recombination",
+					"chromatin structure",
+					"chromatin remodeling",
+					"chromatin",
+					"transcription",
+					"RNA processing",
+					"RNA",
+					"translation",
+					"regulation of transcription",
+					"regulation of translation",
+					"protein folding",
+					"protein processing",
+					"protein degradation",
+					"signal transduction",
+					"intracellular signaling",
+					"membrane processes",
+					"cell surface proteins",
+					"cell-cell interactions",
+					"molecular basis of disease",
+					"molecular",
+					"molecular interactions",
+					"mechanism",
+					"basic cellular processes",
+					"cell cycle",
+					"checkpoints",
+					"apoptosis",
+					"molecular biology",
+					"cell biology",
+					"genetics",
+					"biochemistry",
+					"biophysics",
+					"single molecule studies",
+					"RNAi",
+					"gene expression"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"itemID": "http://www.nature.com/nsmb/journal/v15/n2/full/nsmb.1371.html",
+				"title": "Structure of the SAM-II riboswitch bound to S-adenosylmethionine",
+				"publicationTitle": "Nature Structural & Molecular Biology",
+				"rights": "© 2008 Nature Publishing Group",
+				"volume": "15",
+				"issue": "2",
+				"number": "2",
+				"patentNumber": "2",
+				"pages": "177-182",
+				"publisher": "Nature Publishing Group",
+				"institution": "Nature Publishing Group",
+				"company": "Nature Publishing Group",
+				"label": "Nature Publishing Group",
+				"distributor": "Nature Publishing Group",
+				"date": "February 2008",
+				"ISSN": "1545-9993",
+				"language": "en",
+				"DOI": "10.1038/nsmb.1371",
+				"abstractNote": "In bacteria, numerous genes harbor regulatory elements in the 5' untranslated regions of their mRNA, termed riboswitches, which control gene expression by binding small-molecule metabolites. These sequences influence the secondary and tertiary structure of the RNA in a ligand-dependent manner, thereby directing its transcription or translation. The crystal structure of an S-adenosylmethionine–responsive riboswitch found predominantly in proteobacteria, SAM-II, has been solved to reveal a second means by which RNA interacts with this important cellular metabolite. Notably, this is the first structure of a complete riboswitch containing all sequences associated with both the ligand binding aptamer domain and the regulatory expression platform. Chemical probing of this RNA in the absence and presence of ligand shows how the structure changes in response to S-adenosylmethionine to sequester the ribosomal binding site and affect translational gene regulation.",
+				"url": "http://www.nature.com/nsmb/journal/v15/n2/full/nsmb.1371.html",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.nature.com",
+				"journalAbbreviation": "Nat Struct Mol Biol"
 			}
 		]
 	}
