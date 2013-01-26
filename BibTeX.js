@@ -15,7 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-01-18 11:51:53"
+	"lastUpdated": "2013-01-23 22:29:20"
 }
 
 function detectImport() {
@@ -1991,7 +1991,7 @@ function writeField(field, value, isMacro) {
 	// Other fields (DOI?) may need similar treatment
 	if (!isMacro && !(field == "url" || field == "doi" || field == "file" || field == "lccn" )) {
 		// I hope these are all the escape characters!
-		value = value.replace(/[|\<\>\~\^\\\{\}]/g, mapEscape).replace(/[\#\$\%\&\_]/g, "\\$0");
+		value = value.replace(/[|\<\>\~\^\\\{\}]/g, mapEscape).replace(/([\#\$\%\&\_])/g, "\\$1");
 
 		//disable 
 		/** if (field == "title" || field == "type" || field == "shorttitle" || field == "booktitle" || field == "series") {
