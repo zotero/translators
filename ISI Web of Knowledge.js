@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 5,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-01-23 02:31:07"
+	"lastUpdated": "2013-01-29 16:59:52"
 }
 
 function detectWeb(doc, url) {
@@ -191,6 +191,7 @@ function processTag(item, field, content) {
 		//Z.debug("author: " + content);
 		authors = content.split("\n");
 		for each (var author in authors) {
+			author = author.replace(/\s+\(.*/, '');
 			item.creators[0][field].push(ZU.cleanAuthor(author, "author", author.match(/,/)));
 		}
 	} else if ((field == "BE")) {
@@ -937,6 +938,36 @@ var testCases = [
 				"pages": "1459",
 				"date": "1988",
 				"ISSN": "0419-4217"
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "FN Thomson Reuters Web of Knowledge\nVR 1.0\nPT J\nUT BCI:BCI201300112663\nTI Importance of methane-derived carbon as a basal resource for two benthic\nconsumers in arctic lakes\nAU Medvedeff, Cassandra A. (medvedeff22@ufl.edu)\nHershey, Anne E.\nSO Hydrobiologia\nPY 2013\nPD JAN 2013\nVL 700\nIS 1\nPS 221-230\nBP 221\nEP 230\nAB Microbial processing of detritus is known to be important to benthic\ninvertebrate nutrition, but the role of dissolved (DOC) versus\nparticulate organic carbon (POC), and pathways by which those resources\nare obtained, are poorly understood. We used stable isotopes to\ndetermine the importance of DOC, POC, and CH4-derived carbon to benthic\ninvertebrate consumers from arctic Alaskan Lakes. Intact sediment cores\nfrom Lake GTH 112 were enriched with C-13-labeled organic matter,\nincluding algal detritus, algal-derived DOC, methyl-labeled acetate, and\ncarboxyl-labeled acetate, and incubated for 1 month with either\ncaddisflies (Grensia praeterita ) or fingernail clams (Sphaerium\nnitidum), two invertebrate species that are important to fish nutrition.\nBoth species used basal resources derived from POC and DOC. Results\ngenerally suggest greater reliance on POC. Differential assimilation\nfrom acetate treatments suggests Sphaerium assimilated CH4-derived\ncarbon, which likely occurred through deposit-feeding. Grensia\nassimilated some microbially processed acetate, although its\nsurvivorship was poor in acetate treatments. Our data extend previous\nstudies reporting use of CH4-derived carbon by Chironomidae and\noligochaetes. Taken together, these results suggest that the use of\nCH4-derived carbon is common among deposit-feeding benthic\ninvertebrates.\nTC 0\nZ9 0\nSN 0018-8158\nEI 1573-5117\nDI 10.1007/s10750-012-1232-8\nER\n\nEF\n",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Cassandra A.",
+						"lastName": "Medvedeff",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"extra": "BCI:BCI201300112663",
+				"title": "Importance of methane-derived carbon as a basal resource for two benthic consumers in arctic lakes",
+				"publicationTitle": "Hydrobiologia",
+				"date": "JAN 2013",
+				"volume": "700",
+				"issue": "1",
+				"pages": "221-230",
+				"abstractNote": "Microbial processing of detritus is known to be important to benthic invertebrate nutrition, but the role of dissolved (DOC) versus particulate organic carbon (POC), and pathways by which those resources are obtained, are poorly understood. We used stable isotopes to determine the importance of DOC, POC, and CH4-derived carbon to benthic invertebrate consumers from arctic Alaskan Lakes. Intact sediment cores from Lake GTH 112 were enriched with C-13-labeled organic matter, including algal detritus, algal-derived DOC, methyl-labeled acetate, and carboxyl-labeled acetate, and incubated for 1 month with either caddisflies (Grensia praeterita ) or fingernail clams (Sphaerium nitidum), two invertebrate species that are important to fish nutrition. Both species used basal resources derived from POC and DOC. Results generally suggest greater reliance on POC. Differential assimilation from acetate treatments suggests Sphaerium assimilated CH4-derived carbon, which likely occurred through deposit-feeding. Grensia assimilated some microbially processed acetate, although its survivorship was poor in acetate treatments. Our data extend previous studies reporting use of CH4-derived carbon by Chironomidae and oligochaetes. Taken together, these results suggest that the use of CH4-derived carbon is common among deposit-feeding benthic invertebrates.",
+				"ISSN": "0018-8158",
+				"DOI": "10.1007/s10750-012-1232-8"
 			}
 		]
 	}
