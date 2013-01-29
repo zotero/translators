@@ -9,126 +9,152 @@
 	"inRepository": true,
 	"translatorType": 5,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-04-30 08:40:58"
+	"lastUpdated": "2013-01-23 02:31:07"
 }
 
 function detectWeb(doc, url) {
-	if (url.indexOf("full_record.do") !== -1) {
+	if (url.indexOf("full_record.do") !== -1 && getSingleItemId(doc)) {
 		return "journalArticle";
-	} else if ((doc.title.indexOf(" Results") !== -1) 
-		|| url.indexOf("search_mode=") !== -1) {
+	} else if (((doc.title.indexOf(" Results") !== -1) 
+		|| url.indexOf("search_mode=") !== -1)
+		&& getRecords(doc).length) {
 		return "multiple";
 	}
+}
+
+function getRecords(doc) {
+	return ZU.xpath(doc, '//span[@id="records_chunks"]//tr[starts-with(@id,"RECORD_")]');
+}
+
+function getSingleItemId(doc) {
+	var form = doc.forms['records_form'];
+	if(form) return (form.elements.namedItem('marked_list_candidates') || {}).value;
+
+	return false;
 }
 
 function doWeb(doc, url) {
 	var ids = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object;
-		var xpath = '//a[@class="smallV110"]';
-		var titles = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
-		var next_title;
-		while (next_title = titles.iterateNext()) {
-			items[next_title.href.match(/\?(.*)/)[1]] = next_title.textContent;
+		var records = getRecords(doc);
+		var recordID, title;
+		for(var i=0, n=records.length; i<n; i++) {
+			recordID = ZU.xpathText(records[i], './/input[@name="marked_list_candidates"]/@value');
+			title = ZU.xpathText(records[i], '(./td[@class="summary_data"]//a)[1]');
+			if(!title || !recordID) continue;
+			
+			items[recordID] = title.trim();
 		}
 		Zotero.selectItems(items, function (items) {
-			for (var i in items) {
+			if(!items) return true;
+
+			var ids = [];
+			for(var i in items) {
 				ids.push(i);
 			}
-			fetchIds(ids, url);
-		}); 
+			fetchIds(ids, doc);
+		});
 	} else {
-		ids.push(url.match(/\?(.*)/)[1]);
-		fetchIds(ids, url);
+		fetchIds([getSingleItemId(doc)], doc);
 	}
 }
 
-function fetchIds(ids, url) {
-	// XXX Use only the first selected ID, since otherwise we have problems
-	Z.debug("Fetching only first selected item, since we have errors on multi-item save.");
-	ids = [ids[0]];
-	// Call yourself
-	var importer = Zotero.loadTranslator("import");
-	importer.setTranslator("594ebe3c-90a0-4830-83bc-9502825a6810");
-	
-	var hostRegexp = new RegExp("^(https?://[^/]+)/");
-	var m = hostRegexp.exec(url);
-	var host = m[1];
-	for (var i in ids) {
-		ids[i] = host+"/full_record.do?" + ids[i];
-	}
-	var product = url.match("product=([^\&]+)\&")[1];
-	Zotero.Utilities.processDocuments(ids, function (newDoc) {
-		var url = newDoc.location.href;
-		//Z.debug(url);
-		var names = ["recordID", "colName", "SID", "selectedIds", "sortBy", "qid", "product" ];
-		var values = {};
-		var n;
-		for each (n in names) {
-			values[n] = newDoc.evaluate('//input[@name="'+n+'"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
+function getHiddenValues(form) {
+	var inputs = form.elements;
+	var values = {};
+	var node;
+	for(var i=0; node = inputs.item(i); i++) {
+		if(node.type == 'hidden') {
+			values[node.name] = node.value;
 		}
-		// locale=en_US&fileOpt=fieldtagged&colName=&action=saveDataToRef&qid=2&sortBy=PY.D%3BLD.D%3BVL.D%3BSO.A%3BPG.A%3BAU.A&SID=2Al7l8BHkljH2J%402gPc&product=UA&filters=ISSN_ISBN+CITTIMES+SOURCE+TITLE+AUTHORS++&numRecords=1&locale=en_US
-/*
-			<input type="hidden" id="locale" name="locale" value="en_US" />
-		 	<input type="hidden" id="fileOpt" name="fileOpt" value='fieldtagged' />
-		 	<input type="hidden" id="colName" name="colName" value='WOS' />
-		 	<input type="hidden" id="action" name="action" value='saveDataToRef' />
-		 	<input type="hidden" id="qid" name="qid" value='8' />
-		 	<input type="hidden" id="sortBy" name="sortBy" value='PY.D;LD.D;VL.D;SO.A;PG.A;AU.A' />
-		 	<input type="hidden" id="SID" name="SID" value="2Al7l8BHkljH2J@2gPc" />
-		 	<input type="hidden" id="product" name="product" value="UA" />
-		 	<input type="hidden" id="filters" name="filters" value='FUNDING SUBJECT_CATEGORY JCR_CATEGORY LANG IDS PAGEC SABBR CITREFC ISSN PUBINFO KEYWORDS CITTIMES ADDRS CONFERENCE_SPONSORS DOCTYPE ABSTRACT CONFERENCE_INFO SOURCE TITLE AUTHORS  ' />
-			 <input type="hidden" id="numRecords" name="numRecords" value="1" />
-		 	<div class="QprocInstruct">Please wait while your request is processed.<br />
-		 	  (Note: Depending on the number of records, this may take a few moments.) </div>
-		 	  <input type="hidden" id="locale" name="locale" value="en_US" />
-*/
-		// viewType=summary&product=UA&mark_id=UA&colName=&sortBy=PY.D%3BLD.D%3BVL.D%3BSO.A%3BPG.A%3BAU.A&mode=outputService&qid=1&SID=2Al7l8BHkljH2J%402gPc&format=saveToRef&filters=ISSN_ISBN+CITTIMES+SOURCE+TITLE+AUTHORS++&selectedIds=1&mark_to=&mark_from=&count_new_items_marked=0&value%28record_select_type%29=selrecords&markFrom=&markTo=&fields_selection=ISSN_ISBN+CITTIMES+SOURCE+TITLE+AUTHORS++&rurl=&save_options=fieldtagged
-		// FOR ONE:
-		// action=go&viewType=fullRecord&product=UA&mark_id=UA&colName=WOS&recordID=WOS%3A000287717800001&sortBy=PY.D%3BLD.D%3BVL.D%3BSO.A%3BPG.A%3BAU.A&mode=outputService&qid=1&SID=2Al7l8BHkljH2J%402gPc&format=saveToRef&filters=FUNDING+SUBJECT_CATEGORY+JCR_CATEGORY+LANG+IDS+PAGEC+SABBR+CITREFC+ISSN+PUBINFO+KEYWORDS+CITTIMES+ADDRS+CONFERENCE_SPONSORS+DOCTYPE+ABSTRACT+CONFERENCE_INFO+SOURCE+TITLE+AUTHORS++&selectedIds=1&mark_to=&mark_from=&count_new_items_marked=0&value%28record_select_type%29=selrecords&marked_list_candidates=1&LinksAreAllowedRightClick=CitedRefList.do&LinksAreAllowedRightClick=CitingArticles.do&LinksAreAllowedRightClick=OneClickSearch.do&LinksAreAllowedRightClick=full_record.do&fields_selection=FUNDING+SUBJECT_CATEGORY+JCR_CATEGORY+LANG+IDS+PAGEC+SABBR+CITREFC+ISSN+PUBINFO+KEYWORDS+CITTIMES+ADDRS+CONFERENCE_SPONSORS+DOCTYPE+ABSTRACT+CONFERENCE_INFO+SOURCE+TITLE+AUTHORS++&save_options=fieldtagged
-		// locale=en_US&fileOpt=fieldtagged&colName=WOS&action=saveDataToRef&qid=6&sortBy=PY.D%3BLD.D%3BVL.D%3BSO.A%3BPG.A%3BAU.A&SID=2Al7l8BHkljH2J%402gPc&product=UA&filters=FUNDING+SUBJECT_CATEGORY+JCR_CATEGORY+LANG+IDS+PAGEC+SABBR+CITREFC+ISSN+PUBINFO+KEYWORDS+CITTIMES+ADDRS+CONFERENCE_SPONSORS+DOCTYPE+ABSTRACT+CONFERENCE_INFO+SOURCE+TITLE+AUTHORS++&numRecords=1&locale=en_US
-		// locale=en_US&fileOpt=fieldtagged&colName=WOS&action=saveDataToRef&qid=17&sortBy=PY.D%3BLD.D%3BVL.D%3BSO.A%3BPG.A%3BAU.A&SID=2Cb1oI6ijMjk8hNDk51&product=UA&filters=FUNDING+SUBJECT_CATEGORY+JCR_CATEGORY+LANG+IDS+PAGEC+SABBR+CITREFC+ISSN+PUBINFO+KEYWORDS+CITTIMES+ADDRS+CONFERENCE_SPONSORS+DOCTYPE+ABSTRACT+CONFERENCE_INFO+SOURCE+TITLE+AUTHORS++&numRecords=1&locale=en_US
-		// locale=en_US&fileOpt=fieldtagged&colName=WOS&action=saveDataToRef&qid=15&sortBy=PY.D%3BLD.D%3BVL.D%3BSO.A%3BPG.A%3BAU.A&SID=2Cb1oI6ijMjk8hNDk51&product=WOS&filters=FUNDING+SUBJECT_CATEGORY+JCR_CATEGORY+LANG+IDS+PAGEC+SABBR+CITREFC+ISSN+PUBINFO+KEYWORDS+CITTIMES+ADDRS+CONFERENCE_SPONSORS+DOCTYPE+ABSTRACT+CONFERENCE_INFO+SOURCE+TITLE+AUTHORS++&numRecords=1&locale=en_US
-		var post = 'action=go&viewType=fullRecord&product='+values.product
-				+'&mark_id='+values.product+'&colName=' + values.colName
-				+'&recordID='+values.recordID.replace(/;/g,"%3B").replace(/:/g,"%3A")
-				+'&sortBy='+values.sortBy.replace(/;/g,"%3B").replace(/:/g,"%3A")+'&mode=outputService'
-				+'&qid='+values.qid+'&SID='+values.SID
-				+'&format=saveToRef&filters=FUNDING+SUBJECT_CATEGORY+JCR_CATEGORY+LANG+IDS+PAGEC+SABBR+CITREFC+ISSN+PUBINFO+KEYWORDS+CITTIMES+ADDRS+CONFERENCE_SPONSORS+DOCTYPE+ABSTRACT+CONFERENCE_INFO+SOURCE+TITLE+AUTHORS++&selectedIds=3&mark_to=&mark_from=&count_new_items_marked=0&value%28record_select_type%29=selrecords&marked_list_candidates=3&LinksAreAllowedRightClick=CitedRefList.do&LinksAreAllowedRightClick=CitingArticles.do&LinksAreAllowedRightClick=OneClickSearch.do&LinksAreAllowedRightClick=full_record.do&fields_selection=FUNDING+SUBJECT_CATEGORY+JCR_CATEGORY+LANG+IDS+PAGEC+SABBR+CITREFC+ISSN+PUBINFO+KEYWORDS+CITTIMES+ADDRS+CONFERENCE_SPONSORS+DOCTYPE+ABSTRACT+CONFERENCE_INFO+SOURCE+TITLE+AUTHORS++&save_options=fieldtagged';
-		//Z.debug(post);
-		Zotero.Utilities.doPost('http://apps.webofknowledge.com/OutboundService.do',post, function (text, obj) {
-			//Z.debug(text);
-			var qid = text.match(/<input type="hidden" id="qid" name="qid" value='(\d+)' \/>/)[1];
-			var post2 = 'locale=en_US&fileOpt=fieldtagged'+
-					'&colName=' + values.colName + '&action=saveDataToRef'+
-					'&qid='+qid+'&sortBy='+values.sortBy.replace(/;/g,"%3B").replace(/:/g,"%3A")+
-					'&SID='+values.SID+'&product='+'UA'+'&filters=FUNDING+SUBJECT_CATEGORY+JCR_CATEGORY+LANG+IDS+PAGEC+SABBR+CITREFC+ISSN+PUBINFO+KEYWORDS+CITTIMES+ADDRS+CONFERENCE_SPONSORS+DOCTYPE+ABSTRACT+CONFERENCE_INFO+SOURCE+TITLE+AUTHORS++&numRecords=1&locale=en_US';
-			//Z.debug(post2);
-			Zotero.Utilities.doPost('http://ets.webofknowledge.com/ETS/saveDataToRef.do',post2, function (text, obj) {
-				//Z.debug(text);
-				importer.setString(text);
-				importer.setHandler("itemDone", function (obj, item) {
-					item.attachments = [{url: url, type: "text/html", title: "ISI Web of Knowledge Record"}];
-					//remove all caps from titles and authors.
-					for (i in item.creators){
-						if (item.creators[i].lastName && item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
-							item.creators[i].lastName = Zotero.Utilities.capitalizeTitle(item.creators[i].lastName.toLowerCase(),true);
-						}
-						if (item.creators[i].firstName && item.creators[i].firstName == item.creators[i].firstName.toUpperCase()) {
-							item.creators[i].firstName = Zotero.Utilities.capitalizeTitle(item.creators[i].firstName.toLowerCase(),true);
-						}
+	}
+	return values;
+}
+
+function serializePostData(data) {
+	var str = '';
+	for(var i in data) {
+		str += '&' + encodeURIComponent(i) + '='
+			+ encodeURIComponent(data[i]).replace(/%20/g, "+");
+	}
+	return str.substr(1);
+}
+
+function getOutputForm(doc) {
+	return doc.forms['output_form'] || doc.forms['records_form'];
+}
+
+function fetchIds(ids, doc) {
+	var outputForm = getOutputForm(doc);
+	var postData = getHiddenValues(outputForm);
+	var filters = 'USAGEIND RESEARCHERID ACCESSION_NUM FUNDING SUBJECT_CATEGORY ' + 
+		'JCR_CATEGORY LANG IDS PAGEC SABBR CITREFC ISSN PUBINFO KEYWORDS ' +
+		'CITTIMES ADDRS CONFERENCE_SPONSORS DOCTYPE ABSTRACT CONFERENCE_INFO ' +
+		'SOURCE TITLE AUTHORS  ';
+	postData['value(record_select_type)'] = 'selrecords';
+	postData['markFrom'] = '';
+	postData['markTo'] = '';
+	postData['fields_selection'] = filters;
+	postData['filters'] = filters;
+	postData['save_options'] = 'othersoftware';
+	postData['format'] = 'saveToRef';
+
+	//add selected items
+	var selectedIds = ids.join(';');
+	postData['selectedIds'] = selectedIds;
+
+	var postUrl = outputForm.action;
+	ZU.doPost(postUrl, serializePostData(postData), function (text) {
+		//everything it mostly the same as above except for a few fields
+		var postData2 = {}
+		postData2['locale'] = postData['locale'];
+		postData2['colName'] = postData['colName'];
+		postData2['sortBy'] = postData['sortBy'];
+		postData2['SID'] = postData['SID'];
+		postData2['filters'] = postData['filters'];
+		postData2['fileOpt'] = 'fieldtagged';
+		postData2['action'] = 'saveDataToRef';
+		postData2['product'] = 'UA';
+		postData2['numRecords'] = ids.length;
+		postData2['numRecsToRetrieve'] = 500;
+		
+		var qid = text.match(/<input[^>]+name=(['"]?)qid\1[\s\/][^>]*/);
+		if(qid) qid = qid[0].match(/value=['"]?(\d+)/);
+		if(qid) {
+			qid = qid[1];
+		} else {
+			qid = postData['qid']*1+1;	//this can be wrong if pages are refreshed
+			Z.debug("Could not find qid on page. Using 1 + previous qid: " + qid);
+		}
+		postData2['qid'] = qid;
+
+		var postUrl2 = 'http://ets.webofknowledge.com/ETS/saveDataToRef.do';	//Zotero should take care of proxies
+		ZU.doPost(postUrl2, serializePostData(postData2), function(text) {
+			var importer = Zotero.loadTranslator("import");
+			importer.setTranslator("594ebe3c-90a0-4830-83bc-9502825a6810");
+			importer.setString(text);
+			importer.setHandler('itemDone', function(obj, item) {
+				if(item.title.toUpperCase() == item.title) {
+					item.title = ZU.capitalizeTitle(item.title, true);
+				}
+
+				var creator;
+				for(var i=0, n=item.creators.length; i<n; i++) {
+					creator = item.creators[i];
+					if(creator.firstName.toUpperCase() == creator.firstName) {
+						creator.firstName = ZU.capitalizeTitle(creator.firstName, true);
 					}
-					if (item.title == item.title.toUpperCase()) {
-						item.title = Zotero.Utilities.capitalizeTitle(item.title.toLowerCase(),true);
-					}					
-					//Z.debug(item.title);
-					item.complete();
-				});
-				importer.translate();
+					if(creator.lastName.toUpperCase() == creator.lastName) {
+						creator.lastName = ZU.capitalizeTitle(creator.lastName, true);
+					}
+				}
+				item.complete();
 			});
-		});
-	}, function() {});
-	Zotero.wait();
+			importer.translate();
+		}, { 'Referer': postUrl });
+
+	}, { 'Referer': doc.location.href });
 }
 
 function detectImport() {
