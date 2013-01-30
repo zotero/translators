@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-12-13 20:07:25"
+	"lastUpdated": "2013-01-29 15:30:07"
 }
 
 function detectWeb(doc, url) {
@@ -118,6 +118,9 @@ function scrapeByExport(doc) {
 				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 				translator.setString(text);
 				translator.setHandler("itemDone", function(obj, item) {
+					//issue sometimes is set to 0 for single issue volumes (?)
+					if(item.issue == 0) delete item.issue;
+					
 					item.attachments.push({
 						title: "ScienceDirect Snapshot",
 						document: doc
