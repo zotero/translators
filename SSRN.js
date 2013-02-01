@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gbv",
-	"lastUpdated": "2013-01-14 17:13:01"
+	"lastUpdated": "2013-02-01 13:12:35"
 }
 
 /*
@@ -54,35 +54,38 @@ function doWeb(doc,url)
 		if(results.length<1){
 			results = ZU.xpath(doc,"//tr[contains(@id, 'row_') or contains(@id, '_version')]//a[@class='textlink' and contains(@href, 'ssrn.com/abstract=')]");
 		}
-		for (var i in results) {
+		for(var i=0, n=results.length; i<n; i++) {
 			hits[results[i].href] = results[i].textContent;
 		}
 		Z.selectItems(hits, function(items) {
-			if (items == null) return true;
+			if (!items) return true;
 			for (var j in items) {
 				urls.push(j);
 			}
-			ZU.processDocuments(urls, function (myDoc) { 
-				doWeb(myDoc, myDoc.location.href) });
+			ZU.processDocuments(urls, scrape);
 		});
 	} else {
-		// We call the Embedded Metadata translator to do the actual work
-		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
-		translator.setHandler("itemDone", function(obj, item) {
-				item.itemType = "report";
-				item.type = "SSRN Scholarly Paper";
-				item.institution = "Social Science Research Network";
-				var number = url.match(/abstract_id=(\d+)/)[1];
-				if (number) item.reportNumber= "ID " + number;				
-				item.place = "Rochester, NY";
-				//we could scrape the number from the URL - do we want it though?
-				item.complete();
-				});
-				translator.getTranslatorObject(function (obj) {
-					obj.doWeb(doc, url);
-				});
+		scrape(doc, url)
 	}
+}
+
+function scrape(doc, url) {
+	// We call the Embedded Metadata translator to do the actual work
+	var translator = Zotero.loadTranslator("web");
+	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+	translator.setDocument(doc);
+	translator.setHandler("itemDone", function(obj, item) {
+		item.itemType = "report";
+		item.type = "SSRN Scholarly Paper";
+		item.institution = "Social Science Research Network";
+		var number = url.match(/abstract_id=(\d+)/);
+		if(number) item.reportNumber= "ID " + number[1];
+		item.place = "Rochester, NY";
+		//we could scrape the number from the URL - do we want it though?
+
+		item.complete();
+	});
+	translator.translate();
 }
 /** BEGIN TEST CASES **/
 var testCases = [
