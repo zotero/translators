@@ -15,7 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-02-03 13:56:52"
+	"lastUpdated": "2013-02-03 20:15:34"
 }
 
 function detectImport() {
@@ -59,6 +59,11 @@ function detectImport() {
 		}
 	}
 }
+
+//%a = first author surname
+//%y = year
+//%t = first word of title
+var citeKeyFormat = "%a_%t_%y";
 
 var fieldMap = {
 	address:"place",
@@ -2092,108 +2097,105 @@ function tidyAccents(s) {
 		r = ZU.removeDiacritics(r, true);
 	else {
 	// We fall back on the replacement list we used previously
-		r = r.replace(/[ä]/g,"ae")
-				.replace(/[ö]/g,"oe")
-				.replace(/[ü]/g,"ue")
-				.replace(/[àáâãå]/g,"a")
-				.replace(/æ/g,"ae")
-				.replace(/ç/g,"c")
-				.replace(/[èéêë]/g,"e")
-				.replace(/[ìíîï]/g,"i")
-				.replace(/ñ/g,"n")
-				.replace(/[òóôõ]/g,"o")
-				.replace(/œ/g,"oe")
-				.replace(/[ùúû]/g,"u")
-				.replace(/[ýÿ]/g,"y");
+		r = r.replace(new RegExp("[ä]", 'g'),"ae");
+		r = r.replace(new RegExp("[ö]", 'g'),"oe");
+		r = r.replace(new RegExp("[ü]", 'g'),"ue");
+		r = r.replace(new RegExp("[àáâãå]", 'g'),"a");
+		r = r.replace(new RegExp("æ", 'g'),"ae");
+		r = r.replace(new RegExp("ç", 'g'),"c");
+		r = r.replace(new RegExp("[èéêë]", 'g'),"e");
+		r = r.replace(new RegExp("[ìíîï]", 'g'),"i");
+		r = r.replace(new RegExp("ñ", 'g'),"n");                            
+		r = r.replace(new RegExp("[òóôõ]", 'g'),"o");
+		r = r.replace(new RegExp("œ", 'g'),"oe");
+		r = r.replace(new RegExp("[ùúû]", 'g'),"u");
+		r = r.replace(new RegExp("[ýÿ]", 'g'),"y");
 	}
 
 	return r;
 };
 
-
-//%a = first author surname
-//%y = year
-//%t = first word of title
-var citeKeyFormat = "%a_%t_%y";
-
-var numberRe = /^[0-9]+$/;
+var numberRe = /^[0-9]+/;
 // Below is a list of words that should not appear as part of the citation key
 // in includes the indefinite articles of English, German, French and Spanish, as well as a small set of English prepositions whose 
 // force is more grammatical than lexical, i.e. which are likely to strike many as 'insignificant'.
 // The assumption is that most who want a title word in their key would prefer the first word of significance.
-var citeKeyTitleBannedRe = /\b(?:a|an|the|some|from|on|in|to|of|do|with|der|die|das|ein|eine|einer|eines|einem|einen|un|une|la|le|l\'|el|las|los|al|uno|una|unos|unas|de|des|del|d\')\b\s*/ig;
-var citeKeyConversionsRe = /%([a-zA-Z%])/g;	//% so that we can use % as %%
-var citeKeyCleanRe = /[^A-Za-z0-9!$&*+-.\/:;<>?[\]^_`|]+/g;
+var citeKeyTitleBannedRe = /\b(a|an|the|some|from|on|in|to|of|do|with|der|die|das|ein|eine|einer|eines|einem|einen|un|une|la|le|l\'|el|las|los|al|uno|una|unos|unas|de|des|del|d\')(\s+|\b)/g;
+var citeKeyConversionsRe = /%([a-zA-Z])/;
+var citeKeyCleanRe = /[^a-z0-9\!\$\&\*\+\-\.\/\:\;\<\>\?\[\]\^\_\`\|]+/g;
 
 var citeKeyConversions = {
 	"a":function (flags, item) {
 		if(item.creators && item.creators[0] && item.creators[0].lastName) {
-			return item.creators[0].lastName.replace(/ /g,"_").replace(/,/g,"");
+			return item.creators[0].lastName.toLowerCase().replace(/ /g,"_").replace(/,/g,"");
 		}
 		return "";
 	},
 	"t":function (flags, item) {
-		if (item.title) {
-			return item.title.toLowerCase().replace(citeKeyTitleBannedRe, "").split(/\s+/g)[0];
+		if (item["title"]) {
+			return item["title"].toLowerCase().replace(citeKeyTitleBannedRe, "").split(/\s+/g)[0];
 		}
 		return "";
 	},
 	"y":function (flags, item) {
 		if(item.date) {
 			var date = Zotero.Utilities.strToDate(item.date);
-			return (date.year ? '' + date.year : "");
+			if(date.year && numberRe.test(date.year)) {
+				return date.year;
+			}
 		}
-		return "";
+		return "????";
 	}
 }
+
 
 function buildCiteKey (item,citekeys) {
 	var basekey = "";
 	var counter = 0;
-	var lastIndex = 0;
-	citeKeyConversionsRe.lastIndex = 0;
-	var m;
-	while (m = citeKeyConversionsRe.exec(citeKeyFormat)) {
+	citeKeyFormatRemaining = citeKeyFormat;
+	while (citeKeyConversionsRe.test(citeKeyFormatRemaining)) {
 		if (counter > 100) {
 			Zotero.debug("Pathological BibTeX format: " + citeKeyFormat);
 			break;
 		}
-Z.debug(m.index);
-Z.debug(lastIndex);
-		if (m.index > lastIndex) {
+		var m = citeKeyFormatRemaining.match(citeKeyConversionsRe);
+		if (m.index > 0) {
 			//add data before the conversion match to basekey
-			basekey += citeKeyFormat.substring(lastIndex, m.index);
+			basekey = basekey + citeKeyFormatRemaining.substr(0, m.index);
 		}
-		lastIndex = citeKeyConversionsRe.lastIndex;
-		
 		var flags = ""; // for now
 		var f = citeKeyConversions[m[1]];
-		if(f) {
-			var value = typeof(f) == "function" ? f(flags, item) : f;
+		if (typeof(f) == "function") {
+			var value = f(flags, item);
 			Zotero.debug("Got value " + value + " for %" + m[1]);
-			//clean up and add conversion to basekey
-			basekey += tidyAccents(value).replace(citeKeyCleanRe, "");
-		} else {
-			basekey += m[0];
+			//add conversion to basekey
+			basekey = basekey + value;
 		}
-
+		citeKeyFormatRemaining = citeKeyFormatRemaining.substr(m.index + m.length);
 		counter++;
 	}
-	
-	if (lastIndex < citeKeyFormat.length) {
-		basekey += citeKeyFormat.substring(lastIndex);
+	if (citeKeyFormatRemaining.length > 0) {
+		basekey = basekey + citeKeyFormatRemaining;
 	}
 
-	if(citekeys[basekey]) {
-		var i = 0;
-		while(citekeys[basekey + '-' + i]) {
-			i++;
-		}
-		basekey += '-' + i;
-	}
-	citekeys[basekey] = true;
+	// for now, remove any characters not explicitly known to be allowed;
+	// we might want to allow UTF-8 citation keys in the future, depending
+	// on implementation support.
+	//
+	// no matter what, we want to make sure we exclude
+	// " # % ' ( ) , = { } ~ and backslash
+	// however, we want to keep the base characters 
 
-	return basekey;
+	basekey = tidyAccents(basekey);
+	basekey = basekey.replace(citeKeyCleanRe, "");
+	var citekey = basekey;
+	var i = 0;
+	while(citekeys[citekey]) {
+		i++;
+		citekey = basekey + "-" + i;
+	}
+	citekeys[citekey] = true;
+	return citekey;
 }
 
 function doExport() {
