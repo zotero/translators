@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-12-04 01:03:52"
+	"lastUpdated": "2013-01-31 21:31:24"
 }
 
 /*
@@ -126,6 +126,7 @@ function scrape(doc, url, dois) {
 						risTrans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 						risTrans.setString(text);
 						risTrans.setHandler("itemDone", function(obj, risItem) {
+							if(!item.title) item.title = "<no title>";	//RIS title can be even worse, it actually says "null"
 							item.publisher = risItem.publisher;
 							item.ISSN = risItem.ISSN;
 							item.ISBN = risItem.ISBN;
@@ -363,6 +364,48 @@ var testCases = [
 				"bookTitle": "New England Journal of Medicine",
 				"publisher": "Massachusetts Medical Society",
 				"ISSN": "0028-4793",
+				"libraryCatalog": "Taylor and Francis+NEJM",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.tandfonline.com/doi/abs/10.1080/0308106032000167373",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Milan",
+						"lastName": "Janic",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"publicationTitle": "Transportation Planning and Technology",
+				"volume": "26",
+				"issue": "6",
+				"pages": "491-512",
+				"date": "2003",
+				"DOI": "10.1080/0308106032000167373",
+				"url": "http://www.tandfonline.com/doi/abs/10.1080/0308106032000167373",
+				"abstractNote": "This article deals with a multicriteria evaluation of High-Speed Rail, Transrapid Maglev and Air Passenger Transport in Europe. Operational, socio-economic and environmental performance indicators of the specific high-speed transport systems are adopted as the evaluation criteria. By using the entropy method, weights are assigned to particular criteria in order to indicate their relative importance in decision-making. The TOPSIS method is applied to carry out the multicriteria evaluation and selection of the preferable alternative (high-speed system) under given circumstances.",
+				"bookTitle": "Transportation Planning and Technology",
+				"title": "<no title>",
+				"publisher": "Routledge",
+				"ISSN": "0308-1060",
 				"libraryCatalog": "Taylor and Francis+NEJM",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}

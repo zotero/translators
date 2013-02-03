@@ -15,7 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-01-23 22:29:20"
+	"lastUpdated": "2013-02-03 20:15:34"
 }
 
 function detectImport() {
@@ -2268,8 +2268,14 @@ function doExport() {
 
 				if (creator.firstName) {
 					creatorString = creator.lastName + ", " + creator.firstName;
-				} else if (creator.fieldMode == true) { // fieldMode true, assume corporate author
-					creatorString = "{" + creator.lastName + "}";
+				}
+				
+				creatorString = creatorString.replace(/[|\<\>\~\^\\\{\}]/g, mapEscape)
+																			.replace(/([\#\$\%\&\_])/g, "\\$1")
+																			.replace(/([^\s-\}\(\[]+[A-Z][^\s,]*)/g, "{$1}");
+																			
+				if (creator.fieldMode == true) { // fieldMode true, assume corporate author
+					creatorString = "{" + creatorString + "}";
 				}
 
 				if (creator.creatorType == "editor" || creator.creatorType == "seriesEditor") {
@@ -2282,13 +2288,13 @@ function doExport() {
 			}
 			
 			if(author) {
-				writeField("author", author.substr(5));
+				writeField("author", "{" + author.substr(5) + "}", true);
 			}
 			if(editor) {
-				writeField("editor", editor.substr(5));
+				writeField("editor", "{" + editor.substr(5) + "}", true);
 			}
 			if(translator) {
-				writeField("translator", translator.substr(5));
+				writeField("translator",  "{" + translator.substr(5) + "}", true);
 			}
 		}
 		
