@@ -60,3 +60,4 @@ a07bb62a-4d2d-4d43-ba08-d9679a0122f8 # ABL-CLIO no longer exists
 e85a3134-8c1a-8644-6926-584c8565f23e # History Cooperative - site discontinued
 a2363670-7040-4cb9-8c48-6b96584e92ee # Florida University Libraries (Endeca 1) - replaced by Library Catalog (Mango)
 daa26181-71d4-48ef-8cac-54c06ff4c20e # Citebase - no longer exists
+9220fa99-b936-430e-a8ea-43ca6cb04145 # AGU Journals - moved to Wiley
