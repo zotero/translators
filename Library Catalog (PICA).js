@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-01-30 14:48:34"
+	"lastUpdated": "2013-02-04 16:20:01"
 }
 
 /*Works for many, but not all PICA versions. Tested with:
@@ -174,9 +174,9 @@ function scrape(doc, url) {
 				var m = value.match(issnRE);
 				if(m) {
 					if(m[1].toUpperCase() == 'ISSN' && !newItem.ISSN) {
-						newItem.ISSN = m[2].replace(/\s+/,'');
+						newItem.ISSN = m[2].replace(/\s+/g,'');
 					} else if(m[1].toUpperCase() == 'ISBN' && !newItem.ISBN) {
-						newItem.ISBN = ZU.cleanISBN(m[2]);
+						newItem.ISBN = m[2].replace(/\s+/g,'');
 					}
 				}
 				//publisher information can preceeded ISSN/ISBN
@@ -449,8 +449,9 @@ function scrape(doc, url) {
 				for (var i in isbns) {
 					var m = isbns[i].match(/[-x\d]{10,}/i);	//this is necessary until 3.0.12
 					if(!m) continue;
-					s = ZU.cleanISBN(m[0]);
-					if(s) isbn.push(s);
+					if(m[0].replace(/-/g,'').search(/^(?:\d{9}|\d{12})[\dx]$/i) != -1) {
+						isbn.push(m[0]);
+					}
 				}
 				//we should eventually check for duplicates, but right now this seems fine;
 				newItem.ISBN = isbn.join(", ");
@@ -583,7 +584,7 @@ var testCases = [
 					}
 				],
 				"date": "2010",
-				"ISBN": "9782747217293",
+				"ISBN": "978-2-7472-1729-3",
 				"title": "Souffrance au travail dans les grandes entreprises",
 				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
 				"language": "français",
@@ -630,7 +631,7 @@ var testCases = [
 					}
 				],
 				"date": "2011",
-				"ISBN": "9780838985892",
+				"ISBN": "978-0-83898589-2",
 				"title": "Zotero: a guide for librarians, researchers and educators",
 				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
 				"language": "anglais",
@@ -856,7 +857,7 @@ var testCases = [
 					}
 				],
 				"date": "2004",
-				"ISBN": "2110956747",
+				"ISBN": "2-11-095674-7",
 				"title": "Wind and wave atlas of the Mediterranean sea",
 				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
 				"language": "anglais",
@@ -1028,7 +1029,7 @@ var testCases = [
 				],
 				"date": "2013",
 				"pages": "70-83",
-				"ISBN": "9780415628686, 9780415628693, 9780203080184",
+				"ISBN": "978-0-415-62868-6, 978-0-415-62869-3, 978-0-203-08018-4",
 				"publicationTitle": "Mysticism myth and Celtic identity",
 				"libraryCatalog": "Library Catalog - gso.gbv.de",
 				"title": "'The truth against the world': spectrality and the mystic past in late twentieth-century Cornwall",
@@ -1089,7 +1090,7 @@ var testCases = [
 				"title": "Noise reduction potential of an engine oil pan",
 				"date": "2013",
 				"pages": "291-304",
-				"ISBN": "9783642338328",
+				"ISBN": "978-3-642-33832-8",
 				"journalAbbreviation": "Lecture Notes in Electrical Engineering",
 				"publicationTitle": "Proceedings of the FISITA 2012 World Automotive Congress; Vol. 13: Noise, vibration and harshness (NVH)",
 				"place": "Berlin",
