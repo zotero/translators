@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-12 23:22:58"
+	"lastUpdated": "2013-02-05 08:04:04"
 }
 
 function detectWeb(doc, url) {
@@ -64,7 +64,7 @@ function scrape(url){
 }
 
 function bibURL(url){
-	url = url.replace(/\?.+/, "");
+	url = url.replace(/[\?\#].+/, "");
 	url = url + ".bib";
 	return url;
 }/** BEGIN TEST CASES **/
