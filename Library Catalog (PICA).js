@@ -2,14 +2,14 @@
 	"translatorID": "1b9ed730-69c7-40b0-8a06-517a89a3a278",
 	"label": "Library Catalog (PICA)",
 	"creator": "Sean Takats, Michael Berkowitz, Sylvain Machefert, Sebastian Karcher",
-	"target": "^https?://[^/]+//?DB=\\d",
+	"target": "^https?://[^/]+(?:/[^/]+)?//?DB=\\d",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-02-04 16:20:01"
+	"lastUpdated": "2013-02-05 14:11:16"
 }
 
 /*Works for many, but not all PICA versions. Tested with:
