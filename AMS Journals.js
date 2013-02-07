@@ -2,23 +2,24 @@
 	"translatorID": "bdaac15c-b0ee-453f-9f1d-f35d00c7a994",
 	"label": "AMS Journals",
 	"creator": "Michael Berkowitz",
-	"target": "^https?://www\\.ams\\.org/",
-	"minVersion": "1.0.0b4.r5",
+	"target": "^https?://www\\.ams\\.org/journals/",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-12-10 20:55:57"
+	"lastUpdated": "2013-02-06 23:25:02"
 }
 
 function detectWeb(doc, url) {
-	if (url.match(/home\.html/)) {
+	if (url.match(/home\.html|\d{4}[^\/]*\/.+/)) {
 		return "journalArticle";
 	}
+	/*multiples are currently broken
 	else if (url.match(/jour(nals|search)/)) {
 		return "multiple";
-	} 
+	} */
 }
 
 function doWeb(doc, url) {
@@ -45,50 +46,26 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
-			ZU.processDocuments(articles, scrape, function () {Zotero.done();});
-		Zotero.wait();
+			ZU.processDocuments(articles, scrape);
 	});
 	} else {
 	scrape(doc, url)
 	}
 }
 
-	function scrape(doc, url){
-		var item = new Zotero.Item("journalArticle");
-		item.publicationTitle = doc.title;
-		item.ISSN = ZU.xpathText(doc, '//span[@class="journalISSN"]').replace(/(ISSN:?|\(print\))/g, "").replace(/\(online\)\s*/, ", ").trim();
-		item.title = Zotero.Utilities.trimInternal(ZU.xpathText(doc, '//p[@class="articleTitle"]'));
-		item.url = doc.location.href.replace(/\.html.+/, ".html");
-		var data = Zotero.Utilities.trimInternal(ZU.xpathText(doc, '//p[span[@class="bibDataTag"]][1]'));
-		data = data.replace(/(Journal|MSC|Posted|Retrieve)/g, "\n$1");
-		Zotero.debug(data);
-		var authors = data.match(/(Author\(s\):\s+(.*)\n|Author(s)?:\s+(.*))/)[1].replace(/Author\(s\):|Authors?:/, "").split(/;\s+| and |, /);
-		for each (var aut in authors) {
-			item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
-		}
-		var journalinfo = data.match(/Journal:\s+(.*)\n/)[1].match(/^([^\d]+)(\d+)\s+\((\d+)\),\s+(.*)$|\n/);
-		//the string isn't complete for recent articles w/o volume and issue infor
-		if (journalinfo){
-		item.journalAbbreviation = Zotero.Utilities.trimInternal(journalinfo[1]);
-		item.volume = journalinfo[2];
-		item.pages = journalinfo[4];
-		item.issue = item.url.match(/(\d+)\/S/)[1];
-		}
-		else {
-			var journalabr = data.match(/Journal:\s+(.*)/);
-			item.journalAbbreviation = Zotero.Utilities.trimInternal(journalinfo[1]); }
-		item.date = Zotero.Utilities.trimInternal(data.match(/Posted:\s+(.*)(\n|Full)/)[1]).replace(/MathSci.+$/, "");
-		if (data.match(/MathSciNet/)){
-			item.extra= Zotero.Utilities.trimInternal(data.match(/MathSci.+\d+/)[0]);
-		}
-		var pdfurl = item.url.replace(/([^/]+)\/home.html$/, "$1/$1.pdf");
-		item.attachments = [
-			{url:item.url, title:item.journalAbbreviation + " Snapshot", mimeType:"text/html"},
-			{url:pdfurl, title:item.journalAbbreviation + " PDF", mimeType:"application/pdf"}
-		];
-		item.abstractNote = ZU.trimInternal(ZU.xpathText(doc, '//td[@class="bottomCell"]/p[4]').substr(10)).replace(/^A?bstract:\s/, "");
-		item.complete();
-	}/** BEGIN TEST CASES **/
+function scrape(doc, url){
+	//Z.debug(url)		
+	// We call the Embedded Metadata translator to do the actual work
+	var translator = Zotero.loadTranslator("web");
+	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+	translator.setDocument(doc);
+	translator.setHandler("itemDone", function(obj, item) {
+			var abstract = ZU.xpathText(doc, '//td[@class="bottomCell"]/p[4]');
+			if (abstract) item.abstractNote = ZU.trimInternal(abstract.substr(10)).replace(/^A?bstract:\s/, "");
+			item.complete();
+	});
+	translator.translate();
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -97,7 +74,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"defer": true,
 		"url": "http://www.ams.org/journals/jams/2012-25-01/S0894-0347-2011-00713-3/home.html",
 		"items": [
 			{
@@ -109,7 +85,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Jesper M.",
+						"firstName": "Jesper",
 						"lastName": "Møller",
 						"creatorType": "author"
 					},
@@ -120,31 +96,36 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [],
+				"tags": [
+					"groups of Lie type",
+					"fusion systems",
+					"classifying spaces",
+					"𝑝-completion"
+				],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "J. Amer. Math. Soc. Snapshot",
-						"mimeType": "text/html"
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					},
 					{
-						"title": "J. Amer. Math. Soc. PDF",
-						"mimeType": "application/pdf"
+						"title": "Snapshot"
 					}
 				],
-				"publicationTitle": "Journal of the American Mathematical Society",
-				"ISSN": "1088-6834, 0894-0347",
+				"itemID": "http://www.ams.org/journals/jams/2012-25-01/S0894-0347-2011-00713-3/home.html",
 				"title": "Equivalences between fusion systems of finite groups of Lie type",
-				"url": "http://www.ams.org/journals/jams/2012-25-01/S0894-0347-2011-00713-3/home.html",
+				"date": "2012",
+				"publicationTitle": "Journal of the American Mathematical Society",
 				"journalAbbreviation": "J. Amer. Math. Soc.",
 				"volume": "25",
-				"pages": "1-20",
-				"issue": "01",
-				"date": "July 8, 2011",
-				"extra": "MathSciNet review: 2833477",
+				"issue": "1",
+				"DOI": "10.1090/S0894-0347-2011-00713-3",
 				"abstractNote": "We prove, for certain pairs of finite groups of Lie type, that the -fusion systems and are equivalent. In other words, there is an isomorphism between a Sylow -subgroup of and one of which preserves -fusion. This occurs, for example, when and for a simple Lie ``type'' , and and are prime powers, both prime to , which generate the same closed subgroup of -adic units. Our proof uses homotopy-theoretic properties of the -completed classifying spaces of and , and we know of no purely algebraic proof of this result.",
-				"libraryCatalog": "AMS Journals",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"pages": "1-20",
+				"ISSN": "0894-0347, 1088-6834",
+				"url": "http://www.ams.org/jams/2012-25-01/S0894-0347-2011-00713-3/",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.ams.org"
 			}
 		]
 	}

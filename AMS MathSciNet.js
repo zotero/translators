@@ -9,21 +9,17 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-10-06 10:32:35"
+	"lastUpdated": "2013-02-03 23:35:37"
 }
 
 function detectWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
 	
-	var tableRows = doc.evaluate('//form/div[contains(@class,"headline")]', doc, nsResolver,
+	var tableRows = doc.evaluate('//form/div[contains(@class,"headline")]', doc, null,
 			XPathResult.ANY_TYPE, null);
 	if(tableRows.iterateNext()) {
 		return "multiple"
 	} else if(doc.evaluate('//div[@id="titleSeparator"]/div[@class="navbar"]/span[@class="PageLink"]/a[text() = "Up"]',
-		doc, nsResolver, XPathResult.ANY_TYPE, null)) {
+		doc, null, XPathResult.ANY_TYPE, null)) {
 		return "journalArticle";
 	}
 	
@@ -31,45 +27,49 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
 	//for some reason proxy redirection is sometimes "too slow" - so construct the initial part of the URL
 	var host = url.match(/^(.+)\/mathscinet/)
 	var pub = host[0] + "/search/publications.html?fmt=bibtex";
-	var tableRows = doc.evaluate('//form/div[contains(@class,"headline")]', doc, nsResolver,
+	var tableRows = doc.evaluate('//form/div[contains(@class,"headline")]', doc, null,
 			XPathResult.ANY_TYPE, null);
 	var tableRow = tableRows.iterateNext();
+	var docLinks = new Array();
 	if(tableRow) {
 		// search page
 		var items = new Object();
 		var links = new Object();
 		
 		do {
-			var id = doc.evaluate('.//input[@type="checkbox"]', tableRow, nsResolver,
+			var id = doc.evaluate('.//input[@type="checkbox"]', tableRow, null,
 				XPathResult.ANY_TYPE, null).iterateNext().value;
-			items[id] = doc.evaluate('./div[@class="headlineText"]/span[@class="title"]', tableRow, nsResolver,
+			items[id] = doc.evaluate('./div[@class="headlineText"]/span[@class="title"]', tableRow, null,
 				XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			links[id] = doc.evaluate('.//a', tableRow, nsResolver, XPathResult.ANY_TYPE,
+			links[id] = doc.evaluate('.//a', tableRow, null, XPathResult.ANY_TYPE,
 				null).iterateNext().href;
 		} while(tableRow = tableRows.iterateNext())
 		
 		
-		items = Zotero.selectItems(items);
-		if(!items) return true;
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			
+			for(var id in items) {
+				pub += "&b="+id;
+				docLinks.push(links[id]);
+			}
+			scrape(pub, docLinks)
+		});
 		
-		var docLinks = new Array();
-		for(var id in items) {
-			pub += "&b="+id;
-			docLinks.push(links[id]);
-		}
 	} else {
 		var MR = doc.evaluate('//div[@id="content"]/div[@class="doc"]/div[@class="headline"]/strong',
-			doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	pub += "&b="+MR.replace(/^MR0*/, "");
+			doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		pub += "&b="+MR.replace(/^MR0*/, "");
+	scrape(pub, docLinks, doc)	
 	}
+}
+
+function scrape(pub, docLinks, doc){
 	Zotero.Utilities.HTTP.doGet(pub, function(text) {
 		var m = text.match(/<pre>(?:.|[\r\n])*?<\/pre>/g);
 		//for search results we don't have the MR yet - we need that to create a clean URL below
@@ -97,8 +97,6 @@ function doWeb(doc, url) {
 			item.complete();
 		});
 		translator.translate();
-		
-		Zotero.done();
 	});
 }
 /** BEGIN TEST CASES **/
@@ -110,19 +108,24 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.ams.org/mathscinet/search/publdoc.html?arg3=&co4=AND&co5=AND&co6=AND&co7=AND&dr=all&pg4=AUCN&pg5=TI&pg6=PC&pg7=ALLF&pg8=ET&review_format=html&s4=karcher&s5=&s6=&s7=&s8=All&vfpref=html&yearRangeFirst=&yearRangeSecond=&yrop=eq&r=1&mx-pid=2835894",
+		"url": "http://www.ams.org/mathscinet-getitem?mr=3004573",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "Martin A.",
-						"lastName": "Grepl",
+						"firstName": "Wolfgang",
+						"lastName": "Karcher",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Mark",
-						"lastName": "Kärcher",
+						"firstName": "Elena",
+						"lastName": "Shmileva",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Evgeny",
+						"lastName": "Spodarev",
 						"creatorType": "author"
 					}
 				],
@@ -131,23 +134,28 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "MathSciNet Snapshot"
+						"title": "MathSciNet Snapshot",
+						"mimeType": "text/html"
 					}
 				],
-				"title": "Reduced basis a posteriori error bounds for parametrized linear-quadratic elliptic optimal control problems",
-				"publicationTitle": "Comptes Rendus Mathématique. Académie des Sciences. Paris",
-				"journalAbbreviation": "Comptes Rendus Mathématique. Académie des Sciences. Paris",
-				"volume": "349",
-				"date": "2011",
-				"issue": "15-16",
-				"pages": "873–877",
-				"ISSN": "1631-073X",
-				"DOI": "10.1016/j.crma.2011.07.010",
-				"url": "http://www.ams.org/mathscinet-getitem?mr=2835894",
+				"title": "Extrapolation of stable random fields",
+				"publicationTitle": "Journal of Multivariate Analysis",
+				"journalAbbreviation": "Journal of Multivariate Analysis",
+				"volume": "115",
+				"date": "2013",
+				"pages": "516–536",
+				"ISSN": "0047-259X",
+				"DOI": "10.1016/j.jmva.2012.11.004",
+				"url": "http://www.ams.org/mathscinet-getitem?mr=3004573",
 				"libraryCatalog": "AMS MathSciNet",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.ams.org/mathscinet/search/publications.html?pg1=ISSI&s1=308850",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
