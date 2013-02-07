@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-12-19 01:23:45"
+	"lastUpdated": "2013-02-07 00:06:31"
 }
 
 /*
@@ -189,7 +189,7 @@ function scrape(doc, url) {
 
 	if (!(vol == null)) newItem.volume = vol.textContent;
 
-	var pdf = doc.getElementById("lnkPDF");
+	var pdf = doc.getElementById("lnkPDFFis");
 	if (pdf && pdf.href) {
 		newItem.attachments = [{
 			url: pdf.href,

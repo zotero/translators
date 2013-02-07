@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-24 00:43:16"
+	"lastUpdated": "2013-02-07 00:17:57"
 }
 
 /*
@@ -287,7 +287,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "Gossamer Superconductivity in Layered Organic Compounds $\\kappa$-(BEDT-TTF)<sub>2</sub>X",
+				"title": "Gossamer Superconductivity in Layered Organic Compounds κ-(BEDT-TTF)<sub>2</sub>X",
 				"publicationTitle": "Progress of Theoretical Physics Supplement",
 				"volume": "160",
 				"pages": "15-27",

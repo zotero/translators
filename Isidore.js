@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-01-09 15:36:32"
+	"lastUpdated": "2013-02-07 00:16:13"
 }
 
 var typeMap = {
@@ -565,71 +565,6 @@ var testCases = [
 				"url": "http://www.ird.fr/index.php/toute-l-actualite/evenements-et-manifestations/colloques/seminaire-quand-la-sante-questionne-le-couple-correspondances-sud-et-nord",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "rechercheisidore.fr"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://rechercheisidore.fr/search/resource/?uri=10670/1.1j1489",
-		"items": [
-			{
-				"itemType": "manuscript",
-				"creators": [
-					{
-						"firstName": "Gallus",
-						"lastName": "Kemli",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"manuscrit",
-					"galle",
-					"Gallus",
-					"compilation",
-					"moine",
-					"latin (langue)",
-					"allemand (langue)",
-					"langues",
-					"chanson",
-					"exorcisme",
-					"Indulgences",
-					"XVe siècle",
-					"histoire"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "Isidore Record",
-						"snapshot": false
-					}
-				],
-				"itemID": "http://rechercheisidore.fr/search/resource/?uri=10670/1.1j1489",
-				"title": "Zürich, Zentralbibliothek, Ms. C 101 : Gallus Kemli: Diversarius multarum materiarum (lateinische und deutsche Stücke)",
-				"publisher": "e-codices",
-				"institution": "e-codices",
-				"company": "e-codices",
-				"label": "e-codices",
-				"distributor": "e-codices",
-				"date": "1500-01-01",
-				"abstractNote": "Manuscript compilation by the wandering monk of St. Gallen, Gall Kemli († 1481) with a wide variety of copied texts and original compositions in Latin and German languages (Diversarius multarum materiarum), for instance: recipes for medicines, instructions in liturgical song, exorcism, scribal rules, indulgences, etc. Affixed into the manuscript are twelve colored single page prints from the 15th century, which are valuable–in some cases unique–exemplars in the history of European printing. (smu)",
-				"reportType": "Manuscrits",
-				"letterType": "Manuscrits",
-				"manuscriptType": "Manuscrits",
-				"mapType": "Manuscrits",
-				"thesisType": "Manuscrits",
-				"websiteType": "Manuscrits",
-				"presentationType": "Manuscrits",
-				"postType": "Manuscrits",
-				"audioFileType": "Manuscrits",
-				"language": "Latin",
-				"url": "http://www.e-codices.unifr.ch/en/list/one/zbz/C0101",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "rechercheisidore.fr",
-				"shortTitle": "Zürich, Zentralbibliothek, Ms. C 101"
 			}
 		]
 	},
