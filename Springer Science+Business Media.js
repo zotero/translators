@@ -2,14 +2,14 @@
 	"translatorID": "dfec8317-9b59-4cc5-8771-cdcef719d171",
 	"label": "Springer Science+Business Media",
 	"creator": "Aurimas Vinckevicius",
-	"target": "^https?://[^/]+/(((content|\\d+)/)?[-\\d]+/\\d+/S?\\d+|search/results|inst/\\d+\\?)",
+	"target": "^https?://[^/]+/(((content|\\d+)/)?[-\\d]+/[A-Z]?\\d+/[A-Z]?\\d+|search/results|inst/\\d+\\?)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-02-06 19:31:53"
+	"lastUpdated": "2013-02-07 13:54:57"
 }
 
 /*
@@ -54,22 +54,19 @@ function scrape(doc) {
 		//once we have a PMID field put this there.
 		if (pmid) item.extra = "PMID: " + pmid.match(/\d+/)[0]
 
-		//if there is no pdf link in the meta tags, try to find it in the body
-		var havePdf = false;
-		for(var i=0, n=item.attachments.length; !havePdf && i<n; i++) {
-			havePdf = item.attachments[i].mimeType == 'application/pdf';
-		}
-
-		if(!havePdf) {
-			var pdfUrl = ZU.xpath(doc, 
-			'//div[@id="viewing-options-links"]//a[text()="PDF" or text()="View PDF"]/@href');				
-			if(pdfUrl.length) {
-				item.attachments.push({
-					title: 'Full Text PDF',
-					url: pdfUrl[0].href,
-					mimeType: 'application/pdf'
-				});
-			}
+		//BMC doesn't always put correct links to PDFs in the meta tags
+		//if we can scrape this from the page, use that
+		var pdfUrl = ZU.xpath(doc, '//div[@id="viewing-options-links"]//a[text()="PDF" or text()="View PDF"]');
+		if(pdfUrl.length) {
+			item.attachments = [{
+				title: 'Full Text PDF',
+				url: pdfUrl[0].href,
+				mimeType: 'application/pdf'
+			},
+			{
+				title: "Snapshot",
+				document: doc
+			}];
 		}
 
 		//sometimes there's no url specified in the meta tags,
@@ -242,11 +239,11 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Snapshot"
-					},
-					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
 					}
 				],
 				"itemID": "http://www.nanoscalereslett.com/content/6/1/530/abstract",
@@ -527,11 +524,11 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Snapshot"
-					},
-					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
 					}
 				],
 				"itemID": "http://genomebiology.com/2003/4/7/223/abstract",
@@ -668,6 +665,74 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.biomedcentral.com/inst/45208?page=5&itemsPerPage=25",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.jfootankleres.com/content/1/S1/O4",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Smita",
+						"lastName": "Rao",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Charles L.",
+						"lastName": "Saltzman",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "H. John",
+						"lastName": "Yack",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"itemID": "http://www.jfootankleres.com/content/1/S1/O4",
+				"title": "Plantar fascia thickness and first metatarsal mobility in patients with diabetes and neuropathy",
+				"publicationTitle": "Journal of Foot and Ankle Research",
+				"rights": "2008 Rao et al; licensee BioMed Central Ltd.",
+				"volume": "1",
+				"issue": "Suppl 1",
+				"number": "Suppl 1",
+				"patentNumber": "Suppl 1",
+				"pages": "O4",
+				"publisher": "BioMed Central Ltd",
+				"institution": "BioMed Central Ltd",
+				"company": "BioMed Central Ltd",
+				"label": "BioMed Central Ltd",
+				"distributor": "BioMed Central Ltd",
+				"date": "2008-09-26",
+				"DOI": "10.1186/1757-1146-1-S1-O4",
+				"ISSN": "1757-1146",
+				"reportType": "Oral presentation",
+				"letterType": "Oral presentation",
+				"manuscriptType": "Oral presentation",
+				"mapType": "Oral presentation",
+				"thesisType": "Oral presentation",
+				"websiteType": "Oral presentation",
+				"presentationType": "Oral presentation",
+				"postType": "Oral presentation",
+				"audioFileType": "Oral presentation",
+				"language": "en",
+				"url": "http://www.jfootankleres.com/content/1/S1/O4",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.jfootankleres.com"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
