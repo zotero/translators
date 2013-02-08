@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gbv",
-	"lastUpdated": "2012-04-28 23:36:59"
+	"lastUpdated": "2013-02-08 15:27:31"
 }
 
 /*
@@ -56,9 +56,11 @@ function detectWeb(doc, url) {
 	else if (url.match("base=ead") && url.match("results.html")) {
 		return "multiple";
 	}
+/** //The original method this used to work with - by getting a qId from the search page - doesn't work anymore. 
+ //It's probably possible to fix this otherwise, but I'm not sure if that'd work across pleade implementations
 	else if (url.match("list-results.html") && url.match("mode=")) {
 		return "multiple";	
-	}
+	} */
 }
 
 /**
@@ -87,6 +89,8 @@ function Remplace(expr,a,b) {
  * @param author :  "string author"
  * @param managed : this field is provided by Pleade and permit to now if the @author is normalized
  */
+ 
+ //We're currrently not using this - leaving this here in case problems come up
 function getAuthors(newItem, author, managed) {
 	if(managed=="true") newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
 }
@@ -115,43 +119,43 @@ function scrape(url) {
 
 	// Debug mode
 	Zotero.debug("Getting a term :  "  + url);
-
 	Zotero.Utilities.HTTP.doGet(url, function(text) {
 
 		text = text.replace(/<!DOCTYPE[^>]*>/, "").replace(/<\?xml[^>]*\?>/, "");
 		text = text.replace(/(<[^!>][^>]*>)/g, function replacer(str, p1, p2, offset, s) {return str.replace(/-/gm, "");});
 		text = text.replace(/(<[^!>][^>]*>)/g, function replacer(str, p1, p2, offset, s) {return str.replace(/:/gm, "");});
 		text = Zotero.Utilities.trim(text);
-
-		XML.prettyPrinting = false;
-		XML.ignoreWhitespace = false;
-		var xml = new XML(text);
-
-		for(var i=0 ; i <xml.book.length() ; i++) {
+		//Z.debug(text)
+		var parser = new DOMParser();
+		var doc = parser.parseFromString(text, "text/xml");
+		var books = ZU.xpath(doc, '//book')
+		for(var i in books) {
 			var newItem = new Zotero.Item("book");
-			var book = xml.book[i];
-
-			newItem.url = Zotero.Utilities.superCleanString(book.link.text().toString());
-			newItem.title = Zotero.Utilities.superCleanString(book.title.text().toString());
-			//newItem.seriesNumber = Zotero.Utilities.superCleanString(book.num.text().toString());
-			for(var j=0; j<book.author.length(); j++) getAuthors(newItem, Zotero.Utilities.superCleanString(book.author[j].text().toString()),Zotero.Utilities.superCleanString(book.managed[j].text().toString()));
-			newItem.date = Zotero.Utilities.superCleanString(book.date.text().toString());
-			newItem.publisher = Zotero.Utilities.superCleanString(book.publisher.text().toString());
-			newItem.place = Zotero.Utilities.superCleanString(book.publisherAddr.text().toString());
-			newItem.language = Zotero.Utilities.superCleanString(book.lang.text().toString());
-			newItem.rights = Zotero.Utilities.superCleanString(book.rights.text().toString());
-			//getTag(newItem, book);
-			//newItem.extra.push({url: Zotero.Utilities.superCleanString(book.doclink.@href.text().toString()), title: Zotero.Utilities.superCleanString(book.doclink.text().toString()), mimeType: Zotero.Utilities.superCleanString(book.doclink.@mime-type.text().toString()), snapshot: false});
-			//newItem.archiveLocation = Zotero.Utilities.superCleanString(book.archLoc.text().toString());
-			//newItem.libraryCatalog = Zotero.Utilities.superCleanString(book.serverName.text().toString());
-			newItem.callNumber = Zotero.Utilities.superCleanString(book.cote.text().toString());
-	
+			var book = books[i];
+			var authors = ZU.xpath(book, './author');
+			for (j in authors){
+				newItem.creators.push(ZU.cleanAuthor(authors[j].textContent, "author"))
+			}
+			newItem.url = ZU.xpathText(book, './link');
+			newItem.title = ZU.xpathText(book, './title');
+			newItem.seriesNumber = ZU.xpathText(book, './num');
+			newItem.date = ZU.xpathText(book, './date');
+			newItem.publisher = ZU.xpathText(book, './publisher');
+			newItem.place = ZU.xpathText(book, './publisherAddr');
+			//sometimes the place is in the publisher after a period. We assume it's the last period in the string
+			if (!newItem.place && newItem.publisher.indexOf(".")!=-1){
+				newItem.place = newItem.publisher.match(/\.\s*([^\.]+)$/)[1];
+				newItem.publisher = newItem.publisher.match(/(.+)\./)[1];
+			}	
+			newItem.language = ZU.xpathText(book, './lang');
+			newItem.rights = ZU.xpathText(book, './rights');
+			newItem.archiveLocation = ZU.xpathText(book, './archLoc');
+			newItem.libraryCatalog = ZU.xpathText(book, './serverName');
+			newItem.callNumber = ZU.xpathText(book, './cote');
+			newItem.notes = ZU.xpathText(book, './bookNote')
 			newItem.complete();
 		}
-
-		Zotero.done();
 	})
-	Zotero.wait();
 }
 
 /**
@@ -180,7 +184,6 @@ function getMultipleQid(doc,url)
 
 		text = text.replace(/<!DOCTYPE[^>]*>/, "").replace(/<\?xml[^>]*\?>/, "");
 		text = Zotero.Utilities.trim(text);
-		
 		var temp1;
 		
 		if(url.match("base=ead") && url.match("results.html")) {
@@ -188,7 +191,8 @@ function getMultipleQid(doc,url)
 			qId = temp1.substring(0,temp1.indexOf("\""));
 		}
 		else if(url.match("list-results.html") && url.match("mode=")) {
-			temp1 = text.substr(text.indexOf("var _qid")+12,30);
+			temp1 = text.substr(text.indexOf("id=")+12,30);
+			Z.debug(temp1)
 			qId = temp1.substring(0,temp1.indexOf("\""));
 			//qId = temp1;
 		}
@@ -204,7 +208,6 @@ function getMultipleQid(doc,url)
 			text2 = text2.replace(/(<[^!>][^>]*>)/g, function replacer(str, p1, p2, offset, s) {return str.replace(/-/gm, "");});
 			text2 = text2.replace(/(<[^!>][^>]*>)/g, function replacer(str, p1, p2, offset, s) {return str.replace(/:/gm, "");});
 			text2 = Zotero.Utilities.trim(text2);
-
 
 			var temp = text2.substring(text2.indexOf("\<title\>"),text2.lastIndexOf("\<\/pleadeId\>")+11);
 			var pids = new Array();
@@ -231,7 +234,6 @@ function getMultipleQid(doc,url)
 			});
 		})
 	})
-	Zotero.wait();
 }
 
 /**
@@ -251,7 +253,6 @@ function doWeb(doc, url) {
 		if(url.indexOf("\&") != -1) pleadeId = url.substring(url.indexOf("id=")+3,url.indexOf("\&"));
 		else if(url.indexOf("\&") == -1) pleadeId = url.substring(url.indexOf("id=")+3,url.indexOf("#"));
 		else pleadeId = url.substring(url.indexOf("id=")+3,url.length);
-		
 		// Building the Pleade fragment id of the actual document
 		var temp1 = url.substring(url.indexOf("#"),url.length);
 		var temp2 = temp1.substring(temp1.indexOf(pleadeId), temp1.length);
@@ -271,18 +272,17 @@ var testCases = [
 			{
 				"itemType": "book",
 				"creators": [],
-				"notes": [],
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
 				"url": "http://gael.gironde.fr/ead.html?id=FRAD033_IR_11AV",
+				"title": "Archives sonores et audiovisuelles de l'association Gric de Prat",
+				"date": "2010",
+				"publisher": "Archives départementales de la Gironde",
 				"place": "Bordeaux",
 				"language": "français",
 				"callNumber": "11 AV 1-14",
-				"libraryCatalog": "Pleade",
-				"title": "Archives sonores et audiovisuelles de l'association Gric de Prat",
-				"date": "2010",
-				"publisher": "Archives départementales de la Gironde"
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -292,18 +292,27 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
-				"creators": [],
-				"notes": [],
+				"creators": [
+					{
+						"firstName": "Ami",
+						"lastName": "Boué",
+						"creatorType": "author"
+					}
+				],
+				"notes": "Note : 80 p : 3 pl. en noir et en coul ; 31 cm. (Mémoires de la Société Géologique de France, 1ère série, tome I, mémoire n° 13).",
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"url": "http://jubilotheque.upmc.fr/upmc-front//ead.html?id=GM_000001_014",
+				"url": "http://jubilotheque.upmc.fr/ead.html?id=GM_000001_014",
+				"title": "Journal d'un voyage géologique fait à travers toute la chaîne des Carpathes, en Bukowine, en Transylvanie et dans le Marmarosch / par feu M. Lill de Lilienbach. Observations remises en ordre et accompagnées de notes par M.A. Boué",
+				"seriesNumber": "1",
+				"date": "1834",
+				"publisher": "F.-G. Levrault",
+				"place": "Paris ; Strasbourg",
 				"language": "fre",
 				"rights": "Utilisation libre dans le cadre d'un usage non commercial, en mentionnant la source et sans dénaturer l'oeuvre Free use for non-commercial purposes with mandatory acknowledgement of the source and without adulterating the work",
-				"libraryCatalog": "Pleade",
-				"title": "Journal d'un voyage géologique fait à travers toute la chaîne des Carpathes, en Bukowine, en Transylvanie et dans le Marmarosch / par feu M. Lill de Lilienbach. Observations remises en ordre et accompagnées de notes par M.A. Boué",
-				"date": "1834",
-				"publisher": "F.-G. Levrault. Paris ; Strasbourg"
+				"callNumber": "260",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
