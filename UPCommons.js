@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-05-25 03:51:40"
+	"lastUpdated": "2013-02-08 12:01:01"
 }
 
 function detectWeb(doc, url) {
@@ -82,7 +82,7 @@ var testCases = [
 					},
 					{
 						"firstName": "Nixon",
-						"lastName": "Bahamon Rivera",
+						"lastName": "Bahamón Rivera",
 						"creatorType": "author"
 					},
 					{
@@ -123,23 +123,23 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Catalunya -- Oceanografia",
-					"Climatologia -- Mesurament",
+					"Àrees temàtiques de la UPC::Enginyeria civil::Geologia::Oceanografia",
+					"Àrees temàtiques de la UPC::Enginyeria agroalimentària::Ciències de la terra i de la vida::Climatologia i meteorologia",
+					"Àrees temàtiques de la UPC::Enginyeria electrònica i telecomunicacions::Instrumentació i mesura::Sensors i actuadors",
+					"Sensors",
 					"Climatology",
+					"Pelagic observatory",
+					"Oceanographic buoy",
 					"Multisensor coordinated monitoring",
+					"PAR",
+					"Operational oceanography",
+					"Submarine canyons",
 					"Numerical multiparametric modelling",
 					"Ocean forecast",
-					"Oceanografia -- Mesurament",
-					"Oceanographic buoy",
-					"Operational oceanography",
-					"PAR",
-					"Pelagic observatory",
-					"Sensors",
-					"Submarine canyons",
 					"Western Mediterranean Sea",
-					"Àrees temàtiques de la UPC::Enginyeria agroalimentària::Ciències de la terra i de la vida::Climatologia i meteorologia",
-					"Àrees temàtiques de la UPC::Enginyeria civil::Geologia::Oceanografia",
-					"Àrees temàtiques de la UPC::Enginyeria electrònica i telecomunicacions::Instrumentació i mesura::Sensors i actuadors"
+					"Oceanografia -- Mesurament",
+					"Climatologia -- Mesurament",
+					"Catalunya -- Oceanografia"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -152,15 +152,26 @@ var testCases = [
 					}
 				],
 				"itemID": "http://upcommons.upc.edu/e-prints/handle/2117/14979",
+				"title": "The new pelagic operational observatory of the catalan sea (OOCS) for the multisensor coordinated measurement of atmospheric and oceanographic conditions",
 				"rights": "Open Access",
+				"date": "2011-12",
 				"DOI": "10.3390/s111211251",
 				"abstractNote": "Postprint (published version)",
+				"reportType": "Article",
+				"letterType": "Article",
+				"manuscriptType": "Article",
+				"mapType": "Article",
+				"thesisType": "Article",
+				"websiteType": "Article",
+				"presentationType": "Article",
+				"postType": "Article",
+				"audioFileType": "Article",
+				"accepted": "2012-02-06T15:06:01Z",
 				"language": "en",
 				"ISSN": "1424-8220",
 				"url": "http://upcommons.upc.edu/e-prints/handle/2117/14979",
-				"libraryCatalog": "upcommons.upc.edu",
-				"title": "The new pelagic operational observatory of the catalan sea (OOCS) for the multisensor coordinated measurement of atmospheric and oceanographic conditions",
-				"date": "2011-12"
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "upcommons.upc.edu"
 			}
 		]
 	},

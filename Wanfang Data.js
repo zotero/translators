@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gc",
-	"lastUpdated": "2012-03-13 17:15:00"
+	"lastUpdated": "2013-02-08 11:58:52"
 }
 
 /*
@@ -225,16 +225,18 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"extra": "undefined\nYu Min\nZhu Jiang\nDing Zhaolei",
-				"issue": "2",
-				"abstractNote": "介绍了参考文献管理的基本方法,对参考文献管理工具的主要功能进行了对比,最后分析了参考文献管理的趋势.",
-				"url": "http://d.wanfangdata.com.cn/Periodical_xdqb200902027.aspx",
-				"archiveLocation": "北京万方数据股份有限公司",
-				"libraryCatalog": "Wanfang Data",
 				"title": "参考文献管理工具研究",
 				"publicationTitle": "JOURNAL OF MODERN INFORMATION",
 				"date": "2009",
+				"issue": "2",
 				"volume": "29",
-				"pages": "6"
+				"pages": "6",
+				"abstractNote": "介绍了参考文献管理的基本方法,对参考文献管理工具的主要功能进行了对比,最后分析了参考文献管理的趋势.",
+				"url": "http://d.wanfangdata.com.cn/Periodical_xdqb200902027.aspx",
+				"archiveLocation": "北京万方数据股份有限公司",
+				"DOI": "10.3969/j.issn.1008-0821.2009.02.027",
+				"libraryCatalog": "Wanfang Data",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},

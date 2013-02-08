@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-24 18:24:30"
+	"lastUpdated": "2013-02-08 12:35:08"
 }
 
 function detectWeb(doc, url) {
 	if (url.indexOf("search") != -1 && url.indexOf("classifieds") == -1) {
 		return "multiple";
-	} else if (url.indexOf("article") != -1) {
+	} else if (ZU.xpathText(doc, '//div[@class="article-headline"]/h2')) {
 		return "newspaperArticle";
 	}
 }
@@ -25,26 +25,27 @@ function detectWeb(doc, url) {
 function scrape(doc, url) {
 	var newItem = new Zotero.Item("newspaperArticle");
 
-	var date = ZU.xpathText(doc, '//div[@class="tdShareTools"]/text()');
+	var date = ZU.xpathText(doc, '//span[@class="published-date"]');
 	if(date) {
 		newItem.date = date.replace(/Published on/,'').replace(/[,\n\t\s]*$/, "").trim();
 	}
 	
-	newItem.abstractNote = ZU.xpathText(doc, '//meta[@property="og:description"]');
+	newItem.abstractNote = ZU.xpathText(doc, '//meta[@name="description"]/@content');
 	var comma = false;
-	var authorNode = ZU.xpathText(doc, '//div[@class="td-author"]/strong');
+	var authorNode = ZU.xpathText(doc, '//div[@class="article-authors"]/span[@class="credit"]');
 	if (authorNode) authorNode = authorNode.split(/\s*,\s*/);
 	var authorNode2 =ZU.xpathText(doc, '//span[@class="columnistLabel"]/a');
 	if (authorNode2) {
 		authorNode = authorNode2.split(/\s*[;,]\s*/);
 		 comma = false;}
 	var author;
-	for(var i=0, n=authorNode.length; i<n; i++) {
-		author = authorNode[i];
-		newItem.creators.push(ZU.cleanAuthor(author, "author", comma));
+	if (authorNode){
+			for(var i=0, n=authorNode.length; i<n; i++) {
+			author = authorNode[i];
+			newItem.creators.push(ZU.cleanAuthor(author, "author", comma));
+		}
 	}
-
-	newItem.title = ZU.xpathText(doc, '//h1[contains(@class, "Article")]');	
+	newItem.title = ZU.xpathText(doc, '//div[@class="article-headline"]/h2');	
 
 	// The section is the first listed keyword
 	var keywords = ZU.xpath(doc, '//meta[@name="Keywords"][@content]')[0];
@@ -61,14 +62,14 @@ function scrape(doc, url) {
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		var items = ZU.getItemArray(doc, ZU.xpath(doc, '//div[@class="tdListTitle"]/h2'), /thestar\.com/);
+		var items = ZU.getItemArray(doc, ZU.xpath(doc, '//div[contains(@class, "article-list")]'), /thestar\.com/);
 		Zotero.selectItems(items, function(selectedItems) {
 			if(!selectedItems) return true;
 			var articles = new Array();
 			for (var i in selectedItems) {
 				articles.push(i);
 			}
-			ZU.processDocuments(articles, function(doc) { scrape(doc, doc.location.href) });
+			ZU.processDocuments(articles, scrape);
 		});
 	} else {
 		scrape(doc, url);
@@ -79,7 +80,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.thestar.com/news/world/article/755917--france-should-ban-muslim-veils-commission-says?bn=1",
+		"url": "http://www.thestar.com/news/world/2010/01/26/france_should_ban_muslim_veils_commission_says.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -93,9 +94,10 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"date": "Tuesday January 26, 2010",
+				"date": "Tue Jan 26 2010",
+				"abstractNote": "France's National Assembly should pass a resolution denouncing full Muslim face veils and then vote the strictest law possible to ban women from wearing them, a parliamentary commission proposed on Tuesday.",
 				"title": "France should ban Muslim veils, commission says",
-				"url": "http://www.thestar.com/news/world/article/755917--france-should-ban-muslim-veils-commission-says?bn=1",
+				"url": "http://www.thestar.com/news/world/2010/01/26/france_should_ban_muslim_veils_commission_says.html",
 				"publicationTitle": "The Toronto Star",
 				"ISSN": "0319-0781",
 				"libraryCatalog": "Toronto Star",
@@ -105,7 +107,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.thestar.com/business/cleanbreak/article/1031551--hamilton-ontario-should-reconsider-offshore-wind",
+		"url": "http://www.thestar.com/business/tech_news/2011/07/29/hamilton_ontario_should_reconsider_offshore_wind.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -125,9 +127,10 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"date": "Friday July 29, 2011",
+				"date": "Fri Jul 29 2011",
+				"abstractNote": "There&rsquo;s no reason why Ontario can&rsquo;t regain the momentum it once had.",
 				"title": "Hamilton: Ontario should reconsider offshore wind",
-				"url": "http://www.thestar.com/business/cleanbreak/article/1031551--hamilton-ontario-should-reconsider-offshore-wind",
+				"url": "http://www.thestar.com/business/tech_news/2011/07/29/hamilton_ontario_should_reconsider_offshore_wind.html",
 				"publicationTitle": "The Toronto Star",
 				"ISSN": "0319-0781",
 				"libraryCatalog": "Toronto Star",
@@ -138,7 +141,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.thestar.com/news/canada/article/1221066--bev-oda-resigns-as-international-co-operation-minister-conservative-mp-for-durham",
+		"url": "http://www.thestar.com/news/canada/2012/07/03/bev_oda_resigns_as_international_cooperation_minister_conservative_mp_for_durham.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -163,9 +166,10 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"date": "Tuesday July 03, 2012",
+				"date": "Tue Jul 03 2012",
+				"abstractNote": "Bev Oda will leave politics later this month following a series of scandals over her travel expenses and funding decisions.",
 				"title": "Bev Oda resigns as International Co-operation minister, Conservative MP for Durham",
-				"url": "http://www.thestar.com/news/canada/article/1221066--bev-oda-resigns-as-international-co-operation-minister-conservative-mp-for-durham",
+				"url": "http://www.thestar.com/news/canada/2012/07/03/bev_oda_resigns_as_international_cooperation_minister_conservative_mp_for_durham.html",
 				"publicationTitle": "The Toronto Star",
 				"ISSN": "0319-0781",
 				"libraryCatalog": "Toronto Star",
@@ -175,7 +179,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.thestar.com/search?types=Article&OrderBy=releasetimestamp+desc&query=harper",
+		"url": "http://www.thestar.com/search.html?q=labor&contenttype=articles%2Cvideos%2Cslideshows",
 		"items": "multiple"
 	}
 ]
