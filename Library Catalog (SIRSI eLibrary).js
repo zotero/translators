@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-10-19 00:28:12"
+	"lastUpdated": "2013-02-07 23:02:33"
 }
 
 /* Based on the SIRSI translator by Simon Kornblith and Michael Berkowitz,
@@ -378,7 +378,7 @@ var testCases = [
 				],
 				"seeAlso": [],
 				"attachments": [],
-				"extra": "Uniform title: Structures sociales de l'économie. English\nGeneral note: Translated from the French\nBibliography note: Includes bibliographical references (p. [233]-251) and index\nLanguage: Translated from the French\nLCCN: 2005620708\nControl Number: ocm61244051",
+				"extra": "Uniform title: Structures sociales de l'économie. English\nGeneral note: Translated from the French\nLanguage: Translated from the French\nBibliography note: Includes bibliographical references (p. [233]-251) and index\nLCCN: 2005620708\nControl Number: ocm61244051",
 				"title": "The social structures of the economy",
 				"place": "Cambridge, UK ; Malden, MA",
 				"publisher": "Polity",

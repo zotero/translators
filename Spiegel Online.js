@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-08-24 00:04:03"
+	"lastUpdated": "2013-02-07 23:50:36"
 }
 
 /*
@@ -40,7 +40,7 @@ http://www.spiegel.de/international/europe/0,1518,700530,00.html
 
 function detectWeb(doc, url) {
 
-	var spiegel_article_XPath = ".//div[@id='spArticleFunctions']";
+	var spiegel_article_XPath = ".//div[@id='spArticleFunctions']|.//span[@class='spArticleHeadline']";
 	//the print edition is a magazine. Since the online edition is updated constantly it
 	//makes sense to treat it like a newspaper.
 	if (url.match(/\/print\//) && ZU.xpathText(doc, spiegel_article_XPath)){
@@ -228,7 +228,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.spiegel.de/politik/deutschland/0,1518,797954,00.html",
+		"url": "http://www.spiegel.de/politik/deutschland/cdu-parteitag-partei-im-koma-a-797954.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -241,9 +241,9 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Betreuungsgeld",
+					"Mindestlohn",
 					"Euro-Krise",
-					"Mindestlohn"
+					"Betreuungsgeld"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -253,11 +253,13 @@ var testCases = [
 					}
 				],
 				"url": "http://www.spiegel.de/politik/deutschland/cdu-parteitag-partei-im-koma-a-797954.html",
+				"title": "CDU-Parteitag: Partei im Koma",
 				"abstractNote": "Die CDU feiert sich in Leipzig selbst, doch in Wahrheit befindet sie sich in einem traurigen Zustand: Die Partei ist in ein kollektives Koma gefallen, politische Debatten finden kaum noch statt. Hauptverantwortlich dafür ist Angela Merkel.",
-				"libraryCatalog": "Spiegel Online",
-				"title": "Partei im Koma",
 				"date": "15.11.2011",
-				"publicationTitle": "Spiegel Online"
+				"publicationTitle": "Spiegel Online",
+				"libraryCatalog": "Spiegel Online",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "CDU-Parteitag"
 			}
 		]
 	},
