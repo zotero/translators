@@ -2,14 +2,14 @@
 	"translatorID": "8c1f42d5-02fa-437b-b2b2-73afc768eb07",
 	"label": "HighWire 2.0",
 	"creator": "Matt Burton",
-	"target": "^[^\\?]+(content/([0-9]+[A-Z\\-]*/[0-9]+|current|firstcite|early)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
+	"target": "^[^\\?]+(content/([0-9]+[A-Z\\-]*/(?:suppl_)?[0-9]+|current|firstcite|early)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-12-19 01:27:39"
+	"lastUpdated": "2013-02-07 23:07:53"
 }
 
 /*
@@ -830,6 +830,70 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.bjj.boneandjoint.org.uk/content/94-B/1.toc",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://nar.oxfordjournals.org/content/34/suppl_2/W369.full",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Timothy L.",
+						"lastName": "Bailey",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nadya",
+						"lastName": "Williams",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Chris",
+						"lastName": "Misleh",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Wilfred W.",
+						"lastName": "Li",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"itemID": "http://nar.oxfordjournals.org/content/34/suppl_2/W369.full",
+				"title": "MEME: discovering and analyzing DNA and protein sequence motifs",
+				"publisher": "Oxford University Press",
+				"institution": "Oxford University Press",
+				"company": "Oxford University Press",
+				"label": "Oxford University Press",
+				"distributor": "Oxford University Press",
+				"date": "07/01/2006",
+				"DOI": "10.1093/nar/gkl198",
+				"language": "en",
+				"publicationTitle": "Nucleic Acids Research",
+				"journalAbbreviation": "Nucl. Acids Res.",
+				"volume": "34",
+				"issue": "suppl 2",
+				"url": "http://nar.oxfordjournals.org/content/34/suppl_2/W369",
+				"pages": "W369-W373",
+				"ISSN": "0305-1048, 1362-4962",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "nar.oxfordjournals.org",
+				"abstractNote": "MEME (Multiple EM for Motif Elicitation) is one of the most widely used tools for searching for novel ‘signals’ in sets of biological sequences. Applications include the discovery of new transcription factor binding sites and protein domains. MEME works by searching for repeated, ungapped sequence patterns that occur in the DNA or protein sequences provided by the user. Users can perform MEME searches via the web server hosted by the National Biomedical Computation Resource (http://meme.nbcr.net) and several mirror sites. Through the same web server, users can also access the Motif Alignment and Search Tool to search sequence databases for matches to motifs encoded in several popular formats. By clicking on buttons in the MEME output, users can compare the motifs discovered in their input sequences with databases of known motifs, search sequence databases for matches to the motifs and display the motifs in various formats. This article describes the freely accessible web server and its architecture, and discusses ways to use MEME effectively to find new sequence patterns in biological sequences and analyze their significance.",
+				"shortTitle": "MEME"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
