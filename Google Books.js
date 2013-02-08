@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-12-11 00:16:35"
+	"lastUpdated": "2013-02-07 21:34:10"
 }
 
 /*
@@ -309,6 +309,7 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
+					"Literary Criticism / General",
 					"Literary Criticism / Caribbean & Latin American",
 					"Literary Criticism / European / Spanish & Portuguese"
 				],
@@ -360,7 +361,7 @@ var testCases = [
 				],
 				"numPages": "332",
 				"ISBN": "9780836913620",
-				"publisher": "Ayer Company Pub",
+				"publisher": "G.P. Putnam's Sons",
 				"title": "Some American Ladies: Seven Informal Biographies ...",
 				"language": "en",
 				"date": "1926",
@@ -382,8 +383,8 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "THOM AUTOR",
-						"lastName": "HOLMES",
+						"firstName": "Thom",
+						"lastName": "Holmes",
 						"creatorType": "author"
 					}
 				],
@@ -404,7 +405,7 @@ var testCases = [
 				"numPages": "332",
 				"ISBN": "9780415936446",
 				"publisher": "Psychology Press",
-				"title": "Electronic and Experimental Music: A History of a New Sound",
+				"title": "Electronic and Experimental Music: Pioneers in Technology and Composition",
 				"language": "en",
 				"abstractNote": "Electronic and Experimental Music details the history of electronic music throughout the world, and the people who created it. From the theory of sound production to key composers and instrument designers, this is a complete introduction to the genre from its early roots to the present technological explosion. Every major figure is covered including: Thaddeus Cahill, Peire Henry, Gorden Mumma, Pauline Oliveros, Brian Eno, and D.J. Spooky. The vast array of forms and instruments that these innovators introduced and expanded are also included--tape composition, the synthesizer, \"live\" electronic performance, the ONCE festivals, ambient music, and turntablism. This new edition, includes a thoroughly updated and enlarged theoretical and historical sections and includes new material on using home computers (PCs) and the many resources now available in software and the Internet.",
 				"date": "2002",

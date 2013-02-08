@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-02-06 23:25:02"
+	"lastUpdated": "2013-02-07 20:56:51"
 }
 
 function detectWeb(doc, url) {
@@ -67,11 +67,6 @@ function scrape(doc, url){
 	translator.translate();
 }/** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "http://www.ams.org/journals/jams/2012-25-01/",
-		"items": "multiple"
-	},
 	{
 		"type": "web",
 		"url": "http://www.ams.org/journals/jams/2012-25-01/S0894-0347-2011-00713-3/home.html",
