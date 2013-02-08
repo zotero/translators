@@ -1,21 +1,21 @@
 {
-  "translatorID": "2dc0b23d-64d8-4933-b629-5c003451ccf7",
-  "label": "Légifrance",
+	"translatorID": "2dc0b23d-64d8-4933-b629-5c003451ccf7",
+	"label": "Légifrance",
 	"creator": "Guillaume Adreani",
-	"target": "^https?://(www.)?legifrance.gouv.fr/",
+	"target": "^https?:\\/\\/(www.)?legifrance\\.gouv\\.fr/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2013-01-17 23:37:18"
+	"lastUpdated": "2013-02-08 12:21:44"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 	
-	Copyright © 2013 Guillaume Adreani guillaume.adreani@gmail.cdom
+	Copyright © 2013 Guillaume Adreani (guillaume.adreani@gmail.com @adreagui] for Droit.org
 	
 	This file is part of Zotero.
 	
@@ -40,7 +40,7 @@ Thanks to Sebastian Karcher and Aurimas Vinckevicius
 
 */
 
-var legifrancecaseRegexp = /http:\/\/(www.)?legifrance.gouv.fr\/.+JURITEXT|CETATEXT|CONSTEXT.+/ 
+var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT|CETATEXT|CONSTEXT.+/ 
 // Détection occurences multiples uniquement pour la jurisprudence ... pour l'instant
 
 	function detectWeb(doc, url) {
