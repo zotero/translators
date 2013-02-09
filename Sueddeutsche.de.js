@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-11-26 23:22:04"
+	"lastUpdated": "2013-02-09 13:17:46"
 }
 
 /*
@@ -44,7 +44,7 @@ function detectWeb(doc, url) {
 	if (ZU.xpathText(doc, '//h2/strong')) {
 		return "newspaperArticle";
 	} else if (ZU.xpath(doc, '//div[@id="topthemen" or @class="panoramateaser" \
-						or contains(@class,"maincolumn")]\
+						or contains(@class,"maincolumn") or contains(@class, "teaser")]\
 						//a[starts-with(@class,"entry-title") \
 						and starts-with(@href,"http://www.sueddeutsche.de") \
 						and not(contains(@href,"/app/"))]').length){
@@ -69,7 +69,7 @@ function scrape(doc, url) {
 
 	// One case i've seen: A full sentence as the "author", with no author in it.
 	if (author && author.trim().charAt(author.length - 1) != '.') {
-		author = author.replace(/^Von\s/i, '')
+		author = author.replace(/^\s*Von\s|Ein Kommentar von/i, '')
 		// For multiple Authors, the SZ uses comma, und and u
 						.split(/\s+(?:und|u|,)\s+/);
 
@@ -118,7 +118,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var links = ZU.xpath(doc,
 						'//div[@id="topthemen" or @class="panoramateaser" \
-						or contains(@class,"maincolumn")]\
+						or contains(@class,"maincolumn") or contains(@class, "teaser")]\
 						//a[starts-with(@class,"entry-title") \
 						and starts-with(@href,"http://www.sueddeutsche.de") \
 						and not(contains(@href,"/app/"))]');
@@ -137,7 +137,7 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
-			ZU.processDocuments(articles, function(doc) { scrape(doc, doc.location.href) });
+			ZU.processDocuments(articles, scrape);
 		});
 	} else {
 		scrape(doc, url);

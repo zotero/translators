@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-07-18 18:52:28"
+	"lastUpdated": "2013-02-09 12:09:10"
 }
 
 function detectWeb(doc, url) {
@@ -231,7 +231,7 @@ var testCases = [
 				"language": "en-us",
 				"court": "U.S. Supreme Court",
 				"reporter": "U.S.",
-				"title": "ELDRED V. ASHCROFT (Breyer, J., dissenting)",
+				"title": "Eldred v. Ashcroft (Breyer, J., dissenting)",
 				"caseName": "Eldred v. Ashcroft (Breyer, J., dissenting)",
 				"shortTitle": "Eldred v. Ashcroft",
 				"history": "ON WRIT OF CERTIORARI TO THE UNITED STATES COURT OF APPEALS FOR THE DISTRICT OF COLUMBIA CIRCUIT",

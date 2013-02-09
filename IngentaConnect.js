@@ -3,19 +3,25 @@
 	"label": "IngentaConnect",
 	"creator": "Michael Berkowitz",
 	"target": "^https?://(www\\.)?ingentaconnect\\.com",
-	"minVersion": "1.0.0b3r1",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-11-26 19:15:13"
+	"lastUpdated": "2013-02-09 12:45:00"
 }
 
 function detectWeb(doc, url) {
 	if (url.indexOf("article?") != -1 || url.indexOf("article;") != -1 || url.indexOf("/art") != -1) {
 		return "journalArticle";
-	} else if (url.indexOf("search?") !=-1 || url.indexOf("search;") != -1) {
+	} 
+	//permalinks
+	else if (url.indexOf("/content/") != -1  && ZU.xpathText(doc, '//div[contains(@class,"export-formats")]/ul/li/a[@title="EndNote Export"]')) {
+		return "journalArticle";
+	}
+	
+	else if (url.indexOf("search?") !=-1 || url.indexOf("search;") != -1) {
 		return "multiple";
 	}
 }
@@ -30,14 +36,22 @@ function doWeb(doc, url) {
 		while (next_link = links.iterateNext()) {
 			items[next_link.href] = next_link.textContent;
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
+		
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			Zotero.Utilities.processDocuments(articles, scrape);
+		});
 	} else {
-		articles = [url];
+		scrape(doc, url)
 	}
-	Zotero.Utilities.processDocuments(articles, function(newDoc) {
+}
+
+function scrape(newDoc, url){
 		var abs, pdf;
 		var risurl = newDoc.evaluate('//div[contains(@class,"export-formats")]/ul/li/a[@title="EndNote Export"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
 		if (newDoc.evaluate('//div[@id="abstract"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
@@ -78,13 +92,12 @@ function doWeb(doc, url) {
 			});
 			translator.translate();
 		});
-	}, function() {Zotero.done();});
 }
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.ingentaconnect.com/search/article?option1=tka&value1=argentina&pageSize=10&index=6",
+		"url": "http://www.ingentaconnect.com/content/klu/10436/2007/00000003/00000001/00000064",
 		"items": [
 			{
 				"itemType": "journalArticle",

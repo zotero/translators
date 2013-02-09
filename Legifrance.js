@@ -1,5 +1,5 @@
 {
-  "translatorID": "2dc0b23d-64d8-4933-b629-5c003451ccf7",
+	"translatorID": "2dc0b23d-64d8-4933-b629-5c003451ccf7",
 	"label": "Légifrance",
 	"creator": "Guillaume Adreani",
 	"target": "^https?:\\/\\/(www.)?legifrance\\.gouv\\.fr/",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2013-02-08 12:21:44"
+	"lastUpdated": "2013-02-09 13:04:42"
 }
 
 /*
@@ -531,7 +531,7 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"title": "Délibération 97-008 du 04 février 1997",
+				"title": "Délibération de la Commission Nationale de l'Informatique et des Libertés",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"nameOfAct": "Délibération de la Commission Nationale de l'Informatique et des Libertés",
 				"code": "97-008",

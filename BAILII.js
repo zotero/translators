@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-19 11:15:53"
+	"lastUpdated": "2013-02-09 12:08:46"
 }
 
 function detectWeb(doc, url) {
@@ -103,8 +103,13 @@ var testCases = [
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
-				"attachments": [{"title":"BAILII Snapshot","mimeType":"text/html"}],
-				"title": "Football Association Premier League & Ors (Freedom to provide services) [2011] EUECJ C-403/08 (04 October 2011)",
+				"attachments": [
+					{
+						"title": "BAILII Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Football Association Premier League & Ors (Freedom to provide services) [2011] EUECJ C-403/08",
 				"url": "http://www.bailii.org/cgi-bin/markup.cgi?doc=/eu/cases/EUECJ/2011/C40308.html&query=copyright&method=boolean",
 				"caseName": "Football Association Premier League & Ors (Freedom to provide services) [2011] EUECJ C-403/08",
 				"dateDecided": "04 October 2011",
