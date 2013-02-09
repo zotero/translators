@@ -1,15 +1,15 @@
 {
 	"translatorID": "e16095ae-986c-4117-9cb6-20f3b7a52f64",
 	"label": "Protein Data Bank",
-	"creator": "Michael Berkowitz",
+	"creator": "Michael Berkowitz, Sebastian Karcher",
 	"target": "^https?://www\\.pdb\\.org/pdb/",
-	"minVersion": "1.0.0b4.r5",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gbv",
-	"lastUpdated": "2011-11-13 19:04:47"
+	"lastUpdated": "2013-02-08 22:09:50"
 }
 
 function detectWeb(doc, url) {
@@ -31,59 +31,58 @@ function doWeb(doc, url) {
 		while (next_title = titles.iterateNext()) {
 			items[next_title.href.match(/structureId=(.*)/)[1]] = next_title.textContent;
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			proteins.push(i);
-		}
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				proteins.push(i);
+			}
+			scrape(proteins)
+		})
 	} else {
-		proteins = [url.match(/structureId=(.*)/)[1]];
+		scrape([url.match(/structureId=(.*)/)[1]]);
 	}
+}	
 	
-	Zotero.debug(proteins);
+function scrape (proteins){
 	for (var p in proteins) {
 		var xmlstr = 'http://www.pdb.org/pdb/download/downloadFile.do?fileFormat=xml&headerOnly=YES&structureId=' + proteins[p];
 		Zotero.debug(xmlstr);
-		
 		Zotero.Utilities.HTTP.doGet(xmlstr, function(text) {
 			var item = new Zotero.Item("journalArticle");
 			text = text.replace(/<!DOCTYPE[^>]*>/, "").replace(/<\?xml[^>]*\?>/, "").replace(/PDBx\:/g, "");
 			var article = text.split('<citation id="primary">');
 			var art = article[1].split(/<\/citation>\n/);
 			art = "<citation>" + art[0] + "</citation>";
-			var xml = new XML(art);
-			var info = text.split('<database_PDB_revCategory>')[1].split('</database_PDB_revCategory>')[0];
-			var xml2 = new XML("<PDB_revCategory>" + info + "</PDB_revCategory>");
+			var parser = new DOMParser();
+			var xml = parser.parseFromString(art, "text/xml");
+			var info = text.split('<database_PDB_revCategory>')[1].split('</database_PDB_revCategory>')[0].split('<database_PDB_rev num="2">')[0];
+			var xml2 = parser.parseFromString(info, "text/xml");
 			var aus = text.split('<citation_authorCategory>')[1].split('</citation_authorCategory>')[0];
 			aus = "<authors>" + aus + "</authors>";
-			var xml3 = new XML(aus);
-			
-			item.title = xml..title.text().toString();
-			item.publicationTitle = xml..journal_abbrev.text().toString();
-			item.volume = xml..journal_volume.text().toString();
-			item.pages = xml..page_first.text().toString() + "-" + xml..page_last.text().toString();
-			item.ISSN = xml..journal_id_ISSN.text().toString();
-			item.extra = "PubMed ID: " + xml..pdbx_database_id_PubMed.text().toString();
-			if (xml..pdbx_database_id_DOI.length()) {
-				item.DOI = xml..pdbx_database_id_DOI.text().toString();
-			}
-			item.date = xml2..date_original.text().toString();
-			item.url = 'http://www.pdb.org/pdb/explore/explore.do?structureId=' + xml2..replaces.text().toString();
-			
-			var authors = xml3..citation_author.toString().split(/\n/);
+			var xml3 = parser.parseFromString(aus, "text/xml");
+	
+			item.title = ZU.xpathText(xml, '//title')
+			item.publicationTitle = item.journalAbbreviation = ZU.xpathText(xml, '//journal_abbrev');
+			item.volume = ZU.xpathText(xml, '//journal_volume'); 
+			item.pages = ZU.xpathText(xml, '//page_first') + "-" + ZU.xpathText(xml, '//page_last');
+			item.ISSN = ZU.xpathText(xml, '//journal_id_ISSN');
+			item.extra = "PMID: " + ZU.xpathText(xml, '//pdbx_database_id_PubMed');
+			item.DOI = ZU.xpathText(xml, '//pdbx_database_id_DOI');
+			item.date = ZU.xpathText(xml2, '//date_original');
+			item.url = 'http://www.pdb.org/pdb/explore/explore.do?structureId=' + proteins[p];
+			var authors = ZU.xpath(xml3, '//citation_author[@citation_id="primary"]/@name');
 			for (var i in authors) {
-				var name = authors[i].match(/name=\"([^"]+)\"/)[1].split(", ");;
-				//Zotero.debug(name);
-				item.creators.push({firstName:name[1], lastName:name[0], creatorType:"author"});
+			item.creators.push(ZU.cleanAuthor(authors[i].textContent, "author", true));
 			}
 			item.attachments = [
-				{url:item.url, title:"PDB Snapshot", mimeType:"text/html"},
+				{url: item.url, title:"PDB Snapshot", mimeType:"text/html"},
 				{url:'http://www.pdb.org/pdb/download/downloadFile.do?fileFormat=pdb&compression=NO&structureId=' + proteins[p], title:"Protein Data Bank .pdb File", mimeType:"chemical/x-pdb"}
 			]
-			item.complete();
+			item.complete(); 
 		});
-		Zotero.done();
 	}
-	Zotero.wait();
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -94,112 +93,22 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "M.J.",
+						"firstName": "M. J.",
 						"lastName": "van Raaij",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "J.P.",
+						"firstName": "J. P.",
 						"lastName": "Abrahams",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "A.G.",
+						"firstName": "A. G.",
 						"lastName": "Leslie",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "J.E.",
-						"lastName": "Walker",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "J.P.",
-						"lastName": "Abrahams",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "A.G.",
-						"lastName": "Leslie",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "R.",
-						"lastName": "Lutter",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "J.E.",
-						"lastName": "Walker",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "R.",
-						"lastName": "Lutter",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "J.P.",
-						"lastName": "Abrahams",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "M.J.",
-						"lastName": "Van Raaij",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "R.J.",
-						"lastName": "Todd",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "T.",
-						"lastName": "Lundqvist",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "S.K.",
-						"lastName": "Buchanan",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "A.G.",
-						"lastName": "Leslie",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "J.E.",
-						"lastName": "Walker",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "J.P.",
-						"lastName": "Abrahams",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "R.",
-						"lastName": "Lutter",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "R.J.",
-						"lastName": "Todd",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "M.J.",
-						"lastName": "Van Raaij",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "A.G.",
-						"lastName": "Leslie",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "J.E.",
+						"firstName": "J. E.",
 						"lastName": "Walker",
 						"creatorType": "author"
 					}
@@ -209,29 +118,33 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.pdb.org/pdb/explore/explore.do?structureId=1COW1COW",
 						"title": "PDB Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"url": "http://www.pdb.org/pdb/download/downloadFile.do?fileFormat=pdb&compression=NO&structureId=1COW",
 						"title": "Protein Data Bank .pdb File",
 						"mimeType": "chemical/x-pdb"
 					}
 				],
 				"title": "The structure of bovine F1-ATPase complexed with the antibiotic inhibitor aurovertin B.",
+				"journalAbbreviation": "Proc.Natl.Acad.Sci.USA",
 				"publicationTitle": "Proc.Natl.Acad.Sci.USA",
 				"volume": "93",
 				"pages": "6913-6917",
 				"ISSN": "0027-8424",
-				"extra": "PubMed ID: 8692918",
+				"extra": "PMID: 8692918",
 				"DOI": "10.1073/pnas.93.14.6913",
 				"date": "1996-05-08",
-				"url": "http://www.pdb.org/pdb/explore/explore.do?structureId=1COW1COW",
+				"url": "http://www.pdb.org/pdb/explore/explore.do?structureId=1COW",
 				"libraryCatalog": "Protein Data Bank",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.pdb.org/pdb/results/results.do?qrid=CD2312B7&tabtoshow=Current",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-02-07 22:17:17"
+	"lastUpdated": "2013-02-08 20:50:16"
 }
 
 function detectWeb(doc, url) {
@@ -230,7 +230,17 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [],
+				"tags": [
+					"special issues and sections",
+					"resource management",
+					"system analysis and design",
+					"emotion recognition",
+					"human factors",
+					"speech processing",
+					"cultural differences",
+					"behavioral sciences",
+					"context awareness"
+				],
 				"seeAlso": [],
 				"attachments": [
 					{
@@ -252,6 +262,7 @@ var testCases = [
 				"DOI": "10.1109/T-AFFC.2012.10",
 				"publisher": "IEEE Computer Society",
 				"place": "Los Alamitos, CA, USA",
+				"abstractNote": "The papers in this special section focus on the deployment of naturalistic affect resources for systems design and analysis.",
 				"libraryCatalog": "IEEE Computer Society",
 				"shortTitle": "Guest Editorial"
 			}
@@ -371,102 +382,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.computer.org/portal/web/computingnow/content?g=53319&type=article&urlTitle=beaming:-an-asymmetric-telepresence-system",
-		"items": [
-			{
-				"itemType": "magazineArticle",
-				"creators": [
-					{
-						"firstName": "Anthony",
-						"lastName": "Steed",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "William",
-						"lastName": "Steptoe",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Wole",
-						"lastName": "Oyekoya",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Fabrizio",
-						"lastName": "Pece",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Tim",
-						"lastName": "Weyrich",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Jan",
-						"lastName": "Kautz",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Doron",
-						"lastName": "Friedman",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Angelika",
-						"lastName": "Peer",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Massimiliano",
-						"lastName": "Solazzi",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Franco",
-						"lastName": "Tecchia",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Massimo",
-						"lastName": "Bergamasco",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Mel",
-						"lastName": "Slater",
-						"creatorType": "author"
-					}
-				],
-				"notes": [
-					{
-						"note": "Complete PDF document was either not available or accessible. Please make sure you're logged in to the digital library to retrieve the complete PDF document."
-					}
-				],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"mimeType": "text/html",
-						"title": "IEEE Computer Snapshot"
-					}
-				],
-				"title": "Beaming: An Asymmetric Telepresence System",
-				"publicationTitle": "IEEE Computer Graphics and Applications",
-				"volume": "32",
-				"issue": "6",
-				"ISSN": "0272-1716",
-				"date": "2012",
-				"pages": "10-17",
-				"DOI": "10.1109/MCG.2012.110",
-				"publisher": "IEEE Computer Society",
-				"place": "Los Alamitos, CA, USA",
-				"libraryCatalog": "IEEE Computer Society",
-				"shortTitle": "Beaming"
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "http://www.computer.org/csdl/proceedings/bibe/2010/4083/00/4083a001-abs.html",
 		"items": [
 			{
@@ -509,7 +424,7 @@ var testCases = [
 					}
 				],
 				"title": "A Clustering Approach to Identify Intergenic Non-coding RNA in Mouse Macrophages",
-				"publicationTitle": "Bioinformatic and Bioengineering, IEEE International Symposium on",
+				"publicationTitle": "2012 IEEE 12th International Conference on Bioinformatics & Bioengineering (BIBE)",
 				"volume": "0",
 				"date": "2010",
 				"ISBN": "978-0-7695-4083-2",
@@ -526,6 +441,48 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.computer.org/csdl/proceedings/bibe/2010/4083/00/index.html",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.computer.org/portal/web/computingnow/content?g=53319&type=article&urlTitle=cloud-computing%3A-the-new-normal-",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"creators": [
+					{
+						"firstName": "San",
+						"lastName": "Murugesan",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "Complete PDF document was either not available or accessible. Please make sure you're logged in to the digital library to retrieve the complete PDF document."
+					}
+				],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"mimeType": "text/html",
+						"title": "IEEE Computer Snapshot"
+					}
+				],
+				"title": "Cloud Computing: The New Normal?",
+				"publicationTitle": "Computer",
+				"volume": "46",
+				"issue": "1",
+				"ISSN": "0018-9162",
+				"date": "2013",
+				"pages": "77-79",
+				"DOI": "10.1109/MC.2013.12",
+				"publisher": "IEEE Computer Society",
+				"place": "Los Alamitos, CA, USA",
+				"abstractNote": "Cloud computing is more than just another IT platform shift—it will transform not only the IT industry, but every sector of society.",
+				"libraryCatalog": "IEEE Computer Society",
+				"shortTitle": "Cloud Computing"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
