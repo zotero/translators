@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-01-31 21:31:24"
+	"lastUpdated": "2013-02-09 13:57:16"
 }
 
 /*
@@ -352,6 +352,7 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
+				"extra": "PMID: 23013071",
 				"title": "Cutting Family Planning in Texas",
 				"publicationTitle": "New England Journal of Medicine",
 				"volume": "367",
