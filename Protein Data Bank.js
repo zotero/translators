@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gbv",
-	"lastUpdated": "2013-02-08 22:09:50"
+	"browserSupport": "gcsbv",
+	"lastUpdated": "2013-02-10 22:41:23"
 }
 
 function detectWeb(doc, url) {
@@ -140,11 +140,6 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.pdb.org/pdb/results/results.do?qrid=CD2312B7&tabtoshow=Current",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
