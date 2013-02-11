@@ -3,13 +3,13 @@
 	"label": "Archives Canada",
 	"creator": "Adam Crymble",
 	"target": "^https?://(www\\.)?archivescanada\\.ca",
-	"minVersion": "1.0.0b4.r5",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2011-10-21 14:54:00"
+	"browserSupport": "gcs",
+	"lastUpdated": "2013-02-10 13:25:50"
 }
 
 function detectWeb (doc, url) {
@@ -27,18 +27,13 @@ function associateData (newItem, dataTags, field, zoteroField) {
 }
 
 function scrape(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
 	var dataTags = new Object();
 	var tagsContent = new Array();
 	var cainNo;
 	var newItem = new Zotero.Item("book");
 
-	var data = doc.evaluate('//td/p', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var dataCount = doc.evaluate('count (//td/p)', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var data = doc.evaluate('//td/p', doc, null, XPathResult.ANY_TYPE, null);
+	var dataCount = doc.evaluate('count (//td/p)', doc, null, XPathResult.ANY_TYPE, null);
 
 	for (i=0; i<dataCount.numberValue; i++) {	 	
 	 		data1 = data.iterateNext().textContent.replace(/^\s*|\s*$/g, '').split(":");
@@ -72,8 +67,8 @@ function scrape(doc, url) {
 	 		}
 	 	}
 	 	
-	 	if (doc.evaluate('//tr[3]/td/table/tbody/tr[1]/td/table/tbody/tr[2]/td/table/tbody/tr/td[1]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-	 		cainNo = doc.evaluate('//tr[3]/td/table/tbody/tr[1]/td/table/tbody/tr[2]/td/table/tbody/tr/td[1]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	 	if (doc.evaluate('//tr[3]/td/table/tbody/tr[1]/td/table/tbody/tr[2]/td/table/tbody/tr/td[1]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	 		cainNo = doc.evaluate('//tr[3]/td/table/tbody/tr[1]/td/table/tbody/tr[2]/td/table/tbody/tr/td[1]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	 		newItem.archiveLocation = cainNo.replace(/^\s*|\s*$/g, '');
 	 	}
 	 		for (var i = 0; i < tagsContent.length; i++) {
@@ -99,31 +94,29 @@ function scrape(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
 	var articles = new Array();
 	
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		
-		var titles = doc.evaluate('//td[3]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//td[3]/a', doc, null, XPathResult.ANY_TYPE, null);
 
 		var next_title;
 		while (next_title = titles.iterateNext()) {
 			items[next_title.href] = next_title.textContent;
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
+			Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			Zotero.Utilities.processDocuments(articles, scrape);	
+		});
 	} else {
-		articles = [url];
+		scrape(doc, url)
 	}
-	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-	Zotero.wait();
 }/** BEGIN TEST CASES **/
 var testCases = []
 /** END TEST CASES **/

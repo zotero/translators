@@ -60,10 +60,7 @@ function doWeb(doc, url){
 			for (var i in items) {
 				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(articles, scrape, function () {
-				Zotero.done();
-			});
-			Zotero.wait();	
+			Zotero.Utilities.processDocuments(articles, scrape);	
 		});
 	} else {
 		scrape(doc, url);
@@ -75,7 +72,7 @@ function scrape(doc, url){
 	//get abstract and tags from article plage
 	//the xpaths aren't great , but seem reliable across pages
 	var abs = ZU.xpathText(doc,'//p[1]').replace(/\n/g, "")
-var tags = ZU.xpathText(doc, '//p[last()]').replace(/\n/g, "").split(/\|/);
+	var tags = ZU.xpathText(doc, '//p[last()]').replace(/\n/g, "").split(/\|/);
 	for (i in tags){
 		tags[i] = ZU.trimInternal(tags[i])
 			}
