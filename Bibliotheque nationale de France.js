@@ -1,14 +1,15 @@
 {
-	"translatorID":"47533cd7-ccaa-47a7-81bb-71c45e68a74d",
-	"label":"Bibliothèque nationale de France",
-	"creator":"Florian Ziche",
-	"target":"^https?://[^/]*catalogue\\.bnf\\.fr",
-	"minVersion":"2.0",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"translatorType":4,
-	"lastUpdated":"2011-12-19 09:55:00"
+	"translatorID": "47533cd7-ccaa-47a7-81bb-71c45e68a74d",
+	"label": "Bibliothèque nationale de France",
+	"creator": "Florian Ziche",
+	"target": "^https?://[^/]*catalogue\\.bnf\\.fr",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2013-02-10 19:28:50"
 }
 
 /*
@@ -34,20 +35,7 @@
 var BnfClass = function() {
 	//Private members
 	
-	/* MARC translator. */
-	var marc;
 
-	var that = this;
-
-	/* Load MARC translator. */
-	function loadMarcTranslator() {
-		if(!marc) {
-			var translator = Zotero.loadTranslator("import");
-			translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
-			marc = translator.getTranslatorObject();
-		}
-		return marc;
-	};
 
 	/* Map MARC responsibility roles to Zotero creator types.
 		See http://archive.ifla.org/VI/3/p1996-1/appx-c.htm.
@@ -388,8 +376,8 @@ var BnfClass = function() {
 		}
 		if(noteText) {
 			if(!/\.$/.exec(noteText)) {
-                 		noteText += ".";
-                	}
+				 		noteText += ".";
+					}
 			item.extra = noteText;
 		}
 	};
@@ -495,13 +483,9 @@ var BnfClass = function() {
 	
 	/* Get the results table from a list page, if any. Looks for //table[@class="ListeNotice"]. */
 	this.getResultsTable = function(doc) {
-		var namespace = doc.documentElement.namespaceURI;
-		var nsResolver = namespace ? function(prefix) {
-			if (prefix == 'x') return namespace; else return null;
-		} : null;
 		try {
 			var xPath = '//table[@class="ListeNotice"]';
-			var xPathObject = doc.evaluate(xPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			var xPathObject = doc.evaluate(xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 			return xPathObject;
 		} catch(x) {
 			Zotero.debug(x.lineNumber + " " + x.message);
@@ -513,14 +497,10 @@ var BnfClass = function() {
 		2010-10-01: No DC meta tags any more... simply test for //td[@class="texteNotice"] cells and return "printed text".
 	*/
 	this.getDCType = function(doc, url) {
-		var namespace = doc.documentElement.namespaceURI;
-		var nsResolver = namespace ? function(prefix) {
-			if (prefix == 'x') return namespace; else return null;
-		} : null;
 		try {
 //			var xPath = '//head/meta[@name="DC.type" and @lang="eng"]/@content';
 			var xPath = '//td[@class="texteNotice"]';
-			var xPathObject = doc.evaluate(xPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();;
+			var xPathObject = doc.evaluate(xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();;
 			return xPathObject ? "printed text" : undefined;
 		} catch(x) {
 			Zotero.debug(x.lineNumber + " " + x.message);
@@ -550,15 +530,9 @@ var BnfClass = function() {
 		var items = new Object();
 		
 		var baseUri = /^(https?:\/\/[^\/]+)/.exec(doc.location.href)[1];
-
-		var namespace = doc.documentElement.namespaceURI;
-		var nsResolver = namespace ? function(prefix) {
-			  if (prefix == 'x') return namespace; else return null;
-		} : null;	
-		
 		var cellPath = '//td[@class="mn_partienoticesynthetique"]';
 		var spanPath = './/span';
-		var cells = doc.evaluate(cellPath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var cells = doc.evaluate(cellPath, doc, null, XPathResult.ANY_TYPE, null);
 		var cell = undefined;
 		var regexLink = /\s*window.location='([^']+)'\s*/;
 		
@@ -570,7 +544,7 @@ var BnfClass = function() {
 			//Get title
 			var title = "";
 			var span = undefined;
-			var spans = doc.evaluate(spanPath, cell, nsResolver, XPathResult.ANY_TYPE, null);
+			var spans = doc.evaluate(spanPath, cell, null, XPathResult.ANY_TYPE, null);
 			//Span loop
 			while(span = spans.iterateNext()) {
 				if(title.length > 0) {
@@ -587,15 +561,11 @@ var BnfClass = function() {
 	
 	//Check for Gallica URL (digital version available), if found, set item.url
 	function checkGallica(doc, item) {
-		var namespace = doc.documentElement.namespaceURI;
-		var nsResolver = namespace ? function(prefix) {
-		  if (prefix == 'x') return namespace; else return null;
-		} : null;
-		
+	
 		var url = false;
 		//Check for links containing the "Visualiser" img
 		var elmts = doc.evaluate('//a[img[@src="/images/boutons/bouton_visualiser.gif"]]',
-	            doc, nsResolver, XPathResult.ANY_TYPE, null);
+				doc, null, XPathResult.ANY_TYPE, null);
 		if(elmts) {
 			var link;
 			while(link = elmts.iterateNext()) {
@@ -612,64 +582,61 @@ var BnfClass = function() {
 	
 	/* Process UNIMARC URL. */
 	this.processMarcUrl = function(newDoc) {
-		var namespace = newDoc.documentElement.namespaceURI;
-		var nsResolver = namespace ? function(prefix) {
-		  if (prefix == 'x') return namespace; else return null;
-		} : null;
-		
-		
 		/* Init MARC record. */
-		var marc = loadMarcTranslator();
-		var record = new marc.record();
+		// Load MARC
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
+		translator.getTranslatorObject( function (obj) {
+			 var record = new obj.record();
 		
-		/* Get table cell containing MARC code. */
-		var elmts = newDoc.evaluate('//td[@class="texteNotice"]/text()',
-	            newDoc, nsResolver, XPathResult.ANY_TYPE, null);
-		/* Line loop. */
-		var elmt, tag, content;
-		var ind = "";
-
-		while(elmt = elmts.iterateNext()) {
-			var line = Zotero.Utilities.superCleanString(elmt.nodeValue);
-			if(line.length == 0) {
-				continue;
-			}
-			if(line.substring(0, 6) == "       ")  {
-				content += " "+line.substring(6);
-				continue;
-			} else {
-				if(tag) {
-					record.addField(tag, ind, content);
+			/* Get table cell containing MARC code. */
+			var elmts = newDoc.evaluate('//td[@class="texteNotice"]/text()',
+					newDoc, null, XPathResult.ANY_TYPE, null);
+			/* Line loop. */
+			var elmt, tag, content;
+			var ind = "";
+	
+			while(elmt = elmts.iterateNext()) {
+				var line = Zotero.Utilities.superCleanString(elmt.nodeValue);
+				if(line.length == 0) {
+					continue;
 				}
-			}
-			line = line.replace(/[_\t\xA0]/g," "); // nbsp
-			tag = line.substr(0, 3);
-			if(tag[0] != "0" || tag[1] != "0") {
-				ind = line.substr(3, 2);
-				content = line.substr(5).replace(/\$([a-z]|[0-9])/g, marc.subfieldDelimiter+"$1");
-				content = content.replace(/ˆ([^‰]+)‰/g, "$1");
-			} else {
-				if(tag == "000") {
-					tag = undefined;
-					record.leader = "00000"+line.substr(8);
+				if(line.substring(0, 6) == "       ")  {
+					content += " "+line.substring(6);
+					continue;
 				} else {
-					content = line.substr(3);
+					if(tag) {
+						record.addField(tag, ind, content);
+					}
+				}
+				line = line.replace(/[_\t\xA0]/g," "); // nbsp
+				tag = line.substr(0, 3);
+				if(tag[0] != "0" || tag[1] != "0") {
+					ind = line.substr(3, 2);
+					content = line.substr(5).replace(/\$([a-z]|[0-9])/g, obj.subfieldDelimiter+"$1");
+					content = content.replace(/ˆ([^‰]+)‰/g, "$1");
+				} else {
+					if(tag == "000") {
+						tag = undefined;
+						record.leader = "00000"+line.substr(8);
+					} else {
+						content = line.substr(3);
+					}
 				}
 			}
-		}
+				
+			//Create item
+			var newItem = new Zotero.Item();
+			record.translate(newItem);
+				
+			//Do specific Unimarc postprocessing
+			postprocessMarc(record, newItem);
 			
-		//Create item
-		var newItem = new Zotero.Item();
-		record.translate(newItem);
-			
-		//Do specific Unimarc postprocessing
-		postprocessMarc(record, newItem);
-		
-		//Check for Gallica URL
-		checkGallica(newDoc, newItem);
-			
-		newItem.complete();
-
+			//Check for Gallica URL
+			checkGallica(newDoc, newItem);
+				
+			newItem.complete();
+		});
 	};
 };
 
@@ -687,7 +654,7 @@ function detectWeb(doc, url) {
 		var type = Bnf.getDCType(doc, url);
 		return Bnf.translateDCType(type);
 	} 
-    //Muliple result ?
+	//Muliple result ?
 	else if(Bnf.getResultsTable(doc)) {
 		return "multiple";
 	}
@@ -703,34 +670,64 @@ function doWeb(doc, url) {
 		return;
 	}
 	/* Build array of MARC URLs. */
-	var urls = undefined;
+	var urls = new Array();
 	switch(type) {
-	case "multiple":
-		var items = Bnf.getSelectedItems(doc);
-		if(!items) {
-			return true;
-		}
-		/* Let user select items. */
-		items = Zotero.selectItems(items);
-		
-		urls = new Array();
-		for(var i in items) {
-			urls.push(Bnf.reformURL(i));
-		}
-		break;
-	default:
-		urls = [Bnf.reformURL(url)];
-	}
-	
-	/* Loop through URLs. */
-	if(urls.length > 0) {
-		Zotero.Utilities.processDocuments(urls, 
-			function(doc) {
-				Bnf.processMarcUrl.call(Bnf, doc);
-			},
-			function() { Zotero.done(); }, 
-			null);
-		
-		Zotero.wait();
+		case "multiple":
+			var items = Bnf.getSelectedItems(doc);
+			if(!items) {
+				return true;
+			}
+			/* Let user select items. */
+			Zotero.selectItems(items, function (items) {
+				for(var i in items) {
+				urls.push(Bnf.reformURL(i));
+				}
+				if(urls.length > 0) {
+					//Z.debug(urls)
+					Zotero.Utilities.processDocuments(urls, function(doc) {Bnf.processMarcUrl.call(Bnf, doc)});
+				}	
+			});
+			break;
+		default:
+			urls = [Bnf.reformURL(url)];
+			Zotero.Utilities.processDocuments(urls, function(doc) {Bnf.processMarcUrl.call(Bnf, doc)});
 	}
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://catalogue.bnf.fr/servlet/biblio?ID=35602259",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Jürgen",
+						"lastName": "Pütz",
+						"creatorType": "editor"
+					}
+				],
+				"notes": [],
+				"tags": [
+					" Thelen ,  Albert Vigoleis  ( 1903-1989)"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"ISBN": "3-926738-01-4",
+				"language": "ger",
+				"title": "In Zweifelsfällen entscheidet die Wahrheit: Beitrag zu Albert Vigoleis Thelen [zum 85. Geburtstag]",
+				"place": "Viersen",
+				"publisher": "Juni-Verl",
+				"date": "1988",
+				"callNumber": "820",
+				"country": "DE",
+				"numPages": "149",
+				"extra": "ill. 24 cm.",
+				"libraryCatalog": "French National Library Online Catalog (http://catalogue.bnf.fr)",
+				"shortTitle": "In Zweifelsfällen entscheidet die Wahrheit"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
