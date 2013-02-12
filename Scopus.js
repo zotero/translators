@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2013-01-12 11:24:01"
+	"lastUpdated": "2013-02-12 10:29:34"
 }
 
 /*
@@ -78,7 +78,7 @@ function scrape(doc, url) {
 	var doi = ZU.xpathText(doc, '//div[contains(@class, "formatSourceExtended")]/span[strong[contains(text(), "DOI:")]]');
 	var ISSN = ZU.xpathText(doc, '//div[contains(@class, "formatSourceExtended")]/span[strong[contains(text(), "ISSN:")]]');
 	var ISBN = ZU.xpathText(doc, '//div[contains(@class, "formatSourceExtended")]/span[strong[contains(text(), "ISBN:")]]');
-	var language = ZU.xpathText(doc, '//div[contains(@class, "formatSourceExtended")]/span[strong[contains(text(), "Original language:")]]');
+	var language = ZU.xpathText(doc, '//div[contains(@class, "formatSourceExtended")]/span[strong[contains(text(), "Original language:")]]')
 	articles = [returnURL(getEID(url))];
 	var article = articles.shift();
 	Zotero.Utilities.doGet(article, function(text, obj) {
@@ -93,6 +93,13 @@ function scrape(doc, url) {
 		var rislink = get + "?" + post;	
 		Zotero.Utilities.HTTP.doGet(rislink, function(text) {
 			// load translator for RIS
+			if (text.search(/T2  -/)!=-1 && text.search(/JF  -/)!=-1){
+				//SCOPUS RIS mishandles alternate titles and journal titles
+				//if both fields are present, T2 is the alternate title and JF the journal title
+				text = text.replace(/T2  -/, "N1  -" ).replace(/JF  -/, "T2  -");
+				
+			}
+			Z.debug(text)
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			translator.setString(text);
