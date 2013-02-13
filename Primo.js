@@ -2,14 +2,14 @@
 	"translatorID": "1300cd65-d23a-4bbf-93e5-a3c9e00d1066",
 	"label": "Primo",
 	"creator": "Matt Burton, Avram Lyon, Etienne Cavalié, Rintze Zelle",
-	"target": "/primo_library/",
+	"target": "/primo_library/|/nebis/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-07-07 10:04:11"
+	"lastUpdated": "2013-02-12 11:53:40"
 }
 
 /*
@@ -57,10 +57,10 @@ function doWeb(doc, url) {
 			 	Z.debug("primo3")
 				linkIterator = ZU.xpath(doc, '//h2[contains(@class, "EXLResultTitle")]/a[contains(@href, "display.do")]/@href');
 				titleIterator = ZU.xpath(doc, '//h2[contains(@class, "EXLResultTitle")]');
-			    //if none or not all of the titles have valid links, we move to the details tab.
+				//if none or not all of the titles have valid links, we move to the details tab.
 			 	if (titleIterator.length > linkIterator.length){
-			    	linkIterator = ZU.xpath(doc, '//div[contains(@class, "EXLTabsRibbon")]//li[contains(@class,"EXLDetailsTab")]/a/@href'); 
-			    }
+					linkIterator = ZU.xpath(doc, '//div[contains(@class, "EXLTabsRibbon")]//li[contains(@class,"EXLDetailsTab")]/a/@href'); 
+				}
 			}
 
 			// try/catch for the case when there are no search results, let doc.evealuate fail quietly
