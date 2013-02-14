@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-12-29 01:31:27"
+	"lastUpdated": "2013-02-14 13:20:48"
 }
 
 function detectWeb(doc, url) {
@@ -170,8 +170,7 @@ function scrape(doc) {
 
 		//add abstract
 		var abs = ZU.xpathText(doc,
-					'//div[contains(@class,"abstract-content")]',
-					null, '');
+					'//div[contains(@class,"abstract-content")][1]');
 		if(abs) item.abstractNote = ZU.trimInternal(abs);
 
 		//add keywords
@@ -392,6 +391,74 @@ var testCases = [
 		"type": "web",
 		"url": "http://link.springer.com/book/10.1007/978-3-540-88682-2/page/1",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://link.springer.com/article/10.1007/s10040-009-0439-x",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Xiaolong",
+						"lastName": "Geng",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hailong",
+						"lastName": "Li",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michel C.",
+						"lastName": "Boufadel",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Shuang",
+						"lastName": "Liu",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Waste Water Technology / Water Pollution Control / Water Management / Aquatic Pollution",
+					"Geology",
+					"Hydrogeology",
+					"Coastal aquifers",
+					"Elastic storage",
+					"Submarine outlet-capping",
+					"Analytical solutions",
+					"Tidal loading efficiency"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "Tide-induced head fluctuations in a coastal aquifer: effects of the elastic storage and leakage of the submarine outlet-capping",
+				"date": "2009/07/01",
+				"publicationTitle": "Hydrogeology Journal",
+				"journalAbbreviation": "Hydrogeol J",
+				"volume": "17",
+				"issue": "5",
+				"publisher": "Springer-Verlag",
+				"DOI": "10.1007/s10040-009-0439-x",
+				"language": "en",
+				"pages": "1289-1296",
+				"ISSN": "1431-2174, 1435-0157",
+				"url": "http://link.springer.com/article/10.1007/s10040-009-0439-x",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "link.springer.com",
+				"abstractNote": "This paper considers the tidal head fluctuations in a single coastal confined aquifer which extends under the sea for a certain distance. Its submarine outlet is covered by a silt-layer with properties dissimilar to the aquifer. Recently, Li et al. (2007) gave an analytical solution for such a system which neglected the effect of the elastic storage (specific storage) of the outlet-capping. This article presents an analytical solution which generalizes their work by incorporating the elastic storage of the outlet-capping. It is found that if the outlet-capping is thick enough in the horizontal direction, its elastic storage has a significant enhancing effect on the tidal head fluctuation. Ignoring this elastic storage will lead to significant errors in predicting the relationship of the head fluctuation and the aquifer hydrogeological properties. Quantitative analysis shows the effect of the elastic storage of the outlet-capping on the groundwater head fluctuation. Quantitative conditions are given under which the effect of this elastic storage on the aquifer’s tide-induced head fluctuation is negligible. Li, H.L., Li, G.Y., Chen, J.M., Boufadel, M.C. (2007) Tide-induced head fluctuations in a confined aquifer with sediment covering its outlet at the sea floor. [Fluctuations du niveau piézométrique induites par la marée dans un aquifère captif à décharge sous-marine.] Water Resour. Res 43, doi:10.1029/2005WR004724",
+				"shortTitle": "Tide-induced head fluctuations in a coastal aquifer"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
