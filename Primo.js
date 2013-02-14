@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-02-12 11:53:40"
+	"lastUpdated": "2013-02-14 09:58:13"
 }
 
 /*
@@ -115,7 +115,8 @@ function doWeb(doc, url) {
 		var parser = new DOMParser();
 		var doc = parser.parseFromString(text, "text/xml");
 		var itemType = ZU.xpathText(doc, '//display/type');
-		if (itemType == 'book' || itemType == 'Books') {
+		if (itemType) itemType = itemType.toLowerCase();
+		if (itemType == 'book' || itemType == 'books') {
 			var item = new Zotero.Item("book");
 		} else if (itemType == 'audio') {
 			var item = new Zotero.Item("audioRecording");
