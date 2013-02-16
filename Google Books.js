@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-02-07 21:34:10"
+	"lastUpdated": "2013-02-15 12:21:32"
 }
 
 /*
@@ -30,7 +30,7 @@ http://books.google.com/books?printsec=frontcover&vid=ISBN0684181355&vid=ISBN068
 
 */
 
-var singleRe = /^http:\/\/(?:books|www)\.google\.[a-z]+(?:\.[a-z]+)?\/books(?:\/.*)?\?(?:.*&)?(id|vid)=([^&]+)/i;
+var singleRe = /^http:\/\/(?:books|www)\.google\.[a-z]+(?:\.[a-z]+)?\/books(?:\/.*)?\?(?:[^q].*&)?(id|vid)=([^&]+)/i;
 
 function detectWeb(doc, url) {
 	if(singleRe.test(url)) {
@@ -84,6 +84,7 @@ function doWeb(doc, url) {
 }
 	
 function parseXML(text) {
+	Z.debug(text)
 	// Remove xml parse instruction and doctype
 	var parser = new DOMParser();
 	var xml = parser.parseFromString(text, "text/xml").documentElement;
@@ -264,16 +265,19 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "Julio",
-						"lastName": "d'Escrivan",
+						"firstName": "Julio d' Escrivan",
+						"lastName": "Rincón",
 						"creatorType": "author"
 					}
 				],
 				"notes": [],
 				"tags": [
-					"Music / General",
 					"Music / Genres & Styles / Electronic",
-					"Music / Instruction & Study / Techniques"
+					"Music / Instruction & Study / Techniques",
+					"Music / Genres & Styles / Electronic",
+					"Music / General",
+					"Music / History & Criticism",
+					"Music / General"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -285,12 +289,12 @@ var testCases = [
 				],
 				"numPages": "246",
 				"ISBN": "9780521868617",
-				"language": "en",
-				"abstractNote": "Musicians are always quick to adopt and explore new technologies. The fast-paced changes wrought by electrification, from the microphone via the analogue synthesiser to the laptop computer, have led to a wide diversity of new musical styles and techniques. Electronic music has grown to a broad field of investigation, taking in historical movements such as musique concrète and elektronische musik, and contemporary trends such as electronic dance music and electronica. A fascinating array of composers and inventors have contributed to a diverse set of technologies, practices and music. This book brings together some novel threads through this scene, from the viewpoint of researchers at the forefront of the sonic explorations empowered by electronic technology. The chapters provide accessible and insightful overviews of core topic areas and uncover some hitherto less publicised corners of worldwide movements. Recent areas of intense activity such as audiovisuals, live electronic music, interactivity and network music are actively promoted.",
-				"libraryCatalog": "Google Books",
 				"publisher": "Cambridge University Press",
 				"title": "The Cambridge Companion to Electronic Music",
-				"date": "2007-12-13"
+				"language": "en",
+				"abstractNote": "Musicians are always quick to adopt and explore new technologies. The fast-paced changes wrought by electrification, from the microphone via the analogue synthesiser to the laptop computer, have led to a wide diversity of new musical styles and techniques. Electronic music has grown to a broad field of investigation, taking in historical movements such as musique concrÃ¨te and elektronische musik, and contemporary trends such as electronic dance music and electronica. A fascinating array of composers and inventors have contributed to a diverse set of technologies, practices and music. This book brings together some novel threads through this scene, from the viewpoint of researchers at the forefront of the sonic explorations empowered by electronic technology. The chapters provide accessible and insightful overviews of core topic areas and uncover some hitherto less publicised corners of worldwide movements. Recent areas of intense activity such as audiovisuals, live electronic music, interactivity and network music are actively promoted.",
+				"date": "2007-12-13",
+				"libraryCatalog": "Google Books"
 			}
 		]
 	},
@@ -309,9 +313,10 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Literary Criticism / General",
 					"Literary Criticism / Caribbean & Latin American",
-					"Literary Criticism / European / Spanish & Portuguese"
+					"Literary Criticism / European / Spanish & Portuguese",
+					"Literary Criticism / General",
+					"Literary Criticism / Caribbean & Latin American"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -418,6 +423,11 @@ var testCases = [
 		"type": "web",
 		"defer": true,
 		"url": "https://www.google.com/search?q=asimov&btnG=Search+Books&tbm=bks&tbo=1#q=asimov&hl=en&tbo=1&tbm=bks&ei=guBGUIDOCJP8qQG7u4DYCg&start=10&sa=N&fp=1&biw=1352&bih=588&bav=on.2,or.r_gc.r_pw.r_qf.&cad=b&sei=guBGUIDOCJP8qQG7u4DYCg",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://books.google.com/books?q=editions:HARVARD32044100176072&id=nFMSAAAAYAAJ",
 		"items": "multiple"
 	}
 ]
