@@ -84,7 +84,7 @@ function doWeb(doc, url) {
 }
 	
 function parseXML(text) {
-	Z.debug(text)
+	//Z.debug(text)
 	// Remove xml parse instruction and doctype
 	var parser = new DOMParser();
 	var xml = parser.parseFromString(text, "text/xml").documentElement;
