@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-02-05 23:37:27"
+	"lastUpdated": "2013-02-16 09:27:43"
 }
 
 /*
@@ -209,9 +209,9 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 		scrapeEM(doc, url, pdfUrl);
 		return;
 	}
-
-	var baseUrl = "http://onlinelibrary.wiley.com";
-	var postUrl = baseUrl + '/documentcitationdownloadformsubmit';
+	//leaving this here in case it's still needed
+	//var baseUrl = url.match(/https?:\/\/[^\/]+/); 
+	var postUrl = '/documentcitationdownloadformsubmit';
 	var body = 'doi=' + encodeURIComponent(doi) + 
 				'&fileFormat=BIBTEX' +
 				'&hasAbstract=CITATION_AND_ABSTRACT';
