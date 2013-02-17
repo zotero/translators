@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-09-04 23:26:27"
+	"lastUpdated": "2013-02-17 12:11:14"
 }
 
 /**
@@ -45,10 +45,7 @@ function scrape(doc, url, callDoneWhenFinished) {
 	}
 	//Z.debug(newurl)
 	Zotero.Utilities.HTTP.doGet(newurl, function (text) {
-		//LA is not an actual RIS tag, but we like to get that information where we can
-		if (text.match(/LA  -/)) {
-			var language = text.match(/LA  -.+/)[0].replace(/LA  - /, "");
-		};
+	
 		//Zotero.debug("RIS: " + text)
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -60,7 +57,10 @@ function scrape(doc, url, callDoneWhenFinished) {
 			if(item.libraryCatalog == "http://worldcat.org") {
 				item.libraryCatalog = "Open WorldCat";
 			}
-
+			//remove space before colon
+			item.title = item.title.replace(/\s+:/, ":")
+			
+			
 			//creators have period after firstName
 			for (i in item.creators) {
 				if (item.creators[i].firstName){
@@ -71,7 +71,6 @@ function scrape(doc, url, callDoneWhenFinished) {
 					item.creators[i].fieldMode=1;			
 				}
 			}
-			if (language) item.language = language;
 			//We want ebooks to be treated like books, not webpages (is ISBN the best choice here?)
 			if (item.itemType == "webpage" && item.ISBN) {
 				item.itemType = "book";
@@ -137,19 +136,13 @@ function doWeb(doc, url) {
 					articles.push(i);
 				}
 				//Z.debug(articles)
-				Zotero.Utilities.processDocuments(articles, scrape, function () {
-					Zotero.done();
-				});
-				Zotero.wait();
+				Zotero.Utilities.processDocuments(articles, scrape);
 			});
 		} else { //single item in search results, don't display a select dialog
 			var title = doc.evaluate('//div[@class="name"]/a[1]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 			if (!title) Zotero.done(false);
 			article = title.href;
-			Zotero.Utilities.processDocuments(article, scrape, function () {
-				Zotero.done();
-			});
-			Zotero.wait();
+			Zotero.Utilities.processDocuments(article, scrape);
 		}
 	} else { // regular single item	view
 		scrape(doc, url);
@@ -168,7 +161,6 @@ function doSearch(item) {
 			scrape(doc, url, true);
 		}
 	}, null);
-	Zotero.wait();
 } /** BEGIN TEST CASES **/
 var testCases = [
 	{
