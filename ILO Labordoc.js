@@ -3,13 +3,13 @@
 	"label": "ILO Labordoc",
 	"creator": "Sebastian Karcher",
 	"target": "^https?://labordoc\\.ilo\\.org",
-	"minVersion": "2.1.9",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-10-06 13:32:12"
+	"lastUpdated": "2013-02-18 13:08:49"
 }
 
 /*
@@ -56,29 +56,26 @@ function doWeb(doc, url) {
 				return true;
 			}
 			for (var i in items) {
-				articles.push(i);
+				articles.push(i.replace(/\?/, "/export/xm?"));
 			}
-			Zotero.Utilities.processDocuments(articles, scrape, function () {
-				Zotero.done();
-			});
-			Zotero.wait();
+			Zotero.Utilities.HTTP.doGet(articles, scrape);
 		});
 
 
 	} else {
-		scrape(doc, url);
+		Zotero.Utilities.HTTP.doGet(url.replace(/\?/, "/export/xm?"), scrape);
 	}
 }
 
-function scrape(doc, url) {
-	var pdflink = ZU.xpath(doc, '//td[@class="detailsLinks"]/a[contains(@href, "pdf")]/@href')
-	var newURL = url.replace(/\?/, "/export/xm?");
-	Zotero.Utilities.HTTP.doGet(newURL, function (text) {
+function scrape(text) {
+	var docxml = (new DOMParser()).parseFromString(text, "text/xml");
+	ns = {"marc": "http://www.loc.gov/MARC21/slim"};
+	var xpath = '//marc:datafield[@tag="856"]/marc:subfield[contains(text(),".pdf")]/text()';
+	var pdflink = ZU.xpath(docxml, xpath, ns);
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("edd87d07-9194-42f8-b2ad-997c4c7deefd");
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
-			if (pdflink != null) {
 				for (i in pdflink) {
 					item.attachments[i] = ({
 						url: pdflink[i].textContent,
@@ -86,11 +83,9 @@ function scrape(doc, url) {
 						mimeType: "application/pdf"
 					});
 				}
-			}
 			item.complete();
 		});
 		translator.translate();
-	}) //doGet end
 } 
 /** BEGIN TEST CASES **/
 var testCases = [
