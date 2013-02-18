@@ -77,7 +77,6 @@ var fieldMap = {
 	isbn:"ISBN",
 	issn:"ISSN",
 	lccn:"callNumber",
-	location:"archiveLocation",
 	shorttitle:"shortTitle",
 	url:"url",
 	doi:"DOI",
@@ -92,7 +91,8 @@ var inputFieldMap = {
 	school:"publisher",
 	institution:"publisher",
 	publisher:"publisher",
-	issue:"issue"
+	issue:"issue",
+	location:"place"
 };
 
 var zotero2bibtexTypeMap = {
