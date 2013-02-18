@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-11-15 16:25:08"
+	"lastUpdated": "2013-02-17 20:41:30"
 }
 
 function detectImport() {
@@ -664,7 +664,8 @@ function applyValue(item, zField, value, rawLine) {
 	}
 
 	//check if field is valid for item type
-	if(zField != 'creators' && zField != 'tags'
+	if(!Zotero.parentTranslator //cannot use this in connectors, plus we drop notes in most cases anyway
+		&& zField != 'creators' && zField != 'tags'
 		&& zField != 'notes' && zField != 'attachments'
 		&& !ZU.fieldIsValidForType(zField, item.itemType)) {
 		Z.debug("Invalid field '" + zField + "' for item type '" + item.itemType + "'.");
