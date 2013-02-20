@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-12-20 07:30:34"
+	"lastUpdated": "2013-02-18 22:51:30"
 }
 
 /*
@@ -364,6 +364,8 @@ function detectType(newItem, node, ret) {
 		if(Zotero.Utilities.itemTypeExists(type)) {
 			t.dc = type;
 		} else {
+			//on eprints the type fields are often in the form "Journal Article", "Conference Item" etc.
+			//type = type.toLowerCase().replace(/\s/g, "")
 			switch (type) {
 				//eprints
 				//from http://www.ukoln.ac.uk/repositories/digirep/index/Eprints_Type_Vocabulary_Encoding_Scheme
@@ -394,7 +396,21 @@ function detectType(newItem, node, ret) {
 					t.dc = 'journalArticle';
 					break;
 				case 'workingpaper':
-					t.dc = 'manuscript';
+					t.dc = 'report';
+					break;
+				
+				//via examples from oro.open.ac.uk, http://eprints.soton.ac.uk/
+				case 'musicitem':
+					t.dcGuess = 'audioRecording';
+					break;
+				case 'artdesignitem':
+					t.dcGuess = 'artwork`';
+					break;
+				case 'authoredbook':
+					t.dc= 'book';
+					break;
+				case 'bookchapter':
+					t.dc = 'bookSection';
 					break;
 
 				//from http://www.idealliance.org/specifications/prism/specifications/prism-controlled-vocabularies/prism-12-controlled-vocabularies
@@ -450,6 +466,75 @@ function detectType(newItem, node, ret) {
 			}
 		}
 	}
+
+
+	type = getFirstResults(node, [n.eprints+"type"], true);
+	if(type) {
+			switch (type) {
+				//eprints
+				//from http://www.ukoln.ac.uk/repositories/digirep/index/Eprints_Type_Vocabulary_Encoding_Scheme
+				case 'book':
+				case 'patent':
+				case 'report':
+				case 'thesis':
+					t.eprints = type;
+					break;
+				case 'bookitem':
+					t.eprints = 'bookSection';
+					break;
+				//case 'bookreview':
+				
+				case 'conferenceitem':
+				case 'conferencepaper':
+				case 'conferenceposter':
+					t.eprints = 'conferencePaper';
+					break;
+				case 'journalitem':
+				case 'journalarticle':
+				case 'submittedjournalarticle':
+				case 'article':
+					t.eprints = 'journalArticle';
+					break;
+				case 'newsitem':
+					t.eprints = 'newspaperArticle';
+					break;
+				case 'scholarlytext':
+					t.eprints = 'journalArticle';
+					break;
+				case 'workingpaper':
+					t.eprints = 'report';
+					break;
+				//from  samples at http://oro.open.ac.uk, http://eprints.soton.ac.uk/, http://eprints.biblio.unitn.it
+				case 'techreport':
+				case 'dataset':  
+				//map to dataset once we have it as item type
+					t.eprints = 'report';
+					break;
+				case 'bookedit':
+				case 'proceedings':
+					t.eprints = 'book';
+					break;
+				case 'book_section':
+					t.eprints = 'bookSection';
+				break;
+				case 'ad_item':
+					t.eprints = 'artwork';
+				break;
+				case 'mu_item':
+					t.eprints = 'audioRecording';
+				break;
+				case 'confpaper':
+				case 'conference_item':
+					if (getFirstResults(node, [n.eprints+"type"], true) && getFirstResults(node, [n.eprints+"ispublished"], true) == "unpub"){
+						t.eprints = 'presentation';}
+					else t.eprints = 'conferencePaper';
+				break;
+				
+			}
+	}
+
+
+
 
 	// og:type
 	type = getFirstResults(node, [n.og+"type"], true);
@@ -566,9 +651,9 @@ function detectType(newItem, node, ret) {
 		break;
 	}
 
-	var itemType = t.zotero || t.bib || t.prism || t.og || t.dc ||
+	var itemType = t.zotero || t.bib || t.prism ||t.eprints|| t.og || t.dc || 
 		exports.defaultUnknownType || t.zoteroGuess || t.bibGuess || 
-		t.prismGuess || t.ogGuess || t.dcGuess
+		t.prismGuess || t.ogGuess || t.dcGuess 
 
 	//in case we still don't have a container, double-check
 	//some are copied from above
@@ -636,7 +721,11 @@ function importItem(newItem, node) {
 				n.dcterms+"creator", n.eprints+"creators_name",
 				n.dc+"contributor", n.dc1_0+"contributor", n.dcterms+"contributor"]);
 		} else if(creatorType == "editor" || creatorType == "contributor") {
-			creators = getFirstResults(node, [n.bib+creatorType+"s"]);
+			creators = getFirstResults(node, [n.bib+creatorType+"s", n.eprints+creatorType+"s_name"]);
+		//get presenters in unpublished conference papers on eprints
+		}else if(creatorType == "presenter") {
+			creators = getFirstResults(node, [n.z+creatorType+"s", n.eprints+"creators_name"]);
+
 		} else {
 			creators = getFirstResults(node, [n.z+creatorType+"s"]);
 		}
@@ -644,10 +733,11 @@ function importItem(newItem, node) {
 		if(creators) handleCreators(newItem, creators, creatorType);
 	}
 	
-	// publicationTitle -- first try PRISM, then DC
-	newItem.publicationTitle = getFirstResults(node, [n.prism+"publicationName", n.prism2_0+"publicationName", n.prism2_1+"publicationName", n.eprints+"publication",
-		n.dc+"source", n.dc1_0+"source", n.dcterms+"source", n.og+"site_name"], true);
 	
+	// publicationTitle -- first try PRISM, then DC
+	newItem.publicationTitle = getFirstResults(node, [n.prism+"publicationName", n.prism2_0+"publicationName", n.prism2_1+"publicationName", n.eprints+"publication", n.eprints+"book_title",	n.dc+"source", n.dc1_0+"source", n.dcterms+"source", n.og+"site_name"], true);
+	
+
 	// rights
 	newItem.rights = getFirstResults(node, [n.prism+"copyright", n.prism2_0+"copyright", n.prism2_1+"copyright", n.dc+"rights", n.dc1_0+"rights", n.dcterms+"rights"], true);
 	
@@ -693,7 +783,7 @@ function importItem(newItem, node) {
 	}
 	if(!newItem.issue) {
 		newItem.issue = getFirstResults(node, [n.prism+"number", n.prism2_0+"number", n.prism2_1+"number",
-			n.eprints+"number", n.bibo+"issue", n.dcterms+"citation.issue"], true);
+			n.eprints+"number", n.bibo+"issue", n.dcterms+"citation.issue", n.eprints+"id_number"], true);
 	}
 
 	// these mean the same thing
@@ -716,7 +806,7 @@ function importItem(newItem, node) {
 	}
 	
 	// numPages
-	newItem.numPages = getFirstResults(node, [n.bibo+"numPages"], true);
+	newItem.numPages = getFirstResults(node, [n.bibo+"numPages", n.eprints+"pages"], true);
 
 	// numberOfVolumes
 	newItem.numberOfVolumes = getFirstResults(node, [n.bibo+"numVolumes"], true);
@@ -728,7 +818,7 @@ function importItem(newItem, node) {
 	newItem.artworkMedium = newItem.interviewMedium = getFirstResults(node, [n.dcterms+"medium"], true);
 	
 	// publisher
-	var publisher = getFirstResults(node, [n.dc+"publisher", n.dc1_0+"publisher", n.dcterms+"publisher", n.vcard2+"org"]);
+	var publisher = getFirstResults(node, [n.dc+"publisher", n.dc1_0+"publisher", n.dcterms+"publisher", n.vcard2+"org", n.eprints+"institution"]);
 	if(publisher) {
 		if(typeof(publisher[0]) == "string") {
 			newItem.publisher = publisher[0];
@@ -747,6 +837,12 @@ function importItem(newItem, node) {
 				}
 			}
 		}
+	}
+
+	//place
+	if (!newItem.place){
+		//Prefer place of publication to conference location
+		newItem.place = getFirstResults(node, [n.eprints+"place_of_pub", n.eprints+"event_location"], true);
 	}
 	
 	// these fields mean the same thing
@@ -806,6 +902,8 @@ function importItem(newItem, node) {
 		n.prism+"eIssn", n.prism2_0+"eIssn", n.prism2_1+"eIssn", n.bibo+"eissn"], true) || newItem.ISSN;
 	// ISBN from PRISM
 	newItem.ISBN = getFirstResults((container ? container : node), [n.prism2_1+"isbn", n.bibo+"isbn", n.bibo+"isbn13", n.bibo+"isbn10"], true) || newItem.ISBN;
+	// ISBN from eprints
+	newItem.ISBN = getFirstResults(node, [n.eprints+"isbn"], true);
 	// DOI from PRISM
 	newItem.DOI = getFirstResults(node, [n.prism2_0+"doi", n.prism2_1+"doi", n.bibo+"doi"], true) || newItem.DOI;
 	
@@ -833,6 +931,15 @@ function importItem(newItem, node) {
 		newItem[property] = type;
 	}
 	
+	//thesis type from eprints
+	if (newItem.itemType == "thesis"){
+		newItem.thesisType = getFirstResults(node, [n.eprints+"thesis_type"], true);
+	}
+	//presentation type from eprints
+	if (newItem.itemType == "presentation"){
+		newItem.presentationType = getFirstResults(node, [n.eprints+"event_type"], true);
+	}
+
 	// conferenceName
 	var conference = getFirstResults(node, [n.bib+"presentedAt"]);
 	if(conference) {
@@ -843,7 +950,13 @@ function importItem(newItem, node) {
 			newItem.conferenceName = getFirstResults(conference, [n.dc+"title", n.dc1_0+"title", n.dcterms+"title"], true);
 		}
 	}
-	
+	//from eprints
+	if (!newItem.conferenceName){
+		newItem.conferenceName = getFirstResults(node, [n.eprints+"event_title"]);
+	}
+	//conference and meeting name are the same	
+	newItem.meetingName = newItem.conferenceName;
+
 	// journalAbbreviation
 	newItem.journalAbbreviation = getFirstResults((container ? container : node), [n.dcterms+"alternative"], true);
 	
