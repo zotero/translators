@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 5,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-02-21 16:34:15"
+	"lastUpdated": "2013-02-21 17:17:24"
 }
 
 function detectWeb(doc, url) {
@@ -105,6 +105,7 @@ function fetchIds(ids, doc) {
 	postData['selectedIds'] = selectedIds;
 
 	var postUrl = outputForm.action;
+	Z.debug("Posting to " + postUrl);
 	ZU.doPost(postUrl, serializePostData(postData), function (text) {
 		//everything it mostly the same as above except for a few fields
 		var postData2 = {}
