@@ -167,12 +167,12 @@ function scrapeEM(doc, url, next) {
 
 		if (item.notes) item.notes = [];
 		
-		if(ZU.cleanISSN) {	//introduced in 3.0.12
+		if(item.ISSN && ZU.cleanISSN) {	//introduced in 3.0.12
 			var issn = ZU.cleanISSN(item.ISSN);
 			if(!issn) delete item.ISSN;
 			else item.ISSN = issn;
-		} else {
-			if(item.ISSN === "ERROR! NO ISSN") delete item.ISSN;
+		} else if(item.ISSN === "ERROR! NO ISSN") {
+			delete item.ISSN;
 		}
 
 		next(item);
