@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 5,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-02-21 16:23:46"
+	"lastUpdated": "2013-02-21 16:34:15"
 }
 
 function detectWeb(doc, url) {
@@ -313,13 +313,23 @@ function completeItem(item) {
 
 function doImport(text) {
 	var tag = data = false;
+	var debugBuffer = '';	//in case nothing is found
+	var linesRead = 0, bufferMax = 100;
 	var line = Zotero.read();
 	// first valid line is type
 	while(line !== false && line.replace(/^\s+/, "").substr(0, 6).search(/^PT [A-Z]/) == -1) {
+		if(linesRead < bufferMax) debugBuffer += line + '\n';
+		linesRead++;
 		line = Zotero.read();
 	}
 
-	if(line === false) return;
+	if(line === false) {
+		Z.debug("No valid data found\n" +
+			"Read " + linesRead + " lines.\n" +
+			"Here are the first " + (linesRead<bufferMax?linesRead:bufferMax) + " lines:\n" +
+			debugBuffer);
+		return;
+	}
 
 	var item = new Zotero.Item();
 	var i = 0;
