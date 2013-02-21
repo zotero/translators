@@ -8,8 +8,8 @@
 	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-02-21 13:11:40"
+	"browserSupport": "gcsib",
+	"lastUpdated": "2013-02-21 13:44:33"
 }
 
 /**
@@ -241,8 +241,8 @@ function getMultipleNodes(doc, url) {
 			//oncogene
 			{
 				'nodex': '//div[child::*[@class="atl"]]',
-				'titlex': './' + allHNodes + '/node()[not(self::span)]',
-				'linkx': './p[@class="links"]/a[contains(text(),"Full Text") or contains(text(),"Full text")]'
+				'titlex': './' + allHNodes + '[last()]/node()[not(self::span)]',	//ignore "subheading"
+				'linkx': './p[@class="links" or @class="articlelinks"]/a[contains(text(),"Full Text") or contains(text(),"Full text")]'
 			},
 			//embo journal
 			{
@@ -255,6 +255,18 @@ function getMultipleNodes(doc, url) {
 				'nodex': '//ul[contains(@class,"article-list") or contains(@class,"collapsed-list")]/li',
 				'titlex': './/' + allHNodes + '/a',
 				'linkx': './/' + allHNodes + '/a'
+			},
+			//archive (e.g. http://www.nature.com/bonekey/archive/type.html)
+			{
+				'nodex': '//table[@class="archive"]/tbody/tr',
+				'titlex': './td/hgroup/' + allHNodes + '[last()]/a',
+				'linkx': './td/hgroup/' + allHNodes + '[last()]/a',
+			},
+			//some more ToC (e.g. http://www.nature.com/nrcardio/journal/v5/n1s/index.html)
+			{
+				'nodex': '//div[@class="container"]/div[./h4[@class="norm"] and ./p[@class="journal"]/a[@title]]',
+				'titlex': './h4[@class="norm"]',
+				'linkx': './p[@class="journal"]/a[@title][1]'
 			}
 		];
 
@@ -266,7 +278,9 @@ function getMultipleNodes(doc, url) {
 			nodes = Zotero.Utilities.xpath(doc, nodex);
 		}
 	}
-
+	
+	if(nodes.length) Z.debug("multiples found using: " + nodex);
+	
 	return [nodes, titlex, linkx];
 }
 
@@ -403,7 +417,7 @@ function doWeb(doc, url) {
 		
 		if (nodes.length == 0) {
 			Z.debug("no multiples");
-			return false; //nothing matched
+			//return false; //keep going so we can report this to zotero.org instead of "silently" failing
 		}
 		var items = new Object();
 		var title, url;
@@ -1755,6 +1769,16 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.nature.com/ng/journal/v38/n11/index.html",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.nature.com/nbt/journal/v30/n3/index.html",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.nature.com/bonekey/archive/type.html",
 		"items": "multiple"
 	}
 ]
