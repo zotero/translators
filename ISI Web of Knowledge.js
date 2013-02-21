@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 5,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-01-29 16:59:52"
+	"lastUpdated": "2013-02-21 16:23:46"
 }
 
 function detectWeb(doc, url) {
@@ -126,6 +126,15 @@ function fetchIds(ids, doc) {
 		} else {
 			qid = postData['qid']*1+1;	//this can be wrong if pages are refreshed
 			Z.debug("Could not find qid on page. Using 1 + previous qid: " + qid);
+			text = text.replace(/\s*[\r\n]\s*/g, '\n');	//trim out the extra newlines
+			var forms = text.match(/<form[\s\S]+?<\/form>/ig);
+			if(forms) {
+				Z.debug("Page contained the following forms:");
+				Z.debug(forms.join('\n==============================\n'));
+			} else {
+				Z.debug("Could not find any forms on the page. Here's the whole HTML");
+				Z.debug(text);
+			}
 		}
 		postData2['qid'] = qid;
 
@@ -303,12 +312,14 @@ function completeItem(item) {
 }
 
 function doImport(text) {
-	var line = true;
 	var tag = data = false;
-	do {    // first valid line is type
+	var line = Zotero.read();
+	// first valid line is type
+	while(line !== false && line.replace(/^\s+/, "").substr(0, 6).search(/^PT [A-Z]/) == -1) {
 		line = Zotero.read();
-		line = line.replace(/^\s+/, "");
-	} while(line !== false && !line.substr(0, 6).match(/^PT [A-Z]/));
+	}
+
+	if(line === false) return;
 
 	var item = new Zotero.Item();
 	var i = 0;
