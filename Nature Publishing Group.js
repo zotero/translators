@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-01-25 17:55:13"
+	"lastUpdated": "2013-02-21 13:11:40"
 }
 
 /**
@@ -215,14 +215,73 @@ function scrapeRIS(doc, url, next) {
 	}
 }
 
+function getMultipleNodes(doc, url) {
+	var allHNodes = '*[self::h1 or self::h2 or self::h3 or self::h4 or self::h5]';
+	var nodex, titlex, linkx;
+	var nodes = [];
+
+	if (url.indexOf('/search/') != -1 || url.indexOf('/most.htm') != -1) {
+		//search, "top" lists
+		nodex = '//ol[@class="results-list" or @id="content-list"]/li';
+		titlex = './' + allHNodes + '/node()[not(self::span)]';
+		linkx = './' + allHNodes + '/a';
+
+		nodes = Zotero.Utilities.xpath(doc, nodex);
+	} else {
+
+		//Maybe there's a nice way to figure out which journal uses what style, but for now we'll just try one until it matches
+		//these seem to be listed in order of frequency
+		var styles = [
+			//ToC
+			{
+				'nodex': '//tr[./td/span[@class="articletitle"]]',
+				'titlex': './td/span[@class="articletitle"]',
+				'linkx': './td/a[@class="contentslink" and substring(@href, string-length(@href)-3) != "pdf"][1]' //abstract or full text
+			},
+			//oncogene
+			{
+				'nodex': '//div[child::*[@class="atl"]]',
+				'titlex': './' + allHNodes + '/node()[not(self::span)]',
+				'linkx': './p[@class="links"]/a[contains(text(),"Full Text") or contains(text(),"Full text")]'
+			},
+			//embo journal
+			{
+				'nodex': '//ul[@class="articles"]/li',
+				'titlex': './' + allHNodes + '[@class="article-title"]/node()[not(self::span)]',
+				'linkx': './ul[@class="article-links"]/li/a[contains(text(),"Full Text") or contains(text(),"Full text")]'
+			},
+			//nature
+			{
+				'nodex': '//ul[contains(@class,"article-list") or contains(@class,"collapsed-list")]/li',
+				'titlex': './/' + allHNodes + '/a',
+				'linkx': './/' + allHNodes + '/a'
+			}
+		];
+
+		for (var i = 0; i < styles.length && !nodes.length; i++) {
+			nodex = styles[i].nodex;
+			titlex = styles[i].titlex;
+			linkx = styles[i].linkx;
+
+			nodes = Zotero.Utilities.xpath(doc, nodex);
+		}
+	}
+
+	return [nodes, titlex, linkx];
+}
+
 function detectWeb(doc, url) {
 	if (url.match(/\/(full|abs)\/[^\/]+($|\?|#)/)) {
 
 		return 'journalArticle';
 
-	} else if (doc.title.toLowerCase().indexOf('table of contents') != -1 || //single issue ToC. e.g. http://www.nature.com/emboj/journal/v30/n1/index.html or http://www.nature.com/nature/journal/v481/n7381/index.html
-	doc.title.toLowerCase().indexOf('current issue') != -1 || url.indexOf('/research/') != -1 || url.indexOf('/topten/') != -1 || url.indexOf('/most.htm') != -1 || (url.indexOf('/vaop/') != -1 && url.indexOf('index.html') != -1) || //advanced online publication
-	url.indexOf('sp-q=') != -1) { //search query
+	} else if (doc.title.toLowerCase().indexOf('table of contents') != -1 //single issue ToC. e.g. http://www.nature.com/emboj/journal/v30/n1/index.html or http://www.nature.com/nature/journal/v481/n7381/index.html
+		|| doc.title.toLowerCase().indexOf('current issue') != -1
+		|| url.indexOf('/research/') != -1 || url.indexOf('/topten/') != -1
+		|| url.indexOf('/most.htm') != -1
+		|| (url.indexOf('/vaop/') != -1 && url.indexOf('index.html') != -1) //advanced online publication
+		|| url.indexOf('sp-q=') != -1 //search query
+		|| url.search(/journal\/v\d+\/n\d+\/index\.html/i)) { //more ToC
 		return 'multiple';
 
 	} else if (url.indexOf('/archive/') != -1) {
@@ -337,51 +396,15 @@ function scrape(doc, url) {
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
-		var allHNodes = '*[self::h1 or self::h2 or self::h3 or self::h4 or self::h5]';
-		var nodex, titlex, linkx;
-		var nodes = [];
-
-		if (url.indexOf('/search/') != -1 || url.indexOf('/most.htm') != -1) {
-			//search, "top" lists
-			nodex = '//ol[@class="results-list" or @id="content-list"]/li';
-			titlex = './' + allHNodes + '/node()[not(self::span)]';
-			linkx = './' + allHNodes + '/a';
-
-			nodes = Zotero.Utilities.xpath(doc, nodex);
-		} else {
-
-			//Maybe there's a nice way to figure out which journal uses what style, but for now we'll just try one until it matches
-			//these seem to be listed in order of frequency
-			var styles = [
-			//oncogene
-			{
-				'nodex': '//div[child::*[@class="atl"]]',
-				'titlex': './' + allHNodes + '/node()[not(self::span)]',
-				'linkx': './p[@class="links"]/a[contains(text(),"Full Text") or contains(text(),"Full text")]'
-			},
-			//embo journal
-			{
-				'nodex': '//ul[@class="articles"]/li',
-				'titlex': './' + allHNodes + '[@class="article-title"]/node()[not(self::span)]',
-				'linkx': './ul[@class="article-links"]/li/a[contains(text(),"Full Text") or contains(text(),"Full text")]'
-			},
-			//nature
-			{
-				'nodex': '//ul[contains(@class,"article-list") or contains(@class,"collapsed-list")]/li',
-				'titlex': './/' + allHNodes + '/a',
-				'linkx': './/' + allHNodes + '/a'
-			}];
-
-			for (var i = 0; i < styles.length && nodes.length == 0; i++) {
-				nodex = styles[i].nodex;
-				titlex = styles[i].titlex;
-				linkx = styles[i].linkx;
-
-				nodes = Zotero.Utilities.xpath(doc, nodex);
-			}
+		var nodes = getMultipleNodes(doc, url);
+		var titlex = nodes[1];
+		var linkx = nodes[2];
+		nodes = nodes[0];
+		
+		if (nodes.length == 0) {
+			Z.debug("no multiples");
+			return false; //nothing matched
 		}
-
-		if (nodes.length == 0) return false; //nothing matched
 		var items = new Object();
 		var title, url;
 		for (var i = 0; i < nodes.length; i++) {
@@ -1308,6 +1331,7 @@ var testCases = [
 				"url": "http://www.nature.com/ng/journal/v38/n11/full/ng1901.html",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.nature.com",
+				"abstractNote": "The estrogen receptor is the master transcriptional regulator of breast cancer phenotype and the archetype of a molecular therapeutic target. We mapped all estrogen receptor and RNA polymerase II binding sites on a genome-wide scale, identifying the authentic cis binding sites and target genes, in breast cancer cells. Combining this unique resource with gene expression data demonstrates distinct temporal mechanisms of estrogen-mediated gene regulation, particularly in the case of estrogen-suppressed genes. Furthermore, this resource has allowed the identification of cis-regulatory sites in previously unexplored regions of the genome and the cooperating transcription factors underlying estrogen signaling in breast cancer.",
 				"journalAbbreviation": "Nat Genet",
 				"ISSN": "1061-4036"
 			}
@@ -1727,6 +1751,11 @@ var testCases = [
 				"journalAbbreviation": "Nat Struct Mol Biol"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.nature.com/ng/journal/v38/n11/index.html",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
