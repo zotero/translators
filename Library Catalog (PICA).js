@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-02-05 14:11:16"
+	"lastUpdated": "2013-02-24 11:40:34"
 }
 
 /*Works for many, but not all PICA versions. Tested with:
@@ -87,12 +87,19 @@ function scrape(doc, url) {
 	var rowXpath = '//tr[td[@class="rec_lable"]]';
 	var tableRows = doc.evaluate(rowXpath, doc, null, XPathResult.ANY_TYPE, null);
 	var tableRow, role;
+	var authorpresent = false;
 	while (tableRow = tableRows.iterateNext()) {
 		var field = doc.evaluate('./td[@class="rec_lable"]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		var value = doc.evaluate('./td[@class="rec_title"]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		field = ZU.trimInternal(ZU.superCleanString(field.trim()))
-			.toLowerCase().replace(/\(s\)/g, '');
-
+			.toLowerCase().replace(/\(s\)/g, '');	
+		// With COins, we only get one author - so we start afresh. We do so in two places: Here if there is an author fied
+		//further down for other types of author fields. This is so we don't overwrite the author array when we have both an author and 
+		//a other persons field (cf. the Scheffer/Schachtschabel/Blume/Thiele test)
+		if (field == "author" || field == "auteur" || field == "verfasser"){ 
+			authorpresent = true;
+			newItem.creators = new Array();
+		}	
 		//Z.debug(field + ": " + value)
 		//french, english, german, and dutch interface
 		switch (field) {
@@ -104,8 +111,9 @@ function scrape(doc, url) {
 			case 'sonst. personen':
 				if (field == 'medewerker') role = "editor";
 				else role = "author";
-				// With COins, we only get one author - so we start afresh.
-				newItem.creators = new Array();
+				
+				if (!authorpresent) newItem.creators = new Array();
+				if (authorpresent && (field=="sonst. personen" || field=="other persons")) role = "editor";
 				//sudoc has authors on separate lines and with different format - use this
 				if (url.search(/sudoc\.(abes\.)?fr/) != -1) {
 
@@ -146,7 +154,6 @@ function scrape(doc, url) {
 					}
 
 				} else {
-					//all non SUDOC catalogs separate authors by semicolon
 					var authors = value.split(/\s*;\s*/);
 					for (var i in authors) {
 						var author = authors[i].replace(/[\*\(].+[\)\*]/, "");
@@ -155,6 +162,10 @@ function scrape(doc, url) {
 					}
 				}
 				break;
+			
+			case 'edition':
+			case 'ausgabe':
+				newItem.edition = value;
 
 			case 'dans':
 			case 'in':
@@ -1249,6 +1260,67 @@ var testCases = [
 				"publisher": "Homescreen",
 				"runningTime": "92 min",
 				"place": "Amsterdam"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://gso.gbv.de/DB=2.1/PPNSET?PPN=600530787",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Fritz",
+						"lastName": "Scheffer",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Paul",
+						"lastName": "Schachtschabel",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hans-Peter",
+						"lastName": "Blume",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Sören",
+						"lastName": "Thiele",
+						"creatorType": "editor"
+					}
+				],
+				"notes": [
+					{
+						"note": "<div><span>Literaturangaben</span></div>"
+					}
+				],
+				"tags": [
+					"Bodenkunde / Lehrbuch"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot",
+						"type": "text/html",
+						"snapshot": true
+					}
+				],
+				"date": "2010",
+				"ISBN": "978-3-8274-1444-1",
+				"pages": "569",
+				"title": "Lehrbuch der Bodenkunde",
+				"place": "Heidelberg",
+				"publisher": "Spektrum,  Akad.-Verl.",
+				"libraryCatalog": "Library Catalog - gso.gbv.de",
+				"edition": "16. Aufl.",
+				"numPages": "569"
 			}
 		]
 	}
