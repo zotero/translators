@@ -9,11 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-02-15 15:56:54"
+	"lastUpdated": "2013-02-25 00:03:31"
 }
 
 /*
-    Translator
+	Translator
    Copyright (C) 2013 Sebastian Karcher
 
    This program is free software: you can redistribute it and/or modify
@@ -154,11 +154,12 @@ var testCases = [
 					"comportamento eleitoral",
 					"eleições presidenciais",
 					"simpatia partidária",
-					"ESEB2010.Political parties",
+					"ESEB2010",
+					"Political parties",
 					"electoral behavior",
 					"presidential elections",
 					"party sympathy",
-					"CSES-ESEB2010."
+					"CSES-ESEB2010"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -174,7 +175,13 @@ var testCases = [
 				"title": "Os partidos políticos brasileiros realmente não importam?",
 				"publicationTitle": "Opinião Pública",
 				"abstractNote": "Há décadas a constatação corrente no Brasil é de que os partidos pouco importam para explicar o comportamento dos eleitores brasileiros. Entretanto, esse cenário de baixa identificação partidária contrasta com a observação de que, ao menos para as eleições presidenciais a competição eleitoral tem se...",
+				"date": "2011",
+				"volume": "17",
+				"issue": "2",
 				"publisher": "Universidade Estadual de Campinas",
+				"language": "pt",
+				"pages": "271-303",
+				"ISSN": "0104-6276, 1807-0191",
 				"url": "http://www.redalyc.org/resumen.oa?id=32921102001",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.redalyc.org"

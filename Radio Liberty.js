@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-11-26 22:36:39"
+	"lastUpdated": "2013-02-25 00:15:59"
 }
 
 /*
@@ -86,38 +86,38 @@ function detectWeb(doc, url){
 }
 
 function doWeb(doc, url){
-	var n = doc.documentElement.namespaceURI;
-	var ns = n ? function(prefix) {
-		if (prefix == 'x') return n; else return null;
-	} : null;
 	
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		var results = doc.evaluate('//div[@class="searchResultItem"]', doc, ns, XPathResult.ANY_TYPE, null);
+		var results = doc.evaluate('//div[@class="searchResultItem"]', doc, null, XPathResult.ANY_TYPE, null);
 		var items = new Array();
 		var result;
 		while(result = results.iterateNext()) {
-			var link = doc.evaluate('./a[@class="resultLink"]', result, ns, XPathResult.ANY_TYPE, null).iterateNext();
+			var link = doc.evaluate('./a[@class="resultLink"]', result, null, XPathResult.ANY_TYPE, null).iterateNext();
 			var title = link.textContent;
 			var url = link.href;
 			items[url] = title;
 		}
-		items = Zotero.selectItems(items);
-		if(!items) return true;
-		for (var i in items) {
-			articles.push(i);
-		}
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			Zotero.Utilities.processDocuments(articles, scrape);	
+		});
 	} else {
-		articles = [url];
+		scrape(doc, url);
 	}
 	
-	Zotero.Utilities.processDocuments(articles, function(doc) {
+function scrape(doc, url){
 		item = new Zotero.Item("newspaperArticle");
 		item.title = Zotero.Utilities.trimInternal(
-			doc.evaluate('//h1', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent
+			doc.evaluate('//h1', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent
 		);
 		
-		var author = doc.evaluate('//div[@id="article"]//div[@class="author"]', doc, ns, XPathResult.ANY_TYPE, null);
+		var author = doc.evaluate('//div[@id="article"]//div[@class="author"]', doc, null, XPathResult.ANY_TYPE, null);
 		if ((author = author.iterateNext()) !== null) {
 			author = author.textContent;
 			// Sometimes we have "By Author"
@@ -139,12 +139,12 @@ function doWeb(doc, url){
 			item.creators.push(cleaned);
 		}
 		// The section should _always_ be present
-		item.section = doc.evaluate('//div[@id="article" or @class="middle_content"]/h2', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent.trim();
+		item.section = ZU.xpathText(doc, '//div[@id="article" or contains(@class, "middle_content")]/h2');
 
 		// This exposes a limitation of Zotero's date handling; the Afghan services
 		// use the Hijri calendar, and mixed sorting looks funny-- I'd like to be able
 		// to mark such dates to be handled appropriately
-		var date = doc.evaluate('//div[@id="article"]//p[@class="article_date"]', doc, ns, XPathResult.ANY_TYPE, null);
+		var date = doc.evaluate('//div[@id="article"]//p[@class="article_date"]', doc, null, XPathResult.ANY_TYPE, null);
 		if ((date = date.iterateNext()) !== null) {
 			// sometimes not present
 			item.date = Zotero.Utilities.trimInternal(date.textContent);
@@ -156,7 +156,7 @@ function doWeb(doc, url){
 		// 	characters that may occur in city names.
 		//	This all-caps class is borrowed from utilities.js and augmented by
 		//	the basic Cyrillic capital letters.
-		var textnode = doc.evaluate('//div[@id="article"]//div[@class="zoomMe"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
+		var textnode = doc.evaluate('//div[@id="article"]//div[@class="zoomMe"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 		if (textnode) {
 			var text = textnode.textContent;
 			hits = text.match(/([A-ZА-Я \u0400-\u042f]+) \((.*)\) --/);
@@ -172,7 +172,7 @@ function doWeb(doc, url){
 		}
 
 		item.url = url;
-		item.publicationTitle = doc.evaluate('//h2[@id="header_logo_anchor" or @id="header_logo"]//span', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		item.publicationTitle = doc.evaluate('//h2[@id="header_logo_anchor" or @id="header_logo"]//span', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.trim();
 
 		// Language map:
 		var map = {
@@ -210,13 +210,12 @@ function doWeb(doc, url){
 		*/
 		item.attachments.push({url:url, title: (item.publicationTitle + " Snapshot"), mimeType:"text/html"});
 
-		var listenLink = doc.evaluate('//li[@class="listenlink"]/a', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
+		var listenLink = doc.evaluate('//li[@class="listenlink"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 		if (listenLink) {
 				Zotero.Utilities.doGet(listenLink.href, addAudio, null);
 		} else item.complete();
 
-	}, function() {Zotero.done();});
-	Zotero.wait();
+	}
 }
 
 function addAudio(text) {
@@ -278,7 +277,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": " Радио Свобода  Snapshot",
+						"title": "Радио Свобода Snapshot",
 						"mimeType": "text/html"
 					}
 				],

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-02-06 23:58:52"
+	"lastUpdated": "2013-02-24 23:25:00"
 }
 
 function detectWeb(doc, url) {
@@ -197,6 +197,11 @@ var testCases = [
 						"lastName": "étoile",
 						"creatorType": "contributor",
 						"fieldMode": 1
+					},
+					{
+						"firstName": "photo by France",
+						"lastName": "Ruffenach",
+						"creatorType": "contributor"
 					}
 				],
 				"notes": [

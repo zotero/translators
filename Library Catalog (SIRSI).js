@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-12-16 17:55:02"
+	"lastUpdated": "2013-02-24 23:49:10"
 }
 
 /*Spanish Libraries:
@@ -424,16 +424,11 @@ var testCases = [
 						"firstName": "Harry E.",
 						"lastName": "Vanden",
 						"creatorType": "author"
-					},
-					{
-						"firstName": "Gary",
-						"lastName": "Prevost",
-						"creatorType": "contributor"
 					}
 				],
 				"notes": [
 					"1. An introduction to twenty-first century Latin America -- 2. Early history -- 3. Democracy and dictators: a historical overview from independence to the present day -- 4. The other Americans -- 5. Society, family, and gender -- 6. Religion in Latin America -- 7. The political economy of Latin America -- 8. Democracy and authoritarianism: Latin American political culture -- 9. Politics, power, institutions, and actors -- 10. Struggling for change: revolution, social and political movements in Latin America -- 11. U.S.-Latin American relations -- 12. Guatemala / Susanne Jonas -- 13. Mexico / Nora Hamilton -- 14. Cuba / Gary Prevost -- 15. Brazil / Wilber Albert Chaffee -- 16. Argentina / Aldo C. Vacs -- 17. Chile / Eduardo Silva -- 18. Venezuela / Daniel Hellinger -- 19. Colombia / John C. Dugas -- 20. Nicaragua / Gary Prevost and Harry E. Vanden -- 21. Bolivia / Waltraud Q. Morales -- Appendix 1: Presidential elections -- Appendix 2: Recent Legislative elections",
-					"Subject, geographic: Latin America--Politics and government\nBibliography note: Includes bibliographical references and index\nkey: 7990078\n"
+					"Subject, geographic: Latin America--Politics and government\nBibliography note: Includes bibliographical references and index\nAdded Entry-Personal Name: Prevost, Gary\nkey: 7990078\n"
 				],
 				"tags": [],
 				"seeAlso": [],

@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2013-02-21 20:41:47"
+	"browserSupport": "gcs",
+	"lastUpdated": "2013-02-24 23:22:04"
 }
 
 /**
@@ -65,12 +65,12 @@ function scrape(doc, url) {
 
 
 	var tags = ZU.xpathText(doc, '//tr[contains(@class, "result")]/th[@class="field-name" and contains(text(), "Subject(s)")]/following-sibling::td');
-    if (tags) {
-    tags = tags.split(/\s*,\s*/);
+	if (tags) {
+	tags = tags.split(/\s*,\s*/);
 		for (var i in tags) {
 			newItem.tags.push(tags[i])
 		}
-    }
+	}
 
 	if (fulltext) {
 		fulltext = fulltext.trim();

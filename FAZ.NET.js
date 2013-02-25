@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-27 23:59:07"
+	"lastUpdated": "2013-02-24 23:30:07"
 }
 
 /*
@@ -82,18 +82,16 @@ function scrape(doc) {
 	}
 
 	//some authors are in /a, some aren't we need to distinguish to get this right
-	if (ZU.xpathText(doc, '//div[@class="FAZArtikelEinleitung"]/span[@class = "Autor"]/span[@class="caps"]/a') != null) {
-		var xpath = '//div[@class="FAZArtikelEinleitung"]/span[@class = "Autor"]/span[@class="caps"]/a';
+	if (ZU.xpathText(doc, '//div[@class="FAZArtikelEinleitung"]/span[@class = "Autor"]/span[contains(@class, "caps")]/a') != null) {
+		var xpath = '//div[@class="FAZArtikelEinleitung"]/span[@class = "Autor"]/span[contains(@class, "caps")]/a';
 	} else {
-		var xpath = '//div[@class="FAZArtikelEinleitung"]/span[@class ="Autor"]/span[@class="caps"]';
+		var xpath = '//div[@class="FAZArtikelEinleitung"]/span[@class ="Autor"]/span[contains(@class, "caps")]';
 	};
-	var authors = ZU.xpathText(doc, xpath);
-	if (authors != null) {
-		authors = authors.replace(/,.+/, "").split(/ und /)
+	var authors = ZU.xpath(doc, xpath);
+	
 		for (i in authors) {
-			newArticle.creators.push(Zotero.Utilities.cleanAuthor(authors[i], "author"));
+			newArticle.creators.push(Zotero.Utilities.cleanAuthor(authors[i].textContent, "author"));
 		}
-	}
 
 	newArticle.publicationTitle = "FAZ.NET";
 

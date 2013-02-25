@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-03-10 00:13:16"
+	"lastUpdated": "2013-02-24 22:41:21"
 }
 
 /*
@@ -35,19 +35,8 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	if (ZU === undefined) {
-		var ZU = {};
-		ZU.xpath = function (node, xpath, ns) {
-			var nodes = [];
-			var i;
-			var result = doc.evaluate(xpath, node, ns, XPathResult.ANY_TYPE, null);
-			while (i = result.iterateNext()) nodes.push(i);
-			if (nodes.length > 0) return nodes;
-			return null;
-		}
-	}
 
-	var list = ZU.xpath(doc, '//div[@id="search"]//ol[@id="rso"]/li/div[@class="vsc"]');
+	var list = ZU.xpath(doc, '//div[@id="search"]//ol[@id="rso"]/li/div[@class="vsc" and span/h3/a]');
 	var i, node;
 	var items = [];
 	var names = {};
@@ -80,7 +69,6 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"defer": true,
 		"url": "https://www.google.com/search?tbm=blg&hl=en&source=hp&biw=1024&bih=656&q=argentina&btnG=Search&gbv=2",
 		"items": "multiple"
 	}
