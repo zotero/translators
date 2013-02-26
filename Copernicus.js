@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-04 21:59:35"
+	"lastUpdated": "2013-02-25 21:39:23"
 }
 
 function detectWeb(doc, url) {
@@ -178,7 +178,8 @@ var testCases = [
 				"volume": "6",
 				"pages": "1-4",
 				"date": "May 26, 2008",
-				"ISSN": "1684-9965",
+				"publisher": "Copernicus Publications",
+				"ISSN": "1684-9973",
 				"url": "http://www.adv-radio-sci.net/6/1/2008/",
 				"DOI": "10.5194/ars-6-1-2008",
 				"publicationTitle": "Adv. Radio Sci.",

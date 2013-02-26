@@ -8,12 +8,12 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2013-02-16 17:03:56"
+	"browserSupport": "gcs",
+	"lastUpdated": "2013-02-25 21:38:08"
 }
 
 /*
-    Translator
+	Translator
    Copyright (C) 2013 Sebastian Karcher
 
    This program is free software: you can redistribute it and/or modify

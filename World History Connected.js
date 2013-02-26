@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-01 03:11:08"
+	"lastUpdated": "2013-02-25 21:36:58"
 }
 
 function associateMeta(newItem, metaTags, field, zoteroField) {
@@ -20,10 +20,6 @@ function associateMeta(newItem, metaTags, field, zoteroField) {
 }
 
 function scrape(doc) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
 	
 	var newItem = new Zotero.Item("journalArticle");
 	newItem.url = doc.location.href;
@@ -45,12 +41,12 @@ function scrape(doc) {
 	if (metaTags['FileType'].getAttribute("content") == 'Book Review') {
 		//for a book review, title of reviewed book is
 		titlePath = '/html/body/table[4]/tbody/tr[3]/td[1]/i';	
-		newItem.title = "Review of " + doc.evaluate(titlePath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		newItem.title = "Review of " + doc.evaluate(titlePath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 
 	} else {
 		//it would be nice to grab the title from the meta tags, but quotations are properly escaped and the tags are therefore malformed.
 		titlePath = '/html/body/table[4]/tbody/tr[2]/td[1]/h2';
-		title = doc.evaluate(titlePath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		title = doc.evaluate(titlePath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 		if( title ) {
 			newItem.title = Zotero.Utilities.trimInternal(Zotero.Utilities.superCleanString(title.textContent));
 		}
@@ -91,23 +87,19 @@ function doWeb(doc, url) {
 	
 	var searchLinks;
 	
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-
 	if(doc.title.indexOf("Contents") != -1 || doc.title.indexOf("Search results") != -1) {
 
 		if(doc.title.indexOf("Contents |") != -1) {
-		searchLinks = doc.evaluate('//tbody/tr[2]/td[1]/table//a', doc, nsResolver, XPathResult.ANY_TYPE, null);	
+		searchLinks = doc.evaluate('//tbody/tr[2]/td[1]/table//a', doc, null, XPathResult.ANY_TYPE, null);	
 		} 
 		else if ( doc.title.indexOf("| Search results") != -1) {
-		searchLinks = doc.evaluate('/html/body/dl/dt/strong/a[starts-with(text(),"World History Connected | Vol.")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		searchLinks = doc.evaluate('/html/body/dl/dt/strong/a[starts-with(text(),"World History Connected | Vol.")]', doc, null, XPathResult.ANY_TYPE, null);
 		}
 		
 		var link;
 		var title;
 		var items = new Object();
+		var uris = new Array();
 		
 		while (elmt = searchLinks.iterateNext()) {
 			//Zotero.debug(elmt.href);
@@ -117,22 +109,15 @@ function doWeb(doc, url) {
 				items[link] = title;
 			}
 		}
-	
-		items = Zotero.selectItems(items);
-		
-		if(!items) {
-			return true;
-		}
-		
-		var uris = new Array();
-		for(var i in items) {
-			uris.push(i);
-		}
-		
-		Zotero.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
-			function() { Zotero.done(); }, null);
-		
-		Zotero.wait();
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				uris.push(i);
+			}
+			Zotero.Utilities.processDocuments(uris, scrape);
+		});
 	} else {
 		scrape(doc);
 	}
