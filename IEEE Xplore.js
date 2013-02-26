@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-02-07 00:20:47"
+	"lastUpdated": "2013-02-25 21:47:48"
 }
 
 function detectWeb(doc, url) {
@@ -153,6 +153,8 @@ function scrape (doc, url) {
   	var post = "recordIds=" + arnumber + "&fromPage=&citations-format=citation-abstract&download-format=download-bibtex";
   	Zotero.Utilities.HTTP.doPost(get, post, function(text) {
   		text = ZU.unescapeHTML(text.replace(/(&[^\s;]+) and/g, '$1;'));
+		//remove empty tag - we can take this out once empty tags are ignored
+		text = text.replace(/(keywords=\{.+);\}/, "$1}");	
 		var translator = Zotero.loadTranslator("import");
 		// Calling the BibTeX translator
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
@@ -361,8 +363,7 @@ var testCases = [
 					"fuzzy recursive language",
 					"fuzzy recursively enumerable (f.r.e.) language",
 					"nondeterministic fuzzy Turing machine (NFTM)",
-					"universal fuzzy Turing machine (FTM)",
-					""
+					"universal fuzzy Turing machine (FTM)"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -447,8 +448,7 @@ var testCases = [
 					"model portability",
 					"multitemporal classification",
 					"support vector machine (SVM)",
-					"transfer learning",
-					""
+					"transfer learning"
 				],
 				"seeAlso": [],
 				"attachments": [
