@@ -2,14 +2,14 @@
 	"translatorID": "fef07360-ee97-4f67-b022-6f64d5ec0c25",
 	"label": "KOBV",
 	"creator": "Gunar Maiwald",
-	"target": "^http://vs13.kobv.de/V/",
-	"minVersion": "1.0.0b4.r5",
+	"target": "^https?://vs13\\.kobv\\.de/V/",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2012-03-07 18:56:46"
+	"browserSupport": "gcs",
+	"lastUpdated": "2013-02-26 12:53:22"
 }
 
 function detectWeb(doc, url) {
@@ -51,7 +51,7 @@ function scrape(doc) {
 				while (elmt = elmts.iterateNext()) {
 					var field = Zotero.Utilities.trimInternal(newDoc.evaluate('./td[1]', elmt, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 					var value = Zotero.Utilities.trimInternal(newDoc.evaluate('./td[2]', elmt, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-					value = value.replace(/\|([a-z]) /g, marc.subfieldDelimiter + "$1");
+					value = value.replace(/\|([a-z]) /g, marc.subfieldDelimiter + "$1").replace(/[\<\>]/g, "");
 					var code = field.substring(0, 3);
 					var ind = field.substr(3);
 
@@ -81,13 +81,20 @@ function scrape(doc) {
 
 
 function doWeb(doc, url) {
-	var xpath1 = '//table/tbody/tr/td[@class="no_wrap_center"]/a';
+	var xpath1 = '//table/tbody/tr[td[@class="no_wrap_center"]/a]';
 	var xpath2 = '//table/tbody/tr/th[@class="no_wrap"]';
 	var newUrls = new Array();
-
+	var title;
+	var url;
+	var items = {};
 	if (doc.evaluate(xpath1, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		var items = Zotero.Utilities.getItemArray(doc, doc, '^http://vs13\.kobv\.de/V/.*format=999$', '^\s[0-9]+$');
-		//http://vs13.kobv.de/V/EV2X4CXH83SACASM9IRHI283QIE7GQGIVRTYYM5G9NLVI5LB7Q-09472?func=meta-3&short-format=002&set_number=000364&set_entry=000002&format=999
+		var resultrows = ZU.xpath(doc, xpath1)
+			for (var i in resultrows){
+			 	title = ZU.xpathText(resultrows[i], './td[4]');
+			 	url  = ZU.xpathText(resultrows[i], './td/a[contains(@href, "http://vs13.kobv.de")  and contains(@href, "format=999")]/@href');
+			 	items[url] = title;
+			}
+		
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
 				return true;
@@ -95,10 +102,7 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				newUrls.push(i);
 			}
-			Zotero.Utilities.processDocuments(newUrls, scrape, function () {
-				Zotero.done();
-			});
-			Zotero.wait();
+			Zotero.Utilities.processDocuments(newUrls, scrape);
 		});
 	} else if (doc.evaluate(xpath2, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		scrape(doc, url)
