@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-12-19 01:24:23"
+	"lastUpdated": "2013-02-25 21:26:18"
 }
 
 /*
@@ -98,11 +98,12 @@ function doWeb(doc, url) {
 
 function processor (obj) {
 		// Gets {translator: , text: }
+		//Z.debug(obj.text)
 		// Here, we split up the table and insert little placeholders between record bits
 		var marced = obj.text.replace(/\s+/g," ")
 					.replace(/^.*<div id="marc_details">(?:\s*<[^>"]+>\s*)*/,"")
 					.replace(/<tr +class="(?:odd|even)">\s*/g,"")
-					.replace(/<td +class="marcTag"><strong>(\d+)<\/strong><\/td>\s*/g,"$1\x1F")
+					.replace(/<td +scope="row" +class="marcTag"><strong>(\d+)<\/strong><\/td>\s*/g,"$1\x1F")
 					// We may be breaking the indicator here
 					.replace(/<td\s+class="marcIndicator">\s*(\d*)\s*<\/td>\s*/g,"$1\x1F")
 					.replace(/<td +class="marcTagData">(.*?)<\/td>\s*<\/tr>\s*/g,"$1\x1E")
@@ -110,7 +111,6 @@ function processor (obj) {
 					// We have some extra 0's at the start of the leader
 					.replace(/^000/,"");
 		//Z.debug(marced);
-		
 		// We've used the record delimiter to delimit fields
 		var fields = marced.split("\x1E");
 		
@@ -122,15 +122,18 @@ function processor (obj) {
 		// The first piece is the MARC leader
 		record.leader = fields.shift();
 		for each (var field in fields) {
+			//Z.debug(field)
 			// Skip blanks
 			if (field.replace(/\x1F|\s/g,"") == "") continue;
 			// We're using the subfield delimiter to separate the field code,
 			// indicator, and the content.
 			var pieces = field.split("\x1F");
+			if (pieces.length>2){
 			record.addField(pieces[0].trim(),
 							pieces[1].trim(),
 							// Now we insert the subfield delimiter
 							pieces[2].replace(/\$([a-z]|$)/g,"\x1F$1").trim());
+			}				
 		}
 		// returns {translator: , text: false, items: [Zotero.Item[]]}
 		var item = new Zotero.Item();
@@ -144,73 +147,84 @@ function processor (obj) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://bostonpl.bibliocommons.com/item/catalogue_info/2993906042_test",
+		"url": "http://bostonpl.bibliocommons.com/item/show/2051015075_labor",
 		"items": [
 			{
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "William",
-						"lastName": "Sleator",
+						"firstName": "Marcia McKenna",
+						"lastName": "Biddle",
 						"creatorType": "author"
 					}
 				],
 				"notes": [
 					{
-						"note": "In the security-obsessed, elitist United States of the near future, where a standardized test determines each person's entire life, a powerful man runs a corrupt empire until seventeen-year-old Ann and other students take the lead in boycotting the test"
+						"note": "Brief biographies of five women prominently involved in the labor movement in the United States: Mother Jones, Mary Heaton Vorse, Frances Perkins, Addie Wyatt, and Dolores Huerta. Also includes 11 other women who have made outstanding contributions"
 					}
 				],
 				"tags": [
-					"Educational tests and measurements",
-					"Education",
-					"Political corruption",
-					"Immigrants",
-					"Conspiracies"
+					"Women labor union members",
+					"United States",
+					"Women",
+					"United States",
+					"Women labor union members",
+					"Working class"
 				],
 				"seeAlso": [],
 				"attachments": [],
-				"ISBN": "9780810993563",
-				"title": "Test",
-				"place": "New York",
-				"publisher": "Amulet Books",
-				"date": "2008",
-				"numPages": "298",
-				"callNumber": "SLEATOR W",
+				"ISBN": "0875181678",
+				"title": "Labor",
+				"place": "Minneapolis",
+				"publisher": "Dillon Press",
+				"date": "1979",
+				"numPages": "126",
+				"series": "Contributions of women",
+				"callNumber": "HD6079.2.U5 B52",
 				"libraryCatalog": "bostonpl Library Catalog"
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://bostonpl.bibliocommons.com/item/show/3679347042_adam_smith",
+		"url": "http://bostonpl.bibliocommons.com/search?t=smart&search_category=keyword&q=labor&commit=Search",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://nypl.bibliocommons.com/item/show/10974089052_labour",
 		"items": [
 			{
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "James R.",
-						"lastName": "Otteson",
+						"firstName": "György",
+						"lastName": "Lukács",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "György",
+						"lastName": "Lukács",
 						"creatorType": "author"
 					}
 				],
 				"notes": [],
 				"tags": [
-					"Smith, Adam",
-					"Free enterprise",
-					"Classical school of economics"
+					"Labor",
+					"Philosophy",
+					"Philosophy, Marxist"
 				],
 				"seeAlso": [],
 				"attachments": [],
-				"ISBN": "0826429831",
-				"title": "Adam Smith",
-				"place": "New York",
-				"publisher": "Continuum",
-				"date": "2011",
-				"numPages": "179",
-				"series": "Major conservative and libertarian thinkers",
-				"seriesNumber": "v. 16",
-				"callNumber": "HB103.S6 O88 2011",
-				"libraryCatalog": "bostonpl Library Catalog"
+				"title": "Labour",
+				"place": "London",
+				"publisher": "Merlin Press",
+				"date": "1980",
+				"numPages": "139",
+				"series": "The Ontology of social being",
+				"seriesNumber": "3",
+				"callNumber": "JFD 87-5272",
+				"libraryCatalog": "nypl Library Catalog"
 			}
 		]
 	}

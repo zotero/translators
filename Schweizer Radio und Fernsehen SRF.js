@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-12-19 01:28:48"
+	"lastUpdated": "2013-02-25 21:02:50"
 }
 
 /*
@@ -140,7 +140,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.srf.ch/sendungen/echo-der-zeit",
+		"url": "http://www.srf.ch/sendungen/echo-der-zeit/sendungen",
 		"items": "multiple"
 	}
 ]
