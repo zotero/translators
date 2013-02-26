@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2012-10-15 23:16:34"
+	"lastUpdated": "2013-02-25 23:32:46"
 }
 
 /*
@@ -89,7 +89,7 @@ function importSingleDocument(risImporter, urlForPosting) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://ncco.galegroup.com/gdc/ncco/MonographsDetailsPage/MonographsDetailsWindow?failOverType=&query=&prodId=NCCO&windowstate=normal&contentModules=&mode=view&displayGroupName=DVI-Monographs&dviSelectedPage=1&limiter=&currPage=&disableHighlighting=false&source=&sortBy=&displayGroups=&search_within_results=&action=e&catId=&activityType=&scanId=&documentId=GALE%7CQLILNN865873889",
+		"url": "http://ncco.galegroup.com/gdc/ncco/MonographsDetailsPage/MonographsDetailsWindow?failOverType=&query=&prodId=NCCO&windowstate=normal&contentModules=&mode=view&displayGroupName=DVI-Monographs&dviSelectedPage=1&limiter=&currPage=&disableHighlighting=false&source=&sortBy=&displayGroups=&search_within_results=&action=e&catId=&activityType=&scanId=&documentId=GALE%7CQLILNN865873889&userGroupName=viva_gmu",
 		"items": [
 			{
 				"itemType": "book",
@@ -118,7 +118,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://ncco.galegroup.com/gdc/ncco/ManuscriptsDetailsPage/ManuscriptsDetailsWindow?failOverType=&query=&prodId=NCCO&windowstate=normal&contentModules=&mode=view&displayGroupName=DVI-Manuscripts&dviSelectedPage=1&limiter=&currPage=&disableHighlighting=false&source=&sortBy=&displayGroups=&search_within_results=&action=e&catId=&activityType=&scanId=&documentId=GALE%7CAEAVLN130466301",
+		"url": "http://ncco.galegroup.com/gdc/ncco/ManuscriptsDetailsPage/ManuscriptsDetailsWindow?failOverType=&query=&prodId=NCCO&windowstate=normal&contentModules=&mode=view&displayGroupName=DVI-Manuscripts&dviSelectedPage=1&limiter=&currPage=&disableHighlighting=false&source=&sortBy=&displayGroups=&search_within_results=&action=e&catId=&activityType=&scanId=&documentId=GALE%7CAEAVLN130466301&userGroupName=viva_gmu",
 		"items": [
 			{
 				"itemType": "manuscript",
@@ -151,7 +151,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://ncco.galegroup.com/gdc/ncco/ManuscriptsFullListPage/ManuscriptsFullListWindow?result_type=DVI-Manuscripts&failOverType=&query=&prodId=NCCO&windowstate=normal&contentModules=&display-query=&mode=view&displayGroupName=DVI-Manuscripts&limiter=F_CMC+%22British+Labour+History+Ephemera%22&currPage=1&source=fullList&displayGroups=&totalSearchResultCount=&action=e&catId=&activityType=&scanId=",
+		"url": "http://ncco.galegroup.com/gdc/ncco/ManuscriptsFullListPage/ManuscriptsFullListWindow?result_type=DVI-Manuscripts&failOverType=&query=&prodId=NCCO&windowstate=normal&contentModules=&display-query=&mode=view&displayGroupName=DVI-Manuscripts&limiter=F_CMC+%22British+Labour+History+Ephemera%22&currPage=1&source=fullList&displayGroups=&totalSearchResultCount=&action=e&catId=&activityType=&scanId=&userGroupName=viva_gmu",
 		"items": "multiple"
 	}
 ]
