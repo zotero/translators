@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2013-02-17 16:21:39"
+	"lastUpdated": "2013-02-25 18:54:22"
 }
 
 function detectWeb(doc, url) {
@@ -42,7 +42,7 @@ function processURLs(urls, url) {
 		lineRegexp.compile("^([\\w() ]+): *(.*)$");
 
 		var newItem = new Zotero.Item("book");
-		newItem.extra = "";
+		var notes = "";
 
 		var lines = text.split('\n');
 		for(var i=0;i<lines.length;i++) {
@@ -141,7 +141,7 @@ function processURLs(urls, url) {
 				} else if(match[1] != "Availability" &&
 						  match[1] != "Find Items About" &&
 						  match[1] != "Document Type") {
-					newItem.notes += match[1]+": "+match[2]+"\n";
+					notes += match[1]+": "+match[2]+"\n";
 				}
 			} else {
 				if(lines[i] != "" && lines[i] != "SUBJECT(S)") {
@@ -150,8 +150,8 @@ function processURLs(urls, url) {
 			}
 		}
 
-		if(newItem.extra) {
-			newItem.notes = newItem.extra.substr(0, newItem.extra.length-1);
+		if(notes) {
+			newItem.notes.push(notes.substr(0, notes.length-1));
 		}
 
 		newItem.complete();
