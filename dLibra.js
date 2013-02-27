@@ -2,14 +2,14 @@
 	"translatorID": "915e3ae2-afa9-4b1d-9780-28ed3defe0ab",
 	"label": "dLibra",
 	"creator": "Pawel Kolodziej <p.kolodziej@gmail.com>",
-	"target": "/.*dlibra\\/(doccontent|docmetadata|collectiondescription|results)|/dlibra/?",
-	"minVersion": "1.0.0b3.r1",
+	"target": "/.*dlibra/(doccontent|docmetadata|collectiondescription|results)|/dlibra/?",
+	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gbv",
-	"lastUpdated": "2012-11-27 00:47:20"
+	"browserSupport": "gcsbv",
+	"lastUpdated": "2013-02-27 12:14:33"
 }
 
 /*
@@ -32,39 +32,19 @@
 
 //multiple test URL: http://bcul.lib.uni.lodz.pl/dlibra/results?action=SearchAction&skipSearch=true&mdirids=&server%3Atype=both&tempQueryType=-3&encode=false&isExpandable=on&isRemote=off&roleId=-3&queryType=-3&dirids=1&rootid=&query=Karte&localQueryType=-3&remoteQueryType=-2
 
-dd = Zotero.debug; // shortcut
 
 function detectWeb(doc, url) {
+	
 	var singleRe = /.*dlibra\/(doccontent|docmetadata|publication).*/;
 	var multipleRe = /.*dlibra\/(collectiondescription|results).*|.*\/dlibra\/?/;
 	if(singleRe.test(url)) 
 		return "book"; 
 	if(multipleRe.test(url)) 
 		return "multiple";
-	return "";
 }
 
-function list2txt(list)
-{
-	var a= new Array();
-	for each(var i in list)
-		a.push(i.text());
-	return a.join(", ");
-	
-}
 
-function translateType(type)
-{
-	var types = {
-		"book": /.*książka.*/ ,
-		"journalArticle":  /.*artykuł.*/
-		}
-	
-	for (var t in types)
-		if (types[t].test(type))
-			return t;
-}
-
+ 
 
 function doWeb(doc, url) {
 	if(detectWeb(doc,url)=="multiple"){
