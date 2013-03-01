@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2013-02-10 19:28:50"
+	"lastUpdated": "2013-02-28 14:51:02"
 }
 
 /*
@@ -694,40 +694,5 @@ function doWeb(doc, url) {
 	}
 }
 /** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://catalogue.bnf.fr/servlet/biblio?ID=35602259",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"firstName": "Jürgen",
-						"lastName": "Pütz",
-						"creatorType": "editor"
-					}
-				],
-				"notes": [],
-				"tags": [
-					" Thelen ,  Albert Vigoleis  ( 1903-1989)"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"ISBN": "3-926738-01-4",
-				"language": "ger",
-				"title": "In Zweifelsfällen entscheidet die Wahrheit: Beitrag zu Albert Vigoleis Thelen [zum 85. Geburtstag]",
-				"place": "Viersen",
-				"publisher": "Juni-Verl",
-				"date": "1988",
-				"callNumber": "820",
-				"country": "DE",
-				"numPages": "149",
-				"extra": "ill. 24 cm.",
-				"libraryCatalog": "French National Library Online Catalog (http://catalogue.bnf.fr)",
-				"shortTitle": "In Zweifelsfällen entscheidet die Wahrheit"
-			}
-		]
-	}
-]
+var testCases = []
 /** END TEST CASES **/

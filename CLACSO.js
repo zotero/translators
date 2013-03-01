@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2013-02-26 23:50:19"
+	"lastUpdated": "2013-02-28 14:47:57"
 }
 
 /*
@@ -222,98 +222,5 @@ function doWeb(doc, url) {
 		scrape(doc, url);
 	}
 }/** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://132.248.9.1:8991/F/J5PQFH44IIKCKQBMV1TMTSRNRXDL4BX5VRM7MKSLR453CD3951-00456?func=full-set-set&set_number=164623&set_entry=000034&format=999",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "Murillo de",
-						"lastName": "Aragao",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"Gobierno",
-					"Partidos políticos",
-					"Finanzas públicas",
-					"Condiciones económicas",
-					"Brasil",
-					"Programa de Aceleración del Crecimiento"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "CLASE Record Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"title": "O andamento do PAC e o ambiente pre-eleitoral",
-				"publication": "Conjuntura economica (Rio de Janeiro)",
-				"date": "2009",
-				"pages": "34-35",
-				"volume": "63",
-				"issue": "6",
-				"ISSN": "0010-5945",
-				"language": "Portugués",
-				"libraryCatalog": "CLASE"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://132.248.9.1:8991/F/J5PQFH44IIKCKQBMV1TMTSRNRXDL4BX5VRM7MKSLR453CD3951-01032?func=full-set-set&set_number=164623&set_entry=000016&format=999",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "Marcela",
-						"lastName": "Román",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "F. Javier",
-						"lastName": "Murillo",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"Educación básica",
-					"Problemas sociales",
-					"América Latina",
-					"Violencia escolar",
-					"Desempeño escolar",
-					"Indicadores socioeconómicos"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "CLASE Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "CLASE Record Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"title": "América Latina: violencia entre estudiantes y desempeño escolar",
-				"publication": "Revista de la CEPAL",
-				"date": "2011",
-				"pages": "37-54",
-				"issue": "104",
-				"abstractNote": "Se estimó la magnitud de la violencia escolar en las escuelas latinoamericanas y su incidencia en el desempeño de los estudiantes de primaria. Se analizaron características sociodemográficas del estudiante vinculadas al maltrato entre pares. Se utilizaron modelos multinivel de cuatro y tres niveles con los datos del Segundo Estudio Regional Comparativo y Explicativo (SERCE) de la Organización de las Naciones Unidas para la Educación, la Ciencia y la Cultura (UNESCO), analizándose 2.969 escuelas, 3.903 aulas y 91.223 estudiantes de 6º grado de 16 países latinoamericanos (excluido México al relacionar violencia escolar y desempeño académico). Conclusiones: la violencia interpares es un grave problema en toda la región; los estudiantes que sufrieron violencia de sus iguales alcanzaron un desempeño en lectura y matemáticas significativamente inferior al de quienes no la experimentaron; en aulas con mayores episodios de violencia física o verbal los educandos muestran peores desempeños que en aulas con menor violencia.",
-				"ISSN": "0252-0257",
-				"language": "Español",
-				"libraryCatalog": "CLASE",
-				"shortTitle": "América Latina"
-			}
-		]
-	}
-]
+var testCases = []
 /** END TEST CASES **/
