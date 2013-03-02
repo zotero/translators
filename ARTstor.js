@@ -3,15 +3,14 @@
 	"label": "ARTstor",
 	"creator": "Sebastian Karcher",
 	"target": "^https?://library\\.artstor.org[^/]*",
-	"minVersion": "2.1.9",
+	"minVersion": "3.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-04-28 23:49:07"
+	"lastUpdated": "2013-10-30 01:41:51"
 }
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -35,11 +34,19 @@
 	***** END LICENSE BLOCK *****
 */
 
+function getDataRows(doc) {
+	return ZU.xpath(doc, 'html/body/div[@class="MetaDataWidgetRoot"][last()]\
+		//table[@class="headerTable" and .//th[@class="th1"\
+			and contains(text(), "Field")]]\
+		//table[@class="scrollTable" and ./tbody/tr][1]/tbody/tr');
+}
 
 function detectWeb(doc, url) {
-	if (ZU.xpathText(doc, '//table[@class="headerTable"]//th[@class="th1"]').indexOf("Field")!= -1) {
+	//monitor changes to body's direct children. That's where the metadata popup is added
+	Zotero.monitorDOMChanges(doc.body, {childList: true});
+
+	if (getDataRows(doc).length) {
 		return "artwork";
-		//multiple items are all in one javascript application - no way to get to them.
 	}
 }
 
@@ -52,17 +59,17 @@ function associateData(newItem, dataTags, field, zoteroField) {
 function scrape(doc, url) {
 	var dataTags = new Object();
 	var newItem = new Zotero.Item("artwork");
-	var fields = ZU.xpath(doc, '//tr[@class="alternateRow" or @class="normalRow"]/td[1]');
-	var contents = ZU.xpath(doc, '//tr[@class="alternateRow" or @class="normalRow"]/td[2]');
-    var count = fields.length;
-	for (i=0; i<count; i++){
-		var field = fields[i].textContent.trim();
-		var content = contents[i].textContent.trim();
+	var rows = getDataRows(doc);
+	for(var i=0, n=rows.length; i<n; i++){
+		var td = rows[i].getElementsByTagName('td');
+		var field = td[0].textContent;
+		var content = ZU.cleanTags(td[1].innerHTML).replace(/[\r\n]+/g, ' ');
+		if(!field || !content) continue;
+		
 		dataTags[field] = content;
 		if (field == "Creator"){
-		  var artist= ZU.xpathText(contents[i], './br[1]/preceding-sibling::text()');
-		  if (!artist) artist = content.replace(/[0-9\-]+/, "").replace(/[\s]$/, "");
-		  if (artist) newItem.creators = ZU.cleanAuthor(artist, "artist", artist.match(/,/));
+		  var artist = content.replace(/\s*\(.*/, '');
+		  if(artist) newItem.creators = ZU.cleanAuthor(artist, "artist", artist.indexOf(',') != -1);
 		}
 		//Z.debug("field: " + field + " content: " + dataTags[field])
 	}
@@ -79,5 +86,5 @@ function scrape(doc, url) {
 }
 
 function doWeb(doc, url) {
-scrape(doc, url);
+	scrape(doc, url);
 } 
