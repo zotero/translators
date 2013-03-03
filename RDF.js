@@ -365,7 +365,7 @@ function detectType(newItem, node, ret) {
 			t.dc = type;
 		} else {
 			//on eprints the type fields are often in the form "Journal Article", "Conference Item" etc.
-			//type = type.toLowerCase().replace(/\s/g, "")
+			type = type.toLowerCase().replace(/\s/g, "")
 			switch (type) {
 				//eprints
 				//from http://www.ukoln.ac.uk/repositories/digirep/index/Eprints_Type_Vocabulary_Encoding_Scheme
@@ -525,8 +525,9 @@ function detectType(newItem, node, ret) {
 				break;
 				case 'confpaper':
 				case 'conference_item':
-					if (getFirstResults(node, [n.eprints+"type"], true) && getFirstResults(node, [n.eprints+"ispublished"], true) == "unpub"){
-						t.eprints = 'presentation';}
+					if (getFirstResults(node, [n.eprints+"ispublished"], true) && getFirstResults(node, [n.eprints+"ispublished"], true) == "unpub"){
+						t.eprints = 'presentation';
+					}
 					else t.eprints = 'conferencePaper';
 				break;
 				
@@ -903,7 +904,7 @@ function importItem(newItem, node) {
 	// ISBN from PRISM
 	newItem.ISBN = getFirstResults((container ? container : node), [n.prism2_1+"isbn", n.bibo+"isbn", n.bibo+"isbn13", n.bibo+"isbn10"], true) || newItem.ISBN;
 	// ISBN from eprints
-	newItem.ISBN = getFirstResults(node, [n.eprints+"isbn"], true);
+	newItem.ISBN = getFirstResults(node, [n.eprints+"isbn"], true) || newItem.ISBN;
 	// DOI from PRISM
 	newItem.DOI = getFirstResults(node, [n.prism2_0+"doi", n.prism2_1+"doi", n.bibo+"doi"], true) || newItem.DOI;
 	
@@ -933,11 +934,11 @@ function importItem(newItem, node) {
 	
 	//thesis type from eprints
 	if (newItem.itemType == "thesis"){
-		newItem.thesisType = getFirstResults(node, [n.eprints+"thesis_type"], true);
+		newItem.thesisType = getFirstResults(node, [n.eprints+"thesis_type"], true) || newItem.thesisType;
 	}
 	//presentation type from eprints
 	if (newItem.itemType == "presentation"){
-		newItem.presentationType = getFirstResults(node, [n.eprints+"event_type"], true);
+		newItem.presentationType = getFirstResults(node, [n.eprints+"event_type"], true) || newItem.presentationType;
 	}
 
 	// conferenceName
