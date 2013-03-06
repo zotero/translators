@@ -9,13 +9,16 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2013-03-01 09:23:05"
+	"lastUpdated": "2013-03-06 13:44:16"
 }
 
 function detectWeb(doc, url) {
 	
 	// Make sure that we are on a record page or details page
 	var contentLabel = ZU.xpathText(doc.getElementById("rightcontent"), './div/h2');
+
+	if (!contentLabel) return;
+	
 	if (contentLabel.indexOf("Search Results") != -1) {
 		return "multiple";
 	}
@@ -24,37 +27,27 @@ function detectWeb(doc, url) {
 		var docType = "";
 		
 		// Look in the left nav menu for the document type
-		var rows = ZU.xpath(doc.getElementById("leftnav"), './div/div/div/div/div/form/table/tbody/tr')
-		for (var i in rows) {
-			var row = ZU.xpathText(rows[i], './td');
-			if (row.indexOf("Document Type") != -1) {
-				
-				// remove leading and trailing whitespace
-				var contents = row.replace(/^\s*|\s*$/g, '').split(/[\t\n]+/);
-				
-				// split on the white space between the label and value
-				if (contents.length > 1) {
-					docType = contents[contents.length - 1];
-					
-					// Check against implemented document types
-					if (docType.indexOf("Conference Paper") != -1) {
-						return "conferencePaper"
-					
-					} else if (docType.indexOf("Technical Report") != -1) {
-						return "report"
-					
-					} else if (docType.indexOf("Journal Article") != -1) {
-						return "journalArticle";
-					
-					} else if (docType.indexOf("Masters Thesis") != -1 || docType.indexOf("PhD Dissertation") != -1 || docType.indexOf("Thesis") != -1) {
-						return "thesis"
-						
-					} else {
-						// No match
-						return null;
-					}
-				}
-			}
+		var docType = ZU.xpathText(doc.getElementById("leftnav"), './/form[@name="find_similar_form"]//input[@name="document_type_1"]/following-sibling::a[1]')
+		
+		// remove leading and trailing whitespace
+		var docType = docType.replace(/^\s*|\s*$/g, '');
+		
+		// Check against implemented document types
+		if (docType.indexOf("Conference Paper") != -1) {
+			return "conferencePaper"
+		
+		} else if (docType.indexOf("Technical Report") != -1) {
+			return "report"
+		
+		} else if (docType.indexOf("Journal Article") != -1) {
+			return "journalArticle";
+		
+		} else if (docType.indexOf("Masters Thesis") != -1 || docType.indexOf("PhD Dissertation") != -1 || docType.indexOf("Thesis") != -1) {
+			return "thesis"
+			
+		} else {
+			// No match
+			return null;
 		}
 	}
 }
@@ -138,11 +131,11 @@ function scrape(doc, url) {
 				var confNameLocation = items["Meeting Information"].split("; ");
 				
 				// Save the conference name
-				newItem.conferenceName = confNameLocation[0];
+				newItem.conferenceName = confNameLocation.shift();
 				
 				// Save the location
-				confNameLocationLength = confNameLocation.length;
-				newItem.place = confNameLocation[confNameLocationLength-2] + ", " + confNameLocation[confNameLocationLength-1];
+				newItem.place = confNameLocation.pop();
+				if (confNameLocation.length) newItem.place = confNameLocation.pop() + ", " + newItem.place;
 			}
 		}
 	}
@@ -152,8 +145,8 @@ function scrape(doc, url) {
 		journalInfo = items["Publication Information"].split('; ');
 		
 		// Save the journal name
-		if (!(journalInfo[0].match(/(.*)/))) {
-			newItem.publicationTitle = journalInfo[0];
+		if (journalInfo[0].indexOf("=") == -1) {
+			newItem.publicationTitle = journalInfo[0].replace(/\(.*\)/, '');
 		}
 		
 		for (var i in journalInfo) {
@@ -161,25 +154,26 @@ function scrape(doc, url) {
 			var content =journalInfo[i];
 			
 			// Save the volume
-			if (content.match("Volume")) {
+			if (content.indexOf("Volume") != -1) {
 				newItem.volume = content.replace(/Volume /, '');
 			}
 			
 			// Save the page numbers
-			if (content.match(/^[0-9]*-[0-9]*/)) {
+			if (content.match(/^(.*)[0-9]+-[0-9]+$/)) {
 				newItem.pages = content;
 			}
 			
 			// Save the issue number
-			if (content.match("no.")) {
+			if (content.indexOf("no.") != -1) {
 				newItem.issue = content.replace(/no. /, '');
-			} else if (content.match("Issue")) {
+			} else if (content.indexOf("Issue") != -1) {
 				newItem.issue = content.replace(/Issue /, '');
 			}
 			
 			// Save the ISSN
-			if (content.match("ISSN")) {
-				newItem.ISSN = content.replace(/\(ISSN /, '').replace(/\)/, '');
+			if (ZU.cleanISSN) {
+				Z.debug("Found ISSN function")
+				if (issn) newItem.ISSN = issn;
 			}
 		}
 	}
@@ -235,52 +229,6 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://ntrs.nasa.gov/search.jsp?R=20130010127&qs=N%3D4294937145",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "Alan E.",
-						"lastName": "Rubin",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"chondrites",
-					"ilmenite",
-					"impact melts",
-					"meteorites",
-					"meteoritic composition",
-					"mineralogy",
-					"minerals",
-					"phosphates",
-					"snc meteorites"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"url": "http://ntrs.nasa.gov/search.jsp?R=20130010127",
-				"title": "Mineralogy of Meteorite Groups: An Update",
-				"DOI": "10.1111/j.1945-5100.1997.tb01558.x",
-				"date": "September 1997",
-				"publicationTitle": "Meteoritics and Planetary Science",
-				"volume": "32",
-				"issue": "5",
-				"pages": "733-734",
-				"abstractNote": "Twenty minerals that were not included in the most recent list of meteoritic minerals have been reported as occurring in meteorites. Extraterrestrial anhydrous Ca phosphate should be called menillite, not whitlockite.",
-				"libraryCatalog": "NASA NTRS",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Mineralogy of Meteorite Groups"
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "http://ntrs.nasa.gov/search.jsp?R=20130009946&qs=N%3D4294937145",
 		"items": [
 			{
@@ -333,7 +281,6 @@ var testCases = [
 				"url": "http://ntrs.nasa.gov/search.jsp?R=20130009946",
 				"title": "Microphone Array Phased Processing System (MAPPS): Phased Array System for Acoustic Measurements in a Wind Tunnel",
 				"date": "October 19, 1999",
-				"ISSN": "0148-7191",
 				"abstractNote": "A processing system has been developed to meet increasing demands for detailed noise measurement of aircraft in wind tunnels. Phased arrays enable spatial and amplitude measurements of acoustic sources, including low signal-to-noise sources not measurable by conventional measurement techniques. The Microphone Array Phased Processing System (MAPPS) provides processing and visualization of acoustic array measurements made in wind tunnels. The system uses networked parallel computers to provide noise maps at selected frequencies in a near real-time testing environment. The system has been successfully used in two subsonic, hard-walled wind tunnels, the NASA Ames 7- by 10-Foot Wind Tunnel and the NASA Ames 12-Foot Wind Tunnel. Low level airframe noise that can not be measured with traditional techniques was measured in both tests.",
 				"libraryCatalog": "NASA NTRS",
 				"accessDate": "CURRENT_TIMESTAMP",
@@ -382,6 +329,7 @@ var testCases = [
 				"url": "http://ntrs.nasa.gov/search.jsp?R=20130010240",
 				"title": "Sinoite (Si2N2O): Crystallization from EL Chondrite Impact Melts",
 				"date": "September 1997",
+				"publicationTitle": "American Mineralogist",
 				"volume": "82",
 				"pages": "1001-1006",
 				"abstractNote": "Sinoite (Si,NP) was previously observed only in EL6 chondrites and recently modeled as having formed over geologic time scales at metamorphic temperatures of approx. 950 C. I found several approx. 10-210 micron-sized subhedral and euhedral grains of twinned, optically zoned sinoite associated with euhedral enstatite and euhedral graphite within impact-melted portions of QUE94368, the first EL4 chondrite. The presence of sinoite within a type 4 chondrite mitigates against the metamorphic model of sinoite formation; it seems more likely that si noite crystallized from a liquid. During impact melting of EL material. N, may have been released from lattice defects in sulfides whereupon it reacted with reduced Si dissolved in the metallic Fe-Ni melt and with fine-grained or molten silica derived from the silicate fraction of the EL assemblage. The N that formed the sinoite was derived from the silicate melt or from temporary, melt-filled cavities constructed from unmelted EL material in which the nitrogen fugacity may have reached approx.40 to 130 bars (0.004 to 0.013 GPa). Sinoite in EL6 chondrites may have formed either metamorphically, as previously proposed. or by means of crystallization from an impact melt, as in QUE94368. In the latter case, sinoite-bearing EL6 chondrites would be annealed impact-melt breccias.",
@@ -647,6 +595,109 @@ var testCases = [
 				"title": "Apollo Separation Systems Comparisons",
 				"date": "Oct 1, 1962",
 				"abstractNote": "No abstract available",
+				"libraryCatalog": "NASA NTRS",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://ntrs.nasa.gov/search.jsp?R=20130010127&qs=N%3D4294937145",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Alan E.",
+						"lastName": "Rubin",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"chondrites",
+					"ilmenite",
+					"impact melts",
+					"meteorites",
+					"meteoritic composition",
+					"mineralogy",
+					"minerals",
+					"phosphates",
+					"snc meteorites"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"url": "http://ntrs.nasa.gov/search.jsp?R=20130010127",
+				"title": "Mineralogy of Meteorite Groups: An Update",
+				"DOI": "10.1111/j.1945-5100.1997.tb01558.x",
+				"date": "September 1997",
+				"publicationTitle": "Meteoritics and Planetary Science",
+				"volume": "32",
+				"issue": "5",
+				"pages": "733-734",
+				"abstractNote": "Twenty minerals that were not included in the most recent list of meteoritic minerals have been reported as occurring in meteorites. Extraterrestrial anhydrous Ca phosphate should be called menillite, not whitlockite.",
+				"libraryCatalog": "NASA NTRS",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Mineralogy of Meteorite Groups"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://ntrs.nasa.gov/search.jsp?R=20040200977",
+		"items": [
+			{
+				"itemType": "thesis",
+				"creators": [
+					{
+						"firstName": "Dawn C.",
+						"lastName": "Jegley",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Dulnath D.",
+						"lastName": "Wijayratne",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"aerodynamics",
+					"aeroelasticity",
+					"bending",
+					"box beams",
+					"composite structures",
+					"data processing",
+					"design analysis",
+					"displacement",
+					"fiber composites",
+					"finite element method",
+					"flutter",
+					"loads (forces)",
+					"mathematical models",
+					"panels",
+					"predictions",
+					"stability",
+					"wings"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "NASA NTRS Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"url": "http://ntrs.nasa.gov/search.jsp?R=20040200977",
+				"title": "Validation of Design and Analysis Techniques of Tailored Composite Structures",
+				"date": "December 2004",
+				"abstractNote": "Aeroelasticity is the relationship between the elasticity of an aircraft structure and its aerodynamics. This relationship can cause instabilities such as flutter in a wing. Engineers have long studied aeroelasticity to ensure such instabilities do not become a problem within normal operating conditions. In recent decades structural tailoring has been used to take advantage of aeroelasticity. It is possible to tailor an aircraft structure to respond favorably to multiple different flight regimes such as takeoff, landing, cruise, 2-g pull up, etc. Structures can be designed so that these responses provide an aerodynamic advantage. This research investigates the ability to design and analyze tailored structures made from filamentary composites. Specifically the accuracy of tailored composite analysis must be verified if this design technique is to become feasible. To pursue this idea, a validation experiment has been performed on a small-scale filamentary composite wing box. The box is tailored such that its cover panels induce a global bend-twist coupling under an applied load. Two types of analysis were chosen for the experiment. The first is a closed form analysis based on a theoretical model of a single cell tailored box beam and the second is a finite element analysis. The predicted results are compared with the measured data to validate the analyses. The comparison of results show that the finite element analysis is capable of predicting displacements and strains to within 10% on the small-scale structure. The closed form code is consistently able to predict the wing box bending to 25% of the measured value. This error is expected due to simplifying assumptions in the closed form analysis. Differences between the closed form code representation and the wing box specimen caused large errors in the twist prediction. The closed form analysis prediction of twist has not been validated from this test.",
 				"libraryCatalog": "NASA NTRS",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
