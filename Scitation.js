@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-12-18 00:18:12"
+	"lastUpdated": "2013-03-06 23:09:14"
 }
 
 /**
@@ -283,59 +283,6 @@ var testCases = [
 				"DOI": "10.1116/1.3678208",
 				"abstractNote": "The authors report the development of high internal quantum efficiency AlN/AlGaN/AlN double heterostructures and AlGaN/AlN multiple quantum wells (MQWs) grown on 6H-SiC and 4H-SiC substrates of various miscuts by plasma-assisted molecular-beam epitaxy. The authors find that the luminescence spectra for identical MQWs show a single peak across the gap, with a wavelength that is redshifted by ∼20 nm as the excess Ga during growth of the wells increases. The internal quantum efficiency of the double heterostructures emitting at 250 nm is found to be 43%, and that of the multiple quantum wells emitting at 245 nm is 68%. These results suggest that AlGaN alloys on SiC substrates are capable of producing deep-ultraviolet emitters with high efficiency. The authors propose that these results can be accounted for by the introduction of lateral band structure potential fluctuations due to the changing of the growth mode from physical vapor phase epitaxy to liquid phase epitaxy (LPE) as the excess gallium increases. In this LPE mode the arriving active nitrogen species from the plasma source and aluminum atoms from the aluminum effusion cells dissolve in the excess liquid gallium and incorporate into the film from the liquid phase.",
 				"rights": "© 2012 American Vacuum Society",
-				"libraryCatalog": "Scitation",
-				"accessDate": "CURRENT_TIMESTAMP"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://asmedl.org/getabs/servlet/GetabsServlet?prog=normal&id=JDSMAA000128000003000482000001&idtype=cvips&gifs=Yes&ref=no",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "Kevin B.",
-						"lastName": "Fite",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Michael",
-						"lastName": "Goldfarb",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"telerobotics",
-					"manipulators",
-					"nonlinear control systems",
-					"impedance matrix",
-					"stability",
-					"multivariable control systems"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					}
-				],
-				"title": "Multivariable Loop-Shaping in Bilateral Telemanipulation",
-				"publisher": "ASME",
-				"date": "2006",
-				"publicationTitle": "Journal of Dynamic Systems, Measurement, and Control",
-				"volume": "128",
-				"issue": "3",
-				"pages": "482-488",
-				"url": "http://link.aip.org/link/?JDS/128/482/1",
-				"DOI": "10.1115/1.2229251",
-				"abstractNote": "This paper presents an architecture and control methodology for obtaining transparency and stability robustness in a multivariable bilateral teleoperator system. The work presented here extends a previously published single-input, single-output approach to accommodate multivariable systems. The extension entails the use of impedance control techniques, which are introduced to render linear the otherwise nonlinear dynamics of the master and slave manipulators, in addition to a diagonalization multivariable loop shaping technique, used to render tractable the multivariable compensator design. A multivariable measure of transparency is proposed based on the relative singular values of the environment and transmitted impedance matrices. The approach is experimentally demonstrated on a three degree-of-freedom scaled telemanipulator pair with a highly coupled environment. Using direct measurement of the power delivered to the operator to assess the system's stability robustness, along with the proposed measure of multivariable transparency, the loop-shaping compensation is shown to improve the stability robustness by a factor of two and the transparency by more than a factor of five.",
-				"rights": "©2006 American Society of Mechanical Engineers",
 				"libraryCatalog": "Scitation",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
