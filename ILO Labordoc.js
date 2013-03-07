@@ -150,7 +150,6 @@ function scrape(text) {
          var creator  = creators[i].textContent.split(/\s*;\s*/);
          for (j in creator) {
             creator[j] = creator[j].replace(/\d{4}-(\d{4})?/g, '');
-            //Z.debug("creator: " + creator[j]);
             item.creators.push(Zotero.Utilities.cleanAuthor(creator[j], "author", true));
          }			
       }
@@ -161,7 +160,6 @@ function scrape(text) {
          var contributor = contributors[i].textContent.split(/\s*;\s*/);
          for (j in contributor){
             contributor[j] = contributor[j].replace(/\d{4}-(\d{4})?/g, '');
-            //Z.debug("contributor: " + contributor[j]);
             item.creators.push(Zotero.Utilities.cleanAuthor(contributor[j], "corpAuthor", true));
          }			
       }
@@ -200,24 +198,20 @@ function scrape(text) {
   // isbn  
    var ISBN = xpathFound(ZU.xpath(docxml, '//marc:datafield[@tag="020"]/marc:subfield[@code="a"]', ns));
    if (ISBN != '') {
-      Z.debug("ISBN: " + ISBN);
       item.ISBN = ISBN.replace(/ \(.*$/, '');
       }
  
    // issn, check 440 also in labordoc  
    var ISSN = xpathFound(ZU.xpath(docxml, '//marc:datafield[@tag="022"]/marc:subfield[@code="a"]', ns));
    if (ISSN != '') {
-      Z.debug("ISSN: " + ISSN.toString);
       item.ISSN = ISSN.replace(/ \(.*$/, '');
    } 
    
    // pages 
    var pages = xpathFound(ZU.xpath(docxml, '//marc:datafield[@tag="300"]/marc:subfield[@code="a"]', ns));
    if ((pages != '') && (pages.indexOf('p') != -1)) {
-      //Z.debug("pages1: " + pages);
       pages = pages.replace(/1 v/, "");
       pages = pages.replace(/[A-Za-z,.: ]/g, "");
-      //Z.debug("pages1: " + pages);
    }	
    item.pages = pages;
    
@@ -293,7 +287,6 @@ function scrape(text) {
       var cname111c = xpathFound(ZU.xpath(docxml, '//marc:datafield[@tag="111"]/marc:subfield[@code="c"]', ns));
       var cname111d = xpathFound(ZU.xpath(docxml, '//marc:datafield[@tag="111"]/marc:subfield[@code="d"]', ns));
       item.conferenceName = cname111n + " " + cname111a + " " + cname111c + " " + cname111d;
-      Z.debug("item.conferenceName: -" + item.conferenceName + "-");
       if (item.conferenceName != '') {
          item.conferenceName = item.conferenceName.replace(/\. /g, "\, ");
          item.conferenceName = item.conferenceName.replace(/ : /g, " ");
@@ -301,7 +294,6 @@ function scrape(text) {
          item.conferenceName = item.conferenceName.replace(/\(|\)/g, "");
          item.conferenceName = item.conferenceName.replace(/ Conference /, " Conference, ");
       }
-      Z.debug("item.conferenceName: -" + item.conferenceName + "-");
     }
       
    // get PDF's
@@ -401,7 +393,7 @@ var testCases = [
          				}
 				],
 				"title": "Agenda of the International Labour Conference: Proposals for the agenda of the 103rd Session (2014) of the Conference",
-				"pages": "9",
+				"numPages": "9",
 				"place": "Geneva",
          			"publicationTitle": "Papers of the Governing Body",
          			"callNumber": "GB.312/INS/2/2",
@@ -470,7 +462,7 @@ var testCases = [
 				],
 				"title": "Active ageing and solidarity between generations: a statistical portrait of the European Union 2012",
          			"ISBN": "9789279215070",
-         			"pages": "141",
+         			"numPages": "141",
          			"place": "Luxembourg",
          			"series": "Statistical books",
          			"edition": "2012 ed.",
