@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 13,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-01-21 07:56:02"
+	"lastUpdated": "2013-03-07 19:15:41"
 }
 
 function detectWeb(doc, url) {
@@ -231,13 +231,17 @@ function doImportFromText(text) {
 		var abstractNote = [];
 		for(var j in abstractSections) {
 			var abstractSection = abstractSections[j];
-			if(abstractSection.hasAttribute("Label")) {
-				abstractNote.push(abstractSection.getAttribute("Label"));
+			var paragraph = abstractSection.textContent.trim();
+			if(paragraph) paragraph += '\n';
+			
+			var label = abstractSection.hasAttribute("Label") && abstractSection.getAttribute("Label");
+			if(label && label != "UNLABELLED") {
+				paragraph = label + ": " + paragraph;
 			}
-			abstractNote.push(abstractSection.textContent+"\n");
+			abstractNote.push(paragraph);
 		}
 		
-		newItem.abstractNote = abstractNote.join("\n\n");
+		newItem.abstractNote = abstractNote.join('');
 		newItem.DOI = ZU.xpathText(articles[i], 'PubmedData/ArticleIdList/ArticleId[@IdType="doi"]');
 		// (do we want this?)
 		if(newItem.publicationTitle) {
@@ -591,6 +595,84 @@ var testCases = [
 				"abstractNote": "Cancer Syndromes is a comprehensive multimedia resource for selected single gene cancer syndromes. Syndromes currently included are Peutz-Jeghers syndrome, juvenile polyposis, Birt-Hogg-Dubé syndrome, multiple endocrine neoplasia type 1 and familial atypical multiple mole melanoma syndrome. For each syndrome the history, epidemiology, natural history and management are reviewed. If possible the initial report in the literature of each syndrome is included as an appendix. Chapters are extensively annotated with figures and movie clips. Mission Statement: Improving the care of cancer syndrome patients.",
 				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson",
 				"libraryCatalog": "NCBI PubMed"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.ncbi.nlm.nih.gov/pubmed/?term=11109029",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Marks",
+						"firstName": "D"
+					},
+					{
+						"lastName": "Wonderling",
+						"firstName": "D"
+					},
+					{
+						"lastName": "Thorogood",
+						"firstName": "M"
+					},
+					{
+						"lastName": "Lambert",
+						"firstName": "H"
+					},
+					{
+						"lastName": "Humphries",
+						"firstName": "S E"
+					},
+					{
+						"lastName": "Neil",
+						"firstName": "H A"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Adult",
+					"Aged",
+					"Algorithms",
+					"Attitude to Health",
+					"Child",
+					"Cost-Benefit Analysis",
+					"Decision Trees",
+					"Female",
+					"Great Britain",
+					"Humans",
+					"Hyperlipoproteinemia Type II",
+					"Male",
+					"Mass Screening",
+					"Middle Aged",
+					"Models, Econometric",
+					"Morbidity",
+					"Needs Assessment",
+					"Practice Guidelines as Topic",
+					"Research Design",
+					"Technology Assessment, Biomedical"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "PubMed Link",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"extra": "PMID: 11109029",
+				"title": "Screening for hypercholesterolaemia versus case finding for familial hypercholesterolaemia: a systematic review and cost-effectiveness analysis",
+				"pages": "1-123",
+				"ISSN": "1366-5278",
+				"journalAbbreviation": "Health Technol Assess",
+				"publicationTitle": "Health technology assessment (Winchester, England)",
+				"volume": "4",
+				"issue": "29",
+				"date": "2000",
+				"abstractNote": "BACKGROUND: In the majority of people with familial hypercholesterolaemia (FH) the disorder is caused by a mutation of the low-density lipoprotein receptor gene that impairs its proper function, resulting in very high levels of plasma cholesterol. Such levels result in early and severe atherosclerosis, and hence substantial excess mortality from coronary heart disease. Most people with FH are undiagnosed or only diagnosed after their first coronary event, but early detection and treatment with hydroxymethylglutaryl-coenzyme (HMG CoA) reductase inhibitors (statins) can reduce morbidity and mortality. The prevalence of FH in the UK population is estimated to be 1 in 500, which means that approximately 110,000 people are affected.\nOBJECTIVES: To evaluate whether screening for FH is appropriate. To determine which system of screening is most acceptable and cost-effective. To assess the deleterious psychosocial effects of genetic and clinical screening for an asymptomatic treatable inherited condition. To assess whether the risks of screening outweigh potential benefits.\nMETHODS: DATA SOURCES: Relevant papers were identified through a search of the electronic databases. Additional papers referenced in the search material were identified and collected. Known researchers in the field were contacted and asked to supply information on unpublished or ongoing studies. INCLUSION/EXCLUSION CRITERIA: SCREENING AND TREATMENT: The review included studies of the mortality and morbidity associated with FH, the effectiveness and cost of treatment (ignoring pre-statin therapies in adults), and of the effectiveness or cost of possible screening strategies for FH. PSYCHOSOCIAL EFFECTS OF SCREENING: The search for papers on the psychological and social effects of screening for a treatable inherited condition was limited to the last 5 years because recent developments in genetic testing have changed the nature and implications of such screening tests. Papers focusing on genetic testing for FH and breast cancer were included. Papers relating to the risk of coronary heart disease with similarly modifiable outcome (non-FH) were also included. DATA EXTRACTION AND ASSESSMENT OF VALIDITY: A data assessment tool was designed to assess the quality and validity of the papers which reported primary data for the social and psychological effects of screening. Available guidelines for systematically reviewing papers concentrated on quantitative methods, and were of limited relevance. An algorithm was developed which could be used for both the qualitative and quantitative literature. MODELLING METHODS: A model was constructed to investigate the relative cost and effectiveness of various forms of population screening (universal or opportunistic) and case-finding screening (screening relatives of known FH cases). All strategies involved a two-stage process: first, identifying those people with cholesterol levels sufficiently elevated to be compatible with a diagnosis of FH, and then either making the diagnosis based on clinical signs and a family history of coronary disease or carrying out genetic tests. Cost-effectiveness has been measured in terms of incremental cost per year of life gained.\nRESULTS: MODELLING COST-EFFECTIVENESS: FH is a life-threatening condition with a long presymptomatic state. Diagnostic tests are reasonably reliable and acceptable, and treatment with statins substantially improves prognosis. Therefore, it is appropriate to consider systematic screening for this condition. Case finding amongst relatives of FH cases was the most cost-effective strategy, and universal systematic screening the least cost-effective. However, when targeted at young people (16 year olds) universal screening was also cost-effective. Screening patients admitted to hospital with premature myocardial infarction was also relatively cost-effective. Screening is least cost-effective in men aged over 35 years, because the gains in life expectancy are small. (ABSTRACT TRUNCA",
+				"libraryCatalog": "NCBI PubMed",
+				"shortTitle": "Screening for hypercholesterolaemia versus case finding for familial hypercholesterolaemia"
 			}
 		]
 	}
