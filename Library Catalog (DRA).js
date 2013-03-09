@@ -3,13 +3,13 @@
 	"label": "Library Catalog (DRA)",
 	"creator": "Simon Kornblith",
 	"target": "/web2/tramp2\\.exe/(?:see\\_record/|authority\\_hits/|do_keyword_search|form/|goto/.*\\?.*screen=(MARC)?Record\\.html)",
-	"minVersion": "1.0.0b3.r1",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2013-03-07 22:31:19"
+	"browserSupport": "gcs",
+	"lastUpdated": "2013-03-08 21:43:08"
 }
 
 /* sample URLs: http://libraries.nc-pals.org
