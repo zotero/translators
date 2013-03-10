@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-12-10 23:37:54"
+	"lastUpdated": "2013-02-23 01:07:04"
 }
 
 /*
@@ -98,6 +98,8 @@ var _prefixRemap = {
 	"http://purl.org/DC/elements/1.1/": "http://purl.org/dc/elements/1.1/"
 };
 
+var namespaces = {};
+
 var _rdfPresent = false,
 	_haveItem = false,
 	_itemType;
@@ -135,19 +137,19 @@ function getPrefixes(doc) {
 }
 
 function getContentText(doc, name, strict) {
-	var xpath = '//meta[' +
+	var xpath = '//x:meta[' +
 		(strict?'@name':
 			'substring(@name, string-length(@name)-' + (name.length - 1) + ')') +
 		'="'+ name +'"]/';
-	return ZU.xpathText(doc, xpath + '@content | ' + xpath + '@contents');
+	return ZU.xpathText(doc, xpath + '@content | ' + xpath + '@contents', namespaces);
 }
 
 function getContent(doc, name, strict) {
-	var xpath = '//meta[' +
+	var xpath = '//x:meta[' +
 		(strict?'@name':
 			'substring(@name, string-length(@name)-' + (name.length - 1) + ')') +
 		'="'+ name +'"]/';
-	return ZU.xpath(doc, xpath + '@content | ' + xpath + '@contents');
+	return ZU.xpath(doc, xpath + '@content | ' + xpath + '@contents', namespaces);
 }
 
 function fixCase(authorName) {
@@ -280,6 +282,8 @@ function init(doc, url, callback, forceLoadRDF) {
 }
 
 function doWeb(doc, url) {
+	//set default namespace
+	namespaces.x = doc.documentElement.namespaceURI;
 	// populate _rdfPresent, _itemType, and _prefixes
 	if(!RDF) init(doc, url, function() { importRDF(doc, url) }, true);
 	else importRDF(doc, url);
@@ -370,7 +374,7 @@ function addHighwireMetadata(doc, newItem) {
 
 	//fall back to "keywords"
 	if(!newItem.tags.length)
-		 newItem.tags = ZU.xpath(doc, '//meta[@name="keywords"]/@content')
+		 newItem.tags = ZU.xpath(doc, '//x:meta[@name="keywords"]/@content', namespaces)
 		 					.map(function(t) { return t.textContent; });
 
 	/**If we already have tags - run through them one by one,
@@ -398,7 +402,7 @@ function addHighwireMetadata(doc, newItem) {
 	//We can try getting abstract from 'description'
 	if(!newItem.abstractNote) {
 		newItem.abstractNote = ZU.trimInternal(
-			ZU.xpathText(doc, '//meta[@name="description"]/@content') || '');
+			ZU.xpathText(doc, '//x:meta[@name="description"]/@content', namespaces) || '');
 	}
 
 	//Cleanup DOI
@@ -793,6 +797,44 @@ var testCases = [
 				"url": "http://www.scielosp.org/scielo.php?script=sci_abstract&pid=S0034-89102007000900015&lng=en&nrm=iso&tlng=pt",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.scielosp.org"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.hindawi.com/journals/mpe/2013/868174/abs/",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Yuguang",
+						"lastName": "Bai",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"itemID": "http://www.hindawi.com/journals/mpe/2013/868174/abs/",
+				"abstractNote": "The problem of network-based robust filtering for stochastic systems with sensor nonlinearity is investigated in this paper. In the network environment, the effects of the sensor saturation, output quantization, and network-induced delay are taken into simultaneous consideration, and the output measurements received in the filter side are incomplete. The random delays are modeled as a linear function of the stochastic variable described by a Bernoulli random binary distribution. The derived criteria for performance analysis of the filtering-error system and filter design are proposed which can be solved by using convex optimization method. Numerical examples show the effectiveness of the design method.",
+				"DOI": "10.1155/2013/868174",
+				"ISSN": "1024-123X",
+				"url": "http://www.hindawi.com/journals/mpe/2013/868174/abs/",
+				"libraryCatalog": "www.hindawi.com",
+				"date": "2013/02/20",
+				"title": "Robust Filtering for Networked Stochastic Systems Subject to Sensor Nonlinearity",
+				"publicationTitle": "Mathematical Problems in Engineering",
+				"volume": "2013"
 			}
 		]
 	}

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-10-05 15:13:44"
+	"lastUpdated": "2013-02-28 19:52:30"
 }
 
 function detectWeb(doc, url) {
@@ -30,6 +30,7 @@ function detectWeb(doc, url) {
 			case 'Chapter':
 				return 'bookSection';
 			case 'JournalArticle':
+			case 'Editorial':
 				return 'journalArticle';
 			default:
 				return false;

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-13 23:47:38"
+	"lastUpdated": "2013-03-08 21:42:49"
 }
 
 function detectWeb(doc, url) {
@@ -205,7 +205,7 @@ var testCases = [
 				"url": "http://tvnz.co.nz/national-news/patea-devastated-storm-video-4752377",
 				"network": "TVNZ",
 				"language": "en",
-				"date": "March 03, 2012",
+				"date": "March 02, 2012",
 				"title": "Patea devastated by storm",
 				"libraryCatalog": "TVNZ",
 				"accessDate": "CURRENT_TIMESTAMP"

@@ -2,14 +2,14 @@
 	"translatorID": "9932d1a7-cc6d-4d83-8462-8f6658b13dc0",
 	"label": "Biblio.com",
 	"creator": "Adam Crymble, Michael Berkowitz, and Sebastian Karcher",
-	"target": "^https://www\\.biblio\\.com/",
+	"target": "^https?://www\\.biblio\\.com/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-23 04:26:44"
+	"lastUpdated": "2013-02-27 11:58:08"
 }
 
 function detectWeb(doc, url) {
@@ -85,7 +85,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		var articles = new Array();
-		var titles = doc.evaluate('//div[@class="search-result"]//h2/a', doc, null, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//div[@class="search-result"]//a[@class="sr-title-text"]', doc, null, XPathResult.ANY_TYPE, null);
 		var next_title;
 		while (next_title = titles.iterateNext()) {
 			if (next_title.textContent.match(/\w/)) {
@@ -99,10 +99,7 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(articles, scrape, function () {
-				Zotero.done();
-			});
-			Zotero.wait();	
+			Zotero.Utilities.processDocuments(articles, scrape);	
 		});
 	} else {
 		scrape(doc, url);

@@ -9,14 +9,15 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-12-10 01:15:13"
+	"lastUpdated": "2013-03-10 11:45:19"
 }
 
 function detectWeb(doc, url) {
 	if(doc.evaluate('//input[@id="articleListHeader_selectAllToc"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
 	} else if (doc.evaluate('//div[@id="articleHead"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		return "journalArticle";
+		if (ZU.xpathText(doc, '//div[@id="articleHead"]/h2').indexOf("Chapter") !=-1) return "bookSection";
+		else return "journalArticle";
 	}
 	return false;
 }
@@ -80,8 +81,9 @@ function scrape(setupSets){
 	for (var i in setupSets){
 		(function(set) {
 			Zotero.Utilities.HTTP.doGet(set.citUrl, function(text){
+				//Z.debug(text)
 				//get the exported RIS file name;
-				var downloadFileName = text.match(/name=\"downloadFileName\" value=\"([A-Za-z0-9_]+)\"/)[1];
+				var downloadFileName = text.match(/name=\"downloadFileName\" value=\"([A-Za-z0-9_\-\.]+)\"/)[1];
 				Zotero.debug("downloadfilename= "+downloadFileName);
 				var host = set.citUrl.replace(/action\/showCitFormats\?doi=.+/, "")
 				processCallback(set.doi, host, downloadFileName);
@@ -177,6 +179,54 @@ var testCases = [
 		"type": "web",
 		"url": "http://pubs.acs.org/toc/nalefd/12/6",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://pubs.acs.org/doi/abs/10.1021/bk-2011-1071.ch005",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"creators": [
+					{
+						"lastName": "Donald L. Macalady",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Katherine Walton-Day",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "ACS Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "ACS Full Text Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"date": "January 1, 2011",
+				"volume": "1071",
+				"numberOfVolumes": "0",
+				"DOI": "10.1021/bk-2011-1071.ch005",
+				"url": "http://dx.doi.org/10.1021/bk-2011-1071.ch005",
+				"abstractNote": "Natural organic matter (NOM) is an inherently complex mixture of polyfunctional organic molecules. Because of their universality and chemical reversibility, oxidation/reductions (redox) reactions of NOM have an especially interesting and important role in geochemistry. Variabilities in NOM composition and chemistry make studies of its redox chemistry particularly challenging, and details of NOM-mediated redox reactions are only partially understood. This is in large part due to the analytical difficulties associated with NOM characterization and the wide range of reagents and experimental systems used to study NOM redox reactions. This chapter provides a summary of the ongoing efforts to provide a coherent comprehension of aqueous redox chemistry involving NOM and of techniques for chemical characterization of NOM. It also describes some attempts to confirm the roles of different structural moieties in redox reactions. In addition, we discuss some of the operational parameters used to describe NOM redox capacities and redox states, and describe nomenclature of NOM redox chemistry. Several relatively facile experimental methods applicable to predictions of the NOM redox activity and redox states of NOM samples are discussed, with special attention to the proposed use of fluorescence spectroscopy to predict relevant redox characteristics of NOM samples.",
+				"pages": "85-111",
+				"section": "5",
+				"title": "Redox Chemistry and Natural Organic Matter (NOM): Geochemists? Dream, Analytical Chemists? Nightmare",
+				"bookTitle": "Aquatic Redox Chemistry",
+				"series": "ACS Symposium Series",
+				"ISBN": "0-8412-2652-0",
+				"publisher": "American Chemical Society",
+				"libraryCatalog": "ACS Publications",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Redox Chemistry and Natural Organic Matter (NOM)"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

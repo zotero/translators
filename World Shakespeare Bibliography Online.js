@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2012-12-13 20:42:35"
+	"browserSupport": "gcs",
+	"lastUpdated": "2013-03-06 23:27:12"
 }
 
 /*
@@ -488,33 +488,28 @@ var testCases = [
 		"url": "http://www.worldshakesbib.org/search?searchtype=browse&index=30.14.05.30&rid=49952&words=&returnlink=%2Fsearch%3Fsearchtype%3Dbrowse%26index%3D30.14.05.30%26return%3D1",
 		"items": [
 			{
-				"itemType": "journalArticle",
+				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "R. L",
-						"lastName": "Horn",
-						"creatorType": "author"
+						"firstName": "Jan",
+						"lastName": "Jonk",
+						"creatorType": "translator"
 					}
 				],
 				"notes": [],
-				"tags": [
-					"Doomsday",
-					"Charney, Maurice",
-					"Hutchings, William"
-				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"title": "<i>Hamlet</i>, III.ii.376: A Defense of Second Quarto's 'the bitter day.'",
-				"pages": "179-81",
-				"publicationTitle": "Shakespeare Quarterly",
-				"volume": "33",
-				"language": "English",
-				"archiveLocation": "30.14.05.25  Individual Works — Plays; <i>Hamlet</i>; Scholarship And Criticism; Textual And Bibliographical Studies",
-				"callNumber": "bp272",
-				"date": "1982",
-				"abstractNote": "Argues in favor of Maurice Charney's identification of the \"bitter day\" as \"Doomsday,\" and thus in favor of the Second Quarto reading on both internal and external grounds. Reviewed by William Hutchings, <i>Hamlet Studies</i> 4 (1982): 109-15 (in review-article)",
-				"libraryCatalog": "World Shakespeare Bibliography Online",
-				"shortTitle": "<i>Hamlet</i>, III.ii.376"
+				"title": "Hamlet, Kroonprins van Denemarken",
+				"numPages": "140",
+				"place": "Heijen",
+				"publisher": "AlphaTech",
+				"language": "Dutch",
+				"archiveLocation": "30.14.05.15  Individual Works — Plays; <i>Hamlet</i>; Scholarship And Criticism; Translations And Adaptations",
+				"callNumber": "ad10",
+				"date": "1991",
+				"abstractNote": "Annotated Dutch-language translation based on the Arden edition",
+				"libraryCatalog": "World Shakespeare Bibliography Online"
 			}
 		]
 	},
@@ -526,40 +521,29 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "Melissa D",
-						"lastName": "Aaron",
-						"creatorType": "author"
+						"firstName": "François",
+						"lastName": "Maguin",
+						"creatorType": "translator"
 					}
 				],
 				"notes": [
 					{
-						"note": "Review(s): Hansen, Matthew C. <i>Year's Work in English Studies</i> 86 (2007 for 2005): 399-400; Palmer, Barbara D. <i>Shakespeare Quarterly</i> 58 (2007): 119-22; Johnson, Nora. <i>Medieval and Renaissance Drama in England</i> 21 (2008): 296-99"
+						"note": "Review(s): Peyré, Yves. <i>Cahiers élisabéthains</i> 49 (1996): 122"
 					}
 				],
-				"tags": [
-					"economics",
-					"King's Men",
-					"Lord Chamberlain's Men",
-					"Globe Theatre",
-					"metatheater",
-					"bear",
-					"masque",
-					"wedding",
-					"Elizabeth I"
-				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"title": "Global Economics: A History of the Theater Business, the Chamberlain's/King's Men, and Their Plays, 1599-1642",
-				"numPages": "250",
-				"place": "Newark",
-				"publisher": "University of Delaware Press",
-				"language": "English",
-				"archiveLocation": "30.14.05.30  Individual Works — Plays; <i>Hamlet</i>; Scholarship And Criticism; Criticism",
-				"callNumber": "aaq473",
-				"date": "2005",
-				"abstractNote": "In an examination of the of the Chamberlain's Men/King's Men as a business, offers \"economic readings\" of <i>Henry V</i> (and its relation to the building of the Globe Theatre), <i>Julius Caesar</i> (in the context of the daily earnings of the company), <i>Twelfth Night</i> and <i>Richard II</i> (as examples of income generated from private performances), <i>Hamlet</i> (with attention to how its metatheatrical references relate to the economic state of the company at the end of Elizabeth I's reign), <i>Winter's Tale</i> (with attention to the bear in relation to the popularity of the masque), <i>Tempest</i> (in its commercial context as a wedding play), and <i>Henry VIII</i> (in its relation to the masque). Also considers the company's participation in the publication of the First Folio as a \"corporate statement.\" Published version of \"Global Economics: An Institutional Economic History of the Chamberlain's/King's Men and Their Texts, 1599-1642,\" <i>Dissertation Abstracts International</i> 59 (1998-99): 2516A (Wisconsin--Madison)",
-				"libraryCatalog": "World Shakespeare Bibliography Online",
-				"shortTitle": "Global Economics"
+				"title": "La tragédie de Hamlet",
+				"numPages": "544",
+				"place": "Paris",
+				"publisher": "Flammarion",
+				"language": "French",
+				"archiveLocation": "30.14.05.15  Individual Works — Plays; <i>Hamlet</i>; Scholarship And Criticism; Translations And Adaptations",
+				"callNumber": "ai690",
+				"date": "1995",
+				"abstractNote": "Annotated French-language translation with an introduction",
+				"libraryCatalog": "World Shakespeare Bibliography Online"
 			}
 		]
 	},
@@ -571,40 +555,55 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "Melissa D",
-						"lastName": "Aaron",
+						"firstName": "M. C.",
+						"lastName": "Bradbrook",
 						"creatorType": "author"
 					}
 				],
 				"notes": [
 					{
-						"note": "Review(s): Hansen, Matthew C. <i>Year's Work in English Studies</i> 86 (2007 for 2005): 399-400; Palmer, Barbara D. <i>Shakespeare Quarterly</i> 58 (2007): 119-22; Johnson, Nora. <i>Medieval and Renaissance Drama in England</i> 21 (2008): 296-99"
+						"note": "Review(s): Darrell, S. B. <i>Choice</i> 27 (1989-90): 310; Hapgood, Robert. <i>TLS: The Times Literary Supplement</i> 25-31 August 1989, pp. 927-28 (in review-article, see the letters by Terence Hawkes and Eric Sams, 8-14 September 1989, p. 973, George T. Wright, 29 September-5 October 1989, p. 1061, and Hapgood, 13-19 October 1989, p. 1123); Wright, Laurence. <i>Shakespeare in Southern Africa</i> 3 (1989): 102-3; Elliot, Martin. <i>Encounter</i> March 1990, pp. 38-42 (in review-article); Kirsch, Arthur. <i>Studies in English Literature 1500-1900</i> 30 (1990): 335-67 (especially 357-58); Walch, Günter. <i>Shakespeare-Jahrbuch</i> (Weimar) 127 (1991): 175-77; Knowles, James. <i>Year's Work in English Studies</i> 70 (1992 for 1989): 266; Rutter, Carol Chillington. <i>Year's Work in English Studies</i> 70 (1992 for 1989): 293-94"
 					}
 				],
 				"tags": [
-					"economics",
-					"King's Men",
-					"Lord Chamberlain's Men",
-					"Globe Theatre",
-					"metatheater",
-					"bear",
-					"masque",
-					"wedding",
-					"Elizabeth I"
+					"Gurr, Andrew"
 				],
 				"seeAlso": [],
-				"attachments": [],
-				"title": "Global Economics: A History of the Theater Business, the Chamberlain's/King's Men, and Their Plays, 1599-1642",
-				"numPages": "250",
-				"place": "Newark",
-				"publisher": "University of Delaware Press",
+				"attachments": [
+					{
+						"title": "See also: Bradbrook, \"'The cause of wit in other men'\" ",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "See also: Bradbrook, \"Love and Courtesy in <i>Two Gentlemen of Verona</i>\" ",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "See also: Bradbrook, \"Social Nuances in Shakespeare's Early Comedies\" ",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "See also: Bradbrook, \"What Is 'Shakespeare'?\"",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"title": "Shakespeare in His Context: The Constellated Globe",
+				"numPages": "207",
+				"place": "Totowa, NJ",
+				"publisher": "Barnes and Noble",
+				"series": "(The Collected Papers of Muriel Bradbrook 4.)",
+				"seriesTitle": "(The Collected Papers of Muriel Bradbrook 4.)",
 				"language": "English",
-				"archiveLocation": "10.40.20  General Shakespeareana; Shakespeare And His Stage; Acting Companies",
-				"callNumber": "aaq469",
-				"date": "2005",
-				"abstractNote": "In an examination of the of the Chamberlain's Men/King's Men as a business, offers \"economic readings\" of <i>Henry V</i> (and its relation to the building of the Globe Theatre), <i>Julius Caesar</i> (in the context of the daily earnings of the company), <i>Twelfth Night</i> and <i>Richard II</i> (as examples of income generated from private performances), <i>Hamlet</i> (with attention to how its metatheatrical references relate to the economic state of the company at the end of Elizabeth I's reign), <i>Winter's Tale</i> (with attention to the bear in relation to the popularity of the masque), <i>Tempest</i> (in its commercial context as a wedding play), and <i>Henry VIII</i> (in its relation to the masque). Also considers the company's participation in the publication of the First Folio as a \"corporate statement.\" Published version of \"Global Economics: An Institutional Economic History of the Chamberlain's/King's Men and Their Texts, 1599-1642,\" <i>Dissertation Abstracts International</i> 59 (1998-99): 2516A (Wisconsin--Madison)",
+				"archiveLocation": "10.40.05  General Shakespeareana; Shakespeare And His Stage; General",
+				"callNumber": "af639",
+				"date": "1989",
+				"abstractNote": "Prints four unpublished essays--\"<i>The Phoenix and the Turtle</i>\"; \"The Bankside in Elizabethan Times\"; \"The Brownes, the Greenes, and the Red Bull\"; and \"The Main Collaborators: Shakespeare and His Company\"--and the following previously published works of Shakespeare interest: \"What Is 'Shakespeare'?\" (q.v.); \"'The cause of wit in other men'\" (q.v.); \"The Building of Tragic Character in Shakespeare\"; \"Social Nuances in Shakespeare's Early Comedies\" (q.v.); \"Love and Courtesy in <i>The Two Gentlemen of Verona</i>\" (q.v.); \"<i>Romeo and Juliet</i> in Performance.\" With a foreword by Andrew Gurr and a bibliography of Bradbrook's publications, 1978-88",
 				"libraryCatalog": "World Shakespeare Bibliography Online",
-				"shortTitle": "Global Economics"
+				"shortTitle": "Shakespeare in His Context"
 			}
 		]
 	}

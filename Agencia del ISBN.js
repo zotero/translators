@@ -3,13 +3,13 @@
 	"label": "Agencia del ISBN",
 	"creator": "Michael Berkowitz",
 	"target": "^https?://www\\.mcu\\.es/webISBN",
-	"minVersion": "1.0.0b4.r5",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2012-02-24 23:55:56"
+	"browserSupport": "gcs",
+	"lastUpdated": "2013-02-28 15:02:29"
 }
 
 function detectWeb(doc, url) {
@@ -30,27 +30,36 @@ function doWeb(doc, url) {
 			var book = doc.evaluate('./p/span/strong/a', box, null, XPathResult.ANY_TYPE, null).iterateNext();
 			items[book.href] = book.textContent;
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			books.push(i);
-		}
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				books.push(i);
+			}
+			Zotero.Utilities.processDocuments(books, scrape);	
+		});
+		
 	} else {
-		books = [url];
+		scrape(doc, url);
 	}
-	Zotero.Utilities.processDocuments(books, function(newDoc) {
+}
+		
+		
+	function scrape (doc, url){	
 		var data = new Object();
-		var rows = newDoc.evaluate('//div[@class="fichaISBN"]/table/tbody/tr', newDoc, null, XPathResult.ANY_TYPE, null);
+		var rows = doc.evaluate('//div[@class="fichaISBN"]/table/tbody/tr', doc, null, XPathResult.ANY_TYPE, null);
 		var next_row;
 		while (next_row = rows.iterateNext()) {
-			var heading = newDoc.evaluate('./th', next_row, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			var value = newDoc.evaluate('./td', next_row, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			var heading = doc.evaluate('./th', next_row, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			var value = doc.evaluate('./td', next_row, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 			data[heading.replace(/\W/g, "")] = value;
 		}
-		var isbn = Zotero.Utilities.trimInternal(newDoc.evaluate('//span[@class="cabTitulo"]/strong', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		var isbn = Zotero.Utilities.trimInternal(doc.evaluate('//span[@class="cabTitulo"]/strong', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 		var item = new Zotero.Item("book");
 		item.ISBN = isbn;
 		item.title = Zotero.Utilities.trimInternal(data['Ttulo']);
-		
+		item.title= item.title.replace(/\s+:/, ":");
 		author = data['Autores'];
 		if (author) {
 			var authors = author.match(/\b.*,\s+\w+[^([]/g);
@@ -61,8 +70,7 @@ function doWeb(doc, url) {
 		if (data['Publicacin']) item.publisher = Zotero.Utilities.trimInternal(data['Publicacin']);
 		if (data['FechaEdicin']) item.date = Zotero.Utilities.trimInternal(data['FechaEdicin']);
 		item.complete();
-	}, function() {Zotero.done();});
-	Zotero.wait();
-}/** BEGIN TEST CASES **/
+	}
+/** BEGIN TEST CASES **/
 var testCases = []
 /** END TEST CASES **/

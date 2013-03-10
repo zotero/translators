@@ -2,18 +2,18 @@
 	"translatorID": "232e24fe-2f68-44fc-9366-ecd45720ee9e",
 	"label": "Patents - USPTO",
 	"creator": "Bill McKinney",
-	"target": "^http://patft\\.uspto\\.gov/netacgi/nph-Parser.+",
-	"minVersion": "1.0.0b4.r1",
+	"target": "^http://(patft|appft1)\\.uspto\\.gov/netacgi/nph-Parser.+",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-11-26 22:27:21"
+	"lastUpdated": "2013-02-28 20:40:13"
 }
 
 function detectWeb(doc, url) {
-	var re = new RegExp("^http://patft\.uspto\.gov/netacgi/nph-Parser");
+	var re = new RegExp("^http://(patft|appft1)\.uspto\.gov/netacgi/nph-Parser");
 	if (doc.title.match(/Search Results:/)){
 		return "multiple"
 	}
@@ -105,27 +105,22 @@ function scrape(doc) {
 }
 
 function doWeb(doc, url) {
-if(detectWeb(doc, url) == "patent") {
+	if(detectWeb(doc, url) == "patent") {
 		scrape(doc);
 	} else {
-		var items = Zotero.Utilities.getItemArray(doc, doc, "^http://patft\.uspto\.gov/netacgi/nph-Parser.+");
-		items = Zotero.selectItems(items);
-		
-		if(!items) {
-			return true;
-		}
-		
+		var items = Zotero.Utilities.getItemArray(doc, doc, "^http://(patft|appft1)\.uspto\.gov/netacgi/nph-Parser.+");
 		var uris = new Array();
-		for(var i in items) {
-			uris.push(i);
-		}
-		
-		Zotero.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
-			function() { Zotero.done(); }, null);
-		
-		Zotero.wait();
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				uris.push(i);
+			}
+			Zotero.Utilities.processDocuments(uris, scrape);	
+		});
 	}
-}/** BEGIN TEST CASES **/
+}	/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -173,6 +168,28 @@ var testCases = [
 				"libraryCatalog": "Patents - USPTO",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "United States Patent"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://appft1.uspto.gov/netacgi/nph-Parser?Sect1=PTO2&Sect2=HITOFF&p=1&u=%2Fnetahtml%2FPTO%2Fsearch-bool.html&r=1&f=G&l=50&co1=AND&d=PG01&s1=20130047261&OS=20130047261&RS=20130047261",
+		"items": [
+			{
+				"itemType": "patent",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"url": "http://appft1.uspto.gov/netacgi/nph-Parser?Sect1=PTO2&Sect2=HITOFF&p=1&u=%2Fnetahtml%2FPTO%2Fsearch-bool.html&r=1&f=G&l=50&co1=AND&d=PG01&s1=20130047261&OS=20130047261&RS=20130047261",
+				"title": "United States Patent Application: 0130047261 - Data Access Control",
+				"patentNumber": "20130047261",
+				"issueDate": "A1",
+				"abstractNote": "A set of data is provided to an application executed in an environment\n     within which the application is restricted from making its output\n     available outside the environment. An operation performed on the set of\n     data by the application is inspected. A determination of whether an\n     output of the application is satisfactory is reached based on the\n     inspection. If the output is determined satisfactory, the output of the\n     application is made available outside the environment.",
+				"libraryCatalog": "Patents - USPTO",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "United States Patent Application"
 			}
 		]
 	}

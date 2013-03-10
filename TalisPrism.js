@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-06-30 14:05:17"
+	"lastUpdated": "2013-03-07 12:46:53"
 }
 
 /* TalisPrism translator.
@@ -442,41 +442,6 @@ function doWeb(doc, url) {
 		
 }/** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "http://lclcat.lancashire.gov.uk/TalisPrism/doOpenURLSearch.do?sid=Talis:prod_talis&pid=Key%3A525143%3BArtifactType%3AMarc21Slim%3BsearchLocation%3Atalislms",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"firstName": "Fisheries and Food",
-						"lastName": "Great Britain. Ministry of Agriculture",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"url": "http://lclcat.lancashire.gov.uk/TalisPrism/doOpenURLSearch.do?sid=Talis:prod_talis&pid=Key%3A525143%3BArtifactType%3AMarc21Slim%3BsearchLocation%3Atalislms",
-						"title": "Snapshot of Library Page",
-						"mimeType": "text/html"
-					}
-				],
-				"title": "Aids to management : labour and machinery.",
-				"date": "1969",
-				"publisher": "HMSO",
-				"series": "Farm as a business",
-				"seriesNumber": "6",
-				"edition": "2nd ed.",
-				"libraryCatalog": "http://lclcat.lancashire.gov.uk",
-				"callNumber": "(ZBS) HQ Bowran Street _ Reserve Stock 338.16/GRE",
-				"shortTitle": "Aids to management"
-			}
-		]
-	},
 	{
 		"type": "web",
 		"url": "http://talis-prism.lib.surrey.ac.uk/TalisPrism/doSearch.do?REF=%3C1%3D%221.0%22%3E%3C2%3E%3C3%3E%3C%3D%3E%3C4%3Ekeyword%3C%2F4%3E%3C5%3Eargentina%2C+economy%3C%2F5%3E%3C%2F%3D%3E%3C%2F3%3E%3C7%3E%3C%3C9%3E%3C8%3E11%3C%2F8%3E%3C%2F%3C9%3E%3C%2F7%3E%3C%2F2%3E%3C6%3D%22talislms%22+%3E%3C%2F6%3E%3C%2F1%3E",

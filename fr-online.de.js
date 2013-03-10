@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-17 23:32:44"
+	"lastUpdated": "2013-02-28 15:05:01"
 }
 
 /*
@@ -181,7 +181,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.fr-online.de/krise/portugal-koennte-rettungspaket-benoetigen,1471908,8251842.html",
+		"url": "http://www.fr-online.de/schuldenkrise/andeutung-des-finanzministers-portugal-koennte-rettungspaket-benoetigen,1471908,8251842.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -195,7 +195,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"url": "http://www.fr-online.de/krise/portugal-koennte-rettungspaket-benoetigen,1471908,8251842.html",
+				"url": "http://www.fr-online.de/schuldenkrise/andeutung-des-finanzministers-portugal-koennte-rettungspaket-benoetigen,1471908,8251842.html",
 				"title": "Andeutung des Finanzministers: Portugal könnte Rettungspaket benötigen",
 				"abstractNote": "Eine politische Krise in Portugal aufgrund der harten Sparvorgaben der Europäischen Union könnte ein Rettungspaket notwendig machen, fürchtet Finanzminister Fernando Teixeira dos Santos.",
 				"date": "21. März 2011",
