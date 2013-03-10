@@ -272,7 +272,7 @@ function generateItem(item, teiDoc) {
         }
         if(item.seriesTitle){
             var seriesTitle = teiDoc.createElementNS(ns.tei, "title");
-            title.setAttribute("level", "s");
+            seriesTitle.setAttribute("level", "s");
             seriesTitle.setAttribute("type", "alternative");
             seriesTitle.appendChild(teiDoc.createTextNode(item.seriesTitle));
             series.appendChild(seriesTitle);
