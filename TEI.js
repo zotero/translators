@@ -211,6 +211,7 @@ function generateItem(item, teiDoc) {
         bibl.appendChild(analytic);
         bibl.appendChild(monogr);
         var analyticTitle = teiDoc.createElementNS(ns.tei, "title");
+        analyticTitle.setAttribute("level", "a");
         analytic.appendChild(analyticTitle);
         if(item.title){
             analyticTitle.appendChild(teiDoc.createTextNode(item.title));
@@ -219,12 +220,19 @@ function generateItem(item, teiDoc) {
         // there should be a publication title!
         if(item.publicationTitle){
             var pubTitle = teiDoc.createElementNS(ns.tei, "title");
+            if(item.itemType == "journalTitle"){
+                pubTitle.setAttribute("level", "j");
+            }
+            else{
+                pubTitle.setAttribute("level", "m");
+            }
             pubTitle.appendChild(teiDoc.createTextNode(item.publicationTitle));
             monogr.appendChild(pubTitle);
         }
         // nonetheless if the user pleases this has to be possible
         else if(!item.conferenceName){
             var pubTitle = teiDoc.createElementNS(ns.tei, "title");
+            pubTitle.setAttribute("level", "m");
             monogr.appendChild(pubTitle);
         }
     }
@@ -232,6 +240,7 @@ function generateItem(item, teiDoc) {
         bibl.appendChild(monogr);
         if(item.title){
             var title = teiDoc.createElementNS(ns.tei, "title");
+            title.setAttribute("level", "m");
             title.appendChild(teiDoc.createTextNode(item.title));
             monogr.appendChild(title);
         }
@@ -257,11 +266,13 @@ function generateItem(item, teiDoc) {
 
         if(item.series){
             var title = teiDoc.createElementNS(ns.tei, "title");
+            title.setAttribute("level", "s");
             title.appendChild(teiDoc.createTextNode(item.series));
             series.appendChild(title);
         }
         if(item.seriesTitle){
             var seriesTitle = teiDoc.createElementNS(ns.tei, "title");
+            title.setAttribute("level", "s");
             seriesTitle.setAttribute("type", "alternative");
             seriesTitle.appendChild(teiDoc.createTextNode(item.seriesTitle));
             series.appendChild(seriesTitle);
