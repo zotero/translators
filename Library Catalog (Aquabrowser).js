@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-03-07 16:03:29"
+	"lastUpdated": "2013-03-11 09:11:28"
 }
 
 /*
@@ -104,7 +104,7 @@ function scrape(risurl){
 		//I'll leave this debugging in for the time being
 		Z.debug("This should be RIS: " + text)
 		//fix years - we don't like letters immediately before dates
-		text = text.replace(/(Y  - )[A-Za-z]+(2003)/, "$1$2");
+		text = text.replace(/(Y  - )[A-Za-z]+(\d{4})/, "$1$2");
 		//apparently the RIS doesn't do well with item types
 		text = text.replace(/TY  - (Boek|GEN)/, "TY  - BOOK");
 		
@@ -209,7 +209,7 @@ var testCases = [
 				"publisher": "W. De Gruyter",
 				"ISBN": "3110116715",
 				"numPages": "x, 726 p.",
-				"callNumber": "Dumbarton Oaks PT573.R4 T4 1989",
+				"callNumber": "Widener Harvard Depository PT573.R4 T4 1989x [Consult Circ. Desk for HX45IM]",
 				"series": "Arbeiten zur Frühmittelalterforschung ; Bd. 18",
 				"volume": "Bd. 18",
 				"date": "1989",
