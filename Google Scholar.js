@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-11-01 08:10:06"
+	"lastUpdated": "2013-03-14 20:39:09"
 }
 
 /*
@@ -79,11 +79,12 @@ function setGSPCookie(doc, cookie) {
 function setCookieThroughPrefs(doc, callback) {
 	url = doc.location.href.replace(/hl\=[^&]*&?/, "")
 			.replace("scholar?",
-				"scholar_setprefs?hl=en&scis=yes&scisf=4&submit=Save+Preferences&");
+				"scholar_settings?");
 	ZU.doGet(url, function(scisigDoc) {
 		var scisig = /<input\s+type="?hidden"?\s+name="?scisig"?\s+value="([^"]+)"/
 					.exec(scisigDoc);
-		url = url + "&scisig="+scisig[1];
+		url = url.replace("scholar_settings?", "scholar_setprefs?")
+			+ "&scis=yes&scisf=4&submit=&scisig="+scisig[1];
 		//set prefernces
 		Z.debug('Submitting settings to Google Scholar: ' + url);
 		ZU.doGet(url, function(response) { callback(doc); });
