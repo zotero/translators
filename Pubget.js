@@ -8,12 +8,12 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2013-03-07 00:02:42"
+	"browserSupport": "gcs",
+	"lastUpdated": "2013-03-13 23:34:21"
 }
 
 /*
-    Translator
+	Translator
    Pubget Translator Copyright (C) 2013 Sebastian Karcher
 
    This program is free software: you can redistribute it and/or modify

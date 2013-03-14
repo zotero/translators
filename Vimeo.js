@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-24 18:35:19"
+	"lastUpdated": "2013-03-13 21:13:24"
 }
 
 /*
@@ -113,15 +113,15 @@ var testCases = [
 					}
 				],
 				"itemID": "http://vimeo.com/31179423",
-				"title": "Baroque.me: J.S. Bach - Cello Suite No. 1 - Prelude",
+				"title": "Strings: J.S. Bach - Cello Suite No. 1 - Prelude",
 				"publicationTitle": "Vimeo",
 				"url": "http://vimeo.com/31179423",
-				"abstractNote": "Baroque.me (2011) by Alexander Chen. Video capture. http://www.baroque.me visualizes the first Prelude from Bach's Cello Suites. Using the math behind string length…",
+				"abstractNote": "Strings (2011) by Alexander Chen. Video capture. http://www.baroque.me visualizes the first Prelude from Bach's Cello Suites. Using the math behind string length…",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "vimeo.com",
 				"date": "2011-10-26",
 				"runningTime": "PT00H02M57S",
-				"shortTitle": "Baroque.me"
+				"shortTitle": "Strings"
 			}
 		]
 	}

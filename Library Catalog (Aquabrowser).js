@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-03-11 09:11:28"
+	"lastUpdated": "2013-03-13 20:50:46"
 }
 
 /*
@@ -209,7 +209,7 @@ var testCases = [
 				"publisher": "W. De Gruyter",
 				"ISBN": "3110116715",
 				"numPages": "x, 726 p.",
-				"callNumber": "Widener Harvard Depository PT573.R4 T4 1989x [Consult Circ. Desk for HX45IM]",
+				"callNumber": "Dumbarton Oaks PT573.R4 T4 1989",
 				"series": "Arbeiten zur Frühmittelalterforschung ; Bd. 18",
 				"volume": "Bd. 18",
 				"date": "1989",

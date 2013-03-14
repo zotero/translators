@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-02-24 23:30:07"
+	"lastUpdated": "2013-03-13 20:43:55"
 }
 
 /*
@@ -47,8 +47,9 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 	var arts = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		var items = new Object();
-		var titles = doc.evaluate('//a[@class="TeaserHeadLink"]', doc, null, XPathResult.ANY_TYPE, null);
+		var items = new Object;
+		//make sure we don't get media objects
+		var titles = doc.evaluate('//div[not(div[contains(@class, "MediaLink")])]/a[@class="TeaserHeadLink"]', doc, null, XPathResult.ANY_TYPE, null);
 		var title;
 		while (title = titles.iterateNext()) {
 			items[title.href] = title.textContent.trim();
@@ -60,10 +61,7 @@ function doWeb(doc, url) {
 			for (var itemurl in items) {
 				arts.push(itemurl);
 			}
-			ZU.processDocuments(arts, scrape, function () {
-				Zotero.done();
-			});
-			Zotero.wait();
+			ZU.processDocuments(arts, scrape);
 		});
 	} else {
 		scrape(doc);
