@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-03-14 20:39:09"
+	"lastUpdated": "2013-03-14 21:29:25"
 }
 
 /*
@@ -83,6 +83,16 @@ function setCookieThroughPrefs(doc, callback) {
 	ZU.doGet(url, function(scisigDoc) {
 		var scisig = /<input\s+type="?hidden"?\s+name="?scisig"?\s+value="([^"]+)"/
 					.exec(scisigDoc);
+		if(!scisig) {
+			Z.debug('Could not locate scisig');
+			var form = scisigDoc.match(/<form.+?<\/form>/ig);
+			if(!form) {
+				Z.debug('No forms found on page.');
+				Z.debug(scisigDoc);
+			} else {
+				Z.debug(form.join('\n\n'));
+			}
+		}
 		url = url.replace("scholar_settings?", "scholar_setprefs?")
 			+ "&scis=yes&scisf=4&submit=&scisig="+scisig[1];
 		//set prefernces
@@ -101,6 +111,7 @@ function prepareCookie(doc, callback) {
 		}
 		callback(doc);
 	} else {
+		Z.debug("Attempting to set cookie through GS Settings page");
 		//some proxies do not pass cookies through, so we need to set this by
 		//going to the preferences page
 		setCookieThroughPrefs(doc, callback);
