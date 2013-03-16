@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-12-13 19:10:06"
+	"lastUpdated": "2013-03-16 12:23:12"
 }
 
 function detectWeb(doc, url) {
@@ -86,16 +86,16 @@ function scrape(doc, url){
 		}
 	}
 	//date-Year
-	var dateXPath = '//div[@class="tools"]/span';
+	var dateXPath = '//div[contains(@class, "tools")]/span';
 	var dateXPathObject = doc.evaluate(dateXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/\d{1,2}:\d{1,2} (AM|PM) (\w)+ /g, '');
 
 	//If the original Xpath1 is equal to Updated then go to XPath2
 	if ((dateXPathObject =="Updated")|| (dateXPathObject =="New")){
-		var dateXPath = '//div[@class="tools"]/span[2]';
+		var dateXPath = '//div[contains(@class, "tools")]/span[2]';
 		var dateXPathObject = doc.evaluate(dateXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/\d{1,2}:\d{1,2} (AM|PM) (\w)+ /g, '');
 		newItem.date = dateXPathObject ;
 	} else { //great found the date just push it to Zotero.
-		var dateXPath = '//div[@class="tools"]/span';
+		var dateXPath = '//div[contains(@class, "tools")]/span';
 		var dateXPathObject = doc.evaluate(dateXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/\d{1,2}:\d{1,2} (AM|PM) (\w)+ /g, '');
 		newItem.date = dateXPathObject ;
 	}
