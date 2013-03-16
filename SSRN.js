@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-02-02 01:24:41"
+	"lastUpdated": "2013-03-16 12:47:28"
 }
 
 /*
@@ -70,6 +70,7 @@ function doWeb(doc,url)
 }
 
 function scrape(doc, url) {
+	var abstract = ZU.xpathText(doc, '//div[@id="innerWhite"]/font[1]')
 	// We call the Embedded Metadata translator to do the actual work
 	var translator = Zotero.loadTranslator("web");
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
@@ -81,7 +82,7 @@ function scrape(doc, url) {
 		var number = url.match(/abstract_id=(\d+)/);
 		if(number) item.reportNumber= "ID " + number[1];
 		item.place = "Rochester, NY";
-		//we could scrape the number from the URL - do we want it though?
+		if (abstract) item.abstractNote = abstract.trim(); 
 
 		item.complete();
 	});
@@ -130,7 +131,7 @@ var testCases = [
 				],
 				"title": "The 'Separation Plot': A New Visual Method for Evaluating the Predictive Power of Logit/Probit Models",
 				"date": "August 13, 2009",
-				"abstractNote": "We present a new visual method for assessing the predictive power of models with binary outcomes. This technique allows the analyst to quickly and easily choos",
+				"abstractNote": "We present a new visual method for assessing the predictive power of models with binary outcomes.  This technique allows the analyst to quickly and easily choose among alternative model specifications based upon the models' ability to consistently match high-probability predictions to actual occurrences of the event of interest, and low-probability predictions to non-occurrences of the event of interest.  Unlike existing methods for assessing predictive power for logit and probit models such as the use of \"percent correctly predicted\" statistics, Brier scores and the ROC plot, our \"separation plot\" has the advantage of producing a visual display that is more informative and easier to explain to a general audience than a ROC plot, while also remaining insensitive to the user's often arbitrary choice of threshold for distinguishing between events and non-events.  We show how to implement this technique in R and demonstrate its effectiveness in building predictive models in four different areas of political research.",
 				"url": "http://papers.ssrn.com/abstract=1450589",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "papers.ssrn.com",
