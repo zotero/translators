@@ -1420,6 +1420,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
+					},
+ 					{
+						"title": "Full Text PDF",  
+						"mimeType": "application/pdf"
 					}
 				],
 				"title": "Microsatellite variation and significant population genetic structure of endangered finless porpoises (Neophocaena phocaenoides) in Chinese coastal waters and the Yangtze River",
