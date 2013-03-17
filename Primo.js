@@ -2,14 +2,14 @@
 	"translatorID": "1300cd65-d23a-4bbf-93e5-a3c9e00d1066",
 	"label": "Primo",
 	"creator": "Matt Burton, Avram Lyon, Etienne Cavalié, Rintze Zelle",
-	"target": "/primo_library/|/nebis/",
+	"target": "/primo_library/|/nebis/|^https?://www\\.recherche-portal\\.ch/zbz/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-02-14 09:58:13"
+	"lastUpdated": "2013-03-17 15:18:12"
 }
 
 /*
