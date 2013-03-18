@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-08-28 16:26:18"
+	"lastUpdated": "2013-03-03 10:05:31"
 }
 
 function detectWeb(doc, url) {
@@ -95,13 +95,13 @@ function doWeb(doc, url) {
 			for(var i in items) {
 				var timestamp = encodeURIComponent(generateISODate());
 				var params = "AWSAccessKeyId=AKIAIPYIWJ24AGZJ64AA&AssociateTag=httpwwwdig0e7-20&ItemId=" + Zotero.Utilities.trim(asins[i]) + "&Operation=ItemLookup&ResponseGroup=ItemAttributes&Service=AWSECommerceService&Timestamp="+timestamp+"&Version=2011-08-01";
-				var signString = "GET\necs.amazonaws."+suffix+"\n/onca/xml\n"+params;
+				var signString = "GET\nwebservices.amazon."+suffix+"\n/onca/xml\n"+params;
 				var signature = b64_hmac_sha256("054vk/Lt3LJMxch1srIHUbvI+2T/fZ6E5c0qwlbj", signString);
 				signature = encodeURIComponent(signature);
-				uris.push("http://ecs.amazonaws." + suffix + "/onca/xml?"+params+"&Signature="+signature+"%3D"); //wants the %3D for some reason
+				uris.push("http://webservices.amazon." + suffix + "/onca/xml?"+params+"&Signature="+signature+"%3D"); //wants the %3D for some reason
 			}
 			
-			Zotero.Utilities.HTTP.doGet(uris, parseXML, function() {Zotero.done();}, null);
+			Zotero.Utilities.HTTP.doGet(uris, parseXML);
 		});
 
 	} else {
@@ -112,13 +112,13 @@ function doWeb(doc, url) {
 		}
 		var timestamp = encodeURIComponent(generateISODate()); 
 		var params = "AWSAccessKeyId=AKIAIPYIWJ24AGZJ64AA&AssociateTag=httpwwwdig0e7-20&ItemId=" + Zotero.Utilities.trim(asin) + "&Operation=ItemLookup&ResponseGroup=ItemAttributes&Service=AWSECommerceService&Timestamp="+timestamp+"&Version=2011-08-01";
-		var signString = "GET\necs.amazonaws."+suffix+"\n/onca/xml\n"+params;
+		
+		var signString = "GET\nwebservices.amazon."+suffix+"\n/onca/xml\n"+params;
 		var signature = b64_hmac_sha256("054vk/Lt3LJMxch1srIHUbvI+2T/fZ6E5c0qwlbj", signString);
 		signature = encodeURIComponent(signature);		
-		uris.push("http://ecs.amazonaws." + suffix + "/onca/xml?"+params+"&Signature="+signature+"%3D"); //wants the %3D for some reason
-		Zotero.Utilities.HTTP.doGet(uris, parseXML, function() {Zotero.done();}, null);
+		uris.push("http://webservices.amazon." + suffix + "/onca/xml?"+params+"&Signature="+signature+"%3D"); //wants the %3D for some reason
+		Zotero.Utilities.HTTP.doGet(uris, parseXML);
 	}
-	Zotero.wait();
 }
 
 function parseXML(text) {
@@ -742,6 +742,137 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.amazon.com/gp/registry/registry.html?ie=UTF8&id=1Q7ELHV59D7N&type=wishlist",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.amazon.fr/Candide-Fran%C3%A7ois-Marie-Voltaire-Arouet-dit/dp/2035866014/ref=sr_1_2?s=books&ie=UTF8&qid=1362329827&sr=1-2",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "François-Marie Voltaire (Arouet",
+						"lastName": "dit)",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Amazon.com Link",
+						"snapshot": false,
+						"mimeType": "text/html"
+					}
+				],
+				"publisher": "Larousse",
+				"date": "2011-08-17",
+				"edition": "1",
+				"ISBN": "2035866014",
+				"numPages": "176",
+				"title": "Candide",
+				"libraryCatalog": "Amazon.com"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.amazon.de/Fiktionen-Erz%C3%A4hlungen-Jorge-Luis-Borges/dp/3596105811/ref=sr_1_1?ie=UTF8&qid=1362329791&sr=8-1",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Jorge Luis",
+						"lastName": "Borges",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Amazon.com Link",
+						"snapshot": false,
+						"mimeType": "text/html"
+					}
+				],
+				"publisher": "FISCHER Taschenbuch",
+				"date": "1992-05-01",
+				"edition": "12",
+				"ISBN": "3596105811",
+				"numPages": "192",
+				"title": "Fiktionen: Erzählungen 1939 - 1944",
+				"libraryCatalog": "Amazon.com",
+				"shortTitle": "Fiktionen"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.amazon.co.uk/Tale-Two-Cities-ebook/dp/B004EHZXVQ/ref=sr_1_1?s=books&ie=UTF8&qid=1362329884&sr=1-1",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Charles",
+						"lastName": "Dickens",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Amazon.com Link",
+						"snapshot": false,
+						"mimeType": "text/html"
+					}
+				],
+				"publisher": "Public Domain Books",
+				"date": "2010-12-01",
+				"numPages": "238",
+				"title": "A Tale of Two Cities",
+				"libraryCatalog": "Amazon.com"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.amazon.it/Emil-Astrid-Lindgren/dp/888203867X/ref=sr_1_1?s=books&ie=UTF8&qid=1362324961&sr=1-1",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Astrid",
+						"lastName": "Lindgren",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Amazon.com Link",
+						"snapshot": false,
+						"mimeType": "text/html"
+					}
+				],
+				"publisher": "Nord-Sud",
+				"date": "2008-06-26",
+				"edition": "3",
+				"ISBN": "888203867X",
+				"numPages": "72",
+				"title": "Emil",
+				"libraryCatalog": "Amazon.com"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
