@@ -19,7 +19,7 @@
 		"Full TEI Document": false,
 		"Export Collections": false
 	},
-	"lastUpdated": "2013-03-10 15:00:00"
+	"lastUpdated": "2013-03-18 19:28:00"
 }
 
 // ********************************************************************
@@ -503,7 +503,7 @@ function generateCollection(collection, teiDoc){
     if(children.length > 0){
         listBibl = teiDoc.createElementNS(ns.tei, "listBibl");
         listBibl.setAttribute("head", collection.name);
-        for each(child in children){
+        for each(var child in children){
             if(child.type == "collection"){
                 listBibl.appendChild(generateCollection(child, teiDoc));
             }
@@ -520,7 +520,7 @@ function generateTEIDocument(listBibls, teiDoc){
     var body = teiDoc.createElementNS(ns.tei, "body");
     teiDoc.documentElement.appendChild(text);
     text.appendChild(body);
-    for each(lb in listBibls){
+    for each(var lb in listBibls){
         body.appendChild(lb);
     }
     return teiDoc;
@@ -559,7 +559,7 @@ function doExport() {
     }
     else {
         var listBibl = teiDoc.createElementNS(ns.tei, "listBibl");
-        for each(item in allItems){
+        for each(var item in allItems){
             //skip attachments
             if(item.itemType == "attachment"){
                 continue;
@@ -579,7 +579,7 @@ function doExport() {
     else{
         if(listBibls.length > 1){
             outputElement = teiDoc.createElementNS(ns.tei, "listBibl");
-            for each(lb in listBibls){
+            for each(var lb in listBibls){
                 outputElement.appendChild(lb);
             }
         }
