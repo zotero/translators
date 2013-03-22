@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-02-25 00:03:31"
+	"lastUpdated": "2013-03-21 22:56:56"
 }
 
 /*
@@ -36,12 +36,17 @@ function detectWeb(doc,url) {
 	if (ZU.xpath(doc, xpath).length > 0) {
 		return "journalArticle";
 	}
-			
-	if (url.indexOf("/search.jsp?query=")!=-1) {
-		return "multiple";
+	if (url.indexOf("/home.oa")!=-1) {
+		var searchxpath = "//a[contains(@href, 'articulo.oa?id=') and span[@class='titulo-resultado']]|//span[@class='resultado-articulo']/a[contains(@href, 'articulo.oa?id=')]"
+		if (ZU.xpath(doc, searchxpath).length>0) {
+			return "multiple";
+		}
 	}
-	if (url.indexOf("/IndArtRev.jsp?")!=-1) {
-		return "multiple";
+	if (url.indexOf("/toc.oa?")!=-1) {
+		var tocxpath = "//a[contains(@href, 'articulo.oa?id=') and span[@class='articulo-fasciculo']]";
+		if (ZU.xpath(doc, tocxpath).length>0) {
+			return "multiple";
+		}	
 	}
 	return false;
 }
@@ -52,12 +57,10 @@ function doWeb(doc,url)
 	if (detectWeb(doc, url) == "multiple") {
 		var hits = {};
 		var urls = [];
-		var results = ZU.xpath(doc,"//table[@class='content']//a[@class='estiloTit']");
+		var results = ZU.xpath(doc,"//a[contains(@href, 'articulo.oa?id=') and span[@class='titulo-resultado']]|\
+									//span[@class='resultado-articulo']/a[contains(@href, 'articulo.oa?id=')]");
 		if (results.length<1){
-			//journal ToC
-			//This is a mess - it will only show "Texto completo" in the select dialog, but everything else requires
-			//a lot of unstable guessworks, as titles and links don't share a parent node
-			results = ZU.xpath(doc, "//a[@title='Texto completo']");
+			results = ZU.xpath(doc, "//a[contains(@href, 'articulo.oa?id=') and span[@class='articulo-fasciculo']]");
 		}
 		for (var i in results) {
 			hits[results[i].href] = results[i].textContent.replace(/\[pdf\]\s* Redalyc\.?/, "");
@@ -67,24 +70,21 @@ function doWeb(doc,url)
 			for (var j in items) {
 				urls.push(j);
 			}
-			ZU.processDocuments(urls, function (myDoc) { 
-				doWeb(myDoc, myDoc.location.href) });
-
+			ZU.processDocuments(urls, doWeb);
 		});
 	} else {
-		// We call the Embedded Metadata translator to do the actual work
-		var translator = Zotero.loadTranslator("import");
+		var translator = Zotero.loadTranslator('web');
+		//use Embedded Metadata
 		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
-		translator.setHandler("itemDone", function(obj, item) {
-				if (item.title == item.title.toUpperCase()){
-					item.title = ZU.capitalizeTitle(item.title.toLowerCase(), true)
-				}
-				item.complete();
-				});
-		translator.getTranslatorObject(function (obj) {
-				obj.doWeb(doc, url);
-				});
-	}
+		translator.setDocument(doc);
+		translator.setHandler('itemDone', function(obj, item) {
+			if (item.title == item.title.toUpperCase()){
+				item.title = ZU.capitalizeTitle(item.title.toLowerCase(), true)
+			}
+			item.complete();
+		});
+		translator.translate();
+		};
 }
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -138,13 +138,13 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "Maria do Socorro Sousa",
-						"lastName": "Braga",
+						"firstName": "Jairo Pimentel",
+						"lastName": "Jr",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Jairo Pimentel",
-						"lastName": "Jr",
+						"firstName": "Maria do Socorro Sousa",
+						"lastName": "Braga",
 						"creatorType": "author"
 					}
 				],
