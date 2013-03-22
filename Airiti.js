@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-01-09 15:36:32"
+	"lastUpdated": "2013-03-21 05:23:28"
 }
 
 function detectWeb(doc, url) {
@@ -34,6 +34,7 @@ function doWeb(doc, url) {
 	if(!type) return;
 
 	var translator = Zotero.loadTranslator("web");
+	//Embedded Metadata
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
 
@@ -61,9 +62,16 @@ function doWeb(doc, url) {
 			//	}
 			}
 		}
+		
+		var content = doc.getElementById('main_gcs7');
+		
+		if(!item.DOI) {
+			item.DOI = ZU.xpathText(content,
+				'(.//tr[./td[1][text()="DOI"]]/td[2]//a)[1]');
+		}
 
-		item.abstractNote = ZU.xpathText(doc,
-			'//div[@id="main_gcs7"]//td[\
+		item.abstractNote = ZU.xpathText(content,
+			'.//td[\
 				text()="中文摘要" or \
 				text()="英文摘要"\
 			]/following-sibling::td',	//chinese summary followed by english summary
@@ -98,7 +106,15 @@ function doSearch(item) {
 		}
 
 		if(detectWeb(doc, doc.location.href)) {
-			doWeb(doc, doc.location.href);
+			var translator = Zotero.loadTranslator("web");
+			//load self so we can use itemDone handler
+			translator.setTranslator("5f0ca39b-898a-4b1e-b98d-8cd0d6ce9801");
+			translator.setDocument(doc);
+			translator.setHandler("itemDone", function(obj, newItem) {
+				if(!newItem.DOI) newItem.DOI = item.DOI;
+				newItem.complete();
+			});
+			translator.translate();
 		}
 	});
 }/** BEGIN TEST CASES **/
