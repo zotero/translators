@@ -19,7 +19,7 @@
 		"Full TEI Document": false,
 		"Export Collections": false
 	},
-	"lastUpdated": "2013-03-18 19:28:00"
+	"lastUpdated": "2013-03-25 23:00:00"
 }
 
 // ********************************************************************
@@ -502,7 +502,9 @@ function generateCollection(collection, teiDoc){
 
     if(children.length > 0){
         listBibl = teiDoc.createElementNS(ns.tei, "listBibl");
-        listBibl.setAttribute("head", collection.name);
+        var colHead = teiDoc.createElementNS(ns.tei, "head");
+        colHead.appendChild(teiDoc.createTextNode(collection.name));
+        listBibl.appendChild(colHead);
         for each(var child in children){
             if(child.type == "collection"){
                 listBibl.appendChild(generateCollection(child, teiDoc));
