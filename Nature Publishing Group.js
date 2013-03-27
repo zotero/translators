@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-03-09 06:11:40"
+	"lastUpdated": "2013-03-26 06:11:40"
 }
 
 /**
@@ -456,7 +456,7 @@ function detectWeb(doc, url) {
 		|| url.indexOf('/most.htm') != -1
 		|| (url.indexOf('/vaop/') != -1 && url.indexOf('index.html') != -1) //advanced online publication
 		|| url.indexOf('sp-q=') != -1 //search query
-		|| url.search(/journal\/v\d+\/n\d+\/index\.html/i)) { //more ToC
+		|| url.search(/journal\/v\d+\/n\d+\/index\.html/i) != -1) { //more ToC
 		return getMultipleNodes(doc, url)[0].length ? 'multiple' : null;
 
 	} else if (url.indexOf('/archive/') != -1) {
