@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-02-18 22:51:30"
+	"lastUpdated": "2013-03-28 03:55:47"
 }
 
 /*
@@ -525,7 +525,7 @@ function detectType(newItem, node, ret) {
 				break;
 				case 'confpaper':
 				case 'conference_item':
-					if (getFirstResults(node, [n.eprints+"ispublished"], true) && getFirstResults(node, [n.eprints+"ispublished"], true) == "unpub"){
+					if (getFirstResults(node, [n.eprints+"ispublished"], true) == "unpub"){
 						t.eprints = 'presentation';
 					}
 					else t.eprints = 'conferencePaper';
