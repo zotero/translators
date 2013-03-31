@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-03-21 22:56:56"
+	"lastUpdated": "2013-03-31 00:24:41"
 }
 
 /*
@@ -90,48 +90,6 @@ function doWeb(doc,url)
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://redalyc.uaemex.mx/buscador/search.jsp?query=argentina&fromresult=120",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://redalyc.uaemex.mx/redalyc/src/inicio/ArtPdfRed.jsp?iCve=63612750004",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "Andrés J.",
-						"lastName": "Kaczorkiewicz",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					}
-				],
-				"title": "Taxonomía Veterinaria en Argentina",
-				"date": "2006",
-				"publicationTitle": "REDVET. Revista Electrónica de Veterinaria",
-				"issue": "8",
-				"publisher": "Veterinaria Organización",
-				"pages": "1-3",
-				"url": "http://redalyc.uaemex.mx/redalyc/src/inicio/ArtPdfRed.jsp?iCve=63612750004",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "redalyc.uaemex.mx"
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "http://www.redalyc.org/articulo.oa?id=32921102001",
 		"items": [
 			{
@@ -190,7 +148,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://redalyc.uaemex.mx/redalyc/src/inicio/IndArtRev.jsp?iCveNumRev=18017&iCveEntRev=1993",
+		"url": "http://www.redalyc.org/toc.oa?id=329&numero=21102",
 		"items": "multiple"
 	}
 ]

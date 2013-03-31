@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-03-03 10:05:31"
+	"lastUpdated": "2013-03-30 23:47:53"
 }
 
 function detectWeb(doc, url) {
@@ -768,7 +768,6 @@ var testCases = [
 				],
 				"publisher": "Larousse",
 				"date": "2011-08-17",
-				"edition": "1",
 				"ISBN": "2035866014",
 				"numPages": "176",
 				"title": "Candide",

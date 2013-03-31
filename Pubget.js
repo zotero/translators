@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-03-13 23:34:21"
+	"lastUpdated": "2013-03-31 00:22:48"
 }
 
 /*
@@ -124,7 +124,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "PubMed Link",
+						"title": "PubMed entry",
 						"mimeType": "text/html",
 						"snapshot": false
 					},
@@ -133,7 +133,6 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"extra": "PMID: 22289095",
 				"title": "Comparison of select reference management tools",
 				"pages": "45-60",
 				"ISSN": "1540-9597",
@@ -142,8 +141,10 @@ var testCases = [
 				"volume": "31",
 				"issue": "1",
 				"date": "2012",
+				"language": "eng",
 				"abstractNote": "Bibliographic management tools have been widely used by researchers to store, organize, and manage their references for research papers, theses, dissertations, journal articles, and other publications. There are a number of reference management tools available. In order for users to decide which tool is best for their needs, it is important to know each tool's strengths and weaknesses. This article compares four reference management tools, one of which is licensed by University of Medicine and Dentistry of New Jersey libraries and the other three are open source and freely available. They were chosen based on their functionality, ease of use, availability to library users, and popularity. These four tools are EndNote/EndNote Web, Zotero, Connotea, and Mendeley Desktop/Mendeley Web. Each tool is analyzed in terms of the following features: accessing, collecting, organizing, collaborating, and citing/formatting. A comparison table is included to summarize the key features of these tools.",
 				"DOI": "10.1080/02763869.2012.641841",
+				"extra": "PMID: 22289095",
 				"libraryCatalog": "Pubget"
 			}
 		]
