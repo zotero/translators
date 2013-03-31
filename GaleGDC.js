@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-03-13 23:51:41"
+	"lastUpdated": "2013-03-31 00:34:30"
 }
 
 /*
@@ -33,7 +33,7 @@ function detectWeb(doc, url) {
 	else if (url.indexOf('searchResults') !== -1) return "multiple";
 	else if (url.indexOf('FullList') !== -1) return "multiple";
 	else if (url.indexOf('savedDocuments') !== -1) return "multiple";
-	else if (url.indexOf('PhotographsDetails') !== -1) return "artwork";
+	else if (url.indexOf('PhotographsDetails') !== -1) return "bookSection";
 	else if (url.indexOf('Details') !== -1) return "document";
 	else return false;
 }
@@ -55,10 +55,10 @@ function doWeb(doc, url) {
 		Zotero.selectItems(items, function (selectedItems) {
 			if (!selectedItems) return true;
 			for (var item in selectedItems) {
-				var start = item.indexOf('documentId=');
-				var end = item.indexOf('&', start);
-				var docid = item.substring(start + 11, end > -1 ? end : item.length);
-				var urlForPosting = doc.getElementById("zotero_form").action + '&citation_document_id=' + docid + '&citation_document_url=' + encodeURIComponent(item.replace('|', '%7C'));
+				var docid = parseValue('documentId', item);
+				var productName = parseValue('product_name', item);
+				var urlForPosting = doc.getElementById("zotero_form").action + '&citation_document_id=' + docid + '&citation_document_url=' + encodeURIComponent(item.replace('|', '%7C')) + '&product_name=' + productName;
+				Zotero.debug('\n\n' + urlForPosting + '\n\n');
 				importSingleDocument(risImporter, urlForPosting);
 			}
 		});
@@ -67,9 +67,19 @@ function doWeb(doc, url) {
 	}
 }
 
+function parseValue(name, item) {
+	var value;
+	var start = item.indexOf(name);
+	if(start > -1) {
+		var end = item.indexOf('&', start);
+		value = item.substring(start + (name.length + 1), end > -1 ? end : item.length);
+	}
+	return value;
+}
+
 function processSingleDocument(risImporter, doc) {
 	var citationForm = doc.getElementById("citation_form");
-	var otherUrl, docId;
+	var otherUrl, docId, productName;
 	for (var i = 0; i < citationForm.length; i++) {
 		if (citationForm.elements[i].name === 'citation_document_url') {
 			otherUrl = citationForm.elements[i].value;
@@ -77,8 +87,11 @@ function processSingleDocument(risImporter, doc) {
 		if (citationForm.elements[i].name === 'citation_document_id') {
 			docId = citationForm.elements[i].value;
 		}
+		if (citationForm.elements[i].name === 'product_name') {
+			productName = citationForm.elements[i].value;
+		}
 	}
-	var urlForPosting = citationForm.action + "&citation_format=ris" + "&citation_document_url=" + encodeURIComponent(otherUrl) + "&citation_document_id=" + encodeURIComponent(docId);
+	var urlForPosting = citationForm.action + "&citation_format=ris" + "&citation_document_url=" + encodeURIComponent(otherUrl) + "&citation_document_id=" + encodeURIComponent(docId) + '&product_name=' + productName;
 	importSingleDocument(risImporter, urlForPosting);
 }
 
@@ -87,74 +100,4 @@ function importSingleDocument(risImporter, urlForPosting) {
 		risImporter.setString(text);
 		risImporter.translate();
 	});
-}/** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://ncco.galegroup.com/gdc/ncco/MonographsDetailsPage/MonographsDetailsWindow?failOverType=&query=&prodId=NCCO&windowstate=normal&contentModules=&mode=view&displayGroupName=DVI-Monographs&dviSelectedPage=1&limiter=&currPage=&disableHighlighting=false&source=&sortBy=&displayGroups=&search_within_results=&action=e&catId=&activityType=&scanId=&documentId=GALE%7CQLILNN865873889&userGroupName=viva_gmu",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"lastName": "Davis",
-						"firstName": "J. E.",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"Labor law"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Labour and labour laws",
-				"place": "London",
-				"date": "1883",
-				"archive": "Nineteenth Century Collections Online",
-				"libraryCatalog": "Gale",
-				"language": "English",
-				"publisher": "[s. n.]"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://ncco.galegroup.com/gdc/ncco/ManuscriptsDetailsPage/ManuscriptsDetailsWindow?failOverType=&query=&prodId=NCCO&windowstate=normal&contentModules=&mode=view&displayGroupName=DVI-Manuscripts&dviSelectedPage=1&limiter=&currPage=&disableHighlighting=false&source=&sortBy=&displayGroups=&search_within_results=&action=e&catId=&activityType=&scanId=&documentId=GALE%7CAEAVLN130466301&userGroupName=viva_gmu",
-		"items": [
-			{
-				"itemType": "manuscript",
-				"creators": [
-					{
-						"lastName": "Andrews",
-						"firstName": "R. F.",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Zetkin",
-						"firstName": "Clara",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Working Class Movement Card Catalogue: Pamphlets: Alphabetical Index. Author/Title",
-				"date": "0000 n",
-				"archive": "Nineteenth Century Collections Online",
-				"libraryCatalog": "Gale",
-				"language": "English",
-				"manuscriptType": "MS",
-				"publisher": "Working Class Movement Library",
-				"shortTitle": "Working Class Movement Card Catalogue"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://ncco.galegroup.com/gdc/ncco/ManuscriptsFullListPage/ManuscriptsFullListWindow?result_type=DVI-Manuscripts&failOverType=&query=&prodId=NCCO&windowstate=normal&contentModules=&display-query=&mode=view&displayGroupName=DVI-Manuscripts&limiter=F_CMC+%22British+Labour+History+Ephemera%22&currPage=1&source=fullList&displayGroups=&totalSearchResultCount=&action=e&catId=&activityType=&scanId=&userGroupName=viva_gmu",
-		"items": "multiple"
-	}
-]
-/** END TEST CASES **/
+}
