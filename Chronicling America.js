@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-10-23 20:22:34"
+	"lastUpdated": "2013-03-31 23:29:08"
 }
 
 /*
@@ -60,16 +60,16 @@ function doWeb(doc,url)
 			for (var j in items) {
 				urls.push(j);
 			}
-			ZU.processDocuments(urls, function (myDoc) { 
-				doWeb(myDoc, myDoc.location.href) });
+			ZU.processDocuments(urls, doWeb);
 		});
 	} else {
-		// We call the Embedded Metadata translator to do the actual work
-		var translator = Zotero.loadTranslator("import");
+		var translator = Zotero.loadTranslator('web');
+		//use Embedded Metadata
 		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
-		translator.setHandler("itemDone", function(obj, item) {
+		translator.setDocument(doc);
+		translator.setHandler('itemDone', function(obj, item) {
 			item.itemType = "newspaperArticle";
-			item.notes = item.abstractNote
+			if (item.abstractNote) item.notes.push(item.abstractNote);
 			item.abstractNote = "";
 			item.itemID = "";
 			var pdfurl = ZU.xpathText(doc, '//head/link[@type="application/pdf"]/@href');
@@ -80,10 +80,9 @@ function doWeb(doc,url)
 			var publication = ZU.xpathText(doc, '//meta[@name="mods.title"]/@content'); 
 			if (publication) item.publication = publication.replace(/[\.\s]*$/, "");	
 			item.complete();
+
 		});
-		translator.getTranslatorObject(function (obj) {
-			obj.doWeb(doc, url);
-		});
+		translator.translate();
 	}
 }
 /** BEGIN TEST CASES **/
@@ -95,12 +94,14 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://chroniclingamerica.loc.gov/lccn/sn83030193/1912-02-14/ed-1/seq-15/;words=Wilson?date1=1836&rows=20&searchType=basic&state=&date2=1922&proxtext=wilson&y=0&x=0&dateFilterType=yearRange&index=4",
+		"url": "http://chroniclingamerica.loc.gov/lccn/sn83030193/1912-02-14/ed-1/seq-15/#words=Wilson&date1=1836&rows=20&searchType=basic&state=&date2=1922&proxtext=wilson&y=0&x=0&dateFilterType=yearRange&index=4",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
 				"creators": [],
-				"notes": "The evening world. (New York, N.Y.) 1887-1931, February 14, 1912, Image 15, brought to you by The New York Public Library, Astor, Lenox and Tilden Foundation, and the National Digital Newspaper Program.",
+				"notes": [
+					"The evening world. (New York, N.Y.) 1887-1931, February 14, 1912, Image 15, brought to you by The New York Public Library, Astor, Lenox and Tilden Foundation, and the National Digital Newspaper Program."
+				],
 				"tags": [
 					"New York (N.Y.)--Newspapers.",
 					"New York County (N.Y.)--Newspapers."
@@ -116,13 +117,27 @@ var testCases = [
 					}
 				],
 				"title": "The evening world. (New York, N.Y.) 1887-1931, February 14, 1912, Image 15",
+				"publisher": "s.n.",
+				"institution": "s.n.",
+				"company": "s.n.",
+				"label": "s.n.",
+				"distributor": "s.n.",
+				"reportType": "text",
+				"letterType": "text",
+				"manuscriptType": "text",
+				"mapType": "text",
+				"thesisType": "text",
+				"websiteType": "text",
+				"presentationType": "text",
+				"postType": "text",
+				"audioFileType": "text",
+				"language": "eng",
 				"date": "1912/02/14",
 				"issue": "1912/02/14",
 				"ISSN": "1941-0654",
-				"url": "http://chroniclingamerica.loc.gov/lccn/sn83030193/1912-02-14/ed-1/seq-15/;words=Wilson?date1=1836&rows=20&searchType=basic&state=&date2=1922&proxtext=wilson&y=0&x=0&dateFilterType=yearRange&index=4",
+				"url": "http://chroniclingamerica.loc.gov/lccn/sn83030193/1912-02-14/ed-1/seq-15/#words=Wilson&date1=1836&rows=20&searchType=basic&state=&date2=1922&proxtext=wilson&y=0&x=0&dateFilterType=yearRange&index=4",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "chroniclingamerica.loc.gov",
-				"language": "eng",
 				"publication": "The evening world"
 			}
 		]
