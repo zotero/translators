@@ -9,11 +9,55 @@
 	"priority": 90,
 	"inRepository": true,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-01-30 20:05:00"
+	"lastUpdated": "2012-04-01 20:05:00"
 }
 
 /* CrossRef uses unixref; documentation at http://www.crossref.org/schema/documentation/unixref1.0/unixref.html */
 var ns;
+
+/**********************
+ * Utilitiy Functions *
+ **********************/
+var outerXML;
+try {
+	outerXML = (new XMLSerializer()).serializeToString;
+} catch(e) {
+	outerXML = function(n) {
+		try {
+			return n.xml;	//IE
+		} catch(e) {
+			//fallback
+			return '<' + n.nodeName.toLowerCase() + '>' + n.textContent
+				+ '</' + n.nodeName.toLowerCase() + '>';
+		}
+	};
+}
+function innerXML(n) {
+	return outerXML(n).replace(/^[^>]*>|<[^<]*$/g, '');
+}
+
+var markupRE = /<(\/?)(\w+)[^<>]*>/gi;
+var supportedMarkup = ['i', 'b', 'sub', 'sup', 'span', 'sc'];
+var transformMarkup = {
+	'scp': {
+		open: '<span style="font-variant:small-caps;">',
+		close: '</span>'
+	}
+};
+function removeUnsupportedMarkup(text) {
+	return text.replace(markupRE, function(m, close, name) {
+		if(supportedMarkup.indexOf(name.toLowerCase()) != -1) {
+			return m;
+		}
+		
+		var newMarkup = transformMarkup[name.toLowerCase()]
+		if(newMarkup) {
+			return close ? newMarkup.close : newMarkup.open;
+		}
+		
+		return '';
+	});
+}
 
 function detectSearch(item) {
 	// query: should we make this more forgiving?
@@ -225,8 +269,12 @@ function processCrossRef(xmlOutput) {
 	
 	item.DOI = ZU.xpathText(refXML, 'c:doi_data/c:doi', ns);
 	item.url = ZU.xpathText(refXML, 'c:doi_data/c:resource', ns);
-	item.title = ZU.xpathText(refXML, 'c:titles[1]/c:title[1]', ns);
-	
+	var title = ZU.xpath(refXML, 'c:titles[1]/c:title[1]', ns)[0];
+	if(title) {
+		item.title = ZU.trimInternal(
+			removeUnsupportedMarkup(innerXML(title))
+		);
+	}
 	//Zotero.debug(JSON.stringify(item, null, 4));
 	
 	item.complete();
