@@ -18,20 +18,7 @@ var ns;
 /**********************
  * Utilitiy Functions *
  **********************/
-var outerXML;
-try {
-	outerXML = (new XMLSerializer()).serializeToString;
-} catch(e) {
-	outerXML = function(n) {
-		try {
-			return n.xml;	//IE
-		} catch(e) {
-			//fallback
-			return '<' + n.nodeName.toLowerCase() + '>' + n.textContent
-				+ '</' + n.nodeName.toLowerCase() + '>';
-		}
-	};
-}
+var outerXML = (new XMLSerializer()).serializeToString;
 function innerXML(n) {
 	return outerXML(n).replace(/^[^>]*>|<[^<]*$/g, '');
 }
