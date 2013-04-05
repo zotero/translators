@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-03-26 06:11:40"
+	"lastUpdated": "2013-04-05 21:56:29"
 }
 
 /**
@@ -516,27 +516,46 @@ function scrape(doc, url) {
 			//but it does not (sometimes?) include accented letters
 			//We try to get best of both worlds by trying to re-split EM authors correctly
 			//hopefully the authors match up
-			for(var i=0, n=item.creators.length; i<n; i++) {
+			for(var i=0, j=0, n=item.creators.length, m=items[1].creators.length; i<n && j<m; i++, j++) {
 				//check if last names match, then we don't need to worry
+				var risLName = ZU.removeDiacritics(items[1].creators[j].lastName.toUpperCase());
 				var emLName = ZU.removeDiacritics(item.creators[i].lastName.toUpperCase());
-				var risLName = ZU.removeDiacritics(items[1].creators[i].lastName.toUpperCase());
-				if(emLName == risLName ||
-					!item.creators[i].firstName ||	//split cannot fail if there is no first name to begin with
-					!items[1].creators[i].firstName ||
-					risLName.length <= emLName.length) {	//worst case, EM last names should be shorter than RIS
-															//if they're the same length, we probably split correctly
-															//if RIS is shorter, then this is probably not the same author
+				if(emLName == risLName) {
 					continue;
 				}
 
 				var fullName = item.creators[i].firstName + ' ' + item.creators[i].lastName;
 				emLName = fullName.substring(fullName.length - risLName.length);
 				if(ZU.removeDiacritics(emLName.toUpperCase()) != risLName) {
+					//corporate authors are sometimes skipped in RIS
+					if(i+1<n) {
+						var nextEMLName = item.creators[i+1].firstName + ' '
+							+ item.creators[i+1].lastName;
+						nextEMLName = ZU.removeDiacritics(
+							nextEMLName.substring(nextEMLName.length - risLName.length)
+								.toUpperCase()
+						);
+						if(nextEMLName == risLName) { //this is corporate author and it was skipped in RIS
+							item.creators[i].lastName = item.creators[i].firstName
+								+ ' ' + item.creators[i].lastName;
+							delete item.creators[i].firstName;
+							item.creators[i].fieldMode = 1;
+							j--;
+							Z.debug('It appears that "' + item.creators[i].lastName
+								+ '" is a corporate author and was skipped in the RIS output.');
+							continue;
+						}
+					}
+					
 					Z.debug(emLName + ' and ' + risLName + ' do not match');
 					continue; //we failed
 				}
 
-				item.creators[i].firstName = fullName.substring(0, fullName.length - emLName.length).trim();
+				if(items[1].creators[j].fieldMode !== 1) {
+					item.creators[i].firstName = fullName.substring(0, fullName.length - emLName.length).trim();
+				} else {
+					item.creators[i].fieldMode = 1;
+				}
 				item.creators[i].lastName = emLName;
 
 				Z.debug(fullName + ' was split into ' +
@@ -2368,7 +2387,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.nature.com/nature/journal/vaop/ncurrent/full/nature11968.html",
+		"url": "http://www.nature.com/nature/journal/v495/n7440/full/nature11968.html",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -2466,31 +2485,33 @@ var testCases = [
 						"mimeType": "application/vnd.ms-excel"
 					}
 				],
-				"itemID": "http://www.nature.com/nature/journal/vaop/ncurrent/full/nature11968.html",
+				"itemID": "http://www.nature.com/nature/journal/v495/n7440/full/nature11968.html",
 				"title": "Patterns of population epigenomic diversity",
 				"publicationTitle": "Nature",
 				"rights": "© 2013 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
+				"volume": "495",
+				"pages": "193-198",
 				"publisher": "Nature Publishing Group",
 				"institution": "Nature Publishing Group",
 				"company": "Nature Publishing Group",
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
-				"date": "March 6, 2013",
+				"date": "March 14, 2013",
 				"language": "en",
+				"issue": "7440",
 				"DOI": "10.1038/nature11968",
-				"url": "http://www.nature.com/nature/journal/vaop/ncurrent/full/nature11968.html",
+				"url": "http://www.nature.com/nature/journal/v495/n7440/full/nature11968.html",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.nature.com",
 				"abstractNote": "Natural epigenetic variation provides a source for the generation of phenotypic diversity, but to understand its contribution to such diversity, its interaction with genetic variation requires further investigation. Here we report population-wide DNA sequencing of genomes, transcriptomes and methylomes of wild Arabidopsis thaliana accessions. Single cytosine methylation polymorphisms are not linked to genotype. However, the rate of linkage disequilibrium decay amongst differentially methylated regions targeted by RNA-directed DNA methylation is similar to the rate for single nucleotide polymorphisms. Association analyses of these RNA-directed DNA methylation regions with genetic variants identified thousands of methylation quantitative trait loci, which revealed the population estimate of genetically dependent methylation variation. Analysis of invariably methylated transposons and genes across this population indicates that loci targeted by RNA-directed DNA methylation are epigenetically activated in pollen and seeds, which facilitates proper development of these structures.",
 				"journalAbbreviation": "Nature",
-				"volume": "advance online publication",
-				"ISSN": "1476-4687"
+				"ISSN": "0028-0836"
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.nature.com/nature/journal/vaop/ncurrent/full/nature11899.html",
+		"url": "http://www.nature.com/nature/journal/v495/n7440/full/nature11899.html",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -2600,25 +2621,304 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"itemID": "http://www.nature.com/nature/journal/vaop/ncurrent/full/nature11899.html",
+				"itemID": "http://www.nature.com/nature/journal/v495/n7440/full/nature11899.html",
 				"title": "Crystal structures of the calcium pump and sarcolipin in the Mg2+-bound E1 state",
 				"publicationTitle": "Nature",
 				"rights": "© 2013 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
+				"volume": "495",
+				"pages": "260-264",
 				"publisher": "Nature Publishing Group",
 				"institution": "Nature Publishing Group",
 				"company": "Nature Publishing Group",
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
-				"date": "March 3, 2013",
+				"date": "March 14, 2013",
 				"language": "en",
+				"issue": "7440",
 				"DOI": "10.1038/nature11899",
 				"abstractNote": "P-type ATPases are ATP-powered ion pumps that establish ion concentration gradients across biological membranes, and are distinct from other ATPases in that the reaction cycle includes an autophosphorylation step. The best studied is Ca2+-ATPase from muscle sarcoplasmic reticulum (SERCA1a), a Ca2+ pump that relaxes muscle cells after contraction, and crystal structures have been determined for most of the reaction intermediates. An important outstanding structure is that of the E1 intermediate, which has empty high-affinity Ca2+-binding sites ready to accept new cytosolic Ca2+. In the absence of Ca2+ and at pH 7 or higher, the ATPase is predominantly in E1, not in E2 (low affinity for Ca2+), and if millimolar Mg2+ is present, one Mg2+ is expected to occupy one of the Ca2+-binding sites with a millimolar dissociation constant. This Mg2+ accelerates the reaction cycle, not permitting phosphorylation without Ca2+ binding. Here we describe the crystal structure of native SERCA1a (from rabbit) in this E1·Mg2+ state at 3.0 Å resolution in addition to crystal structures of SERCA1a in E2 free from exogenous inhibitors, and address the structural basis of the activation signal for phosphoryl transfer. Unexpectedly, sarcolipin, a small regulatory membrane protein of Ca2+-ATPase, is bound, stabilizing the E1·Mg2+ state. Sarcolipin is a close homologue of phospholamban, which is a critical mediator of β-adrenergic signal in Ca2+ regulation in heart (for reviews, see, for example, refs 8–10), and seems to play an important role in muscle-based thermogenesis. We also determined the crystal structure of recombinant SERCA1a devoid of sarcolipin, and describe the structural basis of inhibition by sarcolipin/phospholamban. Thus, the crystal structures reported here fill a gap in the structural elucidation of the reaction cycle and provide a solid basis for understanding the physiological regulation of the calcium pump.",
-				"url": "http://www.nature.com/nature/journal/vaop/ncurrent/full/nature11899.html",
+				"url": "http://www.nature.com/nature/journal/v495/n7440/full/nature11899.html",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.nature.com",
 				"journalAbbreviation": "Nature",
-				"volume": "advance online publication",
-				"ISSN": "1476-4687"
+				"ISSN": "0028-0836"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.nature.com/nature/journal/v473/n7346/full/nature09944.html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Manimozhiyan",
+						"lastName": "Arumugam",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jeroen",
+						"lastName": "Raes",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Eric",
+						"lastName": "Pelletier",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Denis",
+						"lastName": "Le Paslier",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Takuji",
+						"lastName": "Yamada",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Daniel R.",
+						"lastName": "Mende",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Gabriel R.",
+						"lastName": "Fernandes",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Julien",
+						"lastName": "Tap",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Thomas",
+						"lastName": "Bruls",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jean-Michel",
+						"lastName": "Batto",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marcelo",
+						"lastName": "Bertalan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Natalia",
+						"lastName": "Borruel",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Francesc",
+						"lastName": "Casellas",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Leyden",
+						"lastName": "Fernandez",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Laurent",
+						"lastName": "Gautier",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Torben",
+						"lastName": "Hansen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Masahira",
+						"lastName": "Hattori",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tetsuya",
+						"lastName": "Hayashi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michiel",
+						"lastName": "Kleerebezem",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ken",
+						"lastName": "Kurokawa",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marion",
+						"lastName": "Leclerc",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Florence",
+						"lastName": "Levenez",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Chaysavanh",
+						"lastName": "Manichanh",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "H. Bjørn",
+						"lastName": "Nielsen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Trine",
+						"lastName": "Nielsen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nicolas",
+						"lastName": "Pons",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Julie",
+						"lastName": "Poulain",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Junjie",
+						"lastName": "Qin",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Thomas",
+						"lastName": "Sicheritz-Ponten",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sebastian",
+						"lastName": "Tims",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "David",
+						"lastName": "Torrents",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Edgardo",
+						"lastName": "Ugarte",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Erwin G.",
+						"lastName": "Zoetendal",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jun",
+						"lastName": "Wang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Francisco",
+						"lastName": "Guarner",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Oluf",
+						"lastName": "Pedersen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Willem M.",
+						"lastName": "de Vos",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Søren",
+						"lastName": "Brunak",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Joel",
+						"lastName": "Doré",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "MetaHIT Consortium (additional Members)",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"firstName": "Jean",
+						"lastName": "Weissenbach",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "S. Dusko",
+						"lastName": "Ehrlich",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Peer",
+						"lastName": "Bork",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Genetics and genomics"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Supplementary Information. Supplementary Methods, Supplementary Notes and Supplementary References. A minor error in Supplementary Information section 2.2 was corrected on 02 June 2011.",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Supplementary Figures. Supplementary Figures 1-27 with legends.",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Supplementary Tables. Supplementary Tables 1 - 2 and 4 - 24 (see separate file for Supplementary Table 3).",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Supplementary Table 3. Supplementary Table 3.",
+						"mimeType": "application/pdf"
+					}
+				],
+				"itemID": "http://www.nature.com/nature/journal/v473/n7346/full/nature09944.html",
+				"title": "Enterotypes of the human gut microbiome",
+				"publicationTitle": "Nature",
+				"rights": "© 2011 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
+				"volume": "473",
+				"pages": "174-180",
+				"publisher": "Nature Publishing Group",
+				"institution": "Nature Publishing Group",
+				"company": "Nature Publishing Group",
+				"label": "Nature Publishing Group",
+				"distributor": "Nature Publishing Group",
+				"date": "May 12, 2011",
+				"language": "en",
+				"issue": "7346",
+				"DOI": "10.1038/nature09944",
+				"url": "http://www.nature.com/nature/journal/v473/n7346/full/nature09944.html",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.nature.com",
+				"abstractNote": "Our knowledge of species and functional composition of the human gut microbiome is rapidly increasing, but it is still based on very few cohorts and little is known about variation across the world. By combining 22 newly sequenced faecal metagenomes of individuals from four countries with previously published data sets, here we identify three robust clusters (referred to as enterotypes hereafter) that are not nation or continent specific. We also confirmed the enterotypes in two published, larger cohorts, indicating that intestinal microbiota variation is generally stratified, not continuous. This indicates further the existence of a limited number of well-balanced host–microbial symbiotic states that might respond differently to diet and drug intake. The enterotypes are mostly driven by species composition, but abundant molecular functions are not necessarily provided by abundant species, highlighting the importance of a functional analysis to understand microbial communities. Although individual host properties such as body mass index, age, or gender cannot explain the observed enterotypes, data-driven marker genes or functional modules can be identified for each of these host properties. For example, twelve genes significantly correlate with age and three functional modules with the body mass index, hinting at a diagnostic potential of microbial markers.",
+				"journalAbbreviation": "Nature",
+				"ISSN": "0028-0836"
 			}
 		]
 	}
