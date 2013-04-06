@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-04-06 10:21:13"
+	"lastUpdated": "2013-04-06 10:59:04"
 }
 
 function detectWeb(doc, url) {
@@ -105,7 +105,9 @@ function downloadFunction(text, url, prefs) {
 		} else if(!an) {	//we'll need this later
 			an = item.callNumber;
 		}
-
+/** Not sure what the original test case for this was where the import was improved,
+ * but it breaks import from
+ * http://search.ebscohost.com/login.aspx?direct=true&db=bth&AN=39564295&site=ehost-live
 		if (m = text.match(/^Y1\s+-(.*)$/m)) {
 			var year = m[1].match(/\d{4}/);
 			var extra = m[1].match(/\/([^\/]+)$/);
@@ -118,7 +120,7 @@ function downloadFunction(text, url, prefs) {
 		// Frequently have dates like "Spring2009";
 		// need to insert space to keep Zotero happy
 		if(item.date) item.date = item.date.replace(/([a-z])([0-9]{4})$/,"$1 $2");
-
+*/
 		// Keep the stable link as a link attachment
 		if(item.url) {
 			// Trim the ⟨=cs suffix -- EBSCO can't find the record with it!
