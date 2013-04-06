@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-12-13 16:47:51"
+	"lastUpdated": "2013-04-06 10:21:13"
 }
 
 function detectWeb(doc, url) {
@@ -34,7 +34,7 @@ function downloadFunction(text, url, prefs) {
 	}
 
 	//fix DOI
-	text = text.replace(/^(?:L3)(\s\s?-)/gm, 'DO$1');
+	text = text.replace(/^L3(\s\s?-)/gm, 'DO$1');
 
 	// There are cases where the RIS type isn't good--
 	// there is sometimes better data in M3
@@ -51,7 +51,10 @@ function downloadFunction(text, url, prefs) {
 			break;
 		}
 	}
-
+	//remove M3 so it does not interfere with DOI.
+	//hopefully EBCSOhost doesn't use this for anything useful
+	text = text.replace(/^M3\s\s?-.*/gm, '');
+	
 	// load translator for RIS
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
