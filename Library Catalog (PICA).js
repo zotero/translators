@@ -5,35 +5,33 @@
 	"target": "^https?://[^/]+(?:/[^/]+)?//?DB=\\d",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 200,
+	"priority": 198,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-02-24 11:40:34"
+	"lastUpdated": "2013-04-06 16:38:35"
 }
 
-/*Works for many, but not all PICA versions. Tested with:
-http://opc4.kb.nl/
-http://catalogue.rug.nl/
-http://www.sudoc.abes.fr/
-http://gso.gbv.de
-*/
+
 
 function getSearchResults(doc) {
 	return doc.evaluate(
-		"//table[@summary='short title presentation']/tbody/tr//td[contains(@class, 'rec_title')]",
+		"//table[@summary='short title presentation']/tbody/tr//td[contains(@class, 'rec_title')]|//table[@summary='hitlist']/tbody/tr//td[contains(@class, 'hit') and a/@href]",
 		doc, null, XPathResult.ANY_TYPE, null);
 }
 
 function detectWeb(doc, url) {
-	var multxpath = "//span[@class='tab1']";
+	var multxpath = "//span[@class='tab1']|//td[@class='tab1']";
 	if (elt = doc.evaluate(multxpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		var content = elt.textContent;
+		//Z.debug(content)
 		if ((content == "Liste des résultats") || (content == "shortlist") || (content == 'Kurzliste') || content == 'titellijst') {
 			if(!getSearchResults(doc).iterateNext()) return;	//no results. Does not seem to be necessary, but just in case.
 			return "multiple";
-		} else if ((content == "Notice détaillée") || (content == "title data") || (content == 'Titeldaten') || (content == 'full title') || (content == 'Titelanzeige' || (content == 'titelgegevens'))) {
-			var xpathimage = "//span[@class='rec_mat_long']/img";
+			
+		} else if ((content == "Notice détaillée") || (content == "title data") || (content == 'Titeldaten') || (content == 'Vollanzeige') || 
+					(content == 'Besitznachweis(e)') || (content == 'full title') || (content == 'Titelanzeige' || (content == 'titelgegevens'))) {
+			var xpathimage = "//span[@class='rec_mat_long']/img|//table[contains(@summary, 'presentation')]/tbody/tr/td/img";
 			if (elt = doc.evaluate(xpathimage, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 				var type = elt.getAttribute('src');
 				//Z.debug(type);
@@ -85,14 +83,20 @@ function scrape(doc, url) {
 	newItem.libraryCatalog = "Library Catalog - " + doc.location.host;
 	// 	We need to correct some informations where COinS is wrong
 	var rowXpath = '//tr[td[@class="rec_lable"]]';
+	if (!ZU.xpathText(doc, rowXpath)){
+		rowXpath = '//tr[td[@class="preslabel"]]';
+	}
 	var tableRows = doc.evaluate(rowXpath, doc, null, XPathResult.ANY_TYPE, null);
+	
 	var tableRow, role;
 	var authorpresent = false;
 	while (tableRow = tableRows.iterateNext()) {
-		var field = doc.evaluate('./td[@class="rec_lable"]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		var value = doc.evaluate('./td[@class="rec_title"]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var field = doc.evaluate('./td[@class="rec_lable"]|./td[@class="preslabel"]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var value = doc.evaluate('./td[@class="rec_title"]|./td[@class="presvalue"]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		
 		field = ZU.trimInternal(ZU.superCleanString(field.trim()))
 			.toLowerCase().replace(/\(s\)/g, '');	
+				
 		// With COins, we only get one author - so we start afresh. We do so in two places: Here if there is an author fied
 		//further down for other types of author fields. This is so we don't overwrite the author array when we have both an author and 
 		//a other persons field (cf. the Scheffer/Schachtschabel/Blume/Thiele test)
@@ -106,11 +110,13 @@ function scrape(doc, url) {
 			case 'auteur':
 			case 'author':
 			case 'medewerker':
+			case 'beteiligt':
 			case 'verfasser':
 			case 'other persons':
 			case 'sonst. personen':
-				if (field == 'medewerker') role = "editor";
-				else role = "author";
+				if (field == 'medewerker' || field == 'beteiligt') role = "editor";
+				//we may have set this in the title field below
+				else if (!role) role = "author";
 				
 				if (!authorpresent) newItem.creators = new Array();
 				if (authorpresent && (field=="sonst. personen" || field=="other persons")) role = "editor";
@@ -147,7 +153,6 @@ function scrape(doc, url) {
 							newItem.university = authorText;
 							newItem.city = extra; //store for later
 						} else {
-
 							var author = authorText.replace(/[\*\(].+[\)\*]/, "");
 							newItem.creators.push(Zotero.Utilities.cleanAuthor(author, zoteroFunction, true));
 						}
@@ -156,7 +161,8 @@ function scrape(doc, url) {
 				} else {
 					var authors = value.split(/\s*;\s*/);
 					for (var i in authors) {
-						var author = authors[i].replace(/[\*\(].+[\)\*]/, "");
+						if (role == "author") if (authors[i].search(/[\[\()]Hrsg\.?[\]\)]/)!=-1) role = "editor";
+						var author = authors[i].replace(/[\*\(\[].+[\)\*\]]/, "");
 						var comma = author.indexOf(",") != -1;
 						newItem.creators.push(Zotero.Utilities.cleanAuthor(author, role, comma));
 					}
@@ -299,14 +305,16 @@ function scrape(doc, url) {
 			case 'titel':
 			case 'title of article':
 			case 'aufsatztitel':
-				if (!newItem.title) {
+				
 					title = value.split(" / ");
 					if (title[1]) {
+						//Z.debug("Title1: "+title[1])
 						//store this to convert authors to editors. 
 						//Run separate if in case we'll do this for more languages
 						//this assumes title precedes author - need to make sure that's the case
-						if (title[1].match(/^\s*(ed. by|edited by)/)) role = "editor";
+						if (title[1].match(/^\s*(ed. by|edited by|hrsg\. von|édité par)/)) role = "editor";
 					}
+				if (!newItem.title) {
 					newItem.title = title[0];
 				}
 				newItem.title = newItem.title.replace(/\s+:/, ":").replace(/\s*\[[^\]]+\]/g, "");
@@ -409,7 +417,7 @@ function scrape(doc, url) {
 			case 'snnotatie':
 			case 'annotatie':
 				newItem.notes.push({
-					note: doc.evaluate('./td[@class="rec_title"]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext().innerHTML
+					note: doc.evaluate('./td[@class="rec_title"]|./td[@class="presvalue"]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext().innerHTML
 				});
 				break;
 
@@ -453,6 +461,9 @@ function scrape(doc, url) {
 			case 'persistent identifier des datensatzes':
 				var permalink = value;	//we handle this at the end
 				break;
+			
+			case 'doi':
+				newItem.DOI = value.trim();
 
 			case 'isbn':
 				var isbns = value.trim().split(/[\n,]/);
@@ -467,7 +478,10 @@ function scrape(doc, url) {
 				//we should eventually check for duplicates, but right now this seems fine;
 				newItem.ISBN = isbn.join(", ");
 				break;
-
+			
+			case 'signatur':
+				newItem.callNumber = value;
+				break;
 			case 'worldcat':
 				//SUDOC only
 				var worldcatLink = doc.evaluate('./td[2]//a', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext();
@@ -493,7 +507,7 @@ function scrape(doc, url) {
 
 	//if we didn't get a permalink, look for it in the entire page
 	if(!permalink) {
-		var permalink = ZU.xpathText(doc, '//a[./img[contains(@src,"/permalink.gif") or contains(@src,"/zitierlink.gif")]][1]/@href');
+		var permalink = ZU.xpathText(doc, '//a[./img[contains(@src,"/permalink") or contains(@src,"/zitierlink")]][1]/@href');
 	}
 	if(permalink) {
 		newItem.attachments.push({
@@ -528,7 +542,7 @@ function doWeb(doc, url) {
 		var elmts = getSearchResults(doc);
 		var elmt = elmts.iterateNext();
 		var links = new Array();
-		var availableItems = new Array();
+		var availableItems = {};
 		do {
 			var link = doc.evaluate(".//a/@href", elmt, null, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
 			var searchTitle = doc.evaluate(".//a", elmt, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
@@ -1321,6 +1335,404 @@ var testCases = [
 				"libraryCatalog": "Library Catalog - gso.gbv.de",
 				"edition": "16. Aufl.",
 				"numPages": "569"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://opac.tib.uni-hannover.de/DB=1/XMLPRS=N/PPN?PPN=620088028",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Caroline",
+						"lastName": "Möhring",
+						"creatorType": "editor"
+					}
+				],
+				"notes": [
+					{
+						"note": "<div>Förderkennzeichen BMBF 0330634 K. - Verbund-Nr. 01033571</div>"
+					}
+				],
+				"tags": [
+					"Waldsterben / Schadstoffimmission / Dübener Heide / Bitterfeld <Region>"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot",
+						"type": "text/html",
+						"snapshot": true
+					}
+				],
+				"title": "Phönix auf Asche: von Wäldern und Wandel in der Dübener Heide und Bitterfeld",
+				"ISBN": "978-3-941300-14-9",
+				"date": "2009",
+				"pages": "140",
+				"place": "Remagen",
+				"publisher": "Kessel",
+				"libraryCatalog": "Library Catalog - opac.tib.uni-hannover.de",
+				"numPages": "140",
+				"callNumber": "F 10 B 2134",
+				"shortTitle": "Phönix auf Asche"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://opac.sub.uni-goettingen.de/DB=1/XMLPRS=N/PPN?PPN=57161647X",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Elmar",
+						"lastName": "Klein",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"*Waldsterben",
+					"*Baumkrankheit",
+					"*Waldsterben / Geschichte"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot",
+						"type": "text/html",
+						"snapshot": true
+					}
+				],
+				"title": "Das war das Waldsterben!",
+				"ISBN": "978-3-7930-9526-2",
+				"date": "2008",
+				"edition": "1. Aufl.",
+				"pages": "164",
+				"series": "Rombach Wissenschaft Ökologie",
+				"place": "Freiburg im Breisgau [u.a.]",
+				"publisher": "Rombach",
+				"libraryCatalog": "Library Catalog - opac.sub.uni-goettingen.de",
+				"numPages": "164",
+				"seriesNumber": "8",
+				"seriesTitle": "Rombach Wissenschaft Ökologie",
+				"callNumber": "48 Kle"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://lhclz.gbv.de/DB=1/XMLPRS=N/PPN?PPN=08727342X",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Bettina",
+						"lastName": "Reckter",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Rolf H.",
+						"lastName": "Simen",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Karl-Heinz",
+						"lastName": "Preuß",
+						"creatorType": "editor"
+					}
+				],
+				"notes": [
+					{
+						"note": "<div>Institutsbestand, deshalb nähere Informationen im Inst. f. Wirtschaftswissenschaft (IfW13)</div>"
+					}
+				],
+				"tags": [
+					"Umweltschaden",
+					"Aufsatzsammlung / Umweltschutz",
+					"Aufsatzsammlung",
+					"Ökomonie",
+					"Umweltschutz",
+					"Gleichgewicht",
+					"Waldsterben",
+					"Tiere",
+					"Lebensräume",
+					"Vogelarten",
+					"Umweltgifte",
+					"Bienen",
+					"Schmetterlinge",
+					"Perlmuscheln",
+					"Gewässerverschmutzung",
+					"Süßwasserfische",
+					"Saurer Regen",
+					"Umweltsignale",
+					"Trinkwasser",
+					"Algenpest",
+					"Sonnenenergie",
+					"Mülldeponie"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot",
+						"type": "text/html",
+						"snapshot": true
+					}
+				],
+				"title": "Geschichten, die die Forschung schreibt: ein Umweltlesebuch des Deutschen Forschungsdienstes",
+				"ISBN": "3-923120-26-5",
+				"date": "1990",
+				"pages": "319",
+				"place": "Bonn - Bad Godesberg",
+				"publisher": "Verlag Deutscher Forschungsdienst",
+				"libraryCatalog": "Library Catalog - lhclz.gbv.de",
+				"numPages": "319",
+				"callNumber": "CL 13 : IfW13 40 W 2",
+				"shortTitle": "Geschichten, die die Forschung schreibt"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://swb.bsz-bw.de/DB=2.1/PPNSET?PPN=012099554&INDEXSET=1",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Emir",
+						"lastName": "Rodríguez Monegal",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jorge Luis",
+						"lastName": "Borges",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "<div>Enth. Werke von und über Borges</div>"
+					}
+				],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot",
+						"type": "text/html",
+						"snapshot": true
+					}
+				],
+				"title": "Borges por el mismo",
+				"date": "1984",
+				"ISBN": "84-7222-967-X",
+				"pages": "255",
+				"publisher": "Ed. laia",
+				"place": "Barcelona",
+				"libraryCatalog": "Library Catalog - swb.bsz-bw.de",
+				"numPages": "255",
+				"series": "Laia literatura",
+				"seriesTitle": "Laia literatura"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://cbsopac.rz.uni-frankfurt.de/DB=2.1/PPNSET?PPN=318490412",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Georg",
+						"lastName": "Borges",
+						"creatorType": "editor"
+					}
+				],
+				"notes": [
+					{
+						"note": "<div>Description based upon print version of record </div>"
+					}
+				],
+				"tags": [
+					"f Online-Publikation"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot",
+						"type": "text/html",
+						"snapshot": true
+					}
+				],
+				"libraryCatalog": "Library Catalog - cbsopac.rz.uni-frankfurt.de",
+				"title": "Daten- und Identitätsschutz in Cloud Computing, E-Government und E-Commerce",
+				"numPages": "188",
+				"ISBN": "978-3-642-30102-5",
+				"series": "SpringerLink: Springer e-Books",
+				"seriesTitle": "SpringerLink: Springer e-Books",
+				"DOI": "10.1007/978-3-642-30102-5",
+				"abstractNote": "Fuer neue und kuenftige Gesch ftsfelder von E-Commerce und E-Government stellen der Datenschutz und der Identit tsschutz wichtige Herausforderungen dar. Renommierte Autoren aus Wissenschaft und Praxis widmen sich in dem Band aktuellen Problemen des Daten- und Identit tsschutzes aus rechtlicher und technischer Perspektive. Sie analysieren aktuelle Problemf lle aus der Praxis und bieten Handlungsempfehlungen an. Das Werk richtet sich an Juristen und technisch Verantwortliche in Beh rden und Unternehmen sowie an Rechtsanw lte und Wissenschaftler."
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://stabikat.de/DB=1/XMLPRS=N/PPN?PPN=717966224",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Danièle",
+						"lastName": "Bourcier",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Romain",
+						"lastName": "Boulet",
+						"creatorType": "editor"
+					}
+				],
+				"notes": [
+					{
+						"note": "Contient des contributions en anglais<br>Notes bibliogr. Résumés. Index"
+					}
+				],
+				"tags": [
+					"Gesetzgebung / Rechtsprechung / Komplexes System / Kongress / Paris <2010>"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot",
+						"type": "text/html",
+						"snapshot": true
+					}
+				],
+				"title": "Politiques publiques, systèmes complexes",
+				"ISBN": "2-7056-8274-0, 978-2-7056-8274-3",
+				"date": "2012",
+				"pages": "290",
+				"place": "Paris",
+				"publisher": "Hermann Ed.",
+				"libraryCatalog": "Library Catalog - stabikat.de",
+				"numPages": "290",
+				"callNumber": "1 A 845058 Verfügbarkeit anzeigen / bestellen"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://iaiweb1.iai.spk-berlin.de/DB=1/XMLPRS=N/PPN?PPN=1914428323",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Gustavo",
+						"lastName": "Rubén Giorgi",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot",
+						"type": "text/html",
+						"snapshot": true
+					}
+				],
+				"title": "La temprana devoción de Borges por el norte",
+				"publicationTitle": "Proa",
+				"ISSN": "1515-4017",
+				"volume": "83",
+				"pages": "61-71",
+				"date": "2012",
+				"libraryCatalog": "Library Catalog - iaiweb1.iai.spk-berlin.de"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://opac.ub.uni-marburg.de/DB=1/XMLPRS=N/PPN?PPN=307889971",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Maria",
+						"lastName": "Borges",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Cinara",
+						"lastName": "Nahra",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Link to Library Catalog Entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot",
+						"type": "text/html",
+						"snapshot": true
+					}
+				],
+				"libraryCatalog": "Library Catalog - opac.ub.uni-marburg.de",
+				"title": "Body and justice",
+				"numPages": "163",
+				"ISBN": "1-4438-3190-5",
+				"callNumber": "070 8 2012/10695"
 			}
 		]
 	}

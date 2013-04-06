@@ -5,11 +5,11 @@
 	"target": "^https?://[^/]+/DB=[\\dA-Z]",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 199,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-03-13 23:34:07"
+	"lastUpdated": "2013-04-06 16:39:57"
 }
 
 /*
@@ -51,7 +51,7 @@ function detectWeb(doc, url) {
 			var xpathimage = "//table[@summary='presentation switch']/tbody/tr/td/img"; 
 			if (elt = doc.evaluate(xpathimage, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 				var type = elt.getAttribute('src');
-				Z.debug(type);
+				//Z.debug(type);
 				if (type.indexOf('article.') > 0) {
 					return "journalArticle";
 				} else if (type.indexOf('audiovisual.') > 0) {
@@ -206,11 +206,6 @@ var testCases = [
 					{
 						"firstName": "Georg",
 						"lastName": "Borges",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Jörg",
-						"lastName": "Schwenk",
 						"creatorType": "editor"
 					}
 				],
@@ -230,7 +225,7 @@ var testCases = [
 					}
 				],
 				"title": "Daten- und Identitätsschutz in Cloud Computing, E-Government und E-Commerce",
-				"abstractNote": "F r neue und k nftige Gesch ftsfelder von E-Commerce und E-Government stellen der Datenschutz und der Identit tsschutz wichtige Herausforderungen dar. Renommierte Autoren aus Wissenschaft und Praxis widmen sich in dem Band aktuellen Problemen des Daten- und Identit tsschutzes aus rechtlicher und technischer Perspektive. Sie analysieren aktuelle Problemf lle aus der Praxis und bieten Handlungsempfehlungen an. Das Werk richtet sich an Juristen und technisch Verantwortliche in Beh rden und Unternehmen sowie an Rechtsanw lte und Wissenschaftler.",
+				"abstractNote": "Fuer neue und kuenftige Gesch ftsfelder von E-Commerce und E-Government stellen der Datenschutz und der Identit tsschutz wichtige Herausforderungen dar. Renommierte Autoren aus Wissenschaft und Praxis widmen sich in dem Band aktuellen Problemen des Daten- und Identit tsschutzes aus rechtlicher und technischer Perspektive. Sie analysieren aktuelle Problemf lle aus der Praxis und bieten Handlungsempfehlungen an. Das Werk richtet sich an Juristen und technisch Verantwortliche in Beh rden und Unternehmen sowie an Rechtsanw lte und Wissenschaftler.",
 				"place": "Berlin, Heidelberg",
 				"publisher": "Imprint: Springer",
 				"date": "2012",
