@@ -3,7 +3,7 @@
 	"label": "RIS",
 	"creator": "Simon Kornblith and Aurimas Vinckevicius",
 	"target": "ris",
-	"minVersion": "3.0.4",
+	"minVersion": "3.0.14",
 	"maxVersion": "",
 	"priority": 100,
 	"displayOptions": {
@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-04-05 21:36:25"
+	"lastUpdated": "2013-04-16 06:43:00"
 }
 
 function detectImport() {
@@ -614,30 +614,31 @@ function processTag(item, entry) {
 				}
 			break;
 			case "attachments":
-					switch(zField[1]) {
-					case 'PDF':
-						value = {
-							url: value.replace(/^internal-pdf:\/\//i,'PDF/'),	//support for EndNote's relative paths
-							mimeType: "application/pdf",
-							title:"Full Text (PDF)",
-							downloadable:true
-						};
-					break;
-						case 'HTML':
-						value = {
-							url: value,
-							mimeType: "text/html",
-							title: "Full Text (HTML)",
-							downloadable:true
-						};
-						break;
-						default:
-						value = {
-							url:value,
-							title:"Attachment",
-							downloadable:true
-						};
+				var values = value.split('\n');
+				var title, mimeType, url;
+				for(var i=0, n=values.length; i<n; i++) {
+					//support for EndNote's relative paths
+					url = values[i].replace(/^internal-pdf:\/\//i,'PDF/').trim();
+					if(!url) continue;
+					
+					//get title from file name
+					title = url.match(/([^\/\\]+)(?:\.\w{1,8})$/);
+					if(title) title = decodeURIComponent(title[1]);
+					else title = "Attachment";
+					
+					if(zField[1] == 'HTML') {
+						title = "Full Text (HTML)";
+						mimeType = "text/html";
 					}
+					
+					item.attachments.push({
+						title: title,
+						url: url,
+						mimeType: mimeType || undefined,
+						downloadable: true
+					});
+				}
+				value = false;
 			break;
 			case "unsupported":	//unsupported fields
 				//we can convert a RIS tag to something more useful though
@@ -924,6 +925,7 @@ function completeItem(item) {
 //returns an array in the format [raw "line", tag, value]
 //lines may be combined into one entry
 var RIS_format = /^([A-Z][A-Z0-9]) {1,2}-(?: (.*))?$/; //allow empty entries
+var preserveNewLines = ['KW', 'L1', 'L2', 'L3'];
 function getLine() {
 	var entry, lastLineLength;
 	if(getLine.buffer) {
@@ -956,13 +958,13 @@ function getLine() {
 				//if previous line was short, this would probably be on a new line
 				//Might consider looking for periods and capital letters
 				if(lastLineLength < 60) {
-					nextLine = "\r\n" + nextLine;
+					nextLine = "\n" + nextLine;
 				}
 			}
 
-			//don't remove new lines from keywords
-			if(entry[1] == 'KW') {
-				nextLine = "\r\n" + nextLine;
+			//don't remove new lines from keywords or attachments
+			if(preserveNewLines.indexOf(entry[1]) != -1) {
+				nextLine = "\n" + nextLine;
 			}
 
 			//check if we need to add a space
@@ -2685,7 +2687,8 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Department",
-						"creatorType": "seriesEditor"
+						"creatorType": "seriesEditor",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Name1",
@@ -3389,8 +3392,7 @@ var testCases = [
 					{
 						"lastName": "Editor",
 						"firstName": "Series",
-						"creatorType": "seriesEditor",
-						"fieldMode": 1
+						"creatorType": "seriesEditor"
 					},
 					{
 						"lastName": "Department/Division",
@@ -3730,6 +3732,48 @@ var testCases = [
 				"title": "Title"
 			}
 		]
+	},
+	{
+		"type": "import",
+		"input": "TY - JOUR\nAB - Optimal integration of next-generation sequencing into mainstream research requires re-evaluation of how problems can be reasonably overcome and what questions can be asked. .... The random sequencing-based approach to identify microsatellites was rapid, cost-effective and identified thousands of useful microsatellite loci in a previously unstudied species.\nAD - Consortium for Comparative Genomics, Department of Biochemistry and Molecular Genetics, University of Colorado School of Medicine, Aurora, CO 80045, USA; Department of Biology, University of Central Florida, 4000 Central Florida Blvd., Orlando, FL 32816, USA; Department of Biology & Amphibian and Reptile Diversity Research Center, The University of Texas at Arlington, Arlington, TX 76019, USA\nAU - CASTOE, TODD A.\nAU - POOLE, ALEXANDER W.\nAU - GU, WANJUN\nAU - KONING, A. P. JASON de\nAU - DAZA, JUAN M.\nAU - SMITH, ERIC N.\nAU - POLLOCK, DAVID D.\nL1 - internal-pdf://2009 Castoe Mol Eco Resources-1114744832/2009 Castoe Mol Eco Resources.pdf\ninternal-pdf://sm001-1634838528/sm001.pdf\ninternal-pdf://sm002-2305927424/sm002.txt\ninternal-pdf://sm003-2624695040/sm003.xls\nM1 - 9999\nN1 - 10.1111/j.1755-0998.2009.02750.x\nPY - 2009\nSN - 1755-0998\nST - Rapid identification of thousands of copperhead snake (Agkistrodon contortrix) microsatellite loci from modest amounts of 454 shotgun genome sequence\nT2 - Molecular Ecology Resources\nTI - Rapid identification of thousands of copperhead snake (Agkistrodon contortrix) microsatellite loci from modest amounts of 454 shotgun genome sequence\nUR - http://dx.doi.org/10.1111/j.1755-0998.2009.02750.x\nVL - 9999\nID - 3\nER -",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "CASTOE",
+						"firstName": "TODD A.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "POOLE",
+						"firstName": "ALEXANDER W.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "GU",
+						"firstName": "WANJUN",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "KONING",
+						"firstName": "A. P. JASON de",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "DAZA",
+						"firstName": "JUAN M.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "SMITH",
+						"firstName": "ERIC N.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "POLLOCK",
+						"firstName": "DAVID D.",
+						"creatorType": "author"
 					}
 				],
 				"notes": [
@@ -3748,22 +3792,22 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "2009 Castoe Mol Eco Resources",
-						"mimeType": "application/pdf",
+						"url": "PDF/2009 Castoe Mol Eco Resources-1114744832/2009 Castoe Mol Eco Resources.pdf",
 						"downloadable": true
 					},
 					{
 						"title": "sm001",
-						"mimeType": "application/pdf",
+						"url": "PDF/sm001-1634838528/sm001.pdf",
 						"downloadable": true
 					},
 					{
 						"title": "sm002",
-						"mimeType": "text/plain",
+						"url": "PDF/sm002-2305927424/sm002.txt",
 						"downloadable": true
 					},
 					{
 						"title": "sm003",
-						"mimeType": "application/vnd.ms-excel",
+						"url": "PDF/sm003-2624695040/sm003.xls",
 						"downloadable": true
 					}
 				],
@@ -3771,9 +3815,9 @@ var testCases = [
 				"extra": "9999",
 				"ISSN": "1755-0998",
 				"shortTitle": "Rapid identification of thousands of copperhead snake (Agkistrodon contortrix) microsatellite loci from modest amounts of 454 shotgun genome sequence",
-				"url": "http://dx.doi.org/10.1111/j.1755-0998.2009.02750.x",
 				"publicationTitle": "Molecular Ecology Resources",
 				"title": "Rapid identification of thousands of copperhead snake (Agkistrodon contortrix) microsatellite loci from modest amounts of 454 shotgun genome sequence",
+				"url": "http://dx.doi.org/10.1111/j.1755-0998.2009.02750.x",
 				"volume": "9999",
 				"date": "2009"
 			}
