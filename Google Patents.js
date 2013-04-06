@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-03-06 23:06:02"
+	"lastUpdated": "2013-04-05 23:25:55"
 }
 
 function detectWeb(doc, url) {
@@ -177,7 +177,7 @@ var scrapers = [
 			fields.url = 'http://' + doc.location.host + doc.location.pathname;
 			var m;
 			if(m = url.match(/[?&](id=[^&]+)/)) fields.url += '?' + m[1];
-
+			Z.debug(fields.url)
 			fields.attachments = [
 				{
 					url: ZU.xpathText(doc, '//a[@id="appbar-download-pdf-link"]/@href'),
@@ -241,7 +241,7 @@ var scrapers = [
 				}
 				zField = undefined;
 			}
-
+			
 			//add other data
 			fields.title = ZU.xpathText(doc, '//span[@class="patent-title"]');
 			var abs = ZU.xpath(doc, '//p[@class="abstract"]');
@@ -254,6 +254,19 @@ var scrapers = [
 			if(fields.patentNumber && fields.patentNumber.indexOf('EP') === 0) {
 				fields.country = 'European Union';
 			}
+			else if(fields.patentNumber && fields.patentNumber.indexOf('US') === 0) {
+				fields.country = 'United States';
+				//looks like only US patents have PDFs
+				var pdfurl = doc.location.href.replace(/\?.+/, "") + ".pdf"
+				fields.attachments = [
+				{
+					url: pdfurl,
+					title: "Google Patents PDF",
+					mimeType: "application/pdf"
+				}
+			];
+			}
+					
 			return fields;
 		}
 	}
@@ -574,7 +587,7 @@ var testCases = [
 				"itemType": "patent",
 				"creators": [
 					{
-						"firstName": "Chester L., Jr.",
+						"firstName": "Jr Chester L.",
 						"lastName": "Craig",
 						"creatorType": "inventor"
 					}
@@ -588,16 +601,15 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"patentNumber": "4748058",
-				"filingDate": "Feb 10, 1987",
+				"patentNumber": "US4748058 A",
 				"date": "May 31, 1988",
-				"extra": "U.S. Classification: 428/9; 428/18; D11/118\nInternational Classification: A47G 3306",
-				"abstractNote": "An artificial tree assembly, and a tree constructed therefrom, are provided. The assembly comprises a collapsible three-piece pole; a base member formed by the bottom of a box for storing the tree assembly and including a pole support member secured thereto for supporting the pole; and a plurality of limb sections and interconnecting garlands. The limb-sections each comprise a central ring portion and a plurality of limb members extending radially outwardly from the central ring portions. The ring portions of the limb sections are stacked, when not in use, on the pole support member and are disposed, in use, along the length of pole in spaced relationship therealong. The garlands interconnect the limb portions so that as the ring portions are lifted, from the top, from the stacked positions thereof on the pole support member and slid along the pole, the garlands between adjacent limb section are tensioned, in turn, and thus serve to lift the next adjacent limb section until the tree...",
+				"filingDate": "Feb 10, 1987",
+				"assignee": "Craig, Jr.; Chester L.",
+				"extra": "International Classification: A47G33/00; A47G33/06\nU.S. Classification: A47G 33/06",
 				"title": "Artificial tree",
+				"abstractNote": "An artificial tree assembly, and a tree constructed therefrom, are provided. The assembly comprises a collapsible three-piece pole; a base member formed by the bottom of a box for storing the tree assembly and including a pole support member secured thereto for supporting the pole; and a plurality of limb sections and interconnecting garlands. The limb-sections each comprise a central ring portion and a plurality of limb members extending radially outwardly from the central ring portions. The ring portions of the limb sections are stacked, when not in use, on the pole support member and are disposed, in use, along the length of pole in spaced relationship therealong. The garlands interconnect the limb portions so that as the ring portions are lifted, from the top, from the stacked positions thereof on the pole support member and slid along the pole, the garlands between adjacent limb section are tensioned, in turn, and thus serve to lift the next adjacent limb section until the tree is fully erected.",
 				"country": "United States",
-				"url": "http://www.google.com/patents/US4748058",
-				"libraryCatalog": "Google Patents",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "Google Patents"
 			}
 		]
 	},
@@ -623,17 +635,15 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"patentNumber": "5979603",
-				"filingDate": "Jan 6, 1995",
+				"patentNumber": "US5979603 A",
 				"date": "Nov 9, 1999",
+				"filingDate": "Jan 6, 1995",
 				"assignee": "Summit Specialties, Inc.",
-				"extra": "U.S. Classification: 182/187; 182/46; 182/135\nInternational Classification: A45F  300",
-				"abstractNote": "A climbing device for a tree or other vertical columnar member having a platform fashioned from fiber-reinforced composite material. The platform is a one-piece structure having a peripheral skin with bi-directionally oriented reinforcing fibers and longitudinally extending reinforcing fibers. The back bar is also fashioned from fiber-reinforced composite material having a peripheral skin with bi-directionally oriented reinforcing fibers and longitudinally extending reinforcing fibers. Fiber-reinforced members include a foam core for shape retention. The manufacturing process permits use of T-shaped joints in fiber-reinforced structures.",
+				"extra": "International Classification: A01M31/00; A45F3/00; A45F3/26; A01M31/02\nU.S. Classification: A45F 3/26; A01M 31/02",
 				"title": "Portable tree stand having fiber composite platform",
+				"abstractNote": "A climbing device for a tree or other vertical columnar member having a platform fashioned from fiber-reinforced composite material. The platform is a one-piece structure having a peripheral skin with bi-directionally oriented reinforcing fibers and longitudinally extending reinforcing fibers. The back bar is also fashioned from fiber-reinforced composite material having a peripheral skin with bi-directionally oriented reinforcing fibers and longitudinally extending reinforcing fibers. Fiber-reinforced members include a foam core for shape retention. The manufacturing process permits use of T-shaped joints in fiber-reinforced structures.",
 				"country": "United States",
-				"url": "http://www.google.com/patents/US5979603",
-				"libraryCatalog": "Google Patents",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "Google Patents"
 			}
 		]
 	}
