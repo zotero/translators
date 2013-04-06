@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-19 09:15:52"
+	"lastUpdated": "2013-04-05 23:03:04"
 }
 
 function detectWeb(doc, url) {
@@ -93,32 +93,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.cup.columbia.edu/book/978-0-231-70178-5/political-islam-observed",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"firstName": "Frédéric",
-						"lastName": "Volpi",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Political Islam Observed",
-				"abstractNote": "Frédéric Volpi compares the academic disciplines that \"observe\" contemporary political Islam to the actual individuals and communities that are being observed by them. Zeroing in on the social sciences and their distinct approach to \"Islamic\" subject matter, Volpi shows how disciplines analyze political Islam according to their own dominant paradigms. Even with the incorporation of specialist viewpoints, the interdisciplinary drive often results in nothing more than educated guesses geared toward political and public consumption. Volpi argues that the competition between these paradigms obscures the actual dynamics and cohesiveness of political Islam. He identifies the strengths and weaknesses of disciplinary approaches toward the Islamist phenomenon and takes the first step in developing an account based on post-orientalism, international relations, the sociology of religion, and studies in democratization, multiculturalism, security analysis, and globalization.Political Islam Observed",
-				"date": "September, 2010",
-				"ISBN": "978-0-231-70178-5",
-				"publisher": "Columbia University Press",
-				"libraryCatalog": "Columbia University Press"
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "http://www.cup.columbia.edu/book/978-0-7486-3967-0/islam",
 		"items": [
 			{
@@ -156,6 +130,32 @@ var testCases = [
 				"publisher": "Edinburgh University Press",
 				"libraryCatalog": "Columbia University Press",
 				"shortTitle": "Islam"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.cup.columbia.edu/book/978-0-7486-3978-6/islam-and-the-foundations-of-political-power",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Ali",
+						"lastName": "Abdelraziq",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Islam and the Foundations of Political Power",
+				"abstractNote": "The publication of this essay in Egypt in 1925 took the contemporaries of 'Ali 'Abd al-Raziq by storm. It was the focus of much attention and the seed of a heated debate. At a time when the Muslim world was in great turmoil over the question of the abolition of the caliphate by Mustapha Kamal Ataturk in Turkey, Abdelraziq, a religious cleric trained at Al-Azhar University, argued in favour of secularism. The abolition of the caliphate had re-ignited the issue of Islam and politics, as traditional political systems were dissolving under pressure from European powers while most Muslim countries had lost their sovereignty. This essay gave rise to a series of 'refutations' of which three were published the same year. It also unleashed the Arab world's first great public debate with polemics supporting or refuting Abdelraziq's ideas published all over the press. Eventually he was tried by the Al-Azhar court, denounced, stripped of his title of 'alim and barred from future employment in education and the judiciary.",
+				"date": "August, 2012",
+				"ISBN": "978-0-7486-3978-6",
+				"publisher": "Edinburgh University Press",
+				"libraryCatalog": "Columbia University Press"
 			}
 		]
 	}

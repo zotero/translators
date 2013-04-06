@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-01-09 15:36:32"
+	"lastUpdated": "2013-04-05 23:06:06"
 }
 
 function detectWeb(doc, url) {
@@ -26,8 +26,8 @@ function doWeb(doc, url) {
 		if (ZU.xpathText(doc, '//h3[@class="story"]/a')){
 			var results = doc.evaluate('//h3[@class="story"]/a', doc, null, XPathResult.ANY_TYPE, null);
 		}
-		else if (ZU.xpathText(doc, '//div[@class="search_result"]/a[./h4]')){
-				var results = doc.evaluate('//div[@class="search_result"]/a[./h4]', doc, null, XPathResult.ANY_TYPE, null);
+		else if (ZU.xpathText(doc, '//div[@class="results"]//a[./h4]')){
+				var results = doc.evaluate('//div[@class="results"]//a[./h4]', doc, null, XPathResult.ANY_TYPE, null);
 		}
 		var result;
 		var items = new Object();

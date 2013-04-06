@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-01-30 22:44:29"
+	"lastUpdated": "2013-04-05 23:35:13"
 }
 
 function detectWeb(doc, url) {
@@ -110,23 +110,21 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Tamar Szabó Gendler",
 					"Kendall Walton",
+					"Tamar Szabó Gendler",
 					"concepts",
-					"imagination",
-					"possibility",
 					"fiction",
-					"morality"
+					"imagination",
+					"morality",
+					"possibility"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://hdl.handle.net/2027/spo.3521354.0004.003",
 						"title": "Morality, Fiction, and Possibility Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"url": "http://quod.lib.umich.edu/p/phimp/images/3521354.0004.003.pdf",
 						"title": "Philosopher's Imprint Full Text PDF",
 						"mimeType": "application/pdf"
 					}
@@ -134,6 +132,7 @@ var testCases = [
 				"title": "Morality, Fiction, and Possibility",
 				"volume": "4",
 				"issue": "3",
+				"pages": "1-27",
 				"date": "November 2004",
 				"place": "Ann Arbor, MI",
 				"publisher": "University of Michigan",
