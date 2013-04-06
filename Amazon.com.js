@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-03-30 23:47:53"
+	"lastUpdated": "2013-04-02 14:54:05"
 }
 
 function detectWeb(doc, url) {
@@ -56,9 +56,6 @@ function doWeb(doc, url) {
 	var searchRe = new RegExp('^https?://(?:www\.)?amazon\.' + suffix + '/(gp/search/|(gp/)?registry/(wishlist|registry)|exec/obidos/search-handle-url/|s/|s\\?|[^/]+/lm/|gp/richpub/)');
 	var m = searchRe.exec(doc.location.href);
 	var uris = new Array();
-	if (suffix == "co.jp"){
-		suffix = "jp";
-	}
 	if (suffix == ".com") suffix = "com";
 	if(m) {
 		var availableItems = new Array();
