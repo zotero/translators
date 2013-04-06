@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-02-24 23:45:46"
+	"lastUpdated": "2013-04-05 23:30:33"
 }
 
 /*
@@ -175,7 +175,7 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 			var numero = h[4];
 			var publication = h[5];
 			newItem.court = 'Cour de cassation';
-			newItem.tags = nature;
+			if (nature) newItem.tags.push(nature);
 			newItem.extra = formation;
 			newItem.date = date;
 			newItem.docketNumber = numero;
@@ -202,7 +202,7 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 			var numero = j[4];
 			var publication = j[5];
 			newItem.court = 'Tribunal des conflits';
-			newItem.tags = nature;
+			if (nature) newItem.tags.push(nature);
 			newItem.date = date;
 			newItem.docketNumber = numero;
 			newItem.reporter = publication;
@@ -402,7 +402,9 @@ var testCases = [
 				"itemType": "case",
 				"creators": [],
 				"notes": [],
-				"tags": "Cour de cassation",
+				"tags": [
+					"Cour de cassation"
+				],
 				"seeAlso": [],
 				"attachments": [
 					{
@@ -411,14 +413,14 @@ var testCases = [
 					}
 				],
 				"title": "Cour de cassation, Chambre mixte, 21 décembre 2012, 12-15.063, Publié au bulletin",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"url": "http://www.legifrance.gouv.fr/affichJuriJudi.do?oldAction=rechJuriJudi&idTexte=JURITEXT000026815591&fastReqId=673705389&fastPos=2",
 				"court": "Cour de cassation",
 				"extra": "Chambre mixte",
 				"date": "21 décembre 2012",
 				"docketNumber": "12-15.063",
 				"reporter": "Publié au bulletin",
-				"libraryCatalog": "Légifrance"
+				"libraryCatalog": "Légifrance",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -482,7 +484,9 @@ var testCases = [
 				"itemType": "case",
 				"creators": [],
 				"notes": [],
-				"tags": "civile",
+				"tags": [
+					"civile"
+				],
 				"seeAlso": [],
 				"attachments": [
 					{
@@ -491,13 +495,13 @@ var testCases = [
 					}
 				],
 				"title": "Tribunal des conflits, civile, 14 mai 2012, 12-03.836, Publié au bulletin",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"url": "http://www.legifrance.gouv.fr/affichJuriJudi.do?oldAction=rechJuriJudi&idTexte=JURITEXT000026304473&fastReqId=2146436360&fastPos=11",
 				"court": "Tribunal des conflits",
 				"date": "14 mai 2012",
 				"docketNumber": "12-03.836",
 				"reporter": "Publié au bulletin",
-				"libraryCatalog": "Légifrance"
+				"libraryCatalog": "Légifrance",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},

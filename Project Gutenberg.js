@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-30 14:19:59"
+	"lastUpdated": "2013-04-05 23:37:12"
 }
 
 function detectWeb(doc, url) {
@@ -83,7 +83,7 @@ function scrape(doc, url) {
 		}
 		//field Title's with a space (nbsp?) are hard to match with strings - so let's do this here.
 		else if (fieldTitle.match(/LoC.?Class/)) {
-			newItem.notes = "LoC Class " + dataTags[fieldTitle];
+			newItem.notes.push("LoC Class " + dataTags[fieldTitle]);
 		} else if (fieldTitle.match(/Release.?Date/)) {
 			newItem.date = dataTags[fieldTitle];
 		} else if (fieldTitle.match(/Copyright.?Status/)) {
@@ -128,7 +128,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		var links = doc.evaluate('//ul[@class="results"]/li[@class="booklink"]/a[@class="link"]', doc, null, XPathResult.ANY_TYPE, null);
-	    var link;
+		var link;
 		while (link = links.iterateNext()){
 			items[link.href] = ZU.xpathText(link, './span/span[@class="title"]')
 		}
@@ -164,7 +164,9 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": "LoC Class F1401: Latin America local history: General",
+				"notes": [
+					"LoC Class F1401: Latin America local history: General"
+				],
 				"tags": [
 					"Indians, Treatment of -- Latin America",
 					"Spain -- Colonies -- America"

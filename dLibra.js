@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-02-27 12:14:33"
+	"lastUpdated": "2013-04-05 23:09:26"
 }
 
 /*
@@ -89,7 +89,7 @@ function scrape(doc, url)
 		translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f");
 		translator.setString(rdf);
 		translator.setHandler("itemDone", function (obj, item) {
-			item.notes = item.extra;
+			if (item.extra) item.notes.push(item.extra);
 			item.extra = "";
 			item.itemID = "";
 			item.complete();
@@ -120,7 +120,9 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": "Mapy topograficzne Prus Południowych.13 arkuszy o wymiarach 62 x 82 cm. Skala [ca 1:150000]. Miedzioryt, ręcznie kolorowany",
+				"notes": [
+					"Mapy topograficzne Prus Południowych.13 arkuszy o wymiarach 62 x 82 cm. Skala [ca 1:150000]. Miedzioryt, ręcznie kolorowany"
+				],
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
