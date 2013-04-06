@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-11-11 11:39:09"
+	"lastUpdated": "2013-04-06 14:04:36"
 }
 
 function detectWeb(doc, url) {
@@ -58,6 +58,7 @@ function doWeb(doc, url) {
 			var jid = m[1];
 		}
 		Zotero.debug("JID found 1 " + jid);
+		setupSets(allJids)
 	}
 	// Sometimes JSTOR uses DOIs as JID; here we exclude "?" characters, since it's a URL
 	// And exclude TOC for journal issues that have their own DOI
@@ -68,6 +69,7 @@ function doWeb(doc, url) {
 		jid = RegExp.$1;
 		allJids.push(jid);
 		Zotero.debug("JID found 2 " + jid);
+		setupSets(allJids)
 	} 
 	else if (/(?:pss|stable)\/(\d+)/.test(url)
 		 && !doc.evaluate('//form[@id="toc"]', doc, nsResolver,
@@ -76,6 +78,7 @@ function doWeb(doc, url) {
 		jid = RegExp.$1;
 		allJids.push(jid);
 		Zotero.debug("JID found 3 " + jid);
+		setupSets(allJids)
 	}
 	else {
 		// We have multiple results
@@ -84,37 +87,47 @@ function doWeb(doc, url) {
 			return true;
 		}
 	
-		var allTitlesElmts = doc.evaluate('//li//a[@class="title"]', resultsBlock, nsResolver,  XPathResult.ANY_TYPE, null);
+		var allTitlesElmts = doc.evaluate('//li//a[@class="title"]|//li//div[@class="title" and not(a[@class="title"])]', resultsBlock, nsResolver,  XPathResult.ANY_TYPE, null);
 		var currTitleElmt;
 		var availableItems = new Object();
 		while (currTitleElmt = allTitlesElmts.iterateNext()) {
-			var title = currTitleElmt.textContent;
+			var title = currTitleElmt.textContent.trim();
 			// Sometimes JSTOR uses DOIs as JID; here we exclude "?" characters, since it's a URL
 			if (/(?:pss|stable)\/(10\.\d+\/[^?]+)(?:\?.*)?/.test(currTitleElmt.href))
 				var jid = RegExp.$1;
-			else
-				var jid = currTitleElmt.href.match(/(?:stable|pss)\/([a-z]*?\d+)/)[1];
+			else if (currTitleElmt.href) var jid = currTitleElmt.href.match(/(?:stable|pss)\/([a-z]*?\d+)/)[1];
+			//for items like Reviews without linked titles
+			else var jid = ZU.xpathText(currTitleElmt, './a[contains(@id, "previewResult")]/@href').match(/doi=10.2307\%2F(\d+)/)[1];
 			if (jid) {
 				availableItems[jid] = title;
 			}
-			Zotero.debug("Found title " + title+jid);
+			Zotero.debug("Found title " + title+" with JID "+ jid);
 		}
 		Zotero.debug("End of titles");
 		
-		var selectedItems = Zotero.selectItems(availableItems);
-		if (!selectedItems) {
-			return true;
-		}
-		for (var j in selectedItems) {
-			Zotero.debug("Pushing " + j);
-			allJids.push(j);
-		}
+		Zotero.selectItems(availableItems, function (selectedItems) {
+			if (!selectedItems) {
+				return true;
+			}
+			for (var j in selectedItems) {
+				Zotero.debug("Pushing " + j);
+				allJids.push(j);
+			}
+			setupSets(allJids)
+		});
+	
+	}		
+}
+	
+	function setupSets(allJids){
+		var sets = [];
+			for each(var jid in allJids) {
+				sets.push({ jid: jid });
+			}
+			var callbacks = [first, second];
+			Zotero.Utilities.processAsync(sets, callbacks, function(){Zotero.done()});
 	}
 	
-	var sets = [];
-	for each(var jid in allJids) {
-		sets.push({ jid: jid });
-	}
 	
 	function first(set, next) {
 		var jid = set.jid;
@@ -125,7 +138,7 @@ function doWeb(doc, url) {
 		else var doi = "10.2307/" + jid;
 		var downloadString = "redirectUri=%2Faction%2FexportSingleCitation%3FsingleCitation%3Dtrue%26doi%3D" + doi + "&noDoi=yesDoi&doi=" + doi;
 		//Z.debug(downloadString)
-		Zotero.Utilities.HTTP.doPost("http://"+host+"/action/downloadSingleCitation?userAction=export&format=refman&direct=true&singleCitation=true", downloadString, function(text) {
+		Zotero.Utilities.HTTP.doPost("/action/downloadSingleCitation?userAction=export&format=refman&direct=true&singleCitation=true", downloadString, function(text) {
 			// load translator for RIS
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -157,7 +170,7 @@ function doWeb(doc, url) {
 				set.doi = "10.2307/" + jid;
 				
 				if (/stable\/(\d+)/.test(item.url)) {
-					var pdfurl = "http://"+ host + "/stable/pdfplus/" + jid + ".pdf?acceptTC=true";
+					var pdfurl = item.url.replace(/\/stable\//, "/stable/pdfplus/")  + ".pdf?acceptTC=true";
 					item.attachments.push({url:pdfurl, title:"JSTOR Full Text PDF", mimeType:"application/pdf"});
 				}
 
@@ -165,10 +178,22 @@ function doWeb(doc, url) {
 				if (matches = item.ISSN.match(/([0-9]{4})([0-9]{3}[0-9Xx])/)) {
 					item.ISSN = matches[1] + '-' + matches[2];
 				}
-
+				//reviews don't have titles in RIS - we get them from the item page
+				if (!item.title && item.url){
+					ZU.processDocuments(item.url, function(doc){
+					if (ZU.xpathText(doc, '//div[@class="bd"]/div[@class="rw"]')){
+						item.title = "Review of: " + ZU.xpathText(doc, '//div[@class="bd"]/div[@class="rw"]')
+					}
+					//this is almost certainly not necessary, but let's be safe
+					else item.title = ZU.xpathText(doc, '//div[@class="bd"]/h2')
+					set.item = item;
+					next();
+					})
+				}
+				else{
 				set.item = item;
-				
 				next();
+				}
 			});
 			
 			translator.translate();
@@ -210,10 +235,6 @@ function doWeb(doc, url) {
 		});
 	}
 	
-	var callbacks = [first, second];
-	Zotero.Utilities.processAsync(sets, callbacks, function () { Zotero.done(); });
-	Zotero.wait();
-}
 
 
 /** BEGIN TEST CASES **/
@@ -356,6 +377,52 @@ var testCases = [
 				"shortTitle": "Remaking Families"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.jstor.org/stable/131548",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Burbank",
+						"firstName": "Jane",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "JSTOR Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"journalAbbreviation": "Russian Review",
+				"volume": "57",
+				"issue": "2",
+				"publisher": "Wiley on behalf of The Editors and Board of Trustees of the Russian Review",
+				"ISSN": "0036-0341",
+				"url": "http://www.jstor.org/stable/131548",
+				"DOI": "10.2307/131548",
+				"date": "April 1, 1998",
+				"pages": "310-311",
+				"rights": "Copyright © 1998 The Editors and Board of Trustees of the Russian Review",
+				"extra": "ArticleType: book-review / Full publication date: Apr., 1998 / Copyright © 1998 The Editors and Board of Trustees of the Russian Review",
+				"publicationTitle": "Russian Review",
+				"title": "Review of: Soviet Criminal Justice under Stalin by Peter H. Solomon",
+				"libraryCatalog": "JSTOR",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Review of"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.jstor.org/action/doAdvancedSearch?q0=solomon+criminal+justice&f0=all&c1=AND&q1=&f1=all&acc=on&wc=on&fc=off&re=on&sd=&ed=&la=&pt=&isbn=&dc.History=History&dc.SlavicStudies=Slavic+Studies&Search=Search",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
