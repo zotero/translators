@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-03-31 00:17:59"
+	"lastUpdated": "2013-04-07 00:37:24"
 }
 
 function detectWeb(doc, url) {
@@ -154,7 +154,12 @@ function scrape (doc, url) {
   	Zotero.Utilities.HTTP.doPost(get, post, function(text) {
   		text = ZU.unescapeHTML(text.replace(/(&[^\s;]+) and/g, '$1;'));
 		//remove empty tag - we can take this out once empty tags are ignored
-		text = text.replace(/(keywords=\{.+);\}/, "$1}");	
+		text = text.replace(/(keywords=\{.+);\}/, "$1}");
+		var earlyaccess = false;
+		if (text.search(/^@null/)!=-1){
+			earlyaccess=true;
+			text = text.replace(/^@null/, "@article");
+		} 
 		var translator = Zotero.loadTranslator("import");
 		// Calling the BibTeX translator
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
@@ -170,6 +175,11 @@ function scrape (doc, url) {
 				item.publicationTitle.trim().match(/^(.*),(.*(?:of|on|IEE|IEEE|IET|IRE))$/))
 			item.publicationTitle = res[2]+" "+res[1];
 			item.proceedingsTitle = item.conferenceName = item.publicationTitle;
+			if (earlyaccess){
+				item.volume = "Early Access Online";
+				item.issue = "";
+				item.pages = "";
+			}
 			if (pdf) {
 				Zotero.Utilities.doGet(pdf, function (src) {
 					var m = /<frame src="(.*\.pdf.*)"/.exec(src);
