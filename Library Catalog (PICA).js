@@ -9,10 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-04-06 16:38:35"
+	"lastUpdated": "2013-04-07 12:26:17"
 }
-
-
 
 function getSearchResults(doc) {
 	return doc.evaluate(
@@ -513,14 +511,14 @@ function scrape(doc, url) {
 		newItem.attachments.push({
 			title: 'Link to Library Catalog Entry',
 			url: permalink,
-			type: 'text/html',
+			mimeType: 'text/html',
 			snapshot: false
 		});
 		//also add snapshot using permalink so that right-click -> View Online works
 		newItem.attachments.push({
 			title: 'Library Catalog Entry Snapshot',
 			url: permalink,
-			type: 'text/html',
+			mimeType: 'text/html',
 			snapshot: true
 		});
 	} else {
@@ -599,12 +597,12 @@ var testCases = [
 					},
 					{
 						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
 						"title": "Library Catalog Entry Snapshot",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": true
 					}
 				],
@@ -646,12 +644,12 @@ var testCases = [
 					},
 					{
 						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
 						"title": "Library Catalog Entry Snapshot",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": true
 					}
 				],
@@ -707,12 +705,12 @@ var testCases = [
 					},
 					{
 						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
 						"title": "Library Catalog Entry Snapshot",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": true
 					}
 				],
@@ -755,12 +753,12 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
 						"title": "Library Catalog Entry Snapshot",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": true
 					}
 				],
@@ -827,17 +825,17 @@ var testCases = [
 					},
 					{
 						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
 						"title": "Library Catalog Entry Snapshot",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": true
 					}
 				],
 				"date": "2006",
-				"ISBN": "0815342233",
+				"ISBN": "0-8153-4223-3",
 				"title": "Exploring the living cell",
 				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
 				"language": "anglais",
@@ -872,12 +870,12 @@ var testCases = [
 					},
 					{
 						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
 						"title": "Library Catalog Entry Snapshot",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": true
 					}
 				],
@@ -931,12 +929,12 @@ var testCases = [
 					},
 					{
 						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
 						"title": "Library Catalog Entry Snapshot",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": true
 					}
 				],
@@ -987,12 +985,12 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
 						"title": "Library Catalog Entry Snapshot",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": true
 					}
 				],
@@ -1043,12 +1041,12 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
 						"title": "Library Catalog Entry Snapshot",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": true
 					}
 				],
@@ -1103,12 +1101,12 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
 						"title": "Library Catalog Entry Snapshot",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": true
 					}
 				],
@@ -1157,12 +1155,12 @@ var testCases = [
 					},
 					{
 						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
 						"title": "Library Catalog Entry Snapshot",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": true
 					}
 				],
@@ -1208,12 +1206,12 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
 						"title": "Library Catalog Entry Snapshot",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": true
 					}
 				],
@@ -1259,12 +1257,12 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
 						"title": "Library Catalog Entry Snapshot",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": true
 					}
 				],
@@ -1317,12 +1315,12 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
 						"title": "Library Catalog Entry Snapshot",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": true
 					}
 				],
@@ -1363,12 +1361,12 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
 						"title": "Library Catalog Entry Snapshot",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": true
 					}
 				],
@@ -1408,12 +1406,12 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
 						"title": "Library Catalog Entry Snapshot",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": true
 					}
 				],
@@ -1489,12 +1487,12 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
 						"title": "Library Catalog Entry Snapshot",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": true
 					}
 				],
@@ -1539,12 +1537,12 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
 						"title": "Library Catalog Entry Snapshot",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": true
 					}
 				],
@@ -1586,12 +1584,12 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
 						"title": "Library Catalog Entry Snapshot",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": true
 					}
 				],
@@ -1636,12 +1634,12 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
 						"title": "Library Catalog Entry Snapshot",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": true
 					}
 				],
@@ -1676,12 +1674,12 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
 						"title": "Library Catalog Entry Snapshot",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": true
 					}
 				],
@@ -1719,12 +1717,12 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
 						"title": "Library Catalog Entry Snapshot",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": true
 					}
 				],
