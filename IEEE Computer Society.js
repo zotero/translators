@@ -2,14 +2,14 @@
 	"translatorID": "8d72adbc-376c-4a33-b6be-730bc235190f",
 	"label": "IEEE Computer Society",
 	"creator": "fasthae@gmail.com, Sebastian Karcher",
-	"target": "^https?://(www[0-9]?|search[0-9]?)\\.computer\\.org/(csdl/(mags/[0-9a-z/]+|trans/[0-9a-z/]+|letters/[0-9a-z]+|proceedings/[0-9a-z/]+|doi|abs/proceedings)|search/results|portal/web/computingnow/content\\?)",
+	"target": "^https?://(www[0-9]?|search[0-9]?)\\.computer\\.org/(csdl/(mags/[0-9a-z/]+|trans/[0-9a-z/]+|letters/[0-9a-z]+|proceedings/[0-9a-z/]+|doi|abs/proceedings)|search/results|portal/web/computingnow/.*content\\?)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-02-08 20:50:16"
+	"lastUpdated": "2013-04-07 23:22:31"
 }
 
 function detectWeb(doc, url) {
@@ -19,7 +19,7 @@ function detectWeb(doc, url) {
 	} else if (url.indexOf("/csdl/mags/") > 1) {
 		if (url.indexOf("index.html") != -1) return "multiple";
 		else return "magazineArticle";
-	} else if (url.indexOf("/portal/web/computingnow/content") > 1) {
+	} else if (url.search(/\/portal\/web\/computingnow\/.*content/) > 1) {
 		if (url.indexOf("index.html") != -1) return "multiple";
 		else return "magazineArticle";
 	} else if (url.indexOf("/csdl/trans/") > 1) {
@@ -444,14 +444,19 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.computer.org/portal/web/computingnow/content?g=53319&type=article&urlTitle=cloud-computing%3A-the-new-normal-",
+		"url": "http://www.computer.org/portal/web/computingnow/cloud/content?g=53319&type=article&urlTitle=a-green-software-development-life-cycle-for-cloud-computing",
 		"items": [
 			{
 				"itemType": "magazineArticle",
 				"creators": [
 					{
-						"firstName": "San",
-						"lastName": "Murugesan",
+						"firstName": "Nitin Singh",
+						"lastName": "Chauhan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ashutosh",
+						"lastName": "Saxena",
 						"creatorType": "author"
 					}
 				],
@@ -468,19 +473,18 @@ var testCases = [
 						"title": "IEEE Computer Snapshot"
 					}
 				],
-				"title": "Cloud Computing: The New Normal?",
-				"publicationTitle": "Computer",
-				"volume": "46",
+				"title": "A Green Software Development Life Cycle for Cloud Computing",
+				"publicationTitle": "IT Professional",
+				"volume": "15",
 				"issue": "1",
-				"ISSN": "0018-9162",
+				"ISSN": "1520-9202",
 				"date": "2013",
-				"pages": "77-79",
-				"DOI": "10.1109/MC.2013.12",
+				"pages": "28-34",
+				"DOI": "10.1109/MITP.2013.6",
 				"publisher": "IEEE Computer Society",
 				"place": "Los Alamitos, CA, USA",
-				"abstractNote": "Cloud computing is more than just another IT platform shift—it will transform not only the IT industry, but every sector of society.",
-				"libraryCatalog": "IEEE Computer Society",
-				"shortTitle": "Cloud Computing"
+				"abstractNote": "Cloud computing's recent proliferation has received attention from green crusaders hoping to mitigate the carbon footprint of large datacenters and IT infrastructures, but what about the software? A new framework for a greener cloud focuses on energy-efficient software development.",
+				"libraryCatalog": "IEEE Computer Society"
 			}
 		]
 	}
