@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-04-06 14:04:36"
+	"lastUpdated": "2013-04-09 00:50:29"
 }
 
 function detectWeb(doc, url) {
@@ -58,7 +58,7 @@ function doWeb(doc, url) {
 			var jid = m[1];
 		}
 		Zotero.debug("JID found 1 " + jid);
-		setupSets(allJids)
+		setupSets(allJids, host)
 	}
 	// Sometimes JSTOR uses DOIs as JID; here we exclude "?" characters, since it's a URL
 	// And exclude TOC for journal issues that have their own DOI
@@ -69,7 +69,7 @@ function doWeb(doc, url) {
 		jid = RegExp.$1;
 		allJids.push(jid);
 		Zotero.debug("JID found 2 " + jid);
-		setupSets(allJids)
+		setupSets(allJids, host)
 	} 
 	else if (/(?:pss|stable)\/(\d+)/.test(url)
 		 && !doc.evaluate('//form[@id="toc"]', doc, nsResolver,
@@ -78,7 +78,7 @@ function doWeb(doc, url) {
 		jid = RegExp.$1;
 		allJids.push(jid);
 		Zotero.debug("JID found 3 " + jid);
-		setupSets(allJids)
+		setupSets(allJids, host)
 	}
 	else {
 		// We have multiple results
@@ -113,130 +113,128 @@ function doWeb(doc, url) {
 				Zotero.debug("Pushing " + j);
 				allJids.push(j);
 			}
-			setupSets(allJids)
+			setupSets(allJids, host)
 		});
 	
 	}		
 }
 	
-	function setupSets(allJids){
-		var sets = [];
-			for each(var jid in allJids) {
-				sets.push({ jid: jid });
-			}
-			var callbacks = [first, second];
-			Zotero.Utilities.processAsync(sets, callbacks, function(){Zotero.done()});
+function setupSets(allJids, host){
+	var sets = [];
+	for each(var jid in allJids) {
+		sets.push({ jid: jid, host: host });
 	}
+	var callbacks = [first, second];
+	Zotero.Utilities.processAsync(sets, callbacks, function(){Zotero.done()});
+}
 	
 	
-	function first(set, next) {
-		var jid = set.jid;
-		//distinguish JID from DOI
-		if (jid.search(/^10\./)!=-1){
-			var doi = jid
-		}
-		else var doi = "10.2307/" + jid;
-		var downloadString = "redirectUri=%2Faction%2FexportSingleCitation%3FsingleCitation%3Dtrue%26doi%3D" + doi + "&noDoi=yesDoi&doi=" + doi;
-		//Z.debug(downloadString)
-		Zotero.Utilities.HTTP.doPost("/action/downloadSingleCitation?userAction=export&format=refman&direct=true&singleCitation=true", downloadString, function(text) {
-			// load translator for RIS
-			var translator = Zotero.loadTranslator("import");
-			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-			//Z.debug(text)
-			translator.setString(text);
-			translator.setHandler("itemDone", function(obj, item) {
-				//author names are not supplied as lasName, firstName in RIS
-				//we fix it here
-				var m;
-				for(var i=0, n=item.creators.length; i<n; i++) {
-					if(!item.creators[i].firstName
-						&& (m = item.creators[i].lastName.match(/^(.+?)\s(\S+)$/))) {
-						item.creators[i].firstName = m[1];
-						item.creators[i].lastName = m[2];
-					}
+function first(set, next) {
+	var jid = set.jid;
+	var host = set.host;
+	//distinguish JID from DOI
+	if (jid.search(/^10\./)!=-1){
+		var doi = jid
+	}	
+	else var doi = "10.2307/" + jid;
+		
+	var downloadString = "redirectUri=%2Faction%2FexportSingleCitation%3FsingleCitation%3Dtrue%26doi%3D" + doi + "&noDoi=yesDoi&doi=" + doi;
+	//Z.debug(downloadString)
+	Zotero.Utilities.HTTP.doPost("/action/downloadSingleCitation?userAction=export&format=refman&direct=true&singleCitation=true", downloadString, function(text) {
+		// load translator for RIS
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+		//Z.debug(text)
+		translator.setString(text);
+		translator.setHandler("itemDone", function(obj, item) {
+			//author names are not supplied as lasName, firstName in RIS
+			//we fix it here
+			var m;
+			for(var i=0, n=item.creators.length; i<n; i++) {
+				if(!item.creators[i].firstName
+					&& (m = item.creators[i].lastName.match(/^(.+?)\s(\S+)$/))) {
+					item.creators[i].firstName = m[1];
+					item.creators[i].lastName = m[2];
 				}
-
+			}
 				if(item.notes && item.notes[0]) {
-					// For some reason JSTOR exports abstract with 'AB' tag istead of 'N1'
-					item.abstractNote = item.notes[0].note;
-					item.abstractNote = item.abstractNote.replace(/^<p>(ABSTRACT )?/,'').replace(/<\/p>$/,'');
-					delete item.notes;
-					item.notes = undefined;
+				// For some reason JSTOR exports abstract with 'AB' tag istead of 'N1'
+				item.abstractNote = item.notes[0].note;
+				item.abstractNote = item.abstractNote.replace(/^<p>(ABSTRACT )?/,'').replace(/<\/p>$/,'');
+				delete item.notes;
+				item.notes = undefined;
+			}
+			
+			// Don't save HTML snapshot from 'UR' tag
+			item.attachments = [];
+			
+			set.doi = "10.2307/" + jid;
+			
+			if (/stable\/(\d+)/.test(item.url)) {
+				var pdfurl = "http://" + host + "/stable/pdfplus/"+ jid  + ".pdf?acceptTC=true";
+				item.attachments.push({url:pdfurl, title:"JSTOR Full Text PDF", mimeType:"application/pdf"});
+			}
+			var matches;
+			if (matches = item.ISSN.match(/([0-9]{4})([0-9]{3}[0-9Xx])/)) {
+				item.ISSN = matches[1] + '-' + matches[2];
+			}
+			//reviews don't have titles in RIS - we get them from the item page
+			if (!item.title && item.url){
+				ZU.processDocuments(item.url, function(doc){
+				if (ZU.xpathText(doc, '//div[@class="bd"]/div[@class="rw"]')){
+					item.title = "Review of: " + ZU.xpathText(doc, '//div[@class="bd"]/div[@class="rw"]')
 				}
-				
-				// Don't save HTML snapshot from 'UR' tag
-				item.attachments = [];
-				
-				set.doi = "10.2307/" + jid;
-				
-				if (/stable\/(\d+)/.test(item.url)) {
-					var pdfurl = item.url.replace(/\/stable\//, "/stable/pdfplus/")  + ".pdf?acceptTC=true";
-					item.attachments.push({url:pdfurl, title:"JSTOR Full Text PDF", mimeType:"application/pdf"});
-				}
-
-				var matches;
-				if (matches = item.ISSN.match(/([0-9]{4})([0-9]{3}[0-9Xx])/)) {
-					item.ISSN = matches[1] + '-' + matches[2];
-				}
-				//reviews don't have titles in RIS - we get them from the item page
-				if (!item.title && item.url){
-					ZU.processDocuments(item.url, function(doc){
-					if (ZU.xpathText(doc, '//div[@class="bd"]/div[@class="rw"]')){
-						item.title = "Review of: " + ZU.xpathText(doc, '//div[@class="bd"]/div[@class="rw"]')
-					}
-					//this is almost certainly not necessary, but let's be safe
-					else item.title = ZU.xpathText(doc, '//div[@class="bd"]/h2')
-					set.item = item;
-					next();
-					})
-				}
-				else{
+				//this is almost certainly not necessary, but let's be safe
+				else item.title = ZU.xpathText(doc, '//div[@class="bd"]/h2')
 				set.item = item;
 				next();
-				}
-			});
-			
-			translator.translate();
+				})
+			}
+			else{
+				set.item = item;
+				next();
+			}
 		});
+			
+		translator.translate();
+	});
+}
+	
+function second(set, next) {
+	var item = set.item;
+	
+	if (!set.doi) {
+		item.complete();
+		next();
 	}
 	
-	function second(set, next) {
-		var item = set.item;
-		
-		if (!set.doi) {
+	var doi = set.doi;
+	var crossrefURL = "http://www.crossref.org/openurl/?req_dat=zter:zter321&url_ver=Z39.88-2004&ctx_ver=Z39.88-2004&rft_id=info%3Adoi/"+doi+"&noredirect=true&format=unixref";
+	
+	Zotero.Utilities.HTTP.doGet(crossrefURL, function (text) {
+		// parse XML with DOMParser
+		try {
+			var parser = new DOMParser();
+			var xml = parser.parseFromString(text, "text/xml");
+		} catch(e) {
 			item.complete();
 			next();
+			return;
 		}
 		
-		var doi = set.doi;
-		var crossrefURL = "http://www.crossref.org/openurl/?req_dat=zter:zter321&url_ver=Z39.88-2004&ctx_ver=Z39.88-2004&rft_id=info%3Adoi/"+doi+"&noredirect=true&format=unixref";
+		var doi = ZU.xpathText(xml, '//doi');
 		
-		Zotero.Utilities.HTTP.doGet(crossrefURL, function (text) {
-			// parse XML with DOMParser
-			try {
-				var parser = new DOMParser();
-				var xml = parser.parseFromString(text, "text/xml");
-			} catch(e) {
-				item.complete();
-				next();
-				return;
-			}
-			
-			var doi = ZU.xpathText(xml, '//doi');
-			
-			// ensure DOI is valid
-			if(!ZU.xpath(xml, '//error').length) {
-				Zotero.debug("DOI is valid");
-				item.DOI = doi;
-			}
-			
-			item.complete();
-			next();
-		});
-	}
+		// ensure DOI is valid
+		if(!ZU.xpath(xml, '//error').length) {
+			Zotero.debug("DOI is valid");
+			item.DOI = doi;
+		}
+		
+		item.complete();
+		next();
+	});
+}
 	
-
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
