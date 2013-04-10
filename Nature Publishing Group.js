@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-04-05 21:56:29"
+	"lastUpdated": "2013-04-10 13:00:52"
 }
 
 /**
@@ -596,7 +596,7 @@ function scrape(doc, url) {
 				for(var i=0, n=accessions.length; i<n; i++) {
 					repo = accessions[i].getElementsByTagName('h3')[0].textContent;
 					if(repo) repo += ' entry ';
-					links = accessions[i].getElementsByTagName('a');
+					links = ZU.xpath(accessions[i], './ul[1]//a');
 					if(links.length) {
 						for(var j=0, m=links.length; j<m; j++) {
 							item.attachments.push({
@@ -1085,21 +1085,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Supplementary Table 1",
-						"mimeType": "application/msword",
-						"snapshot": true
-					},
-					{
-						"title": "Supplementary Table 2",
-						"mimeType": "application/msword",
-						"snapshot": true
-					},
-					{
-						"title": "Supplementary Information",
-						"mimeType": "application/pdf",
-						"snapshot": true
 					}
 				],
 				"itemID": "http://www.nature.com/onc/journal/v31/n6/full/onc2011282a.html",
@@ -1231,16 +1216,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Supplementary Information",
-						"mimeType": "application/pdf",
-						"snapshot": true
-					},
-					{
-						"title": "Source Data for figs 1, 2 and 6",
-						"mimeType": "application/pdf",
-						"snapshot": true
 					}
 				],
 				"itemID": "http://www.nature.com/emboj/journal/v31/n7/full/emboj201217a.html",
@@ -1323,10 +1298,6 @@ var testCases = [
 					},
 					{
 						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Supplementary Information. Supplementary Text and Data, Supplementary References, Supplementary Tables 1-3 and Supplementary Figures 1-6 with legends.",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -1441,10 +1412,6 @@ var testCases = [
 					},
 					{
 						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Supplementary Information. Supplementary Table 1 and Supplementary Figures 1-5 with legends.",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -1580,41 +1547,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Supplementary Fig. 1. Validation of ER binding sites adjacent to estrogen target genes.",
-						"mimeType": "application/pdf",
-						"snapshot": true
-					},
-					{
-						"title": "Supplementary Fig. 2. Assessment of mechanisms of early and late gene repression.",
-						"mimeType": "application/pdf",
-						"snapshot": true
-					},
-					{
-						"title": "Supplementary Fig. 3. Pairwise analysis of motifs at different cutoff scores.",
-						"mimeType": "application/pdf",
-						"snapshot": true
-					},
-					{
-						"title": "Supplementary Table 1. ER binding at previously characterized putative ER binding sites.",
-						"mimeType": "application/pdf",
-						"snapshot": true
-					},
-					{
-						"title": "Supplementary Table 2. Enriched motifs within ER binding sites.",
-						"mimeType": "application/pdf",
-						"snapshot": true
-					},
-					{
-						"title": "Supplementary Table 3. Primer sequences.",
-						"mimeType": "application/pdf",
-						"snapshot": true
-					},
-					{
-						"title": "Supplementary Note",
-						"mimeType": "application/pdf",
-						"snapshot": true
 					}
 				],
 				"itemID": "http://www.nature.com/ng/journal/v38/n11/full/ng1901.html",
@@ -1918,36 +1850,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Supplementary Information",
-						"mimeType": "application/pdf",
-						"snapshot": true
-					},
-					{
-						"title": "Supplementary Table 1",
-						"mimeType": "application/vnd.ms-excel",
-						"snapshot": true
-					},
-					{
-						"title": "Supplementary Table 2",
-						"mimeType": "application/vnd.ms-excel",
-						"snapshot": true
-					},
-					{
-						"title": "Supplementary Table 3",
-						"mimeType": "application/vnd.ms-excel",
-						"snapshot": true
-					},
-					{
-						"title": "Supplementary Table 8",
-						"mimeType": "application/vnd.ms-excel",
-						"snapshot": true
-					},
-					{
-						"title": "Supplementary Table 10",
-						"mimeType": "application/vnd.ms-excel",
-						"snapshot": true
 					}
 				],
 				"itemID": "http://www.nature.com/nature/journal/v462/n7269/full/nature08497.html",
@@ -2060,11 +1962,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Supplementary Text and Figures",
-						"mimeType": "application/pdf",
-						"snapshot": true
 					}
 				],
 				"itemID": "http://www.nature.com/nsmb/journal/v15/n2/full/nsmb.1371.html",
@@ -2220,21 +2117,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Supplementary Information",
-						"mimeType": "application/pdf",
-						"snapshot": true
-					},
-					{
-						"title": "Supplementary Table 2",
-						"mimeType": "application/vnd.ms-excel",
-						"snapshot": true
-					},
-					{
-						"title": "Supplementary Table 3",
-						"mimeType": "application/vnd.ms-excel",
-						"snapshot": true
 					}
 				],
 				"itemID": "http://www.nature.com/emboj/journal/v32/n5/full/emboj2012357a.html",
@@ -2475,14 +2357,6 @@ var testCases = [
 						"title": "Sequence Read Archive entry (SRA012474)",
 						"type": "text/html",
 						"snapshot": false
-					},
-					{
-						"title": "Supplementary Information. The Supplementary Discussion, Supplementary References and Supplementary Figures 1-30.",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Supplementary Tables. Supplementary Tables 1-26.",
-						"mimeType": "application/vnd.ms-excel"
 					}
 				],
 				"itemID": "http://www.nature.com/nature/journal/v495/n7440/full/nature11968.html",
@@ -2579,46 +2453,6 @@ var testCases = [
 						"title": "Protein Data Bank entry (3W5B)",
 						"type": "text/html",
 						"snapshot": false
-					},
-					{
-						"title": "Protein Data Bank entry (3W5D)",
-						"type": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Protein Data Bank entry (3W5C)",
-						"type": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Protein Data Bank entry (3W5A)",
-						"type": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Protein Data Bank entry (3W5B)",
-						"type": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Video 1: Rearrangements of transmembrane helices that form SLN binding cavity. SLN appears as a transparent cylinder in E2 and E1•2Ca2+ in the same position as in E1•Mg2+ to show mismatch between SLN and the binding cavity. Animation derived from Figure 3b. The direct link to this video is currently out of action. To view this video please use the \"download\" link",
-						"snapshot": false
-					},
-					{
-						"title": "Video 2: Alterations of the binding cavity for SLN. Van der Waals surface of the transmembrane region around the SLN binding cavity. Animation derived from Supplementary Figure 14. The direct link to this video is currently out of action. To view this video please use the \"download\" link",
-						"snapshot": false
-					},
-					{
-						"title": "Video 3: Movements of the A domain in Mg2+ and Ca2+ binding. Aligned with the P domain and viewed approximately perpendicular to the membrane. D351 is the phosphorylation residue. Animation derived from Figure 4a. The direct link to this video is currently out of action. To view this video please use the \"download\" link",
-						"snapshot": false
-					},
-					{
-						"title": "Video 4: Rearrangements of the cytoplasmic domains in the transition from E1•Mg2+  E1•ATP. Cytoplasmic domains are aligned with the P7 helix and viewed approximately parallel to the membrane. Animation derived from Figure 4b.",
-						"snapshot": false
-					},
-					{
-						"title": "Supplementary Information. Supplementary Table 1 and Supplementary Figures 1-14.",
-						"mimeType": "application/pdf"
 					}
 				],
 				"itemID": "http://www.nature.com/nature/journal/v495/n7440/full/nature11899.html",
@@ -2879,22 +2713,6 @@ var testCases = [
 					},
 					{
 						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Supplementary Information. Supplementary Methods, Supplementary Notes and Supplementary References. A minor error in Supplementary Information section 2.2 was corrected on 02 June 2011.",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Supplementary Figures. Supplementary Figures 1-27 with legends.",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Supplementary Tables. Supplementary Tables 1 - 2 and 4 - 24 (see separate file for Supplementary Table 3).",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Supplementary Table 3. Supplementary Table 3.",
 						"mimeType": "application/pdf"
 					}
 				],
