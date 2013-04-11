@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-02-17 20:41:30"
+	"lastUpdated": "2013-04-05 21:36:25"
 }
 
 function detectImport() {
@@ -576,6 +576,10 @@ function processTag(item, entry) {
 			case "creators":
 				var creator = value.split(/\s*,\s*/);
 				value = {lastName: creator[0], firstName:creator[1], creatorType:zField[1]};
+				if(value.firstName === undefined) {	//corporate
+					delete value.firstName;
+					value.fieldMode = 1;
+				}
 			break;
 			case "date":
 			case "accessDate":
@@ -1356,11 +1360,13 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Editor",
-						"creatorType": "editor"
+						"creatorType": "editor",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Translator",
-						"creatorType": "translator"
+						"creatorType": "translator",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Name1",
@@ -1411,7 +1417,8 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Artist",
-						"creatorType": "artist"
+						"creatorType": "artist",
+						"fieldMode": 1
 					}
 				],
 				"notes": [
@@ -1504,7 +1511,8 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Sponsor",
-						"creatorType": "sponsor"
+						"creatorType": "sponsor",
+						"fieldMode": 1
 					}
 				],
 				"notes": [
@@ -1593,11 +1601,13 @@ var testCases = [
 					},
 					{
 						"lastName": "Editor",
-						"creatorType": "editor"
+						"creatorType": "editor",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Translator",
-						"creatorType": "translator"
+						"creatorType": "translator",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Name1",
@@ -1654,7 +1664,8 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Editor",
-						"creatorType": "editor"
+						"creatorType": "editor",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Editor",
@@ -1663,7 +1674,8 @@ var testCases = [
 					},
 					{
 						"lastName": "Translator",
-						"creatorType": "translator"
+						"creatorType": "translator",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Name1",
@@ -1720,7 +1732,8 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Counsel",
-						"creatorType": "counsel"
+						"creatorType": "counsel",
+						"fieldMode": 1
 					}
 				],
 				"notes": [
@@ -1760,7 +1773,8 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Translator",
-						"creatorType": "translator"
+						"creatorType": "translator",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Name1",
@@ -1859,11 +1873,13 @@ var testCases = [
 					},
 					{
 						"lastName": "Translator",
-						"creatorType": "translator"
+						"creatorType": "translator",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Attribution",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					}
 				],
 				"notes": [
@@ -1910,7 +1926,8 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Programmer",
-						"creatorType": "programmer"
+						"creatorType": "programmer",
+						"fieldMode": 1
 					}
 				],
 				"notes": [
@@ -1953,7 +1970,8 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Editor",
-						"creatorType": "editor"
+						"creatorType": "editor",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Name1",
@@ -2005,7 +2023,8 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Editor",
-						"creatorType": "editor"
+						"creatorType": "editor",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Editor",
@@ -2014,7 +2033,8 @@ var testCases = [
 					},
 					{
 						"lastName": "Sponsor",
-						"creatorType": "contributor"
+						"creatorType": "contributor",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Name1",
@@ -2071,7 +2091,8 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Producer",
-						"creatorType": "editor"
+						"creatorType": "editor",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Agency",
@@ -2080,7 +2101,8 @@ var testCases = [
 					},
 					{
 						"lastName": "Investigators",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					}
 				],
 				"notes": [
@@ -2119,11 +2141,13 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Editor",
-						"creatorType": "editor"
+						"creatorType": "editor",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Translator",
-						"creatorType": "translator"
+						"creatorType": "translator",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Name1",
@@ -2185,11 +2209,13 @@ var testCases = [
 					},
 					{
 						"lastName": "Translator",
-						"creatorType": "translator"
+						"creatorType": "translator",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Editor",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					}
 				],
 				"notes": [
@@ -2284,7 +2310,8 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Editor",
-						"creatorType": "seriesEditor"
+						"creatorType": "seriesEditor",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Editor",
@@ -2343,7 +2370,8 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Editor",
-						"creatorType": "editor"
+						"creatorType": "editor",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Editor",
@@ -2352,7 +2380,8 @@ var testCases = [
 					},
 					{
 						"lastName": "Translator",
-						"creatorType": "translator"
+						"creatorType": "translator",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Name1",
@@ -2409,11 +2438,13 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Editor",
-						"creatorType": "editor"
+						"creatorType": "editor",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Translator",
-						"creatorType": "translator"
+						"creatorType": "translator",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Name1",
@@ -2556,15 +2587,18 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Producer",
-						"creatorType": "producer"
+						"creatorType": "producer",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Performers",
-						"creatorType": "contributor"
+						"creatorType": "contributor",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Director",
-						"creatorType": "director"
+						"creatorType": "director",
+						"fieldMode": 1
 					}
 				],
 				"notes": [
@@ -2714,11 +2748,13 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Translator",
-						"creatorType": "translator"
+						"creatorType": "translator",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Investigators",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					}
 				],
 				"notes": [
@@ -2986,7 +3022,8 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Cartographer",
-						"creatorType": "cartographer"
+						"creatorType": "cartographer",
+						"fieldMode": 1
 					}
 				],
 				"notes": [
@@ -3031,19 +3068,23 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Editor",
-						"creatorType": "performer"
+						"creatorType": "performer",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Producer",
-						"creatorType": "translator"
+						"creatorType": "translator",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Composer",
-						"creatorType": "composer"
+						"creatorType": "composer",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Target Audience",
-						"creatorType": "wordsBy"
+						"creatorType": "wordsBy",
+						"fieldMode": 1
 					}
 				],
 				"notes": [
@@ -3089,7 +3130,8 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Reporter",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					}
 				],
 				"notes": [
@@ -3182,7 +3224,8 @@ var testCases = [
 					},
 					{
 						"lastName": "Year Cited",
-						"creatorType": "castMember"
+						"creatorType": "castMember",
+						"fieldMode": 1
 					}
 				],
 				"notes": [
@@ -3221,7 +3264,8 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Translator",
-						"creatorType": "translator"
+						"creatorType": "translator",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Name1",
@@ -3274,11 +3318,13 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Inventor",
-						"creatorType": "inventor"
+						"creatorType": "inventor",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Attorney/Agent",
-						"creatorType": "attorneyAgent"
+						"creatorType": "attorneyAgent",
+						"fieldMode": 1
 					}
 				],
 				"notes": [
@@ -3323,7 +3369,8 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Recipient",
-						"creatorType": "recipient"
+						"creatorType": "recipient",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Name1",
@@ -3373,11 +3420,13 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Publisher",
-						"creatorType": "seriesEditor"
+						"creatorType": "seriesEditor",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Department/Division",
-						"creatorType": "translator"
+						"creatorType": "translator",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Name1",
@@ -3432,7 +3481,8 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Editor",
-						"creatorType": "seriesEditor"
+						"creatorType": "seriesEditor",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Editor",
@@ -3499,7 +3549,8 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Institution",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					}
 				],
 				"notes": [
