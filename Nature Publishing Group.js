@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-02-21 13:44:33"
+	"lastUpdated": "2013-04-10 13:00:52"
 }
 
 /**
@@ -29,6 +29,167 @@
 	License along with this program. If not, see
 	<http://www.gnu.org/licenses/>.
 */
+
+//mimetype map for supplementary attachments
+var suppTypeMap = {
+	'pdf': 'application/pdf',
+	'zip': 'application/zip',
+	'doc': 'application/msword',
+	'xls': 'application/vnd.ms-excel',
+	'excel': 'application/vnd.ms-excel'
+};
+
+function attachSupplementary(doc, item, next) {
+	//nature's new website
+	var attachAsLink = Z.getHiddenPref("supplementaryAsLink");
+	var suppDiv = doc.getElementById("supplementary-information");
+	if(suppDiv) {
+		var fileClasses = ZU.xpath(suppDiv, './/div[contains(@class, "supp-info")]/h2');
+		for(var i=0, n=fileClasses.length; i<n; i++) {
+			var type = fileClasses[i].classList.item(0);
+			if(type) type = suppTypeMap[type];
+			
+			if(!fileClasses[i].nextElementSibling) continue;
+			var dls = fileClasses[i].nextElementSibling.getElementsByTagName('dl');
+			for(var j=0, m=dls.length; j<m; j++) {
+				var link = ZU.xpath(dls[j], './dt/a')[0];
+				if(!link) {
+					continue;
+				}
+	
+				var title = dls[j].getElementsByTagName('dd')[0];
+				if(title) {
+					title = title.textContent.replace(
+						/^[\s\r\n]*(?:Th(?:is|e) )?file (?:contains|shows)\s+(\S+)/i,
+						function(m, firstWord) {	//fix capitalization of first word
+							if(firstWord.toLowerCase() == firstWord) {	//lower case word
+								return firstWord.charAt(0).toUpperCase() + firstWord.substr(1);
+							}
+							return firstWord;
+						}
+					).trim();
+				}
+				
+				//add the heading from link
+				title = link.textContent.replace(/\s+\([^()]+\)\s*$/g, '').trim()	//strip off the file size info
+						+ ". " + (title || '');
+
+				//fallback if we fail miserably
+				if(!title) title = "Supplementary file";
+				
+				var attachment = {
+					title: title,
+					url: link.href
+				};
+				
+				if(type) attachment.mimeType = type;
+				if(attachAsLink || !type) {	//don't download unknown file types
+					attachment.snapshot = false;
+				}
+				
+				item.attachments.push(attachment);
+			}
+		}
+		return;
+	}
+	
+	//older websites, e.g. http://www.nature.com/onc/journal/v31/n6/full/onc2011282a.html
+	var suppLink = doc.getElementById('articlenav') || doc.getElementById('extranav');
+	if(suppLink) {
+		suppLink = ZU.xpath(suppLink, './ul/li//a[text()="Supplementary info"]')[0]; //unfortunately, this is the best we can do
+		if(!suppLink) return;
+		
+		if(attachAsLink) {	//we don't need to find links to individual files
+			item.attachments.push({
+				title: "Supplementary info",
+				url: suppLink.href,
+				mimeType: 'text/html',
+				snapshot: false
+			});
+		} else {
+			ZU.processDocuments(suppLink.href, function(newDoc) {
+				var content = newDoc.getElementById('content');
+				if(content) {
+					var links = ZU.xpath(content, './div[@class="container-supplementary" or @id="general"]//a');
+					for(var i=0, n=links.length; i<n; i++) {
+						var title = ZU.trimInternal(links[i].textContent);
+						var type = title.match(/\((\w+)\s+\d+[^)]+\)\s*$/);
+						if(type) type = suppTypeMap[type[1]];
+						if(!type) {
+							type = links[i].classList;
+							type = type.item(type.length-1);
+							if(type) type = suppTypeMap[type.replace(/^(?:i|all)-/, '')];
+						}
+						
+						//clean up title a bit
+						title = title.replace(/\s*\([^()]+\)$/, '')
+									.replace(/\s*-\s*download\b.*/i, '');
+						
+						item.attachments.push({
+							title: title,
+							url: links[i].href,
+							mimeType: type,
+							snapshot: !!type	//don't download unknown file types
+						});
+					}
+				}
+				next(doc, item);
+			});
+			return true;
+		}
+		return;
+	}
+	
+	//e.g. http://www.nature.com/ng/journal/v38/n11/full/ng1901.html
+	var suppLink = ZU.xpath(doc, '(//a[text()="Supplementary info"])[last()]')[0];
+	if(suppLink) {
+		if(attachAsLink) {	//we don't need to find links to individual files
+			item.attachments.push({
+				title: "Supplementary info",
+				url: suppLink.href,
+				mimeType: 'text/html',
+				snapshot: false
+			});
+		} else {
+			Z.debug(suppLink.href);
+			ZU.processDocuments(suppLink.href, function(newDoc) {
+				var links = ZU.xpath(newDoc, './/p[@class="articletext"]');
+				Z.debug("Found " + links.length + " links")
+				for(var i=0, n=links.length; i<n; i++) {
+					var link = links[i].getElementsByTagName('a')[0];
+					if(!link) continue;
+					
+					var title = ZU.trimInternal(link.textContent);
+					
+					var type = title.match(/\((\w+)\s+\d+[^)]+\)\s*$/);
+					if(type) type = suppTypeMap[type[1]];
+					
+					//clean up title a bit
+					title = title.replace(/\s*\([^()]+\)$/, '')
+								.replace(/\s*-\s*download\b.*/i, '');
+					
+					//maybe we can attach description to title
+					//can this be too long? I would probably make more sense to attach these as notes on the files
+					//how do we do that?
+					var desc = ZU.xpathText(links[i], './node()[last()][not(name())]');	//last text node
+					if(desc && (desc = ZU.trimInternal(desc))) {
+						title += '. ' + desc;
+					}
+					
+					item.attachments.push({
+						title: title,
+						url: links[i].href,
+						mimeType: type,
+						snapshot: !!type	//don't download unknown file types
+					});
+				}
+				next(doc, item);
+			});
+			return true;
+		}
+		return;
+	}
+}
 
 //unescape Highwire's special html characters
 function unescape(str) {
@@ -285,7 +446,7 @@ function getMultipleNodes(doc, url) {
 }
 
 function detectWeb(doc, url) {
-	if (url.match(/\/(full|abs)\/[^\/]+($|\?|#)/)) {
+	if (url.search(/\/(full|abs)\/[^\/]+($|\?|#)|\/fp\/.+?[?&]lang=ja(?:&|$)/) != -1) {
 
 		return 'journalArticle';
 
@@ -295,14 +456,14 @@ function detectWeb(doc, url) {
 		|| url.indexOf('/most.htm') != -1
 		|| (url.indexOf('/vaop/') != -1 && url.indexOf('index.html') != -1) //advanced online publication
 		|| url.indexOf('sp-q=') != -1 //search query
-		|| url.search(/journal\/v\d+\/n\d+\/index\.html/i)) { //more ToC
-		return 'multiple';
+		|| url.search(/journal\/v\d+\/n\d+\/index\.html/i) != -1) { //more ToC
+		return getMultipleNodes(doc, url)[0].length ? 'multiple' : null;
 
 	} else if (url.indexOf('/archive/') != -1) {
 		if (url.indexOf('index.htm') != -1) return false; //list of issues
 		if (url.indexOf('subject.htm') != -1) return false; //list of subjects
 		if (url.indexOf('category.htm') != -1 && url.indexOf('code=') == -1) return false; //list of categories
-		return 'multiple'; //all else should be ok
+		return getMultipleNodes(doc, url)[0].length ? 'multiple' : null; //all else should be ok
 	}
 }
 
@@ -353,27 +514,48 @@ function scrape(doc, url) {
 
 			//RIS can properly split first and last name
 			//but it does not (sometimes?) include accented letters
-			//We try to get best of both worlds
+			//We try to get best of both worlds by trying to re-split EM authors correctly
 			//hopefully the authors match up
-			for(var i=0, n=item.creators.length; i<n; i++) {
+			for(var i=0, j=0, n=item.creators.length, m=items[1].creators.length; i<n && j<m; i++, j++) {
 				//check if last names match, then we don't need to worry
+				var risLName = ZU.removeDiacritics(items[1].creators[j].lastName.toUpperCase());
 				var emLName = ZU.removeDiacritics(item.creators[i].lastName.toUpperCase());
-				var risLName = ZU.removeDiacritics(items[1].creators[i].lastName.toUpperCase());
-				if(emLName == risLName ||
-					!item.creators[i].firstName ||
-					!items[1].creators[i].firstName ||
-					risLName.length <= emLName.length) {	//in this case the names are probably not the same anyway
+				if(emLName == risLName) {
 					continue;
 				}
 
 				var fullName = item.creators[i].firstName + ' ' + item.creators[i].lastName;
 				emLName = fullName.substring(fullName.length - risLName.length);
 				if(ZU.removeDiacritics(emLName.toUpperCase()) != risLName) {
+					//corporate authors are sometimes skipped in RIS
+					if(i+1<n) {
+						var nextEMLName = item.creators[i+1].firstName + ' '
+							+ item.creators[i+1].lastName;
+						nextEMLName = ZU.removeDiacritics(
+							nextEMLName.substring(nextEMLName.length - risLName.length)
+								.toUpperCase()
+						);
+						if(nextEMLName == risLName) { //this is corporate author and it was skipped in RIS
+							item.creators[i].lastName = item.creators[i].firstName
+								+ ' ' + item.creators[i].lastName;
+							delete item.creators[i].firstName;
+							item.creators[i].fieldMode = 1;
+							j--;
+							Z.debug('It appears that "' + item.creators[i].lastName
+								+ '" is a corporate author and was skipped in the RIS output.');
+							continue;
+						}
+					}
+					
 					Z.debug(emLName + ' and ' + risLName + ' do not match');
 					continue; //we failed
 				}
 
-				item.creators[i].firstName = fullName.substring(0, fullName.length - emLName.length).trim();
+				if(items[1].creators[j].fieldMode !== 1) {
+					item.creators[i].firstName = fullName.substring(0, fullName.length - emLName.length).trim();
+				} else {
+					item.creators[i].fieldMode = 1;
+				}
 				item.creators[i].lastName = emLName;
 
 				Z.debug(fullName + ' was split into ' +
@@ -403,8 +585,50 @@ function scrape(doc, url) {
 				mimeType: 'application/pdf'
 			});
 		}
-
-		item.complete();
+		
+		//attach some useful links, like...
+		//GEO, GenBank, etc.
+		try {	//this shouldn't really fail, but... just in case
+			var accessionDiv = doc.getElementById('accessions');
+			if(accessionDiv) {
+				var accessions = ZU.xpath(accessionDiv, './/div[@class="content"]//div[./h3]');
+				var repo, links;
+				for(var i=0, n=accessions.length; i<n; i++) {
+					repo = accessions[i].getElementsByTagName('h3')[0].textContent;
+					if(repo) repo += ' entry ';
+					links = ZU.xpath(accessions[i], './ul[1]//a');
+					if(links.length) {
+						for(var j=0, m=links.length; j<m; j++) {
+							item.attachments.push({
+								title: repo + '(' + links[j].textContent + ')',
+								url: links[j].href,
+								type: 'text/html',
+								snapshot: false
+							});
+						}
+					}
+				}
+			}
+		} catch(e) {
+			Z.debug("Error attaching useful links.");
+			Z.debug(e);
+		}
+		
+		//attach supplementary data
+		if(Z.getHiddenPref && Z.getHiddenPref("attachSupplementary")) {
+			try {	//don't fail if we can't attach supplementary data
+				var async = attachSupplementary(doc, item, function(doc, item) { item.complete() });
+			} catch(e) {
+				Z.debug("Error attaching supplementary information.")
+				Z.debug(e);
+				if(async) item.complete();
+			}
+			if(!async) {
+				item.complete();
+			}
+		} else {
+			item.complete();
+		}
 	}, doc, url);
 }
 
@@ -878,14 +1102,14 @@ var testCases = [
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
 				"date": "February 9, 2012",
-				"ISSN": "0950-9232",
 				"language": "en",
 				"DOI": "10.1038/onc.2011.282",
 				"abstractNote": "Identification and characterization of cancer stem cells (CSCs) in gastric cancer are difficult owing to the lack of specific markers and consensus methods. In this study, we show that cells with the CD90 surface marker in gastric tumors could be enriched under non-adherent, serum-free and sphere-forming conditions. These CD90+ cells possess a higher ability to initiate tumor in vivo and could re-establish the cellular hierarchy of tumors from single-cell implantation, demonstrating their self-renewal properties. Interestingly, higher proportion of CD90+ cells correlates with higher in vivo tumorigenicity of gastric primary tumor models. In addition, it was found that ERBB2 was overexpressed in about 25% of the gastric primary tumor models, which correlates with the higher level of CD90 expression in these tumors. Trastuzumab (humanized anti-ERBB2 antibody) treatment of high-tumorigenic gastric primary tumor models could reduce the CD90+ population in tumor mass and suppress tumor growth when combined with traditional chemotherapy. Moreover, tumorigenicity of tumor cells could also be suppressed when trastuzumab treatment starts at the same time as cell implantation. Therefore, we have identified a CSC population in gastric primary tumors characterized by their CD90 phenotype. The finding that trastuzumab targets the CSC population in gastric tumors suggests that ERBB2 signaling has a role in maintaining CSC populations, thus contributing to carcinogenesis and tumor invasion. In conclusion, the results from this study provide new insights into the gastric tumorigenic process and offer potential implications for the development of anticancer drugs as well as therapeutic treatment of gastric cancers.",
 				"url": "http://www.nature.com/onc/journal/v31/n6/full/onc2011282a.html",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.nature.com",
-				"journalAbbreviation": "Oncogene"
+				"journalAbbreviation": "Oncogene",
+				"ISSN": "0950-9232"
 			}
 		]
 	},
@@ -1089,7 +1313,6 @@ var testCases = [
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
 				"date": "January 19, 2012",
-				"ISSN": "0028-0836",
 				"language": "en",
 				"issue": "7381",
 				"DOI": "10.1038/nature10669",
@@ -1097,7 +1320,8 @@ var testCases = [
 				"url": "http://www.nature.com/nature/journal/v481/n7381/full/nature10669.html",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.nature.com",
-				"journalAbbreviation": "Nature"
+				"journalAbbreviation": "Nature",
+				"ISSN": "0028-0836"
 			}
 		]
 	},
@@ -1203,7 +1427,6 @@ var testCases = [
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
 				"date": "January 19, 2012",
-				"ISSN": "0028-0836",
 				"language": "en",
 				"issue": "7381",
 				"DOI": "10.1038/nature10728",
@@ -1211,7 +1434,8 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.nature.com",
 				"abstractNote": "Histone deacetylase enzymes (HDACs) are emerging cancer drug targets. They regulate gene expression by removing acetyl groups from lysine residues in histone tails, resulting in chromatin condensation. The enzymatic activity of most class I HDACs requires recruitment into multi-subunit co-repressor complexes, which are in turn recruited to chromatin by repressive transcription factors. Here we report the structure of a complex between an HDAC and a co-repressor, namely, human HDAC3 with the deacetylase activation domain (DAD) from the human SMRT co-repressor (also known as NCOR2). The structure reveals two remarkable features. First, the SMRT-DAD undergoes a large structural rearrangement on forming the complex. Second, there is an essential inositol tetraphosphate molecule—d-myo-inositol-(1,4,5,6)-tetrakisphosphate (Ins(1,4,5,6)P4)—acting as an ‘intermolecular glue’ between the two proteins. Assembly of the complex is clearly dependent on the Ins(1,4,5,6)P4, which may act as a regulator—potentially explaining why inositol phosphates and their kinases have been found to act as transcriptional regulators. This mechanism for the activation of HDAC3 appears to be conserved in class I HDACs from yeast to humans, and opens the way to novel therapeutic opportunities.",
-				"journalAbbreviation": "Nature"
+				"journalAbbreviation": "Nature",
+				"ISSN": "0028-0836"
 			}
 		]
 	},
@@ -1643,14 +1867,14 @@ var testCases = [
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
 				"date": "November 5, 2009",
-				"ISSN": "0028-0836",
 				"language": "en",
 				"DOI": "10.1038/nature08497",
 				"abstractNote": "Genomes are organized into high-level three-dimensional structures, and DNA elements separated by long genomic distances can in principle interact functionally. Many transcription factors bind to regulatory DNA elements distant from gene promoters. Although distal binding sites have been shown to regulate transcription by long-range chromatin interactions at a few loci, chromatin interactions and their impact on transcription regulation have not been investigated in a genome-wide manner. Here we describe the development of a new strategy, chromatin interaction analysis by paired-end tag sequencing (ChIA-PET) for the de novo detection of global chromatin interactions, with which we have comprehensively mapped the chromatin interaction network bound by oestrogen receptor α (ER-α) in the human genome. We found that most high-confidence remote ER-α-binding sites are anchored at gene promoters through long-range chromatin interactions, suggesting that ER-α functions by extensive chromatin looping to bring genes together for coordinated transcriptional regulation. We propose that chromatin interactions constitute a primary mechanism for regulating transcription in mammalian genomes.",
 				"url": "http://www.nature.com/nature/journal/v462/n7269/full/nature08497.html",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.nature.com",
-				"journalAbbreviation": "Nature"
+				"journalAbbreviation": "Nature",
+				"ISSN": "0028-0836"
 			}
 		]
 	},
@@ -1755,14 +1979,14 @@ var testCases = [
 				"label": "Nature Publishing Group",
 				"distributor": "Nature Publishing Group",
 				"date": "February 2008",
-				"ISSN": "1545-9993",
 				"language": "en",
 				"DOI": "10.1038/nsmb.1371",
 				"abstractNote": "In bacteria, numerous genes harbor regulatory elements in the 5' untranslated regions of their mRNA, termed riboswitches, which control gene expression by binding small-molecule metabolites. These sequences influence the secondary and tertiary structure of the RNA in a ligand-dependent manner, thereby directing its transcription or translation. The crystal structure of an S-adenosylmethionine–responsive riboswitch found predominantly in proteobacteria, SAM-II, has been solved to reveal a second means by which RNA interacts with this important cellular metabolite. Notably, this is the first structure of a complete riboswitch containing all sequences associated with both the ligand binding aptamer domain and the regulatory expression platform. Chemical probing of this RNA in the absence and presence of ligand shows how the structure changes in response to S-adenosylmethionine to sequester the ribosomal binding site and affect translational gene regulation.",
 				"url": "http://www.nature.com/nsmb/journal/v15/n2/full/nsmb.1371.html",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.nature.com",
-				"journalAbbreviation": "Nat Struct Mol Biol"
+				"journalAbbreviation": "Nat Struct Mol Biol",
+				"ISSN": "1545-9993"
 			}
 		]
 	},
@@ -1780,6 +2004,741 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.nature.com/bonekey/archive/type.html",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.nature.com/emboj/journal/v32/n5/full/emboj2012357a.html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Rachel",
+						"lastName": "Deplus",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Benjamin",
+						"lastName": "Delatte",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marie K.",
+						"lastName": "Schwinn",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Matthieu",
+						"lastName": "Defrance",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jacqui",
+						"lastName": "Méndez",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nancy",
+						"lastName": "Murphy",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Mark A.",
+						"lastName": "Dawson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael",
+						"lastName": "Volkmar",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Pascale",
+						"lastName": "Putmans",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Emilie",
+						"lastName": "Calonne",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alan H.",
+						"lastName": "Shih",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ross L.",
+						"lastName": "Levine",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Olivier",
+						"lastName": "Bernard",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Thomas",
+						"lastName": "Mercher",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Eric",
+						"lastName": "Solary",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marjeta",
+						"lastName": "Urh",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Danette L.",
+						"lastName": "Daniels",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "François",
+						"lastName": "Fuks",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"chromatin",
+					"epigenetics",
+					"TET proteins"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"itemID": "http://www.nature.com/emboj/journal/v32/n5/full/emboj2012357a.html",
+				"title": "TET2 and TET3 regulate GlcNAcylation and H3K4 methylation through OGT and SET1/COMPASS",
+				"publicationTitle": "The EMBO Journal",
+				"rights": "© 2013 Nature Publishing Group",
+				"volume": "32",
+				"issue": "5",
+				"number": "5",
+				"patentNumber": "5",
+				"pages": "645-655",
+				"publisher": "Nature Publishing Group",
+				"institution": "Nature Publishing Group",
+				"company": "Nature Publishing Group",
+				"label": "Nature Publishing Group",
+				"distributor": "Nature Publishing Group",
+				"date": "March 6, 2013",
+				"language": "en",
+				"DOI": "10.1038/emboj.2012.357",
+				"abstractNote": "TET proteins convert 5-methylcytosine to 5-hydroxymethylcytosine, an emerging dynamic epigenetic state of DNA that can influence transcription. Evidence has linked TET1 function to epigenetic repression complexes, yet mechanistic information, especially for the TET2 and TET3 proteins, remains limited. Here, we show a direct interaction of TET2 and TET3 with O-GlcNAc transferase (OGT). OGT does not appear to influence hmC activity, rather TET2 and TET3 promote OGT activity. TET2/3–OGT co-localize on chromatin at active promoters enriched for H3K4me3 and reduction of either TET2/3 or OGT activity results in a direct decrease in H3K4me3 and concomitant decreased transcription. Further, we show that Host Cell Factor 1 (HCF1), a component of the H3K4 methyltransferase SET1/COMPASS complex, is a specific GlcNAcylation target of TET2/3–OGT, and modification of HCF1 is important for the integrity of SET1/COMPASS. Additionally, we find both TET proteins and OGT activity promote binding of the SET1/COMPASS H3K4 methyltransferase, SETD1A, to chromatin. Finally, studies in Tet2 knockout mouse bone marrow tissue extend and support the data as decreases are observed of global GlcNAcylation and also of H3K4me3, notably at several key regulators of haematopoiesis. Together, our results unveil a step-wise model, involving TET–OGT interactions, promotion of GlcNAcylation, and influence on H3K4me3 via SET1/COMPASS, highlighting a novel means by which TETs may induce transcriptional activation.",
+				"url": "http://www.nature.com/emboj/journal/v32/n5/full/emboj2012357a.html",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.nature.com",
+				"journalAbbreviation": "EMBO J",
+				"ISSN": "0261-4189"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.nature.com/nature/journal/v481/n7381/fp/nature10669_ja.html?lang=ja",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "S.",
+						"lastName": "Vegetti",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "D. J.",
+						"lastName": "Lagattuta",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "J. P.",
+						"lastName": "McKean",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "M. W.",
+						"lastName": "Auger",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "C. D.",
+						"lastName": "Fassnacht",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "L. V. E.",
+						"lastName": "Koopmans",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Nature",
+					"science",
+					"science news",
+					"biology",
+					"physics",
+					"genetics",
+					"astronomy",
+					"astrophysics",
+					"quantum physics",
+					"evolution",
+					"evolutionary biology",
+					"geophysics",
+					"climate change",
+					"earth science",
+					"materials science",
+					"interdisciplinary science",
+					"science policy",
+					"medicine",
+					"systems biology",
+					"genomics",
+					"transcriptomics",
+					"palaeobiology",
+					"ecology",
+					"molecular biology",
+					"cancer",
+					"immunology",
+					"pharmacology",
+					"development",
+					"developmental biology",
+					"structural biology",
+					"biochemistry",
+					"bioinformatics",
+					"computational biology",
+					"nanotechnology",
+					"proteomics",
+					"metabolomics",
+					"biotechnology",
+					"drug discovery",
+					"environmental science",
+					"life",
+					"marine biology",
+					"medical research",
+					"neuroscience",
+					"neurobiology",
+					"functional genomics",
+					"molecular interactions",
+					"RNA",
+					"DNA",
+					"cell cycle",
+					"signal transduction",
+					"cell signalling."
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"itemID": "http://www.nature.com/nature/journal/v481/n7381/fp/nature10669_ja.html?lang=ja",
+				"title": "Gravitational detection of a low-mass dark satellite galaxy at cosmological distance",
+				"publicationTitle": "Nature",
+				"rights": "© 2012 Nature Publishing Group",
+				"volume": "481",
+				"issue": "7381",
+				"number": "7381",
+				"patentNumber": "7381",
+				"pages": "341-343",
+				"publisher": "Nature Publishing Group",
+				"institution": "Nature Publishing Group",
+				"company": "Nature Publishing Group",
+				"label": "Nature Publishing Group",
+				"distributor": "Nature Publishing Group",
+				"date": "2012-01-18",
+				"language": "en",
+				"DOI": "10.1038/nature10669",
+				"abstractNote": "The mass function of dwarf satellite galaxies that are observed around Local Group galaxies differs substantially from simulations based on cold dark matter: the simulations predict many more dwarf galaxies than are seen. The Local Group, however, may be anomalous in this regard.",
+				"url": "http://www.nature.com/nature/journal/v481/n7381/fp/nature10669_ja.html?lang=ja",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.nature.com"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.nature.com/nature/journal/v495/n7440/full/nature11968.html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Robert J.",
+						"lastName": "Schmitz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Matthew D.",
+						"lastName": "Schultz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Mark A.",
+						"lastName": "Urich",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Joseph R.",
+						"lastName": "Nery",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Mattia",
+						"lastName": "Pelizzola",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ondrej",
+						"lastName": "Libiger",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Andrew",
+						"lastName": "Alix",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Richard B.",
+						"lastName": "McCosh",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Huaming",
+						"lastName": "Chen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nicholas J.",
+						"lastName": "Schork",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Joseph R.",
+						"lastName": "Ecker",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Epigenomics"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Gene Expression Omnibus entry (GSE43857)",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Gene Expression Omnibus entry (GSE43858)",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Sequence Read Archive entry (SRA012474)",
+						"type": "text/html",
+						"snapshot": false
+					}
+				],
+				"itemID": "http://www.nature.com/nature/journal/v495/n7440/full/nature11968.html",
+				"title": "Patterns of population epigenomic diversity",
+				"publicationTitle": "Nature",
+				"rights": "© 2013 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
+				"volume": "495",
+				"pages": "193-198",
+				"publisher": "Nature Publishing Group",
+				"institution": "Nature Publishing Group",
+				"company": "Nature Publishing Group",
+				"label": "Nature Publishing Group",
+				"distributor": "Nature Publishing Group",
+				"date": "March 14, 2013",
+				"language": "en",
+				"issue": "7440",
+				"DOI": "10.1038/nature11968",
+				"url": "http://www.nature.com/nature/journal/v495/n7440/full/nature11968.html",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.nature.com",
+				"abstractNote": "Natural epigenetic variation provides a source for the generation of phenotypic diversity, but to understand its contribution to such diversity, its interaction with genetic variation requires further investigation. Here we report population-wide DNA sequencing of genomes, transcriptomes and methylomes of wild Arabidopsis thaliana accessions. Single cytosine methylation polymorphisms are not linked to genotype. However, the rate of linkage disequilibrium decay amongst differentially methylated regions targeted by RNA-directed DNA methylation is similar to the rate for single nucleotide polymorphisms. Association analyses of these RNA-directed DNA methylation regions with genetic variants identified thousands of methylation quantitative trait loci, which revealed the population estimate of genetically dependent methylation variation. Analysis of invariably methylated transposons and genes across this population indicates that loci targeted by RNA-directed DNA methylation are epigenetically activated in pollen and seeds, which facilitates proper development of these structures.",
+				"journalAbbreviation": "Nature",
+				"ISSN": "0028-0836"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.nature.com/nature/journal/v495/n7440/full/nature11899.html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Chikashi",
+						"lastName": "Toyoshima",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Shiho",
+						"lastName": "Iwasawa",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Haruo",
+						"lastName": "Ogawa",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ayami",
+						"lastName": "Hirata",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Junko",
+						"lastName": "Tsueda",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Giuseppe",
+						"lastName": "Inesi",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"X-ray crystallography"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Protein Data Bank entry (3W5D)",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Protein Data Bank entry (3W5C)",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Protein Data Bank entry (3W5A)",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Protein Data Bank entry (3W5B)",
+						"type": "text/html",
+						"snapshot": false
+					}
+				],
+				"itemID": "http://www.nature.com/nature/journal/v495/n7440/full/nature11899.html",
+				"title": "Crystal structures of the calcium pump and sarcolipin in the Mg2+-bound E1 state",
+				"publicationTitle": "Nature",
+				"rights": "© 2013 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
+				"volume": "495",
+				"pages": "260-264",
+				"publisher": "Nature Publishing Group",
+				"institution": "Nature Publishing Group",
+				"company": "Nature Publishing Group",
+				"label": "Nature Publishing Group",
+				"distributor": "Nature Publishing Group",
+				"date": "March 14, 2013",
+				"language": "en",
+				"issue": "7440",
+				"DOI": "10.1038/nature11899",
+				"abstractNote": "P-type ATPases are ATP-powered ion pumps that establish ion concentration gradients across biological membranes, and are distinct from other ATPases in that the reaction cycle includes an autophosphorylation step. The best studied is Ca2+-ATPase from muscle sarcoplasmic reticulum (SERCA1a), a Ca2+ pump that relaxes muscle cells after contraction, and crystal structures have been determined for most of the reaction intermediates. An important outstanding structure is that of the E1 intermediate, which has empty high-affinity Ca2+-binding sites ready to accept new cytosolic Ca2+. In the absence of Ca2+ and at pH 7 or higher, the ATPase is predominantly in E1, not in E2 (low affinity for Ca2+), and if millimolar Mg2+ is present, one Mg2+ is expected to occupy one of the Ca2+-binding sites with a millimolar dissociation constant. This Mg2+ accelerates the reaction cycle, not permitting phosphorylation without Ca2+ binding. Here we describe the crystal structure of native SERCA1a (from rabbit) in this E1·Mg2+ state at 3.0 Å resolution in addition to crystal structures of SERCA1a in E2 free from exogenous inhibitors, and address the structural basis of the activation signal for phosphoryl transfer. Unexpectedly, sarcolipin, a small regulatory membrane protein of Ca2+-ATPase, is bound, stabilizing the E1·Mg2+ state. Sarcolipin is a close homologue of phospholamban, which is a critical mediator of β-adrenergic signal in Ca2+ regulation in heart (for reviews, see, for example, refs 8–10), and seems to play an important role in muscle-based thermogenesis. We also determined the crystal structure of recombinant SERCA1a devoid of sarcolipin, and describe the structural basis of inhibition by sarcolipin/phospholamban. Thus, the crystal structures reported here fill a gap in the structural elucidation of the reaction cycle and provide a solid basis for understanding the physiological regulation of the calcium pump.",
+				"url": "http://www.nature.com/nature/journal/v495/n7440/full/nature11899.html",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.nature.com",
+				"journalAbbreviation": "Nature",
+				"ISSN": "0028-0836"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.nature.com/nature/journal/v473/n7346/full/nature09944.html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Manimozhiyan",
+						"lastName": "Arumugam",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jeroen",
+						"lastName": "Raes",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Eric",
+						"lastName": "Pelletier",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Denis",
+						"lastName": "Le Paslier",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Takuji",
+						"lastName": "Yamada",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Daniel R.",
+						"lastName": "Mende",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Gabriel R.",
+						"lastName": "Fernandes",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Julien",
+						"lastName": "Tap",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Thomas",
+						"lastName": "Bruls",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jean-Michel",
+						"lastName": "Batto",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marcelo",
+						"lastName": "Bertalan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Natalia",
+						"lastName": "Borruel",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Francesc",
+						"lastName": "Casellas",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Leyden",
+						"lastName": "Fernandez",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Laurent",
+						"lastName": "Gautier",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Torben",
+						"lastName": "Hansen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Masahira",
+						"lastName": "Hattori",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tetsuya",
+						"lastName": "Hayashi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michiel",
+						"lastName": "Kleerebezem",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ken",
+						"lastName": "Kurokawa",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marion",
+						"lastName": "Leclerc",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Florence",
+						"lastName": "Levenez",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Chaysavanh",
+						"lastName": "Manichanh",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "H. Bjørn",
+						"lastName": "Nielsen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Trine",
+						"lastName": "Nielsen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nicolas",
+						"lastName": "Pons",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Julie",
+						"lastName": "Poulain",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Junjie",
+						"lastName": "Qin",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Thomas",
+						"lastName": "Sicheritz-Ponten",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sebastian",
+						"lastName": "Tims",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "David",
+						"lastName": "Torrents",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Edgardo",
+						"lastName": "Ugarte",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Erwin G.",
+						"lastName": "Zoetendal",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jun",
+						"lastName": "Wang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Francisco",
+						"lastName": "Guarner",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Oluf",
+						"lastName": "Pedersen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Willem M.",
+						"lastName": "de Vos",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Søren",
+						"lastName": "Brunak",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Joel",
+						"lastName": "Doré",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "MetaHIT Consortium (additional Members)",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"firstName": "Jean",
+						"lastName": "Weissenbach",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "S. Dusko",
+						"lastName": "Ehrlich",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Peer",
+						"lastName": "Bork",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Genetics and genomics"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"itemID": "http://www.nature.com/nature/journal/v473/n7346/full/nature09944.html",
+				"title": "Enterotypes of the human gut microbiome",
+				"publicationTitle": "Nature",
+				"rights": "© 2011 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
+				"volume": "473",
+				"pages": "174-180",
+				"publisher": "Nature Publishing Group",
+				"institution": "Nature Publishing Group",
+				"company": "Nature Publishing Group",
+				"label": "Nature Publishing Group",
+				"distributor": "Nature Publishing Group",
+				"date": "May 12, 2011",
+				"language": "en",
+				"issue": "7346",
+				"DOI": "10.1038/nature09944",
+				"url": "http://www.nature.com/nature/journal/v473/n7346/full/nature09944.html",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.nature.com",
+				"abstractNote": "Our knowledge of species and functional composition of the human gut microbiome is rapidly increasing, but it is still based on very few cohorts and little is known about variation across the world. By combining 22 newly sequenced faecal metagenomes of individuals from four countries with previously published data sets, here we identify three robust clusters (referred to as enterotypes hereafter) that are not nation or continent specific. We also confirmed the enterotypes in two published, larger cohorts, indicating that intestinal microbiota variation is generally stratified, not continuous. This indicates further the existence of a limited number of well-balanced host–microbial symbiotic states that might respond differently to diet and drug intake. The enterotypes are mostly driven by species composition, but abundant molecular functions are not necessarily provided by abundant species, highlighting the importance of a functional analysis to understand microbial communities. Although individual host properties such as body mass index, age, or gender cannot explain the observed enterotypes, data-driven marker genes or functional modules can be identified for each of these host properties. For example, twelve genes significantly correlate with age and three functional modules with the body mass index, hinting at a diagnostic potential of microbial markers.",
+				"journalAbbreviation": "Nature",
+				"ISSN": "0028-0836"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
