@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-04-11 09:40:24"
+	"lastUpdated": "2013-04-11 11:57:40"
 }
 
 /**
@@ -154,7 +154,7 @@ function doSearch(item) {
 		//we take the first search result and run scrape on it
 		if (doc.evaluate('//div[@class="name"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) { //search results view
 			var article = ZU.xpathText(doc, '(//div[@class="name"]/a)[1]/@href')
-			if (!article) Zotero.done(false);
+			if (!article){Zotero.done(false); return false;}
 			article = "http://www.worldcat.org" + article;
 			ZU.processDocuments(article, function(doc, url) { scrape(doc, url, true); });
 		} else {
