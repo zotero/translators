@@ -2,23 +2,22 @@
 	"translatorID": "d9be934c-edb9-490c-a88d-34e2ee106cd7",
 	"label": "Time.com",
 	"creator": "Michael Berkowitz",
-	"target": "^https?://[^/]*time\\.com/",
+	"target": "^https?://[^/]*\\.time\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-10-26 17:03:50"
+	"lastUpdated": "2013-04-11 11:55:53"
 }
 
 function detectWeb(doc, url) {
-	/* Disabled because Time.com searches use search.time.com, which means
-		links are not accessible.
+
 	if (url.indexOf('results.html') != -1) {
 		return "multiple";
-	} else */
-	if (url.search(/\/article\/|\d{4}\/\d{2}\/\d{2}\/./)) {
+	} else 
+	if (url.search(/\/article\/|\d{4}\/\d{2}\/\d{2}\/./)!=-1) {
 		return "magazineArticle";
 	}
 }
@@ -82,13 +81,7 @@ function scrape(doc, url) {
 function doWeb(doc, url) {
 	var urls = new Array();
 	if (detectWeb(doc, url) == 'multiple') {
-		var origin = doc.location.protocol + '//' + doc.location.host +
-			( (doc.location.port) ? ':' + doc.location.port : '' ) + '/';
-
-		var items = ZU.getItemArray(doc, doc.getElementsByTagName("h3"),
-				//SOP checking
-				'(?:^' + origin + '.*\.html$|^/)', 'covers');
-
+		var items = ZU.getItemArray(doc, doc.getElementsByTagName("h3"));
 		Zotero.selectItems(items, function(selectedItems) {
 			if (!selectedItems) return true;
 		
@@ -96,9 +89,8 @@ function doWeb(doc, url) {
 			for (var i in selectedItems) {
 					urls.push(i);
 			}
-			ZU.processDocuments(urls, function(newDoc) {
-				scrape(newDoc, newDoc.location.href);
-			});
+			Z.debug(urls)
+			ZU.processDocuments(urls, scrape);
 		});
 	} else {
 		scrape(doc, url);
@@ -279,6 +271,11 @@ var testCases = [
 				"ISSN": "0040-718X"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://search.time.com/results.html?Ntt=labor&N=0&Nty=1&p=0&cmd=tags",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
