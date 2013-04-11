@@ -118,7 +118,7 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "www.annee-philologique.com/aph/index.php?do=uneNotice&id=31-02979",
+		"url": "http://www.annee-philologique.com/aph/index.php?do=uneNotice&id=31-02979",
 		"items": [
 			{
 				"itemType": "book",
