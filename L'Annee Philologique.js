@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-03-30 13:44:21"
+	"lastUpdated": "2013-04-15 00:58:32"
 }
 
 /*
@@ -95,10 +95,11 @@ function scrape(doc, url) {
 				if (!item.creators[i].firstName) {
 					var author;
 					//Assume the first word is the last Name - that's the best we can do here
-					var author = item.creators[i].lastName.match(/(\S+)(\s.+)/)
-					if (author[2]) {
-						item.creators[i].firstName = author[2]
-						item.creators[i].lastName = author[1]
+					var author = item.creators[i].lastName.match(/(\S+)\s+(.+)/)
+					if (author) {
+						item.creators[i].firstName = author[2];
+						item.creators[i].lastName = author[1];
+						delete item.creators[i].fieldMode;
 					}
 				}
 			}

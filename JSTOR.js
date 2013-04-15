@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-04-09 00:50:29"
+	"lastUpdated": "2013-04-15 00:57:22"
 }
 
 function detectWeb(doc, url) {
@@ -152,9 +152,10 @@ function first(set, next) {
 			var m;
 			for(var i=0, n=item.creators.length; i<n; i++) {
 				if(!item.creators[i].firstName
-					&& (m = item.creators[i].lastName.match(/^(.+?)\s(\S+)$/))) {
+					&& (m = item.creators[i].lastName.match(/^(.+?)\s+(\S+)$/))) {
 					item.creators[i].firstName = m[1];
 					item.creators[i].lastName = m[2];
+					delete item.creators[i].fieldMode;
 				}
 			}
 				if(item.notes && item.notes[0]) {
