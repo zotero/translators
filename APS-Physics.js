@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsib",
-	"lastUpdated": "2013-01-09 15:36:32"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2013-04-15 18:04:37"
 }
 
 // Works for APS Physics Viewpoints and Focus articles: http://physics.aps.org/

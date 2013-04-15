@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsb",
-	"lastUpdated": "2013-02-07 00:16:13"
+	"browserSupport": "gcsbv",
+	"lastUpdated": "2013-04-15 18:04:37"
 }
 
 var typeMap = {
