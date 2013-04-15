@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-10-17 10:15:26"
+	"lastUpdated": "2013-04-14 20:39:21"
 }
 
 /*
@@ -75,11 +75,13 @@ function parseRIS(url) {
 		//gale puts issue numbers in M1
 		text = text.replace(/M1\s*\-/, "IS  -");
 		//get the LA tag content until we introduce this in the RIS translator
+		//Z.debug(text)
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
 			//make sure the attachment URL gets proxied
+			item.attachments.push({url: item.url, title: "Full Text (HTML)", mimeType: "text/html",})
 			for (i in item.attachments) {
 				item.attachments[i].url = item.attachments[i].url.replace(/^https?:\/\/.+?\//, host);
 			}
@@ -176,7 +178,8 @@ var testCases = [
 				"language": "English",
 				"libraryCatalog": "Gale",
 				"archive": "Literature Resources from Gale",
-				"shortTitle": "Borges"
+				"shortTitle": "Borges",
+				"url": "http://go.galegroup.com/ps/i.do?id=GALE%7CH1420025063&v=2.1&u=viva_gmu&it=r&p=LitRG&sw=w"
 			}
 		]
 	},

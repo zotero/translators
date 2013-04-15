@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-10-08 20:50:41"
+	"lastUpdated": "2013-04-14 21:05:10"
 }
 
 /*
@@ -56,7 +56,7 @@ function doWeb(doc, url) {
 	//Z.debug("ibex doWeb URL = " + url);
 	var urls = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		var items = ZU.getItemArray(doc, doc.getElementById('content-left').getElementsByClassName('field field-title'), 'http://.+/.+');
+		var items = ZU.getItemArray(doc, doc.getElementsByClassName('field field-title'), 'http://.+/.+');
 		if (!items || countObjectProperties(items) == 0) {
 			return true;
 		}
@@ -73,10 +73,7 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				urls.push(i);
 			}
-			Zotero.Utilities.processDocuments(urls, scrape, function () {
-				Zotero.done();
-			});
-			Zotero.wait();	
+			Zotero.Utilities.processDocuments(urls, scrape);	
 		});	
 	} else {
 	 scrape(doc, url);
@@ -100,7 +97,7 @@ function scrape(doc) {
 		newItem.abstractNote = ZU.trimInternal(abstract[0].textContent);
 	}
 
-	var date = ZU.xpath(doc, '//div[' + containingClass('node-type-article') + ']//div[' + containingClass('field-publish-date') + ']');
+	var date = ZU.xpath(doc, '//div[' + containingClass('node-type-article') + ']//div[' + containingClass('field-publish-date') + ' or ' + containingClass('field-update-info') + ']');
 	if (date.length > 0) {
 		newItem.date = ZU.trimInternal(date[0].textContent.replace(/|.*$/, ''));
 	}
@@ -122,6 +119,7 @@ function scrape(doc) {
 	if (section.length > 0) {
 		newItem.section = ZU.trimInternal(section[0].textContent);
 	}
+	else newItem.section = ZU.xpathText(doc, '//div[@class="menu-content"]//li[contains(@class, "expanded")]/a')
 
 	// Use the CSS media print stylesheet for the snapshot.
 	switchDomMediaPrint(doc);
@@ -229,16 +227,13 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Handelszeitung Article Snapshot",
-						"document": {
-							"location": {}
-						}
+						"title": "Handelszeitung Article Snapshot"
 					}
 				],
 				"url": "http://www.handelszeitung.ch/unternehmen/google-kauft-daily-deal",
 				"title": "Google kauft Daily Deal",
 				"abstractNote": "Gutscheine für Google: Der Online-Riese hat das Portal Daily Deal übernommen. Das Unternehmen verkauft in der Schweiz, in Deutschland und in Österreich Rabattgutscheine im Internet.",
-				"date": "19.09.2011 | 14:01",
+				"date": "19.09.2011",
 				"publicationTitle": "Handelszeitung",
 				"ISSN": "1422-8971",
 				"language": "de",

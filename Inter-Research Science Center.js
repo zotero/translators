@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-01-30 22:48:13"
+	"lastUpdated": "2013-04-14 21:10:24"
 }
 
 function detectWeb(doc, url) {
@@ -64,15 +64,21 @@ function doWeb(doc, url) {
 				items[link.href] = names.shift();
 			}
 		}
-		
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			arts.push(i);
-		}
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				arts.push(i);
+			}
+			Zotero.Utilities.processDocuments(arts, scrape);	
+		});
 	} else {
-		arts = [url];
+		scrape(doc, url)
 	}
-	Zotero.Utilities.processDocuments(arts, function(doc) {
+}	
+	
+function scrape(doc, url){
 		var item = new Zotero.Item("journalArticle");
 		item.title = Zotero.Utilities.trimInternal(doc.evaluate('//div[@class="bb"]/h2', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 		item.url = doc.location.href;
@@ -90,7 +96,7 @@ function doWeb(doc, url) {
 			item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
 		}
 		item.date = doc.evaluate('//div[@class="abs-footer"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/date:\s+(.*)/)[1];
-		item.DOI = Zotero.Utilities.trimInternal(doc.evaluate('//h1[@class="csc-firstHeader"]/span', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent).match(/doi:\s*(.*)/)[1];
+		item.DOI = Zotero.Utilities.trimInternal(doc.evaluate('//h1[@class="csc-secondHeader"]/span', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent).match(/doi:\s*(.*)/)[1];
 		var tags = doc.evaluate('//div[@class="box"]/p/a', doc, null, XPathResult.ANY_TYPE, null);
 		var tag;
 		while (tag = tags.iterateNext()) {
@@ -102,10 +108,7 @@ function doWeb(doc, url) {
 			{url:pdfurl, title:item.publicationTitle + " Full Text PDF", mimeType:"application/pdf"}
 		];
 		item.complete();
-	}, function() {Zotero.done();});
-	Zotero.wait();
-}
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",

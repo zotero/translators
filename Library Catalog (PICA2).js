@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-04-06 16:39:57"
+	"lastUpdated": "2013-04-14 21:18:46"
 }
 
 /*
@@ -249,7 +249,7 @@ var testCases = [
 					}
 				],
 				"notes": [
-					"Bestand: Universität des Saarlandes, Deutsch-Europäisches Juridicum <291/102> [Signatur: bestellt];",
+					"Bestand: Universität des Saarlandes, Deutsch-Europäisches Juridicum <291/102> [Signatur: bestellt];Saarländische Universitäts- und Landesbibliothek <291> [Signatur: bestellt];",
 					"Erscheint: Mai 2013"
 				],
 				"tags": [],
