@@ -3,7 +3,7 @@
 	"label": "RIS",
 	"creator": "Simon Kornblith and Aurimas Vinckevicius",
 	"target": "ris",
-	"minVersion": "3.0.14",
+	"minVersion": "3.0.4",
 	"maxVersion": "",
 	"priority": 100,
 	"displayOptions": {
@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-04-16 06:43:00"
+	"lastUpdated": "2013-04-27 05:46:18"
 }
 
 function detectImport() {
@@ -785,16 +785,23 @@ function dateRIStoZotero(risDate, zField) {
 			}
 		}
 
-		//assume this is local time and convert it to UTC
+		/** 
+		 * we export as UTC, so assume UTC on import as well,
+		 * but only if we have a time part. Otherwise this might be coming from
+		 * other software, which is probably local time.
+		 * (maybe also look for time zone in the future)
+		 */
 		var d = new Date();
 		/** We intentionally avoid passing parameters in the constructor,
 		 * because it interprets dates with 2 digits or less as 1900+ dates.
 		 * This is clearly not a problem with accessDate, but maybe this will
 		 * end up being used for something else later.
 		 */
-		d.setFullYear(date[0], date[1], date[2]);
 		if(time) {
-			d.setHours(time[1], time[2], time[3]);
+			d.setUTCFullYear(date[0], date[1], date[2]);
+			d.setUTCHours(time[1], time[2], time[3]);
+		} else {
+			d.setFullYear(date[0], date[1], date[2]);
 		}
 
 		var pad = function(n, width) {
