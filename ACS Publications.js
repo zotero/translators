@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-03-10 11:45:19"
+	"lastUpdated": "2013-04-17 18:46:45"
 }
 
 function detectWeb(doc, url) {
@@ -189,11 +189,13 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Donald L. Macalady",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "Katherine Walton-Day",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					}
 				],
 				"notes": [],

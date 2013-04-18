@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-24 12:54:54"
+	"lastUpdated": "2013-04-17 19:46:34"
 }
 
 function detectWeb(doc, url) {
@@ -186,7 +186,7 @@ var testCases = [
 				"title": "Dutch",
 				"date": "1632 - 1675",
 				"extra": "Aquisition: 1942.9.98",
-				"callNumber": "On View",
+				"callNumber": "Not on View",
 				"url": "http://www.nga.gov/fcgi-bin/tinfo_f?object=1237",
 				"libraryCatalog": "National Gallery of Art - U.S.A.",
 				"accessDate": "CURRENT_TIMESTAMP"

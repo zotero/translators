@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-01-29 15:30:07"
+	"lastUpdated": "2013-04-17 19:54:46"
 }
 
 function detectWeb(doc, url) {
@@ -406,7 +406,8 @@ var testCases = [
 					},
 					{
 						"lastName": "Gene E. Likens",
-						"creatorType": "editor"
+						"creatorType": "editor",
+						"fieldMode": 1
 					}
 				],
 				"notes": [],

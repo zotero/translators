@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-02-08 20:14:33"
+	"lastUpdated": "2013-04-17 19:49:53"
 }
 
 /*
@@ -128,7 +128,8 @@ function scrape(url) {
 		//Z.debug(text)
 		var parser = new DOMParser();
 		var doc = parser.parseFromString(text, "text/xml");
-		var books = ZU.xpath(doc, '//book')
+		var books = ZU.xpath(doc, '//book');
+		
 		for(var i in books) {
 			var newItem = new Zotero.Item("book");
 			var book = books[i];
@@ -136,6 +137,7 @@ function scrape(url) {
 			for (j in authors){
 				newItem.creators.push(ZU.cleanAuthor(authors[j].textContent, "author"))
 			}
+			var note = ZU.xpathText(book, './bookNote');
 			newItem.url = ZU.xpathText(book, './link');
 			newItem.title = ZU.xpathText(book, './title');
 			newItem.seriesNumber = ZU.xpathText(book, './num');
@@ -152,7 +154,8 @@ function scrape(url) {
 			newItem.archiveLocation = ZU.xpathText(book, './archLoc');
 			newItem.libraryCatalog = ZU.xpathText(book, './serverName');
 			newItem.callNumber = ZU.xpathText(book, './cote');
-			newItem.notes = ZU.xpathText(book, './bookNote')
+			
+			if(note) newItem.notes.push(note);
 			newItem.complete();
 		}
 	})
@@ -164,7 +167,8 @@ function scrape(url) {
 */
 function getNbrTerms(text)
 {
-	var temp1 = text.substr(text.indexOf("nb")+4,10);
+	var temp1 = text.substr(text.indexOf
+	("nb")+4,10);
 	var nbr = temp1.substring(0,temp1.indexOf("\""));
 
 	return parseInt(nbr);
@@ -299,7 +303,9 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": "Note : 80 p : 3 pl. en noir et en coul ; 31 cm. (Mémoires de la Société Géologique de France, 1ère série, tome I, mémoire n° 13).",
+				"notes": [
+					"Note : 80 p : 3 pl. en noir et en coul ; 31 cm. (Mémoires de la Société Géologique de France, 1ère série, tome I, mémoire n° 13)."
+				],
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-04-14 20:39:21"
+	"lastUpdated": "2013-04-17 19:39:50"
 }
 
 /*
@@ -164,7 +164,6 @@ var testCases = [
 					{
 						"mimeType": "text/html",
 						"title": "Full Text (HTML)",
-						"downloadable": true
 					}
 				],
 				"publicationTitle": "Chasqui",
@@ -197,7 +196,12 @@ var testCases = [
 				],
 				"tags": [],
 				"seeAlso": [],
-				"attachments": [],
+				"attachments":  [
+					{
+						"mimeType": "text/html",
+						"title": "Full Text (HTML)",
+					}
+				],
 				"title": "A digest of the law of actions and trials at nisi prius. By Isaac 'espinasse, of Gray's Inn, Esq. Barrister at Law. The third edition, corrected, with considerable additions from printed and manuscript cases. In two volumes. ...",
 				"place": "London",
 				"url": "http://find.galegroup.com/ecco/infomark.do?&source=gale&prodId=ECCO&userGroupName=viva_gmu&tabID=T001&docId=CW3325179878&type=multipage&contentSet=ECCOArticles&version=1.0",

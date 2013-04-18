@@ -9,11 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-10-07 15:26:43"
+	"lastUpdated": "2013-04-17 19:59:06"
 }
 
 function detectWeb(doc, url) {
-	if (url.indexOf("SearchResults") != -1) {
+	if (url.indexOf("/search?") != -1) {
 		return "multiple";
 	} else if (url.indexOf("article") != -1) {
 		return "newspaperArticle";
@@ -79,7 +79,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		
-		var titles = doc.evaluate('//span[@class="td_tsr_title"]/a', doc, null, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//div[@class="td_tsr_title"]/a', doc, null, XPathResult.ANY_TYPE, null);
 		
 		var next_title;
 		while (next_title = titles.iterateNext()) {
@@ -128,7 +128,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.thespec.com/SearchResults?AssetType=Article&q=labor",
+		"url": "http://www.thespec.com/search?types=article&orderby=releasetimestamp+desc&query=labor",
 		"items": "multiple"
 	}
 ]

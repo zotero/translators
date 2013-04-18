@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-01-30 22:46:22"
+	"lastUpdated": "2013-04-17 19:42:02"
 }
 
 function detectWeb(doc, url) {
@@ -172,8 +172,8 @@ var testCases = [
 				"title": "Labor : readings on major issues / [edited by] Richard A. Lester",
 				"publisher": "Random House",
 				"callNumber": "331.082 L642",
-				"place": "New York :",
-				"date": "New York : Random House, [1967].",
+				"place": "New York",
+				"date": "New York : Random House, [1967]",
 				"authors": "Lester, Richard Allen, 1908-",
 				"extra": "Bibliographical footnotes.",
 				"libraryCatalog": "National Library of Australia",
