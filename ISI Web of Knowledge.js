@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 5,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-02-21 17:17:24"
+	"lastUpdated": "2013-04-18 00:51:47"
 }
 
 function detectWeb(doc, url) {
@@ -148,7 +148,7 @@ function fetchIds(ids, doc) {
 				if(item.title.toUpperCase() == item.title) {
 					item.title = ZU.capitalizeTitle(item.title, true);
 				}
-
+				
 				var creator;
 				for(var i=0, n=item.creators.length; i<n; i++) {
 					creator = item.creators[i];
@@ -211,6 +211,7 @@ function processTag(item, field, content) {
 			item.creators[1].push(ZU.cleanAuthor(author, "editor", author.match(/,/)));
 		}
 	} else if (field == "TI") {
+		content = content.replace(/\s\s+/g, " ");
 		item.title = content;
 	} else if (field == "JI") {
 		item.journalAbbreviation = content;
@@ -241,6 +242,7 @@ function processTag(item, field, content) {
 	} else if (field == "EP") {
 		item.pages += "-" + content;
 	} else if (field == "AB") {
+		content = content.replace(/\s\s+/g, " ");
 		item.abstractNote = content;
 	} else if (field == "PI" || field == "C1") {
 		item.place = content;
