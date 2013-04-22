@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-03-28 03:55:47"
+	"lastUpdated": "2013-04-21 23:45:50"
 }
 
 /*
@@ -373,7 +373,7 @@ function detectType(newItem, node, ret) {
 				case 'patent':
 				case 'report':
 				case 'thesis':
-					t.dc = value;
+					t.dc = type;
 					break;
 				case 'bookitem':
 					t.dc = 'bookSection';
