@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-04-22 21:04:00"
+	"lastUpdated": "2013-04-23 17:01:51"
 }
 
 /*This Translator mirrors closely Aurimas Vinckevicius' RIS translator
@@ -31,10 +31,10 @@ function detectImport() {
 	while((line = Zotero.read()) !== false) {
 		line = line.replace(/^\s+/, "");
 		if(line != "") {
-			if(line.substr(0, 6).match(/^RT\s+./)) {
+			if(line.search(/^RT\s+./) != -1) {
 				return true;
 			} else {
-				if(i++ > 3) {
+				if(i++ > 150) { //skip preamble
 					return false;
 				}
 			}
@@ -504,30 +504,14 @@ function processTag(item, entry) {
 				}
 			break;
 			case "attachments":
-				switch(zField[1]) {
-					case 'PDF':
-						value = {
-							url: value,
-							mimeType: "application/pdf",
-							title:"Full Text (PDF)",
-							downloadable:true
-						};
-					break;
-					case 'HTML':
-						value = {
-							url: value,
-							mimeType: "text/html",
-							title: "Full Text (HTML)",
-							downloadable:true
-						};
-					break;
-					default:
-						value = {
-							url:value,
-							title:"Image",	//maybe just Attachment?
-							downloadable:true
-						};
-				}
+				var domain = value.match(/^https?:\/\/([^\/]+)/i);
+				domain = domain ? domain[1] + ' ' : '';
+				value = {
+					url:value,
+					title: domain + 'Link',
+					mimeType: 'text/html',
+					downloadable:true
+				};
 			break;
 			case "unsupported":	//unsupported fields
 				//we can convert a RIS tag to something more useful though
@@ -1140,7 +1124,8 @@ var testCases = [
 				"attachments": [
 					{
 						"url": "http:// bmj.com/content/vol325/issue7371/twib.shtml#325/7371/0",
-						"title": "Image",
+						"title": " bmj.com Link",
+						"mimeType": "text/html",
 						"downloadable": true
 					}
 				],
@@ -1153,6 +1138,49 @@ var testCases = [
 				"abstractNote": "Explored the relationship between self-report measures of anger and anger expression with those of social rank (unfavorable social comparison and submissive behavior) and feelings of entrapment in a student population (197 Ss, mean age 23.4 yrs). The authors further investigated if the social rank/status of the target of one's anger affects anger experience and expression. Students were given C. D. Spielberger's (1988) State-Trait Anger Expression Inventory measure of anger and asked to complete it in 3 ways. First, in the normal way, and then 2 further times after reading 2 scenarios that involved lending an important and needed book which the lender fails to return, where the lender was either an up rank/authority figure (one's tutor) or a down rank, fellow student. It was found that self-perceptions of unfavorable rank (inferior self-perceptions and submissive behavior) and feeling trapped significantly affect anger suppression. It was also found that the rank of the target significantly affects anger expression and that people who respond angrily to criticism tend to show more down rank-anger when they are frustrated by a lower rank target and modulate their anger according to the rank of the person they are angry with. ( PsycINFO Database Record ( c) 2002 APA, all rights reserved)",
 				"ISSN": "0191-8869",
 				"language": "English"
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "Refworks Export Tagged Format\n\nCharacter Set=utf-8\n\nTag legend\n*****\nRT=Reference Type\nSR=Source Type\nID=Reference Identifier\nA1=Primary Authors\nT1=Primary Title\nJF=Periodical Full\nJO=Periodical Abbrev\nYR=Publication Year\nFD=Publication Data,Free Form\nVO=Volume\nIS=Issue\nSP=Start Page\nOP=Other Pages\nK1=Keyword\nAB=Abstract\nNO=Notes\nA2=Secondary Authors\nT2=Secondary Title\nED=Edition\nPB=Publisher\nPP=Place of Publication\nA3=Tertiary Authors\nA4=Quaternary Authors\nA5=Quinary Authors\nT3=Tertiary Title\nSN=ISSN/ISBN\nAV=Availability\nAD=Author Address\nAN=Accession Number\nLA=Language\nCL=Classification\nSF=Subfile/Database\nOT=Original Foreign Title\nLK=Links\nDO=Document Object Index\nCN=Call Number\nDB=Database\nDS=Data Source\nIP=Identifying Phrase\nRD=Retrieved Date\nST=Shortened Title\nU1=User 1\nU2=User 2\nU3=User 3\nU4=User 4\nU5=User 5\nU6=User 6\nU7=User 7\nU8=User 8\nU9=User 9\nU10=User 10\nU11=User 11\nU12=User 12\nU13=User 13\nU14=User 14\nU15=User 15\nUL=URL\nSL=Sponsoring Library\nLL=Sponsoring Library Location\nCR=Cited References\nWT=Website Title\nA6=Website Editor\nWV=Website Version\nWP=Date of Electronic Publication\nOL=Output Language\nPMID=PMID\nPMCID=PMCID\n\n*****\nFont Attribute Legend\nStart Bold = \nEnd Bold = \nStart Underline = \nEnd Underline = \nStart Italic = \nEnd Italic = \nStart SuperScript = \nEnd SuperScript = \nStart SubScript = \nEnd SubScript = \n\n*****\nBEGIN EXPORTED REFERENCES\n\n\n\n\nRT Journal Article\nSR Electronic(1)\nID 1220\nA1 Brennan,Timothy\nT1 The Empire's New Clothes\nJF Critical Inquiry\nYR 2003\nFD 01/01\nVO 29\nIS 2\nSP 337\nOP 367\nNO doi: 10.1086/374030\nLK http://www.journals.uchicago.edu/doi/abs/10.1086/374030\nOL Unknown(0)",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Brennan",
+						"firstName": "Timothy",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>doi: 10.1086/374030</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>SR Electronic(1)<br/>ID 1220<br/>OL Unknown(0)<br/>",
+						"tags": [
+							"_RW import"
+						]
+					}
+				],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": "http://www.journals.uchicago.edu/doi/abs/10.1086/374030",
+						"title": "www.journals.uchicago.edu Link",
+						"mimeType": "text/html",
+						"downloadable": true
+					}
+				],
+				"title": "The Empire's New Clothes",
+				"publicationTitle": "Critical Inquiry",
+				"date": "January 01 2003",
+				"volume": "29",
+				"issue": "2",
+				"pages": "337-367"
 			}
 		]
 	}
