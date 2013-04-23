@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-04-17 19:49:53"
+	"lastUpdated": "2013-04-22 19:50:56"
 }
 
 /*
@@ -276,6 +276,7 @@ var testCases = [
 			{
 				"itemType": "book",
 				"creators": [],
+				"notes": [],
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],

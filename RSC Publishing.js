@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-10-20 09:32:44"
+	"lastUpdated": "2013-04-22 21:02:32"
 }
 
 /*
@@ -74,7 +74,7 @@ function scrape(doc, type) {
 			item.bookTitle = ZU.xpathText(doc, '//h2[@class="sub_title"]');
 		} else if(type == 'journalArticle') {
 			//journal title is abbreviated. We can fetch full title from the page
-			item.publicationTitle = ZU.xpathText(doc, '//h2[@class="sub_title"]');
+			item.publicationTitle = ZU.xpathText(doc, '//div[contains(@class, "hg_title")]//h1');
 		}
 
 		//keywords is frequently an empty string
@@ -104,8 +104,7 @@ function doWeb(doc, url) {
 				for(var i in selectedItems) {
 					urls.push(i);
 				}
-				ZU.processDocuments(urls,
-					function(doc) { doWeb(doc, doc.location.href)});
+				ZU.processDocuments(urls,doW);
 			});
 	} else {
 		scrape(doc, type);
@@ -217,13 +216,13 @@ var testCases = [
 				],
 				"itemID": "http://pubs.rsc.org/en/content/chapter/bk9781849730518-00330/978-1-84973-051-8",
 				"title": "Chapter 14 In Vivo Approaches to Predictive Toxicology Using Zebrafish",
-				"date": "2011/11/15",
 				"DOI": "10.1039/9781849733045-00330",
 				"language": "en",
+				"date": "2011/11/15",
 				"url": "http://pubs.rsc.org/en/content/chapter/bk9781849730518-00330/978-1-84973-051-8",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "pubs.rsc.org",
-				"bookTitle": "New Horizons in Predictive Toxicology: Current Status and Application"
+				"bookTitle": "New Horizons in Predictive Toxicology"
 			}
 		]
 	},
