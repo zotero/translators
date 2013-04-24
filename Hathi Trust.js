@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-11-17 04:12:25"
+	"lastUpdated": "2013-04-23 20:37:29"
 }
 
 /*
@@ -51,8 +51,7 @@ function getSearchResults(doc) {
 	var res = ZU.xpath(doc, '//div[@class="resultitem"]\
 					[.//a[@class="cataloglinkhref"][1]/@href]');
 	//collections
-	if(!res.length) res = ZU.xpath(doc, '//div[@id="itemTable"]/div[contains(@class,"row")]\
-					[.//a[@class="cataloglinkhref"][1]/@href]');
+	if(!res.length) res = ZU.xpath(doc, '//div[contains(@class,"row")]/div[.//div[contains(@class, "result")]//a[contains(@class, "cataloglinkhref")][1]/@href]');
 	return res;
 }
 
@@ -64,7 +63,8 @@ function doWeb(doc, url){
 		for (var i in rows) {
 			var title = ZU.xpathText(rows[i], './/span[@class="title"]') || //search result
 						ZU.xpathText(rows[i], './h4[@class="Title"]/text()[last()]');	//collection item
-			var id = ZU.xpathText(rows[i], './/a[@class="cataloglinkhref"][1]/@href');
+			var id = ZU.xpathText(rows[i], './/a[contains(@class, "cataloglinkhref")][1]/@href');
+			//Z.debug(id + ": " + title)
 			if(id) {
 				id = (id.match(/\/(\d+)/) || [])[1];
 				//lists can display the same record, but with different titles
@@ -116,7 +116,6 @@ function scrape(ids){
 var testCases = [
 	{
 		"type": "web",
-		"defer": true,
 		"url": "http://catalog.hathitrust.org/Search/Home?checkspelling=true&lookfor=Cervantes&type=all&sethtftonly=true&submit=Find",
 		"items": "multiple"
 	},

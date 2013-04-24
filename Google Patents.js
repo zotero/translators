@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-05 23:25:55"
+	"lastUpdated": "2013-04-23 20:51:41"
 }
 
 function detectWeb(doc, url) {
@@ -202,7 +202,7 @@ var scrapers = [
 				label = ZU.xpathText(rows[i], './td[@class="patent-bibdata-heading"]');
 				values = ZU.xpath(rows[i], './td[@class="single-patent-bibdata"]|.//div[@class="patent-bibdata-value"]');
 				if(!values.length) continue;
-
+				//Z.debug("European")
 				switch(label.trim().toUpperCase()) {
 					case 'PUBLICATION NUMBER':
 						if(!zField) zField = 'patentNumber';
@@ -211,6 +211,7 @@ var scrapers = [
 					case 'FILING DATE':
 						if(!zField) zField = 'filingDate';
 					case 'APPLICANT':
+					case 'ASSIGNEE':
 						if(!zField) zField = 'assignee';
 						fields[zField] = values[0].textContent.trim();
 					break;
