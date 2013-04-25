@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-03-13 10:14:17"
+	"lastUpdated": "2013-04-25 09:28:20"
 }
 
 /*
@@ -116,6 +116,8 @@ function scrapeBook(doc, url, pdfUrl) {
 }
 
 function scrapeEM(doc, url, pdfUrl) {
+	var itemType = detectWeb(doc, url);
+	
 	//fetch print publication date
 	var date = ZU.xpathText(doc, '//meta[@name="citation_date"]/@content');
 
@@ -200,17 +202,27 @@ function scrapeEM(doc, url, pdfUrl) {
 			item.complete();
 		}
 	});
-	translator.translate();
+	
+	translator.getTranslatorObject(function(em) {
+		em.itemType = itemType;
+		em.doWeb(doc, url);
+	});
 }
 
 function scrapeBibTeX(doc, url, pdfUrl) {
-	var doi = ZU.xpathText(doc, '//meta[@name="citation_doi"][1]/@content');
+	var doi = ZU.xpathText(doc, '(//meta[@name="citation_doi"])[1]/@content')
+		|| ZU.xpathText(doc, '(//input[@name="publicationDoi"])[1]/@value');
+	if(!doi) {
+		doi = ZU.xpathText(doc, '(//p[@id="doi"])[1]');
+		if(doi) doi = doi.replace(/^\s*doi:\s*/i, '');
+	}
+	
 	if(!doi) {
 		scrapeEM(doc, url, pdfUrl);
 		return;
 	}
 	//leaving this here in case it's still needed
-	//var baseUrl = url.match(/https?:\/\/[^\/]+/); 
+	//var baseUrl = url.match(/https?:\/\/[^\/]+/);
 	var postUrl = '/documentcitationdownloadformsubmit';
 	var body = 'doi=' + encodeURIComponent(doi) + 
 				'&fileFormat=BIBTEX' +
@@ -1100,6 +1112,51 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Phosphane-Free Palladium-Catalyzed Coupling Reactions"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://onlinelibrary.wiley.com/doi/10.1002/jhet.5570200408/abstract",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Y.",
+						"lastName": "Tarumi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "T.",
+						"lastName": "Atsumi",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Studies on imidazole derivatives and related compounds. 2. Characterization of substituted derivatives of 4-carbamoylimidazolium-5-olate by ultraviolet absorption spectra",
+				"publicationTitle": "Journal of Heterocyclic Chemistry",
+				"volume": "20",
+				"issue": "4",
+				"publisher": "Wiley-Blackwell",
+				"ISSN": "1943-5193",
+				"url": "http://onlinelibrary.wiley.com/doi/10.1002/jhet.5570200408/abstract",
+				"DOI": "10.1002/jhet.5570200408",
+				"pages": "875–885",
+				"date": "1983",
+				"abstractNote": "The representative mono- and dialkyl-substituted derivatives of 4-carbamoylimidazolium-5-olate (1) were synthesized unequivocally. On the basis of their spectral data for ultraviolet absorption spectra in acidic, basic and neutral solutions, we have found some spectral characteristics which make it facile to clarify the position of substituents.",
+				"bookTitle": "Journal of Heterocyclic Chemistry",
+				"rights": "Copyright © 1983 Journal of Heterocyclic Chemistry",
+				"libraryCatalog": "Wiley Online Library",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}
