@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-03-13 20:50:46"
+	"lastUpdated": "2013-04-25 14:10:42"
 }
 
 /*
@@ -209,7 +209,7 @@ var testCases = [
 				"publisher": "W. De Gruyter",
 				"ISBN": "3110116715",
 				"numPages": "x, 726 p.",
-				"callNumber": "Dumbarton Oaks PT573.R4 T4 1989",
+				"callNumber": "Widener Harvard Depository PT573.R4 T4 1989x [Consult Circ. Desk for HX45IM]",
 				"series": "Arbeiten zur Frühmittelalterforschung ; Bd. 18",
 				"volume": "Bd. 18",
 				"date": "1989",
@@ -231,11 +231,19 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [],
+				"tags": [
+					"Internationale organisaties",
+					"Ethische aspecten"
+				],
 				"seeAlso": [],
 				"attachments": [],
 				"title": "Can institutions have responsibilities?",
+				"series": "collective moral agency and international relations",
+				"numPages": "XII, 241 p",
+				"place": "Basingstoke [etc.]",
+				"publisher": "Palgrave Macmillan",
 				"ISBN": "0333971299",
+				"abstractNote": "Assigning responsibilities to institutional moral agents : the case of states and 'quasi-states' / Toni Erskine -- Moral responsibility and the problem of representing the state / David Runiciman -- Moral agency and international society : reflections on norms, the UN, the Gulf War, and the Kosovo campaign / Chris Brown -- Collective moral agency and the political process / Frances V. Harbour -- Constitutive theory and moral accountability : individuals, institutions, and dispersed practices / Mervyn Frost -- When agents cannot act : international institutions as 'moral patients' / Cornelia Navari -- NATO and the individual soldier as moral agents with reciprocal duties : imbalance in the Kosovo campaign / Paul Cornish, Frances V. Harbour -- The anti-sweatshop movement : constructing corporate moral agency in the global apparel industry / Rebecca DeWinter -- The responsibility of collective external bystanders in cases of genocide : the French in Rwanda / Daniela Kroslak -- The United Nations and the fall of Srebrenica : meaningful responsibility and international society / Anthony Lang, Jr. -- On 'good global governance', institutional design, and the practices of moral agency / Nicholas Rengger -- Global justice: aims, arrangements, and responsibilities / Christian Barry",
 				"date": "2003",
 				"libraryCatalog": "Library Catalog (Aquabrowser)"
 			}

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-02-09 13:17:46"
+	"lastUpdated": "2013-04-25 14:33:55"
 }
 
 /*
@@ -164,6 +164,7 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
+					"Internet",
 					"Café",
 					"Süddeutsche Zeitung",
 					"SZ"
