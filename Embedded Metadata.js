@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-02-23 01:07:04"
+	"lastUpdated": "2013-04-15 14:37:01"
 }
 
 /*
@@ -183,6 +183,8 @@ function completeItem(doc, newItem) {
 }
 
 function detectWeb(doc, url) {
+	//blacklist wordpress jetpack comment plugin so it doesn't override other metadata
+	if (url.indexOf("jetpack.wordpress.com/jetpack-comment/")!=-1) return false;
 	if(exports.itemType) return exports.itemType;
 
 	init(doc, url, Zotero.done);
@@ -808,6 +810,16 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
+						"firstName": "Guoqiang",
+						"lastName": "Wu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jianwei",
+						"lastName": "Zhang",
+						"creatorType": "author"
+					},
+					{
 						"firstName": "Yuguang",
 						"lastName": "Bai",
 						"creatorType": "author"
@@ -826,15 +838,32 @@ var testCases = [
 					}
 				],
 				"itemID": "http://www.hindawi.com/journals/mpe/2013/868174/abs/",
-				"abstractNote": "The problem of network-based robust filtering for stochastic systems with sensor nonlinearity is investigated in this paper. In the network environment, the effects of the sensor saturation, output quantization, and network-induced delay are taken into simultaneous consideration, and the output measurements received in the filter side are incomplete. The random delays are modeled as a linear function of the stochastic variable described by a Bernoulli random binary distribution. The derived criteria for performance analysis of the filtering-error system and filter design are proposed which can be solved by using convex optimization method. Numerical examples show the effectiveness of the design method.",
-				"DOI": "10.1155/2013/868174",
-				"ISSN": "1024-123X",
-				"url": "http://www.hindawi.com/journals/mpe/2013/868174/abs/",
-				"libraryCatalog": "www.hindawi.com",
-				"date": "2013/02/20",
 				"title": "Robust Filtering for Networked Stochastic Systems Subject to Sensor Nonlinearity",
 				"publicationTitle": "Mathematical Problems in Engineering",
-				"volume": "2013"
+				"volume": "2013",
+				"publisher": "Hindawi Publishing Corporation",
+				"institution": "Hindawi Publishing Corporation",
+				"company": "Hindawi Publishing Corporation",
+				"label": "Hindawi Publishing Corporation",
+				"distributor": "Hindawi Publishing Corporation",
+				"date": "2013/02/20",
+				"ISSN": "1024-123X",
+				"reportType": "Research article",
+				"letterType": "Research article",
+				"manuscriptType": "Research article",
+				"mapType": "Research article",
+				"thesisType": "Research article",
+				"websiteType": "Research article",
+				"presentationType": "Research article",
+				"postType": "Research article",
+				"audioFileType": "Research article",
+				"language": "en",
+				"extra": "The problem of network-based robust filtering for stochastic systems with sensor nonlinearity is investigated in this paper. In the network environment, the effects of the sensor saturation, output quantization, and network-induced delay are taken into simultaneous consideration, and the output measurements received in the filter side are incomplete. The random delays are modeled as a linear function of the stochastic variable described by a Bernoulli random binary distribution. The derived criteria for performance analysis of the filtering-error system and filter design are proposed which can be solved by using convex optimization method. Numerical examples show the effectiveness of the design method.",
+				"abstractNote": "The problem of network-based robust filtering for stochastic systems with sensor nonlinearity is investigated in this paper. In the network environment, the effects of the sensor saturation, output quantization, and network-induced delay are taken into simultaneous consideration, and the output measurements received in the filter side are incomplete. The random delays are modeled as a linear function of the stochastic variable described by a Bernoulli random binary distribution. The derived criteria for performance analysis of the filtering-error system and filter design are proposed which can be solved by using convex optimization method. Numerical examples show the effectiveness of the design method.",
+				"DOI": "10.1155/2013/868174",
+				"url": "http://www.hindawi.com/journals/mpe/2013/868174/abs/",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.hindawi.com"
 			}
 		]
 	}
