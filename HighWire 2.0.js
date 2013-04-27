@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-04-15 18:04:37"
+	"lastUpdated": "2013-04-25 18:04:37"
 }
 
 /*
@@ -81,6 +81,72 @@ function getKeywords(doc) {
 	return kwds;
 }
 
+//mimetype map for supplementary attachments
+var suppTypeMap = {
+	'pdf': 'application/pdf',
+	'zip': 'application/zip',
+	'doc': 'application/msword',
+	'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+	'xls': 'application/vnd.ms-excel',
+	'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+};
+
+//attach supplementary information
+function attachSupplementary(doc, item, next) {
+	var navDiv = doc.getElementById('article-cb-main') || doc.getElementById('article-views');
+	if(navDiv) {
+		var suppLink = ZU.xpath(navDiv, './/a[@rel="supplemental-data"]')[0];
+		if(suppLink) {
+			if(Z.getHiddenPref("supplementaryAsLink")){
+				item.attachments.push({
+					title: "Supplementary info",
+					url: suppLink.href,
+					mimeType: 'text/html',
+					snapshot: false
+				});
+			} else {
+				ZU.processDocuments(suppLink.href, function(newDoc, url) {
+					var links = ZU.xpath(newDoc, '//div[@id="content-block"]\
+						/h1[@class="data-supp-article-title"]\
+						/following-sibling::div//ul//a');
+					var counters = {}, title, tUC, url, type, snapshot;
+					var attachAsLink = Z.getHiddenPref("supplementaryAsLink");
+					for(var i=0, n=links.length; i<n; i++) {
+						title = ZU.trimInternal(links[i].textContent.trim())
+								.replace(/^download\s+/i, '')
+								.replace(/\([^()]+\)$/, '');
+						tUC = title.toUpperCase();
+						if(!counters[tUC]) {	//when all supp data has the same title, we'll add some numbers
+							counters[tUC] = 1;
+						} else {
+							title += ' ' + (++counters[tUC]);
+						}
+						
+						url = links[i].href;
+						
+						//determine type by extension
+						type = suppTypeMap[url.substr(url.lastIndexOf('.')+1).toLowerCase()];
+						
+						//don't download files with unknown type.
+						//Could be large files we're not accounting for, like videos,
+						// or HTML pages that we would end up taking snapshots of
+						snapshot = !attachAsLink || type;
+						
+						item.attachments.push({
+							title: title,
+							url: url,
+							mimeType: type,
+							snapshot: !!snapshot
+						});
+					}
+					next(doc, item);
+				});
+				return true;
+			}
+		}
+		return;
+	}
+}
 
 //add using embedded metadata
 function addEmbMeta(doc) {
@@ -113,8 +179,42 @@ function addEmbMeta(doc) {
 		if(kwds) item.tags = kwds;
 
 		if (item.notes) item.notes = [];
-
-		item.complete();
+		
+		//try to get PubMed ID and link
+		var pmDiv = doc.getElementById('cb-art-pm');
+		if(pmDiv) {
+			var pmId = ZU.xpathText(pmDiv, './/a[contains(@class, "cite-link")]/@href')
+					|| ZU.xpathText(pmDiv, './ol/li[1]/a/@href');	//e.g. http://www.pnas.org/content/108/52/20881.full
+			if(pmId) pmId = pmId.match(/access_num=(\d+)/);
+			if(pmId) {
+				if(item.extra) item.extra += '\n';
+				else item.extra = '';
+				
+				item.extra += 'PMID: ' + pmId[1];
+				
+				item.attachments.push({
+					title: "PubMed entry",
+					url: "http://www.ncbi.nlm.nih.gov/pubmed/" + pmId[1],
+					type: "text/html",
+					snapshot: false
+				});
+			}
+		}
+		
+		if(Z.getHiddenPref && Z.getHiddenPref("attachSupplementary")) {
+			try {	//don't fail if we can't attach supplementary data
+				var async = attachSupplementary(doc, item, function(doc, item) { item.complete() });
+			} catch(e) {
+				Z.debug("Error attaching supplementary information.")
+				Z.debug(e);
+				if(async) item.complete();
+			}
+			if(!async) {
+				item.complete();
+			}
+		} else {
+			item.complete();
+		}
 	});
 
 	translator.translate();
@@ -349,6 +449,11 @@ var testCases = [
 					},
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "PubMed entry",
+						"type": "text/html",
+						"snapshot": false
 					}
 				],
 				"itemID": "http://radiographics.rsna.org/content/10/1/41.full.pdf+html?frame=sidebar",
@@ -369,6 +474,7 @@ var testCases = [
 				"ISSN": "0271-5333, 1527-1323",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "radiographics.rsna.org",
+				"extra": "PMID: 2296696",
 				"shortTitle": "Pulmonary nodules"
 			}
 		]
@@ -626,6 +732,26 @@ var testCases = [
 					},
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "PubMed entry",
+						"type": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Supporting Information ",
+						"mimeType": "application/pdf",
+						"snapshot": true
+					},
+					{
+						"title": "Dataset_S01 ",
+						"mimeType": "application/vnd.ms-excel",
+						"snapshot": true
+					},
+					{
+						"title": "Dataset_S02 ",
+						"mimeType": "application/vnd.ms-excel",
+						"snapshot": true
 					}
 				],
 				"itemID": "http://www.pnas.org/content/108/52/20881.full",
@@ -647,7 +773,8 @@ var testCases = [
 				"ISSN": "0027-8424, 1091-6490",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.pnas.org",
-				"abstractNote": "Amyotrophic lateral sclerosis (ALS) is a devastating and universally fatal neurodegenerative disease. Mutations in two related RNA-binding proteins, TDP-43 and FUS, that harbor prion-like domains, cause some forms of ALS. There are at least 213 human proteins harboring RNA recognition motifs, including FUS and TDP-43, raising the possibility that additional RNA-binding proteins might contribute to ALS pathogenesis. We performed a systematic survey of these proteins to find additional candidates similar to TDP-43 and FUS, followed by bioinformatics to predict prion-like domains in a subset of them. We sequenced one of these genes, TAF15, in patients with ALS and identified missense variants, which were absent in a large number of healthy controls. These disease-associated variants of TAF15 caused formation of cytoplasmic foci when expressed in primary cultures of spinal cord neurons. Very similar to TDP-43 and FUS, TAF15 aggregated in vitro and conferred neurodegeneration in Drosophila, with the ALS-linked variants having a more severe effect than wild type. Immunohistochemistry of postmortem spinal cord tissue revealed mislocalization of TAF15 in motor neurons of patients with ALS. We propose that aggregation-prone RNA-binding proteins might contribute very broadly to ALS pathogenesis and the genes identified in our yeast functional screen, coupled with prion-like domain prediction analysis, now provide a powerful resource to facilitate ALS disease gene discovery."
+				"abstractNote": "Amyotrophic lateral sclerosis (ALS) is a devastating and universally fatal neurodegenerative disease. Mutations in two related RNA-binding proteins, TDP-43 and FUS, that harbor prion-like domains, cause some forms of ALS. There are at least 213 human proteins harboring RNA recognition motifs, including FUS and TDP-43, raising the possibility that additional RNA-binding proteins might contribute to ALS pathogenesis. We performed a systematic survey of these proteins to find additional candidates similar to TDP-43 and FUS, followed by bioinformatics to predict prion-like domains in a subset of them. We sequenced one of these genes, TAF15, in patients with ALS and identified missense variants, which were absent in a large number of healthy controls. These disease-associated variants of TAF15 caused formation of cytoplasmic foci when expressed in primary cultures of spinal cord neurons. Very similar to TDP-43 and FUS, TAF15 aggregated in vitro and conferred neurodegeneration in Drosophila, with the ALS-linked variants having a more severe effect than wild type. Immunohistochemistry of postmortem spinal cord tissue revealed mislocalization of TAF15 in motor neurons of patients with ALS. We propose that aggregation-prone RNA-binding proteins might contribute very broadly to ALS pathogenesis and the genes identified in our yeast functional screen, coupled with prion-like domain prediction analysis, now provide a powerful resource to facilitate ALS disease gene discovery.",
+				"extra": "PMID: 22065782"
 			}
 		]
 	},
@@ -731,6 +858,11 @@ var testCases = [
 					},
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "PubMed entry",
+						"type": "text/html",
+						"snapshot": false
 					}
 				],
 				"itemID": "http://genesdev.cshlp.org/content/16/14/1779",
@@ -752,7 +884,8 @@ var testCases = [
 				"pages": "1779-1791",
 				"ISSN": "0890-9369, 1549-5477",
 				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "genesdev.cshlp.org"
+				"libraryCatalog": "genesdev.cshlp.org",
+				"extra": "PMID: 12130538"
 			}
 		]
 	},
@@ -801,6 +934,11 @@ var testCases = [
 					},
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "PubMed entry",
+						"type": "text/html",
+						"snapshot": false
 					}
 				],
 				"itemID": "http://www.bjj.boneandjoint.org.uk/content/94-B/1/10.abstract",
@@ -822,7 +960,8 @@ var testCases = [
 				"ISSN": "2049-4394, 2049-4408",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.bjj.boneandjoint.org.uk",
-				"abstractNote": "The most frequent cause of failure after total hip replacement in all reported arthroplasty registries is peri-prosthetic osteolysis. Osteolysis is an active biological process initiated in response to wear debris. The eventual response to this process is the activation of macrophages and loss of bone.\nActivation of macrophages initiates a complex biological cascade resulting in the final common pathway of an increase in osteolytic activity. The biological initiators, mechanisms for and regulation of this process are beginning to be understood. This article explores current concepts in the causes of, and underlying biological mechanism resulting in peri-prosthetic osteolysis, reviewing the current basic science and clinical literature surrounding the topic."
+				"abstractNote": "The most frequent cause of failure after total hip replacement in all reported arthroplasty registries is peri-prosthetic osteolysis. Osteolysis is an active biological process initiated in response to wear debris. The eventual response to this process is the activation of macrophages and loss of bone.\nActivation of macrophages initiates a complex biological cascade resulting in the final common pathway of an increase in osteolytic activity. The biological initiators, mechanisms for and regulation of this process are beginning to be understood. This article explores current concepts in the causes of, and underlying biological mechanism resulting in peri-prosthetic osteolysis, reviewing the current basic science and clinical literature surrounding the topic.",
+				"extra": "PMID: 22219240"
 			}
 		]
 	},
@@ -869,6 +1008,11 @@ var testCases = [
 					},
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "PubMed entry",
+						"type": "text/html",
+						"snapshot": false
 					}
 				],
 				"itemID": "http://nar.oxfordjournals.org/content/34/suppl_2/W369.full",
@@ -891,6 +1035,7 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "nar.oxfordjournals.org",
 				"abstractNote": "MEME (Multiple EM for Motif Elicitation) is one of the most widely used tools for searching for novel ‘signals’ in sets of biological sequences. Applications include the discovery of new transcription factor binding sites and protein domains. MEME works by searching for repeated, ungapped sequence patterns that occur in the DNA or protein sequences provided by the user. Users can perform MEME searches via the web server hosted by the National Biomedical Computation Resource (http://meme.nbcr.net) and several mirror sites. Through the same web server, users can also access the Motif Alignment and Search Tool to search sequence databases for matches to motifs encoded in several popular formats. By clicking on buttons in the MEME output, users can compare the motifs discovered in their input sequences with databases of known motifs, search sequence databases for matches to the motifs and display the motifs in various formats. This article describes the freely accessible web server and its architecture, and discusses ways to use MEME effectively to find new sequence patterns in biological sequences and analyze their significance.",
+				"extra": "PMID: 16845028",
 				"shortTitle": "MEME"
 			}
 		]
