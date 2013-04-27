@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-04-15 14:37:01"
+	"lastUpdated": "2013-04-27 07:23:06"
 }
 
 /*
@@ -69,6 +69,7 @@ var HIGHWIRE_MAPPINGS = {
 	"citation_pdf_url"
 	"citation_abstract_html_url"
 	"citation_fulltext_html_url"
+	"citation_pmid"
 */
 };
 
@@ -445,7 +446,26 @@ function addHighwireMetadata(doc, newItem) {
 
 		newItem.attachments.push({title:"Full Text PDF", url:pdfURL, mimeType:"application/pdf"});
 	}
-
+	
+	//add snapshot
+	newItem.attachments.push({document:doc, title:"Snapshot"});
+	
+	//store PMID in Extra and as a link attachment
+	//e.g. http://www.sciencemag.org/content/332/6032/977.full
+	var PMID = getContentText(doc, 'citation_pmid');
+	if(PMID) {
+		if(newItem.extra) item.extra += '\n';
+		else newItem.extra = '';
+		
+		newItem.extra += 'PMID: ' + PMID;
+		
+		newItem.attachments.push({
+			title: "PubMed entry",
+			url: "http://www.ncbi.nlm.nih.gov/pubmed/" + PMID,
+			mimeType: "text/html",
+			snapshot: false
+		});
+	}
 
 	// Other last chances
 	if(!newItem.url)
@@ -455,9 +475,6 @@ function addHighwireMetadata(doc, newItem) {
 	if(!newItem.title) newItem.title = doc.title;
 	//worst case, if this is not called from another translator, use URL for title
 	if(!newItem.title && !Zotero.parentTranslator) newItem.title = newItem.url;
-
-	// add attachment
-	newItem.attachments.push({document:doc, title:"Snapshot"});
 
 	// add access date
 	newItem.accessDate = 'CURRENT_TIMESTAMP';

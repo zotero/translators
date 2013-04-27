@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-04-25 18:04:37"
+	"lastUpdated": "2013-04-27 07:35:11"
 }
 
 /*
@@ -82,9 +82,10 @@ function getKeywords(doc) {
 }
 
 //mimetype map for supplementary attachments
+//intentionally excluding potentially large files like videos and zip files
 var suppTypeMap = {
 	'pdf': 'application/pdf',
-	'zip': 'application/zip',
+//	'zip': 'application/zip',
 	'doc': 'application/msword',
 	'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 	'xls': 'application/vnd.ms-excel',
@@ -97,7 +98,8 @@ function attachSupplementary(doc, item, next) {
 	if(navDiv) {
 		var suppLink = ZU.xpath(navDiv, './/a[@rel="supplemental-data"]')[0];
 		if(suppLink) {
-			if(Z.getHiddenPref("supplementaryAsLink")){
+			var attachAsLink = Z.getHiddenPref("supplementaryAsLink");
+			if(attachAsLink) {
 				item.attachments.push({
 					title: "Supplementary info",
 					url: suppLink.href,
@@ -106,40 +108,104 @@ function attachSupplementary(doc, item, next) {
 				});
 			} else {
 				ZU.processDocuments(suppLink.href, function(newDoc, url) {
-					var links = ZU.xpath(newDoc, '//div[@id="content-block"]\
-						/h1[@class="data-supp-article-title"]\
-						/following-sibling::div//ul//a');
-					var counters = {}, title, tUC, url, type, snapshot;
-					var attachAsLink = Z.getHiddenPref("supplementaryAsLink");
-					for(var i=0, n=links.length; i<n; i++) {
-						title = ZU.trimInternal(links[i].textContent.trim())
-								.replace(/^download\s+/i, '')
-								.replace(/\([^()]+\)$/, '');
-						tUC = title.toUpperCase();
-						if(!counters[tUC]) {	//when all supp data has the same title, we'll add some numbers
-							counters[tUC] = 1;
-						} else {
-							title += ' ' + (++counters[tUC]);
+					//sciencemag.org
+					var container = newDoc.getElementById('sci-bd');
+					if(container) {
+						var dts = ZU.xpath(container, './dl/dt');
+						var dt, dd, title, url, type, snapshot, description;
+						for(var i=0, n=dts.length; i<n; i++) {
+							dt = dts[i];
+							title = ZU.trimInternal(dt.textContent);
+							
+							dd = dt.nextElementSibling;
+							
+							if(dd.nodeName.toUpperCase() == 'DD') {
+								if(dd.firstElementChild
+									&& dd.firstElementChild.nodeName.toUpperCase() == 'UL') {
+									description = ZU.xpathText(dd, './ul/li', null, '; ');
+								} else {
+									description = dd.textContent;
+								}
+								
+								if(description) {
+									description = ZU.trimInternal(description)
+										.replace(/\s;/g, ';');
+										
+									if(description.indexOf(title) === 0
+										|| title.toUpperCase() == 'DOWNLOAD SUPPLEMENT') {
+										title = '';
+									} else {
+										title += '. ';
+									}
+									
+									title += description;
+								}
+							}
+							
+							if(title.toUpperCase() == 'DOWNLOAD SUPPLEMENT') {
+								title = 'Supplementary Data';
+							}
+							
+							url = dt.getElementsByTagName('a')[0];
+							if(!url) continue;
+							url = url.href;
+							
+							type = suppTypeMap[url.substr(url.lastIndexOf('.')+1).toLowerCase()];
+							
+							//don't download files with unknown type.
+							//Could be large files we're not accounting for, like videos,
+							// or HTML pages that we would end up taking snapshots of
+							snapshot = !attachAsLink && type;
+							
+							item.attachments.push({
+								title: title,
+								url: url,
+								mimeType: type,
+								snapshot: !!snapshot
+							})
 						}
-						
-						url = links[i].href;
-						
-						//determine type by extension
-						type = suppTypeMap[url.substr(url.lastIndexOf('.')+1).toLowerCase()];
-						
-						//don't download files with unknown type.
-						//Could be large files we're not accounting for, like videos,
-						// or HTML pages that we would end up taking snapshots of
-						snapshot = !attachAsLink || type;
-						
-						item.attachments.push({
-							title: title,
-							url: url,
-							mimeType: type,
-							snapshot: !!snapshot
-						});
+						next(doc, item);
+						return;
 					}
-					next(doc, item);
+					
+					//others
+					container = newDoc.getElementById('content-block');
+					if(container) {
+						var links = ZU.xpath(container, './h1[@class="data-supp-article-title"]\
+							/following-sibling::div//ul//a');
+					
+						var counters = {}, title, tUC, url, type, snapshot;
+						for(var i=0, n=links.length; i<n; i++) {
+							title = ZU.trimInternal(links[i].textContent.trim())
+									.replace(/^download\s+/i, '')
+									.replace(/\([^()]+\)$/, '');
+							tUC = title.toUpperCase();
+							if(!counters[tUC]) {	//when all supp data has the same title, we'll add some numbers
+								counters[tUC] = 1;
+							} else {
+								title += ' ' + (++counters[tUC]);
+							}
+							
+							url = links[i].href;
+							
+							//determine type by extension
+							type = suppTypeMap[url.substr(url.lastIndexOf('.')+1).toLowerCase()];
+							
+							//don't download files with unknown type.
+							//Could be large files we're not accounting for, like videos,
+							// or HTML pages that we would end up taking snapshots of
+							snapshot = !attachAsLink && type;
+							
+							item.attachments.push({
+								title: title,
+								url: url,
+								mimeType: type,
+								snapshot: !!snapshot
+							});
+						}
+						next(doc, item);
+						return;
+					}
 				});
 				return true;
 			}
@@ -180,9 +246,10 @@ function addEmbMeta(doc) {
 
 		if (item.notes) item.notes = [];
 		
-		//try to get PubMed ID and link
-		var pmDiv = doc.getElementById('cb-art-pm');
-		if(pmDiv) {
+		//try to get PubMed ID and link if we don't already have it from EM
+		var pmDiv;
+		if(item.extra.search(/\bPMID:/) == -1
+			&& (pmDiv = doc.getElementById('cb-art-pm'))) {
 			var pmId = ZU.xpathText(pmDiv, './/a[contains(@class, "cite-link")]/@href')
 					|| ZU.xpathText(pmDiv, './ol/li[1]/a/@href');	//e.g. http://www.pnas.org/content/108/52/20881.full
 			if(pmId) pmId = pmId.match(/access_num=(\d+)/);
@@ -195,7 +262,7 @@ function addEmbMeta(doc) {
 				item.attachments.push({
 					title: "PubMed entry",
 					url: "http://www.ncbi.nlm.nih.gov/pubmed/" + pmId[1],
-					type: "text/html",
+					mimeType: "text/html",
 					snapshot: false
 				});
 			}
@@ -452,7 +519,7 @@ var testCases = [
 					},
 					{
 						"title": "PubMed entry",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": false
 					}
 				],
@@ -472,9 +539,9 @@ var testCases = [
 				"url": "http://radiographics.rsna.org/content/10/1/41",
 				"pages": "41-51",
 				"ISSN": "0271-5333, 1527-1323",
+				"extra": "PMID: 2296696",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "radiographics.rsna.org",
-				"extra": "PMID: 2296696",
 				"shortTitle": "Pulmonary nodules"
 			}
 		]
@@ -735,23 +802,8 @@ var testCases = [
 					},
 					{
 						"title": "PubMed entry",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": false
-					},
-					{
-						"title": "Supporting Information ",
-						"mimeType": "application/pdf",
-						"snapshot": true
-					},
-					{
-						"title": "Dataset_S01 ",
-						"mimeType": "application/vnd.ms-excel",
-						"snapshot": true
-					},
-					{
-						"title": "Dataset_S02 ",
-						"mimeType": "application/vnd.ms-excel",
-						"snapshot": true
 					}
 				],
 				"itemID": "http://www.pnas.org/content/108/52/20881.full",
@@ -771,10 +823,10 @@ var testCases = [
 				"url": "http://www.pnas.org/content/108/52/20881",
 				"pages": "20881-20890",
 				"ISSN": "0027-8424, 1091-6490",
+				"extra": "PMID: 22065782",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.pnas.org",
-				"abstractNote": "Amyotrophic lateral sclerosis (ALS) is a devastating and universally fatal neurodegenerative disease. Mutations in two related RNA-binding proteins, TDP-43 and FUS, that harbor prion-like domains, cause some forms of ALS. There are at least 213 human proteins harboring RNA recognition motifs, including FUS and TDP-43, raising the possibility that additional RNA-binding proteins might contribute to ALS pathogenesis. We performed a systematic survey of these proteins to find additional candidates similar to TDP-43 and FUS, followed by bioinformatics to predict prion-like domains in a subset of them. We sequenced one of these genes, TAF15, in patients with ALS and identified missense variants, which were absent in a large number of healthy controls. These disease-associated variants of TAF15 caused formation of cytoplasmic foci when expressed in primary cultures of spinal cord neurons. Very similar to TDP-43 and FUS, TAF15 aggregated in vitro and conferred neurodegeneration in Drosophila, with the ALS-linked variants having a more severe effect than wild type. Immunohistochemistry of postmortem spinal cord tissue revealed mislocalization of TAF15 in motor neurons of patients with ALS. We propose that aggregation-prone RNA-binding proteins might contribute very broadly to ALS pathogenesis and the genes identified in our yeast functional screen, coupled with prion-like domain prediction analysis, now provide a powerful resource to facilitate ALS disease gene discovery.",
-				"extra": "PMID: 22065782"
+				"abstractNote": "Amyotrophic lateral sclerosis (ALS) is a devastating and universally fatal neurodegenerative disease. Mutations in two related RNA-binding proteins, TDP-43 and FUS, that harbor prion-like domains, cause some forms of ALS. There are at least 213 human proteins harboring RNA recognition motifs, including FUS and TDP-43, raising the possibility that additional RNA-binding proteins might contribute to ALS pathogenesis. We performed a systematic survey of these proteins to find additional candidates similar to TDP-43 and FUS, followed by bioinformatics to predict prion-like domains in a subset of them. We sequenced one of these genes, TAF15, in patients with ALS and identified missense variants, which were absent in a large number of healthy controls. These disease-associated variants of TAF15 caused formation of cytoplasmic foci when expressed in primary cultures of spinal cord neurons. Very similar to TDP-43 and FUS, TAF15 aggregated in vitro and conferred neurodegeneration in Drosophila, with the ALS-linked variants having a more severe effect than wild type. Immunohistochemistry of postmortem spinal cord tissue revealed mislocalization of TAF15 in motor neurons of patients with ALS. We propose that aggregation-prone RNA-binding proteins might contribute very broadly to ALS pathogenesis and the genes identified in our yeast functional screen, coupled with prion-like domain prediction analysis, now provide a powerful resource to facilitate ALS disease gene discovery."
 			}
 		]
 	},
@@ -861,7 +913,7 @@ var testCases = [
 					},
 					{
 						"title": "PubMed entry",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": false
 					}
 				],
@@ -883,9 +935,9 @@ var testCases = [
 				"abstractNote": "Covalent modification of histone tails is crucial for transcriptional regulation, mitotic chromosomal condensation, and heterochromatin formation. Histone H3 lysine 9 (H3-K9) methylation catalyzed by the Suv39h family proteins is essential for establishing the architecture of pericentric heterochromatin. We recently identified a mammalian histone methyltransferase (HMTase), G9a, which has strong HMTase activity towards H3-K9 in vitro. To investigate the in vivo functions of G9a, we generated G9a-deficient mice and embryonic stem (ES) cells. We found that H3-K9 methylation was drastically decreased in G9a-deficient embryos, which displayed severe growth retardation and early lethality. G9a-deficient ES cells also exhibited reduced H3-K9 methylation compared to wild-type cells, indicating that G9a is a dominant H3-K9 HMTase in vivo. Importantly, the loss of G9a abolished methylated H3-K9 mostly in euchromatic regions. Finally, G9a exerted a transcriptionally suppressive function that depended on its HMTase activity. Our results indicate that euchromatic H3-K9 methylation regulated by G9a is essential for early embryogenesis and is involved in the transcriptional repression of developmental genes.",
 				"pages": "1779-1791",
 				"ISSN": "0890-9369, 1549-5477",
+				"extra": "PMID: 12130538",
 				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "genesdev.cshlp.org",
-				"extra": "PMID: 12130538"
+				"libraryCatalog": "genesdev.cshlp.org"
 			}
 		]
 	},
@@ -937,7 +989,7 @@ var testCases = [
 					},
 					{
 						"title": "PubMed entry",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": false
 					}
 				],
@@ -958,10 +1010,10 @@ var testCases = [
 				"url": "http://www.bjj.boneandjoint.org.uk/content/94-B/1/10",
 				"pages": "10-15",
 				"ISSN": "2049-4394, 2049-4408",
+				"extra": "PMID: 22219240",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.bjj.boneandjoint.org.uk",
-				"abstractNote": "The most frequent cause of failure after total hip replacement in all reported arthroplasty registries is peri-prosthetic osteolysis. Osteolysis is an active biological process initiated in response to wear debris. The eventual response to this process is the activation of macrophages and loss of bone.\nActivation of macrophages initiates a complex biological cascade resulting in the final common pathway of an increase in osteolytic activity. The biological initiators, mechanisms for and regulation of this process are beginning to be understood. This article explores current concepts in the causes of, and underlying biological mechanism resulting in peri-prosthetic osteolysis, reviewing the current basic science and clinical literature surrounding the topic.",
-				"extra": "PMID: 22219240"
+				"abstractNote": "The most frequent cause of failure after total hip replacement in all reported arthroplasty registries is peri-prosthetic osteolysis. Osteolysis is an active biological process initiated in response to wear debris. The eventual response to this process is the activation of macrophages and loss of bone.\nActivation of macrophages initiates a complex biological cascade resulting in the final common pathway of an increase in osteolytic activity. The biological initiators, mechanisms for and regulation of this process are beginning to be understood. This article explores current concepts in the causes of, and underlying biological mechanism resulting in peri-prosthetic osteolysis, reviewing the current basic science and clinical literature surrounding the topic."
 			}
 		]
 	},
@@ -1011,7 +1063,7 @@ var testCases = [
 					},
 					{
 						"title": "PubMed entry",
-						"type": "text/html",
+						"mimeType": "text/html",
 						"snapshot": false
 					}
 				],
@@ -1032,11 +1084,80 @@ var testCases = [
 				"url": "http://nar.oxfordjournals.org/content/34/suppl_2/W369",
 				"pages": "W369-W373",
 				"ISSN": "0305-1048, 1362-4962",
+				"extra": "PMID: 16845028",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "nar.oxfordjournals.org",
 				"abstractNote": "MEME (Multiple EM for Motif Elicitation) is one of the most widely used tools for searching for novel ‘signals’ in sets of biological sequences. Applications include the discovery of new transcription factor binding sites and protein domains. MEME works by searching for repeated, ungapped sequence patterns that occur in the DNA or protein sequences provided by the user. Users can perform MEME searches via the web server hosted by the National Biomedical Computation Resource (http://meme.nbcr.net) and several mirror sites. Through the same web server, users can also access the Motif Alignment and Search Tool to search sequence databases for matches to motifs encoded in several popular formats. By clicking on buttons in the MEME output, users can compare the motifs discovered in their input sequences with databases of known motifs, search sequence databases for matches to the motifs and display the motifs in various formats. This article describes the freely accessible web server and its architecture, and discusses ways to use MEME effectively to find new sequence patterns in biological sequences and analyze their significance.",
-				"extra": "PMID: 16845028",
 				"shortTitle": "MEME"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.sciencemag.org/content/340/6131/449.full",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Davide",
+						"lastName": "Dulcis",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Pouya",
+						"lastName": "Jamshidi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Stefan",
+						"lastName": "Leutgeb",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nicholas C.",
+						"lastName": "Spitzer",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					},
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"itemID": "http://www.sciencemag.org/content/340/6131/449.full",
+				"title": "Neurotransmitter Switching in the Adult Brain Regulates Behavior",
+				"publisher": "American Association for the Advancement of Science",
+				"institution": "American Association for the Advancement of Science",
+				"company": "American Association for the Advancement of Science",
+				"label": "American Association for the Advancement of Science",
+				"distributor": "American Association for the Advancement of Science",
+				"date": "04/26/2013",
+				"DOI": "10.1126/science.1234152",
+				"language": "en",
+				"publicationTitle": "Science",
+				"journalAbbreviation": "Science",
+				"volume": "340",
+				"issue": "6131",
+				"url": "http://www.sciencemag.org/content/340/6131/449",
+				"pages": "449-453",
+				"ISSN": "0036-8075, 1095-9203",
+				"extra": "PMID: 23620046",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.sciencemag.org",
+				"abstractNote": "Neurotransmitters have been thought to be fixed throughout life, but whether sensory stimuli alter behaviorally relevant transmitter expression in the mature brain is unknown. We found that populations of interneurons in the adult rat hypothalamus switched between dopamine and somatostatin expression in response to exposure to short- and long-day photoperiods. Changes in postsynaptic dopamine receptor expression matched changes in presynaptic dopamine, whereas somatostatin receptor expression remained constant. Pharmacological blockade or ablation of these dopaminergic neurons led to anxious and depressed behavior, phenocopying performance after exposure to the long-day photoperiod. Induction of newly dopaminergic neurons through exposure to the short-day photoperiod rescued the behavioral consequences of lesions. Natural stimulation of other sensory modalities may cause changes in transmitter expression that regulate different behaviors.\nDaylight Determines Dopamine\nExpression of the appropriate neurotransmitters is essential for the function of neural circuits. Can neurons change their transmitter phenotype to deal with alterations in the environment? Dulcis et al. (p. 449; see the Perspective by Birren and Marder) exposed adult rats to different photoperiods mimicking summer and winter daylengths. Neurotransmitter expression switched between dopamine and somatostatin in hypothalamic neurons that regulate release of corticotropin-releasing factor. Transmitter switching occurred at the transcriptional level and was accompanied by changes in postsynaptic receptors."
 			}
 		]
 	}

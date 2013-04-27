@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-04-10 13:00:52"
+	"lastUpdated": "2013-04-27 13:00:52"
 }
 
 /**
@@ -33,7 +33,7 @@
 //mimetype map for supplementary attachments
 var suppTypeMap = {
 	'pdf': 'application/pdf',
-	'zip': 'application/zip',
+//	'zip': 'application/zip',
 	'doc': 'application/msword',
 	'xls': 'application/vnd.ms-excel',
 	'excel': 'application/vnd.ms-excel'
