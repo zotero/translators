@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 13,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-04-29 01:52:38"
+	"lastUpdated": "2013-04-29 06:02:30"
 }
 
 /*****************************
@@ -60,7 +60,13 @@ function getUID(doc) {
 
 //retrieves a list of result nodes from a search results page (perhaps others too)
 function getResultList(doc) {
-	return ZU.xpath(doc, '//div[./div[@class="rslt"][./p[@class="title"] or ./h1]]');
+	var results = ZU.xpath(doc, '//div[./div[@class="rslt"][./p[@class="title"] or ./h1]]');
+	if(results.length) return results;
+	
+	//My Bibliography
+	results = ZU.xpath(doc, '//li[@class="citationListItem"]\
+		[./div[@class="chkBoxLeftCol"]/input[@ref-system="pubmed"]]');
+	return results;
 }
 
 function detectWeb(doc, url) {
@@ -98,9 +104,12 @@ function doWeb(doc, url) {
 		var items = {};
 		var title, uid;
 		for(var i=0, n=results.length; i<n; i++) {
-			title = ZU.xpathText(results[i], '(.//p[@class="title"]|.//h1)[1]');
+			title = ZU.xpathText(results[i], '(.//p[@class="title"]|.//h1)[1]')
+				|| ZU.xpathText(results[i], './div[@class="docsumRightcol"]/a'); //My Bibliography
 			uid = ZU.xpathText(results[i], './/input[starts-with(@id,"UidCheckBox")]/@value')
+				|| ZU.xpathText(results[i], './div[@class="chkBoxLeftCol"]/input/@ref-uid') //My Bibliography
 				|| ZU.xpathText(results[i], './/dl[@class="rprtid"]/dd[preceding-sibling::*[1][text()="PMID:"]]');
+				
 			if(!uid) {
 				uid = ZU.xpathText(results[i], './/p[@class="title"]/a/@href');
 				if(uid) uid = uid.match(/\/(\d+)/);
