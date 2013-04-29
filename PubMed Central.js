@@ -5,11 +5,11 @@
 	"target": "https?://[^/]*.nih.gov/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 101,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-03-01 16:36:30"
+	"lastUpdated": "2013-04-29 01:36:58"
 }
 
 function detectWeb(doc, url) {
