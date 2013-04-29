@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-04-27 07:35:11"
+	"lastUpdated": "2013-04-29 02:58:19"
 }
 
 /*
@@ -248,7 +248,7 @@ function addEmbMeta(doc) {
 		
 		//try to get PubMed ID and link if we don't already have it from EM
 		var pmDiv;
-		if(item.extra.search(/\bPMID:/) == -1
+		if((!item.extra || item.extra.search(/\bPMID:/) == -1)
 			&& (pmDiv = doc.getElementById('cb-art-pm'))) {
 			var pmId = ZU.xpathText(pmDiv, './/a[contains(@class, "cite-link")]/@href')
 					|| ZU.xpathText(pmDiv, './ol/li[1]/a/@href');	//e.g. http://www.pnas.org/content/108/52/20881.full
@@ -1094,29 +1094,24 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sciencemag.org/content/340/6131/449.full",
+		"url": "http://www.sciencemag.org/content/340/6131/483",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "Davide",
-						"lastName": "Dulcis",
+						"firstName": "Erica van de",
+						"lastName": "Waal",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Pouya",
-						"lastName": "Jamshidi",
+						"firstName": "Christèle",
+						"lastName": "Borgeaud",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Stefan",
-						"lastName": "Leutgeb",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Nicholas C.",
-						"lastName": "Spitzer",
+						"firstName": "Andrew",
+						"lastName": "Whiten",
 						"creatorType": "author"
 					}
 				],
@@ -1137,27 +1132,21 @@ var testCases = [
 						"snapshot": false
 					}
 				],
-				"itemID": "http://www.sciencemag.org/content/340/6131/449.full",
-				"title": "Neurotransmitter Switching in the Adult Brain Regulates Behavior",
-				"publisher": "American Association for the Advancement of Science",
-				"institution": "American Association for the Advancement of Science",
-				"company": "American Association for the Advancement of Science",
-				"label": "American Association for the Advancement of Science",
-				"distributor": "American Association for the Advancement of Science",
-				"date": "04/26/2013",
-				"DOI": "10.1126/science.1234152",
+				"itemID": "http://www.sciencemag.org/content/340/6131/483",
+				"DOI": "10.1126/science.1232769",
 				"language": "en",
-				"publicationTitle": "Science",
 				"journalAbbreviation": "Science",
-				"volume": "340",
 				"issue": "6131",
-				"url": "http://www.sciencemag.org/content/340/6131/449",
-				"pages": "449-453",
+				"url": "http://www.sciencemag.org/content/340/6131/483",
 				"ISSN": "0036-8075, 1095-9203",
-				"extra": "PMID: 23620046",
-				"accessDate": "CURRENT_TIMESTAMP",
+				"extra": "PMID: 23620053",
 				"libraryCatalog": "www.sciencemag.org",
-				"abstractNote": "Neurotransmitters have been thought to be fixed throughout life, but whether sensory stimuli alter behaviorally relevant transmitter expression in the mature brain is unknown. We found that populations of interneurons in the adult rat hypothalamus switched between dopamine and somatostatin expression in response to exposure to short- and long-day photoperiods. Changes in postsynaptic dopamine receptor expression matched changes in presynaptic dopamine, whereas somatostatin receptor expression remained constant. Pharmacological blockade or ablation of these dopaminergic neurons led to anxious and depressed behavior, phenocopying performance after exposure to the long-day photoperiod. Induction of newly dopaminergic neurons through exposure to the short-day photoperiod rescued the behavioral consequences of lesions. Natural stimulation of other sensory modalities may cause changes in transmitter expression that regulate different behaviors.\nDaylight Determines Dopamine\nExpression of the appropriate neurotransmitters is essential for the function of neural circuits. Can neurons change their transmitter phenotype to deal with alterations in the environment? Dulcis et al. (p. 449; see the Perspective by Birren and Marder) exposed adult rats to different photoperiods mimicking summer and winter daylengths. Neurotransmitter expression switched between dopamine and somatostatin in hypothalamic neurons that regulate release of corticotropin-releasing factor. Transmitter switching occurred at the transcriptional level and was accompanied by changes in postsynaptic receptors."
+				"abstractNote": "Conformity to local behavioral norms reflects the pervading role of culture in human life. Laboratory experiments have begun to suggest a role for conformity in animal social learning, but evidence from the wild remains circumstantial. Here, we show experimentally that wild vervet monkeys will abandon personal foraging preferences in favor of group norms new to them. Groups first learned to avoid the bitter-tasting alternative of two foods. Presentations of these options untreated months later revealed that all new infants naïve to the foods adopted maternal preferences. Males who migrated between groups where the alternative food was eaten switched to the new local norm. Such powerful effects of social learning represent a more potent force than hitherto recognized in shaping group differences among wild animals.\nAnimal Culture\nCultural transmission of information occurs when individuals learn from others with more experience or when individuals come to accept particular modes of behavior as the local norm. Such information transfer can be expected in highly social or long-lived species where contact and time for learning are maximized and are seen in humans (see the Perspective by de Waal). Using a network-based diffusion analysis on a long-term data set that includes tens of thousands of observations of individual humpback whales, Allen et al. (p. 485) show that an innovative feeding behavior has spread through social transmission since it first emerged in a single individual in 1980. The “lobtail” feeding has passed among associating individuals for more than three decades. Van de Waal et al. (p. 483), on the other hand, used a controlled experimental approach in vervet monkeys to show that individuals learn what to eat from more experienced individuals within their social group. Not only did young animals learn from observing older animals, but immigrating males switched their food preference to that of their new group.",
+				"title": "Potent Social Learning and Conformity Shape a Wild Primate’s Foraging Decisions",
+				"date": "04/26/2013",
+				"publicationTitle": "Science",
+				"volume": "340",
+				"pages": "483-485"
 			}
 		]
 	}
