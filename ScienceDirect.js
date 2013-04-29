@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-04-27 08:01:27"
+	"lastUpdated": "2013-04-29 03:09:44"
 }
 
 function detectWeb(doc, url) {
@@ -128,9 +128,20 @@ function scrapeByExport(doc) {
 	var pdfLink = getPDFLink(doc);
 	ZU.doGet(url, function(text) {
 		//select the correct form
-		text = text.match(/<form[^>]+name=(['"])exportCite\1[\s\S]+?<\/form>/)[0];
+		var form = text.match(/<form[^>]+name=(['"])exportCite\1[\s\S]+?<\/form>/);
+		if(form) {
+			form = form[0];
+		} else {
+			form = text.match(/<form[^>]*>/g);
+			if(!form) {
+				Z.debug('No forms found on page.');
+			} else {
+				Z.debug(form.join('\n*********\n'));
+			}
+			throw new Error('exportCite form could not be found.');
+		}
 
-		var postParams = getFormValues(text, [
+		var postParams = getFormValues(form, [
 						//'_ArticleListID',	//do we still need this?
 						'_acct', '_docType', '_eidkey',
 						'_method', '_ob', '_uoikey', '_userid', 'count',
