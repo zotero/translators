@@ -2,14 +2,14 @@
 	"translatorID": "8c1f42d5-02fa-437b-b2b2-73afc768eb07",
 	"label": "HighWire 2.0",
 	"creator": "Matt Burton",
-	"target": "^[^\\?]+(content/([0-9]+[A-Z\\-]*/(?:suppl_)?[0-9]+|current|firstcite|early)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
+	"target": "^[^\\?]+(content/([0-9]+[A-Z\\-]*/(?:suppl_)?[0-9]+|current|firstcite|early)|search\\?submit=|search(/results)?\\?fulltext=|cgi/collection/.+)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-04-30 06:06:51"
+	"lastUpdated": "2013-04-30 00:44:33"
 }
 
 /*
@@ -344,7 +344,8 @@ function doWeb(doc, url) {
 		}
 
 		var next_res, title, link;
-		var linkx = '(.//a)[1]/@href';
+		//block links to "Available Items" on some search pages
+		var linkx = '(.//a[not(contains(@href, "hasaccess.xhtml"))])[1]/@href';
 		var searchres = ZU.xpath(doc, searchx);
 		var items = new Object();
 		//Z.debug(searchres.length)
@@ -352,6 +353,7 @@ function doWeb(doc, url) {
 			next_res = searchres[i];
 			title = ZU.xpathText(next_res, titlex);
 			link = ZU.xpathText(next_res, linkx);
+			//Z.debug(title + ": " + link)
 			if(link && title) {
 				items[link] = title.trim();
 			}
@@ -1149,6 +1151,11 @@ var testCases = [
 				"pages": "483-485"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://oss.sagepub.com/search/results?fulltext=labor&x=0&y=0&submit=yes&journal_set=sposs&src=selected&andorexactfulltext=and",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
