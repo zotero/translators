@@ -2,14 +2,14 @@
 	"translatorID": "3e684d82-73a3-9a34-095f-19b112d88bbf",
 	"label": "Google Books",
 	"creator": "Simon Kornblith, Michael Berkowitz and Rintze Zelle",
-	"target": "^https?://(books|www)\\.google\\.[a-z]+(\\.[a-z]+)?/(books(?:\\/.*)?\\?(.*id=.*|.*q=.*)|search\\?.*?btnG=Search\\+Books)",
+	"target": "^https?://(books|www)\\.google\\.[a-z]+(\\.[a-z]+)?/(books(?:\\/.*)?\\?(.*id=.*|.*q=.*)|search\\?.*?btnG=Search\\+Books)|^https?://play\\.google\\.[a-z]+(\\.[a-z]+)?\\/(store\\/)?(books|search\\?.+&c=books)",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-02-15 12:21:32"
+	"lastUpdated": "2013-04-30 15:21:37"
 }
 
 /*
@@ -28,9 +28,18 @@ http://books.google.com/books?hl=en&lr=&id=Ct6FKwHhBSQC&oi=fnd&pg=PP9&dq=%22Pegg
 Single item - URL with "vid" (see http://code.google.com/apis/books/docs/static-links.html)
 http://books.google.com/books?printsec=frontcover&vid=ISBN0684181355&vid=ISBN0684183951&vid=LCCN84026715#v=onepage&q&f=false
 
+Personal play store book lists
+https://play.google.com/books (no test)
+
+Play Store Individual Books
+https://play.google.com/store/books/details/Adam_Smith_The_Wealth_of_Nations?id=-WxKAAAAYAAJ
+
+Play Store Book Searches
+https://play.google.com/store/search?q=doyle+arthur+conan&c=books
+
 */
 
-var singleRe = /^http:\/\/(?:books|www)\.google\.[a-z]+(?:\.[a-z]+)?\/books(?:\/.*)?\?(?:[^q].*&)?(id|vid)=([^&]+)/i;
+var singleRe = /^https?:\/\/(?:books|www|play)\.google\.[a-z]+(?:\.[a-z]+)?(?:\/store)?\/books(?:\/.*)?\?(?:[^q].*&)?(id|vid)=([^&]+)/i;
 
 function detectWeb(doc, url) {
 	if(singleRe.test(url)) {
@@ -42,13 +51,9 @@ function detectWeb(doc, url) {
 
 var itemUrlBase;
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-		} : null;
 	
 	// get local domain suffix
-	var psRe = new RegExp("https?://(books|www)\.google\.([^/]+)/");
+	var psRe = new RegExp("https?://(books|www|play)\.google\.([^/]+)/");
 	var psMatch = psRe.exec(url);
 	var suffix = psMatch[2];
 	var prefix = "books"; //Where is it not books? psMatch[1];
@@ -56,13 +61,14 @@ function doWeb(doc, url) {
 	
 	var m = singleRe.exec(url);
 	if(m && m[1] == "id") {
-		ZU.doGet("http://books.google.com/books/feeds/volumes/"+m[2], parseXML, function() { Z.done() });
+		ZU.doGet("http://books.google.com/books/feeds/volumes/"+m[2], parseXML);
 	} else if (m && m[1] == "vid") {
 		var itemLinkWithID = ZU.xpath(doc, '/html/head/link[@rel="canonical"]')[0].href;
 		var m = singleRe.exec(itemLinkWithID);
-		ZU.doGet("http://books.google.com/books/feeds/volumes/"+m[2], parseXML, function() { Z.done() });
+		ZU.doGet("http://books.google.com/books/feeds/volumes/"+m[2], parseXML);
 	} else {
 		var items = getItemArrayGB(doc, doc, 'google\\.' + suffix + '/books\\?id=([^&]+)', '^(?:All matching pages|About this Book|Table of Contents|Index)');
+		//Z.debug(items)
 		// Drop " - Page" thing
 		//Zotero.debug(items);
 		for(var i in items) {
@@ -70,17 +76,19 @@ function doWeb(doc, url) {
 		}
 		Zotero.selectItems(items, function(items) {
 			if(!items) Z.done();
-			
+			var baseurl = url.match(psRe)[0];
 			var newUris = [];
 			for(var i in items) {
+				//the singleRe has the full URL - we may only be getting the URL w/o host correct for that.
+				if (i.search(psRe)===-1){
+					i = baseurl.replace(/\/$/, "") + i;
+				}
 				var m = singleRe.exec(i);
 				newUris.push("http://books.google.com/books/feeds/volumes/"+m[2]);
 			}
-			ZU.doGet(newUris, parseXML, function() { Z.done() });
+			ZU.doGet(newUris, parseXML);
 		});
 	}
-	
-	Z.wait();
 }
 	
 function parseXML(text) {
@@ -152,10 +160,6 @@ function parseXML(text) {
  *	Zotero.selectItems from within a translator
  */
 function getItemArrayGB (doc, inHere, urlRe, rejectRe) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-		} : null;
 	
 	var availableItems = new Object();	// Technically, associative arrays are objects
 
@@ -171,7 +175,19 @@ function getItemArrayGB (doc, inHere, urlRe, rejectRe) {
 		}
 		return availableItems;
 	}
-	
+
+	var googleplay = ZU.xpath(doc, '//div[@class="details goog-inline-block"]//a[@class="title"]');
+	if(googleplay.length) {
+		for(var i=0, n=googleplay.length; i<n; i++) {
+			var link = ZU.xpathText(googleplay[i], './@href');
+			var title = googleplay[i].textContent;
+			if(link && title) {
+				availableItems[link] = title;
+			}
+		}
+		return availableItems;
+	}
+
 	// Require link to match this
 	if(urlRe) {
 		if(urlRe.exec) {
@@ -196,7 +212,7 @@ function getItemArrayGB (doc, inHere, urlRe, rejectRe) {
 	}
 	
 	for(var j=0; j<inHere.length; j++) {
-		var coverView = doc.evaluate('//div[@class="thumbotron"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();//Detect Cover view
+		var coverView = doc.evaluate('//div[@class="thumbotron"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();//Detect Cover view
 		if(coverView){
 			var links = inHere[j].getElementsByTagName("a");
 			for(var i=0; i<links.length; i++) {
@@ -429,6 +445,43 @@ var testCases = [
 		"type": "web",
 		"url": "http://books.google.com/books?q=editions:HARVARD32044100176072&id=nFMSAAAAYAAJ",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://play.google.com/store/search?q=doyle+arthur+conan&c=books",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://play.google.com/store/books/details/Adam_Smith_The_Wealth_of_Nations?id=-WxKAAAAYAAJ",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Adam",
+						"lastName": "Smith",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Google Books Link",
+						"snapshot": false,
+						"mimeType": "text/html"
+					}
+				],
+				"numPages": "458",
+				"publisher": "Collier",
+				"title": "The Wealth of Nations",
+				"language": "en",
+				"date": "1902",
+				"libraryCatalog": "Google Books"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
