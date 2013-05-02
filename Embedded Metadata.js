@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-04-27 07:23:06"
+	"lastUpdated": "2013-05-02 08:08:29"
 }
 
 /*
@@ -454,7 +454,7 @@ function addHighwireMetadata(doc, newItem) {
 	//e.g. http://www.sciencemag.org/content/332/6032/977.full
 	var PMID = getContentText(doc, 'citation_pmid');
 	if(PMID) {
-		if(newItem.extra) item.extra += '\n';
+		if(newItem.extra) newItem.extra += '\n';
 		else newItem.extra = '';
 		
 		newItem.extra += 'PMID: ' + PMID;
