@@ -3,21 +3,106 @@
 	"label": "Amazon.com",
 	"creator": "Sean Takats and Michael Berkowitz",
 	"target": "^https?://(?:www\\.)?amazon",
-	"minVersion": "2.1",
+	"minVersion": "3.0.9",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 101,
 	"inRepository": true,
-	"translatorType": 4,
+	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-04-02 14:54:05"
+	"lastUpdated": "2013-04-22 05:40:03"
+}
+
+function detectSearch(item) {
+	if(item.ISBN && ZU.cleanISBN(item.ISBN)) {
+		return true;
+	}
+}
+
+function doSearch(item) {
+	var isbn = ZU.cleanISBN(item.ISBN).replace(/[^0-9x]+/ig, '');
+	var url = "http://www.amazon.com/gp/search/ref=sr_adv_b/?"
+		+ "search-alias=stripbooks&unfiltered=1&field-isbn=" + isbn;
+Z.debug(url);
+	ZU.processDocuments(url, function(doc, url) {
+//Z.debug(doc.body.innerHTML);
+Z.debug(url);
+		//check if we have any results
+		var count = getSearchResults(doc, url, {});
+Z.debug(count);
+		if(!count) return;
+		
+		//load self so we can use itemDone and select handlers
+		var translator = Zotero.loadTranslator("web");
+		translator.setTranslator("96b9f483-c44d-5784-cdad-ce21b984fe01");
+		translator.setDocument(doc);
+		
+		translator.setHandler("select", function(obj, items, callback) {
+			//select first
+			var id;
+			for(id in items) {
+Z.debug("selecting " + id);
+				callback([id]);
+				return;
+			}
+		});
+		
+		translator.setHandler("itemDone", function(obj, item) {
+Z.debug(item);
+			//verify that we got the right isbn
+			if(!item.ISBN) return;
+			
+			var newISBN = ZU.cleanISBN(item.ISBN);
+			if(!newISBN) return;
+			
+			if(isbn != newISBN.replace(/[^0-9x]+/ig, '')) return;
+			
+			item.complete();
+		});
+		
+		translator.translate();
+	});
+}
+
+function getSearchResults(doc, url, availableItems) {
+	if(url.search(/gp\/richpub\//) != -1){ // Show selector for Guides
+		var xpath = '//a[(contains(@href, "ref=cm_syf_dtl_pl") or contains(@href, "ref=cm_syf_dtl_top")) and preceding-sibling::b]';
+	} else if (url.search(/\/lm\//) != -1) { // Show selector for Lists
+		var xpath = '//span[@id="lm_asinlink95"]//a'
+	} else { // Show selector for Search results
+		var xpath = '//div[@class="productTitle"]/a |//div[@id="init-container"]//span[@class="small productTitle"]//a | //div[@class="wedding"]//span[@class="small productTitle"]//a |//a[span[@class="srTitle"]] | //div[@class="title"]/a[@class="title"]| //h3[@class="title"]/a[@class="title"] | //h3[@class="newaps"]/a';
+	}
+Z.debug(xpath);
+	var elmts = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
+	var elmt, i=0;
+	var asinRe = /\/(?:dp|product)\/([^\/]+)\//;
+	var asinMatch
+	while(elmt = elmts.iterateNext()) {
+		var link = elmt.href;
+Z.debug(elmt);
+Z.debug(elmt.outerHTML);
+Z.debug(link);
+		if(asinMatch = asinRe.exec(link)) {
+			availableItems[asinMatch[1]] = elmt.textContent;
+			i++;
+		}
+	}
+	return i;
+}
+
+function getSuffix(url) {
+	return url.match(/https?:\/\/(?:www\.)?amazon\.([^\/]+)\//)[1];
+}
+
+function isUrlForMultiple(url, suffix) {
+	if(!suffix) suffix = getSuffix(url);
+	var searchRe = new RegExp('^https?://(?:www\.)?amazon\.' + suffix
+		+ '/(gp/search/|(gp/)?registry/(wishlist|registry)|'
+		+ 'exec/obidos/search-handle-url/|s/|s\\?|[^/]+/lm/|gp/richpub/)');
+	return searchRe.test(url);
 }
 
 function detectWeb(doc, url) {
-	var suffixRe = new RegExp("https?://(?:www\.)?amazon\.([^/]+)/");
-	var suffixMatch = suffixRe.exec(url);
-	var suffix = suffixMatch[1];
-	var searchRe = new RegExp('^https?://(?:www\.)?amazon\.' + suffix + '/(gp/search/|(gp/)?registry/(wishlist|registry)|exec/obidos/search-handle-url/|s/|s\\?|[^/]+/lm/|gp/richpub/)');
-	if(searchRe.test(doc.location.href)) {
+	if(isUrlForMultiple(url)) {
 		return (Zotero.isBookmarklet ? "server" : "multiple");
 	} else {
 		var xpath = '//input[@name="ASIN"]';
@@ -49,40 +134,15 @@ function detectWeb(doc, url) {
 
 var suffix;
 function doWeb(doc, url) {
-	var suffixRe = new RegExp("https?://(?:www\.)?amazon\.([^/]+)/");
-	var suffixMatch = suffixRe.exec(url);
-	suffix = suffixMatch[1];
-
-	var searchRe = new RegExp('^https?://(?:www\.)?amazon\.' + suffix + '/(gp/search/|(gp/)?registry/(wishlist|registry)|exec/obidos/search-handle-url/|s/|s\\?|[^/]+/lm/|gp/richpub/)');
-	var m = searchRe.exec(doc.location.href);
-	var uris = new Array();
+	var realSuffix = getSuffix(url);
+	suffix = realSuffix;
 	if (suffix == ".com") suffix = "com";
-	if(m) {
-		var availableItems = new Array();
-		
-		
-		if(doc.location.href.match(/gp\/richpub\//)){ // Show selector for Guides
-			var xpath = '//a[(contains(@href, "ref=cm_syf_dtl_pl") or contains(@href, "ref=cm_syf_dtl_top")) and preceding-sibling::b]';
-		} else if (doc.location.href.match(/\/lm\//)) { // Show selector for Lists
-			var xpath = '//span[@id="lm_asinlink95"]//a'
-		} else { // Show selector for Search results
-			var xpath = '//div[@class="productTitle"]/a |//div[@id="init-container"]//span[@class="small productTitle"]//a | //div[@class="wedding"]//span[@class="small productTitle"]//a |//a[span[@class="srTitle"]] | //div[@class="title"]/a[@class="title"]| //h3[@class="title"]/a[@class="title"] | //h3[@class="newaps"]/a';
-		}
-		var elmts = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
-		var elmt = elmts.iterateNext();
-		var asins = new Array();
-		var i = 0;
-		var asinRe = new RegExp('/(dp|product)/([^/]+)/');
-		do {
-			var link = elmt.href;
-			var searchTitle = elmt.textContent;
-			if  (asinRe.exec(link)) {
-				var asinMatch = asinRe.exec(link);
-				availableItems[i] = searchTitle;
-				asins[i] = asinMatch[2];
-				i++;
-			}
-		} while (elmt = elmts.iterateNext());
+	
+	var uris = new Array();
+	
+	if(isUrlForMultiple(url, realSuffix)) {
+		var availableItems = {};
+		getSearchResults(doc, url, availableItems);
 		
 		Zotero.selectItems(availableItems, function(items) {
 			if(!items) {
@@ -91,16 +151,22 @@ function doWeb(doc, url) {
 			
 			for(var i in items) {
 				var timestamp = encodeURIComponent(generateISODate());
-				var params = "AWSAccessKeyId=AKIAIPYIWJ24AGZJ64AA&AssociateTag=httpwwwdig0e7-20&ItemId=" + Zotero.Utilities.trim(asins[i]) + "&Operation=ItemLookup&ResponseGroup=ItemAttributes&Service=AWSECommerceService&Timestamp="+timestamp+"&Version=2011-08-01";
-				var signString = "GET\nwebservices.amazon."+suffix+"\n/onca/xml\n"+params;
+				var params = "AWSAccessKeyId=AKIAIPYIWJ24AGZJ64AA"
+					+ "&AssociateTag=httpwwwdig0e7-20"
+					+ "&ItemId=" + Zotero.Utilities.trim(i)
+					+ "&Operation=ItemLookup&ResponseGroup=ItemAttributes"
+					+ "&Service=AWSECommerceService&Timestamp=" + timestamp
+					+ "&Version=2011-08-01";
+				var signString = "GET\nwebservices.amazon." + suffix
+					+ "\n/onca/xml\n" + params;
 				var signature = b64_hmac_sha256("054vk/Lt3LJMxch1srIHUbvI+2T/fZ6E5c0qwlbj", signString);
 				signature = encodeURIComponent(signature);
-				uris.push("http://webservices.amazon." + suffix + "/onca/xml?"+params+"&Signature="+signature+"%3D"); //wants the %3D for some reason
+				uris.push("http://webservices.amazon." + suffix + "/onca/xml?"
+					+ params + "&Signature=" + signature + "%3D"); //wants the %3D for some reason
 			}
 			
 			Zotero.Utilities.HTTP.doGet(uris, parseXML);
 		});
-
 	} else {
 		var elmts = doc.evaluate('//input[@name = "ASIN"]', doc, null, XPathResult.ANY_TYPE, null);
 		var elmt;
