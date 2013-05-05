@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-04-07 12:26:17"
+	"lastUpdated": "2013-05-05 12:24:46"
 }
 
 function getSearchResults(doc) {
@@ -67,8 +67,14 @@ function scrape(doc, url) {
 
 		var newItem = new Zotero.Item();
 		//newItem.repository = "SUDOC"; // do not save repository
-		Zotero.Utilities.parseContextObject(coins, newItem);
-
+		//make sure we don't get stuck because of a COinS error
+		var coinserror = false;
+		try {(Zotero.Utilities.parseContextObject(coins, newItem))}
+		catch(e) {
+			Z.debug("error parsing COinS");
+			coinserror = true;
+			}
+		if (!coinserror) Zotero.Utilities.parseContextObject(coins, newItem)
 		/** we need to clean up the results a bit **/
 		//pages should not contain any extra characters like p. or brackets (what about supplementary pages?)
 		if(newItem.pages) newItem.pages = newItem.pages.replace(/[^\d-]+/g, '');
