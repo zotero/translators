@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-08-27 04:30:05"
+	"lastUpdated": "2013-05-08 15:12:03"
 }
 
 /*
@@ -159,9 +159,6 @@ var testCases = [
 					}
 				],
 				"notes": [
-					{
-						"note": "Includes index."
-					},
 					{
 						"note": "edited by Peter B. Evans, Dietrich Rueschemeyer, Theda Skocpol"
 					}

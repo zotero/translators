@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-02-25 21:39:23"
+	"lastUpdated": "2013-05-08 15:02:39"
 }
 
 function detectWeb(doc, url) {
@@ -29,6 +29,7 @@ function getRIS(link) {
 			item.repository = "Copernicus Online Journals";
 			if(item.attachments[0]) {
 				item.attachments[0].title = item.publicationTitle + " PDF";
+				item.attachments[0].mimeType = "application/pdf";
 			}
 
 			item.attachments.push({

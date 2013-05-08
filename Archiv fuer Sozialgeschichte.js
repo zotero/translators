@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2013-04-27 23:32:20"
+	"lastUpdated": "2013-05-08 14:58:21"
 }
 
 /*
@@ -142,7 +142,7 @@ var testCases = [
 				"language": "de-DE",
 				"url": "http://library.fes.de/jportal/receive/jportal_jparticle_00010003",
 				"journalAbbreviation": "AFS",
-				"libraryCatalog": "FES",
+				"libraryCatalog": "Archiv fuer Sozialgeschichte",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Karl Radek in Berlin"
 			}

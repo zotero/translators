@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-04-14 21:18:46"
+	"lastUpdated": "2013-05-08 15:10:53"
 }
 
 /*
@@ -273,40 +273,41 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://pica1l.ulb.tu-darmstadt.de/DB=FHBWI/PPN?PPN=221765255",
+		"url": "https://pica1l.ulb.tu-darmstadt.de/DB=LHBDA/PPN?PPN=245962255",
 		"items": [
 			{
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "Bernie",
-						"lastName": "Borges",
+						"firstName": "William Somerset",
+						"lastName": "Maugham",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "Thomas",
+						"lastName": "Stölzel",
+						"creatorType": "editor"
 					}
 				],
 				"notes": [
-					"Bestand: u? [Signatur: 20 HKM 212 263];u? [Signatur: 20 HKM 212 263];"
+					"Bestand: ubi? [Signatur: /HM 3575 M449];",
+					"Bibliogr. W. Somerset Maugham S. 214 - [223]"
 				],
 				"tags": [
-					"",
-					"Marketing / World Wide Web 2.0"
+					"Maugham",
+					"William Somerset"
 				],
 				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Link to Library Catalog",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
-				"title": "Marketing 2.0: bridging the gap between seller and buyer through social media marketing",
-				"place": "Tucson, Ariz.",
-				"publisher": "Wheatmark",
-				"date": "2009",
-				"ISBN": "978-1-60494-288-0",
-				"numPages": "XII, 299",
-				"libraryCatalog": "Katalog - Hochschule RheinMain",
-				"shortTitle": "Marketing 2.0"
+				"attachments": [],
+				"title": "W. Somerset Maugham - Leben und Werk",
+				"series": "Diogenes-Taschenbuch ; 23911",
+				"place": "Zürich",
+				"publisher": "Diogenes",
+				"date": "2011",
+				"edition": "Orig.-Ausg.",
+				"ISBN": "978-3-257-23911-9 ; 3-257-23911-4",
+				"numPages": "222",
+				"libraryCatalog": "Katalog - ULB DA"
 			}
 		]
 	}

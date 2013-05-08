@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-04-02 14:54:05"
+	"lastUpdated": "2013-05-08 14:53:45"
 }
 
 function detectWeb(doc, url) {
@@ -58,7 +58,7 @@ function doWeb(doc, url) {
 	var uris = new Array();
 	if (suffix == ".com") suffix = "com";
 	if(m) {
-		var availableItems = new Array();
+		var availableItems = {};
 		
 		
 		if(doc.location.href.match(/gp\/richpub\//)){ // Show selector for Guides
@@ -66,7 +66,7 @@ function doWeb(doc, url) {
 		} else if (doc.location.href.match(/\/lm\//)) { // Show selector for Lists
 			var xpath = '//span[@id="lm_asinlink95"]//a'
 		} else { // Show selector for Search results
-			var xpath = '//div[@class="productTitle"]/a |//div[@id="init-container"]//span[@class="small productTitle"]//a | //div[@class="wedding"]//span[@class="small productTitle"]//a |//a[span[@class="srTitle"]] | //div[@class="title"]/a[@class="title"]| //h3[@class="title"]/a[@class="title"] | //h3[@class="newaps"]/a';
+			var xpath = '//div[@class="productTitle"]/a |//div[@id="init-container"]//span[@class="small productTitle"]//a | //div[@class="wedding" or @class="list-items"]//span[@class="small productTitle"]//a |//a[span[@class="srTitle"]] | //div[@class="title"]/a[@class="title"]| //h3[@class="title"]/a[@class="title"] | //h3[@class="newaps"]/a';
 		}
 		var elmts = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 		var elmt = elmts.iterateNext();
@@ -75,7 +75,7 @@ function doWeb(doc, url) {
 		var asinRe = new RegExp('/(dp|product)/([^/]+)/');
 		do {
 			var link = elmt.href;
-			var searchTitle = elmt.textContent;
+			var searchTitle = elmt.textContent.trim();
 			if  (asinRe.exec(link)) {
 				var asinMatch = asinRe.exec(link);
 				availableItems[i] = searchTitle;
@@ -721,14 +721,13 @@ var testCases = [
 					{
 						"title": "Amazon.com Link",
 						"snapshot": false,
-						"mimeType": "text/html",
-						"url": "http://www.amazon.com/dp/B00005JLRE"
+						"mimeType": "text/html"
 					}
 				],
 				"studio": "Sony Pictures Home Entertainment",
 				"videoRecordingType": "DVD",
 				"runningTime": "114",
-				"date": "2003-05-20",
+				"date": "2003",
 				"ISBN": "0767879805",
 				"title": "Adaptation",
 				"libraryCatalog": "Amazon.com"
