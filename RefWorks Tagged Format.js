@@ -13,8 +13,8 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"browserSupport": "gcs",
-	"lastUpdated": "2013-04-23 17:01:51"
+	"browserSupport": "gcsv",
+	"lastUpdated": "2013-05-08 23:03:38"
 }
 
 /*This Translator mirrors closely Aurimas Vinckevicius' RIS translator

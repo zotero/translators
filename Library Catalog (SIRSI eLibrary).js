@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsib",
-	"lastUpdated": "2013-02-07 23:02:33"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2013-05-08 23:03:38"
 }
 
 /* Based on the SIRSI translator by Simon Kornblith and Michael Berkowitz,
