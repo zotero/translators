@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-12-13 20:15:03"
+	"lastUpdated": "2013-05-07 18:18:30"
 }
 
 /*
@@ -30,7 +30,7 @@ function detectWeb(doc, url) {
 			case "weekly":
 			case "daily":
 			case "article":
-				return "newspaperArticle";
+				return "magazineArticle";
 			case "blogPost":    
 				return "blogPost";
 			default:
@@ -101,7 +101,8 @@ function doWeb (doc, url) {
 			
 			// We keep the Chronicle as the Website Type, for lack of a better place
 			item.websiteType = item.publicationTitle;
-			item.publicationTitle = doc.evaluate('//div[@class="header-breadcrumb-wrap"]/ul/li[last()]/a', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			item.publicationTitle = ZU.xpathText(doc, '//div[@class="search-wrap"]//a');
+			item.publicationTitle = item.publicationTitle.replace(/back to\s*/, "");
 		} else {
 			var dateline = doc.evaluate('//p[@class="dateline"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
 			if (dateline !== null) {
@@ -232,7 +233,7 @@ var testCases = [
 		"url": "http://chronicle.com/article/Grinnells-Green-Secrets/2653/",
 		"items": [
 			{
-				"itemType": "newspaperArticle",
+				"itemType": "magazineArticle",
 				"creators": [
 					{
 						"firstName": "Xiao-Bo",
@@ -250,14 +251,13 @@ var testCases = [
 					}
 				],
 				"url": "http://chronicle.com/article/Grinnells-Green-Secrets/2653/",
-				"ISSN": "0009-5982",
-				"section": "News : Short Subjects",
-				"edition": "Volume 52, Issue 41",
-				"libraryCatalog": "The Chronicle of Higher Education",
 				"publicationTitle": "The Chronicle of Higher Education",
+				"ISSN": "0009-5982",
 				"date": "June 16, 2006",
 				"title": "Grinnell's Green Secrets",
-				"pages": "A9"
+				"section": "News",
+				"libraryCatalog": "The Chronicle of Higher Education",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -284,7 +284,7 @@ var testCases = [
 					}
 				],
 				"url": "http://chronicle.com/blogPost/humanities-cyberinfrastructure-project-bamboo/6138",
-				"publicationTitle": "From the Archives: Brainstorm",
+				"publicationTitle": "Brainstorm",
 				"ISSN": "0009-5982",
 				"date": "July 17, 2008, 01:29 PM ET",
 				"title": "Humanities Cyberinfrastructure: Project Bamboo",
