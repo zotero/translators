@@ -1,4 +1,4 @@
-25  # Increment number when modifying file
+26  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -61,6 +61,5 @@ e85a3134-8c1a-8644-6926-584c8565f23e # History Cooperative - site discontinued
 a2363670-7040-4cb9-8c48-6b96584e92ee # Florida University Libraries (Endeca 1) - replaced by Library Catalog (Mango)
 daa26181-71d4-48ef-8cac-54c06ff4c20e # Citebase - no longer exists
 9220fa99-b936-430e-a8ea-43ca6cb04145 # AGU Journals - moved to Wiley
-032ae9b7-ab90-9205-a479-baf81f49184a # TEI - E4X-based; dead as of Firefox 17
 cae7d3ec-bc8d-465b-974f-8b0dcfe24290 # BIUM - moved to a (supported) Dynix catalog
 e9632edc-8032-4dc5-b2d4-284d481583e6 # SAE Inernational - replaced by SAE Papers 
