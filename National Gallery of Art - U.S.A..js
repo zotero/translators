@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-05-08 16:26:41"
+	"lastUpdated": "2013-05-09 15:03:14"
 }
 
 function detectWeb(doc, url) {
@@ -104,11 +104,13 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.nga.gov/content/ngaweb/Collection/artist-info.1951.html",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "http://www.nga.gov/content/ngaweb/collection-search-result.html?artist=",
+		"defer": true,
 		"items": "multiple"
 	}
 ]
