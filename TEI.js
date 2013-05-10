@@ -19,7 +19,7 @@
 		"Full TEI Document": false,
 		"Export Collections": false
 	},
-	"lastUpdated": "2013-03-25 23:00:00"
+	"lastUpdated": "2013-05-10 15:30:00"
 }
 
 // ********************************************************************
@@ -419,8 +419,7 @@ function generateItem(item, teiDoc) {
 
     // flag unpublished if there is no date | publisher | place
     if(!(item.date || item.publisher || item.place)){
-        var publisher = teiDoc.createElementNS(ns.tei, "publisher");
-        publisher.appendChild(teiDoc.createTextNode("unpublished"));
+        publisher = teiDoc.createComment("  no publisher, publication date or place given  ");
         imprint.appendChild(publisher);
     }
     if(item.accessDate){
@@ -446,11 +445,13 @@ function generateItem(item, teiDoc) {
     if(Zotero.getOption("exportNotes")) {
         for(var n in item.notes) {
             // do only some basic cleaning of the html
-            var noteText = item.notes[n].note.replace(/<(([^>"]*)|("[^"]*"))+>/g,"")
+            // strip HTML tags
+            var noteText = Zotero.Utilities.cleanTags(item.notes[n].note);
+            // unescape remaining entities -> no double escapes
+            noteText = Zotero.Utilities.unescapeHTML(noteText);
             var note = teiDoc.createElementNS(ns.tei, "note");
             note.appendChild(teiDoc.createTextNode(noteText));
             bibl.appendChild(note);
-            // bibl.appendChild(<note>{item.notes[n].note.replace(/<\/?[a-zA-Z][a-zA-Z0-9]*( +[a-zA-Z][a-zA-Z0-9]*=\"[-_a-zA-Z0-9 ,.;:]*\")*\/?>/g,"")}</note>);
         }
     }
 
