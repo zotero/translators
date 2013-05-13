@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-02-06 23:57:46"
+	"lastUpdated": "2013-05-12 18:08:35"
 }
 
 /*
@@ -178,7 +178,7 @@ Zotero.Utilities.HTTP.doGet(url, function(page){
 	}
 	
 	// 简介
-	var tags = ZU.xpath(doc, '//div[@id="db-tags-section"]/div/a');
+	var tags = ZU.xpath(doc, '//div[@id="db-tags-section"]/div//a');
 	for (i in tags){
 		newItem.tags.push(tags[i].textContent)
 	}
