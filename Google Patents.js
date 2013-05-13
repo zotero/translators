@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-23 20:51:41"
+	"lastUpdated": "2013-05-12 18:04:34"
 }
 
 function detectWeb(doc, url) {
@@ -192,7 +192,7 @@ var scrapers = [
 	{
 		detect: function(doc) { return this.getRows(doc).length; },
 		getRows: function(doc) {
-			return ZU.xpath(doc, '//table[contains(@class,"patent-bibdata")]//tr[not(@class)][./td[@class="patent-bibdata-heading"]]');
+			return ZU.xpath(doc, '//table[contains(@class,"patent-bibdata")]//tr[not(@class) or @class=""][./td[@class="patent-bibdata-heading"]]');
 		},
 		getMetadata: function(doc) {
 			var rows = this.getRows(doc);
@@ -201,6 +201,7 @@ var scrapers = [
 			for(var i=0, n=rows.length; i<n; i++) {
 				label = ZU.xpathText(rows[i], './td[@class="patent-bibdata-heading"]');
 				values = ZU.xpath(rows[i], './td[@class="single-patent-bibdata"]|.//div[@class="patent-bibdata-value"]');
+				//Z.debug(label)
 				if(!values.length) continue;
 				//Z.debug("European")
 				switch(label.trim().toUpperCase()) {
@@ -212,6 +213,7 @@ var scrapers = [
 						if(!zField) zField = 'filingDate';
 					case 'APPLICANT':
 					case 'ASSIGNEE':
+					case 'ORIGINAL ASSIGNEE':
 						if(!zField) zField = 'assignee';
 						fields[zField] = values[0].textContent.trim();
 					break;
@@ -543,7 +545,7 @@ var testCases = [
 				"date": "Jul 18, 2007",
 				"filingDate": "Jan 16, 2006",
 				"assignee": "Billon, Michel",
-				"extra": "International Classification: C02F1/00\nU.S. Classification: E03B 1/04B2; E03D 5/00B1; E03B 1/04; E03D 5/00B",
+				"extra": "International Classification: C02F1/00\nU.S. Classification: E03B1/04B2; E03D5/00B1; E03B1/04; E03D5/00B",
 				"title": "Device for recycling sanitary water",
 				"abstractNote": "The installation for recycling used water originating from sanitary equipment and re-use of water for rinsing a water closet bowl, comprises a control system having an electronic terminal with a micro controller, and an additional drain to pour an overflow of a tank directly in an evacuation pipe of the water closet bowl. The water closet bowl is equipped with a flush water saver system, which surmounts the bowl. The saver system comprises tank (3) with a water reserve, and a water-flushing device placed in the tank to supply the flush water to the water closet bowl. The installation for recycling used water originating from sanitary equipment and re-use of water for rinsing a water closet bowl, comprises a control system having an electronic terminal with a micro controller, and an additional drain to pour an overflow of a tank directly in an evacuation pipe of the water closet bowl. The water closet bowl is equipped with a flush water saver system, which surmounts the bowl. The saver system comprises tank (3) with a water reserve, and a water-flushing device placed in the tank to supply the flush water to the water closet bowl, water supply pipes, a filter and a raising pump are arranged in one of the pipes, a water level detector to control the water reserve level contained in the tank, and a flapper valve to control the arrival of running water. The flapper valve is normally closed and temporarily opened when quantity of water contained in the tank is lower than a predetermined quantity detected by the detector. The water-flushing device comprises a drain valve (25A) with a vertical actuation inside a flow regulation tube, which extends on all the height of the tank and communicates with the rest of the tank by openings in lateral surface of the tube. The drain valve is operated automatically by a motor reducer, which is connected to the valve by a rod and a chain. The drain valve is equipped with a cam and limit switch. The level detector comprises a probe connected to the flapper valve. One of the water supply pipes comprises a flow regulator in which the pipe is bent so as to present an outlet opening in the bottom of the tank. The sanitary equipment generates used water comprises bathtub, shower and/or washbasin. The capacity of the tank is higher than 150 liters. The used water path is traversed between the sanitary equipment and the tank. The filter is placed in an upstream of the pump. The filter comprises a basket filter for a coarse filtration, a float sensor and reed contact, and an outlet towards the overflow discharge. The basket filter contains a solid preference product for the used water treatment, which dissolves gradually during draining by sanitary equipment. The raising pump is equipped with a plunger of automatic startup when water is reached a predetermined level, a non-return valve, and a venting device. The control system comprises a device to regulate/modify the volume of water supplied by the actuation of the flushing water, and a device to- control the flow of the water in the tank, and check and display the electronic installation, the pump and the filter. The terminal comprises display board e.g. liquid crystals, which allows message display. The control system is programmed to operate the actuator periodically in the drain valve. Another water supply pipe in the tank is connected by an upstream of the flapper valve with a rainwater collection device. The water closet bowl is connected to a forced ventilation device.",
 				"country": "European Union",
@@ -572,7 +574,7 @@ var testCases = [
 				"date": "Jun 11, 1980",
 				"filingDate": "Nov 6, 1979",
 				"assignee": "Merck & Co., Inc.",
-				"extra": "International Classification: D06M15/01; C08L5/00; C08B37/00\nU.S. Classification: D06M 15/01; C08B 37/00P6",
+				"extra": "International Classification: D06M15/01; C08L5/00; C08B37/00\nU.S. Classification: D06M15/01; C08B37/00P6",
 				"title": "Cold-water soluble tamarind gum, process for its preparation and its application in sizing textile warp",
 				"abstractNote": "A novel composition of crude tamarind kernel powder (TKP) is disclosed. The novel composition results from a process which makes TKP soluble in cold water; this process is not dependent on purification of TKP, but involves dissolving it in hot water and evaporating the resulting solution. The novel TKP composition has utility in textile, paper, and oilfield applications.",
 				"country": "European Union",
@@ -606,7 +608,7 @@ var testCases = [
 				"date": "May 31, 1988",
 				"filingDate": "Feb 10, 1987",
 				"assignee": "Craig, Jr.; Chester L.",
-				"extra": "International Classification: A47G33/00; A47G33/06\nU.S. Classification: A47G 33/06",
+				"extra": "International Classification: A47G33/00; A47G33/06\nU.S. Classification: A47G33/06",
 				"title": "Artificial tree",
 				"abstractNote": "An artificial tree assembly, and a tree constructed therefrom, are provided. The assembly comprises a collapsible three-piece pole; a base member formed by the bottom of a box for storing the tree assembly and including a pole support member secured thereto for supporting the pole; and a plurality of limb sections and interconnecting garlands. The limb-sections each comprise a central ring portion and a plurality of limb members extending radially outwardly from the central ring portions. The ring portions of the limb sections are stacked, when not in use, on the pole support member and are disposed, in use, along the length of pole in spaced relationship therealong. The garlands interconnect the limb portions so that as the ring portions are lifted, from the top, from the stacked positions thereof on the pole support member and slid along the pole, the garlands between adjacent limb section are tensioned, in turn, and thus serve to lift the next adjacent limb section until the tree is fully erected.",
 				"country": "United States",
