@@ -2,14 +2,14 @@
 	"translatorID": "6614a99-479a-4524-8e30-686e4d66663e",
 	"label": "Nature Publishing Group",
 	"creator": "Aurimas Vinckevicius",
-	"target": "https?://[^/]*nature\\.com(:[\\d]+)?(?=/)[^?]*(/(journal|archive|research|topten|search|full|abs)/|/current_issue.htm|/most.htm)",
+	"target": "https?://(?:[^/]+\\.)?(?:nature\\.com|palgrave-journals\\.com)(?::[\\d]+)?(?=/)[^?]*(?:/(?:journal|archive|research|topten|search|full|abs)/|/current_issue\\.htm|/most\\.htm)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-04-27 13:00:52"
+	"lastUpdated": "2013-05-15 03:43:29"
 }
 
 /**
@@ -347,11 +347,12 @@ function scrapeRIS(doc, url, next) {
 	var risURL
 	if(navBar) {
 		risURL = doc.evaluate('//li[@class="export"]/a', navBar, null, XPathResult.ANY_TYPE, null).iterateNext();
-		if(!risURL) risURL = doc.evaluate('//a[normalize-space(text())="Export citation"]', navBar, null, XPathResult.ANY_TYPE, null).iterateNext();
+		if(!risURL) risURL = doc.evaluate('//a[normalize-space(text())="Export citation" and not(@href="#")]', navBar, null, XPathResult.ANY_TYPE, null).iterateNext();
 	}
 	
+	if(!risURL) risURL = doc.evaluate('//a[normalize-space(text())="RIS" and not(@href="#")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if(!risURL) risURL = doc.evaluate('//li[@class="download-citation"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-	if(!risURL) risURL = doc.evaluate('//a[normalize-space(text())="Export citation"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+	if(!risURL) risURL = doc.evaluate('//a[normalize-space(text())="Export citation" and not(@href="#")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 
 	if(risURL) {
 		risURL = risURL.href;
@@ -445,6 +446,10 @@ function getMultipleNodes(doc, url) {
 	return [nodes, titlex, linkx];
 }
 
+function isNature(url) {
+	return url.search(/^https?:\/\/(?:[^\/]+\.)?nature.com/) != -1;
+}
+
 function detectWeb(doc, url) {
 	if (url.search(/\/(full|abs)\/[^\/]+($|\?|#)|\/fp\/.+?[?&]lang=ja(?:&|$)/) != -1) {
 
@@ -509,7 +514,17 @@ function scrape(doc, url) {
 		if(!item) {	//EM failed (unlikely)
 			item = items[1];
 		} else if(items[1]) {
-			item = supplementItem(item, items[1], ['journalAbbreviation', 'date']);
+			var preferredRisFields = ['journalAbbreviation', 'date'];
+			//palgrave-macmillan journals
+			if(!isNature(url)) {
+				preferredRisFields.push('publisher'); //all others are going to be dropped since we only handle journalArticle
+				if(item.rights.indexOf('Nature Publishing Group') != -1) {
+					delete item.rights;
+				}
+			}
+			
+			item = supplementItem(item, items[1], preferredRisFields);
+			
 			if(items[1].tags.length) item.tags = items[1].tags;	//RIS doesn't seem to have tags, but we check just in case
 
 			//RIS can properly split first and last name
@@ -2737,6 +2752,65 @@ var testCases = [
 				"abstractNote": "Our knowledge of species and functional composition of the human gut microbiome is rapidly increasing, but it is still based on very few cohorts and little is known about variation across the world. By combining 22 newly sequenced faecal metagenomes of individuals from four countries with previously published data sets, here we identify three robust clusters (referred to as enterotypes hereafter) that are not nation or continent specific. We also confirmed the enterotypes in two published, larger cohorts, indicating that intestinal microbiota variation is generally stratified, not continuous. This indicates further the existence of a limited number of well-balanced host–microbial symbiotic states that might respond differently to diet and drug intake. The enterotypes are mostly driven by species composition, but abundant molecular functions are not necessarily provided by abundant species, highlighting the importance of a functional analysis to understand microbial communities. Although individual host properties such as body mass index, age, or gender cannot explain the observed enterotypes, data-driven marker genes or functional modules can be identified for each of these host properties. For example, twelve genes significantly correlate with age and three functional modules with the body mass index, hinting at a diagnostic potential of microbial markers.",
 				"journalAbbreviation": "Nature",
 				"ISSN": "0028-0836"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.palgrave-journals.com/cpcs/journal/v12/n3/abs/cpcs20104a.html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Mark",
+						"lastName": "Button",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Barry",
+						"lastName": "Loveday",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"direct elections",
+					"CDRP",
+					"CSP",
+					"crime"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"itemID": "http://www.palgrave-journals.com/cpcs/journal/v12/n3/abs/cpcs20104a.html",
+				"title": "Direct elections and the local governance of crime in the United Kingdom: A view from the ground",
+				"publicationTitle": "Crime Prevention & Community Safety",
+				"pages": "156-175",
+				"publisher": "Macmillan Publishers Ltd.",
+				"institution": "Nature Publishing Group",
+				"company": "Nature Publishing Group",
+				"label": "Nature Publishing Group",
+				"distributor": "Nature Publishing Group",
+				"date": "July 2010",
+				"language": "en",
+				"volume": "12",
+				"issue": "3",
+				"DOI": "10.1057/cpcs.2010.4",
+				"abstractNote": "In the latter half of 2008, proposals emerged from the Home Office for the creation of a completely new elected office in England and Wales, the Crime and Policing Representative. These were to be directly elected and would chair Crime and Disorder Reduction Partnerships (CDRPs) in England and Community Safety Partnerships (CSPs) in Wales, as well as automatically become members of the police authority. However, before the proposals were even debated in parliament they were dropped because of concerns extremist parties may win them. This article presents findings from interviews with a range of councillors, police officers and other officials working with or for CDRPs/CSPs in a representative mix of authorities. It shows that although extremist parties winning were a concern there were many more compelling reasons to reject this policy. The article ends with a brief discussion of alternative proposals that could be considered.",
+				"url": "http://www.palgrave-journals.com/cpcs/journal/v12/n3/abs/cpcs20104a.html",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.palgrave-journals.com",
+				"journalAbbreviation": "Crime Prev Community Saf",
+				"ISSN": "1460-3780",
+				"shortTitle": "Direct elections and the local governance of crime in the United Kingdom"
 			}
 		]
 	}
