@@ -9,28 +9,29 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-15 18:04:37"
+	"lastUpdated": "2013-05-17 18:04:37"
 }
 
 function detectWeb(doc, url) {
 	var type;
-	if (url.indexOf('search.searchResults') != -1) {
+  url = url.toLowerCase();
+	if (url.indexOf('search.searchresults') != -1) {
 	//permission error (still relevant?)
 	//return false;
 		return "multiple";
 	}
 
-	if(url.indexOf('search.displayRecord') != -1) {
+	if(url.indexOf('search.displayrecord') != -1) {
 		type = doc.getElementById('rdcPubType');
 		if(!type) return false;
 		type = type.textContent.replace(/[\s\[\]]/g,'').split(';');
-		switch(type[0]) {
-			case 'Book':
+		switch(type[0].toLowerCase()) {
+			case 'book':
 				return 'book';
-			case 'Chapter':
+			case 'chapter':
 				return 'bookSection';
-			case 'JournalArticle':
-			case 'Editorial':
+			case 'journalarticle':
+			case 'editorial':
 				return 'journalArticle';
 			default:
 				return false;
@@ -50,7 +51,7 @@ function detectWeb(doc, url) {
 		return "book";
 	}
 
-	if(url.indexOf('buy.optionToBuy') != -1
+	if(url.indexOf('buy.optiontobuy') != -1
 		&& url.indexOf('id=') != -1
 		&& (type = doc.getElementById('obArticleHeaderText')) ) {
 		fields.title = '(//div[@id="obArticleTitleHighlighted"])[1]';
@@ -58,11 +59,11 @@ function detectWeb(doc, url) {
 		fields.voliss = '(//div[@id="obSource"])[1]';
 		fields.abstract = '(//div[@id="obAbstract"])[1]';
 
-		if(type.textContent.indexOf('Article') != -1) {
+		if(type.textContent.toLowerCase().indexOf('article') != -1) {
 			return 'journalArticle';
 		}
 
-		if(type.textContent.indexOf('Chapter') != -1) {
+		if(type.textContent.toLowerCase().indexOf('chapter') != -1) {
 			return 'bookSection';
 		}
 	}
