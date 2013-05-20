@@ -9,7 +9,7 @@
 	"priority": 90,
 	"inRepository": true,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-04-01 20:05:00"
+	"lastUpdated": "2012-05-20 20:05:00"
 }
 
 /* CrossRef uses unixref; documentation at http://www.crossref.org/schema/documentation/unixref1.0/unixref.html */
@@ -23,6 +23,10 @@ function innerXML(n) {
 	return outerXML(n).replace(/^[^>]*>|<[^<]*$/g, '');
 }
 
+function removeCDATA(text) {
+	return text;
+}
+
 var markupRE = /<(\/?)(\w+)[^<>]*>/gi;
 var supportedMarkup = ['i', 'b', 'sub', 'sup', 'span', 'sc'];
 var transformMarkup = {
@@ -32,18 +36,19 @@ var transformMarkup = {
 	}
 };
 function removeUnsupportedMarkup(text) {
-	return text.replace(markupRE, function(m, close, name) {
-		if(supportedMarkup.indexOf(name.toLowerCase()) != -1) {
-			return m;
-		}
-		
-		var newMarkup = transformMarkup[name.toLowerCase()]
-		if(newMarkup) {
-			return close ? newMarkup.close : newMarkup.open;
-		}
-		
-		return '';
-	});
+	return text.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1') // Remove CDATA markup
+		.replace(markupRE, function(m, close, name) {
+			if(supportedMarkup.indexOf(name.toLowerCase()) != -1) {
+				return m;
+			}
+			
+			var newMarkup = transformMarkup[name.toLowerCase()]
+			if(newMarkup) {
+				return close ? newMarkup.close : newMarkup.open;
+			}
+			
+			return '';
+		});
 }
 
 function detectSearch(item) {
