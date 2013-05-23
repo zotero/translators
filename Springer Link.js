@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-02-14 13:20:48"
+	"lastUpdated": "2013-05-23 19:36:34"
 }
 
 function detectWeb(doc, url) {
@@ -75,15 +75,29 @@ function doWeb(doc, url){
 }
 
 function scrape(doc) {
-	itemType = detectWeb(doc, doc.location.href);
+	var itemType = detectWeb(doc, doc.location.href);
+	
 	//use Embeded Metadata translator
 	var translator = Zotero.loadTranslator("web");
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
 		
 	translator.setHandler("itemDone", function(obj, item) {
-		if(!itemType.match(/^http:/)) item.itemType = itemType;
-
+		//sometimes we get an error about title not being set
+		if(!item.title) {
+			Z.debug("Springer Link: title not found");
+			Z.debug(item);
+			if(doc.head) {
+				//clean up and strip out uninteresting content
+				Z.debug(doc.head.innerHTML
+					.replace(/<style[^<]+(?:<\/style>|\/>)/ig, '')
+					.replace(/<link[^>]+>/ig, '')
+					.replace(/(?:\s*[\r\n]\s*)+/g, '\n'));
+			} else {
+				Z.debug("Springer Link: no head tag");
+			}
+		}
+		
 		//in case we're missing something, we can try supplementing it from page
 		if(!item.DOI) {
 			item.DOI = ZU.xpathText(doc,
@@ -187,6 +201,8 @@ function scrape(doc) {
 		trans.addCustomFields({
 			"citation_inbook_title": "bookTitle"
 		});
+		if(itemType) trans.itemType = itemType;
+		
 		trans.doWeb(doc, doc.location.href);
 	});
 }/** BEGIN TEST CASES **/
