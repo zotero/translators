@@ -9,13 +9,18 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-05-23 19:36:34"
+	"lastUpdated": "2013-05-23 20:07:42"
 }
 
 function detectWeb(doc, url) {
 	var action = url.match(/^https?:\/\/[^\/]+\/([^\/?#]+)/);
 	if(!action) return;
-
+	
+	if(!doc.head || !doc.head.getElementsByTagName('meta').length) {
+		Z.debug("Springer Link: No head or meta tags");
+		return;
+	}
+	
 	switch(action[1]) {
 		case "search":
 		case "journal":
