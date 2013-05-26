@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-05-08 23:03:38"
+	"lastUpdated": "2013-05-23 19:31:01"
 }
 
 /*
@@ -195,6 +195,19 @@ function init(doc, url, callback, forceLoadRDF) {
 	getPrefixes(doc);
 
 	var metaTags = doc.getElementsByTagName("meta");
+	Z.debug("Embedded Metadata: found " + metaTags.length + " meta tags.");
+	if(forceLoadRDF /* check if this is called from doWeb */ && !metaTags.length) {
+		if(doc.head) {
+			Z.debug(doc.head.innerHTML
+				.replace(/<style[^<]+(?:<\/style>|\/>)/ig, '')
+				.replace(/<link[^>]+>/ig, '')
+				.replace(/(?:\s*[\r\n]\s*)+/g, '\n')
+			);
+		} else {
+			Z.debug("Embedded Metadata: No head tag");
+		}
+	}
+
 	var hwType, hwTypeGuess, statements = [];
 
 	for(var i=0, metaTag; metaTag = metaTags[i]; i++) {
