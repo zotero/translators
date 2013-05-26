@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 13,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-04-29 06:08:14"
+	"lastUpdated": "2013-05-26 17:34:04"
 }
 
 /*****************************
@@ -267,6 +267,13 @@ function processAuthors(newItem, authorsLists) {
 					lastName:lastName,
 					firstName:firstName
 				});
+			} else if(lastName = ZU.xpathText(author, 'CollectiveName')) {
+				//corporate author
+				newItem.creators.push({
+					creatorType: type,
+					lastName: lastName,
+					fieldMode: 1
+				});
 			}
 		}
 	}
@@ -370,23 +377,8 @@ function doImportFromText(text, next) {
 			}
 		}
 
-		var authors = ZU.xpath(article, 'AuthorList/Author');
-		for(var j=0, m=authors.length; j<m; j++) {
-			var author = authors[j];
-			
-			var lastName = ZU.xpathText(author, 'LastName');
-			var firstName = ZU.xpathText(author, 'FirstName');
-			if(!firstName) {
-				firstName = ZU.xpathText(author, 'ForeName');
-			}
-			var suffix = ZU.xpathText(author, 'Suffix');
-			if(suffix && firstName) {
-				firstName += ", " + suffix
-			}
-			if(firstName || lastName) {
-				newItem.creators.push({lastName:lastName, firstName:firstName});
-			}
-		}
+		var authorLists = ZU.xpath(article, 'AuthorList');
+		processAuthors(newItem, authorLists);
 		
 		newItem.language = ZU.xpathText(article, 'Language');
 		
@@ -553,10 +545,12 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
+						"creatorType": "author",
 						"lastName": "Coar",
 						"firstName": "Jaekea T"
 					},
 					{
+						"creatorType": "author",
 						"lastName": "Sewell",
 						"firstName": "Jeanne P"
 					}
@@ -575,20 +569,20 @@ var testCases = [
 						"snapshot": false
 					}
 				],
-				"title": "Zotero: harnessing the power of a personal bibliographic manager",
-				"pages": "205-207",
 				"ISSN": "1538-9855",
 				"journalAbbreviation": "Nurse Educ",
-				"publicationTitle": "Nurse educator",
-				"volume": "35",
 				"issue": "5",
-				"date": "2010 Sep-Oct",
 				"language": "eng",
 				"abstractNote": "Zotero is a powerful free personal bibliographic manager (PBM) for writers. Use of a PBM allows the writer to focus on content, rather than the tedious details of formatting citations and references. Zotero 2.0 (http://www.zotero.org) has new features including the ability to synchronize citations with the off-site Zotero server and the ability to collaborate and share with others. An overview on how to use the software and discussion about the strengths and limitations are included.",
 				"DOI": "10.1097/NNE.0b013e3181ed81e4",
 				"extra": "PMID: 20729678",
 				"libraryCatalog": "NCBI PubMed",
-				"shortTitle": "Zotero"
+				"shortTitle": "Zotero",
+				"title": "Zotero: harnessing the power of a personal bibliographic manager",
+				"pages": "205-207",
+				"publicationTitle": "Nurse educator",
+				"volume": "35",
+				"date": "2010 Sep-Oct"
 			}
 		]
 	},
@@ -703,26 +697,32 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
+						"creatorType": "author",
 						"lastName": "Marks",
 						"firstName": "D"
 					},
 					{
+						"creatorType": "author",
 						"lastName": "Wonderling",
 						"firstName": "D"
 					},
 					{
+						"creatorType": "author",
 						"lastName": "Thorogood",
 						"firstName": "M"
 					},
 					{
+						"creatorType": "author",
 						"lastName": "Lambert",
 						"firstName": "H"
 					},
 					{
+						"creatorType": "author",
 						"lastName": "Humphries",
 						"firstName": "S E"
 					},
 					{
+						"creatorType": "author",
 						"lastName": "Neil",
 						"firstName": "H A"
 					}
@@ -758,19 +758,19 @@ var testCases = [
 						"snapshot": false
 					}
 				],
-				"title": "Screening for hypercholesterolaemia versus case finding for familial hypercholesterolaemia: a systematic review and cost-effectiveness analysis",
-				"pages": "1-123",
 				"ISSN": "1366-5278",
 				"journalAbbreviation": "Health Technol Assess",
-				"publicationTitle": "Health technology assessment (Winchester, England)",
-				"volume": "4",
 				"issue": "29",
-				"date": "2000",
 				"language": "eng",
 				"abstractNote": "BACKGROUND: In the majority of people with familial hypercholesterolaemia (FH) the disorder is caused by a mutation of the low-density lipoprotein receptor gene that impairs its proper function, resulting in very high levels of plasma cholesterol. Such levels result in early and severe atherosclerosis, and hence substantial excess mortality from coronary heart disease. Most people with FH are undiagnosed or only diagnosed after their first coronary event, but early detection and treatment with hydroxymethylglutaryl-coenzyme (HMG CoA) reductase inhibitors (statins) can reduce morbidity and mortality. The prevalence of FH in the UK population is estimated to be 1 in 500, which means that approximately 110,000 people are affected.\nOBJECTIVES: To evaluate whether screening for FH is appropriate. To determine which system of screening is most acceptable and cost-effective. To assess the deleterious psychosocial effects of genetic and clinical screening for an asymptomatic treatable inherited condition. To assess whether the risks of screening outweigh potential benefits.\nMETHODS: DATA SOURCES: Relevant papers were identified through a search of the electronic databases. Additional papers referenced in the search material were identified and collected. Known researchers in the field were contacted and asked to supply information on unpublished or ongoing studies. INCLUSION/EXCLUSION CRITERIA: SCREENING AND TREATMENT: The review included studies of the mortality and morbidity associated with FH, the effectiveness and cost of treatment (ignoring pre-statin therapies in adults), and of the effectiveness or cost of possible screening strategies for FH. PSYCHOSOCIAL EFFECTS OF SCREENING: The search for papers on the psychological and social effects of screening for a treatable inherited condition was limited to the last 5 years because recent developments in genetic testing have changed the nature and implications of such screening tests. Papers focusing on genetic testing for FH and breast cancer were included. Papers relating to the risk of coronary heart disease with similarly modifiable outcome (non-FH) were also included. DATA EXTRACTION AND ASSESSMENT OF VALIDITY: A data assessment tool was designed to assess the quality and validity of the papers which reported primary data for the social and psychological effects of screening. Available guidelines for systematically reviewing papers concentrated on quantitative methods, and were of limited relevance. An algorithm was developed which could be used for both the qualitative and quantitative literature. MODELLING METHODS: A model was constructed to investigate the relative cost and effectiveness of various forms of population screening (universal or opportunistic) and case-finding screening (screening relatives of known FH cases). All strategies involved a two-stage process: first, identifying those people with cholesterol levels sufficiently elevated to be compatible with a diagnosis of FH, and then either making the diagnosis based on clinical signs and a family history of coronary disease or carrying out genetic tests. Cost-effectiveness has been measured in terms of incremental cost per year of life gained.\nRESULTS: MODELLING COST-EFFECTIVENESS: FH is a life-threatening condition with a long presymptomatic state. Diagnostic tests are reasonably reliable and acceptable, and treatment with statins substantially improves prognosis. Therefore, it is appropriate to consider systematic screening for this condition. Case finding amongst relatives of FH cases was the most cost-effective strategy, and universal systematic screening the least cost-effective. However, when targeted at young people (16 year olds) universal screening was also cost-effective. Screening patients admitted to hospital with premature myocardial infarction was also relatively cost-effective. Screening is least cost-effective in men aged over 35 years, because the gains in life expectancy are small. (ABSTRACT TRUNCA",
 				"extra": "PMID: 11109029",
 				"libraryCatalog": "NCBI PubMed",
-				"shortTitle": "Screening for hypercholesterolaemia versus case finding for familial hypercholesterolaemia"
+				"shortTitle": "Screening for hypercholesterolaemia versus case finding for familial hypercholesterolaemia",
+				"title": "Screening for hypercholesterolaemia versus case finding for familial hypercholesterolaemia: a systematic review and cost-effectiveness analysis",
+				"pages": "1-123",
+				"publicationTitle": "Health technology assessment (Winchester, England)",
+				"volume": "4",
+				"date": "2000"
 			}
 		]
 	},
@@ -1051,6 +1051,111 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.ncbi.nlm.nih.gov/myncbi/browse/collection/40383442/?sort=&direction=",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.ncbi.nlm.nih.gov/pubmed/20981092",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"creatorType": "author",
+						"lastName": "1000 Genomes Project Consortium",
+						"fieldMode": 1
+					},
+					{
+						"creatorType": "author",
+						"lastName": "Abecasis",
+						"firstName": "Gonçalo R"
+					},
+					{
+						"creatorType": "author",
+						"lastName": "Altshuler",
+						"firstName": "David"
+					},
+					{
+						"creatorType": "author",
+						"lastName": "Auton",
+						"firstName": "Adam"
+					},
+					{
+						"creatorType": "author",
+						"lastName": "Brooks",
+						"firstName": "Lisa D"
+					},
+					{
+						"creatorType": "author",
+						"lastName": "Durbin",
+						"firstName": "Richard M"
+					},
+					{
+						"creatorType": "author",
+						"lastName": "Gibbs",
+						"firstName": "Richard A"
+					},
+					{
+						"creatorType": "author",
+						"lastName": "Hurles",
+						"firstName": "Matt E"
+					},
+					{
+						"creatorType": "author",
+						"lastName": "McVean",
+						"firstName": "Gil A"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Calibration",
+					"Chromosomes, Human, Y",
+					"Computational Biology",
+					"DNA Mutational Analysis",
+					"DNA, Mitochondrial",
+					"Evolution, Molecular",
+					"Female",
+					"Genetic Association Studies",
+					"Genetic Variation",
+					"Genetics, Population",
+					"Genome, Human",
+					"Genome-Wide Association Study",
+					"Genomics",
+					"Genotype",
+					"Haplotypes",
+					"Humans",
+					"Male",
+					"Mutation",
+					"Pilot Projects",
+					"Polymorphism, Single Nucleotide",
+					"Recombination, Genetic",
+					"Sample Size",
+					"Selection, Genetic",
+					"Sequence Alignment",
+					"Sequence Analysis, DNA"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"ISSN": "1476-4687",
+				"journalAbbreviation": "Nature",
+				"issue": "7319",
+				"language": "eng",
+				"abstractNote": "The 1000 Genomes Project aims to provide a deep characterization of human genome sequence variation as a foundation for investigating the relationship between genotype and phenotype. Here we present results of the pilot phase of the project, designed to develop and compare different strategies for genome-wide sequencing with high-throughput platforms. We undertook three projects: low-coverage whole-genome sequencing of 179 individuals from four populations; high-coverage sequencing of two mother-father-child trios; and exon-targeted sequencing of 697 individuals from seven populations. We describe the location, allele frequency and local haplotype structure of approximately 15 million single nucleotide polymorphisms, 1 million short insertions and deletions, and 20,000 structural variants, most of which were previously undescribed. We show that, because we have catalogued the vast majority of common variation, over 95% of the currently accessible variants found in any individual are present in this data set. On average, each person is found to carry approximately 250 to 300 loss-of-function variants in annotated genes and 50 to 100 variants previously implicated in inherited disorders. We demonstrate how these results can be used to inform association and functional studies. From the two trios, we directly estimate the rate of de novo germline base substitution mutations to be approximately 10(-8) per base pair per generation. We explore the data with regard to signatures of natural selection, and identify a marked reduction of genetic variation in the neighbourhood of genes, due to selection at linked sites. These methods and public data will support the next phase of human genetic research.",
+				"DOI": "10.1038/nature09534",
+				"extra": "PMID: 20981092",
+				"libraryCatalog": "NCBI PubMed",
+				"title": "A map of human genome variation from population-scale sequencing",
+				"pages": "1061-1073",
+				"publicationTitle": "Nature",
+				"volume": "467",
+				"date": "Oct 28, 2010"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
