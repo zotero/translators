@@ -15,7 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-02-03 20:15:34"
+	"lastUpdated": "2013-04-13 14:31:26"
 }
 
 function detectImport() {
@@ -2122,7 +2122,7 @@ var numberRe = /^[0-9]+/;
 // The assumption is that most who want a title word in their key would prefer the first word of significance.
 var citeKeyTitleBannedRe = /\b(a|an|the|some|from|on|in|to|of|do|with|der|die|das|ein|eine|einer|eines|einem|einen|un|une|la|le|l\'|el|las|los|al|uno|una|unos|unas|de|des|del|d\')(\s+|\b)/g;
 var citeKeyConversionsRe = /%([a-zA-Z])/;
-var citeKeyCleanRe = /[^a-z0-9\!\$\&\*\+\-\.\/\:\;\<\>\?\[\]\^\_\`\|]+/g;
+var citeKeyCleanRe = /[^a-z0-9\!\*\+\-\.\/\:\;\<\>\?\[\]\_\`\|]+/g;
 
 var citeKeyConversions = {
 	"a":function (flags, item) {
