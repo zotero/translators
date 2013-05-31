@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-08-11 14:42:41"
+	"browserSupport": "gcsib",
+	"lastUpdated": "2013-05-27 02:33:14"
 }
 
 /**
@@ -29,6 +29,10 @@
 
 	Change log
 	==========
+
+	2013-05-27
+
+	* New page layout parsing.
 
 	2012-08-11
 
@@ -134,7 +138,7 @@ function CleanCreator(creatorStr) {
 
 function GetCreators(creatorsStr, creatorsCategory) {
 	var result = new Array();
-    var creator;
+	var creator;
 	if (creatorsStr.match(",")) {
 		// http://www.ozon.ru/context/detail/id/7341440/
 		var authors = creatorsStr.split(",");
@@ -353,17 +357,22 @@ function doWeb(doc, url) {
 	var pdObject = new Object();
 	//pdObject["url"] = url;
 
-	var pdXPath = '//div[@class="l h1"]/h1';
+	// For the reason I do not understand, OZON.ru may alter its layout
+	// even within the same browser and screen resolution. I only noticed
+	// two layout types so far. Therefore the xpath expressions are
+	// extended with 'or' operator to accommodate both layouts types.
+
+	var pdXPath = '//div[@class="bContentBlock"]/h1|//div[@class="l h1"]/h1';
 	var pdXPathRes = doc.evaluate(
 	pdXPath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 	pdObject["title"] = CleanText(pdXPathRes.iterateNext().textContent);
-	pdXPath = '//div[@class="product-detail"]/p';
+	pdXPath = '//div[@id="js_basic_properties"]/p|//div[@class="product-detail"]/p';
 	pdXPathRes = doc.evaluate(
 	pdXPath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 	pdObject = MergeObjects(pdObject, ParseProductDetail(pdXPathRes));
 
-	var nameXPath = '//div[@class="techDescription"]/div/div[2]/span';
-	var valueXPath = '//div[@class="techDescription"]/div/div[3]/span';
+	var nameXPath = '//div[@class="bTechDescription"]/div/div[2]/span|//div[@class="techDescription"]/div/div[2]/span';
+	var valueXPath = '//div[@class="bTechDescription"]/div/div[3]/span|//div[@class="techDescription"]/div/div[3]/span';
 	var nameXPathRes = doc.evaluate(
 	nameXPath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 	var valueXPathRes = doc.evaluate(
@@ -371,8 +380,8 @@ function doWeb(doc, url) {
 	pdObject = MergeObjects(
 	pdObject, ParseTechDesc(nameXPathRes, valueXPathRes));
 
-	nameXPath = '//div[@id="detail_description"]/table/tbody/tr/td/h3';
-	valueXPath = '//div[@id="detail_description"]/table/tbody/tr/td';
+	nameXPath = '//div[@id="detail_description"]/div/table/tbody/tr/td/h3|//div[@id="detail_description"]/table/tbody/tr/td/h3';
+	valueXPath = '//div[@id="detail_description"]/div/table/tbody/tr/td|//div[@id="detail_description"]/table/tbody/tr/td';
 	nameXPathRes = doc.evaluate(
 	nameXPath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 	valueXPathRes = doc.evaluate(
@@ -393,7 +402,6 @@ function doWeb(doc, url) {
 
 	newItem.complete();
 }
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
