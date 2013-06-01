@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-08-08 22:38:57"
+	"lastUpdated": "2013-06-01 17:29:22"
 }
 
 function detectWeb(doc, url) {
@@ -134,18 +134,27 @@ function doWeb(doc, url) {
 	} else {
 		return false;
 	}
+	//get permalink for LoC - getting this from MARC is going to be much harder
+	if (url.length > 23 && url.substr(0, 23) == "http://catalog.loc.gov/") {
+	  var LoCpermalink = ZU.xpathText(doc, '//tr/td/a[contains(@href, "http://lccn.loc.gov/")]');		
+	}
+	
 	postString += 'RD=' + rd + '&MAILADDY=&SAVE=Press+to+SAVE+or+PRINT';
-
+	
 	// No idea why this doesn't work as post
 	Zotero.Utilities.HTTP.doGet(newUri + '?' + postString, function (text) {
 		// load translator for MARC
 		var marc = Zotero.loadTranslator("import");
 		marc.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
 		marc.setString(text);
+		//Z.debug(text)
 
 		// if this is the LOC catalog, specify that in repository field
 		if (url.length > 23 && url.substr(0, 23) == "http://catalog.loc.gov/") {
 			marc.setHandler("itemDone", function (obj, item) {
+				if (LoCpermalink){
+					item.attachments.push({url: LoCpermalink, title: "Library of Congress Permalink", mimeType: "text/html", snapshot: false})
+				}
 				item.repository = "Library of Congress Catalog";
 				item.complete();
 			});
@@ -156,12 +165,8 @@ function doWeb(doc, url) {
 				item.complete();
 			});
 		}
-
 		marc.translate();
-
-		Zotero.done();
 	}, null, responseCharset);
-	Zotero.wait();
 }
 
 /** BEGIN TEST CASES **/
