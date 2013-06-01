@@ -25,8 +25,8 @@ function detectSearch(item) {
 function doSearch(item) {
 	//Sends an SRU formatted as CQL to the library of Congress asking for marcXML back
 	//http://www.loc.gov/standards/sru/
-	ZU.doGet("http://z3950.loc.gov:7090/voyager?version=1.1&operation=searchRetrieve&query=dc.resourceIdentifier=" + ZU.cleanISBN(item.ISBN) + "&maximumRecords=1", function (text) {
-		//Z.debug(text);
+	ZU.doGet("http://lx2.loc.gov:210/LCDB?operation=searchRetrieve&version=1.1&query=bath.ISBN=" + ZU.cleanISBN(item.ISBN) + "&maximumRecords=1", function (text) {
+		Z.debug(text);
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("edd87d07-9194-42f8-b2ad-997c4c7deefd");
 		translator.setString(text);

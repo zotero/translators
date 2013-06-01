@@ -2,14 +2,14 @@
 	"translatorID": "9f52911f-e1b5-41f8-be66-b16982269e6a",
 	"label": "HLAS (historical)",
 	"creator": "Sebastian Karcher",
-	"target": "http://lcweb2.loc.gov/cgi-bin/query",
+	"target": "^https?://lcweb2\\.loc\\.gov/cgi-bin/query",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-04-15 18:04:37"
+	"lastUpdated": "2013-06-01 14:47:30"
 }
 
 /*
@@ -74,7 +74,8 @@ function scrape(doc, url){
 	//scrape the LC control number from the page and get LoC catalog data for it via SRU
 	var idnumbers = ZU.xpathText(doc, '//body/p[b[contains(text(), "LC Control No")]]');
 	if (idnumbers) var LCcontrol = idnumbers.match(/LC Control No\:\s*(\d+)/)[1]
-	ZU.doGet("http://z3950.loc.gov:7090/voyager?version=1.1&operation=searchRetrieve&query=dc.resourceIdentifier=" + LCcontrol + "&maximumRecords=1", function (text) {
+	Z.debug(LCcontrol)
+	ZU.doGet("http://lx2.loc.gov:210/LCDB?operation=searchRetrieve&version=1.1&query=bath.LCCN=" + LCcontrol + "&maximumRecords=1", function (text) {
 		//Z.debug(text);
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("edd87d07-9194-42f8-b2ad-997c4c7deefd");
