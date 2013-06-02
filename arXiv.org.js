@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-03-09 23:51:48"
+	"lastUpdated": "2013-06-02 13:45:43"
 }
 
 function detectWeb(doc, url) {
@@ -51,7 +51,7 @@ function doWeb(doc, url) {
 	var elmt = elmts.iterateNext();
 	var title = titles.iterateNext();
 	if (elmt && titles) {
-		var availableItems = new Array();
+		var availableItems = new Object();
 		var arXivCats = new Array();
 		var arXivIDs = new Array();
 		var i=0;
@@ -84,7 +84,7 @@ function doWeb(doc, url) {
 			for(var i in items) {
 				newURIs.push("http://export.arxiv.org/oai2?verb=GetRecord&identifier=oai%3AarXiv.org%3A" + arXivIDs[i] + "&metadataPrefix=oai_dc");
 			}
-			Zotero.Utilities.HTTP.doGet(newURIs, parseXML, function() {Zotero.done();}, null);
+			Zotero.Utilities.HTTP.doGet(newURIs, parseXML);
 		});
 	}
 	else {
@@ -103,13 +103,13 @@ function doWeb(doc, url) {
 		}
 		arXivID = arXivID.replace(/v\d*/, ""); //remove version number
 		newURIs.push("http://export.arxiv.org/oai2?verb=GetRecord&identifier=oai%3AarXiv.org%3A" + arXivID + "&metadataPrefix=oai_dc");
- 		Zotero.Utilities.HTTP.doGet(newURIs, parseXML, function() {Zotero.done();}, null);
+ 		Zotero.Utilities.HTTP.doGet(newURIs, parseXML);
 	}
-	Zotero.wait();
 }
 
 function parseXML(text) {
-	var newItem = new Zotero.Item("journalArticle");
+	//Z.debug(text)
+	var newItem = new Zotero.Item("report");
 	//	remove header
 	text = text.replace(/<!DOCTYPE[^>]*>/, "").replace(/<\?xml[^>]*\?>/, "");
 	//	fix non-compliant XML tags (colons)
@@ -125,11 +125,15 @@ function parseXML(text) {
 	newItem.date = getXPathNodeTrimmed(xml, "dc_date");
 		
 	var descriptions = ZU.xpath(xml, "//GetRecord/record/metadata/oai_dc_dc/dc_description");
-	for(var j=0; j<descriptions.length; j++) {
-		var noteStr = ZU.trimInternal(descriptions[j].textContent);
-		newItem.notes.push({note:noteStr});		
+	
+	//Put the first description into abstract, all other into notes.
+	if (descriptions.length>0){
+		newItem.abstractNote = ZU.trimInternal(descriptions[0].textContent);
+		for(var j=1; j<descriptions.length; j++) {
+			var noteStr = ZU.trimInternal(descriptions[j].textContent);
+			newItem.notes.push({note:noteStr});		
+		}	
 	}	
-		
 	var subjects = ZU.xpath(xml, "//GetRecord/record/metadata/oai_dc_dc/dc_subject");
 	for(var j=0; j<subjects.length; j++) {
 		var subject = ZU.trimInternal(subjects[j].textContent);
@@ -152,22 +156,14 @@ function parseXML(text) {
 
 	var articleID = ZU.xpath(xml, "//GetRecord/record/header/identifier");
 	articleID = ZU.trimInternal(articleID[0].textContent);
+	newItem.reportType = "arXiv e-print";
+	
 	articleID = articleID.substr(14);
-	var idPrefixRegex = new RegExp('^arXiv:', "i");
-	if (idPrefixRegex.test (articleID)) {
-		newItem.publicationTitle = articleID;
-	}
-	else {
-		newItem.publicationTitle = "arXiv:" + articleID;
-	}
-
+	newItem.reportNumber = articleID;
+	
 //	TODO add "arXiv.org" to bib data?
 	newItem.attachments.push({url:newItem.url, title:"arXiv.org Snapshot", mimeType:"text/html"});
 	newItem.attachments.push(getPDF(articleID));
-	if (newItem.notes[0]['note']) {
-		newItem.abstractNote = newItem.notes[0]['note'];
-		newItem.notes = new Array();
-	}
 	newItem.complete();
 }
 
@@ -198,7 +194,7 @@ var testCases = [
 		"url": "http://arxiv.org/abs/1107.4612",
 		"items": [
 			{
-				"itemType": "journalArticle",
+				"itemType": "report",
 				"creators": [
 					{
 						"firstName": "D. T.",
@@ -221,7 +217,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
+				"notes": [
+					{
+						"note": "Comment: 7 pages, 4 figures"
+					}
+				],
 				"tags": [
 					"Astrophysics - Cosmology and Extragalactic Astrophysics",
 					"Astrophysics - Galaxy Astrophysics"
@@ -229,23 +229,22 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://arxiv.org/abs/1107.4612",
 						"title": "arXiv.org Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"url": "http://www.arxiv.org/pdf/1107.4612.pdf",
 						"mimeType": "application/pdf",
 						"title": "1107.4612 PDF"
 					}
 				],
 				"title": "A Model For Polarised Microwave Foreground Emission From Interstellar Dust",
 				"date": "2011-07-22",
+				"abstractNote": "The upcoming generation of cosmic microwave background (CMB) experiments face a major challenge in detecting the weak cosmic B-mode signature predicted as a product of primordial gravitational waves. To achieve the required sensitivity these experiments must have impressive control of systematic effects and detailed understanding of the foreground emission that will influence the signal. In this paper, we present templates of the intensity and polarisation of emission from one of the main Galactic foregrounds, interstellar dust. These are produced using a model which includes a 3D description of the Galactic magnetic field, examining both large and small scales. We also include in the model the details of the dust density, grain alignment and the intrinsic polarisation of the emission from an individual grain. We present here Stokes parameter template maps at 150GHz and provide an on-line repository (http://www.imperial.ac.uk/people/c.contaldi/fgpol) for these and additional maps at frequencies that will be targeted by upcoming experiments such as EBEX, Spider and SPTpol.",
 				"url": "http://arxiv.org/abs/1107.4612",
 				"extra": "Mon. Not. R. Astron. Soc. 419, 1795-1803 (2012)",
 				"DOI": "10.1111/j.1365-2966.2011.19851.x",
-				"publicationTitle": "arXiv:1107.4612",
-				"abstractNote": "The upcoming generation of cosmic microwave background (CMB) experiments face a major challenge in detecting the weak cosmic B-mode signature predicted as a product of primordial gravitational waves. To achieve the required sensitivity these experiments must have impressive control of systematic effects and detailed understanding of the foreground emission that will influence the signal. In this paper, we present templates of the intensity and polarisation of emission from one of the main Galactic foregrounds, interstellar dust. These are produced using a model which includes a 3D description of the Galactic magnetic field, examining both large and small scales. We also include in the model the details of the dust density, grain alignment and the intrinsic polarisation of the emission from an individual grain. We present here Stokes parameter template maps at 150GHz and provide an on-line repository (http://www.imperial.ac.uk/people/c.contaldi/fgpol) for these and additional maps at frequencies that will be targeted by upcoming experiments such as EBEX, Spider and SPTpol.",
+				"reportType": "arXiv e-print",
+				"reportNumber": "1107.4612",
 				"libraryCatalog": "arXiv.org",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
