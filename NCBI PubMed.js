@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 13,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-05-26 17:34:04"
+	"lastUpdated": "2013-06-02 19:18:28"
 }
 
 /*****************************
@@ -280,6 +280,9 @@ function processAuthors(newItem, authorsLists) {
 }
 
 function doImportFromText(text, next) {
+	if (text.length<300){
+		throw("No Pubmed Data found - Most likely eutils is temporarily down")
+	}
 	if (text.substr(0,1000).indexOf("<PubmedArticleSet>") == -1) {
 		// Pubmed data in the wild, perhaps copied from the web site's search results,
 		// can be missing the <PubmedArticleSet> root tag. Let's add a pair!
