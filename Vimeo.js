@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-03-13 21:13:24"
+	"lastUpdated": "2013-06-04 20:46:13"
 }
 
 /*
@@ -31,7 +31,8 @@
 */
 
 function detectWeb(doc, url) {
-	var xpath = '//meta[@property="og:video:type"]';
+	//the meta properties are missing once you're logged in
+	var xpath = '//meta[@property="og:video:type"]|//div[@class="video_meta"]';
 	if (ZU.xpath(doc, xpath).length > 0) {
 		return "videoRecording";
 	}
@@ -39,7 +40,6 @@ function detectWeb(doc, url) {
 	if (url.match(/vimeo\.com\/search\?q=/)) {
 		return "multiple";
 	}
-
 	return false;
 }
 
@@ -58,21 +58,16 @@ function doWeb(doc, url) {
 			for (var j in items) {
 				urls.push(j);
 			}
-			ZU.processDocuments(urls, function (myDoc) {
-				doWeb(myDoc, myDoc.location.href)
-			}, function () {
-				Z.done()
-			});
-
-			Z.wait();
+			ZU.processDocuments(urls, doWeb);
 		});
 	} else {
 		// We call the Embedded Metadata translator to do the actual work
 		var creator = ZU.xpathText(doc, '//div[@class="byline"]/a[1]');
 		var date = ZU.xpathText(doc, '//meta[@itemprop="dateCreated"]/@content');
 		var duration = ZU.xpathText(doc, '//meta[@itemprop="duration"]/@content');
-		var translator = Zotero.loadTranslator("import");
+		var translator = Zotero.loadTranslator("web");
 		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+		translator.setDocument(doc);
 		translator.setHandler("itemDone", function (obj, item) {
 			item.itemType= "videoRecording";
 			item.creators = ZU.cleanAuthor(creator, "author");
@@ -81,9 +76,7 @@ function doWeb(doc, url) {
 			item.extra = '';
 			item.complete();
 		});
-		translator.getTranslatorObject(function (obj) {
-			obj.doWeb(doc, url);
-		});
+		translator.translate();
 	}
 }
 /** BEGIN TEST CASES **/
