@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-06-04 23:42:03"
+	"lastUpdated": "2013-06-05 06:31:04"
 }
 
 /*
@@ -343,17 +343,26 @@ function scrape(doc, url, pdfUrl) {
 	}
 }
 
+function getSearchResults(doc, url) {
+	var links = ZU.xpath(doc, '//li//div[@class="citation article" or starts-with(@class,"citation")]/a');
+	if(links.length) return links;
+	
+	Z.debug("Cochrane Library");
+	return ZU.xpath(doc, '//div[@class="listingContent"]//td/strong/a[contains(@href, "/doi/")]');
+}
+
 function detectWeb(doc, url) {	
 	if( url.indexOf('/issuetoc') != -1 ||
 		url.indexOf('/results') != -1 ||
 		url.indexOf('/search') != -1 ||
 		url.indexOf('/mainSearch?') != -1) {
-		return 'multiple';
+		if(getSearchResults(doc, url).length) return 'multiple';
 	} else {
-		if( url.indexOf('/book/') != -1 ) {
-			//make sure the book has chapters
-			if (ZU.xpath(doc, '//li//div[@class="citation article" or starts-with(@class,"citation")]/a').length>1)	return 'multiple';
-			else return book;
+		if(url.indexOf('/book/') != -1 ) {
+			//if the book has more than one chapter, scrape chapters
+			if(getSearchResults(doc, url).length > 1) return 'multiple';
+			//otherwise, import book
+			return 'book'; //does this exist?
 		} else if ( ZU.xpath(doc, '//meta[@name="citation_book_title"]').length ) {
 			return 'bookSection';
 		} else {
@@ -365,11 +374,7 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 	var type = detectWeb(doc, url);
 	if(type == "multiple") {
-		var articles = ZU.xpath(doc, '//li//div[@class="citation article" or starts-with(@class,"citation")]/a');
-		if (articles.length ==0){
-			Z.debug("Cochrane Library");
-			var articles =ZU.xpath(doc, '//div[@class="listingContent"]//td/strong/a[contains(@href, "/doi/")]');
-		}
+		var articles = getSearchResults(doc, url);
 		var availableItems = new Object();
 		for(var i=0, n=articles.length; i<n; i++) {
 			availableItems[articles[i].href] = ZU.trimInternal(articles[i].textContent.trim());
