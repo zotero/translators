@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-06-05 18:06:09"
+	"lastUpdated": "2013-06-06 01:09:42"
 }
 
 function detectWeb(doc, url) {
@@ -55,6 +55,14 @@ function downloadFunction(text, url, prefs) {
 	//hopefully EBCSOhost doesn't use this for anything useful
 	text = text.replace(/^M3\s\s?-.*/gm, '');
 	
+	//Let's try to keep season info
+	// Y1  - 1993///Winter93
+	// Y1  - 2009///Spring2009
+	// maybe also Y1  - 1993///93Winter
+	var season = text.match(
+		/^(Y1\s+-\s+(\d{2})(\d{2})\/\/\/)(?:\2?\3(.+)|(.+?)\2?\3)\s*$/m);
+	season = season && (season[4] || season[5]);
+	
 	// load translator for RIS
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -62,8 +70,13 @@ function downloadFunction(text, url, prefs) {
 	translator.setHandler("itemDone", function(obj, item) {
 		/* Fix capitalization issues */
 		//title
-		if(item.title && item.title.toUpperCase() == item.title) {
-			item.title = ZU.capitalizeTitle(item.title, true);
+		if(item.title) {
+			// Strip final period from title if present
+			item.title = item.title.replace(/([^\.])\.\s*$/,'$1');
+			
+			if(item.title.toUpperCase() == item.title) {
+				item.title = ZU.capitalizeTitle(item.title, true);
+			}
 		}
 
 		//authors
@@ -79,20 +92,22 @@ function downloadFunction(text, url, prefs) {
 				item.creators[i].lastName = ZU.capitalizeTitle(ln, true);
 			}
 		}
-
+		
+		//Sometimes EBSCOhost gives us year and season
+		if(season) {
+			item.date = season + ' ' + item.date;
+		}
+		
 		//The non-DOI values in M3 should never pass RIS translator,
 		// but, just in case, if we know it's not DOI, let's remove it
 		if (item.DOI && item.DOI == m3Data) {
 			item.DOI = undefined;
 		}
-
-		// Strip final period from title if present
-		if(item.title) item.title = item.title.replace(/([^\.])\.\s*$/,'$1');
-
+		
 		// Strip EBSCOhost tags from the end of abstract
 		if(item.abstractNote) {
 			item.abstractNote = item.abstractNote
-								.replace(/\s*\[[^\]\.]+\]$/, '');	//to be safe, don't strip sentences
+				.replace(/\s*\[[^\]\.]+\]$/, ''); //to be safe, don't strip sentences
 		}
 
 		// Get the accession number from URL if not in RIS
@@ -105,35 +120,20 @@ function downloadFunction(text, url, prefs) {
 		} else if(!an) {	//we'll need this later
 			an = item.callNumber;
 		}
-/** Not sure what the original test case for this was where the import was improved,
- * but it breaks import from
- * http://search.ebscohost.com/login.aspx?direct=true&db=bth&AN=39564295&site=ehost-live
-		if (m = text.match(/^Y1\s+-(.*)$/m)) {
-			var year = m[1].match(/\d{4}/);
-			var extra = m[1].match(/\/([^\/]+)$/);
-			// If we have a double year in risDate, use last section
-			if (year && extra && extra[1].indexOf(year[0]) !== -1) {
-				item.date = extra[1];
-			}
-		}
-
-		// Frequently have dates like "Spring2009";
-		// need to insert space to keep Zotero happy
-		if(item.date) item.date = item.date.replace(/([a-z])([0-9]{4})$/,"$1 $2");
-*/
-	
-
+		
 		// A lot of extra info is jammed into notes
 		item.notes = [];
 		
 		//the archive field is pretty useless:
 		item.archive = "";
-		if(item.url){	
+		
+		if(item.url) {	
 			// Trim the ⟨=cs suffix -- EBSCO can't find the record with it!
-				item.url = item.url.replace(/(AN=[0-9]+)⟨=[a-z]{2}/,"$1")
-									.replace(/#.*$/,'');
-			if(!prefs.hasFulltext){	
-				// For items without full text, move the stable link to a link attachment
+			item.url = item.url.replace(/(AN=[0-9]+)⟨=[a-z]{2}/,"$1")
+				.replace(/#.*$/,'');
+			if(!prefs.hasFulltext) {	
+				// For items without full text,
+				// move the stable link to a link attachment
 				item.attachments.push({
 					url: item.url+"&scope=cite",
 					title: "EBSCO Record",
@@ -371,7 +371,6 @@ var testCases = [
 				"title": "Zbigniew Herbert",
 				"journalAbbreviation": "Wilson Quarterly",
 				"publicationTitle": "Wilson Quarterly",
-				"date": "1993",
 				"volume": "17",
 				"issue": "1",
 				"pages": "112",
@@ -382,6 +381,7 @@ var testCases = [
 				"libraryCatalog": "EBSCOhost",
 				"callNumber": "9606204477",
 				"accessDate": "CURRENT_TIMESTAMP"
+				"date": "Winter 1993",
 			}
 		]
 	}
