@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-03-14 21:29:25"
+	"lastUpdated": "2013-06-02 17:59:46"
 }
 
 /*
@@ -200,7 +200,9 @@ getAttachment.mimeTypes = {
 
 function getViableResults(doc) {
  return ZU.xpath(doc, '//div[@class="gs_r"]\
-				[.//div[@class="gs_fl"]/a[contains(@href,"q=info:") or contains(@href,"q=related:")]]');
+				[.//div[@class="gs_fl"]/a[contains(@href,"q=info:")\
+					or contains(@href,"q=related:")\
+					or contains(@onclick, "gs_ocit(event")]]');
 }
 
 function scrapeArticleResults(doc, articles) {
@@ -478,10 +480,29 @@ function doWeb(doc, url) {
 		var bibtexUrl;
 		for(var i=0, n=results.length; i<n; i++) {
 			bibtexUrl = ZU.xpathText(results[i],
-					'.//div[@class="gs_fl"]/a[contains(@href,"q=info:") or contains(@href,"q=related:")][1]/@href')
-				.replace(/\/scholar.*?\?/,'/scholar.bib?')
-				.replace(/=related:/,'=info:')
-				+ '&ct=citation&cd=1&output=citation';
+					'.//div[@class="gs_fl"]/a[contains(@href,"q=info:")\
+						or contains(@href,"q=related:")][1]/@href');
+			if(bibtexUrl) {
+				bibtexUrl = bibtexUrl.replace(/\/scholar.*?\?/,'/scholar.bib?')
+					.replace(/=related:/,'=info:')
+					+ '&ct=citation&cd=1&output=citation';
+			} else {
+				Z.debug('Could not find a good link to construct BibTeX URL\n'
+					+ 'Creating BibTeX URL from scratch');
+				bibtexUrl = ZU.xpathText(results[i],
+					'.//div[@class="gs_fl"]/a[contains(@onclick, "gs_ocit(event")]\
+						[1]/@onclick');
+				var id;
+				if(!bibtexUrl
+					|| !(id = bibtexUrl.match(/gs_ocit\(event,\s*(['"])([^)]+?)\1/)) ) {
+					if(!bibtexUrl) Z.debug('onclick not found');
+					throw new Error('Could not build a BibTeX URL');
+				}
+				
+				bibtexUrl = '/scholar.bib?q=info:' + id[2]	
+					+ ':scholar.google.com/&ct=citation&cd=1&output=citation';
+				Z.debug('Constructed BibTeX URL: ' + bibtexUrl);
+			}
 			items[bibtexUrl] = ZU.xpathText(results[i], './/h3[@class="gs_rt"]');
 
 			//keep the result div for extra information
