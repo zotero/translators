@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-04-06 10:59:04"
+	"lastUpdated": "2013-06-05 18:06:09"
 }
 
 function detectWeb(doc, url) {
@@ -121,29 +121,28 @@ function downloadFunction(text, url, prefs) {
 		// need to insert space to keep Zotero happy
 		if(item.date) item.date = item.date.replace(/([a-z])([0-9]{4})$/,"$1 $2");
 */
-		// Keep the stable link as a link attachment
-		if(item.url) {
-			// Trim the ⟨=cs suffix -- EBSCO can't find the record with it!
-			item.url = item.url.replace(/(AN=[0-9]+)⟨=[a-z]{2}/,"$1")
-								.replace(/#.*$/,'');
-
-			item.attachments.push({
-				url: item.url+"&scope=cite",
-				title: "EBSCO Record",
-				mimeType: "text/html",
-				snapshot: false
-			});
-
-			item.url = undefined;
-		}
+	
 
 		// A lot of extra info is jammed into notes
 		item.notes = [];
 		
 		//the archive field is pretty useless:
 		item.archive = "";
-
-
+		if(item.url){	
+			// Trim the ⟨=cs suffix -- EBSCO can't find the record with it!
+				item.url = item.url.replace(/(AN=[0-9]+)⟨=[a-z]{2}/,"$1")
+									.replace(/#.*$/,'');
+			if(!prefs.hasFulltext){	
+				// For items without full text, move the stable link to a link attachment
+				item.attachments.push({
+					url: item.url+"&scope=cite",
+					title: "EBSCO Record",
+					mimeType: "text/html",
+					snapshot: false
+				});
+				item.url = undefined;
+			}
+		}
 		if(prefs.fetchPDF) {
 			var arguments = urlToArgs(url);
 			var pdf = "/ehost/pdfviewer/pdfviewer?"
@@ -214,7 +213,9 @@ function getResultList(doc, items, itemInfo) {
 						'.//div[@class="pubtype"]/span/@class'),
 			//check if PDF is available
 			fetchPDF: ZU.xpath(results[i], './/span[@class="record-formats"]\
-										/a[contains(@class,"pdf-ft")]').length
+										/a[contains(@class,"pdf-ft")]').length,
+			hasFulltext: ZU.xpath(results[i], './/span[@class="record-formats"]\
+										/a[contains(@class,"pdf-ft") or contains(@class, "html-ft")]').length
 		};
 	}
 
@@ -320,13 +321,15 @@ function doDelivery(doc, itemInfo) {
 	if(!itemInfo)	{
 		prefs.fetchPDF = !(ZU.xpath(doc, '//div[@id="column1"]//ul[1]/li').length	//check for left-side column
 			&& !ZU.xpath(doc, '//a[contains(@class,"pdf-ft")]').length);	//check if there's a PDF there
+		prefs.hasFulltext = !(ZU.xpath(doc, '//div[@id="column1"]//ul[1]/li').length	//check for left-side column
+			&& !ZU.xpath(doc, '//a[contains(@class,"pdf-ft") or contains(@class, "html-ft")]').length);
 	} else {
 		prefs.fetchPDF = itemInfo.fetchPDF;
-	}
-
-	if(itemInfo) {
+		prefs.hasFulltext = itemInfo.hasFulltext;
 		prefs.itemType = ebscoToZoteroItemType(itemInfo.itemType);
 	}
+	//Z.debug(prefs.hasFulltext)
+	//Z.debug(prefs.fetchPDF)
 
 	var postURL = ZU.xpathText(doc, '//form[@id="aspnetForm"]/@action');
 	var arguments = urlToArgs(postURL);
@@ -347,7 +350,7 @@ function doDelivery(doc, itemInfo) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://search.ebscohost.com/login.aspx?direct=true&db=aph&AN=9606204477&site=ehost-live",
+		"url": "http://web.ebscohost.com/ehost/detail?sid=4bcfec05-db01-4d69-9028-c40ff1331e56%40sessionmgr15&vid=1&hid=28&bdata=JnNpdGU9ZWhvc3QtbGl2ZQ%3d%3d#db=aph&AN=9606204477",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -364,25 +367,21 @@ var testCases = [
 					"HERBERT, Zbigniew, 1924-1998"
 				],
 				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "EBSCO Record",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"attachments": [],
 				"title": "Zbigniew Herbert",
 				"journalAbbreviation": "Wilson Quarterly",
 				"publicationTitle": "Wilson Quarterly",
-				"date": "Winter93 1993",
+				"date": "1993",
 				"volume": "17",
 				"issue": "1",
 				"pages": "112",
 				"publisher": "Woodrow Wilson International Center for Scholars",
 				"ISSN": "03633276",
 				"abstractNote": "Introduces the poetry of Polish poet Zbigniew Herbert. Impression of difficulty in modern poetry; Polish poet Czeslaw Milosz; Herbert's 1980 Nobel Prize; Translations into English; Use of vers libre; Sample poems.",
+				"url": "http://search.ebscohost.com/login.aspx?direct=true&db=aph&AN=9606204477&site=ehost-live",
 				"libraryCatalog": "EBSCOhost",
-				"callNumber": "9606204477"
+				"callNumber": "9606204477",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}
