@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-06-05 17:43:40"
+	"lastUpdated": "2013-06-05 18:06:09"
 }
 
 function detectWeb(doc, url) {
@@ -128,23 +128,21 @@ function downloadFunction(text, url, prefs) {
 		
 		//the archive field is pretty useless:
 		item.archive = "";
-		
-		if(prefs.hasFulltext && item.url){
-				// Trim the ⟨=cs suffix -- EBSCO can't find the record with it!
+		if(item.url){	
+			// Trim the ⟨=cs suffix -- EBSCO can't find the record with it!
 				item.url = item.url.replace(/(AN=[0-9]+)⟨=[a-z]{2}/,"$1")
 									.replace(/#.*$/,'');
+			if(!prefs.hasFulltext){	
+				// For items without full text, move the stable link to a link attachment
+				item.attachments.push({
+					url: item.url+"&scope=cite",
+					title: "EBSCO Record",
+					mimeType: "text/html",
+					snapshot: false
+				});
+				item.url = undefined;
+			}
 		}
-		else if(item.url){		
-			// For items without full text, move the stable link to a link attachment
-			item.attachments.push({
-				url: item.url+"&scope=cite",
-				title: "EBSCO Record",
-				mimeType: "text/html",
-				snapshot: false
-			});
-			item.url = undefined;
-		}
-
 		if(prefs.fetchPDF) {
 			var arguments = urlToArgs(url);
 			var pdf = "/ehost/pdfviewer/pdfviewer?"
