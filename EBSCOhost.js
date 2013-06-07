@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-06-06 01:09:42"
+	"lastUpdated": "2013-06-06 05:39:15"
 }
 
 function detectWeb(doc, url) {
@@ -380,8 +380,8 @@ var testCases = [
 				"url": "http://search.ebscohost.com/login.aspx?direct=true&db=aph&AN=9606204477&site=ehost-live",
 				"libraryCatalog": "EBSCOhost",
 				"callNumber": "9606204477",
-				"accessDate": "CURRENT_TIMESTAMP"
-				"date": "Winter 1993",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"date": "Winter 1993"
 			}
 		]
 	}
