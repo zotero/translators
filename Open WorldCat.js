@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-04-11 11:57:40"
+	"lastUpdated": "2013-05-29 02:42:03"
 }
 
 /**
@@ -45,8 +45,20 @@ function scrape(doc, url, callDoneWhenFinished) {
 	}
 	//Z.debug(newurl)
 	Zotero.Utilities.HTTP.doGet(newurl, function (text) {
-	
+		//2013-05-28 RIS export currently has messed up authors
+		// e.g. A1  - Gabbay, Dov M., Woods, John Hayden., Hartmann, Stephan, 
+		text = text.replace(/^((?:A1|ED)\s+-\s+)(.+)/mg, function(m, tag, value) {
+			var authors = value.replace(/[,\s]+$/, '')
+				.split('.,');
+			var replStr = '';
+			for(var i=0, n=authors.length; i<n; i++) {
+				replStr += tag + authors[i].trim() + '\n';
+			}
+			return replStr.trim();
+		});
+		
 		//Zotero.debug("RIS: " + text)
+		
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);

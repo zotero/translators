@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-04-25 09:28:20"
+	"lastUpdated": "2013-06-05 06:31:04"
 }
 
 /*
@@ -343,15 +343,26 @@ function scrape(doc, url, pdfUrl) {
 	}
 }
 
+function getSearchResults(doc, url) {
+	var links = ZU.xpath(doc, '//li//div[@class="citation article" or starts-with(@class,"citation")]/a');
+	if(links.length) return links;
+	
+	Z.debug("Cochrane Library");
+	return ZU.xpath(doc, '//div[@class="listingContent"]//td/strong/a[contains(@href, "/doi/")]');
+}
+
 function detectWeb(doc, url) {	
 	if( url.indexOf('/issuetoc') != -1 ||
 		url.indexOf('/results') != -1 ||
 		url.indexOf('/search') != -1 ||
 		url.indexOf('/mainSearch?') != -1) {
-		return 'multiple';
+		if(getSearchResults(doc, url).length) return 'multiple';
 	} else {
-		if( url.indexOf('/book/') != -1 ) {
-			return 'book';
+		if(url.indexOf('/book/') != -1 ) {
+			//if the book has more than one chapter, scrape chapters
+			if(getSearchResults(doc, url).length > 1) return 'multiple';
+			//otherwise, import book
+			return 'book'; //does this exist?
 		} else if ( ZU.xpath(doc, '//meta[@name="citation_book_title"]').length ) {
 			return 'bookSection';
 		} else {
@@ -363,11 +374,7 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 	var type = detectWeb(doc, url);
 	if(type == "multiple") {
-		var articles = ZU.xpath(doc, '//li//div[@class="citation article" or starts-with(@class,"citation")]/a');
-		if (articles.length ==0){
-			Z.debug("Cochrane Library");
-			var articles =ZU.xpath(doc, '//div[@class="listingContent"]//td/strong/a[contains(@href, "/doi/")]');
-		}
+		var articles = getSearchResults(doc, url);
 		var availableItems = new Object();
 		for(var i=0, n=articles.length; i<n; i++) {
 			availableItems[articles[i].href] = ZU.trimInternal(articles[i].textContent.trim());
@@ -462,42 +469,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://onlinelibrary.wiley.com/book/10.1002/9783527610853",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"firstName": "Dietrich",
-						"lastName": "Papenfuß",
-						"creatorType": "editor"
-					},
-					{
-						"firstName": "Dieter",
-						"lastName": "Lüst",
-						"creatorType": "editor"
-					},
-					{
-						"firstName": "Wolfgang P.",
-						"lastName": "Schleich",
-						"creatorType": "editor"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "100 Years Werner Heisenberg: Works and Impact",
-				"date": "November 29, 2007",
-				"DOI": "10.1002/9783527610853",
-				"ISBN": "9783527403929, 9783527610853",
-				"rights": "Copyright © 2002 Wiley-VCH Verlag GmbH",
-				"url": "http://onlinelibrary.wiley.com/book/10.1002/9783527610853",
-				"abstractNote": "Over 40 renowned scientists from all around the world discuss the work and influence of Werner Heisenberg. The papers result from the symposium held by the Alexander von Humboldt-Stiftung on the occasion of the 100th anniversary of Heisenberg's birth, one of the most important physicists of the 20th century and cofounder of modern-day quantum mechanics. Taking atomic and laser physics as their starting point, the scientists illustrate the impact of Heisenberg's theories on astroparticle physics, high-energy physics and string theory right up to processing quantum information.",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "Wiley Online Library",
-				"shortTitle": "100 Years Werner Heisenberg"
-			}
-		]
+		"items": "multiple"
 	},
 	{
 		"type": "web",
@@ -577,82 +549,12 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://onlinelibrary.wiley.com/book/10.1002/9781444390124",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"firstName": "Anthony C.",
-						"lastName": "Thiselton",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "John",
-						"lastName": "Sawyer",
-						"creatorType": "seriesEditor"
-					},
-					{
-						"firstName": "Christopher",
-						"lastName": "Rowland",
-						"creatorType": "seriesEditor"
-					},
-					{
-						"firstName": "Judith",
-						"lastName": "Kovacs",
-						"creatorType": "seriesEditor"
-					},
-					{
-						"firstName": "David M.",
-						"lastName": "Gunn",
-						"creatorType": "seriesEditor"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "1 & 2 Thessalonians: Through the Centuries",
-				"date": "March 24, 2011",
-				"DOI": "10.1002/9781444390124",
-				"ISBN": "9781405196826, 9781444390124",
-				"rights": "Copyright © 2011 Anthony C. Thiselton",
-				"url": "http://onlinelibrary.wiley.com/book/10.1002/9781444390124",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "Wiley Online Library",
-				"shortTitle": "1 & 2 Thessalonians"
-			}
-		]
+		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "http://onlinelibrary.wiley.com/book/10.1002/9780470320419",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"firstName": "William",
-						"lastName": "Smothers",
-						"creatorType": "editor"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "14th Automotive Materials Conference: Ceramic Engineering and Science Proceedings, Volume 8, Issue 9/10",
-				"date": "March 27, 2008",
-				"DOI": "10.1002/9780470320419",
-				"series": "Ceramic Engineering and Science Proceedings",
-				"ISBN": "9780470374740, 9780470320419",
-				"rights": "Copyright © 1987 The American Ceramic Society, Inc.",
-				"url": "http://onlinelibrary.wiley.com/book/10.1002/9780470320419",
-				"abstractNote": "This volume is part of the Ceramic Engineering and Science Proceeding (CESP) series. This series contains a collection of papers dealing with issues in both traditional ceramics (i.e., glass, whitewares, refractories, and porcelain enamel) and advanced ceramics. Topics covered in the area of advanced ceramic include bioceramics, nanomaterials, composites, solid oxide fuel cells, mechanical properties and structural design, advanced ceramic coatings, ceramic armor, porous ceramics, and more.",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "Wiley Online Library",
-				"shortTitle": "14th Automotive Materials Conference"
-			}
-		]
+		"items": "multiple"
 	},
 	{
 		"type": "web",

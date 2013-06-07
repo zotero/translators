@@ -15,7 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-02-03 20:15:34"
+	"lastUpdated": "2013-06-04 22:34:19"
 }
 
 function detectImport() {
@@ -2331,9 +2331,12 @@ function doExport() {
 		//	writeField("pages", item.numPages);
 		//}
 		
+		/* We'll prefer url over howpublished see 
+		https://forums.zotero.org/discussion/24554/bibtex-doubled-url/#Comment_157802
+		
 		if(item.itemType == "webpage") {
 			writeField("howpublished", item.url);
-		}
+		}*/
 		if (item.notes && Zotero.getOption("exportNotes")) {
 			for(var i in item.notes) {
 				var note = item.notes[i];

@@ -9,7 +9,7 @@
 	"priority": 90,
 	"inRepository": true,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-05-20 20:05:00"
+	"lastUpdated": "2013-06-03 20:05:00"
 }
 
 /* CrossRef uses unixref; documentation at http://www.crossref.org/schema/documentation/unixref1.0/unixref.html */
@@ -18,13 +18,10 @@ var ns;
 /**********************
  * Utilitiy Functions *
  **********************/
-var outerXML = (new XMLSerializer()).serializeToString;
+var xmlSerializer = new XMLSerializer();
 function innerXML(n) {
-	return outerXML(n).replace(/^[^>]*>|<[^<]*$/g, '');
-}
-
-function removeCDATA(text) {
-	return text;
+	return xmlSerializer.serializeToString(n) //outer XML
+		.replace(/^[^>]*>|<[^<]*$/g, '');
 }
 
 var markupRE = /<(\/?)(\w+)[^<>]*>/gi;

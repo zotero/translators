@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-04-29 03:09:44"
+	"lastUpdated": "2013-05-28 01:42:17"
 }
 
 function detectWeb(doc, url) {
@@ -114,12 +114,29 @@ function attachSupplementary(doc, item) {
 		type = suppTypeMap[url.substr(url.lastIndexOf('.')+1).toLowerCase()];
 		snapshot = !attachAsLink && type;
 		
-		item.attachments.push({
+		var attachment = {
 			title: title,
 			url: url,
 			mimeType: type,
 			snapshot: !!snapshot
-		});
+		};
+		
+		var replaced = false;
+		if(snapshot && title.search(/Article plus Supplemental Information/i) != -1) {
+			//replace full text PDF
+			for(var j=0, m=item.attachments.length; j<m; j++) {
+				if(item.attachments[j].title == "ScienceDirect Full Text PDF") {
+					attachment.title = "Article plus Supplemental Information";
+					item.attachments[j] = attachment;
+					replaced = true;
+					break;
+				}
+			}
+		}
+		
+		if(!replaced) {
+			item.attachments.push(attachment);
+		}
 	}
 }
 

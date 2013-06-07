@@ -1,20 +1,23 @@
 {
-	"translatorID":"24d9f058-3eb3-4d70-b78f-1ba1aef2128d",
-	"translatorType":5,
-	"label":"CTX",
-	"creator":"Avram Lyon and Simon Kornblith",
-	"target":"^http://freecite\\.library\\.brown\\.edu",
-	"minVersion":"2.0",
-	"maxVersion":"",
-	"priority":100,
-	"configOptions":{"dataMode":"line"},
-	"inRepository":false,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"translatorID": "24d9f058-3eb3-4d70-b78f-1ba1aef2128d",
+	"label": "CTX",
+	"creator": "Avram Lyon and Simon Kornblith",
+	"target": "^http://freecite\\.library\\.brown\\.edu",
+	"minVersion": "2.0",
+	"maxVersion": "",
+	"priority": 100,
+	"configOptions": {
+		"dataMode": "line"
+	},
+	"inRepository": true,
+	"translatorType": 5,
+	"browserSupport": "g",
+	"lastUpdated": "2013-06-07 00:13:26"
 }
 
 /*
    ContextObjects in XML Translator
-   Copyright (C) 2010 Avram Lyon, ajlyon@gmail.com
+   Copyright (C) 2010 Avram Lyon, 2013 Sebastian Karcher
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -46,21 +49,21 @@
   <ctx:metadata-by-val>
    <ctx:format>info:ofi/fmt:xml:xsd:journal</ctx:format>
    <ctx:metadata>
-    <journal xmlns:rft='info:ofi/fmt:xml:xsd:journal' xsi:schemaLocation='info:ofi/fmt:xml:xsd:journal http://www.openurl.info/registry/docs/info:ofi/fmt:xml:xsd:journal'>
-     <rft:atitle>Acute Myocardial Infarction in the Medicare population: process of care and clinical outcomes</rft:atitle>
-     <rft:spage>2530</rft:spage>
-     <rft:date>1992</rft:date>
-     <rft:stitle>Journal of the American Medical Association</rft:stitle>
-     <rft:genre>article</rft:genre>
-     <rft:volume>18</rft:volume>
-     <rft:epage>2536</rft:epage>
-     <rft:au>I S Udvarhelyi</rft:au>
-     <rft:au>C A Gatsonis</rft:au>
-     <rft:au>A M Epstein</rft:au>
-     <rft:au>C L Pashos</rft:au>
-     <rft:au>J P Newhouse</rft:au>
-     <rft:au>B J McNeil</rft:au>
-    </journal>
+	<journal xmlns:rft='info:ofi/fmt:xml:xsd:journal' xsi:schemaLocation='info:ofi/fmt:xml:xsd:journal http://www.openurl.info/registry/docs/info:ofi/fmt:xml:xsd:journal'>
+	 <rft:atitle>Acute Myocardial Infarction in the Medicare population: process of care and clinical outcomes</rft:atitle>
+	 <rft:spage>2530</rft:spage>
+	 <rft:date>1992</rft:date>
+	 <rft:stitle>Journal of the American Medical Association</rft:stitle>
+	 <rft:genre>article</rft:genre>
+	 <rft:volume>18</rft:volume>
+	 <rft:epage>2536</rft:epage>
+	 <rft:au>I S Udvarhelyi</rft:au>
+	 <rft:au>C A Gatsonis</rft:au>
+	 <rft:au>A M Epstein</rft:au>
+	 <rft:au>C L Pashos</rft:au>
+	 <rft:au>J P Newhouse</rft:au>
+	 <rft:au>B J McNeil</rft:au>
+	</journal>
    </ctx:metadata>
   </ctx:metadata-by-val>
  </ctx:referent>
@@ -112,10 +115,10 @@ function detectImport() {
 }
 
 function detectInString(text) {
-    var detectedType = false;
+	var detectedType = false;
 
 	var spans = [];
-	
+	Z.debug(text)
 	// This is because we want to be able to read multiple such CTX elements in a single page
 	if (typeof text != "string" && text.length >= 1) {
 		spans = text.map(contextObjectXMLToCOinS).reduce(function(a,b){return a.concat(b);});
@@ -129,7 +132,7 @@ function detectInString(text) {
 		if(item.itemType) {
 			Zotero.debug("Found " + item.itemType);
 			if (detectedType) {
-			    return "multiple";
+				return "multiple";
 			}
 			detectedType = item.itemType;
 		} else {
@@ -144,53 +147,58 @@ function detectInString(text) {
  * specification.
  */
 function contextObjectXMLToCOinS (text) {
+	//Z.debug(text);
+	var parser = new DOMParser();
+		
 	try {
-		var doc = new XML(text);
+		var doc = parser.parseFromString(text, "text/xml");	
 	}
 	catch (e) {
 		return [];
 	}
-	
+	ns = {		"xsi" : "http://www.w3.org/2001/XMLSchema-instance",
+				"ctx" : "info:ofi/fmt:xml:xsd:ctx",
+				"rft" : "info:ofi/fmt:xml:xsd:journal"
+		};
 	/* Here and elsewhere, we are using the E4X syntax for XML */
-	var objects = doc..*::["context-object"];
-
+	var objects = ZU.xpath(doc, '//ctx:context-object', ns)
 	/* Bail out if no object */
-	if (objects.length() == 0) {
+	if(objects.length === 0) {
 		Zotero.debug("No context object");
 		return [];
 	}
 
 	var titles = [];
 	
-	for (var i = 0; i < objects.length(); i++) {
-		Zotero.debug("Processing object: " + objects[i].text());
+	for (var i = 0; i < objects.length; i++) {
+		Zotero.debug("Processing object: " + objects[i].textContent);
 		var pieces = [];
 		
 		
-		var version = objects[i].@version;
+		var version = ZU.xpathText(objects[i], './@version', ns)
+	
 		pieces.push("ctx_ver="+encodeURIComponent(version));
 		
-		var format = objects[i]..*::format;
-		// Now convert this to the corresponding Key/Encoded-Value format; see note below.
+		var format = ZU.xpathText(objects[i], '//ctx:format', ns)
+		// Now conert this to the corresponding Key/Encoded-Value format; see note below.
 		// Check if this is unknown; if it is, skip
-		if (format.text() == "info:ofi/fmt:xml:xsd:unknown") {
+		if (format == "info:ofi/fmt:xml:xsd:unknown") {
 			Zotero.debug("Skipping object of type 'unknown'");
 			continue;
 		}
-		format = mapXMLtoKEV[format.text()];
 		
+		format = mapXMLtoKEV[format];
+
 		pieces.push("rft_val_fmt=" + encodeURIComponent(format));
 		
-		// Here we disregard the namespaces
-		var fields = objects[i]..*::metadata.children()[0].*::*;
+		var fields = ZU.xpath(objects[i], '//ctx:metadata/*/*', ns);
 		var field;
-		
-		for each (field in fields) {
-		    var name = field.localName();
-		    // We can hardcode the 'rft' namespace to keep COinS valid
-		    name = "rft."+name;
-		    var value = encodeURIComponent(field.text());
-		    pieces.push(name + "=" + value);
+		for (var j in fields) {
+			var name = fields[j].nodeName;
+			// turn this into html
+			name = name.replace(/:/, ".")
+			var value = encodeURIComponent(fields[j].textContent);
+			pieces.push(name + "=" + value);
 		}
 		
 		var title = pieces.join("&");
@@ -266,3 +274,58 @@ var mapXMLtoKEV = {
 	'info:ofi/fmt:xml:xsd:patent'	:	'info:ofi/fmt:kev:mtx:patent',		// Patents
 	'info:ofi/fmt:xml:xsd:sch_svc'	:	'info:ofi/fmt:kev:mtx:sch_svc'		// Scholarly ServiceTypes
 };
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "import",
+		"input": "<ctx:context-objects xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='info:ofi/fmt:xml:xsd:ctx http://www.openurl.info/registry/docs/info:ofi/fmt:xml:xsd:ctx' xmlns:ctx='info:ofi/fmt:xml:xsd:ctx'>\n<ctx:context-object timestamp='2010-01-02T16:55:48-05:00' encoding='info:ofi/enc:UTF-8' version='Z39.88-2004' identifier=''>\n <ctx:referent>\n  <ctx:metadata-by-val>\n   <ctx:format>info:ofi/fmt:xml:xsd:journal</ctx:format>\n   <ctx:metadata>\n    <journal xmlns:rft='info:ofi/fmt:xml:xsd:journal' xsi:schemaLocation='info:ofi/fmt:xml:xsd:journal http://www.openurl.info/registry/docs/info:ofi/fmt:xml:xsd:journal'>\n\t <rft:atitle>Acute Myocardial Infarction in the Medicare population: process of care and clinical outcomes</rft:atitle>\n\t <rft:spage>2530</rft:spage>\n\t <rft:date>1992</rft:date>\n\t <rft:stitle>Journal of the American Medical Association</rft:stitle>\n\t <rft:genre>article</rft:genre>\n\t <rft:volume>18</rft:volume>\n\t <rft:epage>2536</rft:epage>\n\t <rft:au>I S Udvarhelyi</rft:au>\n\t <rft:au>C A Gatsonis</rft:au>\n\t <rft:au>A M Epstein</rft:au>\n\t <rft:au>C L Pashos</rft:au>\n\t <rft:au>J P Newhouse</rft:au>\n\t <rft:au>B J McNeil</rft:au>\n\t</journal>\n   </ctx:metadata>\n  </ctx:metadata-by-val>\n </ctx:referent>\n</ctx:context-object>\n</ctx:context-objects>",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "I. S.",
+						"lastName": "Udvarhelyi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "C. A.",
+						"lastName": "Gatsonis",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "A. M.",
+						"lastName": "Epstein",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "C. L.",
+						"lastName": "Pashos",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "J. P.",
+						"lastName": "Newhouse",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "B. J.",
+						"lastName": "McNeil",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Acute Myocardial Infarction in the Medicare population: process of care and clinical outcomes",
+				"pages": "2530-2536",
+				"date": "1992",
+				"journalAbbreviation": "Journal of the American Medical Association",
+				"volume": "18",
+				"publicationTitle": "Journal of the American Medical Association"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

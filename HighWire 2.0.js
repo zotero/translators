@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-04-30 00:44:33"
+	"lastUpdated": "2013-05-28 00:08:31"
 }
 
 /*
@@ -94,9 +94,12 @@ var suppTypeMap = {
 
 //attach supplementary information
 function attachSupplementary(doc, item, next) {
-	var navDiv = doc.getElementById('article-cb-main') || doc.getElementById('article-views');
+	var navDiv = doc.getElementById('article-cb-main')
+		|| doc.getElementById('article-views')
+		|| ZU.xpath(doc, '//div[contains(@class, "cb-section")]')[0]; //http://www.plantphysiol.org/content/162/1/9.abstract
 	if(navDiv) {
-		var suppLink = ZU.xpath(navDiv, './/a[@rel="supplemental-data"]')[0];
+		var suppLink = ZU.xpath(navDiv, './/a[@rel="supplemental-data"]')[0]
+			|| ZU.xpath(doc, '//a[@rel="supplemental-data"]')[0];
 		if(suppLink) {
 			var attachAsLink = Z.getHiddenPref("supplementaryAsLink");
 			if(attachAsLink) {
@@ -176,9 +179,18 @@ function attachSupplementary(doc, item, next) {
 					
 						var counters = {}, title, tUC, url, type, snapshot;
 						for(var i=0, n=links.length; i<n; i++) {
-							title = ZU.trimInternal(links[i].textContent.trim())
+							title = links[i].nextSibling; //http://www.plantphysiol.org/content/162/1/9.abstract
+							if(title) {
+								title = title.textContent
+									.replace(/^[^a-z]+/i, '').trim();
+							}
+
+							if(!title) {
+								title = ZU.trimInternal(links[i].textContent.trim())
 									.replace(/^download\s+/i, '')
 									.replace(/\([^()]+\)$/, '');
+							}
+							
 							tUC = title.toUpperCase();
 							if(!counters[tUC]) {	//when all supp data has the same title, we'll add some numbers
 								counters[tUC] = 1;
@@ -295,7 +307,7 @@ function detectWeb(doc, url) {
 
 	//only queue up the sidebar for data extraction (it seems to always be present)
 	if(highwiretest && url.indexOf('?frame=sidebar') == -1) {
-		return null;
+		return;
 	}
 
 	if (!highwiretest) {
@@ -303,7 +315,7 @@ function detectWeb(doc, url) {
 		highwiretest = ZU.xpath(doc,
 				"//link[@href='/shared/css/hw-global.css']").length;
 	}
-
+	
 	if(highwiretest) {
 		if (hasMultiple(doc, url)) {
 			return "multiple";
