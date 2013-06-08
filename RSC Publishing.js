@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-04-22 21:02:32"
+	"lastUpdated": "2013-06-08 14:11:40"
 }
 
 /*
@@ -104,7 +104,7 @@ function doWeb(doc, url) {
 				for(var i in selectedItems) {
 					urls.push(i);
 				}
-				ZU.processDocuments(urls,doW);
+				ZU.processDocuments(urls,doWeb);
 			});
 	} else {
 		scrape(doc, type);

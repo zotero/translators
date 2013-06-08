@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-07 23:22:31"
+	"lastUpdated": "2013-06-08 12:06:04"
 }
 
 function detectWeb(doc, url) {
@@ -21,7 +21,7 @@ function detectWeb(doc, url) {
 		else return "magazineArticle";
 	} else if (url.search(/\/portal\/web\/computingnow\/.*content/) > 1) {
 		if (url.indexOf("index.html") != -1) return "multiple";
-		else return "magazineArticle";
+		else if(ZU.xpath(doc, '//li/a[contains(text(), "BibTex") and contains(@href, ".bib")]|//div[@id="bibText-content"]').length > 0) return "magazineArticle";
 	} else if (url.indexOf("/csdl/trans/") > 1) {
 		if (url.indexOf("index.html") != -1) return "multiple";
 		else return "journalArticle";
@@ -444,19 +444,19 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.computer.org/portal/web/computingnow/cloud/content?g=53319&type=article&urlTitle=a-green-software-development-life-cycle-for-cloud-computing",
+		"url": "http://www.computer.org/portal/web/computingnow/content?g=53319&type=article&urlTitle=reimagining-the-scientific-visualization-interaction-paradigm",
 		"items": [
 			{
 				"itemType": "magazineArticle",
 				"creators": [
 					{
-						"firstName": "Nitin Singh",
-						"lastName": "Chauhan",
+						"firstName": "Daniel F.",
+						"lastName": "Keefe",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Ashutosh",
-						"lastName": "Saxena",
+						"firstName": "Tobias",
+						"lastName": "Isenberg",
 						"creatorType": "author"
 					}
 				],
@@ -473,17 +473,17 @@ var testCases = [
 						"title": "IEEE Computer Snapshot"
 					}
 				],
-				"title": "A Green Software Development Life Cycle for Cloud Computing",
-				"publicationTitle": "IT Professional",
-				"volume": "15",
-				"issue": "1",
-				"ISSN": "1520-9202",
+				"title": "Reimagining the Scientific Visualization Interaction Paradigm",
+				"publicationTitle": "Computer",
+				"volume": "46",
+				"issue": "5",
+				"ISSN": "0018-9162",
 				"date": "2013",
-				"pages": "28-34",
-				"DOI": "10.1109/MITP.2013.6",
+				"pages": "51-57",
+				"DOI": "10.1109/MC.2013.178",
 				"publisher": "IEEE Computer Society",
 				"place": "Los Alamitos, CA, USA",
-				"abstractNote": "Cloud computing's recent proliferation has received attention from green crusaders hoping to mitigate the carbon footprint of large datacenters and IT infrastructures, but what about the software? A new framework for a greener cloud focuses on energy-efficient software development.",
+				"abstractNote": "The technological building blocks are in place to address six major challenges for natural visualization interfaces to enable an exciting future where natural interfaces powerfully strengthen and expand the use of visualizations in science, engineering, art, and the humanities.",
 				"libraryCatalog": "IEEE Computer Society"
 			}
 		]

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-24 16:46:42"
+	"lastUpdated": "2013-06-08 14:23:08"
 }
 
 function scrape(doc) {
@@ -36,8 +36,8 @@ function scrape(doc) {
 
 	item.type = ZU.xpathText(doc, '//ul[@class="h-slideshow-categories"]/li[1]');
 
-	item.date = ZU.xpathText(doc, '//meta[contains(@property, "published")]/@content');
-
+	var date = ZU.xpathText(doc, '//meta[contains(@property, "updated_at")]/@content');
+	if(date) item.date = date.replace(/\d{2}:\d{2}:\d{2}\s+[+-]\d{4}/, "")
 	item.url = doc.location.href
 	item.repository = "SlideShare";
 
@@ -101,7 +101,7 @@ var testCases = [
 				"abstractNote": "Representatives from the Center for History and New Media will introduce Zotero, a free and open source extension for Firefox that allows you to collect, organize and archive your research materials. After a brief demo and explanation, we will discuss best practices for making your projects \"Zotero ready\" and other opportunities to integrate with your digital projects through the Zotero API.",
 				"rights": "© All Rights Reserved",
 				"type": "Business & Mgmt",
-				"date": "2008-03-06T10:51:58-06:00",
+				"date": "Thu Mar 06  2008",
 				"url": "http://www.slideshare.net/eby/zotero-and-you-or-bibliography-on-the-semantic-web",
 				"libraryCatalog": "SlideShare",
 				"accessDate": "CURRENT_TIMESTAMP"

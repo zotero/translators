@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-15 18:04:37"
+	"lastUpdated": "2013-06-08 14:00:21"
 }
 
 function detectWeb(doc, url) {
@@ -69,14 +69,18 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
 						"title": "Snapshot"
 					}
 				],
 				"itemID": "http://cab.unime.it/journals/index.php/AAPP/article/view/AAPP.901A1",
 				"title": "A framework of coopetitive games: Applications to the Greek crisis",
 				"publicationTitle": "AAPP | Physical, Mathematical, and Natural Sciences",
-				"rights": "Articles and conference papers published in  Atti della Accademia Peloritana dei Pericolanti &ndash; Classe di Scienze Fisiche, Matematiche e Naturali  are distributed under the terms and conditions of a  Creative Commons Attribution 3.0 Unported License  (effective since 2009, Vol. 87). Correspondingly, authors who publish with this journal agree to the following terms:   Authors retain copyright and grant the journal right of first publication with the work simultaneously licensed under a  Creative Commons Attribution License  that allows others to share the work with an acknowledgement of the work's authorship and initial publication in this journal.   Authors are able to enter into separate, additional contractual arrangements for the non-exclusive distribution of the journal's published version of the work (e.g., post it to an institutional repository or publish it in a book), with an acknowledgement of its initial publication in this journal.   Authors are permitted and encouraged to post their work online (e.g., in institutional repositories or on their website) prior to and during the submission process, as it can lead to productive exchanges, as well as earlier and greater citation of published work (See  The Effect of Open Access ).   &nbsp;",
-				"date": "08/06/2012",
+				"rights": "Articles and conference papers published in  Atti della Accademia Peloritana dei Pericolanti – Classe di Scienze Fisiche, Matematiche e Naturali  are distributed under the terms and conditions of a  Creative Commons Attribution 3.0 Unported License  (effective since 2009, Vol. 87). Correspondingly, authors who publish with this journal agree to the following terms:    Authors retain copyright and grant the journal right of first publication with the work simultaneously licensed under a  Creative Commons Attribution License  that allows others to share the work with an acknowledgement of the work's authorship and initial publication in this journal.       Authors are able to enter into separate, additional contractual arrangements for the non-exclusive distribution of the journal's published version of the work (e.g., post it to an institutional repository or publish it in a book), with an acknowledgement of its initial publication in this journal.      Authors are permitted and encouraged to post their work online (e.g., in institutional repositories or on their website) prior to and during the submission process, as it can lead to productive exchanges, as well as earlier and greater citation of published work (See  The Effect of Open Access ).",
+				"date": "2012/06/08",
 				"reportType": "Text.Serial.Journal",
 				"letterType": "Text.Serial.Journal",
 				"manuscriptType": "Text.Serial.Journal",

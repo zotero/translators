@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-05-07 18:18:30"
+	"lastUpdated": "2013-06-08 14:54:29"
 }
 
 /*
@@ -195,7 +195,7 @@ var testCases = [
 		"url": "http://chronicle.com/article/A-Little-Advice-From-32000/46210/",
 		"items": [
 			{
-				"itemType": "newspaperArticle",
+				"itemType": "magazineArticle",
 				"creators": [
 					{
 						"firstName": "Adam",
@@ -213,7 +213,6 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": false,
 						"title": "Chronicle of Higher Education Snapshot",
 						"mimeType": "text/html"
 					}
@@ -224,7 +223,8 @@ var testCases = [
 				"date": "January 14, 2002",
 				"title": "A Little Advice From 32,000 Graduate Students",
 				"section": "Advice",
-				"libraryCatalog": "The Chronicle of Higher Education"
+				"libraryCatalog": "The Chronicle of Higher Education",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -255,7 +255,9 @@ var testCases = [
 				"ISSN": "0009-5982",
 				"date": "June 16, 2006",
 				"title": "Grinnell's Green Secrets",
-				"section": "News",
+				"section": "News : Short Subjects",
+				"pages": "A9",
+				"edition": "Volume 52, Issue 41",
 				"libraryCatalog": "The Chronicle of Higher Education",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}

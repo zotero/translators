@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-05-19 06:11:57"
+	"lastUpdated": "2013-06-08 11:38:45"
 }
 
 function detectWeb(doc, url) {
@@ -328,15 +328,16 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"D. melanogaster",
+					"walking behavior",
 					"coordination",
-					"gait analysis",
-					"motor neuron",
 					"proprioception",
 					"sensory feedback",
-					"walking behavior"
+					"gait analysis",
+					"motor neuron",
+					"D. melanogaster"
 				],
 				"seeAlso": [
+					"10.7554/eLife.00231",
 					"10.7554/eLife.00231"
 				],
 				"attachments": [
@@ -354,17 +355,24 @@ var testCases = [
 					}
 				],
 				"itemID": "http://elife.elifesciences.org/content/2/e00565",
+				"title": "Correction: Quantification of gait parameters in freely walking wild type and sensory deprived Drosophila melanogaster",
+				"publicationTitle": "eLife",
 				"rights": "Copyright © 2013, Mendes et al. This article is distributed under the terms of the Creative Commons Attribution License, which permits unrestricted use and redistribution provided that the original author and source are credited.",
+				"section": "Neuroscience",
+				"publisher": "eLife Sciences Publications Limited",
+				"institution": "eLife Sciences Publications Limited",
+				"company": "eLife Sciences Publications Limited",
+				"label": "eLife Sciences Publications Limited",
+				"distributor": "eLife Sciences Publications Limited",
+				"date": "02/11/2013",
 				"DOI": "10.7554/eLife.00565",
 				"url": "http://elife.elifesciences.org/content/2/e00565",
 				"language": "en",
+				"volume": "2",
+				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "elife.elifesciences.org",
 				"abstractNote": "Mendes CS, Bartos I, Akay T, Márka S, Mann RS. 2013. Quantification of gait parameters in freely walking wild type and sensory deprived Drosophila melanogaster . eLife 2 :e00231. doi: <http://dx.doi.org/10.7554/eLife.00231>. Published 8 January 2013\n\nIn the first sentence of the abstract, ‘multi-legged in vertebrates’ has been corrected to ‘multi-legged invertebrates’.\n\nIn the vertical axis of Figure 7, panel B, ‘Step lenght’ has been corrected to ‘Step length’.\n\nThe article has been corrected accordingly.\nPMID: 23408481",
-				"shortTitle": "Correction",
-				"title": "Correction: Quantification of gait parameters in freely walking wild type and sensory deprived Drosophila melanogaster",
-				"publicationTitle": "eLife",
-				"date": "02/11/2013",
-				"volume": "2"
+				"shortTitle": "Correction"
 			}
 		]
 	}

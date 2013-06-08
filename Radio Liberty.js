@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-02-25 00:15:59"
+	"lastUpdated": "2013-06-08 14:07:45"
 }
 
 /*
@@ -267,7 +267,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.svoboda.org/archive/ru_news_zone/20111105/17/17.html?id=24382010",
+		"url": "http://www.svoboda.org/content/news/24382010.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -283,7 +283,8 @@ var testCases = [
 				],
 				"title": "Партия \"Яблоко\" перевела свою предвыборную программу на 18 языков",
 				"section": "Новости",
-				"url": "http://www.svoboda.org/archive/ru_news_zone/20111105/17/17.html?id=24382010",
+				"date": "Опубликовано 05.11.2011 06:49",
+				"url": "http://www.svoboda.org/content/news/24382010.html",
 				"publicationTitle": "Радио Свобода",
 				"language": "Russian",
 				"libraryCatalog": "Radio Free Europe / Radio Liberty",

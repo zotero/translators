@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-17 03:09:28"
+	"lastUpdated": "2013-06-08 12:33:26"
 }
 
 var typeMap = {
@@ -108,8 +108,14 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"géométrie",
+					"Education",
+					"Histoire",
+					"Philosophie et Sociologie des             sciences",
+					"Philosophie",
+					"Éducation",
+					"Philosophie",
 					"Géométrie",
+					"géométrie",
 					"Addition"
 				],
 				"seeAlso": [],
@@ -162,6 +168,18 @@ var testCases = [
 				"notes": [],
 				"tags": [
 					"Sociologie",
+					"Anthropologie sociale et ethnologie",
+					"Géographie",
+					"Economies et finances",
+					"Géographie",
+					"Ethnologie",
+					"anthropologie",
+					"Études urbaines",
+					"Économie",
+					"Migrations",
+					"immigrations",
+					"minorités",
+					"Études du politique",
 					"Sociologie",
 					"tisserand"
 				],
@@ -183,6 +201,7 @@ var testCases = [
 				"label": "MESR",
 				"distributor": "MESR",
 				"date": "2000",
+				"archiveLocation": "XXe siècle",
 				"abstractNote": "Weber Florence, . Introduction. In: Genèses, 41, 2000. Comment décrire les transactions. pp. 2-4.",
 				"reportType": "Ouvrages",
 				"letterType": "Ouvrages",
@@ -195,79 +214,6 @@ var testCases = [
 				"audioFileType": "Ouvrages",
 				"language": "Français",
 				"url": "http://www.persee.fr/web/revues/home/prescript/article/genes_1155-3219_2000_num_41_1_1644",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "rechercheisidore.fr"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://rechercheisidore.fr/search/resource/?uri=10670/1.3t6n7a",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"creators": [
-					{
-						"firstName": "Yu",
-						"lastName": "Jianrong",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"Travail",
-					"Thérapeutique par l'exercice",
-					"travail",
-					"Histoire",
-					"histoire",
-					"lutte politique",
-					"Contrôle social",
-					"bien",
-					"Création",
-					"Développement",
-					"emploi",
-					"Adaptations",
-					"Société",
-					"société",
-					"Droit",
-					"droit",
-					"Police",
-					"Nature",
-					"nature",
-					"Conséquence",
-					"fils",
-					"Justification (théologie)"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "Isidore Record",
-						"snapshot": false
-					}
-				],
-				"itemID": "http://rechercheisidore.fr/search/resource/?uri=10670/1.3t6n7a",
-				"title": "Le système de rééducation par le travail, instrument de la lutte politique et moyen de contrôle social",
-				"publisher": "OpenEdition",
-				"institution": "OpenEdition",
-				"company": "OpenEdition",
-				"label": "OpenEdition",
-				"distributor": "OpenEdition",
-				"date": "2010-06-01",
-				"abstractNote": "Après un bref récapitulatif de l’histoire du système de rééducation par le travail ( laojiao), notre article conclut que la création et le développement de ce système peut se diviser de manière générale en deux phases : celle de la rééducation par le travail en tant qu’instrument de lutte politique et celle de la rééducation par le travail en tant que moyen de contrôle social. Bien qu’au cours de l’histoire, le laojiaoait été réformé plusieurs fois, que sa fonction et ses cibles aient connu de grandes variations, on peut dire que ces changements dans les tâches concrètes n’ont constitué que des adaptations du laojiaoaux exigences de la société à différentes époques, mais que la violation arbitraire du droit individuel par la force publique qui constitue la nature profonde de ce système, n’a jamais changé. En conséquence, bien que le système du laojiao, anomalie produite par l’histoire, continue de jouer un rôle aujourd’hui, la poursuite de son existence a déjà perdu toute justification et toute légitimité.",
-				"reportType": "Actualités",
-				"letterType": "Actualités",
-				"manuscriptType": "Actualités",
-				"mapType": "Actualités",
-				"thesisType": "Actualités",
-				"websiteType": "Actualités",
-				"presentationType": "Actualités",
-				"postType": "Actualités",
-				"audioFileType": "Actualités",
-				"language": "Français",
-				"url": "http://perspectiveschinoises.revues.org/5625",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "rechercheisidore.fr"
 			}
@@ -288,15 +234,17 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Psychologie",
 					"Education",
+					"Philosophie",
+					"Psychologie",
 					"Éducation",
 					"Psychologie",
 					"Épistémologie et méthodes",
 					"Pensée",
 					"Psychisme",
-					"Éducation",
+					"Philosophie",
 					"éducation",
+					"Éducation",
 					"Psychologie de l'éducation",
 					"Sciences de l'éducation",
 					"Étudiants",
@@ -304,8 +252,8 @@ var testCases = [
 					"Psychologie",
 					"Philosophie",
 					"philosophie",
-					"Épistémologie",
 					"épistémologie",
+					"Épistémologie",
 					"Sciences et civilisation",
 					"Mars"
 				],
@@ -360,11 +308,13 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
+					"Sciences de l'information et de la             communication",
+					"Sciences de l'information",
 					"Archives",
 					"archives",
 					"Recherche",
-					"mouvement/immobilité",
 					"Mouvement",
+					"mouvement/immobilité",
 					"lieu",
 					"recherche",
 					"Sciences -- Documentation",
@@ -378,8 +328,8 @@ var testCases = [
 					"Scientifiques",
 					"Algériennes",
 					"Origines",
-					"Paysage",
 					"représentation de paysage",
+					"Paysage",
 					"Modes",
 					"Organisation",
 					"Marche",
@@ -387,8 +337,8 @@ var testCases = [
 					"Vers",
 					"dépôt",
 					"Information technique",
-					"Sciences -- Vulgarisation",
 					"Documentation technique",
+					"Sciences -- Vulgarisation",
 					"Édition scientifique",
 					"Électronique"
 				],
@@ -410,6 +360,7 @@ var testCases = [
 				"label": "Centre pour la communication scientifique directe",
 				"distributor": "Centre pour la communication scientifique directe",
 				"date": "2007-05-30",
+				"archiveLocation": "Époque contemporaine",
 				"abstractNote": "L'exploitation rationnelle des résultats de la recherche scientifique dépend en premier lieu de l'accès à ces résultats. C'est de ce principe qu'a émergé le mouvement des archives ouvertes dans les milieux de la recherche afin de prôner un accès libre et gratuit à la littérature scientifique mondiale. La maîtrise de ce mouvement quand à ses principes, ses techniques....justifie cette étude qui se propose de définir un prototype d'archive ouverte institutionnelle (CERIST d'Alger) et multidisciplinaire pour les communautés scientifiques algériennes. Pour atteindre cet objectif, nous avons, dans un premier lieu, fait un rappel sur les origines et les évolutions du mouvement des archives ouvertes (Open Archive) dans le paysage de la communication scientifique. Puis, nous avons étudié quelques dépôts d'archives afin de nous inspirer de leur modes d'organisation et de fonctionnement dans la réalisation de notre prototype d'archive ouverte que nous avons nommé ArchivAlg. La suite de cette recherche expose dans une démarche constructive les étapes de création et de mise en oeuvre de notre prototype et propose vers la fin quelques perspectives de promotion de l'archivage libre en Algérie.",
 				"reportType": "Mémoires, Thèses et HDR",
 				"letterType": "Mémoires, Thèses et HDR",
@@ -443,9 +394,14 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
+					"Démographie",
+					"Anthropologie sociale et ethnologie",
 					"Sociologie",
 					"Sociologie",
 					"Sociologie de la santé",
+					"Ethnologie",
+					"anthropologie",
+					"Démographie",
 					"santé",
 					"Santé",
 					"Couple",
@@ -461,28 +417,28 @@ var testCases = [
 					"Cas",
 					"sphère",
 					"Sphère",
-					"Mariage",
 					"mariage",
+					"Mariage",
 					"Prévention",
+					"Sciences -- Documentation",
 					"Information scientifique",
 					"Information technique",
-					"Sciences -- Vulgarisation",
-					"Sciences -- Documentation",
 					"Documentation technique",
+					"Sciences -- Vulgarisation",
 					"Relations humaines",
 					"rapports sociaux",
 					"Développement",
 					"Concept",
-					"Reproduction",
 					"restitution",
+					"Reproduction",
 					"Et les femmes",
 					"Nouvelle",
 					"nouvelle",
 					"Sexualité",
 					"sexualité",
 					"Risque",
-					"Vie",
 					"vie",
+					"Vie",
 					"Membres",
 					"fils",
 					"père",
@@ -496,14 +452,14 @@ var testCases = [
 					"Évolution",
 					"Âge",
 					"entrée",
-					"Concorde",
 					"union",
+					"Concorde",
 					"Femmes",
 					"Arrestine 4",
 					"Nouvelles",
 					"concubinage",
-					"polygamie",
 					"Polygamie",
+					"polygamie",
 					"Africains",
 					"Africains",
 					"Pacte civil de solidarité",
@@ -572,6 +528,81 @@ var testCases = [
 		"type": "web",
 		"url": "http://rechercheisidore.fr/search/?type=http://www.rechercheisidore.fr/ontology/art",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://rechercheisidore.fr/search/resource/?uri=10670/1.mnjsvs",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"lastName": "Yu Jianrong",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Linguistique",
+					"Linguistique",
+					"Travail",
+					"Thérapeutique par l'exercice",
+					"travail",
+					"Histoire",
+					"histoire",
+					"lutte politique",
+					"Contrôle social",
+					"bien",
+					"Création",
+					"Développement",
+					"emploi",
+					"Adaptations",
+					"société",
+					"Société",
+					"Droit",
+					"droit",
+					"Police",
+					"Nature",
+					"nature",
+					"Conséquence",
+					"fils",
+					"Justification (théologie)"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					},
+					{
+						"title": "Isidore Record",
+						"snapshot": false
+					}
+				],
+				"itemID": "http://rechercheisidore.fr/search/resource/?uri=10670/1.mnjsvs",
+				"title": "Le système de rééducation par le travail, instrument de la lutte politique et moyen de contrôle social",
+				"publisher": "OpenEdition",
+				"institution": "OpenEdition",
+				"company": "OpenEdition",
+				"label": "OpenEdition",
+				"distributor": "OpenEdition",
+				"date": "2010-06-01",
+				"archiveLocation": "Époque contemporaine",
+				"abstractNote": "Après un bref récapitulatif de l’histoire du système de rééducation par le travail ( laojiao), notre article conclut que la création et le développement de ce système peut se diviser de manière générale en deux phases : celle de la rééducation par le travail en tant qu’instrument de lutte politique et celle de la rééducation par le travail en tant que moyen de contrôle social. Bien qu’au cours de l’histoire, le laojiaoait été réformé plusieurs fois, que sa fonction et ses cibles aient connu de grandes variations, on peut dire que ces changements dans les tâches concrètes n’ont constitué que des adaptations du laojiaoaux exigences de la société à différentes époques, mais que la violation arbitraire du droit individuel par la force publique qui constitue la nature profonde de ce système, n’a jamais changé. En conséquence, bien que le système du laojiao, anomalie produite par l’histoire, continue de jouer un rôle aujourd’hui, la poursuite de son existence a déjà perdu toute justification et toute légitimité.",
+				"reportType": "Actualités",
+				"letterType": "Actualités",
+				"manuscriptType": "Actualités",
+				"mapType": "Actualités",
+				"thesisType": "Actualités",
+				"websiteType": "Actualités",
+				"presentationType": "Actualités",
+				"postType": "Actualités",
+				"audioFileType": "Actualités",
+				"language": "Français",
+				"url": "http://perspectiveschinoises.revues.org/5625",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "rechercheisidore.fr"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

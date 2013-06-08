@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-03-13 23:19:53"
+	"lastUpdated": "2013-06-08 12:20:25"
 }
 
 function detectWeb(doc, url) {
@@ -109,76 +109,94 @@ function doWeb(doc, url) {
 	}
 }
 /** BEGIN TEST CASES **/
-var testCases = [{
-	"type": "web",
-	"url": "http://jmlr.csail.mit.edu/papers/v10/",
-	"items": "multiple"
-}, {
-	"type": "web",
-	"url": "http://jmlr.csail.mit.edu/papers/v10/kang09a.html",
-	"items": [{
-		"itemType": "journalArticle",
-		"creators": [{
-			"firstName": "Changsung",
-			"lastName": "Kang",
-			"creatorType": "author"
-		}, {
-			"firstName": "Jin",
-			"lastName": "Tian",
-			"creatorType": "author"
-		}],
-		"notes": [],
-		"tags": [],
-		"seeAlso": [],
-		"attachments": [{
-			"url": "http://www.jmlr.org/papers/volume10/kang09a/kang09a.pdf",
-			"title": "Markov Properties for Linear Causal Models with Correlated Errors",
-			"mimeType": "application/pdf"
-		}],
-		"url": "http://jmlr.csail.mit.edu/papers/v10/kang09a.html",
-		"publicationTitle": "Journal of Machine Learning Research",
-		"title": "Markov Properties for Linear Causal Models with Correlated Errors",
-		"volume": "10",
-		"date": "Jan, 2009",
-		"pages": "41--70",
-		"abstractNote": "A linear causal model with correlated errors, represented by a DAG\nwith bi-directed edges, can be tested by the set of conditional\nindependence relations implied by the model. A global Markov property\nspecifies, by the d-separation criterion, the set of all conditional\nindependence relations holding in any model associated with a graph. A\nlocal Markov property specifies a much smaller set of conditional\nindependence relations which will imply all other conditional\nindependence relations which hold under the global Markov\nproperty. For DAGs with bi-directed edges associated with arbitrary\nprobability distributions, a local Markov property is given in\nRichardson (2003) which may invoke an exponential number of\nconditional independencies. In this paper, we show that for a class of\nlinear structural equation models with correlated errors, there is a\nlocal Markov property which will invoke only a linear number of\nconditional independence relations. For general linear models, we\nprovide a local Markov property that often invokes far fewer\nconditional independencies than that in Richardson (2003). The\nresults have applications in testing linear structural equation models\nwith correlated errors.",
-		"libraryCatalog": "Journal of Machine Learning Research",
-		"accessDate": "CURRENT_TIMESTAMP"
-	}]
-}, {
-	"type": "web",
-	"url": "http://jmlr.csail.mit.edu/papers/v12/goldwater11a.html",
-	"items": [{
-		"itemType": "journalArticle",
-		"creators": [{
-			"firstName": "Sharon",
-			"lastName": "Goldwater",
-			"creatorType": "author"
-		}, {
-			"firstName": "Thomas L.",
-			"lastName": "Griffiths",
-			"creatorType": "author"
-		}, {
-			"firstName": "Mark",
-			"lastName": "Johnson",
-			"creatorType": "author"
-		}],
-		"notes": [],
-		"tags": [],
-		"seeAlso": [],
-		"attachments": [{
-			"title": "Producing Power-Law Distributions and Damping Word Frequencies with Two-Stage Language Models",
-			"mimeType": "application/pdf"
-		}],
-		"url": "http://jmlr.csail.mit.edu/papers/v12/goldwater11a.html",
-		"publicationTitle": "Journal of Machine Learning Research",
-		"title": "Producing Power-Law Distributions and Damping Word Frequencies with Two-Stage Language Models",
-		"volume": "12",
-		"date": "Jul, 2011",
-		"pages": "2335−2382",
-		"abstractNote": "Standard statistical models of language fail to capture one of the most striking properties of natural languages: the power-law distribution in the frequencies of word tokens. We present a framework for developing statistical models that can generically produce power laws, breaking generative models into two stages. The first stage, the generator, can be any standard probabilistic model, while the second stage, the adaptor, transforms the word frequencies of this model to provide a closer match to natural language. We show that two commonly used Bayesian models, the Dirichlet-multinomial model and the Dirichlet process, can be viewed as special cases of our framework.  We discuss two stochastic processes---the Chinese restaurant process and its two-parameter generalization based on the Pitman-Yor process---that can be used as adaptors in our framework to produce power-law distributions over word frequencies.  We show that these adaptors justify common estimation procedures based on logarithmic or inverse-power transformations of empirical frequencies.  In addition, taking the Pitman-Yor Chinese restaurant process as an adaptor justifies the appearance of type frequencies in formal analyses of natural language and improves the performance of a model for unsupervised learning of morphology.",
-		"libraryCatalog": "Journal of Machine Learning Research",
-		"accessDate": "CURRENT_TIMESTAMP"
-	}]
-}]
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://jmlr.csail.mit.edu/papers/v10/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://jmlr.org/papers/v10/kang09a.html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Changsung",
+						"lastName": "Kang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jin",
+						"lastName": "Tian",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Markov Properties for Linear Causal Models with Correlated Errors",
+						"mimeType": "application/pdf"
+					}
+				],
+				"url": "http://jmlr.org/papers/v10/kang09a.html",
+				"publicationTitle": "Journal of Machine Learning Research",
+				"title": "Markov Properties for Linear Causal Models with Correlated Errors",
+				"volume": "10",
+				"date": "Jan, 2009",
+				"pages": "41--70",
+				"abstractNote": "A linear causal model with correlated errors, represented by a DAG\nwith bi-directed edges, can be tested by the set of conditional\nindependence relations implied by the model. A global Markov property\nspecifies, by the d-separation criterion, the set of all conditional\nindependence relations holding in any model associated with a graph. A\nlocal Markov property specifies a much smaller set of conditional\nindependence relations which will imply all other conditional\nindependence relations which hold under the global Markov\nproperty. For DAGs with bi-directed edges associated with arbitrary\nprobability distributions, a local Markov property is given in\nRichardson (2003) which may invoke an exponential number of\nconditional independencies. In this paper, we show that for a class of\nlinear structural equation models with correlated errors, there is a\nlocal Markov property which will invoke only a linear number of\nconditional independence relations. For general linear models, we\nprovide a local Markov property that often invokes far fewer\nconditional independencies than that in Richardson (2003). The\nresults have applications in testing linear structural equation models\nwith correlated errors.",
+				"libraryCatalog": "Journal of Machine Learning Research",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://jmlr.org/papers/v12/goldwater11a.html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Sharon",
+						"lastName": "Goldwater",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Thomas L.",
+						"lastName": "Griffiths",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Mark",
+						"lastName": "Johnson",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Producing Power-Law Distributions and Damping Word Frequencies with Two-Stage Language Models",
+						"mimeType": "application/pdf"
+					}
+				],
+				"url": "http://jmlr.org/papers/v12/goldwater11a.html",
+				"publicationTitle": "Journal of Machine Learning Research",
+				"title": "Producing Power-Law Distributions and Damping Word Frequencies with Two-Stage Language Models",
+				"volume": "12",
+				"date": "Jul, 2011",
+				"pages": "2335−2382",
+				"abstractNote": "Standard statistical models of language fail to capture one of the most striking properties of natural languages: the power-law distribution in the frequencies of word tokens. We present a framework for developing statistical models that can generically produce power laws, breaking generative models into two stages. The first stage, the generator, can be any standard probabilistic model, while the second stage, the adaptor, transforms the word frequencies of this model to provide a closer match to natural language. We show that two commonly used Bayesian models, the Dirichlet-multinomial model and the Dirichlet process, can be viewed as special cases of our framework.  We discuss two stochastic processes---the Chinese restaurant process and its two-parameter generalization based on the Pitman-Yor process---that can be used as adaptors in our framework to produce power-law distributions over word frequencies.  We show that these adaptors justify common estimation procedures based on logarithmic or inverse-power transformations of empirical frequencies.  In addition, taking the Pitman-Yor Chinese restaurant process as an adaptor justifies the appearance of type frequencies in formal analyses of natural language and improves the performance of a model for unsupervised learning of morphology.",
+				"libraryCatalog": "Journal of Machine Learning Research",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
 /** END TEST CASES **/

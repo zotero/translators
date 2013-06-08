@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-15 18:04:37"
+	"lastUpdated": "2013-06-08 14:46:32"
 }
 
 /*
@@ -40,7 +40,7 @@ http://www.spiegel.de/international/europe/0,1518,700530,00.html
 
 function detectWeb(doc, url) {
 
-	var spiegel_article_XPath = ".//div[@id='spArticleFunctions']|.//span[@class='spArticleHeadline']";
+	var spiegel_article_XPath = './/div[@class="column-both"]/h2[@class="article-title"]|.//div[@class="column-wide"]/h2[contains(@class, "headline")]';
 	//the print edition is a magazine. Since the online edition is updated constantly it
 	//makes sense to treat it like a newspaper.
 	if (url.match(/\/print\//) && ZU.xpathText(doc, spiegel_article_XPath)){
@@ -76,7 +76,7 @@ function scrape(doc, url) {
 
 	// This is for the title 
 	
-	var title_xPath = '//h2[@itemprop="headline"]/span[@class="spArticleHeadLine"]';
+	var title_xPath = '//div[@class="column-wide"]/h2[contains(@class, "headline")]';
 	if (doc.evaluate(title_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
 		var title = doc.evaluate(title_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		newItem.title = title;
@@ -101,7 +101,7 @@ function scrape(doc, url) {
 	}
 	
 	// Author
-	var author_XPath1 = ".//p[contains(@class, 'spAuthor')]"; // Most of the time, the author has its own tag. Easy Case, really.
+	var author_XPath1 = ".//p[contains(@class, 'author')]"; // Most of the time, the author has its own tag. Easy Case, really.
 	var author_XPath2 =  ".//*[@id='spIntroTeaser']/strong/i"; // Sometimes, though, the author is in italics in the teaser.
 	if (doc.evaluate(author_XPath1, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		var author = doc.evaluate(author_XPath1, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
@@ -137,8 +137,8 @@ function scrape(doc, url) {
 	} 
 
 	if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/spiegel/)){
-		var printurl_xPath = ".//div[@id='spArticleFunctions']/ul/li[1]/a";
-		var printurl = doc.evaluate(printurl_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+		var printurl_xPath = ".//div[contains(@class, 'article-function-box')]/ul/li[1]/a/@href";
+		var printurl = ZU.xpathText(doc, printurl_xPath);
 		//Zotero.debug(printurl);
 		newItem.attachments.push({url:printurl, title:doc.title, mimeType:"application/pdf"});
 	} else { 
@@ -149,12 +149,12 @@ function scrape(doc, url) {
 	}
 	
 	//Ausgabe/Volume für Print
-	if (ZU.xpathText(doc, '//div[@class="spAssetHdln"]') && newItem.itemType == "magazineArticle"){
-		newItem.volume = ZU.xpathText(doc, '//div[@class="spAssetHdln"]').match(/(\d+)\/\d{4}/)[1];
+	if (ZU.xpathText(doc, '//div[@class="spiegel-magazin-title asset-title"]') && newItem.itemType == "magazineArticle"){
+		newItem.volume = ZU.xpathText(doc, '//div[@class="spiegel-magazin-title asset-title"]').match(/(\d+)\/\d{4}/)[1];
 	}
 	
 	// Summary
-	var summary_xPath = ".//p[@id='spIntroTeaser']";
+	var summary_xPath = ".//p[@class='article-intro']";
 	if (doc.evaluate(summary_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
 		var summary= doc.evaluate(summary_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		newItem.abstractNote = Zotero.Utilities.trim(summary);
@@ -193,14 +193,10 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		
-		 if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/thema/)){ 
-			var titles = doc.evaluate(".//*[@id='spTeaserColumn']/div/h3/a", doc, null, XPathResult.ANY_TYPE, null);
-		} else  if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/suche/)){ 
-			var titles = doc.evaluate(".//*[@id='spTeaserColumn']/div/a", doc, null, XPathResult.ANY_TYPE, null);
-		} else  if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/international\/search/)){ 
-			var titles = doc.evaluate("//*[@id='spTeaserColumn']/div/a", doc, null, XPathResult.ANY_TYPE, null);
-		} else  if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/international\/topic/)){ 
-			var titles = doc.evaluate(".//*[@id='spTeaserColumn']/div/h2/a", doc, null, XPathResult.ANY_TYPE, null);
+		 if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/(suche|international\/search)/)){ 
+			var titles = doc.evaluate(".//div[@class='search-teaser']/a", doc, null, XPathResult.ANY_TYPE, null);
+		} else  if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/(thema\/|international\/topic)/)){ 
+			var titles = doc.evaluate(".//div[contains(@class, 'teaser')]/h2/a", doc, null, XPathResult.ANY_TYPE, null);
 		} 
 	
 		var next_title;
@@ -315,13 +311,17 @@ var testCases = [
 				"url": "http://www.spiegel.de/spiegel/print/d-84789653.html",
 				"title": "VEB Energiewende",
 				"volume": "15",
-				"abstractNote": "Der Atomausstieg wird zur Subventionsmaschine für Industriebosse, Elektrokonzerne und findige Geschäftemacher. Die Kosten und Risiken sollen andere tragen - die Bürger.",
 				"date": "07.04.2012",
 				"publicationTitle": "Der Spiegel",
 				"libraryCatalog": "Spiegel Online",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.spiegel.de/thema/atomkraftwerke/",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

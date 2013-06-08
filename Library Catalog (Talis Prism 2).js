@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-05-08 15:12:03"
+	"lastUpdated": "2013-06-08 13:41:43"
 }
 
 /*
@@ -124,7 +124,7 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"title": "The compact wine guide; e. John Mahoney)",
+				"title": "The compact wine guide",
 				"place": "(London",
 				"publisher": "Wine and Spirit Publications",
 				"date": "1969",

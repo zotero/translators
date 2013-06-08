@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-02-08 12:35:08"
+	"lastUpdated": "2013-06-08 14:56:34"
 }
 
 function detectWeb(doc, url) {
@@ -96,7 +96,7 @@ var testCases = [
 				],
 				"date": "Tue Jan 26 2010",
 				"abstractNote": "France's National Assembly should pass a resolution denouncing full Muslim face veils and then vote the strictest law possible to ban women from wearing them, a parliamentary commission proposed on Tuesday.",
-				"title": "France should ban Muslim veils, commission says",
+				"title": "France's National Assembly should pass a resolution denouncing full Muslim face veils and then vote the strictest law possible to ban women from wearing them, a parliamentary commission proposed on Tuesday.",
 				"url": "http://www.thestar.com/news/world/2010/01/26/france_should_ban_muslim_veils_commission_says.html",
 				"publicationTitle": "The Toronto Star",
 				"ISSN": "0319-0781",
@@ -129,13 +129,12 @@ var testCases = [
 				],
 				"date": "Fri Jul 29 2011",
 				"abstractNote": "There&rsquo;s no reason why Ontario can&rsquo;t regain the momentum it once had.",
-				"title": "Hamilton: Ontario should reconsider offshore wind",
+				"title": "There’s no reason why Ontario can’t regain the momentum it once had.",
 				"url": "http://www.thestar.com/business/tech_news/2011/07/29/hamilton_ontario_should_reconsider_offshore_wind.html",
 				"publicationTitle": "The Toronto Star",
 				"ISSN": "0319-0781",
 				"libraryCatalog": "Toronto Star",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Hamilton"
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -168,7 +167,7 @@ var testCases = [
 				],
 				"date": "Tue Jul 03 2012",
 				"abstractNote": "Bev Oda will leave politics later this month following a series of scandals over her travel expenses and funding decisions.",
-				"title": "Bev Oda resigns as International Co-operation minister, Conservative MP for Durham",
+				"title": "Bev Oda will leave politics later this month following a series of scandals over her travel expenses and funding decisions.",
 				"url": "http://www.thestar.com/news/canada/2012/07/03/bev_oda_resigns_as_international_cooperation_minister_conservative_mp_for_durham.html",
 				"publicationTitle": "The Toronto Star",
 				"ISSN": "0319-0781",

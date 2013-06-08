@@ -9,8 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-05-09 15:03:14"
+	"lastUpdated": "2013-06-08 13:57:52"
 }
+
+/* Multiple items examples (tests don't work)
+http://www.nga.gov/content/ngaweb/collection-search-result.html?artist=
+http://www.nga.gov/content/ngaweb/Collection/artist-info.1951.html
+*/
 
 function detectWeb(doc, url) {
 	if (url.indexOf("art-object-page")!=-1) {
@@ -30,7 +35,8 @@ function scrape(doc, url) {
 	var newItem = new Zotero.Item("artwork");
 	var authors = ZU.xpath(doc, '//dl[@class="artist-details"]/dt[@class="artist"]/a');
 	for (var i in authors){
-		newItem.creators.push(ZU.cleanAuthor(authors[i].textContent, "artist", true))
+		//there are occasional empty items
+		if (authors[i].textContent) newItem.creators.push(ZU.cleanAuthor(authors[i].textContent, "artist", true))
 	}
 	newItem.title = ZU.xpathText(doc, '//dl[@class="artwork-details"]/dt[@class="title"]');
 	newItem.date = ZU.xpathText(doc, '//dl[@class="artwork-details"]/dt[@class="created"]');
@@ -43,8 +49,6 @@ function scrape(doc, url) {
 }
 
 function doWeb(doc, url) {
-
-	
 	var articles = new Array();
 	
 	if (detectWeb(doc, url) == "multiple") {
@@ -100,18 +104,6 @@ var testCases = [
 				"libraryCatalog": "National Gallery of Art - U.S.A."
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.nga.gov/content/ngaweb/Collection/artist-info.1951.html",
-		"defer": true,
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://www.nga.gov/content/ngaweb/collection-search-result.html?artist=",
-		"defer": true,
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

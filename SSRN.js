@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-03-16 12:47:28"
+	"lastUpdated": "2013-06-08 14:47:14"
 }
 
 /*
@@ -98,7 +98,7 @@ var testCases = [
 				"itemType": "report",
 				"creators": [
 					{
-						"firstName": "Brian",
+						"firstName": "Brian D.",
 						"lastName": "Greenhill",
 						"creatorType": "author"
 					},
@@ -108,7 +108,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Audrey",
+						"firstName": "Audrey E.",
 						"lastName": "Sacks",
 						"creatorType": "author"
 					}
@@ -130,7 +130,7 @@ var testCases = [
 					}
 				],
 				"title": "The 'Separation Plot': A New Visual Method for Evaluating the Predictive Power of Logit/Probit Models",
-				"date": "August 13, 2009",
+				"date": "2009",
 				"abstractNote": "We present a new visual method for assessing the predictive power of models with binary outcomes.  This technique allows the analyst to quickly and easily choose among alternative model specifications based upon the models' ability to consistently match high-probability predictions to actual occurrences of the event of interest, and low-probability predictions to non-occurrences of the event of interest.  Unlike existing methods for assessing predictive power for logit and probit models such as the use of \"percent correctly predicted\" statistics, Brier scores and the ROC plot, our \"separation plot\" has the advantage of producing a visual display that is more informative and easier to explain to a general audience than a ROC plot, while also remaining insensitive to the user's often arbitrary choice of threshold for distinguishing between events and non-events.  We show how to implement this technique in R and demonstrate its effectiveness in building predictive models in four different areas of political research.",
 				"url": "http://papers.ssrn.com/abstract=1450589",
 				"accessDate": "CURRENT_TIMESTAMP",

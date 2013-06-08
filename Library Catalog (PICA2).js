@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-05-15 20:05:47"
+	"lastUpdated": "2013-06-08 13:39:30"
 }
 
 /*
@@ -92,6 +92,8 @@ function scrape(doc, url) {
 		//we can have garbage after the bibtex, but note before.
 		bibtex=ZU.trimInternal(bibtex).replace(/^.*?@/, "@")
 		//Z.debug(bibtex);
+		//They have faulty bibtex with semicolons between authors
+		bibtex = bibtex.replace(/(author\s*=\s*\{[^\}]+);([^\}]+\})/g, "$1and$2");
 		//this is provisional. should be fixed in bibtex
 		bibtex = bibtex.replace(/location\s*=\s*\{/, "bestand = {")
 		var bestand = bibtex.match(/bestand\s*=\s*\{([^\}]+)\}/);

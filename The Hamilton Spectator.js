@@ -3,19 +3,19 @@
 	"label": "The Hamilton Spectator",
 	"creator": "Adam Crymble",
 	"target": "^https?://www\\.thespec\\.com",
-	"minVersion": "1.0.0b4.r5",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-17 19:59:06"
+	"lastUpdated": "2013-06-08 15:21:58"
 }
 
 function detectWeb(doc, url) {
-	if (url.indexOf("/search?") != -1) {
+	if (url.indexOf("/search/") != -1) {
 		return "multiple";
-	} else if (url.indexOf("article") != -1) {
+	} else if (ZU.xpathText(doc, '//h1[@class="printable-title"]')) {
 		return "newspaperArticle";
 	}
 }
@@ -62,11 +62,11 @@ function scrape(doc, url) {
 		newItem.creators.push(Zotero.Utilities.cleanAuthor(author2, "author"));	
 	}
 	
-	var xPathTitle = '//h1';
+	var xPathTitle = '//h1[@class="printable-title"]';
 	newItem.title = doc.evaluate(xPathTitle, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;	
 
 	newItem.abstractNote = ZU.xpathText(doc, '//meta[@name="description"]/@content');
-	newItem.date = ZU.xpathText(doc, '//span[contains(@class,"td_page_date")]');
+	newItem.date = ZU.xpathText(doc, '//div[contains(@class, "above-page-title")]/span[contains(@class,"left")]');
 
 	newItem.url = doc.location.href;
 	newItem.publicationTitle = "The Hamilton Spectator";
@@ -79,11 +79,11 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		
-		var titles = doc.evaluate('//div[@class="td_tsr_title"]/a', doc, null, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//h3[@class="title"]/a', doc, null, XPathResult.ANY_TYPE, null);
 		
 		var next_title;
 		while (next_title = titles.iterateNext()) {
-				items[next_title.href] = next_title.textContent;
+				items[next_title.href] = next_title.textContent.trim();
 		}
 		Zotero.selectItems(items, function(items) {
 			if(!items) return true;
@@ -101,35 +101,23 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.thespec.com/news/ontario/article/626278--expert-calls-occupy-demos-most-important-in-generations",
+		"url": "http://www.thespec.com/news-story/2223303-expert-calls-occupy-demos-most-important-in-generations-/",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"creators": [
-					{
-						"firstName": "Colin",
-						"lastName": "Perkel",
-						"creatorType": "author"
-					}
-				],
+				"creators": [],
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
 				"title": "Expert calls Occupy demos most important in generations",
-				"abstractNote": "The Occupy protest is the most important democratic social movement of the last two generations and demonstrators who have taken over parks and other...",
-				"date": "Wed Nov 16 2011 21:54:00",
-				"url": "http://www.thespec.com/news/ontario/article/626278--expert-calls-occupy-demos-most-important-in-generations",
+				"date": "Nov 16, 2011  |",
+				"url": "http://www.thespec.com/news-story/2223303-expert-calls-occupy-demos-most-important-in-generations-/",
 				"publicationTitle": "The Hamilton Spectator",
 				"libraryCatalog": "The Hamilton Spectator",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.thespec.com/search?types=article&orderby=releasetimestamp+desc&query=labor",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

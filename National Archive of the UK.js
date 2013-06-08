@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcbv",
-	"lastUpdated": "2013-05-15 20:05:47"
+	"lastUpdated": "2013-06-08 13:42:07"
 }
 
 /**
@@ -101,11 +101,6 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://discovery.nationalarchives.gov.uk/SearchUI/s/res?_aq=test&_ep=&_or1=&_or2=&_or3=&_nq1=&_nq2=&_nq3=&_sd=&_ed=&_col=all&_sw=dep&_d=ACT&_d=AE&_d=AO&_cr1=&_cr2=&_cr3=&_ps=15&_ro=any&_rd=&_rsd=&_red=&_fr=&_st=adv",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "http://discovery.nationalarchives.gov.uk/SearchUI/Details?uri=C3454320",
 		"items": [
 			{
@@ -170,6 +165,11 @@ var testCases = [
 				"libraryCatalog": "National Archive of the UK"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://discovery.nationalarchives.gov.uk/SearchUI/s/res?_q=labour",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

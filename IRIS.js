@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-13 04:09:40"
+	"lastUpdated": "2013-06-08 12:14:42"
 }
 
 function detectWeb(doc, url) {
@@ -203,7 +203,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www-iris-rutgers-edu.proxy.libraries.rutgers.edu/cgi-bin/IRISquickSearch2.cgi?searchdata1=4835224{CKEY}&searchfield1=GENERAL^SUBJECT^GENERAL^^&user_id=WEBSERVER",
+		"url": "https://www-iris-rutgers-edu.proxy.libraries.rutgers.edu/uhtbin/cgisirsi/0/0/0/123?srchfield1=&searchdata1=4835224%7bCKEY%7d&library=",
 		"items": [
 			{
 				"itemType": "book",
@@ -233,7 +233,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"extra": "Contents: Convergence or diversity? : stability and change in German and Japanese capitalism / Wolfgang Streeck and Kozo Yamamura -- Germany and Japan : binding versus autonomy / Erica R. Gould and Stephen D. Krasner -- Regional states : Japan and Asia,  Germany in Europe / Peter J. Katzenstein -- Germany and Japan in a new phase of capitalism / Kozo Yamamura -- The embedded innovation systems of Germany and Japan / Robert Boyer -- The future of nationally embedded capitalism / Kathleen Thelen and Ikuo Kume -- Transformation and interaction / Ulrich Jürgens -- From banks to markets / Sigurt Vitols -- Corporate governance in Germany and Japan / Gregory Jackson -- The re-organization of organized capitalism / Steven K. Vogel -- Competitive party democracy and political-economic reform in Germany and Japan / Herbert Kitschelt\nSecondary subject: Capitalisme--Allemagne\nSecondary subject: Capitalisme--Japon\nSecondary subject: Allemagne--Politique économique\nSecondary subject: Japon--Politique économique\nElectronic access: Book review (H-Net) http://www.h-net.org/review/hrev-a0e5q7-aa",
-				"series": "Cornell studies in political economy",
+				"series": "Cornell studies in political economy; Cornell studies in political economy",
 				"title": "The end of diversity?: prospects for German and Japanese capitalism",
 				"place": "Ithaca",
 				"publisher": "Cornell University Press",

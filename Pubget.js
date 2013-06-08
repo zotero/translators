@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-04-17 03:10:37"
+	"lastUpdated": "2013-06-08 14:05:46"
 }
 
 /*
@@ -32,13 +32,13 @@
 
 function detectWeb(doc,url) {
 	var xpath='//meta[@name="citation_journal_title"]';
-		
-	if (ZU.xpath(doc, xpath).length > 0) {
-		return "journalArticle";
-	}
-			
+				
 	if (url.match(/\/search\?.*\&q=|\/mesh_browser\/./)) {
 		return "multiple";
+	}
+	
+	else if (ZU.xpath(doc, xpath).length > 0) {
+		return "journalArticle";
 	}
 	return false;
 }
@@ -110,6 +110,7 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
+						"creatorType": "author",
 						"lastName": "Zhang",
 						"firstName": "Yingting"
 					}
