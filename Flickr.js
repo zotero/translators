@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-05-31 02:47:06"
+	"lastUpdated": "2013-06-08 04:28:54"
 }
 
 function detectWeb(doc, url) {
@@ -74,10 +74,11 @@ function fetchForIds(ids) {
 		(function(uri, att) {
 			var newItem;
 			// We first fetch the items, then their attachments
-			ZU.processDocuments(uri, function (doc) {
-				newItem = parseResponse(doc);
+			ZU.doGet(uri, function (text) {
+				newItem = parseResponse(text);
 			}, function () {
-				ZU.processDocuments(att, function (doc) {
+				ZU.doGet(att, function (text) {
+					var doc = (new DOMParser()).parseFromString(text, 'application/xml');
 					var attachmentUri = ZU.xpathText(doc, '//size[last()]/@source');
 					newItem.attachments = [{
 						title: newItem.title,
@@ -91,7 +92,8 @@ function fetchForIds(ids) {
 	}
 }
 
-function parseResponse(doc) {
+function parseResponse(text) {
+	var doc = (new DOMParser()).parseFromString(text, 'application/xml');
 	var newItem = new Zotero.Item("artwork");
 
 	var title;
