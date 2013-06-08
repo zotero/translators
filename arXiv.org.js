@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-06-02 13:45:43"
+	"lastUpdated": "2013-06-07 21:22:56"
 }
 
 function detectWeb(doc, url) {
@@ -18,7 +18,7 @@ function detectWeb(doc, url) {
 	if(searchRe.test(url)) {
 		return "multiple";
 	} else {
-		return "journalArticle";
+		return "report";
 	}
 }
 
