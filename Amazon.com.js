@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-05-08 14:53:45"
+	"lastUpdated": "2013-06-07 15:41:14"
 }
 
 function detectWeb(doc, url) {
@@ -20,7 +20,7 @@ function detectWeb(doc, url) {
 	if(searchRe.test(doc.location.href)) {
 		return (Zotero.isBookmarklet ? "server" : "multiple");
 	} else {
-		var xpath = '//input[@name="ASIN"]';
+		var xpath = '//input[contains(@name, "ASIN")]';
 		if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 			if(Zotero.isBookmarklet) return "server";
 			
@@ -102,7 +102,7 @@ function doWeb(doc, url) {
 		});
 
 	} else {
-		var elmts = doc.evaluate('//input[@name = "ASIN"]', doc, null, XPathResult.ANY_TYPE, null);
+		var elmts = doc.evaluate('//input[contains(@name, "ASIN")]', doc, null, XPathResult.ANY_TYPE, null);
 		var elmt;
 		while(elmt = elmts.iterateNext()) {
 			var asin = elmt.value;
