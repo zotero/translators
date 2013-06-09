@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gc",
-	"lastUpdated": "2013-02-08 11:58:52"
+	"lastUpdated": "2013-06-09 14:54:17"
 }
 
 /*
@@ -227,10 +227,11 @@ var testCases = [
 				"extra": "undefined\nYu Min\nZhu Jiang\nDing Zhaolei",
 				"title": "参考文献管理工具研究",
 				"publicationTitle": "JOURNAL OF MODERN INFORMATION",
+				"ISBN": "1008-0821",
 				"date": "2009",
 				"issue": "2",
 				"volume": "29",
-				"pages": "6",
+				"pages": "94-98,93",
 				"abstractNote": "介绍了参考文献管理的基本方法,对参考文献管理工具的主要功能进行了对比,最后分析了参考文献管理的趋势.",
 				"url": "http://d.wanfangdata.com.cn/Periodical_xdqb200902027.aspx",
 				"archiveLocation": "北京万方数据股份有限公司",
@@ -262,17 +263,19 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
+				"title": "Zotero: harnessing the power of a personal bibliographic manager.",
+				"publicationTitle": "Nurse educator",
+				"ISBN": "0363-3624",
+				"date": "2010",
 				"issue": "5",
+				"volume": "35",
+				"pages": "205-207",
 				"abstractNote": "Zotero is a powerful free personal bibliographic manager (PBM) for writers. Use of a PBM allows the writer to focus on content, rather than the tedious details of formatting citations and references. Zotero 2.0 (http://www.zotero.org) has new features including the ability to synchronize citations with the off-site Zotero server and the ability to collaborate and share with others. An overview on how to use the software and discussion about the strengths and limitations are included.",
 				"url": "http://d.wanfangdata.com.cn/NSTLQK_NSTL_QKJJ0216348353.aspx",
 				"archiveLocation": "北京万方数据股份有限公司",
 				"libraryCatalog": "Wanfang Data",
-				"shortTitle": "Zotero",
-				"title": "Zotero: harnessing the power of a personal bibliographic manager.",
-				"publicationTitle": "Nurse educator",
-				"date": "2010",
-				"volume": "35",
-				"pages": "3"
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Zotero"
 			}
 		]
 	},
