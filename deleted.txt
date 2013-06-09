@@ -1,4 +1,4 @@
-26  # Increment number when modifying file
+27  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -62,4 +62,6 @@ a2363670-7040-4cb9-8c48-6b96584e92ee # Florida University Libraries (Endeca 1) -
 daa26181-71d4-48ef-8cac-54c06ff4c20e # Citebase - no longer exists
 9220fa99-b936-430e-a8ea-43ca6cb04145 # AGU Journals - moved to Wiley
 cae7d3ec-bc8d-465b-974f-8b0dcfe24290 # BIUM - moved to a (supported) Dynix catalog
-e9632edc-8032-4dc5-b2d4-284d481583e6 # SAE Inernational - replaced by SAE Papers 
+e9632edc-8032-4dc5-b2d4-284d481583e6 # SAE Inernational - replaced by SAE Papers
+4f62425a-c99f-4ce1-b7c1-5a3ac0d636a3 # Afro-Europa - Journal Defunct
+19643c25-a4b2-480d-91b7-4e0b761fb6ad # ScientificCommons - page defunct 
