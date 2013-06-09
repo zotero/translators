@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2013-06-08 16:53:42"
+	"lastUpdated": "2013-06-09 12:22:46"
 }
 
 /*
@@ -111,62 +111,61 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.euppublishing.com/toc/jqs/14/1",
+		"url": "http://www.nrcresearchpress.com/action/doSearch?searchText=determination&stemming=yes&publication=",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.euppublishing.com/doi/abs/10.3366/jqs.2012.0036",
+		"url": "http://www.nrcresearchpress.com/toc/cjc/41/10",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.nrcresearchpress.com/doi/abs/10.1139/v63-354#.UbTHgBXft0w",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"lastName": "Koç",
-						"firstName": "Mehmet Akif",
+						"lastName": "Mazurek",
+						"firstName": "M.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Perlin",
+						"firstName": "A. S.",
 						"creatorType": "author"
 					}
 				],
 				"notes": [],
-				"tags": [
-					"Tafsir",
-					"Exegesis",
-					"Orientalist studies",
-					"Turkish higher education",
-					"Divinity Faculties in Turkey"
-				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "EUP Snapshot",
+						"title": "NRC Research Press Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"title": "EUP PDF fulltext",
+						"title": "NRC Research Press PDF fulltext",
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "The Influence of Western Qur'anic Scholarship in Turkey",
-				"date": "April 1, 2012",
-				"DOI": "10.3366/jqs.2012.0036",
-				"publicationTitle": "Journal of Qur'anic Studies",
-				"journalAbbreviation": "J Qur'anic Studies",
-				"pages": "9-44",
-				"volume": "14",
-				"issue": "1",
-				"publisher": "Edinburgh University Press",
-				"ISSN": "1465-3591",
-				"url": "http://www.euppublishing.com/doi/abs/10.3366/jqs.2012.0036",
-				"abstractNote": "After first surveying the development of academic studies of Islam within the modern Turkish higher education system, this essay provides an inventory of material that has been translated from Western languages into Turkish. It is inevitable that orientalist studies will have a place of tremendous importance in this analysis. However, approaches to the Qur'an and its exegesis which have been developed under the influence of the Western scientific and cultural world encompass a larger range of literature that includes not only the orientalist studies themselves but also the criticisms directed against these studies. Particular attention is paid to the work of Fazlur Rahman and Arab scholars influenced by Western methods, and an assessment of the various issues related to the critique of orientalist works is provided.",
-				"libraryCatalog": "Edinburgh University Press Journals",
+				"title": "BORATE COMPLEXING BY FIVE-MEMBERED-RING vic-DIOLS VAPOR PRESSURE EQUILIBRIUM AND N.M.R. SPECTRAL OBSERVATIONS",
+				"date": "October 1, 1963",
+				"DOI": "10.1139/v63-354",
+				"publicationTitle": "Canadian Journal of Chemistry",
+				"journalAbbreviation": "Can. J. Chem.",
+				"pages": "2403-2411",
+				"volume": "41",
+				"issue": "10",
+				"publisher": "NRC Research Press",
+				"ISSN": "0008-4042",
+				"url": "http://www.nrcresearchpress.com/doi/abs/10.1139/v63-354",
+				"abstractNote": "Thermometric measurement of vapor pressure equilibria in reaction mixtures containing borate ion and cis-3,4-dihydroxytetrahydrofuran (I) or D-glucose 5,6-carbonate (II) indicate that complexing involves at least three different equilibria. Borate complexing by I is characterized by a gross change in n.m.r. spectral characteristics, most striking being a strong overall decoupling effect. Alterations in the spectrum of II and of 5-O-methyl D-glucose in the presence of borate, when compared with those of D-glucose, suggest that complex formation by the latter sugar proceeds with a pyranose-to-furanose interconversion. The O—C—C—O dihedral angle, within the range 0° to about 40°, does not appear to be a factor determining the stability of borate complexes. Crystalline spirane-type complexes of I, II, and of D-threose have been prepared, illustrating the usefulness of borate complexing for the isolation of some furanose sugars and derivatives.Solutions of alkali tetraborates are found by thermometric vapor pr..., non disponible",
+				"libraryCatalog": "NRC Research Press",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.euppublishing.com/action/doSearch?allowEmptyTermQuery=true&title=labour&author=&pubidspan=&pubType=journal&fulltext=labour&pageSize=10&sortBy=false&AfterMonth=&AfterYear=&BeforeMonth=&BeforeYear=&categoryId=all",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

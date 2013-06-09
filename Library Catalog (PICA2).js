@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-06-08 13:39:30"
+	"lastUpdated": "2013-06-09 12:37:40"
 }
 
 /*
@@ -208,6 +208,16 @@ var testCases = [
 					{
 						"firstName": "Georg",
 						"lastName": "Borges",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jörg",
+						"lastName": "Schwenk",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Georg",
+						"lastName": "Borges",
 						"creatorType": "editor"
 					}
 				],
@@ -232,7 +242,7 @@ var testCases = [
 				"publisher": "Imprint: Springer",
 				"date": "2012",
 				"ISBN": "978-3-642-30101-8",
-				"numPages": "188",
+				"numPages": "X, 187",
 				"libraryCatalog": "HeBIS-Verbundkatalog"
 			}
 		]

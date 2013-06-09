@@ -9,8 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-12-13 19:07:46"
+	"lastUpdated": "2013-06-09 13:07:04"
 }
+
+/* other example here: http://ocl.tlcdelivers.com/TLCScripts/interpac.dll?LabelDisplay&LastResult=Search%26Config=ysm%26FormId=6588839%26Branch=,0,%26LimitsId=0%26StartIndex=0%26SearchField=7%26SearchType=1%26SearchData=food%26NotAddToHistory=1%26ItemsPerPage=30%26SortField=0%26PeriodLimit=-1%26SearchAvailableOnly=0&DataNumber=52182&RecordNumber=52182&SearchAvailableOnly=0&FormId=6588839&ItemField=1&Config=ysm&Branch=,0, 
+but test won't work on that page */
 
 function detectWeb(doc, url) {
 	var detailRe = new RegExp("TLCScripts/interpac\.dll\?.*LabelDisplay.*RecordNumber=[0-9]");
@@ -119,56 +122,6 @@ var testCases = [
 				"series": "Cornerstones of freedom",
 				"callNumber": "F2808.2 .B56 2007",
 				"libraryCatalog": "martinsburg.lib.wv.us Library Catalog"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://ocl.tlcdelivers.com/TLCScripts/interpac.dll?LabelDisplay&LastResult=Search%26Config=ysm%26FormId=6588839%26Branch=,0,%26LimitsId=0%26StartIndex=0%26SearchField=7%26SearchType=1%26SearchData=food%26NotAddToHistory=1%26ItemsPerPage=30%26SortField=0%26PeriodLimit=-1%26SearchAvailableOnly=0&DataNumber=52182&RecordNumber=52182&SearchAvailableOnly=0&FormId=6588839&ItemField=1&Config=ysm&Branch=,0,",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"firstName": "Muriel",
-						"lastName": "Mandell",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Frances W.",
-						"lastName": "Zweifel",
-						"creatorType": "contributor"
-					}
-				],
-				"notes": [
-					{
-						"note": "Includes index"
-					},
-					{
-						"note": "Includes a variety of simple experiments involving food and cooking principles examining such questions as the effects of heat on different foods, the difference between baking powder and baking soda, and the role of salt"
-					}
-				],
-				"tags": [
-					"Food",
-					"Experiments Juvenile literature",
-					"Cookbooks",
-					"Juvenile literature",
-					"Food",
-					"Experiments",
-					"Experiments",
-					"Cookery"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"ISBN": "0806984147",
-				"title": "Simple kitchen experiments: learning science with everyday foods",
-				"place": "New York",
-				"publisher": "Sterling Pub. Co",
-				"date": "1993",
-				"numPages": "128",
-				"callNumber": "TX355 .M355 1993",
-				"libraryCatalog": "ocl.tlcdelivers.com Library Catalog",
-				"shortTitle": "Simple kitchen experiments"
 			}
 		]
 	}
