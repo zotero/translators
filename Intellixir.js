@@ -2,7 +2,7 @@
 	"translatorID": "20e87da1-e1c9-410d-b400-a1c27272ae19",
 	"label": "Intellixir",
 	"creator": "Maxime Escourbiac",
-	"target": "/intellixir/(afficheliste.aspx|liste_articles.aspx)",
+	"target": "/intellixir/(afficheliste\.aspx|liste_articles\.aspx)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -14,12 +14,23 @@
 
 
 /**
- * Intellixir Translator
- * COPYRIGHT (C) 2013 Intellixir. All Rights Reserved.
- * 
- * Script compatible with Firefox, Chrome, Safari, Opera.
- * 
-*/
+ * Licensed to Rhapsodia and Maxime Escourbiac under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. ElasticSearch licenses this
+ * file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 var debug = 0;
 
@@ -27,11 +38,7 @@ var debug = 0;
  * Determine the type of documents imported
  */
 function detectWeb(doc,url) {
-	var result = false;
-	if (url.indexOf("/intellixir/afficheliste.aspx") != -1 || url.indexOf("/intellixir/liste_articles.aspx") != -1) { 
-		result = "document";
-	}
-	return result;
+	return "document";
 }
 
 /**
@@ -58,6 +65,7 @@ function doWeb(doc, url) {
 function collectColumnTitle(doc){
 	var columnNames = new Array();
 	var titles = doc.evaluate('//table[@id="TAB_PAGE"]//tbody//tr[1]//th', doc, null, XPathResult.ANY_TYPE, null);
+	var title;
 	while (title = titles.iterateNext()) {
 		columnNames.push(title.textContent.trim());
 	}
@@ -77,6 +85,7 @@ function collectColumnTitle(doc){
 function collectDocuments(doc,className){
 	var linesCollected = new Array();
 	var lines = doc.evaluate('//table[@id="TAB_PAGE"]//tbody//tr[@class="' + className + '"]', doc, null, XPathResult.ANY_TYPE, null);
+	var line;
 	while (line = lines.iterateNext()) {
 		linesCollected.push(line);
 	}
@@ -95,7 +104,7 @@ function collectDocuments(doc,className){
  */
 function documentsTreatment(titles,lines,doc){
 	var documents = new Array();
-	var typeColumn = arrayIndexOf(titles,"Type");
+	var typeColumn = titles.indexOf("Type");
 	if(typeColumn != -1){
 		for(var i = 0; i < lines.length ; ++i){
 			documents.push(documentTreatment(lines[i],titles,typeColumn,doc));
@@ -104,7 +113,7 @@ function documentsTreatment(titles,lines,doc){
 	if(debug == 1){
 		Zotero.debug("------ Documents Treatment ------")
 		for(var i = 0; i < documents.length;++i){
-			Zotero.debug("documents [" + i + "] : " + documents[i]);
+			Zotero.debug("documents [" + i + "] : " + documents[i].title);
 		}
 	}
 	return documents;
@@ -120,6 +129,7 @@ function documentTreatment(line,titles,typeColumn,doc){
  	
  	/* Convert XPathResult into an array */
  	var values = new Array()
+ 	var element;
  	while (element = elements.iterateNext()) {
 		values.push(element);
 	}
@@ -182,6 +192,7 @@ function documentTreatment(line,titles,typeColumn,doc){
 		}
  	} else{
  		document = new Zotero.Item("patent");
+ 		var i;
  		for(i=0; i<titles.length; ++i ){
  			switch(titles[i]){
  				case "Titre":
@@ -228,7 +239,7 @@ function documentTreatment(line,titles,typeColumn,doc){
  				break;
  				case "Numéro de priorité":
  				case "Priority number":
- 					document.applicationNumber = values[i].textContent;
+ 					document.priorityNumbers = values[i].textContent;
  				break;
  			}
  		}
@@ -239,7 +250,7 @@ function documentTreatment(line,titles,typeColumn,doc){
 			Zotero.debug("Auteurs : " + document.creators);
 			Zotero.debug("Date : " + document.date);
 			Zotero.debug("Affiliations Courtes : " + document.assignee);
-			Zotero.debug("Numéro de priorité : " + document.applicationNumber);
+			Zotero.debug("Numéro de priorité : " + document.priorityNumbers);
 		}
  	}
  	return document;
@@ -254,15 +265,3 @@ function documentTreatment(line,titles,typeColumn,doc){
 		documents[i].complete();
 	}
  }
- 
- /**
-  * Look for an element in an array
-  * 
-  */
-function arrayIndexOf(array,element){
-	var i = 0;
-	while(i < array.length && array[i] != element){
-		++i
-	}
-	return (i==array.lenght)? -1 : i; 
-}
