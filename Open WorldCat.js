@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-05-29 02:42:03"
+	"lastUpdated": "2013-06-11 06:37:37"
 }
 
 /**
@@ -162,13 +162,14 @@ function doWeb(doc, url) {
 }
 
 function doSearch(item) {
-	ZU.processDocuments("http://www.worldcat.org/search?q=isbn%3A" + item.ISBN.replace(/[^0-9X]/g, "") + "&=Search&qt=results_page", function (doc, url) {
+	var url = "http://www.worldcat.org/search?q=isbn%3A" + item.ISBN.replace(/[^0-9X]/g, "") + "&=Search&qt=results_page";
+	ZU.processDocuments(url, function (doc) {
 		//we take the first search result and run scrape on it
 		if (doc.evaluate('//div[@class="name"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) { //search results view
 			var article = ZU.xpathText(doc, '(//div[@class="name"]/a)[1]/@href')
 			if (!article){Zotero.done(false); return false;}
 			article = "http://www.worldcat.org" + article;
-			ZU.processDocuments(article, function(doc, url) { scrape(doc, url, true); });
+			ZU.processDocuments(article, function(doc) { scrape(doc, article, true); });
 		} else {
 			scrape(doc, url, true);
 		}
