@@ -2282,7 +2282,7 @@ function doExport() {
 					editor += " and "+creatorString;
 				} else if (creator.creatorType == "translator") {
 					translator += " and "+creatorString;
-				} else {
+				} else if (creator.creatorType == "author") {
 					author += " and "+creatorString;
 				}
 			}
