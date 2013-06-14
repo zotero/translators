@@ -2126,6 +2126,16 @@ var citeKeyCleanRe = /[^a-z0-9\!\$\&\*\+\-\.\/\:\;\<\>\?\[\]\^\_\`\|]+/g;
 
 var citeKeyConversions = {
 	"a":function (flags, item) {
+		/*
+		var primaryCreatorType = Zotero.Utilities.getCreatorsForType(item.itemType)[0];
+		if(Zotero.Utilities.getConfigurationParameter("extensions.zotero.preferPrimaryAuthorsInCiteKeys") && item.creators && item.creators[0]) {
+			for(var i in item.creators) {
+				if(item.creators[i].lastName && item.creators[i].creatorType === primaryCreatorType) {
+					return item.creators[i].lastName.toLowerCase().replace(/ /g,"_").replace(/,/g,"");
+				}
+			}
+		}
+		*/
 		if(item.creators && item.creators[0] && item.creators[0].lastName) {
 			return item.creators[0].lastName.toLowerCase().replace(/ /g,"_").replace(/,/g,"");
 		}
@@ -2262,6 +2272,8 @@ function doExport() {
 			var author = "";
 			var editor = "";
 			var translator = "";
+			var collaborator = "";
+			var primaryCreatorType = Zotero.Utilities.getCreatorsForType(item.itemType)[0];
 			for(var i in item.creators) {
 				var creator = item.creators[i];
 				var creatorString = creator.lastName;
@@ -2282,8 +2294,10 @@ function doExport() {
 					editor += " and "+creatorString;
 				} else if (creator.creatorType == "translator") {
 					translator += " and "+creatorString;
-				} else if (creator.creatorType == "author") {
+				} else if (creator.creatorType == primaryCreatorType) {
 					author += " and "+creatorString;
+				} else {
+					collaborator += " and "+creatorString;
 				}
 			}
 			
@@ -2295,6 +2309,9 @@ function doExport() {
 			}
 			if(translator) {
 				writeField("translator",  "{" + translator.substr(5) + "}", true);
+			}
+			if(collaborator) {
+				writeField("collaborator",  "{" + collaborator.substr(5) + "}", true);
 			}
 		}
 		
