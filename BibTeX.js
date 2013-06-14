@@ -2126,16 +2126,6 @@ var citeKeyCleanRe = /[^a-z0-9\!\$\&\*\+\-\.\/\:\;\<\>\?\[\]\^\_\`\|]+/g;
 
 var citeKeyConversions = {
 	"a":function (flags, item) {
-		/*
-		var primaryCreatorType = Zotero.Utilities.getCreatorsForType(item.itemType)[0];
-		if(Zotero.Utilities.getConfigurationParameter("extensions.zotero.preferPrimaryAuthorsInCiteKeys") && item.creators && item.creators[0]) {
-			for(var i in item.creators) {
-				if(item.creators[i].lastName && item.creators[i].creatorType === primaryCreatorType) {
-					return item.creators[i].lastName.toLowerCase().replace(/ /g,"_").replace(/,/g,"");
-				}
-			}
-		}
-		*/
 		if(item.creators && item.creators[0] && item.creators[0].lastName) {
 			return item.creators[0].lastName.toLowerCase().replace(/ /g,"_").replace(/,/g,"");
 		}
