@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-06-06 05:39:15"
+	"lastUpdated": "2013-06-18 13:25:09"
 }
 
 function detectWeb(doc, url) {
@@ -193,30 +193,34 @@ function downloadFunction(text, url, prefs) {
 //collects item url->title (in items) and item url->database info (in itemInfo)
 function getResultList(doc, items, itemInfo) {
 	var results = ZU.xpath(doc, '//li[@class="result-list-li"]');
-
+	//make search results work if you can't add to folder, e.g. for EBSCO used as discovery service of library such as
+	//http://search.ebscohost.com/login.aspx?direct=true&site=eds-live&scope=site&type=0&custid=s4895734&groupid=main&profid=eds&mode=and&lang=en&authtype=ip,guest,athens
+	var folder = ZU.xpathText(doc, '//span[@class = "item add-to-folder"]/input/@value');
 	var title, folderData, count = 0;
 	for(var i=0, n=results.length; i<n; i++) {
 		title = ZU.xpath(results[i], './/a[@class = "title-link color-p4"]');
-		folderData = ZU.xpath(results[i],
-			'.//span[@class = "item add-to-folder"]/input/@value');
-
-		//skip if we're missing something
-		if(!title.length || !folderData.length) continue;
-
+		if (folder) {
+			folderData = ZU.xpath(results[i],
+				'.//span[@class = "item add-to-folder"]/input/@value');
+			//skip if we're missing something
+			if(!title.length || !folderData.length) continue; 
+		}
 		count++;
 
 		items[title[0].href] = title[0].textContent;
-		itemInfo[title[0].href] = {
-			folderData: folderData[0].textContent,
-			//let's also store item type
-			itemType: ZU.xpathText(results[i],
-						'.//div[@class="pubtype"]/span/@class'),
-			//check if PDF is available
-			fetchPDF: ZU.xpath(results[i], './/span[@class="record-formats"]\
-										/a[contains(@class,"pdf-ft")]').length,
-			hasFulltext: ZU.xpath(results[i], './/span[@class="record-formats"]\
-										/a[contains(@class,"pdf-ft") or contains(@class, "html-ft")]').length
-		};
+		if (folder){
+			itemInfo[title[0].href] = {
+				folderData: folderData[0].textContent,
+				//let's also store item type
+				itemType: ZU.xpathText(results[i],
+							'.//div[@class="pubtype"]/span/@class'),
+				//check if PDF is available
+				fetchPDF: ZU.xpath(results[i], './/span[@class="record-formats"]\
+											/a[contains(@class,"pdf-ft")]').length,
+				hasFulltext: ZU.xpath(results[i], './/span[@class="record-formats"]\
+											/a[contains(@class,"pdf-ft") or contains(@class, "html-ft")]').length
+				}
+			};
 	}
 
 	return count;
@@ -347,43 +351,5 @@ function doDelivery(doc, itemInfo) {
 }
 
 /** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://web.ebscohost.com/ehost/detail?sid=4bcfec05-db01-4d69-9028-c40ff1331e56%40sessionmgr15&vid=1&hid=28&bdata=JnNpdGU9ZWhvc3QtbGl2ZQ%3d%3d#db=aph&AN=9606204477",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"lastName": "Brodsky",
-						"firstName": "Joseph",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"POETS, Polish",
-					"HERBERT, Zbigniew, 1924-1998"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Zbigniew Herbert",
-				"journalAbbreviation": "Wilson Quarterly",
-				"publicationTitle": "Wilson Quarterly",
-				"volume": "17",
-				"issue": "1",
-				"pages": "112",
-				"publisher": "Woodrow Wilson International Center for Scholars",
-				"ISSN": "03633276",
-				"abstractNote": "Introduces the poetry of Polish poet Zbigniew Herbert. Impression of difficulty in modern poetry; Polish poet Czeslaw Milosz; Herbert's 1980 Nobel Prize; Translations into English; Use of vers libre; Sample poems.",
-				"url": "http://search.ebscohost.com/login.aspx?direct=true&db=aph&AN=9606204477&site=ehost-live",
-				"libraryCatalog": "EBSCOhost",
-				"callNumber": "9606204477",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"date": "Winter 1993"
-			}
-		]
-	}
-]
+var testCases = []
 /** END TEST CASES **/
