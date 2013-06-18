@@ -2,14 +2,14 @@
 	"translatorID": "d921155f-0186-1684-615c-ca57682ced9b",
 	"label": "JSTOR",
 	"creator": "Simon Kornblith, Sean Takats, Michael Berkowitz, and Eli Osherovich",
-	"target": "https?://[^/]*jstor\\.org[^/]*/(action/(showArticle|doBasicSearch|doAdvancedSearch|doLocatorSearch|doAdvancedResults|doBasicResults)|stable/|pss/|openurl\\?)",
+	"target": "https?://[^/]*jstor\\.org[^/]*/(action/(showArticle|doBasicSearch|doAdvancedSearch|doLocatorSearch|doAdvancedResults|doBasicResults)|stable/|pss/|betasearch\\?|openurl\\?)",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-04-15 00:57:22"
+	"lastUpdated": "2013-06-18 13:27:53"
 }
 
 function detectWeb(doc, url) {
@@ -19,7 +19,7 @@ function detectWeb(doc, url) {
 	} : null;
 	
 	// See if this is a seach results page or Issue content
-	if (doc.title == "JSTOR: Search Results" || url.match(/\/i\d+/) ||
+	if (doc.title == "JSTOR: Search Results" || url.match(/\/i\d+/) || url.indexOf("/betasearch?") !=-1 ||
 		(url.match(/stable|pss/) // Issues with DOIs can't be identified by URL
 		 && doc.evaluate('//form[@id="toc"]', doc, nsResolver,
 			XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue)
@@ -82,7 +82,7 @@ function doWeb(doc, url) {
 	}
 	else {
 		// We have multiple results
-		var resultsBlock = doc.evaluate('//fieldset[@id="results"]', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+		var resultsBlock = doc.evaluate('//fieldset[@id="results" or @id="resultsBlock"]', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 		if (! resultsBlock) {
 			return true;
 		}
@@ -421,6 +421,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.jstor.org/action/doAdvancedSearch?q0=solomon+criminal+justice&f0=all&c1=AND&q1=&f1=all&acc=on&wc=on&fc=off&re=on&sd=&ed=&la=&pt=&isbn=&dc.History=History&dc.SlavicStudies=Slavic+Studies&Search=Search",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.jstor.org/betasearch?Query=labor+market&ac=0&si=0",
 		"items": "multiple"
 	}
 ]
