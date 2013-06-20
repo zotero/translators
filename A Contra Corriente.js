@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-23 04:26:44"
+	"lastUpdated": "2013-06-19 10:57:55"
 }
 
 /*
@@ -97,52 +97,65 @@ function doWeb(doc, url) {
 	}
 }
 /** BEGIN TEST CASES **/
-var testCases = [{
-	"type": "web",
-	"url": "http://tools.chass.ncsu.edu/open_journal/index.php/acontracorriente/article/view/102",
-	"items": [{
-		"itemType": "journalArticle",
-		"creators": [{
-			"firstName": "José Luis",
-			"lastName": "Rénique",
-			"creatorType": "author"
-		}],
-		"notes": [],
-		"tags": ["Carlos Iván degregori", "historia", "Perú"],
-		"seeAlso": [],
-		"attachments": [{
-			"title": "Full Text PDF",
-			"mimeType": "application/pdf"
-		}, {
-			"title": "Snapshot"
-		}],
-		"itemID": "http://tools.chass.ncsu.edu/open_journal/index.php/acontracorriente/article/view/102",
-		"title": "Carlos Iván Degregori: antropólogo del alma",
-		"publicationTitle": "A Contracorriente",
-		"date": "02/06/2011",
-		"reportType": "Text.Serial.Journal",
-		"letterType": "Text.Serial.Journal",
-		"manuscriptType": "Text.Serial.Journal",
-		"mapType": "Text.Serial.Journal",
-		"thesisType": "Text.Serial.Journal",
-		"websiteType": "Text.Serial.Journal",
-		"presentationType": "Text.Serial.Journal",
-		"postType": "Text.Serial.Journal",
-		"audioFileType": "Text.Serial.Journal",
-		"language": "en",
-		"volume": "8",
-		"issue": "3",
-		"pages": "i-vii",
-		"ISSN": "1548-7083",
+var testCases = [
+	{
+		"type": "web",
 		"url": "http://tools.chass.ncsu.edu/open_journal/index.php/acontracorriente/article/view/102",
-		"accessDate": "CURRENT_TIMESTAMP",
-		"libraryCatalog": "tools.chass.ncsu.edu",
-		"abstractNote": "Remembranza de la reciente muerte (18 de Mayo de 2011) en Lima de Carlos&nbsp;Iv&aacute;n Degregori, uno de los intelectuales peruanos m&aacute;s&nbsp;importantes de las &uacute;ltimas d&eacute;cadas y uno de los estudiosos&nbsp;internacionales m&aacute;s destacados de la violencia pol&iacute;tica. A&nbsp;Contracorriente se suma a los innumerables homenajes que se&nbsp;tributan a su memoria. Su colega y amigo a lo largo de muchos&nbsp;a&ntilde;os, el historiador Jos&eacute; Luis R&eacute;nique, traza en esta nota el perfil&nbsp;humano, intelectual y pol&iacute;tico de Degregori. Al final incluimos&nbsp;tambi&eacute;n una lista de sus principales publicaciones.",
-		"shortTitle": "Carlos Iván Degregori"
-	}]
-}, {
-	"type": "web",
-	"url": "http://tools.chass.ncsu.edu/open_journal/index.php/acontracorriente/issue/view/16/showToc",
-	"items": "multiple"
-}]
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "José Luis",
+						"lastName": "Rénique",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Carlos Iván degregori",
+					"historia",
+					"Perú"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "Carlos Iván Degregori: antropólogo del alma",
+				"publicationTitle": "A Contracorriente",
+				"date": "02/06/2011",
+				"reportType": "Text.Serial.Journal",
+				"letterType": "Text.Serial.Journal",
+				"manuscriptType": "Text.Serial.Journal",
+				"mapType": "Text.Serial.Journal",
+				"thesisType": "Text.Serial.Journal",
+				"websiteType": "Text.Serial.Journal",
+				"presentationType": "Text.Serial.Journal",
+				"postType": "Text.Serial.Journal",
+				"audioFileType": "Text.Serial.Journal",
+				"language": "en",
+				"volume": "8",
+				"issue": "3",
+				"abstractNote": "Remembranza de la reciente muerte (18 de Mayo de 2011) en Lima de Carlos&nbsp;Iv&aacute;n Degregori, uno de los intelectuales peruanos m&aacute;s&nbsp;importantes de las &uacute;ltimas d&eacute;cadas y uno de los estudiosos&nbsp;internacionales m&aacute;s destacados de la violencia pol&iacute;tica. A&nbsp;Contracorriente se suma a los innumerables homenajes que se&nbsp;tributan a su memoria. Su colega y amigo a lo largo de muchos&nbsp;a&ntilde;os, el historiador Jos&eacute; Luis R&eacute;nique, traza en esta nota el perfil&nbsp;humano, intelectual y pol&iacute;tico de Degregori. Al final incluimos&nbsp;tambi&eacute;n una lista de sus principales publicaciones.",
+				"pages": "i-vii",
+				"ISSN": "1548-7083",
+				"url": "http://tools.chass.ncsu.edu/open_journal/index.php/acontracorriente/article/view/102",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "tools.chass.ncsu.edu",
+				"shortTitle": "Carlos Iván Degregori"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://tools.chass.ncsu.edu/open_journal/index.php/acontracorriente/issue/view/16/showToc",
+		"items": "multiple"
+	}
+]
 /** END TEST CASES **/

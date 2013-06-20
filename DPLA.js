@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcv",
-	"lastUpdated": "2013-05-10 05:23:14"
+	"lastUpdated": "2013-06-19 10:13:09"
 }
 
 /**
@@ -37,12 +37,15 @@ function detectWeb(doc, url) {
 		var type = ZU.xpathText(doc, '//article[@id="content"]/div[@class="table"]/ul/li[h6[contains(text(), "Type")]]/following-sibling::li')
 		//Z.debug(type)
 		//we can't use the typemap below, as the types get merged together when scraping them
-		if (type.search(/^(image|physical)/) != -1) return "artwork";
-		else if (type.search(/^(image|physical)/) != -1) return "artwork";
-		else if (type.search(/^sound/) != -1) return "audioRecording";
-		else if (type.search(/^moving/) != -1) return "film";
-		else if (type.search(/^software/) != -1) return "computerProgram";
-		else if (type.search(/^(dataset|interactive)/) != -1) return "webpage";
+		if (type){
+			if (type.search(/^(image|physical)/) != -1) return "artwork";
+			else if (type.search(/^(image|physical)/) != -1) return "artwork";
+			else if (type.search(/^sound/) != -1) return "audioRecording";
+			else if (type.search(/^moving/) != -1) return "film";
+			else if (type.search(/^software/) != -1) return "computerProgram";
+			else if (type.search(/^(dataset|interactive)/) != -1) return "webpage";
+			else return "book";
+		}
 		else return "book";
 	}
 }
@@ -157,8 +160,15 @@ function parseDPLAapi(text) {
 		}
 		if (!item.place) {
 			if (source.spatial) {
-				if (source.spatial[0].city) item.place = source.spatial[0].city;
-				else if (source.spatial[0].name) item.place = source.spatial[0].name;
+				//this again is displayed in two different ways:
+				if (source.spatial.length){
+					if (source.spatial[0].city) item.place = source.spatial[0].city;
+					else if (source.spatial[0].name) item.place = source.spatial[0].name;
+				}
+				else{
+					if (source.spatial.city) item.place = source.spatial.city;
+					else if (source.spatial.name) item.place = source.spatial.name;
+				}
 			}
 		}
 
@@ -185,8 +195,11 @@ function parseDPLAapi(text) {
 
 		}
 		var type = source.type;
-		if (typeof type != "string") type = type[0];
-		if (typemap[type]) item.itemType = typemap[type];
+		if (type){
+			if (typeof type != "string") type = type[0];
+			if (typemap[type]) item.itemType = typemap[type];
+		}
+		else item.itemType = "book";
 		item.complete();
 	}
 }/** BEGIN TEST CASES **/

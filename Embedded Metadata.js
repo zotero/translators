@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-05-23 19:31:01"
+	"lastUpdated": "2013-06-19 10:57:36"
 }
 
 /*
@@ -491,7 +491,8 @@ function addHighwireMetadata(doc, newItem) {
 
 	// add access date
 	newItem.accessDate = 'CURRENT_TIMESTAMP';
-
+	//remove itemID - comes from RDF translator, doesn't make any sense for online data
+	newItem.itemID = "";
 	newItem.libraryCatalog = doc.location.host;
 }
 
@@ -540,7 +541,6 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"itemID": "http://tools.chass.ncsu.edu/open_journal/index.php/acontracorriente/article/view/174",
 				"title": "\"La Huelga de los Conventillos\", Buenos Aires, Nueva Pompeya, 1936. Un aporte a los estudios sobre género y clase",
 				"publicationTitle": "A Contracorriente",
 				"rights": "1. Author hereby grants, transfers, and assigns to  A Contracorriente :  (a) the exclusive first serial rights in the Work for publication and distribution throughout the world, as  A Contracorriente  sees fit, in all languages and formats, by print or any electronic means, including, without limitation, the internet, other public and/or private proprietary intranets and computer networks and on CD-ROMs, DVDs and other discs, before the Work shall appear in any other publication (whether print or electronic), in any manner, format or language, or in any other medium now known or hereafter devised. The first serial rights granted to  A Contracorriente  by this Paragraph 1(a) shall be exclusive to  A Contracorriente  until one year following the date of the first serial publication of the Work by  A Contracorriente ; in addition, this grant of rights shall include the non-exclusive right in perpetuity to include the Work in any collection, or compilation produced or authorized by  A Contracorriente , and containing at least 75% material that has appeared in  A Contracorriente , for distribution throughout the world, in all languages and formats, by print or any electronic means, including, without limitation, the internet and other public and proprietary intranets and computer networks and on CDROMs, DVDs and other discs;  (b) further, the non-exclusive right to authorize, reproduce and distribute reprints of the Work throughout the world, in all languages and formats, by print or any electronic means, after the Work appears in a publication produced or authorized by  A Contracorriente ; the right to permit subscribers and other users of the services and publications in which the Work may appear electronically to download, reproduce, and otherwise utilize the Work for their personal, non-commercial use throughout the universe; and the non-exclusive perpetual right, throughout the world, to use the Work, in whole or in part, and Author’s name, likeness, or biography in promoting, advertising, and/or publicizing any publication in which the Work is authorized to appear consistent with this Agreement.  2.  A Contracorriente  reserves the right to publish the Work with illustrations and other graphic materials. Nothing contained herein shall obligate  A Contracorriente  to exploit any of the rights granted to  A Contracorriente  hereunder. All rights not granted to  A Contracorriente  are reserved to Author for Author’s own use and/or transfer, assignment, or disposition.  3. Author represents and warrants: the Work is original to Author, has not been copied in whole or in part, and does not infringe upon the copyright or any other rights of any person or entity; Author has the right to grant the rights granted to  A Contracorriente  under this Agreement free of any and all claims and encumbrances; Author has not granted or transferred any rights in or to the Work to any third party; and Author has not done and will not do anything that has impaired, might impair or will impair in any way any of the rights granted to  A Contracorriente  hereunder.  4. Author shall defend, indemnify, and hold harmless the NC State and its employees, agents, affiliates, successors, licensees, and assigns from and against all claims, damages, liabilities, losses, costs, and expenses, including, without limitation, attorney’s fees and costs, arising out of any breach or alleged breach of any of Author’s representations, warranties, or agreements. Any remedies that Author may have against  A Contracorriente  for breach of this Agreement shall be limited to the right to recover damages, if any, in an action at law. Author hereby waives any right or remedy in equity, including any right to terminate this Agreement, to rescind  A Contracorriente ’s rights in the Work, or to enjoin, restrain, or otherwise impair in any manner the production or distribution of any publication that is authorized or produced by  A Contracorriente .   5.  A Contracorriente  shall have the right to assign this Agreement, either in whole or in part, to any entity affiliated with  A Contracorriente  or to any party that acquires all or substantially all of  A Contracorriente 's assets. Author shall not have the right to further assign any of the rights conferred pursuant to this Agreement, either in whole or in part, or any of the rights granted to Author herein.   6. This Agreement is intended by the parties hereto as the final expression of their understanding with respect to the subject matter herein, as a complete and exclusive statement of the terms herein, and supersedes any and all prior or contemporaneous negotiations, understandings, and agreements between the parties relating thereto.   7. The Agreement may be modified only by a writing signed by both parties to the Agreement. The laws and courts of the State of North Carolina shall govern and control the resolution of any and all conflicts and disputes that may arise hereunder.",
@@ -629,7 +629,6 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"itemID": "http://www.ajol.info/index.php/thrb/article/view/63347",
 				"title": "Knowledge, treatment seeking and preventive practices in respect of malaria among patients with HIV at the Lagos University Teaching Hospital",
 				"publicationTitle": "Tanzania Journal of Health Research",
 				"rights": "Copyright for articles published in this journal is retained by the journal.",
@@ -647,6 +646,7 @@ var testCases = [
 				"extra": "The synergistic interaction between Human Immunodeficiency virus (HIV) disease and Malaria makes it mandatory for patients with HIV to respond appropriately in preventing and treating malaria. Such response will help to control the two diseases. This study assessed the knowledge of 495 patients attending the HIV clinic, in Lagos University Teaching Hospital, Nigeria.&nbsp; Their treatment seeking, preventive practices with regards to malaria, as well as the impact of socio &ndash; demographic / socio - economic status were assessed. Out of these patients, 245 (49.5 %) used insecticide treated bed nets; this practice was not influenced by socio &ndash; demographic or socio &ndash; economic factors.&nbsp; However, knowledge of the cause, knowledge of prevention of malaria, appropriate use of antimalarial drugs and seeking treatment from the right source increased with increasing level of education (p &lt; 0.05). A greater proportion of the patients, 321 (64.9 %) utilized hospitals, pharmacy outlets or health centres when they perceived an attack of malaria. Educational intervention may result in these patients seeking treatment from the right place when an attack of malaria fever is perceived.",
 				"volume": "13",
 				"issue": "4",
+				"publisher": "National Institute for Medical Research",
 				"DOI": "10.4314/thrb.v13i4.63347",
 				"abstractNote": "Knowledge, treatment seeking and preventive practices in respect of malaria among patients with HIV at the Lagos University Teaching Hospital",
 				"ISSN": "0856-6496",
@@ -867,7 +867,6 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"itemID": "http://www.hindawi.com/journals/mpe/2013/868174/abs/",
 				"title": "Robust Filtering for Networked Stochastic Systems Subject to Sensor Nonlinearity",
 				"publicationTitle": "Mathematical Problems in Engineering",
 				"volume": "2013",

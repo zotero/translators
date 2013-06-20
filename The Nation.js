@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-05 02:52:33"
+	"lastUpdated": "2013-06-19 10:50:37"
 }
 
 /*
@@ -71,7 +71,8 @@ function scrapeSingle(doc, url) {
 	var newItem = new Zotero.Item("magazineArticle");
 	if (PUB_TITLE) newItem.publicationTitle = PUB_TITLE;
 	if (PUB_ISSN) newItem.ISSN = PUB_ISSN;
-	newItem.url = url;
+	//clean up the clutter at the end of the URL
+	newItem.url = url.replace(/#.+/, "");
 	
 	newItem.title = xpath_string(doc, doc, XPATH_TITLE);
 	
@@ -109,7 +110,7 @@ function scrapeSingle(doc, url) {
 	// attach html
 	newItem.attachments.push({title:PUB_TITLE+" Snapshot", mimeType:"text/html",
 							  url:snapUrl, snapshot:true});
-	
+
 	return newItem;
 }
 

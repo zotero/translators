@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-08-06 19:23:07"
+	"lastUpdated": "2013-06-19 10:30:31"
 }
 
 /*
@@ -488,7 +488,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"abstractNote": "<p>The Intellectual Property Issues in Cultural Heritage (IPinCH) research project is an international collaboration of over 50 archaeologists, lawyers, anthropologists, museum specialists, ethicists and other specialists, and 25 partnering organizations (including, among others, Parks Canada, the World Intellectual Property Organization, the Champagne and Aishihik First Nation, and the Barunga Community Management Board, an Aboriginal organization from Australia) building a foundation to facilitate fair and equitable exchanges of knowledge relating to archaeology and cultural heritage. The project is concerned with the theoretical, ethical, and practical implications of using knowledge about the past, and how these may affect communities, researchers, and other stakeholders. Based at the Archaeology Department of Simon Fraser University, in Burnaby, British Columbia, Canada, the project is funded by the Social Sciences and Humanities Research Council of Canada. Project team members and partner organizations can be found in Canada, USA, Australia, New Zealand, UK, Germany, Switzerland and South Africa. A number of partner organizations are indigenous communities. Research will follow a community-based participatory research (CBPR) approach. The IPinCH project provides a foundation of research, knowledge and resources to assist scholars, academic institutions, descendant communities, policy makers, and many other stakeholders in negotiating more equitable and successful terms of research and policies through an agenda of community-based field research and topical exploration of intellectual property issues.</p>",
-				"rights": "http://discovermagazine.com",
+				"rights": "Discover Magazine (Kalmbach Publishing Co.)",
 				"title": "Secrets of the Alpaca Mummies",
 				"publicationTitle": "Discover",
 				"issue": "1",
