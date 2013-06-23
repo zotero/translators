@@ -104,13 +104,13 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"entrepreneurs africains",
-					"trading post",
-					"comptoir commercial",
-					"migration africaine",
 					"African entrepreneurs",
 					"African migration",
-					"Guangzhou"
+					"Guangzhou",
+					"comptoir commercial",
+					"entrepreneurs africains",
+					"migration africaine",
+					"trading post"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -122,34 +122,18 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"itemID": "http://booksandjournals.brillonline.com/content/10.1163/187254612x646206",
-				"title": "African Trading Post in Guangzhou: Emergent or Recurrent Commercial Form?",
-				"publisher": "Ice Virtual Library",
-				"institution": "Ice Virtual Library",
-				"company": "Ice Virtual Library",
-				"label": "Ice Virtual Library",
-				"distributor": "Ice Virtual Library",
-				"date": "2012/01/01",
-				"reportType": "Text",
-				"letterType": "Text",
-				"manuscriptType": "Text",
-				"mapType": "Text",
-				"thesisType": "Text",
-				"websiteType": "Text",
-				"presentationType": "Text",
-				"postType": "Text",
-				"audioFileType": "Text",
-				"publicationTitle": "African Diaspora",
-				"volume": "5",
 				"issue": "1",
 				"abstractNote": "Abstract In the early 2000s, nationals of Sub-Saharan Africa who had settled in the market places of Hong Kong, Bangkok, Jakarta, and Kuala Lumpur, moved to Guangzhou and opened offices in the upper floors of buildings in Baiyun and Yuexiu Districts. These were located in the northwest of the city, near the central railway station and one of the two fairs of Canton. Gradually these traders were able to create the necessary conditions of hospitality by opening community restaurants on upper floors, increasing the number of showrooms and offices as well as the services of freight and customs clearance in order to live up to an African itinerant customer&#8217;s expectations. From interviews carried out between 2006 and 2009 in the People&#8217;s Republic of China and in Hong Kong, Bangkok, Dubai, and West Africa, the article will first highlight the economic logics which have contributed to the constitution of African trading posts in China and describe their extension from the Middle East and from Asia. The second part will determine the respective roles of migrants and traveling Sub-Saharan entrepreneurs, before exploring their interactions with Chinese society in the setting up of these commercial networks. It will also look at the impact of toughening immigration policies. It is the principle of the African trading posts of anchoring of some traders in strategic places negotiated with the host society that allows the movement but also the temporary settlement of many visitors. The first established traders purchase products manufactured in the hinterland to fulfill the demand of the itinerant merchants who in turn supply customers located in other continents.",
 				"DOI": "10.1163/187254612X646206",
-				"pages": "27-50",
 				"ISSN": "1872-5465",
 				"url": "http://booksandjournals.brillonline.com/content/10.1163/187254612x646206",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "booksandjournals.brillonline.com",
-				"shortTitle": "African Trading Post in Guangzhou"
+				"shortTitle": "African Trading Post in Guangzhou",
+				"title": "African Trading Post in Guangzhou: Emergent or Recurrent Commercial Form?",
+				"date": "2012/01/01",
+				"publicationTitle": "African Diaspora",
+				"volume": "5",
+				"pages": "27-50"
 			}
 		]
 	},

@@ -174,26 +174,14 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"itemID": "http://patentscope.wipo.int/search/en/WO2010111344",
-				"title": "Methods and Microorganisms for Production of C4-Dicarboxylic Acids",
-				"date": "2010/10/01",
-				"reportType": "Patent Application",
-				"letterType": "Patent Application",
-				"manuscriptType": "Patent Application",
-				"mapType": "Patent Application",
-				"thesisType": "Patent Application",
-				"websiteType": "Patent Application",
-				"presentationType": "Patent Application",
-				"postType": "Patent Application",
-				"audioFileType": "Patent Application",
 				"abstractNote": "Methods and recombinant microorganisms for the biological production of C4-dicarboxylic acids are described. The recombinant microorganisms have increased production of OAA as compared to unmodified microorganisms. In some cases, the recombinant microorganisms have been modified to reduce production of pyruvate and/or reduce conversion of pyruvate to acetaldehyde. Thus, the microorganisms are modified to reduce the activity of pyruvate kinase and/or pyruvate decarboxylase., La présente invention concerne des procédés et des microorganismes recombinants pour la production biologique d'acides dicarboxyliques en C4. Comparés aux microorganismes non modifiés, les microorganismes recombinants produisent beaucoup plus d'OAA. Dans certains cas, les microorganismes recombinants ont été modifiés pour réduire la production de pyruvate et/ou réduire la conversion du pyruvate en acétaldéhyde. Les microorganismes sont ainsi modifiés pour réduire l'activité de la pyruvate kinase et/ou de la pyruvate décarboxylase.",
 				"url": "http://patentscope.wipo.int/search/en/WO2010111344",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "patentscope.wipo.int",
 				"language": "English (EN)",
 				"assignee": "DSM IP Assets B.V., LAWRENCE, Adam, PRONK, Jacobus, Thomas, VAN MARIS, Antonius, Jeroen Adriaan, ZELLE, Rintze, Meindert, MADDEN, Kevin, T., HARRISON, Jacob, C., TRUEHEART, Joshua, GANCEDO RODRIGUEZ, Carlos, FLORES MAURIZ, Carmen-lisset, BOWER, Stanley",
 				"applicationNumber": "PCT/US2010/028429",
-				"patentNumber": "WO/2010/111344"
+				"patentNumber": "WO/2010/111344",
+				"title": "Methods and Microorganisms for Production of C4-Dicarboxylic Acids",
+				"issueDate": "2010/10/01"
 			}
 		]
 	}

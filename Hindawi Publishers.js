@@ -149,32 +149,16 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"itemID": "http://www.hindawi.com/journals/scientifica/2012/942507/",
-				"title": "MammaPrint Feasibility in a Large Tertiary Urban Medical Center: An Initial Experience",
-				"publicationTitle": "Scientifica",
-				"volume": "2012",
-				"publisher": "Hindawi Publishing Corporation",
-				"institution": "Hindawi Publishing Corporation",
-				"company": "Hindawi Publishing Corporation",
-				"label": "Hindawi Publishing Corporation",
-				"distributor": "Hindawi Publishing Corporation",
-				"date": "2012/12/31",
-				"reportType": "Research article",
-				"letterType": "Research article",
-				"manuscriptType": "Research article",
-				"mapType": "Research article",
-				"thesisType": "Research article",
-				"websiteType": "Research article",
-				"presentationType": "Research article",
-				"postType": "Research article",
-				"audioFileType": "Research article",
 				"language": "en",
 				"abstractNote": "Background. The MammaPrint (MP) diagnostic assay stratifies breast cancer patients into high- and low-risk groups using mRNA analysis of a 70-gene profile. The assay is validated for assessment of patients with estrogen receptor positive or negative tumors less than 5 cm with 3 or fewer malignant lymph nodes. TargetPrint (TP) is an assay for assessing estrogen, progesterone, and HER2-neu receptor status based on mRNA expression. A potential limitation of these assays is that they require an evaluation of fresh tissue samples. There is limited published experience describing MP or TP implementation. Methods. Over 10 months, 4 breast surgeons obtained samples from 54 patients for MP/TP analysis. The samples were analyzed by Agendia Labs. The tumors were independently evaluated for receptor status using immunohistochemistry (IHC). Retrospectively, we identified patients who were assessed by MP/TP during this period. Patients who underwent OncotypeDx evaluation were also identified. Results. Of the 54 patients receiving MP, 4 were found ineligible for MP risk assessment because &#x3e;3 lymph nodes were found to be malignant. Out of all eligible patients, 14/50 (28&#x25;) had samples whose quantity of tumor was not sufficient for analysis (QNS). Out of eligible patients with tumors &#x3c;1&#x2009;cm, 7/8 (88&#x25;) had QNS samples. 7/42 with tumors &#x2265;1&#x2009;cm (17&#x25;) had QNS samples. Nine patients had discordant receptor results when evaluated by IHC versus. TP. Of patients who also underwent OncotypeDx testing, 6/14 (43&#x25;) had discordant results with MP. Conclusions. This study indicates that using MP/TP assay is feasible in a tertiary care center but there may be utility in limiting MP testing to patients with tumors between 1 and 5&#x2009;cm due to high likelihood of uninformative results in subcentimeter tumors. Further study is needed to explore the discordance between oncotype and MP results.",
 				"DOI": "10.6064/2012/942507",
 				"url": "http://www.hindawi.com/journals/scientifica/2012/942507/abs/",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.hindawi.com",
-				"shortTitle": "MammaPrint Feasibility in a Large Tertiary Urban Medical Center"
+				"shortTitle": "MammaPrint Feasibility in a Large Tertiary Urban Medical Center",
+				"title": "MammaPrint Feasibility in a Large Tertiary Urban Medical Center: An Initial Experience",
+				"publicationTitle": "Scientifica",
+				"volume": "2012",
+				"date": "2012/12/31"
 			}
 		]
 	}

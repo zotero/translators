@@ -105,16 +105,13 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"itemID": "http://vimeo.com/31179423",
-				"title": "Strings: J.S. Bach - Cello Suite No. 1 - Prelude",
-				"publicationTitle": "Vimeo",
 				"url": "http://vimeo.com/31179423",
 				"abstractNote": "Strings (2011) by Alexander Chen. Video capture. http://www.baroque.me visualizes the first Prelude from Bach's Cello Suites. Using the math behind string length…",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "vimeo.com",
-				"date": "2011-10-26",
 				"runningTime": "PT00H02M57S",
-				"shortTitle": "Strings"
+				"shortTitle": "Strings",
+				"title": "Strings: J.S. Bach - Cello Suite No. 1 - Prelude",
+				"date": "2011-10-26"
 			}
 		]
 	}

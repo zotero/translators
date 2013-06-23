@@ -123,15 +123,13 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"itemID": "http://www.time.com/time/nation/article/0,8599,2099187,00.html",
-				"title": "How the U.S. Postal Service Fell Apart",
-				"publicationTitle": "Time",
 				"url": "http://www.time.com/time/nation/article/0,8599,2099187,00.html",
 				"abstractNote": "Battling debilitating congressional mandates and competition online, the USPS is closing thousands of post offices and struggling to find a place in the modern world. But there are people behind the scenes trying to save this American institution",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.time.com",
-				"date": "Thursday, Nov. 17, 2011",
-				"ISSN": "0040-718X"
+				"ISSN": "0040-718X",
+				"title": "How the U.S. Postal Service Fell Apart",
+				"publicationTitle": "Time",
+				"date": "Thursday, Nov. 17, 2011"
 			}
 		]
 	},
@@ -150,13 +148,13 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"weather",
-					"storm",
-					"tornado",
+					"destruction",
 					"henryville",
 					"indiana",
 					"kentucky",
-					"destruction"
+					"storm",
+					"tornado",
+					"weather"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -164,16 +162,14 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"itemID": "http://www.time.com/time/nation/article/0,8599,2108263,00.html",
-				"title": "On Scene in Indiana and Kentucky: When the Tornadoes Came",
-				"publicationTitle": "Time",
 				"url": "http://www.time.com/time/nation/article/0,8599,2108263,00.html",
 				"abstractNote": "The month of March isn't really the heart of the tornado season but they have come fast and with awesome destruction.",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.time.com",
-				"date": "Sunday, Mar. 04, 2012",
 				"ISSN": "0040-718X",
-				"shortTitle": "On Scene in Indiana and Kentucky"
+				"shortTitle": "On Scene in Indiana and Kentucky",
+				"title": "On Scene in Indiana and Kentucky: When the Tornadoes Came",
+				"publicationTitle": "Time",
+				"date": "Sunday, Mar. 04, 2012"
 			}
 		]
 	},
@@ -185,15 +181,15 @@ var testCases = [
 				"itemType": "magazineArticle",
 				"creators": [
 					{
-						"firstName": "Jay",
-						"lastName": "Newton-Small",
+						"firstName": "Jay Newton-Small",
+						"lastName": "@JNSmall",
 						"creatorType": "author"
 					}
 				],
 				"notes": [],
 				"tags": [
-					"barack obama",
 					"aipac",
+					"barack obama",
 					"bibi",
 					"iran",
 					"israel",
@@ -209,14 +205,12 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"itemID": "http://swampland.time.com/2012/03/04/obama-courts-aipac-before-netanyahu-meeting/?iid=sl-main-lede",
-				"title": "Obama Courts AIPAC Before Netanyahu Meeting",
-				"publicationTitle": "Time",
 				"url": "http://swampland.time.com/2012/03/04/obama-courts-aipac-before-netanyahu-meeting/?iid=sl-main-lede",
 				"abstractNote": "Obama rejected any notion that his administration has not been in Israel's corner. “Over the last three years, as President of the United States, I have kept my commitments to the state of Israel.\" The President then ticked off the number of ways he has supported Israel in the last year.",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "swampland.time.com",
-				"ISSN": "0040-718X"
+				"ISSN": "0040-718X",
+				"title": "Obama Courts AIPAC Before Netanyahu Meeting",
+				"publicationTitle": "Time"
 			}
 		]
 	},
@@ -228,29 +222,29 @@ var testCases = [
 				"itemType": "magazineArticle",
 				"creators": [
 					{
-						"firstName": "Brad",
-						"lastName": "Tuttle",
+						"firstName": "Brad Tuttle",
+						"lastName": "@bradrtuttle",
 						"creatorType": "author"
 					}
 				],
 				"notes": [],
 				"tags": [
-					"california real estate",
-					"economics & policy",
-					"florida real estate",
-					"mortgages",
-					"personal finance",
-					"real estate & homes",
-					"real estate markets",
-					"the economy",
 					"arizona",
 					"baltimore",
 					"california",
+					"california real estate",
 					"dallas",
+					"economics & policy",
 					"florida",
+					"florida real estate",
 					"georgia",
+					"mortgages",
 					"nevada",
+					"personal finance",
+					"real estate & homes",
+					"real estate markets",
 					"sunbelt",
+					"the economy",
 					"underwater",
 					"upside-down"
 				],
@@ -260,15 +254,13 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"itemID": "http://business.time.com/2012/03/02/struggling-to-stay-afloat-number-of-underwater-homeowners-keeps-on-rising/?iid=pf-main-lede/",
-				"title": "Struggling to Stay Afloat: Number of Underwater Homeowners Keeps on Rising",
-				"publicationTitle": "Time",
 				"url": "http://business.time.com/2012/03/02/struggling-to-stay-afloat-number-of-underwater-homeowners-keeps-on-rising/?iid=pf-main-lede/",
 				"abstractNote": "Despite signs that some housing markets are improving, the overall trend is for home prices (and values) to keep dropping—and dropping. As values shrink, more and more homeowners find themselves underwater, the unfortunate scenario in which one owes more on the mortgage than the home is worth.",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "business.time.com",
+				"ISSN": "0040-718X",
 				"shortTitle": "Struggling to Stay Afloat",
-				"ISSN": "0040-718X"
+				"title": "Struggling to Stay Afloat: Number of Underwater Homeowners Keeps on Rising",
+				"publicationTitle": "Time"
 			}
 		]
 	},

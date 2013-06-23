@@ -108,16 +108,16 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Partidos políticos",
-					"comportamento eleitoral",
-					"eleições presidenciais",
-					"simpatia partidária",
+					"CSES-ESEB2010",
 					"ESEB2010",
+					"Partidos políticos",
 					"Political parties",
+					"comportamento eleitoral",
 					"electoral behavior",
-					"presidential elections",
+					"eleições presidenciais",
 					"party sympathy",
-					"CSES-ESEB2010"
+					"presidential elections",
+					"simpatia partidária"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -129,20 +129,17 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"itemID": "http://www.redalyc.org/articulo.oa?id=32921102001",
-				"title": "Os partidos políticos brasileiros realmente não importam?",
-				"publicationTitle": "Opinião Pública",
 				"abstractNote": "Há décadas a constatação corrente no Brasil é de que os partidos pouco importam para explicar o comportamento dos eleitores brasileiros. Entretanto, esse cenário de baixa identificação partidária contrasta com a observação de que, ao menos para as eleições presidenciais a competição eleitoral tem se...",
-				"date": "2011",
-				"volume": "17",
 				"issue": "2",
-				"publisher": "Universidade Estadual de Campinas",
 				"language": "pt",
-				"pages": "271-303",
 				"ISSN": "0104-6276, 1807-0191",
 				"url": "http://www.redalyc.org/resumen.oa?id=32921102001",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "www.redalyc.org"
+				"libraryCatalog": "www.redalyc.org",
+				"title": "Os partidos políticos brasileiros realmente não importam?",
+				"publicationTitle": "Opinião Pública",
+				"date": "2011",
+				"volume": "17",
+				"pages": "271-303"
 			}
 		]
 	},
