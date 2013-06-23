@@ -15,7 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-06-04 22:34:19"
+	"lastUpdated": "2013-06-23 00:51:39"
 }
 
 function detectImport() {
@@ -2262,6 +2262,8 @@ function doExport() {
 			var author = "";
 			var editor = "";
 			var translator = "";
+			var collaborator = "";
+			var primaryCreatorType = Zotero.Utilities.getCreatorsForType(item.itemType)[0];
 			for(var i in item.creators) {
 				var creator = item.creators[i];
 				var creatorString = creator.lastName;
@@ -2282,8 +2284,10 @@ function doExport() {
 					editor += " and "+creatorString;
 				} else if (creator.creatorType == "translator") {
 					translator += " and "+creatorString;
-				} else {
+				} else if (creator.creatorType == primaryCreatorType) {
 					author += " and "+creatorString;
+				} else {
+					collaborator += " and "+creatorString;
 				}
 			}
 			
@@ -2295,6 +2299,9 @@ function doExport() {
 			}
 			if(translator) {
 				writeField("translator",  "{" + translator.substr(5) + "}", true);
+			}
+			if(collaborator) {
+				writeField("collaborator",  "{" + collaborator.substr(5) + "}", true);
 			}
 		}
 		
