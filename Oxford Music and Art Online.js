@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-05-14 21:20:45"
+	"lastUpdated": "2013-06-23 12:06:33"
 }
 
 function detectWeb(doc, url) {
@@ -31,16 +31,24 @@ function doWeb(doc, url) {
 		while (link = links.iterateNext()) {
 			items[link.href] = link.textContent;
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			ids.push(i.match(/(music|art)\/([^?]+)/)[2]);
-		}
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				ids.push(i.match(/(article)\/([^?]+)/)[2]);
+			}
+			scrape(ids, host);
+		});
 	} else {
-		ids = [url.match(/(music|art)\/([^?]+)/)[2]];
-	}
-	Zotero.debug(ids);
+		ids = [url.match(/(article)\/([^?]+)/)[2]];
+		scrape(ids, host);
+	}	
+}	
+
+function scrape(ids, host){
 	for each (var id in ids) {
-		var get = 'http://' + host + '/subscriber/article_export_citation/grove/' + site + '/' + id;
+		var get = 'http://' + host + '/subscriber/article_export_citation/' + id;
 		Zotero.Utilities.HTTP.doGet(get, function(text) {
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -48,10 +56,11 @@ function doWeb(doc, url) {
 			translator.setHandler("itemDone", function(obj, item) {
 				var authors = new Array();
 				for (var i in item.creators) {
+				if (!item.creators[i].firstName){
 					names = item.creators[i].lastName.match(/(.*)\s([^\s]+)$/);
-					authors.push({firstName:names[1], lastName:names[2], creatorType:"author"});
+					item.creators[i] = {firstName:names[1], lastName:names[2], creatorType:"author"};
+				} 
 				}
-				item.creators = authors;
 				item.complete();
 			});
 			translator.translate();

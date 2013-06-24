@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-10-18 20:10:13"
+	"lastUpdated": "2013-06-23 23:00:08"
 }
 
 function detectWeb(doc, url) {
@@ -68,7 +68,7 @@ function doWeb(doc, url) {
 // Given an article page, get the RIS and open it
 function scrapeOne(doc) {
 	var url = doc.location.href;
-	var hostRe = new RegExp("^(http://[^/]+)/");
+	var hostRe = new RegExp("^(https?://[^/]+)/");
 		var m = hostRe.exec(url);
 		var host = m[1];
 
