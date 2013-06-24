@@ -8,8 +8,8 @@
 	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2013-06-23 00:25:01"
+	"browserSupport": "gcs",
+	"lastUpdated": "2013-06-23 00:39:01"
 }
 /*
  * Gale GDC Copyright (C) 2011 Gale GDC
