@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-15 18:04:37"
+	"lastUpdated": "2013-06-25 17:44:43"
 }
 
 /*
@@ -130,6 +130,8 @@ function scrape(doc, url, dois) {
 							item.publisher = risItem.publisher;
 							item.ISSN = risItem.ISSN;
 							item.ISBN = risItem.ISBN;
+							//clean up abstract removing Abstract:, Summary: or Abstract Summary:
+							if (item.abstractNote) item.abstractNote = item.abstractNote.replace(/^(Abstract)?\s*(Summary)?:\s*/, "");
 							if(item.title.toUpperCase() == item.title) {
 								item.title = ZU.capitalizeTitle(item.title, true);
 							}
