@@ -9,14 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-06-11 02:11:37"
+	"lastUpdated": "2013-06-30 22:37:02"
 }
 
+var searchRe = new RegExp('^https?://(?:www\.)?amazon\.([^/]+)/(gp/search/|(gp/)?registry/(wishlist|registry)|exec/obidos/search-handle-url/|s/|s\\?|[^/]+/lm/|gp/richpub/)');
 function detectWeb(doc, url) {
-	var suffixRe = new RegExp("https?://(?:www\.)?amazon\.([^/]+)/");
-	var suffixMatch = suffixRe.exec(url);
-	var suffix = suffixMatch[1];
-	var searchRe = new RegExp('^https?://(?:www\.)?amazon\.' + suffix + '/(gp/search/|(gp/)?registry/(wishlist|registry)|exec/obidos/search-handle-url/|s/|s\\?|[^/]+/lm/|gp/richpub/)');
 	if(searchRe.test(doc.location.href)) {
 		return (Zotero.isBookmarklet ? "server" : "multiple");
 	} else {
@@ -47,15 +44,8 @@ function detectWeb(doc, url) {
 	}
 }
 
-var suffix;
 function doWeb(doc, url) {
 	var asinRe = new RegExp('/(dp|product)/([^/]+)/');
-	var suffixRe = new RegExp("https?://(?:www\.)?amazon\.([^/]+)/");
-	var suffixMatch = suffixRe.exec(url);
-	suffix = suffixMatch[1];
-
-	var searchRe = new RegExp('^https?://(?:www\.)?amazon\.' + suffix + '/(gp/search/|(gp/)?registry/(wishlist|registry)|exec/obidos/search-handle-url/|s/|s\\?|[^/]+/lm/|gp/richpub/)');
-	if(suffix == ".com") suffix = "com";
 	if(searchRe.test(doc.location.href)) {
 		if(doc.location.href.match(/gp\/richpub\//)){ // Show selector for Guides
 			var xpath = '//a[(contains(@href, "ref=cm_syf_dtl_pl") or contains(@href, "ref=cm_syf_dtl_top")) and preceding-sibling::b]';
@@ -92,7 +82,8 @@ function getItem(doc) {
 	// First look for ISBN and use it for search if possible. We do this instead of using
 	// the API because it will give us the place published, and because it's less likely to
 	// be broken by site changes.
-	var isbns = ZU.xpath(doc, '//li[b/text() = "ISBN-13:" or b/text() = "ISBN-10:" or b/text() = "Page Numbers Source ISBN:"]/text()');
+	var isbns = ZU.xpath(doc, '//li[b/text() = "ISBN-13:" or b/text() = "ISBN-10:" or b/text() = "Page Numbers Source ISBN:"]/text() | \
+	                           //tr[td[1]/span/text() = "ISBN-13" or td[1]/span/text() = "ISBN-10"]/td[2]/span/text()');
 	if(isbns.length) {
 		Zotero.debug("Retrieving by ISBN search")
 		var isbn = isbns[0].nodeValue.trim(),
@@ -131,14 +122,14 @@ var DEPARTMENT_TO_TYPE = {
 };
 
 var CREATOR = {
-	"Actors:":"castMember",
-	"Directors:":"director",
-	"Producers:":"producer"
+	"Actors":"castMember",
+	"Directors":"director",
+	"Producers":"producer"
 };
 
 var DATE = [
-	"Original Release Date:",
-	"DVD Release Date:"
+	"Original Release Date",
+	"DVD Release Date"
 ];
 
 function scrape(doc) {
@@ -147,20 +138,38 @@ function scrape(doc) {
 	// TODO localize
 	var department = ZU.xpathText(doc, '//li[contains(@class, "nav-category-button")]/a').trim(),
 		item = new Zotero.Item(DEPARTMENT_TO_TYPE[department] || "book"),
-		authors = ZU.xpath(doc, '//span[@class="byLinePipe"]/../span/a | //span[@class="byLinePipe"]/../a');
+		authors = ZU.xpath(doc, '//span[@class="byLinePipe"]/../span/a | //span[@class="byLinePipe"]/../a | //span[contains(@class, "author")]/a[1]');
 	for(var i=0; i<authors.length; i++) {
 		var author = authors[i].textContent.trim();
 		if(author) item.creators.push(ZU.cleanAuthor(author));
 	}
-	item.title = ZU.xpath(doc, '//span[@id="btAsinTitle"]/text()')[0].nodeValue.replace(/(?: \([^)]*\))+$/, "");
+	
+	// Old design
+	var titleNode = ZU.xpath(doc, '//span[@id="btAsinTitle"]/text()')[0] ||
+	// New design encountered 06/30/2013
+	                ZU.xpath(doc, '//h1[@id="title"]/text()')[0];
+	item.title = titleNode.nodeValue.replace(/(?: \([^)]*\))+$/, "");
 	
 	// Extract info into an array
-	var els = ZU.xpath(doc, '//div[@class="content"]/ul/li[b]'),
-		info = {};
-	for(var i=0; i<els.length; i++) {
-		var el = els[i],
-			key = ZU.xpathText(el, 'b[1]');
-		info[key.trim()] = el.textContent.substr(key.length+1).trim();
+	var info = {},
+		els = ZU.xpath(doc, '//div[@class="content"]/ul/li[b]');
+	if(els.length) {
+		for(var i=0; i<els.length; i++) {
+			var el = els[i],
+				key = ZU.xpathText(el, 'b[1]').trim()
+			if(key) {
+				info[key.replace(/:$/, "")] = el.textContent.substr(key.length+1).trim();
+			}
+		}
+	} else {
+		// New design encountered 06/30/2013
+		els = ZU.xpath(doc, '//tr[td[@class="a-span3"]][td[@class="a-span9"]]');
+		for(var i=0; i<els.length; i++) {
+			var el = els[i],
+				key = ZU.xpathText(el, 'td[@class="a-span3"]'),
+				value = ZU.xpathText(el, 'td[@class="a-span9"]');
+			if(key && value) info[key.trim()] = value.trim();
+		}
 	}
 	
 	// Date
@@ -176,13 +185,14 @@ function scrape(doc) {
 	}
 	
 	// Books
-	var publisher = info["Publisher:"];
+	var publisher = info["Publisher"];
 	if(publisher) {
 		var m = /([^;(]+)(?:; *([^(]*))?( \([^)]*\))?/.exec(publisher);
 		item.publisher = m[1];
 		item.edition = m[2];
 	}
-	var pages = info["Print Length:"];
+	var pages = info["Print Length"];
+	item.ISBN = info["ISBN-10"] || info["ISBN-13"];
 	if(pages) item.numPages = parseInt(pages, 10);
 	
 	// Video
@@ -199,18 +209,18 @@ function scrape(doc) {
 			}
 		}
 	}
-	item.studio = info["Studio:"];
-	item.runningTime = info["Run Time:"];
-	item.language = info["Language:"];
+	item.studio = info["Studio"];
+	item.runningTime = info["Run Time"];
+	item.language = info["Language"];
 	
 	// Music
-	item.label = info["Label:"];
+	item.label = info["Label"];
 	if(info["Audio CD"]) {
 		item.audioRecordingType = "Audio CD";
 	} else if(department == "Amazon MP3 Store") {
 		item.audioRecordingType = "MP3";
 	}
-	item.recordingTime = info["Total Length:"];
+	item.recordingTime = info["Total Length"];
 	
 	addLink(doc, item);
 	
