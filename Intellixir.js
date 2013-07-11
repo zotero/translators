@@ -2,7 +2,7 @@
 	"translatorID": "20e87da1-e1c9-410d-b400-a1c27272ae19",
 	"label": "Intellixir",
 	"creator": "Maxime Escourbiac",
-	"target": "/intellixir/(afficheliste\.aspx|liste_articles\.aspx)",
+	"target": "/intellixir/(afficheliste.aspx|liste_articles.aspx)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
