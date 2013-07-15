@@ -1,6 +1,6 @@
 {
 	"translatorID": "9499c586-d672-42d6-9ec4-ee9594dcc571",
-	"label": "The Hindu",
+	"label": "The Hindu (old)",
 	"creator": "Prashant Iyengar and Michael Berkowitz",
 	"target": "^http://(www\\.)?hindu\\.com",
 	"minVersion": "1.0.0b4.r5",
@@ -9,7 +9,7 @@
 	"browserSupport": "gcsib",
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-09-06 06:38:30"
+	"lastUpdated": "2013-07-15 06:38:30"
 }
 
 function detectWeb(doc, url) {
@@ -116,7 +116,7 @@ var testCases = [
 				"pages": "01",
 				"place": "CHEN",
 				"section": "LITERARY",
-				"libraryCatalog": "The Hindu"
+				"libraryCatalog": "The Hindu (old)"
 			}
 		]
 	}
