@@ -1,122 +1,301 @@
 {
-	"translatorID": "9499c586-d672-42d6-9ec4-ee9594dcc571",
-	"label": "The Hindu",
-	"creator": "Prashant Iyengar and Michael Berkowitz",
-	"target": "^http://(www\\.)?hindu\\.com",
-	"minVersion": "1.0.0b4.r5",
-	"maxVersion": "",
-	"priority": 100,
-	"browserSupport": "gcsib",
-	"inRepository": true,
-	"translatorType": 4,
-	"lastUpdated": "2011-09-06 06:38:30"
+    "translatorID": "06142d59-fa9c-48c3-982b-6e7c67d3d6b8",
+    "label": "The Hindu",
+    "creator": "Piyush Srivastava",
+    "target": "https?://www\\.thehindu\\.com/.*ece",
+    "minVersion": "1.0",
+    "maxVersion": "",
+    "priority": 100,
+    "inRepository": true,
+    "translatorType": 4,
+    "browserSupport": "g",
+    "lastUpdated": "2013-07-14 23:35:02"
 }
+
+/*****
+   Copyright 2013, Piyush Srivastava.
+
+   This program is free software: you can redistribute it and/or
+   modify it under the terms of the GNU Affero General Public License
+   as published by the Free Software Foundation, either version 3 of
+   the License, or (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public
+   License along with this program.  If not, see
+   <http://www.gnu.org/licenses/>.
+
+*****/
+
+/**
+The current Zotero translator for "The Hindu" interfaces only with the
+newspaper's old website www.hindu.com (which is now used only for
+archival purposes).  
+
+This translator interfaces with www.thehindu.com, the current website
+of the newspaper.
+
+**/
 
 function detectWeb(doc, url) {
-	if (doc.evaluate('//h2[@class="r"]/a[@class="l"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-	  		return "multiple";
-	  	} else {
-		  	return "newspaperArticle";
-	}
+    return "newspaperArticle";
 }
 
-function regexMeta(str, item) {
-	var re = /NAME\=\"([\w\W]*?)\"\s+CONTENT\=\"([\w\W]*?)\"/;
-	var stuff = str.match(re);
-		if (stuff)
-		{
-		if (stuff[1] == "PAGEHEAD") {
-		item.section = stuff[2].split(/\s+/)[0];
-	}
-	if (stuff[1] == "ZONE") {
-		item.place = stuff[2].split(/\s+/)[0];
-	}
-	if (stuff[1] == "EXPORTTIME") {
-		item.date = stuff[2].split(/\s+/)[0];
-	}
-	if (stuff[1] == "PAGENUMBER") {
-		item.pages = stuff[2].split(/\s+/)[0];
-	}
-	}
+
+function insertCreator(authorName, newItem){
+    /*Check for some author name conventions unique to the Hindu*/
+    /*Right now we are using the following: 
+      
+      1) PTI, a news agency, is often credited as an author on The
+      Hindu articles.  We just change the author status to
+      "contributor", and retain the capitalization.
+      
+      2) Some articles are bylined "Special Coresspondent".  Again, we
+      change the author status to "contributor".
+      
+    */
+    authorName = Zotero.Utilities.capitalizeTitle(authorName.toLowerCase(), true);
+    authorStatus = "author";
+    if (authorName == "Pti"){
+	authorName = "PTI";
+	authorStatus = "contributor";
+	newItem.creators.push({lastName: authorName, 
+			       creatorType: 'contributor', 
+			       fieldMode: 1});
+    } else if (authorName == "Special Correspondent"){
+	authorStatus = "contributor";
+	newItem.creators.push({lastName: "Correspondent", 
+			       firstName: "Special", 
+			       creatorType: 'contributor', 
+			       fieldMode: 1});
+    } else {
+	newItem.creators.push(Zotero.Utilities.cleanAuthor(authorName, authorStatus));
+    }
 }
+
+function scrape(doc, url){
+    
+    var newItem = new Zotero.Item('newspaperArticle');
+    newItem.url = doc.location.href;
+    newItem.language = "en-IN";
+    
+    
+    newItem.publicationTitle = "The Hindu";
+    newItem.ISSN = "0971-751X";
+    
+    //Get title of the news article via xpath
+    var titleXPath = '//h1[@class="detail-title"]';
+    var titleString = doc.evaluate(titleXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+    newItem.title = titleString;
+    
+    
+    //Get author(s) of the article
+    var authorXPath = '//span[@class="author"]';
+    var authorListObject = doc.evaluate(authorXPath, doc, null, 
+					XPathResult.ANY_TYPE, null);
+    var authorObject = authorListObject.iterateNext();
+    while (authorObject){
+	insertCreator(authorObject.textContent, newItem);
+	authorObject = authorListObject.iterateNext();
+    }
+    
+    //date and Place
+    var datePlaceXPath = '//span[@class="dateline"]';
+    var placeXPath='//span[@class="dateline"]/span[@class="upper"]';
+    var datePlaceString = doc.evaluate(datePlaceXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+    var placeString = doc.evaluate(placeXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+    var dateString = datePlaceString.replace(placeString, ""); //Remove place info from date
+    dateString = dateString.replace(/^\s+|\s+$/g, '');
+    placeString = placeString.replace(/^(\s|,)+|(\s|,)+$/g, '');
+    newItem.place=Zotero.Utilities.capitalizeTitle(placeString, true);//remove trailing commans and whitespace;
+    newItem.date=dateString;
+    
+    //keywords
+    var keywordXPath='//div[@id="articleKeywords"]//a[@href="#"]';
+    var keywordListObject  = doc.evaluate(keywordXPath, doc, null,
+					  XPathResult.ANY_TYPE, null);
+    var keywordObject = keywordListObject.iterateNext();
+    while(keywordObject){
+	newItem.tags.push(keywordObject.textContent);
+	keywordObject = keywordListObject.iterateNext();
+    }
+    
+    //Store a snapshot of the page
+    newItem.attachments.push({
+	title:"The Hindu Snapshot",
+	document:doc});
+    
+    newItem.complete();
+}
+
 
 function doWeb(doc, url) {
-	var arts = new Array();
-	if (detectWeb(doc, url) == "multiple") {
-		var xpath = '//h2[@class="r"]/a[@class="l"]';
-		var links = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
-		var link;
-		var items = new Object();
-		while (link = links.iterateNext()) {
-			items[link.href] = link.textContent;
-		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			arts.push(i);
-		}
-		
-	} else { arts = [url]; }
-	for each (var art in arts) {
-		Zotero.debug(art);
-		Zotero.Utilities.HTTP.doGet(art, function(text) {
-			var newItem = new Zotero.Item("newspaperArticle");
-			newItem.publicationTitle = "The Hindu";
-			newItem.url = art;
-			//title
-			var t = /\<TITLE\>[\w\W]*\:([\w\W]*?)<\/TITLE/;
-			newItem.title = Zotero.Utilities.unescapeHTML(Zotero.Utilities.capitalizeTitle(text.match(t)[1]));
-	
-			var auth = 	/\<font class\=storyhead[\w\W]*?justify\>([\w\W]*?)\<p\>/;
-			if (text.match(auth))
-			{
-				//newItem.author=Zotero.Utilities.cleanAuthor(text.match(auth)[1]);
-				cleanauth=Zotero.Utilities.cleanTags(text.match(auth)[1]);
-				newItem.creators.push(Zotero.Utilities.cleanAuthor(cleanauth, "author"));	
-			}
-	
-			newItem.publicationTitle="The Hindu";
-			
-			newItem.attachments = [{"title":"The Hindu Snapshot", mimeType:"text/html", url:art}];
-	
-			//hooray for real meta tags!
-			var meta = /<META NAME[\w\W]*?\>/g;
-			var metaTags = text.match(meta);
-			for (var i = 0 ; i <metaTags.length ; i++) {
-				regexMeta(metaTags[i], newItem);
-			}
-			newItem.complete();
-			Zotero.done();
-		});
-		Zotero.wait();
-	}
-}/** BEGIN TEST CASES **/
+    scrape(doc, url);
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.hindu.com/lr/2004/01/04/stories/2004010400030100.htm",
+		"url": "http://www.thehindu.com/news/national/sincere-regrets-stop/article4914819.ece",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
 				"creators": [
 					{
-						"firstName": "To be torn between two languages, discovers H. MASUD TAJ, is to drown soul-deep in  the",
-						"lastName": "present",
+						"firstName": "Shiv Sahay",
+						"lastName": "Singh",
 						"creatorType": "author"
 					}
 				],
 				"notes": [],
-				"tags": [],
+				"tags": [
+					"Telegram",
+					"Telegraph service",
+					"BSNL",
+					"Telegram service discontinuation"
+				],
 				"seeAlso": [],
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "The Hindu Snapshot"
+					}
+				],
+				"url": "http://www.thehindu.com/news/national/sincere-regrets-stop/article4914819.ece",
+				"language": "en-IN",
 				"publicationTitle": "The Hindu",
-				"url": "http://www.hindu.com/lr/2004/01/04/stories/2004010400030100.htm",
-				"title": "Falling at the speed of light",
-				"websiteTitle": "The Hindu",
-				"date": "01-01-2004",
-				"pages": "01",
-				"place": "CHEN",
-				"section": "LITERARY",
-				"libraryCatalog": "The Hindu"
+				"ISSN": "0971-751X",
+				"title": "Telegram no more STOP 100 STOP",
+				"place": "Kolkata",
+				"date": "July 14, 2013",
+				"libraryCatalog": "The Hindu",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.thehindu.com/features/once-favoured-now-forgotten/article4912011.ece?homepage=true",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "Anusha",
+						"lastName": "Parthasarathy",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Lakshmi",
+						"lastName": "Krupa",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Transistor radio",
+					"Cassette tapes",
+					"Floppy discs",
+					"VCR",
+					"Pager",
+					"Gramophone",
+					"Typewriter",
+					"Roll films",
+					"Dial-up"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "The Hindu Snapshot"
+					}
+				],
+				"url": "http://www.thehindu.com/features/once-favoured-now-forgotten/article4912011.ece?homepage=true",
+				"language": "en-IN",
+				"publicationTitle": "The Hindu",
+				"ISSN": "0971-751X",
+				"title": "Once favoured, now forgotten",
+				"place": "Chennai",
+				"date": "July 14, 2013",
+				"libraryCatalog": "The Hindu",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.thehindu.com/business/Economy/petrol-prices-to-go-up-by-rs-155-per-litre/article4914855.ece",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"lastName": "PTI",
+						"creatorType": "contributor",
+					        "fieldMode" : 1
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Petrol price hike",
+					"oil marketing companies",
+					"oil imports",
+					"Rupee fall"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "The Hindu Snapshot"
+					}
+				],
+				"url": "http://www.thehindu.com/business/Economy/petrol-prices-to-go-up-by-rs-155-per-litre/article4914855.ece",
+				"language": "en-IN",
+				"publicationTitle": "The Hindu",
+				"ISSN": "0971-751X",
+				"title": "Petrol prices to go up by Rs. 1.55 per litre",
+				"place": "New Delhi",
+				"date": "July 14, 2013",
+				"libraryCatalog": "The Hindu",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.thehindu.com/opinion/columns/Chandrasekhar/the-forgotten-software-boom/article4914571.ece",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "C. P.",
+						"lastName": "Chandrasekhar",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"IT industry",
+					"ITeS",
+					"NASSCOM",
+					"economic slowdown"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "The Hindu Snapshot"
+					}
+				],
+				"url": "http://www.thehindu.com/opinion/columns/Chandrasekhar/the-forgotten-software-boom/article4914571.ece",
+				"language": "en-IN",
+				"publicationTitle": "The Hindu",
+				"ISSN": "0971-751X",
+				"title": "The forgotten software boom",
+				"date": "July 14, 2013",
+				"libraryCatalog": "The Hindu",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}
