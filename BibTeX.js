@@ -15,7 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-06-23 01:00:08"
+	"lastUpdated": "2013-07-03 20:59:44"
 }
 
 function detectImport() {
@@ -1782,7 +1782,7 @@ function processField(item, field, value) {
 		}
 	} else if (field == "comment" || field == "annote" || field == "review") {
 		item.notes.push({note:Zotero.Utilities.text2html(value)});
-	} else if (field == "pdf") {
+	} else if (field == "pdf" || field == "path" /*Papers2 compatibility*/) {
 		item.attachments = [{path:value, mimeType:"application/pdf"}];
 	} else if (field == "sentelink") { // the reference manager 'Sente' has a unique file scheme in exported BibTeX
 		item.attachments = [{path:value.split(",")[0], mimeType:"application/pdf"}];
