@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-04-27 05:46:18"
+	"lastUpdated": "2013-07-16 20:29:17"
 }
 
 function detectImport() {
@@ -955,32 +955,42 @@ function getLine() {
 		//otherwise this is a new entry
 		} else if(temp) {
 			entry = temp;
-			lastLineLength = entry[2].length;
+			lastLineLength = entry[0].length;
 
 		//if this line didn't match, then we just attach it to the current value
 		//Try to figure out if this is supposed to be on a new line or not
 		} else if(entry) {
+			var rawLine = nextLine;
+			
+			//trim leading/trailing whitespace
+			nextLine = nextLine.trim();
+			
+			var newLineAdded = false;
 			//new lines would probably only be meaningful in notes and abstracts
 			if(entry[1] == 'AB' || entry[1] == 'N1' || entry[1] == 'N2') {
 				//if previous line was short, this would probably be on a new line
 				//Might consider looking for periods and capital letters
-				if(lastLineLength < 60) {
+				//empty lines imply new line
+				if(lastLineLength < 60 || nextLine.length == 0) {
 					nextLine = "\n" + nextLine;
+					newLineAdded = true;
 				}
 			}
 
 			//don't remove new lines from keywords or attachments
-			if(preserveNewLines.indexOf(entry[1]) != -1) {
+			if(!newLineAdded && preserveNewLines.indexOf(entry[1]) != -1) {
 				nextLine = "\n" + nextLine;
+				newLineAdded = true;
 			}
 
 			//check if we need to add a space
-			if(entry[2].substr(entry[2].length-1) != ' ') {
+			if(!newLineAdded && entry[2].substr(entry[2].length-1) != ' ') {
 				nextLine = ' ' + nextLine;
 			}
 
-			entry[0] += nextLine;
+			entry[0] += "\n" + rawLine;
 			entry[2] += nextLine;
+			lastLineLength = rawLine.length;
 		}
 	}
 
