@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-05-28 01:42:17"
+	"lastUpdated": "2013-07-25 09:52:20"
 }
 
 function detectWeb(doc, url) {
@@ -54,7 +54,7 @@ function getExportLink(doc) {
 
 function getPDFLink(doc) {
 	return ZU.xpathText(doc,
-		'//div[@id="articleNav"]//div[@class="icon_pdf"]\
+		'//div[@id="articleNav"]//div[contains(@class, "icon_pdf")]\
 			/a[not(@title="Purchase PDF")]/@href[1]');
 }
 
