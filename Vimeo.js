@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-06-04 20:46:13"
+	"lastUpdated": "2013-07-25 23:57:48"
 }
 
 /*
@@ -70,6 +70,7 @@ function doWeb(doc, url) {
 		translator.setDocument(doc);
 		translator.setHandler("itemDone", function (obj, item) {
 			item.itemType= "videoRecording";
+			item.title = item.title.replace(/\s*on Vimeo$/, "");
 			item.creators = ZU.cleanAuthor(creator, "author");
 			if (date) item.date = date.replace(/T.+/, "");
 			if (duration) item.runningTime = duration;
