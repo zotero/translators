@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-05-28 00:08:31"
+	"lastUpdated": "2013-07-26 06:22:07"
 }
 
 /*
@@ -381,6 +381,9 @@ function doWeb(doc, url) {
 
 			Zotero.Utilities.processDocuments(urls, addEmbMeta);
 		});
+	} else if(url.indexOf('.full.pdf+html') != -1) {
+		//abstract in EM is not reliable. Fetch abstract page and scrape from there.
+		ZU.processDocuments(url.replace(/\.full\.pdf\+html.*/, ''), addEmbMeta);
 	} else {
 		addEmbMeta(doc);
 	}
@@ -523,19 +526,26 @@ var testCases = [
 						"snapshot": false
 					}
 				],
+				"title": "Pulmonary nodules: computer-aided detection in digital chest images.",
+				"publisher": "Radiological Society of North America",
+				"institution": "Radiological Society of North America",
+				"company": "Radiological Society of North America",
+				"label": "Radiological Society of North America",
+				"distributor": "Radiological Society of North America",
+				"date": "01/01/1990",
 				"language": "en",
+				"publicationTitle": "Radiographics",
 				"journalAbbreviation": "Radiographics",
+				"volume": "10",
 				"issue": "1",
 				"url": "http://radiographics.rsna.org/content/10/1/41",
+				"pages": "41-51",
 				"ISSN": "0271-5333, 1527-1323",
 				"extra": "PMID: 2296696",
+				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "radiographics.rsna.org",
-				"shortTitle": "Pulmonary nodules",
-				"title": "Pulmonary nodules: computer-aided detection in digital chest images.",
-				"date": "01/01/1990",
-				"publicationTitle": "Radiographics",
-				"volume": "10",
-				"pages": "41-51"
+				"abstractNote": "Currently, radiologists fail to detect pulmonary nodules in up to 30% of cases with actually positive findings. Diagnoses may be missed due to camouflaging effects of anatomic background, subjective and varying decision criteria, or distractions in clinical situations. We developed a computerized method to detect locations of lung nodules in digital chest images. The method is based on a difference-image approach and feature-extraction techniques, including growth, slope, and profile tests. Computer results were used to alert 12 radiologists to possible nodule locations in 60 clinical cases. Preliminary results suggest that computer aid can improve the detection performance of radiologists.",
+				"shortTitle": "Pulmonary nodules"
 			}
 		]
 	},
