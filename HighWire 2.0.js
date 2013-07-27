@@ -2,14 +2,14 @@
 	"translatorID": "8c1f42d5-02fa-437b-b2b2-73afc768eb07",
 	"label": "HighWire 2.0",
 	"creator": "Matt Burton",
-	"target": "^[^\\?]+(content/([0-9]+[A-Z\\-]*/(?:suppl_)?[0-9]+|current|firstcite|early)|search\\?submit=|search(/results)?\\?fulltext=|cgi/collection/.+)",
+	"target": "^[^\\?]+(content/([0-9]+[A-Z\\-]*/(?:suppl_)?[0-9]+|current|firstcite|early)|search\\?(tmonth=[A-Za-z]*&pubdate_year=[0-9]*&)?submit=|search(/results)?\\?fulltext=|cgi/collection/.+)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-07-26 06:22:07"
+	"lastUpdated": "2013-07-27 16:26:13"
 }
 
 /*
@@ -72,10 +72,10 @@ function getKeywords(doc) {
 	//some journals are odd and don't work with this.
 	//e.g. http://jn.nutrition.org/content/130/12/3122S.abstract
 	var keywords = ZU.xpath(doc,'//ul[contains(@class,"kwd-group")]//a');
-
 	var kwds = new Array();
 	for(var i=0, n=keywords.length; i<n; i++) {
-		kwds.push(keywords[i].textContent.trim());
+		//don't break for empty nodes
+		if(keywords[i].textContent)	kwds.push(keywords[i].textContent.trim());
 	}
 
 	return kwds;
@@ -1127,6 +1127,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://oss.sagepub.com/search/results?fulltext=labor&x=0&y=0&submit=yes&journal_set=sposs&src=selected&andorexactfulltext=and",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://amj.aom.org/search?tmonth=Dec&pubdate_year=&submit=yes&submit=yes&submit=Submit&andorexacttitle=and&format=standard&firstpage=&fmonth=Jan&title=&hits=50&tyear=2013&titleabstract=&journalcode=amj&journalcode=amr&volume=&sortspec=relevance&andorexacttitleabs=and&author2=&andorexactfulltext=and&fyear=2008&author1=&doi=&fulltext=culture%20cultural&FIRSTINDEX=100",
 		"items": "multiple"
 	}
 ]
