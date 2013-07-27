@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 3,
-	"browserSupport": "gscn",
-	"lastUpdated": "2012-01-11 09:09:04"
+	"browserSupport": "gcs",
+	"lastUpdated": "2013-10-30 04:22:04"
 }
 
 /*
@@ -38,30 +38,38 @@
   * Input looks like:
 <!DOCTYPE NETSCAPE-Bookmark-file-1>
 <!-- This is an automatically generated file.
-     It will be read and overwritten.
-     DO NOT EDIT! -->
+	 It will be read and overwritten.
+	 DO NOT EDIT! -->
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
 <TITLE>Bookmarks</TITLE>
 <H1>Bookmarks Menu</H1>
 <DL>
-    <DT><A HREF="http://www.example.com/">Example Site</A></DT>
-    <DD>Longer title</DD>
+	<DT><A HREF="http://www.example.com/">Example Site</A></DT>
+	<DD>Longer title</DD>
 </DL>
   */
 
 var MAX_DETECT_LINES = 150;
+var bookmarkRE = /<DT>[\s\r\n]*<A[^>]+HREF[\s\r\n]*=[\s\r\n]*(['"])([^"]+)\1[^>]*>([^<\n]+?)<\/A>/gi;
+var collectionRE = /<DT>[\s\r\n]*<H3[^>]*>([^<]+?)<\/H3>/gi;
+var collectionEndRE = /<\/DL>/gi;
+var descriptionRE = /<DD>([\s\S]*?)(?=<(?:DT|\/DL|HR)>)/gi;
+var bookmarkDetailsRE = /[\s\r\n](HREF|TAGS|ADD_DATE|SHORTCUTURL)[s\r\n]*=[s\r\n]*(['"])(.+?)\2/gi;
 
 function detectImport() {
 	var text = "";
-	var line;
-	var match;
-	var re = /<DT>\s*<A[^>]*HREF="([^"]+)"[^>]*>([^<\n]+)/gi;
+	var line, m;
+	var lastIndex = 0;
 	var i = 0;
 	while((line = Zotero.read()) !== false && (i++ < MAX_DETECT_LINES)) {
 		text += line;
-		match = re.exec(text);
-		if (match) {
-			Zotero.debug("Found a match with line: "+line);
+
+		bookmarkRE.lastIndex = lastIndex; //don't restart searches from begining
+		m = bookmarkRE.exec(text);
+		if(m && lastIndex < bookmarkRE.lastIndex) lastIndex = bookmarkRE.lastIndex;
+
+		if (m && m[2].toUpperCase().indexOf('PLACE:') !== 0) {
+			Zotero.debug("Found a match with line: "+m[0]);
 			return true;
 		}
 	}
@@ -69,72 +77,144 @@ function detectImport() {
 }
 
 function doImport() {
-	var line;
-	var hits;
-	var item = false;
-	var itemIncomplete = false;
-	var collection = false;
-	var re = /([A-Za-z_]+)="([^"]+)"/g; 
-	while((line = Zotero.read()) !== false) {
-		if (line.indexOf("<DT>") !== -1 && line.indexOf("<A") !== -1) {
-			if (itemIncomplete) item.complete();
-			itemIncomplete = true;
-			//Zotero.debug(line);
-			item = new Zotero.Item("webpage");
-			if (collection) collection.children.push(item);
-			item.title = line.match(/>([^<]*)<\/A>/)[1];
-			//Zotero.debug(item.title);
-			while(hits = re.exec(line)) {
-				if (!hits) {
-					Zotero.debug("RE no match in "+line);
+	var itemID = 0;
+	var l, m, re, line = '';
+	var allREs = {
+		b: bookmarkRE,
+		c: collectionRE,
+		ce: collectionEndRE,
+		d: descriptionRE
+	};
+	var firstMatch, firstMatchAt, openItem, lastIndex = 0;
+	var collectionStack = [], collection;
+	
+	while((l = Zotero.read()) !== false) {
+		line += '\n' + l;
+		bookmarkRE.lastIndex = collectionRE.lastIndex = descriptionRE.lastIndex = 0;
+		do {
+			firstMatch = false;
+			firstMatchType = false;
+			
+			for(var re in allREs) {
+				if(re == 'd' && !openItem) {
 					continue;
 				}
-				switch (hits[1]) {
-					case "HREF":	item.url = hits[2]; 
-									break;
-					case "TAGS": item.tags = hits[2].split(','); break;
-					case "ICON": break;
-					case "ICON_URI": break;
-					case "ADD_DATE":
-							item.accessDate = convertDate(hits[2]);
-							break;
-					default: item.extra = item.extra ? 	item.extra + "; "+ [hits[1], hits[2]].join("=") :
-										[hits[1], hits[2]].join("=");
+				
+				allREs[re].lastIndex = lastIndex;
+				m = allREs[re].exec(line);
+				if(m && (!firstMatchType || m.index < firstMatch.index)) {
+					firstMatch = m;
+					firstMatchType = re;
 				}
 			}
-			if (item.url.match(/^place:/)) {
-				item = false;
-				itemIncomplete = false;
+			
+			if(firstMatchType) {
+				m = firstMatch;
+				lastIndex = allREs[firstMatchType].lastIndex;
 			}
-		} else if (line.indexOf("<DT>") !== -1 && line.indexOf("<H3") !== -1) {
-			if (collection) {
-				collection.complete();
+			
+			switch(firstMatchType) {
+				case 'b': //create new webpage item
+					if(openItem) openItem.complete();
+					
+					var title = m[3].trim();
+					
+					if(!title || m[2].toUpperCase().indexOf('PLACE:') == 0) {
+						Z.debug('Skipping item with no title or special "place:" item');
+						openItem = false;
+						break;
+					}
+					
+					openItem = new Zotero.Item("webpage");
+					openItem.title = title;
+					openItem.itemID = openItem.id = itemID++;
+					if(collection) collection.children.push(openItem);
+					
+					bookmarkDetailsRE.lastIndex = 0;
+					var detailMatch;
+					while(detailMatch = bookmarkDetailsRE.exec(m[0])) {
+						switch(detailMatch[1].toUpperCase()) {
+							case 'HREF':
+								openItem.url = detailMatch[3];
+							break;
+							case 'TAGS':
+							case 'SHORTCUTURL':
+								openItem.tags = openItem.tags.concat(detailMatch[3].split(/[\s\r\n]*,[\s\r\n]*/));
+							break;
+							case 'ADD_DATE':
+								openItem.accessDate = convertDate(detailMatch[3])
+							break;
+						}
+					}
+				break;
+				case 'c': //start a collection
+					if(openItem) {
+						openItem.complete();
+						openItem = false;
+					}
+					
+					if(collection) collectionStack.push(collection)
+					
+					collection = new Zotero.Collection();
+					collection.type = 'collection';
+					collection.name = ZU.unescapeHTML(m[1]);
+					Zotero.debug("Starting collection: "+ collection.name);
+					collection.children = new Array();
+				break;
+				case 'ce': //end a collection
+					if(openItem) {
+						openItem.complete();
+						openItem = false;
+					}
+					
+					var parentCollection = collectionStack.pop();
+					
+					if(parentCollection) {
+						if(collection.children.length) {
+							parentCollection.children.push(collection);
+						}
+						collection = parentCollection;
+					} else if(collection && collection.children.length) {
+						collection.complete();
+						collection = false;
+					}
+				break;
+				case 'd': //add description to bookmark and complete item
+					openItem.abstractNote = ZU.trimInternal(m[1]);
+					openItem.complete();
+					openItem = false;
+				break;
 			}
-			collection = new Zotero.Collection();
-			collection.name = Zotero.Utilities.unescapeHTML(line.match(/<H3[^>]*>([^<]*)<\/H3>/i)[1]);
-			Zotero.debug("Starting collection: "+ collection.name);
-			collection.type = "collection";
-			collection.children = new Array();
-		} else if (line.substr(0,4) == "<DD>") {
-			if (itemIncomplete) item.abstractNote = item.abstractNote ? item.abstractNote + " " + line.substr(4) : line.substr(4);
-			else Zotero.debug("Discarding description line without item: " + line);
-		} else {
-			//Zotero.debug("Discarding line: " + line);
+		} while(firstMatch);
+		
+		line = line.substr(lastIndex);
+		lastIndex = 0;
+	}
+	
+	if(openItem) openItem.complete();
+	if(collection) {
+		var parentCollection;
+		while(parentCollection = collectionStack.pop()) {
+			if(collection.children.length) {
+				parentCollection.children.push(collection);
+			}
+			collection = parentCollection;
+		}
+		if(collection.children.length) {
+			collection.complete();
 		}
 	}
-	if (item && itemIncomplete) item.complete();
-	if (collection) collection.complete();
 }
 
 function convertDate(timestamp){
 	var d = new Date(timestamp*1000);
- 	function pad(n){return n<10 ? '0'+n : n};
- 	return d.getUTCFullYear()+'-'
-      + pad(d.getUTCMonth()+1)+'-'
-      + pad(d.getUTCDate())+' '
-      + pad(d.getUTCHours())+':'
-      + pad(d.getUTCMinutes())+':'
-      + pad(d.getUTCSeconds())+' UTC';
+ 	function pad(n) { return ZU.lpad(n, '0', 2) };
+ 	return ZU.lpad(d.getUTCFullYear(), '0', 4)+'-'
+	  + pad(d.getUTCMonth()+1)+'-'
+	  + pad(d.getUTCDate())+' '
+	  + pad(d.getUTCHours())+':'
+	  + pad(d.getUTCMinutes())+':'
+	  + pad(d.getUTCSeconds());
  }
 
 
