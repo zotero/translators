@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-07-31 13:38:36"
+	"lastUpdated": "2013-07-31 22:24:15"
 }
 
 /*
@@ -56,6 +56,10 @@ function detectWeb(doc, url) {
 
 	if (count == 1) return "journalArticle";
 
+	//some pages don't have a checkbox, but we can follow a link to abstract, which does
+	var a = doc.getElementById('abstract');
+	if(a && a.nodeName.toUpperCase() == 'A') return 'journalArticle';
+	
 	return false;
 }
 
@@ -70,14 +74,25 @@ function senCase(string) {
 }
 
 function doWeb(doc, url) {
-	var post = "S=" + doc.evaluate('.//input[@name="S"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
 	var results = doc.evaluate('.//input[@class="bibrecord-checkbox"]', doc, null, XPathResult.ANY_TYPE, null);
 
 	var count = 0;
 	while (results.iterateNext()) {
 		if (++count > 1) break;
 	}
-
+	
+	//if we're on a page with no checkboxes, we might have to redirect to a different page
+	if(!count) {
+		Z.debug("Could not find any checkboxes. Looking for link to abstract...");
+		var a = doc.getElementById('abstract');
+		if(a && a.href) {
+			ZU.processDocuments(a.href, doWeb);
+			return;
+		}
+		Z.debug("No link found. This will fail.");
+	}
+	
+	var post = "S=" + doc.evaluate('.//input[@name="S"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
 	var record_type = "";
 	if (count > 1) { // If page contains multiple Articles.
 		var items = new Object();
