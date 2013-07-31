@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 5,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-04-18 00:51:47"
+	"lastUpdated": "2013-07-31 13:27:26"
 }
 
 function detectWeb(doc, url) {
@@ -82,7 +82,31 @@ function serializePostData(data) {
 }
 
 function getOutputForm(doc) {
-	return doc.forms['output_form'] || doc.forms['records_form'];
+	return doc.forms['output_form'] || doc.forms['records_form'] || doc.forms['summary_records_form'];
+}
+
+function importISIRecord(text) {
+	var importer = Zotero.loadTranslator("import");
+	importer.setTranslator("594ebe3c-90a0-4830-83bc-9502825a6810");
+	importer.setString(text);
+	importer.setHandler('itemDone', function(obj, item) {
+		if(item.title.toUpperCase() == item.title) {
+			item.title = ZU.capitalizeTitle(item.title, true);
+		}
+		
+		var creator;
+		for(var i=0, n=item.creators.length; i<n; i++) {
+			creator = item.creators[i];
+			if(creator.firstName.toUpperCase() == creator.firstName) {
+				creator.firstName = ZU.capitalizeTitle(creator.firstName, true);
+			}
+			if(creator.lastName.toUpperCase() == creator.lastName) {
+				creator.lastName = ZU.capitalizeTitle(creator.lastName, true);
+			}
+		}
+		item.complete();
+	});
+	importer.translate();
 }
 
 function fetchIds(ids, doc) {
@@ -107,6 +131,13 @@ function fetchIds(ids, doc) {
 	var postUrl = outputForm.action;
 	Z.debug("Posting to " + postUrl);
 	ZU.doPost(postUrl, serializePostData(postData), function (text) {
+		//check if there's an intermediate page
+		if(text.indexOf('FN ') === 0) {
+			importISIRecord(text);
+			return;
+		}
+		
+		//otherwise we have an intermediate page (maybe... it just kind of went away one day)
 		//everything it mostly the same as above except for a few fields
 		var postData2 = {}
 		postData2['locale'] = postData['locale'];
@@ -141,27 +172,7 @@ function fetchIds(ids, doc) {
 
 		var postUrl2 = 'http://ets.webofknowledge.com/ETS/saveDataToRef.do';	//Zotero should take care of proxies
 		ZU.doPost(postUrl2, serializePostData(postData2), function(text) {
-			var importer = Zotero.loadTranslator("import");
-			importer.setTranslator("594ebe3c-90a0-4830-83bc-9502825a6810");
-			importer.setString(text);
-			importer.setHandler('itemDone', function(obj, item) {
-				if(item.title.toUpperCase() == item.title) {
-					item.title = ZU.capitalizeTitle(item.title, true);
-				}
-				
-				var creator;
-				for(var i=0, n=item.creators.length; i<n; i++) {
-					creator = item.creators[i];
-					if(creator.firstName.toUpperCase() == creator.firstName) {
-						creator.firstName = ZU.capitalizeTitle(creator.firstName, true);
-					}
-					if(creator.lastName.toUpperCase() == creator.lastName) {
-						creator.lastName = ZU.capitalizeTitle(creator.lastName, true);
-					}
-				}
-				item.complete();
-			});
-			importer.translate();
+			importISIRecord(text);
 		}, { 'Referer': postUrl });
 
 	}, { 'Referer': doc.location.href });
@@ -180,8 +191,8 @@ function detectImport() {
 					return false;
 				}
 			}
-				}
 		}
+	}
 }
 
 function processTag(item, field, content) {
