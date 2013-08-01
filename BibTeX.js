@@ -1,7 +1,7 @@
 {
 	"translatorID": "9cb70025-a888-4a29-a210-93ec52da40d4",
 	"label": "BibTeX",
-	"creator": "Simon Kornblith and Richard Karnesky",
+	"creator": "Simon Kornblith, Richard Karnesky and Emiliano heyns",
 	"target": "bib",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
@@ -15,7 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-07-03 20:59:44"
+	"lastUpdated": "2013-08-01 10:05:00"
 }
 
 function detectImport() {
