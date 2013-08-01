@@ -9,7 +9,7 @@
 	"priority": 90,
 	"inRepository": true,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-06-03 20:05:00"
+	"lastUpdated": "2013-07-31 20:05:00"
 }
 
 /* CrossRef uses unixref; documentation at http://www.crossref.org/schema/documentation/unixref1.0/unixref.html */
@@ -263,6 +263,12 @@ function processCrossRef(xmlOutput) {
 		item.title = ZU.trimInternal(
 			removeUnsupportedMarkup(innerXML(title))
 		);
+		var subtitle = ZU.xpath(refXML, 'c:titles[1]/c:subtitle[1]', ns)[0];
+		if(subtitle) {
+			item.title += ': ' + ZU.trimInternal(
+				removeUnsupportedMarkup(innerXML(subtitle))
+			);
+		}
 	}
 	//Zotero.debug(JSON.stringify(item, null, 4));
 	
