@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-06-19 10:57:36"
+	"lastUpdated": "2013-08-02 03:45:11"
 }
 
 /*
@@ -316,6 +316,76 @@ function importRDF(doc, url) {
 /**
  * Adds HighWire metadata and completes the item
  */
+function getAuthorFromByline(doc, newItem) {
+	var byline = doc.getElementsByClassName('byline');
+	var actualByline;
+	if(!byline.length) {
+		return;
+	} else if(byline.length == 1) {
+		actualByline = byline[0];
+	} else if(newItem.title) {
+		//find the closest one to the title (in DOM)
+		var actualByline = false;
+		var titleFound = false;
+		var parentLevel = 1;
+		var skipList = [];
+		var titleXpath = './/*[normalize-space(text())="' + newItem.title.replace('"', '\\"') + '"]';
+		while(!titleFound && byline.length != skipList.length && parentLevel < 5) {
+			for(var i=0; i<byline.length; i++) {
+				if(skipList.indexOf(i) !== -1) continue;
+				
+				//skip bylines that contain bylines
+				if(byline[i].getElementsByClassName('byline').length) {
+					skipList.push(i);
+					continue;
+				}
+				
+				var bylineParent = byline[i];
+				for(var j=0; j<parentLevel; j++) {
+					bylineParent = bylineParent.parentElement;
+				}
+				if(!bylineParent) {
+					skipList.push(i);
+					continue;
+				}
+				
+				if(ZU.xpath(bylineParent, titleXpath).length) {
+					titleFound = true;
+					if(actualByline) {
+						//found more than one, bail
+						Z.debug('More than one possible byline found');
+						actualByline = false;
+						break;
+					}
+					actualByline = byline[i];
+				}
+			}
+			
+			parentLevel++;
+		}
+	}
+	
+	if(actualByline) {
+		byline = ZU.trimInternal(actualByline.textContent);
+		Z.debug("Extracting author(s) from byline: " + byline);
+		byline = byline.split(/\bby[:\s]+/i);
+		if(byline.length == 2) {
+			byline = byline[1];
+			var authors = byline.split(/\s*(?:(?:,\s*)?and|,|&)\s*/i);
+			if(authors.length == 2 && authors[0].split(' ').length == 1) {
+				//this was probably last, first
+				newItem.creators.push(ZU.cleanAuthor(fixCase(byline), 'author', true));
+			} else {
+				for(var i=0, n=authors.length; i<n; i++) {
+					if(authors[i].length == 0) continue;
+					
+					newItem.creators.push(ZU.cleanAuthor(fixCase(authors[i]), 'author'))
+				}
+			}
+		}
+	}
+}
+ 
 function addHighwireMetadata(doc, newItem) {
 	// HighWire metadata
 	processFields(doc, newItem, HIGHWIRE_MAPPINGS);
@@ -381,6 +451,9 @@ function addHighwireMetadata(doc, newItem) {
 			}
 		}*/
 	}
+	
+	//if we still don't have a creator, look for byline on the page
+	if(!newItem.creators.length) getAuthorFromByline(doc, newItem);
 
 	//Deal with tags in a string
 	//we might want to look at the citation_keyword metatag later
@@ -508,7 +581,7 @@ var exports = {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://tools.chass.ncsu.edu/open_journal/index.php/acontracorriente/article/view/174",
+		"url": "http://acontracorriente.chass.ncsu.edu/index.php/acontracorriente/article/view/174",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -561,9 +634,9 @@ var testCases = [
 				"abstractNote": "\"La Huelga de los Conventillos\", Buenos Aires, Nueva Pompeya, 1936. Un aporte a los estudios sobre género y clase",
 				"pages": "1-37",
 				"ISSN": "1548-7083",
-				"url": "http://tools.chass.ncsu.edu/open_journal/index.php/acontracorriente/article/view/174",
+				"url": "http://acontracorriente.chass.ncsu.edu/index.php/acontracorriente/article/view/174",
 				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "tools.chass.ncsu.edu"
+				"libraryCatalog": "acontracorriente.chass.ncsu.edu"
 			}
 		]
 	},
@@ -893,6 +966,116 @@ var testCases = [
 				"url": "http://www.hindawi.com/journals/mpe/2013/868174/abs/",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.hindawi.com"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.salon.com/2012/10/10/junot_diaz_my_stories_come_from_trauma/",
+		"items": [
+			{
+				"itemType": "webpage",
+				"creators": [
+					{
+						"firstName": "Gregg",
+						"lastName": "Barrios",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Salon.com",
+					"LA Review of Books",
+					"science fiction",
+					"Junot Diaz",
+					"Dominican Republic",
+					"Drown",
+					"Rafael Trujillo"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "Junot Díaz: My stories come from trauma",
+				"url": "http://www.salon.com/2012/10/10/junot_diaz_my_stories_come_from_trauma/",
+				"abstractNote": "The effervescent author of \"This is How You Lose Her\" explains the darkness coursing through his fiction",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.salon.com",
+				"shortTitle": "Junot Díaz"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.newyorker.com/online/blogs/backissues/2013/06/window-washers-at-the-hearst-tower.html",
+		"items": [
+			{
+				"itemType": "webpage",
+				"creators": [
+					{
+						"firstName": "Joshua",
+						"lastName": "Rothman",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Hearst Tower",
+					"architecture",
+					"archive",
+					"skyscrapers",
+					"window washers",
+					"Hearst Tower",
+					"architecture",
+					"archive",
+					"skyscrapers",
+					"window washers"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "Rescue at the Hearst Tower",
+				"publicationTitle": "The New Yorker",
+				"url": "http://www.newyorker.com/online/blogs/backissues/2013/06/window-washers-at-the-hearst-tower.html",
+				"abstractNote": "Rescuers successfully retrieved two maintenance workers at the Hearst Tower, in Midtown, who had become trapped on their scaffold.",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.newyorker.com"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.chicagotribune.com/news/politics/clout/chi-chicagos-unicorn-new-red-divvy-bicycle-20130801,0,2833828.story",
+		"items": [
+			{
+				"itemType": "webpage",
+				"creators": [
+					{
+						"firstName": "John",
+						"lastName": "Byrne",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "Chicago's 'unicorn': new red Divvy bicycle",
+				"publicationTitle": "chicagotribune.com",
+				"url": "http://www.chicagotribune.com/news/politics/clout/chi-chicagos-unicorn-new-red-divvy-bicycle-20130801,0,2833828.story",
+				"abstractNote": "Mayor  Rahm Emanuel  hopped on the city&rsquo;s shiny, new &ldquo;unicorn&rdquo; Thursday and briefly pedaled around a Near West Side park for the benefit of a few TV cameras.",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.chicagotribune.com",
+				"shortTitle": "Chicago's 'unicorn'"
 			}
 		]
 	}
