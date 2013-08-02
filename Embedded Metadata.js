@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-08-02 03:45:11"
+	"lastUpdated": "2013-08-02 20:52:20"
 }
 
 /*
@@ -370,14 +370,17 @@ function getAuthorFromByline(doc, newItem) {
 		Z.debug("Extracting author(s) from byline: " + byline);
 		byline = byline.split(/\bby[:\s]+/i);
 		if(byline.length == 2) {
-			byline = byline[1];
+			byline = byline[1].replace(/\s*[[(].+?[)\]]\s*/g, '');
 			var authors = byline.split(/\s*(?:(?:,\s*)?and|,|&)\s*/i);
 			if(authors.length == 2 && authors[0].split(' ').length == 1) {
 				//this was probably last, first
 				newItem.creators.push(ZU.cleanAuthor(fixCase(byline), 'author', true));
 			} else {
 				for(var i=0, n=authors.length; i<n; i++) {
-					if(authors[i].length == 0) continue;
+					if(!authors[i].length || authors[i].indexOf('@') !== -1) {
+						//skip some odd splits and twitter handles
+						continue;
+					}
 					
 					newItem.creators.push(ZU.cleanAuthor(fixCase(authors[i]), 'author'))
 				}
@@ -453,6 +456,16 @@ function addHighwireMetadata(doc, newItem) {
 	}
 	
 	//if we still don't have a creator, look for byline on the page
+	//but first, we're desperate for a title
+	if(!newItem.title) newItem.title = doc.title;
+	
+	if(newItem.title && newItem.publicationTitle) {
+		//remove publication title from the end of title
+		var removePubTitleRegex = new RegExp('\\s*\\W\\s*'
+			+ newItem.publicationTitle + '\\s*$','i');
+		newItem.title = newItem.title.replace(removePubTitleRegex, '');
+	}
+	
 	if(!newItem.creators.length) getAuthorFromByline(doc, newItem);
 
 	//Deal with tags in a string
@@ -558,7 +571,6 @@ function addHighwireMetadata(doc, newItem) {
 		newItem.url = getContentText(doc, "citation_abstract_html_url") ||
 			getContentText(doc, "citation_fulltext_html_url") ||
 			doc.location.href;
-	if(!newItem.title) newItem.title = doc.title;
 	//worst case, if this is not called from another translator, use URL for title
 	if(!newItem.title && !Zotero.parentTranslator) newItem.title = newItem.url;
 
