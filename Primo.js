@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-03-17 15:18:12"
+	"lastUpdated": "2013-08-03 13:10:31"
 }
 
 /*
@@ -112,6 +112,8 @@ function doWeb(doc, url) {
 			return "false"
 		}  */
 		Z.debug(text);
+		//remove the ns declarations - we don't need them and they break this
+		text = text.replace(/\<record[^\>]*/, "<record");
 		var parser = new DOMParser();
 		var doc = parser.parseFromString(text, "text/xml");
 		var itemType = ZU.xpathText(doc, '//display/type');
