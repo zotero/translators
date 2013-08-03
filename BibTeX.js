@@ -1,7 +1,7 @@
 {
 	"translatorID": "9cb70025-a888-4a29-a210-93ec52da40d4",
 	"label": "BibTeX",
-	"creator": "Simon Kornblith and Richard Karnesky",
+	"creator": "Simon Kornblith, Richard Karnesky and Emiliano heyns",
 	"target": "bib",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
@@ -15,7 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-07-03 20:59:44"
+	"lastUpdated": "2013-08-01 10:05:00"
 }
 
 function detectImport() {
@@ -138,6 +138,11 @@ var bibtex2zoteroTypeMap = {
  */
 var months = ["jan", "feb", "mar", "apr", "may", "jun",
 			  "jul", "aug", "sep", "oct", "nov", "dec"];
+
+var jabref = {
+	format: null,
+	root: {}
+};
 
 /*
  * new mapping table based on that from Matthias Steffens,
@@ -1887,6 +1892,104 @@ function getFieldValue(read) {
 	return value;
 }
 
+function processComment() {
+	var comment = "";
+	var read;
+	var records, ri;
+	var keys, ki;
+	var record;
+	var collectionPath = [], cpi;
+	var collection, child, ci;
+
+	while(read = Zotero.read(1)) {
+		if (read == "}") { break; }
+		comment += read;
+	}
+
+	if (comment == 'jabref-meta: groupsversion:3;') {
+		jabref.format = 3;
+		return;
+	}
+
+	if (comment.match(/^jabref-meta: groupstree:/)) {
+		if (jabref.format != 3) {
+			Zotero.debug("jabref: fatal: unsupported group format: " + jabref.format);
+			return;
+		}
+		comment = comment.replace(/^jabref-meta: groupstree:/, '').replace(/[\r\n]/gm, '').replace(/\\;/gm, '\t');
+
+		records = comment.split(';')
+		for (ri = 0; ri < records.length; ri++) {
+			keys = records[ri].split('\t');
+			if (keys.length == 1) { continue; }
+
+			record = {'data': keys[0].match(/^([0-9]) ([^:]*):(.*)/)}
+			if (record.data == null) {
+				Zotero.debug("jabref: fatal: unexpected non-match for group " + keys[0]);
+				return;
+			}
+			record.level = parseInt(record.data[1]);
+			record.type = record.data[2]
+			record.name = record.data[3]
+
+			if (isNaN(record.level) || record.level == 0) { continue; } // level 0 is uninteresting
+			if (record.type != 'ExplicitGroup') {
+				Zotero.debug("jabref: group type " + record.type + " is not supported");
+				return;
+			}
+
+			collectionPath = collectionPath.slice(0, record.level - 1).concat([record.name]);
+			Zotero.debug("jabref: locating " + collectionPath.join('/'));
+
+			collection = null;
+			for (var key in jabref.root) {
+				if (jabref.root.hasOwnProperty(key) && key == collectionPath[0]) {
+					collection = jabref.root[key];
+					Zotero.debug("jabref: root " + collection.name + " found");
+					break;
+				}
+			}
+			if (!collection) {
+				collection = new Zotero.Collection();
+				collection.name = collectionPath[0];
+				collection.type = 'collection';
+				collection.children = [];
+				jabref.root[collectionPath[0]] = collection;
+				Zotero.debug("jabref: root " + collection.name + " created");
+			}
+
+			for (cpi = 1; cpi < collectionPath.length; cpi++) {
+				Zotero.debug("jabref: looking for child " + collectionPath[cpi] + " under " + collection.name);
+				child = null;
+				for (ci = 0; ci < collection.children.length; ci++) {
+					if (collection.children[ci].name != collectionPath[cpi]) { continue; }
+					child = collection.children[ci];
+					Zotero.debug("jabref: child " + child.name + " found under " + collection.name);
+					break;
+				}
+				if (!child) {
+					child = new Zotero.Collection();
+					child.name = collectionPath[cpi];
+					child.type = 'collection';
+					child.children = [];
+
+					collection.children.push(child);
+					Zotero.debug("jabref: child " + child.name + " created under " + collection.name);
+				}
+
+				collection = child;
+			}
+
+			for (ki = 1; ki < keys.length; ki++) {
+				key = keys[ki];
+				if (key == '' || key == '0') { continue; }
+				Zotero.debug('jabref: adding ' + key + ' to ' + collection.name);
+				collection.children.push({type: 'item', id: key});
+			}
+		}
+	}
+}
+
 function beginRecord(type, closeChar) {
 	type = Zotero.Utilities.trimInternal(type.toLowerCase());
 	if(type != "string") {
@@ -1944,6 +2047,9 @@ function beginRecord(type, closeChar) {
 			}
 			field = "";
 		} else if(read == ",") {						// commas reset
+			if (item.itemID == null) {
+				item.itemID = field; // itemID = citekey
+			}
 			field = "";
 		} else if(read == closeChar) {
 			if(item) {
@@ -1966,6 +2072,7 @@ function doImport() {
 			type = "";
 		} else if(type !== false) {
 			if(type == "comment") {
+				processComment();
 				type = false;
 			} else if(read == "{") {		// possible open character
 				beginRecord(type, "}");
@@ -1977,6 +2084,10 @@ function doImport() {
 				type += read;
 			}
 		}
+	}
+
+	for (var key in jabref.root) {
+		if (jabref.root.hasOwnProperty(key)) { jabref.root[key].complete(); }
 	}
 }
 
