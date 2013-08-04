@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-08-02 20:52:20"
+	"lastUpdated": "2013-08-04 07:01:16"
 }
 
 /*
@@ -175,11 +175,13 @@ function processFields(doc, item, fieldMap, strict) {
 
 function completeItem(doc, newItem) {
 	addHighwireMetadata(doc, newItem);
+	addLowQualityMetadata(doc, newItem);
+	finalDataCleanup(doc, newItem);
 
 	if(CUSTOM_FIELD_MAPPINGS) {
 		processFields(doc, newItem, CUSTOM_FIELD_MAPPINGS, true);
 	}
-
+	
 	newItem.complete();
 }
 
@@ -316,79 +318,6 @@ function importRDF(doc, url) {
 /**
  * Adds HighWire metadata and completes the item
  */
-function getAuthorFromByline(doc, newItem) {
-	var byline = doc.getElementsByClassName('byline');
-	var actualByline;
-	if(!byline.length) {
-		return;
-	} else if(byline.length == 1) {
-		actualByline = byline[0];
-	} else if(newItem.title) {
-		//find the closest one to the title (in DOM)
-		var actualByline = false;
-		var titleFound = false;
-		var parentLevel = 1;
-		var skipList = [];
-		var titleXpath = './/*[normalize-space(text())="' + newItem.title.replace('"', '\\"') + '"]';
-		while(!titleFound && byline.length != skipList.length && parentLevel < 5) {
-			for(var i=0; i<byline.length; i++) {
-				if(skipList.indexOf(i) !== -1) continue;
-				
-				//skip bylines that contain bylines
-				if(byline[i].getElementsByClassName('byline').length) {
-					skipList.push(i);
-					continue;
-				}
-				
-				var bylineParent = byline[i];
-				for(var j=0; j<parentLevel; j++) {
-					bylineParent = bylineParent.parentElement;
-				}
-				if(!bylineParent) {
-					skipList.push(i);
-					continue;
-				}
-				
-				if(ZU.xpath(bylineParent, titleXpath).length) {
-					titleFound = true;
-					if(actualByline) {
-						//found more than one, bail
-						Z.debug('More than one possible byline found');
-						actualByline = false;
-						break;
-					}
-					actualByline = byline[i];
-				}
-			}
-			
-			parentLevel++;
-		}
-	}
-	
-	if(actualByline) {
-		byline = ZU.trimInternal(actualByline.textContent);
-		Z.debug("Extracting author(s) from byline: " + byline);
-		byline = byline.split(/\bby[:\s]+/i);
-		if(byline.length == 2) {
-			byline = byline[1].replace(/\s*[[(].+?[)\]]\s*/g, '');
-			var authors = byline.split(/\s*(?:(?:,\s*)?and|,|&)\s*/i);
-			if(authors.length == 2 && authors[0].split(' ').length == 1) {
-				//this was probably last, first
-				newItem.creators.push(ZU.cleanAuthor(fixCase(byline), 'author', true));
-			} else {
-				for(var i=0, n=authors.length; i<n; i++) {
-					if(!authors[i].length || authors[i].indexOf('@') !== -1) {
-						//skip some odd splits and twitter handles
-						continue;
-					}
-					
-					newItem.creators.push(ZU.cleanAuthor(fixCase(authors[i]), 'author'))
-				}
-			}
-		}
-	}
-}
- 
 function addHighwireMetadata(doc, newItem) {
 	// HighWire metadata
 	processFields(doc, newItem, HIGHWIRE_MAPPINGS);
@@ -454,63 +383,12 @@ function addHighwireMetadata(doc, newItem) {
 			}
 		}*/
 	}
-	
-	//if we still don't have a creator, look for byline on the page
-	//but first, we're desperate for a title
-	if(!newItem.title) newItem.title = doc.title;
-	
-	if(newItem.title && newItem.publicationTitle) {
-		//remove publication title from the end of title
-		var removePubTitleRegex = new RegExp('\\s*\\W\\s*'
-			+ newItem.publicationTitle + '\\s*$','i');
-		newItem.title = newItem.title.replace(removePubTitleRegex, '');
-	}
-	
-	if(!newItem.creators.length) getAuthorFromByline(doc, newItem);
 
 	//Deal with tags in a string
 	//we might want to look at the citation_keyword metatag later
 	if(!newItem.tags || !newItem.tags.length)
 		 newItem.tags = getContent(doc, 'citation_keywords')
 		 					.map(function(t) { return t.textContent; });
-
-	//fall back to "keywords"
-	if(!newItem.tags.length)
-		 newItem.tags = ZU.xpath(doc, '//x:meta[@name="keywords"]/@content', namespaces)
-		 					.map(function(t) { return t.textContent; });
-
-	/**If we already have tags - run through them one by one,
-	 * split where ncessary and concat them.
-	 * This  will deal with multiple tags, some of them comma delimited,
-	 * some semicolon, some individual
-	 */
-	if (newItem.tags.length) {
-		var tags = [];
-		for (var i in newItem.tags) {
-			newItem.tags[i] = newItem.tags[i].trim();
-			if (newItem.tags[i].indexOf(';') == -1) {
-				//split by comma, since there are no semicolons
-				tags = tags.concat( newItem.tags[i].split(/\s*,\s*/) );
-			} else {
-				tags = tags.concat( newItem.tags[i].split(/\s*;\s*/) );
-			}
-		}
-		for (var i=0; i<tags.length; i++) {
-			if (tags[i] === "") tags.splice(i, 1);
-		}
-		newItem.tags = tags;
-	}
-
-	//We can try getting abstract from 'description'
-	if(!newItem.abstractNote) {
-		newItem.abstractNote = ZU.trimInternal(
-			ZU.xpathText(doc, '//x:meta[@name="description"]/@content', namespaces) || '');
-	}
-
-	//Cleanup DOI
-	if (newItem.DOI){
-		newItem.DOI =newItem.DOI.replace(/^doi:\s*/, "");
-	}
 
 	//sometimes RDF has more info, let's not drop it
 	var rdfPages = (newItem.pages)? newItem.pages.split(/\s*-\s*/) : new Array();
@@ -567,18 +445,190 @@ function addHighwireMetadata(doc, newItem) {
 	}
 
 	// Other last chances
-	if(!newItem.url)
+	if(!newItem.url) {
 		newItem.url = getContentText(doc, "citation_abstract_html_url") ||
-			getContentText(doc, "citation_fulltext_html_url") ||
-			doc.location.href;
-	//worst case, if this is not called from another translator, use URL for title
-	if(!newItem.title && !Zotero.parentTranslator) newItem.title = newItem.url;
+			getContentText(doc, "citation_fulltext_html_url");
+	}
+}
 
+function addLowQualityMetadata(doc, newItem) {
+	//if we don't have a creator, look for byline on the page
+	//but first, we're desperate for a title
+	if(!newItem.title) {
+		Z.debug("Title was not found in meta tags. Using document title as title");
+		newItem.title = doc.title;
+	}
+	
+	if(newItem.title) {
+		newItem.title = newItem.title.replace(/\s+/g, ' '); //make sure all spaces are \u0020
+		if(newItem.publicationTitle) {
+			//remove publication title from the end of title
+			var removePubTitleRegex = new RegExp('\\s*\\W\\s*'
+				+ newItem.publicationTitle + '\\s*$','i');
+			newItem.title = newItem.title.replace(removePubTitleRegex, '');
+		}
+	}
+	
+	if(!newItem.creators.length) getAuthorFromByline(doc, newItem);
+	
+	//fall back to "keywords"
+	if(!newItem.tags.length) {
+		 newItem.tags = ZU.xpath(doc, '//x:meta[@name="keywords"]/@content', namespaces)
+		 	.map(function(t) { return t.textContent; });
+	}
+	
+	//We can try getting abstract from 'description'
+	if(!newItem.abstractNote) {
+		newItem.abstractNote = ZU.trimInternal(
+			ZU.xpathText(doc, '//x:meta[@name="description"]/@content', namespaces) || '');
+	}
+	
+	if(!newItem.url) {
+		newItem.url = doc.location.href;
+	}
+	
+	newItem.libraryCatalog = doc.location.host;
+	
 	// add access date
 	newItem.accessDate = 'CURRENT_TIMESTAMP';
+}
+
+function getAuthorFromByline(doc, newItem) {
+	var bylineClasses = ['byline', 'vcard'];
+	Z.debug("Looking for authors in " + bylineClasses.join(', '));
+	var bylines = [], byline;
+	for(var i=0; i<bylineClasses.length; i++) {
+		byline = doc.getElementsByClassName(bylineClasses[i]);
+		Z.debug("Found " + byline.length + " elements with '" + bylineClasses[i] + "' class");
+		for(var j=0; j<byline.length; j++) {
+			bylines.push(byline[j]);
+		}
+	}
+	
+	var actualByline;
+	if(!bylines.length) {
+		Z.debug("No byline found.");
+		return;
+	} else if(bylines.length == 1) {
+		actualByline = bylines[0];
+	} else if(newItem.title) {
+		Z.debug(bylines.length + " bylines found. Locating the one closest to title.")
+		//find the closest one to the title (in DOM)
+		actualByline = false;
+		var parentLevel = 1;
+		var skipList = [];
+		var titleXPath = './/*[normalize-space(translate(text(),"\u00a0"," "))="'
+			+ newItem.title.replace('"', '\\"') + '"]';
+		Z.debug("Looking for title using: " + titleXPath);
+		while(!actualByline && bylines.length != skipList.length && parentLevel < 5) {
+			Z.debug("Parent level " + parentLevel);
+			for(var i=0; i<bylines.length; i++) {
+				if(skipList.indexOf(i) !== -1) continue;
+				
+				if(parentLevel == 1) {
+					//skip bylines that contain bylines
+					var containsBylines = false;
+					for(var j=0;!containsBylines && j<bylineClasses.length; j++) {
+						containsBylines = bylines[i].getElementsByClassName(bylineClasses[j]).length;
+					}
+					if(containsBylines) {
+						Z.debug("Skipping potential byline " + i + ". Contains other bylines");
+						skipList.push(i);
+						continue;
+					}
+				}
+				
+				var bylineParent = bylines[i];
+				for(var j=0; j<parentLevel; j++) {
+					bylineParent = bylineParent.parentElement;
+				}
+				if(!bylineParent) {
+					Z.debug("Skipping potential byline " + i + ". Nowhere near title");
+					skipList.push(i);
+					continue;
+				}
+				
+				if(ZU.xpath(bylineParent, titleXPath).length) {
+					if(actualByline) {
+						//found more than one, bail
+						Z.debug('More than one possible byline found. Will not proceed');
+						return;
+					}
+					actualByline = bylines[i];
+				}
+			}
+			
+			parentLevel++;
+		}
+	}
+	
+	if(actualByline) {
+		byline = ZU.trimInternal(actualByline.textContent);
+		Z.debug("Extracting author(s) from byline: " + byline);
+		byline = byline.split(/\bby[:\s]+/i);
+		byline = byline[byline.length-1].replace(/\s*[[(].+?[)\]]\s*/g, '');
+		var authors = byline.split(/\s*(?:(?:,\s*)?and|,|&)\s*/i);
+		if(authors.length == 2 && authors[0].split(' ').length == 1) {
+			//this was probably last, first
+			newItem.creators.push(ZU.cleanAuthor(fixCase(byline), 'author', true));
+		} else {
+			for(var i=0, n=authors.length; i<n; i++) {
+				if(!authors[i].length || authors[i].indexOf('@') !== -1) {
+					//skip some odd splits and twitter handles
+					continue;
+				}
+				
+				if(authors[i].split(/\s/).length == 1) {
+					//probably corporate author
+					newItem.creators.push({
+						lastName: authors[i],
+						creatorType: 'author',
+						fieldMode: 1
+					});
+				} else {
+					newItem.creators.push(
+						ZU.cleanAuthor(fixCase(authors[i]), 'author'));
+				}
+			}
+		}
+	} else {
+		Z.debug("No reliable byline found.");
+	}
+}
+
+function finalDataCleanup(doc, newItem) {
+	/**If we already have tags - run through them one by one,
+	 * split where ncessary and concat them.
+	 * This  will deal with multiple tags, some of them comma delimited,
+	 * some semicolon, some individual
+	 */
+	if (newItem.tags.length) {
+		var tags = [];
+		for (var i in newItem.tags) {
+			newItem.tags[i] = newItem.tags[i].trim();
+			if (newItem.tags[i].indexOf(';') == -1) {
+				//split by comma, since there are no semicolons
+				tags = tags.concat( newItem.tags[i].split(/\s*,\s*/) );
+			} else {
+				tags = tags.concat( newItem.tags[i].split(/\s*;\s*/) );
+			}
+		}
+		for (var i=0; i<tags.length; i++) {
+			if (tags[i] === "") tags.splice(i, 1);
+		}
+		newItem.tags = tags;
+	}
+	
+	//Cleanup DOI
+	if (newItem.DOI){
+		newItem.DOI =newItem.DOI.replace(/^doi:\s*/, "");
+	}
+	
 	//remove itemID - comes from RDF translator, doesn't make any sense for online data
 	newItem.itemID = "";
-	newItem.libraryCatalog = doc.location.host;
+	
+	//worst case, if this is not called from another translator, use URL for title
+	if(!newItem.title && !Zotero.parentTranslator) newItem.title = newItem.url;
 }
 
 var exports = {
