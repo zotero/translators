@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-06-06 05:39:15"
+	"lastUpdated": "2013-08-04 20:37:57"
 }
 
 function detectWeb(doc, url) {
@@ -151,8 +151,10 @@ function downloadFunction(text, url, prefs) {
 			Z.debug("Fetching PDF from " + pdf);
 
 			ZU.doGet(pdf, function (text) {
+				Z.debug(text)
 					var realpdf = text.match(/<iframe\s+id="pdfIframe"[^>]+\bsrc="([^"]+)"/i)
-						|| text.match(/<embed\s+id="pdfEmbed"[^>]+\bsrc="([^"]+)"/i);	//this is probably no longer used
+						|| text.match(/<embed\s+id="pdfEmbed"[^>]+\bsrc="([^"]+)"/i) || text.match(/<input\s+id="pdfUrl".+value="([^"]+)/i);	//this is probably no longer used
+					Z.debug(realpdf)
 					if(realpdf) {
 						realpdf = realpdf[1].replace(/&amp;/g, "&")	//that's & amp; (Scaffold parses it)
 											.replace(/#.*$/,'');
