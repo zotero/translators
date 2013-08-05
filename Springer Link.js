@@ -2,14 +2,14 @@
 	"translatorID": "d6c6210a-297c-4b2c-8c43-48cb503cc49e",
 	"label": "Springer Link",
 	"creator": "Aurimas Vinckevicius",
-	"target": "https?://link\\.springer\\.com/(search\\?|(article|chapter|book|referenceworkentry|protocol|journal|referencework)/.+)",
+	"target": "https?://link\\.springer\\.com/(search\\?|search/page|(article|chapter|book|referenceworkentry|protocol|journal|referencework)/.+)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-05-23 20:07:42"
+	"lastUpdated": "2013-08-05 10:25:42"
 }
 
 function detectWeb(doc, url) {
@@ -480,6 +480,11 @@ var testCases = [
 				"shortTitle": "Tide-induced head fluctuations in a coastal aquifer"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://link.springer.com/search/page/1?query=zotero",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
