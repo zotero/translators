@@ -2,14 +2,14 @@
 	"translatorID": "d0b1914a-11f1-4dd7-8557-b32fe8a3dd47",
 	"label": "EBSCOhost",
 	"creator": "Simon Kornblith, Michael Berkowitz, Josh Geller",
-	"target": "^https?://[^/]+/(?:eds|bsi|ehost)/(?:results|detail|folder)",
+	"target": "^https?://[^/]+/(?:eds|bsi|ehost)/(?:results|detail|folder|pdfviewer)",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-08-04 20:37:57"
+	"lastUpdated": "2013-08-06 03:19:34"
 }
 
 function detectWeb(doc, url) {
@@ -19,8 +19,8 @@ function detectWeb(doc, url) {
 		return "multiple";
 	}
 
-	var persistentLink = ZU.xpath(doc, '//a[@class="permalink-link"]');
-	if(persistentLink.length) {
+	var persistentLink = doc.getElementsByClassName("permalink-link");
+	if(persistentLink.length && persistentLink[0].nodeName.toUpperCase() == 'A') {
 		return "journalArticle";
 	}
 }
@@ -143,27 +143,33 @@ function downloadFunction(text, url, prefs) {
 				item.url = undefined;
 			}
 		}
-		if(prefs.fetchPDF) {
+		
+		if(prefs.pdfURL) {
+			item.attachments.push({
+					url: prefs.pdfURL,
+					title: "EBSCO Full Text",
+					mimeType:"application/pdf"
+			});
+			item.complete();
+		} else if(prefs.fetchPDF) {
 			var arguments = urlToArgs(url);
 			var pdf = "/ehost/pdfviewer/pdfviewer?"
 				+ "sid=" + arguments["sid"]
 				+ "&vid=" + arguments["vid"];
 			Z.debug("Fetching PDF from " + pdf);
 
-			ZU.doGet(pdf, function (text) {
-				Z.debug(text)
-					var realpdf = text.match(/<iframe\s+id="pdfIframe"[^>]+\bsrc="([^"]+)"/i)
-						|| text.match(/<embed\s+id="pdfEmbed"[^>]+\bsrc="([^"]+)"/i) || text.match(/<input\s+id="pdfUrl".+value="([^"]+)/i);	//this is probably no longer used
-					Z.debug(realpdf)
+			ZU.processDocuments(pdf,
+				function(pdfDoc) {
+					var realpdf = findPdfUrl(pdfDoc);
 					if(realpdf) {
+						/* Not sure if this is still necessary. Doesn't seem to be.
 						realpdf = realpdf[1].replace(/&amp;/g, "&")	//that's & amp; (Scaffold parses it)
 											.replace(/#.*$/,'');
-		
 						if(an) {
 							realpdf = realpdf.replace(/K=\d+/,"K="+an);
 						} else {
 							Z.debug("Don't have an accession number. PDF might fail.");
-						}
+						}*/
 
 						item.attachments.push({
 								url:realpdf,
@@ -171,14 +177,13 @@ function downloadFunction(text, url, prefs) {
 								mimeType:"application/pdf"
 						});
 					} else {
-						Z.debug("Could not detect embedded pdf.");
-						var m = text.match(/<iframe[^>]+>/i) || text.match(/<embed[^>]+>/i);
-						if(m) Z.debug(m[0]);
+						Z.debug("Could not find a reference to PDF.");
 					}
 				},
 				function () {
 					Z.debug("PDF retrieval done.");
-					item.complete(); }
+					item.complete();
+				}
 			);
 		} else {
 			Z.debug("Not attempting to retrieve PDF.");
@@ -259,6 +264,24 @@ function urlToArgs(url) {
 
 	return arguments;
 }
+
+//given a pdfviewer page, extracts the PDF url
+function findPdfUrl(pdfDoc) {
+	var el;
+	var realpdf = (el = pdfDoc.getElementById('downloadLink')) && el.href; //link
+	if(!realpdf) {
+		//input
+		realpdf = (el = pdfDoc.getElementById('pdfUrl')) && el.value;
+	}
+	if(!realpdf) {
+		realpdf = (el = pdfDoc.getElementById('pdfIframe') //iframe
+				|| pdfDoc.getElementById('pdfEmbed')) //embed
+			&& el.src;
+	}
+	
+	return realpdf;
+}
+
 //var counter;
 function doWeb(doc, url) {
 //counter = 0;
@@ -317,12 +340,17 @@ function doDelivery(doc, itemInfo) {
 	}
 
 	//some preferences for later
-	var prefs = {}
+	var prefs = {};
 	//figure out if there's a PDF available
 	//if PDFs stop downloading, might want to remove this
 	if(!itemInfo)	{
-		prefs.fetchPDF = !(ZU.xpath(doc, '//div[@id="column1"]//ul[1]/li').length	//check for left-side column
-			&& !ZU.xpath(doc, '//a[contains(@class,"pdf-ft")]').length);	//check if there's a PDF there
+		if(doc.location.href.indexOf('/pdfviewer/') != -1) {
+			prefs.pdfURL = findPdfUrl(doc);
+			prefs.fetchPDF = !!prefs.pdfURL;
+		} else {
+			prefs.fetchPDF = !(ZU.xpath(doc, '//div[@id="column1"]//ul[1]/li').length	//check for left-side column
+					&& !ZU.xpath(doc, '//a[contains(@class,"pdf-ft")]').length);	//check if there's a PDF there
+		}
 		prefs.hasFulltext = !(ZU.xpath(doc, '//div[@id="column1"]//ul[1]/li').length	//check for left-side column
 			&& !ZU.xpath(doc, '//a[contains(@class,"pdf-ft") or contains(@class, "html-ft")]').length);
 	} else {
@@ -330,8 +358,7 @@ function doDelivery(doc, itemInfo) {
 		prefs.hasFulltext = itemInfo.hasFulltext;
 		prefs.itemType = ebscoToZoteroItemType(itemInfo.itemType);
 	}
-	//Z.debug(prefs.hasFulltext)
-	//Z.debug(prefs.fetchPDF)
+	//Z.debug(prefs);
 
 	var postURL = ZU.xpathText(doc, '//form[@id="aspnetForm"]/@action');
 	var arguments = urlToArgs(postURL);
