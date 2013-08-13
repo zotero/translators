@@ -2053,7 +2053,11 @@ function beginRecord(type, closeChar) {
 			field = "";
 		} else if(read == closeChar) {
 			if(item) {
-				if(!item.extra) item.extra = '';
+				if(item.extra) {
+          item.extra += "\n";
+        } else {
+          item.extra = '';
+        }
         item.extra += JSON.stringify({bibtexCiteKey: item.itemID})
 
 				item.complete();
