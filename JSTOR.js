@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-06-18 13:27:53"
+	"lastUpdated": "2013-08-13 01:34:12"
 }
 
 function detectWeb(doc, url) {
@@ -93,11 +93,15 @@ function doWeb(doc, url) {
 		while (currTitleElmt = allTitlesElmts.iterateNext()) {
 			var title = currTitleElmt.textContent.trim();
 			// Sometimes JSTOR uses DOIs as JID; here we exclude "?" characters, since it's a URL
-			if (/(?:pss|stable)\/(10\.\d+\/[^?]+)(?:\?.*)?/.test(currTitleElmt.href))
+			if (/(?:pss|stable)\/(10\.\d+\/[^?]+)(?:\?.*)?/.test(currTitleElmt.href)) {
 				var jid = RegExp.$1;
-			else if (currTitleElmt.href) var jid = currTitleElmt.href.match(/(?:stable|pss)\/([a-z]*?\d+)/)[1];
-			//for items like Reviews without linked titles
-			else var jid = ZU.xpathText(currTitleElmt, './a[contains(@id, "previewResult")]/@href').match(/doi=10.2307\%2F(\d+)/)[1];
+			} else if (currTitleElmt.href) {
+				var jid = currTitleElmt.href.match(/(?:stable|pss)\/([a-z]*?\d+)/)[1];
+			} else {
+				//for items like Reviews without linked titles
+				var jid = ZU.xpathText(currTitleElmt, './a[contains(@id, "previewResult")]/@href').match(/doi=10.2307\%2F(\d+)/)[1];
+			}
+			
 			if (jid) {
 				availableItems[jid] = title;
 			}
@@ -118,7 +122,13 @@ function doWeb(doc, url) {
 	
 	}		
 }
-	
+
+function getTitleFromPage(doc) {
+	return ZU.xpathText(doc, '(//div[@class="bd"]/div[@class="rw"])[1]')
+		|| ZU.xpathText(doc, '//div[@class="mainCite"]/h3')
+		|| ZU.xpathText(doc, '//div[@class="bd"]/h2');
+}
+
 function setupSets(allJids, host){
 	var sets = [];
 	for each(var jid in allJids) {
@@ -180,18 +190,25 @@ function first(set, next) {
 				item.ISSN = matches[1] + '-' + matches[2];
 			}
 			//reviews don't have titles in RIS - we get them from the item page
-			if (!item.title && item.url){
-				ZU.processDocuments(item.url, function(doc){
-				if (ZU.xpathText(doc, '//div[@class="bd"]/div[@class="rw"]')){
-					item.title = "Review of: " + ZU.xpathText(doc, '//div[@class="bd"]/div[@class="rw"]')
+			if (!item.title){
+				if(item.url) {
+					ZU.processDocuments(item.url, function(doc){
+						item.title = getTitleFromPage(doc);
+						if(item.title) {
+							item.title = "Review of " + item.title;
+						} else {
+							item.title = "Review";
+						}
+						
+						set.item = item;
+						next();
+					})
+				} else {
+					item.title = "Review";
+					set.item = item;
+					next();
 				}
-				//this is almost certainly not necessary, but let's be safe
-				else item.title = ZU.xpathText(doc, '//div[@class="bd"]/h2')
-				set.item = item;
-				next();
-				})
-			}
-			else{
+			} else {
 				set.item = item;
 				next();
 			}
@@ -400,21 +417,18 @@ var testCases = [
 					}
 				],
 				"journalAbbreviation": "Russian Review",
-				"volume": "57",
 				"issue": "2",
-				"publisher": "Wiley on behalf of The Editors and Board of Trustees of the Russian Review",
 				"ISSN": "0036-0341",
 				"url": "http://www.jstor.org/stable/131548",
 				"DOI": "10.2307/131548",
-				"date": "April 1, 1998",
-				"pages": "310-311",
 				"rights": "Copyright © 1998 The Editors and Board of Trustees of the Russian Review",
 				"extra": "ArticleType: book-review / Full publication date: Apr., 1998 / Copyright © 1998 The Editors and Board of Trustees of the Russian Review",
-				"publicationTitle": "Russian Review",
-				"title": "Review of: Soviet Criminal Justice under Stalin by Peter H. Solomon",
 				"libraryCatalog": "JSTOR",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Review of"
+				"volume": "57",
+				"date": "April 1, 1998",
+				"pages": "310-311",
+				"publicationTitle": "Russian Review",
+				"title": "Review of Soviet Criminal Justice under Stalin by Peter H. Solomon"
 			}
 		]
 	},
