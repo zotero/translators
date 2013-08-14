@@ -2053,7 +2053,13 @@ function beginRecord(type, closeChar) {
 			field = "";
 		} else if(read == closeChar) {
 			if(item) {
-				if(item.extra) item.extra = item.extra.substr(1); // chop \n
+				if(item.extra) {
+          item.extra += "\n";
+        } else {
+          item.extra = '';
+        }
+        item.extra += JSON.stringify({bibtexCiteKey: item.itemID})
+
 				item.complete();
 			}
 			return;
@@ -2263,8 +2269,33 @@ var citeKeyConversions = {
 }
 
 
+var trailingInfoRe = /\s*{[\S\s]*?}\s*?$/;
+function embeddedCiteKey(item, citekeys) {
+  if (!item.extra) { return null; }
+
+  var m = trailingInfoRe.exec(item.extra);
+  if (!m) { return null; }
+
+  var trailingInfo = m[0];
+
+  try {
+    var info = JSON.parse(trailingInfo);
+  } catch(e) {
+    Zotero.debug("Failed to parse trailing info block: " + trailingInfo);
+    return null;
+  }
+
+  citekey = info['bibtexCiteKey'];
+  if (!citekey || citekey.trim() == '') { return null; }
+  item.extra = item.extra.replace(trailingInfo, '');
+  return citekey;
+}
+
 function buildCiteKey (item,citekeys) {
-	var basekey = "";
+	var basekey = embeddedCiteKey(item, citekeys);
+
+  if (!basekey) {
+    basekey = "";
 	var counter = 0;
 	citeKeyFormatRemaining = citeKeyFormat;
 	while (citeKeyConversionsRe.test(citeKeyFormatRemaining)) {
@@ -2302,6 +2333,8 @@ function buildCiteKey (item,citekeys) {
 
 	basekey = tidyAccents(basekey);
 	basekey = basekey.replace(citeKeyCleanRe, "");
+  }
+
 	var citekey = basekey;
 	var i = 0;
 	while(citekeys[citekey]) {
