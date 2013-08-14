@@ -2058,7 +2058,7 @@ function beginRecord(type, closeChar) {
         } else {
           item.extra = '';
         }
-        item.extra += JSON.stringify({bibtexCiteKey: item.itemID})
+        item.extra += 'bibtex: ' + item.itemID;
 
 				item.complete();
 			}
@@ -2269,26 +2269,15 @@ var citeKeyConversions = {
 }
 
 
-var trailingInfoRe = /\s*{[\S\s]*?}\s*?$/;
+var bibtexKey = /bibtex:\s*([^\s\r\n]+)/;
 function embeddedCiteKey(item, citekeys) {
   if (!item.extra) { return null; }
 
-  var m = trailingInfoRe.exec(item.extra);
+  var m = bibtexKey.exec(item.extra);
   if (!m) { return null; }
 
-  var trailingInfo = m[0];
-
-  try {
-    var info = JSON.parse(trailingInfo);
-  } catch(e) {
-    Zotero.debug("Failed to parse trailing info block: " + trailingInfo);
-    return null;
-  }
-
-  citekey = info['bibtexCiteKey'];
-  if (!citekey || citekey.trim() == '') { return null; }
-  item.extra = item.extra.replace(trailingInfo, '');
-  return citekey;
+  item.extra = item.extra.replace(m[0], '');
+  return m[1];
 }
 
 function buildCiteKey (item,citekeys) {
