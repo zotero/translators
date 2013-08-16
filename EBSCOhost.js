@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-08-06 03:19:34"
+	"lastUpdated": "2013-08-16 21:38:06"
 }
 
 function detectWeb(doc, url) {
@@ -70,6 +70,9 @@ function downloadFunction(text, url, prefs) {
 	translator.setHandler("itemDone", function(obj, item) {
 		/* Fix capitalization issues */
 		//title
+		if(!item.title && prefs.itemTitle) {
+			item.title = prefs.itemTitle;
+		}
 		if(item.title) {
 			// Strip final period from title if present
 			item.title = item.title.replace(/([^\.])\.\s*$/,'$1');
@@ -217,12 +220,13 @@ function getResultList(doc, items, itemInfo) {
 			folderData: folderData[0].textContent,
 			//let's also store item type
 			itemType: ZU.xpathText(results[i],
-						'.//div[@class="pubtype"]/span/@class'),
+				'.//div[@class="pubtype"]/span/@class'),
+			itemTitle: ZU.xpathText(results[i], './/span[@class="title-link-wrapper"]/a'),
 			//check if PDF is available
 			fetchPDF: ZU.xpath(results[i], './/span[@class="record-formats"]\
-										/a[contains(@class,"pdf-ft")]').length,
+				/a[contains(@class,"pdf-ft")]').length,
 			hasFulltext: ZU.xpath(results[i], './/span[@class="record-formats"]\
-										/a[contains(@class,"pdf-ft") or contains(@class, "html-ft")]').length
+				/a[contains(@class,"pdf-ft") or contains(@class, "html-ft")]').length
 		};
 	}
 
@@ -353,10 +357,17 @@ function doDelivery(doc, itemInfo) {
 		}
 		prefs.hasFulltext = !(ZU.xpath(doc, '//div[@id="column1"]//ul[1]/li').length	//check for left-side column
 			&& !ZU.xpath(doc, '//a[contains(@class,"pdf-ft") or contains(@class, "html-ft")]').length);
+		prefs.itemTitle = ZU.xpathText(doc, '//dd[contains(@class, "citation-title")]/a/span')
+			|| ZU.xpathText(doc, '//h2[@id="selectionTitle"]');
 	} else {
 		prefs.fetchPDF = itemInfo.fetchPDF;
 		prefs.hasFulltext = itemInfo.hasFulltext;
 		prefs.itemType = ebscoToZoteroItemType(itemInfo.itemType);
+		prefs.itemTitle = itemInfo.itemTitle;
+	}
+	
+	if(prefs.itemTitle) {
+		prefs.itemTitle = ZU.trimInternal(prefs.itemTitle).replace(/([^.])\.$/, '$1');
 	}
 	//Z.debug(prefs);
 
