@@ -11,7 +11,7 @@
 	"configOptions":{"getCollections":"true", "dataMode":"rdf/xml"},
 	"displayOptions":{"exportNotes":true},
 	"inRepository":false,
-	"lastUpdated":"2013-01-10 02:12:42"
+	"lastUpdated":"2013-08-19 21:29:44"
 }
 
 var n = {
@@ -487,7 +487,7 @@ Type.prototype.addNodeRelations = function(nodes) {
 			
 			// add relation to parent
 			for(var j = i-1; j>1; j--) {
-				if(nodes[j] != nodes[i]) {
+				if(Zotero.RDF.getResourceURI(nodes[j]) != Zotero.RDF.getResourceURI(nodes[i])) {
 					Zotero.RDF.addStatement(nodes[j], predicate, nodes[i], false);
 					break;
 				}
