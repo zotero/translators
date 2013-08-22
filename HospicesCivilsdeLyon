@@ -1,0 +1,105 @@
+{
+	"translatorID": "6618c8fb-5419-403d-90ab-1836ccc74905",
+	"label": "HospicesCivilsdeLyon",
+	"creator": "Sebastian Karcher, Hospices Civils de Lyon",
+	"target": "(.chu-lyon|.cclin-france|.hcl)[^/]*.fr[^/]*/cgi-bin/koha/(opac-(detail|MARCdetail|search|shelves)|catalogue)",//It's dosen't work for admin and shelves
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 25,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsib",
+	"lastUpdated": "2013-08-20 17:31:24"
+}
+
+//Translator pour les sites http://rbh.chu-lyon.fr | http://www.nosobase-biblio.cclin-france.fr/ | http://documentationcentrale.chu-lyon.progilone.fr/
+//Basé sur le //Based on the Translator "Library Catalog (Koha)" ID: 8e66aa6d-5b2a-4b44-b384-a838e23b8538 par Sebastian Karcher
+//Contact: Documentation Centrale des Hospices Civils de Lyon sur sa.documentationcentrale@chu-lyon.fr
+
+//Correspondance des types //Match Types
+var typeMap = {
+	' [Article de Revue]': 'journalArticle',
+	' [Texte législatif]': 'case',
+	' [Thèse]': 'thesis',
+	' [Chapitre d\'ouvrage]': 'bookSection',
+	' [Multimédia]': 'film',
+	' [Rapport]': 'report',
+	' [Mémoire]': 'thesis',
+	' [Article de Presse]': 'newspaperArticle',
+	' [Recommandation]': 'conferencePaper',
+	' [Acte de congrès]': 'conferencePaper',
+	' [Affiche]': 'artwork',
+};
+
+//Détection de la présence de document multiple ou unique //Document detection: multiple or single
+function detectWeb(doc, url) {
+	if (url.match(/\/opac-search\.pl\?/)){return "multiple";}
+	if (url.match(/\/opac-detail.pl\?/)) {
+		var type = ZU.xpathText(doc, '//span[@class="doc_type"]');
+		if(type) return typeMap[type] || 'journalArticle';	//valeur par défaut //Default
+}}
+
+//Téléchargement de la notice au format MARC utf8 //Download biblio in MARC utf8
+function marcURL(url){
+	var bibnumber = url.match(/(biblionumber=)(\d+)/)[2];
+	var host = url.match(/^.+cgi-bin\/koha\//)[0];
+	var marcURL = host + "opac-export.pl?format=utf8&op=export&bib=" + bibnumber +"save=Go";
+	return marcURL;
+}
+
+//Enregistrement de documents depuis la liste de résultat //Registration from the results list
+function doWeb(doc, url) {
+	if (detectWeb(doc, url) == "multiple") {
+		var articles = [];
+		var items = {};
+		var titles = doc.evaluate('//span[@class="results_summary"]/a[contains(@href, "opac-detail.pl")]', doc, null, XPathResult.ANY_TYPE, null);
+		var title;
+		while (title = titles.iterateNext()) {
+			items[title.href] = title.textContent.trim();
+		}
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(marcURL(i));
+			}
+			scrape(articles);
+		});
+	} else {
+		scrape(marcURL(url));
+	}
+}
+
+//Lien vers le Translator MARC //Calling the MARC translator
+function scrape(marcurl) {
+	Zotero.Utilities.HTTP.doGet(marcurl, function (text) {
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
+		translator.setString(text);
+		translator.setHandler("itemDone", function (obj, item) {
+			//editors get mapped as contributors - but so do many others who should be
+			// --> for books that don't have an author, turn contributors into editors.
+			if (item.itemType=="books"){
+				var hasAuthor = false;
+				for (var i in item.creators) {
+					if (item.creators[i].creatorType=="author") {
+						hasAuthor = true;
+						break;
+					}
+				}
+				if (!hasAuthor) {
+					for (var i in item.creators) {
+						if (item.creators[i].creatorType=="contributor") {
+						item.creators[i].creatorType="editor";
+						}
+					}
+				}
+			}
+			item.complete();
+		});
+		translator.translate();
+	
+	})
+} 
+
