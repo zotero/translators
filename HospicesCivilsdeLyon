@@ -1,19 +1,19 @@
 {
-	"translatorID": "6618c8fb-5419-403d-90ab-1836ccc74905",
+	"translatorID": "26ab1a2b-8740-4f79-a3e7-e0df62818839",
 	"label": "HospicesCivilsdeLyon",
 	"creator": "Sebastian Karcher, Hospices Civils de Lyon",
-	"target": "(.chu-lyon|.cclin-france|.hcl)[^/]*.fr[^/]*/cgi-bin/koha/(opac-(detail|MARCdetail|search|shelves)|catalogue)",//It's dosen't work for admin and shelves
-	"minVersion": "2.1.9",
+	"target": "(.chu-lyon|.cclin-france|.hcl)[^/]*.fr[^/]*/cgi-bin/koha/(opac-(detail|MARCdetail|search|shelves)|catalogue)",
+	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 25,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsib",
-	"lastUpdated": "2013-08-20 17:31:24"
+	"browserSupport": "g",
+	"lastUpdated": "2013-08-23 14:57:25"
 }
 
-//Translator pour les sites http://rbh.chu-lyon.fr | http://www.nosobase-biblio.cclin-france.fr/ | http://documentationcentrale.chu-lyon.progilone.fr/
-//Basé sur le //Based on the Translator "Library Catalog (Koha)" ID: 8e66aa6d-5b2a-4b44-b384-a838e23b8538 par Sebastian Karcher
+//Translator pour les sites http://rbh.chu-lyon.fr | http://www.nosobase-biblio.cclin-france.fr/ | http://documentationcentrale.chu-lyon.fr/
+//Basé sur le //Based on the Translator "Library Catalog (Koha)" ID: "8e66aa6d-5b2a-4b44-b384-a838e23b8538" par Sebastian Karcher
 //Contact: Documentation Centrale des Hospices Civils de Lyon sur sa.documentationcentrale@chu-lyon.fr
 
 //Correspondance des types //Match Types
@@ -26,14 +26,22 @@ var typeMap = {
 	' [Rapport]': 'report',
 	' [Mémoire]': 'thesis',
 	' [Article de Presse]': 'newspaperArticle',
-	' [Recommandation]': 'conferencePaper',
+	' [Recommandation]': 'journalArticle',
 	' [Acte de congrès]': 'conferencePaper',
+	' [Poster Scientifique]': 'conferencePaper',
 	' [Affiche]': 'artwork',
+	' [Norme]': 'journalArticle',
+	' [Ouvrage]': 'book',
+	' [Revue]': 'book',
+	' [Presse]': 'book',
+	' [Mallette de bilan]': 'book',
+	' [Dictionnaire]': 'book',
 };
 
 //Détection de la présence de document multiple ou unique //Document detection: multiple or single
 function detectWeb(doc, url) {
 	if (url.match(/\/opac-search\.pl\?/)){return "multiple";}
+	if (url.match(/opac-shelves/)){return "multiple";}
 	if (url.match(/\/opac-detail.pl\?/)) {
 		var type = ZU.xpathText(doc, '//span[@class="doc_type"]');
 		if(type) return typeMap[type] || 'journalArticle';	//valeur par défaut //Default
@@ -47,7 +55,7 @@ function marcURL(url){
 	return marcURL;
 }
 
-//Enregistrement de documents depuis la liste de résultat //Registration from the results list
+//Enregistrement de documents depuis la liste de résultats et listes publiques //Registration from the results list & shelves
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var articles = [];
@@ -75,7 +83,7 @@ function doWeb(doc, url) {
 function scrape(marcurl) {
 	Zotero.Utilities.HTTP.doGet(marcurl, function (text) {
 		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
+		translator.setTranslator("1b77cfcc-f4ae-47bd-86fe-47bda67f7793");
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
 			//editors get mapped as contributors - but so do many others who should be
@@ -103,3 +111,96 @@ function scrape(marcurl) {
 	})
 } 
 
+/** BEGIN TEST CASES **/
+var testCases = [
+         {
+         	"itemType": "journalArticle",
+         	"creators": [
+         		{
+         			"firstName": "Americo",
+         			"lastName": "Agostinho",
+         			"creatorType": "author"
+         		},
+         		{
+         			"firstName": "Gesuele",
+         			"lastName": "Renzi",
+         			"creatorType": "author"
+         		},
+         		{
+         			"firstName": "Thomas",
+         			"lastName": "Haustein",
+         			"creatorType": "author"
+         		},
+         		{
+         			"firstName": "Ghislaine",
+         			"lastName": "Jourdan ",
+         			"creatorType": "author"
+         		},
+         		{
+         			"firstName": "Chantal",
+         			"lastName": "Bonfillon ",
+         			"creatorType": "author"
+         		},
+         		{
+         			"firstName": "Mathieu",
+         			"lastName": "Rougemont ",
+         			"creatorType": "author"
+         		},
+         		{
+         			"firstName": "Pierre",
+         			"lastName": "Hoffmeyer",
+         			"creatorType": "author"
+         		},
+         		{
+         			"firstName": "Stephan",
+         			"lastName": "Harbarth",
+         			"creatorType": "author"
+         		},
+         		{
+         			"firstName": "Ilker",
+         			"lastName": "Uçkay",
+         			"creatorType": "author"
+         		}
+         	],
+         	"notes": [],
+         	"tags": [
+         		"EPIDEMIOLOGIE",
+         		"ENTEROBACTER",
+         		"BETA-LACTAMASE A SPECTRE ELARGI",
+         		"ENTEROBACTERIE",
+         		"CHIRURGIE ORTHOPEDIQUE",
+         		"TYPAGE",
+         		"BIOLOGIE MOLECULAIRE",
+         		"DEPISTAGE",
+         		"ENVIRONNEMENT",
+         		"CENTRE HOSPITALIER UNIVERSITAIRE",
+         		"ESCHERICHIA COLI",
+         		"CITROBACTER",
+         		"KLEBSIELLA PNEUMONIAE",
+         		"SUISSE",
+         		"Présentation de matériel produit Compte-rendu de recherche"
+         	],
+         	"seeAlso": [],
+         	"attachments": [],
+         	"extra": "HCLID: 367294",
+         	"language": "Eng",
+         	"abstractNote": "Wards cohorting infected orthopaedic patients may be particularly prone to transmitting extended-spectrum beta-lactamase-producing Enterobacteriaceae (ESBL-E). We analyze their epidemic pattern by performing molecular typing of ESBL-E isolated from patients and healthcare workers (HCW) from our septic ward. Between March 2010 and November 2011, 186 patients were admitted. Among 565 anal swabs, ESBL-E were detected in 204 samples from 45 patients, suggesting prolonged carriage in affected patients. Among 25 cases with identical ESBL-E species and positive epidemiological links, only 9 were really attributable to our service. We also screened 41 healthcare workers (HCW) on 49 occasions during the study period. Six samples (13%) were positive. None of the ESBL-E detected in HCW were related to any of the patient isolates. Among 60 environmental samples taken at the peak of the epidemic none revealed ESBL-E. We conclude that HCW also were anal carriers of ESBL-E, however the ESBL- strains from the HCW were not the same strains isolated from patients in the septic ward. Moreover, the epidemiological attribution of ESBL by simple vicinity, timing, and species identification might grossly overestimate transmission within a given unit.\n(RESUME D’AUTEUR)",
+         	"reportType": "Présentation de matériel produit Compte-rendu de recherche",
+         	"thesisType": "Présentation de matériel produit Compte-rendu de recherche",
+         	"genre": "Présentation de matériel produit Compte-rendu de recherche",
+         	"title": "Epidemiology and acquisition of extended-spectrum beta-lactamase-producing Enterobacteriaceae in a septic orthopedic ward",
+         	"date": "2013",
+         	"pages": "1-4",
+         	"codePages": "1-4",
+         	"numPages": "1-4",
+         	"volume": "2",
+         	"issue": "1",
+         	"reportNumber": "1",
+         	"publicationTitle": "Springerplus",
+         	"code": "Springerplus",
+         	"bookTitle": "Springerplus",
+         	"seriesNumber": "2",
+         	"libraryCatalog": "HospicesCivilsdeLyon"
+         }
+]
+/** END TEST CASES **/
