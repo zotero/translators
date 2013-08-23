@@ -1,0 +1,526 @@
+{
+	"translatorID": "1b77cfcc-f4ae-47bd-86fe-47bda67f7793",
+	"label": "MARC_HospicesCivilsdeLyon",
+	"creator": "Simon Kornblith, Sylvain Machefert, HospicesCivilsdeLyon",
+	"target": "marc",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 1,
+	"browserSupport": "gcs",
+	"lastUpdated": "2013-08-22 14:00:01"
+}
+
+function detectImport() {
+	var marcRecordRegexp = /^[0-9]{5}[a-z ]{3}$/
+	var read = Zotero.read(8);
+	if(marcRecordRegexp.test(read)) {
+		return true;
+	}
+}
+//test
+var fieldTerminator = "\x1E";
+var recordTerminator = "\x1D";
+var subfieldDelimiter = "\x1F";
+
+/*
+ * CLEANING FUNCTIONS
+ */
+
+
+// general purpose cleaning
+function clean(value) {
+	value = value.replace(/^[\s\.\,\/\:;]+/, '');
+	value = value.replace(/[\s\.\,\/\:;]+$/, '');
+	value = value.replace(/ +/g, ' ');
+	
+	var char1 = value.substr(0, 1);
+	var char2 = value.substr(value.length-1);
+	if((char1 == "[" && char2 == "]") || (char1 == "(" && char2 == ")")) {
+		// chop of extraneous characters
+		return value.substr(1, value.length-2);
+	}
+	
+	return value;
+}
+
+//Correspondance des types //Match Types
+	var KohaType = {
+	'ARE': 'journalArticle',
+	'TLEX': 'case',
+	'THE': 'thesis',
+	'CHAP': 'bookSection',
+	'MUL': 'film',
+	'RAP': 'report',
+	'MEM': 'thesis',
+	'APR': 'newspaperArticle',
+	'RECO': 'journalArticle',	
+	'REV': 'book',
+	'PRE': 'book',
+	'OUV': 'book',
+	'DICO': 'book',
+	'MAB': 'book',
+	'BUL': 'journalArticle',
+	'CONN': 'journalArticle',
+	'ACTI': 'journalArticle',
+	'ACT': 'conferencePaper',
+	'AFF': 'artwork',
+	'POST ': 'conferencePaper',
+	'NOR': 'journalArticle',
+	 
+};
+
+//Modification des types Koha=>Zotero //Change Koha's types to Zotero's one
+function MapType(text) {
+	var pullRe = /[A-Z]+/;
+	var m = pullRe.exec(text);
+	if(m) {
+		return KohaType[m];
+	}
+}
+
+//Ajout du préfixe "HCLID" au champ "extra" //Add the prefix "HCLID" to "extra" field
+function IDHCL(text){
+	var pullRe = /[0-9]+/;
+	var m = pullRe.exec(text);
+	if(m) {	return "HCLID: "+m[0];
+	}
+}
+
+// number extraction
+function pullNumber(text) {
+	var pullRe = /[0-9]+/;
+	var m = pullRe.exec(text);
+	if(m) {
+		return m[0];
+	}
+}
+
+// ISBN extraction
+function pullISBN(text) {
+	var pullRe = /[0-9X\-]+/;
+	var m = pullRe.exec(text);
+	if(m) {
+		return m[0];
+	}
+}
+
+// corporate author extraction
+function corpAuthor(author) {
+	return {lastName:author, fieldMode:true};
+}
+
+// regular author extraction
+function author(author, type, useComma) {
+	return Zotero.Utilities.cleanAuthor(author, type, useComma);
+}
+
+/*
+ * END CLEANING FUNCTIONS
+ */
+
+var record = function() {
+	this.directory = new Object();
+	this.leader = "";
+	this.content = "";
+	
+	// defaults
+	this.indicatorLength = 2;
+	this.subfieldCodeLength = 2;
+}
+
+// import a binary MARC record into this record
+record.prototype.importBinary = function(record) {
+	// get directory and leader
+	var directory = record.substr(0, record.indexOf(fieldTerminator));
+	this.leader = directory.substr(0, 24);
+	var directory = directory.substr(24);
+
+	// get various data
+	this.indicatorLength = parseInt(this.leader.substr(10, 1), 10);
+	this.subfieldCodeLength = parseInt(this.leader.substr(11, 1), 10);
+	var baseAddress = parseInt(this.leader.substr(12, 5), 10);
+
+	// get record data
+	var contentTmp = record.substr(baseAddress);
+
+	// MARC wants one-byte characters, so when we have multi-byte UTF-8
+	// sequences, add null characters so that the directory shows up right. we
+	// can strip the nulls later.
+	this.content = "";
+	for(i=0; i<contentTmp.length; i++) {
+		this.content += contentTmp.substr(i, 1);
+		if(contentTmp.charCodeAt(i) > 0x00FFFF) {
+			this.content += "\x00\x00\x00";
+		} else if(contentTmp.charCodeAt(i) > 0x0007FF) {
+			this.content += "\x00\x00";
+		} else if(contentTmp.charCodeAt(i) > 0x00007F) {
+			this.content += "\x00";
+		}
+	}
+	
+	// read directory
+	for(var i=0; i<directory.length; i+=12) {
+		var tag = parseInt(directory.substr(i, 3), 10);
+		var fieldLength = parseInt(directory.substr(i+3, 4), 10);
+		var fieldPosition = parseInt(directory.substr(i+7, 5), 10);
+		
+		if(!this.directory[tag]) {
+			this.directory[tag] = new Array();
+		}
+		this.directory[tag].push([fieldPosition, fieldLength]);
+	}
+}
+
+// add a field to this record
+record.prototype.addField = function(field, indicator, value) {
+	field = parseInt(field, 10);
+	// make sure indicator is the right length
+	if(indicator.length > this.indicatorLength) {
+		indicator = indicator.substr(0, this.indicatorLength);
+	} else if(indicator.length != this.indicatorLength) {
+		indicator = Zotero.Utilities.lpad(indicator, " ", this.indicatorLength);
+	}
+	
+	// add terminator
+	value = indicator+value+fieldTerminator;
+	
+	// add field to directory
+	if(!this.directory[field]) {
+		this.directory[field] = new Array();
+	}
+	this.directory[field].push([this.content.length, value.length]);
+	
+	// add field to record
+	this.content += value;
+}
+
+// get all fields with a certain field number
+record.prototype.getField = function(field) {
+	field = parseInt(field, 10);
+	var fields = new Array();
+	
+	// make sure fields exist
+	if(!this.directory[field]) {
+		return fields;
+	}
+	
+	// get fields
+	for(var i in this.directory[field]) {
+		var location = this.directory[field][i];
+		
+		// add to array, replacing null characters
+		fields.push([this.content.substr(location[0], this.indicatorLength),
+			this.content.substr(location[0]+this.indicatorLength,
+			location[1]-this.indicatorLength-1).replace(/\x00/g, "")]);
+	}
+	
+	return fields;
+}
+
+//given a field string, split it into subfields
+record.prototype.extractSubfields = function(fieldStr, tag /*for error message only*/) {
+	if(!tag) tag = '<no tag>';
+
+	returnSubfields = new Object();
+
+	var subfields = fieldStr.split(subfieldDelimiter);
+	if (subfields.length == 1) {
+		returnSubfields["?"] = fieldStr;
+	} else {
+		for(var j in subfields) {
+			if(subfields[j]) {
+				var subfieldIndex = subfields[j].substr(0, this.subfieldCodeLength-1);
+				if(!returnSubfields[subfieldIndex]) {
+					returnSubfields[subfieldIndex] = subfields[j].substr(this.subfieldCodeLength-1);
+				} else {
+					// Duplicate subfield
+					Zotero.debug("Duplicate subfield '"+tag+" "+subfieldIndex+"="+subfields[j]);
+					returnSubfields[subfieldIndex] = returnSubfields[subfieldIndex] + " " + subfields[j].substr(this.subfieldCodeLength-1);
+				}
+			}
+		}
+	}
+
+	return returnSubfields;
+}
+
+// get subfields from a field
+record.prototype.getFieldSubfields = function(tag) { // returns a two-dimensional array of values
+	var fields = this.getField(tag);
+	var returnFields = new Array();
+	
+	for(var i=0, n=fields.length; i<n; i++) {
+		returnFields[i] = this.extractSubfields(fields[i][1], tag);
+	}
+	
+	return returnFields;
+}
+
+// add field to DB
+record.prototype._associateDBField = function(item, fieldNo, part, fieldName, execMe, arg1, arg2) {
+	var field = this.getFieldSubfields(fieldNo);
+	
+	Zotero.debug('MARC: found '+field.length+' matches for '+fieldNo+part);
+	if(field) {
+		for(var i in field) {
+			var value = false;
+			for(var j=0; j<part.length; j++) {
+				var myPart = part.substr(j, 1);
+				if(field[i][myPart]) {
+					if(value) {
+						value += " "+field[i][myPart];
+					} else {
+						value = field[i][myPart];
+					}
+				}
+			}
+			if(value) {
+				value = clean(value);
+				
+				if(execMe) {
+					value = execMe(value, arg1, arg2);
+				}
+				
+				if(fieldName == "creator") {
+					item.creators.push(value);
+				} else {
+					item[fieldName] = value;
+					return;
+				}
+			}
+		}
+	}
+}
+
+// add field to DB as note
+record.prototype._associateNotes = function(item, fieldNo, part) {
+	var field = this.getFieldSubfields(fieldNo);
+	var texts = [];	
+
+	for(var i in field) {
+		for(var j=0; j<part.length; j++) {
+			var myPart = part.substr(j, 1);
+			if(field[i][myPart]) {
+				texts.push(clean(field[i][myPart]));
+			}
+		}
+	}
+	var text = texts.join(' ');
+	if (text.trim() != "")
+		item.notes.push({note: text});
+}
+
+// add field to DB as tags
+record.prototype._associateTags = function(item, fieldNo, part) {
+	var field = this.getFieldSubfields(fieldNo);
+	
+	for(var i in field) {
+		for(var j=0; j<part.length; j++) {
+			var myPart = part.substr(j, 1);
+			if(field[i][myPart]) {
+				item.tags.push(clean(field[i][myPart]));
+			}
+		}
+	}
+}
+
+// this function loads a MARC record into our database
+
+
+record.prototype.translate = function(item) {
+
+	if ( (this.getFieldSubfields("200")[0]))
+	{
+		this._associateDBField(item, "010", "a", "ISBN", pullISBN);
+		// Extract ISBN
+		this._associateDBField(item, "010", "a", "ISBN", pullISBN);
+		// Extract ISSN
+		this._associateDBField(item, "011", "a", "ISSN", pullISBN);
+		// Extract ISSN source
+		this._associateDBField(item, "463", "x", "ISSN", pullISBN);
+		// Extract ISBN source
+		this._associateDBField(item, "463", "y", "ISBN", pullISBN);
+		// Extract DOI
+		this._associateDBField(item, "014", "a", "DOI");
+		// Extract Bill Numbers
+		this._associateDBField(item, "022", "b", "billNumber");
+		// Extract standard number
+		this._associateDBField(item, "017", "a", "issue");
+		// Extract report number
+		this._associateDBField(item, "015", "a", "reportNumber");
+		//Extract internal ID "HCLID"
+		this._associateDBField(item, "090", "a","extra", IDHCL);
+		//Extract ItemType
+		this._associateDBField(item, "200", "b","itemType", MapType);
+	
+		
+		// Extract creators (700, 701 & 702)
+		for (var i = 700; i < 703; i++)
+		{
+			var authorTab = this.getFieldSubfields(i);
+			for (var j in authorTab) 
+			{
+				var aut = authorTab[j];
+				var authorText = "";
+				if ( (aut.b) && (aut.a) ){
+					authorText = aut['a'].replace(/,\s*$/,'') + ", " + aut['b'];
+				} 
+				else
+				{
+					authorText = aut['a'];
+				}
+				//prevent this from crashing with empty author tags 
+				if(authorText) item.creators.push(Zotero.Utilities.cleanAuthor(authorText, "author", true));
+			}
+		}
+		
+		// Extract corporate creators (710, 711 & 712)
+		for (var i = 710; i < 713; i++)
+		{
+			var authorTab = this.getFieldSubfields(i);
+			for (var j in authorTab)
+			{
+				if (authorTab[j]['a'])
+				{
+					item.creators.push({lastName:authorTab[j]['a'], creatorType:"contributor", fieldMode:true});
+				}
+			}
+		}
+		
+		// Extract languages
+		this._associateDBField(item, "101", "a", "language");
+		
+		// Extract notes & summary
+		this._associateDBField(item, "328", "a", "abstractNote");
+		this._associateDBField(item, "330", "a", "abstractNote");
+		this._associateDBField(item, "311", "a", "history");
+		//this._associateDBField(item, "424", "t", "history");
+		//this._associateDBField(item, "425", "t", "history");
+		//this._associateDBField(item, "432", "t", "history");
+		//this._associateDBField(item, "442", "t", "history");
+		
+		
+		// Extraction des mots-clés //Keywords
+		
+		// personne
+		this._associateTags(item, "600", "aqtxyz");
+		// Organismes ou congres
+		this._associateTags(item, "601", "abtxyz");
+		// Sujet Noms Communs
+		this._associateTags(item, "606", "abcxyz");
+		// termes géographiques
+		this._associateTags(item, "607", "axyz");
+		// genre/forme
+		this._associateTags(item, "608", "abcxyz");
+		// Type de raport
+		this._associateDBField(item, "608", "a", "reportType");
+		// Type de thèse
+		this._associateDBField(item, "608", "a", "thesisType");
+		// Genre du film
+		this._associateDBField(item, "608", "a", "genre");
+		//Mots Libres (non utilisé)
+		//this._associateTags(item, "610", "a");
+		
+		// Extract title
+		var title = this.getField("200")[0][1]	//non-repeatable
+						.replace(	//chop off any translations, since they may have repeated $e fields
+							new RegExp('\\' + subfieldDelimiter + 'd.+'), '');
+		title = this.extractSubfields(title, '200');
+		item.title = title.a;
+		if(title.e) {
+			//If the title proper did not end in a punctuation mark, we should add a colon
+			if(item.title.search(/[A-Za-z0-9]\s*/) != -1) {
+				item.title += ':';
+			}
+
+			item.title += ' ' + title.e;
+		}
+		
+		// Extract Mention d'édition
+		this._associateDBField(item, "205", "a", "edition");
+		this._associateDBField(item, "463", "e", "edition");
+		
+		// Extract Lieu de publication/production
+		this._associateDBField(item, "210", "a", "place");
+		this._associateDBField(item, "463", "c", "place");
+		
+		// Extract Editeur/distributeur/organisme
+		this._associateDBField(item, "210", "c", "distributor");
+		this._associateDBField(item, "210", "c", "publisher");
+		this._associateDBField(item, "463", "n", "place");
+		this._associateDBField(item, "710", "ab", "institution");
+		this._associateDBField(item, "210", "c", "university");
+		
+		// Extract Année de publication/diffusion
+		this._associateDBField(item, "210", "d", "date", pullNumber);
+		
+		// Extract pages
+		this._associateDBField(item, "209", "h", "pages");
+		this._associateDBField(item, "209", "h", "codePages");
+		this._associateDBField(item, "209", "h", "numPages");
+		
+		// Extract volume/tome-numéro
+		this._associateDBField(item, "209", "b", "volume");
+		this._associateDBField(item, "209", "d", "issue");
+		
+		// Extract Durée et format du film
+		this._associateDBField(item, "215", "a", "runningTime");
+		this._associateDBField(item, "215", "d", "videoRecordingFormat");
+		
+		// Extract Numéro de raport
+		this._associateDBField(item, "209", "d", "reportNumber");
+		
+		// Extract Collection - Publication Source
+		this._associateDBField(item, "225", "a", "series");
+		this._associateDBField(item, "463", "t", "publicationTitle");
+		this._associateDBField(item, "463", "t", "code");
+		this._associateDBField(item, "463", "t", "bookTitle");
+		
+		// Extract series number
+		this._associateDBField(item, "209", "b", "seriesNumber");
+
+		// Extract Numéro de cote
+		this._associateDBField(item, "995", "k", "callNumber");
+		
+		// Extract url
+		this._associateDBField(item, "856", "u", "url");
+	}
+	
+}
+
+function doImport() {
+	var text;
+	var holdOver = "";	// part of the text held over from the last loop
+	
+	while(text = Zotero.read(4096)) {	// read in 4096 byte increments
+		var records = text.split("\x1D");
+		
+		if(records.length > 1) {
+			records[0] = holdOver + records[0];
+			holdOver = records.pop(); // skip last record, since it's not done
+			
+			for(var i in records) {
+				var newItem = new Zotero.Item();
+				
+				// create new record
+				var rec = new record();	
+				rec.importBinary(records[i]);
+				rec.translate(newItem);
+				
+				newItem.complete();
+			}
+		} else {
+			holdOver += text;
+		}
+	}
+}
+
+var exports = {
+	"record":record,
+	"fieldTerminator":fieldTerminator,
+	"recordTerminator":recordTerminator,
+	"subfieldDelimiter":subfieldDelimiter
+};
+
