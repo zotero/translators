@@ -45,7 +45,11 @@ function detectWeb(doc, url) {
 	if (url.match(/\/opac-detail.pl\?/)) {
 		var type = ZU.xpathText(doc, '//span[@class="doc_type"]');
 		if(type) return typeMap[type] || 'journalArticle';	//valeur par défaut //Default
-}}
+	}
+	if (url.match(/\/opac-MARCdetail.pl\?/)) {
+		return 'journalArticle'
+	}
+}
 
 //Téléchargement de la notice au format MARC utf8 //Download biblio in MARC utf8
 function marcURL(url){
