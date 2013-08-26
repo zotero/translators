@@ -19,10 +19,11 @@
 }
 
 /* This translator is tailor made for working with Biblatex and Biber
+ * I haven't test is in other settings, so I am not sure my changes won't have side effects of same sort
  * I made the following tweaks
  *   line 11)   Set ExportNotes to 'false' (They can be very long, creating a lot of trouble to Biber);
- *   line 2345) Removed the comma separating each item (Biber saw it a as junk character);
- *   line 2133) Improved (or fixed) the regex to curly bracket protect the capitalised words. This allows 
+ *   line 2359) Removed the comma separating each item (Biber saw it a as junk character);
+ *   line 2147) Improved (or fixed) the regex to curly bracket protect the capitalised words. This allows 
  *              correct rendering of capitalised word when sentence case is required by the citation style;
  *       
  */
@@ -2100,6 +2101,22 @@ function doImport() {
 	}
 }
 
+function surroundCaps(str) {
+    //get first word
+    var temp = str.match(/^.+?\b/);
+    //if word was found
+    if (temp) {
+        temp = temp[0];
+        //remove it from the string
+        str = str.substring(temp.length);
+    }
+    else
+        temp = '';
+
+    str = str.replace(/\b[A-Z].*?\b/g, '{$&}');
+    return temp + str;
+}
+
 // some fields are, in fact, macros.  If that is the case then we should not put the
 // data in the braces as it will cause the macros to not expand properly
 function writeField(field, value, isMacro) {
@@ -2126,11 +2143,8 @@ function writeField(field, value, isMacro) {
 		**/
 
 		// Case of words with uppercase characters in non-initial positions is preserved with braces.
-		// treat hyphen as whitespace for this purpose so that Large-scale etc. don't get enclosed
-		// treat curly bracket as whitespace because of mark-up immediately preceding word
-		// treat opening parentheses &brackets as whitespace
 		if (field != "pages") {
-			value = value.replace(/\b[A-Z].*?\b/g, '{$&}');
+		    value = surroundCaps(value);
 		}
 	}
 	if (Zotero.getOption("exportCharset") != "UTF-8") {
