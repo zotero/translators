@@ -15,7 +15,8 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-08-01 10:05:00"
+	"lastUpdated": "Mon Aug 26 19:55:08 EST 2013"
+"
 }
 
 /* This translator is tailor made for working with Biblatex and Biber
