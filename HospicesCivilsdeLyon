@@ -47,16 +47,32 @@ function detectWeb(doc, url) {
 		if(type) return typeMap[type] || 'journalArticle';	//valeur par défaut //Default
 	}
 	if (url.match(/\/opac-MARCdetail.pl\?/)) {
-		return 'journalArticle'
+		return 'journalArticle';
+	}
+		if (url.match(/\/MARCdetailHCL.pl\?/)) {
+		return 'journalArticle';
+	}
+	if (url.match(/\/catalogue\/detail\.pl\?/)) {
+		var type = ZU.xpathText(doc, '//span[@class="doc_type"]');
+		if(type) return typeMap[type] || 'journalArticle';	//valeur par défaut //Default
 	}
 }
 
 //Téléchargement de la notice au format MARC utf8 //Download biblio in MARC utf8
 function marcURL(url){
 	var bibnumber = url.match(/(biblionumber=)(\d+)/)[2];
-	var host = url.match(/^.+cgi-bin\/koha\//)[0];
-	var marcURL = host + "opac-export.pl?format=utf8&op=export&bib=" + bibnumber +"save=Go";
-	return marcURL;
+	
+	if (url.match(/^.+cgi-bin\/koha\/catalogue\//)){
+		var host = url.match(/^.+cgi-bin\/koha\/catalogue\//)[0];
+		var marcURL = host + "export.pl?format=utf8&op=export&bib=" + bibnumber +"save=Go";
+		return marcURL;
+		}
+		
+	if (url.match(/^.+cgi-bin\/koha\//)){	
+		var host = url.match(/^.+cgi-bin\/koha\//)[0];
+		var marcURL = host + "opac-export.pl?format=utf8&op=export&bib=" + bibnumber +"save=Go";
+		return marcURL;
+		}
 }
 
 //Enregistrement de documents depuis la liste de résultats et listes publiques //Registration from the results list & shelves
