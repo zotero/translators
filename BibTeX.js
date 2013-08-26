@@ -1,14 +1,14 @@
 {
 	"translatorID": "9cb70025-a888-4a29-a210-93ec52da40d4",
 	"label": "BibTeX",
-	"creator": "Simon Kornblith, Richard Karnesky and Emiliano heyns",
+	"creator": "Simon Kornblith, Richard Karnesky and Emiliano heyns (Revisited by fraba)",
 	"target": "bib",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 200,
 	"displayOptions": {
 		"exportCharset": "UTF-8",
-		"exportNotes": true,
+		"exportNotes": false,
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
@@ -17,6 +17,15 @@
 	"browserSupport": "gcsv",
 	"lastUpdated": "2013-08-01 10:05:00"
 }
+
+/* This translator is tailor made for working with Biblatex and Biber
+ * I made the following tweaks
+ *   line 11)   Set ExportNotes to 'false' (They can be very long, creating a lot of trouble to Biber);
+ *   line 2345) Removed the comma separating each item (Biber saw it a as junk character);
+ *   line 2133) Improved (or fixed) the regex to curly bracket protect the capitalised words. This allows 
+ *              correct rendering of capitalised word when sentence case is required by the citation style;
+ *       
+ */
 
 function detectImport() {
 	var maxChars = 1048576; // 1MB
@@ -2121,7 +2130,7 @@ function writeField(field, value, isMacro) {
 		// treat curly bracket as whitespace because of mark-up immediately preceding word
 		// treat opening parentheses &brackets as whitespace
 		if (field != "pages") {
-			value = value.replace(/([^\s-\}\(\[]+[A-Z][^\s,]*)/g, "{$1}");
+			value = value.replace(/\b[A-Z].*?\b/g, '{$&}');
 		}
 	}
 	if (Zotero.getOption("exportCharset") != "UTF-8") {
@@ -2333,7 +2342,7 @@ function doExport() {
 		var citekey = buildCiteKey(item, citekeys);
 		
 		// write citation key
-		Zotero.write((first ? "" : ",\n\n") + "@"+type+"{"+citekey);
+		Zotero.write((first ? "" : "\n\n") + "@"+type+"{"+citekey);
 		first = false;
 		
 		for(var field in fieldMap) {
