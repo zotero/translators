@@ -19,7 +19,7 @@
 //Correspondance des types //Match Types
 var typeMap = {
 	' [Article de Revue]': 'journalArticle',
-	' [Texte législatif]': 'case',
+	' [Texte législatif]': 'statute',
 	' [Thèse]': 'thesis',
 	' [Chapitre d\'ouvrage]': 'bookSection',
 	' [Multimédia]': 'film',
