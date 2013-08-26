@@ -345,7 +345,7 @@ record.prototype.translate = function(item) {
 		// Extract DOI
 		this._associateDBField(item, "014", "a", "DOI");
 		// Extract Bill Numbers
-		this._associateDBField(item, "022", "b", "billNumber");
+		this._associateDBField(item, "022", "b", "publicLawNumber");
 		// Extract standard number
 		this._associateDBField(item, "017", "a", "issue");
 		// Extract report number
