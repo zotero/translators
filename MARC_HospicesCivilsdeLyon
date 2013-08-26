@@ -48,7 +48,7 @@ function clean(value) {
 //Correspondance des types //Match Types
 	var KohaType = {
 	'ARE': 'journalArticle',
-	'TLEX': 'case',
+	'TLEX': 'statute',
 	'THE': 'thesis',
 	'CHAP': 'bookSection',
 	'MUL': 'film',
@@ -396,10 +396,17 @@ record.prototype.translate = function(item) {
 		this._associateDBField(item, "328", "a", "abstractNote");
 		this._associateDBField(item, "330", "a", "abstractNote");
 		this._associateDBField(item, "311", "a", "history");
-		//this._associateDBField(item, "424", "t", "history");
-		//this._associateDBField(item, "425", "t", "history");
-		//this._associateDBField(item, "432", "t", "history");
-		//this._associateDBField(item, "442", "t", "history");
+		this._associateNotes(item, "422", "t");
+		this._associateNotes(item, "423", "t");
+		this._associateNotes(item, "424", "t");
+		this._associateNotes(item, "425", "t");
+		this._associateNotes(item, "430", "t");
+		this._associateNotes(item, "432", "t");
+		this._associateNotes(item, "434", "t");
+		this._associateNotes(item, "436", "t");
+		this._associateNotes(item, "440", "t");
+		this._associateNotes(item, "442", "t");
+		this._associateNotes(item, "447", "t");
 		
 		
 		// Extraction des mots-clés //Keywords
