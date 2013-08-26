@@ -15,16 +15,18 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "Mon Aug 26 19:55:08 EST 2013"
+	"lastUpdated": "Mon Aug 26 23:57:00 EST 2013"
+"
 }
 
 /* This translator is tailor made for working with Biblatex and Biber
  * I haven't test is in other settings, so I am not sure my changes won't have side effects of same sort
  * I made the following tweaks
- *   line 11)   Set ExportNotes to 'false' (They can be very long, creating a lot of trouble to Biber);
- *   line 2359) Removed the comma separating each item (Biber saw it a as junk character);
- *   line 2147) Improved (or fixed) the regex to curly bracket protect the capitalised words. This allows 
- *              correct rendering of capitalised word when sentence case is required by the citation style;
+ *   - Set ExportNotes to 'false' (They can be very long, creating a lot of trouble to Biber);
+ *   - Removed the comma separating each item (Biber saw it a as junk character);
+ *   - Added capitalisation of first word after colon, question mark and exclamation mark in title and booktitle
+ *   - Improved (or fixed) the regex to curly bracket protect the capitalised words. This allows 
+ *     correct rendering of capitalised word when sentence case is required by the citation style;
  *       
  */
 
@@ -2101,6 +2103,7 @@ function doImport() {
 	}
 }
 
+// Thanks to Hashbrown
 function surroundCaps(str) {
     //get first word
     var temp = str.match(/^.+?\b/);
@@ -2117,6 +2120,11 @@ function surroundCaps(str) {
     return temp + str;
 }
 
+// Thanks to jimbojw
+function capitaliseAfter(full, prefix, letter){
+    return prefix + letter.toUpperCase();
+}
+
 // some fields are, in fact, macros.  If that is the case then we should not put the
 // data in the braces as it will cause the macros to not expand properly
 function writeField(field, value, isMacro) {
@@ -2129,23 +2137,20 @@ function writeField(field, value, isMacro) {
 	if (!isMacro && !(field == "url" || field == "doi" || field == "file" || field == "lccn" )) {
 		// I hope these are all the escape characters!
 		value = value.replace(/[|\<\>\~\^\\\{\}]/g, mapEscape).replace(/([\#\$\%\&\_])/g, "\\$1");
-
-		//disable 
-		/** if (field == "title" || field == "type" || field == "shorttitle" || field == "booktitle" || field == "series") {
-			if (!isTitleCase(value)) {
-				//protect caps for everything but the first letter
-				value = value.replace(/(.)([A-Z]+)/g, "$1{$2}");
-			} else {	//protect all-caps vords and initials
-				value = value.replace(/([\s.-])([A-Z]+)(?=\.)/g, "$1{$2}");	//protect initials
-				if(value.toUpperCase() != value) value = value.replace(/(\s)([A-Z]{2,})(?=[\.,\s]|$)/g, "$1{$2}");
-			}
-		} 
-		**/
-
+	    
+                // Make sure first word after colon, question marks and exclamation mark is capitalised
+	        // in titles and booktitles
+	        if (field == "title" || field == "booktitle") {
+		    var regex = /([:\?\!]\s+)(.)/g;
+		    value = value.replace(regex, capitaliseAfter); 
+	        }
+		    
 		// Case of words with uppercase characters in non-initial positions is preserved with braces.
 		if (field != "pages") {
 		    value = surroundCaps(value);
 		}
+
+	        
 	}
 	if (Zotero.getOption("exportCharset") != "UTF-8") {
 		value = value.replace(/[\u0080-\uFFFF]/g, mapAccent);
