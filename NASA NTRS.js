@@ -2,20 +2,19 @@
 	"translatorID": "5a697ab5-913a-478a-b4ec-98d019aa5dc6",
 	"label": "NASA NTRS",
 	"creator": "Andrew Bergan",
-	"target": "^http://ntrs\\.nasa\\.gov/search\\.jsp\\?",
+	"target": "^http://ntrs\\.nasa\\.gov/(search.jsp)?\\?",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2013-03-06 13:44:16"
+	"lastUpdated": "2013-08-26 20:53:10"
 }
 
 function detectWeb(doc, url) {
-	
 	// Make sure that we are on a record page or details page
-	var contentLabel = ZU.xpathText(doc.getElementById("rightcontent"), './div/h2');
+	var contentLabel = ZU.xpathText(doc, '//p[@class="sectiontitle"]');
 
 	if (!contentLabel) return;
 	
@@ -26,24 +25,67 @@ function detectWeb(doc, url) {
 		
 		var docType = "";
 		
-		// Look in the left nav menu for the document type
-		var docType = ZU.xpathText(doc.getElementById("leftnav"), './/form[@name="find_similar_form"]//input[@name="document_type_1"]/following-sibling::a[1]')
+		// Look in the document type field
+		var docType = ZU.xpathText(doc, '//td[contains(text(), "Document Type:")]/following-sibling::td/text()')
 		
 		// remove leading and trailing whitespace
-		var docType = docType.replace(/^\s*|\s*$/g, '');
+		//var docType = docType.replace(/^\s*|\s*$/g, '');
 		
 		// Check against implemented document types
 		if (docType.indexOf("Conference Paper") != -1) {
 			return "conferencePaper"
-		
-		} else if (docType.indexOf("Technical Report") != -1) {
+			
+		} else if (docType.indexOf("Bibliographic Database") != -1 || 
+		docType.indexOf("Congressional Report") != -1 ||
+		docType.indexOf("Bibliography") != -1 ||
+		docType.indexOf("Collected Works") != -1 ||
+		docType.indexOf("Technical Report") != -1) {
 			return "report"
-		
-		} else if (docType.indexOf("Journal Article") != -1) {
+			
+		} else if (docType.indexOf("Journal Article") != -1 ||
+		docType.indexOf("Journal Issue") != -1) {
 			return "journalArticle";
+			
+		} else if (docType.indexOf("Presentation") != -1) {
+			return "presentation";
 		
-		} else if (docType.indexOf("Masters Thesis") != -1 || docType.indexOf("PhD Dissertation") != -1 || docType.indexOf("Thesis") != -1) {
+		} else if (docType.indexOf("Thesis") != -1 || 
+		docType.indexOf("PhD Dissertation") != -1) {
 			return "thesis"
+			
+		} else if (docType.indexOf("Book Chapter") != -1) {
+			return "bookSection"
+			
+		} else if (docType.indexOf("Book/Monograph") != -1 ||
+		docType.indexOf("Conference Proceedings") != -1) {
+			return "book"
+			
+		} else if (docType.indexOf("Patent") != -1) {
+			return "patent"
+			
+		} else if (docType.indexOf("Brief Communication/Note") != -1 ||
+		docType.indexOf("NASA Tech Brief") != -1) {
+			return "note"
+			
+		} else if (docType.indexOf("Computer Program") != -1) {
+			return "computerProgram"
+			
+		} else if (docType.indexOf("Motion Picture") != -1) {
+			return "videoRecording"
+			
+		} else if (docType.indexOf("Preprint") != -1) {
+			return "manuscript"
+		
+		} else if (docType.indexOf("Data Set") != -1 || 
+		docType.indexOf("Dictionary") != -1 ||
+		docType.indexOf("Extended Abstract") != -1 ||
+		docType.indexOf("Full Text Database") != -1 ||
+		docType.indexOf("Multimedia Database") != -1 ||
+		docType.indexOf("Numeric Database") != -1 ||
+		docType.indexOf("News Release/Speech") != -1 ||
+		docType.indexOf("Other") != -1 ||
+		docType.indexOf("Photograph") != -1) {
+			return "document"
 			
 		} else {
 			// No match
@@ -60,22 +102,26 @@ function scrape(doc, url) {
 	// Get the url
 	newItem.url = doc.location.href.replace(/\?.*?\b(R=\d+)(?:&.*)?$/, '?$1');
 	
-	// Set a temporary title (placeholder in case the entry doesn't have a title)
-	newItem.title = "No title found";
-	
 	// Build an array of the items containing the bibliographic data
 	var items = new Object();
-	var rows = ZU.xpath(doc.getElementById("doctext"), './table/tbody/tr');
+	
+	// Get the title
+	newItem.title = "No title found";
+	items["Title"] = ZU.xpathText(doc, '//div[@id="doctext"]/table/tbody/tr/td[@id="recordtitle"]')
+	if (items["Title"]) newItem.title = items["Title"];
+	
+	// Loop through each row in table following the "recordtitle" row
+	var rows = ZU.xpath(doc, '//div[@id="doctext"]/table/tbody/tr[td[@id!="recordtitle"]]');
 	for (var i in rows) {
-		var label = ZU.xpathText(rows[i], './td[1]').replace(/^\s*|\s*$/g, '').replace(/:/, '');
+		var label = ZU.xpathText(rows[i], './td[@id="colTitle"]').replace(/^\s*|\s*$/g, '').replace(/:/, '');
+		
 		// Handle the document link differently
 		if (label.indexOf("Online Source") != -1) {
+			var content = ZU.xpathText(rows[i], './/a/@href');
 			
-			// Online source
-			var contents = ZU.xpathText(rows[i], './td[2]/a/@href').split(', ');
-			var content  = contents[0];
+		// Grab the content and remove extra white space and parenthetical info
 		} else {
-			var content = ZU.xpathText(rows[i], './td[2]').replace(/^\s*|\s*$/g, '');
+			var content = ZU.xpathText(rows[i], './td[@id="colTitle"]/following-sibling::td').replace(/\([^)]*\)/g, '').replace(/^\s*|\s*$/g, '');
 		}
 
 		items[label] = content;
@@ -95,16 +141,16 @@ function scrape(doc, url) {
 		}
 	}
 	
-	
 	// Save a snapshot
 	newItem.attachments.push({title: "Snapshot", document: doc});
 
 	// Format and save author field
-	if (items["Author"]) {
-		var author = items["Author"];
-		
+	if (items["Author and Affiliation"]) {
+		var author = items["Author and Affiliation"];
+
 		// Handle multiple authors
-		var authors = author.split("; ");
+		var authors = author.split(";");
+
 		for (var i in authors) {
 			var authorName = authors[i];
 			newItem.creators.push(Zotero.Utilities.cleanAuthor(authorName, "author", authorName.indexOf(', ') != -1));
@@ -112,8 +158,8 @@ function scrape(doc, url) {
 	}
 	
 	// Save tags
-	if (items["Subject Terms"]) {
-		var tags = items["Subject Terms"].split("; ");
+	if (items["NASA Terms"]) {
+		var tags = items["NASA Terms"].split(";");
 		for (var i = 0; i < tags.length; i++) {
 			newItem.tags[i] = tags[i].toLowerCase();
 		}
@@ -127,67 +173,90 @@ function scrape(doc, url) {
 	// Save the place / conference name
 	if (newItem.itemType == "conferencePaper") {
 		if (items["Meeting Information"]) {
-			if (items["Meeting Information"].match("; ")) {
+			if (items["Meeting Information"].match(";")) {
 				var confNameLocation = items["Meeting Information"].split("; ");
-				
+
 				// Save the conference name
 				newItem.conferenceName = confNameLocation.shift();
 				
 				// Save the location
-				newItem.place = confNameLocation.pop();
-				if (confNameLocation.length) newItem.place = confNameLocation.pop() + ", " + newItem.place;
+				if(confNameLocation.length > 2) {
+					newItem.place = confNameLocation.shift() + ", "  + confNameLocation.pop();
+				} else if (confNameLocation.length) {
+					newItem.place = confNameLocation.shift();
+				}
 			}
 		}
+	} else {
+		if (items["Meeting Information"]) newItem.notes.push("Meeting Information: " + items["Meeting Information"]);
 	}
 	
 	// Save journal publication information: journal name, vol, issue, pages
-	if (items["Publication Information"]) {
-		journalInfo = items["Publication Information"].split('; ');
-		
-		// Save the journal name
-		if (journalInfo[0].indexOf("=") == -1) {
-			newItem.publicationTitle = journalInfo[0].replace(/\(.*\)/, '');
+	if (newItem.itemType == "journalArticle") {
+		if (items["Publication Information"]) {
+			journalInfo = items["Publication Information"].split('; ');
+			
+			// Save the journal name
+			if (journalInfo[0].indexOf("=") == -1) {
+				newItem.publicationTitle = journalInfo[0].replace(/\(.*\)/, '');
+			}
+			
+			for (var i in journalInfo) {
+				
+				var content =journalInfo[i];
+				
+				// Save the volume
+				if (content.indexOf("Volume") != -1) {
+					newItem.volume = content.replace(/Volume /, '');
+				}
+				
+				// Save the page numbers
+				if (content.match(/^(.*)[0-9]+-[0-9]+$/)) {
+					newItem.pages = content;
+				}
+				
+				// Save the issue number
+				if (content.indexOf("no.") != -1) {
+					newItem.issue = content.replace(/no. /, '');
+				} else if (content.indexOf("Issue") != -1) {
+					newItem.issue = content.replace(/Issue /, '');
+				}
+				
+				// Save the ISSN
+				if (ZU.cleanISSN) {
+					Z.debug("Found ISSN function")
+					if (issn) newItem.ISSN = issn;
+				}
+			}
 		}
-		
-		for (var i in journalInfo) {
-			
-			var content =journalInfo[i];
-			
-			// Save the volume
-			if (content.indexOf("Volume") != -1) {
-				newItem.volume = content.replace(/Volume /, '');
-			}
-			
-			// Save the page numbers
-			if (content.match(/^(.*)[0-9]+-[0-9]+$/)) {
-				newItem.pages = content;
-			}
-			
-			// Save the issue number
-			if (content.indexOf("no.") != -1) {
-				newItem.issue = content.replace(/no. /, '');
-			} else if (content.indexOf("Issue") != -1) {
-				newItem.issue = content.replace(/Issue /, '');
-			}
-			
-			// Save the ISSN
-			if (ZU.cleanISSN) {
-				Z.debug("Found ISSN function")
-				if (issn) newItem.ISSN = issn;
-			}
-		}
+	} else {
+		if (items["Publication Information"]) newItem.notes.push("Publication Information: " + items["Publication Information"]);
 	}
 	
-	// Save the title
-	if (items["Title"]) newItem.title = items["Title"];
+	// Save the report/paper number
+	if (items["Report/Patent Number"]) {
+		if (newItem["reportNumber"]) {
+			newItem.reportNumber = items["Report/Patent Number"];
+		} else {
+			newItem.notes.push("Report/Patent Number: " + items["Report/Patent Number"]);
+		}
+	}
 	
 	// Save the abstract
 	newItem.abstractNote = items["Abstract"];
 	
-	// Save notes
+	// Store extra info as notes
+	if (items["Document ID"]) newItem.notes.push("Document ID: " + items["Document ID"]);
+	if (items["Accession Number"]) newItem.notes.push("Accession Number: " + items["Accession Number"]);
+	if (items["Subject Category"]) newItem.notes.push("Subject Category: " + items["Subject Category"]);
+	if (items["Publisher Information"]) newItem.notes.push("Publisher Information: " + items["Publisher Information"]);
+	if (items["Financial Sponsor"]) newItem.notes.push("Financial Sponsor: " + items["Financial Sponsor"]);
+	if (items["Organization Source"]) newItem.notes.push("Organization Source: " + items["Organization Source"]);
+	if (items["Description"]) newItem.notes.push("Description: " + items["Description"]);
+	if (items["Imprint And Other Notes"]) newItem.notes.push("Imprint And Other Notes: " + items["Imprint And Other Notes"]);
 	if (items["Notes"]) newItem.notes.push(items["Notes"]);
 	
-	newItem.complete();
+	//newItem.complete();
 }
 
 function doWeb(doc, url) {
