@@ -2,14 +2,14 @@
 	"translatorID": "fc3ac6f7-b461-49fe-879c-dd234f9c101c",
 	"label": "LIbrary Catalog (SLIMS)",
 	"creator": "Sebastian Karcher",
-	"target": "/libsenayan/index\\.php",
+	"target": "(^https?://makassarlib\\.net|^https?://kit\\.ft\\.ugm\\.ac\\.id/ucs|/libsenayan)/index\\.php",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2013-08-24 16:46:37"
+	"lastUpdated": "2013-08-26 22:37:21"
 }
 
 /*
@@ -37,7 +37,7 @@
 function detectWeb(doc, url) {
 	
 	if (url.match(/show_detail&id=/)) return "book";
-	else if (ZU.xpathText(doc, '//div[contains(@class, "item")]/a[@class="titleField"]')) return "multiple"
+	else if (ZU.xpathText(doc, '//div[contains(@class, "item alterList")]/a')) return "multiple"
 	
 }
 	
@@ -47,7 +47,7 @@ function doWeb(doc, url){
 	var articles = new Array();
 	if(detectWeb(doc, url) == "multiple") { 
 		var items = {};
-		var titles = doc.evaluate('//div[contains(@class, "item")]/a[@class="titleField"]', doc, null, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//div[contains(@class, "item alterList")]/a', doc, null, XPathResult.ANY_TYPE, null);
 		var title;
 		while (title = titles.iterateNext()) {
 			items[title.href] = title.textContent;
