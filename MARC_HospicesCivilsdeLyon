@@ -71,6 +71,43 @@ function clean(value) {
 	 
 };
 
+//Correspondance des labels avec les zones 4xx //Matching Notes Labels with 4xx fields
+	var Label =	{
+	'422':'<b>Est un suplément&nbsp;:&nbsp;</b>',
+	'423':'<b>Est publié avec&nbsp;:&nbsp;</b>',
+	'424':'<b>Est mis à jour Par&nbsp;:&nbsp;</b>',
+	'425':'<b>Met à jour&nbsp;:&nbsp;</b>',
+	'430':'<b>Suite de&nbsp;:&nbsp;</b>',
+	'432':'<b>Remplace&nbsp;:&nbsp;</b>',
+	'433':'<b>Remplace partiellement&nbsp;:&nbsp;</b>',
+	'434':'<b>Absorbe&nbsp;:&nbsp;</b>',
+	'436':'<b>Fusion de&nbsp;:&nbsp;</b>',
+	'440':'<b>Devient&nbsp;:&nbsp;</b>',
+	'442':'<b>Remplacé par&nbsp;:&nbsp;</b>',
+	'447':'<b>Fusionne avec&nbsp;:&nbsp;</b>',
+	//'463':'<b>Source&nbsp;:&nbsp;</b>',
+	'488':'<b>Voir aussi le document&nbsp;:&nbsp;</b>',
+	'300':'<b>Notes sur le document&nbsp;:&nbsp;</b>',
+};
+
+//Test de la valeur du tag des zones 4xx
+function LabelsforNotes(text) {
+	var pullRe = /[0-9]+/;
+	var m = pullRe.exec(text);
+	if(m) {
+		return Label[m];
+	}
+}
+
+// Ajouter un label aux zones 4xx importées en notes
+function Notes400(text) {
+	var pullRe = /.*/;
+	var m = pullRe.exec(text);
+	if(m) {
+		return m[0]+'<br><br>';
+	}
+}
+
 //Modification des types Koha=>Zotero //Change Koha's types to Zotero's one
 function MapType(text) {
 	var pullRe = /[A-Z]+/;
@@ -298,14 +335,15 @@ record.prototype._associateDBField = function(item, fieldNo, part, fieldName, ex
 record.prototype._associateNotes = function(item, fieldNo, part) {
 	var field = this.getFieldSubfields(fieldNo);
 	var texts = [];	
-
+	var TagNote =fieldNo;
 	for(var i in field) {
 		for(var j=0; j<part.length; j++) {
 			var myPart = part.substr(j, 1);
 			if(field[i][myPart]) {
-				texts.push(clean(field[i][myPart]));
+				texts.push(LabelsforNotes(TagNote),Notes400(field[i][myPart])); //Prefix label + Note content
 			}
 		}
+
 	}
 	var text = texts.join(' ');
 	if (text.trim() != "")
@@ -337,7 +375,7 @@ record.prototype.translate = function(item) {
 		// Extract ISBN
 		this._associateDBField(item, "010", "a", "ISBN", pullISBN);
 		// Extract ISSN
-		this._associateDBField(item, "011", "a", "ISSN", pullISBN);
+		this._associateDBField(item, "011", "a", "ISBN", pullISBN);
 		// Extract ISSN source
 		this._associateDBField(item, "463", "x", "ISSN", pullISBN);
 		// Extract ISBN source
@@ -407,7 +445,9 @@ record.prototype.translate = function(item) {
 		this._associateNotes(item, "440", "t");
 		this._associateNotes(item, "442", "t");
 		this._associateNotes(item, "447", "t");
-		
+		//this._associateNotes(item, "463", "t");
+		this._associateNotes(item, "488", "t");
+		this._associateNotes(item, "300", "a");
 		
 		// Extraction des mots-clés //Keywords
 		
@@ -444,6 +484,9 @@ record.prototype.translate = function(item) {
 
 			item.title += ' ' + title.e;
 		}
+		//Extraction des titres ISO
+		this._associateDBField(item, "531", "a", "shortTitle");
+
 		
 		// Extract Mention d'édition
 		this._associateDBField(item, "205", "a", "edition");
