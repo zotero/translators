@@ -1,7 +1,7 @@
 {
-	"translatorID": "9cb70025-a888-4a29-a210-93ec52da40d4",
-	"label": "BibTeX",
-	"creator": "Simon Kornblith, Richard Karnesky and Emiliano heyns (Revisited by fraba)",
+	"translatorID": "c8b2103e-0a25-44f3-8a4a-f1502872f080",
+	"label": "BibTeX fraba",
+        "creator": "Simon Kornblith, Richard Karnesky and Emiliano heyns (Revisited by fraba)",
 	"target": "bib",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
@@ -15,8 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "Mon Aug 26 23:57:00 EST 2013"
-"
+	"lastUpdated": "Tue Aug 27 10:39:05 EST 2013"
 }
 
 /* This translator is tailor made for working with Biblatex and Biber
