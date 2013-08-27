@@ -15,7 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "Tue Aug 27 10:39:05 EST 2013"
+	"lastUpdated": "Mon Aug 26 23:57:00 EST 2013"
 }
 
 /* This translator is tailor made for working with Biblatex and Biber
@@ -26,6 +26,9 @@
  *   - Added capitalisation of first word after colon, question mark and exclamation mark in title and booktitle
  *   - Improved (or fixed) the regex to curly bracket protect the capitalised words. This allows 
  *     correct rendering of capitalised word when sentence case is required by the citation style;
+ *   - Added substitution of quotation marks for compatibility with Latex;
+ *   - Added substitution of "–" (EN DASH, utf-8: E2 80 93) for double "--" (HYPHEN-MINUS, utf-8: 2 D);
+ *   - Removed all non-alphanumeric characters from citeKey
  *       
  */
 
@@ -2149,6 +2152,18 @@ function writeField(field, value, isMacro) {
 		    value = surroundCaps(value);
 		}
 
+	    // Replace quotation marks for compatibility with Latex
+	    if (field == "title" || field == "booktitle" || field == "abstract") {
+		value = value.replace("“", "``");
+		value = value.replace("”", "\'\'");
+		value = value.replace("‘", "`");
+		value = value.replace("’", "\'");
+	    }
+
+	    // Replace "–" (EN DASH, utf-8: E2 80 93) with double "--" (HYPHEN-MINUS, utf-8: 2 D) -- Subtle difference...
+	    if (field == "pages") {
+		value = value.replace("–", "--");
+	    }
 	        
 	}
 	if (Zotero.getOption("exportCharset") != "UTF-8") {
@@ -2261,6 +2276,7 @@ var numberRe = /^[0-9]+/;
 // in includes the indefinite articles of English, German, French and Spanish, as well as a small set of English prepositions whose 
 // force is more grammatical than lexical, i.e. which are likely to strike many as 'insignificant'.
 // The assumption is that most who want a title word in their key would prefer the first word of significance.
+// Also removed all non alphanumeric characters
 var citeKeyTitleBannedRe = /\b(a|an|the|some|from|on|in|to|of|do|with|der|die|das|ein|eine|einer|eines|einem|einen|un|une|la|le|l\'|el|las|los|al|uno|una|unos|unas|de|des|del|d\')(\s+|\b)/g;
 var citeKeyConversionsRe = /%([a-zA-Z])/;
 var citeKeyCleanRe = /[^a-z0-9\!\$\&\*\+\-\.\/\:\;\<\>\?\[\]\^\_\`\|]+/g;
@@ -2274,7 +2290,7 @@ var citeKeyConversions = {
 	},
 	"t":function (flags, item) {
 		if (item["title"]) {
-			return item["title"].toLowerCase().replace(citeKeyTitleBannedRe, "").split(/\s+/g)[0];
+			return item["title"].toLowerCase().replace(citeKeyTitleBannedRe, "").split(/\s+/g)[0].replace(/\W/g, "");
 		}
 		return "";
 	},
