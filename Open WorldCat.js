@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-06-11 06:37:37"
+	"lastUpdated": "2013-08-28 18:51:01"
 }
 
 /**
@@ -39,23 +39,25 @@ function scrape(doc, url, callDoneWhenFinished) {
 	//we need a different replace for item displays from search results
 	if (!url) url = doc.location.href;
 	if (url.match(/\?/)) {
-		var newurl = url.replace(/\&[^/]*$|$/, "&client=worldcat.org-detailed_record&page=endnote");
+		var newurl = url.replace(/\&[^/]*$|$/, "&client=worldcat.org-detailed_record&page=endnotealt");
 	} else {
-		var newurl = url.replace(/\&[^/]*$|$/, "?client=worldcat.org-detailed_record&page=endnote");
+		var newurl = url.replace(/\&[^/]*$|$/, "?client=worldcat.org-detailed_record&page=endnotealt");
 	}
 	//Z.debug(newurl)
 	Zotero.Utilities.HTTP.doGet(newurl, function (text) {
 		//2013-05-28 RIS export currently has messed up authors
 		// e.g. A1  - Gabbay, Dov M., Woods, John Hayden., Hartmann, Stephan, 
 		text = text.replace(/^((?:A1|ED)\s+-\s+)(.+)/mg, function(m, tag, value) {
-			var authors = value.replace(/[,\s]+$/, '')
-				.split('.,');
-			var replStr = '';
-			for(var i=0, n=authors.length; i<n; i++) {
-				replStr += tag + authors[i].trim() + '\n';
-			}
-			return replStr.trim();
-		});
+				var authors = value.replace(/[,\s]+$/, '')
+					.split(/[.,],/);
+				var replStr = '';
+				var author;
+				for(var i=0, n=authors.length; i<n; i++) {
+					author = authors[i].trim();
+					if(author) replStr += tag + author + '\n';
+				}
+				return replStr.trim();
+			});
 		
 		//Zotero.debug("RIS: " + text)
 		
@@ -266,6 +268,43 @@ var testCases = [
 				"date": "2006",
 				"ISBN": "0521770599 0521779243  9780521770590 9780521779241",
 				"abstractNote": "\"Adam Smith is best known as the founder of scientific economics and as an early proponent of the modern market economy. Political economy, however, was only one part of Smith's comprehensive intellectual system. Consisting of a theory of mind and its functions in language, arts, science, and social intercourse, Smith's system was a towering contribution to the Scottish Enlightenment. His ideas on social intercourse, in fact, also served as the basis for a moral theory that provided both historical and theoretical accounts of law, politics, and economics. This companion volume provides an up-to-date examination of all aspects of Smith's thought. Collectively, the essays take into account Smith's multiple contexts - Scottish, British, European, Atlantic, biographical, institutional, political, philosophical - and they draw on all his works, including student notes from his lectures. Pluralistic in approach, the volume provides a contextualist history of Smith, as well as direct philosophical engagement with his ideas.\"--Jacket."
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.worldcat.org/title/from-lanka-eastwards-the-ramayana-in-the-literature-and-visual-arts-of-indonesia/oclc/765821302",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"creators": [
+					{
+						"lastName": "Acri",
+						"firstName": "Andrea",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Creese",
+						"firstName": "Helen",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Griffiths",
+						"firstName": "Arlo",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"libraryCatalog": "Open WorldCat",
+				"language": "English",
+				"title": "From Laṅkā eastwards: the Rāmāyaṇa in the literature and visual arts of Indonesia",
+				"publisher": "KITLV Press",
+				"date": "2011",
+				"ISBN": "9067183849 9789067183840",
+				"shortTitle": "From Laṅkā eastwards"
 			}
 		]
 	}
