@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-11-11 17:35:08"
+	"lastUpdated": "2013-08-28 20:56:33"
 }
 
 function detectWeb(doc, url) {
@@ -157,8 +157,21 @@ function doWeb(doc, url) {
 			if (m) {
 				newUri = uri.replace(/frameset/, "marc");
 			} else {
-				var xpath = '//a[img[@src="/screens/marc_display.gif" or @src="/screens/ico_marc.gif" or @src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]] | //a[span/img[@src="/screens/marc_display.gif" or @src="/screens/ico_marc.gif" or @src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]';
-				newUri = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().href.replace(/frameset/, "marc");
+				var xpath = '//a[\
+						.//img[\
+							@src="/screens/marc_display.gif" or\
+							@src="/screens/ico_marc.gif" or\
+							@src="/screens/marcdisp.gif" or\
+							starts-with(@alt, "MARC ") or\
+							@src="/screens/regdisp.gif" or\
+							@alt="REGULAR RECORD DISPLAY"\
+						]\
+					]';
+				newUri = ZU.xpath(doc, xpath);
+				if(!newUri.length) newUri = ZU.xpath(doc, '//a[contains(@href, "/marc~")]');
+				if(!newUri.length) throw new Error("MARC link not found");
+				
+				newUri = newUri[0].href.replace(/frameset/, "marc");
 			}
 			pageByPage(marc, [newUri]);
 		} else {	// Search results page
