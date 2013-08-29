@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-12-08 07:22:47"
+	"lastUpdated": "2013-08-28 18:14:51"
 }
 
 function detectImport() {
@@ -520,6 +520,11 @@ record.prototype.translate = function(item) {
 		// Extract URL for electronic resources
 		this._associateDBField(item, "245", "h", "medium")
 		if (item.medium == "electronic resource") this._associateDBField(item, "856", "u", "url");
+		
+		//Field 264 instead of 260
+		if (!item.place) this._associateDBField(item, "264", "a", "place");
+		if (!item.publisher) this._associateDBField(item, "264", "b", "publisher");
+		if (!item.date) this._associateDBField(item, "264", "c", "date", pullNumber);
 		
 		//German
 		if (!item.place) this._associateDBField(item, "410", "a", "place");
