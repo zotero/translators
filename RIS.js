@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-07-16 20:29:17"
+	"lastUpdated": "2013-08-29 20:07:42"
 }
 
 function detectImport() {
@@ -720,7 +720,7 @@ function dateRIStoZotero(risDate, zField) {
 	var date = [];
 	//we'll be very lenient about formatting
 	//First, YYYY/MM/DD/other with everything but year optional
-	var m = risDate.match(/^(\d+)(?:\/(\d{0,2})\/(\d{0,2})(?:\/?(.*))?)?/);
+	var m = risDate.match(/^(\d+)(?:\/(\d{0,2})(?:\/(\d{0,2})(?:(?:\/|\s)([^\/]*))?)?)?$/);
 	var timeCheck, part;
 	if(m) {
 		date[0] = m[1];	//year
@@ -934,11 +934,11 @@ function completeItem(item) {
 var RIS_format = /^([A-Z][A-Z0-9]) {1,2}-(?: (.*))?$/; //allow empty entries
 var preserveNewLines = ['KW', 'L1', 'L2', 'L3'];
 function getLine() {
-	var entry, lastLineLength;
+	var entry, lastLineLength, maxLineLength = 0;
 	if(getLine.buffer) {
 		entry = getLine.buffer.match(RIS_format); //this should always match
 		if(entry[2] === undefined) entry[2] = '';
-		lastLineLength = entry[2].length;
+		maxLineLength = lastLineLength = entry[2].length;
 		getLine.buffer = undefined;
 	}
 
@@ -956,6 +956,7 @@ function getLine() {
 		} else if(temp) {
 			entry = temp;
 			lastLineLength = entry[0].length;
+			if(lastLineLength > maxLineLength) maxLineLength = lastLineLength;
 
 		//if this line didn't match, then we just attach it to the current value
 		//Try to figure out if this is supposed to be on a new line or not
@@ -968,10 +969,11 @@ function getLine() {
 			var newLineAdded = false;
 			//new lines would probably only be meaningful in notes and abstracts
 			if(entry[1] == 'AB' || entry[1] == 'N1' || entry[1] == 'N2') {
-				//if previous line was short, this would probably be on a new line
+				//if lines are not trimmed to ~80 characters or previous line was short,
+				// this would probably be on a new line
 				//Might consider looking for periods and capital letters
 				//empty lines imply new line
-				if(lastLineLength < 60 || nextLine.length == 0) {
+				if(maxLineLength > 85 || lastLineLength < 60 || nextLine.length == 0) {
 					nextLine = "\n" + nextLine;
 					newLineAdded = true;
 				}
@@ -991,6 +993,7 @@ function getLine() {
 			entry[0] += "\n" + rawLine;
 			entry[2] += nextLine;
 			lastLineLength = rawLine.length;
+			if(lastLineLength > maxLineLength) maxLineLength = lastLineLength;
 		}
 	}
 
