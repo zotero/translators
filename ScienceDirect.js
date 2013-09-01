@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-07-25 09:52:20"
+	"lastUpdated": "2013-09-01 10:40:52"
 }
 
 function detectWeb(doc, url) {
@@ -173,13 +173,14 @@ function scrapeByExport(doc) {
 		}
 
 		ZU.doPost('/science', post, function(text) {
-				//short title is stored in T2. Fix it to ST.
-				text = text.replace(/^T2\s/mg, 'ST ');
+				//T2 doesn't appear to hold the short title anymore. Sometimes has series title, so I'm mapping this to T3,
+				//although we currently don't recognize that in RIS
+				text = text.replace(/^T2\s/mg, 'T3 ');
 
 				//Certain authors sometimes have "role" prefixes
 				text = text.replace(
 					/^((?:A[U\d]|ED)\s+-\s+)Editor-in-Chief:\s+/mg, '$1');
-
+	
 				var translator = Zotero.loadTranslator("import");
 				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 				translator.setString(text);
