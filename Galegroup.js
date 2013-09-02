@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-04-17 19:39:50"
+	"lastUpdated": "2013-09-02 15:35:05"
 }
 
 /*
@@ -95,10 +95,13 @@ function doWeb(doc, url) {
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
-		var titles = doc.evaluate('//span[@class="title"]/a|//div[contains(@class, "Title")]/a|//li[@class="resultInfo"]/p/b/a', doc, null, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//span[@class="title"]/a|//div[contains(@class, "Title")]/a|//li[@class="resultInfo"]/p/b/a|//li[@class="resultsInstance"]/p[@class="subTitle"]/a', doc, null, XPathResult.ANY_TYPE, null);
 		var next_title;
 		while (next_title = titles.iterateNext()) {
-			items[next_title.href] = next_title.textContent;
+			var textContent = next_title.textContent;
+			// Strip trailing comma on some sites
+			textContent = textContent.replace(/\,$/, '');
+			items[next_title.href] = textContent;
 		}
 
 		Zotero.selectItems(items, function (items) {
@@ -163,7 +166,7 @@ var testCases = [
 				"attachments": [
 					{
 						"mimeType": "text/html",
-						"title": "Full Text (HTML)",
+						"title": "Full Text (HTML)"
 					}
 				],
 				"publicationTitle": "Chasqui",
@@ -196,10 +199,10 @@ var testCases = [
 				],
 				"tags": [],
 				"seeAlso": [],
-				"attachments":  [
+				"attachments": [
 					{
 						"mimeType": "text/html",
-						"title": "Full Text (HTML)",
+						"title": "Full Text (HTML)"
 					}
 				],
 				"title": "A digest of the law of actions and trials at nisi prius. By Isaac 'espinasse, of Gray's Inn, Esq. Barrister at Law. The third edition, corrected, with considerable additions from printed and manuscript cases. In two volumes. ...",
