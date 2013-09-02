@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-08-28 20:56:33"
+	"lastUpdated": "2013-09-01 23:10:59"
 }
 
 function detectWeb(doc, url) {
@@ -26,6 +26,7 @@ function detectWeb(doc, url) {
 // Persistent URL for item
 // http://bearcat.baylor.edu/record=b1540169~S7
 // http://innopac.cooley.edu/record=b507916~S0
+http://libcat.dartmouth.edu/record=b4054652~S1
 // Persistent URL for item, without suffix
 // http://luna.wellesley.edu/record=b2398784
 // Specific search parameters
@@ -49,7 +50,15 @@ function detectWeb(doc, url) {
 		}
 	}
 	// Next, look for the MARC button	
-	xpath = '//a[img[@src="/screens/marc_display.gif" or @src="/screens/ico_marc.gif" or @src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]] | //a[span/img[@src="/screens/marc_display.gif" or @src="/screens/ico_marc.gif" or @src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]';
+	xpath = '//a[img[@src="/screens/marc_display.gif" or @src="/screens/ico_marc.gif" or\
+				@src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or\
+				@src="/screens/regdisp.gif" or\
+				@alt="REGULAR RECORD DISPLAY"]] |\
+				//a[span/img[@src="/screens/marc_display.gif" or\
+				@src="/screens/ico_marc.gif" or @src="/screens/marcdisp.gif" or\
+				starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or\
+				@alt="REGULAR RECORD DISPLAY"]] |\
+				//a[contains(@href, "/marc~")]';
 	elmt = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if(elmt) {
 		return "book";
@@ -290,6 +299,51 @@ var testCases = [
 		"type": "web",
 		"url": "http://clues.concordia.ca/search/?searchtype=X&SORT=D&searcharg=history+of+communication",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://libcat.dartmouth.edu/record=b4054652~S1",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "John",
+						"lastName": "Gray",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "The death of utopia -- Enlightenment and terror in the twentieth century -- Utopia enters the mainstream -- The Americanization of the apocalypse -- Armed missionaries --Post-apocalypse"
+					}
+				],
+				"tags": [
+					"Religion and politics",
+					"Utopias",
+					"Revolutions",
+					"Religious aspects",
+					"Conservatism",
+					"Religious aspects",
+					"World politics",
+					"20th century",
+					"World politics",
+					"21st century"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"ISBN": "9780374105983",
+				"title": "Black mass: apocalyptic religion and the death of utopia",
+				"edition": "1st American ed",
+				"place": "New York",
+				"publisher": "Farrar Straus and Giroux",
+				"date": "2007",
+				"numPages": "242",
+				"callNumber": "BL65.P7 G69 2007",
+				"libraryCatalog": "libcat.dartmouth.edu Library Catalog",
+				"shortTitle": "Black mass"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
