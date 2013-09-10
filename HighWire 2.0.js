@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-09-10 12:00:37"
+	"lastUpdated": "2013-09-10 17:34:56"
 }
 
 /*
@@ -314,7 +314,7 @@ function detectWeb(doc, url) {
 	if (!highwiretest) {
 		// lets hope this installations don't tweak this...
 		highwiretest = ZU.xpath(doc,
-				"//link[@href='/shared/css/hw-global.css']|//meta[@name='HW.identifier']").length;
+				"//link[@href='/shared/css/hw-global.css']|//link[contains(@href,'highwire.css')]").length;
 	}
 	
 	if(highwiretest) {
