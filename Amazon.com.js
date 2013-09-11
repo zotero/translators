@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-06-30 22:37:02"
+	"browserSupport": "gcsb",
+	"lastUpdated": "2013-09-05 21:44:07"
 }
 
 var searchRe = new RegExp('^https?://(?:www\.)?amazon\.([^/]+)/(gp/search/|(gp/)?registry/(wishlist|registry)|exec/obidos/search-handle-url/|s/|s\\?|[^/]+/lm/|gp/richpub/)');
@@ -82,8 +82,8 @@ function getItem(doc) {
 	// First look for ISBN and use it for search if possible. We do this instead of using
 	// the API because it will give us the place published, and because it's less likely to
 	// be broken by site changes.
-	var isbns = ZU.xpath(doc, '//li[b/text() = "ISBN-13:" or b/text() = "ISBN-10:" or b/text() = "Page Numbers Source ISBN:"]/text() | \
-	                           //tr[td[1]/span/text() = "ISBN-13" or td[1]/span/text() = "ISBN-10"]/td[2]/span/text()');
+	var isbns = ZU.xpath(doc, '//li[b/text() = "ISBN-13:" or b/text() = "ISBN-10:" or b/text() = "Page Numbers Source ISBN:" or b/text()="ISBN:"]/text() | \
+							   //tr[td[1]/span/text() = "ISBN-13" or td[1]/span/text() = "ISBN-10"]/td[2]/span/text()');
 	if(isbns.length) {
 		Zotero.debug("Retrieving by ISBN search")
 		var isbn = isbns[0].nodeValue.trim(),
@@ -147,7 +147,7 @@ function scrape(doc) {
 	// Old design
 	var titleNode = ZU.xpath(doc, '//span[@id="btAsinTitle"]/text()')[0] ||
 	// New design encountered 06/30/2013
-	                ZU.xpath(doc, '//h1[@id="title"]/text()')[0];
+					ZU.xpath(doc, '//h1[@id="title"]/text()')[0];
 	item.title = titleNode.nodeValue.replace(/(?: \([^)]*\))+$/, "");
 	
 	// Extract info into an array
@@ -520,6 +520,40 @@ var testCases = [
 				"place": "Milano",
 				"date": "2008",
 				"ISBN": "9788882038670 888203867X"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.amazon.cn/%E5%9B%BE%E4%B9%A6/dp/B007CUSP3A",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "吕士楠",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Amazon.com Link",
+						"snapshot": false,
+						"mimeType": "text/html"
+					}
+				],
+				"libraryCatalog": "Open WorldCat",
+				"language": "Chinese",
+				"title": "汉语语音合成: 原理和技术",
+				"publisher": "科学出版社",
+				"place": "北京",
+				"date": "2012",
+				"ISBN": "9787030329202 7030329201",
+				"shortTitle": "汉语语音合成"
 			}
 		]
 	}
