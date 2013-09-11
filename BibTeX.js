@@ -15,7 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-08-01 10:05:00"
+	"lastUpdated": "2013-09-10 22:11:00"
 }
 
 function detectImport() {
@@ -2355,7 +2355,8 @@ function doExport() {
 			if(item.itemType == "bookSection" || item.itemType == "conferencePaper") {
 				writeField("booktitle", item.publicationTitle);
 			} else if(Zotero.getOption("useJournalAbbreviation")){
-				writeField("journal", item.journalAbbreviation);
+				if(item.journalAbbreviation) writeField("journal", item.journalAbbreviation);
+				else writeField("journal", item.publicationTitle);
 			} else {
 				writeField("journal", item.publicationTitle);
 			}
