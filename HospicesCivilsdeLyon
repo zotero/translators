@@ -2,7 +2,7 @@
 	"translatorID": "26ab1a2b-8740-4f79-a3e7-e0df62818839",
 	"label": "HospicesCivilsdeLyon",
 	"creator": "Sebastian Karcher, Hospices Civils de Lyon",
-	"target": "(.chu-lyon|.cclin-france|.hcl)[^/]*.fr[^/]*/cgi-bin/koha/(opac-(detail|MARCdetail|search|shelves)|catalogue)",
+	"target": "(\.chu-lyon|\.cclin-france|\.hcl)[^/]*\.fr[^/]*/cgi-bin/koha/(opac-(detail|MARCdetail|search|shelves)|catalogue)",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 25,
