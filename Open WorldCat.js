@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-08-28 18:51:01"
+	"lastUpdated": "2013-09-12 18:19:47"
 }
 
 /**
@@ -35,7 +35,7 @@ function getZoteroType(iconSrc) {
  *
  */
 
-function scrape(doc, url, callDoneWhenFinished) {
+function scrape(doc, url, callDoneWhenFinished, itemData) {
 	//we need a different replace for item displays from search results
 	if (!url) url = doc.location.href;
 	if (url.match(/\?/)) {
@@ -45,19 +45,23 @@ function scrape(doc, url, callDoneWhenFinished) {
 	}
 	//Z.debug(newurl)
 	Zotero.Utilities.HTTP.doGet(newurl, function (text) {
+		//Z.debug(text);
+		
 		//2013-05-28 RIS export currently has messed up authors
 		// e.g. A1  - Gabbay, Dov M., Woods, John Hayden., Hartmann, Stephan, 
 		text = text.replace(/^((?:A1|ED)\s+-\s+)(.+)/mg, function(m, tag, value) {
-				var authors = value.replace(/[,\s]+$/, '')
+			var authors = value.replace(/[.,\s]+$/, '')
 					.split(/[.,],/);
-				var replStr = '';
+			var replStr = '';
 				var author;
-				for(var i=0, n=authors.length; i<n; i++) {
+			for(var i=0, n=authors.length; i<n; i++) {
 					author = authors[i].trim();
 					if(author) replStr += tag + author + '\n';
-				}
-				return replStr.trim();
-			});
+			}
+			return replStr.trim();
+		});
+		//ebooks are exported as ELEC. We need them as BOOK
+		text = text.replace(/^TY\s+-\s+ELEC\s*$/mg, 'TY  - BOOK');
 		
 		//Zotero.debug("RIS: " + text)
 		
@@ -75,20 +79,18 @@ function scrape(doc, url, callDoneWhenFinished) {
 			item.title = item.title.replace(/\s+:/, ":")
 			
 			
-			//creators have period after firstName
+			//correct field mode for corporate authors
 			for (i in item.creators) {
-				if (item.creators[i].firstName){
-				item.creators[i].firstName = item.creators[i].firstName.replace(/\.$/, "");
-				}
-				else {
-					item.creators[i].lastName = item.creators[i].lastName.replace(/\.$/, "");
-					item.creators[i].fieldMode=1;			
+				if (!item.creators[i].firstName){
+					item.creators[i].fieldMode=1;
 				}
 			}
-			//We want ebooks to be treated like books, not webpages (is ISBN the best choice here?)
-			if (item.itemType == "webpage" && item.ISBN) {
-				item.itemType = "book";
+			
+			//attach notes
+			if(itemData && itemData.notes) {
+				item.notes.push({note: itemData.notes});
 			}
+			
 			item.complete();
 		});
 		translator.translate();
@@ -112,6 +114,13 @@ function generateItem(doc, node) {
 		type = getZoteroType(type);
 		if (type) item.itemType = type;
 	}
+	
+	//check under Material Type
+	var matType = ZU.xpathText(doc, '//div[@id="details"]//tr[./th[normalize-space(text())="Material Type:"]]/td');
+	if(matType && ZU.trimInternal(matType).toLowerCase() == 'conference publication') {
+		item.itemType = 'conferencePaper';
+	}
+	
 	return item;
 }
 
@@ -136,21 +145,44 @@ function doWeb(doc, url) {
 	var articles = [];
 	if (doc.evaluate('//div[@class="name"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) { //search results view
 		if (detectWeb(doc) == "multiple") {
-			var titles = doc.evaluate('//div[@class="name"]/a', doc, null, XPathResult.ANY_TYPE, null);
+			var titles = doc.getElementsByClassName("result");
 			var items = {};
-			var title;
-			while (title = titles.iterateNext()) {
-				items[title.href] = title.textContent;
+			var itemData = {};
+			var title, notes, url;
+			for(var i=0, n=titles.length; i<n; i++) {
+				title = ZU.xpath(titles[i], './div[@class="name"]/a');
+				if(!title.length || !title[0].href) continue;
+				url = title[0].href;
+				items[url] = title[0].textContent;
+				
+				notes = ZU.xpath(titles[i], './div[@class="description" and ./strong[contains(text(), "Notes")]]');
+				var trimStrong = false;
+				if(!notes.length) {
+					//maybe we're looking at our own list
+					notes = ZU.xpath(titles[i], './div/div[@class="description"]/div[contains(@id,"saved_comments_") and normalize-space(text())]');
+				}
+				if(notes.length) {
+					notes = ZU.trimInternal(notes[0].innerHTML)
+						.replace(/^<strong>\s*Notes:\s*<\/strong>\s*<br>\s*/i, '');
+					
+					if(notes) {
+						itemData[url] = {
+							notes: ZU.unescapeHTML(ZU.unescapeHTML(notes)) //it's double-escaped on WorldCat
+						};
+					}
+				}
 			}
 			Zotero.selectItems(items, function (items) {
 				if (!items) {
 					return true;
 				}
 				for (var i in items) {
-					articles.push(i);
+					(function(url) {
+						ZU.processDocuments(url, function(newUrl, newDoc) {
+							scrape(newUrl, newDoc, false, itemData[url]);
+						});
+					})(i);
 				}
-				//Z.debug(articles)
-				Zotero.Utilities.processDocuments(articles, scrape);
 			});
 		} else { //single item in search results, don't display a select dialog
 			var title = doc.evaluate('//div[@class="name"]/a[1]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
@@ -305,6 +337,34 @@ var testCases = [
 				"date": "2011",
 				"ISBN": "9067183849 9789067183840",
 				"shortTitle": "From Laṅkā eastwards"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.worldcat.org/title/newmans-relation-to-modernism/oclc/676747555",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Smith",
+						"firstName": "Sydney F",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"libraryCatalog": "Open WorldCat",
+				"language": "English",
+				"url": "http://www.archive.org/details/a626827800smituoft/",
+				"title": "Newman's relation to modernism",
+				"publisher": "s.n.",
+				"place": "London",
+				"date": "1912",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}
