@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-07-27 16:26:13"
+	"lastUpdated": "2013-09-10 17:34:56"
 }
 
 /*
@@ -35,7 +35,8 @@ function hasMultiple(doc, url) {
 		doc.title.indexOf("Early Edition") != -1 ||
 		url.match(/cgi\/collection\/./) ||
 		url.indexOf("content/firstcite") != -1 ||
-		url.match(/content\/early\/recent$/);
+		url.match(/content\/early\/recent$/)||
+		(url.match(/content\//) && ZU.xpathText(doc, '//div[@class="toc-citation"]'));
 }
 
 //get abstract
@@ -313,7 +314,7 @@ function detectWeb(doc, url) {
 	if (!highwiretest) {
 		// lets hope this installations don't tweak this...
 		highwiretest = ZU.xpath(doc,
-				"//link[@href='/shared/css/hw-global.css']").length;
+				"//link[@href='/shared/css/hw-global.css']|//link[contains(@href,'highwire.css')]").length;
 	}
 	
 	if(highwiretest) {
@@ -331,12 +332,15 @@ function doWeb(doc, url) {
 		if (!url) url = doc.documentElement.location;
 
 		//get a list of URLs to import
-		if ( doc.title.indexOf("Table of Contents") != -1 ||
+		if ( doc.title.indexOf("Table of Contents") != -1 ||		
 			url.indexOf("content/firstcite") != -1 ) {
 			var searchx = '//li[contains(@class, "toc-cit") and \
 				not(ancestor::div/h2/a/text() = "Correction" or \
 					ancestor::div/h2/a/text() = "Corrections")]';
 			var titlex = './/h4';
+		} else if (doc.title.indexOf("In this Issue") != -1){
+			var searchx = '//div[@class="toc-citation"]'
+			var titlex = './/div[@class="highwire-cite-title"]'
 		} else if ( url.indexOf("content/early/recent") != -1 ||
 					doc.title.indexOf("Early Edition") != -1) {
 						
@@ -1132,6 +1136,73 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://amj.aom.org/search?tmonth=Dec&pubdate_year=&submit=yes&submit=yes&submit=Submit&andorexacttitle=and&format=standard&firstpage=&fmonth=Jan&title=&hits=50&tyear=2013&titleabstract=&journalcode=amj&journalcode=amr&volume=&sortspec=relevance&andorexacttitleabs=and&author2=&andorexactfulltext=and&fyear=2008&author1=&doi=&fulltext=culture%20cultural&FIRSTINDEX=100",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://ajpheart.physiology.org/content/235/5/H553",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "C. F.",
+						"lastName": "Babbs",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "S. J.",
+						"lastName": "Whistler",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "G. K.",
+						"lastName": "Yim",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					},
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"title": "Temporal stability and precision of ventricular defibrillation threshold data",
+				"publicationTitle": "American Journal of Physiology - Heart and Circulatory Physiology",
+				"rights": "Copyright © 1978 the American Physiological Society",
+				"section": "Article",
+				"publisher": "American Physiological Society",
+				"institution": "American Physiological Society",
+				"company": "American Physiological Society",
+				"label": "American Physiological Society",
+				"distributor": "American Physiological Society",
+				"date": "11/01/1978",
+				"url": "http://ajpheart.physiology.org/content/235/5/H553",
+				"language": "en",
+				"extra": "Over 200 measurements of the minimum damped sinusoidal current and energy for transchest electrical ventricular defibrillation (ventricular defibrillation threshold) were made to determine the stability and precision of threshold data in 15 pentobarbital-anesthetized dogs. Threshold was determined by repeated trials of fibrillation and defibrillation with successive shocks of diminishing current, each 10% less than that of the preceding shock. The lowest shock intensity that defibrillated was defined as threshold. In three groups of five dogs each, threshold was measured at intervals of 60, 15, and 5 min over periods of 8, 5, and 1 h, respectively. Similar results were obtained for all groups. There was no significant change in mean threshold current with time. Owing to a decrease in transchest impedance, threshold delivered energy decreased by 10% during the first hour of testing. The standard deviations for threshold peak current and delivered energy in a given animal were 11% and 22% of their respective mean values. Arterial blood pH, Pco2, and Po2 averaged change of pH, PCO2 and PO2 were not significantly different from zero. The data demonstrate that ventricular defibrillation threshold is a stable physiological parameter that may be measured with reasonable precision.\nPMID: 31797",
+				"volume": "235",
+				"issue": "5",
+				"pages": "H553-H558",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "ajpheart.physiology.org",
+				"abstractNote": "Over 200 measurements of the minimum damped sinusoidal current and energy for transchest electrical ventricular defibrillation (ventricular defibrillation threshold) were made to determine the stability and precision of threshold data in 15 pentobarbital-anesthetized dogs. Threshold was determined by repeated trials of fibrillation and defibrillation with successive shocks of diminishing current, each 10% less than that of the preceding shock. The lowest shock intensity that defibrillated was defined as threshold. In three groups of five dogs each, threshold was measured at intervals of 60, 15, and 5 min over periods of 8, 5, and 1 h, respectively. Similar results were obtained for all groups. There was no significant change in mean threshold current with time. Owing to a decrease in transchest impedance, threshold delivered energy decreased by 10% during the first hour of testing. The standard deviations for threshold peak current and delivered energy in a given animal were 11% and 22% of their respective mean values. Arterial blood pH, Pco2, and Po2 averaged change of pH, PCO2 and PO2 were not significantly different from zero. The data demonstrate that ventricular defibrillation threshold is a stable physiological parameter that may be measured with reasonable precision."
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://ajpheart.physiology.org/content/235/5",
 		"items": "multiple"
 	}
 ]
