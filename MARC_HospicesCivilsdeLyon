@@ -5,7 +5,7 @@
 	"target": "marc",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 125,
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
