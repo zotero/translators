@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-09-13 17:03:09"
+	"lastUpdated": "2013-09-15 10:38:09"
 }
 
 /*
@@ -27,8 +27,8 @@ Primos with showPNX.jsp installed:
 */
 
 function getSearchResults(doc) {
-	var linkXPath = '(.//h2[@class="EXLResultTitle"]' //title link
-		+ '|.//li[starts-with(@id,"exlidResult") and substring(@id,string-length(@id)-10)="-DetailsTab"])/a[1]'; //details link
+	var linkXPath = '((.//h2[@class="EXLResultTitle"]' //title link
+		+ '|.//li[starts-with(@id,"exlidResult") and substring(@id,string-length(@id)-10)="-DetailsTab"])/a[@href])[1]'; //details link
 	var resultsXPath = '//tr[starts-with(@id, "exlidResult")][' + linkXPath + ']';
 	//Z.debug(resultsXPath);
 	var results = ZU.xpath(doc, resultsXPath);
@@ -298,7 +298,7 @@ function importPNX(text) {
 	item.DOI = ZU.xpathText(doc, '//addata/doi');
 	item.issue = ZU.xpathText(doc, '//addata/issue');
 	item.volume = ZU.xpathText(doc, '//addata/volume');
-	item.publication = ZU.xpathText(doc, '//addata/jtitle');
+	item.publicationTitle = ZU.xpathText(doc, '//addata/jtitle');
 	item.pages = ZU.xpathText(doc, '//addata/pages');
 	
 	// does callNumber get stored anywhere else in the xml?
