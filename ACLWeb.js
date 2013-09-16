@@ -2,14 +2,14 @@
 	"translatorID": "f4a5876a-3e53-40e2-9032-d99a30d7a6fc",
 	"label": "ACL",
 	"creator": "Nathan Schneider",
-	"target": "^https?://(www[.])?aclweb\\.org/anthology-new/[^#]+",
+	"target": "^https?://(www[.])?aclweb\\.org/anthology/[^#]+",
 	"minVersion": "1.0.7",
 	"maxVersion": "",
 	"priority": 100,
-	"browserSupport": "gcsbv",
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2012-01-01 01:42:16"
+	"browserSupport": "gcsbv",
+	"lastUpdated": "2013-09-16 00:20:13"
 }
 
 // based on ACM translator
@@ -42,7 +42,7 @@ function scrapeIndex(doc, items) {
 	else {
 		bibFileNodes = doc.evaluate('//a[substring(@href, string-length(@href)-3, 4) = ".bib"]', doc, null, XPathResult.ANY_TYPE, null);
 
-		results = new Array();
+		results = [];
 		doImport = false;
 
 		var bibFileNode = bibFileNodes.iterateNext();
@@ -162,24 +162,22 @@ function doWeb(doc, url) {
 	var searchResult = true;
 	if(searchResult) {
 		var possibleItems = scrapeIndex(doc, null);	// items to present to user
-
-		items = Zotero.selectItems(possibleItems);	// items selected by the user
-		if(!items) return true;
-
-		scrapeIndex(doc, items);
-
+		Zotero.selectItems(possibleItems, function (items) {
+			if (!items) {
+				return true;
+			}
+			scrapeIndex(doc, items)	
+		});
 	} else {
 	  //not implemented yet
 		scrape(doc);
 	}
-
-	Zotero.wait();
 }
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://aclweb.org/anthology-new/P/P93/",
+		"url": "http://aclweb.org/anthology/P/P93/",
 		"items": "multiple"
 	}
 ]
