@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-09-17 13:42:29"
+	"lastUpdated": "2013-09-17 14:00:21"
 }
 
 /*
@@ -234,11 +234,14 @@ function init(doc, url, callback, forceLoadRDF) {
 
 		if(_prefixes[prefix]) {
 			var prop = tag.substr(delimIndex+1, 1).toLowerCase()+tag.substr(delimIndex+2);
-			//bib, bibo, zotero types are special, they use rdf:type to define type
-			if(prop == 'type' && (prefix == 'bib' || prefix == 'bibo' || prefix == 'z')) {
+			
+			//bib and bibo types are special, they use rdf:type to define type
+			var specialNS = [_prefixes['bib'], _prefixes['bibo']];
+			if(prop == 'type' && specialNS.indexOf(_prefixes[prefix]) != -1) {
 				value = _prefixes[prefix] + value;
 				prefix = 'rdf';
 			}
+			
 			// This debug is for seeing what is being sent to RDF
 			//Zotero.debug(_prefixes[prefix]+prop +"=>"+value);
 			statements.push([url, _prefixes[prefix]+prop, value]);
