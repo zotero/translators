@@ -2,14 +2,14 @@
 	"translatorID": "d0b1914a-11f1-4dd7-8557-b32fe8a3dd47",
 	"label": "EBSCOhost",
 	"creator": "Simon Kornblith, Michael Berkowitz, Josh Geller",
-	"target": "^https?://[^/]+/(?:eds|bsi|ehost)/(?:results|detail|folder)",
+	"target": "^https?://[^/]+/(?:eds|bsi|ehost)/(?:results|detail|folder|pdfviewer)",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-06-18 13:25:09"
+	"lastUpdated": "2013-09-17 23:34:17"
 }
 
 function detectWeb(doc, url) {
@@ -19,8 +19,8 @@ function detectWeb(doc, url) {
 		return "multiple";
 	}
 
-	var persistentLink = ZU.xpath(doc, '//a[@class="permalink-link"]');
-	if(persistentLink.length) {
+	var persistentLink = doc.getElementsByClassName("permalink-link");
+	if(persistentLink.length && persistentLink[0].nodeName.toUpperCase() == 'A') {
 		return "journalArticle";
 	}
 }
@@ -70,6 +70,9 @@ function downloadFunction(text, url, prefs) {
 	translator.setHandler("itemDone", function(obj, item) {
 		/* Fix capitalization issues */
 		//title
+		if(!item.title && prefs.itemTitle) {
+			item.title = prefs.itemTitle;
+		}
 		if(item.title) {
 			// Strip final period from title if present
 			item.title = item.title.replace(/([^\.])\.\s*$/,'$1');
@@ -143,25 +146,33 @@ function downloadFunction(text, url, prefs) {
 				item.url = undefined;
 			}
 		}
-		if(prefs.fetchPDF) {
+		
+		if(prefs.pdfURL) {
+			item.attachments.push({
+					url: prefs.pdfURL,
+					title: "EBSCO Full Text",
+					mimeType:"application/pdf"
+			});
+			item.complete();
+		} else if(prefs.fetchPDF) {
 			var arguments = urlToArgs(url);
 			var pdf = "/ehost/pdfviewer/pdfviewer?"
 				+ "sid=" + arguments["sid"]
 				+ "&vid=" + arguments["vid"];
 			Z.debug("Fetching PDF from " + pdf);
 
-			ZU.doGet(pdf, function (text) {
-					var realpdf = text.match(/<iframe\s+id="pdfIframe"[^>]+\bsrc="([^"]+)"/i)
-						|| text.match(/<embed\s+id="pdfEmbed"[^>]+\bsrc="([^"]+)"/i);	//this is probably no longer used
+			ZU.processDocuments(pdf,
+				function(pdfDoc) {
+					var realpdf = findPdfUrl(pdfDoc);
 					if(realpdf) {
+						/* Not sure if this is still necessary. Doesn't seem to be.
 						realpdf = realpdf[1].replace(/&amp;/g, "&")	//that's & amp; (Scaffold parses it)
 											.replace(/#.*$/,'');
-		
 						if(an) {
 							realpdf = realpdf.replace(/K=\d+/,"K="+an);
 						} else {
 							Z.debug("Don't have an accession number. PDF might fail.");
-						}
+						}*/
 
 						item.attachments.push({
 								url:realpdf,
@@ -169,14 +180,13 @@ function downloadFunction(text, url, prefs) {
 								mimeType:"application/pdf"
 						});
 					} else {
-						Z.debug("Could not detect embedded pdf.");
-						var m = text.match(/<iframe[^>]+>/i) || text.match(/<embed[^>]+>/i);
-						if(m) Z.debug(m[0]);
+						Z.debug("Could not find a reference to PDF.");
 					}
 				},
 				function () {
 					Z.debug("PDF retrieval done.");
-					item.complete(); }
+					item.complete();
+				}
 			);
 		} else {
 			Z.debug("Not attempting to retrieve PDF.");
@@ -194,33 +204,37 @@ function downloadFunction(text, url, prefs) {
 function getResultList(doc, items, itemInfo) {
 	var results = ZU.xpath(doc, '//li[@class="result-list-li"]');
 	//make search results work if you can't add to folder, e.g. for EBSCO used as discovery service of library such as
-	//http://search.ebscohost.com/login.aspx?direct=true&site=eds-live&scope=site&type=0&custid=s4895734&groupid=main&profid=eds&mode=and&lang=en&authtype=ip,guest,athens
-	var folder = ZU.xpathText(doc, '//span[@class = "item add-to-folder"]/input/@value');
+  	//http://search.ebscohost.com/login.aspx?direct=true&site=eds-live&scope=site&type=0&custid=s4895734&groupid=main&profid=eds&mode=and&lang=en&authtype=ip,guest,athens
+
+	var folder = ZU.xpathText(doc, '//span[@class = "item add-to-folder"]/input/@value|.//span[@class = "item add-to-folder"]/a[1]/@data-folder')
 	var title, folderData, count = 0;
 	for(var i=0, n=results.length; i<n; i++) {
-		title = ZU.xpath(results[i], './/a[@class = "title-link color-p4"]');
+		//we're extra cautious here: When there's not folder, good chance user isn't logged in and import will fail where 
+		//there is no preview icon. We might be able to just rely on the 2nd xpath, but why take the risk
+		if (folder) title = ZU.xpath(results[i], './/a[@class = "title-link color-p4"]');
+		else title = ZU.xpath(results[i], './/a[@class = "title-link color-p4" and following-sibling::span[contains(@id, "hoverPreview")]]');
+		if(!title.length) continue;
 		if (folder) {
-			folderData = ZU.xpath(results[i],
-				'.//span[@class = "item add-to-folder"]/input/@value');
-			//skip if we're missing something
-			if(!title.length || !folderData.length) continue; 
-		}
-		count++;
+		folderData = ZU.xpath(results[i],
+			'.//span[@class = "item add-to-folder"]/input/@value|.//span[@class = "item add-to-folder"]/a[1]/@data-folder');
+		//I'm not sure if the input/@value format still exists somewhere, but leaving this in to be safe
+		//skip if we're missing something
 
+		itemInfo[title[0].href] = {
+			folderData: folderData[0].textContent,
+			//let's also store item type
+			itemType: ZU.xpathText(results[i],
+				'.//div[@class="pubtype"]/span/@class'),
+			itemTitle: ZU.xpathText(results[i], './/span[@class="title-link-wrapper"]/a'),
+			//check if PDF is available
+			fetchPDF: ZU.xpath(results[i], './/span[@class="record-formats"]\
+				/a[contains(@class,"pdf-ft")]').length,
+			hasFulltext: ZU.xpath(results[i], './/span[@class="record-formats"]\
+				/a[contains(@class,"pdf-ft") or contains(@class, "html-ft")]').length
+		} 
+		};
+		count++;
 		items[title[0].href] = title[0].textContent;
-		if (folder){
-			itemInfo[title[0].href] = {
-				folderData: folderData[0].textContent,
-				//let's also store item type
-				itemType: ZU.xpathText(results[i],
-							'.//div[@class="pubtype"]/span/@class'),
-				//check if PDF is available
-				fetchPDF: ZU.xpath(results[i], './/span[@class="record-formats"]\
-											/a[contains(@class,"pdf-ft")]').length,
-				hasFulltext: ZU.xpath(results[i], './/span[@class="record-formats"]\
-											/a[contains(@class,"pdf-ft") or contains(@class, "html-ft")]').length
-				}
-			};
 	}
 
 	return count;
@@ -261,6 +275,24 @@ function urlToArgs(url) {
 
 	return arguments;
 }
+
+//given a pdfviewer page, extracts the PDF url
+function findPdfUrl(pdfDoc) {
+	var el;
+	var realpdf = (el = pdfDoc.getElementById('downloadLink')) && el.href; //link
+	if(!realpdf) {
+		//input
+		realpdf = (el = pdfDoc.getElementById('pdfUrl')) && el.value;
+	}
+	if(!realpdf) {
+		realpdf = (el = pdfDoc.getElementById('pdfIframe') //iframe
+				|| pdfDoc.getElementById('pdfEmbed')) //embed
+			&& el.src;
+	}
+	
+	return realpdf;
+}
+
 //var counter;
 function doWeb(doc, url) {
 //counter = 0;
@@ -294,7 +326,7 @@ function doWeb(doc, url) {
 }
 function doDelivery(doc, itemInfo) {
 	var folderData;
-	if(!itemInfo)	{
+	if(!itemInfo||!itemInfo.folderData)	{
 		/* Get the db, AN, and tag from ep.clientData instead */
 		var script, clientData;
 		var scripts = doc.getElementsByTagName("script");
@@ -319,21 +351,32 @@ function doDelivery(doc, itemInfo) {
 	}
 
 	//some preferences for later
-	var prefs = {}
+	var prefs = {};
 	//figure out if there's a PDF available
 	//if PDFs stop downloading, might want to remove this
 	if(!itemInfo)	{
-		prefs.fetchPDF = !(ZU.xpath(doc, '//div[@id="column1"]//ul[1]/li').length	//check for left-side column
-			&& !ZU.xpath(doc, '//a[contains(@class,"pdf-ft")]').length);	//check if there's a PDF there
+		if(doc.location.href.indexOf('/pdfviewer/') != -1) {
+			prefs.pdfURL = findPdfUrl(doc);
+			prefs.fetchPDF = !!prefs.pdfURL;
+		} else {
+			prefs.fetchPDF = !(ZU.xpath(doc, '//div[@id="column1"]//ul[1]/li').length	//check for left-side column
+					&& !ZU.xpath(doc, '//a[contains(@class,"pdf-ft")]').length);	//check if there's a PDF there
+		}
 		prefs.hasFulltext = !(ZU.xpath(doc, '//div[@id="column1"]//ul[1]/li').length	//check for left-side column
 			&& !ZU.xpath(doc, '//a[contains(@class,"pdf-ft") or contains(@class, "html-ft")]').length);
+		prefs.itemTitle = ZU.xpathText(doc, '//dd[contains(@class, "citation-title")]/a/span')
+			|| ZU.xpathText(doc, '//h2[@id="selectionTitle"]');
 	} else {
 		prefs.fetchPDF = itemInfo.fetchPDF;
 		prefs.hasFulltext = itemInfo.hasFulltext;
 		prefs.itemType = ebscoToZoteroItemType(itemInfo.itemType);
+		prefs.itemTitle = itemInfo.itemTitle;
 	}
-	//Z.debug(prefs.hasFulltext)
-	//Z.debug(prefs.fetchPDF)
+	
+	if(prefs.itemTitle) {
+		prefs.itemTitle = ZU.trimInternal(prefs.itemTitle).replace(/([^.])\.$/, '$1');
+	}
+	//Z.debug(prefs);
 
 	var postURL = ZU.xpathText(doc, '//form[@id="aspnetForm"]/@action');
 	var arguments = urlToArgs(postURL);
@@ -351,5 +394,43 @@ function doDelivery(doc, itemInfo) {
 }
 
 /** BEGIN TEST CASES **/
-var testCases = []
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://web.ebscohost.com/ehost/detail?sid=4bcfec05-db01-4d69-9028-c40ff1331e56%40sessionmgr15&vid=1&hid=28&bdata=JnNpdGU9ZWhvc3QtbGl2ZQ%3d%3d#db=aph&AN=9606204477",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Brodsky",
+						"firstName": "Joseph",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"POETS, Polish",
+					"HERBERT, Zbigniew, 1924-1998"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Zbigniew Herbert",
+				"journalAbbreviation": "Wilson Quarterly",
+				"publicationTitle": "Wilson Quarterly",
+				"volume": "17",
+				"issue": "1",
+				"pages": "112",
+				"publisher": "Woodrow Wilson International Center for Scholars",
+				"ISSN": "03633276",
+				"abstractNote": "Introduces the poetry of Polish poet Zbigniew Herbert. Impression of difficulty in modern poetry; Polish poet Czeslaw Milosz; Herbert's 1980 Nobel Prize; Translations into English; Use of vers libre; Sample poems.",
+				"url": "http://search.ebscohost.com/login.aspx?direct=true&db=aph&AN=9606204477&site=ehost-live",
+				"libraryCatalog": "EBSCOhost",
+				"callNumber": "9606204477",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"date": "Winter 1993"
+			}
+		]
+	}
+]
 /** END TEST CASES **/
