@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-12-13 16:46:17"
+	"lastUpdated": "2013-09-17 22:52:51"
 }
 
 /*
@@ -137,6 +137,7 @@ function scrape(doc, url) {
 	associateData(newItem, dataTags, "Language", "language");
 	associateData(newItem, dataTags, "Languages", "language");
 	associateData(newItem, dataTags, "Nb of pages", "numPages");
+	associateData(newItem, dataTags, "Main content page count", "numPages");
 	newItem.abstractNote = ZU.xpathText(doc, '//div[@id="bookpagedescription"]');
 	newItem.complete();
 } /** BEGIN TEST CASES **/

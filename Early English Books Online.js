@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-09-04 21:25:49"
+	"lastUpdated": "2013-09-18 01:13:11"
 }
 
 function detectWeb(doc, url) {
@@ -30,7 +30,8 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url)=="multiple") {
 		var items = new Object();
 		var IDxpath = '//td/input[@name="EeboId" or @name="ADDALL"]/@value';
-		var Titlexpath = '//table[tbody/tr/td/input[@name="EeboId"]]/following-sibling::table[1]//i[1]';
+		//Z.debug(ZU.xpathText(doc, IDxpath))
+		var Titlexpath = '//table[tbody/tr/td/input[@name="EeboId"]]/following-sibling::table[tbody]//i[1]';
 		if (!ZU.xpathText(doc, Titlexpath)){
 			//the logic for author lists is different
 			var Titlexpath = '//table/tbody/tr/td/i'
@@ -40,6 +41,7 @@ function doWeb(doc, url) {
 		var next_id = new_ids.iterateNext();
 		var next_title = new_titles.iterateNext();
 		while (next_id) {
+			Z.debug(next_id.textContent +": " + next_title.textContent)
 			//the EEBOIDs from author lists have a suffix that we don't want
 			items[next_id.textContent.replace(/\+.+/, "").trim()] = next_title.textContent.trim();
 			next_id = new_ids.iterateNext();
