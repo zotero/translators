@@ -45,7 +45,7 @@ function clean(value) {
 	return value;
 }
 
-//Correspondance des types //Match Types
+//Correspondance des types //Match Types //HCL Specific
 	var KohaType = {
 	'ARE': 'journalArticle',
 	'TLEX': 'statute',
@@ -71,7 +71,7 @@ function clean(value) {
 	 
 };
 
-//Correspondance des labels avec les zones 4xx //Matching Notes Labels with 4xx fields
+//Correspondance des labels avec les zones 4xx //Matching Notes Labels with 4xx fields //HCL Specific
 	var Label =	{
 	'422':'<b>Est un suplément&nbsp;:&nbsp;</b>',
 	'423':'<b>Est publié avec&nbsp;:&nbsp;</b>',
@@ -90,7 +90,7 @@ function clean(value) {
 	'300':'<b>Notes sur le document&nbsp;:&nbsp;</b>',
 };
 
-//Test de la valeur du tag des zones 4xx
+//Test de la valeur du tag des zones 4xx //HCL Specific
 function LabelsforNotes(text) {
 	var pullRe = /[0-9]+/;
 	var m = pullRe.exec(text);
@@ -99,7 +99,7 @@ function LabelsforNotes(text) {
 	}
 }
 
-// Ajouter un label aux zones 4xx importées en notes
+// Ajouter un label aux zones 4xx importées en notes //Adding label to notes //HCL Specific
 function Notes400(text) {
 	var pullRe = /.*/;
 	var m = pullRe.exec(text);
@@ -108,7 +108,7 @@ function Notes400(text) {
 	}
 }
 
-//Modification des types Koha=>Zotero //Change Koha's types to Zotero's one
+//Modification des types Koha=>Zotero //Change Koha's types to Zotero's one //HCL Specific
 function MapType(text) {
 	var pullRe = /[A-Z]+/;
 	var m = pullRe.exec(text);
@@ -117,7 +117,7 @@ function MapType(text) {
 	}
 }
 
-//Ajout du préfixe "HCLID" au champ "extra" //Add the prefix "HCLID" to "extra" field
+//Ajout du préfixe "HCLID" au champ "extra" //Add the prefix "HCLID" to "extra" field //HCL Specific
 function IDHCL(text){
 	var pullRe = /[0-9]+/;
 	var m = pullRe.exec(text);
@@ -331,7 +331,7 @@ record.prototype._associateDBField = function(item, fieldNo, part, fieldName, ex
 	}
 }
 
-// add field to DB as note
+// add field to DB as note //HCL Specific
 record.prototype._associateNotes = function(item, fieldNo, part) {
 	var field = this.getFieldSubfields(fieldNo);
 	var texts = [];	
@@ -340,7 +340,7 @@ record.prototype._associateNotes = function(item, fieldNo, part) {
 		for(var j=0; j<part.length; j++) {
 			var myPart = part.substr(j, 1);
 			if(field[i][myPart]) {
-				texts.push(LabelsforNotes(TagNote),Notes400(field[i][myPart])); //Prefix label + Note content
+				texts.push(LabelsforNotes(TagNote),Notes400(field[i][myPart])); //Prefix label + Note content //HCL Specific
 			}
 		}
 
@@ -376,21 +376,21 @@ record.prototype.translate = function(item) {
 		this._associateDBField(item, "010", "a", "ISBN", pullISBN);
 		// Extract ISSN
 		this._associateDBField(item, "011", "a", "ISBN", pullISBN);
-		// Extract ISSN source
+		// Extract ISSN source //HCL Specific
 		this._associateDBField(item, "463", "x", "ISSN", pullISBN);
-		// Extract ISBN source
+		// Extract ISBN source //HCL Specific
 		this._associateDBField(item, "463", "y", "ISBN", pullISBN);
 		// Extract DOI
 		this._associateDBField(item, "014", "a", "DOI");
-		// Extract Bill Numbers
+		// Extract Bill Numbers //HCL Specific
 		this._associateDBField(item, "022", "b", "publicLawNumber");
-		// Extract standard number
+		// Extract standard number //HCL Specific
 		this._associateDBField(item, "017", "a", "issue");
 		// Extract report number
 		this._associateDBField(item, "015", "a", "reportNumber");
-		//Extract internal ID "HCLID"
+		//Extract internal ID "HCLID" //HCL Specific
 		this._associateDBField(item, "090", "a","extra", IDHCL);
-		//Extract ItemType
+		//Extract ItemType //HCL Specific
 		this._associateDBField(item, "200", "b","itemType", MapType);
 	
 		
@@ -433,20 +433,20 @@ record.prototype.translate = function(item) {
 		// Extract notes & summary
 		this._associateDBField(item, "328", "a", "abstractNote");
 		this._associateDBField(item, "330", "a", "abstractNote");
-		this._associateDBField(item, "311", "a", "history");
-		this._associateNotes(item, "422", "t");
-		this._associateNotes(item, "423", "t");
-		this._associateNotes(item, "424", "t");
-		this._associateNotes(item, "425", "t");
-		this._associateNotes(item, "430", "t");
-		this._associateNotes(item, "432", "t");
-		this._associateNotes(item, "434", "t");
-		this._associateNotes(item, "436", "t");
-		this._associateNotes(item, "440", "t");
-		this._associateNotes(item, "442", "t");
-		this._associateNotes(item, "447", "t");
-		//this._associateNotes(item, "463", "t");
-		this._associateNotes(item, "488", "t");
+		this._associateDBField(item, "311", "a", "history"); //HCL Specific
+		this._associateNotes(item, "422", "t"); //HCL Specific
+		this._associateNotes(item, "423", "t"); //HCL Specific
+		this._associateNotes(item, "424", "t"); //HCL Specific
+		this._associateNotes(item, "425", "t"); //HCL Specific
+		this._associateNotes(item, "430", "t"); //HCL Specific
+		this._associateNotes(item, "432", "t"); //HCL Specific
+		this._associateNotes(item, "434", "t"); //HCL Specific
+		this._associateNotes(item, "436", "t"); //HCL Specific
+		this._associateNotes(item, "440", "t"); //HCL Specific
+		this._associateNotes(item, "442", "t"); //HCL Specific
+		this._associateNotes(item, "447", "t"); //HCL Specific
+		//this._associateNotes(item, "463", "t"); //HCL Specific
+		this._associateNotes(item, "488", "t"); //HCL Specific
 		this._associateNotes(item, "300", "a");
 		
 		// Extraction des mots-clés //Keywords
@@ -459,13 +459,13 @@ record.prototype.translate = function(item) {
 		this._associateTags(item, "606", "abcxyz");
 		// termes géographiques
 		this._associateTags(item, "607", "axyz");
-		// genre/forme
+		// genre/forme //HCL Specific
 		this._associateTags(item, "608", "abcxyz");
-		// Type de raport
+		// Type de raport //HCL Specific
 		this._associateDBField(item, "608", "a", "reportType");
-		// Type de thèse
+		// Type de thèse //HCL Specific
 		this._associateDBField(item, "608", "a", "thesisType");
-		// Genre du film
+		// Genre du film //HCL Specific
 		this._associateDBField(item, "608", "a", "genre");
 		//Mots Libres (non utilisé)
 		//this._associateTags(item, "610", "a");
@@ -484,52 +484,52 @@ record.prototype.translate = function(item) {
 
 			item.title += ' ' + title.e;
 		}
-		//Extraction des titres ISO
+		//Extraction des titres ISO //HCL Specific
 		this._associateDBField(item, "531", "a", "shortTitle");
 
 		
 		// Extract Mention d'édition
 		this._associateDBField(item, "205", "a", "edition");
-		this._associateDBField(item, "463", "e", "edition");
+		this._associateDBField(item, "463", "e", "edition"); //HCL Specific
 		
 		// Extract Lieu de publication/production
 		this._associateDBField(item, "210", "a", "place");
-		this._associateDBField(item, "463", "c", "place");
+		this._associateDBField(item, "463", "c", "place"); //HCL Specific
 		
 		// Extract Editeur/distributeur/organisme
 		this._associateDBField(item, "210", "c", "distributor");
 		this._associateDBField(item, "210", "c", "publisher");
-		this._associateDBField(item, "463", "n", "place");
-		this._associateDBField(item, "710", "ab", "institution");
-		this._associateDBField(item, "210", "c", "university");
+		this._associateDBField(item, "463", "n", "place"); //HCL Specific
+		this._associateDBField(item, "710", "ab", "institution"); //HCL Specific
+		this._associateDBField(item, "210", "c", "university"); //HCL Specific
 		
 		// Extract Année de publication/diffusion
-		this._associateDBField(item, "210", "d", "date", pullNumber);
+		this._associateDBField(item, "210", "d", "date", pullNumber); //HCL Specific
 		
 		// Extract pages
-		this._associateDBField(item, "209", "h", "pages");
-		this._associateDBField(item, "209", "h", "codePages");
-		this._associateDBField(item, "209", "h", "numPages");
+		this._associateDBField(item, "209", "h", "pages"); //HCL Specific
+		this._associateDBField(item, "209", "h", "codePages"); //HCL Specific
+		this._associateDBField(item, "209", "h", "numPages"); //HCL Specific
 		
 		// Extract volume/tome-numéro
-		this._associateDBField(item, "209", "b", "volume");
-		this._associateDBField(item, "209", "d", "issue");
+		this._associateDBField(item, "209", "b", "volume"); //HCL Specific
+		this._associateDBField(item, "209", "d", "issue"); //HCL Specific
 		
 		// Extract Durée et format du film
 		this._associateDBField(item, "215", "a", "runningTime");
 		this._associateDBField(item, "215", "d", "videoRecordingFormat");
 		
 		// Extract Numéro de raport
-		this._associateDBField(item, "209", "d", "reportNumber");
+		this._associateDBField(item, "209", "d", "reportNumber"); //HCL Specific
 		
 		// Extract Collection - Publication Source
 		this._associateDBField(item, "225", "a", "series");
-		this._associateDBField(item, "463", "t", "publicationTitle");
-		this._associateDBField(item, "463", "t", "code");
-		this._associateDBField(item, "463", "t", "bookTitle");
+		this._associateDBField(item, "463", "t", "publicationTitle"); //HCL Specific
+		this._associateDBField(item, "463", "t", "code"); //HCL Specific
+		this._associateDBField(item, "463", "t", "bookTitle"); //HCL Specific
 		
 		// Extract series number
-		this._associateDBField(item, "209", "b", "seriesNumber");
+		this._associateDBField(item, "209", "b", "seriesNumber"); //HCL Specific
 
 		// Extract Numéro de cote
 		this._associateDBField(item, "995", "k", "callNumber");
