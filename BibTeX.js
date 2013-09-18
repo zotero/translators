@@ -1892,17 +1892,46 @@ function getFieldValue(read) {
 	return value;
 }
 
+function jabrefSplit(str, sep) {
+	var quoted = false;
+	var result = [];
+
+	str = str.split('');
+	while (str.length > 0) {
+		if (result.length == 0) { result = ['']; }
+
+		if (str[0] == sep) {
+			str.shift();
+			result.push('');
+		} else {
+			if (str[0] == '\\') { str.shift(); }
+			result[result.length - 1] += str.shift();
+		}
+	}
+	return result;
+}
+
+function jabrefCollect(arr, func) {
+	if (arr == null) { return []; }
+
+	var result = [];
+
+	for (var i = 0; i < arr.length; i++) {
+		if (func(arr[i])) {
+			result.push(arr[i]);
+		}
+	}
+	return result;
+}
+
 function processComment() {
 	var comment = "";
 	var read;
-	var records, ri;
-	var keys, ki;
-	var record;
-	var collectionPath = [], cpi;
-	var collection, child, ci;
+	var collectionPath = [];
+	var parentCollection, collection;
 
 	while(read = Zotero.read(1)) {
-		if (read == "}") { break; }
+		if (read == "}") { break; } // JabRef ought to escape '}' but doesn't; embedded '}' chars will break the import just as it will on JabRef itself
 		comment += read;
 	}
 
@@ -1911,45 +1940,48 @@ function processComment() {
 		return;
 	}
 
-	if (comment.match(/^jabref-meta: groupstree:/)) {
+	if (comment.indexOf('jabref-meta: groupstree:') == 0) {
 		if (jabref.format != 3) {
 			Zotero.debug("jabref: fatal: unsupported group format: " + jabref.format);
 			return;
 		}
-		comment = comment.replace(/^jabref-meta: groupstree:/, '').replace(/[\r\n]/gm, '').replace(/\\;/gm, '\t');
+		comment = comment.replace(/^jabref-meta: groupstree:/, '').replace(/[\r\n]/gm, '')
 
-		records = comment.split(';')
-		for (ri = 0; ri < records.length; ri++) {
-			keys = records[ri].split('\t');
-			if (keys.length == 1) { continue; }
+		var records = jabrefSplit(comment, ';');
+		while (records.length > 0) {
+			var record = records.shift();
+			var keys = jabrefSplit(record, ';');
+			if (keys.length < 2) { continue; }
 
-			record = {'data': keys[0].match(/^([0-9]) ([^:]*):(.*)/)}
+			var record = {id: keys.shift()};
+			record.data = record.id.match(/^([0-9]) ([^:]*):(.*)/);
 			if (record.data == null) {
-				Zotero.debug("jabref: fatal: unexpected non-match for group " + keys[0]);
+				Zotero.debug("jabref: fatal: unexpected non-match for group " + record.id);
 				return;
 			}
 			record.level = parseInt(record.data[1]);
 			record.type = record.data[2]
 			record.name = record.data[3]
+			record.intersection = keys.shift(); // 0 = independent, 1 = intersection, 2 = union
 
-			if (isNaN(record.level) || record.level == 0) { continue; } // level 0 is uninteresting
+			if (isNaN(record.level)) {
+				Zotero.debug("jabref: fatal: unexpected record level in " + record.id);
+				return;
+			}
+
+			if (record.level == 0) { continue; }
 			if (record.type != 'ExplicitGroup') {
-				Zotero.debug("jabref: group type " + record.type + " is not supported");
+				Zotero.debug("jabref: fatal: group type " + record.type + " is not supported");
 				return;
 			}
 
 			collectionPath = collectionPath.slice(0, record.level - 1).concat([record.name]);
-			Zotero.debug("jabref: locating " + collectionPath.join('/'));
+			Zotero.debug("jabref: locating level " + record.level + ": " + collectionPath.join('/'));
 
-			collection = null;
-			for (var key in jabref.root) {
-				if (jabref.root.hasOwnProperty(key) && key == collectionPath[0]) {
-					collection = jabref.root[key];
-					Zotero.debug("jabref: root " + collection.name + " found");
-					break;
-				}
-			}
-			if (!collection) {
+			if (jabref.root.hasOwnProperty(collectionPath[0])) {
+				collection = jabref.root[collectionPath[0]];
+				Zotero.debug("jabref: root " + collection.name + " found");
+			} else {
 				collection = new Zotero.Collection();
 				collection.name = collectionPath[0];
 				collection.type = 'collection';
@@ -1957,19 +1989,19 @@ function processComment() {
 				jabref.root[collectionPath[0]] = collection;
 				Zotero.debug("jabref: root " + collection.name + " created");
 			}
+			parentCollection = null;
 
-			for (cpi = 1; cpi < collectionPath.length; cpi++) {
-				Zotero.debug("jabref: looking for child " + collectionPath[cpi] + " under " + collection.name);
-				child = null;
-				for (ci = 0; ci < collection.children.length; ci++) {
-					if (collection.children[ci].name != collectionPath[cpi]) { continue; }
-					child = collection.children[ci];
+			for (var i = 1; i < collectionPath.length; i++) {
+				var path = collectionPath[i];
+				Zotero.debug("jabref: looking for child " + path + " under " + collection.name);
+
+				var child = jabrefCollect(collection.children, function(n) { return (n.name == path)})
+				if (child.length != 0) {
+					child = child[0]
 					Zotero.debug("jabref: child " + child.name + " found under " + collection.name);
-					break;
-				}
-				if (!child) {
+				} else {
 					child = new Zotero.Collection();
-					child.name = collectionPath[cpi];
+					child.name = path;
 					child.type = 'collection';
 					child.children = [];
 
@@ -1977,14 +2009,28 @@ function processComment() {
 					Zotero.debug("jabref: child " + child.name + " created under " + collection.name);
 				}
 
+				parentCollection = collection;
 				collection = child;
 			}
 
-			for (ki = 1; ki < keys.length; ki++) {
-				key = keys[ki];
-				if (key == '' || key == '0') { continue; }
-				Zotero.debug('jabref: adding ' + key + ' to ' + collection.name);
-				collection.children.push({type: 'item', id: key});
+			if (parentCollection) {
+				parentCollection = jabrefCollect(parentCollection.children, function(n) { return (n.type == 'item') });
+			}
+
+			if (record.intersection == '2' && parentCollection) { // union with parent
+				collection.children = parentCollection;
+			}
+
+			while(keys.length > 0) {
+				key = keys.shift();
+				if (key != '') {
+					Zotero.debug('jabref: adding ' + key + ' to ' + collection.name);
+					collection.children.push({type: 'item', id: key});
+				}
+			}
+
+			if (parentCollection && record.intersection == '1') { // intersection with parent
+				collection.children = jabrefMap(collection.children, function(n) { parentCollection.indexOf(n) !== -1; });
 			}
 		}
 	}
