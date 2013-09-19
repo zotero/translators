@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-04-22 00:05:53"
+	"lastUpdated": "2013-09-15 17:34:07"
 }
 
 /*
@@ -77,9 +77,10 @@ function scrape(doc, url){
 		tags[i] = ZU.trimInternal(tags[i])
 			}
 	//get BibTex Link
-	var bibtexurl = url.replace(/entries\//,"cgi-bin/encyclopedia/archinfo.cgi?entry=").replace(/\/$/, "");
+	var bibtexurl = url.replace(/entries\//,"cgi-bin/encyclopedia/archinfo.cgi?entry=").replace(/\/(index\.html)?$/, "");
+	//Z.debug(bibtexurl)
 	Zotero.Utilities.HTTP.doGet(bibtexurl, function (text) {
-	
+	//Z.debug(text)
 	//remove line breaks, then match match the bibtex, then remove the odd /t in it.
 	bibtex = text.replace(/\n/g, "").match(/<pre>.+<\/pre>/)[0].replace(/\/t/g, "")
 	//Zotero.debug(bibtex)

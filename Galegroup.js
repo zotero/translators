@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-09-02 15:35:05"
+	"lastUpdated": "2013-09-19 10:25:38"
 }
 
 /*
@@ -53,7 +53,13 @@ function composeURL(url) {
 	if (url.match(/userGroupName=.+?&/)) var usergroup = url.match(/userGroupName=.+?&/)[0];
 	else if (!url.match(/userGroupName=.+?&/)) var usergroup = "";
 	var tabID = url.match(/tabID=.+?&/)[0];
-	var docID = url.match(/docId=.+?(&|$)/)[0];
+	var docID = url.match(/docId=.*?(&|$)/)[0];
+	//Z.debug(docID)
+	if (docID == "docId=&"){
+		Z.debug("here")
+		var pageBatch= url.match(/relevancePageBatch=(.+?(&|$))/);
+		if (pageBatch) docID = "docId=" + pageBatch[1];
+	}
 	var contentSet = url.match(/contentSet=.+?(&|$)/)[0];
 	if (!contentSet.match(/&/)) contentSet = contentSet + "&";
 	var RISurl = host + "generateCitation.do?actionString=FormatCitation&inPS=true&" + prodID + tabID + usergroup + docID + contentSet + "citationFormat=REFMGR";
@@ -74,7 +80,6 @@ function parseRIS(url) {
 		text = text.trim();
 		//gale puts issue numbers in M1
 		text = text.replace(/M1\s*\-/, "IS  -");
-		//get the LA tag content until we introduce this in the RIS translator
 		//Z.debug(text)
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -85,6 +90,8 @@ function parseRIS(url) {
 			for (i in item.attachments) {
 				item.attachments[i].url = item.attachments[i].url.replace(/^https?:\/\/.+?\//, host);
 			}
+			//remove empty date clutter
+			if (item.date) item.date = item.date.replace(/[\/\.]+$/, "")
 			item.complete();
 		});
 		translator.translate();
@@ -95,7 +102,7 @@ function doWeb(doc, url) {
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
-		var titles = doc.evaluate('//span[@class="title"]/a|//div[contains(@class, "Title")]/a|//li[@class="resultInfo"]/p/b/a|//li[@class="resultsInstance"]/p[@class="subTitle"]/a', doc, null, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//span[@class="title"]/a|//div[contains(@class, "Title")]/a|//p[@class="articleTitle"]//a|//li[@class="resultInfo"]/p/b/a|//li[@class="resultsInstance"]/p[@class="subTitle"]/a', doc, null, XPathResult.ANY_TYPE, null);
 		var next_title;
 		while (next_title = titles.iterateNext()) {
 			var textContent = next_title.textContent;
@@ -124,6 +131,7 @@ function doWeb(doc, url) {
 			url = host + ZU.xpathText(doc, '//li/a[contains(@title, "Download")]/@href');
 		}
 		var RISurl = composeURL(url);
+		//Z.debug(RISurl)
 		parseRIS(RISurl);
 	}
 }

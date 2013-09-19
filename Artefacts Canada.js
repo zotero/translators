@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-10-14 18:54:00"
+	"lastUpdated": "2013-09-16 00:25:18"
 }
 
 function detectWeb(doc, url) {
@@ -133,7 +133,7 @@ function doWeb(doc, url) {
 		var items = new Object();
 		
 		var titles = doc.evaluate('//tr[1]/td[2][@class="pageText"]', doc, null, XPathResult.ANY_TYPE, null);
-		var links = doc.evaluate('//td/a[@class="moreInfoink"]', doc, null, XPathResult.ANY_TYPE, null);
+		var links = doc.evaluate('//td/a[contains(@class, "moreInfoink")]', doc, null, XPathResult.ANY_TYPE, null);
 		
 		var next_title;
 		while (next_title = titles.iterateNext()) {

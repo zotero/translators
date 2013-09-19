@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-05 23:03:04"
+	"lastUpdated": "2013-09-19 00:42:16"
 }
 
 function detectWeb(doc, url) {
@@ -93,56 +93,41 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.cup.columbia.edu/book/978-0-7486-3967-0/islam",
+		"url": "http://www.cup.columbia.edu/book/978-3-933127-81-5/politics-and-cultures-of-islamization-in-southeast-asia",
 		"items": [
 			{
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "Abdelmadjid",
-						"lastName": "Charfi",
+						"firstName": "Georg",
+						"lastName": "Stauth",
 						"creatorType": "author"
-					},
-					{
-						"firstName": "David",
-						"lastName": "Bond",
-						"creatorType": "translator"
-					},
-					{
-						"firstName": "Abdou",
-						"lastName": "Filali-Ansary",
-						"creatorType": "editor"
-					},
-					{
-						"firstName": "Sikeena Karmali",
-						"lastName": "Ahmad",
-						"creatorType": "editor"
 					}
 				],
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"title": "Islam: Between Message and History",
-				"abstractNote": "Abdelmadjid Charfi recovers what he believes to be the essential message of Islam and pairs it with a history of the Prophet Muhammad, a visionary seeking to change the ideals, attitudes, and behaviors of the society in which he lived. The message and its history are delineated as two separate things, conflated by tradition. Charfi's reflections cross those horizons where few Muslim scholars have dared until now to tread. He confronts with great lucidity those difficult questions with which Muslims are struggling, attempting to reconsider them from a moral and political perspective that remains independent of traditional frameworks.",
-				"date": "June, 2010",
-				"ISBN": "978-0-7486-3967-0",
-				"publisher": "Edinburgh University Press",
+				"title": "Politics and Cultures of Islamization in Southeast Asia: Indonesia and Malaysia in the Nineteen-nineties",
+				"abstractNote": "This book is about cultural and political figures, institutions and ideas in a period of transition in two Muslim countries in Southeast Asia, Malaysia and Indonesia. It also addresses some of the permutations of civilizing processes in Singapore and the city-state's image, moving across its borders into the region and representing a miracle of modernity beyond ideas. The central theme is the way in which Islam was re-constructed as an intellectual and socio-political tradition in Southeast Asia in the nineteen-nineties. Scholars who approach Islam both as a textual and local tradition, students who take the heartlands of Islam as imaginative landscapes for cultural transformation and politicians and institutions which have been concerned with transmitting the idea of Islamization are the subjects of this inquiry into different patterns of modernity in a tropical region still bearing the signature of a colonial past.",
+				"date": "July, 2002",
+				"ISBN": "978-3-933127-81-5",
+				"publisher": "Transcript-Verlag",
 				"libraryCatalog": "Columbia University Press",
-				"shortTitle": "Islam"
+				"shortTitle": "Politics and Cultures of Islamization in Southeast Asia"
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.cup.columbia.edu/book/978-0-7486-3978-6/islam-and-the-foundations-of-political-power",
+		"url": "http://www.cup.columbia.edu/book/978-0-231-12038-8/religion-and-state",
 		"items": [
 			{
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "Ali",
-						"lastName": "Abdelraziq",
+						"firstName": "L. Carl",
+						"lastName": "Brown",
 						"creatorType": "author"
 					}
 				],
@@ -150,12 +135,13 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"title": "Islam and the Foundations of Political Power",
-				"abstractNote": "The publication of this essay in Egypt in 1925 took the contemporaries of 'Ali 'Abd al-Raziq by storm. It was the focus of much attention and the seed of a heated debate. At a time when the Muslim world was in great turmoil over the question of the abolition of the caliphate by Mustapha Kamal Ataturk in Turkey, Abdelraziq, a religious cleric trained at Al-Azhar University, argued in favour of secularism. The abolition of the caliphate had re-ignited the issue of Islam and politics, as traditional political systems were dissolving under pressure from European powers while most Muslim countries had lost their sovereignty. This essay gave rise to a series of 'refutations' of which three were published the same year. It also unleashed the Arab world's first great public debate with polemics supporting or refuting Abdelraziq's ideas published all over the press. Eventually he was tried by the Al-Azhar court, denounced, stripped of his title of 'alim and barred from future employment in education and the judiciary.",
-				"date": "August, 2012",
-				"ISBN": "978-0-7486-3978-6",
-				"publisher": "Edinburgh University Press",
-				"libraryCatalog": "Columbia University Press"
+				"title": "Religion and State: The Muslim Approach to Politics",
+				"abstractNote": "If Westerners know a single Islamic term, it is likely to be jihad, the Arabic word for \"holy war.\" The image of Islam as an inherently aggressive and xenophobic religion has long prevailed in the West and can at times appear to be substantiated by current events. L. Carl Brown challenges this conventional wisdom with a fascinating historical overview of the relationship between religious and political life in the Muslim world ranging from Islam's early centuries to the present day. Religion and State examines the commonplace notion—held by both radical Muslim ideologues and various Western observers alike—that in Islam there is no separation between religion and politics. By placing this assertion in a broad historical context, the book reveals both the continuities between premodern and modern Islamic political thought as well as the distinctive dimensions of modern Muslim experiences. Brown shows that both the modern-day fundamentalists and their critics have it wrong when they posit an eternally militant, unchanging Islam outside of history. \"They are conflating theology and history. They are confusing the oughtand the is,\" he writes. As the historical record shows, mainstream Muslim political thought in premodern times tended toward political quietism.Brown maintains that we can better understand present-day politics among Muslims by accepting the reality of their historical diversity while at the same time seeking to identify what may be distinctive in Muslim thought and action. In order to illuminate the distinguishing characteristics of Islam in relation to politics, Brown compares this religion with its two Semitic sisters, Judaism and Christianity, drawing striking comparisons between Islam today and Christianity during the Reformation. With a wealth of evidence, he recreates a tradition of Islamic diversity every bit as rich as that of Judaism and Christianity.",
+				"date": "October, 2000",
+				"ISBN": "978-0-231-12038-8",
+				"publisher": "Columbia University Press",
+				"libraryCatalog": "Columbia University Press",
+				"shortTitle": "Religion and State"
 			}
 		]
 	}

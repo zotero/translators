@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-08-16 21:38:06"
+	"lastUpdated": "2013-09-15 15:47:36"
 }
 
 function detectWeb(doc, url) {
@@ -208,8 +208,8 @@ function getResultList(doc, items, itemInfo) {
 	for(var i=0, n=results.length; i<n; i++) {
 		title = ZU.xpath(results[i], './/a[@class = "title-link color-p4"]');
 		folderData = ZU.xpath(results[i],
-			'.//span[@class = "item add-to-folder"]/input/@value');
-
+			'.//span[@class = "item add-to-folder"]/input/@value|.//span[@class = "item add-to-folder"]/a[1]/@data-folder');
+		//I'm not sure if the input/@value format still exists somewhere, but leaving this in to be safe
 		//skip if we're missing something
 		if(!title.length || !folderData.length) continue;
 

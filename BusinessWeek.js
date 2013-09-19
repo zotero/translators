@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-05 23:06:06"
+	"lastUpdated": "2013-09-19 00:06:33"
 }
 
 function detectWeb(doc, url) {
 	if (doc.evaluate('//body[contains(@class, "searchResults")]|//div[contains(@class, "search_result")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
-	} else if (doc.evaluate('//h1[@id="article_headline"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	} else if (doc.evaluate('//h1[@class="headline"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "magazineArticle";
 	}
 }
@@ -59,7 +59,7 @@ var metaTags = new Object();
 		}
 		Zotero.debug(metaTags);
 		var item = new Zotero.Item("magazineArticle");
-		item.title = ZU.xpathText(doc, '//h1[@id="article_headline"]');
+		item.title = ZU.xpathText(doc, '//h1[@class="headline"]');
 		if (metaTags['description']) item.abstractNote = metaTags['description'];
 		if (metaTags['keywords']) item.tags = metaTags['keywords'].split(/\s*,\s*/);
 		//some articles don't have author tags - prevent this from failing

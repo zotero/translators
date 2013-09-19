@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-08-04 07:01:16"
+	"lastUpdated": "2013-09-17 14:00:21"
 }
 
 /*
@@ -90,7 +90,8 @@ var _prefixes = {
 	eprints:"http://purl.org/eprint/terms/",
 	og:"http://ogp.me/ns#",				// Used for Facebook's OpenGraph Protocol
 	article:"http://ogp.me/ns/article#",
-	book:"http://ogp.me/ns/book#"
+	book:"http://ogp.me/ns/book#",
+	rdf:"http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 };
 
 var _prefixRemap = {
@@ -233,6 +234,14 @@ function init(doc, url, callback, forceLoadRDF) {
 
 		if(_prefixes[prefix]) {
 			var prop = tag.substr(delimIndex+1, 1).toLowerCase()+tag.substr(delimIndex+2);
+			
+			//bib and bibo types are special, they use rdf:type to define type
+			var specialNS = [_prefixes['bib'], _prefixes['bibo']];
+			if(prop == 'type' && specialNS.indexOf(_prefixes[prefix]) != -1) {
+				value = _prefixes[prefix] + value;
+				prefix = 'rdf';
+			}
+			
 			// This debug is for seeing what is being sent to RDF
 			//Zotero.debug(_prefixes[prefix]+prop +"=>"+value);
 			statements.push([url, _prefixes[prefix]+prop, value]);
