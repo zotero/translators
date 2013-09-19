@@ -6,10 +6,10 @@
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
-	"browserSupport": "gcsibv",
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2012-07-30 18:47:38"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2013-09-19 00:39:54"
 }
 
 function detectWeb(doc, url)	{
@@ -75,7 +75,10 @@ function scrape (doc) {
 		if (doc.evaluate('//p[@class="KeyWords"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 			var kws = doc.evaluate('//p[@class="KeyWords"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.substr(11).split('; ');
 		}
-		var pdfpath='//div/ul/li/a[contains(text(), "PDF")]';
+		//Z.debug(locURL)
+		//on pages with a PDF Frame, we can now just take the download link and this will work
+		if(locURL.indexOf("displayFulltext?type=1")!= -1) var pdfpath = '//ul[@class="articles"]//a[img[@title="Download PDF"]]'
+		else var pdfpath='//div/ul/li/a[contains(text(), "PDF")]';
 		if (doc.evaluate(pdfpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 			var pdflink = doc.evaluate(pdfpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
 		}
@@ -114,7 +117,9 @@ function scrape (doc) {
 						title: "Cambridge Journals PDF", 
 						mimeType:"application/pdf"
 					});
+					//Z.debug(pdflink)
 					Zotero.Utilities.doGet(pdflink, function(text) {
+					//	Z.debug(text)
 						var domain = pdflink.match(/^https?:\/\/[^\/]+\//);
 						var realpdf = text.match(/<iframe src="\/(action\/displayFulltext[^"]+)"/);
 						if (realpdf && domain) {
@@ -139,11 +144,6 @@ function scrape (doc) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://journals.cambridge.org/action/quickSearch?quickSearchType=search_combined&inputField1=tatar&fieldStartMonth=01&fieldStartYear=1800&fieldEndMonth=12&fieldEndYear=2011&searchType=ADVANCESEARCH&searchTypeFrom=quickSearch&fieldScjrnl=All&fieldSccats=All&selectField1=%23&jnlId=AMS&issId=02&volId=45&journalSearchType=all",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "http://journals.cambridge.org/action/displayAbstract?fromPage=online&aid=8267699&fulltextType=RA&fileId=S0021875810001738",
 		"items": [
 			{
@@ -166,8 +166,8 @@ var testCases = [
 					},
 					{
 						"url": false,
-						"title":"Cambridge Journals PDF",
-						"mimeType":"application/pdf"
+						"title": "Cambridge Journals PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"date": "2011",
@@ -178,6 +178,49 @@ var testCases = [
 				"issue": "02",
 				"DOI": "10.1017/S0021875810001738",
 				"abstractNote": "Heir to the racist configuration of the American art exchange and the delimiting appraisals of blackness in the American mainstream media, Jean-Michel Basquiat appeared on the late 1970s New York City street art scene – then he called himself “SAMO.” Not long thereafter, Basquiat grew into one of the most influential artists of an international movement that began around 1980, marked by a return to figurative painting. Given its rough, seemingly untrained and extreme, conceptual nature, Basquiat's high-art oeuvre might not look so sophisticated to the uninformed viewer. However, Basquiat's work reveals a powerful poetic and visual gift, “heady enough to confound academics and hip enough to capture the attention span of the hip hop nation,” as Greg Tate has remarked. As noted by Richard Marshall, Basquiat's aesthetic strength actually comes from his striving “to achieve a balance between the visual and intellectual attributes” of his artwork. Like Marshall, Tate, and others, I will connect with Basquiat's unique, self-reflexively experimental visual practices of signifying and examine anew Basquiat's active contribution to his self-alienation, as Hebdige has called it. Basquiat's aesthetic makes of his paintings economies of accumulation, building a productive play of contingency from the mainstream's constructions of race. This aesthetic move speaks to a need for escape from the perceived epistemic necessities of blackness. Through these economies of accumulation we see, as Tate has pointed out, Basquiat's “intellectual obsession” with issues such as ancestry/modernity, personhood/property and originality/origins of knowledge, driven by his tireless need to problematize mainstream media's discourses surrounding race – in other words, a commodified American Africanism.",
+				"libraryCatalog": "Cambridge Journals Online",
+				"shortTitle": "“SAMO© as an Escape Clause”"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://journals.cambridge.org/action/displayIssue?decade=2010&jid=PSR&volumeId=107&issueId=02&iid=8919472",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://journals.cambridge.org/action/displayFulltext?type=1&fid=8267701&jid=AMS&volumeId=45&issueId=02&aid=8267699&bodyId=&membershipNumber=&societyETOCSession=",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Laurie A.",
+						"lastName": "Rodrigues",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Cambridge Journals Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Cambridge Journals PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"title": "“SAMO© as an Escape Clause”: Jean-Michel Basquiat's Engagement with a Commodified American Africanism",
+				"publicationTitle": "Journal of American Studies",
+				"pages": "227-243",
+				"volume": "45",
+				"issue": "02",
+				"DOI": "10.1017/S0021875810001738",
+				"date": "2011",
 				"libraryCatalog": "Cambridge Journals Online",
 				"shortTitle": "“SAMO© as an Escape Clause”"
 			}
