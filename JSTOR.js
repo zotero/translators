@@ -2,14 +2,14 @@
 	"translatorID": "d921155f-0186-1684-615c-ca57682ced9b",
 	"label": "JSTOR",
 	"creator": "Simon Kornblith, Sean Takats, Michael Berkowitz, and Eli Osherovich",
-	"target": "https?://[^/]*jstor\\.org[^/]*/(action/(showArticle|doBasicSearch|doAdvancedSearch|doLocatorSearch|doAdvancedResults|doBasicResults)|stable/|pss/|betasearch\\?|openurl\\?)",
+	"target": "https?://[^/]*jstor\\.org[^/]*/(action/(showArticle|doBasicSearch|doAdvancedSearch|doLocatorSearch|doAdvancedResults|doBasicResults)|stable/|pss/|betasearch\\?|openurl\\?|sici\\?)",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-08-13 01:34:12"
+	"lastUpdated": "2013-09-19 23:25:07"
 }
 
 function detectWeb(doc, url) {
@@ -441,6 +441,58 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.jstor.org/betasearch?Query=labor+market&ac=0&si=0",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.jstor.org/sici?sici=07421222%282005%2922%3A3%3C265%3E2.3.TX",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Oh",
+						"firstName": "Wonseok",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Choi",
+						"firstName": "Jin Nam",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Kim",
+						"firstName": "Kimin",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "JSTOR Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"journalAbbreviation": "Journal of Management Information Systems",
+				"title": "Coauthorship Dynamics and Knowledge Capital: The Patterns of Cross-Disciplinary Collaboration in Information Systems Research",
+				"volume": "22",
+				"issue": "3",
+				"publisher": "M.E. Sharpe, Inc.",
+				"ISSN": "0742-1222",
+				"url": "http://www.jstor.org/stable/40398803",
+				"DOI": "10.2307/40398803",
+				"date": "December 1, 2005",
+				"pages": "265-292",
+				"abstractNote": "From the social network perspective, this study explores the ontological structure of knowledge sharing activities engaged in by researchers in the field of information systems (IS) over the past three decades. We construct a knowledge network based on coauthorship patterns extracted from four major journals in the IS field in order to analyze the distinctive characteristics of each subfield and to assess the amount of internal and external knowledge exchange that has taken place among IS researchers. This study also tests the role of different types of social capital that influence the academic impact of researchers. Our results indicate that the proportion of coauthored IS articles in the four journals has doubled over the past 25 years, from merely 40 percent in 1978 to over 80 percent in 2002. However, a significant variation exists in terms of the shape, density, and centralization of knowledge exchange networks across the four subfields of IS—namely, behavioral science, organizational science, computer science, and economic science. For example, the behavioral science subgroup, in terms of internal cohesion among researchers, tends to develop the most dense collaborative relationships, whereas the computer science subgroup is the most fragmented. Moreover, external collaboration across these subfields appears to be limited and severely unbalanced. Across the four subfields, on average, less than 20 percent of the research collaboration ties involved researchers from different subdisciplines. Finally, the regression analysis reveals that knowledge capital derived from a network rich in structural holes has a positive influence on an individual researcher's academic performance.",
+				"rights": "Copyright © 2005 M.E. Sharpe, Inc.",
+				"extra": "ArticleType: research-article / Full publication date: Winter, 2005/2006 / Copyright © 2005 M.E. Sharpe, Inc.",
+				"publicationTitle": "Journal of Management Information Systems",
+				"libraryCatalog": "JSTOR",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Coauthorship Dynamics and Knowledge Capital"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
