@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-09-15 10:38:09"
+	"lastUpdated": "2013-09-19 22:43:03"
 }
 
 /*
@@ -27,13 +27,15 @@ Primos with showPNX.jsp installed:
 */
 
 function getSearchResults(doc) {
-	var linkXPath = '((.//h2[@class="EXLResultTitle"]' //title link
-		+ '|.//li[starts-with(@id,"exlidResult") and substring(@id,string-length(@id)-10)="-DetailsTab"])/a[@href])[1]'; //details link
-	var resultsXPath = '//tr[starts-with(@id, "exlidResult")][' + linkXPath + ']';
+	var linkXPaths = [ //order dictates preference
+		'.//li[starts-with(@id,"exlidResult") and substring(@id,string-length(@id)-10)="-DetailsTab"]/a[@href]', //details link
+		'.//h2[@class="EXLResultTitle"]/a[@href]' //title link
+	];
+	var resultsXPath = '//tr[starts-with(@id, "exlidResult")][' + linkXPaths.join('|') + ']';
 	//Z.debug(resultsXPath);
 	var results = ZU.xpath(doc, resultsXPath);
 	results.titleXPath = './/h2[@class="EXLResultTitle"]';
-	results.linkXPath = linkXPath;
+	results.linkXPaths = linkXPaths;
 	return results;
 }
 
@@ -53,9 +55,15 @@ function doWeb(doc, url) {
 		var items = {};
 		var itemIDs = {};
 		var title, link;
+		var linkXPaths = searchResults.linkXPaths;
 		for(var i=0, n=searchResults.length; i<n; i++) {
 			title = ZU.xpathText(searchResults[i], searchResults.titleXPath);
-			link = ZU.xpath(searchResults[i], searchResults.linkXPath)[0];
+			for(var j=0, m=linkXPaths.length; j<m; j++) {
+				link = ZU.xpath(searchResults[i], linkXPaths[j])[0];
+				if(link) {
+					break;
+				}
+			}
 			
 			if(!link || !title || !(title = ZU.trimInternal(title))) continue;
 			
@@ -90,7 +98,7 @@ getPNXUrl.convertUrl = [
 	//from: http://primo.bib.uni-mannheim.de/primo_library/libweb/action/search.do?...
 	//to:   http://primo.bib.uni-mannheim.de/primo_library/libweb/showPNX.jsp?id=
 	function(url, id) {
-		url = url.match(/([^?#]+\/)[^?#]+\/[^\/]*(?:[?#]|$)/);
+		url = url.match(/(https?:\/\/[^?#]+\/)[^?#]+\/[^\/]*(?:[?#]|$)/);
 		if(!url) return;
 		return url[1] + 'showPNX.jsp?id=' + id;
 	},
@@ -111,6 +119,7 @@ getPNXUrl.nextFunction = function() {
 	if(!getPNXUrl.confirmed && getPNXUrl.currentFunction < getPNXUrl.convertUrl.length) {
 		Z.debug("Function " + getPNXUrl.currentFunction + " did not work.");
 		getPNXUrl.currentFunction++;
+		return true;
 	}
 }
 
@@ -120,7 +129,21 @@ function fetchPNX(itemData) {
 	
 	var data = itemData.shift();
 	var url = getPNXUrl(data.url, data.id); //format URL if still possible
-	if(!url) return;
+	
+	if(!url) {
+		if(getPNXUrl.nextFunction()) {
+			itemData.unshift(data);
+		} else if(!getPNXUrl.confirmed){
+			//in case we can't find PNX for a particular item,
+			//go to the next and start looking from begining
+			Z.debug("Could not determine PNX url from " + data.url);
+			getPNXUrl.currentFunction = 0;
+		}
+		
+		fetchPNX(itemData);
+		return;
+	}
+	
 	var gotPNX = false;
 	ZU.doGet(url,
 		function(text) {
@@ -137,11 +160,10 @@ function fetchPNX(itemData) {
 			importPNX(text);
 		},
 		function() {
-			if(!gotPNX && !getPNXUrl.confirmed) {
+			if(!gotPNX && getPNXUrl.nextFunction()) {
 				//if url function not confirmed, try another one on the same URL
 				//otherwise, we move on
 				itemData.unshift(data);
-				getPNXUrl.nextFunction();
 			}
 			
 			fetchPNX(itemData);
@@ -160,7 +182,7 @@ function importPNX(text) {
 			.replace(/<[^>]+/g, function(m) {
 				return m.replace(/\s+xmlns(?::\w+)?\s*=\s*(['"]).*?\1/ig, '');
 			});
-	Z.debug(text);
+	//Z.debug(text);
 	
 	var parser = new DOMParser();
 	var doc = parser.parseFromString(text, "text/xml");
