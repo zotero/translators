@@ -2099,7 +2099,13 @@ function beginRecord(type, closeChar) {
 			field = "";
 		} else if(read == closeChar) {
 			if(item) {
-				if(item.extra) item.extra = item.extra.substr(1); // chop \n
+				if(item.extra) {
+          item.extra += "\n";
+        } else {
+          item.extra = '';
+        }
+        item.extra += 'bibtex: ' + item.itemID;
+
 				item.complete();
 			}
 			return;
@@ -2309,8 +2315,22 @@ var citeKeyConversions = {
 }
 
 
+var bibtexKey = /bibtex:\s*([^\s\r\n]+)/;
+function embeddedCiteKey(item, citekeys) {
+  if (!item.extra) { return null; }
+
+  var m = bibtexKey.exec(item.extra);
+  if (!m) { return null; }
+
+  item.extra = item.extra.replace(m[0], '');
+  return m[1];
+}
+
 function buildCiteKey (item,citekeys) {
-	var basekey = "";
+	var basekey = embeddedCiteKey(item, citekeys);
+
+  if (!basekey) {
+    basekey = "";
 	var counter = 0;
 	citeKeyFormatRemaining = citeKeyFormat;
 	while (citeKeyConversionsRe.test(citeKeyFormatRemaining)) {
@@ -2348,6 +2368,8 @@ function buildCiteKey (item,citekeys) {
 
 	basekey = tidyAccents(basekey);
 	basekey = basekey.replace(citeKeyCleanRe, "");
+  }
+
 	var citekey = basekey;
 	var i = 0;
 	while(citekeys[citekey]) {
