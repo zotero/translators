@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-08-06 23:15:32"
+	"lastUpdated": "2013-09-21 00:37:39"
 }
 
 function textToXML(text) {
@@ -42,6 +42,11 @@ function scrape(text) {
 }
 
 function detectWeb(doc, url) {
+	if(Z.monitorDOMChanges) {
+		var itemsPane = doc.getElementById('items-pane');
+		if(itemsPane) Z.monitorDOMChanges(itemsPane);
+	}
+	
 	//single item
 	if( url.match(/\/itemKey\/\w+/) ) {
 		return ZU.xpathText(doc, '//div[@id="item-details-div"]//td[preceding-sibling::th[text()="Item Type"]]/@class')
@@ -63,7 +68,7 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var libraryURI = ZU.xpathText(doc, '//link[@type="application/atom+xml" and @rel="alternate"]/@href')
+	var libraryURI = ZU.xpath(doc, '//a[@type="application/atom+xml" and @rel="alternate"]')[0].href
 					.match(/^.+?\/(?:users|groups)\/\w+/)[0]
 					+ '/items/';
 	if(Zotero.isBookmarklet) {
@@ -73,7 +78,7 @@ function doWeb(doc, url) {
 	var itemRe = /\/itemKey\/(\w+)/;
 
 	if (detectWeb(doc, url) == "multiple") {
-		var elems = ZU.xpath(doc, '//table[@id="field-table"]//td[1][not(contains(./a, "Unpublished Note"))]');
+		var elems = ZU.xpath(doc, '//table[@id="field-table"]//td[@class="title"][not(contains(./a, "Unpublished Note"))]');
 		var items = ZU.getItemArray(doc, elems);
 		
 		Zotero.selectItems(items, function(selectedItems) {
