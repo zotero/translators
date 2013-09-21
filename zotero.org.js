@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-09-21 00:37:39"
+	"lastUpdated": "2013-09-21 21:50:03"
 }
 
 function textToXML(text) {
@@ -41,12 +41,13 @@ function scrape(text) {
 	}
 }
 
+function getListTitles(doc) {
+	return ZU.xpath(doc, '//table[@id="field-table"]//td[@class="title"]'
+		+ '[./a[not(contains(text(), "Unpublished Note"))]'
+			+ '/span[not(contains(@class,"sprite-treeitem-attachment"))]]');
+}
+
 function detectWeb(doc, url) {
-	if(Z.monitorDOMChanges) {
-		var itemsPane = doc.getElementById('items-pane');
-		if(itemsPane) Z.monitorDOMChanges(itemsPane);
-	}
-	
 	//single item
 	if( url.match(/\/itemKey\/\w+/) ) {
 		return ZU.xpathText(doc, '//div[@id="item-details-div"]//td[preceding-sibling::th[text()="Item Type"]]/@class')
@@ -60,9 +61,11 @@ function detectWeb(doc, url) {
 	}
 
 	// Library and collections
-	if ( ( url.match(/\/items\/?([?#].*)?$/) ||
-		url.indexOf('/collectionKey/') != -1 || url.match(/\/collection\/\w+/) )
-		&& doc.getElementById("field-table") ) {
+	if ( ( url.match(/\/items\/?([?#].*)?$/)
+		|| url.indexOf('/collectionKey/') != -1
+		|| url.match(/\/collection\/\w+/)
+		|| url.indexOf('/tag/') != -1 )	
+		&& getListTitles(doc).length ) {
 		return "multiple";
 	}
 }
@@ -78,7 +81,7 @@ function doWeb(doc, url) {
 	var itemRe = /\/itemKey\/(\w+)/;
 
 	if (detectWeb(doc, url) == "multiple") {
-		var elems = ZU.xpath(doc, '//table[@id="field-table"]//td[@class="title"][not(contains(./a, "Unpublished Note"))]');
+		var elems = getListTitles(doc);
 		var items = ZU.getItemArray(doc, elems);
 		
 		Zotero.selectItems(items, function(selectedItems) {
@@ -122,7 +125,8 @@ var testCases = [
 				"title": "Expert Searching, Zotero: A New Bread of Search Tool",
 				"publicationTitle": "Medical Library Association Newsletter",
 				"date": "April 2007",
-				"callNumber": "0000"
+				"callNumber": "0000",
+				"extra": "Cited by 0000"
 			}
 		]
 	},
@@ -180,6 +184,12 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.zotero.org/marksample/items/collection/5RN69IBP",
+		"items": "multiple",
+		"defer": true
+	},
+	{
+		"type": "web",
+		"url": "https://www.zotero.org/groups/devtesting/items/tag/tag2",
 		"items": "multiple",
 		"defer": true
 	}
