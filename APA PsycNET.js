@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-05-18 01:05:33"
+	"lastUpdated": "2013-09-21 18:25:29"
 }
 
 function detectWeb(doc, url) {
@@ -214,15 +214,13 @@ function fetchRIS(url, post, itemType, doc, retry) {
 					return match;
 				}
 			});
-
+		text = text.replace(/\s*DESCRIPTORS  -.+/, "");
 		translator.setString(text);
 		translator.setHandler("itemDone", function(obj, item) {
 			//item.url = newurl;
 		
 			item.title = item.title.replace(/\.$/,'');
-		finalizeItem(item, doc);
-			
-		
+		finalizeItem(item, doc);		
 		});
 		translator.translate();
 	});
@@ -303,6 +301,7 @@ function scrapePage(doc, type) {
 }
 
 function finalizeItem(item, doc) {
+
 	var pdfurl = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
 	if (!pdfurl) pdfurl = ZU.xpathText(doc, '//li[contains(@class, "PDF") and contains(@href, ".pdf")]/@href');
 	//clean up abstract and get copyright info
@@ -370,13 +369,14 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"attention-deficit/hyperactivity disorder",
-					"adults",
-					"behavioral inhibition",
-					"neuropsychological performance",
-					"developmental considerations",
-					"neuropsychological deficits",
-					"empirical methods"
+					"*Attention Deficit Disorder with Hyperactivity",
+					"*Experimentation",
+					"*Neuropsychological Assessment",
+					"*Neuropsychology",
+					"Empirical Methods",
+					"Hyperkinesis",
+					"Inhibition (Personality)",
+					"Reaction Time"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -422,11 +422,11 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"factor analysis",
-					"evaluation",
-					"potency",
-					"activity",
-					"semantic"
+					"*Factor Analysis",
+					"*Judgment",
+					"*Semantics",
+					"Factor Structure",
+					"Meaning"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -481,7 +481,14 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"discusses tonic immobility as an animal model for catatonia & catalepsy"
+					"*Catalepsy",
+					"*Catatonia",
+					"*Tonic Immobility",
+					"Animal Models",
+					"Fear",
+					"Genetics",
+					"Neurology",
+					"Pharmacology"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -519,9 +526,7 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"abnormal personality",
-					"abnormal psychology",
-					"personality disorders"
+					"Abnormal Psychology"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -559,9 +564,7 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"abnormal personality",
-					"abnormal psychology",
-					"personality disorders"
+					"Abnormal Psychology"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -598,8 +601,8 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"disordered personalities",
-					"abnormal psychology"
+					"*Abnormal Psychology",
+					"Personality Disorders"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -656,12 +659,12 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"affect",
-					"cooperation",
-					"dictator game",
-					"emotions",
-					"ultimatum game",
-					"economics"
+					"*Economics",
+					"*Games",
+					"*Prediction",
+					"Behavior",
+					"Cooperation",
+					"Emotional States"
 				],
 				"seeAlso": [],
 				"attachments": [
