@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-23 14:55:28"
+	"lastUpdated": "2013-09-22 20:52:10"
 }
 
 /*
@@ -93,8 +93,8 @@ function scrape(doc, url) {
 	}
 
 	// Date
-	var date_XPath = '//meta[contains(@name, "date_first_released")]';
-	var date2_XPath = '//ul[@class="tools"]/li[contains(@class, "date")]/@content';	
+	var date_XPath = '//meta[contains(@name, "dats")]';
+	var date2_XPath = '//span[@class="articlemeta-date"]';	
 	if (doc.evaluate(date_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
 		var date = doc.evaluate(date_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().content;
 		date = date.split("T")[0];
@@ -103,7 +103,6 @@ function scrape(doc, url) {
 
 	var date = ZU.xpathText(doc, date2_XPath);
 		Z.debug(date)
-		date = date.match(/\d\d?\.\d\d?\.\d\d\d\d/)[0];
 		newItem.date = date;
 	}
 
@@ -183,25 +182,22 @@ var testCases = [
 				"notes": [],
 				"tags": [
 					"Libyen",
-					"Stadt",
+					"Muammar al-Gaddafi",
 					"Mustafa Abdel Dschalil",
-					"Berg",
-					"Hauptstadt",
+					"Stadt",
 					"Bani Walid",
-					"Präsident",
-					"Innenminister",
-					"Tripolis"
+					"Berg"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Libyen: Rebellen bereiten Angriff auf Bani Walid vor | Politik | ZEIT ONLINE",
+						"title": "Libyen: Rebellen bereiten Angriff auf Bani Walid vor | ZEIT ONLINE",
 						"mimeType": "text/html"
 					}
 				],
 				"url": "http://www.zeit.de/politik/ausland/2011-09/libyen-bani-walid",
 				"title": "Libyen: Rebellen bereiten Angriff auf Bani Walid vor",
-				"date": "04.09.2011",
+				"date": "4. September 2011",
 				"abstractNote": "Die von Gadhafi-Anhängern geführte Stadt ist von Rebellentruppen eingekreist. Gespräche über eine friedliche Übergabe sind gescheitert, ein Angriff steht offenbar bevor.",
 				"publicationTitle": "Die Zeit",
 				"section": "Ausland",
@@ -217,37 +213,27 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"creators": [
-					{
-						"firstName": "Moritz",
-						"lastName": "Müller-Wirth",
-						"creatorType": "author"
-					}
-				],
+				"creators": [],
 				"notes": [],
 				"tags": [
 					"Philipp Lahm",
-					"Angela Merkel",
 					"Andreas Ottl",
-					"Fußball",
+					"Angela Merkel",
 					"Bundesliga",
-					"FC Bayern München",
-					"Robert Enke",
-					"SV Werder Bremen",
-					"Fifa",
-					"Trainer"
+					"Fußball",
+					"Oskar Lafontaine"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Philipp Lahm: \"Hast du elf Freunde?\" | Sport | ZEIT ONLINE",
+						"title": "Philipp Lahm: \"Hast du elf Freunde?\" | ZEIT ONLINE",
 						"mimeType": "text/html"
 					}
 				],
 				"url": "http://www.zeit.de/2011/36/Interview-Lahm-Rinke",
 				"title": "Philipp Lahm: \"Hast du elf Freunde?\"",
-				"date": "04.09.2011",
-				"abstractNote": "Tschechow und Robben, Drama im Flutlicht und Wahrhaftigkeit bei der Arbeit. Der Fußballprofi und Autor Philipp Lahm im Gespräch mit dem Schriftsteller und Fußballer Moritz Rinke",
+				"date": "4. September 2011",
+				"abstractNote": "Tschechow und Robben, Drama im Flutlicht und Wahrhaftigkeit bei der Arbeit. Der Fußballprofi und Autor Philipp Lahm im Gespräch mit dem Schriftsteller und Fußballer Moritz Rinke Von Moritz Müller-Wirth",
 				"publicationTitle": "Die Zeit",
 				"section": "sport",
 				"libraryCatalog": "Die Zeit",
