@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-09-17 14:00:21"
+	"lastUpdated": "2013-09-23 04:14:36"
 }
 
 /*
@@ -131,10 +131,22 @@ function getPrefixes(doc) {
 		if(rel) {
 			var matches = rel.match(/^schema\.([a-zA-Z]+)/);
 			if(matches) {
-				//Zotero.debug("Prefix '" + matches[1].toLowerCase() +"' => '" + links[i].getAttribute("href") + "'");
-				_prefixes[matches[1].toLowerCase()] = remapPrefix(link.getAttribute("href"));
+				var uri = remapPrefix(link.getAttribute("href"));
+				//Zotero.debug("Prefix '" + matches[1].toLowerCase() +"' => '" + uri + "'");
+				_prefixes[matches[1].toLowerCase()] = uri;
 			}
 		}
+	}
+	
+	//also look in html and head elements
+	var prefixes = (doc.documentElement.getAttribute('prefix') || '')
+		+ (doc.head.getAttribute('prefix') || '');
+	var prefixRE = /(\w+):\s+(\S+)/g;
+	var m;
+	while(m = prefixRE.exec(prefixes)) {
+		var uri = remapPrefix(m[2]);
+		Z.debug("Prefix '" + m[1].toLowerCase() +"' => '" + uri + "'");
+		_prefixes[m[1].toLowerCase()] = uri;
 	}
 }
 
