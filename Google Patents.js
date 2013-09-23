@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-06-04 20:18:06"
+	"lastUpdated": "2013-09-22 23:15:28"
 }
 
 function detectWeb(doc, url) {
@@ -248,7 +248,7 @@ var scrapers = [
 			
 			//add other data
 			fields.title = ZU.xpathText(doc, '//span[@class="patent-title"]');
-			var abs = ZU.xpath(doc, '//p[@class="abstract"]');
+			var abs = ZU.xpath(doc, '//div[@class="abstract"]|//p[@class="abstract"]');
 			fields.abstractNote = '';
 			for(var i=0, n=abs.length; i<n; i++) {
 				fields.abstractNote += ZU.trimInternal(abs[i].textContent) + '\n';
@@ -559,7 +559,7 @@ var testCases = [
 				"patentNumber": "EP1808414 A1",
 				"date": "Jul 18, 2007",
 				"filingDate": "Jan 16, 2006",
-				"assignee": "Billon, Michel",
+				"assignee": "Michel Billon",
 				"title": "Device for recycling sanitary water",
 				"abstractNote": "The installation for recycling used water originating from sanitary equipment and re-use of water for rinsing a water closet bowl, comprises a control system having an electronic terminal with a micro controller, and an additional drain to pour an overflow of a tank directly in an evacuation pipe of the water closet bowl. The water closet bowl is equipped with a flush water saver system, which surmounts the bowl. The saver system comprises tank (3) with a water reserve, and a water-flushing device placed in the tank to supply the flush water to the water closet bowl. The installation for recycling used water originating from sanitary equipment and re-use of water for rinsing a water closet bowl, comprises a control system having an electronic terminal with a micro controller, and an additional drain to pour an overflow of a tank directly in an evacuation pipe of the water closet bowl. The water closet bowl is equipped with a flush water saver system, which surmounts the bowl. The saver system comprises tank (3) with a water reserve, and a water-flushing device placed in the tank to supply the flush water to the water closet bowl, water supply pipes, a filter and a raising pump are arranged in one of the pipes, a water level detector to control the water reserve level contained in the tank, and a flapper valve to control the arrival of running water. The flapper valve is normally closed and temporarily opened when quantity of water contained in the tank is lower than a predetermined quantity detected by the detector. The water-flushing device comprises a drain valve (25A) with a vertical actuation inside a flow regulation tube, which extends on all the height of the tank and communicates with the rest of the tank by openings in lateral surface of the tube. The drain valve is operated automatically by a motor reducer, which is connected to the valve by a rod and a chain. The drain valve is equipped with a cam and limit switch. The level detector comprises a probe connected to the flapper valve. One of the water supply pipes comprises a flow regulator in which the pipe is bent so as to present an outlet opening in the bottom of the tank. The sanitary equipment generates used water comprises bathtub, shower and/or washbasin. The capacity of the tank is higher than 150 liters. The used water path is traversed between the sanitary equipment and the tank. The filter is placed in an upstream of the pump. The filter comprises a basket filter for a coarse filtration, a float sensor and reed contact, and an outlet towards the overflow discharge. The basket filter contains a solid preference product for the used water treatment, which dissolves gradually during draining by sanitary equipment. The raising pump is equipped with a plunger of automatic startup when water is reached a predetermined level, a non-return valve, and a venting device. The control system comprises a device to regulate/modify the volume of water supplied by the actuation of the flushing water, and a device to- control the flow of the water in the tank, and check and display the electronic installation, the pump and the filter. The terminal comprises display board e.g. liquid crystals, which allows message display. The control system is programmed to operate the actuator periodically in the drain valve. Another water supply pipe in the tank is connected by an upstream of the flapper valve with a rainwater collection device. The water closet bowl is connected to a forced ventilation device.",
 				"country": "European Union",
@@ -605,8 +605,8 @@ var testCases = [
 				"itemType": "patent",
 				"creators": [
 					{
-						"firstName": "Jr Chester L.",
-						"lastName": "Craig",
+						"firstName": "Chester L. Craig",
+						"lastName": "Jr",
 						"creatorType": "inventor"
 					}
 				],
@@ -622,7 +622,7 @@ var testCases = [
 				"patentNumber": "US4748058 A",
 				"date": "May 31, 1988",
 				"filingDate": "Feb 10, 1987",
-				"assignee": "Craig, Jr.; Chester L.",
+				"assignee": "Craig Jr Chester L",
 				"title": "Artificial tree",
 				"abstractNote": "An artificial tree assembly, and a tree constructed therefrom, are provided. The assembly comprises a collapsible three-piece pole; a base member formed by the bottom of a box for storing the tree assembly and including a pole support member secured thereto for supporting the pole; and a plurality of limb sections and interconnecting garlands. The limb-sections each comprise a central ring portion and a plurality of limb members extending radially outwardly from the central ring portions. The ring portions of the limb sections are stacked, when not in use, on the pole support member and are disposed, in use, along the length of pole in spaced relationship therealong. The garlands interconnect the limb portions so that as the ring portions are lifted, from the top, from the stacked positions thereof on the pole support member and slid along the pole, the garlands between adjacent limb section are tensioned, in turn, and thus serve to lift the next adjacent limb section until the tree is fully erected.",
 				"country": "United States",
@@ -673,13 +673,8 @@ var testCases = [
 				"itemType": "patent",
 				"creators": [
 					{
-						"firstName": "Average Scale Inhibitor",
-						"lastName": "Cone",
-						"creatorType": "inventor"
-					},
-					{
-						"firstName": "Average Scale Inhibitor",
-						"lastName": "Cone",
+						"firstName": "Loyd W.",
+						"lastName": "Jones",
 						"creatorType": "inventor"
 					}
 				],
@@ -692,15 +687,14 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"patentNumber": "2970959",
-				"filingDate": "Jun 17, 1958",
+				"patentNumber": "US2970959 A",
 				"date": "Feb 7, 1961",
-				"extra": "U.S. Classification: 507/215; 252/181; 264/15; 264/122; 507/209; 507/927",
-				"title": "Composition and Method For",
+				"filingDate": "Jun 17, 1958",
+				"assignee": "Pan American Petroleum Corp",
+				"title": "Composition and method for inhibiting scale",
 				"country": "United States",
-				"url": "http://www.google.com/patents/US2970959",
-				"libraryCatalog": "Google Patents",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"extra": "U.S. Classification 507/215, 264/15, 507/927, 252/181, 507/209, 264/122; International Classification C02F5/10; Cooperative Classification C02F5/105, Y10S507/927; European Classification C02F5/10B",
+				"libraryCatalog": "Google Patents"
 			}
 		]
 	},

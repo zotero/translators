@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-04-30 15:21:37"
+	"lastUpdated": "2013-09-22 23:10:03"
 }
 
 /*
@@ -176,7 +176,7 @@ function getItemArrayGB (doc, inHere, urlRe, rejectRe) {
 		return availableItems;
 	}
 
-	var googleplay = ZU.xpath(doc, '//div[@class="details goog-inline-block"]//a[@class="title"]');
+	var googleplay = ZU.xpath(doc, '//div[contains(@class, "details")]//a[@class="title"]');
 	if(googleplay.length) {
 		for(var i=0, n=googleplay.length; i<n; i++) {
 			var link = ZU.xpathText(googleplay[i], './@href');
@@ -265,12 +265,12 @@ function getItemArrayGB (doc, inHere, urlRe, rejectRe) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://books.google.com/books?q=asimov&btnG=Search+Books",
+		"url": "https://www.google.com/search?tbo=p&tbm=bks&q=asimov",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://books.google.com/books?q=asimov&btnG=Search%20Books&rview=1",
+		"url": "https://www.google.com/search?tbo=p&tbm=bks&q=asimov",
 		"items": "multiple"
 	},
 	{
@@ -281,6 +281,11 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
+						"firstName": "Nicholas",
+						"lastName": "Collins",
+						"creatorType": "author"
+					},
+					{
 						"firstName": "Julio d' Escrivan",
 						"lastName": "Rincón",
 						"creatorType": "author"
@@ -288,12 +293,9 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Music / Genres & Styles / Electronic",
-					"Music / Instruction & Study / Techniques",
-					"Music / Genres & Styles / Electronic",
 					"Music / General",
-					"Music / History & Criticism",
-					"Music / General"
+					"Music / Genres & Styles / Electronic",
+					"Music / Instruction & Study / Techniques"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -308,7 +310,7 @@ var testCases = [
 				"publisher": "Cambridge University Press",
 				"title": "The Cambridge Companion to Electronic Music",
 				"language": "en",
-				"abstractNote": "Musicians are always quick to adopt and explore new technologies. The fast-paced changes wrought by electrification, from the microphone via the analogue synthesiser to the laptop computer, have led to a wide diversity of new musical styles and techniques. Electronic music has grown to a broad field of investigation, taking in historical movements such as musique concrÃ¨te and elektronische musik, and contemporary trends such as electronic dance music and electronica. A fascinating array of composers and inventors have contributed to a diverse set of technologies, practices and music. This book brings together some novel threads through this scene, from the viewpoint of researchers at the forefront of the sonic explorations empowered by electronic technology. The chapters provide accessible and insightful overviews of core topic areas and uncover some hitherto less publicised corners of worldwide movements. Recent areas of intense activity such as audiovisuals, live electronic music, interactivity and network music are actively promoted.",
+				"abstractNote": "Musicians are always quick to adopt and explore new technologies. The fast-paced changes wrought by electrification, from the microphone via the analogue synthesiser to the laptop computer, have led to a wide diversity of new musical styles and techniques. Electronic music has grown to a broad field of investigation, taking in historical movements such as musique concrète and elektronische musik, and contemporary trends such as electronic dance music and electronica. A fascinating array of composers and inventors have contributed to a diverse set of technologies, practices and music. This book brings together some novel threads through this scene, from the viewpoint of researchers at the forefront of the sonic explorations empowered by electronic technology. The chapters provide accessible and insightful overviews of core topic areas and uncover some hitherto less publicised corners of worldwide movements. Recent areas of intense activity such as audiovisuals, live electronic music, interactivity and network music are actively promoted.",
 				"date": "2007-12-13",
 				"libraryCatalog": "Google Books"
 			}
@@ -330,9 +332,7 @@ var testCases = [
 				"notes": [],
 				"tags": [
 					"Literary Criticism / Caribbean & Latin American",
-					"Literary Criticism / European / Spanish & Portuguese",
-					"Literary Criticism / General",
-					"Literary Criticism / Caribbean & Latin American"
+					"Literary Criticism / European / Spanish & Portuguese"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -345,12 +345,11 @@ var testCases = [
 				"numPages": "208",
 				"ISBN": "9780313312601",
 				"publisher": "Greenwood Publishing Group",
-				"title": "Gabriel García Márquez: A Critical Companion",
+				"title": "Gabriel García Márquez",
 				"language": "en",
-				"abstractNote": "Winner of the Nobel Prize for Literature in 1982 for his masterpiece One Hundred Years of Solitude, Gabriel Garc^D'ia M^D'arquez had already earned tremendous respect and popularity in the years leading up to that honor, and remains, to date, an active and prolific writer. Readers are introduced to Garc^D'ia M^D'arquez with a vivid account of his fascinating life; from his friendships with poets and presidents, to his distinguished career as a journalist, novelist, and chronicler of the quintessential Latin American experience. This companion also helps students situate Garc^D'ia M^D'arquez within the canon of Western literature, exploring his contributions to the modern novel in general, and his forging of literary techniques, particularly magic realism, that have come to distinguish Latin American fiction.Full literary analysis is given for One Hundred Years of Solitude, as well as Chronicle of a Death Foretold (1981), Love in the Time of Cholera (1985), two additional novels, and five of Garc^D'ia M^D'arquez's best short stories. Students are given guidance in understanding the historical contexts, as well as the characters and themes that recur in these interrelated works. Narrative technique and alternative critical perspectives are also explored for each work, helping readers fully appreciate the literary accomplishments of Gabriel Garc^D'ia M^D'arquez.",
-				"date": "2001",
-				"libraryCatalog": "Google Books",
-				"shortTitle": "Gabriel García Márquez"
+				"abstractNote": "Winner of the Nobel Prize for Literature in 1982 for his masterpiece \"One Hundred Years of Solitude,\" Gabriel Garc DEGREESD'ia M DEGREESD'arquez had already earned tremendous respect and popularity in the years leading up to that honor, and remains, to date, an active and prolific writer. Readers are introduced to Garc DEGREESD'ia M DEGREESD'arquez with a vivid account of his fascinating life; from his friendships with poets and presidents, to his distinguished career as a journalist, novelist, and chronicler of the quintessential Latin American experience. This companion also helps students situate Garc DEGREESD'ia M DEGREESD'arquez within the canon of Western literature, exploring his contributions to the modern novel in general, and his forging of literary techniques, particularly magic realism, that have come to distinguish Latin American fiction. Full literary analysis is given for \"One Hundred Years of Solitude,\" as well as \"Chronicle of a Death Foretold\" (1981), \"Love in the Time of Cholera\" (1985), two additional novels, and five of Garc DEGREESD'ia M DEGREESD'arquez's best short stories. Students are given guidance in understanding the historical contexts, as well as the characters and themes that recur in these interrelated works. Narrative technique and alternative critical perspectives are also explored for each work, helping readers fully appreciate the literary accomplishments of Gabriel Garc DEGREESD'ia M DEGREESD'arquez.",
+				"date": "2001-01-01",
+				"libraryCatalog": "Google Books"
 			}
 		]
 	},
@@ -369,7 +368,6 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Biography & Autobiography / General",
 					"Biography & Autobiography / Women"
 				],
 				"seeAlso": [],
@@ -411,8 +409,6 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Music / General",
-					"Music / History & Criticism",
 					"Music / Genres & Styles / New Age"
 				],
 				"seeAlso": [],
@@ -428,7 +424,7 @@ var testCases = [
 				"publisher": "Psychology Press",
 				"title": "Electronic and Experimental Music: Pioneers in Technology and Composition",
 				"language": "en",
-				"abstractNote": "Electronic and Experimental Music details the history of electronic music throughout the world, and the people who created it. From the theory of sound production to key composers and instrument designers, this is a complete introduction to the genre from its early roots to the present technological explosion. Every major figure is covered including: Thaddeus Cahill, Peire Henry, Gorden Mumma, Pauline Oliveros, Brian Eno, and D.J. Spooky. The vast array of forms and instruments that these innovators introduced and expanded are also included--tape composition, the synthesizer, \"live\" electronic performance, the ONCE festivals, ambient music, and turntablism. This new edition, includes a thoroughly updated and enlarged theoretical and historical sections and includes new material on using home computers (PCs) and the many resources now available in software and the Internet.",
+				"abstractNote": "Annotation Electronic and Experimental Music details the history of electronic music throughout the world, and the people who created it. From the theory of sound production to key composers and instrument designers, this is a complete introduction to the genre from its early roots to the present technological explosion. Every major figure is covered including: Thaddeus Cahill, Peire Henry, Gorden Mumma, Pauline Oliveros, Brian Eno, and D.J. Spooky. The vast array of forms and instruments that these innovators introduced and expanded are also included--tape composition, the synthesizer, \"live\" electronic performance, the ONCE festivals, ambient music, and turntablism. This new edition, includes a thoroughly updated and enlarged theoretical and historical sections and includes new material on using home computers (PCs) and the many resources now available in software and the Internet.",
 				"date": "2002",
 				"libraryCatalog": "Google Books",
 				"shortTitle": "Electronic and Experimental Music"
@@ -437,8 +433,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"defer": true,
-		"url": "https://www.google.com/search?q=asimov&btnG=Search+Books&tbm=bks&tbo=1#q=asimov&hl=en&tbo=1&tbm=bks&ei=guBGUIDOCJP8qQG7u4DYCg&start=10&sa=N&fp=1&biw=1352&bih=588&bav=on.2,or.r_gc.r_pw.r_qf.&cad=b&sei=guBGUIDOCJP8qQG7u4DYCg",
+		"url": "https://www.google.com/search?q=asimov&btnG=Search+Books&tbm=bks&tbo=1#hl=en&q=asimov&sei=guBGUIDOCJP8qQG7u4DYCg&start=10&tbm=bks",
 		"items": "multiple"
 	},
 	{
