@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-02-07 00:17:57"
+	"lastUpdated": "2013-09-23 22:58:35"
 }
 
 /*
@@ -240,66 +240,6 @@ var testCases = [
 		"type": "web",
 		"url": "http://jpsj.ipap.jp/journal/JPSJS-78SA.html",
 		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://ptp.ipap.jp/journal/PTPS-160.html",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://ptp.ipap.jp/link?PTPS/160/15",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "J. Y.",
-						"lastName": "Gan",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Yan",
-						"lastName": "Chen",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Z. B.",
-						"lastName": "Su",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "F. C.",
-						"lastName": "Zhang",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "IPAP - Snapshot",
-						"mimeType": "text/html"
-					},
-					{
-						"title": "IPAP - Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"title": "Gossamer Superconductivity in Layered Organic Compounds κ-(BEDT-TTF)<sub>2</sub>X",
-				"publicationTitle": "Progress of Theoretical Physics Supplement",
-				"volume": "160",
-				"pages": "15-27",
-				"date": "2005",
-				"url": "http://ptp.ipap.jp/link?PTPS/160/15/",
-				"DOI": "10.1143/PTPS.160.15",
-				"publisher": "Progress of Theoretical Physics",
-				"abstractNote": "The layered organic superconductors κ-(BEDT-TTF)2Xexhibit similar normal and superconducting state properties withthose of the high temperature cuprate superconductors. Manyexperimental measurements support the version that thesuperconducting state is on the verge of the Mott insulator. Usingthe strong-coupling approach, we employ the Gutzwiller variationalmethod to study a two-dimensional Hubbard model including a spinexchange coupling term on an anisotropic triangular lattice as aminimal model for the compounds. The ground state is found to be aGossamer superconductor at a small on-site Coulomb repulsion U andan antiferromagnetic Mott insulator at large U, separated by afirst order phase transition. The lattice structure anisotropy, orthe ratio of the hopping integrals along different latticeorientation t′/t plays an important role in determining thehighly non-trivial phase diagram. Our theory is qualitativelyconsistent with major experiments reported in organicsuperconductors.",
-				"libraryCatalog": "Institute of Pure and Applied Physics",
-				"accessDate": "CURRENT_TIMESTAMP"
-			}
-		]
 	},
 	{
 		"type": "web",

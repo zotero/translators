@@ -2,18 +2,18 @@
 	"translatorID": "0cdc6a07-38cf-4ec1-b9d5-7a3c0cc89b15",
 	"label": "OSTI Energy Citations",
 	"creator": "Michael Berkowitz",
-	"target": "^https?://www\\.osti\\.gov/energycitations",
+	"target": "^https?://www\\.osti\\.gov/(energycitations|scitech)",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-11-24 11:36:35"
+	"lastUpdated": "2013-09-23 22:23:09"
 }
 
 /*
-    Translator
+	Translator
    Copyright (C) 2012 Sebastian Karcher an Avram Lyon
 
    This program is free software: you can redistribute it and/or modify
@@ -53,7 +53,7 @@ function doWeb(doc,url)
 	if (detectWeb(doc, url) == "multiple") {
 		var hits = {};
 		var urls = [];
-		var results = ZU.xpath(doc,"//table[@class='searchresults']//a[@class='citation']");
+		var results = ZU.xpath(doc,"//div[@class='title']//a[@itemprop='url']");
 	
 		for (var i in results) {
 			hits[results[i].href] = results[i].textContent;
@@ -68,9 +68,9 @@ function doWeb(doc,url)
 
 		});
 	} else {
-		var pageno = ZU.xpathText(doc, '//table[@class="productDetails"]/tbody/tr/th[contains(text(), "Format")]/following-sibling::td')
+		var pageno = ZU.xpathText(doc, '//div[@id="citation-details"]//tr/td[contains(text(), "Format")]/following-sibling::td')
 		if (pageno && pageno.indexOf("Pages")!=-1) pageno = pageno.match(/Pages:\s*(\d+)/)
-		var type = ZU.xpathText(doc, '//table[@class="productDetails"]/tbody/tr/th[contains(text(), "Resource Type")]/following-sibling::td');
+		var type = ZU.xpathText(doc, '//div[@id="citation-details"]//tr/td[contains(text(), "Resource Type")]/following-sibling::td');
 		var itemtype;
 		//Currently journal articles and reports work through metadata, thesis was an easy call
 		//It's be easy to add other item types.
@@ -105,7 +105,7 @@ function doWeb(doc,url)
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.osti.gov/energycitations/product.biblio.jsp?query_id=0&page=0&osti_id=893699",
+		"url": "http://www.osti.gov/scitech/biblio/893699",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -145,56 +145,37 @@ var testCases = [
 					}
 				],
 				"title": "Phase Transition from Hadronic Matter to Quark Matter",
-				"date": "04/01/2007",
+				"date": "2007/04/01",
 				"publicationTitle": "Phys.Rev.C",
 				"volume": "75",
 				"institution": "Thomas Jefferson National Accelerator Facility, Newport",
 				"number": "JLAB-THY-06-545; DOE/ER/40150-4072",
 				"DOI": "10.1103/PhysRevC.75.045202",
 				"language": "English",
-				"url": "http://www.osti.gov/energycitations/product.biblio.jsp?query_id=0&page=0&osti_id=893699",
-				"accessDate": "CURRENT_TIMESTAMP",
+				"url": "http://www.osti.gov/scitech/biblio/893699",
 				"libraryCatalog": "www.osti.gov",
-				"place": "News, VA",
-				"numPages": "S"
+				"accessDate": "CURRENT_TIMESTAMP",
+				"place": "News, VA"
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.osti.gov/energycitations/product.biblio.jsp?query_id=0&page=0&osti_id=900531",
+		"url": "http://www.osti.gov/scitech/biblio/1084504",
 		"items": [
 			{
 				"itemType": "report",
 				"creators": [
 					{
-						"firstName": "Joseph",
-						"lastName": "Gambogi",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Stephen J.",
-						"lastName": "Gerdemann",
+						"firstName": "Boris A.",
+						"lastName": "Maiorov",
 						"creatorType": "author"
 					}
 				],
 				"notes": [],
 				"tags": [
-					"materials science",
-					"chlorination",
-					"corrosion resistance",
-					"economics",
-					"machining",
-					"magnesium",
-					"mining",
-					"physical properties",
-					"production",
-					"purification",
-					"rutile",
-					"titanium",
-					"titanium",
-					"titanium metal",
-					"kroll process"
+					"condensed matter physics",
+					"superconductivity & superfluidity(75)"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -206,17 +187,15 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"title": "Titanium Metal: Extraction to Application",
-				"date": "09/01/2002",
-				"institution": "Albany Research Center (ARC),",
-				"number": "DOE/ARC-1999-060",
-				"publisher": "TMS (The Minerals, Metals & Materials Society), Warrendale, PA",
+				"title": "Superconductivity",
+				"date": "2013/06/19",
+				"institution": "Los Alamos National Laboratory (LANL)",
+				"number": "LA-UR-13-24526",
+				"DOI": "10.2172/1084504",
 				"language": "English",
-				"url": "http://www.osti.gov/energycitations/product.biblio.jsp?query_id=0&page=0&osti_id=900531",
-				"accessDate": "CURRENT_TIMESTAMP",
+				"url": "http://www.osti.gov/scitech/biblio/1084504",
 				"libraryCatalog": "www.osti.gov",
-				"place": "Albany, OR",
-				"shortTitle": "Titanium Metal"
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}
