@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-03-13 21:04:33"
+	"lastUpdated": "2013-09-23 22:11:14"
 }
 
 /*
@@ -413,7 +413,7 @@ function scrape(doc, url, type, pdfUrl) {
 		});
 	} else {
 		var pdfLink = ZU.xpath(doc, '//div[@id="side_panel"]//\
-			a[contains(@class,"format_pdf") and contains(@href,"fulltext")][1]');
+			a[contains(@class,"format_pdf") and contains(@href,"fulltext") or contains(@href, "preview")][1]');
 		if(pdfLink.length) {
 			fetchEmbeddedPdf(pdfLink[0].href, item,
 				function() { item.complete(); });
@@ -1158,11 +1158,11 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Book reviews",
 					"Peace",
-					"Political Science--International Relations",
+					"Book reviews",
 					"Sciences: Comprehensive Works",
-					"Sociology"
+					"Sociology",
+					"Political Science--International Relations"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -1170,18 +1170,23 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
+				"title": "Peacemaking: moral & policy challenges for a new world // Review",
+				"publicationTitle": "Peace Research",
+				"volume": "27",
 				"issue": "2",
+				"pages": "90-100",
+				"numPages": "0",
+				"publisher": "Menno Simons College",
 				"ISSN": "00084697",
 				"language": "English",
 				"rights": "Copyright Peace Research May 1995",
 				"url": "http://search.proquest.com/docview/213445241",
+				"place": "Winnipeg, Canada",
+				"date": "May 1995",
+				"abstractNote": "In his \"Introduction\" to the book entitled Peacemaking: Moral and Policy Challenges for a New World, Rev. Drew Christiansen points out that the Roman Catholic bishops of the United States have made a clear distinction between the social teachings of the Church--comprising universally binding moral and ethical principles--and the particular positions they have taken on public policy issues--such as those relating to war, peace, justice, human rights and other socio-political matters. While the former are not to be mitigated under any circumstances, the latter, being particular applications, observations and recommendations, can allow for plurality of opinion and diversity of focus in the case of specific social, political and opinion and diversity of focus in the case of specific social, political and moral issues.(f.1) Peacemaking aligns itself with this second category. The objectives of this review essay are the following: to summarize the main topics and themes, of some of the recently-published documents on Catholic political thought, relating to peacemaking and peacekeeping; and to provide a brief critique of their main contents, recommendations and suggestions.\nThe Directions of Peacemaking: As in the earlier documents, so too are the virtues of faith, hope, courage, compassion, humility, kindness, patience, perseverance, civility and charity emphasized, in The Harvest of Justice, as definite aids in peacemaking and peacekeeping. The visions of global common good, social and economic development consistent with securing and nurturing conditions for justice and peace, solidarity among people, as well as cooperation among the industrial rich and the poor developing nations are also emphasized as positive enforcements in the peacemaking and peacekeeping processes. All of these are laudable commitments, so long as they are pursued through completely pacifist perspectives. The Harvest of Justice also emphasizes that, \"as far as possible, justice should be sought through nonviolent means;\" however, \"when sustained attempt at nonviolent action fails, then legitimate political authorities are permitted as a last resort to employ limited force to rescue the innocent and establish justice.\"(f.13) The document also frankly admits that \"the vision of Christian nonviolence is not passive.\"(f.14) Such a position may disturb many pacifists. Even though some restrictive conditions--such as a \"just cause,\" \"comparative justice,\" legitimate authority\" to pursue justice issues, \"right intentions,\" probability of success, proportionality of gains and losses in pursuing justice, and the use of force as last resort--are indicated and specified in the document, the use of violence and devastation are sanctioned, nevertheless, by its reaffirmation of the use of force in setting issues and by its support of the validity of the \"just war\" tradition.\nThe first section, entitled \"Theology, Morality, and Foreign Policy in A New World,\" contains four essays. These deal with the new challenges of peace, the illusion of control, creating peace conditions through a theological framework, as well as moral reasoning and foreign policy after the containment. The second, comprising six essays, is entitled \"Human Rights, Self-Determination, and Sustainable Development.\" These essays deal with effective human rights agenda, religious nationalism and human rights, identity, sovereignty, and self-determination, peace and the moral imperatives of democracy, and political economy of peace. The two essays which comprise the third section, entitled \"Global Institutions,\" relate the strengthening of the global institutions and action for the future. The fourth, entitled \"The Use of Force After the Cold War,\" is both interesting and controversial. Its six essays discuss ethical dilemmas in the use of force, development of the just-war tradition, in a multicultural world, casuistry, pacifism, and the just-war tradition, possibilities and limits of humanitarian intervention, and the challenge of peace and stability in a new international order. The last section, devoted to \"Education and Action for Peace,\" contains three essays, which examine the education for peacemaking, the challenge of conscience and the pastoral response to ongoing challenge of peace.",
 				"libraryCatalog": "ProQuest",
-				"shortTitle": "Peacemaking",
-				"title": "Peacemaking: moral & policy challenges for a new world // Review",
-				"publicationTitle": "Peace Research",
-				"volume": "27",
-				"pages": "90-100",
-				"date": "May 1995"
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Peacemaking"
 			}
 		]
 	},
@@ -1421,8 +1426,8 @@ var testCases = [
 					{
 						"title": "Snapshot"
 					},
- 					{
-						"title": "Full Text PDF",  
+					{
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
