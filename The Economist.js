@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-02-08 13:37:04"
+	"lastUpdated": "2013-09-25 16:00:02"
 }
 
 function detectWeb(doc, url) {
@@ -83,7 +83,7 @@ function doWeb(doc, url) {
 
 		var articles = new Array();
 		var items = {};
-		var titles = doc.evaluate('//p[@class="search-item-title"]/a', doc, null, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//p[@class="search-item-title"]/a|//div[contains(@class, "gs-title")]/a[@class="gs-title"]', doc, null, XPathResult.ANY_TYPE, null);
 		var title;
 		while (title = titles.iterateNext()) {
 			items[title.href] = title.textContent;
@@ -130,11 +130,6 @@ var testCases = [
 				"shortTitle": "Asia-Pacific trade initiatives"
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.economist.com/search/apachesolr_search/labour",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

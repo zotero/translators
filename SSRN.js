@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-06-08 14:47:14"
+	"lastUpdated": "2013-09-25 15:23:47"
 }
 
 /*
@@ -92,59 +92,6 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://papers.ssrn.com/sol3/papers.cfm?abstract_id=1450589",
-		"items": [
-			{
-				"itemType": "report",
-				"creators": [
-					{
-						"firstName": "Brian D.",
-						"lastName": "Greenhill",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Michael",
-						"lastName": "Ward",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Audrey E.",
-						"lastName": "Sacks",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"Visual Evidence",
-					"Logistic Regression",
-					"Fit"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					}
-				],
-				"title": "The 'Separation Plot': A New Visual Method for Evaluating the Predictive Power of Logit/Probit Models",
-				"date": "2009",
-				"abstractNote": "We present a new visual method for assessing the predictive power of models with binary outcomes.  This technique allows the analyst to quickly and easily choose among alternative model specifications based upon the models' ability to consistently match high-probability predictions to actual occurrences of the event of interest, and low-probability predictions to non-occurrences of the event of interest.  Unlike existing methods for assessing predictive power for logit and probit models such as the use of \"percent correctly predicted\" statistics, Brier scores and the ROC plot, our \"separation plot\" has the advantage of producing a visual display that is more informative and easier to explain to a general audience than a ROC plot, while also remaining insensitive to the user's often arbitrary choice of threshold for distinguishing between events and non-events.  We show how to implement this technique in R and demonstrate its effectiveness in building predictive models in four different areas of political research.",
-				"url": "http://papers.ssrn.com/abstract=1450589",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "papers.ssrn.com",
-				"type": "SSRN Scholarly Paper",
-				"institution": "Social Science Research Network",
-				"reportNumber": "ID 1450589",
-				"place": "Rochester, NY",
-				"shortTitle": "The 'Separation Plot'"
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "http://papers.ssrn.com/sol3/results.cfm?txtKey_Words=europe",
 		"items": "multiple"
 	},
@@ -157,6 +104,62 @@ var testCases = [
 		"type": "web",
 		"url": "http://papers.ssrn.com/sol3/cf_dev/AbsByAuth.cfm?per_id=16042",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://papers.ssrn.com/sol3/papers.cfm?abstract_id=1450387",
+		"items": [
+			{
+				"itemType": "report",
+				"creators": [
+					{
+						"firstName": "Michael",
+						"lastName": "Strausz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Brian D.",
+						"lastName": "Greenhill",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"human rights",
+					"genocide",
+					"Japan",
+					"international law",
+					"nested analysis",
+					"mixed methods",
+					"event history analysis",
+					"survival models",
+					"hazard models",
+					"international norms",
+					"norm cascades"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "Who Doesn't Support the Genocide Convention? A Nested Analysis",
+				"date": "2009",
+				"url": "http://papers.ssrn.com/abstract=1450387",
+				"abstractNote": "What explains the large variation in the time taken by different countries to ratify the 1948 Genocide Convention? The costs of ratiﬁcation would appear to be relatively low, yet many countries have waited for years, and even decades, before ratifying this symbolically important treaty. This study employs a \"nested analysis\" that combines a large-n event history analysis with a detailed study of an important outlying case in order to explain the main sources of this variation. The initial event history history produces a puzzling ﬁnding: countries appear to be less likely to ratify the treaty if relevant peer countries have already done so. We use the case of Japan -- which has not yet ratiﬁed the Genocide Convention, despite the predictions of the event history model -- to explore the proposed causes of ratiﬁcation in more detail. Based on these ﬁndings, we suggest that once the norms embodied in a treaty take on a sufﬁciently \"taken-for-granted\" character, many countries decide that the costs of ratiﬁcation outweigh its marginal beneﬁts. The pattern of ratiﬁcation of the Genocide Convention therefore does not appear to ﬁt the classic model of the \"norm cascade\" that has been used to explain the adoption of other human rights norms. We conclude with suggestions for how the validity of our theory could be tested through a combination of further large-n and small-n analysis.",
+				"libraryCatalog": "papers.ssrn.com",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"type": "SSRN Scholarly Paper",
+				"institution": "Social Science Research Network",
+				"reportNumber": "ID 1450387",
+				"place": "Rochester, NY",
+				"shortTitle": "Who Doesn't Support the Genocide Convention?"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

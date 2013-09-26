@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-12-13 20:25:03"
+	"lastUpdated": "2013-09-25 16:09:43"
 }
 
 /*
@@ -166,7 +166,8 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Pfeiffer Doris,Krankenkassen,Kliniken"
+					"Pfeiffer Doris,Kliniken,Krankenkassen,Pfeiffer",
+					"Doris,Kliniken [ks],Krankenkassen [ks]"
 				],
 				"seeAlso": [],
 				"attachments": [

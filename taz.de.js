@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-05 04:27:32"
+	"lastUpdated": "2013-09-25 15:39:32"
 }
 
 /*
@@ -41,16 +41,9 @@ http://www.taz.de/1/debatte/kolumnen/artikel/1/haengt-sie-hoeher-1/
 
 function detectWeb(doc, url) {
 
-	// I use XPaths. Therefore, I need the following block.
-	
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
 	var taz_ArticleTitle_XPath = ".//h1";
-	var taz_Multiple_XPath = ".//*[@id='hauptspalte']/div/ul/li/a/h3";
-	var taz_Search_XPath = ".//*[@id='hauptspalte']/div/div/ul/li/a/h3";	
+	var taz_Multiple_XPath = '//div[contains(@class, "first_page")]//a[h4]';
+	var taz_Search_XPath = '//div[contains(@class, "searchresults")]//a[h4]'   	
 	if (doc.evaluate(taz_ArticleTitle_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
 		//Zotero.debug("newspaperArticle");
 		return "newspaperArticle";
@@ -74,11 +67,7 @@ function authorCase(author) { // Turns All-Uppercase-Authors to normally cased A
 }
 
 function scrape(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
+
 	var newItem = new Zotero.Item("newspaperArticle");
 	newItem.url = doc.location.href; 
 
@@ -86,19 +75,19 @@ function scrape(doc, url) {
 	// This is for the title!
 	
 	var title_XPath = '//title';
-	var title = doc.evaluate(title_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	var title = doc.evaluate(title_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	newItem.title = title.split(" - ")[0];
 	
 	// Summary
 	var description_XPath = '//meta[contains(@name, "description")]';
-	var description = doc.evaluate(description_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().content;
+	var description = doc.evaluate(description_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().content;
 	summary = description.replace(/\sVON.*$/g, '');
 	newItem.abstractNote = summary.replace(/KOMMENTAR|KOLUMNE.*$/g, '');
 	
 	// Authors 
-	var author_XPath = "//*[contains(@class, 'sectbody')]/*/span[contains(@class, 'author')]";
+	var author_XPath = "//*[contains(@class, 'sectbody')]//a[contains(@class, 'author')]/h4";
 	if (doc.evaluate(author_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ) {
-		var author = doc.evaluate(author_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var author = doc.evaluate(author_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	} else if (description.match(/^(KOMMENTAR)|(KOLUMNE)\sVON/)){
 		Zotero.debug(description);
 		author = description.replace(/^(KOMMENTAR)|(KOLUMNE)\sVON\s/, '');
@@ -123,16 +112,14 @@ function scrape(doc, url) {
 	// Section
 	var section_XPath = ".//*[contains(@class, 'selected')]/ul/li[contains(@class, 'selected')]";
 	if (doc.evaluate(section_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ) {
-		var section= doc.evaluate(section_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var section= doc.evaluate(section_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		newItem.section = section;
 	}
 	
 	// Date 
-	var date_XPath = ".//div[contains(@class, 'secthead')]";
-	var date = doc.evaluate(date_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	date = date.replace(/^\s*|\s*$/g, '');
-	date = date.substr(0,10);
-	newItem.date = date;	
+	var date_XPath = '//div[contains(@class, "sectbody")]/span[@class="date"]';
+	var date = ZU.xpathText(doc, date_XPath);
+	if (date) newItem.date = ZU.trimInternal(date);	
 
 	newItem.attachments.push({url:doc.location.href, title:doc.title, mimeType:"text/html"});
 	newItem.publicationTitle = "die tageszeitung"
@@ -143,20 +130,15 @@ function scrape(doc, url) {
 
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
-		var taz_Multiple_XPath = ".//*[@id='hauptspalte']/div/ul/li/a";
-		var taz_Search_XPath = ".//*[@id='hauptspalte']/div/div/ul/li/a";	
+		var taz_Multiple_XPath = '//div[contains(@class, "first_page")]//a[h4]';
+		var taz_Search_XPath = '//div[contains(@class, "searchresults")]//a[h4]'   
 
 		 if (doc.evaluate(taz_Multiple_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
-			var titles = doc.evaluate(taz_Multiple_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var titles = doc.evaluate(taz_Multiple_XPath, doc, null, XPathResult.ANY_TYPE, null);
 		}  else if (doc.evaluate(taz_Search_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
-			var titles = doc.evaluate(taz_Search_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var titles = doc.evaluate(taz_Search_XPath, doc, null, XPathResult.ANY_TYPE, null);
 		}
 
 		
@@ -186,13 +168,18 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"creators": [],
+				"creators": [
+					{
+						"firstName": "Josef",
+						"lastName": "Winkler",
+						"creatorType": "author"
+					}
+				],
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.taz.de/!67936/",
 						"title": "Wortklauberei: Hängt sie höher! - taz.de",
 						"mimeType": "text/html"
 					}
@@ -201,7 +188,7 @@ var testCases = [
 				"title": "Wortklauberei: Hängt sie höher!",
 				"abstractNote": "Der deutsche Wald als Leistungsträger. Oder: zynisch Kranke auf freiem Fuß! Was ist mit der öffentlichen Sicherheit?",
 				"section": "Kolumnen",
-				"date": "23.03.2011",
+				"date": "23. 03. 2011",
 				"publicationTitle": "die tageszeitung",
 				"libraryCatalog": "taz.de",
 				"accessDate": "CURRENT_TIMESTAMP",

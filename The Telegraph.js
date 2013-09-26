@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-09-24 18:16:10"
+	"lastUpdated": "2013-09-25 16:18:41"
 }
 
 function createExcludes(url, excludeArr) {
@@ -81,10 +81,10 @@ function scrape(doc, url) {
 		if(keywords && keywords.trim()) {
 			item.tags = keywords.split(/,\s*/);
 		}
-
+		item.creators = [];
 		//authors
-		var authors = ZU.xpathText(doc, '//meta[@name="GSAAuthor"]/@content') ||
-						ZU.xpathText(doc, '//meta[@name="DCSext.author"]/@content');
+		var authors	 = ZU.xpathText(doc, '//meta[@name="GSAAuthor"]/@content') ||
+					ZU.xpathText(doc, '//meta[@name="DCSext.author"]/@content');
 		if(authors) {
 			item.creators.push(ZU.cleanAuthor(authors, 'author'));
 		}
@@ -162,10 +162,10 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Asia",
 					"China",
-					"News",
-					"World News"
+					"Asia",
+					"World News",
+					"News"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -173,15 +173,19 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
+				"itemID": "http://www.telegraph.co.uk/news/worldnews/asia/china/8888909/China-Google-Earth-spots-huge-unidentified-structures-in-Gobi-desert.html",
+				"title": "China: Google Earth spots huge, unidentified structures in Gobi desert",
+				"source": "Telegraph.co.uk",
+				"publicationTitle": "Telegraph.co.uk",
+				"date": "2011-11-14",
 				"url": "http://www.telegraph.co.uk/news/worldnews/asia/china/8888909/China-Google-Earth-spots-huge-unidentified-structures-in-Gobi-desert.html",
 				"abstractNote": "Vast, unidentified, structures have been spotted by satellites in the barren Gobi desert, raising questions about what China might be building in a region it uses for its military, space and nuclear programmes.",
-				"libraryCatalog": "www.telegraph.co.uk",
 				"section": "worldnews",
 				"callNumber": "8888909",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.telegraph.co.uk",
 				"shortTitle": "China",
-				"title": "China: Google Earth spots huge, unidentified structures in Gobi desert",
-				"publicationTitle": "Telegraph.co.uk",
-				"date": "2011-11-14"
+				"publisher": "Telegraph Media Group Limited"
 			}
 		]
 	},
@@ -200,9 +204,9 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Politics",
 					"Russia",
 					"Vladimir Putin",
+					"Politics",
 					"World"
 				],
 				"seeAlso": [],
@@ -211,11 +215,17 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
+				"itemID": "http://blogs.telegraph.co.uk/news/cristinaodone/100141152/putin-wins-the-russian-election-but-it-wont-be-long-before-hes-in-trouble/",
+				"title": "Putin 'wins' the Russian election. But it won't be long before he's in trouble",
+				"publicationTitle": "News - Telegraph Blogs",
+				"date": "2012-03-04",
 				"url": "http://blogs.telegraph.co.uk/news/cristinaodone/100141152/putin-wins-the-russian-election-but-it-wont-be-long-before-hes-in-trouble/",
 				"abstractNote": "Vladimir Putin looks set to win the Russian elections – no surprise there, then. Few, even in Russia, believe that today's election is anything bu",
-				"title": "Putin 'wins' the Russian election. But it won't be long before he's in trouble",
-				"blogTitle": "News - Telegraph Blogs",
-				"date": "2012-03-04"
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "blogs.telegraph.co.uk",
+				"section": "Blogs",
+				"callNumber": "100141152",
+				"publisher": "Telegraph Media Group Limited"
 			}
 		]
 	},
