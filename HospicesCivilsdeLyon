@@ -2,7 +2,7 @@
 	"translatorID": "26ab1a2b-8740-4f79-a3e7-e0df62818839",
 	"label": "HospicesCivilsdeLyon",
 	"creator": "Sebastian Karcher, Hospices Civils de Lyon",
-	"target": "(\.chu-lyon|\.cclin-france|\.hcl)[^/]*\.fr[^/]*/cgi-bin/koha/(opac-(detail|MARCdetail|search|shelves)|catalogue)",
+	"target": "(\.docchu-lyon|\.cclin-france|\.hcl)[^/]*\.fr[^/]*/cgi-bin/koha/(opac-(detail|MARCdetail|search|shelves)|catalogue)",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 25,
@@ -12,7 +12,7 @@
 	"lastUpdated": "2013-08-27 14:08:36"
 }
 
-//Translator pour les sites http://rbh.chu-lyon.fr | http://www.nosobase-biblio.cclin-france.fr/ | http://documentationcentrale.chu-lyon.fr/
+//Translator pour les sites http://rbh.docchu-lyon.fr | http://www.nosobase-biblio.cclin-france.fr/ | http://documentationcentrale.docchu-lyon.fr/
 //Basé sur le //Based on the Translator "Library Catalog (Koha)" ID: "8e66aa6d-5b2a-4b44-b384-a838e23b8538" par Sebastian Karcher
 //Contact: Documentation Centrale des Hospices Civils de Lyon sur sa.documentationcentrale@chu-lyon.fr
 
@@ -129,7 +129,7 @@ function scrape(marcurl) {
 			//attachments PROBLEME: faire varier l'url
 			//item.attachments = [{
 			//	title: 'Capture',
-			//	url: 'http://rbh.chu-lyon.fr/cgi-bin/koha/opac-detail.pl?biblionumber='+bibnumber,
+			//	url: 'http://rbh.docchu-lyon.fr/cgi-bin/koha/opac-detail.pl?biblionumber='+bibnumber,
 			//	mimeType: 'text/html',
 			//}];
 		});
