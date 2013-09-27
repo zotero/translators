@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-11-26 22:15:10"
+	"lastUpdated": "2013-09-26 20:05:49"
 }
 
 // #################################
@@ -144,7 +144,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://mainichi.jp/english/english/features/news/20120707p2g00m0et049000c.html",
+		"url": "http://mainichi.jp/english/english/newsselect/news/20130926p2g00m0dm100000c.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -158,13 +158,14 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Works of cartoonist Leiji Matsumoto to be celebrated at Gunma summit",
+				"title": "Fukushima plant's undersea radiation curtain ripped: TEPCO",
 				"publicationTitle": "Mainichi Daily News",
 				"edition": "online edition",
-				"url": "http://mainichi.jp/english/english/features/news/20120707p2g00m0et049000c.html",
-				"date": "2012-07-07",
+				"url": "http://mainichi.jp/english/english/newsselect/news/20130926p2g00m0dm100000c.html",
+				"date": "2013-09-26",
 				"libraryCatalog": "Mainichi Daily News",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Fukushima plant's undersea radiation curtain ripped"
 			}
 		]
 	}

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-02-24 22:41:21"
+	"lastUpdated": "2013-09-26 16:47:31"
 }
 
 /*
@@ -36,24 +36,27 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 
-	var list = ZU.xpath(doc, '//div[@id="search"]//ol[@id="rso"]/li/div[@class="vsc" and span/h3/a]');
-	var i, node;
+	var list = ZU.xpath(doc, '//div[@id="search"]//ol[@id="rso"]/li/div[@class="rc"]');
+	var i, authornode, datenode;
 	var items = [];
 	var names = {};
 	for (i in list) {
 		items[i] = new Zotero.Item("blogPost");
-		link = ZU.xpath(list[i], './span/h3/a')[0];
+		link = ZU.xpath(list[i], './h3/a')[0];
 		names[i] = link.textContent;
 		items[i].title = link.textContent;
 		items[i].url = link.href;
 		items[i].attachments.push({url:link.href,
 					title:"Blog Snapshot",
 					mimeType:"text/html"});
-		items[i].blogTitle = ZU.xpath(list[i], './/cite/a')[0].textContent;
-		node = ZU.xpath(list[i], './/div[@class="f slp"]')[0].textContent.match(/^(.*) by (.*)$/);
-		if (node) {
-			items[i].date = node[1];
-			items[i].creators.push(Zotero.Utilities.cleanAuthor(node[2], "author"));
+		items[i].blogTitle = ZU.xpath(list[i], './/h3/a')[0].textContent;
+		authornode = ZU.xpath(list[i], './/div[@class="f"]') 
+		if (authornode.length) {
+			items[i].creators.push(Zotero.Utilities.cleanAuthor(authornode[0].textContent.replace(/[Bb]y /g, ""), "author"));
+		}
+		datenode = ZU.xpath(list[i], './/span[@class="f"]') 
+		if (datenode.length && datenode[0].textContent.match(/\d{4}/)) {
+			items[i].date = datenode[0].textContent;
 		}
 	}
 

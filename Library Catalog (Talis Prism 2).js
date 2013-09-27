@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-06-08 13:41:43"
+	"lastUpdated": "2013-09-26 20:04:39"
 }
 
 /*
@@ -100,11 +100,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://catalogue.library.manchester.ac.uk/items?query=bringing+the+state+back+in",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "http://prism.talis.com/cityoflondon/items/169754?query=mahoney&resultsUri=items%3Fquery%3Dmahoney",
 		"items": [
 			{
@@ -137,45 +132,43 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://catalogue.library.manchester.ac.uk/items/710564?query=bringing+the+state+back+in&resultsUri=items%3Fquery%3Dbringing%2Bthe%2Bstate%2Bback%2Bin",
+		"url": "http://prism.talis.com/surrey-ac/items?query=borges",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://prism.talis.com/surrey-ac/items/199580?query=borges&resultsUri=items%3Fquery%3Dborges",
 		"items": [
 			{
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "Peter",
-						"lastName": "Evans",
+						"firstName": "Jorge Luis",
+						"lastName": "Borges",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Dietrich",
-						"lastName": "Rueschemeyer",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Theda",
-						"lastName": "Skocpol",
+						"firstName": "Anthony",
+						"lastName": "Kerrigan",
 						"creatorType": "author"
 					}
 				],
 				"notes": [
 					{
-						"note": "edited by Peter B. Evans, Dietrich Rueschemeyer, Theda Skocpol"
+						"note": "Jorge Luis Borges ; edited and with an introduction by Anthony Kerrigan"
 					}
 				],
 				"tags": [
-					"State, The.",
-					"State Sociological perspectives",
-					"Political sociology."
+					"Short stories in Spanish Argentinian writers 1910-1945 English texts"
 				],
 				"seeAlso": [],
 				"attachments": [],
-				"title": "Bringing the state back in",
-				"place": "Cambridge",
-				"publisher": "Cambridge University Press",
-				"date": "1985",
-				"ISBN": "0521307864",
-				"url": "http://catalogue.library.manchester.ac.uk/items/710564",
+				"title": "Fictions",
+				"place": "London",
+				"publisher": "Calder",
+				"date": "1965 1985",
+				"ISBN": "0714540838",
+				"url": "http://prism.talis.com/surrey-ac/items/199580",
 				"language": "English",
 				"libraryCatalog": "Library Catalog (Talis Prism 2)",
 				"accessDate": "CURRENT_TIMESTAMP"

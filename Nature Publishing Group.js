@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-05-15 03:43:29"
+	"lastUpdated": "2013-09-26 21:05:12"
 }
 
 /**
@@ -421,8 +421,8 @@ function getMultipleNodes(doc, url) {
 			//archive (e.g. http://www.nature.com/bonekey/archive/type.html)
 			{
 				'nodex': '//table[@class="archive"]/tbody/tr',
-				'titlex': './td/hgroup/' + allHNodes + '[last()]/a',
-				'linkx': './td/hgroup/' + allHNodes + '[last()]/a',
+				'titlex': './td/' + allHNodes + '[last()]/a',
+				'linkx': './td/' + allHNodes + '[last()]/a',
 			},
 			//some more ToC (e.g. http://www.nature.com/nrcardio/journal/v5/n1s/index.html)
 			{
@@ -534,6 +534,7 @@ function scrape(doc, url) {
 			for(var i=0, j=0, n=item.creators.length, m=items[1].creators.length; i<n && j<m; i++, j++) {
 				//check if last names match, then we don't need to worry
 				var risLName = ZU.removeDiacritics(items[1].creators[j].lastName.toUpperCase());
+				
 				var emLName = ZU.removeDiacritics(item.creators[i].lastName.toUpperCase());
 				if(emLName == risLName) {
 					continue;
@@ -1286,7 +1287,8 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Astronomy"
+					"Astronomy",
+					"Astrophysics"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -1298,20 +1300,26 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
+				"title": "Gravitational detection of a low-mass dark satellite galaxy at cosmological distance",
+				"publicationTitle": "Nature",
 				"rights": "© 2012 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
+				"volume": "481",
+				"pages": "341-343",
+				"publisher": "Nature Publishing Group",
+				"institution": "Nature Publishing Group",
+				"company": "Nature Publishing Group",
+				"label": "Nature Publishing Group",
+				"distributor": "Nature Publishing Group",
+				"date": "January 19, 2012",
 				"language": "en",
 				"issue": "7381",
 				"DOI": "10.1038/nature10669",
-				"abstractNote": "The mass function of dwarf satellite galaxies that are observed around Local Group galaxies differs substantially from simulations based on cold dark matter: the simulations predict many more dwarf galaxies than are seen. The Local Group, however, may be anomalous in this regard. A massive dark satellite in an early-type lens galaxy at a redshift of 0.222 was recently found using a method based on gravitational lensing, suggesting that the mass fraction contained in substructure could be higher than is predicted from simulations. The lack of very low-mass detections, however, prohibited any constraint on their mass function. Here we report the presence of a (1.9 ± 0.1) × 108nature10669-m1jpg19K2716 dark satellite galaxy in the Einstein ring system JVAS B1938+666 (ref. 11) at a redshift of 0.881, where nature10669-m2jpg20K2716 denotes the solar mass. This satellite galaxy has a mass similar to that of the Sagittarius galaxy, which is a satellite of the Milky Way. We determine the logarithmic slope of the mass function for substructure beyond the local Universe to be nature10669-m3jpg21K4620, with an average mass fraction of nature10669-m4jpg21K4820 per cent, by combining data on both of these recently discovered galaxies. Our results are consistent with the predictions from cold dark matter simulations at the 95 per cent confidence level, and therefore agree with the view that galaxies formed hierarchically in a Universe composed of cold dark matter.",
 				"url": "http://www.nature.com/nature/journal/v481/n7381/full/nature10669.html",
+				"abstractNote": "The mass function of dwarf satellite galaxies that are observed around Local Group galaxies differs substantially from simulations based on cold dark matter: the simulations predict many more dwarf galaxies than are seen. The Local Group, however, may be anomalous in this regard. A massive dark satellite in an early-type lens galaxy at a redshift of 0.222 was recently found using a method based on gravitational lensing, suggesting that the mass fraction contained in substructure could be higher than is predicted from simulations. The lack of very low-mass detections, however, prohibited any constraint on their mass function. Here we report the presence of a (1.9 ± 0.1) × 108nature10669-m1jpg19K2716 dark satellite galaxy in the Einstein ring system JVAS B1938+666 (ref. 11) at a redshift of 0.881, where nature10669-m2jpg20K2716 denotes the solar mass. This satellite galaxy has a mass similar to that of the Sagittarius galaxy, which is a satellite of the Milky Way. We determine the logarithmic slope of the mass function for substructure beyond the local Universe to be nature10669-m3jpg21K4620, with an average mass fraction of nature10669-m4jpg21K4820 per cent, by combining data on both of these recently discovered galaxies. Our results are consistent with the predictions from cold dark matter simulations at the 95 per cent confidence level, and therefore agree with the view that galaxies formed hierarchically in a Universe composed of cold dark matter.",
 				"libraryCatalog": "www.nature.com",
+				"accessDate": "CURRENT_TIMESTAMP",
 				"journalAbbreviation": "Nature",
-				"ISSN": "0028-0836",
-				"title": "Gravitational detection of a low-mass dark satellite galaxy at cosmological distance",
-				"publicationTitle": "Nature",
-				"volume": "481",
-				"pages": "341-343",
-				"date": "January 19, 2012"
+				"ISSN": "0028-0836"
 			}
 		]
 	},
@@ -1865,7 +1873,53 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [],
+				"tags": [
+					"structure and function of proteins",
+					"nucleic acids",
+					"proteins",
+					"nature structural molecular biology",
+					"nature publishing group",
+					"content",
+					"journal",
+					"macromolecules",
+					"multi-component complexes",
+					"DNA replication",
+					"DNA repair",
+					"DNA recombination",
+					"chromatin structure",
+					"chromatin remodeling",
+					"chromatin",
+					"transcription",
+					"RNA processing",
+					"RNA",
+					"translation",
+					"regulation of transcription",
+					"regulation of translation",
+					"protein folding",
+					"protein processing",
+					"protein degradation",
+					"signal transduction",
+					"intracellular signaling",
+					"membrane processes",
+					"cell surface proteins",
+					"cell-cell interactions",
+					"molecular basis of disease",
+					"molecular",
+					"molecular interactions",
+					"mechanism",
+					"basic cellular processes",
+					"cell cycle",
+					"checkpoints",
+					"apoptosis",
+					"molecular biology",
+					"cell biology",
+					"genetics",
+					"biochemistry",
+					"biophysics",
+					"single molecule studies",
+					"RNAi",
+					"gene expression"
+				],
 				"seeAlso": [],
 				"attachments": [
 					{
@@ -1876,20 +1930,28 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
+				"title": "Structure of the SAM-II riboswitch bound to S-adenosylmethionine",
+				"publicationTitle": "Nature Structural & Molecular Biology",
 				"rights": "© 2008 Nature Publishing Group",
+				"volume": "15",
 				"issue": "2",
+				"number": "2",
+				"patentNumber": "2",
+				"pages": "177-182",
+				"publisher": "Nature Publishing Group",
+				"institution": "Nature Publishing Group",
+				"company": "Nature Publishing Group",
+				"label": "Nature Publishing Group",
+				"distributor": "Nature Publishing Group",
+				"date": "February 2008",
 				"language": "en",
 				"DOI": "10.1038/nsmb.1371",
 				"url": "http://www.nature.com/nsmb/journal/v15/n2/full/nsmb.1371.html",
+				"abstractNote": "In bacteria, numerous genes harbor regulatory elements in the 5' untranslated regions of their mRNA, termed riboswitches, which control gene expression by binding small-molecule metabolites. These sequences influence the secondary and tertiary structure of the RNA in a ligand-dependent manner, thereby directing its transcription or translation. The crystal structure of an S-adenosylmethionine–responsive riboswitch found predominantly in proteobacteria, SAM-II, has been solved to reveal a second means by which RNA interacts with this important cellular metabolite. Notably, this is the first structure of a complete riboswitch containing all sequences associated with both the ligand binding aptamer domain and the regulatory expression platform. Chemical probing of this RNA in the absence and presence of ligand shows how the structure changes in response to S-adenosylmethionine to sequester the ribosomal binding site and affect translational gene regulation.",
 				"libraryCatalog": "www.nature.com",
-				"abstractNote": "In bacteria, numerous genes harbor regulatory elements in the 5′ untranslated regions of their mRNA, termed riboswitches, which control gene expression by binding small-molecule metabolites. These sequences influence the secondary and tertiary structure of the RNA in a ligand-dependent manner, thereby directing its transcription or translation. The crystal structure of an S-adenosylmethionine–responsive riboswitch found predominantly in proteobacteria, SAM-II, has been solved to reveal a second means by which RNA interacts with this important cellular metabolite. Notably, this is the first structure of a complete riboswitch containing all sequences associated with both the ligand binding aptamer domain and the regulatory expression platform. Chemical probing of this RNA in the absence and presence of ligand shows how the structure changes in response to S-adenosylmethionine to sequester the ribosomal binding site and affect translational gene regulation.",
+				"accessDate": "CURRENT_TIMESTAMP",
 				"journalAbbreviation": "Nat Struct Mol Biol",
-				"ISSN": "1545-9993",
-				"title": "Structure of the SAM-II riboswitch bound to S-adenosylmethionine",
-				"publicationTitle": "Nature Structural & Molecular Biology",
-				"volume": "15",
-				"pages": "177-182",
-				"date": "February 2008"
+				"ISSN": "1545-9993"
 			}
 		]
 	},
