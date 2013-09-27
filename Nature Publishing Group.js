@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-09-26 21:05:12"
+	"lastUpdated": "2013-09-27 02:05:56"
 }
 
 /**
@@ -563,6 +563,18 @@ function scrape(doc, url) {
 						}
 					}
 					
+					//authors with same name are sometimes skipped in EM
+					if(j+1<m) {
+						var nextRisLName = ZU.removeDiacritics(items[1].creators[j+1].lastName.toUpperCase());
+						var resplitEmLName = ZU.removeDiacritics(fullName.substring(fullName.length - nextRisLName.length).toUpperCase());
+						if(resplitEmLName == nextRisLName) {
+							item.creators.splice(i, 0, items[1].creators[j]); //insert missing author
+							Z.debug('It appears that "' + item.creators[i].lastName
+								+ '" was missing from EM.');
+							continue;
+						}
+					}
+					
 					Z.debug(emLName + ' and ' + risLName + ' do not match');
 					continue; //we failed
 				}
@@ -1065,8 +1077,8 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Y.",
 						"lastName": "Zhang",
+						"firstName": "Y",
 						"creatorType": "author"
 					},
 					{
@@ -1087,11 +1099,18 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"CD90",
-					"ERBB2",
-					"cancer stem cells",
-					"gastric cancer",
-					"trastuzumab (herceptin)"
+					"ONC",
+					"apoptosis",
+					"apoptosis",
+					"cancer",
+					"cell cycle",
+					"growth factor receptors",
+					"growth factors",
+					"growth regulatory genes",
+					"molecular oncology",
+					"oncogenes",
+					"tumor suppressor genes",
+					"tumor viruses"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -1107,8 +1126,8 @@ var testCases = [
 				"issue": "6",
 				"language": "en",
 				"DOI": "10.1038/onc.2011.282",
-				"abstractNote": "Identification and characterization of cancer stem cells (CSCs) in gastric cancer are difficult owing to the lack of specific markers and consensus methods. In this study, we show that cells with the CD90 surface marker in gastric tumors could be enriched under non-adherent, serum-free and sphere-forming conditions. These CD90+ cells possess a higher ability to initiate tumor in vivo and could re-establish the cellular hierarchy of tumors from single-cell implantation, demonstrating their self-renewal properties. Interestingly, higher proportion of CD90+ cells correlates with higher in vivo tumorigenicity of gastric primary tumor models. In addition, it was found that ERBB2 was overexpressed in about 25% of the gastric primary tumor models, which correlates with the higher level of CD90 expression in these tumors. Trastuzumab (humanized anti-ERBB2 antibody) treatment of high-tumorigenic gastric primary tumor models could reduce the CD90+ population in tumor mass and suppress tumor growth when combined with traditional chemotherapy. Moreover, tumorigenicity of tumor cells could also be suppressed when trastuzumab treatment starts at the same time as cell implantation. Therefore, we have identified a CSC population in gastric primary tumors characterized by their CD90 phenotype. The finding that trastuzumab targets the CSC population in gastric tumors suggests that ERBB2 signaling has a role in maintaining CSC populations, thus contributing to carcinogenesis and tumor invasion. In conclusion, the results from this study provide new insights into the gastric tumorigenic process and offer potential implications for the development of anticancer drugs as well as therapeutic treatment of gastric cancers.",
 				"url": "http://www.nature.com/onc/journal/v31/n6/full/onc2011282a.html",
+				"abstractNote": "Identification and characterization of cancer stem cells (CSCs) in gastric cancer are difficult owing to the lack of specific markers and consensus methods. In this study, we show that cells with the CD90 surface marker in gastric tumors could be enriched under non-adherent, serum-free and sphere-forming conditions. These CD90+ cells possess a higher ability to initiate tumor in vivo and could re-establish the cellular hierarchy of tumors from single-cell implantation, demonstrating their self-renewal properties. Interestingly, higher proportion of CD90+ cells correlates with higher in vivo tumorigenicity of gastric primary tumor models. In addition, it was found that ERBB2 was overexpressed in about 25% of the gastric primary tumor models, which correlates with the higher level of CD90 expression in these tumors. Trastuzumab (humanized anti-ERBB2 antibody) treatment of high-tumorigenic gastric primary tumor models could reduce the CD90+ population in tumor mass and suppress tumor growth when combined with traditional chemotherapy. Moreover, tumorigenicity of tumor cells could also be suppressed when trastuzumab treatment starts at the same time as cell implantation. Therefore, we have identified a CSC population in gastric primary tumors characterized by their CD90 phenotype. The finding that trastuzumab targets the CSC population in gastric tumors suggests that ERBB2 signaling has a role in maintaining CSC populations, thus contributing to carcinogenesis and tumor invasion. In conclusion, the results from this study provide new insights into the gastric tumorigenic process and offer potential implications for the development of anticancer drugs as well as therapeutic treatment of gastric cancers.",
 				"libraryCatalog": "www.nature.com",
 				"journalAbbreviation": "Oncogene",
 				"ISSN": "0950-9232",
@@ -1873,53 +1892,7 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [
-					"structure and function of proteins",
-					"nucleic acids",
-					"proteins",
-					"nature structural molecular biology",
-					"nature publishing group",
-					"content",
-					"journal",
-					"macromolecules",
-					"multi-component complexes",
-					"DNA replication",
-					"DNA repair",
-					"DNA recombination",
-					"chromatin structure",
-					"chromatin remodeling",
-					"chromatin",
-					"transcription",
-					"RNA processing",
-					"RNA",
-					"translation",
-					"regulation of transcription",
-					"regulation of translation",
-					"protein folding",
-					"protein processing",
-					"protein degradation",
-					"signal transduction",
-					"intracellular signaling",
-					"membrane processes",
-					"cell surface proteins",
-					"cell-cell interactions",
-					"molecular basis of disease",
-					"molecular",
-					"molecular interactions",
-					"mechanism",
-					"basic cellular processes",
-					"cell cycle",
-					"checkpoints",
-					"apoptosis",
-					"molecular biology",
-					"cell biology",
-					"genetics",
-					"biochemistry",
-					"biophysics",
-					"single molecule studies",
-					"RNAi",
-					"gene expression"
-				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [
 					{
@@ -1930,28 +1903,20 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "Structure of the SAM-II riboswitch bound to S-adenosylmethionine",
-				"publicationTitle": "Nature Structural & Molecular Biology",
 				"rights": "© 2008 Nature Publishing Group",
-				"volume": "15",
 				"issue": "2",
-				"number": "2",
-				"patentNumber": "2",
-				"pages": "177-182",
-				"publisher": "Nature Publishing Group",
-				"institution": "Nature Publishing Group",
-				"company": "Nature Publishing Group",
-				"label": "Nature Publishing Group",
-				"distributor": "Nature Publishing Group",
-				"date": "February 2008",
 				"language": "en",
 				"DOI": "10.1038/nsmb.1371",
 				"url": "http://www.nature.com/nsmb/journal/v15/n2/full/nsmb.1371.html",
-				"abstractNote": "In bacteria, numerous genes harbor regulatory elements in the 5' untranslated regions of their mRNA, termed riboswitches, which control gene expression by binding small-molecule metabolites. These sequences influence the secondary and tertiary structure of the RNA in a ligand-dependent manner, thereby directing its transcription or translation. The crystal structure of an S-adenosylmethionine–responsive riboswitch found predominantly in proteobacteria, SAM-II, has been solved to reveal a second means by which RNA interacts with this important cellular metabolite. Notably, this is the first structure of a complete riboswitch containing all sequences associated with both the ligand binding aptamer domain and the regulatory expression platform. Chemical probing of this RNA in the absence and presence of ligand shows how the structure changes in response to S-adenosylmethionine to sequester the ribosomal binding site and affect translational gene regulation.",
 				"libraryCatalog": "www.nature.com",
-				"accessDate": "CURRENT_TIMESTAMP",
+				"abstractNote": "In bacteria, numerous genes harbor regulatory elements in the 5′ untranslated regions of their mRNA, termed riboswitches, which control gene expression by binding small-molecule metabolites. These sequences influence the secondary and tertiary structure of the RNA in a ligand-dependent manner, thereby directing its transcription or translation. The crystal structure of an S-adenosylmethionine–responsive riboswitch found predominantly in proteobacteria, SAM-II, has been solved to reveal a second means by which RNA interacts with this important cellular metabolite. Notably, this is the first structure of a complete riboswitch containing all sequences associated with both the ligand binding aptamer domain and the regulatory expression platform. Chemical probing of this RNA in the absence and presence of ligand shows how the structure changes in response to S-adenosylmethionine to sequester the ribosomal binding site and affect translational gene regulation.",
 				"journalAbbreviation": "Nat Struct Mol Biol",
-				"ISSN": "1545-9993"
+				"ISSN": "1545-9993",
+				"title": "Structure of the SAM-II riboswitch bound to S-adenosylmethionine",
+				"publicationTitle": "Nature Structural & Molecular Biology",
+				"volume": "15",
+				"pages": "177-182",
+				"date": "February 2008"
 			}
 		]
 	},
