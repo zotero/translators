@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-06-08 14:56:34"
+	"lastUpdated": "2013-09-27 23:48:52"
 }
 
 function detectWeb(doc, url) {
 	if (url.indexOf("search") != -1 && url.indexOf("classifieds") == -1) {
 		return "multiple";
-	} else if (ZU.xpathText(doc, '//div[@class="article-headline"]/h2')) {
+	} else if (ZU.xpathText(doc, '//div[@class="article-headline"]/h2|//div[@class="article-headline"]/h1')) {
 		return "newspaperArticle";
 	}
 }
@@ -45,7 +45,8 @@ function scrape(doc, url) {
 			newItem.creators.push(ZU.cleanAuthor(author, "author", comma));
 		}
 	}
-	newItem.title = ZU.xpathText(doc, '//div[@class="article-headline"]/h2');	
+	newItem.title = ZU.xpathText(doc, '//div[@class="article-headline"]/h2');
+	if (!newItem.title) newItem.title = ZU.xpathText(doc, '//div[@class="article-headline"]/h1');
 
 	// The section is the first listed keyword
 	var keywords = ZU.xpath(doc, '//meta[@name="Keywords"][@content]')[0];
