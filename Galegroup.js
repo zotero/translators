@@ -1,15 +1,15 @@
 {
 	"translatorID": "4ea89035-3dc4-4ae3-b22d-726bc0d83a64",
 	"label": "Galegroup",
-	"creator": "Sebastian Karcher",
+	"creator": "Sebastian Karcher and Aurimas Vinckevicius",
 	"target": "https?://(find|go)\\.galegroup\\.com",
-	"minVersion": "2.1.9",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-09-19 10:25:38"
+	"lastUpdated": "2013-09-30 04:05:04"
 }
 
 /*
@@ -33,106 +33,152 @@
 	
 	***** END LICENSE BLOCK *****
 */
+function getSearchResults(doc) {
+	//Gale Virtual Reference Library
+	var results = ZU.xpath(doc, '//*[@id="SearchResults"]//section[@class="resultsBody"]/ul/li');
+	if(results.length) {
+		results.linkXPath = './p[@class="subTitle"]/a';
+		composeAttachment = composeAttachmentGVRL;
+		composeRisUrl = composeRisUrlGVRL;
+		return results;
+	}
+	
+	//Gale NewsVault
+	results = ZU.xpath(doc, '//*[@id="results_list"]/div[contains(@class,"resultList")]');
+	if(results.length) {
+		results.linkXPath = './div[@class="pub_details"]//li[@class="resultInfo"]/p//a';
+		composeAttachment = composeAttachmentGNV;
+		composeRisUrl = composeRisUrlGNV;
+		return results;
+	}
+	
+	return [];
+}
 
 function detectWeb(doc, url) {
-	if (url.match(/\/retrieve\.do|\/i\.do|\/infomark\.do|newspaperRetrieve\.do/)) {
-		if (url.match(/\/ecco\//)) return "book"
-		else if (url.indexOf("newspaperRetrieve.do")!= -1) return "newspaperArticle"
-		else return "journalArticle";
+	if(url.indexOf('/newspaperRetrieve.do') != -1) {
+		return "newspaperArticle";
+	}
+	
+	if(url.indexOf('/retrieve.do') != -1
+		|| url.indexOf('/i.do') != -1
+		|| url.indexOf('/infomark.do') != -1) {
+		
+		if(url.indexOf('/ecco/') != -1) return "book";
+		
+		return "journalArticle";
+	}
+	
+	if(getSearchResults(doc).length) return "multiple";
+}
 
-	} else if (url.match(/\/basicSearch\.do|\/advancedSearch\.do|\/subjectguide\.do|\/limitExpandSearchResults\.do/)) {
-		return "multiple";
+var composeRisUrl;
+
+function composeRisUrlGNV(url) {
+	return url.replace(/#.*/,'').replace(/\/[^\/?]+(?=\?|$)/, '/centralizedGenerateCitation.do')
+		.replace(/\bactionString=[^&]*/g, '').replace(/\bcitationFormat=[^&]*/g, '')
+		+ '&actionString=FormatCitation&citationFormat=ENDNOTE';
+}
+
+function composeRisUrlGVRL(url) {
+	return url.replace(/#.*/,'').replace(/\/[^\/?]+(?=\?|$)/, '/generateCitation.do')
+		.replace(/\bactionString=[^&]*/g, '').replace(/\bcitationFormat=[^&]*/g, '')
+		+ '&actionString=FormatCitation&citationFormat=ENDNOTE';
+}
+
+var composeAttachment;
+
+function composeAttachmentGVRL(doc, url) {
+	var pdf = !!doc.getElementById('pdfLink');
+	var attachment = ZU.xpath(doc, '//*[@id="docTools-download"]/a[./href/@text]')[0];
+	if(attachment) {
+		return {
+			url: (url.replace(/#.*/, '') + '&downloadFormat=' + (pdf?'PDF':'HTML'))
+				.replace(/\bactionCmd=[^&]*/, 'actionCmd=DO_DOWNLOAD_DOCUMENT'),
+			title: "Full Text " + (pdf?'PDF':'HTML'),
+			mimeType: pdf?'application/pdf':'text/html'
+		};
+	} else {
+		return {document: doc, title: "Snapshot"};
 	}
 }
 
-function composeURL(url) {
-	//Z.debug("url: " + url)
-	//"host" here includes the database abbreviation
-	var host = url.match(/^https?:\/\/.+?\/.+?\//)[0];
-	var prodID = url.match(/prodId=.+?&/)[0];
-	if (url.match(/userGroupName=.+?&/)) var usergroup = url.match(/userGroupName=.+?&/)[0];
-	else if (!url.match(/userGroupName=.+?&/)) var usergroup = "";
-	var tabID = url.match(/tabID=.+?&/)[0];
-	var docID = url.match(/docId=.*?(&|$)/)[0];
-	//Z.debug(docID)
-	if (docID == "docId=&"){
-		Z.debug("here")
-		var pageBatch= url.match(/relevancePageBatch=(.+?(&|$))/);
-		if (pageBatch) docID = "docId=" + pageBatch[1];
-	}
-	var contentSet = url.match(/contentSet=.+?(&|$)/)[0];
-	if (!contentSet.match(/&/)) contentSet = contentSet + "&";
-	var RISurl = host + "generateCitation.do?actionString=FormatCitation&inPS=true&" + prodID + tabID + usergroup + docID + contentSet + "citationFormat=REFMGR";
-	//Z.debug(RISurl)
-	return RISurl;
+function composeAttachmentGNV(doc, url) {
+	var lowerLimit = ZU.xpathText(doc, '//form[@id="resultsForm"]/input[@name="pdfLowerLimit"]/@value') || '1';
+	var upperLimit = ZU.xpathText(doc, '//form[@id="resultsForm"]/input[@name="pdfHigherLimit"]/@value') || lowerLimit;
+	var numPages = ZU.xpathText(doc, '//form[@id="resultsForm"]/input[@name="noOfPages"]/@value') || (upperLimit - lowerLimit + 1);
+	return {
+		url: url.replace(/#.*/,'').replace(/\/[^\/?]+(?=\?|$)/, '/downloadDocument.do')
+			.replace(/\b(?:scale|orientation|docType|pageIndex|relatedDocId|isIllustration|imageId|aCmnd|recNum|pageRange|noOfPages)=[^&]*/g, '')
+			+ '&scale=&orientation=&docType=&pageIndex=1&relatedDocId=&isIllustration=false'
+			+ '&imageId=&aCmnd=PDFFormat&recNum=&' + 'noOfPages=' + numPages + '&pageRange=' + lowerLimit + '-' + upperLimit,
+		title: 'Full Text PDF',
+		mimeType: 'application/pdf'
+	};
 }
 
+function parseRis(text, attachment) {
+	text = text.trim();
+	//gale puts issue numbers in M1
+	text = text.replace(/M1\s*\-/, "IS  -");
 
-function parseRIS(url) {
-	//we get the host so that proxies will work later
-	if (typeof url == "string") {
-		var host = url.match(/^https?:\/\/.+?\//)[0];
-	} else if (typeof url == "object") {
-		var host = url[0].match(/^https?:\/\/.+?\//)[0];
-	}
+	var translator = Zotero.loadTranslator("import");
+	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+	translator.setString(text);
+	translator.setHandler("itemDone", function (obj, item) {
+		if(attachment) item.attachments.push(attachment);
+		item.complete();
+	});
+	translator.translate();
+}
 
-	Zotero.Utilities.HTTP.doGet(url, function (text) {
-		text = text.trim();
-		//gale puts issue numbers in M1
-		text = text.replace(/M1\s*\-/, "IS  -");
-		//Z.debug(text)
-		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-		translator.setString(text);
-		translator.setHandler("itemDone", function (obj, item) {
-			//make sure the attachment URL gets proxied
-			item.attachments.push({url: item.url, title: "Full Text (HTML)", mimeType: "text/html",})
-			for (i in item.attachments) {
-				item.attachments[i].url = item.attachments[i].url.replace(/^https?:\/\/.+?\//, host);
-			}
-			//remove empty date clutter
-			if (item.date) item.date = item.date.replace(/[\/\.]+$/, "")
-			item.complete();
+function processArticles(articles) {
+	var article;
+	while(article = articles.shift()) {
+		ZU.processDocuments(article, function(doc, url) {
+			processPage(doc, url);
+			processArticles(articles);
 		});
-		translator.translate();
+	}
+}
+
+function processPage(doc, url) {
+	var attachment = composeAttachment(doc, url);
+	ZU.doGet(composeRisUrl(url), function(text) {
+		parseRis(text, attachment);
 	});
 }
 
 function doWeb(doc, url) {
-	var articles = new Array();
-	if (detectWeb(doc, url) == "multiple") {
-		var items = new Object();
-		var titles = doc.evaluate('//span[@class="title"]/a|//div[contains(@class, "Title")]/a|//p[@class="articleTitle"]//a|//li[@class="resultInfo"]/p/b/a|//li[@class="resultsInstance"]/p[@class="subTitle"]/a', doc, null, XPathResult.ANY_TYPE, null);
-		var next_title;
-		while (next_title = titles.iterateNext()) {
-			var textContent = next_title.textContent;
-			// Strip trailing comma on some sites
-			textContent = textContent.replace(/\,$/, '');
-			items[next_title.href] = textContent;
+	if(detectWeb(doc, url) == "multiple") {
+		var results = getSearchResults(doc);
+		var items = {};
+		for(var i=0, n=results.length; i<n; i++) {
+			var link = ZU.xpath(results[i], results.linkXPath)[0];
+			if(!link) continue;
+			
+			items[link.href] = ZU.trimInternal(link.textContent);
 		}
-
+		
 		Zotero.selectItems(items, function (items) {
-			if (!items) {
-				return true;
-			}
-			for (var i in items) {
-				i = composeURL(i);
+			if(!items) return true;
+			
+			var articles = [];
+			for(var i in items) {
 				articles.push(i);
 			}
-			parseRIS(articles, function () {
-				Zotero.done();
-			});
+			processArticles(articles);
 		});
-
 	} else {
-		//get a full URL for permalinks
-		if (url.match(/\/i\.do/)) {
-			var host = url.match(/^https?:\/\/.+?\/.+?\//)[0];
-			url = host + ZU.xpathText(doc, '//li/a[contains(@title, "Download")]/@href');
+		if(doc.title.indexOf('NewsVault') != -1) {
+			composeAttachment = composeAttachmentGNV;
+			composeRisUrl = composeRisUrlGNV;
+		} else {
+			composeAttachment = composeAttachmentGVRL;
+			composeRisUrl = composeRisUrlGVRL;
 		}
-		var RISurl = composeURL(url);
-		//Z.debug(RISurl)
-		parseRIS(RISurl);
+		
+		processPage(doc, url);
 	}
 }
 /** BEGIN TEST CASES **/
