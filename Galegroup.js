@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-09-30 04:05:04"
+	"lastUpdated": "2013-10-02 11:34:11"
 }
 
 /*
@@ -76,13 +76,13 @@ var composeRisUrl;
 
 function composeRisUrlGNV(url) {
 	return url.replace(/#.*/,'').replace(/\/[^\/?]+(?=\?|$)/, '/centralizedGenerateCitation.do')
-		.replace(/\bactionString=[^&]*/g, '').replace(/\bcitationFormat=[^&]*/g, '')
+		.replace(/\bactionString=[^&]*/g, '').replace(/\bcitationFormat=[^&]*&?/g, '')
 		+ '&actionString=FormatCitation&citationFormat=ENDNOTE';
 }
 
 function composeRisUrlGVRL(url) {
 	return url.replace(/#.*/,'').replace(/\/[^\/?]+(?=\?|$)/, '/generateCitation.do')
-		.replace(/\bactionString=[^&]*/g, '').replace(/\bcitationFormat=[^&]*/g, '')
+		.replace(/\bactionString=[^&]*/g, '').replace(/\bcitationFormat=[^&]*&?/g, '')
 		+ '&actionString=FormatCitation&citationFormat=ENDNOTE';
 }
 
@@ -90,11 +90,13 @@ var composeAttachment;
 
 function composeAttachmentGVRL(doc, url) {
 	var pdf = !!doc.getElementById('pdfLink');
-	var attachment = ZU.xpath(doc, '//*[@id="docTools-download"]/a[./href/@text]')[0];
-	if(attachment) {
+	var attachment = ZU.xpath(doc, '//*[@id="docTools-download"]/a[./@href]')[0];
+	if(attachment && pdf /* currently pops up a download dialog for HTML attachments */) {
+		url = attachment.href;
 		return {
-			url: (url.replace(/#.*/, '') + '&downloadFormat=' + (pdf?'PDF':'HTML'))
-				.replace(/\bactionCmd=[^&]*/, 'actionCmd=DO_DOWNLOAD_DOCUMENT'),
+			url: url.replace(/#.*/, '').replace(/\/[^\/?]+(?=\?|$)/, '/downloadDocument.do')
+				.replace(/\b(?:actionCmd|downloadFormat)=[^&]*&?/g, '')
+				+ '&actionCmd=DO_DOWNLOAD_DOCUMENT&downloadFormat=' + (pdf?'PDF':'HTML'),
 			title: "Full Text " + (pdf?'PDF':'HTML'),
 			mimeType: pdf?'application/pdf':'text/html'
 		};
@@ -109,7 +111,7 @@ function composeAttachmentGNV(doc, url) {
 	var numPages = ZU.xpathText(doc, '//form[@id="resultsForm"]/input[@name="noOfPages"]/@value') || (upperLimit - lowerLimit + 1);
 	return {
 		url: url.replace(/#.*/,'').replace(/\/[^\/?]+(?=\?|$)/, '/downloadDocument.do')
-			.replace(/\b(?:scale|orientation|docType|pageIndex|relatedDocId|isIllustration|imageId|aCmnd|recNum|pageRange|noOfPages)=[^&]*/g, '')
+			.replace(/\b(?:scale|orientation|docType|pageIndex|relatedDocId|isIllustration|imageId|aCmnd|recNum|pageRange|noOfPages)=[^&]*&?/g, '')
 			+ '&scale=&orientation=&docType=&pageIndex=1&relatedDocId=&isIllustration=false'
 			+ '&imageId=&aCmnd=PDFFormat&recNum=&' + 'noOfPages=' + numPages + '&pageRange=' + lowerLimit + '-' + upperLimit,
 		title: 'Full Text PDF',
@@ -126,6 +128,16 @@ function parseRis(text, attachment) {
 	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 	translator.setString(text);
 	translator.setHandler("itemDone", function (obj, item) {
+		//move copyright info from note to rights
+		for(var i=0, n=item.notes.length; i<n; i++) {
+			if(item.notes[i].note.indexOf("COPYRIGHT") != -1) {
+				item.rights = ZU.cleanTags(item.notes[i].note);
+				delete item.notes[i];
+				i--;
+				n--;
+			}
+		}
+		
 		if(attachment) item.attachments.push(attachment);
 		item.complete();
 	});
@@ -182,97 +194,5 @@ function doWeb(doc, url) {
 	}
 }
 /** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://go.galegroup.com/ps/i.do?action=interpret&id=GALE%7CH1420025063&v=2.1&u=viva_gmu&it=r&p=LitRG&sw=w&authCount=1",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"lastName": "Lewald",
-						"firstName": "H. Ernest",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Borges",
-						"firstName": "Jorge Luis",
-						"creatorType": "author"
-					}
-				],
-				"notes": [
-					{
-						"note": "<p>COPYRIGHT 1999 Gale Research, COPYRIGHT 2007 Gale, Cengage Learning</p>"
-					}
-				],
-				"tags": [
-					"Fervor de Buenos Aires (Poetry collection)",
-					"Dulcia Linquimus Arva (Poem)",
-					"El Amenazado (Poem)",
-					"El Centinela (Poem)",
-					"Lo perdido (Poem)",
-					"El Triste (Poem)",
-					"H. O. (Poem)",
-					"Borges, Jorge Luis"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"mimeType": "text/html",
-						"title": "Full Text (HTML)"
-					}
-				],
-				"publicationTitle": "Chasqui",
-				"issue": "1",
-				"extra": "19",
-				"date": "November 1974",
-				"pages": "19-33",
-				"title": "Borges: His Recent Poetry",
-				"volume": "4",
-				"accessDate": "May 7, 2012",
-				"language": "English",
-				"libraryCatalog": "Gale",
-				"archive": "Literature Resources from Gale",
-				"shortTitle": "Borges",
-				"url": "http://go.galegroup.com/ps/i.do?id=GALE%7CH1420025063&v=2.1&u=viva_gmu&it=r&p=LitRG&sw=w"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://find.galegroup.com/ecco/infomark.do?&source=gale&prodId=ECCO&u=viva_gmu&tabID=T001&docId=CW3325179878&type=multipage&contentSet=ECCOArticles&version=1.0&docLevel=FASCIMILE",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [],
-				"notes": [
-					{
-						"note": "<p>Copyright 2009 Gale, Cengage Learning</p>"
-					}
-				],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"mimeType": "text/html",
-						"title": "Full Text (HTML)"
-					}
-				],
-				"title": "A digest of the law of actions and trials at nisi prius. By Isaac 'espinasse, of Gray's Inn, Esq. Barrister at Law. The third edition, corrected, with considerable additions from printed and manuscript cases. In two volumes. ...",
-				"place": "London",
-				"url": "http://find.galegroup.com/ecco/infomark.do?&source=gale&prodId=ECCO&userGroupName=viva_gmu&tabID=T001&docId=CW3325179878&type=multipage&contentSet=ECCOArticles&version=1.0",
-				"pages": "469",
-				"numPages": "469",
-				"DOI": "Monograph",
-				"date": "1798",
-				"volume": "Volume 1",
-				"accessDate": "2012/05/07",
-				"archive": "Eighteenth Century Collection Online",
-				"numberOfVolumes": "2",
-				"libraryCatalog": "Gale"
-			}
-		]
-	}
-]
+var testCases = []
 /** END TEST CASES **/
