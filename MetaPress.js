@@ -9,14 +9,19 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-10-22 23:40:09"
+	"lastUpdated": "2013-10-02 17:02:31"
 }
 
 function detectWeb(doc, url) {
 	if (ZU.xpath(doc, '//div[@class="primitive article"]/h2/a[1]').length > 0) {
 		return "multiple";
 	} else if (url.match(/content\/[^?/]/)) {
-		return "journalArticle";
+		switch(ZU.trimInternal(ZU.xpathText(doc, '//*[@id="ctl00_PageHeadingLabel"]') || '').toLowerCase()) {
+			case 'book chapter':
+				return 'bookSection';
+			default:
+				return "journalArticle";
+		}
 	}
 }
 
@@ -51,6 +56,8 @@ function scrape(doc, url) {
 		// load translator for RIS
 		//some entries have empty author fields, or fields with just a comma. Delete those.
 		text = text.replace(/AU  - [\s,]+\n/g, "");
+		//book chapters are supposed to be CHAP not CHAPTER
+		text = text.replace(/TY\s+-\s+CHAP.+/g, 'TY  - CHAP');
 		//Z.debug(text);
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -125,6 +132,43 @@ var testCases = [
 		"type": "web",
 		"url": "http://metapress.com/content/j99677822343/?v=editorial",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://brepols.metapress.com/content/V4G02936X2860845",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"creators": [
+					{
+						"lastName": "Abram",
+						"firstName": "Andrew",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "MetaPress Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "MetaPress Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"publicationTitle": "Medieval Church Studies",
+				"title": "The Regular Canons in the Medieval British Isles",
+				"pages": "79-95",
+				"url": "http://dx.doi.org/10.1484/M.MCS-EB.5.100378",
+				"DOI": "10.1484/M.MCS-EB.5.100378",
+				"date": "2011",
+				"libraryCatalog": "MetaPress",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
