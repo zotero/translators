@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-09-23 22:11:14"
+	"lastUpdated": "2013-10-03 23:27:03"
 }
 
 /*
@@ -367,6 +367,9 @@ function scrape(doc, url, type, pdfUrl) {
 
 	//sometimes number of pages ends up in pages
 	if(!item.numPages) item.numPages = item.pages;
+	
+	//lanuguage is sometimes given as full word and abbreviation
+	if(item.language) item.language = item.language.split(/\s*;\s*/)[0];
 
 	//parse some data from the byline in case we're missing publication title
 	// or the date is not complete
@@ -412,8 +415,8 @@ function scrape(doc, url, type, pdfUrl) {
 			mimeType: 'application/pdf'
 		});
 	} else {
-		var pdfLink = ZU.xpath(doc, '//div[@id="side_panel"]//\
-			a[contains(@class,"format_pdf") and contains(@href,"fulltext") or contains(@href, "preview")][1]');
+		var pdfLink = ZU.xpath(doc, '(//div[@id="side_panel"]//\
+			a[contains(@class,"format_pdf") and contains(@href,"fulltext") or contains(@href, "preview")])[last()]');
 		if(pdfLink.length) {
 			fetchEmbeddedPdf(pdfLink[0].href, item,
 				function() { item.complete(); });
