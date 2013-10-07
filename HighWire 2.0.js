@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-09-10 17:34:56"
+	"lastUpdated": "2013-10-07 10:09:43"
 }
 
 /*
@@ -237,11 +237,13 @@ function addEmbMeta(doc) {
 	translator.setHandler("itemDone", function(obj, item) {
 		//remove all caps in Names and Titles
 		for (i in item.creators){
+			Z.debug(item.creators[i])
 			if(item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
 				item.creators[i].lastName =
 					ZU.capitalizeTitle(item.creators[i].lastName, true);
 			}
-			if(item.creators[i].firstName == item.creators[i].firstName.toUpperCase()) {
+			//we test for existence of first Name to not fail with spotty data. 
+			if(item.creators[i].firstName && item.creators[i].firstName == item.creators[i].firstName.toUpperCase()) {
 				item.creators[i].firstName =
 					ZU.capitalizeTitle(item.creators[i].firstName, true);
 			}
