@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-10-11 02:21:55"
+	"lastUpdated": "2013-10-11 03:33:45"
 }
 
 function getSearchResults(doc) {
@@ -50,6 +50,11 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
+	var item = makeItem(doc, url);
+	item.complete();
+}
+
+function makeItem(doc, url) {
 	var item = new Zotero.Item('book');
 	item.title = ZU.capitalizeTitle(
 		ZU.trimInternal(ZU.xpathText(doc, '//div[@class="product-information"]/h2[1]')),
@@ -78,7 +83,7 @@ function scrape(doc, url) {
 	}
 	
 	var productDetails = doc.getElementsByClassName('product-details')[0];
-	item.ISBN = ZU.cleanISBN(ZU.xpathText(productDetails, './dd[@class="isbn"]') || '');
+	item.ISBN = ZU.cleanISBN(ZU.xpathText(productDetails, './dd[@class="isbn"]') || '', true);
 	item.publisher = ZU.trimInternal(ZU.xpathText(productDetails, './dd[@class="publisher"]') || '');
 	item.rights = ZU.trimInternal(ZU.xpathText(productDetails, './dd[@class="copyright-info"]') || '');	
 	item.language = ZU.trimInternal(ZU.xpathText(productDetails, './dd[@class="language"]') || '');
@@ -92,7 +97,7 @@ function scrape(doc, url) {
 		snapshot: false
 	})
 	
-	item.complete();
+	return item;
 }
 
 function detectSearch(items) {
@@ -113,7 +118,7 @@ function doSearch(items) {
 	var query = [];
 	for(var i=0, n=items.length; i<n; i++) {
 		var isbn;
-		if(items[i].ISBN && (isbn = ZU.cleanISBN('' + items[i].ISBN, false))) {
+		if(items[i].ISBN && (isbn = ZU.cleanISBN('' + items[i].ISBN))) {
 			(function(item, isbn) {
 				ZU.processDocuments('http://www.lulu.com/shop/search.ep?keyWords=' + isbn, function(doc, url) {
 					var results = getSearchResults(doc);
@@ -122,7 +127,14 @@ function doSearch(items) {
 						return;
 					}
 					
-					ZU.processDocuments('http://www.lulu.com' + ZU.xpathText(results[0], './@href'), scrape);
+					ZU.processDocuments('http://www.lulu.com' + ZU.xpathText(results[0], './@href'), function(doc, url) {
+						var newItem = makeItem(doc, url);
+						if(newItem.ISBN == isbn) {
+							newItem.complete();
+						} else {
+							if(item.complete) item.complete();
+						}
+					});
 				})
 			})(items[i], isbn);
 		} else if(items[i].complete) {
