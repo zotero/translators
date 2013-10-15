@@ -2463,6 +2463,9 @@ function doExport() {
 		}
 		
 		if(item.date) {
+		    if (item.date.match(/\[/g)) {
+			writeField("year", item.date);
+		    } else {
 			var date = Zotero.Utilities.strToDate(item.date);
 			// need to use non-localized abbreviation
 			if(typeof date.month == "number") {
@@ -2471,6 +2474,7 @@ function doExport() {
 			if(date.year) {
 				writeField("year", date.year);
 			}
+		    }
 		}
 		
 		if(item.extra) {
