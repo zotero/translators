@@ -15,7 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "Mon Aug 26 23:57:00 EST 2013"
+	"lastUpdated": "Wed Oct 16 08:19:47 EST 2013"
 }
 
 /* This translator is tailor made for working with Biblatex and Biber
@@ -29,6 +29,8 @@
  *   - Added substitution of quotation marks for compatibility with Latex;
  *   - Added substitution of "–" (EN DASH, utf-8: E2 80 93) for double "--" (HYPHEN-MINUS, utf-8: 2 D);
  *   - Removed all non-alphanumeric characters from citeKey
+ *   - It is possbile to add original year of pubblication in square bracket in the year field (not recommended)
+ *   - The Zotero field EXTRA is converted into the BibTex field ADDENDUM instead of NOTE. I use it for specifing the original publication date of translated works. ADDENDUM is printed by Biblatex at the end of the bibliography entry in paranthesis. 
  *       
  */
 
@@ -2478,7 +2480,7 @@ function doExport() {
 		}
 		
 		if(item.extra) {
-			writeField("note", item.extra);
+			writeField("addendum", item.extra);
 		}
 		
 		if(item.tags && item.tags.length) {
