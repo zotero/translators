@@ -2480,7 +2480,10 @@ function doExport() {
 		}
 		
 		if(item.extra) {
-			writeField("addendum", item.extra);
+			//writeField("addendum", item.extra);
+		        if (/^Reprinted/.test(item.extra) || /^Original work/.test(item.extra)) {
+		            writeField("origdate", item.extra.match(/\d{4}/));
+		        }
 		}
 		
 		if(item.tags && item.tags.length) {
