@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-09-15 15:47:36"
+	"lastUpdated": "2013-09-17 23:34:17"
 }
 
 function detectWeb(doc, url) {
@@ -203,19 +203,23 @@ function downloadFunction(text, url, prefs) {
 //collects item url->title (in items) and item url->database info (in itemInfo)
 function getResultList(doc, items, itemInfo) {
 	var results = ZU.xpath(doc, '//li[@class="result-list-li"]');
+	//make search results work if you can't add to folder, e.g. for EBSCO used as discovery service of library such as
+  	//http://search.ebscohost.com/login.aspx?direct=true&site=eds-live&scope=site&type=0&custid=s4895734&groupid=main&profid=eds&mode=and&lang=en&authtype=ip,guest,athens
 
+	var folder = ZU.xpathText(doc, '//span[@class = "item add-to-folder"]/input/@value|.//span[@class = "item add-to-folder"]/a[1]/@data-folder')
 	var title, folderData, count = 0;
 	for(var i=0, n=results.length; i<n; i++) {
-		title = ZU.xpath(results[i], './/a[@class = "title-link color-p4"]');
+		//we're extra cautious here: When there's not folder, good chance user isn't logged in and import will fail where 
+		//there is no preview icon. We might be able to just rely on the 2nd xpath, but why take the risk
+		if (folder) title = ZU.xpath(results[i], './/a[@class = "title-link color-p4"]');
+		else title = ZU.xpath(results[i], './/a[@class = "title-link color-p4" and following-sibling::span[contains(@id, "hoverPreview")]]');
+		if(!title.length) continue;
+		if (folder) {
 		folderData = ZU.xpath(results[i],
 			'.//span[@class = "item add-to-folder"]/input/@value|.//span[@class = "item add-to-folder"]/a[1]/@data-folder');
 		//I'm not sure if the input/@value format still exists somewhere, but leaving this in to be safe
 		//skip if we're missing something
-		if(!title.length || !folderData.length) continue;
 
-		count++;
-
-		items[title[0].href] = title[0].textContent;
 		itemInfo[title[0].href] = {
 			folderData: folderData[0].textContent,
 			//let's also store item type
@@ -227,7 +231,10 @@ function getResultList(doc, items, itemInfo) {
 				/a[contains(@class,"pdf-ft")]').length,
 			hasFulltext: ZU.xpath(results[i], './/span[@class="record-formats"]\
 				/a[contains(@class,"pdf-ft") or contains(@class, "html-ft")]').length
+		} 
 		};
+		count++;
+		items[title[0].href] = title[0].textContent;
 	}
 
 	return count;
@@ -319,7 +326,7 @@ function doWeb(doc, url) {
 }
 function doDelivery(doc, itemInfo) {
 	var folderData;
-	if(!itemInfo)	{
+	if(!itemInfo||!itemInfo.folderData)	{
 		/* Get the db, AN, and tag from ep.clientData instead */
 		var script, clientData;
 		var scripts = doc.getElementsByTagName("script");
