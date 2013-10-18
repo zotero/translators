@@ -2400,8 +2400,8 @@ function doExport() {
 		if(item.publicationTitle) {
 			if(item.itemType == "bookSection" || item.itemType == "conferencePaper") {
 				writeField("booktitle", item.publicationTitle);
-			} else if(Zotero.getOption("useJournalAbbreviation")){
-				writeField("journal", item.journalAbbreviation);
+			} else if(Zotero.getOption("useJournalAbbreviation") && item.journalAbbreviation){
+			    writeField("journal", item.journalAbbreviation);
 			} else {
 				writeField("journal", item.publicationTitle);
 			}
