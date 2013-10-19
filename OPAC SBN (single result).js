@@ -9,12 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2013-10-19 12:33:34"
+	"lastUpdated": "2013-10-19 15:51:14"
 }
 
 /*
 OPAC SBN Catalogo del servizio bibliotecario nazionale translator
 www.sbn.it
+Based on code from http://www.zotero.org/support/dev/how_to_write_a_zotero_translator_plusplus
 Copyright (C) 2013 Francesco Bailo
 
 This program is free software: you can redistribute it and/or modify
@@ -97,8 +98,10 @@ function getAuthors(newItem, items) {
 	var words = author.split(", ");
 	var authorFixed = '';
 	for (i = words.length-1; i > -1; i--) {
-	authorFixed = authorFixed + words[i] + ' ';
-	author = authorFixed
+	  words[i] = words[i].replace(/\W/g, '');
+	  words[i] = words[i].replace(/\d/g, '');
+	  authorFixed = authorFixed + words[i] + ' ';
+	  author = authorFixed;
 	}
   } else {
 		author = items["Titolo"].substr(items["Titolo"].indexOf("/") + 1);
@@ -190,3 +193,122 @@ function doWeb(doc, url) {
   Zotero.Utilities.processDocuments(articles, scrape, function(){Zotero.done();});
   Zotero.wait();
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.sbn.it/opacsbn/opaclib?db=solr_iccu&select_db=solr_iccu&saveparams=false&resultForward=opac%2Ficcu%2Ffull.jsp&searchForm=opac%2Ficcu%2Ffree.jsp&y=0&do_cmd=search_show_cmd&x=0&nentries=1&rpnlabel=+Tutti+i+campi+%3D+Camilleri+%28parole+in+AND%29+&rpnquery=%2540attrset%2Bbib-1%2B%2B%2540attr%2B1%253D1016%2B%2540attr%2B4%253D6%2B%2522Camilleri%2522&&fname=none&from=2",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Andrea",
+						"lastName": "Camilleri",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"url": "http://www.sbn.it/opacsbn/opaclib?db=solr_iccu&select_db=solr_iccu&saveparams=false&resultForward=opac%2Ficcu%2Ffull.jsp&searchForm=opac%2Ficcu%2Ffree.jsp&y=0&do_cmd=search_show_cmd&x=0&nentries=1&rpnlabel=+Tutti+i+campi+%3D+Camilleri+%28parole+in+AND%29+&rpnquery=%2540attrset%2Bbib-1%2B%2B%2540attr%2B1%253D1016%2B%2540attr%2B4%253D6%2B%2522Camilleri%2522&&fname=none&from=2",
+				"title": "La strage dimenticata",
+				"place": "Palermo",
+				"date": "1999",
+				"publisher": "Sellerio",
+				"numPages": "72",
+				"edition": "7",
+				"libraryCatalog": "OPAC SBN",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.sbn.it/opacsbn/opaclib?db=solr_iccu&select_db=solr_iccu&saveparams=false&resultForward=opac%2Ficcu%2Ffull.jsp&searchForm=opac%2Ficcu%2Ffree.jsp&y=0&do_cmd=search_show_cmd&x=0&nentries=1&rpnlabel=+Any+%3D+Buzzati+%28ricerca.parole+tutte%29+&rpnquery=%2540attrset%2Bbib-1%2B%2B%2540attr%2B1%253D1016%2B%2540attr%2B4%253D6%2B%2522Buzzati%2522&&fname=none&from=3",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Dino",
+						"lastName": "Buzzati",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"url": "http://www.sbn.it/opacsbn/opaclib?db=solr_iccu&select_db=solr_iccu&saveparams=false&resultForward=opac%2Ficcu%2Ffull.jsp&searchForm=opac%2Ficcu%2Ffree.jsp&y=0&do_cmd=search_show_cmd&x=0&nentries=1&rpnlabel=+Any+%3D+Buzzati+%28ricerca.parole+tutte%29+&rpnquery=%2540attrset%2Bbib-1%2B%2B%2540attr%2B1%253D1016%2B%2540attr%2B4%253D6%2B%2522Buzzati%2522&&fname=none&from=3",
+				"title": "Sessanta racconti",
+				"place": "Milano",
+				"date": "1964",
+				"publisher": "Mondadori",
+				"numPages": "563",
+				"edition": "8",
+				"libraryCatalog": "OPAC SBN",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.sbn.it/opacsbn/opaclib?db=solr_iccu&select_db=solr_iccu&saveparams=false&resultForward=opac%2Ficcu%2Ffull.jsp&searchForm=opac%2Ficcu%2Ffree.jsp&y=0&do_cmd=search_show_cmd&x=0&nentries=1&rpnlabel=+Tutti+i+campi+%3D+il+nome+della+rosa+%28parole+in+AND%29+&rpnquery=%2540attrset%2Bbib-1%2B%2B%2540attr%2B1%253D1016%2B%2540attr%2B4%253D6%2B%2522nome%2Bdella%2Brosa%2522&&fname=none&from=1",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Umberto",
+						"lastName": "Eco",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"url": "http://www.sbn.it/opacsbn/opaclib?db=solr_iccu&select_db=solr_iccu&saveparams=false&resultForward=opac%2Ficcu%2Ffull.jsp&searchForm=opac%2Ficcu%2Ffree.jsp&y=0&do_cmd=search_show_cmd&x=0&nentries=1&rpnlabel=+Tutti+i+campi+%3D+il+nome+della+rosa+%28parole+in+AND%29+&rpnquery=%2540attrset%2Bbib-1%2B%2B%2540attr%2B1%253D1016%2B%2540attr%2B4%253D6%2B%2522nome%2Bdella%2Brosa%2522&&fname=none&from=1",
+				"title": "Il nome della rosa",
+				"place": "Milano",
+				"date": "1981",
+				"publisher": "Bompiani",
+				"numPages": "503",
+				"edition": "7",
+				"libraryCatalog": "OPAC SBN",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.sbn.it/opacsbn/opaclib?db=solr_iccu&select_db=solr_iccu&saveparams=false&resultForward=opac%2Ficcu%2Ffull.jsp&searchForm=opac%2Ficcu%2Ffree.jsp&y=0&do_cmd=search_show_cmd&x=0&nentries=1&rpnlabel=+Tutti+i+campi+%3D+Caproni+%28parole+in+AND%29+&rpnquery=%2540attrset%2Bbib-1%2B%2B%2540attr%2B1%253D1016%2B%2540attr%2B4%253D6%2B%2522Caproni%2522&&fname=none&from=3",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Giorgio",
+						"lastName": "Caproni",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"url": "http://www.sbn.it/opacsbn/opaclib?db=solr_iccu&select_db=solr_iccu&saveparams=false&resultForward=opac%2Ficcu%2Ffull.jsp&searchForm=opac%2Ficcu%2Ffree.jsp&y=0&do_cmd=search_show_cmd&x=0&nentries=1&rpnlabel=+Tutti+i+campi+%3D+Caproni+%28parole+in+AND%29+&rpnquery=%2540attrset%2Bbib-1%2B%2B%2540attr%2B1%253D1016%2B%2540attr%2B4%253D6%2B%2522Caproni%2522&&fname=none&from=3",
+				"title": "Poesie",
+				"place": "Milano",
+				"date": "1976",
+				"publisher": "Garzanti",
+				"numPages": "275",
+				"libraryCatalog": "OPAC SBN",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

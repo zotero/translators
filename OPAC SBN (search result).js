@@ -9,12 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2013-10-19 12:46:20"
+	"lastUpdated": "2013-10-19 15:51:31"
 }
 
 /*
 OPAC SBN Catalogo del servizio bibliotecario nazionale translator
 www.sbn.it
+Based on code from http://www.zotero.org/support/dev/how_to_write_a_zotero_translator_plusplus
 Copyright (C) 2013 Francesco Bailo
 
 This program is free software: you can redistribute it and/or modify
