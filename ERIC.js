@@ -1,7 +1,7 @@
 {
 	"translatorID": "e4660e05-a935-43ec-8eec-df0347362e4c",
 	"label": "ERIC",
-	"creator": "Ramesh Srigiriraju, Avram Lyon",
+	"creator": "Sebastian Karcher",
 	"target": "^http://(?:www\\.)?eric\\.ed\\.gov/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,151 +9,111 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-10-18 16:28:37"
+	"lastUpdated": "2013-10-19 22:59:26"
 }
 
-function detectWeb(doc, url)	{
-	// Search results
-	var searchpath='//div[@id="searchFaceted"]//td[@class="resultHeader"]';
-	if(doc.evaluate(searchpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext())
-		return "multiple";
-	// Clipboard
-	if(url.match(/ERICWebPortal\/search\/clipboard\.jsp/))
-		return "multiple";	
-	// folder
-	if(url.match(/ERICWebPortal\/MyERIC\/clipboard\/viewFolder\.jsp\?folderIndex/))
-		return "multiple";	
-	// Individual record
-	var singpath='//div[@id="titleBarBlue"]';
-	var res = doc.evaluate(singpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-	if(res && res.textContent.indexOf("Record Details") !== -1)	{
-		var typepath='//tr[td/span/a/strong/text()="Pub Types:"]/td[2]/text()';
-		var typestr=doc.evaluate(typepath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
-		var typereg=new RegExp("([^;/\-]+)");
-		var typearr=typereg.exec(typestr);
-		if(typearr[1]=="Journal Articles")
-			return "journalArticle";
-		if(typearr[1]=="Information Analyses")
-			return "journalArticle";
-		if(typearr[1]="Machine")
-			return "computerProgram";
-		if(typearr[1]="Computer Programs")
-			return "computerProgram";
-		if(typearr[1]="Dissertations")
-			return "thesis";
-		if(typearr[1]="Reports")
-			return "report";
-		if(typearr[1]="Non")
-			return "audioRecording";
-		if(typearr[1]="Legal")
-			return "statute";
-		else
-			return "book";
+/*
+	Translator
+   Copyright (C) 2013 Sebastian Karcher
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+function detectWeb(doc,url) {
+	
+	var xpath='//meta[@name="citation_journal_title"]';
+	var type = ZU.xpathText(doc, '//meta[@name="source"]/@content');	
+	if (ZU.xpath(doc, xpath).length > 0) {
+		if (type && type.indexOf("Non-Journal")!=-1) return "book"
+		else return "journalArticle";
 	}
+			
+	else if (getMultiples(doc).length>0) return "multiple";
+	return false;
 }
 
-function doWeb(doc, url)	{
-	if(detectWeb(doc, url) == "multiple")	{
-		var string="http://eric.ed.gov/ERICWebPortal/custom/portlets/clipboard/performExport.jsp";
-		var items=new Array();
-		if(url.match(/ERICWebPortal\/search\/clipboard\.jsp/)
-			|| url.match(/ERICWebPortal\/MyERIC\/clipboard\/viewFolder\.jsp\?folderIndex/)) {
-			// We have a clipboard or folder page; structure is the same
-			var rowpath='//table[@class="tblDataTable"]/tbody/tr[td]';
-			var rows = doc.evaluate(rowpath, doc, null, XPathResult.ANY_TYPE, null);
-			var row, id, title;
-			while(row = rows.iterateNext()) {
-				title = doc.evaluate('./td[2]/a', row, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-				id = doc.evaluate('./td[6]', row, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-				Zotero.debug(title + id);
-				items[id] = Zotero.Utilities.cleanTags(Zotero.Utilities.trimInternal(title));
-			}
-		} else {
-			// We have normal search results
-			var idpath='//a[img[@width="64"]]';
-			var ids=doc.evaluate(idpath, doc, null, XPathResult.ANY_TYPE, null);
-			var titlpath='//table[@class="tblSearchResult"]//td[@class="resultHeader"][1]/p/a';
-			var titlerows=doc.evaluate(titlpath, doc, null, XPathResult.ANY_TYPE, null);
-			var id;
-			while(id=ids.iterateNext())
-				items[id.id]=Zotero.Utilities.cleanTags(Zotero.Utilities.trimInternal(titlerows.iterateNext().textContent));
+function getMultiples(doc) {
+	return ZU.xpath(doc, '//div[@class="r_t"]/a[contains(@href, "id=")]');
+}
+
+ 
+function doWeb(doc,url)
+{
+	if (detectWeb(doc, url) == "multiple") {
+		var hits = {};
+		var urls = [];
+		var results = getMultiples(doc)
+		var link;
+		for (var i in results) {
+			
+			hits[results[i].href] = results[i].textContent.trim();
 		}
-	Zotero.selectItems(items, function (items) {
-			if (!items) {
-				return true;
+		Z.selectItems(hits, function(items) {
+			if (items == null) return true;
+			for (var j in items) {
+				urls.push(j);
 			}
-		var string="http://eric.ed.gov/ERICWebPortal/MyERIC/clipboard/performExport.jsp?";
-		for(var ids in items)
-			string+="accno="+ids+"&";
-		string+="texttype=endnote&citationtype=brief&Download.x=86&Download.y=14";
-		Zotero.debug(string);
-		Zotero.Utilities.HTTP.doGet(string, function(text)	{
-			var trans=Zotero.loadTranslator("import");
-			trans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-			trans.setString(text);
-			trans.setHandler("itemDone", function(obj, newItem)	{
-				var linkpath='//tbody[tr/td/a/@id="'+newItem.itemID+'"]/tr/td/p/a[@class="action"]';
-				var link=doc.evaluate(linkpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-				if(link)
-					newItem.attachments.push({url:link.href, title:newItem.title, mimeType:"application/pdf"});
-				if (newItem.ISSN) newItem.ISSN = newItem.ISSN.replace(/ISSN-?/,"");
-				if (newItem.ISBN) newItem.ISBN = newItem.ISBN.replace(/ISBN-?/,"");
-				newItem.complete();
-			});
-			trans.translate();
+		ZU.processDocuments(urls, doWeb);
 		});
-	});
-	}
-	var type = detectWeb(doc, url);
-	if(type && type != "multiple")	{
-		var idpath='//tr[/td[1]/span/a/strong/contains("ERIC #")]/td[2]';
-		var idpath2='//meta[@name="eric #"]/@content';
-		var id = url.match(/accno=([^&]+)/)[1];
-		var string="http://eric.ed.gov/ERICWebPortal/MyERIC/clipboard/performExport.jsp?";
-		string+= "accno="+ id+"&texttype=endnote&citationtype=brief&Download.x=86&Download.y=14";
-		Zotero.debug(string);
-		Zotero.Utilities.HTTP.doGet(string, function(text)	{
-			var trans=Zotero.loadTranslator("import");
-			trans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-			trans.setString(text);
-			trans.setHandler("itemDone", function(obj, newItem)	{
-				var linkpath='//tr/td/p[img/@alt="PDF"]/a';
-				var link=doc.evaluate(linkpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-				if(link)
-					var pdfid = link.href.match(/accno=([A-Z0-9]+)/)[1];
-					Z.debug(pdfid)
-					var pdfurl = "http://www.eric.ed.gov/PDFS/"+ pdfid +".pdf";
-					newItem.attachments.push({url:pdfurl, title:newItem.title, mimeType:"application/pdf"});
-				if (newItem.ISSN) newItem.ISSN = newItem.ISSN.replace(/ISSN-?/,"");
-				if (newItem.ISBN) newItem.ISBN = newItem.ISBN.replace(/ISBN-?/,"");
-				newItem.complete();
-			});
-			trans.translate();
+	} else {
+		var abstract = ZU.xpathText(doc, '//div[@class="abstract"]');
+		//Z.debug(abstract)
+		var type = ZU.xpathText(doc, '//meta[@name="source"]/@content');
+		// We call the Embedded Metadata translator to do the actual work
+		var translator = Zotero.loadTranslator('web');
+		//use Embedded Metadata
+		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+		translator.setDocument(doc);
+		translator.setHandler('itemDone', function(obj, item) {
+			item.abstractNote = abstract;
+			//the metadata isn't good enough to properly distinguish item types. Anything that's non journal we treat as a book
+			if (type && type.indexOf("Non-Journal")!=-1) item.itemType = "book";
+			item.title = item.title.replace(/.\s*$/, "");
+			if (item.ISSN){ 
+				var ISSN = item.ISSN.match(/[0-9Xx]{4}\-[0-9Xx]{4}/);
+				if (ISSN) item.ISSN = ISSN[0]
+			}
+			if (item.ISBN) item.ISBN = ZU.cleanISBN(item.ISBN);
+			if (item.publisher) item.publisher = item.publisher.replace(/\..+/, "");
+			item.url = "";
+			item.libraryCatalog = "ERIC";
+			item.complete();
 		});
+		translator.translate();
 	}
-}
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://eric.ed.gov/ERICWebPortal/search/recordDetails.jsp?ERICExtSearch_SearchValue_0=EJ956651&searchtype=keyword&ERICExtSearch_SearchType_0=no&_pageLabel=RecordDetails&accno=EJ956651&_nfls=false&source=ae",
+		"url": "http://eric.ed.gov/?id=EJ956651",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"lastName": "Post",
 						"firstName": "Phyllis B.",
+						"lastName": "Post",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Ceballos",
 						"firstName": "Peggy L.",
+						"lastName": "Ceballos",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Penn",
 						"firstName": "Saundra L.",
+						"lastName": "Penn",
 						"creatorType": "author"
 					}
 				],
@@ -173,21 +133,89 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Collaborating with Parents to Establish Behavioral Goals in Child-Centered Play Therapy",
-						"mimeType": "application/pdf"
+						"title": "Snapshot"
 					}
 				],
 				"title": "Collaborating with Parents to Establish Behavioral Goals in Child-Centered Play Therapy",
+				"date": "2012/01/00",
+				"publicationTitle": "Family Journal: Counseling and Therapy for Couples and Families",
 				"volume": "20",
 				"issue": "1",
+				"publisher": "SAGE Publications",
+				"language": "en",
 				"pages": "51-57",
-				"journalAbbreviation": "Family Journal: Counseling and Therapy for Couples and Families",
-				"publisher": "SAGE Publications. 2455 Teller Road, Thousand Oaks, CA 91320. Tel: 800-818-7243; Tel: 805-499-9774; Fax: 800-583-2665; e-mail: journals@sagepub.com; Web site: http://sagepub.com",
 				"ISSN": "1066-4807",
 				"abstractNote": "The purpose of this article is to provide specific guidelines for child-centered play therapists to set behavioral outcome goals to effectively work with families and to meet the demands for accountability in the managed care environment. The child-centered play therapy orientation is the most widely practiced approach among play therapists who identify a specific theoretical orientation. While information about setting broad objectives is addressed using this approach to therapy, explicit guidelines for setting behavioral goals, while maintaining the integrity of the child-centered theoretical orientation, are needed. The guidelines are presented in three phases of parent consultation: (a) the initial engagement with parents, (b) the ongoing parent consultations, and (c) the termination phase. In keeping with the child-centered approach, the authors propose to work with parents from a person-centered orientation and seek to appreciate how cultural influences relate to parents' concerns and goals for their children. A case example is provided to demonstrate how child-centered play therapists can accomplish the aforementioned goals.",
-				"url": "http://www.eric.ed.gov/ERICWebPortal/detail?accno=EJ956651",
-				"date": "January 2012",
-				"publicationTitle": "Family Journal: Counseling and Therapy for Couples and Families",
+				"libraryCatalog": "ERIC",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://eric.ed.gov/?q=(prekindergarten+OR+kindergarten)+AND+literacy",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://eric.ed.gov/?q=(prekindergarten+OR+kindergarten)+AND+literacy&ff1=pubBooks&id=ED509979",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Katherine A.",
+						"lastName": "Beauchat",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Katrin L.",
+						"lastName": "Blamey",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sharon",
+						"lastName": "Walpole",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Play",
+					"Group Activities",
+					"Oral Language",
+					"Disadvantaged Youth",
+					"Phonological Awareness",
+					"Second Language Learning",
+					"Preschool Teachers",
+					"Emergent Literacy",
+					"Vocabulary Development",
+					"Suburban Schools",
+					"Best Practices",
+					"English (Second Language)",
+					"Preschool Children",
+					"Reprography",
+					"Instructional Materials",
+					"Language Skills",
+					"Educational Assessment",
+					"Classroom Environment",
+					"Alphabets",
+					"Reading Instruction",
+					"Writing Instruction"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "The Building Blocks of Preschool Success",
+				"date": "2010/06/00",
+				"publicationTitle": "Guilford Publications",
+				"publisher": "Guilford Press",
+				"ISBN": "9781606236949",
+				"language": "en",
+				"abstractNote": "Written expressly for preschool teachers, this engaging book explains the \"whats,\" \"whys,\" and \"how-tos\" of implementing best practices for instruction in the preschool classroom. The authors show how to target key areas of language and literacy development across the entire school day, including whole-group and small-group activities, center time, transitions, and outdoor play. Detailed examples in every chapter illustrate what effective instruction and assessment look like in three distinct settings: a school-based pre-kindergarten, a Head Start center with many English language learners, and a private suburban preschool. Helpful book lists, charts, and planning tools are featured, including reproducible materials. Contents include: (1) The Realities of Preschool; (2) A Focus on Oral Language and Vocabulary Development; (3) Comprehension; (4) Phonological Awareness; (5) Print and Alphabet Awareness; (6) Emergent Writing; (7) Tracking Children's Progress: The Role of Assessment in Preschool Classrooms; and (8) Making It Work for Adults and Children.",
 				"libraryCatalog": "ERIC",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
