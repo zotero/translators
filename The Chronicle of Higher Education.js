@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-06-08 14:54:29"
+	"lastUpdated": "2013-10-22 15:14:17"
 }
 
 /*
@@ -50,31 +50,35 @@ function detectWeb(doc, url) {
 }
 
 function doWeb (doc, url) {
-	var n = doc.documentElement.namespaceURI;
-	var ns = n ? function(prefix) {
-		if (prefix == 'x') return n; else return null;
-	} : null;
+
 	
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = {};
-		var aTags = doc.getElementsByTagName("a");
-		for(var i=0; i<aTags.length; i++) {
-			var articleRegexp = /^http:\/\/chronicle\.com\/(daily|weekly|article|blogPost|blogs\/\w+)\/[^/]+\//;
-			if(articleRegexp.test(aTags[i].href)) {
-				items[aTags[i].href] = aTags[i].textContent;
+		var results = ZU.xpath(doc, '//h4[@class="result-title"]/a')
+		if (results.length<1){
+			var results = ZU.xpath(doc, '//div[@id="portal"]//h4/a[contains(@href, "/article/")]|//div[@id="portal"]//h2/a[contains(@href, "/article/")]|//div[@class="blogpost-container"]/a' )
+		}
+		for (var i in results){
+			items[results[i].href] = results[i].textContent.trim();
+		}
+		
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
 			}
-		}
-		items = Zotero.selectItems(items);
-		if(!items) return true;
-		for (var i in items) {
-			articles.push(i);
-		}
+			for (var i in items) {
+				articles.push(i);
+			}
+			Z.debug(articles)
+			Zotero.Utilities.processDocuments(articles, scrape);	
+		});
 	} else {
-		articles = [url];
+		scrape(doc, url)
 	}
-	
-	Zotero.Utilities.processDocuments(articles, function(doc) {
+}
+
+function scrape (doc, url){
 		var type = detectWeb(doc, doc.location.href);
 		var item = new Zotero.Item(type);
 
@@ -83,7 +87,7 @@ function doWeb (doc, url) {
 		// Does the ISSN apply to online-only blog posts?
 		item.ISSN = "0009-5982";
 		
-		var byline = doc.evaluate('//p[@class="byline"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
+		var byline = doc.evaluate('//p[@class="byline"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 		if (byline !== null) {
 			var authors = parseAuthors(byline.textContent);
 			for (var i = 0; i < authors.length; i++) {
@@ -93,27 +97,28 @@ function doWeb (doc, url) {
 		
 		// Behavior for some items is different:
 		if(type === "blogPost") {
-			var dateline = doc.evaluate('//p[@class="time"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
+			var dateline = doc.evaluate('//p[@class="time"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 			if (dateline !== null) {
 				item.date = Zotero.Utilities.trimInternal(dateline.textContent);
 			}
-			item.title = doc.evaluate('//div[@class="blog-mod"]//h1[@class="entry-title" or @class="title"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			item.title = doc.evaluate('//div[@class="blog-mod"]//h1[@class="entry-title" or @class="title"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 			
 			// We keep the Chronicle as the Website Type, for lack of a better place
 			item.websiteType = item.publicationTitle;
 			item.publicationTitle = ZU.xpathText(doc, '//div[@class="search-wrap"]//a');
 			item.publicationTitle = item.publicationTitle.replace(/back to\s*/, "");
 		} else {
-			var dateline = doc.evaluate('//p[@class="dateline"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
+			var dateline = doc.evaluate('//p[@class="dateline"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 			if (dateline !== null) {
 				item.date = dateline.textContent;
 			}
-			item.title = Zotero.Utilities.trimInternal(doc.evaluate('//div[@class="article"]/h1', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-			item.section = Zotero.Utilities.trimInternal(doc.evaluate('//div[@class="header-breadcrumb-wrap"]/h1', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+			item.title = ZU.xpathText(doc, '//div[@class="article"]/h1');
+			var section = ZU.xpathText(doc, '//div[@class="header-breadcrumb-wrap"]/h1');
+			if (section) item.section = ZU.trimInternal(section)
 			
 			// Some items have publication details at the end of the article; one
 			// example is: http://chronicle.com/article/Grinnells-Green-Secrets/2653/
-			var articleParagraphs = doc.evaluate('//div[@class="article-body"]/p', doc, ns, XPathResult.ANY_TYPE, null);
+			var articleParagraphs = doc.evaluate('//div[@class="article-body"]/p', doc, null, XPathResult.ANY_TYPE, null);
 			var par;
 			while ((par = articleParagraphs.iterateNext()) !== null) {
 				var data = par.textContent.match(/Section: ([a-zA-Z -&]+)[\n\t ]+Volume ([0-9]+), Issue ([0-9]+), Page ([0-9A-Za-z]+)/);
@@ -130,8 +135,7 @@ function doWeb (doc, url) {
 		
 		item.attachments.push({url:doc.location.href, title: ("Chronicle of Higher Education Snapshot"), mimeType:"text/html"});
 		item.complete();
-	}, function() {Zotero.done();});
-	Zotero.wait();
+
 }
 
 function parseAuthors(author) {
@@ -296,6 +300,16 @@ var testCases = [
 				"shortTitle": "Humanities Cyberinfrastructure"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://chronicle.com/section/Opinion-Ideas/40/?eio=58977",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://chronicle.com/search/?search_siteId=5&contextId=&action=rem&searchQueryString=adjunct",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
