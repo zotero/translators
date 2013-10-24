@@ -2,14 +2,14 @@
 	"translatorID": "117feb72-21bb-4424-a47b-c9ca6b71f979",
 	"label": "DPLA",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://dp.la/",
+	"target": "^https?://dp\\.la/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcv",
-	"lastUpdated": "2013-06-19 10:13:09"
+	"lastUpdated": "2013-10-24 09:48:34"
 }
 
 /**
@@ -126,7 +126,7 @@ function parseDPLAapi(text) {
 		}
 		//authors are sometimes strings, sometimes arrays
 		if (typeof source.creator === "string") {
-			var fieldmode = 2;
+			var fieldmode = 0;
 			var comma = true;
 			if (source.creator.indexOf(",") == -1) {
 				fieldmode = 1;
@@ -135,7 +135,7 @@ function parseDPLAapi(text) {
 			item.creators[0].fieldMode = fieldmode;
 		} else {
 			for (i in source.creator) {
-				var fieldmode = 2;
+				var fieldmode = 0;
 				var comma = true;
 				if (source.creator[i].indexOf(",") == -1) {
 					fieldmode = 1;
@@ -251,13 +251,13 @@ var testCases = [
 						"firstName": "Mary",
 						"lastName": "Moultrie",
 						"creatorType": "author",
-						"fieldMode": 2
+						"fieldMode": 0
 					},
 					{
 						"firstName": "Jean-Claude",
 						"lastName": "Bouffard",
 						"creatorType": "author",
-						"fieldMode": 2
+						"fieldMode": 0
 					}
 				],
 				"notes": [],
@@ -314,7 +314,7 @@ var testCases = [
 						"firstName": "Mariano",
 						"lastName": "Cuevas",
 						"creatorType": "author",
-						"fieldMode": 2
+						"fieldMode": 0
 					}
 				],
 				"notes": [],
