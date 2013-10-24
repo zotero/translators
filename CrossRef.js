@@ -1,15 +1,15 @@
 {
 	"translatorID": "11645bd1-0420-45c1-badb-53fb41eeb753",
-	"translatorType": 8,
 	"label": "CrossRef",
 	"creator": "Simon Kornblith",
 	"target": "^https?://partneraccess\\.oclc\\.org/",
 	"minVersion": "2.1.9",
-	"maxVersion": null,
+	"maxVersion": "",
 	"priority": 90,
 	"inRepository": true,
+	"translatorType": 8,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-07-31 20:05:00"
+	"lastUpdated": "2013-10-23 04:49:28"
 }
 
 /* CrossRef uses unixref; documentation at http://www.crossref.org/schema/documentation/unixref1.0/unixref.html */
@@ -48,11 +48,23 @@ function removeUnsupportedMarkup(text) {
 		});
 }
 
-function detectSearch(item) {
-	// query: should we make this more forgiving?
-	if(item.itemType === "journalArticle" || item.DOI) {
-		return true;
+function detectSearch(items) {
+	if(!items) return false;
+	
+	if(!items.directSearch) {
+		Z.debug("CrossRef: directSearch was not true. Will not attempt to search directly.")
+		return false;
 	}
+	
+	if(typeof items == 'string' || !items.length) items = [items];
+	
+	for(var i=0, n=items.length; i<n; i++) {
+		if(!items[i]) continue;
+		
+		if(items[i].DOI && ZU.cleanDOI(items[i].DOI)) return true;
+		if(typeof items[i] == 'string' && ZU.cleanDOI(items[i])) return true;
+	}
+	
 	return false;
 }
 
@@ -89,13 +101,13 @@ function parseCreators(node, item, typeOverrideMap) {
 	}
 }
 
-function processCrossRef(xmlOutput) {
+function processCrossRef(xmlOutput, queryTracker) {
 	// XPath does not give us the ability to use the same XPaths regardless of whether or not
 	// there is a namespace, so we add an element to make sure that there will always be a 
 	// namespace.
-	xmlOutput = '<xml xmlns="http://www.example.com/">'+xmlOutput.replace(/<\?xml[^>]*\?>/, "")+"</xml>";
+	xmlOutput = xmlOutput.replace(/<\?xml[^>]*\?>/, '$&<xml xmlns="http://www.example.com/">')+"</xml>";
 	
-	// parse XML with E4X
+	// parse XML
 	try {
 		var parser = new DOMParser();
 		var doc = parser.parseFromString(xmlOutput, "text/xml");
@@ -115,192 +127,272 @@ function processCrossRef(xmlOutput) {
 			ns.c = "http://www.example.com/";
 			doiRecords = ZU.xpath(doc, '/c:xml/c:doi_records/c:doi_record', ns);
 			if(!doiRecords.length) {
-				throw new Error("No records found");
+				Z.debug('No records found');
 				return;
 			}
 		}
 	}
 	
-	var doiRecord = doiRecords[0];
-	
-	// ensure this isn't an error
+	var doiRecord;
+	for(var i=0, n=doiRecords.length; i<n; i++) {
+		doiRecord = doiRecords[i];
+		var key = ZU.htmlSpecialChars(doiRecord.getAttribute('key'));
+		if(!key || !queryTracker[key]) {
+			Z.debug("Got result for " + key + " which was not in input");
+			continue;
+		}
+		
+		var query = queryTracker[key];
+		delete queryTracker[key];
+		
+		// ensure this isn't an error
 	var errorString = ZU.xpathText(doiRecord, 'c:crossref/c:error', ns);
-	if(errorString !== null) {
-		throw errorString;
-		return false;
-	}
-	
-	var itemXML, item, refXML, metadataXML, seriesXML;
+		if(errorString !== null) {
+			Z.debug("Query for " + key + " returned an error: " + errorString);
+			var newItem = new Zotero.Item();
+			newItem._query = query;
+			newItem._status = 'not found';
+			newItem.complete();
+			continue;
+		}
+		
+		var itemXML, item, refXML, metadataXML, seriesXML;
 	if((itemXML = ZU.xpath(doiRecord, 'c:crossref/c:journal', ns)).length) {
-		item = new Zotero.Item("journalArticle");
+			item = new Zotero.Item("journalArticle");
 		refXML = ZU.xpath(itemXML, 'c:journal_article', ns);
 		metadataXML = ZU.xpath(itemXML, 'c:journal_metadata', ns);
-	
+		
 		item.publicationTitle = ZU.xpathText(metadataXML, 'c:full_title[1]', ns);
 		item.journalAbbreviation = ZU.xpathText(refXML, 'c:abbrev_title[1]', ns);
 		item.volume = ZU.xpathText(itemXML, 'c:journal_issue/c:journal_volume/c:volume', ns);
 		item.issue = ZU.xpathText(itemXML, 'c:journal_issue/c:journal_volume/c:issue', ns);
-		// Sometimes the <issue> tag is not nested inside the volume tag; see 10.1007/BF00938486
-		if (!item.issue)
+			// Sometimes the <issue> tag is not nested inside the volume tag; see 10.1007/BF00938486
+			if (!item.issue)
 			item.issue = ZU.xpathText(itemXML, 'c:journal_issue/c:issue', ns);
    } else if((itemXML = ZU.xpath(doiRecord, 'c:crossref/c:report-paper', ns)).length) {
-		// Report Paper
-		// Example: doi: 10.4271/2010-01-0907
-		// http://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&rft_id=info:doi/10.4271/2010-01-0907&format=unixref&redirect=false
-		item = new Zotero.Item("report");
+			// Report Paper
+			// Example: doi: 10.4271/2010-01-0907
+			// http://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&rft_id=info:doi/10.4271/2010-01-0907&format=unixref&redirect=false
+			item = new Zotero.Item("report");
 		refXML = ZU.xpath(itemXML, 'c:report-paper_metadata', ns);
-		metadataXML = refXML;
-		
+			metadataXML = refXML;
+			
 		item.reportNumber = ZU.xpathText(refXML, 'c:publisher_item/c:item_number', ns);
 		item.institution = ZU.xpathText(refXML, 'c:publisher/c:publisher_name', ns);
 		item.place = ZU.xpathText(refXML, 'c:publisher/c:publisher_place', ns);
 	} else if((itemXML = ZU.xpath(doiRecord, 'c:crossref/c:book', ns)).length) {
-		// Book chapter
-		// Example: doi: 10.1017/CCOL0521858429.016
-		// http://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&rft_id=info:doi/10.1017/CCOL0521858429.016&format=unixref&redirect=false
-		// Reference book entry
-		// Example: doi: 10.1002/14651858.CD002966.pub3
-		// http://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&rft_id=info:doi/10.1002/14651858.CD002966.pub3&format=unixref&redirect=false
-		var bookType = itemXML[0].hasAttribute("book_type") ? itemXML[0].getAttribute("book_type") : null;
-		var componentType = itemXML[0].hasAttribute("component_type") ? itemXML[0].getAttribute("component_type") : null;
-		
-		var isReference = ["reference", "other"].indexOf(bookType) !== -1
-				&& ["chapter", "reference_entry"].indexOf(componentType);
-		
-		if(bookType === "edited_book" || isReference) {
-			item = new Zotero.Item("bookSection");
-			refXML = ZU.xpath(itemXML, 'c:content_item', ns);
+			// Book chapter
+			// Example: doi: 10.1017/CCOL0521858429.016
+			// http://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&rft_id=info:doi/10.1017/CCOL0521858429.016&format=unixref&redirect=false
+			// Reference book entry
+			// Example: doi: 10.1002/14651858.CD002966.pub3
+			// http://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&rft_id=info:doi/10.1002/14651858.CD002966.pub3&format=unixref&redirect=false
+			var bookType = itemXML[0].hasAttribute("book_type") ? itemXML[0].getAttribute("book_type") : null;
+			var componentType = itemXML[0].hasAttribute("component_type") ? itemXML[0].getAttribute("component_type") : null;
 			
-			if(isReference) {
-				metadataXML = ZU.xpath(itemXML, 'c:book_metadata', ns);
-				if(!metadataXML.length) metadataXML = ZU.xpath(itemXML, 'c:book_series_metadata', ns);
+			var isReference = ["reference", "other"].indexOf(bookType) !== -1
+					&& ["chapter", "reference_entry"].indexOf(componentType);
+			
+			if(bookType === "edited_book" || isReference) {
+				item = new Zotero.Item("bookSection");
+			refXML = ZU.xpath(itemXML, 'c:content_item', ns);
 				
+				if(isReference) {
+					metadataXML = ZU.xpath(itemXML, 'c:book_metadata', ns);
+				if(!metadataXML.length) metadataXML = ZU.xpath(itemXML, 'c:book_series_metadata', ns);
+					
 				item.bookTitle = ZU.xpathText(metadataXML, 'c:titles[1]/c:title[1]', ns);
 				item.seriesTitle = ZU.xpathText(metadataXML, 'c:series_metadata/c:titles[1]/c:title[1]', ns);
 
 				var metadataSeriesXML = ZU.xpath(metadataXML, 'c:series_metadata', ns);
-				if (metadataSeriesXML.length) parseCreators(metadataSeriesXML, item, {"editor":"seriesEditor"});
-			} else {
+					if (metadataSeriesXML.length) parseCreators(metadataSeriesXML, item, {"editor":"seriesEditor"});
+				} else {
 				metadataXML = ZU.xpath(itemXML, 'c:book_series_metadata', ns);
 				if(!metadataXML.length) metadataXML = ZU.xpath(itemXML, 'c:book_metadata', ns);
-				
+					
 				item.bookTitle = ZU.xpathText(metadataXML, 'c:series_metadata/c:titles[1]/c:title[1]', ns);
 				if(!item.bookTitle) item.bookTitle = ZU.xpathText(metadataXML, 'c:titles[1]/c:title[1]', ns);
+				}
+				
+				// Handle book authors
+				parseCreators(metadataXML, item, {"author":"bookAuthor"});
+			// Book
+			} else {
+				item = new Zotero.Item("book");
+			refXML = ZU.xpath(itemXML, 'c:book_metadata', ns);
+				metadataXML = refXML;
+			seriesXML = ZU.xpath(refXML, 'c:series_metadata', ns);
 			}
 			
-			// Handle book authors
-			parseCreators(metadataXML, item, {"author":"bookAuthor"});
-		// Book
-		} else {
-			item = new Zotero.Item("book");
-			refXML = ZU.xpath(itemXML, 'c:book_metadata', ns);
-			metadataXML = refXML;
-			seriesXML = ZU.xpath(refXML, 'c:series_metadata', ns);
-		}
-		
 		item.place = ZU.xpathText(metadataXML, 'c:publisher/c:publisher_place', ns);
 	} else if((itemXML = ZU.xpath(doiRecord, 'c:crossref/c:standard', ns)).length) {
-		item = new Zotero.Item("report");
+			item = new Zotero.Item("report");
 		refXML = ZU.xpath(itemXML, 'c:standard_metadata', ns);
 		metadataXML = ZU.xpath(itemXML, 'c:standard_metadata', ns);
-		
+			
 	} else if((itemXML = ZU.xpath(doiRecord, 'c:crossref/c:conference', ns)).length) {
-		item = new Zotero.Item("conferencePaper");
+			item = new Zotero.Item("conferencePaper");
 		refXML = ZU.xpath(itemXML, 'c:conference_paper', ns);
 		metadataXML = ZU.xpath(itemXML, 'c:proceedings_metadata', ns);
 		seriesXML = ZU.xpath(metadataXML, 'c:proceedings_metadata', ns);
-		
+			
 		item.publicationTitle = ZU.xpathText(metadataXML, 'c:publisher/c:proceedings_title', ns);
 		item.place = ZU.xpathText(metadataXML, 'c:event_metadata/c:conference_location', ns);
 		item.conferenceName = ZU.xpathText(metadataXML, 'c:event_metadata/c:conference_name', ns);
-	}
-	
+		}
+		
 	item.ISBN = ZU.xpathText(metadataXML, 'c:isbn', ns);
 	item.ISSN = ZU.xpathText(metadataXML, 'c:issn', ns);
 	item.publisher = ZU.xpathText(metadataXML, 'c:publisher/c:publisher_name', ns);
 	item.edition = ZU.xpathText(metadataXML, 'c:edition_number', ns);
 	if(!item.volume) item.volume = ZU.xpathText(metadataXML, 'c:volume', ns);
-	
-	parseCreators(refXML, item, "author");
-	
-	if(seriesXML && seriesXML.length) {
-		parseCreators(refXML, item, {"editor":"seriesEditor"});
+		
+		parseCreators(refXML, item, "author");
+		
+		if(seriesXML && seriesXML.length) {
+			parseCreators(refXML, item, {"editor":"seriesEditor"});
 		item.seriesNumber = ZU.xpathText(seriesXML, 'c:series_number', ns);
-	}
-	
+		}
+		
 	var pubDateNode = ZU.xpath(refXML, 'c:publication_date', ns);
 	if(!pubDateNode) ZU.xpath(metadataXML, 'c:publication_date', ns);
-	
-	if(pubDateNode.length) {
+		
+		if(pubDateNode.length) {
 		var year = ZU.xpathText(pubDateNode[0], 'c:year', ns);
 		var month = ZU.xpathText(pubDateNode[0], 'c:month', ns);
 		var day = ZU.xpathText(pubDateNode[0], 'c:day', ns);
-		
-		if(year) {
-			if(month) {
-				if(day) {
-					item.date = year+"-"+month+"-"+day;
+			
+			if(year) {
+				if(month) {
+					if(day) {
+						item.date = year+"-"+month+"-"+day;
+					} else {
+						item.date = month+"/"+year
+					}
 				} else {
-					item.date = month+"/"+year
+					item.date = year;
 				}
-			} else {
-				item.date = year;
 			}
 		}
-	}
-	
+		
 	var pages = ZU.xpath(refXML, 'c:pages[1]', ns);
-	if(pages.length) {
+		if(pages.length) {
 		item.pages = ZU.xpathText(pages, 'c:first_page[1]', ns);
 		var lastPage = ZU.xpathText(pages, 'c:last_page[1]', ns);
-		if(lastPage) item.pages += "-"+lastPage;
-	}
-	
+			if(lastPage) item.pages += "-"+lastPage;
+		}
+		
 	item.DOI = ZU.xpathText(refXML, 'c:doi_data/c:doi', ns);
 	item.url = ZU.xpathText(refXML, 'c:doi_data/c:resource', ns);
 	var title = ZU.xpath(refXML, 'c:titles[1]/c:title[1]', ns)[0];
-	if(title) {
-		item.title = ZU.trimInternal(
-			removeUnsupportedMarkup(innerXML(title))
-		);
-		var subtitle = ZU.xpath(refXML, 'c:titles[1]/c:subtitle[1]', ns)[0];
-		if(subtitle) {
-			item.title += ': ' + ZU.trimInternal(
-				removeUnsupportedMarkup(innerXML(subtitle))
+		if(title) {
+			item.title = ZU.trimInternal(
+				removeUnsupportedMarkup(innerXML(title))
 			);
+		var subtitle = ZU.xpath(refXML, 'c:titles[1]/c:subtitle[1]', ns)[0];
+			if(subtitle) {
+				item.title += ': ' + ZU.trimInternal(
+					removeUnsupportedMarkup(innerXML(subtitle))
+				);
+			}
 		}
+		//Zotero.debug(JSON.stringify(item, null, 4));
+		
+		item._query = query;
+		item._status = 'success';
+		item.complete();
 	}
-	//Zotero.debug(JSON.stringify(item, null, 4));
-	
-	item.complete();
-	return true;
 }
 
-function doSearch(item) {
-	if(item.contextObject) {
-		var co = item.contextObject;
-		if(co.indexOf("url_ver=") == -1) {
-			co = "url_ver=Z39.88-2004&"+co;
+/**
+ * Filter out invalid queries
+ */
+function filterQuery(items) {
+	if(!items) return [];
+	
+	if(typeof items == 'string' || !items.length) items = [items];
+	
+	//filter out invalid queries
+	var query = [];
+	for(var i=0, n=items.length; i<n; i++) {
+		if( ( items[i].DOI && ZU.cleanDOI(items[i].DOI) )
+			|| ( typeof items[i] == 'string' && ZU.cleanDOI(items[i]) ) ) {
+			query.push(items[i]);
+		} else {
+			var newItem = new Zotero.Item();
+			newItem._status = 'invalid';
+			newItem._query = items[i];
+			newItem.complete();
 		}
-	} else if(item.DOI) {
-		var co = "url_ver=Z39.88-2004&&rft_id=info:doi/"+ZU.cleanDOI(item.DOI.toString());
-	} else {
-		var co = Zotero.Utilities.createContextObject(item);
+	}
+	return query;
+}
+
+function doSearch(items) {
+	var query = filterQuery(items);
+	if(!query.length) return;
+	
+	var urlPrefix = 'http://doi.crossref.org/servlet/query'
+		+ '?usr=zter&pwd=zter321&format=unixref&qdata='
+		+ encodeURIComponent('<?xml version="1.0" encoding="UTF-8"?>'
+			+ '<query_batch version="2.0" xmlns="http://www.crossref.org/qschema/2.0"'
+				+ ' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'
+			+ '<head><email_address>ckoscher@crossref.org</email_address>'
+			+ '<doi_batch_id>trackingid1</doi_batch_id></head>'
+			+ '<body>');
+	var urlSuffix = encodeURIComponent('</body></query_batch>');
+	var maxUrlLength = 2048;
+	var maxItems = 10;
+	
+	var urls = [],
+		url = urlPrefix;
+		itemCount = 0,
+		queryTracker = {};
+	for(var i=0, n=query.length; i<n; i++) {
+		var doi = ZU.htmlSpecialChars(ZU.cleanDOI(query[i].DOI || query[i]));
+		if(queryTracker[doi]) continue; //don't query twice
+		queryTracker[doi] = query[i];
+		
+		var querySubstring = encodeURIComponent(
+			'<query key="' + doi + '" expanded-results="true">'
+			+ '<doi>' + doi + '</doi></query>');
+		
+		//if we can fit more dois into query, keep adding
+		if(url == urlPrefix
+			|| (itemCount < maxItems
+				&& (url.length + urlSuffix.length + querySubstring.length) <= maxUrlLength)) {
+			url += querySubstring;
+			itemCount++;
+			continue;
+		}
+		
+		//otherwise, this query is full, start a fresh one
+		urls.push(url + urlSuffix);
+		itemCount = 1;
+		url = urlPrefix + querySubstring;
 	}
 	
-	Zotero.Utilities.HTTP.doGet("http://www.crossref.org/openurl/?pid=zter:zter321&"+co+"&noredirect=true&format=unixref", function(responseText) {
-		processCrossRef(responseText);
-		Zotero.done();
-	});
+	if(url != urlPrefix) urls.push(url + urlSuffix);
 	
-	Zotero.wait();
+	ZU.doGet(urls, function(responseText) {
+		processCrossRef(responseText, queryTracker);
+	}, function() {
+		//take care of queries that did not get results
+		for(var q in queryTracker) {
+			Z.debug("No result for " + q);
+			var newItem = new Zotero.Item();
+			newItem._query = queryTracker[q];
+			newItem._status = 'not found';
+			newItem.complete();
+		}
+	});
 }
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "search",
 		"input": {
-			"DOI":"10.1017/CCOL0521858429.016"
+			"DOI": "10.1017/CCOL0521858429.016"
 		},
 		"items": [
 			{
