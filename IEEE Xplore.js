@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-05-12 13:47:05"
+	"lastUpdated": "2013-10-27 10:59:14"
 }
 
 function detectWeb(doc, url) {
@@ -39,10 +39,13 @@ function doWeb(doc, url) {
 		var items = new Object();
 
 		var xPathRows = '//ul[@class="Results"]/li[@class="noAbstract"]/div[@class="header"]';
+		if (ZU.xpath(doc, xPathRows).length<1){
+			var xPathRows = '//ul[@class="results"]/li/div[@class="txt"]'
+		}
 		var tableRows = doc.evaluate(xPathRows, doc, null, XPathResult.ANY_TYPE, null);
 		var tableRow;
 		while (tableRow = tableRows.iterateNext()) {
-			var linknode = doc.evaluate('.//div[@class="detail"]/h3/a', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext();
+			var linknode = doc.evaluate('.//h3/a', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext();
 			if (!linknode) {
 				// There are things like tables of contents that don't have item pages, so we'll just skip them
 				continue;
@@ -486,6 +489,16 @@ var testCases = [
 				"libraryCatalog": "IEEE Xplore"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://ieeexplore.ieee.org/search/searchresult.jsp?queryText%3Dlabor&refinements=4291944246&pageNumber=1&resultAction=REFINE",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://ieeexplore.ieee.org/xpl/mostRecentIssue.jsp?punumber=6221021",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

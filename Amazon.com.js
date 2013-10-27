@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-09-05 21:44:07"
+	"lastUpdated": "2013-10-25 18:03:58"
 }
 
 var searchRe = new RegExp('^https?://(?:www\.)?amazon\.([^/]+)/(gp/search/|(gp/)?registry/(wishlist|registry)|exec/obidos/search-handle-url/|s/|s\\?|[^/]+/lm/|gp/richpub/)');
@@ -98,6 +98,9 @@ function getItem(doc) {
 		//});
 		translate.setHandler("itemDone", function(obj, item) {
 			addLink(doc, item);
+			//remove URL and Extra which only make sense for Worldcat
+			item.url = "";
+			item.extra = "";
 			item.complete();
 		});
 		translate.setHandler("error", function() {
@@ -443,7 +446,7 @@ var testCases = [
 				],
 				"libraryCatalog": "Open WorldCat",
 				"language": "German",
-				"title": "Fiktionen: Erzählungen 1939 - 1944",
+				"title": "Fiktionen: Erzählungen 1939 - 1944",
 				"publisher": "Fischer-Taschenbuch-Verl.",
 				"place": "Frankfurt am Main",
 				"date": "1992",
@@ -499,7 +502,7 @@ var testCases = [
 					},
 					{
 						"lastName": "Berg",
-						"firstName": "Björn",
+						"firstName": "Björn",
 						"creatorType": "author"
 					}
 				],
