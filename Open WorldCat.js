@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-09-12 18:19:47"
+	"lastUpdated": "2013-10-29 02:07:35"
 }
 
 /**
@@ -53,7 +53,7 @@ function scrape(doc, url, callDoneWhenFinished, itemData) {
 			var authors = value.replace(/[.,\s]+$/, '')
 					.split(/[.,],/);
 			var replStr = '';
-				var author;
+			var author;
 			for(var i=0, n=authors.length; i<n; i++) {
 					author = authors[i].trim();
 					if(author) replStr += tag + author + '\n';
@@ -62,6 +62,12 @@ function scrape(doc, url, callDoneWhenFinished, itemData) {
 		});
 		//ebooks are exported as ELEC. We need them as BOOK
 		text = text.replace(/^TY\s+-\s+ELEC\s*$/mg, 'TY  - BOOK');
+		//conference proceedings exported as CONF, but fields match BOOK better
+		text = text.replace(/TY\s+-\s+CONF\s+[\s\S]+\n\s*ER\s+-/g, function(m) {
+			return m.replace(/^TY\s+-\s+CONF\s*$/mg, 'TY  - BOOK')
+				//authors are actually editors
+				.replace(/^A1\s+-\s+/mg, 'A3  - ');
+		})
 		
 		//Zotero.debug("RIS: " + text)
 		
@@ -113,12 +119,6 @@ function generateItem(doc, node) {
 	if (type) {
 		type = getZoteroType(type);
 		if (type) item.itemType = type;
-	}
-	
-	//check under Material Type
-	var matType = ZU.xpathText(doc, '//div[@id="details"]//tr[./th[normalize-space(text())="Material Type:"]]/td');
-	if(matType && ZU.trimInternal(matType).toLowerCase() == 'conference publication') {
-		item.itemType = 'conferencePaper';
 	}
 	
 	return item;
@@ -308,22 +308,22 @@ var testCases = [
 		"url": "http://www.worldcat.org/title/from-lanka-eastwards-the-ramayana-in-the-literature-and-visual-arts-of-indonesia/oclc/765821302",
 		"items": [
 			{
-				"itemType": "conferencePaper",
+				"itemType": "book",
 				"creators": [
 					{
 						"lastName": "Acri",
 						"firstName": "Andrea",
-						"creatorType": "author"
+						"creatorType": "editor"
 					},
 					{
 						"lastName": "Creese",
 						"firstName": "Helen",
-						"creatorType": "author"
+						"creatorType": "editor"
 					},
 					{
 						"lastName": "Griffiths",
 						"firstName": "Arlo",
-						"creatorType": "author"
+						"creatorType": "editor"
 					}
 				],
 				"notes": [],
@@ -332,11 +332,12 @@ var testCases = [
 				"attachments": [],
 				"libraryCatalog": "Open WorldCat",
 				"language": "English",
+				"place": "Leiden",
+				"ISBN": "9067183849 9789067183840",
+				"shortTitle": "From Laṅkā eastwards",
 				"title": "From Laṅkā eastwards: the Rāmāyaṇa in the literature and visual arts of Indonesia",
 				"publisher": "KITLV Press",
-				"date": "2011",
-				"ISBN": "9067183849 9789067183840",
-				"shortTitle": "From Laṅkā eastwards"
+				"date": "2011"
 			}
 		]
 	},

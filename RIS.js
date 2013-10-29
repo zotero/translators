@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-08-29 20:07:42"
+	"lastUpdated": "2013-10-29 02:01:09"
 }
 
 function detectImport() {
@@ -577,9 +577,10 @@ function processTag(item, entry) {
 				value = undefined;
 			break;
 			case "creators":
-				var creator = value.split(/\s*,\s*/);
-				value = {lastName: creator[0], firstName:creator[1], creatorType:zField[1]};
-				if(value.firstName === undefined) {	//corporate
+				var lName = value.split(/\s*,\s*/)[0];
+				var fName = value.substr(lName.length).replace(/^\s*,\s*/, '');
+				value = {lastName: lName, firstName:fName, creatorType:zField[1]};
+				if(!value.firstName) {	//corporate
 					delete value.firstName;
 					value.fieldMode = 1;
 				}
