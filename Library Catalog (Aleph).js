@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-12-15 18:26:53"
+	"lastUpdated": "2013-10-29 23:00:49"
 }
 
 /*
@@ -160,6 +160,9 @@ function scrape(newDoc, marc, url) {
 		var xpath;
 		if (newDoc.evaluate('//*[tr[td/text()="LDR"]]/tr[td[2]]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 			xpath = '//*[tr[td/text()="LDR"]]/tr[td[2]]';
+		}	else if (newDoc.evaluate('//tbody[tr/td[@scope="row"]/strong[contains(text(), "LDR")]]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			//UCSB Pegasus
+			xpath = '//tbody[tr/td[@scope="row"]/strong[contains(text(), "LDR")]]/tr';
 		} else if (newDoc.evaluate('//*[tr[th/text()="LDR"]]/tr[td[1]]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		  xpath = '//*[tr[th/text()="LDR"]]/tr[td[1]]';
 		  th = true;
@@ -177,6 +180,7 @@ function scrape(newDoc, marc, url) {
 			xpath = '//tr/td[2]/table/tbody[tr/td[contains(text(), "LDR")]]/tr';
 			nonstandard = true;
 		}
+ 	
 
 		var elmts = newDoc.evaluate(xpath, newDoc, null, XPathResult.ANY_TYPE, null);
 		var elmt;
