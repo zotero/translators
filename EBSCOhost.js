@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-09-17 23:34:17"
+	"lastUpdated": "2013-10-30 02:42:32"
 }
 
 function detectWeb(doc, url) {
@@ -293,6 +293,69 @@ function findPdfUrl(pdfDoc) {
 	return realpdf;
 }
 
+/**
+ * borrowed from http://www.webtoolkit.info/javascript-base64.html
+ */
+var base64KeyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+function utf8_encode(string) {
+	string = string.replace(/\r\n/g,"\n");
+	var utftext = "";
+
+	for(var n=0; n<string.length; n++) {
+		var c = string.charCodeAt(n);
+		if(c < 128) {
+			utftext += String.fromCharCode(c);
+		} else if((c > 127) && (c < 2048)) {
+			utftext += String.fromCharCode((c >> 6) | 192);
+			utftext += String.fromCharCode((c & 63) | 128);
+		} else {
+			utftext += String.fromCharCode((c >> 12) | 224);
+			utftext += String.fromCharCode(((c >> 6) & 63) | 128);
+			utftext += String.fromCharCode((c & 63) | 128);
+		}
+	}
+	return utftext;
+}
+
+function btoa(input) {
+		var output = "";
+		var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+		var i = 0;
+		input = utf8_encode(input);
+		
+		while(i < input.length) {
+				chr1 = input.charCodeAt(i++);
+				chr2 = input.charCodeAt(i++);
+				chr3 = input.charCodeAt(i++);
+				enc1 = chr1 >> 2;
+				enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+				enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+				enc4 = chr3 & 63;
+				if(isNaN(chr2)) {
+						enc3 = enc4 = 64;
+				} else if (isNaN(chr3)) {
+						enc4 = 64;
+				}
+				output = output +
+				base64KeyStr.charAt(enc1) + base64KeyStr.charAt(enc2) +
+				base64KeyStr.charAt(enc3) + base64KeyStr.charAt(enc4);
+		}
+		return output;
+}
+/**
+ * end borrowed code
+ */
+ 
+/**
+ * EBSCOhost encodes the target url before posting the form
+ * Replicated from http://global.ebsco-content.com/interfacefiles/13.4.0.98/javascript/bundled/_layout2/master.js
+ */
+function urlSafeEncodeBase64(str) {
+	return btoa(str).replace(/\+/g, "-").replace(/\//g, "_")
+		.replace(/=*$/, function(m) { return m.length; });
+}
+
 //var counter;
 function doWeb(doc, url) {
 //counter = 0;
@@ -324,6 +387,7 @@ function doWeb(doc, url) {
 		doDelivery(doc);
 	}
 }
+
 function doDelivery(doc, itemInfo) {
 	var folderData;
 	if(!itemInfo||!itemInfo.folderData)	{
@@ -339,7 +403,7 @@ function doDelivery(doc, itemInfo) {
 		/* We now have the script containing ep.clientData */
 		clientData = clientData[1].match(/"currentRecord"\s*:\s*({[^}]*})/);
 		if (!clientData) { return false; }
-		/* If this starts throwing exceptions, we should probably start try-elsing it */
+		/* If this starts throwing exceptions, we should probably start try-catching it */
 		folderData = JSON.parse(clientData[1]);
 	} else {
 		/* Ditto for this. */
@@ -382,7 +446,7 @@ function doDelivery(doc, itemInfo) {
 	var arguments = urlToArgs(postURL);
 
 	postURL = "/ehost/delivery/ExportPanelSave/"
-		+ folderData.Db + "_" + folderData.Term + "_" + folderData.Tag
+		+ urlSafeEncodeBase64(folderData.Db + "__" + folderData.Term + "__" + folderData.Tag)
 		+ "?sid=" + arguments["sid"]
 		+ "&vid=" + arguments["vid"]
 		+ "&bdata="+arguments["bdata"]
