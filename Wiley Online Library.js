@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-06-09 12:04:46"
+	"lastUpdated": "2013-10-30 22:29:21"
 }
 
 /*
@@ -379,7 +379,13 @@ function getSearchResults(doc, url) {
 	return ZU.xpath(doc, '//div[@class="listingContent"]//td/strong/a[contains(@href, "/doi/")]');
 }
 
+
+
 function detectWeb(doc, url) {	
+		 //monitor for site changes on Cochrane
+	if(ZU.xpathText(doc, '//form[@id="cochraneAdvancedSearchForm"]')) {
+    	Zotero.monitorDOMChanges(doc.body);
+    }
 	if( url.indexOf('/issuetoc') != -1 ||
 		url.indexOf('/results') != -1 ||
 		url.indexOf('/search') != -1 ||
@@ -400,6 +406,7 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
+
 	var type = detectWeb(doc, url);
 	if(type == "multiple") {
 		var articles = getSearchResults(doc, url);
