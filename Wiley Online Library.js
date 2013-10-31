@@ -3,13 +3,13 @@
 	"label": "Wiley Online Library",
 	"creator": "Sean Takats, Michael Berkowitz, Avram Lyon and Aurimas Vinckevicius",
 	"target": "^https?://onlinelibrary\\.wiley\\.com[^\\/]*/(?:book|doi|advanced/search|search-web/cochrane|cochranelibrary/search|o/cochrane/clcentral/articles/.+/sect0.html)",
-	"minVersion": "3.0",
+	"minVersion": "3.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-10-30 22:29:21"
+	"lastUpdated": "2013-10-31 19:09:58"
 }
 
 /*
@@ -381,11 +381,12 @@ function getSearchResults(doc, url) {
 
 
 
-function detectWeb(doc, url) {	
-		 //monitor for site changes on Cochrane
-	if(ZU.xpathText(doc, '//form[@id="cochraneAdvancedSearchForm"]')) {
-    	Zotero.monitorDOMChanges(doc.body);
-    }
+function detectWeb(doc, url) {
+	//monitor for site changes on Cochrane
+	if(doc.getElementsByClassName('cochraneSearchForm').length && doc.getElementById('searchResultOuter')) {
+		Zotero.monitorDOMChanges(doc.getElementById('searchResultOuter'));
+	}
+	
 	if( url.indexOf('/issuetoc') != -1 ||
 		url.indexOf('/results') != -1 ||
 		url.indexOf('/search') != -1 ||
