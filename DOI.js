@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-04-04 05:29:41"
+	"lastUpdated": "2012-09-06 07:13:03"
 }
 
 var items = {};
@@ -126,12 +126,125 @@ function retrieveDOIs(DOIs, doc) {
 }
 
 function doWeb(doc, url) {
+doSearch({DOI:'10.1126/science.169.3946.635'});
+return;
 	var DOIs = getDOIs(doc);
 
 	// retrieve full items asynchronously
 	retrieveDOIs(DOIs, doc);
 }
 
+function detectSearch(item) {
+	if(typeof(item.DOI) == "string") {
+		item.DOI = [item.DOI];
+	} else if(!(item.DOI instanceof Array)) {	//we can only handle single DOI or an array of DOIs
+		return false;
+	}
+
+	//filter out invalid DOIs (very loosely)
+	for(var i=0, n=item.DOI.length; i<n; i++) {
+		if(typeof(item.DOI[i]) != "string" || !item.DOI[i].match(/^10\..+\/.+/)) {
+			item.DOI.splice(i,1);
+			i--;
+			n--;
+		}
+	}
+
+	return (item.DOI.length > 0);
+}
+
+const DOI_URL_BASE = 'http://dx.doi.org/';
+
+var fallback_search_translators = [
+	"79c3d292-0afc-42a1-bd86-7e706fc35aa5"	//EIDR
+];
+
+//try translators until we get a result
+function runTranslator(translators, item) {
+	if(!translators.length) {
+		Z.debug("No more translators left to try.");
+		return;
+	}
+
+	var transDesc = translators.shift();
+	var trans = Zotero.loadTranslator("search");
+	trans.setTranslator(transDesc);
+	trans.setSearch(item);
+
+	trans.setHandler("itemDone", function(obj, newItem) {
+		runTranslator.done = true;
+		newItem.complete();
+	});
+
+	//keep going until we get an item
+	trans.setHandler("done", function(){
+		if(!runTranslator.done) {
+			runTranslator(translators);
+		}
+	});
+
+	trans.translate();
+}
+
+//try to resolve doi via other methods
+function fail_callback(doi) {
+	var trans = Zotero.loadTranslator("search");
+	trans.setTranslator(fallback_search_translators);
+
+	var item = new Zotero.Item();
+	item.DOI = doi;
+	trans.setSearch(item);
+
+	trans.setHandler('translators', function(trans, detected) {
+		runTranslator.done = false;
+		runTranslator(detected, item);
+	});
+
+	trans.getTranslators(false, true);	//get all translators that pass detectSearch
+}
+
+function doSearch(item) {
+	if(!detectSearch(item)) return;
+
+	var DOIs = ['10.1126/science.169?.3946.635', '10.1126/science.169.3946.635', '10.5240/6F7E-EF59-329B-1F0A-8440-2']; //item.DOI;
+	for(var i=0, n=DOIs.length; i<n; i++) {
+		(function(doi, fail_callback) {
+			ZU.doPost(DOI_URL_BASE + doi, '', function(text) {
+				//Z.debug(text);
+				var rdf = Zotero.loadTranslator("import");
+				rdf.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f");
+				rdf.setString(text);
+	
+				rdf.setHandler('itemDone', function(obj, newItem) {
+					//dates can sometimes appear in timestamp format. Fix it.
+					if(newItem.date) newItem.date = newItem.date.split(/Z/)[0];
+
+					//CrossRef (at least) does not include the resource URL in their response
+					//This is intentional: http://www.crossref.org/CrossTech/2011/04/content_negotiation_for_crossr.html#comment-71026
+					//We will add a DOI url ourselves
+					newItem.url = DOI_URL_BASE + doi;
+
+					newItem.complete();
+				});
+
+				//called after getTranslators finishes
+				//If detect call succeeded, continue
+				rdf.setHandler('translators', function(trans, detected) {	//trans is not actually passed for security reasons
+					if(detected.length) {
+						rdf.translate();
+					} else {
+						Z.debug('Could not resolve doi using doi.org: ' + doi);
+						fail_callback(doi);
+					}
+				});
+
+				//this effectively calls detectImport on the RDF translator
+				rdf.getTranslators(false, true);
+			},
+			{ Accept: 'application/rdf+xml' });
+		})(DOIs[i], fail_callback);
+	}
+}
 
 /** BEGIN TEST CASES **/
 var testCases = [
