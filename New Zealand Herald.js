@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-03-16 12:23:12"
+	"lastUpdated": "2013-11-11 19:50:26"
 }
 
 function detectWeb(doc, url) {
@@ -40,7 +40,7 @@ function scrape(doc, url){
 	newItem.ISSN = "1170-0777";
 
 	//Get title of the news via xpath
-	var myXPath = '//div[@class="storyHeader"]/h1';
+	var myXPath = '//h1[@class="articleTitle"]';
 	var myXPathObject = doc.evaluate(myXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	var headers;
 	var items = new Object();
@@ -57,7 +57,7 @@ function scrape(doc, url){
 	 authors then push author to Zotero.  Possible with more than 1 author
 	 on an article.
 	*/
-	var authorXPath = '//span[@class="credits"]';
+	var authorXPath = '//p[@class="details"]';
 	var authorXPathObject = doc.evaluate(authorXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 
 	if (authorXPathObject) {
@@ -86,7 +86,7 @@ function scrape(doc, url){
 		}
 	}
 	//date-Year
-	var dateXPath = '//div[contains(@class, "tools")]/span';
+	var dateXPath = '//span[contains(@class, "storyDate")]';
 	var dateXPathObject = doc.evaluate(dateXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/\d{1,2}:\d{1,2} (AM|PM) (\w)+ /g, '');
 
 	//If the original Xpath1 is equal to Updated then go to XPath2
@@ -95,14 +95,14 @@ function scrape(doc, url){
 		var dateXPathObject = doc.evaluate(dateXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/\d{1,2}:\d{1,2} (AM|PM) (\w)+ /g, '');
 		newItem.date = dateXPathObject ;
 	} else { //great found the date just push it to Zotero.
-		var dateXPath = '//div[contains(@class, "tools")]/span';
+		var dateXPath = '//span[contains(@class, "storyDate")]';
 		var dateXPathObject = doc.evaluate(dateXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/\d{1,2}:\d{1,2} (AM|PM) (\w)+ /g, '');
 		newItem.date = dateXPathObject ;
 	}
 
 	//Get Section of the news
-	var sectionXPath = '//div[@class="sectionHeader"]/span/a[1]';
-	var sectionXPathObject = doc.evaluate(sectionXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	var sectionXPath = '//ul[@id="navContainer"]/li/a[contains(@class, "active")]';
+	var sectionXPathObject = ZU.xpathText(doc, sectionXPath);
 	newItem.section = sectionXPathObject;
 
 	//Get news title
