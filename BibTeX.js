@@ -15,7 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-09-18 02:25:21"
+	"lastUpdated": "2013-11-14 23:52:21"
 }
 
 function detectImport() {
@@ -1752,6 +1752,9 @@ function processField(item, field, value) {
 		} else {
 			item.date = value;
 		}
+	} else if(field == "date") {
+	//We're going to assume that "date" and the date parts don't occur together. If they do, we pick date, which should hold all.
+		item.date = value;
 	} else if(field == "pages") {
 		if (item.itemType == "book" || item.itemType == "thesis" || item.itemType == "manuscript") {
 			item.numPages = value;
@@ -2401,7 +2404,7 @@ function doExport() {
 			if(item.itemType == "bookSection" || item.itemType == "conferencePaper") {
 				writeField("booktitle", item.publicationTitle);
 			} else if(Zotero.getOption("useJournalAbbreviation") && item.journalAbbreviation){
-			    writeField("journal", item.journalAbbreviation);
+				writeField("journal", item.journalAbbreviation);
 			} else {
 				writeField("journal", item.publicationTitle);
 			}
