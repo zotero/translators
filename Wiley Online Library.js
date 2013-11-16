@@ -2,14 +2,14 @@
 	"translatorID": "fe728bc9-595a-4f03-98fc-766f1d8d0936",
 	"label": "Wiley Online Library",
 	"creator": "Sean Takats, Michael Berkowitz, Avram Lyon and Aurimas Vinckevicius",
-	"target": "^https?://onlinelibrary\\.wiley\\.com[^\\/]*/(?:book|doi|advanced/search|search-web/cochrane|cochranelibrary/search|o/cochrane/clcentral/articles/.+/sect0.html)",
+	"target": "^https?://onlinelibrary\\.wiley\\.com[^\\/]*/(?:book|doi|advanced/search|search-web/cochrane|cochranelibrary/search|o/cochrane/(clcentral|cldare|clcmr|clhta|cleed|clabout)/articles/.+/sect0.html)",
 	"minVersion": "3.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-10-31 19:09:58"
+	"lastUpdated": "2013-11-16 11:24:25"
 }
 
 /*
@@ -333,27 +333,30 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 }
 
 function scrapeCochraneTrial(doc, url){
-	Z.debug("Scraping Cochrane Trial");
+	Z.debug("Scraping Cochrane External Sources");
 	var item = new Zotero.Item('journalArticle');
 	//Z.debug(ZU.xpathText(doc, '//meta/@content'))
 	item.title = ZU.xpathText(doc, '//meta[@name="Article-title"]/@content');
-	item.publication = ZU.xpathText(doc, '//meta[@name="source"]/@content');
+	item.publicationTitle = ZU.xpathText(doc, '//meta[@name="source"]/@content');
 	item.abstractNote = ZU.xpathText(doc, '//meta[@name="abstract"]/@content');
 	item.date = ZU.xpathText(doc, '//meta[@name="simpleYear"]/@content');
 	item.volume = ZU.xpathText(doc, '//meta[@name="volume"]/@content');
-	item.page = ZU.xpathText(doc, '//meta[@name="pages"]/@content');
+	item.pages = ZU.xpathText(doc, '//meta[@name="pages"]/@content');
+	item.issue = ZU.xpathText(doc, '//meta[@name="issue"]/@content');
 	item.rights = ZU.xpathText(doc, '//meta[@name="Copyright"]/@content');
 	var tags = ZU.xpathText(doc, '//meta[@name="cochraneGroupCode"]/@content');
 	if (tags) tags = tags.split(/\s*;\s*/);
 	for (var i in tags){
 		item.tags.push(tags[i]);
 	}
-	var authors = ZU.xpathText(doc, '//meta[@name="Author"]/@content');
-	item.attachments.push({document: doc, title: "Cochrane Trial Snapshot", mimType: "text/html"});
+	item.attachments.push({document: doc, title: "Cochrane Snapshot", mimType: "text/html"});
+	var authors = ZU.xpathText(doc, '//meta[@name="orderedAuthors"]/@content');
+	if (!authors) authors = ZU.xpathText(doc, '//meta[@name="Author"]/@content');
+
 	authors = authors.split(/\s*,\s*/);
 	for (var i in authors){
 		//authors are in the forms Smith AS
-		var authormatch = authors[i].match(/(.+)\s+([A-Z]+)/);
+		var authormatch = authors[i].match(/(.+?)\s+([A-Z]+(\s[A-Z])?)/);
 		item.creators.push({lastName: authormatch[1], firstName: authormatch[2], creatorType: "author"}) ;
 		}
 	item.complete();
@@ -365,7 +368,7 @@ function scrape(doc, url, pdfUrl) {
 	if( itemType == 'book' ) {
 		scrapeBook(doc, url, pdfUrl);
 	} else {
-		if (url.indexOf("/o/cochrane/clcentral")!=-1) scrapeCochraneTrial(doc, url)
+		if (url.search(/\/o\/cochrane\/(clcentral|cldare|clcmr|clhta|cleed|clabout)/)!=-1) scrapeCochraneTrial(doc, url);
 		//scrapeEM(doc, url, pdfUrl);
 		else scrapeBibTeX(doc, url, pdfUrl);
 	}
@@ -1161,6 +1164,95 @@ var testCases = [
 				"page": "7041",
 				"rights": "Copyright © 2011 The Cochrane Collaboration. Published by John Wiley & Sons, Ltd.",
 				"libraryCatalog": "Wiley Online Library"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://onlinelibrary.wiley.com/o/cochrane/cldare/articles/DARE-12004008706/sect0.html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Murff",
+						"firstName": "H J",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Spigel",
+						"firstName": "D R",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Syngal",
+						"firstName": "S",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Cochrane Snapshot",
+						"mimType": "text/html"
+					}
+				],
+				"title": "Does this patient have a family history of cancer: an evidence‐based analysis of the accuracy of family cancer history (Structured abstract)",
+				"publicationTitle": "JAMA",
+				"date": "2004",
+				"volume": "292",
+				"pages": "1480-1489",
+				"issue": "12",
+				"rights": "Copyright © 2013 University of York. Published by John Wiley & Sons, Ltd.",
+				"libraryCatalog": "Wiley Online Library",
+				"shortTitle": "Does this patient have a family history of cancer"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://onlinelibrary.wiley.com/o/cochrane/clcmr/articles/CMR-7395/sect0.html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Gerlach",
+						"firstName": "KK",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Marino",
+						"firstName": "C",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Hoffman-Goetz",
+						"firstName": "L",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Cochrane Snapshot",
+						"mimType": "text/html"
+					}
+				],
+				"title": "Cancer coverage in women's magazines: what information are women receiving?",
+				"publicationTitle": "Journal of Cancer Education",
+				"abstractNote": "BACKGROUND: Women use magazines as sources of health-related information, including information about cancer. Given this reliance on magazines for cancer-related information, it may interest cancer educators to know which cancers are reported on in women's magazines and what types of information are being presented. METHODS: Four widely circulated monthly women's magazines were analyzed for their coverage of cancers during the years 1987-1995. The types of cancers discussed and the frequencies of coverage were noted for each issue of every magazine. Additionally, the content of every cancer-related article was assessed for issues in cancer prevention (primary and secondary), risks, treatment, and genetics. RESULTS: All four magazines in this study reported on breast cancer more often than any other cancer. Lung and colon cancers received very little coverage. The percentages of articles devoted to the six most-discussed cancers (breast, cervical, colon, lung, ovarian, and skin) did not reflect either the mortality rates or the incidence rates of these cancers. CONCLUSIONS: The discussions of cancers in these four women's magazines focused mostly on breast and skin cancers and neglected two very important cancers--lung and colon. If women are indeed receiving much of their cancer information from such media coverage, these findings should alert cancer educators to the possible need to work with these media to help in the dissemination of additional information about cancers to women.",
+				"date": "1997",
+				"volume": "12",
+				"pages": "240-244",
+				"issue": "4",
+				"rights": "Copyright © 2012 The Cochrane Collaboration. Published by John Wiley & Sons, Ltd.",
+				"libraryCatalog": "Wiley Online Library",
+				"shortTitle": "Cancer coverage in women's magazines"
 			}
 		]
 	}
