@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-11-17 23:28:29"
+	"lastUpdated": "2013-11-18 13:33:05"
 }
 
 function detectWeb(doc, url) {
@@ -175,19 +175,20 @@ function parseXML(text) {
 		var item = {"itemType":"journalArticle", "DOI":DOI};
 		translate.setSearch(item);
 		translate.setHandler("itemDone", function(obj, item) {
-		//Z.debug(item)
-		newItem.volume = item.volume
-		newItem.issue = item.issue
-		newItem.pages = item.pages
-		newItem.date = item.date
-		newItem.ISSN = item.ISSN
-		if (item.publicationTitle){
-			newItem.extra = newItem.publicationTitle;
-			newItem.publicationTitle =  item.publicationTitle
-		}
-		newItem.date = item.date
-		newItem.complete();
-		
+			//Z.debug(item)
+			newItem.volume = item.volume
+			newItem.issue = item.issue
+			newItem.pages = item.pages
+			newItem.date = item.date
+			newItem.ISSN = item.ISSN
+			if (item.publicationTitle){
+				newItem.extra = newItem.publicationTitle;
+				newItem.publicationTitle =  item.publicationTitle
+			}
+			newItem.date = item.date
+		});
+		translate.setHandler("done", function(translate){
+			newItem.complete();
 		});
 		translate.setHandler("error", function() {});
 		translate.translate();
