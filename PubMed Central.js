@@ -8,8 +8,8 @@
 	"priority": 101,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsb",
-	"lastUpdated": "2013-09-15 17:04:01"
+	"browserSupport": "gcsbv",
+	"lastUpdated": "2013-11-19 08:23:18"
 }
 
 function detectWeb(doc, url) {
