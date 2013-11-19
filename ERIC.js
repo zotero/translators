@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-10-19 22:59:26"
+	"lastUpdated": "2013-11-18 18:18:27"
 }
 
 /*
@@ -67,7 +67,7 @@ function doWeb(doc,url)
 		ZU.processDocuments(urls, doWeb);
 		});
 	} else {
-		var abstract = ZU.xpathText(doc, '//div[@class="abstract"]');
+		var abstract = ZU.xpathText(doc, '//div[@class="abstract"]').replace(/^\|/, "");
 		//Z.debug(abstract)
 		var type = ZU.xpathText(doc, '//meta[@name="source"]/@content');
 		// We call the Embedded Metadata translator to do the actual work

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-06-10 07:07:15"
+	"lastUpdated": "2013-11-18 18:16:39"
 }
 
 function detectWeb(doc, url) {
@@ -52,10 +52,13 @@ function scrape(doc, url) {
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
 	translator.setHandler("itemDone", function(obj, item) {
+		//make sure there is no PMID in extra. Only then use extra as abstract when we have none.
 		if(item.extra) {
-			if(!item.abstractNote) item.abstractNote = item.extra;
 			
+			var PMID = item.extra.match(/PMID:\s*\d+/);
+			if(!item.abstractNote) item.abstractNote = item.extra.replace(/PMID:\s*\d+/, "");
 			delete item.extra;
+			if (PMID) item.extra = PMID[0];
 		}
 		item.complete();
 	});
@@ -90,10 +93,10 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"eLife",
-					"peer review",
+					"scientific publishing",
 					"publishing",
-					"scientific publishing"
+					"peer review",
+					"eLife"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -110,16 +113,23 @@ var testCases = [
 						"snapshot": false
 					}
 				],
+				"title": "The eLife approach to peer review",
+				"publicationTitle": "eLife",
 				"rights": "Copyright © 2013, Schekman et al. This article is distributed under the terms of the Creative Commons Attribution License, which permits unrestricted use and redistribution provided that the original author and source are credited.",
+				"publisher": "eLife Sciences Publications Limited",
+				"institution": "eLife Sciences Publications Limited",
+				"company": "eLife Sciences Publications Limited",
+				"label": "eLife Sciences Publications Limited",
+				"distributor": "eLife Sciences Publications Limited",
+				"date": "04/30/2013",
 				"DOI": "10.7554/eLife.00799",
 				"url": "http://elife.elifesciences.org/content/2/e00799",
 				"language": "en",
+				"volume": "2",
 				"libraryCatalog": "elife.elifesciences.org",
-				"abstractNote": "All editorial decisions at eLife are taken by working scientists in a process that emphasizes fairness, speed and transparency.\nPMID: 23638304",
-				"title": "The eLife approach to peer review",
-				"publicationTitle": "eLife",
-				"date": "04/30/2013",
-				"volume": "2"
+				"accessDate": "CURRENT_TIMESTAMP",
+				"abstractNote": "All editorial decisions at eLife are taken by working scientists in a process that emphasizes fairness, speed and transparency.",
+				"extra": "PMID: 23638304"
 			}
 		]
 	},
@@ -143,15 +153,15 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
+					"mast cell",
+					"vascular leakage",
+					"dengue virus",
+					"chymase",
+					"leukotrienes",
+					"infectious disease",
 					"Human",
 					"Mouse",
-					"Viruses",
-					"chymase",
-					"dengue virus",
-					"infectious disease",
-					"leukotrienes",
-					"mast cell",
-					"vascular leakage"
+					"Viruses"
 				],
 				"seeAlso": [
 					"10.7554/eLife.00481"
@@ -170,16 +180,24 @@ var testCases = [
 						"snapshot": false
 					}
 				],
+				"title": "Unmasking the role of mast cells in dengue",
+				"publicationTitle": "eLife",
 				"rights": "Copyright © 2013, Avirutnan and Matangkasombut. This article is distributed under the terms of the Creative Commons Attribution License, which permits unrestricted use and redistribution provided that the original author and source are credited.",
+				"section": "Immunology",
+				"publisher": "eLife Sciences Publications Limited",
+				"institution": "eLife Sciences Publications Limited",
+				"company": "eLife Sciences Publications Limited",
+				"label": "eLife Sciences Publications Limited",
+				"distributor": "eLife Sciences Publications Limited",
+				"date": "04/30/2013",
 				"DOI": "10.7554/eLife.00767",
 				"url": "http://elife.elifesciences.org/content/2/e00767",
 				"language": "en",
+				"volume": "2",
 				"libraryCatalog": "elife.elifesciences.org",
-				"abstractNote": "Immune cells called mast cells can hinder rather than help the body's response to dengue virus, which suggests that mast cell products could be used as biomarkers to identify severe forms of the disease.\nPMID: 23638302",
-				"title": "Unmasking the role of mast cells in dengue",
-				"publicationTitle": "eLife",
-				"date": "04/30/2013",
-				"volume": "2"
+				"accessDate": "CURRENT_TIMESTAMP",
+				"abstractNote": "Immune cells called mast cells can hinder rather than help the body's response to dengue virus, which suggests that mast cell products could be used as biomarkers to identify severe forms of the disease.",
+				"extra": "PMID: 23638302"
 			}
 		]
 	},
@@ -254,12 +272,12 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
+					"TB",
 					"HIV",
 					"K-RITH",
-					"South Africa",
-					"TB",
 					"drug resistance",
-					"epidemic"
+					"epidemic",
+					"South Africa"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -276,16 +294,23 @@ var testCases = [
 						"snapshot": false
 					}
 				],
+				"title": "Basic research at the epicenter of an epidemic",
+				"publicationTitle": "eLife",
 				"rights": "Copyright © 2013, Bishai. This article is distributed under the terms of the Creative Commons Attribution License, which permits unrestricted use and redistribution provided that the original author and source are credited.",
+				"publisher": "eLife Sciences Publications Limited",
+				"institution": "eLife Sciences Publications Limited",
+				"company": "eLife Sciences Publications Limited",
+				"label": "eLife Sciences Publications Limited",
+				"distributor": "eLife Sciences Publications Limited",
+				"date": "04/02/2013",
 				"DOI": "10.7554/eLife.00639",
 				"url": "http://elife.elifesciences.org/content/2/e00639",
 				"language": "en",
+				"volume": "2",
 				"libraryCatalog": "elife.elifesciences.org",
-				"abstractNote": "William R Bishai , director of the KwaZulu-Natal Research Institute for Tuberculosis and HIV (K-RITH), argues that the best place to carry out research into a disease is in its midst.\nPMID: 23577235",
-				"title": "Basic research at the epicenter of an epidemic",
-				"publicationTitle": "eLife",
-				"date": "04/02/2013",
-				"volume": "2"
+				"accessDate": "CURRENT_TIMESTAMP",
+				"abstractNote": "William R Bishai , director of the KwaZulu-Natal Research Institute for Tuberculosis and HIV (K-RITH), argues that the best place to carry out research into a disease is in its midst.",
+				"extra": "PMID: 23577235"
 			}
 		]
 	},
@@ -324,13 +349,13 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"D. melanogaster",
+					"walking behavior",
 					"coordination",
-					"gait analysis",
-					"motor neuron",
 					"proprioception",
 					"sensory feedback",
-					"walking behavior"
+					"gait analysis",
+					"motor neuron",
+					"D. melanogaster"
 				],
 				"seeAlso": [
 					"10.7554/eLife.00231"
@@ -349,17 +374,24 @@ var testCases = [
 						"snapshot": false
 					}
 				],
+				"title": "Correction: Quantification of gait parameters in freely walking wild type and sensory deprived Drosophila melanogaster",
+				"publicationTitle": "eLife",
 				"rights": "Copyright © 2013, Mendes et al. This article is distributed under the terms of the Creative Commons Attribution License, which permits unrestricted use and redistribution provided that the original author and source are credited.",
+				"section": "Neuroscience",
+				"publisher": "eLife Sciences Publications Limited",
+				"institution": "eLife Sciences Publications Limited",
+				"company": "eLife Sciences Publications Limited",
+				"label": "eLife Sciences Publications Limited",
+				"distributor": "eLife Sciences Publications Limited",
+				"date": "02/11/2013",
 				"DOI": "10.7554/eLife.00565",
 				"url": "http://elife.elifesciences.org/content/2/e00565",
 				"language": "en",
+				"volume": "2",
 				"libraryCatalog": "elife.elifesciences.org",
-				"abstractNote": "Mendes CS, Bartos I, Akay T, Márka S, Mann RS. 2013. Quantification of gait parameters in freely walking wild type and sensory deprived Drosophila melanogaster . eLife 2 :e00231. doi: <http://dx.doi.org/10.7554/eLife.00231>. Published 8 January 2013\n\nIn the first sentence of the abstract, ‘multi-legged in vertebrates’ has been corrected to ‘multi-legged invertebrates’.\n\nIn the vertical axis of Figure 7, panel B, ‘Step lenght’ has been corrected to ‘Step length’.\n\nThe article has been corrected accordingly.\nPMID: 23408481",
-				"shortTitle": "Correction",
-				"title": "Correction: Quantification of gait parameters in freely walking wild type and sensory deprived Drosophila melanogaster",
-				"publicationTitle": "eLife",
-				"date": "02/11/2013",
-				"volume": "2"
+				"accessDate": "CURRENT_TIMESTAMP",
+				"extra": "PMID: 23408481",
+				"shortTitle": "Correction"
 			}
 		]
 	}

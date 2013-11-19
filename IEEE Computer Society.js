@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-06-08 12:06:04"
+	"lastUpdated": "2013-11-18 22:27:18"
 }
 
 function detectWeb(doc, url) {
@@ -441,52 +441,6 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.computer.org/csdl/proceedings/bibe/2010/4083/00/index.html",
 		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://www.computer.org/portal/web/computingnow/content?g=53319&type=article&urlTitle=reimagining-the-scientific-visualization-interaction-paradigm",
-		"items": [
-			{
-				"itemType": "magazineArticle",
-				"creators": [
-					{
-						"firstName": "Daniel F.",
-						"lastName": "Keefe",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Tobias",
-						"lastName": "Isenberg",
-						"creatorType": "author"
-					}
-				],
-				"notes": [
-					{
-						"note": "Complete PDF document was either not available or accessible. Please make sure you're logged in to the digital library to retrieve the complete PDF document."
-					}
-				],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"mimeType": "text/html",
-						"title": "IEEE Computer Snapshot"
-					}
-				],
-				"title": "Reimagining the Scientific Visualization Interaction Paradigm",
-				"publicationTitle": "Computer",
-				"volume": "46",
-				"issue": "5",
-				"ISSN": "0018-9162",
-				"date": "2013",
-				"pages": "51-57",
-				"DOI": "10.1109/MC.2013.178",
-				"publisher": "IEEE Computer Society",
-				"place": "Los Alamitos, CA, USA",
-				"abstractNote": "The technological building blocks are in place to address six major challenges for natural visualization interfaces to enable an exciting future where natural interfaces powerfully strengthen and expand the use of visualizations in science, engineering, art, and the humanities.",
-				"libraryCatalog": "IEEE Computer Society"
-			}
-		]
 	}
 ]
 /** END TEST CASES **/

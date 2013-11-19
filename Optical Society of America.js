@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-09-26 22:35:57"
+	"lastUpdated": "2013-11-18 23:51:37"
 }
 
 /*
@@ -163,9 +163,9 @@ function getArticleType(doc, url, nsResolver) {
 		return "multiple";
 	}
 
-	var conference = ZU.xpathText(doc, '//meta[@name="citation_conference"]/@content');
+	var conference = ZU.xpathText(doc, '//meta[@name="citation_conference_title"]/@content');
 	var journal = ZU.xpathText(doc, '//meta[@name="citation_journal_title"]/@content');
-	Zotero.debug(journal);
+	//Zotero.debug(journal);
 	if (conference && conference.indexOf(" ") != -1) return "conferencePaper";
 	else if (journal && journal.indexOf(" ") != -1) return "journalArticle";
 	else return "book";

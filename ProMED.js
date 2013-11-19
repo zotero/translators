@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-17 03:09:28"
+	"lastUpdated": "2013-11-19 00:12:31"
 }
 
 function detectWeb(doc, url)  {
@@ -19,7 +19,8 @@ function detectWeb(doc, url)  {
 } 
 function doWeb(doc, url) {
 		var newItem = new Zotero.Item('email');
-		var info = ZU.xpathText(doc, '//div[@id="content_container"]//p[1]');
+		var info = ZU.xpathText(doc, '//div[@id="content_container"]//div/p[1]');
+		Z.debug(info)
 		var infos = info.replace(/Published Date:/, "").split(/Subject:|Archive Number:/)
 		newItem.title = infos[1];
 		newItem.date =infos[0];

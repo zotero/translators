@@ -1,15 +1,15 @@
 {
 	"translatorID": "5af42734-7cd5-4c69-97fc-bc406999bdba",
-	"label": "ESA Journals",
+	"label": "ESA+RSNA Journals",
 	"creator": "Sebastian Karcher",
-	"target": "^http://www\\.esajournals\\.org/",
+	"target": "^https?://(www\\.esajournals|pubs\\.rsna)\\.org/",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-11-12 20:51:45"
+	"lastUpdated": "2013-11-18 20:55:20"
 }
 
 /*
@@ -43,7 +43,7 @@ function doWeb(doc, url) {
 		var items = new Object();
 		var rows = ZU.xpath(doc, '//table[@class="articleEntry"]');
 		for (var i in rows) {
-			var title = ZU.xpathText(rows[i], './/div[@class="art_title"]');
+			var title = ZU.xpathText(rows[i], './/div[contains(@class, "art_title")]');
 			//Z.debug(title)
 			var id = ZU.xpathText(rows[i], './/a[contains(@href, "/doi/abs/")][1]/@href');
 			//	Z.debug(id)
@@ -87,6 +87,10 @@ function scrape(doc, url) {
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
 			item.url = url;
+			if (url.indexOf("rsna.org")!=-1){
+				var database = "RSNA"
+			}
+			else var database = "ESA"
 			item.notes = [];
 			for (var i in tags){
 				item.tags.push(tags[i].textContent)
@@ -94,13 +98,14 @@ function scrape(doc, url) {
 			item.abstractNote = abstract;
 			item.attachments = [{
 				url: pdfurl,
-				title: "ESA PDF fulltext",
+				title: database + " PDF fulltext",
 				mimeType: "application/pdf"
 			}, {
 				document: doc,
-				title: "ESA Snapshot",
+				title: database + " Snapshot",
 				mimeType: "text/html"
 			}];
+			item.libraryCatalog = database + " Journals";
 			item.complete();
 		});
 		translator.translate();
@@ -188,6 +193,85 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.esajournals.org/toc/ecap/21/5",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://pubs.rsna.org/toc/radiographics/toc/33/7",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://pubs.rsna.org/doi/abs/10.1148/rg.337125073",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Stojanovska",
+						"firstName": "Jadranka",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Garg",
+						"firstName": "Anubhav",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Patel",
+						"firstName": "Smita",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Melville",
+						"firstName": "David M.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Kazerooni",
+						"firstName": "Ella A.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Mueller",
+						"firstName": "Gisela C.",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "RSNA PDF fulltext",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "RSNA Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Congenital and Hereditary Causes of Sudden Cardiac Death in Young Adults: Diagnosis, Differential Diagnosis, and Risk Stratification",
+				"date": "November 1, 2013",
+				"DOI": "10.1148/rg.337125073",
+				"publicationTitle": "RadioGraphics",
+				"journalAbbreviation": "RadioGraphics",
+				"pages": "1977-2001",
+				"volume": "33",
+				"issue": "7",
+				"publisher": "Radiological Society of North America",
+				"ISSN": "0271-5333",
+				"url": "http://pubs.rsna.org/doi/abs/10.1148/rg.337125073",
+				"abstractNote": "Sudden cardiac death is defined as death from unexpected circulatory arrest—usually a result of cardiac arrhythmia—that occurs within 1 hour of the onset of symptoms. Proper and timely identification of individuals at risk for sudden cardiac death and the diagnosis of its predisposing conditions are vital. A careful history and physical examination, in addition to electrocardiography and cardiac imaging, are essential to identify conditions associated with sudden cardiac death. Among young adults (18–35 years), sudden cardiac death most commonly results from a previously undiagnosed congenital or hereditary condition, such as coronary artery anomalies and inherited cardiomyopathies (eg, hypertrophic cardiomyopathy, arrhythmogenic right ventricular cardiomyopathy [ARVC], dilated cardiomyopathy, and noncompaction cardiomyopathy). Overall, the most common causes of sudden cardiac death in young adults are, in descending order of frequency, hypertrophic cardiomyopathy, coronary artery anomalies with an interarterial or intramural course, and ARVC. Often, sudden cardiac death is precipitated by ventricular tachycardia or fibrillation and may be prevented with an implantable cardioverter defibrillator (ICD). Risk stratification to determine the need for an ICD is challenging and involves imaging, particularly echocardiography and cardiac magnetic resonance (MR) imaging. Coronary artery anomalies, a diverse group of congenital disorders with a variable manifestation, may be depicted at coronary computed tomographic angiography or MR angiography. A thorough understanding of clinical risk stratification, imaging features, and complementary diagnostic tools for the evaluation of cardiac disorders that may lead to sudden cardiac death is essential to effectively use imaging to guide diagnosis and therapy.",
+				"libraryCatalog": "RSNA Journals",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Congenital and Hereditary Causes of Sudden Cardiac Death in Young Adults"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://pubs.rsna.org/action/doSearch?SeriesKey=&AllField=cardiac",
 		"items": "multiple"
 	}
 ]

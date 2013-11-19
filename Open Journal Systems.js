@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-06-08 14:00:21"
+	"lastUpdated": "2013-11-18 23:07:36"
 }
 
 function detectWeb(doc, url) {
@@ -89,57 +89,6 @@ var testCases = [
 				"publicationTitle": "AAPP | Physical, Mathematical, and Natural Sciences",
 				"date": "2012/06/08",
 				"volume": "90"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://epress.lib.uts.edu.au/journals/index.php/ijcre/article/view/2382",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "Cheryl A.",
-						"lastName": "Hyde",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Karen",
-						"lastName": "Hopkins",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Megan",
-						"lastName": "Meyer",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					}
-				],
-				"rights": "Authors submitting articles to UTSePress publications agree to assign a limited license to UTSePress if and when the manuscript is accepted for publication. This license allows UTSePress to publish a manuscript in a given issue.\n\nArticles published by UTSePress are protected by copyright which is retained by the authors who assert their moral rights. Authors control translation and reproduction rights to their works published by UTSePress.\n\nUTSePress publications are copyright and all rights are reserved worldwide. Downloads of specific portions of them are permitted for personal use only, not for commercial use or resale. Permissions to reprint or use any materials should be directed to UTSePress.",
-				"language": "en",
-				"issue": "1",
-				"abstractNote": "This article examines the benefits and limitations of ‘loosely-coupled’ research collaborations between university faculty and 12 grassroots community-based organisations (CBOs). The authors assert that community-based research projects that develop the knowledge base within CBOs, and can be described as ‘pre-capacity building’ work, can be an important stepping stone to the subsequent development of more formal and strategic capacity-building partnership ventures. However, such projects must be approached carefully with a clear understanding of the ‘threshold dimensions’ that must be met before proceeding with any collaboration. Written as a cautionary tale, the authors identify some of the problems that arise when the threshold stage is poorly executed, and more generally speak to the dangers of initiating even loosely-coupled collaborations in the absence of an explicit and well-established campus commitment to and support for community engagement and partnerships. \n\nKeywords: Community capacity-building, community-university partnerships, community research, collaboration",
-				"ISSN": "1836-3393",
-				"url": "http://epress.lib.uts.edu.au/journals/index.php/ijcre/article/view/2382",
-				"libraryCatalog": "epress.lib.uts.edu.au",
-				"shortTitle": "Pre-capacity building in loosely-coupled collaborations",
-				"title": "Pre-capacity building in loosely-coupled collaborations: Setting the stage for future initiatives",
-				"publicationTitle": "Gateways: International Journal of Community Research and Engagement",
-				"date": "2012/08/24",
-				"volume": "5",
-				"pages": "76–97"
 			}
 		]
 	},

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-02-28 20:40:13"
+	"lastUpdated": "2013-11-18 23:58:05"
 }
 
 function detectWeb(doc, url) {
@@ -90,14 +90,16 @@ function scrape(doc) {
 		}
 	
 	}
-	var inventors = ZU.xpath(doc, '//th[contains(text(), "Inventors")]/following-sibling::td/b');
+	var inventors = ZU.xpath(doc, '//td[contains(text(), "Inventors")]/following-sibling::td/b');
  	var inventor;
+
 	for (i in inventors){
-		var inventor = inventors[i].textContent.replace(/;/, ",")
+		Z.debug( inventors[i].textContent)
+		var inventor = inventors[i].textContent.replace(/^\s*;\s*/, "").replace(/;/, ",")
 		newItem.creators.push(ZU.cleanAuthor(inventor, "inventor", true))
 	}
 	
-	var assignee = ZU.xpathText(doc, '//th[contains(text(), "Assignee")]/following-sibling::td/b');
+	var assignee = ZU.xpathText(doc, '//td[contains(text(), "Assignee")]/following-sibling::td/b');
 	newItem.assignee = assignee;
 //References currenlty broken
 	//newItem.references = tmpRefs;
@@ -177,7 +179,18 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "patent",
-				"creators": [],
+				"creators": [
+					{
+						"firstName": "Graeme John",
+						"lastName": "Proudler",
+						"creatorType": "inventor"
+					},
+					{
+						"firstName": "Chris I.",
+						"lastName": "Dalton",
+						"creatorType": "inventor"
+					}
+				],
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-09-26 20:04:39"
+	"lastUpdated": "2013-11-18 23:02:45"
 }
 
 /*
@@ -95,12 +95,7 @@ function referURL(url){
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://prism.talis.com/cityoflondon/items?query=argentina",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://prism.talis.com/cityoflondon/items/169754?query=mahoney&resultsUri=items%3Fquery%3Dmahoney",
+		"url": "http://capitadiscovery.co.uk/cityoflondon/items/169754?outdated=true&query=mahoney&resultsUri=items%3Fquery%3Dmahoney",
 		"items": [
 			{
 				"itemType": "book",
@@ -123,7 +118,7 @@ var testCases = [
 				"place": "(London",
 				"publisher": "Wine and Spirit Publications",
 				"date": "1969",
-				"url": "http://prism.talis.com/cityoflondon/items/169754",
+				"url": "http://capitadiscovery.co.uk/cityoflondon/items/169754",
 				"language": "English",
 				"libraryCatalog": "Library Catalog (Talis Prism 2)",
 				"accessDate": "CURRENT_TIMESTAMP"
@@ -132,12 +127,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://prism.talis.com/surrey-ac/items?query=borges",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://prism.talis.com/surrey-ac/items/199580?query=borges&resultsUri=items%3Fquery%3Dborges",
+		"url": "http://capitadiscovery.co.uk/surrey-ac/items/199580?outdated=true&query=borges&resultsUri=items%3Fquery%3Dborges",
 		"items": [
 			{
 				"itemType": "book",
@@ -168,12 +158,22 @@ var testCases = [
 				"publisher": "Calder",
 				"date": "1965 1985",
 				"ISBN": "0714540838",
-				"url": "http://prism.talis.com/surrey-ac/items/199580",
+				"url": "http://capitadiscovery.co.uk/surrey-ac/items/199580",
 				"language": "English",
 				"libraryCatalog": "Library Catalog (Talis Prism 2)",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://capitadiscovery.co.uk/surrey-ac/items?query=borges",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://capitadiscovery.co.uk/cityoflondon/items?query=argentina",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

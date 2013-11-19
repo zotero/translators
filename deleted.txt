@@ -1,4 +1,4 @@
-27  # Increment number when modifying file
+28  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -64,4 +64,5 @@ daa26181-71d4-48ef-8cac-54c06ff4c20e # Citebase - no longer exists
 cae7d3ec-bc8d-465b-974f-8b0dcfe24290 # BIUM - moved to a (supported) Dynix catalog
 e9632edc-8032-4dc5-b2d4-284d481583e6 # SAE Inernational - replaced by SAE Papers
 4f62425a-c99f-4ce1-b7c1-5a3ac0d636a3 # Afro-Europa - Journal Defunct
-19643c25-a4b2-480d-91b7-4e0b761fb6ad # ScientificCommons - page defunct 
+19643c25-a4b2-480d-91b7-4e0b761fb6ad # ScientificCommons - page defunct
+4c9dbe33-e64f-4536-a02f-f347fa1f187d # BioInfoBank - page defunct
