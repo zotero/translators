@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 5,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-07-31 13:27:26"
+	"lastUpdated": "2013-11-20 13:47:41"
 }
 
 function detectWeb(doc, url) {
@@ -252,6 +252,9 @@ function processTag(item, field, content) {
 		item.pages = content;
 	} else if (field == "EP") {
 		item.pages += "-" + content;
+	} else if (field == "AR") {
+		//save articleNumber - we're going to use that where we don't have pages & discard later on
+		item.articleNumber = content; ;
 	} else if (field == "AB") {
 		content = content.replace(/\s\s+/g, " ");
 		item.abstractNote = content;
@@ -306,6 +309,11 @@ function completeItem(item) {
 				item.creators[i].creatorType = "inventor";
 			}
 		}
+	}
+	
+	if (item.articleNumber){
+		if (!item.pages) item.pages = item.articleNumber;
+		delete item.articleNumber
 	}
 	
 	// Fix caps, trim in various places
