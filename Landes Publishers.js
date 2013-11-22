@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-11-19 16:21:11"
+	"lastUpdated": "2013-11-19 20:51:38"
 }
 
 /*
@@ -84,7 +84,7 @@ function doWeb(doc,url)
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.landesbioscience.com/search/?q_terms=cell&q_author=",
+		"url": "https://www.landesbioscience.com/search/?q_terms=cell&q_author=",
 		"items": "multiple"
 	},
 	{
@@ -141,7 +141,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.landesbioscience.com/journals/cc/toc/volume/4/issue/5/",
+		"url": "https://www.landesbioscience.com/journals/cc/toc/volume/4/issue/5/",
 		"items": "multiple"
 	}
 ]

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-11-18 20:47:52"
+	"lastUpdated": "2013-11-19 20:51:56"
 }
 
 /*
@@ -484,90 +484,12 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://radiographics.rsna.org/content/10/1/41.full.pdf+html?frame=sidebar",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "M. L.",
-						"lastName": "Giger",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "K.",
-						"lastName": "Doi",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "H.",
-						"lastName": "MacMahon",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "C. E.",
-						"lastName": "Metz",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "F. F.",
-						"lastName": "Yin",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
-				"title": "Pulmonary nodules: computer-aided detection in digital chest images.",
-				"publisher": "Radiological Society of North America",
-				"institution": "Radiological Society of North America",
-				"company": "Radiological Society of North America",
-				"label": "Radiological Society of North America",
-				"distributor": "Radiological Society of North America",
-				"date": "01/01/1990",
-				"language": "en",
-				"publicationTitle": "Radiographics",
-				"journalAbbreviation": "Radiographics",
-				"volume": "10",
-				"issue": "1",
-				"url": "http://radiographics.rsna.org/content/10/1/41",
-				"pages": "41-51",
-				"ISSN": "0271-5333, 1527-1323",
-				"extra": "PMID: 2296696",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "radiographics.rsna.org",
-				"abstractNote": "Currently, radiologists fail to detect pulmonary nodules in up to 30% of cases with actually positive findings. Diagnoses may be missed due to camouflaging effects of anatomic background, subjective and varying decision criteria, or distractions in clinical situations. We developed a computerized method to detect locations of lung nodules in digital chest images. The method is based on a difference-image approach and feature-extraction techniques, including growth, slope, and profile tests. Computer results were used to alert 12 radiologists to possible nodule locations in 60 clinical cases. Preliminary results suggest that computer aid can improve the detection performance of radiologists.",
-				"shortTitle": "Pulmonary nodules"
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "http://bjaesthetics.oxfordjournals.org/search?fulltext=art&submit=yes&x=0&y=0",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "http://bjaesthetics.oxfordjournals.org/content/current",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://radiographics.rsna.org/cgi/collection/professional",
 		"items": "multiple"
 	},
 	{
