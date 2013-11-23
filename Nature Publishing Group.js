@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-09-27 02:05:56"
+	"lastUpdated": "2013-11-23 02:40:47"
 }
 
 /**
@@ -216,18 +216,26 @@ function fixCaps(str) {
 //get abstract
 function getAbstract(doc) {
 	var abstractLocations = [
-	//e.g. 'lead' http://www.nature.com/emboj/journal/v31/n1/full/emboj2011343a.html
-	//e.g. 'first_paragraph' http://www.nature.com/emboj/journal/vaop/ncurrent/full/emboj201239a.html
-	'//p[contains(@class,"lead") or contains(@class,"first_paragraph")]',
-	//e.g.
-	'//div[@id="abs"]/*[self::div[not(contains(@class, "keyw-abbr"))] or self::p]',
-	//e.g. 'first-paragraph' http://www.nature.com/nature/journal/v481/n7381/full/nature10669.html
-	//e.g. 'standfirst' http://www.nature.com/nature/journal/v481/n7381/full/481237a.html
-	'//div[@id="first-paragraph" or @class="standfirst"]/p',
-	//e.g. http://www.nature.com/nature/journal/v481/n7381/full/nature10728.html
-	'//div[contains(@id,"abstract")]/div[@class="content"]/p',
-	//e.g. http://www.nature.com/ng/journal/v38/n8/abs/ng1845.html
-	'//span[@class="articletext" and ./preceding-sibling::*[1][name()="a" or name()="A"][@name="abstract"]]'];
+		//e.g. 'lead' http://www.nature.com/emboj/journal/v31/n1/full/emboj2011343a.html
+		//e.g. 'first_paragraph' http://www.nature.com/emboj/journal/vaop/ncurrent/full/emboj201239a.html
+		'//p[contains(@class,"lead") or contains(@class,"first_paragraph")]',
+		
+		//e.g. http://www.nature.com/nprot/journal/v8/n11/full/nprot.2013.143.html
+		'//div[@id="abstract"]/div[@class="content"]/p',
+		
+		//e.g.
+		'//div[@id="abs"]/*[self::div[not(contains(@class, "keyw-abbr"))] or self::p]',
+		
+		//e.g. 'first-paragraph' http://www.nature.com/nature/journal/v481/n7381/full/nature10669.html
+		//e.g. 'standfirst' http://www.nature.com/nature/journal/v481/n7381/full/481237a.html
+		'//div[@id="first-paragraph" or @class="standfirst"]/p',
+		
+		//e.g. http://www.nature.com/nature/journal/v481/n7381/full/nature10728.html
+		'//div[contains(@id,"abstract")]/div[contains(@class,"content")]/p',
+		
+		//e.g. http://www.nature.com/ng/journal/v38/n8/abs/ng1845.html
+		'//span[@class="articletext" and ./preceding-sibling::*[1][name()="a" or name()="A"][@name="abstract"]]'
+	];
 
 	var paragraphs = [];
 
@@ -314,17 +322,7 @@ function scrapeEM(doc, url, next) {
 			item.abstractNote = abstract;
 		}
 
-		var keywords = getKeywords(doc);
-		if(keywords) item.tags = keywords;
-		else if(item.tags) {
-			keywords = [];
-			//sometimes keywords inside meta tags are not split properly
-			//they have both semicolon and comma. We will also split by comma
-			for(var i=0, n=item.tags.length; i<n; i++) {
-				keywords = keywords.concat(item.tags[i].split(/\s*,\s*/));
-			}
-			item.tags = keywords;
-		}
+		item.tags = getKeywords(doc) || [];
 
 		if (item.notes) item.notes = [];
 		
@@ -1099,18 +1097,11 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"ONC",
-					"apoptosis",
-					"apoptosis",
-					"cancer",
-					"cell cycle",
-					"growth factor receptors",
-					"growth factors",
-					"growth regulatory genes",
-					"molecular oncology",
-					"oncogenes",
-					"tumor suppressor genes",
-					"tumor viruses"
+					"gastric cancer",
+					"cancer stem cells",
+					"CD90",
+					"ERBB2",
+					"trastuzumab (herceptin)"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -1122,20 +1113,28 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
+				"title": "Trastuzumab (herceptin) targets gastric cancer stem cells characterized by CD90 phenotype",
+				"publicationTitle": "Oncogene",
 				"rights": "© 2011 Nature Publishing Group",
+				"volume": "31",
 				"issue": "6",
+				"number": "6",
+				"patentNumber": "6",
+				"pages": "671-682",
+				"publisher": "Nature Publishing Group",
+				"institution": "Nature Publishing Group",
+				"company": "Nature Publishing Group",
+				"label": "Nature Publishing Group",
+				"distributor": "Nature Publishing Group",
+				"date": "February 9, 2012",
+				"ISSN": "0950-9232",
 				"language": "en",
 				"DOI": "10.1038/onc.2011.282",
 				"url": "http://www.nature.com/onc/journal/v31/n6/full/onc2011282a.html",
 				"abstractNote": "Identification and characterization of cancer stem cells (CSCs) in gastric cancer are difficult owing to the lack of specific markers and consensus methods. In this study, we show that cells with the CD90 surface marker in gastric tumors could be enriched under non-adherent, serum-free and sphere-forming conditions. These CD90+ cells possess a higher ability to initiate tumor in vivo and could re-establish the cellular hierarchy of tumors from single-cell implantation, demonstrating their self-renewal properties. Interestingly, higher proportion of CD90+ cells correlates with higher in vivo tumorigenicity of gastric primary tumor models. In addition, it was found that ERBB2 was overexpressed in about 25% of the gastric primary tumor models, which correlates with the higher level of CD90 expression in these tumors. Trastuzumab (humanized anti-ERBB2 antibody) treatment of high-tumorigenic gastric primary tumor models could reduce the CD90+ population in tumor mass and suppress tumor growth when combined with traditional chemotherapy. Moreover, tumorigenicity of tumor cells could also be suppressed when trastuzumab treatment starts at the same time as cell implantation. Therefore, we have identified a CSC population in gastric primary tumors characterized by their CD90 phenotype. The finding that trastuzumab targets the CSC population in gastric tumors suggests that ERBB2 signaling has a role in maintaining CSC populations, thus contributing to carcinogenesis and tumor invasion. In conclusion, the results from this study provide new insights into the gastric tumorigenic process and offer potential implications for the development of anticancer drugs as well as therapeutic treatment of gastric cancers.",
 				"libraryCatalog": "www.nature.com",
-				"journalAbbreviation": "Oncogene",
-				"ISSN": "0950-9232",
-				"title": "Trastuzumab (herceptin) targets gastric cancer stem cells characterized by CD90 phenotype",
-				"publicationTitle": "Oncogene",
-				"volume": "31",
-				"pages": "671-682",
-				"date": "February 9, 2012"
+				"accessDate": "CURRENT_TIMESTAMP",
+				"journalAbbreviation": "Oncogene"
 			}
 		]
 	},
@@ -1783,59 +1782,7 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [
-					"DNA",
-					"Nature",
-					"RNA",
-					"astronomy",
-					"astrophysics",
-					"biochemistry",
-					"bioinformatics",
-					"biology",
-					"biotechnology",
-					"cancer",
-					"cell cycle",
-					"cell signalling",
-					"climate change",
-					"computational biology",
-					"development",
-					"developmental biology",
-					"drug discovery",
-					"earth science",
-					"ecology",
-					"environmental science",
-					"evolution",
-					"evolutionary biology",
-					"functional genomics",
-					"genetics",
-					"genomics",
-					"geophysics",
-					"immunology",
-					"interdisciplinary science",
-					"life",
-					"marine biology",
-					"materials science",
-					"medical research",
-					"medicine",
-					"metabolomics",
-					"molecular biology",
-					"molecular interactions",
-					"nanotechnology",
-					"neurobiology",
-					"neuroscience",
-					"palaeobiology",
-					"pharmacology",
-					"physics",
-					"proteomics",
-					"quantum physics",
-					"science",
-					"science news",
-					"science policy",
-					"signal transduction",
-					"structural biology",
-					"systems biology",
-					"transcriptomics"
-				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [
 					{
@@ -1846,20 +1793,28 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"rights": "© 2009 Nature Publishing Group",
-				"issue": "7269",
-				"language": "en",
-				"DOI": "10.1038/nature08497",
-				"abstractNote": "Genomes are organized into high-level three-dimensional structures, and DNA elements separated by long genomic distances can in principle interact functionally. Many transcription factors bind to regulatory DNA elements distant from gene promoters. Although distal binding sites have been shown to regulate transcription by long-range chromatin interactions at a few loci, chromatin interactions and their impact on transcription regulation have not been investigated in a genome-wide manner. Here we describe the development of a new strategy, chromatin interaction analysis by paired-end tag sequencing (ChIA-PET) for the de novo detection of global chromatin interactions, with which we have comprehensively mapped the chromatin interaction network bound by oestrogen receptor α (ER-α) in the human genome. We found that most high-confidence remote ER-α-binding sites are anchored at gene promoters through long-range chromatin interactions, suggesting that ER-α functions by extensive chromatin looping to bring genes together for coordinated transcriptional regulation. We propose that chromatin interactions constitute a primary mechanism for regulating transcription in mammalian genomes.",
-				"url": "http://www.nature.com/nature/journal/v462/n7269/full/nature08497.html",
-				"libraryCatalog": "www.nature.com",
-				"journalAbbreviation": "Nature",
-				"ISSN": "0028-0836",
 				"title": "An oestrogen-receptor-α-bound human chromatin interactome",
 				"publicationTitle": "Nature",
+				"rights": "© 2009 Nature Publishing Group",
 				"volume": "462",
+				"issue": "7269",
+				"number": "7269",
+				"patentNumber": "7269",
 				"pages": "58-64",
-				"date": "November 5, 2009"
+				"publisher": "Nature Publishing Group",
+				"institution": "Nature Publishing Group",
+				"company": "Nature Publishing Group",
+				"label": "Nature Publishing Group",
+				"distributor": "Nature Publishing Group",
+				"date": "November 5, 2009",
+				"ISSN": "0028-0836",
+				"language": "en",
+				"DOI": "10.1038/nature08497",
+				"url": "http://www.nature.com/nature/journal/v462/n7269/full/nature08497.html",
+				"abstractNote": "Genomes are organized into high-level three-dimensional structures, and DNA elements separated by long genomic distances can in principle interact functionally. Many transcription factors bind to regulatory DNA elements distant from gene promoters. Although distal binding sites have been shown to regulate transcription by long-range chromatin interactions at a few loci, chromatin interactions and their impact on transcription regulation have not been investigated in a genome-wide manner. Here we describe the development of a new strategy, chromatin interaction analysis by paired-end tag sequencing (ChIA-PET) for the de novo detection of global chromatin interactions, with which we have comprehensively mapped the chromatin interaction network bound by oestrogen receptor α (ER-α) in the human genome. We found that most high-confidence remote ER-α-binding sites are anchored at gene promoters through long-range chromatin interactions, suggesting that ER-α functions by extensive chromatin looping to bring genes together for coordinated transcriptional regulation. We propose that chromatin interactions constitute a primary mechanism for regulating transcription in mammalian genomes.",
+				"libraryCatalog": "www.nature.com",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"journalAbbreviation": "Nature"
 			}
 		]
 	},
@@ -1903,20 +1858,28 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
+				"title": "Structure of the SAM-II riboswitch bound to S-adenosylmethionine",
+				"publicationTitle": "Nature Structural & Molecular Biology",
 				"rights": "© 2008 Nature Publishing Group",
+				"volume": "15",
 				"issue": "2",
+				"number": "2",
+				"patentNumber": "2",
+				"pages": "177-182",
+				"publisher": "Nature Publishing Group",
+				"institution": "Nature Publishing Group",
+				"company": "Nature Publishing Group",
+				"label": "Nature Publishing Group",
+				"distributor": "Nature Publishing Group",
+				"date": "February 2008",
+				"ISSN": "1545-9993",
 				"language": "en",
 				"DOI": "10.1038/nsmb.1371",
 				"url": "http://www.nature.com/nsmb/journal/v15/n2/full/nsmb.1371.html",
+				"abstractNote": "In bacteria, numerous genes harbor regulatory elements in the 5' untranslated regions of their mRNA, termed riboswitches, which control gene expression by binding small-molecule metabolites. These sequences influence the secondary and tertiary structure of the RNA in a ligand-dependent manner, thereby directing its transcription or translation. The crystal structure of an S-adenosylmethionine–responsive riboswitch found predominantly in proteobacteria, SAM-II, has been solved to reveal a second means by which RNA interacts with this important cellular metabolite. Notably, this is the first structure of a complete riboswitch containing all sequences associated with both the ligand binding aptamer domain and the regulatory expression platform. Chemical probing of this RNA in the absence and presence of ligand shows how the structure changes in response to S-adenosylmethionine to sequester the ribosomal binding site and affect translational gene regulation.",
 				"libraryCatalog": "www.nature.com",
-				"abstractNote": "In bacteria, numerous genes harbor regulatory elements in the 5′ untranslated regions of their mRNA, termed riboswitches, which control gene expression by binding small-molecule metabolites. These sequences influence the secondary and tertiary structure of the RNA in a ligand-dependent manner, thereby directing its transcription or translation. The crystal structure of an S-adenosylmethionine–responsive riboswitch found predominantly in proteobacteria, SAM-II, has been solved to reveal a second means by which RNA interacts with this important cellular metabolite. Notably, this is the first structure of a complete riboswitch containing all sequences associated with both the ligand binding aptamer domain and the regulatory expression platform. Chemical probing of this RNA in the absence and presence of ligand shows how the structure changes in response to S-adenosylmethionine to sequester the ribosomal binding site and affect translational gene regulation.",
-				"journalAbbreviation": "Nat Struct Mol Biol",
-				"ISSN": "1545-9993",
-				"title": "Structure of the SAM-II riboswitch bound to S-adenosylmethionine",
-				"publicationTitle": "Nature Structural & Molecular Biology",
-				"volume": "15",
-				"pages": "177-182",
-				"date": "February 2008"
+				"accessDate": "CURRENT_TIMESTAMP",
+				"journalAbbreviation": "Nat Struct Mol Biol"
 			}
 		]
 	},
@@ -2105,77 +2068,34 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [
-					"DNA",
-					"Nature",
-					"RNA",
-					"astronomy",
-					"astrophysics",
-					"biochemistry",
-					"bioinformatics",
-					"biology",
-					"biotechnology",
-					"cancer",
-					"cell cycle",
-					"cell signalling.",
-					"climate change",
-					"computational biology",
-					"development",
-					"developmental biology",
-					"drug discovery",
-					"earth science",
-					"ecology",
-					"environmental science",
-					"evolution",
-					"evolutionary biology",
-					"functional genomics",
-					"genetics",
-					"genomics",
-					"geophysics",
-					"immunology",
-					"interdisciplinary science",
-					"life",
-					"marine biology",
-					"materials science",
-					"medical research",
-					"medicine",
-					"metabolomics",
-					"molecular biology",
-					"molecular interactions",
-					"nanotechnology",
-					"neurobiology",
-					"neuroscience",
-					"palaeobiology",
-					"pharmacology",
-					"physics",
-					"proteomics",
-					"quantum physics",
-					"science",
-					"science news",
-					"science policy",
-					"signal transduction",
-					"structural biology",
-					"systems biology",
-					"transcriptomics"
-				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"rights": "© 2012 Nature Publishing Group",
-				"issue": "7381",
-				"language": "en",
-				"DOI": "10.1038/nature10669",
-				"abstractNote": "The mass function of dwarf satellite galaxies that are observed around Local Group galaxies differs substantially from simulations based on cold dark matter: the simulations predict many more dwarf galaxies than are seen. The Local Group, however, may be anomalous in this regard.",
-				"url": "http://www.nature.com/nature/journal/v481/n7381/fp/nature10669_ja.html?lang=ja",
-				"libraryCatalog": "www.nature.com",
 				"title": "Gravitational detection of a low-mass dark satellite galaxy at cosmological distance",
 				"publicationTitle": "Nature",
+				"rights": "© 2012 Nature Publishing Group",
 				"volume": "481",
+				"issue": "7381",
+				"number": "7381",
+				"patentNumber": "7381",
 				"pages": "341-343",
-				"date": "2012-01-18"
+				"publisher": "Nature Publishing Group",
+				"institution": "Nature Publishing Group",
+				"company": "Nature Publishing Group",
+				"label": "Nature Publishing Group",
+				"distributor": "Nature Publishing Group",
+				"date": "2012-01-19",
+				"ISSN": "0028-0836",
+				"language": "en",
+				"DOI": "10.1038/nature10669",
+				"url": "http://www.nature.com/nature/journal/v481/n7381/fp/nature10669_ja.html?lang=ja",
+				"abstractNote": "The mass function of dwarf satellite galaxies that are observed around Local Group galaxies differs substantially from simulations based on cold dark matter: the simulations predict many more dwarf galaxies than are seen. The Local Group, however, may be anomalous in this regard.",
+				"libraryCatalog": "www.nature.com",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -2254,37 +2174,28 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Gene Expression Omnibus entry (GSE43857)",
-						"type": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Gene Expression Omnibus entry (GSE43858)",
-						"type": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Sequence Read Archive entry (SRA012474)",
-						"type": "text/html",
-						"snapshot": false
 					}
 				],
+				"title": "Patterns of population epigenomic diversity",
+				"publicationTitle": "Nature",
 				"rights": "© 2013 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
+				"volume": "495",
+				"pages": "193-198",
+				"publisher": "Nature Publishing Group",
+				"institution": "Nature Publishing Group",
+				"company": "Nature Publishing Group",
+				"label": "Nature Publishing Group",
+				"distributor": "Nature Publishing Group",
+				"date": "March 14, 2013",
+				"ISSN": "0028-0836",
 				"language": "en",
 				"issue": "7440",
 				"DOI": "10.1038/nature11968",
 				"url": "http://www.nature.com/nature/journal/v495/n7440/full/nature11968.html",
 				"libraryCatalog": "www.nature.com",
+				"accessDate": "CURRENT_TIMESTAMP",
 				"abstractNote": "Natural epigenetic variation provides a source for the generation of phenotypic diversity, but to understand its contribution to such diversity, its interaction with genetic variation requires further investigation. Here we report population-wide DNA sequencing of genomes, transcriptomes and methylomes of wild Arabidopsis thaliana accessions. Single cytosine methylation polymorphisms are not linked to genotype. However, the rate of linkage disequilibrium decay amongst differentially methylated regions targeted by RNA-directed DNA methylation is similar to the rate for single nucleotide polymorphisms. Association analyses of these RNA-directed DNA methylation regions with genetic variants identified thousands of methylation quantitative trait loci, which revealed the population estimate of genetically dependent methylation variation. Analysis of invariably methylated transposons and genes across this population indicates that loci targeted by RNA-directed DNA methylation are epigenetically activated in pollen and seeds, which facilitates proper development of these structures.",
-				"journalAbbreviation": "Nature",
-				"ISSN": "0028-0836",
-				"title": "Patterns of population epigenomic diversity",
-				"publicationTitle": "Nature",
-				"volume": "495",
-				"pages": "193-198",
-				"date": "March 14, 2013"
+				"journalAbbreviation": "Nature"
 			}
 		]
 	},
@@ -2338,42 +2249,28 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Protein Data Bank entry (3W5D)",
-						"type": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Protein Data Bank entry (3W5C)",
-						"type": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Protein Data Bank entry (3W5A)",
-						"type": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Protein Data Bank entry (3W5B)",
-						"type": "text/html",
-						"snapshot": false
 					}
 				],
+				"title": "Crystal structures of the calcium pump and sarcolipin in the Mg2+-bound E1 state",
+				"publicationTitle": "Nature",
 				"rights": "© 2013 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
+				"volume": "495",
+				"pages": "260-264",
+				"publisher": "Nature Publishing Group",
+				"institution": "Nature Publishing Group",
+				"company": "Nature Publishing Group",
+				"label": "Nature Publishing Group",
+				"distributor": "Nature Publishing Group",
+				"date": "March 14, 2013",
+				"ISSN": "0028-0836",
 				"language": "en",
 				"issue": "7440",
 				"DOI": "10.1038/nature11899",
-				"abstractNote": "P-type ATPases are ATP-powered ion pumps that establish ion concentration gradients across biological membranes, and are distinct from other ATPases in that the reaction cycle includes an autophosphorylation step. The best studied is Ca2+-ATPase from muscle sarcoplasmic reticulum (SERCA1a), a Ca2+ pump that relaxes muscle cells after contraction, and crystal structures have been determined for most of the reaction intermediates. An important outstanding structure is that of the E1 intermediate, which has empty high-affinity Ca2+-binding sites ready to accept new cytosolic Ca2+. In the absence of Ca2+ and at pH 7 or higher, the ATPase is predominantly in E1, not in E2 (low affinity for Ca2+), and if millimolar Mg2+ is present, one Mg2+ is expected to occupy one of the Ca2+-binding sites with a millimolar dissociation constant. This Mg2+ accelerates the reaction cycle, not permitting phosphorylation without Ca2+ binding. Here we describe the crystal structure of native SERCA1a (from rabbit) in this E1·Mg2+ state at 3.0 Å resolution in addition to crystal structures of SERCA1a in E2 free from exogenous inhibitors, and address the structural basis of the activation signal for phosphoryl transfer. Unexpectedly, sarcolipin, a small regulatory membrane protein of Ca2+-ATPase, is bound, stabilizing the E1·Mg2+ state. Sarcolipin is a close homologue of phospholamban, which is a critical mediator of β-adrenergic signal in Ca2+ regulation in heart (for reviews, see, for example, refs 8–10), and seems to play an important role in muscle-based thermogenesis. We also determined the crystal structure of recombinant SERCA1a devoid of sarcolipin, and describe the structural basis of inhibition by sarcolipin/phospholamban. Thus, the crystal structures reported here fill a gap in the structural elucidation of the reaction cycle and provide a solid basis for understanding the physiological regulation of the calcium pump.",
 				"url": "http://www.nature.com/nature/journal/v495/n7440/full/nature11899.html",
+				"abstractNote": "P-type ATPases are ATP-powered ion pumps that establish ion concentration gradients across biological membranes, and are distinct from other ATPases in that the reaction cycle includes an autophosphorylation step. The best studied is Ca2+-ATPase from muscle sarcoplasmic reticulum (SERCA1a), a Ca2+ pump that relaxes muscle cells after contraction, and crystal structures have been determined for most of the reaction intermediates. An important outstanding structure is that of the E1 intermediate, which has empty high-affinity Ca2+-binding sites ready to accept new cytosolic Ca2+. In the absence of Ca2+ and at pH 7 or higher, the ATPase is predominantly in E1, not in E2 (low affinity for Ca2+), and if millimolar Mg2+ is present, one Mg2+ is expected to occupy one of the Ca2+-binding sites with a millimolar dissociation constant. This Mg2+ accelerates the reaction cycle, not permitting phosphorylation without Ca2+ binding. Here we describe the crystal structure of native SERCA1a (from rabbit) in this E1·Mg2+ state at 3.0 Å resolution in addition to crystal structures of SERCA1a in E2 free from exogenous inhibitors, and address the structural basis of the activation signal for phosphoryl transfer. Unexpectedly, sarcolipin, a small regulatory membrane protein of Ca2+-ATPase, is bound, stabilizing the E1·Mg2+ state. Sarcolipin is a close homologue of phospholamban, which is a critical mediator of β-adrenergic signal in Ca2+ regulation in heart (for reviews, see, for example, refs 8–10), and seems to play an important role in muscle-based thermogenesis. We also determined the crystal structure of recombinant SERCA1a devoid of sarcolipin, and describe the structural basis of inhibition by sarcolipin/phospholamban. Thus, the crystal structures reported here fill a gap in the structural elucidation of the reaction cycle and provide a solid basis for understanding the physiological regulation of the calcium pump.",
 				"libraryCatalog": "www.nature.com",
-				"journalAbbreviation": "Nature",
-				"ISSN": "0028-0836",
-				"title": "Crystal structures of the calcium pump and sarcolipin in the Mg2+-bound E1 state",
-				"publicationTitle": "Nature",
-				"volume": "495",
-				"pages": "260-264",
-				"date": "March 14, 2013"
+				"accessDate": "CURRENT_TIMESTAMP",
+				"journalAbbreviation": "Nature"
 			}
 		]
 	},
