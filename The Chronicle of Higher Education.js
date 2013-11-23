@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-10-22 15:14:17"
+	"lastUpdated": "2013-11-23 10:54:53"
 }
 
 /*
@@ -24,7 +24,7 @@ function detectWeb(doc, url) {
 	   of the translator; they don't appear to still be on the Chronicle site, but
 	   they might persist in older URLs. */
 	var articleRegexp = /\/(daily|weekly|article|blogPost|blogs\/\w+)\/[^/]+\// ;
-	if(articleRegexp.test(url)) {
+	if(articleRegexp.test(url) && ZU.xpathText(doc, '//h1')) {
 		var section = url.match(articleRegexp);
 		switch (section[1]) {
 			case "weekly":
