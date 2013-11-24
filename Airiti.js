@@ -9,10 +9,13 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-03-21 05:23:28"
+	"lastUpdated": "2013-11-21 05:23:28"
 }
 
 function detectWeb(doc, url) {
+	//currently broken. Disable
+	return;
+	
 	var icon = ZU.xpathText(doc, '//div[@id="main_gcs7"]//tbody/tr[2]\
 									//div[starts-with(@class, "icon_")]/@class');
 	if(!icon) return;
@@ -84,6 +87,9 @@ function doWeb(doc, url) {
 }
 
 function detectSearch(item) {
+	//currently broken. Disable
+	return false;
+	
 	//accept all valid DOIs
 	if(!item.DOI || !item.DOI.match(/^10\.[^/]+\/.+/)) {
 		return false;
