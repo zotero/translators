@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 8,
 	"browserSupport": "gcsi",
-	"lastUpdated": "2012-04-12 01:51:21"
+	"lastUpdated": "2013-10-23 07:30:55"
 }
 
 var typeMap = {
@@ -52,52 +52,123 @@ function getValue(parentNode, node) {
 }
 
 function detectSearch(item) {
-	if(!item.DOI)
-		return;
-
-	//we should detect party and user but throw an error later
-	//this way other translators don't need to process the DOI
-	var prefix = item.DOI.split('/')[0];
-	if(prefix == '10.5237' || prefix == '10.5238' || prefix == '10.5240') {
-		return true;
+	if(!items) return false;
+	
+	if(!items.directSearch) {
+		Z.debug("EIDR: directSearch was not true. Will not attempt to search directly.")
+		return false;
 	}
+	
+	if(typeof items == 'string' || !items.length) items = [items];
+	
+	for(var i=0, n=items.length; i<n; i++) {
+		if(!items[i]) continue;
+		
+		var doi;
+		if( ( items[i].DOI && ( doi = ZU.cleanDOI(items[i].DOI) ) )
+			|| ( typeof items[i] == 'string' && ( doi = ZU.cleanDOI(items[i]) ) ) ) {
+			//we should detect party and user but return an error later
+			//this way other translators don't need to process the DOI
+			var prefix = doi.split('/')[0];
+			if(prefix == '10.5237' || prefix == '10.5238' || prefix == '10.5240') {
+				return true;
+			}
+		}
+	}
+	
+	return false;
 }
 
-function  doSearch(searchItem) {
-	if(!searchItem.DOI)
-		throw new Error("EIDR not specified.");
-	if(!checkEIDR(searchItem.DOI))
-		throw new Error("Invalid EIDR: " + searchItem.DOI);
+/**
+ * Filter out invalid queries
+ */
+function filterQuery(items) {
+	if(!items) return [];
+	
+	if(typeof items == 'string' || !items.length) items = [items];
+	
+	//filter out invalid queries
+	var query = [];
+	var doi;
+	for(var i=0, n=items.length; i<n; i++) {
+		if( ( ( items[i].DOI && ( doi = ZU.cleanDOI(items[i].DOI) ) )
+				|| ( typeof items[i] == 'string' && ( doi = ZU.cleanDOI(items[i]) ) ) )
+			&& checkEIDR(doi) ) {
+			query.push(items[i]);
+		} else {
+			var newItem = new Zotero.Item();
+			newItem._status = 'invalid';
+			newItem._query = items[i];
+			newItem.complete();
+		}
+	}
+	return query;
+}
 
-	var request = 'https://resolve.eidr.org/EIDR/object/' + searchItem.DOI
+function doSearch(items) {
+	var query = filterQuery(items);
+	if(!query.length) return;
+	
+	var dois = [];
+	var queryTracker = {};
+	for(var i=0, n=query.length; i<n; i++) {
+		var doi = ZU.cleanDOI(query[i].DOI || query[i]);
+		if(queryTracker[doi]) continue;
+		
+		queryTracker[doi] = query[i];
+		dois.push(doi);
+	}
+	
+	if(!dois.length) return;
+	
+	processDOIs(dois, queryTracker);
+}
+
+function fail(query, status) {
+	var newItem = new Zotero.Item();
+	newItem._query = query;
+	newItem._status = status;
+	newItem.complete();
+}
+
+function processDOIs(dois, queryTracker) {
+	var doi = dois.pop();
+	var query = queryTracker[doi];
+	
+	var request = 'https://resolve.eidr.org/EIDR/object/' + doi
 					+ '/?type=Full&followAlias=true';
+Z.debug(request);
 	ZU.doGet(request, function(text) {
 		var parser = new DOMParser();
 		var res = parser.parseFromString(text, "application/xml");
 
-		var ns = {  
-      'n' : 'http://www.eidr.org/schema/1.0',  
-      'md': 'http://www.movielabs.com/md'  
-    };  
+		var ns = {
+			'n' : 'http://www.eidr.org/schema/1.0',
+			'md': 'http://www.movielabs.com/md'
+		};
 
 		if(res.getElementsByTagName('Response').length) {
-		
-			throw new Error("Server returned error: ("
+			Z.debug("Server returned error: ("
 				+ getValue(res, 'Code') + ") "
 				+ getValue(res, 'Type'));
+			fail(query, 'fail');
+			return;
 		}
 
 		var base = res.getElementsByTagName('BaseObjectData')[0];
 
-		if(getValue(base, 'StructuralType') != 'Performance') {
+		if(getValue(base, 'StructuralType') != 'Performance'
+			&& getValue(base, 'StructuralType') != 'Abstraction') {
 			Z.debug("Unhandled StructuralType: "
 				+ getValue(base, 'StructuralType'));
+			fail(query, 'unimplemented');
 			return;
 		}
 
 		var type = typeMap[getValue(base,'ReferentType')];
 		if(!type) {
 			Z.debug("Unhandled ReferentType: " + getValue(base,'ReferentType'));
+			fail(query, 'unimplemented');
 			return
 		}
 		var item = new Zotero.Item(type);
@@ -133,7 +204,12 @@ function  doSearch(searchItem) {
 		}
 
 		/**TODO: Handle producers*/
-
+		
+		item.DOI = doi;
+		item._query = query;
+		item._status = 'success';
 		item.complete();
+	}, function() {
+		if(dois.length) processDOIs(dois, queryTracker);
 	});
 }

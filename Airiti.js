@@ -2,30 +2,19 @@
 	"translatorID": "5f0ca39b-898a-4b1e-b98d-8cd0d6ce9801",
 	"label": "Airiti",
 	"creator": "Aurimas Vinckevicius",
-	"target": "https?://([^/]*\\.)?airitilibrary.com/searchdetail.aspx",
+	"target": "https?://(?:[^/]+\\.)?airitilibrary\\.com/Publication/alDetailedMesh",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-03-21 05:23:28"
+	"lastUpdated": "2013-10-23 06:56:26"
 }
 
 function detectWeb(doc, url) {
-	var icon = ZU.xpathText(doc, '//div[@id="main_gcs7"]//tbody/tr[2]\
-									//div[starts-with(@class, "icon_")]/@class');
-	if(!icon) return;
-
-	switch(icon) {
-		case "icon_T2":
-			return "thesis";
-		case "icon_J2":
-			return "journalArticle";
-		case "icon_C2":
-			return "conferencePaper";
-		default:
-			return "journalArticle";
+	if(ZU.xpathText(doc, '/html/head/meta[@name="citation_title"]/@content')) {
+		return 'journalArticle';
 	}
 }
 
@@ -63,46 +52,95 @@ function doWeb(doc, url) {
 			}
 		}
 		
-		var content = doc.getElementById('main_gcs7');
+		delete item.abstractNote;
 		
-		if(!item.DOI) {
-			item.DOI = ZU.xpathText(content,
-				'(.//tr[./td[1][text()="DOI"]]/td[2]//a)[1]');
-		}
-
-		item.abstractNote = ZU.xpathText(content,
-			'.//td[\
-				text()="中文摘要" or \
-				text()="英文摘要"\
-			]/following-sibling::td',	//chinese summary followed by english summary
-			null, '\n');
-
 		item.complete();
 	});
 
 	translator.translate();
 }
 
-function detectSearch(item) {
-	//accept all valid DOIs
-	if(!item.DOI || !item.DOI.match(/^10\.[^/]+\/.+/)) {
-		return false;
+function checkItem(item, directSearch) {
+	var doi, url;
+	if(typeof item == 'string') {
+		doi = url = item;
+	} else {
+		if(item.url) url = item.url;
+		if(item.DOI) doi = item.DOI;
 	}
-
-	//also, if we're being provided a url, check it against our target regex
-	if(item.url && !item.url.match(/^https?:\/\/([^/]*\.)?airitilibrary.com\/searchdetail.aspx/)) {
-		return false;
+	
+	if(url && url.search(/^https?:\/\/([^\/]*\.)?airitilibrary.com\/searchdetail.aspx/) !== -1) {
+		return true;
 	}
-
-	return true;
+	
+	if(directSearch && doi && ZU.cleanDOI(doi)) return true;
 }
 
-function doSearch(item) {
-	if(!detectSearch(item)) return;
+function detectSearch(items) {
+	if(!items) return false;
+	
+	if(!items.directSearch) {
+		Z.debug("Airiti: directSearch was not true. Will not attempt to search directly.")
+		return false;
+	}
+	
+	if(typeof items == 'string' || !items.length) items = [items];
+	
+	for(var i=0, n=items.length; i<n; i++) {
+		if(!items[i]) continue;
+		
+		if(items[i].DOI && ZU.cleanDOI(items[i].DOI)) return true;
+		if(typeof items[i] == 'string' && ZU.cleanDOI(items[i])) return true;
+	}
+	
+	return false;
+}
 
-	ZU.processDocuments('http://dx.doi.org/' + item.DOI, function(doc) {
-		if(!doc.location.href.match(/^https?:\/\/([^/]*\.)?airitilibrary.com\/searchdetail.aspx/)) {
-			return;
+function filterQuery(items) {
+	if(!items) return [];
+	
+	if(typeof items == 'string' || !items.length) items = [items];
+	
+	//filter out invalid queries
+	var query = [];
+	for(var i=0, n=items.length; i<n; i++) {
+		if( ( items[i].DOI && ZU.cleanDOI(items[i].DOI) )
+			|| ( typeof items[i] == 'string' && ZU.cleanDOI(items[i]) ) ) {
+			query.push(items[i]);
+		} else {
+			var newItem = new Zotero.Item();
+			newItem._status = 'invalid';
+			newItem._query = items[i];
+			newItem.complete();
+		}
+	}
+	return query;
+}
+
+function doSearch(items) {
+	var query = filterQuery(items);
+	var queryTracker = {};
+	var dois = [];
+	for(var i=0, n=query.length; i<n; i++) {
+		var doi = ZU.cleanDOI(query[i].DOI || query[i]);
+		queryTracker[doi] = query[i];
+		dois.push(doi);
+	}
+	
+	if(!dois.length) return;
+	
+	processDOIs(dois, queryTracker);
+}
+
+function processDOIs(dois, queryTracker) {
+	var doi = dois.pop();
+	var query = queryTracker[doi];
+	ZU.processDocuments('http://doi.org/' + doi, function(doc) {
+		if(doc.location.href.search(/^https?:\/\/(?:[^\/]+\.)?airitilibrary\.com\/Publication\/alDetailedMesh\//) == -1) {
+			var newItem = new Zotero.Item();
+			newItem._query = query;
+			newItem._status = 'not found';
+			newItem.complete();
 		}
 
 		if(detectWeb(doc, doc.location.href)) {
@@ -111,13 +149,18 @@ function doSearch(item) {
 			translator.setTranslator("5f0ca39b-898a-4b1e-b98d-8cd0d6ce9801");
 			translator.setDocument(doc);
 			translator.setHandler("itemDone", function(obj, newItem) {
-				if(!newItem.DOI) newItem.DOI = item.DOI;
+				if(!newItem.DOI) newItem.DOI = doi;
+				newItem._query = query;
+				newItem._status = 'success';
 				newItem.complete();
 			});
 			translator.translate();
 		}
+	}, function() {
+		if(dois.length) processDOIs(dois, queryTracker);
 	});
-}/** BEGIN TEST CASES **/
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
