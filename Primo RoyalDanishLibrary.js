@@ -344,37 +344,5 @@ function importPNX(text) {
 	item.complete();
 }
 /** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"defer": true,
-		"url": "http://rex.kb.dk/primo_library/libweb/action/display.do?tabs=detailsTab&ct=display&fn=search&doc=KGL01007942429&indx=6&recIds=KGL01007942429&recIdxs=5&elementId=&renderMode=poppedOut&displayMode=full&http://rex.kb.dk:80/primo_library/libweb/action/expand.do?dscnt=0&frbrVersion=&scp.scps=scope%3A%28KGL%29&tab=default_tab&dstmp=1384875284065&srt=rank&gathStatTab=true&mode=Basic&tb=t&vl%28764319501UI1%29=all_items&vl%28freeText0%29=hest&vid=KGL&frbg=&dum=true&vl%281UIStartWith0%29=contains&vl%28747109341UI0%29=any",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"firstName": "Pernille",
-						"lastName": "West",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "[Hest]",
-				"edition": "1. oplag",
-				"place": "Kbh",
-				"publisher": "Carlsen",
-				"date": "2008",
-				"language": "dan",
-				"numPages": "10",
-				"ISBN": "9788762655355",
-				"libraryCatalog": "Primo RoyalDanishLibrary",
-				"shortTitle": "Hest"
-			}
-		]
-	}
-]
+var testCases = []
 /** END TEST CASES **/
