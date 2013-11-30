@@ -315,6 +315,8 @@ var citeKeyConversions = {
 			//don't export standalone notes and attachments
 			if (item.itemType == "note" || item.itemType == "attachment") continue;
 
+		var noteused = false; //a switch for keeping track whether the
+							//field "note" has been written to
 			// determine type
 			var type = zotero2biblatexTypeMap[item.itemType];
 			if (typeof (type) == "function") {
@@ -442,6 +444,12 @@ var citeKeyConversions = {
 				}
 			}
 
+		//presentations have a meetingName field which we want to
+		//map to note
+		if (item.meetingName) {
+			write.Field("note", item.meetingName);
+			noteused = true;
+		}
 
 			if (item.creators && item.creators.length) {
 				// split creators into subcategories
@@ -544,7 +552,7 @@ var citeKeyConversions = {
 			}
 		}
 
-			if (item.extra) {
+			if (item.extra && !noteused) {
 				writeField("note", item.extra);
 			}
 
