@@ -363,45 +363,25 @@ var citeKeyConversions = {
         }
 
 
-			if (item.publicationTitle) {
-				if (item.itemType == "bookSection" || item.itemType == "conferencePaper") {
-					writeField("booktitle", item.publicationTitle);
-				} else if (item.itemType == "magazineArticle" || item.itemType == "newspaperArticle") {
+		//publicationTitles and special titles
+		if (item.publicationTitle) {
+			if(item.itemType == "bookSection" || item.itemType == "conferencePaper" || item.itemType == "dictionaryEntry" || item.itemType == "encyclopediaArticle") {
+				writeField("booktitle", item.publicationTitle);
+			} else if (item.itemType == "magazineArticle" || item.itemType == "newspaperArticle") {
+				writeField("journaltitle", item.publicationTitle);
+			} else if (item.itemType == "journalArticle") {
+				if (Zotero.getOption("useJournalAbbreviation")) {
+	    			writeField("journaltitle", item.journalAbbreviation);
+				} else {
 					writeField("journaltitle", item.publicationTitle);
-				} else if (item.itemType == "journalArticle") {
-					if (Zotero.getOption("useJournalAbbreviation")) {
-						writeField("journal", item.journalAbbreviation);
-					} else {
-						writeField("journaltitle", item.publicationTitle);
-						writeField("shortjournal", item.journalAbbreviation);
-					}
-				}
-
-				// else if (item.itemType == "website" || item.itemType == "forumPost" || item.itemType == "blogPost" || item.itemType == "tvBroadcast" || item.itemType == "radioBroadcast") {
-				//	writeField("titleaddon", item.publicationTitle);
-				// 
-				//do nothing as websiteTitle, forumTitle, blogTitle,
-				//programTitle seems
-				//to be just aliases for publicationTitle and already
-				//are correctly mapped below
-				//	    }
-				else {
-					//writeField("journaltitle", item.publicationTitle);
-					//TODO, did we miss something
+					writeField("shortjournal", item.journalAbbreviation);
 				}
 			}
+		}
 
-
-			//TODO: check what happens to bookTitle, is that also an alias for publicationTitle?
-
-
-			if (item.encyclopediaTitle || item.dictionaryTitle || item.proceedingsTitle) {
-				writeField("booktitle", item.encyclopediaTitle || item.dictionaryTitle || item.proceedingsTitle);
-			}
-
-			if (item.websiteTitle || item.forumTitle || item.blogTitle || item.programTitle) {
-				writeField("titleaddon", item.websiteTitle || item.forumTitle || item.blogTitle || item.programTitle);
-			}
+		if (item.websiteTitle || item.forumTitle || item.blogTitle || item.programTitle) {
+			writeField("titleaddon", item.websiteTitle || item.forumTitle || item.blogTitle || item.programTitle);
+		}
 
 
 			if (item.publisher) {
