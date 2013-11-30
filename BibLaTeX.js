@@ -384,10 +384,9 @@ var citeKeyConversions = {
 		}
 
 
+			//publishers
 			if (item.publisher) {
-				if (item.itemType == "thesis") {
-					writeField("school", item.publisher); //school is an acceptable alias in biblatex
-				} else if (item.itemType == "report") {
+				if(item.itemType == "thesis" || item.itemType =="report") {
 					writeField("institution", item.publisher);
 				} else {
 					writeField("publisher", item.publisher);
