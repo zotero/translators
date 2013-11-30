@@ -36,7 +36,7 @@ var fieldMap = {
 	url: "url",
 	doi: "DOI",
 	shorttitle: "shortTitle",
-	abstract: "abstract",
+    abstract:"abstractNote",
 	volumes: "numberOfVolumes",
 	version: "version",
 	eventtitle: "conferenceName",
