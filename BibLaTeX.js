@@ -103,6 +103,40 @@ var alwaysMap = {
 };
 
 
+//to map ISO language codes to babel/polyglossia language codes used
+//in biblates.
+//from list of supported languages in biblatex 2.8
+var languageMap = {
+	"ca":"catalan",
+	"hr":"croatian",
+	"cz":"czech",
+	"da":"danish",
+	"nl":"dutch",
+	"en":{""  :"english", //same as american
+	      "US":"american",
+	      "GB":"british",
+	      "CA":"canadian",
+	      "AU":"australian",
+	      "NZ":"newzealand"},
+	"fi":"finnish",
+	"fr":"french",
+	"de":{""  :"german",
+	      "AT":"austrian"},
+	//	"de":"ngerman", //FIXME: should ngerman be available via some hack?
+	//	"de-AT":"naustrian", //FIXME: same problem here
+	"el":"greek",
+	"it":"italian",
+	"nn":"norwegian",
+	"pl":"polish",
+	"pt-BR":"brazil",
+	"pt-PT":"portugese",
+	"pt":{""  :"portuguese",
+	      "PT":"portuguese",
+	      "BR":"brazil"},
+	"ru":"russian",
+	"es":"spanish",
+	"sv":"swedish",
+};
 
 
 // some fields are, in fact, macros.  If that is the case then we should not put the
@@ -493,6 +527,26 @@ var citeKeyConversions = {
 				writeField("date", Zotero.Utilities.strToISO(item.date));
 			}
 
+		//Map Languages to biblatex-field "langid" (used for
+		//hyphenation with a correct setting of the "autolang" option)
+		//if possible. See languageMap above for languagecodes to use
+		if(item.language) {
+			var lang = languageMap[item.language.slice(0,2)]
+			if (typeof lang == 'string' || lang instanceof String) {
+				//if there are no variants for this language
+				writeField("langid",lang);
+			} else if(typeof lang == 'object') {
+				var variant = lang[item.language.slice(3,5)];
+				if (variant) {
+					writeField("langid",variant);
+				} else {
+					writeField("langid",lang[""]); //use default variant
+				}
+
+			} else {
+				writeField("language","lang:" + item.language) // language field, which is sometimes written out by biblatex. FIXME: perhaps one should be able to use both langid and language in some way.
+			}
+		}
 
 			if (item.extra) {
 				writeField("note", item.extra);
