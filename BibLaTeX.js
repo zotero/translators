@@ -347,10 +347,20 @@ var citeKeyConversions = {
 			//e.g. where fieldname translation is dependent upon type, or special transformations
 			//has to be made
 
-			//all kinds of numbers (biblatex has additional support for journal number != issue, but zotero has not)
+			//all kinds of numbers
 			if (item.reportNumber || item.seriesNumber || item.patentNumber || item.billNumber || item.episodeNumber || item.number) {
 				writeField("number", item.reportNumber || item.seriesNumber || item.patentNumber || item.billNumber || item.episodeNumber || item.number);
 			}
+
+        //split numeric and nonnumeric issue specifications (for journals) into "number" and "issue"
+        if(item.issue) { //issue
+            var jnumber = parseInt(item.issue);
+            if(!isNaN(jnumber)) {
+                writeField("number", jnumber);
+            } else {
+                writeField("issue", item.issue);
+            }
+        }
 
 
 			if (item.publicationTitle) {
