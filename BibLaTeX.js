@@ -320,8 +320,10 @@ var citeKeyConversions = {
 			if (typeof (type) == "function") {
 				type = type(item);
 			}
-			if (!type) type = "misc";
 
+        //biblatex recommends us to use mvbook for multi-volume books
+        if(type == "book" && item.volume) type = "mvbook"
+		if (!type) type = "misc";
 
 			var citekey = "";
 			if (!citekey) {
