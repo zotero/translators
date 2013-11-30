@@ -35,6 +35,7 @@ var fieldMap = {
 	issn: "ISSN",
 	url: "url",
 	doi: "DOI",
+    series:"series",
 	shorttitle: "shortTitle",
     abstract:"abstractNote",
 	volumes: "numberOfVolumes",
@@ -386,13 +387,6 @@ var citeKeyConversions = {
 
 			if (item.websiteTitle || item.forumTitle || item.blogTitle || item.programTitle) {
 				writeField("titleaddon", item.websiteTitle || item.forumTitle || item.blogTitle || item.programTitle);
-			}
-
-			//don't really know if this is the best way
-			if (item.seriesTitle) {
-				writeField("series", item.seriesTitle);
-			} else if (item.series) {
-				writeField("series", item.series);
 			}
 
 
