@@ -49,12 +49,7 @@ var fieldMap = {
 
 
 //POTENTIAL ISSUES
-//"programTitle", "bookTitle" //TODO, check!!
-// 
-//	accessDate:"accessDate", //only written on attached webpage snapshots by zo
-//	journalAbbreviation:"journalAbbreviation", //not supported by bl
-
-//	country:"country", //TODO if patent, should be put into 'location' 
+//accessDate:"accessDate", //only written on attached webpage snapshots by zotero
 
 
 
@@ -192,7 +187,7 @@ function tidyAccents(s) {
 
 var numberRe = /^[0-9]+/;
 // Below is a list of words that should not appear as part of the citation key
-// in includes the indefinite articles of English, German, French and Spanish, as well as a small set of English prepositions whose 
+// in includes the indefinite articles of English, German, French and Spanish, as well as a small set of English prepositions whose
 // force is more grammatical than lexical, i.e. which are likely to strike many as 'insignificant'.
 // The assumption is that most who want a title word in their key would prefer the first word of significance.
 var citeKeyTitleBannedRe = /\b(a|an|the|some|from|on|in|to|of|do|with|der|die|das|ein|eine|einer|eines|einem|einen|un|une|la|le|l\'|el|las|los|al|uno|una|unos|unas|de|des|del|d\')(\s+|\b)/g;
