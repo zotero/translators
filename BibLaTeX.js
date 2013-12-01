@@ -56,7 +56,7 @@ var fieldMap = {
 
 var zotero2biblatexTypeMap = {
 	"book": "book",
-	"bookSection": "inbook",
+	"bookSection": "incollection",
 	"journalArticle": "article",
 	"magazineArticle": "article",
 	"newspaperArticle": "article",
