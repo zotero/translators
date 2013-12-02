@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-11-16 11:24:25"
+	"lastUpdated": "2013-12-02 22:29:50"
 }
 
 /*
@@ -299,9 +299,11 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 			//fetch pdf url. There seems to be some magic value that must be sent
 			// with the request
 			if(!pdfUrl &&
-				(pdfUrl = ZU.xpathText(doc,
-					'//meta[@name="citation_pdf_url"]/@content'))) {
-
+				(pdfUrl =
+					ZU.xpathText(doc,'(//meta[@name="citation_pdf_url"]/@content)[1]')
+					|| ZU.xpathText(doc, '(//a[@class="pdfLink"]/@href)[1]')
+				)
+			) {
 				ZU.doGet(pdfUrl, function(text) {
 					var m = text.match(
 						/<iframe id="pdfDocument"[^>]+?src="([^"]+)"/i);
@@ -437,7 +439,7 @@ function doWeb(doc, url) {
 			url = url.replace(/\/pdf(.+)?$/,'/abstract');
 			//Zotero.debug("Redirecting to abstract page: "+url);
 			//grab pdf url before leaving
-			var pdfUrl = ZU.xpathText(doc, '//div[@iframe="pdfDocument"]/@src');
+			var pdfUrl = ZU.xpathText(doc, '//iframe[@id="pdfDocument"]/@src');
 			ZU.processDocuments(url, function(doc) { scrape(doc, doc.location.href, pdfUrl) });
 		} else if(type != 'book' &&
 				url.indexOf('abstract') == -1 && url.indexOf("/o/cochrane/") == -1 &&
@@ -553,38 +555,45 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"1897",
-					"Directors (Life and Works) - Ángel García Cardona and Antonio Cuesta13",
-					"Florián Rey (Antonio Martínez de Castillo)",
-					"Florián Rey's La aldea maldita (1930)",
-					"Fructuós Gelabert - made the first Spanish fiction film",
-					"Fructuós Gelabert's Amor que mata (1909)",
-					"Ricardo Baños",
-					"Ricardo Baños and Albert Marro's Don Pedro el Cruel (1911)",
-					"Riña en un café",
 					"silent cinema and its pioneers (1906–1930)",
-					"three films - part of “the preliminary industrial and expressive framework for Spain's budding cinema”",
+					"Ángel García Cardona's El ciego de aldea (1906)",
 					"Ángel García Cardona and Antonio Cuesta",
-					"Ángel García Cardona's El ciego de aldea (1906)"
+					"Ricardo Baños and Albert Marro's Don Pedro el Cruel (1911)",
+					"Fructuós Gelabert's Amor que mata (1909)",
+					"three films - part of “the preliminary industrial and expressive framework for Spain's budding cinema”",
+					"Directors (Life and Works) - Ángel García Cardona and Antonio Cuesta13",
+					"Ricardo Baños",
+					"Florián Rey's La aldea maldita (1930)",
+					"Florián Rey (Antonio Martínez de Castillo)",
+					"Fructuós Gelabert - made the first Spanish fiction film",
+					"Riña en un café",
+					"1897"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
+				"title": "Silent Cinema and its Pioneers (1906–1930)",
+				"publisher": "Wiley-Blackwell",
 				"ISBN": "9781444304794",
 				"url": "http://onlinelibrary.wiley.com/doi/10.1002/9781444304794.ch1/summary",
+				"DOI": "10.1002/9781444304794.ch1",
+				"pages": "1–20",
+				"publicationTitle": "100 Years of Spanish Cinema",
+				"date": "2009",
 				"abstractNote": "This chapter contains sections titled: * Historical and Political Overview of the Period * Context11 * Film Scenes: Close Readings * Directors (Life and Works) * Critical Commentary",
 				"bookTitle": "100 Years of Spanish Cinema",
 				"language": "en",
 				"rights": "Copyright © 2009 Tatjana Pavlović, Inmaculada Alvarez, Rosana Blanco-Cano, Anitra Grisales, Alejandra Osorio, and Alejandra Sánchez",
 				"libraryCatalog": "Wiley Online Library",
-				"title": "Silent Cinema and its Pioneers (1906–1930)",
-				"publisher": "Wiley-Blackwell",
-				"pages": "1–20",
-				"date": "2009"
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -644,6 +653,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
+				"itemID": "PMIC:PMIC201100327",
 				"title": "A mass spectrometry-based method to screen for α-amidated peptides",
 				"publicationTitle": "PROTEOMICS",
 				"volume": "12",
@@ -709,6 +719,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
+				"itemID": "PMIC:PMIC201100327",
 				"title": "A mass spectrometry-based method to screen for α-amidated peptides",
 				"publicationTitle": "PROTEOMICS",
 				"volume": "12",
@@ -774,6 +785,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
+				"itemID": "PMIC:PMIC201100327",
 				"title": "A mass spectrometry-based method to screen for α-amidated peptides",
 				"publicationTitle": "PROTEOMICS",
 				"volume": "12",
@@ -839,6 +851,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
+				"itemID": "PMIC:PMIC201100327",
 				"title": "A mass spectrometry-based method to screen for α-amidated peptides",
 				"publicationTitle": "PROTEOMICS",
 				"volume": "12",
@@ -937,6 +950,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
+				"itemID": "JAPP:JAPP548",
 				"title": "The Principled Case for Employing Private Military and Security Companies in Interventions for Human Rights Purposes",
 				"publicationTitle": "Journal of Applied Philosophy",
 				"volume": "29",
@@ -983,6 +997,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
+				"itemID": "JOFI:JOFI4559",
 				"title": "Volume for Winners and Losers: Taxation and Other Motives for Stock Trading",
 				"publicationTitle": "The Journal of Finance",
 				"volume": "41",
@@ -1039,6 +1054,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
+				"itemID": "ANIE:ANIE165",
 				"title": "Phosphane-Free Palladium-Catalyzed Coupling Reactions: The Decisive Role of Pd Nanoparticles",
 				"publicationTitle": "Angewandte Chemie International Edition",
 				"volume": "39",
@@ -1152,16 +1168,16 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Cochrane Trial Snapshot",
+						"title": "Cochrane Snapshot",
 						"mimType": "text/html"
 					}
 				],
 				"title": "Differences in primary care clinicians' approach to non-small cell lung cancer (NSCLC) patients compared to breast cancer (BrCa)",
-				"publication": "Journal of Clinical Oncology: ASCO annual meeting proceedings",
+				"publicationTitle": "Journal of Clinical Oncology: ASCO annual meeting proceedings",
 				"abstractNote": "42nd Annual Meeting of the American Society of Clinical Oncology, Atlanta,GA, 2-6 June, 2006. Background: Lung cancer is a disease associated with a stigma of being primarily self-induced via smoking and therefore avoidable. It is unclear if this stigma results in feelings of guilt and shame on the part of the patient, and a difference in care on the part of primary care physicians (MDs), both of which could lead to differences in treatment and patient self-advocacy, and ultimately poorer outcomes. Methods: We conducted a prospective survey study of 1,132 MDs who were randomized into 4 groups. Each group received a questionnaire representing a clinical scenario (smoker/NSCLC; nonsmoker/NSCLC; smoker/BrCa; nonsmoker/BrCa). The scenarios were identical in terms of stage, gender and outcome; but varied in the disease and smoking history (smoker (S) vs. nonsmoker (NS)). The primary objective was to collect preliminary data to determine if these MDs approached the care and referral of patients (pts) with NSCLC or BrCa differently. A secondary objective was to determine whether or not tobacco use influenced the MD's approach to the cancer pts. Comparisons of response patterns between the groups were evaluated by Chi-square analysis. Results: 672 questionnaires were completed: 175 in the NS/BrCa, 177 in the S/BrCa, 166 in the NS/NSCLC and 154 in the S/NSCLC scenarios. We observed that MDs were less likely to refer pts with advanced NSCLC to an oncologist than BrCa pts (p=<0.001). More MDs knew that chemotherapy improved survival in pts with advanced BrCa than did MDs regarding chemotherapy use in advanced NSCLC (p=0.0145). In addition, more MDs stated they did not know the benefit of adjuvant therapy for NSCLC than for BrCa (p= <0.001). As a result, more pts with advanced BrCa were referred for further therapy vs. NSCLC pts, who were more likely to be referred only for symptom control (p=0.0092). BrCa pts also had more aggressive follow up than did pts with NSCLC (p=0.0256). There was no statistical significant difference when comparing smoking vs. non-smoking pts. Conclusions: We conclude that there is a significant lack of knowledge in the primary care physician regarding the treatment of pts with advanced stage NSCLC, and the role and benefit of adjuvant therapy. This might lead to a less aggressive referral pattern in these pts to clinical oncologists.",
 				"date": "2006",
 				"volume": "24",
-				"page": "7041",
+				"pages": "7041",
 				"rights": "Copyright © 2011 The Cochrane Collaboration. Published by John Wiley & Sons, Ltd.",
 				"libraryCatalog": "Wiley Online Library"
 			}
