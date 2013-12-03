@@ -8,8 +8,8 @@
 	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2012-09-05 00:03:34"
+	"browserSupport": "gcsbv",
+	"lastUpdated": "2013-12-02 17:35:21"
 }
 
 var RECOGNIZABLE_FORMATS = ["rdf_zotero", "rdf_bibliontology", "mods", "marc", "unimarc", "ris",
