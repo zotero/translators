@@ -2,7 +2,7 @@
 	"translatorID": "fcf41bed-0cbc-3704-85c7-8062a0068a7a",
 	"label": "NCBI PubMed",
 	"creator": "Simon Kornblith, Michael Berkowitz, Avram Lyon, and Rintze Zelle",
-	"target": "https?://[^/]*(www|preview)[\\.\\-]ncbi[\\.\\-]nlm[\\.\\-]nih[\\.\\-]gov[^/]*/(books|pubmed|sites/pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed|myncbi/browse/collection/|myncbi/collections/)",
+	"target": "https?://[^/]*(www|preview)[\\.\\-]ncbi[\\.\\-]nlm[\\.\\-]nih[\\.\\-]gov[^/]*/(?:m/)?(books|pubmed|sites/pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed|myncbi/browse/collection/|myncbi/collections/)",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 13,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-06-02 19:18:28"
+	"lastUpdated": "2013-12-02 20:50:04"
 }
 
 /*****************************
@@ -42,6 +42,7 @@ function getUID(doc) {
 	}
 
 	uid = ZU.xpath(doc, 'html/head/link[@media="handheld"]/@href');
+	if(!uid.length) uid = ZU.xpath(doc, 'html/head/link[@rel="canonical"]/@href'); //mobile site
 	if(uid.length == 1) {
 		uid = uid[0].textContent.match(/\/(\d+)(?:\/|$)/);
 		if(uid) return uid[1];
@@ -82,7 +83,7 @@ function detectWeb(doc, url) {
 	//try to determine if this is a book
 	//"Sections" heading only seems to show up for books
 	var maincontent = doc.getElementById('maincontent');
-	if(ZU.xpath(maincontent, './/div[@class="sections"]').length)
+	if(maincontent && ZU.xpath(maincontent, './/div[@class="sections"]').length)
 	{
 		var inBook = ZU.xpath(maincontent, './/div[contains(@class, "aff_inline_book")]').length;
 		return inBook ? "bookSection" : "book";
