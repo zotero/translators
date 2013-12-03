@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-03-30 23:41:52"
+	"lastUpdated": "2013-12-03 22:31:52"
 }
 
 /*
@@ -83,8 +83,8 @@ function scrape(doc) {
 	var xpath = '//div/div[@style="display:inline"]';
 	var abs = getText(xpath, doc);
 
-	//get genric URL
-	var url = getText('//meta[@name="citation_abstract_html_url"]/@content', doc);
+	//get genric URL, preferring the conference version.
+	var url = getText('//meta[@name="citation_conference"]/following-sibling::meta[@name="citation_abstract_html_url"]/@content', doc) || getText('//meta[@name="citation_abstract_html_url"]/@content', doc);
 	//Zotero.debug('generic URL: ' + url);
 	var matchtest = url.match(/[0-9]+\.[0-9]+/);
 
@@ -103,6 +103,14 @@ function scrape(doc) {
 	var bibtexURL = url.replace(/citation\.cfm/, "exportformats.cfm").replace(/id\=.+/, bibtexstring);
 	Zotero.debug('bibtex URL: ' + bibtexURL);
 	Zotero.Utilities.HTTP.doGet(bibtexURL, function (text) {
+		// If we can find an @inproceedings, prefer that.  Papers that have both
+		// @inproceedings and @article are conference papers that also appear in
+		// newsletters.  We should prefer the conference proceedings version.
+		var inproceedingsIndex = text.toLowerCase().indexOf('@inproceedings');
+		if (inproceedingsIndex != -1) {
+			var ts = text.substring(inproceedingsIndex);
+			text = ts.substring(0, ts.toLowerCase().indexOf('</pre>'));
+		}
 		var translator = Zotero.loadTranslator("import");
 		var haveImported = false;
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
@@ -154,8 +162,8 @@ function getArticleType(doc, url) {
 	var conference = getText('//meta[@name="citation_conference"]/@content', doc);
 	var journal = getText('//meta[@name="citation_journal_title"]/@content', doc);
 	//Zotero.debug(conference);
-	if (journal.indexOf(" ") != -1) return "journalArticle";
-	else if (conference.indexOf(" ") != -1) return "conferencePaper";
+	if (conference.trim()) return "conferencePaper";
+	else if (journal.trim()) return "journalArticle";
 	else return "book";
 
 }
@@ -220,11 +228,12 @@ var testCases = [
 				"place": "New York, NY, USA",
 				"abstractNote": "Repository-based revision control systems such as CVS, RCS, Subversion, and GIT, are extremely useful tools that enable software developers to concurrently modify source code, manage conflicting changes, and commit updates as new revisions. Such systems facilitate collaboration with and concurrent contribution to shared source code by large developer bases. In this work, we investigate a framework for \"performance-aware\" repository and revision control for Java programs. Our system automatically tracks behavioral differences across revisions to provide developers with feedback as to how their change impacts performance of the application. It does so as part of the repository commit process by profiling the performance of the program or component, and performing automatic analyses that identify differences in the dynamic behavior or performance between two code revisions. In this paper, we present our system that is based upon and extends prior work on calling context tree (CCT) profiling and performance differencing. Our framework couples the use of precise CCT information annotated with performance metrics and call-site information, with a simple tree comparison technique and novel heuristics that together target the cause of performance differences between code revisions without knowledge of program semantics. We evaluate the efficacy of the framework using a number of open source Java applications and present a case study in which we use the framework to distinguish two revisions of the popular FindBugs application.",
 				"libraryCatalog": "ACM Digital Library",
-				"title": "Tracking performance across software revisions",
+				"title": "Tracking Performance Across Software Revisions",
 				"proceedingsTitle": "Proceedings of the 7th International Conference on Principles and Practice of Programming in Java",
 				"date": "2009",
 				"pages": "162–171",
-				"publisher": "ACM"
+				"publisher": "ACM",
+				"itemID": "Mostafa:2009:TPA:1596655.1596682"
 			}
 		],
 		"defer": true
@@ -259,7 +268,8 @@ var testCases = [
 				"shortTitle": "Version Control with Git",
 				"title": "Version Control with Git: Powerful Tools and Techniques for Collaborative Software Development",
 				"date": "2009",
-				"publisher": "O'Reilly Media, Inc."
+				"publisher": "O'Reilly Media, Inc.",
+				"itemID": "Loeliger:2009:VCG:1717186"
 			}
 		],
 		"defer": true
@@ -313,6 +323,7 @@ var testCases = [
 				"publisher": "Kluwer Academic Publishers",
 				"place": "Norwell, MA, USA",
 				"libraryCatalog": "ACM Digital Library",
+				"itemID": "Tegethoff:1997:STM:254650.257486",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
@@ -322,7 +333,7 @@ var testCases = [
 		"url": "http://dl.acm.org/citation.cfm?id=258948.258973&coll=DL&dl=ACM",
 		"items": [
 			{
-				"itemType": "journalArticle",
+				"itemType": "conferencePaper",
 				"creators": [
 					{
 						"firstName": "Conal",
@@ -344,17 +355,19 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"issue": "8",
-				"ISSN": "0362-1340",
-				"url": "http://doi.acm.org/10.1145/258949.258973",
-				"DOI": "10.1145/258949.258973",
+				"series": "ICFP '97",
+				"ISBN": "0-89791-918-1",
+				"url": "http://doi.acm.org/10.1145/258948.258973",
+				"DOI": "10.1145/258948.258973",
+				"place": "New York, NY, USA",
 				"abstractNote": "Fran (Functional Reactive Animation) is a collection of data types and functions for composing richly interactive, multimedia animations. The key ideas in Fran are its notions of behaviors and events. Behaviors are time-varying, reactive values, while events are sets of arbitrarily complex conditions, carrying possibly rich information. Most traditional values can be treated as behaviors, and when images are thus treated, they become animations. Although these notions are captured as data types rather than a programming language, we provide them with a denotational semantics, including a proper treatment of real time, to guide reasoning and implementation. A method to effectively and efficiently perform event detection using interval analysis is also described, which relies on the partial information structure on the domain of event times. Fran has been implemented in Hugs, yielding surprisingly good performance for an interpreter-based system. Several examples are given, including the ability to describe physical phenomena involving gravity, springs, velocity, acceleration, etc. using ordinary differential equations.",
 				"libraryCatalog": "ACM Digital Library",
-				"title": "Functional reactive animation",
-				"publicationTitle": "SIGPLAN Not.",
-				"volume": "32",
-				"date": "August 1997",
-				"pages": "263–273"
+				"title": "Functional Reactive Animation",
+				"proceedingsTitle": "Proceedings of the Second ACM SIGPLAN International Conference on Functional Programming",
+				"date": "1997",
+				"pages": "263–273",
+				"publisher": "ACM",
+				"itemID": "Elliott:1997:FRA:258948.258973"
 			}
 		],
 		"defer": true
