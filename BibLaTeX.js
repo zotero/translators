@@ -18,7 +18,7 @@
 }
 
 
-//%a = first author surname
+//%a = first listed creator surname
 //%y = year
 //%t = first word of title
 var citeKeyFormat = "%a_%t_%y";
@@ -35,9 +35,9 @@ var fieldMap = {
 	issn: "ISSN",
 	url: "url",
 	doi: "DOI",
-    series:"series",
+	series: "series",
 	shorttitle: "shortTitle",
-    abstract:"abstractNote",
+	abstract: "abstractNote",
 	volumes: "numberOfVolumes",
 	version: "version",
 	eventtitle: "conferenceName",
@@ -108,35 +108,41 @@ var alwaysMap = {
 //in biblates.
 //from list of supported languages in biblatex 2.8
 var languageMap = {
-	"ca":"catalan",
-	"hr":"croatian",
-	"cz":"czech",
-	"da":"danish",
-	"nl":"dutch",
-	"en":{""  :"english", //same as american
-	      "US":"american",
-	      "GB":"british",
-	      "CA":"canadian",
-	      "AU":"australian",
-	      "NZ":"newzealand"},
-	"fi":"finnish",
-	"fr":"french",
-	"de":{""  :"german",
-	      "AT":"austrian"},
+	"ca": "catalan",
+	"hr": "croatian",
+	"cz": "czech",
+	"da": "danish",
+	"nl": "dutch",
+	"en": {
+		"": "english", //same as american
+		"US": "american",
+		"GB": "british",
+		"CA": "canadian",
+		"AU": "australian",
+		"NZ": "newzealand"
+	},
+	"fi": "finnish",
+	"fr": "french",
+	"de": {
+		"": "german",
+		"AT": "austrian"
+	},
 	//	"de":"ngerman", //FIXME: should ngerman be available via some hack?
 	//	"de-AT":"naustrian", //FIXME: same problem here
-	"el":"greek",
-	"it":"italian",
-	"nn":"norwegian",
-	"pl":"polish",
-	"pt-BR":"brazil",
-	"pt-PT":"portugese",
-	"pt":{""  :"portuguese",
-	      "PT":"portuguese",
-	      "BR":"brazil"},
-	"ru":"russian",
-	"es":"spanish",
-	"sv":"swedish",
+	"el": "greek",
+	"it": "italian",
+	"nn": "norwegian",
+	"pl": "polish",
+	"pt-BR": "brazil",
+	"pt-PT": "portugese",
+	"pt": {
+		"": "portuguese",
+		"PT": "portuguese",
+		"BR": "brazil"
+	},
+	"ru": "russian",
+	"es": "spanish",
+	"sv": "swedish",
 };
 
 
@@ -315,17 +321,17 @@ var citeKeyConversions = {
 			//don't export standalone notes and attachments
 			if (item.itemType == "note" || item.itemType == "attachment") continue;
 
-		var noteused = false; //a switch for keeping track whether the
-							//field "note" has been written to
+			var noteused = false; //a switch for keeping track whether the
+			//field "note" has been written to
 			// determine type
 			var type = zotero2biblatexTypeMap[item.itemType];
 			if (typeof (type) == "function") {
 				type = type(item);
 			}
 
-        //biblatex recommends us to use mvbook for multi-volume books
-        if(type == "book" && item.volume) type = "mvbook"
-		if (!type) type = "misc";
+			//biblatex recommends us to use mvbook for multi-volume books
+			if (type == "book" && item.volume) type = "mvbook"
+			if (!type) type = "misc";
 
 			var citekey = "";
 			if (!citekey) {
@@ -352,41 +358,41 @@ var citeKeyConversions = {
 				writeField("number", item.reportNumber || item.seriesNumber || item.patentNumber || item.billNumber || item.episodeNumber || item.number);
 			}
 
-        //split numeric and nonnumeric issue specifications (for journals) into "number" and "issue"
-        if(item.issue) { //issue
-            var jnumber = parseInt(item.issue);
-            if(!isNaN(jnumber)) {
-                writeField("number", jnumber);
-            } else {
-                writeField("issue", item.issue);
-            }
-        }
-
-
-		//publicationTitles and special titles
-		if (item.publicationTitle) {
-			if(item.itemType == "bookSection" || item.itemType == "conferencePaper" || item.itemType == "dictionaryEntry" || item.itemType == "encyclopediaArticle") {
-				writeField("booktitle", item.publicationTitle);
-			} else if (item.itemType == "magazineArticle" || item.itemType == "newspaperArticle") {
-				writeField("journaltitle", item.publicationTitle);
-			} else if (item.itemType == "journalArticle") {
-				if (Zotero.getOption("useJournalAbbreviation")) {
-	    			writeField("journaltitle", item.journalAbbreviation);
+			//split numeric and nonnumeric issue specifications (for journals) into "number" and "issue"
+			if (item.issue) { //issue
+				var jnumber = parseInt(item.issue);
+				if (!isNaN(jnumber)) {
+					writeField("number", jnumber);
 				} else {
-					writeField("journaltitle", item.publicationTitle);
-					writeField("shortjournal", item.journalAbbreviation);
+					writeField("issue", item.issue);
 				}
 			}
-		}
 
-		if (item.websiteTitle || item.forumTitle || item.blogTitle || item.programTitle) {
-			writeField("titleaddon", item.websiteTitle || item.forumTitle || item.blogTitle || item.programTitle);
-		}
+
+			//publicationTitles and special titles
+			if (item.publicationTitle) {
+				if (item.itemType == "bookSection" || item.itemType == "conferencePaper" || item.itemType == "dictionaryEntry" || item.itemType == "encyclopediaArticle") {
+					writeField("booktitle", item.publicationTitle);
+				} else if (item.itemType == "magazineArticle" || item.itemType == "newspaperArticle") {
+					writeField("journaltitle", item.publicationTitle);
+				} else if (item.itemType == "journalArticle") {
+					if (Zotero.getOption("useJournalAbbreviation")) {
+						writeField("journaltitle", item.journalAbbreviation);
+					} else {
+						writeField("journaltitle", item.publicationTitle);
+						writeField("shortjournal", item.journalAbbreviation);
+					}
+				}
+			}
+
+			if (item.websiteTitle || item.forumTitle || item.blogTitle || item.programTitle) {
+				writeField("titleaddon", item.websiteTitle || item.forumTitle || item.blogTitle || item.programTitle);
+			}
 
 
 			//publishers
 			if (item.publisher) {
-				if(item.itemType == "thesis" || item.itemType =="report") {
+				if (item.itemType == "thesis" || item.itemType == "report") {
 					writeField("institution", item.publisher);
 				} else {
 					writeField("publisher", item.publisher);
@@ -433,12 +439,12 @@ var citeKeyConversions = {
 				}
 			}
 
-		//presentations have a meetingName field which we want to
-		//map to note
-		if (item.meetingName) {
-			write.Field("note", item.meetingName);
-			noteused = true;
-		}
+			//presentations have a meetingName field which we want to
+			//map to note
+			if (item.meetingName) {
+				write.Field("note", item.meetingName);
+				noteused = true;
+			}
 
 			if (item.creators && item.creators.length) {
 				// split creators into subcategories
@@ -520,26 +526,26 @@ var citeKeyConversions = {
 				writeField("date", Zotero.Utilities.strToISO(item.date));
 			}
 
-		//Map Languages to biblatex-field "langid" (used for
-		//hyphenation with a correct setting of the "autolang" option)
-		//if possible. See languageMap above for languagecodes to use
-		if(item.language) {
-			var lang = languageMap[item.language.slice(0,2)]
-			if (typeof lang == 'string' || lang instanceof String) {
-				//if there are no variants for this language
-				writeField("langid",lang);
-			} else if(typeof lang == 'object') {
-				var variant = lang[item.language.slice(3,5)];
-				if (variant) {
-					writeField("langid",variant);
-				} else {
-					writeField("langid",lang[""]); //use default variant
-				}
+			//Map Languages to biblatex-field "langid" (used for
+			//hyphenation with a correct setting of the "autolang" option)
+			//if possible. See languageMap above for languagecodes to use
+			if (item.language) {
+				var lang = languageMap[item.language.slice(0, 2)]
+				if (typeof lang == 'string' || lang instanceof String) {
+					//if there are no variants for this language
+					writeField("langid", lang);
+				} else if (typeof lang == 'object') {
+					var variant = lang[item.language.slice(3, 5)];
+					if (variant) {
+						writeField("langid", variant);
+					} else {
+						writeField("langid", lang[""]); //use default variant
+					}
 
-			} else {
-				writeField("language","lang:" + item.language) // language field, which is sometimes written out by biblatex. FIXME: perhaps one should be able to use both langid and language in some way.
+				} else {
+					writeField("language", "lang:" + item.language) // language field, which is sometimes written out by biblatex. FIXME: perhaps one should be able to use both langid and language in some way.
+				}
 			}
-		}
 
 			if (item.extra && !noteused) {
 				writeField("note", item.extra);
@@ -557,7 +563,7 @@ var citeKeyConversions = {
 			if (item.notes && Zotero.getOption("exportNotes")) {
 				for (var i in item.notes) {
 					var note = item.notes[i];
-				writeField("annotation", Zotero.Utilities.unescapeHTML(note["note"]));
+					writeField("annotation", Zotero.Utilities.unescapeHTML(note["note"]));
 				}
 			}
 
