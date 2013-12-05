@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-11-18 23:58:05"
+	"lastUpdated": "2013-12-04 18:26:59"
 }
 
 function detectWeb(doc, url) {
@@ -90,7 +90,7 @@ function scrape(doc) {
 		}
 	
 	}
-	var inventors = ZU.xpath(doc, '//td[contains(text(), "Inventors")]/following-sibling::td/b');
+	var inventors = ZU.xpath(doc, '//td[contains(text(), "Inventors")]/following-sibling::td/b|//th[contains(text(), "Inventors")]/following-sibling::td/b');
  	var inventor;
 
 	for (i in inventors){
@@ -99,7 +99,7 @@ function scrape(doc) {
 		newItem.creators.push(ZU.cleanAuthor(inventor, "inventor", true))
 	}
 	
-	var assignee = ZU.xpathText(doc, '//td[contains(text(), "Assignee")]/following-sibling::td/b');
+	var assignee = ZU.xpathText(doc, '//td[contains(text(), "Assignee")]/following-sibling::td/b|//th[contains(text(), "Assignee")]/following-sibling::td/b');
 	newItem.assignee = assignee;
 //References currenlty broken
 	//newItem.references = tmpRefs;

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-06-08 14:11:40"
+	"lastUpdated": "2013-12-04 20:54:57"
 }
 
 /*
@@ -71,7 +71,7 @@ function scrape(doc, type) {
 			if(title) item.title = ZU.trimInternal(title);
 
 			//add bookTitle
-			item.bookTitle = ZU.xpathText(doc, '//h2[@class="sub_title"]');
+			item.bookTitle = ZU.xpathText(doc, '//h1[@class="sub_title"]');
 		} else if(type == 'journalArticle') {
 			//journal title is abbreviated. We can fetch full title from the page
 			item.publicationTitle = ZU.xpathText(doc, '//div[contains(@class, "hg_title")]//h1');
@@ -156,26 +156,25 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"itemID": "http://pubs.rsc.org/en/content/articlelanding/2012/ee/c1ee02148f",
 				"title": "Superior radical polymer cathode material with a two-electron process redox reaction promoted by graphene",
 				"publisher": "The Royal Society of Chemistry",
 				"institution": "The Royal Society of Chemistry",
 				"company": "The Royal Society of Chemistry",
 				"label": "The Royal Society of Chemistry",
 				"distributor": "The Royal Society of Chemistry",
-				"date": "2012-01-01",
 				"DOI": "10.1039/C1EE02148F",
 				"language": "en",
+				"date": "2012-01-01",
 				"publicationTitle": "Energy & Environmental Science",
 				"journalAbbreviation": "Energy Environ. Sci.",
 				"volume": "5",
 				"issue": "1",
-				"abstractNote": "Poly(2,2,6,6-tetramethyl-1-piperidinyloxy-4-yl methacrylate) (PTMA) displays a two–electron process redox reaction, high capacity of up to 222 mA h g−1, good rate performance and long cycle life, which is promoted by graphene as cathode material for lithium rechargeable batteries.",
 				"pages": "5221-5225",
 				"ISSN": "1754-5706",
 				"url": "http://pubs.rsc.org/en/content/articlelanding/2012/ee/c1ee02148f",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "pubs.rsc.org"
+				"abstractNote": "Poly(2,2,6,6-tetramethyl-1-piperidinyloxy-4-yl methacrylate) (PTMA) displays a two–electron process redox reaction, high capacity of up to 222 mA h g−1, good rate performance and long cycle life, which is promoted by graphene as cathode material for lithium rechargeable batteries.",
+				"libraryCatalog": "pubs.rsc.org",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -214,14 +213,13 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"itemID": "http://pubs.rsc.org/en/content/chapter/bk9781849730518-00330/978-1-84973-051-8",
 				"title": "Chapter 14 In Vivo Approaches to Predictive Toxicology Using Zebrafish",
 				"DOI": "10.1039/9781849733045-00330",
 				"language": "en",
 				"date": "2011/11/15",
 				"url": "http://pubs.rsc.org/en/content/chapter/bk9781849730518-00330/978-1-84973-051-8",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "pubs.rsc.org",
+				"accessDate": "CURRENT_TIMESTAMP",
 				"bookTitle": "New Horizons in Predictive Toxicology"
 			}
 		]

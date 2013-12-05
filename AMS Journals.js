@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-15 18:04:37"
+	"lastUpdated": "2013-12-04 16:57:35"
 }
 
 function detectWeb(doc, url) {
@@ -60,7 +60,7 @@ function scrape(doc, url){
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
 	translator.setHandler("itemDone", function(obj, item) {
-			var abstract = ZU.xpathText(doc, '//td[@class="bottomCell"]/p[4]');
+			var abstract = ZU.xpathText(doc, '//td[@class="bottomCell"]/p[a[contains(@id, "Abstract")]]');
 			if (abstract) item.abstractNote = ZU.trimInternal(abstract.substr(10)).replace(/^A?bstract:\s/, "");
 			item.complete();
 	});
@@ -107,7 +107,6 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"itemID": "http://www.ams.org/journals/jams/2012-25-01/S0894-0347-2011-00713-3/home.html",
 				"title": "Equivalences between fusion systems of finite groups of Lie type",
 				"date": "2012",
 				"publicationTitle": "Journal of the American Mathematical Society",
@@ -115,12 +114,12 @@ var testCases = [
 				"volume": "25",
 				"issue": "1",
 				"DOI": "10.1090/S0894-0347-2011-00713-3",
-				"abstractNote": "We prove, for certain pairs of finite groups of Lie type, that the -fusion systems and are equivalent. In other words, there is an isomorphism between a Sylow -subgroup of and one of which preserves -fusion. This occurs, for example, when and for a simple Lie ``type'' , and and are prime powers, both prime to , which generate the same closed subgroup of -adic units. Our proof uses homotopy-theoretic properties of the -completed classifying spaces of and , and we know of no purely algebraic proof of this result.",
 				"pages": "1-20",
 				"ISSN": "0894-0347, 1088-6834",
 				"url": "http://www.ams.org/jams/2012-25-01/S0894-0347-2011-00713-3/",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "www.ams.org"
+				"abstractNote": "We prove, for certain pairs of finite groups of Lie type, that the -fusion systems and are equivalent. In other words, there is an isomorphism between a Sylow -subgroup of and one of which preserves -fusion. This occurs, for example, when and for a simple Lie ``type'' , and and are prime powers, both prime to , which generate the same closed subgroup of -adic units. Our proof uses homotopy-theoretic properties of the -completed classifying spaces of and , and we know of no purely algebraic proof of this result.",
+				"libraryCatalog": "www.ams.org",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}
