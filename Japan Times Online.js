@@ -83,15 +83,14 @@ var testCases = [
 						"type": "text/html"
 					}
 				],
-				"url": "http://www.japantimes.co.jp/news/2012/05/09/news/dpj-reinstates-noda-tax-foe-ozawa/",
+				"url": "http://www.japantimes.co.jp/news/2012/05/09/news/dpj-reinstates-noda-tax-foe-ozawa/#.Up_dwsQW2I8",
 				"abstractNote": "The ruling Democratic Party of Japan reinstated the party membership of Ichiro Ozawa on Tuesday, a move that intensifies the power struggle over a proposed",
 				"date": "May 9, 2012",
 				"ISSN": "0447-5763",
 				"language": "en-US",
 				"publicationTitle": "The Japan Times Online",
 				"title": "DPJ reinstates Noda tax foe Ozawa",
-				"libraryCatalog": "Japan Times Online",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "Japan Times Online"
 			}
 		]
 	},

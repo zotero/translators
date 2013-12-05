@@ -123,15 +123,15 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"abstract objects",
 					"Aristotle",
+					"Plato: ethics and politics in The Republic",
+					"Socrates",
+					"Socratic Dialogues",
+					"abstract objects",
 					"education, philosophy of",
 					"epistemology",
 					"metaphysics",
-					"Plato: ethics and politics in The Republic",
-					"religion: and morality",
-					"Socrates",
-					"Socratic Dialogues"
+					"religion: and morality"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -140,14 +140,14 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
+				"itemID": "sep-plato",
 				"title": "Plato",
-				"publicationTitle": "The Stanford Encyclopedia of Philosophy",
-				"url": "http://plato.stanford.edu/archives/sum2012/entries/plato/",
-				"date": "2012",
-				"edition": "Summer 2012",
+				"url": "http://plato.stanford.edu/archives/fall2013/entries/plato/",
+				"date": "2013",
+				"edition": "Fall 2013",
 				"abstractNote": "Plato (429–347 B.C.E.) is, by any reckoning, one of the mostdazzling writers in the Western literary tradition and one of the mostpenetrating, wide-ranging, and influential authors in the history ofphilosophy. An Athenian citizen of high status, he displays in hisworks his absorption in the political events and intellectual movementsof his time, but the questions he raises are so profound and thestrategies he uses for tackling them so richly suggestive andprovocative that educated readers of nearly every period have in someway been influenced by him, and in practically every age there havebeen philosophers who count themselves Platonists in some importantrespects. He was not the first thinker or writer to whom the word“philosopher” should be applied. But he was soself-conscious about how philosophy should be conceived, and what itsscope and ambitions properly are, and he so transformed theintellectual currents with which he grappled, that the subject ofphilosophy, as it is often conceived—a rigorous and systematicexamination of ethical, political, metaphysical, and epistemologicalissues, armed with a distinctive method—can be called hisinvention. Few other authors in the history of Western philosophy approximatehim in depth and range: perhaps only Aristotle (who studied with him),Aquinas, and Kant would be generally agreed to be of the same rank.",
 				"libraryCatalog": "Stanford Encyclopedia of Philosophy",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"bookTitle": "The Stanford Encyclopedia of Philosophy"
 			}
 		]
 	}

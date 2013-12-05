@@ -216,12 +216,12 @@ var testCases = [
 				"creators": [],
 				"notes": [],
 				"tags": [
-					"Philipp Lahm",
 					"Andreas Ottl",
 					"Angela Merkel",
 					"Bundesliga",
 					"Fußball",
-					"Oskar Lafontaine"
+					"Oskar Lafontaine",
+					"Philipp Lahm"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -233,11 +233,10 @@ var testCases = [
 				"url": "http://www.zeit.de/2011/36/Interview-Lahm-Rinke",
 				"title": "Philipp Lahm: \"Hast du elf Freunde?\"",
 				"date": "4. September 2011",
-				"abstractNote": "Tschechow und Robben, Drama im Flutlicht und Wahrhaftigkeit bei der Arbeit. Der Fußballprofi und Autor Philipp Lahm im Gespräch mit dem Schriftsteller und Fußballer Moritz Rinke Von Moritz Müller-Wirth",
+				"abstractNote": "Tschechow und Robben, Drama im Flutlicht und Wahrhaftigkeit bei der Arbeit. Der Fußballprofi und Autor Philipp Lahm im Gespräch mit dem Schriftsteller und Fußballer Moritz Rinke von Moritz Müller-Wirth",
 				"publicationTitle": "Die Zeit",
 				"section": "sport",
 				"libraryCatalog": "Die Zeit",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Philipp Lahm"
 			}
 		]

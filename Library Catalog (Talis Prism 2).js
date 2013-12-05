@@ -157,11 +157,10 @@ var testCases = [
 				"place": "London",
 				"publisher": "Calder",
 				"date": "1965 1985",
-				"ISBN": "0714540838",
+				"ISBN": "9780714540832",
 				"url": "http://capitadiscovery.co.uk/surrey-ac/items/199580",
 				"language": "English",
-				"libraryCatalog": "Library Catalog (Talis Prism 2)",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "Library Catalog (Talis Prism 2)"
 			}
 		]
 	},

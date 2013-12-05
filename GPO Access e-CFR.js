@@ -127,12 +127,10 @@ var testCases = [
 				"url": "http://www.ecfr.gov/cgi-bin/text-idx?c=ecfr&SID=26a49dfbb6ed6cce629ec44a19c7fe94&tpl=/ecfrbrowse/Title02/2cfr376_main_02.tpl",
 				"code": "Electronic Code of Federal Regulations",
 				"language": "en-US",
-				"title": "e-CFR: TITLE 2--Grants and Agreements",
-				"codeNumber": "TITLE 2--Grants and Agreements",
-				"section": "Part 376--Nonprocurement Debarment and Suspension",
-				"libraryCatalog": "GPO Access e-CFR",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "e-CFR"
+				"codeNumber": "TITLE 2—Grants and Agreements",
+				"section": "Part 376—Nonprocurement Debarment and Suspension",
+				"shortTitle": "e-CFR",
+				"nameOfAct": "e-CFR: TITLE 2—Grants and Agreements"
 			}
 		]
 	}

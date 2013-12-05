@@ -118,17 +118,17 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
+				"itemID": ":2002-11-00",
 				"title": "<研究速報>観測用既存鉄骨造モデル構造物を用いたオンライン応答実験=Pseudo-dynamic tests on existing steel model structure for seismic monitoring",
 				"publicationTitle": "生産研究",
 				"ISSN": "0037105X",
-				"publisher": "東京大学",
 				"date": "November 2002",
 				"volume": "54",
 				"issue": "6",
 				"pages": "384-387",
 				"url": "http://ci.nii.ac.jp/naid/110000244188/ja/",
-				"libraryCatalog": "CiNii",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"DOI": "10.11188/seisankenkyu.54.384",
+				"libraryCatalog": "CiNii"
 			}
 		]
 	}

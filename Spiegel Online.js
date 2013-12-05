@@ -298,9 +298,7 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [
-					"DER SPIEGEL"
-				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [
 					{
@@ -313,8 +311,7 @@ var testCases = [
 				"volume": "15",
 				"date": "07.04.2012",
 				"publicationTitle": "Der Spiegel",
-				"libraryCatalog": "Spiegel Online",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "Spiegel Online"
 			}
 		]
 	},

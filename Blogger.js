@@ -163,7 +163,7 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "Federico",
-						"lastName": "González",
+						"lastName": "Gonzalez",
 						"creatorType": "author"
 					}
 				],
@@ -183,8 +183,6 @@ var testCases = [
 				"date": "domingo, 11 de marzo de 2012",
 				"blogTitle": "Politica Argentina - Blog de Psicología Política de Federico González",
 				"url": "http://argentina-politica.blogspot.com/2012/03/perciben-una-caida-en-la-imagen-de-la.html",
-				"libraryCatalog": "Blogger",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Politica Argentina - Blog de Psicología Política de Federico González"
 			}
 		]

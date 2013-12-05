@@ -96,13 +96,13 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "Jairo Pimentel",
-						"lastName": "Jr",
+						"firstName": "Maria do Socorro Sousa",
+						"lastName": "Braga",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Maria do Socorro Sousa",
-						"lastName": "Braga",
+						"firstName": "Jairo Pimentel",
+						"lastName": "Jr",
 						"creatorType": "author"
 					}
 				],
@@ -129,17 +129,17 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"abstractNote": "Há décadas a constatação corrente no Brasil é de que os partidos pouco importam para explicar o comportamento dos eleitores brasileiros. Entretanto, esse cenário de baixa identificação partidária contrasta com a observação de que, ao menos para as eleições presidenciais a competição eleitoral tem se...",
-				"issue": "2",
-				"language": "pt",
-				"ISSN": "0104-6276, 1807-0191",
-				"url": "http://www.redalyc.org/resumen.oa?id=32921102001",
-				"libraryCatalog": "www.redalyc.org",
 				"title": "Os partidos políticos brasileiros realmente não importam?",
 				"publicationTitle": "Opinião Pública",
+				"abstractNote": "Há décadas a constatação corrente no Brasil é de que os partidos pouco importam para explicar o comportamento dos eleitores brasileiros. Entretanto, esse cenário de baixa identificação partidária contrasta com a observação de que, ao menos para as eleições presidenciais a competição eleitoral tem se...",
 				"date": "2011",
 				"volume": "17",
-				"pages": "271-303"
+				"issue": "2",
+				"language": "pt",
+				"pages": "271-303",
+				"ISSN": "0104-6276, 1807-0191",
+				"url": "http://www.redalyc.org/resumen.oa?id=32921102001",
+				"libraryCatalog": "www.redalyc.org"
 			}
 		]
 	},

@@ -164,11 +164,12 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Internet",
 					"Café",
+					"Internet",
 					"Polizei",
+					"SZ",
 					"Süddeutsche Zeitung",
-					"SZ"
+					"Wohnung"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -187,7 +188,6 @@ var testCases = [
 				"ISSN": "0174-4917",
 				"language": "de",
 				"libraryCatalog": "Sueddeutsche.de",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Verdacht gegen hessischen Verfassungsschützer"
 			}
 		]

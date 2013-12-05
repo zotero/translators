@@ -323,8 +323,8 @@ var testCases = [
 					"Economic Conditions and Trends",
 					"Income Inequality",
 					"Social Conditions and Trends",
-					"United States Economy",
-					"United States"
+					"United States",
+					"United States Economy"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -332,15 +332,11 @@ var testCases = [
 						"title": "New York Times Snapshot"
 					}
 				],
-				"publicationTitle": "The New York Times",
-				"ISSN": "0362-4331",
 				"url": "http://opinionator.blogs.nytimes.com/2013/06/19/our-broken-social-contract/",
-				"abstractNote": "At their core, are America&#8217;s problems primarily economic or moral?",
+				"abstractNote": "At their core, are America’s problems primarily economic or moral?",
 				"title": "Our Broken Social Contract",
-				"blogTitle": "The New York Times - Opinionator",
-				"date": "2013-06-19",
-				"libraryCatalog": "NYTimes.com",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"blogTitle": "The New York Times",
+				"date": "2013-06-19"
 			}
 		]
 	}

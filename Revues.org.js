@@ -248,16 +248,17 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
+				"title": "Le testament d’Elvire (Tábara, 1099)",
+				"publicationTitle": "e-Spania. Revue interdisciplinaire d’études hispaniques médiévales et modernes",
 				"rights": "© e-Spania",
 				"issue": "5",
+				"date": "2012/12/16",
+				"DOI": "10.4000/e-spania.12303",
 				"url": "http://e-spania.revues.org/12303?lang=fr",
 				"abstractNote": "Le testament d’Elvire livre de précieuses informations sur la réalité historique de l’infantat : son implantation, la composition de ses biens, ses évolutions, les formes de son acquisition et de sa transmission, sa fonction politique. Mais il nous renseigne aussi sur une infante de niveau moyen, sur son cadre de vie, son entourage, ses activités, les réseaux de son pouvoir et même sur sa foi.",
 				"language": "fr",
 				"ISSN": "1951-6169",
-				"libraryCatalog": "e-spania.revues.org",
-				"title": "Le testament d’Elvire (Tábara, 1099)",
-				"publicationTitle": "e-Spania. Revue interdisciplinaire d’études hispaniques médiévales et modernes",
-				"date": "2012/12/16"
+				"libraryCatalog": "e-spania.revues.org"
 			}
 		]
 	},
@@ -343,19 +344,19 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"rights": "© Droz",
-				"issue": "1",
-				"DOI": "10.4000/chs.142",
-				"ISSN": "1422-0857",
-				"url": "http://chs.revues.org/index142.html",
-				"abstractNote": "Au sortir de la Seconde Guerre mondiale, pour sauvegarder son empire colonial, la France est contrainte de reconnaître la citoyenneté des Français musulmans d’Algérie (FMA). Dès lors, ceux-ci se retrouvent en métropole dans une situation proche de celle d’autres citoyens diminués (vagabonds, prostituées…) qui, bien que juridiquement peu accessibles à la répression policière sont considérés comme « indésirables » et constituent la clientèle privilégiée de forces de l’ordre agissant aux marges de la loi. Si l’ethnicité, la xénophobie, et la situation coloniale contribuent à définir les Algériens comme « indésirables », le répertoire d’actions policier envers les FMA tient avant tout à la façon dont l’arène policière est médiatisée par le contrôle et la représentation politiques.",
-				"language": "fr",
-				"libraryCatalog": "chs.revues.org",
 				"title": "L’encadrement des Algériens de Paris (1944-1954), entre contraintes juridiques et arbitraire policier",
 				"publicationTitle": "Crime, Histoire & Sociétés / Crime, History & Societies",
+				"rights": "© Droz",
 				"volume": "11",
+				"issue": "1",
 				"pages": "5-25",
-				"date": "2007/06/01"
+				"date": "2007/06/01",
+				"DOI": "10.4000/chs.142",
+				"ISSN": "1422-0857",
+				"url": "http://chs.revues.org/142",
+				"abstractNote": "Au sortir de la Seconde Guerre mondiale, pour sauvegarder son empire colonial, la France est contrainte de reconnaître la citoyenneté des Français musulmans d’Algérie (FMA). Dès lors, ceux-ci se retrouvent en métropole dans une situation proche de celle d’autres citoyens diminués (vagabonds, prostituées…) qui, bien que juridiquement peu accessibles à la répression policière sont considérés comme « indésirables » et constituent la clientèle privilégiée de forces de l’ordre agissant aux marges de la loi. Si l’ethnicité, la xénophobie, et la situation coloniale contribuent à définir les Algériens comme « indésirables », le répertoire d’actions policier envers les FMA tient avant tout à la façon dont l’arène policière est médiatisée par le contrôle et la représentation politiques.",
+				"language": "fr",
+				"libraryCatalog": "chs.revues.org"
 			}
 		]
 	},
@@ -391,17 +392,18 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"rights": "© The Graduate Institute|Geneva",
+				"title": "Développement économique et legs coloniaux en Afrique",
+				"publicationTitle": "International Development Policy | Revue internationale de politique de développement",
+				"rights": "© The Graduate Institute|Geneva - http://creativecommons.org/licenses/by-nc/3.0/",
 				"issue": "1",
+				"pages": "11-36",
+				"date": "2010/03/11",
+				"DOI": "10.4000/poldev.135",
 				"ISSN": "1663-9375",
 				"url": "http://poldev.revues.org/135",
 				"abstractNote": "Cet article étudie les effets du gouvernement colonial et de l’action des Africains pendant la période coloniale sur le contexte institutionnel et la situation en matière de ressources qui ont posé le cadre du futur développement économique au sud du Sahara. Cette question est placée dans la perspective de la dynamique du développement dans une région qui était, en 1900, extrêmement riche en terres et caractérisée par un manque de main-d’œuvre et de capital, par des activités marchandes indigènes dont l’ampleur peut étonner et par des degrés variables mais souvent peu élevés de centralisation politique. L’article explore la différence entre les effets des gouvernements français et britannique, mais il affirme que la différence visible dans l’évolution de la pauvreté, du bien-être et du changement structurel a davantage été déterminée par l’opposition entre économies « de peuplement » et « d’exploitation ».",
 				"language": "fr",
-				"libraryCatalog": "poldev.revues.org",
-				"title": "Développement économique et legs coloniaux en Afrique",
-				"publicationTitle": "International Development Policy | Revue internationale de politique de développement",
-				"pages": "11-36",
-				"date": "2010/03/11"
+				"libraryCatalog": "poldev.revues.org"
 			}
 		]
 	}

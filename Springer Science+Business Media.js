@@ -228,20 +228,20 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
+				"title": "Nanoscale potassium niobate crystal structure and phase transition",
+				"publicationTitle": "Nanoscale Research Letters",
 				"rights": "2011 Chen et al; licensee Springer.",
+				"volume": "6",
 				"issue": "1",
+				"pages": "530",
+				"date": "2011-09-23",
 				"DOI": "10.1186/1556-276X-6-530",
 				"ISSN": "1556-276X",
 				"language": "en",
-				"abstractNote": "Nanoscale potassium niobate (KNbO3) powders of orthorhombic structure were synthesized using the sol-gel method. The heat-treatment temperature of the gels had a pronounced effect on KNbO3 particle size and morphology. Field emission scanning electron microscopy and transmission electron microscopy were used to determine particle size and morphology. The average KNbO3 grain size was estimated to be less than 100 nm, and transmission electron microscopy images indicated that KNbO3 particles had a brick-like morphology. Synchrotron X-ray diffraction was used to identify the room-temperature structures using Rietveld refinement. The ferroelectric orthorhombic phase was retained even for particles smaller than 50 nm. The orthorhombic to tetragonal and tetragonal to cubic phase transitions of nanocrystalline KNbO3 were investigated using temperature-dependent powder X-ray diffraction. Differential scanning calorimetry was used to examine the temperature dependence of KNbO3 phase transition. The Curie temperature and phase transition were independent of particle size, and Rietveld analyses showed increasing distortions with decreasing particle size.",
 				"url": "http://www.nanoscalereslett.com/content/6/1/530/abstract",
+				"abstractNote": "Nanoscale potassium niobate (KNbO3) powders of orthorhombic structure were synthesized using the sol-gel method. The heat-treatment temperature of the gels had a pronounced effect on KNbO3 particle size and morphology. Field emission scanning electron microscopy and transmission electron microscopy were used to determine particle size and morphology. The average KNbO3 grain size was estimated to be less than 100 nm, and transmission electron microscopy images indicated that KNbO3 particles had a brick-like morphology. Synchrotron X-ray diffraction was used to identify the room-temperature structures using Rietveld refinement. The ferroelectric orthorhombic phase was retained even for particles smaller than 50 nm. The orthorhombic to tetragonal and tetragonal to cubic phase transitions of nanocrystalline KNbO3 were investigated using temperature-dependent powder X-ray diffraction. Differential scanning calorimetry was used to examine the temperature dependence of KNbO3 phase transition. The Curie temperature and phase transition were independent of particle size, and Rietveld analyses showed increasing distortions with decreasing particle size.\nPMID: 21943345",
 				"libraryCatalog": "www.nanoscalereslett.com",
-				"extra": "PMID: 21943345",
-				"title": "Nanoscale potassium niobate crystal structure and phase transition",
-				"publicationTitle": "Nanoscale Research Letters",
-				"volume": "6",
-				"pages": "530",
-				"date": "2011-09-23"
+				"extra": "PMID: 21943345"
 			}
 		]
 	},
@@ -335,20 +335,20 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
+				"title": "Nicotinic receptors on rat alveolar macrophages dampen ATP-induced increase in cytosolic calcium concentration",
+				"publicationTitle": "Respiratory Research",
 				"rights": "2010 Mikulski et al; licensee BioMed Central Ltd.",
+				"volume": "11",
 				"issue": "1",
+				"pages": "133",
+				"date": "2010-09-29",
 				"DOI": "10.1186/1465-9921-11-133",
 				"ISSN": "1465-9921",
 				"language": "en",
-				"abstractNote": "Nicotinic acetylcholine receptors (nAChR) have been identified on a variety of cells of the immune system and are generally considered to trigger anti-inflammatory events. In the present study, we determine the nAChR inventory of rat alveolar macrophages (AM), and investigate the cellular events evoked by stimulation with nicotine.",
 				"url": "http://respiratory-research.com/content/11/1/133/abstract",
+				"abstractNote": "Nicotinic acetylcholine receptors (nAChR) have been identified on a variety of cells of the immune system and are generally considered to trigger anti-inflammatory events. In the present study, we determine the nAChR inventory of rat alveolar macrophages (AM), and investigate the cellular events evoked by stimulation with nicotine.\nPMID: 20920278",
 				"libraryCatalog": "respiratory-research.com",
-				"extra": "PMID: 20920278",
-				"title": "Nicotinic receptors on rat alveolar macrophages dampen ATP-induced increase in cytosolic calcium concentration",
-				"publicationTitle": "Respiratory Research",
-				"volume": "11",
-				"pages": "133",
-				"date": "2010-09-29"
+				"extra": "PMID: 20920278"
 			}
 		]
 	},
@@ -407,20 +407,20 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
+				"title": "Cacao seeds are a",
+				"publicationTitle": "Chemistry Central Journal",
 				"rights": "2011 Crozier et al",
+				"volume": "5",
 				"issue": "1",
+				"pages": "5",
+				"date": "2011-02-07",
 				"DOI": "10.1186/1752-153X-5-5",
 				"ISSN": "1752-153X",
 				"language": "en",
-				"abstractNote": "Numerous popular media sources have developed lists of",
 				"url": "http://journal.chemistrycentral.com/content/5/1/5/abstract",
+				"abstractNote": "Numerous popular media sources have developed lists of\nPMID: 21299842",
 				"libraryCatalog": "journal.chemistrycentral.com",
-				"extra": "PMID: 21299842",
-				"title": "Cacao seeds are a",
-				"publicationTitle": "Chemistry Central Journal",
-				"volume": "5",
-				"pages": "5",
-				"date": "2011-02-07"
+				"extra": "PMID: 21299842"
 			}
 		]
 	},
@@ -459,20 +459,21 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
+				"title": "Poly(A)-binding proteins: multifunctional scaffolds for the post-transcriptional control of gene expression",
+				"publicationTitle": "Genome Biology",
 				"rights": "2003 BioMed Central Ltd",
+				"volume": "4",
 				"issue": "7",
+				"pages": "223",
+				"date": "2003-07-01",
 				"DOI": "10.1186/gb-2003-4-7-223",
 				"ISSN": "1465-6906",
 				"language": "en",
 				"url": "http://genomebiology.com/2003/4/7/223/abstract",
 				"libraryCatalog": "genomebiology.com",
+				"abstractNote": "PMID: 12844354",
 				"extra": "PMID: 12844354",
-				"shortTitle": "Poly(A)-binding proteins",
-				"title": "Poly(A)-binding proteins: multifunctional scaffolds for the post-transcriptional control of gene expression",
-				"publicationTitle": "Genome Biology",
-				"volume": "4",
-				"pages": "223",
-				"date": "2003-07-01"
+				"shortTitle": "Poly(A)-binding proteins"
 			}
 		]
 	},
@@ -536,20 +537,20 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
+				"title": "Inference of hierarchical regulatory network of estrogen-dependent breast cancer through ChIP-based data",
+				"publicationTitle": "BMC Systems Biology",
 				"rights": "2010 Gu et al; licensee BioMed Central Ltd.",
+				"volume": "4",
 				"issue": "1",
+				"pages": "170",
+				"date": "2010-12-17",
 				"DOI": "10.1186/1752-0509-4-170",
 				"ISSN": "1752-0509",
 				"language": "en",
-				"abstractNote": "Global profiling of in vivo protein-DNA interactions using ChIP-based technologies has evolved rapidly in recent years. Although many genome-wide studies have identified thousands of ERα binding sites and have revealed the associated transcription factor (TF) partners, such as AP1, FOXA1 and CEBP, little is known about ERα associated hierarchical transcriptional regulatory networks.",
 				"url": "http://www.biomedcentral.com/1752-0509/4/170/abstract",
+				"abstractNote": "Global profiling of in vivo protein-DNA interactions using ChIP-based technologies has evolved rapidly in recent years. Although many genome-wide studies have identified thousands of ERα binding sites and have revealed the associated transcription factor (TF) partners, such as AP1, FOXA1 and CEBP, little is known about ERα associated hierarchical transcriptional regulatory networks.\nPMID: 21167036",
 				"libraryCatalog": "www.biomedcentral.com",
-				"extra": "PMID: 21167036",
-				"title": "Inference of hierarchical regulatory network of estrogen-dependent breast cancer through ChIP-based data",
-				"publicationTitle": "BMC Systems Biology",
-				"volume": "4",
-				"pages": "170",
-				"date": "2010-12-17"
+				"extra": "PMID: 21167036"
 			}
 		]
 	},

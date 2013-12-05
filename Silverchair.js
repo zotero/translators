@@ -242,8 +242,8 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "",
-						"firstName": "",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					}
 				],
 				"notes": [],
@@ -257,17 +257,16 @@ var testCases = [
 				],
 				"title": "Improving care transitions: Optimizing medication reconciliation",
 				"date": "July 1, 2012",
-				"journalAbbreviation": "J Am Pharm Assoc.",
+				"journalAbbreviation": "J Am Pharm Assoc (2003)",
 				"pages": "e43-e52",
 				"volume": "52",
 				"issue": "4",
-				"abstractNote": "Objective  \r\n\tTo improve understanding of the medication reconciliation process, its effect on patient care and outcomes, and how pharmacists can contribute to improving this process using a standardized framework of service delivery defined in the context of medication therapy management.Summary  \r\n\tMedication reconciliation is an integral part of the care transitions process in which health care professionals collaborate to improve medication safety as the patient transitions between patient care settings or levels of care. In 2005, medication reconciliation came to the forefront of health care when the Joint Commission on Accreditation designated it as a National Patient Safety Goal. Although individual health professionals have different roles in the process, the overall focus of the medication reconciliation process is on global patient safety and improved patient outcomes.Conclusion  \r\n\tMedication reconciliation research has been increasing, but more studies are needed on the implementation and adoption of effective medication reconciliation processes, with emphasis on the identification of current best practices for medication reconciliation. The application of the foundational concepts in this publication and future work on the enhancement of the medication reconciliation process will help to improve patient safety and patient care outcomes during care transitions.",
+				"abstractNote": "Objective \nTo improve understanding of the medication reconciliation process, its effect on patient care and outcomes, and how pharmacists can contribute to improving this process using a standardized framework of service delivery defined in the context of medication therapy management.Summary\nMedication reconciliation is an integral part of the care transitions process in which health care professionals collaborate to improve medication safety as the patient transitions between patient care settings or levels of care. In 2005, medication reconciliation came to the forefront of health care when the Joint Commission on Accreditation designated it as a National Patient Safety Goal. Although individual health professionals have different roles in the process, the overall focus of the medication reconciliation process is on global patient safety and improved patient outcomes.Conclusion\nMedication reconciliation research has been increasing, but more studies are needed on the implementation and adoption of effective medication reconciliation processes, with emphasis on the identification of current best practices for medication reconciliation. The application of the foundational concepts in this publication and future work on the enhancement of the medication reconciliation process will help to improve patient safety and patient care outcomes during care transitions.",
 				"ISSN": "1544-3191",
 				"DOI": "10.1331/JAPhA.2012.12527",
 				"url": "http://dx.doi.org/10.1331/JAPhA.2012.12527",
 				"publicationTitle": "Journal of the American Pharmacists Association",
 				"libraryCatalog": "Silverchair",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Improving care transitions"
 			}
 		]

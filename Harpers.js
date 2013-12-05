@@ -137,11 +137,11 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Harpers PDF",
+						"title": "Harper's PDF",
 						"type": "application/pdf"
 					},
 					{
-						"title": "Harpers Snapshot",
+						"title": "Harper's Snapshot",
 						"type": "text/html"
 					}
 				],
@@ -151,8 +151,7 @@ var testCases = [
 				"ISSN": "0017-789X",
 				"publicationTitle": "Harper's Magazine",
 				"title": "Labor’s Last Stand",
-				"libraryCatalog": "Harpers",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "Harpers"
 			}
 		]
 	},
@@ -179,17 +178,14 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Harpers Snapshot",
+						"title": "Harper's Snapshot",
 						"type": "text/html"
 					}
 				],
 				"url": "http://harpers.org/blog/2013/10/a-beautiful-truth/",
 				"blogTitle": "The Stream - Harper's Magazine Blog",
 				"date": "October 28, 2013",
-				"ISSN": "0017-789X",
-				"title": "A Beautiful Truth",
-				"libraryCatalog": "Harpers",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"title": "A Beautiful Truth"
 			}
 		]
 	},

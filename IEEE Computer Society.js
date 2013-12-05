@@ -231,15 +231,15 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"special issues and sections",
-					"resource management",
-					"system analysis and design",
+					"behavioral sciences",
+					"context awareness",
+					"cultural differences",
 					"emotion recognition",
 					"human factors",
+					"resource management",
+					"special issues and sections",
 					"speech processing",
-					"cultural differences",
-					"behavioral sciences",
-					"context awareness"
+					"system analysis and design"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -252,6 +252,7 @@ var testCases = [
 						"title": "IEEE Computer Full Text PDF"
 					}
 				],
+				"itemID": "10.1109/T-AFFC.2012.10",
 				"title": "Guest Editorial: Special Section on Naturalistic Affect Resources for System Building and Evaluation",
 				"publicationTitle": "IEEE Transactions on Affective Computing",
 				"volume": "3",
@@ -260,8 +261,6 @@ var testCases = [
 				"date": "2012",
 				"pages": "3-4",
 				"DOI": "10.1109/T-AFFC.2012.10",
-				"publisher": "IEEE Computer Society",
-				"place": "Los Alamitos, CA, USA",
 				"abstractNote": "The papers in this special section focus on the deployment of naturalistic affect resources for systems design and analysis.",
 				"libraryCatalog": "IEEE Computer Society",
 				"shortTitle": "Guest Editorial"
@@ -297,8 +296,8 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"hybrid systems",
-					" design studies"
+					" design studies",
+					"hybrid systems"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -307,6 +306,7 @@ var testCases = [
 						"title": "IEEE Computer Snapshot"
 					}
 				],
+				"itemID": "10.1109/L-CA.2011.22",
 				"title": "A Case for Hybrid Discrete-Continuous Architectures",
 				"publicationTitle": "IEEE Computer Architecture Letters",
 				"volume": "11",
@@ -315,8 +315,6 @@ var testCases = [
 				"date": "2012",
 				"pages": "1-4",
 				"DOI": "10.1109/L-CA.2011.22",
-				"publisher": "IEEE Computer Society",
-				"place": "Los Alamitos, CA, USA",
 				"abstractNote": "Current technology trends indicate that power- and energyefficiency will limit chip throughput in the future. Current solutions to these problems, either in the way of programmable or fixed-function digital accelerators will soon reach their limits as microarchitectural overheads are successively trimmed. A significant departure from current computing methods is required to carry forward computing advances beyond digital accelerators. In this paper we describe how the energy-efficiency of a large class of problems can be improved by employing a hybrid of the discrete and continuous models of computation instead of the ubiquitous, traditional discrete model of computation. We present preliminary analysis of domains and benchmarks that can be accelerated with the new model. Analysis shows that machine learning, physics and up to one-third of SPEC, RMS and Berkeley suite of applications can be accelerated with the new hybrid model.",
 				"libraryCatalog": "IEEE Computer Society"
 			}
@@ -341,17 +339,17 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"google",
-					"data visualization",
-					"visualization education",
-					"google",
-					"data visualization",
 					"computer graphics",
+					"data visualization",
+					"data visualization",
+					"data visualization",
+					"google",
+					"google",
 					"google chart tools",
-					"google maps api",
 					"google fusion tables",
+					"google maps api",
 					"processing",
-					"data visualization"
+					"visualization education"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -360,6 +358,7 @@ var testCases = [
 						"title": "IEEE Computer Snapshot"
 					}
 				],
+				"itemID": "10.1109/MCG.2012.114",
 				"title": "Introducing Google Chart Tools and Google Maps API in Data Visualization Courses",
 				"publicationTitle": "IEEE Computer Graphics and Applications",
 				"volume": "32",
@@ -367,9 +366,6 @@ var testCases = [
 				"ISSN": "0272-1716",
 				"date": "2012",
 				"pages": "6-9",
-				"DOI": "10.1109/MCG.2012.114",
-				"publisher": "IEEE Computer Society",
-				"place": "Los Alamitos, CA, USA",
 				"abstractNote": "This article reports the experience of using Google Chart Tools and Google Maps in a data visualization course at Georgia State University. These visualization toolkits have many benefits but haven&amp;rsquo;t been widely used in such courses. Students found them easy to use for creating a variety of interactive data visualizations.",
 				"libraryCatalog": "IEEE Computer Society"
 			}
@@ -423,8 +419,8 @@ var testCases = [
 						"title": "IEEE Computer Snapshot"
 					}
 				],
+				"itemID": "10.1109/BIBE.2010.10",
 				"title": "A Clustering Approach to Identify Intergenic Non-coding RNA in Mouse Macrophages",
-				"publicationTitle": "2012 IEEE 12th International Conference on Bioinformatics & Bioengineering (BIBE)",
 				"volume": "0",
 				"date": "2010",
 				"ISBN": "978-0-7695-4083-2",
@@ -433,7 +429,8 @@ var testCases = [
 				"publisher": "IEEE Computer Society",
 				"place": "Los Alamitos, CA, USA",
 				"abstractNote": "We present a global clustering approach to identify putative intergenic non-coding RNAs based on the RNA polymerase II and Histone 3 lysine 4 trimethylation signatures. Both of these signatures are processed from the digital sequencing tags produced by chromatin immunoprecipitation, a high-throughput massively parallel sequencing (ChIP-Seq) technology. Our method compares favorably to the comparison method. We characterize the intergenic non-coding RNAs to have conservative promoters. We predict that these nc-RNAs are related to metabolic process without lipopolysaccharides (LPS) treatment, but shift towards developmental and immune-related functions with LPS treatment. We demonstrate that more intergenic nc-RNAs respond positively to LPS treatment, rather than negatively. Using QPCR, we experimentally validate 8 out of 11 nc-RNA regions respond to LPS treatment as predicted by the computational method.",
-				"libraryCatalog": "IEEE Computer Society"
+				"libraryCatalog": "IEEE Computer Society",
+				"proceedingsTitle": "2012 IEEE 12th International Conference on Bioinformatics & Bioengineering (BIBE)"
 			}
 		]
 	},

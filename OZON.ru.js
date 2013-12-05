@@ -446,7 +446,12 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "Гради",
+						"firstName": "Автор не",
+						"lastName": "указан",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Грэди",
 						"lastName": "Буч",
 						"creatorType": "author"
 					},
@@ -519,7 +524,7 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "Дональд Э.",
+						"firstName": "Дональд Эрвин",
 						"lastName": "Кнут",
 						"creatorType": "author"
 					},

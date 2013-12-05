@@ -158,14 +158,12 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Fukushima plant's undersea radiation curtain ripped: TEPCO",
+				"title": "Fukushima plant's undersea radiation-containment curtain ripped",
 				"publicationTitle": "Mainichi Daily News",
 				"edition": "online edition",
 				"url": "http://mainichi.jp/english/english/newsselect/news/20130926p2g00m0dm100000c.html",
 				"date": "2013-09-26",
-				"libraryCatalog": "Mainichi Daily News",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Fukushima plant's undersea radiation curtain ripped"
+				"libraryCatalog": "Mainichi Daily News"
 			}
 		]
 	}

@@ -163,15 +163,15 @@ var testCases = [
 					}
 				],
 				"url": "http://www.nzz.ch/aktuell/wirtschaft/uebersicht/kuoni-gta-uebernahme-1.13276960",
+				"title": "Kuoni profitiert von der GTA-Übernahme: Deutliches Umsatzplus in den ersten neun Monaten",
+				"date": "2011-11-10",
+				"publicationTitle": "Neue Zürcher Zeitung",
 				"ISSN": "0376-6829",
 				"language": "de",
 				"shortTitle": "Kuoni profitiert von der GTA-Übernahme",
 				"abstractNote": "Der Reisekonzern Kuoni hat in den ersten neun Monaten von der Übernahme des Reisekonzerns Gullivers Travel Associates (GTA) profitiert. Der Umsatz stieg, und der Konzern machte Gewinn.",
-				"section": "Übersicht",
-				"libraryCatalog": "NZZ",
-				"title": "Kuoni profitiert von der GTA-Übernahme: Deutliches Umsatzplus in den ersten neun Monaten",
-				"date": "2011-11-10",
-				"publicationTitle": "Neue Zürcher Zeitung"
+				"section": "Wirtschaft",
+				"libraryCatalog": "NZZ"
 			}
 		]
 	},
@@ -198,7 +198,7 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"url": "http://www.nzz.ch/aktuell/international/wie-ein-mexikanisches-staedtchen-die-boesewichte-vertrieb-1.17091747",
+				"url": "http://www.nzz.ch/aktuell/international/uebersicht/wie-ein-mexikanisches-staedtchen-die-boesewichte-vertrieb-1.17091747",
 				"title": "Wie ein mexikanisches Städtchen die Bösewichte vertrieb: Landsgemeinde als Mittel gegen das organisierte Verbrechen und korrupte Behörden",
 				"date": "2012-05-30",
 				"publicationTitle": "Neue Zürcher Zeitung",
@@ -207,8 +207,7 @@ var testCases = [
 				"shortTitle": "Wie ein mexikanisches Städtchen die Bösewichte vertrieb",
 				"abstractNote": "Mit einem Aufstand haben die Einwohner der mexikanischen Gemeinde Cherán die Holzfällermafia vertrieben. Sie haben eine Landsgemeinde gegründet und entdeckt, dass direktdemokratische Institutionen Korruption verhindern.",
 				"section": "International",
-				"libraryCatalog": "NZZ",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "NZZ"
 			}
 		]
 	},

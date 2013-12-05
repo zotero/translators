@@ -84,17 +84,15 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://allafrica.com/stories/printable/201110180002.html",
 						"title": "AllAfrica Printable",
 						"type": "text/html"
 					}
 				],
 				"url": "http://allafrica.com/stories/201110180002.html",
 				"date": "17 October 2011",
-				"publicationTitle": "Institute for Security Studies",
+				"publicationTitle": "Institute for Security Studies (Tshwane/Pretoria)",
 				"title": "Angola: Political Upheaval Ahead of 2012 Polls",
 				"libraryCatalog": "allAfrica.com",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Angola"
 			}
 		]

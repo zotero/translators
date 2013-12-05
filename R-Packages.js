@@ -95,6 +95,11 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
+						"firstName": "Michael",
+						"lastName": "Friendly",
+						"creatorType": "author"
+					},
+					{
 						"firstName": "Jangman",
 						"lastName": "Hong",
 						"creatorType": "author"
@@ -107,11 +112,6 @@ var testCases = [
 					{
 						"firstName": "David",
 						"lastName": "Firth",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Michael",
-						"lastName": "Friendly",
 						"creatorType": "author"
 					},
 					{
@@ -130,13 +130,12 @@ var testCases = [
 					}
 				],
 				"url": "http://cran.us.r-project.org/web/packages/effects/index.html",
-				"abstractNote": "Graphical and tabular effect displays, e.g., of\ninteractions, for linear generalized linear, multinomial-logit,\nand proportional-odds logit models.",
-				"date": "2013-02-18",
+				"abstractNote": "Graphical and tabular effect displays, e.g., of interactions, for\nvarious statistical models with linear predictors.",
+				"date": "2013-11-07",
 				"rights": "GPL-2 | GPL-3 [expanded from: GPL (≥ 2)]",
 				"title": "effects: Effect Displays for Linear, Generalized Linear,\nMultinomial-Logit, Proportional-Odds Logit Models and\nMixed-Effects Models",
-				"version": "2.2-4",
+				"version": "2.3-0",
 				"libraryCatalog": "R-Packages",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "effects"
 			}
 		]

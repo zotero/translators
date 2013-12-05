@@ -195,13 +195,12 @@ var testCases = [
 				"url": "http://www.bilanz.ch/unternehmen/google-kauft-daily-deal",
 				"title": "Google kauft Daily Deal",
 				"abstractNote": "Gutscheine für Google: Der Online-Riese hat das Portal Daily Deal übernommen. Das Unternehmen verkauft in der Schweiz, in Deutschland und in Österreich Rabattgutscheine im Internet.",
-				"date": "19.09.2011 | 14:57",
+				"date": "19.09.2011",
 				"publicationTitle": "Bilanz",
 				"ISSN": "1022-3487",
 				"language": "de",
 				"section": "Unternehmen",
-				"libraryCatalog": "Handelszeitung",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "Handelszeitung"
 			}
 		]
 	},

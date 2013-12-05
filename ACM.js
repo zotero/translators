@@ -311,6 +311,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
+				"itemID": "Tegethoff:1997:STM:254650.257486",
 				"title": "Simulation Techniques for the Manufacturing Test of MCMs",
 				"publicationTitle": "J. Electron. Test.",
 				"volume": "10",
@@ -320,11 +321,8 @@ var testCases = [
 				"pages": "137–149",
 				"url": "http://dx.doi.org/10.1023/A:1008286901817",
 				"DOI": "10.1023/A:1008286901817",
-				"publisher": "Kluwer Academic Publishers",
-				"place": "Norwell, MA, USA",
-				"libraryCatalog": "ACM Digital Library",
-				"itemID": "Tegethoff:1997:STM:254650.257486",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"abstractNote": "Simulation techniques used in the Manufacturing Test SIMulator\n(MTSIM) are described. MTSIM is a Concurrent Engineering tool used to\nsimulate the manufacturing test and\nrepair aspects of boards and MCMs from design concept \nthrough manufacturing release. MTSIM helps designers select assembly\nprocess, specify Design For Test (DFT) features, select board test\ncoverage, specify ASIC defect level goals, establish product\nfeasibility, and predict manufacturing quality and cost goals. A new\nyield model for boards and MCMs which accounts for the\nclustering of solder defects is introduced and used to\npredict the yield at each test step. In addition, MTSIM\nestimates the average number of defects per board detected at each\ntest step, and estimates costs incurred in test execution, fault\nisolation and repair. MTSIM models were validated with\nhigh performance assemblies at Hewlett-Packard (HP).",
+				"libraryCatalog": "ACM Digital Library"
 			}
 		]
 	},

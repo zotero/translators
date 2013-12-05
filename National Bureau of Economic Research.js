@@ -101,16 +101,15 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
+				"itemID": "NBERw17577",
 				"title": "The Dynamics of Firm Lobbying",
-				"publisher": "National Bureau of Economic Research",
-				"type": "Working Paper",
-				"series": "Working Paper Series",
 				"reportNumber": "17577",
 				"date": "November 2011",
 				"url": "http://www.nber.org/papers/w17577",
 				"abstractNote": "We study the determinants of the dynamics of firm lobbying behavior using a panel data set covering 1998-2006. Our data exhibit three striking facts: (i) few firms lobby, (ii) lobbying status is strongly associated with firm size, and (iii) lobbying status is highly persistent over time. Estimating a model of a firm's decision to engage in lobbying, we find significant evidence that up-front costs associated with entering the political process help explain all three facts. We then exploit a natural experiment in the expiration in legislation surrounding the H-1B visa cap for high-skilled immigrant workers to study how these costs affect firms' responses to policy changes. We find that companies primarily adjusted on the intensive margin: the firms that began to lobby for immigration were those who were sensitive to H-1B policy changes and who were already advocating for other issues, rather than firms that became involved in lobbying anew. For a firm already lobbying, the response is determined by the importance of the issue to the firm's business rather than the scale of the firm's prior lobbying efforts. These results support the existence of significant barriers to entry in the lobbying process.",
 				"libraryCatalog": "National Bureau of Economic Research",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"institution": "National Bureau of Economic Research",
+				"reportType": "Working Paper"
 			}
 		]
 	},

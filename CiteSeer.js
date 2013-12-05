@@ -94,45 +94,58 @@ function scrape(doc, url) {
 	translator.translate();
 }
 /** BEGIN TEST CASES **/
-var testCases = [{
-	"type": "web",
-	"url": "http://citeseerx.ist.psu.edu/search?q=karcher&submit=Search&sort=rlv&t=doc",
-	"items": "multiple"
-}, {
-	"type": "web",
-	"url": "http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.17.6708",
-	"items": [{
-		"itemType": "journalArticle",
-		"creators": [{
-			"firstName": "Ulrich",
-			"lastName": "Pinkall",
-			"creatorType": "author"
-		}, {
-			"firstName": "Strasse Des",
-			"lastName": "Juni",
-			"creatorType": "author"
-		}, {
-			"firstName": "Konrad",
-			"lastName": "Polthier",
-			"creatorType": "author"
-		}],
-		"notes": [],
-		"tags": [],
-		"seeAlso": [],
-		"attachments": [{
-			"title": "Citeseer - Snapshot",
-			"mimeType": "text/html"
-		}, {
-			"title": "Citeseer - Full Text PDF",
-			"mimeType": "application/pdf"
-		}],
-		"title": "Computing Discrete Minimal Surfaces and Their Conjugates",
-		"publicationTitle": "Experimental Mathematics",
-		"date": "1993",
-		"volume": "2",
-		"pages": "15–36",
-		"abstractNote": "We present a new algorithm to compute stable discrete  minimal surfaces bounded by a number of fixed or free boundary curves in R 3,  S 3 and H 3. The algorithm makes no restriction on the genus and can handle  singular triangulations. For a discrete harmonic map a conjugation process is  presented leading in case of minimal surfaces additionally to instable solutions  of the free boundary value problem for minimal surfaces. Symmetry properties  of boundary curves are respected during conjugation.",
-		"libraryCatalog": "CiteSeer"
-	}]
-}]
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://citeseerx.ist.psu.edu/search?q=karcher&submit=Search&sort=rlv&t=doc",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.17.6708",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Ulrich",
+						"lastName": "Pinkall",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Strasse Des",
+						"lastName": "Juni",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Konrad",
+						"lastName": "Polthier",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Citeseer - Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Citeseer - Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"itemID": "Pinkall93",
+				"title": "Computing Discrete Minimal Surfaces and Their Conjugates",
+				"publicationTitle": "Experimental Mathematics",
+				"date": "1993",
+				"volume": "2",
+				"pages": "15–36",
+				"abstractNote": "We present a new algorithm to compute stable discrete  minimal surfaces bounded by a number of fixed or free boundary curves in R 3,  S 3 and H 3. The algorithm makes no restriction on the genus and can handle  singular triangulations. For a discrete harmonic map a conjugation process is  presented leading in case of minimal surfaces additionally to instable solutions  of the free boundary value problem for minimal surfaces. Symmetry properties  of boundary curves are respected during conjugation.",
+				"libraryCatalog": "CiteSeer"
+			}
+		]
+	}
+]
 /** END TEST CASES **/

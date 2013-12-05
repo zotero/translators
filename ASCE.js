@@ -184,6 +184,7 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
+				"itemID": "doi:10.1061/(ASCE)0887-381X(2003)17:1(37)",
 				"title": "Friction Measurement on Cycleways Using a Portable Friction Tester",
 				"publicationTitle": "Journal of Cold Regions Engineering",
 				"volume": "17",
@@ -193,12 +194,8 @@ var testCases = [
 				"DOI": "10.1061/(ASCE)0887-381X(2003)17:1(37)",
 				"url": "http://ascelibrary.org/doi/abs/10.1061/%28ASCE%290887-381X%282003%2917%3A1%2837%29",
 				"abstractNote": "In seeking to promote cycling in wintertime, it is desirable to understand how important the winter maintenance service level is in people’s decision to cycle or not, and methods to compare different road conditions on cycleways are therefore needed. By measuring friction, an assessment of the service level can be achieved, but methods available often involve the use of large vehicles, which can lead to overloading damage on cycleways, and constitute a safety risk for cyclists and pedestrians. A portable friction tester (PFT), originally designed to measure friction on road markings, was thought to be an appropriate instrument for cycleways and was, therefore, tested on different winter road conditions, and on different cycleway pavement materials. In this study, it was found that the PFT is a valuable tool for measuring friction on cycleways. Different winter road conditions, as well as different pavement materials, can be distinguished from each other through PFT measurements. The PFT provides a good complement to visual inspections of cycleways in winter maintenance evaluation and can, for example, be used to determine if desired service levels have been achieved.",
-				"bookTitle": "Journal of Cold Regions Engineering",
-				"publisher": "American Society of Civil Engineers",
 				"ISSN": "0887-381X",
-				"ISBN": "0887-381X",
-				"libraryCatalog": "ASCE",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "ASCE"
 			}
 		]
 	},

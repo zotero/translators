@@ -586,14 +586,13 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"patentNumber": "EP0011951 A1",
-				"date": "Jun 11, 1980",
 				"filingDate": "Nov 6, 1979",
 				"assignee": "Merck & Co., Inc.",
 				"title": "Cold-water soluble tamarind gum, process for its preparation and its application in sizing textile warp",
 				"abstractNote": "A novel composition of crude tamarind kernel powder (TKP) is disclosed. The novel composition results from a process which makes TKP soluble in cold water; this process is not dependent on purification of TKP, but involves dissolving it in hot water and evaporating the resulting solution. The novel TKP composition has utility in textile, paper, and oilfield applications.",
 				"country": "European Union",
-				"extra": "International Classification D06M15/01, C08L5/00, C08B37/00; Cooperative Classification D06M15/01, C08B37/0087; European Classification D06M15/01, C08B37/00P6",
-				"libraryCatalog": "Google Patents"
+				"extra": "International Classification D06M15/01, C08L5/00, C08B37/00; Cooperative Classification C08B37/0087, D06M15/01; European Classification D06M15/01, C08B37/00P6",
+				"issueDate": "Jun 11, 1980"
 			}
 		]
 	},
@@ -620,14 +619,13 @@ var testCases = [
 					}
 				],
 				"patentNumber": "US4748058 A",
-				"date": "May 31, 1988",
 				"filingDate": "Feb 10, 1987",
 				"assignee": "Craig Jr Chester L",
 				"title": "Artificial tree",
 				"abstractNote": "An artificial tree assembly, and a tree constructed therefrom, are provided. The assembly comprises a collapsible three-piece pole; a base member formed by the bottom of a box for storing the tree assembly and including a pole support member secured thereto for supporting the pole; and a plurality of limb sections and interconnecting garlands. The limb-sections each comprise a central ring portion and a plurality of limb members extending radially outwardly from the central ring portions. The ring portions of the limb sections are stacked, when not in use, on the pole support member and are disposed, in use, along the length of pole in spaced relationship therealong. The garlands interconnect the limb portions so that as the ring portions are lifted, from the top, from the stacked positions thereof on the pole support member and slid along the pole, the garlands between adjacent limb section are tensioned, in turn, and thus serve to lift the next adjacent limb section until the tree is fully erected.",
 				"country": "United States",
-				"extra": "U.S. Classification 428/9, D11/118, 428/18; International Classification A47G33/00, A47G33/06; Cooperative Classification A47G33/06; European Classification A47G33/06",
-				"libraryCatalog": "Google Patents"
+				"extra": "U.S. Classification 428/9, D11/118, 428/18; International Classification A47G33/06; Cooperative Classification A47G33/06; European Classification A47G33/06",
+				"issueDate": "May 31, 1988"
 			}
 		]
 	},
@@ -654,14 +652,13 @@ var testCases = [
 					}
 				],
 				"patentNumber": "US5979603 A",
-				"date": "Nov 9, 1999",
 				"filingDate": "Jan 6, 1995",
 				"assignee": "Summit Specialties, Inc.",
 				"title": "Portable tree stand having fiber composite platform",
 				"abstractNote": "A climbing device for a tree or other vertical columnar member having a platform fashioned from fiber-reinforced composite material. The platform is a one-piece structure having a peripheral skin with bi-directionally oriented reinforcing fibers and longitudinally extending reinforcing fibers. The back bar is also fashioned from fiber-reinforced composite material having a peripheral skin with bi-directionally oriented reinforcing fibers and longitudinally extending reinforcing fibers. Fiber-reinforced members include a foam core for shape retention. The manufacturing process permits use of T-shaped joints in fiber-reinforced structures.",
 				"country": "United States",
-				"extra": "U.S. Classification 182/187, 182/135, 182/46; International Classification A01M31/00, A45F3/00, A45F3/26, A01M31/02; Cooperative Classification A45F3/26, A01M31/02; European Classification A45F3/26, A01M31/02",
-				"libraryCatalog": "Google Patents"
+				"extra": "U.S. Classification 182/187, 182/135, 182/46; International Classification A45F3/26, A01M31/02; Cooperative Classification A45F3/26, A01M31/02; European Classification A45F3/26, A01M31/02",
+				"issueDate": "Nov 9, 1999"
 			}
 		]
 	},
@@ -731,14 +728,13 @@ var testCases = [
 					}
 				],
 				"patentNumber": "US6239091 B1",
-				"date": "May 29, 2001",
 				"filingDate": "May 11, 1998",
 				"assignee": "Lever Brothers Company, Division Of Conopco, Inc.",
 				"title": "Machine dishwashing compositions with a polymer having cationic monomer units",
 				"abstractNote": "A detergent or rinse aid composition which reduces spotting and filming on glassware cleaned in an automatic dishwashing machine is described. The composition contains an effective amount of a water soluble cationic or amphoteric polymer having at least one monomer unit having a cationic charge over a portion of the pH range of about 2 to about 11 in the wash or rinse cycle.",
 				"country": "United States",
-				"extra": "U.S. Classification 510/220, 510/480, 510/223, 510/504, 510/441, 510/288, 510/434, 510/233, 510/349, 510/323, 510/514; International Classification C11D3/37; Cooperative Classification C23F11/173, C11D3/3719, C11D3/3769, C11D3/3723, C11D3/3796, C11D3/3776, C11D3/0073; European Classification C23F11/173, C11D3/37C8H, C11D3/37C8, C11D3/37B9, C11D3/37B8, C11D3/37Z, C11D3/00B15",
-				"libraryCatalog": "Google Patents"
+				"extra": "U.S. Classification 510/220, 510/480, 510/223, 510/504, 510/441, 510/288, 510/434, 510/233, 510/349, 510/323, 510/514; International Classification C11D3/37; Cooperative Classification C23F11/173, C11D3/3723, C11D3/0073, C11D3/3719, C11D3/3776, C11D3/3769, C11D3/3796; European Classification C23F11/173, C11D3/37C8H, C11D3/37C8, C11D3/37B9, C11D3/37B8, C11D3/37Z, C11D3/00B15",
+				"issueDate": "May 29, 2001"
 			}
 		]
 	},
@@ -775,14 +771,13 @@ var testCases = [
 					}
 				],
 				"patentNumber": "US20110172136 A1",
-				"date": "Jul 14, 2011",
 				"filingDate": "Mar 24, 2011",
 				"assignee": "Rhodia Operations",
 				"title": "Detergent composition with hydrophilizing soil-release agent and methods for using same",
 				"abstractNote": "Laundry detergent compositions that provide soil release benefits to all fabric comprising an organophosphorus soil release agents and optional non-cotton secondary soil release agents. The present invention further relates to a method for providing soil release benefits to cotton fabric by contacting cotton articles with a water soluble and/or dispersible organophosphorus material. The contacting can be during washing or by pretreating by applying the composition directly to stains or by presoaking the clothing in the composition prior to washing. The present invention further relates to providing soil release benefits to all fabric in the laundry wash load in the presence of a bleaching agent.",
 				"country": "United States",
-				"extra": "U.S. Classification 510/299; International Classification C11D3/60; Cooperative Classification C11D3/362, C11D3/3784, C11D11/0017, C11D1/342, C11D1/345, C11D3/0036, C11D3/361; European Classification C11D3/36B, C11D11/00B2A, C11D3/37C10, C11D3/00B7, C11D1/34C, C11D3/36C, C11D1/34B",
-				"libraryCatalog": "Google Patents"
+				"extra": "U.S. Classification 510/299; International Classification C11D3/60; Cooperative Classification C11D1/345, C11D3/361, C11D3/3784, C11D11/0017, C11D3/362, C11D3/0036, C11D1/342; European Classification C11D3/36B, C11D11/00B2A, C11D3/37C10, C11D3/00B7, C11D1/34C, C11D3/36C, C11D1/34B",
+				"issueDate": "Jul 14, 2011"
 			}
 		]
 	}
