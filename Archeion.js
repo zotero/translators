@@ -1,15 +1,15 @@
 {
 	"translatorID": "f6717cbb-2771-4043-bde9-dbae19129bb3",
-	"label": "Archeion/MemoryBC",
+	"label": "Archeion - MemoryBC - Aberta on Record",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://www\\.(archeion\\.ca|memorybc\\.ca)",
+	"target": "^https?://www\\.(archeion|memorybc|albertaonrecord)\\.ca",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-15 18:04:37"
+	"lastUpdated": "2013-12-06 17:16:09"
 }
 
 /*
@@ -167,7 +167,55 @@ var testCases = [
 				"rights": "Notes Session minutes are restricted for a period of 50 years from the date they were written.",
 				"archive": "The Presbyterian Church in Canada",
 				"archiveLocation": "CA ON00313 CONG-147",
-				"libraryCatalog": "Archeion/MemoryBC"
+				"libraryCatalog": "Archeion - MemoryBC - Aberta on Record"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.albertaonrecord.ca/;search?query=alphabet",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.albertaonrecord.ca/northwest-mennonite-conference-fonds;rad",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Northwest Mennonite Conference",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Mennonite Church. Northwest Conference",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Alberta-Saskatchewan Mennonite Conference",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"notes": [
+					"The fonds consists of four series: A) Alphabet Files, B) Congregations, C) Conferences, and D) Northwest Mennonite Conference Centennial Anniversary"
+				],
+				"tags": [
+					"Religions",
+					"Northwest Mennonite Conference",
+					"Alberta-Saskatchewan Mennonite Conference",
+					"Mennonite Church. Northwest Conference"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Northwest Mennonite Conference fonds",
+				"rights": "Access to personal information in financial or medical records is subject to relevant legislation and MHSA privacy policy",
+				"language": "The material is in English.",
+				"archive": "Mennonite Historical Society of Alberta",
+				"archiveLocation": "2003.031, 2004.033",
+				"libraryCatalog": "Archeion - MemoryBC - Aberta on Record"
 			}
 		]
 	}

@@ -1,4 +1,4 @@
-28  # Increment number when modifying file
+29  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -66,3 +66,7 @@ e9632edc-8032-4dc5-b2d4-284d481583e6 # SAE Inernational - replaced by SAE Papers
 4f62425a-c99f-4ce1-b7c1-5a3ac0d636a3 # Afro-Europa - Journal Defunct
 19643c25-a4b2-480d-91b7-4e0b761fb6ad # ScientificCommons - page defunct
 4c9dbe33-e64f-4536-a02f-f347fa1f187d # BioInfoBank - page defunct
+d75381ee-7d8d-4a3b-a595-b9190a06f43f # Scitation now part of AIP
+f39dbd1c-229e-4abb-8414-a09fdbda37b7 # Archives Network of Alberta - new website, now covered by Archeion
+
+
