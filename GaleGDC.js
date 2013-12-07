@@ -9,8 +9,9 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-06-23 00:39:01"
+	"lastUpdated": "2013-12-07 10:55:06"
 }
+
 /*
  * Gale GDC Copyright (C) 2011 Gale GDC
  *
@@ -47,6 +48,10 @@ var GaleZotero = (function() {
 			result = 'manuscript';
 		} else if (isMap(url)) {
 			result = 'map';
+		} else if (isVideo(url)) {
+			result = 'videoRecording';
+		} else if (isImage(url)) {
+			result = 'film';
 		} else if (isNewspaperArticle(url)) {
 			result = 'newspaperArticle';
 		} else if (isMultiple(doc, url)) {
@@ -112,9 +117,9 @@ var GaleZotero = (function() {
 
 	function getSearchResults(doc, url) {
 		var searchResultsLocators = ['//div[@regionid="searchResults"]',
-		                       '//table[@id="searchResult"]',
-		                       '//table[@id="markedDocuments"]',
-		                       '//div[@class="search_results_center"]'];
+							   '//table[@id="searchResult"]',
+							   '//table[@id="markedDocuments"]',
+							   '//div[@class="search_results_center"]'];
 		var resultsLocator = searchResultsLocators.join(' | ');
 		return doc.evaluate(resultsLocator, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	}
@@ -145,6 +150,14 @@ var GaleZotero = (function() {
 
 	function isBookSection(url) {
 		return (/MonographsDetails|PhotographsDetails/).test(url);
+	}
+
+	function isVideo(url) {
+		return (/VideosDetails/).test(url);
+	}
+
+	function isImage(url) {
+		return (/ImagesDetails/).test(url);
 	}
 
 	function initializeRisImporter() {
