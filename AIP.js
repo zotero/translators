@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-10-20 03:35:19"
+	"lastUpdated": "2013-12-06 17:49:29"
 }
 
 function getSearchResults(doc) {
@@ -21,10 +21,10 @@ function detectWeb(doc, url) {
 		return 'multiple';
 	}
 	
-	if(ZU.xpathText(doc, '/html/head/meta[@name="citation_journal_title"]/@content')
-		|| doc.body.id == 'conferencepaper') {
+	if(ZU.xpathText(doc, '/html/head/meta[@name="citation_journal_title"]/@content')) {
 		return 'journalArticle';
 	}
+	else if(doc.body.id == 'conferencepaper') return "conferencePaper"
 }
 function doWeb(doc, url) {
 	if(detectWeb(doc, url) == 'multiple') {
@@ -154,15 +154,15 @@ var testCases = [
 				"notes": [],
 				"tags": [
 					"Antiferroelectricity",
-					"Crystal structure",
 					"Dielectric oxides",
-					"Electron energy loss spectroscopy",
-					"Ferroelectricity",
-					"Image reconstruction",
 					"Iron group ions",
+					"Image reconstruction",
+					"Ozone",
+					"Electron energy loss spectroscopy",
 					"Nanorods",
-					"Optical aberrations",
-					"Ozone"
+					"Crystal structure",
+					"Ferroelectricity",
+					"Optical aberrations"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -175,7 +175,21 @@ var testCases = [
 					}
 				],
 				"title": "Local stabilisation of polar order at charged antiphase boundaries in antiferroelectric (Bi0.85Nd0.15)(Ti0.1Fe0.9)O3",
+				"publisher": "AIP Publishing",
+				"institution": "AIP Publishing",
+				"company": "AIP Publishing",
+				"label": "AIP Publishing",
+				"distributor": "AIP Publishing",
 				"date": "2013/08/13",
+				"reportType": "Text",
+				"letterType": "Text",
+				"manuscriptType": "Text",
+				"mapType": "Text",
+				"thesisType": "Text",
+				"websiteType": "Text",
+				"presentationType": "Text",
+				"postType": "Text",
+				"audioFileType": "Text",
 				"publicationTitle": "APL Materials",
 				"volume": "1",
 				"issue": "2",
@@ -184,7 +198,8 @@ var testCases = [
 				"pages": "021102",
 				"ISSN": "2166-532X",
 				"url": "http://scitation.aip.org/content/aip/journal/aplmater/1/2/10.1063/1.4818002",
-				"libraryCatalog": "scitation.aip.org"
+				"libraryCatalog": "scitation.aip.org",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -203,13 +218,13 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Advanced materials",
 					"Insulator surfaces",
+					"Numerical analysis",
+					"Surface finishing",
+					"Advanced materials",
 					"Materials science",
 					"Number theory",
-					"Numerical analysis",
 					"Radiative heat transfer",
-					"Surface finishing",
 					"Thermal analysis",
 					"Thermal nonlinear materials"
 				],
@@ -224,16 +239,32 @@ var testCases = [
 					}
 				],
 				"title": "Evaluation of thermal resistance of building insulations with reflective surfaces",
-				"publisher": "American Institute of Physics",
+				"publisher": "AIP Publishing",
+				"institution": "AIP Publishing",
+				"company": "AIP Publishing",
+				"label": "AIP Publishing",
+				"distributor": "AIP Publishing",
 				"date": "2012/09/26",
+				"reportType": "Text",
+				"letterType": "Text",
+				"manuscriptType": "Text",
+				"mapType": "Text",
+				"thesisType": "Text",
+				"websiteType": "Text",
+				"presentationType": "Text",
+				"postType": "Text",
+				"audioFileType": "Text",
+				"volume": "1479",
+				"issue": "1",
 				"conferenceName": "NUMERICAL ANALYSIS AND APPLIED MATHEMATICS ICNAAM 2012: International Conference of Numerical Analysis and Applied Mathematics",
 				"abstractNote": "The thermal resistance of advanced insulation materials, applied namely in civil engineering, containing reflective surfaces and air gaps, cannot be evaluated correctly using the valid European standards because of presence of the dominant nonlinear radiative heat transfer and other phenomena not included in the recommended computational formulae. The proper general physical analysis refers to rather complicated problems from classical thermodynamics, whose both existence theory and numerical analysis contain open questions and cannot be done in practice when the optimization of composition of insulation layers is required. This paper, coming from original experimental results, demonstrates an alternative simplified computational approach, taking into account the most important physical processes, useful in the design of modern insulation systems.",
 				"DOI": "10.1063/1.4756630",
 				"pages": "2204-2207",
+				"ISSN": "0094-243X, 1551-7616",
 				"url": "http://scitation.aip.org/content/aip/proceeding/aipcp/10.1063/1.4756630",
 				"libraryCatalog": "scitation.aip.org",
-				"volume": "1479",
-				"proceedingsTitle": "AIP Conference Proceedings"
+				"accessDate": "CURRENT_TIMESTAMP",
+				"publicationTitle": "AIP Conference Proceedings"
 			}
 		]
 	},

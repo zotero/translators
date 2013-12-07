@@ -2,24 +2,46 @@
 	"translatorID": "f318ab1e-71c6-4f67-8ac3-4b1144e5bf4e",
 	"label": "APS-Physics",
 	"creator": "Will Shanks",
-	"target": "^https?://(?:www\\.)?(physics)\\.aps\\.org[^/]*/(articles)/?",
+	"target": "^https?://(?:www\\.)?(physics)\\.aps\\.org([^/]*/(articles|story)/?|/browse(\\?|$))",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-15 18:04:37"
+	"lastUpdated": "2013-12-06 17:44:20"
 }
 
 // Works for APS Physics Viewpoints and Focus articles: http://physics.aps.org/
 
 function detectWeb(doc, url) {
-	return "journalArticle";
+	if (url.indexOf("/browse")!=-1) return "multiple";
+	else return "journalArticle";
 }
 
 function doWeb(doc, url) {
+	if (detectWeb(doc, url)=="multiple"){
+		var items = {};
+		var articles = [];
+		var links = ZU.xpath(doc, '//div[@class="result-title"]/h2/a[contains(@href, "/story/") or contains(@href, "/articles/")]')
+		for (var i in links){
+			items[ZU.xpathText(links[i], './@href')] = ZU.xpathText(links[i], './text()')
+		}
+			Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var itemurl in items) {
+				articles.push(itemurl);
+			}
+			ZU.processDocuments(articles, scrape)
+		});
+	}
+	else scrape(doc, url);
 	
+}
+
+function scrape(doc, url){
 	Zotero.debug(doc.title);
 	
 	//Get abstract (called 'byline' on page)
@@ -30,12 +52,13 @@ function doWeb(doc, url) {
 	var hasPDF = (title.indexOf('Viewpoint:') != -1);
 	
 	//Get DOI
-	var doi = ZU.xpathText(doc, '//article/header/div[contains(@class, "pubinfo")]/abbr[contains(@class, "doi")]/@title');
+	var doi = ZU.xpathText(doc, '//article/header/div[contains(@class, "pubinfo")]/text()');
+	doi = doi.match(/10\.[^\s]+/)[0]
 	
 	//Set up urls
 	var pdfurl = 'http://physics.aps.org/articles/pdf/' + doi;
 	var urlRIS = 'http://physics.aps.org/articles/export/' + doi + '/ris';
-	
+
 	Zotero.Utilities.HTTP.doGet(urlRIS, function(text) {
 		//DOI is stored in ID field. Fix it.
 		text = text.replace(/^ID\s\s?-\s/mg, 'DO  - ');
@@ -54,7 +77,7 @@ function doWeb(doc, url) {
 			item.complete();
 		});
 		translator.translate();
-	}, null, 'UTF-8');
+	});
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
