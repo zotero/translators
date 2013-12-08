@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-10-09 04:23:49"
+	"lastUpdated": "2013-12-07 12:01:52"
 }
 
 function detectWeb(doc, url) {
@@ -82,12 +82,13 @@ function doWeb(doc, url) {
 	}
 	else {
 		// We have multiple results
-		var resultsBlock = doc.evaluate('//fieldset[@id="results" or @id="resultsBlock"]', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+		var resultsBlock = doc.evaluate('//fieldset[@id="results" or @id="resultsBlock"]|//ol[@class="list-searchResults"]', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 		if (! resultsBlock) {
+
 			return true;
 		}
 	
-		var allTitlesElmts = doc.evaluate('//li//a[@class="title"]|//li//div[@class="title" and not(a[@class="title"])]', resultsBlock, nsResolver,  XPathResult.ANY_TYPE, null);
+		var allTitlesElmts = doc.evaluate('//li//a[@class="title"]|//li//div[@class="title" and not(a[@class="title"]) and a[contains(@href, "10.2307")]]', resultsBlock, nsResolver,  XPathResult.ANY_TYPE, null);
 		var currTitleElmt;
 		var availableItems = new Object();
 		while (currTitleElmt = allTitlesElmts.iterateNext()) {
@@ -99,7 +100,8 @@ function doWeb(doc, url) {
 				var jid = currTitleElmt.href.match(/(?:stable|pss)\/([a-z]*?\d+)/)[1];
 			} else {
 				//for items like Reviews without linked titles
-				var jid = ZU.xpathText(currTitleElmt, './a[contains(@id, "previewResult")]/@href').match(/doi=10.2307\%2F(\d+)/)[1];
+				var jid = ZU.xpathText(currTitleElmt, './a/@href').match(/10\.2307(\%2F|\/)(\d+)/)[2];
+				//Z.debug(jid)
 			}
 			
 			if (jid) {

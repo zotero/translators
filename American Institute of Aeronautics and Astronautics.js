@@ -2,104 +2,206 @@
 	"translatorID": "75edc5a1-6470-465a-a928-ccb77d95eb72",
 	"label": "American Institute of Aeronautics and Astronautics",
 	"creator": "Michael Berkowitz",
-	"target": "^https?://www\\.aiaa\\.org/",
-	"minVersion": "1.0.0b4.r5",
+	"target": "^https?://arc\\.aiaa\\.org/",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2011-10-20 14:11:45"
+	"lastUpdated": "2013-12-07 20:26:26"
 }
 
+/*
+AIAA Translator 
+Copyright (C) 2013 Sebastian Karcher
+Based on ASCE
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
+
 function detectWeb(doc, url) {
-	if (doc.evaluate('//td/div[@class="title"]/b/div[@class="centerHeadlines"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	if (url.match(/\/doi\/abs\/10\.|\/doi\/full\/10\./)) {
+		return "journalArticle";
+	} else if(url.match(/\/action\/doSearch\?|\/toc\//))
+		{
 		return "multiple";
 	}
 }
 
-function doWeb(doc, url) {
-	var n = doc.documentElement.namespaceURI;
-	var ns = n ? function(prefix) {
-		if (prefix == 'x') return n; else return null;
-	} : null;
-	
-	var items = new Object();
-	var oldItems = doc.evaluate('//table/tbody/tr/td[div[@class="title"]]', doc, ns, XPathResult.ANY_TYPE, null);
-	var nextItem;
-	while (nextItem = oldItems.iterateNext()) {
-		var data = new Object();
-		data['title'] = Zotero.Utilities.trimInternal(doc.evaluate('./div[@class="title"]//div[@class="centerHeadlines"]', nextItem, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-		data['pages'] = Zotero.Utilities.trimInternal(doc.evaluate('./div[@class="title"]//div[@class="centerHeadlinesSub2"]', nextItem, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/[\d\w]+\-[\d\w]+/)[0]);
-		data['authors'] = Zotero.Utilities.trimInternal(doc.evaluate('./ul/i', nextItem, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-		var extra = Zotero.Utilities.trimInternal(doc.evaluate('./ul', nextItem, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-		var extra = extra.replace(data['authors'], "");
-		data['extra'] = Zotero.Utilities.trimInternal(extra);
-		var pdf = doc.evaluate('.//a', nextItem, ns, XPathResult.ANY_TYPE, null).iterateNext().href;
-		Zotero.debug(pdf);
-		data['pdfurl'] = pdf;
-		items[data['title']] = data;
-	}
-	var volume;
-	var issue;
-	var date;
-	if (doc.evaluate('//td[2]/table/tbody/tr/td[1]/strong', doc, ns, XPathResult.ANY_TYPE, null).iterateNext()) {
-		var voliss = Zotero.Utilities.trimInternal(doc.evaluate('//td[2]/table/tbody/tr/td[1]/strong', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-		voliss = voliss.match(/(\d+)\s+vol\.\s*(\d+)\s+no\.\s*(\d+)/);
-		volume = voliss[2];
-		issue = voliss[3];
-		date = voliss[1];
-	} else if (doc.evaluate('//select', doc, ns, XPathResult.ANY_TYPE, null).iterateNext()) {
-		var voliss = Zotero.Utilities.trimInternal(doc.evaluate('//select[@name="volume"]/option[@selected]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-		var issue = Zotero.Utilities.trimInternal(doc.evaluate('//select[@name="issue"]/option[@selected]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-		voliss = voliss.match(/vol\.\s*(\d+)\s*\-\s*(\d+)/);
-		volume = voliss[1];
-		date = voliss[2];
-	}
-	if (doc.evaluate('//tr[1]/td/b/div[@class="centerHeadlines"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext()) {
-		var journal = Zotero.Utilities.trimInternal(doc.evaluate('//tr[1]/td/b/div[@class="centerHeadlines"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-		var ISSN = Zotero.Utilities.trimInternal(doc.evaluate('//tr[1]/td/font[@class="centerHeadlinesSub2"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/(\(|\))/g, ""));
-	} else if (doc.evaluate('//div[@class="centerHeadlinesTitle"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext()) {
-		var journal = Zotero.Utilities.trimInternal(doc.evaluate('//div[@class="centerHeadlinesTitle"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-		var ISSN = Zotero.Utilities.trimInternal(doc.evaluate('//tr/td[1]/table/tbody/tr[2]/td/div', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/ISSN\s*([\d\-]+)/)[1]);
-	}
-	var searchItems = new Array();
-	for (var i in items) {
-		searchItems.push(i);
-	}
 
-	searchItems = Zotero.selectItems(searchItems);
-	for (var i in items) {
-		for each (var title in searchItems) {
-			if (i == title) {
-				var data = items[i];
-				var item = new Zotero.Item("journalArticle");
-				item.volume = volume;
-				item.issue = issue;
-				item.date = date;
-				item.title = data['title'];
-				item.pages = data['pages'];
-				item.publicationTitle = Zotero.Utilities.capitalizeTitle(journal);
-				item.ISSN = ISSN;
-				if (data['authors'].match(/\w+/)) {
-					var authors = data['authors'].split(/(\band\b|,|;)/);
-					for each (var aut in authors) {
-						if (aut.match(/\w+/) && aut != "and") {
-							item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
-						}
-					}
-				}
-				item.attachments = [{url:data['pdfurl'], title:"AIAA PDF (first page)", mimeType:"application/pdf"}];
-				item.complete();
+function doWeb(doc, url) {
+	if (detectWeb(doc, url) == "multiple") {
+		var items = new Object();
+		var rows = ZU.xpath(doc, '//table[@class="articleEntry"]');
+		var doi;
+		var title;
+		for(var i=0, n=rows.length; i<n; i++) {
+			doi = ZU.xpathText(rows[i], './/a[contains(@href, "/doi/abs/10.")]/@href') //.match(/10\..+/)
+			//Z.debug(doi)
+			title = ZU.xpathText(rows[i], './/div[@class="art_title"]')
+			if(doi && title) {
+				items[doi.match(/10\.[^\?]+/)[0]] = title;
 			}
 		}
+		//Z.debug(items)
+		Zotero.selectItems(items, function(selectedItems){
+			if(!selectedItems) return true;
+			
+			var dois = new Array();
+			for (var i in selectedItems) {
+				dois.push(i);
+			}
+			scrape(null, url,dois);
+		});
+	} else {
+		var doi = url.match(/\/doi\/(?:abs|full)\/(10\.[^?#]+)/);
+		scrape(doc, url,[doi[1]]);
 	}
-}/** BEGIN TEST CASES **/
+}
+
+function finalizeItem(item, doc, doi, baseUrl) {
+	var pdfurl = '/doi/pdf/';
+	var absurl = '/doi/abs/';
+
+	//add attachments
+	item.attachments = [{
+		title: 'AIAA Full Text PDF',
+		url: pdfurl + doi,
+		mimeType: 'application/pdf'
+	}];
+	if(doc) {
+		item.attachments.push({
+			title: 'AIAA Snapshot',
+			document: doc
+		});
+	} else {
+		item.attachments.push({
+			title: 'AIAA Snapshot',
+			url: item.url || absurl + doi,
+			mimeType: 'text/html'
+		});
+	}
+
+	item.complete();
+}
+
+function scrape(doc, url, dois) {
+	var postUrl =   '/action/downloadCitation';
+	var postBody = 	'downloadFileName=citation&' +
+					'direct=true&' +
+					'include=abs&' +
+					'doi=';
+	var risFormat = '&format=ris';
+	var bibtexFormat = '&format=bibtex';
+
+	for(var i=0, n=dois.length; i<n; i++) {
+		(function(doi) {
+			ZU.doPost(postUrl, postBody + doi + bibtexFormat, function(text) {
+				var translator = Zotero.loadTranslator("import");
+				// Use BibTeX translator
+				translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+				translator.setString(text);
+				translator.setHandler("itemDone", function(obj, item) {
+					item.bookTitle = item.publicationTitle;
+					//Z.debug(text)
+					//unfortunately, bibtex is missing some data
+					//publisher, ISSN/ISBN
+					ZU.doPost(postUrl, postBody + doi + risFormat, function(text) {
+						//Z.debug(text)
+						risTrans = Zotero.loadTranslator("import");
+						risTrans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+						risTrans.setString(text);
+						risTrans.setHandler("itemDone", function(obj, risItem) {
+							item.publisher = risItem.publisher;
+							item.ISSN = risItem.ISSN;
+							item.ISBN = risItem.ISBN;
+							finalizeItem(item, doc, doi);
+						});
+						risTrans.translate();
+					});
+				});
+				translator.translate();
+			});
+		})(dois[i]);
+	}
+}
+
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.aiaa.org/content.cfm?pageid=322&lupubid=2",
+		"url": "http://arc.aiaa.org/action/doSearch?searchText=titanium",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://arc.aiaa.org/doi/abs/10.2514/1.T3744?prevSearch=&searchHistoryKey=",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Songping",
+						"lastName": "Mo",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ying",
+						"lastName": "Chen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Xing",
+						"lastName": "Li",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Lisi",
+						"lastName": "Jia",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"itemID": "doi:10.2514/1.T3744",
+				"title": "Solidification Characteristics of Titania Nanofluids",
+				"publicationTitle": "Journal of Thermophysics and Heat Transfer",
+				"volume": "26",
+				"issue": "1",
+				"pages": "192-196",
+				"date": "2012",
+				"DOI": "10.2514/1.T3744",
+				"url": "http://arc.aiaa.org/doi/abs/10.2514/1.T3744",
+				"bookTitle": "Journal of Thermophysics and Heat Transfer",
+				"publisher": "American Institute of Aeronautics and Astronautics",
+				"ISSN": "0887-8722",
+				"libraryCatalog": "American Institute of Aeronautics and Astronautics",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

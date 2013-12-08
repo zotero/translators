@@ -9,13 +9,12 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-06-19 09:52:11"
+	"lastUpdated": "2013-12-07 15:15:58"
 }
 
 function detectWeb(doc, url) {
 	if (url.indexOf("func=full-set") != -1) return "journalArticle"
-	//Items load too slowly and the translator misfires for multiples
-	//	else if (url.indexOf("func=short") != -1) return "multiple";
+	else if (url.indexOf("func=short") != -1 || url.indexOf("func=find") != -1)  return "multiple";
 }
 
 function cleanAuthorstring(author) {
@@ -26,15 +25,15 @@ function cleanAuthorstring(author) {
 
 function scrape(doc, url) {
 	var newItem = new Zotero.Item("journalArticle");
-	var title = ZU.xpathText(doc, '//tr/td[@id="bold" and contains(text(), "Título")]/following-sibling::td');
-	var publication = ZU.xpathText(doc, '//tr/td[@id="bold" and contains(text(), "Revista")]/following-sibling::td');
-	var date = ZU.xpathText(doc, '//tr/td[@id="bold" and contains(text(), "Año de la revista")]/following-sibling::td');
-	var ISSN = ZU.xpathText(doc, '//tr/td[@id="bold" and contains(text(), "ISSN")]/following-sibling::td');
-	var language = ZU.xpathText(doc, '//tr/td[@id="bold" and contains(text(), "Idioma") and not(contains(text(), "resumen"))]/following-sibling::td');
-	var abstract = ZU.xpathText(doc, '//tr/td[@id="bold" and contains(text(), "Resumen")]/following-sibling::td');
-	var fulltext = ZU.xpathText(doc, '//tr/td[@id="bold" and contains(text(), "Texto completo")]/following-sibling::td');
+	var title = ZU.xpathText(doc, '//tr/th[contains(@class, "txtLeft") and contains(text(), "Título")]/following-sibling::td');
+	var publication = ZU.xpathText(doc, '//tr/th[contains(@class, "txtLeft") and contains(text(), "Revista")]/following-sibling::td');
+	var date = ZU.xpathText(doc, '//tr/th[contains(@class, "txtLeft") and contains(text(), "Año de la revista")]/following-sibling::td');
+	var ISSN = ZU.xpathText(doc, '//tr/th[contains(@class, "txtLeft") and contains(text(), "ISSN")]/following-sibling::td');
+	var language = ZU.xpathText(doc, '//tr/th[contains(@class, "txtLeft") and contains(text(), "Idioma") and not(contains(text(), "resumen"))]/following-sibling::td');
+	var abstract = ZU.xpathText(doc, '//tr/th[contains(@class, "txtLeft") and contains(text(), "Resumen")]/following-sibling::td');
+	var fulltext = ZU.xpathText(doc, '//tr/th[contains(@class, "txtLeft") and contains(text(), "Texto completo")]/following-sibling::td');
 	//Descripción field has pages, issue and volume
-	var description = ZU.xpathText(doc, '//tr/td[@id="bold" and contains(text(), "Descripción")]/following-sibling::td');
+	var description = ZU.xpathText(doc, '//tr/th[contains(@class, "txtLeft") and contains(text(), "Descripción")]/following-sibling::td');
 	if (description) {
 		var volume = description.match(/V([^\s]+)/);
 		var issue = description.match(/N([^\s]+)/);
@@ -44,7 +43,7 @@ function scrape(doc, url) {
 
 	//Authors and Tags can have multiple rows. In that case the td[1] remains empty we loop through them until that's no longer the case
 
-	var author1 = ZU.xpathText(doc, '//tr/td[@id="bold" and contains(text(), "Autor")]/following-sibling::td');
+	var author1 = ZU.xpathText(doc, '//tr/th[contains(@class, "txtLeft") and contains(text(), "Autor")]/following-sibling::td');
 	if (author1) newItem.creators.push(ZU.cleanAuthor(cleanAuthorstring(author1), "author", true))
 	var authorloop = ZU.xpath(doc, '//tr[td[@id="bold" and contains(text(), "Autor")]]/following-sibling::tr/td[1]')
 	var author;
@@ -58,9 +57,9 @@ function scrape(doc, url) {
 	}
 
 
-	var tag1 = ZU.xpathText(doc, '//tr/td[@id="bold" and contains(text(), "Palabra Clave")]/following-sibling::td');
+	var tag1 = ZU.xpathText(doc, '//tr/th[contains(@class, "txtLeft") and contains(text(), "Palabra Clave")]/following-sibling::td');
 	if (tag1) newItem.tags.push(tag1.trim())
-	var tagloop = ZU.xpath(doc, '//tr[td[@id="bold" and contains(text(), "Palabra Clave")]]/following-sibling::tr/td[1]')
+	var tagloop = ZU.xpath(doc, '//tr[th[contains(@class, "txtLeft") and contains(text(), "Palabra Clave")]]/following-sibling::tr/td[1]')
 	var tag;
 	for (var i in tagloop) {
 		if (tagloop[i].textContent.search(/[^\s]/) == -1) {
@@ -112,7 +111,7 @@ function doWeb(doc, url) {
 	var items = {};
 	if (detectWeb(doc, url) == "multiple") {
 		//this currently doesn't do anything as multiple detect is disabled
-		var titles = doc.evaluate('//td/strong/a[contains(@href, "func=full-set-set")]', doc, null, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//tr/td/a[contains(@href, "func=full-set-set")][2]', doc, null, XPathResult.ANY_TYPE, null);
 		var next_title;
 		while (next_title = titles.iterateNext()) {
 			items[next_title.href] = next_title.textContent;
