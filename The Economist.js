@@ -3,21 +3,24 @@
 	"label": "The Economist",
 	"creator": "Michael Berkowitz",
 	"target": "^http://(www\\.)?economist\\.com/",
-	"minVersion": "1.0.0b4.r5",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-09-25 16:00:02"
+	"lastUpdated": "2013-12-09 15:07:06"
 }
 
 function detectWeb(doc, url) {
 	if (doc.location.href.indexOf("/search/") != -1) {
 		return "multiple";
-	} else if (doc.location.href.toLowerCase().indexOf("node") != -1) {
+	} else if (ZU.xpathText(doc, '//h3[@class="headline"]')) {
 		return "magazineArticle";
-	}
+	} else if (ZU.xpathText(doc, '//div[@class="view-content"]//div[@class="article"]') || ZU.xpathText(doc, '//div[@id="column-content"]//section[contains(@class, "news-package")]')){
+		return "multiple";
+	} 
+
 }
 
 function scrape(doc, url) {
@@ -29,20 +32,8 @@ function scrape(doc, url) {
 
 
 	//get headline
-	var title = new Array();
-	if (doc.title && doc.title != "" && doc.title != "Economist.com") {
-		title = doc.title.split(" | ");
-	} else {
-		title.push(doc.evaluate('//div[@class="clear"][@id="pay-barrier"]/div[@class="col-left"]/div[@class="article"]/font/b', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-	}
-
-
-	if (title.length == 1) {
-		title.push = title;
-	} else {
-		title = title.slice(0, title.length - 1);
-		title = title.join(": ");
-	}
+	var title = ZU.xpathText(doc, '//h3[@class="headline"]');
+	if (!title) title = ZU.xpathText(doc, '//meta[@property="og:title"]/@content');
 	newItem.title = title;
 
 	if (doc.evaluate('//div[@class="clear"][@id="pay-barrier"]/div[@class="col-right"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
@@ -54,14 +45,9 @@ function scrape(doc, url) {
 		return;
 	}
 	//get abstract
-	if (doc.evaluate('//div[@id="content"]/div[@class="clear top-border"]/div[@class="col-left"]/h2', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		newItem.abstractNote = doc.evaluate('//div[@id="content"]/div[@class="clear top-border"]/div[@class="col-left"]/h2', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	} else if (doc.evaluate('//div[@class="clear"][@id="pay-barrier"]/div[@class="col-left"]/div[@class="article"]/p/strong', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		newItem.abstractNote = doc.evaluate('//div[@class="clear"][@id="pay-barrier"]/div[@class="col-left"]/div[@class="article"]/p/strong', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	} else if (doc.evaluate('//div[@id="content"]/div[@class="clear top-border"]/div[@class="col-left"]/p[3]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		newItem.abstractNote = doc.evaluate('//div[@id="content"]/div[@class="clear top-border"]/div[@class="col-left"]/p[3]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	}
-	if (newItem.abstractNote) newItem.abstractNote = Zotero.Utilities.trimInternal(newItem.abstractNote);
+	var abstract = ZU.xpathText(doc, '//h1[@class="rubric"]');
+	if (!abstract) abstract = ZU.xpathText(doc, '//meta[@property="og:description"]/@content');
+	newItem.abstractNote = abstract;
 	//get date and extra stuff
 	newItem.date = ZU.xpathText(doc, '//time[@class="date-created"]')
 	var url = doc.location.href;
@@ -83,10 +69,20 @@ function doWeb(doc, url) {
 
 		var articles = new Array();
 		var items = {};
-		var titles = doc.evaluate('//p[@class="search-item-title"]/a|//div[contains(@class, "gs-title")]/a[@class="gs-title"]', doc, null, XPathResult.ANY_TYPE, null);
+		//search results
+		var titles = doc.evaluate('//div[contains(@class, "gs-title")]/a[@class="gs-title" and not(contains(@href, "topics"))]', doc, null, XPathResult.ANY_TYPE, null);
+		//sections
+		if (!titles.iterateNext()){
+			var titles = doc.evaluate('//section[contains(@class, "news-package")]//article/a|//section[contains(@class, "news-package")]//ul/li/div/a[@class="headline"]', doc, null, XPathResult.ANY_TYPE, null);
+		}
+		//print ToC
+		if (!titles.iterateNext()){
+			var titles = doc.evaluate('//div[@class="article"]/a[@class="node-link"]', doc, null, XPathResult.ANY_TYPE, null);
+		}
+		
 		var title;
 		while (title = titles.iterateNext()) {
-			items[title.href] = title.textContent;
+			items[title.href] = title.textContent.trim();
 		}
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
@@ -97,9 +93,8 @@ function doWeb(doc, url) {
 			}
 			Zotero.Utilities.processDocuments(articles, scrape)
 		})
-	} else if (doc.location.href.toLowerCase().indexOf("node") != -1) {
+	} else{
 		scrape(doc, url);
-		return;
 	}
 }/** BEGIN TEST CASES **/
 var testCases = [
@@ -115,7 +110,6 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.economist.com/node/21538214",
 						"title": "The Economist Snapshot",
 						"mimeType": "text/html"
 					}
@@ -123,13 +117,22 @@ var testCases = [
 				"ISSN": "0013-0613",
 				"url": "http://www.economist.com/node/21538214",
 				"publicationTitle": "The Economist",
-				"title": "Asia-Pacific trade initiatives: Dreams and realities",
-				"date": "Nov 12th 2011",
+				"title": "Dreams and realities",
+				"abstractNote": "THE American president is bringing a new—or at least rewarmed—cause to the Asia-Pacific region: free trade. Barack Obama recently signed a ground-breaking...",
 				"libraryCatalog": "The Economist",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Asia-Pacific trade initiatives"
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.economist.com/printedition/2013-12-07",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.economist.com/world/united-states",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
