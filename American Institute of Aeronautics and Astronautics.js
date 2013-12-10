@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2013-12-07 20:26:26"
+	"lastUpdated": "2013-12-09 15:45:31"
 }
 
 /*
@@ -179,11 +179,11 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Full Text PDF",
+						"title": "AIAA Full Text PDF",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "AIAA Snapshot"
 					}
 				],
 				"itemID": "doi:10.2514/1.T3744",

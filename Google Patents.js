@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-09-22 23:15:28"
+	"lastUpdated": "2013-12-09 20:04:35"
 }
 
 function detectWeb(doc, url) {
@@ -563,7 +563,7 @@ var testCases = [
 				"title": "Device for recycling sanitary water",
 				"abstractNote": "The installation for recycling used water originating from sanitary equipment and re-use of water for rinsing a water closet bowl, comprises a control system having an electronic terminal with a micro controller, and an additional drain to pour an overflow of a tank directly in an evacuation pipe of the water closet bowl. The water closet bowl is equipped with a flush water saver system, which surmounts the bowl. The saver system comprises tank (3) with a water reserve, and a water-flushing device placed in the tank to supply the flush water to the water closet bowl. The installation for recycling used water originating from sanitary equipment and re-use of water for rinsing a water closet bowl, comprises a control system having an electronic terminal with a micro controller, and an additional drain to pour an overflow of a tank directly in an evacuation pipe of the water closet bowl. The water closet bowl is equipped with a flush water saver system, which surmounts the bowl. The saver system comprises tank (3) with a water reserve, and a water-flushing device placed in the tank to supply the flush water to the water closet bowl, water supply pipes, a filter and a raising pump are arranged in one of the pipes, a water level detector to control the water reserve level contained in the tank, and a flapper valve to control the arrival of running water. The flapper valve is normally closed and temporarily opened when quantity of water contained in the tank is lower than a predetermined quantity detected by the detector. The water-flushing device comprises a drain valve (25A) with a vertical actuation inside a flow regulation tube, which extends on all the height of the tank and communicates with the rest of the tank by openings in lateral surface of the tube. The drain valve is operated automatically by a motor reducer, which is connected to the valve by a rod and a chain. The drain valve is equipped with a cam and limit switch. The level detector comprises a probe connected to the flapper valve. One of the water supply pipes comprises a flow regulator in which the pipe is bent so as to present an outlet opening in the bottom of the tank. The sanitary equipment generates used water comprises bathtub, shower and/or washbasin. The capacity of the tank is higher than 150 liters. The used water path is traversed between the sanitary equipment and the tank. The filter is placed in an upstream of the pump. The filter comprises a basket filter for a coarse filtration, a float sensor and reed contact, and an outlet towards the overflow discharge. The basket filter contains a solid preference product for the used water treatment, which dissolves gradually during draining by sanitary equipment. The raising pump is equipped with a plunger of automatic startup when water is reached a predetermined level, a non-return valve, and a venting device. The control system comprises a device to regulate/modify the volume of water supplied by the actuation of the flushing water, and a device to- control the flow of the water in the tank, and check and display the electronic installation, the pump and the filter. The terminal comprises display board e.g. liquid crystals, which allows message display. The control system is programmed to operate the actuator periodically in the drain valve. Another water supply pipe in the tank is connected by an upstream of the flapper valve with a rainwater collection device. The water closet bowl is connected to a forced ventilation device.",
 				"country": "European Union",
-				"extra": "International Classification C02F1/00; Cooperative Classification E03B1/04, E03B2001/047, C02F2209/42, E03B2001/045, E03B1/042, E03D5/006, C02F2103/002, C02F2209/005, E03D5/003; European Classification E03B1/04B2, E03D5/00B1, E03B1/04, E03D5/00B",
+				"extra": "International Classification C02F1/00; Cooperative Classification E03D5/006, C02F2209/42, E03B2001/045, C02F2103/002, C02F2209/005, E03B2001/047, E03B1/042, E03B1/04, E03D5/003; European Classification E03B1/04B2, E03D5/00B1, E03B1/04, E03D5/00B",
 				"libraryCatalog": "Google Patents"
 			}
 		]
@@ -586,13 +586,14 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"patentNumber": "EP0011951 A1",
+				"date": "Jun 11, 1980",
 				"filingDate": "Nov 6, 1979",
 				"assignee": "Merck & Co., Inc.",
 				"title": "Cold-water soluble tamarind gum, process for its preparation and its application in sizing textile warp",
 				"abstractNote": "A novel composition of crude tamarind kernel powder (TKP) is disclosed. The novel composition results from a process which makes TKP soluble in cold water; this process is not dependent on purification of TKP, but involves dissolving it in hot water and evaporating the resulting solution. The novel TKP composition has utility in textile, paper, and oilfield applications.",
 				"country": "European Union",
-				"extra": "International Classification D06M15/01, C08L5/00, C08B37/00; Cooperative Classification C08B37/0087, D06M15/01; European Classification D06M15/01, C08B37/00P6",
-				"issueDate": "Jun 11, 1980"
+				"extra": "International Classification D06M15/01, C08L5/00, C08B37/00; Cooperative Classification D06M15/01, C08B37/0087; European Classification D06M15/01, C08B37/00P6",
+				"libraryCatalog": "Google Patents"
 			}
 		]
 	},
@@ -619,13 +620,14 @@ var testCases = [
 					}
 				],
 				"patentNumber": "US4748058 A",
+				"date": "May 31, 1988",
 				"filingDate": "Feb 10, 1987",
 				"assignee": "Craig Jr Chester L",
 				"title": "Artificial tree",
 				"abstractNote": "An artificial tree assembly, and a tree constructed therefrom, are provided. The assembly comprises a collapsible three-piece pole; a base member formed by the bottom of a box for storing the tree assembly and including a pole support member secured thereto for supporting the pole; and a plurality of limb sections and interconnecting garlands. The limb-sections each comprise a central ring portion and a plurality of limb members extending radially outwardly from the central ring portions. The ring portions of the limb sections are stacked, when not in use, on the pole support member and are disposed, in use, along the length of pole in spaced relationship therealong. The garlands interconnect the limb portions so that as the ring portions are lifted, from the top, from the stacked positions thereof on the pole support member and slid along the pole, the garlands between adjacent limb section are tensioned, in turn, and thus serve to lift the next adjacent limb section until the tree is fully erected.",
 				"country": "United States",
-				"extra": "U.S. Classification 428/9, D11/118, 428/18; International Classification A47G33/06; Cooperative Classification A47G33/06; European Classification A47G33/06",
-				"issueDate": "May 31, 1988"
+				"extra": "U.S. Classification 428/9, D11/118, 428/18; International Classification A47G33/00, A47G33/06; Cooperative Classification A47G33/06; European Classification A47G33/06",
+				"libraryCatalog": "Google Patents"
 			}
 		]
 	},
@@ -652,13 +654,14 @@ var testCases = [
 					}
 				],
 				"patentNumber": "US5979603 A",
+				"date": "Nov 9, 1999",
 				"filingDate": "Jan 6, 1995",
 				"assignee": "Summit Specialties, Inc.",
 				"title": "Portable tree stand having fiber composite platform",
 				"abstractNote": "A climbing device for a tree or other vertical columnar member having a platform fashioned from fiber-reinforced composite material. The platform is a one-piece structure having a peripheral skin with bi-directionally oriented reinforcing fibers and longitudinally extending reinforcing fibers. The back bar is also fashioned from fiber-reinforced composite material having a peripheral skin with bi-directionally oriented reinforcing fibers and longitudinally extending reinforcing fibers. Fiber-reinforced members include a foam core for shape retention. The manufacturing process permits use of T-shaped joints in fiber-reinforced structures.",
 				"country": "United States",
-				"extra": "U.S. Classification 182/187, 182/135, 182/46; International Classification A45F3/26, A01M31/02; Cooperative Classification A45F3/26, A01M31/02; European Classification A45F3/26, A01M31/02",
-				"issueDate": "Nov 9, 1999"
+				"extra": "U.S. Classification 182/187, 182/135, 182/46; International Classification A01M31/00, A45F3/00, A45F3/26, A01M31/02; Cooperative Classification A45F3/26, A01M31/02; European Classification A45F3/26, A01M31/02",
+				"libraryCatalog": "Google Patents"
 			}
 		]
 	},
@@ -728,13 +731,14 @@ var testCases = [
 					}
 				],
 				"patentNumber": "US6239091 B1",
+				"date": "May 29, 2001",
 				"filingDate": "May 11, 1998",
 				"assignee": "Lever Brothers Company, Division Of Conopco, Inc.",
 				"title": "Machine dishwashing compositions with a polymer having cationic monomer units",
 				"abstractNote": "A detergent or rinse aid composition which reduces spotting and filming on glassware cleaned in an automatic dishwashing machine is described. The composition contains an effective amount of a water soluble cationic or amphoteric polymer having at least one monomer unit having a cationic charge over a portion of the pH range of about 2 to about 11 in the wash or rinse cycle.",
 				"country": "United States",
-				"extra": "U.S. Classification 510/220, 510/480, 510/223, 510/504, 510/441, 510/288, 510/434, 510/233, 510/349, 510/323, 510/514; International Classification C11D3/37; Cooperative Classification C23F11/173, C11D3/3723, C11D3/0073, C11D3/3719, C11D3/3776, C11D3/3769, C11D3/3796; European Classification C23F11/173, C11D3/37C8H, C11D3/37C8, C11D3/37B9, C11D3/37B8, C11D3/37Z, C11D3/00B15",
-				"issueDate": "May 29, 2001"
+				"extra": "U.S. Classification 510/220, 510/480, 510/223, 510/504, 510/441, 510/288, 510/434, 510/233, 510/349, 510/323, 510/514; International Classification C11D3/37; Cooperative Classification C23F11/173, C11D3/3719, C11D3/3769, C11D3/3723, C11D3/3796, C11D3/3776, C11D3/0073; European Classification C23F11/173, C11D3/37C8H, C11D3/37C8, C11D3/37B9, C11D3/37B8, C11D3/37Z, C11D3/00B15",
+				"libraryCatalog": "Google Patents"
 			}
 		]
 	},
@@ -771,13 +775,14 @@ var testCases = [
 					}
 				],
 				"patentNumber": "US20110172136 A1",
+				"date": "Jul 14, 2011",
 				"filingDate": "Mar 24, 2011",
 				"assignee": "Rhodia Operations",
 				"title": "Detergent composition with hydrophilizing soil-release agent and methods for using same",
 				"abstractNote": "Laundry detergent compositions that provide soil release benefits to all fabric comprising an organophosphorus soil release agents and optional non-cotton secondary soil release agents. The present invention further relates to a method for providing soil release benefits to cotton fabric by contacting cotton articles with a water soluble and/or dispersible organophosphorus material. The contacting can be during washing or by pretreating by applying the composition directly to stains or by presoaking the clothing in the composition prior to washing. The present invention further relates to providing soil release benefits to all fabric in the laundry wash load in the presence of a bleaching agent.",
 				"country": "United States",
-				"extra": "U.S. Classification 510/299; International Classification C11D3/60; Cooperative Classification C11D1/345, C11D3/361, C11D3/3784, C11D11/0017, C11D3/362, C11D3/0036, C11D1/342; European Classification C11D3/36B, C11D11/00B2A, C11D3/37C10, C11D3/00B7, C11D1/34C, C11D3/36C, C11D1/34B",
-				"issueDate": "Jul 14, 2011"
+				"extra": "U.S. Classification 510/299; International Classification C11D3/60; Cooperative Classification C11D3/362, C11D3/3784, C11D11/0017, C11D1/342, C11D1/345, C11D3/0036, C11D3/361; European Classification C11D3/36B, C11D11/00B2A, C11D3/37C10, C11D3/00B7, C11D1/34C, C11D3/36C, C11D1/34B",
+				"libraryCatalog": "Google Patents"
 			}
 		]
 	}

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-09-01 23:10:59"
+	"lastUpdated": "2013-12-09 20:21:58"
 }
 
 function detectWeb(doc, url) {
@@ -238,48 +238,6 @@ function doWeb(doc, url) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "http://books.luther.edu/record=b2115431~S9",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"firstName": "G. W.",
-						"lastName": "Kimura",
-						"creatorType": "contributor"
-					},
-					{
-						"lastName": "ebrary, Inc",
-						"fieldMode": true
-					}
-				],
-				"notes": [],
-				"tags": [
-					"Alaska",
-					"Alaska",
-					"Alaska",
-					"Alaska",
-					"Anniversaries, etc",
-					"Economic conditions",
-					"Electronic books",
-					"History",
-					"Social conditions"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"place": "Fairbanks",
-				"numPages": "285",
-				"callNumber": "F904 .A477 2009eb",
-				"url": "http://site.ebrary.com/lib/luthercollege/Doc?id=10397770",
-				"libraryCatalog": "books.luther.edu Library Catalog",
-				"title": "Alaska at 50 the past, present, and next fifty years of statehood",
-				"publisher": "University of Alaska Press",
-				"date": "2009"
-			}
-		]
-	},
 	{
 		"type": "web",
 		"url": "http://utmost.cl.utoledo.edu/search/?searchtype=X&SORT=D&searcharg=history+of+communication&searchscope=3",

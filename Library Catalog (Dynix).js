@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-12-08 07:34:35"
+	"lastUpdated": "2013-12-09 20:19:29"
 }
 
 function detectWeb(doc, url) {
@@ -224,11 +224,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://siris-libraries.si.edu/ipac20/ipac.jsp?session=Y3X077P415286.52120&menu=search&aspect=Keyword&npp=20&ipp=20&spp=20&profile=liball&ri=&term=&index=GW&x=0&y=0&aspect=Keyword&term=smith&index=AW&term=&index=TW&term=&index=SW&term=&index=.JW",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://ipac.kings.edu/ipac20/ipac.jsp?menu=search&aspect=basic_search&npp=30&ipp=20&spp=20&profile=kc&ri=&index=.GW&term=test&x=0&y=0&aspect=basic_search",
 		"items": "multiple"
 	},
 	{

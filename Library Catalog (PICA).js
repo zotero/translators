@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-05-05 12:24:46"
+	"lastUpdated": "2013-12-09 20:28:03"
 }
 
 function getSearchResults(doc) {
@@ -698,9 +698,9 @@ var testCases = [
 				"tags": [
 					"Leucémie lymphoïde chronique -- Thèses et écrits académiques",
 					"Cellules B -- Thèses et écrits académiques",
-					"Lymphome malin non hodgkinien -- Dissertations académiques",
-					"Lymphocytes B -- Dissertations académiques",
-					"Leucémie chronique lymphocytaire à cellules B -- Dissertations académiques"
+					"Lymphome malin non hodgkinien -- Dissertations universitaires",
+					"Lymphocytes B -- Dissertations universitaires",
+					"Leucémie chronique lymphocytaire à cellules B -- Dissertations universitaires"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -1000,7 +1000,7 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"title": "A new method to obtain a consensus ranking of a region",
+				"title": "A new method to obtain a consensus ranking of a region's vintages' quality",
 				"date": "2012",
 				"pages": "88-107",
 				"ISSN": "1931-4361",
@@ -1149,8 +1149,8 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Famille -- Congrès",
-					"Santé publique -- Congrès"
+					"Famille -- Actes de congrès",
+					"Santé publique -- Actes de congrès"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -1206,7 +1206,7 @@ var testCases = [
 					"(GTR) Vrijheid van onderwijs",
 					"(GTR) Katholiek onderwijs",
 					"(GTR) Conflicten",
-					"(GTR) 4.220 België"
+					"(GTR) België"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -1224,7 +1224,7 @@ var testCases = [
 				"libraryCatalog": "Library Catalog - catalogue.rug.nl",
 				"title": "Naar een nieuwe 'onderwijsvrede': de onderhandelingen tussen kardinaal Van Roey en de Duitse bezetter over de toekomst van het vrij katholiek onderwijs, 1942-1943",
 				"date": "2010",
-				"publicationTitle": "Revue belge d'histoire contemporaine",
+				"publicationTitle": "Revue belge d'histoire contemporaine = Belgisch tijdschrift voor nieuwste geschiedenis = Belgian review for contemporary history",
 				"ISSN": "0035-0869",
 				"pages": "603-643",
 				"volume": "40",
@@ -1257,7 +1257,7 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"(GTR) 7.655 Argentinië"
+					"(GTR) Argentinië"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -1311,7 +1311,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "<div><span>Literaturangaben</span></div>"
+						"note": "\n<div><span>Literaturangaben</span></div>\n<div style=\"display:none\" title=\"optional\" id=\"ANNOTATIE\"><span>Hier auch später ersch. unveränd. Nachdr.</span></div>\n"
 					}
 				],
 				"tags": [
@@ -1601,7 +1601,7 @@ var testCases = [
 				],
 				"libraryCatalog": "Library Catalog - cbsopac.rz.uni-frankfurt.de",
 				"title": "Daten- und Identitätsschutz in Cloud Computing, E-Government und E-Commerce",
-				"numPages": "188",
+				"numPages": "187",
 				"ISBN": "978-3-642-30102-5",
 				"series": "SpringerLink: Springer e-Books",
 				"seriesTitle": "SpringerLink: Springer e-Books",
@@ -1634,7 +1634,7 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Gesetzgebung / Rechtsprechung / Komplexes System / Kongress / Paris <2010>"
+					"Gesetzgebung / Rechtsprechung / Komplexes System / Kongress / Paris <2010>Law -- Philosophy -- Congresses / Law -- Political aspects -- Congresses / Rule of law -- Congresses"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -1650,7 +1650,7 @@ var testCases = [
 					}
 				],
 				"title": "Politiques publiques, systèmes complexes",
-				"ISBN": "2-7056-8274-0, 978-2-7056-8274-3",
+				"ISBN": "2-7056-8274-0, 978-270-5682-74-3",
 				"date": "2012",
 				"pages": "290",
 				"place": "Paris",
@@ -1690,7 +1690,7 @@ var testCases = [
 					}
 				],
 				"title": "La temprana devoción de Borges por el norte",
-				"publicationTitle": "Proa",
+				"publicationTitle": "Proa : en las letras y en las artes",
 				"ISSN": "1515-4017",
 				"volume": "83",
 				"pages": "61-71",

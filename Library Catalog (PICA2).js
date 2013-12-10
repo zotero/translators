@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-06-09 12:37:40"
+	"lastUpdated": "2013-12-09 20:28:44"
 }
 
 /*
@@ -187,6 +187,7 @@ var testCases = [
 						"snapshot": false
 					}
 				],
+				"itemID": "SWB-012099554",
 				"title": "Borges por el mismo",
 				"series": "Laia literatura",
 				"place": "Barcelona",
@@ -236,6 +237,7 @@ var testCases = [
 						"snapshot": false
 					}
 				],
+				"itemID": "HeBIS-318490412",
 				"title": "Daten- und Identitätsschutz in Cloud Computing, E-Government und E-Commerce",
 				"abstractNote": "Fuer neue und kuenftige Gesch ftsfelder von E-Commerce und E-Government stellen der Datenschutz und der Identit tsschutz wichtige Herausforderungen dar. Renommierte Autoren aus Wissenschaft und Praxis widmen sich in dem Band aktuellen Problemen des Daten- und Identit tsschutzes aus rechtlicher und technischer Perspektive. Sie analysieren aktuelle Problemf lle aus der Praxis und bieten Handlungsempfehlungen an. Das Werk richtet sich an Juristen und technisch Verantwortliche in Beh rden und Unternehmen sowie an Rechtsanw lte und Wissenschaftler.",
 				"place": "Berlin, Heidelberg",
@@ -273,6 +275,7 @@ var testCases = [
 						"snapshot": false
 					}
 				],
+				"itemID": "SWB-371777577",
 				"title": "Cloud computing",
 				"place": "München",
 				"publisher": "Beck",
@@ -311,6 +314,7 @@ var testCases = [
 				],
 				"seeAlso": [],
 				"attachments": [],
+				"itemID": "HeBIS-245962255",
 				"title": "W. Somerset Maugham - Leben und Werk",
 				"series": "Diogenes-Taschenbuch ; 23911",
 				"place": "Zürich",
