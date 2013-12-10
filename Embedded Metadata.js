@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-09-23 04:28:34"
+	"lastUpdated": "2013-12-10 02:07:32"
 }
 
 /*
@@ -1067,6 +1067,11 @@ var testCases = [
 						"firstName": "Gregg",
 						"lastName": "Barrios",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "LA Review of",
+						"lastName": "Books",
+						"creatorType": "author"
 					}
 				],
 				"notes": [],
@@ -1088,8 +1093,8 @@ var testCases = [
 				"title": "Junot Díaz: My stories come from trauma",
 				"url": "http://www.salon.com/2012/10/10/junot_diaz_my_stories_come_from_trauma/",
 				"abstractNote": "The effervescent author of \"This is How You Lose Her\" explains the darkness coursing through his fiction",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.salon.com",
+				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Junot Díaz"
 			}
 		]
