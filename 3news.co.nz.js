@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-04-21 16:24:49"
+	"lastUpdated": "2013-12-09 20:59:33"
 }
 
 /*
@@ -66,7 +66,7 @@ function scrape (doc, url) {
 		if (doAbstract(doc, url) != null) {
 		newItem.abstractNote= doAbstract(doc, url);
 		}
-		var au = '//div[@id="newsbody"]/div/p/strong';
+		var au = '//div[@id="article_start"]/p/strong';
 		var author = doAuthor(doc, url, au);
 		var title = '//h1';
 		if (doTitle(doc, url, title) !=null){
@@ -103,7 +103,7 @@ function scrape (doc, url) {
 		if (doTitle(doc, url, title) !=null){
 			newItem.title = doTitle(doc, url, title);
 		}
-		var author ='//div[@id="newsbody"]/div/p/strong';
+		var author = '//div[@id="article_start"]/p/strong';
 		if (doAuthor(doc, url, author) != null){
 			newItem.creators.push(Zotero.Utilities.cleanAuthor(doAuthor(doc, url, author), "author"));
 		}
@@ -128,7 +128,7 @@ function doSection (doc, url) {
 }
 
 function dodate ( doc, url ) {
-	var date='//div[@class="ModArticleDisplayC"]/div/div[@class="news"]/span';
+	var date='//div[@id="byline_date"]';
 	var dateObject = doc.evaluate(date, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (dateObject){
 			dateObject = dateObject.textContent.replace(/\s(\d:{0,9})+:(\d{0,9})+([a-zA-Z.]{1,4})/, '');
@@ -235,13 +235,14 @@ var testCases = [
 					}
 				],
 				"url": "http://www.3news.co.nz/Obama-bus-tour-Barbecue-to-Bieber/tabid/417/articleID/230090/Default.aspx",
-				"language": "English",
-				"abstractNote": "President Barack Obama said he wanted to use his bus trip through rural North Carolina and Virginia to hear directly from the American people.",
-				"section": "World",
-				"libraryCatalog": "3news.co.nz",
-				"shortTitle": "Obama bus tour",
 				"publicationTitle": "3news.co.nz",
-				"title": "Obama bus tour: Barbecue to Bieber"
+				"language": "English",
+				"date": "Wednesday 19 Oct 2011",
+				"abstractNote": "President Barack Obama said he wanted to use his bus trip through rural North Carolina and Virginia to hear directly from the American people.",
+				"title": "Obama bus tour: Barbecue to Bieber",
+				"libraryCatalog": "3news.co.nz",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Obama bus tour"
 			}
 		]
 	},
@@ -270,7 +271,10 @@ var testCases = [
 				"url": "http://www.3news.co.nz/Unemployed-youth-would-fill-Eden-Park---blog/tabid/1135/articleID/222342/Default.aspx",
 				"language": "English",
 				"abstractNote": "58,000 young people between the ages of 15-24 are not in education, training or work - this is National's biggest first term failure.",
-				"title": "Unemployed youth would fill Eden Park - blog"
+				"date": "Tuesday 16 Aug 2011",
+				"title": "Unemployed youth would fill Eden Park - blog",
+				"libraryCatalog": "3news.co.nz",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}
