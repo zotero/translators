@@ -14,7 +14,7 @@
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
-	"lastUpdated": "2013-07-01 14:13"
+	"lastUpdated": "2013-11-26 23:01"
 }
 
 
@@ -338,6 +338,18 @@ var citeKeyConversions = {
 				// create a unique citation key
 				citekey = buildCiteKey(item, citekeys);
 			}
+			
+			// Special handling to translate Master and PhD thesis into the right type
+			var inhibitType = false;
+			if(item.itemType.toLowerCase() == "thesis"){
+				if(item.thesisType.toLowerCase() == "phd"){
+					type = "phdthesis";
+					inhibitType = true;
+				} else if(item.thesisType.toLowerCase() == "master"){
+					type = "mastersthesis";
+					inhibitType = true;
+				}
+			}
 
 			// write citation key (removed the comma)
 			Zotero.write((first ? "" : "\n\n") + "@" + type + "{" + citekey);
@@ -408,7 +420,7 @@ var citeKeyConversions = {
 				}
 			} else if (item.itemType == "email") {
 				writeField("type", "E-mail");
-			} else if (item.manuscriptType || item.thesisType || item.websiteType || item.presentationType || item.reportType || item.mapType) {
+			} else if (!inhibitType && (item.manuscriptType || item.thesisType || item.websiteType || item.presentationType || item.reportType || item.mapType)) {
 				writeField("type", item.manuscriptType || item.thesisType || item.websiteType || item.presentationType || item.reportType || item.mapType);
 			}
 
