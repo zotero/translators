@@ -2,14 +2,14 @@
 	"translatorID": "26ab1a2b-8740-4f79-a3e7-e0df62818839",
 	"label": "HospicesCivilsdeLyon",
 	"creator": "Sebastian Karcher, Hospices Civils de Lyon",
-	"target": "(\.docchu-lyon|\.cclin-france|\.hcl)[^/]*\.fr[^/]*/cgi-bin/koha/(opac-(detail|MARCdetail|search|shelves)|catalogue)",
+	"target": "(\\.docchu-lyon|\\.cclin-france|\\.hcl)[^/]*\\.fr[^/]*/cgi-bin/koha/(opac-(detail|MARCdetail|search|shelves)|catalogue)",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 25,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2013-08-27 14:08:36"
+	"lastUpdated": "2013-12-10 15:33:51"
 }
 
 //Translator pour les sites http://rbh.docchu-lyon.fr | http://www.nosobase-biblio.cclin-france.fr/ | http://documentationcentrale.docchu-lyon.fr/
@@ -41,18 +41,20 @@ var typeMap = {
 //Détection de la présence de document multiple ou unique //Document detection: multiple or single
 function detectWeb(doc, url) {
 	if (url.match(/\/opac-search\.pl\?/)){return "multiple";}		//Listes de résultat
+	if (url.match(/\/search\.pl\?/)){return "multiple";}			//Listes de résultat admin
+	if (url.match(/\/basket\.pl\?/)){return "multiple";}
 	if (url.match(/opac-shelves/)){return "multiple";} 				//Listes publiques //Shelves
-	if (url.match(/\/opac-detail.pl\?/)) {							//Notice normale sur OPAC //Single
+	if (url.match(/\/opac-detail.pl\?/)) {							//Notice //normale sur OPAC //Single
 		var type = ZU.xpathText(doc, '//span[@class="doc_type"]');	
 		if(type) return typeMap[type] || 'journalArticle';			//valeur par défaut //Default
 	}
-	if (url.match(/\/opac-MARCdetail.pl\?/)) {						//Notice MARC sur OPAC
+	if (url.match(/\/opac-MARCdetail.pl\?/)) {						//Notice //MARC sur OPAC
 		return 'journalArticle';
 	}
-		if (url.match(/\/MARCdetailHCL.pl\?/)) {					//Notice MARC sur interface admin
+		if (url.match(/\/MARCdetailHCL.pl\?/)) {					//Notice //MARC sur interface admin
 		return 'journalArticle';
 	}
-	if (url.match(/\/catalogue\/detail\.pl\?/)) {					//Notice normale sur interface admin
+	if (url.match(/\/catalogue\/detail\.pl\?/)) {					//Notice //normale sur interface admin
 		var type = ZU.xpathText(doc, '//span[@class="doc_type"]');
 		if(type) return typeMap[type] || 'journalArticle';			//valeur par défaut //Default
 	}
@@ -103,7 +105,7 @@ function doWeb(doc, url) {
 function scrape(marcurl) {
 	Zotero.Utilities.HTTP.doGet(marcurl, function (text) {
 		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("1b77cfcc-f4ae-47bd-86fe-47bda67f7793");
+		translator.setTranslator("8afafd94-1f10-440e-ba2f-93676048da41");
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
 			//editors get mapped as contributors - but so do many others who should be
@@ -137,7 +139,6 @@ function scrape(marcurl) {
 	
 	})
 } 
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
