@@ -9,32 +9,32 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-05-08 23:03:38"
+	"lastUpdated": "2013-12-10 13:44:09"
 }
 
 /* Based on the SIRSI translator by Simon Kornblith and Michael Berkowitz,
    and the modifications for Rutgers (IRIS) by Chad Mills.
    Includes code for Spanish version, e.g. PUCP: http://biblioteca.pucp.edu.pe/ (no permalink)
+   and UChile www.catalogo.uchile.cl
  */
 
 function detectWeb(doc, url) {
 	if (doc.evaluate('//div[@class="columns_container"]/div[contains(@class, "left_column")]/div[@class="content_container"]/div[@class="content"]/form[@id="hitlist"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
-	} else if (doc.evaluate('//div[@class="columns_container"]/div[contains(@class, "left_column")]/form[@name="item_view"]/div[@class="content_container item_details"]/div[@class="content"]/h3[.="Item Details" or .="Detalles del ítem"] ', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	} else if (doc.evaluate('//div[@class="columns_container"]/div[contains(@class, "left_column")]/form[@name="item_view"]/div[@class="content_container item_details"]/div[@class="content"]/h3[.="Item Details" or .="Detalles del ítem" or .="Detalle"] ', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "book";
 	}
 }
 
 function scrape(doc, url) {
 
-	var xpath = '/html/body/div[@class="columns_container"]/div[contains(@class, "left_column")]/form[@name="item_view"]/div[@class="content_container item_details"]/div[@class="content"]/ul[contains(@class, "detail_page")]/li[@id="detail_marc_record"]/dl/dt[@class="viewmarctags"]';
+	var xpath = '//ul[contains(@class, "detail_page")]/li[@id="detail_marc_record"]/dl/dt[@class="viewmarctags"]';
 
 	var elmts = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 
 	var elmt = elmts.iterateNext();
 
 	if (!elmt) {
-
 		return false;
 	}
 
@@ -77,7 +77,7 @@ function scrape(doc, url) {
 					var re = /^[0-9](?:[0-9X]+)/;
 					var m = re.exec(value);
 					newItem.ISBN = m[0];
-				} else if (field == "title" || field =="titulo") {
+				} else if (field == "title" || field =="titulo" || field == "título") {
 					var titleParts = value.split(" / ");
 					re = /\[(.+)\]/i;
 					if (re.test(titleParts[0])) {
@@ -102,15 +102,15 @@ function scrape(doc, url) {
 						newItem.series = value;
 					}
 					seriesItemCount++; //bump counter
-				} else if (field == "dissertation note") {
+				} else if (field == "dissertation note" || field == "nota de tesis") {
 					newItem.itemType = "thesis";
 					var thesisParts = value.split("--");
 					var uniDate = thesisParts[1].split(", ");
 					newItem.university = uniDate[0];
 					newItem.date = uniDate[1];
-				} else if (field == "edition"|| field =="edicion") {
+				} else if (field == "edition"|| field =="edicion" || field =="edición") {
 					newItem.edition = value;
-				} else if (field == "physical description" || field =="descripcion") {
+				} else if (field == "physical description" || field =="descripcion" || field == "descripción física") {
 					var physParts = value.split(" : ");
 					var physParts = physParts[0].split(" ; ");
 					//determine pages, split on " p."
@@ -118,7 +118,7 @@ function scrape(doc, url) {
 					//break off anything in the beginning before the numbers
 					var pageParts = physPages[0].split(" ");
 					newItem.numPages = pageParts[pageParts.length - 1];
-				} else if (field == "publication info" || field =="pie de imprenta") {
+				} else if (field == "publication info" || field =="pie de imprenta" || field == "datos publicación") {
 					var pubParts = value.split(" : ");
 					newItem.place = pubParts[0];
 					//drop off first part of array and recombine
@@ -149,7 +149,7 @@ function scrape(doc, url) {
 					newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "performer", true));
 				} else if (field == "author") {
 					newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "author", true));
-				} else if (field == "added author") {
+				} else if (field == "added author" || field == "otros autores") {
 					newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "contributor", true));
 				} else if (field == "conference author" || field == "corporate author") {
 
@@ -157,7 +157,7 @@ function scrape(doc, url) {
 
 					//The following line is included by Rice to handle corporate or conference author
 					newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "author", true));
-				} else if (field == "subject" || field == "corporate subject" || field == "geographic term" || field=="tema") {
+				} else if (field == "subject" || field == "corporate subject" || field == "geographic term" || field=="tema" || field=="materia") {
 					var subjects = value.split("--");
 					newItem.tags = newItem.tags.concat(subjects);
 				} else if (field == "personal subject") {
