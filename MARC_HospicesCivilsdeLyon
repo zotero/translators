@@ -1,15 +1,15 @@
 {
-	"translatorID": "1b77cfcc-f4ae-47bd-86fe-47bda67f7793",
+	"translatorID": "8afafd94-1f10-440e-ba2f-93676048da41",
 	"label": "MARC_HospicesCivilsdeLyon",
 	"creator": "Simon Kornblith, Sylvain Machefert, HospicesCivilsdeLyon",
 	"target": "marc",
-	"minVersion": "2.1.9",
+	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 125,
 	"inRepository": true,
 	"translatorType": 1,
-	"browserSupport": "gcs",
-	"lastUpdated": "2013-08-22 14:00:01"
+	"browserSupport": "g",
+	"lastUpdated": "2013-12-10 15:31:33"
 }
 
 function detectImport() {
