@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-11-23 10:54:53"
+	"lastUpdated": "2013-12-09 23:24:00"
 }
 
 /*
@@ -88,6 +88,7 @@ function scrape (doc, url){
 		item.ISSN = "0009-5982";
 		
 		var byline = doc.evaluate('//p[@class="byline"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+		if (!byline) byline = doc.evaluate('//div[@class="blog__author"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 		if (byline !== null) {
 			var authors = parseAuthors(byline.textContent);
 			for (var i = 0; i < authors.length; i++) {
@@ -97,16 +98,14 @@ function scrape (doc, url){
 		
 		// Behavior for some items is different:
 		if(type === "blogPost") {
-			var dateline = doc.evaluate('//p[@class="time"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-			if (dateline !== null) {
-				item.date = Zotero.Utilities.trimInternal(dateline.textContent);
-			}
-			item.title = doc.evaluate('//div[@class="blog-mod"]//h1[@class="entry-title" or @class="title"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			item.date = ZU.xpathText(doc, '//div[@class="blog__author"]/time');
+			item.title = ZU.xpathText(doc, '//h2[@class="blog__title"]');
+			//legacy blogs
+			if (!item.title) item.title = ZU.xpathText(doc, '//h1[@class="title"]')
+			if(!item.date) item.date= ZU.xpathText(doc, '//p[@class="time"]');
 			
-			// We keep the Chronicle as the Website Type, for lack of a better place
-			item.websiteType = item.publicationTitle;
-			item.publicationTitle = ZU.xpathText(doc, '//div[@class="search-wrap"]//a');
-			item.publicationTitle = item.publicationTitle.replace(/back to\s*/, "");
+			var blogname = ZU.xpathText(doc, '//div[@class="blog__mast"]//h2[contains(@class, "blog__name")]');
+			if (blogname) item.publicationTitle = item.publicationTitle + " Blogs: " + blogname;
 		} else {
 			var dateline = doc.evaluate('//p[@class="dateline"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 			if (dateline !== null) {
@@ -179,18 +178,17 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": false,
 						"title": "Chronicle of Higher Education Snapshot",
 						"mimeType": "text/html"
 					}
 				],
 				"url": "http://chronicle.com/blogs/profhacker/the-second-day-of-thatcamp/23068",
-				"publicationTitle": "ProfHacker",
+				"publicationTitle": "The Chronicle of Higher Education Blogs: ProfHacker",
 				"ISSN": "0009-5982",
-				"date": "March 26, 2010, 2:07 pm",
+				"date": "March 26, 2010",
 				"title": "The Second Day of THATCamp",
-				"websiteType": "The Chronicle of Higher Education",
-				"libraryCatalog": "The Chronicle of Higher Education"
+				"libraryCatalog": "The Chronicle of Higher Education",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -290,11 +288,10 @@ var testCases = [
 					}
 				],
 				"url": "http://chronicle.com/blogPost/humanities-cyberinfrastructure-project-bamboo/6138",
-				"publicationTitle": "Brainstorm",
+				"publicationTitle": "The Chronicle of Higher Education",
 				"ISSN": "0009-5982",
 				"date": "July 17, 2008, 01:29 PM ET",
 				"title": "Humanities Cyberinfrastructure: Project Bamboo",
-				"websiteType": "The Chronicle of Higher Education",
 				"libraryCatalog": "The Chronicle of Higher Education",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Humanities Cyberinfrastructure"
