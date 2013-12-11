@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-12-11 16:11:55"
+	"lastUpdated": "2013-12-11 16:13:35"
 }
 
 /*
@@ -65,7 +65,7 @@ function doWeb(doc, url) {
 			   });
 
   } else {
-	var citationurl = url.replace(/\/doi\/abs\/|\/doi\/full\//, "/action/showCitFormats?doi=").replace(/\?journalCode.+/, "");
+	var citationurl = url.replace(/\?.+/, "").replace(/\/doi\/abs\/|\/doi\/full\//, "/action/showCitFormats?doi=");
 	//Z.debug(citationurl)
 	getpages(citationurl);
   }
