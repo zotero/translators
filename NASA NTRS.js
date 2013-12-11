@@ -2,14 +2,14 @@
 	"translatorID": "5a697ab5-913a-478a-b4ec-98d019aa5dc6",
 	"label": "NASA NTRS",
 	"creator": "Andrew Bergan",
-	"target": "^http://ntrs\\.nasa\\.gov/(search.jsp)?\\?",
-	"minVersion": "1.0",
+	"target": "^http://ntrs\\.nasa\\.gov/(search\\.jsp)?\\?",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcv",
-	"lastUpdated": "2013-12-10 04:20:00"
+	"browserSupport": "gcsbv",
+	"lastUpdated": "2013-12-10 17:58:24"
 }
 
 function detectWeb(doc, url) {
