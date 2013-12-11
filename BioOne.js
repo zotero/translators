@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-04 21:50:06"
+	"lastUpdated": "2013-12-11 16:11:55"
 }
 
 /*
@@ -65,32 +65,27 @@ function doWeb(doc, url) {
 			   });
 
   } else {
-	var citationurl = url.replace(/\/doi\/abs\/|\/doi\/full\//, "/action/showCitFormats?doi=");
+	var citationurl = url.replace(/\/doi\/abs\/|\/doi\/full\//, "/action/showCitFormats?doi=").replace(/\?journalCode.+/, "");
 	//Z.debug(citationurl)
 	getpages(citationurl);
   }
-  Zotero.wait();
 }
 
 function getpages(citationurl) {
 	//we work entirely from the citations page
-  Zotero.Utilities.processDocuments(citationurl, function(doc) {
-					  scrape(doc);
-	}, function() { Zotero.done() });
+  Zotero.Utilities.processDocuments(citationurl, scrape);
 }
-
 
 function scrape (doc) {
   var newurl = doc.location.href;
-  //Z.debug(newurl);
   var pdfurl = newurl.replace(/\/action\/showCitFormats\?doi=/, "/doi/pdf/");
   var absurl = newurl.replace(/\/action\/showCitFormats\?doi=/, "/doi/abs/");
-  var doi = doc.evaluate('//form[@target="_self"]/input[@name="doi"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
-  var filename = doc.evaluate('//form[@target="_self"]/input[@name="downloadFileName"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
-  //	Z.debug(filename);
+  var doi = ZU.xpathText(doc, '//form/input[@name="doi"]/@value')
+  var filename = ZU.xpathText(doc, '//form/input[@name="downloadFileName"]');
   var get = 'http://www.bioone.org/action/downloadCitation';
   var post = 'doi=' + doi + '&downloadFileName=' + filename + '&format=ris&direct=true&include=cit';
-  Zotero.Utilities.HTTP.doPost(get, post, function(text) {
+   Zotero.Utilities.HTTP.doPost(get, post, function(text) {
+  	//Z.debug(text)
 	var translator = Zotero.loadTranslator("import");
 	// Calling the RIS translator
 	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
