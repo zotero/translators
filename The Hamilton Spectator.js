@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-06-08 15:21:58"
+	"lastUpdated": "2013-12-12 13:55:59"
 }
 
 function detectWeb(doc, url) {
@@ -66,7 +66,7 @@ function scrape(doc, url) {
 	newItem.title = doc.evaluate(xPathTitle, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;	
 
 	newItem.abstractNote = ZU.xpathText(doc, '//meta[@name="description"]/@content');
-	newItem.date = ZU.xpathText(doc, '//div[contains(@class, "above-page-title")]/span[contains(@class,"left")]');
+	newItem.date = ZU.xpathText(doc, '//div[contains(@class, "above-page-title")]/span[contains(@class,"left")][1]');
 
 	newItem.url = doc.location.href;
 	newItem.publicationTitle = "The Hamilton Spectator";
@@ -111,7 +111,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"title": "Expert calls Occupy demos most important in generations",
-				"date": "Nov 16, 2011  |",
+				"date": "Nov 16, 2011",
 				"url": "http://www.thespec.com/news-story/2223303-expert-calls-occupy-demos-most-important-in-generations-/",
 				"publicationTitle": "The Hamilton Spectator",
 				"libraryCatalog": "The Hamilton Spectator",

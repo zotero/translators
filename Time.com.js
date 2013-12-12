@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-04-11 11:55:53"
+	"lastUpdated": "2013-12-12 14:02:17"
 }
 
 function detectWeb(doc, url) {
@@ -99,7 +99,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.time.com/time/nation/article/0,8599,2099187,00.html",
+		"url": "http://content.time.com/time/nation/article/0,8599,2099187,00.html",
 		"items": [
 			{
 				"itemType": "magazineArticle",
@@ -123,19 +123,20 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"url": "http://www.time.com/time/nation/article/0,8599,2099187,00.html",
-				"abstractNote": "Battling debilitating congressional mandates and competition online, the USPS is closing thousands of post offices and struggling to find a place in the modern world. But there are people behind the scenes trying to save this American institution",
-				"libraryCatalog": "www.time.com",
-				"ISSN": "0040-718X",
 				"title": "How the U.S. Postal Service Fell Apart",
 				"publicationTitle": "Time",
-				"date": "Thursday, Nov. 17, 2011"
+				"url": "http://content.time.com/time/nation/article/0,8599,2099187,00.html",
+				"abstractNote": "Battling debilitating congressional mandates and competition online, the USPS is closing thousands of post offices and struggling to find a place in the modern world. But there are people behind the scenes trying to save this American institution",
+				"libraryCatalog": "content.time.com",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"date": "Thursday, Nov. 17, 2011",
+				"ISSN": "0040-718X"
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.time.com/time/nation/article/0,8599,2108263,00.html",
+		"url": "http://content.time.com/time/nation/article/0,8599,2108263,00.html",
 		"items": [
 			{
 				"itemType": "magazineArticle",
@@ -148,13 +149,13 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"destruction",
+					"weather",
+					"storm",
+					"tornado",
 					"henryville",
 					"indiana",
 					"kentucky",
-					"storm",
-					"tornado",
-					"weather"
+					"destruction"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -162,14 +163,15 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"url": "http://www.time.com/time/nation/article/0,8599,2108263,00.html",
-				"abstractNote": "The month of March isn't really the heart of the tornado season but they have come fast and with awesome destruction.",
-				"libraryCatalog": "www.time.com",
-				"ISSN": "0040-718X",
-				"shortTitle": "On Scene in Indiana and Kentucky",
 				"title": "On Scene in Indiana and Kentucky: When the Tornadoes Came",
 				"publicationTitle": "Time",
-				"date": "Sunday, Mar. 04, 2012"
+				"url": "http://content.time.com/time/nation/article/0,8599,2108263,00.html",
+				"abstractNote": "The month of March isn't really the heart of the tornado season but they have come fast and with awesome destruction.",
+				"libraryCatalog": "content.time.com",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"date": "Sunday, Mar. 04, 2012",
+				"ISSN": "0040-718X",
+				"shortTitle": "On Scene in Indiana and Kentucky"
 			}
 		]
 	},
@@ -181,15 +183,15 @@ var testCases = [
 				"itemType": "magazineArticle",
 				"creators": [
 					{
-						"firstName": "Jay Newton-Small",
-						"lastName": "@JNSmall",
+						"firstName": "Jay",
+						"lastName": "Newton-Small",
 						"creatorType": "author"
 					}
 				],
 				"notes": [],
 				"tags": [
-					"aipac",
 					"barack obama",
+					"aipac",
 					"bibi",
 					"iran",
 					"israel",
@@ -205,12 +207,14 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
+				"itemID": "http://swampland.time.com/2012/03/04/obama-courts-aipac-before-netanyahu-meeting/?iid=sl-main-lede",
+				"title": "Obama Courts AIPAC Before Netanyahu Meeting",
+				"publicationTitle": "Time",
 				"url": "http://swampland.time.com/2012/03/04/obama-courts-aipac-before-netanyahu-meeting/?iid=sl-main-lede",
 				"abstractNote": "Obama rejected any notion that his administration has not been in Israel's corner. “Over the last three years, as President of the United States, I have kept my commitments to the state of Israel.\" The President then ticked off the number of ways he has supported Israel in the last year.",
+				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "swampland.time.com",
-				"ISSN": "0040-718X",
-				"title": "Obama Courts AIPAC Before Netanyahu Meeting",
-				"publicationTitle": "Time"
+				"ISSN": "0040-718X"
 			}
 		]
 	},
@@ -222,29 +226,29 @@ var testCases = [
 				"itemType": "magazineArticle",
 				"creators": [
 					{
-						"firstName": "Brad Tuttle",
-						"lastName": "@bradrtuttle",
+						"firstName": "Brad",
+						"lastName": "Tuttle",
 						"creatorType": "author"
 					}
 				],
 				"notes": [],
 				"tags": [
-					"arizona",
-					"baltimore",
-					"california",
 					"california real estate",
-					"dallas",
 					"economics & policy",
-					"florida",
 					"florida real estate",
-					"georgia",
 					"mortgages",
-					"nevada",
 					"personal finance",
 					"real estate & homes",
 					"real estate markets",
-					"sunbelt",
 					"the economy",
+					"arizona",
+					"baltimore",
+					"california",
+					"dallas",
+					"florida",
+					"georgia",
+					"nevada",
+					"sunbelt",
 					"underwater",
 					"upside-down"
 				],
@@ -254,13 +258,15 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
+				"itemID": "http://business.time.com/2012/03/02/struggling-to-stay-afloat-number-of-underwater-homeowners-keeps-on-rising/?iid=pf-main-lede/",
+				"title": "Struggling to Stay Afloat: Number of Underwater Homeowners Keeps on Rising",
+				"publicationTitle": "Time",
 				"url": "http://business.time.com/2012/03/02/struggling-to-stay-afloat-number-of-underwater-homeowners-keeps-on-rising/?iid=pf-main-lede/",
 				"abstractNote": "Despite signs that some housing markets are improving, the overall trend is for home prices (and values) to keep dropping—and dropping. As values shrink, more and more homeowners find themselves underwater, the unfortunate scenario in which one owes more on the mortgage than the home is worth.",
+				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "business.time.com",
-				"ISSN": "0040-718X",
 				"shortTitle": "Struggling to Stay Afloat",
-				"title": "Struggling to Stay Afloat: Number of Underwater Homeowners Keeps on Rising",
-				"publicationTitle": "Time"
+				"ISSN": "0040-718X"
 			}
 		]
 	},

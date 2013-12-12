@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-09-25 16:18:41"
+	"lastUpdated": "2013-12-12 13:59:44"
 }
 
 function createExcludes(url, excludeArr) {
@@ -110,7 +110,8 @@ function scrape(doc, url) {
 				'DCSext.articleId': 'callNumber',
 				'article-id': 'callNumber',
 				'tmgads.articleid': 'callNumber',
-				'last-modified': 'date'
+				'last-modified': 'date',
+				'DCSext.articleFirstPublished' : 'date'
 			});
 	
 			em.doWeb(doc, url);
@@ -173,19 +174,17 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"itemID": "http://www.telegraph.co.uk/news/worldnews/asia/china/8888909/China-Google-Earth-spots-huge-unidentified-structures-in-Gobi-desert.html",
 				"title": "China: Google Earth spots huge, unidentified structures in Gobi desert",
-				"source": "Telegraph.co.uk",
 				"publicationTitle": "Telegraph.co.uk",
-				"date": "2011-11-14",
+				"date": "2011-11-14 13:50",
 				"url": "http://www.telegraph.co.uk/news/worldnews/asia/china/8888909/China-Google-Earth-spots-huge-unidentified-structures-in-Gobi-desert.html",
 				"abstractNote": "Vast, unidentified, structures have been spotted by satellites in the barren Gobi desert, raising questions about what China might be building in a region it uses for its military, space and nuclear programmes.",
+				"libraryCatalog": "www.telegraph.co.uk",
+				"accessDate": "CURRENT_TIMESTAMP",
 				"section": "worldnews",
 				"callNumber": "8888909",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "www.telegraph.co.uk",
-				"shortTitle": "China",
-				"publisher": "Telegraph Media Group Limited"
+				"publisher": "Telegraph Media Group Limited",
+				"shortTitle": "China"
 			}
 		]
 	},
@@ -215,16 +214,15 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"itemID": "http://blogs.telegraph.co.uk/news/cristinaodone/100141152/putin-wins-the-russian-election-but-it-wont-be-long-before-hes-in-trouble/",
 				"title": "Putin 'wins' the Russian election. But it won't be long before he's in trouble",
 				"publicationTitle": "News - Telegraph Blogs",
-				"date": "2012-03-04",
 				"url": "http://blogs.telegraph.co.uk/news/cristinaodone/100141152/putin-wins-the-russian-election-but-it-wont-be-long-before-hes-in-trouble/",
 				"abstractNote": "Vladimir Putin looks set to win the Russian elections – no surprise there, then. Few, even in Russia, believe that today's election is anything bu",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "blogs.telegraph.co.uk",
+				"accessDate": "CURRENT_TIMESTAMP",
 				"section": "Blogs",
 				"callNumber": "100141152",
+				"date": "2012-03-04 18:32:08",
 				"publisher": "Telegraph Media Group Limited"
 			}
 		]
