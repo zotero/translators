@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-02-09 12:45:00"
+	"lastUpdated": "2013-12-12 12:55:31"
 }
 
 function detectWeb(doc, url) {
@@ -83,6 +83,7 @@ function scrape(newDoc, url){
 				// Note that the RIS translator gives us a link to the record already
 				item.url = null;
 				if (keys) item.tags = keys;
+				if (item.date) item.date = item.date.replace(/\-01\-01T00:00:00\/*/, "")
 				if (item.DOI) {
 					if (item.DOI.match(/^doi:/)) {
 						item.DOI = item.DOI.substr(4);

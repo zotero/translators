@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-04-04 05:29:41"
+	"lastUpdated": "2013-12-12 12:35:55"
 }
 
 var items = {};
@@ -35,6 +35,7 @@ function getDOIs(doc) {
 	var node, m, DOI;
 	var results = doc.evaluate(DOIXPath, doc, null, XPathResult.ANY_TYPE, null);
 	while(node = results.iterateNext()) {
+		//Z.debug(node.nodeValue)
 		DOIre.lastMatch = 0;
 		while(m = DOIre.exec(node.nodeValue)) {
 			DOI = m[0];
@@ -137,25 +138,25 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.crossref.org/help/Content/01_About_DOIs/What_is_a_DOI.htm",
+		"url": "http://blog.apastyle.org/apastyle/digital-object-identifier-doi/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://libguides.csuchico.edu/citingbusiness",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"creators": [
 					{
 						"creatorType": "author",
-						"firstName": "Jianxun",
-						"lastName": "Mou"
+						"firstName": "Jean M.",
+						"lastName": "Twenge"
 					},
 					{
 						"creatorType": "author",
-						"firstName": "Jie",
-						"lastName": "Yang"
-					},
-					{
-						"creatorType": "author",
-						"firstName": "Zhifeng",
-						"lastName": "Shao"
+						"firstName": "Stacy M.",
+						"lastName": "Campbell"
 					}
 				],
 				"notes": [],
@@ -164,23 +165,19 @@ var testCases = [
 				"attachments": [
 					{}
 				],
-				"issue": "3",
-				"ISSN": "00222836",
-				"DOI": "10.1006/jmbi.1995.0238",
-				"url": "http://www.crossref.org/help/Content/01_About_DOIs/What_is_a_DOI.htm",
+				"publicationTitle": "Journal of Managerial Psychology",
+				"volume": "23",
+				"issue": "8",
+				"ISSN": "0268-3946",
+				"date": "2008",
+				"pages": "862-877",
+				"DOI": "10.1108/02683940810904367",
+				"url": "http://libguides.csuchico.edu/citingbusiness",
+				"title": "Generational differences in psychological traits and their impact on the workplace",
 				"libraryCatalog": "CrossRef",
-				"publicationTitle": "Journal of Molecular Biology",
-				"volume": "248",
-				"date": "5/1995",
-				"pages": "507-512",
-				"title": "Atomic Force Microscopy of Cholera Toxin B-oligomers Bound to Bilayers of Biologically Relevant Lipids"
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://blog.apastyle.org/apastyle/digital-object-identifier-doi/",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

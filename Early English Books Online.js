@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-12-07 14:52:55"
+	"lastUpdated": "2013-12-12 12:41:36"
 }
 
 function detectWeb(doc, url) {
@@ -73,7 +73,7 @@ function scrape(eeboIDs, host){
 		var postString = 'cit_format=RIS&Print=Print&cit_eeboid=' + eeboIDs[i] + '&EeboId=' + eeboIDs[i];
 		var new_eeboid = eeboIDs[i]
 		Zotero.Utilities.HTTP.doPost(host+'/search/print', postString, function(text) {
-			Z.debug(text)
+			//Z.debug(text)
 			// load translator for RIS
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -81,7 +81,7 @@ function scrape(eeboIDs, host){
 			translator.setHandler("itemDone", function(obj, item) {
 				//remove date for authors
 				for (var i in item.creators){
-					if (item.creators[i].firstName) item.creators[i].firstName = item.creators[i].firstName.replace(/[,\-\d\.]+$/, "")
+					if (item.creators[i].firstName) item.creators[i].firstName = item.creators[i].firstName.replace(/[,\-\d\.\s]+$/g, "")
 				}
 				item.attachments.push(
 						{url : host+'/search/full_rec?SOURCE=pgimages.cfg&ACTION=ByID&ID=' + new_eeboid + '&FILE=../session/1190302085_15129&SEARCHSCREEN=CITATIONS&SEARCHCONFIG=config.cfg&DISPLAY=ALPHA',
@@ -90,7 +90,6 @@ function scrape(eeboIDs, host){
 				item.complete();
 			});
 			translator.translate();
-			Zotero.done();
 		});
 	}
 }

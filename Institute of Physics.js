@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-09-23 22:46:18"
+	"lastUpdated": "2013-12-12 12:48:04"
 }
 
 /*
@@ -139,7 +139,6 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"itemID": "http://iopscience.iop.org/0022-3727/34/10/311",
 				"title": "Hydrodynamical simulation of the electric wind in a cylindrical vessel with positive point-to-plane device",
 				"publisher": "IOP Publishing",
 				"institution": "IOP Publishing",
@@ -162,12 +161,12 @@ var testCases = [
 				"journalAbbreviation": "J. Phys. D: Appl. Phys.",
 				"volume": "34",
 				"issue": "10",
-				"abstractNote": "Electrical corona discharges at atmospheric pressure in a positive point-to-plane configuration create an electric wind from the point to the plane which, in a closed cylindrical vessel, generates in a few seconds axisymmetrical vortices in the vessel. Photography and video recording show that a small ring vortex appears around the discharge axis, close to the plane, enlarges and progressively fills the vessel up to a stationary situation. A simplified stationary model was first used in order to take into account the measured values of the wind velocity along the discharge axis as well as the velocity field lines visualized by smoke particles. Simulation and experimental results are in fairly good agreement, and a few particular adjustments concerning temperature profiles were made to improve the numerical results. Then, a dynamical model, including the effect of the repetitive ionizing fronts (streamers) occurring in the filamentary discharge, allows one to render an account of the transient evolution of the velocity field lines towards the stationary vortices. Although the numerical simulation could not be continued to a steady state, it shows that a small ring vortex is created near the point electrode, moves rapidly from the point to the plane and then begins to enlarge at the right (experimental) place.",
 				"pages": "1510",
 				"ISSN": "0022-3727",
 				"url": "http://iopscience.iop.org/0022-3727/34/10/311",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "Institute of Physics"
+				"abstractNote": "Electrical corona discharges at atmospheric pressure in a positive point-to-plane configuration create an electric wind from the point to the plane which, in a closed cylindrical vessel, generates in a few seconds axisymmetrical vortices in the vessel. Photography and video recording show that a small ring vortex appears around the discharge axis, close to the plane, enlarges and progressively fills the vessel up to a stationary situation. A simplified stationary model was first used in order to take into account the measured values of the wind velocity along the discharge axis as well as the velocity field lines visualized by smoke particles. Simulation and experimental results are in fairly good agreement, and a few particular adjustments concerning temperature profiles were made to improve the numerical results. Then, a dynamical model, including the effect of the repetitive ionizing fronts (streamers) occurring in the filamentary discharge, allows one to render an account of the transient evolution of the velocity field lines towards the stationary vortices. Although the numerical simulation could not be continued to a steady state, it shows that a small ring vortex is created near the point electrode, moves rapidly from the point to the plane and then begins to enlarge at the right (experimental) place.",
+				"libraryCatalog": "Institute of Physics",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -241,7 +240,6 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"itemID": "http://iopscience.iop.org/1741-2552/10/2/026008/article#jne451204f3",
 				"title": "Local-learning-based neuron selection for grasping gesture prediction in motor brain machine interfaces",
 				"publisher": "IOP Publishing",
 				"institution": "IOP Publishing",
@@ -264,12 +262,12 @@ var testCases = [
 				"journalAbbreviation": "J. Neural Eng.",
 				"volume": "10",
 				"issue": "2",
-				"abstractNote": "Objective. The high-dimensional neural recordings bring computational challenges to movement decoding in motor brain machine interfaces (mBMI), especially for portable applications. However, not all recorded neural activities relate to the execution of a certain movement task. This paper proposes to use a local-learning-based method to perform neuron selection for the gesture prediction in a reaching and grasping task. Approach. Nonlinear neural activities are decomposed into a set of linear ones in a weighted feature space. A margin is defined to measure the distance between inter-class and intra-class neural patterns. The weights, reflecting the importance of neurons, are obtained by minimizing a margin-based exponential error function. To find the most dominant neurons in the task, 1-norm regularization is introduced to the objective function for sparse weights, where near-zero weights indicate irrelevant neurons. Main results. The signals of only 10 neurons out of 70 selected by the proposed method could achieve over 95% of the full recording's decoding accuracy of gesture predictions, no matter which different decoding methods are used (support vector machine and K-nearest neighbor). The temporal activities of the selected neurons show visually distinguishable patterns associated with various hand states. Compared with other algorithms, the proposed method can better eliminate the irrelevant neurons with near-zero weights and provides the important neuron subset with the best decoding performance in statistics. The weights of important neurons converge usually within 10–20 iterations. In addition, we study the temporal and spatial variation of neuron importance along a period of one and a half months in the same task. A high decoding performance can be maintained by updating the neuron subset. Significance. The proposed algorithm effectively ascertains the neuronal importance without assuming any coding model and provides a high performance with different decoding models. It shows better robustness of identifying the important neurons with noisy signals presented. The low demand of computational resources which, reflected by the fast convergence, indicates the feasibility of the method applied in portable BMI systems. The ascertainment of the important neurons helps to inspect neural patterns visually associated with the movement task. The elimination of irrelevant neurons greatly reduces the computational burden of mBMI systems and maintains the performance with better robustness.",
 				"pages": "026008",
 				"ISSN": "1741-2552",
 				"url": "http://iopscience.iop.org/1741-2552/10/2/026008",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "Institute of Physics"
+				"abstractNote": "Objective. The high-dimensional neural recordings bring computational challenges to movement decoding in motor brain machine interfaces (mBMI), especially for portable applications. However, not all recorded neural activities relate to the execution of a certain movement task. This paper proposes to use a local-learning-based method to perform neuron selection for the gesture prediction in a reaching and grasping task. Approach. Nonlinear neural activities are decomposed into a set of linear ones in a weighted feature space. A margin is defined to measure the distance between inter-class and intra-class neural patterns. The weights, reflecting the importance of neurons, are obtained by minimizing a margin-based exponential error function. To find the most dominant neurons in the task, 1-norm regularization is introduced to the objective function for sparse weights, where near-zero weights indicate irrelevant neurons. Main results. The signals of only 10 neurons out of 70 selected by the proposed method could achieve over 95% of the full recording's decoding accuracy of gesture predictions, no matter which different decoding methods are used (support vector machine and K-nearest neighbor). The temporal activities of the selected neurons show visually distinguishable patterns associated with various hand states. Compared with other algorithms, the proposed method can better eliminate the irrelevant neurons with near-zero weights and provides the important neuron subset with the best decoding performance in statistics. The weights of important neurons converge usually within 10–20 iterations. In addition, we study the temporal and spatial variation of neuron importance along a period of one and a half months in the same task. A high decoding performance can be maintained by updating the neuron subset. Significance. The proposed algorithm effectively ascertains the neuronal importance without assuming any coding model and provides a high performance with different decoding models. It shows better robustness of identifying the important neurons with noisy signals presented. The low demand of computational resources which, reflected by the fast convergence, indicates the feasibility of the method applied in portable BMI systems. The ascertainment of the important neurons helps to inspect neural patterns visually associated with the movement task. The elimination of irrelevant neurons greatly reduces the computational burden of mBMI systems and maintains the performance with better robustness.",
+				"libraryCatalog": "Institute of Physics",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
