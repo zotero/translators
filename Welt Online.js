@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-09-25 16:09:43"
+	"lastUpdated": "2013-12-11 22:19:16"
 }
 
 /*
@@ -38,16 +38,16 @@ http://www.welt.de/wirtschaft/article12962920/Krankenkassen-werfen-Aerzten-Gewin
 */
 
 function detectWeb(doc, url) {
-	var welt_article_XPath = ".//meta[contains(@property, 'og:type')]";
+	var welt_article_XPath = '//div[@id="main"]//h1';
 	var welt_multiple_XPath = "//h4[contains(@class, 'headline')]/a";
-	if (doc.evaluate(welt_multiple_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
-		Zotero.debug("multiple");
-		return "multiple";
-	 
-	} else if (doc.evaluate(welt_article_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
+	//Z.debug(ZU.xpathText(doc, welt_multiple_XPath))
+	if (ZU.xpathText(doc, welt_article_XPath) ){ 
 		Zotero.debug("newspaperArticle");
 		return "newspaperArticle";
-	}
+	} 	else if (ZU.xpathText(doc, welt_multiple_XPath)){ 
+		Zotero.debug("multiple");
+		return "multiple"; 
+	} 
 }
 
 function scrape(doc, url) {
@@ -111,8 +111,8 @@ function scrape(doc, url) {
 	}
 	
 	// Section
-	var xPath = ".//*[@id='mainMenu']/ul/li[contains(@class, 'active')]/a";
-	var section= doc.evaluate(xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	var xPath = ".//*[@id='mainNavigationMenu']/ul/li[contains(@class, 'active')]/a";
+	var section= ZU.xpathText(doc, xPath);
 	newItem.section = section;
 
 	// Attachment

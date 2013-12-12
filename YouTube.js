@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-09-25 16:27:20"
+	"lastUpdated": "2013-12-11 21:33:44"
 }
 
 function detectWeb(doc, url){
@@ -29,7 +29,7 @@ function detectWeb(doc, url){
 		return "multiple";
 	}
 	//user page
-	if ( ZU.xpath(doc, '//li[contains(@class, "feed-list-item")]//a[contains(@href, "/watch?v=")]').length ){
+	if ( ZU.xpath(doc, '//div[contains(@class, "feed-item-main")]//a[contains(@href, "/watch?v=")]').length ){
 		return "multiple";
 	}
 	// still used?
@@ -53,7 +53,7 @@ function doWeb(doc, url){
 		var items = new Object();
 		var isPlaylist = false;
 		// search results and community/user pages
-		var elmts = ZU.xpath(doc, '//ol[@id="search-results"]//a[contains(@href, "/watch?v=")]|//li[contains(@class, "feed-list-item")]//a[contains(@href, "/watch?v=")]')
+		var elmts = ZU.xpath(doc, '//ol[@id="search-results"]//a[contains(@href, "/watch?v=")]|//div[contains(@class, "feed-item-main")]//a[contains(@href, "/watch?v=")]')
 		if (!elmts.length) {
 			//playlists
 			elmts = ZU.xpath(doc, '//a[contains(@class,"sessionlink") and contains(@href,"/watch?")][descendant::span[starts-with(@class,"title")]]');
