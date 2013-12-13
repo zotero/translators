@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-11-18 23:51:37"
+	"browserSupport": "gbv",
+	"lastUpdated": "2013-12-13 13:27:23"
 }
 
 /*
@@ -95,6 +95,7 @@ function scrape(newDoc) {
 		var get = 'http://' + host + '/custom_tags/IB_Download_Citations.cfm';
 		var post = 'articles=' + id + '&ArticleAction=save_endnote2&' + action + '=save_endnote2';
 		Zotero.Utilities.HTTP.doPost(get, post, function (text) {
+							Z.debug(text)
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			translator.setString(text);
@@ -267,6 +268,63 @@ var testCases = [
 				"series": "Technical Digest (CD)",
 				"pages": "JThB89",
 				"url": "http://www.opticsinfobase.org/abstract.cfm?URI=OFC-2006-JThB89",
+				"libraryCatalog": "Optical Society of America",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.opticsinfobase.org/ao/abstract.cfm?URI=ao-31-26-5706",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Prongué",
+						"firstName": "D.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Herzig",
+						"firstName": "H. P.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Dändliker",
+						"firstName": "R.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Gale",
+						"firstName": "M. T.",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Appl. Opt. Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Appl. Opt. Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"title": "Optimized kinoform structures for highly efficient fan-out elements",
+				"abstractNote": "We discuss the realization of highly efficient fan-out elements. Laser-beam writing lithography is available now for fabricating smooth surface relief microstructures. We develop several methods for optimizing microstructure profiles. Only a small number of parameters in the object plane are necessary for determining the kinoform. This simplifies the calculation of M × N arrays also for large M and N. Experimental results for a 9-beam fan-out element are presented.",
+				"publisher": "OSA",
+				"date": "September 10, 1992",
+				"publicationTitle": "Applied Optics",
+				"journalAbbreviation": "Appl. Opt.",
+				"volume": "31",
+				"issue": "26",
+				"pages": "5706-5711",
+				"url": "http://ao.osa.org/abstract.cfm?URI=ao-31-26-5706",
+				"DOI": "10.1364/AO.31.005706",
 				"libraryCatalog": "Optical Society of America",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
