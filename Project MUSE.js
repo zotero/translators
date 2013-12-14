@@ -2,14 +2,14 @@
 	"translatorID": "c54d1932-73ce-dfd4-a943-109380e06574",
 	"label": "Project MUSE",
 	"creator": "Simon Kornblith, Avram Lyon, Sean Takats",
-	"target": "^https?://[^/]*muse\\.jhu\\.edu[^/]*/(login\\?uri=/)?(?:journals/[^/]+/(summary/)?[^/]+/[^/]+\\.html|search/results|results)",
+	"target": "^https?://[^/]*muse\\.jhu\\.edu[^/]*/(login\\?.+ur[il]=/)?(?:journals/[^/]+/(summary/)?[^/]+/[^/]+\\.html|search/results|results)",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-09-26 23:40:33"
+	"lastUpdated": "2013-12-14 16:29:40"
 }
 
 function detectWeb(doc, url) {
@@ -252,6 +252,43 @@ var testCases = [
 				"abstractNote": "In Writing the Forest in Early Modern England: A Sylvan Pastoral Nation, Jeffrey S. Theis focuses on pastoral literature in early modern England as an emerging form of nature writing. In particular, Theis analyzes what happens when pastoral writing is set in forests — what he terms “sylvan pastoral.”\nDuring the sixteenth and seventeenth centuries, forests and woodlands played an instrumental role in the formation of individual and national identities in England. Although environmentalism as we know it did not yet exist, persistent fears of timber shortages led to a larger anxiety about the status of forests. Perhaps more important, forests were dynamic and contested sites of largely undeveloped spaces where the poor would migrate in a time of rising population when land became scarce. And in addition to being a place where the poor would go, the forest also was a playground for monarchs and aristocrats where they indulged in the symbolically rich sport of hunting.\nConventional pastoral literature, then, transforms when writers use it to represent and define forests and the multiple ways in which English society saw these places. In exploring these themes, authors expose national concerns regarding deforestation and forest law and present views relating to land ownership, nationhood, and the individual’s relationship to nature. Of particular interest are the ways in which cultures turn confusing spaces into known places and how this process is shaped by nature, history, gender, and class.\nTheis examines the playing out of these issues in familiar works by Shakespeare, such as A Midsummer Night’s Dream, The Merry Wives of Windsor, and As You Like It, Andrew Marvell’s “Upon Appleton House,” John Milton’s Mask and Paradise Lost, as well as in lesser known prose works of the English Revolution, such as James Howell’s Dendrologia>/i> and John Evelyn’s Sylva.\nAs a unique ecocritical study of forests in early modern English literature, Writing the Forest makes an important contribution to the growing field of the history of environmentalism, and will be of interest to those working in literary and cultural history as well as philosophers concerned with nature and space theory.\n       show less, In Writing the Forest in Early Modern England: A Sylvan Pastoral Nation, Jeffrey S. Theis focuses on pastoral literature in early modern England as an emerging form of nature writing. In particular, Theis analyzes what happens when pastoral writing is set in forests — what he terms “sylvan pastoral.” During the sixteenth and seventeenth centuries, forests and woodlands played an instrumental role in the formation of individual and national identities in England. Although environmentalism as we know it did not yet exist, persistent fears of timber shortages led to a larger anxiety about the status of forests. Perhaps more important . . .  show more",
 				"libraryCatalog": "Project MUSE",
 				"shortTitle": "Writing the Forest in Early Modern England"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://muse.jhu.edu/login?auth=0&type=summary&url=/journals/technology_and_culture/v054/54.4.prescott.html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Heather",
+						"lastName": "Prescott",
+						"creatorType": "author"
+					}
+				],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Project MUSE Snapshot"
+					}
+				],
+				"title": "The Pill at Fifty: Scientific Commemoration and the Politics of American Memory",
+				"publicationTitle": "Technology and Culture",
+				"volume": "54",
+				"issue": "4",
+				"pages": "735-745",
+				"publisher": "The Johns Hopkins University Press",
+				"ISSN": "1097-3729",
+				"url": "http://muse.jhu.edu/journals/technology_and_culture/v054/54.4.prescott.html",
+				"date": "2013",
+				"extra": "<p>Volume 54, Number 4, October 2013</p>",
+				"abstractNote": "Abstract Abstract:This article uses coverage of the fiftieth anniversary of the Pill as an example of what Richard Hirsh describes as the “real world” role of historians of technology. It explores how the presentation of historical topics on the world wide web has complicated how the history of technology is conveyed to the public. The article shows that that the Pill is especially suited to demonstrating the public role of historians of technology because, as the most popular form of reversible birth control, it has touched the lives of millions of Americans. Thus, an exploration of how the Pill’s fiftieth anniversary was covered illustrates how historians can use their expertise to provide a nuanced interpretation of a controversial topic in the history of technology.",
+				"libraryCatalog": "Project MUSE",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "The Pill at Fifty"
 			}
 		]
 	}
