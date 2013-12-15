@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-12-12 13:34:15"
+	"lastUpdated": "2013-12-14 13:34:15"
 }
 
 function detectWeb(doc, url) {
@@ -173,8 +173,9 @@ function scrapeByExport(doc) {
 		}
 
 		ZU.doPost('/science', post, function(text) {
-				//T2 doesn't appear to hold the short title anymore. Sometimes has series title, so I'm mapping this to T3,
-				//although we currently don't recognize that in RIS
+				//T2 doesn't appear to hold the short title anymore.
+				//Sometimes has series title, so I'm mapping this to T3,
+				// although we currently don't recognize that in RIS
 				text = text.replace(/^T2\s/mg, 'T3 ');
 
 				//Certain authors sometimes have "role" prefixes
@@ -213,6 +214,10 @@ function scrapeByExport(doc) {
 						item.abstractNote = item.notes[0].note;
 						item.notes = new Array();
 					}
+					if(item.abstractNote) {
+						item.abstractNote = item.abstractNote.replace(/^\s*abstract\s+/i, '');
+					}
+					
 					item.DOI = item.DOI.replace(/^doi:\s+/i, '');
 					item.complete();
 				});
