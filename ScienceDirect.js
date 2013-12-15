@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-12-14 13:34:15"
+	"lastUpdated": "2013-12-14 20:34:15"
 }
 
 function detectWeb(doc, url) {
@@ -189,6 +189,13 @@ function scrapeByExport(doc) {
 					//issue sometimes is set to 0 for single issue volumes (?)
 					if(item.issue == 0) delete item.issue;
 					
+					//add spaces after initials
+					for(var i=0, n=item.creators.length; i<n; i++) {
+						if(item.creators[i].firstName) {
+							item.creators[i].firstName = item.creators[i].firstName.replace(/\.\s*(?=\S)/g, '. ');
+						}
+					}
+					
 					item.attachments.push({
 						title: "ScienceDirect Snapshot",
 						document: doc
@@ -215,7 +222,7 @@ function scrapeByExport(doc) {
 						item.notes = new Array();
 					}
 					if(item.abstractNote) {
-						item.abstractNote = item.abstractNote.replace(/^\s*abstract\s+/i, '');
+						item.abstractNote = item.abstractNote.replace(/^\s*(?:abstract|publisher\s+summary)\s+/i, '');
 					}
 					
 					item.DOI = item.DOI.replace(/^doi:\s+/i, '');
@@ -334,7 +341,7 @@ var testCases = [
 					},
 					{
 						"lastName": "Silva",
-						"firstName": "R.D.",
+						"firstName": "R. D.",
 						"creatorType": "author"
 					},
 					{
@@ -349,7 +356,7 @@ var testCases = [
 					},
 					{
 						"lastName": "Sousa",
-						"firstName": "M.J.",
+						"firstName": "M. J.",
 						"creatorType": "author"
 					},
 					{
@@ -412,7 +419,7 @@ var testCases = [
 					},
 					{
 						"lastName": "Janssens",
-						"firstName": "Koenraad G.F.",
+						"firstName": "Koenraad G. F.",
 						"creatorType": "editor"
 					},
 					{
@@ -452,7 +459,7 @@ var testCases = [
 				"ISBN": "978-0-12-369468-3",
 				"DOI": "10.1016/B978-012369468-3/50008-3",
 				"url": "http://www.sciencedirect.com/science/article/pii/B9780123694683500083",
-				"abstractNote": "Publisher Summary\nThis chapter provides an introduction to discrete dislocation statics and dynamics. The chapter deals with the simulation of plasticity of metals at the microscopic and mesoscopic scale using space- and time-discretized dislocation statics and dynamics. The complexity of discrete dislocation models is due to the fact that the mechanical interaction of ensembles of such defects is of an elastic nature and, therefore, involves long-range interactions. Space-discretized dislocation simulations idealize dislocations outside the dislocation cores as linear defects that are embedded within an otherwise homogeneous, isotropic or anisotropic, linear elastic medium. The aim of the chapter is to concentrate on those simulations that are discrete in both space and time. It explicitly incorporates the properties of individual lattice defects in a continuum formulation. The theoretical framework of linear continuum elasticity theory is overviewed as required for the formulation of basic dislocation mechanics. The chapter also discusses the dislocation statics, where the fundamentals of linear isotropic and anisotropic elasticity theory that are required in dislocation theory are reviewed. The chapter describes the dislocation dynamics, where it is concerned with the introduction of continuum dislocation dynamics. The last two sections deal with kinematics of discrete dislocation dynamics and dislocation reactions and annihilation.",
+				"abstractNote": "This chapter provides an introduction to discrete dislocation statics and dynamics. The chapter deals with the simulation of plasticity of metals at the microscopic and mesoscopic scale using space- and time-discretized dislocation statics and dynamics. The complexity of discrete dislocation models is due to the fact that the mechanical interaction of ensembles of such defects is of an elastic nature and, therefore, involves long-range interactions. Space-discretized dislocation simulations idealize dislocations outside the dislocation cores as linear defects that are embedded within an otherwise homogeneous, isotropic or anisotropic, linear elastic medium. The aim of the chapter is to concentrate on those simulations that are discrete in both space and time. It explicitly incorporates the properties of individual lattice defects in a continuum formulation. The theoretical framework of linear continuum elasticity theory is overviewed as required for the formulation of basic dislocation mechanics. The chapter also discusses the dislocation statics, where the fundamentals of linear isotropic and anisotropic elasticity theory that are required in dislocation theory are reviewed. The chapter describes the dislocation dynamics, where it is concerned with the introduction of continuum dislocation dynamics. The last two sections deal with kinematics of discrete dislocation dynamics and dislocation reactions and annihilation.",
 				"date": "2007",
 				"libraryCatalog": "ScienceDirect",
 				"accessDate": "CURRENT_TIMESTAMP"
