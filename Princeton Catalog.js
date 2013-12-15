@@ -5,11 +5,11 @@
 	"target": "https?://[^/]+princeton\\.edu/primo_library/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
-	"priority": 1,
+	"priority": 101,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-03-08 21:43:30"
+	"lastUpdated": "2013-12-14 20:33:30"
 }
 
 //
@@ -84,6 +84,7 @@ function doWeb(doc, url) {
 					for (var i in items) {
 						links.push(i);
 					}
+					Z.debug(links)
 					//Z.debug(links)
 					ZU.doGet(links, scrape, function () {
 						Zotero.done();
@@ -98,6 +99,7 @@ function doWeb(doc, url) {
 
 	} else {
 		links = url + '&showPnx=true';
+		Z.debug(links)
 		Zotero.Utilities.doGet(links, scrape, function () {
 			Zotero.done();
 		});
