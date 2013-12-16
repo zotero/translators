@@ -118,9 +118,9 @@ var testCases = [
 				"url": "http://www.economist.com/node/21538214",
 				"publicationTitle": "The Economist",
 				"title": "Dreams and realities",
-				"abstractNote": "THE American president is bringing a new—or at least rewarmed—cause to the Asia-Pacific region: free trade. Barack Obama recently signed a ground-breaking...",
-				"libraryCatalog": "The Economist",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"abstractNote": "A battle over American-led free trade brews in Asia",
+				"date": "Nov 12th 2011",
+				"libraryCatalog": "The Economist"
 			}
 		]
 	},

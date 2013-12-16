@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-12-12 13:05:46"
+	"lastUpdated": "2013-12-16 00:13:45"
 }
 
 /**
@@ -1137,11 +1137,6 @@ var testCases = [
 				"journalAbbreviation": "Oncogene"
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.nature.com/emboj/journal/vaop/ncurrent/index.html",
-		"items": "multiple"
 	},
 	{
 		"type": "web",
@@ -2579,6 +2574,11 @@ var testCases = [
 				"volume": "12"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.nature.com/emboj/journal/v32/n23/index.html",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

@@ -555,45 +555,38 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"silent cinema and its pioneers (1906–1930)",
-					"Ángel García Cardona's El ciego de aldea (1906)",
-					"Ángel García Cardona and Antonio Cuesta",
-					"Ricardo Baños and Albert Marro's Don Pedro el Cruel (1911)",
-					"Fructuós Gelabert's Amor que mata (1909)",
-					"three films - part of “the preliminary industrial and expressive framework for Spain's budding cinema”",
+					"1897",
 					"Directors (Life and Works) - Ángel García Cardona and Antonio Cuesta13",
-					"Ricardo Baños",
-					"Florián Rey's La aldea maldita (1930)",
 					"Florián Rey (Antonio Martínez de Castillo)",
+					"Florián Rey's La aldea maldita (1930)",
 					"Fructuós Gelabert - made the first Spanish fiction film",
+					"Fructuós Gelabert's Amor que mata (1909)",
+					"Ricardo Baños",
+					"Ricardo Baños and Albert Marro's Don Pedro el Cruel (1911)",
 					"Riña en un café",
-					"1897"
+					"silent cinema and its pioneers (1906–1930)",
+					"three films - part of “the preliminary industrial and expressive framework for Spain's budding cinema”",
+					"Ángel García Cardona and Antonio Cuesta",
+					"Ángel García Cardona's El ciego de aldea (1906)"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"title": "Silent Cinema and its Pioneers (1906–1930)",
 				"publisher": "Wiley-Blackwell",
 				"ISBN": "9781444304794",
 				"url": "http://onlinelibrary.wiley.com/doi/10.1002/9781444304794.ch1/summary",
-				"DOI": "10.1002/9781444304794.ch1",
 				"pages": "1–20",
-				"publicationTitle": "100 Years of Spanish Cinema",
 				"date": "2009",
 				"abstractNote": "This chapter contains sections titled: * Historical and Political Overview of the Period * Context11 * Film Scenes: Close Readings * Directors (Life and Works) * Critical Commentary",
 				"bookTitle": "100 Years of Spanish Cinema",
 				"language": "en",
 				"rights": "Copyright © 2009 Tatjana Pavlović, Inmaculada Alvarez, Rosana Blanco-Cano, Anitra Grisales, Alejandra Osorio, and Alejandra Sánchez",
-				"libraryCatalog": "Wiley Online Library",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "Wiley Online Library"
 			}
 		]
 	},
@@ -1102,21 +1095,19 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
+				"itemID": "JHET:JHET5570200408",
 				"title": "Studies on imidazole derivatives and related compounds. 2. Characterization of substituted derivatives of 4-carbamoylimidazolium-5-olate by ultraviolet absorption spectra",
 				"publicationTitle": "Journal of Heterocyclic Chemistry",
 				"volume": "20",
 				"issue": "4",
-				"publisher": "Wiley-Blackwell",
 				"ISSN": "1943-5193",
 				"url": "http://onlinelibrary.wiley.com/doi/10.1002/jhet.5570200408/abstract",
 				"DOI": "10.1002/jhet.5570200408",
 				"pages": "875–885",
 				"date": "1983",
 				"abstractNote": "The representative mono- and dialkyl-substituted derivatives of 4-carbamoylimidazolium-5-olate (1) were synthesized unequivocally. On the basis of their spectral data for ultraviolet absorption spectra in acidic, basic and neutral solutions, we have found some spectral characteristics which make it facile to clarify the position of substituents.",
-				"bookTitle": "Journal of Heterocyclic Chemistry",
 				"rights": "Copyright © 1983 Journal of Heterocyclic Chemistry",
-				"libraryCatalog": "Wiley Online Library",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "Wiley Online Library"
 			}
 		]
 	},

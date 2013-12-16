@@ -449,6 +449,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "ScienceDirect Snapshot"
+					},
+					{
+						"title": "ScienceDirect Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"title": "8 - Introduction to discrete dislocation statics and dynamics",
@@ -457,12 +461,10 @@ var testCases = [
 				"place": "Burlington",
 				"pages": "267-316",
 				"ISBN": "978-0-12-369468-3",
-				"DOI": "10.1016/B978-012369468-3/50008-3",
 				"url": "http://www.sciencedirect.com/science/article/pii/B9780123694683500083",
 				"abstractNote": "This chapter provides an introduction to discrete dislocation statics and dynamics. The chapter deals with the simulation of plasticity of metals at the microscopic and mesoscopic scale using space- and time-discretized dislocation statics and dynamics. The complexity of discrete dislocation models is due to the fact that the mechanical interaction of ensembles of such defects is of an elastic nature and, therefore, involves long-range interactions. Space-discretized dislocation simulations idealize dislocations outside the dislocation cores as linear defects that are embedded within an otherwise homogeneous, isotropic or anisotropic, linear elastic medium. The aim of the chapter is to concentrate on those simulations that are discrete in both space and time. It explicitly incorporates the properties of individual lattice defects in a continuum formulation. The theoretical framework of linear continuum elasticity theory is overviewed as required for the formulation of basic dislocation mechanics. The chapter also discusses the dislocation statics, where the fundamentals of linear isotropic and anisotropic elasticity theory that are required in dislocation theory are reviewed. The chapter describes the dislocation dynamics, where it is concerned with the introduction of continuum dislocation dynamics. The last two sections deal with kinematics of discrete dislocation dynamics and dislocation reactions and annihilation.",
 				"date": "2007",
-				"libraryCatalog": "ScienceDirect",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "ScienceDirect"
 			}
 		]
 	},
