@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-12-10 01:53:33"
+	"lastUpdated": "2013-12-17 23:23:38"
 }
 
 /*
@@ -258,8 +258,9 @@ function detectType(newItem, node, ret) {
 	var isPartOf = getFirstResults(node, [n.dcterms+"isPartOf"]);
 	
 	// get parts of parts, because parts are sections of wholes.
-	var processedParts = []; //keep track of processed parts, so we don't end up in an infinite loop
 	if(isPartOf) {
+		//keep track of processed parts, so we don't end up in an infinite loop
+		var processedParts = isPartOf.slice(0);
 		for(var i=0; i<isPartOf.length; i++) {
 			if(processedParts.indexOf(isPartOf[i]) !== -1) continue;
 			processedParts.push(isPartOf[i]);
@@ -272,7 +273,7 @@ function detectType(newItem, node, ret) {
 		
 		//remove self from parts
 		for(var i=0; i<isPartOf.length; i++) {
-			if(isPartOf[i].value == node.value) {
+			if(Zotero.RDF.getResourceURI(isPartOf[i]) == Zotero.RDF.getResourceURI(node)) {
 				isPartOf.splice(i,1);
 				i--;
 			}
