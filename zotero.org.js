@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-09-21 21:50:03"
+	"lastUpdated": "2013-12-18 22:57:58"
 }
 
 function textToXML(text) {
@@ -47,17 +47,38 @@ function getListTitles(doc) {
 			+ '/span[not(contains(@class,"sprite-treeitem-attachment"))]]');
 }
 
+var apiKey;
+
+function getLibraryURI(doc) {
+	var feed = ZU.xpath(doc, '//a[@type="application/atom+xml" and @rel="alternate"]')[0]
+	if(!feed) return;
+	var url = feed.href.match(/^.+?\/(?:users|groups)\/\w+/);
+	
+	if(!url) {
+		//personal library. see if we can find an API key
+		var key = ZU.xpathText(doc, '//script[contains(text(),"apiKey")]');
+		if(!key) return;
+		
+		key = key.match(/apiKey\s*:\s*(['"])(.+?)\1/);
+		if(!key) return;
+		apiKey = key[2];
+		
+		url = decodeURIComponent(feed.href)
+			.match(/https?:\/\/[^\/]+\/(?:users|groups)\/\w+/);
+		if(!url) return;
+	}
+	
+	return url[0] + '/items/';
+}
+
 function detectWeb(doc, url) {
+	//disable for libraries where we can't get a library URI or an apiKey
+	if(!getLibraryURI(doc)) return;
+	
 	//single item
 	if( url.match(/\/itemKey\/\w+/) ) {
 		return ZU.xpathText(doc, '//div[@id="item-details-div"]//td[preceding-sibling::th[text()="Item Type"]]/@class')
 				|| false;
-	}
-
-	// Skip private groups
-	//is this still how they are identified??
-	if (url.match(/\/groups\/[0-9]+\/items/)) {
-		return false;
 	}
 
 	// Library and collections
@@ -71,13 +92,11 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var libraryURI = ZU.xpath(doc, '//a[@type="application/atom+xml" and @rel="alternate"]')[0].href
-					.match(/^.+?\/(?:users|groups)\/\w+/)[0]
-					+ '/items/';
+	var libraryURI = getLibraryURI(doc);
 	if(Zotero.isBookmarklet) {
 		libraryURI = libraryURI.replace("https://api.zotero.org", "https://www.zotero.org/api");
 	}
-	var apiOpts = '?format=atom&content=json';
+	var apiOpts = '?format=atom&content=json' + (apiKey ? '&key=' + apiKey : '' );
 	var itemRe = /\/itemKey\/(\w+)/;
 
 	if (detectWeb(doc, url) == "multiple") {
