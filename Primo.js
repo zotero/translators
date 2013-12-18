@@ -31,7 +31,7 @@ function getSearchResults(doc) {
 		'.//li[starts-with(@id,"exlidResult") and substring(@id,string-length(@id)-10)="-DetailsTab"]/a[@href]', //details link
 		'.//h2[@class="EXLResultTitle"]/a[@href]' //title link
 	];
-	var resultsXPath = '//tr[starts-with(@id, "exlidResult")][' + linkXPaths.join('|') + ']';
+	var resultsXPath = '//*[self::tr|self::div][starts-with(@id, "exlidResult")][' + linkXPaths.join('|') + ']';
 	//Z.debug(resultsXPath);
 	var results = ZU.xpath(doc, resultsXPath);
 	results.titleXPath = './/h2[@class="EXLResultTitle"]';
