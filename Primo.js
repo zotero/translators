@@ -46,6 +46,7 @@ function detectWeb(doc, url) {
 	
 	var contentDiv = doc.getElementsByClassName('EXLFullResultsHeader');
 	if(!contentDiv.length) contentDiv = doc.getElementsByClassName('EXLFullDisplay');
+	if(!contentDiv.length) contentDiv = doc.getElementsByClassName('EXLFullView');
 	if(contentDiv.length) return 'book';
 }
 
