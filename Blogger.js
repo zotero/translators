@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-17 19:10:09"
+	"lastUpdated": "2013-12-18 00:16:20"
 }
 
 function detectWeb(doc, url) {
@@ -40,7 +40,7 @@ function scrape(doc, url) {
 	
 	//author, if available
 		if (doc.evaluate('//span[@class="post-author vcard"]', doc,  null, XPathResult.ANY_TYPE, null).iterateNext()) {
-			var author = doc.evaluate('//span[@class="post-author vcard"]/span[@class="fn"]', doc,  null, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/^\s*|\s*$/g, '');
+			var author = doc.evaluate('//span[@class="post-author vcard"]//span[@class="fn"]', doc,  null, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/^\s*|\s*$/g, '');
 			var author = author.toLowerCase();
 			if (author.match(/\sby\s/)) {
 				var shortenAuthor = author.indexOf(" by");
@@ -184,6 +184,46 @@ var testCases = [
 				"blogTitle": "Politica Argentina - Blog de Psicología Política de Federico González",
 				"url": "http://argentina-politica.blogspot.com/2012/03/perciben-una-caida-en-la-imagen-de-la.html",
 				"shortTitle": "Politica Argentina - Blog de Psicología Política de Federico González"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://utotherescue.blogspot.com/2013/11/the-heart-of-matter-humanities-do-more.html",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"creators": [
+					{
+						"firstName": "Michael",
+						"lastName": "Meranze",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"academic development",
+					"arts and sciences",
+					"cutting arts and humanities",
+					"Humanities and Social Science Knowledge",
+					"humanities disciplines",
+					"public purpose",
+					"thought",
+					"writing"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Blogspot Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "National Humanities Report Reinforces Stereotypes about the Humanities ~ Remaking the University",
+				"date": "Monday, November 25, 2013",
+				"blogTitle": "National Humanities Report Reinforces Stereotypes about the Humanities ~ Remaking the University",
+				"url": "http://utotherescue.blogspot.com/2013/11/the-heart-of-matter-humanities-do-more.html",
+				"libraryCatalog": "Blogger",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}
