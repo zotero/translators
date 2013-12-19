@@ -14,7 +14,7 @@
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
-	"lastUpdated": "2013-07-01 14:13"
+	"lastUpdated": "2013-12-19 12:13"
 }
 
 
