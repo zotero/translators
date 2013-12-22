@@ -14,7 +14,7 @@
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
-	"lastUpdated": "2013-12-19 12:13"
+	"lastUpdated": "2013-12-22 16:46"
 }
 
 
@@ -41,7 +41,6 @@ var fieldMap = {
 	volumes: "numberOfVolumes",
 	version: "version",
 	eventtitle: "conferenceName",
-	language: "language",
 	issue: "issue",
 	pages: "pages",
 	pagetotal: "numPages"
@@ -541,9 +540,6 @@ var citeKeyConversions = {
 					} else {
 						writeField("langid", lang[""]); //use default variant
 					}
-
-				} else {
-					writeField("language", "lang:" + item.language) // language field, which is sometimes written out by biblatex. FIXME: perhaps one should be able to use both langid and language in some way.
 				}
 			}
 
