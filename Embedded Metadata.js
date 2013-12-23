@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-12-23 02:07:50"
+	"lastUpdated": "2013-12-23 02:48:24"
 }
 
 /*
@@ -188,6 +188,7 @@ function processFields(doc, item, fieldMap, strict) {
 
 function completeItem(doc, newItem) {
 	addHighwireMetadata(doc, newItem);
+	addOtherMetadata(doc, newItem);
 	addLowQualityMetadata(doc, newItem);
 	finalDataCleanup(doc, newItem);
 
@@ -481,6 +482,45 @@ function addHighwireMetadata(doc, newItem) {
 	if(!newItem.url) {
 		newItem.url = getContentText(doc, "citation_abstract_html_url") ||
 			getContentText(doc, "citation_fulltext_html_url");
+	}
+}
+
+function addOtherMetadata(doc, newItem) {
+	// Scrape parsely metadata http://parsely.com/api/crawler.html
+	var parselyJSON = ZU.xpathText(doc, '(//x:meta[@name="parsely-page"]/@content)[1]', namespaces);
+	if(parselyJSON) {
+		try {
+			var parsely = JSON.parse(parselyJSON);
+		} catch(e) {}
+		
+		if(parsely) {
+			if(!newItem.title && parsely.title) {
+				newItem.title = parsely.title;
+			}
+			
+			if(!newItem.url && parsely.url) {
+				newItem.url = parsely.url;
+			}
+			
+			if(!newItem.date && parsely.pub_date) {
+				var date = new Date(parsely.pub_date);
+				if(!isNaN(date.getUTCFullYear())) {
+					newItem.date = ZU.formatDate({
+						year: date.getUTCFullYear(),
+						month: date.getUTCMonth(),
+						day: date.getUTCDate()
+					}, true);
+				}
+			}
+			
+			if(!newItem.creators.length && parsely.author) {
+				newItem.creators.push(ZU.cleanAuthor(''+parsely.author, 'author'));
+			}
+			
+			if(!newItem.tags.length && parsely.tags && parsely.tags.length) {
+				newItem.tags = parsely.tags;
+			}
+		}
 	}
 }
 
@@ -1126,11 +1166,6 @@ var testCases = [
 					"architecture",
 					"archive",
 					"skyscrapers",
-					"window washers",
-					"Hearst Tower",
-					"architecture",
-					"archive",
-					"skyscrapers",
 					"window washers"
 				],
 				"seeAlso": [],
@@ -1143,8 +1178,9 @@ var testCases = [
 				"publicationTitle": "The New Yorker",
 				"url": "http://www.newyorker.com/online/blogs/backissues/2013/06/window-washers-at-the-hearst-tower.html",
 				"abstractNote": "Rescuers successfully retrieved two maintenance workers at the Hearst Tower, in Midtown, who had become trapped on their scaffold.",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "www.newyorker.com"
+				"date": "10/10/2008",
+				"libraryCatalog": "www.newyorker.com",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -1176,6 +1212,40 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.chicagotribune.com",
 				"shortTitle": "Chicago's 'unicorn'"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.volokh.com/2013/12/22/northwestern-cant-quit-asa-boycott-member/",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"creators": [
+					{
+						"firstName": "Eugene",
+						"lastName": "Kontorovich",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"boycott",
+					"israel"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "Northwestern Can't Quit ASA Over Boycott Because it is Not a Member",
+				"publicationTitle": "The Volokh Conspiracy",
+				"url": "http://www.volokh.com/2013/12/22/northwestern-cant-quit-asa-boycott-member/",
+				"abstractNote": "Northwestern University recently condemned the American Studies Association boycott of Israel. Unlike some other schools that quit their institutional membership in the ASA over the boycott, Northwestern has not. Many of my Northwestern colleagues were about to start urging a similar withdrawal.\nThen we learned from our administration that despite being listed as in institutional member by the ASA,  the university has, after checking, concluded it has no such membership, does not plan to get one, and is unclear why the ASA would list us as institutional member.\nApparently, at least several other schools listed by the ASA as institutional members say they have no such relationship.\nThe ASA has been spending a great deal of energy on political activism far from its mission, but apparently cannot keep its books in order. The association has yet to explain how it has come to list as institutional members so many schools that know nothing about such a membership. The ASA’s membership rolls may get much shorter in the coming weeks even without any quitting.\nHow this confusion came to arise is unclear. ASA membership, like that of many academic organizations, comes with a subscription to their journal. Some have suggested that perhaps  the ASA also counts as members any institution whose library happened to subscribe to the journal, ie tacking on membership to a subscription, rather than vice versa. This would not be fair on their part. A library may subscribe to all sorts of journals for academic research purposes (ie Pravda), without endorsing the organization that publishes it. That is the difference between subscription and membership.\nI eagerly await the ASA’s explanation of the situation. [...]",
+				"date": "12/22/2013",
+				"libraryCatalog": "www.volokh.com",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}
