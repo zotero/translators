@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-12-10 02:07:32"
+	"lastUpdated": "2013-12-23 02:07:50"
 }
 
 /*
@@ -223,7 +223,7 @@ function init(doc, url, callback, forceLoadRDF) {
 		}
 	}
 
-	var hwType, hwTypeGuess, statements = [];
+	var hwType, hwTypeGuess, generatorType, statements = [];
 
 	for(var i=0, metaTag; metaTag = metaTags[i]; i++) {
 		// Two formats allowed:
@@ -243,7 +243,7 @@ function init(doc, url, callback, forceLoadRDF) {
 			var delimIndex = tag.indexOf('.');
 			if(delimIndex === -1) delimIndex = tag.indexOf(':');
 			if(delimIndex === -1) delimIndex = tag.indexOf('_');
-			if(delimIndex === -1) continue;
+			//if(delimIndex === -1) continue;
 
 			var prefix = tag.substr(0, delimIndex).toLowerCase();
 
@@ -260,6 +260,14 @@ function init(doc, url, callback, forceLoadRDF) {
 				// This debug is for seeing what is being sent to RDF
 				//Zotero.debug(_prefixes[prefix]+prop +"=>"+value);
 				statements.push([url, _prefixes[prefix]+prop, value]);
+			} else if(tag.toLowerCase() == 'generator') {
+				var lcValue = value.toLowerCase();
+				if(lcValue.indexOf('blogger') != -1
+					|| lcValue.indexOf('wordpress') != -1
+					|| lcValue.indexOf('wooframework') != -1
+				) {	
+					generatorType = 'blogPost';
+				}
 			} else {
 				var shortTag = tag.slice(tag.lastIndexOf('citation_'));
 				switch(shortTag) {
@@ -304,7 +312,7 @@ function init(doc, url, callback, forceLoadRDF) {
 			}
 
 			var nodes = rdf.getNodes(true);
-			rdf.defaultUnknownType = hwType || hwTypeGuess ||
+			rdf.defaultUnknownType = hwType || hwTypeGuess || generatorType ||
 				//if we have RDF data, then default to webpage
 				(nodes.length ? "webpage":false);
 
@@ -320,7 +328,7 @@ function init(doc, url, callback, forceLoadRDF) {
 			callback(_itemType);
 		});
 	} else {
-		callback(exports.itemType || hwType || hwTypeGuess);
+		callback(exports.itemType || hwType || hwTypeGuess || generatorType);
 	}
 }
 
