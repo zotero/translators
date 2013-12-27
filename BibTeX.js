@@ -12,10 +12,11 @@
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
+	"configOptions":{"getCollections": "true"},
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-11-14 23:52:21"
+	"lastUpdated": "2013-12-26 23:52:21"
 }
 
 function detectImport() {
