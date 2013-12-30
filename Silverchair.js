@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-17 03:09:28"
+	"lastUpdated": "2013-12-30 21:33:54"
 }
 
 /*
@@ -76,7 +76,8 @@ function doWeb(doc, url){
 
 function scrape(doc, url){
 	//get tags, Journal Abbreviation, and pdflink from google highwire metadata
-	var pdflink = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
+	var pdflink = ZU.xpathText(doc, '//a[@id="hypPDFlink"]/@href')
+		|| ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
 	var tags = ZU.xpathText(doc, '//meta[@name="dc.Keywords"]/@content');
 	var jabbr = ZU.xpathText(doc, '//meta[@name="citation_journal_abbrev"]/@content');
 	var host = url.match(/http?\:\/\/[^\/]+/)[0];
