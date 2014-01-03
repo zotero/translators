@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-12-16 00:13:45"
+	"lastUpdated": "2014-01-03 14:00:00"
 }
 
 /**
@@ -1135,123 +1135,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.nature.com/emboj/journal/v31/n7/full/emboj201217a.html",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "Er-Chieh",
-						"lastName": "Cho",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Shunsheng",
-						"lastName": "Zheng",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Shonagh",
-						"lastName": "Munro",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Geng",
-						"lastName": "Liu",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Simon M.",
-						"lastName": "Carr",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Jutta",
-						"lastName": "Moehlenbrink",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Yi-Chien",
-						"lastName": "Lu",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Lindsay",
-						"lastName": "Stimson",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Omar",
-						"lastName": "Khan",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Rebecca",
-						"lastName": "Konietzny",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Joanna",
-						"lastName": "McGouran",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Amanda S.",
-						"lastName": "Coutts",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Benedikt",
-						"lastName": "Kessler",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "David J.",
-						"lastName": "Kerr",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Nicholas B. La",
-						"lastName": "Thangue",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"E2F-1",
-					"arginine methylation",
-					"cancer",
-					"growth control"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"rights": "© 2012 Nature Publishing Group",
-				"issue": "7",
-				"language": "en",
-				"DOI": "10.1038/emboj.2012.17",
-				"abstractNote": "E2F transcription factors are implicated in diverse cellular functions. The founding member, E2F-1, is endowed with contradictory activities, being able to promote cell-cycle progression and induce apoptosis. However, the mechanisms that underlie the opposing outcomes of E2F-1 activation remain largely unknown. We show here that E2F-1 is directly methylated by PRMT5 (protein arginine methyltransferase 5), and that arginine methylation is responsible for regulating its biochemical and functional properties, which impacts on E2F-1-dependent growth control. Thus, depleting PRMT5 causes increased E2F-1 protein levels, which coincides with decreased growth rate and associated apoptosis. Arginine methylation influences E2F-1 protein stability, and the enhanced transcription of a variety of downstream target genes reflects increased E2F-1 DNA-binding activity. Importantly, E2F-1 is methylated in tumour cells, and a reduced level of methylation is evident under DNA damage conditions that allow E2F-1 stabilization and give rise to apoptosis. Significantly, in a subgroup of colorectal cancer, high levels of PRMT5 frequently coincide with low levels of E2F-1 and reflect a poor clinical outcome. Our results establish that arginine methylation regulates the biological activity of E2F-1 activity, and raise the possibility that arginine methylation contributes to tumourigenesis by influencing the E2F pathway.",
-				"url": "http://www.nature.com/emboj/journal/v31/n7/full/emboj201217a.html",
-				"libraryCatalog": "www.nature.com",
-				"journalAbbreviation": "EMBO J",
-				"ISSN": "0261-4189",
-				"title": "Arginine methylation controls growth regulation by E2F-1",
-				"publicationTitle": "The EMBO Journal",
-				"volume": "31",
-				"pages": "1785-1797",
-				"date": "April 4, 2012"
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "http://www.nature.com/onc/topten/index.html",
 		"items": "multiple"
 	},
@@ -1882,137 +1765,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.nature.com/emboj/journal/v32/n5/full/emboj2012357a.html",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "Rachel",
-						"lastName": "Deplus",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Benjamin",
-						"lastName": "Delatte",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Marie K.",
-						"lastName": "Schwinn",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Matthieu",
-						"lastName": "Defrance",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Jacqui",
-						"lastName": "Méndez",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Nancy",
-						"lastName": "Murphy",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Mark A.",
-						"lastName": "Dawson",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Michael",
-						"lastName": "Volkmar",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Pascale",
-						"lastName": "Putmans",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Emilie",
-						"lastName": "Calonne",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Alan H.",
-						"lastName": "Shih",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Ross L.",
-						"lastName": "Levine",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Olivier",
-						"lastName": "Bernard",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Thomas",
-						"lastName": "Mercher",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Eric",
-						"lastName": "Solary",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Marjeta",
-						"lastName": "Urh",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Danette L.",
-						"lastName": "Daniels",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "François",
-						"lastName": "Fuks",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"TET proteins",
-					"chromatin",
-					"epigenetics"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"rights": "© 2013 Nature Publishing Group",
-				"issue": "5",
-				"language": "en",
-				"DOI": "10.1038/emboj.2012.357",
-				"abstractNote": "TET proteins convert 5-methylcytosine to 5-hydroxymethylcytosine, an emerging dynamic epigenetic state of DNA that can influence transcription. Evidence has linked TET1 function to epigenetic repression complexes, yet mechanistic information, especially for the TET2 and TET3 proteins, remains limited. Here, we show a direct interaction of TET2 and TET3 with O-GlcNAc transferase (OGT). OGT does not appear to influence hmC activity, rather TET2 and TET3 promote OGT activity. TET2/3–OGT co-localize on chromatin at active promoters enriched for H3K4me3 and reduction of either TET2/3 or OGT activity results in a direct decrease in H3K4me3 and concomitant decreased transcription. Further, we show that Host Cell Factor 1 (HCF1), a component of the H3K4 methyltransferase SET1/COMPASS complex, is a specific GlcNAcylation target of TET2/3–OGT, and modification of HCF1 is important for the integrity of SET1/COMPASS. Additionally, we find both TET proteins and OGT activity promote binding of the SET1/COMPASS H3K4 methyltransferase, SETD1A, to chromatin. Finally, studies in Tet2 knockout mouse bone marrow tissue extend and support the data as decreases are observed of global GlcNAcylation and also of H3K4me3, notably at several key regulators of haematopoiesis. Together, our results unveil a step-wise model, involving TET–OGT interactions, promotion of GlcNAcylation, and influence on H3K4me3 via SET1/COMPASS, highlighting a novel means by which TETs may induce transcriptional activation.",
-				"url": "http://www.nature.com/emboj/journal/v32/n5/full/emboj2012357a.html",
-				"libraryCatalog": "www.nature.com",
-				"journalAbbreviation": "EMBO J",
-				"ISSN": "0261-4189",
-				"title": "TET2 and TET3 regulate GlcNAcylation and H3K4 methylation through OGT and SET1/COMPASS",
-				"publicationTitle": "The EMBO Journal",
-				"volume": "32",
-				"pages": "645-655",
-				"date": "March 6, 2013"
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "http://www.nature.com/nature/journal/v481/n7381/fp/nature10669_ja.html?lang=ja",
 		"items": [
 			{
@@ -2552,11 +2304,6 @@ var testCases = [
 				"volume": "12"
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.nature.com/emboj/journal/v32/n23/index.html",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
