@@ -139,11 +139,9 @@ var testCases = [
 				],
 				"url": "http://blogs.rollcall.com/rothenblog/obama-administration-heading-for-a-tough-few-weeks/",
 				"abstractNote": "Maybe it’s because two-term presidents suffer from hubris, or merely that after an administration has been in office for years, it inevitably makes mistake",
-				"date": "May 11",
-				"publicationTitle": "Roll Call Blog: Rothenblog",
+				"date": "May 11, 2013",
 				"title": "Obama Administration Heading for a Tough Few Weeks",
-				"libraryCatalog": "Roll Call",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"blogTitle": "Roll Call Blog: Rothenblog"
 			}
 		]
 	}

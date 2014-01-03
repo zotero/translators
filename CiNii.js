@@ -118,7 +118,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"itemID": ":2002-11-00",
+				"itemID": ":2002-11",
 				"title": "<研究速報>観測用既存鉄骨造モデル構造物を用いたオンライン応答実験=Pseudo-dynamic tests on existing steel model structure for seismic monitoring",
 				"publicationTitle": "生産研究",
 				"ISSN": "0037105X",

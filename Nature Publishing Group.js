@@ -219,20 +219,15 @@ function getAbstract(doc) {
 		//e.g. 'lead' http://www.nature.com/emboj/journal/v31/n1/full/emboj2011343a.html
 		//e.g. 'first_paragraph' http://www.nature.com/emboj/journal/vaop/ncurrent/full/emboj201239a.html
 		'//p[contains(@class,"lead") or contains(@class,"first_paragraph")]',
-		
 		//e.g. http://www.nature.com/nprot/journal/v8/n11/full/nprot.2013.143.html
 		'//div[@id="abstract"]/div[@class="content"]/p',
-		
 		//e.g.
 		'//div[@id="abs"]/*[self::div[not(contains(@class, "keyw-abbr"))] or self::p]',
-		
 		//e.g. 'first-paragraph' http://www.nature.com/nature/journal/v481/n7381/full/nature10669.html
 		//e.g. 'standfirst' http://www.nature.com/nature/journal/v481/n7381/full/481237a.html
 		'//div[@id="first-paragraph" or @class="standfirst"]/p',
-		
 		//e.g. http://www.nature.com/nature/journal/v481/n7381/full/nature10728.html
 		'//div[contains(@id,"abstract")]/div[contains(@class,"content")]/p',
-		
 		//e.g. http://www.nature.com/ng/journal/v38/n8/abs/ng1845.html
 		'//span[@class="articletext" and ./preceding-sibling::*[1][name()="a" or name()="A"][@name="abstract"]]'
 	];
@@ -1858,23 +1853,15 @@ var testCases = [
 				"rights": "© 2008 Nature Publishing Group",
 				"volume": "15",
 				"issue": "2",
-				"number": "2",
-				"patentNumber": "2",
 				"pages": "177-182",
-				"publisher": "Nature Publishing Group",
-				"institution": "Nature Publishing Group",
-				"company": "Nature Publishing Group",
-				"label": "Nature Publishing Group",
-				"distributor": "Nature Publishing Group",
 				"date": "February 2008",
-				"ISSN": "1545-9993",
 				"language": "en",
 				"DOI": "10.1038/nsmb.1371",
 				"url": "http://www.nature.com/nsmb/journal/v15/n2/full/nsmb.1371.html",
-				"abstractNote": "In bacteria, numerous genes harbor regulatory elements in the 5' untranslated regions of their mRNA, termed riboswitches, which control gene expression by binding small-molecule metabolites. These sequences influence the secondary and tertiary structure of the RNA in a ligand-dependent manner, thereby directing its transcription or translation. The crystal structure of an S-adenosylmethionine–responsive riboswitch found predominantly in proteobacteria, SAM-II, has been solved to reveal a second means by which RNA interacts with this important cellular metabolite. Notably, this is the first structure of a complete riboswitch containing all sequences associated with both the ligand binding aptamer domain and the regulatory expression platform. Chemical probing of this RNA in the absence and presence of ligand shows how the structure changes in response to S-adenosylmethionine to sequester the ribosomal binding site and affect translational gene regulation.",
 				"libraryCatalog": "www.nature.com",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"journalAbbreviation": "Nat Struct Mol Biol"
+				"abstractNote": "In bacteria, numerous genes harbor regulatory elements in the 5′ untranslated regions of their mRNA, termed riboswitches, which control gene expression by binding small-molecule metabolites. These sequences influence the secondary and tertiary structure of the RNA in a ligand-dependent manner, thereby directing its transcription or translation. The crystal structure of an S-adenosylmethionine–responsive riboswitch found predominantly in proteobacteria, SAM-II, has been solved to reveal a second means by which RNA interacts with this important cellular metabolite. Notably, this is the first structure of a complete riboswitch containing all sequences associated with both the ligand binding aptamer domain and the regulatory expression platform. Chemical probing of this RNA in the absence and presence of ligand shows how the structure changes in response to S-adenosylmethionine to sequester the ribosomal binding site and affect translational gene regulation.",
+				"journalAbbreviation": "Nat Struct Mol Biol",
+				"ISSN": "1545-9993"
 			}
 		]
 	},
@@ -2075,22 +2062,13 @@ var testCases = [
 				"rights": "© 2012 Nature Publishing Group",
 				"volume": "481",
 				"issue": "7381",
-				"number": "7381",
-				"patentNumber": "7381",
 				"pages": "341-343",
-				"publisher": "Nature Publishing Group",
-				"institution": "Nature Publishing Group",
-				"company": "Nature Publishing Group",
-				"label": "Nature Publishing Group",
-				"distributor": "Nature Publishing Group",
 				"date": "2012-01-19",
-				"ISSN": "0028-0836",
 				"language": "en",
 				"DOI": "10.1038/nature10669",
 				"url": "http://www.nature.com/nature/journal/v481/n7381/fp/nature10669_ja.html?lang=ja",
 				"abstractNote": "The mass function of dwarf satellite galaxies that are observed around Local Group galaxies differs substantially from simulations based on cold dark matter: the simulations predict many more dwarf galaxies than are seen. The Local Group, however, may be anomalous in this regard.",
-				"libraryCatalog": "www.nature.com",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "www.nature.com"
 			}
 		]
 	},

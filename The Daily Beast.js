@@ -102,14 +102,14 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Mikheil Saakashvili",
-					"Iran",
 					"Barack Obama",
-					"World News",
+					"Georgia",
 					"Hillary Clinton",
+					"Iran",
+					"Mikheil Saakashvili",
 					"Russia",
 					"Turkey",
-					"Georgia"
+					"World News"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -120,12 +120,10 @@ var testCases = [
 				],
 				"url": "http://www.thedailybeast.com/articles/2011/09/26/mikheil-saakashvili-interview-hillary-clinton-saved-georgia.html",
 				"abstractNote": "In an exclusive interview, Georgia’s president credits Clinton and the Obama team with quelling bombings.",
-				"date": "September 26th 2011",
-				"publicationTitle": "The Daily Beast",
+				"date": "09.26.11",
 				"title": "Saakashvili: U.S. Stopped Russia Bombings",
-				"libraryCatalog": "The Daily Beast",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Saakashvili"
+				"shortTitle": "Saakashvili",
+				"websiteTitle": "The Daily Beast"
 			}
 		]
 	},
@@ -144,10 +142,10 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Yahoo",
 					"Powerwall",
+					"RoadRunner",
 					"U.S. Politics",
-					"RoadRunner"
+					"Yahoo"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -158,11 +156,9 @@ var testCases = [
 				],
 				"url": "http://www.thedailybeast.com/articles/2011/09/26/gop-s-2012-presidential-primaries-purity-test.html",
 				"abstractNote": "The party now punishes any deviation from conservative orthodoxy in the presidential primaries.",
-				"date": "September 26th 2011",
-				"publicationTitle": "The Daily Beast",
+				"date": "09.26.11",
 				"title": "The GOP’s Purity Test",
-				"libraryCatalog": "The Daily Beast",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"websiteTitle": "The Daily Beast"
 			}
 		]
 	},

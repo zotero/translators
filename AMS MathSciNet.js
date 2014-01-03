@@ -138,6 +138,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
+				"itemID": "MR3004573",
 				"title": "Extrapolation of stable random fields",
 				"publicationTitle": "Journal of Multivariate Analysis",
 				"journalAbbreviation": "Journal of Multivariate Analysis",
@@ -147,8 +148,7 @@ var testCases = [
 				"ISSN": "0047-259X",
 				"DOI": "10.1016/j.jmva.2012.11.004",
 				"url": "http://www.ams.org/mathscinet-getitem?mr=3004573",
-				"libraryCatalog": "AMS MathSciNet",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "AMS MathSciNet"
 			}
 		]
 	},

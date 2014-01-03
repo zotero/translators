@@ -147,7 +147,7 @@ var testCases = [
 				"volume": "53",
 				"issue": "2",
 				"pages": "209",
-				"rights": "Copyright © 1996-2010 ProQuest LLC. All Rights Reserved.",
+				"rights": "Copyright © 1996-2009 ProQuest LLC. All Rights Reserved.",
 				"libraryCatalog": "Chadwyck Literature Online"
 			}
 		]
@@ -182,7 +182,7 @@ var testCases = [
 				"issue": "6",
 				"pages": "536",
 				"ISSN": "00322032",
-				"rights": "Copyright © 1996-2010 ProQuest LLC. All Rights Reserved.",
+				"rights": "Copyright © 1996-2009 ProQuest LLC. All Rights Reserved.",
 				"libraryCatalog": "Chadwyck Literature Online"
 			}
 		]

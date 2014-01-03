@@ -99,7 +99,7 @@ var testCases = [
 				"itemType": "newspaperArticle",
 				"creators": [
 					{
-						"firstName": "To be torn between two languages, discovers H. MASUD TAJ, is to drown soul-deep in  the",
+						"firstName": "To be torn between two languages, discovers H. MASUD TAJ, is to drown soul-deep in the",
 						"lastName": "present",
 						"creatorType": "author"
 					}
@@ -107,11 +107,15 @@ var testCases = [
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "The Hindu Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"publicationTitle": "The Hindu",
 				"url": "http://www.hindu.com/lr/2004/01/04/stories/2004010400030100.htm",
 				"title": "Falling at the speed of light",
-				"websiteTitle": "The Hindu",
 				"date": "01-01-2004",
 				"pages": "01",
 				"place": "CHEN",

@@ -280,14 +280,13 @@ var testCases = [
 				"volume": "54",
 				"issue": "4",
 				"pages": "735-745",
-				"publisher": "The Johns Hopkins University Press",
 				"ISSN": "1097-3729",
 				"url": "http://muse.jhu.edu/journals/technology_and_culture/v054/54.4.prescott.html",
 				"date": "2013",
 				"extra": "<p>Volume 54, Number 4, October 2013</p>",
+				"DOI": "10.1353/tech.2013.0137",
 				"abstractNote": "Abstract Abstract:This article uses coverage of the fiftieth anniversary of the Pill as an example of what Richard Hirsh describes as the “real world” role of historians of technology. It explores how the presentation of historical topics on the world wide web has complicated how the history of technology is conveyed to the public. The article shows that that the Pill is especially suited to demonstrating the public role of historians of technology because, as the most popular form of reversible birth control, it has touched the lives of millions of Americans. Thus, an exploration of how the Pill’s fiftieth anniversary was covered illustrates how historians can use their expertise to provide a nuanced interpretation of a controversial topic in the history of technology.",
 				"libraryCatalog": "Project MUSE",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "The Pill at Fifty"
 			}
 		]

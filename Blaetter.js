@@ -177,26 +177,24 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Parteien",
 					"Antisemitismus",
-					"Demokratie"
+					"Demokratie",
+					"Parteien"
 				],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://www.blaetter.de/archiv/jahrgaenge/2011/august/die-linkspartei-ideologie-oder-politik",
 						"title": "Die Linkspartei: Ideologie oder Politik | Blätter für deutsche und internationale Politik",
 						"mimeType": "text/html"
 					}
 				],
-				"url": "http://www.blaetter.de/archiv/jahrgaenge/2011/august/die-linkspartei-ideologie-oder-politik",
+				"url": "https://www.blaetter.de/archiv/jahrgaenge/2011/august/die-linkspartei-ideologie-oder-politik",
 				"title": "Die Linkspartei: Ideologie oder Politik",
 				"publicationTitle": "Blätter für deutsche und internationale Politik",
 				"date": "2011-08-00",
 				"pages": "16-22",
 				"abstractNote": "„Eine Partei zerfleischt sich“, hieß es am 1. Juli in den „heute“-Nachrichten des ZDF über die Linkspartei. Es ist erst gut zwei Monate her, dass die Parteiführung ihre heftigen Differenzen für beendet erklärt hatte und zu gemeinsamer politischer Sacharbeit zurückkehren wollte.",
 				"libraryCatalog": "Blaetter fuer deutsche und internationale Politik",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Die Linkspartei"
 			}
 		]
