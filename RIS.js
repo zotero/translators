@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-10-29 02:01:09"
+	"lastUpdated": "2014-01-03 13:44:40"
 }
 
 function detectImport() {
@@ -478,10 +478,119 @@ var importFields = new TagMapper([fieldMap, degenerateImportFieldMap]);
 //do not store unknwon fields into notes. Configurable via RIS.import.ignoreUnknown
 var ignoreUnknown = false;
 
-function processTag(item, entry) {
-	var tag = entry[1];
-	var value = entry[2].trim();
-	var rawLine = entry[0];
+var RISReader = new function() {
+	var _tagValueBuffer = [];
+	this.nextEntry = function() {
+		var tagValue,
+			entry = []; //maintain tag order
+		entry.tags = {}; //tag list for convenience
+		
+		while(tagValue = _tagValueBuffer.pop() || _getTagValue()) {
+			if(tagValue.tag == 'TY' && entry.length) {
+				//we hit a new entry
+				_tagValueBuffer.push(tagValue);
+				return entry;
+			}
+			
+			if(tagValue.tag == 'ER') {
+				if(!entry.length) continue; //weird, but keep going
+				return entry;
+			}
+			
+			entry.push(tagValue);
+			if(!entry.tags[tagValue.tag]) entry.tags[tagValue.tag] = [];
+			entry.tags[tagValue.tag].push(tagValue);
+		}
+		
+		if(entry.length) return entry;
+	};
+	
+	var RIS_format = /^([A-Z][A-Z0-9]) {1,2}-(?: (.*))?$/; //allow empty entries
+	var preserveNewLines = ['KW', 'L1', 'L2', 'L3'];
+	var _maxLineLength = 0;
+	//get the next RIS entry that matches the RIS format
+	//returns an array in the format [raw "line", tag, value]
+	//lines may be combined into one entry
+	function _getTagValue() {
+		var line, tagValue, temp, lastLineLength = 0;
+		while((line = _nextLine()) !== false) {
+			temp = line.match(RIS_format);
+			
+			if(!temp && !tagValue) {
+				Z.debug("RIS: Dropping line outside of RIS record: " + line);
+				continue;
+			}
+			
+			if(line.length > _maxLineLength) _maxLineLength = line.length;
+			
+			if(temp && tagValue) {
+				//if we are already processing a tag-value pair, then this is the next pair
+				//store this line for later and return
+				_lineBuffer.push(line);
+				return tagValue;
+			}
+			
+			if(temp) {
+				//new tag-value pair
+				tagValue = {
+					tag: temp[1],
+					value: temp[2],
+					raw: line
+				};
+				
+				if(tagValue.value === undefined) tagValue.value = '';
+			} else {
+				//tagValue && !temp
+				//multi-line RIS tag-value pair
+				var newLineAdded = false;
+				var cleanLine = line.trim();
+				//new lines would probably only be meaningful in notes and abstracts
+				if((['AB', 'N1', 'N2']).indexOf(tagValue.tag) !== -1
+					//if lines are not trimmed to ~80 characters or previous line was short,
+					// this would probably be on a new line
+					//Might consider looking for periods and capital letters
+					//empty lines imply new line
+					&& (_maxLineLength > 85 || lastLineLength < 65 || cleanLine.length == 0) ) {
+					
+					cleanLine = "\n" + cleanLine;
+					newLineAdded = true;
+				}
+				
+				//don't remove new lines from keywords or attachments
+				if(!newLineAdded && preserveNewLines.indexOf(tagValue.tag) != -1) {
+					cleanLine = "\n" + cleanLine;
+					newLineAdded = true;
+				}
+				
+				//check if we need to add a space
+				if(!newLineAdded && tagValue.value.charAt(tagValue.value.length-1) != ' ') {
+					cleanLine = ' ' + cleanLine;
+				}
+	
+				tagValue.raw += "\n" + line;
+				tagValue.value += cleanLine;
+			}
+			
+			lastLineLength = line.length;
+		}
+		
+		if(tagValue) return tagValue;
+	}
+		
+	var _lineBuffer = [];
+	function _nextLine() {
+		// Don't use shortcuts like _lineBuffer.pop() || Zotero.read(),
+		//  because we may have an empty line, which could be meaningful
+		if(_lineBuffer.length) return _lineBuffer.pop();
+		return Zotero.read();
+	}
+};
+
+
+function processTag(item, tagValue, risEntry) {
+	var tag = tagValue.tag;
+	var value = tagValue.value.trim();
+	var rawLine = tagValue.raw;
 
 	var zField = importFields.getFields(item.itemType, tag)[0];
 	if(!zField) {
@@ -929,78 +1038,6 @@ function completeItem(item) {
 	item.complete();
 }
 
-//get the next RIS entry that matches the RIS format
-//returns an array in the format [raw "line", tag, value]
-//lines may be combined into one entry
-var RIS_format = /^([A-Z][A-Z0-9]) {1,2}-(?: (.*))?$/; //allow empty entries
-var preserveNewLines = ['KW', 'L1', 'L2', 'L3'];
-function getLine() {
-	var entry, lastLineLength, maxLineLength = 0;
-	if(getLine.buffer) {
-		entry = getLine.buffer.match(RIS_format); //this should always match
-		if(entry[2] === undefined) entry[2] = '';
-		maxLineLength = lastLineLength = entry[2].length;
-		getLine.buffer = undefined;
-	}
-
-	var nextLine, temp;
-	while((nextLine = Zotero.read()) !== false) {
-		temp = nextLine.match(RIS_format);
-		if(temp && temp[2] === undefined) temp[2] = '';
-		//if we are already processing an entry, then this is the next entry
-		//store this line for later and return
-		if(temp && entry) {
-			getLine.buffer = temp[0];
-			return entry;
-
-		//otherwise this is a new entry
-		} else if(temp) {
-			entry = temp;
-			lastLineLength = entry[0].length;
-			if(lastLineLength > maxLineLength) maxLineLength = lastLineLength;
-
-		//if this line didn't match, then we just attach it to the current value
-		//Try to figure out if this is supposed to be on a new line or not
-		} else if(entry) {
-			var rawLine = nextLine;
-			
-			//trim leading/trailing whitespace
-			nextLine = nextLine.trim();
-			
-			var newLineAdded = false;
-			//new lines would probably only be meaningful in notes and abstracts
-			if(entry[1] == 'AB' || entry[1] == 'N1' || entry[1] == 'N2') {
-				//if lines are not trimmed to ~80 characters or previous line was short,
-				// this would probably be on a new line
-				//Might consider looking for periods and capital letters
-				//empty lines imply new line
-				if(maxLineLength > 85 || lastLineLength < 60 || nextLine.length == 0) {
-					nextLine = "\n" + nextLine;
-					newLineAdded = true;
-				}
-			}
-
-			//don't remove new lines from keywords or attachments
-			if(!newLineAdded && preserveNewLines.indexOf(entry[1]) != -1) {
-				nextLine = "\n" + nextLine;
-				newLineAdded = true;
-			}
-
-			//check if we need to add a space
-			if(!newLineAdded && entry[2].substr(entry[2].length-1) != ' ') {
-				nextLine = ' ' + nextLine;
-			}
-
-			entry[0] += "\n" + rawLine;
-			entry[2] += nextLine;
-			lastLineLength = rawLine.length;
-			if(lastLineLength > maxLineLength) maxLineLength = lastLineLength;
-		}
-	}
-
-	return entry;
-}
-
 //creates a new item of specified type
 function getNewItem(type) {
 	var item = new Zotero.Item(type);
@@ -1009,7 +1046,7 @@ function getNewItem(type) {
 	return item;
 }
 
-function doImport(attachments) {
+function doImport() {
 	//prepare some configurable options
 	if(Zotero.getHiddenPref) {
 		if(Zotero.getHiddenPref("RIS.import.ignoreUnknown")) {
@@ -1021,42 +1058,31 @@ function doImport(attachments) {
 	}
 	
 	var entry;
-	//skip to the first TY entry
-	do {
-		entry = getLine();
-	} while(entry && entry[1] != 'TY');
-
-	var item;
-	var i = -1; //item counter for attachments
-	while(entry) {
-		switch(entry[1]) {
-			//new item
-			case 'TY':
-				if(item) completeItem(item);
-				var type = exportedOptions.itemType || importTypeMap[entry[2].trim().toUpperCase()];
-				if(!type) {
-					type = DEFAULT_IMPORT_TYPE;
-					Z.debug("Unknown RIS item type: " + entry[2] + ". Defaulting to " + type);
-				}
-				var item = getNewItem(type);
-				//add attachments
-				i++;
-				if(attachments && attachments[i]) {
-					item.attachments = attachments[i];
-				}
-			break;
-			case 'ER':
-				if(item) completeItem(item);
-				item = undefined;
-			break;
-			default:
-				processTag(item, entry);
+	while(entry = RISReader.nextEntry()) {
+		var itemType = exportedOptions.itemType
+			|| (entry.tags.TY && importTypeMap[entry.tags.TY[0].value.trim().toUpperCase()]);
+		if(!itemType) {
+			if(entry.tags.TY) {
+				Z.debug("RIS: Unknown item type: " + entry.tags.TY[0].value
+					+ ". Defaulting to " + DEFAULT_IMPORT_TYPE);
+			} else {
+				Z.debug("RIS: TY tag not specified. Defaulting to " + DEFAULT_IMPORT_TYPE);
+			}
+			
+			itemType = DEFAULT_IMPORT_TYPE;
 		}
-		entry = getLine();
+		
+		var item = getNewItem(itemType);
+		
+		for(var i=0, n=entry.length; i<n; i++) {
+			if((['TY', 'ER']).indexOf(entry[i].tag) == -1) {
+				processTag(item, entry[i], entry);
+			}
+		}
+		
+		completeItem(item);
 	}
-
-	//complete last item if ER is missing
-	if(item) completeItem(item);
+	
 }
 
 /********************
