@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-15 18:04:37"
+	"lastUpdated": "2014-01-02 19:24:40"
 }
 
 /*Spanish Libraries:
@@ -61,6 +61,7 @@ function detectWeb(doc, url) {
 }
 
 function scrape(doc) {
+
 //second xpath version for http://catalogue-bibliotheques.upmc.fr
 	var xpath = '//tr[th[@class="viewmarctags"]][td[@class="viewmarctags"]]|//dl/dt[@class="viewmarctags"]';
 	var elmts = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
@@ -75,11 +76,13 @@ function scrape(doc) {
 	
 	while(elmt) {
 		try {
-			var node = ZU.xpathText(elmt, './TD[1]/A[1]/text()[1]|./following-sibling::dd[1]/a[1]/text()');
+			var node = ZU.xpathText(elmt, './TD[1]/A[1]/span/text()[1]|./following-sibling::dd[1]/a[1]/span/text()');
+			if(!node) {
+				var node = ZU.xpathText(elmt, './TD[1]/A[1]/text()[1]|./following-sibling::dd[1]/a[1]/text()');	
+			}
 			if(!node) {
 				var node = ZU.xpathText(elmt, './TD[1]/text()[1]|./following-sibling::dd[1]/text()')
 			}
-			
 			if(node) {
 				var casedField = Zotero.Utilities.superCleanString(ZU.xpathText(elmt, './th[1]/text()|./text()'));
 				field = casedField.toLowerCase();
