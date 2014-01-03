@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-12-12 14:02:17"
+	"lastUpdated": "2014-01-02 17:52:46"
 }
 
 function detectWeb(doc, url) {
@@ -51,7 +51,7 @@ function scrape(doc, url) {
 			authors = authors.replace(/^By\s+|\sBy\s+/, "").split(/ and /i);
 			var authArr = new Array();
 			for(var i=0, n=authors.length; i<n; i++) {
-				authArr.push(ZU.cleanAuthor(ZU.capitalizeTitle(authors[i]), 'author'));
+				authArr.push(ZU.cleanAuthor(ZU.capitalizeTitle(authors[i].replace(/@.+/, "")), 'author'));
 			}
 	
 			if(authArr.length) {
@@ -207,13 +207,12 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"itemID": "http://swampland.time.com/2012/03/04/obama-courts-aipac-before-netanyahu-meeting/?iid=sl-main-lede",
 				"title": "Obama Courts AIPAC Before Netanyahu Meeting",
 				"publicationTitle": "Time",
 				"url": "http://swampland.time.com/2012/03/04/obama-courts-aipac-before-netanyahu-meeting/?iid=sl-main-lede",
 				"abstractNote": "Obama rejected any notion that his administration has not been in Israel's corner. “Over the last three years, as President of the United States, I have kept my commitments to the state of Israel.\" The President then ticked off the number of ways he has supported Israel in the last year.",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "swampland.time.com",
+				"accessDate": "CURRENT_TIMESTAMP",
 				"ISSN": "0040-718X"
 			}
 		]
@@ -258,15 +257,14 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"itemID": "http://business.time.com/2012/03/02/struggling-to-stay-afloat-number-of-underwater-homeowners-keeps-on-rising/?iid=pf-main-lede/",
 				"title": "Struggling to Stay Afloat: Number of Underwater Homeowners Keeps on Rising",
 				"publicationTitle": "Time",
 				"url": "http://business.time.com/2012/03/02/struggling-to-stay-afloat-number-of-underwater-homeowners-keeps-on-rising/?iid=pf-main-lede/",
 				"abstractNote": "Despite signs that some housing markets are improving, the overall trend is for home prices (and values) to keep dropping—and dropping. As values shrink, more and more homeowners find themselves underwater, the unfortunate scenario in which one owes more on the mortgage than the home is worth.",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "business.time.com",
-				"shortTitle": "Struggling to Stay Afloat",
-				"ISSN": "0040-718X"
+				"accessDate": "CURRENT_TIMESTAMP",
+				"ISSN": "0040-718X",
+				"shortTitle": "Struggling to Stay Afloat"
 			}
 		]
 	},

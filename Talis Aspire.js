@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcbv",
-	"lastUpdated": "2013-06-25 06:39:27"
+	"lastUpdated": "2014-01-02 17:59:02"
 }
 
 /*
@@ -173,13 +173,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"creators": [
-					{
-						"lastName": "Tara J. Radin and Martin Calkins",
-						"creatorType": "author",
-						"fieldMode": 1
-					}
-				],
+				"creators": [],
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
@@ -189,14 +183,11 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"url": "http://www.jstor.org/stable/25123831",
-				"pages": "261-272",
-				"issue": "No. 2",
 				"title": "The Struggle against Sweatshops: Moving toward Responsible Global Business",
-				"volume": "Vol. 66",
-				"date": "Jul., 2006",
+				"publicationTitle": "Journal of Business Ethics",
+				"publisher": "Springer",
+				"ISSN": "01674544",
 				"libraryCatalog": "Talis Aspire",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "The Struggle against Sweatshops"
 			}
 		]

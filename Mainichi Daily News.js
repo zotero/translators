@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-09-26 20:05:49"
+	"lastUpdated": "2014-01-02 18:00:40"
 }
 
 // #################################
@@ -144,7 +144,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://mainichi.jp/english/english/newsselect/news/20130926p2g00m0dm100000c.html",
+		"url": "http://mainichi.jp/english/english/perspectives/news/20131230p2a00m0na010000c.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -158,12 +158,14 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Fukushima plant's undersea radiation-containment curtain ripped",
+				"title": "Editorial: Gov't compensation for nuclear disaster must respect range of choices",
 				"publicationTitle": "Mainichi Daily News",
 				"edition": "online edition",
-				"url": "http://mainichi.jp/english/english/newsselect/news/20130926p2g00m0dm100000c.html",
-				"date": "2013-09-26",
-				"libraryCatalog": "Mainichi Daily News"
+				"url": "http://mainichi.jp/english/english/perspectives/news/20131230p2a00m0na010000c.html",
+				"date": "2013-12-30",
+				"libraryCatalog": "Mainichi Daily News",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Editorial"
 			}
 		]
 	}

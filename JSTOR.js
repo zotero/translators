@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-12-07 12:01:52"
+	"lastUpdated": "2014-01-02 19:07:13"
 }
 
 function detectWeb(doc, url) {
@@ -126,7 +126,7 @@ function doWeb(doc, url) {
 }
 
 function getTitleFromPage(doc) {
-	return ZU.xpathText(doc, '(//div[@class="bd"]/div[@class="rw"])[1]')
+	return ZU.xpathText(doc, '(//div[@class="bd"]/div[cite[@class="rw"]])[1]')
 		|| ZU.xpathText(doc, '//div[@class="mainCite"]/h3')
 		|| ZU.xpathText(doc, '//div[@class="bd"]/h2');
 }
