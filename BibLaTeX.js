@@ -14,7 +14,7 @@
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
-	"lastUpdated": "2013-12-22 16:46"
+	"lastUpdated": "2014-01-04 21:54"
 }
 
 
@@ -41,7 +41,6 @@ var fieldMap = {
 	volumes: "numberOfVolumes",
 	version: "version",
 	eventtitle: "conferenceName",
-	issue: "issue",
 	pages: "pages",
 	pagetotal: "numPages"
 };
