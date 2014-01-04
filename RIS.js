@@ -6,6 +6,9 @@
 	"minVersion": "3.0.4",
 	"maxVersion": "",
 	"priority": 100,
+	"configOptions": {
+		"getCollections": "true"
+	},
 	"displayOptions": {
 		"exportCharset": "UTF-8",
 		"exportNotes": true,
@@ -14,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-01-03 13:44:40"
+	"lastUpdated": "2014-01-18 09:12:06"
 }
 
 function detectImport() {
@@ -144,6 +147,24 @@ for(ty in degenerateExportTypeMap) {
 /*****************************
  * Tag <-> zotero field maps *
  *****************************/
+/** Syntax
+ * {
+ *   RIS-TAG: 
+ *     String, Zotero field used for any item type
+ *     List, item-type dependent mapping
+ *     {
+ *       Zotero field: Zotero item type array. Map RIS tag to the specified Zotero field for indicated item types
+ *       "__ignore": Zotero item type array. Ignore this RIS tag for indicated item types. Do not place it in a note
+ *       "__default": Zotero field. If not matched by above, map RIS tag to this field, unless...
+ *       "__exclude": Zotero item type array. Do not use the __default mapping for these item types
+ *     }
+ * }
+ *
+ * Special "Zotero fields"
+ *   "attachments/[PDF|HTML|other]": import as attachment with a provided path/url
+ *   "creators/...": map to a specified creator type
+ *   "unsupported/...": there is no corresponding Zotero field, but we can provide a human-readable label for the data and attach it as note
+ */
 
 //used for exporting and importing
 //this ensures that we can mostly reimport everything the same way
@@ -156,14 +177,12 @@ var fieldMap = {
 	DB:"archive",
 	DO:"DOI",
 	DP:"libraryCatalog",
-	IS:"issue",
 	J2:"journalAbbreviation",
 	KW:"tags",
 	L1:"attachments/PDF",
 	L2:"attachments/HTML",
 	L4:"attachments/other",
 	N1:"notes",
-	NV:"numberOfVolumes",
 	ST:"shortTitle",
 	UR:"url",
 	Y2:"accessDate",
@@ -278,11 +297,16 @@ var fieldMap = {
 		session:["bill", "hearing", "statute"],
 		version:["computerProgram"]
 	},
+	IS: {
+		"__default":"issue",
+		numberOfVolumes: ["bookSection"]
+	},
 	LA: {
 		"__default":"language",
 		programmingLanguage: ["computerProgram"]
 	},
 	M1: {
+		seriesNumber:["book"],
 		billNumber:["bill"],
 		system:["computerProgram"],
 		documentNumber:["hearing"],
@@ -303,6 +327,10 @@ var fieldMap = {
 		presentationType:["presentation"],
 		artworkMedium:["artwork"],
 		audioFileType:["podcast"]
+	},
+	NV: {
+		"__default": "numberOfVolumes",
+		"__exclude": ["bookSection"] //IS
 	},
 	OP: {
 		history:["hearing", "statute", "bill", "case"],
@@ -344,6 +372,7 @@ var fieldMap = {
 		runningTime:["film"]
 	},
 	SV: {
+		seriesNumber: ["bookSection"],
 		docketNumber: ["case"]	//not in spec. EndNote exports this way
 	},
 	VL: {
@@ -390,6 +419,7 @@ var degenerateImportFieldMap = {
 	M2: "extra", //not in spec
 	M3: "DOI",
 	N2: "abstractNote",
+	NV: "numberOfVolumes",
 	OP: {
 		"__default": "unsupported/Original Publication",
 		"unsupported/Content": ["blogPost", "computerProgram", "film", "presentation", "report", "videoRecording", "webpage"]
@@ -416,56 +446,116 @@ var degenerateImportFieldMap = {
 	Y1: fieldMap["PY"]
 };
 
-//generic tag mapping object with caching
-//not intended to be used directly
+/**
+ * @class Generic tag mapping with caching
+ * 
+ * @param {Tag <-> zotero field map []} mapList An array of field map lists as
+ *   described above. Lists are matched in order they are supplied. If a tag is
+ *   not present in the list, the next list is checked. If the RIS tag is
+ *   present, but an item type does not match (no __default) or is explicit
+ *   excluded from matching (__exclude), the next list is checked.
+ */
 var TagMapper = function(mapList) {
 	this.cache = {};
+	this.reverseCache = {};
 	this.mapList = mapList;
 };
 
-TagMapper.prototype.getFields = function(itemType, tag) {
+/**
+ * Given an item type and a RIS tag, return Zotero field data should be mapped to.
+ * Mappings are cached.
+ *
+ * @param {String} itemType Zotero item type
+ * @param {String} tag RIS tag
+ * @return {String} Zotero field
+ */
+TagMapper.prototype.getField = function(itemType, tag) {
 	if(!this.cache[itemType]) this.cache[itemType] = {};
 
 	//retrieve from cache if available
-	if(this.cache[itemType][tag]) {
+	//it can be false if previous search did not find a mapping
+	if(this.cache[itemType][tag] !== undefined) {
 		return this.cache[itemType][tag];
 	}
 
-	var fields = [];
+	var field = false;
 	for(var i=0, n=this.mapList.length; i<n; i++) {
 		var map = this.mapList[i];
-		var field;
 		if(typeof(map[tag]) == 'object') {
 			var def, exclude = false;
 			for(var f in map[tag]) {
+				//__ignore is not handled here. It's returned as a Zotero field so it
+				//can be explicitly excluded from the note attachment
 				if(f == "__default") {
+					//store default mapping in case we can't find anything explicit
 					def = map[tag][f];
 					continue;
 				}
 
 				if(f == "__exclude") {
 					if(map[tag][f].indexOf(itemType) != -1) {
-						exclude = true;
+						exclude = true; //don't break. Let explicit mapping override this
 					}
 					continue;
 				}
 
 				if(map[tag][f].indexOf(itemType) != -1) {
 					field = f;
+					break;
 				}
 			}
 
+			//assign default value if not excluded
 			if(!field && def && !exclude) field = def;
 		} else if(typeof(map[tag]) == 'string') {
 			field = map[tag];
 		}
 
-		if(field) fields.push(field);
+		if(field) break; //no need to go on
 	}
 
-	this.cache[itemType][tag] = fields;
+	this.cache[itemType][tag] = field;
 
-	return fields;
+	return field;
+};
+
+/**
+ * Given a Zotero item type and field, return a RIS tag.
+ * Mappings are cached.
+ * Not used for export, but for ProCite tag re-mapping
+ *
+ * @param {String} itemType Zotero item type
+ * @param {String} zField Zotero field
+ * @return {String} RIS tag
+ */
+TagMapper.prototype.reverseLookup = function(itemType, zField) {
+	if(!this.reverseCache[itemType]) this.reverseCache[itemType] = {};
+	
+	if(this.reverseCache[itemType][zField] !== undefined) {
+		return this.reverseCache[itemType][zField];
+	}
+	
+	for(var i=0, n=this.mapList.length; i<n; i++) {
+		var risTag;
+		for(risTag in this.mapList[i]) {
+			var typeMap = this.mapList[i][risTag];
+			if(typeMap == zField //item type-independent
+				|| (typeof(typeMap) == 'object'
+					&& ( (typeMap[zField] && typeMap[zField].indexOf(itemType) !== -1) //explicitly mapped
+						|| (
+							!(typeMap.__exclude && typeMap.__exclude.indexOf(itemType) !== -1)
+							&& typeMap.__default == zField //mapped via __default and not excluded
+						)
+					)
+				)
+			) {
+				this.reverseCache[itemType][zField] = risTag;
+				return risTag;
+			}
+		}
+	}
+	this.reverseCache[itemType][zField] = false;
+	return false;
 };
 
 /********************
@@ -475,29 +565,45 @@ TagMapper.prototype.getFields = function(itemType, tag) {
 //set up import field mapping
 var importFields = new TagMapper([fieldMap, degenerateImportFieldMap]);
 
-//do not store unknwon fields into notes. Configurable via RIS.import.ignoreUnknown
+//do not store unknwon fields in notes
+//configurable via RIS.import.ignoreUnknown hidden preference
 var ignoreUnknown = false;
 
+/**
+ * @singleton Provides facilities to read one RIS entry at a time
+ */
 var RISReader = new function() {
+	//if we read a tag-value pair from the next entry, we need to keep it for later
 	var _tagValueBuffer = [];
+	/**
+	 * public
+	 * Returns the next RIS entry
+	 * Note: we do allow entries to be missing a TY tag
+	 *
+	 * @return  Array of tag-value pairs in order of appearance.
+	 *   Includes an additional property "tags", which is a list of RIS tags.
+	 *   The values of the list are arrays, which contain references to the
+	 *   tag-value pairs stored in the returned array.
+	 */
 	this.nextEntry = function() {
 		var tagValue,
 			entry = []; //maintain tag order
 		entry.tags = {}; //tag list for convenience
 		
-		while(tagValue = _tagValueBuffer.pop() || _getTagValue()) {
+		while(tagValue = (_tagValueBuffer.length && _tagValueBuffer.pop()) || _getTagValue()) {
 			if(tagValue.tag == 'TY' && entry.length) {
-				//we hit a new entry
+				//we hit a new entry. ER was omitted, but we'll forgive
 				_tagValueBuffer.push(tagValue);
 				return entry;
 			}
 			
 			if(tagValue.tag == 'ER') {
-				if(!entry.length) continue; //weird, but keep going
+				if(!entry.length) continue; //weird, but keep going and ignore ER outside of entry
 				return entry;
 			}
 			
 			entry.push(tagValue);
+			//also add to the "tags" list for convenient access
 			if(!entry.tags[tagValue.tag]) entry.tags[tagValue.tag] = [];
 			entry.tags[tagValue.tag].push(tagValue);
 		}
@@ -505,19 +611,34 @@ var RISReader = new function() {
 		if(entry.length) return entry;
 	};
 	
-	var RIS_format = /^([A-Z][A-Z0-9]) {1,2}-(?: (.*))?$/; //allow empty entries
-	var preserveNewLines = ['KW', 'L1', 'L2', 'L3'];
-	var _maxLineLength = 0;
-	//get the next RIS entry that matches the RIS format
-	//returns an array in the format [raw "line", tag, value]
-	//lines may be combined into one entry
+	var RIS_format = /^([A-Z][A-Z0-9]) {1,2}-(?: (.*))?$/, //allow empty entries
+	//list of tags for which we preserve newlines
+		preserveNewLines = ['KW', 'L1', 'L2', 'L3'], //these could use newline as separator
+	//keep track of maximum line length so we can make a better call on whether
+	//something should be on a new line or not
+		_maxLineLength = 0;
+	
+	/**
+	 * private
+	 * Get the next RIS tag-value pair
+	 *
+	 * @return {
+	 *   raw: the line (or multiple lines) that were read in for this tag value pair,
+	 *   tag: RIS tag,
+	 *   value: value, which may have newlines stripped
+	 * }
+	 */
 	function _getTagValue() {
 		var line, tagValue, temp, lastLineLength = 0;
-		while((line = _nextLine()) !== false) {
+		while((line = _nextLine()) !== false) { //could be reading empty lines
 			temp = line.match(RIS_format);
 			
 			if(!temp && !tagValue) {
-				Z.debug("RIS: Dropping line outside of RIS record: " + line);
+				//doesn't match RIS format and we're not processing a tag-value pair,
+				//so this is not a multi-line tag-value pair
+				if(line.trim()) {
+					Z.debug("RIS: Dropping line outside of RIS record: " + line);
+				}
 				continue;
 			}
 			
@@ -546,11 +667,14 @@ var RISReader = new function() {
 				var cleanLine = line.trim();
 				//new lines would probably only be meaningful in notes and abstracts
 				if((['AB', 'N1', 'N2']).indexOf(tagValue.tag) !== -1
-					//if lines are not trimmed to ~80 characters or previous line was short,
-					// this would probably be on a new line
-					//Might consider looking for periods and capital letters
-					//empty lines imply new line
-					&& (_maxLineLength > 85 || lastLineLength < 65 || cleanLine.length == 0) ) {
+					//if all lines are not trimmed to ~80 characters or previous line was
+					// short, this would probably be on a new line. Might want to consider
+					// looking for periods and capital letters to make a better call.
+					// Empty lines imply a new line
+					&& (_maxLineLength > 85
+						|| (lastLineLength !== undefined && lastLineLength < 65)
+						|| cleanLine.length == 0)
+					) {
 					
 					cleanLine = "\n" + cleanLine;
 					newLineAdded = true;
@@ -562,7 +686,7 @@ var RISReader = new function() {
 					newLineAdded = true;
 				}
 				
-				//check if we need to add a space
+				//check if we need to add a space before concatenating
 				if(!newLineAdded && tagValue.value.charAt(tagValue.value.length-1) != ' ') {
 					cleanLine = ' ' + cleanLine;
 				}
@@ -576,8 +700,14 @@ var RISReader = new function() {
 		
 		if(tagValue) return tagValue;
 	}
-		
+	
 	var _lineBuffer = [];
+	/**
+	 * private
+	 * Gets the next line in the buffer or file
+	 *
+	 * @return (String)
+	 */
 	function _nextLine() {
 		// Don't use shortcuts like _lineBuffer.pop() || Zotero.read(),
 		//  because we may have an empty line, which could be meaningful
@@ -586,13 +716,345 @@ var RISReader = new function() {
 	}
 };
 
+/**
+ * @singleton Provides facilities to remap ProCite note-based data tagging to
+ *   proper RIS format
+ * Note that after processing, the order of tag-value pairs in the "tags" list
+ *   may be out of order
+ */
+var ProCiteCleaner = new function() {
+	this.proCiteMode = false; //are we sure we're processing a ProCite file?
+	//ProCite -> Zotero field map
+	this.proCiteMap = {
+		'Author Role': { //special case
+			'actor': 'cast-member',
+			'author': 'author',
+			'cartographer': 'cartographer',
+			'composer': 'composer',
+			'composed': 'composer',
+			'director': 'director',
+			'directed': 'director',
+			'performer': 'performer',
+			'performed': 'performer',
+			'producer': 'producer',
+			'produced': 'producer',
+			'editor': 'editor',
+			'ed': 'editor',
+			'edited': 'editor',
+			'editor-in-chief': 'editor',
+			'compiler': 'editor',
+			'compiled': 'editor',
+			'collected': 'editor',
+			'assembled': 'editor',
+			'presenter': 'presenter',
+			'presented': 'presenter',
+			'translator': 'translator',
+			'translated':'translator',
+			'introduction': 'contributor'
+			//conductor
+			//illustrator
+			//librettist
+		},
+		'Call Number': 'callNumber',
+		'Edition': 'edition',
+		'ISBN': 'ISBN',
+		'Language': 'language',
+		'Publisher Name': 'publisher',
+		'Series Title': 'series',
+		'Proceedings Title': 'proceedingsTitle',
+		'Page(s)': 'pages',
+		'Volume ID': 'volume',
+		'Issue ID': 'issue',
+		'Issue Identification': 'issue',
+		'Series Volume ID': 'seriesNumber',
+		'Scale': 'scale',
+		'Place of Publication': 'place',
+		'History': 'history',
+		'Size': 'artworkSize'
+	};
+	
+	var tagValueSplit = /([A-Za-z,\s]+)\s*:\s*([\s\S]*)/; //ProCite version
+	/**
+	 * public
+	 * Converts ProCite "tags" to RIS tags
+	 *
+	 * @param (RISReader entry) entry Entry to be cleaned up in-place
+	 * @param (Zotero.Item) item Indicates item type for proper mapping
+	 */
+	this.cleanTags = function(entry, item) {
+		var notes = entry.tags.N1, extentOfWork, packagingMethod;
+		//go through all the notes
+		for(var i=0; notes && notes.length && i<entry.length; i++) {
+			var m;
+			if(entry[i].tag !== 'N1'
+				|| !(m = entry[i].value.trim().match(tagValueSplit)) ) {
+				continue;
+			}
+			
+			switch(m[1]) {
+				case 'Author, Subsidiary':
+				case 'Author, Monographic':
+					//seems to always come before "Author Role"
+					//we guess what RIS tag to assign,
+					//but this gets fixed on next iteration anyway
+					var risTag = entry.tags.A1 ? (entry.tags.A2 ? 'A3' : 'A2') : 'A1';
+					var authors = m[2].split(/;\s*/); //multiple authors on the same line
+					this._changeTag(entry, i, [risTag]);
+					//use current tag-value pair for first author
+					//authors are in firstName lastName format, we need to fix it
+					entry[i].value = _fixAuthor(authors[0]);
+					//subsequent authors need to have their own tag-value pairs
+					for(var j=1; j<authors.length; j++) {
+						var newEntry = ZU.deepCopy(entry[i]);
+						newEntry.value = authors[j];
+						entry.splice(i+1,0,newEntry); //insert into tag-value array
+						entry.tags[risTag].push(newEntry); //and add to tags
+					}
+					i += authors.length - 1; //skip past the new entries we just added
+				break;
+				case 'Artist Role':
+				case 'Series Editor Role':
+				case 'Editor/Compiler Role':
+				case 'Cartographer Role':
+				case 'Composer Role':
+				case 'Producer Role':
+				case 'Director Role':
+				case 'Performer Role':
+				case 'Author Role':
+					var authorRoles = _normalizeAuthorRole(m[2]);
+					var risTags = [], fail = false;
+					//find a RIS tag for each author role
+					for(var j=0, k=authorRoles.length; j<k; j++) {
+						var role = this.proCiteMap['Author Role'][authorRoles[j]];
+						if(!role) {
+							Z.debug('RIS: Unknown ProCite author role: ' + authorRoles[j]);
+							continue;
+						}
+						role = 'creators/' + role;
+						var risTag = importFields.reverseLookup(item.itemType, role);
+						if(!risTag) {
+							Z.debug('RIS: Cannot map ProCite author role to RIS tag: ' + role + ' for ' + item.itemType);
+							Z.debug('RIS: Will not attempt a partial match: ' + m[0]);
+							fail = true;
+							break;
+						}
+						if(risTags.indexOf(risTag) === -1) risTags.push(risTag); //don't add same role
+					}
+					
+					if(fail || !risTags.length) continue;
+					
+					Z.debug('RIS: ' + m[0]);
+					Z.debug('RIS: Mapping preceeding authors to ' + risTags.join(', '));
+					var added;
+					if(added = this._remapPreceedingTags(entry, i, ['A1','A2','A3'], risTags)) {
+						this._changeTag(entry, i); //remove ProCite note
+						i--;
+						if(added !== true) {
+							i += added;
+						}
+					}
+				break;
+				case 'Record ID':
+				case 'Record Number':
+					this._changeTag(entry, i, ['ID']);
+					entry[i].value = m[2];
+				break;
+				case 'Notes':
+					entry[i].value = m[2];
+				break;
+				case 'Connective Phrase':
+					if(m[2].trim().toLowerCase() == 'in') {
+						//this is somewhat meaningless, remove it
+						this._changeTag(entry, i);
+						i--;
+					}
+				break;
+				case 'Extent of Work':
+					extentOfWork = entry[i]; //processed later
+				break;
+				case 'Packaging Method':
+					packagingMethod = entry[i]; //processed later
+				break;
+				default:
+					if(this.proCiteMap[m[1]]) {
+						var risTag = importFields.reverseLookup(item.itemType, this.proCiteMap[m[1]]);
+						if(!risTag) {
+							Z.debug('RIS: Cannot map ProCite note to RIS tag: ' + this.proCiteMap[m[1]] + ' for ' + item.itemType);
+							continue;
+						}
+						this._changeTag(entry, i, [risTag]);
+						entry[i].value = m[2];
+					}
+			}
+		}
+		
+		if(extentOfWork) {
+			var extent = extentOfWork.value.match(tagValueSplit)[2],
+				m = extent.match(/^(\d+)\s*(pages?|p(?:p|gs?)?|vols?|volumes?)\.?$/i), //e.g. 2 vols.
+				units, deletePackagingMethod = false;
+			if(m) {
+				//we have both extent and units in the same field
+				//packagingMethod will be useless
+				units = m[2].charAt(0).toLowerCase() == 'p' ? 'numPages' : 'numberOfVolumes';
+				extent = m[1];
+			} else if(packagingMethod && /^\s*\d+\s*$/.test(extent) //numeric extent
+				&& (m = packagingMethod.value.match(/:\s*(pages?|p(?:p|gs?)?|vols?|volumes?)\.?\s*$/i))
+			) {
+				units = m[1].charAt(0).toLowerCase() == 'p' ? 'numPages' : 'numberOfVolumes';
+				extent = extent.trim();
+				deletePackagingMethod = true; //we can delete it since we used it
+			}
+			
+			if(units) {
+				risTag = importFields.reverseLookup(item.itemType, units);
+				if(risTag) {
+					extentOfWork.value = extent;
+					this._changeTag(entry, entry.indexOf(extentOfWork), [risTag]);
+					if(deletePackagingMethod) {
+						this._changeTag(entry, entry.indexOf(packagingMethod));
+					}
+				}
+			}
+		}
+		
+		//the rest we only fix if we're sure this is ProCite
+		if(!this.proCiteMode) return;
+		
+		//fix titles in book sections.
+		//essentially, make sure there are no duplicate T tags and put them in order
+		if(entry.tags.TY && entry.tags.TY[0].value == 'CHAP') {
+			var titleTags = ['T3', 'T2', 'TI'];
+			for(var i=0; i<entry.length && titleTags.length; i++) {
+				if((['TI', 'T1', 'T2', 'T3']).indexOf(entry[i].tag) !== -1) {
+					entry[i].tag = titleTags.pop();
+				}
+			}
+		}
+		
+		//fix publication place for conferences. Should be C1, not CY
+		if(entry.tags.TY && entry.tags.TY[0].value == 'CONF' && entry.tags.CY && !entry.tags.C1) {
+			for(var i=0; i<entry.tags.CY.length; i++) {
+				entry.tags.CY[i].tag = 'C1';
+			}
+			
+			entry.tags.C1 = entry.tags.CY;
+			delete entry.tags.CY;
+		}
+		
+	};
+	
+	/**
+	 * private
+	 * Normalize author role strings
+	 *
+	 * @param (String) role
+	 * @return (String[]) normalized author role(s)
+	 */
+	function _normalizeAuthorRole(role) {
+		return role.toLowerCase()
+			.replace(/s\b|\.|\s+by\b|with an\s*/g,'')
+			//split multiple types
+			.split(/\s*(?:,|and)\s*/);
+	}
+	
+	/**
+	 * private
+	 * Formats author name as lastName, firstName
+	 *
+	 * @param (String) author
+	 * @return (String)
+	 */
+	function _fixAuthor(author) {
+		if(author.indexOf(',') !== -1 || author.trim().indexOf(' ') === -1) return author;
+		author = author.trim();
+		return author.substr(author.lastIndexOf(' ')+1) + ', ' + author.substring(0,author.lastIndexOf(' '));
+	}
+	
+	/**
+	 * public
+	 * Changes the RIS tag for an indicated tag-value pair. If more than one tag
+	 *   is specified, additional pairs are added.
+	 *
+	 * @param (RISReader entry) entry
+	 * @param (Integer) at Index in entry of the tag-value pair to alter
+	 * @param (String[]) toTags Array of tags to change to
+	 */
+	this._changeTag = function(entry, at, toTags) {
+		var source = entry[at], byTag = entry.tags[source.tag];
+		
+		//clean up "tags" list
+		byTag.splice(byTag.indexOf(source),1);
+		if(!byTag.length) delete entry.tags[source.tag];
+		
+		if(!toTags || !toTags.length) {
+			//then we just remove
+			entry.splice(at,1);
+		} else {
+			source.tag = toTags[0]; //re-use the same pair for first tag
+			if(!entry.tags[toTags[0]]) entry.tags[toTags[0]] = [];
+			entry.tags[toTags[0]].push(source);
+			//if we're changing to more than one tag, we need to add extras
+			for(var i=1, n=toTags.length; i<n; i++) {
+				var newSource = ZU.deepCopy(source);
+				newSource.tag = toTags[i];
+				entry.splice(at+i, 0, newSource);
+				if(!entry.tags[toTags[i]]) entry.tags[toTags[i]] = [];
+				entry.tags[toTags[i]].push(newSource);
+			}
+		}
+		
+		//if we're changing tags, then we're sure this is ProCite format
+		//it's not the most intuitive place for this,
+		//but it makes sure that we don't miss setting this somewhere
+		this.proCiteMode = true;
+	};
+	
+	/**
+	 * public
+	 * Changes RIS tags for preceeding tag-value pairs until we hit something that
+	 *   is not allowed to be modified
+	 *
+	 * @param (RISReader entry) entry
+	 * @param (Integer) start Index in entry before which to change tags
+	 * @param (String[]) allowedTags Array of tags that are allowed to be modified
+	 * @param (String[]) risTags Array of tags to change to
+	 * @return (Boolean | Integer) If only one tag is specified in risTags,
+	 *   this will be a Boolean indicating whether anything was changed.
+	 *   If risTags contains more than one tag, then this will be Integer
+	 *   indicating how many new tag-value pairs were inserted.
+	 */
+	this._remapPreceedingTags = function(entry, start, allowedTags, risTags) {
+		var tag, added = 0;
+		for(var i=start-1; i>=0; i--) {
+			
+			if(tag && entry[i].tag !== tag) {
+				//different from the tags we changed previously. Don't continue
+				return added ? added : true;
+			}
+			
+			tag = entry[i].tag;
+			if(allowedTags.indexOf(tag) === -1) {
+				//not allowed to remap this tag
+				Z.debug('RIS: nothing to remap');
+				return;
+			}
+			
+			this._changeTag(entry, i, risTags); //don't need to adjust i, since we're traversing backwards
+			added += risTags.length - 1;
+		}
+		
+		//we should not end up at the begining of entry,
+		//since we will probably never be replacing TY, but just in case
+		if(tag) return added ? added : true;
+	};
+}
 
 function processTag(item, tagValue, risEntry) {
 	var tag = tagValue.tag;
 	var value = tagValue.value.trim();
 	var rawLine = tagValue.raw;
 
-	var zField = importFields.getFields(item.itemType, tag)[0];
+	var zField = importFields.getField(item.itemType, tag);
 	if(!zField) {
 		Z.debug("Unknown field " + tag + " in entry :\n" + rawLine);
 		zField = 'unknown'; //this will result in the value being added as note
@@ -1059,8 +1521,10 @@ function doImport() {
 	
 	var entry;
 	while(entry = RISReader.nextEntry()) {
+		//determine item type
 		var itemType = exportedOptions.itemType
 			|| (entry.tags.TY && importTypeMap[entry.tags.TY[0].value.trim().toUpperCase()]);
+		//we allow entries without TY and just use default type
 		if(!itemType) {
 			if(entry.tags.TY) {
 				Z.debug("RIS: Unknown item type: " + entry.tags.TY[0].value
@@ -1073,9 +1537,10 @@ function doImport() {
 		}
 		
 		var item = getNewItem(itemType);
+		ProCiteCleaner.cleanTags(entry, item); //clean up ProCite "tags"
 		
 		for(var i=0, n=entry.length; i<n; i++) {
-			if((['TY', 'ER']).indexOf(entry[i].tag) == -1) {
+			if((['TY', 'ER']).indexOf(entry[i].tag) == -1) { //ignore TY and ER tags
 				processTag(item, entry[i], entry);
 			}
 		}
@@ -1162,7 +1627,7 @@ function doExport() {
 		for(var i=0, n=order.length; i<n; i++) {
 			tag = order[i];
 			//find the appropriate field to export for this item type
-			field = exportFields.getFields(item.itemType, tag)[0];
+			field = exportFields.getField(item.itemType, tag);
 
 			//if we didn't get anything, we don't need to export this tag for this item type
 			if(!field) continue;
@@ -1701,7 +2166,7 @@ var testCases = [
 				"libraryCatalog": "Database Provider",
 				"edition": "Edition",
 				"language": "Language",
-				"extra": "Series Volume",
+				"seriesNumber": "Series Volume",
 				"numberOfVolumes": "Number of Volumes",
 				"ISBN": "ISBN",
 				"numPages": "Number of Pages",
@@ -1747,7 +2212,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Original Publication: Original Publication<br/>Reviewed Item: Reviewed Item<br/>Research Notes: Research Notes<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C1  - Section<br/>C3  - Title Prefix<br/>C4  - Reviewer<br/>C5  - Packaging Method<br/>DO  - DOI<br/>J2  - Abbreviation<br/>RP  - Reprint Edition<br/>SE  - Chapter<br/>SV  - Series Volume<br/>",
+						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Original Publication: Original Publication<br/>Reviewed Item: Reviewed Item<br/>Research Notes: Research Notes<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C1  - Section<br/>C3  - Title Prefix<br/>C4  - Reviewer<br/>C5  - Packaging Method<br/>DO  - DOI<br/>J2  - Abbreviation<br/>RP  - Reprint Edition<br/>SE  - Chapter<br/>",
 						"tags": [
 							"_RIS import"
 						]
@@ -1771,6 +2236,7 @@ var testCases = [
 				"numberOfVolumes": "Number of Volumes",
 				"ISBN": "ISBN",
 				"shortTitle": "Short Title",
+				"seriesNumber": "Series Volume",
 				"bookTitle": "Book Title",
 				"series": "Series Title",
 				"url": "URL",
@@ -1957,7 +2423,7 @@ var testCases = [
 				"libraryCatalog": "Database Provider",
 				"edition": "Edition",
 				"language": "Language",
-				"extra": "Series Volume",
+				"seriesNumber": "Series Volume",
 				"numberOfVolumes": "Number of Volumes",
 				"ISBN": "ISSN/ISBN",
 				"numPages": "Number of Pages",
@@ -2287,7 +2753,7 @@ var testCases = [
 				"libraryCatalog": "Database Provider",
 				"edition": "Edition",
 				"language": "Language",
-				"extra": "Series Volume",
+				"seriesNumber": "Series Volume",
 				"numberOfVolumes": "Number of Volumes",
 				"ISBN": "ISBN",
 				"numPages": "Number of Pages",
@@ -3548,7 +4014,7 @@ var testCases = [
 				"libraryCatalog": "Database Provider",
 				"edition": "Edition",
 				"language": "Language",
-				"extra": "Series Volume",
+				"seriesNumber": "Series Volume",
 				"numberOfVolumes": "Number of Volumes",
 				"ISBN": "ISBN",
 				"numPages": "Pages",
