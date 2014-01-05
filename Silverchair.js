@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-12-30 21:33:54"
+	"lastUpdated": "2014-01-05 12:35:24"
 }
 
 /*
@@ -37,7 +37,7 @@
 function detectWeb(doc, url) {
 	//concerned about false positives - make sure this is actualy Silverchair.
 	var scm6 = ZU.xpathText(doc, '//body/@class|//script/@src');
-	var multxpath = '//div[contains(@class, "resultBlock")]/a|//div[contains(@class, "articleTitle") or contains(@class, "articleSection")]/a[contains(@href, "articleid")]';
+	var multxpath = '//div[contains(@class, "resultBlock")]/a|//div[contains(@class, "articleTitle") or contains(@class, "articleSection")]/a[contains(@href, "articleid")  or contains(@href, "articleID")]';
 	if (scm6){
 		if (scm6.indexOf("SCM6")!=-1){
 			if (url.search(/\/(article|proceeding)\.aspx\?articleid=\d+/i)!=-1) return "journalArticle";
@@ -53,7 +53,7 @@ function doWeb(doc, url){
 	var articles = new Array();
 	if(detectWeb(doc, url) == "multiple") { 
 		var items = {};
-		var titles = doc.evaluate('//div[contains(@class, "resultBlock")]/a|//div[contains(@class, "articleTitle") or contains(@class, "articleSection")]/a[contains(@href, "articleid")]', doc, null, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//div[contains(@class, "resultBlock")]/a|//div[contains(@class, "articleTitle") or contains(@class, "articleSection")]/a[contains(@href, "articleid") or contains(@href, "articleID")]', doc, null, XPathResult.ANY_TYPE, null);
 		var title;
 		while (title = titles.iterateNext()) {
 			items[title.href] = title.textContent.trim();
@@ -87,6 +87,7 @@ function scrape(doc, url){
 	
 	var risurl=host +"/downloadCitation.aspx?format=ris&" +articleid;
 	//we prefer the RIS because it consistently has abstracts.
+	Z.debug(risurl)
 	Zotero.Utilities.HTTP.doGet(risurl, function (text) {
 		//remove extra DOI
 		text = text.replace(/N1  - 10\..+/, "");
@@ -159,9 +160,8 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"exercise",
-					"heart",
-					"postural orthostatic tachycardia syndrome"
+					"postural orthostatic tachycardia syndrome",
+					"exercise"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -176,7 +176,7 @@ var testCases = [
 				"pages": "2858-2868",
 				"volume": "55",
 				"issue": "25",
-				"abstractNote": "Objectives  \n The purpose of this study was to test the hypothesis that a small heart coupled with reduced blood volume contributes to the postural orthostatic tachycardia syndrome (POTS) and that exercise training improves this syndrome.Background  \n Patients with POTS have marked increases in heart rate during orthostasis. However, the underlying mechanisms are unknown and the effective therapy is uncertain.Methods  \n Twenty-seven POTS patients underwent autonomic function tests, cardiac magnetic resonance imaging, and blood volume measurements. Twenty-five of them participated in a 3-month specially designed exercise training program with 19 completing the program; these patients were re-evaluated after training. Results were compared with those of 16 healthy controls.Results  \n Upright heart rate and total peripheral resistance were greater, whereas stroke volume and cardiac output were smaller in patients than in controls. Baroreflex function was similar between groups. Left ventricular mass (median [25th, 75th percentiles], 1.26 g/kg [1.12, 1.37 g/kg] vs. 1.45 g/kg [1.34, 1.57 g/kg]; p < 0.01) and blood volume (60 ml/kg [54, 64 ml/kg] vs. 71 ml/kg [65, 78 ml/kg]; p < 0.01) were smaller in patients than in controls. Exercise training increased left ventricular mass and blood volume by approximately 12% and approximately 7% and decreased upright heart rate by 9 beats/min [1, 17 beats/min]. Ten of 19 patients no longer met POTS criteria after training, whereas patient quality of life assessed by the 36-item Short-Form Health Survey was improved in all patients after training.Conclusions  \n Autonomic function was intact in POTS patients. The marked tachycardia during orthostasis was attributable to a small heart coupled with reduced blood volume. Exercise training improved or even cured this syndrome in most patients. It seems reasonable to offer POTS a new name based on its underlying pathophysiology, the “Grinch syndrome,” because in this famous children's book by Dr. Seuss, the main character had a heart that was “two sizes too small.”",
+				"abstractNote": "Objectives \nThe purpose of this study was to test the hypothesis that a small heart coupled with reduced blood volume contributes to the postural orthostatic tachycardia syndrome (POTS) and that exercise training improves this syndrome.Background\nPatients with POTS have marked increases in heart rate during orthostasis. However, the underlying mechanisms are unknown and the effective therapy is uncertain.Methods\nTwenty-seven POTS patients underwent autonomic function tests, cardiac magnetic resonance imaging, and blood volume measurements. Twenty-five of them participated in a 3-month specially designed exercise training program with 19 completing the program; these patients were re-evaluated after training. Results were compared with those of 16 healthy controls.Results\nUpright heart rate and total peripheral resistance were greater, whereas stroke volume and cardiac output were smaller in patients than in controls. Baroreflex function was similar between groups. Left ventricular mass (median [25th, 75th percentiles], 1.26 g/kg [1.12, 1.37 g/kg] vs. 1.45 g/kg [1.34, 1.57 g/kg]; p < 0.01) and blood volume (60 ml/kg [54, 64 ml/kg] vs. 71 ml/kg [65, 78 ml/kg]; p < 0.01) were smaller in patients than in controls. Exercise training increased left ventricular mass and blood volume by approximately 12% and approximately 7% and decreased upright heart rate by 9 beats/min [1, 17 beats/min]. Ten of 19 patients no longer met POTS criteria after training, whereas patient quality of life assessed by the 36-item Short-Form Health Survey was improved in all patients after training.Conclusions\nAutonomic function was intact in POTS patients. The marked tachycardia during orthostasis was attributable to a small heart coupled with reduced blood volume. Exercise training improved or even cured this syndrome in most patients. It seems reasonable to offer POTS a new name based on its underlying pathophysiology, the “Grinch syndrome,” because in this famous children's book by Dr. Seuss, the main character had a heart that was “two sizes too small.”",
 				"ISSN": "0735-1097",
 				"DOI": "10.1016/j.jacc.2010.02.043",
 				"url": "http://dx.doi.org/10.1016/j.jacc.2010.02.043",
@@ -279,12 +279,12 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://ajp.psychiatryonline.org/issue.aspx?journalid=13",
+		"url": "http://jbjs.org/issue.aspx?journalid=12&issueid=929420",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://jbjs.org/issue.aspx",
+		"url": "http://neuro.psychiatryonline.org/issue.aspx?journalid=62&issueid=926971",
 		"items": "multiple"
 	}
 ]

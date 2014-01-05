@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-05-16 23:40:37"
+	"lastUpdated": "2014-01-05 12:14:58"
 }
 
 /*
@@ -75,39 +75,5 @@ function doWeb(doc, url){
 	item.complete();
 }
 /** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://www.readability.com/articles/a7bk0mlz?readbar=1",
-		"items": [
-			{
-				"itemType": "webpage",
-				"creators": [
-					{
-						"firstName": "Florence",
-						"lastName": "Waters",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"document": {
-							"location": {}
-						},
-						"title": "Readability Snapshot"
-					}
-				],
-				"title": "Why is Andreas Gursky's Rhine II the most expensive photograph?",
-				"url": "http://www.telegraph.co.uk/culture/art/8884829/Why-is-Andreas-Gurskys-Rhine-II-the-most-expensive-photograph.html",
-				"websiteTitle": "telegraph.co.uk",
-				"date": "Nov. 11, 2011",
-				"libraryCatalog": "Readability",
-				"accessDate": "CURRENT_TIMESTAMP"
-			}
-		]
-	}
-]
+var testCases = []
 /** END TEST CASES **/

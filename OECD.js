@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-01-09 15:36:32"
+	"lastUpdated": "2014-01-05 11:58:51"
 }
 
 /*
@@ -113,43 +113,6 @@ function scrape(doc, url){
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.oecd-ilibrary.org/governance/better-regulation-in-europe-italy-2012_9789264169975-en",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"lastName": "OECD",
-						"creatorType": "author",
-						"fieldMode": 1
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "OECD Fulltext"
-					}
-				],
-				"title": "Better Regulation in Europe: Italy 2012",
-				"publicationTitle": "Better Regulation in Europe",
-				"date": "Mar 12 2012",
-				"abstractNote": "This review of regulation in Italy maps and analyses the core issues which together make up effective regulatory management, laying down a framework of what should be driving regulatory policy and reform in the future. Issues examined include&nbsp;improving regulatory management,&nbsp;institutional capacities for effective regulation,&nbsp;transparency and processes for effective public consultation and communication,&nbsp;processes for the development of new regulations and for the&nbsp;management of the regulatory stock,&nbsp;compliance rates, enforcement policy. appeal processes, the interface between different levels of government and interface between&nbsp;national processes and those of the EU.",
-				"publisher": "Organisation for Economic Co-operation and Development",
-				"ISBN": "9789264169968",
-				"DOI": "10.1787/9789264169975-en",
-				"url": "http://www.oecd-ilibrary.org/content/book/9789264169975-en",
-				"language": "en",
-				"place": "Paris",
-				"libraryCatalog": "OECD",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Better Regulation in Europe"
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "http://www.oecd-ilibrary.org/economics/current-account-benchmarks-for-turkey_5k92smtqp9vk-en",
 		"items": [
 			{
@@ -194,6 +157,43 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.oecd-ilibrary.org/search?option1=titleAbstract&option2=&value2=&option3=&value3=&option4=&value4=&option5=&value5=&option6=&value6=&option7=&value7=&option8=&value8=&option9=&value9=&option10=&value10=&option11=&value11=&option12=&value12=&option13=&value13=&option14=&value14=&option15=&value15=&option16=&value16=&option17=&value17=&option21=discontinued&value21=true&option22=excludeKeyTableEditions&value22=true&option18=sort&value18=&form_name=quick&discontin=factbooks&value1=labor&x=0&y=0",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.oecd-ilibrary.org/governance/better-regulation-in-europe-france-2010_9789264086968-en",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "OECD",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "OECD Fulltext"
+					}
+				],
+				"title": "Better Regulation in Europe: France 2010",
+				"publicationTitle": "Better Regulation in Europe",
+				"date": "Sep 17 2010",
+				"abstractNote": "This report maps and analyses the core issues which together make up effective regulatory management for France, laying down a framework of what should be driving regulatory policy and reform in the future. Issues examined include: strategy and policies for improving regulatory management; institutional capacities for effective regulation and the broader policy making context; transparency and processes for effective public consultation and communication; processes for the development of new regulations, including impact assessment and for the management of the regulatory stock, including administrative burdens; compliance rates, enforcement policy and appeal processes; and the multilevel dimension: interface between different levels of government and interface between national processes and those of the EU. This book is part of a project examining better regulation, being carried out in partnership with the European Commission.",
+				"publisher": "Organisation for Economic Co-operation and Development",
+				"ISBN": "9789264086555",
+				"DOI": "10.1787/9789264086968-en",
+				"url": "http://www.oecd-ilibrary.org/content/book/9789264086968-en",
+				"language": "en",
+				"place": "Paris",
+				"libraryCatalog": "OECD",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Better Regulation in Europe"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
