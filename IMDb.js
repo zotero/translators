@@ -152,13 +152,13 @@ var testCases = [
 						"creatorType": "scriptwriter"
 					},
 					{
-						"firstName": "Norma",
-						"lastName": "Aleandro",
+						"firstName": "Héctor",
+						"lastName": "Alterio",
 						"creatorType": "contributor"
 					},
 					{
-						"firstName": "Héctor",
-						"lastName": "Alterio",
+						"firstName": "Norma",
+						"lastName": "Aleandro",
 						"creatorType": "contributor"
 					},
 					{
@@ -184,7 +184,7 @@ var testCases = [
 				"date": "08 Nov 1985",
 				"genre": "Drama, History, War",
 				"abstractNote": "After the end of the Dirty War, a high school teacher sets out to find out who the mother of her adopted daughter is.",
-				"runningTime": "1 h 52 min",
+				"runningTime": "112 min",
 				"extra": "IMDB ID: undefined; IMDB Rating: undefined (undefined votes)",
 				"libraryCatalog": "IMDb"
 			}
@@ -250,7 +250,7 @@ var testCases = [
 				"date": "21 Oct 1966",
 				"genre": "Drama",
 				"abstractNote": "N/A",
-				"runningTime": "1 h 29 min",
+				"runningTime": "89 min",
 				"extra": "IMDB ID: undefined; IMDB Rating: undefined (undefined votes)",
 				"libraryCatalog": "IMDb"
 			}

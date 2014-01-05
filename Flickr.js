@@ -9,13 +9,16 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-06-08 04:28:54"
+	"lastUpdated": "2014-01-04 17:23:31"
 }
 
 function detectWeb(doc, url) {
 	if (ZU.xpath(doc,'//h1[@property="dc:title" and starts-with(@id, "title_div")]').length) {
 		return "artwork";
-	} else if (ZU.xpath(doc,'//span[contains(@class, "photo_container")]').length) {
+	} else if (ZU.xpathText(doc,'//meta[@name="og:type"]/@content') && ZU.xpathText(doc,'//meta[@name="og:type"]/@content').match(/photo$/)) {
+		return "artwork";
+	}
+	else if (ZU.xpath(doc,'//span[contains(@class, "photo_container")]').length) {
 		return "multiple";
 	}
 }
@@ -25,7 +28,8 @@ function doWeb(doc, url) {
 
 	// single result
 	if (detectWeb(doc, url) != "multiple") {
-		var elmt = ZU.xpathText(doc, '//meta[@property="og:image"]/@content')
+		var elmt = ZU.xpathText(doc, '//meta[@property="og:image"]/@content');
+		if (!elmt)  elmt = ZU.xpathText(doc, '//meta[@name="og:image"]/@content');
 		var photo_id = elmt.substr(elmt.lastIndexOf('/')+1).match(/^[0-9]+/);
 		if(!photo_id) return;
 		items[photo_id[0]] = "title";

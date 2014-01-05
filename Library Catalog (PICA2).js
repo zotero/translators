@@ -226,7 +226,7 @@ var testCases = [
 					"Description based upon print version of recordOnline-Ausg.:"
 				],
 				"tags": [
-					"",
+					"Deutschland / Datenschutz / Persönlichkeitsrecht / Cloud Computing / Electronic Government / Electronic Commerce",
 					"Law / Computers / Commercial law / Mass media"
 				],
 				"seeAlso": [],

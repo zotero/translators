@@ -1,4 +1,4 @@
-29  # Increment number when modifying file
+30  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -68,5 +68,6 @@ e9632edc-8032-4dc5-b2d4-284d481583e6 # SAE Inernational - replaced by SAE Papers
 4c9dbe33-e64f-4536-a02f-f347fa1f187d # BioInfoBank - page defunct
 d75381ee-7d8d-4a3b-a595-b9190a06f43f # Scitation now part of AIP
 f39dbd1c-229e-4abb-8414-a09fdbda37b7 # Archives Network of Alberta - new website, now covered by Archeion
+45763818-8530-49c6-a069-34acdee1a096 # National Library of New Zealand now runs Voyager7
 
 

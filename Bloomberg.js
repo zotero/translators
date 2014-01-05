@@ -98,11 +98,9 @@ var testCases = [
 				],
 				"url": "http://www.bloomberg.com/news/2012-01-04/bank-earnings-increase-57-in-analyst-forecasts-which-proved-wrong-in-2011.html",
 				"abstractNote": "Analysts’ failure to foresee declining earnings per share for the biggest U.S. banks last year hasn’t stopped them from predicting an even bigger profit surge for 2012.",
-				"date": "Jan 3, 2012 5:00 PM MT",
+				"date": "Jan 4, 2012 12:00 AM GMT+0000",
 				"title": "Bank Earnings Jump 57% in Analyst Forecasts",
-				"websiteTitle": "Bloomberg",
-				"libraryCatalog": "Bloomberg",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"websiteTitle": "Bloomberg"
 			}
 		]
 	},
@@ -124,11 +122,9 @@ var testCases = [
 				],
 				"url": "http://www.bloomberg.com/news/2012-01-05/four-economists-come-together-to-say-we-agree-business-class.html",
 				"abstractNote": "“If you laid all the economists in the world end to end, they still wouldn’t reach a conclusion.” This old joke still works because it reflects a common belief that economists can’t agree on anything important. Yet the four of us are part of a project that we believe will demonstrate that this proposition is wrong.",
-				"date": "Jan 4, 2012 5:01 PM MT",
+				"date": "Jan 5, 2012 12:01 AM GMT+0000",
 				"title": "Four Economists Come Together to Say ‘We Agree’: Business Class",
 				"websiteTitle": "Bloomberg",
-				"libraryCatalog": "Bloomberg",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Four Economists Come Together to Say ‘We Agree’"
 			}
 		]

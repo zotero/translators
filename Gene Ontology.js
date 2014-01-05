@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gv",
-	"lastUpdated": "2013-04-15 18:04:37"
+	"browserSupport": "gcv",
+	"lastUpdated": "2014-01-05 11:26:46"
 }
 
 /*
@@ -36,10 +36,9 @@
 	authors of that translator for their premium quality code.
 */
 
+
 var items = {};
-var selectArray = {};
-
-
+var selectArray = {};	
 function detectWeb(doc, url) {
 	var xPath = '//cite//*[@class="pmid"] | //cite//a[contains (@href, "pubmed")]';
 	var cites = doc.evaluate(xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
@@ -51,7 +50,12 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
+	var PMIDs = getPMIDs(doc);
+	retrievePMIDs(PMIDs, doc);
+}
 
+
+function getPMIDs(doc){
 	var myPMID = '//cite//*[@class="pmid"] | //cite//a[contains (@href, "pubmed")]';
 	var pmids = doc.evaluate(myPMID, doc, null, XPathResult.ANY_TYPE, null);
 	var pmid_list = new Array();
@@ -75,37 +79,62 @@ function doWeb(doc, url) {
 	if (pmid_list.length > 0) {
 		Zotero.debug( "Found " + pmid_list.length + " PMIDs!" );
 	}
-	// get the data from the NCBI server
-	var pmids = pmid_list.join(",");
-	var url = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&retmode=xml&id=" + pmids;
+	return pmid_list;
+}
 
-	Zotero.Utilities.HTTP.doGet(url, function(text) {
-	// load translator for PubMed
-		var translator = Zotero.loadTranslator("import");
-//		var translator = Zotero.Translate.Import;
-		translator.setTranslator("fcf41bed-0cbc-3704-85c7-8062a0068a7a");
-		translator.setString(text);
+function retrievePMIDs(PMIDs, doc){
+	_numPMIDs = PMIDs.length;
+	for (var i=0; i<_numPMIDs; i++){
+		(function(doc, PMID) {
+			var translate = Zotero.loadTranslator("search");
+			translate.setTranslator("fcf41bed-0cbc-3704-85c7-8062a0068a7a");
+	
+			var item = {"itemType":"journalArticle", "PMID":PMID};
+			translate.setSearch(item);
+	
+			// don't save when item is done
+			translate.setHandler("itemDone", function(translate, item) {
+				item.repository = "CrossRef";
+				items[PMID] = item;
+				selectArray[PMID] = item.title;
+			});
+	
+			translate.setHandler("done", function(translate) {
+				_numPMIDs--;
+				if(_numPMIDs <= 0) {
+					completePMIDs(doc);
+				}
+			});
+	
+			// Don't throw on error
+			translate.setHandler("error", function() {});
+	
+			translate.translate();
+		})(doc, PMIDs[i]);	
+	}
+}
 
-		// don't save when item is done
-		translator.setHandler("itemDone", function(obj, item) {
-			items[item.extra] = item;
-			selectArray[item.extra] = item.title;
-		});
+function completePMIDs(doc) {
+	// all PMIDs retrieved now
+	// check to see if there is more than one DOI
+	var numPMIDs = 0;
+	for(var PMID in selectArray) {
+		numPMIDs++;
+		if(numPMIDs == 1) break;
+	}
+	if(numPMIDs == 0) {
+		throw "Could not find PMID";
+	}  else {
+		Zotero.selectItems(selectArray, function(selectedPMIDs) {
+			if(!selectedPMIDs) return true;
 
-		translator.translate();
-
-		// all pmids retrieved now
-		
-		Zotero.selectItems(selectArray, function (selectArray) {
-			if (!selectArray) {
-				return true;
-			}
-			for (var PMID in selectArray) {
+			for(var PMID in selectedPMIDs) {
 				items[PMID].complete();
 			}
 		});
-	});
+	}
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
