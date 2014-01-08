@@ -9,146 +9,80 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-11-13 12:15:19"
+	"lastUpdated": "2014-01-08 00:08:55"
 }
 
-function detectWeb(doc, url) {
+/*
+	Translator
+   Copyright (C) 2014 Sebastian Karcher
 
-	var xpath = '//div[@class="abstract-text"]';
-	Zotero.debug(xpath);
-	if (doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+function detectWeb(doc,url) {
+
+	var xpath='//meta[@name="citation_journal_title"]';
+	if (ZU.xpath(doc, xpath).length > 0) {
 		return "journalArticle";
 	}
+			
+	multxpath = '//div[@class="article-item"]/span[@class="title"]|//div[@class="result"]/h3'
+	
+	if (ZU.xpath(doc, multxpath).length>0){
+		return "multiple";
+	}
+	return false;
 }
 
-function doWeb(doc, url) {
-	var host = doc.location.host;
-	var newItem = new Zotero.Item("journalArticle");
-	newItem.url = doc.location.href;
-	//Zotero.debug(doc.location.href);
-	var items = Object();
-	var header;
-	var contents;
 
-	var titleXPath = '//div[@id="main-text"]/h3';
-	var titleitem = doc.evaluate(titleXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	//Zotero.debug(titleitem);
-	newItem.title = titleitem;
-	
-	//get author from google tags
-	var authors = ZU.xpathText(doc, '//meta[@name="citation_authors"]/@content');
-	if (authors){
-		var author = authors.split(/\s*;\s*/)
-		for (var i in author){
-			Z.debug(author)
-			newItem.creators.push(Zotero.Utilities.cleanAuthor(author[i], 'author', true));
+function doWeb(doc,url)
+{
+	if (detectWeb(doc, url) == "multiple") {
+		var hits = {};
+		var urls = [];
+		resultxpath = '//div[@class="article-item"]/span[@class="title"]/a|//div[@class="result"]/h3/a'
+		var results = ZU.xpath(doc, resultxpath);
+		for (var i in results) {
+			hits[results[i].href] = results[i].textContent;
 		}
-	}
-	
-	else{
-		//leaving the old code here in case it's still needed
-		var authorXPath = '//div[@class="abs-page-text-bold"]/span';
-		var authoritem = doc.evaluate(authorXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/^\s*|\s*$/g, '');
-		if (authoritem.search(/\sand\s/) == -1) {
-			var authoritem2 = "";
-			for (var authornamescount in authoritem.split(/\s/)) {
-				authoritem2 = authoritem2 + " " + authoritem.split(/\s/)[authornamescount][0] + authoritem.split(/\s/)[authornamescount].substring(1).toLowerCase();
+		Z.selectItems(hits, function(items) {
+			if (items == null) return true;
+			for (var j in items) {
+				urls.push(j);
 			}
-			newItem.creators.push(Zotero.Utilities.cleanAuthor(authoritem2, 'author'));
-		} else {
-			var authors = authoritem.split(/\sand\s/i);
-			for (var authorcount in authors) {
-				var author = "";
-				for (var authornames in authors[authorcount].split(/\s/)) {
-					author = author + " " + authors[authorcount].split(/\s/)[authornames][0] + authors[authorcount].split(/\s/)[authornames].substring(1).toLowerCase();
-				}
-				newItem.creators.push(Zotero.Utilities.cleanAuthor(author, 'author'));
-			}
-		}
-	}
-	var abstractXPath = '//div[@class="abstract-text"]/p';
-	var abstractitem = doc.evaluate(abstractXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	newItem.abstractNote = abstractitem;
-
-	var journalXPath = '//div[@id="main-image"]/img';
-	var journalitem = doc.evaluate(journalXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()["alt"];
-	newItem.publicationTitle = journalitem;
-
-	var journalabbXPath = '//div[@class="abs-page-text"]/a';
-	var journalabbitem = doc.evaluate(journalabbXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	newItem.journalAbbreviation = journalabbitem;
-
-	var idXPath = '//div[@id="identifier"]/p';
-	var idresult = doc.evaluate(idXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().innerHTML;
-	var idrows = idresult.split('<br>');
-	var idrow, pieces;
-	var identifiers = [];
-	newItem.extra = "";
-	for each(idrow in idrows) {
-		pieces = idrow.match(/\s*([^:]+)\s*:\s*(.+)/);
-		if (pieces && pieces[1] && pieces[2]) {
-			switch (pieces[1]) {
-			case "Digital Object Identifier":
-				newItem.DOI = pieces[2].match(/^\s*doi:(.*)/)[1];
-				break;
-			case "Mathematical Reviews number (MathSciNet)":
-			case "Zentralblatt MATH identifier":
-				identifiers.push(pieces[1] + ": " + pieces[2].match(/>(.*?)</)[1]);
-				break;
-			case "Permanent link to this document":
-				newItem.url = pieces[2];
-				break;
-			default:
-				Zotero.debug("Discarding identifier: " + pieces[1] + ": " + pieces[2]);
-				break;
-			}
-			pieces = null;
-		}
-		newItem.extra = identifiers.join("; ");
-	}
-
-	var volumeetcXPath = '//div[@class="abs-page-text"]/text()';
-	//var volumeetcitem = doc.evaluate(volumeetcXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().childNodes[2].textContent;
-	var volumeetcitem = doc.evaluate(volumeetcXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	//Zotero.debug("volumeetcitem="+volumeetcitem);
-	var volumeetcitemarray = volumeetcitem.replace(/\s+/g, " ").split(/\s/);
-	if (volumeetcitemarray[3].search(/Number/) == -1 && volumeetcitemarray[3].search(/Issue/) == -1) {
-		var volumeitem = volumeetcitemarray[2].match(/\d+/)[0];
-		var yearitem = volumeetcitemarray[3].match(/\d+/)[0];
-		var pagesitem = volumeetcitemarray[4].match(/[^\.]+/)[0];
-		newItem.volume = volumeitem;
-		newItem.pages = pagesitem;
-		newItem.date = yearitem;
-	} else {
-		var volumeitem = volumeetcitemarray[2].match(/\d+/)[0];
-		var issueitem = volumeetcitemarray[4].match(/\d+/)[0];
-		var yearitem = volumeetcitemarray[5].match(/\d+/)[0];
-		var pagesitem = volumeetcitemarray[6].match(/[^\.]+/)[0];
-		newItem.volume = volumeitem;
-		newItem.pages = pagesitem;
-		newItem.issue = issueitem;
-		newItem.date = yearitem;
-	}
-
-	// From META tags
-	newItem.publisher = doc.evaluate('//meta[@name="citation_publisher"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().content;
-	newItem.date = doc.evaluate('//meta[@name="citation_date"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().content;
-	newItem.ISSN = doc.evaluate('//meta[@name="citation_issn"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().content;
-	newItem.language = doc.evaluate('//meta[@name="citation_language"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().content;
-
-	var pdfurlxpath = '//meta[@name="citation_pdf_url"]';
-	if (doc.evaluate(pdfurlxpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		var pdfurl = doc.evaluate(pdfurlxpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().content;
-		newItem.attachments.push({
-			url: pdfurl,
-			title: "Euclid Project PDF",
-			mimeType: "application/pdf"
+			ZU.processDocuments(urls, doWeb);
 		});
+	} else {
+		var abstract = ZU.xpathText(doc, '//div[@class="abstract-text"]');
+		var DOI = ZU.xpathText(doc, '//div[@id="info"]/p[strong[contains(text(), "Digital Object")]]/text()');
+		var identifiers = ZU.xpathText(doc, '//div[@id="info"]/p[strong[contains(text(), "Mathematical Reviews number") or contains(text(), "Zentralblatt MATH")]]');	
+		var journalAbbr = ZU.xpathText(doc, '//ul[@class="citation"]/li[1]/a')
+		var translator = Zotero.loadTranslator('web');
+		//use Embedded Metadata
+		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+		translator.setDocument(doc);
+		translator.setHandler('itemDone', function(obj, item) {
+			if (abstract) item.abstractNote = abstract.replace(/\s\s+/g, " ").replace(/\n/g, " ");
+			if (DOI) item.DOI = DOI.replace(/doi:\s*/, "");
+			item.journalAbbreviation = journalAbbr;
+			item.libraryCatalog = "Project Euclid"
+			item.extra = identifiers;
+			item.complete();
+		});
+		translator.translate();
 	}
-
-	newItem.complete();
-}
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -168,27 +102,29 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://projecteuclid.org/DPubS/Repository/1.0/Disseminate?view=body&id=pdf_1&handle=euclid.jsl/1309952534",
-						"title": "Euclid Project PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
 					}
 				],
-				"url": "http://projecteuclid.org/euclid.jsl/1309952534",
 				"title": "Low5 Boolean subalgebras and computable copies",
-				"abstractNote": "It is known that the spectrum of a Boolean algebra\ncannot contain a low4 degree unless it also contains\nthe degree 0; it remains open\nwhether the same holds for low5 degrees.\nWe address the question differently, by considering\nBoolean subalgebras of the computable atomless\nBoolean algebra ℬ.  For such subalgebras 𝒜,\nwe show that it is possible for the spectrum of\nthe unary relation 𝒜 on ℬ to contain\na low5 degree without containing 0.",
-				"publicationTitle": "Journal of Symbolic Logic",
-				"journalAbbreviation": "J. Symbolic Logic",
-				"DOI": "10.2178/jsl/1309952534",
-				"volume": "76",
-				"pages": "1061-1074",
-				"issue": "3",
 				"date": "2011-09",
+				"publicationTitle": "Journal of Symbolic Logic",
+				"volume": "76",
+				"issue": "3",
 				"publisher": "Association for Symbolic Logic",
-				"ISSN": "0022-4812",
 				"language": "EN",
-				"libraryCatalog": "Euclid",
-				"extra": "Mathematical Reviews number (MathSciNet): MR2849259",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"pages": "1061-1074",
+				"ISSN": "0022-4812, 1943-5886",
+				"url": "http://projecteuclid.org/euclid.jsl/1309952534",
+				"abstractNote": "It is known that the spectrum of a Boolean algebra cannot contain a low4 degree unless it also contains the degree 0; it remains open whether the same holds for low5 degrees. We address the question differently, by considering Boolean subalgebras of the computable atomless Boolean algebra ℬ. For such subalgebras 𝒜, we show that it is possible for the spectrum of the unary relation 𝒜 on ℬ to contain a low5 degree without containing 0.",
+				"libraryCatalog": "Project Euclid",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"DOI": "10.2178/jsl/1309952534",
+				"journalAbbreviation": "J. Symbolic Logic",
+				"extra": "Mathematical Reviews number (MathSciNet) MR 2849259"
 			}
 		]
 	},
@@ -231,32 +167,50 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [],
+				"tags": [
+					"Magnetoencephalography",
+					"source localization",
+					"Kalman filter",
+					"fixed interval smoother"
+				],
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Euclid Project PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
 					}
 				],
-				"url": "http://projecteuclid.org/euclid.aoas/1310562719",
 				"title": "State-space solutions to the dynamic magnetoencephalography inverse problem using high performance computing",
-				"abstractNote": "Determining the magnitude and location of neural sources within the brain that are responsible for generating magnetoencephalography (MEG) signals measured on the surface of the head is a challenging problem in functional neuroimaging. The number of potential sources within the brain exceeds by an order of magnitude the number of recording sites. As a consequence, the estimates for the magnitude and location of the neural sources will be ill-conditioned because of the underdetermined nature of the problem. One well-known technique designed to address this imbalance is the minimum norm estimator (MNE). This approach imposes an L2 regularization constraint that serves to stabilize and condition the source parameter estimates. However, these classes of regularizer are static in time and do not consider the temporal constraints inherent to the biophysics of the MEG experiment. In this paper we propose a dynamic state-space model that accounts for both spatial and temporal correlations within and across candidate intracortical sources. In our model, the observation model is derived from the steady-state solution to Maxwell’s equations while the latent model representing neural dynamics is given by a random walk process. We show that the Kalman filter (KF) and the Kalman smoother [also known as the fixed-interval smoother (FIS)] may be used to solve the ensuing high-dimensional state-estimation problem. Using a well-known relationship between Bayesian estimation and Kalman filtering, we show that the MNE estimates carry a significant zero bias. Calculating these high-dimensional state estimates is a computationally challenging task that requires High Performance Computing (HPC) resources. To this end, we employ the NSF Teragrid Supercomputing Network to compute the source estimates. We demonstrate improvement in performance of the state-space algorithm relative to MNE in analyses of simulated and actual somatosensory MEG experiments. Our findings establish the benefits of high-dimensional state-space modeling as an effective means to solve the MEG source localization problem.",
-				"publicationTitle": "The Annals of Applied Statistics",
-				"journalAbbreviation": "Ann. Appl. Stat.",
-				"extra": "Mathematical Reviews number (MathSciNet): MR2849772; Zentralblatt MATH identifier: 1223.62160",
-				"DOI": "10.1214/11-AOAS483",
-				"volume": "5",
-				"pages": "1207-1228",
-				"issue": "2",
 				"date": "2011-06",
+				"publicationTitle": "The Annals of Applied Statistics",
+				"volume": "5",
+				"issue": "2B",
 				"publisher": "Institute of Mathematical Statistics",
-				"ISSN": "1932-6157",
 				"language": "EN",
-				"libraryCatalog": "Euclid",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"pages": "1207-1228",
+				"ISSN": "1932-6157, 1941-7330",
+				"url": "http://projecteuclid.org/euclid.aoas/1310562719",
+				"abstractNote": "Determining the magnitude and location of neural sources within the brain that are responsible for generating magnetoencephalography (MEG) signals measured on the surface of the head is a challenging problem in functional neuroimaging. The number of potential sources within the brain exceeds by an order of magnitude the number of recording sites. As a consequence, the estimates for the magnitude and location of the neural sources will be ill-conditioned because of the underdetermined nature of the problem. One well-known technique designed to address this imbalance is the minimum norm estimator (MNE). This approach imposes an L2 regularization constraint that serves to stabilize and condition the source parameter estimates. However, these classes of regularizer are static in time and do not consider the temporal constraints inherent to the biophysics of the MEG experiment. In this paper we propose a dynamic state-space model that accounts for both spatial and temporal correlations within and across candidate intracortical sources. In our model, the observation model is derived from the steady-state solution to Maxwell’s equations while the latent model representing neural dynamics is given by a random walk process. We show that the Kalman filter (KF) and the Kalman smoother [also known as the fixed-interval smoother (FIS)] may be used to solve the ensuing high-dimensional state-estimation problem. Using a well-known relationship between Bayesian estimation and Kalman filtering, we show that the MNE estimates carry a significant zero bias. Calculating these high-dimensional state estimates is a computationally challenging task that requires High Performance Computing (HPC) resources. To this end, we employ the NSF Teragrid Supercomputing Network to compute the source estimates. We demonstrate improvement in performance of the state-space algorithm relative to MNE in analyses of simulated and actual somatosensory MEG experiments. Our findings establish the benefits of high-dimensional state-space modeling as an effective means to solve the MEG source localization problem.",
+				"libraryCatalog": "Project Euclid",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"DOI": "10.1214/11-AOAS483",
+				"journalAbbreviation": "Ann. Appl. Stat.",
+				"extra": "Mathematical Reviews number (MathSciNet) MR 2849772, Zentralblatt MATH identifier1223.62160"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://projecteuclid.org/euclid.aoas/1380804792",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://projecteuclid.org/search_result?type=index&q.s=Karcher&resultPage=1",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
