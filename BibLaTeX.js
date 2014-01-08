@@ -14,7 +14,7 @@
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
-	"lastUpdated": "2014-01-04 21:54"
+	"lastUpdated": "2014-01-08 27:55"
 }
 
 
@@ -457,13 +457,13 @@ var citeKeyConversions = {
 				var noEscape = false;
 
 				for each(var creator in item.creators) {
-					//var creatorString = creator.lastName;
+					var creatorString = creator.lastName;
 
 					if (creator.firstName && creator.lastName) {
 						creatorString = creator.lastName + ", " + creator.firstName;
 						//below to preserve possible corporate creators (biblatex 1.4a manual 2.3.3)
 					} else if (creator.fieldMode == true) { // fieldMode true, assume corporate author
-						creatorString = "{" + creator.lastName + "}";
+						creatorString = "{" + creator.creatorString + "}";
 						noEscape = true;
 					}
 
