@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-12-10 17:59:18"
+	"lastUpdated": "2014-01-09 02:51:37"
 }
 
 /*
@@ -52,10 +52,8 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 	var searchResults = getSearchResults(doc);
 	if(searchResults.length) {
-		var items = {};
-		var itemIDs = {};
-		var title, link;
-		var linkXPaths = searchResults.linkXPaths;
+		var items = {}, itemIDs = {}, title, link,
+			linkXPaths = searchResults.linkXPaths;
 		for(var i=0, n=searchResults.length; i<n; i++) {
 			title = ZU.xpathText(searchResults[i], searchResults.titleXPath);
 			for(var j=0, m=linkXPaths.length; j<m; j++) {
@@ -68,7 +66,7 @@ function doWeb(doc, url) {
 			if(!link || !title || !(title = ZU.trimInternal(title))) continue;
 			
 			items[link.href] = title;
-			itemIDs[link.href] = i;
+			itemIDs[link.href] = {id: i, docID: getDocID(link.href)};
 		}
 		
 		Z.selectItems(items, function(selectedItems) {
@@ -76,68 +74,87 @@ function doWeb(doc, url) {
 			
 			var urls = [];
 			for(var i in selectedItems) {
-				urls.push({url: i, id: itemIDs[i]});
+				urls.push({url: i, id: itemIDs[i].id, docID: itemIDs[i].docID});
 			}
 			fetchPNX(urls);
 		})
 	} else {
-		fetchPNX([{url: url, id: 0}]);
+		fetchPNX([{url: url, id: 0, docID: getDocID(url)}]);
 	}
+}
+
+function getDocID(url) {
+	var id = url.match(/\bdoc(?:Id)?=([^&]+)/i);
+	if(id) return id[1];
 }
 
 //keeps track of which URL format works for retrieving PNX record
 //and applies the correct transformation function
-function getPNXUrl(url, id) {
-	var fun = getPNXUrl.convertUrl[getPNXUrl.currentFunction];
-	if(!fun) return;
-
-	return fun(url, id);
-}
-getPNXUrl.convertUrl = [
-	//showPNX.js
-	//from: http://primo.bib.uni-mannheim.de/primo_library/libweb/action/search.do?...
-	//to:   http://primo.bib.uni-mannheim.de/primo_library/libweb/showPNX.jsp?id=
-	function(url, id) {
-		url = url.match(/(https?:\/\/[^?#]+\/)[^?#]+\/[^\/]*(?:[?#]|$)/);
+var PNXUrlGenerator = new function() {
+	var functions = [
+		//showPNX.js
+		//using docIDs instead of IDs tied to a session
+		//e.g. http://searchit.princeton.edu/primo_library/libweb/showPNX.jsp?id=PRN_VOYAGER7343340
+		function(urlObj) {
+			return getUrlWithId(urlObj.url, urlObj.docID);
+		},
+		//fall back to IDs
+		//from: http://primo.bib.uni-mannheim.de/primo_library/libweb/action/search.do?...
+		//to:   http://primo.bib.uni-mannheim.de/primo_library/libweb/showPNX.jsp?id=
+		function(urlObj) {
+			return getUrlWithId(urlObj.url, urlObj.id);
+		},
+		//simply add &showPnx=true
+		function(urlObj) {
+			var url = urlObj.url.split('#');
+			if(url[0].indexOf('?') == -1) {
+				url[0] += '?';
+			} else {
+				url[0] += '&';
+			}
+			return url[0] + 'showPnx=true';
+		}
+	];
+	
+	function getUrlWithId(url, id) {
+		var url = url.match(/(https?:\/\/[^?#]+\/)[^?#]+\/[^\/]*(?:[?#]|$)/);
 		if(!url) return;
 		return url[1] + 'showPNX.jsp?id=' + id;
-	},
-	//simply add &showPnx=true
-	function(url) {
-		url = url.split('#');
-		if(url[0].indexOf('?') == -1) {
-			url[0] += '?';
-		} else {
-			url[0] += '&';
+	}
+	
+	this.currentFunction = 0;
+	this.confirmed = false;
+	
+	this.getUrl = function(data) {
+		var fun = functions[this.currentFunction];
+		if(!fun) return;
+		
+		return fun(data);
+	};
+	
+	this.nextFunction = function() {
+		if(!this.confirmed && this.currentFunction < functions.length) {
+			Z.debug("Function " + this.currentFunction + " did not work.");
+			this.currentFunction++;
+			return true;
 		}
-		return url[0] + 'showPnx=true';
-	}
-];
-getPNXUrl.currentFunction = 0;
-getPNXUrl.confirmed = false;
-getPNXUrl.nextFunction = function() {
-	if(!getPNXUrl.confirmed && getPNXUrl.currentFunction < getPNXUrl.convertUrl.length) {
-		Z.debug("Function " + getPNXUrl.currentFunction + " did not work.");
-		getPNXUrl.currentFunction++;
-		return true;
-	}
-}
+	};
+};
 
 //retrieve PNX records for given items sequentially
 function fetchPNX(itemData) {
 	if(!itemData.length) return; //do this until we run out of URLs
 	
 	var data = itemData.shift();
-	var url = getPNXUrl(data.url, data.id); //format URL if still possible
-	
+	var url = PNXUrlGenerator.getUrl(data); //format URL if still possible
 	if(!url) {
-		if(getPNXUrl.nextFunction()) {
+		if(PNXUrlGenerator.nextFunction()) {
 			itemData.unshift(data);
-		} else if(!getPNXUrl.confirmed){
+		} else if(!PNXUrlGenerator.confirmed){
 			//in case we can't find PNX for a particular item,
 			//go to the next and start looking from begining
 			Z.debug("Could not determine PNX url from " + data.url);
-			getPNXUrl.currentFunction = 0;
+			PNXUrlGenerator.currentFunction = 0;
 		}
 		
 		fetchPNX(itemData);
@@ -145,22 +162,23 @@ function fetchPNX(itemData) {
 	}
 	
 	var gotPNX = false;
+	Z.debug("Trying " + url);
 	ZU.doGet(url,
 		function(text) {
 			text = text.trim();
-			if(text.substr(0,5) != '<?xml') {
+			if(text.substr(0,5) != '<?xml' || text.search(/<error\b/i) !== -1) {
 				//try a different PNX url
 				gotPNX = false;
 				return;
 			} else {
 				gotPNX = true;
-				getPNXUrl.confirmed = true;
+				PNXUrlGenerator.confirmed = true;
 			}
 			
 			importPNX(text);
 		},
 		function() {
-			if(!gotPNX && getPNXUrl.nextFunction()) {
+			if(!gotPNX && PNXUrlGenerator.nextFunction()) {
 				//if url function not confirmed, try another one on the same URL
 				//otherwise, we move on
 				itemData.unshift(data);
@@ -358,6 +376,36 @@ var testCases = [
 				"ISBN": "3926738014",
 				"libraryCatalog": "Primo",
 				"shortTitle": "In Zweifelsfällen entscheidet die Wahrheit"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://searchit.princeton.edu/primo_library/libweb/action/dlDisplay.do?docId=PRN_VOYAGER2778598&vid=PRINCETON&institution=PRN",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Great Britain. Foreign Office",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"notes": [],
+				"tags": [
+					"China Foreign relations Great Britain.",
+					"China Religion.",
+					"Great Britain Foreign relations China.",
+					"Missions China."
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"language": "eng",
+				"libraryCatalog": "Primo",
+				"title": "China and foreign missionaries.",
+				"publisher": "London 1860-1912",
+				"date": "1860"
 			}
 		]
 	}
