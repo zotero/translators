@@ -2,14 +2,14 @@
 	"translatorID": "6614a99-479a-4524-8e30-686e4d66663e",
 	"label": "Nature Publishing Group",
 	"creator": "Aurimas Vinckevicius",
-	"target": "https?://(?:[^/]+\\.)?(?:nature\\.com|palgrave-journals\\.com)(?::[\\d]+)?(?=/)[^?]*(?:/(?:journal|archive|research|topten|search|full|abs)/|/current_issue\\.htm|/most\\.htm)",
+	"target": "^https?://(?:[^/]+\\.)?(?:nature\\.com|palgrave-journals\\.com)(?::[\\d]+)?(?=/)[^?]*(?:/(?:journal|archive|research|topten|search|full|abs)/|/current_issue\\.htm|/most\\.htm)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-01-03 14:00:00"
+	"lastUpdated": "2014-01-11 14:00:00"
 }
 
 /**
