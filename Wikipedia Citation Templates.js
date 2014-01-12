@@ -8,9 +8,9 @@
 	"maxVersion":"",
 	"priority":100,
 	"displayOptions":{"exportCharset":"UTF-8"},
-	"browserSupport":"gcsn",
+	"browserSupport":"gcs",
 	"inRepository":true,
-	"lastUpdated":"2012-02-06 18:00:26"
+	"lastUpdated":"2013-01-12 8:00:26"
 }
 
 var fieldMap = {
@@ -124,10 +124,10 @@ function doExport() {
 				}
 			} else if(type == "Cite email") {
 				// get rid of non-authors
-				for(var i in item.creators) {
+				for(var i=0; i<item.creators.length; i++) {
 					if(item.creators[i].creatorType != "author") {
 						// drop contributors
-						item.creators.splice(i, 1);
+						item.creators.splice(i--, 1);
 					}
 				}
 				
@@ -141,14 +141,14 @@ function doExport() {
 				// check for an interviewer or translator
 				var interviewers = [];
 				var translators = [];
-				for(var i in item.creators) {
+				for(var i=0; i<item.creators.length; i++) {
 					if(item.creators[i].creatorType == "translator") {
-						translators = translators.concat(item.creators.splice(i, 1));
+						translators.push(item.creators.splice(i--,1)[0]);
 					} else if(item.creators[i].creatorType == "interviewer") {
-						interviewers = interviewers.concat(item.creators.splice(i, 1));
+						interviewers.push(item.creators.splice(i--,1)[0]);
 					} else if(item.creators[i].creatorType == "contributor") {
 						// drop contributors
-						item.creators.splice(i, 1);
+						item.creators.splice(i--,1);
 					}
 				}
 				
@@ -186,16 +186,15 @@ function doExport() {
 				// check for an editor or translator
 				var editors = [];
 				var translators = [];
-				for(var i = 0; i < item.creators.length; i++) {
+				for(var i=0; i < item.creators.length; i++) {
 					var creator = item.creators[i];
 					if(creator.creatorType == "translator") {
-						translators = translators.concat(item.creators.splice(i, 1));
+						translators.push(item.creators.splice(i--,1)[0]);
 					} else if(creator.creatorType == "editor") {
-						editors = editors.concat(item.creators.splice(i, 1));
+						editors.push(item.creators.splice(i--,1)[0]);
 					} else if(creator.creatorType == "contributor") {
 						// drop contributors
-						item.creators.splice(i, 1);
-						i--;
+						item.creators.splice(i--, 1);
 					}
 				}
 				
@@ -324,6 +323,38 @@ function doExport() {
 				properties.chapterurl = item.url;
 			} else {
 				properties.url = item.url;
+			}
+		}
+		
+		if(properties.pages) {
+			properties.pages = properties.pages.replace(/[^0-9]+/,"–")//separate page numbers with en dash
+		}
+		
+		if(item.extra) {
+			// automatically fill in PMCID, PMID, and JSTOR fields
+			var extraFields={
+				pmid: /^PMID\s*\:\s*([0-9]+)/m,
+				pmc: /^PMCID\s*\:\s*((?:PMC)?[0-9]+)/m
+			};
+			
+			for(var f in extraFields){
+				var match = item.extra.match(extraFields[f]);
+				if(match) properties[f] = match[1];
+			}
+		}
+		
+		if(item.url) {
+			//try to extract missing fields from URL
+			var libraryURLs={ 
+				pmid:/www\.ncbi\.nlm\.nih\.gov\/pubmed\/([0-9]+)/i,
+				pmc:/www\.ncbi\.nlm\.nih\.gov\/pmc\/articles\/((?:PMC)?[0-9]+)/i,
+				jstor:/www\.jstor\.org\/stable\/([^?#]+)/i
+			};
+			
+			for(var f in libraryURLs){
+				if(properties[f]) continue; //don't overwrite from extra field
+				var match = item.url.match(libraryURLs[f]);
+				if(match) properties[f] = match[1];
 			}
 		}
 		
