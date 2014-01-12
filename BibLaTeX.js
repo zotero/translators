@@ -463,7 +463,7 @@ var citeKeyConversions = {
 						creatorString = creator.lastName + ", " + creator.firstName;
 						//below to preserve possible corporate creators (biblatex 1.4a manual 2.3.3)
 					} else if (creator.fieldMode == true) { // fieldMode true, assume corporate author
-						creatorString = "{" + creator.creatorString + "}";
+						creatorString = "{" + creatorString + "}";
 						noEscape = true;
 					}
 
