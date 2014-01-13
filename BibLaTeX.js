@@ -440,7 +440,7 @@ var citeKeyConversions = {
 			//presentations have a meetingName field which we want to
 			//map to note
 			if (item.meetingName) {
-				write.Field("note", item.meetingName);
+				writeField("note", item.meetingName);
 				noteused = true;
 			}
 
