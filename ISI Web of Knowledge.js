@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 5,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-11-20 13:47:41"
+	"lastUpdated": "2014-01-15 08:59:36"
 }
 
 function detectWeb(doc, url) {
@@ -23,7 +23,7 @@ function detectWeb(doc, url) {
 }
 
 function getRecords(doc) {
-	return ZU.xpath(doc, '//span[@id="records_chunks"]//tr[starts-with(@id,"RECORD_")]');
+	return ZU.xpath(doc, '//span[@id="records_chunks"]//div[starts-with(@id,"RECORD_")]');
 }
 
 function getSingleItemId(doc) {
@@ -41,7 +41,7 @@ function doWeb(doc, url) {
 		var recordID, title;
 		for(var i=0, n=records.length; i<n; i++) {
 			recordID = ZU.xpathText(records[i], './/input[@name="marked_list_candidates"]/@value');
-			title = ZU.xpathText(records[i], '(./td[@class="summary_data"]//a)[1]');
+			title = ZU.xpathText(records[i], '(.//div[@class="search-results-content"]//a)[1]');
 			if(!title || !recordID) continue;
 			
 			items[recordID] = title.trim();
