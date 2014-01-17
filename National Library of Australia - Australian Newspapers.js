@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-01-30 22:39:18"
+	"lastUpdated": "2014-01-16 22:39:18"
 }
 
 /*
@@ -60,18 +60,16 @@ function doWeb(doc, url) {
 		}
 		Zotero.selectItems(items, function(items) {
 		    if(!items) {
-			Zotero.done();
 			return true;
 		    }
                     for (var i in items) {
 			articles.push(i);
                     }
-                    Zotero.Utilities.processDocuments(articles, scrape, function(){Zotero.done();});
+                    Zotero.Utilities.processDocuments(articles, scrape);
                 });
 	} else {
-            Zotero.Utilities.processDocuments([url], scrape, function(){Zotero.done();});
+            Zotero.Utilities.processDocuments([url], scrape);
 	}
-	Zotero.wait();
 }
 
 function scrape(doc) {
@@ -105,8 +103,9 @@ function scrape(doc) {
 	while (nextLine = OCRLines.iterateNext()) {
 		OCRText = OCRText + nextLine.textContent + '\n';
 	}
-	if (OCRText != '') {
-		newItem.abstractNote = OCRText;
+	if (OCRText.trim()) {
+		//PDFs are OCR'ed, but are difficult to read, so we attach this as note
+		newItem.notes.push({note: OCRText.trim()});
 	}
 	/* Uncomment this section if you want to save jpgs of the article (the pdfs are generally easier to work with).
 	// Change the number at the end of the string to alter zoom factor - '/3?print=n'
