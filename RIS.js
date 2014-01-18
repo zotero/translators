@@ -14,11 +14,10 @@
 		"exportNotes": true,
 		"exportFileData": false
 	},
-	"configOptions":{"getCollections": "true"},
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-01-18 09:12:06"
+	"lastUpdated": "2014-01-18 09:43:44"
 }
 
 function detectImport() {
@@ -313,8 +312,7 @@ var fieldMap = {
 		documentNumber:["hearing"],
 		applicationNumber:["patent"],
 		publicLawNumber:["statute"],
-		episodeNumber:["podcast", "radioBroadcast", "tvBroadcast"],
-		"__exclude": ["webpage"]
+		episodeNumber:["podcast", "radioBroadcast", "tvBroadcast"]
 	},
 	M3: {
 		manuscriptType:["manuscript"],
@@ -414,6 +412,7 @@ var degenerateImportFieldMap = {
 	LB: "unsupported/Label",
 	M1: {
 		"__default":"extra",
+		issue: ["journalArticle"], //EndNote hack
 		numberOfVolumes: ["bookSection"],	//EndNote exports here instead of IS
 		accessDate: ["webpage"]		//this is access date when coming from EndNote
 	},
@@ -1872,15 +1871,16 @@ var testCases = [
 				"attachments": [],
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
 				"extra": "Publication Number",
-				"shortTitle": "Short Title",
-				"url": "URL",
-				"date": "0000 Year Date",
 				"publisher": "Publisher",
-				"title": "Title"
+				"shortTitle": "Short Title",
+				"title": "Title",
+				"url": "URL",
+				"publicationTitle": "Periodical"
 			},
 			{
 				"itemType": "document",
@@ -1927,15 +1927,17 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
 				"extra": "Text Number",
-				"shortTitle": "Short Title",
-				"url": "URL",
-				"date": "0000 Year Date",
 				"publisher": "Publisher",
-				"title": "Title"
+				"shortTitle": "Short Title",
+				"title": "Title",
+				"url": "URL",
+				"accessDate": "0000 Access",
+				"publicationTitle": "Publication Title"
 			},
 			{
 				"itemType": "artwork",
@@ -1968,15 +1970,16 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"artworkSize": "Size/Length",
 				"callNumber": "Call Number",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
 				"extra": "Size",
 				"artworkMedium": "Type of Work",
 				"shortTitle": "Short Title",
+				"title": "Title",
 				"url": "URL",
-				"date": "0000 Year Date",
-				"title": "Title"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "film",
@@ -2019,15 +2022,16 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"videoRecordingFormat": "Format",
 				"callNumber": "Call Number",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
 				"extra": "Number",
 				"distributor": "Publisher",
 				"shortTitle": "Short Title",
+				"title": "Title",
 				"url": "URL",
-				"date": "0000 Year Date",
-				"title": "Title"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "bill",
@@ -2057,6 +2061,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"abstractNote": "Abstract",
+				"date": "0000 Year Date",
 				"session": "Session",
 				"language": "Language",
 				"billNumber": "Bill Number",
@@ -2066,10 +2071,10 @@ var testCases = [
 				"shortTitle": "Short Title",
 				"code": "Code",
 				"legislativeBody": "Legislative Body",
+				"title": "Title",
 				"url": "URL",
 				"codeVolume": "Code Volume",
-				"date": "0000 Year Date",
-				"title": "Title"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "blogPost",
@@ -2104,13 +2109,14 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"abstractNote": "Abstract",
+				"date": "0000 Year Last",
 				"language": "Language",
 				"websiteType": "Type of Medium",
 				"shortTitle": "Short Title",
 				"blogTitle": "Title of WebLog",
+				"title": "Title of Entry",
 				"url": "URL",
-				"date": "0000 Year Last",
-				"title": "Title of Entry"
+				"accessDate": "0000 Number"
 			},
 			{
 				"itemType": "book",
@@ -2163,21 +2169,22 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
 				"place": "Place Published",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"edition": "Edition",
 				"language": "Language",
 				"seriesNumber": "Series Volume",
 				"numberOfVolumes": "Number of Volumes",
+				"publisher": "Publisher",
 				"ISBN": "ISBN",
 				"numPages": "Number of Pages",
 				"shortTitle": "Short Title",
 				"series": "Series Title",
-				"url": "URL",
-				"date": "0000 Year Date",
-				"publisher": "Publisher",
 				"title": "Title",
-				"volume": "Volume"
+				"url": "URL",
+				"volume": "Volume",
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "bookSection",
@@ -2235,16 +2242,17 @@ var testCases = [
 				"edition": "Edition",
 				"language": "Language",
 				"numberOfVolumes": "Number of Volumes",
+				"publisher": "Publisher",
 				"ISBN": "ISBN",
+				"pages": "Pages",
 				"shortTitle": "Short Title",
 				"seriesNumber": "Series Volume",
 				"bookTitle": "Book Title",
 				"series": "Series Title",
-				"url": "URL",
-				"publisher": "Publisher",
-				"pages": "Pages",
 				"title": "Title",
+				"url": "URL",
 				"volume": "Volume",
+				"accessDate": "0000 Access",
 				"date": "0000 Year"
 			},
 			{
@@ -2283,9 +2291,10 @@ var testCases = [
 				"firstPage": "First Page",
 				"shortTitle": "Abbreviated Case Name",
 				"docketNumber": "Docket Number",
-				"caseName": "Abbreviated Case Name",
+				"caseName": "Case Name",
 				"url": "URL",
-				"reporterVolume": "Reporter Volume"
+				"reporterVolume": "Reporter Volume",
+				"title": "Abbreviated Case Name"
 			},
 			{
 				"itemType": "magazineArticle",
@@ -2327,18 +2336,19 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
 				"extra": "Series Volume",
 				"ISSN": "ISBN",
-				"shortTitle": "Short Title",
-				"url": "URL",
-				"date": "0000 Year Date",
 				"pages": "Pages",
+				"shortTitle": "Short Title",
 				"publicationTitle": "Series Title",
 				"title": "Title",
-				"volume": "Volume"
+				"url": "URL",
+				"volume": "Volume",
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "artwork",
@@ -2370,14 +2380,16 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
 				"extra": "Number",
 				"artworkMedium": "Type of Image",
+				"title": "Title",
 				"url": "URL",
-				"date": "0000 Year Date",
-				"title": "Title"
+				"accessDate": "0000 Access",
+				"publicationTitle": "Image Source Program"
 			},
 			{
 				"itemType": "book",
@@ -2426,14 +2438,15 @@ var testCases = [
 				"language": "Language",
 				"seriesNumber": "Series Volume",
 				"numberOfVolumes": "Number of Volumes",
+				"publisher": "Publisher",
 				"ISBN": "ISSN/ISBN",
 				"numPages": "Number of Pages",
 				"shortTitle": "Short Title",
 				"series": "Series Title",
-				"url": "URL",
-				"publisher": "Publisher",
 				"title": "Title",
+				"url": "URL",
 				"volume": "Volume",
+				"accessDate": "0000 Access",
 				"date": "0000 Year"
 			},
 			{
@@ -2475,8 +2488,9 @@ var testCases = [
 				"ISBN": "ISBN",
 				"shortTitle": "Short Title",
 				"seriesTitle": "Series Title",
-				"url": "URL",
 				"title": "Title",
+				"url": "URL",
+				"accessDate": "0000 Access",
 				"date": "0000 Year"
 			},
 			{
@@ -2519,17 +2533,18 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
 				"place": "Place Published",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
 				"extra": "Issue",
-				"conferenceName": "Conference Name",
-				"url": "URL",
-				"date": "0000 Year Date",
 				"publisher": "Publisher",
 				"pages": "Pages",
+				"conferenceName": "Conference Name",
 				"title": "Title",
-				"volume": "Volume"
+				"url": "URL",
+				"volume": "Volume",
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "conferencePaper",
@@ -2583,20 +2598,21 @@ var testCases = [
 				"place": "Place Published",
 				"proceedingsTitle": "Proceedings Title",
 				"callNumber": "Call Number",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
 				"extra": "Issue",
+				"publisher": "Publisher",
 				"ISBN": "ISBN",
+				"pages": "Pages",
 				"shortTitle": "Short Title",
 				"conferenceName": "Conference Name",
 				"series": "Series Title",
-				"url": "URL",
-				"date": "0000 Year Date",
-				"publisher": "Publisher",
-				"pages": "Pages",
 				"title": "Title",
-				"volume": "Volume"
+				"url": "URL",
+				"volume": "Volume",
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "document",
@@ -2638,14 +2654,15 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
-				"shortTitle": "Short Title",
-				"url": "URL",
-				"date": "0000 Year Date",
 				"publisher": "Distributor",
-				"title": "Title"
+				"shortTitle": "Short Title",
+				"title": "Title",
+				"url": "URL",
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "dictionaryEntry",
@@ -2699,14 +2716,15 @@ var testCases = [
 				"language": "Language",
 				"extra": "Number",
 				"numberOfVolumes": "Number of Volumes",
+				"publisher": "Publisher",
 				"ISBN": "ISBN",
+				"pages": "Pages",
 				"shortTitle": "Short Title",
 				"dictionaryTitle": "Dictionary Title",
-				"url": "URL",
-				"publisher": "Publisher",
-				"pages": "Pages",
 				"title": "Title",
+				"url": "URL",
 				"volume": "Volume",
+				"accessDate": "0000 Access",
 				"date": "0000 Year"
 			},
 			{
@@ -2750,21 +2768,22 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
 				"place": "Place Published",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"edition": "Edition",
 				"language": "Language",
 				"seriesNumber": "Series Volume",
 				"numberOfVolumes": "Number of Volumes",
+				"publisher": "Publisher",
 				"ISBN": "ISBN",
 				"numPages": "Number of Pages",
 				"shortTitle": "Short Title",
 				"series": "Series Title",
-				"url": "URL",
-				"date": "0000 Year Date",
-				"publisher": "Publisher",
 				"title": "Title",
-				"volume": "Volume"
+				"url": "URL",
+				"volume": "Volume",
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "journalArticle",
@@ -2800,18 +2819,18 @@ var testCases = [
 				"attachments": [],
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"journalAbbreviation": "Periodical Title",
 				"language": "Language",
-				"extra": "Issue",
+				"issue": "Issue",
 				"ISSN": "ISSN",
-				"shortTitle": "Short Title",
-				"url": "URL",
-				"date": "0000 Year Date",
 				"pages": "Pages",
+				"shortTitle": "Short Title",
 				"publicationTitle": "Periodical Title",
 				"title": "Title",
+				"url": "URL",
 				"volume": "Volume"
 			},
 			{
@@ -2860,18 +2879,18 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
 				"place": "Place Published",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"edition": "Edition",
 				"language": "Language",
 				"numberOfVolumes": "Version",
+				"publisher": "Publisher",
 				"ISBN": "ISBN",
 				"numPages": "Number of Pages",
 				"series": "Secondary Title",
-				"url": "URL",
-				"date": "0000 Year Date",
-				"publisher": "Publisher",
 				"title": "Title",
+				"url": "URL",
 				"volume": "Volume"
 			},
 			{
@@ -2925,21 +2944,22 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
 				"place": "Place Published",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"edition": "Edition",
 				"language": "Language",
 				"numberOfVolumes": "Series Volume",
+				"publisher": "Publisher",
 				"ISBN": "ISSN/ISBN",
+				"pages": "Number of Pages",
 				"shortTitle": "Short Title",
 				"bookTitle": "Book Title",
 				"series": "Series Title",
-				"url": "URL",
-				"date": "0000 Year Date",
-				"publisher": "Publisher",
-				"pages": "Number of Pages",
 				"title": "Title",
-				"volume": "Volume"
+				"url": "URL",
+				"volume": "Volume",
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "encyclopediaArticle",
@@ -2987,20 +3007,21 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
 				"place": "Place Published",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"edition": "Edition",
 				"language": "Language",
 				"numberOfVolumes": "Number of Volumes",
+				"publisher": "Publisher",
 				"ISBN": "ISBN",
+				"pages": "Pages",
 				"shortTitle": "Short Title",
 				"encyclopediaTitle": "Encyclopedia Title",
-				"url": "URL",
-				"date": "0000 Year Date",
-				"publisher": "Publisher",
-				"pages": "Pages",
 				"title": "Title",
-				"volume": "Volume"
+				"url": "URL",
+				"volume": "Volume",
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "document",
@@ -3037,14 +3058,16 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
 				"extra": "Number",
-				"url": "URL",
-				"date": "0000 Year Date",
 				"publisher": "Publisher",
-				"title": "Title"
+				"title": "Title",
+				"url": "URL",
+				"accessDate": "0000 Access",
+				"publicationTitle": "Image Source Program"
 			},
 			{
 				"itemType": "artwork",
@@ -3076,14 +3099,16 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
 				"extra": "Number",
 				"artworkMedium": "Type of Image",
+				"title": "Title",
 				"url": "URL",
-				"date": "0000 Year Date",
-				"title": "Title"
+				"accessDate": "0000 Access",
+				"publicationTitle": "Image Source Program"
 			},
 			{
 				"itemType": "film",
@@ -3127,15 +3152,17 @@ var testCases = [
 				"genre": "Genre",
 				"videoRecordingFormat": "Format",
 				"callNumber": "Call Number",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
 				"distributor": "Distributor",
 				"runningTime": "Running Time",
 				"shortTitle": "Short Title",
+				"title": "Title",
 				"url": "URL",
-				"date": "0000 Year Date",
-				"title": "Title"
+				"accessDate": "0000 Access",
+				"publicationTitle": "Series Title"
 			},
 			{
 				"itemType": "journalArticle",
@@ -3182,19 +3209,20 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"journalAbbreviation": "Periodical Title",
 				"language": "Language",
-				"extra": "Number",
+				"issue": "Number",
 				"ISSN": "ISSN/ISBN",
-				"shortTitle": "Short Title",
-				"url": "URL",
-				"date": "0000 Year Date",
 				"pages": "Pages",
+				"shortTitle": "Short Title",
 				"publicationTitle": "Secondary Title",
 				"title": "Title",
-				"volume": "Volume"
+				"url": "URL",
+				"volume": "Volume",
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "report",
@@ -3242,9 +3270,10 @@ var testCases = [
 				"extra": "Number",
 				"institution": "Publisher",
 				"reportNumber": "ISSN/ISBN",
-				"url": "URL",
 				"pages": "Pages",
 				"title": "Title",
+				"url": "URL",
+				"accessDate": "0000 Access",
 				"date": "0000 Year"
 			},
 			{
@@ -3282,17 +3311,18 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
+				"date": "0000 Year Deadline",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"journalAbbreviation": "Periodical Title",
 				"language": "Language",
-				"extra": "Status",
-				"shortTitle": "Short Title",
-				"url": "URL",
-				"date": "0000 Year Deadline",
+				"issue": "Status",
 				"pages": "Pages",
+				"shortTitle": "Short Title",
 				"title": "Title of Grant",
+				"url": "URL",
 				"volume": "Amount Requested",
+				"accessDate": "0000 Access",
 				"publicationTitle": "Periodical Title"
 			},
 			{
@@ -3318,19 +3348,20 @@ var testCases = [
 				"attachments": [],
 				"abstractNote": "Abstract",
 				"place": "Place Published",
+				"date": "0000 Year Date",
 				"session": "Session",
 				"language": "Language",
 				"documentNumber": "Document Number",
 				"numberOfVolumes": "Number of Volumes",
 				"history": "History",
+				"publisher": "Publisher",
+				"pages": "Pages",
 				"shortTitle": "Short Title",
 				"committee": "Committee",
 				"legislativeBody": "Legislative Body",
+				"title": "Title",
 				"url": "URL",
-				"date": "0000 Year Date",
-				"publisher": "Publisher",
-				"pages": "Pages",
-				"title": "Title"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "journalArticle",
@@ -3360,19 +3391,20 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"journalAbbreviation": "Periodical Title",
 				"language": "Language",
 				"issue": "Issue",
 				"ISSN": "ISSN",
-				"shortTitle": "Short Title",
-				"url": "URL",
-				"date": "0000 Year Date",
 				"pages": "Pages",
+				"shortTitle": "Short Title",
 				"publicationTitle": "Journal",
 				"title": "Title",
-				"volume": "Volume"
+				"url": "URL",
+				"volume": "Volume",
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "case",
@@ -3416,7 +3448,9 @@ var testCases = [
 				"firstPage": "Pages",
 				"caseName": "Title",
 				"url": "URL",
-				"reporterVolume": "Rule Number"
+				"reporterVolume": "Rule Number",
+				"accessDate": "0000 Access",
+				"publicationTitle": "Title Number"
 			},
 			{
 				"itemType": "magazineArticle",
@@ -3453,18 +3487,19 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
 				"extra": "Issue Number",
 				"ISSN": "ISSN",
-				"shortTitle": "Short Title",
-				"url": "URL",
-				"date": "0000 Year Date",
 				"pages": "Pages",
+				"shortTitle": "Short Title",
 				"publicationTitle": "Magazine",
 				"title": "Title",
-				"volume": "Volume"
+				"url": "URL",
+				"volume": "Volume",
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "manuscript",
@@ -3502,6 +3537,7 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
 				"place": "Place Published",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
@@ -3509,9 +3545,10 @@ var testCases = [
 				"manuscriptType": "Type of Work",
 				"numPages": "Pages",
 				"shortTitle": "Short Title",
+				"title": "Title",
 				"url": "URL",
-				"date": "0000 Year Date",
-				"title": "Title"
+				"accessDate": "0000 Access",
+				"publicationTitle": "Collection Title"
 			},
 			{
 				"itemType": "map",
@@ -3545,18 +3582,19 @@ var testCases = [
 				"scale": "Scale",
 				"callNumber": "Call Number",
 				"place": "Place Published",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"edition": "Edition",
 				"language": "Language",
 				"mapType": "Type",
+				"publisher": "Publisher",
 				"ISBN": "ISSN/ISBN",
 				"shortTitle": "Short Title",
 				"seriesTitle": "Series Title",
+				"title": "Title",
 				"url": "URL",
-				"date": "0000 Year Date",
-				"publisher": "Publisher",
-				"title": "Title"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "audioRecording",
@@ -3605,6 +3643,7 @@ var testCases = [
 				"audioRecordingFormat": "Accompanying Matter",
 				"callNumber": "Call Number",
 				"place": "Place Published",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
@@ -3613,10 +3652,11 @@ var testCases = [
 				"ISBN": "ISBN",
 				"shortTitle": "Short Title",
 				"seriesTitle": "Series Title",
-				"url": "URL",
-				"date": "0000 Year Date",
 				"title": "Title",
-				"volume": "Volume"
+				"url": "URL",
+				"volume": "Volume",
+				"accessDate": "0000 Access",
+				"publicationTitle": "Album Title"
 			},
 			{
 				"itemType": "newspaperArticle",
@@ -3649,6 +3689,7 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
 				"place": "Place Published",
+				"date": "0000 Year Issue",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"edition": "Edition",
@@ -3656,12 +3697,12 @@ var testCases = [
 				"extra": "Start Page",
 				"section": "Section",
 				"ISSN": "ISSN",
-				"shortTitle": "Short Title",
-				"url": "URL",
-				"date": "0000 Year Issue",
 				"pages": "Pages",
+				"shortTitle": "Short Title",
 				"publicationTitle": "Newspaper",
-				"title": "Title"
+				"title": "Title",
+				"url": "URL",
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "document",
@@ -3697,13 +3738,14 @@ var testCases = [
 				"attachments": [],
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
-				"url": "URL",
-				"date": "0000 Year Date",
 				"publisher": "Publisher",
-				"title": "Title"
+				"title": "Title",
+				"url": "URL",
+				"publicationTitle": "Periodical"
 			},
 			{
 				"itemType": "videoRecording",
@@ -3740,14 +3782,15 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
 				"videoRecordingFormat": "Format/Length",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
 				"extra": "Number of Screens",
 				"studio": "Distributor",
+				"title": "Title",
 				"url": "URL",
-				"date": "0000 Year Date",
-				"title": "Title"
+				"publicationTitle": "Series Title"
 			},
 			{
 				"itemType": "manuscript",
@@ -3790,6 +3833,7 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
 				"place": "Place Published",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
@@ -3797,9 +3841,10 @@ var testCases = [
 				"manuscriptType": "Type of Work",
 				"numPages": "Pages",
 				"shortTitle": "Short Title",
+				"title": "Title",
 				"url": "URL",
-				"date": "0000 Year Date",
-				"title": "Title"
+				"accessDate": "0000 Access",
+				"publicationTitle": "Published Source"
 			},
 			{
 				"itemType": "patent",
@@ -3845,10 +3890,12 @@ var testCases = [
 				"priorityNumbers": "Priority Numbers",
 				"assignee": "Assignee",
 				"patentNumber": "Patent Number",
-				"shortTitle": "Short Title",
-				"url": "URL",
 				"pages": "Pages",
-				"title": "Title"
+				"shortTitle": "Short Title",
+				"title": "Title",
+				"url": "URL",
+				"accessDate": "0000 Access",
+				"publicationTitle": "Published Source"
 			},
 			{
 				"itemType": "letter",
@@ -3890,15 +3937,16 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
 				"extra": "Folio Number",
 				"letterType": "Type",
 				"shortTitle": "Short Title",
+				"title": "Title",
 				"url": "URL",
-				"date": "0000 Year Date",
-				"title": "Title"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "report",
@@ -3946,6 +3994,7 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
 				"place": "Place Published",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
@@ -3953,12 +4002,12 @@ var testCases = [
 				"reportType": "Type",
 				"institution": "Institution",
 				"reportNumber": "Report Number",
+				"pages": "Pages",
 				"shortTitle": "Short Title",
 				"seriesTitle": "Series Title",
+				"title": "Title",
 				"url": "URL",
-				"date": "0000 Year Date",
-				"pages": "Pages",
-				"title": "Title"
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "book",
@@ -4011,21 +4060,22 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
 				"place": "Place Published",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"edition": "Edition",
 				"language": "Language",
 				"seriesNumber": "Series Volume",
 				"numberOfVolumes": "Number of Volumes",
+				"publisher": "Publisher",
 				"ISBN": "ISBN",
 				"numPages": "Pages",
 				"shortTitle": "Short Title",
 				"series": "Secondary Title",
-				"url": "URL",
-				"date": "0000 Year Date",
-				"publisher": "Publisher",
 				"title": "Title",
-				"volume": "Volume"
+				"url": "URL",
+				"volume": "Volume",
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "report",
@@ -4058,6 +4108,7 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
 				"place": "Place Published",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
@@ -4065,11 +4116,11 @@ var testCases = [
 				"reportType": "Type of Work",
 				"institution": "Publisher",
 				"reportNumber": "Document Number",
-				"seriesTitle": "Section Title",
-				"url": "URL",
-				"date": "0000 Year Date",
 				"pages": "Pages",
-				"title": "Title"
+				"seriesTitle": "Section Title",
+				"title": "Title",
+				"url": "URL",
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "statute",
@@ -4099,12 +4150,14 @@ var testCases = [
 				"publicLawNumber": "Public Law Number",
 				"history": "History",
 				"section": "Sections",
+				"pages": "Pages",
 				"shortTitle": "Short Title",
 				"code": "Code",
-				"nameOfAct": "Short Title",
+				"nameOfAct": "Name of Act",
 				"url": "URL",
 				"codeNumber": "Code Number",
-				"pages": "Pages"
+				"accessDate": "0000 Access",
+				"title": "Short Title"
 			},
 			{
 				"itemType": "thesis",
@@ -4142,6 +4195,7 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
 				"place": "Place Published",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
@@ -4150,9 +4204,10 @@ var testCases = [
 				"university": "University",
 				"numPages": "Number of Pages",
 				"shortTitle": "Short Title",
+				"title": "Title",
 				"url": "URL",
-				"date": "0000 Year Date",
-				"title": "Title"
+				"accessDate": "0000 Access",
+				"publicationTitle": "Academic Department"
 			},
 			{
 				"itemType": "journalArticle",
@@ -4192,17 +4247,18 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"abstractNote": "Abstract",
+				"date": "0000 Year Date",
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"journalAbbreviation": "Abbreviation",
 				"language": "Language",
-				"extra": "Number",
-				"shortTitle": "Short Title",
-				"url": "URL",
-				"date": "0000 Year Date",
+				"issue": "Number",
 				"pages": "Pages",
+				"shortTitle": "Short Title",
 				"publicationTitle": "Series Title",
-				"title": "Title of Work"
+				"title": "Title of Work",
+				"url": "URL",
+				"accessDate": "0000 Access"
 			},
 			{
 				"itemType": "webpage",
@@ -4237,13 +4293,14 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"abstractNote": "Abstract",
+				"date": "0000 Year Last",
 				"language": "Language",
 				"websiteType": "Type of Medium",
 				"shortTitle": "Short Title",
 				"websiteTitle": "Series Title",
+				"title": "Title",
 				"url": "URL",
-				"date": "0000 Year Last",
-				"title": "Title"
+				"accessDate": "0000 Access"
 			}
 		]
 	},
@@ -4326,7 +4383,7 @@ var testCases = [
 					}
 				],
 				"abstractNote": "Optimal integration of next-generation sequencing into mainstream research requires re-evaluation of how problems can be reasonably overcome and what questions can be asked. .... The random sequencing-based approach to identify microsatellites was rapid, cost-effective and identified thousands of useful microsatellite loci in a previously unstudied species.",
-				"extra": "9999",
+				"issue": "9999",
 				"ISSN": "1755-0998",
 				"shortTitle": "Rapid identification of thousands of copperhead snake (Agkistrodon contortrix) microsatellite loci from modest amounts of 454 shotgun genome sequence",
 				"publicationTitle": "Molecular Ecology Resources",
