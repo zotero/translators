@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-12-14 20:34:15"
+	"lastUpdated": "2014-01-18 10:54:39"
 }
 
 function detectWeb(doc, url) {
@@ -177,6 +177,20 @@ function scrapeByExport(doc) {
 				//Sometimes has series title, so I'm mapping this to T3,
 				// although we currently don't recognize that in RIS
 				text = text.replace(/^T2\s/mg, 'T3 ');
+				
+				//Sometimes PY has some nonsensical value. Y2 contains the correct
+				// date in that case.
+				if(text.search(/^Y2\s+-\s+\d{4}\b/m) !== -1) {
+					text = text.replace(/TY\s+-[\S\s]+?ER/g, function(m) {
+						if(m.search(/^PY\s+-\s+\d{4}\b/m) === -1
+							&& m.search(/^Y2\s+-\s+\d{4}\b/m) !== -1
+						) {
+							return m.replace(/^PY\s+-.*\r?\n/mg, '')
+								.replace(/^Y2\s+-/mg, 'PY  -');
+						}
+						return m;
+					});
+				}
 
 				//Certain authors sometimes have "role" prefixes
 				text = text.replace(
@@ -616,6 +630,87 @@ var testCases = [
 				"libraryCatalog": "ScienceDirect",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Unwrapping of Nucleosomal DNA Ends"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.sciencedirect.com/science/article/pii/S014067361362228X",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Glasziou",
+						"firstName": "Paul",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Altman",
+						"firstName": "Douglas G",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bossuyt",
+						"firstName": "Patrick",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Boutron",
+						"firstName": "Isabelle",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Clarke",
+						"firstName": "Mike",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Julious",
+						"firstName": "Steven",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Michie",
+						"firstName": "Susan",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Moher",
+						"firstName": "David",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wager",
+						"firstName": "Elizabeth",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "ScienceDirect Snapshot"
+					},
+					{
+						"title": "ScienceDirect Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"title": "Reducing waste from incomplete or unusable reports of biomedical research",
+				"journalAbbreviation": "The Lancet",
+				"volume": "383",
+				"issue": "9913",
+				"pages": "267-276",
+				"ISSN": "0140-6736",
+				"DOI": "10.1016/S0140-6736(13)62228-X",
+				"url": "http://www.sciencedirect.com/science/article/pii/S014067361362228X",
+				"abstractNote": "Summary\nResearch publication can both communicate and miscommunicate. Unless research is adequately reported, the time and resources invested in the conduct of research is wasted. Reporting guidelines such as CONSORT, STARD, PRISMA, and ARRIVE aim to improve the quality of research reports, but all are much less adopted and adhered to than they should be. Adequate reports of research should clearly describe which questions were addressed and why, what was done, what was shown, and what the findings mean. However, substantial failures occur in each of these elements. For example, studies of published trial reports showed that the poor description of interventions meant that 40–89% were non-replicable; comparisons of protocols with publications showed that most studies had at least one primary outcome changed, introduced, or omitted; and investigators of new trials rarely set their findings in the context of a systematic review, and cited a very small and biased selection of previous relevant trials. Although best documented in reports of controlled trials, inadequate reporting occurs in all types of studies—animal and other preclinical studies, diagnostic studies, epidemiological studies, clinical prediction research, surveys, and qualitative studies. In this report, and in the Series more generally, we point to a waste at all stages in medical research. Although a more nuanced understanding of the complex systems involved in the conduct, writing, and publication of research is desirable, some immediate action can be taken to improve the reporting of research. Evidence for some recommendations is clear: change the current system of research rewards and regulations to encourage better and more complete reporting, and fund the development and maintenance of infrastructure to support better reporting, linkage, and archiving of all elements of research. However, the high amount of waste also warrants future investment in the monitoring of and research into reporting of research, and active implementation of the findings to ensure that research reports better address the needs of the range of research users.",
+				"date": "January 24, 2014",
+				"publicationTitle": "The Lancet",
+				"libraryCatalog": "ScienceDirect",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}
