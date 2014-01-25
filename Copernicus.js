@@ -2,14 +2,14 @@
 	"translatorID": "8082115d-5bc6-4517-a4e8-abed1b2a784a",
 	"label": "Copernicus",
 	"creator": "Michael Berkowitz",
-	"target": "^https?://www\\.(adv-sci-res|adv-geosci|adv-radio-sci|ann-geophys|astrophys-space-sci-trans|atmos-chem-phys|biogeosciences(-discuss)?|clim-past|electronic-earth|hydrol-earth-syst-sci|nat-hazards-earth-syst-sci|nonlin-processes-geophys|ocean-sci|soc-geogr|surv-perspect-integr-environ-soc|the-cryosphere)\\.net/",
+	"target": "^https?://www\\.(adv-sci-res|adv-geosci|adv-radio-sci|ann-geophys|astrophys-space-sci-trans|atmos-chem-phys(-discuss)?|biogeosciences(-discuss)?|clim-past|electronic-earth|hydrol-earth-syst-sci|nat-hazards-earth-syst-sci|nonlin-processes-geophys|ocean-sci|soc-geogr|surv-perspect-integr-environ-soc|the-cryosphere)\\.net/",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-05-08 15:02:39"
+	"lastUpdated": "2014-01-24 23:19:41"
 }
 
 function detectWeb(doc, url) {
@@ -193,6 +193,141 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.adv-geosci.net/title_and_author_search.html?x=0&y=0&title=measurement",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.atmos-chem-phys-discuss.net/14/2307/2014/acpd-14-2307-2014.html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Thompson",
+						"firstName": "R. L.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Patra",
+						"firstName": "P. K.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Ishijima",
+						"firstName": "K.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Saikawa",
+						"firstName": "E.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Corazza",
+						"firstName": "M.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Karstens",
+						"firstName": "U.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wilson",
+						"firstName": "C.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bergamaschi",
+						"firstName": "P.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Dlugokencky",
+						"firstName": "E.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Sweeney",
+						"firstName": "C.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Prinn",
+						"firstName": "R. G.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Weiss",
+						"firstName": "R. F.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "O'Doherty",
+						"firstName": "S.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Fraser",
+						"firstName": "P. J.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Steele",
+						"firstName": "L. P.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Krummel",
+						"firstName": "P. B.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Saunois",
+						"firstName": "M.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Chipperfield",
+						"firstName": "M.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bousquet",
+						"firstName": "P.",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Atmos. Chem. Phys. Discuss. PDF",
+						"downloadable": true,
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Atmos. Chem. Phys. Discuss. Snapshot",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"title": "TransCom N2O model inter-comparison – Part 1: Assessing the influence of transport and surface fluxes on tropospheric N2O variability",
+				"journalAbbreviation": "Atmos. Chem. Phys. Discuss.",
+				"volume": "14",
+				"issue": "2",
+				"pages": "2307-2362",
+				"date": "January 24, 2014",
+				"publisher": "Copernicus Publications",
+				"ISSN": "1680-7375",
+				"url": "http://www.atmos-chem-phys-discuss.net/14/2307/2014/",
+				"DOI": "10.5194/acpd-14-2307-2014",
+				"publicationTitle": "Atmos. Chem. Phys. Discuss.",
+				"libraryCatalog": "Copernicus Online Journals",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "TransCom N2O model inter-comparison – Part 1"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
