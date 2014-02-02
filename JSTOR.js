@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-01-02 19:07:13"
+	"lastUpdated": "2014-02-02 20:03:27"
 }
 
 function detectWeb(doc, url) {
@@ -156,10 +156,16 @@ function first(set, next) {
 		// load translator for RIS
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-		//Z.debug(text)
+		//Z.debug(text);
+		
+		//M1 is mostly useless and sometimes ends up in the issue field
+		//we can use it to check if the article is a review though
+		var review = text.search(/^M1\s+-\s+ArticleType:\s*book-review/m) !== -1;
+		text = text.replace(/^M1\s+-.*?\n/mg, '');
+		
 		translator.setString(text);
 		translator.setHandler("itemDone", function(obj, item) {
-			//author names are not supplied as lasName, firstName in RIS
+			//author names are not supplied as lastName, firstName in RIS
 			//we fix it here
 			var m;
 			for(var i=0, n=item.creators.length; i<n; i++) {
@@ -170,7 +176,7 @@ function first(set, next) {
 					delete item.creators[i].fieldMode;
 				}
 			}
-				if(item.notes && item.notes[0]) {
+			if(item.notes && item.notes[0]) {
 				// For some reason JSTOR exports abstract with 'AB' tag istead of 'N1'
 				item.abstractNote = item.notes[0].note;
 				item.abstractNote = item.abstractNote.replace(/^<p>(ABSTRACT )?/,'').replace(/<\/p>$/,'');
@@ -197,7 +203,7 @@ function first(set, next) {
 				item.ISSN = matches[1] + '-' + matches[2];
 			}
 			//reviews don't have titles in RIS - we get them from the item page
-			if (!item.title){
+			if (!item.title && review){
 				if(item.url) {
 					ZU.processDocuments(item.url, function(doc){
 						item.title = getTitleFromPage(doc);
@@ -302,19 +308,20 @@ var testCases = [
 					}
 				],
 				"journalAbbreviation": "Avian Diseases",
-				"issue": "3",
-				"ISSN": "0005-2086",
-				"url": "http://www.jstor.org/stable/1593514",
-				"abstractNote": "A reproducible and original method for the preparation of chicken intestine epithelial cells from 18-day-old embryos for long-term culture was obtained by using a mechanical isolation procedure, as opposed to previous isolation methods using relatively high concentrations of trypsin, collagenase, or EDTA. Chicken intestine epithelial cells typically expressed keratin and chicken E-cadherin, in contrast to chicken embryo fibroblasts, and they increased cell surface MHC II after activation with crude IFN-γ containing supernatants, obtained from chicken spleen cells stimulated with concanavalin A or transformed by reticuloendotheliosis virus. Eimeria tenella was shown to be able to develop until the schizont stage after 46 hr of culture in these chicken intestinal epithelial cells, but it was not able to develop further. However, activation with IFN-γ containing supernatants resulted in strong inhibition of parasite replication, as shown by incorporation of [3 H]uracil. Thus, chicken enterocytes, which are the specific target of Eimeria development in vivo, could be considered as potential local effector cells involved in the protective response against this parasite. /// Se desarrolló un método reproducible y original para la preparación de células epiteliales de intestino de embriones de pollo de 18 días de edad para ser empleadas como cultivo primario de larga duración. Las células epiteliales de intestino fueron obtenidas mediante un procedimiento de aislamiento mecánico, opuesto a métodos de aislamientos previos empleando altas concentraciones de tripsina, colagenasa o EDTA. Las células epiteliales de intestino expresaron típicamente keratina y caderina E, a diferencia de los fibroblastos de embrión de pollo, e incrementaron el complejo mayor de histocompatibilidad tipo II en la superficie de la célula posterior a la activación con sobrenadantes de interferón gamma. Los sobrenadantes de interferón gamma fueron obtenidos a partir de células de bazos de pollos estimuladas con concanavalina A o transformadas con el virus de reticuloendoteliosis. Se observó el desarrollo de la Eimeria tenella hasta la etapa de esquizonte después de 46 horas de cultivo en las células intestinales epiteliales de pollo pero no se observó un desarrollo posterior. Sin embargo, la activación de los enterocitos con los sobrenadantes con interferón gamma resultó en una inhibición fuerte de la replicación del parásito, comprobada mediante la incorporación de uracilo [3 H]. Por lo tanto, los enterocitos de pollo, blanco específico del desarrollo in vivo de la Eimeria, podrían ser considerados como células efectoras locales, involucradas en la respuesta protectora contra este parásito.",
-				"rights": "Copyright © 2004 American Association of Avian Pathologists",
-				"extra": "ArticleType: research-article / Full publication date: Sep., 2004 / Copyright © 2004 American Association of Avian Pathologists",
-				"libraryCatalog": "JSTOR",
-				"shortTitle": "Chicken Primary Enterocytes",
 				"title": "Chicken Primary Enterocytes: Inhibition of Eimeria tenella Replication after Activation with Crude Interferon-γ Supernatants",
 				"volume": "48",
+				"issue": "3",
+				"publisher": "American Association of Avian Pathologists",
+				"ISSN": "0005-2086",
+				"url": "http://www.jstor.org/stable/1593514",
 				"date": "September 1, 2004",
 				"pages": "617-624",
-				"publicationTitle": "Avian Diseases"
+				"abstractNote": "A reproducible and original method for the preparation of chicken intestine epithelial cells from 18-day-old embryos for long-term culture was obtained by using a mechanical isolation procedure, as opposed to previous isolation methods using relatively high concentrations of trypsin, collagenase, or EDTA. Chicken intestine epithelial cells typically expressed keratin and chicken E-cadherin, in contrast to chicken embryo fibroblasts, and they increased cell surface MHC II after activation with crude IFN-γ containing supernatants, obtained from chicken spleen cells stimulated with concanavalin A or transformed by reticuloendotheliosis virus. Eimeria tenella was shown to be able to develop until the schizont stage after 46 hr of culture in these chicken intestinal epithelial cells, but it was not able to develop further. However, activation with IFN-γ containing supernatants resulted in strong inhibition of parasite replication, as shown by incorporation of [3 H]uracil. Thus, chicken enterocytes, which are the specific target of Eimeria development in vivo, could be considered as potential local effector cells involved in the protective response against this parasite. /// Se desarrolló un método reproducible y original para la preparación de células epiteliales de intestino de embriones de pollo de 18 días de edad para ser empleadas como cultivo primario de larga duración. Las células epiteliales de intestino fueron obtenidas mediante un procedimiento de aislamiento mecánico, opuesto a métodos de aislamientos previos empleando altas concentraciones de tripsina, colagenasa o EDTA. Las células epiteliales de intestino expresaron típicamente keratina y caderina E, a diferencia de los fibroblastos de embrión de pollo, e incrementaron el complejo mayor de histocompatibilidad tipo II en la superficie de la célula posterior a la activación con sobrenadantes de interferón gamma. Los sobrenadantes de interferón gamma fueron obtenidos a partir de células de bazos de pollos estimuladas con concanavalina A o transformadas con el virus de reticuloendoteliosis. Se observó el desarrollo de la Eimeria tenella hasta la etapa de esquizonte después de 46 horas de cultivo en las células intestinales epiteliales de pollo pero no se observó un desarrollo posterior. Sin embargo, la activación de los enterocitos con los sobrenadantes con interferón gamma resultó en una inhibición fuerte de la replicación del parásito, comprobada mediante la incorporación de uracilo [3 H]. Por lo tanto, los enterocitos de pollo, blanco específico del desarrollo in vivo de la Eimeria, podrían ser considerados como células efectoras locales, involucradas en la respuesta protectora contra este parásito.",
+				"rights": "Copyright © 2004 American Association of Avian Pathologists",
+				"publicationTitle": "Avian Diseases",
+				"libraryCatalog": "JSTOR",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Chicken Primary Enterocytes"
 			}
 		]
 	},
@@ -341,19 +348,20 @@ var testCases = [
 					}
 				],
 				"journalAbbreviation": "The Journal of Modern History",
-				"issue": "4",
-				"ISSN": "0022-2801",
-				"url": "http://www.jstor.org/stable/10.1086/245591",
-				"rights": "Copyright © 1997 The University of Chicago Press",
-				"extra": "ArticleType: research-article / Full publication date: December 1997 / Copyright © 1997 The University of Chicago Press",
-				"DOI": "10.1086/jmh.1997.69.issue-4",
-				"libraryCatalog": "JSTOR",
-				"shortTitle": "Not by Bread Alone",
 				"title": "Not by Bread Alone: Subsistence Riots in Russia during World War I",
 				"volume": "69",
+				"issue": "4",
+				"publisher": "The University of Chicago Press",
+				"ISSN": "0022-2801",
+				"url": "http://www.jstor.org/stable/10.1086/245591",
 				"date": "December 1, 1997",
 				"pages": "696-721",
-				"publicationTitle": "The Journal of Modern History"
+				"rights": "Copyright © 1997 The University of Chicago Press",
+				"publicationTitle": "The Journal of Modern History",
+				"DOI": "10.1086/jmh.1997.69.issue-4",
+				"libraryCatalog": "JSTOR",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Not by Bread Alone"
 			}
 		]
 	},
@@ -380,19 +388,20 @@ var testCases = [
 					}
 				],
 				"journalAbbreviation": "Signs",
-				"issue": "2",
-				"ISSN": "0097-9740",
-				"url": "http://www.jstor.org/stable/10.1086/508232",
-				"rights": "Copyright © 2007 The University of Chicago Press",
-				"extra": "ArticleType: research-article / Full publication date: Winter 2007 / Copyright © 2007 The University of Chicago Press",
-				"DOI": "10.1086/500751",
-				"libraryCatalog": "JSTOR",
-				"shortTitle": "Remaking Families",
 				"title": "Remaking Families: A Review Essay",
 				"volume": "32",
+				"issue": "2",
+				"publisher": "The University of Chicago Press",
+				"ISSN": "0097-9740",
+				"url": "http://www.jstor.org/stable/10.1086/508232",
 				"date": "January 1, 2007",
 				"pages": "523-538",
-				"publicationTitle": "Signs"
+				"rights": "Copyright © 2007 The University of Chicago Press",
+				"publicationTitle": "Signs",
+				"DOI": "10.1086/500751",
+				"libraryCatalog": "JSTOR",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Remaking Families"
 			}
 		]
 	},
@@ -419,17 +428,18 @@ var testCases = [
 					}
 				],
 				"journalAbbreviation": "Russian Review",
+				"volume": "57",
 				"issue": "2",
+				"publisher": "Wiley on behalf of The Editors and Board of Trustees of the Russian Review",
 				"ISSN": "0036-0341",
 				"url": "http://www.jstor.org/stable/131548",
-				"rights": "Copyright © 1998 The Editors and Board of Trustees of the Russian Review",
-				"extra": "ArticleType: book-review / Full publication date: Apr., 1998 / Copyright © 1998 The Editors and Board of Trustees of the Russian Review",
-				"libraryCatalog": "JSTOR",
-				"volume": "57",
 				"date": "April 1, 1998",
 				"pages": "310-311",
+				"rights": "Copyright © 1998 The Editors and Board of Trustees of the Russian Review",
 				"publicationTitle": "Russian Review",
-				"title": "Review of Soviet Criminal Justice under Stalin by Peter H. Solomon"
+				"title": "Review of Soviet Criminal Justice under Stalin by Peter H. Solomon",
+				"libraryCatalog": "JSTOR",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -476,19 +486,20 @@ var testCases = [
 					}
 				],
 				"journalAbbreviation": "Journal of Management Information Systems",
-				"issue": "3",
-				"ISSN": "0742-1222",
-				"url": "http://www.jstor.org/stable/40398803",
-				"abstractNote": "From the social network perspective, this study explores the ontological structure of knowledge sharing activities engaged in by researchers in the field of information systems (IS) over the past three decades. We construct a knowledge network based on coauthorship patterns extracted from four major journals in the IS field in order to analyze the distinctive characteristics of each subfield and to assess the amount of internal and external knowledge exchange that has taken place among IS researchers. This study also tests the role of different types of social capital that influence the academic impact of researchers. Our results indicate that the proportion of coauthored IS articles in the four journals has doubled over the past 25 years, from merely 40 percent in 1978 to over 80 percent in 2002. However, a significant variation exists in terms of the shape, density, and centralization of knowledge exchange networks across the four subfields of IS—namely, behavioral science, organizational science, computer science, and economic science. For example, the behavioral science subgroup, in terms of internal cohesion among researchers, tends to develop the most dense collaborative relationships, whereas the computer science subgroup is the most fragmented. Moreover, external collaboration across these subfields appears to be limited and severely unbalanced. Across the four subfields, on average, less than 20 percent of the research collaboration ties involved researchers from different subdisciplines. Finally, the regression analysis reveals that knowledge capital derived from a network rich in structural holes has a positive influence on an individual researcher's academic performance.",
-				"rights": "Copyright © 2005 M.E. Sharpe, Inc.",
-				"extra": "ArticleType: research-article / Full publication date: Winter, 2005/2006 / Copyright © 2005 M.E. Sharpe, Inc.",
-				"libraryCatalog": "JSTOR",
-				"shortTitle": "Coauthorship Dynamics and Knowledge Capital",
 				"title": "Coauthorship Dynamics and Knowledge Capital: The Patterns of Cross-Disciplinary Collaboration in Information Systems Research",
 				"volume": "22",
+				"issue": "3",
+				"publisher": "M.E. Sharpe, Inc.",
+				"ISSN": "0742-1222",
+				"url": "http://www.jstor.org/stable/40398803",
 				"date": "December 1, 2005",
 				"pages": "265-292",
-				"publicationTitle": "Journal of Management Information Systems"
+				"abstractNote": "From the social network perspective, this study explores the ontological structure of knowledge sharing activities engaged in by researchers in the field of information systems (IS) over the past three decades. We construct a knowledge network based on coauthorship patterns extracted from four major journals in the IS field in order to analyze the distinctive characteristics of each subfield and to assess the amount of internal and external knowledge exchange that has taken place among IS researchers. This study also tests the role of different types of social capital that influence the academic impact of researchers. Our results indicate that the proportion of coauthored IS articles in the four journals has doubled over the past 25 years, from merely 40 percent in 1978 to over 80 percent in 2002. However, a significant variation exists in terms of the shape, density, and centralization of knowledge exchange networks across the four subfields of IS—namely, behavioral science, organizational science, computer science, and economic science. For example, the behavioral science subgroup, in terms of internal cohesion among researchers, tends to develop the most dense collaborative relationships, whereas the computer science subgroup is the most fragmented. Moreover, external collaboration across these subfields appears to be limited and severely unbalanced. Across the four subfields, on average, less than 20 percent of the research collaboration ties involved researchers from different subdisciplines. Finally, the regression analysis reveals that knowledge capital derived from a network rich in structural holes has a positive influence on an individual researcher's academic performance.",
+				"rights": "Copyright © 2005 M.E. Sharpe, Inc.",
+				"publicationTitle": "Journal of Management Information Systems",
+				"libraryCatalog": "JSTOR",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "Coauthorship Dynamics and Knowledge Capital"
 			}
 		]
 	}
