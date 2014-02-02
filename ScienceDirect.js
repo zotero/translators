@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-01-18 10:54:39"
+	"lastUpdated": "2014-02-02 04:44:46"
 }
 
 function detectWeb(doc, url) {
@@ -52,6 +52,11 @@ function getExportLink(doc) {
 	return link.length ? link[0].textContent : false;
 }
 
+function getExportFormAction(doc) {
+	var form = ZU.xpath(doc, '//div[@id="export_popup"]/form')[0];
+	return form ? form.action : false;
+}
+
 function getPDFLink(doc) {
 	return ZU.xpathText(doc,
 		'//div[@id="articleNav"]//div[contains(@class, "icon_pdf")]\
@@ -83,6 +88,15 @@ function getFormValues(text, inputs) {
 	}
 
 	return params;
+}
+
+function getAbstract(doc) {
+	var p = ZU.xpath(doc, '//div[contains(@class, "abstract") and not(contains(@class, "abstractHighlights"))]/p');
+	var paragraphs = [];
+	for(var i=0; i<p.length; i++) {
+		paragraphs.push(ZU.trimInternal(p[i].textContent));
+	}
+	return paragraphs.join('\n');
 }
 
 //mimetype map for supplementary attachments
@@ -140,9 +154,16 @@ function attachSupplementary(doc, item) {
 	}
 }
 
+function scrapeByDirectExport(doc) {
+	Z.debug("ScienceDirect: Scrapping by RIS directly through export form");
+	var url = getExportFormAction(doc);
+	var postParams = 'citation-type=RIS&zone=exportDropDown&export=Export&format=cite-abs';
+	ZU.doPost(url, postParams, function(text) { processRIS(doc, text) });
+}
+
 function scrapeByExport(doc) {
+	Z.debug("ScienceDirect: Scraping by RIS export through an intermediate page");
 	var url = getExportLink(doc);
-	var pdfLink = getPDFLink(doc);
 	ZU.doGet(url, function(text) {
 		//select the correct form
 		var form = text.match(/<form[^>]+name=(['"])exportCite\1[\s\S]+?<\/form>/);
@@ -172,82 +193,91 @@ function scrapeByExport(doc) {
 			post += key + '=' + postParams[key] + "&";
 		}
 
-		ZU.doPost('/science', post, function(text) {
-				//T2 doesn't appear to hold the short title anymore.
-				//Sometimes has series title, so I'm mapping this to T3,
-				// although we currently don't recognize that in RIS
-				text = text.replace(/^T2\s/mg, 'T3 ');
-				
-				//Sometimes PY has some nonsensical value. Y2 contains the correct
-				// date in that case.
-				if(text.search(/^Y2\s+-\s+\d{4}\b/m) !== -1) {
-					text = text.replace(/TY\s+-[\S\s]+?ER/g, function(m) {
-						if(m.search(/^PY\s+-\s+\d{4}\b/m) === -1
-							&& m.search(/^Y2\s+-\s+\d{4}\b/m) !== -1
-						) {
-							return m.replace(/^PY\s+-.*\r?\n/mg, '')
-								.replace(/^Y2\s+-/mg, 'PY  -');
-						}
-						return m;
-					});
-				}
-
-				//Certain authors sometimes have "role" prefixes
-				text = text.replace(
-					/^((?:A[U\d]|ED)\s+-\s+)Editor-in-Chief:\s+/mg, '$1');
-	
-				var translator = Zotero.loadTranslator("import");
-				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-				translator.setString(text);
-				translator.setHandler("itemDone", function(obj, item) {
-					//issue sometimes is set to 0 for single issue volumes (?)
-					if(item.issue == 0) delete item.issue;
-					
-					//add spaces after initials
-					for(var i=0, n=item.creators.length; i<n; i++) {
-						if(item.creators[i].firstName) {
-							item.creators[i].firstName = item.creators[i].firstName.replace(/\.\s*(?=\S)/g, '. ');
-						}
-					}
-					
-					item.attachments.push({
-						title: "ScienceDirect Snapshot",
-						document: doc
-					});
-
-					if(pdfLink) item.attachments.push({
-						title: 'ScienceDirect Full Text PDF',
-						url: pdfLink,
-						mimeType: 'application/pdf'
-					});
-					
-					//attach supplementary data
-					if(Z.getHiddenPref && Z.getHiddenPref("attachSupplementary")) {
-						try {	//don't fail if we can't attach supplementary data
-							attachSupplementary(doc, item);
-						} catch(e) {
-							Z.debug("Error attaching supplementary information.")
-							Z.debug(e);
-						}
-					}
-
-					if(item.notes[0]) {
-						item.abstractNote = item.notes[0].note;
-						item.notes = new Array();
-					}
-					if(item.abstractNote) {
-						item.abstractNote = item.abstractNote.replace(/^\s*(?:abstract|publisher\s+summary)\s+/i, '');
-					}
-					
-					item.DOI = item.DOI.replace(/^doi:\s+/i, '');
-					item.complete();
-				});
-				translator.translate();
-			});
+		ZU.doPost('/science', post, function(text) { processRIS(doc, text) });
 	});
 }
 
+function processRIS(doc, text) {
+	//T2 doesn't appear to hold the short title anymore.
+	//Sometimes has series title, so I'm mapping this to T3,
+	// although we currently don't recognize that in RIS
+	text = text.replace(/^T2\s/mg, 'T3 ');
+	
+	//Sometimes PY has some nonsensical value. Y2 contains the correct
+	// date in that case.
+	if(text.search(/^Y2\s+-\s+\d{4}\b/m) !== -1) {
+		text = text.replace(/TY\s+-[\S\s]+?ER/g, function(m) {
+			if(m.search(/^PY\s+-\s+\d{4}\b/m) === -1
+				&& m.search(/^Y2\s+-\s+\d{4}\b/m) !== -1
+			) {
+				return m.replace(/^PY\s+-.*\r?\n/mg, '')
+					.replace(/^Y2\s+-/mg, 'PY  -');
+			}
+			return m;
+		});
+	}
+
+	//Certain authors sometimes have "role" prefixes
+	text = text.replace(
+		/^((?:A[U\d]|ED)\s+-\s+)Editor-in-Chief:\s+/mg, '$1');
+
+	var translator = Zotero.loadTranslator("import");
+	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+	translator.setString(text);
+	translator.setHandler("itemDone", function(obj, item) {
+		//issue sometimes is set to 0 for single issue volumes (?)
+		if(item.issue == 0) delete item.issue;
+		
+		//add spaces after initials
+		for(var i=0, n=item.creators.length; i<n; i++) {
+			if(item.creators[i].firstName) {
+				item.creators[i].firstName = item.creators[i].firstName.replace(/\.\s*(?=\S)/g, '. ');
+			}
+		}
+		
+		//abstract is not included with the new export form. Scrape from page
+		if(!item.abstractNote) {
+			item.abstractNote = getAbstract(doc);
+		}
+		
+		item.attachments.push({
+			title: "ScienceDirect Snapshot",
+			document: doc
+		});
+
+		var pdfLink = getPDFLink(doc);
+		if(pdfLink) item.attachments.push({
+			title: 'ScienceDirect Full Text PDF',
+			url: pdfLink,
+			mimeType: 'application/pdf'
+		});
+		
+		//attach supplementary data
+		if(Z.getHiddenPref && Z.getHiddenPref("attachSupplementary")) {
+			try {	//don't fail if we can't attach supplementary data
+				attachSupplementary(doc, item);
+			} catch(e) {
+				Z.debug("Error attaching supplementary information.")
+				Z.debug(e);
+			}
+		}
+
+		if(item.notes[0]) {
+			item.abstractNote = item.notes[0].note;
+			item.notes = new Array();
+		}
+		if(item.abstractNote) {
+			item.abstractNote = item.abstractNote.replace(/^\s*(?:abstract|publisher\s+summary)\s+/i, '');
+		}
+		
+		item.DOI = item.DOI.replace(/^doi:\s+/i, '');
+		item.complete();
+	});
+	translator.translate();
+}
+
 function scrapeByISBN(doc) {
+	Z.debug("ScienceDirect: Scraping by ISBN");
 	var isbn = getISBN(doc);
 	var translator = Zotero.loadTranslator("search");
 	translator.setTranslator("c73a4a8c-3ef1-4ec8-8229-7531ee384cc4");
@@ -287,7 +317,10 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc) {
-	if(getExportLink(doc)) {
+	if(getExportFormAction(doc)) {
+		scrapeByDirectExport(doc);
+	} else if(getExportLink(doc)) {
+		//we might no longer be hitting this case
 		scrapeByExport(doc);
 	} else if(getISBN(doc)) {
 		scrapeByISBN(doc);
@@ -298,6 +331,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.sciencedirect.com/science/article/pii/S0896627311004430#bib5",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -344,6 +378,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.sciencedirect.com/science/article/pii/S016748890800116X",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -422,6 +457,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.sciencedirect.com/science/article/pii/B9780123694683500083",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "bookSection",
@@ -485,6 +521,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.sciencedirect.com/science?_ob=RefWorkIndexURL&_idxType=AU&_cid=277739&_acct=C000228598&_version=1&_userid=10&md5=a27159035e8b2b8e216c551de9cedefd",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "book",
@@ -520,6 +557,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.sciencedirect.com/science/article/pii/B9780123706263000508",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "bookSection",
@@ -574,6 +612,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.sciencedirect.com/science/article/pii/S0006349512000835",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -706,9 +745,9 @@ var testCases = [
 				"ISSN": "0140-6736",
 				"DOI": "10.1016/S0140-6736(13)62228-X",
 				"url": "http://www.sciencedirect.com/science/article/pii/S014067361362228X",
-				"abstractNote": "Summary\nResearch publication can both communicate and miscommunicate. Unless research is adequately reported, the time and resources invested in the conduct of research is wasted. Reporting guidelines such as CONSORT, STARD, PRISMA, and ARRIVE aim to improve the quality of research reports, but all are much less adopted and adhered to than they should be. Adequate reports of research should clearly describe which questions were addressed and why, what was done, what was shown, and what the findings mean. However, substantial failures occur in each of these elements. For example, studies of published trial reports showed that the poor description of interventions meant that 40–89% were non-replicable; comparisons of protocols with publications showed that most studies had at least one primary outcome changed, introduced, or omitted; and investigators of new trials rarely set their findings in the context of a systematic review, and cited a very small and biased selection of previous relevant trials. Although best documented in reports of controlled trials, inadequate reporting occurs in all types of studies—animal and other preclinical studies, diagnostic studies, epidemiological studies, clinical prediction research, surveys, and qualitative studies. In this report, and in the Series more generally, we point to a waste at all stages in medical research. Although a more nuanced understanding of the complex systems involved in the conduct, writing, and publication of research is desirable, some immediate action can be taken to improve the reporting of research. Evidence for some recommendations is clear: change the current system of research rewards and regulations to encourage better and more complete reporting, and fund the development and maintenance of infrastructure to support better reporting, linkage, and archiving of all elements of research. However, the high amount of waste also warrants future investment in the monitoring of and research into reporting of research, and active implementation of the findings to ensure that research reports better address the needs of the range of research users.",
 				"date": "January 24, 2014",
 				"publicationTitle": "The Lancet",
+				"abstractNote": "Research publication can both communicate and miscommunicate. Unless research is adequately reported, the time and resources invested in the conduct of research is wasted. Reporting guidelines such as CONSORT, STARD, PRISMA, and ARRIVE aim to improve the quality of research reports, but all are much less adopted and adhered to than they should be. Adequate reports of research should clearly describe which questions were addressed and why, what was done, what was shown, and what the findings mean. However, substantial failures occur in each of these elements. For example, studies of published trial reports showed that the poor description of interventions meant that 40–89% were non-replicable; comparisons of protocols with publications showed that most studies had at least one primary outcome changed, introduced, or omitted; and investigators of new trials rarely set their findings in the context of a systematic review, and cited a very small and biased selection of previous relevant trials. Although best documented in reports of controlled trials, inadequate reporting occurs in all types of studies—animal and other preclinical studies, diagnostic studies, epidemiological studies, clinical prediction research, surveys, and qualitative studies. In this report, and in the Series more generally, we point to a waste at all stages in medical research. Although a more nuanced understanding of the complex systems involved in the conduct, writing, and publication of research is desirable, some immediate action can be taken to improve the reporting of research. Evidence for some recommendations is clear: change the current system of research rewards and regulations to encourage better and more complete reporting, and fund the development and maintenance of infrastructure to support better reporting, linkage, and archiving of all elements of research. However, the high amount of waste also warrants future investment in the monitoring of and research into reporting of research, and active implementation of the findings to ensure that research reports better address the needs of the range of research users.",
 				"libraryCatalog": "ScienceDirect",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
