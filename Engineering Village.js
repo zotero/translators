@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-12-10 16:35:24"
+	"lastUpdated": "2014-02-02 07:20:12"
 }
 
 function detectWeb(doc, url)
@@ -45,7 +45,7 @@ function createURL(EISESSION,docidlist,curURL)
 {
 	var milli = (new Date()).getTime();
 	var temp = curURL.split('/');		
-	var url = 'http://www.engineeringvillage.com/delivery/download/submit.url?downloadformat=ris&displayformat=abstract&timestamp=' + milli  + docidlist + '&handlelist=1'
+	var url = '/delivery/download/submit.url?downloadformat=ris&displayformat=abstract&timestamp=' + milli  + docidlist + '&handlelist=1'
 	//Z.debug("risurl: " + url)
 	return url;
 }
@@ -106,86 +106,5 @@ function doWeb(doc, url) {
 		});
 	}
 }/** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://www.engineeringvillage.com/search/doc/detailed.url?SEARCHID=Mff218bf140487b2273M28a4prod3con1&pageType=quickSearch&CID=quickSearchDetailedFormat&DOCINDEX=1&database=1&format=quickSearchDetailedFormat&tagscope=&displayPagination=yes",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"lastName": "Johnson",
-						"firstName": "Kent C.",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Durbin",
-						"firstName": "Thomas D.",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Jung",
-						"firstName": "Heejung",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Cocker",
-						"firstName": "David R.",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Bishnu",
-						"firstName": "Dipak",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Giannelli",
-						"firstName": "Robert",
-						"creatorType": "author"
-					}
-				],
-				"notes": [
-					{
-						"note": "<p>Compilation and indexing terms, Copyright 2012 Elsevier Inc.</p>"
-					}
-				],
-				"tags": [
-					"Air pollution control equipment",
-					"Automobiles",
-					"Engines",
-					"Organic carbon",
-					"Particulate emissions",
-					"Sea level"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Full Text (HTML)",
-						"mimeType": "text/html",
-						"downloadable": true
-					}
-				],
-				"title": "Quantifying in-use PM measurements for heavy duty diesel vehicles",
-				"journalAbbreviation": "Environmental Science and Technology",
-				"volume": "45",
-				"issue": "14",
-				"pages": "6073-6079",
-				"ISSN": "0013936X",
-				"place": "2540 Olentangy River Road, P.O. Box 3337, Columbus, OH 43210-3337, United States",
-				"publisher": "American Chemical Society",
-				"abstractNote": "Heavy duty emissions regulations have recently expanded from the laboratory to include in-use requirements. This paradigm shift to in-use testing has forced the development of portable emissions measurement systems (PEMS) for particulate matter (PM). These PM measurements are not trivial for laboratory work, and are even more complex for in-use testing. This study evaluates five PM PEMS in comparison to UCR's mobile reference laboratory under in-use conditions. Three on-highway, heavy-duty trucks were selected to provide PM emissions levels from 0.1 to 0.0003 g/hp-h, with varying compositions of elemental carbon (EC), organic carbon (OC), and sulfate. The on-road driving courses included segments near sea level, at elevations up to 1500 m, and coastal and desert regions. The photoacoustic measurement PEMS performed best for the non-aftertreatment system (ATS)-equipped engine, where the PM was mostly EC, with a linear regression slope of 0.91 and an R2 of 0.95. The PEMS did not perform as well for the 2007 modified ATS equipped engines. The best performing PEMS showed a slope of 0.16 for the ATS-equipped engine with predominantly sulfate emissions and 0.89 for the ATS-equipped engine with predominantly OC emissions, with the next best slope at 0.45 for the predominantly OC engine.  2011 American Chemical Society.",
-				"DOI": "10.1021/es104151v",
-				"date": "2011",
-				"publicationTitle": "Environmental Science and Technology",
-				"libraryCatalog": "Engineering Village"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.engineeringvillage.com/search/results/quick.url?CID=quickSearchCitationFormat&database=3&SEARCHID=13b46935140494bffd5M256fprod3con2&intialSearch=true&showpatentshelp=false",
-		"items": "multiple"
-	}
-]
+var testCases = []
 /** END TEST CASES **/
