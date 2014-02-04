@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-12-04 20:54:57"
+	"lastUpdated": "2014-02-04 12:09:00"
 }
 
 /*
@@ -47,7 +47,7 @@ function detectWeb(doc, url) {
 		return 'multiple';
 	}
 	//apparently URLs sometimes have upper case as in /Content/ArticleLanding/
-	if(url.search(/\/content\/articlelanding\//i) != -1) {
+	if(url.search(/\/content\/articlelanding\//i) != -1 && ZU.xpathText(doc, '//meta[@name="citation_title"]/@content')) {
 		return 'journalArticle';
 	}
 
