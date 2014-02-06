@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 5,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-01-15 08:59:36"
+	"lastUpdated": "2014-02-06 00:34:29"
 }
 
 function detectWeb(doc, url) {
@@ -209,7 +209,7 @@ function processTag(item, field, content) {
 			Zotero.debug("Unknown type: " + content);
 		}
 	} else if ((field == "AF" || field == "AU")) {
-		//Z.debug("author: " + content);
+		Z.debug("author: " + content);
 		authors = content.split("\n");
 		for each (var author in authors) {
 			author = author.replace(/\s+\(.*/, '');
@@ -398,9 +398,9 @@ function doImport(text) {
 		} else {
 			// otherwise, assume this is data from the previous line continued
 			if(tag == "AU" || tag == "AF" || tag == "BE") {
-				//Z.debug(rawLine);
+				Z.debug(rawLine);
 				// preserve line endings for AU fields
-				data += rawLine.replace(/^  /,"\n");
+				data += "\n" + rawLine;
 			} else if(tag) {
 				// otherwise, concatenate and avoid extra spaces
 				if(data[data.length-1] == " " || rawLine[0] == " ") {
@@ -994,6 +994,11 @@ var testCases = [
 					{
 						"firstName": "Cassandra A.",
 						"lastName": "Medvedeff",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Anne E.",
+						"lastName": "Hershey",
 						"creatorType": "author"
 					}
 				],
