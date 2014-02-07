@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-02-06 11:33:24"
+	"lastUpdated": "2014-02-06 19:18:32"
 }
 
 /*
@@ -196,7 +196,7 @@ function finalizeItem(item) {
 	}
 	delete item.creatorsBackup;
 	if (!item.itemType) item.itemType = inputTypeMap["Journal Article"];
-	item.title = item.title.replace(/(\.\s*)?(\[(Article|Report)\])?$/, "")
+	item.title = item.title.replace(/(\.\s*)?(\[(Article|Report|Miscellaneous)\])?$/, "")
 	var monthRegex =
 		/(Jan(uary)?|Feb(ruary)?|Mar(ch)?|Apr(il)?|May|Jun(e)?|Jul(y)?|Aug(ust)?|Sep(tember)?|Oct(ober)?|Nov(ember)?|Dec(ember)?)\.?/
 	var value = item.citation
@@ -276,6 +276,8 @@ function finalizeItem(item) {
 			item.publisher = item.publisher.replace(/,.+?$/, "")
 		}
 	}
+	if (item.ISBN) item.ISBN = ZU.cleanISBN(item.ISBN);
+	if (item.ISSN) item.ISSN = ZU.cleanISSN(item.ISSN);
 	if (item.libraryCatalog && item.libraryCatalog.indexOf("MEDLINE") != -1 && item.PMID) {
 		item.extra = item.PMID;
 		delete item.PMID;
@@ -314,8 +316,7 @@ var testCases = [
 				"libraryCatalog": "BIOSIS Previews",
 				"rights": "Copyright Thomson 2004.",
 				"title": "Dietary supplements containing ultradense calcium citrate and carbonyl iron",
-				"citation": "Official Gazette of the United States Patent & Trademark Office Patents. 1288(3), Nov. 16, 2004.",
-				"ISSN": "0098-1133 (ISSN print)",
+				"ISSN": "0098-1133",
 				"patentNumber": "US 6818228",
 				"issueDate": "November 16, 2004",
 				"language": "English",
@@ -348,8 +349,7 @@ var testCases = [
 				"libraryCatalog": "BIOSIS Previews",
 				"rights": "Copyright Thomson 2004.",
 				"title": "Comparison of methods for sampling Thysanoptera on basswood (Tilia americana L.) trees in mixed northern hardwood deciduous forests",
-				"citation": "Forest Ecology & Management. 201(2-3):327-334, November 15, 2004.",
-				"ISSN": "0378-1127 (ISSN print)",
+				"ISSN": "0378-1127",
 				"language": "English",
 				"abstractNote": "Canopy arthropods play integral roles in the functioning, biodiversity, and productivity of forest ecosystems. Yet quantitative sampling of arboreal arthropods poses formidable challenges. We evaluated three methods of sampling the introduced basswood thrips, Thrips calcaratus Uzel (Thysanoptera: Thripidae), from the foliage of basswood canopies with respect to statistical variability and practical considerations (legal, economic and logistical accessibility). All three methods involved removal of foliage, which was performed using a pole-pruner, shotgun, and certified tree-climber. We also tested a fourth method, in which the tree-climber enclosed samples in a plastic bag to estimate losses that occur when branches fall to the ground, even though this is often not practical. The climber plus bag and pole-pruning methods obtained the highest numbers of thrips. Mean number of larval thrips did not vary significantly among the three main sampling methods. Site had a stronger effect on the number of larval thrips obtained than on the number of adults. A significant method by site interaction was observed with adults but not larvae. Significant collection date (which corresponds to thrips life stage) by site interaction was also observed. We regressed sampling methods to determine if the number of thrips obtained using one method can be used to predict the number obtained with another. Tree-climber and pole-pruner data were highly predictive of each other, but shotgun data cannot be used to estimate other methods. Pole-pruning is the most cost-effective and legally permissible technique, but is limited to trees with accessible lower branches. The shotgun method is cost-effective and useful in sampling trees at least up to 27 m, but is prohibited close to human activity. The tree-climber is effective and broadly applicable, but incurs the highest costs. This study shows the need to evaluate a variety of techniques when sampling arboreal insects with respect to predictability, pragmatics and life stages. Copyright 2004, Elsevier B.V. All rights reserved.",
 				"date": "2004 November",
@@ -419,8 +419,7 @@ var testCases = [
 				"libraryCatalog": "BIOSIS Previews",
 				"rights": "Copyright Thomson 2004.",
 				"title": "Increasing throughput and data quality for proteomics",
-				"citation": "Kamp, Roza Maria [Editor, Reprint Author], Calvete, Juan J. [Editor], Choli-Papadopoulou, Theodora [Editor]. Methods in proteome and protein analysis.:371-397, 2004. Series Information:  Principles and Practice.",
-				"ISBN": "3-540-20222-6 (cloth)",
+				"ISBN": "3540202226",
 				"language": "English",
 				"date": "2004",
 				"pages": "371-397",
@@ -462,8 +461,7 @@ var testCases = [
 				"libraryCatalog": "BIOSIS Previews",
 				"rights": "Copyright Thomson 2004.",
 				"title": "Peak Erazor: A Windows-based program for improving peptide mass searches",
-				"citation": "Kamp, Roza Maria [Editor, Reprint Author], Calvete, Juan J. [Editor], Choli-Papadopoulou, Theodora [Editor]. Methods in proteome and protein analysis.:359-370, 2004. Series Information:  Principles and Practice.",
-				"ISBN": "3-540-20222-6 (cloth)",
+				"ISBN": "3540202226",
 				"language": "English",
 				"date": "2004",
 				"pages": "359-370",
@@ -490,10 +488,8 @@ var testCases = [
 				"attachments": [],
 				"libraryCatalog": "International Political Science Abstract",
 				"title": "Legitimacy crises in Pakistan",
-				"citation": "Journal of Political Studies 12, Winter 2007: 7-14.",
 				"abstractNote": "This paper presents a thorough review of legality of governments in Pakistan. It suggests that how non-political rulers have legalized their authority within the political system of Pakistan. This paper analyzes the behavior of dictators and their supporters and even opponents which legitimize unconstitutional actions taken by dictators. Analytical and political interaction approach is adopted in this paper. Another object of this discussion is to analyze the behavior of politicians and the judiciary about the legitimacy of dictators' rule. [R]",
 				"language": "English",
-				"ISSN": "1991-1080",
 				"date": "2007",
 				"pages": "7-14",
 				"publicationTitle": "Journal of Political Studies 12"
@@ -513,7 +509,6 @@ var testCases = [
 				"attachments": [],
 				"libraryCatalog": "International Political Science Abstract",
 				"title": "Contributions to transformative change in Cambodia: a study on returnees as institutional entrepreneurs",
-				"citation": "Journal of Current Southeast Asian Affairs, 2013(1): 3-28.",
 				"abstractNote": "This paper explores the experiences of Cambodian French returnees who are contributing to transformative change in Cambodia as institutional entrepreneurs. In order to delve into how returnees and their work are perceived in both host and home country, this multi-sited research project was designed as a comparative case study. Data were primarily collected through conversations with individual informants from the Lyonnese and Parisian Cambodian community as well as selected key informants in Phnom Penh. Excerpts of case studies are presented and discussed to illustrate the history, context and situation of their return as these influence their institutional entrepreneurial activities and the ways in which they use their transnational social networks as resources. [R, abr.]",
 				"language": "English",
 				"ISSN": "1868-1034",
@@ -543,8 +538,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"libraryCatalog": "Journals@Ovid",
-				"title": "Take Ten: Need-to-Know Facts About Breast Cancer.  [Miscellaneous]",
-				"citation": "ACSM'S Health & Fitness Journal January/February 2010;14(1):56",
+				"title": "Take Ten: Need-to-Know Facts About Breast Cancer",
 				"language": "English.",
 				"ISSN": "1091-5397",
 				"DOI": "10.1249/FIT.0b013e3181c6723d",
@@ -602,7 +596,6 @@ var testCases = [
 				"attachments": [],
 				"libraryCatalog": "Journals@Ovid",
 				"title": "Up-regulation of breast cancer resistance protein plays a role in HER2-mediated chemoresistance through PI3K/Akt and nuclear factor-kappa B signaling pathways in MCF7 breast cancer cells",
-				"citation": "Acta Biochimica et Biophysica Sinica August 2011;43(8):647-653",
 				"abstractNote": "Human epidermal growth factor receptor 2 (HER2/neu, also known as ErbB2) overexpression is correlated with the poor prognosis and chemoresistance in cancer. Breast cancer resistance protein (BCRP and ABCG2) is a drug efflux pump responsible for multidrug resistance (MDR) in a variety of cancer cells. HER2 and BCRP are associated with poor treatment response in breast cancer patients, although the relationship between HER2 and BCRP expression is not clear. Here, we showed that transfection of HER2 into MCF7 breast cancer cells (MCF7/HER2) resulted in an up-regulation of BCRP via the phosphatidylinositol 3-kinase (PI3K)/Akt and nuclear factor-kappa B (NF-[kappa]B) signaling. Treatment of MCF/HER2 cells with the PI3K inhibitor LY294002, the I[kappa]B phosphorylation inhibitor Bay11-7082, and the dominant negative mutant of I[kappa]B[alpha] inhibited HER2-induced BCRP promoter activity. Furthermore, we found that HER2 overexpression led to an increased resistance of MCF7 cells to multiple antitumor drugs such as paclitaxel (Taxol), cisplatin (DDP), etoposide (VP-16), adriamycin (ADM), mitoxantrone (MX), and 5-fluorouracil (5-FU). Moreover, silencing the expression of BCRP or selectively inhibiting the activity of Akt or NF-[kappa]B sensitized the MCF7/HER2 cells to these chemotherapy agents at least in part. Taken together, up-regulation of BCRP through PI3K/AKT/NF-[kappa]B signaling pathway played an important role in HER2-mediated chemoresistance of MCF7 cells, and AKT, NF-[kappa]B, and BCRP pathways might serve as potential targets for therapeutic intervention., Copyright (C) 2011 Blackwell Publishing Ltd.",
 				"language": "English.",
 				"ISSN": "1672-9145",
@@ -643,7 +636,6 @@ var testCases = [
 				"attachments": [],
 				"libraryCatalog": "Journals@Ovid",
 				"title": "Brain Metastasis after Breast Cancer and Hysterectomy for a Benign Leiomyoma",
-				"citation": "Acta Chirurgica Belgica November/December 2010;6:611-613",
 				"language": "English.",
 				"ISSN": "0001-5458",
 				"date": "2010 November",
@@ -675,7 +667,6 @@ var testCases = [
 				"attachments": [],
 				"libraryCatalog": "Your Journals@Ovid",
 				"title": "Lobular Breast Carcinoma Metastasis to a Superficial Plexiform Schwannoma as the First Evidence of an Occult Breast Cancer",
-				"citation": "American Journal of Dermatopathology December 2011;33(8):845-849",
 				"abstractNote": "Tumor to tumor metastasis is a rare phenomenon, in which one, benign or malignant, tumor is involved by metastatic deposits from another. Most documented tumor to tumor metastases have been located intracranially, in which, in the majority of cases, either a breast or a lung carcinoma metastasized to a meningioma. Only 7 cases of metastases to schwannoma have so far been reported in the English literature, in 6 cases to an intracranial acoustic schwannoma and in a single case to a subcutaneous schwannoma. We present a case of dermal/subcutaneous plexiform schwannoma containing metastatic deposits of an occult lobular breast carcinoma, creating a unique schwannoma with epithelioid cells. Differential diagnosis of schwannoma with epithelioid cells includes malignant transformation of schwannoma and metastasis of a carcinoma or melanoma to schwannoma, epithelioid schwannoma, and schwannoma with glandular or pseudo glandular elements., (C) 2011 Lippincott Williams & Wilkins, Inc.",
 				"language": "English.",
 				"ISSN": "0193-1091",
