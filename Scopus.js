@@ -9,12 +9,12 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2013-02-12 10:29:34"
+	"lastUpdated": "2014-02-07 12:11:38"
 }
 
 /*
    Scopus Translator
-   Copyright (C) 2008-2013 Center for History and New Media and Sebastian Karcher
+   Copyright (C) 2008-2014 Center for History and New Media and Sebastian Karcher
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU Affero General Public License as published by
@@ -44,11 +44,8 @@ function getEID(url) {
 }
 
 function getBoxes(doc) {
-	return doc.evaluate('//div[@id="resultsBody"]//div[@class="fldtextPad"][1]', doc, null, XPathResult.ANY_TYPE, null);
-}
 
-function returnURL(eid) {
-	return 'http://www.scopus.com/citation/output.url?origin=recordpage&eid=' + eid + '&src=s&view=FullDocument&outputType=export';
+	return doc.evaluate('//div[@id="resultsBody"]//span[@class="docTitle"]', doc, null, XPathResult.ANY_TYPE, null);
 }
 
 function doWeb(doc, url) {
@@ -70,7 +67,6 @@ function doWeb(doc, url) {
 	} else {
 		scrape(doc, url);
 	}
-	Zotero.wait();
 }
 
 function scrape(doc, url) {
@@ -78,28 +74,23 @@ function scrape(doc, url) {
 	var doi = ZU.xpathText(doc, '//div[contains(@class, "formatSourceExtended")]/span[strong[contains(text(), "DOI:")]]');
 	var ISSN = ZU.xpathText(doc, '//div[contains(@class, "formatSourceExtended")]/span[strong[contains(text(), "ISSN:")]]');
 	var ISBN = ZU.xpathText(doc, '//div[contains(@class, "formatSourceExtended")]/span[strong[contains(text(), "ISBN:")]]');
-	var language = ZU.xpathText(doc, '//div[contains(@class, "formatSourceExtended")]/span[strong[contains(text(), "Original language:")]]')
-	articles = [returnURL(getEID(url))];
-	var article = articles.shift();
-	Zotero.Utilities.doGet(article, function(text, obj) {
-		var stateKey = text.match(/<input[^>]*name="stateKey"[^>]*>/);
-		if (!stateKey) Zotero.debug("No stateKey");
-		else stateKey = stateKey[0].match(/value="([^"]*)"/)[1];
-		var eid = text.match(/<input[^>]*name="eid"[^>]*>/);
-		if (!eid) Zotero.debug("No eid");
-		else eid = eid[0].match(/value="([^"]*)"/)[1];
-		var get = 'http://www.scopus.com/citation/export.url';
-		var post = 'origin=recordpage&sid=&src=s&stateKey=' + stateKey + '&eid=' + eid + '&sort=&exportFormat=RIS&view=CiteAbsKeyws&selectedCitationInformationItemsAll=on';
-		var rislink = get + "?" + post;	
+	var language = ZU.xpathText(doc, '//div[contains(@class, "formatSourceExtended")]/span[strong[contains(text(), "Original language:")]]');
+		var get = 'https://' + doc.location.host + 
+		'/onclick/export.url?oneClickExport=%7b%22Format%22%3a%22RIS%22%2c%22View%22%3a%22CiteAbsKeyws%22%7d&origin=recordpage&eid=';
+		//this is the encoded version of oneClickExport={"Format":"RIS","View":"CiteAbsKeyws"} but since it's always the same, no need to run encodeURL
+		var eid = getEID(url)
+		var rislink = get + eid;	
+		Z.debug(rislink)
 		Zotero.Utilities.HTTP.doGet(rislink, function(text) {
 			// load translator for RIS
+			//Z.debug(text)
 			if (text.search(/T2  -/)!=-1 && text.search(/JF  -/)!=-1){
 				//SCOPUS RIS mishandles alternate titles and journal titles
 				//if both fields are present, T2 is the alternate title and JF the journal title
 				text = text.replace(/T2  -/, "N1  -" ).replace(/JF  -/, "T2  -");
 				
 			}
-			Z.debug(text)
+
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			translator.setString(text);
@@ -112,16 +103,13 @@ function scrape(doc, url) {
 				}
 				item.notes = notes;
 				item.url = "";
+				item.attachments.push({document: doc, title: "SCOPUS Snapshot", mimeType: "text/html"});
 				if (doi) item.DOI = doi.replace(/DOI:/, "").trim();
-				if (ISSN) item.ISSN = ISSN.replace(/ISSN:/, "").trim();
-				if (ISBN) item.ISBN = ISBN.replace(/ISBN:/, "").trim();
+				if (ISSN) item.ISSN = ZU.cleanISSN(ISSN);
+				if (ISBN) item.ISBN = ZU.cleanISBN(ISBN);
 				if (language) item.language = language.replace(/Original language:/, "").trim();
 				item.complete();
 			});
 			translator.translate();
-		}, function() { 
-			if (articles.length > 0) scrape(articles);
-			else Zotero.done();
-		});
-	});
+		});;
 }
