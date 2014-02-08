@@ -311,7 +311,9 @@ function init(doc, url, callback, forceLoadRDF) {
 				var statement = statements[i];			
 				rdf.Zotero.RDF.addStatement(statement[0], statement[1], statement[2], true);
 			}
-
+			//see what we pushed to RDF
+			//Z.debug(rdf.Zotero.RDF.serialize());
+			
 			var nodes = rdf.getNodes(true);
 			rdf.defaultUnknownType = hwType || hwTypeGuess || generatorType ||
 				//if we have RDF data, then default to webpage
