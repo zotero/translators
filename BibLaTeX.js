@@ -8,13 +8,14 @@
 	"maxVersion": "null",
 	"priority": 100,
 	"inRepository": true,
+	"configOptions":{"getCollections":"true"},
 	"displayOptions": {
 		"exportCharset": "UTF-8",
 		"exportNotes": false,
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
-	"lastUpdated": "2014-01-17 07:55"
+	"lastUpdated": "2014-02-13 22:00"
 }
 
 
@@ -102,10 +103,15 @@ var alwaysMap = {
 };
 
 
-//to map ISO language codes to babel/polyglossia language codes used
-//in biblates.
-//from list of supported languages in biblatex 2.8
-var languageMap = {
+//to map ISO language codes (tries to follow IETF RFC5646) to babel
+//language codes used in biblatex. Taken from Babel manual 3.9h.
+var babelLanguageMap = {
+	"af": "afrikaans",
+	"ar": "arabic",
+	//bahasa (see malay and indonesian)
+	"eu": "basque",
+	"br": "breton",
+	"bg": "bulgarian",
 	"ca": "catalan",
 	"hr": "croatian",
 	"cz": "czech",
@@ -119,28 +125,80 @@ var languageMap = {
 		"AU": "australian",
 		"NZ": "newzealand"
 	},
+	"eo": "esperanto",
+	"et": "estonian",
+	//ethiop (package for many languages)
+	"fa": "farsi",
 	"fi": "finnish",
-	"fr": "french",
+	"fr": {
+		"": "french",
+		"CA": "canadien"
+		//frenchle (a special package)
+	},
+	"fur": "friulan",
+	"gl": "galician",
 	"de": {
 		"": "german",
-		"AT": "austrian"
+		"AT": "austrian",
+		"DE-1996": "ngerman", //these are valid IETF language codes
+		"AT-1996": "naustrian",
+		"1996": "ngerman"
 	},
-	//	"de":"ngerman", //FIXME: should ngerman be available via some hack?
-	//	"de-AT":"naustrian", //FIXME: same problem here
-	"el": "greek",
+	"el": {
+		"": "greek",
+		"polyton": "polutonikogreek"
+	},
+	"he": "hebrew",
+	"hi": "hindi",
+	"is": "icelandic",
+	"id": "indonesian", //aliases: bahasai, indon
+	"ia": "interlingua",
+	"ga": "irish",
 	"it": "italian",
-	"nn": "norwegian",
+	"ja": "japanese",
+	"la": "latin",
+	"lv": "latvian",
+	"lt": "lithuanian",
+	"dsb": "lowersorbian",
+	"hu": "magyar",
+	"zlm": "malay", //aliases: bahasam, melayu (currently, there's no
+	//real difference between bahasam and bahasai in babel)
+	"mn": "mongolian",
+	"se": "samin",
+	"nn": "nynorsk", //nynorsk
+	"nb": "norsk", //bokmål
+	"no": "norwegian", //"no" could be used, norwegian is an alias for "norsk" in babel
+	"zh": {
+		"": "pinyin", //only supported chinese in babel is the romanization pinyin?
+		"Latn": "pinyin"
+	},
 	"pl": "polish",
-	"pt-BR": "brazil",
-	"pt-PT": "portugese",
 	"pt": {
 		"": "portuguese",
 		"PT": "portuguese",
 		"BR": "brazil"
 	},
+	"ro": "romanian",
+	"rm": "romansh",
 	"ru": "russian",
+	"gd": "scottish",
+	"sr": {
+		"": "serbian", //latin script as default?
+		"Cyrl": "serbianc",
+		"Latn": "serbian",
+	},
+	"sk": "slovak",
+	"sl": "slovene",
+	//spanglish (pseudo language)
 	"es": "spanish",
 	"sv": "swedish",
+	"th": "thaicjk", //thaicjk preferred?
+	"tr": "turkish",
+	"tk": "turkmen",
+	"uk": "ukrainian",
+	"hsb": "uppersorbian",
+	"vi": "vietnamese",
+	"cy": "welsh",
 };
 
 
@@ -257,6 +315,18 @@ var citeKeyConversions = {
 	}
 }
 
+//checks whether an item contains any creator of type ctype
+function creatorCheck(item, ctype) {
+	if (item.creators && item.creators.length) {
+		for (var i in item.creators) {
+			if (item.creators[i].creatorType == ctype) {
+				return true; //found a ctype creator
+			}
+		}
+	}
+	//didn't find any ctype creator (or no creators at all)
+	return false;
+}
 
 	function buildCiteKey(item, citekeys) {
 		var basekey = "";
@@ -327,8 +397,18 @@ var citeKeyConversions = {
 				type = type(item);
 			}
 
+			//inbook is reasonable at times, using a bookauthor should
+			//indicate this
+			if(item.itemType == "bookSection" &&
+			   creatorCheck(item, "bookAuthor")) type = "inbook";
+
+			//a book without author but with editors is a collection
+			if(item.itemType == "book" && !creatorCheck(item,"author") &&
+			   creatorCheck(item, "editor")) type = "collection";
+
 			//biblatex recommends us to use mvbook for multi-volume books
 			if (type == "book" && item.volume) type = "mvbook"
+
 			if (!type) type = "misc";
 
 			var citekey = "";
@@ -406,6 +486,9 @@ var citeKeyConversions = {
 				}
 			} else if (item.itemType == "email") {
 				writeField("type", "E-mail");
+			} else if (item.itemType == "thesis" &&
+					   (!item.thesisType || item.thesisType.search(/ph\.?d/i) != -1)) {
+				writeField("type", "phdthesis");
 			} else if (item.manuscriptType || item.thesisType || item.websiteType || item.presentationType || item.reportType || item.mapType) {
 				writeField("type", item.manuscriptType || item.thesisType || item.websiteType || item.presentationType || item.reportType || item.mapType);
 			}
@@ -456,7 +539,8 @@ var citeKeyConversions = {
 				var translator = "";
 				var noEscape = false;
 
-				for each(var creator in item.creators) {
+				for (var i in item.creators) {
+					var creator = item.creators[i];
 					var creatorString = creator.lastName;
 
 					if (creator.firstName && creator.lastName) {
@@ -526,18 +610,21 @@ var citeKeyConversions = {
 
 			//Map Languages to biblatex-field "langid" (used for
 			//hyphenation with a correct setting of the "autolang" option)
-			//if possible. See languageMap above for languagecodes to use
+			//if possible. See babelLanguageMap above for languagecodes to use
 			if (item.language) {
-				var lang = languageMap[item.language.slice(0, 2)]
-				if (typeof lang == 'string' || lang instanceof String) {
-					//if there are no variants for this language
-					writeField("langid", lang);
-				} else if (typeof lang == 'object') {
-					var variant = lang[item.language.slice(3, 5)];
-					if (variant) {
-						writeField("langid", variant);
-					} else {
-						writeField("langid", lang[""]); //use default variant
+				var langcode = item.language.match(/^([a-z]{2,3})(?:[^a-z](.+))?$/i); //not too strict
+				if(langcode){
+					var lang = babelLanguageMap[langcode[1]];
+					if (typeof lang == 'string') {
+						//if there are no variants for this language
+						writeField("langid", lang);
+					} else if (typeof lang == 'object') {
+						var variant = lang[langcode[2]];
+						if (variant) {
+							writeField("langid", variant);
+						} else {
+							writeField("langid", lang[""]); //use default variant
+						}
 					}
 				}
 			}
@@ -548,8 +635,8 @@ var citeKeyConversions = {
 
 			if (item.tags && item.tags.length) {
 				var tagString = "";
-				for each(var tag in item.tags) {
-					tagString += ", " + tag.tag;
+				for (var i in item.tags) {
+					tagString += ", " + item.tags[i].tag;
 				}
 				writeField("keywords", tagString.substr(2));
 			}
