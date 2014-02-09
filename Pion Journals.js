@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-13 07:33:49"
+	"lastUpdated": "2014-02-09 12:26:39"
 }
 
 function detectWeb(doc, url) {
@@ -45,7 +45,7 @@ function doWeb(doc, url) {
 function scrape(doc, url){
 		var item = new Zotero.Item("journalArticle");
 		item.publicationTitle = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="footer"]/div[@class="left"]/i', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-		item.title = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="total"]/p[2]/font/b', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		item.title = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="total"]/p[2]//b', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 		var authors = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="total"]/p[3]/b', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent).split(/,\s*/);
 		for each (var aut in authors) {
 			item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
@@ -120,6 +120,47 @@ var testCases = [
 				"libraryCatalog": "Pion Journals",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Bricks, butter, and slices of cucumber"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.envplan.com/abstract.cgi?id=a311901",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "P. J.",
+						"lastName": "Taylor",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Environment and Planning A Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Environment and Planning A Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"publicationTitle": "Environment and Planning A",
+				"title": "CommentarySo-called 'world cities': the evidential structure within a literature",
+				"date": "1999",
+				"volume": "31",
+				"issue": "11",
+				"pages": "1901 – 1904",
+				"DOI": "10.1068/a311901",
+				"url": "http://www.envplan.com/abstract.cgi?id=a311901",
+				"abstractNote": "b = 'pion';",
+				"libraryCatalog": "Pion Journals",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "CommentarySo-called 'world cities'"
 			}
 		]
 	}
