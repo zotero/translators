@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 5,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-02-06 00:34:29"
+	"lastUpdated": "2014-02-10 00:34:29"
 }
 
 function detectWeb(doc, url) {
@@ -86,6 +86,7 @@ function getOutputForm(doc) {
 }
 
 function importISIRecord(text) {
+	Z.debug(text);
 	var importer = Zotero.loadTranslator("import");
 	importer.setTranslator("594ebe3c-90a0-4830-83bc-9502825a6810");
 	importer.setString(text);
@@ -209,7 +210,7 @@ function processTag(item, field, content) {
 			Zotero.debug("Unknown type: " + content);
 		}
 	} else if ((field == "AF" || field == "AU")) {
-		Z.debug("author: " + content);
+		//Z.debug("author: " + content);
 		authors = content.split("\n");
 		for each (var author in authors) {
 			author = author.replace(/\s+\(.*/, '');
@@ -398,7 +399,7 @@ function doImport(text) {
 		} else {
 			// otherwise, assume this is data from the previous line continued
 			if(tag == "AU" || tag == "AF" || tag == "BE") {
-				Z.debug(rawLine);
+				//Z.debug(rawLine);
 				// preserve line endings for AU fields
 				data += "\n" + rawLine;
 			} else if(tag) {
