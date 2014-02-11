@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-02-06 19:18:32"
+	"lastUpdated": "2014-02-10 19:08:44"
 }
 
 /*
@@ -197,15 +197,15 @@ function finalizeItem(item) {
 	delete item.creatorsBackup;
 	if (!item.itemType) item.itemType = inputTypeMap["Journal Article"];
 	item.title = item.title.replace(/(\.\s*)?(\[(Article|Report|Miscellaneous)\])?$/, "")
-	var monthRegex =
-		/(Jan(uary)?|Feb(ruary)?|Mar(ch)?|Apr(il)?|May|Jun(e)?|Jul(y)?|Aug(ust)?|Sep(tember)?|Oct(ober)?|Nov(ember)?|Dec(ember)?)\.?/
+	var monthRegex = new ZU.XRegExp('([-/]?(Jan(uary)?|Feb(ruary)?|Mar(ch)?|Apr(il)?|May|Jun(e)?|Jul(y)?|Aug(ust)?|Sep(tember)?|Oct(ober)?|Nov(ember)?|Dec(ember)?))+', 'n');
 	var value = item.citation
 	if (!value && item.itemType == "bookSection") value = item.bookTitle
 	if (item.itemType == "journalArticle" && value) {
 		if (value.match(/\d{4}/)) {
 			if (!item.date) item.date = value.match(/\d{4}/)[0];
 		}
-		if (value.match(monthRegex)) item.date = item.date += " " + value.match(monthRegex)[0];
+		var month = ZU.XRegExp.exec(value, monthRegex); 
+		if (month) item.date = item.date += " " + (month)[0];
 		if (value.match(/(\d+)\((\d+(?:\-\d+)?)\)/)) {
 			var voliss = value.match(/(\d+)\((\d+(?:\-\d+)?)\)/);
 
@@ -226,7 +226,7 @@ function finalizeItem(item) {
 		} else {
 			item.publicationTitle = Zotero.Utilities.trimInternal(value.split(/(\.|;|(,\s*vol\.))/)[0]);
 		}
-		item.publicationTitle = item.publicationTitle.split(monthRegex)[0]
+		item.publicationTitle = item.publicationTitle.split(monthRegex)[0];
 	}
 	if (item.itemType == "bookSection" && value) {
 		if (value.match(/:\s*\d+\-\d+/)) item.pages = value.match(/:\s*(\d+\-\d+)/)[1];
@@ -542,7 +542,7 @@ var testCases = [
 				"language": "English.",
 				"ISSN": "1091-5397",
 				"DOI": "10.1249/FIT.0b013e3181c6723d",
-				"date": "2010 January",
+				"date": "2010 January/February",
 				"volume": "14",
 				"issue": "1",
 				"publicationTitle": "Journal"
@@ -638,7 +638,7 @@ var testCases = [
 				"title": "Brain Metastasis after Breast Cancer and Hysterectomy for a Benign Leiomyoma",
 				"language": "English.",
 				"ISSN": "0001-5458",
-				"date": "2010 November",
+				"date": "2010 November/December",
 				"volume": "6",
 				"pages": "611-613",
 				"publicationTitle": "Acta Chirurgica Belgica"
