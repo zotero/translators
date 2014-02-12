@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-08-28 18:14:51"
+	"lastUpdated": "2014-02-12 01:15:22"
 }
 
 function detectImport() {
@@ -563,6 +563,23 @@ record.prototype.translate = function(item) {
 			item.title = item.title + ": " + this.getFieldSubfields("335")[0]['a'];
 		}
 	}
+	//editors get mapped as contributors - but so do many others who should be
+	// --> for books that don't have an author, turn contributors into editors.
+	if (item.itemType=="book"){
+		var hasAuthor = false;
+		for (var i=0; i<item.creators.length; i++) {
+			if (item.creators[i].creatorType=="author") {
+				hasAuthor = true;
+			}
+		}
+		if (!hasAuthor) {
+			for (var i=0; i<item.creators.length; i++) {
+		 		if (item.creators[i].creatorType=="contributor") {
+					item.creators[i].creatorType="editor";
+				}
+			}
+		}
+	}	
 }
 
 function doImport() {
