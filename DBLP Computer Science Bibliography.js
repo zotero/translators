@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-02-09 16:59:54"
+	"lastUpdated": "2014-02-12 06:58:30"
 }
 
 function detectWeb(doc, url) {
@@ -275,7 +275,7 @@ var testCases = [
 						"creatorType": "editor"
 					},
 					{
-						"firstName": "José D. P.",
+						"firstName": "JosÃ© D. P.",
 						"lastName": "Rolim",
 						"creatorType": "editor"
 					}
