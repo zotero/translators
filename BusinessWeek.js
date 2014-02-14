@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-09-19 00:06:33"
+	"lastUpdated": "2014-02-14 00:21:11"
 }
 
 function detectWeb(doc, url) {
@@ -101,7 +101,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [],
 				"title": "Ten Things Only Bad Managers Say",
-				"abstractNote": "We know the kinds of things good managers say: They say “Attaboy” or “Attagirl,” “Let me know if you run into any roadblocks, and I’ll try to get rid of them for you,” and “You’ve been killing yourself—why don’t you take off at noon on Friday?”",
+				"abstractNote": "Nope, it's not just you. These jerks are out there",
 				"publicationTitle": "BusinessWeek: management",
 				"url": "http://www.businessweek.com/management/ten-things-only-bad-managers-say-09232011.html?campaign_id=rss_topStories",
 				"date": "2011-09-23",

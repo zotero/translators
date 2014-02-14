@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-12-18 00:16:20"
+	"lastUpdated": "2014-02-14 00:20:16"
 }
 
 function detectWeb(doc, url) {
@@ -205,6 +205,7 @@ var testCases = [
 					"academic development",
 					"arts and sciences",
 					"cutting arts and humanities",
+					"guest post",
 					"Humanities and Social Science Knowledge",
 					"humanities disciplines",
 					"public purpose",

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-17 03:09:28"
+	"lastUpdated": "2014-02-14 00:18:56"
 }
 
 /*
@@ -37,7 +37,7 @@ function detectWeb(doc,url) {
 		return "journalArticle";
 	}
 			
-	if (ZU.xpathText(doc, '//div[@class="content"]//div[@class="specs"]/div[@class="title" or contains(@class, "articleBookList")]')) {
+	if (ZU.xpathText(doc, '//div[contains(@class, "list_articles")]//div[contains(@class, "article") or contains(@class, "articleBookList")]')) {
 		return "multiple";
 	}
 
@@ -52,17 +52,13 @@ function doWeb(doc,url)
 		var urls = [];
 		var title;
 		var link;
-		var resultsrow = ZU.xpath(doc, '//div[@class="content"]//div[@class="specs"]/div[contains(@class, "articleBookList")]');
-		if (resultsrow.length <1){
-			var resultsrow = ZU.xpath(doc, '//div[@class="content"]//div[@class="specs"]');
-			Z.debug(resultsrow.length)
-		}	
+		var resultsrow = ZU.xpath(doc, '//div[contains(@class, "list_articles")]//div[contains(@class, "article")]');
 		for (var i in resultsrow) {
-			title = ZU.xpathText(resultsrow[i], './div[@class="bookDescription"]/div[@class="title"]');
+			title = ZU.xpathText(resultsrow[i], './div[@class="wrapper_meta"]//div[@class="title"]');
 			if (!title){
-				title = ZU.xpathText(resultsrow[i], './div[@class="title"]/text()');
+				title = ZU.xpathText(resultsrow[i], './/div[@class="wrapper_title"]/h2/text()');
 			}
-			link = ZU.xpathText(resultsrow[i], './/div[@class="links"]/span[@class="St1LIGNE" or @class="StRES"][1]/a/@href');
+			link = ZU.xpathText(resultsrow[i], './/div[@class="state"]/a[1]/@href');
 			//Z.debug(title + ": " + link)
 			hits[link] = title.replace(/^[\s\,]+/, "").trim();
 		}

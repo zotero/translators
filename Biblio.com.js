@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-02-27 11:58:08"
+	"lastUpdated": "2014-01-19 23:44:31"
 }
 
 function detectWeb(doc, url) {
@@ -40,11 +40,10 @@ function scrape(doc, url) {
 	
 	var newItem = new Zotero.Item("book");
 
-	var content = doc.evaluate('//ul[@class="bd-details-list"]/li', doc, null, XPathResult.ANY_TYPE,  null);
-	var xPathCount = doc.evaluate('count (//ul[@class="bd-details-list"]/li)', doc, null, XPathResult.ANY_TYPE,  null);
+	var content = doc.evaluate('//div[@id="description"]/ul/li', doc, null, XPathResult.ANY_TYPE,  null);
+	var xPathCount = doc.evaluate('count (//div[@id="description"]/ul/li)', doc, null, XPathResult.ANY_TYPE,  null);
 	
 	for (i=0; i<xPathCount.numberValue; i++) {	 	
-	 			
 	 		contents = content.iterateNext().textContent.split(": ");
 	 		if (contents.length>1){
 	 		fieldTitle = contents[0].replace(/\s*/g, '');
