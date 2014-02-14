@@ -15,7 +15,7 @@
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
-	"lastUpdated": "2014-02-13 22:00"
+	"lastUpdated": "2014-02-13 23:25"
 }
 
 
@@ -318,7 +318,7 @@ var citeKeyConversions = {
 //checks whether an item contains any creator of type ctype
 function creatorCheck(item, ctype) {
 	if (item.creators && item.creators.length) {
-		for (var i in item.creators) {
+		for (var i=0; i<item.creators.length; i++) {
 			if (item.creators[i].creatorType == ctype) {
 				return true; //found a ctype creator
 			}
@@ -539,7 +539,7 @@ function creatorCheck(item, ctype) {
 				var translator = "";
 				var noEscape = false;
 
-				for (var i in item.creators) {
+				for (var i=0; i<item.creators.length; i++) {
 					var creator = item.creators[i];
 					var creatorString = creator.lastName;
 
@@ -635,7 +635,7 @@ function creatorCheck(item, ctype) {
 
 			if (item.tags && item.tags.length) {
 				var tagString = "";
-				for (var i in item.tags) {
+				for (var i=0; i<item.tags.length; i++) {
 					tagString += ", " + item.tags[i].tag;
 				}
 				writeField("keywords", tagString.substr(2));
@@ -643,7 +643,7 @@ function creatorCheck(item, ctype) {
 
 
 			if (item.notes && Zotero.getOption("exportNotes")) {
-				for (var i in item.notes) {
+				for (var i=0; i<item.notes.length; i++) {
 					var note = item.notes[i];
 					writeField("annotation", Zotero.Utilities.unescapeHTML(note["note"]));
 				}
@@ -652,7 +652,7 @@ function creatorCheck(item, ctype) {
 			if (item.attachments) {
 				var attachmentString = "";
 
-				for (var i in item.attachments) {
+				for (var i=0; i<item.attachments.length; i++) {
 					var attachment = item.attachments[i];
 					if (Zotero.getOption("exportFileData") && attachment.saveFile) {
 						attachment.saveFile(attachment.defaultPath, true);
