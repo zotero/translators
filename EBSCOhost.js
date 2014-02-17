@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-10-30 02:42:32"
+	"lastUpdated": "2014-02-16 19:09:02"
 }
 
 function detectWeb(doc, url) {
@@ -21,6 +21,9 @@ function detectWeb(doc, url) {
 
 	var persistentLink = doc.getElementsByClassName("permalink-link");
 	if(persistentLink.length && persistentLink[0].nodeName.toUpperCase() == 'A') {
+		return "journalArticle";
+	}
+	else if(ZU.xpathText(doc, '//section[@class="record-header"]/h2')){
 		return "journalArticle";
 	}
 }
@@ -156,38 +159,54 @@ function downloadFunction(text, url, prefs) {
 			item.complete();
 		} else if(prefs.fetchPDF) {
 			var arguments = urlToArgs(url);
-			var pdf = "/ehost/pdfviewer/pdfviewer?"
-				+ "sid=" + arguments["sid"]
-				+ "&vid=" + arguments["vid"];
-			Z.debug("Fetching PDF from " + pdf);
+			if (prefs.mobile){
+				//the PDF is not embedded in the mobile view
+				var id = url.match(/([^\/]+)\?sid/)[1];
+				var pdfurl = "/ehost/pdfviewer/pdfviewer/"
+					+ id 
+					+ "?sid=" + arguments["sid"]
+					+ "&vid=" + arguments["vid"];
+					item.attachments.push({
+						url:pdfurl,
+						title: "EBSCO Full Text",
+						mimeType:"application/pdf"
+					});
+					item.complete();
+			}
+			else {
+			
+				var pdf = "/ehost/pdfviewer/pdfviewer?"
+					+ "sid=" + arguments["sid"]
+					+ "&vid=" + arguments["vid"];
+				Z.debug("Fetching PDF from " + pdf);
 
-			ZU.processDocuments(pdf,
-				function(pdfDoc) {
-					var realpdf = findPdfUrl(pdfDoc);
-					if(realpdf) {
-						/* Not sure if this is still necessary. Doesn't seem to be.
-						realpdf = realpdf[1].replace(/&amp;/g, "&")	//that's & amp; (Scaffold parses it)
-											.replace(/#.*$/,'');
-						if(an) {
-							realpdf = realpdf.replace(/K=\d+/,"K="+an);
-						} else {
-							Z.debug("Don't have an accession number. PDF might fail.");
-						}*/
+				ZU.processDocuments(pdf,
+					function(pdfDoc) {
+						var realpdf = findPdfUrl(pdfDoc);
+						if(realpdf) {
+							/* Not sure if this is still necessary. Doesn't seem to be.
+							realpdf = realpdf[1].replace(/&amp;/g, "&")	//that's & amp; (Scaffold parses it)
+												.replace(/#.*$/,'');
+							if(an) {
+								realpdf = realpdf.replace(/K=\d+/,"K="+an);
+							} else {
+								Z.debug("Don't have an accession number. PDF might fail.");
+							}*/
 
-						item.attachments.push({
+							item.attachments.push({
 								url:realpdf,
 								title: "EBSCO Full Text",
 								mimeType:"application/pdf"
-						});
-					} else {
-						Z.debug("Could not find a reference to PDF.");
+							});
+						} else {
+							Z.debug("Could not find a reference to PDF.");
+						}
+					},
+					function () {
+						Z.debug("PDF retrieval done.");
+						item.complete();
 					}
-				},
-				function () {
-					Z.debug("PDF retrieval done.");
-					item.complete();
-				}
-			);
+				);}
 		} else {
 			Z.debug("Not attempting to retrieve PDF.");
 			item.complete();
@@ -203,40 +222,66 @@ function downloadFunction(text, url, prefs) {
 //collects item url->title (in items) and item url->database info (in itemInfo)
 function getResultList(doc, items, itemInfo) {
 	var results = ZU.xpath(doc, '//li[@class="result-list-li"]');
+			var title, folderData, count = 0;
 	//make search results work if you can't add to folder, e.g. for EBSCO used as discovery service of library such as
   	//http://search.ebscohost.com/login.aspx?direct=true&site=eds-live&scope=site&type=0&custid=s4895734&groupid=main&profid=eds&mode=and&lang=en&authtype=ip,guest,athens
-
-	var folder = ZU.xpathText(doc, '//span[@class = "item add-to-folder"]/input/@value|.//span[@class = "item add-to-folder"]/a[1]/@data-folder')
-	var title, folderData, count = 0;
-	for(var i=0, n=results.length; i<n; i++) {
-		//we're extra cautious here: When there's not folder, good chance user isn't logged in and import will fail where 
-		//there is no preview icon. We might be able to just rely on the 2nd xpath, but why take the risk
-		if (folder) title = ZU.xpath(results[i], './/a[@class = "title-link color-p4"]');
-		else title = ZU.xpath(results[i], './/a[@class = "title-link color-p4" and following-sibling::span[contains(@id, "hoverPreview")]]');
-		if(!title.length) continue;
-		if (folder) {
-		folderData = ZU.xpath(results[i],
-			'.//span[@class = "item add-to-folder"]/input/@value|.//span[@class = "item add-to-folder"]/a[1]/@data-folder');
-		//I'm not sure if the input/@value format still exists somewhere, but leaving this in to be safe
-		//skip if we're missing something
-
-		itemInfo[title[0].href] = {
-			folderData: folderData[0].textContent,
-			//let's also store item type
-			itemType: ZU.xpathText(results[i],
-				'.//div[@class="pubtype"]/span/@class'),
-			itemTitle: ZU.xpathText(results[i], './/span[@class="title-link-wrapper"]/a'),
-			//check if PDF is available
-			fetchPDF: ZU.xpath(results[i], './/span[@class="record-formats"]\
-				/a[contains(@class,"pdf-ft")]').length,
-			hasFulltext: ZU.xpath(results[i], './/span[@class="record-formats"]\
-				/a[contains(@class,"pdf-ft") or contains(@class, "html-ft")]').length
-		} 
-		};
-		count++;
-		items[title[0].href] = title[0].textContent;
+	if (results.length>0) {	
+		var folder = ZU.xpathText(doc, '//span[@class = "item add-to-folder"]/input/@value|.//span[@class = "item add-to-folder"]/a[1]/@data-folder')
+		for(var i=0, n=results.length; i<n; i++) {
+			//we're extra cautious here: When there's not folder, good chance user isn't logged in and import will fail where 
+			//there is no preview icon. We might be able to just rely on the 2nd xpath, but why take the risk
+			if (folder) title = ZU.xpath(results[i], './/a[@class = "title-link color-p4"]');
+			else title = ZU.xpath(results[i], './/a[@class = "title-link color-p4" and following-sibling::span[contains(@id, "hoverPreview")]]');
+			if(!title.length) continue;
+			if (folder) {
+			folderData = ZU.xpath(results[i],
+				'.//span[@class = "item add-to-folder"]/input/@value|.//span[@class = "item add-to-folder"]/a[1]/@data-folder');
+			//I'm not sure if the input/@value format still exists somewhere, but leaving this in to be safe
+			//skip if we're missing something
+	
+			itemInfo[title[0].href] = {
+				folderData: folderData[0].textContent,
+				//let's also store item type
+				itemType: ZU.xpathText(results[i],
+					'.//div[contains(@class, "pubtype")]/span/@class'),
+				itemTitle: ZU.xpathText(results[i], './/span[@class="title-link-wrapper"]/a'),
+				//check if PDF is available
+				fetchPDF: ZU.xpath(results[i], './/span[@class="record-formats"]\
+					/a[contains(@class,"pdf-ft")]').length,
+				hasFulltext: ZU.xpath(results[i], './/span[@class="record-formats"]\
+					/a[contains(@class,"pdf-ft") or contains(@class, "html-ft")]').length
+			} 
+			};
+			count++;
+			items[title[0].href] = title[0].textContent;
+		}
 	}
-
+	else {
+		var results = ZU.xpath(doc, '//ol[@id="resultlist"]//li[@class="resultlist-record"]');
+		var folder = ZU.xpathText(doc, '//a[@class="add-to-folder"]')
+		for(var i=0, n=results.length; i<n; i++) {
+			title = ZU.xpath(results[i], './/h2[@class="record-title"]/a');
+			if(!title.length) continue;
+			if (folder) {
+				folderData = ZU.xpath(results[i], './/a[@class="add-to-folder"]/@data-folder');
+			
+				itemInfo[title[0].href] = {
+					folderData: folderData[0].textContent,
+					//let's also store item type
+					itemType: ZU.xpathText(results[i],
+						'.//div[contains(@class, "pub-type")]/@class'),
+					itemTitle: ZU.xpathText(results[i], './/h2[@class="record-title"]/a'),
+					//check if FullText is available - if it is we also try the PDF
+					fetchPDF: ZU.xpath(results[i], './/ul[@class="record-description"]\
+						/li/span[contains(text(),"Full Text")]').length,
+					hasFulltext:  ZU.xpath(results[i], './/ul[@class="record-description"]\
+						/li/span[contains(text(),"Full Text")]').length
+				} 
+			};
+			count++;
+			items[title[0].href] = title[0].textContent;
+		}
+	}
 	return count;
 }
 
@@ -391,6 +436,7 @@ function doWeb(doc, url) {
 function doDelivery(doc, itemInfo) {
 	var folderData;
 	if(!itemInfo||!itemInfo.folderData)	{
+		
 		/* Get the db, AN, and tag from ep.clientData instead */
 		var script, clientData;
 		var scripts = doc.getElementsByTagName("script");
@@ -416,6 +462,10 @@ function doDelivery(doc, itemInfo) {
 
 	//some preferences for later
 	var prefs = {};
+	prefs.mobile = false;
+	if (ZU.xpathText(doc, '//p[@class="view-layout"]/strong[@class="mobile"]')){
+		prefs.mobile = true;
+	}
 	//figure out if there's a PDF available
 	//if PDFs stop downloading, might want to remove this
 	if(!itemInfo)	{
@@ -443,6 +493,9 @@ function doDelivery(doc, itemInfo) {
 	//Z.debug(prefs);
 
 	var postURL = ZU.xpathText(doc, '//form[@id="aspnetForm"]/@action');
+	if (!postURL){
+		postURL = doc.location.href; //fallback for mobile site 
+	}
 	var arguments = urlToArgs(postURL);
 
 	postURL = "/ehost/delivery/ExportPanelSave/"
@@ -451,7 +504,6 @@ function doDelivery(doc, itemInfo) {
 		+ "&vid=" + arguments["vid"]
 		+ "&bdata="+arguments["bdata"]
 		+ "&theExportFormat=1";	//RIS file
-
 	ZU.doGet(postURL, function (text) {
 		downloadFunction(text, postURL, prefs);
 	});
@@ -461,6 +513,7 @@ function doDelivery(doc, itemInfo) {
 var testCases = [
 	{
 		"type": "web",
+		"defer": true,
 		"url": "http://web.ebscohost.com/ehost/detail?sid=4bcfec05-db01-4d69-9028-c40ff1331e56%40sessionmgr15&vid=1&hid=28&bdata=JnNpdGU9ZWhvc3QtbGl2ZQ%3d%3d#db=aph&AN=9606204477",
 		"items": [
 			{
