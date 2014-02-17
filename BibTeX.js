@@ -7,7 +7,7 @@
 	"maxVersion": "",
 	"priority": 200,
 	"configOptions": {
-		"getCollections": "true"
+		"getCollections": true
 	},
 	"displayOptions": {
 		"exportCharset": "UTF-8",
