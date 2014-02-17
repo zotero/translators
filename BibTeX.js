@@ -131,7 +131,8 @@ var bibtex2zoteroTypeMap = {
 	"manual":"book",
 	"mastersthesis":"thesis",
 	"misc":"book",
-	"proceedings":"book"
+	"proceedings":"book",
+	"online":"webpage"
 };
 
 /*
