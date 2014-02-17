@@ -227,9 +227,12 @@ function processCrossRef(xmlOutput) {
 		parseCreators(refXML, item, {"editor":"seriesEditor"});
 		item.seriesNumber = ZU.xpathText(seriesXML, 'c:series_number', ns);
 	}
-	
-	var pubDateNode = ZU.xpath(refXML, 'c:publication_date', ns);
-	if(!pubDateNode) ZU.xpath(metadataXML, 'c:publication_date', ns);
+	//prefer article to journal metadata and print to other dates
+	var pubDateNode = ZU.xpath(refXML, 'c:publication_date[@media_type="print"]', ns);
+	if(!pubDateNode) pubDateNode = ZU.xpath(refXML, 'c:publication_date', ns);
+	if(!pubDateNode) pubDateNode = ZU.xpath(metadataXML, 'c:publication_date[@media_type="print"]', ns);
+	if(!pubDateNode) pubDateNode = ZU.xpath(metadataXML, 'c:publication_date', ns);
+
 	
 	if(pubDateNode.length) {
 		var year = ZU.xpathText(pubDateNode[0], 'c:year', ns);
