@@ -16,7 +16,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "g",
-	"lastUpdated": "2014-02-17 19:33:05"
+	"lastUpdated": "2014-02-17 21:24:13"
 }
 
 function detectImport() {
@@ -1268,7 +1268,7 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"title": "Plain   <b>Bold</b>  <i> Italics</i>       Underline       <sup>Superscript</sup>       <sub>Subscript</sub>       SymbolFont       CourierNew       SmallerSize       Size12   <b><i><sup>TimesNewRoman-Bold-Italics-Underline-Superscript</sup></i></b>"
+				"title": "Plain <b>Bold</b><i> Italics</i> Underline <sup>Superscript</sup> <sub>Subscript</sub> SymbolFont CourierNew SmallerSize Size12 <b><i><sup>TimesNewRoman-Bold-Italics-Underline-Superscript</sup></i></b>"
 			}
 		]
 	}
