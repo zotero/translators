@@ -9,10 +9,10 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-09-22 20:55:35"
+	"lastUpdated": "2014-02-20 19:17:52"
 }
 
-var canLiiRegexp = /http:\/\/(www\.)?canlii\.org\/.*en\/[^\/]+\/[^\/]+\/doc\/.+/;
+var canLiiRegexp = /https?:\/\/(www\.)?canlii\.org\/.*en\/[^\/]+\/[^\/]+\/doc\/.+/;
 
 function detectWeb(doc, url) {
 
