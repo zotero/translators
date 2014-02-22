@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-12-07 09:15:44"
+	"lastUpdated": "2014-02-21 18:21:33"
 }
 
 var searchRe = new RegExp('^https?://(?:www\.)?amazon\.([^/]+)/(gp/search/|(gp/)?registry/(wishlist|registry)|exec/obidos/search-handle-url/|s/|s\\?|[^/]+/lm/|gp/richpub/)');
@@ -88,6 +88,7 @@ function getItem(doc) {
 		Zotero.debug("Retrieving by ISBN search")
 		var isbn = isbns[0].nodeValue.trim(),
 			translate = Zotero.loadTranslator("search");
+					Z.debug(isbn)
 		// Use Open WorldCat for now to get around issues with failing search translators
 		// in current connector release.
 		translate.setTranslator("c73a4a8c-3ef1-4ec8-8229-7531ee384cc4");
@@ -139,9 +140,11 @@ function scrape(doc) {
 	// Scrape HTML for items without ISBNs, because Amazon doesn't provide an easy way for
 	// open source projects like us to use their API
 	// TODO localize
+	Z.debug("ISBN lookup failed. Scraping from Page")		
 	var department = ZU.xpathText(doc, '//li[contains(@class, "nav-category-button")]/a').trim(),
 		item = new Zotero.Item(DEPARTMENT_TO_TYPE[department] || "book"),
-		authors = ZU.xpath(doc, '//span[@class="byLinePipe"]/../span/a | //span[@class="byLinePipe"]/../a | //span[contains(@class, "author")]/a[1]');
+		authors = ZU.xpath(doc, '//span[@class="byLinePipe"]/../span/a | //span[@class="byLinePipe"]/../a \
+			| //span[contains(@class, "author")]/span/a[1] | //span[contains(@class, "author")]/a[1]');
 	for(var i=0; i<authors.length; i++) {
 		var author = authors[i].textContent.trim();
 		if(author) item.creators.push(ZU.cleanAuthor(author));
@@ -149,10 +152,12 @@ function scrape(doc) {
 	
 	// Old design
 	var titleNode = ZU.xpath(doc, '//span[@id="btAsinTitle"]/text()')[0] ||
-	// New design encountered 06/30/2013
-					ZU.xpath(doc, '//h1[@id="title"]/text()')[0];
+	// New design encountered 06/30/2013					
+		ZU.xpath(doc, '//h1[@id="title"]/span/text()')[0]||
+		ZU.xpath(doc, '//h1[@id="title"]/text()')[0]
+
 	item.title = titleNode.nodeValue.replace(/(?: \([^)]*\))+$/, "");
-	
+
 	// Extract info into an array
 	var info = {},
 		els = ZU.xpath(doc, '//div[@class="content"]/ul/li[b]');
@@ -555,7 +560,7 @@ var testCases = [
 				"publisher": "科学出版社",
 				"place": "北京",
 				"date": "2012",
-				"ISBN": "9787030329202 : 7030329201",
+				"ISBN": "9787030329202 7030329201",
 				"shortTitle": "汉语语音合成"
 			}
 		]
