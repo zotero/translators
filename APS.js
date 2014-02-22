@@ -2,14 +2,14 @@
 	"translatorID": "2c310a37-a4dd-48d2-82c9-bd29c53c1c76",
 	"label": "APS",
 	"creator": "Aurimas Vinckevicius",
-	"target": "^https?://journals.aps.org",
+	"target": "^https?://journals\\.aps\\.org",
 	"minVersion": "3.0.12",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-02-22 00:32:29"
+	"lastUpdated": "2014-02-22 03:32:29"
 }
 
 function getSearchResults(doc) {
