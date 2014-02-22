@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-10-05 13:47:51"
+	"lastUpdated": "2014-02-22 11:53:11"
 }
 
 /*
@@ -142,6 +142,7 @@ function composeRisUrlGNV(url) {
 function composeRisUrlGVRL(url) {
 	return url.replace(/#.*/,'').replace(/\/[^\/?]+(?=\?|$)/, '/generateCitation.do')
 		.replace(/\bactionString=[^&]*/g, '').replace(/\bcitationFormat=[^&]*&?/g, '')
+		.replace(/\&u=/, "&userGroupName=").replace(/\&id=/, "&docId=") //for bookmarked pages
 		+ '&actionString=FormatCitation&citationFormat=ENDNOTE';
 }
 
@@ -210,6 +211,7 @@ function processArticles(articles) {
 
 function processPage(doc, url) {
 	var attachment = composeAttachment(doc, url);
+	Z.debug(composeRisUrl(url))
 	ZU.doGet(composeRisUrl(url), function(text) {
 		parseRis(text, attachment);
 	});
