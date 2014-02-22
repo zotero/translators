@@ -2,14 +2,14 @@
 	"translatorID": "2c310a37-a4dd-48d2-82c9-bd29c53c1c76",
 	"label": "APS",
 	"creator": "Aurimas Vinckevicius",
-	"target": "https?://journals.aps.org",
+	"target": "^https?://journals.aps.org",
 	"minVersion": "3.0.12",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-02-21 05:32:29"
+	"lastUpdated": "2014-02-22 00:32:29"
 }
 
 function getSearchResults(doc) {
@@ -66,7 +66,7 @@ function scrape(doc, url) {
 	ZU.doGet(risUrl, function(text) {
 		text = text.replace(/^ID\s+-\s+/mg, 'DO  - ');
 		var trans = Zotero.loadTranslator('import');
-		trans.setTranslator('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7');
+		trans.setTranslator('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7'); //RIS
 		trans.setString(text);
 		trans.setHandler('itemDone', function(obj, item) {
 			// scrape abstract from page
@@ -97,26 +97,29 @@ function scrape(doc, url) {
 						for(var i=0; i<suppInfo.components.length; i++) {
 							var supp = suppInfo.components[i];
 							if(!supp.path) continue;
+							var title = supp.filename || 'Supplementary Data';
 							if(asLink) {
 								item.attachments.push({
-									title: supp.filename,
+									title: title,
 									url: supp.path,
 									mimeType: 'text/html',
 									snapshot: false
 								});
 							} else {
 								item.attachments.push({
-									title: supp.filename,
+									title: title,
 									url: supp.path
+									//probably PDF, but not sure it's always the case
 								});
 							}
 						}
 					}, function() { item.complete() });
 				} catch(e) {
 					Z.debug('Could not attach supplemental data. ' + e.message);
+					item.complete();
 				}
 			} else {
-				item.complete()
+				item.complete();
 			}
 		});
 		trans.translate();
@@ -126,7 +129,8 @@ function scrape(doc, url) {
 function cleanMath(str) {
 	//math tags appear to have duplicate content and are somehow left in even after textContent
 	return str.replace(/<(math|mi)[^<>]*>.*?<\/\1>/g, '');
-}/** BEGIN TEST CASES **/
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
