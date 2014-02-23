@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-12-12 12:35:55"
+	"lastUpdated": "2014-02-23 11:23:36"
 }
 
 var items = {};
@@ -168,6 +168,7 @@ var testCases = [
 				"publicationTitle": "Journal of Managerial Psychology",
 				"volume": "23",
 				"issue": "8",
+				"language": "en",
 				"ISSN": "0268-3946",
 				"date": "2008",
 				"pages": "862-877",

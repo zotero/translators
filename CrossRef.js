@@ -143,15 +143,22 @@ function processCrossRef(xmlOutput) {
 		// Sometimes the <issue> tag is not nested inside the volume tag; see 10.1007/BF00938486
 		if (!item.issue)
 			item.issue = ZU.xpathText(itemXML, 'c:journal_issue/c:issue', ns);
-   } else if((itemXML = ZU.xpath(doiRecord, 'c:crossref/c:report-paper', ns)).length) {
+   	} else if((itemXML = ZU.xpath(doiRecord, 'c:crossref/c:report-paper', ns)).length) {
 		// Report Paper
 		// Example: doi: 10.4271/2010-01-0907
 		// http://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&rft_id=info:doi/10.4271/2010-01-0907&format=unixref&redirect=false
 		item = new Zotero.Item("report");
 		refXML = ZU.xpath(itemXML, 'c:report-paper_metadata', ns);
+		if (refXML.length==0) {
+			//Example doi: 10.1787/5jzb6vwk338x-en 
+			//http://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&&rft_id=info:doi/10.1787/5jzb6vwk338x-en&noredirect=true&format=unixref
+			refXML = ZU.xpath(itemXML, 'c:report-paper_series_metadata', ns);
+			seriesXML = ZU.xpath(refXML, 'c:series_metadata', ns);
+		}
 		metadataXML = refXML;
 		
 		item.reportNumber = ZU.xpathText(refXML, 'c:publisher_item/c:item_number', ns);
+		if (!item.reportNumber) item.reportNumber = ZU.xpathText(refXML, 'c:volume', ns);
 		item.institution = ZU.xpathText(refXML, 'c:publisher/c:publisher_name', ns);
 		item.place = ZU.xpathText(refXML, 'c:publisher/c:publisher_place', ns);
 	} else if((itemXML = ZU.xpath(doiRecord, 'c:crossref/c:book', ns)).length) {
@@ -214,7 +221,7 @@ function processCrossRef(xmlOutput) {
 		item.place = ZU.xpathText(metadataXML, 'c:event_metadata/c:conference_location', ns);
 		item.conferenceName = ZU.xpathText(metadataXML, 'c:event_metadata/c:conference_name', ns);
 	}
-	
+	item.language = ZU.xpathText(metadataXML, './@language', ns)
 	item.ISBN = ZU.xpathText(metadataXML, 'c:isbn', ns);
 	item.ISSN = ZU.xpathText(metadataXML, 'c:issn', ns);
 	item.publisher = ZU.xpathText(metadataXML, 'c:publisher/c:publisher_name', ns);
@@ -226,6 +233,7 @@ function processCrossRef(xmlOutput) {
 	if(seriesXML && seriesXML.length) {
 		parseCreators(refXML, item, {"editor":"seriesEditor"});
 		item.seriesNumber = ZU.xpathText(seriesXML, 'c:series_number', ns);
+		item.reportType = ZU.xpathText(seriesXML, 'c:titles[1]/c:title[1]', ns);
 	}
 	//prefer article to journal metadata and print to other dates
 	var pubDateNode = ZU.xpath(refXML, 'c:publication_date[@media_type="print"]', ns);
