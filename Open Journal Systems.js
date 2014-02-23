@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-11-18 23:07:36"
+	"lastUpdated": "2014-02-23 00:53:05"
 }
 
 function detectWeb(doc, url) {
@@ -33,6 +33,13 @@ function doWeb(doc, url) {
 		//if we still don't have abstract, we can try scraping from page
 		if(!item.abstractNote) {
 			item.abstractNote = ZU.xpathText(doc, '//div[@id="articleAbstract"]/div[1]');
+		}
+		
+		//some journals link to a PDF view page in the header, not the PDF itself
+		for(var i=0; i<item.attachments.length; i++) {
+			if(item.attachments[i].mimeType == 'application/pdf') {
+				item.attachments[i].url = item.attachments[i].url.replace(/\/article\/view\//, '/article/download/');
+			}
 		}
 
 		item.complete();
@@ -150,6 +157,52 @@ var testCases = [
 				"date": "2011/05/11",
 				"volume": "2",
 				"pages": "279-311"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.ijdc.net/index.php/ijdc/article/view/8.2.5/",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Katherine G.",
+						"lastName": "Akers",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jennifer",
+						"lastName": "Doty",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"rights": "Copyright for papers and articles published in this journal is retained by the authors, with first publication rights granted to the University of Edinburgh. It is a condition of publication that authors license their paper or article under a  Creative Commons Attribution Licence .",
+				"language": "en",
+				"issue": "2",
+				"DOI": "10.2218/ijdc.v8i2.263",
+				"ISSN": "1746-8256",
+				"url": "http://www.ijdc.net/index.php/ijdc/article/view/8.2.5",
+				"abstractNote": "Academic librarians are increasingly engaging in data curation by providing infrastructure (e.g., institutional repositories) and offering services (e.g., data management plan consultations) to support the management of research data on their campuses. Efforts to develop these resources may benefit from a greater understanding of disciplinary differences in research data management needs. After conducting a survey of data management practices and perspectives at our research university, we categorized faculty members into four research domains—arts and humanities, social sciences, medical sciences, and basic sciences—and analyzed variations in their patterns of survey responses. We found statistically significant differences among the four research domains for nearly every survey item, revealing important disciplinary distinctions in data management actions, attitudes, and interest in support services. Serious consideration of both the similarities and dissimilarities among disciplines will help guide academic librarians and other data curation professionals in developing a range of data-management services that can be tailored to the unique needs of different scholarly researchers.",
+				"libraryCatalog": "www.ijdc.net",
+				"title": "Disciplinary differences in faculty research data management practices and perspectives",
+				"publicationTitle": "International Journal of Digital Curation",
+				"date": "19/11/2013",
+				"volume": "8",
+				"pages": "5-26"
 			}
 		]
 	}
