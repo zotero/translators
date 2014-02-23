@@ -98,8 +98,8 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "Josep",
-						"lastName": "CorbÃ\\-",
+						"firstName": "Josep E.",
+						"lastName": "Corbí",
 						"creatorType": "author"
 					}
 				],
@@ -112,10 +112,9 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"itemID": "CorbA2011-COROCA-4",
+				"itemID": "Corbi2011-COROCA-4",
 				"volume": "26",
 				"issue": "4",
-				"abstractNote": "In Values and the Reflective Point of View (2006), Robert Dunn defends a certain expressivist view about evaluative beliefs from which some implications about self-knowledge are explicitly derived. He thus distinguishes between an observational and a deliberative attitude towards oneself, so that the latter involves a purely first-person point of view that gives rise to an especially authoritative, but wholly non-observational, kind of self-knowledge. Even though I sympathize with many aspects of Dunn's approach to evaluative beliefs and also with his stress on the practical significance of self-knowledge, I argue that his proposal seriously misinterprets the role of observation and evidence within the first-person point of view and, derivatively, in the formation of evaluative beliefs",
 				"title": "Observation, Character, and A Purely First-Person Point of View",
 				"publicationTitle": "Acta Analytica",
 				"date": "2011",

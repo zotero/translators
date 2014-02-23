@@ -1212,7 +1212,7 @@ var testCases = [
 				"volume": "292",
 				"pages": "1480-1489",
 				"issue": "12",
-				"rights": "Copyright © 2013 University of York. Published by John Wiley & Sons, Ltd.",
+				"rights": "Copyright © 2014 University of York. Published by John Wiley & Sons, Ltd.",
 				"libraryCatalog": "Wiley Online Library",
 				"shortTitle": "Does this patient have a family history of cancer"
 			}

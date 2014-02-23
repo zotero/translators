@@ -114,17 +114,15 @@ var testCases = [
 				"publicationTitle": "Journal of Symbolic Logic",
 				"volume": "76",
 				"issue": "3",
-				"publisher": "Association for Symbolic Logic",
 				"language": "EN",
 				"pages": "1061-1074",
 				"ISSN": "0022-4812, 1943-5886",
 				"url": "http://projecteuclid.org/euclid.jsl/1309952534",
 				"abstractNote": "It is known that the spectrum of a Boolean algebra cannot contain a low4 degree unless it also contains the degree 0; it remains open whether the same holds for low5 degrees. We address the question differently, by considering Boolean subalgebras of the computable atomless Boolean algebra ℬ. For such subalgebras 𝒜, we show that it is possible for the spectrum of the unary relation 𝒜 on ℬ to contain a low5 degree without containing 0.",
 				"libraryCatalog": "Project Euclid",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"DOI": "10.2178/jsl/1309952534",
 				"journalAbbreviation": "J. Symbolic Logic",
-				"extra": "Mathematical Reviews number (MathSciNet) MR 2849259"
+				"extra": "Mathematical Reviews number (MathSciNet) MR2849259"
 			}
 		]
 	},
@@ -168,10 +166,10 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Magnetoencephalography",
-					"source localization",
 					"Kalman filter",
-					"fixed interval smoother"
+					"Magnetoencephalography",
+					"fixed interval smoother",
+					"source localization"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -188,17 +186,15 @@ var testCases = [
 				"publicationTitle": "The Annals of Applied Statistics",
 				"volume": "5",
 				"issue": "2B",
-				"publisher": "Institute of Mathematical Statistics",
 				"language": "EN",
 				"pages": "1207-1228",
 				"ISSN": "1932-6157, 1941-7330",
 				"url": "http://projecteuclid.org/euclid.aoas/1310562719",
 				"abstractNote": "Determining the magnitude and location of neural sources within the brain that are responsible for generating magnetoencephalography (MEG) signals measured on the surface of the head is a challenging problem in functional neuroimaging. The number of potential sources within the brain exceeds by an order of magnitude the number of recording sites. As a consequence, the estimates for the magnitude and location of the neural sources will be ill-conditioned because of the underdetermined nature of the problem. One well-known technique designed to address this imbalance is the minimum norm estimator (MNE). This approach imposes an L2 regularization constraint that serves to stabilize and condition the source parameter estimates. However, these classes of regularizer are static in time and do not consider the temporal constraints inherent to the biophysics of the MEG experiment. In this paper we propose a dynamic state-space model that accounts for both spatial and temporal correlations within and across candidate intracortical sources. In our model, the observation model is derived from the steady-state solution to Maxwell’s equations while the latent model representing neural dynamics is given by a random walk process. We show that the Kalman filter (KF) and the Kalman smoother [also known as the fixed-interval smoother (FIS)] may be used to solve the ensuing high-dimensional state-estimation problem. Using a well-known relationship between Bayesian estimation and Kalman filtering, we show that the MNE estimates carry a significant zero bias. Calculating these high-dimensional state estimates is a computationally challenging task that requires High Performance Computing (HPC) resources. To this end, we employ the NSF Teragrid Supercomputing Network to compute the source estimates. We demonstrate improvement in performance of the state-space algorithm relative to MNE in analyses of simulated and actual somatosensory MEG experiments. Our findings establish the benefits of high-dimensional state-space modeling as an effective means to solve the MEG source localization problem.",
 				"libraryCatalog": "Project Euclid",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"DOI": "10.1214/11-AOAS483",
 				"journalAbbreviation": "Ann. Appl. Stat.",
-				"extra": "Mathematical Reviews number (MathSciNet) MR 2849772, Zentralblatt MATH identifier1223.62160"
+				"extra": "Mathematical Reviews number (MathSciNet) MR2849772, Zentralblatt MATH identifier1223.62160"
 			}
 		]
 	},

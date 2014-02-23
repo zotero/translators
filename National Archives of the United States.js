@@ -60,7 +60,6 @@ FW.Scraper({
 	date: FW.Xpath("//div[@class=\"information\"]//dt[contains(text(),\"This item was produced or created:\")]/following-sibling::dd[1]/ul/li/text()").text().trim(),
 	// abstract = Scope and Content
 	abstractNote: FW.Xpath("//h3[contains(text(),\"Scope & Content\")]/../div/p/text()").text().trim(),
-	
 	/**
 	 * hook:
 	 * 		clean up archive information so that it can be cited correctly
@@ -258,7 +257,7 @@ var testCases = [
 				"itemType": "report",
 				"creators": [],
 				"notes": [
-					"HMS/MLR Entry Number: A1 312\nDeclassification Project Number: NND 775051, NND 775119\nContainer ID: Boxes 1-2183\nSize: 954 linear feet, 7 linear inches\nRecord Level: Series\nMaterial Type: Textual Records\nMedia Type: Paper\nInstitution: Department of Defense. European Command. Office of Military Government for Germany (U.S.). Civil Administration Division. Public Safety Branch. (03/15/1947 - 09/21/1949)\nDate Compiled: 1945 - 1948\n"
+					"HMS/MLR Entry Number: A1 313\nDeclassification Project Number: NND 775051, NND 775119\nContainer ID: Boxes 1-2183\nSize: 954 linear feet, 7 linear inches\nRecord Level: Series\nMaterial Type: Textual Records\nMedia Type: Paper\nInstitution: Department of Defense. European Command. Office of Military Government for Germany (U.S.). Civil Administration Division. Public Safety Branch. (03/15/1947 - 09/21/1949)\nDate Compiled: 1945 - 1948\n"
 				],
 				"tags": [],
 				"seeAlso": [],
@@ -271,8 +270,7 @@ var testCases = [
 				"institution": "Department of Defense",
 				"rights": "Unrestricted",
 				"title": "Fragebogen Files Relating to Denazification,   1945 - 1948",
-				"libraryCatalog": "National Archives of the United States",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "National Archives of the United States"
 			}
 		]
 	}

@@ -253,14 +253,14 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"村上春树",
 					"HarukiMurakami",
-					"日本",
 					"小说",
+					"挪威森林英文版",
+					"日本",
+					"村上春树",
+					"英文",
 					"英文原版",
-					"英文版",
-					"Norwegian",
-					"挪威森林英文版"
+					"英文版"
 				],
 				"seeAlso": [],
 				"attachments": [],
@@ -271,8 +271,7 @@ var testCases = [
 				"publisher": "Vintage",
 				"date": "2003-06-30",
 				"abstractNote": "When he hears her favourite Beatles song, Toru Watanabe recalls his first love Naoko, the girlfriend of his best friend Kizuki. Immediately he is transported back almost twenty years to his student days in Tokyo, adrift in a world of uneasy friendships, casual sex, passion, loss and desire - to a time when an impetuous young woman called Midori marches into his life and he has ..., (展开全部)",
-				"libraryCatalog": "Douban",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "Douban"
 			}
 		]
 	}

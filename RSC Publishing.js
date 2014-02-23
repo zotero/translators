@@ -214,12 +214,11 @@ var testCases = [
 					}
 				],
 				"title": "Chapter 14 In Vivo Approaches to Predictive Toxicology Using Zebrafish",
-				"DOI": "10.1039/9781849733045-00330",
 				"language": "en",
 				"date": "2011/11/15",
+				"abstractNote": "A key to sustainability in modern paradigms of drug discovery and toxicology will be predictive structure–activity relationships based on vertebrate-model responses. The zebrafish embryo is the emerging vertebrate choice for rapid-throughput chemical screening, providing a quick and inexpensive way to test hypotheses and to generate strategies for complementary integrative research with rodent models, and humans. Numerous embryonic zebrafish assays and omics approaches appear to predict hazard in mammals. We review physiologic parameters of the zebrafish that are amenable to rapid-throughput screening. Toxicity investigations in the zebrafish have included endpoints in developmental, neuro, cardio, ocular, otic, gastrointestinal, hepato, regenerative and vascular toxicity. Small-scale screens have used zebrafish embryos to analyze heart rate and ERG function, and to screen drugs that affect these parameters. Novel tissue-specific and xenobiotic-responsive reporter lines are enabling rapid screening of new chemistries for cardio, hepato, and neuronal toxicity. In particular, zebrafish screens that combine gene expression profiling with comprehensive phenotype analyses are strengthening the predictivity of the toxicology data and fostering greater use of the model, especially as a means of frontloading hazard detection and reducing late-stage attrition in drug discovery. A pressing need remains for large-scale zebrafish studies that systematically evaluate the most promising zebrafish assays against the widest possible range of positive and negative reference compounds to distinguish the truly predictive approaches in zebrafish from those that are not.",
 				"url": "http://pubs.rsc.org/en/content/chapter/bk9781849730518-00330/978-1-84973-051-8",
 				"libraryCatalog": "pubs.rsc.org",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"bookTitle": "New Horizons in Predictive Toxicology"
 			}
 		]

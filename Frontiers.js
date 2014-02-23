@@ -252,11 +252,11 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"mefloquine",
-					"gap junctions",
-					"motor behavior",
+					"cerebellum",
 					"eye-blink conditioning",
-					"cerebellum"
+					"gap junctions",
+					"mefloquine",
+					"motor behavior"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -267,15 +267,14 @@ var testCases = [
 				],
 				"url": "http://www.frontiersin.org/neuropharmacology/10.3389/fnins.2010.00191/abstract",
 				"title": "Anti-malaria drug mefloquine induces motor learning deficits in humans",
-				"publicationTitle": "Frontiers in Neuropharmacology",
+				"publicationTitle": "Neuropharmacology",
 				"abstractNote": "Mefloquine (a marketed anti-malaria drug) prophylaxis has a high risk of causing adverse events. Interestingly, animal studies have shown that mefloquine imposes a major deficit in motor learning skills by affecting the connexin 36 gap junctions of the inferior olive. We were therefore interested in assessing whether mefloquine might induce similar effects in humans. The main aim of this study was to investigate the effect of mefloquine on olivary-related motor performance and motor learning tasks in humans. We subjected nine participants to voluntary motor timing (dart throwing task), perceptual timing (rhythm perceptual task) and reflex timing tasks (eye-blink task) before and 24 h after the intake of mefloquine. The influence of mefloquine on motor learning was assessed by subjecting participants with and without mefloquine intake (controls: n = 11 vs mefloquine: n = 8) to an eye-blink conditioning task. Voluntary motor performance, perceptual timing, and reflex blinking were not affected by mefloquine use. However, the influence of mefloquine on motor learning was substantial; both learning speed as well as learning capacity was impaired by mefloquine use. Our data suggest that mefloquine disturbs motor learning skills. This adverse effect can have clinical as well as social clinical implications for mefloquine users. Therefore, this side-effect of mefloquine should be further investigated and recognized by clinicians.",
 				"DOI": "10.3389/fnins.2010.00191",
 				"pages": "191",
 				"date": "2010",
 				"journalAbbreviation": "Front. Neurosci",
 				"volume": "4",
-				"libraryCatalog": "Frontiers",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "Frontiers"
 			}
 		]
 	},

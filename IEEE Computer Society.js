@@ -430,7 +430,7 @@ var testCases = [
 				"place": "Los Alamitos, CA, USA",
 				"abstractNote": "We present a global clustering approach to identify putative intergenic non-coding RNAs based on the RNA polymerase II and Histone 3 lysine 4 trimethylation signatures. Both of these signatures are processed from the digital sequencing tags produced by chromatin immunoprecipitation, a high-throughput massively parallel sequencing (ChIP-Seq) technology. Our method compares favorably to the comparison method. We characterize the intergenic non-coding RNAs to have conservative promoters. We predict that these nc-RNAs are related to metabolic process without lipopolysaccharides (LPS) treatment, but shift towards developmental and immune-related functions with LPS treatment. We demonstrate that more intergenic nc-RNAs respond positively to LPS treatment, rather than negatively. Using QPCR, we experimentally validate 8 out of 11 nc-RNA regions respond to LPS treatment as predicted by the computational method.",
 				"libraryCatalog": "IEEE Computer Society",
-				"proceedingsTitle": "2012 IEEE 12th International Conference on Bioinformatics & Bioengineering (BIBE)"
+				"proceedingsTitle": "13th IEEE International Conference on BioInformatics and BioEngineering"
 			}
 		]
 	},

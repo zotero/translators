@@ -216,8 +216,8 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Connolly",
-						"creatorType": "author",
-						"fieldMode": 1
+						"firstName": "Andy",
+						"creatorType": "author"
 					}
 				],
 				"notes": [],

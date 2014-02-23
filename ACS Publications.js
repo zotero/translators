@@ -369,18 +369,16 @@ var testCases = [
 				"date": "January 1, 2011",
 				"volume": "1071",
 				"numberOfVolumes": "0",
-				"DOI": "10.1021/bk-2011-1071.ch005",
+				"seriesNumber": "1071",
 				"url": "http://dx.doi.org/10.1021/bk-2011-1071.ch005",
 				"abstractNote": "Natural organic matter (NOM) is an inherently complex mixture of polyfunctional organic molecules. Because of their universality and chemical reversibility, oxidation/reductions (redox) reactions of NOM have an especially interesting and important role in geochemistry. Variabilities in NOM composition and chemistry make studies of its redox chemistry particularly challenging, and details of NOM-mediated redox reactions are only partially understood. This is in large part due to the analytical difficulties associated with NOM characterization and the wide range of reagents and experimental systems used to study NOM redox reactions. This chapter provides a summary of the ongoing efforts to provide a coherent comprehension of aqueous redox chemistry involving NOM and of techniques for chemical characterization of NOM. It also describes some attempts to confirm the roles of different structural moieties in redox reactions. In addition, we discuss some of the operational parameters used to describe NOM redox capacities and redox states, and describe nomenclature of NOM redox chemistry. Several relatively facile experimental methods applicable to predictions of the NOM redox activity and redox states of NOM samples are discussed, with special attention to the proposed use of fluorescence spectroscopy to predict relevant redox characteristics of NOM samples.",
 				"pages": "85-111",
-				"section": "5",
 				"title": "Redox Chemistry and Natural Organic Matter (NOM): Geochemists? Dream, Analytical Chemists? Nightmare",
 				"bookTitle": "Aquatic Redox Chemistry",
 				"series": "ACS Symposium Series",
 				"ISBN": "0-8412-2652-0",
 				"publisher": "American Chemical Society",
 				"libraryCatalog": "ACS Publications",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Redox Chemistry and Natural Organic Matter (NOM)"
 			}
 		]

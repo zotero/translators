@@ -297,13 +297,13 @@ var testCases = [
 					}
 				],
 				"title": "Method and System for Secure Financial Transactions Using Mobile Communications Devices",
+				"assignee": "Li Michael; Shakula Yuri; Rodriguez Martin",
 				"extra": "CIB: G06Q20/00",
 				"applicationNumber": "US201113172170 20110629",
 				"priorityNumbers": "US201113172170 20110629 ; US20100406097P 20101022",
-				"date": "2012-04-26",
 				"patentNumber": "US2012101951 (A1)",
 				"abstractNote": "The present invention employs public key infrastructure to electronically sign and encrypt important personal information on a mobile communications device (MCD), without disclosing private, personal information to the transaction counterparts and middleman, thus preserving highly elevated and enhanced security and fraud protection. In one embodiment, the present invention can use a mobile device identifier, such as a cell phone number or email address, for example, as an index/reference during the entire transaction, so that only the account holder and the account issuer know the underlying account number and other private information.",
-				"libraryCatalog": "ESpacenet"
+				"issueDate": "2012-04-26"
 			}
 		]
 	},

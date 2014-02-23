@@ -1070,8 +1070,8 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
+						"firstName": "Y.",
 						"lastName": "Zhang",
-						"firstName": "Y",
 						"creatorType": "author"
 					},
 					{
@@ -1092,10 +1092,10 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"gastric cancer",
-					"cancer stem cells",
 					"CD90",
 					"ERBB2",
+					"cancer stem cells",
+					"gastric cancer",
 					"trastuzumab (herceptin)"
 				],
 				"seeAlso": [],
@@ -1113,23 +1113,15 @@ var testCases = [
 				"rights": "© 2011 Nature Publishing Group",
 				"volume": "31",
 				"issue": "6",
-				"number": "6",
-				"patentNumber": "6",
 				"pages": "671-682",
-				"publisher": "Nature Publishing Group",
-				"institution": "Nature Publishing Group",
-				"company": "Nature Publishing Group",
-				"label": "Nature Publishing Group",
-				"distributor": "Nature Publishing Group",
 				"date": "February 9, 2012",
-				"ISSN": "0950-9232",
 				"language": "en",
 				"DOI": "10.1038/onc.2011.282",
 				"url": "http://www.nature.com/onc/journal/v31/n6/full/onc2011282a.html",
 				"abstractNote": "Identification and characterization of cancer stem cells (CSCs) in gastric cancer are difficult owing to the lack of specific markers and consensus methods. In this study, we show that cells with the CD90 surface marker in gastric tumors could be enriched under non-adherent, serum-free and sphere-forming conditions. These CD90+ cells possess a higher ability to initiate tumor in vivo and could re-establish the cellular hierarchy of tumors from single-cell implantation, demonstrating their self-renewal properties. Interestingly, higher proportion of CD90+ cells correlates with higher in vivo tumorigenicity of gastric primary tumor models. In addition, it was found that ERBB2 was overexpressed in about 25% of the gastric primary tumor models, which correlates with the higher level of CD90 expression in these tumors. Trastuzumab (humanized anti-ERBB2 antibody) treatment of high-tumorigenic gastric primary tumor models could reduce the CD90+ population in tumor mass and suppress tumor growth when combined with traditional chemotherapy. Moreover, tumorigenicity of tumor cells could also be suppressed when trastuzumab treatment starts at the same time as cell implantation. Therefore, we have identified a CSC population in gastric primary tumors characterized by their CD90 phenotype. The finding that trastuzumab targets the CSC population in gastric tumors suggests that ERBB2 signaling has a role in maintaining CSC populations, thus contributing to carcinogenesis and tumor invasion. In conclusion, the results from this study provide new insights into the gastric tumorigenic process and offer potential implications for the development of anticancer drugs as well as therapeutic treatment of gastric cancers.",
 				"libraryCatalog": "www.nature.com",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"journalAbbreviation": "Oncogene"
+				"journalAbbreviation": "Oncogene",
+				"ISSN": "0950-9232"
 			}
 		]
 	},
@@ -1815,7 +1807,7 @@ var testCases = [
 				"volume": "481",
 				"issue": "7381",
 				"pages": "341-343",
-				"date": "2012-01-19",
+				"date": "2012-01-18",
 				"language": "en",
 				"DOI": "10.1038/nature10669",
 				"url": "http://www.nature.com/nature/journal/v481/n7381/fp/nature10669_ja.html?lang=ja",

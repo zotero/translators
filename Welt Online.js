@@ -166,8 +166,8 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Pfeiffer Doris,Kliniken,Krankenkassen,Pfeiffer",
-					"Doris,Kliniken [ks],Krankenkassen [ks]"
+					"Doris;Kliniken [ks];Krankenkassen [ks]",
+					"Pfeiffer"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -182,8 +182,7 @@ var testCases = [
 				"date": "26.03.11",
 				"publicationTitle": "Welt Online",
 				"section": "Wirtschaft",
-				"libraryCatalog": "Welt Online",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "Welt Online"
 			}
 		]
 	},

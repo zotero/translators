@@ -146,7 +146,9 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [],
+				"tags": [
+					"bk23"
+				],
 				"seeAlso": [],
 				"attachments": [
 					{
@@ -161,8 +163,8 @@ var testCases = [
 				"date": "1748-1989",
 				"abstractNote": "Scope and Content\nThe records of the National Dock Labour Corporation, established to regularise dock labour during the Second World War, and the records of the National Dock Labour Board, which took over these functions in 1947.\nAlso included are the records of four local boards responsible for day to day running of the National Dock Labour Scheme from 1947:\nLondon Dock Labour BoardCumbria Dock Labour BoardGrimsby and Immingham Dock Labour BoardSouth Coast Dock Labour Board.",
 				"archive": "The National Archives, Kew",
-				"type": "series",
-				"libraryCatalog": "National Archive of the UK"
+				"libraryCatalog": "National Archive of the UK",
+				"manuscriptType": "series"
 			}
 		]
 	},

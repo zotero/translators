@@ -106,13 +106,13 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"url": "http://vimeo.com/31179423",
-				"abstractNote": "Strings (2011) by Alexander Chen. Video capture. http://www.baroque.me visualizes the first Prelude from Bach's Cello Suites. Using the math behind string length…",
-				"libraryCatalog": "vimeo.com",
-				"runningTime": "PT00H02M57S",
-				"shortTitle": "Strings",
 				"title": "Strings: J.S. Bach - Cello Suite No. 1 - Prelude",
-				"date": "2011-10-26"
+				"url": "http://vimeo.com/31179423",
+				"abstractNote": "Strings (2011) by Alexander Chen visualizes the first Prelude from Bach's Cello Suites. Using the math behind string length and pitch, it came from a simple idea:…",
+				"libraryCatalog": "vimeo.com",
+				"date": "2011-10-26",
+				"runningTime": "PT00H02M57S",
+				"shortTitle": "Strings"
 			}
 		]
 	}
