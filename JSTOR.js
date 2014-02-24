@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-02-02 20:03:27"
+	"lastUpdated": "2014-02-23 22:24:45"
 }
 
 function detectWeb(doc, url) {
@@ -99,8 +99,8 @@ function doWeb(doc, url) {
 			} else if (currTitleElmt.href) {
 				var jid = currTitleElmt.href.match(/(?:stable|pss)\/([a-z]*?\d+)/)[1];
 			} else {
-				//for items like Reviews without linked titles
-				var jid = ZU.xpathText(currTitleElmt, './a/@href').match(/10\.2307(\%2F|\/)(\d+)/)[2];
+				//this looks like it's the default now. Not sure how common the others are.
+				var jid = ZU.xpathText(currTitleElmt, './a/@href').match(/10\.2307(\%2F|\/)([^?]+)/)[2];
 				//Z.debug(jid)
 			}
 			
@@ -199,8 +199,8 @@ function first(set, next) {
 				item.attachments.push({url:pdfurl, title:"JSTOR Full Text PDF", mimeType:"application/pdf"});
 			}
 			var matches;
-			if (matches = item.ISSN.match(/([0-9]{4})([0-9]{3}[0-9Xx])/)) {
-				item.ISSN = matches[1] + '-' + matches[2];
+			if (item.ISSN) {
+				item.ISSN = ZU.cleanISSN(item.ISSN);
 			}
 			//reviews don't have titles in RIS - we get them from the item page
 			if (!item.title && review){
