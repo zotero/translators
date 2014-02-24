@@ -3,13 +3,13 @@
 	"label": "Google Play",
 	"creator": "Avram Lyon",
 	"target": "^https?://play\\.google\\.[^/]+/",
-	"minVersion": "2.1.8",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-02-24 01:50:34"
+	"lastUpdated": "2014-02-24 09:20:33"
 }
 
 /*
@@ -31,13 +31,18 @@
  */
 
 function detectWeb(doc, url) {
+	var cardListParent = cardList(doc);
+	if (cardListParent.length > 0) {
+		Z.monitorDOMChanges(cardListParent[0], {childList: true, subtree: true});
+	}
+
 	if (url.indexOf('/apps/details?id=') !== -1) {
 		return "computerProgram";
 	}
 
 	if (url.indexOf('/store/apps') !== -1
 			|| url.indexOf('&c=apps') !== -1) {
-		return "multiple";
+		return (cardListFindCards(doc).length > 0) ? "multiple" : false;
 	}
 
 	return false;
@@ -52,8 +57,7 @@ function doWeb(doc, url) {
 		return;
 	}
 
-	var cells = ZU.xpath(doc, '//div[contains(@class,"card-list")]/div[contains(@class, "card")]//h2/a[contains(@class, "title")]');
-
+	var cells = cardListFindCards(doc);
 	var items = new Object();
 
 	for (var index = 0; index < cells.length; index++) {
@@ -65,7 +69,7 @@ function doWeb(doc, url) {
 			return true;
 		}
 		var articles = new Array();
-		for (var i = 0; i < items.length; i++) {
+		for (var article in articles) {
 			articles.push(i);
 		}
 
@@ -73,12 +77,19 @@ function doWeb(doc, url) {
 	});
 }
 
+function cardList(doc) {
+	return ZU.xpath(doc, '//div[@class="card-list"]');
+}
+
+function cardListFindCards(doc) {
+	return ZU.xpath(doc, '//div[contains(@class,"card-list")]/div[contains(@class, "card")]//h2/a[contains(@class, "title")]');
+}
+
 function findProperty(doc, propertyKey) {
 	return ZU.xpathText(doc, '//div[contains(@itemprop, "' + propertyKey + '")]');
 }
 
 function saveIndividual(doc, url) {
-	Z.debug(url);
 	var title = findProperty(doc, "name");
 	var author = ZU.xpathText(doc, '//div[contains(@itemtype, "http://schema.org/Organization")]//span[contains(@itemprop, "name")]');
 
@@ -95,18 +106,28 @@ function saveIndividual(doc, url) {
 	item.date = date;
 	item.abstractNote = description;
 
-	for (var screenshot in screenshots) {
+	for (var index = 0; index < screenshots.length; index++) {
 		item.attachments.push({
-			url: screenshots[screenshot].src,
-			mimeType: "image/jpeg",
+			url: screenshots[index].src,
 			title: "App Screenshot"
 		})
 	}
 
-	item.system = "Android " + findProperty(doc, "operatingSystems").trim();
-	item.version = findProperty(doc, "version");
+	// We exclude "Varies with device"
+	var os = findProperty(doc, "operatingSystems").trim();
+	item.system = os.match(/.*\d.*/) ? "Android " + os : "Android";
+	
+	var version = findProperty(doc, "softwareVersion");
+	// We exlide "Varies with device"
+	if (version.match(/.*\d.*/)) {
+		item.version = version;
+	}
 	item.company = author;
-	item.creators.push(ZU.cleanAuthor(author, "author"))
+	item.creators.push({
+		lastName: author,
+		fieldMode: "single",
+		creatorType: "author"
+	});
 	
 	item.complete();
 }
@@ -121,8 +142,8 @@ var testCases = [
 				"itemType": "computerProgram",
 				"creators": [
 					{
-						"firstName": "Avram",
-						"lastName": "Lyon",
+						"lastName": "Avram Lyon",
+						"fieldMode": "single",
 						"creatorType": "author"
 					}
 				],
@@ -133,36 +154,27 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"mimeType": "image/jpeg",
 						"title": "App Screenshot"
 					},
 					{
-						"mimeType": "image/jpeg",
 						"title": "App Screenshot"
 					},
 					{
-						"mimeType": "image/jpeg",
 						"title": "App Screenshot"
 					},
 					{
-						"mimeType": "image/jpeg",
 						"title": "App Screenshot"
 					},
 					{
-						"mimeType": "image/jpeg",
 						"title": "App Screenshot"
 					}
 				],
-				"multi": {
-					"main": {},
-					"_lsts": {},
-					"_keys": {}
-				},
 				"title": "Zandy",
 				"url": "https://play.google.com/store/apps/details?id=com.gimranov.zandy.app",
 				"date": "January 25, 2014",
 				"abstractNote": "Access your Zotero library from your mobile device! Edit and view your library, sync, and work offline. Zandy provides a simple interface to all your research. Browse and modify the items in your library, add new items, view attachments, take and edit item notes, search your library, and add webpages from the Android browser, with more features coming soon!See http://www.gimranov.com/avram/w/zandy-user-guide for a complete guide to using Zandy. If you have Zandy 1.0 already, see the update note, http://wp.me/p1i2jM-2UFor more information on the Zotero project, the premier system for managing research and bibliographic data, see the project site at http://www.zotero.org/. Zandy is a free software project, licensed under the Affero GPL v3. By buying the paid application on Google Play, you support the future development of this app and ensure its further improvement. All future releases of the software will be free updates bringing new capabilities and bugfixes.To file bug reports or feature requests, please see the project repository at https://github.com/ajlyon/zandy/. The full source code is also available at that address.If you find that Zandy doesn't fit your needs, satisfaction is guaranteed: just send me an email at zandy@gimranov.com, and I'll refund the purchase price.Please note that Zandy has no official connection to the Zotero project and its home institution at the Center for History and New Media at George Mason University.",
 				"system": "Android 2.1 and up",
+				"version": "1.4.1",
 				"company": "Avram Lyon",
 				"libraryCatalog": "Google Play",
 				"accessDate": "CURRENT_TIMESTAMP"
@@ -172,7 +184,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://play.google.com/store/search?q=research&c=apps",
-		"items": "multiple"
+ 		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
