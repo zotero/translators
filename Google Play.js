@@ -56,7 +56,7 @@ function doWeb(doc, url) {
 
 	var items = new Object();
 
-	for (var index in cells) {
+	for (var index = 0; index < cells.length; index++) {
 		items[cells[index].href] = cells[index].textContent;
 	}
 
@@ -65,7 +65,7 @@ function doWeb(doc, url) {
 			return true;
 		}
 		var articles = new Array();
-		for (var i in items) {
+		for (var i = 0; i < items.length; i++) {
 			articles.push(i);
 		}
 
