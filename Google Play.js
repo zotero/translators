@@ -31,11 +31,12 @@
  */
 
 function detectWeb(doc, url) {
-	if (url.indexOf('/details?id=') !== -1) {
+	if (url.indexOf('/apps/details?id=') !== -1) {
 		return "computerProgram";
 	}
 
-	if (url.indexOf('/search?q=') !== -1) {
+	if (url.indexOf('/store/apps') !== -1
+			|| url.indexOf('&c=apps') !== -1) {
 		return "multiple";
 	}
 
