@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-02-24 01:23:18"
+	"lastUpdated": "2014-02-24 01:50:34"
 }
 
 /*
@@ -69,9 +69,7 @@ function doWeb(doc, url) {
 			articles.push(i);
 		}
 
-		ZU.processDocuments(articles, function(resultDoc) {
-			saveIndividual(resultDoc, resultDoc.location.href);
-		});
+		ZU.processDocuments(articles, saveIndividual);
 	});
 }
 
