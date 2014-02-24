@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-02-22 03:32:29"
+	"lastUpdated": "2014-02-23 23:53:47"
 }
 
 function getSearchResults(doc) {
@@ -62,7 +62,7 @@ function scrape(doc, url) {
 	url = url.replace(/[?#].*/, '').replace(/\/abstract\//, '/{REPLACE}/');
 	// fetch RIS
 	var risUrl = url.replace('{REPLACE}', 'export')
-	           + '?type=ris&download=true';
+			   + '?type=ris&download=true';
 	ZU.doGet(risUrl, function(text) {
 		text = text.replace(/^ID\s+-\s+/mg, 'DO  - ');
 		var trans = Zotero.loadTranslator('import');
@@ -178,7 +178,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://prd.aps.org/toc/PRD/v84/i7",
+		"url": "http://journals.aps.org/prd/issues/84/7",
 		"items": "multiple"
 	}
 ]

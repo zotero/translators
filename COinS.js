@@ -269,23 +269,19 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [
-					{
-						"document": {
-							"location": {}
-						}
-					}
+					{}
 				],
 				"publicationTitle": "Evaluation and Program Planning",
 				"volume": "34",
 				"issue": "4",
+				"language": "en",
 				"ISSN": "01497189",
 				"date": "11/2011",
 				"pages": "343-352",
 				"DOI": "10.1016/j.evalprogplan.2011.04.002",
 				"url": "http://linkinghub.elsevier.com/retrieve/pii/S0149718911000449",
 				"title": "Optimizing an immersion ESL curriculum using analytic hierarchy process",
-				"libraryCatalog": "CrossRef",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "CrossRef"
 			}
 		]
 	}

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-23 20:37:29"
+	"lastUpdated": "2014-02-24 00:03:36"
 }
 
 /*
@@ -97,6 +97,7 @@ function scrape(ids){
 	var risurl = "http://catalog.hathitrust.org/Search/SearchExport?handpicked="
 		+ ids.join(',') + "&method=ris";
 	Zotero.Utilities.HTTP.doGet(risurl, function (text) {
+		text = text.replace(/M1  - .+/, ""); //M1 has only garbage like repeated page number info
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);

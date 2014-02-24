@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-03-13 20:43:55"
+	"lastUpdated": "2014-02-24 00:01:06"
 }
 
 /*
@@ -73,7 +73,7 @@ function scrape(doc) {
 	newArticle.url = doc.location.href;
 	newArticle.title = ZU.trimInternal(ZU.xpathText(doc, '//div[@class = "FAZArtikelEinleitung"]/h1')).replace(/^,/, "");
 	var date = ZU.xpathText(doc, '//span[@class="Datum"]');
-	newArticle.date = ZU.trimInternal(date.replace(/ .*$/, ""));
+	if (date) newArticle.date = ZU.trimInternal(date.replace(/,? .*$/, ""));
 	var teaser = ZU.xpathText(doc, '//div[@class="FAZArtikelEinleitung"]/p[@class = "Copy"]');
 	if (teaser != null) {
 		newArticle.abstractNote = Zotero.Utilities.trimInternal(teaser).replace(/^,\s*/, "");

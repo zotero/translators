@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-11-18 18:16:39"
+	"lastUpdated": "2014-02-23 23:55:29"
 }
 
 function detectWeb(doc, url) {
@@ -358,6 +358,7 @@ var testCases = [
 					"D. melanogaster"
 				],
 				"seeAlso": [
+					"10.7554/eLife.00231",
 					"10.7554/eLife.00231"
 				],
 				"attachments": [

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-02-21 18:21:33"
+	"lastUpdated": "2014-02-23 23:48:47"
 }
 
 var searchRe = new RegExp('^https?://(?:www\.)?amazon\.([^/]+)/(gp/search/|(gp/)?registry/(wishlist|registry)|exec/obidos/search-handle-url/|s/|s\\?|[^/]+/lm/|gp/richpub/)');
@@ -560,7 +560,7 @@ var testCases = [
 				"publisher": "科学出版社",
 				"place": "北京",
 				"date": "2012",
-				"ISBN": "9787030329202 7030329201",
+				"ISBN": "9787030329202 : 7030329201",
 				"shortTitle": "汉语语音合成"
 			}
 		]

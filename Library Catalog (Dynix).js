@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-12-09 20:19:29"
+	"lastUpdated": "2014-02-23 23:49:49"
 }
 
 function detectWeb(doc, url) {
@@ -159,27 +159,27 @@ var testCases = [
 					{
 						"firstName": "Thomas",
 						"lastName": "Eakins",
-						"creatorType": "contributor"
+						"creatorType": "editor"
 					},
 					{
 						"firstName": "Susan Macdowell",
 						"lastName": "Eakins",
-						"creatorType": "contributor"
+						"creatorType": "editor"
 					},
 					{
 						"firstName": "Benjamin",
 						"lastName": "Eakins",
-						"creatorType": "contributor"
+						"creatorType": "editor"
 					},
 					{
 						"firstName": "Charles",
 						"lastName": "Bregler",
-						"creatorType": "contributor"
+						"creatorType": "editor"
 					},
 					{
 						"firstName": "Kathleen A.",
 						"lastName": "Foster",
-						"creatorType": "contributor"
+						"creatorType": "editor"
 					}
 				],
 				"notes": [
@@ -217,6 +217,7 @@ var testCases = [
 				"date": "1989",
 				"numPages": "37",
 				"callNumber": "mfc 000652",
+				"medium": "microform",
 				"libraryCatalog": "siris-libraries.si.edu Library Catalog"
 			}
 		]
