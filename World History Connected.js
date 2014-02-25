@@ -9,15 +9,9 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-02-25 21:36:58"
+	"lastUpdated": "2014-02-24 22:44:44"
 }
 
-function associateMeta(newItem, metaTags, field, zoteroField) {
-	var field = metaTags[field];
-	if(field) {
-		newItem[zoteroField] = field.getAttribute("content");
-	}
-}
 
 function scrape(doc) {
 	
@@ -28,17 +22,16 @@ function scrape(doc) {
 	var bookTitle;
 	var month, year;
 	var metaTags = doc.getElementsByTagName("meta");
-
-	associateMeta(newItem, metaTags, "Journal", "publicationTitle");
-	associateMeta(newItem, metaTags, "Volume", "volume");
-	associateMeta(newItem, metaTags, "Issue", "issue");
-
+	
+	newItem.publicationTitle = ZU.xpathText(doc, '//meta[@name="Journal"]/@content');
+	newItem.volume = ZU.xpathText(doc, '//meta[@name="Volume"]/@content')
+	newItem.issue = ZU.xpathText(doc, '//meta[@name="Issue"]/@content')
 	// in the case of book reviews, the title field is blank
 	//but quotes are not escaped properly, so if an article title begins with quotes, then the title tag looks blank even though it is not.
 	//(though semantically it is)
 	//they use the meta tag 'FileType' to indicate Aritlce or Book Review. silly, but we can use it.
 	
-	if (metaTags['FileType'].getAttribute("content") == 'Book Review') {
+	if (ZU.xpathText(doc, '//meta[@name="File Type"]/@content') == 'Book Review') {
 		//for a book review, title of reviewed book is
 		titlePath = '/html/body/table[4]/tbody/tr[3]/td[1]/i';	
 		newItem.title = "Review of " + doc.evaluate(titlePath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
@@ -61,10 +54,10 @@ function scrape(doc) {
 		}
 	}
 	
-	var month = metaTags["PublicationMonth"];
-	var year = metaTags["PublicationYear"];
-	if(month && year) {
-		newItem.date = month.getAttribute("content")+" "+year.getAttribute("content");
+	var month = ZU.xpathText(doc, '//meta[@name="PublicationMonth"]/@content')
+	var year = ZU.xpathText(doc, '//meta[@name="PublicationYear"]/@content')
+	if(month || year) {
+		newItem.date = month +" "+ year;
 	}
 	
 	newItem.attachments.push({document:doc, title:"World History Connected Snapshot"});

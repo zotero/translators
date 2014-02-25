@@ -121,20 +121,13 @@ var testCases = [
 				"publicationTitle": "Cell Cycle",
 				"volume": "4",
 				"issue": "5",
-				"number": "5",
-				"patentNumber": "5",
 				"pages": "665-668",
-				"publisher": "Landes Bioscience",
-				"institution": "Landes Bioscience",
-				"company": "Landes Bioscience",
-				"label": "Landes Bioscience",
-				"distributor": "Landes Bioscience",
 				"DOI": "10.4161/cc.4.5.1683",
 				"ISSN": "1538-4101, 1551-4005",
 				"url": "http://www.landesbioscience.com/journals/cc/article/1683/",
-				"libraryCatalog": "www.landesbioscience.com",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"abstractNote": "The fidelity of chromosome segregation during cell division is critical to maintain\ngenomic stability and to prevent cancer and birth defects. A key set of kinases that regulates this\nprocess has been identified and characterized over the last few years, including the Aurora, Polo\nand Nek families. Recently we proposed that a little-studied kinase known as haspin is a new\nmember of this important group. During mitosis haspin is phosphorylated, associates with the\nchromosomes, centrosomes and spindle, and is responsible for phosphorylation of histone H3 at\nthreonine-3. Depletion of haspin using RNA interference prevents normal alignment of\nchromosomes at metaphase, suggesting that haspin plays a crucial role in chromosome\nsegregation. Here we discuss possible mechanisms of haspin action and the function of histone\nphosphorylation in mitosis. We also outline some of the questions raised by these new findings\nand consider what role haspin might play in cancer.",
+				"date": "2005/03/02",
+				"libraryCatalog": "www.landesbioscience.com",
 				"shortTitle": "Haspin"
 			}
 		]
