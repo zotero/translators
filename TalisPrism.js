@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-03-07 12:46:53"
+	"lastUpdated": "2014-02-27 23:48:15"
 }
 
 /* TalisPrism translator.
@@ -441,46 +441,5 @@ function doWeb(doc, url) {
 	}
 		
 }/** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://talis-prism.lib.surrey.ac.uk/TalisPrism/doSearch.do?REF=%3C1%3D%221.0%22%3E%3C2%3E%3C3%3E%3C%3D%3E%3C4%3Ekeyword%3C%2F4%3E%3C5%3Eargentina%2C+economy%3C%2F5%3E%3C%2F%3D%3E%3C%2F3%3E%3C7%3E%3C%3C9%3E%3C8%3E11%3C%2F8%3E%3C%2F%3C9%3E%3C%2F7%3E%3C%2F2%3E%3C6%3D%22talislms%22+%3E%3C%2F6%3E%3C%2F1%3E",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://talis-prism.lib.surrey.ac.uk/TalisPrism/doOpenURLSearch.do?sid=Talis:prod_talis&pid=Key%3A220658%3BArtifactType%3AMarc21Slim%3BsearchLocation%3Atalislms",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"firstName": "Alejandro",
-						"lastName": "Dabat",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot of Library Page",
-						"mimeType": "text/html"
-					}
-				],
-				"title": "Argentina : the Malvinas and the end of military rule",
-				"date": "1984",
-				"place": "London",
-				"publisher": "Verso",
-				"ISBN": "0860910857",
-				"numPages": "205p",
-				"extra": "ill., maps ; 21 cm",
-				"libraryCatalog": "http://talis-prism.lib.surrey.ac.uk",
-				"callNumber": "Main Library 997.11/DAB",
-				"shortTitle": "Argentina"
-			}
-		]
-	}
-]
+var testCases = []
 /** END TEST CASES **/

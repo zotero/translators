@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-12-10 17:58:24"
+	"lastUpdated": "2014-02-28 00:21:33"
 }
 
 function detectWeb(doc, url) {
@@ -116,7 +116,7 @@ function scrape(doc, url) {
 		var label = ZU.xpathText(rows[i], './td[@id="colTitle"]').replace(/^\s*|\s*$/g, '').replace(/:/, '');
 		
 		// Handle the document link differently
-		if (label.indexOf("Online Source") != -1) {
+		if (label.indexOf("Online Source") != -1||label.indexOf("NTRS Full-Text")!=-1) {
 			var content = ZU.xpathText(rows[i], './/a/@href');
 			
 		// Grab the content and remove extra white space and parenthetical info
@@ -128,8 +128,10 @@ function scrape(doc, url) {
 	}
 	
 	// Save the document as a link attachment
-	if (items["Online Source"]) {
-		var linkurl = items["Online Source"];
+	if (items["Online Source"] || items["External Online Source"]) {
+		Z.debug("here")
+		var linkurl = items["Online Source"] ? items["Online Source"] : items["External Online Source"];
+		
 		if (linkurl.match("doi.org")) {
 			newItem.DOI = linkurl.replace(/http:\/\/dx.doi.org\//, '');
 		} else {
@@ -140,7 +142,13 @@ function scrape(doc, url) {
 			}];
 		}
 	}
-	
+	if (items["NTRS Full-Text"]){
+		newItem.attachments.push({
+			url: items["NTRS Full-Text"],
+			title: "NASA NTRS Full Text PDF",
+			mimeType: "application/pdf"
+		})
+	}
 	// Save a snapshot
 	newItem.attachments.push({title: "Snapshot", document: doc});
 
@@ -181,7 +189,9 @@ function scrape(doc, url) {
 				newItem.conferenceName = confNameLocation.shift();
 				
 				// Save the location
-				if(confNameLocation.length > 2) {
+				
+				if (confNameLocation.length > 2){
+					var daterange = confNameLocation.shift();//right now we discard this, but may be useful later
 					newItem.place = confNameLocation.shift() + ", "  + confNameLocation.pop();
 				} else if (confNameLocation.length) {
 					newItem.place = confNameLocation.shift();
@@ -252,7 +262,6 @@ function scrape(doc, url) {
 	if (items["Description"]) note.push("Description: " + items["Description"]);
 	if (items["Imprint And Other Notes"]) note.push("Imprint And Other Notes: " + items["Imprint And Other Notes"]);
 	if (items["Notes"]) note.push(items["Notes"]);
-	
 	if(note.length){
 		newItem.notes.push(note.join("; "))
 	}
@@ -650,7 +659,7 @@ var testCases = [
 				"itemType": "report",
 				"creators": [],
 				"notes": [
-					"Document ID: 19630002484; Accession Number: 63N12360; Subject Category: SPACE VEHICLES; Publisher Information: United States; Financial Sponsor: NASA; United States; Description: 23p; In Other"
+					"Document ID: 19630002484; Accession Number: 63N12360; Subject Category: SPACE VEHICLES; Publisher Information: United States; Financial Sponsor: NASA; United States; Description: 23p; In Other; Imprint And Other Notes: NATIONAL AERONAUTICS AND SPACE ADMINISTRATION, WASHINGTON, D.C. THIRD SATURN ROCKET TO BE LAUNCHED  NEWS RELEASE NO. 62-237 NOV. 13, 1962  22P"
 				],
 				"tags": [
 					"launching",

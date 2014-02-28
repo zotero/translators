@@ -9,9 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-02-24 22:44:44"
+	"lastUpdated": "2014-02-27 23:05:02"
 }
-
 
 function scrape(doc) {
 	
@@ -45,14 +44,11 @@ function scrape(doc) {
 		}
 	}
 
-	var author = metaTags["Author"];
-	if(author) {
-		var authors = author.getAttribute("content").split(" and ");
+	var authors = ZU.xpath(doc, '//meta[@name="Author"]/@content')
 		for(j in authors) {
-			authors[j] = authors[j].replace("Reviewed by ", "");
+			authors[j] = authors[j].textContent.replace("Reviewed by ", "");
 			newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[j], "author"));
 		}
-	}
 	
 	var month = ZU.xpathText(doc, '//meta[@name="PublicationMonth"]/@content')
 	var year = ZU.xpathText(doc, '//meta[@name="PublicationYear"]/@content')
