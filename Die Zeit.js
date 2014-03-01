@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-09-22 20:52:10"
+	"lastUpdated": "2014-03-01 09:58:35"
 }
 
 /*
@@ -94,16 +94,14 @@ function scrape(doc, url) {
 
 	// Date
 	var date_XPath = '//meta[contains(@name, "dats")]';
-	var date2_XPath = '//span[@class="articlemeta-date"]';	
+	var date2_XPath = '//span[@class="articlemeta-datetime"]';	
 	if (doc.evaluate(date_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
 		var date = doc.evaluate(date_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().content;
 		date = date.split("T")[0];
 		newItem.date = date;
 	} else if (doc.evaluate(date2_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
-
-	var date = ZU.xpathText(doc, date2_XPath);
-		Z.debug(date)
-		newItem.date = date;
+		var date = ZU.xpathText(doc, date2_XPath)
+		if (date) newItem.date = date.replace(/\d{1,2}:\d{2}\sUhr/, "").trim();
 	}
 
 	
@@ -181,7 +179,7 @@ var testCases = [
 				"creators": [],
 				"notes": [],
 				"tags": [
-					"Libyen",
+					"Muammar al-Gaddafi",
 					"Muammar al-Gaddafi",
 					"Mustafa Abdel Dschalil",
 					"Stadt",
@@ -198,7 +196,7 @@ var testCases = [
 				"url": "http://www.zeit.de/politik/ausland/2011-09/libyen-bani-walid",
 				"title": "Libyen: Rebellen bereiten Angriff auf Bani Walid vor",
 				"date": "4. September 2011",
-				"abstractNote": "Die von Gadhafi-Anhängern geführte Stadt ist von Rebellentruppen eingekreist. Gespräche über eine friedliche Übergabe sind gescheitert, ein Angriff steht offenbar bevor.",
+				"abstractNote": "Die von Gadhafi-Anhängern geführte Stadt ist von Rebellentruppen eingekreist. Gespräche über eine friedliche Übergabe sind gescheitert, ein Angriff steht offenbar bevor. von AFP und dpa",
 				"publicationTitle": "Die Zeit",
 				"section": "Ausland",
 				"libraryCatalog": "Die Zeit",

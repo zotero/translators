@@ -1,15 +1,15 @@
 {
 	"translatorID": "0863b8ec-e717-4b6d-9e35-0b2db2ac6b0f",
-	"label": "Institute of Pure and Applied Physics",
+	"label": "Physical Society of Japan",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://[a-z]+\\.(ipap|jsap)\\.jp/",
+	"target": "^https?://[a-z]+\\.jsap\\.jp/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-09-23 22:58:35"
+	"lastUpdated": "2014-03-01 10:50:01"
 }
 
 /*
@@ -174,120 +174,17 @@ var testCases = [
 				"date": "2011",
 				"url": "http://jjap.jsap.jp/link?JJAP/50/01AA01/",
 				"DOI": "10.7567/JJAP.50.01AA01",
+				"publisher": "The Japan Society of Applied Physics",
 				"abstractNote": "In this study, an attempt is made to provide a framework to assess and improve metal–oxide–semiconductor field-effect transistor (MOSFET) reliability from the early stage of the design to the completion of the product. A small gate area has very small capacitances that are difficult to measure, making capacitance–voltage (C–V) based techniques difficult or impossible. In view of these experimental difficulties, we tried electrical doping profiling measurement for MOSFET with short gate length, ultra thin oxide thickness and asymmetric source/drain structure and checked the agreement with simulation result. We could get the effective mobility by simple drain current versus drain bias voltage measurement. The calculated effective mobility was smaller than expected value and we explained some reasons. An accurate effective mobility for asymmetric source–drain junction transistor was successfully extracted by using the split C–V technique, with the capacitance measured between the gate and source–drain and between the gate and the substrate.",
-				"libraryCatalog": "Institute of Pure and Applied Physics"
+				"libraryCatalog": "Institute of Pure and Applied Physics",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://jpsj.ipap.jp/link?JPSJ/80/053703/",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "Ai",
-						"lastName": "Yamakage",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Kentaro",
-						"lastName": "Nomura",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Ken-Ichiro",
-						"lastName": "Imura",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Yoshio",
-						"lastName": "Kuramoto",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "IPAP - Snapshot",
-						"mimeType": "text/html"
-					},
-					{
-						"title": "IPAP - Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"itemID": "JPSJ.80.053703",
-				"title": "Disorder-Induced Multiple Transition Involving $\\mathbbZ_2$ Topological Insulator",
-				"publicationTitle": "Journal of the Physical Society of Japan",
-				"volume": "80",
-				"issue": "5",
-				"pages": "053703",
-				"date": "2011",
-				"url": "http://jpsj.ipap.jp/link?JPSJ/80/053703/",
-				"DOI": "10.1143/JPSJ.80.053703",
-				"abstractNote": "Effects of disorder on two-dimensional Z2 topological insulator are studied numerically by the transfer matrix method. Based on the scaling analysis, the phase diagram is derived for a model of HgTe quantum well as a function of disorder strength and magnitude of the energy gap. In the presence of sz non-conserving spin–orbit coupling, a finite metallic region is found that partitions the two topologically distinct insulating phases. As disorder increases, a narrow-gap topologically trivial insulator undergoes a series of transitions; first to metal, second to topological insulator, third to metal, and finally back to trivial insulator. We show that this multiple transition is a consequence of two disorder effects; renormalization of the band gap, and Anderson localization. The metallic region found in the scaling analysis corresponds roughly to the region of finite density of states at the Fermi level evaluated in the self-consistent Born approximation.©2011 The Physical Society of Japan",
-				"libraryCatalog": "Institute of Pure and Applied Physics"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://jpsj.ipap.jp/journal/JPSJS-78SA.html",
+		"url": "http://jjap.jsap.jp/journal/JJAP-50-1S1.html",
 		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://jpsj.ipap.jp/cgi-bin/getarticle?journal=JPSJ&volume=70&page=1604",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "Tomoya",
-						"lastName": "Isoshima",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Kazushige",
-						"lastName": "Machida",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Tetsuo",
-						"lastName": "Ohmi",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "IPAP - Snapshot",
-						"mimeType": "text/html"
-					},
-					{
-						"title": "IPAP - Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"itemID": "JPSJ.70.1604",
-				"title": "Quantum Vortex in a Spinor Bose-Einstein Condensate",
-				"publicationTitle": "Journal of the Physical Society of Japan",
-				"volume": "70",
-				"issue": "6",
-				"pages": "1604-1610",
-				"date": "2001",
-				"url": "http://jpsj.ipap.jp/link?JPSJ/70/1604/",
-				"DOI": "10.1143/JPSJ.70.1604",
-				"abstractNote": "Quantum vortices in the multi-component Bose-Einstein condensation (BEC) are investigated theoretically. It is found that three kinds of the vortex configurations are possible and their physical properties are discussed in details, including the density distribution and the spin texture. By using the Bogoliubov theory extended to the three component BEC, the collective modes for these vortices are evaluated. The local vortex stability for these vortices are examined in light of the existence of the negative eigenvalue, yielding a narrow magnetization window for the local intrinsic stable region where the multi-components work together to stabilize a vortex in a self-organized way.©2001 The Physical Society of Japan",
-				"libraryCatalog": "Institute of Pure and Applied Physics"
-			}
-		]
 	}
 ]
 /** END TEST CASES **/

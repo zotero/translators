@@ -1808,6 +1808,7 @@ var testCases = [
 				"issue": "7381",
 				"pages": "341-343",
 				"date": "2012-01-18",
+				"ISSN": "0028-0836",
 				"language": "en",
 				"DOI": "10.1038/nature10669",
 				"url": "http://www.nature.com/nature/journal/v481/n7381/fp/nature10669_ja.html?lang=ja",

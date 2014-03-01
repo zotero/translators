@@ -144,9 +144,8 @@ var testCases = [
 				"date": "FEBRUARY 27, 2014",
 				"ISSN": "0028-6583",
 				"publicationTitle": "The New Republic",
-				"title": "Uh-Oh: Janet Yellen is Waffling About Whether \"Too Big To Fail\" is Over",
+				"title": "Uh-Oh: Janet Yellen Is Waffling About Whether \"Too Big To Fail\" Is Over",
 				"libraryCatalog": "The New Republic",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Uh-Oh"
 			}
 		]

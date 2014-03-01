@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-02-28 14:46:49"
+	"lastUpdated": "2014-03-01 11:11:35"
 }
 
 function getSearchResults(doc) {
@@ -458,7 +458,8 @@ function scrape(doc, url) {
 					//subjects separated by newline or ; in same div.
 					var subjects = value.trim().split(/\s*[;\n]\s*/)
 					for (var i in subjects) {
-						newItem.tags.push(Zotero.Utilities.trimInternal(subjects[i].replace(/\*/g, "")))
+						subjects[i] = subjects[i].trim().replace(/\*/g, "").replace(/^\s*\/|\/\s*$/, "");
+						if (subjects[i].length!=0) newItem.tags.push(Zotero.Utilities.trimInternal(subjects[i]))
 					}
 				}
 				break;
@@ -705,7 +706,7 @@ var testCases = [
 				],
 				"tags": [
 					"Leucémie lymphoïde chronique -- Thèses et écrits académiques",
-					"Cellules B -- Thèses et écrits académiques",
+					"Lymphocytes B -- Thèses et écrits académiques",
 					"Lymphome malin non hodgkinien -- Dissertations universitaires",
 					"Lymphocytes B -- Dissertations universitaires",
 					"Leucémie chronique lymphocytaire à cellules B -- Dissertations universitaires"
@@ -1592,6 +1593,13 @@ var testCases = [
 					}
 				],
 				"tags": [
+					"Deutschland",
+					"Datenschutz",
+					"Persönlichkeitsrecht",
+					"Cloud Computing",
+					"Electronic Government",
+					"Electronic Commerce",
+					"f Aufsatzsammlung",
 					"f Online-Publikation"
 				],
 				"seeAlso": [],

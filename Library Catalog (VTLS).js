@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-18 00:31:33"
+	"lastUpdated": "2014-03-01 11:15:01"
 }
 
 function detectWeb(doc, url) {
@@ -124,41 +124,48 @@ function scrape(doc, newUris) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://webvirtua.ums.edu.my/cgi-bin/gw/chameleon?sessionid=2011110906595202796&skin=ums&lng=en&inst=consortium&host=10.11.50.2%2b1111%2bDEFAULT&sourcescreen=INITREQ&scant1=Peronism%20without%20Peron%20%3a%20unions,%20parties,%20and%20democracy%20in%20Argentina%20%2f%20James%20W.%20McGuire&scanu1=4&elementcount=1&t1=Peronism%20without%20Peron%20%3a%20unions,%20parties,%20and%20democracy%20in%20Argentina%20%2f%20James%20W.%20McGuire&u1=4&op1=0&pos=1&itempos=1&rootsearch=KEYWORD&function=INITREQ&search=AUTHID&authid=428069&authidu=4",
+		"url": "http://webvirtua.ums.edu.my/cgi-bin/gw/chameleon?sessionid=2014030201591329116&skin=ums&lng=en&inst=consortium&host=10.50.9.80%2b1111%2bDEFAULT&patronhost=10.50.9.80%201111%20DEFAULT&search=KEYWORD&searchid=H1&function=COPVOLSCR&sourcescreen=INITREQ&pos=1&totalitems=1&itempos=1&rootsearch=KEYWORD",
 		"items": [
 			{
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "James W.",
-						"lastName": "McGuire",
-						"creatorType": "author"
+						"lastName": "Mohd. Yaakub Hj. Johari",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Institut kajian pembangunan (Sabah)",
+						"fieldMode": true
+					},
+					{
+						"lastName": "Konrad Adenauer Foundation",
+						"fieldMode": true
+					},
+					{
+						"lastName": "Seminarp on Human Resources Developement in Sabah",
+						"fieldMode": true
 					}
 				],
 				"notes": [],
 				"tags": [
-					"Peronism",
-					"Trade-unions",
-					"Political activity History",
-					"Argentina",
-					"Democracy",
-					"History",
-					"Argentina",
-					"Argentina",
-					"Politics and government",
-					"1943-"
+					"Manpower policy",
+					"Sabah",
+					"Human capital",
+					"Sabah",
+					"Labor market",
+					"Sabah"
 				],
 				"seeAlso": [],
 				"attachments": [],
-				"ISBN": "0804728313",
-				"title": "Peronism without Peron: unions, parties, and democracy in Argentina",
-				"place": "Stanford",
-				"publisher": "Stanford University Press",
-				"date": "1997",
-				"numPages": "388",
-				"callNumber": "F2849 . M34",
+				"ISBN": "9679910113",
+				"title": "Issues on human resources development in Sabah: proceedings of a Seminar held at Kota Kinabalu, Sabah on August 17-19, 1987",
+				"place": "Kota Kinabalu",
+				"publisher": "Institut Kajian Pembangunan (Sabah) : Konrad Adenauer Foundation",
+				"date": "1989",
+				"numPages": "172",
+				"callNumber": "HD5812.57 . S36I77 1987",
 				"libraryCatalog": "webvirtua.ums.edu.my Library Catalog",
-				"shortTitle": "Peronism without Peron"
+				"shortTitle": "Issues on human resources development in Sabah"
 			}
 		]
 	}

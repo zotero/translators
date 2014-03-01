@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-12-23 02:48:24"
+	"lastUpdated": "2014-03-01 10:07:04"
 }
 
 /*
@@ -311,9 +311,7 @@ function init(doc, url, callback, forceLoadRDF) {
 				var statement = statements[i];			
 				rdf.Zotero.RDF.addStatement(statement[0], statement[1], statement[2], true);
 			}
-			//see what we pushed to RDF
-			//Z.debug(rdf.Zotero.RDF.serialize());
-			
+
 			var nodes = rdf.getNodes(true);
 			rdf.defaultUnknownType = hwType || hwTypeGuess || generatorType ||
 				//if we have RDF data, then default to webpage
@@ -1101,18 +1099,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "webpage",
-				"creators": [
-					{
-						"firstName": "Gregg",
-						"lastName": "Barrios",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "LA Review of",
-						"lastName": "Books",
-						"creatorType": "author"
-					}
-				],
+				"creators": [],
 				"notes": [],
 				"tags": [
 					"Salon.com",

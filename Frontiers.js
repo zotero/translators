@@ -2,14 +2,14 @@
 	"translatorID": "cb9e794e-7a65-47cd-90f6-58cdd191e8b0",
 	"label": "Frontiers",
 	"creator": "Jason Friedman and Simon Kornblith",
-	"target": "^https?://www\\.frontiersin\\.org.*/",
+	"target": "^https?://(www|journal)\\.frontiersin\\.org.*/",
 	"minVersion": "2.1.10",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-02-07 00:06:31"
+	"lastUpdated": "2014-03-01 10:33:33"
 }
 
 /*
@@ -68,10 +68,7 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(articles, scrape, function () {
-				Zotero.done();
-			});
-			Zotero.wait();
+			Zotero.Utilities.processDocuments(articles, scrape);
 		});
 	}
 }
@@ -94,9 +91,9 @@ function scrape(doc, url) {
 	newItem.publicationTitle = Zotero.Utilities.trimInternal(docTitle.split('|')[2]);
 
 	//authors - can be in two ways, depending on which page
-	var authors = doc.evaluate('//div[@class="authors"]/a', doc, null, XPathResult.ANY_TYPE, null);
+	var authors = doc.evaluate('//meta[@name="citation_author"]/@content', doc, null, XPathResult.ANY_TYPE, null);
 	while (author = authors.iterateNext()) {
-		newItem.creators.push(Zotero.Utilities.cleanAuthor(Zotero.Utilities.trimInternal(author.textContent), "author"));
+		newItem.creators.push(Zotero.Utilities.cleanAuthor(Zotero.Utilities.trimInternal(author.textContent), "author", true));
 	}
 
 	authors = doc.evaluate('//div[@class="paperauthor"]/a', doc, null, XPathResult.ANY_TYPE, null);
@@ -189,10 +186,10 @@ function scrape(doc, url) {
 
 	if (!(vol == null)) newItem.volume = vol.textContent;
 
-	var pdf = doc.getElementById("lnkPDFFis");
-	if (pdf && pdf.href) {
+	var pdfurl = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content')
+	if (pdfurl) {
 		newItem.attachments = [{
-			url: pdf.href,
+			url: pdfurl,
 			title: "Full Text PDF",
 			mimeType: "application/pdf"
 		}];
@@ -204,59 +201,34 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.frontiersin.org/neuropharmacology/10.3389/fnins.2010.00191/abstract",
+		"url": "http://www.frontiersin.org/SearchData.aspx?sq=key+visual+features",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://journal.frontiersin.org/Journal/10.3389/fpsyg.2011.00326/abstract",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "Thomas A. van",
-						"lastName": "Essen",
+						"firstName": "Sébastien M.",
+						"lastName": "Crouzet",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Ruben S. van der",
-						"lastName": "Giessen",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Sebastiaan K. E.",
-						"lastName": "Koekkoek",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Frans",
-						"lastName": "VanderWerf",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Chris I. De",
-						"lastName": "Zeeuw",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Perry J. J. van",
-						"lastName": "Genderen",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "David",
-						"lastName": "Overbosch",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Marcel T. G. de",
-						"lastName": "Jeu",
+						"firstName": "Thomas",
+						"lastName": "Serre",
 						"creatorType": "author"
 					}
 				],
 				"notes": [],
 				"tags": [
-					"cerebellum",
-					"eye-blink conditioning",
-					"gap junctions",
-					"mefloquine",
-					"motor behavior"
+					"rapid visual object recognition",
+					"computational models",
+					"visual features",
+					"computer vision",
+					"feedforward"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -265,23 +237,19 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"url": "http://www.frontiersin.org/neuropharmacology/10.3389/fnins.2010.00191/abstract",
-				"title": "Anti-malaria drug mefloquine induces motor learning deficits in humans",
-				"publicationTitle": "Neuropharmacology",
-				"abstractNote": "Mefloquine (a marketed anti-malaria drug) prophylaxis has a high risk of causing adverse events. Interestingly, animal studies have shown that mefloquine imposes a major deficit in motor learning skills by affecting the connexin 36 gap junctions of the inferior olive. We were therefore interested in assessing whether mefloquine might induce similar effects in humans. The main aim of this study was to investigate the effect of mefloquine on olivary-related motor performance and motor learning tasks in humans. We subjected nine participants to voluntary motor timing (dart throwing task), perceptual timing (rhythm perceptual task) and reflex timing tasks (eye-blink task) before and 24 h after the intake of mefloquine. The influence of mefloquine on motor learning was assessed by subjecting participants with and without mefloquine intake (controls: n = 11 vs mefloquine: n = 8) to an eye-blink conditioning task. Voluntary motor performance, perceptual timing, and reflex blinking were not affected by mefloquine use. However, the influence of mefloquine on motor learning was substantial; both learning speed as well as learning capacity was impaired by mefloquine use. Our data suggest that mefloquine disturbs motor learning skills. This adverse effect can have clinical as well as social clinical implications for mefloquine users. Therefore, this side-effect of mefloquine should be further investigated and recognized by clinicians.",
-				"DOI": "10.3389/fnins.2010.00191",
-				"pages": "191",
-				"date": "2010",
-				"journalAbbreviation": "Front. Neurosci",
-				"volume": "4",
-				"libraryCatalog": "Frontiers"
+				"url": "http://journal.frontiersin.org/Journal/10.3389/fpsyg.2011.00326/abstract",
+				"title": "What are the visual features underlying rapid object recognition?",
+				"publicationTitle": "Perception Science",
+				"abstractNote": "Research progress in machine vision has been very significant in recent years. Robust face detection and identification algorithms are already readily available to consumers, and modern computer vision algorithms for generic object recognition are now coping with the richness and complexity of natural visual scenes. Unlike early vision models of object recognition that emphasized the role of figure-ground segmentation and spatial information between parts, recent successful approaches are based on the computation of loose collections of image features without prior segmentation or any explicit encoding of spatial relations. While these models remain simplistic models of visual processing, they suggest that, in principle, bottom-up activation of a loose collection of image features could support the rapid recognition of natural object categories and provide an initial coarse visual representation before more complex visual routines and attentional mechanisms take place. Focusing on biologically plausible computational models of (bottom-up) pre-attentive visual recognition, we review some of the key visual features that have been described in the literature. We discuss the consistency of these feature-based representations with classical theories from visual psychology and test their ability to account for human performance on a rapid object categorization task.",
+				"DOI": "10.3389/fpsyg.2011.00326",
+				"pages": "326",
+				"date": "2011",
+				"journalAbbreviation": "Front. Psychology",
+				"volume": "2",
+				"libraryCatalog": "Frontiers",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.frontiersin.org/SearchData.aspx?sq=key+visual+features",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

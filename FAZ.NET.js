@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-02-24 00:01:06"
+	"lastUpdated": "2014-03-01 10:10:41"
 }
 
 /*
@@ -71,7 +71,7 @@ function doWeb(doc, url) {
 function scrape(doc) {
 	var newArticle = new Zotero.Item('newspaperArticle');
 	newArticle.url = doc.location.href;
-	newArticle.title = ZU.trimInternal(ZU.xpathText(doc, '//div[@class = "FAZArtikelEinleitung"]/h1')).replace(/^,/, "");
+	newArticle.title = ZU.trimInternal(ZU.xpathText(doc, '//div[@class = "FAZArtikelEinleitung"]/h2')).replace(/^,/, "");
 	var date = ZU.xpathText(doc, '//span[@class="Datum"]');
 	if (date) newArticle.date = ZU.trimInternal(date.replace(/,? .*$/, ""));
 	var teaser = ZU.xpathText(doc, '//div[@class="FAZArtikelEinleitung"]/p[@class = "Copy"]');
@@ -130,7 +130,7 @@ function countObjectProperties(obj) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.faz.net/aktuell/wissen/mensch-gene/wissenschaftsphilosophie-ludwik-fleck-moritz-schlick-und-die-vernunft-1654864.html",
+		"url": "http://www.faz.net/aktuell/wissen/mensch-gene/wissenschaftsphilosophie-krumme-wege-der-vernunft-1654864.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -156,7 +156,7 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"url": "http://www.faz.net/aktuell/wissen/mensch-gene/wissenschaftsphilosophie-ludwik-fleck-moritz-schlick-und-die-vernunft-1654864.html",
+				"url": "http://www.faz.net/aktuell/wissen/mensch-gene/wissenschaftsphilosophie-krumme-wege-der-vernunft-1654864.html",
 				"title": "Wissenschaftsphilosophie Krumme Wege der Vernunft",
 				"date": "13.06.2011",
 				"abstractNote": "13.06.2011 · Wissenschaft hat eine Geschichte, wie kann sie dann aber rational sein? Im Briefwechsel zwischen Ludwik Fleck und Moritz Schlick deuteten sich bereits Antworten an.",
