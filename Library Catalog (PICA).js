@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-12-09 20:28:03"
+	"lastUpdated": "2014-02-28 14:46:49"
 }
 
 function getSearchResults(doc) {
@@ -118,7 +118,11 @@ function scrape(doc, url) {
 			case 'verfasser':
 			case 'other persons':
 			case 'sonst. personen':
-				if (field == 'medewerker' || field == 'beteiligt') role = "editor";
+			case 'collaborator':
+			case 'beiträger': //turn into contributor
+			case 'contributor':
+				if (field == 'medewerker' || field == 'beteiligt'||field =='collaborator') role = "editor";
+				if (field == 'beiträger' || field == 'contributor') role = "contributor";
 				//we may have set this in the title field below
 				else if (!role) role = "author";
 				
@@ -389,6 +393,8 @@ function scrape(doc, url) {
 			case 'extent':
 			case 'umfang':
 			case 'omvang':
+			case 'kollation':
+			case 'collation':
 				// We're going to extract the number of pages from this field
 				// Known bug doesn't work when there are 2 volumes (maybe fixed?), 
 				var m = value.match(/(\d+) vol\./);
@@ -430,6 +436,8 @@ function scrape(doc, url) {
 			case 'subject heading':
 			case 'trefwoord':
 			case 'schlagwörter':
+			case 'gattung/fach':
+			case 'category/subject':
 
 				var subjects = doc.evaluate('./td[2]/div', tableRow, null, XPathResult.ANY_TYPE, null);
 				//subjects on separate div lines
