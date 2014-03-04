@@ -174,10 +174,8 @@ var testCases = [
 				"date": "2011",
 				"url": "http://jjap.jsap.jp/link?JJAP/50/01AA01/",
 				"DOI": "10.7567/JJAP.50.01AA01",
-				"publisher": "The Japan Society of Applied Physics",
 				"abstractNote": "In this study, an attempt is made to provide a framework to assess and improve metal–oxide–semiconductor field-effect transistor (MOSFET) reliability from the early stage of the design to the completion of the product. A small gate area has very small capacitances that are difficult to measure, making capacitance–voltage (C–V) based techniques difficult or impossible. In view of these experimental difficulties, we tried electrical doping profiling measurement for MOSFET with short gate length, ultra thin oxide thickness and asymmetric source/drain structure and checked the agreement with simulation result. We could get the effective mobility by simple drain current versus drain bias voltage measurement. The calculated effective mobility was smaller than expected value and we explained some reasons. An accurate effective mobility for asymmetric source–drain junction transistor was successfully extracted by using the split C–V technique, with the capacitance measured between the gate and source–drain and between the gate and the substrate.",
-				"libraryCatalog": "Institute of Pure and Applied Physics",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "Physical Society of Japan"
 			}
 		]
 	},

@@ -1099,16 +1099,27 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "webpage",
-				"creators": [],
+				"creators": [
+					{
+						"firstName": "Gregg",
+						"lastName": "Barrios",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "LA Review of",
+						"lastName": "Books",
+						"creatorType": "author"
+					}
+				],
 				"notes": [],
 				"tags": [
-					"Salon.com",
-					"LA Review of Books",
-					"science fiction",
-					"Junot Diaz",
 					"Dominican Republic",
 					"Drown",
-					"Rafael Trujillo"
+					"Junot Diaz",
+					"LA Review of Books",
+					"Rafael Trujillo",
+					"Salon.com",
+					"science fiction"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -1119,8 +1130,6 @@ var testCases = [
 				"title": "Junot Díaz: My stories come from trauma",
 				"url": "http://www.salon.com/2012/10/10/junot_diaz_my_stories_come_from_trauma/",
 				"abstractNote": "The effervescent author of \"This is How You Lose Her\" explains the darkness coursing through his fiction",
-				"libraryCatalog": "www.salon.com",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Junot Díaz"
 			}
 		]

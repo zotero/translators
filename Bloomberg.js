@@ -134,11 +134,11 @@ var testCases = [
 						"type": "text/html"
 					}
 				],
-				"url": "http://www.bloomberg.com/news/2012-01-05/four-economists-come-together-to-say-we-agree-business-class.html",
-				"abstractNote": "“If you laid all the economists in the world end to end, they still wouldn’t reach a conclusion.” This old joke still works because it reflects a common belief that economists can’t agree on anything important. Yet the four of us are part of a project that we believe will demonstrate that this proposition is wrong.",
-				"date": "Jan 5, 2012 12:01 AM GMT+0000",
+				"url": "http://www.bloombergview.com/articles/2012-01-05/four-economists-come-together-to-say-we-agree-business-class",
+				"abstractNote": "“If you laid all the economists in the world end to end, they still wouldn’t reach a conclusion.” This old joke still works because it reflects a common belief",
+				"date": "Jan 4, 2012 7:01 PM ET",
 				"title": "Four Economists Come Together to Say ‘We Agree’: Business Class",
-				"websiteTitle": "Bloomberg",
+				"websiteTitle": "BloombergView",
 				"shortTitle": "Four Economists Come Together to Say ‘We Agree’"
 			}
 		]

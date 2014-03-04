@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-02-13 20:07:06"
+	"lastUpdated": "2014-03-03 22:02:54"
 }
 
 /*
@@ -70,7 +70,7 @@ function relativeToAbsolute(doc, url) {
 
 function detectWeb(doc, url) {
 	if( url.match('nrs.cfm') &&
-	    url.match(/detail=(perspectives|reviews|most%20viewed|methods)(&|$)/i) ) {
+		url.match(/detail=(perspectives|reviews|most%20viewed|methods)(&|$)/i) ) {
 		return 'multiple';
 	} else if( !doc.title.match(/^Error/i) &&
 		   doc.title.trim().toLowerCase() != 'nursa |' ) {
@@ -159,10 +159,8 @@ function doWeb(doc, url) {
 
 		item.url = url;
 
-		var issn = Zotero.Utilities.xpathText(doc, '//div[@class="issn"]');
-		if(issn) {
-			item.ISSN = issn.trim().replace(/ISSN#\s*/,'');
-		}
+		item.ISSN = "1550-7629";
+		
 
 		var rights = Zotero.Utilities.xpathText(doc, '//div[contains(@class,"bottomHeader")]/p[2]');
 		if(rights) {
