@@ -336,10 +336,10 @@ var testCases = [
 				"place": "Tlalpam [D.F.] (México)",
 				"publisher": "Impr. del asilo \"Patricio Sanz",
 				"abstractNote": "Added t.p; Bibliografia de la historia de la Iglesia en México\" : v. 1, p. [13]-27, and at head of chapters; Includes indexes; Appendices; STH LIBRARY HAS: vols. 1-3 ; later edition (1928) has vols. 4-5. See Theo Research BX1428.C8 1928; V. 1. Estado del país de Anahuac antes de su evangelización. Orígenes de la Iglesia en Nueva España, 1511-1548.--v. 2. Consolidación y actividades de las instituciones fundadoras, 1548-1572. Los elementos regeneradores, 1572-1600. Frutos especiales de la Iglesia en el Siglo XVI.--v. 3. Instituciones y labor de la Iglesia organizada. Las Misiones. Frutos de la Iglesia en el Siglo XVII",
+				"rights": "Access to the Internet Archive's Collections is granted for scholarship and research purposes only. Some of the content available through the Archive may be governed by local, national, and/or international laws and regulations, and your use of such content is solely at your own risk.",
 				"url": "http://www.archive.org/details/historiadelaigle02cuev",
 				"archive": "School of Theology, Boston University",
-				"libraryCatalog": "DPLA",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "DPLA"
 			}
 		]
 	}

@@ -197,10 +197,10 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Prayer in literature.",
-					"Prayers, Medieval.",
+					"German literature -- Middle High German, 1050-1500 -- History and criticism.",
 					"German literature -- Old High German, 750-1050 -- History and criticism.",
-					"German literature -- Middle High German, 1050-1500 -- History and criticism."
+					"Prayer in literature.",
+					"Prayers, Medieval."
 				],
 				"seeAlso": [],
 				"attachments": [],
@@ -209,7 +209,7 @@ var testCases = [
 				"publisher": "W. De Gruyter",
 				"ISBN": "3110116715",
 				"numPages": "x, 726 p.",
-				"callNumber": "Widener Harvard Depository PT573.R4 T4 1989x [Consult Circ. Desk for HX45IM]",
+				"callNumber": "Dumbarton Oaks PT573.R4 T4 1989",
 				"series": "Arbeiten zur Frühmittelalterforschung ; Bd. 18",
 				"volume": "Bd. 18",
 				"date": "1989",
