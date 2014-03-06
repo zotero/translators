@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-03-01 10:07:04"
+	"lastUpdated": "2014-03-06 06:52:33"
 }
 
 /*
@@ -241,9 +241,7 @@ function init(doc, url, callback, forceLoadRDF) {
 		for(var j=0, m=tags.length; j<m; j++) {
 			var tag = tags[j];
 			// We allow three delimiters between the namespace and the property
-			var delimIndex = tag.indexOf('.');
-			if(delimIndex === -1) delimIndex = tag.indexOf(':');
-			if(delimIndex === -1) delimIndex = tag.indexOf('_');
+			var delimIndex = tag.search(/[.:_]/);
 			//if(delimIndex === -1) continue;
 
 			var prefix = tag.substr(0, delimIndex).toLowerCase();
