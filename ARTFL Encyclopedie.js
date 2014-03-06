@@ -1,21 +1,24 @@
 {
-	"translatorID":"72cb2536-3211-41e0-ae8b-974c0385e085",
-	"translatorType":4,
-	"label":"ARTFL Encyclopedie",
-	"creator":"Sean Takats",
-	"target":"/cgi-bin/philologic31/(getobject\\.pl\\?c\\.[0-9]+:[0-9]+\\.encyclopedie|search3t\\?dbname=encyclopedie0507)",
-	"minVersion":"1.0.0b4.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"translatorID": "72cb2536-3211-41e0-ae8b-974c0385e085",
+	"label": "ARTFL Encyclopedie",
+	"creator": "Sean Takats, Sebastian Karcher",
+	"target": "^https?://artflsrv\\d+\\.uchicago\\.edu/cgi-bin/philologic/(getobject\\.pl\\?[cp]\\.[0-9]+:[0-9]+(:[0-9]+)?\\.encyclopedie|navigate.pl\\?encyclopedie|search3t\\?dbname=encyclopedie)",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2014-03-06 01:28:06"
 }
 
 function detectWeb(doc, url) {
 	if (url.indexOf("getobject.pl") != -1){
 		return "encyclopediaArticle";
-	} else {
+	} else if (url.indexOf("navigate.pl")!=-1){//browsing
 		return "multiple";
+	} else if (url.indexOf("search3t?")!=-1){//search results
+		return "multiple"
 	}
 }
 
@@ -74,78 +77,50 @@ function reconcileAuthor(author){
 	return author;
 }
 
-function scrape (doc){
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-		} : null;
-		var url = doc.location.href;
-		var newItem = new Zotero.Item("encyclopediaArticle");
-		var xpath = '/html/body/div[@class="text"]/font';
-		var titleElmt = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-		if (titleElmt) {
-			var title = titleElmt.textContent;
-		} else {
-			xpath = '/html/body/div[@class="text"]/b';
-			var title = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+function scrape (doc, url){
+	var newItem = new Zotero.Item("encyclopediaArticle");
+	newItem.title = ZU.xpathText(doc, '(//index[@type="headword"])[1]/@value')
+	newItem.encyclopediaTitle = "Encyclopédie, ou Dictionnaire raisonné des sciences, des arts et des métiers";
+	newItem.shortTitle = "Encyclopédie";
+	newItem.date = "1751-1772";
+	newItem.publisher = "Briasson";
+	newItem.place = "Paris";
+	newItem.numberOfVolumes = "17";
+	newItem.creators.push({firstName:"Denis", lastName:"Diderot", creatorType:"editor"});
+	newItem.creators.push({firstName:"Jean le Rond", lastName:"d'Alembert", creatorType:"editor"});
+	newItem.url = url;
+	newItem.attachments.push({title:"ARTFL Snapshot", mimeType:"text/html", document:doc});
+	
+	var volpage = ZU.xpathText(doc, '(//index/a[contains(@href, "getobject.pl") and contains(text(), ":")])[1]');
+	if (!volpage){//pageview
+		var volpage = ZU.xpathText(doc, '//div[@id="content"]/center[contains(text(), ":")]/text()')
+	}
+	if (volpage){
+		volpage = volpage.match(/(\d+):([A-Z\d]+)/); //page number can have letters
+		newItem.volume = volpage[1];
+		newItem.pages = volpage[2];
+	}
+	var authors = ZU.xpathText(doc, '(//index[@type="author"])[1]/@value');
+	if (authors){
+		author = authors.split(/\s*\|\s*/);
+		for (var i =0; i<author.length; i++){
+			newItem.creators.push(ZU.cleanAuthor(reconcileAuthor(author[i]), "author", true))	
 		}
-		newItem.title = title;
-		newItem.encyclopediaTitle = "Encyclopédie, ou Dictionnaire raisonné des sciences, des arts et des métiers";
-		newItem.shortTitle = "Encyclopédie";
-		newItem.date = "1751-1772";
-		newItem.publisher = "Briasson";
-		newItem.place = "Paris";
-		newItem.url = url;
-	
-		newItem.attachments.push({title:"ARTFL Snapshot", mimeType:"text/html", url:url, snapshot:true});
-	
-		// get author and tags
-		var hostRegexp = new RegExp("^(https?://[^/]+)/");
-		var hMatch = hostRegexp.exec(url);
-		var host = hMatch[1];
-		var getString1 = "/cgi-bin/philologic31/search3t?dbname=encyclopedie0507&word=&dgdivhead=";
-		var getString2 = "&dgdivocauthor=&dgdivocplacename=&dgdivocsalutation=&dgdivocclassification=&dgdivocpartofspeech=&dgdivtype=&CONJUNCT=PHRASE&DISTANCE=3&PROXY=or+fewer&OUTPUT=conc&POLESPAN=5&KWSS=1&KWSSPRLIM=500";
-		
-		Zotero.Utilities.HTTP.doGet(host+getString1+title+getString2, function(text){
-			var tagRe = new RegExp('>'+title+'</a>[^\[]*\\[([^\\]]*)\]', 'i');
-			var m = tagRe.exec(text);
-			if(m[1] != "unclassified"){
-			 	var tagstring = m[1].replace("&amp;", "&", "g");
-				var tags = tagstring.split(";")
-				for(var j in tags) {
-					newItem.tags.push(Zotero.Utilities.trimInternal(tags[j]));
-				}
-			}
-			var authorRe = new RegExp('>'+title+'</a>,([^,]*),', "i");
-			var m = authorRe.exec(text);
-			var author = m[1];
-			author = Zotero.Utilities.trimInternal(author);
-			// reconcile author
-			author = reconcileAuthor(author);	
-			if (author!="NA"){ // ignore unknown authors
-				newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author", true));
-			}
-			newItem.creators.push({firstName:"Denis", lastName:"Diderot", creatorType:"editor"});
-			newItem.creators.push({firstName:"Jean le Rond", lastName:"d'Alembert", creatorType:"editor"});
-			newItem.complete();
-		}, function() {Zotero.done();}, null);
-		Zotero.wait();	
+	}
+	newItem.complete();
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-		} : null;
 
 	if (url.indexOf("getobject.pl") != -1){
 		// single article
-		scrape(doc);				
+		scrape(doc, url);				
 	} else {
 		//search page
-		var items = new Object();
-		var xpath = '/html/body/div[@class="text"]/p/a';
-		var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var items = {};
+		var urls = [];
+		var xpath = '//a[contains(@href, "getobject.pl")]';
+		var elmts = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 		var elmt;		
 		while (elmt = elmts.iterateNext()){
 			var title = elmt.textContent;
@@ -154,16 +129,128 @@ function doWeb(doc, url) {
 				items[link] = title;
 			}			
 		}
-		var items = Zotero.selectItems(items);
-		if(!items) {
-			return true;
-		}
-		var urls = new Array();
-		for(var i in items) {
-			urls.push(i);
-		}
-		Zotero.Utilities.processDocuments(urls, scrape, function() { Zotero.done(); });
-		Zotero.wait();	
+		Z.selectItems(items, function(items) {
+			if (items == null) return true;
+			for (var j in items) {
+				urls.push(j);
+			}
+			ZU.processDocuments(urls, scrape);
+		});
 	}
-		
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://artflsrv02.uchicago.edu/cgi-bin/philologic/getobject.pl?c.0:683:1.encyclopedie0513",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"creators": [
+					{
+						"firstName": "Denis",
+						"lastName": "Diderot",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Jean le Rond",
+						"lastName": "d'Alembert",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Yvon",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "François-Vincent",
+						"lastName": "Toussaint",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Denis",
+						"lastName": "Diderot",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "ARTFL Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Adultere",
+				"encyclopediaTitle": "Encyclopédie, ou Dictionnaire raisonné des sciences, des arts et des métiers",
+				"shortTitle": "Encyclopédie",
+				"date": "1751-1772",
+				"publisher": "Briasson",
+				"place": "Paris",
+				"numberOfVolumes": "17",
+				"url": "http://artflsrv02.uchicago.edu/cgi-bin/philologic/getobject.pl?c.0:683:1.encyclopedie0513",
+				"volume": "1",
+				"pages": "150",
+				"libraryCatalog": "ARTFL Encyclopedie",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://artflsrv02.uchicago.edu/cgi-bin/philologic/getobject.pl?p.0:203.encyclopedie0513",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"creators": [
+					{
+						"firstName": "Denis",
+						"lastName": "Diderot",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Jean le Rond",
+						"lastName": "d'Alembert",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Pierre",
+						"lastName": "Tarin",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "ARTFL Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "ADULTE",
+				"encyclopediaTitle": "Encyclopédie, ou Dictionnaire raisonné des sciences, des arts et des métiers",
+				"shortTitle": "Encyclopédie",
+				"date": "1751-1772",
+				"publisher": "Briasson",
+				"place": "Paris",
+				"numberOfVolumes": "17",
+				"url": "http://artflsrv02.uchicago.edu/cgi-bin/philologic/getobject.pl?p.0:203.encyclopedie0513",
+				"volume": "1",
+				"pages": "150",
+				"libraryCatalog": "ARTFL Encyclopedie",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://artflsrv02.uchicago.edu/cgi-bin/philologic/search3t?dbname=encyclopedie0513&word=amour&CONJUNCT=PHRASE&dgdivhead=&dgdivocauthor=&ExcludeDiderot3=on&dgdivocsalutation=&OUTPUT=conc&POLESPAN=5",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://artflsrv02.uchicago.edu/cgi-bin/philologic/search3t?dbname=encyclopedie0513&dgdivhead=EAU",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
