@@ -18,7 +18,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-01-21 00:28:57"
+	"lastUpdated": "2014-03-06 21:46:56"
 }
 
 function detectImport() {
@@ -1860,7 +1860,9 @@ function getFieldValue(read) {
 	
 	if(value.length > 1) {
 		// replace accented characters (yucky slow)
-		value = value.replace(/{?(\\[`"'^~=a-z]){?\\?([A-Za-z])}/g, "{$1$2}");
+		value = value.replace(/{?(\\[`"'^~=]){?\\?([A-Za-z])}/g, "{$1$2}");
+		//for special characters rendered by \[a-z] we need a space
+		value = value.replace(/{?(\\[a-z]){?\\?([A-Za-z])}/g, "{$1 $2}");
 		//convert tex markup into permitted HTML
 		value = mapTeXmarkup(value);
 		for (var mapped in reversemappingTable) { // really really slow!
