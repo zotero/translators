@@ -18,7 +18,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-03-06 21:46:56"
+	"lastUpdated": "2014-03-08 22:53:34"
 }
 
 function detectImport() {
@@ -63,7 +63,7 @@ function detectImport() {
 	}
 }
 
-//%a = first author surname
+//%a = first listed creator surname
 //%y = year
 //%t = first word of title
 var citeKeyFormat = "%a_%t_%y";
