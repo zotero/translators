@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-02-12 01:15:22"
+	"lastUpdated": "2014-03-09 19:19:22"
 }
 
 function detectImport() {
@@ -561,6 +561,97 @@ record.prototype.translate = function(item) {
 		}
 		if (this.getFieldSubfields("335")[0]) {
 			item.title = item.title + ": " + this.getFieldSubfields("335")[0]['a'];
+		}
+		var container;
+		if (container = this.getFieldSubfields("773")[0]) {
+			var type = container['7'];
+			switch (type){
+				case "nnam":
+					item.itemType = "bookSection";
+					break;
+				case "nnas":
+					item.itemType = "journalArticle";
+					break;
+				case "m2am":
+					item.itemType = "conferencePaper";
+					break;
+				default: //some catalogs don't have the $7 subfield
+					if (container['t'] && container['z']){ //if there is an ISBN assume book section
+						item.itemType = "bookSection"
+					}
+					else if (container['t']){//else default to journal article
+						item.itemType = "journalArticle"
+					}
+			}
+			if (item.itemType=="bookSection"||item.itemType=="conferencePaper"){
+				var pubinfo = container['d'];
+				if(pubinfo){
+					item.place = pubinfo.replace(/:.+/, "");
+					var publisher = pubinfo.match(/:\s*(.+),\s*\d{4}/);
+					if (publisher) item.publisher = publisher[1];
+					var year = pubinfo.match(/,\s*(\d{4})/);
+					if (year) item.date = year[1];
+				}
+				var publication = container['t'];
+				if (publication){
+					var title = publication.replace(/\..*/, "");
+					if (item.itemType=="bookSection"){
+						item.bookTitle = title;
+					}
+					else{
+						item.proceedingsTitle = title;
+					}
+					if (publication.indexOf("Edited by")!=-1){
+						var editors = publication.match(/Edited by\s+(.+)\.?/)[1];
+						var editors = editors.split(/\s+and\s+|\s*,\s*|\s*;\s*/);
+						for (var i = 0; i<editors.length; i++){
+							item.creators.push(ZU.cleanAuthor(editors[i], "editor"))
+						}
+					}
+				}
+				var pages = container['g'];
+				if (pages){
+					pagerange = pages.match(/[ps]\.\s*(\d+(\-\d+)?)/);
+					//if we don't have a page marker, we'll guess that a number range is good enough but
+					if (!pagerange) pagerange = pages.match(/(\d+\-\d+)/);
+					if (pagerange) item.pages = pagerange[1];
+				}
+				var event = container['a'];
+				if (event){
+					item.conferenceName = event.replace(/[\{\}]/g, "");
+				}
+				item.ISBN = container['z'];
+			}
+			else {
+				var publication = container['t'];
+				if (publication){
+					item.publicationTitle=publication.replace(/[\.,\s]+$/, "")
+				}
+				item.journalAbbreviation = container['p'];
+				var locators = container['g'];
+				if (locators){
+					//unfortunately there is no standardization whatsoever here
+					var pagerange = locators.match(/[ps]\.\s*(\d+(\-\d+)?)/);
+					// For Journals, since there are a lot of issue-ranges we require the first number to have >=2 digits
+					if (!pagerange) pagerange - locators.match(/(\d\d+\-\d+)/);
+					if (pagerange) item.pages = pagerange[1];
+					var date = locators. match(/((Jan(uary)?|Feb(ruary)?|Mar(ch)?|Apr(il)?|May|Jun(e)?|Jul(y)?|Aug(ust)?|Sep(tember)?|Oct(ober)?|Nov(ember)?|Dec(ember)?)\.?\s*)?\d{4}/);
+					if (date){
+						item.date = date[0];
+					}
+					if (locators.match(/vol\.\s*(\d+)/)) {
+						item.volume = locators.match(/vol\.\s*(\d+)/i)[1];
+					}
+					if (locators.match(/vol\.\s*\d+\s*,\s*no\.\s*(\d+)/i)) {
+						item.issue = locators.match(/vol\.\s*\d+\s*,\s*no\.\s*(\d+)/i)[1];
+					}
+					if(!item.volume && locators.match(/\d+:\d+/)){
+						item.volume = locators.match(/(\d+):\d+/)[1];
+						item.issue = locators.match(/\d+:(\d+)/)[1]
+					}
+				item.ISSN = container['x'];	
+				}	
+			}
 		}
 	}
 	//editors get mapped as contributors - but so do many others who should be
