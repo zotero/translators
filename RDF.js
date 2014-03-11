@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-02-08 23:44:24"
+	"lastUpdated": "2014-03-11 12:08:59"
 }
 
 /*
@@ -134,9 +134,14 @@ function handleCreators(newItem, creators, creatorType) {
 					creator.lastName = getFirstResults(creators[i],
 						[n.foaf+"familyName", n.foaf+"lastName",
 						n.foaf+"surname", n.foaf+"family_name"], true); //unofficial
-					creator.firstName = getFirstResults(creators[i],
-						[n.foaf+"givenName", n.foaf+"firstName",
-						n.foaf+"givenname"], true);	//unofficial
+					if(getFirstResults(creators[i], [n.foaf+"givenName", n.foaf+"firstName", n.foaf+"givenname"], true)){
+							creator.firstName = getFirstResults(creators[i],
+								[n.foaf+"givenName", n.foaf+"firstName",
+								n.foaf+"givenname"], true);	//unofficial
+					}
+					else{
+						creator.fieldMode=1;
+					}
 					creator.creatorType = creatorType;
 					newItem.creators.push(creator);
 				}
