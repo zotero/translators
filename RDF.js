@@ -137,6 +137,9 @@ function handleCreators(newItem, creators, creatorType) {
 					creator.firstName = getFirstResults(creators[i],
 						[n.foaf+"givenName", n.foaf+"firstName",
 						n.foaf+"givenname"], true);	//unofficial
+				   	 if (!creator.firstName){
+						creator.fieldMode=1;
+					}
 					creator.creatorType = creatorType;
 					newItem.creators.push(creator);
 				}
