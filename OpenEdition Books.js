@@ -17,7 +17,7 @@ function detectWeb(doc, url){
 	if(doc.getElementById('zotero_rdf')){
 		//testing to know if we have a book or a chapter
 		var met = doc.getElementsByName('DC.type')[0];
-		var cont = met.getAttributeNode("content").value
+		var cont = met.content
 		Zotero.debug(cont);
 		if(cont == 'Book' || cont == 'book'){
 			return 'book';
@@ -30,10 +30,8 @@ function detectWeb(doc, url){
 }
 
 function doWeb(doc, url) {
-	detectWeb(doc, url);
 	var rdf = doc.getElementById('zotero_rdf').href;
-	if (rdf) {
-		Zotero.debug(rdf);
+		//Zotero.debug(rdf);
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("14763d25-8ba0-45df-8f52-b8d1108e7ac9");
 		Zotero.Utilities.HTTP.doGet(rdf, function (text) {
@@ -41,5 +39,4 @@ function doWeb(doc, url) {
 			translator.setString(text);
 				 translator.translate();
 		});
-	}
 }
