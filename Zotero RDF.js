@@ -272,14 +272,19 @@ function generateItem(item, zoteroType, resource) {
 		
 		for(var j in item.creators) {
 			var creator = Zotero.RDF.newResource();
-			Zotero.RDF.addStatement(creator, rdf+"type", n.foaf+"Person", false);
-			// gee. an entire vocabulary for describing people, and these aren't even
-			// standardized in it. oh well. using them anyway.
-			Zotero.RDF.addStatement(creator, n.foaf+"surname", item.creators[j].lastName, true);
-			if(item.creators[j].firstName) {
-				Zotero.RDF.addStatement(creator, n.foaf+"givenname", item.creators[j].firstName, true);
+			if (item.creators[j].fieldMode ==1){
+				Zotero.RDF.addStatement(creator, rdf+"type", n.foaf+"Organization", false);
+				Zotero.RDF.addStatement(creator, n.foaf+"name", item.creators[j].lastName, true);	
 			}
-			
+			else{
+				Zotero.RDF.addStatement(creator, rdf+"type", n.foaf+"Person", false);
+				// gee. an entire vocabulary for describing people, and these aren't even
+				// standardized in it. oh well. using them anyway.
+				Zotero.RDF.addStatement(creator, n.foaf+"surname", item.creators[j].lastName, true);
+				if(item.creators[j].firstName) {
+					Zotero.RDF.addStatement(creator, n.foaf+"givenname", item.creators[j].firstName, true);
+				}
+			}
 			if(biblioCreatorTypes.indexOf(item.creators[j].creatorType) != -1) {
 				var cTag = n.bib+item.creators[j].creatorType+"s";
 			} else {
