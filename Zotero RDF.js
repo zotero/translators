@@ -10,7 +10,7 @@
 	"configOptions":{"getCollections":"true", "dataMode":"rdf/xml"},
 	"displayOptions":{"exportNotes":true, "exportFileData":false},
 	"inRepository":true,
-	"lastUpdated":"2012-02-13 07:58:03"
+	"lastUpdated":"2014-03-11 07:58:03"
 }
 
 var item;
@@ -280,9 +280,9 @@ function generateItem(item, zoteroType, resource) {
 				Zotero.RDF.addStatement(creator, rdf+"type", n.foaf+"Person", false);
 				// gee. an entire vocabulary for describing people, and these aren't even
 				// standardized in it. oh well. using them anyway.
-				Zotero.RDF.addStatement(creator, n.foaf+"surname", item.creators[j].lastName, true);
+				Zotero.RDF.addStatement(creator, n.foaf+"familyName", item.creators[j].lastName, true);
 				if(item.creators[j].firstName) {
-					Zotero.RDF.addStatement(creator, n.foaf+"givenname", item.creators[j].firstName, true);
+					Zotero.RDF.addStatement(creator, n.foaf+"givenName", item.creators[j].firstName, true);
 				}
 			}
 			if(biblioCreatorTypes.indexOf(item.creators[j].creatorType) != -1) {
