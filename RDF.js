@@ -134,12 +134,10 @@ function handleCreators(newItem, creators, creatorType) {
 					creator.lastName = getFirstResults(creators[i],
 						[n.foaf+"familyName", n.foaf+"lastName",
 						n.foaf+"surname", n.foaf+"family_name"], true); //unofficial
-					if(getFirstResults(creators[i], [n.foaf+"givenName", n.foaf+"firstName", n.foaf+"givenname"], true)){
-							creator.firstName = getFirstResults(creators[i],
-								[n.foaf+"givenName", n.foaf+"firstName",
-								n.foaf+"givenname"], true);	//unofficial
-					}
-					else{
+					creator.firstName = getFirstResults(creators[i],
+						[n.foaf+"givenName", n.foaf+"firstName",
+						n.foaf+"givenname"], true);	//unofficial
+				   	 if (!creator.firstName){
 						creator.fieldMode=1;
 					}
 					creator.creatorType = creatorType;
