@@ -2,7 +2,7 @@
 	"translatorID": "4c6b4c5f-7286-45bb-8e99-0c518d177fa7",
 	"label": "OpenEdition Books",
 	"creator": "Cédric Chatelain",
-	"target": "^http?://books\\.openedition\\.org/",
+	"target": "^http://books\\.openedition\\.org/",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
