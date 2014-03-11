@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-02-08 23:44:24"
+	"lastUpdated": "2014-03-11 00:28:57"
 }
 
 /*
@@ -139,6 +139,16 @@ function handleCreators(newItem, creators, creatorType) {
 						n.foaf+"givenname"], true);	//unofficial
 					creator.creatorType = creatorType;
 					newItem.creators.push(creator);
+				}
+				else if (type == n.foaf+"Organization"){
+					var creator = new Object();
+					creator.lastName = getFirstResults(creators[i],
+						[n.foaf+"name"], true); //unofficial
+					creator.creatorType = creatorType;
+					creator.fieldMode = 1;
+					newItem.creators.push(creator);
+					
+					
 				}
 			}
 		}
