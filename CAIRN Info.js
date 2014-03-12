@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-02-14 00:18:56"
+	"lastUpdated": "2014-03-11 22:36:38"
 }
 
 /*
@@ -52,7 +52,7 @@ function doWeb(doc,url)
 		var urls = [];
 		var title;
 		var link;
-		var resultsrow = ZU.xpath(doc, '//div[contains(@class, "list_articles")]//div[contains(@class, "article")]');
+		var resultsrow = ZU.xpath(doc, '//div[contains(@class, "list_articles")]/div[contains(@class, "article")]');
 		for (var i in resultsrow) {
 			title = ZU.xpathText(resultsrow[i], './div[@class="wrapper_meta"]//div[@class="title"]');
 			if (!title){
