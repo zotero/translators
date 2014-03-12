@@ -9,7 +9,7 @@
 	"priority": 90,
 	"inRepository": true,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-07-31 20:05:00"
+	"lastUpdated": "2014-03-12 04:05:00"
 }
 
 /* CrossRef uses unixref; documentation at http://www.crossref.org/schema/documentation/unixref1.0/unixref.html */
@@ -282,6 +282,16 @@ function processCrossRef(xmlOutput) {
 		}
 	}
 	//Zotero.debug(JSON.stringify(item, null, 4));
+	
+	//check if there are potential issues with character encoding and try to fix it
+	//e.g. 10.1057/9780230391116.0016 (en dash in title is presented as <control><control>â)
+	for(var field in item) {
+		if(typeof item[field] != 'string') continue;
+		//check for control characters that should never be in strings from CrossRef
+		if(/[\u007F-\u009F]/.test(item[field])) {
+			item[field] = decodeURIComponent(escape(item[field]));
+		}
+	}
 	
 	item.complete();
 	return true;
