@@ -70,13 +70,15 @@ function parseCreators(node, item, typeOverrideMap) {
 		var creator = {};
 		
 		var role = creatorXML.getAttribute("contributor_role");
-		if(typeOverrideMap && typeOverrideMap[role]) {
+		if(typeOverrideMap && typeOverrideMap[role] !== undefined) {
 			creator.creatorType = typeOverrideMap[role];
 		} else if(role === "author" || role === "editor" || role === "translator") {
 			creator.creatorType = role;
 		} else {
 			creator.creatorType = "contributor";
 		}
+		
+		if(!creator.creatorType) continue;
 		
 		if(creatorXML.nodeName === "organization") {
 			creator.fieldMode = 1;
@@ -228,7 +230,7 @@ function processCrossRef(xmlOutput) {
 	item.edition = ZU.xpathText(metadataXML, 'c:edition_number', ns);
 	if(!item.volume) item.volume = ZU.xpathText(metadataXML, 'c:volume', ns);
 	
-	parseCreators(refXML, item, "author");
+	parseCreators(refXML, item, (item.itemType == 'bookSection' ? {"editor": null} : "author") );
 	
 	if(seriesXML && seriesXML.length) {
 		parseCreators(refXML, item, {"editor":"seriesEditor"});
@@ -237,9 +239,9 @@ function processCrossRef(xmlOutput) {
 	}
 	//prefer article to journal metadata and print to other dates
 	var pubDateNode = ZU.xpath(refXML, 'c:publication_date[@media_type="print"]', ns);
-	if(!pubDateNode) pubDateNode = ZU.xpath(refXML, 'c:publication_date', ns);
-	if(!pubDateNode) pubDateNode = ZU.xpath(metadataXML, 'c:publication_date[@media_type="print"]', ns);
-	if(!pubDateNode) pubDateNode = ZU.xpath(metadataXML, 'c:publication_date', ns);
+	if(!pubDateNode.length) pubDateNode = ZU.xpath(refXML, 'c:publication_date', ns);
+	if(!pubDateNode.length) pubDateNode = ZU.xpath(metadataXML, 'c:publication_date[@media_type="print"]', ns);
+	if(!pubDateNode.length) pubDateNode = ZU.xpath(metadataXML, 'c:publication_date', ns);
 
 	
 	if(pubDateNode.length) {
@@ -344,12 +346,54 @@ var testCases = [
 				"attachments": [],
 				"bookTitle": "The Cambridge Companion to George Orwell",
 				"place": "Cambridge",
-				"ISBN": "0521858429, 9780521858427, 0521675073, 9780521675079",
+				"ISBN": "9781139001472",
 				"publisher": "Cambridge University Press",
 				"pages": "201-207",
+				"date": "2007",
 				"DOI": "10.1017/CCOL0521858429.016",
-				"url": "http://cco.cambridge.org/extract?id=ccol0521858429_CCOL0521858429A016",
+				"url": "http://universitypublishingonline.org/ref/id/companions/CBO9781139001472A019",
 				"title": "Why Orwell still matters",
+				"libraryCatalog": "CrossRef"
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"DOI":"10.1057/9780230391116.0016"
+		},
+		"items": [
+			{
+				"itemType": "bookSection",
+				"creators": [
+					{
+						"creatorType": "editor",
+						"firstName": "Claus-Christian W.",
+						"lastName": "Szejnmann"
+					},
+					{
+						"creatorType": "editor",
+						"firstName": "Maiken",
+						"lastName": "Umbach"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Oliver",
+						"lastName": "Werner"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"bookTitle": "Heimat, Region, and Empire",
+				"ISBN": "9780230391116",
+				"publisher": "Palgrave Macmillan",
+				"language": "en",
+				"date": "2012-10-17",
+				"DOI": "10.1017/CCOL0521858429.016",
+				"url": "http://www.palgraveconnect.com/doifinder/10.1057/9780230391116.0016",
+				"title": "Conceptions, Competences and Limits of German Regional Planning during the Four Year Plan, 1936–1940",
 				"libraryCatalog": "CrossRef"
 			}
 		]
