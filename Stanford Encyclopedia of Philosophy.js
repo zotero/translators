@@ -2,14 +2,14 @@
 	"translatorID": "5aabfa6e-79e6-4791-a9d2-46c9cb137561",
 	"label": "Stanford Encyclopedia of Philosophy",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://plato\\.stanford\\.edu/entries",
+	"target": "^https?://plato\\.stanford\\.edu/(?:entries|search)",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-09-15 17:34:07"
+	"lastUpdated": "2014-03-11 19:17:32"
 }
 
 /*
@@ -48,7 +48,7 @@ function doWeb(doc, url){
 	var articles = new Array();
 	if(detectWeb(doc, url) == "multiple") { 
 		var items = {};
-		var titles = doc.evaluate('//a[@class="l"]', doc, null, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//div[@class="result_title"]/a', doc, null, XPathResult.ANY_TYPE, null);
 		var title;
 		while (title = titles.iterateNext()) {
 			items[title.href] = title.textContent;
@@ -71,8 +71,9 @@ function doWeb(doc, url){
 function scrape(doc, url){
 	//get abstract and tags from article plage
 	//the xpaths aren't great , but seem reliable across pages
-	var abs = ZU.xpathText(doc,'//p[1]').replace(/\n/g, "")
-	var tags = ZU.xpathText(doc, '//p[last()]').replace(/\n/g, "").split(/\|/);
+	var abs = ZU.xpathText(doc,'//p[1]').replace(/\n/g, "");
+	var tags = ZU.xpathText(doc, '//div[@id="article-content"]//h2[a[@name="Rel" or @id="Rel"]]/following-sibling::p');
+	if (tags) tags = tags.replace(/\n/g, "").split(/\|/);
 	for (i in tags){
 		tags[i] = ZU.trimInternal(tags[i])
 			}
@@ -123,15 +124,15 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Aristotle",
-					"Plato: ethics and politics in The Republic",
-					"Socrates",
-					"Socratic Dialogues",
 					"abstract objects",
+					"Aristotle",
 					"education, philosophy of",
 					"epistemology",
 					"metaphysics",
-					"religion: and morality"
+					"Plato: ethics and politics in The Republic",
+					"religion: and morality",
+					"Socrates",
+					"Socratic Dialogues"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -142,12 +143,13 @@ var testCases = [
 				],
 				"itemID": "sep-plato",
 				"title": "Plato",
+				"publicationTitle": "The Stanford Encyclopedia of Philosophy",
 				"url": "http://plato.stanford.edu/archives/fall2013/entries/plato/",
 				"date": "2013",
 				"edition": "Fall 2013",
-				"abstractNote": "Plato (429–347 B.C.E.) is, by any reckoning, one of the mostdazzling writers in the Western literary tradition and one of the mostpenetrating, wide-ranging, and influential authors in the history ofphilosophy. An Athenian citizen of high status, he displays in hisworks his absorption in the political events and intellectual movementsof his time, but the questions he raises are so profound and thestrategies he uses for tackling them so richly suggestive andprovocative that educated readers of nearly every period have in someway been influenced by him, and in practically every age there havebeen philosophers who count themselves Platonists in some importantrespects. He was not the first thinker or writer to whom the word“philosopher” should be applied. But he was soself-conscious about how philosophy should be conceived, and what itsscope and ambitions properly are, and he so transformed theintellectual currents with which he grappled, that the subject ofphilosophy, as it is often conceived—a rigorous and systematicexamination of ethical, political, metaphysical, and epistemologicalissues, armed with a distinctive method—can be called hisinvention. Few other authors in the history of Western philosophy approximatehim in depth and range: perhaps only Aristotle (who studied with him),Aquinas, and Kant would be generally agreed to be of the same rank.",
+				"abstractNote": "Plato (429–347 B.C.E.) is, by any reckoning, one of the mostdazzling writers in the Western literary tradition and one of the mostpenetrating, wide-ranging, and influential authors in the history ofphilosophy. An Athenian citizen of high status, he displays in hisworks his absorption in the political events and intellectual movementsof his time, but the questions he raises are so profound and thestrategies he uses for tackling them so richly suggestive andprovocative that educated readers of nearly every period have in someway been influenced by him, and in practically every age there havebeen philosophers who count themselves Platonists in some importantrespects. He was not the first thinker or writer to whom the word“philosopher” should be applied. But he was soself-conscious about how philosophy should be conceived, and what itsscope and ambitions properly are, and he so transformed theintellectual currents with which he grappled, that the subject ofphilosophy, as it is often conceived—a rigorous and systematicexamination of ethical, political, metaphysical, and epistemologicalissues, armed with a distinctive method—can be called hisinvention. Few other authors in the history of Western philosophy approximatehim in depth and range: perhaps only Aristotle (who studied with him),Aquinas, and Kant would be generally agreed to be of the same rank.,  Copyright © 2013 byRichard Kraut<rkraut1@northwestern.edu>    , View this site from another server:,",
 				"libraryCatalog": "Stanford Encyclopedia of Philosophy",
-				"bookTitle": "The Stanford Encyclopedia of Philosophy"
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}
