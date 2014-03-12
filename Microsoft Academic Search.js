@@ -186,14 +186,13 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Link to page at www.bsos.umd.edu",
+						"title": "Link to page at www.journals.cambridge.org",
 						"mimeType": "text/html",
 						"snapshot": false
 					},
 					{
-						"title": "Link to page at www.journals.cambridge.org",
-						"mimeType": "text/html",
-						"snapshot": false
+						"title": "PDF from www.bsos.umd.edu",
+						"mimeType": "application/pdf"
 					}
 				],
 				"itemID": "13366371",
