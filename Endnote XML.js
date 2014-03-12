@@ -15,8 +15,8 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"browserSupport": "g",
-	"lastUpdated": "2014-02-17 21:24:13"
+	"browserSupport": "gcv",
+	"lastUpdated": "2014-03-12 04:43:57"
 }
 
 function detectImport() {
