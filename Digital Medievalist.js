@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-03-12 00:13:14"
+	"lastUpdated": "2014-03-12 00:24:31"
 }
 
 function detectWeb(doc, url) {
@@ -60,7 +60,7 @@ function scrape(doc, url){
 	newItem.title = ZU.xpathText(doc, '//h1')
 	newItem.attachments.push({document:doc, title: "Digital Medievalist Snapshot", mimeType:"text/html"});
 	var keywords = ZU.xpathText(doc, '//div[@class="keywords"]/p');
-	if (keywords) keywords=keywords.replace(/Keywords:\s*/, "").split(/\s*;\s*/);
+	if (keywords) keywords=keywords.replace(/Keywords:\s*/, "").replace(/.\s*$/, "").split(/\s*;\s*/);
 	for (var i in keywords){
 		newItem.tags.push(keywords[i].trim())
 	}
@@ -69,7 +69,7 @@ function scrape(doc, url){
 		var author = authors[i].textContent.match(/^.+?,/);
 		if(author) newItem.creators.push(ZU.cleanAuthor(author[0], "author"))
 	}
-	var abstract = ZU.xpathText(doc, '//div[@class="abstract"]');
+	var abstract = ZU.xpathText(doc, '//div[@class="abstract"]/p[last()]');
 	if (abstract) newItem.abstractNote = ZU.trimInternal(abstract);	
 	var pubinfo = ZU.xpathText(doc, '//div[@class="frontmatter"]/p[1]');
 	var volyear = pubinfo.match(/Digital Medievalist (\d+)\s*\((\d{4})\)/)
