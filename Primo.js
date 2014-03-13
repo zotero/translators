@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-01-09 03:13:27"
+	"lastUpdated": "2014-03-12 21:53:46"
 }
 
 /*
@@ -24,6 +24,7 @@ Primos with showPNX.jsp installed:
 (2) http://primo.bib.uni-mannheim.de/primo_library/libweb/action/search.do?vid=MAN_UB
 (3) http://limo.libis.be/primo_library/libweb/action/search.do?vid=LIBISnet&fromLogin=true
 (4.a) http://virtuose.uqam.ca/primo_library/libweb/action/search.do?vid=UQAM
+(5) http://searchit.princeton.edu/primo_library/libweb/action/dlDisplay.do?docId=PRN_VOYAGER2778598&vid=PRINCETON&institution=PRN
 */
 
 function getSearchResults(doc) {
@@ -378,36 +379,6 @@ var testCases = [
 				"ISBN": "3926738014",
 				"libraryCatalog": "Primo",
 				"shortTitle": "In Zweifelsfällen entscheidet die Wahrheit"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://searchit.princeton.edu/primo_library/libweb/action/dlDisplay.do?docId=PRN_VOYAGER2778598&vid=PRINCETON&institution=PRN",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"lastName": "Great Britain. Foreign Office",
-						"creatorType": "author",
-						"fieldMode": 1
-					}
-				],
-				"notes": [],
-				"tags": [
-					"China Foreign relations Great Britain.",
-					"China Religion.",
-					"Great Britain Foreign relations China.",
-					"Missions China."
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"language": "eng",
-				"libraryCatalog": "Primo",
-				"title": "China and foreign missionaries.",
-				"publisher": "London 1860-1912",
-				"date": "1860"
 			}
 		]
 	}

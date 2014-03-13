@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-03-01 11:15:01"
+	"lastUpdated": "2014-03-12 21:55:58"
 }
 
 function detectWeb(doc, url) {
@@ -124,48 +124,43 @@ function scrape(doc, newUris) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://webvirtua.ums.edu.my/cgi-bin/gw/chameleon?sessionid=2014030201591329116&skin=ums&lng=en&inst=consortium&host=10.50.9.80%2b1111%2bDEFAULT&patronhost=10.50.9.80%201111%20DEFAULT&search=KEYWORD&searchid=H1&function=COPVOLSCR&sourcescreen=INITREQ&pos=1&totalitems=1&itempos=1&rootsearch=KEYWORD",
+		"url": "http://webvirtua.ums.edu.my/cgi-bin/gw/chameleon?sessionid=2014030201591329116&skin=ums&lng=en&inst=consortium&host=10.50.9.80%2b1111%2bDEFAULT&patronhost=10.50.9.80%201111%20DEFAULT&searchid=H1&sourcescreen=INITREQ&pos=1&itempos=1&rootsearch=SCAN&function=INITREQ&search=AUTHID&authid=581020&authidu=4",
 		"items": [
 			{
 				"itemType": "book",
 				"creators": [
 					{
-						"lastName": "Mohd. Yaakub Hj. Johari",
-						"creatorType": "editor"
+						"firstName": "Joyce P.",
+						"lastName": "Jacobsen",
+						"creatorType": "author"
 					},
 					{
-						"lastName": "Institut kajian pembangunan (Sabah)",
-						"fieldMode": true
-					},
-					{
-						"lastName": "Konrad Adenauer Foundation",
-						"fieldMode": true
-					},
-					{
-						"lastName": "Seminarp on Human Resources Developement in Sabah",
-						"fieldMode": true
+						"firstName": "Gilbert L.",
+						"lastName": "Skillman",
+						"creatorType": "contributor"
 					}
 				],
-				"notes": [],
+				"notes": [
+					{
+						"note": "Introduction: labor economics and the political economy of labor -- Part I: Labor supply and demand: Labor supply -- Labor demand -- Perfectly competitive labor markets -- Imperfectly competitive labor markets -- Part II: The labor exchange: The structure of labor exchange -- Strategic labor exchange -- Bargaining in labor exchange -- Imperfect contracting in labor exchange -- Part III: The employment relationship: The nature of the employment relationship -- Employee compensation and incentive provision -- Employment continuity and internal labor markets -- Employee representation in the workplace -- Part IV: Labor market divisions: Wages and working conditions -- Education and ability -- Employee characteristics and discrimination -- Employer characteristics and market segmentation -- Part V: labor in the market system: -- Earnings inequality -- Unemployment -- Labor market dynamics"
+					}
+				],
 				"tags": [
-					"Manpower policy",
-					"Sabah",
-					"Human capital",
-					"Sabah",
-					"Labor market",
-					"Sabah"
+					"Labor Market",
+					"Industrial relations",
+					"Labor economics"
 				],
 				"seeAlso": [],
 				"attachments": [],
-				"ISBN": "9679910113",
-				"title": "Issues on human resources development in Sabah: proceedings of a Seminar held at Kota Kinabalu, Sabah on August 17-19, 1987",
-				"place": "Kota Kinabalu",
-				"publisher": "Institut Kajian Pembangunan (Sabah) : Konrad Adenauer Foundation",
-				"date": "1989",
-				"numPages": "172",
-				"callNumber": "HD5812.57 . S36I77 1987",
+				"ISBN": "9780631208365",
+				"title": "Labor markets and employment relationships: a comprehensive approach",
+				"place": "Malden, MA",
+				"publisher": "Blackwell Pub",
+				"date": "2004",
+				"numPages": "556",
+				"callNumber": "HD5706 . J33 2004",
 				"libraryCatalog": "webvirtua.ums.edu.my Library Catalog",
-				"shortTitle": "Issues on human resources development in Sabah"
+				"shortTitle": "Labor markets and employment relationships"
 			}
 		]
 	}

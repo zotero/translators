@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-03-13 14:10:14"
+	"lastUpdated": "2014-03-12 21:40:16"
 }
 
 function detectImport() {
@@ -84,7 +84,7 @@ var testCases = [
 					{
 						"firstName": "Ray",
 						"lastName": "Charles",
-						"creatorType": "contributor"
+						"creatorType": "editor"
 					}
 				],
 				"notes": [
@@ -107,7 +107,8 @@ var testCases = [
 				"publisher": "Atlantic",
 				"date": "1957",
 				"numPages": "1",
-				"callNumber": "Atlantic 1259"
+				"callNumber": "Atlantic 1259",
+				"medium": "sound recording"
 			},
 			{
 				"itemType": "book",
@@ -132,7 +133,8 @@ var testCases = [
 				"place": "Washington, D.C",
 				"publisher": "White House Web Team",
 				"date": "1994",
-				"callNumber": "F204.W5"
+				"callNumber": "F204.W5",
+				"medium": "computer file"
 			}
 		]
 	},

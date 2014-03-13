@@ -111,17 +111,17 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Image Acquisition",
-					"Processing",
-					"Manuscripts",
 					"Codicology",
-					"Palaeography",
-					"Multi-Spectral Imaging",
+					"Damaged Manuscripts",
+					"Digital Palaeography",
 					"Foreground-Background Separation",
 					"Graphemic Character Segmentation",
-					"Damaged Manuscripts",
+					"Image Acquisition",
+					"Manuscripts",
+					"Multi-Spectral Imaging",
+					"Palaeography",
 					"Palimpsests",
-					"Digital Palaeography."
+					"Processing"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -134,11 +134,9 @@ var testCases = [
 				"ISSN": "1715-0736",
 				"url": "http://digitalmedievalist.org/journal/6/gau/",
 				"title": "Image Acquisition & Processing Routines for Damaged Manuscripts",
-				"abstractNote": "[ Skip to Navigation | Return to Colophon ] Abstract This paper presents an overview of data acquisition and processing procedures of an interdisciplinary project of philologists and image processing experts aiming at the decipherment and reconstruction of damaged manuscripts. The digital raw image data was acquired via multi-spectral imaging. As a preparatory step we developed a method of foreground-background separation (binarisation) especially designed for multi-spectral images of degraded documents. On the basis of the binarised images further applications were developed: an automatic character decomposition and primitive extraction dissects the scriptural elements into analysable pieces that are necessary for palaeographic and graphemic analyses, writing tool recognition, text restoration, and optical character recognition. The results of the relevant procedures can be stored and interrogated in a database application. Furthermore, a semi-automatic page layout analysis provides codicological information on latent page contents (script, ruling, decorations).",
-				"year": "2010",
+				"abstractNote": "This paper presents an overview of data acquisition and processing procedures of an interdisciplinary project of philologists and image processing experts aiming at the decipherment and reconstruction of damaged manuscripts. The digital raw image data was acquired via multi-spectral imaging. As a preparatory step we developed a method of foreground-background separation (binarisation) especially designed for multi-spectral images of degraded documents. On the basis of the binarised images further applications were developed: an automatic character decomposition and primitive extraction dissects the scriptural elements into analysable pieces that are necessary for palaeographic and graphemic analyses, writing tool recognition, text restoration, and optical character recognition. The results of the relevant procedures can be stored and interrogated in a database application. Furthermore, a semi-automatic page layout analysis provides codicological information on latent page contents (script, ruling, decorations).",
 				"volume": "6",
-				"libraryCatalog": "Digital Medievalist",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "Digital Medievalist"
 			}
 		]
 	},
