@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 5,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-02-10 00:34:29"
+	"lastUpdated": "2014-03-14 11:26:32"
 }
 
 function detectWeb(doc, url) {
@@ -113,10 +113,15 @@ function importISIRecord(text) {
 function fetchIds(ids, doc) {
 	var outputForm = getOutputForm(doc);
 	var postData = getHiddenValues(outputForm);
-	var filters = 'USAGEIND RESEARCHERID ACCESSION_NUM FUNDING SUBJECT_CATEGORY ' + 
-		'JCR_CATEGORY LANG IDS PAGEC SABBR CITREFC ISSN PUBINFO KEYWORDS ' +
-		'CITTIMES ADDRS CONFERENCE_SPONSORS DOCTYPE ABSTRACT CONFERENCE_INFO ' +
-		'SOURCE TITLE AUTHORS  ';
+	var filters = 'USAGEIND RESEARCHERID ACCESSION_NUM FUNDING SUBJECT_CATEGORY '
+		+ 'JCR_CATEGORY LANG IDS PAGEC SABBR CITREFC ISSN PUBINFO KEYWORDS '
+		+ 'CITTIMES ADDRS CONFERENCE_SPONSORS DOCTYPE ABSTRACT CONFERENCE_INFO '
+		+ 'SOURCE TITLE AUTHORS ' + 
+		//additional fields from INSPEC
+		+ 'ADDRESS AUTHORS_EDITORS AUTHORSIDENTIFIERS CLASSIFICATION_CODES '
+		+ 'CONFERENCE_SPONSORS DESCRIPTORS IDENTIFYING_CODES IMAGES '
+		+ 'INVENTORS_ASSIGNEES IPC NUM_OF_REF PATENT_INFO SPONSORS TRANSLATORS '
+		+ 'TREATMENT UNCONTROLLED_TERMS';
 	postData['value(record_select_type)'] = 'selrecords';
 	postData['markFrom'] = '';
 	postData['markTo'] = '';
