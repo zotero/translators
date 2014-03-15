@@ -1,20 +1,20 @@
 {
 	"translatorID": "5af42734-7cd5-4c69-97fc-bc406999bdba",
-	"label": "ESA+RSNA Journals",
+	"label": "Atypon Journals",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://(www\\.esajournals|pubs\\.rsna)\\.org/",
+	"target": "^https?://(www\\.esajournals|pubs\\.rsna|pubsonline\\.informs)\\.org/",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-11-18 20:55:20"
+	"lastUpdated": "2014-03-15 09:29:18"
 }
 
 /*
-ESA Journals Translator
-Copyright (C) 2011 Sebastian Karcher
+Atypon Journals Translator
+Copyright (C) 2011-2014 Sebastian Karcher
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -42,11 +42,14 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		var rows = ZU.xpath(doc, '//table[@class="articleEntry"]');
+		if (rows.length==0) rows = ZU.xpath(doc, '//div[contains(@class, "search-result-row")]')
 		for (var i in rows) {
 			var title = ZU.xpathText(rows[i], './/div[contains(@class, "art_title")]');
+			if (!title) title = ZU.xpathText(rows[i], './/span[contains(@class, "art_title")]');
 			//Z.debug(title)
-			var id = ZU.xpathText(rows[i], './/a[contains(@href, "/doi/abs/")][1]/@href');
-			//	Z.debug(id)
+			var id = ZU.xpathText(rows[i], '(.//a[contains(@href, "/doi/abs/")])[1]/@href');
+			if (!id) id = ZU.xpathText(rows[i], '(.//a[contains(@href, "/doi/full/")])[1]/@href');
+			//Z.debug(id)
 			items[id] = title;
 		}
 		Zotero.selectItems(items, function (items) {
@@ -59,6 +62,7 @@ function doWeb(doc, url) {
 				//some search results have some "baggage" at the end - remove
 				urls.push(itemurl.replace(/\?prev.+/, ""));
 			}
+			Z.debug(urls)
 			ZU.processDocuments(urls, scrape)
 		});
 
@@ -89,6 +93,9 @@ function scrape(doc, url) {
 			item.url = url;
 			if (url.indexOf("rsna.org")!=-1){
 				var database = "RSNA"
+			}
+			else if (url.indexOf("informs.org")!=-1){
+				var database = "informs"
 			}
 			else var database = "ESA"
 			item.notes = [];
