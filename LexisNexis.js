@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-03-16 14:20:57"
+	"lastUpdated": "2014-03-17 00:10:57"
 }
 
 function detectWeb(doc, url) {
@@ -34,6 +34,15 @@ function detectWeb(doc, url) {
 }
 
 function scrape(doc, url) {
+if (url.indexOf("target=results_listview_resultsNav") == -1 ) {
+	var frames = doc.getElementsByTagName("frame");
+	var gotoUrl;
+	for (var i=0; i<frames.length; i++) {
+		if (frames[i].src.indexOf("target=results_listview_resultsNav") != -1) gotoUrl=frames[i].src;
+	}
+	Z.debug(gotoUrl);
+	ZU.processDocuments(gotoUrl, scrape);
+} else {
 	//base is url containing the host and the first two subdirectories
 	//e.g. http://www.lexisnexis.com/uk/nexis/
 	//or   http://www.lexisnexis.com/us/lnacademic/
@@ -55,11 +64,6 @@ function scrape(doc, url) {
 	
 	var cisb = ZU.xpathText(doc,'//input[@name="cisb"]/@value');//or @name="cisbId"
 	if (cisb.length==0) {
-		/* legacy code ?
-		var cisbTemp = ZU.xpath(doc,'//a[@target="_parent"]');
-		if (cisbTemp.length>0) {
-			cisb = cisbTemp[0].href.match(/cisb=([^&]+)/)[1];
-		} else {*/
 		cisb = "";
 	}
 
@@ -106,10 +110,10 @@ function scrape(doc, url) {
 				//for debugging TODO: delete later
 				item.notes.push({note:risData});
 				
-				//TODO: make it better than just this frame
+				//TODO: make it better
+				//1st attempt -> saves just this frame
 				item.attachments.push( { title: "Snapshot", document:doc } );
-				
-				//TODO: permalink --> problem with redirection, cookies?
+				//2nd attempt --> problem with redirection, cookies?
 				item.attachments.push( {
 					url: permaLink,
 					title: "LexisNexis Entry",
@@ -125,42 +129,21 @@ function scrape(doc, url) {
 			
 		});
 	});
-
+}
 }
 
 
 function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {//TODO: not properly working...because of iframes
-		//iframes are problematic for the xpath-expressions and they do not contain anything useful
-		//--> tried to delete them BUT couldn't get a grip at them
-		//neither an xpath-expression, getElementsByTagName, nor getElementById could get a handle on them :-(
-		//it seems that with these functions we only have access to the content of the first iframe (and nothing around/besides it)
+	if (detectWeb(doc, url) == "multiple") {
 		
 		var items = new Object();
 		var articles = new Array();
 		
-		/* Attemp to grab the elements from pure text --> did not work!
-		var docHTML = doc.documentElement.outerHTML;
-		Z.debug(docHTML);// --> not the whole document only the google-translate iframe !!
-		var searchString = 'name="frm_tagged_documents"';
-		var startIndex = 0;
-		var linkBegin; var linkEnd; var titleBegin; var titleEnd; var link; var title;
-		var test = docHTML.indexOf(searchString,startIndex);
-		while (test != -1) {
-			Z.debug("found one");
-			linkBegin = docHTML.indexOf('<a href="',test)+10;
-			linkEnd = docHTML.indexOf('"',linkBegin)-1;
-			titleBegin = docHTML.indexOf('>',linkEnd)+1;
-			titleEnd = docHTML.indexOf('</a>',titleBegin)-1;
-			link = docHTML.substring(linkBegin, linkEnd);
-			title = docHTML.substring(titleBegin, titleEnd);
-			items[link] = title;
-			test = docHTML.indexOf(searchString,titleEnd);
-		}
-		*/
+		//because the page contains iframe, we cannot use doc itself for xpath, etc.
+		//but the following construction seems to work:
+		var tempDoc = doc.defaultView.parent.document;
 		
-		//should work in theory, but not in practice
-		var rows = ZU.xpath(doc, '//tr[td/input[@name="frm_tagged_documents"]]');
+		var rows = ZU.xpath(tempDoc, '//tr[td/input[@name="frm_tagged_documents"]]');
 		Z.debug("rows.length = " + rows.length);
 		for(var i=0; i<rows.length; i++) {
 			if (ZU.xpath(rows[i], './td/a').length>0 ) {//exclude weblinks
