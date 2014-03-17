@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-03-01 10:50:01"
+	"lastUpdated": "2014-03-17 15:11:36"
 }
 
 /*
@@ -61,12 +61,16 @@ function doWeb(doc, url){
 	var articles = new Array();
 	if(detectWeb(doc, url) == "multiple") { 
 		var items = {};
-		//we have to deal with some different search pages. This should capture most of them and avoid false positives
-		var titles = doc.evaluate('//dl/dd/a[1][contains(@href, "/link?")]|//td/div/a[1][contains(@href, "/link?")]|//ul/li/a[contains(@href, "/link?")]|//ol/li/a[contains(@href, "/link?")]', doc, null, XPathResult.ANY_TYPE, null);
-		var title;
-		while (title = titles.iterateNext()) {
-			items[title.href] = title.textContent;
+		//we have to deal with search results and issue numbers. This should work for both.
+		var rows = ZU.xpath(doc, '//dl/dd[a[1][contains(@href, "/link?")]]|//ol/li[a[contains(@href, "/link?")]]');
+		for(var i=0; i<rows.length; i++) {
+			var title = ZU.xpathText(rows[i], './dl/dt/b');
+			if (!title) title = ZU.xpathText(rows[i], './preceding-sibling::dt[1]/b');
+			var link = ZU.xpathText(rows[i], './a[1][contains(@href, "/link?")]/@href');
+			items[link] = title;
+		
 		}
+		//Z.debug(items)
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
 				return true;
@@ -74,8 +78,7 @@ function doWeb(doc, url){
 			for (var i in items) {
 				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(articles, scrape, function () {
-			});
+			Zotero.Utilities.processDocuments(articles, scrape)
 		});
 	} else {
 		scrape(doc, url);
@@ -174,8 +177,10 @@ var testCases = [
 				"date": "2011",
 				"url": "http://jjap.jsap.jp/link?JJAP/50/01AA01/",
 				"DOI": "10.7567/JJAP.50.01AA01",
+				"publisher": "The Japan Society of Applied Physics",
 				"abstractNote": "In this study, an attempt is made to provide a framework to assess and improve metal–oxide–semiconductor field-effect transistor (MOSFET) reliability from the early stage of the design to the completion of the product. A small gate area has very small capacitances that are difficult to measure, making capacitance–voltage (C–V) based techniques difficult or impossible. In view of these experimental difficulties, we tried electrical doping profiling measurement for MOSFET with short gate length, ultra thin oxide thickness and asymmetric source/drain structure and checked the agreement with simulation result. We could get the effective mobility by simple drain current versus drain bias voltage measurement. The calculated effective mobility was smaller than expected value and we explained some reasons. An accurate effective mobility for asymmetric source–drain junction transistor was successfully extracted by using the split C–V technique, with the capacitance measured between the gate and source–drain and between the gate and the substrate.",
-				"libraryCatalog": "Physical Society of Japan"
+				"libraryCatalog": "Institute of Pure and Applied Physics",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
