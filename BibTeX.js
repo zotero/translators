@@ -18,7 +18,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-03-08 22:53:34"
+	"lastUpdated": "2014-03-18 17:12:44"
 }
 
 function detectImport() {
@@ -2391,7 +2391,7 @@ function doExport() {
 		var citekey = buildCiteKey(item, citekeys);
 		
 		// write citation key
-		Zotero.write((first ? "" : ",\n\n") + "@"+type+"{"+citekey);
+		Zotero.write((first ? "" : "\n\n") + "@"+type+"{"+citekey);
 		first = false;
 		
 		for(var field in fieldMap) {

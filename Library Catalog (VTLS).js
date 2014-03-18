@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-03-12 21:55:58"
+	"lastUpdated": "2014-03-18 15:42:51"
 }
 
 function detectWeb(doc, url) {
@@ -121,48 +121,5 @@ function scrape(doc, newUris) {
 	});
 } 
 /** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://webvirtua.ums.edu.my/cgi-bin/gw/chameleon?sessionid=2014030201591329116&skin=ums&lng=en&inst=consortium&host=10.50.9.80%2b1111%2bDEFAULT&patronhost=10.50.9.80%201111%20DEFAULT&searchid=H1&sourcescreen=INITREQ&pos=1&itempos=1&rootsearch=SCAN&function=INITREQ&search=AUTHID&authid=581020&authidu=4",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"firstName": "Joyce P.",
-						"lastName": "Jacobsen",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Gilbert L.",
-						"lastName": "Skillman",
-						"creatorType": "contributor"
-					}
-				],
-				"notes": [
-					{
-						"note": "Introduction: labor economics and the political economy of labor -- Part I: Labor supply and demand: Labor supply -- Labor demand -- Perfectly competitive labor markets -- Imperfectly competitive labor markets -- Part II: The labor exchange: The structure of labor exchange -- Strategic labor exchange -- Bargaining in labor exchange -- Imperfect contracting in labor exchange -- Part III: The employment relationship: The nature of the employment relationship -- Employee compensation and incentive provision -- Employment continuity and internal labor markets -- Employee representation in the workplace -- Part IV: Labor market divisions: Wages and working conditions -- Education and ability -- Employee characteristics and discrimination -- Employer characteristics and market segmentation -- Part V: labor in the market system: -- Earnings inequality -- Unemployment -- Labor market dynamics"
-					}
-				],
-				"tags": [
-					"Labor Market",
-					"Industrial relations",
-					"Labor economics"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"ISBN": "9780631208365",
-				"title": "Labor markets and employment relationships: a comprehensive approach",
-				"place": "Malden, MA",
-				"publisher": "Blackwell Pub",
-				"date": "2004",
-				"numPages": "556",
-				"callNumber": "HD5706 . J33 2004",
-				"libraryCatalog": "webvirtua.ums.edu.my Library Catalog",
-				"shortTitle": "Labor markets and employment relationships"
-			}
-		]
-	}
-]
+var testCases = []
 /** END TEST CASES **/
