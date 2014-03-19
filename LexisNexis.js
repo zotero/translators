@@ -2,14 +2,14 @@
 	"translatorID": "b047a13c-fe5c-6604-c997-bef15e502b09",
 	"label": "LexisNexis",
 	"creator": "Philipp Zumstein",
-	"target": "https?://[^/]*lexis-?nexis\\.com",
+	"target": "^https?://[^/]*lexis-?nexis\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-03-18 16:33:57"
+	"lastUpdated": "2014-03-19 18:04:57"
 }
 
 /*
@@ -34,6 +34,7 @@
 	***** END LICENSE BLOCK *****
 */
 
+//Debugging does not work with Scaffold!
 
 function detectWeb(doc, url) {
 	//besides deciding whether it is a single item or multiple items
@@ -47,22 +48,23 @@ function detectWeb(doc, url) {
 		return "newspaperArticle";
 	}
 	
-	if (url.indexOf("contentRenderer.do?") != -1 || url.indexOf("target=results_ResultsList") != -1) {
+	if ((url.indexOf("contentRenderer.do?") != -1 || url.indexOf("target=results_ResultsList") != -1) && ZU.xpath(doc, '//tr[./td/input[@name="frm_tagged_documents"]]/td/a').length > 0) {
 		return "multiple";
 	}
 }
 
 function selectFrame(doc, url) {
-    if (url.indexOf("target=results_listview_resultsNav") == -1 ) {
-        var frames = doc.getElementsByTagName("frame");
-        var gotoUrl;
-        for (var i=0; i<frames.length; i++) {
-            if (frames[i].src.indexOf("target=results_listview_resultsNav") != -1) gotoUrl=frames[i].src;
-        }
-        ZU.processDocuments(gotoUrl, scrape);
-    } else {
-        scrape(doc,url);
-    }
+	if (url.indexOf("target=results_listview_resultsNav") == -1 ) {
+		var frames = doc.getElementsByTagName("frame");
+		var gotoUrl;
+		for (var i=0; i<frames.length; i++) {
+			Z.debug("selectFrame: " + frames[i].src);
+			if (frames[i].src.indexOf("target=results_listview_resultsNav") != -1) gotoUrl=frames[i].src;
+		}
+		ZU.processDocuments(gotoUrl, scrape);
+	} else {
+		scrape(doc,url);
+	}
 }
 
 function scrape(doc, url) {
@@ -82,7 +84,7 @@ function scrape(doc, url) {
 		cisb = "";
 	}
 
-	var urlIntermediateSite = base+"results/listview/delPrep.do?cisb="+cisb+"&risb="+risb+"&mode=delivery_refworks";
+	var urlIntermediateSite = base+"results/listview/delPrep.do?cisb="+encodeURIComponent(cisb)+"&risb="+encodeURIComponent(risb)+"&mode=delivery_refworks";
 
 	var hiddenInputs = ZU.xpath(doc, '//form[@name="results_docview_DocumentForm"]//input[@type="hidden" and not(@name="tagData")]');
 	if (hiddenInputs.length==0) {
@@ -90,7 +92,7 @@ function scrape(doc, url) {
 	}
 	var poststring="";
 	for (var i=0; i<hiddenInputs.length; i++) {
-		poststring = poststring+"&"+hiddenInputs[i].name+"="+encodeURIComponent(hiddenInputs[i].value);
+		poststring = poststring+"&"+encodeURIComponent(hiddenInputs[i].name)+"="+encodeURIComponent(hiddenInputs[i].value);
 	};
 	
 	poststring += "&focusTerms=&nextSteps=0";
@@ -101,15 +103,38 @@ function scrape(doc, url) {
 		var disb = /<input type="hidden" name="disb" value="([^"]+)">/.exec(text);
 		var initializationPage = /<input type="hidden" name="initializationPage" value="([^"]+)">/.exec(text);
 		
-		var poststring2 = "screenReaderSupported=false&delRange=cur&selDocs=&exportType=dnldBiblio&disb="+disb[1]+"&initializationPage="+initializationPage[1];
-		Z.debug(poststring2);
+		var poststring2 = "screenReaderSupported=false&delRange=cur&selDocs=&exportType=dnldBiblio&disb="+encodeURIComponent(disb[1])+"&initializationPage="+encodeURIComponent(initializationPage[1]);
+		//Z.debug(poststring2);
 
 		ZU.doPost(urlRis, poststring2, function(text) {
 			var risData = text;
+			//type is GEN, but better NEWS (or CASE, JOUR)
+			text = text.replace(/^TY\s+-\s+GEN\s*$/mg, 'TY  - NEWS');
+			//the title information is sometimes somewhere else
+			if ( text.search(/^TI\s+-/m) == -1) {
+				if ( text.search(/^N2\s+-/m) != -1 ) {
+					text = text.replace(/^N2\s+-/m,"TI  -");
+					text = text.replace(/^TY\s+-\s+NEWS\s*$/mg, 'TY  - JOUR');
+				} else if ( text.search(/^U3\s+-/m) != -1 ) {
+					text = text.replace(/^U3\s+-/m,"TI  -");
+					text = text.replace(/^TY\s+-\s+NEWS\s*$/mg, 'TY  - CASE');
+				}
+			} 
 			//most authors are saved in N1 tag, correct that:
-			text = text.replace(/^N1\s+-\s+(\w.*)$/mg, cleanAuthorFields );
+			text = text.replace(/^N1\s+-[ \f\r\t\v\u00A0\u2028\u2029]+(\w.*)$/mg, cleanAuthorFields );//the range in the regexp is actually just \s without the line break
 			//correct date format in RIS e.g. PY - 2013/05/09/
-			text = text.replace(/^PY\s+-\s+/mg, 'DA - ');
+			text = text.replace(/^PY\s+-\s+(\d\d\d\d)\/(\d\d)\/(\d\d)\//mg, "DA  - $1-$2-$3");
+			//correct page information, e.g. SP - WORLD; Pg. 8
+			text = text.replace(/^SP\s+-\s+(\w.*)$/mg, function(totalMatch, pageString){
+				var pageAbbreviations = ["Pg.", "S.", "Pag.", "Blz.", "Pág."];
+				var pageArray = pageString.split(";");
+				var pageArray2 = ZU.trimInternal(pageArray[pageArray.length-1]).split(" ");
+				if (pageAbbreviations.indexOf(pageArray2[0]) > -1) {
+					return 'SP  - ' + pageArray2.slice(1).join(" ") + "\nSE  - " + pageArray.slice(0,-1).join(";");
+				} else {
+					return 'SE  - ' + pageString;
+				}
+			});
 			Z.debug(text);
 			
 			var trans = Zotero.loadTranslator('import');
@@ -124,7 +149,7 @@ function scrape(doc, url) {
 				item.notes.push({note:risData});
 				
 				item.attachments.push( {
-					url: url.replace(/target=results_listview_resultsNav/,"target=results_DocumentContent"),
+					url: url.replace("target=results_listview_resultsNav","target=results_DocumentContent"),
 					title: "LexisNexis Entry",
 					mimeType: "text/html",
 				} );
@@ -151,7 +176,7 @@ function cleanAuthorFields(m, authorStr) {
 			//we have to distinguish the correct cases where the third part is
 			//just a suffix as "Jr." and wrong cases where this is a list of
 			//three authors ==> easiest is maybe to check for a space
-			if (ZU.trim(authors[2]).indexOf(' ') == -1) {
+			if (ZU.trimInternal(authors[2]).indexOf(' ') == -1) {
 				return 'AU  - ' + authorStr;
 			}
 		}
@@ -162,7 +187,7 @@ function cleanAuthorFields(m, authorStr) {
 	//(ii) authorStr contains no semicolon but more than one comma, authors is the array of its different parts, fixName = true	
 	var str = '';
 	for(var i=0; i<authors.length; i++) {
-		var author = ZU.trim(authors[i]);
+		var author = ZU.trimInternal(authors[i]);
 		if(author.indexOf(',') == -1 && author.indexOf(' ') != -1) {
 			//best guess: split at the last space
 			var splitAt = author.lastIndexOf(' ');
@@ -180,11 +205,11 @@ function doWeb(doc, url) {
 		var items = new Object();
 		var articles = new Array();
 		
-		//because the page contains iframe, we cannot use doc itself for xpath, etc.
-		//but the following construction seems to work:
-		var tempDoc = doc.defaultView.parent.document;
+		//if the detectWeb is not clear on the iframe, we might need
+		//tempDoc instead of doc:
+		//var tempDoc = doc.defaultView.parent.document;
 		
-		var rows = ZU.xpath(tempDoc, '//tr[./td/input[@name="frm_tagged_documents"]]/td/a');//exclude weblinks
+		var rows = ZU.xpath(doc, '//tr[./td/input[@name="frm_tagged_documents"]]/td/a');//exclude weblinks
 		Z.debug("rows.length = " + rows.length);
 		for(var i=0; i<rows.length; i++) {
 			var title = ZU.trimInternal(rows[i].textContent);
@@ -205,3 +230,19 @@ function doWeb(doc, url) {
 	}
 	
 }
+
+/*
+	Examples for permalink to pages:
+		Nexis access (Germany):
+			Search page:
+			http://www.lexisnexis.com/uk/nexis/api/version1/sr?sr=%28%28HEADLINE%28h%C3%B6ness%29%29%29+und+DATUM%28%3D2014-03-19%29&csi=5949&oc=00240&shr=t&scl=t&hac=f&hct=f&nonLatin1Chars=true
+			Single newspaper article:
+			http://www.lexisnexis.com/uk/nexis/docview/getDocForCuiReq?lni=5BS1-R651-DYJR-P1N8&csi=5949&oc=00240&perma=true
+			http://www.lexisnexis.com/uk/nexis/docview/getDocForCuiReq?lni=58CH-TVH1-F11P-X54V&csi=372151&oc=00240&perma=true
+		LexisNexis acces (Germany):
+			Single newspaper article:
+			http://www.lexisnexis.com/lnacui2api/api/version1/getDocCui?lni=5BRW-BGR1-JD34-V3FB&csi=314239&hl=t&hv=t&hnsd=f&hns=t&hgn=t&oc=00240&perma=true
+			http://www.lexisnexis.com/lnacui2api/api/version1/getDocCui?lni=5BS7-5CJ1-DYR7-33T8&csi=151977&hl=t&hv=t&hnsd=f&hns=t&hgn=t&oc=00240&perma=true
+			Case:
+			http://www.lexisnexis.com/lnacui2api/api/version1/getDocCui?lni=4WMW-WG80-TXFX-11XY&csi=6443&hl=t&hv=t&hnsd=f&hns=t&hgn=t&oc=00240&perma=true
+*/
