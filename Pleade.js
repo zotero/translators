@@ -285,8 +285,7 @@ var testCases = [
 				"date": "2010",
 				"publisher": "Archives départementales de la Gironde",
 				"place": "Bordeaux",
-				"language": "français",
-				"callNumber": "11 AV 1-14"
+				"language": "français"
 			}
 		]
 	},

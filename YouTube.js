@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-02-24 23:19:32"
+	"lastUpdated": "2014-03-22 22:52:29"
 }
 
 function detectWeb(doc, url){
@@ -25,7 +25,7 @@ function detectWeb(doc, url){
 		return "multiple";
 	}
 	//playlists
-	if ( ZU.xpath(doc, '//h3[@class="pl-video-title"]/a[contains(@class,"sessionlink") and contains(@href,"/watch?")]').length ){	
+	if ( ZU.xpath(doc, '//td[@class="pl-video-title"]/a[contains(@class,"sessionlink") and contains(@href,"/watch?")]').length ){	
 		return "multiple";
 	}
 	//user page
@@ -56,7 +56,7 @@ function doWeb(doc, url){
 		var elmts = ZU.xpath(doc, '//ol[@id="search-results"]//a[contains(@href, "/watch?v=")]|//div[contains(@class, "feed-item-main")]//a[contains(@href, "/watch?v=")]')
 		if (!elmts.length) {
 			//playlists
-			elmts = ZU.xpath(doc, '//h3[@class="pl-video-title"]/a[contains(@class,"sessionlink") and contains(@href,"/watch?")]');
+			elmts = ZU.xpath(doc, '//td[@class="pl-video-title"]/a[contains(@class,"sessionlink") and contains(@href,"/watch?")]');
 			if(elmts.length==0 ) {
 				// still used?
 				elmts = ZU.xpath(doc, '//div[@class="vltitle"]/div[@class="vlshortTitle"]/a[contains(@href, "/watch?v=")]');

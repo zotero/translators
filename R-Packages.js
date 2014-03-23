@@ -131,10 +131,10 @@ var testCases = [
 				],
 				"url": "http://cran.us.r-project.org/web/packages/effects/index.html",
 				"abstractNote": "Graphical and tabular effect displays, e.g., of interactions, for\nvarious statistical models with linear predictors.",
-				"date": "2013-11-07",
+				"date": "2014-03-21",
 				"rights": "GPL-2 | GPL-3 [expanded from: GPL (≥ 2)]",
 				"title": "effects: Effect Displays for Linear, Generalized Linear,\nMultinomial-Logit, Proportional-Odds Logit Models and\nMixed-Effects Models",
-				"version": "2.3-0",
+				"version": "3.0-0",
 				"libraryCatalog": "R-Packages",
 				"shortTitle": "effects"
 			}

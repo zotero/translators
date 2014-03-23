@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-11 09:03:16"
+	"lastUpdated": "2014-03-22 22:27:50"
 }
 
 /*
@@ -103,6 +103,7 @@ function scrape(doc) {
 	}
 
 	var authorline = getXPath('//article/address/span', doc);
+	if (!authorline) authorline = getXPath('//h6//span[@class="author"]', doc)
 	if (authorline != null) {
 		authorline = Zotero.Utilities.trimInternal(authorline.textContent);
 		//assumption of authorline: "[Interview:|Von ]name1[, name2] [und Name3][, location]"
@@ -122,6 +123,7 @@ function scrape(doc) {
 	}
 
 	var section = getXPath('//hgroup/h6/a', doc);
+	if (!section) section = getXPath('//h1/a[@class="link-info"]', doc);
 	if (section != null) {
 		var sectionText = Zotero.Utilities.trimInternal(section.textContent);
 		if (sectionText.indexOf("NZZ am Sonntag") > -1 ) {

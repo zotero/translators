@@ -349,16 +349,15 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"walking behavior",
+					"D. melanogaster",
 					"coordination",
-					"proprioception",
-					"sensory feedback",
 					"gait analysis",
 					"motor neuron",
-					"D. melanogaster"
+					"proprioception",
+					"sensory feedback",
+					"walking behavior"
 				],
 				"seeAlso": [
-					"10.7554/eLife.00231",
 					"10.7554/eLife.00231"
 				],
 				"attachments": [
@@ -378,19 +377,12 @@ var testCases = [
 				"title": "Correction: Quantification of gait parameters in freely walking wild type and sensory deprived Drosophila melanogaster",
 				"publicationTitle": "eLife",
 				"rights": "Copyright © 2013, Mendes et al. This article is distributed under the terms of the Creative Commons Attribution License, which permits unrestricted use and redistribution provided that the original author and source are credited.",
-				"section": "Neuroscience",
-				"publisher": "eLife Sciences Publications Limited",
-				"institution": "eLife Sciences Publications Limited",
-				"company": "eLife Sciences Publications Limited",
-				"label": "eLife Sciences Publications Limited",
-				"distributor": "eLife Sciences Publications Limited",
 				"date": "02/11/2013",
 				"DOI": "10.7554/eLife.00565",
 				"url": "http://elife.elifesciences.org/content/2/e00565",
 				"language": "en",
 				"volume": "2",
 				"libraryCatalog": "elife.elifesciences.org",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"extra": "PMID: 23408481",
 				"shortTitle": "Correction"
 			}
