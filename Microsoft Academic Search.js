@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-04-11 00:40:43"
+	"lastUpdated": "2014-03-23 11:12:39"
 }
 
 /**
@@ -117,6 +117,12 @@ function scrape(doc, url) {
 		translator.setHandler('itemDone', function(obj, item) {
 			item.attachments = att;
 			item.tags = tags;
+			
+			if(!item.abstractNote) {
+				var abstract = ZU.xpathText(doc, '//div[@class="paper-card"]//div[@class="abstract"]');
+				if(abstract) item.abstractNote = ZU.trimInternal(abstract);
+			}
+			
 			item.complete();
 		})
 
@@ -202,6 +208,7 @@ var testCases = [
 				"date": "2009",
 				"issue": "01",
 				"DOI": "10.1017/S1049096509090337",
+				"abstractNote": "Times change, and so do research methods; gone are the days of researching with index cards. While academics may be slow to adopt emerging citation technology, the reference manager field is blazing ahead. This article explains what reference managers are, addresses their emergence in and potential impact on academe, and profiles a new- comer to the field: Zotero. We close by surveying and contrasting Zotero's features with those of its staunchest competitors: EndNote and RefWorks. WHERE WE WORK VS. HOW WE WORK",
 				"libraryCatalog": "Microsoft Academic Search"
 			}
 		]
