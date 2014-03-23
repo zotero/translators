@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-02-23 23:48:47"
+	"lastUpdated": "2014-03-23 11:31:39"
 }
 
 var searchRe = new RegExp('^https?://(?:www\.)?amazon\.([^/]+)/(gp/search/|(gp/)?registry/(wishlist|registry)|exec/obidos/search-handle-url/|s/|s\\?|[^/]+/lm/|gp/richpub/)');
@@ -120,6 +120,7 @@ var DEPARTMENT_TO_TYPE = {
 	"Music":"audioRecording",
 	"Amazon MP3 Store":"audioRecording",
 	"Movies & TV":"videoRecording",
+	"DVD & Blu-ray":"videoRecording",
 	"Amazon Instant Video":"videoRecording",
 	"Appstore for Android":"computerProgram",
 	"Video Games":"computerProgram"
@@ -151,12 +152,12 @@ function scrape(doc) {
 	}
 	
 	// Old design
-	var titleNode = ZU.xpath(doc, '//span[@id="btAsinTitle"]/text()')[0] ||
+	var titleNode = ZU.xpath(doc, '//span[@id="btAsinTitle"]')[0] ||
 	// New design encountered 06/30/2013					
-		ZU.xpath(doc, '//h1[@id="title"]/span/text()')[0]||
-		ZU.xpath(doc, '//h1[@id="title"]/text()')[0]
+		ZU.xpath(doc, '//h1[@id="title"]/span')[0]||
+		ZU.xpath(doc, '//h1[@id="title"]')[0]
 
-	item.title = titleNode.nodeValue.replace(/(?: \([^)]*\))+$/, "");
+	item.title = ZU.trimInternal(titleNode.textContent).replace(/(?: [(\[].+[)\]])+$/, "");
 
 	// Extract info into an array
 	var info = {},
@@ -562,6 +563,58 @@ var testCases = [
 				"date": "2012",
 				"ISBN": "9787030329202 : 7030329201",
 				"shortTitle": "汉语语音合成"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.amazon.co.uk/Walt-Disney-Pixar-Up-DVD/dp/B0029Z9UQ4/ref=sr_1_1?s=dvd&ie=UTF8&qid=1395560537&sr=1-1&keywords=up",
+		"items": [
+			{
+				"itemType": "videoRecording",
+				"creators": [
+					{
+						"firstName": "Ed",
+						"lastName": "Asner",
+						"creatorType": "castMember"
+					},
+					{
+						"firstName": "Christopher",
+						"lastName": "Plummer",
+						"creatorType": "castMember"
+					},
+					{
+						"firstName": "Jordan",
+						"lastName": "Nagai",
+						"creatorType": "castMember"
+					},
+					{
+						"firstName": "Pete",
+						"lastName": "Docter",
+						"creatorType": "director"
+					},
+					{
+						"firstName": "Bob",
+						"lastName": "Peterson",
+						"creatorType": "director"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Amazon.com Link",
+						"snapshot": false,
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Walt Disney / Pixar - Up",
+				"date": "15 Feb 2010",
+				"studio": "Walt Disney Studios Home Entertainment",
+				"runningTime": "96 minutes",
+				"language": "English",
+				"libraryCatalog": "Amazon.com"
 			}
 		]
 	}
