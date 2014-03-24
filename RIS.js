@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-03-24 11:10:25"
+	"lastUpdated": "2014-03-24 11:26:45"
 }
 
 function detectImport() {
@@ -42,7 +42,9 @@ function detectImport() {
  ********************/
  //exported as translatorObject.options
  var exportedOptions = {
-	itemType: false //allows translators to supply item type
+	itemType: false, //allows translators to supply item type
+	typeMap: false,
+	fieldMap: false
 };
 
 
@@ -562,8 +564,8 @@ TagMapper.prototype.reverseLookup = function(itemType, zField) {
  * Import Functions *
  ********************/
 
-//set up import field mapping
-var importFields = new TagMapper([fieldMap, degenerateImportFieldMap]);
+//import field mapping
+var importFields;
 
 //do not store unknwon fields in notes
 //configurable via RIS.import.ignoreUnknown hidden preference
@@ -1543,6 +1545,11 @@ function getNewItem(type) {
 }
 
 function doImport() {
+	//set up import field mapper
+	var maps = [fieldMap, degenerateImportFieldMap];
+	if(exportedOptions.fieldMap) maps.unshift(exportedOptions.fieldMap);
+	importFields = new TagMapper(maps);
+	
 	//prepare some configurable options
 	if(Zotero.getHiddenPref) {
 		if(Zotero.getHiddenPref("RIS.import.ignoreUnknown")) {
@@ -1556,8 +1563,17 @@ function doImport() {
 	var entry;
 	while(entry = RISReader.nextEntry()) {
 		//determine item type
-		var itemType = exportedOptions.itemType
-			|| (entry.tags.TY && importTypeMap[entry.tags.TY[0].value.trim().toUpperCase()]);
+		var itemType = exportedOptions.itemType;
+		if(!itemType && entry.tags.TY) {
+			var risType = entry.tags.TY[0].value.trim().toUpperCase();
+			if(exportedOptions.typeMap) {
+				itemType = exportedOptions.typeMap[risType];
+			}
+			if(!itemType) {
+				itemType = importTypeMap[risType];
+			}
+		}
+		
 		//we allow entries without TY and just use default type
 		if(!itemType) {
 			if(entry.tags.TY) {
@@ -1606,7 +1622,7 @@ var exportOrder = {
 var newLineChar = "\r\n"; //from spec
 
 //set up export field mapping
-var exportFields = new TagMapper([fieldMap]);
+var exportFields;
 
 function addTag(tag, value) {
 	if(!(value instanceof Array)) value = [value];
@@ -1623,6 +1639,11 @@ function addTag(tag, value) {
 
 function doExport() {
 	var item, order, tag, fields, field, value;
+	
+	//set up field mapper
+	var map = [fieldMap];
+	if(exportedOptions.fieldMap) map.unshift(exportedOptions.fieldMap);
+	exportFields = new TagMapper(map);
 
 	while(item = Zotero.nextItem()) {
 		// can't store independent notes in RIS

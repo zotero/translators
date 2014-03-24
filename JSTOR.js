@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-02-23 22:24:45"
+	"lastUpdated": "2014-03-24 11:33:45"
 }
 
 function detectWeb(doc, url) {
@@ -161,7 +161,6 @@ function first(set, next) {
 		//M1 is mostly useless and sometimes ends up in the issue field
 		//we can use it to check if the article is a review though
 		var review = text.search(/^M1\s+-\s+ArticleType:\s*book-review/m) !== -1;
-		text = text.replace(/^M1\s+-.*?\n/mg, '');
 		
 		translator.setString(text);
 		translator.setHandler("itemDone", function(obj, item) {
@@ -227,7 +226,14 @@ function first(set, next) {
 			}
 		});
 			
-		translator.translate();
+		translator.getTranslatorObject(function (trans) {
+			trans.options.fieldMap = {
+				'M1': {
+					'__default': '__ignore'
+				}
+			}
+			trans.doImport();	
+		});
 	});
 }
 	
