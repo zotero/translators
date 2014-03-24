@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-01-18 09:43:44"
+	"lastUpdated": "2014-03-24 11:10:25"
 }
 
 function detectImport() {
@@ -717,6 +717,45 @@ var RISReader = new function() {
 };
 
 /**
+ * Generic methods for cleaning RIS tags
+ */
+var TagCleaner = {
+	/**
+	 * public
+	 * Changes the RIS tag for an indicated tag-value pair. If more than one tag
+	 *   is specified, additional pairs are added.
+	 *
+	 * @param (RISReader entry) entry
+	 * @param (Integer) at Index in entry of the tag-value pair to alter
+	 * @param (String[]) toTags Array of tags to change to
+	 */
+	changeTag: function(entry, at, toTags) {
+		var source = entry[at], byTag = entry.tags[source.tag];
+		
+		//clean up "tags" list
+		byTag.splice(byTag.indexOf(source),1);
+		if(!byTag.length) delete entry.tags[source.tag];
+		
+		if(!toTags || !toTags.length) {
+			//then we just remove
+			entry.splice(at,1);
+		} else {
+			source.tag = toTags[0]; //re-use the same pair for first tag
+			if(!entry.tags[toTags[0]]) entry.tags[toTags[0]] = [];
+			entry.tags[toTags[0]].push(source);
+			//if we're changing to more than one tag, we need to add extras
+			for(var i=1, n=toTags.length; i<n; i++) {
+				var newSource = ZU.deepCopy(source);
+				newSource.tag = toTags[i];
+				entry.splice(at+i, 0, newSource);
+				if(!entry.tags[toTags[i]]) entry.tags[toTags[i]] = [];
+				entry.tags[toTags[i]].push(newSource);
+			}
+		}
+	}
+};
+
+/**
  * @singleton Provides facilities to remap ProCite note-based data tagging to
  *   proper RIS format
  * Note that after processing, the order of tag-value pairs in the "tags" list
@@ -926,7 +965,9 @@ var ProCiteCleaner = new function() {
 			var titleTags = ['T3', 'T2', 'TI'];
 			for(var i=0; i<entry.length && titleTags.length; i++) {
 				if((['TI', 'T1', 'T2', 'T3']).indexOf(entry[i].tag) !== -1) {
-					entry[i].tag = titleTags.pop();
+					var newTag = titleTags.pop();
+					if(entry[i].tag == newTag) continue; //already correct
+					this._changeTag(entry, i, [newTag]);
 				}
 			}
 		}
@@ -972,36 +1013,10 @@ var ProCiteCleaner = new function() {
 	
 	/**
 	 * public
-	 * Changes the RIS tag for an indicated tag-value pair. If more than one tag
-	 *   is specified, additional pairs are added.
-	 *
-	 * @param (RISReader entry) entry
-	 * @param (Integer) at Index in entry of the tag-value pair to alter
-	 * @param (String[]) toTags Array of tags to change to
+	 * Wrapper for TagCleaner.changeTag
 	 */
 	this._changeTag = function(entry, at, toTags) {
-		var source = entry[at], byTag = entry.tags[source.tag];
-		
-		//clean up "tags" list
-		byTag.splice(byTag.indexOf(source),1);
-		if(!byTag.length) delete entry.tags[source.tag];
-		
-		if(!toTags || !toTags.length) {
-			//then we just remove
-			entry.splice(at,1);
-		} else {
-			source.tag = toTags[0]; //re-use the same pair for first tag
-			if(!entry.tags[toTags[0]]) entry.tags[toTags[0]] = [];
-			entry.tags[toTags[0]].push(source);
-			//if we're changing to more than one tag, we need to add extras
-			for(var i=1, n=toTags.length; i<n; i++) {
-				var newSource = ZU.deepCopy(source);
-				newSource.tag = toTags[i];
-				entry.splice(at+i, 0, newSource);
-				if(!entry.tags[toTags[i]]) entry.tags[toTags[i]] = [];
-				entry.tags[toTags[i]].push(newSource);
-			}
-		}
+		TagCleaner.changeTag(entry, at, toTags);
 		
 		//if we're changing tags, then we're sure this is ProCite format
 		//it's not the most intuitive place for this,
@@ -1048,6 +1063,25 @@ var ProCiteCleaner = new function() {
 		if(tag) return added ? added : true;
 	};
 }
+/**
+ * @singleton Fixes some EndNote bugs, makes it more conveninent to import
+ */
+var EndNoteCleaner = new function() {
+	/**
+	 * public
+	 * 
+	 * @param (RISReader entry) entry Entry to be cleaned up in-place
+	 * @param (Zotero.Item) item Indicates item type for proper mapping
+	 */
+	this.cleanTags = function(entry, item) {
+		// for edited books, treat authors as editors
+		if(entry.tags.TY && entry.tags.TY[0].value == 'EDBOOK' && entry.tags.AU) {
+			for(var i = entry.tags.AU.length-1; i>=0; i--) {
+				TagCleaner.changeTag(entry, entry.indexOf(entry.tags.AU[i]), ['A3']);
+			}
+		}
+	}
+};
 
 function processTag(item, tagValue, risEntry) {
 	var tag = tagValue.tag;
@@ -1538,6 +1572,7 @@ function doImport() {
 		
 		var item = getNewItem(itemType);
 		ProCiteCleaner.cleanTags(entry, item); //clean up ProCite "tags"
+		EndNoteCleaner.cleanTags(entry, item); //some tweaks to EndNote export
 		
 		for(var i=0, n=entry.length; i<n; i++) {
 			if((['TY', 'ER']).indexOf(entry[i].tag) == -1) { //ignore TY and ER tags
@@ -2742,7 +2777,7 @@ var testCases = [
 					},
 					{
 						"lastName": "Editor",
-						"creatorType": "author",
+						"creatorType": "editor",
 						"fieldMode": 1
 					}
 				],
