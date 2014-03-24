@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-03-24 11:26:45"
+	"lastUpdated": "2014-03-24 11:47:01"
 }
 
 function detectImport() {
@@ -217,7 +217,7 @@ var fieldMap = {
 	},
 	T3: {
 		legislativeBody:["hearing", "bill"],
-		series:["bookSection", "conferencePaper"],
+		series:["bookSection", "conferencePaper", "journalArticle"],
 		seriesTitle:["audioRecording"]
 	},
 	//NOT HANDLED: reviewedAuthor, scriptwriter, contributor, guest
@@ -2860,7 +2860,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>DOI: Type of Work<br/>Reviewed Item: Reviewed Item<br/>Research Notes: Research Notes<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C1  - Year Cited<br/>C2  - Date Cited<br/>C3  - PMCID<br/>C4  - Reviewer<br/>C5  - Issue Title<br/>C6  - NIHMSID<br/>C7  - Article Number<br/>CY  - Place Published<br/>ET  - Edition<br/>NV  - Document Number<br/>PB  - Publisher<br/>RP  - Reprint Edition<br/>SE  - E-Pub Date<br/>T3  - Website Title<br/>",
+						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>DOI: Type of Work<br/>Reviewed Item: Reviewed Item<br/>Research Notes: Research Notes<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C1  - Year Cited<br/>C2  - Date Cited<br/>C3  - PMCID<br/>C4  - Reviewer<br/>C5  - Issue Title<br/>C6  - NIHMSID<br/>C7  - Article Number<br/>CY  - Place Published<br/>ET  - Edition<br/>NV  - Document Number<br/>PB  - Publisher<br/>RP  - Reprint Edition<br/>SE  - E-Pub Date<br/>",
 						"tags": [
 							"_RIS import"
 						]
@@ -2885,6 +2885,7 @@ var testCases = [
 				"pages": "Pages",
 				"shortTitle": "Short Title",
 				"publicationTitle": "Periodical Title",
+				"series": "Website Title",
 				"title": "Title",
 				"url": "URL",
 				"volume": "Volume"
@@ -3249,7 +3250,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>DOI: Type of Work<br/>Original Publication: Original Publication<br/>Reviewed Item: Reviewed Item<br/>Research Notes: Research Notes<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>A3  - Author, Tertiary<br/>C1  - Custom 1<br/>C2  - Custom 2<br/>C3  - Custom 3<br/>C4  - Custom 4<br/>C5  - Custom 5<br/>C6  - Custom 6<br/>C7  - Custom 7<br/>C8  - Custom 8<br/>CY  - Place Published<br/>ET  - Edition<br/>NV  - Number of Volumes<br/>PB  - Publisher<br/>RP  - Reprint Edition<br/>SE  - Section<br/>T3  - Tertiary Title<br/>",
+						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>DOI: Type of Work<br/>Original Publication: Original Publication<br/>Reviewed Item: Reviewed Item<br/>Research Notes: Research Notes<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>A3  - Author, Tertiary<br/>C1  - Custom 1<br/>C2  - Custom 2<br/>C3  - Custom 3<br/>C4  - Custom 4<br/>C5  - Custom 5<br/>C6  - Custom 6<br/>C7  - Custom 7<br/>C8  - Custom 8<br/>CY  - Place Published<br/>ET  - Edition<br/>NV  - Number of Volumes<br/>PB  - Publisher<br/>RP  - Reprint Edition<br/>SE  - Section<br/>",
 						"tags": [
 							"_RIS import"
 						]
@@ -3275,6 +3276,7 @@ var testCases = [
 				"pages": "Pages",
 				"shortTitle": "Short Title",
 				"publicationTitle": "Secondary Title",
+				"series": "Tertiary Title",
 				"title": "Title",
 				"url": "URL",
 				"volume": "Volume",
@@ -4289,7 +4291,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>DOI: Type of Work<br/>Research Notes: Research Notes<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>CY  - Place Published<br/>PB  - Institution<br/>T3  - Department<br/>",
+						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>DOI: Type of Work<br/>Research Notes: Research Notes<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>CY  - Place Published<br/>PB  - Institution<br/>",
 						"tags": [
 							"_RIS import"
 						]
@@ -4312,6 +4314,7 @@ var testCases = [
 				"pages": "Pages",
 				"shortTitle": "Short Title",
 				"publicationTitle": "Series Title",
+				"series": "Department",
 				"title": "Title of Work",
 				"url": "URL",
 				"accessDate": "0000 Access"
