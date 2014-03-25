@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-01-18 09:43:44"
+	"lastUpdated": "2014-03-24 11:47:01"
 }
 
 function detectImport() {
@@ -42,7 +42,9 @@ function detectImport() {
  ********************/
  //exported as translatorObject.options
  var exportedOptions = {
-	itemType: false //allows translators to supply item type
+	itemType: false, //allows translators to supply item type
+	typeMap: false,
+	fieldMap: false
 };
 
 
@@ -215,7 +217,7 @@ var fieldMap = {
 	},
 	T3: {
 		legislativeBody:["hearing", "bill"],
-		series:["bookSection", "conferencePaper"],
+		series:["bookSection", "conferencePaper", "journalArticle"],
 		seriesTitle:["audioRecording"]
 	},
 	//NOT HANDLED: reviewedAuthor, scriptwriter, contributor, guest
@@ -562,8 +564,8 @@ TagMapper.prototype.reverseLookup = function(itemType, zField) {
  * Import Functions *
  ********************/
 
-//set up import field mapping
-var importFields = new TagMapper([fieldMap, degenerateImportFieldMap]);
+//import field mapping
+var importFields;
 
 //do not store unknwon fields in notes
 //configurable via RIS.import.ignoreUnknown hidden preference
@@ -713,6 +715,45 @@ var RISReader = new function() {
 		//  because we may have an empty line, which could be meaningful
 		if(_lineBuffer.length) return _lineBuffer.pop();
 		return Zotero.read();
+	}
+};
+
+/**
+ * Generic methods for cleaning RIS tags
+ */
+var TagCleaner = {
+	/**
+	 * public
+	 * Changes the RIS tag for an indicated tag-value pair. If more than one tag
+	 *   is specified, additional pairs are added.
+	 *
+	 * @param (RISReader entry) entry
+	 * @param (Integer) at Index in entry of the tag-value pair to alter
+	 * @param (String[]) toTags Array of tags to change to
+	 */
+	changeTag: function(entry, at, toTags) {
+		var source = entry[at], byTag = entry.tags[source.tag];
+		
+		//clean up "tags" list
+		byTag.splice(byTag.indexOf(source),1);
+		if(!byTag.length) delete entry.tags[source.tag];
+		
+		if(!toTags || !toTags.length) {
+			//then we just remove
+			entry.splice(at,1);
+		} else {
+			source.tag = toTags[0]; //re-use the same pair for first tag
+			if(!entry.tags[toTags[0]]) entry.tags[toTags[0]] = [];
+			entry.tags[toTags[0]].push(source);
+			//if we're changing to more than one tag, we need to add extras
+			for(var i=1, n=toTags.length; i<n; i++) {
+				var newSource = ZU.deepCopy(source);
+				newSource.tag = toTags[i];
+				entry.splice(at+i, 0, newSource);
+				if(!entry.tags[toTags[i]]) entry.tags[toTags[i]] = [];
+				entry.tags[toTags[i]].push(newSource);
+			}
+		}
 	}
 };
 
@@ -926,7 +967,9 @@ var ProCiteCleaner = new function() {
 			var titleTags = ['T3', 'T2', 'TI'];
 			for(var i=0; i<entry.length && titleTags.length; i++) {
 				if((['TI', 'T1', 'T2', 'T3']).indexOf(entry[i].tag) !== -1) {
-					entry[i].tag = titleTags.pop();
+					var newTag = titleTags.pop();
+					if(entry[i].tag == newTag) continue; //already correct
+					this._changeTag(entry, i, [newTag]);
 				}
 			}
 		}
@@ -972,36 +1015,10 @@ var ProCiteCleaner = new function() {
 	
 	/**
 	 * public
-	 * Changes the RIS tag for an indicated tag-value pair. If more than one tag
-	 *   is specified, additional pairs are added.
-	 *
-	 * @param (RISReader entry) entry
-	 * @param (Integer) at Index in entry of the tag-value pair to alter
-	 * @param (String[]) toTags Array of tags to change to
+	 * Wrapper for TagCleaner.changeTag
 	 */
 	this._changeTag = function(entry, at, toTags) {
-		var source = entry[at], byTag = entry.tags[source.tag];
-		
-		//clean up "tags" list
-		byTag.splice(byTag.indexOf(source),1);
-		if(!byTag.length) delete entry.tags[source.tag];
-		
-		if(!toTags || !toTags.length) {
-			//then we just remove
-			entry.splice(at,1);
-		} else {
-			source.tag = toTags[0]; //re-use the same pair for first tag
-			if(!entry.tags[toTags[0]]) entry.tags[toTags[0]] = [];
-			entry.tags[toTags[0]].push(source);
-			//if we're changing to more than one tag, we need to add extras
-			for(var i=1, n=toTags.length; i<n; i++) {
-				var newSource = ZU.deepCopy(source);
-				newSource.tag = toTags[i];
-				entry.splice(at+i, 0, newSource);
-				if(!entry.tags[toTags[i]]) entry.tags[toTags[i]] = [];
-				entry.tags[toTags[i]].push(newSource);
-			}
-		}
+		TagCleaner.changeTag(entry, at, toTags);
 		
 		//if we're changing tags, then we're sure this is ProCite format
 		//it's not the most intuitive place for this,
@@ -1048,6 +1065,25 @@ var ProCiteCleaner = new function() {
 		if(tag) return added ? added : true;
 	};
 }
+/**
+ * @singleton Fixes some EndNote bugs, makes it more conveninent to import
+ */
+var EndNoteCleaner = new function() {
+	/**
+	 * public
+	 * 
+	 * @param (RISReader entry) entry Entry to be cleaned up in-place
+	 * @param (Zotero.Item) item Indicates item type for proper mapping
+	 */
+	this.cleanTags = function(entry, item) {
+		// for edited books, treat authors as editors
+		if(entry.tags.TY && entry.tags.TY[0].value == 'EDBOOK' && entry.tags.AU) {
+			for(var i = entry.tags.AU.length-1; i>=0; i--) {
+				TagCleaner.changeTag(entry, entry.indexOf(entry.tags.AU[i]), ['A3']);
+			}
+		}
+	}
+};
 
 function processTag(item, tagValue, risEntry) {
 	var tag = tagValue.tag;
@@ -1509,6 +1545,11 @@ function getNewItem(type) {
 }
 
 function doImport() {
+	//set up import field mapper
+	var maps = [fieldMap, degenerateImportFieldMap];
+	if(exportedOptions.fieldMap) maps.unshift(exportedOptions.fieldMap);
+	importFields = new TagMapper(maps);
+	
 	//prepare some configurable options
 	if(Zotero.getHiddenPref) {
 		if(Zotero.getHiddenPref("RIS.import.ignoreUnknown")) {
@@ -1522,8 +1563,17 @@ function doImport() {
 	var entry;
 	while(entry = RISReader.nextEntry()) {
 		//determine item type
-		var itemType = exportedOptions.itemType
-			|| (entry.tags.TY && importTypeMap[entry.tags.TY[0].value.trim().toUpperCase()]);
+		var itemType = exportedOptions.itemType;
+		if(!itemType && entry.tags.TY) {
+			var risType = entry.tags.TY[0].value.trim().toUpperCase();
+			if(exportedOptions.typeMap) {
+				itemType = exportedOptions.typeMap[risType];
+			}
+			if(!itemType) {
+				itemType = importTypeMap[risType];
+			}
+		}
+		
 		//we allow entries without TY and just use default type
 		if(!itemType) {
 			if(entry.tags.TY) {
@@ -1538,6 +1588,7 @@ function doImport() {
 		
 		var item = getNewItem(itemType);
 		ProCiteCleaner.cleanTags(entry, item); //clean up ProCite "tags"
+		EndNoteCleaner.cleanTags(entry, item); //some tweaks to EndNote export
 		
 		for(var i=0, n=entry.length; i<n; i++) {
 			if((['TY', 'ER']).indexOf(entry[i].tag) == -1) { //ignore TY and ER tags
@@ -1571,7 +1622,7 @@ var exportOrder = {
 var newLineChar = "\r\n"; //from spec
 
 //set up export field mapping
-var exportFields = new TagMapper([fieldMap]);
+var exportFields;
 
 function addTag(tag, value) {
 	if(!(value instanceof Array)) value = [value];
@@ -1588,6 +1639,11 @@ function addTag(tag, value) {
 
 function doExport() {
 	var item, order, tag, fields, field, value;
+	
+	//set up field mapper
+	var map = [fieldMap];
+	if(exportedOptions.fieldMap) map.unshift(exportedOptions.fieldMap);
+	exportFields = new TagMapper(map);
 
 	while(item = Zotero.nextItem()) {
 		// can't store independent notes in RIS
@@ -2742,7 +2798,7 @@ var testCases = [
 					},
 					{
 						"lastName": "Editor",
-						"creatorType": "author",
+						"creatorType": "editor",
 						"fieldMode": 1
 					}
 				],
@@ -2804,7 +2860,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>DOI: Type of Work<br/>Reviewed Item: Reviewed Item<br/>Research Notes: Research Notes<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C1  - Year Cited<br/>C2  - Date Cited<br/>C3  - PMCID<br/>C4  - Reviewer<br/>C5  - Issue Title<br/>C6  - NIHMSID<br/>C7  - Article Number<br/>CY  - Place Published<br/>ET  - Edition<br/>NV  - Document Number<br/>PB  - Publisher<br/>RP  - Reprint Edition<br/>SE  - E-Pub Date<br/>T3  - Website Title<br/>",
+						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>DOI: Type of Work<br/>Reviewed Item: Reviewed Item<br/>Research Notes: Research Notes<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C1  - Year Cited<br/>C2  - Date Cited<br/>C3  - PMCID<br/>C4  - Reviewer<br/>C5  - Issue Title<br/>C6  - NIHMSID<br/>C7  - Article Number<br/>CY  - Place Published<br/>ET  - Edition<br/>NV  - Document Number<br/>PB  - Publisher<br/>RP  - Reprint Edition<br/>SE  - E-Pub Date<br/>",
 						"tags": [
 							"_RIS import"
 						]
@@ -2829,6 +2885,7 @@ var testCases = [
 				"pages": "Pages",
 				"shortTitle": "Short Title",
 				"publicationTitle": "Periodical Title",
+				"series": "Website Title",
 				"title": "Title",
 				"url": "URL",
 				"volume": "Volume"
@@ -3193,7 +3250,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>DOI: Type of Work<br/>Original Publication: Original Publication<br/>Reviewed Item: Reviewed Item<br/>Research Notes: Research Notes<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>A3  - Author, Tertiary<br/>C1  - Custom 1<br/>C2  - Custom 2<br/>C3  - Custom 3<br/>C4  - Custom 4<br/>C5  - Custom 5<br/>C6  - Custom 6<br/>C7  - Custom 7<br/>C8  - Custom 8<br/>CY  - Place Published<br/>ET  - Edition<br/>NV  - Number of Volumes<br/>PB  - Publisher<br/>RP  - Reprint Edition<br/>SE  - Section<br/>T3  - Tertiary Title<br/>",
+						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>DOI: Type of Work<br/>Original Publication: Original Publication<br/>Reviewed Item: Reviewed Item<br/>Research Notes: Research Notes<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>A3  - Author, Tertiary<br/>C1  - Custom 1<br/>C2  - Custom 2<br/>C3  - Custom 3<br/>C4  - Custom 4<br/>C5  - Custom 5<br/>C6  - Custom 6<br/>C7  - Custom 7<br/>C8  - Custom 8<br/>CY  - Place Published<br/>ET  - Edition<br/>NV  - Number of Volumes<br/>PB  - Publisher<br/>RP  - Reprint Edition<br/>SE  - Section<br/>",
 						"tags": [
 							"_RIS import"
 						]
@@ -3219,6 +3276,7 @@ var testCases = [
 				"pages": "Pages",
 				"shortTitle": "Short Title",
 				"publicationTitle": "Secondary Title",
+				"series": "Tertiary Title",
 				"title": "Title",
 				"url": "URL",
 				"volume": "Volume",
@@ -4233,7 +4291,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>DOI: Type of Work<br/>Research Notes: Research Notes<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>CY  - Place Published<br/>PB  - Institution<br/>T3  - Department<br/>",
+						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>DOI: Type of Work<br/>Research Notes: Research Notes<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>CY  - Place Published<br/>PB  - Institution<br/>",
 						"tags": [
 							"_RIS import"
 						]
@@ -4256,6 +4314,7 @@ var testCases = [
 				"pages": "Pages",
 				"shortTitle": "Short Title",
 				"publicationTitle": "Series Title",
+				"series": "Department",
 				"title": "Title of Work",
 				"url": "URL",
 				"accessDate": "0000 Access"
