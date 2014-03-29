@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-03-23 11:31:39"
+	"lastUpdated": "2014-03-30 00:15:24"
 }
 
 var searchRe = new RegExp('^https?://(?:www\.)?amazon\.([^/]+)/(gp/search/|(gp/)?registry/(wishlist|registry)|exec/obidos/search-handle-url/|s/|s\\?|[^/]+/lm/|gp/richpub/)');
@@ -24,16 +24,14 @@ function detectWeb(doc, url) {
 			var elmt = doc.evaluate('//input[@name="storeID"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 			if(elmt) {
 				var storeID = elmt.value;
-				if (storeID=="books"){
-					return "book";
-				}
-				else if (storeID=="music"){
+				//Z.debug(storeID);
+				if (storeID=="music"|storeID=="dmusic"){
 					return "audioRecording";
-				}
-				else if (storeID=="dvd"|storeID=="video"|storeID=="movies-tv"){
+				} else if (storeID=="dvd"|storeID=="dvd-de"|storeID=="video"|storeID=="movies-tv"){
 					return "videoRecording";
-				}
-				else {
+				} else if (storeID=="videogames"|storeID=="mobile-apps") {
+					return "computerProgram";
+				} else {
 					return "book";
 				}
 			}
@@ -114,18 +112,6 @@ function getItem(doc) {
 	}
 }
 
-var DEPARTMENT_TO_TYPE = {
-	"Books":"book",
-	"Kindle Store":"book",
-	"Music":"audioRecording",
-	"Amazon MP3 Store":"audioRecording",
-	"Movies & TV":"videoRecording",
-	"DVD & Blu-ray":"videoRecording",
-	"Amazon Instant Video":"videoRecording",
-	"Appstore for Android":"computerProgram",
-	"Video Games":"computerProgram"
-};
-
 var CREATOR = {
 	"Actors":"castMember",
 	"Directors":"director",
@@ -137,13 +123,41 @@ var DATE = [
 	"DVD Release Date"
 ];
 
+//localization
+var i15dFields = {
+	'ISBN' : ['ISBN-10', 'ISBN-13', 'ISBN', '条形码'],
+	'Publisher': ['Publisher', 'Verlag', 'Editora', '出版社', 'Editeur',  'Éditeur', 'Editore', 'Editor'],
+	'Hardcover': ['Hardcover', 'Gebundene Ausgabe', '精装', 'ハードカバー', 'Relié', 'Copertina rigida', 'Tapa dura'],
+	'Paperback' : ['Paperback', 'Taschenbuch', '平装', 'ペーパーバック', 'Broché', 'Copertina flessibile', 'Tapa blanda'],
+	'Print Length' : ['Print Length', 'Seitenzahl der Print-Ausgabe', '紙の本の長さ', "Nombre de pages de l'édition imprimée", "Longueur d'impression", 'Lunghezza stampa', 'Longitud de impresión', 'Número de páginas'],//TODO: Chinese label
+	'Language' : ['Language', 'Sprache', '语种', '言語', 'Langue', 'Lingua', 'Idioma'],
+	'Actors' : ['Actors', 'Darsteller', 'Acteurs', 'Attori', 'Actores', '出演'],
+	'Directors' : ['Directors', 'Regisseur(e)', 'Réalisateurs', 'Regista', 'Directores', '監督'],
+	'Producers' : ['Producers'],
+	'Run Time' : ['Run Time', 'Spieldauer', 'Durée', 'Durata', 'Duración', '時間'],
+	'Studio' : ['Studio', 'Estudio', '販売元'],
+	'Audio CD' : ['Audio CD', 'CD', 'CD de audio'],
+	'Label' : ['Label', 'Etichetta', 'Étiquette', 'Sello', '发行公司', 'レーベル'],
+	'Total Length' : ['Total Length', 'Gesamtlänge', 'Durée totale', 'Lunghezza totale', 'Duración total', '収録時間']
+};
+
+function getField(info, field) {
+	//returns the value for the key 'field' or any of its
+	//corresponding (language specific) keys of the array 'info'
+	
+	if(!i15dFields[field]) return;
+	
+	for(var i=0; i<i15dFields[field].length; i++) {
+		if(info[i15dFields[field][i]] !== undefined) return info[i15dFields[field][i]];	
+	}
+}
+
 function scrape(doc) {
 	// Scrape HTML for items without ISBNs, because Amazon doesn't provide an easy way for
 	// open source projects like us to use their API
-	// TODO localize
 	Z.debug("ISBN lookup failed. Scraping from Page")		
 	var department = ZU.xpathText(doc, '//li[contains(@class, "nav-category-button")]/a').trim(),
-		item = new Zotero.Item(DEPARTMENT_TO_TYPE[department] || "book"),
+		item = new Zotero.Item(detectWeb(doc) || "book"),
 		authors = ZU.xpath(doc, '//span[@class="byLinePipe"]/../span/a | //span[@class="byLinePipe"]/../a \
 			| //span[contains(@class, "author")]/span/a[1] | //span[contains(@class, "author")]/a[1]');
 	for(var i=0; i<authors.length; i++) {
@@ -155,7 +169,8 @@ function scrape(doc) {
 	var titleNode = ZU.xpath(doc, '//span[@id="btAsinTitle"]')[0] ||
 	// New design encountered 06/30/2013					
 		ZU.xpath(doc, '//h1[@id="title"]/span')[0]||
-		ZU.xpath(doc, '//h1[@id="title"]')[0]
+		ZU.xpath(doc, '//h1[@id="title"]')[0]||
+		ZU.xpath(doc, '//div[@id="title_row"]')[0]
 
 	item.title = ZU.trimInternal(titleNode.textContent).replace(/(?: [(\[].+[)\]])+$/, "");
 
@@ -167,7 +182,7 @@ function scrape(doc) {
 			var el = els[i],
 				key = ZU.xpathText(el, 'b[1]').trim()
 			if(key) {
-				info[key.replace(/:$/, "")] = el.textContent.substr(key.length+1).trim();
+				info[key.replace(/\s*:$/, "")] = el.textContent.substr(key.length+1).trim();
 			}
 		}
 	} else {
@@ -180,7 +195,7 @@ function scrape(doc) {
 			if(key && value) info[key.trim()] = value.trim();
 		}
 	}
-	
+
 	// Date
 	for(var i=0; i<DATE.length; i++) {
 		item.date = info[DATE[i]];
@@ -194,42 +209,43 @@ function scrape(doc) {
 	}
 	
 	// Books
-	var publisher = info["Publisher"];
+	var publisher = getField(info, 'Publisher');
 	if(publisher) {
 		var m = /([^;(]+)(?:; *([^(]*))?( \([^)]*\))?/.exec(publisher);
 		item.publisher = m[1];
 		item.edition = m[2];
 	}
-	var pages = info["Print Length"];
-	item.ISBN = info["ISBN-10"] || info["ISBN-13"];
+	item.ISBN = getField(info, 'ISBN');
+	var pages = getField(info, 'Hardcover') || getField(info, 'Paperback') || getField(info, 'Print Length');
 	if(pages) item.numPages = parseInt(pages, 10);
+	item.language = getField(info, 'Language');
 	
 	// Video
 	var clearedCreators = false;
 	for(var i in CREATOR) {
-		if(info[i]) {
+		if(getField(info, i)) {
 			if(!clearedCreators) {
 				item.creators = [];
 				clearedCreators = true;
 			}
-			var creators = info[i].split(/ *, */);
+			var creators = getField(info, i).split(/ *, */);
 			for(var j=0; j<creators.length; j++) {
 				item.creators.push(ZU.cleanAuthor(creators[j], CREATOR[i]));
 			}
 		}
 	}
-	item.studio = info["Studio"];
-	item.runningTime = info["Run Time"];
-	item.language = info["Language"];
+	item.studio = getField(info, 'Studio');
+	item.runningTime = getField(info, 'Run Time');
+	item.language = getField(info, 'Language');
 	
 	// Music
-	item.label = info["Label"];
-	if(info["Audio CD"]) {
+	item.label = getField(info, 'Label');
+	if(getField(info, 'Audio CD')) {
 		item.audioRecordingType = "Audio CD";
 	} else if(department == "Amazon MP3 Store") {
 		item.audioRecordingType = "MP3";
 	}
-	item.recordingTime = info["Total Length"];
+	item.runningTime = getField(info, 'Total Length');
 	
 	addLink(doc, item);
 	
@@ -614,6 +630,42 @@ var testCases = [
 				"studio": "Walt Disney Studios Home Entertainment",
 				"runningTime": "96 minutes",
 				"language": "English",
+				"libraryCatalog": "Amazon.com"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.amazon.de/dp/B00GKBYC3E/",
+		"items": [
+			{
+				"itemType": "audioRecording",
+				"creators": [
+					{
+						"firstName": "Willemijn",
+						"lastName": "Verkaik"
+					},
+					{
+						"firstName": "Demi",
+						"lastName": "Lovato"
+					},
+					{
+						"firstName": "Idina",
+						"lastName": "Menzel"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Amazon.com Link",
+						"snapshot": false,
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Die Eiskönigin Völlig Unverfroren",
+				"runningTime": "1:08:59",
 				"libraryCatalog": "Amazon.com"
 			}
 		]
