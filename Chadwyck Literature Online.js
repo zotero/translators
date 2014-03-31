@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-01-18 18:08:06"
+	"lastUpdated": "2014-03-31 15:22:07"
 }
 
 /*
@@ -127,6 +127,7 @@ function fetchRIS(risurl, downloadurl, retry){
 			if (item.title == item.title.toUpperCase()){
 				item.title = ZU.capitalizeTitle(item.title.toLowerCase(), true);
 			}
+			item.series = ""; //T3 contains meaningless info like "Literature online
 			item.complete();
 		});	
 		translator.translate();

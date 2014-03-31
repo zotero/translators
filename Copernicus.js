@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-03-30 19:01:00"
+	"lastUpdated": "2014-03-31 13:44:16"
 }
 
 function detectWeb(doc, url) {
@@ -30,7 +30,7 @@ function scrape (doc, url){
 		translator.setHandler("itemDone", function(obj, item) {
 			item.repository = "Copernicus Online Journals";
 			if (!item.abstractNote && abstract){
-				item.abstractNote = abstract.replace(/\n\n/, "\r").replace(/\n\s*/g, " ").replace(/^Abstract\.\s*/, ""); //preserve paragraphs but not line breaks all over
+				item.abstractNote = abstract.replace(/\n(?!\n)\s*/g, " ").replace(/^Abstract\.\s*/, ""); //preserve paragraphs but not line breaks all over
 			}
 			if(item.attachments[0]) {
 				item.attachments[0].title = item.publicationTitle + " PDF";
@@ -201,7 +201,7 @@ var testCases = [
 				"url": "http://www.adv-radio-sci.net/6/1/2008/",
 				"DOI": "10.5194/ars-6-1-2008",
 				"publicationTitle": "Adv. Radio Sci.",
-				"abstractNote": "Microwave techniques for the measurement of the permittivity of soils including the water content of soils and other materials, especially TDR (time domain reflectometry), have become accepted as routine measurement techniques. This summary deals with an advanced use of the TDR principle for the determination of the water content of soil along a probe. The basis of the advanced TDR technique is a waveguide, which is inserted into the soil for obtaining measurements of the effective soil permittivity, from which the water content is estimated, and an obstacle, which can mechanically be moved along the probe and which acts as a reference reflection for the TDR system with an exactly known position. Based on the known mechanical position of the reference reflection, the measured electrical position can be used as a measure for the effective dielectric constant of the environment. Thus, it is possible to determine the effective dielectric constant with a spatial resolution given by the step size of the obstacle displacement.\r A conventional industrial TDR-system, operating in the baseband, is used for the signal generation and for the evaluation of the pulse delay time of the obstacle reflection. Thus, a cost effective method for the acquisition of the dielectric measurement data is available.",
+				"abstractNote": "Microwave techniques for the measurement of the permittivity of soils including the water content of soils and other materials, especially TDR (time domain reflectometry), have become accepted as routine measurement techniques. This summary deals with an advanced use of the TDR principle for the determination of the water content of soil along a probe. The basis of the advanced TDR technique is a waveguide, which is inserted into the soil for obtaining measurements of the effective soil permittivity, from which the water content is estimated, and an obstacle, which can mechanically be moved along the probe and which acts as a reference reflection for the TDR system with an exactly known position. Based on the known mechanical position of the reference reflection, the measured electrical position can be used as a measure for the effective dielectric constant of the environment. Thus, it is possible to determine the effective dielectric constant with a spatial resolution given by the step size of the obstacle displacement.\n\n A conventional industrial TDR-system, operating in the baseband, is used for the signal generation and for the evaluation of the pulse delay time of the obstacle reflection. Thus, a cost effective method for the acquisition of the dielectric measurement data is available.",
 				"libraryCatalog": "Copernicus Online Journals",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
