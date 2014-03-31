@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-10-30 04:22:04"
+	"lastUpdated": "2014-03-31 19:52:15"
 }
 
 /*
@@ -54,7 +54,7 @@ var bookmarkRE = /<DT>[\s\r\n]*<A[^>]+HREF[\s\r\n]*=[\s\r\n]*(['"])([^"]+)\1[^>]
 var collectionRE = /<DT>[\s\r\n]*<H3[^>]*>([^<]+?)<\/H3>/gi;
 var collectionEndRE = /<\/DL>/gi;
 var descriptionRE = /<DD>([\s\S]*?)(?=<(?:DT|\/DL|HR)>)/gi;
-var bookmarkDetailsRE = /[\s\r\n](HREF|TAGS|ADD_DATE|SHORTCUTURL)[s\r\n]*=[s\r\n]*(['"])(.+?)\2/gi;
+var bookmarkDetailsRE = /[\s\r\n](HREF|TAGS|ADD_DATE|SHORTCUTURL|DESCRIPTION)[s\r\n]*=[s\r\n]*(['"])(.+?)\2/gi;
 
 function detectImport() {
 	var text = "";
@@ -136,6 +136,10 @@ function doImport() {
 						switch(detailMatch[1].toUpperCase()) {
 							case 'HREF':
 								openItem.url = detailMatch[3];
+							break;
+							case 'DESCRIPTION':
+								// sample file with that field: https://gist.github.com/anarcat/9893881
+								openItem.abstractNote = detailMatch[3];
 							break;
 							case 'TAGS':
 							case 'SHORTCUTURL':
