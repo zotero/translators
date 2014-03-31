@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-03-30 00:15:24"
+	"lastUpdated": "2014-03-31 14:03:24"
 }
 
 var searchRe = new RegExp('^https?://(?:www\.)?amazon\.([^/]+)/(gp/search/|(gp/)?registry/(wishlist|registry)|exec/obidos/search-handle-url/|s/|s\\?|[^/]+/lm/|gp/richpub/)');
@@ -195,7 +195,6 @@ function scrape(doc) {
 			if(key && value) info[key.trim()] = value.trim();
 		}
 	}
-
 	// Date
 	for(var i=0; i<DATE.length; i++) {
 		item.date = info[DATE[i]];
@@ -236,8 +235,8 @@ function scrape(doc) {
 	}
 	item.studio = getField(info, 'Studio');
 	item.runningTime = getField(info, 'Run Time');
+	if (!item.runningTime) item.runningTime = getField(info, 'Total Length');
 	item.language = getField(info, 'Language');
-	
 	// Music
 	item.label = getField(info, 'Label');
 	if(getField(info, 'Audio CD')) {
@@ -245,7 +244,6 @@ function scrape(doc) {
 	} else if(department == "Amazon MP3 Store") {
 		item.audioRecordingType = "MP3";
 	}
-	item.runningTime = getField(info, 'Total Length');
 	
 	addLink(doc, item);
 	

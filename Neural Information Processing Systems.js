@@ -29,7 +29,7 @@ function scrape(doc, url) {
 			// Zotero.debug( text );
 			translator.setString( text );
 			translator.setHandler( "itemDone", function( obj, item ) {
-				item.attachments = [{url: pdfurl, title:"NIPS Full Text PDF", mimeType:"application/pdf"}, 
+				item.attachments = [{url: pdfurl, title:"NIPS Full Text PDF", mimeType:"application/pdf"},
 									{document: doc, title: "NIPS Snapshort", mimeTYpe: "text/html"}];
 				item.complete();
 			});
@@ -132,12 +132,12 @@ var testCases = [
 				],
 				"itemID": "NIPS2009_3689",
 				"title": "Information-theoretic lower bounds on the oracle complexity of convex optimization",
-				"publicationTitle": "Advances in Neural Information Processing Systems 22",
 				"pages": "1–9",
 				"date": "2009",
+				"publisher": "Curran Associates, Inc.",
 				"url": "http://papers.nips.cc/paper/3689-information-theoretic-lower-bounds-on-the-oracle-complexity-of-convex-optimization.pdf",
 				"libraryCatalog": "Neural Information Processing Systems",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"bookTitle": "Advances in Neural Information Processing Systems 22"
 			}
 		]
 	},

@@ -205,10 +205,9 @@ var testCases = [
 				"url": "http://tvnz.co.nz/national-news/patea-devastated-storm-video-4752377",
 				"network": "TVNZ",
 				"language": "en",
-				"date": "March 02, 2012",
+				"date": "March 03, 2012",
 				"title": "Patea devastated by storm",
-				"libraryCatalog": "TVNZ",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "TVNZ"
 			}
 		]
 	}

@@ -1160,12 +1160,9 @@ var testCases = [
 					}
 				],
 				"title": "Rescue at the Hearst Tower",
-				"publicationTitle": "The New Yorker",
 				"url": "http://www.newyorker.com/online/blogs/backissues/2013/06/window-washers-at-the-hearst-tower.html",
 				"abstractNote": "Rescuers successfully retrieved two maintenance workers at the Hearst Tower, in Midtown, who had become trapped on their scaffold.",
-				"date": "10/10/2008",
-				"libraryCatalog": "www.newyorker.com",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"websiteTitle": "The New Yorker"
 			}
 		]
 	},

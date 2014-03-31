@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-02-20 19:17:52"
+	"lastUpdated": "2014-03-31 14:05:47"
 }
 
 var canLiiRegexp = /https?:\/\/(www\.)?canlii\.org\/.*en\/[^\/]+\/[^\/]+\/doc\/.+/;
@@ -141,7 +141,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://canlii.org/eliisa/highlight.do?language=en&searchTitle=SOR%2F97-457&origin=%2Fen%2Fca%2Flaws%2Fregu%2Fsor-97-457%2Flatest%2Fsor-97-457.html&translatedOrigin=%2Ffr%2Fca%2Flegis%2Fregl%2Fdors-97-457%2Fderniere%2Fdors-97-457.html&path=/en/ca/fct/doc/2011/2011fc119/2011fc119.html",
+		"url": "http://www.canlii.org/en/ca/fct/doc/2011/2011fc119/2011fc119.html?searchUrlHash=AAAAAQAjU3V0dGllIHYuIENhbmFkYSAoQXR0b3JuZXkgR2VuZXJhbCkAAAAAAQ",
 		"items": [
 			{
 				"itemType": "case",

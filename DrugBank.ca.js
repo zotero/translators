@@ -112,11 +112,10 @@ var testCases = [
 				],
 				"url": "http://www.drugbank.ca/drugs/DB00381",
 				"abstractNote": "Amlodipine is a long-acting 1,4-dihydropyridine calcium channel blocker. It acts primarily on vascular smooth muscle cells by stabilizing voltage-gated L-type calcium channels in their inactive conformation. By inhibiting the influx of calcium in smooth muscle cells, amlodipine prevents calcium-dependent myocyte contraction and vasoconstriction. A second proposed mechanism for the drug’s vasodilatory effects involves pH-dependent inhibition of calcium influx via inhibition of smooth muscle carbonic anhydrase. Some studies have shown that amlodipine also exerts inhibitory effects on voltage-gated N-type calcium channels. N-type calcium channels located in the central nervous system may be involved in nociceptive signaling and pain sensation. Amlodipine is used to treat hypertension and chronic stable angina.",
-				"date": "October 08, 2013",
+				"date": "March 15, 2014",
 				"encyclopediaTitle": "DrugBank",
 				"title": "Amlodipine",
-				"libraryCatalog": "DrugBank.ca",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "DrugBank.ca"
 			}
 		]
 	},

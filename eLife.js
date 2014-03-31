@@ -358,6 +358,7 @@ var testCases = [
 					"walking behavior"
 				],
 				"seeAlso": [
+					"10.7554/eLife.00231",
 					"10.7554/eLife.00231"
 				],
 				"attachments": [
