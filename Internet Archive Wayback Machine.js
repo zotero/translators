@@ -9,16 +9,12 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-01-30 22:48:18"
+	"lastUpdated": "2014-04-03 15:32:02"
 }
 
 function detectWeb(doc, url){
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-			if (prefix == "x") return namespace; else return null;
-		} : null;
 	var xpath = '//td[@class="mainBody"]/a';
-	var links = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var links = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 	if (links.iterateNext()){
 		return "multiple";
 	}
@@ -27,45 +23,43 @@ function detectWeb(doc, url){
 
 function doWeb(doc, url){
 	var uris = new Array();
-	var dateRe = new RegExp("^http://web.archive.org/web/([0-9]+)");
+	var dateRe = new RegExp("^https?://web.archive.org/web/([0-9]+)");
 	if (dateRe.test(url)){ //handle single item
-		uris.push(url);
+		scrape(doc, url)
 	} else{//handle multiple items
-		var namespace = doc.documentElement.namespaceURI;
-		var nsResolver = namespace ? function(prefix) {
-				if (prefix == "x") return namespace; else return null;
-			} : null;
 		var xpath = '//td[@class="mainBody"]/a';
-		var links = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var links = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 		var items=new Array();
 		var link;
 		while (link = links.iterateNext()){
 			items[link.href] = link.textContent;
 		}
-		items=Zotero.selectItems(items);
-		for (var i in items) {
-			uris.push(i);
-		}
+		Zotero.selectItems(items, function (items) {
+					if (!items) {
+						return true;
+					}
+					for (var i in items) {
+						uris.push(i);
+					}
+					ZU.processDocuments(uris, scrape);
+				});
 	}
-	Zotero.Utilities.processDocuments(uris, function(newDoc) {
+}
+
+function scrape(doc, url){
+		var dateRe = new RegExp("^https?://web.archive.org/web/([0-9]+)");
 		//create new webpage Item from page
 		var newItem = new Zotero.Item("webpage");
-		newItem.title = newDoc.title;
+		newItem.title = doc.title;
 		//parse date and add
-		var m = dateRe.exec(newDoc.location.href);
+		var m = dateRe.exec(doc.location.href);
 		var date = m[1];
 		date = date.substr(0, 4) + "-" + date.substr(4,2) + "-" + date.substr(6,2);
 		newItem.date = date;
 		//create snapshot
-		newItem.attachments = [{url:newDoc.location.href, title:newDoc.title, mimeType:"text/html"}];
+		newItem.attachments = [{url:doc.location.href, title:doc.title, mimeType:"text/html"}];
 		newItem.complete();
-	}, function() {Zotero.done();});
-	Zotero.wait();
-
-
-}
-
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
