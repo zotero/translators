@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-04-17 03:10:37"
+	"lastUpdated": "2014-04-03 15:57:35"
 }
 
 /*
@@ -76,9 +76,11 @@ function doWeb(doc,url)
 		ZU.processDocuments(urls, doWeb);
 		});
 	} else {
-		var abstract = ZU.xpathText(doc, '//div[@class="tContent"]/*[self::h3 or (self::p and not(self::p[@class="note"]))]', null, '\n')
+		var abstract = ZU.xpathText(doc, '//div[@class="abstract"]/*[self::h3 or (self::p and not(self::p[@class="note"]))]', null, '\n');
+		if (!abstract) abstract = ZU.xpathText(doc, '//div[@class="tContent"]/*[self::h3 or (self::p and not(self::p[@class="note"]))]', null, '\n');
 		//Z.debug(abstract)
-		var keywords = ZU.xpath(doc, '//div[@class="tContent"]/p/span[contains(@class, "keyword")]')
+		var keywords = ZU.xpath(doc, '//div[@class="keywords"]/a');
+		if (keywords.length==0) keywords = ZU.xpath(doc, '//div[@class="tContent"]/p/span[contains(@class, "keyword")]');
 		// We call the Embedded Metadata translator to do the actual work
 		var translator = Zotero.loadTranslator('web');
 		//use Embedded Metadata
@@ -89,9 +91,17 @@ function doWeb(doc,url)
 			if(item.publicationTitle && (m = item.publicationTitle.match(/^(.+), (the)$/i) )){
 				item.publicationTitle = m[2] + ' ' + m[1];
 			}
-			for (var i in keywords){
-				var kw = keywords[i].textContent.trim();
-				if(kw) item.tags.push(kw);		
+			//correct UK dates
+			if (item.date && item.date.search(/\d{2}\/\d{2}\/\d{4}/)!=-1){
+				var dateregex = item.date.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+				item.date = dateregex[3] + "-" + dateregex[2] + "-" + dateregex[1];
+			}
+			
+			if (item.tags.length==0){
+				for (var i in keywords){
+					var kw = keywords[i].textContent.trim();
+					if(kw) item.tags.push(kw);		
+				}
 			}
 			item.abstractNote = abstract;
 			item.complete();
@@ -163,17 +173,18 @@ var testCases = [
 					}
 				],
 				"title": "Risk of Falls and Major Bleeds in Patients on Oral Anticoagulation Therapy",
-				"date": "August 2012",
+				"date": "2012-08-01",
 				"publicationTitle": "The American Journal of Medicine",
 				"volume": "125",
 				"issue": "8",
 				"publisher": "Elsevier",
 				"DOI": "10.1016/j.amjmed.2012.01.033",
+				"language": "English",
 				"pages": "773-778",
 				"ISSN": "0002-9343",
-				"url": "http://www.amjmed.com/article/S0002-9343(12)00352-X/abstract",
-				"accessDate": "CURRENT_TIMESTAMP",
+				"url": "http://www.amjmed.com/article/S000293431200352X/abstract",
 				"libraryCatalog": "www.amjmed.com",
+				"accessDate": "CURRENT_TIMESTAMP",
 				"abstractNote": "Background\nThe risk of falls is the most commonly cited reason for not providing oral anticoagulation, although the risk of bleeding associated with falls on oral anticoagulants is still debated. We aimed to evaluate whether patients on oral anticoagulation with high falls risk have an increased risk of major bleeding.\nMethods\nWe prospectively studied consecutive adult medical patients who were discharged on oral anticoagulants. The outcome was the time to a first major bleed within a 12-month follow-up period adjusted for age, sex, alcohol abuse, number of drugs, concomitant treatment with antiplatelet agents, and history of stroke or transient ischemic attack.\nResults\nAmong the 515 enrolled patients, 35 patients had a first major bleed during follow-up (incidence rate: 7.5 per 100 patient-years). Overall, 308 patients (59.8%) were at high risk of falls, and these patients had a nonsignificantly higher crude incidence rate of major bleeding than patients at low risk of falls (8.0 vs 6.8 per 100 patient-years, P=.64). In multivariate analysis, a high falls risk was not statistically significantly associated with the risk of a major bleed (hazard ratio 1.09; 95% confidence interval, 0.54-2.21). Overall, only 3 major bleeds occurred directly after a fall (incidence rate: 0.6 per 100 patient-years).\nConclusions\nIn this prospective cohort, patients on oral anticoagulants at high risk of falls did not have a significantly increased risk of major bleeds. These findings suggest that being at risk of falls is not a valid reason to avoid oral anticoagulants in medical patients."
 			}
 		]
