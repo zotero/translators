@@ -2,14 +2,14 @@
 	"translatorID": "6b0b11a6-9b77-4b49-b768-6b715792aa37",
 	"label": "Toronto Star",
 	"creator": "Adam Crymble, Avram Lyon",
-	"target": "^http://www\\.thestar\\.com",
+	"target": "^https?://www\\.thestar\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-03-22 22:43:32"
+	"lastUpdated": "2014-04-04 10:01:02"
 }
 
 function detectWeb(doc, url) {

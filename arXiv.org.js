@@ -9,11 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-11-18 13:33:05"
+	"lastUpdated": "2014-04-04 10:06:53"
 }
 
 function detectWeb(doc, url) {
-	var searchRe = new RegExp('^http://(?:([^\.]+\.))?(?:(arxiv\.org|xxx\.lanl\.gov)/(?:find|list)|eprintweb.org/S/(?:archive|search$))');
+	var searchRe = new RegExp('^https?://(?:([^\.]+\.))?(?:(arxiv\.org|xxx\.lanl\.gov)/(?:find|list)|eprintweb.org/S/(?:archive|search$))');
 	
 	if(searchRe.test(url)) {
 		return "multiple";
@@ -29,10 +29,10 @@ function getPDF(articleID) {
 
 function doWeb(doc, url) {
 	// eprintweb appears to be defunct as of mid-2011. leaving relevant code here for now
-	var eprintMultRe = new RegExp('^http://(?:www\.)?eprintweb.org/S/(?:search|archive)');
+	var eprintMultRe = new RegExp('^https?://(?:www\.)?eprintweb.org/S/(?:search|archive)');
 	var eprintMultM = eprintMultRe.exec(url);
 	
-	var eprintSingRe = new RegExp('^http://(?:www\.)?eprintweb.org/S/(?:article|search/[0-9]+/A[0-9]+)');
+	var eprintSingRe = new RegExp('^https?://(?:www\.)?eprintweb.org/S/(?:article|search/[0-9]+/A[0-9]+)');
 	var eprintSingM = eprintSingRe.exec(url);
 
 	if (eprintMultM) {
@@ -252,8 +252,8 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Astrophysics - Astrophysics of Galaxies",
-					"Astrophysics - Cosmology and Nongalactic Astrophysics"
+					"Astrophysics - Cosmology and Extragalactic Astrophysics",
+					"Astrophysics - Galaxy Astrophysics"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -277,7 +277,8 @@ var testCases = [
 				"issue": "2",
 				"pages": "1795-1803",
 				"ISSN": "00358711",
-				"libraryCatalog": "arXiv.org"
+				"libraryCatalog": "arXiv.org",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},

@@ -2,14 +2,14 @@
 	"translatorID": "0d6f8450-72e8-4d8f-bdc2-b7fa03e6f2c5",
 	"label": "The Nation",
 	"creator": "odie5533",
-	"target": "^http://www\\.thenation\\.com",
+	"target": "^https?://www\\.thenation\\.com",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-06-19 10:50:37"
+	"lastUpdated": "2014-04-04 09:56:16"
 }
 
 /*
@@ -40,7 +40,7 @@ XPATH_DATE = "//span[@class='article-date']";
 RE_DATE = /(.*)/;
 XPATH_AUTHORS = "//span[@property='dc:creator']";
 RE_AUTHORS = /(.*)/;
-RE_ARTICLE_URL = '^http://www\\.thenation\\.com/(?:article|blog|video)/(?!.*com\
+RE_ARTICLE_URL = '^https?://www\\.thenation\\.com/(?:article|blog|video)/(?!.*com\
 ment$)';
 RE_PRETTY_URL = /com\//;
 RE_PRETTY_URL_REPLACE = "com/print/";

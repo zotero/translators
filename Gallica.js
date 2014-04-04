@@ -2,14 +2,14 @@
 	"translatorID": "58ab2618-4a25-4b9b-83a7-80cd0259f896",
 	"label": "Gallica",
 	"creator": "Sylvain Machefert",
-	"target": "^http://gallica\\.bnf\\.fr",
+	"target": "^https?://gallica\\.bnf\\.fr",
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-03-31 00:10:45"
+	"lastUpdated": "2014-04-04 10:09:18"
 }
 
 function detectWeb(doc, url) {
@@ -203,7 +203,7 @@ function scrapeGallica(doc, div, type, direct_url)
 			{
 				item.ISSN = temp;	
 			}
-			else if (contenu.match(/^http:\/\//))
+			else if (contenu.match(/^https?:\/\//))
 			{
 				// If identifier starts with http it is the url of the document
 				item.url = contenu;

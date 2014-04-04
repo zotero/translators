@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-03 17:43:49"
+	"lastUpdated": "2014-04-04 10:09:57"
 }
 
 /*
@@ -36,7 +36,7 @@ http://www.monde-diplomatique.de/pm/.search?tx=Globalisierung
 */
 
 function detectWeb(doc, url) {
-	if (url.match(/^http:\/\/www\.monde-diplomatique\.de\/pm\/\d\d\d\d\/\d\d/) ){ 
+	if (url.match(/^https?:\/\/www\.monde-diplomatique\.de\/pm\/\d\d\d\d\/\d\d/) ){ 
 		Zotero.debug("newspaperArticle");
 		return "newspaperArticle";
 	}  else if (url.match(/search/) ) {

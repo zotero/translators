@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-04-03 18:52:23"
+	"lastUpdated": "2014-04-04 10:11:27"
 }
 
 function detectWeb(doc, url) {
@@ -110,7 +110,7 @@ function doWeb(doc, url) {
 	if(detectWeb(doc, url) == "patent") {
 		scrape(doc);
 	} else {
-		var items = Zotero.Utilities.getItemArray(doc, doc, "^http://(patft|appft1)\.uspto\.gov/netacgi/nph-Parser.+");
+		var items = Zotero.Utilities.getItemArray(doc, doc, "^https?://(patft|appft1)\.uspto\.gov/netacgi/nph-Parser.+");
 		var uris = new Array();
 		Zotero.selectItems(items, function (items) {
 			if (!items) {

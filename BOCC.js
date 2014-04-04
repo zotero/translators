@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-04-03 16:46:48"
+	"lastUpdated": "2014-04-04 10:08:43"
 }
 
 /* Translator for Biblioteca Online de Ciências da Comunicação (BOCC,
@@ -65,7 +65,7 @@ function doWeb(doc, url) {
 	var urls = new Array();
 	var bloco;
 	var lines = new Array();
-	var resite = /^http:\/\/[^\/]*bocc[^\/]*\/(?:_listas|_esp)/;
+	var resite = /^https?:\/\/[^\/]*bocc[^\/]*\/(?:_listas|_esp)/;
 	var site = resite.exec(url);
 	site = site[0];
 	site = site.replace("/_esp", "");
