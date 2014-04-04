@@ -2,14 +2,14 @@
 	"translatorID": "9405db4b-be7f-42ab-86ca-430226be9b35",
 	"label": "Potsdamer Neueste Nachrichten",
 	"creator": "Martin Meyerhoff",
-	"target": "^http://www\\.pnn\\.de",
+	"target": "^https?://www\\.pnn\\.de",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-01-30 22:44:08"
+	"lastUpdated": "2014-04-03 18:54:09"
 }
 
 /*
@@ -39,15 +39,7 @@ http://www.pnn.de/zeitung/12.01.2011/
 http://www.pnn.de/titelseite/364860/
 */
 
-function detectWeb(doc, url) {
-
-	// I use XPaths. Therefore, I need the following block.
-	
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
+function detectWeb(doc, url) {	
 	var PNN_Article_XPath = ".//div[contains (@class, 'um-article')]/h1"; //only articles have a print button.
 	var PNN_Multiple_XPath = "//div[contains(@class, 'um-teaser')]/h2/a"
 	
@@ -61,11 +53,6 @@ function detectWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
 	var newItem = new Zotero.Item("newspaperArticle");
 	newItem.url = doc.location.href; 
 	
@@ -117,10 +104,6 @@ function scrape(doc, url) {
 
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
 	var articles = new Array();
 	
 	if (detectWeb(doc, url) == "multiple") {
@@ -132,15 +115,18 @@ function doWeb(doc, url) {
 		while (next_title = titles.iterateNext()) {
 			items[next_title.href] = next_title.textContent.replace(/\s+/g, ' ');
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
-		Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
+		});
 	} else {
 		scrape(doc, url);
 	}
-	Zotero.wait();
 }	
 /** BEGIN TEST CASES **/
 var testCases = [

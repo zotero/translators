@@ -2,14 +2,14 @@
 	"translatorID": "1f245496-4c1b-406a-8641-d286b3888231",
 	"label": "The Boston Globe",
 	"creator": "Adam Crymble, Frank Bennett, Sebastian Karcher",
-	"target": "^http://(www|search|articles)\\.boston\\.com/",
+	"target": "^https?://(www|search|articles)\\.boston\\.com/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-10-22 16:27:03"
+	"lastUpdated": "2014-04-03 19:59:08"
 }
 
 /*

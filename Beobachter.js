@@ -2,14 +2,14 @@
 	"translatorID": "a571680e-6338-46c2-a740-3cd9eb80fc7f",
 	"label": "Beobachter",
 	"creator": "ibex",
-	"target": "^http://((www\\.)?beobachter\\.ch/.)",
+	"target": "^https?://((www\\.)?beobachter\\.ch/.)",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-09-16 00:37:06"
+	"lastUpdated": "2014-04-03 16:37:44"
 }
 
 /*
@@ -71,8 +71,7 @@ function doWeb(doc, url) {
 	} else {
 		urls.push(doc.location.href);
 	}
-	ZU.processDocuments(urls, scrape, function() { Z.done(); } );
-	Z.wait();
+	ZU.processDocuments(urls, scrape);
 }
 
 /* Zotero API */

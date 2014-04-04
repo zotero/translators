@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-07-01 13:02:02"
+	"lastUpdated": "2014-04-03 17:50:01"
 }
 
 function detectWeb(doc, url) {
@@ -202,7 +202,7 @@ function scrape(doc, url) {
 function doWeb(doc, url) {
 	var searchResults = doc.evaluate('//div[@id="search_results"] |//div[@id="searchResults"]| //div[@id="srchContent"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (searchResults) {
-		var items = Zotero.Utilities.getItemArray(doc, searchResults, '^http://(?:select\.|www\.)nytimes.com/.*\.html(\\?|$)');
+		var items = Zotero.Utilities.getItemArray(doc, searchResults, '^https?://(?:select\.|www\.)nytimes.com/.*\.html(\\?|$)');
 
 		Zotero.selectItems(items, function (items) {
 			if (!items) return true;

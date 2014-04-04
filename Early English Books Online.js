@@ -2,14 +2,14 @@
 	"translatorID": "b86bb082-6310-4772-a93c-913eaa3dfa1b",
 	"label": "Early English Books Online",
 	"creator": "Michael Berkowitz",
-	"target": "^http://[^/]*eebo.chadwyck.com[^/]*(/works)?/search",
+	"target": "^https?://[^/]*eebo\\.chadwyck\\.com[^/]*(/works)?/search",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-12-12 12:41:36"
+	"lastUpdated": "2014-04-03 16:50:31"
 }
 
 function detectWeb(doc, url) {

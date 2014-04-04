@@ -2,14 +2,14 @@
 	"translatorID": "4f0d0c90-5da0-11df-a08a-0800200c9a66",
 	"label": "FAZ.NET",
 	"creator": "ibex, Sebastian Karcher",
-	"target": "^http://((www\\.)?faz\\.net/.)",
+	"target": "^https?://((www\\.)?faz\\.net/.)",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-03-01 10:10:41"
+	"lastUpdated": "2014-04-03 17:37:06"
 }
 
 /*

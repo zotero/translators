@@ -2,14 +2,14 @@
 	"translatorID": "488fe1e0-b7d2-406f-8257-5060418ce9b2",
 	"label": "fr-online.de",
 	"creator": "Martin Meyerhoff",
-	"target": "^http://www\\.fr-online\\.de",
+	"target": "^https?://www\\.fr-online\\.de",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-25 14:09:56"
+	"lastUpdated": "2014-04-03 17:37:43"
 }
 
 /*
@@ -158,10 +158,7 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(articles, scrape, function () {
-				Zotero.done();
-			});
-			Zotero.wait();
+			Zotero.Utilities.processDocuments(articles, scrape);
 		});
 	} else {
 		scrape(doc, url);

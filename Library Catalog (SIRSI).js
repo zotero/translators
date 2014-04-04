@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-01-02 19:24:40"
+	"lastUpdated": "2014-04-03 17:45:33"
 }
 
 /*Spanish Libraries:
@@ -316,7 +316,7 @@ function doWeb(doc, url){
 		var elmts = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 		var elmt = elmts.iterateNext();
 		if(elmt) {	// Search results page
-			var uriRegexp = /^http:\/\/[^\/]+/;
+			var uriRegexp = /^https?:\/\/[^\/]+/;
 			var m = uriRegexp.exec(uri);
 			var postAction = doc.forms.namedItem("hitlist").getAttribute("action");
 			var newUri = m[0]+postAction.substr(0, postAction.length-1)+"40";

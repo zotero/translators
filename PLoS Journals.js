@@ -2,14 +2,14 @@
 	"translatorID": "9575e804-219e-4cd6-813d-9b690cbfc0fc",
 	"label": "PLoS Journals",
 	"creator": "Michael Berkowitz And Rintze Zelle",
-	"target": "^http://www\\.plos(one|ntds|compbiol|pathogens|genetics|medicine|biology)\\.org/(search|article)/",
+	"target": "^https?://www\\.plos(one|ntds|compbiol|pathogens|genetics|medicine|biology)\\.org/(search|article)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-05-27 22:56:46"
+	"lastUpdated": "2014-04-03 18:52:52"
 }
 
 function detectWeb(doc, url) {

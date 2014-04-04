@@ -2,14 +2,14 @@
 	"translatorID": "eef50507-c756-4081-86fd-700ae4ebf22e",
 	"label": "Spiegel Online",
 	"creator": "Martin Meyerhoff",
-	"target": "^http://www\\.spiegel\\.de/",
+	"target": "^https?://www\\.spiegel\\.de/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-06-08 14:46:32"
+	"lastUpdated": "2014-04-03 18:58:24"
 }
 
 /*
@@ -214,7 +214,7 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(articles, function(doc) { scrape(doc, doc.location.href)});
+			Zotero.Utilities.processDocuments(articles, scrape);
 		});
 	} else {
 		scrape(doc, url);

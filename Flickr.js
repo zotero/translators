@@ -2,14 +2,14 @@
 	"translatorID": "5dd22e9a-5124-4942-9b9e-6ee779f1023e",
 	"label": "Flickr",
 	"creator": "Sean Takats, Rintze Zelle, and Aurimas Vinckevicius",
-	"target": "^http://(?:www\\.)?flickr\\.com/",
+	"target": "^https?://(?:www\\.)?flickr\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-01-04 17:23:31"
+	"lastUpdated": "2014-04-03 16:34:41"
 }
 
 function detectWeb(doc, url) {
@@ -18,7 +18,7 @@ function detectWeb(doc, url) {
 	} else if (ZU.xpathText(doc,'//meta[@name="og:type"]/@content') && ZU.xpathText(doc,'//meta[@name="og:type"]/@content').match(/photo$/)) {
 		return "artwork";
 	}
-	else if (ZU.xpath(doc,'//span[contains(@class, "photo_container")]').length) {
+	else if (ZU.xpath(doc,'//span[contains(@class, "photo_container")]|//div/span[@class="title"]').length) {
 		return "multiple";
 	}
 }
@@ -35,7 +35,7 @@ function doWeb(doc, url) {
 		items[photo_id[0]] = "title";
 		fetchForIds(items);
 	} else { //multiple results
-		var photoRe = /\/photos\/[^\/]*\/([0-9]+)\//;
+		var photoRe = /\/photos\/[^\/]*\/([0-9]+)/;
 		//tested for:
 		//search: http://www.flickr.com/search/?q=test
 		//galleries: http://www.flickr.com/photos/lomokev/galleries/72157623433999749/
@@ -49,7 +49,10 @@ function doWeb(doc, url) {
 		//videos have a second <a/> element ("a[1]")
 		var elmts = ZU.xpath(doc, '//div[not(contains(@style, "display: none"))]\
 							/*/span[contains(@class, "photo_container")]/a[1]');
-
+		if (elmts.length==0){
+			elmts = ZU.xpath(doc, '//div[not(contains(@style, "display: none"))]\
+							/*/span[@class="title"]/a[1]');
+		}
 		for(var i=0, n=elmts.length; i<n; i++) {
 			var title = elmts[i].title;
 			//in photostreams, the <a/> element doesn't have a title attribute

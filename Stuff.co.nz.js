@@ -2,14 +2,14 @@
 	"translatorID": "631ff0c7-2e64-4279-a9c9-ad9518d40f2b",
 	"label": "Stuff.co.nz",
 	"creator": "Sopheak Hean (University of Waikato, Faculty of Education)",
-	"target": "^http://(www\\.)?stuff\\.co\\.nz/",
+	"target": "^https?://(www\\.)?stuff\\.co\\.nz/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-03 17:42:37"
+	"lastUpdated": "2014-04-03 19:56:54"
 }
 
 /*
@@ -370,13 +370,9 @@ function doTitle(doc, url){
 }
 
 function doDate(doc, url){
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
+
 	var dateXpath = "//div[@id='toolbox']/div[3]";
-	var dateXpathObject = doc.evaluate(dateXpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var dateXpathObject = doc.evaluate(dateXpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	try {
 		if (dateXpathObject){
 			var storeDateValue = dateXpathObject.textContent.replace(/\b(Last updated )\d{0,9}:\d{0,9} /g,'');

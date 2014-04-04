@@ -2,14 +2,14 @@
 	"translatorID": "87766765-919e-4d3b-9071-3dd7efe984c8",
 	"label": "Revues.org",
 	"creator": "Aurimas Vinckevicius, Pierre-Alain Mignot, and Michael Berkowitz",
-	"target": "^http://.*\\.revues\\.org",
+	"target": "^https?://.*\\.revues\\.org",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-03-03 21:57:50"
+	"lastUpdated": "2014-04-03 18:55:44"
 }
 
 function detectWeb(doc, url) {
@@ -257,12 +257,12 @@ var testCases = [
 				"publicationTitle": "e-Spania. Revue interdisciplinaire d’études hispaniques médiévales et modernes",
 				"rights": "© e-Spania",
 				"issue": "5",
-				"date": "2008/02/01",
+				"date": "2012/12/16",
 				"DOI": "10.4000/e-spania.12303",
-				"ISSN": "1951-6169",
 				"url": "http://e-spania.revues.org/12303?lang=fr",
 				"abstractNote": "Le testament d’Elvire livre de précieuses informations sur la réalité historique de l’infantat : son implantation, la composition de ses biens, ses évolutions, les formes de son acquisition et de sa transmission, sa fonction politique. Mais il nous renseigne aussi sur une infante de niveau moyen, sur son cadre de vie, son entourage, ses activités, les réseaux de son pouvoir et même sur sa foi.",
 				"language": "fr",
+				"ISSN": "1951-6169",
 				"libraryCatalog": "e-spania.revues.org"
 			}
 		]
@@ -314,12 +314,12 @@ var testCases = [
 				"publicationTitle": "e-Spania. Revue interdisciplinaire d’études hispaniques médiévales et modernes",
 				"rights": "© e-Spania",
 				"issue": "5",
-				"date": "2008/02/01",
+				"date": "2012/12/16",
 				"DOI": "10.4000/e-spania.12303",
-				"ISSN": "1951-6169",
 				"url": "http://e-spania.revues.org/12303?lang=es",
 				"abstractNote": "El testamento de Elvira brinda una preciosísima información sobre la realidad del infantazgo : su extensión, la composición de sus bienes, sus evoluciones, las formas de su adquisición y transmisión, su papel político. También nos informa sobre una infanta de nivel mediano, sobre el marco de su vida, su entorno personal, sus actividades, la red de sus influencias e incluso sobre su fe.",
 				"language": "fr",
+				"ISSN": "1951-6169",
 				"libraryCatalog": "e-spania.revues.org"
 			}
 		]
@@ -355,7 +355,7 @@ var testCases = [
 				"volume": "11",
 				"issue": "1",
 				"pages": "5-25",
-				"date": "2009/01/15",
+				"date": "2007/06/01",
 				"DOI": "10.4000/chs.142",
 				"ISSN": "1422-0857",
 				"url": "http://chs.revues.org/142",
@@ -402,7 +402,7 @@ var testCases = [
 				"rights": "© The Graduate Institute|Geneva - http://creativecommons.org/licenses/by-nc/3.0/",
 				"issue": "1",
 				"pages": "11-36",
-				"date": "2009/12/14",
+				"date": "2010/03/11",
 				"DOI": "10.4000/poldev.135",
 				"ISSN": "1663-9375",
 				"url": "http://poldev.revues.org/135",

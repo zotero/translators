@@ -2,14 +2,14 @@
 	"translatorID": "7cb0089b-9551-44b2-abca-eb03cbf586d9",
 	"label": "BioOne",
 	"creator": "Michael Berkowitz",
-	"target": "^http://[^/]*www\\.bioone\\.org[^/]*/",
+	"target": "^https?://[^/]*www\\.bioone\\.org[^/]*/s",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-12-11 16:13:35"
+	"lastUpdated": "2014-04-03 16:38:14"
 }
 
 /*
