@@ -16,7 +16,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcv",
-	"lastUpdated": "2014-03-12 04:43:57"
+	"lastUpdated": "2014-04-07 22:51:57"
 }
 
 function detectImport() {
@@ -765,16 +765,17 @@ function doExport() {
 				var attachment = item.attachments[i];
 				var path;
 				if ( exportFileData && attachment.saveFile) {
-					attachment.saveFile(attachment.defaultPath, true);
-					path = 'defaultPath';
+					path = attachment.defaultPath.replace(/^files\//, '');
+					attachment.saveFile('PDF/' + path, true);
+					path = 'internal-pdf://' + path;
 				} else if (attachment.localPath) {
-					path = 'localPath';
+					path = attachment.localPath;
 				}
 				
 				if (attachment.mimeType == "application/pdf") {
-					mapProperty(pdfurls, "url", attachment[path]);
+					mapProperty(pdfurls, "url", path);
 				} else {
-					mapProperty(texturls, "url", attachment[path]);
+					mapProperty(texturls, "url", path);
 				}
 			}
 			
