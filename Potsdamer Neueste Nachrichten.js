@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-03 18:54:09"
+	"lastUpdated": "2014-04-06 16:15:15"
 }
 
 /*
@@ -58,27 +58,27 @@ function scrape(doc, url) {
 	
 	// Title
 	var title_XPath = "//div[contains (@class, 'um-article')]/h1"
-	var title = doc.evaluate(title_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	var title = doc.evaluate(title_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	title = title.replace(/\s+|\n/g, ' ');
 	newItem.title = title;
 	
 	// Summary
 	var summary_XPath = "//div[contains (@class, 'um-article')]/p[@class='um-first']";
 	if (doc.evaluate(summary_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()  ){ 
-		var summary = doc.evaluate(summary_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var summary = doc.evaluate(summary_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		newItem.abstractNote = summary;
 	}
 	
 	// Date 
 	var date_XPath = "//div[contains (@class, 'um-article')]/div[@class='um-metabar']/ul/li[contains(@class, 'um-first')]";
-	var date = doc.evaluate(date_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	var date = doc.evaluate(date_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	newItem.date = date.replace(/(\d+)\.(\d+).(\d+)/, '$3-$2-$1');;
 	
 
 	// Authors 
 	var author_XPath = "//div[contains (@class, 'um-article')]/span[@class='um-author']"; 
 	if (doc.evaluate(author_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()  ){ 
-		var author = doc.evaluate(author_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var author = doc.evaluate(author_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		author =author.replace(/^von\s|^\s*|\s*$/g, '');
 		author =author.split(/\sund\s|\su\.\s|\,\s/); 
 	 	for (var i in author) {
@@ -94,7 +94,7 @@ function scrape(doc, url) {
 	// section
 	var section_XPath = "//div[@class='um-mainnav']/ul/li[@class='um-selected']/a";
 	if (doc.evaluate(section_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()  ){ 
-		var section = doc.evaluate(section_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var section = doc.evaluate(section_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		newItem.section = section.replace(/^\s*|\s*$/g, '');
 	}
 	
@@ -109,7 +109,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		
-		var titles = doc.evaluate("//div[contains(@class, 'um-teaser')]/h2/a", doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate("//div[contains(@class, 'um-teaser')]/h2/a", doc, null, XPathResult.ANY_TYPE, null);
 		
 		var next_title;
 		while (next_title = titles.iterateNext()) {
