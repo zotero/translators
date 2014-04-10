@@ -174,7 +174,7 @@ function processCrossRef(xmlOutput) {
 		var componentType = itemXML[0].hasAttribute("component_type") ? itemXML[0].getAttribute("component_type") : null;
 		
 		var isReference = ["reference", "other"].indexOf(bookType) !== -1
-				&& ["chapter", "reference_entry"].indexOf(componentType);
+				&& ["chapter", "reference_entry"].indexOf(componentType) !==-1;
 		
 		if(bookType === "edited_book" || isReference) {
 			item = new Zotero.Item("bookSection");
