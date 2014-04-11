@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-03-24 11:47:01"
+	"lastUpdated": "2014-04-10 11:47:01"
 }
 
 function detectImport() {
@@ -42,7 +42,8 @@ function detectImport() {
  ********************/
  //exported as translatorObject.options
  var exportedOptions = {
-	itemType: false, //allows translators to supply item type
+	itemType: false, //allows translators to override item type
+	defaultItemType: false, //item type to default to
 	typeMap: false,
 	fieldMap: false
 };
@@ -1576,14 +1577,15 @@ function doImport() {
 		
 		//we allow entries without TY and just use default type
 		if(!itemType) {
+			var defaultType = exportedOptions.defaultItemType || DEFAULT_IMPORT_TYPE;
 			if(entry.tags.TY) {
 				Z.debug("RIS: Unknown item type: " + entry.tags.TY[0].value
-					+ ". Defaulting to " + DEFAULT_IMPORT_TYPE);
+					+ ". Defaulting to " + defaultType);
 			} else {
-				Z.debug("RIS: TY tag not specified. Defaulting to " + DEFAULT_IMPORT_TYPE);
+				Z.debug("RIS: TY tag not specified. Defaulting to " + defaultType);
 			}
 			
-			itemType = DEFAULT_IMPORT_TYPE;
+			itemType = defaultType;
 		}
 		
 		var item = getNewItem(itemType);
