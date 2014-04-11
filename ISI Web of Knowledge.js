@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 5,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-03-17 11:26:32"
+	"lastUpdated": "2014-04-10 11:26:32"
 }
 
 function detectWeb(doc, url) {
@@ -254,7 +254,7 @@ function processTag(item, field, content) {
 		item.issue = content;
 	} else if (field == "UT") {
 		item.extra += content;
-	} else if (field == "BP") {
+	} else if (field == "BP" || field == "PS") { // not sure why this varies
 		item.pages = content;
 	} else if (field == "EP") {
 		item.pages += "-" + content;
