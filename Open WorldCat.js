@@ -29,6 +29,38 @@ function getZoteroType(iconSrc) {
 	return false;
 }
 
+/**
+ * Generates a Zotero item from a single item WorldCat page, or the first item on a multiple item
+ * page
+ */
+function generateItem(doc, node) {
+	var item = new Zotero.Item();
+	Zotero.Utilities.parseContextObject(node.nodeValue, item);
+	// if only one, first check for special types (audio & video recording)
+	var type = false;
+	try {
+		type = doc.evaluate('//img[@class="icn"][contains(@src, "icon-")]/@src', doc, null, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
+	} catch (e) {}
+	if (type) {
+		type = getZoteroType(type);
+		if (type) item.itemType = type;
+	}
+	
+	return item;
+}
+
+function detectWeb(doc) {
+	var xpath = doc.evaluate('//span[@class="Z3988"]/@title', doc, null, XPathResult.ANY_TYPE, null);
+	var node = xpath.iterateNext();
+	if (!node) return false;
+	// see if there is more than one
+	if (xpath.iterateNext()) {
+		multiple = true;
+		return "multiple";
+	}
+	// generate item and return type
+	return generateItem(doc, node).itemType;
+}
 
 /**
  * RIS Scraper Function
@@ -104,43 +136,6 @@ function scrape(doc, url, callDoneWhenFinished, itemData) {
 	});
 }
 
-/**
- * Generates a Zotero item from a single item WorldCat page, or the first item on a multiple item
- * page
- */
-function generateItem(doc, node) {
-	var item = new Zotero.Item();
-	Zotero.Utilities.parseContextObject(node.nodeValue, item);
-	// if only one, first check for special types (audio & video recording)
-	var type = false;
-	try {
-		type = doc.evaluate('//img[@class="icn"][contains(@src, "icon-")]/@src', doc, null, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
-	} catch (e) {}
-	if (type) {
-		type = getZoteroType(type);
-		if (type) item.itemType = type;
-	}
-	
-	return item;
-}
-
-function detectWeb(doc) {
-	var xpath = doc.evaluate('//span[@class="Z3988"]/@title', doc, null, XPathResult.ANY_TYPE, null);
-	var node = xpath.iterateNext();
-	if (!node) return false;
-	// see if there is more than one
-	if (xpath.iterateNext()) {
-		multiple = true;
-		return "multiple";
-	}
-	// generate item and return type
-	return generateItem(doc, node).itemType;
-}
-
-function detectSearch(item) {
-	return !!item.ISBN;
-}
-
 function doWeb(doc, url) {
 	var articles = [];
 	if (doc.evaluate('//div[@class="name"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) { //search results view
@@ -193,6 +188,10 @@ function doWeb(doc, url) {
 	} else { // regular single item	view
 		scrape(doc, url);
 	}
+}
+
+function detectSearch(item) {
+	return !!item.ISBN;
 }
 
 function doSearch(item) {
