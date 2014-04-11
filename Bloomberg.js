@@ -136,7 +136,7 @@ var testCases = [
 				],
 				"url": "http://www.bloombergview.com/articles/2012-01-05/four-economists-come-together-to-say-we-agree-business-class",
 				"abstractNote": "“If you laid all the economists in the world end to end, they still wouldn’t reach a conclusion.” This old joke still works because it reflects a common belief",
-				"date": "Jan 4, 2012 7:01 PM ET",
+				"date": "Jan 4, 2012 7:01 PM EST",
 				"title": "Four Economists Come Together to Say ‘We Agree’: Business Class",
 				"websiteTitle": "BloombergView",
 				"shortTitle": "Four Economists Come Together to Say ‘We Agree’"

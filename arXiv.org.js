@@ -252,8 +252,8 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Astrophysics - Cosmology and Extragalactic Astrophysics",
-					"Astrophysics - Galaxy Astrophysics"
+					"Astrophysics - Astrophysics of Galaxies",
+					"Astrophysics - Cosmology and Nongalactic Astrophysics"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -277,8 +277,7 @@ var testCases = [
 				"issue": "2",
 				"pages": "1795-1803",
 				"ISSN": "00358711",
-				"libraryCatalog": "arXiv.org",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "arXiv.org"
 			}
 		]
 	},

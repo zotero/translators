@@ -322,7 +322,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"numPages": "246",
+				"numPages": "260",
 				"ISBN": "9780521868617",
 				"publisher": "Cambridge University Press",
 				"title": "The Cambridge Companion to Electronic Music",

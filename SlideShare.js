@@ -100,11 +100,9 @@ var testCases = [
 				"title": "Zotero and You, or Bibliography on the Semantic Web",
 				"abstractNote": "Representatives from the Center for History and New Media will introduce Zotero, a free and open source extension for Firefox that allows you to collect, organize and archive your research materials. After a brief demo and explanation, we will discuss best practices for making your projects \"Zotero ready\" and other opportunities to integrate with your digital projects through the Zotero API.",
 				"rights": "© All Rights Reserved",
-				"type": "Business & Mgmt",
 				"date": "2008-03-06 16:51:58 UTC",
 				"url": "http://www.slideshare.net/eby/zotero-and-you-or-bibliography-on-the-semantic-web",
-				"libraryCatalog": "SlideShare",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"presentationType": "Business"
 			}
 		]
 	},
