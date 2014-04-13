@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-03-31 14:03:24"
+	"lastUpdated": "2014-04-11 20:51:52"
 }
 
 var searchRe = new RegExp('^https?://(?:www\.)?amazon\.([^/]+)/(gp/search/|(gp/)?registry/(wishlist|registry)|exec/obidos/search-handle-url/|s/|s\\?|[^/]+/lm/|gp/richpub/)');
@@ -64,11 +64,11 @@ function doWeb(doc, url) {
 		Zotero.selectItems(availableItems, function(items) {
 			var links = [];
 			for(var i in items) links.push(i);
-			Zotero.Utilities.processDocuments(links, getItem);
+			Zotero.Utilities.processDocuments(links, scrape);
 		});
 
 	} else {
-		getItem(doc);
+		scrape(doc);
 	}
 }
 
@@ -76,41 +76,6 @@ function addLink(doc, item) {
 	item.attachments.push({title:"Amazon.com Link", snapshot:false, mimeType:"text/html", url:doc.location.href});
 }
 
-function getItem(doc) {
-	// First look for ISBN and use it for search if possible. We do this instead of using
-	// the API because it will give us the place published, and because it's less likely to
-	// be broken by site changes.
-	var isbns = ZU.xpath(doc, '//li[b/text() = "ISBN-13:" or b/text() = "ISBN-10:" or b/text() = "Page Numbers Source ISBN:" or b/text()="ISBN:"]/text() | \
-							   //tr[td[1]/span/text() = "ISBN-13" or td[1]/span/text() = "ISBN-10"]/td[2]/span/text()');
-	if(isbns.length) {
-		Zotero.debug("Retrieving by ISBN search")
-		var isbn = isbns[0].nodeValue.trim(),
-			translate = Zotero.loadTranslator("search");
-					Z.debug(isbn)
-		// Use Open WorldCat for now to get around issues with failing search translators
-		// in current connector release.
-		translate.setTranslator("c73a4a8c-3ef1-4ec8-8229-7531ee384cc4");
-		translate.setSearch({"itemType":"book", "ISBN":isbn});
-		//translate.setHandler("translators", function(obj, translators) {
-		//	translate.setTranslator(translators);
-		//	translate.translate();
-		//});
-		translate.setHandler("itemDone", function(obj, item) {
-			addLink(doc, item);
-			//remove URL and Extra which only make sense for Worldcat
-			item.url = "";
-			item.extra = "";
-			item.complete();
-		});
-		translate.setHandler("error", function() {
-			scrape(doc);
-		});
-		translate.translate();
-		//translate.getTranslators();
-	} else {
-		scrape(doc);
-	}
-}
 
 var CREATOR = {
 	"Actors":"castMember",
@@ -125,7 +90,7 @@ var DATE = [
 
 //localization
 var i15dFields = {
-	'ISBN' : ['ISBN-10', 'ISBN-13', 'ISBN', '条形码'],
+	'ISBN' : ['ISBN-13', 'ISBN-10', 'ISBN', '条形码'],
 	'Publisher': ['Publisher', 'Verlag', 'Editora', '出版社', 'Editeur',  'Éditeur', 'Editore', 'Editor'],
 	'Hardcover': ['Hardcover', 'Gebundene Ausgabe', '精装', 'ハードカバー', 'Relié', 'Copertina rigida', 'Tapa dura'],
 	'Paperback' : ['Paperback', 'Taschenbuch', '平装', 'ペーパーバック', 'Broché', 'Copertina flessibile', 'Tapa blanda'],
@@ -138,7 +103,9 @@ var i15dFields = {
 	'Studio' : ['Studio', 'Estudio', '販売元'],
 	'Audio CD' : ['Audio CD', 'CD', 'CD de audio'],
 	'Label' : ['Label', 'Etichetta', 'Étiquette', 'Sello', '发行公司', 'レーベル'],
-	'Total Length' : ['Total Length', 'Gesamtlänge', 'Durée totale', 'Lunghezza totale', 'Duración total', '収録時間']
+	'Total Length' : ['Total Length', 'Gesamtlänge', 'Durée totale', 'Lunghezza totale', 'Duración total', '収録時間'],
+	'Translator' : ["Translator", "Übersetzer", "Traduttore", "Traductor", "翻訳"],
+	'Illustrator' : ["Illustrator", "Illustratore", "Ilustrador", "イラスト"]
 };
 
 function getField(info, field) {
@@ -152,18 +119,29 @@ function getField(info, field) {
 	}
 }
 
+function get_nextsibling(n) {
+	//returns next sibling of n, or if it was the last one
+	//returns next sibling of its parent node, or... --> while(x == null)
+	//accepts only element nodes (type 1) or nonempty textnode (type 3)
+	//and skips everything else
+	var x=n.nextSibling;
+	while (x == null || (x.nodeType != 1 && (x.nodeType != 3 || x.textContent.match(/^\s*$/) ))) {
+		if (x==null) {
+			x = get_nextsibling(n.parentNode);
+		} else {
+			x=x.nextSibling;
+		}
+	}
+	return x;	
+}
+
 function scrape(doc) {
 	// Scrape HTML for items without ISBNs, because Amazon doesn't provide an easy way for
 	// open source projects like us to use their API
-	Z.debug("ISBN lookup failed. Scraping from Page")		
-	var department = ZU.xpathText(doc, '//li[contains(@class, "nav-category-button")]/a').trim(),
-		item = new Zotero.Item(detectWeb(doc) || "book"),
-		authors = ZU.xpath(doc, '//span[@class="byLinePipe"]/../span/a | //span[@class="byLinePipe"]/../a \
-			| //span[contains(@class, "author")]/span/a[1] | //span[contains(@class, "author")]/a[1]');
-	for(var i=0; i<authors.length; i++) {
-		var author = authors[i].textContent.trim();
-		if(author) item.creators.push(ZU.cleanAuthor(author));
-	}
+	Z.debug("Scraping from Page")		
+	var department = ZU.xpathText(doc, '//li[contains(@class, "nav-category-button")]/a').trim();
+	var item = new Zotero.Item(detectWeb(doc) || "book");
+
 	
 	// Old design
 	var titleNode = ZU.xpath(doc, '//span[@id="btAsinTitle"]')[0] ||
@@ -171,9 +149,53 @@ function scrape(doc) {
 		ZU.xpath(doc, '//h1[@id="title"]/span')[0]||
 		ZU.xpath(doc, '//h1[@id="title"]')[0]||
 		ZU.xpath(doc, '//div[@id="title_row"]')[0]
-
+		
 	item.title = ZU.trimInternal(titleNode.textContent).replace(/(?: [(\[].+[)\]])+$/, "");
+	
+	var nextLine = get_nextsibling(titleNode);
+	if ( ZU.xpath(nextLine, './/a[@href]').length == 0 &&  nextLine.tagName != "A") { //e.g. http://www.amazon.com/dp/1118728963
+		nextLine = get_nextsibling(nextLine);
+	}
 
+	//we dont want div id=contributorContainer...
+	//or some fake link with javascript functions...
+	authors = ZU.xpath(nextLine, './a[@href] | ./span/a[@href] | ./span/span//a[@href]');
+	if (authors.length == 0) authors = [ nextLine ];
+	for(var i=0; i<authors.length; i++) {
+		var author = authors[i].textContent.trim().replace(/\([^\)]*\)/,"");
+		if(author) {
+			var creatorRoleNode = get_nextsibling(authors[i]);
+			if (creatorRoleNode.tagName == "A") {
+				creatorRoleNode = get_nextsibling(creatorRoleNode);
+			}
+			var creatorRoleText = ZU.trimInternal(creatorRoleNode.textContent).replace("(","").replace(")","");
+			if (i15dFields["Translator"].indexOf(creatorRoleText) > -1) {
+				item.creators.push(ZU.cleanAuthor(author, 'translator'));
+			} else if (i15dFields["Illustrator"].indexOf(creatorRoleText) > -1) {
+				item.creators.push(ZU.cleanAuthor(author, 'contributor'));
+			} else {
+				item.creators.push(ZU.cleanAuthor(author, 'author'));
+			}
+			if (item.creators[item.creators.length -1].firstName == "") {
+				item.creators[item.creators.length -1].fieldMode = 1;
+				delete item.creators[item.creators.length -1].firstName;
+			}
+		}
+	}
+	
+	//Abstract
+	var abstractNode = doc.getElementById('postBodyPS');
+	if (abstractNode) {
+		item.abstractNote = abstractNode.textContent.trim();
+		if (!item.abstractNote) {
+			var iframe = abstractNode.getElementsByTagName('iframe')[0];
+			if(iframe) {
+				abstractNode = iframe.contentWindow.document.getElementById('iframeContent');
+				item.abstractNote = abstractNode.textContent.trim();
+			}
+		}
+	}
+	
 	// Extract info into an array
 	var info = {},
 		els = ZU.xpath(doc, '//div[@class="content"]/ul/li[b]');
@@ -215,9 +237,13 @@ function scrape(doc) {
 		item.edition = m[2];
 	}
 	item.ISBN = getField(info, 'ISBN');
+	if (item.ISBN) {
+		item.ISBN = ZU.cleanISBN(item.ISBN);
+	}
 	var pages = getField(info, 'Hardcover') || getField(info, 'Paperback') || getField(info, 'Print Length');
 	if(pages) item.numPages = parseInt(pages, 10);
 	item.language = getField(info, 'Language');
+	//add publication place from ISBN translator, see at the end
 	
 	// Video
 	var clearedCreators = false;
@@ -247,7 +273,31 @@ function scrape(doc) {
 	
 	addLink(doc, item);
 	
-	item.complete();
+	//we search for translators for a given ISBN
+	//and try to figure out the missing publication place
+	if(item.ISBN && !item.place) {
+		var search = Zotero.loadTranslator("search");
+		search.setHandler("translators", function(obj, translators) {
+			search.setTranslator(translators);
+			search.setHandler("itemDone", function(obj, lookupItem) {
+				Z.debug(lookupItem.libraryCatalog);
+				if (lookupItem.place) {
+					//e.g. [Paris]
+					item.place = lookupItem.place.replace("[","").replace("]","");
+				}
+			});
+			search.translate();
+		});
+		search.setHandler("done", function(obj) {
+			item.complete();
+		});
+		search.setSearch({ ISBN: item.ISBN });
+		search.getTranslators();
+		
+	} else {
+		item.complete();
+	}
+	
 }
 
 /** BEGIN TEST CASES **/
@@ -260,8 +310,8 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"lastName": "Sleator",
 						"firstName": "William",
+						"lastName": "Sleator",
 						"creatorType": "author"
 					}
 				],
@@ -275,14 +325,16 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"libraryCatalog": "Open WorldCat",
-				"language": "English",
 				"title": "Test",
-				"publisher": "Amulet Books",
+				"abstractNote": "Now in paperback! Pass, and have it made. Fail, and suffer the consequences. A master of teen thrillers tests readers’ courage in an edge-of-your-seat novel that echoes the fears of exam-takers everywhere. Ann, a teenage girl living in the security-obsessed, elitist United States of the very near future, is threatened on her way home from school by a mysterious man on a black motorcycle. Soon she and a new friend are caught up in a vast conspiracy of greed involving the mega-wealthy owner of a school testing company. Students who pass his test have it made; those who don’t, disappear . . . or worse. Will Ann be next? For all those who suspect standardized tests are an evil conspiracy, here’s a thriller that really satisfies! Praise for Test “Fast-paced with short chapters that end in cliff-hangers . . . good read for moderately reluctant readers. Teens will be able to draw comparisons to contemporary society’s shift toward standardized testing and ecological concerns, and are sure to appreciate the spoofs on NCLB.” —School Library Journal “Part mystery, part action thriller, part romance . . . environmental and political overtones . . . fast pace and unique blend of genres holds attraction for younger teen readers.” —Booklist",
+				"date": "April 1, 2010",
+				"publisher": "Amulet Paperbacks",
+				"edition": "Reprint edition",
+				"ISBN": "9780810989894",
+				"numPages": 320,
+				"language": "English",
 				"place": "New York",
-				"date": "2010",
-				"ISBN": "9780810989894  0810989891",
-				"abstractNote": "In the security-obsessed, elitist United States of the near future, where a standardized test determines each person's entire life, a powerful man runs a corrupt empire until seventeen-year-old Ann and other students take the lead in boycotting the test."
+				"libraryCatalog": "Amazon.com"
 			}
 		]
 	},
@@ -300,7 +352,8 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "My Bloody",
-						"lastName": "Valentine"
+						"lastName": "Valentine",
+						"creatorType": "author"
 					}
 				],
 				"notes": [],
@@ -416,41 +469,8 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
+						"firstName": "François-Marie",
 						"lastName": "Voltaire",
-						"creatorType": "author",
-						"fieldMode": 1
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Amazon.com Link",
-						"snapshot": false,
-						"mimeType": "text/html"
-					}
-				],
-				"libraryCatalog": "Open WorldCat",
-				"language": "French",
-				"title": "Candide ou l'Optimisme",
-				"publisher": "Larousse",
-				"place": "[Paris]",
-				"date": "2007",
-				"ISBN": "9782035866011 2035866014"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.amazon.de/Fiktionen-Erz%C3%A4hlungen-Jorge-Luis-Borges/dp/3596105811/ref=sr_1_1?ie=UTF8&qid=1362329791&sr=8-1",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"lastName": "Borges",
-						"firstName": "Jorge Luis",
 						"creatorType": "author"
 					}
 				],
@@ -464,13 +484,51 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"libraryCatalog": "Open WorldCat",
-				"language": "German",
-				"title": "Fiktionen: Erzählungen 1939 - 1944",
-				"publisher": "Fischer-Taschenbuch-Verl.",
+				"title": "Candide",
+				"abstractNote": "Que signifie ce nom \"Candide\" : innocence de celui qui ne connaît pas le mal ou illusion du naïf qui n'a pas fait l'expérience du monde ? Voltaire joue en 1759, après le tremblement de terre de Lisbonne, sur ce double sens. Il nous fait partager les épreuves fictives d'un jeune homme simple, confronté aux leurres de l'optimisme, mais qui n'entend pas désespérer et qui en vient à une sagesse finale, mesurée et mystérieuse. Candide n'en a pas fini de nous inviter au gai savoir et à la réflexion.",
+				"date": "17 août 2011",
+				"publisher": "Larousse",
+				"ISBN": "9782035866011",
+				"numPages": 176,
+				"language": "Français",
+				"place": "Paris",
+				"libraryCatalog": "Amazon.com"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.amazon.de/Fiktionen-Erz%C3%A4hlungen-Jorge-Luis-Borges/dp/3596105811/ref=sr_1_1?ie=UTF8&qid=1362329791&sr=8-1",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Jorge Luis",
+						"lastName": "Borges",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Amazon.com Link",
+						"snapshot": false,
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Fiktionen: Erzählungen 1939 - 1944",
+				"abstractNote": "Gleich bei seinem Erscheinen in den 40er Jahren löste Jorge Luis Borges’ erster Erzählband »Fiktionen« eine literarische Revolution aus. Erfundene Biographien, fiktive Bücher, irreale Zeitläufe und künstliche Realitäten verflocht Borges zu einem geheimnisvollen Labyrinth, das den Leser mit seinen Rätseln stets auf neue herausfordert. Zugleich begründete er mit seinen berühmten Erzählungen wie»›Die Bibliothek zu Babel«, «Die kreisförmigen Ruinen« oder»›Der Süden« den modernen »Magischen Realismus«.   »Obwohl sie sich im Stil derart unterscheiden, zeigen zwei Autoren uns ein Bild des nächsten Jahrtausends: Joyce und Borges.« Umberto Eco",
+				"date": "1. Mai 1992",
+				"publisher": "FISCHER Taschenbuch",
+				"edition": "Auflage: 12",
+				"ISBN": "9783596105816",
+				"numPages": 192,
+				"language": "Deutsch",
 				"place": "Frankfurt am Main",
-				"date": "1992",
-				"ISBN": "3596105811 9783596105816",
+				"libraryCatalog": "Amazon.com",
 				"shortTitle": "Fiktionen"
 			}
 		]
@@ -483,8 +541,8 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"lastName": "Dickens",
 						"firstName": "Charles",
+						"lastName": "Dickens",
 						"creatorType": "author"
 					}
 				],
@@ -498,13 +556,12 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"libraryCatalog": "Open WorldCat",
+				"title": "A Tale of Two Cities",
+				"date": "1 Dec 2010",
+				"publisher": "Public Domain Books",
+				"numPages": 238,
 				"language": "English",
-				"title": "A tale of two cities",
-				"publisher": "Cassia Press",
-				"place": "[Lexington, KY]",
-				"date": "2010",
-				"ISBN": "9781448625024  1448625025"
+				"libraryCatalog": "Amazon.com"
 			}
 		]
 	},
@@ -516,14 +573,19 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"lastName": "Lindgren",
 						"firstName": "Astrid",
+						"lastName": "Lindgren",
 						"creatorType": "author"
 					},
 					{
+						"firstName": "B.",
 						"lastName": "Berg",
-						"firstName": "Björn",
-						"creatorType": "author"
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "A. Palme",
+						"lastName": "Sanavio",
+						"creatorType": "translator"
 					}
 				],
 				"notes": [],
@@ -536,13 +598,16 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"libraryCatalog": "Open WorldCat",
-				"language": "Italian",
 				"title": "Emil",
-				"publisher": "Salani",
+				"abstractNote": "Si pensa che soprattutto in una casa moderna, con prese elettriche, gas, balconi altissimi un bambino possa mettersi in pericolo: Emil vive in una tranquilla casa di campagna, ma riesce a ficcare la testa in una zuppiera e a rimanervi incastrato, a issare la sorellina Ida in cima all'asta di una bandiera, e a fare una tale baldoria alla fiera del paese che i contadini decideranno di organizzare una colletta per spedirlo in America e liberare così la sua povera famiglia. Ma questo succederà nel prossimo libro di Emil, perché ce ne sarà un altro, anzi due, tante sono le sue monellerie. Età di lettura: da 7 anni.",
+				"date": "26 giugno 2008",
+				"publisher": "Nord-Sud",
+				"edition": "3 edizione",
+				"ISBN": "9788882038670",
+				"numPages": 72,
+				"language": "Italiano",
 				"place": "Milano",
-				"date": "2008",
-				"ISBN": "9788882038670 888203867X"
+				"libraryCatalog": "Amazon.com"
 			}
 		]
 	},
@@ -557,6 +622,21 @@ var testCases = [
 						"lastName": "吕士楠",
 						"creatorType": "author",
 						"fieldMode": 1
+					},
+					{
+						"lastName": "初敏",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "许洁萍",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "贺琳",
+						"creatorType": "author",
+						"fieldMode": 1
 					}
 				],
 				"notes": [],
@@ -569,13 +649,14 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"libraryCatalog": "Open WorldCat",
-				"language": "Chinese",
-				"title": "汉语语音合成: 原理和技术",
+				"title": "汉语语音合成:原理和技术",
+				"abstractNote": "《汉语语音合成:原理和技术》介绍语音合成的原理和针对汉语的各项合成技术，以及应用的范例。全书分基础篇和专题篇两大部分。基础篇介绍语音合成技术的发展历程和作为语音合成技术基础的声学语音学知识，尤其是作者获得的相关研究成果（填补了汉语语音学知识中的某些空白），并对各种合成器的工作原理和基本结构进行系统的阐述。专题篇结合近十年来国内外技术发展的热点和方向，讨论韵律分析与建模、数据驱动的语音合成方法、语音合成数据库的构建技术、文语转换系统的评估方法、语音合成技术的应用等。 《汉语语音合成:原理和技术》面向从事语言声学、语音通信技术，特别是语音合成的科学工作者、工程技术人员、大学教师、研究生和高年级的大学生，可作为他们研究、开发、进修的参考书。",
 				"publisher": "科学出版社",
-				"place": "北京",
-				"date": "2012",
-				"ISBN": "9787030329202 : 7030329201",
+				"edition": "第1版",
+				"ISBN": "9787030329202",
+				"numPages": 373,
+				"place": "Beijing",
+				"libraryCatalog": "Amazon.com",
 				"shortTitle": "汉语语音合成"
 			}
 		]
@@ -640,16 +721,9 @@ var testCases = [
 				"itemType": "audioRecording",
 				"creators": [
 					{
-						"firstName": "Willemijn",
-						"lastName": "Verkaik"
-					},
-					{
-						"firstName": "Demi",
-						"lastName": "Lovato"
-					},
-					{
-						"firstName": "Idina",
-						"lastName": "Menzel"
+						"firstName": "Various",
+						"lastName": "artists",
+						"creatorType": "author"
 					}
 				],
 				"notes": [],
@@ -665,6 +739,40 @@ var testCases = [
 				"title": "Die Eiskönigin Völlig Unverfroren",
 				"runningTime": "1:08:59",
 				"libraryCatalog": "Amazon.com"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.amazon.co.jp/gp/product/0099578077/",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Haruki",
+						"lastName": "Murakami",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Amazon.com Link",
+						"snapshot": false,
+						"mimeType": "text/html"
+					}
+				],
+				"title": "1Q84: Books 1, 2 and 3",
+				"publisher": "Vintage",
+				"ISBN": "9780099578079",
+				"numPages": 1328,
+				"language": "英語, 英語, 不明",
+				"place": "London",
+				"libraryCatalog": "Amazon.com",
+				"shortTitle": "1Q84"
 			}
 		]
 	}
