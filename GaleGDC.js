@@ -54,6 +54,8 @@ var GaleZotero = (function() {
 			result = 'film';
 		} else if (isNewspaperArticle(url)) {
 			result = 'newspaperArticle';
+		} else if (isMagazineArticle(url)) {
+			result = 'magazineArticle';
 		} else if (isMultiple(doc, url)) {
 			result = 'multiple';
 		} else if (isDocument(url)) {
@@ -126,6 +128,10 @@ var GaleZotero = (function() {
 
 	function isNewspaperArticle(url) {
 		return (/NewspapersDetails/).test(url);
+	}
+	
+	function isMagazineArticle(url) {
+		return (/MagazinesDetails/).test(url);
 	}
 
 	function isMap(url) {
