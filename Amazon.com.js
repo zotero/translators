@@ -3,13 +3,13 @@
 	"label": "Amazon.com",
 	"creator": "Sean Takats, Michael Berkowitz, and Simon Kornblith",
 	"target": "^https?://(?:www\\.)?amazon",
-	"minVersion": "2.1",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-04-11 20:51:52"
+	"lastUpdated": "2014-04-15 20:51:52"
 }
 
 var searchRe = new RegExp('^https?://(?:www\.)?amazon\.([^/]+)/(gp/search/|(gp/)?registry/(wishlist|registry)|exec/obidos/search-handle-url/|s/|s\\?|[^/]+/lm/|gp/richpub/)');
@@ -62,6 +62,8 @@ function doWeb(doc, url) {
 		}
 		
 		Zotero.selectItems(availableItems, function(items) {
+			if(!items) return true;
+			
 			var links = [];
 			for(var i in items) links.push(i);
 			Zotero.Utilities.processDocuments(links, scrape);
