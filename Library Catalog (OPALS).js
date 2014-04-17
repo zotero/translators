@@ -2,14 +2,14 @@
     "translatorID": "83501b8c-1033-4722-ae50-a77d67271ef7",
     "label": "Library Catalog (OPALS)",
     "creator": "Opals",
-    "target": "/bin/(search|pf|rs)",
+    "target": "^https?://[^?#&]+/bin/(search|pf|rs)",
     "minVersion": "3.0",
     "maxVersion": "",
     "priority": 200,
     "inRepository": true,
     "translatorType": 4,
     "browserSupport": "gcsib",
-    "lastUpdated": "2014-04-15 15:25:32"
+    "lastUpdated": "2014-04-17 09:20:31"
 }
 
 
@@ -32,8 +32,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 function detectWeb(doc, url) {
-    if (!url.match(/\/bin\/(search|pf|rs)\//))
-        return "";
     var titles = getTitleList(doc);
     var count = titles.length;
     if (count == 1) return "book";
@@ -76,11 +74,10 @@ function scrape(rid, url) {
             // adding record URL
             item.attachments = [{
                 url: baseUrl + "/bin/search/recDetailPage?rid=" + rid,
-                title: "Record link",
-                mineType: "text/html",
+                title: "Library Catalog Entry Permalink",
+                mimeType: "text/html",
                 snapshot: false
             }];
-
             item.complete();
         });
         translator.translate();
@@ -90,7 +87,7 @@ function scrape(rid, url) {
 //==============================================================================
 function getUrlBase(url) {
     var rs;
-    if (rs = url.match(/(http[s]*:\/\/(.*?))\//)) {
+    if (rs = url.match(/(https?:\/\/.*?)\//)) {
         return rs[1];
     }
     return null;
@@ -99,51 +96,66 @@ function getUrlBase(url) {
 //==============================================================================
 function getTitleList(doc) {
     var items = [];
-    var inputs = doc.evaluate('//input[@name="bib_rid"]', doc, null, XPathResult.ANY_TYPE, null);
-    var chkBoox;
-    while (chkBox = inputs.iterateNext()) {
-        var title = chkBox.getAttribute("bib_title").trim();
-        var rid = chkBox.value.trim();
-        if (rid && rid.match(/^[1-9][0-9]*$/) && title) {
-            items.push({
-                rid: rid,
-                title: title
-            });
+    var els = doc.getElementsByName("bib_rid");
+    for (var i = 0; i < els.length; i++) {
+        if (els[i].tagName == 'INPUT' && els[i].getAttribute('type') == 'checkbox') {
+            var title = els[i].getAttribute("bib_title").trim();
+            var rid = els[i].value.trim();
+            if (rid && rid.search(/^[1-9][0-9]*$/) != -1 && title) {
+                items.push({
+                    rid: rid,
+                    title: title
+                });
+            }
         }
     }
+
     return items;
 }
 
 /** BEGIN TEST CASES **/
 var testCases = [{
     "type": "web",
-    "url": "http://cogent.opalsinfo.net/bin/search/recDetailPage?rid=68738",
+    "url": "http://cogent.opalsinfo.net/bin/search/recDetailPage?rid=32857",
     "items": [{
         "itemType": "book",
         "creators": [{
-            "firstName": "Jay",
-            "lastName": "Wertz",
+            "firstName": "Edgar Allan",
+            "lastName": "Poe",
             "creatorType": "author"
+        }, {
+            "firstName": "Philip",
+            "lastName": "Pullman",
+            "creatorType": "contributor"
         }],
         "notes": [{
-            "note": "Item cannot be cataloged"
+            "note": "Includes bibliographical references and indexes"
         }, {
-            "note": "Chronicles the history of Native Americans from the Ice Age to the early twenty-first century, and includes more than thirty slip-cased facsimile documents"
+            "note": "Dreams -- The lake -- Sonnet-- to science -- [Alone] -- Introduction -- To Helen -- Israfel -- The Valley of unrest -- The city in the sea -- To one in paradise -- The coliseum -- The Haunted palace -- The conqueror worm -- Dream-land -- Eulalie -- The Raven -- [\"Deep in earth\"] -- To M.L.S. -- Ulalume, a ballad -- The bells -- To Helen [Whitman] -- A dream within a dream -- For Annie -- Eldorado -- To my mother -- Annabel Lee"
+        }, {
+            "note": "A collection of twenty-six poems by nineteenth-century American poet Edgar Allen Poe"
         }],
-        "tags": [],
+        "tags": [
+            "Poetry",
+            "American poetry",
+            "Ravens",
+            "Fantasy poetry, American"
+        ],
         "seeAlso": [],
         "attachments": [{
-            "url": "http://cogent.opalsinfo.net/bin/search/recDetailPage?rid=68738",
-            "title": "Record link",
-            "mineType": "text/html",
+            "url": "http://cogent.opalsinfo.net/bin/search/recDetailPage?rid=32857",
+            "title": "Library Catalog Entry Permalink",
+            "mimeType": "text/html",
             "snapshot": false
         }],
-        "ISBN": "159921475X",
-        "title": "The Native American experience",
-        "place": "Guilford, Conn.",
-        "publisher": "Lyons Press",
-        "date": "2008",
-        "callNumber": "000 WER",
+        "ISBN": "0439227135",
+        "title": "The raven and other poems",
+        "place": "New York",
+        "publisher": "Scholastic",
+        "date": "2000",
+        "numPages": "73",
+        "series": "Scholastic classics",
+        "callNumber": "811 POE",
         "libraryCatalog": "Library Catalog (OPALS)"
     }]
 }, {
@@ -169,8 +181,8 @@ var testCases = [{
         "seeAlso": [],
         "attachments": [{
             "url": "http://cogent.opalsinfo.net/bin/search/recDetailPage?rid=58224",
-            "title": "Record link",
-            "mineType": "text/html",
+            "title": "Library Catalog Entry Permalink",
+            "mimeType": "text/html",
             "snapshot": false
         }],
         "ISBN": "1575728060",
