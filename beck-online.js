@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-04-02 08:51:03"
+	"lastUpdated": "2014-04-14 11:50:31"
 }
 
 /*
@@ -47,7 +47,6 @@ var mappingClassNameToItemType = {
 	'ZSONST' : 'journalArticle',//Sonstiges, z.B. Vorwort
 	'ZINHALTVERZ' : 'multiple'//Inhaltsverzeichnis
 }
-
 
 function detectWeb(doc, url) {
 	var documentClassName = doc.getElementById("dokument").className;
@@ -103,6 +102,7 @@ function scrape(doc, url) {
 	for (var i=0; i<authorNode.length; i++) {
 		//normally several authors are under the same authorNode
 		//and they occur in pairs with first and last names
+		
 		var authorFirstNames = ZU.xpath(authorNode[i], './/span[@class="vname"]');
 		var authorLastNames = ZU.xpath(authorNode[i], './/span[@class="nname"]');
 		for (var j=0; j<authorFirstNames.length; j++) {
@@ -113,11 +113,12 @@ function scrape(doc, url) {
 			});
 		}
 	}
-	if (authorNode.length == 0) {
-		authorNode = ZU.xpath(doc, '//p[@class="authorline"]/text() | //div[@class="authorline"]/p/text()');
+	
+	if (item.creators.length == 0) {
+		authorNode = ZU.xpath(doc, '//div[@class="autor"]/p | //p[@class="authorline"]/text() | //div[@class="authorline"]/p/text()');
 		for (var j=0; j<authorNode.length; j++) {
 			//first we delete some prefixes
-			var authorString = authorNode[j].textContent.replace(/\/|Dr\.|Professor|wiss\.? Mitarbeiter(in)?|RA,?|FAArbR|Fachanwalt für Insolvenzrecht|Rechtsanwalt|Rechtsanwältin|Rechtsanwälte|Richter am AG|Richter am BGH/g,"");
+			var authorString = authorNode[j].textContent.replace(/\/|Dr\. (h\. c\.)?|Professor|wiss\.? Mitarbeiter(in)?|RA,?|FAArbR|Fachanwalt für Insolvenzrecht|Rechtsanwalt|Rechtsanwältin|Rechtsanwälte|Richter am AG|Richter am BGH|zur Fussnote|\*|, LL.M.|^Von/g,"");
 			//authors can be seperated by "und" and "," if there are 3 or more authors
 			//a comma can also mark the beginning of suffixes, which we want to delete
 			//therefore we have to distinguish these two cases in the following
@@ -338,7 +339,7 @@ var testCases = [
 				"shortTitle": "BGH, Urteil vom 23.1.2014 – VII ZR 168/13",
 				"reporter": "NJW",
 				"reporterVolume": "2014",
-				"extra": "Parallelfundstellen: BeckRS 2014, 03315 ; GWR 2014, 125 ; IBRRS 96371 ; ZVertriebsR 2014, 98 ; ADAJUR Dok.Nr. 103938 (Ls...",
+				"extra": "Parallelfundstellen: BeckRS 2014, 03315 ; GWR 2014, 125 ; IBRRS 96371 ; LSK 2014, 110552 ; MDR 2014, 354 ; ZVertriebsR 2014, 98 ; ZVertriebsR 2014, 98 ; ADAJUR Dok.Nr. 103938 (Ls...",
 				"libraryCatalog": "beck-online"
 			}
 		]
@@ -347,6 +348,40 @@ var testCases = [
 		"type": "web",
 		"url": "https://beck-online.beck.de/?vpath=bibdata%2fzeits%2fGRUR%2f2003%2fcont%2fGRUR%2e2003%2eH09%2eNAMEINHALTSVERZEICHNIS%2ehtm",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://beck-online.beck.de/Default.aspx?words=ZUM+2013%2C+909&btsearch.x=42&btsearch.x=0&btsearch.y=0",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Günter",
+						"lastName": "Krings"
+					},
+					{
+						"firstName": "Christian-Henner",
+						"lastName": "Hentsch"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "Das neue Zweitverwertungsrecht",
+				"publicationTitle": "ZUM",
+				"journalAbbreviation": "ZUM",
+				"date": "2013",
+				"issue": "12",
+				"pages": "909-913",
+				"libraryCatalog": "beck-online"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
