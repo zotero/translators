@@ -2,14 +2,14 @@
 	"translatorID": "5af42734-7cd5-4c69-97fc-bc406999bdba",
 	"label": "Atypon Journals",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://(www\\.esajournals|pubs\\.rsna|pubsonline\\.informs)\\.org/",
-	"minVersion": "2.1",
+	"target": "^[^?#]+(?:/doi/(?:abs|full|figure|ref|citedby)/10\\.|/action/doSearch\\?)|^https?://[^/]+/toc/",
+	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-03-15 09:29:18"
+	"lastUpdated": "2014-04-17 15:29:18"
 }
 
 /*
@@ -32,17 +32,24 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 
 function detectWeb(doc, url) {
-	if (url.match(/\/doi\/abs\/10\.|\/doi\/full\/10\./)) return "journalArticle";
-	else if (url.match(/\/action\/doSearch|\/toc\//)) return "multiple";
+	if (url.search(/^https?:\/\/[^\/]+\/toc\/|\/action\/doSearch\?/) != -1) {
+		return getSearchResults(doc).length ? "multiple" : false;
+	}
+	
+	return "journalArticle";
 }
 
+function getSearchResults(doc) {
+	var rows = ZU.xpath(doc, '//table[@class="articleEntry"]');
+	if (!rows.length) rows = ZU.xpath(doc, '//div[contains(@class, "search-result-row")]');
+	return rows;
+}
 
 function doWeb(doc, url) {
 	var arts = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
-		var rows = ZU.xpath(doc, '//table[@class="articleEntry"]');
-		if (rows.length==0) rows = ZU.xpath(doc, '//div[contains(@class, "search-result-row")]')
+		var rows = getSearchResults(doc);
 		for (var i in rows) {
 			var title = ZU.xpathText(rows[i], './/div[contains(@class, "art_title")]');
 			if (!title) title = ZU.xpathText(rows[i], './/span[contains(@class, "art_title")]');
