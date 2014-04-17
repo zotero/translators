@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-17 11:45:25"
+	"lastUpdated": "2014-04-17 14:30:53"
 }
 
 /*
@@ -33,33 +33,44 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 function detectWeb(doc, url) {
 	if (url.search(/^https?:\/\/[^\/]+\/toc\/|\/action\/doSearch\?/) != -1) {
-		return getSearchResults(doc).length ? "multiple" : false;
+		return Object.keys(getSearchResults(doc)).length ? "multiple" : false;
+	}
+	
+	if (url.indexOf('/doi/book/') != -1) {
+		return 'book';
 	}
 	
 	return "journalArticle";
 }
 
 function getSearchResults(doc) {
-	var rows = ZU.xpath(doc, '//table[@class="articleEntry"]');
-	if (!rows.length) rows = ZU.xpath(doc, '//div[contains(@class, "search-result-row")]');
-	return rows;
+	var articles = {};
+	var container = doc.getElementsByName('frmSearchResults')[0]
+		|| doc.getElementsByName('frmAbs')[0];
+	if(!container) {
+		Z.debug('Atypon: multiples container not found.');
+		return articles;
+	}
+	
+	var rows = container.getElementsByClassName('articleEntry');
+	for(var i = 0; i<rows.length; i++) {
+		var title = rows[i].getElementsByClassName('art_title')[0];
+		if(!title) continue;
+		title = ZU.trimInternal(title.textContent);
+		
+		var url = ZU.xpathText(rows[i], '(.//a[contains(@href, "/doi/abs/") or\
+			contains(@href, "/doi/full/") or contains(@href, "/doi/book/")])[1]/@href');
+		if(!url) continue;
+		
+		articles[url] = title;
+	}
+	return articles;
 }
 
 function doWeb(doc, url) {
 	var arts = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		var items = new Object();
-		var rows = getSearchResults(doc);
-		for (var i in rows) {
-			var title = ZU.xpathText(rows[i], './/div[contains(@class, "art_title")]');
-			if (!title) title = ZU.xpathText(rows[i], './/span[contains(@class, "art_title")]');
-			//Z.debug(title)
-			var id = ZU.xpathText(rows[i], '(.//a[contains(@href, "/doi/abs/")])[1]/@href');
-			if (!id) id = ZU.xpathText(rows[i], '(.//a[contains(@href, "/doi/full/")])[1]/@href');
-			//Z.debug(id)
-			items[id] = title;
-		}
-		Zotero.selectItems(items, function (items) {
+		Zotero.selectItems(getSearchResults(doc), function (items) {
 			if (!items) {
 				return true;
 			}
@@ -79,51 +90,47 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	url = url.replace(/\?.+/, "")
-	var pdfurl = url.replace(/\/doi\/abs\/|\/doi\/full\//, "/doi/pdf/");
-	var doi = url.match(/10\.[^?]+/)[0]
-	var citationurl = url.replace(/\/doi\/abs\/|\/doi\/full\//, "/action/showCitFormats?doi=");
+	url = url.replace(/[?#].*/, "");
+	var replURLRegExp = /\/doi\/(?:abs|full|figure|ref|citedby|book)\//;
+	var pdfurl = url.replace(replURLRegExp, "/doi/pdf/");
+	var doi = url.match(/10\.[^?#]+/)[0];
+	var citationurl = url.replace(replURLRegExp, "/action/showCitFormats?doi=");
 	var abstract = ZU.xpathText(doc, '//div[@class="abstractSection"]')
 	var tags = ZU.xpath(doc, '//p[@class="fulltext"]//a[contains(@href, "keywordsfield")]')
-	//Z.debug(citationurl)	
-	ZU.processDocuments(citationurl, function(doc){
-	var filename = doc.evaluate('//form[@target="_self"]/input[@name="downloadFileName"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
-	//Z.debug(filename);
-	var get = '/action/downloadCitation';
-	var post = 'doi=' + doi + '&downloadFileName=' + filename + '&format=ris&direct=true&include=cit';
-	Zotero.Utilities.HTTP.doPost(get, post, function (text) {
-		var translator = Zotero.loadTranslator("import");
-		// Calling the RIS translator
-		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-		translator.setString(text);
-		translator.setHandler("itemDone", function (obj, item) {
-			item.url = url;
-			if (url.indexOf("rsna.org")!=-1){
-				var database = "RSNA"
-			}
-			else if (url.indexOf("informs.org")!=-1){
-				var database = "informs"
-			}
-			else var database = "ESA"
-			item.notes = [];
-			for (var i in tags){
-				item.tags.push(tags[i].textContent)
-			}
-			item.abstractNote = abstract;
-			item.attachments = [{
-				url: pdfurl,
-				title: database + " PDF fulltext",
-				mimeType: "application/pdf"
-			}, {
-				document: doc,
-				title: database + " Snapshot",
-				mimeType: "text/html"
-			}];
-			item.libraryCatalog = database + " Journals";
-			item.complete();
+	Z.debug("Citation URL: " + citationurl);
+	ZU.processDocuments(citationurl, function(citationDoc){
+		var filename = citationDoc.evaluate('//form[@target="_self"]/input[@name="downloadFileName"]', citationDoc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
+		Z.debug("Filename: " + filename);
+		var get = '/action/downloadCitation';
+		var post = 'doi=' + doi + '&downloadFileName=' + filename + '&format=ris&direct=true&include=cit';
+		Zotero.Utilities.HTTP.doPost(get, post, function (text) {
+			//Z.debug(text);
+			var translator = Zotero.loadTranslator("import");
+			// Calling the RIS translator
+			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			translator.setString(text);
+			translator.setHandler("itemDone", function (obj, item) {
+				item.url = url;
+				item.notes = [];
+				for (var i in tags){
+					item.tags.push(tags[i].textContent)
+				}
+				item.abstractNote = abstract;
+				item.attachments = [{
+					url: pdfurl,
+					title: "Full Text PDF",
+					mimeType: "application/pdf"
+				}, {
+					document: doc,
+					title: "Snapshot",
+					mimeType: "text/html"
+				}];
+				item.libraryCatalog = url.replace(/^https?:\/\/(?:www\.)?/, '')
+					.replace(/[\/:].*/, '') + " (Atypon)";
+				item.complete();
+			});
+			translator.translate();
 		});
-		translator.translate();
-	});
 	})
 }
 
@@ -179,28 +186,26 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "ESA PDF fulltext",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "ESA Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Assimilation of multiple data sets with the ensemble Kalman filter to improve forecasts of forest carbon dynamics",
-				"date": "February 22, 2011",
 				"DOI": "10.1890/09-1234.1",
-				"publicationTitle": "Ecological Applications",
 				"journalAbbreviation": "Ecological Applications",
-				"pages": "1461-1473",
-				"volume": "21",
 				"issue": "5",
-				"publisher": "Ecological Society of America",
 				"ISSN": "1051-0761",
 				"url": "http://www.esajournals.org/doi/abs/10.1890/09-1234.1",
 				"abstractNote": "The ensemble Kalman filter (EnKF) has been used in weather forecasting to assimilate observations into weather models. In this study, we examine how effectively forecasts of a forest carbon cycle can be improved by assimilating observations with the EnKF. We used the EnKF to assimilate into the terrestrial ecosystem (TECO) model eight data sets collected at the Duke Forest between 1996 and 2004 (foliage biomass, fine root biomass, woody biomass, litterfall, microbial biomass, forest floor carbon, soil carbon, and soil respiration). We then used the trained model to forecast changes in carbon pools from 2004 to 2012. Our daily analysis of parameters indicated that all the exit rates were well constrained by the EnKF, with the exception of the exit rates controlling the loss of metabolic litter and passive soil organic matter. The poor constraint of these two parameters resulted from the low sensitivity of TECO predictions to their values and the poor correlation between these parameters and the observed variables. Using the estimated parameters, the model predictions and observations were in agreement. Model forecasts indicate 15 380–15 660 g C/m2 stored in Duke Forest by 2012 (a 27% increase since 2004). Parameter uncertainties decreased as data were sequentially assimilated into the model using the EnKF. Uncertainties in forecast carbon sinks increased over time for the long-term carbon pools (woody biomass, structure litter, slow and passive SOM) but remained constant over time for the short-term carbon pools (foliage, fine root, metabolic litter, and microbial carbon). Overall, EnKF can effectively assimilate multiple data sets into an ecosystem model to constrain parameters, forecast dynamics of state variables, and evaluate uncertainty.",
-				"libraryCatalog": "ESA Journals",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "esajournals.org (Atypon)",
+				"title": "Assimilation of multiple data sets with the ensemble Kalman filter to improve forecasts of forest carbon dynamics",
+				"date": "February 22, 2011",
+				"publicationTitle": "Ecological Applications",
+				"pages": "1461-1473",
+				"volume": "21"
 			}
 		]
 	},
@@ -257,29 +262,27 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "RSNA PDF fulltext",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "RSNA Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Congenital and Hereditary Causes of Sudden Cardiac Death in Young Adults: Diagnosis, Differential Diagnosis, and Risk Stratification",
-				"date": "November 1, 2013",
 				"DOI": "10.1148/rg.337125073",
-				"publicationTitle": "RadioGraphics",
 				"journalAbbreviation": "RadioGraphics",
-				"pages": "1977-2001",
-				"volume": "33",
 				"issue": "7",
-				"publisher": "Radiological Society of North America",
 				"ISSN": "0271-5333",
 				"url": "http://pubs.rsna.org/doi/abs/10.1148/rg.337125073",
 				"abstractNote": "Sudden cardiac death is defined as death from unexpected circulatory arrest—usually a result of cardiac arrhythmia—that occurs within 1 hour of the onset of symptoms. Proper and timely identification of individuals at risk for sudden cardiac death and the diagnosis of its predisposing conditions are vital. A careful history and physical examination, in addition to electrocardiography and cardiac imaging, are essential to identify conditions associated with sudden cardiac death. Among young adults (18–35 years), sudden cardiac death most commonly results from a previously undiagnosed congenital or hereditary condition, such as coronary artery anomalies and inherited cardiomyopathies (eg, hypertrophic cardiomyopathy, arrhythmogenic right ventricular cardiomyopathy [ARVC], dilated cardiomyopathy, and noncompaction cardiomyopathy). Overall, the most common causes of sudden cardiac death in young adults are, in descending order of frequency, hypertrophic cardiomyopathy, coronary artery anomalies with an interarterial or intramural course, and ARVC. Often, sudden cardiac death is precipitated by ventricular tachycardia or fibrillation and may be prevented with an implantable cardioverter defibrillator (ICD). Risk stratification to determine the need for an ICD is challenging and involves imaging, particularly echocardiography and cardiac magnetic resonance (MR) imaging. Coronary artery anomalies, a diverse group of congenital disorders with a variable manifestation, may be depicted at coronary computed tomographic angiography or MR angiography. A thorough understanding of clinical risk stratification, imaging features, and complementary diagnostic tools for the evaluation of cardiac disorders that may lead to sudden cardiac death is essential to effectively use imaging to guide diagnosis and therapy.",
-				"libraryCatalog": "RSNA Journals",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Congenital and Hereditary Causes of Sudden Cardiac Death in Young Adults"
+				"libraryCatalog": "pubs.rsna.org (Atypon)",
+				"shortTitle": "Congenital and Hereditary Causes of Sudden Cardiac Death in Young Adults",
+				"title": "Congenital and Hereditary Causes of Sudden Cardiac Death in Young Adults: Diagnosis, Differential Diagnosis, and Risk Stratification",
+				"date": "November 1, 2013",
+				"publicationTitle": "RadioGraphics",
+				"pages": "1977-2001",
+				"volume": "33"
 			}
 		]
 	},
@@ -287,6 +290,88 @@ var testCases = [
 		"type": "web",
 		"url": "http://pubs.rsna.org/action/doSearch?SeriesKey=&AllField=cardiac",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://epubs.siam.org/doi/book/10.1137/1.9780898718553",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Hubert",
+						"firstName": "L.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Arabie",
+						"firstName": "P.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Meulman",
+						"firstName": "J.",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"url": "http://epubs.siam.org/doi/book/10.1137/1.9780898718553",
+				"numPages": "172",
+				"series": "Discrete Mathematics and Applications",
+				"ISBN": "978-0-89871-478-4",
+				"abstractNote": "The first part of this monograph's title, Combinatorial Data Analysis (CDA), refers to a wide class of methods for the study of relevant data sets in which the arrangement of a collection of objects is absolutely central. Characteristically, CDA is involved either with the identification of arrangements that are optimal for a specific representation of a given data set (usually operationalized with some specific loss or merit function that guides a combinatorial search defined over a domain constructed from the constraints imposed by the particular representation selected), or with the determination in a confirmatory manner of whether a specific object arrangement given a priori reflects the observed data. As the second part of the title, Optimization by Dynamic Programming, suggests, the sole focus of this monograph is on the identification of arrangements; it is then restricted further, to where the combinatorial search is carried out by a recursive optimization process based on the general principles of dynamic programming. For an introduction to confirmatory CDA without any type of optimization component, the reader is referred to the monograph by Hubert (1987). For the use of combinatorial optimization strategies other than dynamic programming for some (clustering) problems in CDA, the recent comprehensive review by Hansen and Jaumard (1997) provides a particularly good introduction.",
+				"libraryCatalog": "epubs.siam.org (Atypon)",
+				"date": "January 1, 2001",
+				"title": "Combinatorial Data Analysis",
+				"publisher": "Society for Industrial and Applied Mathematics"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://epubs.siam.org/doi/abs/10.1137/1.9780898718553.ch6",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"numberOfVolumes": "0",
+				"url": "http://epubs.siam.org/doi/abs/10.1137/1.9780898718553.ch6",
+				"bookTitle": "Combinatorial Data Analysis",
+				"series": "Discrete Mathematics and Applications",
+				"ISBN": "978-0-89871-478-4",
+				"abstractNote": "6.1 Introduction There are a variety of extensions of the topics introduced in the previous chapters that could be pursued, several of which have been mentioned earlier along with a comment that they would not be developed in any detail within this monograph. Among some of these possibilities are: (a) the development of a mechanism for generating all the optimal solutions for a specific optimization task when multiple optima may be present, not just one representative exemplar; (b) the incorporation of other loss or merit measures within the various sequencing and partitioning contexts discussed; (c) extensions to the analysis of arbitrary t-mode data, with possible (order) restrictions on some modes but not others, or to a framework in which proximity is given on more than just a pair of objects, e.g., proximity could be defined for all distinct object triples (see Daws (1996)); (d) the generalization of the task of constructing optimal ordered partitions to a two- or higher-mode context that may be hierarchical and/or have various types of order or precedence constraints imposed; and (e) the extension of object ordering constraints when they are to be imposed (e.g., in various partitioning and two-mode sequencing tasks) to the use of circular object orders, where optimal subsets or ordered sequences must now be consistent with respect to a circular contiguity structure.",
+				"libraryCatalog": "epubs.siam.org (Atypon)",
+				"date": "January 1, 2001",
+				"pages": "103-114",
+				"title": "6. Extensions and Generalizations",
+				"publisher": "Society for Industrial and Applied Mathematics"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
