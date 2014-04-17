@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-04-16 20:51:52"
+	"lastUpdated": "2014-04-17 15:51:52"
 }
 
 var searchRe = new RegExp('^https?://(?:www\.)?amazon\.([^/]+)/(gp/search/|(gp/)?registry/(wishlist|registry)|exec/obidos/search-handle-url/|s/|s\\?|[^/]+/lm/|gp/richpub/)');
@@ -290,11 +290,11 @@ function scrape(doc) {
 			});
 			search.translate();
 		});
-		search.setHandler("error", function(obj, errror) {
+		search.setHandler("error", function(error) {
 			// we mostly need this handler to prevent the default one from kicking in
 			Z.debug("ISBN search for " + item.ISBN + " failed: " + error);
 		});
-		search.setHandler("done", function(obj) {
+		search.setHandler("done", function() {
 			item.complete();
 		});
 		search.setSearch({ ISBN: item.ISBN });
