@@ -9,12 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-04-17 15:51:52"
+	"lastUpdated": "2014-04-18 13:56:21"
 }
 
-var searchRe = new RegExp('^https?://(?:www\.)?amazon\.([^/]+)/(gp/search/|(gp/)?registry/(wishlist|registry)|exec/obidos/search-handle-url/|s/|s\\?|[^/]+/lm/|gp/richpub/)');
 function detectWeb(doc, url) {
-	if(searchRe.test(doc.location.href)) {
+	if(getSearchResults(doc, url)) {
 		return (Zotero.isBookmarklet ? "server" : "multiple");
 	} else {
 		var xpath = '//input[contains(@name, "ASIN")]';
@@ -34,34 +33,48 @@ function detectWeb(doc, url) {
 				} else {
 					return "book";
 				}
-			}
-			else {
+			} else {
 				return "book";
 			}
 		}
 	}
 }
 
+function getSearchResults(doc, url) {
+	//search results
+	var links = [],
+		container = doc.getElementById('atfResults')
+			|| doc.getElementById('mainResults'); //e.g. http://www.amazon.com/Mark-LeBar/e/B00BU8L2DK
+	if(container) {
+		links = ZU.xpath(container, './div[starts-with(@id,"result_")]//h3/a')
+	}
+	
+	if(!links.length) {
+		//wish lists
+		container = doc.getElementById('item-page-wrapper');
+		if(container) {
+			links = ZU.xpath(container, './/a[starts-with(@id, "itemName_")]');
+		}
+	}
+	
+	if(!links.length) return false;
+	
+	var availableItems = {}, found = false,
+		asinRe = /\/(?:dp|product)\/(?:[^?#]+)\//;
+	for(var i=0; i<links.length; i++) {
+		var elmt = links[i];
+		if(asinRe.test(elmt.href)) {
+			availableItems[elmt.href] = elmt.textContent.trim();
+			found = true;
+		}
+	}
+	
+	return found ? availableItems : false;
+}
+
 function doWeb(doc, url) {
-	var asinRe = new RegExp('/(dp|product)/([^/]+)/');
-	if(searchRe.test(doc.location.href)) {
-		if(doc.location.href.match(/gp\/richpub\//)){ // Show selector for Guides
-			var xpath = '//a[(contains(@href, "ref=cm_syf_dtl_pl") or contains(@href, "ref=cm_syf_dtl_top")) and preceding-sibling::b]';
-		} else if (doc.location.href.match(/\/lm\//)) { // Show selector for Lists
-			var xpath = '//span[@id="lm_asinlink95"]//a'
-		} else { // Show selector for Search results
-			var xpath = '//div[@class="productTitle"]/a |//div[@id="init-container"]//span[@class="small productTitle"]//a | //div[@class="wedding" or @class="list-items"]//span[@class="small productTitle"]//a |//a[span[@class="srTitle"]] | //div[@class="title"]/a[@class="title"]| //h3[@class="title"]/a[@class="title"] | //h3[@class="newaps"]/a|//div[@class="a-fixed-right-grid-inner"]//a';
-		}
-		var availableItems = {};
-		var links = ZU.xpath(doc, xpath);
-		for(var i=0; i<links.length; i++) {
-			var elmt = links[i];
-			if(asinRe.test(elmt.href)) {
-				availableItems[elmt.href] = elmt.textContent.trim();
-			}
-		}
-		
-		Zotero.selectItems(availableItems, function(items) {
+	if(detectWeb(doc, url) == 'multiple') {
+		Zotero.selectItems(getSearchResults(doc, url), function(items) {
 			if(!items) return true;
 			
 			var links = [];
@@ -70,7 +83,7 @@ function doWeb(doc, url) {
 		});
 
 	} else {
-		scrape(doc);
+		scrape(doc, url);
 	}
 }
 
@@ -137,12 +150,12 @@ function get_nextsibling(n) {
 	return x;	
 }
 
-function scrape(doc) {
+function scrape(doc, url) {
 	// Scrape HTML for items without ISBNs, because Amazon doesn't provide an easy way for
 	// open source projects like us to use their API
 	Z.debug("Scraping from Page")		
 	var department = ZU.xpathText(doc, '//li[contains(@class, "nav-category-button")]/a').trim();
-	var item = new Zotero.Item(detectWeb(doc) || "book");
+	var item = new Zotero.Item(detectWeb(doc, url) || "book");
 
 	
 	// Old design
@@ -278,6 +291,7 @@ function scrape(doc) {
 	//we search for translators for a given ISBN
 	//and try to figure out the missing publication place
 	if(item.ISBN && !item.place) {
+		Z.debug("Searching for additional metadata by ISBN: " + item.ISBN);
 		var search = Zotero.loadTranslator("search");
 		search.setHandler("translators", function(obj, translators) {
 			search.setTranslator(translators);
@@ -781,6 +795,11 @@ var testCases = [
 				"shortTitle": "1Q84"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.amazon.com/Mark-LeBar/e/B00BU8L2DK",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
