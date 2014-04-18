@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-05-06 00:30:44"
+	"lastUpdated": "2014-04-18 14:09:12"
 }
 
 function getSearchResults(doc) {
@@ -161,7 +161,8 @@ function scrape(items, opts){
 	//get citation export page's source code;
 	for(var i=0, n=items.length; i<n; i++) {
 		(function(item) {
-			var url = opts.host + 'action/showCitFormats?doi=' + item.doi;
+			var url = opts.host + 'action/showCitFormats?doi=' + encodeURIComponent(item.doi);
+			//Z.debug(url);
 			ZU.doGet(url, function(text){
 				//Z.debug(text)
 				//get the exported RIS file name;
@@ -177,7 +178,7 @@ function scrape(items, opts){
 function processCallback(fetchItem, opts, downloadFileName) {
 		var baseurl = "http://pubs.acs.org/action/downloadCitation";
 		var doi = fetchItem.doi;
-		var post = "doi=" + doi + "&downloadFileName=" + downloadFileName
+		var post = "doi=" + encodeURIComponent(doi) + "&downloadFileName=" + encodeURIComponent(downloadFileName)
 			+ "&include=abs&format=refman&direct=on"
 			+ "&submit=Download+article+citation+data";
 		ZU.doPost(baseurl, post, function(text){
