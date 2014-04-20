@@ -9,7 +9,7 @@
 	"priority": 90,
 	"inRepository": true,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-04-10 04:05:00"
+	"lastUpdated": "2014-04-20 21:00:00"
 }
 
 /* CrossRef uses unixref; documentation at http://www.crossref.org/schema/documentation/unixref1.0/unixref.html */
@@ -175,7 +175,6 @@ function processCrossRef(xmlOutput) {
 		
 		var isReference = ["reference", "other"].indexOf(bookType) !== -1
 				&& ["chapter", "reference_entry"].indexOf(componentType) !==-1;
-		
 		if(bookType === "edited_book" || isReference) {
 			item = new Zotero.Item("bookSection");
 			refXML = ZU.xpath(itemXML, 'c:content_item', ns);
@@ -192,7 +191,6 @@ function processCrossRef(xmlOutput) {
 			} else {
 				metadataXML = ZU.xpath(itemXML, 'c:book_series_metadata', ns);
 				if(!metadataXML.length) metadataXML = ZU.xpath(itemXML, 'c:book_metadata', ns);
-				
 				item.bookTitle = ZU.xpathText(metadataXML, 'c:series_metadata/c:titles[1]/c:title[1]', ns);
 				if(!item.bookTitle) item.bookTitle = ZU.xpathText(metadataXML, 'c:titles[1]/c:title[1]', ns);
 			}
@@ -203,6 +201,10 @@ function processCrossRef(xmlOutput) {
 		} else {
 			item = new Zotero.Item("book");
 			refXML = ZU.xpath(itemXML, 'c:book_metadata', ns);
+			//Sometimes book data is in book_series_metadata
+			// doi: 10.1007/978-1-4419-9164-5
+			//http://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&rft_id=info:doi/10.1007/978-1-4419-9164-5&format=unixref&redirect=false
+			if (!refXML.length) refXML = ZU.xpath(itemXML, 'c:book_series_metadata', ns);
 			metadataXML = refXML;
 			seriesXML = ZU.xpath(refXML, 'c:series_metadata', ns);
 		}
@@ -233,7 +235,8 @@ function processCrossRef(xmlOutput) {
 	parseCreators(refXML, item, (item.itemType == 'bookSection' ? {"editor": null} : "author") );
 	
 	if(seriesXML && seriesXML.length) {
-		parseCreators(refXML, item, {"editor":"seriesEditor"});
+		parseCreators(seriesXML, item, {"editor":"seriesEditor"});
+		item.series = ZU.xpathText(seriesXML, 'c:titles[1]/c:title[1]', ns);
 		item.seriesNumber = ZU.xpathText(seriesXML, 'c:series_number', ns);
 		item.reportType = ZU.xpathText(seriesXML, 'c:titles[1]/c:title[1]', ns);
 	}
