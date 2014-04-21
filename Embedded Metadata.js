@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-03-06 06:52:33"
+	"lastUpdated": "2014-04-21 13:56:23"
 }
 
 /*
@@ -151,7 +151,7 @@ function getPrefixes(doc) {
 }
 
 function getContentText(doc, name, strict) {
-	var xpath = '//x:meta[' +
+	var xpath = '//x:head//x:meta[' +
 		(strict?'@name':
 			'substring(@name, string-length(@name)-' + (name.length - 1) + ')') +
 		'="'+ name +'"]/';
@@ -159,7 +159,7 @@ function getContentText(doc, name, strict) {
 }
 
 function getContent(doc, name, strict) {
-	var xpath = '//x:meta[' +
+	var xpath = '//x:head//x:meta[' +
 		(strict?'@name':
 			'substring(@name, string-length(@name)-' + (name.length - 1) + ')') +
 		'="'+ name +'"]/';
@@ -1160,9 +1160,11 @@ var testCases = [
 					}
 				],
 				"title": "Rescue at the Hearst Tower",
+				"publicationTitle": "The New Yorker",
 				"url": "http://www.newyorker.com/online/blogs/backissues/2013/06/window-washers-at-the-hearst-tower.html",
 				"abstractNote": "Rescuers successfully retrieved two maintenance workers at the Hearst Tower, in Midtown, who had become trapped on their scaffold.",
-				"websiteTitle": "The New Yorker"
+				"libraryCatalog": "www.newyorker.com",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
