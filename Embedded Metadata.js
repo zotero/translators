@@ -151,7 +151,7 @@ function getPrefixes(doc) {
 }
 
 function getContentText(doc, name, strict) {
-	var xpath = '//x:head//x:meta[' +
+	var xpath = '/x:html/x:head/x:meta[' +
 		(strict?'@name':
 			'substring(@name, string-length(@name)-' + (name.length - 1) + ')') +
 		'="'+ name +'"]/';
@@ -159,7 +159,7 @@ function getContentText(doc, name, strict) {
 }
 
 function getContent(doc, name, strict) {
-	var xpath = '//x:head//x:meta[' +
+	var xpath = '/x:html/x:head/x:meta[' +
 		(strict?'@name':
 			'substring(@name, string-length(@name)-' + (name.length - 1) + ')') +
 		'="'+ name +'"]/';
@@ -210,7 +210,7 @@ function detectWeb(doc, url) {
 function init(doc, url, callback, forceLoadRDF) {
 	getPrefixes(doc);
 
-	var metaTags = doc.getElementsByTagName("meta");
+	var metaTags = doc.head.getElementsByTagName("meta");
 	Z.debug("Embedded Metadata: found " + metaTags.length + " meta tags.");
 	if(forceLoadRDF /* check if this is called from doWeb */ && !metaTags.length) {
 		if(doc.head) {
