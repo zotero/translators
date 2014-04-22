@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-18 15:48:53"
+	"lastUpdated": "2014-04-22 00:37:48"
 }
 
 /*
@@ -99,7 +99,7 @@ function scrape(doc, url) {
 	var tags = ZU.xpath(doc, '//p[@class="fulltext"]//a[contains(@href, "keywordsfield")]')
 	Z.debug("Citation URL: " + citationurl);
 	ZU.processDocuments(citationurl, function(citationDoc){
-		var filename = citationDoc.evaluate('//form[@target="_self"]/input[@name="downloadFileName"]', citationDoc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
+		var filename = citationDoc.evaluate('//form[@target="_self"]//input[@name="downloadFileName"]', citationDoc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
 		Z.debug("Filename: " + filename);
 		var get = '/action/downloadCitation';
 		var post = 'doi=' + doi + '&downloadFileName=' + filename + '&format=ris&direct=true&include=cit';
@@ -370,6 +370,58 @@ var testCases = [
 				"pages": "103-114",
 				"title": "6. Extensions and Generalizations",
 				"publisher": "Society for Industrial and Applied Mathematics"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://online.liebertpub.com/doi/abs/10.1089/cmb.2009.0238",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Boisvert",
+						"firstName": "Sébastien",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Laviolette",
+						"firstName": "François",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Corbeil",
+						"firstName": "Jacques",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"DOI": "10.1089/cmb.2009.0238",
+				"journalAbbreviation": "Journal of Computational Biology",
+				"issue": "11",
+				"ISSN": "1066-5277",
+				"url": "http://online.liebertpub.com/doi/abs/10.1089/cmb.2009.0238",
+				"abstractNote": "An accurate genome sequence of a desired species is now a pre-requisite for genome research. An important step in obtaining a high-quality genome sequence is to correctly assemble short reads into longer sequences accurately representing contiguous genomic regions. Current sequencing technologies continue to offer increases in throughput, and corresponding reductions in cost and time. Unfortunately, the benefit of obtaining a large number of reads is complicated by sequencing errors, with different biases being observed with each platform. Although software are available to assemble reads for each individual system, no procedure has been proposed for high-quality simultaneous assembly based on reads from a mix of different technologies. In this paper, we describe a parallel short-read assembler, called Ray, which has been developed to assemble reads obtained from a combination of sequencing platforms. We compared its performance to other assemblers on simulated and real datasets. We used a combination of Roche/454 and Illumina reads to assemble three different genomes. We showed that mixing sequencing technologies systematically reduces the number of contigs and the number of errors. Because of its open nature, this new tool will hopefully serve as a basis to develop an assembler that can be of universal utilization (availability: http://deNovoAssembler.sf.Net/). For online Supplementary Material, see www.liebertonline.com.",
+				"libraryCatalog": "online.liebertpub.com (Atypon)",
+				"shortTitle": "Ray",
+				"title": "Ray: Simultaneous Assembly of Reads from a Mix of High-Throughput Sequencing Technologies",
+				"date": "October 20, 2010",
+				"publicationTitle": "Journal of Computational Biology",
+				"pages": "1519-1533",
+				"volume": "17"
 			}
 		]
 	}
