@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-18 14:09:12"
+	"lastUpdated": "2014-04-22 00:54:18"
 }
 
 function getSearchResults(doc) {
@@ -23,7 +23,7 @@ function getDoi(url) {
 		if(doi.indexOf("prevSearch") != -1) {
 			doi = doi.substring(0,doi.indexOf("?"));
 		}
-		return doi;
+		return decodeURIComponent(doi);
 	}
 }
 
@@ -381,6 +381,67 @@ var testCases = [
 				"publisher": "American Chemical Society",
 				"libraryCatalog": "ACS Publications",
 				"shortTitle": "Redox Chemistry and Natural Organic Matter (NOM)"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://pubs.acs.org/doi/abs/10.1021/jp000606%2B",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Schlag",
+						"firstName": "E. W.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Sheu",
+						"firstName": "Sheh-Yi",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Yang",
+						"firstName": "Dah-Yen",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Selzle",
+						"firstName": "H. L.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Lin",
+						"firstName": "S. H.",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "ACS Full Text PDF w/ Links",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "ACS Full Text Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"DOI": "10.1021/jp000606+",
+				"journalAbbreviation": "J. Phys. Chem. B",
+				"issue": "32",
+				"abstractNote": "We have derived phase space and diffusion theories for a new hopping model of charge transport in polypeptides and thence for distal chemical kinetics. The charge is transferred between two carbamide groups on each side of the Cα atom hinging two amino acid groups. When the torsional angles on the hinge approach a certain region of the Ramachandran plot, the charge transfer has zero barrier height and makes charge transfer the result of strong electronic correlation. The mean first passage time calculated from this analytic model of some 164 fs is in reasonable agreement with prior molecular dynamics calculation of some 140 fs and supports this new bifunctional model for charge transport and chemical reactions in polypeptides.",
+				"ISSN": "1520-6106",
+				"url": "http://dx.doi.org/10.1021/jp000606+",
+				"libraryCatalog": "ACS Publications",
+				"title": "Theory of Charge Transport in Polypeptides",
+				"date": "August 1, 2000",
+				"publicationTitle": "The Journal of Physical Chemistry B",
+				"pages": "7790-7794",
+				"volume": "104"
 			}
 		]
 	}
