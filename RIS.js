@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-04-10 11:47:01"
+	"lastUpdated": "2014-04-23 06:03:29"
 }
 
 function detectImport() {
@@ -395,6 +395,7 @@ var degenerateImportFieldMap = {
 		"__default": "unsupported/Author Address",
 		"unsupported/Inventor Address": ["patent"]
 	},
+	AV: "archiveLocation", //REFMAN
 	BT: {
 		title: ["book", "manuscript"],
 		bookTitle: ["bookSection"],
@@ -1141,22 +1142,22 @@ function processTag(item, tagValue, risEntry) {
 			//Endnote exports access date for webpages to M1
 			//It makes much more sense to export to Y2
 			//We should make sure that M1 does not overwrite whatever may be in Y2
-			if(zField == "accessDate") {
+			if(zField[0] == "accessDate") {
 				item.backupAccessDate = {
-					field: zField,
-					value: dateRIStoZotero(value, zField)
+					field: zField[0],
+					value: dateRIStoZotero(value, zField[0])
 				}
 				value = undefined;
 				processFields = false;
 			}
 		break;
 		case "VL":
-			if(zField == "accessDate") {
+			if(zField[0] == "accessDate") {
 				//EndNote screws up webpage entries. VL is access year, but access date is available
 				if(!item.backupAccessDate) {	//make sure we don't replace the M1 data
 					item.backupAccessDate = {
-						field: zField,
-						value: dateRIStoZotero(value, zField)
+						field: zField[0],
+						value: dateRIStoZotero(value, zField[0])
 					};
 				}
 				value = undefined;
@@ -1166,11 +1167,18 @@ function processTag(item, tagValue, risEntry) {
 		//PY is typically less complete than other dates. We'll store it as backup
 		case "PY":
 			item.backupDate = {
-				field: zField,
-				value: dateRIStoZotero(value, zField)
+				field: zField[0],
+				value: dateRIStoZotero(value, zField[0])
 			};
 			value = undefined;
 			processFields = false;
+		break;
+		case "UR":
+			//REFMAN places PMIDS in UR sometimes
+			if(value.indexOf('PM:') != -1) {
+				value = 'PMID: ' + value.substr(3);
+				zField = ['extra'];
+			}
 		break;
 	}
 
@@ -1199,11 +1207,12 @@ function processTag(item, tagValue, risEntry) {
 			case "issueDate":
 			case "dateEnacted":
 			case "dateDecided":
-				value = dateRIStoZotero(value, zField);
+				value = dateRIStoZotero(value, zField[0]);
 			break;
 			case "tags":
 				//allow new lines or semicolons. Commas, might be more problematic
-				value = value.split(/\s*(?:[\r\n]+\s*)+|\s*(?:;\s*)+/);
+				//%K part is a hack for REFMAN exports
+				value = value.split(/\s*(?:[\r\n]+\s*)+(?:%K\s+)?|\s*(?:;\s*)+/);
 
 				//the regex will take care of double semicolons and newlines
 				//but it will still allow a blank tag if there is a newline or
@@ -1307,7 +1316,7 @@ function applyValue(item, zField, value, rawLine) {
 		break;
 		case 'extra':
 			if(item.extra) {
-				item.extra += '; ' + value;
+				item.extra += '\n' + value;
 			} else {
 				item.extra = value;
 			}
@@ -3897,7 +3906,7 @@ var testCases = [
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
-				"extra": "Series Volume; Number of Pages",
+				"extra": "Series Volume\nNumber of Pages",
 				"manuscriptType": "Type of Work",
 				"numPages": "Pages",
 				"shortTitle": "Short Title",
