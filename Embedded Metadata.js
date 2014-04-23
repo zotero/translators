@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-21 13:56:23"
+	"lastUpdated": "2014-04-23 04:34:11"
 }
 
 /*
@@ -70,6 +70,9 @@ var HIGHWIRE_MAPPINGS = {
 	"citation_abstract_html_url"
 	"citation_fulltext_html_url"
 	"citation_pmid"
+	"citation_online_date"
+	"citation_year"
+	"citation_keywords"
 */
 };
 
@@ -418,9 +421,20 @@ function addHighwireMetadata(doc, newItem) {
 
 	//Deal with tags in a string
 	//we might want to look at the citation_keyword metatag later
-	if(!newItem.tags || !newItem.tags.length)
-		 newItem.tags = getContent(doc, 'citation_keywords')
-		 					.map(function(t) { return t.textContent; });
+	if(!newItem.tags || !newItem.tags.length) {
+		var tags = getContent(doc, 'citation_keywords');
+		newItem.tags = [];
+		for(var i=0; i<tags.length; i++) {
+			var tag = tags[i].textContent.trim();
+			if(tag) {
+				var splitTags = tag.split(';');
+				for(var j=0; j<splitTags.length; j++) {
+					if(!splitTags[j].trim()) continue;
+					newItem.tags.push(splitTags[j].trim());
+				}
+			}
+		}
+	}
 
 	//sometimes RDF has more info, let's not drop it
 	var rdfPages = (newItem.pages)? newItem.pages.split(/\s*-\s*/) : new Array();
@@ -432,8 +446,13 @@ function addHighwireMetadata(doc, newItem) {
 		newItem.pages = firstpage +
 			( ( lastpage && ( lastpage = lastpage.trim() ) )?'-' + lastpage : '' );
 	}
-
-
+	
+	//fall back to some other date options
+	if(!newItem.date) {
+		newItem.date = getContentText(doc, 'citation_online_date')
+			|| getContentText(doc, 'citation_year');
+	}
+	
 	//prefer ISSN over eISSN
 	var issn = getContentText(doc, 'citation_issn') ||
 			getContentText(doc, 'citation_eIssn');
