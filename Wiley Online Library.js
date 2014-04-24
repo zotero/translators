@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-03-17 15:35:00"
+	"lastUpdated": "2014-04-24 04:17:46"
 }
 
 /*
@@ -31,6 +31,8 @@
  */
 
 function fixCase(authorName) {
+	if(typeof authorName != 'string') return authorName;
+	
 	if(authorName.toUpperCase() == authorName ||
 		authorName.toLowerCase() == authorName) {
 		return ZU.capitalizeTitle(authorName, true);
@@ -1262,6 +1264,55 @@ var testCases = [
 				"rights": "Copyright © 2012 The Cochrane Collaboration. Published by John Wiley & Sons, Ltd.",
 				"libraryCatalog": "Wiley Online Library",
 				"shortTitle": "Cancer coverage in women's magazines"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://onlinelibrary.wiley.com/doi/10.1002/ev.20077/full",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Cousins",
+						"firstName": "J. Bradley",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bourgeois",
+						"firstName": "Isabelle",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Associates",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"journalAbbreviation": "New Directions for Evaluation",
+				"issue": "141",
+				"ISSN": "1534-875X",
+				"url": "http://onlinelibrary.wiley.com/doi/10.1002/ev.20077/abstract",
+				"DOI": "10.1002/ev.20077",
+				"abstractNote": "Research on organizational evaluation capacity building (ECB) has focused very much on the capacity to do evaluation, neglecting organizational demand for evaluation and the capacity to use it. This qualitative multiple case study comprises a systematic examination of organizational capacity within eight distinct organizations guided by a common conceptual framework. Described in this chapter are the rationale and methods for the study and then the sequential presentation of findings for each of the eight case organizations. Data collection and analyses for these studies occurred six years ago; findings are cross-sectional and do not reflect changes in organizations or their capacity for evaluation since that time. The format for presenting the findings was standardized so as to foster cross-case analyses, the focus for the next and final chapter of this volume.",
+				"language": "en",
+				"rights": "© Wiley Periodicals, Inc., and the American Evaluation Association",
+				"libraryCatalog": "Wiley Online Library",
+				"title": "Multiple Case Study Methods and Findings",
+				"publicationTitle": "New Directions for Evaluation",
+				"volume": "2014",
+				"pages": "25-99",
+				"date": "March 1, 2014"
 			}
 		]
 	}
