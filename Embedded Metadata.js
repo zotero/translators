@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-23 04:34:11"
+	"lastUpdated": "2014-04-24 05:42:40"
 }
 
 /*
@@ -607,8 +607,24 @@ function getAuthorFromByline(doc, newItem) {
 		actualByline = false;
 		var parentLevel = 1;
 		var skipList = [];
-		var titleXPath = './/*[normalize-space(translate(text(),"\u00a0"," "))="'
-			+ newItem.title.replace('"', '\\"') + '"]';
+		
+		// Wrap title in quotes so we can use it in the xpath
+		var xpathTitle = newItem.title;
+		if(xpathTitle.indexOf('"') != -1) {
+			if(xpathTitle.indexOf("'") == -1) {
+				// We can just use single quotes then
+				xpathTitle = "'" + xpathTitle + "'";
+			} else {
+				// Escaping double quotes in xpaths is really hard
+				// Solution taken from http://kushalm.com/the-perils-of-xpath-expressions-specifically-escaping-quotes
+				xpathTitle = 'concat("' + xpathTitle.replace(/"+/g, '",\'$&\', "') + '")';
+			}
+		} else {
+			xpathTitle = '"' + xpathTitle + '"';
+		}
+		
+		var titleXPath = './/*[normalize-space(translate(text(),"\u00a0"," "))='
+			+ xpathTitle + ']';
 		Z.debug("Looking for title using: " + titleXPath);
 		while(!actualByline && bylines.length != skipList.length && parentLevel < 5) {
 			Z.debug("Parent level " + parentLevel);
