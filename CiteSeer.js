@@ -3,13 +3,13 @@
 	"label": "CiteSeer",
 	"creator": "Sebastian Karcher",
 	"target": "^https?://citeseerx?\\.ist\\.psu\\.edu",
-	"minVersion": "2.1.9",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-17 18:37:55"
+	"lastUpdated": "2014-04-24 02:37:16"
 }
 
 /*
@@ -35,18 +35,25 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.match(/\/search\?q/)) return "multiple";
-	if (url.match(/viewdoc\//)) return "journalArticle";
+	if (url.indexOf('/search?q') != -1 && getSearchResults(doc).length) {
+		return "multiple";
+	}
+	if (url.indexOf('/viewdoc/') != -1 && doc.getElementById('bibtex')) {
+		return "journalArticle";
+	}
+}
+
+function getSearchResults(doc) {
+	return ZU.xpath(doc, '//div[@class="result"]/h3/a');
 }
 
 function doWeb(doc, url) {
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = {};
-		var titles = doc.evaluate('//div[@class="result"]/h3/a', doc, null, XPathResult.ANY_TYPE, null);
-		var title;
-		while (title = titles.iterateNext()) {
-			items[title.href] = title.textContent;
+		var titles = getSearchResults(doc);
+		for (var i=0; i<titles.length; i++) {
+			items[titles[i].href] = titles[i].textContent;
 		}
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
@@ -55,10 +62,7 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(articles, scrape, function () {
-				Zotero.done();
-			});
-			Zotero.wait();
+			ZU.processDocuments(articles, scrape);
 		});
 	} else {
 		scrape(doc, url);
