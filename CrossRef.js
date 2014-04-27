@@ -225,7 +225,16 @@ function processCrossRef(xmlOutput) {
 		item.place = ZU.xpathText(metadataXML, 'c:event_metadata/c:conference_location', ns);
 		item.conferenceName = ZU.xpathText(metadataXML, 'c:event_metadata/c:conference_name', ns);
 	}
-	item.language = ZU.xpathText(metadataXML, './@language', ns)
+
+	else if((itemXML = ZU.xpath(doiRecord, 'c:crossref/c:database', ns)).length) {
+		item = new Zotero.Item("report"); //should be dataset
+		refXML = ZU.xpath(itemXML, 'c:dataset', ns);
+		metadataXML = ZU.xpath(itemXML, 'c:database_metadata', ns);
+	}
+
+
+	item.abstractNote = ZU.xpathText(refXML, 'c:description', ns);
+	item.language = ZU.xpathText(metadataXML, './@language', ns);
 	item.ISBN = ZU.xpathText(metadataXML, 'c:isbn', ns);
 	item.ISSN = ZU.xpathText(metadataXML, 'c:issn', ns);
 	item.publisher = ZU.xpathText(metadataXML, 'c:publisher/c:publisher_name', ns);
@@ -245,8 +254,10 @@ function processCrossRef(xmlOutput) {
 	if(!pubDateNode.length) pubDateNode = ZU.xpath(refXML, 'c:publication_date', ns);
 	if(!pubDateNode.length) pubDateNode = ZU.xpath(metadataXML, 'c:publication_date[@media_type="print"]', ns);
 	if(!pubDateNode.length) pubDateNode = ZU.xpath(metadataXML, 'c:publication_date', ns);
+	//dataset
+	if(!pubDateNode.length) pubDateNode = ZU.xpath(refXML, 'c:database_date/c:publication_date', ns);
+	if(!pubDateNode.length) pubDateNode = ZU.xpath(metaXML, 'c:database_date/c:publication_date', ns);
 
-	
 	if(pubDateNode.length) {
 		var year = ZU.xpathText(pubDateNode[0], 'c:year', ns);
 		var month = ZU.xpathText(pubDateNode[0], 'c:month', ns);
