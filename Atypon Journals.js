@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-22 00:37:48"
+	"lastUpdated": "2014-04-28 21:01:10"
 }
 
 /*
@@ -39,7 +39,9 @@ function detectWeb(doc, url) {
 	if (url.indexOf('/doi/book/') != -1) {
 		return 'book';
 	}
-	
+	else if (url.search(/\.ch\d+$/)!=-1){
+		return 'bookSection';
+	}
 	return "journalArticle";
 }
 

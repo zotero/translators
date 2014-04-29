@@ -148,7 +148,7 @@ var testCases = [
 					}
 				],
 				"url": "http://clients1.ibisworld.com/reports/us/riskrating/default.aspx?entid=1281",
-				"date": "March 2014",
+				"date": "April 2014",
 				"institution": "IBISWorld Services",
 				"place": "Melbourne, Australia",
 				"reportNumber": "51821",

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-03-31 14:05:47"
+	"lastUpdated": "2014-04-28 19:52:25"
 }
 
 var canLiiRegexp = /https?:\/\/(www\.)?canlii\.org\/.*en\/[^\/]+\/[^\/]+\/doc\/.+/;
@@ -29,10 +29,10 @@ function detectWeb(doc, url) {
 }
 
 
-function scrape(doc) {
+function scrape(doc, url) {
 
 	var newItem = new Zotero.Item("case");
-	var voliss = ZU.xpathText(doc, '//td[@class="canlii-label" and contains(text(), "Citation:")]/following-sibling::td');
+	var voliss = ZU.xpathText(doc, '//td[contains(@class, "canlii-label") and contains(text(), "Citation:")]/following-sibling::td');
 	//Z.debug("voliss: ("+voliss+")")
 	var casename = voliss.match(/.+?,/)[0].replace(/,/, "").trim();
 	//Z.debug("casename: ("+casename+")");
@@ -45,25 +45,27 @@ function scrape(doc) {
 	var reporterpg = voliss.match(/\]\s*\d+\s*[A-Z]+\s*\d+/);
 	//Z.debug("reporterpg: ("+reporterpg+")");
 	var page = voliss.match(/,\s*\d{4}\s*[A-Z]+\s*\d+/);
-	var date = ZU.xpathText(doc, '//td[@class="canlii-label" and contains(text(), "Date:")]/following-sibling::td');
-	//Z.debug("date: ("+date+")")
-	var docket = ZU.xpathText(doc, '//td[@class="canlii-label" and contains(text(), "Docket:")]/following-sibling::td');
-	//Z.debug("docket: ("+docket+")")
+	var dateDocket = ZU.xpathText(doc, '//td[@class="canlii-label" and contains(text(), "Date:")]/following-sibling::td');
 
 	newItem.caseName = newItem.title = casename;
 	if (court) newItem.court = court[0].replace(/,\s*\d{4}\s*/, "").trim();;
 	if (reporter) newItem.reporter = reporter[0].replace(/\]\s*\d+\s*/, "");
-	newItem.dateDecided = date;
-	if (docket) newItem.docketNumber = docket.trim();
+
+	if (dateDocket){
+		var date = dateDocket.match(/\d{4}-\d{2}-\d{2}/);
+		if (date) newItem.dateDecided = date[0];
+		var docket = ZU.trimInternal(dateDocket).match(/\(Docket:(.+?)\)/);
+		if (docket) newItem.docketNumber = docket[1];
+	}
 	if (reporterpg) newItem.firstPage = reporterpg[0].replace(/\]\s*\d+\s*[A-Z]+\s*/, "");
 	//
 	if (!reporterpg && page) newItem.firstPage = page[0].replace(/,\s*\d{4}\s*[A-Z]+\s*/, "");
 	if (reportvl) newItem.reporterVolume = reportvl[0].replace(/\]\s*/, "");
 
 	// attach link to pdf version
-	var pdfurl = ZU.xpathText(doc, '//td/a[contains(text(), "PDF Format")]/@href');
+	Z.debug(url)
+	var pdfurl = url.replace(/\.html.+/, ".pdf");
 	if (pdfurl) {
-		pdfurl = "http://canlii.ca" + pdfurl;
 		newItem.attachments = [{
 			url: pdfurl,
 			title: "CanLII Full Text PDF",
@@ -93,10 +95,7 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(articles, scrape, function () {
-				Zotero.done();
-			});
-			Zotero.wait();
+			Zotero.Utilities.processDocuments(articles, scrape);
 		});
 	}
 }

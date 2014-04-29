@@ -416,10 +416,9 @@ var testCases = [
 				],
 				"title": "Punishment and cooperation in nature",
 				"date": "01/05/2012",
-				"publicationTitle": "Trends in Ecology &amp; Evolution",
+				"publicationTitle": "Trends in Ecology & Evolution",
 				"volume": "27",
 				"issue": "5",
-				"publisher": "Elsevier",
 				"DOI": "10.1016/j.tree.2011.12.004",
 				"language": "English",
 				"pages": "288-295",
@@ -427,7 +426,6 @@ var testCases = [
 				"extra": "PMID: 22284810",
 				"url": "http://www.cell.com/article/S016953471200002X/abstract",
 				"libraryCatalog": "www.cell.com",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"abstractNote": "Humans use punishment to promote cooperation in laboratory experiments but evidence that punishment plays a similar role in non-human animals is comparatively rare. In this article, we examine why this may be the case by reviewing evidence from both laboratory experiments on humans and ecologically relevant studies on non-human animals. Generally, punishment appears to be most probable if players differ in strength or strategic options. Although these conditions are common in nature, punishment (unlike other forms of aggression) involves immediate payoff reductions to both punisher and target, with net benefits to punishers contingent on cheats behaving more cooperatively in future interactions. In many cases, aggression yielding immediate benefits may suffice to deter cheats and might explain the relative scarcity of punishment in nature."
 			}
 		]

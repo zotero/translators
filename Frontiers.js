@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-03-12 04:43:57"
+	"lastUpdated": "2014-04-28 20:54:37"
 }
 
 /*
@@ -44,7 +44,7 @@ function detectWeb(doc, url) {
 
 function getItems(doc, url) {
 	var items = {};
-	var links = doc.evaluate('//*[@class="AS55"]/a[contains(@title, " ")]', doc, null, XPathResult.ANY_TYPE, null);
+	var links = doc.evaluate('//*[@class="AS55"]/a[contains(@title, " ") or contains(@title, "/")]', doc, null, XPathResult.ANY_TYPE, null);
 	while (link = links.iterateNext()) {
 		if (link.href.indexOf("/abstract") === -1) continue;
 		items[link.href] = link.textContent;
