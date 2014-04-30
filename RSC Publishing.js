@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-02-04 12:09:00"
+	"lastUpdated": "2014-04-30 15:56:32"
 }
 
 /*
@@ -59,6 +59,13 @@ function detectWeb(doc, url) {
 function scrape(doc, type) {
 	var translator = Zotero.loadTranslator('web');
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+	
+	// temporary hack: move meta tags to the head (reported to RSC 2014-04-30)
+	var meta = doc.body.getElementsByTagName('meta');
+	while(meta.length) {
+		doc.head.appendChild(meta[0]);
+	}
+	
 	translator.setDocument(doc);
 
 	translator.setHandler('itemDone', function(obj, item) {
