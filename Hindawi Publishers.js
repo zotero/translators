@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-02-28 00:27:33"
+	"lastUpdated": "2014-05-01 00:37:52"
 }
 
 /*
@@ -76,6 +76,10 @@ function doWeb(doc,url)
 		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 		translator.setDocument(doc);
 		translator.setHandler('itemDone', function(obj, item) {
+			if(!item.pages && item.DOI) {
+				// use article ID as a page (seems to be the last part of URL/DOI)
+				item.pages = 'e' + item.DOI.substr(item.DOI.lastIndexOf('/') + 1);
+			}
 			item.extra = "";
 			item.complete();
 		});
@@ -153,7 +157,8 @@ var testCases = [
 				"title": "MammaPrint Feasibility in a Large Tertiary Urban Medical Center: An Initial Experience",
 				"publicationTitle": "Scientifica",
 				"volume": "2012",
-				"date": "2012/12/31"
+				"date": "2012/12/31",
+				"pages": "e942507"
 			}
 		]
 	},
