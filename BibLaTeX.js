@@ -226,7 +226,7 @@ function writeField(field, value, isMacro, noEscape) {
 		// treat curly bracket as whitespace because of mark-up immediately preceding word
 		// treat opening parentheses &brackets as whitespace
 		if (field != "pages") {
-			value = value.replace(/([^\s-\}\(\[]+[A-Z][^\s,]*)/g, "{$1}");
+			value = value.replace(/([^\s-\}\(\[]+[A-Z][^\s,\)]*)/g, "{$1}");
 		}
 	}
 	//we write utf8
