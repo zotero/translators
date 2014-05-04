@@ -60,7 +60,11 @@ title			 : FW.Xpath('//div[contains(@class,"permalink-tweet-container")]//p[cont
 hooks            : {
 		"scraperDone" : function (item, doc, url) {
 				var match = item.date.match(/(\d+:\d+(?: AM| PM)?) - (\d+) ([A-Za-z]+) (\d+)/);
-				if (match) item.date = (new Date("20" + match[4] + ' ' + match[3] + ' ' + match[2] + ' ' + match[1])).toGMTString();
+				if (match) {
+					var prefix = "";
+					if (match[4].length === 2) prefix = "20";
+					item.date = (new Date(prefix + match[4] + ' ' + match[3] + ' ' + match[2] + ' ' + match[1])).toGMTString();
+				}
 			}
 }
 });
