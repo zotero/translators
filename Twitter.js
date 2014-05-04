@@ -96,7 +96,7 @@ var testCases = [
 				],
 				"url": "https://twitter.com/zotero/status/105608278976905216",
 				"blogTitle": "@zotero",
-				"date": "Mon, 22 Aug 202011 04:52:00 GMT",
+				"date": "Mon, 22 Aug 2011 04:52:00 GMT",
 				"title": "Zotero 3.0 beta is now available with duplicate detection and tons more. Runs outside Firefox with Chrome or Safari!  http://www.zotero.org/blog/announcing-zotero-3-0-beta-release/ …",
 				"websiteType": "microblog",
 				"shortTitle": "Zotero 3.0 beta is now available with duplicate detection and tons more. Runs outside Firefox with Chrome or Safari!  http"
