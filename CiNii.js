@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-11-24 13:12:41"
+	"lastUpdated": "2014-05-05 02:54:55"
 }
 
 function detectWeb(doc, url) {
@@ -74,7 +74,8 @@ function scrape(doc, url){
 			});
 			trans.translate();
 		});
-	}/** BEGIN TEST CASES **/
+	}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -83,29 +84,24 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://ci.nii.ac.jp/naid/110000244188/ja/",
+		"url": "http://ci.nii.ac.jp/naid/110008803112/ja",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "謙一=Kenichi Ohi",
-						"lastName": "大井",
+						"firstName": "啓佑",
+						"lastName": "岡田",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "輿助=Yosuke Shimawaki",
-						"lastName": "嶋脇",
+						"firstName": "文彦",
+						"lastName": "伊野",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "拓海=Takumi Ito",
-						"lastName": "伊藤",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Li",
-						"lastName": "Yushun",
+						"firstName": "兼一",
+						"lastName": "萩原",
 						"creatorType": "author"
 					}
 				],
@@ -114,21 +110,23 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "<研究速報>観測用既存鉄骨造モデル構造物を用いたオンライン応答実験=Pseudo-dynamic tests on existing steel model structure for seismic monitoring Snapshot",
+						"title": "遺伝子配列に対するペアワイズアライメントのGPUによる高速化 Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"itemID": ":2002-11",
-				"title": "<研究速報>観測用既存鉄骨造モデル構造物を用いたオンライン応答実験=Pseudo-dynamic tests on existing steel model structure for seismic monitoring",
-				"publicationTitle": "生産研究",
-				"ISSN": "0037105X",
-				"date": "November 2002",
-				"volume": "54",
-				"issue": "6",
-				"pages": "384-387",
-				"url": "http://ci.nii.ac.jp/naid/110000244188/ja/",
-				"DOI": "10.11188/seisankenkyu.54.384",
-				"libraryCatalog": "CiNii"
+				"itemID": "岡田啓佑:2012-03-21",
+				"title": "遺伝子配列に対するペアワイズアライメントのGPUによる高速化",
+				"publicationTitle": "情報処理学会研究報告. BIO, バイオ情報学",
+				"ISSN": "09196072",
+				"publisher": "一般社団法人情報処理学会",
+				"date": "March 2012",
+				"volume": "2012",
+				"issue": "7",
+				"pages": "1-2",
+				"url": "http://ci.nii.ac.jp/naid/110008803112/ja",
+				"abstractNote": "本稿では,GPU(Graphics Processing Unit)における高速なSmith-Waterman(SW)アルゴリズムの実装を示す.提案実装は1組の遺伝子配列に対するアライメントを高速に処理する.そのために,Striped SWアルゴリズムをタイリング技術とともにCUDA(Compute Unified Device Architecture)上に実装している.\n\t\t\t\t\tThis paper presents a fast implementation of the Smith-Waterman (SW) algorithm running on the graphics processing unit (GPU). Our implementation accelerates pairwise alignment of genome sequences. To achieve this, a striped version of the SW algorithm is implemented with a tiling technique on the compute unified device architecture (CUDA).",
+				"libraryCatalog": "CiNii",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}
