@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-28 21:01:10"
+	"lastUpdated": "2014-05-03 12:09:13"
 }
 
 /*
@@ -53,7 +53,6 @@ function getSearchResults(doc) {
 		Z.debug('Atypon: multiples container not found.');
 		return articles;
 	}
-	
 	var rows = container.getElementsByClassName('articleEntry');
 	for(var i = 0; i<rows.length; i++) {
 		var title = rows[i].getElementsByClassName('art_title')[0];
@@ -65,6 +64,17 @@ function getSearchResults(doc) {
 		if(!url) continue;
 		
 		articles[url] = title;
+	}
+	if (!Object.keys(articles).length){
+		Z.debug("trying alternate multiple format");
+		var rows = ZU.xpath(container, '//div[contains(@class, "item-details")]');
+		for(var i = 0; i<rows.length; i++) {
+			var title = ZU.xpathText(rows[i], './h3');
+			var url = ZU.xpathText(rows[i], '(.//ul[contains(@class, "icon-list")]/li/a[contains(@href, "/doi/abs/") or\
+				contains(@href, "/doi/full/") or contains(@href, "/doi/book/")])[1]/@href');
+			if(!url) continue;
+			articles[url] = title;
+		}
 	}
 	return articles;
 }
@@ -426,6 +436,11 @@ var testCases = [
 				"volume": "17"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://journals.jps.jp/toc/jpsj/2014/83/6",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
