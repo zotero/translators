@@ -61,9 +61,7 @@ hooks            : {
 		"scraperDone" : function (item, doc, url) {
 				var match = item.date.match(/(\d+:\d+(?: AM| PM)?) - (\d+) ([A-Za-z]+) (\d+)/);
 				if (match) {
-					var prefix = "";
-					if (match[4].length === 2) prefix = "20";
-					item.date = (new Date(prefix + match[4] + ' ' + match[3] + ' ' + match[2] + ' ' + match[1])).toGMTString();
+					item.date = (new Date(match[4] + ' ' + match[3] + ' ' + match[2] + ' ' + match[1])).toGMTString();
 				}
 			}
 }
