@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-03 17:37:06"
+	"lastUpdated": "2014-05-06 09:57:14"
 }
 
 /*
@@ -72,8 +72,8 @@ function scrape(doc) {
 	var newArticle = new Zotero.Item('newspaperArticle');
 	newArticle.url = doc.location.href;
 	newArticle.title = ZU.trimInternal(ZU.xpathText(doc, '//div[@class = "FAZArtikelEinleitung"]/h2')).replace(/^,/, "");
-	var date = ZU.xpathText(doc, '//span[@class="Datum"]');
-	if (date) newArticle.date = ZU.trimInternal(date.replace(/,? .*$/, ""));
+	var date = ZU.xpathText(doc, '(//span[@class="Datum"])[1]/@content');
+	if (date) newArticle.date = ZU.trimInternal(date.replace(/T.+$/, ""));
 	var teaser = ZU.xpathText(doc, '//div[@class="FAZArtikelEinleitung"]/p[@class = "Copy"]');
 	if (teaser != null) {
 		newArticle.abstractNote = Zotero.Utilities.trimInternal(teaser).replace(/^,\s*/, "");
@@ -158,7 +158,7 @@ var testCases = [
 				],
 				"url": "http://www.faz.net/aktuell/wissen/mensch-gene/wissenschaftsphilosophie-krumme-wege-der-vernunft-1654864.html",
 				"title": "Wissenschaftsphilosophie Krumme Wege der Vernunft",
-				"date": "13.06.2011",
+				"date": "2011-06-13",
 				"abstractNote": "13.06.2011 · Wissenschaft hat eine Geschichte, wie kann sie dann aber rational sein? Im Briefwechsel zwischen Ludwik Fleck und Moritz Schlick deuteten sich bereits Antworten an.",
 				"publicationTitle": "FAZ.NET",
 				"section": "Wissen",
