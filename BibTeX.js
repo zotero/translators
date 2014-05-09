@@ -1810,6 +1810,10 @@ function processField(item, field, value) {
 			if (filetitle.length == 0) {
 				filetitle = "Attachment";
 			}
+			// If the file being imported contains windows-style paths, change them to file:/// urls.
+			// Zotero accepts nothing else, on any platform
+			filepath = filepath.replace(/\\/g, '/');
+			if (filepath.match(/^[a-z]:\//i)) filepath = 'file:///' + filepath;
 			if (filetype.match(/pdf/i)) {
 				item.attachments.push({path:filepath, mimeType:"application/pdf", title:filetitle});
 			} else {
