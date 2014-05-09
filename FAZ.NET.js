@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-05-06 09:57:14"
+	"lastUpdated": "2014-05-09 09:55:17"
 }
 
 /*
@@ -83,7 +83,8 @@ function scrape(doc) {
 	if (ZU.xpathText(doc, '//div[@class="FAZArtikelEinleitung"]/span[@class = "Autor"]/span[contains(@class, "caps")]/a') != null) {
 		var xpath = '//div[@class="FAZArtikelEinleitung"]/span[@class = "Autor"]/span[contains(@class, "caps")]/a';
 	} else {
-		var xpath = '//div[@class="FAZArtikelEinleitung"]/span[@class ="Autor"]/span[contains(@class, "caps")]';
+		Z.debug("here")
+		var xpath = '//div[@class="FAZArtikelEinleitung"]/span[@class ="Autor"]/span/span[contains(@class, "caps")]';
 	};
 	var authors = ZU.xpath(doc, xpath);
 	
@@ -91,7 +92,7 @@ function scrape(doc) {
 			newArticle.creators.push(Zotero.Utilities.cleanAuthor(authors[i].textContent, "author"));
 		}
 
-	newArticle.publicationTitle = "FAZ.NET";
+	newArticle.publicationTitle = "Frankfurter Allgemeine Zeitung";
 
 	var section = ZU.xpathText(doc, '//ul[@id="nav"]/li/span[@class = "Selected"]');
 	if (section != null) {
@@ -159,8 +160,8 @@ var testCases = [
 				"url": "http://www.faz.net/aktuell/wissen/mensch-gene/wissenschaftsphilosophie-krumme-wege-der-vernunft-1654864.html",
 				"title": "Wissenschaftsphilosophie Krumme Wege der Vernunft",
 				"date": "2011-06-13",
-				"abstractNote": "13.06.2011 · Wissenschaft hat eine Geschichte, wie kann sie dann aber rational sein? Im Briefwechsel zwischen Ludwik Fleck und Moritz Schlick deuteten sich bereits Antworten an.",
-				"publicationTitle": "FAZ.NET",
+				"abstractNote": "Wissenschaft hat eine Geschichte, wie kann sie dann aber rational sein? Im Briefwechsel zwischen Ludwik Fleck und Moritz Schlick deuteten sich bereits Antworten an.",
+				"publicationTitle": "Frankfurter Allgemeine Zeitung",
 				"section": "Wissen",
 				"language": "Deutsch",
 				"ISSN": "0174-4909",
