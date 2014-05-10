@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-05-09 09:55:17"
+	"lastUpdated": "2014-05-10 09:55:17"
 }
 
 /*
@@ -83,7 +83,6 @@ function scrape(doc) {
 	if (ZU.xpathText(doc, '//div[@class="FAZArtikelEinleitung"]/span[@class = "Autor"]/span[contains(@class, "caps")]/a') != null) {
 		var xpath = '//div[@class="FAZArtikelEinleitung"]/span[@class = "Autor"]/span[contains(@class, "caps")]/a';
 	} else {
-		Z.debug("here")
 		var xpath = '//div[@class="FAZArtikelEinleitung"]/span[@class ="Autor"]/span/span[contains(@class, "caps")]';
 	};
 	var authors = ZU.xpath(doc, xpath);
