@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-05-11 10:56:10"
+	"lastUpdated": "2014-05-11 15:11:26"
 }
 
 function getSearchResults(doc) {
@@ -82,7 +82,6 @@ function scrape(doc, url) {
 		
 	} else var newItem = new Zotero.Item();
 
-
 	newItem.itemType = detectWeb(doc, url);
 	newItem.libraryCatalog = "Library Catalog - " + doc.location.host;
 	// 	We need to correct some informations where COinS is wrong
@@ -148,7 +147,8 @@ function scrape(doc, url) {
 						// TODO : Add other author types
 						if (authorFunction == 'Traduction') {
 							zoteroFunction = 'translator';
-						} else if ((authorFunction.substr(0, 7) == 'Éditeur')) {
+						} else if ((authorFunction.substr(0, 7) == 'Éditeur') || authorFunction=="Directeur de la publication") {
+							//once Zotero suppports it, distinguish between editorial director and editor here;
 							zoteroFunction = 'editor';
 						} else if ((newItem.itemType == "thesis") && (authorFunction != 'Auteur')) {
 							zoteroFunction = "contributor";
@@ -261,7 +261,7 @@ function scrape(doc, url) {
 				var dateRE = /\b(?:19|20)\d{2}\b/g;
 				var date, lastDate;
 				while(date = dateRE.exec(n)) {
-					lastDate = date[0]
+					lastDate = date[0];
 					n = n.replace(lastDate,'');	//get rid of year
 				}
 				if(lastDate) {
@@ -341,7 +341,7 @@ function scrape(doc, url) {
 			case 'year':
 			case 'jahr':
 			case 'jaar':
-				newItem.date = value.replace(/[[\]]+/g, '');
+				newItem.date = value; //we clean this up below
 				break;
 
 			case 'language':
@@ -378,10 +378,6 @@ function scrape(doc, url) {
 					}
 					if(pub.length) newItem.publisher = pub.join(',');	//in case publisher contains commas
 				}
-				//remove u.a. and [u.a.];
-			 	if (newItem.publisher){
-			 		newItem.publisher = newItem.publisher.replace(/\[?u\.a\.\]?\s*$/, "");
-			 	}
 				if(!newItem.date) {	//date is always (?) last on the line
 					m = value.match(/\D(\d{4})\b[^,;]*$/);	//could be something like c1986
 					if(m) newItem.date = m[1];
@@ -526,10 +522,26 @@ function scrape(doc, url) {
 	newItem.country = undefined;
 	//join and remove the "u.a." common in German libraries
 	if(location.length) newItem.place = location.join(', ').replace(/\[?u\.a\.\]?\s*$/, "");
-
+	
+	//remove u.a. and [u.a.] from publisher
+	if (newItem.publisher){
+		newItem.publisher = newItem.publisher.replace(/\[?u\.a\.\]?\s*$/, "");
+	}
+	
+	//clean up date, which may come from various places; We're conservative here and are just cleaning up c1996 and [1995] and combinations thereof
+	if (newItem.date){
+		newItem.date = newItem.date.replace(/[\[c]+\s*(\d{4})\]?/, "$1");
+	}
 	//if we didn't get a permalink, look for it in the entire page
 	if(!permalink) {
 		var permalink = ZU.xpathText(doc, '//a[./img[contains(@src,"/permalink") or contains(@src,"/zitierlink")]][1]/@href');
+	}
+	
+	//switch institutional authors to single field;
+	for (var i=0; i<newItem.creators.length; i++){
+		if (!newItem.creators[i].firstName){
+			newItem.creators[i].fieldMode = true;
+		}
 	}
 	if(permalink) {
 		newItem.attachments.push({
@@ -1153,11 +1165,13 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Organisation mondiale de la santé",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": true
 					},
 					{
 						"lastName": "Congrès",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": true
 					}
 				],
 				"notes": [],
@@ -1815,6 +1829,53 @@ var testCases = [
 				"edition": "2",
 				"numPages": "332",
 				"abstractNote": "Zum ersten Mal als Einzelausgabe erscheinen die von Robert Schumann und seiner Frau, der Pianistin und Komponistin Clara Schumann, geb. Wieck, in den ersten Jahren ihrer Ehe geführten gemeinsamen Tagebücher. 1987 waren diese in Leipzig und bei Stroemfeld in wissenschaftlich-kritischer Edition von dem Schumannforscher und langjährigen Direktor des Robert-Schumann-Hauses Zwickau, Gerd Nauhaus, vorgelegt worden. Mit der Neupublikation wird die textgetreue, mit Sacherläuterungen sowie Personen-, Werk- und Ortsregistern und ergänzenden Abbildungen versehene Leseausgabe vorgelegt, die einem breiten interessierten Publikum diese einzigartigen Zeugnisse einer bewegenden Künstlerehe nahebringen."
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://gso.gbv.de/DB=2.1/PPNSET?PPN=770481450",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "João Baptista Borges",
+						"lastName": "Pereira",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "<div><span>Includes bibliographical references</span></div>"
+					}
+				],
+				"tags": [
+					"Religious pluralism -- Brazil",
+					"Spiritualism -- Brazil -- History",
+					"Brazil -- Religion"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Link to Library Catalog Entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"date": "2012",
+				"ISBN": "978-85-314-1374-2, 85-314-1374-5",
+				"pages": "397",
+				"title": "Religiosidade no Brasil",
+				"place": "São Paulo, SP, Brasil",
+				"publisher": "EDUSP",
+				"libraryCatalog": "Library Catalog - gso.gbv.de",
+				"numPages": "397"
 			}
 		]
 	}
