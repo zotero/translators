@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-03-01 11:11:35"
+	"lastUpdated": "2014-05-11 10:56:10"
 }
 
 function getSearchResults(doc) {
@@ -179,7 +179,11 @@ function scrape(doc, url) {
 			
 			case 'edition':
 			case 'ausgabe':
-				newItem.edition = value;
+				var edition;
+				if (edition = value.match(/(\d+)[.\s]+(Aufl|ed|éd)/)){
+					newItem.edition = edition[1];
+				}
+				else newItem.edition = value;
 
 			case 'dans':
 			case 'in':
@@ -374,7 +378,10 @@ function scrape(doc, url) {
 					}
 					if(pub.length) newItem.publisher = pub.join(',');	//in case publisher contains commas
 				}
-
+				//remove u.a. and [u.a.];
+			 	if (newItem.publisher){
+			 		newItem.publisher = newItem.publisher.replace(/\[?u\.a\.\]?\s*$/, "");
+			 	}
 				if(!newItem.date) {	//date is always (?) last on the line
 					m = value.match(/\D(\d{4})\b[^,;]*$/);	//could be something like c1986
 					if(m) newItem.date = m[1];
@@ -398,7 +405,8 @@ function scrape(doc, url) {
 				// We're going to extract the number of pages from this field
 				// Known bug doesn't work when there are 2 volumes (maybe fixed?), 
 				var m = value.match(/(\d+) vol\./);
-				if (m) {
+				// sudoc in particular includes "1 vol" for every book; We don't want that info;
+				if (m && m[1] != 1) {
 					newItem.numberOfVolumes = m[1];
 				}
 				//make sure things like 2 partition don't match, but 2 p at the end of the field do:
@@ -516,7 +524,8 @@ function scrape(doc, url) {
 	newItem.city = undefined;
 	if (newItem.country) location.push(newItem.country.trim());
 	newItem.country = undefined;
-	if(location.length) newItem.place = location.join(', ');
+	//join and remove the "u.a." common in German libraries
+	if(location.length) newItem.place = location.join(', ').replace(/\[?u\.a\.\]?\s*$/, "");
 
 	//if we didn't get a permalink, look for it in the entire page
 	if(!permalink) {
@@ -627,7 +636,6 @@ var testCases = [
 				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
 				"language": "français",
 				"publisher": "Eska",
-				"numberOfVolumes": "1",
 				"numPages": "290",
 				"place": "Paris, France"
 			}
@@ -674,7 +682,6 @@ var testCases = [
 				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
 				"language": "anglais",
 				"publisher": "Association of College and Research Libraries",
-				"numberOfVolumes": "1",
 				"numPages": "159",
 				"place": "Chicago, Etats-Unis",
 				"shortTitle": "Zotero"
@@ -959,9 +966,6 @@ var testCases = [
 				"language": "latin",
 				"publisher": "Éditions de l'oiseau-lyre",
 				"numPages": "243",
-				"volume": "17",
-				"series": "Polyphonic music of the fourteenth century",
-				"seriesTitle": "Polyphonic music of the fourteenth century",
 				"place": "Monoco, Monaco"
 			}
 		]
@@ -1346,7 +1350,7 @@ var testCases = [
 				"place": "Heidelberg",
 				"publisher": "Spektrum,  Akad.-Verl.",
 				"libraryCatalog": "Library Catalog - gso.gbv.de",
-				"edition": "16. Aufl.",
+				"edition": "16",
 				"numPages": "569"
 			}
 		]
@@ -1433,7 +1437,7 @@ var testCases = [
 				"title": "Das war das Waldsterben!",
 				"ISBN": "978-3-7930-9526-2",
 				"date": "2008",
-				"edition": "1. Aufl.",
+				"edition": "1",
 				"pages": "164",
 				"series": "Rombach Wissenschaft Ökologie",
 				"place": "Freiburg im Breisgau [u.a.]",
@@ -1666,7 +1670,7 @@ var testCases = [
 					}
 				],
 				"title": "Politiques publiques, systèmes complexes",
-				"ISBN": "2-7056-8274-0, 978-270-5682-74-3",
+				"ISBN": "2-7056-8274-0, 978-2-7056-8274-3",
 				"date": "2012",
 				"pages": "290",
 				"place": "Paris",
@@ -1753,6 +1757,64 @@ var testCases = [
 				"numPages": "163",
 				"ISBN": "1-4438-3190-5",
 				"callNumber": "070 8 2012/10695"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://gso.gbv.de/DB=2.1/PPNSET?PPN=768059798",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Robert",
+						"lastName": "Schumann",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Clara",
+						"lastName": "Schumann",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Gerd",
+						"lastName": "Nauhaus",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Ingrid",
+						"lastName": "Bodsch",
+						"creatorType": "editor"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Schumann, Robert 1810-1856 / Schumann, Clara 1819-1896 / Tagebuch 1840-1844"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Link to Library Catalog Entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"date": "2013",
+				"ISBN": "978-3-86600-002-5, 978-3-931878-40-5",
+				"pages": "332",
+				"title": "Ehetagebücher 1840 - 1844",
+				"place": "Frankfurt/M.",
+				"publisher": "Stroemfeld",
+				"libraryCatalog": "Library Catalog - gso.gbv.de",
+				"edition": "2",
+				"numPages": "332",
+				"abstractNote": "Zum ersten Mal als Einzelausgabe erscheinen die von Robert Schumann und seiner Frau, der Pianistin und Komponistin Clara Schumann, geb. Wieck, in den ersten Jahren ihrer Ehe geführten gemeinsamen Tagebücher. 1987 waren diese in Leipzig und bei Stroemfeld in wissenschaftlich-kritischer Edition von dem Schumannforscher und langjährigen Direktor des Robert-Schumann-Hauses Zwickau, Gerd Nauhaus, vorgelegt worden. Mit der Neupublikation wird die textgetreue, mit Sacherläuterungen sowie Personen-, Werk- und Ortsregistern und ergänzenden Abbildungen versehene Leseausgabe vorgelegt, die einem breiten interessierten Publikum diese einzigartigen Zeugnisse einer bewegenden Künstlerehe nahebringen."
 			}
 		]
 	}
