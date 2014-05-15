@@ -18,7 +18,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-03-18 17:12:44"
+	"lastUpdated": "2014-05-15 01:53:29"
 }
 
 function detectImport() {
@@ -1799,37 +1799,88 @@ function processField(item, field, value) {
 	} else if (field == "sentelink") { // the reference manager 'Sente' has a unique file scheme in exported BibTeX
 		item.attachments = [{path:value.split(",")[0], mimeType:"application/pdf"}];
 	} else if (field == "file") {
-		var attachments = value.split(";");
-		for(var i in attachments){
-			var attachment = attachments[i];
-			var parts = attachment.split(":");
-			var filetitle = parts[0];
-			var filepath = parts[1];
-			if (filepath.trim() === '') continue; // skip empty entries
-			var filetype = parts[2];
-			if (filetitle.length == 0) {
-				filetitle = "Attachment";
+		var start = 0, attachment;
+		value = value.replace(/\$\\backslash\$/g, '\\') // Mendeley invention?
+			.replace(/([^\\](?:\\\\)*)\\(.){}/g, '$1$2'); // part of Mendeley's escaping (e.g. \~{} = ~)
+		for(var i=0; i<value.length; i++) {
+			if(value[i] == '\\') {
+				i++; //skip next char
+				continue;
 			}
-			if (filetype.match(/pdf/i)) {
-				item.attachments.push({path:filepath, mimeType:"application/pdf", title:filetitle});
-			} else {
-				item.attachments.push({path:filepath, title:filetitle});
+			if(value[i] == ';') {
+				attachment = parseFilePathRecord(value.slice(start, i));
+				if(attachment) item.attachments.push(attachment);
+				start = i+1;
 			}
 		}
+		
+		attachment = parseFilePathRecord(value.slice(start));
+		if(attachment) item.attachments.push(attachment);
 	}
 }
 
-function getFieldValue(read) {
+function parseFilePathRecord(record) {
+	var start = 0, fields = [];
+	for(var i=0; i<record.length; i++) {
+		if(record[i] == '\\') {
+			i++;
+			continue;
+		}
+		if(record[i] == ':') {
+			fields.push(decodeFilePathComponent(record.slice(start, i)));
+			start = i+1;
+		}
+	}
+	
+	fields.push(decodeFilePathComponent(record.slice(start)));
+	
+	if(fields.length != 3 && fields.length != 1) {
+		Zotero.debug("Unknown file path record format: " + record);
+		return;
+	}
+	
+	var attachment = {};
+	if(fields.length == 3) {
+		attachment.title = fields[0].trim() || 'Attachment';
+		attachment.path = fields[1];
+		attachment.mimeType = fields[2];
+		if(attachment.mimeType.search(/pdf/i) != -1) {
+			attachment.mimeType = 'application/pdf';
+		}
+	} else {
+		attachment.title = 'Attachment';
+		attachment.path = fields[0];
+	}
+	
+	attachment.path = attachment.path.trim();
+	if(!attachment.path) return;
+	
+	return attachment;
+}
+
+function getFieldValue(read, verbatim) {
 	var value = "";
 	// now, we have the first character of the field
 	if(read == "{") {
 		// character is a brace
-		var openBraces = 1;
+		var openBraces = 1, nextAsLiteral = false;
 		while(read = Zotero.read(1)) {
-			if(read == "{" && value[value.length-1] != "\\") {
+			if(nextAsLiteral) { // Previous character was a backslash
+				value += read;
+				nextAsLiteral = false;
+				continue;
+			}
+			
+			if(read == "\\") {
+				value += read;
+				nextAsLiteral = true;
+				continue;
+			}
+			
+			if(read == "{") {
 				openBraces++;
 				value += "{";
-			} else if(read == "}" && value[value.length-1] != "\\") {
+			} else if(read == "}") {
 				openBraces--;
 				if(openBraces == 0) {
 					break;
@@ -1858,7 +1909,7 @@ function getFieldValue(read) {
 		}
 	}
 	
-	if(value.length > 1) {
+	if(value.length > 1 && !verbatim) {
 		// replace accented characters (yucky slow)
 		value = value.replace(/{?(\\[`"'^~=]){?\\?([A-Za-z])}/g, "{$1$2}");
 		//for special characters rendered by \[a-z] we need a space
@@ -2092,7 +2143,7 @@ function beginRecord(type, closeChar) {
 				// see if there's a defined string
 				if(strings[value]) value = strings[value];
 			} else {
-				var value = getFieldValue(read);
+				var value = getFieldValue(read, field == 'file');
 			}
 			
 			if(item) {
@@ -2255,6 +2306,17 @@ function mapEscape(character) {
 
 function mapAccent(character) {
 	return (mappingTable[character] ? mappingTable[character] : "?");
+}
+
+var filePathSpecialChars = '\\\\:;{}$'; // $ for Mendeley
+var encodeFilePathRE = new RegExp('[' + filePathSpecialChars + ']', 'g');
+
+function encodeFilePathComponent(value) {
+	return value.replace(encodeFilePathRE, "\\$&");
+}
+
+function decodeFilePathComponent(value) {
+	return value.replace(/\\([^A-Za-z0-9.])/g, "$1");
 }
 
 // a little substitution function for BibTeX keys, where we don't want LaTeX 
@@ -2530,9 +2592,13 @@ function doExport() {
 				var attachment = item.attachments[i];
 				if(Zotero.getOption("exportFileData") && attachment.saveFile) {
 					attachment.saveFile(attachment.defaultPath, true);
-					attachmentString += ";" + attachment.title + ":" + attachment.defaultPath + ":" + attachment.mimeType;
+					attachmentString += ";" + encodeFilePathComponent(attachment.title)
+						+ ":" + encodeFilePathComponent(attachment.defaultPath)
+						+ ":" + encodeFilePathComponent(attachment.mimeType);
 				} else if(attachment.localPath) {
-					attachmentString += ";" + attachment.title + ":" + attachment.localPath + ":" + attachment.mimeType;
+					attachmentString += ";" + encodeFilePathComponent(attachment.title)
+						+ ":" + encodeFilePathComponent(attachment.localPath)
+						+ ":" + encodeFilePathComponent(attachment.mimeType);
 				}
 			}
 			
@@ -2853,6 +2919,141 @@ var testCases = [
 				"url": "http://www.americanrightsatwork.org/blogcategory-275/",
 				"title": "Public Service Research Foundation",
 				"date": "2012"
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@article{zoteroFilePath1,\n    title = {Zotero: single attachment},\n    file = {Test:files/47/test2.pdf:application/pdf}\n}\n\n@article{zoteroFilePaths2,\n    title = {Zotero: multiple attachments},\n    file = {Test1:files/47/test2.pdf:application/pdf;Test2:files/46/test2-min.pdf:application/pdf}\n}\n\n@article{zoteroFilePaths3,\n    title = {Zotero: linked attachments (old)},\n    file = {Test:E:\\some\\random\\folder\\test2.pdf:application/pdf}\n}\n\n@article{zoteroFilePaths4,\n    title = {Zotero: linked attachments},\n    file = {Test:E\\:\\\\some\\\\random\\\\folder\\\\test2.pdf:application/pdf}\n}\n\n@article{mendeleyFilePaths1,\n    title = {Mendeley: single attachment},\n    url = {https://forums.zotero.org/discussion/28347/unable-to-get-pdfs-stored-on-computer-into-zotero-standalone/},\n    file = {:C$\\backslash$:/Users/somewhere/AppData/Local/Mendeley Ltd./Mendeley Desktop/Downloaded/test.pdf:pdf}\n}\n\n@article{mendeleyFilePaths2,\ntitle = {Mendeley: escaped characters}\nfile = {:C$\\backslash$:/some/path/,.$\\backslash$;'[]\\{\\}`-=\\~{}!@\\#\\$\\%\\^{}\\&()\\_+.pdf:pdf},\n}\n\n@article{citaviFilePaths1,\n    title = {Citavi: single attachment},\n    url = {https://forums.zotero.org/discussion/35909/bibtex-import-from-citavi-including-pdf-attachments/},\n    file = {Test:Q\\:\\\\some\\\\random\\\\folder\\\\test.pdf:pdf}\n}",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Test",
+						"path": "files/47/test2.pdf",
+						"mimeType": "application/pdf"
+					}
+				],
+				"itemID": "zoteroFilePath1",
+				"title": "Zotero: single attachment"
+			},
+			{
+				"itemType": "journalArticle",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Test1",
+						"path": "files/47/test2.pdf",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Test2",
+						"path": "files/46/test2-min.pdf",
+						"mimeType": "application/pdf"
+					}
+				],
+				"itemID": "zoteroFilePaths2",
+				"title": "Zotero: multiple attachments"
+			},
+			{
+				"itemType": "journalArticle",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"itemID": "zoteroFilePaths3",
+				"title": "Zotero: linked attachments (old)"
+			},
+			{
+				"itemType": "journalArticle",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Test",
+						"path": "E:\\some\\random\\folder\\test2.pdf",
+						"mimeType": "application/pdf"
+					}
+				],
+				"itemID": "zoteroFilePaths4",
+				"title": "Zotero: linked attachments"
+			},
+			{
+				"itemType": "journalArticle",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Attachment",
+						"path": "C:/Users/somewhere/AppData/Local/Mendeley Ltd./Mendeley Desktop/Downloaded/test.pdf",
+						"mimeType": "application/pdf"
+					}
+				],
+				"itemID": "mendeleyFilePaths1",
+				"url": "https://forums.zotero.org/discussion/28347/unable-to-get-pdfs-stored-on-computer-into-zotero-standalone/",
+				"title": "Mendeley: single attachment"
+			},
+			{
+				"itemType": "journalArticle",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Attachment",
+						"path": "C:/some/path/,.;'[]{}`-=~!@#$%^&()_+.pdf",
+						"mimeType": "application/pdf"
+					}
+				],
+				"itemID": "mendeleyFilePaths2",
+				"title": "Mendeley: escaped characters"
+			},
+			{
+				"itemType": "journalArticle",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Test",
+						"path": "Q:\\some\\random\\folder\\test.pdf",
+						"mimeType": "application/pdf"
+					}
+				],
+				"itemID": "citaviFilePaths1",
+				"url": "https://forums.zotero.org/discussion/35909/bibtex-import-from-citavi-including-pdf-attachments/",
+				"title": "Citavi: single attachment"
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@article{BibTeXEscapeTest1,\n    title = {\textbackslash\textbackslash\\{\\}: \\\\{}}\n}",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"itemID": "BibTeXEscapeTest1",
+				"title": "extbackslash extbackslash{}: {"
 			}
 		]
 	}
