@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-12-10 17:55:11"
+	"lastUpdated": "2014-05-19 18:07:23"
 }
 
 /*
@@ -61,7 +61,7 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 	var detailRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set|func=direct|func=myshelf-full|func=myself_full.*)");
-	var mab2Opac = new RegExp("^https?://(?!alephdai)[^/]+berlin|193\.30\.112\.134|duisburg-essen/F/[A-Z0-9\-]+\?.*");
+	var mab2Opac = new RegExp("^https?://(?!alephdai)[^/]+berlin|193\.30\.112\.134|duisburg-essen/F/[A-Z0-9\-]+\?.*|^https?://katalog\.ub\.uni-duesseldorf\.de/F/");
 	var uri = doc.location.href;
 	var newUris = new Array();
 	
@@ -258,5 +258,48 @@ function scrape(newDoc, marc, url) {
 		newItem.complete();
 }
 /** BEGIN TEST CASES **/
-var testCases = []
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://katalog.ub.uni-duesseldorf.de/F/INMBJJFQM6CQLRHL9KC66J1443GT9XK9N66FH9ISFXSU2YFA7L-01956?func=full-set-set&set_number=010000&set_entry=000001&format=999",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Erdmute",
+						"lastName": "Alber",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Cati",
+						"lastName": "Coe",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tatjana",
+						"lastName": "Thelen",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"language": "eng",
+				"title": "The anthropology of sibling relations: Shared parentage, experience, and exchange",
+				"place": "Basingstoke",
+				"publisher": "Palgrave Macmillan",
+				"date": "2013",
+				"pages": "192",
+				"extra": "9781137331229, 2013. - PDF",
+				"ISBN": "9781137331236",
+				"url": "http://www.palgraveconnect.com/doifinder/10.1057/9781137331236",
+				"libraryCatalog": "katalog.ub.uni-duesseldorf.de Library Catalog",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"shortTitle": "The anthropology of sibling relations"
+			}
+		]
+	}
+]
 /** END TEST CASES **/
