@@ -220,7 +220,7 @@ function generateItem(item, teiDoc) {
         // there should be a publication title!
         if(item.publicationTitle){
             var pubTitle = teiDoc.createElementNS(ns.tei, "title");
-            if(item.itemType == "journalTitle"){
+            if(item.itemType == "journalArticle"){
                 pubTitle.setAttribute("level", "j");
             }
             else{
