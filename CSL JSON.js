@@ -9,21 +9,12 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-09-25 20:49:56"
+	"lastUpdated": "2013-10-24 05:03:52"
 }
 
 var parsedData;
-function detectImport() {
-	const CSL_TYPES = {"article":true, "article-journal":true, "article-magazine":true,
-		"article-newspaper":true, "bill":true, "book":true, "broadcast":true,
-		"chapter":true, "dataset":true, "entry":true, "entry-dictionary":true,
-		"entry-encyclopedia":true, "figure":true, "graphic":true, "interview":true,
-		"legal_case":true, "legislation":true, "manuscript":true, "map":true,
-		"motion_picture":true, "musical_score":true, "pamphlet":true,
-		"paper-conference":true, "patent":true, "personal_communication":true,
-		"post":true, "post-weblog":true, "report":true, "review":true, "review-book":true,
-		"song":true, "speech":true, "thesis":true, "treaty":true, "webpage":true};
-		
+
+function parseInput() {
 	var str, json = "";
 	
 	// Read in the whole file at once, since we can't easily parse a JSON stream. The 
@@ -35,8 +26,22 @@ function detectImport() {
 		parsedData = JSON.parse(json);	
 	} catch(e) {
 		Zotero.debug(e);
-		return false;
 	}
+}
+
+function detectImport() {
+	const CSL_TYPES = {"article":true, "article-journal":true, "article-magazine":true,
+		"article-newspaper":true, "bill":true, "book":true, "broadcast":true,
+		"chapter":true, "dataset":true, "entry":true, "entry-dictionary":true,
+		"entry-encyclopedia":true, "figure":true, "graphic":true, "interview":true,
+		"legal_case":true, "legislation":true, "manuscript":true, "map":true,
+		"motion_picture":true, "musical_score":true, "pamphlet":true,
+		"paper-conference":true, "patent":true, "personal_communication":true,
+		"post":true, "post-weblog":true, "report":true, "review":true, "review-book":true,
+		"song":true, "speech":true, "thesis":true, "treaty":true, "webpage":true};
+		
+	parseInput();
+	if(!parsedData) return false;
 	
 	if(typeof parsedData !== "object") return false;
 	if(!(parsedData instanceof Array)) parsedData = [parsedData];
@@ -51,6 +56,9 @@ function detectImport() {
 }
 
 function doImport() {
+	if(!parsedData) parseInput();
+	if(!parsedData) return;
+	
 	for(var i=0; i<parsedData.length; i++) {
 		var item = new Z.Item();
 		ZU.itemFromCSLJSON(item, parsedData[i]);
