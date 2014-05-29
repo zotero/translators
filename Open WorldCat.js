@@ -226,7 +226,9 @@ function doSearch(item) {
 			scrape(extractOCLCID(getTitleNode(results[0]).href));
 		}
 	});
-} /** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -421,6 +423,42 @@ var testCases = [
 				"title": "[Cahokia Mounds replicas]",
 				"publisher": "Cahokia Mounds Museum Society]",
 				"date": "2000"
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"ISBN": "9780585030159"
+		},
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Thelen",
+						"firstName": "Esther",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Smith",
+						"firstName": "Linda B",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"libraryCatalog": "Open WorldCat",
+				"language": "English",
+				"url": "http://search.ebscohost.com/login.aspx?direct=true&scope=site&db=nlebk&db=nlabk&AN=1712",
+				"title": "A dynamic systems approach to the development of cognition and action",
+				"publisher": "MIT Press",
+				"place": "Cambridge, Mass.",
+				"date": "1996",
+				"ISBN": "0585030154  9780585030159",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}

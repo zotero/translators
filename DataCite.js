@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 8,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-05-24 07:46:16"
+	"lastUpdated": "2014-05-29 07:46:16"
 }
 
 function detectSearch(items) {
@@ -92,22 +92,23 @@ var testCases = [
 		},
 		"items": [
 			{
-				"itemType": "journalArticle"
+				"itemType": "journalArticle",
 				"creators": [
 					{
-						"lastName": "Heiliges römisches Reich deutscher Nation"
-						"fieldMode": 1
+						"lastName": "Heiliges römisches Reich deutscher Nation",
+						"fieldMode": 1,
 						"creatorType": "author"
 					}
-				]
-				"notes": []
-				"tags": []
-				"seeAlso": []
-				"attachments": []
-				"title": "Code criminel de l'empereur Charles V vulgairement appellé la Caroline contenant les loix qui sont suivies dans les jurisdictions criminelles de l'Empire et à l'usage des conseils de guerre des troupes suisses."
-				"url": "http://dx.doi.org/10.12763/ONA1045"
-				"DOI": "10.12763/ONA1045"
-				"date": "1734"
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Code criminel de l'empereur Charles V vulgairement appellé la Caroline contenant les loix qui sont suivies dans les jurisdictions criminelles de l'Empire et à l'usage des conseils de guerre des troupes suisses.",
+				"url": "http://dx.doi.org/10.12763/ONA1045",
+				"DOI": "10.12763/ONA1045",
+				"date": "1734",
+				"libraryCatalog": "DataCite"
 			}
 		]
 	}

@@ -449,7 +449,11 @@ var testCases = [
 					"people capability maturity model"
 				],
 				"seeAlso": [],
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
 				"itemID": "AL:10220690-201202-201202200002-201202200002-1-20",
 				"issue": "1",
 				"abstractNote": "The People Capability Maturity Model (P-CMM) is an evolving channel for and a roadmap of organizational development and improvement. This model comprises five consecutive maturity levels: initial, managed, defined, predictable, and optimized. The unique characteristics of P-CMM lie in the standardization of processes guiding employees to perform their daily routines more efficiently. This was a field research project that used document analysis, observation, interviews, and analysis of researchers' field notes. By triangulating this data, researchers hoped to maintain a satisfactory level of reliability and validity for the model. Through on-site research into the industrial control industry, researchers endeavored to obtain some indication of the significance and potential application of this model. After evaluating each step of the current production process, researchers made necessary changes or appropriate adjustments based on the protocol set out in the second level of P-CMM to evaluate and diagnose the model.",

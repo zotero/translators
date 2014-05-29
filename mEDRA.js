@@ -557,6 +557,44 @@ var testCases = [
 				"pages": "69–78"
 			}
 		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"DOI": "10.12908/SEEJPH-2014-05"
+		},
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Gazmend",
+						"lastName": "Bojaj",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Katarzyna",
+						"lastName": "Czabanowska",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Fitim",
+						"lastName": "Skeraj",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"DOI": "10.12908/SEEJPH-2014-05",
+				"url": "http://www.seejph.com/wp-content/uploads/2014/02/2014-02-Gazmend-Bojaj-et-al.-SEEJPH.pdf",
+				"language": "ger",
+				"libraryCatalog": "mEDRA",
+				"title": "Level of competencies of family physicians from patients’ viewpoint in post-war Kosovo",
+				"date": "2014-02-09"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

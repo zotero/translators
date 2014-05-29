@@ -1162,6 +1162,108 @@ var testCases = [
 				"libraryCatalog": "NCBI PubMed"
 			}
 		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"PMID": "20729678"
+		},
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"creatorType": "author",
+						"lastName": "Coar",
+						"firstName": "Jaekea T"
+					},
+					{
+						"creatorType": "author",
+						"lastName": "Sewell",
+						"firstName": "Jeanne P"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Bibliography as Topic",
+					"Database Management Systems",
+					"Humans"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"ISSN": "1538-9855",
+				"journalAbbreviation": "Nurse Educ",
+				"issue": "5",
+				"language": "eng",
+				"abstractNote": "Zotero is a powerful free personal bibliographic manager (PBM) for writers. Use of a PBM allows the writer to focus on content, rather than the tedious details of formatting citations and references. Zotero 2.0 (http://www.zotero.org) has new features including the ability to synchronize citations with the off-site Zotero server and the ability to collaborate and share with others. An overview on how to use the software and discussion about the strengths and limitations are included.",
+				"DOI": "10.1097/NNE.0b013e3181ed81e4",
+				"extra": "PMID: 20729678",
+				"libraryCatalog": "NCBI PubMed",
+				"shortTitle": "Zotero",
+				"title": "Zotero: harnessing the power of a personal bibliographic manager",
+				"pages": "205-207",
+				"publicationTitle": "Nurse educator",
+				"volume": "35",
+				"date": "2010 Sep-Oct"
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"contextObject": "url_ver=Z39.88-2004&ctx_ver=Z39.88-2004&rfr_id=info:sid/zotero.org:2&rft_id=info:doi/10.1097/NNE.0b013e3181ed81e4&rft_id=info:pmid/20729678&rft_val_fmt=info:ofi/fmt:kev:mtx:journal&rft.genre=article&rft.atitle=Zotero: harnessing the power of a personal bibliographic manager&rft.jtitle=Nurse educator&rft.stitle=Nurse Educ&rft.volume=35&rft.issue=5&rft.aufirst=Jaekea T&rft.aulast=Coar&rft.au=Jaekea T Coar&rft.au=Jeanne P Sewell&rft.date=2010-10&rft.pages=205-207&rft.spage=205&rft.epage=207&rft.issn=1538-9855&rft.language=eng"
+		},
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"creatorType": "author",
+						"lastName": "Coar",
+						"firstName": "Jaekea T"
+					},
+					{
+						"creatorType": "author",
+						"lastName": "Sewell",
+						"firstName": "Jeanne P"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Bibliography as Topic",
+					"Database Management Systems",
+					"Humans"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"ISSN": "1538-9855",
+				"journalAbbreviation": "Nurse Educ",
+				"issue": "5",
+				"language": "eng",
+				"abstractNote": "Zotero is a powerful free personal bibliographic manager (PBM) for writers. Use of a PBM allows the writer to focus on content, rather than the tedious details of formatting citations and references. Zotero 2.0 (http://www.zotero.org) has new features including the ability to synchronize citations with the off-site Zotero server and the ability to collaborate and share with others. An overview on how to use the software and discussion about the strengths and limitations are included.",
+				"DOI": "10.1097/NNE.0b013e3181ed81e4",
+				"extra": "PMID: 20729678",
+				"libraryCatalog": "NCBI PubMed",
+				"shortTitle": "Zotero",
+				"title": "Zotero: harnessing the power of a personal bibliographic manager",
+				"pages": "205-207",
+				"publicationTitle": "Nurse educator",
+				"volume": "35",
+				"date": "2010 Sep-Oct"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

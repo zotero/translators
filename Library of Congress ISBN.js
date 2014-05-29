@@ -33,3 +33,45 @@ function doSearch(item) {
 		translator.translate();
 	});
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "search",
+		"input": {
+			"ISBN": "9780521779241"
+		},
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Haakonssen",
+						"firstName": "Knud",
+						"creatorType": "editor"
+					}
+				],
+				"notes": [ 
+					{ 
+						"note": "Imagination : morals, science, arts / Charles L. Griswold, Jr. -- Adam Smith, belletrist / Mark Salber Phillips -- Adam Smith's theory of language / Marcelo Dascal -- Smith and science / Christopher J. Berry -- Smith on ingenuity, pleasure, and the imitative arts / Neil de Marchi -- Sympathy and the impartial spectator / Alexander Broadie -- Virtues, utility, and rules / Robert Shaver -- Adam Smith on justice, rights, and law / David Lieberman -- Self-interest and other interests / Pratap Bhanu Mehta -- Adam Smith and history / J.G.A. Pocock -- Adam Smith's politics / Douglas Long -- Adam Smith's economics / Emma Rothschild and Amartya Sen -- The legacy of Adam Smith / Knud Haakonssen and Donald Winch" 
+					}
+				],
+				"tags": [
+					"Smith, Adam"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"libraryCatalog": "Library of Congress ISBN",
+				"place": "Cambridge ; New York",
+				"ISBN": "0521770599",
+				"title": "The Cambridge companion to Adam Smith",
+				"publisher": "Cambridge University Press",
+				"date": "2006",
+				"numPages": "409",
+				"series": "Cambridge companions to philosophy",
+				"callNumber": "B1545.Z7 C36 2006"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
