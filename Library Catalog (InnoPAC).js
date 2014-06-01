@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-12-09 20:21:58"
+	"lastUpdated": "2014-06-01 16:02:26"
 }
 
 function detectWeb(doc, url) {
@@ -187,13 +187,16 @@ function doWeb(doc, url) {
 			// Require link to match this
 			var tagRegexp = new RegExp();
 			tagRegexp.compile('^https?://[^/]+/search\\??/[^/]+/[^/]+/[0-9]+\%2C[^/]+/frameset');
-			
 			var urls = new Array();
-			var availableItems = new Array();
+			var availableItems = {};
 			var firstURL = false;
 			
-			var tableRows = doc.evaluate('//table//tr[@class="browseEntry" or @class="briefCitRow" or td/input[@type="checkbox"] or td[contains(@class,"briefCitRow") or contains(@class,"briefcitCell")]]',
+			var tableRows = doc.evaluate('//table//tr[@class="browseEntry" or @class="briefCitRow" or td/input[@type="checkbox"] or td[contains(@class,"briefCitRow") or contains(@class,"briefcitCell") or contains(@class,"briefcitDetail")]]',
 										 doc, null, XPathResult.ANY_TYPE, null);
+			if (!tableRows.iterateNext()){
+				//http://lib.ntu.edu.tw/en
+				tableRows = doc.evaluate('//table[@class="briefCitRow"]', doc, null, XPathResult.ANY_TYPE, null);
+			}
 			// Go through table rows
 			var i = 0;
 			while(tableRow = tableRows.iterateNext()) {
@@ -213,7 +216,7 @@ function doWeb(doc, url) {
 					
 					// Go through links
 					while(link) {
-						if (link.textContent.match(/\w+/)) availableItems[link.href] = link.textContent;
+						if (link.textContent.trim()) availableItems[link.href] = link.textContent;
 						link = links.iterateNext();
 					}
 					i++;
@@ -302,6 +305,16 @@ var testCases = [
 				"shortTitle": "Black mass"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://tulips.ntu.edu.tw/search/c?searchtype=Y&searcharg=test&searchscope=5",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://las.sinica.edu.tw:1085/search~S0*eng/?searchtype=a&searcharg=%E9%BB%83%E5%8B%97%E5%90%BE&sortdropdown=-&SORT=D&extended=0&SUBMIT=Search&searchlimits=&searchorigarg=aborges",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
