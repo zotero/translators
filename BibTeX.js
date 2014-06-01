@@ -18,7 +18,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-05-15 01:53:29"
+	"lastUpdated": "2014-06-01 01:53:29"
 }
 
 function detectImport() {
@@ -1792,7 +1792,7 @@ function processField(item, field, value) {
 		} else {
 			item.tags = value.split(re);
 		}
-	} else if (field == "comment" || field == "annote" || field == "review") {
+	} else if (field == "comment" || field == "annote" || field == "review" || field == "notes") {
 		item.notes.push({note:Zotero.Utilities.text2html(value)});
 	} else if (field == "pdf" || field == "path" /*Papers2 compatibility*/) {
 		item.attachments = [{path:value, mimeType:"application/pdf"}];
