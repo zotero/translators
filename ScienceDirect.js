@@ -2,14 +2,14 @@
 	"translatorID": "b6d0a7a-d076-48ae-b2f0-b6de28b194e",
 	"label": "ScienceDirect",
 	"creator": "Michael Berkowitz and Aurimas Vinckevicius",
-	"target": "^https?://[^/]*science-?direct\\.com[^/]*/science(\\/article)?(\\?(?:.+\\&|)ob=(?:ArticleURL|ArticleListURL|PublicationURL))?",
+	"target": "^https?://[^/]*science-?direct\\.com[^/]*/science(?:/article/|\\?.*\\b_ob=ArticleListURL|/(?:journal|bookseries|book|handbooks|referenceworks)/\\d)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-02-02 04:44:46"
+	"lastUpdated": "2014-06-02 02:22:48"
 }
 
 function detectWeb(doc, url) {
@@ -23,9 +23,8 @@ function detectWeb(doc, url) {
 	if((url.indexOf("pdf") !== -1
 			&& url.indexOf("_ob=ArticleURL") === -1
 			&& url.indexOf("/article/") === -1)
-		|| url.indexOf("/journal/") !== -1
-		|| url.indexOf("_ob=ArticleListURL") !== -1
-		|| url.indexOf("/book/") !== -1) {
+		|| url.search(/\/(?:journal|bookseries|book|handbooks|referenceworks)\//) !== -1
+		|| url.indexOf("_ob=ArticleListURL") !== -1) {
 		if (getArticleList(doc).length > 0) {
 			return "multiple";
 		} else {
@@ -288,9 +287,10 @@ function scrapeByISBN(doc) {
 function getArticleList(doc) {
 	return ZU.xpath(doc,
 		'(//table[@class="resultRow"]/tbody/tr/td[2]/a\
-		|//table[@class="resultRow"]/tbody/tr/td[2]/h3/a\
-		|//td[@class="nonSerialResultsList"]/h3/a)\
-		[not(contains(text(),"PDF (") or contains(text(), "Related Articles"))]');
+			|//table[@class="resultRow"]/tbody/tr/td[2]/h3/a\
+			|//td[@class="nonSerialResultsList"]/h3/a\
+			|//div[@id="bodyMainResults"]//li[contains(@class,"title")]//a\
+		)\[not(contains(text(),"PDF (") or contains(text(), "Related Articles"))]');
 }
 
 function doWeb(doc, url) {
@@ -378,7 +378,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.sciencedirect.com/science/article/pii/S016748890800116X",
-		"defer": true,
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -416,12 +415,12 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Yeast apoptosis",
 					"Apoptotic regulators",
+					"Bcl-2 family",
+					"Mitochondrial fragmentation",
 					"Mitochondrial outer membrane permeabilization",
 					"Permeability transition pore",
-					"Bcl-2 family",
-					"Mitochondrial fragmentation"
+					"Yeast apoptosis"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -433,19 +432,19 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "Mitochondria-dependent apoptosis in yeast",
 				"journalAbbreviation": "Biochimica et Biophysica Acta (BBA) - Molecular Cell Research",
-				"volume": "1783",
 				"issue": "7",
-				"pages": "1286-1302",
+				"series": "Apoptosis in yeast",
 				"ISSN": "0167-4889",
 				"DOI": "10.1016/j.bbamcr.2008.03.010",
 				"url": "http://www.sciencedirect.com/science/article/pii/S016748890800116X",
 				"abstractNote": "Mitochondrial involvement in yeast apoptosis is probably the most unifying feature in the field. Reports proposing a role for mitochondria in yeast apoptosis present evidence ranging from the simple observation of ROS accumulation in the cell to the identification of mitochondrial proteins mediating cell death. Although yeast is unarguably a simple model it reveals an elaborate regulation of the death process involving distinct proteins and most likely different pathways, depending on the insult, growth conditions and cell metabolism. This complexity may be due to the interplay between the death pathways and the major signalling routes in the cell, contributing to a whole integrated response. The elucidation of these pathways in yeast has been a valuable help in understanding the intricate mechanisms of cell death in higher eukaryotes, and of severe human diseases associated with mitochondria-dependent apoptosis. In addition, the absence of obvious orthologues of mammalian apoptotic regulators, namely of the Bcl-2 family, favours the use of yeast to assess the function of such proteins. In conclusion, yeast with its distinctive ability to survive without respiration-competent mitochondria is a powerful model to study the involvement of mitochondria and mitochondria interacting proteins in cell death.",
-				"date": "July 2008",
-				"publicationTitle": "Biochimica et Biophysica Acta (BBA) - Molecular Cell Research",
 				"libraryCatalog": "ScienceDirect",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"title": "Mitochondria-dependent apoptosis in yeast",
+				"volume": "1783",
+				"pages": "1286-1302",
+				"date": "July 2008",
+				"publicationTitle": "Biochimica et Biophysica Acta (BBA) - Molecular Cell Research"
 			}
 		]
 	},
@@ -457,7 +456,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.sciencedirect.com/science/article/pii/B9780123694683500083",
-		"defer": true,
 		"items": [
 			{
 				"itemType": "bookSection",
@@ -499,65 +497,24 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "ScienceDirect Snapshot"
-					},
-					{
-						"title": "ScienceDirect Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
-				"title": "8 - Introduction to discrete dislocation statics and dynamics",
 				"bookTitle": "Computational Materials Engineering",
-				"publisher": "Academic Press",
 				"place": "Burlington",
-				"pages": "267-316",
 				"ISBN": "978-0-12-369468-3",
 				"url": "http://www.sciencedirect.com/science/article/pii/B9780123694683500083",
 				"abstractNote": "This chapter provides an introduction to discrete dislocation statics and dynamics. The chapter deals with the simulation of plasticity of metals at the microscopic and mesoscopic scale using space- and time-discretized dislocation statics and dynamics. The complexity of discrete dislocation models is due to the fact that the mechanical interaction of ensembles of such defects is of an elastic nature and, therefore, involves long-range interactions. Space-discretized dislocation simulations idealize dislocations outside the dislocation cores as linear defects that are embedded within an otherwise homogeneous, isotropic or anisotropic, linear elastic medium. The aim of the chapter is to concentrate on those simulations that are discrete in both space and time. It explicitly incorporates the properties of individual lattice defects in a continuum formulation. The theoretical framework of linear continuum elasticity theory is overviewed as required for the formulation of basic dislocation mechanics. The chapter also discusses the dislocation statics, where the fundamentals of linear isotropic and anisotropic elasticity theory that are required in dislocation theory are reviewed. The chapter describes the dislocation dynamics, where it is concerned with the introduction of continuum dislocation dynamics. The last two sections deal with kinematics of discrete dislocation dynamics and dislocation reactions and annihilation.",
-				"date": "2007",
-				"libraryCatalog": "ScienceDirect"
+				"libraryCatalog": "ScienceDirect",
+				"title": "8 - Introduction to discrete dislocation statics and dynamics",
+				"publisher": "Academic Press",
+				"pages": "267-316",
+				"date": "2007"
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.sciencedirect.com/science?_ob=RefWorkIndexURL&_idxType=AU&_cid=277739&_acct=C000228598&_version=1&_userid=10&md5=a27159035e8b2b8e216c551de9cedefd",
-		"defer": true,
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"lastName": "Likens",
-						"firstName": "Gene E",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "Open WorldCat",
-				"language": "English",
-				"url": "http://public.eblib.com/EBLPublic/PublicView.do?ptiID=634856",
-				"title": "Encyclopedia of inland waters",
-				"publisher": "Elsevier",
-				"place": "Amsterdam; Boston",
-				"date": "2009",
-				"ISBN": "9780123706263  0123706262",
-				"abstractNote": "Contains over 240 individual articles covering various broad topics including properties of water hydrologic cycles, surface and groundwater hydrology, hydrologic balance, lakes of the world, rivers of the world, light and heat in aquatic ecosystems, hydrodynamics and mixing in rivers, reservoirs, and lakes, biological integration among inland aquatic ecosystems, pollution and remediation, and conservation and management of inland aquatic ecosystems.",
-				"accessDate": "CURRENT_TIMESTAMP"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.sciencedirect.com/science?_ob=RefWorkIndexURL&_idxType=AR&_cid=277739&_acct=C000228598&_version=1&_userid=10&md5=54bf1ed459ae10ac5ad1a2dc11c873b9",
-		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "http://www.sciencedirect.com/science/article/pii/B9780123706263000508",
-		"defer": true,
 		"items": [
 			{
 				"itemType": "bookSection",
@@ -588,24 +545,18 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "ScienceDirect Snapshot"
-					},
-					{
-						"title": "ScienceDirect Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
-				"title": "Africa",
 				"bookTitle": "Encyclopedia of Inland Waters",
-				"publisher": "Academic Press",
 				"place": "Oxford",
-				"pages": "295-305",
 				"ISBN": "978-0-12-370626-3",
-				"DOI": "10.1016/B978-012370626-3.00050-8",
 				"url": "http://www.sciencedirect.com/science/article/pii/B9780123706263000508",
 				"abstractNote": "The African continent (30.1 million km2) extends from 37°17′N to 34°52 S and covers a great variety of climates except the polar climate. Although Africa is often associated to extended arid areas as the Sahara (7 million km2) and Kalahari (0.9 million km2), it is also characterized by a humid belt in its equatorial part and by few very wet regions as in Cameroon and in Sierra Leone. Some of the largest river basins are found in this continent such as the Congo, also termed Zaire, Nile, Zambezi, Orange, and Niger basins. Common features of Africa river basins are (i) warm temperatures, (ii) general smooth relief due to the absence of recent mountain ranges, except in North Africa and in the Rift Valley, (iii) predominance of old shields and metamorphic rocks with very developed soil cover, and (iv) moderate human impacts on river systems except for the recent spread of river damming. African rivers are characterized by very similar hydrochemical and physical features (ionic contents, suspended particulate matter, or SPM) but differ greatly by their hydrological regimes, which are more developed in this article.",
-				"date": "2009",
 				"libraryCatalog": "ScienceDirect",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"title": "Africa",
+				"publisher": "Academic Press",
+				"pages": "295-305",
+				"date": "2009"
 			}
 		]
 	},
@@ -737,21 +688,45 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "Reducing waste from incomplete or unusable reports of biomedical research",
 				"journalAbbreviation": "The Lancet",
-				"volume": "383",
 				"issue": "9913",
-				"pages": "267-276",
 				"ISSN": "0140-6736",
 				"DOI": "10.1016/S0140-6736(13)62228-X",
 				"url": "http://www.sciencedirect.com/science/article/pii/S014067361362228X",
-				"date": "January 24, 2014",
-				"publicationTitle": "The Lancet",
-				"abstractNote": "Research publication can both communicate and miscommunicate. Unless research is adequately reported, the time and resources invested in the conduct of research is wasted. Reporting guidelines such as CONSORT, STARD, PRISMA, and ARRIVE aim to improve the quality of research reports, but all are much less adopted and adhered to than they should be. Adequate reports of research should clearly describe which questions were addressed and why, what was done, what was shown, and what the findings mean. However, substantial failures occur in each of these elements. For example, studies of published trial reports showed that the poor description of interventions meant that 40–89% were non-replicable; comparisons of protocols with publications showed that most studies had at least one primary outcome changed, introduced, or omitted; and investigators of new trials rarely set their findings in the context of a systematic review, and cited a very small and biased selection of previous relevant trials. Although best documented in reports of controlled trials, inadequate reporting occurs in all types of studies—animal and other preclinical studies, diagnostic studies, epidemiological studies, clinical prediction research, surveys, and qualitative studies. In this report, and in the Series more generally, we point to a waste at all stages in medical research. Although a more nuanced understanding of the complex systems involved in the conduct, writing, and publication of research is desirable, some immediate action can be taken to improve the reporting of research. Evidence for some recommendations is clear: change the current system of research rewards and regulations to encourage better and more complete reporting, and fund the development and maintenance of infrastructure to support better reporting, linkage, and archiving of all elements of research. However, the high amount of waste also warrants future investment in the monitoring of and research into reporting of research, and active implementation of the findings to ensure that research reports better address the needs of the range of research users.",
+				"abstractNote": "Summary\nResearch publication can both communicate and miscommunicate. Unless research is adequately reported, the time and resources invested in the conduct of research is wasted. Reporting guidelines such as CONSORT, STARD, PRISMA, and ARRIVE aim to improve the quality of research reports, but all are much less adopted and adhered to than they should be. Adequate reports of research should clearly describe which questions were addressed and why, what was done, what was shown, and what the findings mean. However, substantial failures occur in each of these elements. For example, studies of published trial reports showed that the poor description of interventions meant that 40–89% were non-replicable; comparisons of protocols with publications showed that most studies had at least one primary outcome changed, introduced, or omitted; and investigators of new trials rarely set their findings in the context of a systematic review, and cited a very small and biased selection of previous relevant trials. Although best documented in reports of controlled trials, inadequate reporting occurs in all types of studies—animal and other preclinical studies, diagnostic studies, epidemiological studies, clinical prediction research, surveys, and qualitative studies. In this report, and in the Series more generally, we point to a waste at all stages in medical research. Although a more nuanced understanding of the complex systems involved in the conduct, writing, and publication of research is desirable, some immediate action can be taken to improve the reporting of research. Evidence for some recommendations is clear: change the current system of research rewards and regulations to encourage better and more complete reporting, and fund the development and maintenance of infrastructure to support better reporting, linkage, and archiving of all elements of research. However, the high amount of waste also warrants future investment in the monitoring of and research into reporting of research, and active implementation of the findings to ensure that research reports better address the needs of the range of research users.",
 				"libraryCatalog": "ScienceDirect",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"title": "Reducing waste from incomplete or unusable reports of biomedical research",
+				"volume": "383",
+				"pages": "267-276",
+				"date": "January 24, 2014",
+				"publicationTitle": "The Lancet"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.sciencedirect.com/science?_ob=ArticleListURL&_method=list&_ArticleListID=-590513498&_sort=r&_st=13&view=c&md5=a918945fc4b0c6f407679abcc6f8f493&searchtype=a",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.sciencedirect.com/science/journal/22126716",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.sciencedirect.com/science/handbooks/18745709",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.sciencedirect.com/science/referenceworks/9780080437484",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.sciencedirect.com/science/bookseries/00652458",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
