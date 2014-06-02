@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-22 00:54:18"
+	"lastUpdated": "2014-06-01 17:29:05"
 }
 
 function getSearchResults(doc) {
@@ -80,7 +80,7 @@ function detectWeb(doc, url) {
 	if(doc.getElementById('articleListHeader_selectAllToc')
 		&& getSearchResults(doc).length) {
 		return "multiple";
-	} else if(doc.getElementById('articleHead') && getDoi(url)) {
+	} else if(getDoi(url)) {
 		var h2 = ZU.xpathText(doc, '//div[@id="articleHead"]/h2');
 		if(h2 && h2.indexOf("Chapter") !=-1) {
 			return "bookSection";

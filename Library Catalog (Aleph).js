@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-05-19 18:07:23"
+	"lastUpdated": "2014-06-01 20:40:45"
 }
 
 /*
@@ -258,48 +258,5 @@ function scrape(newDoc, marc, url) {
 		newItem.complete();
 }
 /** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://katalog.ub.uni-duesseldorf.de/F/INMBJJFQM6CQLRHL9KC66J1443GT9XK9N66FH9ISFXSU2YFA7L-01956?func=full-set-set&set_number=010000&set_entry=000001&format=999",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"firstName": "Erdmute",
-						"lastName": "Alber",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Cati",
-						"lastName": "Coe",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Tatjana",
-						"lastName": "Thelen",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"language": "eng",
-				"title": "The anthropology of sibling relations: Shared parentage, experience, and exchange",
-				"place": "Basingstoke",
-				"publisher": "Palgrave Macmillan",
-				"date": "2013",
-				"pages": "192",
-				"extra": "9781137331229, 2013. - PDF",
-				"ISBN": "9781137331236",
-				"url": "http://www.palgraveconnect.com/doifinder/10.1057/9781137331236",
-				"libraryCatalog": "katalog.ub.uni-duesseldorf.de Library Catalog",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "The anthropology of sibling relations"
-			}
-		]
-	}
-]
+var testCases = []
 /** END TEST CASES **/

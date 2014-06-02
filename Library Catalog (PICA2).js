@@ -305,7 +305,7 @@ var testCases = [
 					}
 				],
 				"notes": [
-					"Bestand: ubi? [Signatur: /HM 3575 M449];",
+					"Bestand:  [Signatur: /HM 3575 M449];",
 					"Bibliogr. W. Somerset Maugham S. 214 - [223]"
 				],
 				"tags": [

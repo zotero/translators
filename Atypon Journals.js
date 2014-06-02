@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-05-03 12:09:13"
+	"lastUpdated": "2014-06-01 17:35:03"
 }
 
 /*
@@ -108,7 +108,7 @@ function scrape(doc, url) {
 	var doi = url.match(/10\.[^?#]+/)[0];
 	var citationurl = url.replace(replURLRegExp, "/action/showCitFormats?doi=");
 	var abstract = ZU.xpathText(doc, '//div[@class="abstractSection"]')
-	var tags = ZU.xpath(doc, '//p[@class="fulltext"]//a[contains(@href, "keywordsfield")]')
+	var tags = ZU.xpath(doc, '//p[@class="fulltext"]//a[contains(@href, "keywordsfield") or contains(@href, "Keyword=")]');
 	Z.debug("Citation URL: " + citationurl);
 	ZU.processDocuments(citationurl, function(citationDoc){
 		var filename = citationDoc.evaluate('//form[@target="_self"]//input[@name="downloadFileName"]', citationDoc, null, XPathResult.ANY_TYPE, null).iterateNext().value;

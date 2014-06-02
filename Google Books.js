@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-03-11 22:18:46"
+	"lastUpdated": "2014-06-01 17:47:45"
 }
 
 /*
@@ -322,7 +322,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"numPages": "260",
+				"numPages": "246",
 				"ISBN": "9780521868617",
 				"publisher": "Cambridge University Press",
 				"title": "The Cambridge Companion to Electronic Music",
@@ -452,11 +452,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.google.com/search?q=asimov&btnG=Search+Books&tbm=bks&tbo=1#hl=en&q=asimov&sei=guBGUIDOCJP8qQG7u4DYCg&start=10&tbm=bks",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://books.google.com/books?q=editions:HARVARD32044100176072&id=nFMSAAAAYAAJ",
 		"items": "multiple"
 	},
 	{

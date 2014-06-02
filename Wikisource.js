@@ -86,9 +86,9 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Spoken works",
 					"Individual Christian hymns",
-					"Non-gospel Christian and Judaic hymns"
+					"Non-gospel Christian and Judaic hymns",
+					"Spoken works"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -100,10 +100,9 @@ var testCases = [
 				"url": "https://en.wikisource.org/wiki/Amazing_Grace",
 				"abstractNote": "\"Amazing Grace\" (c. 1772) is one of the most well-known Christian hymns. The words thereof are part of the Olney Hymns that the author had worked on, with William Cowper and other hymnodists.\nThe text was first set to the tune NEW BRITAIN in William Walker's Southern Harmony, 1835.",
 				"archive": "Wikisource",
-				"rights": "Text is available under the Creative Commons Attribution/Share-Alike License; additional terms may apply.  By using this site, you agree to the Terms of Use and Privacy Policy.",
+				"rights": "Text is available under the Creative Commons Attribution-ShareAlike License; additional terms may apply.  By using this site, you agree to the Terms of Use and Privacy Policy.",
 				"title": "Amazing Grace",
-				"libraryCatalog": "Wikisource",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "Wikisource"
 			}
 		]
 	}

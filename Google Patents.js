@@ -608,7 +608,7 @@ var testCases = [
 				"patentNumber": "US4748058 A",
 				"filingDate": "Feb 10, 1987",
 				"assignee": "Craig Jr Chester L",
-				"title": "Artificial tree",
+				"title": "For christmas",
 				"abstractNote": "An artificial tree assembly, and a tree constructed therefrom, are provided. The assembly comprises a collapsible three-piece pole; a base member formed by the bottom of a box for storing the tree assembly and including a pole support member secured thereto for supporting the pole; and a plurality of limb sections and interconnecting garlands. The limb-sections each comprise a central ring portion and a plurality of limb members extending radially outwardly from the central ring portions. The ring portions of the limb sections are stacked, when not in use, on the pole support member and are disposed, in use, along the length of pole in spaced relationship therealong. The garlands interconnect the limb portions so that as the ring portions are lifted, from the top, from the stacked positions thereof on the pole support member and slid along the pole, the garlands between adjacent limb section are tensioned, in turn, and thus serve to lift the next adjacent limb section until the tree is fully erected.",
 				"country": "United States",
 				"extra": "U.S. Classification 428/9, D11/118, 428/18; International Classification A47G33/06; Cooperative Classification A47G33/06; European Classification A47G33/06",

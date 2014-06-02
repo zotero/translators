@@ -97,8 +97,8 @@ var testCases = [
 				"itemType": "report",
 				"creators": [
 					{
-						"firstName": "Anna",
-						"lastName": "Son",
+						"firstName": "Britanny",
+						"lastName": "Carter",
 						"creatorType": "author"
 					}
 				],
@@ -116,14 +116,13 @@ var testCases = [
 					}
 				],
 				"url": "http://clients1.ibisworld.com/reports/us/industry/default.aspx?entid=932",
-				"date": "May 2013",
+				"date": "May 2014",
 				"institution": "IBISWorld Services",
 				"place": "Melbourne, Australia",
 				"reportNumber": "42349",
 				"reportType": "IBISWorld Industry Report",
 				"title": "Laboratory Supply Wholesaling in the US",
-				"libraryCatalog": "IBISWorld",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "IBISWorld"
 			}
 		]
 	},
@@ -148,7 +147,7 @@ var testCases = [
 					}
 				],
 				"url": "http://clients1.ibisworld.com/reports/us/riskrating/default.aspx?entid=1281",
-				"date": "April 2014",
+				"date": "May 2014",
 				"institution": "IBISWorld Services",
 				"place": "Melbourne, Australia",
 				"reportNumber": "51821",

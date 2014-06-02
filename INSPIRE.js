@@ -119,26 +119,26 @@ var testCases = [
 					}
 				],
 				"notes": [
-					"*Temporary entry* , 27 pages, 11 figures "
+					"27 pages, 11 figures "
 				],
 				"tags": [
 					"* Automatic Keywords *",
-					"radiation: electromagnetic",
-					"quark gluon: interaction",
 					"conductivity: electric",
-					"quark gluon: plasma",
-					"symmetry: chiral",
-					"quantum chromodynamics: matter",
+					"diffusion",
+					"flavor",
+					"flux",
+					"gas",
 					"gluon: condensation",
 					"matter: effect",
 					"pi: density",
+					"quantum chromodynamics: matter",
+					"quark gluon: interaction",
+					"quark gluon: plasma",
+					"radiation: electromagnetic",
 					"spectral representation",
 					"susceptibility",
-					"diffusion",
-					"flavor",
-					"gas",
-					"thermal",
-					"flux"
+					"symmetry: chiral",
+					"thermal"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -192,9 +192,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [
-					"*Brief entry* "
-				],
+				"notes": [],
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [
@@ -207,12 +205,12 @@ var testCases = [
 						"mimeType": "application/pdf`"
 					}
 				],
-				"title": "Relativistically Induced Transparency Acceleration (RITA) of Protons and Light-ions with Ultrashort Laser Interaction with Heavy-ion Plasma Density Gradient",
+				"title": "Relativistically induced transparency acceleration of light ions by an ultrashort laser pulse interacting with a heavy-ion-plasma density gradient",
 				"publicationTitle": "Phys.Rev.",
 				"DOI": "10.1103/PhysRevE.88.043105",
 				"pages": "043105",
 				"volume": "E88",
-				"date": "2013",
+				"date": "2013-10-28",
 				"abstractNote": "The relativistically induced transparency acceleration (RITA) scheme of proton and ion acceleration using laser-plasma interactions is introduced, modeled, and compared to the existing schemes. Protons are accelerated with femtosecond relativistic pulses to produce quasimonoenergetic bunches with controllable peak energy. The RITA scheme works by a relativistic laser inducing transparency to densities higher than the cold-electron critical density, while the background heavy ions are stationary. The rising laser pulse creates a traveling acceleration structure at the relativistic critical density by ponderomotively driving a local electron density inflation, creating an electron snowplow and a co-propagating electrostatic potential. The snowplow advances with a velocity determined by the rate of the rise of the laser's intensity envelope and the heavy-ion-plasma density gradient scale length. The rising laser is incrementally rendered transparent to higher densities such that the relativistic-electron plasma frequency is resonant with the laser frequency. In the snowplow frame, trace density protons reflect off the electrostatic potential and get snowplowed, while the heavier background ions are relatively unperturbed. Quasimonoenergetic bunches of velocity equal to twice the snowplow velocity can be obtained and tuned by controlling the snowplow velocity using laser-plasma parameters. An analytical model for the proton energy as a function of laser intensity, rise time, and plasma density gradient is developed and compared to 1D and 2D PIC OSIRIS simulations. We model the acceleration of protons to GeV energies with tens-of-femtoseconds laser pulses of a few petawatts. The scaling of proton energy with laser power compares favorably to other mechanisms for ultrashort pulses.",
 				"libraryCatalog": "INSPIRE"
 			}

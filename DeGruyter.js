@@ -276,12 +276,7 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [
-					"SQL",
-					"Datenmodelle",
-					"Data Warehouse",
-					"XML"
-				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
 				"title": "Datenbanksysteme, Eine Einführung",
@@ -292,8 +287,7 @@ var testCases = [
 				"language": "DT",
 				"date": "2011",
 				"abstractNote": "Dieses Buch vermittelt eine systematische und umfassende Einführung in moderne Datenbanksysteme. Der Schwerpunkt der Darstellung liegt auf der derzeit marktbeherrschenden relationalen Datenbanktechnologie, aber auch Entwicklungen wie XML und Web-Services werden ausführlich behandelt. Das Besondere an diesem Buch: - Das Buch behandelt auch Implementierungsaspekte und betont die praktischen Aspekte des Datenbankbereichs -- ohne jedoch die theoretischen Grundlagen zu vernachlässigen. - Der Einsatz von Datenbanken als Data Warehouse für Decision Support-Anfragen sowie für das Data Mining wird beschrieben. - Ein umfangreiches Kapitel behandelt die Realisierung von Internet-Datenbanken mit Hilfe der Java-Anbindungen. - Inhaltliche Abhängigkeiten zwischen den Kapiteln sind gering gehalten, so dass im Grundstudium vermittelte Gebiete problemlos im Hauptstudium mit den übrigen Kapiteln zu vervollständigen sind. - Alle Konzepte werden an gut verständlichen Beispielen veranschaulicht, so dass sich das Buch hervorragend zum Selbststudium eignet. Eine ideale Ergänzung bietet darüber hinaus das Übungsbuch Datenbanksysteme von Kemper und Wimmer, das Lösungsvorschlage für die Übungsaufgaben und weitergehende (teilweise multimediale) Lernhilfen enthält. Für die 8. Auflage wurden die Ausführungen aktualisiert und neuere Entwicklungen aufgegriffen. Techniken für die Beherrschbarkeit der Informationsflut des Webs, wie NoSQL Key-Value-Speicher, RDF/SPARQL als Grundlage des Semantic Web, Information Retrieval und Suchmaschinen-Grundlagen (u.a. PageRank), hochgradig verteilte Datenverarbeitung (MapReduce), Datenströme, Hauptspeicher-Datenbanken und Cloud/Multi-Tenancy Datenbanken sind einige der neuen Themen.",
-				"libraryCatalog": "DeGruyter",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "DeGruyter"
 			}
 		]
 	},
@@ -351,16 +345,20 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"rossini, gioacchino antonio (komponist 1792-1868)",
-					"oper",
-					"opera",
-					"theater",
-					"theatre",
+					"Italian music",
+					"Italienische Musik",
+					"Musiktheater",
+					"Oper",
+					"Orientalismus",
+					"Rossini, Gioacchino Antonio (Komponist 1792-1868)",
+					"Theater",
+					"female (feminine)",
 					"feminin",
 					"feminine",
-					"female (feminine)",
-					"orientalismus",
-					"orientalism"
+					"musical theatre",
+					"opera",
+					"orientalism",
+					"theatre"
 				],
 				"seeAlso": [],
 				"attachments": [],
@@ -370,13 +368,10 @@ var testCases = [
 				"publicationTitle": "Anuario Musical",
 				"issue": "66",
 				"pages": "165-180",
-				"publisher": "Consejo Superior de Investigaciones Científicas (CSIC)",
-				"place": "Madrid",
 				"abstractNote": "La expresión Eterno Femenino (Eternal-Feminine, o Das Ewig-Weibliche), apareció por primera vez en los últimos versos de la segunda parte del Fausto de Goethe (acabado en 1832). Posteriormente, se convirtió en tema de especulación, y en un enigma que los estudiosos han estado intentando resolver desde entonces. La expresión vino a identificar, con el paso del tiempo, un principio cultural relacionado con la imagen de la feminidad y alcanzó su extremo romántico, en el siglo XIX, cuando diversos arquetipos femeninos se fundieron en una sola heroína. El presente artículo pretende explorar el personaje de Isabella en La italianaen Argel de Rossini, a la luz del principio del Eterno Femenino. Aunque Goethe se encontraba todavía escribiendo la segunda parte de su Fausto cuando se estrenó La italiana (1813) en Italia, el principio cultural del Eterno Femenino puede utilizarse retrospectivamente en el análisis de Isabella como protagonista femenino central de la ópera. La lectura minuciosa de su personaje sugiere una aproximación estética que hace uso de ciertos aspectos románticos del principio del Eterno Femenino. El presente artículo se centra específicamente en la escena del Cruda sorte! Amor tiranno! y se refiere brevemente, también, a otras escenas",
 				"url": "http://www.degruyter.com/view/IBZ/55568460-8061-41c8-8479-783eefecc02f",
 				"date": "2011",
 				"libraryCatalog": "DeGruyter",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "The Principle of the Eternal-Feminine in Rossini’s L’Italiana in Algeri"
 			}
 		]

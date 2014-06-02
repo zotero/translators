@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-03-24 11:33:45"
+	"lastUpdated": "2014-06-01 19:55:01"
 }
 
 function detectWeb(doc, url) {
@@ -451,11 +451,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.jstor.org/action/doAdvancedSearch?q0=solomon+criminal+justice&f0=all&c1=AND&q1=&f1=all&acc=on&wc=on&fc=off&re=on&sd=&ed=&la=&pt=&isbn=&dc.History=History&dc.SlavicStudies=Slavic+Studies&Search=Search",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "http://www.jstor.org/betasearch?Query=labor+market&ac=0&si=0",
 		"items": "multiple"
 	},
@@ -508,6 +503,11 @@ var testCases = [
 				"shortTitle": "Coauthorship Dynamics and Knowledge Capital"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.jstor.org/action/doBasicSearch?Query=%28solomon+criminal+justice%29+AND+disc%3A%28slavicstudies-discipline+OR+history-discipline%29&prq=%28criminal+justice%29+AND+disc%3A%28slavicstudies-discipline+OR+history-discipline%29&hp=25&acc=on&wc=on&fc=off&so=rel&racc=off",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-12-10 02:09:12"
+	"lastUpdated": "2014-06-01 19:38:15"
 }
 
 /*
@@ -348,8 +348,8 @@ function doWeb(doc, url) {
 						
 			var searchx = '//div[contains(@class, "is-early-release") or \
 								contains(@class, "from-current-issue")] \
-								|//div[contains(@class, "toc-level level3")]//ul[@class="cit-list"]/div';
-			var titlex = './/span[contains(@class, "cit-title")]';
+								|//div[contains(@class, "toc-level level3")]//ul[@class="cit-list"]/div|//cite[contains(@class, "toc-title")]';
+			var titlex = './/span[contains(@class, "cit-title")]|./div[@class="highwire-cite-title"]';
 		} else if (url.indexOf("content/by/section") != -1 ||
 					url.match(/cgi\/collection\/./)) {
 			var searchx = '//li[contains(@class, "results-cit cit")]';

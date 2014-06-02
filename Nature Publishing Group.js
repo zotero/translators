@@ -1070,8 +1070,8 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Y.",
 						"lastName": "Zhang",
+						"firstName": "Y",
 						"creatorType": "author"
 					},
 					{
@@ -1115,13 +1115,13 @@ var testCases = [
 				"issue": "6",
 				"pages": "671-682",
 				"date": "February 9, 2012",
+				"ISSN": "0950-9232",
 				"language": "en",
 				"DOI": "10.1038/onc.2011.282",
 				"url": "http://www.nature.com/onc/journal/v31/n6/full/onc2011282a.html",
 				"abstractNote": "Identification and characterization of cancer stem cells (CSCs) in gastric cancer are difficult owing to the lack of specific markers and consensus methods. In this study, we show that cells with the CD90 surface marker in gastric tumors could be enriched under non-adherent, serum-free and sphere-forming conditions. These CD90+ cells possess a higher ability to initiate tumor in vivo and could re-establish the cellular hierarchy of tumors from single-cell implantation, demonstrating their self-renewal properties. Interestingly, higher proportion of CD90+ cells correlates with higher in vivo tumorigenicity of gastric primary tumor models. In addition, it was found that ERBB2 was overexpressed in about 25% of the gastric primary tumor models, which correlates with the higher level of CD90 expression in these tumors. Trastuzumab (humanized anti-ERBB2 antibody) treatment of high-tumorigenic gastric primary tumor models could reduce the CD90+ population in tumor mass and suppress tumor growth when combined with traditional chemotherapy. Moreover, tumorigenicity of tumor cells could also be suppressed when trastuzumab treatment starts at the same time as cell implantation. Therefore, we have identified a CSC population in gastric primary tumors characterized by their CD90 phenotype. The finding that trastuzumab targets the CSC population in gastric tumors suggests that ERBB2 signaling has a role in maintaining CSC populations, thus contributing to carcinogenesis and tumor invasion. In conclusion, the results from this study provide new insights into the gastric tumorigenic process and offer potential implications for the development of anticancer drugs as well as therapeutic treatment of gastric cancers.",
 				"libraryCatalog": "www.nature.com",
-				"journalAbbreviation": "Oncogene",
-				"ISSN": "0950-9232"
+				"journalAbbreviation": "Oncogene"
 			}
 		]
 	},
@@ -1807,7 +1807,7 @@ var testCases = [
 				"volume": "481",
 				"issue": "7381",
 				"pages": "341-343",
-				"date": "2012-01-18",
+				"date": "2012-01-19",
 				"ISSN": "0028-0836",
 				"language": "en",
 				"DOI": "10.1038/nature10669",

@@ -113,93 +113,141 @@ function scrape(doc, url) {
 
 } 
 /** BEGIN TEST CASES **/
-var testCases = [{
-	"type": "web",
-	"url": "http://www.uptodate.com/contents/approach-to-the-diagnosis-and-evaluation-of-low-back-pain-in-adults/abstract/43",
-	"items": [{
-		"itemType": "journalArticle",
-		"creators": [{
-			"creatorType": "author",
-			"lastName": "Deyo",
-			"firstName": "RA"
-		}],
-		"notes": [],
-		"tags": [],
-		"seeAlso": [],
-		"attachments": [{
-			"title": "UpToDate Record",
-			"mimeType": "text/html"
-		}],
-		"title": "Clinical strategies for controlling costs and improving quality in the primary care of low back pain",
-		"journalAbbreviation": "J Back Musculoskeletal Rehabil.",
-		"publicationTitle": "J Back Musculoskeletal Rehabil.",
-		"date": "1993",
-		"volume": "3",
-		"pages": "1",
-		"libraryCatalog": "UpToDate References"
-	}]
-}, {
-	"type": "web",
-	"url": "http://www.uptodate.com/contents/cancer-prevention/abstract/1",
-	"items": [{
-		"itemType": "journalArticle",
-		"creators": [{
-			"creatorType": "author",
-			"lastName": "Jemal",
-			"firstName": "Ahmedin"
-		}, {
-			"creatorType": "author",
-			"lastName": "Bray",
-			"firstName": "Freddie"
-		}, {
-			"creatorType": "author",
-			"lastName": "Center",
-			"firstName": "Melissa M"
-		}, {
-			"creatorType": "author",
-			"lastName": "Ferlay",
-			"firstName": "Jacques"
-		}, {
-			"creatorType": "author",
-			"lastName": "Ward",
-			"firstName": "Elizabeth"
-		}, {
-			"creatorType": "author",
-			"lastName": "Forman",
-			"firstName": "David"
-		}],
-		"notes": [],
-		"tags": [
-			"Humans",
-			"Internationality",
-			"Neoplasms"
-		],
-		"seeAlso": [],
-		"attachments": [{
-			"title": "PubMed entry",
-			"mimeType": "text/html",
-			"snapshot": false
-		}, {
-			"title": "UpToDate Record",
-			"mimeType": "text/html"
-		}],
-		"title": "Global cancer statistics",
-		"pages": "69-90",
-		"ISSN": "1542-4863",
-		"journalAbbreviation": "CA Cancer J Clin",
-		"publicationTitle": "CA: a cancer journal for clinicians",
-		"volume": "61",
-		"issue": "2",
-		"date": "2011 Mar-Apr",
-		"language": "eng",
-		"abstractNote": "The global burden of cancer continues to increase largely because of the aging and growth of the world population alongside an increasing adoption of cancer-causing behaviors, particularly smoking, in economically developing countries. Based on the GLOBOCAN 2008 estimates, about 12.7 million cancer cases and 7.6 million cancer deaths are estimated to have occurred in 2008; of these, 56% of the cases and 64% of the deaths occurred in the economically developing world. Breast cancer is the most frequently diagnosed cancer and the leading cause of cancer death among females, accounting for 23% of the total cancer cases and 14% of the cancer deaths. Lung cancer is the leading cancer site in males, comprising 17% of the total new cancer cases and 23% of the total cancer deaths. Breast cancer is now also the leading cause of cancer death among females in economically developing countries, a shift from the previous decade during which the most common cause of cancer death was cervical cancer. Further, the mortality burden for lung cancer among females in developing countries is as high as the burden for cervical cancer, with each accounting for 11% of the total female cancer deaths. Although overall cancer incidence rates in the developing world are half those seen in the developed world in both sexes, the overall cancer mortality rates are generally similar. Cancer survival tends to be poorer in developing countries, most likely because of a combination of a late stage at diagnosis and limited access to timely and standard treatment. A substantial proportion of the worldwide burden of cancer could be prevented through the application of existing cancer control knowledge and by implementing programs for tobacco control, vaccination (for liver and cervical cancers), and early detection and treatment, as well as public health campaigns promoting physical activity and a healthier dietary intake. Clinicians, public health professionals, and policy makers can play an active role in accelerating the application of such interventions globally.",
-		"DOI": "10.3322/caac.20107",
-		"extra": "PMID: 21296855",
-		"libraryCatalog": "UpToDate References"
-	}]
-}, {
-	"type": "web",
-	"url": "http://www.uptodate.com/contents/approach-to-the-diagnosis-and-evaluation-of-low-back-pain-in-adults?source=search_result&search=back+pain&selectedTitle=1%7E150",
-	"items": "multiple"
-}]
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.uptodate.com/contents/approach-to-the-diagnosis-and-evaluation-of-low-back-pain-in-adults/abstract/43",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"creatorType": "author",
+						"lastName": "Deyo",
+						"firstName": "R A"
+					},
+					{
+						"creatorType": "author",
+						"lastName": "Weinstein",
+						"firstName": "J N"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Chronic Disease",
+					"Diagnosis, Differential",
+					"Female",
+					"Female Urogenital Diseases",
+					"Gastrointestinal Diseases",
+					"Humans",
+					"Low Back Pain",
+					"Male",
+					"Male Urogenital Diseases",
+					"Spinal Diseases"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "UpToDate Record",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Low back pain",
+				"pages": "363-370",
+				"ISSN": "0028-4793",
+				"journalAbbreviation": "N. Engl. J. Med.",
+				"publicationTitle": "The New England journal of medicine",
+				"volume": "344",
+				"issue": "5",
+				"date": "Feb 1, 2001",
+				"language": "eng",
+				"DOI": "10.1056/NEJM200102013440508",
+				"extra": "PMID: 11172169",
+				"libraryCatalog": "UpToDate References"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.uptodate.com/contents/cancer-prevention/abstract/1",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"creatorType": "author",
+						"lastName": "Jemal",
+						"firstName": "Ahmedin"
+					},
+					{
+						"creatorType": "author",
+						"lastName": "Bray",
+						"firstName": "Freddie"
+					},
+					{
+						"creatorType": "author",
+						"lastName": "Center",
+						"firstName": "Melissa M"
+					},
+					{
+						"creatorType": "author",
+						"lastName": "Ferlay",
+						"firstName": "Jacques"
+					},
+					{
+						"creatorType": "author",
+						"lastName": "Ward",
+						"firstName": "Elizabeth"
+					},
+					{
+						"creatorType": "author",
+						"lastName": "Forman",
+						"firstName": "David"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Humans",
+					"Internationality",
+					"Neoplasms"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "UpToDate Record",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Global cancer statistics",
+				"pages": "69-90",
+				"ISSN": "1542-4863",
+				"journalAbbreviation": "CA Cancer J Clin",
+				"publicationTitle": "CA: a cancer journal for clinicians",
+				"volume": "61",
+				"issue": "2",
+				"date": "2011 Mar-Apr",
+				"language": "eng",
+				"abstractNote": "The global burden of cancer continues to increase largely because of the aging and growth of the world population alongside an increasing adoption of cancer-causing behaviors, particularly smoking, in economically developing countries. Based on the GLOBOCAN 2008 estimates, about 12.7 million cancer cases and 7.6 million cancer deaths are estimated to have occurred in 2008; of these, 56% of the cases and 64% of the deaths occurred in the economically developing world. Breast cancer is the most frequently diagnosed cancer and the leading cause of cancer death among females, accounting for 23% of the total cancer cases and 14% of the cancer deaths. Lung cancer is the leading cancer site in males, comprising 17% of the total new cancer cases and 23% of the total cancer deaths. Breast cancer is now also the leading cause of cancer death among females in economically developing countries, a shift from the previous decade during which the most common cause of cancer death was cervical cancer. Further, the mortality burden for lung cancer among females in developing countries is as high as the burden for cervical cancer, with each accounting for 11% of the total female cancer deaths. Although overall cancer incidence rates in the developing world are half those seen in the developed world in both sexes, the overall cancer mortality rates are generally similar. Cancer survival tends to be poorer in developing countries, most likely because of a combination of a late stage at diagnosis and limited access to timely and standard treatment. A substantial proportion of the worldwide burden of cancer could be prevented through the application of existing cancer control knowledge and by implementing programs for tobacco control, vaccination (for liver and cervical cancers), and early detection and treatment, as well as public health campaigns promoting physical activity and a healthier dietary intake. Clinicians, public health professionals, and policy makers can play an active role in accelerating the application of such interventions globally.",
+				"DOI": "10.3322/caac.20107",
+				"extra": "PMID: 21296855",
+				"libraryCatalog": "UpToDate References"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.uptodate.com/contents/approach-to-the-diagnosis-and-evaluation-of-low-back-pain-in-adults?source=search_result&search=back+pain&selectedTitle=1%7E150",
+		"items": "multiple"
+	}
+]
 /** END TEST CASES **/

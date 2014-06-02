@@ -204,7 +204,7 @@ var testCases = [
 				"pages": "545-576",
 				"date": "2000",
 				"DOI": "10.1146/annurev.biophys.29.1.545",
-				"url": "http://www.annualreviews.org/doi/abs/10.1146/annurev.biophys.29.1.545",
+				"url": "http://dx.doi.org/10.1146/annurev.biophys.29.1.545",
 				"abstractNote": "We review how motile cells regulate actin filament assembly at their leading edge. Activation of cell surface receptors generates signals (including activated Rho family GTPases) that converge on integrating proteins of the WASp family (WASp, N-WASP, and Scar/WAVE). WASP family proteins stimulate Arp2/3 complex to nucleate actin filaments, which grow at a fixed 70° angle from the side of pre-existing actin filaments. These filaments push the membrane forward as they grow at their barbed ends. Arp2/3 complex is incorporated into the network, and new filaments are capped rapidly, so that activated Arp2/3 complex must be supplied continuously to keep the network growing. Hydrolysis of ATP bound to polymerized actin followed by phosphate dissociation marks older filaments for depolymerization by ADF/cofilins. Profilin catalyzes exchange of ADP for ATP, recycling actin back to a pool of unpolymerized monomers bound to profilin and thymosin-β4 that is poised for rapid elongation of new barbed ends.",
 				"libraryCatalog": "Annual Reviews"
 			}
