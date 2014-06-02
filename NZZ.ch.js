@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-03-22 22:27:50"
+	"lastUpdated": "2014-06-01 23:06:06"
 }
 
 /*
@@ -52,9 +52,11 @@ function doWeb(doc, url) {
 	var urls = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 	var items = {};
-		var titles = doc.evaluate('//hgroup/h3/a', doc, null, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//hgroup/h2/a', doc, null, XPathResult.ANY_TYPE, null);
 		var title;
 		while (title = titles.iterateNext()) {
+			//ignore topic pages;
+			if (title.href.search(/\d$/)==-1) continue;
 			items[title.href] = title.textContent;
 		}
 		Zotero.selectItems(items, function (items) {

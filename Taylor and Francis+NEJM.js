@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-06-25 17:44:43"
+	"lastUpdated": "2014-06-01 22:52:27"
 }
 
 /*
@@ -148,11 +148,6 @@ function scrape(doc, url, dois) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "http://www.tandfonline.com/action/doSearch?type=simple&filter=multiple&stemming=yes&searchText=labor+market&x=0&y=0&publication=",
-		"items": "multiple"
-	},
 	{
 		"type": "web",
 		"url": "http://www.tandfonline.com/doi/abs/10.1080/17487870802543480",
@@ -403,6 +398,11 @@ var testCases = [
 				"libraryCatalog": "Taylor and Francis+NEJM"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.tandfonline.com/action/doSearch?AllField=labor+market",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
