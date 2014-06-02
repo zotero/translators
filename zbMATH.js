@@ -156,9 +156,9 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"spanning trees",
 					"random graphs",
 					"sharp thresholds",
+					"spanning trees",
 					"tree-universality"
 				],
 				"seeAlso": [],
@@ -176,15 +176,13 @@ var testCases = [
 				"issue": "4",
 				"pages": "391–412",
 				"date": "2012",
-				"publisher": "John Wiley & Sons, Inc., New York, NY",
 				"language": "English",
 				"DOI": "10.1002/rsa.20472",
 				"extra": "MSC2010: 05C05 = Trees\nMSC2010: 05C80 = Random graphs",
 				"abstractNote": "We prove that a given tree T on n vertices with bounded maximum degree is contained asymptotically almost surely in the binomial random graph Gn,(1+ε)logn n provided that T belongs to one of the following two classes: (1) T has linearly many leaves; (2) T has a path of linear length all of whose vertices have degree two in T.",
 				"callNumber": "Zbl 1255.05045",
-				"url": "http://www.zbmath.org/?q=an:1255.05045",
-				"libraryCatalog": "zbMATH",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"url": "https://www.zbmath.org/?q=an:1255.05045",
+				"libraryCatalog": "zbMATH"
 			}
 		]
 	},
@@ -223,10 +221,10 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
+					"equilibrium",
 					"low diameter",
 					"network creation",
 					"network design",
-					"equilibrium",
 					"price of anarchy"
 				],
 				"seeAlso": [],
@@ -244,15 +242,13 @@ var testCases = [
 				"issue": "2",
 				"pages": "656–668",
 				"date": "2013",
-				"publisher": "Society for Industrial and Applied Mathematics (SIAM), Philadelphia, PA",
 				"language": "English",
 				"DOI": "10.1137/090771478",
 				"extra": "MSC2010: 90C27 = Combinatorial optimization\nMSC2010: 05C85 = Graph algorithms (graph theory)\nMSC2010: 91A06 = n-person games, n>2",
 				"abstractNote": "We study a natural network creation game, in which each node locally tries to minimize its local diameter or its local average distance to other nodes by swapping one incident edge at a time. The central question is what structure the resulting equilibrium graphs have, in particular, how well they globally minimize diameter. For the local-average-distance version, we prove an upper bound of 2 O(lgn) , a lower bound of 3, and a tight bound of exactly 2 for trees, and give evidence of a general polylogarithmic upper bound. For the local-diameter version, we prove a lower bound of Ω(n) and a tight upper bound of 3 for trees. The same bounds apply, up to constant factors, to the price of anarchy. Our network creation games are closely related to the previously studied unilateral network creation game. The main difference is that our model has no parameter α for the link creation cost, so our results effectively apply for all values of α without additional effort; furthermore, equilibrium can be checked in polynomial time in our model, unlike in previous models. Our perspective enables simpler proofs that get at the heart of network creation games.",
 				"callNumber": "Zbl 1273.90167",
-				"url": "http://zbmath.org/?q=an:1273.90167",
-				"libraryCatalog": "zbMATH",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"url": "https://zbmath.org/?q=an:1273.90167",
+				"libraryCatalog": "zbMATH"
 			}
 		]
 	},

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-01-05 12:35:24"
+	"lastUpdated": "2014-06-01 22:02:49"
 }
 
 /*
@@ -275,11 +275,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://journal.publications.chestnet.org/issue.aspx",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://jbjs.org/issue.aspx?journalid=12&issueid=929420",
 		"items": "multiple"
 	},
 	{
