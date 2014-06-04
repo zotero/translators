@@ -1816,7 +1816,17 @@ function processField(item, field, value) {
 		
 		attachment = parseFilePathRecord(value.slice(start));
 		if(attachment) item.attachments.push(attachment);
-	}
+	} else if (field == "mrnumber") {
+    if (value.search(/\D/) != -1) {
+  		// MathSciNet entries older than 2012 have aditional identifiers for
+      // compatibility with the paper publication 1940-2012 Mathematical Reviews.
+      // See http://www.ams.org/mathscinet/help/field_help.html#mrnumber
+      // We only keep the newer 7-digit MR number
+      item.extra += "\nMR"+value.substr(0,value.search(/\D/));
+    } else {
+      item.extra += "\nMR"+value;
+    }
+  }
 }
 
 function parseFilePathRecord(record) {
@@ -2550,10 +2560,34 @@ function doExport() {
 			}
 		}
 		
-		if(item.extra) {
-			writeField("note", item.extra);
+		if (item.extra) {
+		  // If present, extract MR (=Mathematical Reviews) number
+		  // and put it in the mrnumber field
+      var startingPoint = 0;
+      var mrnumberstart = item.extra.indexOf("MR",startingPoint);
+      var extraleft = item.extra;
+      while (mrnumberstart != -1) {
+        if (item.extra.substr(mrnumberstart).search(/\d/) == 2) {
+		      // So it is an MR number after all
+  		    var mrnumberlength = item.extra.substr(mrnumberstart+2).search(/\D/);
+  		    var mrnumber = "";
+  		    // Is there anything after the MR number?
+  		    if (mrnumberlength != -1) {
+  		      mrnumber = item.extra.substr(mrnumberstart+2,mrnumberlength);
+  		      extraleft = item.extra.substr(0, mrnumberstart) + item.extra.substr(mrnumberstart+2+mrnumberlength);
+  		    } else {
+  		      mrnumber = item.extra.substr(mrnumberstart+2);
+  		      extraleft = item.extra.substr(0, mrnumberstart);
+  		    }
+  		    writeField("mrnumber", mrnumber);
+          break; // We found the MR number, so no need to check the rest
+        }
+        startingPoint = startingPoint+2;
+        mrnumberstart = item.extra.indexOf("MR",startingPoint);
+      }
+      writeField("note", extraleft);
 		}
-		
+
 		if(item.tags && item.tags.length) {
 			var tagString = "";
 			for(var i in item.tags) {
@@ -3056,6 +3090,40 @@ var testCases = [
 				"title": "extbackslash extbackslash{}: {"
 			}
 		]
+	},
+	{
+	  "type": "import",
+	  "input": "@article{MR0237510,\nauthor = {Katz, Nicholas M. and Oda, Tadao},\ntitle = {On the differentiation of de {R}ham cohomology classes with respect to parameters},\njournal = {J. Math. Kyoto Univ.},\nfjournal = {Journal of Mathematics of Kyoto University},\nvolume = {8},\nyear = {1968},\npages = {199--213},\nissn = {0023-608X},\nmrclass = {14.52},\nmrnumber = {0237510 (38 #5792)},\nmrreviewer = {J. S. Milne}\n}",
+	  "items": [
+      {
+	      "itemType": "journalArticle",
+	      "creators": [
+          {
+	          "firstName": "Nicholas M.",
+	          "lastName": "Katz",
+	          "creatorType": "author"
+	        },
+          {
+	          "firstName": "Tadao",
+	          "lastName": "Oda",
+	          "creatorType": "author"
+	        }
+        ],
+	      "notes": [],
+	      "tags": [],
+	      "seeAlso": [],
+	      "attachments": [],
+	      "itemID": "MR0237510",
+	      "publicationTitle": "Journal of Mathematics of Kyoto University",
+	      "journalAbbreviation": "J. Math. Kyoto Univ.",
+	      "pages": "199-213",
+	      "title": "On the differentiation of de Rham cohomology classes with respect to parameters",
+	      "volume": "8",
+	      "date": "1968",
+	      "issn": "0023-608X",
+	      "extra": "MR0237510"
+	    }
+    ]
 	}
 ]
 /** END TEST CASES **/
