@@ -1693,7 +1693,7 @@ function processField(item, field, value) {
 	} else if(field == "fjournal") {
 		if(item.publicationTitle) {
 			// move publicationTitle to abbreviation
-			item.journalAbbreviation = value;
+			item.journalAbbreviation = item.publicationTitle;
 		}
 		item.publicationTitle = value;
 	} else if(field == "author" || field == "editor" || field == "translator") {
