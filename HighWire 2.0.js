@@ -2,14 +2,14 @@
 	"translatorID": "8c1f42d5-02fa-437b-b2b2-73afc768eb07",
 	"label": "HighWire 2.0",
 	"creator": "Matt Burton",
-	"target": "^[^\\?]+(content/([0-9]+[A-Z\\-]*/(?:suppl_)?[0-9]+|current|firstcite|early)|search\\?(tmonth=[A-Za-z]*&pubdate_year=[0-9]*&)?submit=|search(/results)?\\?fulltext=|cgi/collection/.+)",
+	"target": "^[^?#]+(?:/content/(?:[0-9]+[A-Z\\-]*/(?:suppl_)?[A-Z]?[0-9]|current|firstcite|early)|/search\\?.*?\\bsubmit=|/search(?:/results)?\\?fulltext=|/cgi/collection/.)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-06-01 19:38:15"
+	"lastUpdated": "2014-06-04 05:08:59"
 }
 
 /*
@@ -27,16 +27,54 @@
 	   http://jcb.rupress.org/content/191/1/2.2.short
 */
 
-//detect if there are multiple articles on the page
-function hasMultiple(doc, url) {
-	return url.match(/search?(.*?&)?submit=[^&]/) ||
-		url.indexOf("content/by/section") != -1 ||
-		doc.title.indexOf("Table of Contents") != -1 ||
-		doc.title.indexOf("Early Edition") != -1 ||
-		url.match(/cgi\/collection\/./) ||
-		url.indexOf("content/firstcite") != -1 ||
-		url.match(/content\/early\/recent$/)||
-		(url.match(/content\//) && ZU.xpathText(doc, '//div[@class="toc-citation"]'));
+function getSearchResults(doc, url, checkOnly) {
+	var xpaths = [
+		{
+			searchx: '//li[contains(@class, "toc-cit") and \
+				not(ancestor::div/h2/a/text() = "Correction" or \
+					ancestor::div/h2/a/text() = "Corrections")]',
+			titlex: './/h4'
+		},
+		{
+			searchx: '//*[contains(@class, "results-cit cit")]',
+			titlex: './/*[contains(@class, "cit-title")]'
+		},
+		{
+			searchx: '//div[contains(@class, "is-early-release") or \
+				contains(@class, "from-current-issue")] \
+				|//div[contains(@class, "toc-level level3")]//ul[@class="cit-list"]/div',
+			titlex: './/span[contains(@class, "cit-title")]'
+		},
+		{
+			searchx: '//div[contains(@class,"main-content-wrapper")]\
+				//div[contains(@class, "highwire-article-citation")]',
+			titlex:	'.//div[contains(@class, "highwire-cite-title")]'
+		}
+	];
+	
+	var found = false, items = {},
+		linkx = '(.//a[not(contains(@href, "hasaccess.xhtml"))])[1]';
+	for(var i=0; i<xpaths.length && !found; i++) {
+		var rows = ZU.xpath(doc, xpaths[i].searchx);
+		if(!rows.length) continue;
+		
+		for(var j=0, n=rows.length; j<n; j++) {
+			var title = ZU.xpathText(rows[j], xpaths[i].titlex);
+			if(!title) continue;
+			
+			var link = ZU.xpath(rows[j], linkx);
+			if(!link.length || !link[0].href) continue;
+			
+			items[link[0].href] = ZU.trimInternal(title);
+			found = true;
+			
+			if(checkOnly) return true;
+		}
+	}
+	
+	if(found) Zotero.debug('Found search results using xpath set #' + (i-1));
+	
+	return found ? items : null;
 }
 
 //get abstract
@@ -320,7 +358,7 @@ function detectWeb(doc, url) {
 	}
 	
 	if(highwiretest) {
-		if (hasMultiple(doc, url)) {
+		if (getSearchResults(doc, url, true)) {
 			return "multiple";
 		} else if ( url.match("content/(early/)?[0-9]+") && 
 					url.indexOf('/suppl/') == -1 ) {
@@ -330,55 +368,12 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	if (hasMultiple(doc, url)) {
-		if (!url) url = doc.documentElement.location;
-
-		//get a list of URLs to import
-		if ( doc.title.indexOf("Table of Contents") != -1 ||		
-			url.indexOf("content/firstcite") != -1 ) {
-			var searchx = '//li[contains(@class, "toc-cit") and \
-				not(ancestor::div/h2/a/text() = "Correction" or \
-					ancestor::div/h2/a/text() = "Corrections")]';
-			var titlex = './/h4';
-		} else if (doc.title.indexOf("In this Issue") != -1){
-			var searchx = '//div[@class="toc-citation"]'
-			var titlex = './/div[@class="highwire-cite-title"]'
-		} else if ( url.indexOf("content/early/recent") != -1 ||
-					doc.title.indexOf("Early Edition") != -1) {
-						
-			var searchx = '//div[contains(@class, "is-early-release") or \
-								contains(@class, "from-current-issue")] \
-								|//div[contains(@class, "toc-level level3")]//ul[@class="cit-list"]/div|//cite[contains(@class, "toc-title")]';
-			var titlex = './/span[contains(@class, "cit-title")]|./div[@class="highwire-cite-title"]';
-		} else if (url.indexOf("content/by/section") != -1 ||
-					url.match(/cgi\/collection\/./)) {
-			var searchx = '//li[contains(@class, "results-cit cit")]';
-			var titlex = './/*[contains(@class, "cit-title")]';
-		} else {
-			//should we exclude corrections?
-			//e.g. http://jcb.rupress.org/search?submit=yes&fulltext=%22CLIP%20catches%20enzymes%20in%20the%20act%22&sortspec=date&where=fulltext&y=0&x=0&hopnum=1
-			var searchx = '//div[contains(@class,"results-cit cit")]';
-			var titlex = './/span[contains(@class,"cit-title")]';
-		}
-
-		var next_res, title, link;
-		//block links to "Available Items" on some search pages
-		var linkx = '(.//a[not(contains(@href, "hasaccess.xhtml"))])[1]/@href';
-		var searchres = ZU.xpath(doc, searchx);
-		var items = new Object();
-		//Z.debug(searchres.length)
-		for(var i=0, n=searchres.length; i<n; i++) {
-			next_res = searchres[i];
-			title = ZU.xpathText(next_res, titlex);
-			link = ZU.xpathText(next_res, linkx);
-			//Z.debug(title + ": " + link)
-			if(link && title) {
-				items[link] = title.trim();
-			}
-		}
-
+	if (!url) url = doc.documentElement.location;
+	
+	var items = getSearchResults(doc, url);
+	if(items) {
 		Zotero.selectItems(items, function(selectedItems) {
-			if( selectedItems == null ) return true;
+			if(!selectedItems) return true;
 
 			var urls = new Array();
 			for( var item in selectedItems ) {
@@ -1120,6 +1115,119 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://ajpheart.physiology.org/content/235/5",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://nar.oxfordjournals.org/content/41/D1/D94.long",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Regina Z.",
+						"lastName": "Cer",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Duncan E.",
+						"lastName": "Donohue",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Uma S.",
+						"lastName": "Mudunuri",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nuri A.",
+						"lastName": "Temiz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael A.",
+						"lastName": "Loss",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nathan J.",
+						"lastName": "Starner",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Goran N.",
+						"lastName": "Halusa",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Natalia",
+						"lastName": "Volfovsky",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ming",
+						"lastName": "Yi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Brian T.",
+						"lastName": "Luke",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Albino",
+						"lastName": "Bacolla",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jack R.",
+						"lastName": "Collins",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Robert M.",
+						"lastName": "Stephens",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					},
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"DOI": "10.1093/nar/gks955",
+				"language": "en",
+				"journalAbbreviation": "Nucl. Acids Res.",
+				"issue": "D1",
+				"url": "http://nar.oxfordjournals.org/content/41/D1/D94",
+				"ISSN": "0305-1048, 1362-4962",
+				"extra": "PMID: 23125372",
+				"libraryCatalog": "nar.oxfordjournals.org",
+				"abstractNote": "The non-B DB, available at http://nonb.abcc.ncifcrf.gov, catalogs predicted non-B DNA-forming sequence motifs, including Z-DNA, G-quadruplex, A-phased repeats, inverted repeats, mirror repeats, direct repeats and their corresponding subsets: cruciforms, triplexes and slipped structures, in several genomes. Version 2.0 of the database revises and re-implements the motif discovery algorithms to better align with accepted definitions and thresholds for motifs, expands the non-B DNA-forming motifs coverage by including short tandem repeats and adds key visualization tools to compare motif locations relative to other genomic annotations. Non-B DB v2.0 extends the ability for comparative genomics by including re-annotation of the five organisms reported in non-B DB v1.0, human, chimpanzee, dog, macaque and mouse, and adds seven additional organisms: orangutan, rat, cow, pig, horse, platypus and Arabidopsis thaliana. Additionally, the non-B DB v2.0 provides an overall improved graphical user interface and faster query performance.",
+				"shortTitle": "Non-B DB v2.0",
+				"title": "Non-B DB v2.0: a database of predicted non-B DNA-forming motifs and its associated tools",
+				"date": "01/01/2013",
+				"publicationTitle": "Nucleic Acids Research",
+				"volume": "41",
+				"pages": "D94-D100"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://bloodjournal.hematologylibrary.org/content/123/22",
 		"items": "multiple"
 	}
 ]
