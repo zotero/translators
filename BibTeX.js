@@ -1817,15 +1817,7 @@ function processField(item, field, value) {
 		attachment = parseFilePathRecord(value.slice(start));
 		if(attachment) item.attachments.push(attachment);
 	} else if (field == "mrnumber") {
-    if (value.search(/\D/) != -1) {
-  		// MathSciNet entries older than 2012 have aditional identifiers for
-      // compatibility with the paper publication 1940-2012 Mathematical Reviews.
-      // See http://www.ams.org/mathscinet/help/field_help.html#mrnumber
-      // We only keep the newer 7-digit MR number
-      item.extra += "\nMR"+value.substr(0,value.search(/\D/));
-    } else {
-      item.extra += "\nMR"+value;
-    }
+    item.extra += "\nMR"+value;
   }
 }
 
@@ -2563,29 +2555,21 @@ function doExport() {
 		if (item.extra) {
 		  // If present, extract MR (=Mathematical Reviews) number
 		  // and put it in the mrnumber field
-      var startingPoint = 0;
-      var mrnumberstart = item.extra.indexOf("MR",startingPoint);
+      var mrnumberstart = item.extra.indexOf("MR");
       var extraleft = item.extra;
-      while (mrnumberstart != -1) {
-        if (item.extra.substr(mrnumberstart).search(/\d/) == 2) {
-		      // So it is an MR number after all
-  		    var mrnumberlength = item.extra.substr(mrnumberstart+2).search(/\D/);
-  		    var mrnumber = "";
-  		    // Is there anything after the MR number?
-  		    if (mrnumberlength != -1) {
-  		      mrnumber = item.extra.substr(mrnumberstart+2,mrnumberlength);
-  		      extraleft = item.extra.substr(0, mrnumberstart) + item.extra.substr(mrnumberstart+2+mrnumberlength);
-  		    } else {
-  		      mrnumber = item.extra.substr(mrnumberstart+2);
-  		      extraleft = item.extra.substr(0, mrnumberstart);
-  		    }
-  		    writeField("mrnumber", mrnumber);
-          break; // We found the MR number, so no need to check the rest
+      if (mrnumberstart != -1) {
+        var mrnumberlength = item.extra.substr(mrnumberstart).search("\n");
+        var mrnumber = "";
+        if (mrnumberlength != -1) {
+          mrnumber = item.extra.substr(mrnumberstart+2,mrnumberlength-2); // Drop the MR prefix
+          extraleft = item.extra.substr(0, mrnumberstart) + item.extra.substr(mrnumberstart+mrnumberlength+1);
+        } else {
+          mrnumber = item.extra.substr(mrnumberstart+2); // Drop the MR prefix
+          extraleft = item.extra.substr(0, mrnumberstart);
         }
-        startingPoint = startingPoint+2;
-        mrnumberstart = item.extra.indexOf("MR",startingPoint);
+        writeField("mrnumber", mrnumber);
       }
-      writeField("note", extraleft);
+      writeField("note", extraleft)
 		}
 
 		if(item.tags && item.tags.length) {
