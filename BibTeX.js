@@ -1816,7 +1816,9 @@ function processField(item, field, value) {
 		
 		attachment = parseFilePathRecord(value.slice(start));
 		if(attachment) item.attachments.push(attachment);
-	}
+	} else if (field == "mrnumber") {
+    item.extra += "\nMR"+value;
+  }
 }
 
 function parseFilePathRecord(record) {
@@ -2550,10 +2552,26 @@ function doExport() {
 			}
 		}
 		
-		if(item.extra) {
-			writeField("note", item.extra);
+		if (item.extra) {
+		  // If present, extract MR (=Mathematical Reviews) number
+		  // and put it in the mrnumber field
+      var mrnumberstart = item.extra.indexOf("MR");
+      var extraleft = item.extra;
+      if (mrnumberstart != -1) {
+        var mrnumberlength = item.extra.substr(mrnumberstart).search("\n");
+        var mrnumber = "";
+        if (mrnumberlength != -1) {
+          mrnumber = item.extra.substr(mrnumberstart+2,mrnumberlength-2); // Drop the MR prefix
+          extraleft = item.extra.substr(0, mrnumberstart) + item.extra.substr(mrnumberstart+mrnumberlength+1);
+        } else {
+          mrnumber = item.extra.substr(mrnumberstart+2); // Drop the MR prefix
+          extraleft = item.extra.substr(0, mrnumberstart);
+        }
+        writeField("mrnumber", mrnumber);
+      }
+      writeField("note", extraleft)
 		}
-		
+
 		if(item.tags && item.tags.length) {
 			var tagString = "";
 			for(var i in item.tags) {
@@ -3056,6 +3074,40 @@ var testCases = [
 				"title": "extbackslash extbackslash{}: {"
 			}
 		]
+	},
+	{
+	  "type": "import",
+	  "input": "@article{MR0237510,\nauthor = {Katz, Nicholas M. and Oda, Tadao},\ntitle = {On the differentiation of de {R}ham cohomology classes with respect to parameters},\njournal = {J. Math. Kyoto Univ.},\nfjournal = {Journal of Mathematics of Kyoto University},\nvolume = {8},\nyear = {1968},\npages = {199--213},\nissn = {0023-608X},\nmrclass = {14.52},\nmrnumber = {0237510 (38 \\#5792)},\nmrreviewer = {J. S. Milne}\n}",
+	  "items": [
+      {
+	      "itemType": "journalArticle",
+	      "creators": [
+          {
+	          "firstName": "Nicholas M.",
+	          "lastName": "Katz",
+	          "creatorType": "author"
+	        },
+          {
+	          "firstName": "Tadao",
+	          "lastName": "Oda",
+	          "creatorType": "author"
+	        }
+        ],
+	      "notes": [],
+	      "tags": [],
+	      "seeAlso": [],
+	      "attachments": [],
+	      "itemID": "MR0237510",
+	      "publicationTitle": "Journal of Mathematics of Kyoto University",
+	      "journalAbbreviation": "J. Math. Kyoto Univ.",
+	      "pages": "199-213",
+	      "title": "On the differentiation of de Rham cohomology classes with respect to parameters",
+	      "volume": "8",
+	      "date": "1968",
+	      "issn": "0023-608X",
+	      "extra": "MR0237510 (38 #5792)"
+	    }
+    ]
 	}
 ]
 /** END TEST CASES **/

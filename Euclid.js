@@ -66,7 +66,8 @@ function doWeb(doc,url)
 	} else {
 		var abstract = ZU.xpathText(doc, '//div[@class="abstract-text"]');
 		var DOI = ZU.xpathText(doc, '//div[@id="info"]/p[strong[contains(text(), "Digital Object")]]/text()');
-		var identifiers = ZU.xpathText(doc, '//div[@id="info"]/p[strong[contains(text(), "Mathematical Reviews number") or contains(text(), "Zentralblatt MATH")]]');	
+    var mrnumber = ZU.xpathText(doc, '//div[@id="info"]/p[strong[contains(text(), "Mathematical Reviews number")]]');	
+		var zblnumber = ZU.xpathText(doc, '//div[@id="info"]/p[strong[contains(text(), "Zentralblatt MATH")]]');	
 		var journalAbbr = ZU.xpathText(doc, '//ul[@class="citation"]/li[1]/a')
 		var translator = Zotero.loadTranslator('web');
 		//use Embedded Metadata
@@ -76,8 +77,9 @@ function doWeb(doc,url)
 			if (abstract) item.abstractNote = abstract.replace(/\s\s+/g, " ").replace(/\n/g, " ");
 			if (DOI) item.DOI = DOI.replace(/doi:\s*/, "");
 			item.journalAbbreviation = journalAbbr;
-			item.libraryCatalog = "Project Euclid"
-			item.extra = identifiers;
+			item.libraryCatalog = "Project Euclid";
+      if (mrnumber) item.extra = mrnumber.substr(mrnumber.indexOf("MR"));
+      if (zblnumber) item.extra += "\nZbl "+zblnumber.substr(zblnumber.search(/\d/));
 			item.complete();
 		});
 		translator.translate();
@@ -122,7 +124,7 @@ var testCases = [
 				"libraryCatalog": "Project Euclid",
 				"DOI": "10.2178/jsl/1309952534",
 				"journalAbbreviation": "J. Symbolic Logic",
-				"extra": "Mathematical Reviews number (MathSciNet) MR2849259"
+				"extra": "MR2849259"
 			}
 		]
 	},
@@ -194,7 +196,7 @@ var testCases = [
 				"libraryCatalog": "Project Euclid",
 				"DOI": "10.1214/11-AOAS483",
 				"journalAbbreviation": "Ann. Appl. Stat.",
-				"extra": "Mathematical Reviews number (MathSciNet) MR2849772, Zentralblatt MATH identifier1223.62160"
+				"extra": "MR2849772\nZbl 1223.62160"
 			}
 		]
 	},
