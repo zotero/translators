@@ -18,7 +18,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-06-04 21:44:16"
+	"lastUpdated": "2014-06-05 03:27:44"
 }
 
 function detectImport() {
@@ -181,7 +181,7 @@ function setKeywordDelimRe( val, flags ) {
 	}
 }
 
-function processField(item, field, value) {
+function processField(item, field, value, rawValue) {
 	if(Zotero.Utilities.trim(value) == '') return null;
 	if(fieldMap[field]) {
 		item[fieldMap[field]] = value;
@@ -195,28 +195,39 @@ function processField(item, field, value) {
 		}
 	} else if(field == "fjournal") {
 		if(item.publicationTitle) {
-			// move publicationTitle to abbreviation
+			// move publicationTitle to abbreviation, since itprobably came from 'journal'
 			item.journalAbbreviation = item.publicationTitle;
 		}
 		item.publicationTitle = value;
 	} else if(field == "author" || field == "editor" || field == "translator") {
 		// parse authors/editors/translators
-		var names = value.split(/ and /i); // now case insensitive
+		var names = splitUnprotected(rawValue.trim(), / and /gi);
 		for(var i in names) {
 			var name = names[i];
+			
 			// skip empty names
-			if (name.trim() == '') {
-				continue;
-			}
+			if (!name) continue;
+			
 			// Names in BibTeX can have three commas
-			pieces = name.split(',');
+			pieces = splitUnprotected(name, /\s*,\s*/g);
 			var creator = {};
 			if (pieces.length > 1) {
-				creator.firstName = pieces.pop().trim();
-				creator.lastName = pieces.join(',').trim();
+				creator.firstName = pieces.pop();
+				creator.lastName = unescapeBibTeX(pieces.shift());
+				if(pieces.length) {
+					// If anything is left, it should only be the 'Jr' part
+					creator.firstName += ', ' + pieces.join(', ');
+				}
+				creator.firstName = unescapeBibTeX(creator.firstName);
 				creator.creatorType = field;
+			} else if(splitUnprotected(name, / +/g).length > 1){
+				creator = Zotero.Utilities.cleanAuthor(unescapeBibTeX(name), field, false);
 			} else {
-				creator = Zotero.Utilities.cleanAuthor(name, field, false);
+				creator = {
+					firstName: unescapeBibTeX(name),
+					creatorType: field,
+					fieldMode: 1
+				}
 			}
 			item.creators.push(creator);
 		}
@@ -303,23 +314,84 @@ function processField(item, field, value) {
 		item.attachments.push({path:value.split(",")[0], mimeType:"application/pdf"});
 	} else if (field == "file") {
 		var start = 0, attachment;
-		value = value.replace(/\$\\backslash\$/g, '\\') // Mendeley invention?
+		rawValue = rawValue.replace(/\$\\backslash\$/g, '\\') // Mendeley invention?
 			.replace(/([^\\](?:\\\\)*)\\(.){}/g, '$1$2'); // part of Mendeley's escaping (e.g. \~{} = ~)
-		for(var i=0; i<value.length; i++) {
-			if(value[i] == '\\') {
+		for(var i=0; i<rawValue.length; i++) {
+			if(rawValue[i] == '\\') {
 				i++; //skip next char
 				continue;
 			}
-			if(value[i] == ';') {
-				attachment = parseFilePathRecord(value.slice(start, i));
+			if(rawValue[i] == ';') {
+				attachment = parseFilePathRecord(rawValue.slice(start, i));
 				if(attachment) item.attachments.push(attachment);
 				start = i+1;
 			}
 		}
 		
-		attachment = parseFilePathRecord(value.slice(start));
+		attachment = parseFilePathRecord(rawValue.slice(start));
 		if(attachment) item.attachments.push(attachment);
 	}
+}
+
+/**
+ * Split a string on a provided delimiter, but not if delimiter appears inside { }
+ * @param {String} str String to split
+ * @param {RegExp} delim RegExp object for the split delimiter. Use g flag to split on each
+ * @return {String[]} Array of strings without delimiters
+ */
+function splitUnprotected(str, delim) {
+	delim.lastIndex = 0; // In case we're reusing a regexp
+	var nextPossibleSplit = delim.exec(str);
+	if(!nextPossibleSplit) return [str];
+	
+	var parts = [], open = 0, nextPartStart = 0;
+	for(var i=0; i<str.length; i++) {
+		if(i>nextPossibleSplit.index) {
+			// Must have been inside braces
+			nextPossibleSplit = delim.exec(str);
+			if(!nextPossibleSplit) {
+				parts.push(str.substr(nextPartStart));
+				return parts;
+			}
+		}
+		
+		if(str[i] == '\\') {
+			// Skip next character
+			i++;
+			continue;
+		}
+		
+		if(str[i] == '{') {
+			open++;
+			continue;
+		}
+		
+		if(str[i] == '}') {
+			open--;
+			if(open < 0) open = 0; // Shouldn't happen, but...
+			continue;
+		}
+		
+		if(open) continue;
+		
+		if(i == nextPossibleSplit.index) {
+			parts.push(str.substring(nextPartStart, i));
+			i += nextPossibleSplit[0].length - 1; // We can jump past the split delim
+			nextPartStart = i + 1;
+			nextPossibleSplit = delim.exec(str);
+			if(!nextPossibleSplit) {
+				parts.push(str.substr(nextPartStart));
+				return parts;
+			}
+		}
+	}
+	
+	// I don't think we should ever get here*, but just to be safe
+	// *we should always be returning from the for loop
+	var last = str.substr(nextPartStart).trim();
+	if(last) parts.push(last);
+	
+	return parts;
 }
 
 function parseFilePathRecord(record) {
@@ -361,7 +433,7 @@ function parseFilePathRecord(record) {
 	return attachment;
 }
 
-function getFieldValue(read, verbatim) {
+function getFieldValue(read) {
 	var value = "";
 	// now, we have the first character of the field
 	if(read == "{") {
@@ -411,47 +483,51 @@ function getFieldValue(read, verbatim) {
 			}
 		}
 	}
-	
-	if(value.length > 1 && !verbatim) {
-		// replace accented characters (yucky slow)
-		value = value.replace(/{?(\\[`"'^~=]){?\\?([A-Za-z])}/g, "{$1$2}");
-		//for special characters rendered by \[a-z] we need a space
-		value = value.replace(/{?(\\[a-z]){?\\?([A-Za-z])}/g, "{$1 $2}");
-		//convert tex markup into permitted HTML
-		value = mapTeXmarkup(value);
-		for (var mapped in reversemappingTable) { // really really slow!
-			var unicode = reversemappingTable[mapped];
-			while(value.indexOf(mapped) !== -1) {
-				Zotero.debug("Replace " + mapped + " in " + value + " with " + unicode);
-				value = value.replace(mapped, unicode);
-			}
-			mapped = mapped.replace(/[{}]/g, "");
-			while(value.indexOf(mapped) !== -1) {
-				//Z.debug(value)
-				Zotero.debug("Replace(2) " + mapped + " in " + value + " with " + unicode);
-				value = value.replace(mapped, unicode);
-			}
-		}
-		
-		// kill braces
-		value = value.replace(/([^\\])[{}]+/g, "$1");
-		if(value[0] == "{") {
-			value = value.substr(1);
-		}
-		
-		// chop off backslashes
-		value = value.replace(/([^\\])\\([#$%&~_^\\{}])/g, "$1$2");
-		value = value.replace(/([^\\])\\([#$%&~_^\\{}])/g, "$1$2");
-		if(value[0] == "\\" && "#$%&~_^\\{}".indexOf(value[1]) != -1) {
-			value = value.substr(1);
-		}
-		if(value[value.length-1] == "\\" && "#$%&~_^\\{}".indexOf(value[value.length-2]) != -1) {
-			value = value.substr(0, value.length-1);
-		}
-		value = value.replace(/\\\\/g, "\\");
-		value = value.replace(/\s+/g, " ");
-	}
 
+	return value;
+}
+
+function unescapeBibTeX(value) {
+	if(value.length < 2) return value;
+	
+	// replace accented characters (yucky slow)
+	value = value.replace(/{?(\\[`"'^~=]){?\\?([A-Za-z])}/g, "{$1$2}");
+	//for special characters rendered by \[a-z] we need a space
+	value = value.replace(/{?(\\[a-z]){?\\?([A-Za-z])}/g, "{$1 $2}");
+	//convert tex markup into permitted HTML
+	value = mapTeXmarkup(value);
+	for (var mapped in reversemappingTable) { // really really slow!
+		var unicode = reversemappingTable[mapped];
+		while(value.indexOf(mapped) !== -1) {
+			Zotero.debug("Replace " + mapped + " in " + value + " with " + unicode);
+			value = value.replace(mapped, unicode);
+		}
+		mapped = mapped.replace(/[{}]/g, "");
+		while(value.indexOf(mapped) !== -1) {
+			//Z.debug(value)
+			Zotero.debug("Replace(2) " + mapped + " in " + value + " with " + unicode);
+			value = value.replace(mapped, unicode);
+		}
+	}
+	
+	// kill braces
+	value = value.replace(/([^\\])[{}]+/g, "$1");
+	if(value[0] == "{") {
+		value = value.substr(1);
+	}
+	
+	// chop off backslashes
+	value = value.replace(/([^\\])\\([#$%&~_^\\{}])/g, "$1$2");
+	value = value.replace(/([^\\])\\([#$%&~_^\\{}])/g, "$1$2");
+	if(value[0] == "\\" && "#$%&~_^\\{}".indexOf(value[1]) != -1) {
+		value = value.substr(1);
+	}
+	if(value[value.length-1] == "\\" && "#$%&~_^\\{}".indexOf(value[value.length-2]) != -1) {
+		value = value.substr(0, value.length-1);
+	}
+	value = value.replace(/\\\\/g, "\\");
+	value = value.replace(/\s+/g, " ");
+	
 	return value;
 }
 
@@ -618,6 +694,7 @@ function beginRecord(type, closeChar) {
 	// of this loop. this is useful after we read past the end of a string.
 	var dontRead = false;
 	
+	var value, rawValue;
 	while(dontRead || (read = Zotero.read(1))) {
 		dontRead = false;
 		
@@ -646,11 +723,12 @@ function beginRecord(type, closeChar) {
 				// see if there's a defined string
 				if(strings[value]) value = strings[value];
 			} else {
-				var value = getFieldValue(read, field == 'file');
+				rawValue = getFieldValue(read);
+				value = unescapeBibTeX(rawValue);
 			}
 			
 			if(item) {
-				processField(item, field.toLowerCase(), value);
+				processField(item, field.toLowerCase(), value, rawValue);
 			} else if(type == "string") {
 				strings[field] = value;
 			}
@@ -1006,15 +1084,18 @@ function doExport() {
 				var creatorString = creator.lastName;
 
 				if (creator.firstName) {
-					creatorString = creator.lastName + ", " + creator.firstName;
+					var fname = creator.firstName.split(/\s*,\s*/);
+					fname.push(fname.shift()); // If we have a Jr. part(s), it should precede first name
+					creatorString = creator.lastName + ", " + fname.join(', ');
 				}
 				
 				creatorString = creatorString.replace(/[|\<\>\~\^\\\{\}]/g, mapEscape)
-																			.replace(/([\#\$\%\&\_])/g, "\\$1")
-																			.replace(/([^\s-\}\(\[]+[A-Z][^\s,]*)/g, "{$1}");
+					.replace(/([\#\$\%\&\_])/g, "\\$1");
 																			
 				if (creator.fieldMode == true) { // fieldMode true, assume corporate author
 					creatorString = "{" + creatorString + "}";
+				} else {
+					creatorString = creatorString.replace(/ (and) /i, ' {$1} ');
 				}
 
 				if (creator.creatorType == "editor" || creator.creatorType == "seriesEditor") {
@@ -2616,9 +2697,7 @@ var reversemappingTable = {
 	"{\\~y}"                          : "\u1EF9", // LATIN SMALL LETTER Y WITH TILDE
 	"{\\~}"                           : "\u223C", // TILDE OPERATOR
 	"~"                               : "\u00A0" // NO-BREAK SPACE
-};
-
-/** BEGIN TEST CASES **/
+};/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "import",
@@ -2799,8 +2878,8 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "Michael",
-						"lastName": "von Hicks, III",
+						"firstName": "Michael, III",
+						"lastName": "von Hicks",
 						"creatorType": "author"
 					}
 				],
@@ -3054,6 +3133,144 @@ var testCases = [
 				"attachments": [],
 				"itemID": "BibTeXEscapeTest1",
 				"title": "extbackslash extbackslash{}: {"
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@article{sasson_increasing_2013,\n    title = {Increasing cardiopulmonary resuscitation provision in communities with low bystander cardiopulmonary resuscitation rates: a science advisory from the American Heart Association for healthcare providers, policymakers, public health departments, and community leaders},\n\tvolume = {127},\n\tissn = {1524-4539},\n\tshorttitle = {Increasing cardiopulmonary resuscitation provision in communities with low bystander cardiopulmonary resuscitation rates},\n\tdoi = {10.1161/CIR.0b013e318288b4dd},\n\tlanguage = {eng},\n\tnumber = {12},\n\tjournal = {Circulation},\n\tauthor = {Sasson, Comilla and Meischke, Hendrika and Abella, Benjamin S and Berg, Robert A and Bobrow, Bentley J and Chan, Paul S and Root, Elisabeth Dowling and Heisler, Michele and Levy, Jerrold H and Link, Mark and Masoudi, Frederick and Ong, Marcus and Sayre, Michael R and Rumsfeld, John S and Rea, Thomas D and {American Heart Association Council on Quality of Care and Outcomes Research} and {Emergency Cardiovascular Care Committee} and {Council on Cardiopulmonary, Critical Care, Perioperative and Resuscitation} and {Council on Clinical Cardiology} and {Council on Cardiovascular Surgery and Anesthesia}},\n\tmonth = mar,\n\tyear = {2013},\n\tnote = {{PMID:} 23439512},\n\tkeywords = {Administrative Personnel, American Heart Association, Cardiopulmonary Resuscitation, Community Health Services, Health Personnel, Heart Arrest, Humans, Leadership, Public Health, United States},\n\tpages = {1342--1350}\n}",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Comilla",
+						"lastName": "Sasson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hendrika",
+						"lastName": "Meischke",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Benjamin S",
+						"lastName": "Abella",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Robert A",
+						"lastName": "Berg",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Bentley J",
+						"lastName": "Bobrow",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Paul S",
+						"lastName": "Chan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Elisabeth Dowling",
+						"lastName": "Root",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michele",
+						"lastName": "Heisler",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jerrold H",
+						"lastName": "Levy",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Mark",
+						"lastName": "Link",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Frederick",
+						"lastName": "Masoudi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marcus",
+						"lastName": "Ong",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael R",
+						"lastName": "Sayre",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "John S",
+						"lastName": "Rumsfeld",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Thomas D",
+						"lastName": "Rea",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "American Heart Association Council on Quality of Care and Outcomes Research",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"firstName": "Emergency Cardiovascular Care Committee",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"firstName": "Council on Cardiopulmonary, Critical Care, Perioperative and Resuscitation",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"firstName": "Council on Clinical Cardiology",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"firstName": "Council on Cardiovascular Surgery and Anesthesia",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Administrative Personnel",
+					"American Heart Association",
+					"Cardiopulmonary Resuscitation",
+					"Community Health Services",
+					"Health Personnel",
+					"Heart Arrest",
+					"Humans",
+					"Leadership",
+					"Public Health",
+					"United States"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"extra": "PMID: 23439512",
+				"itemID": "sasson_increasing_2013",
+				"ISSN": "1524-4539",
+				"shortTitle": "Increasing cardiopulmonary resuscitation provision in communities with low bystander cardiopulmonary resuscitation rates",
+				"DOI": "10.1161/CIR.0b013e318288b4dd",
+				"language": "eng",
+				"issue": "12",
+				"title": "Increasing cardiopulmonary resuscitation provision in communities with low bystander cardiopulmonary resuscitation rates: a science advisory from the American Heart Association for healthcare providers, policymakers, public health departments, and community leaders",
+				"volume": "127",
+				"publicationTitle": "Circulation",
+				"date": "March 2013",
+				"pages": "1342–1350"
 			}
 		]
 	}
