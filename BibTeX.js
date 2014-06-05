@@ -18,7 +18,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-06-05 03:27:44"
+	"lastUpdated": "2014-06-05 06:05:46"
 }
 
 function detectImport() {
@@ -79,7 +79,6 @@ var fieldMap = {
 	copyright:"rights",
 	isbn:"ISBN",
 	issn:"ISSN",
-	lccn:"callNumber",
 	shorttitle:"shortTitle",
 	url:"url",
 	doi:"DOI",
@@ -88,6 +87,72 @@ var fieldMap = {
   	language:"language",
   	assignee:"assignee"
 };
+
+// Import/export in BibTeX
+var extraIdentifiers = {
+	lccn: 'LCCN',
+	mrnumber: 'MR',
+	zmnumber: 'Zbl',
+	pmid: 'PMID',
+	pmcid: 'PMCID'
+	
+	//Mostly from Wikipedia citation templates
+	//asin - Amazon ID
+	//bibcode/refcode - used in astronomy, but haven't seen any Bib(La)TeX examples
+	//jfm - Jahrbuch ID, but it seems to be part of Zentralblatt MATH, so Zbl
+	//oclc
+	//ol - openlibrary.org ID
+	//osti
+	//rfc
+	//ssrn? http://cyber.law.harvard.edu/cybersecurity/Guidelines_for_adding_Bibliography_entries
+};
+
+// Make a reverse map for convenience
+var revExtraIds = {};
+for(var field in extraIdentifiers) {
+	revExtraIds[extraIdentifiers[field]] = field;
+}
+
+// Import only. Exported by BibLaTeX
+var eprintIds = {
+	// eprinttype: Zotero label
+	
+	// From BibLaTeX manual
+	'arxiv': 'arXiv', // Sorry, but no support for eprintclass yet
+	'jstor': 'JSTOR',
+	'pubmed': 'PMID',
+	'hdl': 'HDL',
+	'googlebooks': 'GoogleBooksID'
+};
+
+function parseExtraFields(extra) {
+	var lines = extra.split(/[\r\n]+/);
+	var fields = [];
+	for(var i=0; i<lines.length; i++) {
+		var rec = { raw: lines[i] };
+		var line = lines[i].trim();
+		var splitAt = line.indexOf(':');
+		if(splitAt > 1) {
+			rec.field = line.substr(0,splitAt).trim();
+			rec.value = line.substr(splitAt + 1).trim();
+		}
+		fields.push(rec);
+	}
+	return fields;
+}
+
+function extraFieldsToString(extra) {
+	var str = '';
+	for(var i=0; i<extra.length; i++) {
+		if(!extra[i].raw) {
+			str += '\n' + extra[i].field + ': ' + extra[i].value;
+		} else {
+			str += '\n' + extra[i].raw;
+		}
+	}
+	
+	return str.substr(1);
+}
 
 var inputFieldMap = {
 	booktitle :"publicationTitle",
@@ -281,14 +346,14 @@ function processField(item, field, value, rawValue) {
 			item.pages = value.replace(/--/g, "-");
 		}
 	} else if(field == "note") {
-		item.extra += "\n"+value;
+		item._extraFields.push({raw: value.trim()});
 	} else if(field == "howpublished") {
 		if(value.length >= 7) {
 			var str = value.substr(0, 7);
 			if(str == "http://" || str == "https:/" || str == "mailto:") {
 				item.url = value;
 			} else {
-				item.extra += "\nPublished: "+value;
+				item._extraFields.push({field: 'Published', value: value});
 			}
 		}
 	
@@ -297,8 +362,7 @@ function processField(item, field, value, rawValue) {
 	//If they do we don't know which is better so we might as well just take the second one
 	else if (field == "lastchecked"|| field == "urldate"){
 		item.accessDate = value;
-	}
-	else if(field == "keywords" || field == "keyword") {
+	} else if(field == "keywords" || field == "keyword") {
 		var re = new RegExp(keywordDelimRe, keywordDelimReFlags);
 		if(!value.match(re) && keywordSplitOnSpace) {
 			// keywords/tags
@@ -330,6 +394,26 @@ function processField(item, field, value, rawValue) {
 		
 		attachment = parseFilePathRecord(rawValue.slice(start));
 		if(attachment) item.attachments.push(attachment);
+	} else if (field == "eprint" || field == "eprinttype") {
+		// Support for IDs exported by BibLaTeX
+		if(field == 'eprint') item._eprint = value;
+		else item._eprinttype = value;
+		
+		var eprint = item._eprint;
+		var eprinttype = item._eprinttype;
+		// If we don't have both yet, continue
+		if(!eprint || !eprinttype) return;
+		
+		var label = eprintIds[eprinttype.trim().toLowerCase()];
+		if(!label) return;
+		
+		item._extraFields.push({field: label, value: eprint.trim()});
+		
+		delete item._eprinttype;
+		delete item._eprint;
+	} else if (extraIdentifiers[field]) {
+		var label = extraIdentifiers[field];
+		item._extraFields.push({field: label, value: value.trim()});
 	}
 }
 
@@ -684,8 +768,7 @@ function beginRecord(type, closeChar) {
 			return;
 		}
 		var item = new Zotero.Item(zoteroType);
-		
-		item.extra = "";
+		item._extraFields = [];
 	}
 	
 	var field = "";
@@ -740,7 +823,9 @@ function beginRecord(type, closeChar) {
 			field = "";
 		} else if(read == closeChar) {
 			if(item) {
-				if(item.extra) item.extra = item.extra.substr(1); // chop \n
+				item.extra = extraFieldsToString(item._extraFields);
+				delete item._extraFields;
+				
 				if (!item.publisher && item.backupPublisher){
 					item.publisher=item.backupPublisher;
 					delete item.backupPublisher;
@@ -1135,7 +1220,20 @@ function doExport() {
 		}
 		
 		if(item.extra) {
-			writeField("note", item.extra);
+			// Export identifiers
+			var extraFields = parseExtraFields(item.extra);
+			for(var i=0; i<extraFields.length; i++) {
+				var rec = extraFields[i];
+				if(!rec.field || !revExtraIds[rec.field]) continue;
+				var value = rec.value.trim();
+				if(value) {
+					writeField(revExtraIds[rec.field], '{'+value+'}', true);
+					extraFields.splice(i, 1);
+					i--;
+				}
+			}
+			var extra = extraFieldsToString(extraFields); // Make sure we join exactly with what we split
+			if(extra) writeField("note", extra);
 		}
 		
 		if(item.tags && item.tags.length) {
@@ -3271,6 +3369,29 @@ var testCases = [
 				"publicationTitle": "Circulation",
 				"date": "March 2013",
 				"pages": "1342–1350"
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@article{smith_testing_????,\n    title = {Testing identifier import},\n\tauthor = {Smith, John},\n\tlccn = {L123456},\n\tmrnumber = {MR123456},\n\tzmnumber = {ZM123456},\n\tpmid = {P123456},\n\tpmcid = {PMC123456},\n\teprinttype = {arxiv},\n\teprint = {AX123456}\n}",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "John",
+						"lastName": "Smith",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"itemID": "smith_testing_????",
+				"extra": "LCCN: L123456\nMR: MR123456\nZbl: ZM123456\nPMID: P123456\nPMCID: PMC123456\narXiv: AX123456",
+				"title": "Testing identifier import"
 			}
 		]
 	}
