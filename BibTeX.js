@@ -3077,7 +3077,7 @@ var testCases = [
 	},
 	{
 	  "type": "import",
-	  "input": "@article{MR0237510,\nauthor = {Katz, Nicholas M. and Oda, Tadao},\ntitle = {On the differentiation of de {R}ham cohomology classes with respect to parameters},\njournal = {J. Math. Kyoto Univ.},\nfjournal = {Journal of Mathematics of Kyoto University},\nvolume = {8},\nyear = {1968},\npages = {199--213},\nissn = {0023-608X},\nmrclass = {14.52},\nmrnumber = {0237510 (38 #5792)},\nmrreviewer = {J. S. Milne}\n}",
+	  "input": "@article{MR0237510,\nauthor = {Katz, Nicholas M. and Oda, Tadao},\ntitle = {On the differentiation of de {R}ham cohomology classes with respect to parameters},\njournal = {J. Math. Kyoto Univ.},\nfjournal = {Journal of Mathematics of Kyoto University},\nvolume = {8},\nyear = {1968},\npages = {199--213},\nissn = {0023-608X},\nmrclass = {14.52},\nmrnumber = {0237510 (38 \\#5792)},\nmrreviewer = {J. S. Milne}\n}",
 	  "items": [
       {
 	      "itemType": "journalArticle",
@@ -3105,7 +3105,7 @@ var testCases = [
 	      "volume": "8",
 	      "date": "1968",
 	      "issn": "0023-608X",
-	      "extra": "MR0237510"
+	      "extra": "MR0237510 (38 #5792)"
 	    }
     ]
 	}
