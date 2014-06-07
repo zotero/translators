@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-07-01 12:27:55"
+	"lastUpdated": "2014-06-05 07:43:14"
 }
 
 /*
@@ -49,7 +49,7 @@ function doWeb(doc, url) {
 	var ids = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var results = doc.evaluate('//td[a[contains(@href,"/title/tt")]]', doc, ns, XPathResult.ANY_TYPE, null);
-		var items = new Array();
+		var items = {};
 		var result;
 		while (result = results.iterateNext()) {
 			var link = doc.evaluate('./a[contains(@href,"/title/tt")]', result, ns, XPathResult.ANY_TYPE, null).iterateNext();
@@ -109,8 +109,8 @@ function parseIMDBapi(text, response, url) {
 		title: "Poster"
 	});
 	item.runningTime = obj.Runtime;
-	item.extra = "IMDB ID: " + obj.ID;
-	item.extra += "; IMDB Rating: " + obj.Rating + " (" + obj.Votes + " votes)";
+	item.extra = "IMDB ID: " + obj.imdbID;
+	item.extra += "\nIMDB Rating: " + obj.imdbRating + " (" + obj.imdbVotes + " votes)";
 	//rotten tomatoes ranking break the API frequently
 	//item.extra += "; Rotten Tomatoes: " + obj.tomatoRating + " (" + obj.tomatoReviews + " reviews " + " " + obj.tomatoFresh + " fresh, " + obj.tomatoRotten + " rotten)" + ", Tomato Meter: " + obj.tomatoMeter;
 	item.complete();
@@ -180,13 +180,13 @@ var testCases = [
 						"title": "Poster"
 					}
 				],
-				"title": "The Official Story",
-				"date": "08 Nov 1985",
 				"genre": "Drama, History, War",
 				"abstractNote": "After the end of the Dirty War, a high school teacher sets out to find out who the mother of her adopted daughter is.",
 				"runningTime": "112 min",
-				"extra": "IMDB ID: undefined; IMDB Rating: undefined (undefined votes)",
-				"libraryCatalog": "IMDb"
+				"extra": "IMDB ID: tt0089276\nIMDB Rating: 7.8 (4,193 votes)",
+				"libraryCatalog": "IMDb",
+				"title": "The Official Story",
+				"date": "08 Nov 1985"
 			}
 		]
 	},
@@ -246,13 +246,13 @@ var testCases = [
 						"title": "Poster"
 					}
 				],
-				"title": "Skin, Skin",
-				"date": "21 Oct 1966",
 				"genre": "Drama",
 				"abstractNote": "N/A",
 				"runningTime": "89 min",
-				"extra": "IMDB ID: undefined; IMDB Rating: undefined (undefined votes)",
-				"libraryCatalog": "IMDb"
+				"extra": "IMDB ID: tt0060613\nIMDB Rating: 6.9 (395 votes)",
+				"libraryCatalog": "IMDb",
+				"title": "Skin, Skin",
+				"date": "21 Oct 1966"
 			}
 		]
 	}

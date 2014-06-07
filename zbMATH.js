@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-03-06 16:54:58"
+	"lastUpdated": "2014-06-05 08:12:07"
 }
 
 /*
@@ -93,7 +93,11 @@ function scrape(doc, url) {
 
 			var id = ZU.xpath(doc, '//div[@class="title"]/a[@class="label"]')[0];
 			if (id) {
-				item.callNumber = ZU.trimInternal(id.textContent);//e.g. Zbl 1255.05045
+				if(!item.extra) item.extra = '';
+				else item.extra += "\n";
+				
+				item.extra += 'Zbl: ' + ZU.trimInternal(id.textContent)
+					.replace(/^\s*Zbl\s+/i, ''); //e.g. Zbl 1255.05045
 				item.url = id.href;
 			}
 			
@@ -133,7 +137,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.zbmath.org/?q=an:06115874",
+		"url": "https://www.zbmath.org/?q=an:06115874",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -168,21 +172,20 @@ var testCases = [
 					}
 				],
 				"itemID": "zbMATH06115874",
-				"title": "Sharp threshold for the appearance of certain spanning trees in random graphs",
-				"publicationTitle": "Random Structures & Algorithms",
 				"journalAbbreviation": "Random Struct. Algorithms",
 				"ISSN": "1042-9832; 1098-2418/e",
-				"volume": "41",
 				"issue": "4",
-				"pages": "391–412",
-				"date": "2012",
 				"language": "English",
 				"DOI": "10.1002/rsa.20472",
-				"extra": "MSC2010: 05C05 = Trees\nMSC2010: 05C80 = Random graphs",
+				"extra": "MSC2010: 05C05 = Trees\nMSC2010: 05C80 = Random graphs\nZbl: 1255.05045",
 				"abstractNote": "We prove that a given tree T on n vertices with bounded maximum degree is contained asymptotically almost surely in the binomial random graph Gn,(1+ε)logn n provided that T belongs to one of the following two classes: (1) T has linearly many leaves; (2) T has a path of linear length all of whose vertices have degree two in T.",
-				"callNumber": "Zbl 1255.05045",
 				"url": "https://www.zbmath.org/?q=an:1255.05045",
-				"libraryCatalog": "zbMATH"
+				"libraryCatalog": "zbMATH",
+				"title": "Sharp threshold for the appearance of certain spanning trees in random graphs",
+				"publicationTitle": "Random Structures & Algorithms",
+				"volume": "41",
+				"pages": "391–412",
+				"date": "2012"
 			}
 		]
 	},
@@ -193,7 +196,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://zbmath.org/?q=an:06212000",
+		"url": "https://zbmath.org/?q=an:06212000",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -234,21 +237,20 @@ var testCases = [
 					}
 				],
 				"itemID": "zbMATH06212000",
-				"title": "Basic network creation games",
-				"publicationTitle": "SIAM Journal on Discrete Mathematics",
 				"journalAbbreviation": "SIAM J. Discrete Math.",
 				"ISSN": "0895-4801; 1095-7146/e",
-				"volume": "27",
 				"issue": "2",
-				"pages": "656–668",
-				"date": "2013",
 				"language": "English",
 				"DOI": "10.1137/090771478",
-				"extra": "MSC2010: 90C27 = Combinatorial optimization\nMSC2010: 05C85 = Graph algorithms (graph theory)\nMSC2010: 91A06 = n-person games, n>2",
+				"extra": "MSC2010: 90C27 = Combinatorial optimization\nMSC2010: 05C85 = Graph algorithms (graph theory)\nMSC2010: 91A06 = n-person games, n>2\nZbl: 1273.90167",
 				"abstractNote": "We study a natural network creation game, in which each node locally tries to minimize its local diameter or its local average distance to other nodes by swapping one incident edge at a time. The central question is what structure the resulting equilibrium graphs have, in particular, how well they globally minimize diameter. For the local-average-distance version, we prove an upper bound of 2 O(lgn) , a lower bound of 3, and a tight bound of exactly 2 for trees, and give evidence of a general polylogarithmic upper bound. For the local-diameter version, we prove a lower bound of Ω(n) and a tight upper bound of 3 for trees. The same bounds apply, up to constant factors, to the price of anarchy. Our network creation games are closely related to the previously studied unilateral network creation game. The main difference is that our model has no parameter α for the link creation cost, so our results effectively apply for all values of α without additional effort; furthermore, equilibrium can be checked in polynomial time in our model, unlike in previous models. Our perspective enables simpler proofs that get at the heart of network creation games.",
-				"callNumber": "Zbl 1273.90167",
 				"url": "https://zbmath.org/?q=an:1273.90167",
-				"libraryCatalog": "zbMATH"
+				"libraryCatalog": "zbMATH",
+				"title": "Basic network creation games",
+				"publicationTitle": "SIAM Journal on Discrete Mathematics",
+				"volume": "27",
+				"pages": "656–668",
+				"date": "2013"
 			}
 		]
 	},

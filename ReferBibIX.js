@@ -1,17 +1,21 @@
 {
-	"translatorID":"881f60f2-0802-411a-9228-ce5f47b64c7d",
-	"translatorType":3,
-	"label":"Refer/BibIX",
-	"creator":"Simon Kornblith",
-	"target":"txt",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"browserSupport":"gcsn",
-	"configOptions":{"dataMode":"line"},
-	"displayOptions":{"exportCharset":"UTF-8"},
-	"inRepository":true,
-	"lastUpdated":"2011-07-08 04:51:41"
+	"translatorID": "881f60f2-0802-411a-9228-ce5f47b64c7d",
+	"label": "Refer/BibIX",
+	"creator": "Simon Kornblith",
+	"target": "txt",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"configOptions": {
+		"dataMode": "line"
+	},
+	"displayOptions": {
+		"exportCharset": "UTF-8"
+	},
+	"inRepository": true,
+	"translatorType": 3,
+	"browserSupport": "gcs",
+	"lastUpdated": "2014-06-05 08:00:52"
 }
 
 function detectImport() {
@@ -154,7 +158,9 @@ function processTag(item, tag, value) {
 	} else if(tag == "Q") {
 		item.creators.push({creatorType:"author", lastName:value, fieldMode:true});
 	} else if(tag == "H" || tag == "O") {
-		item.extra += "\n"+value;
+		if(!item.extra) item.extra = '';
+		else item.extra += "\n";
+		item.extra += value;
 	} else if(tag == "Z") {
 		item.notes.push({note:value});
 	} else if(tag == "D") {
@@ -282,4 +288,49 @@ function doExport() {
 		}
 		Zotero.write("\r\n");
 	}
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "import",
+		"input": "%0 Journal Article\n%A 余敏\n%A 朱江\n%A 丁照蕾\n%H Yu Min\n%H Zhu Jiang\n%H Ding Zhaolei\n%+ 中科院国家科学图书馆成都分馆,四川,成都,610041;中国科学院研究生院,北京,100049\n%+ 中科院国家科学图书馆成都分馆,四川,成都,610041\n%+ 四川大学公共管理学院,四川,成都,610064\n%T 参考文献管理工具研究\n%J 现代情报\n%J JOURNAL OF MODERN INFORMATION\n%@ 1008-0821\n%G chi\n%D 2009\n%N 2\n%V 29\n%P 94-98,93\n%K 参考文献管理 文献管理软件 学术书签网站 Zotero\n%X 介绍了参考文献管理的基本方法,对参考文献管理工具的主要功能进行了对比,最后分析了参考文献管理的趋势.\n%U http://d.wanfangdata.com.cn/Periodical_xdqb200902027.aspx\n%R 10.3969/j.issn.1008-0821.2009.02.027\n%W 北京万方数据股份有限公司",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "余敏",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "",
+						"lastName": "朱江",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "",
+						"lastName": "丁照蕾",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"参考文献管理 文献管理软件 学术书签网站 Zotero"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"extra": "Yu Min\nZhu Jiang\nDing Zhaolei",
+				"issue": "2",
+				"abstractNote": "介绍了参考文献管理的基本方法,对参考文献管理工具的主要功能进行了对比,最后分析了参考文献管理的趋势.",
+				"url": "http://d.wanfangdata.com.cn/Periodical_xdqb200902027.aspx",
+				"archiveLocation": "北京万方数据股份有限公司",
+				"title": "参考文献管理工具研究",
+				"publicationTitle": "JOURNAL OF MODERN INFORMATION",
+				"date": "2009",
+				"volume": "29",
+				"pages": "94-98,93"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
