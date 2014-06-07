@@ -18,7 +18,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-06-05 06:05:46"
+	"lastUpdated": "2014-06-07 18:08:01"
 }
 
 function detectImport() {
@@ -1166,12 +1166,14 @@ function doExport() {
 			var primaryCreatorType = Zotero.Utilities.getCreatorsForType(item.itemType)[0];
 			for(var i in item.creators) {
 				var creator = item.creators[i];
-				var creatorString = creator.lastName;
+				var creatorString;
 
 				if (creator.firstName) {
-					var fname = creator.firstName.split(/\s*,\s*/);
+					var fname = creator.firstName.split(/\s*,!?\s*/);
 					fname.push(fname.shift()); // If we have a Jr. part(s), it should precede first name
 					creatorString = creator.lastName + ", " + fname.join(', ');
+				} else {
+					creatorString = creator.lastName;
 				}
 				
 				creatorString = creatorString.replace(/[|\<\>\~\^\\\{\}]/g, mapEscape)
@@ -1180,7 +1182,7 @@ function doExport() {
 				if (creator.fieldMode == true) { // fieldMode true, assume corporate author
 					creatorString = "{" + creatorString + "}";
 				} else {
-					creatorString = creatorString.replace(/ (and) /i, ' {$1} ');
+					creatorString = creatorString.replace(/ (and) /gi, ' {$1} ');
 				}
 
 				if (creator.creatorType == "editor" || creator.creatorType == "seriesEditor") {

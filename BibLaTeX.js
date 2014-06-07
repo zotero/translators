@@ -15,7 +15,7 @@
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
-	"lastUpdated": "2014-06-05 05:03:43"
+	"lastUpdated": "2014-06-07 05:03:43"
 }
 
 
@@ -601,14 +601,24 @@ function encodeFilePathComponent(value) {
 
 				for (var i=0; i<item.creators.length; i++) {
 					var creator = item.creators[i];
-					var creatorString = creator.lastName;
+					var creatorString;
 
-					if (creator.firstName && creator.lastName) {
-						creatorString = creator.lastName + ", " + creator.firstName;
-						//below to preserve possible corporate creators (biblatex 1.4a manual 2.3.3)
-					} else if (creator.fieldMode == true) { // fieldMode true, assume corporate author
+					if (creator.firstName) {
+						var fname = creator.firstName.split(/\s*,!?\s*/);
+						fname.push(fname.shift()); // If we have a Jr. part(s), it should precede first name
+						creatorString = creator.lastName + ", " + fname.join(', ');
+					} else {
+						creatorString = creator.lastName;
+					}
+					
+					creatorString = creatorString.replace(/[|\<\>\~\^\\\{\}]/g, mapEscape)
+						.replace(/([\#\$\%\&\_])/g, "\\$1");
+																				
+					if (creator.fieldMode == true) { // fieldMode true, assume corporate author
 						creatorString = "{" + creatorString + "}";
 						noEscape = true;
+					} else {
+						creatorString = creatorString.replace(/ (and) /gi, ' {$1} ');
 					}
 
 					if (creator.creatorType == "author" || creator.creatorType == "interviewer" || creator.creatorType == "director" || creator.creatorType == "programmer" || creator.creatorType == "artist" || creator.creatorType == "podcaster" || creator.creatorType == "presenter") {
