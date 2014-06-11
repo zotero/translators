@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-06-11 01:13:42"
+	"lastUpdated": "2014-06-11 01:31:00"
 }
 
 var canLiiRegexp = /https?:\/\/(?:www\.)?canlii\.org[^\/]*\/(?:en|fr)\/[^\/]+\/[^\/]+\/doc\/.+/;
@@ -33,7 +33,7 @@ function scrape(doc, url) {
 	var newItem = new Zotero.Item("case");
 	var voliss = doc.getElementsByClassName('documentMeta-citation')[0].nextElementSibling;
 	voliss = ZU.trimInternal(
-		ZU.xpathText(voliss, './node()[not(self::script)]', null, '')
+		ZU.xpathText(voliss, './node()[not(self::script)]', null, '') // We technically only use ./text() parts, but this is less confusing
 	);
 	//Z.debug("voliss: ("+voliss+")")
 	
@@ -64,6 +64,11 @@ function scrape(doc, url) {
 		if (date) newItem.dateDecided = date[0];
 		var docket = ZU.trimInternal(dateDocket).match(/\(\s*(?:Docket|Dossier)\s*:\s*(.+?)\s*\)/);
 		if (docket) newItem.docketNumber = docket[1];
+	}
+	
+	var shortUrl = doc.getElementsByClassName('documentStaticUrl')[0];
+	if(shortUrl) {
+		newItem.url = shortUrl.textContent.trim();
 	}
 
 	// attach link to pdf version
@@ -130,7 +135,8 @@ var testCases = [
 				"reporter": "SCR",
 				"firstPage": "6",
 				"dateDecided": "2010-01-21",
-				"docketNumber": "32797"
+				"docketNumber": "32797",
+				"url": "http://canlii.ca/t/27jmr"
 			}
 		]
 	},
@@ -157,7 +163,8 @@ var testCases = [
 				"court": "FC",
 				"firstPage": "119",
 				"dateDecided": "2011-02-02",
-				"docketNumber": "T-1089-10"
+				"docketNumber": "T-1089-10",
+				"url": "http://canlii.ca/t/2flrk"
 			}
 		]
 	},
@@ -191,7 +198,8 @@ var testCases = [
 				"reporter": "RCS",
 				"firstPage": "6",
 				"dateDecided": "2010-01-21",
-				"docketNumber": "32797"
+				"docketNumber": "32797",
+				"url": "http://canlii.ca/t/27jms"
 			}
 		]
 	},
@@ -218,7 +226,8 @@ var testCases = [
 				"court": "CF",
 				"firstPage": "119",
 				"dateDecided": "2011-02-02",
-				"docketNumber": "T-1089-10"
+				"docketNumber": "T-1089-10",
+				"url": "http://canlii.ca/t/fks9z"
 			}
 		]
 	}
