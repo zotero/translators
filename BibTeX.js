@@ -18,7 +18,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-06-07 18:08:01"
+	"lastUpdated": "2014-06-11 21:44:03"
 }
 
 function detectImport() {
@@ -266,10 +266,9 @@ function processField(item, field, value, rawValue) {
 		item.publicationTitle = value;
 	} else if(field == "author" || field == "editor" || field == "translator") {
 		// parse authors/editors/translators
-		var names = splitUnprotected(rawValue.trim(), / and /gi);
+		var names = splitUnprotected(rawValue.trim(), /\sand\s/gi);
 		for(var i in names) {
 			var name = names[i];
-			
 			// skip empty names
 			if (!name) continue;
 			
