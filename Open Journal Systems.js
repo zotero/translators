@@ -83,19 +83,19 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"rights": "Articles and conference papers published in  Atti della Accademia Peloritana dei Pericolanti – Classe di Scienze Fisiche, Matematiche e Naturali  are distributed under the terms and conditions of a  Creative Commons Attribution 3.0 Unported License  (effective since 2009, Vol. 87). Correspondingly, authors who publish with this journal agree to the following terms:    Authors retain copyright and grant the journal right of first publication with the work simultaneously licensed under a  Creative Commons Attribution License  that allows others to share the work with an acknowledgement of the work's authorship and initial publication in this journal.       Authors are able to enter into separate, additional contractual arrangements for the non-exclusive distribution of the journal's published version of the work (e.g., post it to an institutional repository or publish it in a book), with an acknowledgement of its initial publication in this journal.      Authors are permitted and encouraged to post their work online (e.g., in institutional repositories or on their website) prior to and during the submission process, as it can lead to productive exchanges, as well as earlier and greater citation of published work (See  The Effect of Open Access ).",
-				"language": "en",
-				"issue": "1",
-				"DOI": "10.1478/AAPP.901A1",
-				"abstractNote": "In the present work we propose an original analytical model of coopetitive game. We shall apply this analytical model of coopetition (based on normal form game theory) to the Greek crisis, while conceiving this game theory model at a macro level. We construct two realizations of such model, trying to represent possible realistic macro-economic scenarios of the Germany-Greek strategic interaction. We shall suggest - after a deep and complete study of the two samples - feasible transferable utility solutions in a properly coopetitive perspective for the divergent interests which drive the economic policies in the euro area.",
-				"ISSN": "1825-1242",
-				"url": "http://cab.unime.it/journals/index.php/AAPP/article/view/AAPP.901A1",
-				"libraryCatalog": "cab.unime.it",
-				"shortTitle": "A framework of coopetitive games",
 				"title": "A framework of coopetitive games: Applications to the Greek crisis",
 				"publicationTitle": "AAPP | Physical, Mathematical, and Natural Sciences",
+				"rights": "Copyright (c) 2014 AAPP | Physical, Mathematical, and Natural Sciences",
 				"date": "2012/06/08",
-				"volume": "90"
+				"language": "en",
+				"volume": "90",
+				"issue": "1",
+				"DOI": "10.1478/AAPP.901A1",
+				"ISSN": "1825-1242",
+				"url": "http://cab.unime.it/journals/index.php/AAPP/article/view/AAPP.901A1",
+				"abstractNote": "In the present work we propose an original analytical model of coopetitive game. We shall apply this analytical model of coopetition (based on normal form game theory) to the Greek crisis, while conceiving this game theory model at a macro level. We construct two realizations of such model, trying to represent possible realistic macro-economic scenarios of the Germany-Greek strategic interaction. We shall suggest - after a deep and complete study of the two samples - feasible transferable utility solutions in a properly coopetitive perspective for the divergent interests which drive the economic policies in the euro area.",
+				"libraryCatalog": "cab.unime.it",
+				"shortTitle": "A framework of coopetitive games"
 			}
 		]
 	},

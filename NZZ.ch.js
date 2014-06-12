@@ -174,7 +174,7 @@ var testCases = [
 				"language": "de",
 				"shortTitle": "Kuoni profitiert von der GTA-Übernahme",
 				"abstractNote": "Der Reisekonzern Kuoni hat in den ersten neun Monaten von der Übernahme des Reisekonzerns Gullivers Travel Associates (GTA) profitiert. Der Umsatz stieg, und der Konzern machte Gewinn.",
-				"section": "Wirtschaft",
+				"section": "Nachrichten",
 				"libraryCatalog": "NZZ"
 			}
 		]

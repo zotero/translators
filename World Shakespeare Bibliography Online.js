@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-03-06 23:27:12"
+	"lastUpdated": "2014-06-11 22:48:03"
 }
 
 /*
@@ -491,59 +491,41 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "Jan",
-						"lastName": "Jonk",
-						"creatorType": "translator"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Hamlet, Kroonprins van Denemarken",
-				"numPages": "140",
-				"place": "Heijen",
-				"publisher": "AlphaTech",
-				"language": "Dutch",
-				"archiveLocation": "30.14.05.15  Individual Works — Plays; <i>Hamlet</i>; Scholarship And Criticism; Translations And Adaptations",
-				"callNumber": "ad10",
-				"date": "1991",
-				"abstractNote": "Annotated Dutch-language translation based on the Arden edition",
-				"libraryCatalog": "World Shakespeare Bibliography Online"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.worldshakesbib.org/search?searchtype=browse&index=30.14.05.30&return=1&rid=50112&words=&returnlink=%2Fsearch%3Fsearchtype%3Dbrowse%26index%3D30.14.05.30%26return%3D1%26return%3D1",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"firstName": "François",
-						"lastName": "Maguin",
-						"creatorType": "translator"
+						"firstName": "Madhavi",
+						"lastName": "Menon",
+						"creatorType": "author"
 					}
 				],
 				"notes": [
 					{
-						"note": "Review(s): Peyré, Yves. <i>Cahiers élisabéthains</i> 49 (1996): 122"
+						"note": "Review(s): Guy-Bray, Stephen. <i>Renaissance Quarterly</i> 62, no. 1 (2009): 318-20; Patricia, Anthony Guy. <i>Popular Culture Review</i> 20, no. 2 (2009): 88-93; Rieh, Anna. <i>Sixteenth Century Journal</i> 41, no. 4 (2010): 1243-44; Rosenberger, JeriLynn. <i>Sixteenth Century Journal</i> 41, no. 4 (2010): 1243-44; Paul, Ryan Singh. <i>Shaksper: The Global Shakespeare Discussion List</i> 6 October 2011: SHK 22.0270 (http://shaksper.net)"
 					}
 				],
-				"tags": [],
+				"tags": [
+					"queer theory",
+					"sexuality",
+					"desire",
+					"Madden, John"
+				],
 				"seeAlso": [],
-				"attachments": [],
-				"title": "La tragédie de Hamlet",
-				"numPages": "544",
-				"place": "Paris",
-				"publisher": "Flammarion",
-				"language": "French",
-				"archiveLocation": "30.14.05.15  Individual Works — Plays; <i>Hamlet</i>; Scholarship And Criticism; Translations And Adaptations",
-				"callNumber": "ai690",
-				"date": "1995",
-				"abstractNote": "Annotated French-language translation with an introduction",
-				"libraryCatalog": "World Shakespeare Bibliography Online"
+				"attachments": [
+					{
+						"title": "See also: Madden, <i>Shakespeare in Love</i>",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"title": "Unhistorical Shakespeare: Queer Theory in Shakespearean Literature and Film",
+				"numPages": "195",
+				"place": "New York and Basingstoke",
+				"publisher": "Palgrave Macmillan",
+				"language": "English",
+				"archiveLocation": "30.12.05.30  Individual Works — Plays; <i>Cymbeline</i>; Scholarship And Criticism; Criticism",
+				"callNumber": "aaw627",
+				"date": "2008",
+				"abstractNote": "Introducing the term \"homohistory\" as a \"methodological resistance to sexuality as historical difference\" in Shakespeare criticism, pursues the \"eccentricities of desire\" in <i>Venus and Adonis</i>, <i>Cymbeline</i>, and <i>Titus Adronicus</i>, as well as in such contemporary films as John Madden's <i>Shakespeare in Love</i> (q.v.) and Bollywood adaptations of <i>Much Ado about Nothing</i>",
+				"libraryCatalog": "World Shakespeare Bibliography Online",
+				"shortTitle": "Unhistorical Shakespeare"
 			}
 		]
 	},
@@ -552,58 +534,40 @@ var testCases = [
 		"url": "http://www.worldshakesbib.org/search?rid=10156&words=",
 		"items": [
 			{
-				"itemType": "book",
+				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "M. C.",
-						"lastName": "Bradbrook",
+						"firstName": "A. Luis",
+						"lastName": "Pujante",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Miguel Angel",
+						"lastName": "Centenero",
 						"creatorType": "author"
 					}
 				],
-				"notes": [
-					{
-						"note": "Review(s): Darrell, S. B. <i>Choice</i> 27 (1989-90): 310; Hapgood, Robert. <i>TLS: The Times Literary Supplement</i> 25-31 August 1989, pp. 927-28 (in review-article, see the letters by Terence Hawkes and Eric Sams, 8-14 September 1989, p. 973, George T. Wright, 29 September-5 October 1989, p. 1061, and Hapgood, 13-19 October 1989, p. 1123); Wright, Laurence. <i>Shakespeare in Southern Africa</i> 3 (1989): 102-3; Elliot, Martin. <i>Encounter</i> March 1990, pp. 38-42 (in review-article); Kirsch, Arthur. <i>Studies in English Literature 1500-1900</i> 30 (1990): 335-67 (especially 357-58); Walch, Günter. <i>Shakespeare-Jahrbuch</i> (Weimar) 127 (1991): 175-77; Knowles, James. <i>Year's Work in English Studies</i> 70 (1992 for 1989): 266; Rutter, Carol Chillington. <i>Year's Work in English Studies</i> 70 (1992 for 1989): 293-94"
-					}
-				],
+				"notes": [],
 				"tags": [
-					"Gurr, Andrew"
+					"songs",
+					"semantics",
+					"music",
+					"metrics",
+					"rhythm",
+					"Schlegel, A. W. von"
 				],
 				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "See also: Bradbrook, \"'The cause of wit in other men'\" ",
-						"mimeType": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "See also: Bradbrook, \"Love and Courtesy in <i>Two Gentlemen of Verona</i>\" ",
-						"mimeType": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "See also: Bradbrook, \"Social Nuances in Shakespeare's Early Comedies\" ",
-						"mimeType": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "See also: Bradbrook, \"What Is 'Shakespeare'?\"",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
-				"title": "Shakespeare in His Context: The Constellated Globe",
-				"numPages": "207",
-				"place": "Totowa, NJ",
-				"publisher": "Barnes and Noble",
-				"series": "(The Collected Papers of Muriel Bradbrook 4.)",
-				"seriesTitle": "(The Collected Papers of Muriel Bradbrook 4.)",
-				"language": "English",
-				"archiveLocation": "10.40.05  General Shakespeareana; Shakespeare And His Stage; General",
-				"callNumber": "af639",
-				"date": "1989",
-				"abstractNote": "Prints four unpublished essays--\"<i>The Phoenix and the Turtle</i>\"; \"The Bankside in Elizabethan Times\"; \"The Brownes, the Greenes, and the Red Bull\"; and \"The Main Collaborators: Shakespeare and His Company\"--and the following previously published works of Shakespeare interest: \"What Is 'Shakespeare'?\" (q.v.); \"'The cause of wit in other men'\" (q.v.); \"The Building of Tragic Character in Shakespeare\"; \"Social Nuances in Shakespeare's Early Comedies\" (q.v.); \"Love and Courtesy in <i>The Two Gentlemen of Verona</i>\" (q.v.); \"<i>Romeo and Juliet</i> in Performance.\" With a foreword by Andrew Gurr and a bibliography of Bradbrook's publications, 1978-88",
-				"libraryCatalog": "World Shakespeare Bibliography Online",
-				"shortTitle": "Shakespeare in His Context"
+				"attachments": [],
+				"title": "Las canciones de Shakespeare en las traducciones alemanas de A. W. Schlegel",
+				"pages": "93-106",
+				"publicationTitle": "Cuadernos de filología inglesa",
+				"volume": "4",
+				"language": "Spanish",
+				"archiveLocation": "10.35.30  General Shakespeareana; Language, Linguistics, Philology; Translation",
+				"callNumber": "bi950",
+				"date": "1995",
+				"abstractNote": "Finds that A. W. von Schlegel's translations of the songs in Shakespeare (which \"combine a high degree of semantic fidelity to the text with a perfect adjustment to the original tunes\") are an exception to the tendency of translators to ignore their musical dimension. Concludes that although Schlegel did not know the tunes, his synchronization of metrical stress with musical beat results from his reading of the lines rhythmically. English summary, 93",
+				"libraryCatalog": "World Shakespeare Bibliography Online"
 			}
 		]
 	}

@@ -497,18 +497,22 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "ScienceDirect Snapshot"
+					},
+					{
+						"title": "ScienceDirect Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
+				"title": "8 - Introduction to discrete dislocation statics and dynamics",
 				"bookTitle": "Computational Materials Engineering",
+				"publisher": "Academic Press",
 				"place": "Burlington",
+				"pages": "267-316",
 				"ISBN": "978-0-12-369468-3",
 				"url": "http://www.sciencedirect.com/science/article/pii/B9780123694683500083",
 				"abstractNote": "This chapter provides an introduction to discrete dislocation statics and dynamics. The chapter deals with the simulation of plasticity of metals at the microscopic and mesoscopic scale using space- and time-discretized dislocation statics and dynamics. The complexity of discrete dislocation models is due to the fact that the mechanical interaction of ensembles of such defects is of an elastic nature and, therefore, involves long-range interactions. Space-discretized dislocation simulations idealize dislocations outside the dislocation cores as linear defects that are embedded within an otherwise homogeneous, isotropic or anisotropic, linear elastic medium. The aim of the chapter is to concentrate on those simulations that are discrete in both space and time. It explicitly incorporates the properties of individual lattice defects in a continuum formulation. The theoretical framework of linear continuum elasticity theory is overviewed as required for the formulation of basic dislocation mechanics. The chapter also discusses the dislocation statics, where the fundamentals of linear isotropic and anisotropic elasticity theory that are required in dislocation theory are reviewed. The chapter describes the dislocation dynamics, where it is concerned with the introduction of continuum dislocation dynamics. The last two sections deal with kinematics of discrete dislocation dynamics and dislocation reactions and annihilation.",
-				"libraryCatalog": "ScienceDirect",
-				"title": "8 - Introduction to discrete dislocation statics and dynamics",
-				"publisher": "Academic Press",
-				"pages": "267-316",
-				"date": "2007"
+				"date": "2007",
+				"libraryCatalog": "ScienceDirect"
 			}
 		]
 	},
@@ -545,18 +549,22 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "ScienceDirect Snapshot"
+					},
+					{
+						"title": "ScienceDirect Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
+				"title": "Africa",
 				"bookTitle": "Encyclopedia of Inland Waters",
+				"publisher": "Academic Press",
 				"place": "Oxford",
+				"pages": "295-305",
 				"ISBN": "978-0-12-370626-3",
 				"url": "http://www.sciencedirect.com/science/article/pii/B9780123706263000508",
 				"abstractNote": "The African continent (30.1 million km2) extends from 37°17′N to 34°52 S and covers a great variety of climates except the polar climate. Although Africa is often associated to extended arid areas as the Sahara (7 million km2) and Kalahari (0.9 million km2), it is also characterized by a humid belt in its equatorial part and by few very wet regions as in Cameroon and in Sierra Leone. Some of the largest river basins are found in this continent such as the Congo, also termed Zaire, Nile, Zambezi, Orange, and Niger basins. Common features of Africa river basins are (i) warm temperatures, (ii) general smooth relief due to the absence of recent mountain ranges, except in North Africa and in the Rift Valley, (iii) predominance of old shields and metamorphic rocks with very developed soil cover, and (iv) moderate human impacts on river systems except for the recent spread of river damming. African rivers are characterized by very similar hydrochemical and physical features (ionic contents, suspended particulate matter, or SPM) but differ greatly by their hydrological regimes, which are more developed in this article.",
-				"libraryCatalog": "ScienceDirect",
-				"title": "Africa",
-				"publisher": "Academic Press",
-				"pages": "295-305",
-				"date": "2009"
+				"date": "2009",
+				"libraryCatalog": "ScienceDirect"
 			}
 		]
 	},

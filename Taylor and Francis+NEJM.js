@@ -391,7 +391,7 @@ var testCases = [
 				"pages": "491-512",
 				"date": "2003",
 				"DOI": "10.1080/0308106032000167373",
-				"url": "http://www.tandfonline.com/doi/abs/10.1080/0308106032000167373",
+				"url": "http://dx.doi.org/10.1080/0308106032000167373",
 				"abstractNote": "This article deals with a multicriteria evaluation of High-Speed Rail, Transrapid Maglev and Air Passenger Transport in Europe. Operational, socio-economic and environmental performance indicators of the specific high-speed transport systems are adopted as the evaluation criteria. By using the entropy method, weights are assigned to particular criteria in order to indicate their relative importance in decision-making. The TOPSIS method is applied to carry out the multicriteria evaluation and selection of the preferable alternative (high-speed system) under given circumstances.",
 				"title": "<no title>",
 				"ISSN": "0308-1060",
