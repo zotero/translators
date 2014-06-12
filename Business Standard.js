@@ -117,28 +117,28 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"T N Ninan",
-					"T N Ninan: Make-believe solutions",
-					"WEEKEND RUMINATIONS",
-					"power stations",
-					"Railway Budget",
-					"FDI in retail trade",
 					"Coal India",
+					"Coal India",
+					"FDI in retail trade",
+					"FDI in retail trade",
 					"Kingfisher",
-					"new manufacturing policy",
+					"Kingfisher",
+					"LIC",
 					"LIC",
 					"ONGC",
+					"ONGC",
+					"Railway Budget",
+					"Railway Budget",
+					"T N Ninan",
 					"T N Ninan",
 					"T N Ninan: Make-believe solutions",
+					"T N Ninan: Make-believe solutions",
 					"WEEKEND RUMINATIONS",
-					"power stations",
-					"Railway Budget",
-					"FDI in retail trade",
-					"Coal India",
-					"Kingfisher",
+					"WEEKEND RUMINATIONS",
 					"new manufacturing policy",
-					"LIC",
-					"ONGC"
+					"new manufacturing policy",
+					"power stations",
+					"power stations"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -147,13 +147,12 @@ var testCases = [
 						"type": "text/html"
 					}
 				],
-				"url": "http://www.business-standard.com/article/opinion/t-n-ninan-b-make-believe-solutions-112033100081_1.html",
+				"url": "http://www.business-standard.com/article/opinion/t-n-ninan-make-believe-solutions-112033100081_1.html",
 				"abstractNote": "The government has been trying to get rid of the impression that it is caught in “policy paralysis”.",
 				"date": "2012-03-31",
 				"publicationTitle": "Business Standard India",
 				"title": "T N Ninan: Make-believe solutions",
 				"libraryCatalog": "Business Standard",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "T N Ninan"
 			}
 		]
