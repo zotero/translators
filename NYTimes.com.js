@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-04-03 17:50:01"
+	"lastUpdated": "2014-06-11 21:54:15"
 }
 
 function detectWeb(doc, url) {
@@ -177,7 +177,7 @@ function scrape(doc, url) {
 		newItem.url = newItem.url.replace(/\?.+/, '');
 	}
 	//	get pdf for archive articles - make sure we don't go here if we're getting multiples or regular items
-	var pdfxpath = '//div[@class="articleAccess"]/p[@class="button"]/a[contains(@href, "/pdf")]/@href'
+	var pdfxpath = '//div[@id="articleAccess"]//span[@class="downloadPDF"]/a[contains(@href, "/pdf")]/@href'
 	if (!m && ZU.xpathText(doc, pdfxpath) != null) {
 		var pdflink = ZU.xpathText(doc, pdfxpath)
 		Zotero.Utilities.doGet(pdflink, function (text) {
