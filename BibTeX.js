@@ -18,7 +18,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-06-11 21:44:03"
+	"lastUpdated": "2014-06-13 03:37:22"
 }
 
 function detectImport() {
@@ -288,7 +288,7 @@ function processField(item, field, value, rawValue) {
 				creator = Zotero.Utilities.cleanAuthor(unescapeBibTeX(name), field, false);
 			} else {
 				creator = {
-					firstName: unescapeBibTeX(name),
+					lastName: unescapeBibTeX(name),
 					creatorType: field,
 					fieldMode: 1
 				}
@@ -3318,27 +3318,27 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "American Heart Association Council on Quality of Care and Outcomes Research",
+						"lastName": "American Heart Association Council on Quality of Care and Outcomes Research",
 						"creatorType": "author",
 						"fieldMode": 1
 					},
 					{
-						"firstName": "Emergency Cardiovascular Care Committee",
+						"lastName": "Emergency Cardiovascular Care Committee",
 						"creatorType": "author",
 						"fieldMode": 1
 					},
 					{
-						"firstName": "Council on Cardiopulmonary, Critical Care, Perioperative and Resuscitation",
+						"lastName": "Council on Cardiopulmonary, Critical Care, Perioperative and Resuscitation",
 						"creatorType": "author",
 						"fieldMode": 1
 					},
 					{
-						"firstName": "Council on Clinical Cardiology",
+						"lastName": "Council on Clinical Cardiology",
 						"creatorType": "author",
 						"fieldMode": 1
 					},
 					{
-						"firstName": "Council on Cardiovascular Surgery and Anesthesia",
+						"lastName": "Council on Cardiovascular Surgery and Anesthesia",
 						"creatorType": "author",
 						"fieldMode": 1
 					}
@@ -3358,13 +3358,13 @@ var testCases = [
 				],
 				"seeAlso": [],
 				"attachments": [],
-				"extra": "PMID: 23439512",
 				"itemID": "sasson_increasing_2013",
 				"ISSN": "1524-4539",
 				"shortTitle": "Increasing cardiopulmonary resuscitation provision in communities with low bystander cardiopulmonary resuscitation rates",
 				"DOI": "10.1161/CIR.0b013e318288b4dd",
 				"language": "eng",
 				"issue": "12",
+				"extra": "PMID: 23439512",
 				"title": "Increasing cardiopulmonary resuscitation provision in communities with low bystander cardiopulmonary resuscitation rates: a science advisory from the American Heart Association for healthcare providers, policymakers, public health departments, and community leaders",
 				"volume": "127",
 				"publicationTitle": "Circulation",
