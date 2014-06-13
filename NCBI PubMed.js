@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 13,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-01-05 14:36:04"
+	"lastUpdated": "2014-06-11 16:48:48"
 }
 
 /*****************************
@@ -59,6 +59,48 @@ function getUID(doc) {
 	return false;
 }
 
+// retrieve itemprop elements for scraping books directly from page where UID is not available
+function getBookProps(doc) {
+	var main = doc.getElementById('maincontent');
+	if(!main) return;
+	
+	var itemprops = ZU.xpath(main, './/div[@itemtype="http://schema.org/Book"]//*[@itemprop]');
+	return itemprops.length ? itemprops : null;
+}
+
+// itemprop to Zotero field map
+var bookRDFaMap = {
+	name: 'title',
+	bookEdition: 'edition',
+	author: 'creator/author',
+	publisher: 'publisher',
+	datePublished: 'date',
+	isbn: 'ISBN',
+	description: 'abstractNote'
+};
+
+function scrapeItemProps(itemprops) {
+	var item = new Zotero.Item('book');
+	for(var i=0; i<itemprops.length; i++) {
+		var value = ZU.trimInternal(itemprops[i].textContent);
+		var field = bookRDFaMap[itemprops[i].getAttribute('itemprop')];
+		if(!field) continue;
+		
+		if(field.indexOf('creator/') == 0) {
+			field = field.substr(8);
+			item.creators.push(ZU.cleanAuthor(value, field, false));
+		} else if(field == 'ISBN') {
+			if(!item.ISBN) item.ISBN = '';
+			else item.ISBN += '; ';
+			
+			item.ISBN += value;
+		} else {
+			item[field] = value;
+		}
+	}
+	item.complete();
+}
+
 //retrieves a list of result nodes from a search results page (perhaps others too)
 function getResultList(doc) {
 	var results = ZU.xpath(doc, '//div[./div[@class="rslt"][./p[@class="title"] or ./h1]]');
@@ -77,6 +119,8 @@ function detectWeb(doc, url) {
 	}
 	
 	if(!getUID(doc)) {
+		if(getBookProps(doc)) return 'book';
+		
 		return;
 	}
 	
@@ -133,7 +177,12 @@ function doWeb(doc, url) {
 			lookupPMIDs(uids);
 		});
 	} else {
-		lookupPMIDs([getUID(doc)]);
+		var uid = getUID(doc), itemprops;
+		if(uid) {
+			lookupPMIDs([uid]);
+		} else if(itemprops = getBookProps(doc)) {
+			scrapeItemProps(itemprops);
+		}
 	}
 /*
 		} else {
@@ -1160,6 +1209,58 @@ var testCases = [
 				"DOI": "10.1038/nature09534",
 				"extra": "PMID: 20981092 \nPMCID: PMC3042601",
 				"libraryCatalog": "NCBI PubMed"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.ncbi.nlm.nih.gov/books/NBK21054/",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Bruce",
+						"lastName": "Alberts",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alexander",
+						"lastName": "Johnson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Julian",
+						"lastName": "Lewis",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Martin",
+						"lastName": "Raff",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Keith",
+						"lastName": "Roberts",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Peter",
+						"lastName": "Walter",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"edition": "4th",
+				"ISBN": "0-8153-3218-1; 0-8153-4072-9",
+				"abstractNote": "ExcerptMolecular Biology of the Cell is the classic in-depth text reference in cell biology. By extracting fundamental concepts and meaning from this enormous and ever-growing field, the authors tell the story of cell biology, and create a coherent framework through which non-expert readers may approach the subject. Written in clear and concise language, and illustrated with original drawings, the book is enjoyable to read, and provides a sense of the excitement of modern biology. Molecular Biology of the Cell not only sets forth the current understanding of cell biology (updated as of Fall 2001), but also explores the intriguing implications and possibilities of that which remains unknown.",
+				"libraryCatalog": "NCBI PubMed",
+				"title": "Molecular Biology of the Cell",
+				"publisher": "Garland Science",
+				"date": "2002"
 			}
 		]
 	},
