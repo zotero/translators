@@ -10,7 +10,7 @@
 	"configOptions":{"getCollections":"true", "dataMode":"rdf/xml"},
 	"displayOptions":{"exportNotes":true, "exportFileData":false},
 	"inRepository":true,
-	"lastUpdated":"2012-02-13 07:58:03"
+	"lastUpdated":"2015-02-12 09:23:24"
 }
 
 var item;
@@ -197,6 +197,11 @@ function generateItem(item, zoteroType, resource) {
 		type = n.bib+"Recording";
 	} else if(zoteroType == "computerProgram") {
 		type = n.bib+"Data";
+	} else if(zoteroType == "encyclopediaArticle"
+		|| zoteroType == "dictionaryEntry") {
+		container = n.bib+"Book";
+	} else if(zoteroType == "conferencePaper") {
+		container = n.bib+"Journal";
 	}
 	
 	if(type) {
