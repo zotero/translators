@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 13,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-06-20 03:38:54"
+	"lastUpdated": "2014-06-20 04:23:04"
 }
 
 /*****************************
@@ -23,6 +23,7 @@ function lookupPMIDs(ids, next) {
 		"db=PubMed&tool=Zotero&retmode=xml&rettype=citation&id="+ids.join(",");
 	Zotero.debug(newUri);
 	Zotero.Utilities.HTTP.doGet(newUri, function(text) {
+		//Z.debug(text);
 		doImportFromText(text, next);
 	});	//call the import translator
 }
@@ -401,6 +402,15 @@ function doImportFromText(text, next) {
 			
 			var title = ZU.xpathText(journal, 'Title');
 			if(title) {
+				title = ZU.trimInternal(title);
+				// Fix sentence-cased titles, but be careful...
+				if(!( // of accronyms that could get messed up if we fix case
+					/\b[A-Z]{2}/.test(title) // this could mean that there's an accronym in the title
+					&& (title.toUpperCase() != title // the whole title isn't in upper case, so bail
+						|| !(/\s/.test(title))) // it's all in upper case and there's only one word, so we can't be sure
+				)) {
+					title = ZU.capitalizeTitle(title, true);
+				}
 				newItem.publicationTitle = title;
 			} else if(newItem.journalAbbreviation) {
 				newItem.publicationTitle = newItem.journalAbbreviation;
@@ -638,7 +648,7 @@ var testCases = [
 				"shortTitle": "Zotero",
 				"title": "Zotero: harnessing the power of a personal bibliographic manager",
 				"pages": "205-207",
-				"publicationTitle": "Nurse educator",
+				"publicationTitle": "Nurse Educator",
 				"volume": "35",
 				"date": "2010 Sep-Oct"
 			}
@@ -825,7 +835,7 @@ var testCases = [
 				"shortTitle": "Screening for hypercholesterolaemia versus case finding for familial hypercholesterolaemia",
 				"title": "Screening for hypercholesterolaemia versus case finding for familial hypercholesterolaemia: a systematic review and cost-effectiveness analysis",
 				"pages": "1-123",
-				"publicationTitle": "Health technology assessment (Winchester, England)",
+				"publicationTitle": "Health Technology Assessment (Winchester, England)",
 				"volume": "4",
 				"date": "2000"
 			}
