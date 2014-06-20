@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 13,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-06-11 16:48:48"
+	"lastUpdated": "2014-06-20 03:38:54"
 }
 
 /*****************************
@@ -312,11 +312,14 @@ function processAuthors(newItem, authorsLists) {
 			}
 	
 			if(firstName || lastName) {
-				newItem.creators.push({
-					creatorType:type,
-					lastName:lastName,
-					firstName:firstName
-				});
+				var creator = ZU.cleanAuthor(lastName + ', ' + firstName, type, true);
+				if(creator.lastName.toUpperCase() == creator.lastName) {
+					creator.lastName = ZU.capitalizeTitle(creator.lastName, true);
+				}
+				if(creator.firstName.toUpperCase() == creator.firstName) {
+					creator.firstName = ZU.capitalizeTitle(creator.firstName, true);
+				}
+				newItem.creators.push(creator);
 			} else if(lastName = ZU.xpathText(author, 'CollectiveName')) {
 				//corporate author
 				newItem.creators.push({
@@ -600,14 +603,14 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"creatorType": "author",
+						"firstName": "Jaekea T.",
 						"lastName": "Coar",
-						"firstName": "Jaekea T"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Jeanne P.",
 						"lastName": "Sewell",
-						"firstName": "Jeanne P"
+						"creatorType": "author"
 					}
 				],
 				"notes": [],
@@ -699,24 +702,24 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"creatorType": "editor",
+						"firstName": "Douglas L.",
 						"lastName": "Riegert-Johnson",
-						"firstName": "Douglas L"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Lisa A.",
 						"lastName": "Boardman",
-						"firstName": "Lisa A"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Timothy",
 						"lastName": "Hefferon",
-						"firstName": "Timothy"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Maegan",
 						"lastName": "Roberts",
-						"firstName": "Maegan"
+						"creatorType": "editor"
 					}
 				],
 				"notes": [],
@@ -729,10 +732,7 @@ var testCases = [
 						"snapshot": false
 					}
 				],
-				"title": "Cancer Syndromes",
-				"date": "2009",
 				"place": "Bethesda (MD)",
-				"publisher": "National Center for Biotechnology Information (US)",
 				"language": "eng",
 				"abstractNote": "Cancer Syndromes is a comprehensive multimedia resource for selected single gene cancer syndromes. Syndromes currently included are Peutz-Jeghers syndrome, juvenile polyposis, Birt-Hogg-Dubé syndrome, multiple endocrine neoplasia type 1 and familial atypical multiple mole melanoma syndrome. For each syndrome the history, epidemiology, natural history and management are reviewed. If possible the initial report in the literature of each syndrome is included as an appendix. Chapters are extensively annotated with figures and movie clips. Mission Statement: Improving the care of cancer syndrome patients.",
 				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson",
@@ -740,7 +740,9 @@ var testCases = [
 				"callNumber": "NBK1825",
 				"url": "http://www.ncbi.nlm.nih.gov/books/NBK1825/",
 				"libraryCatalog": "NCBI PubMed",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"title": "Cancer Syndromes",
+				"date": "2009",
+				"publisher": "National Center for Biotechnology Information (US)"
 			}
 		]
 	},
@@ -752,34 +754,34 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"creatorType": "author",
+						"firstName": "D.",
 						"lastName": "Marks",
-						"firstName": "D"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "D.",
 						"lastName": "Wonderling",
-						"firstName": "D"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "M.",
 						"lastName": "Thorogood",
-						"firstName": "M"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "H.",
 						"lastName": "Lambert",
-						"firstName": "H"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "S. E.",
 						"lastName": "Humphries",
-						"firstName": "S E"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "H. A.",
 						"lastName": "Neil",
-						"firstName": "H A"
+						"creatorType": "author"
 					}
 				],
 				"notes": [],
@@ -837,29 +839,29 @@ var testCases = [
 				"itemType": "bookSection",
 				"creators": [
 					{
-						"creatorType": "author",
+						"firstName": "Warren",
 						"lastName": "Hyer",
-						"firstName": "Warren"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Douglas L.",
 						"lastName": "Riegert-Johnson",
-						"firstName": "Douglas L"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Lisa A.",
 						"lastName": "Boardman",
-						"firstName": "Lisa A"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Timothy",
 						"lastName": "Hefferon",
-						"firstName": "Timothy"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Maegan",
 						"lastName": "Roberts",
-						"firstName": "Maegan"
+						"creatorType": "editor"
 					}
 				],
 				"notes": [],
@@ -900,29 +902,29 @@ var testCases = [
 				"itemType": "bookSection",
 				"creators": [
 					{
-						"creatorType": "author",
+						"firstName": "Warren",
 						"lastName": "Hyer",
-						"firstName": "Warren"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Douglas L.",
 						"lastName": "Riegert-Johnson",
-						"firstName": "Douglas L"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Lisa A.",
 						"lastName": "Boardman",
-						"firstName": "Lisa A"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Timothy",
 						"lastName": "Hefferon",
-						"firstName": "Timothy"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Maegan",
 						"lastName": "Roberts",
-						"firstName": "Maegan"
+						"creatorType": "editor"
 					}
 				],
 				"notes": [],
@@ -940,11 +942,7 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"title": "Implications of Peutz-Jeghers Syndrome in Children and Adolescents",
-				"publicationTitle": "Cancer Syndromes",
-				"date": "2009",
 				"place": "Bethesda (MD)",
-				"publisher": "National Center for Biotechnology Information (US)",
 				"language": "eng",
 				"abstractNote": "Pigmentation tends to arise in infancy, occurring around the mouth, nostrils, perianal area, fingers and toes, and the dorsal and volar aspects of hands and feet (Figure 1). They may fade after puberty but tend to persist in the buccal mucosa. The primary concern to the paediatrician is the risk of small bowel intussusception causing intestinal obstruction, vomiting, and pain. In addition, intestinal bleeding leading to anaemia can occur. The management of a young child with mid-gut PJS polyps is controversial. In a retrospective review, 68% of children had undergone a laparotomy for bowel obstruction by the age of 18 years, and many of these proceeded to a second laparotomy within 5 years (1). There is a high re-operation rate after initial laparotomy for small bowel obstruction.",
 				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson",
@@ -952,7 +950,10 @@ var testCases = [
 				"callNumber": "NBK26374",
 				"url": "http://www.ncbi.nlm.nih.gov/books/NBK26374/",
 				"libraryCatalog": "NCBI PubMed",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"title": "Implications of Peutz-Jeghers Syndrome in Children and Adolescents",
+				"bookTitle": "Cancer Syndromes",
+				"date": "2009",
+				"publisher": "National Center for Biotechnology Information (US)"
 			}
 		]
 	},
@@ -964,24 +965,24 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"creatorType": "editor",
+						"firstName": "Douglas L.",
 						"lastName": "Riegert-Johnson",
-						"firstName": "Douglas L"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Lisa A.",
 						"lastName": "Boardman",
-						"firstName": "Lisa A"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Timothy",
 						"lastName": "Hefferon",
-						"firstName": "Timothy"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Maegan",
 						"lastName": "Roberts",
-						"firstName": "Maegan"
+						"creatorType": "editor"
 					}
 				],
 				"notes": [],
@@ -994,10 +995,7 @@ var testCases = [
 						"snapshot": false
 					}
 				],
-				"title": "Cancer Syndromes",
-				"date": "2009",
 				"place": "Bethesda (MD)",
-				"publisher": "National Center for Biotechnology Information (US)",
 				"language": "eng",
 				"abstractNote": "Cancer Syndromes is a comprehensive multimedia resource for selected single gene cancer syndromes. Syndromes currently included are Peutz-Jeghers syndrome, juvenile polyposis, Birt-Hogg-Dubé syndrome, multiple endocrine neoplasia type 1 and familial atypical multiple mole melanoma syndrome. For each syndrome the history, epidemiology, natural history and management are reviewed. If possible the initial report in the literature of each syndrome is included as an appendix. Chapters are extensively annotated with figures and movie clips. Mission Statement: Improving the care of cancer syndrome patients.",
 				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson",
@@ -1005,7 +1003,9 @@ var testCases = [
 				"callNumber": "NBK1825",
 				"url": "http://www.ncbi.nlm.nih.gov/books/NBK1825/",
 				"libraryCatalog": "NCBI PubMed",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"title": "Cancer Syndromes",
+				"date": "2009",
+				"publisher": "National Center for Biotechnology Information (US)"
 			}
 		]
 	},
@@ -1017,59 +1017,59 @@ var testCases = [
 				"itemType": "bookSection",
 				"creators": [
 					{
-						"creatorType": "author",
+						"firstName": "Douglas",
 						"lastName": "Riegert-Johnson",
-						"firstName": "Douglas"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Ferga C.",
 						"lastName": "Gleeson",
-						"firstName": "Ferga C."
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Wytske",
 						"lastName": "Westra",
-						"firstName": "Wytske"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Timothy",
 						"lastName": "Hefferon",
-						"firstName": "Timothy"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Louis M.",
 						"lastName": "Wong Kee Song",
-						"firstName": "Louis M."
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Lauren",
 						"lastName": "Spurck",
-						"firstName": "Lauren"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Lisa A.",
 						"lastName": "Boardman",
-						"firstName": "Lisa A."
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Douglas L.",
 						"lastName": "Riegert-Johnson",
-						"firstName": "Douglas L"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Lisa A.",
 						"lastName": "Boardman",
-						"firstName": "Lisa A"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Timothy",
 						"lastName": "Hefferon",
-						"firstName": "Timothy"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Maegan",
 						"lastName": "Roberts",
-						"firstName": "Maegan"
+						"creatorType": "editor"
 					}
 				],
 				"notes": [],
@@ -1120,44 +1120,44 @@ var testCases = [
 						"fieldMode": 1
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Gonçalo R.",
 						"lastName": "Abecasis",
-						"firstName": "Gonçalo R"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "David",
 						"lastName": "Altshuler",
-						"firstName": "David"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Adam",
 						"lastName": "Auton",
-						"firstName": "Adam"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Lisa D.",
 						"lastName": "Brooks",
-						"firstName": "Lisa D"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Richard M.",
 						"lastName": "Durbin",
-						"firstName": "Richard M"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Richard A.",
 						"lastName": "Gibbs",
-						"firstName": "Richard A"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Matt E.",
 						"lastName": "Hurles",
-						"firstName": "Matt E"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Gil A.",
 						"lastName": "McVean",
-						"firstName": "Gil A"
+						"creatorType": "author"
 					}
 				],
 				"notes": [],
@@ -1196,19 +1196,19 @@ var testCases = [
 						"snapshot": false
 					}
 				],
-				"title": "A map of human genome variation from population-scale sequencing",
-				"pages": "1061-1073",
 				"ISSN": "1476-4687",
 				"journalAbbreviation": "Nature",
-				"publicationTitle": "Nature",
-				"volume": "467",
 				"issue": "7319",
-				"date": "Oct 28, 2010",
 				"language": "eng",
 				"abstractNote": "The 1000 Genomes Project aims to provide a deep characterization of human genome sequence variation as a foundation for investigating the relationship between genotype and phenotype. Here we present results of the pilot phase of the project, designed to develop and compare different strategies for genome-wide sequencing with high-throughput platforms. We undertook three projects: low-coverage whole-genome sequencing of 179 individuals from four populations; high-coverage sequencing of two mother-father-child trios; and exon-targeted sequencing of 697 individuals from seven populations. We describe the location, allele frequency and local haplotype structure of approximately 15 million single nucleotide polymorphisms, 1 million short insertions and deletions, and 20,000 structural variants, most of which were previously undescribed. We show that, because we have catalogued the vast majority of common variation, over 95% of the currently accessible variants found in any individual are present in this data set. On average, each person is found to carry approximately 250 to 300 loss-of-function variants in annotated genes and 50 to 100 variants previously implicated in inherited disorders. We demonstrate how these results can be used to inform association and functional studies. From the two trios, we directly estimate the rate of de novo germline base substitution mutations to be approximately 10(-8) per base pair per generation. We explore the data with regard to signatures of natural selection, and identify a marked reduction of genetic variation in the neighbourhood of genes, due to selection at linked sites. These methods and public data will support the next phase of human genetic research.",
 				"DOI": "10.1038/nature09534",
 				"extra": "PMID: 20981092 \nPMCID: PMC3042601",
-				"libraryCatalog": "NCBI PubMed"
+				"libraryCatalog": "NCBI PubMed",
+				"title": "A map of human genome variation from population-scale sequencing",
+				"pages": "1061-1073",
+				"publicationTitle": "Nature",
+				"volume": "467",
+				"date": "Oct 28, 2010"
 			}
 		]
 	},
@@ -1261,6 +1261,45 @@ var testCases = [
 				"title": "Molecular Biology of the Cell",
 				"publisher": "Garland Science",
 				"date": "2002"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.ncbi.nlm.nih.gov/pubmed/14779137",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "C. C.",
+						"lastName": "Blackwell",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Pancreatitis"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"ISSN": "0025-7044",
+				"journalAbbreviation": "J Med Assoc State Ala",
+				"issue": "4",
+				"language": "eng",
+				"extra": "PMID: 14779137",
+				"libraryCatalog": "NCBI PubMed",
+				"title": "Surgical management of pancreatitis",
+				"pages": "118-128",
+				"publicationTitle": "Journal of the Medical Association of the State of Alabama",
+				"volume": "20",
+				"date": "Oct 1950"
 			}
 		]
 	},
