@@ -2,7 +2,7 @@
 	"translatorID": "f4a5876a-3e53-40e2-9032-d99a30d7a6fc",
 	"label": "ACL",
 	"creator": "Nathan Schneider",
-	"target": "^https?://(www\\.)?((anthology\\.)?aclweb\\.org/anthology(-new)?|anthology\\.aclweb\\.org)/+[^#]+",
+	"target": "^https?://((www\\.)?((anthology\\.)?aclweb\\.org|69.195.124.161/~aclwebor)/anthology(-new)?|anthology\\.aclweb\\.org)/+[^#]+",
 	"minVersion": "1.0.7",
 	"maxVersion": "",
 	"priority": 100,
