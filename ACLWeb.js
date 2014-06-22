@@ -2,7 +2,7 @@
 	"translatorID": "f4a5876a-3e53-40e2-9032-d99a30d7a6fc",
 	"label": "ACL",
 	"creator": "Nathan Schneider",
-	"target": "^https?://(www[.])?aclweb\\.org/anthology/[^#]+",
+	"target": "^https?://(www\\.)?((anthology\\.)?aclweb\\.org/anthology(-new)?|anthology\\.aclweb\\.org)/+[^#]+",
 	"minVersion": "1.0.7",
 	"maxVersion": "",
 	"priority": 100,
@@ -178,6 +178,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://aclweb.org/anthology/P/P93/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.anthology.aclweb.org//P/P14/",
 		"items": "multiple"
 	}
 ]
