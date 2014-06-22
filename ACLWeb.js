@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-06-21 23:48:51"
+	"lastUpdated": "2014-06-22 00:15:46"
 }
 
 // based on ACM translator
@@ -129,7 +129,7 @@ function scrapeIndex(doc, items) {
 		attachments.push({title:authorsShort + " " + year + ".pdf", mimeType:"application/pdf", url:pdf});
 
 		var type = "";
-		if (pageurl.indexOf("/anthology-new/J/")>-1)
+		if (pageurl.indexOf("/J/")>-1 || pageurl.indexOf("/Q/")>-1)
 			type = "journalArticle";
 		else
 			type = "conferencePaper";
