@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-09-16 00:20:13"
+	"lastUpdated": "2014-06-21 23:48:51"
 }
 
 // based on ACM translator
