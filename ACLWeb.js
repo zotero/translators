@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-06-22 00:15:46"
+	"lastUpdated": "2014-06-22 00:36:42"
 }
 
 // based on ACM translator
@@ -19,9 +19,19 @@ function detectWeb(doc, url) {
 		if (prefix == 'x') return prefix; else return null;
 	} : namespace;
 
-	var bibXpath = "//a[./text() = 'bib']"
+	var bibXpath = "//a[./text() = 'bib']";
+	var frameXpath = "//frame";
 	if(doc.evaluate(bibXpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 	  return "multiple"
+	}
+        else {
+	    var frameNode = doc.evaluate(frameXpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	    if (frameNode) {
+		var frameURL = frameNode.getAttribute("src");
+		Zotero.Utilities.loadDocument(frameURL, function(doc2) {
+			return detectWeb(doc2, frameURL);
+		    });
+	    }
 	}
   //commenting out single stuff
   // if (url.indexOf("/anthology-new/J/")>-1)
