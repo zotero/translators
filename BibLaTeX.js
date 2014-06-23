@@ -15,7 +15,7 @@
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
-	"lastUpdated": "2014-06-07 05:03:43"
+	"lastUpdated": "2014-06-23 05:03:43"
 }
 
 
@@ -275,11 +275,10 @@ function writeField(field, value, isMacro, noEscape) {
 
 
 		// Case of words with uppercase characters in non-initial positions is preserved with braces.
-		// treat hyphen as whitespace for this purpose so that Large-scale etc. don't get enclosed
-		// treat curly bracket as whitespace because of mark-up immediately preceding word
-		// treat opening parentheses &brackets as whitespace
+		// we're looking at all unicode letters
+		var protectCaps = new ZU.XRegExp("\\b\\p{Letter}+\\p{Uppercase_Letter}\\p{Letter}*", 'g')
 		if (field != "pages") {
-			value = value.replace(/([^\s-\}\(\[]+[A-Z][^\s,]*)/g, "{$1}");
+			value = ZU.XRegExp.replace(value, protectCaps, "{$0}");
 		}
 	}
 	//we write utf8
