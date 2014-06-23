@@ -278,8 +278,9 @@ function writeField(field, value, isMacro, noEscape) {
 		// treat hyphen as whitespace for this purpose so that Large-scale etc. don't get enclosed
 		// treat curly bracket as whitespace because of mark-up immediately preceding word
 		// treat opening parentheses &brackets as whitespace
+                // terminate matching on encountering comma, or closing parenthesis
 		if (field != "pages") {
-			value = value.replace(/([^\s-\}\(\[]+[A-Z][^\s,]*)/g, "{$1}");
+			value = value.replace(/([^\s-\}\(\[]+[A-Z][^\s,\)]*)/g, "{$1}");
 		}
 	}
 	//we write utf8
