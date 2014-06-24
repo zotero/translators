@@ -2,14 +2,14 @@
 	"translatorID": "f4a5876a-3e53-40e2-9032-d99a30d7a6fc",
 	"label": "ACL",
 	"creator": "Nathan Schneider",
-	"target": "^https?://(www[.])?aclweb\\.org/anthology/[^#]+",
+	"target": "^https?://((www\\.)?((anthology\\.)?aclweb\\.org|69.195.124.161/~aclwebor)/anthology(-new)?|anthology\\.aclweb\\.org)/+[^#]+",
 	"minVersion": "1.0.7",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-09-16 00:20:13"
+	"lastUpdated": "2014-06-22 00:36:42"
 }
 
 // based on ACM translator
@@ -19,9 +19,19 @@ function detectWeb(doc, url) {
 		if (prefix == 'x') return prefix; else return null;
 	} : namespace;
 
-	var bibXpath = "//a[./text() = 'bib']"
+	var bibXpath = "//a[./text() = 'bib']";
+	var frameXpath = "//frame";
 	if(doc.evaluate(bibXpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 	  return "multiple"
+	}
+        else {
+	    var frameNode = doc.evaluate(frameXpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	    if (frameNode) {
+		var frameURL = frameNode.getAttribute("src");
+		Zotero.Utilities.loadDocument(frameURL, function(doc2) {
+			return detectWeb(doc2, frameURL);
+		    });
+	    }
 	}
   //commenting out single stuff
   // if (url.indexOf("/anthology-new/J/")>-1)
@@ -129,7 +139,7 @@ function scrapeIndex(doc, items) {
 		attachments.push({title:authorsShort + " " + year + ".pdf", mimeType:"application/pdf", url:pdf});
 
 		var type = "";
-		if (pageurl.indexOf("/anthology-new/J/")>-1)
+		if (pageurl.indexOf("/J/")>-1 || pageurl.indexOf("/Q/")>-1)
 			type = "journalArticle";
 		else
 			type = "conferencePaper";
@@ -178,6 +188,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://aclweb.org/anthology/P/P93/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.anthology.aclweb.org//P/P14/",
 		"items": "multiple"
 	}
 ]
