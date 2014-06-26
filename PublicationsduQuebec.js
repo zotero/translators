@@ -31,20 +31,10 @@ function scrape(doc, url) {
 
 	var newItem = new Zotero.Item("statute");
 	
-	try {
-		var titleloi = doc.getElementsByClassName('Titreloi');
-		titleloi = ZU.xpathText(titleloi, './node()', null, '');
-		var codeloi = doc.getElementsByClassName('Alpha')[0];
-		codeloi = ZU.xpathText(codeloi, './node()', null, '');
-	
-	}
-	catch(err) {
-		var titleloi = doc.getElementsByClassName('Titrereg');
-		titleloi = ZU.xpathText(titleloi, './node()', null, '');
-		var codeloi = doc.getElementsByClassName('Libelle')[0];
-		codeloi = ZU.xpathText(codeloi, './node()', null, '');
-	
-	}
+	var titleloi = doc.getElementsByClassName('Titreloi')[0] || doc.getElementsByClassName('Titrereg')[0];
+	titleloi = ZU.trimInternal(titleloi.textContent); 
+	var codeloi = doc.getElementsByClassName('Alpha')[0] || doc.getElementsByClassName('Libelle')[0];
+	codeloi = ZU.trimInternal(codeloi.textContent);
 	
 	if (codeloi.contains("chapitre")){
 		newItem.language="french";
