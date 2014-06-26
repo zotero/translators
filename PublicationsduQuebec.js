@@ -47,7 +47,7 @@ function scrape(doc, url) {
 		
 	newItem.code="RLRQ"+" "+codeloi;
 	
-	newItem.rights="© Éditeur officiel du Québec";
+	newItem.rights="Snapshot";
 	
 	newItem.jurisdiction="Québec, Canada";
 	newItem.url=url;
