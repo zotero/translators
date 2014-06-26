@@ -3,7 +3,7 @@
 	"label": "PublicationsduQuébec",
 	"creator": "Marc Lajoie",
 	"target": "^https?://(?:www2\\.)?publicationsduquebec\\.gouv\\.qc\\.ca\\/",
-	"minVersion": "1.0",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
