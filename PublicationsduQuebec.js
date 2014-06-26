@@ -100,7 +100,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "© Éditeur officiel du Québec"
+						"title": "Snapshot"
 					}
 				],
 				"language": "french",
@@ -128,7 +128,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "© Éditeur officiel du Québec"
+						"title": "Snapshot"
 					}
 				],
 				"language": "english",
@@ -156,7 +156,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "© Éditeur officiel du Québec"
+						"title": "Snapshot"
 					}
 				],
 				"language": "french",
@@ -184,7 +184,7 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "© Éditeur officiel du Québec"
+						"title": "Snapshot"
 					}
 				],
 				"language": "english",
