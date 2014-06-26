@@ -83,7 +83,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www2.publicationsduquebec.gouv.qc.ca/home.php",
+		"url": "http://www2.publicationsduquebec.gouv.qc.ca/page_intermediaire.php?content=http://www2.publicationsduquebec.gouv.qc.ca/lois_et_reglements/liste_alpha.php&title=Lois%20refondues%20et%20r%E8glements&action=4&lang=en&section=lois_et_reglements",
 		"items": "multiple"
 	},
 	{
