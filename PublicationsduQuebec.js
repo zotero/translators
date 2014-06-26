@@ -41,7 +41,7 @@ function scrape(doc, url) {
 	} else {
 		newItem.language="english";
 	}
-	codeloi=codeloi.replace("chapitre"||"chapter", "c");
+	codeloi=codeloi.replace(/chapitre|chapter/, "c");
 	
 	newItem.title=titleloi;
 		
