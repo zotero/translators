@@ -36,16 +36,17 @@ function scrape(doc, url) {
 	var codeloi = doc.getElementsByClassName('Alpha')[0] || doc.getElementsByClassName('Libelle')[0];
 	codeloi = ZU.trimInternal(codeloi.textContent);
 	
-	if (codeloi.contains("chapitre")){
+	newItem.title=titleloi+" ";
+	
+	if (codeloi.indexOf("chapitre")!=-1){
 		newItem.language="french";
+		codeloi=codeloi.replace(/chapitre/, "c");
+		newItem.code="RLRQ"+" "+codeloi;
 	} else {
 		newItem.language="english";
+		codeloi=codeloi.replace(/chapter/, "c");
+		newItem.code="CQLR"+" "+codeloi;
 	}
-	codeloi=codeloi.replace(/chapitre|chapter/, "c");
-	
-	newItem.title=titleloi;
-		
-	newItem.code="RLRQ"+" "+codeloi;
 	
 	newItem.rights="© Éditeur officiel du Québec";
 	
