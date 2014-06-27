@@ -9,9 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcv",
-	"lastUpdated": "2013-12-16 06:13:54"
+	"lastUpdated": "2014-06-12 18:56:25"
 }
-
 
 /*
 UpToDate Translator
@@ -114,64 +113,6 @@ function scrape(doc, url) {
 } 
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "http://www.uptodate.com/contents/approach-to-the-diagnosis-and-evaluation-of-low-back-pain-in-adults/abstract/43",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"creatorType": "author",
-						"lastName": "Deyo",
-						"firstName": "R A"
-					},
-					{
-						"creatorType": "author",
-						"lastName": "Weinstein",
-						"firstName": "J N"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"Chronic Disease",
-					"Diagnosis, Differential",
-					"Female",
-					"Female Urogenital Diseases",
-					"Gastrointestinal Diseases",
-					"Humans",
-					"Low Back Pain",
-					"Male",
-					"Male Urogenital Diseases",
-					"Spinal Diseases"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "UpToDate Record",
-						"mimeType": "text/html"
-					}
-				],
-				"title": "Low back pain",
-				"pages": "363-370",
-				"ISSN": "0028-4793",
-				"journalAbbreviation": "N. Engl. J. Med.",
-				"publicationTitle": "The New England journal of medicine",
-				"volume": "344",
-				"issue": "5",
-				"date": "Feb 1, 2001",
-				"language": "eng",
-				"DOI": "10.1056/NEJM200102013440508",
-				"extra": "PMID: 11172169",
-				"libraryCatalog": "UpToDate References"
-			}
-		]
-	},
 	{
 		"type": "web",
 		"url": "http://www.uptodate.com/contents/cancer-prevention/abstract/1",
