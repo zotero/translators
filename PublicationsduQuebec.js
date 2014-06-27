@@ -45,17 +45,27 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 +*/
 
-var pubqcRegexp = /https?:\/\/(?:www2\.)?publicationsduquebec\.gouv\.qc\.ca\/dynamicSearch\/.+/;
+var pubqcRegexp = /https?:\/\/(?:www2\.)?publicationsduquebec\.gouv\.qc\.ca\/dynamicSearch\/telecharge\.php\?/;
+
+function getMultiple(doc, checkOnly) {
+  var res = ZU.xpath(doc, '//span[@class="texteNormalBleuB"]/a[2]');
+  if(!res.length) return false;
+  if(checkOnly) return true;
+
+  var items = {};
+  for(var i=0; i<res.length; i++) {
+	items[res[i].href] = ZU.trimInternal(res[i].textContent);
+  }
+
+  return items;
+}
 
 function detectWeb(doc, url) {
 	if (pubqcRegexp.test(url)) {
 		return "statute";
 	} else {
-		var aTags = doc.getElementsByTagName("a");
-		for (var i = 0; i < aTags.length; i++) {
-			if (pubqcRegexp.test(aTags[i].href)) {
+			if (getMultiple(doc, true)) {
 				return "multiple";
-			}
 		}
 	}
 }
@@ -100,7 +110,7 @@ function doWeb(doc, url) {
 	if (pubqcRegexp.test(url)) {
 		scrape(doc, url);
 	} else {
-		var items = ZU.getItemArray(doc, doc, pubqcRegexp);
+		var items = getMultiple(doc);
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
 				return true;
