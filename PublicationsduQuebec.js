@@ -122,11 +122,12 @@ function doWeb(doc, url) {
 			ZU.processDocuments(articles, scrape);
 		});
 	}
-}/** BEGIN TEST CASES **/
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www2.publicationsduquebec.gouv.qc.ca/page_intermediaire.php?content=http://www2.publicationsduquebec.gouv.qc.ca/lois_et_reglements/liste_alpha.php&title=Lois%20refondues%20et%20r%E8glements&action=4&lang=en&section=lois_et_reglements",
+		"url": "http://www2.publicationsduquebec.gouv.qc.ca/home.php",
 		"items": "multiple"
 	},
 	{
@@ -146,7 +147,7 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"language": "french",
+				"language": "fr-CA",
 				"title": "Loi sur le Barreau",
 				"code": "RLRQ c B-1",
 				"rights": "© Éditeur officiel du Québec",
@@ -174,7 +175,7 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"language": "english",
+				"language": "en-CA",
 				"title": "An Act respecting the Barreau du Québec",
 				"code": "CQLR c B-1",
 				"rights": "© Éditeur officiel du Québec",
@@ -202,7 +203,7 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"language": "french",
+				"language": "fr-CA",
 				"title": "Code de déontologie des avocats",
 				"code": "RLRQ c B-1, r. 3",
 				"rights": "© Éditeur officiel du Québec",
@@ -230,7 +231,7 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"language": "english",
+				"language": "en-CA",
 				"title": "Code of ethics of advocates",
 				"code": "CQLR c B-1, r. 3",
 				"rights": "© Éditeur officiel du Québec",
