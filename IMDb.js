@@ -246,13 +246,13 @@ var testCases = [
 						"title": "Poster"
 					}
 				],
+				"title": "Skin, Skin",
+				"date": "21 Oct 1966",
 				"genre": "Drama",
 				"abstractNote": "N/A",
 				"runningTime": "89 min",
-				"extra": "IMDB ID: tt0060613\nIMDB Rating: 6.9 (395 votes)",
-				"libraryCatalog": "IMDb",
-				"title": "Skin, Skin",
-				"date": "21 Oct 1966"
+				"extra": "IMDB ID: tt0060613\nIMDB Rating: 6.9 (398 votes)",
+				"libraryCatalog": "IMDb"
 			}
 		]
 	}

@@ -110,9 +110,9 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"creatorType": "author",
+						"firstName": "Yingting",
 						"lastName": "Zhang",
-						"firstName": "Yingting"
+						"creatorType": "author"
 					}
 				],
 				"notes": [],
@@ -138,7 +138,7 @@ var testCases = [
 				"pages": "45-60",
 				"ISSN": "1540-9597",
 				"journalAbbreviation": "Med Ref Serv Q",
-				"publicationTitle": "Medical reference services quarterly",
+				"publicationTitle": "Medical Reference Services Quarterly",
 				"volume": "31",
 				"issue": "1",
 				"date": "2012",

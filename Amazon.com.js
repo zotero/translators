@@ -787,7 +787,7 @@ var testCases = [
 				],
 				"title": "1Q84: Books 1, 2 and 3",
 				"publisher": "Vintage",
-				"ISBN": "9780099578079",
+				"ISBN": "9780552995825",
 				"numPages": 1328,
 				"language": "英語, 英語, 不明",
 				"place": "London",

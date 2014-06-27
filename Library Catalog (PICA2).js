@@ -171,7 +171,7 @@ var testCases = [
 					}
 				],
 				"notes": [
-					"Bestand: Universitätsbibliothek Tübingen <21> [Signatur: 27 A 4742];Universitätsbibliothek Freiburg <25> [Signatur: TM 86/5922];Universitätsbibliothek Konstanz <352> [Signatur: spa 959:b732:q/r62];Universität Heidelberg, Romanisches Seminar <16/143> [Signatur: bestellt];Badische Landesbibliothek <31> [Signatur: 86 A 11242];",
+					"Bestand: Universitätsbibliothek Tübingen <21> [Signatur: 27 A 4742];Universitätsbibliothek Freiburg <25> [Signatur: TM 86/5922];Kommunikations-, Informations-, Medienzentrum (KIM) Konstanz / <352> [Signatur: spa 959:b732:q/r62];Universität Heidelberg, Romanisches Seminar <16/143> [Signatur: bestellt];Badische Landesbibliothek <31> [Signatur: 86 A 11242];",
 					"Enth. Werke von und über Borges"
 				],
 				"tags": [

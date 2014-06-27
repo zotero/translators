@@ -249,13 +249,11 @@ var testCases = [
 				],
 				"publicationTitle": "The New York Times",
 				"ISSN": "0362-4331",
-				"url": "http://query.nytimes.com/gst/abstract.html?res=F30D15FD3F5813738DDDAC0894DB405B828DF1D3",
+				"url": "http://query.nytimes.com/gst/abstract.html?res=9C07E4DC143CE633A25756C0A9659C946396D6CF",
 				"date": "1912-03-05",
 				"title": "TWO MONEY INQUIRIES.; Hearings of Trust Charges and Aldrich Plan at the Same Time.",
 				"abstractNote": "WASHINGTON, March 4. -- The Money Trust inquiry and consideration of the proposed Aldrich monetary legislation will probably be handled side by side by the House Banking and Currency Committee. The present tentative plan is to divide the committee into two parts, one of which, acting as a sub-committee, will investigate as far as it can those allegations of the Henry Money Trust resolution which fall within the jurisdiction of the Banking and Currency Committee.",
-				"accessionNumber": "100523320",
-				"libraryCatalog": "NYTimes.com",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "NYTimes.com"
 			}
 		]
 	},

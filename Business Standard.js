@@ -74,15 +74,15 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Bs Reporter",
-					"Air India unions withdraw strike threat",
 					"Air India",
+					"Air India",
+					"Air India unions withdraw strike threat",
+					"Air India unions withdraw strike threat",
+					"Bs Reporter",
+					"Bs Reporter",
+					"Rohit Nandan",
 					"Rohit Nandan",
 					"strike",
-					"Bs Reporter",
-					"Air India unions withdraw strike threat",
-					"Air India",
-					"Rohit Nandan",
 					"strike"
 				],
 				"seeAlso": [],
@@ -93,12 +93,11 @@ var testCases = [
 					}
 				],
 				"url": "http://www.business-standard.com/article/companies/air-india-unions-withdraw-strike-threat-112033100032_1.html",
-				"abstractNote": "Air India employees have withdrawn their threat to go on “no pay, no work” strike after the airline on Friday assured them of clearing all pay dues by June end.",
+				"abstractNote": "Read more about Air India unions withdraw strike threat on Business Standard. Air India employees have withdrawn their threat to go on “no pay, no work” strike after the airline on Friday assured them of clearing all pay dues by June end.",
 				"date": "2012-03-31",
 				"publicationTitle": "Business Standard India",
 				"title": "Air India unions withdraw strike threat",
-				"libraryCatalog": "Business Standard",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "Business Standard"
 			}
 		]
 	},
@@ -148,7 +147,7 @@ var testCases = [
 					}
 				],
 				"url": "http://www.business-standard.com/article/opinion/t-n-ninan-make-believe-solutions-112033100081_1.html",
-				"abstractNote": "The government has been trying to get rid of the impression that it is caught in “policy paralysis”.",
+				"abstractNote": "Read more about T N Ninan: Make-believe solutions on Business Standard. The government has to deliver solutions that work, not indulge in action for the sake of demonstrating lack of paralysis",
 				"date": "2012-03-31",
 				"publicationTitle": "Business Standard India",
 				"title": "T N Ninan: Make-believe solutions",
