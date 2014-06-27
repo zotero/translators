@@ -84,11 +84,11 @@ function scrape(doc, url) {
 	if (codeloi.indexOf("chapitre")!=-1){
 		newItem.language="french";
 		codeloi=codeloi.replace("chapitre", "c");
-		newItem.code="RLRQ"+" "+codeloi;
+		newItem.code="RLRQ " + codeloi;
 	} else {
 		newItem.language="english";
 		codeloi=codeloi.replace("chapter", "c");
-		newItem.code="CQLR"+" "+codeloi;
+		newItem.code="CQLR " + codeloi;
 	}
 	
 	newItem.rights="© Éditeur officiel du Québec";
