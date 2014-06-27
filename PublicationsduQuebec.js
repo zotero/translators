@@ -82,11 +82,11 @@ function scrape(doc, url) {
 	newItem.title=titleloi;
 	
 	if (codeloi.indexOf("chapitre")!=-1){
-		newItem.language="french";
+		newItem.language="fr-CA";
 		codeloi=codeloi.replace("chapitre", "c");
 		newItem.code="RLRQ " + codeloi;
 	} else {
-		newItem.language="english";
+		newItem.language="en-CA";
 		codeloi=codeloi.replace("chapter", "c");
 		newItem.code="CQLR " + codeloi;
 	}
