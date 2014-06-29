@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-10-03 23:27:03"
+	"lastUpdated": "2014-06-28 20:23:55"
 }
 
 /*
@@ -393,10 +393,9 @@ function scrape(doc, url, type, pdfUrl) {
 	}
 
 	item.abstractNote = ZU.xpath(doc,
-		'//div[@id="abstractZone" or contains(@id,"abstractFull")]/\
-			p[normalize-space(text())]')
-		.map(function(p) { return ZU.trimInternal(p.textContent) })
-		.join('\n');
+		'//div[@id="abstractZone" or contains(@id,"abstractFull")]/p')
+		.map(function(p) { return ZU.trimInternal(p.textContent) }).join('\n');
+	
 
 	if(!item.tags.length && altKeywords.length) {
 		item.tags = altKeywords.join(',').split(/\s*(?:,|;)\s*/);
