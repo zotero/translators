@@ -49,12 +49,12 @@ function getMultiple(doc, checkOnly) {
 function detectWeb(doc, url) {
 	if (pubqcRegexp.test(url)) {
 		return "statute";
-	} else {
-			if (getMultiple(doc, true)) {
+	} else if (getMultiple(doc, true)) {
 				return "multiple";
-		}
+				}
+				
 	}
-}
+
 
 function scrape(doc, url) {
 
