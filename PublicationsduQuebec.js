@@ -124,9 +124,7 @@ var testCases = [
 				"itemType": "statute",
 				"creators": [],
 				"notes": [],
-				"tags": [
-					"New"
-				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [
 					{
@@ -152,9 +150,7 @@ var testCases = [
 				"itemType": "statute",
 				"creators": [],
 				"notes": [],
-				"tags": [
-					"New"
-				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [
 					{
@@ -180,9 +176,7 @@ var testCases = [
 				"itemType": "statute",
 				"creators": [],
 				"notes": [],
-				"tags": [
-					"New"
-				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [
 					{
@@ -208,9 +202,7 @@ var testCases = [
 				"itemType": "statute",
 				"creators": [],
 				"notes": [],
-				"tags": [
-					"New"
-				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [
 					{
