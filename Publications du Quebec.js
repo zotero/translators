@@ -9,10 +9,10 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-06-24 10:16:52"
+	"lastUpdated": "2014-07-01 19:40:02"
 }
-/*
 
+/*
 Publications du Québec Translator
 Copyright (C) 2014 Marc Lajoie
 
@@ -28,72 +28,68 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
-
-+*/
-
-var pubqcRegexp = /https?:\/\/(?:www2\.)?publicationsduquebec\.gouv\.qc\.ca\/dynamicSearch\/telecharge\.php\?/;
+*/
 
 function getMultiple(doc, checkOnly) {
-  var res = ZU.xpath(doc, '//span[@class="texteNormalBleuB"]/a[2]');
-  if(!res.length) return false;
-  if(checkOnly) return true;
+	var res = ZU.xpath(doc, '//span[@class="texteNormalBleuB"]/a[2]');
+	if (!res.length) return false;
+	if (checkOnly) return true;
 
-  var items = {};
-  for(var i=0; i<res.length; i++) {
-	items[res[i].href] = ZU.trimInternal(res[i].textContent);
-  }
+	var items = {};
+	for (var i = 0; i < res.length; i++) {
+		items[res[i].href] = ZU.trimInternal(res[i].textContent);
+	}
 
-  return items;
+	return items;
 }
 
 function detectWeb(doc, url) {
-	if (pubqcRegexp.test(url)) {
+	if (url.indexOf('/dynamicSearch/telecharge.php?') != -1) {
 		return "statute";
 	} else if (getMultiple(doc, true)) {
-				return "multiple";
-				}
-				
+		return "multiple";
 	}
 
+}
 
 function scrape(doc, url) {
-
 	var newItem = new Zotero.Item("statute");
+
+	var titleloi = doc.getElementsByClassName('Titreloi')[0]
+		|| doc.getElementsByClassName('Titrereg')[0];
+	titleloi = ZU.trimInternal(titleloi.textContent);
 	
-	var titleloi = doc.getElementsByClassName('Titreloi')[0] || doc.getElementsByClassName('Titrereg')[0];
-	titleloi = ZU.trimInternal(titleloi.textContent); 
-	var codeloi = doc.getElementsByClassName('Alpha')[0] || doc.getElementsByClassName('Libelle')[0];
+	var codeloi = doc.getElementsByClassName('Alpha')[0]
+		|| doc.getElementsByClassName('Libelle')[0];
 	codeloi = ZU.trimInternal(codeloi.textContent);
-	
-	newItem.title=titleloi;
-	
-	if (codeloi.indexOf("chapitre")!=-1){
-		newItem.language="fr-CA";
-		codeloi=codeloi.replace("chapitre", "c");
-		newItem.code="RLRQ " + codeloi;
+
+	newItem.title = titleloi;
+
+	if (codeloi.indexOf("chapitre") != -1) {
+		newItem.language = "fr-CA";
+		codeloi = codeloi.replace("chapitre", "c");
+		newItem.code = "RLRQ " + codeloi;
 	} else {
-		newItem.language="en-CA";
-		codeloi=codeloi.replace("chapter", "c");
-		newItem.code="CQLR " + codeloi;
+		newItem.language = "en-CA";
+		codeloi = codeloi.replace("chapter", "c");
+		newItem.code = "CQLR " + codeloi;
 	}
-	
-	newItem.rights="© Éditeur officiel du Québec";
-	
-	newItem.jurisdiction="Québec, Canada";
-	newItem.url=url;
+
+	newItem.rights = "© Éditeur officiel du Québec";
+
+	newItem.jurisdiction = "Québec, Canada";
+	newItem.url = url;
 
 	newItem.attachments.push({
 		document: doc,
 		title: "Snapshot"
 	});
-	
 
-	
 	newItem.complete();
 }
 
 function doWeb(doc, url) {
-	if (pubqcRegexp.test(url)) {
+	if (url.indexOf('/dynamicSearch/telecharge.php?') != -1) {
 		scrape(doc, url);
 	} else {
 		var items = getMultiple(doc);
@@ -113,7 +109,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www2.publicationsduquebec.gouv.qc.ca/home.php",
+		"url": "http://www2.publicationsduquebec.gouv.qc.ca/lois_et_reglements/liste_alpha.php",
 		"items": "multiple"
 	},
 	{
@@ -122,23 +118,20 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "statute",
+				"nameOfAct": "Loi sur le Barreau",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"code": "RLRQ c B-1",
+				"language": "fr-CA",
+				"rights": "© Éditeur officiel du Québec",
+				"url": "http://www2.publicationsduquebec.gouv.qc.ca/dynamicSearch/telecharge.php?type=2&file=/B_1/B1.html",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"language": "fr-CA",
-				"title": "Loi sur le Barreau",
-				"code": "RLRQ c B-1",
-				"rights": "© Éditeur officiel du Québec",
-				"jurisdiction": "Québec, Canada",
-				"url": "http://www2.publicationsduquebec.gouv.qc.ca/dynamicSearch/telecharge.php?type=2&file=/B_1/B1.html",
-				"libraryCatalog": "PublicationsduQuébec",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -148,23 +141,20 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "statute",
+				"nameOfAct": "An Act respecting the Barreau du Québec",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"code": "CQLR c B-1",
+				"language": "en-CA",
+				"rights": "© Éditeur officiel du Québec",
+				"url": "http://www2.publicationsduquebec.gouv.qc.ca/dynamicSearch/telecharge.php?type=2&file=/B_1/B1_A.html",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"language": "en-CA",
-				"title": "An Act respecting the Barreau du Québec",
-				"code": "CQLR c B-1",
-				"rights": "© Éditeur officiel du Québec",
-				"jurisdiction": "Québec, Canada",
-				"url": "http://www2.publicationsduquebec.gouv.qc.ca/dynamicSearch/telecharge.php?type=2&file=/B_1/B1_A.html",
-				"libraryCatalog": "PublicationsduQuébec",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -174,23 +164,20 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "statute",
+				"nameOfAct": "Code de déontologie des avocats",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"code": "RLRQ c B-1, r. 3",
+				"language": "fr-CA",
+				"rights": "© Éditeur officiel du Québec",
+				"url": "http://www2.publicationsduquebec.gouv.qc.ca/dynamicSearch/telecharge.php?type=3&file=/B_1/B1R3.HTM",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"language": "fr-CA",
-				"title": "Code de déontologie des avocats",
-				"code": "RLRQ c B-1, r. 3",
-				"rights": "© Éditeur officiel du Québec",
-				"jurisdiction": "Québec, Canada",
-				"url": "http://www2.publicationsduquebec.gouv.qc.ca/dynamicSearch/telecharge.php?type=3&file=/B_1/B1R3.HTM",
-				"libraryCatalog": "PublicationsduQuébec",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -200,23 +187,20 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "statute",
+				"nameOfAct": "Code of ethics of advocates",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"code": "CQLR c B-1, r. 3",
+				"language": "en-CA",
+				"rights": "© Éditeur officiel du Québec",
+				"url": "http://www2.publicationsduquebec.gouv.qc.ca/dynamicSearch/telecharge.php?type=3&file=/B_1/B1R3_A.HTM",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"language": "en-CA",
-				"title": "Code of ethics of advocates",
-				"code": "CQLR c B-1, r. 3",
-				"rights": "© Éditeur officiel du Québec",
-				"jurisdiction": "Québec, Canada",
-				"url": "http://www2.publicationsduquebec.gouv.qc.ca/dynamicSearch/telecharge.php?type=3&file=/B_1/B1R3_A.HTM",
-				"libraryCatalog": "PublicationsduQuébec",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
