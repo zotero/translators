@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-05-11 15:11:26"
+	"lastUpdated": "2014-06-27 05:25:51"
 }
 
 function getSearchResults(doc) {
@@ -102,7 +102,7 @@ function scrape(doc, url) {
 				
 		// With COins, we only get one author - so we start afresh. We do so in two places: Here if there is an author fied
 		//further down for other types of author fields. This is so we don't overwrite the author array when we have both an author and 
-		//a other persons field (cf. the Scheffer/Schachtschabel/Blume/Thiele test)
+		//another persons field (cf. the Scheffer/Schachtschabel/Blume/Thiele test)
 		if (field == "author" || field == "auteur" || field == "verfasser"){ 
 			authorpresent = true;
 			newItem.creators = new Array();
@@ -188,8 +188,8 @@ function scrape(doc, url) {
 			case 'dans':
 			case 'in':
 				//Looks like we can do better with titles than COinS
-				//journal/book title are always first
-				//Several different formts for ending a title
+				//journal/book titles are always first
+				//Several different formats for ending a title
 				// end with "/" http://gso.gbv.de/DB=2.1/PPNSET?PPN=732386977
 				//              http://gso.gbv.de/DB=2.1/PPNSET?PPN=732443563
 				// end with ". -" followed by publisher information http://gso.gbv.de/DB=2.1/PPNSET?PPN=729937798
@@ -208,7 +208,7 @@ function scrape(doc, url) {
 						newItem.ISBN = m[2].replace(/\s+/g,'');
 					}
 				}
-				//publisher information can preceeded ISSN/ISBN
+				//publisher information can be preceeded by ISSN/ISBN
 				// typically / ed. by ****. - city, country : publisher
 				//http://gso.gbv.de/DB=2.1/PPNSET?PPN=732386977
 				var n = value;
@@ -398,18 +398,28 @@ function scrape(doc, url) {
 			case 'omvang':
 			case 'kollation':
 			case 'collation':
+				value = ZU.trimInternal(value); // Since we assume spaces
+				
 				// We're going to extract the number of pages from this field
-				// Known bug doesn't work when there are 2 volumes (maybe fixed?), 
 				var m = value.match(/(\d+) vol\./);
-				// sudoc in particular includes "1 vol" for every book; We don't want that info;
+				// sudoc in particular includes "1 vol" for every book; We don't want that info
 				if (m && m[1] != 1) {
 					newItem.numberOfVolumes = m[1];
 				}
-				//make sure things like 2 partition don't match, but 2 p at the end of the field do:
-				m = value.match(/\[?(\d+)\]?\s+[fpS]([^A-Za-z]|$)/);
-				if (m) {
-					newItem.numPages = m[1];
+				
+				//make sure things like 2 partition don't match, but 2 p at the end of the field do
+				// f., p., and S. are "pages" in various languages
+				// For multi-volume works, we expect formats like:
+				//   x-109 p., 510 p. and X, 106 S.; 123 S.
+				var numPagesRE = /\[?((?:[ivxlcdm\d]+[ ,\-]*)+)\]?\s+[fps]\b/ig,
+					numPages = [], m;
+				while(m = numPagesRE.exec(value)) {
+					numPages.push(m[1].replace(/ /g, '')
+						.replace(/[\-,]/g,'+')
+						.toLowerCase() // for Roman numerals
+					);
 				}
+				if(numPages.length) newItem.numPages = numPages.join('; ');
 				
 				//running time for movies:
 				m = value.match(/\d+\s*min/);
@@ -1229,11 +1239,11 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"(GTR) Tweede Wereldoorlog",
-					"(GTR) Vrijheid van onderwijs",
-					"(GTR) Katholiek onderwijs",
+					"(GTR) Belgie",
 					"(GTR) Conflicten",
-					"(GTR) België"
+					"(GTR) Katholiek onderwijs",
+					"(GTR) Tweede Wereldoorlog",
+					"(GTR) Vrijheid van onderwijs"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -1249,14 +1259,14 @@ var testCases = [
 					}
 				],
 				"libraryCatalog": "Library Catalog - catalogue.rug.nl",
+				"ISSN": "0035-0869",
+				"issue": "4",
+				"shortTitle": "Naar een nieuwe 'onderwijsvrede'",
 				"title": "Naar een nieuwe 'onderwijsvrede': de onderhandelingen tussen kardinaal Van Roey en de Duitse bezetter over de toekomst van het vrij katholiek onderwijs, 1942-1943",
 				"date": "2010",
 				"publicationTitle": "Revue belge d'histoire contemporaine = Belgisch tijdschrift voor nieuwste geschiedenis = Belgian review for contemporary history",
-				"ISSN": "0035-0869",
 				"pages": "603-643",
-				"volume": "40",
-				"issue": "4",
-				"shortTitle": "Naar een nieuwe 'onderwijsvrede'"
+				"volume": "40"
 			}
 		]
 	},
@@ -1357,15 +1367,14 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"date": "2010",
 				"ISBN": "978-3-8274-1444-1",
-				"pages": "569",
-				"title": "Lehrbuch der Bodenkunde",
 				"place": "Heidelberg",
-				"publisher": "Spektrum,  Akad.-Verl.",
 				"libraryCatalog": "Library Catalog - gso.gbv.de",
 				"edition": "16",
-				"numPages": "569"
+				"numPages": "xiv+569",
+				"date": "2010",
+				"title": "Lehrbuch der Bodenkunde",
+				"publisher": "Spektrum,  Akad.-Verl."
 			}
 		]
 	},
@@ -1611,12 +1620,12 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Deutschland",
-					"Datenschutz",
-					"Persönlichkeitsrecht",
 					"Cloud Computing",
-					"Electronic Government",
+					"Datenschutz",
+					"Deutschland",
 					"Electronic Commerce",
+					"Electronic Government",
+					"Persönlichkeitsrecht",
 					"f Aufsatzsammlung",
 					"f Online-Publikation"
 				],
@@ -1634,13 +1643,11 @@ var testCases = [
 					}
 				],
 				"libraryCatalog": "Library Catalog - cbsopac.rz.uni-frankfurt.de",
-				"title": "Daten- und Identitätsschutz in Cloud Computing, E-Government und E-Commerce",
-				"numPages": "187",
+				"numPages": "x+187",
 				"ISBN": "978-3-642-30102-5",
 				"series": "SpringerLink: Springer e-Books",
-				"seriesTitle": "SpringerLink: Springer e-Books",
-				"DOI": "10.1007/978-3-642-30102-5",
-				"abstractNote": "Fuer neue und kuenftige Gesch ftsfelder von E-Commerce und E-Government stellen der Datenschutz und der Identit tsschutz wichtige Herausforderungen dar. Renommierte Autoren aus Wissenschaft und Praxis widmen sich in dem Band aktuellen Problemen des Daten- und Identit tsschutzes aus rechtlicher und technischer Perspektive. Sie analysieren aktuelle Problemf lle aus der Praxis und bieten Handlungsempfehlungen an. Das Werk richtet sich an Juristen und technisch Verantwortliche in Beh rden und Unternehmen sowie an Rechtsanw lte und Wissenschaftler."
+				"abstractNote": "Fuer neue und kuenftige Gesch ftsfelder von E-Commerce und E-Government stellen der Datenschutz und der Identit tsschutz wichtige Herausforderungen dar. Renommierte Autoren aus Wissenschaft und Praxis widmen sich in dem Band aktuellen Problemen des Daten- und Identit tsschutzes aus rechtlicher und technischer Perspektive. Sie analysieren aktuelle Problemf lle aus der Praxis und bieten Handlungsempfehlungen an. Das Werk richtet sich an Juristen und technisch Verantwortliche in Beh rden und Unternehmen sowie an Rechtsanw lte und Wissenschaftler.",
+				"title": "Daten- und Identitätsschutz in Cloud Computing, E-Government und E-Commerce"
 			}
 		]
 	},
@@ -1767,10 +1774,10 @@ var testCases = [
 					}
 				],
 				"libraryCatalog": "Library Catalog - opac.ub.uni-marburg.de",
-				"title": "Body and justice",
-				"numPages": "163",
+				"numPages": "ix+163",
 				"ISBN": "1-4438-3190-5",
-				"callNumber": "070 8 2012/10695"
+				"callNumber": "070 8 2012/10695",
+				"title": "Body and justice"
 			}
 		]
 	},
@@ -1876,6 +1883,118 @@ var testCases = [
 				"publisher": "EDUSP",
 				"libraryCatalog": "Library Catalog - gso.gbv.de",
 				"numPages": "397"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=024630527",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Léon",
+						"lastName": "Aucoc",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "<div><span>Titre des tomes 2 et 3 : Conférences sur l'administration et le droit administratif faites à l'Ecole des ponts et chaussées</span></div><div><span>&nbsp;</span></div>"
+					}
+				],
+				"tags": [
+					"Droit administratif -- France",
+					"Ponts et chaussées (administration) -- France",
+					"Travaux publics -- Droit -- France",
+					"Voirie et réseaux divers -- France"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Worldcat Link",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Link to Library Catalog Entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
+				"language": "français",
+				"numberOfVolumes": "3",
+				"numPages": "xii+xxiii+681+540+739",
+				"place": "Paris, France",
+				"date": "1869-1876",
+				"title": "Conférences sur l'administration et le droit administratif faites à l'Ecole impériale des ponts et chaussées",
+				"publisher": "Dunod"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=001493817",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Édouard",
+						"lastName": "Laferrière",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Roland",
+						"lastName": "Drago",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "<div><span>1, Notions générales et législation comparée, histoire, organisation compétence de la juridiction administrative. 2, Compétence (suite), marchés et autres contrats, dommages, responsabilité de l'état, traitements et pensions, contributions directes, élections, recours pour excés de pouvoir, interprétation, contraventions de grandes voirie</span></div>"
+					}
+				],
+				"tags": [
+					"Contentieux administratif -- France -- 19e siècle",
+					"Recours administratifs -- France",
+					"Tribunaux administratifs -- France -- 19e siècle",
+					"Tribunaux administratifs -- Études comparatives"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Worldcat Link",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Link to Library Catalog Entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"ISBN": "2-275-00790-3",
+				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
+				"language": "français",
+				"numberOfVolumes": "2",
+				"numPages": "ix+670; 675",
+				"place": "Paris, France",
+				"date": "1989",
+				"title": "Traité de la juridiction administrative et des recours contentieux",
+				"publisher": "Librairie générale de droit et de jurisprudence"
 			}
 		]
 	}
