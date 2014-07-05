@@ -19,7 +19,7 @@
 	"inRepository": true,
 	"translatorType": 2,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-05-30 11:58:51"
+	"lastUpdated": "2014-07-07 23:31:51"
 }
 
 //The export will be stucked if you try to export to a csv-file
@@ -106,7 +106,12 @@ function parseObject(item, fieldName) {
 		if (exclude(currentFieldName.substring(0, currentFieldName.length -1))) {
 			continue;//with next element in for-loop
 		}
+		
         if (typeof item[keys[i]] === 'object') {
+			var indexOverallStructure = overallStructure.lastIndexOf( currentFieldName.substring(0, currentFieldName.length-1) );
+			if (indexOverallStructure != -1 ) {
+				oldIndex = indexOverallStructure;
+			}
 			parseObject(item[keys[i]], currentFieldName);
 		} else {
 			currentFieldName = currentFieldName.substring(0, currentFieldName.length-1);//delete last slash
