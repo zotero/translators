@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-03 15:32:02"
+	"lastUpdated": "2014-07-05 10:50:25"
 }
 
 function detectWeb(doc, url){
@@ -51,6 +51,7 @@ function scrape(doc, url){
 		//create new webpage Item from page
 		var newItem = new Zotero.Item("webpage");
 		newItem.title = doc.title;
+		newItem.url = url;
 		//parse date and add
 		var m = dateRe.exec(doc.location.href);
 		var date = m[1];
@@ -73,14 +74,15 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://web.archive.org/web/20110310073553/http://www.taz.de/",
 						"title": "taz.de",
 						"mimeType": "text/html"
 					}
 				],
 				"title": "taz.de",
+				"url": "http://web.archive.org/web/20110310073553/http://www.taz.de/",
 				"date": "2011-03-10",
-				"libraryCatalog": "Internet Archive Wayback Machine"
+				"libraryCatalog": "Internet Archive Wayback Machine",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}
