@@ -7,19 +7,12 @@
 	"maxVersion": "",
 	"priority": 100,
 	"displayOptions": {
-		"exportCharset": "UTF-8",
-		"Export Creators" : true,
-		"exportNotes": false,
-		"Export Attachements": false,
-		"Export Tags" : false,
-		"Export Related" : false,
-		"Export SeeAlso" : false,
-		"Export UniqueFields" : false
+		"exportCharset": "UTF-8"
 	},
 	"inRepository": true,
 	"translatorType": 2,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-07-07 23:31:51"
+	"lastUpdated": "2014-07-06 16:50:51"
 }
 
 //The export will be stucked if you try to export to a csv-file
@@ -30,40 +23,22 @@ var recordsDeliminator = "\n";
 var fieldsDeliminator = ",";
 var fieldWrapperCharacter = '"';
 
+function exclude(field) {
+	return false;//standard configuration: exclude no fields
+	
+	//change for non-standard configuration, e.g.
+	//return  field == 'notes' || field == 'attachments' || field == 'tags' || field == 'related' || 
+	//		field == 'seeAlso' || field == 'uniqueFields' ||
+	//		/creators\/\d+\/fieldMode/g.test(field);
+}
+
+
 var item;
 var overallStructure;
-var oldIndex;
+var positionToInsertNext;
 
-//exclude some fields from export
-//theoretical it is also possible to
-//exclude some path like creators/0/fieldMode
-function exclude(field) {
-	var excludeCreators = !(Zotero.getOption("Export Creators"));
-	var excludeNotes = !(Zotero.getOption("exportNotes"));
-	var excludeAttachements = !(Zotero.getOption("Export Attachements"));
-	var excludeTags = !(Zotero.getOption("Export Tags"));
-	var excludeRelated = !(Zotero.getOption("Export Related"));
-	var excludeSeeAlso = !(Zotero.getOption("Export SeeAlso"));
-	var excludeUniqueFields = !(Zotero.getOption("Export UniqueFields"));
-	return  (field == 'creators' && excludeCreators) ||
-			(field == 'notes' && excludeNotes) || 
-			(field == 'attachments' && excludeAttachements) || 
-			(field == 'tags' && excludeTags) || 
-			(field == 'related' && excludeRelated) || 
-			(field == 'seeAlso' & excludeSeeAlso) || 
-			(field == 'uniqueFields' && excludeUniqueFields);
-}
 
-/*
-function escapeString(text) {
-	if (typeof text === 'string') {//replace don't work on numbers e.g. itemID
-		text = text.replace(new RegExp(recordsDeliminator, 'g') , " ");// /\r?\n|\r/g
-		text = text.replace(new RegExp(fieldWrapperCharacter, 'g') , fieldWrapperCharacter+fieldWrapperCharacter);//Wenn der Feldbegrenzer selbst in den Daten enthalten ist, wird dieser im Datenfeld verdoppelt http://de.wikipedia.org/wiki/CSV_%28Dateiformat%29
-	}
-	return text;
-}
-*/
-
+//export the content of a field
 function exportField(content) {
 	if (content == undefined) {
 		Zotero.write(fieldWrapperCharacter + fieldWrapperCharacter + fieldsDeliminator);
@@ -95,32 +70,42 @@ function evaluate(obj, path) {
 }
 
 
-function parseObject(item, fieldName) {
+//parse the object item (with possible previous path prevPath)
+//adjust the overallStructure, i.e. import new column names if needed
+//(function is recursive)
+function parseObject(item, prevPath) {
 	if (item == undefined) {
 		return false;
 	}
     var keys = Object.keys(item);
 	
     for (var i = 0; i < keys.length; i++) {
-		currentFieldName = fieldName+keys[i]+"/";
-		if (exclude(currentFieldName.substring(0, currentFieldName.length -1))) {
+		if (prevPath == "") {
+			currentFieldName = keys[i];
+		} else {
+			currentFieldName = prevPath+"/"+keys[i];
+		}
+		
+		if (exclude(currentFieldName)) {
 			continue;//with next element in for-loop
 		}
 		
         if (typeof item[keys[i]] === 'object') {
-			var indexOverallStructure = overallStructure.lastIndexOf( currentFieldName.substring(0, currentFieldName.length-1) );
-			if (indexOverallStructure != -1 ) {
-				oldIndex = indexOverallStructure;
+		
+			for (var j = 0; j < overallStructure.length; j++) {
+				if ( overallStructure[j].startsWith( currentFieldName ) ) {
+					positionToInsertNext = j+1;
+				}
 			}
+
 			parseObject(item[keys[i]], currentFieldName);
 		} else {
-			currentFieldName = currentFieldName.substring(0, currentFieldName.length-1);//delete last slash
 			var indexOverallStructure = overallStructure.indexOf(currentFieldName);
 			if (indexOverallStructure == -1 ) {
-				overallStructure.splice(oldIndex, 0, currentFieldName);
-				oldIndex++;
+				overallStructure.splice(positionToInsertNext, 0, currentFieldName);//splice works also if positionToInsertNext is equal to the length of the array
+				positionToInsertNext++;
 			} else {
-				oldIndex = indexOverallStructure;
+				positionToInsertNext = indexOverallStructure+1;
 			}
 		}
     }
@@ -135,7 +120,7 @@ function doExport() {
 	while (item = Zotero.nextItem()) {
 		itemList.push(item);
 		
-		oldIndex = 0;//, oldIndex
+		positionToInsertNext = 0;//oldIndex
 		parseObject( item, "" );//call function with possible recursion
 		
 	}
