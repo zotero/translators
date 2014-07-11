@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-04-18 13:56:21"
+	"lastUpdated": "2014-07-11 01:03:20"
 }
 
 function detectWeb(doc, url) {
@@ -93,9 +93,13 @@ function addLink(doc, item) {
 
 
 var CREATOR = {
-	"Actors":"castMember",
-	"Directors":"director",
-	"Producers":"producer"
+	"Actor":"castMember",
+	"Director":"director",
+	"Producer":"producer",
+	"Writer":"scriptwriter",
+	"Translator":"translator",
+	"Author":"author",
+	"Illustrator":"contributor"
 };
 
 var DATE = [
@@ -111,16 +115,18 @@ var i15dFields = {
 	'Paperback' : ['Paperback', 'Taschenbuch', '平装', 'ペーパーバック', 'Broché', 'Copertina flessibile', 'Tapa blanda'],
 	'Print Length' : ['Print Length', 'Seitenzahl der Print-Ausgabe', '紙の本の長さ', "Nombre de pages de l'édition imprimée", "Longueur d'impression", 'Lunghezza stampa', 'Longitud de impresión', 'Número de páginas'],//TODO: Chinese label
 	'Language' : ['Language', 'Sprache', '语种', '言語', 'Langue', 'Lingua', 'Idioma'],
-	'Actors' : ['Actors', 'Darsteller', 'Acteurs', 'Attori', 'Actores', '出演'],
-	'Directors' : ['Directors', 'Regisseur(e)', 'Réalisateurs', 'Regista', 'Directores', '監督'],
-	'Producers' : ['Producers'],
+	'Author' : ['Author', '著', '作者'],
+	'Actor' : ['Actors', 'Actor', 'Darsteller', 'Acteurs', 'Attori', 'Attore', 'Actores', '出演'],
+	'Director' : ['Directors', 'Director', 'Regisseur', 'Regisseur(e)', 'Réalisateurs', 'Regista', 'Directores', '監督'],
+	'Producer' : ['Producers', 'Producer'],
 	'Run Time' : ['Run Time', 'Spieldauer', 'Durée', 'Durata', 'Duración', '時間'],
 	'Studio' : ['Studio', 'Estudio', '販売元'],
 	'Audio CD' : ['Audio CD', 'CD', 'CD de audio'],
 	'Label' : ['Label', 'Etichetta', 'Étiquette', 'Sello', '发行公司', 'レーベル'],
 	'Total Length' : ['Total Length', 'Gesamtlänge', 'Durée totale', 'Lunghezza totale', 'Duración total', '収録時間'],
 	'Translator' : ["Translator", "Übersetzer", "Traduttore", "Traductor", "翻訳"],
-	'Illustrator' : ["Illustrator", "Illustratore", "Ilustrador", "イラスト"]
+	'Illustrator' : ["Illustrator", "Illustratore", "Ilustrador", "イラスト"],
+	'Writer' : ['Writers']
 };
 
 function getField(info, field) {
@@ -131,6 +137,14 @@ function getField(info, field) {
 	
 	for(var i=0; i<i15dFields[field].length; i++) {
 		if(info[i15dFields[field][i]] !== undefined) return info[i15dFields[field][i]];	
+	}
+}
+
+function translateField(str) {
+	for(var f in i15dFields) {
+		if(i15dFields[f].indexOf(str) != -1) {
+			return f;
+		}
 	}
 }
 
@@ -151,49 +165,55 @@ function get_nextsibling(n) {
 }
 
 function scrape(doc, url) {
+	var isAsian = url.search(/^https?:\/\/[^\/]+\.(?:jp|cn)[:\/]/) != -1;
 	// Scrape HTML for items without ISBNs, because Amazon doesn't provide an easy way for
 	// open source projects like us to use their API
 	Z.debug("Scraping from Page")		
 	var department = ZU.xpathText(doc, '//li[contains(@class, "nav-category-button")]/a').trim();
 	var item = new Zotero.Item(detectWeb(doc, url) || "book");
 
+	var title = doc.getElementById('btAsinTitle')
+		|| doc.getElementById('title_row')
+		|| doc.getElementById('productTitle');
+	// get first non-empty text node (other text nodes are things like [Paperback] and dates)
+	item.title = ZU.trimInternal(
+			ZU.xpathText(title, '(.//text()[normalize-space(self::text())])[1]')
+		)
+		// though sometimes [Paperback] or [DVD] is mushed with the title...
+		.replace(/(?: [(\[].+[)\]])+$/, "");
 	
-	// Old design
-	var titleNode = ZU.xpath(doc, '//span[@id="btAsinTitle"]')[0] ||
-	// New design encountered 06/30/2013					
-		ZU.xpath(doc, '//h1[@id="title"]/span')[0]||
-		ZU.xpath(doc, '//h1[@id="title"]')[0]||
-		ZU.xpath(doc, '//div[@id="title_row"]')[0]
-		
-	item.title = ZU.trimInternal(titleNode.textContent).replace(/(?: [(\[].+[)\]])+$/, "");
-	
-	var nextLine = get_nextsibling(titleNode);
-	if ( ZU.xpath(nextLine, './/a[@href]').length == 0 &&  nextLine.tagName != "A") { //e.g. http://www.amazon.com/dp/1118728963
-		nextLine = get_nextsibling(nextLine);
+	var baseNode = title.parentNode, bncl = baseNode.classList;
+	while(baseNode &&
+		!(baseNode.id == 'booksTitle' || bncl.contains('buying')
+			|| bncl.contains('content') || bncl.contains('DigitalMusicInfoColumn'))
+	) {
+		baseNode = baseNode.parentNode;
+		bncl = baseNode.classList;
 	}
-
-	//we dont want div id=contributorContainer...
-	//or some fake link with javascript functions...
-	authors = ZU.xpath(nextLine, './a[@href] | ./span/a[@href] | ./span/span//a[@href]');
-	if (authors.length == 0) authors = [ nextLine ];
-	for(var i=0; i<authors.length; i++) {
-		var author = authors[i].textContent.trim().replace(/\([^\)]*\)/,"");
-		if(author) {
-			var creatorRoleNode = get_nextsibling(authors[i]);
-			if (creatorRoleNode.tagName == "A") {
-				creatorRoleNode = get_nextsibling(creatorRoleNode);
-			}
-			var creatorRoleText = ZU.trimInternal(creatorRoleNode.textContent).replace("(","").replace(")","");
-			if (i15dFields["Translator"].indexOf(creatorRoleText) > -1) {
-				item.creators.push(ZU.cleanAuthor(author, 'translator'));
-			} else if (i15dFields["Illustrator"].indexOf(creatorRoleText) > -1) {
-				item.creators.push(ZU.cleanAuthor(author, 'contributor'));
+	
+	if(baseNode) {
+		var authors = ZU.xpath(baseNode, './/span[@id="artistBlurb"]/a');
+		if(!authors.length) authors = baseNode.getElementsByClassName('contributorNameID');
+		if(!authors.length) authors = ZU.xpath(baseNode, './/span[@class="contributorNameTrigger"]/a[not(@href="#")]');
+		if(!authors.length) authors = ZU.xpath(baseNode, './/a[following-sibling::*[1][@class="byLinePipe"]]');
+		if(!authors.length) authors = ZU.xpath(baseNode, './/a[contains(@href, "field-author=")]');
+		for(var i=0; i<authors.length; i++) {
+			var role = ZU.xpathText(authors[i], '(.//following::text()[normalize-space(self::text())])[1]');
+			if(role) role = CREATOR[translateField(role.replace(/^.*\(\s*|\s*\).*$/g, ''))];
+			if(!role) role = 'author';
+			
+			var name = ZU.trimInternal(authors[i].textContent)
+				.replace(/\s*\([^)]+\)/, '');
+			
+			if(item.itemType == 'audioRecording') {
+				item.creators.push({
+					lastName: name,
+					creatorType: 'performer',
+					fieldMode: 1
+				});
 			} else {
-				item.creators.push(ZU.cleanAuthor(author, 'author'));
-			}
-			if (item.creators[item.creators.length -1].firstName == "") {
-				item.creators[item.creators.length -1].fieldMode = 1;
-				delete item.creators[item.creators.length -1].firstName;
+				if(isAsian && name.indexOf(' ') == -1) name = name.replace(/.$/, ' $&');
+				item.creators.push(ZU.cleanAuthor(name, role, false));
 			}
 		}
 	}
@@ -281,9 +301,9 @@ function scrape(doc, url) {
 	// Music
 	item.label = getField(info, 'Label');
 	if(getField(info, 'Audio CD')) {
-		item.audioRecordingType = "Audio CD";
+		item.audioRecordingFormat = "Audio CD";
 	} else if(department == "Amazon MP3 Store") {
-		item.audioRecordingType = "MP3";
+		item.audioRecordingFormat = "MP3";
 	}
 	
 	addLink(doc, item);
@@ -328,6 +348,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Test",
 				"creators": [
 					{
 						"firstName": "William",
@@ -335,9 +356,15 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "April 1, 2010",
+				"ISBN": "9780810989894",
+				"abstractNote": "Now in paperback! Pass, and have it made. Fail, and suffer the consequences. A master of teen thrillers tests readers’ courage in an edge-of-your-seat novel that echoes the fears of exam-takers everywhere. Ann, a teenage girl living in the security-obsessed, elitist United States of the very near future, is threatened on her way home from school by a mysterious man on a black motorcycle. Soon she and a new friend are caught up in a vast conspiracy of greed involving the mega-wealthy owner of a school testing company. Students who pass his test have it made; those who don’t, disappear . . . or worse. Will Ann be next? For all those who suspect standardized tests are an evil conspiracy, here’s a thriller that really satisfies! Praise for Test “Fast-paced with short chapters that end in cliff-hangers . . . good read for moderately reluctant readers. Teens will be able to draw comparisons to contemporary society’s shift toward standardized testing and ecological concerns, and are sure to appreciate the spoofs on NCLB.” —School Library Journal “Part mystery, part action thriller, part romance . . . environmental and political overtones . . . fast pace and unique blend of genres holds attraction for younger teen readers.” —Booklist",
+				"edition": "Reprint edition",
+				"language": "English",
+				"libraryCatalog": "Amazon.com",
+				"numPages": 320,
+				"place": "New York",
+				"publisher": "Amulet Paperbacks",
 				"attachments": [
 					{
 						"title": "Amazon.com Link",
@@ -345,16 +372,9 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Test",
-				"abstractNote": "Now in paperback! Pass, and have it made. Fail, and suffer the consequences. A master of teen thrillers tests readers’ courage in an edge-of-your-seat novel that echoes the fears of exam-takers everywhere. Ann, a teenage girl living in the security-obsessed, elitist United States of the very near future, is threatened on her way home from school by a mysterious man on a black motorcycle. Soon she and a new friend are caught up in a vast conspiracy of greed involving the mega-wealthy owner of a school testing company. Students who pass his test have it made; those who don’t, disappear . . . or worse. Will Ann be next? For all those who suspect standardized tests are an evil conspiracy, here’s a thriller that really satisfies! Praise for Test “Fast-paced with short chapters that end in cliff-hangers . . . good read for moderately reluctant readers. Teens will be able to draw comparisons to contemporary society’s shift toward standardized testing and ecological concerns, and are sure to appreciate the spoofs on NCLB.” —School Library Journal “Part mystery, part action thriller, part romance . . . environmental and political overtones . . . fast pace and unique blend of genres holds attraction for younger teen readers.” —Booklist",
-				"date": "April 1, 2010",
-				"publisher": "Amulet Paperbacks",
-				"edition": "Reprint edition",
-				"ISBN": "9780810989894",
-				"numPages": 320,
-				"language": "English",
-				"place": "New York",
-				"libraryCatalog": "Amazon.com"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -369,16 +389,18 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "audioRecording",
+				"title": "Loveless",
 				"creators": [
 					{
-						"firstName": "My Bloody",
-						"lastName": "Valentine",
-						"creatorType": "author"
+						"lastName": "My Bloody Valentine",
+						"creatorType": "performer",
+						"fieldMode": 1
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "November 5, 1991",
+				"audioRecordingFormat": "Audio CD",
+				"label": "Sire / London/Rhino",
+				"libraryCatalog": "Amazon.com",
 				"attachments": [
 					{
 						"title": "Amazon.com Link",
@@ -386,11 +408,9 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Loveless",
-				"date": "November 5, 1991",
-				"label": "Sire / London/Rhino",
-				"audioRecordingType": "Audio CD",
-				"libraryCatalog": "Amazon.com"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -405,6 +425,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "videoRecording",
+				"title": "Adaptation",
 				"creators": [
 					{
 						"firstName": "Nicolas",
@@ -455,11 +476,28 @@ var testCases = [
 						"firstName": "Peter",
 						"lastName": "Saraf",
 						"creatorType": "producer"
+					},
+					{
+						"firstName": "Charlie",
+						"lastName": "Kaufman",
+						"creatorType": "scriptwriter"
+					},
+					{
+						"firstName": "Donald",
+						"lastName": "Kaufman",
+						"creatorType": "scriptwriter"
+					},
+					{
+						"firstName": "Susan",
+						"lastName": "Orlean",
+						"creatorType": "scriptwriter"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "May 20, 2003",
+				"language": "English (Dolby Digital 2.0 Surround), English (Dolby Digital 5.1), English (DTS 5.1), French (Dolby Digital 5.1)",
+				"libraryCatalog": "Amazon.com",
+				"runningTime": "114 minutes",
+				"studio": "Sony Pictures Home Entertainment",
 				"attachments": [
 					{
 						"title": "Amazon.com Link",
@@ -467,12 +505,9 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Adaptation",
-				"date": "May 20, 2003",
-				"studio": "Sony Pictures Home Entertainment",
-				"runningTime": "114 minutes",
-				"language": "English (Dolby Digital 2.0 Surround), English (Dolby Digital 5.1), English (DTS 5.1), French (Dolby Digital 5.1)",
-				"libraryCatalog": "Amazon.com"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -487,6 +522,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Candide",
 				"creators": [
 					{
 						"firstName": "François-Marie",
@@ -494,9 +530,14 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "17 août 2011",
+				"ISBN": "9782035866011",
+				"abstractNote": "Que signifie ce nom \"Candide\" : innocence de celui qui ne connaît pas le mal ou illusion du naïf qui n'a pas fait l'expérience du monde ? Voltaire joue en 1759, après le tremblement de terre de Lisbonne, sur ce double sens. Il nous fait partager les épreuves fictives d'un jeune homme simple, confronté aux leurres de l'optimisme, mais qui n'entend pas désespérer et qui en vient à une sagesse finale, mesurée et mystérieuse. Candide n'en a pas fini de nous inviter au gai savoir et à la réflexion.",
+				"language": "Français",
+				"libraryCatalog": "Amazon.com",
+				"numPages": 176,
+				"place": "Paris",
+				"publisher": "Larousse",
 				"attachments": [
 					{
 						"title": "Amazon.com Link",
@@ -504,15 +545,9 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Candide",
-				"abstractNote": "Que signifie ce nom \"Candide\" : innocence de celui qui ne connaît pas le mal ou illusion du naïf qui n'a pas fait l'expérience du monde ? Voltaire joue en 1759, après le tremblement de terre de Lisbonne, sur ce double sens. Il nous fait partager les épreuves fictives d'un jeune homme simple, confronté aux leurres de l'optimisme, mais qui n'entend pas désespérer et qui en vient à une sagesse finale, mesurée et mystérieuse. Candide n'en a pas fini de nous inviter au gai savoir et à la réflexion.",
-				"date": "17 août 2011",
-				"publisher": "Larousse",
-				"ISBN": "9782035866011",
-				"numPages": 176,
-				"language": "Français",
-				"place": "Paris",
-				"libraryCatalog": "Amazon.com"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -522,6 +557,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Fiktionen: Erzählungen 1939 - 1944",
 				"creators": [
 					{
 						"firstName": "Jorge Luis",
@@ -529,9 +565,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "1. Mai 1992",
+				"ISBN": "9783596105816",
+				"abstractNote": "Gleich bei seinem Erscheinen in den 40er Jahren löste Jorge Luis Borges’ erster Erzählband »Fiktionen« eine literarische Revolution aus. Erfundene Biographien, fiktive Bücher, irreale Zeitläufe und künstliche Realitäten verflocht Borges zu einem geheimnisvollen Labyrinth, das den Leser mit seinen Rätseln stets auf neue herausfordert. Zugleich begründete er mit seinen berühmten Erzählungen wie»›Die Bibliothek zu Babel«, «Die kreisförmigen Ruinen« oder»›Der Süden« den modernen »Magischen Realismus«.   »Obwohl sie sich im Stil derart unterscheiden, zeigen zwei Autoren uns ein Bild des nächsten Jahrtausends: Joyce und Borges.« Umberto Eco",
+				"edition": "Auflage: 12",
+				"language": "Deutsch",
+				"libraryCatalog": "Amazon.com",
+				"numPages": 192,
+				"place": "Frankfurt am Main",
+				"publisher": "FISCHER Taschenbuch",
+				"shortTitle": "Fiktionen",
 				"attachments": [
 					{
 						"title": "Amazon.com Link",
@@ -539,17 +582,9 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Fiktionen: Erzählungen 1939 - 1944",
-				"abstractNote": "Gleich bei seinem Erscheinen in den 40er Jahren löste Jorge Luis Borges’ erster Erzählband »Fiktionen« eine literarische Revolution aus. Erfundene Biographien, fiktive Bücher, irreale Zeitläufe und künstliche Realitäten verflocht Borges zu einem geheimnisvollen Labyrinth, das den Leser mit seinen Rätseln stets auf neue herausfordert. Zugleich begründete er mit seinen berühmten Erzählungen wie»›Die Bibliothek zu Babel«, «Die kreisförmigen Ruinen« oder»›Der Süden« den modernen »Magischen Realismus«.   »Obwohl sie sich im Stil derart unterscheiden, zeigen zwei Autoren uns ein Bild des nächsten Jahrtausends: Joyce und Borges.« Umberto Eco",
-				"date": "1. Mai 1992",
-				"publisher": "FISCHER Taschenbuch",
-				"edition": "Auflage: 12",
-				"ISBN": "9783596105816",
-				"numPages": 192,
-				"language": "Deutsch",
-				"place": "Frankfurt am Main",
-				"libraryCatalog": "Amazon.com",
-				"shortTitle": "Fiktionen"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -559,6 +594,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "A Tale of Two Cities",
 				"creators": [
 					{
 						"firstName": "Charles",
@@ -566,9 +602,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "1 Dec 2010",
+				"language": "English",
+				"libraryCatalog": "Amazon.com",
+				"numPages": 238,
+				"publisher": "Public Domain Books",
 				"attachments": [
 					{
 						"title": "Amazon.com Link",
@@ -576,12 +614,9 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"title": "A Tale of Two Cities",
-				"date": "1 Dec 2010",
-				"publisher": "Public Domain Books",
-				"numPages": 238,
-				"language": "English",
-				"libraryCatalog": "Amazon.com"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -591,6 +626,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Emil",
 				"creators": [
 					{
 						"firstName": "Astrid",
@@ -608,9 +644,15 @@ var testCases = [
 						"creatorType": "translator"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "26 giugno 2008",
+				"ISBN": "9788882038670",
+				"abstractNote": "Si pensa che soprattutto in una casa moderna, con prese elettriche, gas, balconi altissimi un bambino possa mettersi in pericolo: Emil vive in una tranquilla casa di campagna, ma riesce a ficcare la testa in una zuppiera e a rimanervi incastrato, a issare la sorellina Ida in cima all'asta di una bandiera, e a fare una tale baldoria alla fiera del paese che i contadini decideranno di organizzare una colletta per spedirlo in America e liberare così la sua povera famiglia. Ma questo succederà nel prossimo libro di Emil, perché ce ne sarà un altro, anzi due, tante sono le sue monellerie. Età di lettura: da 7 anni.",
+				"edition": "3 edizione",
+				"language": "Italiano",
+				"libraryCatalog": "Amazon.com",
+				"numPages": 72,
+				"place": "Milano",
+				"publisher": "Nord-Sud",
 				"attachments": [
 					{
 						"title": "Amazon.com Link",
@@ -618,16 +660,9 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Emil",
-				"abstractNote": "Si pensa che soprattutto in una casa moderna, con prese elettriche, gas, balconi altissimi un bambino possa mettersi in pericolo: Emil vive in una tranquilla casa di campagna, ma riesce a ficcare la testa in una zuppiera e a rimanervi incastrato, a issare la sorellina Ida in cima all'asta di una bandiera, e a fare una tale baldoria alla fiera del paese che i contadini decideranno di organizzare una colletta per spedirlo in America e liberare così la sua povera famiglia. Ma questo succederà nel prossimo libro di Emil, perché ce ne sarà un altro, anzi due, tante sono le sue monellerie. Età di lettura: da 7 anni.",
-				"date": "26 giugno 2008",
-				"publisher": "Nord-Sud",
-				"edition": "3 edizione",
-				"ISBN": "9788882038670",
-				"numPages": 72,
-				"language": "Italiano",
-				"place": "Milano",
-				"libraryCatalog": "Amazon.com"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -637,31 +672,37 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "汉语语音合成:原理和技术",
 				"creators": [
 					{
-						"lastName": "吕士楠",
-						"creatorType": "author",
-						"fieldMode": 1
+						"firstName": "吕士",
+						"lastName": "楠",
+						"creatorType": "author"
 					},
 					{
-						"lastName": "初敏",
-						"creatorType": "author",
-						"fieldMode": 1
+						"firstName": "初",
+						"lastName": "敏",
+						"creatorType": "author"
 					},
 					{
-						"lastName": "许洁萍",
-						"creatorType": "author",
-						"fieldMode": 1
+						"firstName": "许洁",
+						"lastName": "萍",
+						"creatorType": "author"
 					},
 					{
-						"lastName": "贺琳",
-						"creatorType": "author",
-						"fieldMode": 1
+						"firstName": "贺",
+						"lastName": "琳",
+						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"ISBN": "9787030329202",
+				"abstractNote": "《汉语语音合成:原理和技术》介绍语音合成的原理和针对汉语的各项合成技术，以及应用的范例。全书分基础篇和专题篇两大部分。基础篇介绍语音合成技术的发展历程和作为语音合成技术基础的声学语音学知识，尤其是作者获得的相关研究成果（填补了汉语语音学知识中的某些空白），并对各种合成器的工作原理和基本结构进行系统的阐述。专题篇结合近十年来国内外技术发展的热点和方向，讨论韵律分析与建模、数据驱动的语音合成方法、语音合成数据库的构建技术、文语转换系统的评估方法、语音合成技术的应用等。 《汉语语音合成:原理和技术》面向从事语言声学、语音通信技术，特别是语音合成的科学工作者、工程技术人员、大学教师、研究生和高年级的大学生，可作为他们研究、开发、进修的参考书。",
+				"edition": "第1版",
+				"libraryCatalog": "Amazon.com",
+				"numPages": 373,
+				"place": "Beijing",
+				"publisher": "科学出版社",
+				"shortTitle": "汉语语音合成",
 				"attachments": [
 					{
 						"title": "Amazon.com Link",
@@ -669,15 +710,9 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"title": "汉语语音合成:原理和技术",
-				"abstractNote": "《汉语语音合成:原理和技术》介绍语音合成的原理和针对汉语的各项合成技术，以及应用的范例。全书分基础篇和专题篇两大部分。基础篇介绍语音合成技术的发展历程和作为语音合成技术基础的声学语音学知识，尤其是作者获得的相关研究成果（填补了汉语语音学知识中的某些空白），并对各种合成器的工作原理和基本结构进行系统的阐述。专题篇结合近十年来国内外技术发展的热点和方向，讨论韵律分析与建模、数据驱动的语音合成方法、语音合成数据库的构建技术、文语转换系统的评估方法、语音合成技术的应用等。 《汉语语音合成:原理和技术》面向从事语言声学、语音通信技术，特别是语音合成的科学工作者、工程技术人员、大学教师、研究生和高年级的大学生，可作为他们研究、开发、进修的参考书。",
-				"publisher": "科学出版社",
-				"edition": "第1版",
-				"ISBN": "9787030329202",
-				"numPages": 373,
-				"place": "Beijing",
-				"libraryCatalog": "Amazon.com",
-				"shortTitle": "汉语语音合成"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -687,6 +722,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "videoRecording",
+				"title": "Walt Disney / Pixar - Up",
 				"creators": [
 					{
 						"firstName": "Ed",
@@ -714,9 +750,11 @@ var testCases = [
 						"creatorType": "director"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "15 Feb 2010",
+				"language": "English",
+				"libraryCatalog": "Amazon.com",
+				"runningTime": "96 minutes",
+				"studio": "Walt Disney Studios Home Entertainment",
 				"attachments": [
 					{
 						"title": "Amazon.com Link",
@@ -724,12 +762,9 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Walt Disney / Pixar - Up",
-				"date": "15 Feb 2010",
-				"studio": "Walt Disney Studios Home Entertainment",
-				"runningTime": "96 minutes",
-				"language": "English",
-				"libraryCatalog": "Amazon.com"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -739,16 +774,16 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "audioRecording",
+				"title": "Die Eiskönigin Völlig Unverfroren",
 				"creators": [
 					{
-						"firstName": "Various",
-						"lastName": "artists",
-						"creatorType": "author"
+						"lastName": "Various artists",
+						"creatorType": "performer",
+						"fieldMode": 1
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"libraryCatalog": "Amazon.com",
+				"runningTime": "1:08:59",
 				"attachments": [
 					{
 						"title": "Amazon.com Link",
@@ -756,9 +791,9 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Die Eiskönigin Völlig Unverfroren",
-				"runningTime": "1:08:59",
-				"libraryCatalog": "Amazon.com"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -768,6 +803,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "1Q84: Books 1, 2 and 3",
 				"creators": [
 					{
 						"firstName": "Haruki",
@@ -775,9 +811,14 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "August 2, 2012",
+				"ISBN": "9780099578079",
+				"language": "英語, 英語, 不明",
+				"libraryCatalog": "Amazon.com",
+				"numPages": 1328,
+				"place": "London",
+				"publisher": "Vintage",
+				"shortTitle": "1Q84",
 				"attachments": [
 					{
 						"title": "Amazon.com Link",
@@ -785,14 +826,9 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"title": "1Q84: Books 1, 2 and 3",
-				"publisher": "Vintage",
-				"ISBN": "9780552995825",
-				"numPages": 1328,
-				"language": "英語, 英語, 不明",
-				"place": "London",
-				"libraryCatalog": "Amazon.com",
-				"shortTitle": "1Q84"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
