@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 2,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-07-06 16:50:51"
+	"lastUpdated": "2014-07-17 22:51:51"
 }
 
 //The export will be stucked if you try to export to a csv-file
@@ -23,19 +23,82 @@ var recordsDeliminator = "\n";
 var fieldsDeliminator = ",";
 var fieldWrapperCharacter = '"';
 
-function exclude(field) {
-	return false;//standard configuration: exclude no fields
-	
-	//change for non-standard configuration, e.g.
-	//return  field == 'notes' || field == 'attachments' || field == 'tags' || field == 'related' || 
-	//		field == 'seeAlso' || field == 'uniqueFields' ||
-	//		/creators\/\d+\/fieldMode/g.test(field);
-}
+var singleFieldsForExport = [
+	'key',
+	'itemType',
+	'dateAdded',
+	'dateModified',
+	'uniqueFields/title',
+	'uniqueFields/abstractNote',
+	'uniqueFields/medium',
+	'uniqueFields/artworkSize',
+	'uniqueFields/reporter',
+	'uniqueFields/publicationTitle',
+	'uniqueFields/conferenceName',
+	'uniqueFields/type',
+	'uniqueFields/scale',
+	'uniqueFields/series',
+	'uniqueFields/seriesTitle',
+	'uniqueFields/version',
+	'uniqueFields/seriesText',
+	'uniqueFields/journalAbbreviation',
+	'uniqueFields/seriesNumber',
+	'uniqueFields/volume',
+	'uniqueFields/court',
+	'uniqueFields/number',
+	'uniqueFields/filingDate',
+	'uniqueFields/issue',
+	'uniqueFields/pages',
+	'uniqueFields/applicationNumber',
+	'uniqueFields/priorityNumbers',
+	'uniqueFields/history',
+	'uniqueFields/numberOfVolumes',
+	'uniqueFields/edition',
+	'uniqueFields/place',
+	'uniqueFields/country',
+	'uniqueFields/assignee',
+	'uniqueFields/issuingAuthority',
+	'uniqueFields/meetingName',
+	'uniqueFields/publisher',
+	'uniqueFields/programmingLanguage',
+	'uniqueFields/date',
+	'uniqueFields/references',
+	'uniqueFields/legalStatus',
+	'uniqueFields/runningTime',
+	'uniqueFields/system',
+	'uniqueFields/section',
+	'uniqueFields/numPages',
+	'uniqueFields/language',
+	'uniqueFields/DOI',
+	'uniqueFields/ISSN',
+	'uniqueFields/ISBN',
+	'uniqueFields/shortTitle',
+	'uniqueFields/url',
+	'uniqueFields/mimeType',
+	'uniqueFields/charset',
+	'uniqueFields/accessDate',
+	'uniqueFields/archive',
+	'uniqueFields/archiveLocation',
+	'uniqueFields/libraryCatalog',
+	'uniqueFields/callNumber',
+	'uniqueFields/rights',
+	'uniqueFields/extra',
+	'uniqueFields/note',
+	];
 
+//It is possible to disable some multiple fields from the export.
+//just set the corresponding flag below to false.
+var multipleFieldsForExport = {'creators' : true, 'tags' : true, 'notes' : true, 'attachments' : true};
+
+//list of all creator types in some order
+var creatorsType = ['author', 'contributor', 'editor', 'bookAuthor', 'seriesEditor', 'translator',
+					'reviewedAuthor', 'artist', 'performer', 'composer', 'wordsBy',
+					'sponsor', 'cosponsor', 'commenter', 'counsel', 'programmer', 'recipient', 
+					'director', 'producer', 'scriptwriter', 'interviewee', 'interviewer',
+					'cartographer', 'inventor', 'attorneyAgent', 'podcaster', 'guest',
+					'presenter', 'castMember'];
 
 var item;
-var overallStructure;
-var positionToInsertNext;
 
 
 //export the content of a field
@@ -70,76 +133,99 @@ function evaluate(obj, path) {
 }
 
 
-//parse the object item (with possible previous path prevPath)
-//adjust the overallStructure, i.e. import new column names if needed
-//(function is recursive)
-function parseObject(item, prevPath) {
-	if (item == undefined) {
-		return false;
-	}
-    var keys = Object.keys(item);
-	
-    for (var i = 0; i < keys.length; i++) {
-		if (prevPath == "") {
-			currentFieldName = keys[i];
-		} else {
-			currentFieldName = prevPath+"/"+keys[i];
-		}
-		
-		if (exclude(currentFieldName)) {
-			continue;//with next element in for-loop
-		}
-		
-        if (typeof item[keys[i]] === 'object') {
-		
-			for (var j = 0; j < overallStructure.length; j++) {
-				if ( overallStructure[j].startsWith( currentFieldName ) ) {
-					positionToInsertNext = j+1;
-				}
-			}
-
-			parseObject(item[keys[i]], currentFieldName);
-		} else {
-			var indexOverallStructure = overallStructure.indexOf(currentFieldName);
-			if (indexOverallStructure == -1 ) {
-				overallStructure.splice(positionToInsertNext, 0, currentFieldName);//splice works also if positionToInsertNext is equal to the length of the array
-				positionToInsertNext++;
-			} else {
-				positionToInsertNext = indexOverallStructure+1;
-			}
-		}
-    }
-}
-
 
 function doExport() {
 	
-	//filling up the overallStructure and saving items in itemList
-	overallStructure = new Array();
-	var itemList = new Array();
-	while (item = Zotero.nextItem()) {
-		itemList.push(item);
-		
-		positionToInsertNext = 0;//oldIndex
-		parseObject( item, "" );//call function with possible recursion
-		
-	}
-	Z.debug("overallStructure"); Z.debug(overallStructure);
-	
 	//write header line
-	for (var i=0; i<overallStructure.length; i++) {
-		exportField(overallStructure[i]);
+	for (var i=0; i<singleFieldsForExport.length; i++) {
+		var name = singleFieldsForExport[i];
+		var nameArray = name.split("/");
+		name = nameArray[nameArray.length-1];
+		exportField(name);
 	}
+	exportField('tagsOwn');
+	exportField('tagsAutomatic');
+	exportField('notes');
+	exportField('attachements');
+	for (var c=0; c<creatorsType.length; c++) {
+		exportField(creatorsType[c]);
+	}
+	
 	Zotero.write(recordsDeliminator);
 	
 	//writing data for each item
-	for (var j=0; j<itemList.length; j++) {
-		item = itemList[j];
-		for (var i=0; i<overallStructure.length; i++) {
-			var content = evaluate(item, overallStructure[i]);
+	while (item = Zotero.nextItem()) {
+		//go over all single fields
+		for (var j=0; j<singleFieldsForExport.length; j++){
+			var field = singleFieldsForExport[j];
+			var content = evaluate(item, field);
 			exportField(content);
 		}
+		//tags fields
+		if (multipleFieldsForExport['tags']) {
+			var tagsObject = evaluate(item, 'tags');
+			var contentArray = [ [], [] ];
+			for (var k=0; k<tagsObject.length; k++) {
+				var test = evaluate(item, 'tags/' + k + '/type');
+				contentArray[test].push( evaluate(item, 'tags/' + k + '/tag') );//Is tags/0/tag = tags/0/fields/name ?
+			}
+			exportField( contentArray[0].join(";") );
+			exportField( contentArray[1].join(";") );
+		}
+		//notes fields
+		if (multipleFieldsForExport['notes']) {
+			var noteObject = evaluate(item, 'notes');
+			var contentArray = [];
+			for (var k=0; k<noteObject.length; k++) {
+				contentArray.push( evaluate(item, 'notes/' + k + '/note') );
+			}
+			exportField( contentArray.join("\n") );//? TODO change to something?
+		}
+		//attachements fields
+		if (multipleFieldsForExport['attachments']) {
+			var attObject = evaluate(item, 'attachments');
+			var contentArray = [];
+			for (var k=0; k<attObject.length; k++) {
+				contentArray.push( evaluate(item, 'attachments/' + k + '/url') );
+			}
+			exportField( contentArray.join(' ') );
+		}
+		//creators fields
+		if (multipleFieldsForExport['creators']) {
+			//initialize data structure
+			var contentCreators = {};
+			for (var index=0; index<creatorsType.length; index++) {
+				contentCreators[ creatorsType[index] ] = [];
+			}
+			//fill in all data into contentCreators
+			var creatorsObject = evaluate(item, 'creators');
+			for (var k=0; k<creatorsObject.length; k++) {
+				var creatorType = evaluate(item, 'creators/' + k + '/creatorType');
+				var creatorLastName = evaluate(item, 'creators/' + k + '/lastName');
+				var creatorFirstName = evaluate(item, 'creators/' + k + '/firstName');
+				var creatorFieldMode = evaluate(item, 'creators/' + k + '/fieldMode');
+				if (creatorFieldMode == "") {
+					contentCreators[ creatorType ].push( creatorLastName +', ' + creatorFirstName );
+				} else {
+					contentCreators[ creatorType ].push( creatorLastName );
+				}
+			}
+			//export
+			for (var index=0; index<creatorsType.length; index++) {
+				var contentArray = contentCreators[ creatorsType[index] ];
+				if (contentArray.length > 0) {
+					exportField( contentArray.join(';') );
+				} else {
+					exportField('');
+				}
+			}
+		}
 		
+
+		
+		Z.debug(item);
+	
+
 		Zotero.write(recordsDeliminator);
 	}
 
