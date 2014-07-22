@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-28 20:54:37"
+	"lastUpdated": "2014-07-22 19:46:46"
 }
 
 /*
@@ -80,9 +80,9 @@ function scrape(doc, url) {
 	newItem.url = doc.location.href;
 
 	//title
-	var title1 = doc.evaluate('//div[@class="JournalAbstract"]/h1', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-
-	if (title1 == null) title1 = doc.evaluate('//div[@class="JournalAbstract"]/div/h1', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+	var abstractNode = doc.getElementsByClassName('JournalAbstract')[0];
+	var title1 = doc.evaluate('./h1', abstractNode, null, XPathResult.ANY_TYPE, null).iterateNext();
+	if (!title1) title1 = doc.evaluate('./div/h1', abstractNode, null, XPathResult.ANY_TYPE, null).iterateNext();
 
 	newItem.title = Zotero.Utilities.trim(title1.textContent);
 
@@ -210,6 +210,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "What are the visual features underlying rapid object recognition?",
 				"creators": [
 					{
 						"firstName": "Sébastien M.",
@@ -222,32 +223,169 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"rapid visual object recognition",
-					"computational models",
-					"visual features",
-					"computer vision",
-					"feedforward"
-				],
-				"seeAlso": [],
+				"date": "2011",
+				"DOI": "10.3389/fpsyg.2011.00326",
+				"abstractNote": "Research progress in machine vision has been very significant in recent years. Robust face detection and identification algorithms are already readily available to consumers, and modern computer vision algorithms for generic object recognition are now coping with the richness and complexity of natural visual scenes. Unlike early vision models of object recognition that emphasized the role of figure-ground segmentation and spatial information between parts, recent successful approaches are based on the computation of loose collections of image features without prior segmentation or any explicit encoding of spatial relations. While these models remain simplistic models of visual processing, they suggest that, in principle, bottom-up activation of a loose collection of image features could support the rapid recognition of natural object categories and provide an initial coarse visual representation before more complex visual routines and attentional mechanisms take place. Focusing on biologically plausible computational models of (bottom-up) pre-attentive visual recognition, we review some of the key visual features that have been described in the literature. We discuss the consistency of these feature-based representations with classical theories from visual psychology and test their ability to account for human performance on a rapid object categorization task.",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"journalAbbreviation": "Front. Psychology",
+				"libraryCatalog": "Frontiers",
+				"pages": "326",
+				"publicationTitle": "Perception Science",
+				"url": "http://journal.frontiersin.org/Journal/10.3389/fpsyg.2011.00326/abstract",
+				"volume": "2",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"url": "http://journal.frontiersin.org/Journal/10.3389/fpsyg.2011.00326/abstract",
-				"title": "What are the visual features underlying rapid object recognition?",
-				"publicationTitle": "Perception Science",
-				"abstractNote": "Research progress in machine vision has been very significant in recent years. Robust face detection and identification algorithms are already readily available to consumers, and modern computer vision algorithms for generic object recognition are now coping with the richness and complexity of natural visual scenes. Unlike early vision models of object recognition that emphasized the role of figure-ground segmentation and spatial information between parts, recent successful approaches are based on the computation of loose collections of image features without prior segmentation or any explicit encoding of spatial relations. While these models remain simplistic models of visual processing, they suggest that, in principle, bottom-up activation of a loose collection of image features could support the rapid recognition of natural object categories and provide an initial coarse visual representation before more complex visual routines and attentional mechanisms take place. Focusing on biologically plausible computational models of (bottom-up) pre-attentive visual recognition, we review some of the key visual features that have been described in the literature. We discuss the consistency of these feature-based representations with classical theories from visual psychology and test their ability to account for human performance on a rapid object categorization task.",
-				"DOI": "10.3389/fpsyg.2011.00326",
-				"pages": "326",
-				"date": "2011",
-				"journalAbbreviation": "Front. Psychology",
-				"volume": "2",
+				"tags": [
+					"computational models",
+					"computer vision",
+					"feedforward",
+					"rapid visual object recognition",
+					"visual features"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://journal.frontiersin.org/Journal/10.3389/fmicb.2014.00402/abstract",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Aromatic inhibitors derived from ammonia-pretreated lignocellulose hinder bacterial ethanologenesis by activating regulatory circuits controlling inhibitor efflux and detoxification",
+				"creators": [
+					{
+						"firstName": "David H.",
+						"lastName": "Keating",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yaoping",
+						"lastName": "Zhang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Irene M.",
+						"lastName": "Ong",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sean",
+						"lastName": "McIlwain",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Eduardo H.",
+						"lastName": "Morales",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jeff A.",
+						"lastName": "Grass",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Mary",
+						"lastName": "Tremaine",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "William",
+						"lastName": "Bothfeld",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alan",
+						"lastName": "Higbee",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Arne",
+						"lastName": "Ulbrich",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Allison",
+						"lastName": "Balloon",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael S.",
+						"lastName": "Westphall",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Joshua",
+						"lastName": "Aldrich",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Mary S.",
+						"lastName": "Lipton",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Joonhoon",
+						"lastName": "Kim",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Oleg",
+						"lastName": "Moskvin",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yury V.",
+						"lastName": "Bukhman",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Joshua",
+						"lastName": "Coon",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Patricia J.",
+						"lastName": "Kiley",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Donna M.",
+						"lastName": "Bates",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Robert",
+						"lastName": "Landick",
+						"creatorType": "author"
+					}
+				],
+				"date": "2014",
+				"DOI": "10.3389/fmicb.2014.00402",
+				"journalAbbreviation": "Front. Microbiol.",
 				"libraryCatalog": "Frontiers",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"pages": "402",
+				"publicationTitle": "Microbial Physiology and Metabolism",
+				"url": "http://journal.frontiersin.org/Journal/10.3389/fmicb.2014.00402/abstract",
+				"volume": "5",
+				"attachments": [],
+				"tags": [
+					"Biofuels",
+					"Escherichia coli",
+					"Ethanol",
+					"Proteomics",
+					"RNAseq",
+					"Transcriptomics",
+					"aromatic inhibitors",
+					"lignocellulosic hydrolysate"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
