@@ -9,11 +9,14 @@
 	"inRepository": true,
 	"translatorType": 5,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-04-10 11:26:32"
+	"lastUpdated": "2014-07-24 21:53:33"
 }
 
 function detectWeb(doc, url) {
-	if (url.indexOf("full_record.do") !== -1 && getSingleItemId(doc)) {
+	if ( (url.indexOf("full_record.do") !== -1
+			|| url.indexOf("InboundService.do") != -1)
+		&& getSingleItemId(doc)
+	) {
 		return "journalArticle";
 	} else if (((doc.title.indexOf(" Results") !== -1) 
 		|| url.indexOf("search_mode=") !== -1)
