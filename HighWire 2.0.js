@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-06-04 05:08:59"
+	"lastUpdated": "2014-07-24 01:16:55"
 }
 
 /*
@@ -36,19 +36,19 @@ function getSearchResults(doc, url, checkOnly) {
 			titlex: './/h4'
 		},
 		{
-			searchx: '//*[contains(@class, "results-cit cit")]',
+			searchx: '//div[@id="normal-search-results"]\
+				//*[contains(@class, "results-cit cit")]',
 			titlex: './/*[contains(@class, "cit-title")]'
 		},
 		{
-			searchx: '//div[contains(@class, "is-early-release") or \
-				contains(@class, "from-current-issue")] \
-				|//div[contains(@class, "toc-level level3")]//ul[@class="cit-list"]/div',
+			searchx: '//div[contains(@class, "toc-level level3")]\
+				//ul[@class="cit-list"]/div',
 			titlex: './/span[contains(@class, "cit-title")]'
 		},
 		{
 			searchx: '//div[contains(@class,"main-content-wrapper")]\
 				//div[contains(@class, "highwire-article-citation")]',
-			titlex:	'.//div[contains(@class, "highwire-cite-title")]'
+			titlex:	'.//a[contains(@class, "highwire-cite-linked-title")]'
 		}
 	];
 	
@@ -59,13 +59,18 @@ function getSearchResults(doc, url, checkOnly) {
 		if(!rows.length) continue;
 		
 		for(var j=0, n=rows.length; j<n; j++) {
-			var title = ZU.xpathText(rows[j], xpaths[i].titlex);
+			var title = ZU.xpath(rows[j], xpaths[i].titlex)[0];
 			if(!title) continue;
 			
-			var link = ZU.xpath(rows[j], linkx);
-			if(!link.length || !link[0].href) continue;
+			var link;
+			if(title.nodeName == 'A') {
+				link = title;
+			} else {
+				link = ZU.xpath(rows[j], linkx)[0];
+				if(!link || !link.href) continue;
+			}
 			
-			items[link[0].href] = ZU.trimInternal(title);
+			items[link.href] = ZU.trimInternal(title.textContent);
 			found = true;
 			
 			if(checkOnly) return true;
