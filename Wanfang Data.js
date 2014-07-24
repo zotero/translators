@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gc",
-	"lastUpdated": "2014-06-05 08:01:20"
+	"browserSupport": "gcs",
+	"lastUpdated": "2014-07-24 01:37:16"
 }
 
 /*
@@ -95,6 +95,34 @@ function detectType(code) {
 	}
 }
 
+function getSearchResults(doc, checkOnly) {
+	var items = [], found = false
+		lis = ZU.xpath(doc, '//li[contains(@class,"title_li")]');
+	for(var i=0, n=lis.length; i<n; i++) {
+		var a = lis[i].getElementsByTagName("a")[1];
+		var title = ZU.trimInternal( ZU.cleanTags(a.textContent) );
+		var link = a.getAttribute("href").match(/\/([^\/]+)\.aspx/)[1];
+		if (!link) continue;
+		
+		if(checkOnly) return true;
+		
+		items[link] = title;
+		found = true;
+	}
+	
+	return found ? items : false;
+}
+
+function getItemId(doc) {
+	var action = ZU.xpathText(doc, '//form[@id="aspnetForm"]/@action');
+	if(!action) return;
+	
+	var id = action.match(/(?:\?|&)ID=([^&]+)/);
+	if(!id) return;
+	
+	return id[1];
+}
+
 // #############################
 // ##### Scraper functions #####
 // #############################
@@ -148,12 +176,14 @@ function scrape(doc, id) {
 // #########################
 
 function detectWeb(doc, url) {
-	if (url.toLowerCase().indexOf('paper.aspx') != -1) {
+	if (url.toLowerCase().indexOf('paper.aspx') != -1
+		&& getSearchResults(doc, true)
+	) {
 		return "multiple";
 	}
 	
 	pattern = /[ds]\.(?:g\.)?wanfangdata\.com\.cn/;
-	if (pattern.test(url)) {
+	if (pattern.test(url) && getItemId(doc)) {
 		var code = detectCode(url);
 		return detectType(code);
 	}
@@ -164,19 +194,7 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		// search page
-		var items = new Array();
-
-		lis = ZU.xpath(doc, '//li[contains(@class,"title_li")]');
-
-		var li, link, title;
-		for(var i=0, n=lis.length; i<n; i++) {
-			var a = lis[i].getElementsByTagName("a")[1];
-			title = ZU.trimInternal( ZU.cleanTags(a.textContent) );
-			link = a.getAttribute("href").match(/\/([^\/]+)\.aspx/)[1];
-			if (link) {
-				items[link] = title;
-			}
-		}
+		var items = getSearchResults(doc);
 
 		Zotero.selectItems(items, function(selectedItems) {
 			if (!selectedItems) return true;
@@ -190,8 +208,7 @@ function doWeb(doc, url) {
 			scrape(doc, ids);
 		});
 	} else {
-		var id = ZU.xpathText(doc, '//form[@id="aspnetForm"]/@action')
-			.match(/(?:\?|&)ID=([^&]+)/)[1];
+		var id = getItemId(doc);
 		scrape(doc, id);
 	}
 }
@@ -203,6 +220,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "参考文献管理工具研究",
 				"creators": [
 					{
 						"firstName": "",
@@ -220,22 +238,21 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
+				"date": "2009",
+				"DOI": "10.3969/j.issn.1008-0821.2009.02.027",
+				"abstractNote": "介绍了参考文献管理的基本方法,对参考文献管理工具的主要功能进行了对比,最后分析了参考文献管理的趋势.",
+				"archiveLocation": "北京万方数据股份有限公司",
 				"extra": "Yu Min\nZhu Jiang\nDing Zhaolei",
 				"issue": "2",
-				"abstractNote": "介绍了参考文献管理的基本方法,对参考文献管理工具的主要功能进行了对比,最后分析了参考文献管理的趋势.",
-				"url": "http://d.wanfangdata.com.cn/Periodical_xdqb200902027.aspx",
-				"archiveLocation": "北京万方数据股份有限公司",
-				"DOI": "10.3969/j.issn.1008-0821.2009.02.027",
 				"libraryCatalog": "Wanfang Data",
-				"title": "参考文献管理工具研究",
+				"pages": "94-98,93",
 				"publicationTitle": "JOURNAL OF MODERN INFORMATION",
-				"date": "2009",
+				"url": "http://d.wanfangdata.com.cn/Periodical_xdqb200902027.aspx",
 				"volume": "29",
-				"pages": "94-98,93"
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -245,6 +262,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Zotero: harnessing the power of a personal bibliographic manager.",
 				"creators": [
 					{
 						"firstName": "JT",
@@ -257,23 +275,22 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Zotero: harnessing the power of a personal bibliographic manager.",
-				"publicationTitle": "Nurse educator",
-				"ISBN": "0363-3624",
 				"date": "2010",
-				"issue": "5",
-				"volume": "35",
-				"pages": "205-207",
+				"ISBN": "0363-3624",
 				"abstractNote": "Zotero is a powerful free personal bibliographic manager (PBM) for writers. Use of a PBM allows the writer to focus on content, rather than the tedious details of formatting citations and references. Zotero 2.0 (http://www.zotero.org) has new features including the ability to synchronize citations with the off-site Zotero server and the ability to collaborate and share with others. An overview on how to use the software and discussion about the strengths and limitations are included.",
-				"url": "http://d.wanfangdata.com.cn/NSTLQK_NSTL_QKJJ0216348353.aspx",
-				"archiveLocation": "北京万方数据股份有限公司",
-				"libraryCatalog": "Wanfang Data",
 				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Zotero"
+				"archiveLocation": "北京万方数据股份有限公司",
+				"issue": "5",
+				"libraryCatalog": "Wanfang Data",
+				"pages": "205-207",
+				"publicationTitle": "Nurse educator",
+				"shortTitle": "Zotero",
+				"url": "http://d.wanfangdata.com.cn/NSTLQK_NSTL_QKJJ0216348353.aspx",
+				"volume": "35",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
