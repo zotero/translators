@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-03-17 19:59:24"
+	"lastUpdated": "2014-07-24 02:01:01"
 }
 
 /*
@@ -78,9 +78,10 @@ function setGSPCookie(doc, cookie) {
 				':CF=4';
 	}
 
+	// Make sure we capture "0-" in
+	// http://0-scholar.google.co.za.innopac.up.ac.za/...
 	var domain = doc.location.href
-				.match(/https?:\/\/[^\/]*?(scholar\.google\.[^:\/]+)/i)[1];
-
+				.match(/https?:\/\/[^\/]*?([^.\/]*scholar\.google\.[^:\/]+)/i)[1];
 	cookie += '; domain=.' + domain +
 				'; expires=Sun, 17 Jan 2038 19:14:09 UTC';	//this is what google scholar uses
 	doc.cookie = cookie;
@@ -362,8 +363,7 @@ function scrapeCaseResults(doc, cases) {
 			if(caseId) caseId = caseId.match(/\b(?:cites|about)=(\d+)/);
 			if(caseId) caseId = caseId[1];
 			if(caseId) {
-				attachmentFrag = 'http://scholar.google.com/scholar_case?'
-					+ 'case=' + caseId;
+				attachmentFrag = '/scholar_case?case=' + caseId;
 			}
 		}
 		
