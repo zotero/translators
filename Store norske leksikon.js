@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-07-26 01:03:54"
+	"lastUpdated": "2014-07-26 01:22:54"
 }
 
 /* Translator for Store norske leksikon
@@ -48,7 +48,8 @@ function doWeb(doc, url) {
 		null, '');
 	if (abs) item.abstractNote = ZU.trimInternal(abs);
 
-	Zotero.Utilities.doGet(url.replace(/[#?].*/, '') + ".json", function(json) {
+	url = url.replace(/[#?].*/, '');
+	Zotero.Utilities.doGet(url + ".json", function(json) {
 
 		try {
 			obj = JSON.parse(json);
