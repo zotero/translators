@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-07-11 01:03:20"
+	"lastUpdated": "2014-07-28 22:24:35"
 }
 
 function detectWeb(doc, url) {
@@ -168,8 +168,7 @@ function scrape(doc, url) {
 	var isAsian = url.search(/^https?:\/\/[^\/]+\.(?:jp|cn)[:\/]/) != -1;
 	// Scrape HTML for items without ISBNs, because Amazon doesn't provide an easy way for
 	// open source projects like us to use their API
-	Z.debug("Scraping from Page")		
-	var department = ZU.xpathText(doc, '//li[contains(@class, "nav-category-button")]/a').trim();
+	Z.debug("Scraping from Page");
 	var item = new Zotero.Item(detectWeb(doc, url) || "book");
 
 	var title = doc.getElementById('btAsinTitle')
@@ -300,9 +299,10 @@ function scrape(doc, url) {
 	item.language = getField(info, 'Language');
 	// Music
 	item.label = getField(info, 'Label');
+	var department = ZU.xpathText(doc, '//li[contains(@class, "nav-category-button")]/a')
 	if(getField(info, 'Audio CD')) {
 		item.audioRecordingFormat = "Audio CD";
-	} else if(department == "Amazon MP3 Store") {
+	} else if(department && department.trim() == "Amazon MP3 Store") {
 		item.audioRecordingFormat = "MP3";
 	}
 	
