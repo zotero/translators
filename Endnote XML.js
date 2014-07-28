@@ -16,7 +16,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcv",
-	"lastUpdated": "2014-04-07 22:51:57"
+	"lastUpdated": "2014-07-28 22:51:57"
 }
 
 function detectImport() {
@@ -31,27 +31,30 @@ function detectImport() {
 }
 
 //list of Endnote XML fields used for export (same for title, date, periodical, and author fields below)
-var fields = ["pages", "volume", "number", "issue", "num-vols", "orig-pub", "edition", "section",
-	"electronic-resource-num", "pub-location", "publisher", "isbn", "accession-num", "call-num", "report-id",
-	"abstract", "work-type", "meeting-place", "remote-database-name", "language", "access-date", "custom1",
-	"custom2", "custom3", "custom4", "custom5", "custom6", "custom7", "misc1", "misc2", "misc3", "auth-address",
-	"auth-affiliaton", "secondary-volume", "secondary-issue", "num-vols", "edition", "section",
-	"reprint-edition", "reprint-status", "coden", "label", "image", "caption", "work-type", "reviewed-item",
-	"availability", "remote-source", "work-location", "work-extent", "pack-method", "size", "repro-ratio",
-	"remote-database-provider"
-]
+var fields = ["database", "source-app", "rec-number", "ref-type", "contributors",
+"auth-address", "auth-affiliaton", "titles", "periodical", "pages", "volume",
+"number", "issue", "secondary-volume", "secondary-issue", "num-vols", "edition",
+"section", "reprint-edition", "reprint-status", "keywords", "dates", "pub-location",
+"publisher", "orig-pub", "isbn", "accession-num", "call-num", "report-id", "coden",
+"electronic-resource-num", "abstract", "label", "image", "caption", "notes",
+"research-notes", "work-type", "reviewed-item", "availability", "remote-source",
+"meeting-place", "work-location", "work-extent", "pack-method", "size", "repro-ratio",
+"remote-database-name", "remote-database-provider", "language", "urls", "access-date",
+"modified-date", "custom1", "custom2", "custom3", "custom4", "custom5", "custom6",
+"custom7", "misc1", "misc2", "misc3"
+];
 
-var titleFields = ["title", "short-title", "secondary-title", "tertiary-title", "alt-title",
+var titleFields = ["title", "secondary-title", "tertiary-title", "alt-title", "short-title", 
 	"translated-title"
-]
+];
 
-var dateFields = ["year", "pub-dates"]
-var periodicalFields = ["full-title", "abbr-1", "abbr-2", "abbr-3"]
+var dateFields = ["year", "pub-dates"];
+var periodicalFields = ["full-title", "abbr-1", "abbr-2", "abbr-3"];
 var authorFields = ["authors", "secondary-authors", "tertiary-authors", "subsidiary-authors",
 	"translated-authors"
-]
+];
 
-var attachmentFields = ["pdf-urls", "text-urls", "related-urls", "image-urls"]
+var attachmentFields = ["pdf-urls", "text-urls", "related-urls", "image-urls"];
 
 var processItemType = {
 	Artwork: "artwork",
@@ -102,7 +105,7 @@ var processItemType = {
 	Dataset: "report", //map to dataset once we have that
 	"Electronic Book Section": "bookSection",
 	Music: "audioRecording"
-}
+};
 
 var processNumberType = {
 	2: "artwork",
@@ -153,7 +156,7 @@ var processNumberType = {
 	59: "report",
 	60: "bookSection",
 	61: "audioRecording"
-}
+};
 
 var exportItemType = {
 	artwork: "Artwork",
@@ -190,7 +193,7 @@ var exportItemType = {
 	tvBroadcast: "Film or Broadcast",
 	videoRecording: "Audiovisual Material",
 	webpage: "Web Page"
-}
+};
 
 var exportRefNumber = {
 	artwork: "2",
@@ -227,9 +230,7 @@ var exportRefNumber = {
 	thesis: "32",
 	forumPost: "12",
 	webpage: "12"
-}
-
-
+};
 
 var fieldMap = {
 	//same for all itemTypes
@@ -657,142 +658,148 @@ function doExport() {
 	while (item = Zotero.nextItem()) {
 		// Don't export notes or standalone attachments
 		if (item.itemType === "note" || item.itemType === "attachment") continue;
+		
 		var record = doc.createElement("record");
-		mapProperty(record, "database", "MyLibrary", {
-			"name": "MyLibrary"
-		});
-		mapProperty(record, "source-app", "Zotero", {
-			"name": "Zotero"
-		});
-
-		var type = exportItemType[item.itemType];
-		var typeNumber = exportRefNumber[item.itemType];
-		mapProperty(record, "ref-type", typeNumber, {
-			"name": type
-		})
-
-
-		//Title elements
-		var titles = doc.createElement("titles");
-		for (var i = 0; i < titleFields.length; i++) {
-			var titleField = titleFields[i];
-			var zfield = getField(titleField, item.itemType);
-			if (item[zfield]) mapProperty(titles, titleField, item[zfield]);
-		}
-		record.appendChild(titles);
-
-		//Creators
-		if (item.creators.length > 0) {
-			var contributors = doc.createElement("contributors");
-			for (var i = 0; i < authorFields.length; i++) {
-				var custom4 =[];
-				var creatornode = doc.createElement(authorFields[i]);
-				var type = getField(authorFields[i], item.itemType);
-				for (var j = 0; j < item.creators.length; j++) {
-					if (item.creators[j].creatorType == type) {
-						var name = item.creators[j].lastName;
-						if (item.creators[j].firstName) name += ", " + item.creators[j].firstName;
-						mapProperty(creatornode, "author", name);
+		for(var f=0; f<fields.length; f++) {
+			switch(fields[f]) {
+				case 'database':
+					mapProperty(record, "database", "MyLibrary", {
+						"name": "MyLibrary"
+					});
+				break;
+				case 'source-app':
+					mapProperty(record, "source-app", "Zotero", {
+						"name": "Zotero"
+					});
+				break;
+				case 'ref-type':
+					var type = exportItemType[item.itemType];
+					var typeNumber = exportRefNumber[item.itemType];
+					mapProperty(record, "ref-type", typeNumber, {
+						"name": type
+					})
+				break;
+				case 'titles':
+					var titles = doc.createElement("titles");
+					for (var i = 0; i < titleFields.length; i++) {
+						var titleField = titleFields[i];
+						var zfield = getField(titleField, item.itemType);
+						if (item[zfield]) mapProperty(titles, titleField, item[zfield]);
 					}
-					//deal with creators that are mapped to regular fields, currently only one
-					else if(item.creators[j].creatorType=="attorneyAgent") {						
-						var name = item.creators[j].lastName;
-						if (item.creators[j].firstName) name += ", " + item.creators[j].firstName;
-						custom4.push(name);
+					record.appendChild(titles);
+				break;
+				case 'contributors':
+					if (item.creators.length > 0) {
+						var contributors = doc.createElement("contributors");
+						for (var i = 0; i < authorFields.length; i++) {
+							var custom4 =[];
+							var creatornode = doc.createElement(authorFields[i]);
+							var type = getField(authorFields[i], item.itemType);
+							for (var j = 0; j < item.creators.length; j++) {
+								if (item.creators[j].creatorType == type) {
+									var name = item.creators[j].lastName;
+									if (item.creators[j].firstName) name += ", " + item.creators[j].firstName;
+									mapProperty(creatornode, "author", name);
+								}
+								//deal with creators that are mapped to regular fields, currently only one
+								else if(item.creators[j].creatorType=="attorneyAgent") {						
+									var name = item.creators[j].lastName;
+									if (item.creators[j].firstName) name += ", " + item.creators[j].firstName;
+									custom4.push(name);
+								}
+							}
+							if (creatornode.hasChildNodes()) {
+								contributors.appendChild(creatornode);
+							}
+						}
+						if (custom4.length>0){
+							mapProperty(record, "custom4", custom4.join("; "));
+						}
+						record.appendChild(contributors);
 					}
-				}
-				if (creatornode.hasChildNodes()) {
-					contributors.appendChild(creatornode);
-				}
+				break;
+				case 'dates':
+					var dates = doc.createElement("dates");
+					var zfield = getField("pub-dates", item.itemType);
+					if (item[zfield]) {
+						var pubdates = doc.createElement("pub-dates");
+						dates.appendChild(pubdates);
+						var dateobject = ZU.strToDate(item[zfield]);
+						if (dateobject.year) mapProperty(dates, "year", dateobject.year);
+						mapProperty(pubdates, "date", item[zfield]);
+					}
+					record.appendChild(dates);
+				break;
+				case 'periodical':
+					var periodical = doc.createElement("periodical");
+					var zfield = getField("full-title", item.itemType);
+					if (item[zfield]) {
+						mapProperty(periodical, "full-title", item[zfield]);
+					}
+					var zfield = getField("abbr-1", item.itemType);
+					if (item[zfield]) {
+						mapProperty(periodical, "abbr-1", item[zfield]);
+					}
+					if (periodical.children.length > 0) record.appendChild(periodical);
+				break;
+				case 'keywords':
+					if (item.tags.length > 0) {
+						var keywords = doc.createElement("keywords");
+						for (var i = 0; i < item.tags.length; i++) {
+							mapProperty(keywords, "keyword", item.tags[i].tag);
+						}
+						record.appendChild(keywords);
+					}
+				break;
+				case 'research-notes':
+					if (item.notes && Zotero.getOption("exportNotes")) {
+						for (var i = 0; i < item.notes.length; i++) {
+							mapProperty(record, "research-notes", item.notes[i].note)
+						}
+					}
+				break;
+				case 'urls':
+					if (item.attachments || item.url) {
+						var urls = doc.createElement("urls");
+						var pdfurls = doc.createElement("pdf-urls");
+						var texturls = doc.createElement("text-urls");
+						if (item.url) {
+							var weburls = doc.createElement("web-urls");
+							urls.appendChild(weburls);
+							mapProperty(weburls, "url", item.url);
+						}
+						var exportFileData = Zotero.getOption("exportFileData");
+						for (var i=0; i< item.attachments.length; i++) {
+							var attachment = item.attachments[i];
+							var path;
+							if ( exportFileData && attachment.saveFile) {
+								path = attachment.defaultPath.replace(/^files\//, '');
+								attachment.saveFile('PDF/' + path, true);
+								path = 'internal-pdf://' + path;
+							} else if (attachment.localPath) {
+								path = attachment.localPath;
+							}
+							
+							if (attachment.mimeType == "application/pdf") {
+								mapProperty(pdfurls, "url", path);
+							} else {
+								mapProperty(texturls, "url", path);
+							}
+						}
+						
+						if(pdfurls.children.length) urls.appendChild(pdfurls);
+						if(texturls.children.length) urls.appendChild(texturls);
+						
+						record.appendChild(urls)
+					}
+				break;
+				default:
+					var zfield = getField(fields[f], item.itemType);
+					//Z.debug(fields[f] + ": " + zfield);
+					if (item[zfield]) mapProperty(record, fields[f], item[zfield]);
 			}
-			if (custom4.length>0){
-				mapProperty(record, "custom4", custom4.join("; "));
-			}
-			record.appendChild(contributors);
 		}
-
-		//Dates
-		var dates = doc.createElement("dates");
-		var zfield = getField("pub-dates", item.itemType);
-		if (item[zfield]) {
-			var pubdates = doc.createElement("pub-dates");
-			dates.appendChild(pubdates);
-			mapProperty(pubdates, "date", item[zfield]);
-			var dateobject = ZU.strToDate(item[zfield]);
-			if (dateobject.year) mapProperty(dates, "year", dateobject.year);
-		}
-		record.appendChild(dates)
-
-
-		//periodicals
-		var periodical = doc.createElement("periodical");
-		var zfield = getField("full-title", item.itemType);
-		if (item[zfield]) {
-			mapProperty(periodical, "full-title", item[zfield]);
-		}
-		var zfield = getField("abbr-1", item.itemType);
-		if (item[zfield]) {
-			mapProperty(periodical, "abbr-1", item[zfield]);
-		}
-		if (periodical.children.length > 0) record.appendChild(periodical);
-
-		//tags
-		if (item.tags.length > 0) {
-			var keywords = doc.createElement("keywords");
-			for (var i = 0; i < item.tags.length; i++) {
-				mapProperty(keywords, "keyword", item.tags[i].tag);
-			}
-			record.appendChild(keywords);
-		}
-
-		if (item.notes && Zotero.getOption("exportNotes")) {
-			for (var i = 0; i < item.notes.length; i++) {
-				mapProperty(record, "research-notes", item.notes[i].note)
-			}
-		}
-
-		if (item.attachments || item.url) {
-			var urls = doc.createElement("urls");
-			var pdfurls = doc.createElement("pdf-urls");
-			var texturls = doc.createElement("text-urls");
-			if (item.url) {
-				var weburls = doc.createElement("web-urls");
-				urls.appendChild(weburls);
-				mapProperty(weburls, "url", item.url);
-			}
-			var exportFileData = Zotero.getOption("exportFileData");
-			for (var i=0; i< item.attachments.length; i++) {
-				var attachment = item.attachments[i];
-				var path;
-				if ( exportFileData && attachment.saveFile) {
-					path = attachment.defaultPath.replace(/^files\//, '');
-					attachment.saveFile('PDF/' + path, true);
-					path = 'internal-pdf://' + path;
-				} else if (attachment.localPath) {
-					path = attachment.localPath;
-				}
-				
-				if (attachment.mimeType == "application/pdf") {
-					mapProperty(pdfurls, "url", path);
-				} else {
-					mapProperty(texturls, "url", path);
-				}
-			}
-			
-			if(pdfurls.children.length) urls.appendChild(pdfurls);
-			if(texturls.children.length) urls.appendChild(texturls);
-			
-			record.appendChild(urls)
-		}
-
-
-
-		for (var i = 0; i < fields.length; i++) {
-			var field = fields[i]
-			var zfield = getField(field, item.itemType);
-			//Z.debug(field + ": " + zfield);
-			if (item[zfield]) mapProperty(record, field, item[zfield]);
-		}
+		
 		records.appendChild(record);
 	}
 	doc.documentElement.appendChild(records);
