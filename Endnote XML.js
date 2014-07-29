@@ -16,7 +16,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcv",
-	"lastUpdated": "2014-07-28 22:51:57"
+	"lastUpdated": "2014-07-29 19:31:22"
 }
 
 function detectImport() {
@@ -722,10 +722,11 @@ function doExport() {
 					var dates = doc.createElement("dates");
 					var zfield = getField("pub-dates", item.itemType);
 					if (item[zfield]) {
-						var pubdates = doc.createElement("pub-dates");
-						dates.appendChild(pubdates);
 						var dateobject = ZU.strToDate(item[zfield]);
 						if (dateobject.year) mapProperty(dates, "year", dateobject.year);
+						
+						var pubdates = doc.createElement("pub-dates");
+						dates.appendChild(pubdates);
 						mapProperty(pubdates, "date", item[zfield]);
 					}
 					record.appendChild(dates);
