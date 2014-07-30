@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-07-28 22:24:35"
+	"lastUpdated": "2014-07-29 22:24:35"
 }
 
 function detectWeb(doc, url) {
@@ -181,12 +181,12 @@ function scrape(doc, url) {
 		// though sometimes [Paperback] or [DVD] is mushed with the title...
 		.replace(/(?: [(\[].+[)\]])+$/, "");
 	
-	var baseNode = title.parentNode, bncl = baseNode.classList;
+	var baseNode = title.parentElement, bncl = baseNode.classList;
 	while(baseNode &&
 		!(baseNode.id == 'booksTitle' || bncl.contains('buying')
 			|| bncl.contains('content') || bncl.contains('DigitalMusicInfoColumn'))
 	) {
-		baseNode = baseNode.parentNode;
+		baseNode = baseNode.parentElement;
 		bncl = baseNode.classList;
 	}
 	
