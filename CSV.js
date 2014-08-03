@@ -7,12 +7,12 @@
 	"maxVersion": "",
 	"priority": 100,
 	"displayOptions": {
-		"exportCharset": "UTF-8"
+		"exportCharset": "UTF-8xBOM"
 	},
 	"inRepository": true,
 	"translatorType": 2,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-07-27 20:45:17"
+	"lastUpdated": "2014-08-03 09:25:17"
 }
 
 //The export will be stucked if you try to export to a csv-file
@@ -121,19 +121,17 @@ var lastField = false;
 
 //export the content of a field
 function exportField(content) {
-	if (content == undefined) {
-		Zotero.write(fieldWrapperCharacter + fieldWrapperCharacter + fieldsDelimiter);
-	} else {
-		Zotero.write(fieldWrapperCharacter);
+	Zotero.write(fieldWrapperCharacter);
+	if (content != undefined && content != '') {
 		if (typeof content === 'string') {//replace don't work on numbers e.g. itemID
 			//content = content.replace(new RegExp(recordsDelimiter, 'g') , " ");//may be useful if line breaks in fields in csv are not working correctly for the further computation
 			content = content.replace(new RegExp(fieldWrapperCharacter, 'g') , fieldWrapperCharacter+fieldWrapperCharacter);//"If double-quotes are used to enclose fields, then a double-quote appearing inside a field must be escaped by preceding it with another double quote." cf. http://tools.ietf.org/html/rfc4180#section-2
 		}
 		Zotero.write( content );
-		Zotero.write(fieldWrapperCharacter);
-		if (!lastField) {
-			Zotero.write(fieldsDelimiter);
-		}
+	}
+	Zotero.write(fieldWrapperCharacter);
+	if (!lastField) {
+		Zotero.write(fieldsDelimiter);
 	}
 }
 
@@ -174,53 +172,53 @@ function doExport() {
 		var tagsObject = evaluate(item, 'tags');
 		var tagsContentArray = [ [], [] ];
 		for (var k=0; k<tagsObject.length; k++) {
-			var test = evaluate(item, 'tags/' + k + '/type');
-			tagsContentArray[test].push( evaluate(item, 'tags/' + k + '/tag') );
+			var test = tagsObject[k].type;
+			tagsContentArray[test].push( tagsObject[k].tag );
 		}
 		//prepare an object for notes:
 		var noteObject = evaluate(item, 'notes');
 		var noteContentArray = [];
 		for (var k=0; k<noteObject.length; k++) {
-			noteContentArray.push( evaluate(item, 'notes/' + k + '/note') );
+			noteContentArray.push( noteObject[k].note );
 		}
 		//prepare an object for attachments:
 		var attObject = evaluate(item, 'attachments');
 		var attContentArray = [];
 		for (var k=0; k<attObject.length; k++) {
-			attContentArray.push( evaluate(item, 'attachments/' + k + '/url') );
+			attContentArray.push( attObject[k].url );
 		}
 		//prepare an object for creators:
 		//  initialize data structure with all possible creatorTypes
 		var contentCreators = {
-			'author' : [],
-			'contributor' : [],
-			'editor' : [],
-			'bookAuthor' : [],
-			'seriesEditor' : [],
-			'translator' : [],
-			'reviewedAuthor' : [],
 			'artist' : [],
-			'performer' : [],
-			'composer' : [],
-			'wordsBy' : [],
-			'sponsor' : [],
-			'cosponsor' : [],
+			'attorneyAgent' : [],
+			'author' : [],
+			'bookAuthor' : [],
+			'cartographer' : [],
+			'castMember' : [],
 			'commenter' : [],
+			'composer' : [],
+			'contributor' : [],
+			'cosponsor' : [],
 			'counsel' : [],
-			'programmer' : [],
-			'recipient' : [], 
 			'director' : [],
-			'producer' : [],
-			'scriptwriter' : [],
+			'editor' : [],
+			'guest' : [],
 			'interviewee' : [],
 			'interviewer' : [],
-			'cartographer' : [],
 			'inventor' : [],
-			'attorneyAgent' : [],
+			'performer' : [],
 			'podcaster' : [],
-			'guest' : [],
 			'presenter' : [],
-			'castMember' : []
+			'producer' : [],
+			'programmer' : [],
+			'recipient' : [], 
+			'reviewedAuthor' : [],
+			'scriptwriter' : [],
+			'seriesEditor' : [],
+			'sponsor' : [],
+			'translator' : [],
+			'wordsBy' : []
 		};
 		//  fill in all data into contentCreators object
 		var creatorsObject = evaluate(item, 'creators');
@@ -239,7 +237,7 @@ function doExport() {
 			if (j == exportConfiguration.length-1) {
 				lastField = true;
 			}
-			Z.debug(exportConfiguration.length+' '+j+' '+lastField);
+			
 			var field = exportConfiguration[j];
 			if (field.indexOf('>') == -1) {//single fields to export
 				var content = evaluate(item, field);
