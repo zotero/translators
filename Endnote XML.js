@@ -16,7 +16,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcv",
-	"lastUpdated": "2014-07-29 19:31:22"
+	"lastUpdated": "2014-08-05 12:31:22"
 }
 
 function detectImport() {
@@ -760,15 +760,17 @@ function doExport() {
 					}
 				break;
 				case 'urls':
-					if (item.attachments || item.url) {
-						var urls = doc.createElement("urls");
+					var urls = doc.createElement("urls");
+					
+					if (item.url) {
+						var weburls = doc.createElement("web-urls");
+						urls.appendChild(weburls);
+						mapProperty(weburls, "url", item.url);
+					}
+					
+					if (item.attachments.length) {
 						var pdfurls = doc.createElement("pdf-urls");
 						var texturls = doc.createElement("text-urls");
-						if (item.url) {
-							var weburls = doc.createElement("web-urls");
-							urls.appendChild(weburls);
-							mapProperty(weburls, "url", item.url);
-						}
 						var exportFileData = Zotero.getOption("exportFileData");
 						for (var i=0; i< item.attachments.length; i++) {
 							var attachment = item.attachments[i];
@@ -777,9 +779,11 @@ function doExport() {
 								path = attachment.defaultPath.replace(/^files\//, '');
 								attachment.saveFile('PDF/' + path, true);
 								path = 'internal-pdf://' + path;
-							} else if (attachment.localPath) {
-								path = attachment.localPath;
+							} else {
+								path = attachment.localPath || attachment.url;
 							}
+							
+							if (!path) continue;
 							
 							if (attachment.mimeType == "application/pdf") {
 								mapProperty(pdfurls, "url", path);
@@ -788,11 +792,11 @@ function doExport() {
 							}
 						}
 						
-						if(pdfurls.children.length) urls.appendChild(pdfurls);
-						if(texturls.children.length) urls.appendChild(texturls);
-						
-						record.appendChild(urls)
+						if (pdfurls.children.length) urls.appendChild(pdfurls);
+						if (texturls.children.length) urls.appendChild(texturls);
 					}
+					
+					if (urls.children.length) record.appendChild(urls);
 				break;
 				default:
 					var zfield = getField(fields[f], item.itemType);
