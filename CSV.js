@@ -13,7 +13,7 @@
 	"inRepository": true,
 	"translatorType": 2,
 	"browserSupport": "g",
-	"lastUpdated": "2014-08-14 11:58:51"
+	"lastUpdated": "2014-08-14 19:58:51"
 }
 
 //The export will be stuck if you try to export to a csv-file
@@ -76,7 +76,6 @@ function doExport() {
 	writeColumnHeaders();
 	var item, line;
 	while (item = Zotero.nextItem()) {
-Z.debug(item);
 		line = '';
 		for (var i=0; i<exportedFields.length; i++) {
 			line += (i ? fieldDelimiter : recordDelimiter)
