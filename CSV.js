@@ -1,7 +1,7 @@
 {
 	"translatorID": "25f4c5e2-d790-4daa-a667-797619c7e2f2",
 	"label": "CSV",
-	"creator": "Philipp Zumstein",
+	"creator": "Philipp Zumstein and Aurimas Vinckevicius",
 	"target": "csv",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -13,7 +13,7 @@
 	"inRepository": true,
 	"translatorType": 2,
 	"browserSupport": "g",
-	"lastUpdated": "2014-05-30 11:58:51"
+	"lastUpdated": "2014-08-14 11:58:51"
 }
 
 //The export will be stuck if you try to export to a csv-file
@@ -23,20 +23,21 @@
 var recordDelimiter = "\n",
 	fieldDelimiter = ",",
 	fieldWrapperCharacter = '"',
-	replaceNewlinesWith = " ",
+	replaceNewlinesWith = " ", // Set to `false` for no replacement
 	valueSeparator = "; "; // For multi-value fields, like creators, tags, etc.
 
 // Exported columns in order of export
 var exportedFields = [
 	// "Important" metadata
-	"key","itemType","publicationYear","creators/author","title","publicationTitle",
-	"ISBN","ISSN","DOI","url","abstractNote","date","dateAdded","dateModified",
+	"key","itemType","publicationYear","creators/author","title",
+	"publicationTitle","ISBN","ISSN","DOI","url","abstractNote","date",
+	"dateAdded","dateModified",
 	// Other common fields
 	"accessDate","pages","numPages","issue","volume","numberOfVolumes",
 	"journalAbbreviation","shortTitle","series","seriesNumber","seriesText",
 	"seriesTitle","publisher","place","language","rights","type","archive",
-	"archiveLocation","libraryCatalog","callNumber","extra","notes","attachments",
-	"tags/own","tags/automatic",
+	"archiveLocation","libraryCatalog","callNumber","extra","notes",
+	"attachments/path","attachments/url","tags/own","tags/automatic",
 	// Creators
 	"creators/editor","creators/seriesEditor","creators/translator",
 	"creators/contributor","creators/attorneyAgent","creators/bookAuthor",
@@ -45,11 +46,29 @@ var exportedFields = [
 	"creators/producer","creators/recipient","creators/reviewedAuthor",
 	"creators/scriptwriter","creators/wordsBy","creators/guest",
 	// Other fields
-	"number","edition","section","runningTime","scale","medium","artworkSize",
+	"number","edition","runningTime","scale","medium","artworkSize",
 	"filingDate","applicationNumber","assignee","issuingAuthority","country",
-	"meetingName","conferenceName","court","history","references","reporter",
-	"legalStatus","priorityNumbers","programmingLanguage","version","system"
+	"meetingName","conferenceName","court","references","reporter",
+	"legalStatus","priorityNumbers","programmingLanguage","version","system",
+	"code","codeNumber","section","session","committee","history",
+	"legislativeBody"
 ];
+
+// Creators that should map to base type
+var creatorBaseTypes = {
+	interviewee: 'author',
+	director: 'author',
+	artist: 'author',
+	sponsor: 'author',
+	contributor: 'author',
+	inventor: 'auhtor',
+	cartographer: 'author',
+	performer: 'author',
+	presenter: 'author',
+	director: 'author',
+	podcaster: 'author',
+	programmer: 'author'
+};
 
 var exportNotes;
 function doExport() {
@@ -57,6 +76,7 @@ function doExport() {
 	writeColumnHeaders();
 	var item, line;
 	while (item = Zotero.nextItem()) {
+Z.debug(item);
 		line = '';
 		for (var i=0; i<exportedFields.length; i++) {
 			line += (i ? fieldDelimiter : recordDelimiter)
@@ -87,9 +107,16 @@ function writeColumnHeaders() {
 			case 'tags':
 				label = ( label[1] == 'own' ? 'Manual Tags' : 'Automatic Tags');
 			break;
+			case 'attachments':
+				label = (label[1] == 'url' ? 'Link Attachments' : 'File Attachments');
+			break;
 			default:
 				label = label[0];
 		}
+		// Split individual words in labels and capitalize property
+		label = label[0].toUpperCase() + label.substr(1);
+		label = label.replace(/([a-z])([A-Z])/g, '$1 $2');
+		
 		line += escapeValue(label) + fieldWrapperCharacter;
 	}
 	Zotero.write(line);
@@ -108,7 +135,10 @@ function getValue(item, field) {
 			var creators = [];
 			for (var i=0; i<item.creators.length; i++) {
 				var creator = item.creators[i];
-				if (creator.creatorType != split[1]) continue;
+				var baseCreator = creatorBaseTypes[creator.creatorType];
+				if (creator.creatorType != split[1] && baseCreator !== split[1]) {
+					continue;
+				}
 				creators.push(creator.lastName
 					+ (creator.firstName ? ', ' + creator.firstName : ''));
 			}
@@ -124,7 +154,11 @@ function getValue(item, field) {
 		case 'attachments':
 			var paths = [];
 			for (var i=0; i<item.attachments.length; i++) {
-				paths.push(item.attachments[i].localPath || item.attachments[i].url);
+				if (split[1] == 'path') {
+					paths.push(item.attachments[i].localPath);
+				} else if (split[1] == 'url' && !item.attachments[i].localPath) {
+					paths.push(item.attachments[i].url);
+				}
 			}
 			value += escapeValue(paths.join(valueSeparator));
 		break;
@@ -137,8 +171,8 @@ function getValue(item, field) {
 			value += escapeValue(notes.join(valueSeparator));
 		break;
 		default:
-			if (item[field]) {
-				value += escapeValue('' + item[field]);
+			if (item[field] || item.uniqueFields[field]) {
+				value += escapeValue('' + (item[field] || item.uniqueFields[field]));
 			}
 	}
 	return value + fieldWrapperCharacter;
