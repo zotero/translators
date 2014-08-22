@@ -15,7 +15,7 @@
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
-	"lastUpdated": "2014-06-23 05:03:43"
+	"lastUpdated": "2014-08-22 20:03:43"
 }
 
 
@@ -279,6 +279,11 @@ function writeField(field, value, isMacro, noEscape) {
 		var protectCaps = new ZU.XRegExp("\\b\\p{Letter}+\\p{Uppercase_Letter}\\p{Letter}*", 'g')
 		if (field != "pages") {
 			value = ZU.XRegExp.replace(value, protectCaps, "{$0}");
+		}
+
+		// Page ranges should use double dash
+		if (field == "pages"{
+			value = value.replace(/[-\u2012-\u2015\u2053]+/g,"--");
 		}
 	}
 	//we write utf8

@@ -18,7 +18,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-06-23 03:37:22"
+	"lastUpdated": "2014-08-22 20:37:22"
 }
 
 function detectImport() {
@@ -1246,7 +1246,7 @@ function doExport() {
 		}
 		
 		if(item.pages) {
-			writeField("pages", item.pages.replace("-","--"));
+			writeField("pages", item.pages.replace(/[-\u2012-\u2015\u2053]+/g,"--"));
 		}
 		
 		// Commented out, because we don't want a books number of pages in the BibTeX "pages" field for books.
