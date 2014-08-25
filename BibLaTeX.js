@@ -15,7 +15,7 @@
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
-	"lastUpdated": "2014-08-22 20:03:43"
+	"lastUpdated": "2014-08-25 06:43:15"
 }
 
 
@@ -282,7 +282,7 @@ function writeField(field, value, isMacro, noEscape) {
 		}
 
 		// Page ranges should use double dash
-		if (field == "pages"{
+		if (field == "pages") {
 			value = value.replace(/[-\u2012-\u2015\u2053]+/g,"--");
 		}
 	}
