@@ -5,11 +5,11 @@
 	"target": "https?://[^/]*annualreviews\\.org(:[\\d]+)?(?=/)[^?]*(/(toc|journal|doi)/|showMost(Read|Cited)Articles|doSearch)",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 200,
+	"priority": 150,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-10-26 10:43:09"
+	"lastUpdated": "2014-08-26 03:31:19"
 }
 
 /**
