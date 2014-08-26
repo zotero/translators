@@ -5,11 +5,11 @@
 	"target": "/web2/tramp2\\.exe/(?:see\\_record/|authority\\_hits/|do_keyword_search|form/|goto/.*\\?.*screen=(MARC)?Record\\.html)",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 260,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-06-09 12:35:22"
+	"lastUpdated": "2014-08-26 03:57:40"
 }
 
 /* No more libraries with permalinks that I know of

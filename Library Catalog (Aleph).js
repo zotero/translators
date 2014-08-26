@@ -5,11 +5,11 @@
 	"target": "https?://[^/]+/F(?:/[A-Z0-9\\-]+(?:\\?.*)?$|\\?func=find|\\?func=scan|\\?func=short)",
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-06-01 20:40:45"
+	"lastUpdated": "2014-08-26 03:48:17"
 }
 
 /*

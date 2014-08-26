@@ -5,11 +5,11 @@
 	"target": "(search~|\\/search\\?|(a|X|t|Y|w)\\?|\\?(searchtype|searchscope)|frameset&FF|record=b[0-9]+(~S[0-9])?|/search/q\\?)",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
-	"priority": 200,
+	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-06-01 16:02:26"
+	"lastUpdated": "2014-08-26 04:02:52"
 }
 
 function detectWeb(doc, url) {
@@ -26,7 +26,7 @@ function detectWeb(doc, url) {
 // Persistent URL for item
 // http://bearcat.baylor.edu/record=b1540169~S7
 // http://innopac.cooley.edu/record=b507916~S0
-http://libcat.dartmouth.edu/record=b4054652~S1
+// http://libcat.dartmouth.edu/record=b4054652~S1
 // Persistent URL for item, without suffix
 // http://luna.wellesley.edu/record=b2398784
 // Specific search parameters

@@ -5,11 +5,11 @@
 	"target": "^https?://([^/]+\\.)?(((my)?reading|resource|lib|cyprus|)lists|aspire\\.surrey)\\..+/(lists|items)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 200,
+	"priority": 270,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-09-13 22:51:45"
+	"lastUpdated": "2014-09-25 15:51:45"
 }
 
 /*

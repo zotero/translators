@@ -5,11 +5,11 @@
 	"target": "",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 300,
+	"priority": 320,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-02-23 11:23:36"
+	"lastUpdated": "2014-08-26 03:36:25"
 }
 
 var items = {};

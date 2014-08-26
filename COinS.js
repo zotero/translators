@@ -5,11 +5,11 @@
 	"target": "",
 	"minVersion": "2.1",
 	"maxVersion": "",
-	"priority": 250,
+	"priority": 310,
 	"inRepository": true,
 	"translatorType": 6,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2012-05-04 05:28:01"
+	"lastUpdated": "2014-08-26 03:36:14"
 }
 
 function detectWeb(doc, url) {

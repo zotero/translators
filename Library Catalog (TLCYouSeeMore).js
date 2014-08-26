@@ -5,11 +5,11 @@
 	"target": "TLCScripts/interpac\\.dll\\?(?:.*LabelDisplay.*RecordNumber=[0-9]|Search|ItemTitles)",
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 260,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-06-09 13:07:04"
+	"lastUpdated": "2014-08-26 04:11:42"
 }
 
 /* other example here: http://ocl.tlcdelivers.com/TLCScripts/interpac.dll?LabelDisplay&LastResult=Search%26Config=ysm%26FormId=6588839%26Branch=,0,%26LimitsId=0%26StartIndex=0%26SearchField=7%26SearchType=1%26SearchData=food%26NotAddToHistory=1%26ItemsPerPage=30%26SortField=0%26PeriodLimit=-1%26SearchAvailableOnly=0&DataNumber=52182&RecordNumber=52182&SearchAvailableOnly=0&FormId=6588839&ItemField=1&Config=ysm&Branch=,0, 

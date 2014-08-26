@@ -5,11 +5,11 @@
 	"target": "/uhtbin/(?:cgisirsi|quick_keyword)",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-03 17:44:40"
+	"lastUpdated": "2014-08-26 04:08:13"
 }
 
 /* Based on the SIRSI translator by Simon Kornblith and Michael Berkowitz,

@@ -5,11 +5,11 @@
 	"target": "^[^?#]+(?:/content/(?:[0-9]+[A-Z\\-]*/(?:suppl_)?[A-Z]?[0-9]|current|firstcite|early)|/search\\?.*?\\bsubmit=|/search(?:/results)?\\?fulltext=|/cgi/collection/.)",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 200,
+	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-07-24 01:16:55"
+	"lastUpdated": "2014-08-26 03:44:11"
 }
 
 /*

@@ -5,11 +5,11 @@
 	"target": "",
 	"minVersion": "2.1",
 	"maxVersion": "",
-	"priority": 200,
+	"priority": 300,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-12-02 17:35:21"
+	"lastUpdated": "2014-08-26 03:36:05"
 }
 
 var RECOGNIZABLE_FORMATS = ["rdf_zotero", "rdf_bibliontology", "mods", "marc", "unimarc", "ris",

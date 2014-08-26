@@ -5,11 +5,11 @@
 	"target": "^https?://[^/]+(?:/[^/]+)?//?DB=\\d",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 198,
+	"priority": 248,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-09-02 04:49:46"
+	"lastUpdated": "2014-09-25 15:49:46"
 }
 
 function getSearchResults(doc) {

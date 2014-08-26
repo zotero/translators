@@ -5,11 +5,11 @@
 	"target": "/fullrecordinnerframe\\.ashx\\?.+id=|/result\\.ashx\\?",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 270,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-05-15 20:05:47"
+	"lastUpdated": "2014-08-26 03:51:35"
 }
 
 /*
