@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-02-27 23:52:00"
+	"lastUpdated": "2014-08-27 02:47:50"
 }
 
 function detectWeb(doc, url) {
@@ -98,9 +98,10 @@ function scrapeOne(doc) {
 		var getPDF = doc.evaluate('//a[text() = "PDF Version" or text() = "[Access article in PDF]" or text() = "Download PDF"]', doc,
 								  null, XPathResult.ANY_TYPE, null).iterateNext();		
 		var DOI = doc.evaluate('//meta[@name="citation_doi"]/@content', doc,
-								  null, XPathResult.ANY_TYPE, null).iterateNext();		
-		var abstract = doc.evaluate('//div[@class="abstract"]', doc,
 								  null, XPathResult.ANY_TYPE, null).iterateNext();
+		//test for two different abstract formats						  
+		var abstract = ZU.xpathText(doc, '//abstract/p[1]');
+		if (!abstract) abstract = ZU.xpathText(doc, '//div[@class="abstract"][1]/p[1]');
 		var authorNodes = ZU.xpath(doc, '//meta[@name="citation_author"]/@content');
 
 		if(url.indexOf('?') != -1) {
@@ -163,7 +164,7 @@ function scrapeOne(doc) {
 					item.DOI = DOI.textContent.replace(/^DOI: /,"");
 				}
 				if(abstract) {
-					item.abstractNote = abstract.textContent.replace(/\n/g, " ").replace(/\s\s+/g, " ");
+					item.abstractNote = abstract.replace(/\n/g, " ").replace(/\s\s+/g, " ");
 				}
 				item.complete();
 			});
@@ -202,12 +203,14 @@ var testCases = [
 				"volume": "191",
 				"issue": "1",
 				"pages": "121-164",
+				"publisher": "Oxford University Press",
 				"ISSN": "1477-464X",
 				"url": "http://muse.jhu.edu/journals/past_and_present/v191/191.1higonnet.html",
 				"date": "2006",
 				"extra": "<p>Number 191, May 2006</p>",
-				"abstractNote": "In lieu of an abstract, here is a brief excerpt of the content: Past & Present 191.1 (2006) 121-164 Patrice Higonnet Harvard University Tocqueville in the 1850s wrote of France in the 1780s that never had tolerance been more accepted, authority been more mild, or benevolence been so widely practised. Nonetheless, he went on, 'from the bosom of such mild mores would spring the most inhuman of revolutions'. And even for those of us who deeply admire the French Revolution's message of civic equality, the Terror of the Year II (1793–4) seems not just ominous and horrendous, but also out of place. Auschwitz, Dresden and Hiroshima — after the Great War of 1914–18 and the Great Depression of the 1930s: we can see why these wartime tragedies happened, given the awful events that preceded them. But what of the Terror after the Enlightenment — after Voltaire, Boucher, and Madame de Pompadour? Isser Woloch has rightly described the 'sequence' from 1789 to 1793, from liberalism to terror, as an eternally fascinating 'enigma'. Why the French Revolution occurred is something of a mystery. And why it failed so dramatically is also deeply perplexing. Historians have pored over the cause and nature of the Terror of the Year II ever since it occurred. And yet the many valuable (though often conflicting) explanations which have been offered to account for it have somehow fallen short. Many of them are too narrow or too vague. They are seldom wrong in any simple sense, but they need to be reconceived. I propose that there is an extant and even ancient frame, the 'young Marx explanation', which, if rejuvenated by reference to the theory of collective trauma, can enable us to renew these accounts, first by identifying new ground for research, but principally by making it possible to integrate the seemingly irreconcilable points of view about why the unanimity of 1789 gave way by 1792–4 to a divisive and self-destructive intolerance. I A first step is to review explanations, past and present, that range from culture and ideology (Rousseauian Jacobinism was bound to end as it did) to circumstance (where the circumstances might be social, political or institutional). For many reasons, it is important to have these various answers in mind — however biased or incomplete they may have been: first, because explanations of Revolutionary terrorism are suggestive in their own right since they indirectly chronicle two centuries of historiographic effort; second, because their very number speaks to the importance of the Terror as a historical event, and of course any understanding of the French Revolution must subsume an understanding of the Terror; and third, because the variety and incompatibility of extant accounts underscore the interest of any explanation that aims to reconcile opposing points of view. As regards larger ideological explanations, a good place to begin is with François Furet, since his is the dominant mode of explanation today. This brilliant historian was unambiguous: for him, the 'revolutionary government' 'was written in the logic of Montagnard policy'. The Terror, taken as government policy by the Convention, does not originate in September 1793 at all, but in the past (both recent and distant): The circumstances surrounding this celebrated vote indicate that before becoming a set of repressive institutions used by the Republic to liquidate its adversaries and establish its domination on a basis of fear, the Terror was a demand based on political conviction or beliefs, a characteristic feature of the mentality of revolutionary activism. From this perspective, the Terror is the illegitimate child of the Enlightenment — begotten, perhaps, on the Enlightenment by Jean-Jacques Rousseau. The year 1793 is embedded in 1789. Furet's first and most talented disciple, Keith Baker, gives us a new (and, it must be said, extreme) version of this same ideological causal perspective. What, he asks, was the implication of the path chosen by the National Assembly in September 1789 over the issue of the king's suspensive veto? At stake here, he argues in a historical version of 'path determinacy', was the setting aside of a discourse of the social, grounded on the notion of the differential distribution of reason, functions, and interests in modern civil society, in favor of a discourse of the political...",
-				"libraryCatalog": "Project MUSE"
+				"abstractNote": "Past & Present 191.1 (2006) 121-164",
+				"libraryCatalog": "Project MUSE",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	},
@@ -278,14 +281,56 @@ var testCases = [
 				"volume": "54",
 				"issue": "4",
 				"pages": "735-745",
+				"publisher": "The Johns Hopkins University Press",
 				"ISSN": "1097-3729",
 				"url": "http://muse.jhu.edu/journals/technology_and_culture/v054/54.4.prescott.html",
 				"date": "2013",
 				"extra": "<p>Volume 54, Number 4, October 2013</p>",
 				"DOI": "10.1353/tech.2013.0137",
-				"abstractNote": "Abstract Abstract:This article uses coverage of the fiftieth anniversary of the Pill as an example of what Richard Hirsh describes as the “real world” role of historians of technology. It explores how the presentation of historical topics on the world wide web has complicated how the history of technology is conveyed to the public. The article shows that that the Pill is especially suited to demonstrating the public role of historians of technology because, as the most popular form of reversible birth control, it has touched the lives of millions of Americans. Thus, an exploration of how the Pill’s fiftieth anniversary was covered illustrates how historians can use their expertise to provide a nuanced interpretation of a controversial topic in the history of technology.",
+				"abstractNote": "This article uses coverage of the fiftieth anniversary of the Pill as an example of what Richard Hirsh describes as the “real world” role of historians of technology. It explores how the presentation of historical topics on the world wide web has complicated how the history of technology is conveyed to the public. The article shows that that the Pill is especially suited to demonstrating the public role of historians of technology because, as the most popular form of reversible birth control, it has touched the lives of millions of Americans. Thus, an exploration of how the Pill’s fiftieth anniversary was covered illustrates how historians can use their expertise to provide a nuanced interpretation of a controversial topic in the history of technology.",
 				"libraryCatalog": "Project MUSE",
+				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "The Pill at Fifty"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://muse.jhu.edu.turing.library.northwestern.edu/journals/latin_american_research_review/v049/49.2.manzetti.html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Luigi",
+						"lastName": "Manzetti",
+						"creatorType": "author"
+					}
+				],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Project MUSE Snapshot"
+					},
+					{
+						"title": "Project MUSE Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"title": "Accountability and Corruption in Argentina During the Kirchners’ Era",
+				"publicationTitle": "Latin American Research Review",
+				"volume": "49",
+				"issue": "2",
+				"pages": "173-195",
+				"publisher": "Latin American Studies Association",
+				"ISSN": "1542-4278",
+				"url": "http://muse.jhu.edu.turing.library.northwestern.edu/journals/latin_american_research_review/v049/49.2.manzetti.html",
+				"date": "2014",
+				"extra": "<p>Volume 49, Number 2, 2014</p>",
+				"abstractNote": "This article highlights an important paradox: in Argentina between 2003 and 2013 the center-left Peronist government’s approach to governance mirrors that of the center-right Peronist administration of the 1990s. While the latter centralized authority to pursue neoliberal reforms, the former have centralized authority in the name of expanding government intervention in the economy. In both cases, corruption has tended to go unchecked due to insufficient government accountability. Therefore, although economic policies and political rhetoric have changed dramatically, government corruption remains a constant of the Argentine political system due to the executive branch’s ability to emasculate constitutional checks and balances.",
+				"libraryCatalog": "Project MUSE",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}
