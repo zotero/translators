@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-07-29 22:24:35"
+	"lastUpdated": "2014-08-28 02:13:10"
 }
 
 function detectWeb(doc, url) {
@@ -181,24 +181,32 @@ function scrape(doc, url) {
 		// though sometimes [Paperback] or [DVD] is mushed with the title...
 		.replace(/(?: [(\[].+[)\]])+$/, "");
 	
-	var baseNode = title.parentElement, bncl = baseNode.classList;
-	while(baseNode &&
+	var baseNode = title.parentElement, bncl;
+	while(baseNode && (bncl = baseNode.classList) && 
 		!(baseNode.id == 'booksTitle' || bncl.contains('buying')
-			|| bncl.contains('content') || bncl.contains('DigitalMusicInfoColumn'))
+			|| bncl.contains('content') || bncl.contains('DigitalMusicInfoColumn')
+			|| (baseNode.id == 'centerCol' && baseNode.firstElementChild.id.indexOf('title') == 0)
+		)
 	) {
 		baseNode = baseNode.parentElement;
-		bncl = baseNode.classList;
 	}
 	
 	if(baseNode) {
 		var authors = ZU.xpath(baseNode, './/span[@id="artistBlurb"]/a');
 		if(!authors.length) authors = baseNode.getElementsByClassName('contributorNameID');
+		if(!authors.length) authors = ZU.xpath(baseNode, './/*[@id="byline"]//span[contains(@class, "author")]/a[1]');
 		if(!authors.length) authors = ZU.xpath(baseNode, './/span[@class="contributorNameTrigger"]/a[not(@href="#")]');
 		if(!authors.length) authors = ZU.xpath(baseNode, './/a[following-sibling::*[1][@class="byLinePipe"]]');
 		if(!authors.length) authors = ZU.xpath(baseNode, './/a[contains(@href, "field-author=")]');
 		for(var i=0; i<authors.length; i++) {
 			var role = ZU.xpathText(authors[i], '(.//following::text()[normalize-space(self::text())])[1]');
-			if(role) role = CREATOR[translateField(role.replace(/^.*\(\s*|\s*\).*$/g, ''))];
+			if(role) {
+				role = CREATOR[translateField(
+					role.replace(/^.*\(\s*|\s*\).*$/g, '')
+						.split(',')[0] // E.g. "Actor, Primary Contributor"
+						.trim()
+				)];
+			}
 			if(!role) role = 'author';
 			
 			var name = ZU.trimInternal(authors[i].textContent)
@@ -251,6 +259,12 @@ function scrape(doc, url) {
 			if(key && value) info[key.trim()] = value.trim();
 		}
 	}
+	
+	item.ISBN = getField(info, 'ISBN');
+	if (item.ISBN) {
+		item.ISBN = ZU.cleanISBN(item.ISBN);
+	}
+	
 	// Date
 	for(var i=0; i<DATE.length; i++) {
 		item.date = info[DATE[i]];
@@ -266,13 +280,10 @@ function scrape(doc, url) {
 	// Books
 	var publisher = getField(info, 'Publisher');
 	if(publisher) {
-		var m = /([^;(]+)(?:; *([^(]*))?( \([^)]*\))?/.exec(publisher);
-		item.publisher = m[1];
-		item.edition = m[2];
-	}
-	item.ISBN = getField(info, 'ISBN');
-	if (item.ISBN) {
-		item.ISBN = ZU.cleanISBN(item.ISBN);
+		var m = /([^;(]+)(?:;? *([^(]*))?(?:\(([^)]*)\))?/.exec(publisher);
+		item.publisher = m[1].trim();
+		if(m[2]) item.edition = m[2].trim();
+		if(m[3] && m[3].search(/\b\d{4}\b/) != -1) item.date = m[3].trim(); // Looks like a date
 	}
 	var pages = getField(info, 'Hardcover') || getField(info, 'Paperback') || getField(info, 'Print Length');
 	if(pages) item.numPages = parseInt(pages, 10);
@@ -320,6 +331,10 @@ function scrape(doc, url) {
 				if (lookupItem.place) {
 					//e.g. [Paris]
 					item.place = lookupItem.place.replace("[","").replace("]","");
+				}
+				
+				if (!item.date && lookupItem.date) {
+					item.date = lookupItem.date;
 				}
 			});
 			search.translate();
@@ -695,6 +710,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2012年1月1日",
 				"ISBN": "9787030329202",
 				"abstractNote": "《汉语语音合成:原理和技术》介绍语音合成的原理和针对汉语的各项合成技术，以及应用的范例。全书分基础篇和专题篇两大部分。基础篇介绍语音合成技术的发展历程和作为语音合成技术基础的声学语音学知识，尤其是作者获得的相关研究成果（填补了汉语语音学知识中的某些空白），并对各种合成器的工作原理和基本结构进行系统的阐述。专题篇结合近十年来国内外技术发展的热点和方向，讨论韵律分析与建模、数据驱动的语音合成方法、语音合成数据库的构建技术、文语转换系统的评估方法、语音合成技术的应用等。 《汉语语音合成:原理和技术》面向从事语言声学、语音通信技术，特别是语音合成的科学工作者、工程技术人员、大学教师、研究生和高年级的大学生，可作为他们研究、开发、进修的参考书。",
 				"edition": "第1版",
@@ -783,7 +799,7 @@ var testCases = [
 					}
 				],
 				"libraryCatalog": "Amazon.com",
-				"runningTime": "1:08:59",
+				"runningTime": "1:08:58",
 				"attachments": [
 					{
 						"title": "Amazon.com Link",
@@ -811,12 +827,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "August 2, 2012",
+				"date": "2012/8/2",
 				"ISBN": "9780099578079",
 				"language": "英語, 英語, 不明",
 				"libraryCatalog": "Amazon.com",
 				"numPages": 1328,
-				"place": "London",
 				"publisher": "Vintage",
 				"shortTitle": "1Q84",
 				"attachments": [
@@ -836,6 +851,48 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.amazon.com/Mark-LeBar/e/B00BU8L2DK",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.amazon.com/About-Nothing-Shakespeares-Globe-Theatre/dp/B00AJER4EM/ref=sr_1_1/175-9708720-8034706?ie=UTF8&qid=1409188213&sr=8-1&keywords=globe+shakespeare",
+		"items": [
+			{
+				"itemType": "videoRecording",
+				"title": "Much Ado About Nothing",
+				"creators": [
+					{
+						"firstName": "Charles",
+						"lastName": "Edwards",
+						"creatorType": "castMember"
+					},
+					{
+						"firstName": "Eve",
+						"lastName": "Best",
+						"creatorType": "castMember"
+					},
+					{
+						"firstName": "Shakespeare's Globe",
+						"lastName": "Theatre",
+						"creatorType": "director"
+					}
+				],
+				"date": "February 26, 2013",
+				"language": "English",
+				"libraryCatalog": "Amazon.com",
+				"runningTime": "166 minutes",
+				"studio": "Kultur",
+				"attachments": [
+					{
+						"title": "Amazon.com Link",
+						"snapshot": false,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
