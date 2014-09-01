@@ -2,14 +2,14 @@
 	"translatorID": "c59896bc-4beb-43ed-8109-a73a13251828",
 	"label": "Eastview",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://dlib\\.eastview\\.com/(search/(advanced|simple)/|browse/(doc|favorites))",
+	"target": "^https?://dlib\\.eastview\\.com/(search/(advanced|simple)/|browse/(doc|favorites|issue))",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-08-31 20:21:04"
+	"lastUpdated": "2014-09-01 13:01:04"
 }
 
 /*
@@ -35,111 +35,112 @@
 	***** END LICENSE BLOCK *****
 */
 function detectWeb(doc, url) {
-    if (url.search("/search/simple/articles?") != -1 || url.indexOf("/search/advanced/articles") != -1 || url.indexOf("/browse/favorites") != -1) {
-        return "multiple";
-    } else {
-        return "newspaperArticle"
-    }
+	if (url.search("/search/simple/articles?") != -1 || url.indexOf("/search/advanced/articles") != -1 || url.search(/browse\/(favorites|issue)/) != -1) {
+		if (ZU.xpath(doc, '//td[contains(@class, "title-cell")]/a').length) return "multiple";
+	} else {
+		return "newspaperArticle"
+	}
 }
 
 var typeMap = {
-    "Argumenty i fakty": "magazineArticle",
-    "Argumenty nedeli": "magazineArticle",
-    "Ekonomika i zhizn'": "magazineArticle",
-    "Ekspert": "magazineArticle",
-    "Izvestiia": "newspaperArticle",
-    "Kommersant. Daily": "newspaperArticle",
-    "Komsomol'skaia pravda": "newspaperArticle",
-    "Kul'tura": "magazineArticle",
-    "Literaturnaia gazeta": "magazineArticle",
-    "Moscow Times, The": "newspaperArticle",
-    "Moskovskaia pravda": "newspaperArticle",
-    "Moskovskii komsomolets": "newspaperArticle",
-    "New Times, The": "magazineArticle",
-    "Nezavisimaia gazeta": "newspaperArticle",
-    "Novaia gazeta": "newspaperArticle",
-    "Novye izvestiia": "newspaperArticle",
-    "Ogonek": "magazineArticle",
-    "Pravda": "newspaperArticle",
-    "President": "magazineArticle",
-    "Profil'": "magazineArticle",
-    "RBK Daily": "newspaperArticle",
-    "Rossiiskaia gazeta": "newspaperArticle",
-    "Rossiiskie vesti": "newspaperArticle",
-    "Russkii reporter": "magazineArticle",
-    "Sankt-Peterburgskie vedomosti": "newspaperArticle",
-    "Slovo": "magazineArticle",
-    "Sovetskaia Rossiia": "newspaperArticle",
-    "Trud": "newspaperArticle",
-    "Vecherniaia Moskva": "newspaperArticle",
-    "Vedomosti": "newspaperArticle",
-    "Zavtra": "newspaperArticle"
+	"Argumenty i fakty": "magazineArticle",
+	"Argumenty nedeli": "magazineArticle",
+	"Ekonomika i zhizn'": "magazineArticle",
+	"Ekspert": "magazineArticle",
+	"Izvestiia": "newspaperArticle",
+	"Kommersant. Daily": "newspaperArticle",
+	"Komsomol'skaia pravda": "newspaperArticle",
+	"Kul'tura": "magazineArticle",
+	"Literaturnaia gazeta": "magazineArticle",
+	"Moscow Times, The": "newspaperArticle",
+	"Moskovskaia pravda": "newspaperArticle",
+	"Moskovskii komsomolets": "newspaperArticle",
+	"New Times, The": "magazineArticle",
+	"Nezavisimaia gazeta": "newspaperArticle",
+	"Novaia gazeta": "newspaperArticle",
+	"Novye izvestiia": "newspaperArticle",
+	"Ogonek": "magazineArticle",
+	"Pravda": "newspaperArticle",
+	"President": "magazineArticle",
+	"Profil'": "magazineArticle",
+	"RBK Daily": "newspaperArticle",
+	"Rossiiskaia gazeta": "newspaperArticle",
+	"Rossiiskie vesti": "newspaperArticle",
+	"Russkii reporter": "magazineArticle",
+	"Sankt-Peterburgskie vedomosti": "newspaperArticle",
+	"Slovo": "magazineArticle",
+	"Sovetskaia Rossiia": "newspaperArticle",
+	"Trud": "newspaperArticle",
+	"Vecherniaia Moskva": "newspaperArticle",
+	"Vedomosti": "newspaperArticle",
+	"Zavtra": "newspaperArticle"
 }
 
 function permaLink(URL) {
-    var id = URL.match(/id=(\d+)/);
-    if (id) return "http://dlib.eastview.com/browse/doc/" + id[1];
-    else return URL
+	var id = URL.match(/id=(\d+)/);
+	if (id) return "http://dlib.eastview.com/browse/doc/" + id[1];
+	else return URL
 }
 
 
 function scrape(doc, url) {
-    Z.debug(url)
-    var item = new Zotero.Item("newspaperArticle");
-    var publication = ZU.xpathText(doc, '//a[@class="path" and contains(@href, "browse/publication")]');
-    item.publication = publication;
-    var voliss = ZU.xpathText(doc, '//a[@class="path" and contains(@href, "browse/issue/")]');
-    if (voliss) {
-        var issue = voliss.match(/No\. (\d+)/);
-        if (issue) item.issue = issue[1];
-        var volume = voliss.match(/Vol\. (\d+)/);
-        if (volume) item.volume = volume[1];
-    }
-    var database = ZU.xpathText(doc, '//a[@class="path" and contains(@href, "browse/udb")]');
-    if (database) item.libraryCatalog = database.replace(/\(.+\)/, "") + "(Eastview)";
-    if (ZU.xpathText(doc, '//table[@id="metatable"]')) {
-        //we have the metadata in a table
-        var title = ZU.xpathText(doc, '//table[@id="metatable"]//td[@class="hdr" and contains(text(), "Article Title")]/following-sibling::td[@class="val"]');
-        var source = ZU.xpathText(doc, '//table[@id="metatable"]//td[@class="hdr" and contains(text(), "Source")]/following-sibling::td[@class="val"]');
-        if (source) {
-            var date = source.match(/(January|February|March|April|May|Juni|July|August|September|October|November|December)\s+(\d{1,2},\s+)?\d{4}/);
-            if (date) item.date = ZU.trimInternal(date[0]);
-            var pages = source.match(/page\(s\): (\d+(?:-\d+)?)/);
-            if (pages) item.page = pages[1]
-        }
-        var author = ZU.xpathText(doc, '//table[@id="metatable"]//td[@class="hdr" and contains(text(), "Author(s)")]/following-sibling::td[@class="val"]');
-        if (author) {
-            //Z.debug(author)
-            authors = author.trim().split(/\s*,\s*/);
-            for (var i in authors) {
-                item.creators.push(ZU.cleanAuthor(authors[i], "author"))
-            }
-        }
+	Z.debug(url)
+	var item = new Zotero.Item("newspaperArticle");
+	var publication = ZU.xpathText(doc, '//a[@class="path" and contains(@href, "browse/publication")]');
+	item.publication = publication;
+	var voliss = ZU.xpathText(doc, '//a[@class="path" and contains(@href, "browse/issue/")]');
+	if (voliss) {
+		var issue = voliss.match(/No\. (\d+)/);
+		if (issue) item.issue = issue[1];
+		var volume = voliss.match(/Vol\. (\d+)/);
+		if (volume) item.volume = volume[1];
+	}
+	var database = ZU.xpathText(doc, '//a[@class="path" and contains(@href, "browse/udb")]');
+	if (database) item.libraryCatalog = database.replace(/\(.+\)/, "") + "(Eastview)";
+	if (doc.getElementById('metatable')) {
+		//we have the metadata in a table
+		var metatable = doc.getElementById('metatable');
+		var title = ZU.xpathText(metatable, './/td[@class="hdr" and contains(text(), "Article Title")]/following-sibling::td[@class="val"]');
+		var source = ZU.xpathText(metatable, './/td[@class="hdr" and contains(text(), "Source")]/following-sibling::td[@class="val"]');
+		if (source) {
+			var date = source.match(/(January|February|March|April|May|Juni|July|August|September|October|November|December)\s+(\d{1,2},\s+)?\d{4}/);
+			if (date) item.date = ZU.trimInternal(date[0]);
+			var pages = source.match(/page\(s\): (\d+(?:-\d+)?)/);
+			if (pages) item.page = pages[1]
+		}
+		var author = ZU.xpathText(metatable, './/td[@class="hdr" and contains(text(), "Author(s)")]/following-sibling::td[@class="val"]');
+		if (author) {
+			//Z.debug(author)
+			authors = author.trim().split(/\s*,\s*/);
+			for (var i=0; i<authors.length; i++) {
+				item.creators.push(ZU.cleanAuthor(authors[i], "author"))
+			}
+		}
+		item.place = ZU.xpathText(doc, '//table[@id="metatable"]//td[@class="hdr" and contains(text(), "Place of Publication")]/following-sibling::td');
+	} else {
+		var title = ZU.xpathText(doc, '//div[@class="change_font"]');
+		//the "old" page format. We have very little structure here, doing the best we can.	
+		var header = ZU.xpathText(doc, '//tbody/tr/td/ul');
+		Z.debug(header);
+		var date = header.match(/Date:\s*(\d{2}-\d{2}-\d{2,4})/);
+		if (date) item.date = date[1];
+	}
 
-        item.place = ZU.xpathText(doc, '//table[@id="metatable"]//td[@class="hdr" and contains(text(), "Place of Publication")]/following-sibling::td');
-    } else {
-        //the "old" page format. We have very little structure here, doing the best we can.	
-        var header = ZU.xpathText(doc, '//tbody/tr/td/ul');
-        Z.debug(header);
-        var date = header.match(/Date:\s*(\d{2}-\d{2}-\d{2,4})/);
-        if (date) item.date = date[1];
-        var title = ZU.xpathText(doc, '//div[@class="change_font"]');
-    }
-    if (title && title == title.toUpperCase()) {
-        title = ZU.capitalizeTitle(title.toLowerCase(), true);
-    }
-    //see if we have a match for item type; default to newspaper otherwise.
-    var itemType = typeMap[item.publication];
-    if (itemType) item.itemType = itemType;
-    item.attachments.push({
-        document: doc,
-        title: "Eastview Fulltext Snapshot",
-        mimeType: "text/html"
-    })
-    item.title = title;
-    //sometimes items actually don't have a title: use the publication title instead.
-    if (!item.title) item.title = item.publication;
-    item.complete();
+	//see if we have a match for item type; default to newspaper otherwise.
+	var itemType = typeMap[item.publication];
+	if (itemType) item.itemType = itemType;
+	item.attachments.push({
+		document: doc,
+		title: "Eastview Fulltext Snapshot",
+		mimeType: "text/html"
+	});
+	if (title && title == title.toUpperCase()) {
+		title = ZU.capitalizeTitle(title, true);
+	}
+	item.title = title;
+	//sometimes items actually don't have a title: use the publication title instead.
+	if (!item.title) item.title = item.publication;
+	item.complete();
 
 }
 
@@ -177,36 +178,36 @@ function scrapeSearch(doc, url) {
 
 
 function doWeb(doc, url) {
-    var articles = new Array();
-    var items = {};
-    if (detectWeb(doc, url) == "multiple") {
-        var titles = ZU.xpath(doc, '//td[contains(@class, "title-cell")]/a');
-        //var number = ZU.xpath(doc, '//td[contains(@class, "check-cell")]/following-sibling::td[1]');
-        for (i = 0; i < titles.length; i++) {
-            items[ZU.xpathText(titles[i], './@href')] = titles[i].textContent.trim();
-        }
-        Zotero.selectItems(items, function(items) {
-            if (!items) {
-                return true;
-            }
-            for (i in items) {
-                /* For scraping search table 
+	var articles = new Array();
+	var items = {};
+	if (detectWeb(doc, url) == "multiple") {
+		var titles = ZU.xpath(doc, '//td[contains(@class, "title-cell")]/a');
+		//var number = ZU.xpath(doc, '//td[contains(@class, "check-cell")]/following-sibling::td[1]');
+		for (var i = 0; i < titles.length; i++) {
+			items[titles[i].href] = titles[i].textContent.trim();
+		}
+		Zotero.selectItems(items, function(items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				/* For scraping search table 
 				var xpath = '//tr[td[text()="' + i + '"]]'
 				var node = ZU.xpath(doc, xpath);
 				scrapeSearch(node, url); */
-                articles.push(permaLink(i))
-            }
-            ZU.processDocuments(articles, scrape)
-        });
-    } else {
-        if (url.search(/doc\/\d+/) != -1) {
-            scrape(doc, url);
-        }
-        //always scrape from the permalink page, which has extra publication info at the top
-        else {
-            ZU.processDocuments(permaLink(url), scrape);
-        }
-    }
+				articles.push(permaLink(i))
+			}
+			ZU.processDocuments(articles, scrape)
+		});
+	} else {
+		if (url.search(/doc\/\d+/) != -1) {
+			scrape(doc, url);
+		}
+		//always scrape from the permalink page, which has extra publication info at the top
+		else {
+			ZU.processDocuments(permaLink(url), scrape);
+		}
+	}
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
