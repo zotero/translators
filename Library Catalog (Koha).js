@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-12-13 18:14:13"
+	"lastUpdated": "2014-09-05 20:46:46"
 }
 
 /*
@@ -35,23 +35,34 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.match(/\/opac-search\.pl\?/)) return "multiple";
-	else if (url.match(/\/opac-detail\.pl\?/)) return "book";
+	if (url.match(/\/opac-search\.pl\?/) && getSearchResults(doc, true)) return "multiple";
+	if (url.match(/\/opac-detail\.pl\?/)) return "book";
+}
+
+function getSearchResults(doc, checkOnly) {
+	var items = {}, found = false;
+	var resultContainer = doc.getElementsByClassName('searchresults')[0];
+	if (!resultContainer) return false;
+	
+	resultContainer = doc.getElementsByTagName('tr');
+	for (var i=0; i<resultContainer.length; i++) {
+		var item = ZU.xpath(resultContainer[i], '(.//a[contains(@href, "opac-detail.pl")])[1]')[0];
+		if (!item) continue;
+		
+		if(checkOnly) return true;
+		found = true;
+		items[item.href] = ZU.trimInternal(item.textContent);
+	}
+	
+	return found ? items : false;
 }
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		var articles = [];
-		var items = {};
-		var titles = doc.evaluate('//span[@class="results_summary"]/span[@class="label"]/a[contains(@href, "opac-detail.pl")]|//span[@class="results_summary"]/preceding-sibling::a[contains(@href, "opac-detail.pl")]', doc, null, XPathResult.ANY_TYPE, null);
-		var title;
-		while (title = titles.iterateNext()) {
-			items[title.href] = title.textContent.trim();
-		}
-		Zotero.selectItems(items, function (items) {
-			if (!items) {
-				return true;
-			}
+		Zotero.selectItems(getSearchResults(doc), function (items) {
+			if (!items) return true;
+			
+			var articles = [];
 			for (var i in items) {
 				articles.push(marcURL(i));
 			}
@@ -65,6 +76,7 @@ function doWeb(doc, url) {
 function scrape(marcurl) {
 	Zotero.Utilities.HTTP.doGet(marcurl, function (text) {
 		var translator = Zotero.loadTranslator("import");
+		// Use MARC translator
 		translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
@@ -81,7 +93,7 @@ function scrape(marcurl) {
 				if (!hasAuthor) {
 					for (var i in item.creators) {
 						if (item.creators[i].creatorType=="contributor") {
-						item.creators[i].creatorType="editor";
+							item.creators[i].creatorType="editor";
 						}
 					}
 				}
@@ -106,28 +118,28 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Synopsis: revue de cinéma",
 				"creators": [
 					{
 						"lastName": "Collège Ahuntsic",
 						"fieldMode": true
 					}
 				],
+				"date": "2011",
+				"libraryCatalog": "Library Catalog (Koha)",
+				"place": "Montréal",
+				"publisher": "Collège Ahuntsic",
+				"shortTitle": "Synopsis",
+				"attachments": [],
+				"tags": [
+					"Cinéma"
+				],
 				"notes": [
 					{
 						"note": "Les finissants et finissantes du Collège Ahuntsic soulignent les connaissances acquises au sein du profil Cinéma et médias en faisant découvrir leurs coups de coeur, « des films qui, à leur façon, les ont marqués par une recherche formelle, une originalité thématique, une authenticité sociologique et/ou une valeur historique. » -- P. 5"
 					}
 				],
-				"tags": [
-					"Cinéma"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Synopsis: revue de cinéma",
-				"place": "Montréal",
-				"publisher": "Collège Ahuntsic",
-				"date": "2011",
-				"libraryCatalog": "Library Catalog (Koha)",
-				"shortTitle": "Synopsis"
+				"seeAlso": []
 			}
 		]
 	},
@@ -147,6 +159,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Les jeunes et la sexualité: initiations, interdits, identités (XIXe-XXIe siècle)",
 				"creators": [
 					{
 						"firstName": "Véronique",
@@ -164,32 +177,31 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
+				"date": "2010",
+				"ISBN": "9782746713666",
+				"callNumber": "HQ 27 J485",
+				"libraryCatalog": "Library Catalog (Koha)",
+				"numPages": "407",
+				"place": "Paris",
+				"publisher": "Éditions Autrement",
+				"series": "Mutations",
+				"seriesNumber": "262",
+				"shortTitle": "Les jeunes et la sexualité",
+				"attachments": [],
+				"tags": [
+					"Abus sexuels à l'égard des enfants",
+					"Adolescents",
+					"Éducation sexuelle des jeunes",
+					"Prostitution juvénile",
+					"Sexualité",
+					"Tourisme sexuel"
+				],
 				"notes": [
 					{
 						"note": "« Le sujet préoccupe les jeunes eux-mêmes, bien entendu, mais aussi les adultes qui les entourent, parents, enseignants, travailleurs sociaux, médecins, juges, responsables politiques... Il inquiète, il paraît sulfureux, ou tabou. L'émotion suscitée dans les médias en témoigne : tournantes, tourisme sexuel, \"dédipix\" échangés, pilule du lendemain, difficulté d'assumer son homosexualité, etc. Sur les plateaux de télévision, à la radio ou dans les magazines, la parole est donnée aux \"psy\" ou aux \"témoins\", qui renforcent bien souvent les normes et les idées reçues. En contrepoint, ici sont réunis des historiens, des sociologues, des philosophes : trente-cinq chercheurs qui ont dépouillé les archives et mené l'enquête sur le terrain, en France, en Espagne, aux États-Unis, mais aussi en Argentine, au Cameroun, à Madagascar, en Iran, en Thaïlande, en Nouvelle-Zélande... Ce vaste panorama en trois volets, initiations, interdits, identités, permet de s'interroger sur notre actualité sexuelle : peu réprimée jusqu'à une époque récente, pourquoi la pédophilie est-elle aujourd'hui considérée comme le crime le plus abominable? Quel rôle joue la pornographie dans l'éducation sexuelle? La violence sexuelle des jeunes est-elle plus marquée aujourd'hui? Comment se construisent les identités de genre et les orientations sexuelles chez les jeunes? Faut-il avoir peur des jeunes et de la sexualité? Voilà de quoi alimenter la réflexion individuelle et les débats publics tout à la fois... » -- P. 4 de la couv"
 					}
 				],
-				"tags": [
-					"Adolescents",
-					"Sexualité",
-					"Abus sexuels à l'égard des enfants",
-					"Tourisme sexuel",
-					"Éducation sexuelle des jeunes",
-					"Prostitution juvénile"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"ISBN": "9782746713666",
-				"title": "Les jeunes et la sexualité: initiations, interdits, identités (XIXe-XXIe siècle)",
-				"place": "Paris",
-				"publisher": "Éditions Autrement",
-				"date": "2010",
-				"numPages": "407",
-				"series": "Mutations",
-				"seriesNumber": "262",
-				"callNumber": "HQ 27 J485",
-				"libraryCatalog": "Library Catalog (Koha)",
-				"shortTitle": "Les jeunes et la sexualité"
+				"seeAlso": []
 			}
 		]
 	},
@@ -199,6 +211,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Dia Mundial da Dança: Dança Caldas 21h30",
 				"creators": [
 					{
 						"firstName": "Úxia",
@@ -306,19 +319,23 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
+				"date": "2005",
 				"language": "por",
-				"title": "Dia Mundial da Dança: Dança Caldas 21h30",
+				"libraryCatalog": "Library Catalog (Koha)",
 				"place": "Lisboa",
 				"publisher": "ESD",
-				"date": "2005",
-				"libraryCatalog": "Library Catalog (Koha)",
-				"shortTitle": "Dia Mundial da Dança"
+				"shortTitle": "Dia Mundial da Dança",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://rdl.koha.ccsr.qc.ca/cgi-bin/koha/opac-search.pl?q=test",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
