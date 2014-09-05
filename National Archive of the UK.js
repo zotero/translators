@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcbv",
-	"lastUpdated": "2013-06-08 13:42:07"
+	"browserSupport": "gcb",
+	"lastUpdated": "2014-09-04 23:34:15"
 }
 
 /**
@@ -31,18 +31,36 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.search(/SearchUI\/details\?Uri=/i) != -1) return "manuscript";
-	else if (url.search(/SearchUI\/s\/res\?_/i) != -1) return "multiple";
+	if (url.search(/details\/r\//i) != -1) return "manuscript";
+	else if (url.search(/results\/r\//i) != -1) return "multiple";
 }
 
 function scrape(doc, url) {
-	var id = url.match(/uri=([A-Z0-9]+)/i)[1];
-	var reference = ZU.xpathText(doc, '//div[@id="assetDetails"]//div[contains(text(), "Reference")]/following-sibling::div')
+	var id = url.match(/details\/r\/([A-Z0-9]+)/i)[1];
+	var reference = ZU.xpathText(doc, '//tr/th[contains(text(), "Reference")]/following-sibling::td')
 	var tags  = ZU.xpath(doc, '//span/a[@class="tagName"]');
+	
+	var item = new Zotero.Item("manuscript");
+	var title =  "The National Archive of the UK " + reference;
+	item.archiveLocation = reference;
+	item.title = title.replace(/&lt.+?&gt;/g, "").replace(/<.+?>/g, "");
+	item.language = ZU.xpathText(doc, '//tr/th[contains(text(), "Language")]/following-sibling::td');
+	item.date = ZU.xpathText(doc, '//tr/th[contains(text(), "Date")]/following-sibling::td');
+	item.abstractNote = ZU.xpathText(doc, '//tr/th[contains(text(), "Description")]/following-sibling::td').replace(/<p>/g, "\n").replace(/&lt;p&gt;/g, "\n").replace(/<.+?>/g, "");
+	item.archive = ZU.xpathText(doc, '//tr/th[contains(text(), "Held by")]/following-sibling::td');
+	item.attachments.push({url: url, title: "British National Archive - Link", mimeType: "text/html", snapshot: false});
+
+	for (var i in tags){
+		item.tags.push(tags[i].textContent);
+	}
+	item.complete();
+
+/* XML Code - hopefully to be reused once API is sorted
 	var xmlUrl = "http://discovery.nationalarchives.gov.uk/DiscoveryAPI/xml/informationasset/" + id;
 	Zotero.Utilities.doGet(xmlUrl, function (text) {
 		//Z.debug(text)
 		var docxml = (new DOMParser()).parseFromString(text, "text/xml");
+
   	 	ns = {	
   	 			"xsi" : "http://www.w3.org/2001/XMLSchema-instance",
   	 			"xsd" : "http://www.w3.org/2001/XMLSchema"};
@@ -67,7 +85,10 @@ function scrape(doc, url) {
 		}
 		item.complete();
 	});
+*/
+
 }
+
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
