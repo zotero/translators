@@ -2,7 +2,7 @@
 	"translatorID": "cc4b1ea4-3349-4bb4-af55-cce5e06e4669",
 	"label": "Hispanic-American Periodical Index (Beta)",
 	"creator": "Sebastian Karcher",
-	"target": "https?://newstaging\\.hapi\\.imagistic\\.com/",
+	"target": "^https?://hapi\\.ucla\\.edu",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -36,7 +36,7 @@
 
 function detectWeb(doc, url) {
     if (url.indexOf("article/citation") != -1) return "journalArticle";
-    else if (url.indexOf("/search") != -1) return "multiple";
+    else if (url.indexOf("/search") != -1 || url.indexOf("/name/") != -1) return "multiple";
 }
 
 function scrape(doc, url) {
