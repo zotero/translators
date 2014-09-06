@@ -9,11 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-06-01 17:29:05"
+	"lastUpdated": "2014-09-05 22:36:05"
 }
 
 function getSearchResults(doc) {
-	return ZU.xpath(doc, '//div[@class="articleBox" or @class="articleBox "]');
+	return ZU.xpath(doc, '//div[contains(@class, "articleBox")]');
 }
 
 function getDoi(url) {
@@ -444,6 +444,11 @@ var testCases = [
 				"volume": "104"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://pubs.acs.org/isbn/9780841239999",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
