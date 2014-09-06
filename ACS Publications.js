@@ -2,18 +2,18 @@
 	"translatorID": "938ebe32-2b2e-4349-a5b3-b3a05d3de627",
 	"label": "ACS Publications",
 	"creator": "Sean Takats, Michael Berkowitz, Santawort, and Aurimas Vinckevicius",
-	"target": "^https?://[^/]*pubs3?\\.acs\\.org[^/]*/(?:wls/journals/query/(?:subscriberResults|query)\\.html|acs/journals/toc\\.page|cgi-bin/(?:article|abstract|sample|asap)\\.cgi)?",
+	"target": "^https?://[^/]*pubs3?\\.acs\\.org[^/]*/(?:wls/journals/query/(?:subscriberResults|query)\\.html|acs/journals/toc\\.page|cgi-bin/(?:article|abstract|sample|asap)\\.cgi|isbn/\\d)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-09-05 22:36:05"
+	"lastUpdated": "2014-09-06 06:36:08"
 }
 
 function getSearchResults(doc) {
-	return ZU.xpath(doc, '//div[contains(@class, "articleBox")]');
+	return doc.getElementsByClassName('articleBox');
 }
 
 function getDoi(url) {
@@ -106,7 +106,7 @@ function doWeb(doc, url){
 	}
 	
 	if(detectWeb(doc, url) == "multiple") { //search
-		var a, doi, title, items = {}, supp, hasSupp = {};
+		var a, doi, title, items = {}, supp, itemOpts = {};
 		var elmts = getSearchResults(doc);
 		for(var i=0, n=elmts.length; i<n; i++){
 			a = ZU.xpath(elmts[i], '(.//div[@class="titleAndAuthor"]/h2/a)[1]')[0];
@@ -114,13 +114,18 @@ function doWeb(doc, url){
 			doi = getDoi(a.href);
 			items[doi] = title;
 			
+			itemOpts[doi] = {};
 			//check if article contains supporting info,
 			//so we don't have to waste an HTTP request later if it doesn't
 			supp = doc.evaluate('.//a[text()="Supporting Info"]', elmts[i],
 				null, XPathResult.ANY_TYPE, null).iterateNext();
 			if(supp) {
-				hasSupp[doi] = true;
+				itemOpts[doi].hasSupp = true;
 			}
+			
+			// Check which versions of the PDF we have
+			itemOpts[doi].highRes = !!elmts[i].getElementsByClassName('pdf-high-res').length;
+			itemOpts[doi].pdfPlus = !!elmts[i].getElementsByClassName('pdf-low-res').length;
 		}
 		
 		Zotero.selectItems(items, function (items) {
@@ -130,7 +135,7 @@ function doWeb(doc, url){
 			
 			var dois = [];
 			for (var i in items) {
-				dois.push({doi: i, hasSupp: !!hasSupp[i]});
+				dois.push({doi: i, opts: itemOpts[i]});
 			}
 			
 			scrape(dois, opts);
@@ -153,7 +158,13 @@ function doWeb(doc, url){
 		//then it doesn't have supp info anyway. This way we know not to check later
 		if(!opts.attach) opts.attach = [];
 		
-		scrape([{doi: doi}], opts);
+		// See if we have pdfplus
+		var div = doc.getElementById('links');
+		var itemOpts = {};
+		itemOpts.highRes = !!div.getElementsByClassName('pdf-high-res').length;
+		itemOpts.pdfPlus = !!div.getElementsByClassName('pdf-low-res').length;
+		
+		scrape([{doi: doi, opts: itemOpts}], opts);
 	}
 }
 
@@ -198,7 +209,9 @@ function processCallback(fetchItem, opts, downloadFileName) {
 			translator.setHandler("itemDone", function(obj, item) {
 				item.attachments = [];
 				
-				if(!opts.removePdfPlus) {
+				if (fetchItem.opts.pdfPlus
+					&& (!opts.removePdfPlus || !fetchItem.opts.highRes)
+				) {
 					item.attachments.push({
 						title: "ACS Full Text PDF w/ Links",
 						url: opts.host + 'doi/pdfplus/' + doi,
@@ -206,7 +219,9 @@ function processCallback(fetchItem, opts, downloadFileName) {
 					});
 				}
 				
-				if(opts.highResPDF) {
+				if (fetchItem.opts.highRes
+					&& (opts.highResPDF	|| !fetchItem.opts.pdfPlus)
+				) {
 					item.attachments.push({
 						title: "ACS Full Text PDF",
 						url: opts.host + 'doi/pdf/' + doi,
@@ -225,7 +240,7 @@ function processCallback(fetchItem, opts, downloadFileName) {
 					if(opts.attachSupp && opts.attach) {
 						//came from individual item page
 						attachSupp(item, doi, opts);
-					} else if(opts.attachSupp && fetchItem.hasSupp) {
+					} else if(opts.attachSupp && fetchItem.opts.hasSupp) {
 						//was a search result and has supp info
 						var suppUrl = opts.host + 'doi/suppl/' + doi;
 						
