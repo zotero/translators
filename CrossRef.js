@@ -9,7 +9,7 @@
 	"priority": 90,
 	"inRepository": true,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-04-27 21:00:00"
+	"lastUpdated": "2014-09-09 18:00:00"
 }
 
 /* CrossRef uses unixref; documentation at http://www.crossref.org/schema/documentation/unixref1.0/unixref.html */
@@ -86,6 +86,7 @@ function parseCreators(node, item, typeOverrideMap) {
 		} else if(creatorXML.nodeName === "person_name") {
 			creator.firstName = fixAuthorCapitalization(ZU.xpathText(creatorXML, 'c:given_name', ns));
 			creator.lastName = fixAuthorCapitalization(ZU.xpathText(creatorXML, 'c:surname', ns));
+			if (!creator.firstName) creator.fieldMode = 1;
 		}
 		item.creators.push(creator);
 	}
