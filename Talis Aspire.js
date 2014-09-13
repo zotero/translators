@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-09-13 18:51:45"
+	"lastUpdated": "2014-09-13 22:51:45"
 }
 
 /*
@@ -35,7 +35,7 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.indexOf('/lists/') != -1 && getSearchResults(doc)) return "multiple";
+	if (url.indexOf('/lists/') != -1 && getSearchResults(doc, true)) return "multiple";
 	
 	if (url.indexOf('/items/') != -1) {
 		var type = ZU.xpathText(doc, '//dd/span[@class="label"]');
