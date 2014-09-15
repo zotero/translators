@@ -9,7 +9,7 @@
 	"priority": 90,
 	"inRepository": true,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-09-09 18:00:00"
+	"lastUpdated": "2014-09-09 20:05:00"
 }
 
 /* CrossRef uses unixref; documentation at http://www.crossref.org/schema/documentation/unixref1.0/unixref.html */
@@ -171,12 +171,18 @@ function processCrossRef(xmlOutput) {
 		// Reference book entry
 		// Example: doi: 10.1002/14651858.CD002966.pub3
 		// http://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&rft_id=info:doi/10.1002/14651858.CD002966.pub3&format=unixref&redirect=false
+		// Entire edite book. This should _not_ be imported as bookSection
+		// Example: doi: 10.4135/9781446200957
+		// http://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&&rft_id=info:doi/10.4135/9781446200957&noredirect=true&format=unixref
+
 		var bookType = itemXML[0].hasAttribute("book_type") ? itemXML[0].getAttribute("book_type") : null;
-		var componentType = itemXML[0].hasAttribute("component_type") ? itemXML[0].getAttribute("component_type") : null;
-		
+		var componentType = ZU.xpathText(itemXML[0], 'c:content_item/@component_type', ns);
+		//is this an entry in a reference book?
 		var isReference = ["reference", "other"].indexOf(bookType) !== -1
 				&& ["chapter", "reference_entry"].indexOf(componentType) !==-1;
-		if(bookType === "edited_book" || isReference) {
+		
+		//for items that are entry in reference books OR edited book types that have some type of a chapter entry.
+		if((bookType === "edited_book"  && componentType) || isReference) {
 			item = new Zotero.Item("bookSection");
 			refXML = ZU.xpath(itemXML, 'c:content_item', ns);
 			
