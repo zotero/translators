@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-09-16 03:04:05"
+	"lastUpdated": "2014-09-16 06:04:05"
 }
 
 function detectWeb(doc, url)	{
@@ -61,7 +61,7 @@ function doWeb(doc, url) {
 					pdf: extras[i]
 				});
 			}
-			scrape(articles);
+			fetch(articles);
 		});
 	} else {
 		var article = {};
@@ -83,23 +83,23 @@ function doWeb(doc, url) {
 		
 		article.doc = doc;
 		
-		scrape([article]);
+		fetch([article]);
 	}
 }
 
-function scrape(articles) {
+function fetch(articles) {
 	var article = articles.shift();
 	ZU.doPost('/action/exportCitation',
 		'format=BibTex&Download=Export&displayAbstract=Yes&componentIds=' + encodeURIComponent(article.id),
 		function(text) {
-			parseRIS(text, article, function() { if (articles.length) scrape(articles) });
+			parseData(text, article, function() { if (articles.length) fetch(articles) });
 		}
 	);
 }
 
 var months = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
 
-function parseRIS(text, article, next) {
+function parseData(text, article, next) {
 	// Fix month (presented as a digit)
 	text = text.replace(/\bmonth\s*=\s*{\s*(\d+)\s*}/g, function(match, m) {
 		if (months[m-1]) return 'month = ' + months[m-1];
@@ -158,6 +158,7 @@ function parseRIS(text, article, next) {
 			'format=RIS&Download=Export&displayAbstract=No&componentIds=' + encodeURIComponent(article.id),
 			function(text) {
 				var translator = Zotero.loadTranslator("import");
+				// RIS
 				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 				translator.setString(text);
 				translator.setHandler("itemDone", function(obj, risItem) {
