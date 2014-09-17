@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-03-12 21:53:46"
+	"lastUpdated": "2014-09-17 15:22:51"
 }
 
 /*
@@ -195,7 +195,7 @@ function fetchPNX(itemData) {
 //import PNX record
 function importPNX(text) {
 	//Note that if the session times out, PNX record will just contain a "null" entry
-	//Z.debug(text);
+	Z.debug(text);
 	//a lot of these apply only to prim records, mainly (but no exclusively) served by the jsp file
 	text = text.replace(/\<\/?xml-fragment[^\>]*\>/g, "")
 			.replace(/(<\/?)\w+:([^\>]*)/g, "$1$2") //remove namespaces
@@ -240,6 +240,9 @@ function importPNX(text) {
 		break;
 		case 'map':
 			item.itemType = "map";
+		break;
+		case 'newspaper_article':
+			item.itemType="newspaperArticle";
 		break;
 		default:
 			item.itemType = "document";
