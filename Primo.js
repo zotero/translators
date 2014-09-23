@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-03-12 21:53:46"
+	"lastUpdated": "2014-09-23 18:33:13"
 }
 
 /*
@@ -241,6 +241,9 @@ function importPNX(text) {
 		case 'map':
 			item.itemType = "map";
 		break;
+		case 'newspaper_article':
+			item.itemType="newspaperArticle";
+		break;
 		default:
 			item.itemType = "document";
 	}
@@ -342,7 +345,22 @@ function importPNX(text) {
 	item.issue = ZU.xpathText(doc, '//addata/issue');
 	item.volume = ZU.xpathText(doc, '//addata/volume');
 	item.publicationTitle = ZU.xpathText(doc, '//addata/jtitle');
-	item.pages = ZU.xpathText(doc, '//addata/pages');
+	
+	var startPage = ZU.xpathText(doc, '//addata/spage');
+	var endPage = ZU.xpathText(doc, '//addata/epage');
+	var overallPages = ZU.xpathText(doc, '//addata/pages');
+	if ( overallPages && !(startPage && endPage)) {
+		item.pages = overallPages;
+	} else if (startPage || endPage){
+		var pagesString = '-';
+		if (startPage) {
+			pagesString = startPage+pagesString;
+		} 
+		if (endPage) {
+			pagesString = pagesString+endPage;
+		}
+		item.pages = pagesString;
+	}
 	
 	// does callNumber get stored anywhere else in the xml?
 	item.callNumber = ZU.xpathText(doc, '//enrichment/classificationlcc');
