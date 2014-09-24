@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-06-01 17:35:03"
+	"lastUpdated": "2014-09-24 17:11:01"
 }
 
 /*
@@ -33,7 +33,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 function detectWeb(doc, url) {
 	if (url.search(/^https?:\/\/[^\/]+\/toc\/|\/action\/doSearch\?/) != -1) {
-		return Object.keys(getSearchResults(doc)).length ? "multiple" : false;
+		return getSearchResults(doc, true) ? "multiple" : false;
 	}
 	
 	if (url.indexOf('/doi/book/') != -1) {
@@ -45,38 +45,59 @@ function detectWeb(doc, url) {
 	return "journalArticle";
 }
 
-function getSearchResults(doc) {
+function getSearchResults(doc, checkOnly) {
 	var articles = {};
 	var container = doc.getElementsByName('frmSearchResults')[0]
 		|| doc.getElementsByName('frmAbs')[0];
-	if(!container) {
+	if (!container) {
 		Z.debug('Atypon: multiples container not found.');
-		return articles;
+		return false;
 	}
-	var rows = container.getElementsByClassName('articleEntry');
-	for(var i = 0; i<rows.length; i++) {
+	var rows = container.getElementsByClassName('articleEntry'),
+		found = false;
+	for (var i = 0; i<rows.length; i++) {
 		var title = rows[i].getElementsByClassName('art_title')[0];
-		if(!title) continue;
+		if (!title) continue;
 		title = ZU.trimInternal(title.textContent);
 		
 		var url = ZU.xpathText(rows[i], '(.//a[contains(@href, "/doi/abs/") or\
 			contains(@href, "/doi/full/") or contains(@href, "/doi/book/")])[1]/@href');
-		if(!url) continue;
+		if (!url) {
+			// e.g. http://pubs.rsna.org/toc/radiographics/toc/33/7 shows links in adjacent div
+			var urlRow = rows[i].nextElementSibling;
+			if (!urlRow || urlRow.classList.contains('articleEntry')) continue;
+			
+			url = ZU.xpathText(urlRow, '(.//a[contains(@href, "/doi/abs/") or\
+			contains(@href, "/doi/full/") or contains(@href, "/doi/book/")])[1]/@href');
+		}
+		if (!url) continue;
+		
+		if (checkOnly) return true;
+		found = true;
 		
 		articles[url] = title;
 	}
-	if (!Object.keys(articles).length){
-		Z.debug("trying alternate multiple format");
-		var rows = ZU.xpath(container, '//div[contains(@class, "item-details")]');
-		for(var i = 0; i<rows.length; i++) {
+	
+	if (!found){
+		Z.debug("Trying an alternate multiple format");
+		var rows = container.getElementsByClassName("item-details");
+		for (var i = 0; i<rows.length; i++) {
 			var title = ZU.xpathText(rows[i], './h3');
+			if (!title) continue;
+			title = ZU.trimInternal(title);
+			
 			var url = ZU.xpathText(rows[i], '(.//ul[contains(@class, "icon-list")]/li/a[contains(@href, "/doi/abs/") or\
 				contains(@href, "/doi/full/") or contains(@href, "/doi/book/")])[1]/@href');
-			if(!url) continue;
+			if (!url) continue;
+			
+			if (checkOnly) return true;
+			found = true;
+			
 			articles[url] = title;
 		}
 	}
-	return articles;
+	
+	return found ? articles : false;
 }
 
 function doWeb(doc, url) {
@@ -92,13 +113,23 @@ function doWeb(doc, url) {
 				//some search results have some "baggage" at the end - remove
 				urls.push(itemurl.replace(/\?prev.+/, ""));
 			}
-			Z.debug(urls)
+			
 			ZU.processDocuments(urls, scrape)
 		});
 
 	} else {
 		scrape(doc, url)
 	}
+}
+
+function fixCase(str, titleCase) {
+	if (str.toUpperCase() != str) return str;
+	
+	if (titleCase) {
+		return ZU.capitalizeTitle(str, true);
+	}
+	
+	return str.charAt(0) + str.substr(1).toLowerCase();
 }
 
 function scrape(doc, url) {
@@ -115,13 +146,23 @@ function scrape(doc, url) {
 		Z.debug("Filename: " + filename);
 		var get = '/action/downloadCitation';
 		var post = 'doi=' + doi + '&downloadFileName=' + filename + '&format=ris&direct=true&include=cit';
-		Zotero.Utilities.HTTP.doPost(get, post, function (text) {
+		ZU.doPost(get, post, function (text) {
 			//Z.debug(text);
 			var translator = Zotero.loadTranslator("import");
 			// Calling the RIS translator
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			translator.setString(text);
 			translator.setHandler("itemDone", function (obj, item) {
+				// Sometimes we get titles and authros in all caps
+				item.title = fixCase(item.title);
+				
+				for (var i=0; i<item.creators.length; i++) {
+					item.creators[i].lastName = fixCase(item.creators[i].lastName, true);
+					if (item.creators[i].firstName) {
+						item.creators[i].firstName = fixCase(item.creators[i].firstName, true);
+					}
+				}
+				
 				item.url = url;
 				item.notes = [];
 				for (var i in tags){
@@ -154,6 +195,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Assimilation of multiple data sets with the ensemble Kalman filter to improve forecasts of forest carbon dynamics",
 				"creators": [
 					{
 						"lastName": "Gao",
@@ -186,16 +228,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"carbon cycle",
-					"data assimilation",
-					"ecological forecast",
-					"ensemble Kalman filter (EnKF)",
-					"parameter estimation",
-					"uncertainty analysis"
-				],
-				"seeAlso": [],
+				"date": "February 22, 2011",
+				"DOI": "10.1890/09-1234.1",
+				"ISSN": "1051-0761",
+				"abstractNote": "The ensemble Kalman filter (EnKF) has been used in weather forecasting to assimilate observations into weather models. In this study, we examine how effectively forecasts of a forest carbon cycle can be improved by assimilating observations with the EnKF. We used the EnKF to assimilate into the terrestrial ecosystem (TECO) model eight data sets collected at the Duke Forest between 1996 and 2004 (foliage biomass, fine root biomass, woody biomass, litterfall, microbial biomass, forest floor carbon, soil carbon, and soil respiration). We then used the trained model to forecast changes in carbon pools from 2004 to 2012. Our daily analysis of parameters indicated that all the exit rates were well constrained by the EnKF, with the exception of the exit rates controlling the loss of metabolic litter and passive soil organic matter. The poor constraint of these two parameters resulted from the low sensitivity of TECO predictions to their values and the poor correlation between these parameters and the observed variables. Using the estimated parameters, the model predictions and observations were in agreement. Model forecasts indicate 15 380–15 660 g C/m2 stored in Duke Forest by 2012 (a 27% increase since 2004). Parameter uncertainties decreased as data were sequentially assimilated into the model using the EnKF. Uncertainties in forecast carbon sinks increased over time for the long-term carbon pools (woody biomass, structure litter, slow and passive SOM) but remained constant over time for the short-term carbon pools (foliage, fine root, metabolic litter, and microbial carbon). Overall, EnKF can effectively assimilate multiple data sets into an ecosystem model to constrain parameters, forecast dynamics of state variables, and evaluate uncertainty.",
+				"issue": "5",
+				"journalAbbreviation": "Ecological Applications",
+				"libraryCatalog": "esajournals.org (Atypon)",
+				"pages": "1461-1473",
+				"publicationTitle": "Ecological Applications",
+				"url": "http://www.esajournals.org/doi/abs/10.1890/09-1234.1",
+				"volume": "21",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -206,18 +249,16 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"DOI": "10.1890/09-1234.1",
-				"journalAbbreviation": "Ecological Applications",
-				"issue": "5",
-				"ISSN": "1051-0761",
-				"url": "http://www.esajournals.org/doi/abs/10.1890/09-1234.1",
-				"abstractNote": "The ensemble Kalman filter (EnKF) has been used in weather forecasting to assimilate observations into weather models. In this study, we examine how effectively forecasts of a forest carbon cycle can be improved by assimilating observations with the EnKF. We used the EnKF to assimilate into the terrestrial ecosystem (TECO) model eight data sets collected at the Duke Forest between 1996 and 2004 (foliage biomass, fine root biomass, woody biomass, litterfall, microbial biomass, forest floor carbon, soil carbon, and soil respiration). We then used the trained model to forecast changes in carbon pools from 2004 to 2012. Our daily analysis of parameters indicated that all the exit rates were well constrained by the EnKF, with the exception of the exit rates controlling the loss of metabolic litter and passive soil organic matter. The poor constraint of these two parameters resulted from the low sensitivity of TECO predictions to their values and the poor correlation between these parameters and the observed variables. Using the estimated parameters, the model predictions and observations were in agreement. Model forecasts indicate 15 380–15 660 g C/m2 stored in Duke Forest by 2012 (a 27% increase since 2004). Parameter uncertainties decreased as data were sequentially assimilated into the model using the EnKF. Uncertainties in forecast carbon sinks increased over time for the long-term carbon pools (woody biomass, structure litter, slow and passive SOM) but remained constant over time for the short-term carbon pools (foliage, fine root, metabolic litter, and microbial carbon). Overall, EnKF can effectively assimilate multiple data sets into an ecosystem model to constrain parameters, forecast dynamics of state variables, and evaluate uncertainty.",
-				"libraryCatalog": "esajournals.org (Atypon)",
-				"title": "Assimilation of multiple data sets with the ensemble Kalman filter to improve forecasts of forest carbon dynamics",
-				"date": "February 22, 2011",
-				"publicationTitle": "Ecological Applications",
-				"pages": "1461-1473",
-				"volume": "21"
+				"tags": [
+					"carbon cycle",
+					"data assimilation",
+					"ecological forecast",
+					"ensemble Kalman filter (EnKF)",
+					"parameter estimation",
+					"uncertainty analysis"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -237,6 +278,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Congenital and Hereditary Causes of Sudden Cardiac Death in Young Adults: Diagnosis, Differential Diagnosis, and Risk Stratification",
 				"creators": [
 					{
 						"lastName": "Stojanovska",
@@ -269,9 +311,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "November 1, 2013",
+				"DOI": "10.1148/rg.337125073",
+				"ISSN": "0271-5333",
+				"abstractNote": "Sudden cardiac death is defined as death from unexpected circulatory arrest—usually a result of cardiac arrhythmia—that occurs within 1 hour of the onset of symptoms. Proper and timely identification of individuals at risk for sudden cardiac death and the diagnosis of its predisposing conditions are vital. A careful history and physical examination, in addition to electrocardiography and cardiac imaging, are essential to identify conditions associated with sudden cardiac death. Among young adults (18–35 years), sudden cardiac death most commonly results from a previously undiagnosed congenital or hereditary condition, such as coronary artery anomalies and inherited cardiomyopathies (eg, hypertrophic cardiomyopathy, arrhythmogenic right ventricular cardiomyopathy [ARVC], dilated cardiomyopathy, and noncompaction cardiomyopathy). Overall, the most common causes of sudden cardiac death in young adults are, in descending order of frequency, hypertrophic cardiomyopathy, coronary artery anomalies with an interarterial or intramural course, and ARVC. Often, sudden cardiac death is precipitated by ventricular tachycardia or fibrillation and may be prevented with an implantable cardioverter defibrillator (ICD). Risk stratification to determine the need for an ICD is challenging and involves imaging, particularly echocardiography and cardiac magnetic resonance (MR) imaging. Coronary artery anomalies, a diverse group of congenital disorders with a variable manifestation, may be depicted at coronary computed tomographic angiography or MR angiography. A thorough understanding of clinical risk stratification, imaging features, and complementary diagnostic tools for the evaluation of cardiac disorders that may lead to sudden cardiac death is essential to effectively use imaging to guide diagnosis and therapy.",
+				"issue": "7",
+				"journalAbbreviation": "RadioGraphics",
+				"libraryCatalog": "pubs.rsna.org (Atypon)",
+				"pages": "1977-2001",
+				"publicationTitle": "RadioGraphics",
+				"shortTitle": "Congenital and Hereditary Causes of Sudden Cardiac Death in Young Adults",
+				"url": "http://pubs.rsna.org/doi/abs/10.1148/rg.337125073",
+				"volume": "33",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -282,19 +333,9 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"DOI": "10.1148/rg.337125073",
-				"journalAbbreviation": "RadioGraphics",
-				"issue": "7",
-				"ISSN": "0271-5333",
-				"url": "http://pubs.rsna.org/doi/abs/10.1148/rg.337125073",
-				"abstractNote": "Sudden cardiac death is defined as death from unexpected circulatory arrest—usually a result of cardiac arrhythmia—that occurs within 1 hour of the onset of symptoms. Proper and timely identification of individuals at risk for sudden cardiac death and the diagnosis of its predisposing conditions are vital. A careful history and physical examination, in addition to electrocardiography and cardiac imaging, are essential to identify conditions associated with sudden cardiac death. Among young adults (18–35 years), sudden cardiac death most commonly results from a previously undiagnosed congenital or hereditary condition, such as coronary artery anomalies and inherited cardiomyopathies (eg, hypertrophic cardiomyopathy, arrhythmogenic right ventricular cardiomyopathy [ARVC], dilated cardiomyopathy, and noncompaction cardiomyopathy). Overall, the most common causes of sudden cardiac death in young adults are, in descending order of frequency, hypertrophic cardiomyopathy, coronary artery anomalies with an interarterial or intramural course, and ARVC. Often, sudden cardiac death is precipitated by ventricular tachycardia or fibrillation and may be prevented with an implantable cardioverter defibrillator (ICD). Risk stratification to determine the need for an ICD is challenging and involves imaging, particularly echocardiography and cardiac magnetic resonance (MR) imaging. Coronary artery anomalies, a diverse group of congenital disorders with a variable manifestation, may be depicted at coronary computed tomographic angiography or MR angiography. A thorough understanding of clinical risk stratification, imaging features, and complementary diagnostic tools for the evaluation of cardiac disorders that may lead to sudden cardiac death is essential to effectively use imaging to guide diagnosis and therapy.",
-				"libraryCatalog": "pubs.rsna.org (Atypon)",
-				"shortTitle": "Congenital and Hereditary Causes of Sudden Cardiac Death in Young Adults",
-				"title": "Congenital and Hereditary Causes of Sudden Cardiac Death in Young Adults: Diagnosis, Differential Diagnosis, and Risk Stratification",
-				"date": "November 1, 2013",
-				"publicationTitle": "RadioGraphics",
-				"pages": "1977-2001",
-				"volume": "33"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -309,6 +350,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Combinatorial Data Analysis",
 				"creators": [
 					{
 						"lastName": "Hubert",
@@ -326,9 +368,14 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "January 1, 2001",
+				"ISBN": "978-0-89871-478-4",
+				"abstractNote": "The first part of this monograph's title, Combinatorial Data Analysis (CDA), refers to a wide class of methods for the study of relevant data sets in which the arrangement of a collection of objects is absolutely central. Characteristically, CDA is involved either with the identification of arrangements that are optimal for a specific representation of a given data set (usually operationalized with some specific loss or merit function that guides a combinatorial search defined over a domain constructed from the constraints imposed by the particular representation selected), or with the determination in a confirmatory manner of whether a specific object arrangement given a priori reflects the observed data. As the second part of the title, Optimization by Dynamic Programming, suggests, the sole focus of this monograph is on the identification of arrangements; it is then restricted further, to where the combinatorial search is carried out by a recursive optimization process based on the general principles of dynamic programming. For an introduction to confirmatory CDA without any type of optimization component, the reader is referred to the monograph by Hubert (1987). For the use of combinatorial optimization strategies other than dynamic programming for some (clustering) problems in CDA, the recent comprehensive review by Hansen and Jaumard (1997) provides a particularly good introduction.",
+				"libraryCatalog": "epubs.siam.org (Atypon)",
+				"numPages": "172",
+				"publisher": "Society for Industrial and Applied Mathematics",
+				"series": "Discrete Mathematics and Applications",
+				"url": "http://epubs.siam.org/doi/book/10.1137/1.9780898718553",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -339,15 +386,9 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"url": "http://epubs.siam.org/doi/book/10.1137/1.9780898718553",
-				"numPages": "172",
-				"series": "Discrete Mathematics and Applications",
-				"ISBN": "978-0-89871-478-4",
-				"abstractNote": "The first part of this monograph's title, Combinatorial Data Analysis (CDA), refers to a wide class of methods for the study of relevant data sets in which the arrangement of a collection of objects is absolutely central. Characteristically, CDA is involved either with the identification of arrangements that are optimal for a specific representation of a given data set (usually operationalized with some specific loss or merit function that guides a combinatorial search defined over a domain constructed from the constraints imposed by the particular representation selected), or with the determination in a confirmatory manner of whether a specific object arrangement given a priori reflects the observed data. As the second part of the title, Optimization by Dynamic Programming, suggests, the sole focus of this monograph is on the identification of arrangements; it is then restricted further, to where the combinatorial search is carried out by a recursive optimization process based on the general principles of dynamic programming. For an introduction to confirmatory CDA without any type of optimization component, the reader is referred to the monograph by Hubert (1987). For the use of combinatorial optimization strategies other than dynamic programming for some (clustering) problems in CDA, the recent comprehensive review by Hansen and Jaumard (1997) provides a particularly good introduction.",
-				"libraryCatalog": "epubs.siam.org (Atypon)",
-				"date": "January 1, 2001",
-				"title": "Combinatorial Data Analysis",
-				"publisher": "Society for Industrial and Applied Mathematics"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -357,10 +398,18 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "bookSection",
+				"title": "6. Extensions and Generalizations",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "January 1, 2001",
+				"ISBN": "978-0-89871-478-4",
+				"abstractNote": "6.1 Introduction There are a variety of extensions of the topics introduced in the previous chapters that could be pursued, several of which have been mentioned earlier along with a comment that they would not be developed in any detail within this monograph. Among some of these possibilities are: (a) the development of a mechanism for generating all the optimal solutions for a specific optimization task when multiple optima may be present, not just one representative exemplar; (b) the incorporation of other loss or merit measures within the various sequencing and partitioning contexts discussed; (c) extensions to the analysis of arbitrary t-mode data, with possible (order) restrictions on some modes but not others, or to a framework in which proximity is given on more than just a pair of objects, e.g., proximity could be defined for all distinct object triples (see Daws (1996)); (d) the generalization of the task of constructing optimal ordered partitions to a two- or higher-mode context that may be hierarchical and/or have various types of order or precedence constraints imposed; and (e) the extension of object ordering constraints when they are to be imposed (e.g., in various partitioning and two-mode sequencing tasks) to the use of circular object orders, where optimal subsets or ordered sequences must now be consistent with respect to a circular contiguity structure.",
+				"bookTitle": "Combinatorial Data Analysis",
+				"libraryCatalog": "epubs.siam.org (Atypon)",
+				"numberOfVolumes": "0",
+				"pages": "103-114",
+				"publisher": "Society for Industrial and Applied Mathematics",
+				"series": "Discrete Mathematics and Applications",
+				"url": "http://epubs.siam.org/doi/abs/10.1137/1.9780898718553.ch6",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -371,17 +420,9 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"numberOfVolumes": "0",
-				"url": "http://epubs.siam.org/doi/abs/10.1137/1.9780898718553.ch6",
-				"bookTitle": "Combinatorial Data Analysis",
-				"series": "Discrete Mathematics and Applications",
-				"ISBN": "978-0-89871-478-4",
-				"abstractNote": "6.1 Introduction There are a variety of extensions of the topics introduced in the previous chapters that could be pursued, several of which have been mentioned earlier along with a comment that they would not be developed in any detail within this monograph. Among some of these possibilities are: (a) the development of a mechanism for generating all the optimal solutions for a specific optimization task when multiple optima may be present, not just one representative exemplar; (b) the incorporation of other loss or merit measures within the various sequencing and partitioning contexts discussed; (c) extensions to the analysis of arbitrary t-mode data, with possible (order) restrictions on some modes but not others, or to a framework in which proximity is given on more than just a pair of objects, e.g., proximity could be defined for all distinct object triples (see Daws (1996)); (d) the generalization of the task of constructing optimal ordered partitions to a two- or higher-mode context that may be hierarchical and/or have various types of order or precedence constraints imposed; and (e) the extension of object ordering constraints when they are to be imposed (e.g., in various partitioning and two-mode sequencing tasks) to the use of circular object orders, where optimal subsets or ordered sequences must now be consistent with respect to a circular contiguity structure.",
-				"libraryCatalog": "epubs.siam.org (Atypon)",
-				"date": "January 1, 2001",
-				"pages": "103-114",
-				"title": "6. Extensions and Generalizations",
-				"publisher": "Society for Industrial and Applied Mathematics"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -391,6 +432,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Ray: Simultaneous Assembly of Reads from a Mix of High-Throughput Sequencing Technologies",
 				"creators": [
 					{
 						"lastName": "Boisvert",
@@ -408,9 +450,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "October 20, 2010",
+				"DOI": "10.1089/cmb.2009.0238",
+				"ISSN": "1066-5277",
+				"abstractNote": "An accurate genome sequence of a desired species is now a pre-requisite for genome research. An important step in obtaining a high-quality genome sequence is to correctly assemble short reads into longer sequences accurately representing contiguous genomic regions. Current sequencing technologies continue to offer increases in throughput, and corresponding reductions in cost and time. Unfortunately, the benefit of obtaining a large number of reads is complicated by sequencing errors, with different biases being observed with each platform. Although software are available to assemble reads for each individual system, no procedure has been proposed for high-quality simultaneous assembly based on reads from a mix of different technologies. In this paper, we describe a parallel short-read assembler, called Ray, which has been developed to assemble reads obtained from a combination of sequencing platforms. We compared its performance to other assemblers on simulated and real datasets. We used a combination of Roche/454 and Illumina reads to assemble three different genomes. We showed that mixing sequencing technologies systematically reduces the number of contigs and the number of errors. Because of its open nature, this new tool will hopefully serve as a basis to develop an assembler that can be of universal utilization (availability: http://deNovoAssembler.sf.Net/). For online Supplementary Material, see www.liebertonline.com.",
+				"issue": "11",
+				"journalAbbreviation": "Journal of Computational Biology",
+				"libraryCatalog": "online.liebertpub.com (Atypon)",
+				"pages": "1519-1533",
+				"publicationTitle": "Journal of Computational Biology",
+				"shortTitle": "Ray",
+				"url": "http://online.liebertpub.com/doi/abs/10.1089/cmb.2009.0238",
+				"volume": "17",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -421,19 +472,9 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"DOI": "10.1089/cmb.2009.0238",
-				"journalAbbreviation": "Journal of Computational Biology",
-				"issue": "11",
-				"ISSN": "1066-5277",
-				"url": "http://online.liebertpub.com/doi/abs/10.1089/cmb.2009.0238",
-				"abstractNote": "An accurate genome sequence of a desired species is now a pre-requisite for genome research. An important step in obtaining a high-quality genome sequence is to correctly assemble short reads into longer sequences accurately representing contiguous genomic regions. Current sequencing technologies continue to offer increases in throughput, and corresponding reductions in cost and time. Unfortunately, the benefit of obtaining a large number of reads is complicated by sequencing errors, with different biases being observed with each platform. Although software are available to assemble reads for each individual system, no procedure has been proposed for high-quality simultaneous assembly based on reads from a mix of different technologies. In this paper, we describe a parallel short-read assembler, called Ray, which has been developed to assemble reads obtained from a combination of sequencing platforms. We compared its performance to other assemblers on simulated and real datasets. We used a combination of Roche/454 and Illumina reads to assemble three different genomes. We showed that mixing sequencing technologies systematically reduces the number of contigs and the number of errors. Because of its open nature, this new tool will hopefully serve as a basis to develop an assembler that can be of universal utilization (availability: http://deNovoAssembler.sf.Net/). For online Supplementary Material, see www.liebertonline.com.",
-				"libraryCatalog": "online.liebertpub.com (Atypon)",
-				"shortTitle": "Ray",
-				"title": "Ray: Simultaneous Assembly of Reads from a Mix of High-Throughput Sequencing Technologies",
-				"date": "October 20, 2010",
-				"publicationTitle": "Journal of Computational Biology",
-				"pages": "1519-1533",
-				"volume": "17"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -441,6 +482,47 @@ var testCases = [
 		"type": "web",
 		"url": "http://journals.jps.jp/toc/jpsj/2014/83/6",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.worldscientific.com/doi/abs/10.1142/S0219749904000195",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Probabilities from envariance?",
+				"creators": [
+					{
+						"lastName": "Mohrhoff",
+						"firstName": "Ulrich",
+						"creatorType": "author"
+					}
+				],
+				"date": "June 1, 2004",
+				"DOI": "10.1142/S0219749904000195",
+				"ISSN": "0219-7499",
+				"abstractNote": "Zurek claims to have derived Born's rule noncircularly in the context of an ontological no-collapse interpretation of quantum states, without any \"deus ex machina imposition of the symptoms of classicality\". After a brief review of Zurek's derivation it is argued that this claim is exaggerated if not wholly unjustified. In order to demonstrate that Born's rule arises noncircularly from deterministically evolving quantum states, it is not sufficient to assume that quantum states are somehow associated with probabilities and then prove that these probabilities are given by Born's rule. One has to show how irreducible probabilities can arise in the context of an ontological no-collapse interpretation of quantum states. It is argued that the reason why all attempts to do this have so far failed is that quantum states are fundamentally algorithms for computing correlations between possible measurement outcomes, rather than evolving ontological states.",
+				"issue": "02",
+				"journalAbbreviation": "Int. J. Quantum Inform.",
+				"libraryCatalog": "worldscientific.com (Atypon)",
+				"pages": "221-229",
+				"publicationTitle": "International Journal of Quantum Information",
+				"url": "http://www.worldscientific.com/doi/abs/10.1142/S0219749904000195",
+				"volume": "02",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
