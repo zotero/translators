@@ -2,14 +2,14 @@
 	"translatorID": "5af42734-7cd5-4c69-97fc-bc406999bdba",
 	"label": "Atypon Journals",
 	"creator": "Sebastian Karcher",
-	"target": "^[^?#]+(?:/doi/(?:abs|full|figure|ref|citedby|book)/10\\.|/action/doSearch\\?)|^https?://[^/]+/toc/",
+	"target": "^https?://[^?#]+(?:/doi/(?:abs|full|figure|ref|citedby|book)/10\\.|/action/doSearch\\?)|^https?://[^/]+/toc/",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 200,
+	"priority": 270,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-09-24 17:11:01"
+	"lastUpdated": "2014-09-25 16:44:01"
 }
 
 /*
@@ -54,21 +54,21 @@ function getSearchResults(doc, checkOnly) {
 		return false;
 	}
 	var rows = container.getElementsByClassName('articleEntry'),
-		found = false;
+		found = false,
+		doiLink = 'a[contains(@href, "/doi/abs/") or '
+			+ 'contains(@href, "/doi/full/") or contains(@href, "/doi/book/")]';
 	for (var i = 0; i<rows.length; i++) {
 		var title = rows[i].getElementsByClassName('art_title')[0];
 		if (!title) continue;
 		title = ZU.trimInternal(title.textContent);
 		
-		var url = ZU.xpathText(rows[i], '(.//a[contains(@href, "/doi/abs/") or\
-			contains(@href, "/doi/full/") or contains(@href, "/doi/book/")])[1]/@href');
+		var url = ZU.xpathText(rows[i], '(.//' + doiLink + ')[1]/@href');
 		if (!url) {
 			// e.g. http://pubs.rsna.org/toc/radiographics/toc/33/7 shows links in adjacent div
 			var urlRow = rows[i].nextElementSibling;
 			if (!urlRow || urlRow.classList.contains('articleEntry')) continue;
 			
-			url = ZU.xpathText(urlRow, '(.//a[contains(@href, "/doi/abs/") or\
-			contains(@href, "/doi/full/") or contains(@href, "/doi/book/")])[1]/@href');
+			url = ZU.xpathText(urlRow, '(.//' + doiLink + ')[1]/@href');
 		}
 		if (!url) continue;
 		
@@ -86,8 +86,8 @@ function getSearchResults(doc, checkOnly) {
 			if (!title) continue;
 			title = ZU.trimInternal(title);
 			
-			var url = ZU.xpathText(rows[i], '(.//ul[contains(@class, "icon-list")]/li/a[contains(@href, "/doi/abs/") or\
-				contains(@href, "/doi/full/") or contains(@href, "/doi/book/")])[1]/@href');
+			var url = ZU.xpathText(rows[i], '(.//ul[contains(@class, "icon-list")]/li/'
+				+ doiLink + ')[1]/@href');
 			if (!url) continue;
 			
 			if (checkOnly) return true;
@@ -142,7 +142,7 @@ function scrape(doc, url) {
 	var tags = ZU.xpath(doc, '//p[@class="fulltext"]//a[contains(@href, "keywordsfield") or contains(@href, "Keyword=")]');
 	Z.debug("Citation URL: " + citationurl);
 	ZU.processDocuments(citationurl, function(citationDoc){
-		var filename = citationDoc.evaluate('//form[@target="_self"]//input[@name="downloadFileName"]', citationDoc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
+		var filename = citationDoc.evaluate('//form//input[@name="downloadFileName"]', citationDoc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
 		Z.debug("Filename: " + filename);
 		var get = '/action/downloadCitation';
 		var post = 'doi=' + doi + '&downloadFileName=' + filename + '&format=ris&direct=true&include=cit';
@@ -508,6 +508,53 @@ var testCases = [
 				"publicationTitle": "International Journal of Quantum Information",
 				"url": "http://www.worldscientific.com/doi/abs/10.1142/S0219749904000195",
 				"volume": "02",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.annualreviews.org/doi/abs/10.1146/annurev.matsci.31.1.323",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "BLOCK COPOLYMER THIN FILMS: Physics and Applications1",
+				"creators": [
+					{
+						"lastName": "Fasolka",
+						"firstName": "Michael J",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Mayes",
+						"firstName": "Anne M",
+						"creatorType": "author"
+					}
+				],
+				"date": "August 1, 2001",
+				"DOI": "10.1146/annurev.matsci.31.1.323",
+				"ISSN": "1531-7331",
+				"abstractNote": "▪ Abstract  A two-part review of research concerning block copolymer thin films is presented. The first section summarizes experimental and theoretical studies of the fundamental physics of these systems, concentrating upon the forces that govern film morphology. The role of film thickness and surface energetics on the morphology of compositionally symmetric, amorphous diblock copolymer films is emphasized, including considerations of boundary condition symmetry, so-called hybrid structures, and surface chemical expression. Discussions of compositionally asymmetric systems and emerging research areas, e.g., liquid-crystalline and A-B-C triblock systems, are also included. In the second section, technological applications of block copolymer films, e.g., as lithographic masks and photonic materials, are considered. Particular attention is paid to means by which microphase domain order and orientation can be controlled, including exploitation of thickness and surface effects, the application of external fields, and the use of patterned substrates.",
+				"issue": "1",
+				"journalAbbreviation": "Annu. Rev. Mater. Res.",
+				"libraryCatalog": "annualreviews.org (Atypon)",
+				"pages": "323-355",
+				"publicationTitle": "Annual Review of Materials Research",
+				"shortTitle": "BLOCK COPOLYMER THIN FILMS",
+				"url": "http://www.annualreviews.org/doi/abs/10.1146/annurev.matsci.31.1.323",
+				"volume": "31",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
