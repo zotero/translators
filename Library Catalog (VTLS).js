@@ -5,11 +5,11 @@
 	"target": "/chameleon(?:\\?|$)",
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-03-18 15:42:51"
+	"lastUpdated": "2014-08-26 04:13:58"
 }
 
 function detectWeb(doc, url) {

@@ -5,11 +5,11 @@
 	"target": "^https?://inspirehep\\.net/",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 200,
+	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-03-15 23:06:14"
+	"lastUpdated": "2014-08-26 03:46:51"
 }
 
 /*INSPIRE Translator

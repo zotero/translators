@@ -5,11 +5,11 @@
 	"target": "/iii/encore/(record|search)",
 	"minVersion": "1.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 270,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-02-23 23:34:49"
+	"lastUpdated": "2014-08-26 03:59:48"
 }
 
 /*

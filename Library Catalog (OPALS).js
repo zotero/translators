@@ -1,15 +1,15 @@
 {
-    "translatorID": "83501b8c-1033-4722-ae50-a77d67271ef7",
-    "label": "Library Catalog (OPALS)",
-    "creator": "Opals",
-    "target": "^https?://[^?#&]+/bin/(search|pf|rs)",
-    "minVersion": "3.0",
-    "maxVersion": "",
-    "priority": 200,
-    "inRepository": true,
-    "translatorType": 4,
-    "browserSupport": "gcsib",
-    "lastUpdated": "2014-04-17 09:20:31"
+	"translatorID": "83501b8c-1033-4722-ae50-a77d67271ef7",
+	"label": "Library Catalog (OPALS)",
+	"creator": "Opals",
+	"target": "^https?://[^?#&]+/bin/(search|pf|rs)",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 250,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsib",
+	"lastUpdated": "2014-08-26 04:06:03"
 }
 
 

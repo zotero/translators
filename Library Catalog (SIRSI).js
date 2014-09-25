@@ -5,11 +5,11 @@
 	"target": "/uhtbin/(?:cgisirsi|quick_keyword)",
 	"minVersion": "2.1",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-03 17:45:33"
+	"lastUpdated": "2014-08-26 04:09:11"
 }
 
 /*Spanish Libraries:

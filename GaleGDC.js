@@ -5,11 +5,11 @@
 	"target": "/gdc/ncco|/gdc/xsearch|/gdc/artemis",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 200,
+	"priority": 270,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-04-14 17:15:41"
+	"lastUpdated": "2014-08-26 03:45:45"
 }
 
 /*

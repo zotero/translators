@@ -5,11 +5,11 @@
 	"target": "cgi-bin/koha/opac-(detail|search)",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 260,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-09-05 20:46:46"
+	"lastUpdated": "2014-09-25 15:46:46"
 }
 
 /*

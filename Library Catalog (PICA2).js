@@ -5,11 +5,11 @@
 	"target": "^https?://[^/]+/DB=[\\dA-Z]",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 199,
+	"priority": 249,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-12-09 20:28:44"
+	"lastUpdated": "2014-08-26 04:07:48"
 }
 
 /*
