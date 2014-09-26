@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-03 17:36:43"
+	"lastUpdated": "2014-09-26 19:30:32"
 }
 
 /*
@@ -31,7 +31,6 @@
 */
 
 function detectWeb(doc,url) {
-	
 	var xpath='//meta[@name="citation_journal_title"]';
 	var type = ZU.xpathText(doc, '//meta[@name="source"]/@content');	
 	if (ZU.xpath(doc, xpath).length > 0) {
@@ -48,8 +47,7 @@ function getMultiples(doc) {
 }
 
  
-function doWeb(doc,url)
-{
+function doWeb(doc,url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var hits = {};
 		var urls = [];
@@ -86,7 +84,12 @@ function doWeb(doc,url)
 			}
 			if (item.ISBN) item.ISBN = ZU.cleanISBN(item.ISBN);
 			if (item.publisher) item.publisher = item.publisher.replace(/\..+/, "");
-			item.url = "";
+			
+			// Only include URL if full text is hosted on ERIC
+			if (!ZU.xpath(doc, '//div[@id="r_colR"]//img[@alt="PDF on ERIC"]').length) {
+				delete item.url;
+			}
+			
 			item.libraryCatalog = "ERIC";
 			item.complete();
 		});
@@ -100,6 +103,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Collaborating with Parents to Establish Behavioral Goals in Child-Centered Play Therapy",
 				"creators": [
 					{
 						"firstName": "Phyllis B.",
@@ -117,37 +121,36 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Cultural Influences",
-					"Therapy",
-					"Play Therapy",
-					"Parent Participation",
-					"Cooperative Planning",
-					"Counseling Techniques",
-					"Guidelines",
-					"Cultural Relevance",
-					"Counselor Role",
-					"Interpersonal Relationship"
-				],
-				"seeAlso": [],
+				"date": "2012/01/00",
+				"ISSN": "1066-4807",
+				"abstractNote": "The purpose of this article is to provide specific guidelines for child-centered play therapists to set behavioral outcome goals to effectively work with families and to meet the demands for accountability in the managed care environment. The child-centered play therapy orientation is the most widely practiced approach among play therapists who identify a specific theoretical orientation. While information about setting broad objectives is addressed using this approach to therapy, explicit guidelines for setting behavioral goals, while maintaining the integrity of the child-centered theoretical orientation, are needed. The guidelines are presented in three phases of parent consultation: (a) the initial engagement with parents, (b) the ongoing parent consultations, and (c) the termination phase. In keeping with the child-centered approach, the authors propose to work with parents from a person-centered orientation and seek to appreciate how cultural influences relate to parents' concerns and goals for their children. A case example is provided to demonstrate how child-centered play therapists can accomplish the aforementioned goals.",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"issue": "1",
+				"language": "en",
+				"libraryCatalog": "ERIC",
+				"pages": "51-57",
+				"publicationTitle": "Family Journal: Counseling and Therapy for Couples and Families",
+				"publisher": "SAGE Publications",
+				"volume": "20",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"title": "Collaborating with Parents to Establish Behavioral Goals in Child-Centered Play Therapy",
-				"date": "2012/01/00",
-				"publicationTitle": "Family Journal: Counseling and Therapy for Couples and Families",
-				"volume": "20",
-				"issue": "1",
-				"publisher": "SAGE Publications",
-				"language": "en",
-				"pages": "51-57",
-				"ISSN": "1066-4807",
-				"abstractNote": "The purpose of this article is to provide specific guidelines for child-centered play therapists to set behavioral outcome goals to effectively work with families and to meet the demands for accountability in the managed care environment. The child-centered play therapy orientation is the most widely practiced approach among play therapists who identify a specific theoretical orientation. While information about setting broad objectives is addressed using this approach to therapy, explicit guidelines for setting behavioral goals, while maintaining the integrity of the child-centered theoretical orientation, are needed. The guidelines are presented in three phases of parent consultation: (a) the initial engagement with parents, (b) the ongoing parent consultations, and (c) the termination phase. In keeping with the child-centered approach, the authors propose to work with parents from a person-centered orientation and seek to appreciate how cultural influences relate to parents' concerns and goals for their children. A case example is provided to demonstrate how child-centered play therapists can accomplish the aforementioned goals.",
-				"libraryCatalog": "ERIC",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [
+					"Cooperative Planning",
+					"Counseling Techniques",
+					"Counselor Role",
+					"Cultural Influences",
+					"Cultural Relevance",
+					"Guidelines",
+					"Interpersonal Relationship",
+					"Parent Participation",
+					"Play Therapy",
+					"Therapy"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -162,6 +165,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "The Building Blocks of Preschool Success",
 				"creators": [
 					{
 						"firstName": "Katherine A.",
@@ -179,45 +183,97 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Play",
-					"Group Activities",
-					"Oral Language",
-					"Disadvantaged Youth",
-					"Phonological Awareness",
-					"Second Language Learning",
-					"Preschool Teachers",
-					"Emergent Literacy",
-					"Vocabulary Development",
-					"Suburban Schools",
-					"Best Practices",
-					"English (Second Language)",
-					"Preschool Children",
-					"Reprography",
-					"Instructional Materials",
-					"Language Skills",
-					"Educational Assessment",
-					"Classroom Environment",
-					"Alphabets",
-					"Reading Instruction",
-					"Writing Instruction"
-				],
-				"seeAlso": [],
+				"date": "2010/06/00",
+				"ISBN": "9781606236949",
+				"abstractNote": "Written expressly for preschool teachers, this engaging book explains the \"whats,\" \"whys,\" and \"how-tos\" of implementing best practices for instruction in the preschool classroom. The authors show how to target key areas of language and literacy development across the entire school day, including whole-group and small-group activities, center time, transitions, and outdoor play. Detailed examples in every chapter illustrate what effective instruction and assessment look like in three distinct settings: a school-based pre-kindergarten, a Head Start center with many English language learners, and a private suburban preschool. Helpful book lists, charts, and planning tools are featured, including reproducible materials. Contents include: (1) The Realities of Preschool; (2) A Focus on Oral Language and Vocabulary Development; (3) Comprehension; (4) Phonological Awareness; (5) Print and Alphabet Awareness; (6) Emergent Writing; (7) Tracking Children's Progress: The Role of Assessment in Preschool Classrooms; and (8) Making It Work for Adults and Children.",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"language": "en",
+				"libraryCatalog": "ERIC",
+				"publicationTitle": "Guilford Publications",
+				"publisher": "Guilford Press",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"title": "The Building Blocks of Preschool Success",
-				"date": "2010/06/00",
-				"publicationTitle": "Guilford Publications",
-				"publisher": "Guilford Press",
-				"ISBN": "9781606236949",
+				"tags": [
+					"Alphabets",
+					"Best Practices",
+					"Classroom Environment",
+					"Disadvantaged Youth",
+					"Educational Assessment",
+					"Emergent Literacy",
+					"English (Second Language)",
+					"Group Activities",
+					"Instructional Materials",
+					"Language Skills",
+					"Oral Language",
+					"Phonological Awareness",
+					"Play",
+					"Preschool Children",
+					"Preschool Teachers",
+					"Reading Instruction",
+					"Reprography",
+					"Second Language Learning",
+					"Suburban Schools",
+					"Vocabulary Development",
+					"Writing Instruction"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://eric.ed.gov/?id=EJ906692",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Determining Faculty Needs for Delivering Accessible Electronically Delivered Instruction in Higher Education",
+				"creators": [
+					{
+						"firstName": "Marsha A.",
+						"lastName": "Gladhart",
+						"creatorType": "author"
+					}
+				],
+				"date": "2010/00/00",
+				"abstractNote": "The purpose of this study was to determine if a need exists for faculty training to improve accommodation for students with disabilities enrolled in electronically delivered courses at a statewide university system. An online survey was used to determine if instructors had students who had been identified as needing accommodation in their online courses, to identify which tools instructors used in electronically delivered instruction, and to determine how familiar the instructors were with strategies for accommodating students with disabilities in their courses. Over half the respondents reported identifying students in their classes with disabilities either by an official notice or through other means of identification. The respondents identified a variety of electronic delivery tools used to provide instruction in distance courses. A low percentage of the faculty surveyed reported they were aware of strategies to improve accessibility in their electronically delivered courses. (Contains 6 tables.)",
+				"issue": "3",
 				"language": "en",
-				"abstractNote": "Written expressly for preschool teachers, this engaging book explains the \"whats,\" \"whys,\" and \"how-tos\" of implementing best practices for instruction in the preschool classroom. The authors show how to target key areas of language and literacy development across the entire school day, including whole-group and small-group activities, center time, transitions, and outdoor play. Detailed examples in every chapter illustrate what effective instruction and assessment look like in three distinct settings: a school-based pre-kindergarten, a Head Start center with many English language learners, and a private suburban preschool. Helpful book lists, charts, and planning tools are featured, including reproducible materials. Contents include: (1) The Realities of Preschool; (2) A Focus on Oral Language and Vocabulary Development; (3) Comprehension; (4) Phonological Awareness; (5) Print and Alphabet Awareness; (6) Emergent Writing; (7) Tracking Children's Progress: The Role of Assessment in Preschool Classrooms; and (8) Making It Work for Adults and Children.",
 				"libraryCatalog": "ERIC",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"pages": "185-196",
+				"publicationTitle": "Journal of Postsecondary Education and Disability",
+				"url": "http://eric.ed.gov/?id=EJ906692",
+				"volume": "22",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					"Academic Accommodations (Disabilities)",
+					"College Faculty",
+					"Delivery Systems",
+					"Disabilities",
+					"Disability Identification",
+					"Educational Needs",
+					"Educational Practices",
+					"Educational Strategies",
+					"Electronic Learning",
+					"Familiarity",
+					"Mail Surveys",
+					"Needs Assessment",
+					"Online Courses",
+					"Teacher Attitudes"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
