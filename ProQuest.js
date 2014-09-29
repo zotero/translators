@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-06-28 20:23:55"
+	"lastUpdated": "2014-10-01 20:36:32"
 }
 
 /*
@@ -430,57 +430,50 @@ function scrape(doc, url, type, pdfUrl) {
 function getItemType(types) {
 	var guessType, govdoc, govdocType;
 	for(var i=0, n=types.length; i<n; i++) {
-		switch (types[i]) {
-			case "Conference Papers and Proceedings":
-			case "Conference Papers & Proceedings":
-				return "conferencePaper";
-			case "Dissertations & Theses":
-			case "Dissertation/Thesis":
-				return "thesis";
-			case "Newspapers":
-			case "Wire Feeds":
-			case "WIRE FEED":
-			case "Historical Newspapers":
-				return "newspaperArticle";
-			case "Scholarly Journals":
-			case "Trade Journals":
-			case "Historical Periodicals":
-				return "journalArticle";
-			case "Magazines":
-				return "magazineArticle";
-			case "Reports":
-			case "REPORT":
-				return "report";
-			case "Blog":
-			case "Article In An Electronic Resource Or Web Site":
-				return "blogPost";
-			case "Patent":
-				return "patent";
-			case "Government & Official Publications":
-				govdoc = true;
-			break;
-			case "Blogs, Podcats, & Websites":
-				guessType = "webpage";
-			break;
-			case "Books":
-				guessType = "book";
-			break;
-			case "Pamphlets & Ephemeral Works":
-				guessType = "document";
-			break;
-			case "Encyclopedias & Reference Works":
-				guessType = "encyclopediaArticle";
-			break;
-		}
-
-		if (types[i].indexOf("report", 0) != -1) {
-			govdocType = "report"
-		} else if (types[i].indexOf("statute", 0) != -1) {
-			govdocType = "statute"
-		}
-
-		if(govdoc && govdocType) {
-			return govdocType;
+		//put the testString to lowercase and test for singular only for maxmial compatibility
+		//in most cases we just can return the type, but sometimes only save it as a guess and will use it only if we don't have anything better
+		var testString = types[i].toLowerCase();
+		if (testString.indexOf("journal") != -1 || testString.indexOf("periodical") != -1) {
+			//"Scholarly Journals", "Trade Journals", "Historical Periodicals"
+			return "journalArticle";
+		} else if (testString.indexOf("newspaper") != -1 || testString.indexOf("wire feed") != -1 ) {
+			//"Newspapers", "Wire Feeds", "WIRE FEED", "Historical Newspapers"
+			return "newspaperArticle";
+		} else if ( testString.indexOf("dissertation") != -1 ) {
+			//"Dissertations & Theses", "Dissertation/Thesis", "Dissertation"
+			return "thesis";
+		} else if (testString.indexOf("book") != -1) {
+			//"Book, Authored Book", "Book, Edited Book", "Books"
+			guessType = "book";
+		} else if ( testString.indexOf("chapter") != -1 ) {
+			//"Chapter"
+			return "bookSection";
+		} else if ( testString.indexOf("conference paper") != -1) {
+			//"Conference Papers and Proceedings", "Conference Papers & Proceedings"
+			return "conferencePaper";
+		} else if (testString.indexOf("magazine") != -1 ) {
+			//"Magazines"
+			return "magazineArticle";
+		} else if (testString.indexOf("report") != -1 ) {
+			//"Reports", "REPORT"
+			return "report";
+		} else if (testString.indexOf("website") != -1) {
+			//"Blogs, Podcats, & Websites"
+			guessType = "webpage";
+		} else if (testString == "blog" || testString == "article in an electronic resource or web site") {
+			//"Blog", "Article In An Electronic Resource Or Web Site"
+			return "blogPost";
+		} else if (testString.indexOf("patent") != -1) {
+			//"Patent"
+			return "patent";
+		} else if (testString.indexOf("pamphlet") != -1) {
+			//Pamphlets & Ephemeral Works
+			guessType = "manuscript";
+		} else if (testString.indexOf("encyclopedia") != -1) {
+			//"Encyclopedias & Reference Works"
+			guessType = "encyclopediaArticle";
+		} else if (testString.indexOf("statute") != -1) {
+			return "statute";
 		}
 	}
 
@@ -1259,7 +1252,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "THE PRESIDENT AND ALDRICH.: Railway Age Relates Happenings Behind the Scenes Regarding Rate Regulation.",
+				"title": "THE PRESIDENT AND ALDRICH.: Railway Age Relates Happenings Behind the Scenes Regarding Rate Regulation.",
 				"publicationTitle": "Wall Street Journal (1889-1922)",
 				"pages": "7",
 				"numPages": "1",
