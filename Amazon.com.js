@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-08-28 02:13:10"
+	"lastUpdated": "2014-09-30 07:16:46"
 }
 
 function detectWeb(doc, url) {
@@ -99,7 +99,8 @@ var CREATOR = {
 	"Writer":"scriptwriter",
 	"Translator":"translator",
 	"Author":"author",
-	"Illustrator":"contributor"
+	"Illustrator":"contributor",
+	"Editor": "editor"
 };
 
 var DATE = [
@@ -110,7 +111,7 @@ var DATE = [
 //localization
 var i15dFields = {
 	'ISBN' : ['ISBN-13', 'ISBN-10', 'ISBN', '条形码'],
-	'Publisher': ['Publisher', 'Verlag', 'Editora', '出版社', 'Editeur',  'Éditeur', 'Editore', 'Editor'],
+	'Publisher': ['Publisher', 'Verlag', '出版社'],
 	'Hardcover': ['Hardcover', 'Gebundene Ausgabe', '精装', 'ハードカバー', 'Relié', 'Copertina rigida', 'Tapa dura'],
 	'Paperback' : ['Paperback', 'Taschenbuch', '平装', 'ペーパーバック', 'Broché', 'Copertina flessibile', 'Tapa blanda'],
 	'Print Length' : ['Print Length', 'Seitenzahl der Print-Ausgabe', '紙の本の長さ', "Nombre de pages de l'édition imprimée", "Longueur d'impression", 'Lunghezza stampa', 'Longitud de impresión', 'Número de páginas'],//TODO: Chinese label
@@ -126,7 +127,8 @@ var i15dFields = {
 	'Total Length' : ['Total Length', 'Gesamtlänge', 'Durée totale', 'Lunghezza totale', 'Duración total', '収録時間'],
 	'Translator' : ["Translator", "Übersetzer", "Traduttore", "Traductor", "翻訳"],
 	'Illustrator' : ["Illustrator", "Illustratore", "Ilustrador", "イラスト"],
-	'Writer' : ['Writers']
+	'Writer' : ['Writers'],
+	'Editor' : ['Editor', 'Editora', 'Editeur', 'Éditeur', 'Editore']
 };
 
 function getField(info, field) {
@@ -193,8 +195,8 @@ function scrape(doc, url) {
 	
 	if(baseNode) {
 		var authors = ZU.xpath(baseNode, './/span[@id="artistBlurb"]/a');
-		if(!authors.length) authors = baseNode.getElementsByClassName('contributorNameID');
-		if(!authors.length) authors = ZU.xpath(baseNode, './/*[@id="byline"]//span[contains(@class, "author")]/a[1]');
+		//if(!authors.length) authors = baseNode.getElementsByClassName('contributorNameID');
+		if(!authors.length) authors = ZU.xpath(baseNode, '(.//*[@id="byline"]/span[contains(@class, "author")] | .//*[@id="byline"]/span[contains(@class, "author")]/span)/a[contains(@class, "a-link-normal")][1]');
 		if(!authors.length) authors = ZU.xpath(baseNode, './/span[@class="contributorNameTrigger"]/a[not(@href="#")]');
 		if(!authors.length) authors = ZU.xpath(baseNode, './/a[following-sibling::*[1][@class="byLinePipe"]]');
 		if(!authors.length) authors = ZU.xpath(baseNode, './/a[contains(@href, "field-author=")]');
@@ -278,7 +280,7 @@ function scrape(doc, url) {
 	}
 	
 	// Books
-	var publisher = getField(info, 'Publisher');
+	var publisher = getField(info, 'Publisher') || getField(info, 'Editor');
 	if(publisher) {
 		var m = /([^;(]+)(?:;? *([^(]*))?(?:\(([^)]*)\))?/.exec(publisher);
 		item.publisher = m[1].trim();
@@ -291,16 +293,19 @@ function scrape(doc, url) {
 	//add publication place from ISBN translator, see at the end
 	
 	// Video
-	var clearedCreators = false;
-	for(var i in CREATOR) {
-		if(getField(info, i)) {
-			if(!clearedCreators) {
-				item.creators = [];
-				clearedCreators = true;
-			}
-			var creators = getField(info, i).split(/ *, */);
-			for(var j=0; j<creators.length; j++) {
-				item.creators.push(ZU.cleanAuthor(creators[j], CREATOR[i]));
+	if (item.itemType == 'videoRecording') {
+		// This seems to only be worth it for videos
+		var clearedCreators = false;
+		for(var i in CREATOR) {
+			if(getField(info, i)) {
+				if(!clearedCreators) {
+					item.creators = [];
+					clearedCreators = true;
+				}
+				var creators = getField(info, i).split(/ *, */);
+				for(var j=0; j<creators.length; j++) {
+					item.creators.push(ZU.cleanAuthor(creators[j], CREATOR[i]));
+				}
 			}
 		}
 	}
@@ -881,6 +886,46 @@ var testCases = [
 				"libraryCatalog": "Amazon.com",
 				"runningTime": "166 minutes",
 				"studio": "Kultur",
+				"attachments": [
+					{
+						"title": "Amazon.com Link",
+						"snapshot": false,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.amazon.com/First-Quarto-Hamlet-Cambridge-Shakespeare/dp/0521653908/",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "The First Quarto of Hamlet",
+				"creators": [
+					{
+						"firstName": "William",
+						"lastName": "Shakespeare",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kathleen O.",
+						"lastName": "Irace",
+						"creatorType": "editor"
+					}
+				],
+				"date": "April 13, 1999",
+				"ISBN": "9780521653909",
+				"abstractNote": "The first printed text of Shakespeare's Hamlet is about half the length of the more familiar second quarto and Folio versions. It reorders and combines key plot elements to present its own workable alternatives. This is the only modernized critical edition of the 1603 quarto in print. Kathleen Irace explains its possible origins, special features and surprisingly rich performance history, and while describing textual differences between it and other versions, offers alternatives that actors or directors might choose for specific productions.",
+				"language": "English",
+				"libraryCatalog": "Amazon.com",
+				"numPages": 144,
+				"place": "Cambridge",
+				"publisher": "Cambridge University Press",
 				"attachments": [
 					{
 						"title": "Amazon.com Link",
