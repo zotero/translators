@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-09-30 07:16:46"
+	"lastUpdated": "2014-09-30 07:37:42"
 }
 
 function detectWeb(doc, url) {
@@ -221,8 +221,13 @@ function scrape(doc, url) {
 					fieldMode: 1
 				});
 			} else {
-				if(isAsian && name.indexOf(' ') == -1) name = name.replace(/.$/, ' $&');
-				item.creators.push(ZU.cleanAuthor(name, role, false));
+				var invertName = isAsian && !(/[A-Za-z]/.test(name));
+				if (invertName) {
+					// Use last character as given name if there is no space
+					if (name.indexOf(' ') == -1) name = name.replace(/.$/, ' $&');
+					name = name.replace(/\s+/, ', '); // Surname comes first
+				}
+				item.creators.push(ZU.cleanAuthor(name, role, invertName));
 			}
 		}
 	}
@@ -695,23 +700,23 @@ var testCases = [
 				"title": "汉语语音合成:原理和技术",
 				"creators": [
 					{
-						"firstName": "吕士",
-						"lastName": "楠",
+						"firstName": "楠",
+						"lastName": "吕士",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "初",
-						"lastName": "敏",
+						"firstName": "敏",
+						"lastName": "初",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "许洁",
-						"lastName": "萍",
+						"firstName": "萍",
+						"lastName": "许洁",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "贺",
-						"lastName": "琳",
+						"firstName": "琳",
+						"lastName": "贺",
 						"creatorType": "author"
 					}
 				],
@@ -926,6 +931,37 @@ var testCases = [
 				"numPages": 144,
 				"place": "Cambridge",
 				"publisher": "Cambridge University Press",
+				"attachments": [
+					{
+						"title": "Amazon.com Link",
+						"snapshot": false,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.amazon.co.jp/dp/4003314212",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "日本イデオロギー論",
+				"creators": [
+					{
+						"firstName": "潤",
+						"lastName": "戸坂",
+						"creatorType": "author"
+					}
+				],
+				"date": "1977/9/16",
+				"ISBN": "9784003314210",
+				"libraryCatalog": "Amazon.com",
+				"publisher": "岩波書店",
 				"attachments": [
 					{
 						"title": "Amazon.com Link",
