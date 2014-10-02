@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-10-01 20:36:32"
+	"lastUpdated": "2014-10-02 17:36:32"
 }
 
 /*
@@ -442,12 +442,12 @@ function getItemType(types) {
 		} else if ( testString.indexOf("dissertation") != -1 ) {
 			//"Dissertations & Theses", "Dissertation/Thesis", "Dissertation"
 			return "thesis";
-		} else if (testString.indexOf("book") != -1) {
-			//"Book, Authored Book", "Book, Edited Book", "Books"
-			guessType = "book";
 		} else if ( testString.indexOf("chapter") != -1 ) {
 			//"Chapter"
 			return "bookSection";
+		} else if (testString.indexOf("book") != -1) {
+			//"Book, Authored Book", "Book, Edited Book", "Books"
+			guessType = "book";
 		} else if ( testString.indexOf("conference paper") != -1) {
 			//"Conference Papers and Proceedings", "Conference Papers & Proceedings"
 			return "conferencePaper";
