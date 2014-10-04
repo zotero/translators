@@ -2,14 +2,14 @@
 	"translatorID": "5af42734-7cd5-4c69-97fc-bc406999bdba",
 	"label": "Atypon Journals",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://[^?#]+(?:/doi/(?:abs|full|figure|ref|citedby|book)/10\\.|/action/doSearch\\?)|^https?://[^/]+/toc/",
+	"target": "^https?://[^?#]+(?:/doi/(?:abs|abstract|full|figure|ref|citedby|book)/10\\.|/action/doSearch\\?)|^https?://[^/]+/toc/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 270,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-09-25 16:44:01"
+	"lastUpdated": "2014-10-04 22:19:55"
 }
 
 /*
@@ -45,7 +45,7 @@ function detectWeb(doc, url) {
 	return "journalArticle";
 }
 
-function getSearchResults(doc, checkOnly) {
+function getSearchResults(doc, checkOnly, extras) {
 	var articles = {};
 	var container = doc.getElementsByName('frmSearchResults')[0]
 		|| doc.getElementsByName('frmAbs')[0];
@@ -55,17 +55,19 @@ function getSearchResults(doc, checkOnly) {
 	}
 	var rows = container.getElementsByClassName('articleEntry'),
 		found = false,
-		doiLink = 'a[contains(@href, "/doi/abs/") or '
+		doiLink = 'a[contains(@href, "/doi/abs/") or contains(@href, "/doi/abstract/") or '
 			+ 'contains(@href, "/doi/full/") or contains(@href, "/doi/book/")]';
 	for (var i = 0; i<rows.length; i++) {
 		var title = rows[i].getElementsByClassName('art_title')[0];
 		if (!title) continue;
 		title = ZU.trimInternal(title.textContent);
 		
-		var url = ZU.xpathText(rows[i], '(.//' + doiLink + ')[1]/@href');
+		var urlRow = rows[i];
+		var url = ZU.xpathText(urlRow, '(.//' + doiLink + ')[1]/@href');
+		
 		if (!url) {
 			// e.g. http://pubs.rsna.org/toc/radiographics/toc/33/7 shows links in adjacent div
-			var urlRow = rows[i].nextElementSibling;
+			urlRow = rows[i].nextElementSibling;
 			if (!urlRow || urlRow.classList.contains('articleEntry')) continue;
 			
 			url = ZU.xpathText(urlRow, '(.//' + doiLink + ')[1]/@href');
@@ -74,6 +76,10 @@ function getSearchResults(doc, checkOnly) {
 		
 		if (checkOnly) return true;
 		found = true;
+		
+		if (extras) {
+			extras[url] = { pdf: buildPdfUrl(url, urlRow) };
+		}
 		
 		articles[url] = title;
 	}
@@ -93,6 +99,10 @@ function getSearchResults(doc, checkOnly) {
 			if (checkOnly) return true;
 			found = true;
 			
+			if (extras) {
+				extras[url] = { pdf: buildPdfUrl(url, rows[i]) };
+			}
+			
 			articles[url] = title;
 		}
 	}
@@ -100,25 +110,52 @@ function getSearchResults(doc, checkOnly) {
 	return found ? articles : false;
 }
 
+// Keep this in line with target regexp
+var replURLRegExp = /\/doi\/(?:abs|abstract|full|figure|ref|citedby|book)\//;
+
+function buildPdfUrl(url, root) {
+	if (!replURLRegExp.test(url)) return false; // The whole thing is probably going to fail anyway
+	
+	var pdfPaths = ['/doi/pdf/', '/doi/pdfplus/'];
+	for (var i=0; i<pdfPaths.length; i++) {
+		if (ZU.xpath(root, './/a[contains(@href, "' + pdfPaths[i] + '")]').length) {
+			return url.replace(replURLRegExp, pdfPaths[i]);
+		}
+	}
+	
+	Z.debug('PDF link not found.')
+	if (root.nodeType != 9 /*DOCUMENT_NODE*/) {
+		Z.debug('Available links:');
+		var links = root.getElementsByTagName('a');
+		if (!links.length) Z.debug('No links');
+		for (var i=0; i<links.length; i++) {
+			Z.debug(links[i].href);
+		}
+	}
+	
+	return false;
+}
+
 function doWeb(doc, url) {
-	var arts = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc), function (items) {
+		var extras = {};
+		Zotero.selectItems(getSearchResults(doc, false, extras), function (items) {
 			if (!items) {
 				return true;
 			}
-			urls = new Array();
+			var articles = [];
 			for (var itemurl in items) {
-				//Z.debug(itemurl)
-				//some search results have some "baggage" at the end - remove
-				urls.push(itemurl.replace(/\?prev.+/, ""));
+				articles.push({
+					url: itemurl.replace(/\?prev.+/, ""),
+					extras: extras[itemurl]
+				});
 			}
 			
-			ZU.processDocuments(urls, scrape)
+			fetchArticles(articles);
 		});
 
 	} else {
-		scrape(doc, url)
+		scrape(doc, url, {pdf: buildPdfUrl(url, doc)});
 	}
 }
 
@@ -132,10 +169,20 @@ function fixCase(str, titleCase) {
 	return str.charAt(0) + str.substr(1).toLowerCase();
 }
 
-function scrape(doc, url) {
+function fetchArticles(articles) {
+	if (!articles.length) return;
+	
+	var article = articles.shift();
+	ZU.processDocuments(article.url, function(doc, url) {
+		scrape(doc, url, article.extras);
+	},
+	function() {
+		if (articles.length) fetchArticles(articles);
+	});
+}
+
+function scrape(doc, url, extras) {
 	url = url.replace(/[?#].*/, "");
-	var replURLRegExp = /\/doi\/(?:abs|full|figure|ref|citedby|book)\//;
-	var pdfurl = url.replace(replURLRegExp, "/doi/pdf/");
 	var doi = url.match(/10\.[^?#]+/)[0];
 	var citationurl = url.replace(replURLRegExp, "/action/showCitFormats?doi=");
 	var abstract = ZU.xpathText(doc, '//div[@class="abstractSection"]')
@@ -169,15 +216,20 @@ function scrape(doc, url) {
 					item.tags.push(tags[i].textContent)
 				}
 				item.abstractNote = abstract;
-				item.attachments = [{
-					url: pdfurl,
-					title: "Full Text PDF",
-					mimeType: "application/pdf"
-				}, {
+				item.attachments = [];
+				if (extras.pdf) {
+					item.attachments.push({
+						url: extras.pdf,
+						title: "Full Text PDF",
+						mimeType: "application/pdf"
+					});
+				}
+				
+				item.attachments.push({
 					document: doc,
 					title: "Snapshot",
 					mimeType: "text/html"
-				}];
+				});
 				item.libraryCatalog = url.replace(/^https?:\/\/(?:www\.)?/, '')
 					.replace(/[\/:].*/, '') + " (Atypon)";
 				item.complete();
@@ -555,6 +607,52 @@ var testCases = [
 				"shortTitle": "BLOCK COPOLYMER THIN FILMS",
 				"url": "http://www.annualreviews.org/doi/abs/10.1146/annurev.matsci.31.1.323",
 				"volume": "31",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.emeraldinsight.com/toc/sajgbr/2/2",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.emeraldinsight.com/doi/full/10.1108/SAJGBR-10-2012-0120",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Irish coffee? Well, something better …",
+				"creators": [
+					{
+						"lastName": "Rao",
+						"firstName": "Pramila",
+						"creatorType": "author"
+					}
+				],
+				"date": "August 16, 2013",
+				"DOI": "10.1108/SAJGBR-10-2012-0120",
+				"ISSN": "2045-4457",
+				"issue": "2",
+				"journalAbbreviation": "S Asian Jnl of Global Bus Res",
+				"libraryCatalog": "emeraldinsight.com (Atypon)",
+				"pages": "165-171",
+				"publicationTitle": "South Asian Journal of Global Business Research",
+				"shortTitle": "Irish coffee?",
+				"url": "http://www.emeraldinsight.com/doi/full/10.1108/SAJGBR-10-2012-0120",
+				"volume": "2",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
