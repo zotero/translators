@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-02-10 19:08:44"
+	"lastUpdated": "2014-10-12 22:00:27"
 }
 
 /*
@@ -197,14 +197,14 @@ function finalizeItem(item) {
 	delete item.creatorsBackup;
 	if (!item.itemType) item.itemType = inputTypeMap["Journal Article"];
 	item.title = item.title.replace(/(\.\s*)?(\[(Article|Report|Miscellaneous)\])?$/, "")
-	var monthRegex = new ZU.XRegExp('([-/]?(Jan(uary)?|Feb(ruary)?|Mar(ch)?|Apr(il)?|May|Jun(e)?|Jul(y)?|Aug(ust)?|Sep(tember)?|Oct(ober)?|Nov(ember)?|Dec(ember)?))+', 'n');
+	var monthRegex = /(?:[-/]?(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?))+/;
 	var value = item.citation
 	if (!value && item.itemType == "bookSection") value = item.bookTitle
 	if (item.itemType == "journalArticle" && value) {
 		if (value.match(/\d{4}/)) {
 			if (!item.date) item.date = value.match(/\d{4}/)[0];
 		}
-		var month = ZU.XRegExp.exec(value, monthRegex); 
+		var month = monthRegex.exec(value);
 		if (month) item.date = item.date += " " + (month)[0];
 		if (value.match(/(\d+)\((\d+(?:\-\d+)?)\)/)) {
 			var voliss = value.match(/(\d+)\((\d+(?:\-\d+)?)\)/);
