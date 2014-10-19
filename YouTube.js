@@ -9,91 +9,67 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-10-19 02:53:13"
+	"lastUpdated": "2014-10-19 03:31:27"
 }
 
-function detectWeb(doc, url){
-	/*var xpath = '//input[@type="hidden" and @name="video_id"]';
-	if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+function detectWeb(doc, url) {
+	if (getVideoId(url)) {
 		return "videoRecording";
-	}*/
-	if (url.match(/\/watch\?(?:.*)v=([0-9a-zA-Z]+)/)) {
-		return "videoRecording";
-	}
-	//Search results
-	if ( ZU.xpath(doc, '//ol[@id="search-results"]//a[contains(@href, "/watch?v=")]').length ){
-		return "multiple";
-	}
-	//playlists
-	if ( ZU.xpath(doc, '//td[@class="pl-video-title"]/a[contains(@class,"sessionlink") and contains(@href,"/watch?")]').length ){	
-		return "multiple";
-	}
-	//user page
-	if ( ZU.xpath(doc, '//div[contains(@class, "feed-item-main")]//a[contains(@href, "/watch?v=")]').length ){
-		return "multiple";
-	}
-	// still used?
-	if ( ZU.xpath(doc,'//div[@class="vltitle"]/div[@class="vlshortTitle"]/a[contains(@href, "/watch?v=")]').length ){	
-		return "multiple";
 	}
 	
+	//Search results
+	if ( getSearchResults(doc, true) ) {	
+		return "multiple";
+	}
 }
 
-function doWeb(doc, url){
-	var host = doc.location.host;
-	var video_ids = new Array();
-	var video_id;
-	var videoRe = /\/watch\?(?:.*)v=([0-9a-zA-Z_-]+)/;
-	if(video_id = videoRe.exec(url)) {
-		//single video
-		video_ids.push(video_id[1]);
-		getData(video_ids, host);
+function getSearchResults(doc, checkOnly) {
+	var container = doc.getElementById('results') || doc.getElementById('browse-items-primary');
+	if (!container) return false;
+	
+	var links = container.getElementsByClassName('yt-uix-tile-link');
+
+	var items = {}, found = false;
+	for (var i=0, n=links.length; i<n; i++) {
+		var title = ZU.trimInternal(links[i].textContent);
+		var id = getVideoId(links[i].href);
+		if (!title || !id) continue;
+		
+		if (checkOnly) return true;
+		
+		found = true
+		items[id] = title;
+	}
+	
+	return found ? items : false;
+}
+
+function getVideoId(url) {
+	var id = url.match(/\/watch\?(?:.*)\bv=([0-9a-zA-Z_-]+)/);
+	if (id) return id[1];
+	return false;
+}
+
+function doWeb(doc, url) {
+	if (detectWeb(doc, url) != 'multiple') {
+		getData([getVideoId(url)]);
 	} else {
-		// multiple videos
-		var items = new Object();
-		var isPlaylist = false;
-		// search results and community/user pages
-		var elmts = ZU.xpath(doc, '//ol[@id="search-results"]//a[contains(@href, "/watch?v=")]|//div[contains(@class, "feed-item-main")]//a[contains(@href, "/watch?v=")]')
-		if (!elmts.length) {
-			//playlists
-			elmts = ZU.xpath(doc, '//td[@class="pl-video-title"]/a[contains(@class,"sessionlink") and contains(@href,"/watch?")]');
-			if(elmts.length==0 ) {
-				// still used?
-				elmts = ZU.xpath(doc, '//div[@class="vltitle"]/div[@class="vlshortTitle"]/a[contains(@href, "/watch?v=")]');
-			}
-		}
-
-		if( !elmts ) return false;
-
-		var elmt, title, link;
-		for (var i=0, n=elmts.length; i<n; i++) {
-			elmt = elmts[i];
-			title = elmt.textContent;
-			title = Zotero.Utilities.trimInternal(title);
-			link = elmt.href;
-			//Zotero.debug(link);
-			video_id = videoRe.exec(link)[1];
-			items[video_id] = title;
-		}
-
-		Zotero.selectItems(items, function (items) {
+		Zotero.selectItems(getSearchResults(doc), function (items) {
 			if (!items) return true;
 
+			var ids = [];
 			for (var i in items) {
-				video_ids.push(i);
+				ids.push(i);
 			}
-			getData(video_ids, host);
+			getData(ids);
 		});
 	}
 }
 
-function getData(ids, host){
-	var uris = new Array();	
-	var url = "//gdata.youtube.com/feeds/videos/";
-	for each(var id in ids){
-		uris.push(url+id);
-	}
-	Zotero.Utilities.HTTP.doGet(uris, function(text) {	
+function getData(ids){
+	var uris = ids.map(function(id) { return "//gdata.youtube.com/feeds/videos/" + id; });
+	
+	ZU.doGet(uris, function(text) {	
 		var ns = {"default":"http://www.w3.org/2005/Atom", "media":"http://search.yahoo.com/mrss/", "yt":"http://gdata.youtube.com/schemas/2007"};
 		
 		var parser = new DOMParser();
