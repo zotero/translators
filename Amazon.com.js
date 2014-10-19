@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-10-19 02:30:12"
+	"lastUpdated": "2014-10-19 06:05:44"
 }
 
 function detectWeb(doc, url) {
@@ -45,7 +45,11 @@ function getSearchResults(doc, checkOnly) {
 	var links = [],
 		container = doc.getElementById('searchTemplate');
 	if (container) {
-		links = ZU.xpath(container, './/div[contains(@class,"results")]/div[starts-with(@id,"result_")]//h3/a');
+		
+		links = container.getElementsByClassName('s-access-detail-page');
+		if (!links.length) {
+			links = ZU.xpath(container, './/div[contains(@class,"results")]/div[starts-with(@id,"result_")]//h3/a');
+		}
 	}
 	
 	if(!links.length) {
