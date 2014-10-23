@@ -2,18 +2,51 @@
 	"translatorID": "938ebe32-2b2e-4349-a5b3-b3a05d3de627",
 	"label": "ACS Publications",
 	"creator": "Sean Takats, Michael Berkowitz, Santawort, and Aurimas Vinckevicius",
-	"target": "^https?://[^/]*pubs3?\\.acs\\.org[^/]*/(?:wls/journals/query/(?:subscriberResults|query)\\.html|acs/journals/toc\\.page|cgi-bin/(?:article|abstract|sample|asap)\\.cgi|isbn/\\d|doi/(?:full|abs)/10\\.)",
+	"target": "https?://pubs\\.acs\\.org[^/]*/(?:toc/|journal/|topic/|isbn/\\d|doi/(?:full|abs)/10\\.|action/doSearch\\?)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-09-07 03:57:02"
+	"lastUpdated": "2014-10-23 02:36:27"
 }
 
-function getSearchResults(doc) {
-	return doc.getElementsByClassName('articleBox');
+function getSearchResults(doc, checkOnly, itemOpts) {
+	var items = {}, found = false;
+	var titles = doc.getElementsByClassName('titleAndAuthor');
+	for(var i=0; i<titles.length; i++){
+		var a = ZU.xpath(titles[i], './h2/a')[0];
+		if (!a) continue;
+		
+		var title = ZU.trimInternal(a.textContent);
+		var doi = getDoi(a.href);
+		if (!title || !doi) continue;
+		
+		if (checkOnly) return true;
+		
+		found = true;
+		items[doi] = title;
+		
+		itemOpts[doi] = {};
+		//check if article contains supporting info,
+		//so we don't have to waste an HTTP request later if it doesn't
+		var articleBox = titles[i].parentNode.parentNode;
+		if (!articleBox.classList.contains('articleBox')) {
+			// e.g. Most Recently Published under Subject Search
+			continue;
+		}
+		
+		if(ZU.xpath(articleBox, './/a[text()="Supporting Info"]').length) {
+			itemOpts[doi].hasSupp = true;
+		}
+		
+		// Check which versions of the PDF we have
+		itemOpts[doi].highRes = !!articleBox.getElementsByClassName('pdf-high-res').length;
+		itemOpts[doi].pdfPlus = !!articleBox.getElementsByClassName('pdf-low-res').length;
+	}
+	
+	return found ? items : false;
 }
 
 function getDoi(url) {
@@ -77,10 +110,11 @@ function attachSupp(item, doi, opts) {
  ***************************/
 
 function detectWeb(doc, url) {
-	if(doc.getElementById('articleListHeader_selectAllToc')
-		&& getSearchResults(doc).length) {
+	if (doc.getElementById('articleListHeader_selectAllToc')
+		&& getSearchResults(doc, true)
+	) {
 		return "multiple";
-	} else if(getDoi(url)) {
+	} else if (getDoi(url)) {
 		var h2 = ZU.xpathText(doc, '//div[@id="articleHead"]/h2');
 		if(h2 && h2.indexOf("Chapter") !=-1) {
 			return "bookSection";
@@ -95,7 +129,7 @@ function doWeb(doc, url){
 		host: 'http://' + doc.location.host + "/"
 	};
 	//reduce some overhead by fetching these only once
-	if(Z.getHiddenPref) {
+	if (Z.getHiddenPref) {
 		opts.attachSupp = Z.getHiddenPref("attachSupplementary");
 		opts.attachAsLink = Z.getHiddenPref("supplementaryAsLink");
 		var highResPDF = Z.getHiddenPref("ACS.highResPDF"); //attach high res PDF?
@@ -105,30 +139,9 @@ function doWeb(doc, url){
 		}
 	}
 	
-	if(detectWeb(doc, url) == "multiple") { //search
-		var a, doi, title, items = {}, supp, itemOpts = {};
-		var elmts = getSearchResults(doc);
-		for(var i=0, n=elmts.length; i<n; i++){
-			a = ZU.xpath(elmts[i], '(.//div[@class="titleAndAuthor"]/h2/a)[1]')[0];
-			title = a.textContent;
-			doi = getDoi(a.href);
-			items[doi] = title;
-			
-			itemOpts[doi] = {};
-			//check if article contains supporting info,
-			//so we don't have to waste an HTTP request later if it doesn't
-			supp = doc.evaluate('.//a[text()="Supporting Info"]', elmts[i],
-				null, XPathResult.ANY_TYPE, null).iterateNext();
-			if(supp) {
-				itemOpts[doi].hasSupp = true;
-			}
-			
-			// Check which versions of the PDF we have
-			itemOpts[doi].highRes = !!elmts[i].getElementsByClassName('pdf-high-res').length;
-			itemOpts[doi].pdfPlus = !!elmts[i].getElementsByClassName('pdf-low-res').length;
-		}
-		
-		Zotero.selectItems(items, function (items) {
+	if (detectWeb(doc, url) == "multiple") { //search
+		var itemOpts = {};
+		Zotero.selectItems(getSearchResults(doc, false, itemOpts), function (items) {
 			if (!items) {
 				return true;
 			}
@@ -299,6 +312,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Life Cycle Environmental Assessment of Lithium-Ion and Nickel Metal Hydride Batteries for Plug-In Hybrid and Battery Electric Vehicles",
 				"creators": [
 					{
 						"lastName": "Majeau-Bettez",
@@ -316,9 +330,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "May 15, 2011",
+				"DOI": "10.1021/es103607c",
+				"ISSN": "0013-936X",
+				"abstractNote": "This study presents the life cycle assessment (LCA) of three batteries for plug-in hybrid and full performance battery electric vehicles. A transparent life cycle inventory (LCI) was compiled in a component-wise manner for nickel metal hydride (NiMH), nickel cobalt manganese lithium-ion (NCM), and iron phosphate lithium-ion (LFP) batteries. The battery systems were investigated with a functional unit based on energy storage, and environmental impacts were analyzed using midpoint indicators. On a per-storage basis, the NiMH technology was found to have the highest environmental impact, followed by NCM and then LFP, for all categories considered except ozone depletion potential. We found higher life cycle global warming emissions than have been previously reported. Detailed contribution and structural path analyses allowed for the identification of the different processes and value-chains most directly responsible for these emissions. This article contributes a public and detailed inventory, which can be easily be adapted to any powertrain, along with readily usable environmental performance assessments.",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"issue": "10",
+				"journalAbbreviation": "Environ. Sci. Technol.",
+				"libraryCatalog": "ACS Publications",
+				"pages": "4548-4554",
+				"publicationTitle": "Environmental Science & Technology",
+				"publisher": "American Chemical Society",
+				"url": "http://dx.doi.org/10.1021/es103607c",
+				"volume": "45",
 				"attachments": [
 					{
 						"title": "ACS Full Text PDF w/ Links",
@@ -329,20 +353,9 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Life Cycle Environmental Assessment of Lithium-Ion and Nickel Metal Hydride Batteries for Plug-In Hybrid and Battery Electric Vehicles",
-				"date": "May 15, 2011",
-				"DOI": "10.1021/es103607c",
-				"publicationTitle": "Environmental Science & Technology",
-				"journalAbbreviation": "Environ. Sci. Technol.",
-				"pages": "4548-4554",
-				"volume": "45",
-				"issue": "10",
-				"publisher": "American Chemical Society",
-				"abstractNote": "This study presents the life cycle assessment (LCA) of three batteries for plug-in hybrid and full performance battery electric vehicles. A transparent life cycle inventory (LCI) was compiled in a component-wise manner for nickel metal hydride (NiMH), nickel cobalt manganese lithium-ion (NCM), and iron phosphate lithium-ion (LFP) batteries. The battery systems were investigated with a functional unit based on energy storage, and environmental impacts were analyzed using midpoint indicators. On a per-storage basis, the NiMH technology was found to have the highest environmental impact, followed by NCM and then LFP, for all categories considered except ozone depletion potential. We found higher life cycle global warming emissions than have been previously reported. Detailed contribution and structural path analyses allowed for the identification of the different processes and value-chains most directly responsible for these emissions. This article contributes a public and detailed inventory, which can be easily be adapted to any powertrain, along with readily usable environmental performance assessments.",
-				"ISSN": "0013-936X",
-				"url": "http://dx.doi.org/10.1021/es103607c",
-				"libraryCatalog": "ACS Publications",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -357,6 +370,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "bookSection",
+				"title": "Redox Chemistry and Natural Organic Matter (NOM): Geochemists? Dream, Analytical Chemists? Nightmare",
 				"creators": [
 					{
 						"lastName": "Donald L. Macalady",
@@ -369,9 +383,19 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "January 1, 2011",
+				"ISBN": "0-8412-2652-0",
+				"abstractNote": "Natural organic matter (NOM) is an inherently complex mixture of polyfunctional organic molecules. Because of their universality and chemical reversibility, oxidation/reductions (redox) reactions of NOM have an especially interesting and important role in geochemistry. Variabilities in NOM composition and chemistry make studies of its redox chemistry particularly challenging, and details of NOM-mediated redox reactions are only partially understood. This is in large part due to the analytical difficulties associated with NOM characterization and the wide range of reagents and experimental systems used to study NOM redox reactions. This chapter provides a summary of the ongoing efforts to provide a coherent comprehension of aqueous redox chemistry involving NOM and of techniques for chemical characterization of NOM. It also describes some attempts to confirm the roles of different structural moieties in redox reactions. In addition, we discuss some of the operational parameters used to describe NOM redox capacities and redox states, and describe nomenclature of NOM redox chemistry. Several relatively facile experimental methods applicable to predictions of the NOM redox activity and redox states of NOM samples are discussed, with special attention to the proposed use of fluorescence spectroscopy to predict relevant redox characteristics of NOM samples.",
+				"bookTitle": "Aquatic Redox Chemistry",
+				"libraryCatalog": "ACS Publications",
+				"numberOfVolumes": "0",
+				"pages": "85-111",
+				"publisher": "American Chemical Society",
+				"series": "ACS Symposium Series",
+				"seriesNumber": "1071",
+				"shortTitle": "Redox Chemistry and Natural Organic Matter (NOM)",
+				"url": "http://dx.doi.org/10.1021/bk-2011-1071.ch005",
+				"volume": "1071",
 				"attachments": [
 					{
 						"title": "ACS Full Text PDF w/ Links",
@@ -382,20 +406,9 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"date": "January 1, 2011",
-				"volume": "1071",
-				"numberOfVolumes": "0",
-				"seriesNumber": "1071",
-				"url": "http://dx.doi.org/10.1021/bk-2011-1071.ch005",
-				"abstractNote": "Natural organic matter (NOM) is an inherently complex mixture of polyfunctional organic molecules. Because of their universality and chemical reversibility, oxidation/reductions (redox) reactions of NOM have an especially interesting and important role in geochemistry. Variabilities in NOM composition and chemistry make studies of its redox chemistry particularly challenging, and details of NOM-mediated redox reactions are only partially understood. This is in large part due to the analytical difficulties associated with NOM characterization and the wide range of reagents and experimental systems used to study NOM redox reactions. This chapter provides a summary of the ongoing efforts to provide a coherent comprehension of aqueous redox chemistry involving NOM and of techniques for chemical characterization of NOM. It also describes some attempts to confirm the roles of different structural moieties in redox reactions. In addition, we discuss some of the operational parameters used to describe NOM redox capacities and redox states, and describe nomenclature of NOM redox chemistry. Several relatively facile experimental methods applicable to predictions of the NOM redox activity and redox states of NOM samples are discussed, with special attention to the proposed use of fluorescence spectroscopy to predict relevant redox characteristics of NOM samples.",
-				"pages": "85-111",
-				"title": "Redox Chemistry and Natural Organic Matter (NOM): Geochemists? Dream, Analytical Chemists? Nightmare",
-				"bookTitle": "Aquatic Redox Chemistry",
-				"series": "ACS Symposium Series",
-				"ISBN": "0-8412-2652-0",
-				"publisher": "American Chemical Society",
-				"libraryCatalog": "ACS Publications",
-				"shortTitle": "Redox Chemistry and Natural Organic Matter (NOM)"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -405,6 +418,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Theory of Charge Transport in Polypeptides",
 				"creators": [
 					{
 						"lastName": "Schlag",
@@ -432,9 +446,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "August 1, 2000",
+				"DOI": "10.1021/jp000606+",
+				"ISSN": "1520-6106",
+				"abstractNote": "We have derived phase space and diffusion theories for a new hopping model of charge transport in polypeptides and thence for distal chemical kinetics. The charge is transferred between two carbamide groups on each side of the Cα atom hinging two amino acid groups. When the torsional angles on the hinge approach a certain region of the Ramachandran plot, the charge transfer has zero barrier height and makes charge transfer the result of strong electronic correlation. The mean first passage time calculated from this analytic model of some 164 fs is in reasonable agreement with prior molecular dynamics calculation of some 140 fs and supports this new bifunctional model for charge transport and chemical reactions in polypeptides.",
+				"issue": "32",
+				"journalAbbreviation": "J. Phys. Chem. B",
+				"libraryCatalog": "ACS Publications",
+				"pages": "7790-7794",
+				"publicationTitle": "The Journal of Physical Chemistry B",
+				"url": "http://dx.doi.org/10.1021/jp000606+",
+				"volume": "104",
 				"attachments": [
 					{
 						"title": "ACS Full Text PDF w/ Links",
@@ -445,24 +467,30 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"DOI": "10.1021/jp000606+",
-				"journalAbbreviation": "J. Phys. Chem. B",
-				"issue": "32",
-				"abstractNote": "We have derived phase space and diffusion theories for a new hopping model of charge transport in polypeptides and thence for distal chemical kinetics. The charge is transferred between two carbamide groups on each side of the Cα atom hinging two amino acid groups. When the torsional angles on the hinge approach a certain region of the Ramachandran plot, the charge transfer has zero barrier height and makes charge transfer the result of strong electronic correlation. The mean first passage time calculated from this analytic model of some 164 fs is in reasonable agreement with prior molecular dynamics calculation of some 140 fs and supports this new bifunctional model for charge transport and chemical reactions in polypeptides.",
-				"ISSN": "1520-6106",
-				"url": "http://dx.doi.org/10.1021/jp000606+",
-				"libraryCatalog": "ACS Publications",
-				"title": "Theory of Charge Transport in Polypeptides",
-				"date": "August 1, 2000",
-				"publicationTitle": "The Journal of Physical Chemistry B",
-				"pages": "7790-7794",
-				"volume": "104"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
 		"url": "http://pubs.acs.org/isbn/9780841239999",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://pubs.acs.org/journal/acbcct",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://pubs.acs.org/action/doSearch?text1=zotero&field1=AllField",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://pubs.acs.org/topic/pharmaceuticials",
 		"items": "multiple"
 	}
 ]
