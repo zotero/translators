@@ -2,79 +2,115 @@
 	"translatorID": "d9be934c-edb9-490c-a88d-34e2ee106cd7",
 	"label": "Time.com",
 	"creator": "Michael Berkowitz",
-	"target": "^https?://[^/]*\\.time\\.com/",
+	"target": "^https://([^/]*\\\\.)?time.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-01-02 17:52:46"
+	"lastUpdated": "2014-10-24 21:31:51"
 }
 
 function detectWeb(doc, url) {
-
 	if (url.indexOf('results.html') != -1) {
 		return "multiple";
-	} else 
-	if (url.search(/\/article\/|\d{4}\/\d{2}\/\d{2}\/./)!=-1) {
+	}
+	else if (url.search(/\/article\/|\d{4}\/\d{2}\/\d{2}\/./)!=-1
+		|| ZU.xpathText(doc, '//section[@class="article-body"]/div[@class="issue-date"]')) {
 		return "magazineArticle";
+	}//we can get false positives on magazine if the user is scrolling
+}
+
+function handleAuthors(authors) {
+	if(authors && authors.trim()) {
+		var matches = authors.match(/^\s*([^\/]+?)\s*\/\s*(.+?)\s*$/);
+		if(matches) {
+			if(matches[1] == 'AP' || matches[1] == 'Fortune') {
+				authors = matches[2];
+			} else {
+				authors = matches[1];
+			}
+		}
+		//x, y and z
+		authors = authors.replace(/^By\s+|\sBy\s+/, "").split(/,| and /i);
+		var authArr = new Array();
+		for(var i=0, n=authors.length; i<n; i++) {
+			authArr.push(ZU.cleanAuthor(ZU.capitalizeTitle(authors[i].replace(/@.+/, "")), 'author'));
+		}
+		if(authArr.length)
+			return authArr
+	}
+}
+
+function handleKeywords(keywords) {
+	if(keywords && keywords.trim()) {
+		return ZU.capitalizeTitle(keywords).split(', ');
 	}
 }
 
 function scrape(doc, url) {
-	var translator = Zotero.loadTranslator('web');
-	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
-	translator.setDocument(doc);
+	var articles = ZU.xpath(doc,'//section/div[@class="wrapper"]/article'),
+		metaUrl = ZU.xpathText(doc, '/html/head/meta[@property="og:url"]/@content'),
+		activeTitle = ZU.xpathText(doc, '//nav/section[@class="article-list"]/article[contains(@class, "active")]');
+		
+	if(articles && doc.location.href.indexOf(metaUrl) == -1 && activeTitle) {
+		//scrolling down to a new article
+		activeTitle = activeTitle.trim();
 
-	translator.setHandler('itemDone', function(obj, item) {
-		item.itemType = "magazineArticle";
-		item.publicationTitle = "Time";
-		item.url = url;
-		item.ISSN = "0040-718X";
-		item.title = ZU.xpathText(doc, '//h1[@class="entry-title"]')
-		if(!item.title) item.title = ZU.xpathText(doc, '//meta[@property="og:title"]/@content')
-		//authors
-		var authors = ZU.xpathText(doc, '/html/head/meta[@name="byline"]/@content');
-		if(!authors) authors = ZU.xpathText(doc, '//span[@class="author vcard"]/a', null, ' and ');
-		if(!authors) authors = ZU.xpathText(doc, '//span[@class="entry-byline"]')
-		if(authors && authors.trim()) {
-			var matches = authors.match(/^\s*([^\/]+?)\s*\/\s*(.+?)\s*$/);
-			if(matches) {
-				if(matches[1] == 'AP') {
-					authors = matches[2];
-				} else {
-					authors = matches[1];
-				}
-			}
+		for(var i = 0; i < articles.length; i++){
+			var title = ZU.xpathText(articles[i], 'header//h2[@class="article-title"]');
+			if(activeTitle.indexOf(title) >= 0){
+				var item = new Zotero.Item("magazineArticle");
+				item.publicationTitle = "Time";
+				item.url = url;
+				item.ISSN = "0040-718X";
+				item.title = title;
+				var authors = ZU.xpathText(articles[i], 'header//ul[@class="article-authors"]//span[@class="byline"]/a')
+				if(authors) item.creators = handleAuthors(authors);
 
-			authors = authors.replace(/^By\s+|\sBy\s+/, "").split(/ and /i);
-			var authArr = new Array();
-			for(var i=0, n=authors.length; i<n; i++) {
-				authArr.push(ZU.cleanAuthor(ZU.capitalizeTitle(authors[i].replace(/@.+/, "")), 'author'));
+				var keywords = ZU.xpathText(articles[i], 'header//a[@class="topic-tag" or @class="section-tag"]');
+				if(keywords) item.tags = handleKeywords(keywords);
+
+				item.abstractNote = ZU.xpathText(articles[i], 'section//h2[@class="article-excerpt"]')
+				item.date = ZU.xpathText(articles[i], 'header//time[@class="publish-date"]/@datetime')
+				item.complete();
+				break;
 			}
+		}
+	}
+	else{
+		var translator = Zotero.loadTranslator('web');
+		translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+		translator.setDocument(doc);
 	
-			if(authArr.length) {
-				item.creators = authArr;
-			}
-		}
+		translator.setHandler('itemDone', function(obj, item) {
+			item.itemType = "magazineArticle";
+			item.publicationTitle = "Time";
+			item.url = url;
+			item.ISSN = "0040-718X";
+			var authors = ZU.xpathText(doc, '//meta[@name="byline"]/@content')
+				|| ZU.xpathText(doc, '//span[@class="author vcard"]/a', null, ' and ')
+				|| ZU.xpathText(doc, '//span[@class="entry-byline"]')
+				|| ZU.xpathText(doc, '//header[@class="article-header"]//ul[@class="article-authors"]//span[@class="byline"]/a');
+			if(authors) item.creators = handleAuthors(authors);
 
-		//keywords
-		var keywords = ZU.xpathText(doc, '/html/head/meta[@name="keywords"]/@content');
-		if(keywords && keywords.trim()) {
-			item.tags = ZU.capitalizeTitle(keywords).split(', ');
-		}
-
-		item.complete();
-	});
-
-	translator.getTranslatorObject(function(em) {
-		em.addCustomFields({
-			'date': 'date'
+			var title = ZU.xpathText(doc, '//h1[@class="entry-title"]');
+			if(title) item.title = title;
+			var keywords = ZU.xpathText(doc, '/html/head/meta[@name="keywords"]/@content')
+				|| ZU.xpathText(doc, 'header//a[@class="topic-tag" or @class="section-tag"]');
+			if(keywords) item.tags = handleKeywords(keywords);
+			if(!item.abstractNote) item.abstractNote = ZU.xpathText(doc, '//h2[@class="article-excerpt"]')
+			if(!item.date) item.date = ZU.xpathText(doc, '//time[@class="publish-date"]/@datetime');
+			item.complete();
 		});
-	});
-
-	translator.translate();
+		
+		translator.getTranslatorObject(function(em) {
+			em.addCustomFields({'date': 'date'});
+		});
+		
+		translator.translate();
+	}
 }
 
 
@@ -97,6 +133,81 @@ function doWeb(doc, url) {
 	}
 }/** BEGIN TEST CASES **/
 var testCases = [
+	{
+		"type": "web",
+		"url": "http://time.com/3533556/the-war-on-teacher-tenure/",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"creators": [
+					{
+						"firstName": "Haley Sweetland",
+						"lastName": "Edwards",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"cover story",
+					"education",
+					"nation",
+					"silicon valley",
+					"teahers",
+					"tech"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "The War on Teacher Tenure",
+				"publicationTitle": "Time",
+				"url": "http://time.com/3533556/the-war-on-teacher-tenure/",
+				"abstractNote": "It’s really difficult to fire a bad teacher. A group of Silicon Valley investors wants to change that",
+				"libraryCatalog": "time.com",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"ISSN": "0040-718X",
+				"date": "2014-10-23 05:58:37"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://time.com/3512672/the-new-ebola-protocols",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"creators": [
+					{
+						"firstName": "David Von",
+						"lastName": "Drehle",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"ebola",
+					"medicine"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"document": "[object]",
+						"title": "Snapshot"
+					}
+				],
+				"title": "The New Ebola Protocols",
+				"publicationTitle": "Time",
+				"url": "http://time.com/3512672/the-new-ebola-protocols/",
+				"abstractNote": "New U.S. cases have health experts rethinking the response and turning to doctors and hospitals that were truly prepared",
+				"libraryCatalog": "time.com",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"ISSN": "0040-718X",
+				"date": "2014-10-16 06:26:47"
+			}
+		]
+	},
 	{
 		"type": "web",
 		"url": "http://content.time.com/time/nation/article/0,8599,2099187,00.html",
