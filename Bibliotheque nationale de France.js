@@ -2,14 +2,14 @@
 	"translatorID": "47533cd7-ccaa-47a7-81bb-71c45e68a74d",
 	"label": "Bibliothèque nationale de France",
 	"creator": "Florian Ziche",
-	"target": "^https?://[^/]*catalogue\\.bnf\\.fr",
+	"target": "^https?://([^/]+\\.)?catalogue\\.bnf\\.fr/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2013-02-28 14:51:02"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 /*

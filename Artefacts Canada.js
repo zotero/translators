@@ -2,14 +2,14 @@
 	"translatorID": "661fc39a-2500-4710-8285-2d67ddc00a69",
 	"label": "Artefacts Canada",
 	"creator": "Adam Crymble",
-	"target": "^https?://(www\\.)?pro\\.rcip-chin\\.gc\\.ca",
+	"target": "^https?://(www\\.)?pro\\.rcip-chin\\.gc\\.ca/",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-09-16 00:25:18"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 function detectWeb(doc, url) {

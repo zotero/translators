@@ -2,14 +2,14 @@
 	"translatorID": "9405db4b-be7f-42ab-86ca-430226be9b35",
 	"label": "Potsdamer Neueste Nachrichten",
 	"creator": "Martin Meyerhoff",
-	"target": "^https?://www\\.pnn\\.de",
+	"target": "^https?://www\\.pnn\\.de/",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-06 16:15:15"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /*

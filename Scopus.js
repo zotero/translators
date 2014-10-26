@@ -2,14 +2,14 @@
 	"translatorID": "a14ac3eb-64a0-4179-970c-92ecc2fec992",
 	"label": "Scopus",
 	"creator": "Michael Berkowitz, Rintze Zelle and Avram Lyon",
-	"target": "^https?://www\\.scopus\\.com[^/]*",
+	"target": "^https?://www\\.scopus\\.com/",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-04-14 16:54:39"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /*

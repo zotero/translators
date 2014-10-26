@@ -2,14 +2,14 @@
 	"translatorID": "9a0ecbda-c0e9-4a19-84a9-fc8e7c845afa",
 	"label": "Lulu",
 	"creator": "Aurimas Vinckevicius",
-	"target": "https?://www.lulu.com/shop/",
+	"target": "^https?://www\\.lulu\\.com/shop/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 101,
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-10-11 03:33:45"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function getSearchResults(doc) {

@@ -2,14 +2,14 @@
 	"translatorID": "96b54986-16c7-45ea-b296-fde962d658b2",
 	"label": "The Open Library",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://openlibrary\\.org",
+	"target": "^https?://openlibrary\\.org/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-04-17 03:10:37"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /*

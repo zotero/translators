@@ -2,14 +2,14 @@
 	"translatorID": "18bc329c-51af-497e-a7cf-aa572fae363d",
 	"label": "Archives Canada",
 	"creator": "Adam Crymble",
-	"target": "^https?://(www\\.)?archivescanada\\.ca",
+	"target": "^https?://(www\\.)?archivescanada\\.ca/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-12-07 15:18:12"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 function detectWeb (doc, url) {

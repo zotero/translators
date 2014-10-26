@@ -2,14 +2,14 @@
 	"translatorID": "fcf41bed-0cbc-3704-85c7-8062a0068a7a",
 	"label": "NCBI PubMed",
 	"creator": "Simon Kornblith, Michael Berkowitz, Avram Lyon, and Rintze Zelle",
-	"target": "https?://[^/]*(www|preview)[\\.\\-]ncbi[\\.\\-]nlm[\\.\\-]nih[\\.\\-]gov[^/]*/(?:m/)?(books|pubmed|sites/pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed|myncbi/browse/collection/|myncbi/collections/)",
+	"target": "^https?://([^/]+\\.)?(www|preview)[\\.\\-]ncbi[\\.\\-]nlm[\\.\\-]nih[\\.\\-]gov[^/]*/(m/)?(books|pubmed|sites/pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed|myncbi/browse/collection/|myncbi/collections/)",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 13,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-01-09 16:06:12"
+	"lastUpdated": "2015-02-12 09:59:12"
 }
 
 /*****************************

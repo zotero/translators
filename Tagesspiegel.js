@@ -2,14 +2,14 @@
 	"translatorID": "374ac2a5-dd45-461e-bf1f-bf90c2eb7085",
 	"label": "Tagesspiegel",
 	"creator": "Martin Meyerhoff, Sebastian Karcher",
-	"target": "^https?://www\\.tagesspiegel\\.de",
+	"target": "^https?://www\\.tagesspiegel\\.de/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2012-10-06 13:16:15"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /*

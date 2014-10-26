@@ -2,14 +2,14 @@
 	"translatorID": "c816f8ad-4c73-4f6d-914e-a6e7212746cf",
 	"label": "Neural Information Processing Systems",
 	"creator": "Fei Qi, Sebastian Karcher",
-	"target": "^https?://(?:books|papers)\\.nips\\.cc/",
+	"target": "^https?://(books|papers)\\.nips\\.cc/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-03-11 19:45:28"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

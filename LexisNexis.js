@@ -2,14 +2,14 @@
 	"translatorID": "b047a13c-fe5c-6604-c997-bef15e502b09",
 	"label": "LexisNexis",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://[^/]*lexis-?nexis\\.com",
+	"target": "^https?://([^/]+\\.)?lexis-?nexis\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-03-20 20:48:18"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 /*

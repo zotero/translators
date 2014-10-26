@@ -2,14 +2,14 @@
 	"translatorID": "19120a71-17a8-4629-936a-ccdf899b9861",
 	"label": "Sydney Morning Herald",
 	"creator": "Michael Berkowitz",
-	"target": "^https?://(www|search).smh.com.au/(news|siteSearch|articles)",
+	"target": "^https?://(www|search)\\.smh\\.com\\.au/(news|siteSearch|articles)",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 99,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2014-04-03 19:57:56"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

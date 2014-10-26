@@ -2,14 +2,14 @@
 	"translatorID": "e8fc7ebc-b63d-4eb3-a16c-91da232f7220",
 	"label": "Aluka",
 	"creator": "Sean Takats, Sebastian Karcher",
-	"target": "^https?://(?:www\\.)aluka\\.org/action/(?:showMetadata\\?doi=[^&]+|doSearch\\?|doBrowseResults\\?)",
+	"target": "^https?://(www\\.)?aluka\\.org/action/(showMetadata\\?doi=[^&]+|doSearch\\?|doBrowseResults\\?)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-08-06 19:23:07"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url){

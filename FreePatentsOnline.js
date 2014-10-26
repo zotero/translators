@@ -2,14 +2,14 @@
 	"translatorID": "879d738c-bbdd-4fa0-afce-63295764d3b7",
 	"label": "FreePatentsOnline",
 	"creator": "Adam Crymble",
-	"target": "^https?://www\\.freepatentsonline\\.com",
+	"target": "^https?://www\\.freepatentsonline\\.com/",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-15 18:04:37"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 function detectWeb(doc, url) {

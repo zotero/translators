@@ -2,14 +2,14 @@
 	"translatorID": "cee0cca2-e82a-4618-b6cf-16327970169d",
 	"label": "Gene Ontology",
 	"creator": "Amelia Ireland",
-	"target": "^https?://.*\\.geneontology\\.org",
+	"target": "^https?://([^/]+\\.)?geneontology\\.org/",
 	"minVersion": "2.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcv",
-	"lastUpdated": "2014-01-05 11:26:46"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 /*

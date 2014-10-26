@@ -2,14 +2,14 @@
 	"translatorID": "930d49bc-44a1-4c22-9dde-aa6f72fb11e5",
 	"label": "Cornell LII",
 	"creator": "Bill McKinney",
-	"target": "^https?://www\\.law\\.cornell\\.edu/supct/.+",
+	"target": "^https?://www\\.law\\.cornell\\.edu/supct/.",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-02-09 12:09:10"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

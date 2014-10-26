@@ -2,14 +2,14 @@
 	"translatorID": "8451431a-895f-4732-8339-79eb6756d2f9",
 	"label": "Civilization.ca",
 	"creator": "Adam Crymble",
-	"target": "^https?://collections\\.civilization\\.ca",
+	"target": "^https?://collections\\.civilization\\.ca/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-13 07:33:49"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 function detectWeb(doc, url) {

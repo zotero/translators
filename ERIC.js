@@ -2,14 +2,14 @@
 	"translatorID": "e4660e05-a935-43ec-8eec-df0347362e4c",
 	"label": "ERIC",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://(?:www\\.)?eric\\.ed\\.gov/",
+	"target": "^https?://(www\\.)?eric\\.ed\\.gov/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-12-14 16:36:31"
+	"lastUpdated": "2015-02-12 09:50:31"
 }
 
 /*

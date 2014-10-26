@@ -2,14 +2,14 @@
 	"translatorID": "98ad3ad1-9d43-4b2e-bc36-172cbf00ba1d",
 	"label": "eLife",
 	"creator": "Aurimas Vinckevicius",
-	"target": "https?://elife.elifesciences.org/(?:content/|elife/search\\?|category/|browse)",
+	"target": "^https?://elife\\.elifesciences\\.org/(content/|elife/search\\?|category/|browse)",
 	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-06-01 17:43:22"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

@@ -2,14 +2,14 @@
 	"translatorID": "73be930f-5773-41b2-a7a1-37c0eeade92f",
 	"label": "OZON.ru",
 	"creator": "Victor Rybynok",
-	"target": "^https?://www\\.ozon\\.ru",
+	"target": "^https?://www\\.ozon\\.ru/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-03 18:47:00"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /**

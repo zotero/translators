@@ -2,14 +2,14 @@
 	"translatorID": "d770e7d2-106c-4396-8c32-b35cdc46376c",
 	"label": "Project Gutenberg",
 	"creator": "Adam Crymble, Avram Lyon",
-	"target": "^https?://www\\.gutenberg\\.org",
+	"target": "^https?://www\\.gutenberg\\.org/",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-03 18:55:01"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 function detectWeb(doc, url) {

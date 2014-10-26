@@ -2,14 +2,14 @@
 	"translatorID": "0f9fc2fc-306e-5204-1117-25bca009dffc",
 	"label": "Library Catalog (TLC/YouSeeMore)",
 	"creator": "Simon Kornblith",
-	"target": "TLCScripts/interpac\\.dll\\?(?:.*LabelDisplay.*RecordNumber=[0-9]|Search|ItemTitles)",
+	"target": "TLCScripts/interpac\\.dll\\?(.*LabelDisplay.*RecordNumber=[0-9]|Search|ItemTitles)",
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
 	"priority": 260,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-08-26 04:11:42"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 /* other example here: http://ocl.tlcdelivers.com/TLCScripts/interpac.dll?LabelDisplay&LastResult=Search%26Config=ysm%26FormId=6588839%26Branch=,0,%26LimitsId=0%26StartIndex=0%26SearchField=7%26SearchType=1%26SearchData=food%26NotAddToHistory=1%26ItemsPerPage=30%26SortField=0%26PeriodLimit=-1%26SearchAvailableOnly=0&DataNumber=52182&RecordNumber=52182&SearchAvailableOnly=0&FormId=6588839&ItemField=1&Config=ysm&Branch=,0, 

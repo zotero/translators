@@ -2,14 +2,14 @@
 	"translatorID": "c9338ed5-b512-4967-8ffe-ab9c973559ef",
 	"label": "The Hamilton Spectator",
 	"creator": "Adam Crymble",
-	"target": "^https?://www\\.thespec\\.com",
+	"target": "^https?://www\\.thespec\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-12-12 13:55:59"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 function detectWeb(doc, url) {

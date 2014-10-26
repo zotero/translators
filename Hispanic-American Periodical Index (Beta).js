@@ -2,14 +2,14 @@
 	"translatorID": "cc4b1ea4-3349-4bb4-af55-cce5e06e4669",
 	"label": "Hispanic-American Periodical Index (Beta)",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://hapi\\.ucla\\.edu",
+	"target": "^https?://hapi\\.ucla\\.edu/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-09-07 10:21:42"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /*

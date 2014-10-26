@@ -2,14 +2,14 @@
 	"translatorID": "e5e34825-1314-43bd-a9fe-f38f6ab48403",
 	"label": "Jahrbuch",
 	"creator": "Aurimas Vinckevicius",
-	"target": "https?://jfm.sub.uni-goettingen.de/",
+	"target": "^https?://jfm\\.sub\\.uni-goettingen\\.de/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gv",
-	"lastUpdated": "2013-04-15 18:04:37"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

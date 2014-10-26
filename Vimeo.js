@@ -2,14 +2,14 @@
 	"translatorID": "1b0ffe71-1c2f-4a79-b894-40b990b3e491",
 	"label": "Vimeo",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://(www\\.)?vimeo\\.com",
+	"target": "^https?://(www\\.)?vimeo\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-07-25 23:57:48"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /*

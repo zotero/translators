@@ -2,14 +2,14 @@
 	"translatorID": "24d9f058-3eb3-4d70-b78f-1ba1aef2128d",
 	"label": "CTX",
 	"creator": "Avram Lyon and Simon Kornblith",
-	"target": "^https?://freecite\\.library\\.brown\\.edu",
+	"target": "^https?://freecite\\.library\\.brown\\.edu/",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 5,
 	"browserSupport": "gcv",
-	"lastUpdated": "2014-12-17 22:27:41"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /*

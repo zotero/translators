@@ -2,14 +2,14 @@
 	"translatorID": "74af9c75-dc14-4cdb-bb0b-1bbb13ba2e22",
 	"label": "Landes Publishers",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://www\\.landesbioscience\\.com",
+	"target": "^https?://www\\.landesbioscience\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-06-11 21:49:07"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /*

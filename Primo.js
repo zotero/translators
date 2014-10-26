@@ -5,11 +5,11 @@
 	"target": "/primo_library/|/nebis/|^https?://www\\.recherche-portal\\.ch/zbz/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2015-01-02 04:40:01"
+	"lastUpdated": "2015-02-12 09:50:52"
 }
 
 /*

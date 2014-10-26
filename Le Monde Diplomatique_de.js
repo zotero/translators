@@ -2,14 +2,14 @@
 	"translatorID": "530cf18c-e80a-4e67-ae9c-9b8c08591610",
 	"label": "Le monde diplomatique",
 	"creator": "Martin Meyerhoff",
-	"target": "^https?://www\\.monde-diplomatique\\.de",
+	"target": "^https?://www\\.monde-diplomatique\\.de/",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-04 10:09:57"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /*

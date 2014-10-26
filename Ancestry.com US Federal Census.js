@@ -3,12 +3,12 @@
 	"translatorType":4,
 	"label":"Ancestry.com US Federal Census",
 	"creator":"Elena Razlogova",
-	"target":"^https?://search.ancestry.com/(.*)usfedcen|1890orgcen|1910uscenindex",
+	"target":"^https?://search.ancestry.com/(.*)(usfedcen|1890orgcen|1910uscenindex)",
 	"minVersion":"1.0.0b4.r1",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 function detectWeb(doc, url) {

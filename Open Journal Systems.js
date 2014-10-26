@@ -5,15 +5,16 @@
 	"target": "/article/view/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-02-23 00:53:05"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {
-	if(ZU.xpathText(doc, '//a[@id="developedBy"]/@href') == 'http://pkp.sfu.ca/ojs/') {	//some sites remove this
+	var a = doc.getElementById('developedBy');
+	if(a && a.href == 'http://pkp.sfu.ca/ojs/') {	//some sites remove this
 		return 'journalArticle';
 	}
 }

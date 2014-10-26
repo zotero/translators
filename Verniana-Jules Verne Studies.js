@@ -2,14 +2,14 @@
 	"translatorID": "cdf8269c-86b9-4039-9bc4-9d998c67740e",
 	"label": "Verniana-Jules Verne Studies",
 	"creator": "Aurimas Vinckevicius",
-	"target": "https?://[^/]*verniana.org(:\\d+)?/volumes/\\d+/",
+	"target": "^https?://([^/]+\\.)?verniana\\.org(:\\d+)?/volumes/\\d+/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-01 01:22:04"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 /**

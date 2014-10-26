@@ -2,14 +2,14 @@
 	"translatorID": "bbad0221-134b-495a-aa56-d77cfaa67ab5",
 	"label": "Digital Humanities Quarterly",
 	"creator": "Michael Berkowitz",
-	"target": "^https?://(www\\.)?digitalhumanities\\.org/(dhq)?",
+	"target": "^https?://(www\\.)?digitalhumanities\\.org/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-20 20:46:53"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 function detectWeb(doc, url) {

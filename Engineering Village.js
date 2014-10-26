@@ -2,14 +2,14 @@
 	"translatorID": "1f40baef-eece-43e4-a1cc-27d20c0ce086",
 	"label": "Engineering Village",
 	"creator": "Ben Parr, Sebastian Karcher",
-	"target": "^https?://(?:www\\.)?engineeringvillage(2)?\\.(?:com|org)",
+	"target": "^https?://(www\\.)?engineeringvillage2?\\.(com|org)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-02-02 07:20:12"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url)

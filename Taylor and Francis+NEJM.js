@@ -2,14 +2,14 @@
 	"translatorID": "dac476e4-401d-430a-8571-a97c31c3b65e",
 	"label": "Taylor and Francis+NEJM",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://(www\\.)?(tandfonline\\.com|nejm\\.org)",
+	"target": "^https?://(www\\.)?(tandfonline\\.com|nejm\\.org)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-12-07 14:59:05"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /*

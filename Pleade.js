@@ -2,14 +2,14 @@
 	"translatorID": "ce68b0ed-3137-4e38-b691-f3bc49bc1497",
 	"label": "Pleade",
 	"creator": "DIA Modou",
-	"target": "(?:list-results|results|ead)\\.html\\?.*(?:base=ead|mode=|id=)",
+	"target": "(list-results|results|ead)\\.html\\?.*(base=ead|mode=|id=)",
 	"minVersion": "1.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 270,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2015-01-30 15:32:05"
+	"lastUpdated": "2015-02-12 09:50:52"
 }
 
 /*

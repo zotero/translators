@@ -2,14 +2,14 @@
 	"translatorID": "291934d5-36ec-4b81-ac9c-c5ad5313dba4",
 	"label": "Pion Journals",
 	"creator": "Michael Berkowitz",
-	"target": "http://(www.)?(hthpweb|envplan|perceptionweb)\\.com/",
+	"target": "^https?://(www\\.)?(hthpweb|envplan|perceptionweb)\\.com/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-02-09 12:26:39"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

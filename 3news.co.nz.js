@@ -2,14 +2,14 @@
 	"translatorID": "a9f7b277-e134-4d1d-ada6-8f7942be71a6",
 	"label": "3news.co.nz",
 	"creator": "Sopheak Hean",
-	"target": "^https?://www\\.3news\\.co\\.nz",
+	"target": "^https?://www\\.3news\\.co\\.nz/",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-12-09 20:59:33"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /*

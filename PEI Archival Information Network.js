@@ -2,14 +2,14 @@
 	"translatorID": "6871e8c5-f935-4ba1-8305-0ba563ce3941",
 	"label": "PEI Archival Information Network",
 	"creator": "Adam Crymble, Sebastian Karcher",
-	"target": "^https?://www\\.archives\\.pe\\.ca",
+	"target": "^https?://www\\.archives\\.pe\\.ca/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-02 23:13:31"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 function detectWeb(doc, url) {

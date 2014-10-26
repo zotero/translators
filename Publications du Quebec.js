@@ -2,14 +2,14 @@
 	"translatorID": "22d0bede-8db5-4656-9b9a-7d682ec1335d",
 	"label": "Publications du Québec",
 	"creator": "Marc Lajoie",
-	"target": "^https?://(?:www2\\.)?publicationsduquebec\\.gouv\\.qc\\.ca\\/",
+	"target": "^https?://(www2\\.)?publicationsduquebec\\.gouv\\.qc\\.ca\\/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-07-01 19:40:02"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 /*

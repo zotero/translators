@@ -2,14 +2,14 @@
 	"translatorID": "0abd577b-ec45-4e9f-9081-448737e2fd34",
 	"label": "UPCommons",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://upcommons\\.upc\\.edu",
+	"target": "^https?://upcommons\\.upc\\.edu/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-02-08 12:01:01"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 function detectWeb(doc, url) {

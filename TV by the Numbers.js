@@ -2,14 +2,14 @@
 	"translatorID": "180a62bf-efdd-4d38-8d85-8971af04dd85",
 	"label": "TV by the Numbers",
 	"creator": "odie5533",
-	"target": "^https?://tvbythenumbers\\.com",
+	"target": "^https?://tvbythenumbers\\.com/",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2014-04-04 10:18:02"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /*

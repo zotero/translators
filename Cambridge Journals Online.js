@@ -2,14 +2,14 @@
 	"translatorID": "850f4c5f-71fb-4669-b7da-7fb7a95500ef",
 	"label": "Cambridge Journals Online",
 	"creator": "Sean Takats, Michael Berkowitz, Avram Lyon, and Aurimas Vinckevicius",
-	"target": "^https?://[^/]*journals.cambridge.org[^/]*//?action/(quickSearch|search|displayAbstract|displayFulltext|displayIssue|displayJournal)",
+	"target": "^https?://([^/]+\\.)?journals\\.cambridge\\.org//?action/(quickSearch|search|displayAbstract|displayFulltext|displayIssue|displayJournal)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-10-28 04:35:23"
+	"lastUpdated": "2015-02-12 09:47:23"
 }
 
 function detectWeb(doc, url)	{

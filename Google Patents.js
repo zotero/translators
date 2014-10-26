@@ -2,14 +2,14 @@
 	"translatorID": "d71e9b6d-2baa-44ed-acb4-13fe2fe592c0",
 	"label": "Google Patents",
 	"creator": "Adam Crymble, Avram Lyon",
-	"target": "^https?://(www\\.)?google\\.[^/]+/(?:patents|[^/]*[&?#]tbm=pts)",
+	"target": "^https?://(www\\.)?google\\.[^/]+/(patents|[^/]*[&?#]tbm=pts)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-08-15 02:22:24"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

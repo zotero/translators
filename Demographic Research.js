@@ -2,14 +2,14 @@
 	"translatorID": "ed317bdd-0416-4762-856d-435004a9f05c",
 	"label": "Demographic Research",
 	"creator": "Sebatian Karcher",
-	"target": "^https?://www\\.demographic-research\\.org",
+	"target": "^https?://www\\.demographic-research\\.org/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-11-05 16:12:50"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /*

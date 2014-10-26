@@ -2,14 +2,14 @@
 	"translatorID": "f61beec2-1431-4218-a9d3-68063ede6ecd",
 	"label": "Welt Online",
 	"creator": "Martin Meyerhoff",
-	"target": "^https?://www\\.welt\\.de",
+	"target": "^https?://www\\.welt\\.de/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-04 10:02:57"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /*

@@ -2,14 +2,14 @@
 	"translatorID": "b56d756e-814e-4b46-bc58-d61dccc9f32f",
 	"label": "Nagoya University OPAC",
 	"creator": "Frank Bennett",
-	"target": "^https?://opac\\.nul\\.nagoya-u\\.ac\\.jp/webopac/(catdbl.do|ctlsrh\\.do)",
+	"target": "^https?://opac\\.nul\\.nagoya-u\\.ac\\.jp/webopac/(catdbl\\.do|ctlsrh\\.do)",
 	"minVersion": "2.0b7",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-13 07:33:49"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 // #######################

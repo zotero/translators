@@ -2,14 +2,14 @@
 	"translatorID": "48d3b115-7e09-4134-ad5d-0beda6296761",
 	"label": "AIP",
 	"creator": "Aurimas Vinckevicius",
-	"target": "^https?://scitation\\.aip\\.org/(?:search\\?|content/)",
+	"target": "^https?://scitation\\.aip\\.org/(search\\?|content/)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-22 21:36:13"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function getSearchResults(doc) {

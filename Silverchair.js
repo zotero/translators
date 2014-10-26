@@ -2,14 +2,14 @@
 	"translatorID": "3bae3a55-f021-4b59-8a14-43701f336adf",
 	"label": "Silverchair",
 	"creator": "Sebastian Karcher",
-	"target": "\\/(article|volume|proceeding|searchresults|issue)\\.aspx",
+	"target": "/(article|volume|proceeding|searchresults|issue)\\.aspx",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-11-12 10:02:49"
+	"lastUpdated": "2015-02-12 09:50:52"
 }
 
 /*
@@ -38,14 +38,18 @@ function detectWeb(doc, url) {
 	//concerned about false positives - make sure this is actualy Silverchair.
 	var scm6 = ZU.xpathText(doc, '//body/@class|//script/@src');
 	var multxpath = '//div[contains(@class, "resultBlock")]/a|//div[contains(@class, "articleTitle") or contains(@class, "articleSection")]/a[contains(@href, "articleid")  or contains(@href, "articleID")]';
-	if (scm6){
-		if (scm6.indexOf("SCM6")!=-1){
-			if (url.search(/\/(article|proceeding)\.aspx\?articleid=\d+/i)!=-1) return "journalArticle";
-			else if(url.indexOf("/searchresults.aspx?q=")!=-1 || url.indexOf("/issue.aspx")!=1  && ZU.xpathText(doc, multxpath)!=null) return "multiple";
-	}
+	if (scm6 && scm6.indexOf("SCM6")!=-1) {
+		if (url.search(/\/(article|proceeding)\.aspx\?articleid=\d+/i)!=-1) {
+			return "journalArticle";
+		} else if (url.indexOf("/searchresults.aspx?q=")!=-1
+			|| url.indexOf("/issue.aspx")!=1 
+			&& ZU.xpathText(doc, multxpath)!=null
+		) {
+			return "multiple";
+		}
 	}
 	return false;
-	}
+}
 
 
 function doWeb(doc, url){

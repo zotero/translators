@@ -2,14 +2,14 @@
 	"translatorID": "d84574f1-e4d6-4337-934f-bf9d01173bf0",
 	"label": "taz.de",
 	"creator": "Martin Meyerhoff",
-	"target": "^https?://(?:www\\.)?taz\\.de",
+	"target": "^https?://(www\\.)?taz\\.de/",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-06-11 22:07:16"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 /*

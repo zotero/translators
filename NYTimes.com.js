@@ -2,14 +2,14 @@
 	"translatorID": "ce7a3727-d184-407f-ac12-52837f3361ff",
 	"label": "NYTimes.com",
 	"creator": "Simon Kornblith",
-	"target": "^https?://(?:query\\.nytimes\\.com/(?:search|gst)/(?:alternate/)?|(?:select\\.|www\\.|\\.blogs\\.)?nytimes\\.com/)",
+	"target": "^https?://(query\\.nytimes\\.com/(search|gst)/(alternate/)?|(select\\.|www\\.|\\.blogs\\.)?nytimes\\.com/)",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-06-11 21:54:15"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

@@ -2,14 +2,14 @@
 	"translatorID": "2abe2519-2f0a-48c0-ad3a-b87b9c059459",
 	"label": "ebrary",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://site\\.ebrary\\.com/.+(?:docDetail|search|detail)\\.action\\?",
+	"target": "^https?://site\\.ebrary\\.com/.+(docDetail|search)\\.action\\?",
 	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcv",
-	"lastUpdated": "2014-10-24 09:38:21"
+	"lastUpdated": "2015-02-12 09:50:52"
 }
 
 /*

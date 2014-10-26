@@ -2,14 +2,14 @@
 	"translatorID": "625c6435-e235-4402-a48f-3095a9c1a09c",
 	"label": "DBLP Computer Science Bibliography",
 	"creator": "Adam Crymble, Sebastian Karcher, Philipp Zumstein",
-	"target": "^https?://(www\\.)?(dblp(\\.org|\\.uni-trier\\.de/|\\.dagstuhl\\.de/)|informatik\\.uni-trier\\.de/\\~ley/)",
+	"target": "^https?://(www\\.)?(dblp(\\.org|\\.uni-trier\\.de|\\.dagstuhl\\.de)/|informatik\\.uni-trier\\.de/\\~ley/)",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-04-03 16:48:03"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 function detectWeb(doc, url) {

@@ -2,14 +2,14 @@
 	"translatorID": "594ebe3c-90a0-4830-83bc-9502825a6810",
 	"label": "ISI Web of Knowledge",
 	"creator": "Michael Berkowitz, Avram Lyon",
-	"target": "^https?://[^/]*webofknowledge\\.com/",
+	"target": "^https?://([^/]+\\.)?webofknowledge\\.com/",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 5,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-07-24 21:53:33"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

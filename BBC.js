@@ -2,14 +2,14 @@
 	"translatorID": "f4130157-93f7-4493-8f24-a7c85549013d",
 	"label": "BBC",
 	"creator": "Ben Parr",
-	"target": "^https?://(?:www|news?)\\.bbc\\.co\\.uk",
+	"target": "^https?://(www|news?)\\.bbc\\.co\\.uk/",
 	"minVersion": "1.0.0b4.r1",
 	"maxVersion": "",
 	"priority": 100,
 	"browserSupport": "gcsibv",
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2012-08-06 19:23:07"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url)

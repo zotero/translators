@@ -5,11 +5,11 @@
 	"target": "^https?://[^/]+/itw/infomark/",
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2013-06-06 00:19:59"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

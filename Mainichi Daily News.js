@@ -2,14 +2,14 @@
 	"translatorID": "b56f856e-934e-4b46-bc58-d61dccc9f32f",
 	"label": "Mainichi Daily News",
 	"creator": "Frank Bennett",
-	"target": "^https?://((?:search\\.)*mdn\\.)?mainichi\\.jp/(?:$|result\\?|mdnnews/|perspectives/|features?/|arts/|travel/|search/|english/)",
+	"target": "^https?://((search\\.)?mdn\\.)?mainichi\\.jp/($|result\\?|mdnnews/|perspectives/|features?/|arts/|travel/|search/|english/)",
 	"minVersion": "2.0b7",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-04-03 17:46:23"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 // #################################

@@ -2,14 +2,14 @@
 	"translatorID": "f20f91fe-d875-47e7-9656-0abb928be472",
 	"label": "HAL Archives Ouvertes",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://hal\\.archives-ouvertes\\.fr",
+	"target": "^https?://hal\\.archives-ouvertes\\.fr/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-11-08 21:46:36"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /*

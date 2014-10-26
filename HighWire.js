@@ -2,14 +2,14 @@
 	"translatorID": "5eacdb93-20b9-4c46-a89b-523f62935ae4",
 	"label": "HighWire",
 	"creator": "Simon Kornblith",
-	"target": "^https?://[^/]+/(?:cgi/searchresults|cgi/search|cgi/content/(?:abstract|full|short|summary)|current.dtl$|content/vol[0-9]+/issue[0-9]+/(?:index.dtl)?$)",
+	"target": "^https?://[^/]+/(cgi/searchresults|cgi/search|cgi/content/(abstract|full|short|summary)|current\\.dtl$|content/vol[0-9]+/issue[0-9]+/(index\\.dtl)?$)",
 	"minVersion": "2.1",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-04-03 17:39:30"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

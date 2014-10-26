@@ -2,14 +2,14 @@
 	"translatorID": "ba10b5bc-562f-11e1-b20d-a3084924019b",
 	"label": "Nuclear Receptor Signaling",
 	"creator": "Aurimas Vinckevicius",
-	"target": "^https?://[^/]*nursa.org/(article|nrs|abstract)",
+	"target": "^https?://([^/]+\\.)?nursa\\.org/(article|nrs|abstract)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-03-03 22:02:54"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 /*

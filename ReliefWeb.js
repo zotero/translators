@@ -3,12 +3,12 @@
 	"translatorType":4,
 	"label":"ReliefWeb",
 	"creator":"Michael Berkowitz",
-	"target":"http://(www.)?reliefweb.int/",
+	"target":"^https?://(www\\.)?reliefweb\\.int/",
 	"minVersion":"1.0.0b4.r5",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

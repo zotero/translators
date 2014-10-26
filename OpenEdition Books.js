@@ -2,14 +2,14 @@
 	"translatorID": "4c6b4c5f-7286-45bb-8e99-0c518d177fa7",
 	"label": "OpenEdition Books",
 	"creator": "Cédric Chatelain",
-	"target": "^http://books\\.openedition\\.org/",
+	"target": "^https?://books\\.openedition\\.org/",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsi",
-	"lastUpdated": "2014-05-14 23:17:46"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url){

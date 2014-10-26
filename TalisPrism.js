@@ -5,11 +5,11 @@
 	"target": "/TalisPrism/(browseResults|doSearch|doOpenURLSearch)",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-02-27 23:48:15"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 /* TalisPrism translator.

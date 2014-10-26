@@ -2,14 +2,14 @@
 	"translatorID": "9418dcc2-cc1e-432b-b7a6-7b00b7402d2f",
 	"label": "Hurricane Digital Memory Bank",
 	"creator": "Adam Crymble",
-	"target": "^https?://hurricanearchive\\.org",
+	"target": "^https?://hurricanearchive\\.org/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-01-30 22:49:09"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 function detectWeb(doc, url) {
