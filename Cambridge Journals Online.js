@@ -2,14 +2,14 @@
 	"translatorID": "850f4c5f-71fb-4669-b7da-7fb7a95500ef",
 	"label": "Cambridge Journals Online",
 	"creator": "Sean Takats, Michael Berkowitz, Avram Lyon, and Aurimas Vinckevicius",
-	"target": "^https?://[^/]*journals.cambridge.org[^/]*//?action/(quickSearch|search|displayAbstract|displayFulltext|displayIssue)",
+	"target": "^https?://[^/]*journals.cambridge.org[^/]*//?action/(quickSearch|search|displayAbstract|displayFulltext|displayIssue|displayJournal)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-09-16 06:04:05"
+	"lastUpdated": "2014-10-28 04:35:23"
 }
 
 function detectWeb(doc, url)	{
@@ -25,7 +25,20 @@ function detectWeb(doc, url)	{
 
 function getSearchResults(doc, checkOnly, extras) {
 	var items = {}, found = false;
-	var rows = doc.getElementsByClassName('tableofcontents-row');
+	var root = doc;
+	
+	// Some multiples pages display different tabs of multiples. Find the active one
+	// e.g. http://journals.cambridge.org/action/displayJournal?jid=ORX
+	var ajaxContainers = doc.getElementsByClassName('ajaxContainer');
+	for (var i=0; i<ajaxContainers.length; i++) {
+		if (ajaxContainers[i].offsetHeight) {
+			// visible
+			root = ajaxContainers[i];
+			break;
+		}
+	}
+	
+	var rows = root.getElementsByClassName('tableofcontents-row');
 	for (var i=0; i<rows.length; i++) {
 		var id = ZU.xpathText(rows[i], './/input[@name="toView"][1]/@value');
 		if (!id) continue;
@@ -130,7 +143,7 @@ function parseData(text, article, next) {
 		if (article.pdf) {
 			item.attachments.push({
 				title: 'Full Text PDF',
-				url: article.pdf,
+				url: article.pdf + '&toPdf=true',
 				mimeType: 'application/pdf'
 			});
 		}
@@ -311,6 +324,12 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://journals.cambridge.org/action/displayJournal?jid=ORX",
+		"items": "multiple",
+		"defer": true
 	}
 ]
 /** END TEST CASES **/
