@@ -8,14 +8,17 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2014-04-14 11:50:31"
+	"browserSupport": "gcs",
+	"lastUpdated": "2014-10-29 15:58:11"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
 	beck-online Translator, Copyright © 2014 Philipp Zumstein
+	
+	v1.1 by rm2342: added support for beck-online Leitsatzkartei LSK
+	
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -44,7 +47,8 @@ var mappingClassNameToItemType = {
 	'ZRSPR' : 'case',//Rechtssprechung
 	'ZENTB' : 'journalArticle',//Entscheidungsbesprechung
 	'ZBUCHB' : 'journalArticle',//Buchbesprechung
-	'ZSONST' : 'journalArticle',//Sonstiges, z.B. Vorwort
+	'ZSONST' : 'journalArticle',//Sonstiges, z.B. Vorwort,
+	'LSK'	: 'journalArticle', // Artikel in Leitsatzkartei
 	'ZINHALTVERZ' : 'multiple'//Inhaltsverzeichnis
 }
 
@@ -53,7 +57,7 @@ function detectWeb(doc, url) {
 	//Z.debug(documentClassName);
 	if (mappingClassNameToItemType[documentClassName.toUpperCase()]) {
 		return mappingClassNameToItemType[documentClassName.toUpperCase()];
-	}
+	}	
 }
 
 
@@ -82,14 +86,91 @@ function doWeb(doc, url) {
 			ZU.processDocuments(articles, scrape);
 		});
 	} else {
-		scrape(doc, url);
+			scrape(doc, url);
 	}
 	
+}
+
+function getXPathContent(doc, xpath) {
+	var elements = Zotero.Utilities.gatherElementsOnXPath(doc, doc, xpath);
+	var content = Zotero.Utilities.xpathText(elements, xpath);
+	return content;
+}
+
+// scrape documents that are only in the beck-online "Leitsatz-Kartei", i.e. 
+// where only information about the article, not the article itself is in beck-online
+function scrapeLSK(doc, url) {
+	//Z.debug("--scrapeLSK");
+
+	var item;
+	var documentClassName = doc.getElementById("dokument").className.toUpperCase();
+	if (mappingClassNameToItemType[documentClassName.toUpperCase()]) {
+		item = new Zotero.Item(mappingClassNameToItemType[documentClassName.toUpperCase()]);
+	}
+	
+	var description = getXPathContent(doc, "//*[@id='dokument']/h1");
+	var descriptionItems = description.split(':');
+	Z.debug(descriptionItems);
+
+	//authors
+	var authorsString = descriptionItems[0];
+	
+	var authors = authorsString.split("/");
+	var authorsItems = new Array();
+
+	for (index = 0; index < authors.length; ++index) {
+		var author = Zotero.Utilities.trimInternal(authors[index]);
+		authorsItems.push ( Zotero.Utilities.cleanAuthor(author, 'author', false) );
+	}
+	item.creators = authorsItems;
+	
+	//title
+	var title = descriptionItems[1];
+	item.title = Zotero.Utilities.trimInternal(title);
+	
+	// src
+	var src = getXPathContent(doc, "//div[@class='lsk-fundst']/ul/li");
+	
+	//date 
+	var date = src.match(/\d\d\d\d+/g);
+	
+	// some articles do not have a date
+	if (date)
+		item.date = date[0];
+	
+	//journal
+	var journalStr = src.substr(0, src.indexOf(date)-1);
+	var journalArr = journalStr.split(',');
+	var journal = Zotero.Utilities.trimInternal(journalArr[journalArr.length-1]);
+	item.publicationTitle = journal;
+	item.journalAbbreviation = journal;
+	
+	//pages (where LSK contains only starting page!)
+	var pagesArr = src.split(',');
+	var pages = Zotero.Utilities.trimInternal(pagesArr[pagesArr.length-1]);
+	
+	item.pages = pages;
+
+	//Z.debug(item);
+
+	item.attachments = [{
+		title: "Snapshot",
+		document:doc
+	}];
+
+	item.complete();
 }
 
 
 function scrape(doc, url) {
 	var documentClassName = doc.getElementById("dokument").className;
+
+	// use different scraping function for documents in LSK
+	if (documentClassName.toUpperCase() == 'LSK') {
+			scrapeLSK(doc, url);
+			return;
+	}
+	
 	var item;
 	if (mappingClassNameToItemType[documentClassName.toUpperCase()]) {
 		item = new Zotero.Item(mappingClassNameToItemType[documentClassName.toUpperCase()]);
@@ -379,6 +460,98 @@ var testCases = [
 				"date": "2013",
 				"issue": "12",
 				"pages": "909-913",
+				"libraryCatalog": "beck-online"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://beck-online.beck.de/default.aspx?vpath=bibdata/ents/lsk/2014/3800/lsk.2014.38.0907.htm&pos=2",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Hannfried",
+						"lastName": "Leisterer",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Florian",
+						"lastName": "Schneider",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "Der überarbeitete Entwurf für ein IT-Sicherheitsgesetz",
+				"date": "2014",
+				"publicationTitle": "CR",
+				"journalAbbreviation": "CR",
+				"pages": "574",
+				"libraryCatalog": "beck-online"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://beck-online.beck.de/default.aspx?vpath=bibdata/ents/lsk/2014/3500/lsk.2014.35.0537.htm&pos=1",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Daniel",
+						"lastName": "Jipp",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "Zum Folgenbeseitigungsanspruch bei Buchveröffentlichungen - Der Rückrufanspruch",
+				"date": "2014",
+				"publicationTitle": "AfP",
+				"journalAbbreviation": "AfP",
+				"pages": "300",
+				"libraryCatalog": "beck-online"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://beck-online.beck.de/Default.aspx?vpath=bibdata/ents/lsk/2014/4100/lsk.2014.41.0740.htm&pos=17&hlwords=#xhlhit",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Marianne Johanna",
+						"lastName": "Hilf",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "Die Strafbarkeit juristischer Personen im schweizerischen, österreichischen und liechtensteinischen Recht",
+				"pages": "73",
 				"libraryCatalog": "beck-online"
 			}
 		]
