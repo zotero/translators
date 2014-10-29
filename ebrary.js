@@ -2,14 +2,14 @@
 	"translatorID": "2abe2519-2f0a-48c0-ad3a-b87b9c059459",
 	"label": "ebrary",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://site\\.ebrary\\.com/.+(?:docDetail|search)\\.action\\?",
+	"target": "^https?://site\\.ebrary\\.com/.+(?:docDetail|search|detail)\\.action\\?",
 	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcv",
-	"lastUpdated": "2014-03-17 19:59:24"
+	"lastUpdated": "2014-10-24 09:38:21"
 }
 
 /*
@@ -33,7 +33,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 
 function detectWeb(doc, url) {
-	if (url.indexOf("docDetail.action?") != -1) return "book";
+	if (url.indexOf("docDetail.action?") != -1 || url.indexOf("detail.action?") != -1) return "book";
 	else if (url.indexOf("search.action?") != -1) {
 		if (ZU.xpathText(doc, '//div[@class="book_info_titlelist"]')) return "multiple";
 	}

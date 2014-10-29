@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-10-02 17:36:32"
+	"lastUpdated": "2014-10-23 16:56:41"
 }
 
 /*
@@ -118,6 +118,33 @@ function fetchEmbeddedPdf(url, item, callback) {
 	}, callback);
 }
 
+function getSearchResults(doc, detect) {
+	var tabs = doc.getElementsByClassName('tabContent');
+	var root;
+	for (var i = 0; i < tabs.length; i++) {
+		if (tabs[i].offsetHeight) {
+			if (Zotero.isBookmarklet && tabs[i].id != 'allResults-content') return false;
+			root = tabs[i].getElementsByClassName('resultListContainer')[0];
+			break;
+		}
+	}
+
+	if (!root) return false;
+
+	var results = ZU.xpath(root, './/a[contains(@class,"previewTitle") or contains(@class,"resultTitle")]');
+		
+	if (detect) {
+		return (results.length > 0 ? true : false);
+	}
+
+	var items = new Array();
+	for(var i=0, n=results.length; i<n; i++) {
+		items[results[i].href] = results[i].textContent;
+	}
+		
+	return (items.length > 0 ? items : false);
+}
+
 function detectWeb(doc, url) {
 	initLang(doc, url);
 
@@ -126,10 +153,8 @@ function detectWeb(doc, url) {
 	//Check for multiple first
 	if (url.indexOf('docview') == -1 &&
 		url.indexOf('pagepdf') == -1) {
-		var resultitem = ZU.xpath(doc, '//a[contains(@href, "/docview/")]');
-		if (resultitem.length) {
+		if (getSearchResults(doc, true))
 			return "multiple";
-		}
 	}
 
 	var types = getTextValue(doc, ["Source type", "Document type", "Record type"]);
@@ -168,27 +193,28 @@ function doWeb(doc, url, pdfUrl) {
 		scrape(doc, url, type, pdfUrl);
 	} else if(type == "multiple") {
 		// detect web returned multiple
-		var results = ZU.xpath(doc, '//a[contains(@class,"previewTitle") or\
-									contains(@class,"resultTitle")]');
-		// If the above didn't get us titles, try agin with a more liberal xPath
-		if (!results.length) {
-			results = ZU.xpath(doc, '//a[contains(@href, "/docview/")]');
-		}
-
-		var items = new Array();
-		for(var i=0, n=results.length; i<n; i++) {
-			items[results[i].href] = results[i].textContent;
-		}
-
-		Zotero.selectItems(items, function (items) {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) return true;
 
 			var articles = new Array();
-			for (var i in items) {
-				ZU.processDocuments(i,
-					//call doWeb so that we rerun detectWeb to get type and
-					//initialize translations
-					function(doc) { doWeb(doc, doc.location.href) });
+			for(var item in items) {
+				articles.push(item);
+			}
+			
+			if (articles[0].indexOf("ebraryresults") > -1) {
+				// if the first result is for ebrary, the rest are also ebrary
+				ZU.processDocuments(articles, function(doc) {
+					var translator = Zotero.loadTranslator("web");
+					translator.setTranslator("2abe2519-2f0a-48c0-ad3a-b87b9c059459");
+					translator.setDocument(doc);
+					translator.setHandler("itemDone", function(obj, item) {
+						item.complete();
+					});
+					translator.translate();
+				});
+			}
+			else {			
+				ZU.processDocuments(articles, doWeb);
 			}
 		});
 	//pdfUrl should be undefined unless we are calling doWeb from the following
