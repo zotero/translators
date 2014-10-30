@@ -1,24 +1,21 @@
 {
 	"translatorID": "bc2ec385-e60a-4899-96ae-d4f0d6574ad7",
-	"label": "Juris (German legal database)",
+	"label": "Juris",
 	"creator": "rm2342",
-	"target": "^http?://(?:www\\.)?juris.de",
-	"minVersion": "1.0",
+	"target": "^(http|https)?://(?:www\\.)?juris.de",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2014-10-29 15:54:37"
+	"browserSupport": "gcsv",
+	"lastUpdated": "2014-10-30 11:14:47"
 }
 
 /*
-Translator for Juris (German legal database) for Zotero
-
 ***** BEGIN LICENSE BLOCK *****
 
-v1.0 rm2342
-
+	Juris Translator, Copyright © 2014 Reto Mantz
 	
 	This file is part of Zotero.
 
@@ -44,48 +41,39 @@ This is a translator written mainly for articles in the database of Juris (a Ger
 */
 
 
-// Array mit unterschiedlichen - erkannten - Typen
+// Array with the different - recognized - types
 var mappingClassNameToItemType = {
 	'AUFSATZ' : 'journalArticle',
 	'ANMERKUNG' : 'journalArticle',
 	'RECHTSPRECHUNGSÜBERSICHT' : 'journalArticle',
 	'RECHTSPRECHUNGSÜBERSICHT, AUFSATZ' : 'journalArticle',
-	'AUFSATZ, KONGRESSVORTRAG' : 'journalArticle'
+	'AUFSATZ, KONGRESSVORTRAG' : 'journalArticle',
+	'AUFSATZ, ANMERKUNG' : 'journalArticle',
+	'ENTSCHEIDUNGSBESPRECHUNG, AUFSATZ' : 'journalArticle'
 }
-
-// XPath zur Angabe des Beitragstyps
 	
 function detectWeb(doc, url) { 
 
 	var xpathtype = "//table[@class='TableRahmenkpl']/tbody/tr/td[1]/table/tbody/tr[2]/td[2]";
-	var elements = Zotero.Utilities.gatherElementsOnXPath(doc, doc, xpathtype);
-	var myType = Zotero.Utilities.xpathText(elements, xpathtype);
-	//Zotero.debug(myType);	
+	var myType = ZU.xpathText(doc, xpathtype);
 
 	if (myType == null) return false;
-		myType = Zotero.Utilities.trimInternal(myType);
+	myType = Zotero.Utilities.trimInternal(myType);
 	
 	// is the type we got from the XPath one we recognized? then return this type, otherwise return false
-	if (mappingClassNameToItemType[myType.toUpperCase()])
-		return (mappingClassNameToItemType[myType.toUpperCase()]);
+	var mappingtype = mappingClassNameToItemType[myType.toUpperCase()];
+	// does the article have an author? 
+	var myAuthorsString = ZU.xpathText(doc, "//table[@class='TableRahmenkpl']/tbody/tr/td[1]/table/tbody/tr[1]/td[2]");
+	
+	if ((mappingClassNameToItemType[myType.toUpperCase()]) && (myAuthorsString != null))
+		return (mappingtype);
 	else return false;	
 }
 
-
 function doWeb(doc, url) { 
-	// is the detected type one we recognize?
-	if (detectWeb(doc, url) == 'journalArticle') {
-	
 		scrape(doc, url);
-	}
-	else return ; 
 }
 
-function getXPathContent(doc, xpath) {
-	var elements = Zotero.Utilities.gatherElementsOnXPath(doc, doc, xpath);
-	var content = Zotero.Utilities.xpathText(elements, xpath);
-	return content;
-}
 
 // does the actual scraping
 function scrape (doc, url) {
@@ -94,132 +82,47 @@ function scrape (doc, url) {
 	
 	// scrape authors
 	var xpathauthors = "//table[@class='TableRahmenkpl']/tbody/tr/td[1]/table/tbody/tr[1]/td[2]";
-	var myAuthorsString = getXPathContent(doc, xpathauthors);
+	var myAuthorsString = ZU.xpathText(doc, xpathauthors);
 
-	if (myAuthorsString == null) return false;
 	myAuthorsString = Zotero.Utilities.trimInternal(myAuthorsString);
 	var myAuthors = myAuthorsString.split(",");
-	var myAuthorsItems = new Array();
 
-	for (index = 0; index < myAuthors.length; ++index) {
+	for (var index = 0; index < myAuthors.length; ++index) {
 		var author = Zotero.Utilities.trimInternal(myAuthors[index]);
-		myAuthorsItems.push ( Zotero.Utilities.cleanAuthor(author, 'author', false) );
+		newItem.creators.push ( Zotero.Utilities.cleanAuthor(author, 'author', false) );
 	}
-	newItem.creators = myAuthorsItems;
 	
 	//scrape title
 	var xpathtitle = "//div[@class='docLayoutTitel']";
-	var myTitle = getXPathContent(doc, xpathtitle);	
+	var myTitle = ZU.xpathText(doc, xpathtitle);	
 	newItem.title = myTitle;
 	
 	//scrape src
 	var xpathsrc = "//table[@class='TableRahmenkpl']/tbody/tr/td[2]/table/tbody/tr[2]/td[2]";
-	var mySrcString = getXPathContent(doc, xpathsrc);
+	var mySrcString = ZU.xpathText(doc, xpathsrc);
 
 	// find four digits in src (=date)
 	var myDate = mySrcString.match(/\d\d\d\d+/g);
-	if (myDate) newItem.date = myDate[0];
+	if (myDate) {
+		newItem.date = myDate[0];
+	}
+	else {
+		myDate = "";
+	}
 
 	//journal
-	var myJournal = mySrcString.substr(0, mySrcString.indexOf(myDate)-1);
+	var journal = mySrcString.substr(0, mySrcString.indexOf(myDate)-1);
+	newItem.publicationTitle = journal;
+	newItem.journalAbbreviation = journal;
 	
 	//pages	
-	var pages = ZU.trimInternal(mySrcString.substr(mySrcString.lastIndexOf(",")+1));
-	newItem.pages = pages;	
+	newItem.pages = ZU.trimInternal(mySrcString.substr(mySrcString.lastIndexOf(",")+1));	
 	
 	newItem.attachments = [{
 		title: "Snapshot",
 		document:doc
-		}];
+	}];
 	
 //	Zotero.debug(newItem);
 	newItem.complete();
-}/** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://www.juris.de/jportal/portal/t/18dq/page/jurisw.psml?doc.hl=1&doc.id=SBLU000100514&documentnumber=16&numberofresults=15000&showdoccase=1&doc.part=S&paramfromHL=true#focuspoint",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "Jochen",
-						"lastName": "Glöckner",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"title": "Die Folgen der Verbraucherrechterichtlinie und ihrer Umsetzung für Bauverträge",
-				"date": "2014",
-				"pages": "411-431",
-				"libraryCatalog": "Juris (German legal database)"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.juris.de/jportal/portal/t/18dq/page/jurisw.psml?doc.hl=1&doc.id=SBLU000467214&documentnumber=17&numberofresults=15000&showdoccase=1&doc.part=S&paramfromHL=true#focuspoint",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "Jens",
-						"lastName": "Joseph",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"title": "Bring Your Own Device: Motivation oder Risiko für Geheimnis- und Datenverlust?",
-				"date": "2014",
-				"pages": "136-137",
-				"libraryCatalog": "Juris (German legal database)",
-				"shortTitle": "Bring Your Own Device"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.juris.de/jportal/portal/t/18dq/page/jurisw.psml?doc.hl=1&doc.id=SBLU000132014&documentnumber=22&numberofresults=15000&showdoccase=1&doc.part=S&paramfromHL=true#focuspoint",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "Christian",
-						"lastName": "Bommarius",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"title": "Dank an Talleyrand",
-				"date": "2014",
-				"pages": "60",
-				"libraryCatalog": "Juris (German legal database)"
-			}
-		]
-	}
-]
-/** END TEST CASES **/
+}
