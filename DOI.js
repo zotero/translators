@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-08-26 03:36:25"
+	"lastUpdated": "2014-10-30 22:11:11"
 }
 
 var items = {};
@@ -106,6 +106,11 @@ function retrieveDOIs(DOIs, doc) {
 	
 			// don't save when item is done
 			translate.setHandler("itemDone", function(translate, item) {
+				if (!item.title) {
+					Zotero.debug("No title available for " + DOI);
+					return;
+				}
+				
 				item.repository = "CrossRef";
 				items[DOI] = item;
 				selectArray[DOI] = item.title;
