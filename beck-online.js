@@ -8,17 +8,14 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcs",
-	"lastUpdated": "2014-10-29 15:58:11"
+	"browserSupport": "gcsv",
+	"lastUpdated": "2014-10-30 11:08:16"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
 	beck-online Translator, Copyright © 2014 Philipp Zumstein
-	
-	v1.1 by rm2342: added support for beck-online Leitsatzkartei LSK
-	
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -57,7 +54,7 @@ function detectWeb(doc, url) {
 	//Z.debug(documentClassName);
 	if (mappingClassNameToItemType[documentClassName.toUpperCase()]) {
 		return mappingClassNameToItemType[documentClassName.toUpperCase()];
-	}	
+	}
 }
 
 
@@ -86,31 +83,18 @@ function doWeb(doc, url) {
 			ZU.processDocuments(articles, scrape);
 		});
 	} else {
-			scrape(doc, url);
+		scrape(doc, url);
 	}
 	
-}
-
-function getXPathContent(doc, xpath) {
-	var elements = Zotero.Utilities.gatherElementsOnXPath(doc, doc, xpath);
-	var content = Zotero.Utilities.xpathText(elements, xpath);
-	return content;
 }
 
 // scrape documents that are only in the beck-online "Leitsatz-Kartei", i.e. 
 // where only information about the article, not the article itself is in beck-online
 function scrapeLSK(doc, url) {
-	//Z.debug("--scrapeLSK");
-
-	var item;
-	var documentClassName = doc.getElementById("dokument").className.toUpperCase();
-	if (mappingClassNameToItemType[documentClassName.toUpperCase()]) {
-		item = new Zotero.Item(mappingClassNameToItemType[documentClassName.toUpperCase()]);
-	}
+	var	item = new Zotero.Item(mappingClassNameToItemType['LSK']);
 	
-	var description = getXPathContent(doc, "//*[@id='dokument']/h1");
+	var description = ZU.xpathText(doc, "//*[@id='dokument']/h1");
 	var descriptionItems = description.split(':');
-	Z.debug(descriptionItems);
 
 	//authors
 	var authorsString = descriptionItems[0];
@@ -118,25 +102,29 @@ function scrapeLSK(doc, url) {
 	var authors = authorsString.split("/");
 	var authorsItems = new Array();
 
-	for (index = 0; index < authors.length; ++index) {
+	for (var index = 0; index < authors.length; ++index) {
 		var author = Zotero.Utilities.trimInternal(authors[index]);
 		authorsItems.push ( Zotero.Utilities.cleanAuthor(author, 'author', false) );
 	}
 	item.creators = authorsItems;
 	
 	//title
-	var title = descriptionItems[1];
-	item.title = Zotero.Utilities.trimInternal(title);
+	item.title = ZU.trimInternal(descriptionItems[1]);
 	
 	// src
-	var src = getXPathContent(doc, "//div[@class='lsk-fundst']/ul/li");
+	var src = ZU.xpathText(doc, "//div[@class='lsk-fundst']/ul/li");
 	
 	//date 
 	var date = src.match(/\d\d\d\d+/g);
 	
 	// some articles do not have a date
-	if (date)
+	if (date) {
 		item.date = date[0];
+	}
+	else {
+		// if we cannot determine date, leave it blank
+		item.date = "";
+	}
 	
 	//journal
 	var journalStr = src.substr(0, src.indexOf(date)-1);
@@ -163,17 +151,17 @@ function scrapeLSK(doc, url) {
 
 
 function scrape(doc, url) {
-	var documentClassName = doc.getElementById("dokument").className;
+	var documentClassName = doc.getElementById("dokument").className.toUpperCase();
 
 	// use different scraping function for documents in LSK
-	if (documentClassName.toUpperCase() == 'LSK') {
+	if (documentClassName == 'LSK') {
 			scrapeLSK(doc, url);
 			return;
 	}
 	
 	var item;
-	if (mappingClassNameToItemType[documentClassName.toUpperCase()]) {
-		item = new Zotero.Item(mappingClassNameToItemType[documentClassName.toUpperCase()]);
+	if (mappingClassNameToItemType[documentClassName]) {
+		item = new Zotero.Item(mappingClassNameToItemType[documentClassName]);
 	}
 	
 	var titleNode = ZU.xpath(doc, '//div[@class="titel"]')[0] || ZU.xpath(doc, '//div[@class="dk2"]//span[@class="titel"]')[0];
