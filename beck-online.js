@@ -91,7 +91,7 @@ function doWeb(doc, url) {
 // scrape documents that are only in the beck-online "Leitsatz-Kartei", i.e. 
 // where only information about the article, not the article itself is in beck-online
 function scrapeLSK(doc, url) {
-	var	item = new Zotero.Item(mappingClassNameToItemType['LSK']);
+	var item = new Zotero.Item(mappingClassNameToItemType['LSK']);
 	
 	var description = ZU.xpathText(doc, "//*[@id='dokument']/h1");
 	var descriptionItems = description.split(':');
