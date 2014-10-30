@@ -167,6 +167,13 @@ function scrape(doc, url) {
 	var titleNode = ZU.xpath(doc, '//div[@class="titel"]')[0] || ZU.xpath(doc, '//div[@class="dk2"]//span[@class="titel"]')[0];
 	item.title = ZU.trimInternal(titleNode.textContent);
 	
+	// in some cases (e.g. NJW 2007, 3313) the title contains an asterisk with a footnote that is imported into the title
+	// therefore, this part should be removed from the title
+	var indexOfAdditionalText = item.title.indexOf("zur Fussnote");
+	if (indexOfAdditionalText !=-1) {
+		item.title = item.title.substr(0, indexOfAdditionalText);
+	}
+	
 	var authorNode = ZU.xpath(doc, '//div[@class="autor"]');
 	for (var i=0; i<authorNode.length; i++) {
 		//normally several authors are under the same authorNode
