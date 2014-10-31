@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-10-30 11:14:47"
+	"lastUpdated": "2014-10-31 07:39:22"
 }
 
 /*
@@ -53,9 +53,8 @@ var mappingClassNameToItemType = {
 }
 	
 function detectWeb(doc, url) { 
-
-	var xpathtype = "//table[@class='TableRahmenkpl']/tbody/tr/td[1]/table/tbody/tr[2]/td[2]";
-	var myType = ZU.xpathText(doc, xpathtype);
+	
+	var myType = ZU.xpathText(doc, "//table[@class='TableRahmenkpl']/tbody/tr/td[1]/table/tbody/tr[2]/td[2]");
 
 	if (myType == null) return false;
 	myType = Zotero.Utilities.trimInternal(myType);
@@ -63,26 +62,23 @@ function detectWeb(doc, url) {
 	// is the type we got from the XPath one we recognized? then return this type, otherwise return false
 	var mappingtype = mappingClassNameToItemType[myType.toUpperCase()];
 	// does the article have an author? 
-	var myAuthorsString = ZU.xpathText(doc, "//table[@class='TableRahmenkpl']/tbody/tr/td[1]/table/tbody/tr[1]/td[2]");
+	var myAuthorsString = scrapeAuthor(doc, url);
 	
-	if ((mappingClassNameToItemType[myType.toUpperCase()]) && (myAuthorsString != null))
-		return (mappingtype);
-	else return false;	
+	if ((mappingClassNameToItemType[myType.toUpperCase()]) && (myAuthorsString != null)) {
+		return mappingtype;
+	}
 }
 
-function doWeb(doc, url) { 
-		scrape(doc, url);
+function scrapeAuthor(doc, url) {
+	return ZU.xpathText(doc, "//table[@class='TableRahmenkpl']/tbody/tr/td[1]/table/tbody/tr[1]/td[2]");
 }
 
 
-// does the actual scraping
-function scrape (doc, url) {
-//	Zotero.debug("--scrape--");
+function doWeb (doc, url) {
 	var newItem = new Zotero.Item("journalArticle");
 	
 	// scrape authors
-	var xpathauthors = "//table[@class='TableRahmenkpl']/tbody/tr/td[1]/table/tbody/tr[1]/td[2]";
-	var myAuthorsString = ZU.xpathText(doc, xpathauthors);
+	var myAuthorsString = scrapeAuthor(doc, url);
 
 	myAuthorsString = Zotero.Utilities.trimInternal(myAuthorsString);
 	var myAuthors = myAuthorsString.split(",");
@@ -93,22 +89,17 @@ function scrape (doc, url) {
 	}
 	
 	//scrape title
-	var xpathtitle = "//div[@class='docLayoutTitel']";
-	var myTitle = ZU.xpathText(doc, xpathtitle);	
+	var myTitle = ZU.xpathText(doc, "//div[@class='docLayoutTitel']");	
 	newItem.title = myTitle;
 	
 	//scrape src
-	var xpathsrc = "//table[@class='TableRahmenkpl']/tbody/tr/td[2]/table/tbody/tr[2]/td[2]";
-	var mySrcString = ZU.xpathText(doc, xpathsrc);
+	var mySrcString = ZU.xpathText(doc, "//table[@class='TableRahmenkpl']/tbody/tr/td[2]/table/tbody/tr[2]/td[2]");
 
 	// find four digits in src (=date)
-	var myDate = mySrcString.match(/\d\d\d\d+/g);
+	var myDate = mySrcString.match(/\d\d\d\d/g);
 	if (myDate) {
 		newItem.date = myDate[0];
-	}
-	else {
-		myDate = "";
-	}
+	}		
 
 	//journal
 	var journal = mySrcString.substr(0, mySrcString.indexOf(myDate)-1);
