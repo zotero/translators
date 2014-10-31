@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-10-30 11:08:16"
+	"lastUpdated": "2014-10-31 07:30:35"
 }
 
 /*
@@ -111,35 +111,14 @@ function scrapeLSK(doc, url) {
 	//title
 	item.title = ZU.trimInternal(descriptionItems[1]);
 	
-	// src
+	// src => journalTitle, date and pages
 	var src = ZU.xpathText(doc, "//div[@class='lsk-fundst']/ul/li");
-	
-	//date 
-	var date = src.match(/\d\d\d\d+/g);
-	
-	// some articles do not have a date
-	if (date) {
-		item.date = date[0];
+	var m = src.trim().match(/([^,]+?)(\b\d{4})?,\s*(\d+)$/);
+	if (m) {
+		item.journalTitle = ZU.trimInternal(m[1]);
+		if (m[2]) item.date = m[2];
+		item.pages = m[3];
 	}
-	else {
-		// if we cannot determine date, leave it blank
-		item.date = "";
-	}
-	
-	//journal
-	var journalStr = src.substr(0, src.indexOf(date)-1);
-	var journalArr = journalStr.split(',');
-	var journal = Zotero.Utilities.trimInternal(journalArr[journalArr.length-1]);
-	item.publicationTitle = journal;
-	item.journalAbbreviation = journal;
-	
-	//pages (where LSK contains only starting page!)
-	var pagesArr = src.split(',');
-	var pages = Zotero.Utilities.trimInternal(pagesArr[pagesArr.length-1]);
-	
-	item.pages = pages;
-
-	//Z.debug(item);
 
 	item.attachments = [{
 		title: "Snapshot",
@@ -283,219 +262,6 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://beck-online.beck.de/?vpath=bibdata%2fzeits%2fDNOTZ-SONDERH%2f2012%2fcont%2fDNOTZ-SONDERH%2e2012%2e88%2e1%2ehtm",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"lastName": "Roth",
-						"firstName": "Günter H.",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"title": "Best practice – Grundstrukturen des kontinentaleuropäischen Gesellschaftsrechts",
-				"publicationTitle": "Sonderheft der Deutschen Notar-Zeitschrift",
-				"journalAbbreviation": "DNotZ-Sonderheft",
-				"date": "2012",
-				"issue": "1",
-				"pages": "88-95",
-				"libraryCatalog": "beck-online"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://beck-online.beck.de/default.aspx?typ=reference&y=300&z=BKR&b=2001&s=99&n=1",
-		"items": [
-			{
-				"itemType": "case",
-				"creators": [],
-				"notes": [
-					"§ WPHG § 15 WpHG; § BOERSG § 88 BörsG; §§ BGB § 823, BGB § 826 BGB"
-				],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"title": "Schadensersatz wegen fehlerhafter Ad-hoc-Mitteilungen („Infomatec”)",
-				"publicationTitle": "Zeitschrift für Bank- und Kapitalmarktrecht",
-				"journalAbbreviation": "BKR",
-				"date": "2001",
-				"issue": "2",
-				"pages": "99-101",
-				"abstractNote": "Leitsätze der Redaktion:\n    1. Ad-hoc-Mitteilungen richten sich nicht nur an ein bilanz- und fachkundiges Publikum, sondern an alle tatsächlichen oder potenziellen Anleger und Aktionäre.\n    2. \n    § BOERSG § 88 Abs. BOERSG § 88 Absatz 1 Nr. 1 BörsG dient neben dem Schutz der Allgemeinheit gerade auch dazu, das Vermögen des einzelnen Kapitalanlegers vor möglichen Schäden durch eine unredliche Beeinflussung der Preisbildung an Börsen und Märkten zu schützen.",
-				"court": "LG Augsburg",
-				"dateDecided": "2001-9-24",
-				"docketNumber": "3 O 4995/00",
-				"shortTitle": "LG Augsburg, Urteil vom 24. 9. 2001 - 3 O 4995/00 (nicht rechtskräftig)",
-				"reporter": "BKR",
-				"reporterVolume": "2001",
-				"extra": "Parallelfundstellen: BB 2001 Heft 42, 2130 ; DB 2001, 2334 ; LSK 2001, 520032 ; NJOZ 2001, 1878 ; NJW-RR 2001, 1705 ; NZG 2002, 429 ; WPM 2001, 1944 ; ZIP 2001, 1881 ; FHZivR 47 Nr. 2816 (Ls.) ; FHZivR 47 Nr. 6449 (Ls.) ; FHZivR 48 Nr. 2514 (Ls.) ; FHZivR 48 Nr. 6053 (Ls.) ; NJW-RR 2003, 216 (Ls.)",
-				"libraryCatalog": "beck-online"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://beck-online.beck.de/default.aspx?typ=reference&y=300&z=NJW&b=2014&s=898&n=1",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "Boris",
-						"lastName": "Scholtka"
-					},
-					{
-						"firstName": "Antje",
-						"lastName": "Baumbach"
-					},
-					{
-						"firstName": "Marike",
-						"lastName": "Pietrowicz"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"title": "Die Entwicklung des Energierechts im Jahr 2013",
-				"publicationTitle": "Neue Juristische Wochenschrift",
-				"journalAbbreviation": "NJW",
-				"date": "2014",
-				"issue": "13",
-				"pages": "898-903",
-				"abstractNote": "Der Bericht knüpft an die bisher in dieser Reihe erschienenen Beiträge zur Entwicklung des Energierechts (zuletzt NJW 2013, NJW Jahr 2013 Seite 2724) an und zeigt die Schwerpunkte energierechtlicher Entwicklungen in Gesetzgebung und Rechtsanwendung im Jahr 2013 auf.",
-				"libraryCatalog": "beck-online"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://beck-online.beck.de/default.aspx?vpath=bibdata%2fzeits%2fNJW%2f2014%2fcont%2fNJW%2e2014%2e930%2e1%2ehtm",
-		"items": [
-			{
-				"itemType": "case",
-				"creators": [],
-				"notes": [
-					"BGB §§ BGB § 276, BGB § 278, BGB § 651 a BGB § 651A Absatz V 1; HGB § HGB § 87 a HGB § 87A Absatz III 2"
-				],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"title": "BGH: Provisionsanspruch des Reisevermittlers bei Absage der Reise durch den Veranstalter",
-				"publicationTitle": "Neue Juristische Wochenschrift",
-				"journalAbbreviation": "NJW",
-				"date": "2014",
-				"issue": "13",
-				"pages": "930-932",
-				"court": "BGH",
-				"dateDecided": "2014-1-23",
-				"docketNumber": "VII ZR 168/13",
-				"shortTitle": "BGH, Urteil vom 23.1.2014 – VII ZR 168/13",
-				"reporter": "NJW",
-				"reporterVolume": "2014",
-				"extra": "Parallelfundstellen: BeckRS 2014, 03315 ; GWR 2014, 125 ; IBRRS 96371 ; LSK 2014, 110552 ; MDR 2014, 354 ; ZVertriebsR 2014, 98 ; ZVertriebsR 2014, 98 ; ADAJUR Dok.Nr. 103938 (Ls...",
-				"libraryCatalog": "beck-online"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://beck-online.beck.de/?vpath=bibdata%2fzeits%2fGRUR%2f2003%2fcont%2fGRUR%2e2003%2eH09%2eNAMEINHALTSVERZEICHNIS%2ehtm",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://beck-online.beck.de/Default.aspx?words=ZUM+2013%2C+909&btsearch.x=42&btsearch.x=0&btsearch.y=0",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "Günter",
-						"lastName": "Krings"
-					},
-					{
-						"firstName": "Christian-Henner",
-						"lastName": "Hentsch"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"title": "Das neue Zweitverwertungsrecht",
-				"publicationTitle": "ZUM",
-				"journalAbbreviation": "ZUM",
-				"date": "2013",
-				"issue": "12",
-				"pages": "909-913",
-				"libraryCatalog": "beck-online"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://beck-online.beck.de/default.aspx?vpath=bibdata/ents/lsk/2014/3800/lsk.2014.38.0907.htm&pos=2",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "Hannfried",
-						"lastName": "Leisterer",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Florian",
-						"lastName": "Schneider",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"title": "Der überarbeitete Entwurf für ein IT-Sicherheitsgesetz",
-				"date": "2014",
-				"publicationTitle": "CR",
-				"journalAbbreviation": "CR",
-				"pages": "574",
-				"libraryCatalog": "beck-online"
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "https://beck-online.beck.de/default.aspx?vpath=bibdata/ents/lsk/2014/3500/lsk.2014.35.0537.htm&pos=1",
 		"items": [
 			{
@@ -520,33 +286,6 @@ var testCases = [
 				"publicationTitle": "AfP",
 				"journalAbbreviation": "AfP",
 				"pages": "300",
-				"libraryCatalog": "beck-online"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://beck-online.beck.de/Default.aspx?vpath=bibdata/ents/lsk/2014/4100/lsk.2014.41.0740.htm&pos=17&hlwords=#xhlhit",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "Marianne Johanna",
-						"lastName": "Hilf",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"title": "Die Strafbarkeit juristischer Personen im schweizerischen, österreichischen und liechtensteinischen Recht",
-				"pages": "73",
 				"libraryCatalog": "beck-online"
 			}
 		]
