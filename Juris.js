@@ -1,7 +1,7 @@
 {
 	"translatorID": "bc2ec385-e60a-4899-96ae-d4f0d6574ad7",
 	"label": "Juris",
-	"creator": "rm2342",
+	"creator": "Reto Mantz",
 	"target": "^https?://(www\\.)?juris\\.de/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -64,7 +64,7 @@ function detectWeb(doc, url) {
 	// does the article have an author? 
 	var myAuthorsString = scrapeAuthor(doc, url);
 	
-	if ((mappingClassNameToItemType[myType.toUpperCase()]) && (myAuthorsString != null)) {
+	if (mappingtype && myAuthorsString) {
 		return mappingtype;
 	}
 }
@@ -79,7 +79,8 @@ function doWeb (doc, url) {
 	
 	// scrape authors
 	var myAuthorsString = scrapeAuthor(doc, url);
-
+	
+	// example: "Michael Fricke, Martin Gerecke"
 	myAuthorsString = Zotero.Utilities.trimInternal(myAuthorsString);
 	var myAuthors = myAuthorsString.split(",");
 
@@ -93,6 +94,8 @@ function doWeb (doc, url) {
 	newItem.title = myTitle;
 	
 	//scrape src
+	//example 1: "AfP 2014, 293-299"
+	//example 2: "ZStW 125, 259-298 (2013)"
 	var mySrcString = ZU.xpathText(doc, "//table[@class='TableRahmenkpl']/tbody/tr/td[2]/table/tbody/tr[2]/td[2]");
 
 	// find four digits in src (=date)
