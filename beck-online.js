@@ -93,6 +93,9 @@ function doWeb(doc, url) {
 function scrapeLSK(doc, url) {
 	var item = new Zotero.Item(mappingClassNameToItemType['LSK']);
 	
+	// description example 1: "Marco Ganzhorn: Ist ein E-Book ein Buch?"
+	// description example 2: "Michael Fricke/Dr. Martin Gerecke: Informantenschutz und Informantenhaftung"
+	// description example 3: "Sara Sun Beale: Die Entwicklung des US-amerikanischen Rechts der strafrechtlichen Verantwortlichkeit von Unternehmen"
 	var description = ZU.xpathText(doc, "//*[@id='dokument']/h1");
 	var descriptionItems = description.split(':');
 
@@ -112,6 +115,9 @@ function scrapeLSK(doc, url) {
 	item.title = ZU.trimInternal(descriptionItems[1]);
 	
 	// src => journalTitle, date and pages
+	// example 1: "Ganzhorn, CR 2014, 492"
+	// example 2: "Fricke, Gerecke, AfP 2014, 293"
+	// example 3 (no date provided): "Beale, ZStrW Bd. 126, 27"
 	var src = ZU.xpathText(doc, "//div[@class='lsk-fundst']/ul/li");
 	var m = src.trim().match(/([^,]+?)(\b\d{4})?,\s*(\d+)$/);
 	if (m) {
