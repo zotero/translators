@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-10-31 07:39:22"
+	"lastUpdated": "2014-11-02 12:57:22"
 }
 
 /*
@@ -104,13 +104,37 @@ function doWeb (doc, url) {
 		newItem.date = myDate[0];
 	}		
 
-	//journal
-	var journal = mySrcString.substr(0, mySrcString.indexOf(myDate)-1);
-	newItem.publicationTitle = journal;
-	newItem.journalAbbreviation = journal;
-	
-	//pages	
-	newItem.pages = ZU.trimInternal(mySrcString.substr(mySrcString.lastIndexOf(",")+1));	
+	// check whether srcString has format of example 1. If so, parse the string accordingly
+	if (mySrcString[mySrcString.indexOf(myDate)+4] == ',') {
+		
+		//journal
+		var journal = mySrcString.substr(0, mySrcString.indexOf(myDate)-1);
+		newItem.publicationTitle = journal;
+		newItem.journalAbbreviation = journal;
+		
+		//pages	
+		newItem.pages = ZU.trimInternal(mySrcString.substr(mySrcString.lastIndexOf(",")+1));	
+	}
+	else {	// format is that of example 2 => different parsing mechanism
+		// journal
+		newItem.publicationTitle = mySrcString.substr(0,mySrcString.indexOf(" "));
+		
+		// find first digits in srcString (=issue no.)
+		var firstDigits = mySrcString.match(/\d+/);
+		if (firstDigits) {
+			newItem.issue = firstDigits[0];
+		}
+		
+		// find pages in srcString = ", abc-def "
+		var pagesWithComma = mySrcString.match(/, \d+-\d+ /);
+		// now copy the pages from the string  = "abc-def");
+		if (pagesWithComma) {
+			var pages = pagesWithComma[0].match(/\d+-\d+/);
+			if (pages) {
+				newItem.pages = pages[0];
+			}
+		}		
+	}
 	
 	newItem.attachments = [{
 		title: "Snapshot",
