@@ -77,3 +77,4 @@ f1f3aa05-d752-4a46-b362-1d3dc87c7c36 # Princeton+ now (re-)unified with Primo
 ca6e95d1-46b9-4535-885c-df0c2d4b7f7a # Innovate Online - site defunct (and ownership transfered). 
 f880bf79-d42f-4337-b0d2-7a7de4a48b7d # X-OPAC - no more instances of this lib catalog
 0863b8ec-e717-4b6d-9e35-0b2db2ac6b0f # Physical Society of Japan - journals moved to IOP or Atypon system
+63c25c45-6257-4985-9169-35b785a2995e # InfoTrac OneFile - merged into Galegroup (see #482)
