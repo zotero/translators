@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-10-31 03:37:51"
+	"lastUpdated": "2014-11-04 03:37:51"
 }
 
 function detectWeb(doc, url) {
@@ -66,7 +66,7 @@ function processTexts(texts) {
 		var pdfURL = texts[i].replace("info", "fetchObject.action?uri=info")
 					+ '&representation=PDF';
 		(function(risLink, pdfURL) {
-			Z.debug(pdfURL)
+			//Z.debug(pdfURL)
 			ZU.doGet(risLink, function (text) {
 				var translator = Zotero.loadTranslator("import");
 				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
