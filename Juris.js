@@ -1,15 +1,15 @@
 {
 	"translatorID": "bc2ec385-e60a-4899-96ae-d4f0d6574ad7",
 	"label": "Juris",
-	"creator": "rm2342",
-	"target": "^(http|https)?://(?:www\\.)?juris.de",
+	"creator": "Reto Mantz",
+	"target": "^https?://(www\\.)?juris\\.de/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-10-31 07:39:22"
+	"lastUpdated": "2014-11-02 12:57:22"
 }
 
 /*
@@ -64,7 +64,7 @@ function detectWeb(doc, url) {
 	// does the article have an author? 
 	var myAuthorsString = scrapeAuthor(doc, url);
 	
-	if ((mappingClassNameToItemType[myType.toUpperCase()]) && (myAuthorsString != null)) {
+	if (mappingtype && myAuthorsString) {
 		return mappingtype;
 	}
 }
@@ -79,7 +79,8 @@ function doWeb (doc, url) {
 	
 	// scrape authors
 	var myAuthorsString = scrapeAuthor(doc, url);
-
+	
+	// example: "Michael Fricke, Martin Gerecke"
 	myAuthorsString = Zotero.Utilities.trimInternal(myAuthorsString);
 	var myAuthors = myAuthorsString.split(",");
 
@@ -93,6 +94,8 @@ function doWeb (doc, url) {
 	newItem.title = myTitle;
 	
 	//scrape src
+	//example 1: "AfP 2014, 293-299"
+	//example 2: "ZStW 125, 259-298 (2013)"
 	var mySrcString = ZU.xpathText(doc, "//table[@class='TableRahmenkpl']/tbody/tr/td[2]/table/tbody/tr[2]/td[2]");
 
 	// find four digits in src (=date)
@@ -101,13 +104,37 @@ function doWeb (doc, url) {
 		newItem.date = myDate[0];
 	}		
 
-	//journal
-	var journal = mySrcString.substr(0, mySrcString.indexOf(myDate)-1);
-	newItem.publicationTitle = journal;
-	newItem.journalAbbreviation = journal;
-	
-	//pages	
-	newItem.pages = ZU.trimInternal(mySrcString.substr(mySrcString.lastIndexOf(",")+1));	
+	// check whether srcString has format of example 1. If so, parse the string accordingly
+	if (mySrcString[mySrcString.indexOf(myDate)+4] == ',') {
+		
+		//journal
+		var journal = mySrcString.substr(0, mySrcString.indexOf(myDate)-1);
+		newItem.publicationTitle = journal;
+		newItem.journalAbbreviation = journal;
+		
+		//pages	
+		newItem.pages = ZU.trimInternal(mySrcString.substr(mySrcString.lastIndexOf(",")+1));	
+	}
+	else {	// format is that of example 2 => different parsing mechanism
+		// journal
+		newItem.publicationTitle = mySrcString.substr(0,mySrcString.indexOf(" "));
+		
+		// find first digits in srcString (=issue no.)
+		var firstDigits = mySrcString.match(/\d+/);
+		if (firstDigits) {
+			newItem.issue = firstDigits[0];
+		}
+		
+		// find pages in srcString = ", abc-def "
+		var pagesWithComma = mySrcString.match(/, \d+-\d+ /);
+		// now copy the pages from the string  = "abc-def");
+		if (pagesWithComma) {
+			var pages = pagesWithComma[0].match(/\d+-\d+/);
+			if (pages) {
+				newItem.pages = pages[0];
+			}
+		}		
+	}
 	
 	newItem.attachments = [{
 		title: "Snapshot",
