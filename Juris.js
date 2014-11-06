@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-11-02 12:57:22"
+	"lastUpdated": "2014-11-06 12:57:22"
 }
 
 /*
@@ -98,42 +98,26 @@ function doWeb (doc, url) {
 	//example 2: "ZStW 125, 259-298 (2013)"
 	var mySrcString = ZU.xpathText(doc, "//table[@class='TableRahmenkpl']/tbody/tr/td[2]/table/tbody/tr[2]/td[2]");
 
-	// find four digits in src (=date)
-	var myDate = mySrcString.match(/\d\d\d\d/g);
-	if (myDate) {
-		newItem.date = myDate[0];
-	}		
-
-	// check whether srcString has format of example 1. If so, parse the string accordingly
-	if (mySrcString[mySrcString.indexOf(myDate)+4] == ',') {
-		
-		//journal
-		var journal = mySrcString.substr(0, mySrcString.indexOf(myDate)-1);
-		newItem.publicationTitle = journal;
-		newItem.journalAbbreviation = journal;
-		
-		//pages	
-		newItem.pages = ZU.trimInternal(mySrcString.substr(mySrcString.lastIndexOf(",")+1));	
+	// match example 1
+	var matchSrc = mySrcString.match(/^([^,]+)\s(\d{4})\s*,\s*(\d+(?:-\d+)?)\s*$/);
+	if (matchSrc) {
+		newItem.publicationTitle = ZU.trimInternal(matchSrc[1]);
+		newItem.journalAbbreviation = newItem.publicationTitle;
+		newItem.date = matchSrc[2];
+		newItem.pages = matchSrc[3];
 	}
-	else {	// format is that of example 2 => different parsing mechanism
-		// journal
-		newItem.publicationTitle = mySrcString.substr(0,mySrcString.indexOf(" "));
-		
-		// find first digits in srcString (=issue no.)
-		var firstDigits = mySrcString.match(/\d+/);
-		if (firstDigits) {
-			newItem.issue = firstDigits[0];
+	// match example 2
+	else {
+		matchSrc = mySrcString.match(/^([^,]+)\s(\d+)\s*,\s*(\d+(?:-\d+)?)\s*\((\d{4})\)\s*$/);
+		if (matchSrc) {
+			Z.debug(matchSrc);
+	
+			newItem.publicationTitle = ZU.trimInternal(matchSrc[1]);
+			newItem.journalAbbreviation = newItem.publicationTitle;
+			newItem.issue = matchSrc[2];
+			newItem.pages = matchSrc[3];
+			newItem.date = matchSrc[4];
 		}
-		
-		// find pages in srcString = ", abc-def "
-		var pagesWithComma = mySrcString.match(/, \d+-\d+ /);
-		// now copy the pages from the string  = "abc-def");
-		if (pagesWithComma) {
-			var pages = pagesWithComma[0].match(/\d+-\d+/);
-			if (pages) {
-				newItem.pages = pages[0];
-			}
-		}		
 	}
 	
 	newItem.attachments = [{
