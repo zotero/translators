@@ -3,19 +3,19 @@
 	"label": "HAL Archives Ouvertes",
 	"creator": "Sebastian Karcher",
 	"target": "^https?://hal\\.archives-ouvertes\\.fr",
-	"minVersion": "2.1.9",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-23 23:44:54"
+	"lastUpdated": "2014-11-08 21:46:36"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 	HAL translator
-	Copyright © 2012 Sebastian Karcher 
+	Copyright © 2012-2014 Sebastian Karcher 
 	
 	This file is part of Zotero.
 	
@@ -36,15 +36,47 @@
 */
 
 function detectWeb(doc, url) {
-	if (ZU.xpath(doc, '//a[@class="metadata"]').length > 0) return "multiple";
-	if (url.match(/\index\.php\?halsid=|\.fr\/hal-\d+/)) return "journalArticle";
+	if (url.search(/\/search\/index\//)!=-1) return "multiple";
+	if (url.search(/\index\.php\?halsid=|\.fr\/[a-z]+-\d+/)!=-1) return findItemType(doc, url);
+}
+
+function findItemType(doc, url){
+	var itemType= ZU.xpathText(doc, '//div[contains(@class, "label")]');
+	//Z.debug(itemType)
+	var typeMap = {
+		"Books": "book",
+		"Ouvrage (y compris édition critique et traduction)": "book",
+		"Book sections": "bookSection",
+		"Chapitre d'ouvrage": "bookSection",
+		"Conference papers": "conferencePaper",
+		"Communication dans un congrès": "conferencePaper",
+		"Directions of work or proceedings": "book",
+		"Direction d'ouvrage, Proceedings": "book",
+		"Journal articles": "journalArticle",
+		"Article dans des revues": "journalArticle",
+		"Lectures": "presentation",
+		"Cours": "presentation",
+		"Other publications": "book",  //this could also be report, not sure here but bibtex guesses book
+		"Autre publication": "book",  //this could also be report, not sure here but bibtex guesses book		
+		"Patents": "patent",
+		"Brevet": "patent",
+		"Preprints, Working Papers, ...": "manuscript",
+		"Pré-publication, Document de travail": "manuscript",
+		"Reports": "report",
+		"Rapport": "report",
+		"Theses": "thesis", 
+		"Thèse": "thesis"
+	}
+	if (typeMap[itemType]) return typeMap[itemType];
+	else if (url.indexOf("medihal-")!=-1) return "artwork";
+	else return "journalArticle";
 }
 
 function doWeb(doc, url) {
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = {};
-		var titles = doc.evaluate('//a[@class="metadata"]', doc, null, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//strong/a[@data-original-title="Display the resource" or @data-original-title="Voir la ressource"]', doc, null, XPathResult.ANY_TYPE, null);
 		var title;
 		while (title = titles.iterateNext()) {
 			items[title.href] = title.textContent;
@@ -56,9 +88,7 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(articles, scrape, function () {
-				Zotero.done();
-			});
+			Zotero.Utilities.processDocuments(articles, scrape)
 		});
 	} else {
 		scrape(doc, url);
@@ -66,24 +96,36 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	var data = ZU.xpathText(doc, '//span[@id="ind_bibtex"]/following-sibling::a/@onclick');
-	var halsid = data.match(/halsid:'.+'/)[0].replace(/:'/, "=").replace(/'$/, "");
-	var haldoc = data.match(/'\d+'/)[0].replace(/'/g, "");
-	Z.debug("HALSID: " + halsid);
-	Z.debug("HALDOC: " + haldoc);
-	var postUrl = "http://hal.archives-ouvertes.fr/action_ajax/browse.php";
-	var postBody = "action=export_in_format&docid=" + haldoc + "&format=BIBTEX&" + halsid;
-	ZU.doPost(postUrl, postBody, function (bibtex) {
+	var bibtexUrl = url.replace(/#.+|\/$/, "") + "/bibtex";
+	var abstract = ZU.xpathText(doc, '//div[@class="abstract-content"]');
+	var pdfUrl = url.replace(/#.+|\/$/, "") + "/document";
+	//Z.debug(pdfUrl)
+	ZU.doGet(bibtexUrl, function (bibtex) {
 		//Z.debug(bibtex)
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 		translator.setString(bibtex);
 		translator.setHandler("itemDone", function (obj, item) {
-			item.attachments = [{
-				url: item.url,
-				title: "HAL Snapshot",
-				mimeType: "text/html"
-			}];
+			if (abstract){
+				item.abstractNote=abstract.replace(/(Abstract|Résumé)\s*:/, "");
+			}
+			if (ZU.xpathText(doc, '//div/a[contains(@data-original-title, ".pdf")]')){	
+				item.attachments = [{
+					url: pdfUrl,
+					title: "HAL PDF Full Text",
+					mimeType: "application/pdf"
+				}];
+			}
+			else{
+				item.attachments = [{
+					document: doc,
+					title: "HAL Snapshot",
+					mimeType: "text/html"
+				}];
+			}
+			if (detectWeb(doc, url)=="artwork"|detectWeb(doc, url)=="presentation"){
+				item.itemType= detectWeb(doc, url);
+			}
 			item.complete();
 		});
 		translator.translate();
@@ -93,10 +135,11 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://hal.archives-ouvertes.fr/hal-00328427",
+		"url": "https://hal.archives-ouvertes.fr/hal-00328427",
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Tropopause referenced ozone climatology and inter-annual variability (1994–2003) from the MOZAIC programme",
 				"creators": [
 					{
 						"firstName": "V.",
@@ -139,28 +182,153 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "March 2006",
+				"abstractNote": "The MOZAIC programme collects ozone and water vapour data using automatic equipment installed on board five long-range Airbus A340 aircraft flying regularly all over the world since August 1994. Those measurements made between September 1994 and August 1996 allowed the first accurate ozone climatology at 9–12 km altitude to be generated. The seasonal variability of the tropopause height has always provided a problem when constructing climatologies in this region. To remove any signal from the seasonal and synoptic scale variability in tropopause height we have chosen in this further study of these and subsequent data to reference our climatology to the altitude of the tropopause. We define the tropopause as a mixing zone 30 hPa thick across the 2 pvu potential vorticity surface. A new ozone climatology is now available for levels characteristic of the upper troposphere (UT) and the lower stratosphere (LS) regardless of the seasonal variations of the tropopause over the period 1994–2003. Moreover, this new presentation has allowed an estimation of the monthly mean climatological ozone concentration at the tropopause showing a sine seasonal variation with a maximum in May (120 ppbv) and a minimum in November (65 ppbv). Besides, we present a first assessment of the inter-annual variability of ozone in this particular critical region. The overall increase in the UTLS is about 1%/yr for the 9 years sampled. However, enhanced concentrations about 10–15 % higher than the other years were recorded in 1998 and 1999 in both the UT and the LS. This so-called \"1998–1999 anomaly\" may be attributed to a combination of different processes involving large scale modes of atmospheric variability, circulation features and local or global pollution, but the most dominant one seems to involve the variability of the North Atlantic Oscillation (NAO) as we find a strong positive correlation (above 0.60) between ozone recorded in the upper troposphere and the NAO index. A strong anti-correlation is also found between ozone and the extremes of the Northern Annular Mode (NAM) index, attributing the lower stratospheric variability to dynamical anomalies. Finally this analysis highlights the coupling between the troposphere, at least the upper one, and the stratosphere, at least the lower one.",
+				"issue": "4",
+				"itemID": "thouret:hal-00328427",
+				"libraryCatalog": "HAL Archives Ouvertes",
+				"pages": "1051",
+				"publicationTitle": "Atmospheric Chemistry and Physics",
+				"url": "https://hal.archives-ouvertes.fr/hal-00328427",
+				"volume": "6",
 				"attachments": [
 					{
 						"title": "HAL Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"itemID": "thouret:hal-00328427",
-				"url": "http://hal.archives-ouvertes.fr/hal-00328427",
-				"title": "Tropopause referenced ozone climatology and inter-annual variability (1994–2003) from the MOZAIC programme",
-				"abstractNote": "The MOZAIC programme collects ozone and water vapour data using automatic equipment installed on board five long-range Airbus A340 aircraft flying regularly all over the world since August 1994. Those measurements made between September 1994 and August 1996 allowed the first accurate ozone climatology at 9–12 km altitude to be generated. The seasonal variability of the tropopause height has always provided a problem when constructing climatologies in this region. To remove any signal from the seasonal and synoptic scale variability in tropopause height we have chosen in this further study of these and subsequent data to reference our climatology to the altitude of the tropopause. We define the tropopause as a mixing zone 30 hPa thick across the 2 pvu potential vorticity surface. A new ozone climatology is now available for levels characteristic of the upper troposphere (UT) and the lower stratosphere (LS) regardless of the seasonal variations of the tropopause over the period 1994–2003. Moreover, this new presentation has allowed an estimation of the monthly mean climatological ozone concentration at the tropopause showing a sine seasonal variation with a maximum in May (120 ppbv) and a minimum in November (65 ppbv). Besides, we present a first assessment of the inter-annual variability of ozone in this particular critical region. The overall increase in the UTLS is about 1%/yr for the 9 years sampled. However, enhanced concentrations about 10–15 % higher than the other years were recorded in 1998 and 1999 in both the UT and the LS. This so-called \"1998–1999 anomaly\" may be attributed to a combination of different processes involving large scale modes of atmospheric variability, circulation features and local or global pollution, but the most dominant one seems to involve the variability of the North Atlantic Oscillation (NAO) as we find a strong positive correlation (above 0.60) between ozone recorded in the upper troposphere and the NAO index. A strong anti-correlation is also found between ozone and the extremes of the Northern Annular Mode (NAM) index, attributing the lower stratospheric variability to dynamical anomalies. Finally this analysis highlights the coupling between the troposphere, at least the upper one, and the stratosphere, at least the lower one.",
-				"language": "Anglais",
-				"pages": "1051",
-				"publicationTitle": "Atmospheric Chemistry and Physics",
-				"volume": "6",
-				"issue": "4",
-				"date": "March 2006",
-				"libraryCatalog": "HAL Archives Ouvertes"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://hal.archives-ouvertes.fr/hal-00472553v1",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Les sites préhistoriques de la région de Fejej, Sud-Omo, Éthiopie, dans leur contexte stratigraphique et paléontologique.",
+				"creators": [
+					{
+						"firstName": "Henry",
+						"lastName": "De Lumley",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Beyene",
+						"lastName": "Yonas",
+						"creatorType": "author"
+					}
+				],
+				"date": "2004",
+				"abstractNote": "Parmi les nombreux sites paléontologiques et préhistoriques de la région de Fejej, dans la région Sud-Omo, en Éthiopie, le site FJ-1, situé à seulement 5 km au nord de la frontière avec le Kenya et daté de 1,96 Ma, parfaitement en place, très riche en faune et en industrie, étudié avec une approche interdisciplinaire, apporte des informations exceptionnelles pour reconstituer l'habitat, le comportement et le mode de vie, ainsi que les paléoenvironnements des premiers hommes. Des Homo habilis s'étaient installés sur un bourrelet de sables fluviatiles, grossier et meuble, bordé par un dénivelé de 50 cm de hauteur, à proximité de la berge d'une rivière, pendant une période d'étiage, et au coeur d'une plaine d'inondation. Peu de temps sans doute après leur départ, en période de pluie une remontée des eaux de la rivière a provoqué l'enfouissement du sol d'occupation par de nouveaux dépôt de sables qui ont protégé l'ensemble sans le déplacer. La bonne conservation du matériel archéologique et paléontologique, l'enfouissement rapide et le maintien des objets en place, les nombreux remontages effectués, que ce soit en ce qui concerne las artefacts lithiques ou les reste fauniques, les traces de fracturations anthropiques et la non-intervention d'autres prédateurs carnivores, sont, entre autre les conditions exceptionnelles de mise en place et d'étude de ce gisement, qui nous apporte autant de renseignements rares et précieux sur un épisode de la vie des hominidés d'il y a presque 2 millions d'années.",
+				"itemID": "delumley:hal-00472553",
+				"libraryCatalog": "HAL Archives Ouvertes",
+				"numPages": "637 p.",
+				"publisher": "Éditions Recherche sur les Civilisations",
+				"url": "https://hal.archives-ouvertes.fr/hal-00472553",
+				"attachments": [
+					{
+						"title": "HAL Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://hal.archives-ouvertes.fr/hal-00973502",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "Learning Centre de l'UHA : comment accompagner son ouverture et inciter les futurs usagers à exploiter ce nouveau centre de ressources ?",
+				"creators": [
+					{
+						"firstName": "Bernard",
+						"lastName": "Coulibaly",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hélène",
+						"lastName": "Hermann",
+						"creatorType": "author"
+					}
+				],
+				"date": "March 2014",
+				"extra": "140 pages",
+				"itemID": "coulibaly:hal-00973502",
+				"libraryCatalog": "HAL Archives Ouvertes",
+				"shortTitle": "Learning Centre de l'UHA",
+				"url": "https://hal.archives-ouvertes.fr/hal-00973502",
+				"attachments": [
+					{
+						"title": "HAL PDF Full Text",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					" ICT appropriation",
+					"Bibliothèque universitaire",
+					"Innovation",
+					"Learning Centre",
+					"Pedagogy",
+					"University Library",
+					"appropriation TICE",
+					"innovation",
+					"pédagogie universitaire"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://hal.archives-ouvertes.fr/medihal-00772952v1",
+		"items": [
+			{
+				"itemType": "artwork",
+				"title": "Children playing in a park",
+				"creators": [
+					{
+						"firstName": "François",
+						"lastName": "Gipouloux",
+						"creatorType": "author"
+					}
+				],
+				"date": "March 2012",
+				"abstractNote": "Children performing for a crowd of passersby in a park in Kunming. (Enfants jouant dans un parc à Kunming Photo d'enfants jouant dans un parc à Kunming",
+				"itemID": "gipouloux:medihal-00772952",
+				"libraryCatalog": "HAL Archives Ouvertes",
+				"url": "https://medihal.archives-ouvertes.fr/medihal-00772952",
+				"attachments": [
+					{
+						"title": "HAL Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					"China",
+					"Kunming",
+					"children",
+					"park",
+					"town"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://hal.archives-ouvertes.fr/search/index/q/%2A/docType_s/THESE/",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
