@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-10-31 07:30:35"
+	"lastUpdated": "2014-11-08 20:10:36"
 }
 
 /*
@@ -295,6 +295,150 @@ var testCases = [
 				"libraryCatalog": "beck-online"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://beck-online.beck.de/default.aspx?vpath=bibdata%2Fzeits%2FDNOTZ-SONDERH%2F2012%2Fcont%2FDNOTZ-SONDERH.2012.88.1.htm",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Roth",
+						"firstName": "Günter H.",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "Best practice – Grundstrukturen des kontinentaleuropäischen Gesellschaftsrechts",
+				"publicationTitle": "Sonderheft der Deutschen Notar-Zeitschrift",
+				"journalAbbreviation": "DNotZ-Sonderheft",
+				"date": "2012",
+				"issue": "1",
+				"pages": "88-95",
+				"libraryCatalog": "beck-online"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://beck-online.beck.de/default.aspx?typ=reference&y=300&z=BKR&b=2001&s=99&n=1",
+		"items": [
+			{
+				"itemType": "case",
+				"creators": [],
+				"notes": [
+					"§ WPHG § 15 WpHG; § BOERSG § 88 BörsG; §§ BGB § 823, BGB § 826 BGB"
+				],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "Schadensersatz wegen fehlerhafter Ad-hoc-Mitteilungen („Infomatec”)",
+				"publicationTitle": "Zeitschrift für Bank- und Kapitalmarktrecht",
+				"journalAbbreviation": "BKR",
+				"date": "2001",
+				"issue": "2",
+				"pages": "99-101",
+				"abstractNote": "Leitsätze der Redaktion:\n    1. Ad-hoc-Mitteilungen richten sich nicht nur an ein bilanz- und fachkundiges Publikum, sondern an alle tatsächlichen oder potenziellen Anleger und Aktionäre.\n    2. \n    § BOERSG § 88 Abs. BOERSG § 88 Absatz 1 Nr. 1 BörsG dient neben dem Schutz der Allgemeinheit gerade auch dazu, das Vermögen des einzelnen Kapitalanlegers vor möglichen Schäden durch eine unredliche Beeinflussung der Preisbildung an Börsen und Märkten zu schützen.",
+				"court": "LG Augsburg",
+				"dateDecided": "2001-9-24",
+				"docketNumber": "3 O 4995/00",
+				"shortTitle": "LG Augsburg, Urteil vom 24. 9. 2001 - 3 O 4995/00 (nicht rechtskräftig)",
+				"reporter": "BKR",
+				"reporterVolume": "2001",
+				"extra": "Parallelfundstellen: BB 2001 Heft 42, 2130 ; DB 2001, 2334 ; NJOZ 2001, 1878 ; NJW-RR 2001, 1705 ; NZG 2002, 429 ; WPM 2001, 1944 ; ZIP 2001, 1881 ; FHZivR 47 Nr. 2816 (Ls.) ; FHZivR 47 Nr. 6449 (Ls.) ; FHZivR 48 Nr. 2514 (Ls.) ; FHZivR 48 Nr. 6053 (Ls.) ; LSK 2001, 520032 (Ls.) ; NJW-RR 2003, 216 (Ls.)",
+				"libraryCatalog": "beck-online"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://beck-online.beck.de/default.aspx?typ=reference&y=300&z=NJW&b=2014&s=898&n=1",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Boris",
+						"lastName": "Scholtka"
+					},
+					{
+						"firstName": "Antje",
+						"lastName": "Baumbach"
+					},
+					{
+						"firstName": "Marike",
+						"lastName": "Pietrowicz"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "Die Entwicklung des Energierechts im Jahr 2013",
+				"publicationTitle": "Neue Juristische Wochenschrift",
+				"journalAbbreviation": "NJW",
+				"date": "2014",
+				"issue": "13",
+				"pages": "898-903",
+				"abstractNote": "Der Bericht knüpft an die bisher in dieser Reihe erschienenen Beiträge zur Entwicklung des Energierechts (zuletzt NJW2013, NJW Jahr 2013 Seite 2724) an und zeigt die Schwerpunkte energierechtlicher Entwicklungen in Gesetzgebung und Rechtsanwendung im Jahr 2013 auf.",
+				"libraryCatalog": "beck-online"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://beck-online.beck.de/default.aspx?vpath=bibdata%2fzeits%2fNJW%2f2014%2fcont%2fNJW%2e2014%2e930%2e1%2ehtm",
+		"items": [
+			{
+				"itemType": "case",
+				"creators": [],
+				"notes": [
+					"BGB §§ BGB § 276, BGB § 278, BGB § 651 a BGB § 651A Absatz V 1; HGB § HGB § 87 a HGB § 87A Absatz III 2"
+				],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "BGH: Provisionsanspruch des Reisevermittlers bei Absage der Reise durch den Veranstalter",
+				"publicationTitle": "Neue Juristische Wochenschrift",
+				"journalAbbreviation": "NJW",
+				"date": "2014",
+				"issue": "13",
+				"pages": "930-932",
+				"court": "BGH",
+				"dateDecided": "2014-1-23",
+				"docketNumber": "VII ZR 168/13",
+				"shortTitle": "BGH, Urteil vom 23.1.2014 – VII ZR 168/13",
+				"reporter": "NJW",
+				"reporterVolume": "2014",
+				"extra": "Parallelfundstellen: BeckRS 2014, 03315 ; DB 2014, 1078 L ; GWR 2014, 125 ; IBRRS 96371 ; MDR 2014, 354 ; RRa 2014, 130 ; VersR 2014, 581 ; ZVertriebsR 2014, 98 ; ZVertriebsR 2014, 98 ; ADAJUR Dok.Nr. 103938 (Ls... ; LSK 2014, 110552 (Ls.)",
+				"libraryCatalog": "beck-online"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://beck-online.beck.de/?vpath=bibdata%2fzeits%2fGRUR%2f2003%2fcont%2fGRUR%2e2003%2eH09%2eNAMEINHALTSVERZEICHNIS%2ehtm",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
