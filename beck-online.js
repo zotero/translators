@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-04-14 11:50:31"
+	"lastUpdated": "2014-11-08 20:10:36"
 }
 
 /*
@@ -44,7 +44,8 @@ var mappingClassNameToItemType = {
 	'ZRSPR' : 'case',//Rechtssprechung
 	'ZENTB' : 'journalArticle',//Entscheidungsbesprechung
 	'ZBUCHB' : 'journalArticle',//Buchbesprechung
-	'ZSONST' : 'journalArticle',//Sonstiges, z.B. Vorwort
+	'ZSONST' : 'journalArticle',//Sonstiges, z.B. Vorwort,
+	'LSK'	: 'journalArticle', // Artikel in Leitsatzkartei
 	'ZINHALTVERZ' : 'multiple'//Inhaltsverzeichnis
 }
 
@@ -87,16 +88,76 @@ function doWeb(doc, url) {
 	
 }
 
+// scrape documents that are only in the beck-online "Leitsatz-Kartei", i.e. 
+// where only information about the article, not the article itself is in beck-online
+function scrapeLSK(doc, url) {
+	var item = new Zotero.Item(mappingClassNameToItemType['LSK']);
+	
+	// description example 1: "Marco Ganzhorn: Ist ein E-Book ein Buch?"
+	// description example 2: "Michael Fricke/Dr. Martin Gerecke: Informantenschutz und Informantenhaftung"
+	// description example 3: "Sara Sun Beale: Die Entwicklung des US-amerikanischen Rechts der strafrechtlichen Verantwortlichkeit von Unternehmen"
+	var description = ZU.xpathText(doc, "//*[@id='dokument']/h1");
+	var descriptionItems = description.split(':');
+
+	//authors
+	var authorsString = descriptionItems[0];
+	
+	var authors = authorsString.split("/");
+	var authorsItems = new Array();
+
+	for (var index = 0; index < authors.length; ++index) {
+		var author = Zotero.Utilities.trimInternal(authors[index]);
+		authorsItems.push ( Zotero.Utilities.cleanAuthor(author, 'author', false) );
+	}
+	item.creators = authorsItems;
+	
+	//title
+	item.title = ZU.trimInternal(descriptionItems[1]);
+	
+	// src => journalTitle, date and pages
+	// example 1: "Ganzhorn, CR 2014, 492"
+	// example 2: "Fricke, Gerecke, AfP 2014, 293"
+	// example 3 (no date provided): "Beale, ZStrW Bd. 126, 27"
+	var src = ZU.xpathText(doc, "//div[@class='lsk-fundst']/ul/li");
+	var m = src.trim().match(/([^,]+?)(\b\d{4})?,\s*(\d+)$/);
+	if (m) {
+		item.journalTitle = ZU.trimInternal(m[1]);
+		if (m[2]) item.date = m[2];
+		item.pages = m[3];
+	}
+
+	item.attachments = [{
+		title: "Snapshot",
+		document:doc
+	}];
+
+	item.complete();
+}
+
 
 function scrape(doc, url) {
-	var documentClassName = doc.getElementById("dokument").className;
+	var documentClassName = doc.getElementById("dokument").className.toUpperCase();
+
+	// use different scraping function for documents in LSK
+	if (documentClassName == 'LSK') {
+			scrapeLSK(doc, url);
+			return;
+	}
+	
 	var item;
-	if (mappingClassNameToItemType[documentClassName.toUpperCase()]) {
-		item = new Zotero.Item(mappingClassNameToItemType[documentClassName.toUpperCase()]);
+	if (mappingClassNameToItemType[documentClassName]) {
+		item = new Zotero.Item(mappingClassNameToItemType[documentClassName]);
 	}
 	
 	var titleNode = ZU.xpath(doc, '//div[@class="titel"]')[0] || ZU.xpath(doc, '//div[@class="dk2"]//span[@class="titel"]')[0];
 	item.title = ZU.trimInternal(titleNode.textContent);
+	
+	// in some cases (e.g. NJW 2007, 3313) the title contains an asterisk with a footnote that is imported into the title
+	// therefore, this part should be removed from the title
+	var indexOfAdditionalText = item.title.indexOf("zur Fussnote");
+	if (indexOfAdditionalText !=-1) {
+		item.title = item.title.substr(0, indexOfAdditionalText);
+	}
 	
 	var authorNode = ZU.xpath(doc, '//div[@class="autor"]');
 	for (var i=0; i<authorNode.length; i++) {
@@ -207,7 +268,37 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://beck-online.beck.de/?vpath=bibdata%2fzeits%2fDNOTZ-SONDERH%2f2012%2fcont%2fDNOTZ-SONDERH%2e2012%2e88%2e1%2ehtm",
+		"url": "https://beck-online.beck.de/default.aspx?vpath=bibdata/ents/lsk/2014/3500/lsk.2014.35.0537.htm&pos=1",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Daniel",
+						"lastName": "Jipp",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"title": "Zum Folgenbeseitigungsanspruch bei Buchveröffentlichungen - Der Rückrufanspruch",
+				"date": "2014",
+				"publicationTitle": "AfP",
+				"journalAbbreviation": "AfP",
+				"pages": "300",
+				"libraryCatalog": "beck-online"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://beck-online.beck.de/default.aspx?vpath=bibdata%2Fzeits%2FDNOTZ-SONDERH%2F2012%2Fcont%2FDNOTZ-SONDERH.2012.88.1.htm",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -266,7 +357,7 @@ var testCases = [
 				"shortTitle": "LG Augsburg, Urteil vom 24. 9. 2001 - 3 O 4995/00 (nicht rechtskräftig)",
 				"reporter": "BKR",
 				"reporterVolume": "2001",
-				"extra": "Parallelfundstellen: BB 2001 Heft 42, 2130 ; DB 2001, 2334 ; LSK 2001, 520032 ; NJOZ 2001, 1878 ; NJW-RR 2001, 1705 ; NZG 2002, 429 ; WPM 2001, 1944 ; ZIP 2001, 1881 ; FHZivR 47 Nr. 2816 (Ls.) ; FHZivR 47 Nr. 6449 (Ls.) ; FHZivR 48 Nr. 2514 (Ls.) ; FHZivR 48 Nr. 6053 (Ls.) ; NJW-RR 2003, 216 (Ls.)",
+				"extra": "Parallelfundstellen: BB 2001 Heft 42, 2130 ; DB 2001, 2334 ; NJOZ 2001, 1878 ; NJW-RR 2001, 1705 ; NZG 2002, 429 ; WPM 2001, 1944 ; ZIP 2001, 1881 ; FHZivR 47 Nr. 2816 (Ls.) ; FHZivR 47 Nr. 6449 (Ls.) ; FHZivR 48 Nr. 2514 (Ls.) ; FHZivR 48 Nr. 6053 (Ls.) ; LSK 2001, 520032 (Ls.) ; NJW-RR 2003, 216 (Ls.)",
 				"libraryCatalog": "beck-online"
 			}
 		]
@@ -305,7 +396,7 @@ var testCases = [
 				"date": "2014",
 				"issue": "13",
 				"pages": "898-903",
-				"abstractNote": "Der Bericht knüpft an die bisher in dieser Reihe erschienenen Beiträge zur Entwicklung des Energierechts (zuletzt NJW 2013, NJW Jahr 2013 Seite 2724) an und zeigt die Schwerpunkte energierechtlicher Entwicklungen in Gesetzgebung und Rechtsanwendung im Jahr 2013 auf.",
+				"abstractNote": "Der Bericht knüpft an die bisher in dieser Reihe erschienenen Beiträge zur Entwicklung des Energierechts (zuletzt NJW2013, NJW Jahr 2013 Seite 2724) an und zeigt die Schwerpunkte energierechtlicher Entwicklungen in Gesetzgebung und Rechtsanwendung im Jahr 2013 auf.",
 				"libraryCatalog": "beck-online"
 			}
 		]
@@ -339,7 +430,7 @@ var testCases = [
 				"shortTitle": "BGH, Urteil vom 23.1.2014 – VII ZR 168/13",
 				"reporter": "NJW",
 				"reporterVolume": "2014",
-				"extra": "Parallelfundstellen: BeckRS 2014, 03315 ; GWR 2014, 125 ; IBRRS 96371 ; LSK 2014, 110552 ; MDR 2014, 354 ; ZVertriebsR 2014, 98 ; ZVertriebsR 2014, 98 ; ADAJUR Dok.Nr. 103938 (Ls...",
+				"extra": "Parallelfundstellen: BeckRS 2014, 03315 ; DB 2014, 1078 L ; GWR 2014, 125 ; IBRRS 96371 ; MDR 2014, 354 ; RRa 2014, 130 ; VersR 2014, 581 ; ZVertriebsR 2014, 98 ; ZVertriebsR 2014, 98 ; ADAJUR Dok.Nr. 103938 (Ls... ; LSK 2014, 110552 (Ls.)",
 				"libraryCatalog": "beck-online"
 			}
 		]
@@ -348,40 +439,6 @@ var testCases = [
 		"type": "web",
 		"url": "https://beck-online.beck.de/?vpath=bibdata%2fzeits%2fGRUR%2f2003%2fcont%2fGRUR%2e2003%2eH09%2eNAMEINHALTSVERZEICHNIS%2ehtm",
 		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://beck-online.beck.de/Default.aspx?words=ZUM+2013%2C+909&btsearch.x=42&btsearch.x=0&btsearch.y=0",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"firstName": "Günter",
-						"lastName": "Krings"
-					},
-					{
-						"firstName": "Christian-Henner",
-						"lastName": "Hentsch"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"title": "Das neue Zweitverwertungsrecht",
-				"publicationTitle": "ZUM",
-				"journalAbbreviation": "ZUM",
-				"date": "2013",
-				"issue": "12",
-				"pages": "909-913",
-				"libraryCatalog": "beck-online"
-			}
-		]
 	}
 ]
 /** END TEST CASES **/
