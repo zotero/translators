@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-11-12 12:36:57"
+	"lastUpdated": "2014-11-13 13:12:58"
 }
 
 function detectWeb(doc, url) {
@@ -86,6 +86,7 @@ function getRefs(documents) {
 		for (item in items) {
 			var ref = documents[item];
 			item = new Zotero.Item(getRefType(ref));
+			item.libraryCatalog = "Summon 2.0";
 
 			if (ref.abstracts && ref.abstracts.length > 0) {
 				item.abstractNote = ref.abstracts[0].abstract;
