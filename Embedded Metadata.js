@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-11-13 09:26:43"
+	"lastUpdated": "2014-11-14 02:04:12"
 }
 
 /*
@@ -711,7 +711,7 @@ function finalDataCleanup(doc, newItem) {
 	 * This  will deal with multiple tags, some of them comma delimited,
 	 * some semicolon, some individual
 	 */
-	if (newItem.tags.length && !Zotero.parentTranslator) {
+	if (newItem.tags.length && Zotero.parentTranslator) {
 		var tags = [];
 		for (var i in newItem.tags) {
 			newItem.tags[i] = newItem.tags[i].trim();
