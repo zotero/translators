@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 6,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-08-26 03:36:14"
+	"lastUpdated": "2014-10-31 18:33:30"
 }
 
 function detectWeb(doc, url) {
@@ -44,22 +44,53 @@ function detectWeb(doc, url) {
 	return encounteredType;
 }
 
+// Borrowed from Nature translator
+function supplementItem(item, supp, prefer, ignore) {
+	if (!prefer) prefer = [];
+	if (!ignore) ignore = [];
+	
+	for(var i in supp) {
+		if (ignore.indexOf(i) != -1)  continue;
+		if (i == 'creators' || i == 'attachments' || i == 'notes'
+			|| i == 'tags' || i == 'seeAlso'
+		) {
+			if ( (item.hasOwnProperty(i) && item[i].length) // Supplement only if completely empty
+				|| (!supp[i].length || typeof supp[i] == 'string')
+			) {
+				continue;
+			}
+		} else if (!supp.hasOwnProperty(i)
+			|| (item.hasOwnProperty(i) && prefer.indexOf(i) == -1)) {
+			continue;
+		}
+
+		Z.debug('Supplementing item.' + i);
+		item[i] = supp[i];
+	}
+
+	return item;
+}
+
 // used to retrieve next COinS object when asynchronously parsing COinS objects
 // on a page
 function retrieveNextCOinS(needFullItems, newItems, couldUseFullItems, doc) {
 	if(needFullItems.length) {
 		var item = needFullItems.shift();
 		
-		Zotero.debug("looking up contextObject");
+		Zotero.debug("Looking up contextObject");
 		var search = Zotero.loadTranslator("search");
-		search.setHandler("itemDone", function(obj, item) {
-			newItems.push(item);
+		search.setHandler("itemDone", function(obj, newItem) {
+			supplementItem(newItem, item, [], ['contextObject', 'repository']);
+			newItems.push(newItem);
 		});
 		search.setHandler("done", function() {
 			retrieveNextCOinS(needFullItems, newItems, couldUseFullItems, doc);
 		});
 		// Don't throw on error
-		search.setHandler("error", function() {});
+		search.setHandler("error", function() {
+			Zotero.debug("Failed to look up item:");
+			Zotero.debug(item);
+		});
 		// look for translators
 		search.setHandler("translators", function(obj, translators) {
 			if(translators.length) {
@@ -106,11 +137,12 @@ function completeItems(newItems, useIndices, couldUseFullItems, doc) {
 	
 	// grab full item if the COinS was missing an author
 	if(couldUseFullItems[i]) {
-		Zotero.debug("looking up contextObject");
+		Zotero.debug("Looking up contextObject");
 		var search = Zotero.loadTranslator("search");
 		
 		var firstItem = false;
 		search.setHandler("itemDone", function(obj, newItem) {
+			supplementItem(newItem, newItems[i], [], ['contextObject', 'repository']);
 			if(!firstItem) {
 				// add doc as attachment
 				newItem.attachments.push({document:doc});
