@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-11-14 02:04:12"
+	"lastUpdated": "2014-11-15 02:04:12"
 }
 
 /*
@@ -190,6 +190,9 @@ function processFields(doc, item, fieldMap, strict) {
 }
 
 function completeItem(doc, newItem) {
+	// Strip off potential junk from RDF
+	newItem.seeAlso = [];
+	
 	addHighwireMetadata(doc, newItem);
 	addOtherMetadata(doc, newItem);
 	addLowQualityMetadata(doc, newItem);
