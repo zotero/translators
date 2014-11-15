@@ -2,34 +2,85 @@
 	"translatorID": "27ee5b2c-2a5a-4afc-a0aa-d386642d4eed",
 	"label": "PubMed Central",
 	"creator": "Michael Berkowitz and Rintze Zelle",
-	"target": "https?://[^/]*.nih.gov/",
+	"target": "^https?://(www.)?ncbi.nlm.nih.gov/pmc/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 101,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-11-19 08:23:18"
+	"lastUpdated": "2014-11-13 20:01:34"
 }
 
 function detectWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
-	try {var pmid = url.match(/ncbi\.nlm\.nih\.gov\/pmc\/articles\/PMC([\d]+)/)[1];} catch (e) {}
-	if (pmid) {
+	if (getPMCID(url)) {
 		return "journalArticle";
 	}
-	
-	var uids = doc.evaluate('//div[@class="rprt"]//dl[@class="rprtid"]/dd', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	if(uids.iterateNext()) {
-		if (uids.iterateNext()){
-			return "multiple";
+	else if(getSearchResults(doc)) {
+		return "multiple";
+	}
+}
+
+function doWeb(doc, url) {
+	if (detectWeb(doc, url) == "multiple") {
+		var results = getSearchResults(doc);
+		Zotero.selectItems(results.ids, function (ids) {
+			if (!ids) {
+				return true;
+			}
+			var pmcids = new Array();
+			for (var i in ids) {
+				pmcids.push(i);
+			}
+			lookupPMCIDs(pmcids, doc, results.pdfs);
+		});
+	} else {
+		getSingle(doc, url);
+	}
+}
+
+function getPMCID(url) {
+	var pmcid = url.match(/\/articles\/PMC([\d]+)/);
+	return pmcid ? pmcid[1] : false;
+}
+
+
+function getPDF(doc,xpath) {
+	var pdf = ZU.xpath(doc,xpath);
+	return pdf.length ? pdf[0].href : false;
+}
+
+function getSingle(doc, url) {
+	var pmcid = getPMCID(url);
+	var pdf = getPDF(doc,'//td[@class="format-menu"]//a[contains(@href,".pdf")]'
+			+ '|//div[@class="format-menu"]//a[contains(@href,".pdf")]'
+			+ '|//aside[@id="jr-alt-p"]/div/a[contains(@href,".pdf")]');
+	var pdfCollection = {};
+			
+	if(pdf) pdfCollection[pmcid] = pdf;
+		
+	lookupPMCIDs([pmcid], doc, pdfCollection);
+}
+
+function getSearchResults(doc) {
+	var articles = doc.getElementsByClassName('rprt'),
+		ids = {},
+		pdfCollection = {},
+		found = false;
+	for (var i = 0; i < articles.length; i++) {
+		var article = articles[i],
+			pmcid = ZU.xpathText(article,'.//dl[@class="rprtid"]/dd').match(/PMC([\d]+)/);
+		if(pmcid) {
+			pmcid = pmcid[1];
+			var title = ZU.xpathText(article,'.//div[@class="title"]');
+			var pdf = getPDF(article,'.//div[@class="links"]/a'
+				+'[@class="view" and contains(@href,".pdf")][1]');
+			ids[pmcid] = title;
+			found = true;
+			if(pdf) pdfCollection[pmcid] = pdf;
 		}
-		return "journalArticle";
 	}
+	return found ? {"ids":ids,"pdfs":pdfCollection} : false;
 }
 
 function lookupPMCIDs(ids, doc, pdfLink) {
@@ -144,20 +195,21 @@ function lookupPMCIDs(ids, doc, pdfLink) {
 			}];
 			
 			if (ZU.xpathText(article, 'selfuri/@xlinktitle') == "pdf") {
-				var pdfFileName = ZU.xpathText(article, 'selfuri/@xlinkhref');
+				var pdfFileName = "http://www.ncbi.nlm.nih.gov/pmc/articles/PMC" + 
+				ids[i] + "/pdf/" + ZU.xpathText(article, 'selfuri/@xlinkhref');
 			} else if (pdfLink) {
-				var pdfFileName = pdfLink;
+				var pdfFileName = pdfLink[ids[i]];
 			} else if (ZU.xpathText(article, 'articleid[@pubidtype="publisherid"]')){
 				//this should work on most multiples
-				var pdfFileName = ZU.xpathText(article, 'articleid[@pubidtype="publisherid"]') + ".pdf";
+				var pdfFileName = "http://www.ncbi.nlm.nih.gov/pmc/articles/PMC" + 
+				ids[i] + "/pdf/" + ZU.xpathText(article, 'articleid[@pubidtype="publisherid"]') + ".pdf";
 			}
 			
 			if (pdfFileName) {
-				var pdfURL = "http://www.ncbi.nlm.nih.gov/pmc/articles/PMC" + ids[i] + "/pdf/" + pdfFileName;
 				newItem.attachments.push({
 				title:"PubMed Central Full Text PDF",
 				mimeType:"application/pdf",
-				url:pdfURL
+				url:pdfFileName
 				});
 			}
 
@@ -166,74 +218,7 @@ function lookupPMCIDs(ids, doc, pdfLink) {
 
 		Zotero.done();
 	});
-}
-
-
-
-function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ?
-	function (prefix) {
-		if (prefix == 'x') return namespace;
-		else return null;
-	} : null;
-
-	var ids = new Array();
-	var pmcid;
-	var pdfLink;
-	var resultsCount = 0;
-	try {
-		pmcid = url.match(/ncbi\.nlm\.nih\.gov\/pmc\/articles\/PMC([\d]+)/)[1];
-	} catch(e) {}
-	if (pmcid) {
-		try {
-			var formatLinks = doc.evaluate('//td[@class="format-menu"]//a'
-				+ '|//div[@class="format-menu"]//a'
-				+ '|//aside[@id="jr-alt-p"]/div/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
-			while (!pdfLink && (formatLink = formatLinks.iterateNext())) {
-				pdfLink = formatLink.href;
-				//Z.debug(pdfLink);
-				if(pdfLink && (pdfLink = pdfLink.match(/\/pdf\/([^\/]*\.pdf$)/))) {
-					pdfLink = pdfLink[1];
-				}
-			}
-		} catch (e) {}
-		ids.push(pmcid);
-		lookupPMCIDs(ids, doc, pdfLink);
-	} else {
-		var pmcids = doc.evaluate('//div[@class="rprt"]//dl[@class="rprtid"]/dd', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var titles = doc.evaluate('//div[@class="rprt"]//div[@class="title"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var title;
-		while (pmcid = pmcids.iterateNext()) {
-			title = titles.iterateNext();
-			ids[pmcid.textContent.match(/PMC([\d]+)/)[1]] = title.textContent;
-			resultsCount = resultsCount + 1;
-		}
-		// Don't display selectItems when there's only one
-		// The actual PMCID is the array key
-		if (resultsCount == 1) {
-			for (var i in ids) {
-				lookupPMCIDs(i, doc);
-				break;
-			}
-			return true;
-		}
-		
-		
-		Zotero.selectItems(ids, function (ids) {
-			if (!ids) {
-				return true;
-			}
-			var pmcids = new Array();
-			for (var i in ids) {
-				pmcids.push(i);
-			}
-			lookupPMCIDs(pmcids, doc);
-		});
-	}
-}
-
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -310,6 +295,86 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.ncbi.nlm.nih.gov/pmc/issues/184700/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3139813/",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Rubio",
+						"firstName": "Doris McGartland"
+					},
+					{
+						"lastName": "del Junco",
+						"firstName": "Deborah J."
+					},
+					{
+						"lastName": "Bhore",
+						"firstName": "Rafia"
+					},
+					{
+						"lastName": "Lindsell",
+						"firstName": "Christopher J."
+					},
+					{
+						"lastName": "Oster",
+						"firstName": "Robert A."
+					},
+					{
+						"lastName": "Wittkowski",
+						"firstName": "Knut M."
+					},
+					{
+						"lastName": "Welty",
+						"firstName": "Leah J."
+					},
+					{
+						"lastName": "Li",
+						"firstName": "Yi-Ju"
+					},
+					{
+						"lastName": "DeMets",
+						"firstName": "Dave"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "PubMed Central Link",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "PubMed Central Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"journalAbbreviation": "Stat Med",
+				"publicationTitle": "Statistics in medicine",
+				"ISSN": "0277-6715",
+				"abstractNote": "Increasing demands for evidence-based medicine and for the translation of biomedical research into individual and public health benefit have been accompanied by the proliferation of special units that offer expertise in biostatistics, epidemiology, and research design (BERD) within academic health centers. Objective metrics that can be used to evaluate, track, and improve the performance of these BERD units are critical to their successful establishment and sustainable future. To develop a set of reliable but versatile metrics that can be adapted easily to different environments and evolving needs, we consulted with members of BERD units from the consortium of academic health centers funded by the Clinical and Translational Science Award Program of the National Institutes of Health. Through a systematic process of consensus building and document drafting, we formulated metrics that covered the three identified domains of BERD practices: the development and maintenance of collaborations with clinical and translational science investigators, the application of BERD-related methods to clinical and translational research, and the discovery of novel BERD-related methodologies. In this article, we describe the set of metrics and advocate their use for evaluating BERD practices. The routine application, comparison of findings across diverse BERD units, and ongoing refinement of the metrics will identify trends, facilitate meaningful changes, and ultimately enhance the contribution of BERD activities to biomedical research.",
+				"DOI": "10.1002/sim.4184",
+				"extra": "PMID: 21284015\nPMCID: PMC3139813",
+				"title": "Evaluation Metrics for Biostatistical and Epidemiological Collaborations",
+				"volume": "30",
+				"issue": "23",
+				"pages": "2767-2777",
+				"date": "2011-10-15",
+				"url": "http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3139813/",
+				"libraryCatalog": "PubMed Central",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.ncbi.nlm.nih.gov/pmc/?term=test",
 		"items": "multiple"
 	}
 ]
