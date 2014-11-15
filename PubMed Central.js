@@ -295,7 +295,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3139813/",
+		"url": "http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3139813/?report=classic",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -371,6 +371,64 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.ncbi.nlm.nih.gov/pmc/?term=test",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2801612/?report=reader",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Cdk4 Regulates Recruitment of Quiescent ?-Cells and Ductal Epithelial Progenitors to Reconstitute ?-Cell Mass",
+				"creators": [
+					{
+						"lastName": "Lee",
+						"firstName": "Ji-Hyeon"
+					},
+					{
+						"lastName": "Jo",
+						"firstName": "Junghyo"
+					},
+					{
+						"lastName": "Hardikar",
+						"firstName": "Anandwardhan A."
+					},
+					{
+						"lastName": "Periwal",
+						"firstName": "Vipul"
+					},
+					{
+						"lastName": "Rane",
+						"firstName": "Sushil G."
+					}
+				],
+				"date": "2010-1-13",
+				"DOI": "10.1371/journal.pone.0008653",
+				"ISSN": "1932-6203",
+				"abstractNote": "Insulin-producing pancreatic islet β cells (β-cells) are destroyed, severely depleted or functionally impaired in diabetes. Therefore, replacing functional β-cell mass would advance clinical diabetes management. We have previously demonstrated the importance of Cdk4 in regulating β-cell mass. Cdk4-deficient mice display β-cell hypoplasia and develop diabetes, whereas β-cell hyperplasia is observed in mice expressing an active Cdk4R24C kinase. While β-cell replication appears to be the primary mechanism responsible for β-cell mass increase, considerable evidence also supports a contribution from the pancreatic ductal epithelium in generation of new β-cells. Further, while it is believed that majority of β-cells are in a state of ‘dormancy’, it is unclear if and to what extent the quiescent cells can be coaxed to participate in the β-cell regenerative response. Here, we address these queries using a model of partial pancreatectomy (PX) in Cdk4 mutant mice. To investigate the kinetics of the regeneration process precisely, we performed DNA analog-based lineage-tracing studies followed by mathematical modeling. Within a week after PX, we observed considerable proliferation of islet β-cells and ductal epithelial cells. Interestingly, the mathematical model showed that recruitment of quiescent cells into the active cell cycle promotes β-cell mass reconstitution in the Cdk4R24C pancreas. Moreover, within 24–48 hours post-PX, ductal epithelial cells expressing the transcription factor Pdx-1 dramatically increased. We also detected insulin-positive cells in the ductal epithelium along with a significant increase of islet-like cell clusters in the Cdk4R24C pancreas. We conclude that Cdk4 not only promotes β-cell replication, but also facilitates the activation of β-cell progenitors in the ductal epithelium. In addition, we show that Cdk4 controls β-cell mass by recruiting quiescent cells to enter the cell cycle. Comparing the contribution of cell proliferation and islet-like clusters to the total increase in insulin-positive cells suggests a hitherto uncharacterized large non-proliferative contribution.",
+				"extra": "PMID: 20084282\nPMCID: PMC2801612",
+				"issue": "1",
+				"journalAbbreviation": "PLoS One",
+				"libraryCatalog": "PubMed Central",
+				"publicationTitle": "PLoS ONE",
+				"shortTitle": "Cdk4 Regulates Recruitment of Quiescent ?",
+				"url": "http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2801612/",
+				"volume": "5",
+				"attachments": [
+					{
+						"title": "PubMed Central Link",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "PubMed Central Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
