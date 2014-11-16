@@ -2,14 +2,14 @@
 	"translatorID": "fce388a6-a847-4777-87fb-6595e710b7e7",
 	"label": "ProQuest",
 	"creator": "Avram Lyon",
-	"target": "^https?://search\\.proquest\\.com.*\\/(docview|pagepdf|results|publicationissue|browseterms|browsetitles|browseresults|myresearch\\/(figtables|documents))",
+	"target": "^https?://search\\.proquest\\.com/(docview|pagepdf|results|publicationissue|browseterms|browsetitles|browseresults|myresearch\\/(figtables|documents))",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-10-23 16:56:41"
+	"lastUpdated": "2014-11-16 10:31:47"
 }
 
 /*
@@ -118,31 +118,40 @@ function fetchEmbeddedPdf(url, item, callback) {
 	}, callback);
 }
 
-function getSearchResults(doc, detect) {
+function getSearchResults(doc, checkOnly) {
 	var tabs = doc.getElementsByClassName('tabContent');
 	var root;
-	for (var i = 0; i < tabs.length; i++) {
-		if (tabs[i].offsetHeight) {
-			if (Zotero.isBookmarklet && tabs[i].id != 'allResults-content') return false;
-			root = tabs[i].getElementsByClassName('resultListContainer')[0];
-			break;
+	if (tabs.length) {
+		for (var i = 0; i < tabs.length; i++) {
+			if (tabs[i].offsetHeight) {
+				if (Zotero.isBookmarklet && tabs[i].id != 'allResults-content') return false;
+				root = tabs[i].getElementsByClassName('resultListContainer')[0];
+				break;
+			}
 		}
+	} else {
+		root = doc.getElementsByClassName('resultListContainer')[0];
+		if (root && !root.offsetHeight) return false; // Not sure if this can actually happen
 	}
 
 	if (!root) return false;
 
-	var results = ZU.xpath(root, './/a[contains(@class,"previewTitle") or contains(@class,"resultTitle")]');
-		
-	if (detect) {
-		return (results.length > 0 ? true : false);
-	}
-
-	var items = new Array();
+	var results = doc.getElementsByClassName('resultItem');
+	//ZU.xpath(root, './/a[contains(@class,"previewTitle") or contains(@class,"resultTitle")]');
+	
+	var items = {}, found = false;
 	for(var i=0, n=results.length; i<n; i++) {
-		items[results[i].href] = results[i].textContent;
+		var title = results[i].getElementsByClassName('resultTitle')[0]
+			|| results[i].getElementsByClassName('previewTitle')[0];
+		if (!title || title.nodeName != 'A') continue;
+		
+		if (checkOnly) return true;
+		found = true;
+		
+		items[title.href] = title.textContent;
 	}
 		
-	return (items.length > 0 ? items : false);
+	return found ? items : false;
 }
 
 function detectWeb(doc, url) {
