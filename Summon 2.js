@@ -2,7 +2,7 @@
 	"translatorID": "6c61897b-ca44-4ce6-87c1-2da68b44e6f7",
 	"label": "Summon 2",
 	"creator": "Caistarrin Mystical",
-	"target": "summon\\.serialssolutions\\.com",
+	"target": "https?://([\\w.\\-]*)?summon\\.serialssolutions\\.com",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
