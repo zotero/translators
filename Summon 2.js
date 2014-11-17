@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-11-13 13:12:58"
+	"lastUpdated": "2014-11-17 10:08:42"
 }
 
 function detectWeb(doc, url) {
@@ -24,176 +24,193 @@ function detectWeb(doc, url) {
 	return false;
 }
 
-function doWeb(doc, url) {
-	var type = detectWeb(doc, url);
-	if (type == "multiple") {
-		var results = ZU.xpath(doc, '//li/div[contains(@class, "documentSummary")]//div[contains(@class, "summary")]');
-		var apiUrls = getUrlSet(url, results.length);
-		var counter = apiUrls.length;
-		var docSets = [];
-
+function doWeb(doc, url) { 
+	if (detectWeb(doc, url) == "multiple") {
+		var apiData = getApiData(url, selectTitles(doc));
+		var indexBlocks = apiData.indexBlocks;
+		var documents = [];
+		
 		ZU.HTTP.doGet(
-			apiUrls, 
+			apiData.urlSet, 
 			function (text, response, url) {
 				var obj = JSON.parse(text);
-				var rollups = obj.rollups.newspaper;
-				var docs = [];
 				var pageNumIndex = url.indexOf("pn=") + 3;
-				var index = url.slice(pageNumIndex, url.indexOf("&", pageNumIndex));
-
-				if (rollups.documents) {
-					var rollupsPosition = rollups.position - 1;
-					docs = obj.documents.slice(0, rollupsPosition).concat(rollups.documents).concat(obj.documents.slice(rollupsPosition));
+				var pageNum = url.slice(pageNumIndex, url.indexOf("&", pageNumIndex));
+				var refIndexes = indexBlocks[pageNum];
+				
+				for (var i = 0; i < refIndexes.length; i++) {
+					if (isNaN(refIndexes[i])) {
+						var rollupIndex = refIndexes[i].slice(1); // get the number past the r
+						documents.push(obj.rollups.newspaper.documents[rollupIndex]);
+					}
+					else {
+						documents.push(obj.documents[refIndexes[i]]);
+					}
 				}
-				else {
-					docs = obj.documents;
-				}
-
-				docSets.push({
-					"index": index,
-					"docs": docs
-				});
 			},
 			function () {
-				orderDocSets(docSets);
+				getRefData(documents);
 			}
 		);
 	}
 }
 
-function orderDocSets(docSets) {
-	var documents = [];
-
-	docSets.sort(function (a, b) {
-		return (a.index < b.index ? -1 : 1)
-	});
-
-	for (var i = 0; i < docSets.length; i++) {
-		documents = documents.concat(docSets[i].docs);
-	}
-
-	getRefs(documents);
-}
-
-function getRefs(documents) {
+function selectTitles(doc) {
+	var titles = ZU.xpath(doc, '//li//div[contains(@class, "summary")]//div/@text');
 	var items = new Object();
+	var numRollups = 0;
+	var rollupStart = 0;
+	var refIndexes = [];
 
-	for (var i = 0; i < documents.length; i++) {
-		items[i] = ZU.cleanTags(documents[i].full_title);
+	for (var i = 0; i < titles.length; i++) {
+		var isRollup = (ZU.xpath(titles[i], '.[ancestor::div[contains(@class, "rollup")]]').length > 0 ? true : false);
+		var index = i + "-" + (isRollup ? "r" + numRollups++ : "");
+			// the hyphen forces integers to string, keeping refs in order
+			
+		// "rollups" are the references in that separated "News results for [search terms]" section
+		if (isRollup && rollupStart == 0) {
+			rollupStart = i;
+		}
+
+		items[index] = ZU.cleanTags(titles[i].value);
 	}
 
 	Zotero.selectItems(items, function(items) {
 		for (item in items) {
-			var ref = documents[item];
-			item = new Zotero.Item(getRefType(ref));
-			item.libraryCatalog = "Summon 2.0";
-
-			if (ref.abstracts && ref.abstracts.length > 0) {
-				item.abstractNote = ref.abstracts[0].abstract;
-			}
-
-			if (ref.languages && ref.languages.length > 0) {
-				item.language = ref.languages[0];
-			}
-
-			if (ref.copyrights && ref.copyrights.length > 0) {
-				item.rights = ref.copyrights[0];
-			}
-
-			if (ref.uris && ref.uris.length > 0) {
-				item.url = ref.uris[0];
-			}
-
-			item.creators = getAuthors(ref);
-
-			item.title = Zotero.Utilities.cleanTags(ref.full_title);
-
-			if (ref.issns && ref.issns.length > 0) {
-				item.ISSN = ref.issns[0];
-			}
-			else if (ref.eissns && ref.eissns.length > 0) {
-				item.ISSN = ref.eissns[0];
-			}
-
-			if (ref.isbn) {
-				item.ISBN = ref.isbn;
-			}
-
-			if (ref.dois && ref.dois.length > 0) {
-				item.DOI = ref.dois[0];
-			}
-
-			if (ref.publisher) {
-				item.publisher = ref.publisher;
-			}
-
-			if (ref.publication_places && ref.publication_places.length > 0) {
-				item.place = ref.publication_places[0];
-			}
-			else if (ref.dissertation_schools && ref.dissertation_schools.length > 0) {
-				item.place = ref.dissertation_schools[0];
-			}
-
-			if (ref.publication_title) {
-				item.publicationTitle = ref.publication_title;
-			}
-
-			if (ref.volumes && ref.volumes.length > 0) {
-				item.volume = ref.volumes[0];
-			}
-
-			if (ref.issues && ref.issues.length > 0) {
-				item.issue = ref.issues[0];
-			}
-
-			if (ref.pages) {
-				item.pages = ref.pages;
-			}
-			else if (ref.start_pages && ref.start_pages.length > 0) {
-				item.pages = ref.start_pages[0] + (ref.end_pages && ref.end_pages.length > 0 ? "-" + ref.end_pages[0] : "");
-			}
-
-			if (ref.page_count) {
-				item.numPages = ref.page_count;
-			}
-
-			if (ref.publication_date) {
-				item.date = ref.publication_date;
-			}
-			else if (ref.publication_years && ref.publication_years.length > 0) {
-				item.date = ref.publication_years[ref.publication_years.length - 1];
-			}
-
-			if (ref.editions && ref.editions.length > 0) {
-				item.edition = ref.editions[0];
-			}
-
-			if (ref.lc_call_numbers && ref.lc_call_numbers.length > 0) {
-				item.callNumber = ref.lc_call_numbers[0];
-			}
-
-			if (ref.publication_series_title) {
-				item.seriesTitle = ref.publication_series_title;
-			}
-
-			if (ref.subject_terms && ref.subject_terms.length > 0) {
-				for (var i = 0; i < ref.subject_terms.length; i++) {
-					item.tags.push(ref.subject_terms[i]);
-				}
-			}
-
-			item.complete();
+			refIndexes.push(item);		// keeping the indexes of the refs we want
 		}
 	});
+	
+	for (var i = 0; i < refIndexes.length; i++) {
+		// converting the indexes into more meaningful numbers
+		var rIndex = refIndexes[i].indexOf("r");
+		
+		if (rIndex > -1) {
+			refIndexes[i] = refIndexes[i].slice(rIndex);
+		}
+		else {
+			refIndexes[i] = refIndexes[i].slice(0, refIndexes[i].indexOf("-"));
+			
+			if (rollupStart > 0 && refIndexes[i] > rollupStart) {
+				refIndexes[i] -= numRollups;
+			}
+		}
+	}
+
+	return refIndexes;
 }
 
-function getUrlSet(url, numResults) {
+function getRefData(documents) {	
+	for (var i = 0; i < documents.length; i++) {
+		var ref = documents[i];
+		var item = new Zotero.Item(getRefType(ref));
+		item.libraryCatalog = "Summon 2.0";
+		item.creators = getAuthors(ref);
+		item.title = Zotero.Utilities.cleanTags(ref.full_title);
+
+		if (ref.abstracts && ref.abstracts.length > 0) {
+			item.abstractNote = ref.abstracts[0].abstract;
+		}
+
+		if (ref.languages && ref.languages.length > 0) {
+			item.language = ref.languages[0];
+		}
+
+		if (ref.copyrights && ref.copyrights.length > 0) {
+			item.rights = ref.copyrights[0];
+		}
+
+		if (ref.uris && ref.uris.length > 0) {
+			item.url = ref.uris[0];
+		}
+
+		if (ref.issns && ref.issns.length > 0) {
+			item.ISSN = ref.issns[0];
+		}
+		else if (ref.eissns && ref.eissns.length > 0) {
+			item.ISSN = ref.eissns[0];
+		}
+
+		if (ref.isbn) {
+			item.ISBN = ref.isbn;
+		}
+
+		if (ref.dois && ref.dois.length > 0) {
+			item.DOI = ref.dois[0];
+		}
+
+		if (ref.publisher) {
+			item.publisher = ref.publisher;
+		}
+
+		if (ref.publication_places && ref.publication_places.length > 0) {
+			item.place = ref.publication_places[0];
+		}
+		else if (ref.dissertation_schools && ref.dissertation_schools.length > 0) {
+			item.place = ref.dissertation_schools[0];
+		}
+
+		if (ref.publication_title) {
+			item.publicationTitle = ref.publication_title;
+		}
+
+		if (ref.volumes && ref.volumes.length > 0) {
+			item.volume = ref.volumes[0];
+		}
+
+		if (ref.issues && ref.issues.length > 0) {
+			item.issue = ref.issues[0];
+		}
+
+		if (ref.pages) {
+			item.pages = ref.pages;
+		}
+		else if (ref.start_pages && ref.start_pages.length > 0) {
+			item.pages = ref.start_pages[0] + (ref.end_pages && ref.end_pages.length > 0 ? "-" + ref.end_pages[0] : "");
+		}
+
+		if (ref.page_count) {
+			item.numPages = ref.page_count;
+		}
+
+		if (ref.publication_date) {
+			item.date = ref.publication_date;
+		}
+		else if (ref.publication_years && ref.publication_years.length > 0) {
+			item.date = ref.publication_years[ref.publication_years.length - 1];
+		}
+
+		if (ref.editions && ref.editions.length > 0 && ref.editions != "1" && ref.editions.indexOf("1st") != 0) {
+			// get any edition numbers after the 1st
+			item.edition = ref.editions[0];
+		}
+
+		if (ref.lc_call_numbers && ref.lc_call_numbers.length > 0) {
+			item.callNumber = ref.lc_call_numbers[0];
+		}
+
+		if (ref.publication_series_title) {
+			item.seriesTitle = ref.publication_series_title;
+		}
+
+		if (ref.subject_terms && ref.subject_terms.length > 0) {
+			for (var c = 0; c < ref.subject_terms.length; c++) {
+				item.tags.push(ref.subject_terms[c]);
+			}
+		}
+
+		item.complete();
+	}
+}
+
+function getApiData(url, refIndexes) {
 	var urlArray = decodeURI(url).split('?');
 	var params = urlArray[1].split('&');
 	var apiURL = urlArray[0].replace("#!", "api") + "?";
 	var fvf = "";
 	var urlSet = [];
-	var numPages = Math.floor(numResults / 10);
+	var pageNum = 0;
+	var indexBlocks = {};
 
 	for (var i = 0; i < params.length; i++) {
 		if (params[i].indexOf("fvf=") > -1) {
@@ -211,13 +228,30 @@ function getUrlSet(url, numResults) {
 			apiURL += "fvf[]=" + fvfArray[i] + "&";
 		}
 	}
+	
+	for (var i = 0; i < refIndexes.length; i++) {
+		var isRollup = isNaN(refIndexes[i]);
+		var currentPage = (isRollup || refIndexes[i] < 10 ? 1 : Math.ceil(refIndexes[i] / 10));
+		// rollup indexes are "r*" (string) rather than integer, and are always on first page
+		
+		if (!indexBlocks[currentPage]) {
+			indexBlocks[currentPage] = [];
+		}
+		
+		if (isRollup) {
+			indexBlocks[currentPage].push(refIndexes[i]);
+		}
+		else {
+			indexBlocks[currentPage].push(refIndexes[i] - ((currentPage - 1) * 10));
+		}
 
-	for (var i = 1; i <= numPages; i++) {
-		Z.debug(apiURL + "pn=" + i + "&ps=10");
-		urlSet.push(apiURL + "pn=" + i + "&ps=10");
+		if (currentPage > pageNum) {
+			pageNum = currentPage;
+			urlSet.push(apiURL + "pn=" + pageNum + "&ps=10");
+		}
 	}
 
-	return urlSet;
+	return {"urlSet": urlSet, "indexBlocks": indexBlocks};
 }
 
 function getAuthors(ref) {
@@ -234,7 +268,7 @@ function getAuthors(ref) {
 	}
 
 	if (refAuthors.length > 0) {
-		for(var i = 0; i < refAuthors.length; i++) {
+		for (var i = 0; i < refAuthors.length; i++) {
 			var a = refAuthors[i];
 			if (a.givenname && a.surname) {
 				itemAuthors.push({
@@ -328,12 +362,15 @@ function getRefType(ref) {
 			break;
 		case "Poem":
 		case "Electronic Resource":
-			if (ref.isbn)
+			if (ref.isbn) {
 				return "book";
-			else if (ref.dois || ref.issns)
+			}
+			else if (ref.dois || ref.issns) {
 				return "journalArticle";
-			else
+			}
+			else {
 				return "document";
+			}
 			break;
 		case "Archival Material":
 		case "Computer File":
