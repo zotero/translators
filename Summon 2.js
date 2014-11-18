@@ -2,21 +2,34 @@
 	"translatorID": "6c61897b-ca44-4ce6-87c1-2da68b44e6f7",
 	"label": "Summon 2",
 	"creator": "Caistarrin Mystical",
-	"target": "https?://([\\w.\\-]*)?summon\\.serialssolutions\\.com",
+	"target": "https?://([^/]+\\.)?summon\\.serialssolutions\\.com",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-11-17 10:08:42"
+	"lastUpdated": "2014-11-18 10:29:36"
 }
+
+/*
+   Summon 2.0 Translator
+   Copyright (C) 2014 ProQuest LLC
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 function detectWeb(doc, url) {
 	// Make sure the search actually returned something by checking whether the "no results" message is visible
-	var noResultsMsg = ZU.xpath(doc, '//div[contains(@class, "noResults") and not(contains(@class, "ng-hide"))]');
-
-	if (noResultsMsg.length == 0 || ZU.xpath(noResultsMsg, 'h2[contains(@class, "endOfResults")]').length > 0) {
+	if (ZU.xpath(doc, '//li//div[contains(@class, "summary")]').length > 0) {
 		// Summon always shows a search results page, so it's multiple or nothing
 		return "multiple";
 	}
