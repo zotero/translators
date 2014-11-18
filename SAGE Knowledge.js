@@ -9,17 +9,35 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-11-18 12:47:36"
+	"lastUpdated": "2014-11-18 14:57:52"
 }
+
+/*
+   SAGE Knowledge Translator
+   Copyright (C) 2014 ProQuest LLC
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 function detectWeb(doc, url) {
 	var multRe = /browse|searchresults/;
 	if(multRe.test(url)) {
+		var result = ZU.xpath(doc, '//div[@id="pageContent"]//div[@class="result"]');
+		if (result.length == 0) return false;
 		return "multiple";
 	} else {
 		var itemType = ZU.xpathText(doc, '//div[@id="contentFrame"]//li[contains(@class, "contentType")]/@class');
-		if(!itemType)
+		if(!itemType) {
 			itemType = ZU.xpathText(doc, '//div[@id="mainContent"]//p[contains(@class, "docTypeIcon")]/@class');
+		}
 		itemType = ZU.trimInternal(itemType.replace(/contentType|docTypeIcon/,''));
 		switch(itemType) {
 			case "iconEncyclopedia-chapter":
@@ -34,6 +52,7 @@ function detectWeb(doc, url) {
 				return "book";
 		}
 	}
+	return false;
 }
 
 function getItem(doc) {
