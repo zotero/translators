@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-11-18 10:29:36"
+	"lastUpdated": "2014-11-18 11:23:28"
 }
 
 /*
@@ -28,7 +28,6 @@
  */
 
 function detectWeb(doc, url) {
-	// Make sure the search actually returned something by checking whether the "no results" message is visible
 	if (ZU.xpath(doc, '//li//div[contains(@class, "summary")]').length > 0) {
 		// Summon always shows a search results page, so it's multiple or nothing
 		return "multiple";
@@ -39,36 +38,11 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) { 
 	if (detectWeb(doc, url) == "multiple") {
-		var apiData = getApiData(url, selectTitles(doc));
-		var indexBlocks = apiData.indexBlocks;
-		var documents = [];
-		
-		ZU.HTTP.doGet(
-			apiData.urlSet, 
-			function (text, response, url) {
-				var obj = JSON.parse(text);
-				var pageNumIndex = url.indexOf("pn=") + 3;
-				var pageNum = url.slice(pageNumIndex, url.indexOf("&", pageNumIndex));
-				var refIndexes = indexBlocks[pageNum];
-				
-				for (var i = 0; i < refIndexes.length; i++) {
-					if (isNaN(refIndexes[i])) {
-						var rollupIndex = refIndexes[i].slice(1); // get the number past the r
-						documents.push(obj.rollups.newspaper.documents[rollupIndex]);
-					}
-					else {
-						documents.push(obj.documents[refIndexes[i]]);
-					}
-				}
-			},
-			function () {
-				getRefData(documents);
-			}
-		);
+		getTitles(doc, url);
 	}
 }
 
-function selectTitles(doc) {
+function getTitles(doc, url) {
 	var titles = ZU.xpath(doc, '//li//div[contains(@class, "summary")]//div/@text');
 	var items = new Object();
 	var numRollups = 0;
@@ -89,28 +63,57 @@ function selectTitles(doc) {
 	}
 
 	Zotero.selectItems(items, function(items) {
-		for (item in items) {
-			refIndexes.push(item);		// keeping the indexes of the refs we want
+		if (!items) {
+			return true;
 		}
-	});
-	
-	for (var i = 0; i < refIndexes.length; i++) {
-		// converting the indexes into more meaningful numbers
-		var rIndex = refIndexes[i].indexOf("r");
 		
-		if (rIndex > -1) {
-			refIndexes[i] = refIndexes[i].slice(rIndex);
+		for (item in items) {
+			// keeping the indexes of the refs we want
+			refIndexes.push(item);
 		}
-		else {
-			refIndexes[i] = refIndexes[i].slice(0, refIndexes[i].indexOf("-"));
+		
+		for (var i = 0; i < refIndexes.length; i++) {
+			// converting the indexes into more meaningful numbers
+			var rIndex = refIndexes[i].indexOf("r");
+		
+			if (rIndex > -1) {
+				refIndexes[i] = refIndexes[i].slice(rIndex);
+			}
+			else {
+				refIndexes[i] = refIndexes[i].slice(0, refIndexes[i].indexOf("-"));
 			
-			if (rollupStart > 0 && refIndexes[i] > rollupStart) {
-				refIndexes[i] -= numRollups;
+				if (rollupStart > 0 && refIndexes[i] > rollupStart) {
+					refIndexes[i] -= numRollups;
+				}
 			}
 		}
-	}
-
-	return refIndexes;
+		
+		var apiData = getApiData(url, refIndexes);
+		var documents = [];
+		
+		ZU.HTTP.doGet(
+			apiData.urlSet, 
+			function (text, response, url) {
+				var obj = JSON.parse(text);
+				var pageNumIndex = url.indexOf("pn=") + 3;
+				var pageNum = url.slice(pageNumIndex, url.indexOf("&", pageNumIndex));
+				var refIndexes = apiData.indexBlocks[pageNum];
+				
+				for (var i = 0; i < refIndexes.length; i++) {
+					if (isNaN(refIndexes[i])) {
+						// get the number past the r
+						documents.push(obj.rollups.newspaper.documents[refIndexes[i].slice(1)]);
+					}
+					else {
+						documents.push(obj.documents[refIndexes[i]]);
+					}
+				}
+			},
+			function () {
+				getRefData(documents);
+			}
+		);
+	});
 }
 
 function getRefData(documents) {	
