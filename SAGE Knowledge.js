@@ -29,13 +29,16 @@
 
 function detectWeb(doc, url) {
 	var multRe = /browse|searchresults/;
-	if(multRe.test(url)) {
+	if (multRe.test(url)) {
 		var result = ZU.xpath(doc, '//div[@id="pageContent"]//div[@class="result"]');
-		if (result.length == 0) return false;
+		if (result.length == 0) {
+			return false;
+		}
 		return "multiple";
-	} else {
+	}
+	else {
 		var itemType = ZU.xpathText(doc, '//div[@id="contentFrame"]//li[contains(@class, "contentType")]/@class');
-		if(!itemType) {
+		if (!itemType) {
 			itemType = ZU.xpathText(doc, '//div[@id="mainContent"]//p[contains(@class, "docTypeIcon")]/@class');
 		}
 		itemType = ZU.trimInternal(itemType.replace(/contentType|docTypeIcon/,''));
@@ -56,7 +59,7 @@ function detectWeb(doc, url) {
 }
 
 function getItem(doc) {
-	var url = doc.getElementById("_citeLink").href
+	var url = doc.getElementById("_citeLink").href;
 	ZU.doGet(url, function(text) {
 		var re = /<textarea name="records".*>((?:.|\n)*?)<\/textarea>/;
 		re.exec(text);
@@ -64,17 +67,19 @@ function getItem(doc) {
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");//RIS translator
 		translator.setString(RegExp.$1);
 		translator.translate();
-	})
+	});
 }
 
 function getSearchResults(doc) {
 	var items = {}, found = false;
 	var results = ZU.xpath(doc, '//div[@id="pageContent"]//div[@class="result"]/div[@class="metaInf"]//a[contains(@id,"title")]');
-	for(var i=0; i<results.length; i++) {
+	for (var i=0; i<results.length; i++) {
 		var title = results[i].text;
 		var url = results[i].href;
 
-		if(!title || !url) continue;
+		if (!title || !url) {
+			continue;
+		}
 		found = true;
 		items[url] = ZU.trimInternal(title);
 	}
@@ -82,19 +87,22 @@ function getSearchResults(doc) {
 }
 
 function doWeb(doc, url) {
-	if(detectWeb(doc, url) == "multiple") {
+	if (detectWeb(doc, url) == "multiple") {
 		var hits = getSearchResults(doc);
 		var urls = [];
 		Z.selectItems(hits, function(items) {
-			if(items == null) return true;
-			for(var j in items) {
+			if(items == null) {
+				return true;
+			}
+			for (var j in items) {
 				urls.push(j);
 			}
 			ZU.processDocuments(urls, getItem);
 		});
 	}
-	else
+	else {
 		getItem(doc);
+	}
 }
 
 /** BEGIN TEST CASES **/
