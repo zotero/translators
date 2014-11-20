@@ -3,13 +3,13 @@
 	"label": "Summon 2",
 	"creator": "Caistarrin Mystical",
 	"target": "https?://([^/]+\\.)?summon\\.serialssolutions\\.com",
-	"minVersion": "1.0",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-11-18 11:23:28"
+	"lastUpdated": "2014-11-20 14:38:42"
 }
 
 /*
@@ -28,6 +28,8 @@
  */
 
 function detectWeb(doc, url) {
+	Zotero.monitorDOMChanges(doc.getElementById("results"), {childList: true});
+	
 	if (ZU.xpath(doc, '//li//div[contains(@class, "summary")]').length > 0) {
 		// Summon always shows a search results page, so it's multiple or nothing
 		return "multiple";
@@ -36,13 +38,7 @@ function detectWeb(doc, url) {
 	return false;
 }
 
-function doWeb(doc, url) { 
-	if (detectWeb(doc, url) == "multiple") {
-		getTitles(doc, url);
-	}
-}
-
-function getTitles(doc, url) {
+function doWeb(doc, url) {
 	var titles = ZU.xpath(doc, '//li//div[contains(@class, "summary")]//div/@text');
 	var items = new Object();
 	var numRollups = 0;
@@ -67,7 +63,7 @@ function getTitles(doc, url) {
 			return true;
 		}
 		
-		for (item in items) {
+		for (var item in items) {
 			// keeping the indexes of the refs we want
 			refIndexes.push(item);
 		}
@@ -110,109 +106,90 @@ function getTitles(doc, url) {
 				}
 			},
 			function () {
-				getRefData(documents);
+				var uniName = ZU.xpath(doc, '//div[contains(@class, "header")]//div[contains(@class, "Logo")]//img/@alt');
+				getRefData(documents, uniName[0].value);
 			}
 		);
 	});
 }
 
-function getRefData(documents) {	
+function getRefData(documents, uniName) {
 	for (var i = 0; i < documents.length; i++) {
 		var ref = documents[i];
 		var item = new Zotero.Item(getRefType(ref));
-		item.libraryCatalog = "Summon 2.0";
+		
+		item.title = ZU.cleanTags(ref.full_title);
+		item.libraryCatalog = uniName + ", Summon 2.0";
 		item.creators = getAuthors(ref);
-		item.title = Zotero.Utilities.cleanTags(ref.full_title);
-
+		item.ISBN = ref.isbn;
+		item.publisher = ref.publisher;
+		item.publicationTitle = ref.publication_title;
+		item.numPages = ref.page_count;
+		item.tags = ref.subject_terms;
+		item.series = ref.publication_series_title;
+		
+		if (ref.lc_call_numbers) {
+			item.callNumber = ref.lc_call_numbers[0];
+		}
+		
+		if (ref.volumes) {
+			item.volume = ref.volumes[0];
+		}
+		
+		if (ref.issues) {
+			item.issue = ref.issues[0];
+		}
+		
+		if (ref.uris) {
+			item.url = ref.uris[0];
+		}
+		
+		if (ref.languages) {
+			item.language = ref.languages[0];
+		}
+		
+		if (ref.copyrights) {
+			item.rights = ref.copyrights[0];
+		}
+		
+		if (ref.dois) {
+			item.DOI = ref.dois[0];
+		}
+		
 		if (ref.abstracts && ref.abstracts.length > 0) {
 			item.abstractNote = ref.abstracts[0].abstract;
 		}
 
-		if (ref.languages && ref.languages.length > 0) {
-			item.language = ref.languages[0];
-		}
-
-		if (ref.copyrights && ref.copyrights.length > 0) {
-			item.rights = ref.copyrights[0];
-		}
-
-		if (ref.uris && ref.uris.length > 0) {
-			item.url = ref.uris[0];
-		}
-
-		if (ref.issns && ref.issns.length > 0) {
+		if (ref.issns) {
 			item.ISSN = ref.issns[0];
 		}
-		else if (ref.eissns && ref.eissns.length > 0) {
+		else if (ref.eissns) {
 			item.ISSN = ref.eissns[0];
 		}
 
-		if (ref.isbn) {
-			item.ISBN = ref.isbn;
-		}
-
-		if (ref.dois && ref.dois.length > 0) {
-			item.DOI = ref.dois[0];
-		}
-
-		if (ref.publisher) {
-			item.publisher = ref.publisher;
-		}
-
-		if (ref.publication_places && ref.publication_places.length > 0) {
+		if (ref.publication_places) {
 			item.place = ref.publication_places[0];
 		}
-		else if (ref.dissertation_schools && ref.dissertation_schools.length > 0) {
+		else if (ref.dissertation_schools) {
 			item.place = ref.dissertation_schools[0];
 		}
 
-		if (ref.publication_title) {
-			item.publicationTitle = ref.publication_title;
-		}
-
-		if (ref.volumes && ref.volumes.length > 0) {
-			item.volume = ref.volumes[0];
-		}
-
-		if (ref.issues && ref.issues.length > 0) {
-			item.issue = ref.issues[0];
-		}
-
-		if (ref.pages) {
-			item.pages = ref.pages;
-		}
-		else if (ref.start_pages && ref.start_pages.length > 0) {
+		item.pages = ref.pages;
+		if (!item.pages && ref.start_pages) {
 			item.pages = ref.start_pages[0] + (ref.end_pages && ref.end_pages.length > 0 ? "-" + ref.end_pages[0] : "");
 		}
 
-		if (ref.page_count) {
-			item.numPages = ref.page_count;
-		}
-
-		if (ref.publication_date) {
-			item.date = ref.publication_date;
-		}
-		else if (ref.publication_years && ref.publication_years.length > 0) {
+		item.date = ref.publication_date;
+		if (!item.date && ref.publication_years) {
 			item.date = ref.publication_years[ref.publication_years.length - 1];
 		}
 
-		if (ref.editions && ref.editions.length > 0 && ref.editions != "1" && ref.editions.indexOf("1st") != 0) {
-			// get any edition numbers after the 1st
+		if (ref.editions && ref.editions.length > 0 
+			&& ref.editions[0] != "1" 
+			&& ref.editions[0].indexOf("1st") != 0 
+			&& ref.editions[0].toLowerCase().indexOf("first") != 0) {
+			// we don't care about the first edition
 			item.edition = ref.editions[0];
-		}
-
-		if (ref.lc_call_numbers && ref.lc_call_numbers.length > 0) {
-			item.callNumber = ref.lc_call_numbers[0];
-		}
-
-		if (ref.publication_series_title) {
-			item.seriesTitle = ref.publication_series_title;
-		}
-
-		if (ref.subject_terms && ref.subject_terms.length > 0) {
-			for (var c = 0; c < ref.subject_terms.length; c++) {
-				item.tags.push(ref.subject_terms[c]);
-			}
 		}
 
 		item.complete();
@@ -220,7 +197,7 @@ function getRefData(documents) {
 }
 
 function getApiData(url, refIndexes) {
-	var urlArray = decodeURI(url).split('?');
+	var urlArray = url.split('?');
 	var params = urlArray[1].split('&');
 	var apiURL = urlArray[0].replace("#!", "api") + "?";
 	var fvf = "";
@@ -247,7 +224,7 @@ function getApiData(url, refIndexes) {
 	
 	for (var i = 0; i < refIndexes.length; i++) {
 		var isRollup = isNaN(refIndexes[i]);
-		var currentPage = (isRollup || refIndexes[i] < 10 ? 1 : Math.ceil(refIndexes[i] / 10));
+		var currentPage = (isRollup || refIndexes[i] < 10 ? 1 : Math.ceil((refIndexes[i] + 1) / 10));
 		// rollup indexes are "r*" (string) rather than integer, and are always on first page
 		
 		if (!indexBlocks[currentPage]) {
@@ -294,10 +271,19 @@ function getAuthors(ref) {
 				});
 			}
 			else {
-				var name = a.fullname ? a.fullname : (a.name ? a.name : "");
+				var name = a.fullname || a.name || "";
 
 				if (name.length > 0) {
-					itemAuthors.push(Zotero.Utilities.cleanAuthor(name, "author", isCorporate ? true : name.indexOf(',') > -1));
+					
+					if (isCorporate) {
+						itemAuthors.push({
+							"lastName": name,
+							"creatorType": "author"
+						});
+					}
+					else {
+						itemAuthors.push(Zotero.Utilities.cleanAuthor(name, "author", name.indexOf(',') > -1));
+					}
 				}
 			}
 		}
@@ -307,9 +293,7 @@ function getAuthors(ref) {
 }
 
 function getRefType(ref) {
-	var type = ref.content_type;
-
-	switch(type) {
+	switch(ref.content_type) {
 		case "Audio Recording":
 		case "Music Recording":
 			return "audioRecording";
@@ -333,13 +317,6 @@ function getRefType(ref) {
 		case "Image":
 		case "Photograph":
 			return "artwork";
-			break;
-		case "Journal Article":
-		case "Journal":
-		case "eJournal":
-		case "Book Review":
-		case "Newsletter":
-			return "journalArticle";
 			break;
 		case "Magazine":
 		case "Magazine Article":
@@ -381,13 +358,15 @@ function getRefType(ref) {
 			if (ref.isbn) {
 				return "book";
 			}
-			else if (ref.dois || ref.issns) {
+			else {
 				return "journalArticle";
 			}
-			else {
-				return "document";
-			}
 			break;
+		case "Journal Article":
+		case "Journal":
+		case "eJournal":
+		case "Book Review":
+		case "Newsletter":
 		case "Archival Material":
 		case "Computer File":
 		case "Course Reading":
@@ -402,6 +381,6 @@ function getRefType(ref) {
 		case "Standard":
 		case "Transcript":
 		default:
-			return "document";
+			return "journalArticle";
 	}
 }
