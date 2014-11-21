@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-11-20 14:38:42"
+	"lastUpdated": "2014-11-20 16:54:38"
 }
 
 /*
@@ -39,7 +39,7 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var titles = ZU.xpath(doc, '//li//div[contains(@class, "summary")]//div/@text');
+	var titles = ZU.xpath(doc, '//li//div[contains(@class, "summary")]//div[descendant::a[not(contains(@class, "availability"))]]//@text');
 	var items = new Object();
 	var numRollups = 0;
 	var rollupStart = 0;
