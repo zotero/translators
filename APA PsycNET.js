@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-11-22 09:45:04"
+	"lastUpdated": "2014-11-22 10:24:38"
 }
 
 function detectWeb(doc, url) {
@@ -386,9 +386,7 @@ var testCases = [
 				"issue": "3",
 				"libraryCatalog": "APA PsycNET",
 				"pages": "485-503",
-				"place": "US",
 				"publicationTitle": "Neuropsychology",
-				"publisher": "American Psychological Association",
 				"rights": "(c) 2012 APA, all rights reserved",
 				"shortTitle": "Neuropsychology of Adults With Attention-Deficit/Hyperactivity Disorder",
 				"volume": "18",
@@ -439,9 +437,7 @@ var testCases = [
 				"issue": "5",
 				"libraryCatalog": "APA PsycNET",
 				"pages": "325-338",
-				"place": "US",
 				"publicationTitle": "Journal of Experimental Psychology",
-				"publisher": "American Psychological Association",
 				"rights": "(c) 2012 APA, all rights reserved",
 				"volume": "50",
 				"attachments": [
@@ -497,7 +493,7 @@ var testCases = [
 				"bookTitle": "Psychopathology: Experimental models",
 				"libraryCatalog": "APA PsycNET",
 				"pages": "334-357",
-				"place": "New York,  NY,  US",
+				"place": "New York, NY, US",
 				"publisher": "W H Freeman/Times Books/ Henry Holt & Co",
 				"rights": "(c) 2012 APA, all rights reserved",
 				"series": "A series of books in psychology.",
@@ -537,11 +533,10 @@ var testCases = [
 					}
 				],
 				"date": "1948",
-				"DOI": "10.1037/10023-000",
 				"abstractNote": "The author's intent is to write about abnormal people in a way that will be valuable and interesting to students new to the subject. A first course in abnormal psychology is not intended to train specialists. Its goal is more general: it should provide the student with the opportunity to whet his interest, expand his horizons, register a certain body of new facts, and relate this to the rest of his knowledge about mankind. I have tried to present the subject in such a way as to emphasize its usefulness to all students of human nature. I have tried the experiment of writing two introductory chapters, one historical and the other clinical. This reflects my desire to set the subject-matter in a broad perspective and at the same time to anchor it in concrete fact. Next comes a block of six chapters designed to set forth the topics of maladjustment and neurosis. The two chapters on psychotherapy complete the more purely psychological or developmental part of the work. In the final chapter the problem of disordered personalities is allowed to expand to its full social dimensions. Treatment, care, and prevention call for social effort and social organization. I have sought to show some of the lines, both professional and nonprofessional, along which this effort can be expended.",
 				"libraryCatalog": "APA PsycNET",
 				"numPages": "617",
-				"place": "New York,  NY,  US",
+				"place": "New York, NY, US",
 				"publisher": "Ronald Press Company",
 				"rights": "(c) 2012 APA, all rights reserved",
 				"shortTitle": "The abnormal personality",
@@ -575,11 +570,10 @@ var testCases = [
 					}
 				],
 				"date": "1948",
-				"DOI": "10.1037/10023-000",
 				"abstractNote": "The author's intent is to write about abnormal people in a way that will be valuable and interesting to students new to the subject. A first course in abnormal psychology is not intended to train specialists. Its goal is more general: it should provide the student with the opportunity to whet his interest, expand his horizons, register a certain body of new facts, and relate this to the rest of his knowledge about mankind. I have tried to present the subject in such a way as to emphasize its usefulness to all students of human nature. I have tried the experiment of writing two introductory chapters, one historical and the other clinical. This reflects my desire to set the subject-matter in a broad perspective and at the same time to anchor it in concrete fact. Next comes a block of six chapters designed to set forth the topics of maladjustment and neurosis. The two chapters on psychotherapy complete the more purely psychological or developmental part of the work. In the final chapter the problem of disordered personalities is allowed to expand to its full social dimensions. Treatment, care, and prevention call for social effort and social organization. I have sought to show some of the lines, both professional and nonprofessional, along which this effort can be expended.",
 				"libraryCatalog": "APA PsycNET",
 				"numPages": "617",
-				"place": "New York,  NY,  US",
+				"place": "New York, NY, US",
 				"publisher": "Ronald Press Company",
 				"rights": "(c) 2012 APA, all rights reserved",
 				"shortTitle": "The abnormal personality",
@@ -612,12 +606,11 @@ var testCases = [
 					}
 				],
 				"date": "1948",
-				"DOI": "10.1037/10023-002",
 				"abstractNote": "This chapter examines some representative examples of disordered personalities. The reader should be forewarned that the five cases described here will be frequently referred to in later chapters of the book. They display to advantage many of the problems and principles that will occupy us when we undertake to build up a systematic account of abnormal psychology. It will be assumed that the cases given in this chapter are well remembered, and with this in mind the reader should not only go through them but study and compare them rather carefully. The main varieties of disordered personalities and student attitudes toward abnormality are discussed before the case histories are presented.",
 				"bookTitle": "The abnormal personality: A textbook",
 				"libraryCatalog": "APA PsycNET",
 				"pages": "54-101",
-				"place": "New York,  NY,  US",
+				"place": "New York, NY, US",
 				"publisher": "Ronald Press Company",
 				"rights": "(c) 2012 APA, all rights reserved",
 				"shortTitle": "Clinical introduction",
@@ -676,9 +669,7 @@ var testCases = [
 				"issue": "4",
 				"libraryCatalog": "APA PsycNET",
 				"pages": "743-755",
-				"place": "US",
 				"publicationTitle": "Journal of Experimental Psychology: General",
-				"publisher": "American Psychological Association",
 				"rights": "(c) 2012 APA, all rights reserved",
 				"volume": "139",
 				"attachments": [
