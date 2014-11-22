@@ -18,7 +18,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-08-22 20:37:22"
+	"lastUpdated": "2014-11-22 12:43:04"
 }
 
 function detectImport() {
@@ -252,6 +252,20 @@ function processField(item, field, value, rawValue) {
 		item[fieldMap[field]] = value;
 	} else if(inputFieldMap[field]) {
 		item[inputFieldMap[field]] = value;
+	} else if(field == "subtitle") {
+		if (!item.title) item.title = '';
+		item.title = item.title.trim();
+		value = value.trim();
+		
+		if (!/[-–—:!?.;]$/.test(item.title)
+			&& !/^[-–—:.;¡¿]/.test(value)
+		) {
+			item.title += ': ';
+		} else if (item.title.length) {
+			item.title += ' ';
+		}
+		
+		item.title += value;
 	} else if(field == "journal") {
 		if(item.publicationTitle) {
 			item.journalAbbreviation = value;
