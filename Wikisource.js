@@ -2,7 +2,7 @@
 	"translatorID": "076bd26a-1517-469d-85e9-31316a6f6cb0",
 	"label": "Wikisource",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://[a-z]{2}\\.wikisource\\.org/w",
+	"target": "^https?://en\\.wikisource\\.org/w",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
