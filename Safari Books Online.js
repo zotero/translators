@@ -2,14 +2,14 @@
 	"translatorID": "ec491fc2-10b1-11e3-99d7-1bd4dc830245",
 	"label": "Safari Books Online",
 	"creator": "Jeffrey Jones",
-	"target": "^https?://.*\\.?safaribooksonline\\.[a-zA-Z]+/",
+	"target": "^https?://([^/]+\\.)?safaribooksonline\\.[a-zA-Z]+/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-11-20 11:09:02"
+	"lastUpdated": "2014-11-27 05:03:12"
 }
 
 /*
@@ -31,7 +31,7 @@ function detectWeb(doc, url) {
 	if (nav && ZU.xpathText(nav,".//a[@class='current']")) {
 		return "bookSection";
 	}
-	else if (url.indexOf("/book/") > -1 || url.match(/\/[0-9]{10}/)) {
+	else if (url.indexOf("/book/") > -1 || /\/[0-9]{10}/.test(url)) {
 		return "book";
 	}
 	else if (getSearchResults(doc,true)) {
@@ -47,6 +47,8 @@ function doWeb(doc, url) {
 	else if (type == "multiple"){
 		var results = getSearchResults(doc);
 		Zotero.selectItems(results, function (ids) {
+			if (!ids) return true;
+			
 			var toProcess = [];
 			for(var id in ids){
 				toProcess.push(id);
@@ -59,7 +61,6 @@ function doWeb(doc, url) {
 function getSearchResults(doc,quick) {
 	var titles = doc.getElementsByClassName('bookTitle'),
 		items = {},
-		urls = {},
 		found = false;
 		
 	if(quick) return titles.length;
@@ -82,29 +83,28 @@ function importBook(doc, url,section) {
 		//a sub-page would likely be a book section, so let's check and save it as such
 		var nav = doc.getElementById("lefttoc");
 		var sectionTitle = nav ? ZU.xpathText(nav,".//a[@class='current']") : false;
-		var prefixes = /^((?:Part|Chapter|Pt|Ch)\.? )?(?:([0-9]{1,3}\.?[0-9]{0,3}\.?)|((?:XC|XL|L?X{0,3})(IX|IV|V?I{0,3}))):? ?/;
-		Z.debug(sectionTitle)
-		Z.debug(prefixes.test(sectionTitle))
-		if(sectionTitle) sectionTitle = sectionTitle.replace(prefixes,"")
-		var originalUrl = url;
-		ZU.processDocuments([parts[1]], function(doc,url){
+		var prefixes = /^(?:(?:Part|Chapter|Pt|Ch)\.? )?(?:[0-9]{1,3}\.?[0-9]{0,3}|(?:XC|XL|L?X{0,3})(?:IX|IV|V?I{0,3}))\b[.: ]+/;
+		
+		if(sectionTitle) sectionTitle = sectionTitle.replace(prefixes,"");
+		
+		ZU.processDocuments([parts[1]], function(newDoc,newUrl){
 			var section = sectionTitle ? 
-				{"sectionTitle":sectionTitle,"originalUrl":originalUrl}
+				{"sectionTitle":sectionTitle,"originalUrl":url}
 				: false;
-			importBook(doc,url,section);
+			importBook(newDoc,newUrl,section);
 		});
 		return;
 	}
 	var mapping = {
-			name: "title",
-			inLanguage: "language",
-			publisher: "publisher",
-			datePublished: "date",
-			bookEdition: "edition",
-			isbn: "ISBN",
-			numberOfPages: "numPages",
-			description: "abstractNote"
-		};
+		name: "title",
+		inLanguage: "language",
+		publisher: "publisher",
+		datePublished: "date",
+		bookEdition: "edition",
+		isbn: "ISBN",
+		numberOfPages: "numPages",
+		description: "abstractNote"
+	};
 	var item = new Z.Item(section ? "bookSection" : "book"),
 		props = ZU.xpath(doc, '//*[@itemprop]'),
 		isbn = {};
@@ -125,10 +125,11 @@ function importBook(doc, url,section) {
 		}
 	}
 	//many isbn, prefer web over print, and 13 over 10
-	if(isbn["Web ISBN-13"]) item.ISBN = isbn["Web ISBN-13"];
-	else if(isbn["Web ISBN-10"]) item.ISBN = isbn["Web ISBN-10"];
-	else if(isbn["Print ISBN-10"]) item.ISBN = isbn["Print ISBN-13"];
-	else if(isbn["Print ISBN-10"]) item.ISBN = isbn["Print ISBN-10"];
+	item.ISBN = isbn["Web ISBN-13"]
+		|| isbn["Web ISBN-10"]
+		|| isbn["Print ISBN-13"]
+		|| isbn["Print ISBN-10"]
+		|| item.ISBN; // in case there's no ISBN with props[i].previousSibling above
 				
 	//author is poorly defined, have to search for it by text
 	var dataItems = ZU.xpath(doc, '//ul[@class="metadatalist"]//p[contains(@class,"data")]');
@@ -146,15 +147,14 @@ function importBook(doc, url,section) {
 		}
 	}
 	var itemUrl = section ? section.originalUrl : url;
-	item.url = itemUrl.indexOf("?") >= 0 ? itemUrl.substr(0, itemUrl.indexOf("?"))
-		: itemUrl.indexOf("#") >= 0 ? itemUrl.substr(0, itemUrl.indexOf("#"))
-		: itemUrl;
+	item.url = itemUrl.replace(/[?#].*/, '');
 	if(section) {
 		item.bookTitle = item.title;
 		item.title = section.sectionTitle;
 	}
 	item.complete();
-}/** BEGIN TEST CASES **/
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -172,6 +172,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "bookSection",
+				"title": "The Java Virtual Machine",
 				"creators": [
 					{
 						"firstName": "Tim",
@@ -194,21 +195,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "The Java Virtual Machine",
-				"publisher": "Addison-Wesley Professional",
 				"date": "May 07, 2014",
 				"ISBN": "978-0-13-392274-5",
-				"numPages": "600",
-				"language": "en",
 				"abstractNote": "Written by the inventors of the technology, The Java® Virtual Machine Specification, Java SE 8 Edition is the definitive technical reference for the Java Virtual Machine. The book provides complete, accurate, and detailed coverage of the Java Virtual Machine. It fully describes the new features added in Java SE 8, including the invocation of default methods and the class file extensions for type annotations and method parameters. The book also clarifies the interpretation of class file attributes and the rules of bytecode verification.",
-				"url": "http://proquest.techbus.safaribooksonline.de/book/programming/java/9780133922745/chapter-1dot-introduction/ch01lev1sec2_html",
 				"bookTitle": "The Java® Virtual Machine Specification, Java SE 8 Edition",
+				"language": "en",
 				"libraryCatalog": "Safari Books Online",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"publisher": "Addison-Wesley Professional",
+				"url": "http://proquest.techbus.safaribooksonline.de/book/programming/java/9780133922745/chapter-1dot-introduction/ch01lev1sec2_html",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -218,6 +216,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "The Java® Virtual Machine Specification, Java SE 8 Edition",
 				"creators": [
 					{
 						"firstName": "Tim",
@@ -240,20 +239,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "The Java® Virtual Machine Specification, Java SE 8 Edition",
-				"publisher": "Addison-Wesley Professional",
 				"date": "May 07, 2014",
 				"ISBN": "978-0-13-392274-5",
-				"numPages": "600",
-				"language": "en",
 				"abstractNote": "Written by the inventors of the technology, The Java® Virtual Machine Specification, Java SE 8 Edition is the definitive technical reference for the Java Virtual Machine. The book provides complete, accurate, and detailed coverage of the Java Virtual Machine. It fully describes the new features added in Java SE 8, including the invocation of default methods and the class file extensions for type annotations and method parameters. The book also clarifies the interpretation of class file attributes and the rules of bytecode verification.",
-				"url": "http://proquest.techbus.safaribooksonline.de/book/programming/java/9780133922745",
+				"language": "en",
 				"libraryCatalog": "Safari Books Online",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"numPages": "600",
+				"publisher": "Addison-Wesley Professional",
+				"url": "http://proquest.techbus.safaribooksonline.de/book/programming/java/9780133922745",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -263,6 +260,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "bookSection",
+				"title": "Emacspeak: The Complete Audio Desktop",
 				"creators": [
 					{
 						"firstName": "Andy",
@@ -275,22 +273,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Emacspeak: The Complete Audio Desktop",
-				"publisher": "O'Reilly Media, Inc.",
 				"date": "June 26, 2007",
 				"ISBN": "0-596-51004-7",
-				"numPages": "620",
-				"language": "en",
 				"abstractNote": "How do the experts solve difficult problems in software development? In this unique and insightful book, leading computer scientists offer case studies that reveal how they found unusual, carefully designed solutions to high-profile projects. You will be able to look over the shoulder of major coding and design experts to see problems through their eyes. This is not simply another design patterns book, or another software engineering treatise on the right and wrong way to do things. The authors think aloud as they work through their project's architecture, the tradeoffs made in its construction, and when it was important to break rules. This book contains 33 chapters contributed by Brian Kernighan, Karl Fogel, Jon Bentley, Tim Bray, Elliotte Rusty Harold, Michael Feathers, Alberto Savoia, Charles Petzold, Douglas Crockford, Henry S. Warren, Jr., Ashish Gulhati, Lincoln Stein, Jim Kent, Jack Dongarra and Piotr Luszczek, Adam Kolawa, Greg Kroah-Hartman, Diomidis Spinellis, Andrew Kuchling, Travis E. Oliphant, Ronald Mak, Rogerio Atem de Carvalho and Rafael Monnerat, Bryan Cantrill, Jeff Dean and Sanjay Ghemawat, Simon Peyton Jones, Kent Dybvig, William Otte and Douglas C. Schmidt, Andrew Patzer, Andreas Zeller, Yukihiro Matsumoto, Arun Mehta, TV Raman, Laura Wingerd and Christopher Seiwald, and Brian Hayes. Beautiful Code is an opportunity for master coders to tell their story. All author royalties will be donated to Amnesty International.",
-				"url": "http://proquestcombo.safaribooksonline.com/book/software-engineering-and-development/9780596510046/31dot-emacspeak-the-complete-audio-desktop/emacspeak_the_complete_audio_desktop",
 				"bookTitle": "Beautiful Code",
+				"language": "en",
 				"libraryCatalog": "Safari Books Online",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Emacspeak"
+				"publisher": "O'Reilly Media, Inc.",
+				"shortTitle": "Emacspeak",
+				"url": "http://proquestcombo.safaribooksonline.com/book/software-engineering-and-development/9780596510046/31dot-emacspeak-the-complete-audio-desktop/emacspeak_the_complete_audio_desktop",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -300,6 +295,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "bookSection",
+				"title": "Laying the Foundations",
 				"creators": [
 					{
 						"firstName": "Adam",
@@ -327,21 +323,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Laying the Foundations",
-				"publisher": "John Wiley & Sons",
 				"date": "August 28, 2012",
 				"ISBN": "978-1-118-28217-5",
-				"numPages": "1416",
-				"language": "en",
 				"abstractNote": "Harness the powerful new SQL Server 2012 Microsoft SQL Server 2012 is the most significant update to this product since 2005, and it may change how database administrators and developers perform many aspects of their jobs. If you're a database administrator or developer, Microsoft SQL Server 2012 Bible teaches you everything you need to take full advantage of this major release. This detailed guide not only covers all the new features of SQL Server 2012, it also shows you step by step how to develop top-notch SQL Server databases and new data connections and keep your databases performing at peak. The book is crammed with specific examples, sample code, and a host of tips, workarounds, and best practices. In addition, downloadable code is available from the book's companion web site, which you can use to jumpstart your own projects. Serves as an authoritative guide to Microsoft's SQL Server 2012 for database administrators and developersCovers all the software's new features and capabilities, including SQL Azure for cloud computing, enhancements to client connectivity, and new functionality that ensures high-availability of mission-critical applicationsExplains major new changes to the SQL Server Business Intelligence tools, such as Integration, Reporting, and Analysis ServicesDemonstrates tasks both graphically and in SQL code to enhance your learningProvides source code from the companion web site, which you can use as a basis for your own projectsExplores tips, smart workarounds, and best practices to help you on the job Get thoroughly up to speed on SQL Server 2012 with Microsoft SQL Server 2012 Bible.",
-				"url": "http://proquestcombo.safaribooksonline.com/book/databases/microsoft-sql-server-2012/9781118282175/part-i-laying-the-foundations/9781118282175p01_xhtml",
 				"bookTitle": "Microsoft SQL Server 2012 Bible",
+				"language": "en",
 				"libraryCatalog": "Safari Books Online",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"publisher": "John Wiley & Sons",
+				"url": "http://proquestcombo.safaribooksonline.com/book/databases/microsoft-sql-server-2012/9781118282175/part-i-laying-the-foundations/9781118282175p01_xhtml",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -351,6 +344,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "bookSection",
+				"title": "The World of SQL Server",
 				"creators": [
 					{
 						"firstName": "Adam",
@@ -378,21 +372,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "The World of SQL Server",
-				"publisher": "John Wiley & Sons",
 				"date": "August 28, 2012",
 				"ISBN": "978-1-118-28217-5",
-				"numPages": "1416",
-				"language": "en",
 				"abstractNote": "Harness the powerful new SQL Server 2012 Microsoft SQL Server 2012 is the most significant update to this product since 2005, and it may change how database administrators and developers perform many aspects of their jobs. If you're a database administrator or developer, Microsoft SQL Server 2012 Bible teaches you everything you need to take full advantage of this major release. This detailed guide not only covers all the new features of SQL Server 2012, it also shows you step by step how to develop top-notch SQL Server databases and new data connections and keep your databases performing at peak. The book is crammed with specific examples, sample code, and a host of tips, workarounds, and best practices. In addition, downloadable code is available from the book's companion web site, which you can use to jumpstart your own projects. Serves as an authoritative guide to Microsoft's SQL Server 2012 for database administrators and developersCovers all the software's new features and capabilities, including SQL Azure for cloud computing, enhancements to client connectivity, and new functionality that ensures high-availability of mission-critical applicationsExplains major new changes to the SQL Server Business Intelligence tools, such as Integration, Reporting, and Analysis ServicesDemonstrates tasks both graphically and in SQL code to enhance your learningProvides source code from the companion web site, which you can use as a basis for your own projectsExplores tips, smart workarounds, and best practices to help you on the job Get thoroughly up to speed on SQL Server 2012 with Microsoft SQL Server 2012 Bible.",
-				"url": "http://proquestcombo.safaribooksonline.com/9781118282175/9781118282175c01_xhtml",
 				"bookTitle": "Microsoft SQL Server 2012 Bible",
+				"language": "en",
 				"libraryCatalog": "Safari Books Online",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"publisher": "John Wiley & Sons",
+				"url": "http://proquestcombo.safaribooksonline.com/9781118282175/9781118282175c01_xhtml",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
