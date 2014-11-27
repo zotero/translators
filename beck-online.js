@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-11-27 04:31:09"
+	"lastUpdated": "2014-11-27 05:31:09"
 }
 
 /*
@@ -255,22 +255,25 @@ function scrapeCase(doc, url) {
 		item.title += " - " + item.shortTitle;
 	}
 	
+	var decisionType;
 	if (courtLine) {
 		item.history = ZU.xpathText(courtLine, './span[@class="vorinst"]');
 	
 		// type of decision. Save this in item.extra according to citeproc-js
-		var decisionType = ZU.xpathText(courtLine, './span[@class="etyp"]');
-		if (decisionType == null) {
-			decisionType = alternativeData[2];
-		}
+		decisionType = ZU.xpathText(courtLine, './span[@class="etyp"]');
+	}
+	
+	if (!decisionType) {
+		decisionType = alternativeData[2];
+	}
+	
+	if (decisionType) {
 		if (/Beschluss|Beschl\./i.test(decisionType)) {
 			item.extra += "\n{:genre: Beschl.}";
 		}
-		else {
-			if (/Urteil|(Urt\.)/i.test(decisionType)) {
-				item.extra += "\n{:genre: Urt.}";
-			}
-		}	
+		else if (/Urteil|(Urt\.)/i.test(decisionType)) {
+			item.extra += "\n{:genre: Urt.}";
+		}
 	}
 	
 	// code to scrape the BeckRS source, if available
