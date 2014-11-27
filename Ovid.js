@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-07-31 22:24:15"
+	"lastUpdated": "2014-11-19 10:32:40"
 }
 
 /*
@@ -40,27 +40,24 @@
 */
 
 function detectWeb(doc, url) {
-	Zotero.debug("detectWeb");
-
 	// Do not show the Zotero icone on books.
-	if (doc.evaluate('.//table[@class="booklist-record-header"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	if (ZU.xpath(doc,'.//table[@class="booklist-record-header"]').length) {
 		return false;
 	}
 
-	var results = doc.evaluate('.//input[@class="bibrecord-checkbox"]', doc, null, XPathResult.ANY_TYPE, null);
-	//Zotero.debug('results::' + results.iterateNext());
-	var count = 0;
-	while (results.iterateNext()) {
-		if (++count > 1) return "multiple";
-	}
-
-	if (count == 1) return "journalArticle";
-
+	var results = getSearchResults(doc);
+	if (results.length > 1) return "multiple";
+	if (results.length == 1) return "journalArticle";
+	
 	//some pages don't have a checkbox, but we can follow a link to abstract, which does
 	var a = doc.getElementById('abstract');
 	if(a && a.nodeName.toUpperCase() == 'A') return 'journalArticle';
 	
 	return false;
+}
+
+function getSearchResults(doc) {
+	return ZU.xpath(doc,'.//input[@class="bibrecord-checkbox"]');
 }
 
 function senCase(string) {
@@ -74,15 +71,10 @@ function senCase(string) {
 }
 
 function doWeb(doc, url) {
-	var results = doc.evaluate('.//input[@class="bibrecord-checkbox"]', doc, null, XPathResult.ANY_TYPE, null);
-
-	var count = 0;
-	while (results.iterateNext()) {
-		if (++count > 1) break;
-	}
+	var results = getSearchResults(doc);
 	
 	//if we're on a page with no checkboxes, we might have to redirect to a different page
-	if(!count) {
+	if(results.length == 0) {
 		Z.debug("Could not find any checkboxes. Looking for link to abstract...");
 		var a = doc.getElementById('abstract');
 		if(a && a.href) {
@@ -94,7 +86,7 @@ function doWeb(doc, url) {
 	
 	var post = "S=" + doc.evaluate('.//input[@name="S"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
 	var record_type = "";
-	if (count > 1) { // If page contains multiple Articles.
+	if (results.length > 1) { // If page contains multiple Articles.
 		var items = new Object();
 		var tableRows;
 		// Go through table rows
@@ -162,21 +154,22 @@ function doWeb(doc, url) {
 			}
 
 		}
-		var items = Zotero.selectItems(items);
-		if (!items) return true;
-
-		for (var i in items) {
-			post += "&R=" + i;
-		}
-
-		var selectvar = doc.evaluate('.//input[@name="SELECT"]', doc, null, XPathResult.ANY_TYPE, null);
-		var nextselect = selectvar.iterateNext().value;
-
-	} else if (count == 1) { // If page contains single Article.
+		Zotero.selectItems(items,function(ids){
+			if (!ids) return true;
+	
+			for (var i in ids) {
+				post += "&R=" + encodeURIComponent(i);
+			}
+			getResponse(doc,url,post);
+		});
+	} else if (results.length == 1) { // If page contains single Article.
 		var id = doc.evaluate('.//input[@name="R" and @class="bibrecord-checkbox"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
-		post += "&R=" + id;
+		post += "&R=" + encodeURIComponent(id);
+		getResponse(doc,url,post);
 	}
+}
 
+function getResponse(doc,url,post) {
 	post += "&jumpstartLink=1";
 	post += "&Citation Page=Export Citation"; // Required on non-js browser
 	var is_OUS = 0;
@@ -271,7 +264,7 @@ function doWeb(doc, url) {
 				} else if (fieldCode == "SB") {
 					newItem.tags.push(Zotero.Utilities.superCleanString(fieldContent));
 				} else if (fieldCode == "KW") {
-					newItem.tags.push(fieldContent.split(/; +/));
+					newItem.tags = newItem.tags.concat(fieldContent.split(/; +/));
 				} else if (fieldCode == "DB") {
 					newItem.repository = "Ovid (" + fieldContent + ")";
 					if (fieldContent.match(/Books\@Ovid/)) {
@@ -306,5 +299,6 @@ function doWeb(doc, url) {
 		}
 		Zotero.done();
 	});
-	Zotero.wait();
-}
+}/** BEGIN TEST CASES **/
+var testCases = []
+/** END TEST CASES **/
