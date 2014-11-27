@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-11-17 17:26:13"
+	"lastUpdated": "2014-11-27 04:31:09"
 }
 
 /*
@@ -52,8 +52,8 @@ var mappingClassNameToItemType = {
 }
 
 // build a regular expression for author cleanup in authorRemoveTitlesEtc()
-var authorTitlesEtc = ['\\/','Dr\\.', 'jur\\.', 'iur\\.','h\\. c\\.','Prof\\.',
-		'Professor', 'wiss\\.', 'Mitarbeiter(in)?', 'RA,?', 'FAArbR',
+var authorTitlesEtc = ['\\/','Dr\\.', '\\b[ji]ur\\.','\\bh\\. c\\.','Prof\\.',
+		'Professor', '\\bwiss\\.', 'Mitarbeiter(?:in)?', 'RA,?', 'FAArbR',
 		'Fachanwalt für Insolvenzrecht', 'Rechtsanw[aä]lt(?:e|in)?',
 		'Richter am (?:AG|LG|OLG|BGH)',	'\\bzur Fussnote', 'LL\\.M\\.',
 		'^Von', "\\*"];
@@ -61,32 +61,45 @@ var authorRegEx = new RegExp(authorTitlesEtc.join('|'), 'g');
 
 
 function detectWeb(doc, url) {
-	var documentClassName = doc.getElementById("dokument").className;
-	if (mappingClassNameToItemType[documentClassName.toUpperCase()]) {
-		return mappingClassNameToItemType[documentClassName.toUpperCase()];
+	var dokument = doc.getElementById("dokument");
+	if (!dokument) return;
+	
+	var type = mappingClassNameToItemType[dokument.className.toUpperCase()];
+	
+	if (type == 'multiple') {
+		return getSearchResults(doc, true) ? type : false;
 	}
+	
+	return type;
 }
 
+function getSearchResults(doc, checkOnly) {
+	var items = {}, found = false,
+		rows = ZU.xpath(doc, '//div[@class="inh"]//span[@class="inhdok"]//a | //div[@class="autotoc"]//a');
+	for(var i=0; i<rows.length; i++) {
+		//rows[i] contains an invisible span with some text, which we have to exclude, e.g.
+		//   <span class="unsichtbar">BKR Jahr 2014 Seite </span>
+		//   Dr. iur. habil. Christian Hofmann: Haftung im Zahlungsverkehr
+		var title = ZU.trimInternal( ZU.xpathText(rows[i], './text()[1]') );
+		var link = rows[i].href;
+		if (!link || !title) continue;
+		
+		if (checkOnly) return true;
+		found = true;
+		
+		items[link] = title;
+	}
+	
+	return found ? items : false;
+}
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		
-		var items = new Object();
-		var articles = new Array();
-		
-		var rows = ZU.xpath(doc, '//div[@class="inh"]//span[@class="inhdok"]//a | //div[@class="autotoc"]//a');
-		for(var i=0; i<rows.length; i++) {
-			//rows[i] contains an invisible span with some text, which we have to exclude, e.g.
-			//   <span class="unsichtbar">BKR Jahr 2014 Seite </span>
-			//   Dr. iur. habil. Christian Hofmann: Haftung im Zahlungsverkehr
-			var title = ZU.trimInternal( ZU.xpathText(rows[i], './text()[1]') );
-			var link = rows[i].href;
-			items[link] = title;
-		}
-		Zotero.selectItems(items, function (items) {
+		Zotero.selectItems(getSearchResults(doc), function (items) {
 			if (!items) {
 				return true;
 			}
+			var articles = [];
 			for (var i in items) {
 				articles.push(i);
 			}
@@ -120,13 +133,11 @@ function scrapeLSK(doc, url) {
 	var authorsString = descriptionItems[0];
 	
 	var authors = authorsString.split("/");
-	var authorsItems = new Array();
 
 	for (var index = 0; index < authors.length; ++index) {
-		var author = authorRemoveTitlesEtc(Zotero.Utilities.trimInternal(authors[index]));
-		authorsItems.push ( Zotero.Utilities.cleanAuthor(author, 'author', false) );
+		var author = authorRemoveTitlesEtc(ZU.trimInternal(authors[index]));
+		item.creators.push ( ZU.cleanAuthor(author, 'author', false) );
 	}
-	item.creators = authorsItems;
 	
 	//title
 	item.title = ZU.trimInternal(descriptionItems[1]);
@@ -205,10 +216,10 @@ function scrapeCase(doc, url) {
 		}
 	}
 	
-	var courtLine = ZU.xpath(doc, '//div[contains(@class, "gerzeile")]/p');
+	var courtLine = ZU.xpath(doc, '//div[contains(@class, "gerzeile")]/p')[0];
 	var alternativeLine = "";
 	var alternativeData = [];
-	if (courtLine.length) {
+	if (courtLine) {
 		item.court = ZU.xpathText(courtLine, './span[@class="gericht"]');
 	}
 	else {
@@ -244,22 +255,24 @@ function scrapeCase(doc, url) {
 		item.title += " - " + item.shortTitle;
 	}
 	
-	item.history = ZU.xpathText(courtLine, './span[@class="vorinst"]');
+	if (courtLine) {
+		item.history = ZU.xpathText(courtLine, './span[@class="vorinst"]');
 	
-	// type of decision. Save this in item.extra according to citeproc-js
-	var decisionType = ZU.xpathText(courtLine, './span[@class="etyp"]');
-	if (decisionType == null) {
-		decisionType = alternativeData[2];
-	}
-	if (/Beschluss|Beschl\./i.test(decisionType)) {
-		item.extra += "\n{:genre: Beschl.}";
-	}
-	else {
-		if (/Urteil|(Urt\.)/i.test(decisionType)) {
-			item.extra += "\n{:genre: Urt.}";
+		// type of decision. Save this in item.extra according to citeproc-js
+		var decisionType = ZU.xpathText(courtLine, './span[@class="etyp"]');
+		if (decisionType == null) {
+			decisionType = alternativeData[2];
 		}
-	}	
-		
+		if (/Beschluss|Beschl\./i.test(decisionType)) {
+			item.extra += "\n{:genre: Beschl.}";
+		}
+		else {
+			if (/Urteil|(Urt\.)/i.test(decisionType)) {
+				item.extra += "\n{:genre: Urt.}";
+			}
+		}	
+	}
+	
 	// code to scrape the BeckRS source, if available
 	// example: BeckRS 2013, 06445
 	// Since BeckRS is not suitable for citing, let's push it into the notes instead
@@ -277,9 +290,9 @@ function scrapeCase(doc, url) {
 		item.pages = beckRSsrc[3];*/
 	}
 
-	var otherCitations = ZU.xpath(doc, '//li[contains(@id, "Parallelfundstellen")]');
-	if (otherCitations && otherCitations.length>0) {
-		note = addNote(note, "<h3>Parallelfundstellen</h3><p>" + ZU.xpathText(otherCitations[0], './ul/li',  null, " ; ") + "</p>");
+	var otherCitations = ZU.xpath(doc, '//li[contains(@id, "Parallelfundstellen")]')[0];
+	if (otherCitations) {
+		note = addNote(note, "<h3>Parallelfundstellen</h3><p>" + ZU.xpathText(otherCitations, './ul/li',  null, " ; ") + "</p>");
 	}
 	var basedOnRegulations = ZU.xpathText(doc, '//div[contains(@class,"normenk")]');
 	if (basedOnRegulations) {
@@ -312,9 +325,8 @@ function scrapeCase(doc, url) {
 		} else {
 			item.pages = pagesStart
 		}
-			
+		
 		item.reporterVolume = item.date;
-
 	}
 	
 	if (note.length != 0) {
@@ -331,7 +343,12 @@ function scrapeCase(doc, url) {
 
 
 function scrape(doc, url) {
-	var documentClassName = doc.getElementById("dokument").className.toUpperCase();
+	var dokument = doc.getElementById("dokument");
+	if (!dokument) {
+		throw new Error("Could not find element with ID 'dokument'. "
+		+ "Probably attempting to scrape multiples with no access.")
+	}
+	var documentClassName = dokument.className.toUpperCase();
 
 	// use different scraping function for documents in LSK
 	if (documentClassName == 'LSK') {
@@ -396,12 +413,8 @@ function scrape(doc, url) {
 				var authorString = ZU.trimInternal(authorRemoveTitlesEtc(authorArray[k]));
 				item.creators.push(ZU.cleanAuthor(authorString));
 			}
-			
-			
 		}
-		
 	}
-	
 	
 	item.publicationTitle = ZU.xpathText(doc, '//li[@class="breadcurmbelemenfirst"]');
 	item.journalAbbreviation = ZU.xpathText(doc, '//div[@id="doktoc"]/ul/li/a[2]');
@@ -429,12 +442,12 @@ function scrape(doc, url) {
 	if (documentClassName == "ZBUCHB") {
 		item.extra = ZU.xpathText(doc, '//div[@class="biblio"]');
 	}
-		
+	
 	item.attachments = [{
 		title: "Snapshot",
 		document:doc
 	}];
-
+	
 	item.complete();
 }/** BEGIN TEST CASES **/
 var testCases = [
@@ -444,6 +457,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Best practice – Grundstrukturen des kontinentaleuropäischen Gesellschaftsrechts",
 				"creators": [
 					{
 						"lastName": "Roth",
@@ -451,21 +465,20 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2012",
+				"issue": "1",
+				"journalAbbreviation": "DNotZ-Sonderheft",
+				"libraryCatalog": "beck-online",
+				"pages": "88-95",
+				"publicationTitle": "Sonderheft der Deutschen Notar-Zeitschrift",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"title": "Best practice – Grundstrukturen des kontinentaleuropäischen Gesellschaftsrechts",
-				"publicationTitle": "Sonderheft der Deutschen Notar-Zeitschrift",
-				"journalAbbreviation": "DNotZ-Sonderheft",
-				"date": "2012",
-				"issue": "1",
-				"pages": "88-95",
-				"libraryCatalog": "beck-online"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -475,31 +488,31 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "case",
+				"title": "LG Augsburg, 24. 9. 2001 - 3 O 4995/00 - Infomatec",
 				"creators": [],
-				"notes": [
-					{
-						"note": "Additional Metadata: <h3>Beschreibung</h3><p>Schadensersatz wegen fehlerhafter Ad-hoc-Mitteilungen („Infomatec”)</p><h3>Parallelfundstellen</h3><p>BB 2001 Heft 42, 2130 ; DB 2001, 2334 ; NJOZ 2001, 1878 ; NJW-RR 2001, 1705 ; NZG 2002, 429 ; WPM 2001, 1944 ; ZIP 2001, 1881 ; FHZivR 47 Nr. 2816 (Ls.) ; FHZivR 47 Nr. 6449 (Ls.) ; FHZivR 48 Nr. 2514 (Ls.) ; FHZivR 48 Nr. 6053 (Ls.) ; LSK 2001, 520032 (Ls.) ; NJW-RR 2003, 216 (Ls.)</p><h3>Normen</h3><p>§ WPHG § 15 WpHG; § BOERSG § 88 BörsG; §§ BGB § 823, BGB § 826 BGB</p><h3>Zeitschrift Titel</h3><p>Zeitschrift für Bank- und Kapitalmarktrecht</p>"
-					}
-				],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2001",
+				"dateDecided": "2001-9-24",
+				"abstractNote": "Leitsätze der Redaktion:\n    1. Ad-hoc-Mitteilungen richten sich nicht nur an ein bilanz- und fachkundiges Publikum, sondern an alle tatsächlichen oder potenziellen Anleger und Aktionäre.\n    2. \n    § BOERSG § 88 Abs. BOERSG § 88 Absatz 1 Nr. 1 BörsG dient neben dem Schutz der Allgemeinheit gerade auch dazu, das Vermögen des einzelnen Kapitalanlegers vor möglichen Schäden durch eine unredliche Beeinflussung der Preisbildung an Börsen und Märkten zu schützen.",
+				"court": "LG Augsburg",
+				"docketNumber": "3 O 4995/00",
+				"extra": "{:jurisdiction: de}\n{:genre: Urt.}",
+				"libraryCatalog": "beck-online",
+				"pages": "99-101",
+				"reporter": "BKR",
+				"reporterVolume": "2001",
+				"shortTitle": "Infomatec",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"shortTitle": "Infomatec",
-				"court": "LG Augsburg",
-				"extra": "{:jurisdiction: de}\n{:genre: Urt.}",
-				"dateDecided": "2001-9-24",
-				"docketNumber": "3 O 4995/00",
-				"title": "LG Augsburg, 24. 9. 2001 - 3 O 4995/00 - Infomatec",
-				"abstractNote": "Leitsätze der Redaktion:\n    1. Ad-hoc-Mitteilungen richten sich nicht nur an ein bilanz- und fachkundiges Publikum, sondern an alle tatsächlichen oder potenziellen Anleger und Aktionäre.\n    2. \n    § BOERSG § 88 Abs. BOERSG § 88 Absatz 1 Nr. 1 BörsG dient neben dem Schutz der Allgemeinheit gerade auch dazu, das Vermögen des einzelnen Kapitalanlegers vor möglichen Schäden durch eine unredliche Beeinflussung der Preisbildung an Börsen und Märkten zu schützen.",
-				"reporter": "BKR",
-				"date": "2001",
-				"pages": "99-101",
-				"reporterVolume": "2001",
-				"libraryCatalog": "beck-online"
+				"tags": [],
+				"notes": [
+					{
+						"note": "Additional Metadata: <h3>Beschreibung</h3><p>Schadensersatz wegen fehlerhafter Ad-hoc-Mitteilungen („Infomatec”)</p><h3>Parallelfundstellen</h3><p>BB 2001 Heft 42, 2130 ; DB 2001, 2334 ; NJOZ 2001, 1878 ; NJW-RR 2001, 1705 ; NZG 2002, 429 ; WPM 2001, 1944 ; ZIP 2001, 1881 ; FHZivR 47 Nr. 2816 (Ls.) ; FHZivR 47 Nr. 6449 (Ls.) ; FHZivR 48 Nr. 2514 (Ls.) ; FHZivR 48 Nr. 6053 (Ls.) ; LSK 2001, 520032 (Ls.) ; NJW-RR 2003, 216 (Ls.)</p><h3>Normen</h3><p>§ WPHG § 15 WpHG; § BOERSG § 88 BörsG; §§ BGB § 823, BGB § 826 BGB</p><h3>Zeitschrift Titel</h3><p>Zeitschrift für Bank- und Kapitalmarktrecht</p>"
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	},
@@ -509,6 +522,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Die Entwicklung des Energierechts im Jahr 2013",
 				"creators": [
 					{
 						"firstName": "Boris",
@@ -523,22 +537,21 @@ var testCases = [
 						"lastName": "Pietrowicz"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2014",
+				"abstractNote": "Der Bericht knüpft an die bisher in dieser Reihe erschienenen Beiträge zur Entwicklung des Energierechts (zuletzt NJW2013, NJW Jahr 2013 Seite 2724) an und zeigt die Schwerpunkte energierechtlicher Entwicklungen in Gesetzgebung und Rechtsanwendung im Jahr 2013 auf.",
+				"issue": "13",
+				"journalAbbreviation": "NJW",
+				"libraryCatalog": "beck-online",
+				"pages": "898-903",
+				"publicationTitle": "Neue Juristische Wochenschrift",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"title": "Die Entwicklung des Energierechts im Jahr 2013",
-				"publicationTitle": "Neue Juristische Wochenschrift",
-				"journalAbbreviation": "NJW",
-				"date": "2014",
-				"issue": "13",
-				"pages": "898-903",
-				"abstractNote": "Der Bericht knüpft an die bisher in dieser Reihe erschienenen Beiträge zur Entwicklung des Energierechts (zuletzt NJW2013, NJW Jahr 2013 Seite 2724) an und zeigt die Schwerpunkte energierechtlicher Entwicklungen in Gesetzgebung und Rechtsanwendung im Jahr 2013 auf.",
-				"libraryCatalog": "beck-online"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -553,6 +566,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Zumutbarkeit von Beweiserhebungen und Wohnungsbetroffenheit im Zivilprozess",
 				"creators": [
 					{
 						"firstName": "Christoph",
@@ -563,22 +577,21 @@ var testCases = [
 						"lastName": "Meßerschmidt"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2014",
+				"abstractNote": "Die Durchführung von Beweisverfahren ist mit Duldungs- und Mitwirkungspflichten von Beweisgegnern und Dritten verbunden, die nur über begrenzte Weigerungsrechte verfügen. Einen Sonderfall bildet der bei „Wohnungsbetroffenheit“ eingreifende letzte Halbsatz des § ZPO § 144 ZPO § 144 Absatz I 3 ZPO. Dessen Voraussetzungen und Reichweite bedürfen der Klärung. Ferner gibt die neuere Rechtsprechung Anlass zu untersuchen, inwieweit auch der Eigentumsschutz einer Beweisaufnahme entgegenstehen kann.",
+				"issue": "46",
+				"journalAbbreviation": "NJW",
+				"libraryCatalog": "beck-online",
+				"pages": "3329-3334",
+				"publicationTitle": "Neue Juristische Wochenschrift",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"title": "Zumutbarkeit von Beweiserhebungen und Wohnungsbetroffenheit im Zivilprozess",
-				"publicationTitle": "Neue Juristische Wochenschrift",
-				"journalAbbreviation": "NJW",
-				"date": "2014",
-				"issue": "46",
-				"pages": "3329-3334",
-				"abstractNote": "Die Durchführung von Beweisverfahren ist mit Duldungs- und Mitwirkungspflichten von Beweisgegnern und Dritten verbunden, die nur über begrenzte Weigerungsrechte verfügen. Einen Sonderfall bildet der bei „Wohnungsbetroffenheit“ eingreifende letzte Halbsatz des § ZPO § 144 ZPO § 144 Absatz I 3 ZPO. Dessen Voraussetzungen und Reichweite bedürfen der Klärung. Ferner gibt die neuere Rechtsprechung Anlass zu untersuchen, inwieweit auch der Eigentumsschutz einer Beweisaufnahme entgegenstehen kann.",
-				"libraryCatalog": "beck-online"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -588,6 +601,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Kennzeichen- und lauterkeitsrechtlicher Schutz für Apps",
 				"creators": [
 					{
 						"firstName": "Stephanie",
@@ -598,22 +612,21 @@ var testCases = [
 						"lastName": "Lehmann"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2014",
+				"abstractNote": "Auf Grund der rasanten Entwicklung und der zunehmenden wirtschaftlichen Bedeutung von Apps kommen in diesem Zusammenhang immer neue rechtliche Probleme auf. Von den urheberrechtlichen Fragen bei der Entwicklung, über die vertragsrechtlichen Probleme beim Verkauf, bis hin zu Fragen der gewerblichen Schutzrechte haben sich Apps zu einem eigenen rechtlichen Themenfeld entwickelt. Insbesondere im Bereich des Kennzeichen- und Lauterkeitsrechts werden Rechtsprechung und Praxis vor neue Herausforderungen gestellt. Dieser Beitrag erörtert anhand von zwei Beispielsfällen die Frage nach den kennzeichen- und lauterkeitsrechtlichen Schutzmöglichkeiten von Apps, insbesondere der Übertragbarkeit bereits etablierter Grundsätze. Gleichzeitig werden die diesbezüglichen Besonderheiten herausgearbeitet.",
+				"issue": "5",
+				"journalAbbreviation": "GRUR",
+				"libraryCatalog": "beck-online",
+				"pages": "431-437",
+				"publicationTitle": "Gewerblicher Rechtsschutz und Urheberrecht",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"title": "Kennzeichen- und lauterkeitsrechtlicher Schutz für Apps",
-				"publicationTitle": "Gewerblicher Rechtsschutz und Urheberrecht",
-				"journalAbbreviation": "GRUR",
-				"date": "2014",
-				"issue": "5",
-				"pages": "431-437",
-				"abstractNote": "Auf Grund der rasanten Entwicklung und der zunehmenden wirtschaftlichen Bedeutung von Apps kommen in diesem Zusammenhang immer neue rechtliche Probleme auf. Von den urheberrechtlichen Fragen bei der Entwicklung, über die vertragsrechtlichen Probleme beim Verkauf, bis hin zu Fragen der gewerblichen Schutzrechte haben sich Apps zu einem eigenen rechtlichen Themenfeld entwickelt. Insbesondere im Bereich des Kennzeichen- und Lauterkeitsrechts werden Rechtsprechung und Praxis vor neue Herausforderungen gestellt. Dieser Beitrag erörtert anhand von zwei Beispielsfällen die Frage nach den kennzeichen- und lauterkeitsrechtlichen Schutzmöglichkeiten von Apps, insbesondere der Übertragbarkeit bereits etablierter Grundsätze. Gleichzeitig werden die diesbezüglichen Besonderheiten herausgearbeitet.",
-				"libraryCatalog": "beck-online"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -623,28 +636,28 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Der Regierungsentwurf eines Gesetzes zur Änderung der Abgaben- ordnung und des Einführungsgesetzes zur Abgabenordnung",
 				"creators": [
 					{
 						"firstName": "Wolfgang",
 						"lastName": "Joecks"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2014",
+				"abstractNote": "Nachdem die Selbstanzeige nach § AO § 371 AO bereits im Frühjahr 2011 nur knapp einer Abschaffung entging und (lediglich) verschärft wurde, plant der Gesetzgeber nun eine weitere Einschränkung. Dabei unterscheiden sich der Referentenentwurf vom 27.8.2014 und der Regierungsentwurf vom 26.9.2014 scheinbar kaum; Details legen aber die Vermutung nahe, dass dort noch einmal jemand „gebremst“ hat. zur Fussnote 1",
+				"issue": "46",
+				"journalAbbreviation": "DStR",
+				"libraryCatalog": "beck-online",
+				"pages": "2261-2267",
+				"publicationTitle": "Deutsches Steuerrecht",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"title": "Der Regierungsentwurf eines Gesetzes zur Änderung der Abgaben- ordnung und des Einführungsgesetzes zur Abgabenordnung",
-				"publicationTitle": "Deutsches Steuerrecht",
-				"journalAbbreviation": "DStR",
-				"date": "2014",
-				"issue": "46",
-				"pages": "2261-2267",
-				"abstractNote": "Nachdem die Selbstanzeige nach § AO § 371 AO bereits im Frühjahr 2011 nur knapp einer Abschaffung entging und (lediglich) verschärft wurde, plant der Gesetzgeber nun eine weitere Einschränkung. Dabei unterscheiden sich der Referentenentwurf vom 27.8.2014 und der Regierungsentwurf vom 26.9.2014 scheinbar kaum; Details legen aber die Vermutung nahe, dass dort noch einmal jemand „gebremst“ hat. zur Fussnote 1",
-				"libraryCatalog": "beck-online"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -654,6 +667,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Best practice – Grundstrukturen des kontinentaleuropäischen Gesellschaftsrechts",
 				"creators": [
 					{
 						"lastName": "Roth",
@@ -661,21 +675,20 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2012",
+				"issue": "1",
+				"journalAbbreviation": "DNotZ-Sonderheft",
+				"libraryCatalog": "beck-online",
+				"pages": "88-95",
+				"publicationTitle": "Sonderheft der Deutschen Notar-Zeitschrift",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"title": "Best practice – Grundstrukturen des kontinentaleuropäischen Gesellschaftsrechts",
-				"publicationTitle": "Sonderheft der Deutschen Notar-Zeitschrift",
-				"journalAbbreviation": "DNotZ-Sonderheft",
-				"date": "2012",
-				"issue": "1",
-				"pages": "88-95",
-				"libraryCatalog": "beck-online"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -685,6 +698,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Zumutbarkeit von Beweiserhebungen und Wohnungsbetroffenheit im Zivilprozess",
 				"creators": [
 					{
 						"firstName": "Christoph",
@@ -695,22 +709,21 @@ var testCases = [
 						"lastName": "Meßerschmidt"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2014",
+				"abstractNote": "Die Durchführung von Beweisverfahren ist mit Duldungs- und Mitwirkungspflichten von Beweisgegnern und Dritten verbunden, die nur über begrenzte Weigerungsrechte verfügen. Einen Sonderfall bildet der bei „Wohnungsbetroffenheit“ eingreifende letzte Halbsatz des § ZPO § 144 ZPO § 144 Absatz I 3 ZPO. Dessen Voraussetzungen und Reichweite bedürfen der Klärung. Ferner gibt die neuere Rechtsprechung Anlass zu untersuchen, inwieweit auch der Eigentumsschutz einer Beweisaufnahme entgegenstehen kann.",
+				"issue": "46",
+				"journalAbbreviation": "NJW",
+				"libraryCatalog": "beck-online",
+				"pages": "3329-3334",
+				"publicationTitle": "Neue Juristische Wochenschrift",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"title": "Zumutbarkeit von Beweiserhebungen und Wohnungsbetroffenheit im Zivilprozess",
-				"publicationTitle": "Neue Juristische Wochenschrift",
-				"journalAbbreviation": "NJW",
-				"date": "2014",
-				"issue": "46",
-				"pages": "3329-3334",
-				"abstractNote": "Die Durchführung von Beweisverfahren ist mit Duldungs- und Mitwirkungspflichten von Beweisgegnern und Dritten verbunden, die nur über begrenzte Weigerungsrechte verfügen. Einen Sonderfall bildet der bei „Wohnungsbetroffenheit“ eingreifende letzte Halbsatz des § ZPO § 144 ZPO § 144 Absatz I 3 ZPO. Dessen Voraussetzungen und Reichweite bedürfen der Klärung. Ferner gibt die neuere Rechtsprechung Anlass zu untersuchen, inwieweit auch der Eigentumsschutz einer Beweisaufnahme entgegenstehen kann.",
-				"libraryCatalog": "beck-online"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -720,6 +733,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Zum Folgenbeseitigungsanspruch bei Buchveröffentlichungen - Der Rückrufanspruch",
 				"creators": [
 					{
 						"firstName": "Daniel",
@@ -727,20 +741,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2014",
+				"journalAbbreviation": "AfP",
+				"libraryCatalog": "beck-online",
+				"pages": "300",
+				"publicationTitle": "AfP",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"title": "Zum Folgenbeseitigungsanspruch bei Buchveröffentlichungen - Der Rückrufanspruch",
-				"pages": "300",
-				"date": "2014",
-				"publicationTitle": "AfP",
-				"journalAbbreviation": "AfP",
-				"libraryCatalog": "beck-online"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -750,6 +763,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Die Entwicklung des Energierechts im Jahr 2013",
 				"creators": [
 					{
 						"firstName": "Boris",
@@ -764,22 +778,21 @@ var testCases = [
 						"lastName": "Pietrowicz"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2014",
+				"abstractNote": "Der Bericht knüpft an die bisher in dieser Reihe erschienenen Beiträge zur Entwicklung des Energierechts (zuletzt NJW2013, NJW Jahr 2013 Seite 2724) an und zeigt die Schwerpunkte energierechtlicher Entwicklungen in Gesetzgebung und Rechtsanwendung im Jahr 2013 auf.",
+				"issue": "13",
+				"journalAbbreviation": "NJW",
+				"libraryCatalog": "beck-online",
+				"pages": "898-903",
+				"publicationTitle": "Neue Juristische Wochenschrift",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"title": "Die Entwicklung des Energierechts im Jahr 2013",
-				"publicationTitle": "Neue Juristische Wochenschrift",
-				"journalAbbreviation": "NJW",
-				"date": "2014",
-				"issue": "13",
-				"pages": "898-903",
-				"abstractNote": "Der Bericht knüpft an die bisher in dieser Reihe erschienenen Beiträge zur Entwicklung des Energierechts (zuletzt NJW2013, NJW Jahr 2013 Seite 2724) an und zeigt die Schwerpunkte energierechtlicher Entwicklungen in Gesetzgebung und Rechtsanwendung im Jahr 2013 auf.",
-				"libraryCatalog": "beck-online"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -789,25 +802,25 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "case",
+				"title": "OLG Köln, 23.03.2012 - 6 U 67/11",
 				"creators": [],
-				"notes": [
-					{
-						"note": "Additional Metadata: <h3>Fundstelle</h3><p>BeckRS 2012, 09546</p><h3>Parallelfundstellen</h3><p>CR 2012, 397 ; K & R 2012, 437 L ; MD 2012, 621 ; MMR 2012, 387 (m. Anm. Ho... ; NJOZ 2013, 365 ; WRP 2012, 1007 ; ZUM 2012, 697 ; LSK 2012, 250148 (Ls.)</p>"
-					}
-				],
-				"tags": [],
-				"seeAlso": [],
+				"dateDecided": "2012-03-23",
+				"court": "OLG Köln",
+				"docketNumber": "6 U 67/11",
+				"extra": "{:jurisdiction: de}\n{:genre: Urt.}",
+				"libraryCatalog": "beck-online",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"court": "OLG Köln",
-				"extra": "{:jurisdiction: de}\n{:genre: Urt.}",
-				"dateDecided": "2012-03-23",
-				"docketNumber": "6 U 67/11",
-				"title": "OLG Köln, 23.03.2012 - 6 U 67/11",
-				"libraryCatalog": "beck-online"
+				"tags": [],
+				"notes": [
+					{
+						"note": "Additional Metadata: <h3>Fundstelle</h3><p>BeckRS 2012, 09546</p><h3>Parallelfundstellen</h3><p>CR 2012, 397 ; K & R 2012, 437 L ; MD 2012, 621 ; MMR 2012, 387 (m. Anm. Ho... ; NJOZ 2013, 365 ; WRP 2012, 1007 ; ZUM 2012, 697 ; LSK 2012, 250148 (Ls.)</p>"
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	},
@@ -817,30 +830,30 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "case",
+				"title": "EuGH, 27.3.2014 - C-314/12 - UPC Telekabel/Constantin Film ua [kino.to]",
 				"creators": [],
-				"notes": [
-					{
-						"note": "Additional Metadata: <h3>Beschreibung</h3><p>EU-konforme unbestimmte Sperrverfügung gegen Internetprovider - UPC Telekabel/Constantin Film ua [kino.to]</p><h3>Parallelfundstellen</h3><p>BeckRS 2014, 80615 ; EWS 2014, 225 ; EuGRZ 2014, 301 ; EuZW 2014, 388 (m. Anm. K... ; GRUR 2014, 468 (m. Anm. M... ; GRUR Int. 2014, 469 ; K & R 2014, 329 ; MMR 2014, 397 (m. Anm. Ro... ; MittdtPatA 2014, 335 L ; NJW 2014, 1577 ; RiW 2014, 373 ; WRP 2014, 540 ; ZUM 2014, 494 ; LSK 2014, 160153 (Ls.)</p><h3>Normen</h3><p>AEUV Art. AEUV Artikel 267; Richtlinie 2001/29/EG Art. EWG_RL_2001_29 Artikel 3 EWG_RL_2001_29 Artikel 3 Absatz II, EWG_RL_2001_29 Artikel 8 EWG_RL_2001_29 Artikel 3 Absatz III</p><h3>Zeitschrift Titel</h3><p>Gewerblicher Rechtsschutz und Urheberrecht</p>"
-					}
-				],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2014",
+				"dateDecided": "2014-3-27",
+				"court": "EuGH",
+				"docketNumber": "C-314/12",
+				"extra": "{:jurisdiction: europa.eu}\n{:genre: Urt.}",
+				"libraryCatalog": "beck-online",
+				"pages": "468-473",
+				"reporter": "GRUR",
+				"reporterVolume": "2014",
+				"shortTitle": "UPC Telekabel/Constantin Film ua [kino.to]",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"shortTitle": "UPC Telekabel/Constantin Film ua [kino.to]",
-				"court": "EuGH",
-				"extra": "{:jurisdiction: europa.eu}\n{:genre: Urt.}",
-				"dateDecided": "2014-3-27",
-				"docketNumber": "C-314/12",
-				"title": "EuGH, 27.3.2014 - C-314/12 - UPC Telekabel/Constantin Film ua [kino.to]",
-				"reporter": "GRUR",
-				"date": "2014",
-				"pages": "468-473",
-				"reporterVolume": "2014",
-				"libraryCatalog": "beck-online"
+				"tags": [],
+				"notes": [
+					{
+						"note": "Additional Metadata: <h3>Beschreibung</h3><p>EU-konforme unbestimmte Sperrverfügung gegen Internetprovider - UPC Telekabel/Constantin Film ua [kino.to]</p><h3>Parallelfundstellen</h3><p>BeckRS 2014, 80615 ; EWS 2014, 225 ; EuGRZ 2014, 301 ; EuZW 2014, 388 (m. Anm. K... ; GRUR 2014, 468 (m. Anm. M... ; GRUR Int. 2014, 469 ; K & R 2014, 329 ; MMR 2014, 397 (m. Anm. Ro... ; MittdtPatA 2014, 335 L ; NJW 2014, 1577 ; RiW 2014, 373 ; WRP 2014, 540 ; ZUM 2014, 494 ; LSK 2014, 160153 (Ls.)</p><h3>Normen</h3><p>AEUV Art. AEUV Artikel 267; Richtlinie 2001/29/EG Art. EWG_RL_2001_29 Artikel 3 EWG_RL_2001_29 Artikel 3 Absatz II, EWG_RL_2001_29 Artikel 8 EWG_RL_2001_29 Artikel 3 Absatz III</p><h3>Zeitschrift Titel</h3><p>Gewerblicher Rechtsschutz und Urheberrecht</p>"
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	}
