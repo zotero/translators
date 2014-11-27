@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2014-11-14 07:52:51"
+	"browserSupport": "gcs",
+	"lastUpdated": "2014-11-17 17:26:13"
 }
 
 /*
@@ -42,6 +42,8 @@
 var mappingClassNameToItemType = {
 	'ZAUFSATZ' : 'journalArticle',
 	'ZRSPR' : 'case',//Rechtssprechung
+	'ZRSPRAKT' : 'case',
+	'BECKRS' : 'case',
 	'ZENTB' : 'journalArticle',//Entscheidungsbesprechung
 	'ZBUCHB' : 'journalArticle',//Buchbesprechung
 	'ZSONST' : 'journalArticle',//Sonstiges, z.B. Vorwort,
@@ -60,7 +62,6 @@ var authorRegEx = new RegExp(authorTitlesEtc.join('|'), 'g');
 
 function detectWeb(doc, url) {
 	var documentClassName = doc.getElementById("dokument").className;
-	//Z.debug(documentClassName);
 	if (mappingClassNameToItemType[documentClassName.toUpperCase()]) {
 		return mappingClassNameToItemType[documentClassName.toUpperCase()];
 	}
@@ -139,12 +140,14 @@ function scrapeLSK(doc, url) {
 	if (m) {
 		item.pages = m[3];
 		if (m[2]) item.date = m[2];		
-		item.journalTitle = ZU.trimInternal(m[1]);
+		item.publicationTitle = ZU.trimInternal(m[1]);
+		item.journalAbbreviation = item.publicationTitle;
 		
 		// if src is like example 3, then extract the volume
-		var tmp = item.journalTitle.match(/(^[A-Za-z]+)\ Bd\. (\d+)/);
+		var tmp = item.publicationTitle.match(/(^[A-Za-z]+)\ Bd\. (\d+)/);
 		if (tmp) {
-			item.journalTitle = tmp[1];
+			item.publicationTitle = tmp[1];
+			item.journalAbbreviation = item.publicationTitle;
 			item.volume = tmp[2];
 		}
 	}
@@ -157,6 +160,175 @@ function scrapeLSK(doc, url) {
 	item.complete();
 }
 
+function addNote(originalNote, newNote) {
+	if (originalNote.length == 0) {
+		originalNote = "Additional Metadata: "+newNote;
+	}
+	else
+	{
+		originalNote += newNote;
+	}
+	return originalNote;
+}
+
+function scrapeCase(doc, url) {
+	var documentClassName = doc.getElementById("dokument").className.toUpperCase();
+	
+	var item = new Zotero.Item('case');
+	var note = "";
+		
+	// case name
+	// in some cases, the caseName is in a separate <span>
+	var caseName = ZU.xpathText(doc, '//div[@class="titel sbin4"]/h1/span');
+
+	if (caseName) {
+		item.shortTitle = caseName;
+	}
+	// if not, we have to extract it from the title
+	else {
+		caseDescription = ZU.xpathText(doc, '//div[@class="titel"]/h1 | //div[@class="titel sbin4"]/h1 | //div[@class="titel sbin4"]/h1/span');
+		if (caseDescription) {
+			var tmp = caseDescription.match(/[^-–]*$/);	// everything after the last slash
+			if (tmp) caseName = ZU.trimInternal(tmp[0]);
+			// sometimes the caseName is enclosed in („”)
+			tmp = caseDescription.match(/\(\„([^”)]+)\”\)/);
+			if (tmp) {
+				caseName = ZU.trimInternal(tmp[1]);
+			}
+			if (caseDescription != caseName) {
+				// save the former title (which is mostly a description of the case by the journal it is published in) in the notes
+				note = addNote(note, "<h3>Beschreibung</h3><p>" + ZU.trimInternal(caseDescription) + "</p>");
+			}
+		}
+		if (caseName) {
+			item.shortTitle = caseName;
+		}
+	}
+	
+	var courtLine = ZU.xpath(doc, '//div[contains(@class, "gerzeile")]/p');
+	var alternativeLine = "";
+	var alternativeData = [];
+	if (courtLine.length) {
+		item.court = ZU.xpathText(courtLine, './span[@class="gericht"]');
+	}
+	else {
+		alternativeLine = ZU.xpathText(doc, '//span[@class="entscheidung"]');
+		// example: OLG Köln: Beschluss vom 23.03.2012 - 6 U 67/11
+		alternativeData = alternativeLine.match(/^([A-Za-zÖöÄäÜüß ]+): \b(.*?Urteil|.*?Urt\.|.*?Beschluss|.*?Beschl\.) vom (\d\d?\.\s*\d\d?\.\s*\d\d\d\d) - ([\w\s\/]*)/i);
+		item.court = ZU.trimInternal(alternativeData[1]);
+	}
+	
+	// add jurisdiction to item.extra - in accordance with citeproc-js - for compatability with Zotero-MLZ
+	item.extra = "";
+	if (item.court.indexOf('EuG') == 0) {
+		item.extra += "{:jurisdiction: europa.eu}";
+	}
+	else {
+		item.extra += "{:jurisdiction: de}";
+	}
+	
+	var decisionDateStr = ZU.xpathText(doc, '//span[@class="edat"] | //span[@class="datum"]');
+	if (decisionDateStr == null) {
+		decisionDateStr = alternativeData[3];
+	}
+	//e.g. 24. 9. 2001
+	item.dateDecided = decisionDateStr.replace(/(\d\d?)\.\s*(\d\d?)\.\s*(\d\d\d\d)/, "$3-$2-$1");
+	
+	item.docketNumber = ZU.xpathText(doc, '//span[@class="az"]');
+	if (item.docketNumber == null) {
+		item.docketNumber = alternativeData[4];
+	}
+	
+	item.title = item.court+", "+decisionDateStr+" - "+item.docketNumber;
+	if (item.shortTitle) {
+		item.title += " - " + item.shortTitle;
+	}
+	
+	item.history = ZU.xpathText(courtLine, './span[@class="vorinst"]');
+	
+	// type of decision. Save this in item.extra according to citeproc-js
+	var decisionType = ZU.xpathText(courtLine, './span[@class="etyp"]');
+	if (decisionType == null) {
+		decisionType = alternativeData[2];
+	}
+	if (/Beschluss|Beschl\./i.test(decisionType)) {
+		item.extra += "\n{:genre: Beschl.}";
+	}
+	else {
+		if (/Urteil|(Urt\.)/i.test(decisionType)) {
+			item.extra += "\n{:genre: Urt.}";
+		}
+	}	
+		
+	// code to scrape the BeckRS source, if available
+	// example: BeckRS 2013, 06445
+	// Since BeckRS is not suitable for citing, let's push it into the notes instead
+	var beckRSline = ZU.xpathText(doc, '//span[@class="fundstelle"]');
+	if (beckRSline) {		
+		note = addNote(note, "<h3>Fundstelle</h3><p>" + ZU.trimInternal(beckRSline) + "</p>");
+		
+		/* commented out, because we cannot use it for the CSL-stylesheet at the moment.
+		 * If we find a better solution later, we can reactivate this code and save the
+		 * information properly
+		 *
+		var beckRSsrc = beckRSline.match(/^([^,]+)\s(\d{4})\s*,\s*(\d+)/);
+		item.reporter = beckRSsrc[1];
+		item.date = beckRSsrc[2];
+		item.pages = beckRSsrc[3];*/
+	}
+
+	var otherCitations = ZU.xpath(doc, '//li[contains(@id, "Parallelfundstellen")]');
+	if (otherCitations && otherCitations.length>0) {
+		note = addNote(note, "<h3>Parallelfundstellen</h3><p>" + ZU.xpathText(otherCitations[0], './ul/li',  null, " ; ") + "</p>");
+	}
+	var basedOnRegulations = ZU.xpathText(doc, '//div[contains(@class,"normenk")]');
+	if (basedOnRegulations) {
+		note = addNote(note, "<h3>Normen</h3><p>" + ZU.trimInternal(basedOnRegulations) + "</p>");
+	}
+	
+	item.abstractNote = ZU.xpathText(doc, '//div[@class="abstract" or @class="leitsatz"]');
+	if (item.abstractNote){
+		item.abstractNote = item.abstractNote.replace(/\n\s*\n/g, "\n");
+	}
+
+	// there is additional information if the case is published in a journal
+	if (documentClassName == 'ZRSPR') {
+		// short title of publication
+		item.reporter = ZU.xpathText(doc, '//div[@id="doktoc"]/ul/li/a[2]');
+		// long title of publication
+		var publicationTitle = ZU.xpathText(doc, '//li[@class="breadcurmbelemenfirst"]');
+		if (publicationTitle) {
+			note = addNote(note, "<h3>Zeitschrift Titel</h3><p>" + ZU.trimInternal(publicationTitle) + "</p>");
+		}
+		
+		item.date = ZU.trimInternal(ZU.xpathText(doc, '//div[@id="doktoc"]/ul/li/ul/li/a[2]'));
+		
+		//e.g. ArbrAktuell 2014, 150
+		var shortCitation = ZU.xpathText(doc, '//div[@class="dk2"]//span[@class="citation"]');
+		var pagesStart = ZU.trimInternal(shortCitation.substr(shortCitation.lastIndexOf(",")+1));
+		var pagesEnd = ZU.xpathText(doc, '(//span[@class="pg"])[last()]');
+		if (pagesEnd) {
+			item.pages = pagesStart + "-" + pagesEnd;
+		} else {
+			item.pages = pagesStart
+		}
+			
+		item.reporterVolume = item.date;
+
+	}
+	
+	if (note.length != 0) {
+		item.notes.push( {note: note} );
+	}
+	
+	item.attachments = [{
+		title: "Snapshot",
+		document:doc
+	}];
+
+	item.complete();		
+}
+
 
 function scrape(doc, url) {
 	var documentClassName = doc.getElementById("dokument").className.toUpperCase();
@@ -164,6 +336,10 @@ function scrape(doc, url) {
 	// use different scraping function for documents in LSK
 	if (documentClassName == 'LSK') {
 			scrapeLSK(doc, url);
+			return;
+	}
+	if (mappingClassNameToItemType[documentClassName] == 'case') {
+			scrapeCase(doc, url);
 			return;
 	}
 	
@@ -249,33 +425,7 @@ function scrape(doc, url) {
 	if (item.abstractNote){
 		item.abstractNote = item.abstractNote.replace(/\n\s*\n/g, "\n");
 	}
-	
-	if (item.itemType == "case") {
-		var courtLine = ZU.xpath(doc, '//div[contains(@class, "gerzeile")]/p');
-		item.court = ZU.xpathText(courtLine, './span[@class="gericht"]');
-		item.dateDecided = ZU.xpathText(courtLine, './span[@class="edat"] | ./span[@class="datum"]');
-		if (item.dateDecided){//e.g. 24. 9. 2001
-			item.dateDecided = item.dateDecided.replace(/(\d\d?)\.\s*(\d\d?)\.\s*(\d\d\d\d)/, "$3-$2-$1");
-		}
-		//item.dateDecided.replace(/(\d\d?)\.\s*(\d\d?)\.\s(\d\d\d\d)/, "\3-\2-\1");
-		item.docketNumber = ZU.xpathText(courtLine, './span[@class="az"]');
-		item.history = ZU.xpathText(courtLine, './span[@class="vorinst"]');
-		
-		item.shortTitle = ZU.trimInternal(courtLine[0].textContent);
-		
-		item.reporter = item.journalAbbreviation;
-		item.reporterVolume = item.date;
-		
-		var otherCitations = ZU.xpath(doc, '//li[contains(@id, "Parallelfundstellen")]');
-		item.extra = "Parallelfundstellen: " + ZU.xpathText(otherCitations[0], './ul/li',  null, " ; ");
-		
-		var basedOnRegulations = ZU.xpathText(doc, '//div[contains(@class,"normenk")]');
-		if (basedOnRegulations) {
-			item.notes.push( ZU.trimInternal(basedOnRegulations) );
-		}
-		
-	}
-	
+
 	if (documentClassName == "ZBUCHB") {
 		item.extra = ZU.xpathText(doc, '//div[@class="biblio"]');
 	}
@@ -327,7 +477,9 @@ var testCases = [
 				"itemType": "case",
 				"creators": [],
 				"notes": [
-					"§ WPHG § 15 WpHG; § BOERSG § 88 BörsG; §§ BGB § 823, BGB § 826 BGB"
+					{
+						"note": "Additional Metadata: <h3>Beschreibung</h3><p>Schadensersatz wegen fehlerhafter Ad-hoc-Mitteilungen („Infomatec”)</p><h3>Parallelfundstellen</h3><p>BB 2001 Heft 42, 2130 ; DB 2001, 2334 ; NJOZ 2001, 1878 ; NJW-RR 2001, 1705 ; NZG 2002, 429 ; WPM 2001, 1944 ; ZIP 2001, 1881 ; FHZivR 47 Nr. 2816 (Ls.) ; FHZivR 47 Nr. 6449 (Ls.) ; FHZivR 48 Nr. 2514 (Ls.) ; FHZivR 48 Nr. 6053 (Ls.) ; LSK 2001, 520032 (Ls.) ; NJW-RR 2003, 216 (Ls.)</p><h3>Normen</h3><p>§ WPHG § 15 WpHG; § BOERSG § 88 BörsG; §§ BGB § 823, BGB § 826 BGB</p><h3>Zeitschrift Titel</h3><p>Zeitschrift für Bank- und Kapitalmarktrecht</p>"
+					}
 				],
 				"tags": [],
 				"seeAlso": [],
@@ -336,20 +488,17 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"title": "Schadensersatz wegen fehlerhafter Ad-hoc-Mitteilungen („Infomatec”)",
-				"publicationTitle": "Zeitschrift für Bank- und Kapitalmarktrecht",
-				"journalAbbreviation": "BKR",
-				"date": "2001",
-				"issue": "2",
-				"pages": "99-101",
-				"abstractNote": "Leitsätze der Redaktion:\n    1. Ad-hoc-Mitteilungen richten sich nicht nur an ein bilanz- und fachkundiges Publikum, sondern an alle tatsächlichen oder potenziellen Anleger und Aktionäre.\n    2. \n    § BOERSG § 88 Abs. BOERSG § 88 Absatz 1 Nr. 1 BörsG dient neben dem Schutz der Allgemeinheit gerade auch dazu, das Vermögen des einzelnen Kapitalanlegers vor möglichen Schäden durch eine unredliche Beeinflussung der Preisbildung an Börsen und Märkten zu schützen.",
+				"shortTitle": "Infomatec",
 				"court": "LG Augsburg",
+				"extra": "{:jurisdiction: de}\n{:genre: Urt.}",
 				"dateDecided": "2001-9-24",
 				"docketNumber": "3 O 4995/00",
-				"shortTitle": "LG Augsburg, Urteil vom 24. 9. 2001 - 3 O 4995/00 (nicht rechtskräftig)",
+				"title": "LG Augsburg, 24. 9. 2001 - 3 O 4995/00 - Infomatec",
+				"abstractNote": "Leitsätze der Redaktion:\n    1. Ad-hoc-Mitteilungen richten sich nicht nur an ein bilanz- und fachkundiges Publikum, sondern an alle tatsächlichen oder potenziellen Anleger und Aktionäre.\n    2. \n    § BOERSG § 88 Abs. BOERSG § 88 Absatz 1 Nr. 1 BörsG dient neben dem Schutz der Allgemeinheit gerade auch dazu, das Vermögen des einzelnen Kapitalanlegers vor möglichen Schäden durch eine unredliche Beeinflussung der Preisbildung an Börsen und Märkten zu schützen.",
 				"reporter": "BKR",
+				"date": "2001",
+				"pages": "99-101",
 				"reporterVolume": "2001",
-				"extra": "Parallelfundstellen: BB 2001 Heft 42, 2130 ; DB 2001, 2334 ; NJOZ 2001, 1878 ; NJW-RR 2001, 1705 ; NZG 2002, 429 ; WPM 2001, 1944 ; ZIP 2001, 1881 ; FHZivR 47 Nr. 2816 (Ls.) ; FHZivR 47 Nr. 6449 (Ls.) ; FHZivR 48 Nr. 2514 (Ls.) ; FHZivR 48 Nr. 6053 (Ls.) ; LSK 2001, 520032 (Ls.) ; NJW-RR 2003, 216 (Ls.)",
 				"libraryCatalog": "beck-online"
 			}
 		]
@@ -589,7 +738,8 @@ var testCases = [
 				"title": "Zum Folgenbeseitigungsanspruch bei Buchveröffentlichungen - Der Rückrufanspruch",
 				"pages": "300",
 				"date": "2014",
-				"journalTitle": "AfP",
+				"publicationTitle": "AfP",
+				"journalAbbreviation": "AfP",
 				"libraryCatalog": "beck-online"
 			}
 		]
@@ -629,6 +779,67 @@ var testCases = [
 				"issue": "13",
 				"pages": "898-903",
 				"abstractNote": "Der Bericht knüpft an die bisher in dieser Reihe erschienenen Beiträge zur Entwicklung des Energierechts (zuletzt NJW2013, NJW Jahr 2013 Seite 2724) an und zeigt die Schwerpunkte energierechtlicher Entwicklungen in Gesetzgebung und Rechtsanwendung im Jahr 2013 auf.",
+				"libraryCatalog": "beck-online"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://beck-online.beck.de/?vpath=bibdata%2fents%2furteile%2f2012%2fcont%2fbeckrs_2012_09546.htm",
+		"items": [
+			{
+				"itemType": "case",
+				"creators": [],
+				"notes": [
+					{
+						"note": "Additional Metadata: <h3>Fundstelle</h3><p>BeckRS 2012, 09546</p><h3>Parallelfundstellen</h3><p>CR 2012, 397 ; K & R 2012, 437 L ; MD 2012, 621 ; MMR 2012, 387 (m. Anm. Ho... ; NJOZ 2013, 365 ; WRP 2012, 1007 ; ZUM 2012, 697 ; LSK 2012, 250148 (Ls.)</p>"
+					}
+				],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"court": "OLG Köln",
+				"extra": "{:jurisdiction: de}\n{:genre: Urt.}",
+				"dateDecided": "2012-03-23",
+				"docketNumber": "6 U 67/11",
+				"title": "OLG Köln, 23.03.2012 - 6 U 67/11",
+				"libraryCatalog": "beck-online"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://beck-online.beck.de/default.aspx?vpath=bibdata%2Fzeits%2Fgrur%2F2014%2Fcont%2Fgrur.2014.468.1.htm",
+		"items": [
+			{
+				"itemType": "case",
+				"creators": [],
+				"notes": [
+					{
+						"note": "Additional Metadata: <h3>Beschreibung</h3><p>EU-konforme unbestimmte Sperrverfügung gegen Internetprovider - UPC Telekabel/Constantin Film ua [kino.to]</p><h3>Parallelfundstellen</h3><p>BeckRS 2014, 80615 ; EWS 2014, 225 ; EuGRZ 2014, 301 ; EuZW 2014, 388 (m. Anm. K... ; GRUR 2014, 468 (m. Anm. M... ; GRUR Int. 2014, 469 ; K & R 2014, 329 ; MMR 2014, 397 (m. Anm. Ro... ; MittdtPatA 2014, 335 L ; NJW 2014, 1577 ; RiW 2014, 373 ; WRP 2014, 540 ; ZUM 2014, 494 ; LSK 2014, 160153 (Ls.)</p><h3>Normen</h3><p>AEUV Art. AEUV Artikel 267; Richtlinie 2001/29/EG Art. EWG_RL_2001_29 Artikel 3 EWG_RL_2001_29 Artikel 3 Absatz II, EWG_RL_2001_29 Artikel 8 EWG_RL_2001_29 Artikel 3 Absatz III</p><h3>Zeitschrift Titel</h3><p>Gewerblicher Rechtsschutz und Urheberrecht</p>"
+					}
+				],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"shortTitle": "UPC Telekabel/Constantin Film ua [kino.to]",
+				"court": "EuGH",
+				"extra": "{:jurisdiction: europa.eu}\n{:genre: Urt.}",
+				"dateDecided": "2014-3-27",
+				"docketNumber": "C-314/12",
+				"title": "EuGH, 27.3.2014 - C-314/12 - UPC Telekabel/Constantin Film ua [kino.to]",
+				"reporter": "GRUR",
+				"date": "2014",
+				"pages": "468-473",
+				"reporterVolume": "2014",
 				"libraryCatalog": "beck-online"
 			}
 		]
