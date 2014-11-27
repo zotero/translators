@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-11-19 10:32:40"
+	"lastUpdated": "2014-11-27 11:19:01"
 }
 
 /*
@@ -29,276 +29,253 @@
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-/*
-   This translator will only work with http://ovidsp.ovid.com and will
-   detect citations in the following scenarios.
 
-   -- On MSP (Main search page) after performing a search and at least one search
-	  result is available on the page.
-   -- On MyProject if at least one citation is displayed.
-   -- On Journals tab if at least one issue is displayed.
+/*
+Known "bug": translator will not work on PDF pages if those are accessed from
+	individual item pages. There does not seem to be any way to construct
+	metadata POST data from those views. If PDF is access directly from search
+	results, we can reconstruct necessary data from the URL.
+	
+	We could try to go to a different page to fetch metadata
 */
 
 function detectWeb(doc, url) {
-	// Do not show the Zotero icone on books.
-	if (ZU.xpath(doc,'.//table[@class="booklist-record-header"]').length) {
-		return false;
+	if (getSearchResults(doc, true) && getMetadataPost(doc, url, [0])) {
+		return 'multiple';
 	}
-
-	var results = getSearchResults(doc);
-	if (results.length > 1) return "multiple";
-	if (results.length == 1) return "journalArticle";
 	
-	//some pages don't have a checkbox, but we can follow a link to abstract, which does
-	var a = doc.getElementById('abstract');
-	if(a && a.nodeName.toUpperCase() == 'A') return 'journalArticle';
+	var id = getIDFromPage(doc) || getIDFromUrl(url);
+	Zotero.debug("Found ID: " + id);
+	if (id && getMetadataPost(doc, url, [id])) {
+		return 'journalArticle';
+	}
 	
 	return false;
 }
 
-function getSearchResults(doc) {
-	return ZU.xpath(doc,'.//input[@class="bibrecord-checkbox"]');
-}
-
-function senCase(string) {
-	var words = string.split(/\b/);
-	for (var i = 0; i < words.length; i++) {
-		if (words[i].match(/[A-Z]/)) {
-			words[i] = words[i][0] + words[i].substring(1).toLowerCase();
+function getMetadataPost(doc, url, ids) {
+	var s = doc.getElementById('S');
+	if (s) s = s.value && 'S=' + encodeURIComponent(s.value);
+	if (!s) s = getSFromUrl(url);
+	if (!s || !ids.length) {
+		if (!s) Zotero.debug("Could not find S parameter");
+		if (!ids.length) Zotero.debug("No IDs supplied");
+		return false;
+	}
+	
+	var post = s
+		+ '&R=' + ids.map(function(id) { return encodeURIComponent(id) }).join('&R=')
+		+ "&jumpstartLink=1&Citation Page=Export Citation"
+		+ "&cmexport=1&exportType=endnote&zoteroRecords=1";
+		
+	var action;
+	if (doc.getElementById('OUSRT')) {
+		//For OUS records, need to format UI code for OUS records in endnote format
+		Zotero.debug("For OUS");
+		action = doc.getElementsByName('Datalist')[0];
+		post += "&ousRecords=1";
+	} else { //for MSP records
+		action = doc.getElementsByName('CitManPrev')[0];
+		post += "&cmFields=ALL";
+	}
+	
+	if (action) {
+		action = action.value.replace(/\|.*/, "")
+	} else {
+		// Try getting it from URL
+		var m = url.match(/S\.sh\.\d+/);
+		if (m) {
+			Zotero.debug("Using Citation Action parameter from URL: " + m[0]);
+			action = m[0];
 		}
 	}
-	return words.join("");
+	
+	if (!action) {
+		Zotero.debug("Citation Action component not found");
+		return false;
+	}
+	
+	post += "&Citation Action=" + encodeURIComponent(action);
+	
+	return post;
+}
+
+function getIDFromPage(doc) {
+	// E.g. single result in My Projects
+	if (!doc.getElementsByClassName('citation-table').length) return;
+	
+	var checkboxes = doc.getElementsByClassName('bibrecord-checkbox');
+	if (checkboxes.length == 1) {
+		return checkboxes[0].value;
+	}
+}
+
+function getIDFromUrl(url) {
+	var m = decodeURI(url).match(/=S\.sh\.[^&#|]+\|([1-9]\d*)/);
+	if (m) return m[1];
+}
+
+function getSFromUrl(url) {
+	var m = decodeURI(url).match(/\bS=([^&]+)/);
+	if (m) return 'S=' + encodeURIComponent(m[1]);
+}
+
+// seems like we have to check all of these, because some can be present but empty
+// next to other nodes that are not empty
+var titleNodeClasses = ['citation_title', 'titles-title', 'article-title',
+	'chapter_title', 'chapter-title', 'muse-title', 'booklist-title'];
+function getSearchResults(doc, checkOnly, extras) {
+	var table = doc.getElementById('titles-records')
+		|| doc.getElementById('item-records');
+	if (!table) return false;
+	
+	var rows = table.getElementsByClassName('titles-row');
+	if (!rows.length) rows = table.getElementsByClassName('toc-row');
+	if (!rows.length) rows = table.getElementsByClassName('booklist-row');
+	
+	var successfulHit;
+	if (!rows.length) return false;
+	
+	var items = {}, found = false;
+	for (var i=0; i<rows.length; i++) {
+		var row = rows[i];
+		var id = row.getElementsByClassName('bibrecord-checkbox')[0];
+		if (id) id = id.value;
+		if (!id) continue;
+		
+		var title;
+		if (successfulHit) {
+			title = row.getElementsByClassName(successfulHit)[0];
+			if (title) title = ZU.trimInternal(title.textContent);
+		} else {
+			for (var j=0; j<titleNodeClasses.length; j++) {
+				title = row.getElementsByClassName(titleNodeClasses[j])[0];
+				if (title) title = ZU.trimInternal(title.textContent);
+				if (title) {
+					successfulHit = titleNodeClasses[j];
+					break;
+				}
+			}
+		}
+		
+		if (!title) continue;
+		
+		if (checkOnly) return true;
+		found = true;
+		items[id] = title;
+		
+		if (extras) {
+			// Look for PDF link
+			var pdfLink = ZU.xpath(row, './/a[starts-with(@name, "PDF")]')[0];
+			if (pdfLink) {
+				extras[id] = {
+					pdfLink: pdfLink.href
+				};
+			}
+		}
+	}
+	
+	return found ? items : false;
 }
 
 function doWeb(doc, url) {
-	var results = getSearchResults(doc);
-	
-	//if we're on a page with no checkboxes, we might have to redirect to a different page
-	if(results.length == 0) {
-		Z.debug("Could not find any checkboxes. Looking for link to abstract...");
-		var a = doc.getElementById('abstract');
-		if(a && a.href) {
-			ZU.processDocuments(a.href, doWeb);
-			return;
-		}
-		Z.debug("No link found. This will fail.");
-	}
-	
-	var post = "S=" + doc.evaluate('.//input[@name="S"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
-	var record_type = "";
-	if (results.length > 1) { // If page contains multiple Articles.
-		var items = new Object();
-		var tableRows;
-		// Go through table rows
-		if (doc.evaluate('//div[@id="titles-records"]/table[starts-with(@class, "titles-row")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-			tableRows = doc.evaluate('//div[@id="titles-records"]/table[starts-with(@class, "titles-row")]', doc, null, XPathResult.ANY_TYPE, null);
-			record_type = "record-on-msp"; // can be journal record
-		} else if (doc.evaluate('//div[@id="titles-records"]/table[starts-with(@class, "toc-row")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-			tableRows = doc.evaluate('//div[@id="titles-records"]/table[starts-with(@class, "toc-row")]', doc, null, XPathResult.ANY_TYPE, null);
-			record_type = "journal-record";
-		} else if (doc.evaluate('//div[@id="item-records"]/table[starts-with(@class, "titles-row")] | //div[@id="item-records"]/table[contains(@class,"citation-block")] | //div[@id="item-records"]//td[@class="citation-banner-critical-info"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-			tableRows = doc.evaluate('//div[@id="item-records"]/table[starts-with(@class, "titles-row")] | //div[@id="item-records"]/table[contains(@class,"citation-block")] | //div[@id="item-records"]//td[@class="citation-banner-critical-info"]', doc, null, XPathResult.ANY_TYPE, null);
-			record_type = "record-on-myproject"; // On My Project
-		} else if (doc.evaluate('//div[@id="titles-records" or @id="item-records"]/table[starts-with(@class, "citation-table")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-			// citation-table
-			tableRows = doc.evaluate('//div[@id="titles-records" or @id="item-records"]/table[starts-with(@class, "citation-table")]', doc, null, XPathResult.ANY_TYPE, null);
-			record_type = "ovid-citation-labled"; // On MSP
-		}
-
-		Zotero.debug("record_type1: " + record_type);
-		var tableRow;
-		while (tableRow = tableRows.iterateNext()) {
-			var id = doc.evaluate('.//input[@name="R"]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext().value;
-
-			var title_container;
-
-			if (title_container = doc.evaluate('.//a[contains(@class,"citation_title")]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-				items[id] = Zotero.Utilities.trimInternal(title_container.textContent);
+	var extras = {};
+	var results = getSearchResults(doc, false, extras);
+	if (results) {
+		Zotero.selectItems(results, function(selectedIds) {
+			if (!selectedIds) return true;
+			
+			var ids = [];
+			for (var i in selectedIds) {
+				ids.push(i)
 			}
-
-			if (!items[id]) {
-				// We can't remove 'record_type == "record-on-msp"' form condition b/c for
-				// Books records if no title then it should pick the chapter title.
-				if (record_type == "record-on-msp" || record_type == "journal-record") { // this is MSP records
-					if (title_container = doc.evaluate('.//span[@class="titles-title"]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-						Zotero.debug("Journal record");
-						items[id] = Zotero.Utilities.trimInternal(title_container.textContent);
-					} else if (title_container = doc.evaluate('.//div[@class="article-title"]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-						Zotero.debug("without title record");
-						// Find the chapter title from title_container.
-						var title;
-						if (title = doc.evaluate('.//span[@class="chapter_title"]', title_container, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-							items[id] = Zotero.Utilities.trimInternal(title.textContent);
-						}
-						// if chapter_title not found collect entire text.
-						else {
-							items[id] = Zotero.Utilities.trimInternal(title_container.textContent);
-						}
-					}
-				} else if (record_type == "record-on-myproject") { //this is for OUS
-					if (title_container = doc.evaluate('.//span[@class="titles-title"] | .//div[@class="muse-title" or @class="chapter-title"] | .//a[contains(@href, "citation_title")]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-						items[id] = Zotero.Utilities.trimInternal(title_container.textContent);
-						Zotero.debug("items[id]" + items[id]);
-					}
-				} else if (record_type == "ovid-citation-labled") {
-					if (table_container = doc.evaluate('.//table[@class="citation-block" or contains(@class, "citation-table") ]', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-						if (title_container = doc.evaluate('.//a[contains(@href, "&Buy+PDF=") or contains(@href, "&Complete+Reference=")  or contains(@href, "&Abstract+Reference=") or contains(@href, "&Link+Set=") ]', table_container, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-							items[id] = Zotero.Utilities.trimInternal(title_container.textContent);
-						}
-					}
-				}
-			}
-			// Still if no title available to display, just show the record index.
-			if (!items[id]) {
-				items[id] = 'Record Index: ' + id;
-			}
-
-		}
-		Zotero.selectItems(items,function(ids){
-			if (!ids) return true;
-	
-			for (var i in ids) {
-				post += "&R=" + encodeURIComponent(i);
-			}
-			getResponse(doc,url,post);
+			
+			fetchMetadata(doc, url, ids, extras);
 		});
-	} else if (results.length == 1) { // If page contains single Article.
-		var id = doc.evaluate('.//input[@name="R" and @class="bibrecord-checkbox"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
-		post += "&R=" + encodeURIComponent(id);
-		getResponse(doc,url,post);
+	} else {
+		var id = getIDFromPage(doc) || getIDFromUrl(url);
+		
+		// Look for PDF link on page as well
+		var extras = {};
+		var pdfLink = doc.getElementById('pdf')
+			|| ZU.xpath(doc, '//a[starts-with(@name, "PDF")]')[0];
+		if (pdfLink) {
+			extras[id] = {
+				pdfLink: pdfLink.href
+			}
+		} else if (pdfLink = doc.getElementById('embedded-frame')) {
+			extras[id] = {
+				resolvedPdfLink: pdfLink.src
+			};
+		} else {
+			// Attempt to construct it from the URL
+			var s = getSFromUrl(url);
+			var pdfID = decodeURI(url).match(/\bS\.sh.\d+\|[1-9]\d*/);
+			if (s && pdfID) {
+				Zotero.debug("Manually constructing PDF URL. There might not be one available.");
+				extras[id] = {
+					pdfLink: 'ovidweb.cgi?' + s + '&PDFLink=B|' + encodeURIComponent(pdfID[0])
+				};
+			}
+		}
+		
+		fetchMetadata(doc, url, [id], extras);
 	}
 }
 
-function getResponse(doc,url,post) {
-	post += "&jumpstartLink=1";
-	post += "&Citation Page=Export Citation"; // Required on non-js browser
-	var is_OUS = 0;
-	if (doc.evaluate('//div[@id="OUSRT"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		Zotero.debug("For OUS");
-		is_OUS = 1;
-	}
-
-	if (is_OUS) {
-		//For OUS records {need to format UI code for OUS records in endnode formate }
-		Zotero.debug("For OUS");
-		var CitManPrev = doc.evaluate('.//input[@name="Datalist"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().value.replace(/\|.*/, "");
-		post += "&cmexport=1&exportType=endnote&zoteroRecords=1&ousRecords=1&Citation Action=" + CitManPrev;
-	} else { //for MSP records
-		var CitManPrev = doc.evaluate('.//input[@name="CitManPrev"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().value.replace(/\|.*/, "");
-		post += "&cmexport=1&exportType=endnote&cmFields=ALL&zoteroRecords=1&Citation Action=" + CitManPrev;
-	}
-
-	url = url.replace(/ovidweb\.cgi.*$/i, "ovidweb.cgi");
-
-	Zotero.debug("URL: " + url + "?" + post);
-	Zotero.Utilities.HTTP.doPost(url, post, function (text) {
-		//Z.debug(text);
-		var lines = text.split("\n");
-		var haveStarted = false;
-		var newItemRe = /^(<[0-9]+\.\s>|[0-9]+\.\s\s)/;
-
-		var newItem = new Zotero.Item("journalArticle");
-		for (var i in lines) {
-			if (!haveStarted && newItemRe.test(lines[i])) {
-				haveStarted = true;
-			} else if (newItemRe.test(lines[i])) {
-				newItem.complete();
-				newItem = new Zotero.Item("journalArticle");
-			} else if (lines[i].substr(2, 4) == "  - " && haveStarted) {
-				var fieldCode = lines[i].substr(0, 2);
-				var fieldContent = Zotero.Utilities.trimInternal(lines[i].substr(6));
-				if (fieldCode == "TI") {
-					newItem.title = fieldContent.replace(/\. \[\w+\]$/, "");
-				} else if (fieldCode == "AU") {
-					var names = fieldContent.split(", ");
-
-					if (names.length >= 2) {
-						// get rid of the weird field codes
-						if (names.length == 2) {
-							names[1] = names[1].replace(/ [\+\*\S\[\]]+$/, "");
-						}
-						names[1] = names[1].replace(/ (?:MD|PhD|[BM]Sc|[BM]A|MPH|MB)$/i, "");
-
-						newItem.creators.push({
-							firstName: names[1],
-							lastName: names[0],
-							creatorType: "author"
-						});
-					} else if (fieldContent.match(/^(.*) [A-Z]{1,3}$/)) {
-						names = fieldContent.match(/^(.*) ([A-Z]{1,3})$/);
-						newItem.creators.push({
-							firstName: names[2],
-							lastName: names[1],
-							creatorType: "author"
-						});
-					} else {
-						newItem.creators.push({
-							lastName: names[0],
-							isInstitution: true,
-							creatorType: "author"
-						});
-					}
-				} else if (fieldCode == "SO") {
-					if (fieldContent.match(/\d{4}/)) {
-						newItem.date = fieldContent.match(/\d{4}/)[0];
-					}
-					if (fieldContent.match(/(\d+)\((\d+)\)/)) {
-						var voliss = fieldContent.match(/(\d+)\((\d+)\)/);
-
-						newItem.volume = voliss[1];
-						newItem.issue = voliss[2];
-					}
-					if (fieldContent.match(/vol\.\s*(\d+)/)) {
-						newItem.volume = fieldContent.match(/vol\.\s*(\d+)/)[1];
-					}
-					if (fieldContent.match(/vol\.\s*\d+\s*,\s*no\.\s*(\d+)/)) {
-						newItem.issue = fieldContent.match(/vol\.\s*\d+\s*,\s*no\.\s*(\d+)/)[1];
-					}
-					if (fieldContent.match(/\d+\-\d+/)) newItem.pages = fieldContent.match(/\d+\-\d+/)[0];
-					if (fieldContent.match(/pp\.\s*(\d+\-\d+)/)) newItem.pages = fieldContent.match(/pp\.\s*(\d+\-\d+)/)[1];
-					if (fieldContent.match(/[J|j]ournal[-\s\w]+/)) {
-						newItem.publicationTitle = fieldContent.match(/[J|j]ournal[-\s\w]+/)[0];
-					} else {
-						newItem.publicationTitle = Zotero.Utilities.trimInternal(fieldContent.split(/(\.|;|(,\s*vol\.))/)[0]);
-					}
-				} else if (fieldCode == "SB") {
-					newItem.tags.push(Zotero.Utilities.superCleanString(fieldContent));
-				} else if (fieldCode == "KW") {
-					newItem.tags = newItem.tags.concat(fieldContent.split(/; +/));
-				} else if (fieldCode == "DB") {
-					newItem.repository = "Ovid (" + fieldContent + ")";
-					if (fieldContent.match(/Books\@Ovid/)) {
-						newItem.itemType = "book";
-					}
-				} else if (fieldCode == "DI") {
-					newItem.DOI = fieldContent;
-				} else if (fieldCode == "DO") {
-					newItem.DOI = fieldContent;
-				} else if (fieldCode == "DP") {
-					newItem.date = fieldContent;
-				} else if (fieldCode == "IS") {
-					newItem.ISSN = fieldContent;
-				} else if (fieldCode == "AB") {
-					newItem.abstractNote = fieldContent;
-				} else if (fieldCode == "XL") {
-					newItem.url = fieldContent;
-				} else if (fieldCode == "PU") {
-					newItem.publisher = fieldContent;
-				}
-
-				if (!newItem.title) {
-					newItem.title = "Ovid Record- Title not available";
-				}
+function fetchMetadata(doc, url, ids, extras) {
+	var postData = getMetadataPost(doc, url, ids);
+	Zotero.debug("POST: " + postData);
+	ZU.doPost('./ovidweb.cgi', postData, function (text) {
+		var trans = Zotero.loadTranslator('import');
+		// OVID Tagged
+		trans.setTranslator('59e7e93e-4ef0-4777-8388-d6eddb3261bf');
+		trans.setString(text);
+		trans.setHandler('itemDone', function(obj, item) {
+			if (item.callNumber) {
+				item.callNumber = item.callNumber.replace(/[.\s]+$/, '');
 			}
-		}
-		Zotero.debug("DONE!!!!!!!!!!!! ");
-
-		// last item is complete
-		if (haveStarted) {
-			newItem.complete();
-		}
-		Zotero.done();
+			
+			if (item.DOI) {
+				item.DOI = ZU.cleanDOI(item.DOI);
+			}
+			
+			if (item.itemID && extras[item.itemID]) {
+				retrievePdfUrl(item, extras[item.itemID]);
+			} else {
+				item.complete();
+			}
+		});
+		trans.translate();
 	});
-}/** BEGIN TEST CASES **/
+}
+
+function retrievePdfUrl(item, extras) {
+	if (extras.resolvedPdfLink) {
+		item.attachments.push({
+			title: "Full Text PDF",
+			url: extras.resolvedPdfLink,
+			mimeType: 'application/pdf'
+		});
+		item.complete();
+	} else if(extras.pdfLink) {
+		Zotero.debug("Looking for PDF URL on " + extras.pdfLink);
+		ZU.doGet(extras.pdfLink, function(text) {
+			var m = text.match(/<iframe [^>]*src\s*=\s*(['"])(.*?)\1/);
+			if (m) {
+				item.attachments.push({
+					title: "Full Text PDF",
+					url: m[2],
+					mimeType: 'application/pdf'
+				});
+			}
+		}, function() {
+			item.complete();
+		});
+	} else {
+		item.complete();
+	}
+}
+/** BEGIN TEST CASES **/
 var testCases = []
 /** END TEST CASES **/
