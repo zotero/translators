@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-10-12 22:00:27"
+	"lastUpdated": "2014-11-27 10:45:12"
 }
 
 /*
@@ -34,8 +34,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-
-
 
 function detectImport() {
 	var line;
@@ -73,7 +71,8 @@ var fieldMap = {
 	LG: "language",
 	EN: "edition",
 	DB: "libraryCatalog",
-	AB: "abstractNote"
+	AB: "abstractNote",
+	AN: "callNumber"
 };
 
 
@@ -103,7 +102,7 @@ function processTag(item, tag, value) {
 		}
 	//I don't think FED or ED exist, but let's keep them to be safe
 	} else if (tag == "FA" || tag == "FED") {
-		if (tag == "FAU") {
+		if (tag == "FA") {
 			var type = "author";
 		} else if (tag == "FED") {
 			var type = "editor";
@@ -138,18 +137,28 @@ function processTag(item, tag, value) {
 function doImport() {
 	var line = true;
 	var tag = data = false;
+	var potentialItemID, checkID;
 	do { // first valid line is type
 		Zotero.debug("ignoring " + line);
 		line = Zotero.read();
 		line = line.replace(/^\s+/, "");
+		checkID = line.match(/^<\s*(\d+)\.\s*>\s*$/);
+		if (checkID) potentialItemID = checkID[1];
 	} while (line !== false && line.search(/^[A-Z0-9]+\s*-/) == -1);
 
 	var item = new Zotero.Item();
 	item.creatorsBackup = [];
+	if (potentialItemID) item.itemID = potentialItemID;
+	potentialItemID = null;
+	
 	var tag = line.match(/^[A-Z0-9]+/)[0];
 	var data = line.substr(line.indexOf("-") + 1);
 	while ((line = Zotero.read()) !== false) { // until EOF
 		line = line.replace(/^\s+/, "");
+		
+		checkID = line.match(/^<\s*(\d+)\.\s*>\s*$/);
+		if (checkID) potentialItemID = checkID[1];
+		
 		if (!line) {
 			if (tag) {
 				//there are empty lines in the SY tag
@@ -163,6 +172,8 @@ function doImport() {
 					finalizeItem(item)
 					item = new Zotero.Item();
 					item.creatorsBackup = [];
+					if (potentialItemID) item.itemID = potentialItemID;
+					potentialItemID = null;
 				}
 			}
 		} else if (line.search(/^[A-Z0-9]+\s*-/) != -1) {
@@ -292,6 +303,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "patent",
+				"title": "Dietary supplements containing ultradense calcium citrate and carbonyl iron",
 				"creators": [
 					{
 						"firstName": "Neill B.",
@@ -309,22 +321,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "BIOSIS Previews",
-				"rights": "Copyright Thomson 2004.",
-				"title": "Dietary supplements containing ultradense calcium citrate and carbonyl iron",
-				"ISSN": "0098-1133",
-				"patentNumber": "US 6818228",
-				"issueDate": "November 16, 2004",
-				"language": "English",
+				"issueDate": "2004",
 				"abstractNote": "A vitamin and mineral supplement containing ULTRADENSE.TM. calcium citrate and carbonyl iron for use in humans. Calcium in the form of citrate enhances absorption of iron, zinc, and magnesium. ULTRADENSE.TM. calcium citrate provides more bioavailable calcium than usual preparations of calcium citrate. Carbonyl iron provides iron in a form that significantly reduces the risk to children of accidental iron poisoning from formulations that provide iron in salt form. The supplement may further contain a number of vitamins and minerals in a tablet that is elegantly small, weighing about 1.5-1.6 g. The small size allows ease of swallowing and encourages patient acceptability. Methods of making such a supplement and methods of treating maladies in need of vitamin and mineral supplementation are provided.",
-				"date": "2004"
+				"language": "English",
+				"patentNumber": "US 6818228",
+				"rights": "Copyright Thomson 2004.",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Comparison of methods for sampling Thysanoptera on basswood (Tilia americana L.) trees in mixed northern hardwood deciduous forests",
 				"creators": [
 					{
 						"firstName": "S. M.",
@@ -342,24 +351,25 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "BIOSIS Previews",
-				"rights": "Copyright Thomson 2004.",
-				"title": "Comparison of methods for sampling Thysanoptera on basswood (Tilia americana L.) trees in mixed northern hardwood deciduous forests",
-				"ISSN": "0378-1127",
-				"language": "English",
-				"abstractNote": "Canopy arthropods play integral roles in the functioning, biodiversity, and productivity of forest ecosystems. Yet quantitative sampling of arboreal arthropods poses formidable challenges. We evaluated three methods of sampling the introduced basswood thrips, Thrips calcaratus Uzel (Thysanoptera: Thripidae), from the foliage of basswood canopies with respect to statistical variability and practical considerations (legal, economic and logistical accessibility). All three methods involved removal of foliage, which was performed using a pole-pruner, shotgun, and certified tree-climber. We also tested a fourth method, in which the tree-climber enclosed samples in a plastic bag to estimate losses that occur when branches fall to the ground, even though this is often not practical. The climber plus bag and pole-pruning methods obtained the highest numbers of thrips. Mean number of larval thrips did not vary significantly among the three main sampling methods. Site had a stronger effect on the number of larval thrips obtained than on the number of adults. A significant method by site interaction was observed with adults but not larvae. Significant collection date (which corresponds to thrips life stage) by site interaction was also observed. We regressed sampling methods to determine if the number of thrips obtained using one method can be used to predict the number obtained with another. Tree-climber and pole-pruner data were highly predictive of each other, but shotgun data cannot be used to estimate other methods. Pole-pruning is the most cost-effective and legally permissible technique, but is limited to trees with accessible lower branches. The shotgun method is cost-effective and useful in sampling trees at least up to 27 m, but is prohibited close to human activity. The tree-climber is effective and broadly applicable, but incurs the highest costs. This study shows the need to evaluate a variety of techniques when sampling arboreal insects with respect to predictability, pragmatics and life stages. Copyright 2004, Elsevier B.V. All rights reserved.",
 				"date": "2004 November",
-				"volume": "201",
+				"ISSN": "0378-1127",
+				"abstractNote": "Canopy arthropods play integral roles in the functioning, biodiversity, and productivity of forest ecosystems. Yet quantitative sampling of arboreal arthropods poses formidable challenges. We evaluated three methods of sampling the introduced basswood thrips, Thrips calcaratus Uzel (Thysanoptera: Thripidae), from the foliage of basswood canopies with respect to statistical variability and practical considerations (legal, economic and logistical accessibility). All three methods involved removal of foliage, which was performed using a pole-pruner, shotgun, and certified tree-climber. We also tested a fourth method, in which the tree-climber enclosed samples in a plastic bag to estimate losses that occur when branches fall to the ground, even though this is often not practical. The climber plus bag and pole-pruning methods obtained the highest numbers of thrips. Mean number of larval thrips did not vary significantly among the three main sampling methods. Site had a stronger effect on the number of larval thrips obtained than on the number of adults. A significant method by site interaction was observed with adults but not larvae. Significant collection date (which corresponds to thrips life stage) by site interaction was also observed. We regressed sampling methods to determine if the number of thrips obtained using one method can be used to predict the number obtained with another. Tree-climber and pole-pruner data were highly predictive of each other, but shotgun data cannot be used to estimate other methods. Pole-pruning is the most cost-effective and legally permissible technique, but is limited to trees with accessible lower branches. The shotgun method is cost-effective and useful in sampling trees at least up to 27 m, but is prohibited close to human activity. The tree-climber is effective and broadly applicable, but incurs the highest costs. This study shows the need to evaluate a variety of techniques when sampling arboreal insects with respect to predictability, pragmatics and life stages. Copyright 2004, Elsevier B.V. All rights reserved.",
+				"callNumber": "PREV200400473722",
 				"issue": "2-3",
+				"language": "English",
+				"libraryCatalog": "BIOSIS Previews",
 				"pages": "327-334",
-				"publicationTitle": "Forest Ecology & Management"
+				"publicationTitle": "Forest Ecology & Management",
+				"rights": "Copyright Thomson 2004.",
+				"volume": "201",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "bookSection",
+				"title": "Increasing throughput and data quality for proteomics",
 				"creators": [
 					{
 						"firstName": "Alfred L.",
@@ -412,21 +422,22 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "BIOSIS Previews",
-				"rights": "Copyright Thomson 2004.",
-				"title": "Increasing throughput and data quality for proteomics",
-				"ISBN": "3540202226",
-				"language": "English",
 				"date": "2004",
+				"ISBN": "3540202226",
+				"bookTitle": "Methods in proteome and protein analysis",
+				"callNumber": "PREV200400435038",
+				"language": "English",
+				"libraryCatalog": "BIOSIS Previews",
 				"pages": "371-397",
-				"bookTitle": "Methods in proteome and protein analysis"
+				"rights": "Copyright Thomson 2004.",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "bookSection",
+				"title": "Peak Erazor: A Windows-based program for improving peptide mass searches",
 				"creators": [
 					{
 						"firstName": "Karin",
@@ -454,18 +465,18 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "BIOSIS Previews",
-				"rights": "Copyright Thomson 2004.",
-				"title": "Peak Erazor: A Windows-based program for improving peptide mass searches",
-				"ISBN": "3540202226",
-				"language": "English",
 				"date": "2004",
+				"ISBN": "3540202226",
+				"bookTitle": "Methods in proteome and protein analysis",
+				"callNumber": "PREV200400435037",
+				"language": "English",
+				"libraryCatalog": "BIOSIS Previews",
 				"pages": "359-370",
-				"bookTitle": "Methods in proteome and protein analysis"
+				"rights": "Copyright Thomson 2004.",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -475,6 +486,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Legitimacy crises in Pakistan",
 				"creators": [
 					{
 						"firstName": "Mughees",
@@ -482,20 +494,21 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "International Political Science Abstract",
-				"title": "Legitimacy crises in Pakistan",
-				"abstractNote": "This paper presents a thorough review of legality of governments in Pakistan. It suggests that how non-political rulers have legalized their authority within the political system of Pakistan. This paper analyzes the behavior of dictators and their supporters and even opponents which legitimize unconstitutional actions taken by dictators. Analytical and political interaction approach is adopted in this paper. Another object of this discussion is to analyze the behavior of politicians and the judiciary about the legitimacy of dictators' rule. [R]",
-				"language": "English",
 				"date": "2007",
+				"abstractNote": "This paper presents a thorough review of legality of governments in Pakistan. It suggests that how non-political rulers have legalized their authority within the political system of Pakistan. This paper analyzes the behavior of dictators and their supporters and even opponents which legitimize unconstitutional actions taken by dictators. Analytical and political interaction approach is adopted in this paper. Another object of this discussion is to analyze the behavior of politicians and the judiciary about the legitimacy of dictators' rule. [R]",
+				"callNumber": "63-7578",
+				"language": "English",
+				"libraryCatalog": "International Political Science Abstract",
 				"pages": "7-14",
-				"publicationTitle": "Journal of Political Studies 12"
+				"publicationTitle": "Journal of Political Studies 12",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Contributions to transformative change in Cambodia: a study on returnees as institutional entrepreneurs",
 				"creators": [
 					{
 						"firstName": "Gea D. M.",
@@ -503,20 +516,20 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "International Political Science Abstract",
-				"title": "Contributions to transformative change in Cambodia: a study on returnees as institutional entrepreneurs",
-				"abstractNote": "This paper explores the experiences of Cambodian French returnees who are contributing to transformative change in Cambodia as institutional entrepreneurs. In order to delve into how returnees and their work are perceived in both host and home country, this multi-sited research project was designed as a comparative case study. Data were primarily collected through conversations with individual informants from the Lyonnese and Parisian Cambodian community as well as selected key informants in Phnom Penh. Excerpts of case studies are presented and discussed to illustrate the history, context and situation of their return as these influence their institutional entrepreneurial activities and the ways in which they use their transnational social networks as resources. [R, abr.]",
-				"language": "English",
-				"ISSN": "1868-1034",
 				"date": "2013",
-				"volume": "2013",
+				"ISSN": "1868-1034",
+				"abstractNote": "This paper explores the experiences of Cambodian French returnees who are contributing to transformative change in Cambodia as institutional entrepreneurs. In order to delve into how returnees and their work are perceived in both host and home country, this multi-sited research project was designed as a comparative case study. Data were primarily collected through conversations with individual informants from the Lyonnese and Parisian Cambodian community as well as selected key informants in Phnom Penh. Excerpts of case studies are presented and discussed to illustrate the history, context and situation of their return as these influence their institutional entrepreneurial activities and the ways in which they use their transnational social networks as resources. [R, abr.]",
+				"callNumber": "63-7566",
 				"issue": "1",
+				"language": "English",
+				"libraryCatalog": "International Political Science Abstract",
 				"pages": "3-28",
-				"publicationTitle": "Journal of Current Southeast Asian Affairs"
+				"publicationTitle": "Journal of Current Southeast Asian Affairs",
+				"volume": "2013",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -526,6 +539,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Take Ten: Need-to-Know Facts About Breast Cancer",
 				"creators": [
 					{
 						"firstName": "James A.",
@@ -533,22 +547,23 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "Journals@Ovid",
-				"title": "Take Ten: Need-to-Know Facts About Breast Cancer",
-				"language": "English.",
-				"ISSN": "1091-5397",
-				"DOI": "10.1249/FIT.0b013e3181c6723d",
 				"date": "2010 January/February",
-				"volume": "14",
+				"DOI": "10.1249/FIT.0b013e3181c6723d",
+				"ISSN": "1091-5397",
+				"callNumber": "00135124-201001000-00018.",
 				"issue": "1",
-				"publicationTitle": "Journal"
+				"language": "English.",
+				"libraryCatalog": "Journals@Ovid",
+				"publicationTitle": "Journal",
+				"volume": "14",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Up-regulation of breast cancer resistance protein plays a role in HER2-mediated chemoresistance through PI3K/Akt and nuclear factor-kappa B signaling pathways in MCF7 breast cancer cells",
 				"creators": [
 					{
 						"firstName": "Weijia",
@@ -586,28 +601,29 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
+				"date": "2011 August",
+				"DOI": "10.1093/abbs/gmr050",
+				"ISSN": "1672-9145",
+				"abstractNote": "Human epidermal growth factor receptor 2 (HER2/neu, also known as ErbB2) overexpression is correlated with the poor prognosis and chemoresistance in cancer. Breast cancer resistance protein (BCRP and ABCG2) is a drug efflux pump responsible for multidrug resistance (MDR) in a variety of cancer cells. HER2 and BCRP are associated with poor treatment response in breast cancer patients, although the relationship between HER2 and BCRP expression is not clear. Here, we showed that transfection of HER2 into MCF7 breast cancer cells (MCF7/HER2) resulted in an up-regulation of BCRP via the phosphatidylinositol 3-kinase (PI3K)/Akt and nuclear factor-kappa B (NF-[kappa]B) signaling. Treatment of MCF/HER2 cells with the PI3K inhibitor LY294002, the I[kappa]B phosphorylation inhibitor Bay11-7082, and the dominant negative mutant of I[kappa]B[alpha] inhibited HER2-induced BCRP promoter activity. Furthermore, we found that HER2 overexpression led to an increased resistance of MCF7 cells to multiple antitumor drugs such as paclitaxel (Taxol), cisplatin (DDP), etoposide (VP-16), adriamycin (ADM), mitoxantrone (MX), and 5-fluorouracil (5-FU). Moreover, silencing the expression of BCRP or selectively inhibiting the activity of Akt or NF-[kappa]B sensitized the MCF7/HER2 cells to these chemotherapy agents at least in part. Taken together, up-regulation of BCRP through PI3K/AKT/NF-[kappa]B signaling pathway played an important role in HER2-mediated chemoresistance of MCF7 cells, and AKT, NF-[kappa]B, and BCRP pathways might serve as potential targets for therapeutic intervention., Copyright (C) 2011 Blackwell Publishing Ltd.",
+				"callNumber": "01189059-201108000-00009.",
+				"issue": "8",
+				"language": "English.",
+				"libraryCatalog": "Journals@Ovid",
+				"pages": "647-653",
+				"publicationTitle": "Acta Biochimica et Biophysica Sinica",
+				"volume": "43",
+				"attachments": [],
 				"tags": [
 					"BCRP",
 					"PI3K/AKT/NF-[kappa]B",
 					"chemoresistance"
 				],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "Journals@Ovid",
-				"title": "Up-regulation of breast cancer resistance protein plays a role in HER2-mediated chemoresistance through PI3K/Akt and nuclear factor-kappa B signaling pathways in MCF7 breast cancer cells",
-				"abstractNote": "Human epidermal growth factor receptor 2 (HER2/neu, also known as ErbB2) overexpression is correlated with the poor prognosis and chemoresistance in cancer. Breast cancer resistance protein (BCRP and ABCG2) is a drug efflux pump responsible for multidrug resistance (MDR) in a variety of cancer cells. HER2 and BCRP are associated with poor treatment response in breast cancer patients, although the relationship between HER2 and BCRP expression is not clear. Here, we showed that transfection of HER2 into MCF7 breast cancer cells (MCF7/HER2) resulted in an up-regulation of BCRP via the phosphatidylinositol 3-kinase (PI3K)/Akt and nuclear factor-kappa B (NF-[kappa]B) signaling. Treatment of MCF/HER2 cells with the PI3K inhibitor LY294002, the I[kappa]B phosphorylation inhibitor Bay11-7082, and the dominant negative mutant of I[kappa]B[alpha] inhibited HER2-induced BCRP promoter activity. Furthermore, we found that HER2 overexpression led to an increased resistance of MCF7 cells to multiple antitumor drugs such as paclitaxel (Taxol), cisplatin (DDP), etoposide (VP-16), adriamycin (ADM), mitoxantrone (MX), and 5-fluorouracil (5-FU). Moreover, silencing the expression of BCRP or selectively inhibiting the activity of Akt or NF-[kappa]B sensitized the MCF7/HER2 cells to these chemotherapy agents at least in part. Taken together, up-regulation of BCRP through PI3K/AKT/NF-[kappa]B signaling pathway played an important role in HER2-mediated chemoresistance of MCF7 cells, and AKT, NF-[kappa]B, and BCRP pathways might serve as potential targets for therapeutic intervention., Copyright (C) 2011 Blackwell Publishing Ltd.",
-				"language": "English.",
-				"ISSN": "1672-9145",
-				"DOI": "10.1093/abbs/gmr050",
-				"date": "2011 August",
-				"volume": "43",
-				"issue": "8",
-				"pages": "647-653",
-				"publicationTitle": "Acta Biochimica et Biophysica Sinica"
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Brain Metastasis after Breast Cancer and Hysterectomy for a Benign Leiomyoma",
 				"creators": [
 					{
 						"firstName": "Ph",
@@ -630,21 +646,22 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "Journals@Ovid",
-				"title": "Brain Metastasis after Breast Cancer and Hysterectomy for a Benign Leiomyoma",
-				"language": "English.",
-				"ISSN": "0001-5458",
 				"date": "2010 November/December",
-				"volume": "6",
+				"ISSN": "0001-5458",
+				"callNumber": "00000042-201011000-00010.",
+				"language": "English.",
+				"libraryCatalog": "Journals@Ovid",
 				"pages": "611-613",
-				"publicationTitle": "Acta Chirurgica Belgica"
+				"publicationTitle": "Acta Chirurgica Belgica",
+				"volume": "6",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Lobular Breast Carcinoma Metastasis to a Superficial Plexiform Schwannoma as the First Evidence of an Occult Breast Cancer",
 				"creators": [
 					{
 						"firstName": "Barbara",
@@ -657,25 +674,25 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
+				"date": "2011 December",
+				"DOI": "10.1097/DAD.0b013e31820d9c0e",
+				"ISSN": "0193-1091",
+				"abstractNote": "Tumor to tumor metastasis is a rare phenomenon, in which one, benign or malignant, tumor is involved by metastatic deposits from another. Most documented tumor to tumor metastases have been located intracranially, in which, in the majority of cases, either a breast or a lung carcinoma metastasized to a meningioma. Only 7 cases of metastases to schwannoma have so far been reported in the English literature, in 6 cases to an intracranial acoustic schwannoma and in a single case to a subcutaneous schwannoma. We present a case of dermal/subcutaneous plexiform schwannoma containing metastatic deposits of an occult lobular breast carcinoma, creating a unique schwannoma with epithelioid cells. Differential diagnosis of schwannoma with epithelioid cells includes malignant transformation of schwannoma and metastasis of a carcinoma or melanoma to schwannoma, epithelioid schwannoma, and schwannoma with glandular or pseudo glandular elements., (C) 2011 Lippincott Williams & Wilkins, Inc.",
+				"callNumber": "00000372-201112000-00014.",
+				"issue": "8",
+				"language": "English.",
+				"libraryCatalog": "Your Journals@Ovid",
+				"pages": "845-849",
+				"publicationTitle": "Journal of Dermatopathology",
+				"volume": "33",
+				"attachments": [],
 				"tags": [
-					"plexiform schwannoma",
 					"lobular breast carcinoma",
+					"plexiform schwannoma",
 					"tumor to tumor metastasis"
 				],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "Your Journals@Ovid",
-				"title": "Lobular Breast Carcinoma Metastasis to a Superficial Plexiform Schwannoma as the First Evidence of an Occult Breast Cancer",
-				"abstractNote": "Tumor to tumor metastasis is a rare phenomenon, in which one, benign or malignant, tumor is involved by metastatic deposits from another. Most documented tumor to tumor metastases have been located intracranially, in which, in the majority of cases, either a breast or a lung carcinoma metastasized to a meningioma. Only 7 cases of metastases to schwannoma have so far been reported in the English literature, in 6 cases to an intracranial acoustic schwannoma and in a single case to a subcutaneous schwannoma. We present a case of dermal/subcutaneous plexiform schwannoma containing metastatic deposits of an occult lobular breast carcinoma, creating a unique schwannoma with epithelioid cells. Differential diagnosis of schwannoma with epithelioid cells includes malignant transformation of schwannoma and metastasis of a carcinoma or melanoma to schwannoma, epithelioid schwannoma, and schwannoma with glandular or pseudo glandular elements., (C) 2011 Lippincott Williams & Wilkins, Inc.",
-				"language": "English.",
-				"ISSN": "0193-1091",
-				"DOI": "10.1097/DAD.0b013e31820d9c0e",
-				"date": "2011 December",
-				"volume": "33",
-				"issue": "8",
-				"pages": "845-849",
-				"publicationTitle": "Journal of Dermatopathology"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -685,6 +702,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Spiders (Arachnida, Aranei) from Sakhalin and the Kuril Islands",
 				"creators": [
 					{
 						"firstName": "YuM",
@@ -707,21 +725,21 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "Zoological Record",
-				"rights": "Copyright 2010 Thomson Reuters",
-				"title": "Spiders (Arachnida, Aranei) from Sakhalin and the Kuril Islands",
-				"publisher": "International Sakhalin Island Project",
-				"bookTitle": "Spiders (Arachnida, Aranei) from Sakhalin and the Kuril Islands. International Sakhalin Island Project, place of publication not given. [undated]: Unpaginated. http://artedi.fish.washington.edu/okhotskia/isip/Info/spiders.htm [viewed 13 March, 2007]",
-				"language": "English",
 				"abstractNote": "A check-list of spiders based on personal and literature data from Sakhalin and Kuril Islands is presented. Four hundred and three species have been found there. Distribution records within Sakhalin (districts) and the Kuril Islands are given. Dubious species recorded by Japanese authors (1924-1937) are listed separately with some comments. Twelve new synonyms, new combinations, and new nominations are proposed. Several previous misidentifications in the Far Eastern linyphiids are corrected.",
-				"place": "place of publication not given"
+				"callNumber": "ZOOR14305031738",
+				"language": "English",
+				"libraryCatalog": "Zoological Record",
+				"place": "place of publication not given",
+				"publisher": "International Sakhalin Island Project",
+				"rights": "Copyright 2010 Thomson Reuters",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Parasites of fishes: list of and dichotomous key to the identification of major metazoan groups",
 				"creators": [
 					{
 						"firstName": "George W.",
@@ -734,20 +752,20 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "Zoological Record",
-				"rights": "Copyright 2010 Thomson Reuters",
-				"title": "Parasites of fishes: list of and dichotomous key to the identification of major metazoan groups",
-				"citation": "Association of Zoos and Aquariums Regional Meetings Proceedings. 2005; 9pp..",
-				"language": "English",
 				"date": "2005",
-				"publicationTitle": "Association of Zoos and Aquariums Regional Meetings Proceedings"
+				"callNumber": "ZOOR14303018462",
+				"language": "English",
+				"libraryCatalog": "Zoological Record",
+				"publicationTitle": "Association of Zoos and Aquariums Regional Meetings Proceedings",
+				"rights": "Copyright 2010 Thomson Reuters",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "book",
+				"title": "Key to the herpetofauna of Fiji",
 				"creators": [
 					{
 						"firstName": "Clare",
@@ -755,21 +773,21 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "Zoological Record",
-				"rights": "Copyright 2010 Thomson Reuters",
-				"title": "Key to the herpetofauna of Fiji",
-				"publisher": "University of the South Pacific",
-				"bookTitle": "Key to the herpetofauna of Fiji. University of the South Pacific, Institute of Applied Sciences, Suva. 2006: Unpaginated. http://www.lucidcentral.org/keys/phoenix/fiji/herpetofauna/ [viewed 05 January, 2007]",
-				"language": "English",
 				"date": "2006",
-				"place": "Institute of Applied Sciences, Suva"
+				"callNumber": "ZOOR14302012772",
+				"language": "English",
+				"libraryCatalog": "Zoological Record",
+				"place": "Institute of Applied Sciences, Suva",
+				"publisher": "University of the South Pacific",
+				"rights": "Copyright 2010 Thomson Reuters",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "The role of temperature in the population dynamics of smelt Osmerus eperlanus eperlanus m. spirinchus Pallas in Lake Peipsi (Estonia/Russia)",
 				"creators": [
 					{
 						"firstName": "Andu",
@@ -792,19 +810,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "Zoological Record",
-				"rights": "Copyright 2009 Thomson Reuters",
-				"title": "The role of temperature in the population dynamics of smelt Osmerus eperlanus eperlanus m. spirinchus Pallas in Lake Peipsi (Estonia/Russia)",
-				"citation": "Hydrobiologia. 2007 15 June; 433-441.",
-				"ISSN": "0018-8158",
-				"language": "English",
-				"abstractNote": "We analysed lake smelt (Osmerus eperlanus eperlanus m. spirinchus Pallas.) population dynamics in relation to water level and temperature in Lake Peipsi, Estonia/Russia, using commercial fishery statistics from 1931 to 2004 (excluding 1940-1945). Over this period, smelt provided the greatest catch of commercial fish although its stock and catches have gradually decreased. At times, catches of smelt were quite variable with a cyclic character. Disappearance of smelt from catches in years 1973-1975 was the result of summer fish kill. Regression analysis revealed a significant negative effect of high temperature on the abundance of smelt stock, while the effect of water level was not significant. Our results suggest that critical factors for the smelt population are the absolute value of water temperature in the hottest period (=20[degree]C) of summer and the duration of this period. These weather parameters have increased in synchrony with smelt decline during the last 7 decades. There appeared to be a significant negative effect of hot summers on the abundance of smelt operating with a lag of one and 2 years, which can be explained by the short life cycle (mainly 1-2 years) of this species.",
 				"date": "2007 June",
-				"publicationTitle": "Hydrobiologia"
+				"ISSN": "0018-8158",
+				"abstractNote": "We analysed lake smelt (Osmerus eperlanus eperlanus m. spirinchus Pallas.) population dynamics in relation to water level and temperature in Lake Peipsi, Estonia/Russia, using commercial fishery statistics from 1931 to 2004 (excluding 1940-1945). Over this period, smelt provided the greatest catch of commercial fish although its stock and catches have gradually decreased. At times, catches of smelt were quite variable with a cyclic character. Disappearance of smelt from catches in years 1973-1975 was the result of summer fish kill. Regression analysis revealed a significant negative effect of high temperature on the abundance of smelt stock, while the effect of water level was not significant. Our results suggest that critical factors for the smelt population are the absolute value of water temperature in the hottest period (=20[degree]C) of summer and the duration of this period. These weather parameters have increased in synchrony with smelt decline during the last 7 decades. There appeared to be a significant negative effect of hot summers on the abundance of smelt operating with a lag of one and 2 years, which can be explained by the short life cycle (mainly 1-2 years) of this species.",
+				"callNumber": "ZOOR14312075663",
+				"language": "English",
+				"libraryCatalog": "Zoological Record",
+				"publicationTitle": "Hydrobiologia",
+				"rights": "Copyright 2009 Thomson Reuters",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -814,6 +831,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "bookSection",
+				"title": "[Parasitic copepods of the genera Salmincola and Tracheliastes (Lernaeopodidae) from freshwater fish of the Sakhalin Island.]",
 				"creators": [
 					{
 						"lastName": "Shedko",
@@ -835,19 +853,19 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "Zoological Record",
-				"rights": "Copyright 2009 Thomson Reuters",
-				"title": "[Parasitic copepods of the genera Salmincola and Tracheliastes (Lernaeopodidae) from freshwater fish of the Sakhalin Island.]",
-				"publisher": "ISiEZH SO RAN",
-				"bookTitle": "[Parasitological research in Siberia and the Far East: materials of the first interregional scientific conference in memory of Professor A",
-				"language": "Russian",
 				"date": "2002",
+				"bookTitle": "[Parasitological research in Siberia and the Far East: materials of the first interregional scientific conference in memory of Professor A",
+				"callNumber": "ZOOR14310064653",
+				"language": "Russian",
+				"libraryCatalog": "Zoological Record",
 				"pages": "1-234",
-				"place": "Novosibirsk"
+				"place": "Novosibirsk",
+				"publisher": "ISiEZH SO RAN",
+				"rights": "Copyright 2009 Thomson Reuters",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
