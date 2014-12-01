@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-11-28 13:44:46"
+	"lastUpdated": "2014-12-01 20:45:09"
 }
 
 /*
@@ -68,7 +68,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {}, found = false;
 	var numRollups = 0;
 	for (var i=0; i<titles.length; i++) {
-		var isRollup = !!ZU.xpath(titles[i], '.[ancestor::div[contains(@class, "rollup")]]').length;
+		var isRollup = !!ZU.xpath(titles[i], './ancestor::div[contains(@class, "rollup")]').length;
 		
 		// That class gets reused a bit
 		if (!isRollup && titles[i].nodeName.toUpperCase() != 'H1') continue;
