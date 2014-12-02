@@ -1,15 +1,15 @@
 {
 	"translatorID": "6c61897b-ca44-4ce6-87c1-2da68b44e6f7",
 	"label": "Summon 2",
-	"creator": "Caistarrin Mystical",
-	"target": "https?://([^/]+\\.)?summon\\.serialssolutions\\.com",
+	"creator": "Caistarrin Mystical and Aurimas Vinckevicius",
+	"target": "^https?://([^/]+\\.)?summon\\.serialssolutions\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-11-20 16:54:38"
+	"lastUpdated": "2014-12-01 20:45:09"
 }
 
 /*
@@ -25,102 +25,204 @@
    GNU General Public License for more details.
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
 function detectWeb(doc, url) {
-	Zotero.monitorDOMChanges(doc.getElementById("results"), {childList: true});
+	var results = doc.getElementById('results');
+	if (results) {
+		var ul = results.firstElementChild.firstElementChild;
+		if (ul) {
+			// This is currently broken in Zotero.
+			// Scrolling down one page ends up triggering Page Modified event
+			// 111 times and makes the page unusable after a while.
+			//Zotero.monitorDOMChanges(ul, {childList: true});
+		}
+	}
 	
-	if (ZU.xpath(doc, '//li//div[contains(@class, "summary")]').length > 0) {
-		// Summon always shows a search results page, so it's multiple or nothing
+	var detailPage = doc.getElementsByClassName('detailPage')[0];
+	if (detailPage) {
+		// Changes from visible to not by adding class ng-hide
+		Zotero.monitorDOMChanges(detailPage, {attributes: true, attributeFiler: ['class']});
+		if (detailPage.offsetHeight) {
+			// Visible details page
+			var id = getIDFromUrl(url);
+			if (id) return 'book';
+		}
+	}
+	
+	if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+}
 
-	return false;
+function getIDFromUrl(url) {
+	var m = url.match(/[&?]id=([^&#]+)/);
+	return m && m[1];
+}
+
+function getSearchResults(doc, checkOnly) {
+	var results = doc.getElementById('results');
+	if (!results) return false;
+	
+	var titles = results.getElementsByClassName('customPrimaryLinkContainer');
+	var items = {}, found = false;
+	var numRollups = 0;
+	for (var i=0; i<titles.length; i++) {
+		var isRollup = !!ZU.xpath(titles[i], './ancestor::div[contains(@class, "rollup")]').length;
+		
+		// That class gets reused a bit
+		if (!isRollup && titles[i].nodeName.toUpperCase() != 'H1') continue;
+		
+		var index;
+		if (isRollup) {
+			index = 'r' + numRollups;
+			numRollups++;
+		} else {
+			index = i - numRollups;
+		}
+		
+		var title = titles[i].getElementsByTagName('a')[0];
+		if (title) title = ZU.trimInternal(title.textContent);
+		
+		if (!title) continue;
+		
+		if (checkOnly) return true;
+		found = true;
+		items['_' + index] = title;
+	}
+	
+	return found ? items : false;
 }
 
 function doWeb(doc, url) {
-	var titles = ZU.xpath(doc, '//li//div[contains(@class, "summary")]//div[descendant::a[not(contains(@class, "availability"))]]//@text');
-	var items = new Object();
-	var numRollups = 0;
-	var rollupStart = 0;
-	var refIndexes = [];
-
-	for (var i = 0; i < titles.length; i++) {
-		var isRollup = (ZU.xpath(titles[i], '.[ancestor::div[contains(@class, "rollup")]]').length > 0 ? true : false);
-		var index = i + "-" + (isRollup ? "r" + numRollups++ : "");
-			// the hyphen forces integers to string, keeping refs in order
+	var dbName = ZU.xpath(doc, '//div[contains(@class, "header")]//div[contains(@class, "Logo")]//img/@alt')[0];
+	if (dbName) dbName = dbName.value;
+	
+	if (detectWeb(doc, url) == 'multiple') {
+		Zotero.selectItems(getSearchResults(doc), function(items) {
+			if (!items) {
+				return true;
+			}
 			
-		// "rollups" are the references in that separated "News results for [search terms]" section
-		if (isRollup && rollupStart == 0) {
-			rollupStart = i;
-		}
-
-		items[index] = ZU.cleanTags(titles[i].value);
+			var indexes = []
+			for (var item in items) {
+				indexes.push(item.substr(1));
+			}
+			
+			fetchData(getApiData(url, indexes), dbName)
+		});
+	} else {
+		var id = getIDFromUrl(url);
+		var url = '/api/search?fids=' + encodeURIComponent(id);
+		fetchData({urlSet: [url], indexBlocks: { 1: ['0'] }}, dbName);
 	}
+}
 
-	Zotero.selectItems(items, function(items) {
-		if (!items) {
-			return true;
-		}
-		
-		for (var item in items) {
-			// keeping the indexes of the refs we want
-			refIndexes.push(item);
-		}
-		
-		for (var i = 0; i < refIndexes.length; i++) {
-			// converting the indexes into more meaningful numbers
-			var rIndex = refIndexes[i].indexOf("r");
-		
-			if (rIndex > -1) {
-				refIndexes[i] = refIndexes[i].slice(rIndex);
+function fetchData(apiData, dbName) {
+	var documents = [];
+	ZU.doGet(apiData.urlSet, function (text, _, chunkUrl) {
+			var obj = JSON.parse(text);
+			var page = chunkUrl.match(/[?&]pn=(\d+)/);
+			if (page) {
+				page = page[1];
+			} else if (/[?&]fids=/.test(chunkUrl)) {
+				// For single pages
+				page = 1;
 			}
-			else {
-				refIndexes[i] = refIndexes[i].slice(0, refIndexes[i].indexOf("-"));
 			
-				if (rollupStart > 0 && refIndexes[i] > rollupStart) {
-					refIndexes[i] -= numRollups;
+			var indexes = apiData.indexBlocks[page];
+			
+			for (var j = 0; j < indexes.length; j++) {
+				var i = indexes[j];
+				if (i.charAt(0) == 'r') {
+					// Rollup. Drop 'r' for actual index
+					documents.push(obj.rollups.newspaper.documents[i.substr(1)]);
+				}
+				else {
+					documents.push(obj.documents[i]);
 				}
 			}
+		},
+		function () { // All done
+			// Grab database name for Library Catalog field
+			getRefData(documents, dbName);
+		}
+	);
+}
+
+var pageSize = 10; // Number of results to fetch per page
+function getApiData(url, indexes) {
+	var urlArray = url.split('?');
+	var apiURL = '/api/search?'
+		+ urlArray.pop().replace(/(^|&)fvf=([^&#]*)/, function(m, sep, fvf) {
+			return sep + 'fvf[]=' + fvf.replace(/\||%7c/gi, '&fvf[]=');
+		})
+		+ '&ps=' + pageSize;
+	
+	// Split up selected indeces into blocks set by pageSize then fetch each block
+	// independently and concatenate them later
+	var urlSet = [];
+	var indexBlocks = {};
+	for (var i = 0; i < indexes.length; i++) {
+		var page, // Page number for given index (these don't have to end up continuous). 1 based
+			pageIndex = indexes[i]; // Item index in a given page. 0 based
+
+		if (pageIndex.charAt(0) == 'r') {
+			// All rollups are on first page
+			page = 1;
+		} else {
+			pageIndex *= 1; // convert to integer from string
+			page = Math.ceil((pageIndex + 1) / pageSize); // +1 because 0 based
+			pageIndex %= pageSize;
 		}
 		
-		var apiData = getApiData(url, refIndexes);
-		var documents = [];
+		if (!indexBlocks[page]) {
+			// New set
+			indexBlocks[page] = [];
+			urlSet.push(apiURL + "&pn=" + page);
+		}
 		
-		ZU.HTTP.doGet(
-			apiData.urlSet, 
-			function (text, response, url) {
-				var obj = JSON.parse(text);
-				var pageNumIndex = url.indexOf("pn=") + 3;
-				var pageNum = url.slice(pageNumIndex, url.indexOf("&", pageNumIndex));
-				var refIndexes = apiData.indexBlocks[pageNum];
-				
-				for (var i = 0; i < refIndexes.length; i++) {
-					if (isNaN(refIndexes[i])) {
-						// get the number past the r
-						documents.push(obj.rollups.newspaper.documents[refIndexes[i].slice(1)]);
-					}
-					else {
-						documents.push(obj.documents[refIndexes[i]]);
-					}
-				}
-			},
-			function () {
-				var uniName = ZU.xpath(doc, '//div[contains(@class, "header")]//div[contains(@class, "Logo")]//img/@alt');
-				getRefData(documents, uniName[0].value);
-			}
-		);
-	});
+		indexBlocks[page].push('' + pageIndex); // make sure it's string so it's easier to check for 'r' later
+	}
+	
+	return {"urlSet": urlSet, "indexBlocks": indexBlocks};
 }
 
 function getRefData(documents, uniName) {
 	for (var i = 0; i < documents.length; i++) {
 		var ref = documents[i];
+//Zotero.debug(ref);
 		var item = new Zotero.Item(getRefType(ref));
 		
-		item.title = ZU.cleanTags(ref.full_title);
-		item.libraryCatalog = uniName + ", Summon 2.0";
 		item.creators = getAuthors(ref);
+		
+		if (item.creators.length && ref.subtitle
+			&& ref.subtitle.indexOf(item.creators[0].lastName) != -1
+		) {
+			item.title = ZU.cleanTags(ref.title);
+			// Frequently the book's subtitle (and full title) will include the author.
+			// Clean it up in those cases
+			var subtitle = ZU.cleanTags(ref.subtitle)
+				.replace(
+					new RegExp(
+						'(?:\\s*[-–—/:])?\\s*' // Possibly separated by /
+						+ '(?:ed(?:itor|\\.)?,?\\s+)?' // Could be an editor. Perhaps others?
+						+ '(?:' + ZU.quotemeta(item.creators[0].lastName) // Not sure which one could come first
+						+ (item.creators[0].firstName
+							? '|' + ZU.quotemeta(item.creators[0].firstName)
+							: '')
+						+ ')'
+						+ '.*', // Toss everything afterwards
+						'i' // ignore case (mostly for editor part)
+					),
+					''
+				);
+			if (subtitle) item.title += ': ' + subtitle;
+		} else {
+			item.title = ZU.cleanTags(ref.full_title);
+		}
+		
+		item.libraryCatalog = uniName + ", Summon 2.0";
 		item.ISBN = ref.isbn;
 		item.publisher = ref.publisher;
 		item.publicationTitle = ref.publication_title;
@@ -176,7 +278,11 @@ function getRefData(documents, uniName) {
 
 		item.pages = ref.pages;
 		if (!item.pages && ref.start_pages) {
-			item.pages = ref.start_pages[0] + (ref.end_pages && ref.end_pages.length > 0 ? "-" + ref.end_pages[0] : "");
+			item.pages = ref.start_pages[0]
+				+ (ref.end_pages && ref.end_pages.length > 0
+					? "-" + ref.end_pages[0]
+					: ""
+				);
 		}
 
 		item.date = ref.publication_date;
@@ -191,98 +297,44 @@ function getRefData(documents, uniName) {
 			// we don't care about the first edition
 			item.edition = ref.editions[0];
 		}
-
+		
 		item.complete();
 	}
 }
 
-function getApiData(url, refIndexes) {
-	var urlArray = url.split('?');
-	var params = urlArray[1].split('&');
-	var apiURL = urlArray[0].replace("#!", "api") + "?";
-	var fvf = "";
-	var urlSet = [];
-	var pageNum = 0;
-	var indexBlocks = {};
-
-	for (var i = 0; i < params.length; i++) {
-		if (params[i].indexOf("fvf=") > -1) {
-			fvf = params[i].substring(4);
-		}
-		else {
-			apiURL += params[i] + "&";
-		}
-	}
-
-	if (fvf.length > 0) {
-		var fvfArray = fvf.split('|');
-
-		for (var i = 0; i < fvfArray.length; i++) {
-			apiURL += "fvf[]=" + fvfArray[i] + "&";
-		}
-	}
-	
-	for (var i = 0; i < refIndexes.length; i++) {
-		var isRollup = isNaN(refIndexes[i]);
-		var currentPage = (isRollup || refIndexes[i] < 10 ? 1 : Math.ceil((refIndexes[i] + 1) / 10));
-		// rollup indexes are "r*" (string) rather than integer, and are always on first page
-		
-		if (!indexBlocks[currentPage]) {
-			indexBlocks[currentPage] = [];
-		}
-		
-		if (isRollup) {
-			indexBlocks[currentPage].push(refIndexes[i]);
-		}
-		else {
-			indexBlocks[currentPage].push(refIndexes[i] - ((currentPage - 1) * 10));
-		}
-
-		if (currentPage > pageNum) {
-			pageNum = currentPage;
-			urlSet.push(apiURL + "pn=" + pageNum + "&ps=10");
-		}
-	}
-
-	return {"urlSet": urlSet, "indexBlocks": indexBlocks};
-}
-
 function getAuthors(ref) {
 	var itemAuthors = [];
-	var refAuthors = [];
-	var isCorporate = false;
-
-	if (ref.authors && ref.authors.length > 0) {
-		refAuthors = ref.authors;
-	}
-	else if (ref.corporate_authors && ref.corporate_authors.length > 0) {
-		refAuthors = ref.corporate_authors;
-		isCorporate = true;
-	}
-
-	if (refAuthors.length > 0) {
+	var types = ['authors','corporate_authors'];
+	
+	for (var j=0; j<types.length; j++) {
+		var isCorporate = types[j] != 'authors';
+		var refAuthors = ref[types[j]];
+		
 		for (var i = 0; i < refAuthors.length; i++) {
 			var a = refAuthors[i];
 			if (a.givenname && a.surname) {
 				itemAuthors.push({
-					"firstName": a.givenname,
-					"lastName": a.surname,
-					"creatorType": "author"
+					firstName: a.givenname,
+					lastName: a.surname,
+					creatorType: "author"
 				});
 			}
 			else {
 				var name = a.fullname || a.name || "";
-
+				
+				if (name == ref.publisher) continue;
+				
 				if (name.length > 0) {
 					
 					if (isCorporate) {
 						itemAuthors.push({
-							"lastName": name,
-							"creatorType": "author"
+							lastName: name,
+							creatorType: "author",
+							fieldMode: 1
 						});
 					}
 					else {
-						itemAuthors.push(Zotero.Utilities.cleanAuthor(name, "author", name.indexOf(',') > -1));
+						itemAuthors.push(ZU.cleanAuthor(name, "author", name.indexOf(',') > -1));
 					}
 				}
 			}
@@ -384,3 +436,41 @@ function getRefType(ref) {
 			return "journalArticle";
 	}
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://dartmouth.summon.serialssolutions.com/?#!/search/document?ho=t&q=buddha&l=en&id=FETCHMERGED-dartmouth_catalog_b412227382",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Buddha",
+				"creators": [
+					{
+						"firstName": "Osamu",
+						"lastName": "Tezuka",
+						"creatorType": "author"
+					}
+				],
+				"date": "2003",
+				"ISBN": "1932234446",
+				"language": "English",
+				"libraryCatalog": "Dartmouth College Library, Summon 2.0",
+				"numPages": "8 v.",
+				"place": "New York, N.Y",
+				"publisher": "Vertical",
+				"attachments": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://dartmouth.summon.serialssolutions.com/?#!/search?ho=t&q=buddha&l=en",
+		"defer": true,
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
