@@ -2,14 +2,14 @@
 	"translatorID": "d21dcd90-c997-4e14-8fe0-353b8e19a47a",
 	"label": "SAGE Knowledge",
 	"creator": "ProQuest",
-	"target": "^https?://knowledge.sagepub.com",
+	"target": "^https?://knowledge\\.sagepub\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-11-21 10:58:20"
+	"lastUpdated": "2014-12-01 16:56:14"
 }
 
 /*
@@ -28,12 +28,7 @@
  */
 
 function detectWeb(doc, url) {
-	var multRe = /browse|searchresults/;
-	if (multRe.test(url)) {
-		var result = ZU.xpath(doc, '//div[@id="pageContent"]//div[@class="result"]');
-		if (result.length == 0) {
-			return false;
-		}
+	if (getSearchResults(doc)) {
 		return "multiple";
 	}
 	else {
@@ -41,12 +36,14 @@ function detectWeb(doc, url) {
 		if (!itemType) {
 			itemType = ZU.xpathText(doc, '//div[@id="mainContent"]//p[contains(@class, "docTypeIcon")]/@class');
 		}
-		itemType = ZU.trimInternal(itemType.replace(/contentType|docTypeIcon/,''));
+		itemType = ZU.trimInternal(itemType.replace(/(?:contentType)|(?:docTypeIcon)/,''));
 		switch(itemType) {
 			case "iconEncyclopedia-chapter":
+				return "encyclopediaArticle";
 			case "iconBook-chapter":
-			case "iconDictionary-chapter":
 				return "bookSection";
+			case "iconDictionary-chapter":
+				return "dictionaryEntry";
 			case "iconDebate":
 			case "iconHandbook":
 			case "iconBook":
@@ -61,21 +58,46 @@ function detectWeb(doc, url) {
 function getItem(doc) {
 	var url = doc.getElementById("_citeLink").href;
 	ZU.doGet(url, function(text) {
-		var re = /<textarea name="records".*>((?:.|\n)*?)<\/textarea>/;
-		re.exec(text);
+		var re = /<textarea name="records".*?>([\s\S]*?)<\/textarea>/;
+		var match = re.exec(text)[1]
+					.replace(/NV\s+-\s+1\n/, "")
+					.replace(/AU\s+-\s+.+?(,? Ph\.?D\.?)|(,? Jr\.?)\n/g, function(match, p1, p2) {
+						return match.replace(p1, "").replace(p2, "");
+					});
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");//RIS translator
-		translator.setString(RegExp.$1);
+		translator.setString(match);
 		translator.setHandler("itemDone", function (obj, item) {
 			if (item.tags.length > 10 || item.tags.length == 0) {
 				var keywords = ZU.xpathText(doc, "//div[@class='keywords']");
-				
 				if (keywords) {
-					item.tags = keywords.split(",").map(function(a) {
-						return ZU.trim(a);
-					});
+					item.tags = keywords.split(/\s*,\s*/);
 				}
 			}
+			
+			for (var i = 0; i < item.creators.length; i++) {
+				var creator = item.creators[i];
+				if (creator.lastName.indexOf(" of ") == -1) {
+					item.creators[i] = ZU.cleanAuthor(creator.lastName, creator.creatorType, creator.lastName.indexOf(",") > -1);
+				}
+			}
+			
+			if (item.series == item.title) {
+				delete item.series;
+			}
+			
+			if (item.title.charAt(item.title.length - 1) == ".") {
+				item.title = item.title.slice(0, item.title.length - 1);
+			}
+			
+			if (item.bookTitle && item.bookTitle.charAt(item.bookTitle.length - 1) == ".") {
+				item.bookTitle = item.bookTitle.slice(0, item.bookTitle.length - 1);
+			}
+			
+			if (item.abstractNote == "There is no abstract available for this title") {
+				delete item.abstractNote;
+			}
+			
 			item.complete();
 		})
 		translator.translate();
@@ -132,8 +154,8 @@ var testCases = [
 				"itemType": "bookSection",
 				"creators": [
 					{
-						"lastName": "Bruce J. Schulman",
-						"firstName": "Ph.D.",
+						"lastName": "Schulman",
+						"firstName": "Bruce J.",
 						"creatorType": "author"
 					}
 				],
@@ -160,8 +182,8 @@ var testCases = [
 				"numberOfVolumes": "1",
 				"publisher": "CQ Press",
 				"ISBN": "9780872895546",
-				"title": "Student's Guide to Congress.",
-				"bookTitle": "Minority Leader.",
+				"title": "Student's Guide to Congress",
+				"bookTitle": "Minority Leader",
 				"url": "http://dx.doi.org/10.4135/9781452240190",
 				"pages": "214-217",
 				"libraryCatalog": "SAGE Knowledge",
@@ -177,19 +199,19 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"lastName": "Allan G. Osborne Jr.",
-						"creatorType": "author",
-						"fieldMode": 1
+						"firstName": "Allan G.",
+						"lastName": "Osborne",
+						"creatorType": "author"
 					},
 					{
-						"lastName": "Charles J. Russo",
-						"creatorType": "author",
-						"fieldMode": 1
+						"firstName": "Charles J.",
+						"lastName": "Russo",
+						"creatorType": "author"
 					},
 					{
-						"lastName": "Gerald M. Cattaro",
-						"creatorType": "author",
-						"fieldMode": 1
+						"firstName": "Gerald M.",
+						"lastName": "Cattaro",
+						"creatorType": "author"
 					}
 				],
 				"notes": [],
@@ -214,8 +236,7 @@ var testCases = [
 				"language": "English",
 				"publisher": "SAGE Publications, Inc.",
 				"ISBN": "9781412987950",
-				"title": "Alternative Schooling and School Choice.",
-				"series": "Alternative Schooling and School Choice.",
+				"title": "Alternative Schooling and School Choice",
 				"url": "http://dx.doi.org/10.4135/9781452218328",
 				"libraryCatalog": "SAGE Knowledge",
 				"accessDate": "CURRENT_TIMESTAMP"
@@ -230,9 +251,9 @@ var testCases = [
 				"itemType": "bookSection",
 				"creators": [
 					{
-						"lastName": "Jan Robertson",
+						"firstName" "Jan",
+						"lastName": "Robertson",
 						"creatorType": "author",
-						"fieldMode": 1
 					}
 				],
 				"notes": [],
@@ -257,8 +278,8 @@ var testCases = [
 				"language": "English",
 				"publisher": "SAGE Publications Ltd",
 				"ISBN": "9781847874047",
-				"title": "Coaching Educational Leadership: Building Leadership Capacity Through Partnership.",
-				"bookTitle": "Leaders Coaching Leaders.",
+				"title": "Coaching Educational Leadership: Building Leadership Capacity Through Partnership",
+				"bookTitle": "Leaders Coaching Leaders",
 				"url": "http://dx.doi.org/10.4135/9781446221402",
 				"pages": "151-161",
 				"libraryCatalog": "SAGE Knowledge",
@@ -302,8 +323,7 @@ var testCases = [
 				"language": "English",
 				"publisher": "SAGE Publications Ltd",
 				"ISBN": "9781412934503",
-				"title": "The Quick-Reference Handbook for School Leaders.",
-				"series": "The Quick-Reference Handbook for School Leaders.",
+				"title": "The Quick-Reference Handbook for School Leaders",
 				"url": "http://dx.doi.org/10.4135/9781446214596",
 				"libraryCatalog": "SAGE Knowledge",
 				"accessDate": "CURRENT_TIMESTAMP"
@@ -318,9 +338,9 @@ var testCases = [
 				"itemType": "bookSection",
 				"creators": [
 					{
-						"lastName": "Norman A. Govoni",
-						"creatorType": "author",
-						"fieldMode": 1
+						"firstName": "Norman A.",
+						"lastName": "Govoni",
+						"creatorType": "author"
 					}
 				],
 				"notes": [],
@@ -334,8 +354,8 @@ var testCases = [
 				"language": "English",
 				"publisher": "SAGE Publications, Inc.",
 				"ISBN": "9780761927716",
-				"title": "Dictionary of Marketing Communications.",
-				"bookTitle": "Leader.",
+				"title": "Dictionary of Marketing Communications",
+				"bookTitle": "Leader",
 				"url": "http://dx.doi.org/10.4135/9781452229669",
 				"pages": "113-113",
 				"libraryCatalog": "SAGE Knowledge",
@@ -365,15 +385,13 @@ var testCases = [
 				],
 				"seeAlso": [],
 				"attachments": [],
-				"abstractNote": "There is no abstract available for this title",
 				"place": "Washington, DC",
 				"date": "2010",
 				"DOI": "10.4135/9781452240060",
 				"language": "English",
 				"publisher": "CQ Press",
 				"ISBN": "9781604265378",
-				"title": "American Political Leaders 1789–2009.",
-				"series": "American Political Leaders 1789–2009.",
+				"title": "American Political Leaders 1789–2009",
 				"url": "http://dx.doi.org/10.4135/9781452240060",
 				"libraryCatalog": "SAGE Knowledge",
 				"accessDate": "CURRENT_TIMESTAMP"
@@ -388,9 +406,9 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"lastName": "Larry E. Sullivan",
-						"creatorType": "author",
-						"fieldMode": 1
+						"firstName": "Larry E.",
+						"lastName": "Sullivan",
+						"creatorType": "author"
 					}
 				],
 				"notes": [],
@@ -404,8 +422,7 @@ var testCases = [
 				"language": "English",
 				"publisher": "SAGE Publications, Inc.",
 				"ISBN": "9781412951432",
-				"title": "The SAGE Glossary of the Social and Behavioral Sciences.",
-				"series": "The SAGE Glossary of the Social and Behavioral Sciences.",
+				"title": "The SAGE Glossary of the Social and Behavioral Sciences",
 				"url": "http://dx.doi.org/10.4135/9781412972024",
 				"libraryCatalog": "SAGE Knowledge",
 				"accessDate": "CURRENT_TIMESTAMP"
@@ -420,9 +437,9 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"lastName": "Richard Fleischman",
-						"creatorType": "author",
-						"fieldMode": 1
+						"firstName": "Richard",
+						"lastName": "Fleischman",
+						"creatorType": "author"
 					}
 				],
 				"notes": [],
@@ -447,8 +464,7 @@ var testCases = [
 				"language": "English",
 				"publisher": "SAGE Publications Ltd",
 				"ISBN": "9781412918701",
-				"title": "Accounting History.",
-				"series": "Accounting History.",
+				"title": "Accounting History",
 				"url": "http://dx.doi.org/10.4135/9781446260777",
 				"libraryCatalog": "SAGE Knowledge",
 				"accessDate": "CURRENT_TIMESTAMP"
