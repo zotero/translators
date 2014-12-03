@@ -344,6 +344,11 @@ function doWeb(doc, url) {
 	//set default namespace
 	namespaces.x = doc.documentElement.namespaceURI;
 	// populate _rdfPresent, _itemType, and _prefixes
+	// As of https://github.com/zotero/zotero/commit/0cd183613f5dacc85676109c3a5c6930e3632fae
+	// globals do not seem to be isolated to individual translators, so
+	// RDF object, importantly the "itemDone" handlers, can get overridden
+	// by other translators, so we cannot reuse the RDF object from detectWeb
+	RDF = false;
 	if(!RDF) init(doc, url, function() { importRDF(doc, url) }, true);
 	else importRDF(doc, url);
 }
