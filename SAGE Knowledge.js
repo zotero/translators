@@ -2,14 +2,14 @@
 	"translatorID": "d21dcd90-c997-4e14-8fe0-353b8e19a47a",
 	"label": "SAGE Knowledge",
 	"creator": "ProQuest",
-	"target": "^https?://knowledge\\.sagepub\\.com",
+	"target": "^https?://knowledge\\.sagepub\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-12-01 16:56:14"
+	"lastUpdated": "2014-12-02 17:54:23"
 }
 
 /*
@@ -37,7 +37,9 @@ function detectWeb(doc, url) {
 			itemType = ZU.xpathText(doc, '//div[@id="mainContent"]//p[contains(@class, "docTypeIcon")]/@class');
 		}
 		itemType = ZU.trimInternal(itemType.replace(/(?:contentType)|(?:docTypeIcon)/,''));
+		
 		switch(itemType) {
+			case "iconEncyclopedia":
 			case "iconEncyclopedia-chapter":
 				return "encyclopediaArticle";
 			case "iconBook-chapter":
@@ -56,24 +58,34 @@ function detectWeb(doc, url) {
 }
 
 function getItem(doc) {
-	var url = doc.getElementById("_citeLink").href;
-	ZU.doGet(url, function(text) {
+	var url = doc.location.href;
+	var type = detectWeb(doc, url);
+	ZU.doGet(doc.getElementById("_citeLink").href, function(text) {
 		var re = /<textarea name="records".*?>([\s\S]*?)<\/textarea>/;
 		var match = re.exec(text)[1]
-					.replace(/NV\s+-\s+1\n/, "")
-					.replace(/AU\s+-\s+.+?(,? Ph\.?D\.?)|(,? Jr\.?)\n/g, function(match, p1, p2) {
-						return match.replace(p1, "").replace(p2, "");
-					});
+			.replace(/NV\s+-\s+1\n/, "")
+			.replace(/^(AU\s+-\s+.+?)(?:,? Jr\.?|,? Ph\.?D\.?)+\n/mg, '$1\n');	
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");//RIS translator
 		translator.setString(match);
 		translator.setHandler("itemDone", function (obj, item) {
-			if (item.tags.length > 10 || item.tags.length == 0) {
-				var keywords = ZU.xpathText(doc, "//div[@class='keywords']");
-				if (keywords) {
-					item.tags = keywords.split(/\s*,\s*/);
-				}
+			var keywords = ZU.xpath(doc, "//div[@class='keywords']/a").map(function (a) {
+				return ZU.trimInternal(a.textContent);
+			});
+			if (keywords.length > 0) {
+				item.tags = keywords;
 			}
+			else if (item.tags && item.tags.length > 10) {
+				 item.tags = item.tags.splice(0, 10);
+			}
+			
+			item.itemType = type;
+			item.url = url;
+			item.attachments.push({
+				title: "SAGE Knowledge snapshot",
+				mimeType: "text/html",
+				url: url
+			});
 			
 			for (var i = 0; i < item.creators.length; i++) {
 				var creator = item.creators[i];
@@ -131,6 +143,7 @@ function doWeb(doc, url) {
 			for (var j in items) {
 				urls.push(j);
 			}
+			
 			ZU.processDocuments(urls, getItem);
 		});
 	}
@@ -151,7 +164,7 @@ var testCases = [
 		"url": "http://knowledge.sagepub.com/view/students-guide-to-congress/n97.xml?rskey=TXWrZX&row=1",
 		"items": [
 			{
-				"itemType": "bookSection",
+				"itemType": "encyclopediaArticle",
 				"creators": [
 					{
 						"lastName": "Schulman",
@@ -173,18 +186,23 @@ var testCases = [
 					"party 's lead candidate"
 				],
 				"seeAlso": [],
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "SAGE Knowledge snapshot",
+						"mimeType": "text/html",
+						"url": "http://knowledge.sagepub.com/view/students-guide-to-congress/n97.xml?rskey=TXWrZX&row=1"
+					}
+				],
 				"abstractNote": "Student’s Guide to Congress is the second title in the brand new Student's Guide to the U.S. Government Series, which presents essential information about the U.S. government in a manner accessible to high school students. In a unique three-part format, these titles place at the reader’s fingertips everything they need to know about the evolution of elections, Congress, the presidency, and the Supreme Court, from the struggles to create the U.S. government in the late eighteenth century through the on-going issues of the early twenty-first century.",
 				"place": "Washington, DC",
 				"date": "2009",
 				"DOI": "10.4135/9781452240190",
 				"language": "English",
-				"numberOfVolumes": "1",
 				"publisher": "CQ Press",
 				"ISBN": "9780872895546",
 				"title": "Student's Guide to Congress",
 				"bookTitle": "Minority Leader",
-				"url": "http://dx.doi.org/10.4135/9781452240190",
+				"url": "http://knowledge.sagepub.com/view/students-guide-to-congress/n97.xml?rskey=TXWrZX&row=1",
 				"pages": "214-217",
 				"libraryCatalog": "SAGE Knowledge",
 				"accessDate": "CURRENT_TIMESTAMP"
@@ -228,7 +246,13 @@ var testCases = [
 					"for-profit school"
 				],
 				"seeAlso": [],
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "SAGE Knowledge snapshot",
+						"mimeType": "text/html",
+						"url": "http://knowledge.sagepub.com/view/debate_schoolchoice/SAGE.xml?rskey=S0HLIJ&row=1"
+					}
+				],
 				"abstractNote": "This issues-based reference set on education in the United States tackles broad, contentious topics that have prompted debate and discussion within the education community. The volumes focus on pre-school through secondary education and explore prominent and perennially important debates. This set is an essential reference resource for undergraduate students within schools of education and related fields including educational administration, educational psychology, school psychology, human development, and more. Education of America's school children always has been and always will be a hot-button issue. From what should be taught to how to pay for education to how to keep kids safe in schools, impassioned debates emerge and mushroom, both within the scholarly community and among the general public. This volume in the point/counterpoint Debating Issues in American Education reference series tackles the topic of alternative schooling and school choice. Fifteen to twenty chapters explore such varied issues as charter schools, for-profit schools, faith-based schools, magnet schools, vouchers, and more. Each chapter opens with an introductory essay by the volume editor, followed by point/counterpoint articles written and signed by invited experts, and concludes with Further Readings and Resources, thus providing readers with views on multiple sides of alternative schooling and school choice issues and pointing them toward more in-depth resources for further exploration.",
 				"place": "Thousand Oaks, CA",
 				"date": "2012",
@@ -237,7 +261,7 @@ var testCases = [
 				"publisher": "SAGE Publications, Inc.",
 				"ISBN": "9781412987950",
 				"title": "Alternative Schooling and School Choice",
-				"url": "http://dx.doi.org/10.4135/9781452218328",
+				"url": "http://knowledge.sagepub.com/view/debate_schoolchoice/SAGE.xml?rskey=S0HLIJ&row=1",
 				"libraryCatalog": "SAGE Knowledge",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
@@ -251,9 +275,9 @@ var testCases = [
 				"itemType": "bookSection",
 				"creators": [
 					{
-						"firstName" "Jan",
+						"firstName": "Jan",
 						"lastName": "Robertson",
-						"creatorType": "author",
+						"creatorType": "author"
 					}
 				],
 				"notes": [],
@@ -270,7 +294,13 @@ var testCases = [
 					"educational leadership"
 				],
 				"seeAlso": [],
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "SAGE Knowledge snapshot",
+						"mimeType": "text/html",
+						"url": "http://knowledge.sagepub.com/view/coaching-educational-leadership/n11.xml?rskey=WAuhwi&row=2"
+					}
+				],
 				"abstractNote": "Coaching Educational Leadership is about building leadership capacity in individuals, and in institutions, through enhancing professional relationships. It is based on the importance of maximizing potential and harnessing the ongoing commitment and energy needed to meet personal and professional goals. Based on over a decade of research and development, nationally and internationally, Coaching Educational Leadership brings you the empirical evidence, the principles, and the skills to be able to develop your own leadership and that of others you work with.",
 				"place": "London",
 				"date": "2008",
@@ -280,7 +310,7 @@ var testCases = [
 				"ISBN": "9781847874047",
 				"title": "Coaching Educational Leadership: Building Leadership Capacity Through Partnership",
 				"bookTitle": "Leaders Coaching Leaders",
-				"url": "http://dx.doi.org/10.4135/9781446221402",
+				"url": "http://knowledge.sagepub.com/view/coaching-educational-leadership/n11.xml?rskey=WAuhwi&row=2",
 				"pages": "151-161",
 				"libraryCatalog": "SAGE Knowledge",
 				"accessDate": "CURRENT_TIMESTAMP",
@@ -315,7 +345,13 @@ var testCases = [
 					"individual school"
 				],
 				"seeAlso": [],
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "SAGE Knowledge snapshot",
+						"mimeType": "text/html",
+						"url": "http://knowledge.sagepub.com/view/the-quick-reference-handbook-for-school-leaders/SAGE.xml?rskey=WAuhwi&row=14"
+					}
+				],
 				"abstractNote": "Distilled from years of NAHT (National Association of Head Teachers) experience of providing advice and guidance for its members in the UK, The Quick-Reference Handbook for School Leaders is a practical guide that provides an answer to the questions \"Where do I start?\" and \"Where do I look for direction?\" Written in an easy-to-read, bulleted format, the handbook is organised around key sections, each part includes brief overviews, checklists and suggestions for further reading. o Organisation and Management - the role of the Headteacher, negligence and liability, media relations, managing conflict and difficult people, effective meetings, inspection, resource management, records and information. o Teaching and Learning - curriculum, learning communities, special education, evaluation, staff development, unions, celebrating success. o Behaviour and Discipline - safe schools, code of conduct, exclusion, search and seizure, police protocols. o Health and Safety - child protection issues, occupational health & safety, risk assessments, emergency preparation, medical needs, health & safety resources. o Looking After Yourself - continuing professional development, and work-life balance. This handbook is an excellent resource for all current and aspiring senior school leaders.",
 				"place": "London",
 				"date": "2007",
@@ -324,7 +360,7 @@ var testCases = [
 				"publisher": "SAGE Publications Ltd",
 				"ISBN": "9781412934503",
 				"title": "The Quick-Reference Handbook for School Leaders",
-				"url": "http://dx.doi.org/10.4135/9781446214596",
+				"url": "http://knowledge.sagepub.com/view/the-quick-reference-handbook-for-school-leaders/SAGE.xml?rskey=WAuhwi&row=14",
 				"libraryCatalog": "SAGE Knowledge",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
@@ -335,7 +371,7 @@ var testCases = [
 		"url": "http://knowledge.sagepub.com/view/dictionary-of-marketing-communications/n1820.xml?rskey=WAuhwi&row=5",
 		"items": [
 			{
-				"itemType": "bookSection",
+				"itemType": "dictionaryEntry",
 				"creators": [
 					{
 						"firstName": "Norman A.",
@@ -346,7 +382,13 @@ var testCases = [
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "SAGE Knowledge snapshot",
+						"mimeType": "text/html",
+						"url": "http://knowledge.sagepub.com/view/dictionary-of-marketing-communications/n1820.xml?rskey=WAuhwi&row=5"
+					}
+				],
 				"abstractNote": "The Dictionary of Marketing Communications contains more than 4,000 entries, including key terms and concepts in the promotion aspect of marketing with coverage of advertising, sales promotion, public relations, direct marketing, personal selling and e-marketing. Growing out of a database of terms compiled over many years by the author for use in his marketing classes at Babson College, this dictionary is a living, growing document reflecting the changing dynamics of the marketing profession. It will be an essential reference to practitioners, managers, academics, students and individuals with an interest in marketing and promotion.",
 				"place": "Thousand Oaks, CA",
 				"date": "2004",
@@ -356,7 +398,7 @@ var testCases = [
 				"ISBN": "9780761927716",
 				"title": "Dictionary of Marketing Communications",
 				"bookTitle": "Leader",
-				"url": "http://dx.doi.org/10.4135/9781452229669",
+				"url": "http://knowledge.sagepub.com/view/dictionary-of-marketing-communications/n1820.xml?rskey=WAuhwi&row=5",
 				"pages": "113-113",
 				"libraryCatalog": "SAGE Knowledge",
 				"accessDate": "CURRENT_TIMESTAMP"
@@ -384,7 +426,13 @@ var testCases = [
 					"chair Rep."
 				],
 				"seeAlso": [],
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "SAGE Knowledge snapshot",
+						"mimeType": "text/html",
+						"url": "http://knowledge.sagepub.com/view/american-political-leaders-1789-2009/SAGE.xml?rskey=mDCULV&row=21"
+					}
+				],
 				"place": "Washington, DC",
 				"date": "2010",
 				"DOI": "10.4135/9781452240060",
@@ -392,7 +440,7 @@ var testCases = [
 				"publisher": "CQ Press",
 				"ISBN": "9781604265378",
 				"title": "American Political Leaders 1789–2009",
-				"url": "http://dx.doi.org/10.4135/9781452240060",
+				"url": "http://knowledge.sagepub.com/view/american-political-leaders-1789-2009/SAGE.xml?rskey=mDCULV&row=21",
 				"libraryCatalog": "SAGE Knowledge",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
@@ -414,7 +462,13 @@ var testCases = [
 				"notes": [],
 				"tags": [],
 				"seeAlso": [],
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "SAGE Knowledge snapshot",
+						"mimeType": "text/html",
+						"url": "http://knowledge.sagepub.com/view/behavioralsciences/SAGE.xml?rskey=DA3xPe&row=3"
+					}
+				],
 				"abstractNote": "The SAGE Glossary of the Social and Behavioral Sciences provides college and university students with a highly accessible, curriculum-driven reference work, both in print and on-line, defining the major terms needed to achieve fluency in the social and behavioral sciences. Comprehensive and inclusive, its interdisciplinary scope covers such varied fields as anthropology, communication and media studies, criminal justice, economics, education, geography, human services, management, political science, psychology, and sociology. In addition, while not a discipline, methodology is at the core of these fields and thus receives due and equal consideration. At the same time we strive to be comprehensive and broad in scope, we recognize a need to be compact, accessible, and affordable. Thus the work is organized in A-to-Z fashion and kept to a single volume of approximately 600 to 700 pages.",
 				"place": "Thousand Oaks, CA",
 				"date": "2009",
@@ -423,7 +477,7 @@ var testCases = [
 				"publisher": "SAGE Publications, Inc.",
 				"ISBN": "9781412951432",
 				"title": "The SAGE Glossary of the Social and Behavioral Sciences",
-				"url": "http://dx.doi.org/10.4135/9781412972024",
+				"url": "http://knowledge.sagepub.com/view/behavioralsciences/SAGE.xml?rskey=DA3xPe&row=3",
 				"libraryCatalog": "SAGE Knowledge",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
@@ -456,7 +510,13 @@ var testCases = [
 					"critical historiography"
 				],
 				"seeAlso": [],
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "SAGE Knowledge snapshot",
+						"mimeType": "text/html",
+						"url": "http://knowledge.sagepub.com/view/navigator-accounting-history/SAGE.xml?rskey=JOo7SV&row=1"
+					}
+				],
 				"abstractNote": "In the last twenty years accounting history literature has been enriched by the widened examination of historical events from different paradigmatic perspectives. These debates have typically pitted “traditional” historians against “critical” historians. The 47 articles in this three-volume set delineate the basic tenets of these rival paradigms. They include the work of prominent scholars from both camps. Volumes I and II reach across key managerial and financial accounting topics. Volume III draws together literature in which paradigmatic issues have been debated heatedly and those that have reflected a tendency towards consensus and joint venturing.",
 				"place": "London",
 				"date": "2006",
@@ -465,7 +525,7 @@ var testCases = [
 				"publisher": "SAGE Publications Ltd",
 				"ISBN": "9781412918701",
 				"title": "Accounting History",
-				"url": "http://dx.doi.org/10.4135/9781446260777",
+				"url": "http://knowledge.sagepub.com/view/navigator-accounting-history/SAGE.xml?rskey=JOo7SV&row=1",
 				"libraryCatalog": "SAGE Knowledge",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
