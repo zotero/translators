@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-11-15 02:04:12"
+	"lastUpdated": "2014-12-03 02:04:12"
 }
 
 /*
