@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-12-04 23:28:52"
+	"lastUpdated": "2014-12-04 23:40:48"
 }
 
 /*
@@ -91,12 +91,12 @@ function getItem(doc, url) {
 				var creator = item.creators[i];
 				if (creator.fieldMode && creator.lastName.indexOf(" of ") == -1) {
 					item.creators[i] = ZU.cleanAuthor(creator.lastName, creator.creatorType, creator.lastName.indexOf(",") > -1);
-					continue;
 				}
 				
-				if (/Jr\.?/i.test(creator.lastName)) {
+				creator = item.creators[i];
+				if (/^\s*(?:(?:Jr|Sr)\.?|I{1,3})\s*$/i.test(creator.lastName)) {
 					item.creators[i] = ZU.cleanAuthor(creator.firstName, creator.creatorType, creator.firstName.indexOf(",") != -1);
-					item.creators[i].firstName += ', ' + creator.lastName;
+					item.creators[i].firstName += ', ' + creator.lastName.trim();
 				}
 			}
 			
@@ -235,8 +235,8 @@ var testCases = [
 				"title": "Alternative Schooling and School Choice",
 				"creators": [
 					{
-						"firstName": "Allan G. Osborne",
-						"lastName": "Jr",
+						"firstName": "Allan G., Jr",
+						"lastName": "Osborne",
 						"creatorType": "author"
 					},
 					{
