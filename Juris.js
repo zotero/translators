@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-11-16 11:02:33"
+	"lastUpdated": "2014-12-03 21:49:46"
 }
 
 /*
@@ -74,8 +74,20 @@ function detectWeb(doc, url) {
 	}		
 }
 
+function addNote(originalNote, newNote) {
+	if (originalNote.length == 0) {
+		originalNote = "Additional Metadata: "+newNote;
+	}
+	else
+	{
+		originalNote += newNote;
+	}
+	return originalNote;
+}
+
 function scrapeArticle(doc, url) {
 	var item = new Zotero.Item("journalArticle");
+	var note = "";
 	
 	// scrape authors
 	var myAuthorsString = scrapeData['Autor'];
@@ -124,9 +136,12 @@ function scrapeArticle(doc, url) {
 	// regulations cited in the database for the article
 	var citedRegulations = scrapeData['Normen'];
 	if (citedRegulations) {
-		item.notes.push({note: "Normen: "+ZU.trimInternal(citedRegulations) });
+		note = addNote(note, "<h3>Normen</h3><p>" + ZU.trimInternal(citedRegulations) + "</p>");
 	}
 	
+	if (note.length != 0) {
+		item.notes.push( {note: note} );
+	}	
 	item.attachments = [{
 		title: "Snapshot",
 		document:doc
@@ -137,6 +152,7 @@ function scrapeArticle(doc, url) {
 
 function scrapeCase(doc, url) {
 	var item = new Zotero.Item('case');
+	var note = "";
 	
 	// court
 	item.court = scrapeData['Gericht'];
@@ -186,16 +202,24 @@ function scrapeCase(doc, url) {
 	// regulations cited in the database for the case
 	var basedOnRegulations = scrapeData['Normen'];
 	if (basedOnRegulations) {
-		item.notes.push({note: "Normen: "+ZU.trimInternal(basedOnRegulations) });
+		note = addNote(note, "<h3>Normen</h3><p>" + ZU.trimInternal(basedOnRegulations) + "</p>");
 	}
 	var inofficialTitle = ZU.xpathText(doc, "//div[@class='docLayoutTitel']/div/dl/dd/p");
-	if (inofficialTitle) item.notes.push({note: "Titel: "+ZU.trimInternal(inofficialTitle)});
-	
+	if (inofficialTitle) 	{
+		note = addNote(note, "<h3>Titel</h3><p>" + ZU.trimInternal(inofficialTitle) + "</p>");
+	}
 	// sources if available
 	if (ZU.xpathText(doc, "//h3[.='Fundstellen']")) {
 		var sources = ZU.xpathText(doc, "//td[@class='TableUnten']/div[2]/div[4]");
-		item.notes.push({note: "Fundstellen: "+ZU.trimInternal(sources)});
+		if (sources) {
+			note = addNote(note, "<h3>Fundstellen</h3><p>" + ZU.trimInternal(sources) + "</p>");
+		}
 	}
+	
+	if (note.length != 0) {
+		item.notes.push( {note: note} );
+	}	
+		
 	
 	item.attachments = [{
 		title: "Snapshot",
@@ -232,7 +256,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "Normen: KrWaffKontrG, AWG, StGB"
+						"note": "Additional Metadata: <h3>Normen</h3><p>KrWaffKontrG, AWG, StGB</p>"
 					}
 				],
 				"tags": [],
@@ -272,7 +296,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "Normen: Art 5 GG, Art 10 MRK, § 53 Abs 1 Nr 5 StPO, § 97 Abs 5 StPO, § 383 Abs 1 Nr 5 ZPO ... mehr"
+						"note": "Additional Metadata: <h3>Normen</h3><p>Art 5 GG, Art 10 MRK, § 53 Abs 1 Nr 5 StPO, § 97 Abs 5 StPO, § 383 Abs 1 Nr 5 ZPO ... mehr</p>"
 					}
 				],
 				"tags": [],
@@ -300,13 +324,7 @@ var testCases = [
 				"creators": [],
 				"notes": [
 					{
-						"note": "Normen: § 101 Abs 2 S 1 Nr 3 UrhG, § 101 Abs 9 S 1 UrhG, § 91 Abs 1 S 1 ZPO"
-					},
-					{
-						"note": "Titel: Urheberrechtsverletzung im Internet: Erstattungsfähigkeit der Kosten des Verfahrens gegen einen Internet-Provider auf Auskunft über die Inhaber bestimmter IP-Adressen - Deus Ex"
-					},
-					{
-						"note": "Fundstellen: NSW UrhG § 101 (BGH-intern) NSW ZPO § 91 (BGH-intern)"
+						"note": "Additional Metadata: <h3>Normen</h3><p>§ 101 Abs 2 S 1 Nr 3 UrhG, § 101 Abs 9 S 1 UrhG, § 91 Abs 1 S 1 ZPO</p><h3>Titel</h3><p>Urheberrechtsverletzung im Internet: Erstattungsfähigkeit der Kosten des Verfahrens gegen einen Internet-Provider auf Auskunft über die Inhaber bestimmter IP-Adressen - Deus Ex</p><h3>Fundstellen</h3><p>NSW UrhG § 101 (BGH-intern) NSW ZPO § 91 (BGH-intern) EBE/BGH 2014, 359-360 (Leitsatz und Gründe) WRP 2014, 1468-1469 (Leitsatz und Gründe) Magazindienst 2014, 1101-1103 (Leitsatz und Gründe)</p>"
 					}
 				],
 				"tags": [],
@@ -341,7 +359,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "Normen: § 69 BauO NW, § 633 BGB, VOB B"
+						"note": "Additional Metadata: <h3>Normen</h3><p>§ 69 BauO NW, § 633 BGB, VOB B</p>"
 					}
 				],
 				"tags": [],
@@ -369,7 +387,7 @@ var testCases = [
 				"creators": [],
 				"notes": [
 					{
-						"note": "Titel: Asylrecht Eilverfahren"
+						"note": "Additional Metadata: <h3>Normen</h3><p>§ 71a Abs 1 AsylVfG 1992</p><h3>Titel</h3><p>Behandlung eines Asylantrages als Folgeantrag, der nach Ablehnung eines in einem EU-Mitgliedstaat (hier: Ungarn) gestellten Asylantrages abgelehnt worden war</p>"
 					}
 				],
 				"tags": [],
@@ -491,13 +509,7 @@ var testCases = [
 				"creators": [],
 				"notes": [
 					{
-						"note": "Normen: § 97 Abs 1 S 1 UrhG"
-					},
-					{
-						"note": "Titel: Urheberrechtsverletzung durch Teilnahme an einer Internet-Musiktauschbörse; Haftung des Internetanschlussinhabers für Rechtsverletzungen volljähriger Familienangehöriger; tatsächliche Vermutung für eine Täterschaft des Anschlussinhabers und Umfang dessen sekundärer Darlegungslast - BearShare"
-					},
-					{
-						"note": "Fundstellen: BGHZ 200, 76-86 (Leitsatz und Gründe) NSW UrhG § 97 (BGH-intern) WM 2014, 1143-1146 (Leitsatz und Gründe) WRP 2014, 851-854 (Leitsatz und Gründe) GRUR 2014, 657-660 (Leitsatz und Gründe) CR 2014, 472-475 (Leitsatz und Gründe) Magazindienst 2014, 642-647 (Leitsatz und Gründe) MDR 2014, 849-850 (Leitsatz und Gründe) K&R 2014, 513-516 (Leitsatz und Gründe) MMR 2014, 547-550 (Leitsatz und Gründe) NJW 2014, 2360-2362 (Leitsatz und Gründe) FamRZ 2014, 1291-1293 (Leitsatz und Gründe) VuR 2014, 316-318 (Leitsatz und Gründe) ZUM 2014, 707-710 (Leitsatz und Gründe) AfP 2014, 320-324 (Leitsatz und Gründe) VersR 2014, 1007-1009 (Leitsatz und Gründe) WuB IV A § 1004 BGB 1.14 (Leitsatz und Gründe)"
+						"note": "Additional Metadata: <h3>Normen</h3><p>§ 97 Abs 1 S 1 UrhG</p><h3>Titel</h3><p>Urheberrechtsverletzung durch Teilnahme an einer Internet-Musiktauschbörse; Haftung des Internetanschlussinhabers für Rechtsverletzungen volljähriger Familienangehöriger; tatsächliche Vermutung für eine Täterschaft des Anschlussinhabers und Umfang dessen sekundärer Darlegungslast - BearShare</p><h3>Fundstellen</h3><p>BGHZ 200, 76-86 (Leitsatz und Gründe) NSW UrhG § 97 (BGH-intern) WM 2014, 1143-1146 (Leitsatz und Gründe) WRP 2014, 851-854 (Leitsatz und Gründe) GRUR 2014, 657-660 (Leitsatz und Gründe) CR 2014, 472-475 (Leitsatz und Gründe) Magazindienst 2014, 642-647 (Leitsatz und Gründe) MDR 2014, 849-850 (Leitsatz und Gründe) K&R 2014, 513-516 (Leitsatz und Gründe) MMR 2014, 547-550 (Leitsatz und Gründe) NJW 2014, 2360-2362 (Leitsatz und Gründe) FamRZ 2014, 1291-1293 (Leitsatz und Gründe) VuR 2014, 316-318 (Leitsatz und Gründe) ZUM 2014, 707-710 (Leitsatz und Gründe) AfP 2014, 320-324 (Leitsatz und Gründe) VersR 2014, 1007-1009 (Leitsatz und Gründe) WuB IV A § 1004 BGB 1.14 (Leitsatz und Gründe)</p>"
 					}
 				],
 				"tags": [],
@@ -526,13 +538,7 @@ var testCases = [
 				"creators": [],
 				"notes": [
 					{
-						"note": "Normen: EGRL 29/2001 Art 3 Abs 2, EGRL 29/2001 Art 5 Abs 1, EGRL 29/2001 Art 5 Abs 2 Buchst b, EGRL 29/2001 Art 8 Abs 2, EGRL 29/2001 Art 8 Abs 3 ... mehr"
-					},
-					{
-						"note": "Titel: Auslegung der Urheberrechtsrichtlinie auf Vorabentscheidungsersuchen eines österreichischen Gerichts: Gerichtliche Anordnung einer unbestimmten Website-Zugangssperrung gegenüber einem Anbieter von Internetzugangsdiensten wegen Urheberrechtsverletzungen"
-					},
-					{
-						"note": "Fundstellen: ABl EU 2014, Nr C 151, 2-3 (Leitsatz) GRUR 2014, 468-472 (Leitsatz und Gründe) GRUR Int 2014, 469-474 (Leitsatz und Gründe) K&R 2014, 329-333 (Leitsatz und Gründe) WRP 2014, 540-544 (Leitsatz und Gründe) EuZW 2014, 388-391 (Leitsatz und Gründe) Medien und Recht 2014, 82-87 (red. Leitsatz und Gründe) NJW 2014, 1577-1580 (Leitsatz und Gründe) RIW 2014, 373-377 (red. Leitsatz und Gründe) ZUM 2014, 494-498 (Leitsatz und Gründe) MMR 2014, 397-399 (Leitsatz und Gründe) EuGRZ 2014, 301-306 (red. Leitsatz und Gründe) CR 2014, 469-472 (Leitsatz und Gründe) EWS 2014, 225-230 (Leitsatz und Gründe)"
+						"note": "Additional Metadata: <h3>Normen</h3><p>EGRL 29/2001 Art 3 Abs 2, EGRL 29/2001 Art 5 Abs 1, EGRL 29/2001 Art 5 Abs 2 Buchst b, EGRL 29/2001 Art 8 Abs 2, EGRL 29/2001 Art 8 Abs 3 ... mehr</p><h3>Titel</h3><p>Auslegung der Urheberrechtsrichtlinie auf Vorabentscheidungsersuchen eines österreichischen Gerichts: Gerichtliche Anordnung einer unbestimmten Website-Zugangssperrung gegenüber einem Anbieter von Internetzugangsdiensten wegen Urheberrechtsverletzungen</p><h3>Fundstellen</h3><p>ABl EU 2014, Nr C 151, 2-3 (Leitsatz) GRUR 2014, 468-472 (Leitsatz und Gründe) GRUR Int 2014, 469-474 (Leitsatz und Gründe) K&R 2014, 329-333 (Leitsatz und Gründe) WRP 2014, 540-544 (Leitsatz und Gründe) EuZW 2014, 388-391 (Leitsatz und Gründe) Medien und Recht 2014, 82-87 (red. Leitsatz und Gründe) NJW 2014, 1577-1580 (Leitsatz und Gründe) RIW 2014, 373-377 (red. Leitsatz und Gründe) ZUM 2014, 494-498 (Leitsatz und Gründe) MMR 2014, 397-399 (Leitsatz und Gründe) EuGRZ 2014, 301-306 (red. Leitsatz und Gründe) CR 2014, 469-472 (Leitsatz und Gründe) EWS 2014, 225-230 (Leitsatz und Gründe)</p>"
 					}
 				],
 				"tags": [],
@@ -560,13 +566,7 @@ var testCases = [
 				"creators": [],
 				"notes": [
 					{
-						"note": "Normen: § 832 Abs 1 BGB, § 19a UrhG, § 78 Abs 1 Nr 1 UrhG, § 85 Abs 1 S 1 UrhG, § 97 UrhG"
-					},
-					{
-						"note": "Titel: Urheberrechtsverletzung im Internet: Grenzen der Aufsichtspflicht von Eltern eines 13-jährigen Kindes hinsichtlich des Verbots der Teilnahme an Internet-Tauschbörsen - Morpheus"
-					},
-					{
-						"note": "Fundstellen: Zitierungen: Entgegen OLG Köln, 23. Dezember 2009, 6 U 101/09, GRUR-RR 2010, 173; LG Hamburg, 25. Januar 2006, 308 O 58/06, MMR 2006, 700; LG Hamburg, 11. Mai 2006, 308 O 196/06; LG Hamburg, 2. August 2006, 308 O 509/09; LG München I, 19. Juni 2008, 7 O 16402/07, MMR 2008, 619 und LG Düsseldorf, 6. Juli 2011, 12 O 256/10, ZUM-RD 2011, 698; Bestätigung OLG Frankfurt, 20. Dezember 2007, 11 W 58/07, BB 2008, 229; LG Mannheim, 29. September 2006, 7 O 76/06, MMR 2007, 267; LG Mannheim, 29. September 2006, 7 O 62/06 und LG Mannheim, 30. Januar 2007, 2 O 71/06.(Rn.20)"
+						"note": "Additional Metadata: <h3>Normen</h3><p>§ 832 Abs 1 BGB, § 19a UrhG, § 78 Abs 1 Nr 1 UrhG, § 85 Abs 1 S 1 UrhG, § 97 UrhG</p><h3>Titel</h3><p>Urheberrechtsverletzung im Internet: Grenzen der Aufsichtspflicht von Eltern eines 13-jährigen Kindes hinsichtlich des Verbots der Teilnahme an Internet-Tauschbörsen - Morpheus</p><h3>Fundstellen</h3><p>Zitierungen: Entgegen OLG Köln, 23. Dezember 2009, 6 U 101/09, GRUR-RR 2010, 173; LG Hamburg, 25. Januar 2006, 308 O 58/06, MMR 2006, 700; LG Hamburg, 11. Mai 2006, 308 O 196/06; LG Hamburg, 2. August 2006, 308 O 509/09; LG München I, 19. Juni 2008, 7 O 16402/07, MMR 2008, 619 und LG Düsseldorf, 6. Juli 2011, 12 O 256/10, ZUM-RD 2011, 698; Bestätigung OLG Frankfurt, 20. Dezember 2007, 11 W 58/07, BB 2008, 229; LG Mannheim, 29. September 2006, 7 O 76/06, MMR 2007, 267; LG Mannheim, 29. September 2006, 7 O 62/06 und LG Mannheim, 30. Januar 2007, 2 O 71/06.(Rn.20)</p>"
 					}
 				],
 				"tags": [],
