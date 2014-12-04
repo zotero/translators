@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-12-02 17:54:23"
+	"lastUpdated": "2014-12-04 14:22:35"
 }
 
 /*
@@ -64,7 +64,7 @@ function getItem(doc) {
 		var re = /<textarea name="records".*?>([\s\S]*?)<\/textarea>/;
 		var match = re.exec(text)[1]
 			.replace(/NV\s+-\s+1\n/, "")
-			.replace(/^(AU\s+-\s+.+?)(?:,? Jr\.?|,? Ph\.?D\.?)+\n/mg, '$1\n');	
+			.replace(/^(AU\s+-\s+.+?)(?:,? Ph\.?D\.?)+\n/mg, '$1\n');
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");//RIS translator
 		translator.setString(match);
