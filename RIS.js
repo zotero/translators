@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-06-10 04:10:54"
+	"lastUpdated": "2014-12-07 14:52:41"
 }
 
 function detectImport() {
@@ -1233,6 +1233,12 @@ function processTag(item, tagValue, risEntry) {
 			}
 		break;
 		//PY is typically less complete than other dates. We'll store it as backup
+		case "Y1":
+			if (item.backupDate) {
+				value = undefined;
+				processFields = false;
+				break;
+			}
 		case "PY":
 			item.backupDate = {
 				field: zField[0],

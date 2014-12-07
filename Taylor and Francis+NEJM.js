@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-08-26 01:04:25"
+	"lastUpdated": "2014-12-07 14:59:05"
 }
 
 /*
@@ -192,7 +192,7 @@ var testCases = [
 				"libraryCatalog": "Taylor and Francis+NEJM",
 				"pages": "229-245",
 				"publicationTitle": "Journal of Economic Policy Reform",
-				"url": "http://www.tandfonline.com/doi/abs/10.1080/17487870802543480",
+				"url": "http://dx.doi.org/10.1080/17487870802543480",
 				"volume": "11",
 				"attachments": [
 					{
@@ -247,7 +247,7 @@ var testCases = [
 				"libraryCatalog": "Taylor and Francis+NEJM",
 				"pages": "229-245",
 				"publicationTitle": "Journal of Economic Policy Reform",
-				"url": "http://www.tandfonline.com/doi/abs/10.1080/17487870802543480",
+				"url": "http://dx.doi.org/10.1080/17487870802543480",
 				"volume": "11",
 				"attachments": [
 					{
@@ -283,7 +283,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "September 14, 2011",
+				"date": "January 1, 2013",
 				"DOI": "10.1080/00036846.2011.568404",
 				"ISSN": "0003-6846",
 				"abstractNote": "Measuring consumers’ Willingness To Pay (WTP) without considering the level of uncertainty in valuation and the consequent risk premiums will result in estimates that are biased toward lower values. This research proposes a model and method for correctly assessing WTP in cases involving valuation uncertainty. The new method, called Risk Adjustment Mechanism (RAM), is presented theoretically and demonstrated empirically. It is shown that the RAM outperforms the traditional method for assessing WTP, especially in a context of a nonmarket good such as a totally new product.",
@@ -343,7 +343,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "September 26, 2012",
+				"date": "September 27, 2012",
 				"DOI": "10.1056/NEJMp1207920",
 				"ISSN": "0028-4793",
 				"abstractNote": "Four fundamental principles drive public funding for family planning. First, unintended pregnancy is associated with negative health consequences, including reduced use of prenatal care, lower breast-feeding rates, and poor maternal and neonatal outcomes.1,2 Second, governments realize substantial cost savings by investing in family planning, which reduces the rate of unintended pregnancies and the costs of prenatal, delivery, postpartum, and infant care.3 Third, all Americans have the right to choose the timing and number of their children. And fourth, family planning enables women to attain their educational and career goals and families to provide for their children. These principles led . . .",
