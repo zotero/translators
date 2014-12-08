@@ -211,7 +211,7 @@ function importPNX(text) {
 	
 	var item = new Zotero.Item();
 	
-	var itemType = ZU.xpathText(doc, '//display/type');
+	var itemType = ZU.xpathText(doc, '//display/type|//search/rsrctype|//facets/rsrctype');
 	if(!itemType) {
 		throw new Error('Could not locate item type');
 	}
@@ -258,10 +258,10 @@ function importPNX(text) {
 		creators = ZU.xpath(doc, '//display/creator'); 
 	}
 	
-	if(ZU.xpathText(doc, '//display/contributor')) {
-		contributors = ZU.xpath(doc, '//display/contributor'); 
+	if(ZU.xpathText(doc, '//display/contributor|//search/creatorcontrib')) {
+		contributors = ZU.xpath(doc, '//display/contributor|//search/creatorcontrib'); 
 	}
-	
+
 	if(!creators && contributors) { // <creator> not available using <contributor> as author instead
 		creators = contributors;
 		contributors = null;
@@ -316,11 +316,12 @@ function importPNX(text) {
 	}
 	
 	// the three letter ISO codes that should be in the language field work well:
-	item.language = ZU.xpathText(doc, '//display/language');
+	item.language = ZU.xpathText(doc, '//display/language|//facets/language');
 	
 	var pages = ZU.xpathText(doc, '//display/format');
 	if(pages && pages.search(/[0-9]+/) != -1) {
 		pages = pages.replace(/[\(\)\[\]]/g, "").match(/[0-9]+/);
+		// And then we just hope pages are the only number mentioned in the format
 		item.pages = item.numPages = pages[0];
 	}
 
@@ -335,7 +336,7 @@ function importPNX(text) {
 	
 	item.edition = ZU.xpathText(doc, '//display/edition');
 	
-	var subjects = ZU.xpath(doc, '//search/subject');
+	var subjects = ZU.xpath(doc, '//display/display|//search/subject');
 	for(var i=0, n=subjects.length; i<n; i++) {
 		item.tags.push(ZU.trimInternal(subjects[i].textContent));
 	}
