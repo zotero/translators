@@ -25,6 +25,7 @@ Primos with showPNX.jsp installed:
 (3) http://limo.libis.be/primo_library/libweb/action/search.do?vid=LIBISnet&fromLogin=true
 (4.a) http://virtuose.uqam.ca/primo_library/libweb/action/search.do?vid=UQAM
 (5) http://searchit.princeton.edu/primo_library/libweb/action/dlDisplay.do?docId=PRN_VOYAGER2778598&vid=PRINCETON&institution=PRN
+(6) http://digitale.beic.it/primo_library/libweb/action/search.do?vid=beic
 */
 
 function getSearchResults(doc) {
@@ -274,6 +275,7 @@ function importPNX(text) {
 		if(creators[i]) {
 			var creator  = ZU.unescapeHTML(creators[i].textContent).split(/\s*;\s*/);
 			for(j in creator){
+				creator[j] = creator[j].replace(/\([\d\sabcfilr.]*[-–][\d\abcfilr.]*\)/gi, '');
 				creator[j] = creator[j].replace(/\d{4}-(\d{4})?/g, '');
 				item.creators.push(Zotero.Utilities.cleanAuthor(creator[j], "author", true));
 			}			
@@ -396,6 +398,38 @@ var testCases = [
 				"shortTitle": "In Zweifelsfällen entscheidet die Wahrheit"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"defer": true,
+		"url": "http://digitale.beic.it/primo_library/libweb/action/display.do?doc=39bei_digitool4783627&vid=beic",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Muhammad",
+						"lastName": "al-Battani",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Stelle fisse - Novae"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "De scientia stellarum",
+				"place": "Bologna",
+				"publisher": "Benacci, Vittorio, eredi",
+				"date": "1645",
+				"language": "lat",
+				"numPages": [],
+				"ISBN": [],
+				"libraryCatalog": "Primo",
+				"shortTitle": "De scientia stellarum"
+			}
+		]
 	}
-]
+];
 /** END TEST CASES **/
