@@ -5,11 +5,11 @@
 	"target": "^https?://([^/]+\\.)?summon\\.serialssolutions\\.com/",
 	"minVersion": "4.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 150,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-12-01 20:45:09"
+	"lastUpdated": "2014-12-08 15:45:09"
 }
 
 /*
