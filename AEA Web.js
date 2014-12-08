@@ -9,7 +9,7 @@
     "inRepository": true,
     "translatorType": 4,
     "browserSupport": "gcsb",
-    "lastUpdated": "2014-11-26 06:33:27"
+    "lastUpdated": "2014-12-08 06:33:27"
 }
 
 /*
@@ -47,10 +47,8 @@ function doWeb(doc, url) {
         var title;
 
         var titles = doc.evaluate('//a[contains(@href, "articles.php?doi") and @style="font-weight:bold;"]', doc, null, XPathResult.ANY_TYPE, null);
-        if (titles.iterateNext()) {
-            while (title = titles.iterateNext()) {
-                items[title.href] = title.textContent;
-            }
+        while (title = titles.iterateNext()) {
+            items[title.href] = title.textContent;
         }
 
         Zotero.selectItems(items, function(items) {
