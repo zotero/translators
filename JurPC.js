@@ -9,12 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-01-09 15:36:32"
+	"lastUpdated": "2014-12-21 21:21:13"
 }
 
 function detectWeb(doc, url) {
 	//prevent Zotero from throwing an error here
-		if (ZU.xpathText(doc, '//h2[1]').indexOf("Urteil vom")!=-1){
+		var firstLine =  ZU.xpathText(doc, '//h2[1]');
+		if ((firstLine.indexOf("Urteil vom")!=-1) ||  (firstLine.indexOf("Beschluss vom")!=-1)) {
 				return "case";
 		}
 		else{
@@ -65,35 +66,66 @@ function doWeb(doc, url) {
 				newArticle.complete();
 		} else {
 				//Case
-
-				//Zotero.debug("Ok, we have an JurPC Case");
-				var authors = '//h2[1]';
-				var docNumber = '//h2[2]';
-				var title = '//h2[3]';
-				var webdoktext = '//h3';
-				var authors = ZU.xpathText(doc, authors);
-				var title = ZU.xpathText(doc, title);
-
-				var cite = ZU.xpathText(doc, webdoktext);
-				//Zotero.debug(doctype);
-				 //Zotero.debug(webdoktext);
-				var year = cite.match(/\/(\d{4}),/)[1];
-				var docNumber = ZU.xpathText(doc, docNumber)
-				var webdok = cite.match(/Dok. (\d+)\//)[1];
-				var webabs = cite.match(/Abs.\s*[\d\-\s]+/)[0].trim();
-				
 				var newArticle = new Zotero.Item('case');
 
-				newArticle.title = title;
-				newArticle.caseName = title;
-				newArticle.docketNumber = docNumber;
-				newArticle.volume =  "JurPC WebDok " + webdok + "/" + year;
-				newArticle.pages = webabs ;
+				// all information about the case are stored in h2-elements.
+				var information = ZU.xpath(doc, '//h2');
+				var caseInformation = [];
+				for (var i=0; i<information.length; i++) {
+					caseInformation[i] = information[i].textContent;
+				}
+								
+				// does the first row contain court, type of decision and date? Then clean up data! 
+				if ((caseInformation[0].indexOf("Urteil vom")!=-1) || (caseInformation[0].indexOf("Beschluss vom")!=-1)) {
+					var i = caseInformation[0].indexOf("Urteil vom");
+					if (i == -1) {
+						i = caseInformation[0].indexOf("Beschluss vom")
+					}
+					caseInformation.splice(1, 0, caseInformation[0].substr(i, information[0].textContent.length));
+					caseInformation[0] = caseInformation[0].substr(0, i);
+				}
+				
+				newArticle.title = caseInformation[3];
+				newArticle.court = caseInformation[0];
+				newArticle.caseName = newArticle.title;
+				newArticle.docketNumber = caseInformation[2];
+
+				var webdoktext = '//h3';			
+				var cite = ZU.xpathText(doc, webdoktext);
+				var year = cite.match(/\/(\d{4})/);
+				if (year != null) {
+					year = year[1];
+				}
+				var webdok = cite.match(/Dok. (\d+)\//);
+				if (webdok != null) {
+					webdok = webdok[1];
+				}
+				var webabs = cite.match(/Abs.\s*[\d\-\s]+/);
+				if (webabs != null) {
+					webabs = webabs[0].trim();
+				}
+				newArticle.reporter = "JurPC WebDok";
+				if (webdok != null && year != null) {
+					newArticle.reporterVolume =  " " + webdok + "/" + year;
+				}
+				
+				newArticle.pages = webabs;
 				newArticle.url = url;
-				var aus = authors.split("Urteil vom");
-				newArticle.court = aus[0];
-				if (aus[1]) newArticle.date = aus[1];
-				else newArticle.date = year;
+
+				var date = caseInformation[1].match(/(\d\d?)\.\s*(\d\d?)\.\s*(\d\d\d\d)/);
+				if (date != null) {
+					newArticle.dateDecided = date[3] + "-" + date[2] + "-" + date[1];
+				}
+				
+				// store type of decision
+				if (/Beschluss./i.test(caseInformation[1])) {
+					newArticle.extra = "{:genre: Beschl.}";
+				}
+				else if (/Urteil/i.test(caseInformation[1])) {
+						newArticle.extra = "{:genre: Urt.}";
+				}
+				
+				
 				newArticle.language = "de-DE";
 				newArticle.attachments = [{document: doc, title: "JurPC SNapshot", mimeType: "text/html"}];
 				newArticle.complete();
@@ -107,6 +139,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Die datenschutzrechtliche Einwilligung des Beschäftigten",
 				"creators": [
 					{
 						"firstName": "Johannes",
@@ -114,25 +147,21 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"journalAbbreviation": "JurPC",
+				"language": "de-DE",
+				"libraryCatalog": "JurPC",
+				"pages": "Abs. 1 - 92",
+				"url": "http://www.jurpc.de/jurpc/show?id=20110132",
+				"volume": "WebDok 132/2011",
 				"attachments": [
 					{
 						"title": "JurPC SNapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Die datenschutzrechtliche Einwilligung des Beschäftigten",
-				"journal": "JurPC",
-				"journalAbbreviation": "JurPC",
-				"year": "2011",
-				"volume": "WebDok 132/2011",
-				"pages": "Abs. 1 - 92",
-				"url": "http://www.jurpc.de/jurpc/show?id=20110132",
-				"language": "de-DE",
-				"libraryCatalog": "JurPC",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -142,27 +171,83 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "case",
+				"caseName": "OEM-Version",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"dateDecided": "2000-07-06",
+				"court": "BGH",
+				"docketNumber": "I ZR 244/97",
+				"extra": "{:genre: Urt.}",
+				"firstPage": "Abs. 1 - 36",
+				"language": "de-DE",
+				"reporter": "JurPC WebDok",
+				"reporterVolume": "220/2000",
+				"url": "http://www.jurpc.de/jurpc/show?id=20000220",
 				"attachments": [
 					{
 						"title": "JurPC SNapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"title": "OEM-Version",
-				"caseName": "OEM-Version",
-				"docketNumber": "I ZR 244/97",
-				"volume": "JurPC WebDok 220/2000",
-				"pages": "Abs. 1 - 36",
-				"url": "http://www.jurpc.de/jurpc/show?id=20000220",
-				"court": "BGH",
-				"date": "06.07.2000",
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.jurpc.de/jurpc/show?id=20140193",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "Zur Haftung des Domainregistrars für Domaininhalte",
+				"creators": [],
+				"dateDecided": "2014-10-22",
+				"court": "Saarländisches Oberlandesgericht",
+				"docketNumber": "1 U 25/14",
+				"extra": "{:genre: Urt.}",
 				"language": "de-DE",
-				"libraryCatalog": "JurPC",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"reporter": "JurPC WebDok",
+				"reporterVolume": "193/2014",
+				"url": "http://www.jurpc.de/jurpc/show?id=20140193",
+				"attachments": [
+					{
+						"title": "JurPC SNapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.jurpc.de/jurpc/show?id=20140165",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "Deus Ex",
+				"creators": [],
+				"dateDecided": "2014-05-15",
+				"court": "BGH",
+				"docketNumber": "I ZB 71/13",
+				"extra": "{:genre: Beschl.}",
+				"firstPage": "Abs. 1 - 18",
+				"language": "de-DE",
+				"reporter": "JurPC WebDok",
+				"reporterVolume": "165/2014",
+				"url": "http://www.jurpc.de/jurpc/show?id=20140165",
+				"attachments": [
+					{
+						"title": "JurPC SNapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
