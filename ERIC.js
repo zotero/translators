@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-09-26 19:30:32"
+	"lastUpdated": "2014-12-14 16:36:31"
 }
 
 /*
@@ -65,8 +65,10 @@ function doWeb(doc,url) {
 		ZU.processDocuments(urls, doWeb);
 		});
 	} else {
-		var abstract = ZU.xpathText(doc, '//div[@class="abstract"]').replace(/^\|/, "");
+		var abstract = ZU.xpathText(doc, '//div[@class="abstract"]');
 		//Z.debug(abstract)
+		var DOI = ZU.xpathText(doc, '//a[contains(text(), "Direct link")]/@href');
+		Z.debug(DOI)
 		var type = ZU.xpathText(doc, '//meta[@name="source"]/@content');
 		// We call the Embedded Metadata translator to do the actual work
 		var translator = Zotero.loadTranslator('web');
@@ -74,7 +76,7 @@ function doWeb(doc,url) {
 		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 		translator.setDocument(doc);
 		translator.setHandler('itemDone', function(obj, item) {
-			item.abstractNote = abstract;
+			if (abstract) item.abstractNote = abstract.replace(/^\|/, "");
 			//the metadata isn't good enough to properly distinguish item types. Anything that's non journal we treat as a book
 			if (type && type.indexOf("Non-Journal")!=-1) item.itemType = "book";
 			item.title = item.title.replace(/.\s*$/, "");
@@ -84,7 +86,10 @@ function doWeb(doc,url) {
 			}
 			if (item.ISBN) item.ISBN = ZU.cleanISBN(item.ISBN);
 			if (item.publisher) item.publisher = item.publisher.replace(/\..+/, "");
-			
+			if (DOI){
+				DOImatch = decodeURIComponent(DOI).match(/doi\.org\/(10\..+)/);
+				if (DOImatch) item.DOI = DOImatch[1];
+			}
 			// Only include URL if full text is hosted on ERIC
 			if (!ZU.xpath(doc, '//div[@id="r_colR"]//img[@alt="PDF on ERIC"]').length) {
 				delete item.url;
@@ -122,15 +127,14 @@ var testCases = [
 					}
 				],
 				"date": "2012/01/00",
+				"DOI": "10.1177/1066480711425472",
 				"ISSN": "1066-4807",
 				"abstractNote": "The purpose of this article is to provide specific guidelines for child-centered play therapists to set behavioral outcome goals to effectively work with families and to meet the demands for accountability in the managed care environment. The child-centered play therapy orientation is the most widely practiced approach among play therapists who identify a specific theoretical orientation. While information about setting broad objectives is addressed using this approach to therapy, explicit guidelines for setting behavioral goals, while maintaining the integrity of the child-centered theoretical orientation, are needed. The guidelines are presented in three phases of parent consultation: (a) the initial engagement with parents, (b) the ongoing parent consultations, and (c) the termination phase. In keeping with the child-centered approach, the authors propose to work with parents from a person-centered orientation and seek to appreciate how cultural influences relate to parents' concerns and goals for their children. A case example is provided to demonstrate how child-centered play therapists can accomplish the aforementioned goals.",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"issue": "1",
 				"language": "en",
 				"libraryCatalog": "ERIC",
 				"pages": "51-57",
 				"publicationTitle": "Family Journal: Counseling and Therapy for Couples and Families",
-				"publisher": "SAGE Publications",
 				"volume": "20",
 				"attachments": [
 					{
