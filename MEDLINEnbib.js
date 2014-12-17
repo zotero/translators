@@ -6,13 +6,10 @@
 	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,
-	"configOptions": {
-		"dataMode": "line"
-	},
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-03-12 04:43:57"
+	"lastUpdated": "2014-12-17 22:44:27"
 }
 
 /*

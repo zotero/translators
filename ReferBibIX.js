@@ -3,19 +3,16 @@
 	"label": "Refer/BibIX",
 	"creator": "Simon Kornblith",
 	"target": "txt",
-	"minVersion": "1.0.0b4.r5",
+	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
-	"configOptions": {
-		"dataMode": "line"
-	},
 	"displayOptions": {
 		"exportCharset": "UTF-8"
 	},
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-06-05 08:00:52"
+	"lastUpdated": "2014-12-17 22:35:48"
 }
 
 function detectImport() {
