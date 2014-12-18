@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-12-18 06:00:13"
+	"lastUpdated": "2014-12-18 07:00:13"
 }
 
 function detectImport() {
@@ -734,7 +734,7 @@ var RISReader = new function() {
 		//  because we may have an empty line, which could be meaningful
 		if(_lineBuffer.length) return _lineBuffer.pop();
 		var line = Zotero.read();
-		if (line && line.indexOf('\u2028') != -1) {
+		if (line && (line.indexOf('\u2028') != -1 || line.indexOf('\u2029') != -1)) {
 			// Apparently some services think that it's cool to break up single
 			// lines in RIS into shorter lines using Unicode "LINE SEPARATOR"
 			// character. Well, that sucks for us, because . (dot) in regexp does
