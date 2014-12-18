@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-10-10 08:16:32"
+	"lastUpdated": "2014-12-18 04:44:52"
 }
 
 function detectWeb(doc, url) {
@@ -172,16 +172,20 @@ function parseResponse(text) {
 	// * add location where the photo was taken into Extra?
 	
 	// We can build the original photo URL manually. See https://www.flickr.com/services/api/misc.urls.html
-	var fileUrl = 'https://farm' + photo.getAttribute('farm') + '.staticflickr.com/'
-	 + photo.getAttribute('server') + '/'
-	 + photo.getAttribute('id') + '_' + photo.getAttribute('originalsecret')
-	 + '_o.' + photo.getAttribute('originalformat');
-	 
-	newItem.attachments.push({
-		title: newItem.title,
-		url: fileUrl,
-		mimeType: 'image/' + photo.getAttribute('originalformat') // jpg|gif|png
-	});
+	var secret = photo.getAttribute('originalsecret');
+	var originalFormat = photo.getAttribute('originalformat');
+	if (secret && originalFormat) { // Both of these appear to be false if the owner disables downloading
+		var fileUrl = 'https://farm' + photo.getAttribute('farm') + '.staticflickr.com/'
+		 + photo.getAttribute('server') + '/'
+		 + photo.getAttribute('id') + '_' + secret
+		 + '_o.' + originalFormat;
+		 
+		newItem.attachments.push({
+			title: newItem.title,
+			url: fileUrl,
+			mimeType: 'image/' + photo.getAttribute('originalformat') // jpg|gif|png
+		});
+	}
 	
 	newItem.complete();
 }
