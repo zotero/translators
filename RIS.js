@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-12-07 14:52:41"
+	"lastUpdated": "2014-12-18 06:00:13"
 }
 
 function detectImport() {
@@ -733,7 +733,19 @@ var RISReader = new function() {
 		// Don't use shortcuts like _lineBuffer.pop() || Zotero.read(),
 		//  because we may have an empty line, which could be meaningful
 		if(_lineBuffer.length) return _lineBuffer.pop();
-		return Zotero.read();
+		var line = Zotero.read();
+		if (line && line.indexOf('\u2028') != -1) {
+			// Apparently some services think that it's cool to break up single
+			// lines in RIS into shorter lines using Unicode "LINE SEPARATOR"
+			// character. Well, that sucks for us, because . (dot) in regexp does
+			// not match this character. We also probably don't want it in the
+			// metadata, so clean it up here.
+			// e.g. http://informahealthcare.com/doi/full/10.3109/07434618.2014.906498
+			// (an Atypon system)
+			// Also include paragraph separator, though no live example available.
+			line = line.replace(/[\u2028\u2029]/g, ' ');
+		}
+		return line;
 	}
 };
 
