@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-12-21 21:21:13"
+	"lastUpdated": "2014-12-22 14:05:09"
 }
 
 function detectWeb(doc, url) {
@@ -30,43 +30,48 @@ function doWeb(doc, url) {
 		if (detectWeb(doc, url) == "journalArticle") {
 
 				// Aufsatz gefunden
+				var item = new Zotero.Item('journalArticle');
 
-				//Zotero.debug("Ok, we have an JurPC Article");
-				var authors = '//h2[1]';
-				var title = '//h2[2]';
-				var webdoktext = '//h3';
-				var authors = ZU.xpathText(doc, authors);
-				var title = ZU.xpathText(doc, title);
-
-				var cite = ZU.xpathText(doc, webdoktext);
-				//Zotero.debug(doctype);
-				 //Zotero.debug(webdoktext);
-				var year = cite.match(/\/(\d{4}),/)[1];
-
-				//Get Year & WebDok Number from Url
-				var webdok = cite.match(/Dok. (\d+)\//)[1];
-				var webabs = cite.match(/Abs.\s*[\d\-\s]+/)[0].trim();
+				// Authors and title are in h2-elements	
+				var information = ZU.xpath(doc, '//h2');				
 				
-				var newArticle = new Zotero.Item('journalArticle');
-
-				newArticle.title = title;
-				newArticle.journal = "JurPC";
-				newArticle.journalAbbreviation = "JurPC";
-				newArticle.year = year;
-				newArticle.volume =  "WebDok " + webdok + "/" + year;
-				newArticle.pages = webabs ;
-				newArticle.url = url;
-				newArticle.language = "de-DE";
-				newArticle.attachments = [{document: doc, title: "JurPC SNapshot", mimeType: "text/html"}];
-				var aus = authors.split("/");
+				var aus = information[0].textContent.split("/");
 				for (var i=0; i< aus.length ; i++) {
 						aus[i] = aus[i].replace(/\*/, "").trim();
-						newArticle.creators.push(Zotero.Utilities.cleanAuthor(aus[i], "author"));
+						item.creators.push(Zotero.Utilities.cleanAuthor(aus[i], "author"));
 				}
-				newArticle.complete();
+	
+				item.title = information[1].textContent;
+				
+				// clean up title information if necessary, e.g. for article at http://www.jurpc.de/jurpc/show?id=20140194
+				item.title = item.title.replace(/\s+/g, " ");
+
+				var webdoktext = ZU.xpathText(doc, '//h3');
+				var year = webdoktext.match(/\/(\d{4}),/)[1];
+
+				//Get Year & WebDok Number from Url
+				var webdok = webdoktext.match(/Dok. (\d+)\//)[1];
+				var webabs = webdoktext.match(/Abs.\s*[\d\-\s]+/)[0].trim();
+				
+				var doi = ZU.xpathText(doc, '//span[@class="resultinfo left"]')
+				if (doi != null) {
+					item.DOI = doi.substr(doi.indexOf("DOI ")+4, doi.length);
+				}
+				
+
+				item.journal = "JurPC";
+				item.journalAbbreviation = "JurPC";
+				item.year = year;
+				if (webdok != null && year != null) {
+					item.volume =  "WebDok " + webdok + "/" + year;
+				}
+				item.url = url;
+				item.language = "de-DE";
+				item.attachments = [{document: doc, title: "JurPC Snapshot", mimeType: "text/html"}];
+				item.complete();
 		} else {
 				//Case
-				var newArticle = new Zotero.Item('case');
+				var item = new Zotero.Item('case');
 
 				// all information about the case are stored in h2-elements.
 				var information = ZU.xpath(doc, '//h2');
@@ -85,10 +90,10 @@ function doWeb(doc, url) {
 					caseInformation[0] = caseInformation[0].substr(0, i);
 				}
 				
-				newArticle.title = caseInformation[3];
-				newArticle.court = caseInformation[0];
-				newArticle.caseName = newArticle.title;
-				newArticle.docketNumber = caseInformation[2];
+				item.title = caseInformation[3];
+				item.court = caseInformation[0];
+				item.caseName = item.title;
+				item.docketNumber = caseInformation[2];
 
 				var webdoktext = '//h3';			
 				var cite = ZU.xpathText(doc, webdoktext);
@@ -100,35 +105,35 @@ function doWeb(doc, url) {
 				if (webdok != null) {
 					webdok = webdok[1];
 				}
-				var webabs = cite.match(/Abs.\s*[\d\-\s]+/);
-				if (webabs != null) {
-					webabs = webabs[0].trim();
-				}
-				newArticle.reporter = "JurPC WebDok";
+
+				item.reporter = "JurPC WebDok";
 				if (webdok != null && year != null) {
-					newArticle.reporterVolume =  " " + webdok + "/" + year;
+					item.reporterVolume =  " " + webdok + "/" + year;
 				}
 				
-				newArticle.pages = webabs;
-				newArticle.url = url;
+				item.url = url;
 
 				var date = caseInformation[1].match(/(\d\d?)\.\s*(\d\d?)\.\s*(\d\d\d\d)/);
 				if (date != null) {
-					newArticle.dateDecided = date[3] + "-" + date[2] + "-" + date[1];
+					item.dateDecided = date[3] + "-" + date[2] + "-" + date[1];
 				}
 				
 				// store type of decision
 				if (/Beschluss./i.test(caseInformation[1])) {
-					newArticle.extra = "{:genre: Beschl.}";
+					item.extra = "{:genre: Beschl.}";
 				}
 				else if (/Urteil/i.test(caseInformation[1])) {
-						newArticle.extra = "{:genre: Urt.}";
+						item.extra = "{:genre: Urt.}";
 				}
 				
+				var doi = ZU.xpathText(doc, '//span[@class="resultinfo left"]')
+				if (doi != null) {
+					item.DOI = doi.substr(doi.indexOf("DOI ")+4, doi.length);
+				}
 				
-				newArticle.language = "de-DE";
-				newArticle.attachments = [{document: doc, title: "JurPC SNapshot", mimeType: "text/html"}];
-				newArticle.complete();
+				item.language = "de-DE";
+				item.attachments = [{document: doc, title: "JurPC Snapshot", mimeType: "text/html"}];
+				item.complete();
 	}
 }
 /** BEGIN TEST CASES **/
@@ -147,15 +152,15 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"DOI": "10.7328/jurpcb/2011268130",
 				"journalAbbreviation": "JurPC",
 				"language": "de-DE",
 				"libraryCatalog": "JurPC",
-				"pages": "Abs. 1 - 92",
 				"url": "http://www.jurpc.de/jurpc/show?id=20110132",
 				"volume": "WebDok 132/2011",
 				"attachments": [
 					{
-						"title": "JurPC SNapshot",
+						"title": "JurPC Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -177,14 +182,13 @@ var testCases = [
 				"court": "BGH",
 				"docketNumber": "I ZR 244/97",
 				"extra": "{:genre: Urt.}",
-				"firstPage": "Abs. 1 - 36",
 				"language": "de-DE",
 				"reporter": "JurPC WebDok",
 				"reporterVolume": "220/2000",
 				"url": "http://www.jurpc.de/jurpc/show?id=20000220",
 				"attachments": [
 					{
-						"title": "JurPC SNapshot",
+						"title": "JurPC Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -212,7 +216,7 @@ var testCases = [
 				"url": "http://www.jurpc.de/jurpc/show?id=20140193",
 				"attachments": [
 					{
-						"title": "JurPC SNapshot",
+						"title": "JurPC Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -234,14 +238,45 @@ var testCases = [
 				"court": "BGH",
 				"docketNumber": "I ZB 71/13",
 				"extra": "{:genre: Beschl.}",
-				"firstPage": "Abs. 1 - 18",
 				"language": "de-DE",
 				"reporter": "JurPC WebDok",
 				"reporterVolume": "165/2014",
 				"url": "http://www.jurpc.de/jurpc/show?id=20140165",
 				"attachments": [
 					{
-						"title": "JurPC SNapshot",
+						"title": "JurPC Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.jurpc.de/jurpc/show?id=20140194",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Tagungsbericht über den 3. IT-Rechtstag in Frankfurt am Main",
+				"creators": [
+					{
+						"firstName": "Wolfgang",
+						"lastName": "Kuntz",
+						"creatorType": "author"
+					}
+				],
+				"DOI": "10.7328/jurpcb20142912190",
+				"journalAbbreviation": "JurPC",
+				"language": "de-DE",
+				"libraryCatalog": "JurPC",
+				"url": "http://www.jurpc.de/jurpc/show?id=20140194",
+				"volume": "WebDok 194/2014",
+				"attachments": [
+					{
+						"title": "JurPC Snapshot",
 						"mimeType": "text/html"
 					}
 				],
