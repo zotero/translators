@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-12-23 02:39:47"
+	"lastUpdated": "2014-12-23 06:17:42"
 }
 
 function detectWeb(doc, url) {
@@ -209,18 +209,21 @@ function processRIS(text, jid) {
 function finalizeItem(item) {
 	// Validate DOI
 	Zotero.debug("Validating DOI " + item.DOI);
-	ZU.doGet('//doi.crossref.org/doiRA/' + item.DOI, function(text) {
-		try {
-			var ra = JSON.parse(text);
-			if (!ra || !ra[0] || ra[0].RA == "DOI does not exist") {
+	ZU.doGet('//api.crossref.org/works/' + encodeURIComponent(item.DOI) + '/agency',
+		function(text) {
+			try {
+				var ra = JSON.parse(text);
+				if (!ra || ra.status != "ok") {
+					delete item.DOI;
+				}
+			} catch(e) {
 				delete item.DOI;
+				Zotero.debug("Could not parse JSON. Probably invalid DOI");
 			}
-		} catch(e) {
-			Zotero.debug(e);
+		}, function() {
+			item.complete();
 		}
-	}, function() {
-		item.complete();
-	});
+	);
 }
 	
 /** BEGIN TEST CASES **/
