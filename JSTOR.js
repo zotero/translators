@@ -2,14 +2,14 @@
 	"translatorID": "d921155f-0186-1684-615c-ca57682ced9b",
 	"label": "JSTOR",
 	"creator": "Simon Kornblith, Sean Takats, Michael Berkowitz, and Eli Osherovich",
-	"target": "https?://([^/]+\\.)?jstor\\.org/(action/(showArticle|doBasicSearch|doAdvancedSearch|doLocatorSearch|doAdvancedResults|doBasicResults)|stable/|pss/|openurl\\?|sici\\?)",
+	"target": "https?://([^/]+\\.)?jstor\\.org/(discover/|action/(showArticle|doBasicSearch|doAdvancedSearch|doLocatorSearch|doAdvancedResults|doBasicResults)|stable/|pss/|openurl\\?|sici\\?)",
 	"minVersion": "3.0.12",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-12-23 06:17:42"
+	"lastUpdated": "2014-12-23 20:18:32"
 }
 
 function detectWeb(doc, url) {
@@ -66,7 +66,7 @@ function getFavLink(doc) {
 }
 
 function getJID(url) {
-	var m = url.match(/(?:pss|stable(?:\/info)?)\/(10\.\d+(?:%2F|\/)[^?]+|[a-z]*\d+)/);
+	var m = url.match(/(?:discover|pss|stable(?:\/info)?)\/(10\.\d+(?:%2F|\/)[^?]+|[a-z]*\d+)/);
 	if (m) {
 		var jid = decodeURIComponent(m[1]);
 		if (jid.search(/10\.\d+\//) != 0) {
@@ -473,6 +473,44 @@ var testCases = [
 				"shortTitle": "“Judaism” as Political Concept",
 				"url": "http://www.jstor.org/stable/10.1525/rep.2014.128.1.1",
 				"volume": "128",
+				"attachments": [
+					{
+						"title": "JSTOR Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.jstor.org/discover/10.1086/378695?uid=3739832&uid=2&uid=4&uid=3739256&sid=21105503736473",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Salaries, Turnover, and Performance in the Federal Criminal Justice System",
+				"creators": [
+					{
+						"lastName": "Boylan",
+						"creatorType": "author",
+						"firstName": "Richard T."
+					}
+				],
+				"date": "April 1, 2004",
+				"DOI": "10.1086/378695",
+				"ISSN": "0022-2186",
+				"abstractNote": "Abstract The effect of salaries on turnover and performance is analyzed for U.S. attorneys in office during the years 1969 through 1999. Lower salaries are shown to increase the turnover of U.S. attorneys, and higher turnover is shown to reduce output. Two features distinguish U.S. attorneys (chief federal prosecutors) from other public‐ and private‐sector employees. First, since 1977, U.S. attorney salaries have been tied to the salaries of members of Congress and are thus exogenously determined. Second, there are public measures for the output of U.S. attorneys. Both features simplify the study of the effect of salaries on turnover and performance.",
+				"issue": "1",
+				"journalAbbreviation": "Journal of Law and Economics",
+				"libraryCatalog": "JSTOR",
+				"pages": "75-92",
+				"publicationTitle": "Journal of Law and Economics",
+				"rights": "Copyright © 2004 The University of Chicago",
+				"url": "http://www.jstor.org/stable/10.1086/378695",
+				"volume": "47",
 				"attachments": [
 					{
 						"title": "JSTOR Full Text PDF",
