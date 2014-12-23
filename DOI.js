@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-10-30 22:11:11"
+	"lastUpdated": "2014-12-23 02:53:47"
 }
 
 var items = {};
@@ -25,8 +25,13 @@ function getDOIs(doc) {
 	// characters except for control characters. Here, we're cheating
 	// by not allowing ampersands, to fix an issue with getting DOIs
 	// out of URLs.
+  // Additionally, all content inside <noscript> is picked up as text()
+  // by the xpath, which we don't necessarily want to exclude, but
+  // that means that we can get DOIs inside node attributes and we should
+	// exclude quotes in this case.
+  // DOI should never end with a period or a comma (we hope)
 	// Description at: http://www.doi.org/handbook_2000/appendix_1.html#A1-4
-	const DOIre = /\b10\.[0-9]{4,}\/[^\s&]*[^\s\&\.,]/g;
+	const DOIre = /\b10\.[0-9]{4,}\/[^\s&"']*[^\s&"'.,]/g;
 	const DOIXPath = "//text()[contains(., '10.')]\
 						[not(parent::script or parent::style)]";
 
