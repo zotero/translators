@@ -254,28 +254,49 @@ function importPNX(text) {
 	
 	var creators;
 	var contributors;
+	var addataCreators = [];
 	if(ZU.xpathText(doc, '//display/creator')) {
 		creators = ZU.xpath(doc, '//display/creator'); 
 	}
-	
 	if(ZU.xpathText(doc, '//display/contributor')) {
 		contributors = ZU.xpath(doc, '//display/contributor'); 
 	}
+	if(ZU.xpathText(doc, '//addata/addau|//addata/au')) {
+		addataCreators = ZU.xpath(doc, '//addata/addau|//addata/au'); 
+	}
+	//The data in the addata section is sometimes much more messy or incomplete,
+	//but it has the first-name-last-name-separation, e.g. <au>Hemingway, Ernest</au>
+	//thus, we will create a lookup table for the names found in the display section.
+	//If the same name is found in the display section, then we will replace it with
+	//its normalized form from the addata section.
+	var lookupTable = {};
+	for (var a=0; a<addataCreators.length; a++) {
+		var normalizedForm = addataCreators[a].textContent;//i.e. lastName, firstName
+		var valueSplit = normalizedForm.split(',');
+		if (valueSplit.length > 1) {
+			var otherForm = valueSplit[1].trim() + ' ' + valueSplit[0].trim();//i.e. firstName lastName
+			lookupTable[otherForm] = normalizedForm;
+		}
+	}
+	//Z.debug(lookupTable);
 	
 	if(!creators && contributors) { // <creator> not available using <contributor> as author instead
 		creators = contributors;
 		contributors = null;
 	}
 	
-	if(!creators && ! contributors){
-		creators = ZU.xpath(doc, '//addata/addau')
+	if(!creators && !contributors){
+		creators = addataCreators;
 	}
 	
 	for(i in creators) {
 		if(creators[i]) {
 			var creator  = ZU.unescapeHTML(creators[i].textContent).split(/\s*;\s*/);
 			for(j in creator){
-				creator[j] = creator[j].replace(/\d{4}-(\d{4})?/g, '');
+				creator[j] = creator[j].replace(/\d{4}-(\d{4})?/g, '').trim();
+				if (creator[j].indexOf(',') == -1 && lookupTable[creator[j]]) {
+					creator[j] = lookupTable[creator[j]];
+				}
 				item.creators.push(Zotero.Utilities.cleanAuthor(creator[j], "author", true));
 			}			
 		}
@@ -285,8 +306,11 @@ function importPNX(text) {
 		if(contributors[i]) {
 			var contributor = ZU.unescapeHTML(contributors[i].textContent).split(/\s*;\s*/);
 			for(j in contributor){
-			contributor[j] = contributor[j].replace(/\d{4}-(\d{4})?/g, '');
-			item.creators.push(Zotero.Utilities.cleanAuthor(contributor[j], "contributor", true));
+				contributor[j] = contributor[j].replace(/\d{4}-(\d{4})?/g, '').trim();
+				if (contributor[j].indexOf(',') == -1 && lookupTable[contributor[j]]) {
+					contributor[j] = lookupTable[contributor[j]];
+				}
+				item.creators.push(Zotero.Utilities.cleanAuthor(contributor[j], "contributor", true));
 			}			
 		}
 	}
