@@ -2,14 +2,14 @@
 	"translatorID": "d770e7d2-106c-4396-8c32-b35cdc46376c",
 	"label": "Project Gutenberg",
 	"creator": "Adam Crymble, Avram Lyon",
-	"target": "^http://www\\.gutenberg\\.org",
+	"target": "^https?://www\\.gutenberg\\.org",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-05 23:37:12"
+	"lastUpdated": "2014-04-03 18:55:01"
 }
 
 function detectWeb(doc, url) {
@@ -139,9 +139,7 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(articles, scrape, function () {
-				Zotero.done();
-			});
+		Zotero.Utilities.processDocuments(articles, scrape);
 		});
 	} else {
 		scrape(doc, url);

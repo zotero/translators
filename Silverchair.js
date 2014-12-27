@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-01-05 12:35:24"
+	"lastUpdated": "2014-11-12 10:02:49"
 }
 
 /*
@@ -53,7 +53,7 @@ function doWeb(doc, url){
 	var articles = new Array();
 	if(detectWeb(doc, url) == "multiple") { 
 		var items = {};
-		var titles = doc.evaluate('//div[contains(@class, "resultBlock")]/a|//div[contains(@class, "articleTitle") or contains(@class, "articleSection")]/a[contains(@href, "articleid") or contains(@href, "articleID")]', doc, null, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//div[contains(@class, "resultBlock")]/a|//div[contains(@class, "articleTitle") or contains(@class, "articleSection")]/a[contains(@href, "articleid") or contains(@href, "articleID")]|//ul[contains(@class, "article")]//h4[contains(@class, "title")]/a', doc, null, XPathResult.ANY_TYPE, null);
 		var title;
 		while (title = titles.iterateNext()) {
 			items[title.href] = title.textContent.trim();
@@ -275,11 +275,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://journal.publications.chestnet.org/issue.aspx",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://jbjs.org/issue.aspx?journalid=12&issueid=929420",
 		"items": "multiple"
 	},
 	{

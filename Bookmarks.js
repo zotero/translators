@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-10-30 04:22:04"
+	"lastUpdated": "2014-03-31 20:27:28"
 }
 
 /*
@@ -54,7 +54,7 @@ var bookmarkRE = /<DT>[\s\r\n]*<A[^>]+HREF[\s\r\n]*=[\s\r\n]*(['"])([^"]+)\1[^>]
 var collectionRE = /<DT>[\s\r\n]*<H3[^>]*>([^<]+?)<\/H3>/gi;
 var collectionEndRE = /<\/DL>/gi;
 var descriptionRE = /<DD>([\s\S]*?)(?=<(?:DT|\/DL|HR)>)/gi;
-var bookmarkDetailsRE = /[\s\r\n](HREF|TAGS|ADD_DATE|SHORTCUTURL)[s\r\n]*=[s\r\n]*(['"])(.+?)\2/gi;
+var bookmarkDetailsRE = /[\s\r\n](HREF|TAGS|ADD_DATE|SHORTCUTURL|DESCRIPTION)[s\r\n]*=[s\r\n]*(['"])([\s\S]*?)\2/gi;
 
 function detectImport() {
 	var text = "";
@@ -136,6 +136,9 @@ function doImport() {
 						switch(detailMatch[1].toUpperCase()) {
 							case 'HREF':
 								openItem.url = detailMatch[3];
+							break;
+							case 'DESCRIPTION':
+								openItem.abstractNote = detailMatch[3];
 							break;
 							case 'TAGS':
 							case 'SHORTCUTURL':
@@ -245,5 +248,31 @@ function doExport() {
 
 
 /** BEGIN TEST CASES **/
-var testCases = []
+var testCases = [
+	{
+		"type": "import",
+		"input": "<!DOCTYPE NETSCAPE-Bookmark-file-1>\n<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=UTF-8\" /><!-- This is an automatically generated file. -->\n<TITLE>Bookmarks</TITLE>\n<H1 LAST_MODIFIED=\"1396239625\">Bookmarks for anarcat from SemanticScuttle</H1>\n<DL>\n        <DT><A HREF=\"https://pond.imperialviolet.org\" description=\"For secure, synchronous communication we have OTR and, when run over Tor, this is pretty good. But while we have secure asynchronous messaging in the form of PGP email, it's not forward secure and it gratuitously leaks traffic information. While a desire for forward secure PGP is hardly new, it still hasn't materialised in a widely usable manner.\n\nAdditionally, email is used predominately for insecure communications (mailing lists, etc) and is useful because it allows previously unconnected people to communicate as long as a (public) email address is known to one party. But the flip side to this is that volume and spam are driving people to use centralised email services. These provide such huge benefits to the majority of email communication, so it's unlikely that this trend is going to reverse. But, even with PGP, these services are trusted with hugely valuable traffic information if any party uses them.\n\nSo Pond is not email. Pond is forward secure, asynchronous messaging for the discerning. Pond messages are asynchronous, but are not a record; they expire automatically a week after they are received. Pond seeks to prevent leaking traffic information against everyone except a global passive attacker.\"  hash=\"192dd9819b1e763872f6cf6a9ac1be26\" tags=\"software,security,social_networking,todo\" ADD_DATE=\"1396253182\" >Pond - Pond</a>\n\n",
+		"items": [
+			{
+				"itemType": "webpage",
+				"creators": [],
+				"notes": [],
+				"tags": [
+					"software",
+					"security",
+					"social_networking",
+					"todo"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Pond - Pond",
+				"id": 0,
+				"itemID": 0,
+				"url": "https://pond.imperialviolet.org",
+				"abstractNote": "For secure, synchronous communication we have OTR and, when run over Tor, this is pretty good. But while we have secure asynchronous messaging in the form of PGP email, it's not forward secure and it gratuitously leaks traffic information. While a desire for forward secure PGP is hardly new, it still hasn't materialised in a widely usable manner.\n\nAdditionally, email is used predominately for insecure communications (mailing lists, etc) and is useful because it allows previously unconnected people to communicate as long as a (public) email address is known to one party. But the flip side to this is that volume and spam are driving people to use centralised email services. These provide such huge benefits to the majority of email communication, so it's unlikely that this trend is going to reverse. But, even with PGP, these services are trusted with hugely valuable traffic information if any party uses them.\n\nSo Pond is not email. Pond is forward secure, asynchronous messaging for the discerning. Pond messages are asynchronous, but are not a record; they expire automatically a week after they are received. Pond seeks to prevent leaking traffic information against everyone except a global passive attacker.",
+				"accessDate": "2014-03-31 08:06:22"
+			}
+		]
+	}
+]
 /** END TEST CASES **/

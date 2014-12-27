@@ -2,14 +2,14 @@
 	"translatorID": "73be930f-5773-41b2-a7a1-37c0eeade92f",
 	"label": "OZON.ru",
 	"creator": "Victor Rybynok",
-	"target": "^http://www\\.ozon\\.ru",
+	"target": "^https?://www\\.ozon\\.ru",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-05-27 02:33:14"
+	"lastUpdated": "2014-04-03 18:47:00"
 }
 
 /**
@@ -72,14 +72,9 @@
 */
 
 function detectWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function (prefix) {
-			if (prefix == "x") return namespace;
-			else return null;
-		} : null;
 	var itemTypeXPath = '//ul[@class="navLine"]/li[1]/a';
 	var itemTypeDOMNode =
-	doc.evaluate(itemTypeXPath, doc, nsResolver,
+	doc.evaluate(itemTypeXPath, doc, null,
 	XPathResult.ANY_TYPE, null).iterateNext();
 	var itemType;
 	if (itemTypeDOMNode) itemType = itemTypeDOMNode.textContent;
@@ -88,14 +83,14 @@ function detectWeb(doc, url) {
 		var nameXPath = '//div[@class="techDescription"]/div/div[2]/span';
 		var valueXPath = '//div[@class="techDescription"]/div/div[3]/span';
 		var nameXPathRes = doc.evaluate(
-		nameXPath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		nameXPath, doc, null, XPathResult.ANY_TYPE, null);
 		var valueXPathRes = doc.evaluate(
-		valueXPath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		valueXPath, doc, null, XPathResult.ANY_TYPE, null);
 		if (!IsAudioBook(nameXPathRes, valueXPathRes)) return "book";
 	} else {
 		itemTypeXPath = '//ul[@class="navLine"]/li[2]/a';
 		itemTypeDOMNode =
-		doc.evaluate(itemTypeXPath, doc, nsResolver,
+		doc.evaluate(itemTypeXPath, doc, null,
 		XPathResult.ANY_TYPE, null).iterateNext();
 		if (itemTypeDOMNode) itemType = itemTypeDOMNode.textContent;
 		else return "";
@@ -138,7 +133,7 @@ function CleanCreator(creatorStr) {
 
 function GetCreators(creatorsStr, creatorsCategory) {
 	var result = new Array();
-    var creator;
+	var creator;
 	if (creatorsStr.match(",")) {
 		// http://www.ozon.ru/context/detail/id/7341440/
 		var authors = creatorsStr.split(",");
@@ -348,12 +343,6 @@ function ParseDetailDesc(nameXPathRes, valueXPathRes) {
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function (prefix) {
-			if (prefix == "x") return namespace;
-			else return null;
-		} : null;
-
 	var pdObject = new Object();
 	//pdObject["url"] = url;
 
@@ -364,28 +353,28 @@ function doWeb(doc, url) {
 
 	var pdXPath = '//div[@class="bContentBlock"]/h1|//div[@class="l h1"]/h1';
 	var pdXPathRes = doc.evaluate(
-	pdXPath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+	pdXPath, doc, null, XPathResult.ANY_TYPE, null);
 	pdObject["title"] = CleanText(pdXPathRes.iterateNext().textContent);
 	pdXPath = '//div[@id="js_basic_properties"]/p|//div[@class="product-detail"]/p';
 	pdXPathRes = doc.evaluate(
-	pdXPath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+	pdXPath, doc, null, XPathResult.ANY_TYPE, null);
 	pdObject = MergeObjects(pdObject, ParseProductDetail(pdXPathRes));
 
 	var nameXPath = '//div[@class="bTechDescription"]/div/div[2]/span|//div[@class="techDescription"]/div/div[2]/span';
 	var valueXPath = '//div[@class="bTechDescription"]/div/div[3]/span|//div[@class="techDescription"]/div/div[3]/span';
 	var nameXPathRes = doc.evaluate(
-	nameXPath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+	nameXPath, doc, null, XPathResult.ANY_TYPE, null);
 	var valueXPathRes = doc.evaluate(
-	valueXPath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+	valueXPath, doc, null, XPathResult.ANY_TYPE, null);
 	pdObject = MergeObjects(
 	pdObject, ParseTechDesc(nameXPathRes, valueXPathRes));
 
 	nameXPath = '//div[@id="detail_description"]/div/table/tbody/tr/td/h3|//div[@id="detail_description"]/table/tbody/tr/td/h3';
 	valueXPath = '//div[@id="detail_description"]/div/table/tbody/tr/td|//div[@id="detail_description"]/table/tbody/tr/td';
 	nameXPathRes = doc.evaluate(
-	nameXPath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+	nameXPath, doc, null, XPathResult.ANY_TYPE, null);
 	valueXPathRes = doc.evaluate(
-	valueXPath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+	valueXPath, doc, null, XPathResult.ANY_TYPE, null);
 	pdObject = MergeObjects(
 	pdObject, ParseDetailDesc(nameXPathRes, valueXPathRes));
 

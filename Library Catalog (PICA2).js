@@ -5,11 +5,11 @@
 	"target": "^https?://[^/]+/DB=[\\dA-Z]",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 199,
+	"priority": 249,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-12-09 20:28:44"
+	"lastUpdated": "2014-08-26 04:07:48"
 }
 
 /*
@@ -171,7 +171,7 @@ var testCases = [
 					}
 				],
 				"notes": [
-					"Bestand: Universitätsbibliothek Tübingen <21> [Signatur: 27 A 4742];Universitätsbibliothek Freiburg <25> [Signatur: TM 86/5922];Universitätsbibliothek Konstanz <352> [Signatur: spa 959:b732:q/r62];Universität Heidelberg, Romanisches Seminar <16/143> [Signatur: bestellt];Badische Landesbibliothek <31> [Signatur: 86 A 11242];",
+					"Bestand: Universitätsbibliothek Tübingen <21> [Signatur: 27 A 4742];Universitätsbibliothek Freiburg <25> [Signatur: TM 86/5922];Kommunikations-, Informations-, Medienzentrum (KIM) Konstanz / <352> [Signatur: spa 959:b732:q/r62];Universität Heidelberg, Romanisches Seminar <16/143> [Signatur: bestellt];Badische Landesbibliothek <31> [Signatur: 86 A 11242];",
 					"Enth. Werke von und über Borges"
 				],
 				"tags": [
@@ -305,7 +305,7 @@ var testCases = [
 					}
 				],
 				"notes": [
-					"Bestand: ubi? [Signatur: /HM 3575 M449];",
+					"Bestand:  [Signatur: /HM 3575 M449];",
 					"Bibliogr. W. Somerset Maugham S. 214 - [223]"
 				],
 				"tags": [

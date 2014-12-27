@@ -2,14 +2,14 @@
 	"translatorID": "6ec8008d-b206-4a4c-8d0a-8ef33807703b",
 	"label": "The Economist",
 	"creator": "Michael Berkowitz",
-	"target": "^http://(www\\.)?economist\\.com/",
+	"target": "^https?://(www\\.)?economist\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-12-12 13:49:22"
+	"lastUpdated": "2014-04-04 09:55:12"
 }
 
 function detectWeb(doc, url) {

@@ -5,11 +5,11 @@
 	"target": "",
 	"minVersion": "2.1",
 	"maxVersion": "",
-	"priority": 200,
+	"priority": 300,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-12-02 17:35:21"
+	"lastUpdated": "2014-08-26 03:36:05"
 }
 
 var RECOGNIZABLE_FORMATS = ["rdf_zotero", "rdf_bibliontology", "mods", "marc", "unimarc", "ris",
@@ -126,7 +126,6 @@ UnAPIID.prototype = {
 			}
 		});
 	},
-	
 	/**
 	 * Gets items associated with this ID
 	 * @param {Function} callback Callback to be passed items when they have been retrieved
@@ -166,7 +165,6 @@ UnAPIID.prototype = {
 			});
 		});
 	},
-	
 	/**
 	 * Determines whether Zotero can handle this ID
 	 * @param {Function} callback Callback to be passed isSupported when it is known
@@ -365,10 +363,10 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Post-Zionism.",
-					"Zionism -- Philosophy.",
+					"Israel -- Politics and government.",
 					"National characteristics, Israeli.",
-					"Israel -- Politics and government."
+					"Post-Zionism.",
+					"Zionism -- Philosophy."
 				],
 				"seeAlso": [],
 				"attachments": [],
@@ -377,9 +375,9 @@ var testCases = [
 				"place": "New York",
 				"ISBN": "185649893X",
 				"url": "http://www.loc.gov/catdir/description/hol032/2002190908.html",
+				"archiveLocation": "Check current status in library catalogue -- http://link.library.utoronto.ca/MyUTL/goto_catalogue_url.cfm?where=ckey&what=4908720",
 				"date": "2003",
 				"libraryCatalog": "search.library.utoronto.ca",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "The challenge of Post-Zionism"
 			}
 		]

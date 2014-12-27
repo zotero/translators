@@ -2,27 +2,27 @@
 	"translatorID": "ab961e61-2a8a-4be1-b8a3-044f20d52d78",
 	"label": "BIBSYS",
 	"creator": "Ramesh Srigiriraju",
-	"target": "^http://ask\\.bibsys\\.no/ask/action",
+	"target": "^https?://ask\\.bibsys\\.no/ask/action",
 	"minVersion": "1.0.0b4.r1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-11-24 13:21:37"
+	"lastUpdated": "2014-04-04 10:08:22"
 }
 
 function detectWeb(doc, url)	{
-	var multireg=new RegExp("^http://ask\.bibsys\.no/ask/action/result");
+	var multireg=new RegExp("^https?://ask\.bibsys\.no/ask/action/result");
 	if(multireg.test(url))
 		return "multiple";
-	var singlereg=new RegExp("^http://ask\.bibsys\.no/ask/action/show");
+	var singlereg=new RegExp("^https?://ask\.bibsys\.no/ask/action/show");
 	if(singlereg.test(url))
 		return "book";
 }
 
 function doWeb(doc, url)	{
-	var multireg=new RegExp("http://ask\.bibsys\.no/ask/action/result");
+	var multireg=new RegExp("https?://ask\.bibsys\.no/ask/action/result");
 	if(multireg.test(url))	{
 		var titlpath='//tr/td[@width="49%"][@align="left"][@valign="top"]/a/text()';
 		var titles=doc.evaluate(titlpath, doc, null, XPathResult.ANY_TYPE, null);

@@ -2,14 +2,14 @@
 	"translatorID": "b6d0a7a-d076-48ae-b2f0-b6de28b194e",
 	"label": "ScienceDirect",
 	"creator": "Michael Berkowitz and Aurimas Vinckevicius",
-	"target": "^https?://[^/]*science-?direct\\.com[^/]*/science(\\/article)?(\\?(?:.+\\&|)ob=(?:ArticleURL|ArticleListURL|PublicationURL))?",
+	"target": "^https?://[^/]*science-?direct\\.com[^/]*/science(?:/article/|\\?.*\\b_ob=ArticleListURL|/(?:journal|bookseries|book|handbooks|referenceworks)/\\d)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-02-02 04:44:46"
+	"lastUpdated": "2014-12-04 23:08:27"
 }
 
 function detectWeb(doc, url) {
@@ -23,9 +23,8 @@ function detectWeb(doc, url) {
 	if((url.indexOf("pdf") !== -1
 			&& url.indexOf("_ob=ArticleURL") === -1
 			&& url.indexOf("/article/") === -1)
-		|| url.indexOf("/journal/") !== -1
-		|| url.indexOf("_ob=ArticleListURL") !== -1
-		|| url.indexOf("/book/") !== -1) {
+		|| url.search(/\/(?:journal|bookseries|book|handbooks|referenceworks)\//) !== -1
+		|| url.indexOf("_ob=ArticleListURL") !== -1) {
 		if (getArticleList(doc).length > 0) {
 			return "multiple";
 		} else {
@@ -217,16 +216,26 @@ function processRIS(doc, text) {
 		});
 	}
 
-	//Certain authors sometimes have "role" prefixes
-	text = text.replace(
-		/^((?:A[U\d]|ED)\s+-\s+)Editor-in-Chief:\s+/mg, '$1');
-
+	// Certain authors sometimes have "role" prefixes or are in the wrong order
+	// e.g. http://www.sciencedirect.com/science/article/pii/S0065260108602506
+	text = text.replace(/^((?:A[U\d]|ED)\s+-\s+)(?:Editor-in-Chief:\s+)?(.+)/mg,
+		function(m, pre, name) {
+			if (name.indexOf(',') == -1) {
+				name = name.trim().replace(/^(.+?)\s+(\S+)$/, '$2, $1');
+			}
+			
+			return pre + name;
+		}
+	);
+	
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 	translator.setString(text);
 	translator.setHandler("itemDone", function(obj, item) {
 		//issue sometimes is set to 0 for single issue volumes (?)
 		if(item.issue == 0) delete item.issue;
+		
+		if (item.volume) item.volume = item.volume.replace(/^\s*volume\s*/i, '');
 		
 		//add spaces after initials
 		for(var i=0, n=item.creators.length; i<n; i++) {
@@ -270,7 +279,11 @@ function processRIS(doc, text) {
 			item.abstractNote = item.abstractNote.replace(/^\s*(?:abstract|publisher\s+summary)\s+/i, '');
 		}
 		
-		item.DOI = item.DOI.replace(/^doi:\s+/i, '');
+		if (item.DOI) item.DOI = item.DOI.replace(/^doi:\s+/i, '');
+		
+		if (item.ISBN && !ZU.cleanISBN(item.ISBN)) delete item.ISBN;
+		if (item.ISSN && !ZU.cleanISSN(item.ISSN)) delete item.ISSN;
+		
 		item.complete();
 	});
 	translator.translate();
@@ -288,9 +301,10 @@ function scrapeByISBN(doc) {
 function getArticleList(doc) {
 	return ZU.xpath(doc,
 		'(//table[@class="resultRow"]/tbody/tr/td[2]/a\
-		|//table[@class="resultRow"]/tbody/tr/td[2]/h3/a\
-		|//td[@class="nonSerialResultsList"]/h3/a)\
-		[not(contains(text(),"PDF (") or contains(text(), "Related Articles"))]');
+			|//table[@class="resultRow"]/tbody/tr/td[2]/h3/a\
+			|//td[@class="nonSerialResultsList"]/h3/a\
+			|//div[@id="bodyMainResults"]//li[contains(@class,"title")]//a\
+		)\[not(contains(text(),"PDF (") or contains(text(), "Related Articles"))]');
 }
 
 function doWeb(doc, url) {
@@ -335,6 +349,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Solving the Autism Puzzle a Few Pieces at a Time",
 				"creators": [
 					{
 						"lastName": "Schaaf",
@@ -347,9 +362,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "June 9, 2011",
+				"DOI": "10.1016/j.neuron.2011.05.025",
+				"ISSN": "0896-6273",
+				"abstractNote": "In this issue, a pair of studies (Levy et al. and Sanders et al.) identify several de novo copy-number variants that together account for 5%–8% of cases of simplex autism spectrum disorders. These studies suggest that several hundreds of loci are likely to contribute to the complex genetic heterogeneity of this group of disorders. An accompanying study in this issue (Gilman et al.), presents network analysis implicating these CNVs in neural processes related to synapse development, axon targeting, and neuron motility.",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"issue": "5",
+				"journalAbbreviation": "Neuron",
+				"libraryCatalog": "ScienceDirect",
+				"pages": "806-808",
+				"publicationTitle": "Neuron",
+				"url": "http://www.sciencedirect.com/science/article/pii/S0896627311004430",
+				"volume": "70",
 				"attachments": [
 					{
 						"title": "ScienceDirect Snapshot"
@@ -359,29 +383,19 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "Solving the Autism Puzzle a Few Pieces at a Time",
-				"journalAbbreviation": "Neuron",
-				"volume": "70",
-				"issue": "5",
-				"pages": "806-808",
-				"ISSN": "0896-6273",
-				"DOI": "10.1016/j.neuron.2011.05.025",
-				"url": "http://www.sciencedirect.com/science/article/pii/S0896627311004430",
-				"abstractNote": "In this issue, a pair of studies (Levy et al. and Sanders et al.) identify several de novo copy-number variants that together account for 5%–8% of cases of simplex autism spectrum disorders. These studies suggest that several hundreds of loci are likely to contribute to the complex genetic heterogeneity of this group of disorders. An accompanying study in this issue (Gilman et al.), presents network analysis implicating these CNVs in neural processes related to synapse development, axon targeting, and neuron motility.",
-				"date": "June 9, 2011",
-				"publicationTitle": "Neuron",
-				"libraryCatalog": "ScienceDirect",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
 		"url": "http://www.sciencedirect.com/science/article/pii/S016748890800116X",
-		"defer": true,
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Mitochondria-dependent apoptosis in yeast",
 				"creators": [
 					{
 						"lastName": "Pereira",
@@ -414,16 +428,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Yeast apoptosis",
-					"Apoptotic regulators",
-					"Mitochondrial outer membrane permeabilization",
-					"Permeability transition pore",
-					"Bcl-2 family",
-					"Mitochondrial fragmentation"
-				],
-				"seeAlso": [],
+				"date": "July 2008",
+				"DOI": "10.1016/j.bbamcr.2008.03.010",
+				"ISSN": "0167-4889",
+				"abstractNote": "Mitochondrial involvement in yeast apoptosis is probably the most unifying feature in the field. Reports proposing a role for mitochondria in yeast apoptosis present evidence ranging from the simple observation of ROS accumulation in the cell to the identification of mitochondrial proteins mediating cell death. Although yeast is unarguably a simple model it reveals an elaborate regulation of the death process involving distinct proteins and most likely different pathways, depending on the insult, growth conditions and cell metabolism. This complexity may be due to the interplay between the death pathways and the major signalling routes in the cell, contributing to a whole integrated response. The elucidation of these pathways in yeast has been a valuable help in understanding the intricate mechanisms of cell death in higher eukaryotes, and of severe human diseases associated with mitochondria-dependent apoptosis. In addition, the absence of obvious orthologues of mammalian apoptotic regulators, namely of the Bcl-2 family, favours the use of yeast to assess the function of such proteins. In conclusion, yeast with its distinctive ability to survive without respiration-competent mitochondria is a powerful model to study the involvement of mitochondria and mitochondria interacting proteins in cell death.",
+				"issue": "7",
+				"journalAbbreviation": "Biochimica et Biophysica Acta (BBA) - Molecular Cell Research",
+				"libraryCatalog": "ScienceDirect",
+				"pages": "1286-1302",
+				"publicationTitle": "Biochimica et Biophysica Acta (BBA) - Molecular Cell Research",
+				"series": "Apoptosis in yeast",
+				"url": "http://www.sciencedirect.com/science/article/pii/S016748890800116X",
+				"volume": "1783",
 				"attachments": [
 					{
 						"title": "ScienceDirect Snapshot"
@@ -433,19 +449,16 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "Mitochondria-dependent apoptosis in yeast",
-				"journalAbbreviation": "Biochimica et Biophysica Acta (BBA) - Molecular Cell Research",
-				"volume": "1783",
-				"issue": "7",
-				"pages": "1286-1302",
-				"ISSN": "0167-4889",
-				"DOI": "10.1016/j.bbamcr.2008.03.010",
-				"url": "http://www.sciencedirect.com/science/article/pii/S016748890800116X",
-				"abstractNote": "Mitochondrial involvement in yeast apoptosis is probably the most unifying feature in the field. Reports proposing a role for mitochondria in yeast apoptosis present evidence ranging from the simple observation of ROS accumulation in the cell to the identification of mitochondrial proteins mediating cell death. Although yeast is unarguably a simple model it reveals an elaborate regulation of the death process involving distinct proteins and most likely different pathways, depending on the insult, growth conditions and cell metabolism. This complexity may be due to the interplay between the death pathways and the major signalling routes in the cell, contributing to a whole integrated response. The elucidation of these pathways in yeast has been a valuable help in understanding the intricate mechanisms of cell death in higher eukaryotes, and of severe human diseases associated with mitochondria-dependent apoptosis. In addition, the absence of obvious orthologues of mammalian apoptotic regulators, namely of the Bcl-2 family, favours the use of yeast to assess the function of such proteins. In conclusion, yeast with its distinctive ability to survive without respiration-competent mitochondria is a powerful model to study the involvement of mitochondria and mitochondria interacting proteins in cell death.",
-				"date": "July 2008",
-				"publicationTitle": "Biochimica et Biophysica Acta (BBA) - Molecular Cell Research",
-				"libraryCatalog": "ScienceDirect",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [
+					"Apoptotic regulators",
+					"Bcl-2 family",
+					"Mitochondrial fragmentation",
+					"Mitochondrial outer membrane permeabilization",
+					"Permeability transition pore",
+					"Yeast apoptosis"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -457,10 +470,10 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.sciencedirect.com/science/article/pii/B9780123694683500083",
-		"defer": true,
 		"items": [
 			{
 				"itemType": "bookSection",
+				"title": "8 - Introduction to discrete dislocation statics and dynamics",
 				"creators": [
 					{
 						"lastName": "Raabe",
@@ -493,9 +506,15 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2007",
+				"ISBN": "978-0-12-369468-3",
+				"abstractNote": "This chapter provides an introduction to discrete dislocation statics and dynamics. The chapter deals with the simulation of plasticity of metals at the microscopic and mesoscopic scale using space- and time-discretized dislocation statics and dynamics. The complexity of discrete dislocation models is due to the fact that the mechanical interaction of ensembles of such defects is of an elastic nature and, therefore, involves long-range interactions. Space-discretized dislocation simulations idealize dislocations outside the dislocation cores as linear defects that are embedded within an otherwise homogeneous, isotropic or anisotropic, linear elastic medium. The aim of the chapter is to concentrate on those simulations that are discrete in both space and time. It explicitly incorporates the properties of individual lattice defects in a continuum formulation. The theoretical framework of linear continuum elasticity theory is overviewed as required for the formulation of basic dislocation mechanics. The chapter also discusses the dislocation statics, where the fundamentals of linear isotropic and anisotropic elasticity theory that are required in dislocation theory are reviewed. The chapter describes the dislocation dynamics, where it is concerned with the introduction of continuum dislocation dynamics. The last two sections deal with kinematics of discrete dislocation dynamics and dislocation reactions and annihilation.",
+				"bookTitle": "Computational Materials Engineering",
+				"libraryCatalog": "ScienceDirect",
+				"pages": "267-316",
+				"place": "Burlington",
+				"publisher": "Academic Press",
+				"url": "http://www.sciencedirect.com/science/article/pii/B9780123694683500083",
 				"attachments": [
 					{
 						"title": "ScienceDirect Snapshot"
@@ -505,62 +524,19 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "8 - Introduction to discrete dislocation statics and dynamics",
-				"bookTitle": "Computational Materials Engineering",
-				"publisher": "Academic Press",
-				"place": "Burlington",
-				"pages": "267-316",
-				"ISBN": "978-0-12-369468-3",
-				"url": "http://www.sciencedirect.com/science/article/pii/B9780123694683500083",
-				"abstractNote": "This chapter provides an introduction to discrete dislocation statics and dynamics. The chapter deals with the simulation of plasticity of metals at the microscopic and mesoscopic scale using space- and time-discretized dislocation statics and dynamics. The complexity of discrete dislocation models is due to the fact that the mechanical interaction of ensembles of such defects is of an elastic nature and, therefore, involves long-range interactions. Space-discretized dislocation simulations idealize dislocations outside the dislocation cores as linear defects that are embedded within an otherwise homogeneous, isotropic or anisotropic, linear elastic medium. The aim of the chapter is to concentrate on those simulations that are discrete in both space and time. It explicitly incorporates the properties of individual lattice defects in a continuum formulation. The theoretical framework of linear continuum elasticity theory is overviewed as required for the formulation of basic dislocation mechanics. The chapter also discusses the dislocation statics, where the fundamentals of linear isotropic and anisotropic elasticity theory that are required in dislocation theory are reviewed. The chapter describes the dislocation dynamics, where it is concerned with the introduction of continuum dislocation dynamics. The last two sections deal with kinematics of discrete dislocation dynamics and dislocation reactions and annihilation.",
-				"date": "2007",
-				"libraryCatalog": "ScienceDirect"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.sciencedirect.com/science?_ob=RefWorkIndexURL&_idxType=AU&_cid=277739&_acct=C000228598&_version=1&_userid=10&md5=a27159035e8b2b8e216c551de9cedefd",
-		"defer": true,
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"lastName": "Likens",
-						"firstName": "Gene E",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
 				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "Open WorldCat",
-				"language": "English",
-				"url": "http://public.eblib.com/EBLPublic/PublicView.do?ptiID=634856",
-				"title": "Encyclopedia of inland waters",
-				"publisher": "Elsevier",
-				"place": "Amsterdam; Boston",
-				"date": "2009",
-				"ISBN": "9780123706263  0123706262",
-				"abstractNote": "Contains over 240 individual articles covering various broad topics including properties of water hydrologic cycles, surface and groundwater hydrology, hydrologic balance, lakes of the world, rivers of the world, light and heat in aquatic ecosystems, hydrodynamics and mixing in rivers, reservoirs, and lakes, biological integration among inland aquatic ecosystems, pollution and remediation, and conservation and management of inland aquatic ecosystems.",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.sciencedirect.com/science?_ob=RefWorkIndexURL&_idxType=AR&_cid=277739&_acct=C000228598&_version=1&_userid=10&md5=54bf1ed459ae10ac5ad1a2dc11c873b9",
-		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "http://www.sciencedirect.com/science/article/pii/B9780123706263000508",
-		"defer": true,
 		"items": [
 			{
 				"itemType": "bookSection",
+				"title": "Africa",
 				"creators": [
 					{
 						"lastName": "Meybeck",
@@ -573,7 +549,24 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"notes": [],
+				"date": "2009",
+				"ISBN": "978-0-12-370626-3",
+				"abstractNote": "The African continent (30.1 million km2) extends from 37°17′N to 34°52 S and covers a great variety of climates except the polar climate. Although Africa is often associated to extended arid areas as the Sahara (7 million km2) and Kalahari (0.9 million km2), it is also characterized by a humid belt in its equatorial part and by few very wet regions as in Cameroon and in Sierra Leone. Some of the largest river basins are found in this continent such as the Congo, also termed Zaire, Nile, Zambezi, Orange, and Niger basins. Common features of Africa river basins are (i) warm temperatures, (ii) general smooth relief due to the absence of recent mountain ranges, except in North Africa and in the Rift Valley, (iii) predominance of old shields and metamorphic rocks with very developed soil cover, and (iv) moderate human impacts on river systems except for the recent spread of river damming. African rivers are characterized by very similar hydrochemical and physical features (ionic contents, suspended particulate matter, or SPM) but differ greatly by their hydrological regimes, which are more developed in this article.",
+				"bookTitle": "Encyclopedia of Inland Waters",
+				"libraryCatalog": "ScienceDirect",
+				"pages": "295-305",
+				"place": "Oxford",
+				"publisher": "Academic Press",
+				"url": "http://www.sciencedirect.com/science/article/pii/B9780123706263000508",
+				"attachments": [
+					{
+						"title": "ScienceDirect Snapshot"
+					},
+					{
+						"title": "ScienceDirect Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [
 					"Africa",
 					"Damming",
@@ -584,28 +577,8 @@ var testCases = [
 					"Sediment fluxes",
 					"Tropical rivers"
 				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "ScienceDirect Snapshot"
-					},
-					{
-						"title": "ScienceDirect Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"title": "Africa",
-				"bookTitle": "Encyclopedia of Inland Waters",
-				"publisher": "Academic Press",
-				"place": "Oxford",
-				"pages": "295-305",
-				"ISBN": "978-0-12-370626-3",
-				"DOI": "10.1016/B978-012370626-3.00050-8",
-				"url": "http://www.sciencedirect.com/science/article/pii/B9780123706263000508",
-				"abstractNote": "The African continent (30.1 million km2) extends from 37°17′N to 34°52 S and covers a great variety of climates except the polar climate. Although Africa is often associated to extended arid areas as the Sahara (7 million km2) and Kalahari (0.9 million km2), it is also characterized by a humid belt in its equatorial part and by few very wet regions as in Cameroon and in Sierra Leone. Some of the largest river basins are found in this continent such as the Congo, also termed Zaire, Nile, Zambezi, Orange, and Niger basins. Common features of Africa river basins are (i) warm temperatures, (ii) general smooth relief due to the absence of recent mountain ranges, except in North Africa and in the Rift Valley, (iii) predominance of old shields and metamorphic rocks with very developed soil cover, and (iv) moderate human impacts on river systems except for the recent spread of river damming. African rivers are characterized by very similar hydrochemical and physical features (ionic contents, suspended particulate matter, or SPM) but differ greatly by their hydrological regimes, which are more developed in this article.",
-				"date": "2009",
-				"libraryCatalog": "ScienceDirect",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -616,6 +589,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Unwrapping of Nucleosomal DNA Ends: A Multiscale Molecular Dynamics Study",
 				"creators": [
 					{
 						"lastName": "Voltz",
@@ -643,9 +617,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "February 22, 2012",
+				"DOI": "10.1016/j.bpj.2011.11.4028",
+				"ISSN": "0006-3495",
+				"abstractNote": "To permit access to DNA-binding proteins involved in the control and expression of the genome, the nucleosome undergoes structural remodeling including unwrapping of nucleosomal DNA segments from the nucleosome core. Here we examine the mechanism of DNA dissociation from the nucleosome using microsecond timescale coarse-grained molecular dynamics simulations. The simulations exhibit short-lived, reversible DNA detachments from the nucleosome and long-lived DNA detachments not reversible on the timescale of the simulation. During the short-lived DNA detachments, 9 bp dissociate at one extremity of the nucleosome core and the H3 tail occupies the space freed by the detached DNA. The long-lived DNA detachments are characterized by structural rearrangements of the H3 tail including the formation of a turn-like structure at the base of the tail that sterically impedes the rewrapping of DNA on the nucleosome surface. Removal of the H3 tails causes the long-lived detachments to disappear. The physical consistency of the CG long-lived open state was verified by mapping a CG structure representative of this state back to atomic resolution and performing molecular dynamics as well as by comparing conformation-dependent free energies. Our results suggest that the H3 tail may stabilize the nucleosome in the open state during the initial stages of the nucleosome remodeling process.",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"issue": "4",
+				"journalAbbreviation": "Biophysical Journal",
+				"libraryCatalog": "ScienceDirect",
+				"pages": "849-858",
+				"publicationTitle": "Biophysical Journal",
+				"shortTitle": "Unwrapping of Nucleosomal DNA Ends",
+				"url": "http://www.sciencedirect.com/science/article/pii/S0006349512000835",
+				"volume": "102",
 				"attachments": [
 					{
 						"title": "ScienceDirect Snapshot"
@@ -655,20 +639,9 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "Unwrapping of Nucleosomal DNA Ends: A Multiscale Molecular Dynamics Study",
-				"journalAbbreviation": "Biophysical Journal",
-				"volume": "102",
-				"issue": "4",
-				"pages": "849-858",
-				"ISSN": "0006-3495",
-				"DOI": "10.1016/j.bpj.2011.11.4028",
-				"url": "http://www.sciencedirect.com/science/article/pii/S0006349512000835",
-				"abstractNote": "To permit access to DNA-binding proteins involved in the control and expression of the genome, the nucleosome undergoes structural remodeling including unwrapping of nucleosomal DNA segments from the nucleosome core. Here we examine the mechanism of DNA dissociation from the nucleosome using microsecond timescale coarse-grained molecular dynamics simulations. The simulations exhibit short-lived, reversible DNA detachments from the nucleosome and long-lived DNA detachments not reversible on the timescale of the simulation. During the short-lived DNA detachments, 9 bp dissociate at one extremity of the nucleosome core and the H3 tail occupies the space freed by the detached DNA. The long-lived DNA detachments are characterized by structural rearrangements of the H3 tail including the formation of a turn-like structure at the base of the tail that sterically impedes the rewrapping of DNA on the nucleosome surface. Removal of the H3 tails causes the long-lived detachments to disappear. The physical consistency of the CG long-lived open state was verified by mapping a CG structure representative of this state back to atomic resolution and performing molecular dynamics as well as by comparing conformation-dependent free energies. Our results suggest that the H3 tail may stabilize the nucleosome in the open state during the initial stages of the nucleosome remodeling process.",
-				"date": "February 22, 2012",
-				"publicationTitle": "Biophysical Journal",
-				"libraryCatalog": "ScienceDirect",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Unwrapping of Nucleosomal DNA Ends"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -678,6 +651,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Reducing waste from incomplete or unusable reports of biomedical research",
 				"creators": [
 					{
 						"lastName": "Glasziou",
@@ -725,9 +699,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "January 24, 2014",
+				"DOI": "10.1016/S0140-6736(13)62228-X",
+				"ISSN": "0140-6736",
+				"abstractNote": "Summary\nResearch publication can both communicate and miscommunicate. Unless research is adequately reported, the time and resources invested in the conduct of research is wasted. Reporting guidelines such as CONSORT, STARD, PRISMA, and ARRIVE aim to improve the quality of research reports, but all are much less adopted and adhered to than they should be. Adequate reports of research should clearly describe which questions were addressed and why, what was done, what was shown, and what the findings mean. However, substantial failures occur in each of these elements. For example, studies of published trial reports showed that the poor description of interventions meant that 40–89% were non-replicable; comparisons of protocols with publications showed that most studies had at least one primary outcome changed, introduced, or omitted; and investigators of new trials rarely set their findings in the context of a systematic review, and cited a very small and biased selection of previous relevant trials. Although best documented in reports of controlled trials, inadequate reporting occurs in all types of studies—animal and other preclinical studies, diagnostic studies, epidemiological studies, clinical prediction research, surveys, and qualitative studies. In this report, and in the Series more generally, we point to a waste at all stages in medical research. Although a more nuanced understanding of the complex systems involved in the conduct, writing, and publication of research is desirable, some immediate action can be taken to improve the reporting of research. Evidence for some recommendations is clear: change the current system of research rewards and regulations to encourage better and more complete reporting, and fund the development and maintenance of infrastructure to support better reporting, linkage, and archiving of all elements of research. However, the high amount of waste also warrants future investment in the monitoring of and research into reporting of research, and active implementation of the findings to ensure that research reports better address the needs of the range of research users.",
+				"issue": "9913",
+				"journalAbbreviation": "The Lancet",
+				"libraryCatalog": "ScienceDirect",
+				"pages": "267-276",
+				"publicationTitle": "The Lancet",
+				"url": "http://www.sciencedirect.com/science/article/pii/S014067361362228X",
+				"volume": "383",
 				"attachments": [
 					{
 						"title": "ScienceDirect Snapshot"
@@ -737,21 +719,31 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "Reducing waste from incomplete or unusable reports of biomedical research",
-				"journalAbbreviation": "The Lancet",
-				"volume": "383",
-				"issue": "9913",
-				"pages": "267-276",
-				"ISSN": "0140-6736",
-				"DOI": "10.1016/S0140-6736(13)62228-X",
-				"url": "http://www.sciencedirect.com/science/article/pii/S014067361362228X",
-				"date": "January 24, 2014",
-				"publicationTitle": "The Lancet",
-				"abstractNote": "Research publication can both communicate and miscommunicate. Unless research is adequately reported, the time and resources invested in the conduct of research is wasted. Reporting guidelines such as CONSORT, STARD, PRISMA, and ARRIVE aim to improve the quality of research reports, but all are much less adopted and adhered to than they should be. Adequate reports of research should clearly describe which questions were addressed and why, what was done, what was shown, and what the findings mean. However, substantial failures occur in each of these elements. For example, studies of published trial reports showed that the poor description of interventions meant that 40–89% were non-replicable; comparisons of protocols with publications showed that most studies had at least one primary outcome changed, introduced, or omitted; and investigators of new trials rarely set their findings in the context of a systematic review, and cited a very small and biased selection of previous relevant trials. Although best documented in reports of controlled trials, inadequate reporting occurs in all types of studies—animal and other preclinical studies, diagnostic studies, epidemiological studies, clinical prediction research, surveys, and qualitative studies. In this report, and in the Series more generally, we point to a waste at all stages in medical research. Although a more nuanced understanding of the complex systems involved in the conduct, writing, and publication of research is desirable, some immediate action can be taken to improve the reporting of research. Evidence for some recommendations is clear: change the current system of research rewards and regulations to encourage better and more complete reporting, and fund the development and maintenance of infrastructure to support better reporting, linkage, and archiving of all elements of research. However, the high amount of waste also warrants future investment in the monitoring of and research into reporting of research, and active implementation of the findings to ensure that research reports better address the needs of the range of research users.",
-				"libraryCatalog": "ScienceDirect",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.sciencedirect.com/science/journal/22126716",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.sciencedirect.com/science/handbooks/18745709",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.sciencedirect.com/science/referenceworks/9780080437484",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.sciencedirect.com/science/bookseries/00652458",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

@@ -1,4 +1,4 @@
-32  # Increment number when modifying file
+38  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -72,5 +72,9 @@ f39dbd1c-229e-4abb-8414-a09fdbda37b7 # Archives Network of Alberta - new website
 f8765470-5ace-4a31-b4bd-4327b960ccd  # Springer Old doesn't exist anymore
 82174f4f-8c13-403b-99b2-affc7bc7769b # Cambridge Scientific Abstracts are now Proquest
 f1f3aa05-d752-4a46-b362-1d3dc87c7c36 # Princeton+ now (re-)unified with Primo
-
-
+31649d9d-8f7e-4b87-8678-b3e68ee98f39 # CARL/ABRC OAI Harvester - doesn't exist anymore 
+409c520b-0720-4011-8fce-70fcd9806493 # Inder Science - articles are on metapress, the translator on the publisher site is pointless
+ca6e95d1-46b9-4535-885c-df0c2d4b7f7a # Innovate Online - site defunct (and ownership transfered). 
+f880bf79-d42f-4337-b0d2-7a7de4a48b7d # X-OPAC - no more instances of this lib catalog
+0863b8ec-e717-4b6d-9e35-0b2db2ac6b0f # Physical Society of Japan - journals moved to IOP or Atypon system
+63c25c45-6257-4985-9169-35b785a2995e # InfoTrac OneFile - merged into Galegroup (see #482)

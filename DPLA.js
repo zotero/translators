@@ -294,12 +294,11 @@ var testCases = [
 				"date": "1982-07-28",
 				"abstractNote": "In this interview, Mary Moultrie (born 1943) talks about her involvement in the 113-day Charleston Hospital Strike at the Medical University of South Carolina (MUSC) in March 1969. After graduating from Burke High School in 1960, Moultrie went to Goldwater Memorial Hospital, New York to become a Licensed Practical Nurse (LPN). In 1967, she returned to Charleston and was hired at MUSC only as a nurses assistant since her LPN was not accepted. She speaks in detail about the working conditions and employee relationships at MUSC prior to and after the strike. Ms. Moultrie explains the various types of nursing titles and the unequal pay between black and white nurses. She retells in detail how the racial tensions that led up to the strike at MUSC increased due to the harassing treatment toward black nurses. In the interview, Moultrie details the first informal meetings and get-togethers that were held, until the black nurses joined forces with the 1199 union and Bill Saunders. Moultrie elaborates, in particular, on the lack of support from the white community under the Gaillard administration, as well as the hesitation of the black community to join them in their efforts for equal pay and treatment. She then refers to support from the Southern Christian Leadership Conference (SCLC), Septima Poinsette Clark, and various leaders such as Andrew Young and Ralph Abernathy. Moultrie mentions the difficult and hostile negotiation process with MUSCs president Dr. William McCord and the memorandum of agreement that was ultimately reached. The interview closes by the interviewer inquiring about the current work force diversity at MUSC and Moultries feelings regarding the strikes accomplishments.",
 				"place": "Charleston",
-				"medium": "2 Cassettes, Audio",
 				"rights": "Digital resource copyright 2010, Avery Research Center at the College of Charleston Libraries. All rights reserved. For more information contact the Avery Research Center, College of Charleston, Charleston, SC 29424.",
 				"url": "http://lowcountrydigital.library.cofc.edu/u?/AOH,203",
 				"archive": "Avery Research Center at the College of Charleston",
 				"libraryCatalog": "DPLA",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"audioRecordingFormat": "Audio"
 			}
 		]
 	},

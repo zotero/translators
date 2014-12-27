@@ -2,14 +2,14 @@
 	"translatorID": "631ff0c7-2e64-4279-a9c9-ad9518d40f2b",
 	"label": "Stuff.co.nz",
 	"creator": "Sopheak Hean (University of Waikato, Faculty of Education)",
-	"target": "^http://(www\\.)?stuff\\.co\\.nz/",
+	"target": "^https?://(www\\.)?stuff\\.co\\.nz/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-03 17:42:37"
+	"lastUpdated": "2014-08-23 05:56:33"
 }
 
 /*
@@ -101,14 +101,14 @@ function scrape(doc, url) {
 					}
 				}
 		} catch (err) {
-			newItem.creators ="error";
-	
-			}
+			newItem.creators = [];
+
+		}
 			
 		//Blog title
 		var blogTitle = url.match(/\/blogs\/([^/]+)/);
 		if (blogTitle){
-			newItem.blogTitle = ZU.capitalizeTitle(blogTitle[1].replace(/-/g,' '));
+			newItem.blogTitle = ZU.capitalizeTitle(blogTitle[1].replace(/-/g,' '), true);
 		}
 		newItem.shortTitle = doShortTitle(doc,url);
 		newItem.title= doTitle(doc, url);
@@ -165,61 +165,59 @@ function scrape(doc, url) {
 				authorXPathObject = authorXPathObject.replace(/([\s\n\r\t]+-[\s\n\r\t]+\b[a-zA-Z\s\n\r\t]*)|\b.co.nz|\b.com|(-[a-zA-Z0-9]*)/g, '');
 				var authorString = authorXPathObject.replace(/^\s+\bBy\s*|^\s+\bBY\s*/g, '');
 				
-				if (authorString.match(/\W\band\W+/g)){
-								authorTemp = authorString.replace(/\W\band\W+/g, ', ');
-								authorArray = authorTemp.split(", ");
-							
-						} else if (!authorString.match(/\W\band\W+/g))
-							{
-								authorArray = authorString.toLowerCase();
-							}
-						if( authorArray instanceof Array ) {
-							for (var i in authorArray){			
-							splitIntoArray = authorArray[i].split (" ");
-								for (var i = 0; i < splitIntoArray.length; i++){
+				if (authorString.match(/\W\band\W+/g)) {
+					authorTemp = authorString.replace(/\W\band\W+/g, ', ');
+					authorArray = authorTemp.split(", ");	
+				} else if (!authorString.match(/\W\band\W+/g)) {
+						authorArray = authorString.toLowerCase();
+				}
+				if( authorArray instanceof Array ) {
+					for (var i in authorArray){			
+					splitIntoArray = authorArray[i].split (" ");
+						for (var i = 0; i < splitIntoArray.length; i++){
+							firstName = splitIntoArray[i].substring(0,1).toUpperCase();
+							lastName = splitIntoArray[i].substring(1).toLowerCase();
+							fullName += firstChar + lastChar + emptyString;
+								
+						
+						}
+					newItem.creators.push(Zotero.Utilities.cleanAuthor(JoinString, "author"));
+					
+					}
+					
+				} else {
+					
+			
+					if (authorString.match(/\W\bof\W+/g)){
+						authorTemp = authorString.replace (/\W\bof\W(.*)/g, '');
+						splitIntoArray = authorTemp.split (" ");
+						for (var i = 0; i < splitIntoArray.length; i++){
 									firstName = splitIntoArray[i].substring(0,1).toUpperCase();
 									lastName = splitIntoArray[i].substring(1).toLowerCase();
 									fullName += firstChar + lastChar + emptyString;
-										
-								
-								}
-							newItem.creators.push(Zotero.Utilities.cleanAuthor(JoinString, "author"));
 							
 							}
-							
-						} else {
-							
+						newItem.creators.push(Zotero.Utilities.cleanAuthor(JoinString, "author"));
 					
-							if (authorString.match(/\W\bof\W+/g)){
-								authorTemp = authorString.replace (/\W\bof\W(.*)/g, '');
-								splitIntoArray = authorTemp.split (" ");
-								for (var i = 0; i < splitIntoArray.length; i++){
-											firstName = splitIntoArray[i].substring(0,1).toUpperCase();
-											lastName = splitIntoArray[i].substring(1).toLowerCase();
-											fullName += firstChar + lastChar + emptyString;
-									
-									}
-								newItem.creators.push(Zotero.Utilities.cleanAuthor(JoinString, "author"));
-							
-		
-							} else {
+	
+					} else {
+						
+						splitIntoArray = authorArray.split (" ");
+						for (var i = 0; i < splitIntoArray.length; i++){	
+							firstName = splitIntoArray[i].substring(0,1).toUpperCase();
+							lastName = splitIntoArray[i].substring(1).toLowerCase();
+							fullName += firstName+ lastName + emptyString;
 								
-								splitIntoArray = authorArray.split (" ");
-								for (var i = 0; i < splitIntoArray.length; i++){	
-									firstName = splitIntoArray[i].substring(0,1).toUpperCase();
-									lastName = splitIntoArray[i].substring(1).toLowerCase();
-									fullName += firstName+ lastName + emptyString;
-										
-									
-								}
-								newItem.creators.push(Zotero.Utilities.cleanAuthor(fullName, "author"));
-							}
-										
+							
 						}
+						newItem.creators.push(Zotero.Utilities.cleanAuthor(fullName, "author"));
+					}
+								
+				}
 			}  else {
 				
 				if(authorXPathObject.match(/[\s\n\r]+/g)){
-					authorXPathObject = ZU.capitalizeTitle( authorXPathObject.trim() ); //.replace(/\s+/g, '-');
+					authorXPathObject = ZU.capitalizeTitle( authorXPathObject.trim(), true ); //.replace(/\s+/g, '-');
 					newItem.creators.push(ZU.cleanAuthor(authorXPathObject, "author"));
 				} else {
 					newItem.creators.push(Zotero.Utilities.cleanAuthor(authorXPathObject , "author"));
@@ -227,7 +225,7 @@ function scrape(doc, url) {
 			}
 			
 		} else {
-			newItem.creators ="";
+			newItem.creators = [];
 		}
 			
 		//Title of the Article
@@ -370,13 +368,9 @@ function doTitle(doc, url){
 }
 
 function doDate(doc, url){
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
+
 	var dateXpath = "//div[@id='toolbox']/div[3]";
-	var dateXpathObject = doc.evaluate(dateXpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var dateXpathObject = doc.evaluate(dateXpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	try {
 		if (dateXpathObject){
 			var storeDateValue = dateXpathObject.textContent.replace(/\b(Last updated )\d{0,9}:\d{0,9} /g,'');
@@ -421,65 +415,30 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"creators": [
-					{
-						"firstName": "DANYA",
-						"lastName": "LEVY",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Stuff.co.nz Snapshot"
-					}
-				],
-				"url": "http://www.stuff.co.nz/national/politics/campaign-trail/5967550/Green-party-link-to-billboard-attacks",
-				"publicationTitle": "Stuff.co.nz",
-				"language": "English",
-				"abstractNote": "The man who coordinated the vandalism of 700 National billboards says it was an attempt at \"freedom of expression.\"",
 				"title": "Green party link to billboard attacks",
-				"place": "New Zealand",
-				"section": "Politics",
-				"date": "Nov 15, 2011",
-				"libraryCatalog": "Stuff.co.nz",
-				"accessDate": "CURRENT_TIMESTAMP"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.stuff.co.nz/national/politics/blogs/the-whip/6490948/Collins-olive-branch",
-		"items": [
-			{
-				"itemType": "blogPost",
 				"creators": [
 					{
-						"firstName": "Andrea",
-						"lastName": "Vance",
+						"firstName": "Danya",
+						"lastName": "Levy",
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "Nov 15, 2011",
+				"abstractNote": "The man who coordinated the vandalism of 700 National billboards says it was an attempt at \"freedom of expression.\"",
+				"language": "English",
+				"libraryCatalog": "Stuff.co.nz",
+				"place": "New Zealand",
+				"publicationTitle": "Stuff.co.nz",
+				"section": "Politics",
+				"url": "http://www.stuff.co.nz/national/politics/campaign-trail/5967550/Green-party-link-to-billboard-attacks",
 				"attachments": [
 					{
 						"title": "Stuff.co.nz Snapshot"
 					}
 				],
-				"url": "http://www.stuff.co.nz/national/politics/blogs/the-whip/6490948/Collins-olive-branch",
-				"publicationTitle": "Stuff.co.nz",
-				"language": "English",
-				"blogTitle": "the whip",
-				"title": "Collins' olive branch",
-				"date": "Feb 28, 2012",
-				"abstractNote": "Judith Collins knows how to pick her battles.",
-				"websiteType": "Newspaper",
-				"libraryCatalog": "Stuff.co.nz",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

@@ -5,11 +5,11 @@
 	"target": "/fullrecordinnerframe\\.ashx\\?.+id=|/result\\.ashx\\?",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 270,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-05-15 20:05:47"
+	"lastUpdated": "2014-08-26 03:51:35"
 }
 
 /*
@@ -209,7 +209,7 @@ var testCases = [
 				"publisher": "W. De Gruyter",
 				"ISBN": "3110116715",
 				"numPages": "x, 726 p.",
-				"callNumber": "Dumbarton Oaks PT573.R4 T4 1989",
+				"callNumber": "Widener Harvard Depository PT573.R4 T4 1989x [Consult Circ. Desk for HX45IM]",
 				"series": "Arbeiten zur Frühmittelalterforschung ; Bd. 18",
 				"volume": "Bd. 18",
 				"date": "1989",

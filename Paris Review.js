@@ -2,14 +2,14 @@
 	"translatorID": "b24ee183-58a6-443d-b8f9-c5cd5a3a0f73",
 	"label": "Paris Review",
 	"creator": "Avram Lyon",
-	"target": "^http://www\\.theparisreview\\.org/",
+	"target": "^https?://www\\.theparisreview\\.org/",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-01-30 22:44:35"
+	"lastUpdated": "2014-04-03 18:50:53"
 }
 
 /*
@@ -41,14 +41,9 @@ function detectWeb(doc, url){
 }
 
 function doWeb(doc, url){
-	var n = doc.documentElement.namespaceURI;
-	var ns = n ? function(prefix) {
-		if (prefix == 'x') return n; else return null;
-	} : null;
-	
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		var items = new Array();
+		var items = {};
 		
 		var aTags = doc.getElementsByTagName("a");
 				for(var i=0; i<aTags.length; i++) {
@@ -57,18 +52,18 @@ function doWeb(doc, url){
 						items[aTags[i].href]=aTags[i].textContent;
 					}
 				}
-
-		items = Zotero.selectItems(items);
-		if(!items) return true;
-		for (var i in items) {
-			articles.push(i);
-		}
-		Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
+		});
 	} else {
 		scrape(doc,url);
 	}
-	
-	Zotero.wait();
 }
 
 function scrape (doc,url) {
@@ -80,20 +75,16 @@ function scrape (doc,url) {
 }
 
 function magazineArticle(doc,url) {
-		var n = doc.documentElement.namespaceURI;
-	var ns = n ? function(prefix) {
-		if (prefix == 'x') return n; else return null;
-	} : null;
 		var item = new Zotero.Item("magazineArticle");
-		item.title = doc.evaluate('//div[@id="left"]//h3[1]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		item.title = doc.evaluate('//div[@id="left"]//h3[1]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		if (url.match(/\/interviews\//)) {
 			item.creators.push(Zotero.Utilities.cleanAuthor(item.title.match(/.*?,/)[0],"contributor"));
-			item.creators.push(Zotero.Utilities.cleanAuthor(doc.evaluate('//div[@id="left"]//p[1]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/Interviewed by (.*)/)[1],"author"));
+			item.creators.push(Zotero.Utilities.cleanAuthor(doc.evaluate('//div[@id="left"]//p[1]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/Interviewed by (.*)/)[1],"author"));
 		} else {
-			item.creators.push(Zotero.Utilities.cleanAuthor(doc.evaluate('//div[@id="left"]/div/p', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent,"author"));
+			item.creators.push(Zotero.Utilities.cleanAuthor(doc.evaluate('//div[@id="left"]/div/p', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent,"author"));
 		}
-		item.date = doc.evaluate('//div[@class="moreonissue-right"]/h3/text()[1]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		item.issue = doc.evaluate('//div[@class="moreonissue-right"]/h3/text()[2]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/[0-9]+/)[0];
+		item.date = doc.evaluate('//div[@class="moreonissue-right"]/h3/text()[1]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		item.issue = doc.evaluate('//div[@class="moreonissue-right"]/h3/text()[2]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/[0-9]+/)[0];
 		item.publicationTitle = "Paris Review";
 		item.url = url;
 		item.ISSN="0031-2037";
@@ -102,14 +93,10 @@ function magazineArticle(doc,url) {
 }
 
 function blogPost(doc,url) {
-			var n = doc.documentElement.namespaceURI;
-	var ns = n ? function(prefix) {
-		if (prefix == 'x') return n; else return null;
-	} : null;
 		var item = new Zotero.Item("blogPost");
-		item.title = doc.evaluate('//h2[@class="blog-title"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		item.creators.push(Zotero.Utilities.cleanAuthor(doc.evaluate('//p[@class="blog-date"]/a', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent,"author"));
-		item.date = doc.evaluate('//p[@class="blog-date"]/text()[1]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/(.*)\|/)[1];
+		item.title = doc.evaluate('//h2[@class="blog-title"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		item.creators.push(Zotero.Utilities.cleanAuthor(doc.evaluate('//p[@class="blog-date"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent,"author"));
+		item.date = doc.evaluate('//p[@class="blog-date"]/text()[1]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/(.*)\|/)[1];
 		item.blogTitle = "Paris Review Daily";
 		item.url = url;
 		item.attachments.push({url:url})

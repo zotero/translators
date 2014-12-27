@@ -2,14 +2,14 @@
 	"translatorID": "4f0d0c90-5da0-11df-a08a-0800200c9a66",
 	"label": "FAZ.NET",
 	"creator": "ibex, Sebastian Karcher",
-	"target": "^http://((www\\.)?faz\\.net/.)",
+	"target": "^https?://((www\\.)?faz\\.net/.)",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-03-01 10:10:41"
+	"lastUpdated": "2014-05-10 09:55:17"
 }
 
 /*
@@ -72,8 +72,8 @@ function scrape(doc) {
 	var newArticle = new Zotero.Item('newspaperArticle');
 	newArticle.url = doc.location.href;
 	newArticle.title = ZU.trimInternal(ZU.xpathText(doc, '//div[@class = "FAZArtikelEinleitung"]/h2')).replace(/^,/, "");
-	var date = ZU.xpathText(doc, '//span[@class="Datum"]');
-	if (date) newArticle.date = ZU.trimInternal(date.replace(/,? .*$/, ""));
+	var date = ZU.xpathText(doc, '(//span[@class="Datum"])[1]/@content');
+	if (date) newArticle.date = ZU.trimInternal(date.replace(/T.+$/, ""));
 	var teaser = ZU.xpathText(doc, '//div[@class="FAZArtikelEinleitung"]/p[@class = "Copy"]');
 	if (teaser != null) {
 		newArticle.abstractNote = Zotero.Utilities.trimInternal(teaser).replace(/^,\s*/, "");
@@ -83,7 +83,7 @@ function scrape(doc) {
 	if (ZU.xpathText(doc, '//div[@class="FAZArtikelEinleitung"]/span[@class = "Autor"]/span[contains(@class, "caps")]/a') != null) {
 		var xpath = '//div[@class="FAZArtikelEinleitung"]/span[@class = "Autor"]/span[contains(@class, "caps")]/a';
 	} else {
-		var xpath = '//div[@class="FAZArtikelEinleitung"]/span[@class ="Autor"]/span[contains(@class, "caps")]';
+		var xpath = '//div[@class="FAZArtikelEinleitung"]/span[@class ="Autor"]/span/span[contains(@class, "caps")]';
 	};
 	var authors = ZU.xpath(doc, xpath);
 	
@@ -91,7 +91,7 @@ function scrape(doc) {
 			newArticle.creators.push(Zotero.Utilities.cleanAuthor(authors[i].textContent, "author"));
 		}
 
-	newArticle.publicationTitle = "FAZ.NET";
+	newArticle.publicationTitle = "Frankfurter Allgemeine Zeitung";
 
 	var section = ZU.xpathText(doc, '//ul[@id="nav"]/li/span[@class = "Selected"]');
 	if (section != null) {
@@ -158,9 +158,9 @@ var testCases = [
 				],
 				"url": "http://www.faz.net/aktuell/wissen/mensch-gene/wissenschaftsphilosophie-krumme-wege-der-vernunft-1654864.html",
 				"title": "Wissenschaftsphilosophie Krumme Wege der Vernunft",
-				"date": "13.06.2011",
-				"abstractNote": "13.06.2011 · Wissenschaft hat eine Geschichte, wie kann sie dann aber rational sein? Im Briefwechsel zwischen Ludwik Fleck und Moritz Schlick deuteten sich bereits Antworten an.",
-				"publicationTitle": "FAZ.NET",
+				"date": "2011-06-13",
+				"abstractNote": "Wissenschaft hat eine Geschichte, wie kann sie dann aber rational sein? Im Briefwechsel zwischen Ludwik Fleck und Moritz Schlick deuteten sich bereits Antworten an.",
+				"publicationTitle": "Frankfurter Allgemeine Zeitung",
 				"section": "Wissen",
 				"language": "Deutsch",
 				"ISSN": "0174-4909",

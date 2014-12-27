@@ -9,15 +9,15 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-01-19 23:44:31"
+	"lastUpdated": "2014-04-28 19:32:32"
 }
 
 function detectWeb(doc, url) {
 	if (doc.location.href.match("bookseller_search") || doc.location.href.match("bookstores") || doc.location.href.match("textbooks")) {
 		
-	} else if (doc.location.href.match("search")) {
+	} else if (doc.location.href.search(/\/search\.php/)!=-1) {
 		return "multiple";
-	} else if (doc.location.href.match("books")) {
+	} else if (doc.location.href.search(/\/book/)!=-1) {
 		return "book";
 	}
 }
@@ -113,7 +113,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.biblio.com/books/29965287.html",
+		"url": "http://www.biblio.com/book/through-year-dickens-compiled-his-eldest/d/29965287",
 		"items": [
 			{
 				"itemType": "book",
@@ -133,7 +133,7 @@ var testCases = [
 				"date": "1909",
 				"edition": "First American",
 				"title": "Through The Year With Dickens. Compiled by his Eldest Daughter",
-				"url": "http://www.biblio.com/books/29965287.html",
+				"url": "http://www.biblio.com/book/through-year-dickens-compiled-his-eldest/d/29965287",
 				"libraryCatalog": "Biblio.com",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}

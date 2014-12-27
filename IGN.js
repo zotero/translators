@@ -2,14 +2,14 @@
 	"translatorID": "d210c5a1-73e1-41ad-a3c9-331d5a3ead48",
 	"label": "IGN",
 	"creator": "odie5533",
-	"target": "^http://[^/]*\\.ign\\.com/",
+	"target": "^https?://[^/]*\\.ign\\.com/",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-24 00:23:58"
+	"lastUpdated": "2014-04-03 17:39:52"
 }
 
 /*

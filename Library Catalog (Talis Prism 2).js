@@ -5,11 +5,11 @@
 	"target": "/items(/\\d+|\\?query=)",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 260,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-11-18 23:02:45"
+	"lastUpdated": "2014-08-26 04:11:00"
 }
 
 /*

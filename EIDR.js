@@ -9,14 +9,17 @@
 	"inRepository": true,
 	"translatorType": 8,
 	"browserSupport": "gcsi",
-	"lastUpdated": "2012-04-12 01:51:21"
+	"lastUpdated": "2014-05-29 01:51:21"
 }
 
 var typeMap = {
 //	'Series'
 //	'Season'
 //	'Supplemental'
-	'TV Show': 'tvBroadcast',
+//	'Composite'
+//	'Compilation'
+//	Interactive Material'
+	'TV': 'tvBroadcast',
 	'Movie': 'film',
 	'Short': 'videoRecording',
 	'Web': 'videoRecording'
@@ -58,7 +61,13 @@ function detectSearch(item) {
 	//we should detect party and user but throw an error later
 	//this way other translators don't need to process the DOI
 	var prefix = item.DOI.split('/')[0];
-	if(prefix == '10.5237' || prefix == '10.5238' || prefix == '10.5240') {
+	if([
+			'10.5237', // Parties
+			'10.5238', // Users
+			'10.5239', // Video Services
+			'10.5240'  // Content Records
+		].indexOf(prefix) != -1)
+	{
 		return true;
 	}
 }
@@ -67,7 +76,7 @@ function  doSearch(searchItem) {
 	if(!searchItem.DOI)
 		throw new Error("EIDR not specified.");
 	if(!checkEIDR(searchItem.DOI))
-		throw new Error("Invalid EIDR: " + searchItem.DOI);
+		throw new Error("EIDR not supported: " + searchItem.DOI);
 
 	var request = 'https://resolve.eidr.org/EIDR/object/' + searchItem.DOI
 					+ '/?type=Full&followAlias=true';
@@ -75,25 +84,19 @@ function  doSearch(searchItem) {
 		var parser = new DOMParser();
 		var res = parser.parseFromString(text, "application/xml");
 
-		var ns = {  
-      'n' : 'http://www.eidr.org/schema/1.0',  
-      'md': 'http://www.movielabs.com/md'  
-    };  
+		var ns = {
+			'n' : 'http://www.eidr.org/schema',
+			'md': 'http://www.movielabs.com/schema/md/v2.1/md'
+		};
 
 		if(res.getElementsByTagName('Response').length) {
-		
+
 			throw new Error("Server returned error: ("
 				+ getValue(res, 'Code') + ") "
 				+ getValue(res, 'Type'));
 		}
 
 		var base = res.getElementsByTagName('BaseObjectData')[0];
-
-		if(getValue(base, 'StructuralType') != 'Performance') {
-			Z.debug("Unhandled StructuralType: "
-				+ getValue(base, 'StructuralType'));
-			return;
-		}
 
 		var type = typeMap[getValue(base,'ReferentType')];
 		if(!type) {
@@ -137,3 +140,45 @@ function  doSearch(searchItem) {
 		item.complete();
 	});
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "search",
+		"input": {
+			"DOI": "10.5240/6F7E-EF59-329B-1F0A-8440-2"
+		},
+		"items": [
+			{
+				"itemType": "videoRecording",
+				"creators": [
+					{
+						"lastName": "Rowland",
+						"firstName": "Roy",
+						"creatorType": "director"
+					},
+					{
+						"firstName": "Byron",
+						"lastName": "Shores",
+						"creatorType": "castMember"
+					},
+					{
+						"firstName": "C. Henry",
+						"lastName": "Gordon",
+						"creatorType": "castMember"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"libraryCatalog": "EIDR",
+				"title": "You, the People",
+				"date": "1940",
+				"place": "US",
+				"runningTime": "1260s"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

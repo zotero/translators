@@ -5,11 +5,11 @@
 	"target": "^https?://(www\\.)?booksandjournals\\.brillonline\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 250,
+	"priority": 150,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-11-18 17:38:45"
+	"lastUpdated": "2014-08-26 03:35:40"
 }
 
 /*

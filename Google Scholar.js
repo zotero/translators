@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsib",
-	"lastUpdated": "2013-11-22 02:08:14"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2014-07-25 21:01:15"
 }
 
 /*
@@ -38,7 +38,7 @@
  */
 
 var bogusItemID = 1;
-var __old_cookie, __result_counter=0;
+var __old_CF, __result_counter=0;
 
 var detectWeb = function (doc, url) {
 	// Icon shows only for search results and law cases
@@ -68,25 +68,28 @@ var detectWeb = function (doc, url) {
  * Cookie manipulation functions *
  *********************************/
 
-//sets Google Scholar Preference cookie and returns old value
-function setGSPCookie(doc, cookie) {
+//sets Google Scholar Preference cookie
+function setGSPCookie(doc, cf) {
 	var m = doc.cookie.match(/\bGSP=[^;]+/);
-	var oldCookie = m[0];
-
-	if(!cookie) {
-		cookie = oldCookie.replace(/:?\s*\bCF=\d+/,'') +
-				':CF=4';
+	var cookie = m ? m[0] : '';
+	if(!cookie) return;
+	
+	Z.debug('Changing cookie: ' + cookie);
+	
+	if(cookie.search(/\bCF=/) != -1) {
+		cookie = cookie.replace(/\s*\bCF=\d*(:?)/,cf ? 'CF=' + cf + '$1' : '');
+	} else {
+		cookie += ':CF=' + cf;
 	}
 
+	// Make sure we capture "0-" in
+	// http://0-scholar.google.co.za.innopac.up.ac.za/...
 	var domain = doc.location.href
-				.match(/https?:\/\/[^\/]*?(scholar\.google\.[^:\/]+)/i)[1];
-
+				.match(/https?:\/\/[^\/]*?([^.\/]*scholar\.google\.[^:\/]+)/i)[1];
 	cookie += '; domain=.' + domain +
 				'; expires=Sun, 17 Jan 2038 19:14:09 UTC';	//this is what google scholar uses
 	doc.cookie = cookie;
 	Z.debug('Cookie set to: ' + cookie);
-
-	return oldCookie;
 }
 
 //set cookie using Googles Scholar preferences page
@@ -117,11 +120,13 @@ function setCookieThroughPrefs(doc, callback) {
 
 function prepareCookie(doc, callback) {
 	// Google Scholar always sets GSP
-	if(doc.cookie.match(/\bGSP=/)) {
+	if(doc.cookie.search(/\bGSP=/) != -1) {
 		//check if we need to change cookie
 		var m = doc.cookie.match(/\bGSP=[^;]*?\bCF=(\d+)/);
-		if(!m || m[1] != 4) {
-			__old_cookie = setGSPCookie(doc);
+		__old_CF = undefined;
+		if(!m || m[1] != '4') {
+			__old_CF = (m && m[1]) || '';
+			setGSPCookie(doc, '4');
 		}
 		callback(doc);
 	} else {
@@ -133,8 +138,8 @@ function prepareCookie(doc, callback) {
 }
 
 function restoreCookie(doc) {
-	if(__old_cookie) {
-		setGSPCookie(doc, __old_cookie);
+	if(__old_CF != undefined) {
+		setGSPCookie(doc, __old_CF);
 	}
 }
 
@@ -362,8 +367,7 @@ function scrapeCaseResults(doc, cases) {
 			if(caseId) caseId = caseId.match(/\b(?:cites|about)=(\d+)/);
 			if(caseId) caseId = caseId[1];
 			if(caseId) {
-				attachmentFrag = 'http://scholar.google.com/scholar_case?'
-					+ 'case=' + caseId;
+				attachmentFrag = '/scholar_case?case=' + caseId;
 			}
 		}
 		
@@ -599,7 +603,9 @@ function doWeb(doc, url) {
 				if(!bibtexUrl
 					|| !(id = bibtexUrl.match(/gs_ocit\(event,\s*(['"])([^)]+?)\1/)) ) {
 					if(!bibtexUrl) Z.debug('onclick not found');
-					throw new Error('Could not build a BibTeX URL');
+					else Z.debug('Could not determine id from: ' + bibtexUrl);
+					Z.debug('Could not build a BibTeX URL');
+					continue;
 				}
 				
 				bibtexUrl = '/scholar.bib?q=info:' + id[2]	

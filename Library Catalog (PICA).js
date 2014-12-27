@@ -5,11 +5,11 @@
 	"target": "^https?://[^/]+(?:/[^/]+)?//?DB=\\d",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 198,
+	"priority": 248,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-03-01 11:11:35"
+	"lastUpdated": "2014-09-25 15:49:46"
 }
 
 function getSearchResults(doc) {
@@ -68,20 +68,17 @@ function scrape(doc, url) {
 		var newItem = new Zotero.Item();
 		//newItem.repository = "SUDOC"; // do not save repository
 		//make sure we don't get stuck because of a COinS error
-		var coinserror = false;
-		try {(Zotero.Utilities.parseContextObject(coins, newItem))}
-		catch(e) {
+		try {
+			Zotero.Utilities.parseContextObject(coins, newItem);
+		} catch(e) {
 			Z.debug("error parsing COinS");
-			coinserror = true;
-			}
-		if (!coinserror) Zotero.Utilities.parseContextObject(coins, newItem)
+		}
 		/** we need to clean up the results a bit **/
 		//pages should not contain any extra characters like p. or brackets (what about supplementary pages?)
 		if(newItem.pages) newItem.pages = newItem.pages.replace(/[^\d-]+/g, '');
 		
 		
 	} else var newItem = new Zotero.Item();
-
 
 	newItem.itemType = detectWeb(doc, url);
 	newItem.libraryCatalog = "Library Catalog - " + doc.location.host;
@@ -103,7 +100,7 @@ function scrape(doc, url) {
 				
 		// With COins, we only get one author - so we start afresh. We do so in two places: Here if there is an author fied
 		//further down for other types of author fields. This is so we don't overwrite the author array when we have both an author and 
-		//a other persons field (cf. the Scheffer/Schachtschabel/Blume/Thiele test)
+		//another persons field (cf. the Scheffer/Schachtschabel/Blume/Thiele test)
 		if (field == "author" || field == "auteur" || field == "verfasser"){ 
 			authorpresent = true;
 			newItem.creators = new Array();
@@ -148,7 +145,8 @@ function scrape(doc, url) {
 						// TODO : Add other author types
 						if (authorFunction == 'Traduction') {
 							zoteroFunction = 'translator';
-						} else if ((authorFunction.substr(0, 7) == 'Éditeur')) {
+						} else if ((authorFunction.substr(0, 7) == 'Éditeur') || authorFunction=="Directeur de la publication") {
+							//once Zotero suppports it, distinguish between editorial director and editor here;
 							zoteroFunction = 'editor';
 						} else if ((newItem.itemType == "thesis") && (authorFunction != 'Auteur')) {
 							zoteroFunction = "contributor";
@@ -179,13 +177,17 @@ function scrape(doc, url) {
 			
 			case 'edition':
 			case 'ausgabe':
-				newItem.edition = value;
+				var edition;
+				if (edition = value.match(/(\d+)[.\s]+(Aufl|ed|éd)/)){
+					newItem.edition = edition[1];
+				}
+				else newItem.edition = value;
 
 			case 'dans':
 			case 'in':
 				//Looks like we can do better with titles than COinS
-				//journal/book title are always first
-				//Several different formts for ending a title
+				//journal/book titles are always first
+				//Several different formats for ending a title
 				// end with "/" http://gso.gbv.de/DB=2.1/PPNSET?PPN=732386977
 				//              http://gso.gbv.de/DB=2.1/PPNSET?PPN=732443563
 				// end with ". -" followed by publisher information http://gso.gbv.de/DB=2.1/PPNSET?PPN=729937798
@@ -204,7 +206,7 @@ function scrape(doc, url) {
 						newItem.ISBN = m[2].replace(/\s+/g,'');
 					}
 				}
-				//publisher information can preceeded ISSN/ISBN
+				//publisher information can be preceeded by ISSN/ISBN
 				// typically / ed. by ****. - city, country : publisher
 				//http://gso.gbv.de/DB=2.1/PPNSET?PPN=732386977
 				var n = value;
@@ -257,7 +259,7 @@ function scrape(doc, url) {
 				var dateRE = /\b(?:19|20)\d{2}\b/g;
 				var date, lastDate;
 				while(date = dateRE.exec(n)) {
-					lastDate = date[0]
+					lastDate = date[0];
 					n = n.replace(lastDate,'');	//get rid of year
 				}
 				if(lastDate) {
@@ -337,7 +339,7 @@ function scrape(doc, url) {
 			case 'year':
 			case 'jahr':
 			case 'jaar':
-				newItem.date = value.replace(/[[\]]+/g, '');
+				newItem.date = value; //we clean this up below
 				break;
 
 			case 'language':
@@ -374,7 +376,6 @@ function scrape(doc, url) {
 					}
 					if(pub.length) newItem.publisher = pub.join(',');	//in case publisher contains commas
 				}
-
 				if(!newItem.date) {	//date is always (?) last on the line
 					m = value.match(/\D(\d{4})\b[^,;]*$/);	//could be something like c1986
 					if(m) newItem.date = m[1];
@@ -395,17 +396,28 @@ function scrape(doc, url) {
 			case 'omvang':
 			case 'kollation':
 			case 'collation':
+				value = ZU.trimInternal(value); // Since we assume spaces
+				
 				// We're going to extract the number of pages from this field
-				// Known bug doesn't work when there are 2 volumes (maybe fixed?), 
 				var m = value.match(/(\d+) vol\./);
-				if (m) {
+				// sudoc in particular includes "1 vol" for every book; We don't want that info
+				if (m && m[1] != 1) {
 					newItem.numberOfVolumes = m[1];
 				}
-				//make sure things like 2 partition don't match, but 2 p at the end of the field do:
-				m = value.match(/\[?(\d+)\]?\s+[fpS]([^A-Za-z]|$)/);
-				if (m) {
-					newItem.numPages = m[1];
+				
+				//make sure things like 2 partition don't match, but 2 p at the end of the field do
+				// f., p., and S. are "pages" in various languages
+				// For multi-volume works, we expect formats like:
+				//   x-109 p., 510 p. and X, 106 S.; 123 S.
+				var numPagesRE = /\[?((?:[ivxlcdm\d]+[ ,\-]*)+)\]?\s+[fps]\b/ig,
+					numPages = [], m;
+				while(m = numPagesRE.exec(value)) {
+					numPages.push(m[1].replace(/ /g, '')
+						.replace(/[\-,]/g,'+')
+						.toLowerCase() // for Roman numerals
+					);
 				}
+				if(numPages.length) newItem.numPages = numPages.join('; ');
 				
 				//running time for movies:
 				m = value.match(/\d+\s*min/);
@@ -516,11 +528,28 @@ function scrape(doc, url) {
 	newItem.city = undefined;
 	if (newItem.country) location.push(newItem.country.trim());
 	newItem.country = undefined;
-	if(location.length) newItem.place = location.join(', ');
-
+	//join and remove the "u.a." common in German libraries
+	if(location.length) newItem.place = location.join(', ').replace(/\[?u\.a\.\]?\s*$/, "");
+	
+	//remove u.a. and [u.a.] from publisher
+	if (newItem.publisher){
+		newItem.publisher = newItem.publisher.replace(/\[?u\.a\.\]?\s*$/, "");
+	}
+	
+	//clean up date, which may come from various places; We're conservative here and are just cleaning up c1996 and [1995] and combinations thereof
+	if (newItem.date){
+		newItem.date = newItem.date.replace(/[\[c]+\s*(\d{4})\]?/, "$1");
+	}
 	//if we didn't get a permalink, look for it in the entire page
 	if(!permalink) {
 		var permalink = ZU.xpathText(doc, '//a[./img[contains(@src,"/permalink") or contains(@src,"/zitierlink")]][1]/@href');
+	}
+	
+	//switch institutional authors to single field;
+	for (var i=0; i<newItem.creators.length; i++){
+		if (!newItem.creators[i].firstName){
+			newItem.creators[i].fieldMode = true;
+		}
 	}
 	if(permalink) {
 		newItem.attachments.push({
@@ -588,22 +617,26 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Souffrance au travail dans les grandes entreprises",
 				"creators": [
 					{
 						"firstName": "Jacques",
 						"lastName": "Delga",
 						"creatorType": "editor"
+					},
+					{
+						"firstName": "Fabrice",
+						"lastName": "Bien",
+						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Stress lié au travail -- France",
-					"Harcèlement -- France",
-					"Conditions de travail -- France",
-					"Violence en milieu de travail",
-					"Psychologie du travail"
-				],
-				"seeAlso": [],
+				"date": "2010",
+				"ISBN": "978-2-7472-1729-3",
+				"language": "français",
+				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
+				"numPages": "290",
+				"place": "Paris, France",
+				"publisher": "Eska",
 				"attachments": [
 					{
 						"title": "Worldcat Link",
@@ -621,15 +654,15 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"date": "2010",
-				"ISBN": "978-2-7472-1729-3",
-				"title": "Souffrance au travail dans les grandes entreprises",
-				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
-				"language": "français",
-				"publisher": "Eska",
-				"numberOfVolumes": "1",
-				"numPages": "290",
-				"place": "Paris, France"
+				"tags": [
+					"Conditions de travail -- France",
+					"Harcèlement -- France",
+					"Psychologie du travail",
+					"Stress lié au travail -- France",
+					"Violence en milieu de travail"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -639,6 +672,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Zotero: a guide for librarians, researchers and educators",
 				"creators": [
 					{
 						"firstName": "Jason",
@@ -646,11 +680,14 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Bibliographie -- Méthodologie -- Informatique"
-				],
-				"seeAlso": [],
+				"date": "2011",
+				"ISBN": "978-0-83898589-2",
+				"language": "anglais",
+				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
+				"numPages": "159",
+				"place": "Chicago, Etats-Unis",
+				"publisher": "Association of College and Research Libraries",
+				"shortTitle": "Zotero",
 				"attachments": [
 					{
 						"title": "Worldcat Link",
@@ -668,16 +705,11 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"date": "2011",
-				"ISBN": "978-0-83898589-2",
-				"title": "Zotero: a guide for librarians, researchers and educators",
-				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
-				"language": "anglais",
-				"publisher": "Association of College and Research Libraries",
-				"numberOfVolumes": "1",
-				"numPages": "159",
-				"place": "Chicago, Etats-Unis",
-				"shortTitle": "Zotero"
+				"tags": [
+					"Bibliographie -- Méthodologie -- Informatique"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -687,6 +719,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "thesis",
+				"title": "Facteurs pronostiques des lymphomes diffus lymphocytiques",
 				"creators": [
 					{
 						"firstName": "Brigitte",
@@ -699,19 +732,14 @@ var testCases = [
 						"creatorType": "contributor"
 					}
 				],
-				"notes": [
-					{
-						"note": "<div><span>Publication autorisée par le jury</span></div>"
-					}
-				],
-				"tags": [
-					"Leucémie lymphoïde chronique -- Thèses et écrits académiques",
-					"Lymphocytes B -- Thèses et écrits académiques",
-					"Lymphome malin non hodgkinien -- Dissertations universitaires",
-					"Lymphocytes B -- Dissertations universitaires",
-					"Leucémie chronique lymphocytaire à cellules B -- Dissertations universitaires"
-				],
-				"seeAlso": [],
+				"date": "2004",
+				"language": "français",
+				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
+				"numPages": "87",
+				"numberOfVolumes": "1",
+				"place": "Lille, France",
+				"type": "Thèse d'exercice",
+				"university": "Université du droit et de la santé",
 				"attachments": [
 					{
 						"title": "Worldcat Link",
@@ -729,15 +757,19 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"date": "2004",
-				"title": "Facteurs pronostiques des lymphomes diffus lymphocytiques",
-				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
-				"university": "Université du droit et de la santé",
-				"language": "français",
-				"numberOfVolumes": "1",
-				"numPages": "87",
-				"type": "Thèse d'exercice",
-				"place": "Lille, France"
+				"tags": [
+					"Leucémie chronique lymphocytaire à cellules B -- Dissertations universitaires",
+					"Leucémie lymphoïde chronique -- Thèses et écrits académiques",
+					"Lymphocytes B -- Dissertations universitaires",
+					"Lymphocytes B -- Thèses et écrits académiques",
+					"Lymphome malin non hodgkinien -- Dissertations universitaires"
+				],
+				"notes": [
+					{
+						"note": "<div><span>Publication autorisée par le jury</span></div>"
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	},
@@ -747,6 +779,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Mobile technology in the village: ICTs, culture, and social logistics in India",
 				"creators": [
 					{
 						"firstName": "Sirpa",
@@ -754,17 +787,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [
-					{
-						"note": "<div><span>Contient un résumé en anglais et en français. - in Journal of the Royal Anthropological Institute, vol. 14, no. 3 (Septembre 2008)</span></div>"
-					}
-				],
-				"tags": [
-					"Communes rurales -- Et la technique -- Aspect social -- Inde",
-					"Téléphonie mobile -- Aspect social -- Inde",
-					"Inde -- Conditions sociales -- 20e siècle"
-				],
-				"seeAlso": [],
+				"date": "2008",
+				"ISSN": "1359-0987",
+				"issue": "3",
+				"language": "anglais",
+				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
+				"pages": "515-534",
+				"place": "London, Royaume-Uni",
+				"publicationTitle": "Journal of the Royal Anthropological Institute",
+				"publisher": "Royal Anthropological Institute",
+				"shortTitle": "Mobile technology in the village",
+				"volume": "14",
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
@@ -777,18 +810,17 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"date": "2008",
-				"pages": "515-534",
-				"issue": "3",
-				"volume": "14",
-				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
-				"title": "Mobile technology in the village: ICTs, culture, and social logistics in India",
-				"language": "anglais",
-				"publisher": "Royal Anthropological Institute",
-				"publicationTitle": "Journal of the Royal Anthropological Institute",
-				"ISSN": "1359-0987",
-				"place": "London, Royaume-Uni",
-				"shortTitle": "Mobile technology in the village"
+				"tags": [
+					"Communes rurales -- Et la technique -- Aspect social -- Inde",
+					"Inde -- Conditions sociales -- 20e siècle",
+					"Téléphonie mobile -- Aspect social -- Inde"
+				],
+				"notes": [
+					{
+						"note": "<div><span>Contient un résumé en anglais et en français. - in Journal of the Royal Anthropological Institute, vol. 14, no. 3 (Septembre 2008)</span></div>"
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	},
@@ -798,6 +830,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "film",
+				"title": "Exploring the living cell",
 				"creators": [
 					{
 						"firstName": "Véronique",
@@ -810,28 +843,14 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [
-					{
-						"note": "<div><span>Les différents films qui composent ce DVD sont réalisés avec des prises de vue réelles, ou des images microcinématographiques ou des images de synthèse, ou des images fixes tirées de livres. La bande son est essentiellement constituée de commentaires en voix off et d'interviews (les commentaires sont en anglais et les interviews sont en langue originales : anglais, français ou allemand, sous-titrée en anglais). - Discovering the cell : participation de Paul Nurse (Rockefeller university, New York), Claude Debru (ENS : Ecole normale supérieure, Paris) et Werner Franke (DKFZ : Deutsches Krebsforschungszentrum, Heidelberg) ; Membrane : participation de Kai Simons, Soizig Le Lay et Lucas Pelkmans (MPI-CBG : Max Planck institute of molecular cell biology and genetics, Dresden) ; Signals and calcium : participation de Christian Sardet et Alex Mc Dougall (CNRS / UPMC : Centre national de la recherche scientifique / Université Pierre et Marie Curie, Villefrance-sur-Mer) ; Membrane traffic : participation de Thierry Galli et Phillips Alberts (Inserm = Institut national de la santé et de la recherche médicale, Paris) ; Mitochondria : participation de Michael Duchen, Rémi Dumollard et Sean Davidson (UCL : University college of London) ; Microfilaments : participation de Cécile Gauthier Rouvière et Alexandre Philips (CNRS-CRBM : CNRS-Centre de recherche de biochimie macromoléculaire, Montpellier) ; Microtubules : participation de Johanna Höög, Philip Bastiaens et Jonne Helenius (EMBL : European molecular biology laboratory, Heidelberg) ; Centrosome : participation de Michel Bornens et Manuel Théry (CNRS-Institut Curie, Paris) ; Proteins : participation de Dino Moras et Natacha Rochel-Guiberteau (IGBMC : Institut de génétique et biologie moléculaire et cellulaire, Strasbourg) ; Nocleolus and nucleus : participation de Daniele Hernandez-Verdun, Pascal Rousset, Tanguy Lechertier (CNRS-UPMC / IJM : Institut Jacques Monod, Paris) ; The cell cycle : participation de Paul Nurse (Rockefeller university, New York) ; Mitosis and chromosomes : participation de Jan Ellenberg, Felipe Mora-Bermudez et Daniel Gerlich (EMBL, Heidelberg) ; Mitosis and spindle : participation de Eric Karsenti, Maiwen Caudron et François Nedelec (EMBL, Heidelberg) ; Cleavage : participation de Pierre Gönczy, Marie Delattre et Tu Nguyen Ngoc (Isrec : Institut suisse de recherche expérimentale sur le cancer, Lausanne) ; Cellules souches : participation de Göran Hermerén (EGE : European group on ethics in science and new technologies, Brussels) ; Cellules libres : participation de Jean-Jacques Kupiec (ENS, Paris) ; Cellules et évolution : participation de Paule Nurse (Rockefeller university, New York)</span></div><div><span>&nbsp;</span></div>"
-					}
-				],
-				"tags": [
-					"Cellules",
-					"Cellules -- Évolution",
-					"Membrane cellulaire",
-					"Cellules -- Aspect moral",
-					"Cytologie -- Recherche",
-					"Biologie cellulaire",
-					"Biogenèse",
-					"Ultrastructure (biologie)",
-					"Cells",
-					"Cells -- Evolution",
-					"Cell membranes",
-					"Cells -- Moral and ethical aspects",
-					"Cytology -- Research",
-					"QH582.4"
-				],
-				"seeAlso": [],
+				"date": "2006",
+				"ISBN": "0-8153-4223-3",
+				"abstractNote": "Ensemble de 20 films permettant de découvrir les protagonistes de la découverte de la théorie cellulaire, l'évolution, la diversité, la structure et le fonctionnement des cellules. Ce DVD aborde aussi en images les recherches en cours dans des laboratoires internationaux et les débats que ces découvertes sur la cellule provoquent. Les films sont regroupés en 5 chapitres complétés de fiches informatives et de liens Internet.",
+				"language": "anglais",
+				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
+				"place": "Meudon, France",
+				"publisher": "CNRS Images",
+				"runningTime": "180 min",
 				"attachments": [
 					{
 						"title": "Worldcat Link",
@@ -849,15 +868,28 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"date": "2006",
-				"ISBN": "0-8153-4223-3",
-				"title": "Exploring the living cell",
-				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
-				"language": "anglais",
-				"publisher": "CNRS Images",
-				"runningTime": "180 min",
-				"abstractNote": "Ensemble de 20 films permettant de découvrir les protagonistes de la découverte de la théorie cellulaire, l'évolution, la diversité, la structure et le fonctionnement des cellules. Ce DVD aborde aussi en images les recherches en cours dans des laboratoires internationaux et les débats que ces découvertes sur la cellule provoquent. Les films sont regroupés en 5 chapitres complétés de fiches informatives et de liens Internet.",
-				"place": "Meudon, France"
+				"tags": [
+					"Biogenèse",
+					"Biologie cellulaire",
+					"Cell membranes",
+					"Cells",
+					"Cells -- Evolution",
+					"Cells -- Moral and ethical aspects",
+					"Cellules",
+					"Cellules -- Aspect moral",
+					"Cellules -- Évolution",
+					"Cytologie -- Recherche",
+					"Cytology -- Research",
+					"Membrane cellulaire",
+					"QH582.4",
+					"Ultrastructure (biologie)"
+				],
+				"notes": [
+					{
+						"note": "<div><span>Les différents films qui composent ce DVD sont réalisés avec des prises de vue réelles, ou des images microcinématographiques ou des images de synthèse, ou des images fixes tirées de livres. La bande son est essentiellement constituée de commentaires en voix off et d'interviews (les commentaires sont en anglais et les interviews sont en langue originales : anglais, français ou allemand, sous-titrée en anglais). - Discovering the cell : participation de Paul Nurse (Rockefeller university, New York), Claude Debru (ENS : Ecole normale supérieure, Paris) et Werner Franke (DKFZ : Deutsches Krebsforschungszentrum, Heidelberg) ; Membrane : participation de Kai Simons, Soizig Le Lay et Lucas Pelkmans (MPI-CBG : Max Planck institute of molecular cell biology and genetics, Dresden) ; Signals and calcium : participation de Christian Sardet et Alex Mc Dougall (CNRS / UPMC : Centre national de la recherche scientifique / Université Pierre et Marie Curie, Villefrance-sur-Mer) ; Membrane traffic : participation de Thierry Galli et Phillips Alberts (Inserm = Institut national de la santé et de la recherche médicale, Paris) ; Mitochondria : participation de Michael Duchen, Rémi Dumollard et Sean Davidson (UCL : University college of London) ; Microfilaments : participation de Cécile Gauthier Rouvière et Alexandre Philips (CNRS-CRBM : CNRS-Centre de recherche de biochimie macromoléculaire, Montpellier) ; Microtubules : participation de Johanna Höög, Philip Bastiaens et Jonne Helenius (EMBL : European molecular biology laboratory, Heidelberg) ; Centrosome : participation de Michel Bornens et Manuel Théry (CNRS-Institut Curie, Paris) ; Proteins : participation de Dino Moras et Natacha Rochel-Guiberteau (IGBMC : Institut de génétique et biologie moléculaire et cellulaire, Strasbourg) ; Nocleolus and nucleus : participation de Daniele Hernandez-Verdun, Pascal Rousset, Tanguy Lechertier (CNRS-UPMC / IJM : Institut Jacques Monod, Paris) ; The cell cycle : participation de Paul Nurse (Rockefeller university, New York) ; Mitosis and chromosomes : participation de Jan Ellenberg, Felipe Mora-Bermudez et Daniel Gerlich (EMBL, Heidelberg) ; Mitosis and spindle : participation de Eric Karsenti, Maiwen Caudron et François Nedelec (EMBL, Heidelberg) ; Cleavage : participation de Pierre Gönczy, Marie Delattre et Tu Nguyen Ngoc (Isrec : Institut suisse de recherche expérimentale sur le cancer, Lausanne) ; Cellules souches : participation de Göran Hermerén (EGE : European group on ethics in science and new technologies, Brussels) ; Cellules libres : participation de Jean-Jacques Kupiec (ENS, Paris) ; Cellules et évolution : participation de Paule Nurse (Rockefeller university, New York)</span></div><div><span>&nbsp;</span></div>"
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	},
@@ -867,16 +899,13 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "map",
+				"title": "Wind and wave atlas of the Mediterranean sea",
 				"creators": [],
-				"notes": [],
-				"tags": [
-					"Météorologie maritime -- Méditerranée (mer) -- Atlas",
-					"Vents -- Méditerranée (mer) -- Atlas",
-					"Vent de mer -- Méditerranée (mer) -- Atlas",
-					"Vagues -- Méditerranée (mer) -- Atlas",
-					"Méditerranée (mer) -- Atlas"
-				],
-				"seeAlso": [],
+				"date": "2004",
+				"ISBN": "2-11-095674-7",
+				"language": "anglais",
+				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
+				"publisher": "Western European Union, Western European armaments organisation research cell",
 				"attachments": [
 					{
 						"title": "Worldcat Link",
@@ -894,12 +923,15 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"date": "2004",
-				"ISBN": "2-11-095674-7",
-				"title": "Wind and wave atlas of the Mediterranean sea",
-				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
-				"language": "anglais",
-				"publisher": "Western European Union, Western European armaments organisation research cell"
+				"tags": [
+					"Méditerranée (mer) -- Atlas",
+					"Météorologie maritime -- Méditerranée (mer) -- Atlas",
+					"Vagues -- Méditerranée (mer) -- Atlas",
+					"Vent de mer -- Méditerranée (mer) -- Atlas",
+					"Vents -- Méditerranée (mer) -- Atlas"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -909,6 +941,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "audioRecording",
+				"title": "English music for mass and offices (II) and music for other ceremonies",
 				"creators": [
 					{
 						"firstName": "Ernest H.",
@@ -926,16 +959,12 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [
-					{
-						"note": "<div><span>Modern notation. - \"Critical apparatus\": p. 174-243</span></div><div><span>&nbsp;</span></div>"
-					}
-				],
-				"tags": [
-					"Messes (musique) -- Partitions",
-					"Motets -- Partitions"
-				],
-				"seeAlso": [],
+				"date": "1986",
+				"language": "latin",
+				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
+				"numPages": "243",
+				"place": "Monoco, Monaco",
+				"publisher": "Éditions de l'oiseau-lyre",
 				"attachments": [
 					{
 						"title": "Worldcat Link",
@@ -953,16 +982,16 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"date": "1986",
-				"title": "English music for mass and offices (II) and music for other ceremonies",
-				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
-				"language": "latin",
-				"publisher": "Éditions de l'oiseau-lyre",
-				"numPages": "243",
-				"volume": "17",
-				"series": "Polyphonic music of the fourteenth century",
-				"seriesTitle": "Polyphonic music of the fourteenth century",
-				"place": "Monoco, Monaco"
+				"tags": [
+					"Messes (musique) -- Partitions",
+					"Motets -- Partitions"
+				],
+				"notes": [
+					{
+						"note": "<div><span>Modern notation. - \"Critical apparatus\": p. 174-243</span></div><div><span>&nbsp;</span></div>"
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	},
@@ -972,6 +1001,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "A new method to obtain a consensus ranking of a region's vintages' quality",
 				"creators": [
 					{
 						"firstName": "José",
@@ -994,9 +1024,15 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2012",
+				"ISSN": "1931-4361",
+				"issue": "1",
+				"libraryCatalog": "Library Catalog - gso.gbv.de",
+				"pages": "88-107",
+				"place": "Walla Walla, Wash.",
+				"publicationTitle": "Journal of wine economics",
+				"publisher": "AAWE",
+				"volume": "7",
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
@@ -1009,16 +1045,9 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"title": "A new method to obtain a consensus ranking of a region's vintages' quality",
-				"date": "2012",
-				"pages": "88-107",
-				"ISSN": "1931-4361",
-				"issue": "1",
-				"publicationTitle": "Journal of wine economics",
-				"volume": "7",
-				"place": "Walla Walla, Wash.",
-				"publisher": "AAWE",
-				"libraryCatalog": "Library Catalog - gso.gbv.de"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1028,6 +1057,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "bookSection",
+				"title": "'The truth against the world': spectrality and the mystic past in late twentieth-century Cornwall",
 				"creators": [
 					{
 						"firstName": "Carl",
@@ -1050,9 +1080,14 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2013",
+				"ISBN": "978-0-415-62868-6, 978-0-415-62869-3, 978-0-203-08018-4",
+				"bookTitle": "Mysticism, myth and Celtic identity",
+				"libraryCatalog": "Library Catalog - gso.gbv.de",
+				"pages": "70-83",
+				"place": "London",
+				"publisher": "Routledge ,",
+				"shortTitle": "'The truth against the world'",
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
@@ -1065,15 +1100,9 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"date": "2013",
-				"pages": "70-83",
-				"ISBN": "978-0-415-62868-6, 978-0-415-62869-3, 978-0-203-08018-4",
-				"publicationTitle": "Mysticism myth and Celtic identity",
-				"libraryCatalog": "Library Catalog - gso.gbv.de",
-				"title": "'The truth against the world': spectrality and the mystic past in late twentieth-century Cornwall",
-				"publisher": "Routledge ,",
-				"place": "London",
-				"shortTitle": "'The truth against the world'"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1083,6 +1112,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "bookSection",
+				"title": "Noise reduction potential of an engine oil pan",
 				"creators": [
 					{
 						"firstName": "Tommy",
@@ -1110,9 +1140,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2013",
+				"ISBN": "978-3-642-33832-8",
+				"journalAbbreviation": "Lecture Notes in Electrical Engineering",
+				"libraryCatalog": "Library Catalog - gso.gbv.de",
+				"pages": "291-304",
+				"place": "Berlin",
+				"publicationTitle": "Proceedings of the FISITA 2012 World Automotive Congress; Vol. 13: Noise, vibration and harshness (NVH)",
+				"publisher": "Springer Berlin",
+				"series": "Lecture notes in electrical engineering",
+				"seriesNumber": "201",
+				"seriesTitle": "Lecture notes in electrical engineering",
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
@@ -1125,18 +1163,9 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"title": "Noise reduction potential of an engine oil pan",
-				"date": "2013",
-				"pages": "291-304",
-				"ISBN": "978-3-642-33832-8",
-				"journalAbbreviation": "Lecture Notes in Electrical Engineering",
-				"publicationTitle": "Proceedings of the FISITA 2012 World Automotive Congress; Vol. 13: Noise, vibration and harshness (NVH)",
-				"place": "Berlin",
-				"publisher": "Springer Berlin",
-				"libraryCatalog": "Library Catalog - gso.gbv.de",
-				"seriesNumber": "201",
-				"series": "Lecture notes in electrical engineering",
-				"seriesTitle": "Lecture notes in electrical engineering"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1146,22 +1175,28 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Health promotion by the family, the role of the family in enhancing healthy behavior, symposium 23-25 March 1992, Brussels",
 				"creators": [
 					{
 						"lastName": "Organisation mondiale de la santé",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": true
 					},
 					{
 						"lastName": "Congrès",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": true
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Famille -- Actes de congrès",
-					"Santé publique -- Actes de congrès"
-				],
-				"seeAlso": [],
+				"date": "1992-1993",
+				"ISSN": "0003-9578",
+				"issue": "1/4",
+				"language": "français",
+				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
+				"pages": "3-232",
+				"place": "Belgique",
+				"publicationTitle": "Archives belges de médecine sociale, hygiène, médecine du travail et médecine légale",
+				"volume": "51",
 				"attachments": [
 					{
 						"title": "Worldcat Link",
@@ -1179,16 +1214,12 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"date": "1992-1993",
-				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
-				"title": "Health promotion by the family, the role of the family in enhancing healthy behavior, symposium 23-25 March 1992, Brussels",
-				"language": "français",
-				"publicationTitle": "Archives belges de médecine sociale, hygiène, médecine du travail et médecine légale",
-				"ISSN": "0003-9578",
-				"pages": "3-232",
-				"volume": "51",
-				"issue": "1/4",
-				"place": "Belgique"
+				"tags": [
+					"Famille -- Actes de congrès",
+					"Santé publique -- Actes de congrès"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1198,6 +1229,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Naar een nieuwe 'onderwijsvrede': de onderhandelingen tussen kardinaal Van Roey en de Duitse bezetter over de toekomst van het vrij katholiek onderwijs, 1942-1943",
 				"creators": [
 					{
 						"firstName": "Sarah Van",
@@ -1205,19 +1237,14 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [
-					{
-						"note": "<div><span>Met lit. opg</span></div><div><span>Met samenvattingen in het Engels en Frans</span></div>"
-					}
-				],
-				"tags": [
-					"(GTR) Tweede Wereldoorlog",
-					"(GTR) Vrijheid van onderwijs",
-					"(GTR) Katholiek onderwijs",
-					"(GTR) Conflicten",
-					"(GTR) België"
-				],
-				"seeAlso": [],
+				"date": "2010",
+				"ISSN": "0035-0869",
+				"issue": "4",
+				"libraryCatalog": "Library Catalog - catalogue.rug.nl",
+				"pages": "603-643",
+				"publicationTitle": "Revue belge d'histoire contemporaine = Belgisch tijdschrift voor nieuwste geschiedenis = Belgian review for contemporary history",
+				"shortTitle": "Naar een nieuwe 'onderwijsvrede'",
+				"volume": "40",
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
@@ -1230,15 +1257,19 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"libraryCatalog": "Library Catalog - catalogue.rug.nl",
-				"title": "Naar een nieuwe 'onderwijsvrede': de onderhandelingen tussen kardinaal Van Roey en de Duitse bezetter over de toekomst van het vrij katholiek onderwijs, 1942-1943",
-				"date": "2010",
-				"publicationTitle": "Revue belge d'histoire contemporaine = Belgisch tijdschrift voor nieuwste geschiedenis = Belgian review for contemporary history",
-				"ISSN": "0035-0869",
-				"pages": "603-643",
-				"volume": "40",
-				"issue": "4",
-				"shortTitle": "Naar een nieuwe 'onderwijsvrede'"
+				"tags": [
+					"(GTR) Belgie",
+					"(GTR) Conflicten",
+					"(GTR) Katholiek onderwijs",
+					"(GTR) Tweede Wereldoorlog",
+					"(GTR) Vrijheid van onderwijs"
+				],
+				"notes": [
+					{
+						"note": "<div><span>Met lit. opg</span></div><div><span>Met samenvattingen in het Engels en Frans</span></div>"
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1248,6 +1279,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "film",
+				"title": "Medianeras",
 				"creators": [
 					{
 						"firstName": "Gustavo",
@@ -1260,15 +1292,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [
-					{
-						"note": "<div><span>Spaans gesproken, Nederlands en Frans ondertiteld</span></div>"
-					}
-				],
-				"tags": [
-					"(GTR) Argentinië"
-				],
-				"seeAlso": [],
+				"date": "2012",
+				"libraryCatalog": "Library Catalog - catalogue.rug.nl",
+				"place": "Amsterdam",
+				"publisher": "Homescreen",
+				"runningTime": "92 min",
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
@@ -1281,12 +1309,15 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"libraryCatalog": "Library Catalog - catalogue.rug.nl",
-				"title": "Medianeras",
-				"date": "2012",
-				"publisher": "Homescreen",
-				"runningTime": "92 min",
-				"place": "Amsterdam"
+				"tags": [
+					"(GTR) Argentinië"
+				],
+				"notes": [
+					{
+						"note": "<div><span>Spaans gesproken, Nederlands en Frans ondertiteld</span></div>"
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1296,6 +1327,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Lehrbuch der Bodenkunde",
 				"creators": [
 					{
 						"firstName": "Fritz",
@@ -1318,15 +1350,13 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"notes": [
-					{
-						"note": "\n<div><span>Literaturangaben</span></div>\n<div style=\"display:none\" title=\"optional\" id=\"ANNOTATIE\"><span>Hier auch später ersch. unveränd. Nachdr.</span></div>\n"
-					}
-				],
-				"tags": [
-					"Bodenkunde / Lehrbuch"
-				],
-				"seeAlso": [],
+				"date": "2010",
+				"ISBN": "978-3-8274-1444-1",
+				"edition": "16",
+				"libraryCatalog": "Library Catalog - gso.gbv.de",
+				"numPages": "xiv+569",
+				"place": "Heidelberg",
+				"publisher": "Spektrum,  Akad.-Verl.",
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
@@ -1339,15 +1369,15 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"date": "2010",
-				"ISBN": "978-3-8274-1444-1",
-				"pages": "569",
-				"title": "Lehrbuch der Bodenkunde",
-				"place": "Heidelberg",
-				"publisher": "Spektrum,  Akad.-Verl.",
-				"libraryCatalog": "Library Catalog - gso.gbv.de",
-				"edition": "16. Aufl.",
-				"numPages": "569"
+				"tags": [
+					"Bodenkunde / Lehrbuch"
+				],
+				"notes": [
+					{
+						"note": "\n<div><span>Literaturangaben</span></div>\n<div style=\"display:none\" title=\"optional\" id=\"ANNOTATIE\"><span>Hier auch später ersch. unveränd. Nachdr.</span></div>\n"
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1357,6 +1387,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Phönix auf Asche: von Wäldern und Wandel in der Dübener Heide und Bitterfeld",
 				"creators": [
 					{
 						"firstName": "Caroline",
@@ -1364,15 +1395,15 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"notes": [
-					{
-						"note": "<div>Förderkennzeichen BMBF 0330634 K. - Verbund-Nr. 01033571</div>"
-					}
-				],
-				"tags": [
-					"Waldsterben / Schadstoffimmission / Dübener Heide / Bitterfeld <Region>"
-				],
-				"seeAlso": [],
+				"date": "2009",
+				"ISBN": "978-3-941300-14-9",
+				"callNumber": "F 10 B 2134",
+				"libraryCatalog": "Library Catalog - opac.tib.uni-hannover.de",
+				"numPages": "140",
+				"pages": "140",
+				"place": "Remagen",
+				"publisher": "Kessel",
+				"shortTitle": "Phönix auf Asche",
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
@@ -1385,16 +1416,15 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"title": "Phönix auf Asche: von Wäldern und Wandel in der Dübener Heide und Bitterfeld",
-				"ISBN": "978-3-941300-14-9",
-				"date": "2009",
-				"pages": "140",
-				"place": "Remagen",
-				"publisher": "Kessel",
-				"libraryCatalog": "Library Catalog - opac.tib.uni-hannover.de",
-				"numPages": "140",
-				"callNumber": "F 10 B 2134",
-				"shortTitle": "Phönix auf Asche"
+				"tags": [
+					"Waldsterben / Schadstoffimmission / Dübener Heide / Bitterfeld <Region>"
+				],
+				"notes": [
+					{
+						"note": "<div>Förderkennzeichen BMBF 0330634 K. - Verbund-Nr. 01033571</div>"
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1404,6 +1434,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Das war das Waldsterben!",
 				"creators": [
 					{
 						"firstName": "Elmar",
@@ -1411,13 +1442,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"*Waldsterben",
-					"*Baumkrankheit",
-					"*Waldsterben / Geschichte"
-				],
-				"seeAlso": [],
+				"date": "2008",
+				"ISBN": "978-3-7930-9526-2",
+				"callNumber": "48 Kle",
+				"edition": "1",
+				"libraryCatalog": "Library Catalog - opac.sub.uni-goettingen.de",
+				"numPages": "164",
+				"pages": "164",
+				"place": "Freiburg im Breisgau [u.a.]",
+				"publisher": "Rombach",
+				"series": "Rombach Wissenschaft Ökologie",
+				"seriesNumber": "8",
+				"seriesTitle": "Rombach Wissenschaft Ökologie",
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
@@ -1430,19 +1466,13 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"title": "Das war das Waldsterben!",
-				"ISBN": "978-3-7930-9526-2",
-				"date": "2008",
-				"edition": "1. Aufl.",
-				"pages": "164",
-				"series": "Rombach Wissenschaft Ökologie",
-				"place": "Freiburg im Breisgau [u.a.]",
-				"publisher": "Rombach",
-				"libraryCatalog": "Library Catalog - opac.sub.uni-goettingen.de",
-				"numPages": "164",
-				"seriesNumber": "8",
-				"seriesTitle": "Rombach Wissenschaft Ökologie",
-				"callNumber": "48 Kle"
+				"tags": [
+					"*Baumkrankheit",
+					"*Waldsterben",
+					"*Waldsterben / Geschichte"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1452,6 +1482,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Geschichten, die die Forschung schreibt: ein Umweltlesebuch des Deutschen Forschungsdienstes",
 				"creators": [
 					{
 						"firstName": "Bettina",
@@ -1469,36 +1500,15 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"notes": [
-					{
-						"note": "<div>Institutsbestand, deshalb nähere Informationen im Inst. f. Wirtschaftswissenschaft (IfW13)</div>"
-					}
-				],
-				"tags": [
-					"Umweltschaden",
-					"Aufsatzsammlung / Umweltschutz",
-					"Aufsatzsammlung",
-					"Ökomonie",
-					"Umweltschutz",
-					"Gleichgewicht",
-					"Waldsterben",
-					"Tiere",
-					"Lebensräume",
-					"Vogelarten",
-					"Umweltgifte",
-					"Bienen",
-					"Schmetterlinge",
-					"Perlmuscheln",
-					"Gewässerverschmutzung",
-					"Süßwasserfische",
-					"Saurer Regen",
-					"Umweltsignale",
-					"Trinkwasser",
-					"Algenpest",
-					"Sonnenenergie",
-					"Mülldeponie"
-				],
-				"seeAlso": [],
+				"date": "1990",
+				"ISBN": "3-923120-26-5",
+				"callNumber": "CL 13 : IfW13 40 W 2",
+				"libraryCatalog": "Library Catalog - lhclz.gbv.de",
+				"numPages": "319",
+				"pages": "319",
+				"place": "Bonn - Bad Godesberg",
+				"publisher": "Verlag Deutscher Forschungsdienst",
+				"shortTitle": "Geschichten, die die Forschung schreibt",
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
@@ -1511,16 +1521,36 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"title": "Geschichten, die die Forschung schreibt: ein Umweltlesebuch des Deutschen Forschungsdienstes",
-				"ISBN": "3-923120-26-5",
-				"date": "1990",
-				"pages": "319",
-				"place": "Bonn - Bad Godesberg",
-				"publisher": "Verlag Deutscher Forschungsdienst",
-				"libraryCatalog": "Library Catalog - lhclz.gbv.de",
-				"numPages": "319",
-				"callNumber": "CL 13 : IfW13 40 W 2",
-				"shortTitle": "Geschichten, die die Forschung schreibt"
+				"tags": [
+					"Algenpest",
+					"Aufsatzsammlung",
+					"Aufsatzsammlung / Umweltschutz",
+					"Bienen",
+					"Gewässerverschmutzung",
+					"Gleichgewicht",
+					"Lebensräume",
+					"Mülldeponie",
+					"Perlmuscheln",
+					"Saurer Regen",
+					"Schmetterlinge",
+					"Sonnenenergie",
+					"Süßwasserfische",
+					"Tiere",
+					"Trinkwasser",
+					"Umweltgifte",
+					"Umweltschaden",
+					"Umweltschutz",
+					"Umweltsignale",
+					"Vogelarten",
+					"Waldsterben",
+					"Ökomonie"
+				],
+				"notes": [
+					{
+						"note": "<div>Institutsbestand, deshalb nähere Informationen im Inst. f. Wirtschaftswissenschaft (IfW13)</div>"
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1530,6 +1560,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Borges por el mismo",
 				"creators": [
 					{
 						"firstName": "Emir",
@@ -1542,13 +1573,15 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [
-					{
-						"note": "<div>Enth. Werke von und über Borges</div>"
-					}
-				],
-				"tags": [],
-				"seeAlso": [],
+				"date": "1984",
+				"ISBN": "84-7222-967-X",
+				"libraryCatalog": "Library Catalog - swb.bsz-bw.de",
+				"numPages": "255",
+				"pages": "255",
+				"place": "Barcelona",
+				"publisher": "Ed. laia",
+				"series": "Laia literatura",
+				"seriesTitle": "Laia literatura",
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
@@ -1561,16 +1594,13 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"title": "Borges por el mismo",
-				"date": "1984",
-				"ISBN": "84-7222-967-X",
-				"pages": "255",
-				"publisher": "Ed. laia",
-				"place": "Barcelona",
-				"libraryCatalog": "Library Catalog - swb.bsz-bw.de",
-				"numPages": "255",
-				"series": "Laia literatura",
-				"seriesTitle": "Laia literatura"
+				"tags": [],
+				"notes": [
+					{
+						"note": "<div>Enth. Werke von und über Borges</div>"
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1580,6 +1610,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Daten- und Identitätsschutz in Cloud Computing, E-Government und E-Commerce",
 				"creators": [
 					{
 						"firstName": "Georg",
@@ -1587,22 +1618,11 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"notes": [
-					{
-						"note": "<div>Description based upon print version of record </div>"
-					}
-				],
-				"tags": [
-					"Deutschland",
-					"Datenschutz",
-					"Persönlichkeitsrecht",
-					"Cloud Computing",
-					"Electronic Government",
-					"Electronic Commerce",
-					"f Aufsatzsammlung",
-					"f Online-Publikation"
-				],
-				"seeAlso": [],
+				"ISBN": "978-3-642-30102-5",
+				"abstractNote": "Fuer neue und kuenftige Gesch ftsfelder von E-Commerce und E-Government stellen der Datenschutz und der Identit tsschutz wichtige Herausforderungen dar. Renommierte Autoren aus Wissenschaft und Praxis widmen sich in dem Band aktuellen Problemen des Daten- und Identit tsschutzes aus rechtlicher und technischer Perspektive. Sie analysieren aktuelle Problemf lle aus der Praxis und bieten Handlungsempfehlungen an. Das Werk richtet sich an Juristen und technisch Verantwortliche in Beh rden und Unternehmen sowie an Rechtsanw lte und Wissenschaftler.",
+				"libraryCatalog": "Library Catalog - cbsopac.rz.uni-frankfurt.de",
+				"numPages": "x+187",
+				"series": "SpringerLink: Springer e-Books",
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
@@ -1615,14 +1635,22 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"libraryCatalog": "Library Catalog - cbsopac.rz.uni-frankfurt.de",
-				"title": "Daten- und Identitätsschutz in Cloud Computing, E-Government und E-Commerce",
-				"numPages": "187",
-				"ISBN": "978-3-642-30102-5",
-				"series": "SpringerLink: Springer e-Books",
-				"seriesTitle": "SpringerLink: Springer e-Books",
-				"DOI": "10.1007/978-3-642-30102-5",
-				"abstractNote": "Fuer neue und kuenftige Gesch ftsfelder von E-Commerce und E-Government stellen der Datenschutz und der Identit tsschutz wichtige Herausforderungen dar. Renommierte Autoren aus Wissenschaft und Praxis widmen sich in dem Band aktuellen Problemen des Daten- und Identit tsschutzes aus rechtlicher und technischer Perspektive. Sie analysieren aktuelle Problemf lle aus der Praxis und bieten Handlungsempfehlungen an. Das Werk richtet sich an Juristen und technisch Verantwortliche in Beh rden und Unternehmen sowie an Rechtsanw lte und Wissenschaftler."
+				"tags": [
+					"Cloud Computing",
+					"Datenschutz",
+					"Deutschland",
+					"Electronic Commerce",
+					"Electronic Government",
+					"Persönlichkeitsrecht",
+					"f Aufsatzsammlung",
+					"f Online-Publikation"
+				],
+				"notes": [
+					{
+						"note": "<div>Description based upon print version of record </div>"
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1632,6 +1660,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Politiques publiques, systèmes complexes",
 				"creators": [
 					{
 						"firstName": "Danièle",
@@ -1644,15 +1673,14 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"notes": [
-					{
-						"note": "Contient des contributions en anglais<br>Notes bibliogr. Résumés. Index"
-					}
-				],
-				"tags": [
-					"Gesetzgebung / Rechtsprechung / Komplexes System / Kongress / Paris <2010>Law -- Philosophy -- Congresses / Law -- Political aspects -- Congresses / Rule of law -- Congresses"
-				],
-				"seeAlso": [],
+				"date": "2012",
+				"ISBN": "2-7056-8274-0, 978-2-7056-8274-3",
+				"callNumber": "1 A 845058 Verfügbarkeit anzeigen / bestellen",
+				"libraryCatalog": "Library Catalog - stabikat.de",
+				"numPages": "290",
+				"pages": "290",
+				"place": "Paris",
+				"publisher": "Hermann Ed.",
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
@@ -1665,15 +1693,15 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"title": "Politiques publiques, systèmes complexes",
-				"ISBN": "2-7056-8274-0, 978-270-5682-74-3",
-				"date": "2012",
-				"pages": "290",
-				"place": "Paris",
-				"publisher": "Hermann Ed.",
-				"libraryCatalog": "Library Catalog - stabikat.de",
-				"numPages": "290",
-				"callNumber": "1 A 845058 Verfügbarkeit anzeigen / bestellen"
+				"tags": [
+					"Gesetzgebung / Rechtsprechung / Komplexes System / Kongress / Paris <2010>Law -- Philosophy -- Congresses / Law -- Political aspects -- Congresses / Rule of law -- Congresses"
+				],
+				"notes": [
+					{
+						"note": "Contient des contributions en anglais<br>Notes bibliogr. Résumés. Index"
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1683,6 +1711,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "La temprana devoción de Borges por el norte",
 				"creators": [
 					{
 						"firstName": "Gustavo",
@@ -1690,9 +1719,12 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2012",
+				"ISSN": "1515-4017",
+				"libraryCatalog": "Library Catalog - iaiweb1.iai.spk-berlin.de",
+				"pages": "61-71",
+				"publicationTitle": "Proa : en las letras y en las artes",
+				"volume": "83",
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
@@ -1705,37 +1737,49 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"title": "La temprana devoción de Borges por el norte",
-				"publicationTitle": "Proa : en las letras y en las artes",
-				"ISSN": "1515-4017",
-				"volume": "83",
-				"pages": "61-71",
-				"date": "2012",
-				"libraryCatalog": "Library Catalog - iaiweb1.iai.spk-berlin.de"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "https://opac.ub.uni-marburg.de/DB=1/XMLPRS=N/PPN?PPN=307889971",
+		"url": "http://gso.gbv.de/DB=2.1/PPNSET?PPN=768059798",
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Ehetagebücher 1840 - 1844",
 				"creators": [
 					{
-						"firstName": "Maria",
-						"lastName": "Borges",
+						"firstName": "Robert",
+						"lastName": "Schumann",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Cinara",
-						"lastName": "Nahra",
+						"firstName": "Clara",
+						"lastName": "Schumann",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "Gerd",
+						"lastName": "Nauhaus",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Ingrid",
+						"lastName": "Bodsch",
+						"creatorType": "editor"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2013",
+				"ISBN": "978-3-86600-002-5, 978-3-931878-40-5",
+				"abstractNote": "Zum ersten Mal als Einzelausgabe erscheinen die von Robert Schumann und seiner Frau, der Pianistin und Komponistin Clara Schumann, geb. Wieck, in den ersten Jahren ihrer Ehe geführten gemeinsamen Tagebücher. 1987 waren diese in Leipzig und bei Stroemfeld in wissenschaftlich-kritischer Edition von dem Schumannforscher und langjährigen Direktor des Robert-Schumann-Hauses Zwickau, Gerd Nauhaus, vorgelegt worden. Mit der Neupublikation wird die textgetreue, mit Sacherläuterungen sowie Personen-, Werk- und Ortsregistern und ergänzenden Abbildungen versehene Leseausgabe vorgelegt, die einem breiten interessierten Publikum diese einzigartigen Zeugnisse einer bewegenden Künstlerehe nahebringen.",
+				"edition": "2",
+				"libraryCatalog": "Library Catalog - gso.gbv.de",
+				"numPages": "332",
+				"place": "Frankfurt/M.",
+				"publisher": "Stroemfeld",
 				"attachments": [
 					{
 						"title": "Link to Library Catalog Entry",
@@ -1748,11 +1792,174 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"libraryCatalog": "Library Catalog - opac.ub.uni-marburg.de",
-				"title": "Body and justice",
-				"numPages": "163",
-				"ISBN": "1-4438-3190-5",
-				"callNumber": "070 8 2012/10695"
+				"tags": [
+					"Schumann, Robert 1810-1856 / Schumann, Clara 1819-1896 / Tagebuch 1840-1844"
+				],
+				"notes": [
+					{
+						"note": "<div><span>Sammlung</span></div>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://gso.gbv.de/DB=2.1/PPNSET?PPN=770481450",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Religiosidade no Brasil",
+				"creators": [
+					{
+						"firstName": "João Baptista Borges",
+						"lastName": "Pereira",
+						"creatorType": "author"
+					}
+				],
+				"date": "2012",
+				"ISBN": "978-85-314-1374-2, 85-314-1374-5",
+				"libraryCatalog": "Library Catalog - gso.gbv.de",
+				"numPages": "397",
+				"pages": "397",
+				"place": "São Paulo, SP, Brasil",
+				"publisher": "EDUSP",
+				"attachments": [
+					{
+						"title": "Link to Library Catalog Entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [
+					"Brazil -- Religion",
+					"Religious pluralism -- Brazil",
+					"Spiritualism -- Brazil -- History"
+				],
+				"notes": [
+					{
+						"note": "<div><span>Includes bibliographical references</span></div>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=024630527",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Conférences sur l'administration et le droit administratif faites à l'Ecole impériale des ponts et chaussées",
+				"creators": [
+					{
+						"firstName": "Léon",
+						"lastName": "Aucoc",
+						"creatorType": "author"
+					}
+				],
+				"date": "1869-1876",
+				"language": "français",
+				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
+				"numPages": "xii+xxiii+681+540+739",
+				"numberOfVolumes": "3",
+				"place": "Paris, France",
+				"publisher": "Dunod",
+				"attachments": [
+					{
+						"title": "Worldcat Link",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Link to Library Catalog Entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [
+					"Droit administratif -- France",
+					"Ponts et chaussées (administration) -- France",
+					"Travaux publics -- Droit -- France",
+					"Voirie et réseaux divers -- France"
+				],
+				"notes": [
+					{
+						"note": "<div><span>Titre des tomes 2 et 3 : Conférences sur l'administration et le droit administratif faites à l'Ecole des ponts et chaussées</span></div><div><span>&nbsp;</span></div>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=001493817",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Traité de la juridiction administrative et des recours contentieux",
+				"creators": [
+					{
+						"firstName": "Édouard",
+						"lastName": "Laferrière",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Roland",
+						"lastName": "Drago",
+						"creatorType": "author"
+					}
+				],
+				"date": "1989",
+				"ISBN": "2-275-00790-3",
+				"language": "français",
+				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
+				"numPages": "ix+670; 675",
+				"numberOfVolumes": "2",
+				"place": "Paris, France",
+				"publisher": "Librairie générale de droit et de jurisprudence",
+				"attachments": [
+					{
+						"title": "Worldcat Link",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Link to Library Catalog Entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [
+					"Contentieux administratif -- France -- 19e siècle",
+					"Recours administratifs -- France",
+					"Tribunaux administratifs -- France -- 19e siècle",
+					"Tribunaux administratifs -- Études comparatives"
+				],
+				"notes": [
+					{
+						"note": "<div><span>1, Notions générales et législation comparée, histoire, organisation compétence de la juridiction administrative. 2, Compétence (suite), marchés et autres contrats, dommages, responsabilité de l'état, traitements et pensions, contributions directes, élections, recours pour excés de pouvoir, interprétation, contraventions de grandes voirie</span></div>"
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	}

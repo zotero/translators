@@ -3,27 +3,32 @@
 	"label": "AMS MathSciNet",
 	"creator": "Simon Kornblith",
 	"target": "^https?://(www\\.)?ams\\.[^/]*/mathscinet(\\-getitem\\?|/search/(?:publications\\.html|publdoc\\.html))",
-	"minVersion": "1.0.0b3.r1",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-02-03 23:35:37"
+	"lastUpdated": "2014-06-06 18:23:10"
 }
 
 function detectWeb(doc, url) {
 	
 	var tableRows = doc.evaluate('//form/div[contains(@class,"headline")]', doc, null,
 			XPathResult.ANY_TYPE, null);
+	var itemType;
 	if(tableRows.iterateNext()) {
 		return "multiple"
-	} else if(doc.evaluate('//div[@id="titleSeparator"]/div[@class="navbar"]/span[@class="PageLink"]/a[text() = "Up"]',
-		doc, null, XPathResult.ANY_TYPE, null)) {
-		return "journalArticle";
+	} else if(itemType = ZU.xpathText(doc, '//div[@class="headlineMenu"]/*[last()-1]')) {
+		switch(itemType.trim().toLowerCase()) {
+			case 'article':
+				return "journalArticle";
+			case 'book':
+				return "book";
+			case 'chapter':
+				return "bookSection";
+		}	
 	}
-	
-	return false;
 }
 
 function doWeb(doc, url) {
@@ -44,8 +49,7 @@ function doWeb(doc, url) {
 				XPathResult.ANY_TYPE, null).iterateNext().value;
 			items[id] = doc.evaluate('./div[@class="headlineText"]/span[@class="title"]', tableRow, null,
 				XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			links[id] = doc.evaluate('.//a', tableRow, null, XPathResult.ANY_TYPE,
-				null).iterateNext().href;
+			links[id] = tableRow.getElementsByTagName('a')[0].href;
 		} while(tableRow = tableRows.iterateNext())
 		
 		
@@ -58,28 +62,24 @@ function doWeb(doc, url) {
 				pub += "&b="+id;
 				docLinks.push(links[id]);
 			}
-			scrape(pub, docLinks)
+			scrape(pub, docLinks);
 		});
 		
 	} else {
-		var MR = doc.evaluate('//div[@id="content"]/div[@class="doc"]/div[@class="headline"]/strong',
-			doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var MR = ZU.xpathText(doc, '//div[@id="content"]/div[@class="doc"]/div[@class="headline"]/strong[1]');
 		pub += "&b="+MR.replace(/^MR0*/, "");
-	scrape(pub, docLinks, doc)	
+		scrape(pub, docLinks, doc);
 	}
 }
 
-function scrape(pub, docLinks, doc){
+function scrape(pub, docLinks, doc) {
 	Zotero.Utilities.HTTP.doGet(pub, function(text) {
-		var m = text.match(/<pre>(?:.|[\r\n])*?<\/pre>/g);
-		//for search results we don't have the MR yet - we need that to create a clean URL below
-		if (!MR) {var MR = String(text.match(/MR\d+/));
-			}
+		var preRE = /<pre>\s*([\s\S]*?)\s*<\/pre>/g;
 		var bibTeXString = "";
-		for each(var citation in m) {
-			// kill pre tags
-			citation = citation.substring(5, citation.length-6);
-			bibTeXString += citation;
+		
+		var m;
+		while(m = preRE.exec(text)) {
+			bibTeXString += m[1] + '\n';
 		}
 		
 		// import using BibTeX
@@ -87,13 +87,31 @@ function scrape(pub, docLinks, doc){
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 		translator.setString(bibTeXString);
 		translator.setHandler("itemDone", function(obj, item) {
-			if(docLinks) {
-				item.attachments.push({title:"MathSciNet Snapshot", url:docLinks.shift(), mimeType:"text/html"});
-			} else {
-				item.attachments.push({title:"MathSciNet Snapshot", document:doc});
+			// Fix/fetch MR number
+			var mrnumber;
+			if(item.extra) {
+				item.extra = item.extra.replace(/^MR:\s*(?:MR)?(\d+).*/gm,
+					function(m, mr) {
+						mrnumber = mr;
+						return 'MR: ' + mr;
+					});
 			}
-		
-		if(MR)	item.url = "http://www.ams.org/mathscinet-getitem?mr=" + MR.replace(/MR/, "");
+			
+			if(mrnumber) {
+				url = 'http://www.ams.org/mathscinet-getitem?mr=' + mrnumber;
+				docLinks.shift();
+			} else {
+				url = docLinks.shift();
+			}
+			
+			item.url = url;
+			
+			if(doc) {
+				item.attachments.push({title: "MathSciNet Snapshot", document: doc});
+			} else {
+				item.attachments.push({title: "MathSciNet Snapshot", url: url, mimeType: "text/html"});
+			}
+			
 			item.complete();
 		});
 		translator.translate();
@@ -134,21 +152,21 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "MathSciNet Snapshot",
-						"mimeType": "text/html"
+						"title": "MathSciNet Snapshot"
 					}
 				],
 				"itemID": "MR3004573",
-				"title": "Extrapolation of stable random fields",
-				"publicationTitle": "Journal of Multivariate Analysis",
-				"journalAbbreviation": "Journal of Multivariate Analysis",
-				"volume": "115",
-				"date": "2013",
-				"pages": "516–536",
+				"journalAbbreviation": "J. Multivariate Anal.",
 				"ISSN": "0047-259X",
 				"DOI": "10.1016/j.jmva.2012.11.004",
 				"url": "http://www.ams.org/mathscinet-getitem?mr=3004573",
-				"libraryCatalog": "AMS MathSciNet"
+				"extra": "MR: 3004573",
+				"libraryCatalog": "AMS MathSciNet",
+				"title": "Extrapolation of stable random fields",
+				"publicationTitle": "Journal of Multivariate Analysis",
+				"volume": "115",
+				"date": "2013",
+				"pages": "516–536"
 			}
 		]
 	},
@@ -156,6 +174,123 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.ams.org/mathscinet/search/publications.html?pg1=ISSI&s1=308850",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.ams.org/mathscinet-getitem?mr=2767535",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"creators": [
+					{
+						"firstName": "Yihua",
+						"lastName": "Jiang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Peter",
+						"lastName": "Karcher",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yuedong",
+						"lastName": "Wang",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "MathSciNet Snapshot"
+					}
+				],
+				"itemID": "MR2767535",
+				"url": "http://www.ams.org/mathscinet-getitem?mr=2767535",
+				"extra": "MR: 2767535",
+				"libraryCatalog": "AMS MathSciNet",
+				"title": "On implementation of the Markov chain Monte Carlo stochastic approximation algorithm",
+				"bookTitle": "Advances in directional and linear statistics",
+				"pages": "97–111",
+				"publisher": "Physica-Verlag/Springer, Heidelberg",
+				"date": "2011"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.ams.org/mathscinet-getitem?mr=2663710",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Martin T.",
+						"lastName": "Wells",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Ashis",
+						"lastName": "SenGupta",
+						"creatorType": "editor"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "MathSciNet Snapshot"
+					}
+				],
+				"itemID": "MR2663710",
+				"numPages": "xiv+321",
+				"ISBN": "978-3-7908-2627-2",
+				"url": "http://www.ams.org/mathscinet-getitem?mr=2663710",
+				"extra": "A Festschrift for Sreenivasa Rao Jammalamadaka\nMR: 2663710",
+				"libraryCatalog": "AMS MathSciNet",
+				"title": "Advances in directional and linear statistics",
+				"publisher": "Physica-Verlag/Springer, Heidelberg",
+				"date": "2011"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.ams.org/mathscinet-getitem?mr=1346201",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Bernard",
+						"lastName": "Malgrange",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "MathSciNet Snapshot"
+					}
+				],
+				"itemID": "MR1346201",
+				"journalAbbreviation": "Exposition. Math.",
+				"issue": "2-3",
+				"ISSN": "0723-0869",
+				"extra": "MR: 1346201",
+				"url": "http://www.ams.org/mathscinet-getitem?mr=1346201",
+				"libraryCatalog": "AMS MathSciNet",
+				"title": "Sommation des séries divergentes",
+				"publicationTitle": "Expositiones Mathematicae. International Journal",
+				"volume": "13",
+				"date": "1995",
+				"pages": "163–222"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

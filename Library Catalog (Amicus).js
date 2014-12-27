@@ -5,11 +5,11 @@
 	"target": "^https?://amicus\\.collectionscanada\\.ca/aaweb-bin/aamain",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
-	"priority": 200,
+	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-28 00:29:30"
+	"lastUpdated": "2014-08-26 03:47:57"
 }
 
 /*

@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"browserSupport": "g",
-	"lastUpdated": "2012-12-15 17:57:47"
+	"browserSupport": "gcs",
+	"lastUpdated": "2014-05-20 17:57:47"
 }
 
 function detectImport() {
@@ -221,7 +221,7 @@ record.prototype.getFieldSubfields = function(tag) { // returns a two-dimensiona
 // add field to DB
 record.prototype._associateDBField = function(item, fieldNo, part, fieldName, execMe, arg1, arg2) {
 	var field = this.getFieldSubfields(fieldNo);
-	Zotero.debug('MARC: found '+field.length+' matches for '+fieldNo+part);
+	Zotero.debug('MAB2: found '+field.length+' matches for '+fieldNo+part);
 	if(field) {
 		for(var i in field) {
 			var value = false;
@@ -364,3 +364,10 @@ function doImport() {
 		}
 	}
 }
+
+var exports = {
+	"record":record,
+	"fieldTerminator":fieldTerminator,
+	"recordTerminator":recordTerminator,
+	"subfieldDelimiter":subfieldDelimiter
+};

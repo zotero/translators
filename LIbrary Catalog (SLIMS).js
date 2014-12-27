@@ -5,11 +5,11 @@
 	"target": "(^https?://makassarlib\\.net|^https?://kit\\.ft\\.ugm\\.ac\\.id/ucs|/libsenayan)/index\\.php",
 	"minVersion": "2.1",
 	"maxVersion": "",
-	"priority": 200,
+	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcv",
-	"lastUpdated": "2013-12-07 05:46:23"
+	"lastUpdated": "2014-08-26 04:10:09"
 }
 
 /*

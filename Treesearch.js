@@ -2,14 +2,14 @@
 	"translatorID": "4ee9dc8f-66d3-4c18-984b-6335408a24af",
 	"label": "Treesearch",
 	"creator": "Aurimas Vinckevicius",
-	"target": "https?://[^/]*treesearch\\.fs\\.fed\\.us/pubs/",
+	"target": "^https?://([^/]+\\.)?treesearch\\.fs\\.fed\\.us/(pubs/\\d+$|search.php)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-12-12 14:09:33"
+	"lastUpdated": "2014-11-04 04:02:47"
 }
 
 /**
@@ -68,7 +68,7 @@ function parseSource(sourceStr) {
 }
 
 function scrape(doc, url) {
-	var entry = doc.getElementById('pub-output');
+	var entry = doc.getElementById('publicationLayoutLeftSide');
 	var source = parseSource(getFieldValue(entry, 'Source'));
 
 	var item = new Zotero.Item(source.type);
@@ -96,8 +96,7 @@ function scrape(doc, url) {
 		item.tags.push(keywords[i].textContent.trim())
  	}
 
-	var pdfUrl = ZU.xpathText(entry,
-		'//strong/a[starts-with(text(),"View or Print")]/@href');
+	var pdfUrl = ZU.xpathText(entry,'/html/head/meta[@name="citation_pdf_url"]/@content');
 	if(pdfUrl) {
 		item.attachments.push({
 			url: pdfUrl.trim(),
@@ -111,29 +110,39 @@ function scrape(doc, url) {
 
 function detectWeb(doc, url) {
 	if(url.match(/\/pubs\/\d+$/)) {
-		var source = parseSource(
-			getFieldValue(doc.getElementById('pub-output'), 'Source'));
+		var entry = doc.getElementById('publicationLayoutLeftSide');
+		if (!entry) return;
+		
+		var source = parseSource(getFieldValue(entry, 'Source'));
 		return source ? source.type : null;
-	} else if(url.indexOf('results.php') != -1 &&
-			ZU.xpath(doc, '//table[@class="query"]//tr[1]/following-sibling::tr/td[2]//a').length) {
+	} else if(url.indexOf('search.php') != -1 && getSearchResults(doc, true)) {
 		return 'multiple';
 	}
 }
 
+function getSearchResults(doc, checkOnly) {
+	var links = ZU.xpath(doc, '//table[@class="query"]//tr[1]/following-sibling::tr/td[2]//a');
+	if (checkOnly || !links.length) return !!links.length;
+	
+	var items = {};
+	for (var i=0; i<links.length; i++) {
+		items[links[i].href] = ZU.trimInternal(links[i].textContent);
+	}
+	
+	return items;
+}
+
 function doWeb(doc, url) {
 	if(detectWeb(doc, url) == 'multiple') {
-		var items = ZU.getItemArray(doc,
-				ZU.xpath(doc, '//table[@class="query"]//tr[1]/following-sibling::tr/td[2]'));
-
-		Zotero.selectItems(items, function(selectedItems) {
+		Zotero.selectItems(getSearchResults(doc), function(selectedItems) {
 			if(!selectedItems) return true;
 
-			var urls = new Array();
+			var urls = [];
 			for(var i in selectedItems) {
 				urls.push(i);
 			}
 
-			ZU.processDocuments(urls, function(doc) { scrape(doc, doc.location.href) });
+			ZU.processDocuments(urls, scrape);
 		});
 	} else {
 		scrape(doc, url);

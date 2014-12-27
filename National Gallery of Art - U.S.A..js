@@ -97,11 +97,11 @@ var testCases = [
 					}
 				],
 				"title": "Girl with a Flute",
-				"date": "probably 1665/1670",
-				"medium": "oil on panel",
+				"date": "probably 1665/1675",
 				"artworkSize": "painted surface: 20 x 17.8 cm (7 7/8 x 7 in.)\n, framed: 39.7 x 37.5 x 5.1 cm (15 5/8 x 14 3/4 x 2 in.)",
 				"callNumber": "1942.9.98",
-				"libraryCatalog": "National Gallery of Art - U.S.A."
+				"libraryCatalog": "National Gallery of Art - U.S.A.",
+				"artworkMedium": "oil on panel"
 			}
 		]
 	}

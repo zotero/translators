@@ -9,11 +9,14 @@
 	"inRepository": true,
 	"translatorType": 5,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-02-10 00:34:29"
+	"lastUpdated": "2014-07-24 21:53:33"
 }
 
 function detectWeb(doc, url) {
-	if (url.indexOf("full_record.do") !== -1 && getSingleItemId(doc)) {
+	if ( (url.indexOf("full_record.do") !== -1
+			|| url.indexOf("InboundService.do") != -1)
+		&& getSingleItemId(doc)
+	) {
 		return "journalArticle";
 	} else if (((doc.title.indexOf(" Results") !== -1) 
 		|| url.indexOf("search_mode=") !== -1)
@@ -113,10 +116,15 @@ function importISIRecord(text) {
 function fetchIds(ids, doc) {
 	var outputForm = getOutputForm(doc);
 	var postData = getHiddenValues(outputForm);
-	var filters = 'USAGEIND RESEARCHERID ACCESSION_NUM FUNDING SUBJECT_CATEGORY ' + 
-		'JCR_CATEGORY LANG IDS PAGEC SABBR CITREFC ISSN PUBINFO KEYWORDS ' +
-		'CITTIMES ADDRS CONFERENCE_SPONSORS DOCTYPE ABSTRACT CONFERENCE_INFO ' +
-		'SOURCE TITLE AUTHORS  ';
+	var filters = 'USAGEIND RESEARCHERID ACCESSION_NUM FUNDING SUBJECT_CATEGORY '
+		+ 'JCR_CATEGORY LANG IDS PAGEC SABBR CITREFC ISSN PUBINFO KEYWORDS '
+		+ 'CITTIMES ADDRS CONFERENCE_SPONSORS DOCTYPE ABSTRACT CONFERENCE_INFO '
+		+ 'SOURCE TITLE AUTHORS '
+		//additional fields from INSPEC
+		+ 'ADDRESS AUTHORS_EDITORS AUTHORSIDENTIFIERS CLASSIFICATION_CODES '
+		+ 'CONFERENCE_SPONSORS DESCRIPTORS IDENTIFYING_CODES IMAGES '
+		+ 'INVENTORS_ASSIGNEES IPC NUM_OF_REF PATENT_INFO SPONSORS TRANSLATORS '
+		+ 'TREATMENT UNCONTROLLED_TERMS';
 	postData['value(record_select_type)'] = 'selrecords';
 	postData['markFrom'] = '';
 	postData['markTo'] = '';
@@ -249,7 +257,7 @@ function processTag(item, field, content) {
 		item.issue = content;
 	} else if (field == "UT") {
 		item.extra += content;
-	} else if (field == "BP") {
+	} else if (field == "BP" || field == "PS") { // not sure why this varies
 		item.pages = content;
 	} else if (field == "EP") {
 		item.pages += "-" + content;

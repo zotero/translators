@@ -2,134 +2,192 @@
 	"translatorID": "5dd22e9a-5124-4942-9b9e-6ee779f1023e",
 	"label": "Flickr",
 	"creator": "Sean Takats, Rintze Zelle, and Aurimas Vinckevicius",
-	"target": "^http://(?:www\\.)?flickr\\.com/",
+	"target": "^https?://(?:www\\.)?flickr\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-01-04 17:23:31"
+	"lastUpdated": "2014-12-18 04:44:52"
 }
 
 function detectWeb(doc, url) {
 	if (ZU.xpath(doc,'//h1[@property="dc:title" and starts-with(@id, "title_div")]').length) {
-		return "artwork";
-	} else if (ZU.xpathText(doc,'//meta[@name="og:type"]/@content') && ZU.xpathText(doc,'//meta[@name="og:type"]/@content').match(/photo$/)) {
-		return "artwork";
+		return getPhotoId(doc) ? "artwork" : null;
 	}
-	else if (ZU.xpath(doc,'//span[contains(@class, "photo_container")]').length) {
+	
+	var type = ZU.xpathText(doc,'//meta[@name="og:type"]/@content');
+	if ( type && type.substr(type.length - 5) == 'photo') {
+		return getPhotoId(doc) ? "artwork" : null;
+	}
+	
+	if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
 }
 
-function doWeb(doc, url) {
-	var items = new Object();
-
-	// single result
-	if (detectWeb(doc, url) != "multiple") {
-		var elmt = ZU.xpathText(doc, '//meta[@property="og:image"]/@content');
-		if (!elmt)  elmt = ZU.xpathText(doc, '//meta[@name="og:image"]/@content');
-		var photo_id = elmt.substr(elmt.lastIndexOf('/')+1).match(/^[0-9]+/);
-		if(!photo_id) return;
-		items[photo_id[0]] = "title";
-		fetchForIds(items);
-	} else { //multiple results
-		var photoRe = /\/photos\/[^\/]*\/([0-9]+)\//;
-		//tested for:
-		//search: http://www.flickr.com/search/?q=test
-		//galleries: http://www.flickr.com/photos/lomokev/galleries/72157623433999749/
-		//archives: http://www.flickr.com/photos/lomokev/archives/date-taken/2003/12/04/
-		//favorites: http://www.flickr.com/photos/lomokev/favorites/
-		//photostream: http://www.flickr.com/photos/lomokev/with/4952001059/
-		//set: http://www.flickr.com/photos/lomokev/sets/502509/
-		//tag: http://www.flickr.com/photos/tags/bmw/
-		
-		//some search results are hidden ("display: none")
-		//videos have a second <a/> element ("a[1]")
-		var elmts = ZU.xpath(doc, '//div[not(contains(@style, "display: none"))]\
-							/*/span[contains(@class, "photo_container")]/a[1]');
-
-		for(var i=0, n=elmts.length; i<n; i++) {
-			var title = elmts[i].title;
-			//in photostreams, the <a/> element doesn't have a title attribute
-			if (title == "") {
-				title = elmts[i].getElementsByTagName("img")[0].alt;
-			}
-			title = ZU.trimInternal(title);
-			var photo_id = elmts[i].href.match(photoRe)[1];
-			items[photo_id] = title;
+function getSearchResults(doc, checkOnly) {
+	//some search results are hidden ("display: none")
+	//videos have a second <a/> element ("a[1]")
+	var elmts = ZU.xpath(doc, '//div[not(contains(@style, "display: none"))]\
+		/*/span[contains(@class, "photo_container")]/a[1]');
+	if (!elmts.length){
+		elmts = ZU.xpath(doc, '//div[not(contains(@style, "display: none"))]\
+			/*/span[@class="title"]/a[1]');
+	}
+	
+	var items = {}, found = false;
+	for(var i=0, n=elmts.length; i<n; i++) {
+		var title = elmts[i].title;
+		//in photostreams, the <a> element doesn't have a title attribute
+		if (title == "") {
+			title = elmts[i].getElementsByTagName("img")[0].alt;
 		}
+		title = ZU.trimInternal(title);
+		if (!title) continue;
+		
+		var photoId = elmts[i].href.match(/\/photos\/[^\/]*\/([0-9]+)/);
+		if (!photoId) continue;
+		
+		if (checkOnly) return true;
+		
+		found = true;
+		items[photoId[1]] = title;
+	}
+	
+	return found ? items : false;
+}
 
-		Zotero.selectItems(items, function (items) {
-			if (!items) {
-				return true;
+function getPhotoId(doc) {
+	var elmt = ZU.xpathText(doc, '//meta[@property="og:image" or @name="og:image"]/@content');
+	var photoId = elmt.substr(elmt.lastIndexOf('/')+1).match(/^[0-9]+/);
+	return photoId ? photoId[0] : false;
+}
+
+function doWeb(doc, url) {
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc), function (items) {
+			if (!items) return true;
+			
+			var ids = [];
+			for (var id in items) {
+				ids.push(id);
 			}
-			fetchForIds(items);
+			
+			fetchForIds(ids);
 		});
+	} else {
+		fetchForIds([getPhotoId(doc)]);
 	}
 }
 
 function fetchForIds(ids) {
 	var key = "3cde2fca0879089abf827c1ec70268b5";
-	var apiURL = "http://api.flickr.com/services/rest/?&api_key=" + key;
-
-	for (var i in ids) {
-		(function(uri, att) {
-			var newItem;
-			// We first fetch the items, then their attachments
-			ZU.doGet(uri, function (text) {
-				newItem = parseResponse(text);
-			}, function () {
-				ZU.doGet(att, function (text) {
-					var doc = (new DOMParser()).parseFromString(text, 'application/xml');
-					var attachmentUri = ZU.xpathText(doc, '//size[last()]/@source');
-					newItem.attachments = [{
-						title: newItem.title,
-						url: attachmentUri
-					}];
-					newItem.complete();
-				})
-			});
-		})(	apiURL + "&method=flickr.photos.getInfo&photo_id=" + i,
-			apiURL + "&method=flickr.photos.getSizes&photo_id=" + i);
-	}
+	var apiUrl = "https://api.flickr.com/services/rest/?api_key=" + key
+		+ "&method=flickr.photos.getInfo&photo_id=";
+	
+	ZU.doGet(
+		ids.map(function(id) { return apiUrl + encodeURIComponent(id) }),
+		parseResponse
+	);
 }
+
+var licenses = [ // See https://api.flickr.com/services/rest/?api_key=3cde2fca0879089abf827c1ec70268b5&photo_id=3122503680&method=flickr.photos.licenses.getInfo
+	'All Rights Reserved',
+	'Attribution-NonCommercial-ShareAlike License',
+	'Attribution-NonCommercial License',
+	'Attribution-NonCommercial-NoDerivs License',
+	'Attribution License',
+	'Attribution-ShareAlike License',
+	'Attribution-NoDerivs License',
+	'No known copyright restrictions',
+	'United States Government Work'
+];
 
 function parseResponse(text) {
 	var doc = (new DOMParser()).parseFromString(text, 'application/xml');
+	
+	var status = doc.firstElementChild.getAttribute('stat');
+	if (status && status == 'fail') {
+		var error = doc.firstElementChild.firstElementChild;
+		throw new Error('Error retrieving metadata: ' + error.getAttribute('msg')
+			+ ' (' + error.getAttribute('code') + ')');
+	}
+	
+	var photo = doc.firstElementChild.firstElementChild;
 	var newItem = new Zotero.Item("artwork");
 
-	var title;
-	if ((title = ZU.xpathText(doc, '//photo/title'))) {
-		title = ZU.trimInternal(title);
+	var title = ZU.xpathText(photo, './title');
+	if (title && (title = ZU.trimInternal(title))) {
 		newItem.title = title;
 	} else {
 		newItem.title = " ";
 	}
-	var tags;
-	if ((tags = ZU.xpath(doc, '//photo//tag'))) {
-		for (var i in tags) {
-			newItem.tags.push(tags[i].textContent);
+	
+	var tags = ZU.xpath(photo, './tags/tag');
+	if (tags.length) {
+		for (var i=0; i<tags.length; i++) {
+			newItem.tags.push(ZU.trimInternal(tags[i].textContent));
 		}
 	}
-	var date;
-	if ((date = ZU.xpathText(doc, '//photo/dates/@taken'))) {
+	
+	var date = ZU.xpathText(photo, './dates/@taken');
+	if (date) {
 		newItem.date = date.substr(0, 10);
 	}
-	var owner;
-	if ((owner = ZU.xpathText(doc, '//photo/owner/@realname') || (owner = ZU.xpathText(doc, '//photo/owner/@username')))) {
+	
+	var owner = ZU.xpathText(photo, './owner/@realname')
+	if (owner) {
 		newItem.creators.push(ZU.cleanAuthor(owner, "artist"));
+	} else if (owner = ZU.xpathText(photo, './owner/@username')) {
+		newItem.creators.push({
+			lastName: owner,
+			creatorType: 'artist',
+			fieldMode: 1
+		});
 	}
-	var url;
-	if ((url = ZU.xpathText(doc, '//photo//url'))) {
-		newItem.url = url;
+	
+	var url = ZU.xpath(photo, './urls/url[@type="photopage"]')[0];
+	if (url) {
+		newItem.url = url.textContent;
 	}
+	
 	var description;
-	if ((description = ZU.xpathText(doc, '//photo/description'))) {
+	if ((description = ZU.xpathText(photo, './description'))) {
 		newItem.abstractNote = description;
 	}
-	return newItem;
+	
+	var license = photo.getAttribute('license');
+	if (license && licenses[license * 1]) {
+		newItem.rights = licenses[license * 1];
+	}
+	
+	var media = photo.getAttribute('media'); // photo, screenshot, other... I think
+	if (media) {
+		newItem.artworkMedium = media;
+	}
+	
+	// TODO:
+	// * add location where the photo was taken into Extra?
+	
+	// We can build the original photo URL manually. See https://www.flickr.com/services/api/misc.urls.html
+	var secret = photo.getAttribute('originalsecret');
+	var originalFormat = photo.getAttribute('originalformat');
+	if (secret && originalFormat) { // Both of these appear to be false if the owner disables downloading
+		var fileUrl = 'https://farm' + photo.getAttribute('farm') + '.staticflickr.com/'
+		 + photo.getAttribute('server') + '/'
+		 + photo.getAttribute('id') + '_' + secret
+		 + '_o.' + originalFormat;
+		 
+		newItem.attachments.push({
+			title: newItem.title,
+			url: fileUrl,
+			mimeType: 'image/' + photo.getAttribute('originalformat') // jpg|gif|png
+		});
+	}
+	
+	newItem.complete();
 }
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -139,76 +197,77 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "artwork",
+				"title": "The blues and the greens EXPLORED",
 				"creators": [
 					{
-						"firstName": "",
 						"lastName": "@Doug88888",
-						"creatorType": "artist"
+						"creatorType": "artist",
+						"fieldMode": 1
 					}
 				],
-				"notes": [],
-				"tags": [
-					"nature",
-					"plant",
-					"living",
-					"green",
-					"frosty",
-					"blue",
-					"bokeh",
-					"canon",
-					"eos",
-					"400d",
-					"18mm",
-					"55mm",
-					"gimp",
-					"pretty",
-					"beautiful",
-					"tones",
-					"ham",
-					"house",
-					"richmond",
-					"south",
-					"west",
-					"bloom",
-					"flower",
-					"grass",
-					"strand",
-					"lone",
-					"isolated",
-					"isolation",
-					"uk",
-					"england",
-					"doug88888",
-					"southwest",
-					"leaf",
-					"fall",
-					"bright",
-					"blossom",
-					"fresh",
-					"december",
-					"dec07",
-					"buy",
-					"purchase",
-					"picture",
-					"pictures",
-					"image",
-					"images",
-					"creative",
-					"commons"
-				],
-				"seeAlso": [],
+				"date": "2008-12-07",
+				"abstractNote": "More xmas shopping today - gulp.\n\nCheck out my  <a href=\"http://doug88888.blogspot.com/\">blog</a> if you like.",
+				"artworkMedium": "photo",
+				"libraryCatalog": "Flickr",
+				"rights": "Attribution-NonCommercial-ShareAlike License",
+				"url": "https://www.flickr.com/photos/doug88888/3122503680/",
 				"attachments": [
 					{
 						"title": "The blues and the greens EXPLORED",
-						"url": "http://farm4.staticflickr.com/3123/3122503680_739103322d_o.jpg"
+						"mimeType": "image/jpg"
 					}
 				],
-				"title": "The blues and the greens EXPLORED",
-				"date": "2008-12-07",
-				"url": "http://www.flickr.com/photos/doug88888/3122503680/",
-				"abstractNote": "More xmas shopping today - gulp.\n\nCheck out my  <a href=\"http://doug88888.blogspot.com/\">blog</a> if you like.",
-				"libraryCatalog": "Flickr",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [
+					"18mm",
+					"400d",
+					"55mm",
+					"beautiful",
+					"bloom",
+					"blossom",
+					"blue",
+					"bokeh",
+					"bright",
+					"buy",
+					"canon",
+					"commons",
+					"creative",
+					"dec07",
+					"december",
+					"doug88888",
+					"england",
+					"eos",
+					"fall",
+					"flower",
+					"fresh",
+					"frosty",
+					"gimp",
+					"grass",
+					"green",
+					"ham",
+					"house",
+					"image",
+					"images",
+					"isolated",
+					"isolation",
+					"leaf",
+					"living",
+					"lone",
+					"nature",
+					"picture",
+					"pictures",
+					"plant",
+					"pretty",
+					"purchase",
+					"richmond",
+					"south",
+					"southwest",
+					"strand",
+					"tones",
+					"uk",
+					"west"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -225,6 +284,26 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.flickr.com/photos/tags/bmw/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.flickr.com/photos/lomokev/galleries/72157623433999749/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.flickr.com/photos/lomokev/archives/date-taken/2003/12/04/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.flickr.com/photos/lomokev/favorites/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.flickr.com/photos/lomokev/sets/502509/",
 		"items": "multiple"
 	}
 ]

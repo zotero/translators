@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-02-22 11:53:11"
+	"lastUpdated": "2014-09-26 22:55:11"
 }
 
 /*
@@ -135,14 +135,24 @@ var composeRisUrl;
 
 function composeRisUrlGNV(url) {
 	return url.replace(/#.*/,'').replace(/\/[^\/?]+(?=\?|$)/, '/centralizedGenerateCitation.do')
-		.replace(/\bactionString=[^&]*/g, '').replace(/\bcitationFormat=[^&]*&?/g, '')
+		.replace(/\bactionString=[^&]*&?/g, '').replace(/\bcitationFormat=[^&]*&?/g, '')
 		+ '&actionString=FormatCitation&citationFormat=ENDNOTE';
 }
 
 function composeRisUrlGVRL(url) {
 	return url.replace(/#.*/,'').replace(/\/[^\/?]+(?=\?|$)/, '/generateCitation.do')
-		.replace(/\bactionString=[^&]*/g, '').replace(/\bcitationFormat=[^&]*&?/g, '')
+		.replace(/\bactionString=[^&]*&?/g, '').replace(/\bcitationFormat=[^&]*&?/g, '')
 		.replace(/\&u=/, "&userGroupName=").replace(/\&id=/, "&docId=") //for bookmarked pages
+		+ '&actionString=FormatCitation&citationFormat=ENDNOTE';
+}
+
+// The Times Digital Archive
+function composeRisUrlTDA(url) {
+	if (url.indexOf('relevancePageBatch=') != -1) {
+		url = url.replace(/\bdocId=[^&]*&?/g, "").replace(/\&relevancePageBatch=/, "&docId=");
+	}
+	return url.replace(/#.*/,'').replace(/\/[^\/?]+(?=\?|$)/, '/generateCitation.do')
+		.replace(/\bactionString=[^&]*&?/g, '').replace(/\bcitationFormat=[^&]*&?/g, '')
 		+ '&actionString=FormatCitation&citationFormat=ENDNOTE';
 }
 
@@ -177,6 +187,13 @@ function composeAttachmentGNV(doc, url) {
 		title: 'Full Text PDF',
 		mimeType: 'application/pdf'
 	};
+}
+
+function composeAttachmentTDA(doc, url) {
+	if (url.indexOf('relevancePageBatch=') != -1) {
+		url = url.replace(/\bdocId=[^&]*&?/g, "").replace(/\&relevancePageBatch=/, "&docId=");
+	}
+	return composeAttachmentGNV(doc, url);
 }
 
 function parseRis(text, attachment) {
@@ -242,6 +259,10 @@ function doWeb(doc, url) {
 			Z.debug("Using GNV");
 			composeAttachment = composeAttachmentGNV;
 			composeRisUrl = composeRisUrlGNV;
+		} else if(doc.title.indexOf('The Times Digital Archive') != -1) {
+			Z.debug("Using TDA");
+			composeAttachment = composeAttachmentTDA;
+			composeRisUrl = composeRisUrlTDA;
 		} else {
 			Z.debug("Using GVRL");
 			composeAttachment = composeAttachmentGVRL;

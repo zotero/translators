@@ -2,14 +2,14 @@
 	"translatorID": "587709d3-80c5-467d-9fc8-ed41c31e20cf",
 	"label": "eLibrary.ru",
 	"creator": "Avram Lyon",
-	"target": "^http://elibrary\\.ru/",
+	"target": "^https?://elibrary\\.ru/",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-04-15 18:04:37"
+	"lastUpdated": "2014-04-03 17:36:01"
 }
 
 /*

@@ -5,11 +5,11 @@
 	"target": "^https?://[^.]+\\.bibliocommons\\.com\\/",
 	"minVersion": "2.1",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-02-25 21:26:18"
+	"lastUpdated": "2014-08-26 03:54:52"
 }
 
 /*

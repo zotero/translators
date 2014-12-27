@@ -2,14 +2,14 @@
 	"translatorID": "6b0b11a6-9b77-4b49-b768-6b715792aa37",
 	"label": "Toronto Star",
 	"creator": "Adam Crymble, Avram Lyon",
-	"target": "^http://www\\.thestar\\.com",
+	"target": "^https?://www\\.thestar\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-09-27 23:48:52"
+	"lastUpdated": "2014-04-04 10:01:02"
 }
 
 function detectWeb(doc, url) {
@@ -17,15 +17,17 @@ function detectWeb(doc, url) {
 		return "multiple";
 	} else if (ZU.xpathText(doc, '//div[@class="article-headline"]/h2|//div[@class="article-headline"]/h1')) {
 		return "newspaperArticle";
+	} else if (ZU.xpathText(doc, '//div[@class="blog-headline"]/strong', doc)){
+		return "blogPost"
 	}
 }
 
 //Toronto Star translator. code by Adam Crymble
 
 function scrape(doc, url) {
-	var newItem = new Zotero.Item("newspaperArticle");
-
-	var date = ZU.xpathText(doc, '//span[@class="published-date"]');
+	var newItem = new Zotero.Item(detectWeb(doc, url));
+	if (newItem.itemType == "newspaperArticle"){
+			var date = ZU.xpathText(doc, '//span[@class="published-date"]');
 	if(date) {
 		newItem.date = date.replace(/Published on/,'').replace(/[,\n\t\s]*$/, "").trim();
 	}
@@ -52,12 +54,22 @@ function scrape(doc, url) {
 	var keywords = ZU.xpath(doc, '//meta[@name="Keywords"][@content]')[0];
 	if (keywords) newItem.section = keywords.textContent.split(',')[0];
 
-	newItem.attachments.push({document:doc, title:"Toronto Star Snapshot", mimeType:'text/html'});
 
-	newItem.url = url;
 	newItem.publicationTitle = "The Toronto Star";
 	newItem.ISSN = "0319-0781";
-
+	
+	}
+	else{
+		newItem.title = ZU.xpathText(doc, '//div[@class="blog-headline"]/strong');
+		newItem.date = ZU.xpathText(doc, '//div[@class="blog-entry-top"]/span[@class="date"]');
+		var authors = ZU.xpath(doc, '//div[@class="blog-entry-top"]/span[@class="blog-tags"]/a');
+		for (var i=0; i<authors.length; i++){
+			newItem.creators.push(ZU.cleanAuthor(authors[i].textContent, "author"));
+		}
+		newItem.publicationTitle = "Toronto Star Blogs - " + ZU.xpathText(doc, '//div[@class="logo"]/strong[@class="heading"]') ;
+	}
+	newItem.url = url;
+	newItem.attachments.push({document:doc, title:"Toronto Star Snapshot", mimeType:'text/html'});
 	newItem.complete();
 }
 
@@ -181,6 +193,37 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.thestar.com/search.html?q=labor&contenttype=articles%2Cvideos%2Cslideshows",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.thestar.com/yourtoronto/education_blog/2014/03/toronto_tustee_misbehaviour_isn_t_anything_new.html#",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"creators": [
+					{
+						"firstName": "Kristin",
+						"lastName": "Rushowy",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Toronto Star Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "Toronto trustee misbehaviour isn't anything new",
+				"date": "Tue Mar 18 2014",
+				"publicationTitle": "Toronto Star Blogs - Learning Curve",
+				"url": "http://www.thestar.com/yourtoronto/education_blog/2014/03/toronto_tustee_misbehaviour_isn_t_anything_new.html#",
+				"libraryCatalog": "Toronto Star",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

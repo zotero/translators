@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-04 23:18:59"
+	"lastUpdated": "2014-06-02 00:32:10"
 }
 
 function detectWeb(doc, url) {
@@ -34,20 +34,29 @@ function doWeb(doc, url) {
 		while ((link = links.iterateNext()) && (title = titles.iterateNext())) {
 			items[link.href] = Zotero.Utilities.trimInternal(title.textContent);
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push('http://www.mitpressjournals.org/doi/abs/' + getDOI(i));
-		}
+		
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			urls = new Array();
+			for (var i in items) {
+				articles.push('http://www.mitpressjournals.org/doi/abs/' + getDOI(i));
+			}
+			ZU.processDocuments(articles, scrape)
+		});
 	} else {
-		articles = ['http://www.mitpressjournals.org/doi/abs/' + getDOI(url)];
+		scrape(doc, 'http://www.mitpressjournals.org/doi/abs/' + getDOI(url));
 	}
-	Zotero.Utilities.processDocuments(articles, function(newDoc) {
-		if (newDoc.evaluate('//div[@class="abstractSection"]/p[contains(@class, "last") or contains(@class, "first")]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-			var abs = Zotero.Utilities.trimInternal(newDoc.evaluate('//div[@class="abstractSection"]/p[contains(@class, "last") or contains(@class, "first")]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+}
+
+function scrape(doc, url){
+		if (doc.evaluate('//div[@class="abstractSection"]/p[contains(@class, "last") or contains(@class, "first")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var abs = Zotero.Utilities.trimInternal(doc.evaluate('//div[@class="abstractSection"]/p[contains(@class, "last") or contains(@class, "first")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 		}
-		var doi = getDOI(newDoc.location.href);
+		var doi = getDOI(doc.location.href);
 		var risurl = 'http://www.mitpressjournals.org/action/downloadCitation?doi=' + doi + '&include=cit&format=refman&direct=on&submit=Download+article+metadata';		
-		var pdfurl = newDoc.location.href.replace("/doi/abs/", "/doi/pdf/");
+		var pdfurl = doc.location.href.replace("/doi/abs/", "/doi/pdf/");
 		Zotero.Utilities.HTTP.doGet(risurl, function(text) {
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -64,9 +73,8 @@ function doWeb(doc, url) {
 			});
 			translator.translate();
 		});
-	}, function() {Zotero.done();});
-	Zotero.wait();
-}
+	}
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -119,7 +127,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.mitpressjournals.org/action/doSearch?type=simple&target=simple&filter=multiple&searchText=test&x=0&y=0&history=&categoryId=all",
+		"url": "http://www.mitpressjournals.org/action/doSearch?AllField=labor+market&x=0&y=0&history=&publication=all",
 		"items": "multiple"
 	}
 ]

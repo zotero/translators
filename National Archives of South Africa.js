@@ -3,13 +3,13 @@
 	"label": "National Archives of South Africa",
 	"creator": "Adam Crymble",
 	"target": "^https?://www\\.national\\.archsrch\\.gov\\.za",
-	"minVersion": "1.0.0b4.r5",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2012-03-11 00:17:44"
+	"browserSupport": "gcsb",
+	"lastUpdated": "2014-03-12 22:00:51"
 }
 
 function detectWeb(doc, url) {
@@ -99,21 +99,23 @@ function doWeb(doc, url) {
 
 			if (!next_title.textContent.match(/^\d\d\d\d/) && !next_title.textContent.match(/\\/) && next_title.textContent.length > 3 && next_title.textContent.match(/\w/)) {
 				Zotero.debug(next_title.textContent);
-				items[next_title.href] = next_title.textContent;
+				items[next_title.href] = next_title.textContent.trim();
 			}
 
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
-	} else {
-		articles = [url];
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape)
+		});	
 	}
-	Zotero.Utilities.processDocuments(articles, scrape, function () {
-		Zotero.done();
-	});
-	Zotero.wait();
+	else {
+		scrape(doc, url);
+	}
 } 
 /** BEGIN TEST CASES **/
 var testCases = []

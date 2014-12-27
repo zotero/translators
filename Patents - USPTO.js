@@ -2,18 +2,18 @@
 	"translatorID": "232e24fe-2f68-44fc-9366-ecd45720ee9e",
 	"label": "Patents - USPTO",
 	"creator": "Bill McKinney",
-	"target": "^http://(patft|appft1)\\.uspto\\.gov/netacgi/nph-Parser.+",
+	"target": "^https?://(patft|appft1)\\.uspto\\.gov/netacgi/nph-Parser.+",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-12-04 18:26:59"
+	"lastUpdated": "2014-04-04 10:11:27"
 }
 
 function detectWeb(doc, url) {
-	var re = new RegExp("^http://(patft|appft1)\.uspto\.gov/netacgi/nph-Parser");
+	var re = new RegExp("^https?://(patft|appft1)\.uspto\.gov/netacgi/nph-Parser");
 	if (doc.title.match(/Search Results:/)){
 		return "multiple"
 	}
@@ -110,7 +110,7 @@ function doWeb(doc, url) {
 	if(detectWeb(doc, url) == "patent") {
 		scrape(doc);
 	} else {
-		var items = Zotero.Utilities.getItemArray(doc, doc, "^http://(patft|appft1)\.uspto\.gov/netacgi/nph-Parser.+");
+		var items = Zotero.Utilities.getItemArray(doc, doc, "^https?://(patft|appft1)\.uspto\.gov/netacgi/nph-Parser.+");
 		var uris = new Array();
 		Zotero.selectItems(items, function (items) {
 			if (!items) {

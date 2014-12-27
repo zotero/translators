@@ -9,11 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-17 03:09:28"
+	"lastUpdated": "2014-04-03 17:38:54"
 }
 
 function detectWeb(doc, url) {
-	var re = new RegExp("^http://(www\.)?ecfr\.gov/cgi-bin/(text-idx|retrieveECFR\?)");
+	var re = new RegExp("^https?://(www\.)?ecfr\.gov/cgi-bin/(text-idx|retrieveECFR\?)");
 	if(re.test(doc.location.href)) {
 		return "statute";
 	} else {
@@ -80,9 +80,7 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(articles, scrape, function () {
-				Zotero.done();
-			});
+			Zotero.Utilities.processDocuments(articles, scrape);
 		});
 	}
 }

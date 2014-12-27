@@ -2,14 +2,14 @@
 	"translatorID": "cfbb3e2c-8292-43d0-86d5-e457399107de",
 	"label": "Handelszeitung",
 	"creator": "ibex",
-	"target": "^http://((www\\.)?(handelszeitung|bilanz|stocks)\\.ch/.)",
+	"target": "^https?://((www\\.)?(handelszeitung|bilanz|stocks)\\.ch/.)",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-14 21:05:10"
+	"lastUpdated": "2014-06-01 19:22:55"
 }
 
 /*
@@ -44,7 +44,7 @@ Reference URLs:
 /* Zotero API */
 function detectWeb(doc, url) {
 	//Z.debug("ibex detectWeb URL = " + url);
-	if (doc.location.href.match(/\/search\//) && (ZU.xpath(doc, '//div[' + containingClass('buildmode-3') + ']').length > 0)) {
+	if (doc.location.href.match(/\/search\//) && (ZU.xpath(doc, '//dl[contains(@class, "search-results")]').length > 0)) {
 		return "multiple";
 	} else if (doc.location.href.match(/./) && (ZU.xpath(doc, '//div[' + containingClass('node-type-article') + ']').length > 0)) {
 		return "newspaperArticle";
@@ -56,7 +56,7 @@ function doWeb(doc, url) {
 	//Z.debug("ibex doWeb URL = " + url);
 	var urls = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		var items = ZU.getItemArray(doc, doc.getElementsByClassName('field field-title'), 'http://.+/.+');
+		var items = ZU.getItemArray(doc, doc.getElementsByClassName('title'), 'http://.+/.+');
 		if (!items || countObjectProperties(items) == 0) {
 			return true;
 		}
@@ -86,20 +86,20 @@ function scrape(doc) {
 
 	var newItem = new Z.Item('newspaperArticle');
 	newItem.url = doc.location.href;
-	var title = ZU.xpath(doc, '//div[' + containingClass('node-type-article') + ']//div[' + containingClass('field-title') + ']');
-	if (title.length > 0) {
-		newItem.title = ZU.trimInternal(title[0].textContent);
+	var title = ZU.xpathText(doc, '//div[contains(@class, "field field-title")]/h1');
+	if (title) {
+		newItem.title = ZU.trimInternal(title);
 	}
 	newItem.shortTitle = null;
 
-	var abstract = ZU.xpath(doc, '//div[' + containingClass('node-type-article') + ']//div[' + containingClass('field-article-lead') + ']');
-	if (abstract.length > 0) {
-		newItem.abstractNote = ZU.trimInternal(abstract[0].textContent);
+	var abstract = ZU.xpathText(doc, '//div[contains(@class, "field-article-lead")]//p[@class="lead"]');
+	if (abstract) {
+		newItem.abstractNote = ZU.trimInternal(abstract);
 	}
 
-	var date = ZU.xpath(doc, '//div[' + containingClass('node-type-article') + ']//div[' + containingClass('field-publish-date') + ' or ' + containingClass('field-update-info') + ']');
-	if (date.length > 0) {
-		newItem.date = ZU.trimInternal(date[0].textContent.replace(/|.*$/, ''));
+	var date = ZU.xpathText(doc, '//div[contains(@class, "region-middle")]/div[contains(@class, "field-publish-date") or contains(@class, "field-update-info")]|//span[@class="date-display-single"]');
+	if (date) {
+		newItem.date = ZU.trimInternal(date.replace(/\|.*$/, ''));
 	}
 
 	if (doc.location.href.match('handelszeitung.ch')) {
@@ -122,7 +122,7 @@ function scrape(doc) {
 	else newItem.section = ZU.xpathText(doc, '//div[@class="menu-content"]//li[contains(@class, "expanded")]/a')
 
 	// Use the CSS media print stylesheet for the snapshot.
-	switchDomMediaPrint(doc);
+	//switchDomMediaPrint(doc);
 	newItem.attachments.push({title: newItem.publicationTitle + " Article Snapshot", document: doc});
 
 	newItem.complete();
@@ -206,16 +206,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.handelszeitung.ch/search/apachesolr_search/Google",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://www.bilanz.ch/search/apachesolr_search/Google",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "http://www.handelszeitung.ch/unternehmen/google-kauft-daily-deal",
 		"items": [
 			{
@@ -241,6 +231,42 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.bilanz.ch/news/google-eroeffnet-online-speicher-google-drive",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Bilanz Article Snapshot"
+					}
+				],
+				"url": "http://www.bilanz.ch/news/google-eroeffnet-online-speicher-google-drive",
+				"title": "Google eröffnet Online-Speicher Google Drive",
+				"date": "24.04.2012",
+				"publicationTitle": "Bilanz",
+				"ISSN": "1022-3487",
+				"language": "de",
+				"libraryCatalog": "Handelszeitung",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.bilanz.ch/search/site/google",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.handelszeitung.ch/search/site/argentinien",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

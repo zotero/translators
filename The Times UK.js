@@ -1,15 +1,15 @@
 {
-        "translatorID":"53f8d182-4edc-4eab-b5a1-141698a10101",
-        "label":"The Times and Sunday Times",
-        "creator":"Will Smith",
-        "creator":"Andrew Brown",
-        "target":"^http://www\\.thetimes\\.co\\.uk/.+ece$",
-        "minVersion":"1.0",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":true,
-        "translatorType":4,
-        "lastUpdated":"2010-08-11 17:23:03"
+	"translatorID": "53f8d182-4edc-4eab-b5a1-141698a10101",
+	"label": "The Times and Sunday Times",
+	"creator": "Andrew Brown",
+	"target": "^https?://www\\.thetimes\\.co\\.uk/.+ece$",
+	"minVersion": "1.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2014-04-04 10:00:38"
 }
 
 /**/

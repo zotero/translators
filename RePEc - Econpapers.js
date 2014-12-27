@@ -65,7 +65,6 @@ tags :  FW.Xpath('//meta[@name="citation_keywords"]/@content').text().split(/;/)
 publisher: FW.Xpath('//meta[@name="citation_publisher"]/@content').text(),
 publicationTitle : FW.Xpath('//meta[@name="citation_journal_title"]/@content').text(),
 place : FW.Xpath('//meta[@name="citation_publication_place"]/@content').text(),
-
 hooks : { "scraperDone": function  (item,doc, url) {
 	for (i in item.creators) {
 		if (item.creators[i]  && !item.creators[i].firstName) {
@@ -102,7 +101,6 @@ reportNumber: FW.Xpath('//meta[@name="citation_technical_report_number"]/@conten
 reportType : FW.Xpath('//meta[@name="series"]/@content').text().replace(/apers$/, "aper"),
 place : FW.Xpath('//meta[@name="citation_publication_place"]/@content').text(),
 numPages : FW.Xpath('//meta[@name="citation_number_of_pages"]/@content').text().remove(/\s\D*/),
-
 hooks : { "scraperDone": function  (item,doc, url) {
 	for (i in item.creators) {
 		if (item.creators[i]  && !item.creators[i].firstName) {
@@ -137,7 +135,6 @@ tags :  FW.Xpath('//meta[@name="citation_keywords"]/@content').text().split(/;/)
 publisher: FW.Xpath('//meta[@name="citation_publisher"]/@content|//meta[@name="citation_technical_report_institution"]/@content').text(),
 place : FW.Xpath('//meta[@name="citation_publication_place"]/@content').text(),
 version : FW.Xpath('//meta[@name="citation_software_version"]/@content').text(),
-
 hooks : { "scraperDone": function  (item,doc, url) {
 	for (i in item.creators) {
 		if (item.creators[i]  && !item.creators[i].firstName) {
@@ -220,11 +217,11 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"estimates",
-					" LaTeX",
 					" HTML",
+					" LaTeX",
+					" output",
 					" word processor",
-					" output"
+					"estimates"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -240,12 +237,11 @@ var testCases = [
 				],
 				"url": "http://econpapers.repec.org/software/bocbocode/s439301.htm",
 				"abstractNote": "estout produces a table of regression results from one or several models for use with spreadsheets, LaTeX, HTML, or a word-processor table. eststo stores a quick copy of the active estimation results for later tabulation. esttab is a wrapper for estout. It displays a pretty looking publication-style regression table without much typing. estadd adds additional results to the e()-returns for one or several models previously fitted and stored. This package subsumes the previously circulated esto, esta, estadd, and estadd_plus. An earlier version of estout is available as estout1.",
-				"date": "2009/10/12",
+				"date": "2014/06/04",
 				"programmingLanguage": "Stata",
 				"seriesTitle": "Statistical Software Components",
 				"title": "ESTOUT: Stata module to make regression tables",
 				"libraryCatalog": "RePEc - Econpapers",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "ESTOUT"
 			}
 		]

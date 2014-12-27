@@ -2,14 +2,14 @@
 	"translatorID": "48d3b115-7e09-4134-ad5d-0beda6296761",
 	"label": "AIP",
 	"creator": "Aurimas Vinckevicius",
-	"target": "^http://scitation\\.aip\\.org/(?:search\\?|content/)",
+	"target": "^https?://scitation\\.aip\\.org/(?:search\\?|content/)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-12-06 17:49:29"
+	"lastUpdated": "2014-04-22 21:36:13"
 }
 
 function getSearchResults(doc) {
@@ -63,6 +63,14 @@ function scrape(doc, url) {
 			item.publicationTitle = "AIP Conference Proceedings";
 			item.volume = ZU.xpathText(doc, '//div[@class="itemCitation"]//span[@class="citationvolume"]');
 		}
+		
+		//check if we have the correct publication date
+		var year = doc.getElementsByClassName('itemCitation')[0];
+		if(year) year = year.textContent.match(/\((\d{4})\)/);
+		if(year && (!item.date || item.date.indexOf(year[1]) == -1) ) {
+			item.date = year[1];
+		}
+		
 		
 		var pdf = ZU.xpath(doc, '//li[@class="pdf"]/a[@class="pdf" and @href]')[0];
 		if(pdf) {
@@ -154,15 +162,15 @@ var testCases = [
 				"notes": [],
 				"tags": [
 					"Antiferroelectricity",
+					"Antiferroelectricity",
 					"Dielectric oxides",
-					"Iron group ions",
+					"Dielectric oxides",
 					"Image reconstruction",
+					"Image reconstruction",
+					"Iron group ions",
+					"Iron group ions",
 					"Ozone",
-					"Electron energy loss spectroscopy",
-					"Nanorods",
-					"Crystal structure",
-					"Ferroelectricity",
-					"Optical aberrations"
+					"Ozone"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -175,21 +183,7 @@ var testCases = [
 					}
 				],
 				"title": "Local stabilisation of polar order at charged antiphase boundaries in antiferroelectric (Bi0.85Nd0.15)(Ti0.1Fe0.9)O3",
-				"publisher": "AIP Publishing",
-				"institution": "AIP Publishing",
-				"company": "AIP Publishing",
-				"label": "AIP Publishing",
-				"distributor": "AIP Publishing",
-				"date": "2013/08/13",
-				"reportType": "Text",
-				"letterType": "Text",
-				"manuscriptType": "Text",
-				"mapType": "Text",
-				"thesisType": "Text",
-				"websiteType": "Text",
-				"presentationType": "Text",
-				"postType": "Text",
-				"audioFileType": "Text",
+				"date": "2013/08/01",
 				"publicationTitle": "APL Materials",
 				"volume": "1",
 				"issue": "2",
@@ -198,8 +192,7 @@ var testCases = [
 				"pages": "021102",
 				"ISSN": "2166-532X",
 				"url": "http://scitation.aip.org/content/aip/journal/aplmater/1/2/10.1063/1.4818002",
-				"libraryCatalog": "scitation.aip.org",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "scitation.aip.org"
 			}
 		]
 	},
@@ -218,15 +211,11 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Insulator surfaces",
-					"Numerical analysis",
-					"Surface finishing",
 					"Advanced materials",
+					"Insulator surfaces",
 					"Materials science",
-					"Number theory",
-					"Radiative heat transfer",
-					"Thermal analysis",
-					"Thermal nonlinear materials"
+					"Numerical analysis",
+					"Surface finishing"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -240,31 +229,15 @@ var testCases = [
 				],
 				"title": "Evaluation of thermal resistance of building insulations with reflective surfaces",
 				"publisher": "AIP Publishing",
-				"institution": "AIP Publishing",
-				"company": "AIP Publishing",
-				"label": "AIP Publishing",
-				"distributor": "AIP Publishing",
 				"date": "2012/09/26",
-				"reportType": "Text",
-				"letterType": "Text",
-				"manuscriptType": "Text",
-				"mapType": "Text",
-				"thesisType": "Text",
-				"websiteType": "Text",
-				"presentationType": "Text",
-				"postType": "Text",
-				"audioFileType": "Text",
 				"volume": "1479",
-				"issue": "1",
 				"conferenceName": "NUMERICAL ANALYSIS AND APPLIED MATHEMATICS ICNAAM 2012: International Conference of Numerical Analysis and Applied Mathematics",
 				"abstractNote": "The thermal resistance of advanced insulation materials, applied namely in civil engineering, containing reflective surfaces and air gaps, cannot be evaluated correctly using the valid European standards because of presence of the dominant nonlinear radiative heat transfer and other phenomena not included in the recommended computational formulae. The proper general physical analysis refers to rather complicated problems from classical thermodynamics, whose both existence theory and numerical analysis contain open questions and cannot be done in practice when the optimization of composition of insulation layers is required. This paper, coming from original experimental results, demonstrates an alternative simplified computational approach, taking into account the most important physical processes, useful in the design of modern insulation systems.",
 				"DOI": "10.1063/1.4756630",
 				"pages": "2204-2207",
-				"ISSN": "0094-243X, 1551-7616",
 				"url": "http://scitation.aip.org/content/aip/proceeding/aipcp/10.1063/1.4756630",
 				"libraryCatalog": "scitation.aip.org",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"publicationTitle": "AIP Conference Proceedings"
+				"proceedingsTitle": "AIP Conference Proceedings"
 			}
 		]
 	},
@@ -272,6 +245,51 @@ var testCases = [
 		"type": "web",
 		"url": "http://scitation.aip.org/search?value1=insulation&option1=all&option12=resultCategory&value12=ResearchPublicationContent",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://scitation.aip.org/content/aip/journal/jap/49/3/10.1063/1.324716",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "L.",
+						"lastName": "Berger",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Carrier generation",
+					"Conduction electrons",
+					"Domain walls",
+					"Iron",
+					"Magnetoresistance"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"title": "Low‐field magnetoresistance and domain drag in ferromagnets",
+				"date": "1978/03/01",
+				"publicationTitle": "Journal of Applied Physics",
+				"volume": "49",
+				"issue": "3",
+				"abstractNote": "Despite common misconceptions, domain walls are too thick to ’’scatter’’ electrons appreciably. However, electrons crossing a wall apply a torque to it, which tends to cant the wall spins. This could be used to measure the conduction electron spin polarization. Most of the low‐field resistive anomalies observed in pure Fe, Ni and Co at low temperature are caused by the Lorentz force associated with the internal field B=M s present inside each domain. The existence of low‐resistivity paths extending over many domains accounts for still unexplained magnetoresistance data in ironwhiskers. In uniaxial materials, a d.c. eddy‐current loop caused by the Hall effect runs around each wall. The field H z generated by these loops tends to ’’drag’’ the whole domain structure in the direction of the carrier drift velocity. Also, the Joule dissipation of the eddy currents manifests itself as an excess Ohmic resistance. As predicted, this excess resistance decreases as the square of the field, in amorphous Gd25Co75 films, in MnBi films, and in pure bulk cobalt, when the walls are removed by an external field. The excess resistance can also be changed by reorienting the walls.",
+				"DOI": "10.1063/1.324716",
+				"pages": "2156-2161",
+				"ISSN": "0021-8979, 1089-7550",
+				"url": "http://scitation.aip.org/content/aip/journal/jap/49/3/10.1063/1.324716",
+				"libraryCatalog": "scitation.aip.org"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

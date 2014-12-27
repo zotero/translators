@@ -242,12 +242,12 @@ var testCases = [
 				],
 				"notes": [],
 				"tags": [
-					"Image Processing and Computer Vision",
-					"Computer Imaging, Vision, Pattern Recognition and Graphics",
+					"Computer Appl. in Arts and Humanities",
 					"Computer Graphics",
-					"Pattern Recognition",
+					"Computer Imaging, Vision, Pattern Recognition and Graphics",
 					"Data Mining and Knowledge Discovery",
-					"Computer Appl. in Arts and Humanities"
+					"Image Processing and Computer Vision",
+					"Pattern Recognition"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -263,15 +263,14 @@ var testCases = [
 				"date": "2008/01/01",
 				"publisher": "Springer Berlin Heidelberg",
 				"ISBN": "978-3-540-88681-5, 978-3-540-88682-2",
-				"DOI": "10.1007/978-3-540-88682-2_1",
+				"language": "en",
 				"pages": "1-1",
 				"url": "http://link.springer.com/chapter/10.1007/978-3-540-88682-2_1",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "link.springer.com",
 				"bookTitle": "Computer Vision – ECCV 2008",
+				"rights": "©2008 Springer Berlin Heidelberg",
 				"series": "Lecture Notes in Computer Science",
 				"seriesNumber": "5302",
-				"rights": "©2008 Springer Berlin Heidelberg",
 				"abstractNote": "My first paper of a “Computer Vision” signature (on invariants related to optic flow) dates from 1975. I have published in Computer Vision (next to work in cybernetics, psychology, physics, mathematics and philosophy) till my retirement earlier this year (hence the slightly blue feeling), thus my career roughly covers the history of the field. “Vision” has diverse connotations. The fundamental dichotomy is between “optically guided action” and “visual experience”. The former applies to much of biology and computer vision and involves only concepts from science and engineering (e.g., “inverse optics”), the latter involves intention and meaning and thus additionally involves concepts from psychology and philosophy. David Marr’s notion of “vision” is an uneasy blend of the two: On the one hand the goal is to create a “representation of the scene in front of the eye” (involving intention and meaning), on the other hand the means by which this is attempted are essentially “inverse optics”. Although this has nominally become something of the “Standard Model” of CV, it is actually incoherent. It is the latter notion of “vision” that has always interested me most, mainly because one is still grappling with basic concepts. It has been my aspiration to turn it into science, although in this I failed. Yet much has happened (something old) and is happening now (something new). I will discuss some of the issues that seem crucial to me, mostly illustrated through my own work, though I shamelessly borrow from friends in the CV community where I see fit."
 			}
 		]
@@ -297,9 +296,9 @@ var testCases = [
 				"notes": [],
 				"tags": [
 					"Child and School Psychology",
-					"Learning & Instruction",
+					"Developmental Psychology",
 					"Education (general)",
-					"Developmental Psychology"
+					"Learning & Instruction"
 				],
 				"seeAlso": [],
 				"attachments": [
@@ -315,13 +314,13 @@ var testCases = [
 				"date": "2011/01/01",
 				"publisher": "Springer US",
 				"ISBN": "978-0-387-77579-1, 978-0-387-79061-9",
-				"DOI": "10.1007/978-0-387-79061-9_5173",
+				"language": "en",
 				"pages": "329-329",
 				"url": "http://link.springer.com/referenceworkentry/10.1007/978-0-387-79061-9_5173",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "link.springer.com",
 				"bookTitle": "Encyclopedia of Child Behavior and Development",
-				"rights": "©2011 Springer Science+Business Media, LLC"
+				"rights": "©2011 Springer Science+Business Media, LLC",
+				"abstractNote": "Identity Foreclosure"
 			}
 		]
 	},

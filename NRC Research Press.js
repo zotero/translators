@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcbv",
-	"lastUpdated": "2013-06-10 07:07:15"
+	"lastUpdated": "2014-06-01 23:00:28"
 }
 
 /*
@@ -111,11 +111,6 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.nrcresearchpress.com/action/doSearch?searchText=determination&stemming=yes&publication=",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "http://www.nrcresearchpress.com/toc/cjc/41/10",
 		"items": "multiple"
 	},
@@ -166,6 +161,11 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.nrcresearchpress.com/action/doSearch?sortBy=&startPage=0&pageSize=20&AllField=cell&Title=&Contrib=&Abstract=&stemming=yes&AfterMonth=&AfterYear=&BeforeMonth=&BeforeYear=",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

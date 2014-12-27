@@ -2,14 +2,14 @@
 	"translatorID": "2bedae3c-bab5-447f-b127-e9babc0e9cfe",
 	"label": "Legislative Insight",
 	"creator": "Kari Hemdal",
-	"target": "^http://www\\.(?:conquest-leg-insight-cert|conquest-leg-insight)\\.com/legislativeinsight/LegHistMain\\.jsp",
+	"target": "^https?://www\\.(?:conquest-leg-insight-cert|conquest-leg-insight)\\.com/legislativeinsight/LegHistMain\\.jsp",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-12-10 17:36:46"
+	"lastUpdated": "2014-04-03 17:41:39"
 }
 
 /*
@@ -44,14 +44,8 @@ function detectWeb(doc, url) {
 
 function getSingleType(doc,url)
 {
-		var namespace = doc.documentElement.namespaceURI;
-		var nsResolver = namespace ? function(prefix) {
-		if (prefix == "x" ) return namespace; else return null;
-			} : null;
-	
-		
 		var myXPath = '//div[@id="docpageid"]';
-		var myXPathObject = doc.evaluate(myXPath, doc, nsResolver, XPathResult.ANY_TYPE, null);    
+		var myXPathObject = doc.evaluate(myXPath, doc, null, XPathResult.ANY_TYPE, null);    
 		var type;
 		
 		if (type = myXPathObject.iterateNext()) 
@@ -67,14 +61,9 @@ function getSingleType(doc,url)
 }
 
 function containsSearchResult(doc, url)
-{
-		var namespace = doc.documentElement.namespaceURI;
-		var nsResolver = namespace ? function(prefix) {
-		if (prefix == "x" ) return namespace; else return null;
-		} : null;
-	
+{	
 		var myXPath = '//div[@class="results-title"]/a';
-		var myXPathObject = doc.evaluate(myXPath, doc, nsResolver, XPathResult.ANY_TYPE, null);    
+		var myXPathObject = doc.evaluate(myXPath, doc, null, XPathResult.ANY_TYPE, null);    
 		var headers;
 	
 	
@@ -96,12 +85,6 @@ function getType(t)
 
 function doLDOC(doc, url, st, showTop) {
 
-	
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-	if (prefix == "x" ) return namespace; else return null;
-	} : null;
-		
 	var articles = new Array();
 	var items = new Object();
 	var headers;
@@ -127,7 +110,7 @@ function doLDOC(doc, url, st, showTop) {
 	
 	
 		var myXPath = '//a[contains(@onclick, "ldoc(")]';
-		var myXPathObject = doc.evaluate(myXPath, doc, nsResolver, XPathResult.ANY_TYPE, null);    
+		var myXPathObject = doc.evaluate(myXPath, doc, null, XPathResult.ANY_TYPE, null);    
 				
 	
 		while (headers = myXPathObject.iterateNext()) 
@@ -189,11 +172,6 @@ function doWeb(doc, url) {
 			process(accNo, pubLaw,type,typeText);
 		return;
 	}
-	
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-	if (prefix == "x" ) return namespace; else return null;
-	} : null;
 		
 	var articles = new Array();
 	var items = new Object();
@@ -204,10 +182,10 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") 
 	{   
 		var myXPath = '//div[@class="results-title"]/a';
-		var myXPathObject = doc.evaluate(myXPath, doc, nsResolver, XPathResult.ANY_TYPE, null);    
+		var myXPathObject = doc.evaluate(myXPath, doc, null, XPathResult.ANY_TYPE, null);    
 		
 		var myXPath2 = '//div[@class="results-type"]';
-		var myXPathObject2 = doc.evaluate(myXPath2, doc, nsResolver, XPathResult.ANY_TYPE, null);    
+		var myXPathObject2 = doc.evaluate(myXPath2, doc, null, XPathResult.ANY_TYPE, null);    
 	
 	
 		while (headers = myXPathObject.iterateNext()) 
@@ -419,7 +397,6 @@ function process(accNo, pubLaw, type, typeText)
 										}
 									}, 
 									function() {Zotero.done(); }, null);
-		Zotero.wait();
-										 
+		 
 
 }

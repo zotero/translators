@@ -6,13 +6,10 @@
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
-	"configOptions": {
-		"dataMode": "block"
-	},
 	"inRepository": true,
 	"translatorType": 13,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-01-05 14:36:04"
+	"lastUpdated": "2014-12-17 22:37:36"
 }
 
 /*****************************
@@ -23,6 +20,7 @@ function lookupPMIDs(ids, next) {
 		"db=PubMed&tool=Zotero&retmode=xml&rettype=citation&id="+ids.join(",");
 	Zotero.debug(newUri);
 	Zotero.Utilities.HTTP.doGet(newUri, function(text) {
+		//Z.debug(text);
 		doImportFromText(text, next);
 	});	//call the import translator
 }
@@ -59,6 +57,48 @@ function getUID(doc) {
 	return false;
 }
 
+// retrieve itemprop elements for scraping books directly from page where UID is not available
+function getBookProps(doc) {
+	var main = doc.getElementById('maincontent');
+	if(!main) return;
+	
+	var itemprops = ZU.xpath(main, './/div[@itemtype="http://schema.org/Book"]//*[@itemprop]');
+	return itemprops.length ? itemprops : null;
+}
+
+// itemprop to Zotero field map
+var bookRDFaMap = {
+	name: 'title',
+	bookEdition: 'edition',
+	author: 'creator/author',
+	publisher: 'publisher',
+	datePublished: 'date',
+	isbn: 'ISBN',
+	description: 'abstractNote'
+};
+
+function scrapeItemProps(itemprops) {
+	var item = new Zotero.Item('book');
+	for(var i=0; i<itemprops.length; i++) {
+		var value = ZU.trimInternal(itemprops[i].textContent);
+		var field = bookRDFaMap[itemprops[i].getAttribute('itemprop')];
+		if(!field) continue;
+		
+		if(field.indexOf('creator/') == 0) {
+			field = field.substr(8);
+			item.creators.push(ZU.cleanAuthor(value, field, false));
+		} else if(field == 'ISBN') {
+			if(!item.ISBN) item.ISBN = '';
+			else item.ISBN += '; ';
+			
+			item.ISBN += value;
+		} else {
+			item[field] = value;
+		}
+	}
+	item.complete();
+}
+
 //retrieves a list of result nodes from a search results page (perhaps others too)
 function getResultList(doc) {
 	var results = ZU.xpath(doc, '//div[./div[@class="rslt"][./p[@class="title"] or ./h1]]');
@@ -77,6 +117,8 @@ function detectWeb(doc, url) {
 	}
 	
 	if(!getUID(doc)) {
+		if(getBookProps(doc)) return 'book';
+		
 		return;
 	}
 	
@@ -133,7 +175,12 @@ function doWeb(doc, url) {
 			lookupPMIDs(uids);
 		});
 	} else {
-		lookupPMIDs([getUID(doc)]);
+		var uid = getUID(doc), itemprops;
+		if(uid) {
+			lookupPMIDs([uid]);
+		} else if(itemprops = getBookProps(doc)) {
+			scrapeItemProps(itemprops);
+		}
 	}
 /*
 		} else {
@@ -263,11 +310,14 @@ function processAuthors(newItem, authorsLists) {
 			}
 	
 			if(firstName || lastName) {
-				newItem.creators.push({
-					creatorType:type,
-					lastName:lastName,
-					firstName:firstName
-				});
+				var creator = ZU.cleanAuthor(lastName + ', ' + firstName, type, true);
+				if(creator.lastName.toUpperCase() == creator.lastName) {
+					creator.lastName = ZU.capitalizeTitle(creator.lastName, true);
+				}
+				if(creator.firstName.toUpperCase() == creator.firstName) {
+					creator.firstName = ZU.capitalizeTitle(creator.firstName, true);
+				}
+				newItem.creators.push(creator);
 			} else if(lastName = ZU.xpathText(author, 'CollectiveName')) {
 				//corporate author
 				newItem.creators.push({
@@ -349,6 +399,15 @@ function doImportFromText(text, next) {
 			
 			var title = ZU.xpathText(journal, 'Title');
 			if(title) {
+				title = ZU.trimInternal(title);
+				// Fix sentence-cased titles, but be careful...
+				if(!( // of accronyms that could get messed up if we fix case
+					/\b[A-Z]{2}/.test(title) // this could mean that there's an accronym in the title
+					&& (title.toUpperCase() != title // the whole title isn't in upper case, so bail
+						|| !(/\s/.test(title))) // it's all in upper case and there's only one word, so we can't be sure
+				)) {
+					title = ZU.capitalizeTitle(title, true);
+				}
 				newItem.publicationTitle = title;
 			} else if(newItem.journalAbbreviation) {
 				newItem.publicationTitle = newItem.journalAbbreviation;
@@ -551,14 +610,14 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"creatorType": "author",
+						"firstName": "Jaekea T.",
 						"lastName": "Coar",
-						"firstName": "Jaekea T"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Jeanne P.",
 						"lastName": "Sewell",
-						"firstName": "Jeanne P"
+						"creatorType": "author"
 					}
 				],
 				"notes": [],
@@ -586,7 +645,7 @@ var testCases = [
 				"shortTitle": "Zotero",
 				"title": "Zotero: harnessing the power of a personal bibliographic manager",
 				"pages": "205-207",
-				"publicationTitle": "Nurse educator",
+				"publicationTitle": "Nurse Educator",
 				"volume": "35",
 				"date": "2010 Sep-Oct"
 			}
@@ -650,24 +709,24 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"creatorType": "editor",
+						"firstName": "Douglas L.",
 						"lastName": "Riegert-Johnson",
-						"firstName": "Douglas L"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Lisa A.",
 						"lastName": "Boardman",
-						"firstName": "Lisa A"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Timothy",
 						"lastName": "Hefferon",
-						"firstName": "Timothy"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Maegan",
 						"lastName": "Roberts",
-						"firstName": "Maegan"
+						"creatorType": "editor"
 					}
 				],
 				"notes": [],
@@ -680,10 +739,7 @@ var testCases = [
 						"snapshot": false
 					}
 				],
-				"title": "Cancer Syndromes",
-				"date": "2009",
 				"place": "Bethesda (MD)",
-				"publisher": "National Center for Biotechnology Information (US)",
 				"language": "eng",
 				"abstractNote": "Cancer Syndromes is a comprehensive multimedia resource for selected single gene cancer syndromes. Syndromes currently included are Peutz-Jeghers syndrome, juvenile polyposis, Birt-Hogg-Dubé syndrome, multiple endocrine neoplasia type 1 and familial atypical multiple mole melanoma syndrome. For each syndrome the history, epidemiology, natural history and management are reviewed. If possible the initial report in the literature of each syndrome is included as an appendix. Chapters are extensively annotated with figures and movie clips. Mission Statement: Improving the care of cancer syndrome patients.",
 				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson",
@@ -691,7 +747,9 @@ var testCases = [
 				"callNumber": "NBK1825",
 				"url": "http://www.ncbi.nlm.nih.gov/books/NBK1825/",
 				"libraryCatalog": "NCBI PubMed",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"title": "Cancer Syndromes",
+				"date": "2009",
+				"publisher": "National Center for Biotechnology Information (US)"
 			}
 		]
 	},
@@ -703,34 +761,34 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"creatorType": "author",
+						"firstName": "D.",
 						"lastName": "Marks",
-						"firstName": "D"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "D.",
 						"lastName": "Wonderling",
-						"firstName": "D"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "M.",
 						"lastName": "Thorogood",
-						"firstName": "M"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "H.",
 						"lastName": "Lambert",
-						"firstName": "H"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "S. E.",
 						"lastName": "Humphries",
-						"firstName": "S E"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "H. A.",
 						"lastName": "Neil",
-						"firstName": "H A"
+						"creatorType": "author"
 					}
 				],
 				"notes": [],
@@ -774,7 +832,7 @@ var testCases = [
 				"shortTitle": "Screening for hypercholesterolaemia versus case finding for familial hypercholesterolaemia",
 				"title": "Screening for hypercholesterolaemia versus case finding for familial hypercholesterolaemia: a systematic review and cost-effectiveness analysis",
 				"pages": "1-123",
-				"publicationTitle": "Health technology assessment (Winchester, England)",
+				"publicationTitle": "Health Technology Assessment (Winchester, England)",
 				"volume": "4",
 				"date": "2000"
 			}
@@ -788,29 +846,29 @@ var testCases = [
 				"itemType": "bookSection",
 				"creators": [
 					{
-						"creatorType": "author",
+						"firstName": "Warren",
 						"lastName": "Hyer",
-						"firstName": "Warren"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Douglas L.",
 						"lastName": "Riegert-Johnson",
-						"firstName": "Douglas L"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Lisa A.",
 						"lastName": "Boardman",
-						"firstName": "Lisa A"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Timothy",
 						"lastName": "Hefferon",
-						"firstName": "Timothy"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Maegan",
 						"lastName": "Roberts",
-						"firstName": "Maegan"
+						"creatorType": "editor"
 					}
 				],
 				"notes": [],
@@ -851,29 +909,29 @@ var testCases = [
 				"itemType": "bookSection",
 				"creators": [
 					{
-						"creatorType": "author",
+						"firstName": "Warren",
 						"lastName": "Hyer",
-						"firstName": "Warren"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Douglas L.",
 						"lastName": "Riegert-Johnson",
-						"firstName": "Douglas L"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Lisa A.",
 						"lastName": "Boardman",
-						"firstName": "Lisa A"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Timothy",
 						"lastName": "Hefferon",
-						"firstName": "Timothy"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Maegan",
 						"lastName": "Roberts",
-						"firstName": "Maegan"
+						"creatorType": "editor"
 					}
 				],
 				"notes": [],
@@ -891,11 +949,7 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"title": "Implications of Peutz-Jeghers Syndrome in Children and Adolescents",
-				"publicationTitle": "Cancer Syndromes",
-				"date": "2009",
 				"place": "Bethesda (MD)",
-				"publisher": "National Center for Biotechnology Information (US)",
 				"language": "eng",
 				"abstractNote": "Pigmentation tends to arise in infancy, occurring around the mouth, nostrils, perianal area, fingers and toes, and the dorsal and volar aspects of hands and feet (Figure 1). They may fade after puberty but tend to persist in the buccal mucosa. The primary concern to the paediatrician is the risk of small bowel intussusception causing intestinal obstruction, vomiting, and pain. In addition, intestinal bleeding leading to anaemia can occur. The management of a young child with mid-gut PJS polyps is controversial. In a retrospective review, 68% of children had undergone a laparotomy for bowel obstruction by the age of 18 years, and many of these proceeded to a second laparotomy within 5 years (1). There is a high re-operation rate after initial laparotomy for small bowel obstruction.",
 				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson",
@@ -903,7 +957,10 @@ var testCases = [
 				"callNumber": "NBK26374",
 				"url": "http://www.ncbi.nlm.nih.gov/books/NBK26374/",
 				"libraryCatalog": "NCBI PubMed",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"title": "Implications of Peutz-Jeghers Syndrome in Children and Adolescents",
+				"bookTitle": "Cancer Syndromes",
+				"date": "2009",
+				"publisher": "National Center for Biotechnology Information (US)"
 			}
 		]
 	},
@@ -915,24 +972,24 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"creatorType": "editor",
+						"firstName": "Douglas L.",
 						"lastName": "Riegert-Johnson",
-						"firstName": "Douglas L"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Lisa A.",
 						"lastName": "Boardman",
-						"firstName": "Lisa A"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Timothy",
 						"lastName": "Hefferon",
-						"firstName": "Timothy"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Maegan",
 						"lastName": "Roberts",
-						"firstName": "Maegan"
+						"creatorType": "editor"
 					}
 				],
 				"notes": [],
@@ -945,10 +1002,7 @@ var testCases = [
 						"snapshot": false
 					}
 				],
-				"title": "Cancer Syndromes",
-				"date": "2009",
 				"place": "Bethesda (MD)",
-				"publisher": "National Center for Biotechnology Information (US)",
 				"language": "eng",
 				"abstractNote": "Cancer Syndromes is a comprehensive multimedia resource for selected single gene cancer syndromes. Syndromes currently included are Peutz-Jeghers syndrome, juvenile polyposis, Birt-Hogg-Dubé syndrome, multiple endocrine neoplasia type 1 and familial atypical multiple mole melanoma syndrome. For each syndrome the history, epidemiology, natural history and management are reviewed. If possible the initial report in the literature of each syndrome is included as an appendix. Chapters are extensively annotated with figures and movie clips. Mission Statement: Improving the care of cancer syndrome patients.",
 				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson",
@@ -956,7 +1010,9 @@ var testCases = [
 				"callNumber": "NBK1825",
 				"url": "http://www.ncbi.nlm.nih.gov/books/NBK1825/",
 				"libraryCatalog": "NCBI PubMed",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"title": "Cancer Syndromes",
+				"date": "2009",
+				"publisher": "National Center for Biotechnology Information (US)"
 			}
 		]
 	},
@@ -968,59 +1024,59 @@ var testCases = [
 				"itemType": "bookSection",
 				"creators": [
 					{
-						"creatorType": "author",
+						"firstName": "Douglas",
 						"lastName": "Riegert-Johnson",
-						"firstName": "Douglas"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Ferga C.",
 						"lastName": "Gleeson",
-						"firstName": "Ferga C."
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Wytske",
 						"lastName": "Westra",
-						"firstName": "Wytske"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Timothy",
 						"lastName": "Hefferon",
-						"firstName": "Timothy"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Louis M.",
 						"lastName": "Wong Kee Song",
-						"firstName": "Louis M."
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Lauren",
 						"lastName": "Spurck",
-						"firstName": "Lauren"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Lisa A.",
 						"lastName": "Boardman",
-						"firstName": "Lisa A."
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Douglas L.",
 						"lastName": "Riegert-Johnson",
-						"firstName": "Douglas L"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Lisa A.",
 						"lastName": "Boardman",
-						"firstName": "Lisa A"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Timothy",
 						"lastName": "Hefferon",
-						"firstName": "Timothy"
+						"creatorType": "editor"
 					},
 					{
-						"creatorType": "editor",
+						"firstName": "Maegan",
 						"lastName": "Roberts",
-						"firstName": "Maegan"
+						"creatorType": "editor"
 					}
 				],
 				"notes": [],
@@ -1071,44 +1127,44 @@ var testCases = [
 						"fieldMode": 1
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Gonçalo R.",
 						"lastName": "Abecasis",
-						"firstName": "Gonçalo R"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "David",
 						"lastName": "Altshuler",
-						"firstName": "David"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Adam",
 						"lastName": "Auton",
-						"firstName": "Adam"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Lisa D.",
 						"lastName": "Brooks",
-						"firstName": "Lisa D"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Richard M.",
 						"lastName": "Durbin",
-						"firstName": "Richard M"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Richard A.",
 						"lastName": "Gibbs",
-						"firstName": "Richard A"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Matt E.",
 						"lastName": "Hurles",
-						"firstName": "Matt E"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Gil A.",
 						"lastName": "McVean",
-						"firstName": "Gil A"
+						"creatorType": "author"
 					}
 				],
 				"notes": [],
@@ -1147,19 +1203,212 @@ var testCases = [
 						"snapshot": false
 					}
 				],
-				"title": "A map of human genome variation from population-scale sequencing",
-				"pages": "1061-1073",
 				"ISSN": "1476-4687",
 				"journalAbbreviation": "Nature",
-				"publicationTitle": "Nature",
-				"volume": "467",
 				"issue": "7319",
-				"date": "Oct 28, 2010",
 				"language": "eng",
 				"abstractNote": "The 1000 Genomes Project aims to provide a deep characterization of human genome sequence variation as a foundation for investigating the relationship between genotype and phenotype. Here we present results of the pilot phase of the project, designed to develop and compare different strategies for genome-wide sequencing with high-throughput platforms. We undertook three projects: low-coverage whole-genome sequencing of 179 individuals from four populations; high-coverage sequencing of two mother-father-child trios; and exon-targeted sequencing of 697 individuals from seven populations. We describe the location, allele frequency and local haplotype structure of approximately 15 million single nucleotide polymorphisms, 1 million short insertions and deletions, and 20,000 structural variants, most of which were previously undescribed. We show that, because we have catalogued the vast majority of common variation, over 95% of the currently accessible variants found in any individual are present in this data set. On average, each person is found to carry approximately 250 to 300 loss-of-function variants in annotated genes and 50 to 100 variants previously implicated in inherited disorders. We demonstrate how these results can be used to inform association and functional studies. From the two trios, we directly estimate the rate of de novo germline base substitution mutations to be approximately 10(-8) per base pair per generation. We explore the data with regard to signatures of natural selection, and identify a marked reduction of genetic variation in the neighbourhood of genes, due to selection at linked sites. These methods and public data will support the next phase of human genetic research.",
 				"DOI": "10.1038/nature09534",
 				"extra": "PMID: 20981092 \nPMCID: PMC3042601",
-				"libraryCatalog": "NCBI PubMed"
+				"libraryCatalog": "NCBI PubMed",
+				"title": "A map of human genome variation from population-scale sequencing",
+				"pages": "1061-1073",
+				"publicationTitle": "Nature",
+				"volume": "467",
+				"date": "Oct 28, 2010"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.ncbi.nlm.nih.gov/books/NBK21054/",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Bruce",
+						"lastName": "Alberts",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alexander",
+						"lastName": "Johnson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Julian",
+						"lastName": "Lewis",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Martin",
+						"lastName": "Raff",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Keith",
+						"lastName": "Roberts",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Peter",
+						"lastName": "Walter",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"edition": "4th",
+				"ISBN": "0-8153-3218-1; 0-8153-4072-9",
+				"abstractNote": "ExcerptMolecular Biology of the Cell is the classic in-depth text reference in cell biology. By extracting fundamental concepts and meaning from this enormous and ever-growing field, the authors tell the story of cell biology, and create a coherent framework through which non-expert readers may approach the subject. Written in clear and concise language, and illustrated with original drawings, the book is enjoyable to read, and provides a sense of the excitement of modern biology. Molecular Biology of the Cell not only sets forth the current understanding of cell biology (updated as of Fall 2001), but also explores the intriguing implications and possibilities of that which remains unknown.",
+				"libraryCatalog": "NCBI PubMed",
+				"title": "Molecular Biology of the Cell",
+				"publisher": "Garland Science",
+				"date": "2002"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.ncbi.nlm.nih.gov/pubmed/14779137",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "C. C.",
+						"lastName": "Blackwell",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Pancreatitis"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"ISSN": "0025-7044",
+				"journalAbbreviation": "J Med Assoc State Ala",
+				"issue": "4",
+				"language": "eng",
+				"extra": "PMID: 14779137",
+				"libraryCatalog": "NCBI PubMed",
+				"title": "Surgical management of pancreatitis",
+				"pages": "118-128",
+				"publicationTitle": "Journal of the Medical Association of the State of Alabama",
+				"volume": "20",
+				"date": "Oct 1950"
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"PMID": "20729678"
+		},
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"creatorType": "author",
+						"lastName": "Coar",
+						"firstName": "Jaekea T"
+					},
+					{
+						"creatorType": "author",
+						"lastName": "Sewell",
+						"firstName": "Jeanne P"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Bibliography as Topic",
+					"Database Management Systems",
+					"Humans"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"ISSN": "1538-9855",
+				"journalAbbreviation": "Nurse Educ",
+				"issue": "5",
+				"language": "eng",
+				"abstractNote": "Zotero is a powerful free personal bibliographic manager (PBM) for writers. Use of a PBM allows the writer to focus on content, rather than the tedious details of formatting citations and references. Zotero 2.0 (http://www.zotero.org) has new features including the ability to synchronize citations with the off-site Zotero server and the ability to collaborate and share with others. An overview on how to use the software and discussion about the strengths and limitations are included.",
+				"DOI": "10.1097/NNE.0b013e3181ed81e4",
+				"extra": "PMID: 20729678",
+				"libraryCatalog": "NCBI PubMed",
+				"shortTitle": "Zotero",
+				"title": "Zotero: harnessing the power of a personal bibliographic manager",
+				"pages": "205-207",
+				"publicationTitle": "Nurse educator",
+				"volume": "35",
+				"date": "2010 Sep-Oct"
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"contextObject": "url_ver=Z39.88-2004&ctx_ver=Z39.88-2004&rfr_id=info:sid/zotero.org:2&rft_id=info:doi/10.1097/NNE.0b013e3181ed81e4&rft_id=info:pmid/20729678&rft_val_fmt=info:ofi/fmt:kev:mtx:journal&rft.genre=article&rft.atitle=Zotero: harnessing the power of a personal bibliographic manager&rft.jtitle=Nurse educator&rft.stitle=Nurse Educ&rft.volume=35&rft.issue=5&rft.aufirst=Jaekea T&rft.aulast=Coar&rft.au=Jaekea T Coar&rft.au=Jeanne P Sewell&rft.date=2010-10&rft.pages=205-207&rft.spage=205&rft.epage=207&rft.issn=1538-9855&rft.language=eng"
+		},
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"creatorType": "author",
+						"lastName": "Coar",
+						"firstName": "Jaekea T"
+					},
+					{
+						"creatorType": "author",
+						"lastName": "Sewell",
+						"firstName": "Jeanne P"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Bibliography as Topic",
+					"Database Management Systems",
+					"Humans"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"ISSN": "1538-9855",
+				"journalAbbreviation": "Nurse Educ",
+				"issue": "5",
+				"language": "eng",
+				"abstractNote": "Zotero is a powerful free personal bibliographic manager (PBM) for writers. Use of a PBM allows the writer to focus on content, rather than the tedious details of formatting citations and references. Zotero 2.0 (http://www.zotero.org) has new features including the ability to synchronize citations with the off-site Zotero server and the ability to collaborate and share with others. An overview on how to use the software and discussion about the strengths and limitations are included.",
+				"DOI": "10.1097/NNE.0b013e3181ed81e4",
+				"extra": "PMID: 20729678",
+				"libraryCatalog": "NCBI PubMed",
+				"shortTitle": "Zotero",
+				"title": "Zotero: harnessing the power of a personal bibliographic manager",
+				"pages": "205-207",
+				"publicationTitle": "Nurse educator",
+				"volume": "35",
+				"date": "2010 Sep-Oct"
 			}
 		]
 	}

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-01-09 03:13:27"
+	"lastUpdated": "2014-09-23 21:03:41"
 }
 
 /*
@@ -24,6 +24,7 @@ Primos with showPNX.jsp installed:
 (2) http://primo.bib.uni-mannheim.de/primo_library/libweb/action/search.do?vid=MAN_UB
 (3) http://limo.libis.be/primo_library/libweb/action/search.do?vid=LIBISnet&fromLogin=true
 (4.a) http://virtuose.uqam.ca/primo_library/libweb/action/search.do?vid=UQAM
+(5) http://searchit.princeton.edu/primo_library/libweb/action/dlDisplay.do?docId=PRN_VOYAGER2778598&vid=PRINCETON&institution=PRN
 */
 
 function getSearchResults(doc) {
@@ -194,7 +195,7 @@ function fetchPNX(itemData) {
 //import PNX record
 function importPNX(text) {
 	//Note that if the session times out, PNX record will just contain a "null" entry
-	//Z.debug(text);
+	Z.debug(text);
 	//a lot of these apply only to prim records, mainly (but no exclusively) served by the jsp file
 	text = text.replace(/\<\/?xml-fragment[^\>]*\>/g, "")
 			.replace(/(<\/?)\w+:([^\>]*)/g, "$1$2") //remove namespaces
@@ -239,6 +240,9 @@ function importPNX(text) {
 		break;
 		case 'map':
 			item.itemType = "map";
+		break;
+		case 'newspaper_article':
+			item.itemType="newspaperArticle";
 		break;
 		default:
 			item.itemType = "document";
@@ -341,7 +345,19 @@ function importPNX(text) {
 	item.issue = ZU.xpathText(doc, '//addata/issue');
 	item.volume = ZU.xpathText(doc, '//addata/volume');
 	item.publicationTitle = ZU.xpathText(doc, '//addata/jtitle');
-	item.pages = ZU.xpathText(doc, '//addata/pages');
+	
+	var startPage = ZU.xpathText(doc, '//addata/spage');
+	var endPage = ZU.xpathText(doc, '//addata/epage');
+	var overallPages = ZU.xpathText(doc, '//addata/pages');
+	if (startPage && endPage){
+		item.pages = startPage + '–' + endPage;
+	} else if (overallPages) {
+		item.pages = overallPages;
+	} else if (startPage) {
+		item.pages = startPage;
+	} else if (endPage) {
+		item.pages = endPage;
+	}
 	
 	// does callNumber get stored anywhere else in the xml?
 	item.callNumber = ZU.xpathText(doc, '//enrichment/classificationlcc');
@@ -378,36 +394,6 @@ var testCases = [
 				"ISBN": "3926738014",
 				"libraryCatalog": "Primo",
 				"shortTitle": "In Zweifelsfällen entscheidet die Wahrheit"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://searchit.princeton.edu/primo_library/libweb/action/dlDisplay.do?docId=PRN_VOYAGER2778598&vid=PRINCETON&institution=PRN",
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"lastName": "Great Britain. Foreign Office",
-						"creatorType": "author",
-						"fieldMode": 1
-					}
-				],
-				"notes": [],
-				"tags": [
-					"China Foreign relations Great Britain.",
-					"China Religion.",
-					"Great Britain Foreign relations China.",
-					"Missions China."
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"language": "eng",
-				"libraryCatalog": "Primo",
-				"title": "China and foreign missionaries.",
-				"publisher": "London 1860-1912",
-				"date": "1860"
 			}
 		]
 	}

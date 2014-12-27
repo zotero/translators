@@ -2,14 +2,14 @@
 	"translatorID": "fe39e97d-7397-4f3f-a5f3-396a1a79213c",
 	"label": "OpenJudis - Indian Supreme Court cases",
 	"creator": "Prashant Iyengar and Michael Berkowitz",
-	"target": "http://(www.)?openarchive\\.in/(judis|newcases)",
+	"target": "^https?://(www.)?openarchive\\.in/(judis|newcases)",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-01-30 22:44:53"
+	"lastUpdated": "2014-04-04 10:10:58"
 }
 
 function detectWeb(doc, url) {
@@ -61,7 +61,7 @@ function regexMeta(stuff, item) {
 function doWeb(doc, url) {
 	var arts = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		var items = Zotero.Utilities.getItemArray(doc, doc, "^http:\/\/openarchive\.in\/[^/]+\/[0-9]+.htm$");
+		var items = Zotero.Utilities.getItemArray(doc, doc, "^https?:\/\/openarchive\.in\/[^/]+\/[0-9]+.htm$");
 		items = Zotero.selectItems(items);
 		for (var i in items) {
 			arts.push(i);

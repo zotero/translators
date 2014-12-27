@@ -2,14 +2,14 @@
 	"translatorID": "f61beec2-1431-4218-a9d3-68063ede6ecd",
 	"label": "Welt Online",
 	"creator": "Martin Meyerhoff",
-	"target": "^http://www\\.welt\\.de",
+	"target": "^https?://www\\.welt\\.de",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-12-11 22:19:16"
+	"lastUpdated": "2014-04-04 10:02:57"
 }
 
 /*
@@ -141,9 +141,7 @@ Zotero.selectItems(items, function (items) {
 			for (var i in items) {
 				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(articles, scrape, function () {
-				Zotero.done();
-			});
+			Zotero.Utilities.processDocuments(articles, scrape);
 		});
 	} else {
 		scrape(doc, url);
@@ -179,7 +177,7 @@ var testCases = [
 				"url": "http://www.welt.de/wirtschaft/article12962920/Krankenkassen-werfen-Aerzten-Gewinnstreben-vor.html",
 				"title": "Krankenkassen werfen Ärzten Gewinnstreben vor",
 				"abstractNote": "Die Chefin des Krankenkassenverbands Doris Pfeiffer fordert den Gesundheitsminister auf, überschüssiges Geld im Gesundheitsfonds zurückzugegeben.",
-				"date": "26.03.11",
+				"date": "2011-03-26",
 				"publicationTitle": "Welt Online",
 				"section": "Wirtschaft",
 				"libraryCatalog": "Welt Online"

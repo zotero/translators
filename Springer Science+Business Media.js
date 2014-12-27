@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-12-16 00:07:54"
+	"lastUpdated": "2014-04-03 19:53:34"
 }
 
 /*
@@ -33,7 +33,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 function getItems(doc, url) {
 	//Since you can perform a cross-site search, make sure we have links that
 	//we can scrape
-	var host = url.match(/^http:\/\/(?:[^/]+\.)?([^\.\/]+\.[^\.\/]+)(?:\/|$)/i);
+	var host = url.match(/^https?:\/\/(?:[^/]+\.)?([^\.\/]+\.[^\.\/]+)(?:\/|$)/i);
 	if(!host) return;
 	host = host[1];
 	return ZU.xpath(doc, '//table[@class="articles-feed" or @id="articles-list"]\

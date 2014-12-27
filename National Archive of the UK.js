@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcbv",
-	"lastUpdated": "2013-06-08 13:42:07"
+	"browserSupport": "gcb",
+	"lastUpdated": "2014-09-11 06:28:15"
 }
 
 /**
@@ -31,18 +31,37 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.search(/SearchUI\/details\?Uri=/i) != -1) return "manuscript";
-	else if (url.search(/SearchUI\/s\/res\?_/i) != -1) return "multiple";
+	if (url.search(/details\/r\//i) != -1) return "manuscript";
+	else if (url.search(/results\/r\/?\?.+hb=tna/i) != -1) return "multiple";
 }
 
 function scrape(doc, url) {
-	var id = url.match(/uri=([A-Z0-9]+)/i)[1];
-	var reference = ZU.xpathText(doc, '//div[@id="assetDetails"]//div[contains(text(), "Reference")]/following-sibling::div')
+	var id = url.match(/details\/r\/([A-Z0-9]+)/i)[1];
+	var reference = ZU.xpathText(doc, '//tr/th[contains(text(), "Reference")]/following-sibling::td')
 	var tags  = ZU.xpath(doc, '//span/a[@class="tagName"]');
+	
+//	In Case we should need it again, we're keeping the screen scraper
+/*	var item = new Zotero.Item("manuscript");
+	var title =  "The National Archive of the UK " + reference;
+	item.archiveLocation = reference;
+	item.title = title.replace(/&lt.+?&gt;/g, "").replace(/<.+?>/g, "");
+	item.language = ZU.xpathText(doc, '//tr/th[contains(text(), "Language")]/following-sibling::td');
+	item.date = ZU.xpathText(doc, '//tr/th[contains(text(), "Date")]/following-sibling::td');
+	item.abstractNote = ZU.xpathText(doc, '//tr/th[contains(text(), "Description")]/following-sibling::td').replace(/<p>/g, "\n").replace(/&lt;p&gt;/g, "\n").replace(/<.+?>/g, "");
+	item.archive = ZU.xpathText(doc, '//tr/th[contains(text(), "Held by")]/following-sibling::td');
+	item.attachments.push({url: url, title: "British National Archive - Link", mimeType: "text/html", snapshot: false});
+
+	for (var i in tags){
+		item.tags.push(tags[i].textContent);
+	}
+	item.complete(); 
+
+	XML Code - hopefully to be reused once API is sorted */
 	var xmlUrl = "http://discovery.nationalarchives.gov.uk/DiscoveryAPI/xml/informationasset/" + id;
 	Zotero.Utilities.doGet(xmlUrl, function (text) {
 		//Z.debug(text)
 		var docxml = (new DOMParser()).parseFromString(text, "text/xml");
+
   	 	ns = {	
   	 			"xsi" : "http://www.w3.org/2001/XMLSchema-instance",
   	 			"xsd" : "http://www.w3.org/2001/XMLSchema"};
@@ -67,7 +86,10 @@ function scrape(doc, url) {
 		}
 		item.complete();
 	});
+
+
 }
+
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
@@ -75,7 +97,7 @@ function doWeb(doc, url) {
 		var items = new Object();
 		
 		//search results
-		var titles = ZU.xpath(doc, '//ul[@id="searchResults"]//h3/a[@class="linkTitle"]');
+		var titles = ZU.xpath(doc, '//ul[@id="search-results"]//a');
 
 		if (titles.length<1){
 			//TODO - other multiples
@@ -83,7 +105,7 @@ function doWeb(doc, url) {
 			//titles = ZU.xpath(doc, '//td[@id="leaf-linkarea2"]//a[contains(@href, "/receive/jportal_jparticle")]');
 		}
 		for (var i in titles) {
-			items[titles[i].href] = titles[i].textContent;
+			items[titles[i].href] = ZU.trimInternal(titles[i].textContent);
 		}
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
@@ -105,13 +127,12 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "manuscript",
+				"title": "The National Archive of the UK INF 3/108",
 				"creators": [],
-				"notes": [],
-				"tags": [
-					"land girls",
-					"women"
-				],
-				"seeAlso": [],
+				"date": "1939-1946",
+				"abstractNote": "POSTERS: Food Production: Land girls - Horse-drawn plough, and girl. \nArtist: Dame Laura Knight. \nMedia/Technique: Watercolour and gouache painting with a charcoal underdrawing.Executed on a heavy weight artist board. Light washes of the aqueous media have been applied on top of the loose charcoal sketch giving the painting a powdery, friable quality.",
+				"archive": "The National Archives, Kew",
+				"libraryCatalog": "National Archive of the UK",
 				"attachments": [
 					{
 						"title": "British National Archive - Link",
@@ -119,11 +140,12 @@ var testCases = [
 						"snapshot": false
 					}
 				],
-				"title": "The National Archive of the UK INF 3/108",
-				"date": "1939-1946",
-				"abstractNote": "POSTERS: Food Production: Land girls - Horse-drawn plough, and girl. \nArtist: Dame Laura Knight. \nMedia/Technique: Watercolour and gouache painting with a charcoal underdrawing.Executed on a heavy weight artist board. Light washes of the aqueous media have been applied on top of the loose charcoal sketch giving the painting a powdery, friable quality.",
-				"archive": "The National Archives, Kew",
-				"libraryCatalog": "National Archive of the UK"
+				"tags": [
+					"land girls",
+					"women"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -133,6 +155,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "manuscript",
+				"title": "Records of the National Dock Labour Corporation and National Dock Labour Board",
 				"creators": [
 					{
 						"lastName": "National Dock Labour Board",
@@ -145,11 +168,13 @@ var testCases = [
 						"creatorType": "contributor"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"bk23"
-				],
-				"seeAlso": [],
+				"date": "1748-1989",
+				"abstractNote": "Scope and Content\nThe records of the National Dock Labour Corporation, established to regularise dock labour during the Second World War, and the records of the National Dock Labour Board, which took over these functions in 1947.\nAlso included are the records of four local boards responsible for day to day running of the National Dock Labour Scheme from 1947:\nLondon Dock Labour BoardCumbria Dock Labour BoardGrimsby and Immingham Dock Labour BoardSouth Coast Dock Labour Board.",
+				"archive": "The National Archives, Kew",
+				"archiveLocation": "BK",
+				"language": "English",
+				"libraryCatalog": "National Archive of the UK",
+				"manuscriptType": "series",
 				"attachments": [
 					{
 						"title": "British National Archive - Link",
@@ -157,20 +182,17 @@ var testCases = [
 						"snapshot": false
 					}
 				],
-				"archiveLocation": "BK",
-				"title": "Records of the National Dock Labour Corporation and National Dock Labour Board",
-				"language": "English",
-				"date": "1748-1989",
-				"abstractNote": "Scope and Content\nThe records of the National Dock Labour Corporation, established to regularise dock labour during the Second World War, and the records of the National Dock Labour Board, which took over these functions in 1947.\nAlso included are the records of four local boards responsible for day to day running of the National Dock Labour Scheme from 1947:\nLondon Dock Labour BoardCumbria Dock Labour BoardGrimsby and Immingham Dock Labour BoardSouth Coast Dock Labour Board.",
-				"archive": "The National Archives, Kew",
-				"libraryCatalog": "National Archive of the UK",
-				"manuscriptType": "series"
+				"tags": [
+					"bk23"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://discovery.nationalarchives.gov.uk/SearchUI/s/res?_q=labour",
+		"url": "http://discovery.nationalarchives.gov.uk/results/r?_q=labour&_hb=tna",
 		"items": "multiple"
 	}
 ]

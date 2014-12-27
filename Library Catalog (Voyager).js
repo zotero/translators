@@ -5,11 +5,11 @@
 	"target": "Pwebrecon\\.cgi",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-06-01 17:29:22"
+	"lastUpdated": "2014-08-26 04:12:55"
 }
 
 function detectWeb(doc, url) {

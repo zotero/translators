@@ -308,7 +308,7 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"url": "jubilotheque.upmc.fr/ead.html?id=GM_000001_014",
+				"url": "http://jubilotheque.upmc.fr/ead.html?id=GM_000001_014",
 				"title": "Journal d'un voyage géologique fait à travers toute la chaîne des Carpathes, en Bukowine, en Transylvanie et dans le Marmarosch / par feu M. Lill de Lilienbach. Observations remises en ordre et accompagnées de notes par M.A. Boué",
 				"seriesNumber": "1",
 				"date": "1834",

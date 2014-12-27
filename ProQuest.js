@@ -2,14 +2,14 @@
 	"translatorID": "fce388a6-a847-4777-87fb-6595e710b7e7",
 	"label": "ProQuest",
 	"creator": "Avram Lyon",
-	"target": "^https?://search\\.proquest\\.com.*\\/(docview|pagepdf|results|publicationissue|browseterms|browsetitles|browseresults|myresearch\\/(figtables|documents))",
+	"target": "^https?://search\\.proquest\\.com/(.*/)?(docview|pagepdf|results|publicationissue|browseterms|browsetitles|browseresults|myresearch\\/(figtables|documents))",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-10-03 23:27:03"
+	"lastUpdated": "2014-11-18 10:31:47"
 }
 
 /*
@@ -118,6 +118,42 @@ function fetchEmbeddedPdf(url, item, callback) {
 	}, callback);
 }
 
+function getSearchResults(doc, checkOnly) {
+	var tabs = doc.getElementsByClassName('tabContent');
+	var root;
+	if (tabs.length) {
+		for (var i = 0; i < tabs.length; i++) {
+			if (tabs[i].offsetHeight) {
+				if (Zotero.isBookmarklet && tabs[i].id != 'allResults-content') return false;
+				root = tabs[i].getElementsByClassName('resultListContainer')[0];
+				break;
+			}
+		}
+	} else {
+		root = doc.getElementsByClassName('resultListContainer')[0];
+		if (root && !root.offsetHeight) return false; // Not sure if this can actually happen
+	}
+
+	if (!root) return false;
+
+	var results = doc.getElementsByClassName('resultItem');
+	//ZU.xpath(root, './/a[contains(@class,"previewTitle") or contains(@class,"resultTitle")]');
+	
+	var items = {}, found = false;
+	for(var i=0, n=results.length; i<n; i++) {
+		var title = results[i].getElementsByClassName('resultTitle')[0]
+			|| results[i].getElementsByClassName('previewTitle')[0];
+		if (!title || title.nodeName != 'A') continue;
+		
+		if (checkOnly) return true;
+		found = true;
+		
+		items[title.href] = title.textContent;
+	}
+		
+	return found ? items : false;
+}
+
 function detectWeb(doc, url) {
 	initLang(doc, url);
 
@@ -126,10 +162,8 @@ function detectWeb(doc, url) {
 	//Check for multiple first
 	if (url.indexOf('docview') == -1 &&
 		url.indexOf('pagepdf') == -1) {
-		var resultitem = ZU.xpath(doc, '//a[contains(@href, "/docview/")]');
-		if (resultitem.length) {
+		if (getSearchResults(doc, true))
 			return "multiple";
-		}
 	}
 
 	var types = getTextValue(doc, ["Source type", "Document type", "Record type"]);
@@ -168,27 +202,28 @@ function doWeb(doc, url, pdfUrl) {
 		scrape(doc, url, type, pdfUrl);
 	} else if(type == "multiple") {
 		// detect web returned multiple
-		var results = ZU.xpath(doc, '//a[contains(@class,"previewTitle") or\
-									contains(@class,"resultTitle")]');
-		// If the above didn't get us titles, try agin with a more liberal xPath
-		if (!results.length) {
-			results = ZU.xpath(doc, '//a[contains(@href, "/docview/")]');
-		}
-
-		var items = new Array();
-		for(var i=0, n=results.length; i<n; i++) {
-			items[results[i].href] = results[i].textContent;
-		}
-
-		Zotero.selectItems(items, function (items) {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) return true;
 
 			var articles = new Array();
-			for (var i in items) {
-				ZU.processDocuments(i,
-					//call doWeb so that we rerun detectWeb to get type and
-					//initialize translations
-					function(doc) { doWeb(doc, doc.location.href) });
+			for(var item in items) {
+				articles.push(item);
+			}
+			
+			if (articles[0].indexOf("ebraryresults") > -1) {
+				// if the first result is for ebrary, the rest are also ebrary
+				ZU.processDocuments(articles, function(doc) {
+					var translator = Zotero.loadTranslator("web");
+					translator.setTranslator("2abe2519-2f0a-48c0-ad3a-b87b9c059459");
+					translator.setDocument(doc);
+					translator.setHandler("itemDone", function(obj, item) {
+						item.complete();
+					});
+					translator.translate();
+				});
+			}
+			else {			
+				ZU.processDocuments(articles, doWeb);
 			}
 		});
 	//pdfUrl should be undefined unless we are calling doWeb from the following
@@ -393,10 +428,9 @@ function scrape(doc, url, type, pdfUrl) {
 	}
 
 	item.abstractNote = ZU.xpath(doc,
-		'//div[@id="abstractZone" or contains(@id,"abstractFull")]/\
-			p[normalize-space(text())]')
-		.map(function(p) { return ZU.trimInternal(p.textContent) })
-		.join('\n');
+		'//div[@id="abstractZone" or contains(@id,"abstractFull")]/p')
+		.map(function(p) { return ZU.trimInternal(p.textContent) }).join('\n');
+	
 
 	if(!item.tags.length && altKeywords.length) {
 		item.tags = altKeywords.join(',').split(/\s*(?:,|;)\s*/);
@@ -431,57 +465,50 @@ function scrape(doc, url, type, pdfUrl) {
 function getItemType(types) {
 	var guessType, govdoc, govdocType;
 	for(var i=0, n=types.length; i<n; i++) {
-		switch (types[i]) {
-			case "Conference Papers and Proceedings":
-			case "Conference Papers & Proceedings":
-				return "conferencePaper";
-			case "Dissertations & Theses":
-			case "Dissertation/Thesis":
-				return "thesis";
-			case "Newspapers":
-			case "Wire Feeds":
-			case "WIRE FEED":
-			case "Historical Newspapers":
-				return "newspaperArticle";
-			case "Scholarly Journals":
-			case "Trade Journals":
-			case "Historical Periodicals":
-				return "journalArticle";
-			case "Magazines":
-				return "magazineArticle";
-			case "Reports":
-			case "REPORT":
-				return "report";
-			case "Blog":
-			case "Article In An Electronic Resource Or Web Site":
-				return "blogPost";
-			case "Patent":
-				return "patent";
-			case "Government & Official Publications":
-				govdoc = true;
-			break;
-			case "Blogs, Podcats, & Websites":
-				guessType = "webpage";
-			break;
-			case "Books":
-				guessType = "book";
-			break;
-			case "Pamphlets & Ephemeral Works":
-				guessType = "document";
-			break;
-			case "Encyclopedias & Reference Works":
-				guessType = "encyclopediaArticle";
-			break;
-		}
-
-		if (types[i].indexOf("report", 0) != -1) {
-			govdocType = "report"
-		} else if (types[i].indexOf("statute", 0) != -1) {
-			govdocType = "statute"
-		}
-
-		if(govdoc && govdocType) {
-			return govdocType;
+		//put the testString to lowercase and test for singular only for maxmial compatibility
+		//in most cases we just can return the type, but sometimes only save it as a guess and will use it only if we don't have anything better
+		var testString = types[i].toLowerCase();
+		if (testString.indexOf("journal") != -1 || testString.indexOf("periodical") != -1) {
+			//"Scholarly Journals", "Trade Journals", "Historical Periodicals"
+			return "journalArticle";
+		} else if (testString.indexOf("newspaper") != -1 || testString.indexOf("wire feed") != -1 ) {
+			//"Newspapers", "Wire Feeds", "WIRE FEED", "Historical Newspapers"
+			return "newspaperArticle";
+		} else if ( testString.indexOf("dissertation") != -1 ) {
+			//"Dissertations & Theses", "Dissertation/Thesis", "Dissertation"
+			return "thesis";
+		} else if ( testString.indexOf("chapter") != -1 ) {
+			//"Chapter"
+			return "bookSection";
+		} else if (testString.indexOf("book") != -1) {
+			//"Book, Authored Book", "Book, Edited Book", "Books"
+			guessType = "book";
+		} else if ( testString.indexOf("conference paper") != -1) {
+			//"Conference Papers and Proceedings", "Conference Papers & Proceedings"
+			return "conferencePaper";
+		} else if (testString.indexOf("magazine") != -1 ) {
+			//"Magazines"
+			return "magazineArticle";
+		} else if (testString.indexOf("report") != -1 ) {
+			//"Reports", "REPORT"
+			return "report";
+		} else if (testString.indexOf("website") != -1) {
+			//"Blogs, Podcats, & Websites"
+			guessType = "webpage";
+		} else if (testString == "blog" || testString == "article in an electronic resource or web site") {
+			//"Blog", "Article In An Electronic Resource Or Web Site"
+			return "blogPost";
+		} else if (testString.indexOf("patent") != -1) {
+			//"Patent"
+			return "patent";
+		} else if (testString.indexOf("pamphlet") != -1) {
+			//Pamphlets & Ephemeral Works
+			guessType = "manuscript";
+		} else if (testString.indexOf("encyclopedia") != -1) {
+			//"Encyclopedias & Reference Works"
+			guessType = "encyclopediaArticle";
+		} else if (testString.indexOf("statute") != -1) {
+			return "statute";
 		}
 	}
 
@@ -1260,7 +1287,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "THE PRESIDENT AND ALDRICH.: Railway Age Relates Happenings Behind the Scenes Regarding Rate Regulation.",
+				"title": "THE PRESIDENT AND ALDRICH.: Railway Age Relates Happenings Behind the Scenes Regarding Rate Regulation.",
 				"publicationTitle": "Wall Street Journal (1889-1922)",
 				"pages": "7",
 				"numPages": "1",

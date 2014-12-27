@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-10-15 21:17:06"
+	"lastUpdated": "2014-03-19 01:59:25"
 }
 
 /*
@@ -174,6 +174,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
+				"itemID": "2001811",
 				"title": "Application of RUSLE Model on Global Soil Erosion Estimate",
 				"publicationTitle": "Proceedings of Hydraulic Engineering",
 				"volume": "45",
@@ -186,11 +187,13 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "https://www.jstage.jst.go.jp/result?item1=4&word1=organic+agriculture+erosion",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "https://www.jstage.jst.go.jp/browse/bpb",
 		"items": "multiple"
 	}

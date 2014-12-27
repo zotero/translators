@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-11 09:03:16"
+	"lastUpdated": "2014-06-01 23:06:06"
 }
 
 /*
@@ -52,9 +52,11 @@ function doWeb(doc, url) {
 	var urls = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 	var items = {};
-		var titles = doc.evaluate('//hgroup/h3/a', doc, null, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//hgroup/h2/a', doc, null, XPathResult.ANY_TYPE, null);
 		var title;
 		while (title = titles.iterateNext()) {
+			//ignore topic pages;
+			if (title.href.search(/\d$/)==-1) continue;
 			items[title.href] = title.textContent;
 		}
 		Zotero.selectItems(items, function (items) {
@@ -103,6 +105,7 @@ function scrape(doc) {
 	}
 
 	var authorline = getXPath('//article/address/span', doc);
+	if (!authorline) authorline = getXPath('//h6//span[@class="author"]', doc)
 	if (authorline != null) {
 		authorline = Zotero.Utilities.trimInternal(authorline.textContent);
 		//assumption of authorline: "[Interview:|Von ]name1[, name2] [und Name3][, location]"
@@ -122,6 +125,7 @@ function scrape(doc) {
 	}
 
 	var section = getXPath('//hgroup/h6/a', doc);
+	if (!section) section = getXPath('//h1/a[@class="link-info"]', doc);
 	if (section != null) {
 		var sectionText = Zotero.Utilities.trimInternal(section.textContent);
 		if (sectionText.indexOf("NZZ am Sonntag") > -1 ) {
@@ -170,7 +174,7 @@ var testCases = [
 				"language": "de",
 				"shortTitle": "Kuoni profitiert von der GTA-Übernahme",
 				"abstractNote": "Der Reisekonzern Kuoni hat in den ersten neun Monaten von der Übernahme des Reisekonzerns Gullivers Travel Associates (GTA) profitiert. Der Umsatz stieg, und der Konzern machte Gewinn.",
-				"section": "Wirtschaft",
+				"section": "Nachrichten",
 				"libraryCatalog": "NZZ"
 			}
 		]

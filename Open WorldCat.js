@@ -2,14 +2,14 @@
 	"translatorID": "c73a4a8c-3ef1-4ec8-8229-7531ee384cc4",
 	"label": "Open WorldCat",
 	"creator": "Simon Kornblith, Sebastian Karcher",
-	"target": "^https?://(.+).worldcat\\.org",
-	"minVersion": "3.0",
+	"target": "^https?://[^/]+\\.worldcat\\.org",
+	"minVersion": "3.0.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-12-14 23:12:44"
+	"lastUpdated": "2014-04-10 23:30:53"
 }
 
 /**
@@ -29,22 +29,76 @@ function getZoteroType(iconSrc) {
 	return false;
 }
 
+/**
+ * Generates a Zotero item from a single item WorldCat page,
+ * or the first item on a multiple item page
+ */
+function generateItem(doc, co) {
+	var item = new Zotero.Item();
+	ZU.parseContextObject(co, item);
+	// if only one, first check for special types (audio & video recording)
+	var type = ZU.xpathText(doc,
+		'//img[@class="icn"][contains(@src, "icon-")][1]/@src');
+	if (type) {
+		type = getZoteroType(type);
+		if (type) item.itemType = type;
+	}
+	
+	return item;
+}
+
+function getSearchResults(doc) {
+	var results = doc.getElementsByClassName('result');
+	for(var i=0; i<results.length; i++) {
+		if(!results[i].getElementsByClassName('name').length) {
+			delete results[i];
+			i--;
+		}
+	}
+	return results;
+}
+
+function getTitleNode(searchResult) {
+	return ZU.xpath(searchResult, './div[@class="name"]/a')[0];
+}
+
+function getFirstContextObj(doc) {
+	return ZU.xpathText(doc, '//span[@class="Z3988"][1]/@title');
+}
+
+function detectWeb(doc, url) {
+	var results = getSearchResults(doc);
+
+	//single result
+	if(results.length) {
+		return "multiple";
+	}
+
+	var co = getFirstContextObj(doc);
+	if(!co) return false;
+
+	// generate item and return type
+	return generateItem(doc, co).itemType;
+}
+
+/**
+ * Given an item URL, extract OCLC ID
+ */
+function extractOCLCID(url) {
+	var id = url.match(/\/(\d+)(?=[&?]|$)/);
+	if(!id) return false;
+	return id[1];
+}
 
 /**
  * RIS Scraper Function
  *
  */
-
-function scrape(doc, url, callDoneWhenFinished, itemData) {
-	//we need a different replace for item displays from search results
-	if (!url) url = doc.location.href;
-	if (url.match(/\?/)) {
-		var newurl = url.replace(/\&[^/]*$|$/, "&client=worldcat.org-detailed_record&page=endnotealt");
-	} else {
-		var newurl = url.replace(/\&[^/]*$|$/, "?client=worldcat.org-detailed_record&page=endnotealt");
-	}
-	//Z.debug(newurl)
-	Zotero.Utilities.HTTP.doGet(newurl, function (text) {
+var baseURL = ''; //we need to set this when calling from doSearch
+function scrape(oclcID, itemData) {
+	var risURL = baseURL + "/oclc/" + oclcID + "?page=endnotealt&client=worldcat.org-detailed_record";
+	
+	ZU.doGet(risURL, function (text) {
 		//Z.debug(text);
 		
 		//2013-05-28 RIS export currently has messed up authors
@@ -60,8 +114,6 @@ function scrape(doc, url, callDoneWhenFinished, itemData) {
 			}
 			return replStr.trim();
 		});
-		//ebooks are exported as ELEC. We need them as BOOK
-		text = text.replace(/^TY\s+-\s+ELEC\s*$/mg, 'TY  - BOOK');
 		//conference proceedings exported as CONF, but fields match BOOK better
 		text = text.replace(/TY\s+-\s+CONF\s+[\s\S]+\n\s*ER\s+-/g, function(m) {
 			return m.replace(/^TY\s+-\s+CONF\s*$/mg, 'TY  - BOOK')
@@ -69,7 +121,7 @@ function scrape(doc, url, callDoneWhenFinished, itemData) {
 				.replace(/^A1\s+-\s+/mg, 'A3  - ');
 		})
 		
-		//Zotero.debug("RIS: " + text)
+		Zotero.debug("Importing corrected RIS: \n" + text);
 		
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -99,116 +151,84 @@ function scrape(doc, url, callDoneWhenFinished, itemData) {
 			
 			item.complete();
 		});
-		translator.translate();
-		if(callDoneWhenFinished) Zotero.done();
+		translator.getTranslatorObject(function(trans) {
+			trans.options.defaultItemType = 'book'; //if not supplied, default to book
+			trans.options.typeMap = {'ELEC': 'book'}; //ebooks should be imported as books
+
+			trans.doImport();
+		});
 	});
 }
 
-/**
- * Generates a Zotero item from a single item WorldCat page, or the first item on a multiple item
- * page
- */
-function generateItem(doc, node) {
-	var item = new Zotero.Item();
-	Zotero.Utilities.parseContextObject(node.nodeValue, item);
-	// if only one, first check for special types (audio & video recording)
-	var type = false;
-	try {
-		type = doc.evaluate('//img[@class="icn"][contains(@src, "icon-")]/@src', doc, null, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
-	} catch (e) {}
-	if (type) {
-		type = getZoteroType(type);
-		if (type) item.itemType = type;
-	}
-	
-	return item;
-}
+function doWeb(doc, url) {
+	var results = getSearchResults(doc);
+	if(results.length) {
+		var items = {}, itemData = {};
+		for(var i=0, n=results.length; i<n; i++) {
+			var title = getTitleNode(results[i]);
+			if(!title || !title.href) continue;
+			var url = title.href;
+			var oclcID = extractOCLCID(url);
+			if(!oclcID) {
+				Zotero.debug("WorldCat: Failed to extract OCLC ID from URL: " + url);
+				continue;
+			}
+			items[oclcID] = title.textContent;
+			
+			var notes = ZU.xpath(results[i], './div[@class="description" and ./strong[contains(text(), "Notes")]]');
+			if(!notes.length) {
+				//maybe we're looking at our own list
+				notes = ZU.xpath(results[i], './div/div[@class="description"]/div[contains(@id,"saved_comments_") and normalize-space(text())]');
+			}
+			if(notes.length) {
+				notes = ZU.trimInternal(notes[0].innerHTML)
+					.replace(/^<strong>\s*Notes:\s*<\/strong>\s*<br>\s*/i, '');
+				
+				if(notes) {
+					itemData[oclcID] = {
+						notes: ZU.unescapeHTML(ZU.unescapeHTML(notes)) //it's double-escaped on WorldCat
+					};
+				}
+			}
+		}
 
-function detectWeb(doc) {
-	var xpath = doc.evaluate('//span[@class="Z3988"]/@title', doc, null, XPathResult.ANY_TYPE, null);
-	var node = xpath.iterateNext();
-	if (!node) return false;
-	// see if there is more than one
-	if (xpath.iterateNext()) {
-		multiple = true;
-		return "multiple";
+		Zotero.selectItems(items, function(items) {
+			if (!items) return true;
+
+			for (var i in items) {
+				scrape(i, itemData[i]);
+			}
+		});
+	} else {
+		var oclcID = extractOCLCID(url);
+		if(!oclcID) throw new Error("WorldCat: Failed to extract OCLC ID from URL: " + url);
+		scrape(oclcID);
 	}
-	// generate item and return type
-	return generateItem(doc, node).itemType;
 }
 
 function detectSearch(item) {
-	return !!item.ISBN;
-}
-
-function doWeb(doc, url) {
-	var articles = [];
-	if (doc.evaluate('//div[@class="name"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) { //search results view
-		if (detectWeb(doc) == "multiple") {
-			var titles = doc.getElementsByClassName("result");
-			var items = {};
-			var itemData = {};
-			var title, notes, url;
-			for(var i=0, n=titles.length; i<n; i++) {
-				title = ZU.xpath(titles[i], './div[@class="name"]/a');
-				if(!title.length || !title[0].href) continue;
-				url = title[0].href;
-				items[url] = title[0].textContent;
-				
-				notes = ZU.xpath(titles[i], './div[@class="description" and ./strong[contains(text(), "Notes")]]');
-				var trimStrong = false;
-				if(!notes.length) {
-					//maybe we're looking at our own list
-					notes = ZU.xpath(titles[i], './div/div[@class="description"]/div[contains(@id,"saved_comments_") and normalize-space(text())]');
-				}
-				if(notes.length) {
-					notes = ZU.trimInternal(notes[0].innerHTML)
-						.replace(/^<strong>\s*Notes:\s*<\/strong>\s*<br>\s*/i, '');
-					
-					if(notes) {
-						itemData[url] = {
-							notes: ZU.unescapeHTML(ZU.unescapeHTML(notes)) //it's double-escaped on WorldCat
-						};
-					}
-				}
-			}
-			Zotero.selectItems(items, function (items) {
-				if (!items) {
-					return true;
-				}
-				for (var i in items) {
-					(function(url) {
-						ZU.processDocuments(url, function(newUrl, newDoc) {
-							scrape(newUrl, newDoc, false, itemData[url]);
-						});
-					})(i);
-				}
-			});
-		} else { //single item in search results, don't display a select dialog
-			var title = doc.evaluate('//div[@class="name"]/a[1]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-			if (!title) Zotero.done(false);
-			article = title.href;
-			Zotero.Utilities.processDocuments(article, scrape);
-		}
-	} else { // regular single item	view
-		scrape(doc, url);
+	if(item.ISBN && typeof(item.ISBN) == 'string') {
+		return !!ZU.cleanISBN(item.ISBN);
 	}
 }
 
 function doSearch(item) {
-	var url = "http://www.worldcat.org/search?q=isbn%3A" + item.ISBN.replace(/[^0-9X]/g, "") + "&=Search&qt=results_page";
+	var ISBN = item.ISBN && ZU.cleanISBN('' + item.ISBN);
+	if(!ISBN) return;
+
+	var url = "http://www.worldcat.org/search?qt=results_page&q=bn%3A"
+		+ encodeURIComponent(ISBN);
 	ZU.processDocuments(url, function (doc) {
 		//we take the first search result and run scrape on it
-		if (doc.evaluate('//div[@class="name"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) { //search results view
-			var article = ZU.xpathText(doc, '(//div[@class="name"]/a)[1]/@href')
-			if (!article){Zotero.done(false); return false;}
-			article = "http://www.worldcat.org" + article;
-			ZU.processDocuments(article, function(doc) { scrape(doc, article, true); });
-		} else {
-			scrape(doc, url, true);
+		var results = getSearchResults(doc);
+		if (results.length > 0) {
+			baseURL = "http://www.worldcat.org";
+			scrape(extractOCLCID(getTitleNode(results[0]).href));
 		}
-	}, null);
-} /** BEGIN TEST CASES **/
+	});
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -365,6 +385,79 @@ var testCases = [
 				"publisher": "s.n.",
 				"place": "London",
 				"date": "1912",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.worldcat.org/title/cahokia-mounds-replicas/oclc/48394842&referer=brief_results",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Grimont",
+						"firstName": "Martha LeeAnn",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Mink",
+						"firstName": "Claudia Gellman",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Cahokia Mounds Museum Society",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"libraryCatalog": "Open WorldCat",
+				"language": "English",
+				"place": "Collinsville, Ill.",
+				"ISBN": "1881563022  9781881563020",
+				"title": "[Cahokia Mounds replicas]",
+				"publisher": "Cahokia Mounds Museum Society]",
+				"date": "2000"
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"ISBN": "9780585030159"
+		},
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Thelen",
+						"firstName": "Esther",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Smith",
+						"firstName": "Linda B",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"libraryCatalog": "Open WorldCat",
+				"language": "English",
+				"url": "http://search.ebscohost.com/login.aspx?direct=true&scope=site&db=nlebk&db=nlabk&AN=1712",
+				"title": "A dynamic systems approach to the development of cognition and action",
+				"publisher": "MIT Press",
+				"place": "Cambridge, Mass.",
+				"date": "1996",
+				"ISBN": "0585030154  9780585030159",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]

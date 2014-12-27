@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-03-01 10:37:34"
+	"lastUpdated": "2014-12-11 17:17:45"
 }
 
 /*
@@ -57,15 +57,15 @@ function doWeb(doc, url) {
 	var psMatch = psRe.exec(url);
 	var suffix = psMatch[2];
 	var prefix = "books"; //Where is it not books? psMatch[1];
-	itemUrlBase = "http://"+prefix+".google."+suffix+"/books?id=";
+	itemUrlBase = "/books?id=";
 	
 	var m = singleRe.exec(url);
 	if(m && m[1] == "id") {
-		ZU.doGet("http://books.google.com/books/feeds/volumes/"+m[2], parseXML);
+		ZU.doGet("//books.google.com/books/feeds/volumes/"+m[2], parseXML);
 	} else if (m && m[1] == "vid") {
 		var itemLinkWithID = ZU.xpath(doc, '/html/head/link[@rel="canonical"]')[0].href;
 		var m = singleRe.exec(itemLinkWithID);
-		ZU.doGet("http://books.google.com/books/feeds/volumes/"+m[2], parseXML);
+		ZU.doGet("//books.google.com/books/feeds/volumes/"+m[2], parseXML);
 	} else {
 		var items = getItemArrayGB(doc, doc, 'google\\.' + suffix + '/books\\?id=([^&]+)', '^(?:All matching pages|About this Book|Table of Contents|Index)');
 		//Zotero.debug(items);
@@ -83,7 +83,7 @@ function doWeb(doc, url) {
 					i = baseurl.replace(/\/$/, "") + i;
 				}
 				var m = singleRe.exec(i);
-				newUris.push("http://books.google.com/books/feeds/volumes/"+m[2]);
+				newUris.push("//books.google.com/books/feeds/volumes/"+m[2]);
 			}
 			ZU.doGet(newUris, parseXML);
 		});
@@ -163,7 +163,7 @@ function getItemArrayGB (doc, inHere, urlRe, rejectRe) {
 	var availableItems = new Object();	// Technically, associative arrays are objects
 
 	//quick check for new format
-	var bookList = ZU.xpath(doc, '//ol[@id="rso"]/li');
+	var bookList = ZU.xpath(doc, '//ol[@id="rso"]/li|//ol[@id="rso"]/div/li');
 	if(bookList.length) {
 		Z.debug("newFormat")
 		for(var i=0, n=bookList.length; i<n; i++) {
@@ -322,7 +322,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"numPages": "246",
+				"numPages": "260",
 				"ISBN": "9780521868617",
 				"publisher": "Cambridge University Press",
 				"title": "The Cambridge Companion to Electronic Music",
@@ -362,11 +362,12 @@ var testCases = [
 				"numPages": "208",
 				"ISBN": "9780313312601",
 				"publisher": "Greenwood Publishing Group",
-				"title": "Gabriel García Márquez",
+				"title": "Gabriel García Márquez: A Critical Companion",
 				"language": "en",
 				"abstractNote": "Winner of the Nobel Prize for Literature in 1982 for his masterpiece \"One Hundred Years of Solitude,\" Gabriel Garc DEGREESD'ia M DEGREESD'arquez had already earned tremendous respect and popularity in the years leading up to that honor, and remains, to date, an active and prolific writer. Readers are introduced to Garc DEGREESD'ia M DEGREESD'arquez with a vivid account of his fascinating life; from his friendships with poets and presidents, to his distinguished career as a journalist, novelist, and chronicler of the quintessential Latin American experience. This companion also helps students situate Garc DEGREESD'ia M DEGREESD'arquez within the canon of Western literature, exploring his contributions to the modern novel in general, and his forging of literary techniques, particularly magic realism, that have come to distinguish Latin American fiction. Full literary analysis is given for \"One Hundred Years of Solitude,\" as well as \"Chronicle of a Death Foretold\" (1981), \"Love in the Time of Cholera\" (1985), two additional novels, and five of Garc DEGREESD'ia M DEGREESD'arquez's best short stories. Students are given guidance in understanding the historical contexts, as well as the characters and themes that recur in these interrelated works. Narrative technique and alternative critical perspectives are also explored for each work, helping readers fully appreciate the literary accomplishments of Gabriel Garc DEGREESD'ia M DEGREESD'arquez.",
 				"date": "2001-01-01",
-				"libraryCatalog": "Google Books"
+				"libraryCatalog": "Google Books",
+				"shortTitle": "Gabriel García Márquez"
 			}
 		]
 	},
@@ -436,7 +437,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"numPages": "332",
+				"numPages": "340",
 				"ISBN": "9780415936446",
 				"publisher": "Psychology Press",
 				"title": "Electronic and Experimental Music: Pioneers in Technology and Composition",
@@ -451,11 +452,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.google.com/search?q=asimov&btnG=Search+Books&tbm=bks&tbo=1#hl=en&q=asimov&sei=guBGUIDOCJP8qQG7u4DYCg&start=10&tbm=bks",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://books.google.com/books?q=editions:HARVARD32044100176072&id=nFMSAAAAYAAJ",
 		"items": "multiple"
 	},
 	{

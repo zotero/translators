@@ -5,11 +5,11 @@
 	"target": "ipac\\.jsp\\?.*(?:uri=(?:link|full)=[0-9]|menu=search|term=)",
 	"minVersion": "2.1",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 260,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-02-23 23:49:49"
+	"lastUpdated": "2014-08-26 03:59:09"
 }
 
 function detectWeb(doc, url) {

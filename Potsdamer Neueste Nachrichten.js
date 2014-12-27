@@ -2,14 +2,14 @@
 	"translatorID": "9405db4b-be7f-42ab-86ca-430226be9b35",
 	"label": "Potsdamer Neueste Nachrichten",
 	"creator": "Martin Meyerhoff",
-	"target": "^http://www\\.pnn\\.de",
+	"target": "^https?://www\\.pnn\\.de",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-01-30 22:44:08"
+	"lastUpdated": "2014-04-06 16:15:15"
 }
 
 /*
@@ -39,15 +39,7 @@ http://www.pnn.de/zeitung/12.01.2011/
 http://www.pnn.de/titelseite/364860/
 */
 
-function detectWeb(doc, url) {
-
-	// I use XPaths. Therefore, I need the following block.
-	
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
+function detectWeb(doc, url) {	
 	var PNN_Article_XPath = ".//div[contains (@class, 'um-article')]/h1"; //only articles have a print button.
 	var PNN_Multiple_XPath = "//div[contains(@class, 'um-teaser')]/h2/a"
 	
@@ -61,37 +53,32 @@ function detectWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
 	var newItem = new Zotero.Item("newspaperArticle");
 	newItem.url = doc.location.href; 
 	
 	// Title
 	var title_XPath = "//div[contains (@class, 'um-article')]/h1"
-	var title = doc.evaluate(title_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	var title = doc.evaluate(title_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	title = title.replace(/\s+|\n/g, ' ');
 	newItem.title = title;
 	
 	// Summary
 	var summary_XPath = "//div[contains (@class, 'um-article')]/p[@class='um-first']";
 	if (doc.evaluate(summary_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()  ){ 
-		var summary = doc.evaluate(summary_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var summary = doc.evaluate(summary_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		newItem.abstractNote = summary;
 	}
 	
 	// Date 
 	var date_XPath = "//div[contains (@class, 'um-article')]/div[@class='um-metabar']/ul/li[contains(@class, 'um-first')]";
-	var date = doc.evaluate(date_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	var date = doc.evaluate(date_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	newItem.date = date.replace(/(\d+)\.(\d+).(\d+)/, '$3-$2-$1');;
 	
 
 	// Authors 
 	var author_XPath = "//div[contains (@class, 'um-article')]/span[@class='um-author']"; 
 	if (doc.evaluate(author_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()  ){ 
-		var author = doc.evaluate(author_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var author = doc.evaluate(author_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		author =author.replace(/^von\s|^\s*|\s*$/g, '');
 		author =author.split(/\sund\s|\su\.\s|\,\s/); 
 	 	for (var i in author) {
@@ -107,7 +94,7 @@ function scrape(doc, url) {
 	// section
 	var section_XPath = "//div[@class='um-mainnav']/ul/li[@class='um-selected']/a";
 	if (doc.evaluate(section_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()  ){ 
-		var section = doc.evaluate(section_XPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		var section = doc.evaluate(section_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		newItem.section = section.replace(/^\s*|\s*$/g, '');
 	}
 	
@@ -117,30 +104,29 @@ function scrape(doc, url) {
 
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
 	var articles = new Array();
 	
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		
-		var titles = doc.evaluate("//div[contains(@class, 'um-teaser')]/h2/a", doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate("//div[contains(@class, 'um-teaser')]/h2/a", doc, null, XPathResult.ANY_TYPE, null);
 		
 		var next_title;
 		while (next_title = titles.iterateNext()) {
 			items[next_title.href] = next_title.textContent.replace(/\s+/g, ' ');
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
-		Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
+		});
 	} else {
 		scrape(doc, url);
 	}
-	Zotero.wait();
 }	
 /** BEGIN TEST CASES **/
 var testCases = [

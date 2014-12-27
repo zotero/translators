@@ -1,14 +1,15 @@
 {
-	"translatorID":"393afc28-212d-47dd-be87-ec51bc7a58a4",
-	"translatorType":4,
-	"label":"The Australian",
-	"creator":"Michael Berkowitz",
-	"target":"^http://(searchresults|www.theaustralian).news.com.au/",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2007-08-14 22:20:00"
+	"translatorID": "393afc28-212d-47dd-be87-ec51bc7a58a4",
+	"label": "The Australian",
+	"creator": "Michael Berkowitz",
+	"target": "^https?://(searchresults|www.theaustralian)\\.news\\.com\\.au/",
+	"minVersion": "1.0.0b3.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2014-04-04 10:17:34"
 }
 
 function detectWeb(doc, url) {
@@ -85,7 +86,7 @@ function doWeb(doc, url) {
 		var xpath = '//ol/li/h4[@class="heading"]/a';
 		//var titles = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 		
-		newItems = Zotero.Utilities.getItemArray(doc, doc.getElementsByTagName("h4"), /^http:\/\//);
+		newItems = Zotero.Utilities.getItemArray(doc, doc.getElementsByTagName("h4"), /^https?:\/\//);
 		newItems = Zotero.selectItems(newItems);
 	} else {
 		newItems[url] = doc.title.split(" | ")[0]; 

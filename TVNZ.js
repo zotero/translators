@@ -2,14 +2,14 @@
 	"translatorID": "649c2836-a94d-4bbe-8e28-6771f283702f",
 	"label": "TVNZ",
 	"creator": "Sopheak Hean",
-	"target": "^http://tvnz\\.co\\.nz",
+	"target": "^https?://tvnz\\.co\\.nz",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-03-08 21:42:49"
+	"lastUpdated": "2014-04-04 10:01:57"
 }
 
 function detectWeb(doc, url) {
@@ -205,10 +205,9 @@ var testCases = [
 				"url": "http://tvnz.co.nz/national-news/patea-devastated-storm-video-4752377",
 				"network": "TVNZ",
 				"language": "en",
-				"date": "March 02, 2012",
+				"date": "March 03, 2012",
 				"title": "Patea devastated by storm",
-				"libraryCatalog": "TVNZ",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"libraryCatalog": "TVNZ"
 			}
 		]
 	}

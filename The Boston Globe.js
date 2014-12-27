@@ -2,14 +2,14 @@
 	"translatorID": "1f245496-4c1b-406a-8641-d286b3888231",
 	"label": "The Boston Globe",
 	"creator": "Adam Crymble, Frank Bennett, Sebastian Karcher",
-	"target": "^http://(www|search|articles)\\.boston\\.com/",
+	"target": "^https?://(www|search|articles)\\.boston\\.com/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-10-22 16:27:03"
+	"lastUpdated": "2014-04-04 09:54:41"
 }
 
 /*
@@ -195,7 +195,7 @@ function scrape (doc, url) {
 
 function doWeb (doc, url) {
 
-	var uris= new Array();
+	var articles = new Array();
 
 	if (detectWeb(doc, url) == "multiple") {
 		var items = {};
@@ -206,18 +206,15 @@ function doWeb (doc, url) {
 			items[elmt.href] = elmt.textContent;
 			elmt = result.iterateNext();
 		}
-		
-		items = Zotero.selectItems(items);
-		
-		if (!items) {
-			return true;
-		}
-		
-		for (var i in items) {
-			uris.push(i);
-		}
-		Zotero.Utilities.processDocuments(uris, scrape, Zotero.done);
-		Zotero.wait();
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
+		});
 	} else {
 		scrape(doc, url);
 	}

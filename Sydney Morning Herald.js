@@ -1,14 +1,15 @@
 {
-	"translatorID":"19120a71-17a8-4629-936a-ccdf899b9861",
-	"translatorType":4,
-	"label":"Sydney Morning Herald",
-	"creator":"Michael Berkowitz",
-	"target":"^http://(www|search).smh.com.au/(news|siteSearch|articles)",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":99,
-	"inRepository":true,
-	"lastUpdated":"2007-08-14 22:15:00"
+	"translatorID": "19120a71-17a8-4629-936a-ccdf899b9861",
+	"label": "Sydney Morning Herald",
+	"creator": "Michael Berkowitz",
+	"target": "^https?://(www|search).smh.com.au/(news|siteSearch|articles)",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 99,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2014-04-03 19:57:56"
 }
 
 function detectWeb(doc, url) {
@@ -77,8 +78,6 @@ function doWeb(doc, url) {
 			abstract = abstract.join(" ");
 			newItem.abstractNote = Zotero.Utilities.unescapeHTML(abstract.substr(0, abstract.length - 3));
 			newItem.complete();
-			Zotero.done();
 		}, function() {});
 	}
-	Zotero.wait();
 }

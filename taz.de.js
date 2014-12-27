@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-09-25 15:39:32"
+	"lastUpdated": "2014-06-11 22:07:16"
 }
 
 /*
@@ -41,7 +41,7 @@ http://www.taz.de/1/debatte/kolumnen/artikel/1/haengt-sie-hoeher-1/
 
 function detectWeb(doc, url) {
 
-	var taz_ArticleTitle_XPath = ".//h1";
+	var taz_ArticleTitle_XPath = ".//div[@class='sectbody']//h1";
 	var taz_Multiple_XPath = '//div[contains(@class, "first_page")]//a[h4]';
 	var taz_Search_XPath = '//div[contains(@class, "searchresults")]//a[h4]'   	
 	if (doc.evaluate(taz_ArticleTitle_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 

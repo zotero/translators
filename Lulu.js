@@ -219,6 +219,43 @@ var testCases = [
 				"libraryCatalog": "Lulu"
 			}
 		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"ISBN": "9780951470329"
+		},
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Stephen Skelton",
+						"lastName": "MW",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+					"title": "Lulu Link",
+					"mimeType": "text/html",
+					"snapshot": false
+					}
+				],
+				"abstractNote": "ALL YOU NEED TO KNOW ABOUT GROWING VINES IN 123 PAGES. \n\nThis book is a basic introduction to growing grapes and aimed at the serious student in the wine trade, WSET Diploma student or Master of Wine candidate. It is also very useful for those thinking of setting up vineyards as it answers a lot of the basic questions. \n\nHas sold over 3,500 copies now and received LOTS of emails saying how helpful it has been. \n\n\"Couldn't have become an MW without your book\" was the latest endorsement!",
+				"ISBN": "9780951470329",
+				"rights": "Stephen Skelton (Standard Copyright License)",
+				"language": "English",
+				"numPages": "146",
+				"libraryCatalog": "Lulu",
+				"title": "Viticulture - An Introduction to Commercial Grape Growing for Wine Production",
+				"publisher": "Stephen Skelton",
+				"date": "May 24, 2014"
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

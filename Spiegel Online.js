@@ -2,14 +2,14 @@
 	"translatorID": "eef50507-c756-4081-86fd-700ae4ebf22e",
 	"label": "Spiegel Online",
 	"creator": "Martin Meyerhoff",
-	"target": "^http://www\\.spiegel\\.de/",
+	"target": "^https?://www\\.spiegel\\.de/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-06-08 14:46:32"
+	"lastUpdated": "2014-04-04 10:16:45"
 }
 
 /*
@@ -49,16 +49,16 @@ function detectWeb(doc, url) {
 	else if (doc.evaluate(spiegel_article_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
 		//Zotero.debug("newspaperArticle");
 		return "newspaperArticle";
-	} else if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/thema/)){ 
+	} else if (doc.location.href.match(/^https?\:\/\/www\.spiegel\.de\/thema/)){ 
 		//Zotero.debug("multiple");
 		return "multiple";
-	}  else if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/suche/)){ 
+	}  else if (doc.location.href.match(/^https?\:\/\/www\.spiegel\.de\/suche/)){ 
 		//Zotero.debug("multiple");
 		return "multiple";
-	}  else if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/international\/search/)){ 
+	}  else if (doc.location.href.match(/^https?\:\/\/www\.spiegel\.de\/international\/search/)){ 
 		//Zotero.debug("multiple");
 		return "multiple";
-	} else if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/international\/topic/)){ 
+	} else if (doc.location.href.match(/^https?\:\/\/www\.spiegel\.de\/international\/topic/)){ 
 		//Zotero.debug("multiple");
 		return "multiple";
 	} 
@@ -193,16 +193,16 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		
-		 if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/(suche|international\/search)/)){ 
+		 if (doc.location.href.match(/^https?\:\/\/www\.spiegel\.de\/(suche|international\/search)/)){ 
 			var titles = doc.evaluate(".//div[@class='search-teaser']/a", doc, null, XPathResult.ANY_TYPE, null);
-		} else  if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/(thema\/|international\/topic)/)){ 
+		} else  if (doc.location.href.match(/^https?\:\/\/www\.spiegel\.de\/(thema\/|international\/topic)/)){ 
 			var titles = doc.evaluate(".//div[contains(@class, 'teaser')]/h2/a", doc, null, XPathResult.ANY_TYPE, null);
 		} 
 	
 		var next_title;
 		while (next_title = titles.iterateNext()) {
 			//The search searches also manager-magazin.de, which won't work
-			if (next_title.textContent != "mehr..."  && next_title.href.match(/^http:\/\/www\.spiegel\.de\//) ) { 
+			if (next_title.textContent != "mehr..."  && next_title.href.match(/^https?:\/\/www\.spiegel\.de\//) ) { 
 				items[next_title.href] = Zotero.Utilities.trim(next_title.textContent);
 			}
 		}
@@ -214,7 +214,7 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(articles, function(doc) { scrape(doc, doc.location.href)});
+			Zotero.Utilities.processDocuments(articles, scrape);
 		});
 	} else {
 		scrape(doc, url);

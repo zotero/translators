@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-02-16 19:09:02"
+	"lastUpdated": "2014-09-09 19:59:20"
 }
 
 function detectWeb(doc, url) {
@@ -37,7 +37,7 @@ function downloadFunction(text, url, prefs) {
 	}
 
 	//fix DOI
-	text = text.replace(/^L3(\s\s?-)/gm, 'DO$1');
+	text = text.replace(/^(?:L3|DI)(\s\s?-)/gm, 'DO$1');
 
 	// There are cases where the RIS type isn't good--
 	// there is sometimes better data in M3

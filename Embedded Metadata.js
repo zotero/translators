@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-03-06 06:52:33"
+	"lastUpdated": "2014-12-03 02:04:12"
 }
 
 /*
@@ -70,6 +70,9 @@ var HIGHWIRE_MAPPINGS = {
 	"citation_abstract_html_url"
 	"citation_fulltext_html_url"
 	"citation_pmid"
+	"citation_online_date"
+	"citation_year"
+	"citation_keywords"
 */
 };
 
@@ -151,7 +154,7 @@ function getPrefixes(doc) {
 }
 
 function getContentText(doc, name, strict) {
-	var xpath = '//x:meta[' +
+	var xpath = '/x:html/x:head/x:meta[' +
 		(strict?'@name':
 			'substring(@name, string-length(@name)-' + (name.length - 1) + ')') +
 		'="'+ name +'"]/';
@@ -159,7 +162,7 @@ function getContentText(doc, name, strict) {
 }
 
 function getContent(doc, name, strict) {
-	var xpath = '//x:meta[' +
+	var xpath = '/x:html/x:head/x:meta[' +
 		(strict?'@name':
 			'substring(@name, string-length(@name)-' + (name.length - 1) + ')') +
 		'="'+ name +'"]/';
@@ -187,6 +190,9 @@ function processFields(doc, item, fieldMap, strict) {
 }
 
 function completeItem(doc, newItem) {
+	// Strip off potential junk from RDF
+	newItem.seeAlso = [];
+	
 	addHighwireMetadata(doc, newItem);
 	addOtherMetadata(doc, newItem);
 	addLowQualityMetadata(doc, newItem);
@@ -210,7 +216,7 @@ function detectWeb(doc, url) {
 function init(doc, url, callback, forceLoadRDF) {
 	getPrefixes(doc);
 
-	var metaTags = doc.getElementsByTagName("meta");
+	var metaTags = doc.head.getElementsByTagName("meta");
 	Z.debug("Embedded Metadata: found " + metaTags.length + " meta tags.");
 	if(forceLoadRDF /* check if this is called from doWeb */ && !metaTags.length) {
 		if(doc.head) {
@@ -288,7 +294,10 @@ function init(doc, url, callback, forceLoadRDF) {
 						break;
 					case "citation_title":		//fall back to journalArticle, since this is quite common
 					case "citation_series_title":	//possibly journal article, though it could be book
-						hwTypeGuess = "journalArticle";
+						hwTypeGuess = hwTypeGuess || "journalArticle";
+						break;
+					case 'citation_isbn':
+						hwTypeGuess = "book"; // Unlikely, but other item types may have ISBNs as well (e.g. Reports?)
 						break;
 				}
 			}
@@ -335,6 +344,11 @@ function doWeb(doc, url) {
 	//set default namespace
 	namespaces.x = doc.documentElement.namespaceURI;
 	// populate _rdfPresent, _itemType, and _prefixes
+	// As of https://github.com/zotero/zotero/commit/0cd183613f5dacc85676109c3a5c6930e3632fae
+	// globals do not seem to be isolated to individual translators, so
+	// RDF object, importantly the "itemDone" handlers, can get overridden
+	// by other translators, so we cannot reuse the RDF object from detectWeb
+	RDF = false;
 	if(!RDF) init(doc, url, function() { importRDF(doc, url) }, true);
 	else importRDF(doc, url);
 }
@@ -418,9 +432,20 @@ function addHighwireMetadata(doc, newItem) {
 
 	//Deal with tags in a string
 	//we might want to look at the citation_keyword metatag later
-	if(!newItem.tags || !newItem.tags.length)
-		 newItem.tags = getContent(doc, 'citation_keywords')
-		 					.map(function(t) { return t.textContent; });
+	if(!newItem.tags || !newItem.tags.length) {
+		var tags = getContent(doc, 'citation_keywords');
+		newItem.tags = [];
+		for(var i=0; i<tags.length; i++) {
+			var tag = tags[i].textContent.trim();
+			if(tag) {
+				var splitTags = tag.split(';');
+				for(var j=0; j<splitTags.length; j++) {
+					if(!splitTags[j].trim()) continue;
+					newItem.tags.push(splitTags[j].trim());
+				}
+			}
+		}
+	}
 
 	//sometimes RDF has more info, let's not drop it
 	var rdfPages = (newItem.pages)? newItem.pages.split(/\s*-\s*/) : new Array();
@@ -432,8 +457,13 @@ function addHighwireMetadata(doc, newItem) {
 		newItem.pages = firstpage +
 			( ( lastpage && ( lastpage = lastpage.trim() ) )?'-' + lastpage : '' );
 	}
-
-
+	
+	//fall back to some other date options
+	if(!newItem.date) {
+		newItem.date = getContentText(doc, 'citation_online_date')
+			|| getContentText(doc, 'citation_year');
+	}
+	
 	//prefer ISSN over eISSN
 	var issn = getContentText(doc, 'citation_issn') ||
 			getContentText(doc, 'citation_eIssn');
@@ -588,8 +618,24 @@ function getAuthorFromByline(doc, newItem) {
 		actualByline = false;
 		var parentLevel = 1;
 		var skipList = [];
-		var titleXPath = './/*[normalize-space(translate(text(),"\u00a0"," "))="'
-			+ newItem.title.replace('"', '\\"') + '"]';
+		
+		// Wrap title in quotes so we can use it in the xpath
+		var xpathTitle = newItem.title;
+		if(xpathTitle.indexOf('"') != -1) {
+			if(xpathTitle.indexOf("'") == -1) {
+				// We can just use single quotes then
+				xpathTitle = "'" + xpathTitle + "'";
+			} else {
+				// Escaping double quotes in xpaths is really hard
+				// Solution taken from http://kushalm.com/the-perils-of-xpath-expressions-specifically-escaping-quotes
+				xpathTitle = 'concat("' + xpathTitle.replace(/"+/g, '",\'$&\', "') + '")';
+			}
+		} else {
+			xpathTitle = '"' + xpathTitle + '"';
+		}
+		
+		var titleXPath = './/*[normalize-space(translate(text(),"\u00a0"," "))='
+			+ xpathTitle + ']';
 		Z.debug("Looking for title using: " + titleXPath);
 		while(!actualByline && bylines.length != skipList.length && parentLevel < 5) {
 			Z.debug("Parent level " + parentLevel);
@@ -673,7 +719,7 @@ function finalDataCleanup(doc, newItem) {
 	 * This  will deal with multiple tags, some of them comma delimited,
 	 * some semicolon, some individual
 	 */
-	if (newItem.tags.length) {
+	if (newItem.tags.length && Zotero.parentTranslator) {
 		var tags = [];
 		for (var i in newItem.tags) {
 			newItem.tags[i] = newItem.tags[i].trim();
@@ -688,6 +734,10 @@ function finalDataCleanup(doc, newItem) {
 			if (tags[i] === "") tags.splice(i, 1);
 		}
 		newItem.tags = tags;
+	} else {
+		// Unless called from another translator, don't include automatic tags,
+		// because most of the time they are not right
+		newItem.tags = [];
 	}
 	
 	//Cleanup DOI
@@ -718,6 +768,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "\"La Huelga de los Conventillos\", Buenos Aires, Nueva Pompeya, 1936. Un aporte a los estudios sobre género y clase",
 				"creators": [
 					{
 						"firstName": "Verónica",
@@ -730,14 +781,28 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"huelga",
-					"trabajadores",
-					"trabajadroras",
-					"relaciones de género"
-				],
-				"seeAlso": [],
+				"date": "10/10/2011",
+				"ISSN": "1548-7083",
+				"abstractNote": "\"La Huelga de los Conventillos\", Buenos Aires, Nueva Pompeya, 1936. Un aporte a los estudios sobre género y clase",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"audioFileType": "Text.Serial.Journal",
+				"extra": "Este trabajo se propone realizar un análisis de las   relaciones de género y clase a través de un estudio de caso: la “Huelga de   los Conventillos” de la fábrica textil Gratry en 1936, que se extendió por   más de tres meses, pasando casi inadvertida, sin embargo, para la   investigación histórica. Siendo la textil una rama de industria con una   mayoría de mano de obra femenina, el caso de la casa Gratry, donde el 60% de   los 800 obreros eran mujeres, aparece como ejemplar para la observación de la   actividad de las mujeres en conflicto.   En el trabajo se analiza el rol de las trabajadoras en   la huelga, su participación política, sus formas de organización y   resistencia, haciendo eje en las determinaciones de género y de clase que son   abordadas de manera complementaria e interrelacionada, así como el complejo   entramado de tensiones y solidaridades que éstas generan. De éste modo, se   pretende ahondar en la compleja conformación de una identidad obrera   femenina, a la vez que se discute con aquella mirada historiográfica tradicional   que ha restado importancia a la participación de la mujer en el conflicto   social. Esto se realizará a través de la exploración de una serie de   variables: las relaciones inter-género e inter-clase (fundamentalmente el   vínculo entre las trabajadoras y la patronal masculina), inter-género e   intra-clase (la relación entre trabajadoras y trabajadores), intra-género e   inter-clase (los lazos entre las trabajadoras y las vecinas comerciantes del   barrio), intra-género e intra-clase (relaciones de solidaridad entre   trabajadoras en huelga, y de antagonismo entre huelguistas y “carneras”).   Para ello se trabajó un corpus documental que incluye   información de tipo cuantitativa (las estadísticas del Boletín Informativo   del Departamento Nacional del Trabajo), y cualitativa: periódicos obreros   –fundamentalmente  El Obrero Textil , órgano gremial de la Unión   Obrera Textil,  Semanario de la CGT-Independencia  (órgano de   la Confederación General del Trabajo (CGT)-Independencia) y  La   Vanguardia  (periódico del Partido Socialista), entre otros, y   entrevistas orales a vecinas de Nueva Pompeya y familiares de trabajadoras de   la fábrica Gratry. Se desarrollará una metodología cuali-cuantitativa para el   cruce de estas fuentes.",
+				"issue": "1",
+				"language": "en",
+				"letterType": "Text.Serial.Journal",
+				"libraryCatalog": "acontracorriente.chass.ncsu.edu",
+				"manuscriptType": "Text.Serial.Journal",
+				"mapType": "Text.Serial.Journal",
+				"pages": "1-37",
+				"postType": "Text.Serial.Journal",
+				"presentationType": "Text.Serial.Journal",
+				"publicationTitle": "A Contracorriente",
+				"reportType": "Text.Serial.Journal",
+				"rights": "1. Author hereby grants, transfers, and assigns to  A Contracorriente :  (a) the exclusive first serial rights in the Work for publication and distribution throughout the world, as  A Contracorriente  sees fit, in all languages and formats, by print or any electronic means, including, without limitation, the internet, other public and/or private proprietary intranets and computer networks and on CD-ROMs, DVDs and other discs, before the Work shall appear in any other publication (whether print or electronic), in any manner, format or language, or in any other medium now known or hereafter devised. The first serial rights granted to  A Contracorriente  by this Paragraph 1(a) shall be exclusive to  A Contracorriente  until one year following the date of the first serial publication of the Work by  A Contracorriente ; in addition, this grant of rights shall include the non-exclusive right in perpetuity to include the Work in any collection, or compilation produced or authorized by  A Contracorriente , and containing at least 75% material that has appeared in  A Contracorriente , for distribution throughout the world, in all languages and formats, by print or any electronic means, including, without limitation, the internet and other public and proprietary intranets and computer networks and on CDROMs, DVDs and other discs;  (b) further, the non-exclusive right to authorize, reproduce and distribute reprints of the Work throughout the world, in all languages and formats, by print or any electronic means, after the Work appears in a publication produced or authorized by  A Contracorriente ; the right to permit subscribers and other users of the services and publications in which the Work may appear electronically to download, reproduce, and otherwise utilize the Work for their personal, non-commercial use throughout the universe; and the non-exclusive perpetual right, throughout the world, to use the Work, in whole or in part, and Author’s name, likeness, or biography in promoting, advertising, and/or publicizing any publication in which the Work is authorized to appear consistent with this Agreement.  2.  A Contracorriente  reserves the right to publish the Work with illustrations and other graphic materials. Nothing contained herein shall obligate  A Contracorriente  to exploit any of the rights granted to  A Contracorriente  hereunder. All rights not granted to  A Contracorriente  are reserved to Author for Author’s own use and/or transfer, assignment, or disposition.  3. Author represents and warrants: the Work is original to Author, has not been copied in whole or in part, and does not infringe upon the copyright or any other rights of any person or entity; Author has the right to grant the rights granted to  A Contracorriente  under this Agreement free of any and all claims and encumbrances; Author has not granted or transferred any rights in or to the Work to any third party; and Author has not done and will not do anything that has impaired, might impair or will impair in any way any of the rights granted to  A Contracorriente  hereunder.  4. Author shall defend, indemnify, and hold harmless the NC State and its employees, agents, affiliates, successors, licensees, and assigns from and against all claims, damages, liabilities, losses, costs, and expenses, including, without limitation, attorney’s fees and costs, arising out of any breach or alleged breach of any of Author’s representations, warranties, or agreements. Any remedies that Author may have against  A Contracorriente  for breach of this Agreement shall be limited to the right to recover damages, if any, in an action at law. Author hereby waives any right or remedy in equity, including any right to terminate this Agreement, to rescind  A Contracorriente ’s rights in the Work, or to enjoin, restrain, or otherwise impair in any manner the production or distribution of any publication that is authorized or produced by  A Contracorriente .   5.  A Contracorriente  shall have the right to assign this Agreement, either in whole or in part, to any entity affiliated with  A Contracorriente  or to any party that acquires all or substantially all of  A Contracorriente 's assets. Author shall not have the right to further assign any of the rights conferred pursuant to this Agreement, either in whole or in part, or any of the rights granted to Author herein.   6. This Agreement is intended by the parties hereto as the final expression of their understanding with respect to the subject matter herein, as a complete and exclusive statement of the terms herein, and supersedes any and all prior or contemporaneous negotiations, understandings, and agreements between the parties relating thereto.   7. The Agreement may be modified only by a writing signed by both parties to the Agreement. The laws and courts of the State of North Carolina shall govern and control the resolution of any and all conflicts and disputes that may arise hereunder.",
+				"thesisType": "Text.Serial.Journal",
+				"url": "http://acontracorriente.chass.ncsu.edu/index.php/acontracorriente/article/view/174",
+				"volume": "9",
+				"websiteType": "Text.Serial.Journal",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -747,29 +812,14 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"title": "\"La Huelga de los Conventillos\", Buenos Aires, Nueva Pompeya, 1936. Un aporte a los estudios sobre género y clase",
-				"publicationTitle": "A Contracorriente",
-				"rights": "1. Author hereby grants, transfers, and assigns to  A Contracorriente :  (a) the exclusive first serial rights in the Work for publication and distribution throughout the world, as  A Contracorriente  sees fit, in all languages and formats, by print or any electronic means, including, without limitation, the internet, other public and/or private proprietary intranets and computer networks and on CD-ROMs, DVDs and other discs, before the Work shall appear in any other publication (whether print or electronic), in any manner, format or language, or in any other medium now known or hereafter devised. The first serial rights granted to  A Contracorriente  by this Paragraph 1(a) shall be exclusive to  A Contracorriente  until one year following the date of the first serial publication of the Work by  A Contracorriente ; in addition, this grant of rights shall include the non-exclusive right in perpetuity to include the Work in any collection, or compilation produced or authorized by  A Contracorriente , and containing at least 75% material that has appeared in  A Contracorriente , for distribution throughout the world, in all languages and formats, by print or any electronic means, including, without limitation, the internet and other public and proprietary intranets and computer networks and on CDROMs, DVDs and other discs;  (b) further, the non-exclusive right to authorize, reproduce and distribute reprints of the Work throughout the world, in all languages and formats, by print or any electronic means, after the Work appears in a publication produced or authorized by  A Contracorriente ; the right to permit subscribers and other users of the services and publications in which the Work may appear electronically to download, reproduce, and otherwise utilize the Work for their personal, non-commercial use throughout the universe; and the non-exclusive perpetual right, throughout the world, to use the Work, in whole or in part, and Author’s name, likeness, or biography in promoting, advertising, and/or publicizing any publication in which the Work is authorized to appear consistent with this Agreement.  2.  A Contracorriente  reserves the right to publish the Work with illustrations and other graphic materials. Nothing contained herein shall obligate  A Contracorriente  to exploit any of the rights granted to  A Contracorriente  hereunder. All rights not granted to  A Contracorriente  are reserved to Author for Author’s own use and/or transfer, assignment, or disposition.  3. Author represents and warrants: the Work is original to Author, has not been copied in whole or in part, and does not infringe upon the copyright or any other rights of any person or entity; Author has the right to grant the rights granted to  A Contracorriente  under this Agreement free of any and all claims and encumbrances; Author has not granted or transferred any rights in or to the Work to any third party; and Author has not done and will not do anything that has impaired, might impair or will impair in any way any of the rights granted to  A Contracorriente  hereunder.  4. Author shall defend, indemnify, and hold harmless the NC State and its employees, agents, affiliates, successors, licensees, and assigns from and against all claims, damages, liabilities, losses, costs, and expenses, including, without limitation, attorney’s fees and costs, arising out of any breach or alleged breach of any of Author’s representations, warranties, or agreements. Any remedies that Author may have against  A Contracorriente  for breach of this Agreement shall be limited to the right to recover damages, if any, in an action at law. Author hereby waives any right or remedy in equity, including any right to terminate this Agreement, to rescind  A Contracorriente ’s rights in the Work, or to enjoin, restrain, or otherwise impair in any manner the production or distribution of any publication that is authorized or produced by  A Contracorriente .   5.  A Contracorriente  shall have the right to assign this Agreement, either in whole or in part, to any entity affiliated with  A Contracorriente  or to any party that acquires all or substantially all of  A Contracorriente 's assets. Author shall not have the right to further assign any of the rights conferred pursuant to this Agreement, either in whole or in part, or any of the rights granted to Author herein.   6. This Agreement is intended by the parties hereto as the final expression of their understanding with respect to the subject matter herein, as a complete and exclusive statement of the terms herein, and supersedes any and all prior or contemporaneous negotiations, understandings, and agreements between the parties relating thereto.   7. The Agreement may be modified only by a writing signed by both parties to the Agreement. The laws and courts of the State of North Carolina shall govern and control the resolution of any and all conflicts and disputes that may arise hereunder.",
-				"date": "10/10/2011",
-				"reportType": "Text.Serial.Journal",
-				"letterType": "Text.Serial.Journal",
-				"manuscriptType": "Text.Serial.Journal",
-				"mapType": "Text.Serial.Journal",
-				"thesisType": "Text.Serial.Journal",
-				"websiteType": "Text.Serial.Journal",
-				"presentationType": "Text.Serial.Journal",
-				"postType": "Text.Serial.Journal",
-				"audioFileType": "Text.Serial.Journal",
-				"language": "en",
-				"extra": "Este trabajo se propone realizar un análisis de las   relaciones de género y clase a través de un estudio de caso: la “Huelga de   los Conventillos” de la fábrica textil Gratry en 1936, que se extendió por   más de tres meses, pasando casi inadvertida, sin embargo, para la   investigación histórica. Siendo la textil una rama de industria con una   mayoría de mano de obra femenina, el caso de la casa Gratry, donde el 60% de   los 800 obreros eran mujeres, aparece como ejemplar para la observación de la   actividad de las mujeres en conflicto.   En el trabajo se analiza el rol de las trabajadoras en   la huelga, su participación política, sus formas de organización y   resistencia, haciendo eje en las determinaciones de género y de clase que son   abordadas de manera complementaria e interrelacionada, así como el complejo   entramado de tensiones y solidaridades que éstas generan. De éste modo, se   pretende ahondar en la compleja conformación de una identidad obrera   femenina, a la vez que se discute con aquella mirada historiográfica tradicional   que ha restado importancia a la participación de la mujer en el conflicto   social. Esto se realizará a través de la exploración de una serie de   variables: las relaciones inter-género e inter-clase (fundamentalmente el   vínculo entre las trabajadoras y la patronal masculina), inter-género e   intra-clase (la relación entre trabajadoras y trabajadores), intra-género e   inter-clase (los lazos entre las trabajadoras y las vecinas comerciantes del   barrio), intra-género e intra-clase (relaciones de solidaridad entre   trabajadoras en huelga, y de antagonismo entre huelguistas y “carneras”).   Para ello se trabajó un corpus documental que incluye   información de tipo cuantitativa (las estadísticas del Boletín Informativo   del Departamento Nacional del Trabajo), y cualitativa: periódicos obreros   –fundamentalmente  El Obrero Textil , órgano gremial de la Unión   Obrera Textil,  Semanario de la CGT-Independencia  (órgano de   la Confederación General del Trabajo (CGT)-Independencia) y  La   Vanguardia  (periódico del Partido Socialista), entre otros, y   entrevistas orales a vecinas de Nueva Pompeya y familiares de trabajadoras de   la fábrica Gratry. Se desarrollará una metodología cuali-cuantitativa para el   cruce de estas fuentes.",
-				"volume": "9",
-				"issue": "1",
-				"abstractNote": "\"La Huelga de los Conventillos\", Buenos Aires, Nueva Pompeya, 1936. Un aporte a los estudios sobre género y clase",
-				"pages": "1-37",
-				"ISSN": "1548-7083",
-				"url": "http://acontracorriente.chass.ncsu.edu/index.php/acontracorriente/article/view/174",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "acontracorriente.chass.ncsu.edu"
+				"tags": [
+					"huelga",
+					"relaciones de género",
+					"trabajadores",
+					"trabajadroras"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -779,6 +829,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Knowledge, treatment seeking and preventive practices in respect of malaria among patients with HIV at the Lagos University Teaching Hospital",
 				"creators": [
 					{
 						"firstName": "Akinwumi A.",
@@ -816,16 +867,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"HIV patients",
-					"Nigeria",
-					"knowledge",
-					"malaria",
-					"prevention",
-					"treatment"
-				],
-				"seeAlso": [],
+				"date": "2011/10/17",
+				"DOI": "10.4314/thrb.v13i4.63347",
+				"ISSN": "1821-9241",
+				"abstractNote": "Knowledge, treatment seeking and preventive practices in respect of malaria among patients with HIV at the Lagos University Teaching Hospital",
+				"extra": "The synergistic interaction between Human Immunodeficiency virus (HIV) disease and Malaria makes it mandatory for patients with HIV to respond appropriately in preventing and treating malaria. Such response will help to control the two diseases. This study assessed the knowledge of 495 patients attending the HIV clinic, in Lagos University Teaching Hospital, Nigeria.&nbsp; Their treatment seeking, preventive practices with regards to malaria, as well as the impact of socio &ndash; demographic / socio - economic status were assessed. Out of these patients, 245 (49.5 %) used insecticide treated bed nets; this practice was not influenced by socio &ndash; demographic or socio &ndash; economic factors.&nbsp; However, knowledge of the cause, knowledge of prevention of malaria, appropriate use of antimalarial drugs and seeking treatment from the right source increased with increasing level of education (p &lt; 0.05). A greater proportion of the patients, 321 (64.9 %) utilized hospitals, pharmacy outlets or health centres when they perceived an attack of malaria. Educational intervention may result in these patients seeking treatment from the right place when an attack of malaria fever is perceived.",
+				"issue": "4",
+				"language": "en",
+				"libraryCatalog": "www.ajol.info",
+				"publicationTitle": "Tanzania Journal of Health Research",
+				"rights": "Copyright for articles published in this journal is retained by the journal.",
+				"url": "http://www.ajol.info/index.php/thrb/article/view/63347",
+				"volume": "13",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -835,19 +888,16 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"title": "Knowledge, treatment seeking and preventive practices in respect of malaria among patients with HIV at the Lagos University Teaching Hospital",
-				"publicationTitle": "Tanzania Journal of Health Research",
-				"rights": "Copyright for articles published in this journal is retained by the journal.",
-				"date": "2011/10/17",
-				"language": "en",
-				"extra": "The synergistic interaction between Human Immunodeficiency virus (HIV) disease and Malaria makes it mandatory for patients with HIV to respond appropriately in preventing and treating malaria. Such response will help to control the two diseases. This study assessed the knowledge of 495 patients attending the HIV clinic, in Lagos University Teaching Hospital, Nigeria.&nbsp; Their treatment seeking, preventive practices with regards to malaria, as well as the impact of socio &ndash; demographic / socio - economic status were assessed. Out of these patients, 245 (49.5 %) used insecticide treated bed nets; this practice was not influenced by socio &ndash; demographic or socio &ndash; economic factors.&nbsp; However, knowledge of the cause, knowledge of prevention of malaria, appropriate use of antimalarial drugs and seeking treatment from the right source increased with increasing level of education (p &lt; 0.05). A greater proportion of the patients, 321 (64.9 %) utilized hospitals, pharmacy outlets or health centres when they perceived an attack of malaria. Educational intervention may result in these patients seeking treatment from the right place when an attack of malaria fever is perceived.",
-				"volume": "13",
-				"issue": "4",
-				"DOI": "10.4314/thrb.v13i4.63347",
-				"ISSN": "1821 0 9241",
-				"url": "http://www.ajol.info/index.php/thrb/article/view/63347",
-				"abstractNote": "Knowledge, treatment seeking and preventive practices in respect of malaria among patients with HIV at the Lagos University Teaching Hospital",
-				"libraryCatalog": "www.ajol.info"
+				"tags": [
+					"HIV patients",
+					"Nigeria",
+					"knowledge",
+					"malaria",
+					"prevention",
+					"treatment"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -857,6 +907,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "conferencePaper",
+				"title": "Session F: Contributed Oral Papers – F2: Energy, Climate, Nuclear Medicine: Reducing Energy Consumption and CO2 One Street Lamp at a Time",
 				"creators": [
 					{
 						"firstName": "Peter",
@@ -864,22 +915,21 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2011",
+				"abstractNote": "Why wait for federal action on incentives to reduce energy use and address Greenhouse Gas (GHG) reductions (e.g. CO2), when we can take personal actions right now in our private lives and in our communities? One such initiative by private citizens working with Portsmouth NH officials resulted in the installation of energy reducing lighting products on Court St. and the benefits to taxpayers are still coming after over 4 years of operation. This citizen initiative to save money and reduce CO2 emissions, while only one small effort, could easily be duplicated in many towns and cities. Replacing old lamps in just one street fixture with a more energy efficient (Non-LED) lamp has resulted after 4 years of operation ($\\sim $15,000 hr. life of product) in real electrical energy savings of $>$ {\\$}43. and CO2 emission reduction of $>$ 465 lbs. The return on investment (ROI) was less than 2 years. This is much better than any financial investment available today and far safer. Our street only had 30 such lamps installed; however, the rest of Portsmouth (population 22,000) has at least another 150 street lamp fixtures that are candidates for such an upgrade. The talk will also address other energy reduction measures that green the planet and also put more green in the pockets of citizens and municipalities.",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"conferenceName": "Climate Change and the Future of Nuclear Power",
+				"libraryCatalog": "scholarworks.umass.edu",
+				"shortTitle": "Session F",
+				"url": "http://scholarworks.umass.edu/climate_nuclearpower/2011/nov19/34",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"title": "Session F: Contributed Oral Papers – F2: Energy, Climate, Nuclear Medicine: Reducing Energy Consumption and CO2 One Street Lamp at a Time",
-				"date": "2011",
-				"conferenceName": "Climate Change and the Future of Nuclear Power",
-				"url": "http://scholarworks.umass.edu/climate_nuclearpower/2011/nov19/34",
-				"abstractNote": "Why wait for federal action on incentives to reduce energy use and address Greenhouse Gas (GHG) reductions (e.g. CO2), when we can take personal actions right now in our private lives and in our communities? One such initiative by private citizens working with Portsmouth NH officials resulted in the installation of energy reducing lighting products on Court St. and the benefits to taxpayers are still coming after over 4 years of operation. This citizen initiative to save money and reduce CO2 emissions, while only one small effort, could easily be duplicated in many towns and cities. Replacing old lamps in just one street fixture with a more energy efficient (Non-LED) lamp has resulted after 4 years of operation ($\\sim $15,000 hr. life of product) in real electrical energy savings of $>$ {\\$}43. and CO2 emission reduction of $>$ 465 lbs. The return on investment (ROI) was less than 2 years. This is much better than any financial investment available today and far safer. Our street only had 30 such lamps installed; however, the rest of Portsmouth (population 22,000) has at least another 150 street lamp fixtures that are candidates for such an upgrade. The talk will also address other energy reduction measures that green the planet and also put more green in the pockets of citizens and municipalities.",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "scholarworks.umass.edu",
-				"shortTitle": "Session F"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -889,6 +939,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Wabanaki Resistance and Healing: An Exploration of the Contemporary Role of an Eighteenth Century Bounty Proclamation in an Indigenous Decolonization Process",
 				"creators": [
 					{
 						"firstName": "Bonnie D.",
@@ -901,13 +952,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Wabanaki",
-					"Bounty Proclamations",
-					"Decolonization"
-				],
-				"seeAlso": [],
+				"date": "2012",
+				"ISSN": "1947-508X",
+				"abstractNote": "The purpose of this paper is to examine the contemporary role of an eighteenth century bounty proclamation issued on the Penobscot Indians of Maine. We focus specifically on how the changing cultural context of the 1755 Spencer Phips Bounty Proclamation has transformed the document from serving as a tool for sanctioned violence to a tool of decolonization for the Indigenous peoples of Maine. We explore examples of the ways indigenous and non-indigenous people use the Phips Proclamation to illustrate past violence directed against Indigenous peoples. This exploration is enhanced with an analysis of the re-introduction of the Phips Proclamation using concepts of decolonization theory.",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"issue": "1",
+				"libraryCatalog": "scholarworks.umass.edu",
+				"pages": "2",
+				"publicationTitle": "Landscapes of Violence",
+				"shortTitle": "Wabanaki Resistance and Healing",
+				"url": "http://scholarworks.umass.edu/lov/vol2/iss1/2",
+				"volume": "2",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -917,18 +972,13 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"title": "Wabanaki Resistance and Healing: An Exploration of the Contemporary Role of an Eighteenth Century Bounty Proclamation in an Indigenous Decolonization Process",
-				"date": "2012",
-				"publicationTitle": "Landscapes of Violence",
-				"volume": "2",
-				"issue": "1",
-				"url": "http://scholarworks.umass.edu/lov/vol2/iss1/2",
-				"abstractNote": "The purpose of this paper is to examine the contemporary role of an eighteenth century bounty proclamation issued on the Penobscot Indians of Maine. We focus specifically on how the changing cultural context of the 1755 Spencer Phips Bounty Proclamation has transformed the document from serving as a tool for sanctioned violence to a tool of decolonization for the Indigenous peoples of Maine. We explore examples of the ways indigenous and non-indigenous people use the Phips Proclamation to illustrate past violence directed against Indigenous peoples. This exploration is enhanced with an analysis of the re-introduction of the Phips Proclamation using concepts of decolonization theory.",
-				"pages": "2",
-				"ISSN": "1947-508X",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "scholarworks.umass.edu",
-				"shortTitle": "Wabanaki Resistance and Healing"
+				"tags": [
+					"Bounty Proclamations",
+					"Decolonization",
+					"Wabanaki"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -938,6 +988,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "thesis",
+				"title": "Decision-Theoretic Meta-reasoning in Partially Observable and Decentralized Settings",
 				"creators": [
 					{
 						"firstName": "Alan Scott",
@@ -945,16 +996,12 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Agents",
-					"Dec-POMDP",
-					"MDP",
-					"Meta-reasoning",
-					"Multiagent",
-					"Partial Observability"
-				],
-				"seeAlso": [],
+				"date": "2012",
+				"abstractNote": "This thesis examines decentralized meta-reasoning. For a single agent or multiple agents, it may not be enough for agents to compute correct decisions if they do not do so in a timely or resource efficient fashion. The utility of agent decisions typically increases with decision quality, but decreases with computation time. The reasoning about one's computation process is referred to as meta-reasoning. Aspects of meta-reasoning considered in this thesis include the reasoning about how to allocate computational resources, including when to stop one type of computation and begin another, and when to stop all computation and report an answer. Given a computational model, this translates into computing how to schedule the basic computations that solve a problem. This thesis constructs meta-reasoning strategies for the purposes of monitoring and control in multi-agent settings, specifically settings that can be modeled by the Decentralized Partially Observable Markov Decision Process (Dec-POMDP). It uses decision theory to optimize computation for efficiency in time and space in communicative and non-communicative decentralized settings. Whereas base-level reasoning describes the optimization of actual agent behaviors, the meta-reasoning strategies produced by this thesis dynamically optimize the computational resources which lead to the selection of base-level behaviors.",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "scholarworks.umass.edu",
+				"university": "University of Massachusetts - Amherst",
+				"url": "http://scholarworks.umass.edu/open_access_dissertations/508",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -964,13 +1011,16 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"title": "Decision-Theoretic Meta-reasoning in Partially Observable and Decentralized Settings",
-				"date": "2012",
-				"university": "University of Massachusetts - Amherst",
-				"url": "http://scholarworks.umass.edu/open_access_dissertations/508",
-				"abstractNote": "This thesis examines decentralized meta-reasoning. For a single agent or multiple agents, it may not be enough for agents to compute correct decisions if they do not do so in a timely or resource efficient fashion. The utility of agent decisions typically increases with decision quality, but decreases with computation time. The reasoning about one's computation process is referred to as meta-reasoning. Aspects of meta-reasoning considered in this thesis include the reasoning about how to allocate computational resources, including when to stop one type of computation and begin another, and when to stop all computation and report an answer. Given a computational model, this translates into computing how to schedule the basic computations that solve a problem. This thesis constructs meta-reasoning strategies for the purposes of monitoring and control in multi-agent settings, specifically settings that can be modeled by the Decentralized Partially Observable Markov Decision Process (Dec-POMDP). It uses decision theory to optimize computation for efficiency in time and space in communicative and non-communicative decentralized settings. Whereas base-level reasoning describes the optimization of actual agent behaviors, the meta-reasoning strategies produced by this thesis dynamically optimize the computational resources which lead to the selection of base-level behaviors.",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "scholarworks.umass.edu"
+				"tags": [
+					"Agents",
+					"Dec-POMDP",
+					"MDP",
+					"Meta-reasoning",
+					"Multiagent",
+					"Partial Observability"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -980,6 +1030,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Impressões sobre o teste rápido para o HIV entre usuários de drogas injetáveis no Brasil",
 				"creators": [
 					{
 						"firstName": "P. R.",
@@ -1002,9 +1053,15 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "12/2007",
+				"DOI": "10.1590/S0034-89102007000900015",
+				"ISSN": "0034-8910",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "www.scielosp.org",
+				"pages": "94-100",
+				"publicationTitle": "Revista de Saúde Pública",
+				"url": "http://www.scielosp.org/scielo.php?script=sci_abstract&pid=S0034-89102007000900015&lng=en&nrm=iso&tlng=pt",
+				"volume": "41",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -1014,16 +1071,9 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"title": "Impressões sobre o teste rápido para o HIV entre usuários de drogas injetáveis no Brasil",
-				"date": "12/2007",
-				"publicationTitle": "Revista de Saúde Pública",
-				"volume": "41",
-				"DOI": "10.1590/S0034-89102007000900015",
-				"pages": "94-100",
-				"ISSN": "0034-8910",
-				"url": "http://www.scielosp.org/scielo.php?script=sci_abstract&pid=S0034-89102007000900015&lng=en&nrm=iso&tlng=pt",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "www.scielosp.org"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1033,6 +1083,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Robust Filtering for Networked Stochastic Systems Subject to Sensor Nonlinearity",
 				"creators": [
 					{
 						"firstName": "Guoqiang",
@@ -1050,9 +1101,31 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2013/02/20",
+				"DOI": "10.1155/2013/868174",
+				"ISSN": "1024-123X",
+				"abstractNote": "The problem of network-based robust filtering for stochastic systems with sensor nonlinearity is investigated in this paper. In the network environment, the effects of the sensor saturation, output quantization, and network-induced delay are taken into simultaneous consideration, and the output measurements received in the filter side are incomplete. The random delays are modeled as a linear function of the stochastic variable described by a Bernoulli random binary distribution. The derived criteria for performance analysis of the filtering-error system and filter design are proposed which can be solved by using convex optimization method. Numerical examples show the effectiveness of the design method.",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"audioFileType": "Research article",
+				"company": "Hindawi Publishing Corporation",
+				"distributor": "Hindawi Publishing Corporation",
+				"extra": "The problem of network-based robust filtering for stochastic systems with sensor nonlinearity is investigated in this paper. In the network environment, the effects of the sensor saturation, output quantization, and network-induced delay are taken into simultaneous consideration, and the output measurements received in the filter side are incomplete. The random delays are modeled as a linear function of the stochastic variable described by a Bernoulli random binary distribution. The derived criteria for performance analysis of the filtering-error system and filter design are proposed which can be solved by using convex optimization method. Numerical examples show the effectiveness of the design method.",
+				"institution": "Hindawi Publishing Corporation",
+				"label": "Hindawi Publishing Corporation",
+				"language": "en",
+				"letterType": "Research article",
+				"libraryCatalog": "www.hindawi.com",
+				"manuscriptType": "Research article",
+				"mapType": "Research article",
+				"postType": "Research article",
+				"presentationType": "Research article",
+				"publicationTitle": "Mathematical Problems in Engineering",
+				"publisher": "Hindawi Publishing Corporation",
+				"reportType": "Research article",
+				"thesisType": "Research article",
+				"url": "http://www.hindawi.com/journals/mpe/2013/868174/abs/",
+				"volume": "2013",
+				"websiteType": "Research article",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -1062,32 +1135,9 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"title": "Robust Filtering for Networked Stochastic Systems Subject to Sensor Nonlinearity",
-				"publicationTitle": "Mathematical Problems in Engineering",
-				"volume": "2013",
-				"publisher": "Hindawi Publishing Corporation",
-				"institution": "Hindawi Publishing Corporation",
-				"company": "Hindawi Publishing Corporation",
-				"label": "Hindawi Publishing Corporation",
-				"distributor": "Hindawi Publishing Corporation",
-				"date": "2013/02/20",
-				"ISSN": "1024-123X",
-				"reportType": "Research article",
-				"letterType": "Research article",
-				"manuscriptType": "Research article",
-				"mapType": "Research article",
-				"thesisType": "Research article",
-				"websiteType": "Research article",
-				"presentationType": "Research article",
-				"postType": "Research article",
-				"audioFileType": "Research article",
-				"language": "en",
-				"extra": "The problem of network-based robust filtering for stochastic systems with sensor nonlinearity is investigated in this paper. In the network environment, the effects of the sensor saturation, output quantization, and network-induced delay are taken into simultaneous consideration, and the output measurements received in the filter side are incomplete. The random delays are modeled as a linear function of the stochastic variable described by a Bernoulli random binary distribution. The derived criteria for performance analysis of the filtering-error system and filter design are proposed which can be solved by using convex optimization method. Numerical examples show the effectiveness of the design method.",
-				"abstractNote": "The problem of network-based robust filtering for stochastic systems with sensor nonlinearity is investigated in this paper. In the network environment, the effects of the sensor saturation, output quantization, and network-induced delay are taken into simultaneous consideration, and the output measurements received in the filter side are incomplete. The random delays are modeled as a linear function of the stochastic variable described by a Bernoulli random binary distribution. The derived criteria for performance analysis of the filtering-error system and filter design are proposed which can be solved by using convex optimization method. Numerical examples show the effectiveness of the design method.",
-				"DOI": "10.1155/2013/868174",
-				"url": "http://www.hindawi.com/journals/mpe/2013/868174/abs/",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "www.hindawi.com"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1097,6 +1147,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "webpage",
+				"title": "Junot Díaz: My stories come from trauma",
 				"creators": [
 					{
 						"firstName": "Gregg",
@@ -1109,7 +1160,14 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
+				"abstractNote": "The effervescent author of \"This is How You Lose Her\" explains the darkness coursing through his fiction",
+				"shortTitle": "Junot Díaz",
+				"url": "http://www.salon.com/2012/10/10/junot_diaz_my_stories_come_from_trauma/",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
 				"tags": [
 					"Dominican Republic",
 					"Drown",
@@ -1119,25 +1177,18 @@ var testCases = [
 					"Salon.com",
 					"science fiction"
 				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"title": "Junot Díaz: My stories come from trauma",
-				"url": "http://www.salon.com/2012/10/10/junot_diaz_my_stories_come_from_trauma/",
-				"abstractNote": "The effervescent author of \"This is How You Lose Her\" explains the darkness coursing through his fiction",
-				"shortTitle": "Junot Díaz"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.newyorker.com/online/blogs/backissues/2013/06/window-washers-at-the-hearst-tower.html",
+		"url": "http://www.newyorker.com/books/double-take/rescue-at-the-hearst-tower",
 		"items": [
 			{
 				"itemType": "webpage",
+				"title": "Rescue at the Hearst Tower",
 				"creators": [
 					{
 						"firstName": "Joshua",
@@ -1145,67 +1196,34 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
+				"date": "6/12/2013",
+				"abstractNote": "Just a few minutes ago, rescuers successfully retrieved two scaffold-maintenance workers at the Hearst Tower, in Midtown, who had become trapped between the forty-fourth and forty-fifth floors. (The rescue workers appear to have removed some windows on the forty-fourth floor, and to have helped the men step off the scaffold and into the building.) Earlier this year, Adam Higginbotham wrote about the challenges of window washing at the Hearst Tower for The New Yorker, in an article called “Life at the Top.” The Hearst Tower, Higginbotham reports, isn’t like other buildings in New York. It has a unique shape, and requires a particularly complex window-washing scaffold:",
+				"url": "http://www.newyorker.com/books/double-take/rescue-at-the-hearst-tower",
+				"websiteTitle": "The New Yorker",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
 				"tags": [
+					"Architecture",
 					"Hearst Tower",
-					"architecture",
-					"archive",
-					"skyscrapers",
-					"window washers"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"title": "Rescue at the Hearst Tower",
-				"publicationTitle": "The New Yorker",
-				"url": "http://www.newyorker.com/online/blogs/backissues/2013/06/window-washers-at-the-hearst-tower.html",
-				"abstractNote": "Rescuers successfully retrieved two maintenance workers at the Hearst Tower, in Midtown, who had become trapped on their scaffold.",
-				"date": "10/10/2008",
-				"libraryCatalog": "www.newyorker.com",
-				"accessDate": "CURRENT_TIMESTAMP"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.chicagotribune.com/news/politics/clout/chi-chicagos-unicorn-new-red-divvy-bicycle-20130801,0,2833828.story",
-		"items": [
-			{
-				"itemType": "webpage",
-				"creators": [
-					{
-						"firstName": "John",
-						"lastName": "Byrne",
-						"creatorType": "author"
-					}
+					"Skyscrapers",
+					"Window Washers",
+					"archive"
 				],
 				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"title": "Chicago's 'unicorn': new red Divvy bicycle",
-				"publicationTitle": "chicagotribune.com",
-				"url": "http://www.chicagotribune.com/news/politics/clout/chi-chicagos-unicorn-new-red-divvy-bicycle-20130801,0,2833828.story",
-				"abstractNote": "Mayor  Rahm Emanuel  hopped on the city&rsquo;s shiny, new &ldquo;unicorn&rdquo; Thursday and briefly pedaled around a Near West Side park for the benefit of a few TV cameras.",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "www.chicagotribune.com",
-				"shortTitle": "Chicago's 'unicorn'"
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.volokh.com/2013/12/22/northwestern-cant-quit-asa-boycott-member/",
+		"url": "http://volokh.com/2013/12/22/northwestern-cant-quit-asa-boycott-member/",
 		"items": [
 			{
 				"itemType": "blogPost",
+				"title": "Northwestern Can't Quit ASA Over Boycott Because it is Not a Member",
 				"creators": [
 					{
 						"firstName": "Eugene",
@@ -1213,24 +1231,66 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"boycott",
-					"israel"
-				],
-				"seeAlso": [],
+				"date": "12/22/2013",
+				"abstractNote": "Northwestern University recently condemned the American Studies Association boycott of Israel. Unlike some other schools that quit their institutional membership in the ASA over the boycott, Northwestern has not. Many of my Northwestern colleagues were about to start urging a similar withdrawal.\nThen we learned from our administration that despite being listed as in institutional member by the ASA,  the university has, after checking, concluded it has no such membership, does not plan to get one, and is unclear why the ASA would list us as institutional member.\nApparently, at least several other schools listed by the ASA as institutional members say they have no such relationship.\nThe ASA has been spending a great deal of energy on political activism far from its mission, but apparently cannot keep its books in order. The association has yet to explain how it has come to list as institutional members so many schools that know nothing about such a membership. The ASA’s membership rolls may get much shorter in the coming weeks even without any quitting.\nHow this confusion came to arise is unclear. ASA membership, like that of many academic organizations, comes with a subscription to their journal. Some have suggested that perhaps  the ASA also counts as members any institution whose library happened to subscribe to the journal, ie tacking on membership to a subscription, rather than vice versa. This would not be fair on their part. A library may subscribe to all sorts of journals for academic research purposes (ie Pravda), without endorsing the organization that publishes it. That is the difference between subscription and membership.\nI eagerly await the ASA’s explanation of the situation. [...]",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"blogTitle": "The Volokh Conspiracy",
+				"url": "http://volokh.com/2013/12/22/northwestern-cant-quit-asa-boycott-member/",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"title": "Northwestern Can't Quit ASA Over Boycott Because it is Not a Member",
-				"publicationTitle": "The Volokh Conspiracy",
-				"url": "http://www.volokh.com/2013/12/22/northwestern-cant-quit-asa-boycott-member/",
-				"abstractNote": "Northwestern University recently condemned the American Studies Association boycott of Israel. Unlike some other schools that quit their institutional membership in the ASA over the boycott, Northwestern has not. Many of my Northwestern colleagues were about to start urging a similar withdrawal.\nThen we learned from our administration that despite being listed as in institutional member by the ASA,  the university has, after checking, concluded it has no such membership, does not plan to get one, and is unclear why the ASA would list us as institutional member.\nApparently, at least several other schools listed by the ASA as institutional members say they have no such relationship.\nThe ASA has been spending a great deal of energy on political activism far from its mission, but apparently cannot keep its books in order. The association has yet to explain how it has come to list as institutional members so many schools that know nothing about such a membership. The ASA’s membership rolls may get much shorter in the coming weeks even without any quitting.\nHow this confusion came to arise is unclear. ASA membership, like that of many academic organizations, comes with a subscription to their journal. Some have suggested that perhaps  the ASA also counts as members any institution whose library happened to subscribe to the journal, ie tacking on membership to a subscription, rather than vice versa. This would not be fair on their part. A library may subscribe to all sorts of journals for academic research purposes (ie Pravda), without endorsing the organization that publishes it. That is the difference between subscription and membership.\nI eagerly await the ASA’s explanation of the situation. [...]",
-				"date": "12/22/2013",
-				"libraryCatalog": "www.volokh.com",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [
+					"boycott",
+					"israel"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://apps.who.int/iris/handle/10665/97603",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "WHO recommendations on postnatal care of the mother and newborn",
+				"creators": [
+					{
+						"firstName": "World Health",
+						"lastName": "Organization",
+						"creatorType": "author"
+					}
+				],
+				"date": "2014",
+				"ISBN": "9789241506649",
+				"extra": "62 p.",
+				"language": "en",
+				"libraryCatalog": "apps.who.int",
+				"publisher": "World Health Organization",
+				"url": "http://apps.who.int//iris/handle/10665/97603",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					"Guideline",
+					"Infant",
+					"Maternal Welfare",
+					"Newborn",
+					"Postnatal Care",
+					"WHO guideline",
+					"standards"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

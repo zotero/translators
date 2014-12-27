@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-01-18 09:43:44"
+	"lastUpdated": "2014-12-18 07:00:13"
 }
 
 function detectImport() {
@@ -42,7 +42,10 @@ function detectImport() {
  ********************/
  //exported as translatorObject.options
  var exportedOptions = {
-	itemType: false //allows translators to supply item type
+	itemType: false, //allows translators to override item type
+	defaultItemType: false, //item type to default to
+	typeMap: false,
+	fieldMap: false
 };
 
 
@@ -215,7 +218,7 @@ var fieldMap = {
 	},
 	T3: {
 		legislativeBody:["hearing", "bill"],
-		series:["bookSection", "conferencePaper"],
+		series:["bookSection", "conferencePaper", "journalArticle"],
 		seriesTitle:["audioRecording"]
 	},
 	//NOT HANDLED: reviewedAuthor, scriptwriter, contributor, guest
@@ -392,6 +395,7 @@ var degenerateImportFieldMap = {
 		"__default": "unsupported/Author Address",
 		"unsupported/Inventor Address": ["patent"]
 	},
+	AV: "archiveLocation", //REFMAN
 	BT: {
 		title: ["book", "manuscript"],
 		bookTitle: ["bookSection"],
@@ -539,18 +543,35 @@ TagMapper.prototype.reverseLookup = function(itemType, zField) {
 		var risTag;
 		for(risTag in this.mapList[i]) {
 			var typeMap = this.mapList[i][risTag];
-			if(typeMap == zField //item type-independent
-				|| (typeof(typeMap) == 'object'
-					&& ( (typeMap[zField] && typeMap[zField].indexOf(itemType) !== -1) //explicitly mapped
-						|| (
-							!(typeMap.__exclude && typeMap.__exclude.indexOf(itemType) !== -1)
-							&& typeMap.__default == zField //mapped via __default and not excluded
-						)
-					)
-				)
-			) {
+			if(typeMap == zField) {
+				// item type indepndent
 				this.reverseCache[itemType][zField] = risTag;
 				return risTag;
+			} else if(typeof(typeMap) == 'object') {
+				if (typeMap[zField] && typeMap[zField].indexOf(itemType) !== -1) {
+					//explicitly mapped
+					this.reverseCache[itemType][zField] = risTag;
+					return risTag;
+				}
+				if(!(typeMap.__exclude && typeMap.__exclude.indexOf(itemType) !== -1)
+					&& typeMap.__default == zField
+				) {
+					// may be mapped via default, but make sure this item type is not
+					// explicitly mapped somewhere else
+					var preventDefault = false;
+					for(var field in typeMap) {
+						if(typeMap[field].indexOf(itemType) != -1) {
+							// mapped to something else
+							preventDefault = true;
+							break;
+						}
+					}
+					
+					if(!preventDefault) {
+						this.reverseCache[itemType][zField] = risTag;
+						return risTag;
+					}
+				}
 			}
 		}
 	}
@@ -562,8 +583,8 @@ TagMapper.prototype.reverseLookup = function(itemType, zField) {
  * Import Functions *
  ********************/
 
-//set up import field mapping
-var importFields = new TagMapper([fieldMap, degenerateImportFieldMap]);
+//import field mapping
+var importFields;
 
 //do not store unknwon fields in notes
 //configurable via RIS.import.ignoreUnknown hidden preference
@@ -712,7 +733,58 @@ var RISReader = new function() {
 		// Don't use shortcuts like _lineBuffer.pop() || Zotero.read(),
 		//  because we may have an empty line, which could be meaningful
 		if(_lineBuffer.length) return _lineBuffer.pop();
-		return Zotero.read();
+		var line = Zotero.read();
+		if (line && (line.indexOf('\u2028') != -1 || line.indexOf('\u2029') != -1)) {
+			// Apparently some services think that it's cool to break up single
+			// lines in RIS into shorter lines using Unicode "LINE SEPARATOR"
+			// character. Well, that sucks for us, because . (dot) in regexp does
+			// not match this character. We also probably don't want it in the
+			// metadata, so clean it up here.
+			// e.g. http://informahealthcare.com/doi/full/10.3109/07434618.2014.906498
+			// (an Atypon system)
+			// Also include paragraph separator, though no live example available.
+			line = line.replace(/[\u2028\u2029]/g, ' ');
+		}
+		return line;
+	}
+};
+
+/**
+ * Generic methods for cleaning RIS tags
+ */
+var TagCleaner = {
+	/**
+	 * public
+	 * Changes the RIS tag for an indicated tag-value pair. If more than one tag
+	 *   is specified, additional pairs are added.
+	 *
+	 * @param (RISReader entry) entry
+	 * @param (Integer) at Index in entry of the tag-value pair to alter
+	 * @param (String[]) toTags Array of tags to change to
+	 */
+	changeTag: function(entry, at, toTags) {
+		var source = entry[at], byTag = entry.tags[source.tag];
+		
+		//clean up "tags" list
+		byTag.splice(byTag.indexOf(source),1);
+		if(!byTag.length) delete entry.tags[source.tag];
+		
+		if(!toTags || !toTags.length) {
+			//then we just remove
+			entry.splice(at,1);
+		} else {
+			source.tag = toTags[0]; //re-use the same pair for first tag
+			if(!entry.tags[toTags[0]]) entry.tags[toTags[0]] = [];
+			entry.tags[toTags[0]].push(source);
+			//if we're changing to more than one tag, we need to add extras
+			for(var i=1, n=toTags.length; i<n; i++) {
+				var newSource = ZU.deepCopy(source);
+				newSource.tag = toTags[i];
+				entry.splice(at+i, 0, newSource);
+				if(!entry.tags[toTags[i]]) entry.tags[toTags[i]] = [];
+				entry.tags[toTags[i]].push(newSource);
+			}
+		}
 	}
 };
 
@@ -769,7 +841,7 @@ var ProCiteCleaner = new function() {
 		'Series Volume ID': 'seriesNumber',
 		'Scale': 'scale',
 		'Place of Publication': 'place',
-		'History': 'history',
+		'Histroy': 'history', // yes, it's misspelled in their export filter
 		'Size': 'artworkSize'
 	};
 	
@@ -782,6 +854,18 @@ var ProCiteCleaner = new function() {
 	 * @param (Zotero.Item) item Indicates item type for proper mapping
 	 */
 	this.cleanTags = function(entry, item) {
+		// We _must_ change some tags before mapping from notes, otherwise
+		// there will be ambiguity
+		var ty;
+		if(this.proCiteMode) {
+			ty = entry.tags.TY && entry.tags.TY[0].value;
+			if((ty == 'CHAP' || ty == 'BOOK') && entry.tags.VL) {
+				// Edition in ET, not VL
+				_changeAllTags(entry, 'VL', 'ET');
+			}
+		}
+		
+		
 		var notes = entry.tags.N1, extentOfWork, packagingMethod;
 		//go through all the notes
 		for(var i=0; notes && notes.length && i<entry.length; i++) {
@@ -920,27 +1004,49 @@ var ProCiteCleaner = new function() {
 		//the rest we only fix if we're sure this is ProCite
 		if(!this.proCiteMode) return;
 		
+		ty = entry.tags.TY && entry.tags.TY[0].value;
+		
 		//fix titles in book sections.
 		//essentially, make sure there are no duplicate T tags and put them in order
-		if(entry.tags.TY && entry.tags.TY[0].value == 'CHAP') {
+		if(ty == 'CHAP') {
 			var titleTags = ['T3', 'T2', 'TI'];
 			for(var i=0; i<entry.length && titleTags.length; i++) {
 				if((['TI', 'T1', 'T2', 'T3']).indexOf(entry[i].tag) !== -1) {
-					entry[i].tag = titleTags.pop();
+					var newTag = titleTags.pop();
+					if(entry[i].tag == newTag) continue; //already correct
+					this._changeTag(entry, i, [newTag]);
 				}
 			}
 		}
 		
-		//fix publication place for conferences. Should be C1, not CY
-		if(entry.tags.TY && entry.tags.TY[0].value == 'CONF' && entry.tags.CY && !entry.tags.C1) {
-			for(var i=0; i<entry.tags.CY.length; i++) {
-				entry.tags.CY[i].tag = 'C1';
-			}
-			
-			entry.tags.C1 = entry.tags.CY;
-			delete entry.tags.CY;
+		if(ty == 'BOOK' && entry.tags.IS && entry.tags.IS.length) {
+			_changeAllTags(entry, 'IS', 'VL');
 		}
 		
+		if((ty == 'CHAP' || ty == 'BOOK') && entry.tags.VL && entry.tags.VL.length > 1) {
+			// We try to fix this ahead of time, but we can't always
+			// 2 of these entries would indicate Edition and then Volume (maybe)
+			this._changeTag(entry, entry.indexOf(entry.tags.VL[0]), ['ET']);
+		}
+		
+		//fix publication place for conferences. Should be C1, not CY
+		if(ty == 'CONF' && entry.tags.CY && !entry.tags.C1) {
+			_changeAllTags(entry, 'CY', 'C1');
+		}
+		
+		if(ty == 'COMP'&& entry.tags.IS) {
+			_changeAllTags(entry, 'IS', 'ET');
+		}
+		
+		if(ty == 'BILL') {
+			if(entry.tags.CY) _changeAllTags(entry, 'CY', 'T2');
+			if(entry.tags.VL) _changeAllTags(entry, 'VL', 'M1');
+			if(entry.tags.SP) _changeAllTags(entry, 'SP', 'SE');
+		}
+		
+		if(ty == 'ART') {
+			if(entry.tags.M1) _changeAllTags(entry, 'M1', 'M3');
+		}
 	};
 	
 	/**
@@ -969,39 +1075,32 @@ var ProCiteCleaner = new function() {
 		author = author.trim();
 		return author.substr(author.lastIndexOf(' ')+1) + ', ' + author.substring(0,author.lastIndexOf(' '));
 	}
+		
+	/**
+	 * private
+	 * Change all appearances of tag to another tag
+	 * 
+	 * @param (RISReader entry) entry
+	 * @param (String) from
+	 * @param (String) to
+	 */
+	function _changeAllTags(entry, from, to) {
+		if(!from || !to) return;
+		
+		for(var i=0; i<entry.tags[from].length; i++) {
+			entry.tags[from][i].tag = to;
+		}
+		
+		entry.tags[to] = entry.tags[from];
+		delete entry.tags[from];
+	}
 	
 	/**
 	 * public
-	 * Changes the RIS tag for an indicated tag-value pair. If more than one tag
-	 *   is specified, additional pairs are added.
-	 *
-	 * @param (RISReader entry) entry
-	 * @param (Integer) at Index in entry of the tag-value pair to alter
-	 * @param (String[]) toTags Array of tags to change to
+	 * Wrapper for TagCleaner.changeTag
 	 */
 	this._changeTag = function(entry, at, toTags) {
-		var source = entry[at], byTag = entry.tags[source.tag];
-		
-		//clean up "tags" list
-		byTag.splice(byTag.indexOf(source),1);
-		if(!byTag.length) delete entry.tags[source.tag];
-		
-		if(!toTags || !toTags.length) {
-			//then we just remove
-			entry.splice(at,1);
-		} else {
-			source.tag = toTags[0]; //re-use the same pair for first tag
-			if(!entry.tags[toTags[0]]) entry.tags[toTags[0]] = [];
-			entry.tags[toTags[0]].push(source);
-			//if we're changing to more than one tag, we need to add extras
-			for(var i=1, n=toTags.length; i<n; i++) {
-				var newSource = ZU.deepCopy(source);
-				newSource.tag = toTags[i];
-				entry.splice(at+i, 0, newSource);
-				if(!entry.tags[toTags[i]]) entry.tags[toTags[i]] = [];
-				entry.tags[toTags[i]].push(newSource);
-			}
-		}
+		TagCleaner.changeTag(entry, at, toTags);
 		
 		//if we're changing tags, then we're sure this is ProCite format
 		//it's not the most intuitive place for this,
@@ -1048,6 +1147,25 @@ var ProCiteCleaner = new function() {
 		if(tag) return added ? added : true;
 	};
 }
+/**
+ * @singleton Fixes some EndNote bugs, makes it more conveninent to import
+ */
+var EndNoteCleaner = new function() {
+	/**
+	 * public
+	 * 
+	 * @param (RISReader entry) entry Entry to be cleaned up in-place
+	 * @param (Zotero.Item) item Indicates item type for proper mapping
+	 */
+	this.cleanTags = function(entry, item) {
+		// for edited books, treat authors as editors
+		if(entry.tags.TY && entry.tags.TY[0].value == 'EDBOOK' && entry.tags.AU) {
+			for(var i = entry.tags.AU.length-1; i>=0; i--) {
+				TagCleaner.changeTag(entry, entry.indexOf(entry.tags.AU[i]), ['A3']);
+			}
+		}
+	}
+};
 
 function processTag(item, tagValue, risEntry) {
 	var tag = tagValue.tag;
@@ -1104,22 +1222,22 @@ function processTag(item, tagValue, risEntry) {
 			//Endnote exports access date for webpages to M1
 			//It makes much more sense to export to Y2
 			//We should make sure that M1 does not overwrite whatever may be in Y2
-			if(zField == "accessDate") {
+			if(zField[0] == "accessDate") {
 				item.backupAccessDate = {
-					field: zField,
-					value: dateRIStoZotero(value, zField)
+					field: zField[0],
+					value: dateRIStoZotero(value, zField[0])
 				}
 				value = undefined;
 				processFields = false;
 			}
 		break;
 		case "VL":
-			if(zField == "accessDate") {
+			if(zField[0] == "accessDate") {
 				//EndNote screws up webpage entries. VL is access year, but access date is available
 				if(!item.backupAccessDate) {	//make sure we don't replace the M1 data
 					item.backupAccessDate = {
-						field: zField,
-						value: dateRIStoZotero(value, zField)
+						field: zField[0],
+						value: dateRIStoZotero(value, zField[0])
 					};
 				}
 				value = undefined;
@@ -1127,13 +1245,26 @@ function processTag(item, tagValue, risEntry) {
 			}
 		break;
 		//PY is typically less complete than other dates. We'll store it as backup
+		case "Y1":
+			if (item.backupDate) {
+				value = undefined;
+				processFields = false;
+				break;
+			}
 		case "PY":
 			item.backupDate = {
-				field: zField,
-				value: dateRIStoZotero(value, zField)
+				field: zField[0],
+				value: dateRIStoZotero(value, zField[0])
 			};
 			value = undefined;
 			processFields = false;
+		break;
+		case "UR":
+			//REFMAN places PMIDS in UR sometimes
+			if(value.indexOf('PM:') != -1) {
+				value = 'PMID: ' + value.substr(3);
+				zField = ['extra'];
+			}
 		break;
 	}
 
@@ -1162,11 +1293,12 @@ function processTag(item, tagValue, risEntry) {
 			case "issueDate":
 			case "dateEnacted":
 			case "dateDecided":
-				value = dateRIStoZotero(value, zField);
+				value = dateRIStoZotero(value, zField[0]);
 			break;
 			case "tags":
 				//allow new lines or semicolons. Commas, might be more problematic
-				value = value.split(/\s*(?:[\r\n]+\s*)+|\s*(?:;\s*)+/);
+				//%K part is a hack for REFMAN exports
+				value = value.split(/\s*(?:[\r\n]+\s*)+(?:%K\s+)?|\s*(?:;\s*)+/);
 
 				//the regex will take care of double semicolons and newlines
 				//but it will still allow a blank tag if there is a newline or
@@ -1270,7 +1402,7 @@ function applyValue(item, zField, value, rawLine) {
 		break;
 		case 'extra':
 			if(item.extra) {
-				item.extra += '; ' + value;
+				item.extra += '\n' + value;
 			} else {
 				item.extra = value;
 			}
@@ -1509,6 +1641,11 @@ function getNewItem(type) {
 }
 
 function doImport() {
+	//set up import field mapper
+	var maps = [fieldMap, degenerateImportFieldMap];
+	if(exportedOptions.fieldMap) maps.unshift(exportedOptions.fieldMap);
+	importFields = new TagMapper(maps);
+	
 	//prepare some configurable options
 	if(Zotero.getHiddenPref) {
 		if(Zotero.getHiddenPref("RIS.import.ignoreUnknown")) {
@@ -1522,22 +1659,33 @@ function doImport() {
 	var entry;
 	while(entry = RISReader.nextEntry()) {
 		//determine item type
-		var itemType = exportedOptions.itemType
-			|| (entry.tags.TY && importTypeMap[entry.tags.TY[0].value.trim().toUpperCase()]);
+		var itemType = exportedOptions.itemType;
+		if(!itemType && entry.tags.TY) {
+			var risType = entry.tags.TY[0].value.trim().toUpperCase();
+			if(exportedOptions.typeMap) {
+				itemType = exportedOptions.typeMap[risType];
+			}
+			if(!itemType) {
+				itemType = importTypeMap[risType];
+			}
+		}
+		
 		//we allow entries without TY and just use default type
 		if(!itemType) {
+			var defaultType = exportedOptions.defaultItemType || DEFAULT_IMPORT_TYPE;
 			if(entry.tags.TY) {
 				Z.debug("RIS: Unknown item type: " + entry.tags.TY[0].value
-					+ ". Defaulting to " + DEFAULT_IMPORT_TYPE);
+					+ ". Defaulting to " + defaultType);
 			} else {
-				Z.debug("RIS: TY tag not specified. Defaulting to " + DEFAULT_IMPORT_TYPE);
+				Z.debug("RIS: TY tag not specified. Defaulting to " + defaultType);
 			}
 			
-			itemType = DEFAULT_IMPORT_TYPE;
+			itemType = defaultType;
 		}
 		
 		var item = getNewItem(itemType);
 		ProCiteCleaner.cleanTags(entry, item); //clean up ProCite "tags"
+		EndNoteCleaner.cleanTags(entry, item); //some tweaks to EndNote export
 		
 		for(var i=0, n=entry.length; i<n; i++) {
 			if((['TY', 'ER']).indexOf(entry[i].tag) == -1) { //ignore TY and ER tags
@@ -1571,7 +1719,7 @@ var exportOrder = {
 var newLineChar = "\r\n"; //from spec
 
 //set up export field mapping
-var exportFields = new TagMapper([fieldMap]);
+var exportFields;
 
 function addTag(tag, value) {
 	if(!(value instanceof Array)) value = [value];
@@ -1588,6 +1736,11 @@ function addTag(tag, value) {
 
 function doExport() {
 	var item, order, tag, fields, field, value;
+	
+	//set up field mapper
+	var map = [fieldMap];
+	if(exportedOptions.fieldMap) map.unshift(exportedOptions.fieldMap);
+	exportFields = new TagMapper(map);
 
 	while(item = Zotero.nextItem()) {
 		// can't store independent notes in RIS
@@ -2742,7 +2895,7 @@ var testCases = [
 					},
 					{
 						"lastName": "Editor",
-						"creatorType": "author",
+						"creatorType": "editor",
 						"fieldMode": 1
 					}
 				],
@@ -2804,7 +2957,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>DOI: Type of Work<br/>Reviewed Item: Reviewed Item<br/>Research Notes: Research Notes<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C1  - Year Cited<br/>C2  - Date Cited<br/>C3  - PMCID<br/>C4  - Reviewer<br/>C5  - Issue Title<br/>C6  - NIHMSID<br/>C7  - Article Number<br/>CY  - Place Published<br/>ET  - Edition<br/>NV  - Document Number<br/>PB  - Publisher<br/>RP  - Reprint Edition<br/>SE  - E-Pub Date<br/>T3  - Website Title<br/>",
+						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>DOI: Type of Work<br/>Reviewed Item: Reviewed Item<br/>Research Notes: Research Notes<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C1  - Year Cited<br/>C2  - Date Cited<br/>C3  - PMCID<br/>C4  - Reviewer<br/>C5  - Issue Title<br/>C6  - NIHMSID<br/>C7  - Article Number<br/>CY  - Place Published<br/>ET  - Edition<br/>NV  - Document Number<br/>PB  - Publisher<br/>RP  - Reprint Edition<br/>SE  - E-Pub Date<br/>",
 						"tags": [
 							"_RIS import"
 						]
@@ -2829,6 +2982,7 @@ var testCases = [
 				"pages": "Pages",
 				"shortTitle": "Short Title",
 				"publicationTitle": "Periodical Title",
+				"series": "Website Title",
 				"title": "Title",
 				"url": "URL",
 				"volume": "Volume"
@@ -3193,7 +3347,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>DOI: Type of Work<br/>Original Publication: Original Publication<br/>Reviewed Item: Reviewed Item<br/>Research Notes: Research Notes<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>A3  - Author, Tertiary<br/>C1  - Custom 1<br/>C2  - Custom 2<br/>C3  - Custom 3<br/>C4  - Custom 4<br/>C5  - Custom 5<br/>C6  - Custom 6<br/>C7  - Custom 7<br/>C8  - Custom 8<br/>CY  - Place Published<br/>ET  - Edition<br/>NV  - Number of Volumes<br/>PB  - Publisher<br/>RP  - Reprint Edition<br/>SE  - Section<br/>T3  - Tertiary Title<br/>",
+						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>DOI: Type of Work<br/>Original Publication: Original Publication<br/>Reviewed Item: Reviewed Item<br/>Research Notes: Research Notes<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>A3  - Author, Tertiary<br/>C1  - Custom 1<br/>C2  - Custom 2<br/>C3  - Custom 3<br/>C4  - Custom 4<br/>C5  - Custom 5<br/>C6  - Custom 6<br/>C7  - Custom 7<br/>C8  - Custom 8<br/>CY  - Place Published<br/>ET  - Edition<br/>NV  - Number of Volumes<br/>PB  - Publisher<br/>RP  - Reprint Edition<br/>SE  - Section<br/>",
 						"tags": [
 							"_RIS import"
 						]
@@ -3219,6 +3373,7 @@ var testCases = [
 				"pages": "Pages",
 				"shortTitle": "Short Title",
 				"publicationTitle": "Secondary Title",
+				"series": "Tertiary Title",
 				"title": "Title",
 				"url": "URL",
 				"volume": "Volume",
@@ -3837,7 +3992,7 @@ var testCases = [
 				"archive": "Name of Database",
 				"libraryCatalog": "Database Provider",
 				"language": "Language",
-				"extra": "Series Volume; Number of Pages",
+				"extra": "Series Volume\nNumber of Pages",
 				"manuscriptType": "Type of Work",
 				"numPages": "Pages",
 				"shortTitle": "Short Title",
@@ -4233,7 +4388,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>DOI: Type of Work<br/>Research Notes: Research Notes<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>CY  - Place Published<br/>PB  - Institution<br/>T3  - Department<br/>",
+						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>DOI: Type of Work<br/>Research Notes: Research Notes<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>CY  - Place Published<br/>PB  - Institution<br/>",
 						"tags": [
 							"_RIS import"
 						]
@@ -4256,6 +4411,7 @@ var testCases = [
 				"pages": "Pages",
 				"shortTitle": "Short Title",
 				"publicationTitle": "Series Title",
+				"series": "Department",
 				"title": "Title of Work",
 				"url": "URL",
 				"accessDate": "0000 Access"
@@ -4391,6 +4547,2109 @@ var testCases = [
 				"url": "http://dx.doi.org/10.1111/j.1755-0998.2009.02750.x",
 				"volume": "9999",
 				"date": "2009"
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "TY  - BILL\nN1  - Record ID: 10\nA1  - Author Name, Author2 Name2\nTI  - Act Name\nRP  - Reprint Status, Date\nCY  - Code\nPY  - Date of Code\nY2  - Date\nVL  - Bill/Res Number\nSP  - Section(s)\nN1  - Histroy: History\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - ART\nN1  - Record ID: 20\nA1  - Author Name, Author2 Name2\nN1  - Artist Role: Artist Role\nT1  - Title/Subject\nM1  - Medium\nN1  - Connective Phrase: Connective Phrase\nN1  - Author, Monographic: Monographic Author\nN1  - Author Role: Author Role\nN1  - Title Monographic: Monographic Title\nRP  - Reprint Status, Date\nVL  - Edition\nCY  - Place of Publication\nPB  - Publisher Name\nY1  - Date of Publication\nN1  - Location in Work: Location in Work\nN1  - Size: Size\nN1  - Series Title: Series Title\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - ADVS\nN1  - Record ID: 30\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nT1  - Analytic Title\nM3  - Medium Designator\nN1  - Connective Phrase: Connective Phrase\nN1  - Author, Monographic: Monographic Author\nN1  - Author Role: Monographic Author Role\nN1  - Title Monographic: Monographic Title\nRP  - Reprint Status, Date\nVL  - Edition\nN1  - Author, Subsidiary: Subsidiary Author\nN1  - Author Role: Author Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nIS  - Volume ID\nN1  - Location in Work: Location in Work\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Size: Size\nN1  - Series Editor: Series Editor\nN1  - Series Editor Role: Series Editor Role\nN1  - Series Title: Series Title\nN1  - Series Volume ID: Series Volume ID\nN1  - Series Issue ID: Series Issue ID\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - CHAP\nN1  - Record ID: 40\nA1  - Author Name, Author2 Name2\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nA2  - Monographic Author\nN1  - Author Role: Author Role\nT2  - Monographic Title\nRP  - Reprint Status, Date\nVL  - Edition\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Volume ID: Volume ID\nN1  - Issue ID: Issue ID\nSP  - Page(s)\nA3  - Series Editor\nN1  - Series Editor Role: Series Editor Role\nN1  - Series Title: Series Title\nN1  - Series Volume ID: Series Volume Identification\nN1  - Series Issue ID: Series Issue Identification\nN1  - Connective PhraseConnective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - CHAP\nN1  - Record ID: 50\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nA2  - Monographic Author\nN1  - Author Role: Author Role\nT2  - Monographic Title\nRP  - Reprint Status, Date\nVL  - Edition\nN1  - Author, Subsidiary: Subsidiary Author\nN1  - Author Role: Author Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Date of Copyright: Date of Copyright\nN1  - Volume ID: Volume ID\nN1  - Issue ID: Issue ID\nSP  - Page(s)\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nA3  - Series Editor\nN1  - Series Editor Role: Series Editor Role\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - ABST\nN1  - Record ID: 180\nA1  - Author Name, Author2 Name2\nT1  - Title\nJF  - Journal Title\nRP  - Reprint Status, Date\nY1  - Date of Publication\nVL  - Volume ID\nIS  - Issue ID\nSP  - Page(s)\nAD  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - BOOK\nN1  - Record ID: 190\nA1  - Monographic Author\nT1  - Monographic Title\nRP  - Reprint Status, Date\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - BOOK\nN1  - Record ID: 200\nA1  - Monographic Author\nN1  - Author Role: Author Role\nT1  - Monographic Title\nN1  - Translated Title: Translated Title\nRP  - Reprint Status, Date\nVL  - Edition\nN1  - Author, Subsidiary: Subsidiary Author\nN1  - Author Role: Author Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Original Pub Date: Original Pub Date\nIS  - Volume ID\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nA3  - Series Editor\nN1  - Series Editor Role: Series Editor Role\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - CASE\nN1  - Record Number: 210\nA1  - Counsel\nT1  - Case Name\nT2  - Case Name (Abbrev)\nRP  - Reprint Status, Date\nCY  - Reporter\nPB  - Court\nPY  - Date Field\nY2  - Date Decided\nN1  - First Page: First Page\nVL  - Reporter Number\nSP  - Page(s)\nT3  - History\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - COMP\nN1  - Record Number: 220\nT1  - Program Title\nN1  - Computer Program: Computer Program\nN1  - Connective Phrase: Connective Phrase\nA1  - Author/Programmer\nN1  - Author Role: Author Role\nN1  - Title: Title\nRP  - Reprint Status, Date\nIS  - Version\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Date of Copyright: Date of Copyright\nN1  - Report Identification: Report ID\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - CONF\nN1  - Record Number: 230\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nN1  - Author Affiliation, Ana.: Author Affiliation\nT1  - Paper/Section Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nA2  - Editor/Compiler\nN1  - Editor/Compiler Role: Editor/Compiler Role\nN1  - Proceedings Title: Proceedings Title\nY2  - Date of Meeting\nN1  - Place of Meeting: Place of Meeting\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Date of Copyright: Date of Copyright\nVL  - Volume ID\nSP  - Location in Work\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nA3  - Series Editor\nN1  - Series Editor Role: Series Editor Role\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nAV  - Address/Availability\nUR  - Location/URL\nN1  - ISBN: ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - DATA\nN1  - Record Number: 240\nT1  - Analytic Title\nN1  - Medium (Data File): Medium (Data File)\nN1  - Connective Phrase: Connective Phrase\nA2  - Editor/Compiler\nN1  - Editor/Compiler Role: Editor/Compiler Role\nN1  - Title, Monographic: Monographic Title\nRP  - Reprint Status, Date\nIS  - Version\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nSP  - Location in Work\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - THES\nN1  - Record Number: 250\nA1  - Author Name, Author2 Name2\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nRP  - Reprint Status, Date\nN1  - Place of Publication: Place of Publication\nPB  - University\nPY  - Date of Publication\nN1  - Date of Copyright: Date of Copyright\nSP  - Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - ELEC\nN1  - Record Number: 260\nA1  - Author Name, Author2 Name2\nT1  - Title\nM1  - Medium\nJO  - Source\nRP  - Reprint Status, Date\nIS  - Edition\nPB  - Publisher Name\nPY  - Last Update\nY2  - Access Date\nN1  - Volume ID: Volume ID\nSP  - Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - ICOMM\nN1  - Record Number: 270\nA1  - Author Name, Author2 Name2\nN1  - Author E-mail: Author E-mail\nN1  - Author Affiliation: Author Affiliation\nT1  - Subject\nA2  - Recipient\nN1  - Recipient E-mail: Recipient E-mail\nRP  - Reprint Status, Date\nPY  - Date of Message\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - GEN\nN1  - Record Number: 280\nA1  - Author Name, Author2 Name2\nT1  - Analytic Title\nA2  - Monographic Author\nT2  - Monographic Title\nJO  - Journal Title\nRP  - Reprint Status, Date\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nY2  - Date of Copyright\nVL  - Volume ID\nIS  - Issue ID\nSP  - Location in Work\nA3  - Series Editor\nT3  - Series Title\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISSN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - HEAR\nN1  - Record Number: 290\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nN1  - Author Affiliation: Author Affiliation\nT1  - Title\nN1  - Medium Designator: Medium Designator\nRP  - Reprint Status, Date\nCY  - Committee\nPB  - Subcommittee\nPY  - Hearing Date\nY2  - Date\nVL  - Bill Number\nN1  - Issue ID: Issue ID\nN1  - Location in Work: Location/URL\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - MGZN\nN1  - Record Number: 300\nA1  - Author Name, Author2 Name2\nT1  - Article Title\nJO  - Magazine Title\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Copyright Date: Date of Copyright\nVL  - Volume ID\nIS  - Issue ID\nSP  - Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - INPR\nN1  - Record Number: 310\nA1  - Author Name, Author2 Name2\nT1  - Title\nJO  - Journal Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nN1  - Volume ID: Volume ID\nN1  - Page(s): Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - JOUR\nN1  - Record Number: 320\nA1  - Author Name, Author2 Name2\nT1  - Article Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nJF  - Journal Title\nN1  - Translated Title: Translated Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nVL  - Volume ID\nIS  - Issue ID\nSP  - Page(s)\nN1  - Language: Language\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISSN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - JOUR\nN1  - Record Number: 330\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nN1  - Author Affiliation: Author Affiliation\nT1  - Article Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nN1  - Author, Monographic: Monographic Author\nN1  - Author Role: Author Role\nJF  - Journal Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nVL  - Volume ID\nIS  - Issue ID\nSP  - Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nN1  - CODEN: CODEN\nSN  - ISSN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - JOUR\nN1  - Record Number: 340\nA1  - Author Name, Author2 Name2\nT1  - Analytic Title\nJF  - Journal Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nVL  - Volume ID\nIS  - Issue ID\nSP  - Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISSN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - JFULL\nN1  - Record Number: 350\nN1  - Editor: Editor\nJF  - Journal Title\nRP  - Reprint Status, Date\nN1  - Medium Designator: Medium Designator\nN1  - Edition: Edition\nN1  - Place of Publication: Place of Publication\nN1  - Publisher Name: Publisher Name\nPY  - Date of Publication\nVL  - Volume ID\nIS  - Issue ID\nSP  - Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Frequency of Publication: Frequency of Publication\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - CODEN: CODEN\nSN  - ISSN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - PCOMM\nN1  - Record Number: 360\nA1  - Author Name, Author2 Name2\nN1  - Author Affiliation: Author Affiliation\nN1  - Medium Designator: Medium Designator\nA2  - Recipient\nRP  - Reprint Status, Date\nN1  - Place of Publication: Place of Publication\nPY  - Date of Letter\nN1  - Extent of Letter: Extent of Letter\nN1  - Packaging Method: Packaging Method\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - SER\nN1  - Record Number: 370\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nT3  - Collection Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nSP  - Location of Work\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Document Type: Document Type\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - MAP\nN1  - Record Number: 380\nT1  - Map Title\nM2  - Map Type\nA1  - Cartographer\nN1  - Cartographer Role: Cartographer Role\nRP  - Reprint Status, Date\nM1  - Area\nN1  - Medium Designator: Medium Designator\nVL  - Edition\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nY2  - Date of Copyright\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Size: Size\nN1  - Scale: Scale\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nN1  - Series Issue ID: Series Issue ID\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - SER\nN1  - Record Number: 390\nA1  - Monographic Author\nN1  - Author Role: Author Role\nT1  - Monographic Title\nRP  - Reprint Status, Date\nVL  - Edition\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - MUSIC\nN1  - Record Number: 400\nA1  - Composer\nN1  - Composer Role: Composer Role\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nA2  - Editor/Compiler\nN1  - Editor/Compiler Role: Editor/Compiler Role\nN1  - Title, Monographic: Monographic Title\nRP  - Reprint Status, Date\nN1  - Medium Designator: Medium Designator\nVL  - Edition\nN1  - Author, Subsidiary: Subsidiary Author\nN1  - Author Role: Author Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Copyright Date: Copyright Date\nIS  - Volume ID\nN1  - Report Identification: Report ID\nN1  - Plate Number: Plate Number\nN1  - Location in Work: Location in Work\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nA3  - Series Editor\nN1  - Series Editor Role: Series Editor Role\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nN1  - Series Issue ID: Series Issue ID\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - MPCT\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Producer: Producer\nN1  - Producer Role: Producer Role\nRP  - Reprint Status, Date\nA1  - Director\nN1  - Director Role: Director Role\nCY  - Place of Publication\nU5  - Distributor\nPY  - Date of Publication\nM2  - Timing\nN1  - Packaging Method: Packaging Method\nN1  - Size: Size\nT3  - Series Title\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - NEWS\nN1  - Record Number: 420\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nJO  - Newspaper Name\nRP  - Reprint Status, Date\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nM2  - Section\nN1  - Column Number: Column Number\nSP  - Page(s)\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - PAT\nN1  - Record Number: 430\nA1  - Inventor Name\nN1  - Address: Address\nT1  - Patent Title\nA2  - Assignee\nN1  - Title, Short Form: Title, Short Form\nN1  - Title, Long Form: Title, Long Form\nN1  - Abstract Journal Date: Abstract Journal Date\nCY  - Country\nM3  - Document Type\nIS  - Patent Number\nN1  - Abstract Journal Title: Abstract Journal Title\nPY  - Date of Patent Issue\nVL  - Application No./Date\nN1  - Abstract Journal Volume: Abstract Journal Volume\nN1  - Abstract Journal Issue: Abstract Journal Issue\nSP  - Abstract Journal Page(s)\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Language: Language\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nM2  - Class Code, National\nM1  - Class Code, International\nN1  - Related Document No.: Related Document Number\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Registry Number: Registry Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - RPRT\nN1  - Record Number: 440\nA1  - Author Name, Author2 Name2\nN1  - Author Role, Analytic: Author Role\nN1  - Author Affiliation: Author Affiliation\nN1  - Section Title: Section Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nA2  - Monographic Author\nN1  - Author Role: Author Role\nT1  - Report Title\nRP  - Reprint Status, Date\nN1  - Edition: Edition\nN1  - Author, Subsidiary: Subsidiary Author\nN1  - Author Role: Author Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nVL  - Report ID\nSP  - Extent of Work\nN1  - Packaging Method: Packaging Method\nT3  - Series Title\nN1  - Series Volume ID: Series Volume ID\nN1  - Series Issue ID: Series Issue ID\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - CODEN: CODEN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - SOUND\nN1  - Record Number: 450\nA1  - Composer\nN1  - Composer Role: Composer Role\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Connective Phrase: Connective Phrase\nN1  - Editor/Compiler: Editor/Compiler\nN1  - Editor/Compiler Role: Editor/Compiler Role\nN1  - Recording Title: Recording Title\nRP  - Reprint Status, Date\nN1  - Edition: Edition\nA2  - Performer\nN1  - Performer Role: Performer Role\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nN1  - Copyright Date: Date of Copyright\nN1  - Acquisition Number: Acquisition Number\nN1  - Matrix Number: Matrix Number\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Size: Size\nN1  - Reproduction Ratio: Reproduction Ratio\nT3  - Series Title\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - STAT\nN1  - Record Number: 460\nA1  - Author Name, Author2 Name2\nT1  - Statute Title\nRP  - Reprint Status, Date\nCY  - Code\nPY  - Date of Publication\nY2  - Date\nVL  - Title/Code Number\nSP  - Section(s)\nT3  - History\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - CTLG\nN1  - Record Number: 470\nA1  - Author Name, Author2 Name2\nT1  - Catalog Title\nN1  - Medium Designator: Medium Designator\nRP  - Reprint Status, Date\nVL  - Edition\nCY  - Place of Publication\nPB  - Publisher Name\nPY  - Date of Publication\nIS  - Catalog Number\nN1  - Issue Identification: Issue ID\nN1  - Extent of Work: Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - UNBILL\nN1  - Record Number: 480\nA1  - Author Name, Author2 Name2\nT1  - Act Title\nRP  - Reprint Status, Date\nCY  - Code\nPY  - Date of Code\nY2  - Date\nVL  - Bill/Res Number\nT3  - History\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - UNPB\nN1  - Record Number: 490\nA1  - Author Name, Author2 Name2\nT1  - Title\nA2  - Editor(s)\nRP  - Reprint Status, Date\nPY  - Date of Publication\nN1  - Date of Copyright: Date of Copyright\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\nTY  - VIDEO\nN1  - Record Number: 500\nA1  - Author Name, Author2 Name2\nT1  - Analytic Title\nN1  - Medium Designator: Medium Designator\nN1  - Producer: Producer\nN1  - Producer Role: Producer Role\nRP  - Reprint Status, Date\nN1  - Director: Director\nN1  - Director Role: Director Role\nCY  - Place of Publication\nPB  - Distributor\nPY  - Date of Publication\nM2  - Extent of Work\nN1  - Packaging Method: Packaging Method\nN1  - Size: Size\nT3  - Series Title\nN1  - Connective Phrase: Connective Phrase\nAV  - Address/Availability\nUR  - Location/URL\nSN  - ISBN\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n\nTY  - ELEC\nN1  - Record Number: 510\nA1  - Author Name, Author2 Name2\nN1  - Author Role: Author Role\nN1  - Author Affiliation: Author Affiliation\nT1  - Title\nRP  - Reprint Status, Date\nPY  - Date of Publication\nY2  - Date of Access\nAV  - Address/Availability\nUR  - Location/URL\nN1  - Notes: Notes\nN2  - Abstract\nN1  - Call Number: Call Number\nKW  - Keywords1, Keywords2, Keywords3\nKW  - Keywords4\nER  - \n\n",
+		"items": [
+			{
+				"itemType": "bill",
+				"creators": [
+					{
+						"lastName": "Author Name",
+						"firstName": "Author2 Name2",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>AV  - Address/Availability<br/>N1  - Call Number: Call Number<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"code": "Code",
+				"billNumber": "Bill/Res Number",
+				"section": "Section(s)",
+				"history": "History",
+				"url": "Location/URL",
+				"abstractNote": "Abstract",
+				"title": "Act Name",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "artwork",
+				"creators": [
+					{
+						"lastName": "Author Name",
+						"firstName": "Author2 Name2",
+						"creatorType": "artist"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Artist Role: Artist Role</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>Author Role: Author Role</p>"
+					},
+					{
+						"note": "<p>Title Monographic: Monographic Title</p>"
+					},
+					{
+						"note": "<p>Location in Work: Location in Work</p>"
+					},
+					{
+						"note": "<p>Series Title: Series Title</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>N1  - Author, Monographic: Monographic Author<br/>RP  - Reprint Status, Date<br/>VL  - Edition<br/>CY  - Place of Publication<br/>PB  - Publisher Name<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"artworkMedium": "Medium",
+				"artworkSize": "Size",
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Title/Subject",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "film",
+				"creators": [
+					{
+						"lastName": "Author Name",
+						"firstName": "Author2 Name2",
+						"creatorType": "director"
+					},
+					{
+						"lastName": "Author",
+						"firstName": "Subsidiary",
+						"creatorType": "producer"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Author Role: Author Role</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>Author Role: Monographic Author Role</p>"
+					},
+					{
+						"note": "<p>Title Monographic: Monographic Title</p>"
+					},
+					{
+						"note": "<p>Author Role: Author Role</p>"
+					},
+					{
+						"note": "<p>Location in Work: Location in Work</p>"
+					},
+					{
+						"note": "<p>Extent of Work: Extent of Work</p>"
+					},
+					{
+						"note": "<p>Packaging Method: Packaging Method</p>"
+					},
+					{
+						"note": "<p>Size: Size</p>"
+					},
+					{
+						"note": "<p>Series Editor: Series Editor</p>"
+					},
+					{
+						"note": "<p>Series Editor Role: Series Editor Role</p>"
+					},
+					{
+						"note": "<p>Series Title: Series Title</p>"
+					},
+					{
+						"note": "<p>Series Volume ID: Series Volume ID</p>"
+					},
+					{
+						"note": "<p>Series Issue ID: Series Issue ID</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>M3  - Medium Designator<br/>N1  - Author, Monographic: Monographic Author<br/>RP  - Reprint Status, Date<br/>VL  - Edition<br/>CY  - Place of Publication<br/>IS  - Volume ID<br/>SN  - ISBN<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"distributor": "Publisher Name",
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Analytic Title",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "bookSection",
+				"creators": [
+					{
+						"lastName": "Author Name",
+						"firstName": "Author2 Name2",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Monographic Author",
+						"creatorType": "editor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Series Editor",
+						"creatorType": "seriesEditor",
+						"fieldMode": 1
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Medium Designator: Medium Designator</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>Author Role: Author Role</p>"
+					},
+					{
+						"note": "<p>Issue ID: Issue ID</p>"
+					},
+					{
+						"note": "<p>Series Editor Role: Series Editor Role</p>"
+					},
+					{
+						"note": "<p>Series Issue ID: Series Issue Identification</p>"
+					},
+					{
+						"note": "<p>Connective PhraseConnective Phrase</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"bookTitle": "Monographic Title",
+				"edition": "Edition",
+				"place": "Place of Publication",
+				"series": "Series Title",
+				"seriesNumber": "Series Volume Identification",
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Analytic Title",
+				"publisher": "Publisher Name",
+				"volume": "Volume ID",
+				"pages": "Page(s)",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "bookSection",
+				"creators": [
+					{
+						"lastName": "Author Name",
+						"firstName": "Author2 Name2",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Monographic Author",
+						"creatorType": "editor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Author",
+						"firstName": "Subsidiary",
+						"creatorType": "seriesEditor"
+					},
+					{
+						"lastName": "Series Editor",
+						"creatorType": "seriesEditor",
+						"fieldMode": 1
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Author Role: Author Role</p>"
+					},
+					{
+						"note": "<p>Medium Designator: Medium Designator</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>Author Role: Author Role</p>"
+					},
+					{
+						"note": "<p>Author Role: Author Role</p>"
+					},
+					{
+						"note": "<p>Date of Copyright: Date of Copyright</p>"
+					},
+					{
+						"note": "<p>Issue ID: Issue ID</p>"
+					},
+					{
+						"note": "<p>Extent of Work: Extent of Work</p>"
+					},
+					{
+						"note": "<p>Packaging Method: Packaging Method</p>"
+					},
+					{
+						"note": "<p>Series Editor Role: Series Editor Role</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"bookTitle": "Monographic Title",
+				"edition": "Edition",
+				"place": "Place of Publication",
+				"series": "Series Title",
+				"seriesNumber": "Series Volume ID",
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"ISBN": "ISBN",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Analytic Title",
+				"publisher": "Publisher Name",
+				"volume": "Volume ID",
+				"pages": "Page(s)",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Author Name",
+						"firstName": "Author2 Name2",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Address/Availability<br/>RP  - Reprint Status, Date<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"issue": "Issue ID",
+				"url": "Location/URL",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Title",
+				"publicationTitle": "Journal Title",
+				"date": "0000 Date",
+				"volume": "Volume ID",
+				"pages": "Page(s)"
+			},
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Monographic Author",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"place": "Place of Publication",
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"ISBN": "ISBN",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Monographic Title",
+				"publisher": "Publisher Name",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Monographic Author",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Author",
+						"firstName": "Subsidiary",
+						"creatorType": "seriesEditor"
+					},
+					{
+						"lastName": "Series Editor",
+						"creatorType": "editor",
+						"fieldMode": 1
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Author Role: Author Role</p>"
+					},
+					{
+						"note": "<p>Translated Title: Translated Title</p>"
+					},
+					{
+						"note": "<p>Author Role: Author Role</p>"
+					},
+					{
+						"note": "<p>Original Pub Date: Original Pub Date</p>"
+					},
+					{
+						"note": "<p>Extent of Work: Extent of Work</p>"
+					},
+					{
+						"note": "<p>Packaging Method: Packaging Method</p>"
+					},
+					{
+						"note": "<p>Series Editor Role: Series Editor Role</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"edition": "Edition",
+				"place": "Place of Publication",
+				"series": "Series Title",
+				"seriesNumber": "Series Volume ID",
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"ISBN": "ISBN",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Monographic Title",
+				"publisher": "Publisher Name",
+				"volume": "Volume ID",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "case",
+				"creators": [
+					{
+						"lastName": "Counsel",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>First Page: First Page</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>CY  - Reporter<br/>T3  - History<br/>AV  - Address/Availability<br/>N1  - Call Number: Call Number<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"caseName": "Case Name",
+				"court": "Court",
+				"reporterVolume": "Reporter Number",
+				"firstPage": "Page(s)",
+				"url": "Location/URL",
+				"abstractNote": "Abstract",
+				"dateDecided": "0000 Date"
+			},
+			{
+				"itemType": "computerProgram",
+				"creators": [
+					{
+						"lastName": "Author/Programmer",
+						"creatorType": "programmer",
+						"fieldMode": 1
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Computer Program: Computer Program</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>Author Role: Author Role</p>"
+					},
+					{
+						"note": "<p>Title: Title</p>"
+					},
+					{
+						"note": "<p>Date of Copyright: Date of Copyright</p>"
+					},
+					{
+						"note": "<p>Report Identification: Report ID</p>"
+					},
+					{
+						"note": "<p>Extent of Work: Extent of Work</p>"
+					},
+					{
+						"note": "<p>Packaging Method: Packaging Method</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"version": "Version",
+				"place": "Place of Publication",
+				"company": "Publisher Name",
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"ISBN": "ISBN",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Program Title",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "conferencePaper",
+				"creators": [
+					{
+						"lastName": "Author Name",
+						"firstName": "Author2 Name2",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Editor/Compiler",
+						"creatorType": "editor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Series Editor",
+						"creatorType": "seriesEditor",
+						"fieldMode": 1
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Author Role: Author Role</p>"
+					},
+					{
+						"note": "<p>Author Affiliation, Ana.: Author Affiliation</p>"
+					},
+					{
+						"note": "<p>Medium Designator: Medium Designator</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>Editor/Compiler Role: Editor/Compiler Role</p>"
+					},
+					{
+						"note": "<p>Place of Meeting: Place of Meeting</p>"
+					},
+					{
+						"note": "<p>Date of Copyright: Date of Copyright</p>"
+					},
+					{
+						"note": "<p>Extent of Work: Extent of Work</p>"
+					},
+					{
+						"note": "<p>Packaging Method: Packaging Method</p>"
+					},
+					{
+						"note": "<p>Series Editor Role: Series Editor Role</p>"
+					},
+					{
+						"note": "<p>Series Volume ID: Series Volume ID</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"proceedingsTitle": "Proceedings Title",
+				"place": "Place of Publication",
+				"series": "Series Title",
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"ISBN": "ISBN",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Paper/Section Title",
+				"publisher": "Publisher Name",
+				"volume": "Volume ID",
+				"pages": "Location in Work",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "document",
+				"creators": [
+					{
+						"lastName": "Editor/Compiler",
+						"creatorType": "editor",
+						"fieldMode": 1
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Medium (Data File): Medium (Data File)</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>Editor/Compiler Role: Editor/Compiler Role</p>"
+					},
+					{
+						"note": "<p>Title, Monographic: Monographic Title</p>"
+					},
+					{
+						"note": "<p>Extent of Work: Extent of Work</p>"
+					},
+					{
+						"note": "<p>Packaging Method: Packaging Method</p>"
+					},
+					{
+						"note": "<p>Series Volume ID: Series Volume ID</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>IS  - Version<br/>CY  - Place of Publication<br/>SP  - Location in Work<br/>T3  - Series Title<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Analytic Title",
+				"publisher": "Publisher Name",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "thesis",
+				"creators": [
+					{
+						"lastName": "Author Name",
+						"firstName": "Author2 Name2",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Medium Designator: Medium Designator</p>"
+					},
+					{
+						"note": "<p>Date of Copyright: Date of Copyright</p>"
+					},
+					{
+						"note": "<p>Packaging Method: Packaging Method</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"place": "Place of Publication",
+				"university": "University",
+				"numPages": "Extent of Work",
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Analytic Title",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "webpage",
+				"creators": [
+					{
+						"lastName": "Author Name",
+						"firstName": "Author2 Name2",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Volume ID: Volume ID</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>JO  - Source<br/>RP  - Reprint Status, Date<br/>IS  - Edition<br/>PB  - Publisher Name<br/>SP  - Page(s)<br/>AV  - Address/Availability<br/>N1  - Call Number: Call Number<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"url": "Location/URL",
+				"abstractNote": "Abstract",
+				"title": "Title",
+				"date": "0000 Last"
+			},
+			{
+				"itemType": "email",
+				"creators": [
+					{
+						"lastName": "Author Name",
+						"firstName": "Author2 Name2",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Recipient",
+						"creatorType": "recipient",
+						"fieldMode": 1
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Author E-mail: Author E-mail</p>"
+					},
+					{
+						"note": "<p>Author Affiliation: Author Affiliation</p>"
+					},
+					{
+						"note": "<p>Recipient E-mail: Recipient E-mail</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>AV  - Address/Availability<br/>N1  - Call Number: Call Number<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"subject": "Subject",
+				"url": "Location/URL",
+				"abstractNote": "Abstract",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Author Name",
+						"firstName": "Author2 Name2",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Monographic Author",
+						"creatorType": "editor",
+						"fieldMode": 1
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>CY  - Place of Publication<br/>PB  - Publisher Name<br/>A3  - Series Editor<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"journalAbbreviation": "Journal Title",
+				"issue": "Issue ID",
+				"series": "Series Title",
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"ISSN": "ISSN",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Analytic Title",
+				"publicationTitle": "Monographic Title",
+				"volume": "Volume ID",
+				"pages": "Location in Work",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "hearing",
+				"creators": [
+					{
+						"lastName": "Author Name",
+						"firstName": "Author2 Name2",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Author Role: Author Role</p>"
+					},
+					{
+						"note": "<p>Author Affiliation: Author Affiliation</p>"
+					},
+					{
+						"note": "<p>Medium Designator: Medium Designator</p>"
+					},
+					{
+						"note": "<p>Location in Work: Location/URL</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>VL  - Bill Number<br/>N1  - Issue ID: Issue ID<br/>AV  - Address/Availability<br/>N1  - Call Number: Call Number<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"place": "Committee",
+				"url": "Location/URL",
+				"abstractNote": "Abstract",
+				"title": "Title",
+				"publisher": "Subcommittee",
+				"date": "0000 Hearing"
+			},
+			{
+				"itemType": "magazineArticle",
+				"creators": [
+					{
+						"lastName": "Author Name",
+						"firstName": "Author2 Name2",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Copyright Date: Date of Copyright</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>JO  - Magazine Title<br/>CY  - Place of Publication<br/>PB  - Publisher Name<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"issue": "Issue ID",
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Article Title",
+				"volume": "Volume ID",
+				"pages": "Page(s)",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "manuscript",
+				"creators": [
+					{
+						"lastName": "Author Name",
+						"firstName": "Author2 Name2",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Page(s): Page(s)</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>JO  - Journal Title<br/>RP  - Reprint Status, Date<br/>N1  - Volume ID: Volume ID<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Title",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Author Name",
+						"firstName": "Author2 Name2",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Medium Designator: Medium Designator</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>Translated Title: Translated Title</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"issue": "Issue ID",
+				"language": "Language",
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"ISSN": "ISSN",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Article Title",
+				"publicationTitle": "Journal Title",
+				"volume": "Volume ID",
+				"pages": "Page(s)",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Author Name",
+						"firstName": "Author2 Name2",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Author",
+						"firstName": "Monographic",
+						"creatorType": "editor"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Author Role: Author Role</p>"
+					},
+					{
+						"note": "<p>Author Affiliation: Author Affiliation</p>"
+					},
+					{
+						"note": "<p>Medium Designator: Medium Designator</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>Author Role: Author Role</p>"
+					},
+					{
+						"note": "<p>CODEN: CODEN</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"issue": "Issue ID",
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"ISSN": "ISSN",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Article Title",
+				"publicationTitle": "Journal Title",
+				"volume": "Volume ID",
+				"pages": "Page(s)",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Author Name",
+						"firstName": "Author2 Name2",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"issue": "Issue ID",
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"ISSN": "ISSN",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Analytic Title",
+				"publicationTitle": "Journal Title",
+				"volume": "Volume ID",
+				"pages": "Page(s)",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "journalArticle",
+				"creators": [],
+				"notes": [
+					{
+						"note": "<p>Editor: Editor</p>"
+					},
+					{
+						"note": "<p>Medium Designator: Medium Designator</p>"
+					},
+					{
+						"note": "<p>Packaging Method: Packaging Method</p>"
+					},
+					{
+						"note": "<p>Frequency of Publication: Frequency of Publication</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>CODEN: CODEN</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>N1  - Edition: Edition<br/>N1  - Place of Publication: Place of Publication<br/>N1  - Publisher Name: Publisher Name<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"issue": "Issue ID",
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"ISSN": "ISSN",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"publicationTitle": "Journal Title",
+				"volume": "Volume ID",
+				"pages": "Extent of Work",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "letter",
+				"creators": [
+					{
+						"lastName": "Author Name",
+						"firstName": "Author2 Name2",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Recipient",
+						"creatorType": "recipient",
+						"fieldMode": 1
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Author Affiliation: Author Affiliation</p>"
+					},
+					{
+						"note": "<p>Medium Designator: Medium Designator</p>"
+					},
+					{
+						"note": "<p>Extent of Letter: Extent of Letter</p>"
+					},
+					{
+						"note": "<p>Packaging Method: Packaging Method</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>N1  - Place of Publication: Place of Publication<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Author Name",
+						"firstName": "Author2 Name2",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Author Role: Author Role</p>"
+					},
+					{
+						"note": "<p>Medium Designator: Medium Designator</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>Extent of Work: Extent of Work</p>"
+					},
+					{
+						"note": "<p>Packaging Method: Packaging Method</p>"
+					},
+					{
+						"note": "<p>Document Type: Document Type</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"series": "Collection Title",
+				"numPages": "Location of Work",
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Analytic Title",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "map",
+				"creators": [
+					{
+						"lastName": "Cartographer",
+						"creatorType": "cartographer",
+						"fieldMode": 1
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Cartographer Role: Cartographer Role</p>"
+					},
+					{
+						"note": "<p>Medium Designator: Medium Designator</p>"
+					},
+					{
+						"note": "<p>Extent of Work: Extent of Work</p>"
+					},
+					{
+						"note": "<p>Packaging Method: Packaging Method</p>"
+					},
+					{
+						"note": "<p>Size: Size</p>"
+					},
+					{
+						"note": "<p>Series Volume ID: Series Volume ID</p>"
+					},
+					{
+						"note": "<p>Series Issue ID: Series Issue ID</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>VL  - Edition<br/>T3  - Series Title<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"extra": "Map Type\nArea",
+				"place": "Place of Publication",
+				"scale": "Scale",
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Map Title",
+				"publisher": "Publisher Name",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Monographic Author",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Author Role: Author Role</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"place": "Place of Publication",
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"ISBN": "ISBN",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Monographic Title",
+				"volume": "Edition",
+				"publisher": "Publisher Name",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "audioRecording",
+				"creators": [
+					{
+						"lastName": "Composer",
+						"creatorType": "composer",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Editor/Compiler",
+						"creatorType": "performer",
+						"fieldMode": 1
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Composer Role: Composer Role</p>"
+					},
+					{
+						"note": "<p>Medium Designator: Medium Designator</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>Editor/Compiler Role: Editor/Compiler Role</p>"
+					},
+					{
+						"note": "<p>Title, Monographic: Monographic Title</p>"
+					},
+					{
+						"note": "<p>Medium Designator: Medium Designator</p>"
+					},
+					{
+						"note": "<p>Author Role: Author Role</p>"
+					},
+					{
+						"note": "<p>Copyright Date: Copyright Date</p>"
+					},
+					{
+						"note": "<p>Report Identification: Report ID</p>"
+					},
+					{
+						"note": "<p>Plate Number: Plate Number</p>"
+					},
+					{
+						"note": "<p>Location in Work: Location in Work</p>"
+					},
+					{
+						"note": "<p>Extent of Work: Extent of Work</p>"
+					},
+					{
+						"note": "<p>Packaging Method: Packaging Method</p>"
+					},
+					{
+						"note": "<p>Series Editor Role: Series Editor Role</p>"
+					},
+					{
+						"note": "<p>Series Volume ID: Series Volume ID</p>"
+					},
+					{
+						"note": "<p>Series Issue ID: Series Issue ID</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>N1  - Author, Subsidiary: Subsidiary Author<br/>IS  - Volume ID<br/>A3  - Series Editor<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"place": "Place of Publication",
+				"label": "Publisher Name",
+				"seriesTitle": "Series Title",
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"ISBN": "ISBN",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Analytic Title",
+				"volume": "Edition",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "film",
+				"creators": [
+					{
+						"lastName": "Director",
+						"creatorType": "director",
+						"fieldMode": 1
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Medium Designator: Medium Designator</p>"
+					},
+					{
+						"note": "<p>Producer: Producer</p>"
+					},
+					{
+						"note": "<p>Producer Role: Producer Role</p>"
+					},
+					{
+						"note": "<p>Director Role: Director Role</p>"
+					},
+					{
+						"note": "<p>Packaging Method: Packaging Method</p>"
+					},
+					{
+						"note": "<p>Size: Size</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>CY  - Place of Publication<br/>U5  - Distributor<br/>T3  - Series Title<br/>SN  - ISBN<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"extra": "Timing",
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Analytic Title",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"lastName": "Author Name",
+						"firstName": "Author2 Name2",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Author Role: Author Role</p>"
+					},
+					{
+						"note": "<p>Medium Designator: Medium Designator</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>Column Number: Column Number</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>JO  - Newspaper Name<br/>RP  - Reprint Status, Date<br/>PB  - Publisher Name<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"place": "Place of Publication",
+				"extra": "Section",
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Analytic Title",
+				"pages": "Page(s)",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "patent",
+				"creators": [
+					{
+						"lastName": "Inventor Name",
+						"creatorType": "inventor",
+						"fieldMode": 1
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Address: Address</p>"
+					},
+					{
+						"note": "<p>Title, Short Form: Title, Short Form</p>"
+					},
+					{
+						"note": "<p>Title, Long Form: Title, Long Form</p>"
+					},
+					{
+						"note": "<p>Abstract Journal Date: Abstract Journal Date</p>"
+					},
+					{
+						"note": "<p>Abstract Journal Title: Abstract Journal Title</p>"
+					},
+					{
+						"note": "<p>Abstract Journal Volume: Abstract Journal Volume</p>"
+					},
+					{
+						"note": "<p>Abstract Journal Issue: Abstract Journal Issue</p>"
+					},
+					{
+						"note": "<p>Extent of Work: Extent of Work</p>"
+					},
+					{
+						"note": "<p>Packaging Method: Packaging Method</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>Related Document No.: Related Document Number</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "<p>Registry Number: Registry Number</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>Patent Version Number: Application No./Date<br/>M3  - Document Type<br/>IS  - Patent Number<br/>AV  - Address/Availability<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"issuingAuthority": "Assignee",
+				"place": "Country",
+				"language": "Language",
+				"url": "Location/URL",
+				"extra": "Class Code, National",
+				"applicationNumber": "Class Code, International",
+				"abstractNote": "Abstract",
+				"issueDate": "0000 Date",
+				"title": "Patent Title",
+				"pages": "Abstract Journal Page(s)"
+			},
+			{
+				"itemType": "report",
+				"creators": [
+					{
+						"lastName": "Author Name",
+						"firstName": "Author2 Name2",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Monographic Author",
+						"creatorType": "seriesEditor",
+						"fieldMode": 1
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Author Role, Analytic: Author Role</p>"
+					},
+					{
+						"note": "<p>Author Affiliation: Author Affiliation</p>"
+					},
+					{
+						"note": "<p>Section Title: Section Title</p>"
+					},
+					{
+						"note": "<p>Medium Designator: Medium Designator</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>Author Role: Author Role</p>"
+					},
+					{
+						"note": "<p>Author Role: Author Role</p>"
+					},
+					{
+						"note": "<p>Packaging Method: Packaging Method</p>"
+					},
+					{
+						"note": "<p>Series Volume ID: Series Volume ID</p>"
+					},
+					{
+						"note": "<p>Series Issue ID: Series Issue ID</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>CODEN: CODEN</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>N1  - Edition: Edition<br/>N1  - Author, Subsidiary: Subsidiary Author<br/>VL  - Report ID<br/>T3  - Series Title<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"place": "Place of Publication",
+				"institution": "Publisher Name",
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Report Title",
+				"pages": "Extent of Work",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "audioRecording",
+				"creators": [
+					{
+						"lastName": "Composer",
+						"creatorType": "composer",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Performer",
+						"creatorType": "performer",
+						"fieldMode": 1
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Composer Role: Composer Role</p>"
+					},
+					{
+						"note": "<p>Medium Designator: Medium Designator</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>Editor/Compiler: Editor/Compiler</p>"
+					},
+					{
+						"note": "<p>Editor/Compiler Role: Editor/Compiler Role</p>"
+					},
+					{
+						"note": "<p>Recording Title: Recording Title</p>"
+					},
+					{
+						"note": "<p>Performer Role: Performer Role</p>"
+					},
+					{
+						"note": "<p>Copyright Date: Date of Copyright</p>"
+					},
+					{
+						"note": "<p>Acquisition Number: Acquisition Number</p>"
+					},
+					{
+						"note": "<p>Matrix Number: Matrix Number</p>"
+					},
+					{
+						"note": "<p>Extent of Work: Extent of Work</p>"
+					},
+					{
+						"note": "<p>Packaging Method: Packaging Method</p>"
+					},
+					{
+						"note": "<p>Size: Size</p>"
+					},
+					{
+						"note": "<p>Reproduction Ratio: Reproduction Ratio</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>N1  - Edition: Edition<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"place": "Place of Publication",
+				"label": "Publisher Name",
+				"seriesTitle": "Series Title",
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"ISBN": "ISBN",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Analytic Title",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "statute",
+				"creators": [
+					{
+						"lastName": "Author Name",
+						"firstName": "Author2 Name2",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>CY  - Code<br/>T3  - History<br/>AV  - Address/Availability<br/>N1  - Call Number: Call Number<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"nameOfAct": "Statute Title",
+				"codeNumber": "Title/Code Number",
+				"url": "Location/URL",
+				"abstractNote": "Abstract",
+				"dateEnacted": "0000 Date",
+				"pages": "Section(s)"
+			},
+			{
+				"itemType": "magazineArticle",
+				"creators": [
+					{
+						"lastName": "Author Name",
+						"firstName": "Author2 Name2",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Medium Designator: Medium Designator</p>"
+					},
+					{
+						"note": "<p>Extent of Work: Extent of Work</p>"
+					},
+					{
+						"note": "<p>Packaging Method: Packaging Method</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>issue: Issue ID<br/>RP  - Reprint Status, Date<br/>CY  - Place of Publication<br/>PB  - Publisher Name<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"issue": "Catalog Number",
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Catalog Title",
+				"volume": "Edition",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "manuscript",
+				"creators": [
+					{
+						"lastName": "Author Name",
+						"firstName": "Author2 Name2",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>VL  - Bill/Res Number<br/>T3  - History<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"place": "Code",
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Act Title",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Author Name",
+						"firstName": "Author2 Name2",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Editor(s)",
+						"creatorType": "editor",
+						"fieldMode": 1
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Date of Copyright: Date of Copyright</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Title",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "videoRecording",
+				"creators": [
+					{
+						"lastName": "Author Name",
+						"firstName": "Author2 Name2",
+						"creatorType": "director"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Medium Designator: Medium Designator</p>"
+					},
+					{
+						"note": "<p>Producer: Producer</p>"
+					},
+					{
+						"note": "<p>Producer Role: Producer Role</p>"
+					},
+					{
+						"note": "<p>Director: Director</p>"
+					},
+					{
+						"note": "<p>Director Role: Director Role</p>"
+					},
+					{
+						"note": "<p>Packaging Method: Packaging Method</p>"
+					},
+					{
+						"note": "<p>Size: Size</p>"
+					},
+					{
+						"note": "<p>Connective Phrase: Connective Phrase</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>T3  - Series Title<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"place": "Place of Publication",
+				"studio": "Distributor",
+				"extra": "Extent of Work",
+				"archiveLocation": "Address/Availability",
+				"url": "Location/URL",
+				"ISBN": "ISBN",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"title": "Analytic Title",
+				"date": "0000 Date"
+			},
+			{
+				"itemType": "webpage",
+				"creators": [
+					{
+						"lastName": "Author Name",
+						"firstName": "Author2 Name2",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>Author Role: Author Role</p>"
+					},
+					{
+						"note": "<p>Author Affiliation: Author Affiliation</p>"
+					},
+					{
+						"note": "<p>Notes</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>AV  - Address/Availability<br/>N1  - Call Number: Call Number<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"url": "Location/URL",
+				"abstractNote": "Abstract",
+				"title": "Title",
+				"date": "0000 Date"
 			}
 		]
 	}

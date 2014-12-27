@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-11-18 22:53:58"
+	"lastUpdated": "2014-04-28 21:06:26"
 }
 
 var typeMap = {
@@ -484,79 +484,6 @@ var testCases = [
 		"type": "web",
 		"url": "http://rechercheisidore.fr/search/?type=http://www.rechercheisidore.fr/ontology/art",
 		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://rechercheisidore.fr/search/resource/?uri=10670/1.mnjsvs",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"creators": [
-					{
-						"lastName": "Yu Jianrong",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"Linguistique",
-					"Linguistique",
-					"Travail",
-					"Thérapeutique par l'exercice",
-					"travail",
-					"Histoire",
-					"histoire",
-					"lutte politique",
-					"Contrôle social",
-					"bien",
-					"Création",
-					"Développement",
-					"emploi",
-					"Adaptations",
-					"société",
-					"Société",
-					"droit",
-					"Droit",
-					"Police",
-					"Nature",
-					"nature",
-					"Conséquence",
-					"Justification (théologie)"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "Isidore Record",
-						"snapshot": false
-					}
-				],
-				"title": "Le système de rééducation par le travail, instrument de la lutte politique et moyen de contrôle social",
-				"publisher": "OpenEdition",
-				"institution": "OpenEdition",
-				"company": "OpenEdition",
-				"label": "OpenEdition",
-				"distributor": "OpenEdition",
-				"date": "2010-06-01",
-				"archiveLocation": "Époque contemporaine",
-				"abstractNote": "Après un bref récapitulatif de l’histoire du système de rééducation par le travail ( laojiao), notre article conclut que la création et le développement de ce système peut se diviser de manière générale en deux phases : celle de la rééducation par le travail en tant qu’instrument de lutte politique et celle de la rééducation par le travail en tant que moyen de contrôle social. Bien qu’au cours de l’histoire, le laojiaoait été réformé plusieurs fois, que sa fonction et ses cibles aient connu de grandes variations, on peut dire que ces changements dans les tâches concrètes n’ont constitué que des adaptations du laojiaoaux exigences de la société à différentes époques, mais que la violation arbitraire du droit individuel par la force publique qui constitue la nature profonde de ce système, n’a jamais changé. En conséquence, bien que le système du laojiao, anomalie produite par l’histoire, continue de jouer un rôle aujourd’hui, la poursuite de son existence a déjà perdu toute justification et toute légitimité.",
-				"reportType": "Actualités",
-				"letterType": "Actualités",
-				"manuscriptType": "Actualités",
-				"mapType": "Actualités",
-				"thesisType": "Actualités",
-				"websiteType": "Actualités",
-				"presentationType": "Actualités",
-				"postType": "Actualités",
-				"audioFileType": "Actualités",
-				"url": "http://perspectiveschinoises.revues.org/5625",
-				"libraryCatalog": "rechercheisidore.fr",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"language": "Français"
-			}
-		]
 	}
 ]
 /** END TEST CASES **/

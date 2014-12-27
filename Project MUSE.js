@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-02-27 23:52:00"
+	"lastUpdated": "2014-08-27 02:47:50"
 }
 
 function detectWeb(doc, url) {
@@ -98,9 +98,10 @@ function scrapeOne(doc) {
 		var getPDF = doc.evaluate('//a[text() = "PDF Version" or text() = "[Access article in PDF]" or text() = "Download PDF"]', doc,
 								  null, XPathResult.ANY_TYPE, null).iterateNext();		
 		var DOI = doc.evaluate('//meta[@name="citation_doi"]/@content', doc,
-								  null, XPathResult.ANY_TYPE, null).iterateNext();		
-		var abstract = doc.evaluate('//div[@class="abstract"]', doc,
 								  null, XPathResult.ANY_TYPE, null).iterateNext();
+		//test for two different abstract formats						  
+		var abstract = ZU.xpathText(doc, '//abstract/p[1]');
+		if (!abstract) abstract = ZU.xpathText(doc, '//div[@class="abstract"][1]/p[1]');
 		var authorNodes = ZU.xpath(doc, '//meta[@name="citation_author"]/@content');
 
 		if(url.indexOf('?') != -1) {
@@ -163,7 +164,7 @@ function scrapeOne(doc) {
 					item.DOI = DOI.textContent.replace(/^DOI: /,"");
 				}
 				if(abstract) {
-					item.abstractNote = abstract.textContent.replace(/\n/g, " ").replace(/\s\s+/g, " ");
+					item.abstractNote = abstract.replace(/\n/g, " ").replace(/\s\s+/g, " ");
 				}
 				item.complete();
 			});
@@ -207,6 +208,7 @@ var testCases = [
 				"url": "http://muse.jhu.edu/journals/past_and_present/v191/191.1higonnet.html",
 				"date": "2006",
 				"extra": "<p>Number 191, May 2006</p>",
+				"abstractNote": "Past & Present 191.1 (2006) 121-164",
 				"libraryCatalog": "Project MUSE",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
@@ -285,9 +287,50 @@ var testCases = [
 				"date": "2013",
 				"extra": "<p>Volume 54, Number 4, October 2013</p>",
 				"DOI": "10.1353/tech.2013.0137",
+				"abstractNote": "This article uses coverage of the fiftieth anniversary of the Pill as an example of what Richard Hirsh describes as the “real world” role of historians of technology. It explores how the presentation of historical topics on the world wide web has complicated how the history of technology is conveyed to the public. The article shows that that the Pill is especially suited to demonstrating the public role of historians of technology because, as the most popular form of reversible birth control, it has touched the lives of millions of Americans. Thus, an exploration of how the Pill’s fiftieth anniversary was covered illustrates how historians can use their expertise to provide a nuanced interpretation of a controversial topic in the history of technology.",
 				"libraryCatalog": "Project MUSE",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "The Pill at Fifty"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://muse.jhu.edu.turing.library.northwestern.edu/journals/latin_american_research_review/v049/49.2.manzetti.html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Luigi",
+						"lastName": "Manzetti",
+						"creatorType": "author"
+					}
+				],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Project MUSE Snapshot"
+					},
+					{
+						"title": "Project MUSE Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"title": "Accountability and Corruption in Argentina During the Kirchners’ Era",
+				"publicationTitle": "Latin American Research Review",
+				"volume": "49",
+				"issue": "2",
+				"pages": "173-195",
+				"publisher": "Latin American Studies Association",
+				"ISSN": "1542-4278",
+				"url": "http://muse.jhu.edu.turing.library.northwestern.edu/journals/latin_american_research_review/v049/49.2.manzetti.html",
+				"date": "2014",
+				"extra": "<p>Volume 49, Number 2, 2014</p>",
+				"abstractNote": "This article highlights an important paradox: in Argentina between 2003 and 2013 the center-left Peronist government’s approach to governance mirrors that of the center-right Peronist administration of the 1990s. While the latter centralized authority to pursue neoliberal reforms, the former have centralized authority in the name of expanding government intervention in the economy. In both cases, corruption has tended to go unchecked due to insufficient government accountability. Therefore, although economic policies and political rhetoric have changed dramatically, government corruption remains a constant of the Argentine political system due to the executive branch’s ability to emasculate constitutional checks and balances.",
+				"libraryCatalog": "Project MUSE",
+				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
 	}

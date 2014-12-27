@@ -2,14 +2,14 @@
 	"translatorID": "b10bf941-12e9-4188-be04-f6357fa594a0",
 	"label": "Old Bailey Online",
 	"creator": "Adam Crymble",
-	"target": "^http://www\\.oldbaileyonline\\.org/",
+	"target": "^https?://www\\.oldbaileyonline\\.org/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-01-30 22:44:56"
+	"lastUpdated": "2014-04-03 17:51:06"
 }
 
 function detectWeb(doc, url) {
@@ -20,21 +20,16 @@ function detectWeb(doc, url) {
 	}
 }
 
-function scrape(doc, url) {
-
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;	
+function scrape(doc, url) {	
 	
 	var tagsContent = new Array();
 	var fieldTitle;
 	
 	var newItem = new Zotero.Item("case");
 
-	var headers = doc.evaluate('//div[@class="apparatus"]/b', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var contents = doc.evaluate('//div[@class="apparatus"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	var xPathCount = doc.evaluate('count (//div[@class="apparatus"]/b)', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var headers = doc.evaluate('//div[@class="apparatus"]/b', doc, null, XPathResult.ANY_TYPE, null);
+	var contents = doc.evaluate('//div[@class="apparatus"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	var xPathCount = doc.evaluate('count (//div[@class="apparatus"]/b)', doc, null, XPathResult.ANY_TYPE, null);
 	
 	var headersArray = new Array();
 	var oneHeader = '';
@@ -85,25 +80,21 @@ function scrape(doc, url) {
 	 		}
 	}
 	
-	newItem.title = doc.evaluate('//div[@class="sessionsPaperTitle"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;	
+	newItem.title = doc.evaluate('//div[@class="sessionsPaperTitle"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;	
 	newItem.url = doc.location.href;
 
 	newItem.complete();
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
+
 	var articles = new Array();
 	var onlyResultSet = false;
 	
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		
-		var titles = doc.evaluate('//li/p[@class="srchtitle"]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//li/p[@class="srchtitle"]/a', doc, null, XPathResult.ANY_TYPE, null);
 			
 		var next_title;
 		while (next_title = titles.iterateNext()) {
@@ -165,9 +156,9 @@ function doWeb(doc, url) {
 			articles.pop();
 		}
 	}
-	else if (doc.evaluate('//div[@id="main2"]/p/a', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+	else if (doc.evaluate('//div[@id="main2"]/p/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 
-		var xmlOrText = doc.evaluate('//div[@id="main2"]/p/a', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		var xmlOrText = doc.evaluate('//div[@id="main2"]/p/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	
 		if (xmlOrText.textContent.match("Text")) {
 			articles = [xmlOrText.href];	
@@ -178,8 +169,7 @@ function doWeb(doc, url) {
 	}
 		
 	if (!onlyResultSet) {
-		Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-		Zotero.wait();	
+		Zotero.Utilities.processDocuments(articles, scrape);	
 	}	
 }
 /** BEGIN TEST CASES **/

@@ -2,19 +2,19 @@
 	"translatorID": "04a23cbe-5f8b-d6cd-8eb1-2e23bcc8ae8f",
 	"label": "ePrint IACR",
 	"creator": "Jonas Schrieb",
-	"target": "^http://eprint\\.iacr\\.org/",
+	"target": "^https?://eprint\\.iacr\\.org/",
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-03 23:30:36"
+	"lastUpdated": "2014-03-25 09:43:59"
 }
 
 function detectWeb(doc, url) {
-	var singleRe   = /^http:\/\/eprint\.iacr\.org\/(\d{4}\/\d{3}|cgi-bin\/print\.pl)/;
-	var multipleRe = /^http:\/\/eprint\.iacr\.org\/(complete|curr|\d{4}|cgi-bin\/search\.pl)/;
+	var singleRe   = /^https?:\/\/eprint\.iacr\.org\/(\d{4}\/\d{3}|cgi-bin\/print\.pl)/;
+	var multipleRe = /^https?:\/\/eprint\.iacr\.org\/(complete|curr|\d{4}|(cgi|eprint)-bin\/search\.pl)/;
 	if(singleRe.test(url)) {
 		return "report";
 	} else if(multipleRe.test(url)) {
@@ -23,35 +23,30 @@ function detectWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-
 	var reportNoXPath = "//h2";
 	var titleXPath    = "//p[1]/b";
 	var authorsXPath  = "//p[2]/i";
 	var abstractXPath = "//p[starts-with(b/text(),\"Abstract\")]/text() | //p[not(*)]";
 	var keywordsXPath = "//p[starts-with(b/text(),\"Category\")]";
 
-	var reportNo = doc.evaluate(reportNoXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	var reportNo = doc.evaluate(reportNoXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	reportNo = reportNo.match(/(\d{4})\/(\d{3})$/);
 	var year = reportNo[1];
 	var no   = reportNo[2];
 
-	var title = doc.evaluate(titleXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	var title = doc.evaluate(titleXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 
-	var authors = doc.evaluate(authorsXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	var authors = doc.evaluate(authorsXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	authors = authors.split(" and ");
 	
 	var abstr = "";
-	var abstractLines = doc.evaluate(abstractXPath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var abstractLines = doc.evaluate(abstractXPath, doc, null, XPathResult.ANY_TYPE, null);
 	var nextLine;
 	while(nextLine = abstractLines.iterateNext()) {
 		abstr += nextLine.textContent;
 	}
 	
-	var keywords = doc.evaluate(keywordsXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	var keywords = doc.evaluate(keywordsXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	var tmp = keywords.match(/Category \/ Keywords: (?:([^\/]*) \/ )?([^\/]*)/);
 	keywords = tmp[2].split(", ")
 	keywords.unshift(tmp[1]);
@@ -80,10 +75,7 @@ for (var i = 0; i < keywords.length; i++) {
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
+
 	var articles = new Array();
 	var items = new Object();
 	var nextTitle;
@@ -92,25 +84,26 @@ function doWeb(doc, url) {
 		var titleXPath = "//dl/dd/b";
 		var linkXPath = "//dl/dt/a[1]";
 
-		var titles = doc.evaluate(titleXPath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var links  = doc.evaluate(linkXPath,  doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate(titleXPath, doc, null, XPathResult.ANY_TYPE, null);
+		var links  = doc.evaluate(linkXPath,  doc, null, XPathResult.ANY_TYPE, null);
 		while (nextTitle = titles.iterateNext()) {
 			nextLink = links.iterateNext();
 			items[nextLink.href] = nextTitle.textContent;
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				Zotero.done();
+				return true;
+			}
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
+		});
 	} else {
-		articles = [url];
-		
+		scrape(doc, url)
 	}
-
-	Zotero.Utilities.processDocuments(articles, scrape, function(){Zotero.done();});
-	Zotero.wait();
-}
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -158,6 +151,11 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://eprint.iacr.org/eprint-bin/search.pl?last=31&title=1",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
