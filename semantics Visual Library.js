@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-12-13 15:55:40"
+	"lastUpdated": "2014-12-29 11:56:09"
 }
 
 /*
@@ -34,8 +34,6 @@
 
 	***** END LICENSE BLOCK *****
 */
-
-
 
 var mappingTypes = {
 	'Aufsatz in Zeitschrift' : 'journalArticle',
@@ -98,13 +96,9 @@ var mapping = {
 	'Part of' : 'note',
 };
 
-
-
 function detectWeb(doc, url) {
 	if (url.toLowerCase().indexOf('/titelaufnahme.xml?') != -1 ) {//single item
-	
-		var karteilegende = doc.getElementsByClassName('karteilegende');
-		var type = karteilegende[0];
+		var type = doc.getElementsByClassName('karteilegende')[0];
 		if (type && mappingTypes[type.textContent]) {
 			return mappingTypes[type.textContent];
 		} else {
@@ -115,14 +109,13 @@ function detectWeb(doc, url) {
 	}
 }
 
-
 //for testing in detectWeb use true for checkOnly
 //for the items in doWeb use false for checkOnly
 //then the items will be an object containing the href/title pairs
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//table[@class="fliesstext"]//td/a[@class="noDeco"]' );
+	var rows = ZU.xpath(doc, '//table[@class="fliesstext"]//td/a[@class="noDeco"]');
 	for (var i=0; i<rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -136,7 +129,6 @@ function getSearchResults(doc, checkOnly) {
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
 				return true;
@@ -156,7 +148,7 @@ function doWeb(doc, url) {
 //e.g. string = "387 S., 1 CD-ROM (12 cm)"
 // --> return "387"
 function extractFirstNumber(string) {
-	return string.replace( /^\D*(\d+).*$/,'$1');
+	return string.replace(/^\D*(\d+).*$/,'$1');
 }
 
 function scrape(doc, url) {
@@ -176,12 +168,14 @@ function scrape(doc, url) {
 		if (sibling.length > 2) {//filter out the empty values
 			var value = sibling[2].textContent;
 			if (value == 'Hinweise zum Inhalt' || value == 'Selections from contents') {
-				var link = ZU.xpathText(sibling[2], './a/@href');
-				item.attachments.push({
-					title : value,
-					url : link,
-					snapshot : false
-				});
+				var link = sibling[2].getElementsByTagName('a')[0];
+				if (link) {
+					item.attachments.push({
+						title : value,
+						url : link.href,
+						snapshot : false
+					});
+				}
 			} else {
 				if (keyValuePairs[key]) {
 					keyValuePairs[key] += ' : ' + value;
@@ -277,7 +271,7 @@ function scrape(doc, url) {
 	
 	item.attachments.push({
 		title : 'Snapshot',
-		document : doc,
+		document : doc
 	});
 	
 	item.complete();
@@ -295,7 +289,8 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.blldb-online.de/blldb/suche/titelaufnahme.xml?vid={72ADA679-6065-410E-B21F-E50DFE4BE370}&erg=NaN&Anzeige=10&Sprache=de&contenttype=text/html&Skript=titelaufnahme&Publikation_ID=300346700",
+		"url": "http://www.blldb-online.de/blldb/suche/titelaufnahme.xml?vid={C908B3C3-153E-4DED-AEAF-717FE482FA96}&contenttype=text/html&Skript=titelaufnahme&Publikation_ID=300346700&lang=en",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "book",
@@ -309,7 +304,7 @@ var testCases = [
 				],
 				"date": "2012",
 				"ISBN": "3-86688-240-8; 978-3-86688-240-9",
-				"language": "Deutsch",
+				"language": "German",
 				"libraryCatalog": "BLLDB (semantics Visual Library)",
 				"numPages": "387",
 				"place": "München [u.a.]",
@@ -319,7 +314,7 @@ var testCases = [
 				"shortTitle": "Bilinguale Lexik.",
 				"attachments": [
 					{
-						"title": "Hinweise zum Inhalt",
+						"title": "Selections from contents",
 						"snapshot": false
 					},
 					{
@@ -329,7 +324,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Hochschulschrift = Zugl.: : Hamburg: Univ., Diss., 2011\nAnmerkung = Literaturverz. S. [373] - 387 \n"
+						"note": "Academic paper = Zugl.: : Hamburg: Univ., Diss., 2011\nNotes = Literaturverz. S. [373] - 387 \n"
 					}
 				],
 				"seeAlso": []
@@ -338,7 +333,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.blldb-online.de/blldb/suche/Titelaufnahme.xml?vid={72ADA679-6065-410E-B21F-E50DFE4BE370}&erg=0&Anzeige=10&Sprache=de&contenttype=text/html&Skript=titelaufnahme&Publikation_ID=055075487",
+		"url": "http://www.blldb-online.de/blldb/suche/titelaufnahme.xml?vid={92AB2423-4F7D-4124-9144-47304435127B}&contenttype=text/html&Skript=titelaufnahme&Publikation_ID=055075487&lang=en",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "book",
@@ -407,7 +403,7 @@ var testCases = [
 				],
 				"date": "1998",
 				"ISBN": "3-8233-5140-0",
-				"language": "Deutsch",
+				"language": "German",
 				"libraryCatalog": "BLLDB (semantics Visual Library)",
 				"numPages": "300",
 				"place": "Tübingen",
@@ -417,7 +413,7 @@ var testCases = [
 				"shortTitle": "Abstrakte Nomina",
 				"attachments": [
 					{
-						"title": "Hinweise zum Inhalt",
+						"title": "Selections from contents",
 						"snapshot": false
 					},
 					{
@@ -427,7 +423,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Anmerkung = Literaturangaben \n"
+						"note": "Notes = Literaturangaben \n"
 					}
 				],
 				"seeAlso": []
@@ -436,7 +432,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.blldb-online.de/blldb/suche/Titelaufnahme.xml?vid={72ADA679-6065-410E-B21F-E50DFE4BE370}&erg=1&Anzeige=10&Sprache=de&contenttype=text/html&Skript=titelaufnahme&Publikation_ID=05901346X&lang=de",
+		"url": "http://www.blldb-online.de/blldb/suche/titelaufnahme.xml?vid={9C1F3309-CEC6-4EF7-AE2A-C70FBBD9C9DD}&contenttype=text/html&Skript=titelaufnahme&Publikation_ID=05901346X&lang=en",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "book",
@@ -505,12 +502,12 @@ var testCases = [
 					{
 						"lastName": "Göttinger Arbeitsgespräch zur Historischen Deutschen Wortforschung <1, 1996, Göttingen>",
 						"creatorType": "contributor",
-						"fieldMode": "1"
+						"fieldMode": 1
 					}
 				],
 				"date": "1998",
 				"ISBN": "3-7776-0882-3",
-				"language": "Deutsch",
+				"language": "German",
 				"libraryCatalog": "BLLDB (semantics Visual Library)",
 				"numPages": "174",
 				"place": "Stuttgart [u.a.]",
@@ -529,7 +526,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.bdsl-online.de/BDSL-DB/suche/Titelaufnahme.xml?vid={D620881E-7697-40A8-BF2C-4E898FD12362}&Skript=titelaufnahme&contenttype=text/html&Publikation_ID=130721638&SucheNr=2",
+		"url": "http://www.bdsl-online.de/BDSL-DB/suche/titelaufnahme.xml?vid={AA8DC9D5-D10C-4C4F-B98D-FB1A5090B582}&contenttype=text/html&Skript=titelaufnahme&Publikation_ID=130721638&lang=de",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -560,7 +558,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.bdsl-online.de/BDSL-DB/suche/Titelaufnahme.xml?vid={D620881E-7697-40A8-BF2C-4E898FD12362}&erg=0&Anzeige=10&Sprache=de&contenttype=text/html&Skript=titelaufnahme&Publikation_ID=13389942X",
+		"url": "http://www.bdsl-online.de/BDSL-DB/suche/titelaufnahme.xml?vid={F1F0B146-4489-4299-96EF-4784977E61A4}&contenttype=text/html&Skript=titelaufnahme&Publikation_ID=13389942X&lang=de",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "book",
@@ -603,7 +602,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.bdsl-online.de/BDSL-DB/suche/Titelaufnahme.xml?vid={D620881E-7697-40A8-BF2C-4E898FD12362}&erg=0&Anzeige=10&Sprache=de&contenttype=text/html&Skript=titelaufnahme&Publikation_ID=028514998",
+		"url": "http://www.bdsl-online.de/BDSL-DB/suche/titelaufnahme.xml?vid={1A778DD2-F52E-4A3A-944F-E06B5E8A5F0A}&contenttype=text/html&Skript=titelaufnahme&Publikation_ID=028514998&lang=de",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "book",
