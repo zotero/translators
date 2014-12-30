@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-12-30 23:14:39"
+	"lastUpdated": "2014-12-30 23:20:21"
 }
 
 function detectImport() {
@@ -1885,6 +1885,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Blood-brain barrier breach following cortical contusion in the rat",
 				"creators": [
 					{
 						"lastName": "Baldwin",
@@ -1912,6 +1913,21 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "1996",
+				"abstractNote": "Adult Fisher 344 rats were subjected to a unilateral impact to the dorsal cortex above the hippocampus at 3.5 m/sec with a 2 mm cortical depression. This caused severe cortical damage and neuronal loss in hippocampus subfields CA1, CA3 and hilus. Breakdown of the blood-brain barrier (BBB) was assessed by injecting the protein horseradish peroxidase (HRP) 5 minutes prior to or at various times following injury (5 minutes, 1, 2, 6, 12 hours, 1, 2, 5, and 10 days). Animals were killed 1 hour after HRP injection and brain sections were reacted with diaminobenzidine to visualize extravascular accumulation of the protein. Maximum staining occurred in animals injected with HRP 5 minutes prior to or 5 minutes after cortical contusion. Staining at these time points was observed in the ipsilateral hippocampus. Some modest staining occurred in the dorsal contralateral cortex near the superior sagittal sinus. Cortical HRP stain gradually decreased at increasing time intervals postinjury. By 10 days, no HRP stain was observed in any area of the brain. In the ipsilateral hippocampus, HRP stain was absent by 3 hours postinjury and remained so at the 6- and 12- hour time points. Surprisingly, HRP stain was again observed in the ipsilateral hippocampus 1 and 2 days following cortical contusion, indicating a biphasic opening of the BBB following head trauma and a possible second wave of secondary brain damage days after the contusion injury. These data indicate regions not initially destroyed by cortical impact, but evidencing BBB breach, may be accessible to neurotrophic factors administered intravenously both immediately and days after brain trauma.",
+				"journalAbbreviation": "J.Neurosurg.",
+				"pages": "476-481",
+				"publicationTitle": "J.Neurosurg.",
+				"volume": "85",
+				"attachments": [],
+				"tags": [
+					"blood-brain barrier",
+					"cortical contusion",
+					"head trauma",
+					"hippocampus",
+					"horseradish peroxidase",
+					"rat"
+				],
 				"notes": [
 					{
 						"note": "The following values have no corresponding Zotero field:<br/>RP  - Not In File<br/>",
@@ -1920,23 +1936,7 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"cortical contusion",
-					"blood-brain barrier",
-					"horseradish peroxidase",
-					"head trauma",
-					"hippocampus",
-					"rat"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Blood-brain barrier breach following cortical contusion in the rat",
-				"journalAbbreviation": "J.Neurosurg.",
-				"date": "1996",
-				"volume": "85",
-				"pages": "476-481",
-				"abstractNote": "Adult Fisher 344 rats were subjected to a unilateral impact to the dorsal cortex above the hippocampus at 3.5 m/sec with a 2 mm cortical depression. This caused severe cortical damage and neuronal loss in hippocampus subfields CA1, CA3 and hilus. Breakdown of the blood-brain barrier (BBB) was assessed by injecting the protein horseradish peroxidase (HRP) 5 minutes prior to or at various times following injury (5 minutes, 1, 2, 6, 12 hours, 1, 2, 5, and 10 days). Animals were killed 1 hour after HRP injection and brain sections were reacted with diaminobenzidine to visualize extravascular accumulation of the protein. Maximum staining occurred in animals injected with HRP 5 minutes prior to or 5 minutes after cortical contusion. Staining at these time points was observed in the ipsilateral hippocampus. Some modest staining occurred in the dorsal contralateral cortex near the superior sagittal sinus. Cortical HRP stain gradually decreased at increasing time intervals postinjury. By 10 days, no HRP stain was observed in any area of the brain. In the ipsilateral hippocampus, HRP stain was absent by 3 hours postinjury and remained so at the 6- and 12- hour time points. Surprisingly, HRP stain was again observed in the ipsilateral hippocampus 1 and 2 days following cortical contusion, indicating a biphasic opening of the BBB following head trauma and a possible second wave of secondary brain damage days after the contusion injury. These data indicate regions not initially destroyed by cortical impact, but evidencing BBB breach, may be accessible to neurotrophic factors administered intravenously both immediately and days after brain trauma.",
-				"publicationTitle": "J.Neurosurg."
+				"seeAlso": []
 			}
 		]
 	},
@@ -1946,6 +1946,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "patent",
+				"title": "Method of detecting AIDS virus infection",
 				"creators": [
 					{
 						"lastName": "Burger",
@@ -1958,6 +1959,20 @@ var testCases = [
 						"creatorType": "inventor"
 					}
 				],
+				"issueDate": "February 27, 1990",
+				"abstractNote": "A method is disclosed for detecting the presence of HTLV III infected cells in a medium. The method comprises contacting the medium with monoclonal antibodies against an antigen produced as a result of the infection and detecting the binding of the antibodies to the antigen. The antigen may be a gene product of the HTLV III virus or may be bound to such gene product. On the other hand the antigen may not be a viral gene product but may be produced as a result of the infection and may further be bound to a lymphocyte. The medium may be a human body fluid or a culture medium. A particular embodiment of the present method involves a method for determining the presence of a AIDS virus in a person. The method comprises combining a sample of a body fluid from the person with a monoclonal antibody that binds to an antigen produced as a result of the infection and detecting the binding of the monoclonal antibody to the antigen. The presence of the binding indicates the presence of a AIDS virus infection. Also disclosed are novel monoclonal antibodies, noval compositions of matter, and novel diagnostic kits",
+				"applicationNumber": "G01N 33/569 G01N 33/577",
+				"assignee": "4,629,783",
+				"extra": "435/5 424/3 424/7.1 435/7 435/29 435/32 435/70.21 435/240.27 435/172.2 530/387 530/808 530/809 935/110",
+				"issuingAuthority": "Epitope,I.",
+				"place": "OR",
+				"attachments": [],
+				"tags": [
+					"AIDS",
+					"antigens",
+					"infection",
+					"virus"
+				],
 				"notes": [
 					{
 						"note": "The following values have no corresponding Zotero field:<br/>Patent Version Number: 877609<br/>IS  - 4,904,581<br/>RP  - Not In File<br/>",
@@ -1966,23 +1981,7 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"AIDS",
-					"virus",
-					"infection",
-					"antigens"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Method of detecting AIDS virus infection",
-				"issueDate": "February 27, 1990",
-				"issuingAuthority": "Epitope,I.",
-				"place": "OR",
-				"assignee": "4,629,783",
-				"accessDate": "1986-06-23",
-				"applicationNumber": "G01N 33/569 G01N 33/577",
-				"extra": "435/5 424/3 424/7.1 435/7 435/29 435/32 435/70.21 435/240.27 435/172.2 530/387 530/808 530/809 935/110",
-				"abstractNote": "A method is disclosed for detecting the presence of HTLV III infected cells in a medium. The method comprises contacting the medium with monoclonal antibodies against an antigen produced as a result of the infection and detecting the binding of the antibodies to the antigen. The antigen may be a gene product of the HTLV III virus or may be bound to such gene product. On the other hand the antigen may not be a viral gene product but may be produced as a result of the infection and may further be bound to a lymphocyte. The medium may be a human body fluid or a culture medium. A particular embodiment of the present method involves a method for determining the presence of a AIDS virus in a person. The method comprises combining a sample of a body fluid from the person with a monoclonal antibody that binds to an antigen produced as a result of the infection and detecting the binding of the monoclonal antibody to the antigen. The presence of the binding indicates the presence of a AIDS virus infection. Also disclosed are novel monoclonal antibodies, noval compositions of matter, and novel diagnostic kits"
+				"seeAlso": []
 			}
 		]
 	},
@@ -1992,6 +1991,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "document",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Name1",
@@ -2004,6 +2004,22 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "0000 Year Date",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"extra": "Publication Number",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"publisher": "Publisher",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -2015,28 +2031,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"language": "Language",
-				"extra": "Publication Number",
-				"publisher": "Publisher",
-				"shortTitle": "Short Title",
-				"title": "Title",
-				"url": "URL",
-				"publicationTitle": "Periodical"
+				"seeAlso": []
 			},
 			{
 				"itemType": "document",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Editor",
@@ -2059,6 +2058,23 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "0000 Year Date",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"callNumber": "Call Number",
+				"extra": "Text Number",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"publisher": "Publisher",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -2070,36 +2086,35 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"callNumber": "Call Number",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"language": "Language",
-				"extra": "Text Number",
-				"publisher": "Publisher",
-				"shortTitle": "Short Title",
-				"title": "Title",
-				"url": "URL",
-				"accessDate": "0000 Access",
-				"publicationTitle": "Publication Title"
+				"seeAlso": []
 			},
 			{
 				"itemType": "artwork",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Artist",
 						"creatorType": "artist",
 						"fieldMode": 1
 					}
+				],
+				"date": "0000 Year Date",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"artworkMedium": "Type of Work",
+				"artworkSize": "Size/Length",
+				"callNumber": "Call Number",
+				"extra": "Size",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
 				],
 				"notes": [
 					{
@@ -2112,30 +2127,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"artworkSize": "Size/Length",
-				"callNumber": "Call Number",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"language": "Language",
-				"extra": "Size",
-				"artworkMedium": "Type of Work",
-				"shortTitle": "Short Title",
-				"title": "Title",
-				"url": "URL",
-				"accessDate": "0000 Access"
+				"seeAlso": []
 			},
 			{
 				"itemType": "film",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Editor",
@@ -2153,6 +2149,24 @@ var testCases = [
 						"creatorType": "director"
 					}
 				],
+				"date": "0000 Year Date",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"callNumber": "Call Number",
+				"distributor": "Publisher",
+				"extra": "Number",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"videoRecordingFormat": "Format",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -2164,36 +2178,36 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"videoRecordingFormat": "Format",
-				"callNumber": "Call Number",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"language": "Language",
-				"extra": "Number",
-				"distributor": "Publisher",
-				"shortTitle": "Short Title",
-				"title": "Title",
-				"url": "URL",
-				"accessDate": "0000 Access"
+				"seeAlso": []
 			},
 			{
 				"itemType": "bill",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Sponsor",
 						"creatorType": "sponsor",
 						"fieldMode": 1
 					}
+				],
+				"date": "0000 Year Date",
+				"abstractNote": "Abstract",
+				"billNumber": "Bill Number",
+				"code": "Code",
+				"codePages": "Code Pages",
+				"codeVolume": "Code Volume",
+				"history": "History",
+				"language": "Language",
+				"legislativeBody": "Legislative Body",
+				"section": "Code Section",
+				"session": "Session",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
 				],
 				"notes": [
 					{
@@ -2206,31 +2220,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"date": "0000 Year Date",
-				"session": "Session",
-				"language": "Language",
-				"billNumber": "Bill Number",
-				"history": "History",
-				"section": "Code Section",
-				"codePages": "Code Pages",
-				"shortTitle": "Short Title",
-				"code": "Code",
-				"legislativeBody": "Legislative Body",
-				"title": "Title",
-				"url": "URL",
-				"codeVolume": "Code Volume",
-				"accessDate": "0000 Access"
+				"seeAlso": []
 			},
 			{
 				"itemType": "blogPost",
+				"title": "Title of Entry",
 				"creators": [
 					{
 						"lastName": "Name1",
@@ -2242,6 +2236,19 @@ var testCases = [
 						"firstName": "Author",
 						"creatorType": "author"
 					}
+				],
+				"date": "0000 Year Last",
+				"abstractNote": "Abstract",
+				"blogTitle": "Title of WebLog",
+				"language": "Language",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"websiteType": "Type of Medium",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
 				],
 				"notes": [
 					{
@@ -2254,25 +2261,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"date": "0000 Year Last",
-				"language": "Language",
-				"websiteType": "Type of Medium",
-				"shortTitle": "Short Title",
-				"blogTitle": "Title of WebLog",
-				"title": "Title of Entry",
-				"url": "URL",
-				"accessDate": "0000 Number"
+				"seeAlso": []
 			},
 			{
 				"itemType": "book",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Editor",
@@ -2299,6 +2292,30 @@ var testCases = [
 						"firstName": "Author",
 						"creatorType": "author"
 					}
+				],
+				"date": "0000 Year Date",
+				"ISBN": "ISBN",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"callNumber": "Call Number",
+				"edition": "Edition",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"numPages": "Number of Pages",
+				"numberOfVolumes": "Number of Volumes",
+				"place": "Place Published",
+				"publisher": "Publisher",
+				"series": "Series Title",
+				"seriesNumber": "Series Volume",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"volume": "Volume",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
 				],
 				"notes": [
 					{
@@ -2311,36 +2328,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"callNumber": "Call Number",
-				"place": "Place Published",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"edition": "Edition",
-				"language": "Language",
-				"seriesNumber": "Series Volume",
-				"numberOfVolumes": "Number of Volumes",
-				"publisher": "Publisher",
-				"ISBN": "ISBN",
-				"numPages": "Number of Pages",
-				"shortTitle": "Short Title",
-				"series": "Series Title",
-				"title": "Title",
-				"url": "URL",
-				"volume": "Volume",
-				"accessDate": "0000 Access"
+				"seeAlso": []
 			},
 			{
 				"itemType": "bookSection",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Editor",
@@ -2368,6 +2360,31 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "0000 Year",
+				"ISBN": "ISBN",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"bookTitle": "Book Title",
+				"callNumber": "Call Number",
+				"edition": "Edition",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"numberOfVolumes": "Number of Volumes",
+				"pages": "Pages",
+				"place": "Place Published",
+				"publisher": "Publisher",
+				"series": "Series Title",
+				"seriesNumber": "Series Volume",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"volume": "Volume",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -2379,43 +2396,34 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"callNumber": "Call Number",
-				"place": "Place Published",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"edition": "Edition",
-				"language": "Language",
-				"numberOfVolumes": "Number of Volumes",
-				"publisher": "Publisher",
-				"ISBN": "ISBN",
-				"pages": "Pages",
-				"shortTitle": "Short Title",
-				"seriesNumber": "Series Volume",
-				"bookTitle": "Book Title",
-				"series": "Series Title",
-				"title": "Title",
-				"url": "URL",
-				"volume": "Volume",
-				"accessDate": "0000 Access",
-				"date": "0000 Year"
+				"seeAlso": []
 			},
 			{
 				"itemType": "case",
+				"caseName": "Abbreviated Case Name",
 				"creators": [
 					{
 						"lastName": "Counsel",
 						"creatorType": "counsel",
 						"fieldMode": 1
 					}
+				],
+				"dateDecided": "0000 Year Date",
+				"abstractNote": "Abstract",
+				"court": "Court",
+				"docketNumber": "Docket Number",
+				"firstPage": "First Page",
+				"history": "History",
+				"language": "Language",
+				"reporter": "Reporter",
+				"reporterVolume": "Reporter Volume",
+				"shortTitle": "Abbreviated Case Name",
+				"url": "URL",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
 				],
 				"notes": [
 					{
@@ -2428,29 +2436,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"reporter": "Reporter",
-				"abstractNote": "Abstract",
-				"dateDecided": "0000 Year Date",
-				"language": "Language",
-				"history": "History",
-				"court": "Court",
-				"firstPage": "First Page",
-				"shortTitle": "Abbreviated Case Name",
-				"docketNumber": "Docket Number",
-				"caseName": "Case Name",
-				"url": "URL",
-				"reporterVolume": "Reporter Volume",
-				"title": "Abbreviated Case Name"
+				"seeAlso": []
 			},
 			{
 				"itemType": "magazineArticle",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Translator",
@@ -2468,6 +2458,26 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "0000 Year Date",
+				"ISSN": "ISBN",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"callNumber": "Call Number",
+				"extra": "Series Volume",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"pages": "Pages",
+				"publicationTitle": "Series Title",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"volume": "Volume",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -2479,38 +2489,33 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"callNumber": "Call Number",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"language": "Language",
-				"extra": "Series Volume",
-				"ISSN": "ISBN",
-				"pages": "Pages",
-				"shortTitle": "Short Title",
-				"publicationTitle": "Series Title",
-				"title": "Title",
-				"url": "URL",
-				"volume": "Volume",
-				"accessDate": "0000 Access"
+				"seeAlso": []
 			},
 			{
 				"itemType": "artwork",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "By",
 						"firstName": "Created",
 						"creatorType": "artist"
 					}
+				],
+				"date": "0000 Year Date",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"artworkMedium": "Type of Image",
+				"callNumber": "Call Number",
+				"extra": "Number",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"url": "URL",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
 				],
 				"notes": [
 					{
@@ -2523,29 +2528,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"callNumber": "Call Number",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"language": "Language",
-				"extra": "Number",
-				"artworkMedium": "Type of Image",
-				"title": "Title",
-				"url": "URL",
-				"accessDate": "0000 Access",
-				"publicationTitle": "Image Source Program"
+				"seeAlso": []
 			},
 			{
 				"itemType": "book",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Editor",
@@ -2563,6 +2550,30 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
+				"date": "0000 Year",
+				"ISBN": "ISSN/ISBN",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"callNumber": "Call Number",
+				"edition": "Edition",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"numPages": "Number of Pages",
+				"numberOfVolumes": "Number of Volumes",
+				"place": "Place Published",
+				"publisher": "Publisher",
+				"series": "Series Title",
+				"seriesNumber": "Series Volume",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"volume": "Volume",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -2574,42 +2585,37 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"callNumber": "Call Number",
-				"place": "Place Published",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"edition": "Edition",
-				"language": "Language",
-				"seriesNumber": "Series Volume",
-				"numberOfVolumes": "Number of Volumes",
-				"publisher": "Publisher",
-				"ISBN": "ISSN/ISBN",
-				"numPages": "Number of Pages",
-				"shortTitle": "Short Title",
-				"series": "Series Title",
-				"title": "Title",
-				"url": "URL",
-				"volume": "Volume",
-				"accessDate": "0000 Access",
-				"date": "0000 Year"
+				"seeAlso": []
 			},
 			{
 				"itemType": "computerProgram",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Programmer",
 						"creatorType": "programmer",
 						"fieldMode": 1
 					}
+				],
+				"date": "0000 Year",
+				"ISBN": "ISBN",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"callNumber": "Call Number",
+				"company": "Publisher",
+				"libraryCatalog": "Database Provider",
+				"place": "Place Published",
+				"programmingLanguage": "Language",
+				"seriesTitle": "Series Title",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"version": "Version",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
 				],
 				"notes": [
 					{
@@ -2622,32 +2628,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"callNumber": "Call Number",
-				"place": "Place Published",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"version": "Version",
-				"programmingLanguage": "Language",
-				"company": "Publisher",
-				"ISBN": "ISBN",
-				"shortTitle": "Short Title",
-				"seriesTitle": "Series Title",
-				"title": "Title",
-				"url": "URL",
-				"accessDate": "0000 Access",
-				"date": "0000 Year"
+				"seeAlso": []
 			},
 			{
 				"itemType": "conferencePaper",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Editor",
@@ -2665,6 +2650,25 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "0000 Year Date",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"conferenceName": "Conference Name",
+				"extra": "Issue",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"pages": "Pages",
+				"place": "Place Published",
+				"publisher": "Publisher",
+				"url": "URL",
+				"volume": "Volume",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -2676,31 +2680,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"place": "Place Published",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"language": "Language",
-				"extra": "Issue",
-				"publisher": "Publisher",
-				"pages": "Pages",
-				"conferenceName": "Conference Name",
-				"title": "Title",
-				"url": "URL",
-				"volume": "Volume",
-				"accessDate": "0000 Access"
+				"seeAlso": []
 			},
 			{
 				"itemType": "conferencePaper",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Editor",
@@ -2728,6 +2712,30 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "0000 Year Date",
+				"ISBN": "ISBN",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"callNumber": "Call Number",
+				"conferenceName": "Conference Name",
+				"extra": "Issue",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"pages": "Pages",
+				"place": "Place Published",
+				"proceedingsTitle": "Proceedings Title",
+				"publisher": "Publisher",
+				"series": "Series Title",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"volume": "Volume",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -2739,36 +2747,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"place": "Place Published",
-				"proceedingsTitle": "Proceedings Title",
-				"callNumber": "Call Number",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"language": "Language",
-				"extra": "Issue",
-				"publisher": "Publisher",
-				"ISBN": "ISBN",
-				"pages": "Pages",
-				"shortTitle": "Short Title",
-				"conferenceName": "Conference Name",
-				"series": "Series Title",
-				"title": "Title",
-				"url": "URL",
-				"volume": "Volume",
-				"accessDate": "0000 Access"
+				"seeAlso": []
 			},
 			{
 				"itemType": "document",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Producer",
@@ -2786,6 +2769,22 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
+				"date": "0000 Year Date",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"callNumber": "Call Number",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"publisher": "Distributor",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -2797,28 +2796,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"callNumber": "Call Number",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"language": "Language",
-				"publisher": "Distributor",
-				"shortTitle": "Short Title",
-				"title": "Title",
-				"url": "URL",
-				"accessDate": "0000 Access"
+				"seeAlso": []
 			},
 			{
 				"itemType": "dictionaryEntry",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Editor",
@@ -2841,6 +2823,30 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "0000 Year",
+				"ISBN": "ISBN",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"callNumber": "Call Number",
+				"dictionaryTitle": "Dictionary Title",
+				"edition": "Edition",
+				"extra": "Number",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"numberOfVolumes": "Number of Volumes",
+				"pages": "Pages",
+				"place": "Place Published",
+				"publisher": "Publisher",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"volume": "Volume",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -2852,36 +2858,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"callNumber": "Call Number",
-				"place": "Place Published",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"edition": "Edition",
-				"language": "Language",
-				"extra": "Number",
-				"numberOfVolumes": "Number of Volumes",
-				"publisher": "Publisher",
-				"ISBN": "ISBN",
-				"pages": "Pages",
-				"shortTitle": "Short Title",
-				"dictionaryTitle": "Dictionary Title",
-				"title": "Title",
-				"url": "URL",
-				"volume": "Volume",
-				"accessDate": "0000 Access",
-				"date": "0000 Year"
+				"seeAlso": []
 			},
 			{
 				"itemType": "book",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Editor",
@@ -2899,6 +2880,30 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
+				"date": "0000 Year Date",
+				"ISBN": "ISBN",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"callNumber": "Call Number",
+				"edition": "Edition",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"numPages": "Number of Pages",
+				"numberOfVolumes": "Number of Volumes",
+				"place": "Place Published",
+				"publisher": "Publisher",
+				"series": "Series Title",
+				"seriesNumber": "Series Volume",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"volume": "Volume",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -2910,36 +2915,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"callNumber": "Call Number",
-				"place": "Place Published",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"edition": "Edition",
-				"language": "Language",
-				"seriesNumber": "Series Volume",
-				"numberOfVolumes": "Number of Volumes",
-				"publisher": "Publisher",
-				"ISBN": "ISBN",
-				"numPages": "Number of Pages",
-				"shortTitle": "Short Title",
-				"series": "Series Title",
-				"title": "Title",
-				"url": "URL",
-				"volume": "Volume",
-				"accessDate": "0000 Access"
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Name1",
@@ -2952,6 +2932,27 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "0000 Year Date",
+				"ISSN": "ISSN",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"issue": "Issue",
+				"journalAbbreviation": "Periodical Title",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"pages": "Pages",
+				"publicationTitle": "Periodical Title",
+				"series": "Website Title",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"volume": "Volume",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -2963,32 +2964,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"journalAbbreviation": "Periodical Title",
-				"language": "Language",
-				"issue": "Issue",
-				"ISSN": "ISSN",
-				"pages": "Pages",
-				"shortTitle": "Short Title",
-				"publicationTitle": "Periodical Title",
-				"series": "Website Title",
-				"title": "Title",
-				"url": "URL",
-				"volume": "Volume"
+				"seeAlso": []
 			},
 			{
 				"itemType": "book",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Editor",
@@ -3011,6 +2991,28 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "0000 Year Date",
+				"ISBN": "ISBN",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"callNumber": "Call Number",
+				"edition": "Edition",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"numPages": "Number of Pages",
+				"numberOfVolumes": "Version",
+				"place": "Place Published",
+				"publisher": "Publisher",
+				"series": "Secondary Title",
+				"url": "URL",
+				"volume": "Volume",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -3022,33 +3024,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"callNumber": "Call Number",
-				"place": "Place Published",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"edition": "Edition",
-				"language": "Language",
-				"numberOfVolumes": "Version",
-				"publisher": "Publisher",
-				"ISBN": "ISBN",
-				"numPages": "Number of Pages",
-				"series": "Secondary Title",
-				"title": "Title",
-				"url": "URL",
-				"volume": "Volume"
+				"seeAlso": []
 			},
 			{
 				"itemType": "bookSection",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Editor",
@@ -3076,6 +3056,30 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "0000 Year Date",
+				"ISBN": "ISSN/ISBN",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"bookTitle": "Book Title",
+				"callNumber": "Call Number",
+				"edition": "Edition",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"numberOfVolumes": "Series Volume",
+				"pages": "Number of Pages",
+				"place": "Place Published",
+				"publisher": "Publisher",
+				"series": "Series Title",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"volume": "Volume",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -3087,36 +3091,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"callNumber": "Call Number",
-				"place": "Place Published",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"edition": "Edition",
-				"language": "Language",
-				"numberOfVolumes": "Series Volume",
-				"publisher": "Publisher",
-				"ISBN": "ISSN/ISBN",
-				"pages": "Number of Pages",
-				"shortTitle": "Short Title",
-				"bookTitle": "Book Title",
-				"series": "Series Title",
-				"title": "Title",
-				"url": "URL",
-				"volume": "Volume",
-				"accessDate": "0000 Access"
+				"seeAlso": []
 			},
 			{
 				"itemType": "encyclopediaArticle",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Editor",
@@ -3139,6 +3118,29 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "0000 Year Date",
+				"ISBN": "ISBN",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"callNumber": "Call Number",
+				"edition": "Edition",
+				"encyclopediaTitle": "Encyclopedia Title",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"numberOfVolumes": "Number of Volumes",
+				"pages": "Pages",
+				"place": "Place Published",
+				"publisher": "Publisher",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"volume": "Volume",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -3150,35 +3152,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"callNumber": "Call Number",
-				"place": "Place Published",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"edition": "Edition",
-				"language": "Language",
-				"numberOfVolumes": "Number of Volumes",
-				"publisher": "Publisher",
-				"ISBN": "ISBN",
-				"pages": "Pages",
-				"shortTitle": "Short Title",
-				"encyclopediaTitle": "Encyclopedia Title",
-				"title": "Title",
-				"url": "URL",
-				"volume": "Volume",
-				"accessDate": "0000 Access"
+				"seeAlso": []
 			},
 			{
 				"itemType": "document",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "File",
@@ -3191,6 +3169,22 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "0000 Year Date",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"callNumber": "Call Number",
+				"extra": "Number",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"publisher": "Publisher",
+				"url": "URL",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -3202,35 +3196,33 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"callNumber": "Call Number",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"language": "Language",
-				"extra": "Number",
-				"publisher": "Publisher",
-				"title": "Title",
-				"url": "URL",
-				"accessDate": "0000 Access",
-				"publicationTitle": "Image Source Program"
+				"seeAlso": []
 			},
 			{
 				"itemType": "artwork",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "By",
 						"firstName": "Created",
 						"creatorType": "artist"
 					}
+				],
+				"date": "0000 Year Date",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"artworkMedium": "Type of Image",
+				"callNumber": "Call Number",
+				"extra": "Number",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"url": "URL",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
 				],
 				"notes": [
 					{
@@ -3243,29 +3235,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"callNumber": "Call Number",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"language": "Language",
-				"extra": "Number",
-				"artworkMedium": "Type of Image",
-				"title": "Title",
-				"url": "URL",
-				"accessDate": "0000 Access",
-				"publicationTitle": "Image Source Program"
+				"seeAlso": []
 			},
 			{
 				"itemType": "film",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Producer",
@@ -3283,6 +3257,25 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
+				"date": "0000 Year Date",
+				"abstractNote": "Synopsis",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"callNumber": "Call Number",
+				"distributor": "Distributor",
+				"genre": "Genre",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"runningTime": "Running Time",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"videoRecordingFormat": "Format",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -3294,32 +3287,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Synopsis",
-				"archiveLocation": "Accession Number",
-				"genre": "Genre",
-				"videoRecordingFormat": "Format",
-				"callNumber": "Call Number",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"language": "Language",
-				"distributor": "Distributor",
-				"runningTime": "Running Time",
-				"shortTitle": "Short Title",
-				"title": "Title",
-				"url": "URL",
-				"accessDate": "0000 Access",
-				"publicationTitle": "Series Title"
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Author",
@@ -3342,6 +3314,28 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "0000 Year Date",
+				"ISSN": "ISSN/ISBN",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"callNumber": "Call Number",
+				"issue": "Number",
+				"journalAbbreviation": "Periodical Title",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"pages": "Pages",
+				"publicationTitle": "Secondary Title",
+				"series": "Tertiary Title",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"volume": "Volume",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -3353,34 +3347,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"callNumber": "Call Number",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"journalAbbreviation": "Periodical Title",
-				"language": "Language",
-				"issue": "Number",
-				"ISSN": "ISSN/ISBN",
-				"pages": "Pages",
-				"shortTitle": "Short Title",
-				"publicationTitle": "Secondary Title",
-				"series": "Tertiary Title",
-				"title": "Title",
-				"url": "URL",
-				"volume": "Volume",
-				"accessDate": "0000 Access"
+				"seeAlso": []
 			},
 			{
 				"itemType": "report",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Department",
@@ -3398,6 +3369,24 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "0000 Year",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"extra": "Number",
+				"institution": "Publisher",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"pages": "Pages",
+				"place": "Place Published",
+				"reportNumber": "ISSN/ISBN",
+				"url": "URL",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -3409,30 +3398,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"place": "Place Published",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"language": "Language",
-				"extra": "Number",
-				"institution": "Publisher",
-				"reportNumber": "ISSN/ISBN",
-				"pages": "Pages",
-				"title": "Title",
-				"url": "URL",
-				"accessDate": "0000 Access",
-				"date": "0000 Year"
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Title of Grant",
 				"creators": [
 					{
 						"lastName": "Translator",
@@ -3445,6 +3415,26 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
+				"date": "0000 Year Deadline",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"callNumber": "Call Number",
+				"issue": "Status",
+				"journalAbbreviation": "Periodical Title",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"pages": "Pages",
+				"publicationTitle": "Periodical Title",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"volume": "Amount Requested",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -3456,33 +3446,32 @@ var testCases = [
 						]
 					}
 				],
+				"seeAlso": []
+			},
+			{
+				"itemType": "hearing",
+				"title": "Title",
+				"creators": [],
+				"date": "0000 Year Date",
+				"abstractNote": "Abstract",
+				"committee": "Committee",
+				"documentNumber": "Document Number",
+				"history": "History",
+				"language": "Language",
+				"legislativeBody": "Legislative Body",
+				"numberOfVolumes": "Number of Volumes",
+				"pages": "Pages",
+				"place": "Place Published",
+				"publisher": "Publisher",
+				"session": "Session",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"attachments": [],
 				"tags": [
 					"Keyword1, Keyword2, Keyword3",
 					"Keyword4",
 					"Keyword5"
 				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"callNumber": "Call Number",
-				"date": "0000 Year Deadline",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"journalAbbreviation": "Periodical Title",
-				"language": "Language",
-				"issue": "Status",
-				"pages": "Pages",
-				"shortTitle": "Short Title",
-				"title": "Title of Grant",
-				"url": "URL",
-				"volume": "Amount Requested",
-				"accessDate": "0000 Access",
-				"publicationTitle": "Periodical Title"
-			},
-			{
-				"itemType": "hearing",
-				"creators": [],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -3494,32 +3483,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"place": "Place Published",
-				"date": "0000 Year Date",
-				"session": "Session",
-				"language": "Language",
-				"documentNumber": "Document Number",
-				"numberOfVolumes": "Number of Volumes",
-				"history": "History",
-				"publisher": "Publisher",
-				"pages": "Pages",
-				"shortTitle": "Short Title",
-				"committee": "Committee",
-				"legislativeBody": "Legislative Body",
-				"title": "Title",
-				"url": "URL",
-				"accessDate": "0000 Access"
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Name1",
@@ -3532,6 +3500,23 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "0000 Year Date",
+				"ISSN": "ISSN",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"callNumber": "Call Number",
+				"issue": "Issue",
+				"journalAbbreviation": "Periodical Title",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"pages": "Pages",
+				"publicationTitle": "Journal",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"volume": "Volume",
+				"attachments": [],
+				"tags": [],
 				"notes": [
 					{
 						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>DOI: Type of Article<br/>Original Publication: Original Publication<br/>Reviewed Item: Reviewed Item<br/>Research Notes: Research Notes<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C1  - Legal Note<br/>C2  - PMCID<br/>C6  - NIHMSID<br/>C7  - Article Number<br/>ET  - Epub Date<br/>RP  - Reprint Edition<br/>SE  - Start Page<br/>",
@@ -3540,29 +3525,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"callNumber": "Call Number",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"journalAbbreviation": "Periodical Title",
-				"language": "Language",
-				"issue": "Issue",
-				"ISSN": "ISSN",
-				"pages": "Pages",
-				"shortTitle": "Short Title",
-				"publicationTitle": "Journal",
-				"title": "Title",
-				"url": "URL",
-				"volume": "Volume",
-				"accessDate": "0000 Access"
+				"seeAlso": []
 			},
 			{
 				"itemType": "case",
+				"caseName": "Title",
 				"creators": [
 					{
 						"lastName": "Name1",
@@ -3574,6 +3541,22 @@ var testCases = [
 						"firstName": "Author",
 						"creatorType": "author"
 					}
+				],
+				"dateDecided": "0000 Year Date",
+				"abstractNote": "Abstract",
+				"court": "Publisher",
+				"extra": "Start Page",
+				"firstPage": "Pages",
+				"history": "History",
+				"language": "Language",
+				"reporter": "Organization, Issuing",
+				"reporterVolume": "Rule Number",
+				"url": "URL",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
 				],
 				"notes": [
 					{
@@ -3586,29 +3569,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"reporter": "Organization, Issuing",
-				"abstractNote": "Abstract",
-				"dateDecided": "0000 Year Date",
-				"language": "Language",
-				"extra": "Start Page",
-				"history": "History",
-				"court": "Publisher",
-				"firstPage": "Pages",
-				"caseName": "Title",
-				"url": "URL",
-				"reporterVolume": "Rule Number",
-				"accessDate": "0000 Access",
-				"publicationTitle": "Title Number"
+				"seeAlso": []
 			},
 			{
 				"itemType": "magazineArticle",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Name1",
@@ -3620,6 +3585,26 @@ var testCases = [
 						"firstName": "Author",
 						"creatorType": "author"
 					}
+				],
+				"date": "0000 Year Date",
+				"ISSN": "ISSN",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"callNumber": "Call Number",
+				"extra": "Issue Number",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"pages": "Pages",
+				"publicationTitle": "Magazine",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"volume": "Volume",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
 				],
 				"notes": [
 					{
@@ -3632,32 +3617,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"callNumber": "Call Number",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"language": "Language",
-				"extra": "Issue Number",
-				"ISSN": "ISSN",
-				"pages": "Pages",
-				"shortTitle": "Short Title",
-				"publicationTitle": "Magazine",
-				"title": "Title",
-				"url": "URL",
-				"volume": "Volume",
-				"accessDate": "0000 Access"
+				"seeAlso": []
 			},
 			{
 				"itemType": "manuscript",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Name1",
@@ -3670,6 +3634,25 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "0000 Year Date",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"callNumber": "Call Number",
+				"extra": "Folio Number",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"manuscriptType": "Type of Work",
+				"numPages": "Pages",
+				"place": "Place Published",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -3681,38 +3664,39 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"callNumber": "Call Number",
-				"place": "Place Published",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"language": "Language",
-				"extra": "Folio Number",
-				"manuscriptType": "Type of Work",
-				"numPages": "Pages",
-				"shortTitle": "Short Title",
-				"title": "Title",
-				"url": "URL",
-				"accessDate": "0000 Access",
-				"publicationTitle": "Collection Title"
+				"seeAlso": []
 			},
 			{
 				"itemType": "map",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Cartographer",
 						"creatorType": "cartographer",
 						"fieldMode": 1
 					}
+				],
+				"date": "0000 Year Date",
+				"ISBN": "ISSN/ISBN",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"callNumber": "Call Number",
+				"edition": "Edition",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"mapType": "Type",
+				"place": "Place Published",
+				"publisher": "Publisher",
+				"scale": "Scale",
+				"seriesTitle": "Series Title",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
 				],
 				"notes": [
 					{
@@ -3725,34 +3709,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"scale": "Scale",
-				"callNumber": "Call Number",
-				"place": "Place Published",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"edition": "Edition",
-				"language": "Language",
-				"mapType": "Type",
-				"publisher": "Publisher",
-				"ISBN": "ISSN/ISBN",
-				"shortTitle": "Short Title",
-				"seriesTitle": "Series Title",
-				"title": "Title",
-				"url": "URL",
-				"accessDate": "0000 Access"
+				"seeAlso": []
 			},
 			{
 				"itemType": "audioRecording",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Editor",
@@ -3775,6 +3736,28 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
+				"date": "0000 Year Date",
+				"ISBN": "ISBN",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"audioRecordingFormat": "Accompanying Matter",
+				"callNumber": "Call Number",
+				"label": "Publisher",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"numberOfVolumes": "Number of Volumes",
+				"place": "Place Published",
+				"seriesTitle": "Series Title",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"volume": "Volume",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -3786,41 +3769,39 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"audioRecordingFormat": "Accompanying Matter",
-				"callNumber": "Call Number",
-				"place": "Place Published",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"language": "Language",
-				"numberOfVolumes": "Number of Volumes",
-				"label": "Publisher",
-				"ISBN": "ISBN",
-				"shortTitle": "Short Title",
-				"seriesTitle": "Series Title",
-				"title": "Title",
-				"url": "URL",
-				"volume": "Volume",
-				"accessDate": "0000 Access",
-				"publicationTitle": "Album Title"
+				"seeAlso": []
 			},
 			{
 				"itemType": "newspaperArticle",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Reporter",
 						"creatorType": "author",
 						"fieldMode": 1
 					}
+				],
+				"date": "0000 Year Issue",
+				"ISSN": "ISSN",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"callNumber": "Call Number",
+				"edition": "Edition",
+				"extra": "Start Page",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"pages": "Pages",
+				"place": "Place Published",
+				"publicationTitle": "Newspaper",
+				"section": "Section",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
 				],
 				"notes": [
 					{
@@ -3833,34 +3814,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"callNumber": "Call Number",
-				"place": "Place Published",
-				"date": "0000 Year Issue",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"edition": "Edition",
-				"language": "Language",
-				"extra": "Start Page",
-				"section": "Section",
-				"ISSN": "ISSN",
-				"pages": "Pages",
-				"shortTitle": "Short Title",
-				"publicationTitle": "Newspaper",
-				"title": "Title",
-				"url": "URL",
-				"accessDate": "0000 Access"
+				"seeAlso": []
 			},
 			{
 				"itemType": "document",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Name1",
@@ -3873,6 +3831,20 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "0000 Year Date",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"publisher": "Publisher",
+				"url": "URL",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -3884,26 +3856,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"language": "Language",
-				"publisher": "Publisher",
-				"title": "Title",
-				"url": "URL",
-				"publicationTitle": "Periodical"
+				"seeAlso": []
 			},
 			{
 				"itemType": "videoRecording",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "By",
@@ -3916,6 +3873,22 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
+				"date": "0000 Year Date",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"extra": "Number of Screens",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"studio": "Distributor",
+				"url": "URL",
+				"videoRecordingFormat": "Format/Length",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -3927,28 +3900,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"videoRecordingFormat": "Format/Length",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"language": "Language",
-				"extra": "Number of Screens",
-				"studio": "Distributor",
-				"title": "Title",
-				"url": "URL",
-				"publicationTitle": "Series Title"
+				"seeAlso": []
 			},
 			{
 				"itemType": "manuscript",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Translator",
@@ -3966,6 +3922,25 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "0000 Year Date",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"callNumber": "Call Number",
+				"extra": "Series Volume\nNumber of Pages",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"manuscriptType": "Type of Work",
+				"numPages": "Pages",
+				"place": "Place Published",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -3977,32 +3952,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"callNumber": "Call Number",
-				"place": "Place Published",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"language": "Language",
-				"extra": "Series Volume\nNumber of Pages",
-				"manuscriptType": "Type of Work",
-				"numPages": "Pages",
-				"shortTitle": "Short Title",
-				"title": "Title",
-				"url": "URL",
-				"accessDate": "0000 Access",
-				"publicationTitle": "Published Source"
+				"seeAlso": []
 			},
 			{
 				"itemType": "patent",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Inventor",
@@ -4015,6 +3969,27 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
+				"issueDate": "0000 Year Issue",
+				"abstractNote": "Abstract",
+				"applicationNumber": "Application Number",
+				"assignee": "Assignee",
+				"country": "Designated States",
+				"issuingAuthority": "Organization, Issuing",
+				"language": "Language",
+				"legalStatus": "Legal Status",
+				"pages": "Pages",
+				"patentNumber": "Patent Number",
+				"place": "Country",
+				"priorityNumbers": "Priority Numbers",
+				"references": "References",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -4026,34 +4001,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"issuingAuthority": "Organization, Issuing",
-				"abstractNote": "Abstract",
-				"issueDate": "0000 Year Issue",
-				"country": "Designated States",
-				"references": "References",
-				"legalStatus": "Legal Status",
-				"place": "Country",
-				"language": "Language",
-				"applicationNumber": "Application Number",
-				"priorityNumbers": "Priority Numbers",
-				"assignee": "Assignee",
-				"patentNumber": "Patent Number",
-				"pages": "Pages",
-				"shortTitle": "Short Title",
-				"title": "Title",
-				"url": "URL",
-				"accessDate": "0000 Access",
-				"publicationTitle": "Published Source"
+				"seeAlso": []
 			},
 			{
 				"itemType": "letter",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Recipient",
@@ -4071,6 +4023,23 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "0000 Year Date",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"callNumber": "Call Number",
+				"extra": "Folio Number",
+				"language": "Language",
+				"letterType": "Type",
+				"libraryCatalog": "Database Provider",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -4082,29 +4051,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"callNumber": "Call Number",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"language": "Language",
-				"extra": "Folio Number",
-				"letterType": "Type",
-				"shortTitle": "Short Title",
-				"title": "Title",
-				"url": "URL",
-				"accessDate": "0000 Access"
+				"seeAlso": []
 			},
 			{
 				"itemType": "report",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Editor",
@@ -4127,6 +4078,28 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "0000 Year Date",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"callNumber": "Call Number",
+				"extra": "Document Number",
+				"institution": "Institution",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"pages": "Pages",
+				"place": "Place Published",
+				"reportNumber": "Report Number",
+				"reportType": "Type",
+				"seriesTitle": "Series Title",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -4138,34 +4111,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"callNumber": "Call Number",
-				"place": "Place Published",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"language": "Language",
-				"extra": "Document Number",
-				"reportType": "Type",
-				"institution": "Institution",
-				"reportNumber": "Report Number",
-				"pages": "Pages",
-				"shortTitle": "Short Title",
-				"seriesTitle": "Series Title",
-				"title": "Title",
-				"url": "URL",
-				"accessDate": "0000 Access"
+				"seeAlso": []
 			},
 			{
 				"itemType": "book",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Editor",
@@ -4193,6 +4143,30 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "0000 Year Date",
+				"ISBN": "ISBN",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"callNumber": "Call Number",
+				"edition": "Edition",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"numPages": "Pages",
+				"numberOfVolumes": "Number of Volumes",
+				"place": "Place Published",
+				"publisher": "Publisher",
+				"series": "Secondary Title",
+				"seriesNumber": "Series Volume",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"volume": "Volume",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -4204,42 +4178,38 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"callNumber": "Call Number",
-				"place": "Place Published",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"edition": "Edition",
-				"language": "Language",
-				"seriesNumber": "Series Volume",
-				"numberOfVolumes": "Number of Volumes",
-				"publisher": "Publisher",
-				"ISBN": "ISBN",
-				"numPages": "Pages",
-				"shortTitle": "Short Title",
-				"series": "Secondary Title",
-				"title": "Title",
-				"url": "URL",
-				"volume": "Volume",
-				"accessDate": "0000 Access"
+				"seeAlso": []
 			},
 			{
 				"itemType": "report",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Institution",
 						"creatorType": "author",
 						"fieldMode": 1
 					}
+				],
+				"date": "0000 Year Date",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"callNumber": "Call Number",
+				"extra": "Start Page",
+				"institution": "Publisher",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"pages": "Pages",
+				"place": "Place Published",
+				"reportNumber": "Document Number",
+				"reportType": "Type of Work",
+				"seriesTitle": "Section Title",
+				"url": "URL",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
 				],
 				"notes": [
 					{
@@ -4252,34 +4222,30 @@ var testCases = [
 						]
 					}
 				],
+				"seeAlso": []
+			},
+			{
+				"itemType": "statute",
+				"nameOfAct": "Short Title",
+				"creators": [],
+				"dateEnacted": "0000 Year Date",
+				"abstractNote": "Abstract",
+				"code": "Code",
+				"codeNumber": "Code Number",
+				"history": "History",
+				"language": "Language",
+				"pages": "Pages",
+				"publicLawNumber": "Public Law Number",
+				"section": "Sections",
+				"session": "Session",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"attachments": [],
 				"tags": [
 					"Keyword1, Keyword2, Keyword3",
 					"Keyword4",
 					"Keyword5"
 				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"callNumber": "Call Number",
-				"place": "Place Published",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"language": "Language",
-				"extra": "Start Page",
-				"reportType": "Type of Work",
-				"institution": "Publisher",
-				"reportNumber": "Document Number",
-				"pages": "Pages",
-				"seriesTitle": "Section Title",
-				"title": "Title",
-				"url": "URL",
-				"accessDate": "0000 Access"
-			},
-			{
-				"itemType": "statute",
-				"creators": [],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -4291,31 +4257,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"dateEnacted": "0000 Year Date",
-				"session": "Session",
-				"language": "Language",
-				"publicLawNumber": "Public Law Number",
-				"history": "History",
-				"section": "Sections",
-				"pages": "Pages",
-				"shortTitle": "Short Title",
-				"code": "Code",
-				"nameOfAct": "Name of Act",
-				"url": "URL",
-				"codeNumber": "Code Number",
-				"accessDate": "0000 Access",
-				"title": "Short Title"
+				"seeAlso": []
 			},
 			{
 				"itemType": "thesis",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Name1",
@@ -4328,6 +4274,26 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "0000 Year Date",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"archiveLocation": "Accession Number",
+				"callNumber": "Call Number",
+				"extra": "Document Number",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"numPages": "Number of Pages",
+				"place": "Place Published",
+				"shortTitle": "Short Title",
+				"thesisType": "Thesis Type",
+				"university": "University",
+				"url": "URL",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -4339,33 +4305,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"archiveLocation": "Accession Number",
-				"callNumber": "Call Number",
-				"place": "Place Published",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"language": "Language",
-				"extra": "Document Number",
-				"thesisType": "Thesis Type",
-				"university": "University",
-				"numPages": "Number of Pages",
-				"shortTitle": "Short Title",
-				"title": "Title",
-				"url": "URL",
-				"accessDate": "0000 Access",
-				"publicationTitle": "Academic Department"
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Title of Work",
 				"creators": [
 					{
 						"lastName": "Editor",
@@ -4383,6 +4327,24 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "0000 Year Date",
+				"abstractNote": "Abstract",
+				"archive": "Name of Database",
+				"issue": "Number",
+				"journalAbbreviation": "Abbreviation",
+				"language": "Language",
+				"libraryCatalog": "Database Provider",
+				"pages": "Pages",
+				"publicationTitle": "Series Title",
+				"series": "Department",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -4394,30 +4356,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"date": "0000 Year Date",
-				"archive": "Name of Database",
-				"libraryCatalog": "Database Provider",
-				"journalAbbreviation": "Abbreviation",
-				"language": "Language",
-				"issue": "Number",
-				"pages": "Pages",
-				"shortTitle": "Short Title",
-				"publicationTitle": "Series Title",
-				"series": "Department",
-				"title": "Title of Work",
-				"url": "URL",
-				"accessDate": "0000 Access"
+				"seeAlso": []
 			},
 			{
 				"itemType": "webpage",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Name1",
@@ -4430,6 +4373,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "0000 Year Last",
+				"abstractNote": "Abstract",
+				"language": "Language",
+				"shortTitle": "Short Title",
+				"url": "URL",
+				"websiteTitle": "Series Title",
+				"websiteType": "Type of Medium",
+				"attachments": [],
+				"tags": [
+					"Keyword1, Keyword2, Keyword3",
+					"Keyword4",
+					"Keyword5"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -4441,22 +4397,7 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Abstract",
-				"date": "0000 Year Last",
-				"language": "Language",
-				"websiteType": "Type of Medium",
-				"shortTitle": "Short Title",
-				"websiteTitle": "Series Title",
-				"title": "Title",
-				"url": "URL",
-				"accessDate": "0000 Access"
+				"seeAlso": []
 			}
 		]
 	},
@@ -4466,6 +4407,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Rapid identification of thousands of copperhead snake (Agkistrodon contortrix) microsatellite loci from modest amounts of 454 shotgun genome sequence",
 				"creators": [
 					{
 						"lastName": "CASTOE",
@@ -4503,6 +4445,33 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2009",
+				"ISSN": "1755-0998",
+				"abstractNote": "Optimal integration of next-generation sequencing into mainstream research requires re-evaluation of how problems can be reasonably overcome and what questions can be asked. .... The random sequencing-based approach to identify microsatellites was rapid, cost-effective and identified thousands of useful microsatellite loci in a previously unstudied species.",
+				"issue": "9999",
+				"publicationTitle": "Molecular Ecology Resources",
+				"shortTitle": "Rapid identification of thousands of copperhead snake (Agkistrodon contortrix) microsatellite loci from modest amounts of 454 shotgun genome sequence",
+				"url": "http://dx.doi.org/10.1111/j.1755-0998.2009.02750.x",
+				"volume": "9999",
+				"attachments": [
+					{
+						"title": "2009 Castoe Mol Eco Resources",
+						"downloadable": true
+					},
+					{
+						"title": "sm001",
+						"downloadable": true
+					},
+					{
+						"title": "sm002",
+						"downloadable": true
+					},
+					{
+						"title": "sm003",
+						"downloadable": true
+					}
+				],
+				"tags": [],
 				"notes": [
 					{
 						"note": "<p>10.1111/j.1755-0998.2009.02750.x</p>"
@@ -4514,39 +4483,7 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "2009 Castoe Mol Eco Resources",
-						"url": "PDF/2009 Castoe Mol Eco Resources-1114744832/2009 Castoe Mol Eco Resources.pdf",
-						"downloadable": true
-					},
-					{
-						"title": "sm001",
-						"url": "PDF/sm001-1634838528/sm001.pdf",
-						"downloadable": true
-					},
-					{
-						"title": "sm002",
-						"url": "PDF/sm002-2305927424/sm002.txt",
-						"downloadable": true
-					},
-					{
-						"title": "sm003",
-						"url": "PDF/sm003-2624695040/sm003.xls",
-						"downloadable": true
-					}
-				],
-				"abstractNote": "Optimal integration of next-generation sequencing into mainstream research requires re-evaluation of how problems can be reasonably overcome and what questions can be asked. .... The random sequencing-based approach to identify microsatellites was rapid, cost-effective and identified thousands of useful microsatellite loci in a previously unstudied species.",
-				"issue": "9999",
-				"ISSN": "1755-0998",
-				"shortTitle": "Rapid identification of thousands of copperhead snake (Agkistrodon contortrix) microsatellite loci from modest amounts of 454 shotgun genome sequence",
-				"publicationTitle": "Molecular Ecology Resources",
-				"title": "Rapid identification of thousands of copperhead snake (Agkistrodon contortrix) microsatellite loci from modest amounts of 454 shotgun genome sequence",
-				"url": "http://dx.doi.org/10.1111/j.1755-0998.2009.02750.x",
-				"volume": "9999",
-				"date": "2009"
+				"seeAlso": []
 			}
 		]
 	},
@@ -4556,12 +4493,25 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "bill",
+				"title": "Act Name",
 				"creators": [
 					{
 						"lastName": "Author Name",
 						"firstName": "Author2 Name2",
 						"creatorType": "author"
 					}
+				],
+				"date": "0000 Date",
+				"abstractNote": "Abstract",
+				"billNumber": "Bill/Res Number",
+				"code": "Code",
+				"history": "History",
+				"section": "Section(s)",
+				"url": "Location/URL",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -4574,29 +4524,29 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"code": "Code",
-				"billNumber": "Bill/Res Number",
-				"section": "Section(s)",
-				"history": "History",
-				"url": "Location/URL",
-				"abstractNote": "Abstract",
-				"title": "Act Name",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "artwork",
+				"title": "Title/Subject",
 				"creators": [
 					{
 						"lastName": "Author Name",
 						"firstName": "Author2 Name2",
 						"creatorType": "artist"
 					}
+				],
+				"date": "0000 Date",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"artworkMedium": "Medium",
+				"artworkSize": "Size",
+				"callNumber": "Call Number",
+				"url": "Location/URL",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -4630,23 +4580,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"artworkMedium": "Medium",
-				"artworkSize": "Size",
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Title/Subject",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "film",
+				"title": "Analytic Title",
 				"creators": [
 					{
 						"lastName": "Author Name",
@@ -4658,6 +4596,17 @@ var testCases = [
 						"firstName": "Subsidiary",
 						"creatorType": "producer"
 					}
+				],
+				"date": "0000 Date",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"callNumber": "Call Number",
+				"distributor": "Publisher Name",
+				"url": "Location/URL",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -4715,22 +4664,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"distributor": "Publisher Name",
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Analytic Title",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "bookSection",
+				"title": "Analytic Title",
 				"creators": [
 					{
 						"lastName": "Author Name",
@@ -4747,6 +4685,24 @@ var testCases = [
 						"creatorType": "seriesEditor",
 						"fieldMode": 1
 					}
+				],
+				"date": "0000 Date",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"bookTitle": "Monographic Title",
+				"callNumber": "Call Number",
+				"edition": "Edition",
+				"pages": "Page(s)",
+				"place": "Place of Publication",
+				"publisher": "Publisher Name",
+				"series": "Series Title",
+				"seriesNumber": "Series Volume Identification",
+				"url": "Location/URL",
+				"volume": "Volume ID",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -4780,29 +4736,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"bookTitle": "Monographic Title",
-				"edition": "Edition",
-				"place": "Place of Publication",
-				"series": "Series Title",
-				"seriesNumber": "Series Volume Identification",
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Analytic Title",
-				"publisher": "Publisher Name",
-				"volume": "Volume ID",
-				"pages": "Page(s)",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "bookSection",
+				"title": "Analytic Title",
 				"creators": [
 					{
 						"lastName": "Author Name",
@@ -4824,6 +4762,25 @@ var testCases = [
 						"creatorType": "seriesEditor",
 						"fieldMode": 1
 					}
+				],
+				"date": "0000 Date",
+				"ISBN": "ISBN",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"bookTitle": "Monographic Title",
+				"callNumber": "Call Number",
+				"edition": "Edition",
+				"pages": "Page(s)",
+				"place": "Place of Publication",
+				"publisher": "Publisher Name",
+				"series": "Series Title",
+				"seriesNumber": "Series Volume ID",
+				"url": "Location/URL",
+				"volume": "Volume ID",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -4866,36 +4823,30 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"bookTitle": "Monographic Title",
-				"edition": "Edition",
-				"place": "Place of Publication",
-				"series": "Series Title",
-				"seriesNumber": "Series Volume ID",
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"ISBN": "ISBN",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Analytic Title",
-				"publisher": "Publisher Name",
-				"volume": "Volume ID",
-				"pages": "Page(s)",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Author Name",
 						"firstName": "Author2 Name2",
 						"creatorType": "author"
 					}
+				],
+				"date": "0000 Date",
+				"abstractNote": "Abstract",
+				"callNumber": "Call Number",
+				"issue": "Issue ID",
+				"pages": "Page(s)",
+				"publicationTitle": "Journal Title",
+				"url": "Location/URL",
+				"volume": "Volume ID",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -4908,30 +4859,30 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"issue": "Issue ID",
-				"url": "Location/URL",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Title",
-				"publicationTitle": "Journal Title",
-				"date": "0000 Date",
-				"volume": "Volume ID",
-				"pages": "Page(s)"
+				"seeAlso": []
 			},
 			{
 				"itemType": "book",
+				"title": "Monographic Title",
 				"creators": [
 					{
 						"lastName": "Monographic Author",
 						"creatorType": "author",
 						"fieldMode": 1
 					}
+				],
+				"date": "0000 Date",
+				"ISBN": "ISBN",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"callNumber": "Call Number",
+				"place": "Place of Publication",
+				"publisher": "Publisher Name",
+				"url": "Location/URL",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -4944,24 +4895,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"place": "Place of Publication",
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"ISBN": "ISBN",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Monographic Title",
-				"publisher": "Publisher Name",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "book",
+				"title": "Monographic Title",
 				"creators": [
 					{
 						"lastName": "Monographic Author",
@@ -4978,6 +4916,23 @@ var testCases = [
 						"creatorType": "editor",
 						"fieldMode": 1
 					}
+				],
+				"date": "0000 Date",
+				"ISBN": "ISBN",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"callNumber": "Call Number",
+				"edition": "Edition",
+				"place": "Place of Publication",
+				"publisher": "Publisher Name",
+				"series": "Series Title",
+				"seriesNumber": "Series Volume ID",
+				"url": "Location/URL",
+				"volume": "Volume ID",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -5011,34 +4966,28 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"edition": "Edition",
-				"place": "Place of Publication",
-				"series": "Series Title",
-				"seriesNumber": "Series Volume ID",
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"ISBN": "ISBN",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Monographic Title",
-				"publisher": "Publisher Name",
-				"volume": "Volume ID",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "case",
+				"caseName": "Case Name",
 				"creators": [
 					{
 						"lastName": "Counsel",
 						"creatorType": "author",
 						"fieldMode": 1
 					}
+				],
+				"dateDecided": "0000 Date",
+				"abstractNote": "Abstract",
+				"court": "Court",
+				"firstPage": "Page(s)",
+				"reporterVolume": "Reporter Number",
+				"url": "Location/URL",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -5054,28 +5003,31 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"caseName": "Case Name",
-				"court": "Court",
-				"reporterVolume": "Reporter Number",
-				"firstPage": "Page(s)",
-				"url": "Location/URL",
-				"abstractNote": "Abstract",
-				"dateDecided": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "computerProgram",
+				"title": "Program Title",
 				"creators": [
 					{
 						"lastName": "Author/Programmer",
 						"creatorType": "programmer",
 						"fieldMode": 1
 					}
+				],
+				"date": "0000 Date",
+				"ISBN": "ISBN",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"callNumber": "Call Number",
+				"company": "Publisher Name",
+				"place": "Place of Publication",
+				"url": "Location/URL",
+				"version": "Version",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -5115,25 +5067,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"version": "Version",
-				"place": "Place of Publication",
-				"company": "Publisher Name",
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"ISBN": "ISBN",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Program Title",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "conferencePaper",
+				"title": "Paper/Section Title",
 				"creators": [
 					{
 						"lastName": "Author Name",
@@ -5150,6 +5088,23 @@ var testCases = [
 						"creatorType": "seriesEditor",
 						"fieldMode": 1
 					}
+				],
+				"date": "0000 Date",
+				"ISBN": "ISBN",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"callNumber": "Call Number",
+				"pages": "Location in Work",
+				"place": "Place of Publication",
+				"proceedingsTitle": "Proceedings Title",
+				"publisher": "Publisher Name",
+				"series": "Series Title",
+				"url": "Location/URL",
+				"volume": "Volume ID",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -5189,34 +5144,28 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"proceedingsTitle": "Proceedings Title",
-				"place": "Place of Publication",
-				"series": "Series Title",
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"ISBN": "ISBN",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Paper/Section Title",
-				"publisher": "Publisher Name",
-				"volume": "Volume ID",
-				"pages": "Location in Work",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "document",
+				"title": "Analytic Title",
 				"creators": [
 					{
 						"lastName": "Editor/Compiler",
 						"creatorType": "editor",
 						"fieldMode": 1
 					}
+				],
+				"date": "0000 Date",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"callNumber": "Call Number",
+				"publisher": "Publisher Name",
+				"url": "Location/URL",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -5253,28 +5202,30 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Analytic Title",
-				"publisher": "Publisher Name",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "thesis",
+				"title": "Analytic Title",
 				"creators": [
 					{
 						"lastName": "Author Name",
 						"firstName": "Author2 Name2",
 						"creatorType": "author"
 					}
+				],
+				"date": "0000 Date",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"callNumber": "Call Number",
+				"numPages": "Extent of Work",
+				"place": "Place of Publication",
+				"university": "University",
+				"url": "Location/URL",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -5299,30 +5250,25 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"place": "Place of Publication",
-				"university": "University",
-				"numPages": "Extent of Work",
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Analytic Title",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "webpage",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Author Name",
 						"firstName": "Author2 Name2",
 						"creatorType": "author"
 					}
+				],
+				"date": "0000 Last",
+				"abstractNote": "Abstract",
+				"url": "Location/URL",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -5338,19 +5284,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"url": "Location/URL",
-				"abstractNote": "Abstract",
-				"title": "Title",
-				"date": "0000 Last"
+				"seeAlso": []
 			},
 			{
 				"itemType": "email",
+				"subject": "Subject",
 				"creators": [
 					{
 						"lastName": "Author Name",
@@ -5362,6 +5300,14 @@ var testCases = [
 						"creatorType": "recipient",
 						"fieldMode": 1
 					}
+				],
+				"date": "0000 Date",
+				"abstractNote": "Abstract",
+				"url": "Location/URL",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -5383,19 +5329,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"subject": "Subject",
-				"url": "Location/URL",
-				"abstractNote": "Abstract",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Analytic Title",
 				"creators": [
 					{
 						"lastName": "Author Name",
@@ -5408,6 +5346,23 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
+				"date": "0000 Date",
+				"ISSN": "ISSN",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"callNumber": "Call Number",
+				"issue": "Issue ID",
+				"journalAbbreviation": "Journal Title",
+				"pages": "Location in Work",
+				"publicationTitle": "Monographic Title",
+				"series": "Series Title",
+				"url": "Location/URL",
+				"volume": "Volume ID",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
@@ -5419,34 +5374,27 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"journalAbbreviation": "Journal Title",
-				"issue": "Issue ID",
-				"series": "Series Title",
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"ISSN": "ISSN",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Analytic Title",
-				"publicationTitle": "Monographic Title",
-				"volume": "Volume ID",
-				"pages": "Location in Work",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "hearing",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Author Name",
 						"firstName": "Author2 Name2",
 						"creatorType": "author"
 					}
+				],
+				"date": "0000 Hearing",
+				"abstractNote": "Abstract",
+				"place": "Committee",
+				"publisher": "Subcommittee",
+				"url": "Location/URL",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -5471,27 +5419,30 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"place": "Committee",
-				"url": "Location/URL",
-				"abstractNote": "Abstract",
-				"title": "Title",
-				"publisher": "Subcommittee",
-				"date": "0000 Hearing"
+				"seeAlso": []
 			},
 			{
 				"itemType": "magazineArticle",
+				"title": "Article Title",
 				"creators": [
 					{
 						"lastName": "Author Name",
 						"firstName": "Author2 Name2",
 						"creatorType": "author"
 					}
+				],
+				"date": "0000 Date",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"callNumber": "Call Number",
+				"issue": "Issue ID",
+				"pages": "Page(s)",
+				"url": "Location/URL",
+				"volume": "Volume ID",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -5507,30 +5458,27 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"issue": "Issue ID",
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Article Title",
-				"volume": "Volume ID",
-				"pages": "Page(s)",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "manuscript",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Author Name",
 						"firstName": "Author2 Name2",
 						"creatorType": "author"
 					}
+				],
+				"date": "0000 Date",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"callNumber": "Call Number",
+				"url": "Location/URL",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -5546,27 +5494,33 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Title",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Article Title",
 				"creators": [
 					{
 						"lastName": "Author Name",
 						"firstName": "Author2 Name2",
 						"creatorType": "author"
 					}
+				],
+				"date": "0000 Date",
+				"ISSN": "ISSN",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"callNumber": "Call Number",
+				"issue": "Issue ID",
+				"language": "Language",
+				"pages": "Page(s)",
+				"publicationTitle": "Journal Title",
+				"url": "Location/URL",
+				"volume": "Volume ID",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -5591,27 +5545,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"issue": "Issue ID",
-				"language": "Language",
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"ISSN": "ISSN",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Article Title",
-				"publicationTitle": "Journal Title",
-				"volume": "Volume ID",
-				"pages": "Page(s)",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Article Title",
 				"creators": [
 					{
 						"lastName": "Author Name",
@@ -5623,6 +5561,21 @@ var testCases = [
 						"firstName": "Monographic",
 						"creatorType": "editor"
 					}
+				],
+				"date": "0000 Date",
+				"ISSN": "ISSN",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"callNumber": "Call Number",
+				"issue": "Issue ID",
+				"pages": "Page(s)",
+				"publicationTitle": "Journal Title",
+				"url": "Location/URL",
+				"volume": "Volume ID",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -5653,32 +5606,32 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"issue": "Issue ID",
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"ISSN": "ISSN",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Article Title",
-				"publicationTitle": "Journal Title",
-				"volume": "Volume ID",
-				"pages": "Page(s)",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Analytic Title",
 				"creators": [
 					{
 						"lastName": "Author Name",
 						"firstName": "Author2 Name2",
 						"creatorType": "author"
 					}
+				],
+				"date": "0000 Date",
+				"ISSN": "ISSN",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"callNumber": "Call Number",
+				"issue": "Issue ID",
+				"pages": "Page(s)",
+				"publicationTitle": "Journal Title",
+				"url": "Location/URL",
+				"volume": "Volume ID",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -5691,27 +5644,26 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"issue": "Issue ID",
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"ISSN": "ISSN",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Analytic Title",
-				"publicationTitle": "Journal Title",
-				"volume": "Volume ID",
-				"pages": "Page(s)",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
 				"creators": [],
+				"date": "0000 Date",
+				"ISSN": "ISSN",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"callNumber": "Call Number",
+				"issue": "Issue ID",
+				"pages": "Extent of Work",
+				"publicationTitle": "Journal Title",
+				"url": "Location/URL",
+				"volume": "Volume ID",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
+				],
 				"notes": [
 					{
 						"note": "<p>Editor: Editor</p>"
@@ -5741,22 +5693,7 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"issue": "Issue ID",
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"ISSN": "ISSN",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"publicationTitle": "Journal Title",
-				"volume": "Volume ID",
-				"pages": "Extent of Work",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "letter",
@@ -5771,6 +5708,16 @@ var testCases = [
 						"creatorType": "recipient",
 						"fieldMode": 1
 					}
+				],
+				"date": "0000 Date",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"callNumber": "Call Number",
+				"url": "Location/URL",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -5798,26 +5745,29 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "book",
+				"title": "Analytic Title",
 				"creators": [
 					{
 						"lastName": "Author Name",
 						"firstName": "Author2 Name2",
 						"creatorType": "author"
 					}
+				],
+				"date": "0000 Date",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"callNumber": "Call Number",
+				"numPages": "Location of Work",
+				"series": "Collection Title",
+				"url": "Location/URL",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -5851,29 +5801,31 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"series": "Collection Title",
-				"numPages": "Location of Work",
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Analytic Title",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "map",
+				"title": "Map Title",
 				"creators": [
 					{
 						"lastName": "Cartographer",
 						"creatorType": "cartographer",
 						"fieldMode": 1
 					}
+				],
+				"date": "0000 Date",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"callNumber": "Call Number",
+				"extra": "Map Type\nArea",
+				"place": "Place of Publication",
+				"publisher": "Publisher Name",
+				"scale": "Scale",
+				"url": "Location/URL",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -5910,31 +5862,31 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"extra": "Map Type\nArea",
-				"place": "Place of Publication",
-				"scale": "Scale",
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Map Title",
-				"publisher": "Publisher Name",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "book",
+				"title": "Monographic Title",
 				"creators": [
 					{
 						"lastName": "Monographic Author",
 						"creatorType": "author",
 						"fieldMode": 1
 					}
+				],
+				"date": "0000 Date",
+				"ISBN": "ISBN",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"callNumber": "Call Number",
+				"place": "Place of Publication",
+				"publisher": "Publisher Name",
+				"url": "Location/URL",
+				"volume": "Edition",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -5950,25 +5902,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"place": "Place of Publication",
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"ISBN": "ISBN",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Monographic Title",
-				"volume": "Edition",
-				"publisher": "Publisher Name",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "audioRecording",
+				"title": "Analytic Title",
 				"creators": [
 					{
 						"lastName": "Composer",
@@ -5980,6 +5918,21 @@ var testCases = [
 						"creatorType": "performer",
 						"fieldMode": 1
 					}
+				],
+				"date": "0000 Date",
+				"ISBN": "ISBN",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"callNumber": "Call Number",
+				"label": "Publisher Name",
+				"place": "Place of Publication",
+				"seriesTitle": "Series Title",
+				"url": "Location/URL",
+				"volume": "Edition",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -6043,32 +5996,28 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"place": "Place of Publication",
-				"label": "Publisher Name",
-				"seriesTitle": "Series Title",
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"ISBN": "ISBN",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Analytic Title",
-				"volume": "Edition",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "film",
+				"title": "Analytic Title",
 				"creators": [
 					{
 						"lastName": "Director",
 						"creatorType": "director",
 						"fieldMode": 1
 					}
+				],
+				"date": "0000 Date",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"callNumber": "Call Number",
+				"extra": "Timing",
+				"url": "Location/URL",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -6102,28 +6051,30 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"extra": "Timing",
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Analytic Title",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "newspaperArticle",
+				"title": "Analytic Title",
 				"creators": [
 					{
 						"lastName": "Author Name",
 						"firstName": "Author2 Name2",
 						"creatorType": "author"
 					}
+				],
+				"date": "0000 Date",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"callNumber": "Call Number",
+				"extra": "Section",
+				"pages": "Page(s)",
+				"place": "Place of Publication",
+				"url": "Location/URL",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -6148,30 +6099,31 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"place": "Place of Publication",
-				"extra": "Section",
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Analytic Title",
-				"pages": "Page(s)",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "patent",
+				"title": "Patent Title",
 				"creators": [
 					{
 						"lastName": "Inventor Name",
 						"creatorType": "inventor",
 						"fieldMode": 1
 					}
+				],
+				"issueDate": "0000 Date",
+				"abstractNote": "Abstract",
+				"applicationNumber": "Class Code, International",
+				"extra": "Class Code, National",
+				"issuingAuthority": "Assignee",
+				"language": "Language",
+				"pages": "Abstract Journal Page(s)",
+				"place": "Country",
+				"url": "Location/URL",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -6220,25 +6172,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"issuingAuthority": "Assignee",
-				"place": "Country",
-				"language": "Language",
-				"url": "Location/URL",
-				"extra": "Class Code, National",
-				"applicationNumber": "Class Code, International",
-				"abstractNote": "Abstract",
-				"issueDate": "0000 Date",
-				"title": "Patent Title",
-				"pages": "Abstract Journal Page(s)"
+				"seeAlso": []
 			},
 			{
 				"itemType": "report",
+				"title": "Report Title",
 				"creators": [
 					{
 						"lastName": "Author Name",
@@ -6250,6 +6188,19 @@ var testCases = [
 						"creatorType": "seriesEditor",
 						"fieldMode": 1
 					}
+				],
+				"date": "0000 Date",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"callNumber": "Call Number",
+				"institution": "Publisher Name",
+				"pages": "Extent of Work",
+				"place": "Place of Publication",
+				"url": "Location/URL",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -6298,24 +6249,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"place": "Place of Publication",
-				"institution": "Publisher Name",
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Report Title",
-				"pages": "Extent of Work",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "audioRecording",
+				"title": "Analytic Title",
 				"creators": [
 					{
 						"lastName": "Composer",
@@ -6327,6 +6265,20 @@ var testCases = [
 						"creatorType": "performer",
 						"fieldMode": 1
 					}
+				],
+				"date": "0000 Date",
+				"ISBN": "ISBN",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"callNumber": "Call Number",
+				"label": "Publisher Name",
+				"place": "Place of Publication",
+				"seriesTitle": "Series Title",
+				"url": "Location/URL",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -6381,31 +6333,27 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"place": "Place of Publication",
-				"label": "Publisher Name",
-				"seriesTitle": "Series Title",
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"ISBN": "ISBN",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Analytic Title",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "statute",
+				"nameOfAct": "Statute Title",
 				"creators": [
 					{
 						"lastName": "Author Name",
 						"firstName": "Author2 Name2",
 						"creatorType": "author"
 					}
+				],
+				"dateEnacted": "0000 Date",
+				"abstractNote": "Abstract",
+				"codeNumber": "Title/Code Number",
+				"pages": "Section(s)",
+				"url": "Location/URL",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -6418,27 +6366,29 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"nameOfAct": "Statute Title",
-				"codeNumber": "Title/Code Number",
-				"url": "Location/URL",
-				"abstractNote": "Abstract",
-				"dateEnacted": "0000 Date",
-				"pages": "Section(s)"
+				"seeAlso": []
 			},
 			{
 				"itemType": "magazineArticle",
+				"title": "Catalog Title",
 				"creators": [
 					{
 						"lastName": "Author Name",
 						"firstName": "Author2 Name2",
 						"creatorType": "author"
 					}
+				],
+				"date": "0000 Date",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"callNumber": "Call Number",
+				"issue": "Catalog Number",
+				"url": "Location/URL",
+				"volume": "Edition",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -6463,29 +6413,28 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"issue": "Catalog Number",
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Catalog Title",
-				"volume": "Edition",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "manuscript",
+				"title": "Act Title",
 				"creators": [
 					{
 						"lastName": "Author Name",
 						"firstName": "Author2 Name2",
 						"creatorType": "author"
 					}
+				],
+				"date": "0000 Date",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"callNumber": "Call Number",
+				"place": "Code",
+				"url": "Location/URL",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -6498,22 +6447,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"place": "Code",
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Act Title",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Author Name",
@@ -6525,6 +6463,16 @@ var testCases = [
 						"creatorType": "editor",
 						"fieldMode": 1
 					}
+				],
+				"date": "0000 Date",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"callNumber": "Call Number",
+				"url": "Location/URL",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -6540,27 +6488,31 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Title",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "videoRecording",
+				"title": "Analytic Title",
 				"creators": [
 					{
 						"lastName": "Author Name",
 						"firstName": "Author2 Name2",
 						"creatorType": "director"
 					}
+				],
+				"date": "0000 Date",
+				"ISBN": "ISBN",
+				"abstractNote": "Abstract",
+				"archiveLocation": "Address/Availability",
+				"callNumber": "Call Number",
+				"extra": "Extent of Work",
+				"place": "Place of Publication",
+				"studio": "Distributor",
+				"url": "Location/URL",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -6597,31 +6549,25 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"place": "Place of Publication",
-				"studio": "Distributor",
-				"extra": "Extent of Work",
-				"archiveLocation": "Address/Availability",
-				"url": "Location/URL",
-				"ISBN": "ISBN",
-				"abstractNote": "Abstract",
-				"callNumber": "Call Number",
-				"title": "Analytic Title",
-				"date": "0000 Date"
+				"seeAlso": []
 			},
 			{
 				"itemType": "webpage",
+				"title": "Title",
 				"creators": [
 					{
 						"lastName": "Author Name",
 						"firstName": "Author2 Name2",
 						"creatorType": "author"
 					}
+				],
+				"date": "0000 Date",
+				"abstractNote": "Abstract",
+				"url": "Location/URL",
+				"attachments": [],
+				"tags": [
+					"Keywords1, Keywords2, Keywords3",
+					"Keywords4"
 				],
 				"notes": [
 					{
@@ -6640,16 +6586,7 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Keywords1, Keywords2, Keywords3",
-					"Keywords4"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"url": "Location/URL",
-				"abstractNote": "Abstract",
-				"title": "Title",
-				"date": "0000 Date"
+				"seeAlso": []
 			}
 		]
 	},
