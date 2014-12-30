@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-12-18 07:00:13"
+	"lastUpdated": "2014-12-30 23:14:39"
 }
 
 function detectImport() {
@@ -743,7 +743,7 @@ var RISReader = new function() {
 			// e.g. http://informahealthcare.com/doi/full/10.3109/07434618.2014.906498
 			// (an Atypon system)
 			// Also include paragraph separator, though no live example available.
-			line = line.replace(/[\u2028\u2029]/g, ' ');
+			line = line.replace(/\s?[\u2028\u2029]|[\u2028\u2029]\s?/g, ' ');
 		}
 		return line;
 	}
@@ -6650,6 +6650,51 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"title": "Title",
 				"date": "0000 Date"
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "TY  - JOUR\nT1  - From Basic to Applied Research to Improve Outcomes for Individuals Who Require Augmentative and Alternative Communication: \u2028Potential Contributions of Eye Tracking Research Methods\nAU  - Light, Janice\nAU  - McNaughton, David\nY1  - 2014/06/01\nPY  - 2014\nDA  - 2014/06/01\nN1  - doi: 10.3109/07434618.2014.906498\nDO  - 10.3109/07434618.2014.906498\nT2  - Augmentative and Alternative Communication\nJF  - Augmentative and Alternative Communication\nJO  - Augment Altern Commun\nSP  - 99\nEP  - 105\nVL  - 30\nIS  - 2\nPB  - Informa Allied Health\nSN  - 0743-4618\nM3  - doi: 10.3109/07434618.2014.906498\nUR  - http://dx.doi.org/10.3109/07434618.2014.906498\nY2  - 2014/12/17\nER  -",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "From Basic to Applied Research to Improve Outcomes for Individuals Who Require Augmentative and Alternative Communication: Potential Contributions of Eye Tracking Research Methods",
+				"creators": [
+					{
+						"lastName": "Light",
+						"firstName": "Janice",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "McNaughton",
+						"firstName": "David",
+						"creatorType": "author"
+					}
+				],
+				"date": "June 1, 2014",
+				"DOI": "10.3109/07434618.2014.906498",
+				"ISSN": "0743-4618",
+				"issue": "2",
+				"journalAbbreviation": "Augment Altern Commun",
+				"pages": "99-105",
+				"publicationTitle": "Augmentative and Alternative Communication",
+				"url": "http://dx.doi.org/10.3109/07434618.2014.906498",
+				"volume": "30",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p>doi: 10.3109/07434618.2014.906498</p>"
+					},
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>DOI: doi: 10.3109/07434618.2014.906498<br/>PB  - Informa Allied Health<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	}
