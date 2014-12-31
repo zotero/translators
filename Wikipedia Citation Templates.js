@@ -10,7 +10,7 @@
 	"displayOptions":{"exportCharset":"UTF-8"},
 	"browserSupport":"gcs",
 	"inRepository":true,
-	"lastUpdated":"2013-01-12 8:00:26"
+	"lastUpdated":"2014-12-31 20:00:26"
 }
 
 var fieldMap = {
@@ -23,9 +23,12 @@ var fieldMap = {
 	volume:"volume",
 	issue:"issue",
 	pages:"pages",
-	number:"episodeNumber"
+	number:"episodeNumber",
+	language:"language",
 };
 
+// Currently only targeting the English Wikipedia subdomain
+// https://en.wikipedia.org/wiki/Category:Citation_templates
 var typeMap = {
 	book:"Cite book",
 	bookSection:"Cite book",
@@ -62,10 +65,14 @@ var typeMap = {
 	dictionaryEntry:"Cite encyclopedia"
 };
 
+// Most Wikipedias use the "First Last" name format in titles and citations.
+// This isn't universal, see e.g. Russian and Chinese.
 function formatAuthors(authors, useTypes) {
 	var text = "";
 	for each(var author in authors) {
-		text += ", "+author.firstName;
+		// The full "continuous" name uses no separators, which need be removed
+		// cf. "Luc, Jean André : de (1727-1817)"
+		text += ", "+author.firstName.replace(/ :/, "");
 		if(author.firstName && author.lastName) text += " ";
 		text += author.lastName;
 		if(useTypes) text += " ("+Zotero.Utilities.getLocalizedCreatorType(author.creatorType)+")";
@@ -73,11 +80,11 @@ function formatAuthors(authors, useTypes) {
 	return text.substr(2);
 }
 
-function formatFirstAuthor(authors, useTypes) {	
+function formatFirstAuthor(authors, useTypes) {
 	var firstCreator = authors.shift();
 	var field = firstCreator.lastName;
 	if(firstCreator.lastName && firstCreator.firstName) field += ", ";
-	field += firstCreator.firstName;
+	field += firstCreator.firstName.replace(/ :/, "");
 	if(useTypes) field += " ("+Zotero.Utilities.getLocalizedCreatorType(firstCreator.creatorType)+")";
 	return field;
 }
@@ -309,6 +316,22 @@ function doExport() {
 				}
 			}
 		}
+
+		// Old publishers may be written as "Last, First" etc. according to
+		// standards, but should be like authors when in citations.
+		// Source: librarian https://it.wikipedia.org/?diff=69781295
+		// "Dozza, Evangelista (1.), eredi"
+		// "Marnef, Jérôme de & Cavellat, Guillaume, veuve"
+		if(item.publisher && properties.date && properties.date < '1831') {
+			// Remove excess space and secondary disambiguations
+			var declutter = item.publisher.replace(/ *\& */g, "; ").replace(/ *\([^)]+\)/g, "");
+			// Shuffle names with disambiguation and remove numbering
+			var shuffle3 = declutter.replace(/ *([^,;]+), +([^,;0-9]+) *[0-9]*, +([^,;]+) */g, "$2 $1 ($3)");
+			// Same, other names
+			var shuffle2 = shuffle3.replace(/ *([^,;]+), +([^,;0-9]+) *[0-9]* */g, "$2 $1");
+			// Use comma list, get rid of space buildup for numbered names
+			properties.publisher = shuffle2.replace(/ *[;] */g, ", ").replace(/  /g, " ");
+		}
 		
 		if(item.runningTime) {
 			if(type == "Cite episode") {
@@ -324,6 +347,12 @@ function doExport() {
 			} else {
 				properties.url = item.url;
 			}
+		}
+		
+		if(item.language) {
+			// MediaWiki uses ISO 639-1/639-3, some differences possible with MARC21
+			// and ISO 639-2 http://www.loc.gov/marc/languages/language_code.html
+			properties.language = item.language;
 		}
 		
 		if(properties.pages) {
