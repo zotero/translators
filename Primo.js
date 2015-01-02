@@ -299,9 +299,8 @@ function importPNX(text) {
 	item.language = ZU.xpathText(doc, '(//display/language|//facets/language)[1]');
 	
 	var pages = ZU.xpathText(doc, '//display/format');
-	if(pages && pages.search(/[0-9]+/) != -1) {
-		pages = pages.replace(/[\(\)\[\]]/g, "").match(/[0-9]+/);
-		item.pages = item.numPages = pages[0];
+	if(item.itemType == 'book' && pages && pages.search(/\d/) != -1) {
+		item.numPages = extractNumPages(pages);
 	}
 	
 	item.series = ZU.xpathText(doc, '(//addata/seriestitle)[1]');
@@ -378,7 +377,23 @@ function fetchCreators(item, creators, type, splitGuidance) {
 		}
 	}
 }
-/** BEGIN TEST CASES **/
+
+function extractNumPages(str) {
+	// Borrowed from Library Catalog (PICA). See #756
+	//make sure things like 2 partition don't match, but 2 p at the end of the field do
+	// f., p., and S. are "pages" in various languages
+	// For multi-volume works, we expect formats like:
+	//   x-109 p., 510 p. and X, 106 S.; 123 S.
+	var numPagesRE = /\[?\b((?:[ivxlcdm\d]+[ ,\-]*)+)\]?\s+[fps]\b/ig,
+		numPages = [], m;
+	while(m = numPagesRE.exec(str)) {
+		numPages.push(m[1].trim()
+			.replace(/[ ,\-]+/g,'+')
+			.toLowerCase() // for Roman numerals
+		);
+	}
+	return numPages.join('; ');
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
