@@ -217,6 +217,7 @@ function importPNX(text) {
 	
 	switch(itemType.toLowerCase()) {
 		case 'book':
+		case 'ebook':
 		case 'books':
 			item.itemType = "book";
 		break;
@@ -314,13 +315,15 @@ function importPNX(text) {
 	}
 	
 	// the three letter ISO codes that should be in the language field work well:
-	item.language = ZU.xpathText(doc, '//display/language');
+	item.language = ZU.xpathText(doc, '(//display/language|//facets/language)[1]');
 	
 	var pages = ZU.xpathText(doc, '//display/format');
 	if(pages && pages.search(/[0-9]+/) != -1) {
 		pages = pages.replace(/[\(\)\[\]]/g, "").match(/[0-9]+/);
 		item.pages = item.numPages = pages[0];
 	}
+	
+	item.series = ZU.xpathText(doc, '(//addata/seriestitle)[1]');
 
 	// The identifier field is supposed to have standardized format, but
 	// the super-tolerant idCheck should be better than a regex.
@@ -338,8 +341,9 @@ function importPNX(text) {
 		item.tags.push(ZU.trimInternal(subjects[i].textContent));
 	}
 	
-	item.abstractNote = ZU.xpathText(doc, '//addata/abstract')
-		|| ZU.xpathText(doc, '//display/description');
+	item.abstractNote = ZU.xpathText(doc, '//display/description')
+		|| ZU.xpathText(doc, '//addata/abstract');
+	if (item.abstractNote) item.abstractNote = ZU.unescapeHTML(item.abstractNote);
 	
 	item.DOI = ZU.xpathText(doc, '//addata/doi');
 	item.issue = ZU.xpathText(doc, '//addata/issue');
