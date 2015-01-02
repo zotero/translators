@@ -252,74 +252,31 @@ function importPNX(text) {
 	item.title = ZU.xpathText(doc, '//display/title');
 	if(item.title) item.title = ZU.unescapeHTML(item.title);
 	
-	var creators;
-	var contributors;
-	var addataCreators = [];
-	if(ZU.xpathText(doc, '//display/creator')) {
-		creators = ZU.xpath(doc, '//display/creator'); 
-	}
-	if(ZU.xpathText(doc, '//display/contributor')) {
-		contributors = ZU.xpath(doc, '//display/contributor'); 
-	}
-	if(ZU.xpathText(doc, '//addata/addau|//addata/au')) {
-		addataCreators = ZU.xpath(doc, '//addata/addau|//addata/au'); 
-	}
-	//The data in the addata section is sometimes much more messy or incomplete,
-	//but it has the first-name-last-name-separation, e.g. <au>Hemingway, Ernest</au>
-	//thus, we will create a lookup table for the names found in the display section.
-	//If the same name is found in the display section, then we will replace it with
-	//its normalized form from the addata section.
-	var lookupTable = {};
-	for (var a=0; a<addataCreators.length; a++) {
-		var normalizedForm = addataCreators[a].textContent;//i.e. lastName, firstName
-		var valueSplit = normalizedForm.split(',');
-		if (valueSplit.length > 1) {
-			var otherForm = valueSplit[1].trim() + ' ' + valueSplit[0].trim();//i.e. firstName lastName
-			lookupTable[otherForm] = normalizedForm;
-		}
-	}
-	//Z.debug(lookupTable);
-	
-	if(!creators && contributors) { // <creator> not available using <contributor> as author instead
+	var creators = ZU.xpath(doc, '//display/creator');
+	var contributors = ZU.xpath(doc, '//display/contributor');
+	if(!creators.length && contributors.length) {
+		// <creator> not available using <contributor> as author instead
 		creators = contributors;
-		contributors = null;
+		contributors = [];
 	}
 	
-	if(!creators && !contributors){
-		creators = addataCreators;
-	}
-	
-	for(i in creators) {
-		if(creators[i]) {
-			var creator  = ZU.unescapeHTML(creators[i].textContent).split(/\s*;\s*/);
-			for(j in creator){
-				creator[j] = creator[j].replace(/\d{4}-(\d{4})?/g, '').trim();
-				if (creator[j].indexOf(',') == -1 && lookupTable[creator[j]]) {
-					creator[j] = lookupTable[creator[j]];
-				}
-				item.creators.push(Zotero.Utilities.cleanAuthor(creator[j], "author", true));
-			}			
+	// //addata/au is great because it lists authors in last, first format,
+	// but it can also have a bunch of junk. We'll use it to help split authors
+	var splitGuidance = {};
+	var addau = ZU.xpath(doc, '//addata/addau|//addata/au');
+	for (var i=0; i<addau.length; i++) {
+		var author = stripAuthor(addau[i].textContent);
+		if (author.indexOf(',') != -1) {
+			var splitAu = author.split(',');
+			if (splitAu.length > 2) continue;
+			var name = splitAu[1].trim().toLowerCase() + ' '
+				+ splitAu[0].trim().toLowerCase()
+			splitGuidance[name] = author;
 		}
 	}
 	
-	for(i in contributors) {
-		if(contributors[i]) {
-			var contributor = ZU.unescapeHTML(contributors[i].textContent).split(/\s*;\s*/);
-			for(j in contributor){
-				contributor[j] = contributor[j].replace(/\d{4}-(\d{4})?/g, '').trim();
-				if (contributor[j].indexOf(',') == -1 && lookupTable[contributor[j]]) {
-					contributor[j] = lookupTable[contributor[j]];
-				}
-				item.creators.push(Zotero.Utilities.cleanAuthor(contributor[j], "contributor", true));
-			}			
-		}
-	}
-	//PNX doesn't do well with institutional authors; This isn't perfect, but it helps:
-	for(i in item.creators){
-		if(!item.creators[i].firstName){
-			item.creators[i].fieldMode=1;
-		}
-	}
+	fetchCreators(item, creators, 'author', splitGuidance);
+	fetchCreators(item, contributors, 'contributor', splitGuidance);
 	
 	var publisher = ZU.xpathText(doc, '//display/publisher');
 	if(publisher) var pubplace = ZU.unescapeHTML(publisher).split(" : ");
@@ -391,7 +348,37 @@ function importPNX(text) {
 	item.callNumber = ZU.xpathText(doc, '//enrichment/classificationlcc');
 	
 	item.complete();
-}/** BEGIN TEST CASES **/
+}
+
+function stripAuthor(str) {
+	return str
+		// Remove year
+		.replace(/\s*,?\s*\(?\d{4}-?(\d{4})?\)?/g, '')
+		// Remove things like (illustrator). TODO: use this to assign creator type?
+		.replace(/\s*,?\s*\([^()]*\)$/, '');
+}
+
+function fetchCreators(item, creators, type, splitGuidance) {
+	for(var i=0; i<creators.length; i++) {
+		var creator = ZU.unescapeHTML(creators[i].textContent).split(/\s*;\s*/);
+		for(var j=0; j<creator.length; j++) {
+			var c = stripAuthor(creator[j]);
+			c = ZU.cleanAuthor(
+				splitGuidance[c.toLowerCase()] || c,
+				type,
+				true
+			);
+			
+			if (!c.firstName) {
+				delete c.firstName;
+				c.fieldMode = 1;
+			}
+			
+			item.creators.push(c);
+		}
+	}
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
