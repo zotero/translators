@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-09-23 21:03:41"
+	"lastUpdated": "2014-12-31 18:43:27"
 }
 
 /*
@@ -25,6 +25,7 @@ Primos with showPNX.jsp installed:
 (3) http://limo.libis.be/primo_library/libweb/action/search.do?vid=LIBISnet&fromLogin=true
 (4.a) http://virtuose.uqam.ca/primo_library/libweb/action/search.do?vid=UQAM
 (5) http://searchit.princeton.edu/primo_library/libweb/action/dlDisplay.do?docId=PRN_VOYAGER2778598&vid=PRINCETON&institution=PRN
+(6) http://digitale.beic.it/primo_library/libweb/action/search.do?vid=beic
 */
 
 function getSearchResults(doc) {
@@ -212,7 +213,13 @@ function importPNX(text) {
 	
 	var itemType = ZU.xpathText(doc, '//display/type');
 	if(!itemType) {
-		throw new Error('Could not locate item type');
+		if ( ZU.xpathText(doc, '//facets/rsrctype') ) {
+			var itemType = ZU.xpathText(doc, '//facets/rsrctype');
+		} else if ( ZU.xpathText(doc, '//search/rsrctype') ) {
+			var itemType = ZU.xpathText(doc, '//search/rsrctype');
+		} else {
+			throw new Error('Could not locate item type');
+		}
 	}
 	
 	switch(itemType.toLowerCase()) {
@@ -260,7 +267,7 @@ function importPNX(text) {
 	if(ZU.xpathText(doc, '//display/contributor')) {
 		contributors = ZU.xpath(doc, '//display/contributor'); 
 	}
-	
+
 	if(!creators && contributors) { // <creator> not available using <contributor> as author instead
 		creators = contributors;
 		contributors = null;
@@ -274,6 +281,7 @@ function importPNX(text) {
 		if(creators[i]) {
 			var creator  = ZU.unescapeHTML(creators[i].textContent).split(/\s*;\s*/);
 			for(j in creator){
+				creator[j] = creator[j].replace(/\([\d\sabcefilr.? ]*[-–][\d\abcefilr.? ]*\)/gi, '');
 				creator[j] = creator[j].replace(/\d{4}-(\d{4})?/g, '');
 				item.creators.push(Zotero.Utilities.cleanAuthor(creator[j], "author", true));
 			}			
@@ -297,6 +305,8 @@ function importPNX(text) {
 	}
 	
 	var publisher = ZU.xpathText(doc, '//display/publisher');
+	// BEIC.it uses //display/lds09, //search/lsr12, //search/lsr03, //facets/lfc03
+	// for place, unclear what those are
 	if(publisher) var pubplace = ZU.unescapeHTML(publisher).split(" : ");
 	if(pubplace && pubplace[1]) {
 		item.place = pubplace[0].replace(/,\s*c?\d+|[\(\)\[\]]|(\.\s*)?/g, "");
@@ -314,12 +324,22 @@ function importPNX(text) {
 	}
 	
 	// the three letter ISO codes that should be in the language field work well:
-	item.language = ZU.xpathText(doc, '//display/language');
+	item.language = ZU.xpathText(doc, '//display/language|//facets/language');
 	
+	// BEIC.it uses //dedup/f9, unclear what that is
 	var pages = ZU.xpathText(doc, '//display/format');
 	if(pages && pages.search(/[0-9]+/) != -1) {
-		pages = pages.replace(/[\(\)\[\]]/g, "").match(/[0-9]+/);
-		item.pages = item.numPages = pages[0];
+		pages = pages.replace(/[\(\)\[\]]/g, "");
+		// And then we'd hope pages are the only number mentioned in the format
+		// Except that they aren't, in BEIC.it, so we focus the match a bit
+		if(pages.search(/ p+[. ]/) != -1) {
+			var dirt = pages;
+			pages = null;
+			pages = dirt.match(/(?:p+[. ]*)([0-9]+) *(?:p+[. ]*)/);
+		} else {
+			pages = pages.match(/[0-9]+/)[0];
+		}
+		item.pages = item.numPages = pages;
 	}
 
 	// The identifier field is supposed to have standardized format, but
@@ -333,7 +353,7 @@ function importPNX(text) {
 	
 	item.edition = ZU.xpathText(doc, '//display/edition');
 	
-	var subjects = ZU.xpath(doc, '//search/subject');
+	var subjects = ZU.xpath(doc, '//display/display|//search/subject');
 	for(var i=0, n=subjects.length; i<n; i++) {
 		item.tags.push(ZU.trimInternal(subjects[i].textContent));
 	}
@@ -394,6 +414,33 @@ var testCases = [
 				"ISBN": "3926738014",
 				"libraryCatalog": "Primo",
 				"shortTitle": "In Zweifelsfällen entscheidet die Wahrheit"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://digitale.beic.it/primo_library/libweb/action/display.do?dscnt=1&fromLogin=true&doc=39bei_digitool4783627&dstmp=1420050573310&vid=beic&fromLogin=true&fromLogin=true",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "De scientia stellarum",
+				"creators": [
+					{
+						"firstName": "Muhammad",
+						"lastName": "al-Battani",
+						"creatorType": "author"
+					}
+				],
+				"date": "1645",
+				"language": "lat",
+				"libraryCatalog": "Primo",
+				"publisher": "Benacci, Vittorio, eredi",
+				"attachments": [],
+				"tags": [
+					"Stelle fisse - Novae"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
