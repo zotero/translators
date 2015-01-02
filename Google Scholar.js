@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-12-30 23:46:35"
+	"lastUpdated": "2015-01-02 20:25:25"
 }
 
 /*
@@ -720,7 +720,6 @@ var ItemFactory = function (doc, citeletString, attachmentLinks, titleString, bi
 	this.vv.volRepPag = [];
 	// portable array
 	this.attachmentLinks = attachmentLinks;
-	// reference back to doc
 	this.doc = doc;
 	// working strings
 	this.citelet = citeletString;
@@ -802,14 +801,14 @@ ItemFactory.prototype.getDate = function () {
 	// If we can find a more specific date in the case's centered text then use it
 	var nodesSnapshot = this.doc.evaluate('//div[@id="gs_opinion"]/center', this.doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null );
 	for( var iNode = 0; iNode < nodesSnapshot.snapshotLength; iNode++ ) {
-		var specificDate = nodesSnapshot.snapshotItem(iNode).textContent;
+		var specificDate = nodesSnapshot.snapshotItem(iNode).textContent.trim();
 		// Remove the first word through the first space 
 		//  if it starts with "Deci" or it doesn't start with the first three letters of a month
 		//  and if it doesn't start with Submitted or Argued
 		// (So, words like "Decided", "Dated", and "Released" will be removed)
-		specificDate = specificDate.replace(/^(Deci|(?!(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|Submitted|Argued)))\w+.\s*/,"");
+		specificDate = specificDate.replace(/^(?:Deci|(?!Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|Submitted|Argued))[a-z]+[.:]?\s*/i,"")
 		// Remove the trailing period, if it is there
-		specificDate = specificDate.replace(/\.$/,"");
+			.replace(/\.$/,"");
 		// If the remaining text is a valid date...
 		if (!isNaN(Date.parse(specificDate))) {
 			// ...then use it
@@ -887,8 +886,12 @@ ItemFactory.prototype.getAttachments = function (doctype) {
 	var i, ilen, attachments;
 	attachments = [];
 	for (i = 0, ilen = this.attachmentLinks.length; i < ilen; i += 1) {
-		attachments.push({title:"Google Scholar Linked " + doctype, type:"text/html",
-							  url:this.attachmentLinks[i]});
+		if (!this.attachmentLinks[i]) continue;
+		attachments.push({
+			title:"Google Scholar Linked " + doctype,
+			url:this.attachmentLinks[i],
+			type:"text/html"
+		});
 	}
 	return attachments;
 };
@@ -1048,25 +1051,23 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "case",
+				"caseName": "Marbury v. Madison",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"dateDecided": "1803",
+				"court": "Supreme Court",
+				"firstPage": "137",
+				"itemID": "1",
+				"reporter": "US",
+				"reporterVolume": "5",
 				"attachments": [
 					{
 						"title": "Google Scholar Linked Judgement",
-						"type": "text/html",
-						"url": false
+						"type": "text/html"
 					}
 				],
-				"volume": "5",
-				"reporter": "US",
-				"pages": "137",
-				"title": "Marbury v. Madison",
-				"court": "Supreme Court",
-				"date": "1803",
-				"itemID": "1",
-				"libraryCatalog": "Google Scholar"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1076,29 +1077,23 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "case",
+				"caseName": "Meier ex rel. Meier v. Sun Intern. Hotels, Ltd.",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"dateDecided": "April 19, 2002",
+				"court": "Court of Appeals, 11th Circuit",
+				"firstPage": "1264",
+				"itemID": "1",
+				"reporter": "F. 3d",
+				"reporterVolume": "288",
 				"attachments": [
 					{
 						"title": "Google Scholar Linked Judgement",
-						"type": "text/html",
-						"url": false
+						"type": "text/html"
 					}
 				],
-				"volume": "288",
-				"reporter": "F. 3d",
-				"pages": "1264",
-				"title": "Meier ex rel. Meier v. Sun Intern. Hotels, Ltd.",
-				"court": "Court of Appeals, 11th Circuit",
-				"date": "April 19, 2002",
-				"itemID": "1",
-				"libraryCatalog": "Google Scholar",
-				"reporterVolume": "288",
-				"firstPage": "1264",
-				"caseName": "Meier ex rel. Meier v. Sun Intern. Hotels, Ltd.",
-				"dateDecided": "April 19, 2002"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1108,30 +1103,24 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "case",
+				"caseName": "Patio Enclosures, Inc. v. Four Seasons Marketing Corp.",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"dateDecided": "September 21, 2005",
+				"court": "Court of Appeals, 9th Appellate Dist.",
+				"extra": "{:jurisdiction: Ohio}",
+				"firstPage": "4933",
+				"itemID": "1",
+				"reporter": "Ohio",
+				"reporterVolume": "2005",
 				"attachments": [
 					{
 						"title": "Google Scholar Linked Judgement",
-						"type": "text/html",
-						"url": false
+						"type": "text/html"
 					}
 				],
-				"volume": "2005",
-				"reporter": "Ohio",
-				"pages": "4933",
-				"title": "Patio Enclosures, Inc. v. Four Seasons Marketing Corp.",
-				"court": "Court of Appeals, 9th Appellate Dist.",
-				"extra": "{:jurisdiction: Ohio}",
-				"date": "September 21, 2005",
-				"itemID": "1",
-				"libraryCatalog": "Google Scholar",
-				"reporterVolume": "2005",
-				"firstPage": "4933",
-				"caseName": "Patio Enclosures, Inc. v. Four Seasons Marketing Corp.",
-				"dateDecided": "September 21, 2005"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1141,30 +1130,24 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "case",
+				"caseName": "click v. estate of click",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"dateDecided": "June 13, 2007",
+				"court": "Court of Appeals, 4th Appellate Dist.",
+				"extra": "{:jurisdiction: Ohio}",
+				"firstPage": "3029",
+				"itemID": "1",
+				"reporter": "Ohio",
+				"reporterVolume": "2007",
 				"attachments": [
 					{
 						"title": "Google Scholar Linked Judgement",
-						"type": "text/html",
-						"url": false
+						"type": "text/html"
 					}
 				],
-				"volume": "2007",
-				"reporter": "Ohio",
-				"pages": "3029",
-				"title": "click v. estate of click",
-				"court": "Court of Appeals, 4th Appellate Dist.",
-				"extra": "{:jurisdiction: Ohio}",
-				"date": "June 13, 2007",
-				"itemID": "1",
-				"libraryCatalog": "Google Scholar",
-				"reporterVolume": "2007",
-				"firstPage": "3029",
-				"caseName": "click v. estate of click",
-				"dateDecided": "June 13, 2007"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1174,30 +1157,24 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "case",
+				"caseName": "Kenty v. Transamerica Premium Ins. Co.",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"dateDecided": "July 5, 1995",
+				"court": "Supreme Court",
+				"extra": "{:jurisdiction: Ohio}",
+				"firstPage": "415",
+				"itemID": "1",
+				"reporter": "Ohio St. 3d",
+				"reporterVolume": "72",
 				"attachments": [
 					{
 						"title": "Google Scholar Linked Judgement",
-						"type": "text/html",
-						"url": false
+						"type": "text/html"
 					}
 				],
-				"volume": "72",
-				"reporter": "Ohio St. 3d",
-				"pages": "415",
-				"title": "Kenty v. Transamerica Premium Ins. Co.",
-				"court": "Supreme Court",
-				"extra": "{:jurisdiction: Ohio}",
-				"date": "July 5, 1995",
-				"itemID": "1",
-				"libraryCatalog": "Google Scholar",
-				"reporterVolume": "72",
-				"firstPage": "415",
-				"caseName": "Kenty v. Transamerica Premium Ins. Co.",
-				"dateDecided": "July 5, 1995"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1207,29 +1184,23 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "case",
+				"caseName": "Tinker v. Des Moines Independent Community School Dist.",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"dateDecided": "February 24, 1969",
+				"court": "Supreme Court",
+				"firstPage": "503",
+				"itemID": "1",
+				"reporter": "US",
+				"reporterVolume": "393",
 				"attachments": [
 					{
 						"title": "Google Scholar Linked Judgement",
-						"type": "text/html",
-						"url": false
+						"type": "text/html"
 					}
 				],
-				"volume": "393",
-				"reporter": "US",
-				"pages": "503",
-				"title": "Tinker v. Des Moines Independent Community School Dist. ",
-				"court": "Supreme Court",
-				"date": "February 24, 1969",
-				"itemID": "1",
-				"libraryCatalog": "Google Scholar",
-				"reporterVolume": "393",
-				"firstPage": "503",
-				"caseName": "Tinker v. Des Moines Independent Community School Dist.",
-				"dateDecided": "February 24, 1969"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1239,29 +1210,23 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "case",
+				"caseName": "Kaimowitz v. Board of Trustees of U. of Illinois",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"dateDecided": "December 23, 1991",
+				"court": "Court of Appeals, 7th Circuit",
+				"firstPage": "765",
+				"itemID": "1",
+				"reporter": "F. 2d",
+				"reporterVolume": "951",
 				"attachments": [
 					{
 						"title": "Google Scholar Linked Judgement",
-						"type": "text/html",
-						"url": false
+						"type": "text/html"
 					}
 				],
-				"volume": "951",
-				"reporter": "F. 2d",
-				"pages": "765",
-				"title": "Kaimowitz v. Board of Trustees of U. of Illinois",
-				"court": "Court of Appeals, 7th Circuit",
-				"date": "December 23, 1991",
-				"itemID": "1",
-				"libraryCatalog": "Google Scholar",
-				"reporterVolume": "951",
-				"firstPage": "765",
-				"caseName": "Kaimowitz v. Board of Trustees of U. of Illinois",
-				"dateDecided": "December 23, 1991"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
