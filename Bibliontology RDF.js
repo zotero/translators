@@ -11,7 +11,7 @@
 	"configOptions":{"getCollections":"true", "dataMode":"rdf/xml"},
 	"displayOptions":{"exportNotes":true},
 	"inRepository":false,
-	"lastUpdated":"2013-08-19 21:29:44"
+	"lastUpdated":"2015-01-02 03:33:15"
 }
 
 var n = {
@@ -379,10 +379,16 @@ Type.prototype.getMatchScore = function(node) {
 	}
 	
 	// check subcontainer
-	[score, nodes[SUBCONTAINER]] = this._scoreNodeRelationship(node, this[SUBCONTAINER], score);
+	var sub = this._scoreNodeRelationship(node, this[SUBCONTAINER], score);
+	score = sub[0];
+	nodes[SUBCONTAINER] = sub[1];
 	// check container
-	[score, nodes[CONTAINER]] = this._scoreNodeRelationship(
-		(nodes[SUBCONTAINER] ? nodes[SUBCONTAINER] : nodes[ITEM]), this[CONTAINER], score);
+	sub = this._scoreNodeRelationship(
+		(nodes[SUBCONTAINER] ? nodes[SUBCONTAINER] : nodes[ITEM]),
+		this[CONTAINER], score
+	);
+	score = sub[0];
+	nodes[CONTAINER] = sub[1];
 	
 	if(!nodes[CONTAINER]) nodes[CONTAINER] = nodes[ITEM];
 	if(!nodes[SUBCONTAINER]) nodes[SUBCONTAINER] = nodes[CONTAINER];
@@ -431,18 +437,26 @@ Type.prototype.getItemSeriesNodes = function(nodes) {
 	nodes[USERITEM] = stmt ? stmt[0][0] : nodes[ITEM];
 	
 	// get ITEM_SERIES node
-	var score, subNode;
-	[score, subNode] = this._scoreNodeRelationship(nodes[ITEM], seriesDefinition, 0);
+	var tmp = this._scoreNodeRelationship(nodes[ITEM], seriesDefinition, 0);
+	var score = tmp[0];
+	var subNode = tmp[1];
+	
 	//Zotero.debug("got itemSeries with score "+score);
 	if(score >= 1) nodes[ITEM_SERIES] = subNode;
 	
 	// get SUBCONTAINER_SERIES node
-	[score, subNode] = this._scoreNodeRelationship(nodes[SUBCONTAINER], seriesDefinition, 0);
+	tmp = this._scoreNodeRelationship(nodes[SUBCONTAINER], seriesDefinition, 0);
+	score = tmp[0];
+	subNode = tmp[1];
+	
 	//Zotero.debug("got subcontainerSeries with score "+score);
 	if(score >= 1) nodes[CONTAINER_SERIES] = subNode;
 	
 	// get CONTAINER_SERIES node
-	[score, subNode] = this._scoreNodeRelationship(nodes[CONTAINER], seriesDefinition, 0);
+	tmp = this._scoreNodeRelationship(nodes[CONTAINER], seriesDefinition, 0);
+	score = tmp[0];
+	subNode = tmp[1];
+	
 	//Zotero.debug("got containerSeries with score "+score);
 	if(score >= 1) nodes[CONTAINER_SERIES] = subNode;
 }
@@ -824,9 +838,12 @@ function doImport() {
 	// Go through all type arcs to find items
 	var itemNode, predicateNode, objectNode;
 	var rdfTypes = Zotero.RDF.getStatementsMatching(null, RDF_TYPE, null);
-	var itemNodes = {};
+	var itemNodes = {}, tmp;
 	for each(var rdfType in rdfTypes) {
-		[itemNode, predicateNode, objectNode] = rdfType;
+		tmp = rdfType;
+		itemNode = tmp[0];
+		predicateNode = tmp[1];
+		objectNode = tmp[2];
 		if(typeof objectNode !== "object") continue;
 		var uri = Zotero.RDF.getResourceURI(itemNode);
 		if(!uri) continue;
@@ -858,7 +875,9 @@ function doImport() {
 			if(!collapsedTypesForItem) continue;
 			
 			for each(var type in collapsedTypesForItem) {
-				[score, nodes] = type.getMatchScore(itemNode);
+				tmp = type.getMatchScore(itemNode);
+				score = tmp[0];
+				nodes = tmp[1];
 				//Zotero.debug("Type "+type.zoteroType+" has score "+score);
 				
 				// check if this is the best we can do
@@ -902,7 +921,9 @@ function doImport() {
 							propertyMapping.mapToItem(newItem, nodes);
 						} else if(propertyMapping.mapToCreator) {	// CreatorProperty
 							var creators, creatorNodes;
-							[creators, creatorNodes] = propertyMapping.mapToCreators(nodes[i], zoteroType);
+							tmp = propertyMapping.mapToCreators(nodes[i], zoteroType);
+							creators = tmp[0];
+							creatorNodes = tmp[1];
 							if(creators.length) {
 								for(var j in creators) {
 									var creatorNodeURI = Zotero.RDF.getResourceURI(creatorNodes[j]);
