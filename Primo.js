@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-09-23 21:03:41"
+	"lastUpdated": "2015-01-02 04:40:01"
 }
 
 /*
@@ -397,33 +397,136 @@ function extractNumPages(str) {
 var testCases = [
 	{
 		"type": "web",
-		"defer": true,
-		"url": "http://solo.bodleian.ox.ac.uk/primo_library/libweb/action/dlDisplay.do?docId=oxfaleph010311597&vid=OXVU1",
+		"url": "http://searchit.princeton.edu/primo_library/libweb/action/dlDisplay.do?docId=PRN_VOYAGER2778598&vid=PRINCETON&institution=PRN&showPNX=true",
 		"items": [
 			{
 				"itemType": "book",
+				"title": "China and foreign missionaries.",
 				"creators": [
 					{
-						"firstName": "Jürgen",
-						"lastName": "Pütz",
+						"lastName": "Great Britain. Foreign Office",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "1860",
+				"language": "eng",
+				"libraryCatalog": "Primo",
+				"publisher": "London",
+				"attachments": [],
+				"tags": [
+					"China Foreign relations Great Britain.",
+					"China Religion.",
+					"Great Britain Foreign relations China.",
+					"Missions China."
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://purdue-primo-prod.hosted.exlibrisgroup.com/primo_library/libweb/action/dlDisplay.do?vid=PURDUE&docId=PURDUE_ALMA21505315560001081&fn=permalink",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "War",
+				"creators": [
+					{
+						"firstName": "Lawrence",
+						"lastName": "Freedman",
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Thelen, Albert Vigoleis, 1903-1989 Y"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "In Zweifelsfällen entscheidet die Wahrheit : Beiträge zu Albert Vigoleis Thelen",
-				"place": "Viersen",
-				"publisher": "JUNI",
-				"date": "1988",
-				"language": "ger",
-				"numPages": "149",
-				"ISBN": "3926738014",
+				"date": "1994",
+				"ISBN": "0192892541",
+				"abstractNote": "Experience of war -- Causes of war -- War and the military establishment -- Ethics of war -- Strategy -- Total war and the great powers -- Limited war and developing countries., \"War makes headlines and history books. It has shaped the international system, prompted social change, and inspired literature, art, and music. It engenders some of the most intense as well as the most brutal human experiences, and it raises fundamental questions of human ethics.\" \"The ubiquitous, contradictory, and many-sided character of war is fully reflected in this reader. It addresses a wide range of questions: What are the causes of war? Which strategic as well as moral principles guide its conduct, and how have these changed? Has total war become unthinkable? What is the nature of contemporary conflict? How is war experienced by those on the front line?\" \"These and other key issues are examined through a variety of writings. Drawing on sources from numerous countries and disciplines, this reader includes accounts by generals, soldiers, historians, strategists, and poets, who consider conflicts from the Napoleonic Wars to Vietnam and Bosnia. The writing not only of great strategic thinkers but also of ordinary soldiers illustrates both the theory and the experience of war in its many guises.\"--BOOK JACKET.",
+				"callNumber": "U21.2",
+				"language": "eng",
 				"libraryCatalog": "Primo",
-				"shortTitle": "In Zweifelsfällen entscheidet die Wahrheit"
+				"numPages": "xi+385",
+				"place": "Oxford ; New York",
+				"publisher": "Oxford University Press",
+				"series": "Oxford readers",
+				"attachments": [],
+				"tags": [
+					"War."
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://limo.libis.be/primo_library/libweb/action/dlDisplay.do?vid=LIBISnet&docId=32LIBIS_ALMA_DS71166851730001471&fn=permalink",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "War",
+				"creators": [
+					{
+						"firstName": "Albert R.",
+						"lastName": "Leventhal",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Del",
+						"lastName": "Byrne",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "1973",
+				"ISBN": "0600393046",
+				"language": "eng",
+				"libraryCatalog": "Primo",
+				"numPages": "252",
+				"publisher": "Hamlyn",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://virtuose.uqam.ca/primo_library/libweb/action/dlDisplay.do?vid=UQAM&docId=UQAM_BIB000969205&fn=permalink",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "War",
+				"creators": [
+					{
+						"firstName": "Ken",
+						"lastName": "Baynes",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Welsh Arts Council",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Glynn Vivian Art Gallery",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					}
+				],
+				"date": "1970",
+				"language": "eng",
+				"libraryCatalog": "Primo",
+				"publisher": "Boston Boston Book and Art Chop",
+				"series": "Art and society 1",
+				"attachments": [],
+				"tags": [
+					"ART",
+					"GUERRE",
+					"WAR"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
