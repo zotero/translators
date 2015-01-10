@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2015-01-09 17:41:12"
+	"lastUpdated": "2015-01-10 13:45:11"
 }
 
 function detectWeb(doc, url) {
@@ -79,7 +79,6 @@ function getJID(url) {
 }
 
 function doWeb(doc, url) {
-	var host = doc.location.host;
 	if (detectWeb(doc, url) == 'multiple') {
 		Zotero.selectItems(getSearchResults(doc), function (selectedItems) {
 			if (!selectedItems) {
@@ -89,7 +88,7 @@ function doWeb(doc, url) {
 			for (var j in selectedItems) {
 				jids.push(j);
 			}
-			scrape(jids, host)
+			scrape(jids)
 		});
 	} else {
 		// If this is a view page, find the link to the citation
@@ -97,11 +96,11 @@ function doWeb(doc, url) {
 		var jid;
 		if (favLink && (jid = getJID(favLink.href))) {
 			Zotero.debug("JID found 1 " + jid);
-			scrape([jid], host);
+			scrape([jid]);
 		}
 		else if (jid = getJID(url)) {
 			Zotero.debug("JID found 2 " + jid);
-			scrape([jid], host);
+			scrape([jid]);
 		}
 	}
 }
@@ -117,12 +116,8 @@ function getTitleFromPage(doc) {
 	if (title) return ZU.trimInternal(title);
 }
 
-function scrape(jids, host) {
-	// Always request HTTPS, because _sometimes_ this seems to redirect to HTTPS
-	// from HTTP and that becomes a cross-origin request. We let Zotero deal with
-	// it properly from the beginning
-	var postUrl = 'https://' + host
-		+ "/action/downloadSingleCitationSec?"
+function scrape(jids) {
+	var postUrl = "/action/downloadSingleCitationSec?"
 		+ "userAction=export&format=refman&direct=true&singleCitation=true";
 	var postBody = "noDoi=yesDoi&doi=";
 	
