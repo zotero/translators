@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-04-10 23:30:53"
+	"lastUpdated": "2015-01-13 17:09:49"
 }
 
 /**
@@ -95,15 +95,19 @@ function extractOCLCID(url) {
  *
  */
 var baseURL = ''; //we need to set this when calling from doSearch
-function scrape(oclcID, itemData) {
-	var risURL = baseURL + "/oclc/" + oclcID + "?page=endnotealt&client=worldcat.org-detailed_record";
+function scrape(ids, data) {
+	var oclcID = ids.shift(),
+		itemData = (data || []).shift();
 	
+	if (!oclcID) return;
+	
+	var risURL = baseURL + "/oclc/" + oclcID + "?page=endnotealt&client=worldcat.org-detailed_record";
 	ZU.doGet(risURL, function (text) {
 		//Z.debug(text);
 		
 		//2013-05-28 RIS export currently has messed up authors
 		// e.g. A1  - Gabbay, Dov M., Woods, John Hayden., Hartmann, Stephan, 
-		text = text.replace(/^((?:A1|ED)\s+-\s+)(.+)/mg, function(m, tag, value) {
+		text = text.replace(/^((?:A[123U]|ED)\s+-\s+)(.+)/mg, function(m, tag, value) {
 			var authors = value.replace(/[.,\s]+$/, '')
 					.split(/[.,],/);
 			var replStr = '';
@@ -114,11 +118,14 @@ function scrape(oclcID, itemData) {
 			}
 			return replStr.trim();
 		});
-		//conference proceedings exported as CONF, but fields match BOOK better
-		text = text.replace(/TY\s+-\s+CONF\s+[\s\S]+\n\s*ER\s+-/g, function(m) {
-			return m.replace(/^TY\s+-\s+CONF\s*$/mg, 'TY  - BOOK')
-				//authors are actually editors
-				.replace(/^A1\s+-\s+/mg, 'A3  - ');
+		
+		// Conference proceedings should be imported as book (below), but authors
+		// are actually editors
+		text = text.replace(/^TY\s+-\s+CONF\s[\s\S]*?^ER\s+-\s/mg, function(m) {
+			if (!/^ED\s+-/m.test(m)) {
+				m = m.replace(/^A[U1](\s+-)/mg, 'ED$1');
+			}
+			return m;
 		})
 		
 		Zotero.debug("Importing corrected RIS: \n" + text);
@@ -151,10 +158,18 @@ function scrape(oclcID, itemData) {
 			
 			item.complete();
 		});
+		
+		translator.setHandler("done", function() {
+			scrape(ids, data);
+		});
+		
 		translator.getTranslatorObject(function(trans) {
 			trans.options.defaultItemType = 'book'; //if not supplied, default to book
-			trans.options.typeMap = {'ELEC': 'book'}; //ebooks should be imported as books
-
+			trans.options.typeMap = {
+				'ELEC': 'book', //ebooks should be imported as books
+				'CONF': 'book' // proceedings rather than papers
+			};
+			
 			trans.doImport();
 		});
 	});
@@ -194,38 +209,119 @@ function doWeb(doc, url) {
 
 		Zotero.selectItems(items, function(items) {
 			if (!items) return true;
-
+			
+			var ids = [], data = [];
 			for (var i in items) {
-				scrape(i, itemData[i]);
+				ids.push(i);
+				data.push(itemData[i]);
 			}
+			
+			scrape(ids, data);
 		});
 	} else {
 		var oclcID = extractOCLCID(url);
 		if(!oclcID) throw new Error("WorldCat: Failed to extract OCLC ID from URL: " + url);
-		scrape(oclcID);
+		scrape([oclcID]);
 	}
 }
 
-function detectSearch(item) {
-	if(item.ISBN && typeof(item.ISBN) == 'string') {
-		return !!ZU.cleanISBN(item.ISBN);
+function sanitizeInput(items, checkOnly) {
+	if (items.length === undefined || typeof items == 'string') {
+		items = [items];
 	}
-}
-
-function doSearch(item) {
-	var ISBN = item.ISBN && ZU.cleanISBN('' + item.ISBN);
-	if(!ISBN) return;
-
-	var url = "http://www.worldcat.org/search?qt=results_page&q=bn%3A"
-		+ encodeURIComponent(ISBN);
-	ZU.processDocuments(url, function (doc) {
-		//we take the first search result and run scrape on it
-		var results = getSearchResults(doc);
-		if (results.length > 0) {
-			baseURL = "http://www.worldcat.org";
-			scrape(extractOCLCID(getTitleNode(results[0]).href));
+	
+	var cleanItems = [];
+	for (var i=0; i<items.length; i++) {
+		var item = ZU.deepCopy(items[i]),
+			valid = false;
+		if (item.ISBN && typeof item.ISBN == 'string'
+			&& (item.ISBN = ZU.cleanISBN(item.ISBN))
+		) {
+			valid = true;
+		} else {
+			delete item.ISBN;
 		}
+		
+		if (item.identifiers && typeof item.identifiers.oclc == 'string'
+			&& /^\d+$/.test(item.identifiers.oclc.trim())
+		) {
+			valid = true;
+			item.identifiers.oclc = item.identifiers.oclc.trim();
+		} else if (item.identifiers) {
+			delete item.identifiers.oclc;
+		}
+		
+		if (valid) {
+			if (checkOnly) return true;
+			cleanItems.push(item);
+		}
+	}
+	
+	return checkOnly ? !!cleanItems.length : cleanItems;
+}
+
+function detectSearch(items) {
+	return sanitizeInput(items, true);
+}
+
+function doSearch(items) {
+	items = sanitizeInput(items);
+	if (!items.length) {
+		Z.debug("Search query does not contain valid identifiers");
+		return false;
+	}
+	
+	baseURL = "http://www.worldcat.org"; // Translator-global
+	
+	var ids = [], isbns = [];
+	for (var i=0; i<items.length; i++) {
+		if (items[i].identifiers && items[i].identifiers.oclc) {
+			ids.push(items[i].identifiers.oclc);
+			continue;
+		}
+		
+		isbns.push(items[i].ISBN);
+	}
+	
+	fetchIDs(isbns, ids, function(ids) {
+		if (!ids.length) {
+			Z.debug("Could not retrieve any OCLC IDs");
+			Zotero.done(false);
+			return;
+		}
+		scrape(ids);
 	});
+}
+
+function fetchIDs(isbns, ids, callback) {
+	if (!isbns.length) {
+		callback(ids);
+		return;
+	}
+	
+	var isbn = isbns.shift();
+	var url = "http://www.worldcat.org/search?qt=results_page&q=bn%3A"
+		+ encodeURIComponent(isbn);
+	ZU.processDocuments(url,
+		function (doc) {
+			//we take the first search result
+			var results = getSearchResults(doc);
+			if (results.length) {
+				var title = getTitleNode(results[0]);
+				if (title) {
+					var id = extractOCLCID(title.href);
+					if (id) ids.push(id);
+				} else {
+					Z.debug("Could not extract OCLC ID for ISBN " + isbn);
+				}
+			} else {
+				Z.debug("No search results found for ISBN " + isbn);
+			}
+		},
+		function() {
+			fetchIDs(isbns, ids, callback)
+		}
+	);
 }
 
 /** BEGIN TEST CASES **/
@@ -430,6 +526,44 @@ var testCases = [
 		"type": "search",
 		"input": {
 			"ISBN": "9780585030159"
+		},
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Thelen",
+						"firstName": "Esther",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Smith",
+						"firstName": "Linda B",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"libraryCatalog": "Open WorldCat",
+				"language": "English",
+				"url": "http://search.ebscohost.com/login.aspx?direct=true&scope=site&db=nlebk&db=nlabk&AN=1712",
+				"title": "A dynamic systems approach to the development of cognition and action",
+				"publisher": "MIT Press",
+				"place": "Cambridge, Mass.",
+				"date": "1996",
+				"ISBN": "0585030154  9780585030159",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"identifiers": {
+				"oclc": "42854423"
+			}
 		},
 		"items": [
 			{
