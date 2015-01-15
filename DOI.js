@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-12-23 02:53:47"
+	"lastUpdated": "2015-01-15 03:34:25"
 }
 
 var items = {};
@@ -149,7 +149,58 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://blog.apastyle.org/apastyle/digital-object-identifier-doi/",
-		"items": "multiple"
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "A longitudinal analysis of estimation, counting skills, and mathematical ability across the first school year.",
+				"creators": [
+					{
+						"lastName": "Muldoon",
+						"firstName": "Kevin",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Towse",
+						"firstName": "John",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Simms",
+						"firstName": "Victoria",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Perra",
+						"firstName": "Oliver",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Menzies",
+						"firstName": "Victoria",
+						"creatorType": "author"
+					}
+				],
+				"date": "2013",
+				"DOI": "10.1037/a0028240",
+				"ISSN": "1939-0599; 0012-1649",
+				"issue": "2",
+				"libraryCatalog": "CrossRef",
+				"pages": "250-257",
+				"publicationTitle": "Developmental Psychology",
+				"url": "http://blog.apastyle.org/apastyle/digital-object-identifier-doi/",
+				"volume": "49",
+				"attachments": [
+					{}
+				],
+				"tags": [
+					"Demography",
+					"Developmental and Educational Psychology",
+					"Life-span and Life-course Studies"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	},
 	{
 		"type": "web",
@@ -157,36 +208,44 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Generational differences in psychological traits and their impact on the workplace",
 				"creators": [
 					{
-						"creatorType": "author",
+						"lastName": "Twenge",
 						"firstName": "Jean M.",
-						"lastName": "Twenge"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"lastName": "Campbell",
 						"firstName": "Stacy M.",
-						"lastName": "Campbell"
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Macky",
+						"firstName": "Keith",
+						"creatorType": "editor"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2008-11-7",
+				"DOI": "10.1108/02683940810904367",
+				"ISSN": "0268-3946",
+				"issue": "8",
+				"libraryCatalog": "CrossRef",
+				"pages": "862-877",
+				"publicationTitle": "Journal of Managerial Psychology",
+				"url": "http://libguides.csuchico.edu/citingbusiness",
+				"volume": "23",
 				"attachments": [
 					{}
 				],
-				"publicationTitle": "Journal of Managerial Psychology",
-				"volume": "23",
-				"issue": "8",
-				"language": "en",
-				"ISSN": "0268-3946",
-				"date": "2008",
-				"pages": "862-877",
-				"DOI": "10.1108/02683940810904367",
-				"url": "http://libguides.csuchico.edu/citingbusiness",
-				"title": "Generational differences in psychological traits and their impact on the workplace",
-				"libraryCatalog": "CrossRef",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [
+					"Applied Psychology",
+					"Management Science and Operations Research",
+					"Organizational Behavior and Human Resource Management",
+					"Social Psychology"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
