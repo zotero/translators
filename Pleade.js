@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-04-22 19:50:56"
+	"lastUpdated": "2015-01-30 15:32:05"
 }
 
 /*
@@ -214,7 +214,7 @@ function getMultipleQid(doc,url)
 			text2 = Zotero.Utilities.trim(text2);
 
 			var temp = text2.substring(text2.indexOf("\<title\>"),text2.lastIndexOf("\<\/pleadeId\>")+11);
-			var pids = new Array();
+			var pids = {};
 			
 			var max=text2.substring(text2.indexOf("nbrresult\>")+20, text2.lastIndexOf("\<nbrresult"));
 			max=parseInt(max.substring(max.indexOf("\>")+1, max.lastIndexOf("\<")));
@@ -254,8 +254,8 @@ function doWeb(doc, url) {
 	else if (detectWeb(doc, url) == "book") {
 
 		// Building the Pleade id of the actual document
-		if(url.indexOf("\&") != -1) pleadeId = url.substring(url.indexOf("id=")+3,url.indexOf("\&"));
-		else if(url.indexOf("\&") == -1) pleadeId = url.substring(url.indexOf("id=")+3,url.indexOf("#"));
+		if(url.indexOf("&") != -1) pleadeId = url.substring(url.indexOf("id=")+3,url.indexOf("&"));
+		else if(url.indexOf("#") != -1) pleadeId = url.substring(url.indexOf("id=")+3,url.indexOf("#"));
 		else pleadeId = url.substring(url.indexOf("id=")+3,url.length);
 		// Building the Pleade fragment id of the actual document
 		var temp1 = url.substring(url.indexOf("#"),url.length);
@@ -271,30 +271,32 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://gael.gironde.fr/ead.html?id=FRAD033_IR_11AV#!{%22content%22:[%22FRAD033_IR_11AV_e0000023%22,true,%22%22]}",
+		"url": "http://gael.gironde.fr/ead.html?id=FRAD033_IR_11AV#!{%22content%22:%5B%22FRAD033_IR_11AV_e0000023%22,true,%22%22%5D}",
 		"items": [
 			{
 				"itemType": "book",
-				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"url": "http://gael.gironde.fr/ead.html?id=FRAD033_IR_11AV",
 				"title": "Archives sonores et audiovisuelles de l'association Gric de Prat",
+				"creators": [],
 				"date": "2010",
-				"publisher": "Archives départementales de la Gironde",
+				"callNumber": "11 AV 1-14",
+				"language": "français",
 				"place": "Bordeaux",
-				"language": "français"
+				"publisher": "Archives départementales de la Gironde",
+				"url": "http://gael.gironde.fr/ead.html?id=FRAD033_IR_11AV",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://jubilotheque.upmc.fr/ead.html?id=GM_000001_014&c=GM_000001_014_page24&qid=sdx_q13#!{%22content%22:[%22GM_000001_014_page24%22,false,%22sdx_q13%22]}",
+		"url": "http://jubilotheque.upmc.fr/ead.html?id=GM_000001_014&c=GM_000001_014_page24&qid=sdx_q13#!{%22content%22:%5B%22GM_000001_014_page24%22,false,%22sdx_q13%22%5D}",
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Journal d'un voyage géologique fait à travers toute la chaîne des Carpathes, en Bukowine, en Transylvanie et dans le Marmarosch / par feu M. Lill de Lilienbach. Observations remises en ordre et accompagnées de notes par M.A. Boué",
 				"creators": [
 					{
 						"firstName": "Ami",
@@ -302,20 +304,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "1834",
+				"language": "fre",
+				"place": "Paris ; Strasbourg",
+				"publisher": "F.-G. Levrault",
+				"rights": "Utilisation libre dans le cadre d'un usage non commercial, en mentionnant la source et sans dénaturer l'oeuvre Free use for non-commercial purposes with mandatory acknowledgement of the source and without adulterating the work",
+				"seriesNumber": "1",
+				"url": "http://jubilotheque.upmc.fr/ead.html?id=GM_000001_014",
+				"attachments": [],
+				"tags": [],
 				"notes": [
 					"Note : 80 p : 3 pl. en noir et en coul ; 31 cm. (Mémoires de la Société Géologique de France, 1ère série, tome I, mémoire n° 13)."
 				],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"url": "http://jubilotheque.upmc.fr/ead.html?id=GM_000001_014",
-				"title": "Journal d'un voyage géologique fait à travers toute la chaîne des Carpathes, en Bukowine, en Transylvanie et dans le Marmarosch / par feu M. Lill de Lilienbach. Observations remises en ordre et accompagnées de notes par M.A. Boué",
-				"seriesNumber": "1",
-				"date": "1834",
-				"publisher": "F.-G. Levrault",
-				"place": "Paris ; Strasbourg",
-				"language": "fre",
-				"rights": "Utilisation libre dans le cadre d'un usage non commercial, en mentionnant la source et sans dénaturer l'oeuvre Free use for non-commercial purposes with mandatory acknowledgement of the source and without adulterating the work"
+				"seeAlso": []
 			}
 		]
 	},
