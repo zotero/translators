@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-12-30 23:20:21"
+	"lastUpdated": "2015-02-03 23:17:09"
 }
 
 function detectImport() {
@@ -406,6 +406,8 @@ var degenerateImportFieldMap = {
 	CT: "title",
 	ED: "creators/editor",
 	EP: "pages",
+	H1: "libraryCatalog", //Citavi specific (possibly multiple occurences)
+	H2: "callNumber", //Citavi specific (possibly multiple occurences)
 	ID: "__ignore",
 	JA: "journalAbbreviation",
 	JF: "publicationTitle",
@@ -1264,6 +1266,21 @@ function processTag(item, tagValue, risEntry) {
 			if(value.indexOf('PM:') != -1) {
 				value = 'PMID: ' + value.substr(3);
 				zField = ['extra'];
+			}
+		break;
+		case "H1":
+			//multiple occurences are not saved
+			if(item.libraryCatalog) {
+				item.multipleLibraries = value;
+			}
+		break;
+		case "H2":
+			//multiple occurences are not saved
+			if(item.callNumber) {
+				zField = ['notes'];
+				if(item.multipleLibraries) {
+					value = item.multipleLibraries+": "+value;
+				}
 			}
 		break;
 	}
@@ -6629,6 +6646,51 @@ var testCases = [
 						"tags": [
 							"_RIS import"
 						]
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "TY  - BOOK\nSN  - 9783642002304\nAU  - Depenheuer, Otto\nT1  - Eigentumsverfassung und Finanzkrise\nT2  - Bibliothek des Eigentums\nPY  - 2009\nCY  - Berlin, Heidelberg\nPB  - Springer Berlin Heidelberg\nKW  - Finanzkrise / Eigentum / Haftung / Ordnungspolitik / Aufsatzsammlung / Online-Publikation\nKW  - Constitutional law\nKW  - Law\nUR  - http://dx.doi.org/10.1007/978-3-642-00230-4\nL1  - doi:10.1007/978-3-642-00230-4\nVL  - 7\nAB  - In dem Buch befinden sich einzelne Beiträge zu ...\nLA  - ger\nH1  - UB Mannheim\nH2  - 300 QN 100 D419\nH1  - UB Leipzig\nH2  - PL 415 D419\nTS  - BibTeX\nDO  - 10.1007/978-3-642-00230-4\nER  -\n\n",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Eigentumsverfassung und Finanzkrise",
+				"creators": [
+					{
+						"lastName": "Depenheuer",
+						"firstName": "Otto",
+						"creatorType": "author"
+					}
+				],
+				"date": "2009",
+				"ISBN": "9783642002304",
+				"abstractNote": "In dem Buch befinden sich einzelne Beiträge zu ...",
+				"callNumber": "300 QN 100 D419",
+				"language": "ger",
+				"libraryCatalog": "UB Mannheim",
+				"place": "Berlin, Heidelberg",
+				"publisher": "Springer Berlin Heidelberg",
+				"series": "Bibliothek des Eigentums",
+				"url": "http://dx.doi.org/10.1007/978-3-642-00230-4",
+				"volume": "7",
+				"attachments": [
+					{
+						"title": "Attachment",
+						"downloadable": true
+					}
+				],
+				"tags": [
+					"Constitutional law",
+					"Finanzkrise / Eigentum / Haftung / Ordnungspolitik / Aufsatzsammlung / Online-Publikation",
+					"Law"
+				],
+				"notes": [
+					{
+						"note": "UB Leipzig: PL 415 D419"
 					}
 				],
 				"seeAlso": []
