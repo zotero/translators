@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-02-03 23:17:09"
+	"lastUpdated": "2015-02-04 11:54:16"
 }
 
 function detectImport() {
@@ -1269,15 +1269,16 @@ function processTag(item, tagValue, risEntry) {
 			}
 		break;
 		case "H1":
-			//multiple occurences are not saved
+			//H1, H2 can have multiple occurences which cannot be saved
 			if(item.libraryCatalog) {
 				item.multipleLibraries = value;
+				value = '';
 			}
 		break;
 		case "H2":
-			//multiple occurences are not saved
+			//H1, H2 can have multiple occurences which cannot be saved
 			if(item.callNumber) {
-				zField = ['notes'];
+				zField = ['unsupported', 'H1/H2'];
 				if(item.multipleLibraries) {
 					value = item.multipleLibraries+": "+value;
 				}
@@ -6690,7 +6691,10 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "UB Leipzig: PL 415 D419"
+						"note": "The following values have no corresponding Zotero field:<br/>H1/H2: UB Leipzig: PL 415 D419<br/>TS  - BibTeX<br/>DO  - 10.1007/978-3-642-00230-4<br/>",
+						"tags": [
+							"_RIS import"
+						]
 					}
 				],
 				"seeAlso": []
