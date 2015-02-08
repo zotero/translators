@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-12-30 23:20:21"
+	"lastUpdated": "2015-02-08 09:24:39"
 }
 
 function detectImport() {
@@ -406,6 +406,8 @@ var degenerateImportFieldMap = {
 	CT: "title",
 	ED: "creators/editor",
 	EP: "pages",
+	H1: "libraryCatalog", //Citavi specific (possibly multiple occurences)
+	H2: "callNumber", //Citavi specific (possibly multiple occurences)
 	ID: "__ignore",
 	JA: "journalAbbreviation",
 	JF: "publicationTitle",
@@ -1167,6 +1169,9 @@ var EndNoteCleaner = new function() {
 	}
 };
 
+var previousTag = '';
+var previousField = '';
+
 function processTag(item, tagValue, risEntry) {
 	var tag = tagValue.tag;
 	var value = tagValue.value.trim();
@@ -1266,6 +1271,20 @@ function processTag(item, tagValue, risEntry) {
 				zField = ['extra'];
 			}
 		break;
+		case "H1":
+			//H1, H2 can have multiple occurences which cannot be saved
+			//as libraryCatalog and callNumber
+			if(item.libraryCatalog || item.callNumber) {
+				zField = ['unsupported', 'Another Library Catalog (H1)'];
+			}
+		break;
+		case "H2":
+			//H1, H2 can have multiple occurences which cannot be saved
+			//as libraryCatalog and callNumber
+			if(item.callNumber || (item.libraryCatalog && previousTag !== "H1") || (previousTag == "H1" && previousField !== "libraryCatalog")) {
+				zField = ['unsupported', 'Another Call Number (H2)'];
+			}
+		break;
 	}
 
 	//zField based manipulations
@@ -1354,6 +1373,8 @@ function processTag(item, tagValue, risEntry) {
 	}
 
 	applyValue(item, zField[0], value, rawLine);
+	previousTag = tag;
+	previousField = zField[0];
 }
 
 function applyValue(item, zField, value, rawLine) {
@@ -6626,6 +6647,54 @@ var testCases = [
 					},
 					{
 						"note": "The following values have no corresponding Zotero field:<br/>DOI: doi: 10.3109/07434618.2014.906498<br/>PB  - Informa Allied Health<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "TY  - BOOK\nSN  - 9783642002304\nAU  - Depenheuer, Otto\nT1  - Eigentumsverfassung und Finanzkrise\nT2  - Bibliothek des Eigentums\nPY  - 2009\nCY  - Berlin, Heidelberg\nPB  - Springer Berlin Heidelberg\nKW  - Finanzkrise / Eigentum / Haftung / Ordnungspolitik / Aufsatzsammlung / Online-Publikation\nKW  - Constitutional law\nKW  - Law\nUR  - http://dx.doi.org/10.1007/978-3-642-00230-4\nL1  - doi:10.1007/978-3-642-00230-4\nVL  - 7\nAB  - In dem Buch befinden sich einzelne Beiträge zu ...\nLA  - ger\nH1  - UB Mannheim\nH2  - 300 QN 100 D419\nH1  - UB Leipzig\nH2  - PL 415 D419\nTS  - BibTeX\nDO  - 10.1007/978-3-642-00230-4\nER  -\n\n",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Eigentumsverfassung und Finanzkrise",
+				"creators": [
+					{
+						"lastName": "Depenheuer",
+						"firstName": "Otto",
+						"creatorType": "author"
+					}
+				],
+				"date": "2009",
+				"ISBN": "9783642002304",
+				"abstractNote": "In dem Buch befinden sich einzelne Beiträge zu ...",
+				"callNumber": "300 QN 100 D419",
+				"language": "ger",
+				"libraryCatalog": "UB Mannheim",
+				"place": "Berlin, Heidelberg",
+				"publisher": "Springer Berlin Heidelberg",
+				"series": "Bibliothek des Eigentums",
+				"url": "http://dx.doi.org/10.1007/978-3-642-00230-4",
+				"volume": "7",
+				"attachments": [
+					{
+						"title": "Attachment",
+						"downloadable": true
+					}
+				],
+				"tags": [
+					"Constitutional law",
+					"Finanzkrise / Eigentum / Haftung / Ordnungspolitik / Aufsatzsammlung / Online-Publikation",
+					"Law"
+				],
+				"notes": [
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>Another Library Catalog (H1): UB Leipzig<br/>Another Call Number (H2): PL 415 D419<br/>TS  - BibTeX<br/>DO  - 10.1007/978-3-642-00230-4<br/>",
 						"tags": [
 							"_RIS import"
 						]
