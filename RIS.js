@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-02-04 11:54:16"
+	"lastUpdated": "2015-02-08 09:24:39"
 }
 
 function detectImport() {
@@ -1169,6 +1169,9 @@ var EndNoteCleaner = new function() {
 	}
 };
 
+var previousTag = '';
+var previousField = '';
+
 function processTag(item, tagValue, risEntry) {
 	var tag = tagValue.tag;
 	var value = tagValue.value.trim();
@@ -1270,18 +1273,16 @@ function processTag(item, tagValue, risEntry) {
 		break;
 		case "H1":
 			//H1, H2 can have multiple occurences which cannot be saved
-			if(item.libraryCatalog) {
-				item.multipleLibraries = value;
-				value = '';
+			//as libraryCatalog and callNumber
+			if(item.libraryCatalog || item.callNumber) {
+				zField = ['unsupported', 'Another Library Catalog (H1)'];
 			}
 		break;
 		case "H2":
 			//H1, H2 can have multiple occurences which cannot be saved
-			if(item.callNumber) {
-				zField = ['unsupported', 'H1/H2'];
-				if(item.multipleLibraries) {
-					value = item.multipleLibraries+": "+value;
-				}
+			//as libraryCatalog and callNumber
+			if(item.callNumber || (item.libraryCatalog && previousTag !== "H1") || (previousTag == "H1" && previousField !== "libraryCatalog")) {
+				zField = ['unsupported', 'Another Call Number (H2)'];
 			}
 		break;
 	}
@@ -1372,6 +1373,8 @@ function processTag(item, tagValue, risEntry) {
 	}
 
 	applyValue(item, zField[0], value, rawLine);
+	previousTag = tag;
+	previousField = zField[0];
 }
 
 function applyValue(item, zField, value, rawLine) {
@@ -6691,7 +6694,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "The following values have no corresponding Zotero field:<br/>H1/H2: UB Leipzig: PL 415 D419<br/>TS  - BibTeX<br/>DO  - 10.1007/978-3-642-00230-4<br/>",
+						"note": "The following values have no corresponding Zotero field:<br/>Another Library Catalog (H1): UB Leipzig<br/>Another Call Number (H2): PL 415 D419<br/>TS  - BibTeX<br/>DO  - 10.1007/978-3-642-00230-4<br/>",
 						"tags": [
 							"_RIS import"
 						]
