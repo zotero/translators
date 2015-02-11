@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-02-11 01:24:45"
+	"lastUpdated": "2015-02-11 02:55:12"
 }
 
 /*This Translator mirrors closely Aurimas Vinckevicius' RIS translator
@@ -1080,7 +1080,7 @@ var testCases = [
 	},
 	{
 		"type": "import",
-		"input": "RT Journal Article\nSR Electronic(1)\nID 271\nA1 Allan,Steven\nA1 Gilbert,Paul\nT1 Anger and anger expression in relation to perceptions of social rank, entrapment and depressive symptoms\nJF Personality & Individual Differences\nYR 2002\nFD Feb\nVO 32\nIS 3\nSP 551\nOP 565\nK1 Anger\nK1 Self Report\nK1 Status\nK1 Depression (Emotion)\nK1 Symptoms\nK1 self-report measures\nK1 anger expression\nK1 social rank\nK1 entrapment\nK1 depressive symptoms\nAB Explored the relationship between self-report measures of anger and anger expression with those of social rank (unfavorable social comparison and submissive behavior) and feelings of entrapment in a student population (197 Ss, mean age 23.4 yrs). The authors further investigated if the social rank/status of the target of one's anger affects anger experience and expression. Students were given C. D. Spielberger's (1988) State-Trait Anger Expression Inventory measure of anger and asked to complete it in 3 ways. First, in the normal way, and then 2 further times after reading 2 scenarios that involved lending an important and needed book which the lender fails to return, where the lender was either an up rank/authority figure (one's tutor) or a down rank, fellow student. It was found that self-perceptions of unfavorable rank (inferior self-perceptions and submissive behavior) and feeling trapped significantly affect anger suppression. It was also found that the rank of the target significantly affects anger expression and that people who respond angrily to criticism tend to show more down rank-anger when they are frustrated by a lower rank target and modulate their anger according to the rank of the person they are angry with. ( PsycINFO Database Record ( c) 2002 APA, all rights reserved)\nNO PO: Human; Male; Female; Adulthood (18 yrs & older); FE: References; Peer Reviewed; UD: 20020227; F1: 0191-8869,32,3,551-565,2002; A1: 20020227\nPB Elsevier Science, England, [URL:http:// www.elsevier.nl]\nSN 0191-8869\nAD Kingsway Hosp, Dept of Clinical Psychology, Derby, United Kingdom; [mailto: stev.allan@hotmail.com]\nAN 2002-00282-017\nLA English\nCL 3120 Personality Traits & Processes\nSF Print (Paper); Journal Article; Empirical Study\nLK http:// bmj.com/content/vol325/issue7371/twib.shtml#325/7371/0\nOL English (30)",
+		"input": "RT Journal Article\nSR Electronic(1)\nID 271\nA1 Allan,Steven\nA1 Gilbert,Paul\nT1 Anger and anger expression in relation to perceptions of social rank, entrapment and depressive symptoms\nJF Personality & Individual Differences\nYR 2002\nFD Feb\nVO 32\nIS 3\nSP 551\nOP 565\nK1 Anger\nK1 Self Report\nK1 Status\nK1 Depression (Emotion)\nK1 Symptoms\nK1 self-report measures\nK1 anger expression\nK1 social rank\nK1 entrapment\nK1 depressive symptoms\nAB Explored the relationship between self-report measures of anger and anger expression with those of social rank (unfavorable social comparison and submissive behavior) and feelings of entrapment in a student population (197 Ss, mean age 23.4 yrs). The authors further investigated if the social rank/status of the target of one's anger affects anger experience and expression. Students were given C. D. Spielberger's (1988) State-Trait Anger Expression Inventory measure of anger and asked to complete it in 3 ways. First, in the normal way, and then 2 further times after reading 2 scenarios that involved lending an important and needed book which the lender fails to return, where the lender was either an up rank/authority figure (one's tutor) or a down rank, fellow student. It was found that self-perceptions of unfavorable rank (inferior self-perceptions and submissive behavior) and feeling trapped significantly affect anger suppression. It was also found that the rank of the target significantly affects anger expression and that people who respond angrily to criticism tend to show more down rank-anger when they are frustrated by a lower rank target and modulate their anger according to the rank of the person they are angry with. ( PsycINFO Database Record ( c) 2002 APA, all rights reserved)\nNO PO: Human; Male; Female; Adulthood (18 yrs & older); FE: References; Peer Reviewed; UD: 20020227; F1: 0191-8869,32,3,551-565,2002; A1: 20020227\nPB Elsevier Science, England, [URL:http:// www.elsevier.nl]\nSN 0191-8869\nAD Kingsway Hosp, Dept of Clinical Psychology, Derby, United Kingdom; [mailto: stev.allan@hotmail.com]\nAN 2002-00282-017\nLA English\nCL 3120 Personality Traits & Processes\nSF Print (Paper); Journal Article; Empirical Study\nLK http://bmj.com/content/vol325/issue7371/twib.shtml#325/7371/0\nOL English (30)",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1107,8 +1107,8 @@ var testCases = [
 				"volume": "32",
 				"attachments": [
 					{
-						"path": "http:// bmj.com/content/vol325/issue7371/twib.shtml#325/7371/0",
-						"title": " bmj.com Link",
+						"path": "http://bmj.com/content/vol325/issue7371/twib.shtml#325/7371/0",
+						"title": "bmj.com Link",
 						"mimeType": "text/html"
 					}
 				],
