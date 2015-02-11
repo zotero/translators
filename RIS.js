@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-12-30 23:20:21"
+	"lastUpdated": "2015-02-11 01:23:23"
 }
 
 function detectImport() {
@@ -1337,9 +1337,8 @@ function processTag(item, tagValue, risEntry) {
 					
 					item.attachments.push({
 						title: title,
-						url: url,
-						mimeType: mimeType || undefined,
-						downloadable: true
+						path: url,
+						mimeType: mimeType || undefined
 					});
 				}
 				value = false;
@@ -4456,19 +4455,19 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "2009 Castoe Mol Eco Resources",
-						"downloadable": true
+						"path": "PDF/2009 Castoe Mol Eco Resources-1114744832/2009 Castoe Mol Eco Resources.pdf"
 					},
 					{
 						"title": "sm001",
-						"downloadable": true
+						"path": "PDF/sm001-1634838528/sm001.pdf"
 					},
 					{
 						"title": "sm002",
-						"downloadable": true
+						"path": "PDF/sm002-2305927424/sm002.txt"
 					},
 					{
 						"title": "sm003",
-						"downloadable": true
+						"path": "PDF/sm003-2624695040/sm003.xls"
 					}
 				],
 				"tags": [],

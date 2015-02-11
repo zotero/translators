@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-05-08 23:03:38"
+	"lastUpdated": "2015-02-11 02:55:12"
 }
 
 /*This Translator mirrors closely Aurimas Vinckevicius' RIS translator
@@ -507,10 +507,9 @@ function processTag(item, entry) {
 				var domain = value.match(/^https?:\/\/([^\/]+)/i);
 				domain = domain ? domain[1] + ' ' : '';
 				value = {
-					url:value,
+					path:value,
 					title: domain + 'Link',
-					mimeType: 'text/html',
-					downloadable:true
+					mimeType: 'text/html'
 				};
 			break;
 			case "unsupported":	//unsupported fields
@@ -985,6 +984,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "bookSection",
+				"title": "Depression and coronary heart disease",
 				"creators": [
 					{
 						"lastName": "Stansfeld",
@@ -1002,6 +1002,28 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
+				"date": "2002",
+				"ISBN": "0727912771 (paperback)",
+				"abstractNote": "(From the chapter) This chapter discusses the evidence for the proposition that depression is an aetiological factor in coronary heart disease, and 2 of the possible pathways by which this might occur: 1 in which social factors predict coronary heart disease, and depression and its associated psychophysiological changes are an intervening step; and the 2nd in which social factors predict coronary heart disease and depression, but depression is not on the pathway. This is followed by a discussion of anxiety as an aetiological factor in coronary heart disease. ( PsycINFO Database Record ( c) 2002 APA, all rights reserved)",
+				"bookTitle": "Stress and the heart: Psychosocial pathways to coronary heart disease",
+				"language": "English",
+				"pages": "101-123",
+				"place": "Williston, VT, US",
+				"publisher": "BMJ Books",
+				"volume": "1",
+				"attachments": [],
+				"tags": [
+					"Anxiety",
+					"Etiology",
+					"Heart Disorders",
+					"Major Depression",
+					"Plants Red Blue",
+					"Prediction",
+					"Psychosocial Factors",
+					"Risk Factors",
+					"coronary heart disease",
+					"psychosocial risk factors"
+				],
 				"notes": [
 					{
 						"note": "<p>Williston, VT, US: BMJ Books. xi, 304 pp.; PO: Human; FE: References; TA: Psychology: Professional & Research; UD: 20020306; A1: 20020306</p>"
@@ -1013,30 +1035,7 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Etiology",
-					"Heart Disorders",
-					"Major Depression",
-					"Psychosocial Factors",
-					"Risk Factors",
-					"Anxiety",
-					"Prediction",
-					"coronary heart disease",
-					"psychosocial risk factors",
-					"Plants Red Blue"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Depression and coronary heart disease",
-				"volume": "1",
-				"pages": "101-123",
-				"abstractNote": "(From the chapter) This chapter discusses the evidence for the proposition that depression is an aetiological factor in coronary heart disease, and 2 of the possible pathways by which this might occur: 1 in which social factors predict coronary heart disease, and depression and its associated psychophysiological changes are an intervening step; and the 2nd in which social factors predict coronary heart disease and depression, but depression is not on the pathway. This is followed by a discussion of anxiety as an aetiological factor in coronary heart disease. ( PsycINFO Database Record ( c) 2002 APA, all rights reserved)",
-				"bookTitle": "Stress and the heart: Psychosocial pathways to coronary heart disease",
-				"publisher": "BMJ Books",
-				"place": "Williston, VT, US",
-				"ISBN": "0727912771 (paperback)",
-				"language": "English",
-				"date": "2002"
+				"seeAlso": []
 			}
 		]
 	},
@@ -1046,12 +1045,23 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "thesis",
+				"title": "Effect of a case management intervention on symptoms of asthma in high risk children",
 				"creators": [
 					{
 						"lastName": "Catrambone",
 						"firstName": "C.D.",
 						"creatorType": "author"
 					}
+				],
+				"date": "2000",
+				"abstractNote": "Statement of the problem. One approach to addressing the health care needs of patients with chronic medical problems is case management. Little is known about the effectiveness of case management in the treatment of children with asthma. Few randomized controlled studies of asthma case management have been conducted. In these studies, follow-up was limited to a one-year period. The purpose of this study was to determine the effectiveness of a one-year primary-care based asthma case management (ACM) strategy on symptoms of asthma in high risk children at 15 and 18 months post-intervention. Methods. Twenty-eight parent caregivers of children with asthma aged 1 to 15 years, who participated in the ACM intervention the year prior to the start of this study, agreed to participate. The ACM group ( n = 15) received one year of asthma case management and the usual care ( UC) group ( n = 13) received one year of routine outpatient care. Results. Child asthma symptoms, affects on parent lifestyle, and health system utilization were assessed. Based on caregiver four-week recall, the ACM group experienced fewer annual wheezing days compared to the UC group. 25.17 (36.55) versus 71.61 (80.01) that was statistically significant (p = 0.03). There were no statistically significant differences between the ACM and UC groups in the cumulative 18-month estimate of child night-time coughing and awakening, parent night-time awakening due to the child's asthma symptoms and worrying, parent change in plans and missed work, and asthma-related physician office visits, emergency department visits, and hospitalizations. Conclusion. A primary-care based asthma case management intervention was effective in reducing annual wheezing days in high-risk children with asthma when followed up to 18 months.",
+				"language": "English",
+				"numPages": "141",
+				"place": "Oceanside, CA, USA",
+				"university": "Rush University, College of Nursing",
+				"attachments": [],
+				"tags": [
+					"Case Management Asthma -- Therapy -- In Infancy and Childhood Treatment Outcomes -- In Infancy and Childhood (Minor): Prospective Studies Comparative Studies Infant Child Adolescence Outpatients Asthma -- Symptoms"
 				],
 				"notes": [
 					{
@@ -1064,27 +1074,17 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Case Management Asthma -- Therapy -- In Infancy and Childhood Treatment Outcomes -- In Infancy and Childhood (Minor): Prospective Studies Comparative Studies Infant Child Adolescence Outpatients Asthma -- Symptoms"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Effect of a case management intervention on symptoms of asthma in high risk children",
-				"numPages": "141",
-				"abstractNote": "Statement of the problem. One approach to addressing the health care needs of patients with chronic medical problems is case management. Little is known about the effectiveness of case management in the treatment of children with asthma. Few randomized controlled studies of asthma case management have been conducted. In these studies, follow-up was limited to a one-year period. The purpose of this study was to determine the effectiveness of a one-year primary-care based asthma case management (ACM) strategy on symptoms of asthma in high risk children at 15 and 18 months post-intervention. Methods. Twenty-eight parent caregivers of children with asthma aged 1 to 15 years, who participated in the ACM intervention the year prior to the start of this study, agreed to participate. The ACM group ( n = 15) received one year of asthma case management and the usual care ( UC) group ( n = 13) received one year of routine outpatient care. Results. Child asthma symptoms, affects on parent lifestyle, and health system utilization were assessed. Based on caregiver four-week recall, the ACM group experienced fewer annual wheezing days compared to the UC group. 25.17 (36.55) versus 71.61 (80.01) that was statistically significant (p = 0.03). There were no statistically significant differences between the ACM and UC groups in the cumulative 18-month estimate of child night-time coughing and awakening, parent night-time awakening due to the child's asthma symptoms and worrying, parent change in plans and missed work, and asthma-related physician office visits, emergency department visits, and hospitalizations. Conclusion. A primary-care based asthma case management intervention was effective in reducing annual wheezing days in high-risk children with asthma when followed up to 18 months.",
-				"university": "Rush University, College of Nursing",
-				"place": "Oceanside, CA, USA",
-				"language": "English",
-				"date": "2000"
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "import",
-		"input": "RT Journal Article\nSR Electronic(1)\nID 271\nA1 Allan,Steven\nA1 Gilbert,Paul\nT1 Anger and anger expression in relation to perceptions of social rank, entrapment and depressive symptoms\nJF Personality & Individual Differences\nYR 2002\nFD Feb\nVO 32\nIS 3\nSP 551\nOP 565\nK1 Anger\nK1 Self Report\nK1 Status\nK1 Depression (Emotion)\nK1 Symptoms\nK1 self-report measures\nK1 anger expression\nK1 social rank\nK1 entrapment\nK1 depressive symptoms\nAB Explored the relationship between self-report measures of anger and anger expression with those of social rank (unfavorable social comparison and submissive behavior) and feelings of entrapment in a student population (197 Ss, mean age 23.4 yrs). The authors further investigated if the social rank/status of the target of one's anger affects anger experience and expression. Students were given C. D. Spielberger's (1988) State-Trait Anger Expression Inventory measure of anger and asked to complete it in 3 ways. First, in the normal way, and then 2 further times after reading 2 scenarios that involved lending an important and needed book which the lender fails to return, where the lender was either an up rank/authority figure (one's tutor) or a down rank, fellow student. It was found that self-perceptions of unfavorable rank (inferior self-perceptions and submissive behavior) and feeling trapped significantly affect anger suppression. It was also found that the rank of the target significantly affects anger expression and that people who respond angrily to criticism tend to show more down rank-anger when they are frustrated by a lower rank target and modulate their anger according to the rank of the person they are angry with. ( PsycINFO Database Record ( c) 2002 APA, all rights reserved)\nNO PO: Human; Male; Female; Adulthood (18 yrs & older); FE: References; Peer Reviewed; UD: 20020227; F1: 0191-8869,32,3,551-565,2002; A1: 20020227\nPB Elsevier Science, England, [URL:http:// www.elsevier.nl]\nSN 0191-8869\nAD Kingsway Hosp, Dept of Clinical Psychology, Derby, United Kingdom; [mailto: stev.allan@hotmail.com]\nAN 2002-00282-017\nLA English\nCL 3120 Personality Traits & Processes\nSF Print (Paper); Journal Article; Empirical Study\nLK http:// bmj.com/content/vol325/issue7371/twib.shtml#325/7371/0\nOL English (30)",
+		"input": "RT Journal Article\nSR Electronic(1)\nID 271\nA1 Allan,Steven\nA1 Gilbert,Paul\nT1 Anger and anger expression in relation to perceptions of social rank, entrapment and depressive symptoms\nJF Personality & Individual Differences\nYR 2002\nFD Feb\nVO 32\nIS 3\nSP 551\nOP 565\nK1 Anger\nK1 Self Report\nK1 Status\nK1 Depression (Emotion)\nK1 Symptoms\nK1 self-report measures\nK1 anger expression\nK1 social rank\nK1 entrapment\nK1 depressive symptoms\nAB Explored the relationship between self-report measures of anger and anger expression with those of social rank (unfavorable social comparison and submissive behavior) and feelings of entrapment in a student population (197 Ss, mean age 23.4 yrs). The authors further investigated if the social rank/status of the target of one's anger affects anger experience and expression. Students were given C. D. Spielberger's (1988) State-Trait Anger Expression Inventory measure of anger and asked to complete it in 3 ways. First, in the normal way, and then 2 further times after reading 2 scenarios that involved lending an important and needed book which the lender fails to return, where the lender was either an up rank/authority figure (one's tutor) or a down rank, fellow student. It was found that self-perceptions of unfavorable rank (inferior self-perceptions and submissive behavior) and feeling trapped significantly affect anger suppression. It was also found that the rank of the target significantly affects anger expression and that people who respond angrily to criticism tend to show more down rank-anger when they are frustrated by a lower rank target and modulate their anger according to the rank of the person they are angry with. ( PsycINFO Database Record ( c) 2002 APA, all rights reserved)\nNO PO: Human; Male; Female; Adulthood (18 yrs & older); FE: References; Peer Reviewed; UD: 20020227; F1: 0191-8869,32,3,551-565,2002; A1: 20020227\nPB Elsevier Science, England, [URL:http:// www.elsevier.nl]\nSN 0191-8869\nAD Kingsway Hosp, Dept of Clinical Psychology, Derby, United Kingdom; [mailto: stev.allan@hotmail.com]\nAN 2002-00282-017\nLA English\nCL 3120 Personality Traits & Processes\nSF Print (Paper); Journal Article; Empirical Study\nLK http://bmj.com/content/vol325/issue7371/twib.shtml#325/7371/0\nOL English (30)",
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Anger and anger expression in relation to perceptions of social rank, entrapment and depressive symptoms",
 				"creators": [
 					{
 						"lastName": "Allan",
@@ -1097,6 +1097,33 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "Feb 2002",
+				"ISSN": "0191-8869",
+				"abstractNote": "Explored the relationship between self-report measures of anger and anger expression with those of social rank (unfavorable social comparison and submissive behavior) and feelings of entrapment in a student population (197 Ss, mean age 23.4 yrs). The authors further investigated if the social rank/status of the target of one's anger affects anger experience and expression. Students were given C. D. Spielberger's (1988) State-Trait Anger Expression Inventory measure of anger and asked to complete it in 3 ways. First, in the normal way, and then 2 further times after reading 2 scenarios that involved lending an important and needed book which the lender fails to return, where the lender was either an up rank/authority figure (one's tutor) or a down rank, fellow student. It was found that self-perceptions of unfavorable rank (inferior self-perceptions and submissive behavior) and feeling trapped significantly affect anger suppression. It was also found that the rank of the target significantly affects anger expression and that people who respond angrily to criticism tend to show more down rank-anger when they are frustrated by a lower rank target and modulate their anger according to the rank of the person they are angry with. ( PsycINFO Database Record ( c) 2002 APA, all rights reserved)",
+				"issue": "3",
+				"language": "English",
+				"pages": "551-565",
+				"publicationTitle": "Personality & Individual Differences",
+				"volume": "32",
+				"attachments": [
+					{
+						"path": "http://bmj.com/content/vol325/issue7371/twib.shtml#325/7371/0",
+						"title": "bmj.com Link",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					"Anger",
+					"Depression (Emotion)",
+					"Self Report",
+					"Status",
+					"Symptoms",
+					"anger expression",
+					"depressive symptoms",
+					"entrapment",
+					"self-report measures",
+					"social rank"
+				],
 				"notes": [
 					{
 						"note": "<p>PO: Human; Male; Female; Adulthood (18 yrs & older); FE: References; Peer Reviewed; UD: 20020227; F1: 0191-8869,32,3,551-565,2002; A1: 20020227</p>"
@@ -1108,36 +1135,7 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [
-					"Anger",
-					"Self Report",
-					"Status",
-					"Depression (Emotion)",
-					"Symptoms",
-					"self-report measures",
-					"anger expression",
-					"social rank",
-					"entrapment",
-					"depressive symptoms"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"url": "http:// bmj.com/content/vol325/issue7371/twib.shtml#325/7371/0",
-						"title": " bmj.com Link",
-						"mimeType": "text/html",
-						"downloadable": true
-					}
-				],
-				"title": "Anger and anger expression in relation to perceptions of social rank, entrapment and depressive symptoms",
-				"publicationTitle": "Personality & Individual Differences",
-				"date": "Feb 2002",
-				"volume": "32",
-				"issue": "3",
-				"pages": "551-565",
-				"abstractNote": "Explored the relationship between self-report measures of anger and anger expression with those of social rank (unfavorable social comparison and submissive behavior) and feelings of entrapment in a student population (197 Ss, mean age 23.4 yrs). The authors further investigated if the social rank/status of the target of one's anger affects anger experience and expression. Students were given C. D. Spielberger's (1988) State-Trait Anger Expression Inventory measure of anger and asked to complete it in 3 ways. First, in the normal way, and then 2 further times after reading 2 scenarios that involved lending an important and needed book which the lender fails to return, where the lender was either an up rank/authority figure (one's tutor) or a down rank, fellow student. It was found that self-perceptions of unfavorable rank (inferior self-perceptions and submissive behavior) and feeling trapped significantly affect anger suppression. It was also found that the rank of the target significantly affects anger expression and that people who respond angrily to criticism tend to show more down rank-anger when they are frustrated by a lower rank target and modulate their anger according to the rank of the person they are angry with. ( PsycINFO Database Record ( c) 2002 APA, all rights reserved)",
-				"ISSN": "0191-8869",
-				"language": "English"
+				"seeAlso": []
 			}
 		]
 	},
@@ -1147,6 +1145,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "The Empire's New Clothes",
 				"creators": [
 					{
 						"lastName": "Brennan",
@@ -1154,6 +1153,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "January 01 2003",
+				"issue": "2",
+				"pages": "337-367",
+				"publicationTitle": "Critical Inquiry",
+				"volume": "29",
+				"attachments": [
+					{
+						"path": "http://www.journals.uchicago.edu/doi/abs/10.1086/374030",
+						"title": "www.journals.uchicago.edu Link",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
 				"notes": [
 					{
 						"note": "<p>doi: 10.1086/374030</p>"
@@ -1165,22 +1177,7 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"url": "http://www.journals.uchicago.edu/doi/abs/10.1086/374030",
-						"title": "www.journals.uchicago.edu Link",
-						"mimeType": "text/html",
-						"downloadable": true
-					}
-				],
-				"title": "The Empire's New Clothes",
-				"publicationTitle": "Critical Inquiry",
-				"date": "January 01 2003",
-				"volume": "29",
-				"issue": "2",
-				"pages": "337-367"
+				"seeAlso": []
 			}
 		]
 	}

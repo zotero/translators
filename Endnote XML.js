@@ -16,7 +16,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcv",
-	"lastUpdated": "2014-08-05 12:31:22"
+	"lastUpdated": "2015-02-11 01:23:55"
 }
 
 function detectImport() {
@@ -622,7 +622,7 @@ function doImport() {
 						} else {
 							newItem.attachments.push({
 								title: filename,
-								url: filepath,
+								path: filepath,
 								mimeType: attachmenttype
 							})
 						}
@@ -1043,6 +1043,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "report",
+				"title": "Country Clustering in Comparative Political Economy",
 				"creators": [
 					{
 						"firstName": "John S.",
@@ -1055,23 +1056,23 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2009",
+				"pages": "32",
+				"place": "Cologne",
 				"attachments": [
 					{
 						"title": "Ahlquist and Breunig _ 2009 _ Country Clustering in Comparative Political Econom",
-						"url": "PDF/Ahlquist and Breunig _ 2009 _ Country Clustering in Comparative Political Econom.pdf",
+						"path": "PDF/Ahlquist and Breunig _ 2009 _ Country Clustering in Comparative Political Econom.pdf",
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "Country Clustering in Comparative Political Economy",
-				"pages": "32",
-				"date": "2009",
-				"place": "Cologne"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "book",
+				"title": "Planting green roofs and living walls",
 				"creators": [
 					{
 						"firstName": "Nigel",
@@ -1084,20 +1085,20 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Planting green roofs and living walls",
-				"edition": "2",
 				"date": "2008",
+				"ISBN": "0881929115",
+				"abstractNote": "The latest techniques for planting roofs and walls to enhance our buildings and benefit the environment. The green roof industry is booming and the technology changing fast as professionals respond to the unique challenges of each new planting. In this comprehensively updated, fully revised edition of their authoritative reference, Nigel Dunnett and Nol Kingsbury reveal the very latest techniques, materials, and plants, and showcase some spectacular new case studies for the non-professional. Green roofs and walls reduce pollution and runoff, help insulate and reduce the maintenance needs of buildings, contribute to biodiversity, and provide habitats for wildlife. In addition to all this, they are attractive to look at and enhance the quality of life of residents. In Planting Green Roofs and Living Walls, Revised and Updated Edition, the authors describe and illustrate the practical techniques required to design, implement, and maintain a green roof or wall to the highest standards. This informative, up-to-the-minute reference will encourage gardeners everywhere to consider the enormous benefits to be gained from planting on their roofs and walls.",
+				"edition": "2",
 				"place": "Portland, OR",
 				"publisher": "Timber Press",
-				"ISBN": "0881929115",
-				"abstractNote": "The latest techniques for planting roofs and walls to enhance our buildings and benefit the environment. The green roof industry is booming and the technology changing fast as professionals respond to the unique challenges of each new planting. In this comprehensively updated, fully revised edition of their authoritative reference, Nigel Dunnett and Nol Kingsbury reveal the very latest techniques, materials, and plants, and showcase some spectacular new case studies for the non-professional. Green roofs and walls reduce pollution and runoff, help insulate and reduce the maintenance needs of buildings, contribute to biodiversity, and provide habitats for wildlife. In addition to all this, they are attractive to look at and enhance the quality of life of residents. In Planting Green Roofs and Living Walls, Revised and Updated Edition, the authors describe and illustrate the practical techniques required to design, implement, and maintain a green roof or wall to the highest standards. This informative, up-to-the-minute reference will encourage gardeners everywhere to consider the enormous benefits to be gained from planting on their roofs and walls."
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Rooftop greenhouse will boost city farming",
 				"creators": [
 					{
 						"firstName": "Lisa W.",
@@ -1105,6 +1106,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2012",
+				"pages": "A20",
+				"publicationTitle": "New York Times",
+				"attachments": [],
+				"tags": [],
 				"notes": [
 					{
 						"note": "The following values have no corresponding Zotero field:<br/>pub-location: New York",
@@ -1113,16 +1119,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Rooftop greenhouse will boost city farming",
-				"publicationTitle": "New York Times",
-				"pages": "A20",
-				"date": "2012"
+				"seeAlso": []
 			},
 			{
 				"itemType": "book",
+				"title": "Beyond varieties of capitalism : Conflict, contradiction, and complementarities in the European economy",
 				"creators": [
 					{
 						"firstName": "Bob",
@@ -1140,19 +1141,19 @@ var testCases = [
 						"creatorType": "seriesEditor"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Beyond varieties of capitalism : Conflict, contradiction, and complementarities in the European economy",
-				"shortTitle": "Beyond varieties of capitalism",
 				"date": "2007",
+				"ISBN": "9780199206483",
 				"place": "Oxford and New York",
 				"publisher": "Oxford University Press",
-				"ISBN": "9780199206483"
+				"shortTitle": "Beyond varieties of capitalism",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "book",
+				"title": "Steve Jobs",
 				"creators": [
 					{
 						"firstName": "Walter",
@@ -1160,18 +1161,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Steve Jobs",
 				"date": "2011",
+				"ISBN": "9781451648539",
 				"place": "New York, {NY}",
 				"publisher": "Simon & Schuster",
-				"ISBN": "9781451648539"
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "bookSection",
+				"title": "Firms and the welfare state: When, why, and how does social policy matter to employers?",
 				"creators": [
 					{
 						"firstName": "Isabela",
@@ -1189,6 +1190,13 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
+				"date": "2001",
+				"bookTitle": "Varieties of capitalism. The institutional foundations of comparative advantage",
+				"pages": "184-213",
+				"place": "New York",
+				"publisher": "Oxford University Press",
+				"attachments": [],
+				"tags": [],
 				"notes": [
 					{
 						"note": "The following values have no corresponding Zotero field:<br/>periodical: Varieties of capitalism. The institutional foundations of comparative advantage",
@@ -1197,18 +1205,11 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Firms and the welfare state: When, why, and how does social policy matter to employers?",
-				"bookTitle": "Varieties of capitalism. The institutional foundations of comparative advantage",
-				"pages": "184-213",
-				"date": "2001",
-				"place": "New York",
-				"publisher": "Oxford University Press"
+				"seeAlso": []
 			},
 			{
 				"itemType": "book",
+				"title": "Shaping the body politic: Art and political formation in early america",
 				"creators": [
 					{
 						"firstName": "Maurie Dee",
@@ -1221,19 +1222,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Shaping the body politic: Art and political formation in early america",
 				"date": "2011",
+				"ISBN": "0813931029",
+				"abstractNote": "Traditional narratives imply that art in early America was severely limited in scope. By contrast, these essays collectively argue that visual arts played a critical role in shaping an early American understanding of the body politic. American artists in the late colonial and early national periods enlisted the arts to explore and exploit their visions of the relationship of the American colonies to the mother country and, later, to give material shape to the ideals of modern republican nationhood. Taking a uniquely broad view of both politics and art, Shaping the Body Politic ranges in topic from national politics to the politics of national identity, and from presidential portraits to the architectures of the ordinary. The book covers subject matter from the 1760s to the 1820s, ranging from Patience Wright's embodiment of late colonial political tension to Thomas Jefferson's designs for the entry hall at Monticello as a museum. Paul Staiti, Maurie {McInnis}, and Roger Stein offer new readings of canonical presidential images and spaces: Jean-Antoine Houdon's George Washington, Gilbert Stuart's the Lansdowne portrait of Washington, and Thomas Jefferson's Monticello. In essays that engage print and painting, portraiture and landscape, Wendy Bellion, David Steinberg, and John Crowley explore the formation of national identity. The volume's concluding essays, by Susan Rather and Bernard Herman, examine the politics of the everyday. The accompanying eighty-five illustrations and color plates demonstrate the broad range of politically resonant visual material in early America. {ContributorsWendy} Bellion, University of Delaware * John E. Crowley, Dalhousie University * Bernard L. Herman, University of North Carolina, Chapel Hill * Maurie D. {McInnis}, University of Virginia * Louis P. Nelson, University of Virginia * Susan Rather, University of Texas, Austin * Paul Staiti, Mount Holyoke College * Roger B. Stein, emeritus, University of Virginia * David Steinberg, Independent Scholar Thomas Jefferson Foundation Distinguished Lecture Series",
 				"place": "Charlottesville, VA",
 				"publisher": "University of Virginia Press",
-				"ISBN": "0813931029",
-				"abstractNote": "Traditional narratives imply that art in early America was severely limited in scope. By contrast, these essays collectively argue that visual arts played a critical role in shaping an early American understanding of the body politic. American artists in the late colonial and early national periods enlisted the arts to explore and exploit their visions of the relationship of the American colonies to the mother country and, later, to give material shape to the ideals of modern republican nationhood. Taking a uniquely broad view of both politics and art, Shaping the Body Politic ranges in topic from national politics to the politics of national identity, and from presidential portraits to the architectures of the ordinary. The book covers subject matter from the 1760s to the 1820s, ranging from Patience Wright's embodiment of late colonial political tension to Thomas Jefferson's designs for the entry hall at Monticello as a museum. Paul Staiti, Maurie {McInnis}, and Roger Stein offer new readings of canonical presidential images and spaces: Jean-Antoine Houdon's George Washington, Gilbert Stuart's the Lansdowne portrait of Washington, and Thomas Jefferson's Monticello. In essays that engage print and painting, portraiture and landscape, Wendy Bellion, David Steinberg, and John Crowley explore the formation of national identity. The volume's concluding essays, by Susan Rather and Bernard Herman, examine the politics of the everyday. The accompanying eighty-five illustrations and color plates demonstrate the broad range of politically resonant visual material in early America. {ContributorsWendy} Bellion, University of Delaware * John E. Crowley, Dalhousie University * Bernard L. Herman, University of North Carolina, Chapel Hill * Maurie D. {McInnis}, University of Virginia * Louis P. Nelson, University of Virginia * Susan Rather, University of Texas, Austin * Paul Staiti, Mount Holyoke College * Roger B. Stein, emeritus, University of Virginia * David Steinberg, Independent Scholar Thomas Jefferson Foundation Distinguished Lecture Series"
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "patent",
+				"title": "Yo-yo having a modifiable string gap",
 				"creators": [
 					{
 						"firstName": "Hans",
@@ -1241,18 +1242,22 @@ var testCases = [
 						"creatorType": "inventor"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Yo-yo having a modifiable string gap",
+				"issueDate": "2011",
+				"abstractNote": "The invention is a yo-yo that includes unique features that enable a user to adjust the yo-yo's string gap. In the preferred embodiment, at least one of the yo-yo's side assemblies includes a screw engaged to a nut that has two thru-bores located in a side-by-side relation. The screw is located to one side of the yo-yo's axis of rotation and can be rotated by a user to adjust the position of the associated side assembly on the yo-yo's axle structure. By appropriate positioning of the side assembly, a user can adjust the yo-yo's performance characteristics.",
 				"patentNumber": "WO2011US30214",
-				"date": "2011",
-				"abstractNote": "The invention is a yo-yo that includes unique features that enable a user to adjust the yo-yo's string gap. In the preferred embodiment, at least one of the yo-yo's side assemblies includes a screw engaged to a nut that has two thru-bores located in a side-by-side relation. The screw is located to one side of the yo-yo's axis of rotation and can be rotated by a user to adjust the position of the associated side assembly on the yo-yo's axle structure. By appropriate positioning of the side assembly, a user can adjust the yo-yo's performance characteristics."
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "webpage",
+				"title": "CSL search by example",
 				"creators": [],
+				"url": "http://editor.citationstyles.org/searchByExample/",
+				"websiteTitle": "Citation Style Editor",
+				"attachments": [],
+				"tags": [],
 				"notes": [
 					{
 						"note": "The following values have no corresponding Zotero field:<br/>periodical: Citation Style Editor",
@@ -1261,12 +1266,7 @@ var testCases = [
 						]
 					}
 				],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "CSL search by example",
-				"websiteTitle": "Citation Style Editor",
-				"url": "http://editor.citationstyles.org/searchByExample/"
+				"seeAlso": []
 			}
 		]
 	},
@@ -1276,12 +1276,12 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Plain <b>Bold</b><i> Italics</i> Underline <sup>Superscript</sup> <sub>Subscript</sub> SymbolFont CourierNew SmallerSize Size12 <b><i><sup>TimesNewRoman-Bold-Italics-Underline-Superscript</sup></i></b>",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
 				"attachments": [],
-				"title": "Plain <b>Bold</b><i> Italics</i> Underline <sup>Superscript</sup> <sub>Subscript</sub> SymbolFont CourierNew SmallerSize Size12 <b><i><sup>TimesNewRoman-Bold-Italics-Underline-Superscript</sup></i></b>"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
