@@ -15,7 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2013-01-09 15:36:32"
+	"lastUpdated": "2015-02-11 01:24:19"
 }
 
 var fromMarcGenre = {
@@ -1141,10 +1141,11 @@ function doImport() {
 				access = urlNode.getAttribute("access"),
 				usage = urlNode.getAttribute("usage");
 			if(access === "raw object") {
-				var attachment = {url:urlNode.textContent,
-						title:(urlNode.getAttribute("displayLabel") || "Attachment"),
-						downloadable:true};
-				if (attachment.url.substr(-4) === ".pdf") attachment.mimeType = "application/pdf";
+				var attachment = {
+					title:(urlNode.getAttribute("displayLabel") || "Attachment"),
+					path:urlNode.textContent
+				};
+				if (attachment.path.substr(-4) === ".pdf") attachment.mimeType = "application/pdf";
 				newItem.attachments.push(attachment);
 			}
 			
@@ -1240,6 +1241,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "webpage",
+				"title": "FranUlmer.com -- Home Page",
 				"creators": [
 					{
 						"firstName": "Fran",
@@ -1247,21 +1249,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Elections",
-					"Governors",
-					"Election",
-					"Democratic Party (AK)"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "FranUlmer.com -- Home Page",
-				"publicationTitle": "Election 2002 Web Archive",
-				"accessDate": "20020702",
-				"url": "http://www.franulmer.com/",
 				"abstractNote": "Web site promoting the candidacy of Fran Ulmer, Democratic candidate for Governor, Alaska, 2002. Includes candidate biography, issue position statements, campaign contact information, privacy policy and campaign news press releases. Site features enable visitors to sign up for campaign email list, volunteer, make campaign contributions and follow links to other internet locations.",
-				"language": "eng"
+				"language": "eng",
+				"url": "http://www.franulmer.com/",
+				"websiteTitle": "Election 2002 Web Archive",
+				"attachments": [],
+				"tags": [
+					"Democratic Party (AK)",
+					"Election",
+					"Elections",
+					"Governors"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1271,6 +1271,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "webpage",
+				"title": "At Gettysburg, or, What a Girl Saw and Heard of the Battle: A True Narrative",
 				"creators": [
 					{
 						"firstName": "Tillie Pierce",
@@ -1278,23 +1279,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
+				"date": "1889",
+				"language": "English",
+				"rights": "Personal, noncommercial use of this item is permitted in the United States of America. Please see http://digital.library.upenn.edu/women/ for other rights and restrictions that may apply to this resource.",
+				"url": "http://digital.library.upenn.edu/women/alleman/gettysburg/gettysburg.html",
+				"websiteTitle": "A Celebration of Women Writers: Americana",
+				"attachments": [],
 				"tags": [
-					"Gettysburg, Battle of, Gettysburg, Pa., 1863",
 					"Gettysburg (Pa.) -- History -- Civil War, 1861-1865",
+					"Gettysburg, Battle of, Gettysburg, Pa., 1863",
 					"United States -- History -- Civil War, 1861-1865 -- Campaigns"
 				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "At Gettysburg, or, What a Girl Saw and Heard of the Battle: A True Narrative",
-				"rights": "Personal, noncommercial use of this item is permitted in the United States of America. Please see http://digital.library.upenn.edu/women/ for other rights and restrictions that may apply to this resource.",
-				"publicationTitle": "A Celebration of Women Writers: Americana",
-				"place": "New York",
-				"publisher": "W. Lake Borland",
-				"date": "1889",
-				"callNumber": "E475.53 .A42",
-				"url": "http://digital.library.upenn.edu/women/alleman/gettysburg/gettysburg.html",
-				"language": "English"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1304,6 +1301,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "artwork",
+				"title": "Telescope Peak from Zabriskie Point",
 				"creators": [
 					{
 						"firstName": "Charles Weever",
@@ -1311,23 +1309,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
+				"date": "2003",
+				"archiveLocation": "Indiana University, Bloomington. University Archives P07803",
+				"rights": "Copyright and reproduction rights for all Charles W. Cushman photographs are held by Indiana University and administered by the University Archives, Indiana University, Bloomington, IN 47405",
+				"url": "http://purl.dlib.indiana.edu/iudl/archives/cushman/P07803",
+				"attachments": [],
 				"tags": [
 					"Mountains",
 					"Snow",
 					"Telescope Peak (Inyo County, Calif.)",
 					"Zabriskie Point (Calif.)"
 				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Telescope Peak from Zabriskie Point",
-				"source": "Indiana University Digital Library Program",
-				"accessionNumber": "archives/cushman/P07803",
-				"rights": "Copyright and reproduction rights for all Charles W. Cushman photographs are held by Indiana University and administered by the University Archives, Indiana University, Bloomington, IN 47405",
-				"publicationTitle": "Indiana University Digital Library Program: Charles W. Cushman Photograph Collection",
-				"date": "2003",
-				"archiveLocation": "Indiana University, Bloomington. University Archives P07803",
-				"url": "http://purl.dlib.indiana.edu/iudl/archives/cushman/P07803"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1337,6 +1331,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Hiring and recruitment practices in academic libraries",
 				"creators": [
 					{
 						"firstName": "Gregory K.",
@@ -1344,24 +1339,22 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
+				"date": "2003",
+				"ISSN": "1531-2542",
+				"abstractNote": "Academic libraries need to change their recruiting and hiring procedures to stay competitive in today's changing marketplace. By taking too long to find and to hire talented professionals in a tight labor market, academic libraries are losing out on top candidates and limiting their ability to become innovative and dynamic organizations. Traditional, deliberate, and risk-averse hiring models lead to positions remaining open for long periods, opportunities lost as top prospects find other positions, and a reduction in the overall talent level of the organization. To be more competitive and effective in their recruitment and hiring processes, academic libraries must foster manageable internal solutions, look to other professions for effective hiring techniques and models, and employ innovative concepts from modern personnel management literature.",
+				"language": "eng",
+				"pages": "53-57",
+				"publicationTitle": "portal: libraries and the academy",
+				"volume": "3",
+				"attachments": [],
 				"tags": [
 					"College librarians",
-					"Recruiting",
 					"College librarians",
+					"Recruiting",
 					"Selection and appointment"
 				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Hiring and recruitment practices in academic libraries",
-				"publicationTitle": "portal: libraries and the academy",
-				"ISSN": "1531-2542",
-				"volume": "3",
-				"pages": "53-57",
-				"date": "2003",
-				"publisher": "Johns Hopkins University Press",
-				"abstractNote": "Academic libraries need to change their recruiting and hiring procedures to stay competitive in today's changing marketplace. By taking too long to find and to hire talented professionals in a tight labor market, academic libraries are losing out on top candidates and limiting their ability to become innovative and dynamic organizations. Traditional, deliberate, and risk-averse hiring models lead to positions remaining open for long periods, opportunities lost as top prospects find other positions, and a reduction in the overall talent level of the organization. To be more competitive and effective in their recruitment and hiring processes, academic libraries must foster manageable internal solutions, look to other professions for effective hiring techniques and models, and employ innovative concepts from modern personnel management literature.",
-				"language": "eng"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1371,12 +1364,30 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "bookSection",
+				"title": "Sound and fury: the making of the punditocracy",
 				"creators": [
 					{
 						"firstName": "Eric",
 						"lastName": "Alterman",
 						"creatorType": "author"
 					}
+				],
+				"date": "1999",
+				"ISBN": "0801486394",
+				"callNumber": "PN4888.P6 A48 1999, 071/.3",
+				"language": "eng",
+				"place": "Ithaca, N.Y",
+				"publisher": "Cornell University Press",
+				"attachments": [],
+				"tags": [
+					"Journalism",
+					"Mass media",
+					"Political aspects",
+					"Political aspects",
+					"Politics and government",
+					"Press and politics",
+					"Talk shows",
+					"Television and politics"
 				],
 				"notes": [
 					{
@@ -1386,27 +1397,7 @@ var testCases = [
 						"note": "Includes bibliographical references (p. 291-312) and index."
 					}
 				],
-				"tags": [
-					"Journalism",
-					"Political aspects",
-					"Politics and government",
-					"Mass media",
-					"Political aspects",
-					"Television and politics",
-					"Press and politics",
-					"Talk shows"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Sound and fury: the making of the punditocracy",
-				"source": "DLC",
-				"accessionNumber": "11761548",
-				"ISBN": "0801486394",
-				"place": "Ithaca, N.Y",
-				"publisher": "Cornell University Press",
-				"date": "1999",
-				"callNumber": "PN4888.P6 A48 1999, 071/.3",
-				"language": "eng"
+				"seeAlso": []
 			}
 		]
 	},
@@ -1416,6 +1407,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "bookSection",
+				"title": "Models, Fantasies and Phantoms of Transition",
 				"creators": [
 					{
 						"firstName": "Ash",
@@ -1428,16 +1420,15 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Models, Fantasies and Phantoms of Transition",
-				"publicationTitle": "Post-Fordism: A Reader",
+				"date": "1994",
+				"bookTitle": "Post-Fordism: A Reader",
 				"pages": "23-45",
 				"place": "Oxford",
 				"publisher": "Blackwell Publishers",
-				"date": "1994"
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1447,6 +1438,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "The Urban Question as a Scale Question: Reflections on Henri Lefebre, Urban Theory and the Politics of Scale",
 				"creators": [
 					{
 						"firstName": "Neil",
@@ -1454,16 +1446,15 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "The Urban Question as a Scale Question: Reflections on Henri Lefebre, Urban Theory and the Politics of Scale",
-				"publicationTitle": "International Journal of Urban and Regional Research",
-				"volume": "24",
+				"date": "2000",
 				"issue": "2",
 				"pages": "361-378",
-				"date": "2000"
+				"publicationTitle": "International Journal of Urban and Regional Research",
+				"volume": "24",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1473,6 +1464,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Fifth-Grade Boys' Decisions about Participation in Sports Activities",
 				"creators": [
 					{
 						"firstName": "Alice",
@@ -1485,16 +1477,15 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Fifth-Grade Boys' Decisions about Participation in Sports Activities",
-				"publicationTitle": "Non-subject-matter Outcomes of Schooling",
-				"volume": "99",
+				"date": "1999",
 				"issue": "5",
 				"pages": "131-146",
-				"date": "1999"
+				"publicationTitle": "Non-subject-matter Outcomes of Schooling",
+				"volume": "99",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1504,6 +1495,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "2700 MHz observations of 4c radio sources in the declination zone +4 to -4",
 				"creators": [
 					{
 						"firstName": "J. V.",
@@ -1511,14 +1503,13 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "2700 MHz observations of 4c radio sources in the declination zone +4 to -4",
-				"publicationTitle": "Australian Journal of Physics and Astronphysics",
+				"date": "1971",
 				"journalAbbreviation": "Australian J. Phys. Astronphys.",
-				"date": "1971"
+				"publicationTitle": "Australian Journal of Physics and Astronphysics",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1528,6 +1519,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Emergence and Dissolvence in the Self-Organization of Complex Systems",
 				"creators": [
 					{
 						"firstName": "Bernard",
@@ -1540,16 +1532,15 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Emergence and Dissolvence in the Self-Organization of Complex Systems",
-				"publicationTitle": "Entropy",
-				"volume": "2",
+				"date": "2000",
 				"issue": "1",
 				"pages": "17",
-				"date": "2000"
+				"publicationTitle": "Entropy",
+				"volume": "2",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1559,12 +1550,22 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "document",
+				"title": "3 Viennese arias : for soprano, obbligato clarinet in B flat, and piano",
 				"creators": [
 					{
 						"firstName": "Colin (Colin James)",
 						"lastName": "Lawson",
 						"creatorType": "author"
 					}
+				],
+				"date": "1984",
+				"callNumber": "M1506 .A14 1984",
+				"language": "ita; eng",
+				"publisher": "Nova Music",
+				"attachments": [],
+				"tags": [
+					"Operas",
+					"Songs (High voice) with instrumental ensemble"
 				],
 				"notes": [
 					{
@@ -1592,21 +1593,7 @@ var testCases = [
 						"note": "Table of Contents: Tutto in pianto il cor struggete / Emperor Joseph I -- E sempre inquieto quel\n\t\tcore infelice : from Endimione / G. Bononcini -- L'adorata genitrice : from Muzio [i.e.\n\t\tMutio] Scevola / G. Bononcini."
 					}
 				],
-				"tags": [
-					"Operas",
-					"Songs (High voice) with instrumental ensemble"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "3 Viennese arias : for soprano, obbligato clarinet in B flat, and piano",
-				"source": "DLC",
-				"accessionNumber": "5594130",
-				"series": "Music for voice and instrument",
-				"place": "London",
-				"publisher": "Nova Music",
-				"date": "1984",
-				"callNumber": "M1506 .A14 1984",
-				"language": "ita; eng"
+				"seeAlso": []
 			}
 		]
 	},
@@ -1616,12 +1603,27 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "document",
+				"title": "Directory of computer assisted research in musicology",
 				"creators": [
 					{
 						"lastName": "Center for Computer Assisted Research in the Humanities",
 						"fieldMode": 1,
 						"creatorType": "author"
 					}
+				],
+				"date": "1985",
+				"callNumber": "ML73 .D57, 780/.01/02584",
+				"language": "eng",
+				"publisher": "Center for Computer Assisted Research in the Humanities",
+				"attachments": [],
+				"tags": [
+					"Data processing",
+					"Data processing",
+					"Music",
+					"Musicians",
+					"Musicologists",
+					"Musicology",
+					"Musicology"
 				],
 				"notes": [
 					{
@@ -1634,26 +1636,7 @@ var testCases = [
 						"note": "Description based on: 1986."
 					}
 				],
-				"tags": [
-					"Musicology",
-					"Data processing",
-					"Music",
-					"Musicians",
-					"Musicologists",
-					"Musicology",
-					"Data processing"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Directory of computer assisted research in musicology",
-				"source": "DLC",
-				"accessionNumber": "11315879",
-				"ISSN": "1057-9478",
-				"place": "Menlo Park, CA",
-				"publisher": "Center for Computer Assisted Research in the Humanities",
-				"date": "1985",
-				"callNumber": "ML73 .D57, 780/.01/02584",
-				"language": "eng"
+				"seeAlso": []
 			}
 		]
 	},
@@ -1663,6 +1646,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "computerProgram",
+				"title": "The American ballroom companion: dance instruction manuals, ca. 1600-1920",
 				"creators": [
 					{
 						"lastName": "Library of Congress: Music Division.",
@@ -1675,6 +1659,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "1998",
+				"abstractNote": "Presents over two hundred social dance manuals, pocket-sized books with diagrams used by itinerant dancing masters to teach the American gentry the latest dance steps. Includes anti-dance manuals as well as treatises on etiquette. Offered as part of the American Memory online resource compiled by the National Digital Library Program of the Library of Congress.",
+				"callNumber": "GV1623, 793.3",
+				"company": "Library of Congress",
+				"place": "Washington, D.C",
+				"url": "http://hdl.loc.gov/loc.music/collmus.mu000010",
+				"attachments": [],
+				"tags": [
+					"Ballroom dancing"
+				],
 				"notes": [
 					{
 						"note": "Title from title screen dated Mar. 23, 1998."
@@ -1686,21 +1680,7 @@ var testCases = [
 						"note": "system details: Mode of access: Internet."
 					}
 				],
-				"tags": [
-					"Ballroom dancing"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "The American ballroom companion: dance instruction manuals, ca. 1600-1920",
-				"source": "DLC",
-				"accessionNumber": "5004836",
-				"place": "Washington, D.C",
-				"publisher": "Library of Congress",
-				"date": "1998",
-				"callNumber": "GV1623, 793.3",
-				"url": "http://hdl.loc.gov/loc.music/collmus.mu000010",
-				"abstractNote": "Presents over two hundred social dance manuals, pocket-sized books with diagrams used by itinerant dancing masters to teach the American gentry the latest dance steps. Includes anti-dance manuals as well as treatises on etiquette. Offered as part of the American Memory online resource compiled by the National Digital Library Program of the Library of Congress.",
-				"language": "eng"
+				"seeAlso": []
 			}
 		]
 	},
@@ -1710,6 +1690,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "bookSection",
+				"title": "Papers from the First International Workshop on Plasma-Based Ion Implantation: 4-6 August 1993, University of Wisconsin--Madison, Madison, Wisconsin",
 				"creators": [
 					{
 						"lastName": "International Workshop on Plasma-Based Ion Implantation 1993 : University of Wisconsin--Madison)",
@@ -1732,6 +1713,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "1994",
+				"ISBN": "1563963442",
+				"bookTitle": "Journal of vacuum science & technology. B, Microelectronics and nanometer structures processing, measurement and phenomena",
+				"callNumber": "TS695.25 .I57 1993, 621.3815/2",
+				"language": "eng",
+				"pages": "813-998",
+				"place": "New York",
+				"publisher": "Published for the American Vacuum Society by the American Institute of Physics",
+				"attachments": [],
+				"tags": [
+					"Congresses",
+					"Ion implantation"
+				],
 				"notes": [
 					{
 						"note": "\"Published in both 1994 March/April issue of the Journal of vacuum science and technology B, vol. 12, no. 2\"--T.p. verso."
@@ -1740,24 +1734,7 @@ var testCases = [
 						"note": "bibliography: Includes bibliographical references and index."
 					}
 				],
-				"tags": [
-					"Ion implantation",
-					"Congresses"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Papers from the First International Workshop on Plasma-Based Ion Implantation: 4-6 August 1993, University of Wisconsin--Madison, Madison, Wisconsin",
-				"source": "DLC",
-				"accessionNumber": "4968605",
-				"publicationTitle": "Journal of vacuum science & technology. B, Microelectronics and nanometer structures processing, measurement and phenomena",
-				"ISSN": "1071-1023",
-				"date": "1994",
-				"pages": "813-998",
-				"ISBN": "1563963442",
-				"place": "New York",
-				"publisher": "Published for the American Vacuum Society by the American Institute of Physics",
-				"callNumber": "TS695.25 .I57 1993, 621.3815/2",
-				"language": "eng"
+				"seeAlso": []
 			}
 		]
 	},
@@ -1767,32 +1744,30 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "map",
+				"title": "Campbell County, Wyoming",
 				"creators": [
 					{
 						"lastName": "Campbell County Chamber of Commerce",
-						"creatorType": "author",
-						"fieldMode": 1
+						"fieldMode": 1,
+						"creatorType": "author"
 					}
+				],
+				"date": "1982",
+				"callNumber": "G4263.C3 1982  .C3",
+				"language": "eng",
+				"place": "Gillette, Wyo.]",
+				"publisher": "Campbell County Chamber of Commerce",
+				"scale": "1:510,000",
+				"attachments": [],
+				"tags": [
+					"Maps"
 				],
 				"notes": [
 					{
 						"note": "In lower right corner: Kintzels-Casper."
 					}
 				],
-				"tags": [
-					"Maps"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Campbell County, Wyoming",
-				"source": "DLC",
-				"accessionNumber": "5466714",
-				"place": "Gillette, Wyo.]",
-				"publisher": "Campbell County Chamber of Commerce",
-				"date": "1982",
-				"callNumber": "G4263.C3 1982  .C3",
-				"scale": "1:510,000",
-				"language": "eng"
+				"seeAlso": []
 			}
 		]
 	},
@@ -1802,6 +1777,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "document",
+				"title": "3 Viennese arias: for soprano, obbligato clarinet in B flat, and piano",
 				"creators": [
 					{
 						"firstName": "Colin (Colin James)",
@@ -1822,6 +1798,18 @@ var testCases = [
 						"lastName": "Bononcini",
 						"creatorType": "author"
 					}
+				],
+				"date": "1984",
+				"callNumber": "M1506 .A14 1984",
+				"language": "ita; eng",
+				"publisher": "Nova Music",
+				"attachments": [],
+				"tags": [
+					"Excerpts, Arranged",
+					"Operas",
+					"Scores and parts",
+					"Scores and parts",
+					"Songs (High voice) with instrumental ensemble"
 				],
 				"notes": [
 					{
@@ -1846,24 +1834,7 @@ var testCases = [
 						"note": "Table of Contents: Tutto in pianto il cor struggete / Emperor Joseph I -- E sempre inquieto quel core infelice : from Endimione / G. Bononcini -- L'adorata genitrice : from Muzio [i.e. Mutio] Scevola / G. Bononcini."
 					}
 				],
-				"tags": [
-					"Operas",
-					"Excerpts, Arranged",
-					"Scores and parts",
-					"Songs (High voice) with instrumental ensemble",
-					"Scores and parts"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "3 Viennese arias: for soprano, obbligato clarinet in B flat, and piano",
-				"source": "DLC",
-				"accessionNumber": "5594130",
-				"series": "Music for voice and instrument",
-				"place": "London",
-				"publisher": "Nova Music",
-				"date": "1984",
-				"callNumber": "M1506 .A14 1984",
-				"language": "ita; eng"
+				"seeAlso": []
 			}
 		]
 	},
@@ -1873,12 +1844,24 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "audioRecording",
+				"title": "2001 bluegrass odyssey",
 				"creators": [
 					{
 						"lastName": "Roustabouts (Musical group)",
 						"fieldMode": 1,
 						"creatorType": "author"
 					}
+				],
+				"date": "1980",
+				"callNumber": "Lamon Records LR-4280",
+				"label": "Lamon Records",
+				"language": "eng",
+				"numberOfVolumes": "1",
+				"place": "Charlotte, NC",
+				"attachments": [],
+				"tags": [
+					"Bluegrass music",
+					"Country music"
 				],
 				"notes": [
 					{
@@ -1891,21 +1874,7 @@ var testCases = [
 						"note": "Table of Contents: Bluegrass odyssey -- Hills of Tennessee -- Sassafrass -- Muddy river -- Take your shoes off Moses -- Don't let Smokey Mountain smoke get in your eyes -- Farewell party -- Faded love -- Super sonic bluegrass -- Old love letters -- Will the circle be unbroken."
 					}
 				],
-				"tags": [
-					"Country music",
-					"Bluegrass music"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "2001 bluegrass odyssey",
-				"source": "DLC",
-				"accessionNumber": "5718053",
-				"numberOfVolumes": "1",
-				"place": "Charlotte, NC",
-				"publisher": "Lamon Records",
-				"date": "1980",
-				"callNumber": "Lamon Records LR-4280",
-				"language": "eng"
+				"seeAlso": []
 			}
 		]
 	},
@@ -1915,7 +1884,17 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "document",
+				"title": "Massachusetts death and marriage records, 1837-1897",
 				"creators": [],
+				"abstractNote": "Records of deaths and marriages in Millbury and Springfield, Mass.",
+				"archiveLocation": "Library of Congress Manuscript Division Washington, D.C. 20540 USA; http://hdl.loc.gov/loc.mss/mss.home",
+				"language": "eng",
+				"rights": "Open to research.",
+				"attachments": [],
+				"tags": [
+					"Registers of births, etc",
+					"Registers of births, etc"
+				],
 				"notes": [
 					{
 						"note": "acquisition: Purchase, 1946."
@@ -1927,19 +1906,7 @@ var testCases = [
 						"note": "Forms part of: Miscellaneous Manuscripts collection."
 					}
 				],
-				"tags": [
-					"Registers of births, etc",
-					"Registers of births, etc"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Massachusetts death and marriage records, 1837-1897",
-				"source": "DLC",
-				"accessionNumber": "5810505",
-				"rights": "Open to research.",
-				"archiveLocation": "Library of Congress Manuscript Division Washington, D.C. 20540 USA; http://hdl.loc.gov/loc.mss/mss.home",
-				"abstractNote": "Records of deaths and marriages in Millbury and Springfield, Mass.",
-				"language": "eng"
+				"seeAlso": []
 			}
 		]
 	}
