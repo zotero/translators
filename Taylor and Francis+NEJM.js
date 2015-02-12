@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-12-07 14:59:05"
+	"lastUpdated": "2015-02-12 22:42:23"
 }
 
 /*
@@ -132,6 +132,11 @@ function scrape(doc, url, dois) {
 					//unfortunately, bibtex is missing some data
 					//publisher, ISSN/ISBN
 					ZU.doPost(postUrl, postBody + doi + risFormat, function(text) {
+						// Y1 is online publication date
+						if (/^DA\s+-\s+/m.test(text)) {
+							text = text.replace(/^Y1(\s+-.*)/gm, '');
+						}
+						
 						risTrans = Zotero.loadTranslator("import");
 						risTrans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 						risTrans.setString(text);
@@ -292,7 +297,7 @@ var testCases = [
 				"libraryCatalog": "Taylor and Francis+NEJM",
 				"pages": "37-46",
 				"publicationTitle": "Applied Economics",
-				"url": "http://www.tandfonline.com/doi/abs/10.1080/00036846.2011.568404",
+				"url": "http://dx.doi.org/10.1080/00036846.2011.568404",
 				"volume": "45",
 				"attachments": [
 					{
@@ -353,7 +358,7 @@ var testCases = [
 				"libraryCatalog": "Taylor and Francis+NEJM",
 				"pages": "1179-1181",
 				"publicationTitle": "New England Journal of Medicine",
-				"url": "http://www.nejm.org/doi/full/10.1056/NEJMp1207920",
+				"url": "http://dx.doi.org/10.1056/NEJMp1207920",
 				"volume": "367",
 				"attachments": [
 					{

@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-02-12 02:23:27"
+	"lastUpdated": "2015-02-12 22:44:41"
 }
 
 function detectImport() {
@@ -447,7 +447,7 @@ var degenerateImportFieldMap = {
 		"unsupported/Patent Version Number":['patent'],
 		accessDate: ["webpage"]	//technically access year according to EndNote
 	},
-	Y1: fieldMap["PY"]
+	Y1: fieldMap["DA"] // Old RIS spec
 };
 
 /**
@@ -1245,12 +1245,6 @@ function processTag(item, tagValue, risEntry) {
 			}
 		break;
 		//PY is typically less complete than other dates. We'll store it as backup
-		case "Y1":
-			if (item.backupDate) {
-				value = undefined;
-				processFields = false;
-				break;
-			}
 		case "PY":
 			item.backupDate = {
 				field: zField[0],
