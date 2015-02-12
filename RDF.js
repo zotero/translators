@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2015-02-11 01:21:39"
+	"lastUpdated": "2015-02-12 09:31:21"
 }
 
 /*
@@ -374,6 +374,11 @@ function detectType(newItem, node, ret) {
 		&& ZU.itemTypeExists(type)
 	) {
 		t.zotero = type;
+		if(type == "encyclopediaArticle" || type == "dictionaryEntry") {
+			container = getNodeByType(isPartOf, n.bib+"Book");
+		} else if(type == "conferencePaper") {
+			container = getNodeByType(isPartOf, n.bib+"Journal");
+		}
 	}
 
 	// dc:type, dcterms:type
