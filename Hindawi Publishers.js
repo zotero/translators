@@ -2,14 +2,14 @@
 	"translatorID": "186efdd2-3621-4703-aac6-3b5e286bdd86",
 	"label": "Hindawi Publishers",
 	"creator": "Sebastian Karcher",
-	"target": "http://www.hindawi.com/(journals|search)/",
+	"target": "^https?://www\\.hindawi\\.com/(journals|search)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-05-01 00:37:52"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 /*

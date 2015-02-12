@@ -2,14 +2,14 @@
 	"translatorID": "fc08c878-ac92-40dc-9105-ca36ca20665d",
 	"label": "NRC Research Press",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://www\\.nrcresearchpress\\.com",
+	"target": "^https?://www\\.nrcresearchpress\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcbv",
-	"lastUpdated": "2014-06-01 23:00:28"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /*

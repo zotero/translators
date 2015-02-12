@@ -2,14 +2,14 @@
 	"translatorID": "87766765-919e-4d3b-9071-3dd7efe984c8",
 	"label": "Revues.org",
 	"creator": "Aurimas Vinckevicius, Pierre-Alain Mignot, and Michael Berkowitz",
-	"target": "^https?://.*\\.revues\\.org",
+	"target": "^https?://([^/]+\\.)?revues\\.org/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-03 18:55:44"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

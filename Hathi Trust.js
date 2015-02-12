@@ -2,14 +2,14 @@
 	"translatorID": "31da33ad-b4d9-4e99-b9ea-3e1ddad284d8",
 	"label": "Hathi Trust",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://(catalog|babel)\\.hathitrust\\.org",
+	"target": "^https?://(catalog|babel)\\.hathitrust\\.org/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-02-24 00:03:36"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /*

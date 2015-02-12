@@ -2,14 +2,14 @@
 	"translatorID": "32ad4782-b106-4ccb-8ae1-ff102ba93eef",
 	"label": "PEP Web",
 	"creator": "Akilesh Ayyar",
-	"target": "^https?://www\\.pep-web\\.org",
+	"target": "^https?://www\\.pep-web\\.org/",
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-12 01:22:21"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 //Only works for journal articles, and only for single entries.

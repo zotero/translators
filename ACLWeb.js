@@ -2,14 +2,14 @@
 	"translatorID": "f4a5876a-3e53-40e2-9032-d99a30d7a6fc",
 	"label": "ACL",
 	"creator": "Nathan Schneider",
-	"target": "^https?://(www[.])?aclweb\\.org/anthology/[^#]+",
+	"target": "^https?://(www\\.)?aclweb\\.org/anthology/[^#]+",
 	"minVersion": "1.0.7",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-09-16 00:20:13"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 // based on ACM translator

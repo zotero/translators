@@ -2,14 +2,14 @@
 	"translatorID": "0cc8e259-106e-4793-8c26-6ec8114a9160",
 	"label": "SlideShare",
 	"creator": "Michael Berkowitz",
-	"target": "https?://[^/]*slideshare\\.net/",
+	"target": "^https?://([^/]+\\.)?slideshare\\.net/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-12-12 13:47:36"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function scrape(doc) {

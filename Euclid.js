@@ -2,14 +2,14 @@
 	"translatorID": "2e1c09a0-3006-11de-8c30-0800200c9a66",
 	"label": "Euclid",
 	"creator": "Guy Freeman and Avram Lyon",
-	"target": "^https?://[^/]*projecteuclid\\.org[^/]*/",
+	"target": "^https?://([^/]+\\.)?projecteuclid\\.org[^/]*/",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-06-05 07:32:38"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 /*

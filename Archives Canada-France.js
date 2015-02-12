@@ -2,14 +2,14 @@
 	"translatorID": "d9a16cf3-8b86-4cab-8610-dbd913ad1a44",
 	"label": "Archives Canada-France",
 	"creator": "Adam Crymble",
-	"target": "^https?://bd\\.archivescanadafrance\\.org",
+	"target": "^https?://bd\\.archivescanadafrance\\.org/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"browserSupport": "gcsibv",
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2012-01-01 01:42:16"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 function detectWeb(doc, url) {

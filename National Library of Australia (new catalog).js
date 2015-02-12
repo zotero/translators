@@ -2,14 +2,14 @@
 	"translatorID": "54ac4ec1-9d07-45d3-9d96-48bed3411fb6",
 	"label": "National Library of Australia (new catalog)",
 	"creator": "Mark Triggs, Steve McPhillips and Matt Burton",
-	"target": "^https?://catalogue\\.nla\\.gov\\.au",
+	"target": "^https?://catalogue\\.nla\\.gov\\.au/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-17 19:42:02"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 function detectWeb(doc, url) {

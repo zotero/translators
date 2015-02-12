@@ -2,14 +2,14 @@
 	"translatorID": "aee2323e-ce00-4fcc-a949-06eb1becc98f",
 	"label": "Epicurious",
 	"creator": "Sean Takats",
-	"target": "^https?://www\\.epicurious\\.com/(?:tools/searchresults|recipes/food/views)",
+	"target": "^https?://www\\.epicurious\\.com/(tools/searchresults|recipes/food/views)",
 	"minVersion": "1.0.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-09-22 22:16:30"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

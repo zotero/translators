@@ -2,14 +2,14 @@
 	"translatorID": "649c2836-a94d-4bbe-8e28-6771f283702f",
 	"label": "TVNZ",
 	"creator": "Sopheak Hean",
-	"target": "^https?://tvnz\\.co\\.nz",
+	"target": "^https?://tvnz\\.co\\.nz/",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-04 10:01:57"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 function detectWeb(doc, url) {

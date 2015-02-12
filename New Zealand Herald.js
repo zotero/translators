@@ -2,14 +2,14 @@
 	"translatorID": "c7830593-807e-48cb-99f2-c3bed2b148c2",
 	"label": "New Zealand Herald",
 	"creator": "Sopheak Hean, Michael Berkowitz",
-	"target": "^https?://www\\.nzherald\\.co\\.nz",
+	"target": "^https?://www\\.nzherald\\.co\\.nz/",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-03 17:49:28"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 function detectWeb(doc, url) {

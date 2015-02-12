@@ -2,14 +2,14 @@
 	"translatorID": "84799379-7bc5-4e55-9817-baf297d129fe",
 	"label": "CanLII",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://(?:www\\.)?canlii\\.org/(?:en|fr)/",
+	"target": "^https?://(www\\.)?canlii\\.org/(en|fr)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-06-11 01:31:00"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 var canLiiRegexp = /https?:\/\/(?:www\.)?canlii\.org[^\/]*\/(?:en|fr)\/[^\/]+\/[^\/]+\/doc\/.+/;

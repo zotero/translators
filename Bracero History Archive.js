@@ -2,14 +2,14 @@
 	"translatorID": "f9373e49-e6ac-46f7-aafe-bb24a2fbc3f0",
 	"label": "Bracero History Archive",
 	"creator": "Adam Crymble",
-	"target": "^https?://braceroarchive\\.org",
+	"target": "^https?://braceroarchive\\.org/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-01-30 22:52:20"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 function detectWeb(doc, url) {

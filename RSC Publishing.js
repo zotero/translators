@@ -2,14 +2,14 @@
 	"translatorID": "ca0e7488-ef20-4485-8499-9c47e60dcfa7",
 	"label": "RSC Publishing",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://(:?www\\.|google\\.)?pubs\\.rsc\\.org/",
+	"target": "^https?://(www\\.|google\\.)?pubs\\.rsc\\.org/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-06-01 22:04:46"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 /*

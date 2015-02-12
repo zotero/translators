@@ -2,14 +2,14 @@
 	"translatorID": "ecd1b7c6-8d31-4056-8c15-1807b2489254",
 	"label": "BOCC",
 	"creator": "José Antonio Meira da Rocha",
-	"target": "^https?:\\/\\/[^/]*bocc[^/]*/(?:_listas|_esp)",
+	"target": "^https?://([^/]+\\.)?bocc\\.[^/]*/(_listas|_esp)",
 	"minVersion": "1.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-04-04 10:08:43"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 /* Translator for Biblioteca Online de Ciências da Comunicação (BOCC,

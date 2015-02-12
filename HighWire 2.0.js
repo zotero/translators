@@ -2,14 +2,14 @@
 	"translatorID": "8c1f42d5-02fa-437b-b2b2-73afc768eb07",
 	"label": "HighWire 2.0",
 	"creator": "Matt Burton",
-	"target": "^[^?#]+(?:/content/(?:[0-9]+[A-Z\\-]*/(?:suppl_)?[A-Z]?[0-9]|current|firstcite|early)|/search\\?.*?\\bsubmit=|/search(?:/results)?\\?fulltext=|/cgi/collection/.)",
+	"target": "^[^?#]+(/content/([0-9]+[A-Z\\-]*/(suppl_)?[A-Z]?[0-9]|current|firstcite|early)|/search\\?.*?\\bsubmit=|/search(/results)?\\?fulltext=|/cgi/collection/.)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-08-26 03:44:11"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 /*

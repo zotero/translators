@@ -2,14 +2,14 @@
 	"translatorID": "1dd21245-29cf-434d-b5b8-49eae0a6912a",
 	"label": "CLASE",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://132\\.248\\.9\\.1\\:",
+	"target": "^https?://clase\\.unam\\.mx/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-12-07 15:15:58"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 function detectWeb(doc, url) {

@@ -2,14 +2,14 @@
 	"translatorID": "abd7c626-6913-42d4-a05f-acc6683c69da",
 	"label": "Insignia OPAC",
 	"creator": "Niko",
-	"target": "https?://[^/]+/(?:library|crts)/[^/?#]+\\.aspx",
+	"target": "^https?://[^/]+/(library|crts)/[^/?#]+\\.aspx",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-05-05 08:32:45"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 /**

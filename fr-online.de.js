@@ -2,14 +2,14 @@
 	"translatorID": "488fe1e0-b7d2-406f-8257-5060418ce9b2",
 	"label": "fr-online.de",
 	"creator": "Martin Meyerhoff",
-	"target": "^https?://www\\.fr-online\\.de",
+	"target": "^https?://www\\.fr-online\\.de/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-03 17:37:43"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /*

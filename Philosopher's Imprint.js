@@ -2,14 +2,14 @@
 	"translatorID": "b0abb562-218c-4bf6-af66-c320fdb8ddd3",
 	"label": "Philosopher's Imprint",
 	"creator": "Michael Berkowitz",
-	"target": "http://quod.lib.umich.edu/p/phimp",
+	"target": "^https?://quod\\.lib\\.umich\\.edu/p/phimp",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-05 23:35:13"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

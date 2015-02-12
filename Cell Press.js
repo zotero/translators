@@ -2,14 +2,14 @@
 	"translatorID": "f26cfb71-efd7-47ae-a28c-d4d8852096bd",
 	"label": "Cell Press",
 	"creator": "Michael Berkowitz, Sebastian Karcher, Aurimas Vinckevicius",
-	"target": "^https?://([^/]*\\.)?cell\\.com",
+	"target": "^https?://([^/]+\\.)?cell\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-03-31 15:18:16"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /*

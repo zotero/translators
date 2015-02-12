@@ -2,14 +2,14 @@
 	"translatorID": "f8b5501a-1acc-4ffa-a0a5-594add5e6bd3",
 	"label": "US National Archives Research Catalog",
 	"creator": "Adam Crymble",
-	"target": "^https?://arcweb\\.archives\\.gov",
+	"target": "^https?://arcweb\\.archives\\.gov/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2012-03-02 00:20:49"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 function detectWeb(doc, url) {

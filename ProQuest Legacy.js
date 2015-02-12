@@ -3,12 +3,12 @@
 	"translatorType":4,
 	"label":"ProQuest Legacy",
 	"creator":"Simon Kornblith",
-	"target":"^https?://[^/]+/pqdweb\\?((?:.*\\&)?did=.*&Fmt=[0-9]|(?:.*\\&)Fmt=[0-9].*&did=|(?:.*\\&)searchInterface=|(?:.*\\&)TS=[0-9])",
+	"target":"^https?://[^/]+/pqdweb\\?((.*\\&)?did=.*&Fmt=[0-9]|(.*\\&)Fmt=[0-9].*&did=|(.*\\&)searchInterface=|(.*\\&)TS=[0-9])",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
-	"priority":100,
+	"priority":250,
 	"inRepository":true,
-	"lastUpdated":"2009-07-24 07:55:00"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

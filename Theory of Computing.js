@@ -5,11 +5,11 @@
 	"target": "^https?://(theoryofcomputing\\.org|toc\\.cse\\.iitk\\.ac\\.in|cs\\.anu\\.edu\\.au/publications/toc|toc\\.ilab\\.sztaki\\.hu|toc\\.nada\\.kth\\.se|tocmirror\\.cs\\.tau\\.ac\\.il)/articles/[vg].*(/|html?)$",
 	"minVersion": "1.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcv",
-	"lastUpdated": "2013-11-19 08:23:18"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 /*****

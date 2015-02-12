@@ -3,12 +3,12 @@
 	"translatorType":4,
 	"label":"Alexander Street Press",
 	"creator":"John West and Michael Berkowitz",
-	"target":"http://(?:www\\.)alexanderstreet",
+	"target":"^https?://(www\\.)?alexanderstreet\\.com/",
 	"minVersion":"1.0.0b4.r5",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

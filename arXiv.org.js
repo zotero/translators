@@ -2,14 +2,14 @@
 	"translatorID": "ecddda2e-4fc6-4aea-9f17-ef3b56d7377a",
 	"label": "arXiv.org",
 	"creator": "Sean Takats and Michael Berkowitz",
-	"target": "^https?://(?:[^\\.]+\\.)?(?:(?:arxiv\\.org|xxx.lanl.gov)/(?:find/\\w|list/\\w|abs/)|eprintweb.org/S/(?:search|archive|article)(?!.*(?:refs|cited)$))",
+	"target": "^https?://([^/]+\\.)?((arxiv\\.org|xxx\\.lanl\\.gov)/(find/\\w|list/\\w|abs/)|eprintweb\\.org/S/(search|archive|article)(?!.*(refs|cited)$))",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-06-07 08:29:23"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

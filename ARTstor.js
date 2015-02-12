@@ -2,14 +2,14 @@
 	"translatorID": "5278b20c-7c2c-4599-a785-12198ea648bf",
 	"label": "ARTstor",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://library\\.artstor\\.org",
+	"target": "^https?://library\\.artstor\\.org/",
 	"minVersion": "3.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-11-13 15:09:17"
+	"lastUpdated": "2015-02-12 09:49:17"
 }
 
 /*

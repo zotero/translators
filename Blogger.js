@@ -2,14 +2,14 @@
 	"translatorID": "6f9aa90d-6631-4459-81ef-a0758d2e3921",
 	"label": "Blogger",
 	"creator": "Adam Crymble",
-	"target": "\\.blogspot\\.com",
+	"target": "^https?://[^/]+\\.blogspot\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-02-14 00:20:16"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

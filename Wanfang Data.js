@@ -2,14 +2,14 @@
 	"translatorID": "eb876bd2-644c-458e-8d05-bf54b10176f3",
 	"label": "Wanfang Data",
 	"creator": "Ace Strong <acestrong@gmail.com>",
-	"target": "^https?://[ds]\\.(?:g\\.)?wanfangdata\\.com\\.cn",
+	"target": "^https?://[ds]\\.(g\\.)?wanfangdata\\.com\\.cn/",
 	"minVersion": "2.0rc1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-07-24 01:37:16"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 /*

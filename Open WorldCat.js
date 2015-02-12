@@ -2,14 +2,14 @@
 	"translatorID": "c73a4a8c-3ef1-4ec8-8229-7531ee384cc4",
 	"label": "Open WorldCat",
 	"creator": "Simon Kornblith, Sebastian Karcher",
-	"target": "^https?://[^/]+\\.worldcat\\.org",
+	"target": "^https?://[^/]+\\.worldcat\\.org/",
 	"minVersion": "3.0.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2015-01-13 17:09:49"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /**

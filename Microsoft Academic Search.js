@@ -2,14 +2,14 @@
 	"translatorID": "91c7b393-af05-476c-ae72-ae244d2347f4",
 	"label": "Microsoft Academic Search",
 	"creator": "Aurimas Vinckevicius",
-	"target": "https?://[^/]*academic\\.research\\.microsoft\\.com",
+	"target": "^https?://([^/]+\\.)?academic\\.research\\.microsoft\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-03-23 11:12:39"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 /**

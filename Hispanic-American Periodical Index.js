@@ -2,14 +2,14 @@
 	"translatorID": "09e8f8a2-a7e6-4430-b86c-47c99ca40a38",
 	"label": "Hispanic-American Periodical Index",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://hapi\\.ucla\\.edu",
+	"target": "^https?://hapi\\.ucla\\.edu/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-12-10 17:20:41"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 function detectWeb(doc, url) {

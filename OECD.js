@@ -2,14 +2,14 @@
 	"translatorID": "8cf74360-e772-4818-8cf1-eda0481c7dfb",
 	"label": "OECD",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://(www\\.)?oecd-ilibrary\\.org",
+	"target": "^https?://(www\\.)?oecd-ilibrary\\.org/",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-01-05 11:58:51"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /*

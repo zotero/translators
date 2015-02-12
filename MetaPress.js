@@ -2,14 +2,14 @@
 	"translatorID": "62c0e36a-ee2f-4aa0-b111-5e2cbd7bb5ba",
 	"label": "MetaPress",
 	"creator": "Michael Berkowitz, Sebastian Karcher",
-	"target": "https?://(.*)metapress\\.com/",
+	"target": "^https?://([^/]+\\.)?metapress\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-08-05 03:26:18"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

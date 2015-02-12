@@ -2,14 +2,14 @@
 	"translatorID": "5ed5ab01-899f-4a3b-a74c-290fb2a1c9a4",
 	"label": "AustLII and NZLII",
 	"creator": "Bill McKinney and Sebastian Karcher",
-	"target": "^https?://www\\.(?:austlii\\.edu\\.au|nzlii\\.org)",
+	"target": "^https?://www\\.(austlii\\.edu\\.au|nzlii\\.org)/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-05-16 23:48:05"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

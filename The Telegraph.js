@@ -2,14 +2,14 @@
 	"translatorID": "40b9ca22-8df4-4f3b-9cb6-8f9b55486d30",
 	"label": "The Telegraph",
 	"creator": "Reino Ruusu",
-	"target": "^https?://[^/]*telegraph\\.co\\.uk/",
+	"target": "^https?://([^/]+\\.)?telegraph\\.co\\.uk/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2013-12-12 13:59:44"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function createExcludes(url, excludeArr) {

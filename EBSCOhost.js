@@ -2,14 +2,14 @@
 	"translatorID": "d0b1914a-11f1-4dd7-8557-b32fe8a3dd47",
 	"label": "EBSCOhost",
 	"creator": "Simon Kornblith, Michael Berkowitz, Josh Geller",
-	"target": "^https?://[^/]+/(?:eds|bsi|ehost)/(?:results|detail|folder|pdfviewer)",
+	"target": "^https?://[^/]+/(eds|bsi|ehost)/(results|detail|folder|pdfviewer)",
 	"minVersion": "2.1",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 270,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-09-09 19:59:20"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

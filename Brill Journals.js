@@ -2,14 +2,14 @@
 	"translatorID": "6d087de8-f858-4ac5-9fbd-2bf2b35ee41a",
 	"label": "Brill Journals",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://(www\\.)?booksandjournals\\.brillonline\\.com",
+	"target": "^https?://(www\\.)?booksandjournals\\.brillonline\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 150,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-08-26 03:35:40"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /*

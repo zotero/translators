@@ -2,14 +2,14 @@
 	"translatorID": "add7c71c-21f3-ee14-d188-caf9da12728b",
 	"label": "Library Catalog (SIRSI)",
 	"creator": "Sean Takats,  Hicham El Kasmi",
-	"target": "/uhtbin/(?:cgisirsi|quick_keyword)",
+	"target": "/uhtbin/(cgisirsi|quick_keyword)",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-08-26 04:09:11"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 /*Spanish Libraries:

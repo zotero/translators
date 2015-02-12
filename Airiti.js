@@ -2,14 +2,14 @@
 	"translatorID": "5f0ca39b-898a-4b1e-b98d-8cd0d6ce9801",
 	"label": "Airiti",
 	"creator": "Aurimas Vinckevicius",
-	"target": "^https?://(?:[^/]+\\.)?airitilibrary\\.com/Publication/alDetailedMesh",
+	"target": "^https?://([^/]+\\.)?airitilibrary\\.com/Publication/alDetailedMesh",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 110,
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-05-24 08:05:07"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

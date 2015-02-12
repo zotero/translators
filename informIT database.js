@@ -2,14 +2,14 @@
 	"translatorID": "add79dfd-7951-4c72-af1d-ce1d50aa4fb4",
 	"label": "informIT database",
 	"creator": "Adam Crymble, Sebastian Karcher",
-	"target": "^https?://www\\.informit\\.com",
+	"target": "^https?://www\\.informit\\.com/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-10-15 10:37:49"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 function detectWeb(doc,  url) {

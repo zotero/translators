@@ -2,14 +2,14 @@
 	"translatorID": "7448d1d7-57e4-4685-b6e4-d4d9f7046fc2",
 	"label": "SFU IPinCH",
 	"creator": "Aurimas Vinckevicius",
-	"target": "^https?://[^/]*sfu\\.ca/kbipinch/(records|browse|search)/",
+	"target": "^https?://([^/]+\\.)?sfu\\.ca/kbipinch/(records|browse|search)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-06-19 10:30:31"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 /*

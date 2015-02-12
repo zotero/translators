@@ -2,14 +2,14 @@
 	"translatorID": "635c1246-e0c8-40a0-8799-a73a0b013ad8",
 	"label": "Bryn Mawr Classical Review",
 	"creator": "Michael Berkowitz",
-	"target": "^https?://bmcr\\.brynmawr\\.edu",
+	"target": "^https?://bmcr\\.brynmawr\\.edu/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-01-23 12:41:08"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 function detectWeb(doc, url) {

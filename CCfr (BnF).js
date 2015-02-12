@@ -2,14 +2,14 @@
 	"translatorID": "899d10f5-3f35-40e6-8dfb-f8ee2dfb1849",
 	"label": "CCfr (BnF)",
 	"creator": "Sylvain Machefert, Aurimas Vinckevicius",
-	"target": "^https?://ccfr\\.bnf\\.fr/portailccfr/.*\\b(?:action=search|menu=menu_view_grappage|search\\.jsp)\\b",
+	"target": "^https?://ccfr\\.bnf\\.fr/portailccfr/.*\\b(action=search|menu=menu_view_grappage|search\\.jsp)\\b",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2014-09-18 14:08:05"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

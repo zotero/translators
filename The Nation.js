@@ -2,14 +2,14 @@
 	"translatorID": "0d6f8450-72e8-4d8f-bdc2-b7fa03e6f2c5",
 	"label": "The Nation",
 	"creator": "odie5533",
-	"target": "^https?://www\\.thenation\\.com",
+	"target": "^https?://www\\.thenation\\.com/",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-04 09:56:16"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /*

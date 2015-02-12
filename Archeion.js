@@ -2,14 +2,14 @@
 	"translatorID": "f6717cbb-2771-4043-bde9-dbae19129bb3",
 	"label": "Archeion - MemoryBC - Aberta on Record",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://www\\.(archeion|memorybc|albertaonrecord)\\.ca",
+	"target": "^https?://www\\.(archeion|memorybc|albertaonrecord)\\.ca/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-02-27 22:58:40"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /*

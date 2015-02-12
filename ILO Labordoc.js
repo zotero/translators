@@ -2,14 +2,14 @@
 	"translatorID": "d8873d23-d874-4b62-b081-1db12ff5a5de",
 	"label": "ILO Labordoc",
 	"creator": "Sebastian Karcher, Vesa Sivunen",
-	"target": "^https?://labordoc\\.ilo\\.org",
+	"target": "^https?://labordoc\\.ilo\\.org/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-03-19 17:53:17"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /*

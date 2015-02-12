@@ -2,14 +2,14 @@
 	"translatorID": "2d174277-7651-458f-86dd-20e168d2f1f3",
 	"label": "Canadiana.ca",
 	"creator": "Adam Crymble, Sebastian Karcher",
-	"target": "^https?://eco\\.canadiana\\.ca",
+	"target": "^https?://eco\\.canadiana\\.ca/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-03 16:44:04"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 function detectWeb(doc, url) {

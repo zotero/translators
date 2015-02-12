@@ -3,12 +3,12 @@
 	"translatorType":4,
 	"label":"National Post",
 	"creator":"Adam Crymble",
-	"target":"http://www.(national|financial)post.com/",
+	"target":"^https?://www.(national|financial)post.com/",
 	"minVersion":"1.0.0b4.r5",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-08-11 20:40:00"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

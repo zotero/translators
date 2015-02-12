@@ -2,14 +2,14 @@
 	"translatorID": "caecaea0-5d06-11df-a08a-0800200c9a66",
 	"label": "Newsnet/Tamedia",
 	"creator": "ibex",
-	"target": "^https?://((www\\.)?(tagesanzeiger|(bo\\.)?bernerzeitung|bazonline|derbund|thurgauerzeitung|24heures)\\.ch/.)",
+	"target": "^https?://(www\\.)?(tagesanzeiger|(bo\\.)?bernerzeitung|bazonline|derbund|thurgauerzeitung|24heures)\\.ch/.",
 	"minVersion": "2.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-03 17:48:45"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 /*

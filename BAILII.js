@@ -2,14 +2,14 @@
 	"translatorID": "5ae63913-669a-4792-9f45-e089a37de9ab",
 	"label": "BAILII",
 	"creator": "Bill McKinney",
-	"target": "^https?:\\/\\/www\\.bailii\\.org(?:\\/cgi\\-bin\\/markup\\.cgi\\?doc\\=)?\\/\\w+\\/cases\\/.+",
+	"target": "^https?://www\\.bailii\\.org(/cgi-bin/markup\\.cgi\\?doc=)?/\\w+/cases/.",
 	"minVersion": "1.0.0b4.r1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-03 16:36:35"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

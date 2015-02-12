@@ -2,14 +2,14 @@
 	"translatorID": "fb342bae-7727-483b-a871-c64c663c2fae",
 	"label": "BusinessWeek",
 	"creator": "Michael Berkowitz",
-	"target": "^https?://(www\\.|search\\.)?businessweek\\.com",
+	"target": "^https?://(www\\.|search\\.)?businessweek\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-02-14 00:21:11"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 function detectWeb(doc, url) {

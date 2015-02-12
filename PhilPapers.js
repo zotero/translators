@@ -2,14 +2,14 @@
 	"translatorID": "8df4f61b-0881-4c85-9186-05f457edb4d3",
 	"label": "PhilPapers",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://philpapers\\.org",
+	"target": "^https?://philpapers\\.org/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-24 13:06:01"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /*

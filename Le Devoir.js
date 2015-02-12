@@ -3,12 +3,12 @@
 	"translatorType":4,
 	"label":"Le Devoir",
 	"creator":"Adam Crymble",
-	"target":"http://www.ledevoir.com",
+	"target":"^https?://www.ledevoir.com/",
 	"minVersion":"1.0.0b4.r5",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-08-21 15:45:00"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

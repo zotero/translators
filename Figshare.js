@@ -2,14 +2,14 @@
 	"translatorID": "ab5983ab-6ad9-4060-aff1-4b455c89a3b3",
 	"label": "Figshare",
 	"creator": "Sebatian Karcher",
-	"target": "^https?://figshare\\.com",
+	"target": "^https?://figshare\\.com/",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2013-12-10 16:57:47"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /*

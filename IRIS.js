@@ -2,14 +2,14 @@
 	"translatorID": "8381bf68-11fa-418c-8530-2e00284d3efd",
 	"label": "IRIS",
 	"creator": "Chad Mills and Michael Berkowitz",
-	"target": "^https?://[^/]*www[\\.\\-]iris[\\.\\-]rutgers[\\.\\-]edu[^/]*/",
+	"target": "^https?://(www\\.)?iris\\.rutgers\\.edu/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 90,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-06-08 12:14:42"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

@@ -3,12 +3,12 @@
 	"translatorType":4,
 	"label":"National Library of Australia",
 	"creator":"Michael Berkowitz",
-	"target":"http://librariesaustralia.nla.gov.au/",
+	"target":"^https?://librariesaustralia.nla.gov.au/",
 	"minVersion":"1.0.0b4.r5",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2012-08-05 08:09:33"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

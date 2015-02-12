@@ -2,14 +2,14 @@
 	"translatorID": "fa87288d-406b-48cb-a957-7defcf415a64",
 	"label": "Library Catalog (Mango)",
 	"creator": "Sebastian Karcher",
-	"target": "\\.catalog\\.fcla\\.edu/.+\\.jsp\\?",
+	"target": "^https?://[^/]+\\.catalog\\.fcla\\.edu/.+\\.jsp\\?",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-24 12:32:34"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /*

@@ -2,14 +2,14 @@
 	"translatorID": "9346ddef-126b-47ec-afef-8809ed1972ab",
 	"label": "Institute of Physics",
 	"creator": "Michael Berkowitz and Avram Lyon",
-	"target": "^https?://iopscience\\.iop\\.org/(?:[0-9-X]+/.+|search.+)",
+	"target": "^https?://iopscience\\.iop\\.org/([0-9-X]+/.+|search.+)",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 99,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-12-12 12:48:04"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 /*

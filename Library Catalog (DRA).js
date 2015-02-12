@@ -2,14 +2,14 @@
 	"translatorID": "fb12ae9e-f473-cab4-0546-27ab88c64101",
 	"label": "Library Catalog (DRA)",
 	"creator": "Simon Kornblith",
-	"target": "/web2/tramp2\\.exe/(?:see\\_record/|authority\\_hits/|do_keyword_search|form/|goto/.*\\?.*screen=(MARC)?Record\\.html)",
+	"target": "/web2/tramp2\\.exe/(see\\_record/|authority\\_hits/|do_keyword_search|form/|goto/.*\\?.*screen=(MARC)?Record\\.html)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 260,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-08-26 03:57:40"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 /* No more libraries with permalinks that I know of

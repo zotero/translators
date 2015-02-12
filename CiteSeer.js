@@ -2,14 +2,14 @@
 	"translatorID": "fa396dd4-7d04-4f99-95e1-93d6f355441d",
 	"label": "CiteSeer",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://citeseerx?\\.ist\\.psu\\.edu",
+	"target": "^https?://citeseerx?\\.ist\\.psu\\.edu/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-24 02:37:16"
+	"lastUpdated": "2015-02-12 11:11:34"
 }
 
 /*

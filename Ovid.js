@@ -5,11 +5,11 @@
 	"target": "(gw2|asinghal|sp)[^\\/]+/ovidweb\\.cgi",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-11-27 11:19:01"
+	"lastUpdated": "2015-02-12 09:50:52"
 }
 
 /*

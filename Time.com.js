@@ -2,14 +2,14 @@
 	"translatorID": "d9be934c-edb9-490c-a88d-34e2ee106cd7",
 	"label": "Time.com",
 	"creator": "Michael Berkowitz",
-	"target": "^https?://([^/]*\\.)?time.com/",
+	"target": "^https?://([^/]+\\.)?time\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-10-25 07:16:36"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 function detectWeb(doc, url) {

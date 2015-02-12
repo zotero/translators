@@ -2,14 +2,14 @@
 	"translatorID": "a1a97ad4-493a-45f2-bd46-016069de4162",
 	"label": "Optical Society of America",
 	"creator": "Michael Berkowitz, Eli Osherovich, and Sebastian Karcher",
-	"target": "^https?://[^.]+\\.(opticsinfobase|osa)\\.org",
+	"target": "^https?://[^/]+\\.(opticsinfobase|osa)\\.org/",
 	"minVersion": "1.0.0b4.r1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gbv",
-	"lastUpdated": "2013-12-13 13:27:23"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 /*

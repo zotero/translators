@@ -2,14 +2,14 @@
 	"translatorID": "e5dc9733-f8fc-4c00-8c40-e53e0bb14664",
 	"label": "Wikipedia",
 	"creator": "Aurimas Vinckevicius",
-	"target": "https?://[^/]*wikipedia\\.org/",
+	"target": "^https?://([^/]+\\.)?wikipedia\\.org/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-11-28 22:10:10"
+	"lastUpdated": "2014-10-26 07:53:34"
 }
 
 /**
