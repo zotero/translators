@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-09-06 05:15:28"
+	"lastUpdated": "2015-02-13 21:54:59"
 }
 
 /*
@@ -188,6 +188,7 @@ function fetchQueries(url, queries, headers, doc) {
 
 function scrapeArticles(articles) {
 	for (var i=0; i<articles.length; i++) {
+		if (articles[i].id.indexOf('article-') != 0) continue; // nested div
 		var rows = articles[i].getElementsByTagName('tr');
 		var element = {};
 		for (var j=0; j<rows.length; j++) {
@@ -268,8 +269,8 @@ function scrapeArticles(articles) {
 			var byline = ZU.trimInternal(element["BY"].replace(/By/i, ""));
 			authors = byline.split(/(?:\&| and |,| et )/i);
 		}
-		for(var i=0; i<authors.length; i++) {
-			newItem.creators.push(ZU.cleanAuthor(authors[i], "author"));
+		for(var j=0; j<authors.length; j++) {
+			newItem.creators.push(ZU.cleanAuthor(authors[j], "author"));
 		}
 		
 		//company: element["CO"] --> seems fine as tags
@@ -284,8 +285,8 @@ function scrapeArticles(articles) {
 		}
 		if (tagString) {
 			var tagArray = tagString.split("|");
-			for(var i=0; i<tagArray.length; i++) {
-				var tagCodeNamePair = tagArray[i].split(":");
+			for(var j=0; j<tagArray.length; j++) {
+				var tagCodeNamePair = tagArray[j].split(":");
 				newItem.tags.push(ZU.trimInternal(tagCodeNamePair[1]));
 			}
 		}
