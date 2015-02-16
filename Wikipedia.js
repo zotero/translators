@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-11-28 22:10:10"
+	"lastUpdated": "2015-02-16 03:56:10"
 }
 
 /**
@@ -31,13 +31,13 @@
 */
 
 function detectWeb(doc, url) {
-	if(ZU.xpathText(doc, '//h1[@id="firstHeading"]/span'))
+	if(ZU.xpathText(doc, '//h1[@id="firstHeading"]'))
 		return 'encyclopediaArticle';
 }
 
 function doWeb(doc, url) {
 	var item = new Zotero.Item('encyclopediaArticle');
-	item.title = ZU.xpathText(doc, '//h1[@id="firstHeading"]/span');
+	item.title = ZU.xpathText(doc, '//h1[@id="firstHeading"]');
 	
 	/* Removing the creator and publisher. Wikipedia is pushing the creator in their own
   	directions on how to cite http://en.wikipedia.org/w/index.php?title=Special%3ACite&page=Psychology
@@ -116,10 +116,16 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "encyclopediaArticle",
+				"title": "Россия",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2015-02-16T02:48:25Z",
+				"abstractNote": "Координаты: 66°25′ с. ш. 94°15′ в. д. / 66.417° с. ш. 94.250° в. д. / 66.417; 94.250 (G) (O)",
+				"encyclopediaTitle": "Википедия",
+				"extra": "Page Version ID: 43336101",
+				"language": "ru",
+				"libraryCatalog": "Wikipedia",
+				"rights": "Creative Commons Attribution-ShareAlike License",
+				"url": "http://ru.wikipedia.org/w/index.php?title=%D0%A0%D0%BE%D1%81%D1%81%D0%B8%D1%8F&oldid=43336101",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -127,16 +133,9 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"title": "Россия",
-				"rights": "Creative Commons Attribution-ShareAlike License",
-				"encyclopediaTitle": "Википедия",
-				"url": "http://ru.wikipedia.org/w/index.php?title=%D0%A0%D0%BE%D1%81%D1%81%D0%B8%D1%8F&oldid=43336101",
-				"extra": "Page Version ID: 43336101",
-				"language": "ru",
-				"abstractNote": "Росси́я (от греч. Ρωσία — Русь[1]; официально — Росси́йская Федера́ция или Росси́я[2], на практике используется также сокращение — РФ[3]) — страна, расположенная в Восточной Европе и Северной Азии. Является самым большим государством мира (17 098 246 км²[4], что составляет 11,46 % (~1 / 9 часть, равная 11,11 %) площади всей суши Земли, или 12,65 % (~1 / 8 часть, равная 12,5 %) заселённой человеком суши, что почти вдвое больше, чем у занимающей второе место Канады). Население на 2012 год составляет 143 030 106 человек[5], в настоящее время страна занимает девятое место в мире по этому показателю. Государственный язык на всей территории страны — русский. В 23 субъектах федерации наряду с русским используются другие государственные языки. Столица — город Москва. Всего в России 13 городов с населением более миллиона человек: Москва, Санкт-Петербург, Новосибирск, Екатеринбург, Нижний Новгород, Самара, Омск, Казань, Челябинск, Ростов-на-Дону, Уфа, Волгоград[6], Пермь[7].",
-				"date": "2012-10-31T19:07:35Z",
-				"libraryCatalog": "Wikipedia",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -146,10 +145,16 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "encyclopediaArticle",
+				"title": "Zotero",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2015-02-14T13:05:20Z",
+				"abstractNote": "Zotero (/[unsupported input]zoʊˈtɛroʊ/) is free, open source reference management software to manage bibliographic data and related research materials (such as PDFs). Notable features include web browser integration, online syncing, generation of in-text citations, footnotes and bibliographies, as well as integration with the word processors Microsoft Word, LibreOffice, OpenOffice.org Writer and NeoOffice. It is produced by the Center for History and New Media of George Mason University (GMU).",
+				"encyclopediaTitle": "Wikipedia, the free encyclopedia",
+				"extra": "Page Version ID: 485342619",
+				"language": "en",
+				"libraryCatalog": "Wikipedia",
+				"rights": "Creative Commons Attribution-ShareAlike License",
+				"url": "http://en.wikipedia.org/w/index.php?title=Zotero&oldid=485342619",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -157,16 +162,9 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"title": "Zotero",
-				"rights": "Creative Commons Attribution-ShareAlike License",
-				"encyclopediaTitle": "Wikipedia, the free encyclopedia",
-				"url": "http://en.wikipedia.org/w/index.php?title=Zotero&oldid=485342619",
-				"extra": "Page Version ID: 485342619",
-				"language": "en",
-				"abstractNote": "Zotero ( /zoʊˈtɛroʊ/) is free, open source reference management software to manage bibliographic data and related research materials (such as PDFs). Notable features include web browser integration, online syncing, generation of in-text citations, footnotes and bibliographies, as well as integration with the word processors Microsoft Word, LibreOffice, OpenOffice.org Writer and NeoOffice. It is produced by the Center for History and New Media of George Mason University (GMU).",
-				"date": "2012-10-24T08:29:51Z",
-				"libraryCatalog": "Wikipedia",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -176,10 +174,16 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "encyclopediaArticle",
+				"title": "Wikipedia:Article wizard",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2015-02-10T14:18:16Z",
+				"encyclopediaTitle": "Wikipedia, the free encyclopedia",
+				"extra": "Page Version ID: 646481896",
+				"language": "en",
+				"libraryCatalog": "Wikipedia",
+				"rights": "Creative Commons Attribution-ShareAlike License",
+				"shortTitle": "Wikipedia",
+				"url": "http://en.wikipedia.org/w/index.php?title=Wikipedia:Article_wizard&oldid=646481896",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -187,16 +191,9 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"title": "Wikipedia:Article wizard",
-				"rights": "Creative Commons Attribution-ShareAlike License",
-				"encyclopediaTitle": "Wikipedia, the free encyclopedia",
-				"url": "http://en.wikipedia.org/w/index.php?title=Wikipedia:Article_wizard&oldid=521878824",
-				"extra": "Page Version ID: 521878824",
-				"language": "en",
-				"date": "2012-11-07T20:23:45Z",
-				"libraryCatalog": "Wikipedia",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Wikipedia"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
