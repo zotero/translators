@@ -18,7 +18,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-02-12 07:13:30"
+	"lastUpdated": "2015-02-16 03:35:30"
 }
 
 function detectImport() {
@@ -902,7 +902,7 @@ function writeField(field, value, isMacro) {
 		value = value.replace(/[|\<\>\~\^\\\{\}]/g, mapEscape).replace(/([\#\$\%\&\_])/g, "\\$1");
 		
 		if (caseProtectedFields.indexOf(field) != -1) {
-			value = ZU.XRegExp.replace(value, protectCapsRE, "$1{$2}");
+			value = ZU.XRegExp.replace(value, protectCapsRE, "$1{$2$3}"); // only $2 or $3 will have a value, not both
 		}
 	}
 	if (Zotero.getOption("exportCharset") != "UTF-8") {
@@ -1109,15 +1109,15 @@ function doExport() {
 	if (Zotero.getHiddenPref && Zotero.getHiddenPref('BibTeX.export.dontProtectInitialCase')) {
 		// Case of words with uppercase characters in non-initial positions is
 		// preserved with braces.
-		// Two captures because of the other regexp below
-		protectCapsRE = new ZU.XRegExp("()\\b(\\p{Letter}+\\p{Uppercase_Letter}\\p{Letter}*)", 'g');
+		// Two extra captures because of the other regexp below
+		protectCapsRE = new ZU.XRegExp("()()\\b(\\p{Letter}+\\p{Uppercase_Letter}\\p{Letter}*)", 'g');
 	} else {
 		// Protect all upper case letters, even if the uppercase letter is only in
 		// initial position of the word.
 		// Don't protect first word if only first letter is capitalized
 		protectCapsRE = new ZU.XRegExp(
 			"(.)\\b(\\p{Letter}*\\p{Uppercase_Letter}\\p{Letter}*)" // Non-initial words with capital letter anywhere
-				+ "|^()(\\p{Letter}+\\p{Uppercase_Letter}\\p{Letter}*)" // Initial word with capital in non-initial position
+				+ "|^(\\p{Letter}+\\p{Uppercase_Letter}\\p{Letter}*)" // Initial word with capital in non-initial position
 			, 'g');
 	}
 	
