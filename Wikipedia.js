@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-02-16 03:56:10"
+	"lastUpdated": "2015-02-16 04:51:10"
 }
 
 /**
@@ -31,13 +31,14 @@
 */
 
 function detectWeb(doc, url) {
-	if(ZU.xpathText(doc, '//h1[@id="firstHeading"]'))
+	if(doc.getElementById('firstHeading')) {
 		return 'encyclopediaArticle';
+	}
 }
 
 function doWeb(doc, url) {
 	var item = new Zotero.Item('encyclopediaArticle');
-	item.title = ZU.xpathText(doc, '//h1[@id="firstHeading"]');
+	item.title = ZU.trimInternal(doc.getElementById('firstHeading').textContent);
 	
 	/* Removing the creator and publisher. Wikipedia is pushing the creator in their own
   	directions on how to cite http://en.wikipedia.org/w/index.php?title=Special%3ACite&page=Psychology
@@ -69,9 +70,10 @@ function doWeb(doc, url) {
 	}
 
 	item.url = ZU.xpathText(doc, '//li[@id="t-permalink"]/a/@href');
+	var revID;
 	if(item.url) {
-		item.extra = 'Page Version ID: ' + 
-						item.url.match(/[&?]oldid=(\d+)/)[1];
+		revID = item.url.match(/[&?]oldid=(\d+)/)[1];
+		item.extra = 'Page Version ID: ' + revID;
 		item.url = doc.location.protocol + '//' + doc.location.hostname
 					+ item.url;
 	} else {
@@ -86,21 +88,33 @@ function doWeb(doc, url) {
 	});
 
 	item.language = doc.documentElement.lang;
-
-	var abs = ZU.xpathText(doc, '//div[@id="mw-content-text"]/p[1]', null, '');
-	if(abs) item.abstractNote = ZU.trimInternal(abs);
-
+	
 	//last modified date is hard to get from the page because it is localized
-	var pageInfoURL = '/w/api.php?action=query&prop=info&format=json&' + 
-						'inprop=url%7Cdisplaytitle&titles=' +
-						item.title;
+	var pageInfoURL = '/w/api.php?action=query&format=json'
+		+ '&inprop=url%7Cdisplaytitle'
+		+ '&exintro=true&explaintext=true' // Intro section in plain text
+		+ '&prop=info%7Cextracts'
+		+ (revID // Different if we want a specific revision (this should be the general case)
+			? '%7Crevisions&rvprop=timestamp&revids=' + encodeURIComponent(revID)
+			: '&titles=' + encodeURIComponent(item.title)
+		);
 	ZU.doGet(pageInfoURL, function(text) {
 		var retObj = JSON.parse(text);
 		if(retObj && !retObj.query.pages['-1']) {
 			var pages = retObj.query.pages;
 			for(var i in pages) {
-				item.date = pages[i].touched;
+				if (pages[i].revisions) {
+					item.date = pages[i].revisions[0].timestamp;
+				} else {
+					item.date = pages[i].touched;
+				}
+				
 				item.title = pages[i].displaytitle;
+				
+				// Note that this is the abstract for the latest revision,
+				// not necessarily the revision that is being queried
+				item.abstractNote = pages[i].extract;
+				
 				//we should never have more than one page returned,
 				//but break just in case
 				break;
@@ -118,8 +132,8 @@ var testCases = [
 				"itemType": "encyclopediaArticle",
 				"title": "Россия",
 				"creators": [],
-				"date": "2015-02-16T02:48:25Z",
-				"abstractNote": "Координаты: 66°25′ с. ш. 94°15′ в. д. / 66.417° с. ш. 94.250° в. д. / 66.417; 94.250 (G) (O)",
+				"date": "2012-04-06T20:11:32Z",
+				"abstractNote": "Росси́я (от греч. Ρωσία — Русь; официально Росси́йская Федера́ция или Росси́я, на практике используется также сокращение РФ) — государство в Восточной Европе и Северной Азии. Население — 146 270 033 чел. (2015), территория — 17 125 187 км². Занимает первое место в мире по территории и девятое место по численности населения.\nСтолица — Москва. Государственный язык — русский.\nСмешанная республика федеративного устройства. В мае 2012 года пост президента занял Владимир Путин, председателя правительства — Дмитрий Медведев.\nВ составе Российской Федерации находятся 85 субъектов, 46 из которых именуются областями, 22 — республиками, 9 — краями, 3 — городами федерального значения, 4 — автономными округами и 1 — автономной областью.\nРоссия граничит с девятнадцатью странами (самый большой показатель в мире), включая две частично признанных, из них по суше со следующими государствами: Норвегией, Финляндией, Эстонией, Латвией, Литвой, Польшей, Белоруссией, Украиной, Абхазией, Грузией, Южной Осетией, Азербайджаном, Казахстаном, КНР, КНДР, Монголией, по морю с Турцией, Японией и США.\nОтличается значительным этнокультурным разнообразием. Бо́льшая часть (около 75 %) населения относит себя к православию, что делает Россию страной с самым многочисленным православным населением в мире.\nПо данным Всемирного банка, объём ВВП по ППС за 2014 год составил $3,461 трлн ($24,120 на человека). Денежная единица — российский рубль (усреднённый курс за 2014 год — 36 рублей за 1 доллар США).\nЯвляется великой державой и энергетической сверхдержавой — кандидатом-сверхдержавой, постоянный член Совета безопасности ООН. Одна из ведущих космических держав мира, обладает ядерным оружием и средствами его «доставки».\nПосле распада СССР в конце 1991 года Российская Федерация была признана международным сообществом как государство-продолжатель СССР в вопросах ядерного потенциала СССР, внешнего долга СССР, собственности СССР за рубежом, а также членства в Совете Безопасности ООН. Россия состоит в ряде международных организаций — ООН, ОБСЕ, Совет Европы, ЕАЭС, СНГ, ОЧЭС, ОДКБ, ВТО, ВФП, ЦАС, ШОС, АТЭС, БРИКС, МОК, ISO и других.",
 				"encyclopediaTitle": "Википедия",
 				"extra": "Page Version ID: 43336101",
 				"language": "ru",
@@ -147,8 +161,8 @@ var testCases = [
 				"itemType": "encyclopediaArticle",
 				"title": "Zotero",
 				"creators": [],
-				"date": "2015-02-14T13:05:20Z",
-				"abstractNote": "Zotero (/[unsupported input]zoʊˈtɛroʊ/) is free, open source reference management software to manage bibliographic data and related research materials (such as PDFs). Notable features include web browser integration, online syncing, generation of in-text citations, footnotes and bibliographies, as well as integration with the word processors Microsoft Word, LibreOffice, OpenOffice.org Writer and NeoOffice. It is produced by the Center for History and New Media of George Mason University (GMU).",
+				"date": "2012-04-03T14:41:27Z",
+				"abstractNote": "Zotero /zoʊˈtɛroʊ/ is free and open-source reference management software to manage bibliographic data and related research materials (such as PDF files). Notable features include web browser integration, online syncing, generation of in-text citations, footnotes and bibliographies, as well as integration with the word processors Microsoft Word, LibreOffice, OpenOffice.org Writer and NeoOffice. It is produced by the Center for History and New Media of George Mason University (GMU).",
 				"encyclopediaTitle": "Wikipedia, the free encyclopedia",
 				"extra": "Page Version ID: 485342619",
 				"language": "en",
@@ -176,7 +190,7 @@ var testCases = [
 				"itemType": "encyclopediaArticle",
 				"title": "Wikipedia:Article wizard",
 				"creators": [],
-				"date": "2015-02-10T14:18:16Z",
+				"date": "2015-02-10T10:51:06Z",
 				"encyclopediaTitle": "Wikipedia, the free encyclopedia",
 				"extra": "Page Version ID: 646481896",
 				"language": "en",
