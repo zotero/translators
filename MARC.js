@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-03-09 19:19:22"
+	"lastUpdated": "2015-02-19 04:29:00"
 }
 
 function detectImport() {
@@ -478,7 +478,12 @@ record.prototype.translate = function(item) {
 		// formatted contents (table of contents)
 		this._associateNotes(item, "505", "art");
 		// summary
-		this._associateNotes(item, "520", "ab");
+		// Store as abstract if not already available and only one such note exists
+		if (!item.abstractNote && this.getField("520").length == 1) {
+			this._associateDBField(item, "520", "ab", "abstractNote");
+		} else {
+			this._associateNotes(item, "520", "ab");
+		}
 		// biographical or historical data
 		this._associateNotes(item, "545", "ab");
 		
