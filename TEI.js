@@ -595,7 +595,7 @@ function doExport() {
     }
 
     // write to file.
-    Zotero.write('<?xml version="1.0"?>'+"\n");
+    Zotero.write('<?xml version="1.0" encoding="UTF-8"?>'+"\n");
     var serializer = new XMLSerializer();
     Zotero.write(serializer.serializeToString(outputElement));
 }
