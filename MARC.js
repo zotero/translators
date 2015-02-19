@@ -66,8 +66,8 @@ function pullISBN(text) {
 }
 
 // corporate author extraction
-function corpAuthor(author) {
-	return {lastName:author, fieldMode:true};
+function corpAuthor(author, type) {
+	return {lastName:author, fieldMode:true, creatorType: type};
 }
 
 // regular author extraction
