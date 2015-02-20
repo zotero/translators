@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-02-12 22:44:41"
+	"lastUpdated": "2015-02-20 11:54:42"
 }
 
 function detectImport() {
@@ -406,6 +406,8 @@ var degenerateImportFieldMap = {
 	CT: "title",
 	ED: "creators/editor",
 	EP: "pages",
+	H1: "unsupported/Library Catalog", //Citavi specific (possibly multiple occurences)
+	H2: "unsupported/Call Number", //Citavi specific (possibly multiple occurences)
 	ID: "__ignore",
 	JA: "journalAbbreviation",
 	JF: "publicationTitle",
@@ -1167,6 +1169,42 @@ var EndNoteCleaner = new function() {
 	}
 };
 
+/**
+ * @singleton Deals with some Citavi specific nuances
+ */
+var CitaviCleaner = new function() {
+	this.cleanTags = function(entry, item) {
+		// Citavi uses multiple H1 and H2 tags to list mutliple libraries and call
+		// numbers for items. We can only store one, so we will transform the first
+		// set of H1+H2 tags to DP+CN tags
+		if (entry.tags.CN || entry.tags.DP) return; // DP or CN already in use, so do nothing
+		
+		if (!entry.tags.H1 && !entry.tags.H2) return;
+		
+		if (!entry.tags.H1) {
+			// Only have a call number (maybe multiple, so take the first)
+			var at = entry.tags.indexOf(entry.tags.H2[0]);
+			TagCleaner.changeTag(entry, at, 'CN');
+			return;
+		}
+		
+		if (!entry.tags.H1) {
+			// Only have a library
+			var at = entry.tags.indexOf(entry.tags.H1[0]);
+			TagCleaner.changeTag(entry, at, 'DP');
+		}
+		
+		// We have pairs, so find the first set and change it
+		for (var i=0; i<entry.length - 1; i++) {
+			if (entry[i].tag == 'H1' && entry[i+1].tag == 'H2') {
+				TagCleaner.changeTag(entry, i, ['DP']);
+				TagCleaner.changeTag(entry, i+1, ['CN']);
+				return;
+			}
+		}
+	}
+}
+
 function processTag(item, tagValue, risEntry) {
 	var tag = tagValue.tag;
 	var value = tagValue.value.trim();
@@ -1679,6 +1717,7 @@ function doImport() {
 		var item = getNewItem(itemType);
 		ProCiteCleaner.cleanTags(entry, item); //clean up ProCite "tags"
 		EndNoteCleaner.cleanTags(entry, item); //some tweaks to EndNote export
+		CitaviCleaner.cleanTags(entry, item);
 		
 		for(var i=0, n=entry.length; i<n; i++) {
 			if((['TY', 'ER']).indexOf(entry[i].tag) == -1) { //ignore TY and ER tags
@@ -6763,6 +6802,54 @@ var testCases = [
 					},
 					{
 						"note": "The following values have no corresponding Zotero field:<br/>DOI: doi: 10.3109/07434618.2014.906498<br/>PB  - Informa Allied Health<br/>",
+						"tags": [
+							"_RIS import"
+						]
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "TY  - BOOK\nSN  - 9783642002304\nAU  - Depenheuer, Otto\nT1  - Eigentumsverfassung und Finanzkrise\nT2  - Bibliothek des Eigentums\nPY  - 2009\nCY  - Berlin, Heidelberg\nPB  - Springer Berlin Heidelberg\nKW  - Finanzkrise / Eigentum / Haftung / Ordnungspolitik / Aufsatzsammlung / Online-Publikation\nKW  - Constitutional law\nKW  - Law\nUR  - http://dx.doi.org/10.1007/978-3-642-00230-4\nL1  - doi:10.1007/978-3-642-00230-4\nVL  - 7\nAB  - In dem Buch befinden sich einzelne Beiträge zu ...\nLA  - ger\nH1  - UB Mannheim\nH2  - 300 QN 100 D419\nH1  - UB Leipzig\nH2  - PL 415 D419\nTS  - BibTeX\nDO  - 10.1007/978-3-642-00230-4\nER  -\n\n",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Eigentumsverfassung und Finanzkrise",
+				"creators": [
+					{
+						"lastName": "Depenheuer",
+						"firstName": "Otto",
+						"creatorType": "author"
+					}
+				],
+				"date": "2009",
+				"ISBN": "9783642002304",
+				"abstractNote": "In dem Buch befinden sich einzelne Beiträge zu ...",
+				"callNumber": "300 QN 100 D419",
+				"language": "ger",
+				"libraryCatalog": "UB Mannheim",
+				"place": "Berlin, Heidelberg",
+				"publisher": "Springer Berlin Heidelberg",
+				"series": "Bibliothek des Eigentums",
+				"url": "http://dx.doi.org/10.1007/978-3-642-00230-4",
+				"volume": "7",
+				"attachments": [
+					{
+						"title": "Attachment",
+						"path": "doi:10.1007/978-3-642-00230-4"
+					}
+				],
+				"tags": [
+					"Constitutional law",
+					"Finanzkrise / Eigentum / Haftung / Ordnungspolitik / Aufsatzsammlung / Online-Publikation",
+					"Law"
+				],
+				"notes": [
+					{
+						"note": "The following values have no corresponding Zotero field:<br/>Library Catalog: UB Leipzig<br/>Call Number: PL 415 D419<br/>TS  - BibTeX<br/>DO  - 10.1007/978-3-642-00230-4<br/>",
 						"tags": [
 							"_RIS import"
 						]
