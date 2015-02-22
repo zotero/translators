@@ -2,14 +2,14 @@
 	"translatorID": "96b9f483-c44d-5784-cdad-ce21b984fe01",
 	"label": "Amazon.com",
 	"creator": "Sean Takats, Michael Berkowitz, and Simon Kornblith",
-	"target": "^https?://(?:www\\.)?amazon",
+	"target": "^https?://((?:www\\.)|(?:smile\\.))?amazon",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-10-19 06:05:44"
+	"lastUpdated": "2015-02-22 09:33:00"
 }
 
 function detectWeb(doc, url) {
