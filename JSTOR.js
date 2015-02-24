@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2015-01-10 13:45:11"
+	"lastUpdated": "2015-02-24 05:27:00"
 }
 
 function detectWeb(doc, url) {
@@ -32,8 +32,8 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	// We have multiple results
 	var resultsBlock = doc.getElementsByClassName('list-searchResults')[0];
+	if (!resultsBlock) resultsBlock = doc.getElementById('results');
 	if (!resultsBlock) return false;
-	
 	var titles = ZU.xpath(resultsBlock, '//li//a[@class="title"]|\
 		//li//div[@class="title" and not(a[@class="title"]) and a[contains(@href, "10.2307")]]');
 	var items = {}, found = false;
@@ -109,6 +109,8 @@ function getTitleFromPage(doc) {
 	var title = 
 		// http://www.jstor.org/stable/131548
 		ZU.xpathText(doc, '//div[@class="rw" and ./cite]/node()[position()>1]', null, ' ')
+		//same page but not logged in 
+		||ZU.xpathText(doc, '//div[@class="main"]//h2[cite[@class="rw"]]')
 		// Need examples. May no longer be relevant
 		|| ZU.xpathText(doc, '(//div[@class="bd"]/div[cite[@class="rw"]])[1]')
 		|| ZU.xpathText(doc, '//div[@class="mainCite"]/h3')
@@ -522,6 +524,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.jstor.org/stable/i250748",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
