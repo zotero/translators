@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2015-02-22 09:33:00"
+	"lastUpdated": "2015-02-25 06:23:59"
 }
 
 function detectWeb(doc, url) {
@@ -179,7 +179,8 @@ function scrape(doc, url) {
 
 	var title = doc.getElementById('btAsinTitle')
 		|| doc.getElementById('title_row')
-		|| doc.getElementById('productTitle');
+		|| doc.getElementById('productTitle')
+		|| doc.getElementById('title_feature_div');
 	// get first non-empty text node (other text nodes are things like [Paperback] and dates)
 	item.title = ZU.trimInternal(
 			ZU.xpathText(title, '(.//text()[normalize-space(self::text())])[1]')
@@ -293,7 +294,7 @@ function scrape(doc, url) {
 	if(publisher) {
 		var m = /([^;(]+)(?:;? *([^(]*))?(?:\(([^)]*)\))?/.exec(publisher);
 		item.publisher = m[1].trim();
-		if(m[2]) item.edition = m[2].trim();
+		if(m[2]) item.edition = m[2].trim().replace(/^(Auflage|Édition)\s?:/, '');
 		if(m[3] && m[3].search(/\b\d{4}\b/) != -1) item.date = m[3].trim(); // Looks like a date
 	}
 	var pages = getField(info, 'Hardcover') || getField(info, 'Paperback') || getField(info, 'Print Length');
@@ -562,6 +563,7 @@ var testCases = [
 				"date": "17 août 2011",
 				"ISBN": "9782035866011",
 				"abstractNote": "Que signifie ce nom \"Candide\" : innocence de celui qui ne connaît pas le mal ou illusion du naïf qui n'a pas fait l'expérience du monde ? Voltaire joue en 1759, après le tremblement de terre de Lisbonne, sur ce double sens. Il nous fait partager les épreuves fictives d'un jeune homme simple, confronté aux leurres de l'optimisme, mais qui n'entend pas désespérer et qui en vient à une sagesse finale, mesurée et mystérieuse. Candide n'en a pas fini de nous inviter au gai savoir et à la réflexion.",
+				"edition": "Larousse",
 				"language": "Français",
 				"libraryCatalog": "Amazon.com",
 				"numPages": 176,
@@ -597,7 +599,7 @@ var testCases = [
 				"date": "1. Mai 1992",
 				"ISBN": "9783596105816",
 				"abstractNote": "Gleich bei seinem Erscheinen in den 40er Jahren löste Jorge Luis Borges’ erster Erzählband »Fiktionen« eine literarische Revolution aus. Erfundene Biographien, fiktive Bücher, irreale Zeitläufe und künstliche Realitäten verflocht Borges zu einem geheimnisvollen Labyrinth, das den Leser mit seinen Rätseln stets auf neue herausfordert. Zugleich begründete er mit seinen berühmten Erzählungen wie»›Die Bibliothek zu Babel«, «Die kreisförmigen Ruinen« oder»›Der Süden« den modernen »Magischen Realismus«.   »Obwohl sie sich im Stil derart unterscheiden, zeigen zwei Autoren uns ein Bild des nächsten Jahrtausends: Joyce und Borges.« Umberto Eco",
-				"edition": "Auflage: 12",
+				"edition": "12",
 				"language": "Deutsch",
 				"libraryCatalog": "Amazon.com",
 				"numPages": 192,
@@ -631,7 +633,8 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "1 Dec 2010",
+				"date": "1 Dec. 2010",
+				"abstractNote": "Novel by Charles Dickens, published both serially and in book form in 1859. The story is set in the late 18th century against the background of the French Revolution. Although Dickens borrowed from Thomas Carlyle's history, The French Revolution, for his sprawling tale of London and revolutionary Paris, the novel offers more drama than accuracy. The scenes of large-scale mob violence are especially vivid, if superficial in historical understanding. The complex plot involves Sydney Carton's sacrifice of his own life on behalf of his friends Charles Darnay and Lucie Manette. While political events drive the story, Dickens takes a decidedly antipolitical tone, lambasting both aristocratic tyranny and revolutionary excess--the latter memorably caricatured in Madame Defarge, who knits beside the guillotine. The book is perhaps best known for its opening lines, \"It was the best of times, it was the worst of times,\" and for Carton's last speech, in which he says of his replacing Darnay in a prison cell, \"It is a far, far better thing that I do, than I have ever done; it is a far, far better rest that I go to, than I have ever known.\" -- The Merriam-Webster Encyclopedia of Literature",
 				"language": "English",
 				"libraryCatalog": "Amazon.com",
 				"numPages": 238,
@@ -780,7 +783,7 @@ var testCases = [
 						"creatorType": "director"
 					}
 				],
-				"date": "15 Feb 2010",
+				"date": "15 Feb. 2010",
 				"language": "English",
 				"libraryCatalog": "Amazon.com",
 				"runningTime": "96 minutes",
@@ -805,13 +808,7 @@ var testCases = [
 			{
 				"itemType": "audioRecording",
 				"title": "Die Eiskönigin Völlig Unverfroren",
-				"creators": [
-					{
-						"lastName": "Various artists",
-						"creatorType": "performer",
-						"fieldMode": 1
-					}
-				],
+				"creators": [],
 				"libraryCatalog": "Amazon.com",
 				"runningTime": "1:08:58",
 				"attachments": [
@@ -843,7 +840,7 @@ var testCases = [
 				],
 				"date": "2012/8/2",
 				"ISBN": "9780099578079",
-				"language": "英語, 英語, 不明",
+				"language": "英語, 英語, 英語",
 				"libraryCatalog": "Amazon.com",
 				"numPages": 1328,
 				"publisher": "Vintage",
