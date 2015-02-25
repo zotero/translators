@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-02-20 11:54:42"
+	"lastUpdated": "2015-02-25 11:16:03"
 }
 
 function detectImport() {
@@ -1209,15 +1209,15 @@ function processTag(item, tagValue, risEntry) {
 	var tag = tagValue.tag;
 	var value = tagValue.value.trim();
 	var rawLine = tagValue.raw;
-
+	
+	//drop empty fields
+	if (value === "") return;
+	
 	var zField = importFields.getField(item.itemType, tag);
 	if(!zField) {
 		Z.debug("Unknown field " + tag + " in entry :\n" + rawLine);
 		zField = 'unknown'; //this will result in the value being added as note
 	}
-
-	//drop empty fields
-	if (value === "" || !zField) return;
 
 	zField = zField.split('/');
 
@@ -1267,6 +1267,18 @@ function processTag(item, tagValue, risEntry) {
 				}
 				value = undefined;
 				processFields = false;
+			}
+		break;
+		case "M3":
+			// This is DOI when coming from EndNote, but it can be used for
+			// publication type as well
+			if (zField[0] == 'DOI') {
+				var cleanDOI = ZU.cleanDOI(value);
+				if (cleanDOI) {
+					value = cleanDOI;
+				} else {
+					zField[0] = 'unknown'
+				}
 			}
 		break;
 		case "VL":
@@ -1613,10 +1625,11 @@ function completeItem(item) {
 		}
 		item.backupAccessDate = undefined;
 	}
-
-	// Clean up DOI
-	if(item.DOI) {
-		item.DOI = ZU.cleanDOI(item.DOI);
+	
+	if (item.DOI) {
+		// Only clean DOI if we get something back. Otherwise just leave it be
+		var cleanDOI = ZU.cleanDOI(item.DOI);
+		if (cleanDOI) item.DOI = cleanDOI;
 	}
 
 	// hack for sites like Nature, which only use JA, journal abbreviation
@@ -2722,6 +2735,7 @@ var testCases = [
 					}
 				],
 				"date": "0000 Year Date",
+				"DOI": "DOI",
 				"abstractNote": "Abstract",
 				"archive": "Name of Database",
 				"archiveLocation": "Accession Number",
@@ -2748,7 +2762,7 @@ var testCases = [
 						"note": "Research Notes"
 					},
 					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>DOI: Type<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>CY  - Conference Location<br/>",
+						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>CY  - Conference Location<br/>M3  - Type<br/>",
 						"tags": [
 							"_RIS import"
 						]
@@ -2787,6 +2801,7 @@ var testCases = [
 					}
 				],
 				"date": "0000 Year Date",
+				"DOI": "DOI",
 				"ISBN": "ISBN",
 				"abstractNote": "Abstract",
 				"archive": "Name of Database",
@@ -3019,6 +3034,7 @@ var testCases = [
 					}
 				],
 				"date": "0000 Year Date",
+				"DOI": "DOI",
 				"ISSN": "ISSN",
 				"abstractNote": "Abstract",
 				"archive": "Name of Database",
@@ -3047,7 +3063,7 @@ var testCases = [
 						"note": "Research Notes"
 					},
 					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>DOI: Type of Work<br/>Reviewed Item: Reviewed Item<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C1  - Year Cited<br/>C2  - Date Cited<br/>C3  - PMCID<br/>C4  - Reviewer<br/>C5  - Issue Title<br/>C6  - NIHMSID<br/>C7  - Article Number<br/>CY  - Place Published<br/>ET  - Edition<br/>NV  - Document Number<br/>PB  - Publisher<br/>RP  - Reprint Edition<br/>SE  - E-Pub Date<br/>",
+						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Reviewed Item: Reviewed Item<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C1  - Year Cited<br/>C2  - Date Cited<br/>C3  - PMCID<br/>C4  - Reviewer<br/>C5  - Issue Title<br/>C6  - NIHMSID<br/>C7  - Article Number<br/>CY  - Place Published<br/>ET  - Edition<br/>M3  - Type of Work<br/>NV  - Document Number<br/>PB  - Publisher<br/>RP  - Reprint Edition<br/>SE  - E-Pub Date<br/>",
 						"tags": [
 							"_RIS import"
 						]
@@ -3422,6 +3438,7 @@ var testCases = [
 					}
 				],
 				"date": "0000 Year Date",
+				"DOI": "DOI",
 				"ISSN": "ISSN/ISBN",
 				"abstractNote": "Abstract",
 				"archive": "Name of Database",
@@ -3451,7 +3468,7 @@ var testCases = [
 						"note": "Research Notes"
 					},
 					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>DOI: Type of Work<br/>Original Publication: Original Publication<br/>Reviewed Item: Reviewed Item<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>A3  - Author, Tertiary<br/>C1  - Custom 1<br/>C2  - Custom 2<br/>C3  - Custom 3<br/>C4  - Custom 4<br/>C5  - Custom 5<br/>C6  - Custom 6<br/>C7  - Custom 7<br/>C8  - Custom 8<br/>CY  - Place Published<br/>ET  - Edition<br/>NV  - Number of Volumes<br/>PB  - Publisher<br/>RP  - Reprint Edition<br/>SE  - Section<br/>",
+						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Original Publication: Original Publication<br/>Reviewed Item: Reviewed Item<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>A3  - Author, Tertiary<br/>C1  - Custom 1<br/>C2  - Custom 2<br/>C3  - Custom 3<br/>C4  - Custom 4<br/>C5  - Custom 5<br/>C6  - Custom 6<br/>C7  - Custom 7<br/>C8  - Custom 8<br/>CY  - Place Published<br/>ET  - Edition<br/>M3  - Type of Work<br/>NV  - Number of Volumes<br/>PB  - Publisher<br/>RP  - Reprint Edition<br/>SE  - Section<br/>",
 						"tags": [
 							"_RIS import"
 						]
@@ -3529,6 +3546,7 @@ var testCases = [
 					}
 				],
 				"date": "0000 Year Deadline",
+				"DOI": "DOI",
 				"abstractNote": "Abstract",
 				"archive": "Name of Database",
 				"archiveLocation": "Accession Number",
@@ -3556,7 +3574,7 @@ var testCases = [
 						"note": "Research Notes"
 					},
 					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>DOI: Funding Type<br/>Original Publication: Original Grant Number<br/>Reviewed Item: Reviewed Item<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C1  - Contact Name<br/>C2  - Contact Address<br/>C3  - Contact Phone<br/>C4  - Contact Fax<br/>C5  - Funding Number<br/>C6  - CFDA Number<br/>CY  - Activity Location<br/>ET  - Requirements<br/>NV  - Amount Received<br/>PB  - Sponsoring Agency<br/>RP  - Review Date<br/>SE  - Duration of Grant<br/>",
+						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Original Publication: Original Grant Number<br/>Reviewed Item: Reviewed Item<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C1  - Contact Name<br/>C2  - Contact Address<br/>C3  - Contact Phone<br/>C4  - Contact Fax<br/>C5  - Funding Number<br/>C6  - CFDA Number<br/>CY  - Activity Location<br/>ET  - Requirements<br/>M3  - Funding Type<br/>NV  - Amount Received<br/>PB  - Sponsoring Agency<br/>RP  - Review Date<br/>SE  - Duration of Grant<br/>",
 						"tags": [
 							"_RIS import"
 						]
@@ -3620,6 +3638,7 @@ var testCases = [
 					}
 				],
 				"date": "0000 Year Date",
+				"DOI": "DOI",
 				"ISSN": "ISSN",
 				"abstractNote": "Abstract",
 				"archive": "Name of Database",
@@ -3641,7 +3660,7 @@ var testCases = [
 						"note": "Research Notes"
 					},
 					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>DOI: Type of Article<br/>Original Publication: Original Publication<br/>Reviewed Item: Reviewed Item<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C1  - Legal Note<br/>C2  - PMCID<br/>C6  - NIHMSID<br/>C7  - Article Number<br/>ET  - Epub Date<br/>RP  - Reprint Edition<br/>SE  - Start Page<br/>",
+						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Original Publication: Original Publication<br/>Reviewed Item: Reviewed Item<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C1  - Legal Note<br/>C2  - PMCID<br/>C6  - NIHMSID<br/>C7  - Article Number<br/>ET  - Epub Date<br/>M3  - Type of Article<br/>RP  - Reprint Edition<br/>SE  - Start Page<br/>",
 						"tags": [
 							"_RIS import"
 						]
@@ -4498,6 +4517,7 @@ var testCases = [
 					}
 				],
 				"date": "0000 Year Date",
+				"DOI": "DOI",
 				"abstractNote": "Abstract",
 				"archive": "Name of Database",
 				"issue": "Number",
@@ -4523,7 +4543,7 @@ var testCases = [
 						"note": "Research Notes"
 					},
 					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>DOI: Type of Work<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>CY  - Place Published<br/>PB  - Institution<br/>",
+						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>CY  - Place Published<br/>M3  - Type of Work<br/>PB  - Institution<br/>",
 						"tags": [
 							"_RIS import"
 						]
@@ -6801,7 +6821,7 @@ var testCases = [
 						"note": "<p>doi: 10.3109/07434618.2014.906498</p>"
 					},
 					{
-						"note": "The following values have no corresponding Zotero field:<br/>DOI: doi: 10.3109/07434618.2014.906498<br/>PB  - Informa Allied Health<br/>",
+						"note": "The following values have no corresponding Zotero field:<br/>PB  - Informa Allied Health<br/>",
 						"tags": [
 							"_RIS import"
 						]
