@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2015-02-12 09:31:21"
+	"lastUpdated": "2015-02-25 13:12:47"
 }
 
 /*
@@ -1008,8 +1008,8 @@ function importItem(newItem, node) {
 	// description/attachment note
 	if(newItem.itemType == "attachment") {
 		newItem.note = getFirstResults(node, [n.dc+"description", n.dc1_0+"description", n.dcterms+"description"], true);
-	} else {
-		newItem.extra = getFirstResults(node, [n.dc+"description", n.dcterms+"description"], true);
+	} else if (!newItem.abstractNote) {
+		newItem.abstractNote = getFirstResults(node, [n.dc+"description", n.dcterms+"description"], true);
 	}
 	
 	/** NOTES **/
