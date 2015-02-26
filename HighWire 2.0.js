@@ -2,14 +2,14 @@
 	"translatorID": "8c1f42d5-02fa-437b-b2b2-73afc768eb07",
 	"label": "HighWire 2.0",
 	"creator": "Matt Burton",
-	"target": "^[^?#]+(/content/([0-9]+[A-Z\\-]*/(suppl_)?[A-Z]?[0-9]|current|firstcite|early)|/search\\?.*?\\bsubmit=|/search(/results)?\\?fulltext=|/cgi/collection/.|/search/.)",
+	"target": "^[^?#]+(/content/([0-9]+[A-Z\\-]*/|current|firstcite|early)|/search\\?.*?\\bsubmit=|/search(/results)?\\?fulltext=|/cgi/collection/.|/search/.)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-02-25 14:10:23"
+	"lastUpdated": "2015-02-26 05:47:57"
 }
 
 /*
@@ -1314,6 +1314,68 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.bmj.com/search/advanced/title%3Acell%20title_flags%3Amatch-all%20limit_from%3A1840-01-01%20limit_to%3A2015-02-25%20numresults%3A10%20sort%3Arelevance-rank%20format_result%3Astandard",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.bmj.com/content/350/bmj.h696",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Length of hospital stay after hip fracture and short term risk of death after discharge: a total cohort study in Sweden",
+				"creators": [
+					{
+						"firstName": "Peter",
+						"lastName": "Nordström",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yngve",
+						"lastName": "Gustafson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Karl",
+						"lastName": "Michaëlsson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Anna",
+						"lastName": "Nordström",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015/02/20",
+				"DOI": "10.1136/bmj.h696",
+				"ISSN": "1756-1833",
+				"abstractNote": "Objective To investigate relation between inpatient length of stay after hip fracture and risk of death after hospital discharge.\nSetting Population ≥50 years old living in Sweden as of 31 December 2005 with a first hip fracture the years 2006-12.\nParticipants 116 111 patients with an incident hip fracture from a closed nationwide cohort.\nMain outcome measure Death within 30 days of hospital discharge in relation to hospital length of stay after adjustment for multiple covariates.\nResults Mean inpatient length of stay after a hip fracture decreased from 14.2 days in 2006 to 11.6 days in 2012 (P<0.001). The association between length of stay and risk of death after discharge was non-linear (P<0.001), with a threshold for this non-linear effect of about 10 days. Thus, for patients with length of stay of ≤10 days (n=59 154), each 1-day reduction in length of stay increased the odds of death within 30 days of discharge by 8% in 2006 (odds ratio 1.08 (95% confidence interval 1.04 to 1.12)), which increased to16% in 2012 (odds ratio 1.16 (1.12 to 1.20)). In contrast, for patients with a length of stay of ≥11 days (n=56 957), a 1-day reduction in length of stay was not associated with an increased risk of death after discharge during any of the years of follow up.\nLimitations No accurate evaluation of the underlying cause of death could be performed.\nConclusion Shorter length of stay in hospital after hip fracture is associated with increased risk of death after hospital discharge, but only among patients with length of stay of 10 days or less. This association remained robust over consecutive years.",
+				"extra": "PMID: 25700551",
+				"language": "en",
+				"libraryCatalog": "www.bmj.com",
+				"pages": "h696",
+				"publicationTitle": "BMJ",
+				"rights": "© Nordström et al 2015. This is an Open Access article distributed in accordance with the Creative Commons Attribution Non Commercial (CC BY-NC 4.0) license, which permits others to distribute, remix, adapt, build upon this work non-commercially, and license their derivative works on different terms, provided the original work is properly cited and the use is non-commercial. See:  http://creativecommons.org/licenses/by-nc/4.0/.",
+				"shortTitle": "Length of hospital stay after hip fracture and short term risk of death after discharge",
+				"url": "http://www.bmj.com/content/350/bmj.h696",
+				"volume": "350",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					},
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
