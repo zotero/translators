@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-01-16 22:39:18"
+	"lastUpdated": "2015-02-28 22:38:27"
 }
 
 /*
@@ -92,11 +92,11 @@ function scrape(doc) {
 	}
 	newItem.date = doc.evaluate('//div[@class="box issue"]/strong', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent.match(/\w+ (\d{1,2} .+)/)[1];
 	newItem.pages = Zotero.Utilities.trim(doc.evaluate('//select[@name="id"]/option[@selected="selected"]', doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
-	// Get tags.
-	var tags = doc.evaluate('//p[@class="tags"]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	// Get tags
+	var tags = doc.evaluate('//p[@class="tags"]/a|//p[@class="tags"]/span', doc, nsResolver, XPathResult.ANY_TYPE, null);
 	while (nextTag = tags.iterateNext()) {
-		newItem.tags.push(nextTag.textContent);
-	}
+		newItem.tags.push(nextTag.textContent.trim());
+	}	
 	// Get OCRed text
 	var OCRLines = doc.evaluate('//p[@class="S8"]/span', doc, nsResolver, XPathResult.ANY_TYPE, null);
 	var OCRText = '';
