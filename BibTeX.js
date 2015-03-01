@@ -18,7 +18,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-02-16 03:35:30"
+	"lastUpdated": "2015-02-28 04:57:15"
 }
 
 function detectImport() {
@@ -980,8 +980,13 @@ function mapAccent(character) {
 	return (mappingTable[character] ? mappingTable[character] : "?");
 }
 
-var filePathSpecialChars = '\\\\:;{}$'; // $ for Mendeley
+var filePathSpecialChars = '\\\\:;$'; // $ for Mendeley (see cleanFilePath for {})
 var encodeFilePathRE = new RegExp('[' + filePathSpecialChars + ']', 'g');
+
+// We strip out {} in general, because \{ and \} still break BibTeX (0.99d)
+function cleanFilePath(str) {
+	return str.replace(/(?:\s*[{}]+)+\s*/g, ' ');
+}
 
 function encodeFilePathComponent(value) {
 	return value.replace(encodeFilePathRE, "\\$&");
@@ -1296,14 +1301,22 @@ function doExport() {
 			
 			for(var i in item.attachments) {
 				var attachment = item.attachments[i];
+				// Unfortunately, it looks like \{ in file field breaks BibTeX (0.99d)
+				// even if properly backslash escaped, so we have to make sure that
+				// it doesn't make it into this field at all
+				var title = cleanFilePath(attachment.title),
+					path = null;
+				
 				if(Zotero.getOption("exportFileData") && attachment.saveFile) {
-					attachment.saveFile(attachment.defaultPath, true);
-					attachmentString += ";" + encodeFilePathComponent(attachment.title)
-						+ ":" + encodeFilePathComponent(attachment.defaultPath)
-						+ ":" + encodeFilePathComponent(attachment.mimeType);
+					path = cleanFilePath(attachment.defaultPath);
+					attachment.saveFile(path, true);
 				} else if(attachment.localPath) {
-					attachmentString += ";" + encodeFilePathComponent(attachment.title)
-						+ ":" + encodeFilePathComponent(attachment.localPath)
+					path = cleanFilePath(attachment.localPath);
+				}
+				
+				if (path) {
+					attachmentString += ";" + encodeFilePathComponent(title)
+						+ ":" + encodeFilePathComponent(path)
 						+ ":" + encodeFilePathComponent(attachment.mimeType);
 				}
 			}
