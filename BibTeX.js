@@ -18,7 +18,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-02-28 04:57:15"
+	"lastUpdated": "2015-03-01 13:21:41"
 }
 
 function detectImport() {
@@ -229,8 +229,9 @@ var alwaysMap = {
 	"~":"{\\textasciitilde}",
 	"^":"{\\textasciicircum}",
 	"\\":"{\\textbackslash}",
-	"{" : "\\{",
-	"}" : "\\}"
+	// See http://tex.stackexchange.com/questions/230750/open-brace-in-bibtex-fields/230754
+	"{" : "\\{\\vphantom{\\}}",
+	"}" : "\\vphantom{\\{}\\}"
 };
 
 
@@ -899,7 +900,7 @@ function writeField(field, value, isMacro) {
 	// Other fields (DOI?) may need similar treatment
 	if (!isMacro && !(field == "url" || field == "doi" || field == "file" || field == "lccn" )) {
 		// I hope these are all the escape characters!
-		value = value.replace(/[|\<\>\~\^\\\{\}]/g, mapEscape).replace(/([\#\$\%\&\_])/g, "\\$1");
+		value = escapeSpecialCharacters(value);
 		
 		if (caseProtectedFields.indexOf(field) != -1) {
 			value = ZU.XRegExp.replace(value, protectCapsRE, "$1{$2$3}"); // only $2 or $3 will have a value, not both
@@ -972,8 +973,26 @@ function isTitleCase(string) {
 }
 */
 
-function mapEscape(character) {
-	return alwaysMap[character];
+// See http://tex.stackexchange.com/questions/230750/open-brace-in-bibtex-fields/230754
+var vphantomRe = /\\vphantom{\\}}((?:.(?!\\vphantom{\\}}))*)\\vphantom{\\{}/g;
+function escapeSpecialCharacters(str) {
+	var newStr = str.replace(/[|\<\>\~\^\\\{\}]/g, function(c) { return alwaysMap[c] })
+		.replace(/([\#\$\%\&\_])/g, "\\$1");
+	
+	// We escape each brace in the text by making sure that it has a counterpart,
+	// but sometimes this is overkill if the brace already has a counterpart in
+	// the text.
+	if (newStr.indexOf('\\vphantom') != -1) {
+		var m;
+		while (m = vphantomRe.exec(newStr)) {
+			// Can't use a simple replace, because we want to match up inner with inner
+			// and outer with outer
+			newStr = newStr.substr(0,m.index) + m[1] + newStr.substr(m.index + m[0].length);
+			vphantomRe.lastIndex = 0; // Start over, because the previous replacement could have created a new pair
+		}
+	}
+	
+	return newStr;
 }
 
 function mapAccent(character) {
@@ -1203,9 +1222,8 @@ function doExport() {
 					creatorString = creator.lastName;
 				}
 				
-				creatorString = creatorString.replace(/[|\<\>\~\^\\\{\}]/g, mapEscape)
-					.replace(/([\#\$\%\&\_])/g, "\\$1");
-																			
+				creatorString = escapeSpecialCharacters(creatorString);
+				
 				if (creator.fieldMode == true) { // fieldMode true, assume corporate author
 					creatorString = "{" + creatorString + "}";
 				} else {
