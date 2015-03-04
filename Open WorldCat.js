@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2015-01-13 17:09:49"
+	"lastUpdated": "2015-03-04 19:52:52"
 }
 
 /**
@@ -159,10 +159,6 @@ function scrape(ids, data) {
 			item.complete();
 		});
 		
-		translator.setHandler("done", function() {
-			scrape(ids, data);
-		});
-		
 		translator.getTranslatorObject(function(trans) {
 			trans.options.defaultItemType = 'book'; //if not supplied, default to book
 			trans.options.typeMap = {
@@ -172,6 +168,8 @@ function scrape(ids, data) {
 			
 			trans.doImport();
 		});
+		
+		scrape(ids, data);
 	});
 }
 
