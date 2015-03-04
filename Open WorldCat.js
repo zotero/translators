@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2015-03-04 19:52:52"
+	"lastUpdated": "2015-03-04 19:58:35"
 }
 
 /**
@@ -335,6 +335,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Argentina",
 				"creators": [
 					{
 						"lastName": "Whitaker",
@@ -342,16 +343,15 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "Open WorldCat",
+				"date": "1964",
 				"language": "English",
-				"title": "Argentina",
-				"publisher": "Prentice-Hall",
+				"libraryCatalog": "Open WorldCat",
 				"place": "Englewood Cliffs, N.J.",
-				"date": "1964"
+				"publisher": "Prentice-Hall",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -361,6 +361,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "A dynamic systems approach to the development of cognition and action",
 				"creators": [
 					{
 						"lastName": "Thelen",
@@ -373,19 +374,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "Open WorldCat",
-				"language": "English",
-				"url": "http://search.ebscohost.com/login.aspx?direct=true&scope=site&db=nlebk&db=nlabk&AN=1712",
-				"title": "A dynamic systems approach to the development of cognition and action",
-				"publisher": "MIT Press",
-				"place": "Cambridge, Mass.",
 				"date": "1996",
-				"ISBN": "0585030154  9780585030159",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"ISBN": "9780585030159",
+				"language": "English",
+				"libraryCatalog": "Open WorldCat",
+				"place": "Cambridge, Mass.",
+				"publisher": "MIT Press",
+				"url": "http://search.ebscohost.com/login.aspx?direct=true&scope=site&db=nlebk&db=nlabk&AN=1712",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -395,6 +394,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "The Cambridge companion to Adam Smith",
 				"creators": [
 					{
 						"lastName": "Haakonssen",
@@ -402,18 +402,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "Open WorldCat",
-				"language": "English",
-				"title": "The Cambridge companion to Adam Smith",
-				"publisher": "Cambridge University Press",
-				"place": "Cambridge; New York",
 				"date": "2006",
-				"ISBN": "0521770599 0521779243  9780521770590 9780521779241",
-				"abstractNote": "\"Adam Smith is best known as the founder of scientific economics and as an early proponent of the modern market economy. Political economy, however, was only one part of Smith's comprehensive intellectual system. Consisting of a theory of mind and its functions in language, arts, science, and social intercourse, Smith's system was a towering contribution to the Scottish Enlightenment. His ideas on social intercourse, in fact, also served as the basis for a moral theory that provided both historical and theoretical accounts of law, politics, and economics. This companion volume provides an up-to-date examination of all aspects of Smith's thought. Collectively, the essays take into account Smith's multiple contexts - Scottish, British, European, Atlantic, biographical, institutional, political, philosophical - and they draw on all his works, including student notes from his lectures. Pluralistic in approach, the volume provides a contextualist history of Smith, as well as direct philosophical engagement with his ideas.\"--Jacket."
+				"ISBN": "9780521770590 9780521779241",
+				"abstractNote": "\"Adam Smith is best known as the founder of scientific economics and as an early proponent of the modern market economy. Political economy, however, was only one part of Smith's comprehensive intellectual system. Consisting of a theory of mind and its functions in language, arts, science, and social intercourse, Smith's system was a towering contribution to the Scottish Enlightenment. His ideas on social intercourse, in fact, also served as the basis for a moral theory that provided both historical and theoretical accounts of law, politics, and economics. This companion volume provides an up-to-date examination of all aspects of Smith's thought. Collectively, the essays take into account Smith's multiple contexts - Scottish, British, European, Atlantic, biographical, institutional, political, philosophical - and they draw on all his works, including student notes from his lectures. Pluralistic in approach, the volume provides a contextualist history of Smith, as well as direct philosophical engagement with his ideas.\"--Jacket.",
+				"language": "English",
+				"libraryCatalog": "Open WorldCat",
+				"place": "Cambridge; New York",
+				"publisher": "Cambridge University Press",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -423,6 +422,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "From Laṅkā eastwards: the Rāmāyaṇa in the literature and visual arts of Indonesia",
 				"creators": [
 					{
 						"lastName": "Acri",
@@ -440,18 +440,17 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "Open WorldCat",
+				"date": "2011",
+				"ISBN": "9789067183840",
 				"language": "English",
+				"libraryCatalog": "Open WorldCat",
 				"place": "Leiden",
-				"ISBN": "9067183849 9789067183840",
-				"shortTitle": "From Laṅkā eastwards",
-				"title": "From Laṅkā eastwards: the Rāmāyaṇa in the literature and visual arts of Indonesia",
 				"publisher": "KITLV Press",
-				"date": "2011"
+				"shortTitle": "From Laṅkā eastwards",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -461,6 +460,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Newman's relation to modernism",
 				"creators": [
 					{
 						"lastName": "Smith",
@@ -468,18 +468,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "Open WorldCat",
-				"language": "English",
-				"url": "http://www.archive.org/details/a626827800smituoft/",
-				"title": "Newman's relation to modernism",
-				"publisher": "s.n.",
-				"place": "London",
 				"date": "1912",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"language": "English",
+				"libraryCatalog": "Open WorldCat",
+				"place": "London",
+				"publisher": "s.n.",
+				"url": "http://www.archive.org/details/a626827800smituoft/",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -489,6 +487,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "[Cahokia Mounds replicas]",
 				"creators": [
 					{
 						"lastName": "Grimont",
@@ -506,17 +505,16 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "Open WorldCat",
+				"date": "2000",
+				"ISBN": "9781881563020",
 				"language": "English",
+				"libraryCatalog": "Open WorldCat",
 				"place": "Collinsville, Ill.",
-				"ISBN": "1881563022  9781881563020",
-				"title": "[Cahokia Mounds replicas]",
 				"publisher": "Cahokia Mounds Museum Society]",
-				"date": "2000"
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -551,7 +549,7 @@ var testCases = [
 				"publisher": "MIT Press",
 				"place": "Cambridge, Mass.",
 				"date": "1996",
-				"ISBN": "0585030154  9780585030159",
+				"ISBN": "9780585030159",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
@@ -589,7 +587,7 @@ var testCases = [
 				"publisher": "MIT Press",
 				"place": "Cambridge, Mass.",
 				"date": "1996",
-				"ISBN": "0585030154  9780585030159",
+				"ISBN": "9780585030159",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
