@@ -16,7 +16,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcv",
-	"lastUpdated": "2015-03-05 00:04:47"
+	"lastUpdated": "2015-03-05 03:20:38"
 }
 
 function detectImport() {
@@ -595,9 +595,10 @@ function doImport() {
 
 			} else if (field == "notes" || field == "research-notes") {
 				newItem.notes.push(
-					'<p>' + processField(node, true)
-						.split(/[\r\n]+/)
+					'<p>' + processField(node, true, 'note')
+						.split(/(?:\r\n|\r(?!\n)|\n){2,}/) // Double newlines (or more) are paragraphs
 						.join('</p><p>')
+						.replace(/[\r\n]+/g, '<br/>') // Single newlines are just new lines
 					+ '</p>'
 				);
 			} else if (field == "keywords") {
@@ -764,10 +765,12 @@ function doExport() {
 					}
 				break;
 				case 'research-notes':
-					if (item.notes && Zotero.getOption("exportNotes")) {
-						for (var i = 0; i < item.notes.length; i++) {
-							mapProperty(record, "research-notes", item.notes[i].note)
-						}
+					if (item.notes && item.notes.length && Zotero.getOption("exportNotes")) {
+						mapProperty(record, "research-notes",
+							item.notes.reduce(function(s, n) {
+								return s + '<p>' + n.note + '</p>'; // EndNote only supports a single note field, so concatenate all notes into one
+							}, '')
+						);
 					}
 				break;
 				case 'urls':
@@ -821,7 +824,9 @@ function doExport() {
 	doc.documentElement.appendChild(records);
 	Zotero.write('<?xml version="1.0" encoding="UTF-8"?>\n');
 	var serializer = new XMLSerializer();
-	Zotero.write(serializer.serializeToString(doc));
+	Zotero.write(serializer.serializeToString(doc)
+		.replace(/\r\n?|\n/g, '&#xD;') // Follow EndNote convention for newlines (carriage return entity)
+	);
 }
 
 
@@ -842,9 +847,13 @@ var en2zMap = {
 	subscript: 'sub'
 };
 
-function htmlify(nodes) {
-	var htmlstr = "";
-	var formatting = [];
+var en2zNoteMap = Object.create(en2zMap);
+en2zNoteMap.underline = 'u';
+
+function htmlify(nodes, field) {
+	var htmlstr = "",
+		formatting = [],
+		map = field == 'note' ? en2zNoteMap : en2zMap;
 	
 	if(nodes.childNodes.length == 1 && nodes.childNodes[0].nodeType == 3) {
 		//single text node
@@ -857,7 +866,7 @@ function htmlify(nodes) {
 		if(face) {
 			face = face.split(/\s+/)
 				//filter out tags we don't care about
-				.filter(function(f) { return !!en2zMap[f] });
+				.filter(function(f) { return !!map[f] });
 		} else {
 			face = [];
 		}
@@ -866,7 +875,7 @@ function htmlify(nodes) {
 		var closing = [];
 		for(var j=0; j<formatting.length; j++) {
 			if(face.indexOf(formatting[j]) == -1) {
-				closing.push(en2zMap[formatting[j]]);
+				closing.push(map[formatting[j]]);
 				formatting.splice(j,1);
 				j--;
 			}
@@ -876,10 +885,10 @@ function htmlify(nodes) {
 		//see what we're opening
 		var opening = [];
 		for(var j=0; j<face.length; j++) {
-			if(!en2zMap[face[j]]) continue;
+			if(!map[face[j]]) continue;
 			
 			if(formatting.indexOf(face[j]) == -1) {
-				opening.push(en2zMap[face[j]]);
+				opening.push(map[face[j]]);
 				formatting.push(face[j]);
 			}
 		}
@@ -891,7 +900,7 @@ function htmlify(nodes) {
 	//close left-over tags
 	var closing = [];
 	for(var j=0; j<formatting.length; j++) {
-		closing.push(en2zMap[formatting[j]]);
+		closing.push(map[formatting[j]]);
 	}
 	if(closing.length) htmlstr += '</' + closing.reverse().join('></') + '>';
 	
@@ -905,11 +914,11 @@ function htmlify(nodes) {
  *
  * @return {String} The text content
  */
-function processField(node, keepNewlines) {
+function processField(node, keepNewlines, field) {
 	if (!node.textContent) {
 		return '';
 	} else {
-		var content = htmlify(node);
+		var content = htmlify(node, field);
 		//don't remove line breaks from abstracts
 		if (keepNewlines) return content;
 		else return ZU.trimInternal(content);
@@ -961,16 +970,20 @@ var convertZoteroMarkup = (function() {
 	//mapping Zotero mark-up to EndNote
 	var map = {
 		I: ['italic'],
+		EM: ['italic'], // TinyMCE
 		B: ['bold'],
+		STRONG: ['bold'], // TinyMCE
 		SUP: ['superscript'],
 		SUB: ['subscript'],
+		U: ['underline'], // Because we import it this way into notes
 		SC: [],
-		SPAN: []
+		SPAN: ['span']
 	};
 	var doc = (new DOMParser()).parseFromString('<foo/>', 'application/xml');
 	
 	function createFormattedNode(str, format) {
 		var node = doc.createElement('style');
+		str = str.replace(/\n{3,}/g, '\n\n'); // Possible if some tags were skipped
 		if(format.length) {
 			node.setAttribute('face', format.join(' '));
 		} else {
@@ -980,23 +993,37 @@ var convertZoteroMarkup = (function() {
 		return node;
 	}
 	
-	var tagRe = new RegExp('<(/?)(' + Object.keys(map).join('|') + ')(\s[^>]*)?>', 'i');
-	
+	var tagRe = /<(\/?)(\w+)(\s[^>]*)?>/gi;
 	return function(str) {
-		var tags = [], formatting = [], currentStr = '', nextStrStart = 0,
-			nodes = [], i = -1;
-		while((i = str.indexOf('<', i + 1)) != -1) {
-			var m = ZU.XRegExp.exec(str, tagRe, i, true);
-			if (!m) continue;
-			
-			var tagName = m[2].toUpperCase();
-			var oldFormatting;
+		// Paragraphs and line breaks get converted to newlines
+		str = str.replace(/\s*<br\s*\/?>\s*/gi, '\n')
+			.replace(/(?:\s*<\/p>\s*)+/gi, '\n\n')
+			.replace(/\s*<p(?:\s.*?)?>\s*/gi, '\n\n')
+			.trim();
+		
+		var tags = [],
+			formatting = [],
+			currentStr = '',
+			nextStrStart = 0,
+			nodes = [],
+			m;
+		while(m = tagRe.exec(str)) {
+			var tagName = m[2].toUpperCase(),
+				format = map[tagName] || [],
+				oldFormatting;
 			if(!m[1]) {
 				//opening tag
-				//get new formatting that would be applied to text
-				var format = map[tagName];
-				if(!format) continue; //we're not supposed to process this
-				var formatDiff = ZU.arrayDiff(format, formatting);
+				// If "span", need to inspect contents of style attribute
+				if (tagName == 'SPAN' && m[3] && /\bstyle\s*=/i.test(m[3])) {
+					// Currently we're only aware of "text-decoration: underline" that is used in tinyMCE
+					if (/text-decoration\s*:[^'";]*\bunderline\b/.test(m[3])) {
+						format = ['underline'];
+					} else {
+						format = []; // Just drop it
+					}
+				}
+				
+				var formatDiff = ZU.arrayDiff(format, formatting); //only consider new formatting
 				
 				//push tag so that we know what we're closing later
 				tags.push({
@@ -1027,16 +1054,14 @@ var convertZoteroMarkup = (function() {
 			}
 			
 			//attach substring up to tag
-			if(nextStrStart < i) currentStr += str.substring(nextStrStart, i);
-			nextStrStart = i + m[0].length; //just past the current tag
+			if(nextStrStart < m.index) currentStr += str.substring(nextStrStart, m.index);
+			nextStrStart = tagRe.lastIndex; //just past the current tag
 			
 			if(formatDiff.length && currentStr) {
 				//formatting is changing, create a node for current formatting
 				nodes.push(createFormattedNode(currentStr, oldFormatting));
 				currentStr = '';
 			}
-			
-			i += m[0].length - 1;
 		}
 		
 		if(nextStrStart < str.length) currentStr += str.substring(nextStrStart);
