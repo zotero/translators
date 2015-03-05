@@ -16,7 +16,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcv",
-	"lastUpdated": "2015-02-11 01:23:55"
+	"lastUpdated": "2015-03-05 00:04:47"
 }
 
 function detectImport() {
@@ -530,7 +530,13 @@ function doImport() {
 					var authortype = zfield.replace(/creators\//, "");
 					newItem.creators.push(ZU.cleanAuthor(node.textContent, authortype))
 				} else if (ZU.fieldIsValidForType(zfield, newItem.itemType)) {
-					newItem[zfield] = processField(node);
+					if (zfield == 'abstractNote') {
+						// Preserve newlines
+						newItem[zfield] = processField(node, true)
+							.replace(/\r\n?/g, '\n');
+					} else {
+						newItem[zfield] = processField(node);
+					}
 				}
 				else {
 					notecache.push(field + ": " + processField(node));
@@ -588,7 +594,12 @@ function doImport() {
 				}
 
 			} else if (field == "notes" || field == "research-notes") {
-				newItem.notes.push(processField(node));
+				newItem.notes.push(
+					'<p>' + processField(node, true)
+						.split(/[\r\n]+/)
+						.join('</p><p>')
+					+ '</p>'
+				);
 			} else if (field == "keywords") {
 				for (var k = 0; k < node.children.length; k++) {
 					var subnode = node.children[k];
@@ -894,13 +905,13 @@ function htmlify(nodes) {
  *
  * @return {String} The text content
  */
-function processField(node) {
+function processField(node, keepNewlines) {
 	if (!node.textContent) {
 		return '';
 	} else {
 		var content = htmlify(node);
 		//don't remove line breaks from abstracts
-		if (node.nodeName == "abstract") return content;
+		if (keepNewlines) return content;
 		else return ZU.trimInternal(content);
 	}
 }
