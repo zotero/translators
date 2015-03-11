@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-02-25 11:16:03"
+	"lastUpdated": "2015-03-11 22:54:28"
 }
 
 function detectImport() {
@@ -1487,8 +1487,16 @@ function dateRIStoZotero(risDate, zField) {
 			return '0000 ' + m[0] + (d ? ' ' + d[0] : '');
 		}
 
-		//TODO: add more formats
-		return risDate;
+		// Let Zotero try and figure this out
+		var parsedDate = ZU.strToDate(risDate);
+		if (!parsedDate || !parsedDate.year) {
+			return risDate;
+		}
+		
+		date[0] = parsedDate.year;
+		date[1] = '' + (parsedDate.month + 1);
+		date[2] = '' + parsedDate.day;
+		part = parsedDate.part;
 	}
 
 	//sometimes unknown parts of date are given as 0. Drop these and anything that follows
