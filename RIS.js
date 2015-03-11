@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-03-11 22:54:28"
+	"lastUpdated": "2015-03-11 23:06:20"
 }
 
 function detectImport() {
@@ -1486,7 +1486,12 @@ function dateRIStoZotero(risDate, zField) {
 		if(!y && m) {
 			return '0000 ' + m[0] + (d ? ' ' + d[0] : '');
 		}
-
+		
+		// Only try harder with access dates, since those get dropped otherwise
+		// For everything else, Zotero will go through the same algorithm later
+		// but at least we won't be discarding anything
+		if (zField != 'accessDate') return risDate;
+		
 		// Let Zotero try and figure this out
 		var parsedDate = ZU.strToDate(risDate);
 		if (!parsedDate || !parsedDate.year) {
