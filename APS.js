@@ -9,14 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-05-08 21:55:24"
+	"lastUpdated": "2015-03-13 14:18:04"
 }
 
 function getSearchResults(doc) {
 	var articles = doc.getElementsByClassName('article');
 	var results = [];
 	for(var i=0; i<articles.length; i++) {
-		if(articles[i].getElementsByClassName('reveal-export').length) {
+		if(articles[i].getElementsByClassName('row').length) {
 			results.push(articles[i]);
 		}
 	}
@@ -75,7 +75,7 @@ function scrape(doc, url) {
 			));
 			
 			// attach PDF
-			if(ZU.xpath(doc, '//section[@id="title"]//a[starts-with(text(), "PDF")]').length) {
+			if(ZU.xpath(doc, '//div[@class="article-nav-actions"]/a[contains(text(), "PDF")]').length) {
 				item.attachments.push({
 					title: 'Full Text PDF',
 					url: url.replace('{REPLACE}', 'pdf'),
@@ -138,6 +138,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Hints for a nonstandard Higgs boson from the LHC",
 				"creators": [
 					{
 						"lastName": "Raidal",
@@ -150,9 +151,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "October 21, 2011",
+				"DOI": "10.1103/PhysRevD.84.077701",
+				"abstractNote": "We reconsider Higgs boson invisible decays into Dark Matter in the light of recent Higgs searches at the LHC. Present hints in the Compact Muon Solenoid and ATLAS data favor a nonstandard Higgs boson with approximately 50% invisible branching ratio, and mass around 143 GeV. This situation can be realized within the simplest thermal scalar singlet Dark Matter model, predicting a Dark Matter mass around 50 GeV and direct detection cross section just below present bound. The present runs of the Xenon100 and LHC experiments can test this possibility.",
+				"issue": "7",
+				"journalAbbreviation": "Phys. Rev. D",
+				"libraryCatalog": "APS",
+				"pages": "077701",
+				"publicationTitle": "Physical Review D",
+				"url": "http://link.aps.org/doi/10.1103/PhysRevD.84.077701",
+				"volume": "84",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -162,23 +170,20 @@ var testCases = [
 						"title": "APS Snapshot"
 					}
 				],
-				"DOI": "10.1103/PhysRevD.84.077701",
-				"url": "http://link.aps.org/doi/10.1103/PhysRevD.84.077701",
-				"journalAbbreviation": "Phys. Rev. D",
-				"issue": "7",
-				"abstractNote": "We reconsider Higgs boson invisible decays into Dark Matter in the light of recent Higgs searches at the LHC. Present hints in the Compact Muon Solenoid and ATLAS data favor a nonstandard Higgs boson with approximately 50% invisible branching ratio, and mass around 143 GeV. This situation can be realized within the simplest thermal scalar singlet Dark Matter model, predicting a Dark Matter mass around 50 GeV and direct detection cross section just below present bound. The present runs of the Xenon100 and LHC experiments can test this possibility.",
-				"libraryCatalog": "APS",
-				"title": "Hints for a nonstandard Higgs boson from the LHC",
-				"publicationTitle": "Physical Review D",
-				"volume": "84",
-				"pages": "077701",
-				"date": "October 21, 2011"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
 		"url": "http://journals.aps.org/prd/issues/84/7",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://journals.aps.org/search?field=all&q=test&sort=recent&date=&start_date=&end_date=",
 		"items": "multiple"
 	}
 ]
