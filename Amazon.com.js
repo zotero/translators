@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2015-02-25 06:23:59"
+	"lastUpdated": "2015-03-13 21:29:32"
 }
 
 function detectWeb(doc, url) {
@@ -190,8 +190,12 @@ function scrape(doc, url) {
 	
 	var baseNode = title.parentElement, bncl;
 	while(baseNode && (bncl = baseNode.classList) && 
-		!(baseNode.id == 'booksTitle' || bncl.contains('buying')
-			|| bncl.contains('content') || bncl.contains('DigitalMusicInfoColumn')
+		!(// ways to identify a node encompasing title and authors
+			baseNode.id == 'booksTitle'
+			|| baseNode.id == 'ppd-center'
+			|| bncl.contains('buying')
+			|| bncl.contains('content')
+			|| bncl.contains('DigitalMusicInfoColumn')
 			|| (baseNode.id == 'centerCol' && baseNode.firstElementChild.id.indexOf('title') == 0)
 		)
 	) {
@@ -205,6 +209,7 @@ function scrape(doc, url) {
 		if(!authors.length) authors = ZU.xpath(baseNode, './/span[@class="contributorNameTrigger"]/a[not(@href="#")]');
 		if(!authors.length) authors = ZU.xpath(baseNode, './/a[following-sibling::*[1][@class="byLinePipe"]]');
 		if(!authors.length) authors = ZU.xpath(baseNode, './/a[contains(@href, "field-author=")]');
+		if(!authors.length) authors = ZU.xpath(baseNode, './/a[@id="ProductInfoArtistLink"]');
 		for(var i=0; i<authors.length; i++) {
 			var role = ZU.xpathText(authors[i], '(.//following::text()[normalize-space(self::text())])[1]');
 			if(role) {
@@ -637,7 +642,7 @@ var testCases = [
 				"abstractNote": "Novel by Charles Dickens, published both serially and in book form in 1859. The story is set in the late 18th century against the background of the French Revolution. Although Dickens borrowed from Thomas Carlyle's history, The French Revolution, for his sprawling tale of London and revolutionary Paris, the novel offers more drama than accuracy. The scenes of large-scale mob violence are especially vivid, if superficial in historical understanding. The complex plot involves Sydney Carton's sacrifice of his own life on behalf of his friends Charles Darnay and Lucie Manette. While political events drive the story, Dickens takes a decidedly antipolitical tone, lambasting both aristocratic tyranny and revolutionary excess--the latter memorably caricatured in Madame Defarge, who knits beside the guillotine. The book is perhaps best known for its opening lines, \"It was the best of times, it was the worst of times,\" and for Carton's last speech, in which he says of his replacing Darnay in a prison cell, \"It is a far, far better thing that I do, than I have ever done; it is a far, far better rest that I go to, than I have ever known.\" -- The Merriam-Webster Encyclopedia of Literature",
 				"language": "English",
 				"libraryCatalog": "Amazon.com",
-				"numPages": 238,
+				"numPages": 341,
 				"publisher": "Public Domain Books",
 				"attachments": [
 					{
@@ -808,7 +813,13 @@ var testCases = [
 			{
 				"itemType": "audioRecording",
 				"title": "Die Eiskönigin Völlig Unverfroren",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Various artists",
+						"creatorType": "performer",
+						"fieldMode": 1
+					}
+				],
 				"libraryCatalog": "Amazon.com",
 				"runningTime": "1:08:58",
 				"attachments": [
