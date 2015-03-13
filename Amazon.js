@@ -1,6 +1,6 @@
 {
 	"translatorID": "96b9f483-c44d-5784-cdad-ce21b984fe01",
-	"label": "Amazon.com",
+	"label": "Amazon",
 	"creator": "Sean Takats, Michael Berkowitz, and Simon Kornblith",
 	"target": "^https?://((?:www\\.)|(?:smile\\.))?amazon",
 	"minVersion": "3.0",
