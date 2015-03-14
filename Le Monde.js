@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-03-14 08:45:35"
+	"lastUpdated": "2015-03-14 09:33:21"
 }
 
 /*
@@ -95,7 +95,7 @@ function scrape(doc, url) {
 		
 		var author = ZU.xpathText(doc, '//span[@itemprop="author"]');
 		if (author) {
-			item.creators.push( ZU.cleanAuthor(author) );
+			item.creators.push( ZU.cleanAuthor(author, "author") );
 		}
 		
 		item.section = ZU.xpathText(doc, '//nav[@id="nav"]/ul/li[contains(@class,"actif")]/a/@data-rubrique-title');
@@ -119,7 +119,8 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "Olivier",
-						"lastName": "Faye"
+						"lastName": "Faye",
+						"creatorType": "author"
 					}
 				],
 				"date": "2015-03-13T10:37:46+01:00",
