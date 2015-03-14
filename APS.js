@@ -9,11 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-03-13 14:18:04"
+	"lastUpdated": "2015-03-14 16:13:43"
 }
 
 function getSearchResults(doc) {
-	var articles = doc.getElementsByClassName('article');
+	var articles = doc.getElementsByClassName('article-result');
 	var results = [];
 	for(var i=0; i<articles.length; i++) {
 		if(articles[i].getElementsByClassName('row').length) {
@@ -185,6 +185,70 @@ var testCases = [
 		"type": "web",
 		"url": "http://journals.aps.org/search?field=all&q=test&sort=recent&date=&start_date=&end_date=",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://journals.aps.org/prl/abstract/10.1103/PhysRevLett.114.098105",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Magnetic Flattening of Stem-Cell Spheroids Indicates a Size-Dependent Elastocapillary Transition",
+				"creators": [
+					{
+						"lastName": "Mazuel",
+						"firstName": "Francois",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Reffay",
+						"firstName": "Myriam",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Du",
+						"firstName": "Vicard",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bacri",
+						"firstName": "Jean-Claude",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Rieu",
+						"firstName": "Jean-Paul",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wilhelm",
+						"firstName": "Claire",
+						"creatorType": "author"
+					}
+				],
+				"date": "March 4, 2015",
+				"DOI": "10.1103/PhysRevLett.114.098105",
+				"abstractNote": "Cellular aggregates (spheroids) are widely used in biophysics and tissue engineering as model systems for biological tissues. In this Letter we propose novel methods for molding stem-cell spheroids, deforming them, and measuring their interfacial and elastic properties with a single method based on cell tagging with magnetic nanoparticles and application of a magnetic field gradient. Magnetic molding yields spheroids of unprecedented sizes (up to a few mm in diameter) and preserves tissue integrity. On subjecting these spheroids to magnetic flattening (over 150g), we observed a size-dependent elastocapillary transition with two modes of deformation: liquid-drop-like behavior for small spheroids, and elastic-sphere-like behavior for larger spheroids, followed by relaxation to a liquidlike drop.",
+				"issue": "9",
+				"journalAbbreviation": "Phys. Rev. Lett.",
+				"libraryCatalog": "APS",
+				"pages": "098105",
+				"publicationTitle": "Physical Review Letters",
+				"url": "http://link.aps.org/doi/10.1103/PhysRevLett.114.098105",
+				"volume": "114",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "APS Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
