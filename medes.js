@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-03-14 14:44:50"
+	"lastUpdated": "2015-03-14 16:21:49"
 }
 
 /*
@@ -49,7 +49,7 @@ function getSearchResults(doc, checkOnly) {
 	var rows = ZU.xpath(doc, '//table[contains(@class, "resultsTable")]//tr');
 	for (var i=0; i<rows.length; i++) {
 		var id = ZU.xpathText(rows[i], './td[@class="firstCell"]/input[@id="PublicationHidden"]/@value');
-		var href = "https://www.medes.com/Public/ResumePublication.aspx?idmedes=" + id;
+		var href = "/Public/ResumePublication.aspx?idmedes=" + id;
 		var title = ZU.xpathText(rows[i], './td/p[@class="larger"]');
 		title = ZU.trimInternal(title);
 		if (!href || !title) continue;
