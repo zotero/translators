@@ -2,14 +2,14 @@
 	"translatorID": "24d9f058-3eb3-4d70-b78f-1ba1aef2128d",
 	"label": "CTX",
 	"creator": "Avram Lyon and Simon Kornblith",
-	"target": "^https?://freecite\\.library\\.brown\\.edu",
+	"target": "ctx",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
-	"translatorType": 5,
+	"translatorType": 1,
 	"browserSupport": "gcv",
-	"lastUpdated": "2014-12-17 22:27:41"
+	"lastUpdated": "2015-03-16 23:13:39"
 }
 
 /*
@@ -29,6 +29,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+ 
  /*This translator imports OpenURL ContextObjects encapsulated in XML
  * documents, as described at:
  *  http://alcme.oclc.org/openurl/servlet/OAIHandler?verb=GetRecord&metadataPrefix=oai_dc&identifier=info:ofi/fmt:xml:xsd:ctx
@@ -38,106 +39,35 @@
  * This format is used in several places online, including Brown University's FreeCite
  * Citation parser (http://freecite.library.brown.edu/welcome) and Oslo University's
  * X-Port (http://www.ub.uio.no/portal/gs.htm or http://x-port.uio.no/).
- 
- * Our input looks like this:
-<ctx:context-objects xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='info:ofi/fmt:xml:xsd:ctx http://www.openurl.info/registry/docs/info:ofi/fmt:xml:xsd:ctx' xmlns:ctx='info:ofi/fmt:xml:xsd:ctx'>
-<ctx:context-object timestamp='2010-01-02T16:55:48-05:00' encoding='info:ofi/enc:UTF-8' version='Z39.88-2004' identifier=''>
- <ctx:referent>
-  <ctx:metadata-by-val>
-   <ctx:format>info:ofi/fmt:xml:xsd:journal</ctx:format>
-   <ctx:metadata>
-	<journal xmlns:rft='info:ofi/fmt:xml:xsd:journal' xsi:schemaLocation='info:ofi/fmt:xml:xsd:journal http://www.openurl.info/registry/docs/info:ofi/fmt:xml:xsd:journal'>
-	 <rft:atitle>Acute Myocardial Infarction in the Medicare population: process of care and clinical outcomes</rft:atitle>
-	 <rft:spage>2530</rft:spage>
-	 <rft:date>1992</rft:date>
-	 <rft:stitle>Journal of the American Medical Association</rft:stitle>
-	 <rft:genre>article</rft:genre>
-	 <rft:volume>18</rft:volume>
-	 <rft:epage>2536</rft:epage>
-	 <rft:au>I S Udvarhelyi</rft:au>
-	 <rft:au>C A Gatsonis</rft:au>
-	 <rft:au>A M Epstein</rft:au>
-	 <rft:au>C L Pashos</rft:au>
-	 <rft:au>J P Newhouse</rft:au>
-	 <rft:au>B J McNeil</rft:au>
-	</journal>
-   </ctx:metadata>
-  </ctx:metadata-by-val>
- </ctx:referent>
-</ctx:context-object>
-</ctx:context-objects>
  *
  * The approach we will take is to convert this into COinS, so that we can
  * piggy-back off of the perhaps more robust support in the core Zotero code.
  */
 
-function detectWeb(doc, url) {
-	var texts = [], text = "";
-	var codes = doc.getElementsByTagName("code");
-	for(var i = 0; i < codes.length; i++) {
-		text = codes[i].textContent;
-		text.replace(/</g,"&lt;").replace(/>/g,"&gt;");
-		texts.push(text);
+function detectImport() {
+	var line;
+	var i=0;
+	while ((line = Zotero.read()) && i<100) {
+		if ( line.indexOf("info:ofi/fmt:xml:xsd:ctx")>-1 ) {
+			return true;
+		}
+		i++;
 	}
-	return detectInString(texts);
-};
+	return false;
+}
 
-function doWeb(doc, url) {
-	var texts = [], text = "";
-	var codes = doc.getElementsByTagName("code");
-	for(var i = 0; i < codes.length; i++) {
-		text = codes[i].textContent;
-		text.replace(/</g,"&lt;").replace(/>/g,"&gt;");
-		texts.push(text);
-	}
-	doImportFromText(texts, true);
-};
+
 
 function doImport() {
-	var text = "";
-	var line;
-	while(line = Zotero.read()) {
-		text += line;
-	}
-	return doImportFromText(text, false);
-}
-
-function detectImport() {
-	var text = "";
-	var line;
-	while(line = Zotero.read()) {
-		text += line;
-	}	
-	return detectInString(text) != false;
-}
-
-function detectInString(text) {
-	var detectedType = false;
-
-	var spans = [];
-	Z.debug(text)
-	// This is because we want to be able to read multiple such CTX elements in a single page
-	if (typeof text != "string" && text.length >= 1) {
-		spans = text.map(contextObjectXMLToCOinS).reduce(function(a,b){return a.concat(b);});
-	} else {
-		spans = contextObjectXMLToCOinS(text);
-	}       
 	
-	for (var i = 0 ; i < spans.length ; i++) {
-		var item = new Zotero.Item;
-		var success = Zotero.Utilities.parseContextObject(spans[i], item);
-		if(item.itemType) {
-			Zotero.debug("Found " + item.itemType);
-			if (detectedType) {
-				return "multiple";
-			}
-			detectedType = item.itemType;
-		} else {
-			Zotero.debug("Type not found");
-		}
+	var text = "";
+	var line;
+	while(line = Zotero.read()) {
+		text += line;
 	}
-	return detectedType;
-};
+	doImportFromText(text);
+}
+
 
 /* Takes the string of the ContextObject XML format
  * and returns an array of COinS titles of the same, per the COinS
@@ -157,7 +87,7 @@ function contextObjectXMLToCOinS (text) {
 				"ctx" : "info:ofi/fmt:xml:xsd:ctx",
 				"rft" : "info:ofi/fmt:xml:xsd:journal"
 		};
-	/* Here and elsewhere, we are using the E4X syntax for XML */
+	
 	var objects = ZU.xpath(doc, '//ctx:context-object', ns)
 	/* Bail out if no object */
 	if(objects.length === 0) {
@@ -176,19 +106,20 @@ function contextObjectXMLToCOinS (text) {
 	
 		pieces.push("ctx_ver="+encodeURIComponent(version));
 		
-		var format = ZU.xpathText(objects[i], '//ctx:format', ns)
+		var format = ZU.xpathText(objects[i], './/ctx:format', ns)
 		// Now conert this to the corresponding Key/Encoded-Value format; see note below.
 		// Check if this is unknown; if it is, skip
 		if (format == "info:ofi/fmt:xml:xsd:unknown") {
-			Zotero.debug("Skipping object of type 'unknown'");
-			continue;
+			//Zotero.debug("Skipping object of type 'unknown'");
+			//continue;
+			format = "info:ofi/fmt:kev:mtx:journal"; // use journalArticle as default value
 		}
 		
 		format = mapXMLtoKEV[format];
 
 		pieces.push("rft_val_fmt=" + encodeURIComponent(format));
 		
-		var fields = ZU.xpath(objects[i], '//ctx:metadata/*/*', ns);
+		var fields = ZU.xpath(objects[i], './/ctx:metadata/*/*', ns);
 		var field;
 		for (var j in fields) {
 			var name = fields[j].nodeName;
@@ -206,49 +137,25 @@ function contextObjectXMLToCOinS (text) {
 	return titles;
 };
 
-function doImportFromText(text, showPrompt) {
-	var spans = [], items = [], zoteroItems = [];
-	
-	// This is because we want to be able to read multiple such CTX elements in a single page
-	if (typeof text != "string" && text.length >= 1) {
-		spans = text.map(contextObjectXMLToCOinS).reduce(function(a,b){return a.concat(b);});
-	} else {
-		spans = contextObjectXMLToCOinS(text);
-	}
+function doImportFromText(text) {
+	var spans = contextObjectXMLToCOinS(text);
 	
 	for (var i = 0 ; i < spans.length ; i++) {
 		Zotero.debug("Processing span: "+spans[i]);
 		var item = new Zotero.Item;
-		Zotero.Utilities.parseContextObject(spans[i], item);
-		if(item.itemType) {
+		var success = Zotero.Utilities.parseContextObject(spans[i], item);
+		if (success) {
 			Zotero.debug("Found " + item.itemType);
-			items.push(item.title);
-			zoteroItems.push(item);
 			// Set publicationTitle to the short title if only the latter is specified
 			if (item.journalAbbreviation && !item.publicationTitle) {
 				item.publicationTitle = item.journalAbbreviation;
 			}
-			// If we're in non-prompting mode, save right away
-			if (showPrompt === false) {
-				item.complete();
-			}
-		} else {
-			Zotero.debug("Type not found");
-		}
-	}
-	// Since we want to prompt, we have to parse twice.
-	if(showPrompt === true) {
-		if(items.length == 1) {
 			item.complete();
 		} else {
-			items = Zotero.selectItems(items);
-			if(!items) return true;
-			for(var i in items) {
-				zoteroItems[i].complete();
-			}
+			Zotero.debug("parseContextObject was not successful");
 		}
 	}
-};
+}
 
 /* These two arrays are needed because COinS uses Key/Escaped-Value, which has a different
  * set of format codes. Codes from "Registry for the OpenURL Framework - ANSI/NISO Z39.88-2004":
@@ -279,6 +186,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Acute Myocardial Infarction in the Medicare population: process of care and clinical outcomes",
 				"creators": [
 					{
 						"firstName": "I. S.",
@@ -311,16 +219,65 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Acute Myocardial Infarction in the Medicare population: process of care and clinical outcomes",
-				"pages": "2530-2536",
 				"date": "1992",
 				"journalAbbreviation": "Journal of the American Medical Association",
+				"pages": "2530-2536",
+				"publicationTitle": "Journal of the American Medical Association",
 				"volume": "18",
-				"publicationTitle": "Journal of the American Medical Association"
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<ctx:context-objects xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='info:ofi/fmt:xml:xsd:ctx http://www.openurl.info/registry/docs/info:ofi/fmt:xml:xsd:ctx' xmlns:ctx='info:ofi/fmt:xml:xsd:ctx'> <ctx:context-object timestamp='2015-03-16T15:37:18-04:00' encoding='info:ofi/enc:UTF-8' version='Z39.88-2004' identifier=''><ctx:referent><ctx:metadata-by-val><ctx:format>info:ofi/fmt:xml:xsd:journal</ctx:format><ctx:metadata><journal xmlns:rft='info:ofi/fmt:xml:xsd:journal' xsi:schemaLocation='info:ofi/fmt:xml:xsd:journal http://www.openurl.info/registry/docs/info:ofi/fmt:xml:xsd:journal'><rft:quarter>4356</rft:quarter><rft:atitle>Molecular structure of nucleic acids; a structure for deoxyribose nucleic acid</rft:atitle><rft:spage>737</rft:spage><rft:date>1953</rft:date><rft:jtitle>Nature</rft:jtitle><rft:genre>article</rft:genre><rft:volume>171</rft:volume><rft:epage>738</rft:epage><rft:au>J D Watson</rft:au><rft:au>F H C Crick</rft:au></journal></ctx:metadata></ctx:metadata-by-val></ctx:referent></ctx:context-object>  <ctx:context-object timestamp='2015-03-16T15:37:18-04:00' encoding='info:ofi/enc:UTF-8' version='Z39.88-2004' identifier=''><ctx:referent><ctx:metadata-by-val><ctx:format>info:ofi/fmt:xml:xsd:journal</ctx:format><ctx:metadata><journal xmlns:rft='info:ofi/fmt:xml:xsd:journal' xsi:schemaLocation='info:ofi/fmt:xml:xsd:journal http://www.openurl.info/registry/docs/info:ofi/fmt:xml:xsd:journal'><rft:quarter>4</rft:quarter><rft:atitle>On the electrodynamics of moving bodies</rft:atitle><rft:spage>1</rft:spage><rft:date>1905</rft:date><rft:stitle>Annalen Der Physik</rft:stitle><rft:genre>article</rft:genre><rft:volume>17</rft:volume><rft:epage>26</rft:epage><rft:au>A Einstein</rft:au></journal></ctx:metadata></ctx:metadata-by-val></ctx:referent></ctx:context-object> </ctx:context-objects>",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Molecular structure of nucleic acids; a structure for deoxyribose nucleic acid",
+				"creators": [
+					{
+						"firstName": "J. D.",
+						"lastName": "Watson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "F. H. C.",
+						"lastName": "Crick",
+						"creatorType": "author"
+					}
+				],
+				"date": "1953",
+				"pages": "737-738",
+				"publicationTitle": "Nature",
+				"volume": "171",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			},
+			{
+				"itemType": "journalArticle",
+				"title": "On the electrodynamics of moving bodies",
+				"creators": [
+					{
+						"firstName": "A.",
+						"lastName": "Einstein",
+						"creatorType": "author"
+					}
+				],
+				"date": "1905",
+				"journalAbbreviation": "Annalen Der Physik",
+				"pages": "1-26",
+				"publicationTitle": "Annalen Der Physik",
+				"volume": "17",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
