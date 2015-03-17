@@ -6,10 +6,13 @@
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
+	"configOptions": {
+		"dataMode": "xml/dom"
+	},
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcv",
-	"lastUpdated": "2015-03-16 23:13:39"
+	"lastUpdated": "2015-03-18 11:56:01"
 }
 
 /*
@@ -44,9 +47,10 @@
  * piggy-back off of the perhaps more robust support in the core Zotero code.
  */
 
+
 function detectImport() {
-	var line;
-	var i=0;
+	// read at most 100 lines and checks for ctx-namespace
+	var line, i=0;
 	while ((line = Zotero.read()) && i<100) {
 		if ( line.indexOf("info:ofi/fmt:xml:xsd:ctx")>-1 ) {
 			return true;
@@ -57,88 +61,9 @@ function detectImport() {
 }
 
 
-
 function doImport() {
-	
-	var text = "";
-	var line;
-	while(line = Zotero.read()) {
-		text += line;
-	}
-	doImportFromText(text);
-}
 
-
-/* Takes the string of the ContextObject XML format
- * and returns an array of COinS titles of the same, per the COinS
- * specification.
- */
-function contextObjectXMLToCOinS (text) {
-	//Z.debug(text);
-	var parser = new DOMParser();
-		
-	try {
-		var doc = parser.parseFromString(text, "text/xml");	
-	}
-	catch (e) {
-		return [];
-	}
-	ns = {		"xsi" : "http://www.w3.org/2001/XMLSchema-instance",
-				"ctx" : "info:ofi/fmt:xml:xsd:ctx",
-				"rft" : "info:ofi/fmt:xml:xsd:journal"
-		};
-	
-	var objects = ZU.xpath(doc, '//ctx:context-object', ns)
-	/* Bail out if no object */
-	if(objects.length === 0) {
-		Zotero.debug("No context object");
-		return [];
-	}
-
-	var titles = [];
-	
-	for (var i = 0; i < objects.length; i++) {
-		Zotero.debug("Processing object: " + objects[i].textContent);
-		var pieces = [];
-		
-		
-		var version = ZU.xpathText(objects[i], './@version', ns)
-	
-		pieces.push("ctx_ver="+encodeURIComponent(version));
-		
-		var format = ZU.xpathText(objects[i], './/ctx:format', ns)
-		// Now conert this to the corresponding Key/Encoded-Value format; see note below.
-		// Check if this is unknown; if it is, skip
-		if (format == "info:ofi/fmt:xml:xsd:unknown") {
-			//Zotero.debug("Skipping object of type 'unknown'");
-			//continue;
-			format = "info:ofi/fmt:kev:mtx:journal"; // use journalArticle as default value
-		}
-		
-		format = mapXMLtoKEV[format];
-
-		pieces.push("rft_val_fmt=" + encodeURIComponent(format));
-		
-		var fields = ZU.xpath(objects[i], './/ctx:metadata/*/*', ns);
-		var field;
-		for (var j in fields) {
-			var name = fields[j].nodeName;
-			// turn this into html
-			name = name.replace(/:/, ".")
-			var value = encodeURIComponent(fields[j].textContent);
-			pieces.push(name + "=" + value);
-		}
-		
-		var title = pieces.join("&");
-		var span = "<span title='" + title + "' class='Z3988'></span>\n";
-		Zotero.debug("Made span: " + span);
-		titles.push(title);
-	}
-	return titles;
-};
-
-function doImportFromText(text) {
-	var spans = contextObjectXMLToCOinS(text);
+	var spans = contextObjectXMLToCOinS( Z.getXML() );
 	
 	for (var i = 0 ; i < spans.length ; i++) {
 		Zotero.debug("Processing span: "+spans[i]);
@@ -156,6 +81,64 @@ function doImportFromText(text) {
 		}
 	}
 }
+
+/* Takes the string of the ContextObject XML format
+ * and returns an array of COinS titles of the same, per the COinS
+ * specification.
+ */
+function contextObjectXMLToCOinS (doc) {
+
+	ns = {
+		"xsi" : "http://www.w3.org/2001/XMLSchema-instance",
+		"ctx" : "info:ofi/fmt:xml:xsd:ctx",
+		"rft" : "info:ofi/fmt:xml:xsd:journal"
+	};
+	
+	var objects = ZU.xpath(doc, '//ctx:context-object', ns)
+	/* Bail out if no object */
+	if (objects.length === 0) {
+		Zotero.debug("No context object");
+		return [];
+	}
+
+	var titles = [];
+	
+	for (var i = 0; i < objects.length; i++) {
+		Zotero.debug("Processing object: " + objects[i].textContent);
+		var pieces = [];
+		
+		var version = ZU.xpathText(objects[i], './@version', ns)
+	
+		pieces.push("ctx_ver="+encodeURIComponent(version));
+		
+		var format = ZU.xpathText(objects[i], './/ctx:format', ns)
+
+		if (mapXMLtoKEV[format]) {
+			format = mapXMLtoKEV[format];
+		} else {
+			// e.g. also format == "info:ofi/fmt:xml:xsd:unknown"
+			// use journalArticle as default value
+			format = "info:ofi/fmt:kev:mtx:journal";
+		}
+
+		pieces.push("rft_val_fmt=" + encodeURIComponent(format));
+		
+		var fields = ZU.xpath(objects[i], './/ctx:metadata/*/*', ns);
+		for (var j in fields) {
+			var name = fields[j].nodeName;
+			// turn this into html
+			name = name.replace(/:/, ".")
+			var value = encodeURIComponent(fields[j].textContent);
+			pieces.push(name + "=" + value);
+		}
+		
+		var title = pieces.join("&");
+		var span = "<span title='" + title + "' class='Z3988'></span>\n";
+		Zotero.debug("Made span: " + span);
+		titles.push(title);
+	}
+	return titles;
+};
 
 /* These two arrays are needed because COinS uses Key/Escaped-Value, which has a different
  * set of format codes. Codes from "Registry for the OpenURL Framework - ANSI/NISO Z39.88-2004":
