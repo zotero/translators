@@ -58,6 +58,22 @@ function doWeb(doc, url) {
 	}
 }
 
+// Extension to mimeType mapping
+var suppTypeMap = {
+	'pdf': 'application/pdf',
+	'zip': 'application/zip',
+	'doc': 'application/msword',
+	'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+	'xls': 'application/vnd.ms-excel',
+	'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+	'mov': 'video/quicktime'
+};
+
+var dontDownload = [
+	'application/zip',
+	'video/quicktime'
+];
+
 function scrape(doc, url) {
 	url = url.replace(/[?#].*/, '').replace(/\/abstract\//, '/{REPLACE}/');
 	// fetch RIS
@@ -89,35 +105,35 @@ function scrape(doc, url) {
 			});
 			
 			if(Z.getHiddenPref && Z.getHiddenPref('attachSupplementary')) {
-				try {
-					// Fetch supplemental info as JSON
-					ZU.doGet(url.replace('{REPLACE}', 'supplemental'), function(text) {
-						var suppInfo = JSON.parse(text);
+				ZU.processDocuments(url.replace('{REPLACE}', 'supplemental'), function(doc) {
+					try {
 						var asLink = Z.getHiddenPref('supplementaryAsLink');
-						for(var i=0; i<suppInfo.components.length; i++) {
-							var supp = suppInfo.components[i];
-							if(!supp.path) continue;
-							var title = supp.filename || 'Supplementary Data';
-							if(asLink) {
+						var suppFiles = doc.getElementsByClassName('supplemental-file');
+						for(var i=0; i<suppFiles.length; i++) {
+							var link = suppFiles[i].getElementsByTagName('a')[0];
+							if (!link || !link.href) continue;
+							var title = link.getAttribute('data-id') || 'Supplementary Data';
+							var type = suppTypeMap[link.href.split('.').pop()];
+							if(asLink || dontDownload.indexOf(type) != -1) {
 								item.attachments.push({
 									title: title,
-									url: supp.path,
-									mimeType: 'text/html',
+									url: link.href,
+									mimeType: type || 'text/html',
 									snapshot: false
 								});
 							} else {
 								item.attachments.push({
 									title: title,
-									url: supp.path
-									//probably PDF, but not sure it's always the case
+									url: link.href,
+									mimeType: type
 								});
 							}
 						}
-					}, function() { item.complete() });
-				} catch(e) {
-					Z.debug('Could not attach supplemental data. ' + e.message);
-					item.complete();
-				}
+					} catch (e) {
+						Z.debug('Could not attach supplemental data');
+						Z.debug(e);
+					}
+				}, function() { item.complete() });
 			} else {
 				item.complete();
 			}
