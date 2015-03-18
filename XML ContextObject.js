@@ -1,9 +1,9 @@
 {
 	"translatorID": "24d9f058-3eb3-4d70-b78f-1ba1aef2128d",
-	"label": "CTX",
+	"label": "XML ContextObject",
 	"creator": "Avram Lyon and Simon Kornblith",
 	"target": "ctx",
-	"minVersion": "2.1",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"configOptions": {
@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"browserSupport": "gcv",
+	"browserSupport": "gcsv",
 	"lastUpdated": "2015-03-18 11:56:01"
 }
 
