@@ -2,14 +2,14 @@
 	"translatorID": "2c310a37-a4dd-48d2-82c9-bd29c53c1c76",
 	"label": "APS",
 	"creator": "Aurimas Vinckevicius",
-	"target": "^https?://journals\\.aps\\.org",
+	"target": "^https?://journals\\.aps\\.org/([^/]+/(abstract|supplemental|references|cited-by|issues)/|search\\?)",
 	"minVersion": "3.0.12",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-03-14 16:13:43"
+	"lastUpdated": "2015-03-18 01:28:18"
 }
 
 function getSearchResults(doc) {
@@ -75,7 +75,28 @@ var dontDownload = [
 ];
 
 function scrape(doc, url) {
-	url = url.replace(/[?#].*/, '').replace(/\/abstract\//, '/{REPLACE}/');
+	url = url.replace(/[?#].*/, '');
+	
+	if (url.indexOf('/abstract/') == -1) {
+		// Go to Abstract page first so we can scrape the abstract
+		url = url.replace(/\/(?:supplemental|references|cited-by)\//, '/abstract/');
+		if (url.indexOf('/abstract/') == -1) {
+			Zotero.debug('Unrecognized URL ' + url);
+			return;
+		}
+		
+		ZU.processDocuments(url, function(doc, url) {
+			if (url.indexOf('/abstract/') == -1) {
+				Zotero.debug('Redirected when trying to go to abstract page. ' + url);
+				return;
+			}
+			scrape(doc, url)
+		});
+		return;
+	}
+	
+	url = url.replace(/\/abstract\//, '/{REPLACE}/');
+	
 	// fetch RIS
 	var risUrl = url.replace('{REPLACE}', 'export')
 			   + '?type=ris&download=true';
@@ -251,6 +272,183 @@ var testCases = [
 				"publicationTitle": "Physical Review Letters",
 				"url": "http://link.aps.org/doi/10.1103/PhysRevLett.114.098105",
 				"volume": "114",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "APS Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://journals.aps.org/prx/supplemental/10.1103/PhysRevX.5.011029",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Weyl Semimetal Phase in Noncentrosymmetric Transition-Metal Monophosphides",
+				"creators": [
+					{
+						"lastName": "Weng",
+						"firstName": "Hongming",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Fang",
+						"firstName": "Chen",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Fang",
+						"firstName": "Zhong",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bernevig",
+						"firstName": "B. Andrei",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Dai",
+						"firstName": "Xi",
+						"creatorType": "author"
+					}
+				],
+				"date": "March 17, 2015",
+				"DOI": "10.1103/PhysRevX.5.011029",
+				"abstractNote": "Based on first-principle calculations, we show that a family of nonmagnetic materials including TaAs, TaP, NbAs, and NbP are Weyl semimetals (WSM) without inversion centers. We find twelve pairs of Weyl points in the whole Brillouin zone (BZ) for each of them. In the absence of spin-orbit coupling (SOC), band inversions in mirror-invariant planes lead to gapless nodal rings in the energy-momentum dispersion. The strong SOC in these materials then opens full gaps in the mirror planes, generating nonzero mirror Chern numbers and Weyl points off the mirror planes. The resulting surface-state Fermi arc structures on both (001) and (100) surfaces are also obtained, and they show interesting shapes, pointing to fascinating playgrounds for future experimental studies.",
+				"issue": "1",
+				"journalAbbreviation": "Phys. Rev. X",
+				"libraryCatalog": "APS",
+				"pages": "011029",
+				"publicationTitle": "Physical Review X",
+				"url": "http://link.aps.org/doi/10.1103/PhysRevX.5.011029",
+				"volume": "5",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "APS Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://journals.aps.org/prx/references/10.1103/PhysRevX.5.011029",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Weyl Semimetal Phase in Noncentrosymmetric Transition-Metal Monophosphides",
+				"creators": [
+					{
+						"lastName": "Weng",
+						"firstName": "Hongming",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Fang",
+						"firstName": "Chen",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Fang",
+						"firstName": "Zhong",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bernevig",
+						"firstName": "B. Andrei",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Dai",
+						"firstName": "Xi",
+						"creatorType": "author"
+					}
+				],
+				"date": "March 17, 2015",
+				"DOI": "10.1103/PhysRevX.5.011029",
+				"abstractNote": "Based on first-principle calculations, we show that a family of nonmagnetic materials including TaAs, TaP, NbAs, and NbP are Weyl semimetals (WSM) without inversion centers. We find twelve pairs of Weyl points in the whole Brillouin zone (BZ) for each of them. In the absence of spin-orbit coupling (SOC), band inversions in mirror-invariant planes lead to gapless nodal rings in the energy-momentum dispersion. The strong SOC in these materials then opens full gaps in the mirror planes, generating nonzero mirror Chern numbers and Weyl points off the mirror planes. The resulting surface-state Fermi arc structures on both (001) and (100) surfaces are also obtained, and they show interesting shapes, pointing to fascinating playgrounds for future experimental studies.",
+				"issue": "1",
+				"journalAbbreviation": "Phys. Rev. X",
+				"libraryCatalog": "APS",
+				"pages": "011029",
+				"publicationTitle": "Physical Review X",
+				"url": "http://link.aps.org/doi/10.1103/PhysRevX.5.011029",
+				"volume": "5",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "APS Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://journals.aps.org/prx/cited-by/10.1103/PhysRevX.5.011003",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Ideal Negative Measurements in Quantum Walks Disprove Theories Based on Classical Trajectories",
+				"creators": [
+					{
+						"lastName": "Robens",
+						"firstName": "Carsten",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Alt",
+						"firstName": "Wolfgang",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Meschede",
+						"firstName": "Dieter",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Emary",
+						"firstName": "Clive",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Alberti",
+						"firstName": "Andrea",
+						"creatorType": "author"
+					}
+				],
+				"date": "January 20, 2015",
+				"DOI": "10.1103/PhysRevX.5.011003",
+				"abstractNote": "We report on a stringent test of the nonclassicality of the motion of a massive quantum particle, which propagates on a discrete lattice. Measuring temporal correlations of the position of single atoms performing a quantum walk, we observe a 6σ violation of the Leggett-Garg inequality. Our results rigorously excludes (i.e., falsifies) any explanation of quantum transport based on classical, well-defined trajectories. We use so-called ideal negative measurements—an essential requisite for any genuine Leggett-Garg test—to acquire information about the atom’s position, yet avoiding any direct interaction with it. The interaction-free measurement is based on a novel atom transport system, which allows us to directly probe the absence rather than the presence of atoms at a chosen lattice site. Beyond the fundamental aspect of this test, we demonstrate the application of the Leggett-Garg correlation function as a witness of quantum superposition. Here, we employ the witness to discriminate different types of walks spanning from merely classical to wholly quantum dynamics.",
+				"issue": "1",
+				"journalAbbreviation": "Phys. Rev. X",
+				"libraryCatalog": "APS",
+				"pages": "011003",
+				"publicationTitle": "Physical Review X",
+				"url": "http://link.aps.org/doi/10.1103/PhysRevX.5.011003",
+				"volume": "5",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
