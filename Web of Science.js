@@ -162,6 +162,12 @@ function fetchIds(ids, doc) {
 
 	var postUrl = outputForm.action;
 	Z.debug("Posting to " + postUrl);
+	/**
+	 * Note that when using the form on the page, the request ends up redirecting
+	 * to ets.webofknowledge.com which makes it cross-origin. Somehow, this POST
+	 * avoids the redirect, so things just work, but if the behavior changes in
+	 * the future, it would break scraping on IE/bookmarklet and Safari
+	 */
 	ZU.doPost(postUrl, serializePostData(postData), function (text) {
 		//check if there's an intermediate page
 		if(text.indexOf('FN ') === 0) {
@@ -202,14 +208,6 @@ function fetchIds(ids, doc) {
 		}
 		postData2['qid'] = qid;
 		
-		/*
-		This cross-origin request would be causing problems for IE, 
-		but it doesn't look like we hit this part any more. 
-		Interestingly, using the export form through the page results 
-		in the request being redirected to a cross-origin address, 
-		which would also be an issue for Safari, but it looks like 
-		somehow our way of POSTing for metadata avoids this redirect.
-		*/
 		var postUrl2 = 'http://ets.webofknowledge.com/ETS/saveDataToRef.do';	//Zotero should take care of proxies
 		ZU.doPost(postUrl2, serializePostData(postData2), function(text) {
 			importISIRecord(text);
