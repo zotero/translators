@@ -1,6 +1,6 @@
 {
 	"translatorID": "3d0231ce-fd4b-478c-b1d3-840389e5b68c",
-	"label": "NCBI",
+	"label": "PubMed",
 	"creator": "Philipp Zumstein",
 	"target": "^https?://[^/]*(www|preview)[\\.\\-]ncbi[\\.\\-]nlm[\\.\\-]nih[\\.\\-]gov[^/]*/(?:m/)?(books|pubmed|sites/pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed|myncbi/browse/collection/|myncbi/collections/)",
 	"minVersion": "3.0",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-03-19 18:48:18"
+	"lastUpdated": "2015-03-21 09:22:39"
 }
 
 /*
@@ -324,7 +324,7 @@ var testCases = [
 				"issue": "5",
 				"journalAbbreviation": "Nurse Educ",
 				"language": "eng",
-				"libraryCatalog": "NCBI PubMed",
+				"libraryCatalog": "PubMed",
 				"pages": "205-207",
 				"publicationTitle": "Nurse Educator",
 				"shortTitle": "Zotero",
@@ -360,24 +360,23 @@ var testCases = [
 				"title": "Endocrinology: An Integrated Approach",
 				"creators": [
 					{
-						"creatorType": "author",
+						"firstName": "Stephen",
 						"lastName": "Nussey",
-						"firstName": "Stephen"
+						"creatorType": "author"
 					},
 					{
-						"creatorType": "author",
+						"firstName": "Saffron",
 						"lastName": "Whitehead",
-						"firstName": "Saffron"
+						"creatorType": "author"
 					}
 				],
 				"date": "2001",
 				"ISBN": "1859962521",
 				"abstractNote": "Endocrinology has been written to meet the requirements of today's trainee doctors and the demands of an increasing number of degree courses in health and biomedical sciences, and allied subjects. It is a truly integrated text using large numbers of real clinical cases to introduce the basic biochemistry, physiology and pathophysiology underlying endocrine disorders and also the principles of clinical diagnosis and treatment. The increasing importance of the molecular and genetic aspects of endocrinology in relation to clinical medicine is explained.",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"callNumber": "NBK22",
 				"extra": "PMID: 20821847",
 				"language": "eng",
-				"libraryCatalog": "NCBI PubMed",
+				"libraryCatalog": "PubMed",
 				"place": "Oxford",
 				"publisher": "BIOS Scientific Publishers",
 				"rights": "Copyright © 2001, BIOS Scientific Publishers Limited",
@@ -430,7 +429,7 @@ var testCases = [
 				"callNumber": "NBK1825",
 				"extra": "PMID: 21249754",
 				"language": "eng",
-				"libraryCatalog": "NCBI PubMed",
+				"libraryCatalog": "PubMed",
 				"place": "Bethesda (MD)",
 				"publisher": "National Center for Biotechnology Information (US)",
 				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson",
@@ -494,7 +493,7 @@ var testCases = [
 				"issue": "29",
 				"journalAbbreviation": "Health Technol Assess",
 				"language": "eng",
-				"libraryCatalog": "NCBI PubMed",
+				"libraryCatalog": "PubMed",
 				"pages": "1-123",
 				"publicationTitle": "Health Technology Assessment (Winchester, England)",
 				"shortTitle": "Screening for hypercholesterolaemia versus case finding for familial hypercholesterolaemia",
@@ -573,7 +572,7 @@ var testCases = [
 				"callNumber": "NBK26374",
 				"extra": "PMID: 21249758",
 				"language": "eng",
-				"libraryCatalog": "NCBI PubMed",
+				"libraryCatalog": "PubMed",
 				"place": "Bethesda (MD)",
 				"publisher": "National Center for Biotechnology Information (US)",
 				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson",
@@ -636,7 +635,7 @@ var testCases = [
 				"callNumber": "NBK26374",
 				"extra": "PMID: 21249758",
 				"language": "eng",
-				"libraryCatalog": "NCBI PubMed",
+				"libraryCatalog": "PubMed",
 				"place": "Bethesda (MD)",
 				"publisher": "National Center for Biotechnology Information (US)",
 				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson",
@@ -693,7 +692,7 @@ var testCases = [
 				"callNumber": "NBK1825",
 				"extra": "PMID: 21249754",
 				"language": "eng",
-				"libraryCatalog": "NCBI PubMed",
+				"libraryCatalog": "PubMed",
 				"place": "Bethesda (MD)",
 				"publisher": "National Center for Biotechnology Information (US)",
 				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson",
@@ -781,7 +780,7 @@ var testCases = [
 				"callNumber": "NBK1826",
 				"extra": "PMID: 21249755",
 				"language": "eng",
-				"libraryCatalog": "NCBI PubMed",
+				"libraryCatalog": "PubMed",
 				"place": "Bethesda (MD)",
 				"publisher": "National Center for Biotechnology Information (US)",
 				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson",
@@ -871,7 +870,7 @@ var testCases = [
 				"issue": "7319",
 				"journalAbbreviation": "Nature",
 				"language": "eng",
-				"libraryCatalog": "NCBI PubMed",
+				"libraryCatalog": "PubMed",
 				"pages": "1061-1073",
 				"publicationTitle": "Nature",
 				"volume": "467",
@@ -957,7 +956,7 @@ var testCases = [
 				"ISBN": "0-8153-3218-1; 0-8153-4072-9",
 				"abstractNote": "ExcerptMolecular Biology of the Cell is the classic in-depth text reference in cell biology. By extracting fundamental concepts and meaning from this enormous and ever-growing field, the authors tell the story of cell biology, and create a coherent framework through which non-expert readers may approach the subject. Written in clear and concise language, and illustrated with original drawings, the book is enjoyable to read, and provides a sense of the excitement of modern biology. Molecular Biology of the Cell not only sets forth the current understanding of cell biology (updated as of Fall 2001), but also explores the intriguing implications and possibilities of that which remains unknown.",
 				"edition": "4th",
-				"libraryCatalog": "NCBI PubMed",
+				"libraryCatalog": "PubMed",
 				"publisher": "Garland Science",
 				"attachments": [],
 				"tags": [],
@@ -986,7 +985,7 @@ var testCases = [
 				"issue": "4",
 				"journalAbbreviation": "J Med Assoc State Ala",
 				"language": "eng",
-				"libraryCatalog": "NCBI PubMed",
+				"libraryCatalog": "PubMed",
 				"pages": "118-128",
 				"publicationTitle": "Journal of the Medical Association of the State of Alabama",
 				"volume": "20",
@@ -1002,108 +1001,6 @@ var testCases = [
 				],
 				"notes": [],
 				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "search",
-		"input": {
-			"PMID": "20729678"
-		},
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"creatorType": "author",
-						"lastName": "Coar",
-						"firstName": "Jaekea T"
-					},
-					{
-						"creatorType": "author",
-						"lastName": "Sewell",
-						"firstName": "Jeanne P"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"Bibliography as Topic",
-					"Database Management Systems",
-					"Humans"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
-				"ISSN": "1538-9855",
-				"journalAbbreviation": "Nurse Educ",
-				"issue": "5",
-				"language": "eng",
-				"abstractNote": "Zotero is a powerful free personal bibliographic manager (PBM) for writers. Use of a PBM allows the writer to focus on content, rather than the tedious details of formatting citations and references. Zotero 2.0 (http://www.zotero.org) has new features including the ability to synchronize citations with the off-site Zotero server and the ability to collaborate and share with others. An overview on how to use the software and discussion about the strengths and limitations are included.",
-				"DOI": "10.1097/NNE.0b013e3181ed81e4",
-				"extra": "PMID: 20729678",
-				"libraryCatalog": "NCBI PubMed",
-				"shortTitle": "Zotero",
-				"title": "Zotero: harnessing the power of a personal bibliographic manager",
-				"pages": "205-207",
-				"publicationTitle": "Nurse educator",
-				"volume": "35",
-				"date": "2010 Sep-Oct"
-			}
-		]
-	},
-	{
-		"type": "search",
-		"input": {
-			"contextObject": "url_ver=Z39.88-2004&ctx_ver=Z39.88-2004&rfr_id=info:sid/zotero.org:2&rft_id=info:doi/10.1097/NNE.0b013e3181ed81e4&rft_id=info:pmid/20729678&rft_val_fmt=info:ofi/fmt:kev:mtx:journal&rft.genre=article&rft.atitle=Zotero: harnessing the power of a personal bibliographic manager&rft.jtitle=Nurse educator&rft.stitle=Nurse Educ&rft.volume=35&rft.issue=5&rft.aufirst=Jaekea T&rft.aulast=Coar&rft.au=Jaekea T Coar&rft.au=Jeanne P Sewell&rft.date=2010-10&rft.pages=205-207&rft.spage=205&rft.epage=207&rft.issn=1538-9855&rft.language=eng"
-		},
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"creatorType": "author",
-						"lastName": "Coar",
-						"firstName": "Jaekea T"
-					},
-					{
-						"creatorType": "author",
-						"lastName": "Sewell",
-						"firstName": "Jeanne P"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"Bibliography as Topic",
-					"Database Management Systems",
-					"Humans"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
-				"ISSN": "1538-9855",
-				"journalAbbreviation": "Nurse Educ",
-				"issue": "5",
-				"language": "eng",
-				"abstractNote": "Zotero is a powerful free personal bibliographic manager (PBM) for writers. Use of a PBM allows the writer to focus on content, rather than the tedious details of formatting citations and references. Zotero 2.0 (http://www.zotero.org) has new features including the ability to synchronize citations with the off-site Zotero server and the ability to collaborate and share with others. An overview on how to use the software and discussion about the strengths and limitations are included.",
-				"DOI": "10.1097/NNE.0b013e3181ed81e4",
-				"extra": "PMID: 20729678",
-				"libraryCatalog": "NCBI PubMed",
-				"shortTitle": "Zotero",
-				"title": "Zotero: harnessing the power of a personal bibliographic manager",
-				"pages": "205-207",
-				"publicationTitle": "Nurse educator",
-				"volume": "35",
-				"date": "2010 Sep-Oct"
 			}
 		]
 	}

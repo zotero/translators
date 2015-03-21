@@ -1,6 +1,6 @@
 {
 	"translatorID": "fcf41bed-0cbc-3704-85c7-8062a0068a7a",
-	"label": "NCBI PubMed",
+	"label": "PubMed XML",
 	"creator": "Simon Kornblith, Michael Berkowitz, Avram Lyon, and Rintze Zelle",
 	"target": "xml",
 	"minVersion": "2.1.9",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-03-19 19:21:46"
+	"lastUpdated": "2015-03-21 09:35:01"
 }
 
 /*******************************
