@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2015-02-12 22:29:53"
+	"lastUpdated": "2015-03-21 03:18:14"
 }
 
 /*
@@ -223,8 +223,7 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 		scrapeEM(doc, url, pdfUrl);
 		return;
 	}
-	//leaving this here in case it's still needed
-	//var baseUrl = url.match(/https?:\/\/[^\/]+/);
+	
 	var postUrl = '/documentcitationdownloadformsubmit';
 	var body = 'doi=' + encodeURIComponent(doi) + 
 				'&fileFormat=REFERENCE_MANAGER' +
@@ -313,22 +312,40 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 					if(m) {
 						m[1] = ZU.unescapeHTML(m[1]);
 						Z.debug('PDF url: ' + m[1]);
-						item.attachments.push({url: m[1],
-							title: 'Full Text PDF',
-							mimeType: 'application/pdf'});
+						pdfUrl = m[1];
 					} else {
 						Z.debug('Could not determine PDF URL.');
 						m = text.match(/<iframe[^>]*>/i);
-						if(m) Z.debug(m[0]);
-						else Z.debug('No iframe found');
+						if(m) {
+							Z.debug(m[0]);
+							pdfUrl = null; // Clearly not the PDF
+						} else {
+							Z.debug('No iframe found. This may be the PDF');
+							// It seems that on Mac, Wiley serves the PDF
+							// directly, not in an iframe, so try using this URL.
+							// TODO: detect whether this is a case before trying
+							// to fetch the PDF page above. See https://github.com/zotero/translators/pull/442
+						}
 					}
+					
+					if (pdfUrl) {
+						item.attachments.push({
+							url: pdfUrl,
+							title: 'Full Text PDF',
+							mimeType: 'application/pdf'
+						});
+					}
+					
 					item.complete();
 				});
 			} else {
-				if(pdfUrl)
-					item.attachments.push({url: pdfUrl,
+				if(pdfUrl) {
+					item.attachments.push({
+						url: pdfUrl,
 						title: 'Full Text PDF',
-						mimeType: 'application/pdf'});
+						mimeType: 'application/pdf'
+					});
+				}
 				item.complete();
 			}
 		});
@@ -383,12 +400,12 @@ function scrapeCochraneTrial(doc, url){
 function scrape(doc, url, pdfUrl) {
 	var itemType = detectWeb(doc,url);
 
-	if( itemType == 'book' ) {
+	if (itemType == 'book') {
 		scrapeBook(doc, url, pdfUrl);
+	} else if (/\/o\/cochrane\/(clcentral|cldare|clcmr|clhta|cleed|clabout)/.test(url)) {
+		scrapeCochraneTrial(doc, url);
 	} else {
-		if (url.search(/\/o\/cochrane\/(clcentral|cldare|clcmr|clhta|cleed|clabout)/)!=-1) scrapeCochraneTrial(doc, url);
-		//scrapeEM(doc, url, pdfUrl);
-		else scrapeBibTeX(doc, url, pdfUrl);
+		scrapeBibTeX(doc, url, pdfUrl);
 	}
 }
 
@@ -408,22 +425,21 @@ function detectWeb(doc, url) {
 		Zotero.monitorDOMChanges(doc.getElementById('searchResultOuter'));
 	}
 	
-	if( url.indexOf('/issuetoc') != -1 ||
+	if (url.indexOf('/issuetoc') != -1 ||
 		url.indexOf('/results') != -1 ||
 		url.indexOf('/search') != -1 ||
-		url.indexOf('/mainSearch?') != -1) {
+		url.indexOf('/mainSearch?') != -1
+	) {
 		if(getSearchResults(doc, url).length) return 'multiple';
+	} else if (url.indexOf('/book/') != -1 ) {
+		//if the book has more than one chapter, scrape chapters
+		if(getSearchResults(doc, url).length > 1) return 'multiple';
+		//otherwise, import book
+		return 'book'; //does this exist?
+	} else if ( ZU.xpath(doc, '//meta[@name="citation_book_title"]').length ) {
+		return 'bookSection';
 	} else {
-		if(url.indexOf('/book/') != -1 ) {
-			//if the book has more than one chapter, scrape chapters
-			if(getSearchResults(doc, url).length > 1) return 'multiple';
-			//otherwise, import book
-			return 'book'; //does this exist?
-		} else if ( ZU.xpath(doc, '//meta[@name="citation_book_title"]').length ) {
-			return 'bookSection';
-		} else {
-			return 'journalArticle';
-		}
+		return 'journalArticle';
 	}
 }
 
@@ -456,18 +472,18 @@ function doWeb(doc, url) {
 			//Zotero.debug("Redirecting to abstract page: "+url);
 			//grab pdf url before leaving
 			var pdfUrl = ZU.xpathText(doc, '//iframe[@id="pdfDocument"]/@src');
-			ZU.processDocuments(url, function(doc) { scrape(doc, doc.location.href, pdfUrl) });
+			ZU.processDocuments(url, function(doc, url) { scrape(doc, url, pdfUrl) });
 		} else if(type != 'book' &&
-				url.indexOf('abstract') == -1 && url.indexOf("/o/cochrane/") == -1 &&
-				!ZU.xpathText(doc, '//div[@id="abstract"]/div[@class="para"]')) {
+			url.indexOf('abstract') == -1 && url.indexOf("/o/cochrane/") == -1 &&
+			!ZU.xpathText(doc, '//div[@id="abstract"]/div[@class="para"]')
+		) {
 			//redirect to abstract or summary so we can scrape that
-			
 			if(type == 'bookSection') {
 				url = url.replace(/\/[^?#\/]+(?:[?#].*)?$/, '/summary');
 			} else {
 				url = url.replace(/\/[^?#\/]+(?:[?#].*)?$/, '/abstract');
 			}
-			ZU.processDocuments(url, function(doc) { scrape(doc, doc.location.href) });
+			ZU.processDocuments(url, scrape);
 		} else {
 			scrape(doc, url);
 		}
