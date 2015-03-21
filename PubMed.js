@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-03-21 09:22:39"
+	"lastUpdated": "2015-03-21 14:51:04"
 }
 
 /*
@@ -44,7 +44,11 @@ function lookupPMIDs(ids, next) {
 		"db=PubMed&tool=Zotero&retmode=xml&rettype=citation&id="+ids.join(",");
 	Zotero.debug(newUri);
 	Zotero.Utilities.HTTP.doGet(newUri, function(text) {
-		//Z.debug(text);
+		
+		if (text.length < 300) { // e.g. http://www.ncbi.nlm.nih.gov/pubmed/1477919937
+			throw("No Pubmed Data found - Most likely eutils is temporarily down")
+		}
+		
 		//call the import translator
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("fcf41bed-0cbc-3704-85c7-8062a0068a7a");

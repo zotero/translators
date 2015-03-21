@@ -6,10 +6,13 @@
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
+	"configOptions": {
+		"dataMode": "xml/dom"
+	},
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-03-21 09:35:01"
+	"lastUpdated": "2015-03-21 14:39:07"
 }
 
 /*******************************
@@ -20,17 +23,8 @@ function detectImport() {
 	Zotero.debug("Detecting Pubmed content....");
 	// Look for the PubmedArticle tag in the first 1000 characters
 	var text = Zotero.read(1000);
-	if (text.indexOf("<PubmedArticle>") != -1) return "journalArticle";
+	if (text.indexOf("<PubmedArticleSet>") != -1) return "true";
 	return false;
-}
-
-function doImport() {
-	var text = "";
-	var line;
-	while((line = Zotero.read(4096)) !== false) {
-		text += line;
-	}
-	return doImportFromText(text);
 }
 
 function processAuthors(newItem, authorsLists) {
@@ -78,21 +72,10 @@ function processAuthors(newItem, authorsLists) {
 	}
 }
 
-function doImportFromText(text, next) {
-	if (text.length<300){
-		throw("No Pubmed Data found - Most likely eutils is temporarily down")
-	}
-	if (text.substr(0,1000).indexOf("<PubmedArticleSet>") == -1) {
-		// Pubmed data in the wild, perhaps copied from the web site's search results,
-		// can be missing the <PubmedArticleSet> root tag. Let's add a pair!
-		Zotero.debug("No root <PubmedArticleSet> tag found, wrapping in a new root tag.");
-		text = "<PubmedArticleSet>" + text + "</PubmedArticleSet>";
-	}
+function doImport() {
 
-	// parse XML with DOMParser
-	var parser = new DOMParser();
-	var doc = parser.parseFromString(text, "text/xml");
-	
+	var doc = Zotero.getXML();
+
 	var pageRangeRE = /(\d+)-(\d+)/g;
 
 	//handle journal articles
@@ -393,6 +376,170 @@ var testCases = [
 					"Database Management Systems",
 					"Humans"
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\"?>\n<!DOCTYPE PubmedArticleSet PUBLIC \"-//NLM//DTD PubMedArticle, 1st January 2015//EN\" \"http://www.ncbi.nlm.nih.gov/corehtml/query/DTD/pubmed_150101.dtd\">\n<PubmedArticleSet>\n<PubmedArticle>\n    <MedlineCitation Owner=\"NLM\" Status=\"MEDLINE\">\n        <PMID Version=\"1\">18157122</PMID>\n        <DateCreated>\n            <Year>2008</Year>\n            <Month>01</Month>\n            <Day>18</Day>\n        </DateCreated>\n        <DateCompleted>\n            <Year>2008</Year>\n            <Month>02</Month>\n            <Day>08</Day>\n        </DateCompleted>\n        <DateRevised>\n            <Year>2014</Year>\n            <Month>07</Month>\n            <Day>25</Day>\n        </DateRevised>\n        <Article PubModel=\"Print-Electronic\">\n            <Journal>\n                <ISSN IssnType=\"Electronic\">1552-4469</ISSN>\n                <JournalIssue CitedMedium=\"Internet\">\n                    <Volume>4</Volume>\n                    <Issue>2</Issue>\n                    <PubDate>\n                        <Year>2008</Year>\n                        <Month>Feb</Month>\n                    </PubDate>\n                </JournalIssue>\n                <Title>Nature chemical biology</Title>\n                <ISOAbbreviation>Nat. Chem. Biol.</ISOAbbreviation>\n            </Journal>\n            <ArticleTitle>High-content single-cell drug screening with phosphospecific flow cytometry.</ArticleTitle>\n            <Pagination>\n                <MedlinePgn>132-42</MedlinePgn>\n            </Pagination>\n            <Abstract>\n                <AbstractText>Drug screening is often limited to cell-free assays involving purified enzymes, but it is arguably best applied against systems that represent disease states or complex physiological cellular networks. Here, we describe a high-content, cell-based drug discovery platform based on phosphospecific flow cytometry, or phosphoflow, that enabled screening for inhibitors against multiple endogenous kinase signaling pathways in heterogeneous primary cell populations at the single-cell level. From a library of small-molecule natural products, we identified pathway-selective inhibitors of Jak-Stat and MAP kinase signaling. Dose-response experiments in primary cells confirmed pathway selectivity, but importantly also revealed differential inhibition of cell types and new druggability trends across multiple compounds. Lead compound selectivity was confirmed in vivo in mice. Phosphoflow therefore provides a unique platform that can be applied throughout the drug discovery process, from early compound screening to in vivo testing and clinical monitoring of drug efficacy.</AbstractText>\n            </Abstract>\n            <AuthorList CompleteYN=\"Y\">\n                <Author ValidYN=\"Y\">\n                    <LastName>Krutzik</LastName>\n                    <ForeName>Peter O</ForeName>\n                    <Initials>PO</Initials>\n                    <AffiliationInfo>\n                        <Affiliation>Department of Microbiology and Immunology, Baxter Laboratory in Genetic Pharmacology, Stanford University, 269 Campus Drive, Stanford, California 94305, USA.</Affiliation>\n                    </AffiliationInfo>\n                </Author>\n                <Author ValidYN=\"Y\">\n                    <LastName>Crane</LastName>\n                    <ForeName>Janelle M</ForeName>\n                    <Initials>JM</Initials>\n                </Author>\n                <Author ValidYN=\"Y\">\n                    <LastName>Clutter</LastName>\n                    <ForeName>Matthew R</ForeName>\n                    <Initials>MR</Initials>\n                </Author>\n                <Author ValidYN=\"Y\">\n                    <LastName>Nolan</LastName>\n                    <ForeName>Garry P</ForeName>\n                    <Initials>GP</Initials>\n                </Author>\n            </AuthorList>\n            <Language>eng</Language>\n            <DataBankList CompleteYN=\"Y\">\n                <DataBank>\n                    <DataBankName>PubChem-Substance</DataBankName>\n                    <AccessionNumberList>\n                        <AccessionNumber>46391334</AccessionNumber>\n                        <AccessionNumber>46391335</AccessionNumber>\n                        <AccessionNumber>46391336</AccessionNumber>\n                        <AccessionNumber>46391337</AccessionNumber>\n                        <AccessionNumber>46391338</AccessionNumber>\n                        <AccessionNumber>46391339</AccessionNumber>\n                        <AccessionNumber>46391340</AccessionNumber>\n                        <AccessionNumber>46391341</AccessionNumber>\n                        <AccessionNumber>46391342</AccessionNumber>\n                        <AccessionNumber>46391343</AccessionNumber>\n                        <AccessionNumber>46391344</AccessionNumber>\n                        <AccessionNumber>46391345</AccessionNumber>\n                        <AccessionNumber>46391346</AccessionNumber>\n                        <AccessionNumber>46391347</AccessionNumber>\n                        <AccessionNumber>46391348</AccessionNumber>\n                        <AccessionNumber>46391349</AccessionNumber>\n                        <AccessionNumber>46391350</AccessionNumber>\n                        <AccessionNumber>46391351</AccessionNumber>\n                        <AccessionNumber>46391352</AccessionNumber>\n                        <AccessionNumber>46391353</AccessionNumber>\n                        <AccessionNumber>46391354</AccessionNumber>\n                        <AccessionNumber>46391355</AccessionNumber>\n                        <AccessionNumber>46391356</AccessionNumber>\n                        <AccessionNumber>46391357</AccessionNumber>\n                    </AccessionNumberList>\n                </DataBank>\n            </DataBankList>\n            <GrantList CompleteYN=\"Y\">\n                <Grant>\n                    <GrantID>AI35304</GrantID>\n                    <Acronym>AI</Acronym>\n                    <Agency>NIAID NIH HHS</Agency>\n                    <Country>United States</Country>\n                </Grant>\n                <Grant>\n                    <GrantID>N01-HV-28183</GrantID>\n                    <Acronym>HV</Acronym>\n                    <Agency>NHLBI NIH HHS</Agency>\n                    <Country>United States</Country>\n                </Grant>\n                <Grant>\n                    <GrantID>T32 AI007290</GrantID>\n                    <Acronym>AI</Acronym>\n                    <Agency>NIAID NIH HHS</Agency>\n                    <Country>United States</Country>\n                </Grant>\n            </GrantList>\n            <PublicationTypeList>\n                <PublicationType UI=\"D016428\">Journal Article</PublicationType>\n                <PublicationType UI=\"D052061\">Research Support, N.I.H., Extramural</PublicationType>\n                <PublicationType UI=\"D013485\">Research Support, Non-U.S. Gov't</PublicationType>\n            </PublicationTypeList>\n            <ArticleDate DateType=\"Electronic\">\n                <Year>2007</Year>\n                <Month>12</Month>\n                <Day>23</Day>\n            </ArticleDate>\n        </Article>\n        <MedlineJournalInfo>\n            <Country>United States</Country>\n            <MedlineTA>Nat Chem Biol</MedlineTA>\n            <NlmUniqueID>101231976</NlmUniqueID>\n            <ISSNLinking>1552-4450</ISSNLinking>\n        </MedlineJournalInfo>\n        <ChemicalList>\n            <Chemical>\n                <RegistryNumber>0</RegistryNumber>\n                <NameOfSubstance UI=\"D050791\">STAT Transcription Factors</NameOfSubstance>\n            </Chemical>\n            <Chemical>\n                <RegistryNumber>27YLU75U4W</RegistryNumber>\n                <NameOfSubstance UI=\"D010758\">Phosphorus</NameOfSubstance>\n            </Chemical>\n            <Chemical>\n                <RegistryNumber>EC 2.7.10.2</RegistryNumber>\n                <NameOfSubstance UI=\"D053612\">Janus Kinases</NameOfSubstance>\n            </Chemical>\n            <Chemical>\n                <RegistryNumber>EC 2.7.11.24</RegistryNumber>\n                <NameOfSubstance UI=\"D020928\">Mitogen-Activated Protein Kinases</NameOfSubstance>\n            </Chemical>\n        </ChemicalList>\n        <CitationSubset>IM</CitationSubset>\n        <MeshHeadingList>\n            <MeshHeading>\n                <DescriptorName MajorTopicYN=\"N\" UI=\"D000818\">Animals</DescriptorName>\n            </MeshHeading>\n            <MeshHeading>\n                <DescriptorName MajorTopicYN=\"N\" UI=\"D045744\">Cell Line, Tumor</DescriptorName>\n            </MeshHeading>\n            <MeshHeading>\n                <DescriptorName MajorTopicYN=\"N\" UI=\"D004353\">Drug Evaluation, Preclinical</DescriptorName>\n            </MeshHeading>\n            <MeshHeading>\n                <DescriptorName MajorTopicYN=\"N\" UI=\"D005434\">Flow Cytometry</DescriptorName>\n                <QualifierName MajorTopicYN=\"Y\" UI=\"Q000379\">methods</QualifierName>\n            </MeshHeading>\n            <MeshHeading>\n                <DescriptorName MajorTopicYN=\"N\" UI=\"D006801\">Humans</DescriptorName>\n            </MeshHeading>\n            <MeshHeading>\n                <DescriptorName MajorTopicYN=\"N\" UI=\"D053612\">Janus Kinases</DescriptorName>\n                <QualifierName MajorTopicYN=\"N\" UI=\"Q000378\">metabolism</QualifierName>\n            </MeshHeading>\n            <MeshHeading>\n                <DescriptorName MajorTopicYN=\"N\" UI=\"D051379\">Mice</DescriptorName>\n            </MeshHeading>\n            <MeshHeading>\n                <DescriptorName MajorTopicYN=\"N\" UI=\"D008807\">Mice, Inbred BALB C</DescriptorName>\n            </MeshHeading>\n            <MeshHeading>\n                <DescriptorName MajorTopicYN=\"N\" UI=\"D020928\">Mitogen-Activated Protein Kinases</DescriptorName>\n                <QualifierName MajorTopicYN=\"N\" UI=\"Q000378\">metabolism</QualifierName>\n            </MeshHeading>\n            <MeshHeading>\n                <DescriptorName MajorTopicYN=\"N\" UI=\"D010758\">Phosphorus</DescriptorName>\n                <QualifierName MajorTopicYN=\"Y\" UI=\"Q000032\">analysis</QualifierName>\n            </MeshHeading>\n            <MeshHeading>\n                <DescriptorName MajorTopicYN=\"N\" UI=\"D050791\">STAT Transcription Factors</DescriptorName>\n                <QualifierName MajorTopicYN=\"N\" UI=\"Q000378\">metabolism</QualifierName>\n            </MeshHeading>\n            <MeshHeading>\n                <DescriptorName MajorTopicYN=\"N\" UI=\"D012680\">Sensitivity and Specificity</DescriptorName>\n            </MeshHeading>\n            <MeshHeading>\n                <DescriptorName MajorTopicYN=\"N\" UI=\"D015398\">Signal Transduction</DescriptorName>\n            </MeshHeading>\n        </MeshHeadingList>\n    </MedlineCitation>\n    <PubmedData>\n        <History>\n            <PubMedPubDate PubStatus=\"received\">\n                <Year>2007</Year>\n                <Month>6</Month>\n                <Day>15</Day>\n            </PubMedPubDate>\n            <PubMedPubDate PubStatus=\"accepted\">\n                <Year>2007</Year>\n                <Month>10</Month>\n                <Day>30</Day>\n            </PubMedPubDate>\n            <PubMedPubDate PubStatus=\"aheadofprint\">\n                <Year>2007</Year>\n                <Month>12</Month>\n                <Day>23</Day>\n            </PubMedPubDate>\n            <PubMedPubDate PubStatus=\"pubmed\">\n                <Year>2007</Year>\n                <Month>12</Month>\n                <Day>25</Day>\n                <Hour>9</Hour>\n                <Minute>0</Minute>\n            </PubMedPubDate>\n            <PubMedPubDate PubStatus=\"medline\">\n                <Year>2008</Year>\n                <Month>2</Month>\n                <Day>9</Day>\n                <Hour>9</Hour>\n                <Minute>0</Minute>\n            </PubMedPubDate>\n            <PubMedPubDate PubStatus=\"entrez\">\n                <Year>2007</Year>\n                <Month>12</Month>\n                <Day>25</Day>\n                <Hour>9</Hour>\n                <Minute>0</Minute>\n            </PubMedPubDate>\n        </History>\n        <PublicationStatus>ppublish</PublicationStatus>\n        <ArticleIdList>\n            <ArticleId IdType=\"pii\">nchembio.2007.59</ArticleId>\n            <ArticleId IdType=\"doi\">10.1038/nchembio.2007.59</ArticleId>\n            <ArticleId IdType=\"pubmed\">18157122</ArticleId>\n        </ArticleIdList>\n    </PubmedData>\n</PubmedArticle>\n<PubmedArticle>\n    <MedlineCitation Owner=\"NLM\" Status=\"MEDLINE\">\n        <PMID Version=\"1\">18157123</PMID>\n        <DateCreated>\n            <Year>2008</Year>\n            <Month>01</Month>\n            <Day>18</Day>\n        </DateCreated>\n        <DateCompleted>\n            <Year>2008</Year>\n            <Month>02</Month>\n            <Day>08</Day>\n        </DateCompleted>\n        <DateRevised>\n            <Year>2013</Year>\n            <Month>11</Month>\n            <Day>21</Day>\n        </DateRevised>\n        <Article PubModel=\"Print-Electronic\">\n            <Journal>\n                <ISSN IssnType=\"Electronic\">1552-4469</ISSN>\n                <JournalIssue CitedMedium=\"Internet\">\n                    <Volume>4</Volume>\n                    <Issue>2</Issue>\n                    <PubDate>\n                        <Year>2008</Year>\n                        <Month>Feb</Month>\n                    </PubDate>\n                </JournalIssue>\n                <Title>Nature chemical biology</Title>\n                <ISOAbbreviation>Nat. Chem. Biol.</ISOAbbreviation>\n            </Journal>\n            <ArticleTitle>Site selectivity of platinum anticancer therapeutics.</ArticleTitle>\n            <Pagination>\n                <MedlinePgn>110-2</MedlinePgn>\n            </Pagination>\n            <Abstract>\n                <AbstractText>X-ray crystallographic and biochemical investigation of the reaction of cisplatin and oxaliplatin with nucleosome core particle and naked DNA reveals that histone octamer association can modulate DNA platination. Adduct formation also occurs at specific histone methionine residues, which could serve as a nuclear platinum reservoir influencing adduct transfer to DNA. Our findings suggest that the nucleosome center may provide a favorable target for the design of improved platinum anticancer drugs.</AbstractText>\n            </Abstract>\n            <AuthorList CompleteYN=\"Y\">\n                <Author ValidYN=\"Y\">\n                    <LastName>Wu</LastName>\n                    <ForeName>Bin</ForeName>\n                    <Initials>B</Initials>\n                    <AffiliationInfo>\n                        <Affiliation>Division of Structural and Computational Biology, School of Biological Sciences, Nanyang Technological University, 60 Nanyang Drive, Singapore 637551, Singapore.</Affiliation>\n                    </AffiliationInfo>\n                </Author>\n                <Author ValidYN=\"Y\">\n                    <LastName>Dröge</LastName>\n                    <ForeName>Peter</ForeName>\n                    <Initials>P</Initials>\n                </Author>\n                <Author ValidYN=\"Y\">\n                    <LastName>Davey</LastName>\n                    <ForeName>Curt A</ForeName>\n                    <Initials>CA</Initials>\n                </Author>\n            </AuthorList>\n            <Language>eng</Language>\n            <DataBankList CompleteYN=\"Y\">\n                <DataBank>\n                    <DataBankName>PubChem-Substance</DataBankName>\n                    <AccessionNumberList>\n                        <AccessionNumber>46095911</AccessionNumber>\n                        <AccessionNumber>46095912</AccessionNumber>\n                    </AccessionNumberList>\n                </DataBank>\n            </DataBankList>\n            <PublicationTypeList>\n                <PublicationType UI=\"D016428\">Journal Article</PublicationType>\n                <PublicationType UI=\"D013485\">Research Support, Non-U.S. Gov't</PublicationType>\n            </PublicationTypeList>\n            <ArticleDate DateType=\"Electronic\">\n                <Year>2007</Year>\n                <Month>12</Month>\n                <Day>23</Day>\n            </ArticleDate>\n        </Article>\n        <MedlineJournalInfo>\n            <Country>United States</Country>\n            <MedlineTA>Nat Chem Biol</MedlineTA>\n            <NlmUniqueID>101231976</NlmUniqueID>\n            <ISSNLinking>1552-4450</ISSNLinking>\n        </MedlineJournalInfo>\n        <ChemicalList>\n            <Chemical>\n                <RegistryNumber>0</RegistryNumber>\n                <NameOfSubstance UI=\"D000970\">Antineoplastic Agents</NameOfSubstance>\n            </Chemical>\n            <Chemical>\n                <RegistryNumber>0</RegistryNumber>\n                <NameOfSubstance UI=\"D018736\">DNA Adducts</NameOfSubstance>\n            </Chemical>\n            <Chemical>\n                <RegistryNumber>0</RegistryNumber>\n                <NameOfSubstance UI=\"D006657\">Histones</NameOfSubstance>\n            </Chemical>\n            <Chemical>\n                <RegistryNumber>0</RegistryNumber>\n                <NameOfSubstance UI=\"D009707\">Nucleosomes</NameOfSubstance>\n            </Chemical>\n            <Chemical>\n                <RegistryNumber>49DFR088MY</RegistryNumber>\n                <NameOfSubstance UI=\"D010984\">Platinum</NameOfSubstance>\n            </Chemical>\n        </ChemicalList>\n        <CitationSubset>IM</CitationSubset>\n        <MeshHeadingList>\n            <MeshHeading>\n                <DescriptorName MajorTopicYN=\"N\" UI=\"D000595\">Amino Acid Sequence</DescriptorName>\n            </MeshHeading>\n            <MeshHeading>\n                <DescriptorName MajorTopicYN=\"N\" UI=\"D000970\">Antineoplastic Agents</DescriptorName>\n                <QualifierName MajorTopicYN=\"Y\" UI=\"Q000737\">chemistry</QualifierName>\n            </MeshHeading>\n            <MeshHeading>\n                <DescriptorName MajorTopicYN=\"N\" UI=\"D001483\">Base Sequence</DescriptorName>\n            </MeshHeading>\n            <MeshHeading>\n                <DescriptorName MajorTopicYN=\"N\" UI=\"D018360\">Crystallography, X-Ray</DescriptorName>\n            </MeshHeading>\n            <MeshHeading>\n                <DescriptorName MajorTopicYN=\"N\" UI=\"D018736\">DNA Adducts</DescriptorName>\n                <QualifierName MajorTopicYN=\"N\" UI=\"Q000737\">chemistry</QualifierName>\n            </MeshHeading>\n            <MeshHeading>\n                <DescriptorName MajorTopicYN=\"N\" UI=\"D006657\">Histones</DescriptorName>\n                <QualifierName MajorTopicYN=\"N\" UI=\"Q000737\">chemistry</QualifierName>\n                <QualifierName MajorTopicYN=\"N\" UI=\"Q000378\">metabolism</QualifierName>\n            </MeshHeading>\n            <MeshHeading>\n                <DescriptorName MajorTopicYN=\"N\" UI=\"D008958\">Models, Molecular</DescriptorName>\n            </MeshHeading>\n            <MeshHeading>\n                <DescriptorName MajorTopicYN=\"N\" UI=\"D008969\">Molecular Sequence Data</DescriptorName>\n            </MeshHeading>\n            <MeshHeading>\n                <DescriptorName MajorTopicYN=\"N\" UI=\"D009707\">Nucleosomes</DescriptorName>\n                <QualifierName MajorTopicYN=\"N\" UI=\"Q000737\">chemistry</QualifierName>\n                <QualifierName MajorTopicYN=\"N\" UI=\"Q000378\">metabolism</QualifierName>\n            </MeshHeading>\n            <MeshHeading>\n                <DescriptorName MajorTopicYN=\"N\" UI=\"D010984\">Platinum</DescriptorName>\n                <QualifierName MajorTopicYN=\"Y\" UI=\"Q000737\">chemistry</QualifierName>\n            </MeshHeading>\n            <MeshHeading>\n                <DescriptorName MajorTopicYN=\"N\" UI=\"D017434\">Protein Structure, Tertiary</DescriptorName>\n            </MeshHeading>\n            <MeshHeading>\n                <DescriptorName MajorTopicYN=\"N\" UI=\"D012680\">Sensitivity and Specificity</DescriptorName>\n            </MeshHeading>\n        </MeshHeadingList>\n    </MedlineCitation>\n    <PubmedData>\n        <History>\n            <PubMedPubDate PubStatus=\"received\">\n                <Year>2007</Year>\n                <Month>6</Month>\n                <Day>07</Day>\n            </PubMedPubDate>\n            <PubMedPubDate PubStatus=\"accepted\">\n                <Year>2007</Year>\n                <Month>10</Month>\n                <Day>26</Day>\n            </PubMedPubDate>\n            <PubMedPubDate PubStatus=\"aheadofprint\">\n                <Year>2007</Year>\n                <Month>12</Month>\n                <Day>23</Day>\n            </PubMedPubDate>\n            <PubMedPubDate PubStatus=\"pubmed\">\n                <Year>2007</Year>\n                <Month>12</Month>\n                <Day>25</Day>\n                <Hour>9</Hour>\n                <Minute>0</Minute>\n            </PubMedPubDate>\n            <PubMedPubDate PubStatus=\"medline\">\n                <Year>2008</Year>\n                <Month>2</Month>\n                <Day>9</Day>\n                <Hour>9</Hour>\n                <Minute>0</Minute>\n            </PubMedPubDate>\n            <PubMedPubDate PubStatus=\"entrez\">\n                <Year>2007</Year>\n                <Month>12</Month>\n                <Day>25</Day>\n                <Hour>9</Hour>\n                <Minute>0</Minute>\n            </PubMedPubDate>\n        </History>\n        <PublicationStatus>ppublish</PublicationStatus>\n        <ArticleIdList>\n            <ArticleId IdType=\"pii\">nchembio.2007.58</ArticleId>\n            <ArticleId IdType=\"doi\">10.1038/nchembio.2007.58</ArticleId>\n            <ArticleId IdType=\"pubmed\">18157123</ArticleId>\n        </ArticleIdList>\n    </PubmedData>\n</PubmedArticle>\n\n</PubmedArticleSet>\n",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "High-content single-cell drug screening with phosphospecific flow cytometry",
+				"creators": [
+					{
+						"firstName": "Peter O.",
+						"lastName": "Krutzik",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Janelle M.",
+						"lastName": "Crane",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Matthew R.",
+						"lastName": "Clutter",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Garry P.",
+						"lastName": "Nolan",
+						"creatorType": "author"
+					}
+				],
+				"date": "Feb 2008",
+				"DOI": "10.1038/nchembio.2007.59",
+				"ISSN": "1552-4469",
+				"abstractNote": "Drug screening is often limited to cell-free assays involving purified enzymes, but it is arguably best applied against systems that represent disease states or complex physiological cellular networks. Here, we describe a high-content, cell-based drug discovery platform based on phosphospecific flow cytometry, or phosphoflow, that enabled screening for inhibitors against multiple endogenous kinase signaling pathways in heterogeneous primary cell populations at the single-cell level. From a library of small-molecule natural products, we identified pathway-selective inhibitors of Jak-Stat and MAP kinase signaling. Dose-response experiments in primary cells confirmed pathway selectivity, but importantly also revealed differential inhibition of cell types and new druggability trends across multiple compounds. Lead compound selectivity was confirmed in vivo in mice. Phosphoflow therefore provides a unique platform that can be applied throughout the drug discovery process, from early compound screening to in vivo testing and clinical monitoring of drug efficacy.",
+				"extra": "PMID: 18157122",
+				"issue": "2",
+				"journalAbbreviation": "Nat. Chem. Biol.",
+				"language": "eng",
+				"pages": "132-142",
+				"publicationTitle": "Nature Chemical Biology",
+				"volume": "4",
+				"attachments": [
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					"Animals",
+					"Cell Line, Tumor",
+					"Drug Evaluation, Preclinical",
+					"Flow Cytometry",
+					"Humans",
+					"Janus Kinases",
+					"Mice",
+					"Mice, Inbred BALB C",
+					"Mitogen-Activated Protein Kinases",
+					"Phosphorus",
+					"STAT Transcription Factors",
+					"Sensitivity and Specificity",
+					"Signal Transduction"
+				],
+				"notes": [],
+				"seeAlso": []
+			},
+			{
+				"itemType": "journalArticle",
+				"title": "Site selectivity of platinum anticancer therapeutics",
+				"creators": [
+					{
+						"firstName": "Bin",
+						"lastName": "Wu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Peter",
+						"lastName": "Dröge",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Curt A.",
+						"lastName": "Davey",
+						"creatorType": "author"
+					}
+				],
+				"date": "Feb 2008",
+				"DOI": "10.1038/nchembio.2007.58",
+				"ISSN": "1552-4469",
+				"abstractNote": "X-ray crystallographic and biochemical investigation of the reaction of cisplatin and oxaliplatin with nucleosome core particle and naked DNA reveals that histone octamer association can modulate DNA platination. Adduct formation also occurs at specific histone methionine residues, which could serve as a nuclear platinum reservoir influencing adduct transfer to DNA. Our findings suggest that the nucleosome center may provide a favorable target for the design of improved platinum anticancer drugs.",
+				"extra": "PMID: 18157123",
+				"issue": "2",
+				"journalAbbreviation": "Nat. Chem. Biol.",
+				"language": "eng",
+				"pages": "110-112",
+				"publicationTitle": "Nature Chemical Biology",
+				"volume": "4",
+				"attachments": [
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					"Amino Acid Sequence",
+					"Antineoplastic Agents",
+					"Base Sequence",
+					"Crystallography, X-Ray",
+					"DNA Adducts",
+					"Histones",
+					"Models, Molecular",
+					"Molecular Sequence Data",
+					"Nucleosomes",
+					"Platinum",
+					"Protein Structure, Tertiary",
+					"Sensitivity and Specificity"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\"?>\n<!DOCTYPE PubmedArticleSet PUBLIC \"-//NLM//DTD PubMedArticle, 1st January 2015//EN\" \"http://www.ncbi.nlm.nih.gov/corehtml/query/DTD/pubmed_150101.dtd\">\n<PubmedArticleSet>\n<PubmedBookArticle>\n    <BookDocument>\n        <PMID>20821847</PMID>\n        <ArticleIdList>\n            <ArticleId IdType=\"bookaccession\">NBK22</ArticleId>\n        </ArticleIdList>\n        <Book>\n            <Publisher>\n                <PublisherName>BIOS Scientific Publishers</PublisherName>\n                <PublisherLocation>Oxford</PublisherLocation>\n            </Publisher>\n            <BookTitle book=\"endocrin\">Endocrinology: An Integrated Approach</BookTitle>\n            <PubDate>\n                <Year>2001</Year>\n            </PubDate>\n            <AuthorList Type=\"authors\">\n                <Author>\n                    <LastName>Nussey</LastName>\n                    <ForeName>Stephen</ForeName>\n                    <Initials>S</Initials>\n                </Author>\n                <Author>\n                    <LastName>Whitehead</LastName>\n                    <ForeName>Saffron</ForeName>\n                    <Initials>S</Initials>\n                </Author>\n            </AuthorList>\n            <Isbn>1859962521</Isbn>\n        </Book>\n        <Language>eng</Language>\n        <Abstract>\n            <AbstractText>Endocrinology has been written to meet the requirements of today's trainee doctors and the demands of an increasing number of degree courses in health and biomedical sciences, and allied subjects. It is a truly integrated text using large numbers of real clinical cases to introduce the basic biochemistry, physiology and pathophysiology underlying endocrine disorders and also the principles of clinical diagnosis and treatment. The increasing importance of the molecular and genetic aspects of endocrinology in relation to clinical medicine is explained.</AbstractText>\n            <CopyrightInformation>Copyright © 2001, BIOS Scientific Publishers Limited</CopyrightInformation>\n        </Abstract>\n        <Sections>\n            <Section>\n                <SectionTitle book=\"endocrin\" part=\"A2\">Preface</SectionTitle>\n            </Section>\n            <Section>\n                <LocationLabel Type=\"chapter\">Chapter 1</LocationLabel>\n                <SectionTitle book=\"endocrin\" part=\"A3\">Principles of endocrinology</SectionTitle>\n            </Section>\n            <Section>\n                <LocationLabel Type=\"chapter\">Chapter 2</LocationLabel>\n                <SectionTitle book=\"endocrin\" part=\"A43\">The endocrine pancreas</SectionTitle>\n            </Section>\n            <Section>\n                <LocationLabel Type=\"chapter\">Chapter 3</LocationLabel>\n                <SectionTitle book=\"endocrin\" part=\"A235\">The thyroid gland</SectionTitle>\n            </Section>\n            <Section>\n                <LocationLabel Type=\"chapter\">Chapter 4</LocationLabel>\n                <SectionTitle book=\"endocrin\" part=\"A442\">The adrenal gland</SectionTitle>\n            </Section>\n            <Section>\n                <LocationLabel Type=\"chapter\">Chapter 5</LocationLabel>\n                <SectionTitle book=\"endocrin\" part=\"A742\">The parathyroid glands and vitamin D</SectionTitle>\n            </Section>\n            <Section>\n                <LocationLabel Type=\"chapter\">Chapter 6</LocationLabel>\n                <SectionTitle book=\"endocrin\" part=\"A972\">The gonad</SectionTitle>\n            </Section>\n            <Section>\n                <LocationLabel Type=\"chapter\">Chapter 7</LocationLabel>\n                <SectionTitle book=\"endocrin\" part=\"A1257\">The pituitary gland</SectionTitle>\n            </Section>\n            <Section>\n                <LocationLabel Type=\"chapter\">Chapter 8</LocationLabel>\n                <SectionTitle book=\"endocrin\" part=\"A1527\">Cardiovascular and renal endocrinology</SectionTitle>\n            </Section>\n        </Sections>\n    </BookDocument>\n    <PubmedBookData>\n        <History>\n            <PubMedPubDate PubStatus=\"pubmed\">\n                <Year>2010</Year>\n                <Month>9</Month>\n                <Day>8</Day>\n                <Hour>6</Hour>\n                <Minute>0</Minute>\n            </PubMedPubDate>\n            <PubMedPubDate PubStatus=\"medline\">\n                <Year>2010</Year>\n                <Month>9</Month>\n                <Day>8</Day>\n                <Hour>6</Hour>\n                <Minute>0</Minute>\n            </PubMedPubDate>\n            <PubMedPubDate PubStatus=\"entrez\">\n                <Year>2010</Year>\n                <Month>9</Month>\n                <Day>8</Day>\n                <Hour>6</Hour>\n                <Minute>0</Minute>\n            </PubMedPubDate>\n        </History>\n        <PublicationStatus>ppublish</PublicationStatus>\n        <ArticleIdList>\n            <ArticleId IdType=\"pubmed\">20821847</ArticleId>\n        </ArticleIdList>\n    </PubmedBookData>\n</PubmedBookArticle>\n\n</PubmedArticleSet>\n",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Endocrinology: An Integrated Approach",
+				"creators": [
+					{
+						"firstName": "Stephen",
+						"lastName": "Nussey",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Saffron",
+						"lastName": "Whitehead",
+						"creatorType": "author"
+					}
+				],
+				"date": "2001",
+				"ISBN": "1859962521",
+				"abstractNote": "Endocrinology has been written to meet the requirements of today's trainee doctors and the demands of an increasing number of degree courses in health and biomedical sciences, and allied subjects. It is a truly integrated text using large numbers of real clinical cases to introduce the basic biochemistry, physiology and pathophysiology underlying endocrine disorders and also the principles of clinical diagnosis and treatment. The increasing importance of the molecular and genetic aspects of endocrinology in relation to clinical medicine is explained.",
+				"callNumber": "NBK22",
+				"extra": "PMID: 20821847",
+				"language": "eng",
+				"place": "Oxford",
+				"publisher": "BIOS Scientific Publishers",
+				"rights": "Copyright © 2001, BIOS Scientific Publishers Limited",
+				"url": "http://www.ncbi.nlm.nih.gov/books/NBK22/",
+				"attachments": [
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
