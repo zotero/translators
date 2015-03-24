@@ -20,11 +20,8 @@
  *******************************/
 
 function detectImport() {
-	Zotero.debug("Detecting Pubmed content....");
-	// Look for the PubmedArticle tag in the first 1000 characters
 	var text = Zotero.read(1000);
-	if (text.indexOf("<PubmedArticleSet>") != -1) return "true";
-	return false;
+	return text.indexOf("<PubmedArticleSet>") != -1;
 }
 
 function processAuthors(newItem, authorsLists) {
@@ -73,7 +70,6 @@ function processAuthors(newItem, authorsLists) {
 }
 
 function doImport() {
-
 	var doc = Zotero.getXML();
 
 	var pageRangeRE = /(\d+)-(\d+)/g;
@@ -202,7 +198,6 @@ function doImport() {
 		var PMCID = ZU.xpathText(articles[i], 'PubmedData/ArticleIdList/ArticleId[@IdType="pmc"]');
 		if(PMID) {
 			newItem.extra = "PMID: "+PMID;
-			if (PMCID) newItem.extra += " \nPMCID: " + PMCID;
 			//this is a catalog, so we should store links as attachments
 			newItem.attachments.push({
 				title: "PubMed entry",
@@ -211,7 +206,11 @@ function doImport() {
 				snapshot: false
 			});
 		}
-		else if (PMCID) newItem.extra += "PMCID: " + PMCID;
+		
+		if (PMCID) {
+			newItem.extra = (newItem.extra ? newItem.extra + "\n" : "")
+				+ "PMCID: " + PMCID;
+		}
 		
 		newItem.complete();
 	}

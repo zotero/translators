@@ -2,7 +2,7 @@
 	"translatorID": "3d0231ce-fd4b-478c-b1d3-840389e5b68c",
 	"label": "PubMed",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://[^/]*(www|preview)[\\.\\-]ncbi[\\.\\-]nlm[\\.\\-]nih[\\.\\-]gov[^/]*/(?:m/)?(books|pubmed|sites/pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed|myncbi/browse/collection/|myncbi/collections/)",
+	"target": "^https?://([^/]+[-.])?(www|preview)[-.]ncbi[-.]nlm[-.]nih[-.]gov[^/]*/(m/)?(books|pubmed|sites/pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed|myncbi/browse/collection/|myncbi/collections/)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -44,9 +44,8 @@ function lookupPMIDs(ids, next) {
 		"db=PubMed&tool=Zotero&retmode=xml&rettype=citation&id="+ids.join(",");
 	Zotero.debug(newUri);
 	Zotero.Utilities.HTTP.doGet(newUri, function(text) {
-		
-		if (text.length < 300) { // e.g. http://www.ncbi.nlm.nih.gov/pubmed/1477919937
-			throw("No Pubmed Data found - Most likely eutils is temporarily down")
+		if (text.indexOf('PubmedArticle') == -1 && text.indexOf('PubmedBookArticle') == -1) { // e.g. http://www.ncbi.nlm.nih.gov/pubmed/1477919937
+			throw("No Pubmed Data found - Most likely eutils is temporarily down");
 		}
 		
 		//call the import translator
@@ -375,7 +374,7 @@ var testCases = [
 					}
 				],
 				"date": "2001",
-				"ISBN": "1859962521",
+				"ISBN": "9781859962527",
 				"abstractNote": "Endocrinology has been written to meet the requirements of today's trainee doctors and the demands of an increasing number of degree courses in health and biomedical sciences, and allied subjects. It is a truly integrated text using large numbers of real clinical cases to introduce the basic biochemistry, physiology and pathophysiology underlying endocrine disorders and also the principles of clinical diagnosis and treatment. The increasing importance of the molecular and genetic aspects of endocrinology in relation to clinical medicine is explained.",
 				"callNumber": "NBK22",
 				"extra": "PMID: 20821847",
@@ -957,7 +956,7 @@ var testCases = [
 					}
 				],
 				"date": "2002",
-				"ISBN": "0-8153-3218-1; 0-8153-4072-9",
+				"ISBN": "9780815332183 9780815340720",
 				"abstractNote": "ExcerptMolecular Biology of the Cell is the classic in-depth text reference in cell biology. By extracting fundamental concepts and meaning from this enormous and ever-growing field, the authors tell the story of cell biology, and create a coherent framework through which non-expert readers may approach the subject. Written in clear and concise language, and illustrated with original drawings, the book is enjoyable to read, and provides a sense of the excitement of modern biology. Molecular Biology of the Cell not only sets forth the current understanding of cell biology (updated as of Fall 2001), but also explores the intriguing implications and possibilities of that which remains unknown.",
 				"edition": "4th",
 				"libraryCatalog": "PubMed",
@@ -1020,12 +1019,12 @@ var testCases = [
 					{
 						"creatorType": "author",
 						"lastName": "Coar",
-						"firstName": "Jaekea T"
+						"firstName": "Jaekea T."
 					},
 					{
 						"creatorType": "author",
 						"lastName": "Sewell",
-						"firstName": "Jeanne P"
+						"firstName": "Jeanne P."
 					}
 				],
 				"notes": [],
@@ -1053,7 +1052,7 @@ var testCases = [
 				"shortTitle": "Zotero",
 				"title": "Zotero: harnessing the power of a personal bibliographic manager",
 				"pages": "205-207",
-				"publicationTitle": "Nurse educator",
+				"publicationTitle": "Nurse Educator",
 				"volume": "35",
 				"date": "2010 Sep-Oct"
 			}
@@ -1071,12 +1070,12 @@ var testCases = [
 					{
 						"creatorType": "author",
 						"lastName": "Coar",
-						"firstName": "Jaekea T"
+						"firstName": "Jaekea T."
 					},
 					{
 						"creatorType": "author",
 						"lastName": "Sewell",
-						"firstName": "Jeanne P"
+						"firstName": "Jeanne P."
 					}
 				],
 				"notes": [],
@@ -1104,7 +1103,7 @@ var testCases = [
 				"shortTitle": "Zotero",
 				"title": "Zotero: harnessing the power of a personal bibliographic manager",
 				"pages": "205-207",
-				"publicationTitle": "Nurse educator",
+				"publicationTitle": "Nurse Educator",
 				"volume": "35",
 				"date": "2010 Sep-Oct"
 			}
