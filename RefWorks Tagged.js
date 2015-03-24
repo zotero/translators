@@ -1,8 +1,8 @@
 {
 	"translatorID": "1a3506da-a303-4b0a-a1cd-f216e6138d86",
-	"label": "RefWorks Tagged Format",
+	"label": "RefWorks Tagged",
 	"creator": "Simon Kornblith, Aurimas Vinckevicius, and Sebastian Karcher",
-	"target": "",
+	"target": "txt",
 	"minVersion": "3.0.4",
 	"maxVersion": "",
 	"priority": 100,
@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-02-11 02:55:12"
+	"lastUpdated": "2015-03-24 02:55:12"
 }
 
 /*This Translator mirrors closely Aurimas Vinckevicius' RIS translator
