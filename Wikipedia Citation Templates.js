@@ -70,7 +70,7 @@ var typeMap = {
 function formatAuthors(authors, useTypes) {
 	var text = "";
 	for each(var author in authors) {
-		text += ", "+author.firstName
+		text += ", "+author.firstName;
 		if(author.firstName && author.lastName) text += " ";
 		text += author.lastName;
 		if(useTypes) text += " ("+Zotero.Utilities.getLocalizedCreatorType(author.creatorType)+")";
