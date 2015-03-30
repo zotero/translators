@@ -18,7 +18,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-03-01 13:21:41"
+	"lastUpdated": "2015-03-30 20:45:08"
 }
 
 function detectImport() {
@@ -237,9 +237,12 @@ var alwaysMap = {
 
 var strings = {};
 var keyRe = /[a-zA-Z0-9\-]/;
-var keywordSplitOnSpace = true;
-var keywordDelimRe = '\\s*[,;]\\s*';
-var keywordDelimReFlags = '';
+
+// Split keywords on space by default when called from another translator
+// This is purely for historical reasons. Otherwise we risk breaking tag import
+// from some websites
+var keywordSplitOnSpace = !!Zotero.parentTranslator;
+var keywordDelimRe = /\s*[,;]\s*/;
 
 function setKeywordSplitOnSpace( val ) {
 	keywordSplitOnSpace = val;
@@ -248,12 +251,12 @@ function setKeywordSplitOnSpace( val ) {
 function setKeywordDelimRe( val, flags ) {
 	//expect string, but it could be RegExp
 	if(typeof(val) != 'string') {
-		keywordDelimRe = val.toString().slice(1, val.toString().lastIndexOf('/'));
-		keywordDelimReFlags = val.toString().slice(val.toString().lastIndexOf('/')+1);
-	} else {
-		keywordDelimRe = val;
-		keywordDelimReFlags = flags;
+		val = val.toString();
+		flags = val.slice(val.lastIndexOf('/')+1);
+		val = val.slice(1, val.lastIndexOf('/'));
 	}
+	
+	keywordDelimRe = new RegExp(val, flags);
 }
 
 function processField(item, field, value, rawValue) {
@@ -386,12 +389,9 @@ function processField(item, field, value, rawValue) {
 	else if (field == "lastchecked"|| field == "urldate"){
 		item.accessDate = value;
 	} else if(field == "keywords" || field == "keyword") {
-		var re = new RegExp(keywordDelimRe, keywordDelimReFlags);
-		if(!value.match(re) && keywordSplitOnSpace) {
-			// keywords/tags
+		item.tags = value.split(keywordDelimRe);
+		if(item.tags.length == 1 && keywordSplitOnSpace) {
 			item.tags = value.split(/\s+/);
-		} else {
-			item.tags = value.split(re);
 		}
 	} else if (field == "comment" || field == "annote" || field == "review" || field == "notes") {
 		item.notes.push({note:Zotero.Utilities.text2html(value)});
