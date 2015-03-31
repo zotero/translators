@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-09-23 22:23:09"
+	"lastUpdated": "2015-03-31 22:43:59"
 }
 
 /*
@@ -74,7 +74,7 @@ function doWeb(doc,url)
 		var itemtype;
 		//Currently journal articles and reports work through metadata, thesis was an easy call
 		//It's be easy to add other item types.
-		if (type.indexOf("Thesis")!=-1) itemtype = "thesis";
+		if (type && type.indexOf("Thesis")!=-1) itemtype = "thesis";
 		
 		// We call the Embedded Metadata translator to do the actual work
 		var translator = Zotero.loadTranslator("import");
