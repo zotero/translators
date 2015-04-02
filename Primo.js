@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2015-01-02 04:40:01"
+	"lastUpdated": "2015-04-02 18:40:40"
 }
 
 /*
@@ -218,6 +218,7 @@ function importPNX(text) {
 	switch(itemType.toLowerCase()) {
 		case 'book':
 		case 'ebook':
+		case 'pbook' :
 		case 'books':
 			item.itemType = "book";
 		break;
