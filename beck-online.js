@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-12-08 05:31:09"
+	"lastUpdated": "2015-03-29 09:11:30"
 }
 
 /*
@@ -220,7 +220,7 @@ function scrapeCase(doc, url) {
 	var alternativeLine = "";
 	var alternativeData = [];
 	if (courtLine) {
-		item.court = ZU.xpathText(courtLine, './span[@class="gericht"]');
+		item.court = ZU.xpathText(courtLine, './span[@class="gericht"] | ./span[@class="GERICHT"]');
 	}
 	else {
 		alternativeLine = ZU.xpathText(doc, '//span[@class="entscheidung"]');
@@ -238,12 +238,12 @@ function scrapeCase(doc, url) {
 		item.extra += "{:jurisdiction: de}";
 	}
 	
-	var decisionDateStr = ZU.xpathText(doc, '//span[@class="edat"] | //span[@class="datum"]');
+	var decisionDateStr = ZU.xpathText(doc, '//span[@class="edat"] | //span[@class="EDAT"] | //span[@class="datum"]');
 	if (decisionDateStr == null) {
 		decisionDateStr = alternativeData[3];
 	}
-	//e.g. 24. 9. 2001
-	item.dateDecided = decisionDateStr.replace(/(\d\d?)\.\s*(\d\d?)\.\s*(\d\d\d\d)/, "$3-$2-$1");
+	//e.g. 24. 9. 2001 or 24-9-1990
+	item.dateDecided = decisionDateStr.replace(/(\d\d?)[\.-]\s*(\d\d?)[\.-]\s*(\d\d\d\d)/, "$3-$2-$1");
 	
 	item.docketNumber = ZU.xpathText(doc, '//span[@class="az"]');
 	if (item.docketNumber == null) {
@@ -854,6 +854,38 @@ var testCases = [
 				"notes": [
 					{
 						"note": "Additional Metadata: <h3>Beschreibung</h3><p>EU-konforme unbestimmte Sperrverfügung gegen Internetprovider - UPC Telekabel/Constantin Film ua [kino.to]</p><h3>Parallelfundstellen</h3><p>BeckRS 2014, 80615 ; EWS 2014, 225 ; EuGRZ 2014, 301 ; EuZW 2014, 388 (m. Anm. K... ; GRUR 2014, 468 (m. Anm. M... ; GRUR Int. 2014, 469 ; K & R 2014, 329 ; MMR 2014, 397 (m. Anm. Ro... ; MittdtPatA 2014, 335 L ; NJW 2014, 1577 ; RiW 2014, 373 ; WRP 2014, 540 ; ZUM 2014, 494 ; LSK 2014, 160153 (Ls.)</p><h3>Normen</h3><p>AEUV Art. AEUV Artikel 267; Richtlinie 2001/29/EG Art. EWG_RL_2001_29 Artikel 3 EWG_RL_2001_29 Artikel 3 Absatz II, EWG_RL_2001_29 Artikel 8 EWG_RL_2001_29 Artikel 3 Absatz III</p><h3>Zeitschrift Titel</h3><p>Gewerblicher Rechtsschutz und Urheberrecht</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://beck-online.beck.de/?vpath=bibdata/zeits/njw/1991/cont/njw.1991.1471.1.htm&pos=4&lasthit=true",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "BVerfG, 27-11-1990 - 1 BvR 402/87 - Indizierung eines pornographischen Romans (\"Josefine Mutzenbacher\") zur Fussnote †",
+				"creators": [],
+				"dateDecided": "1991",
+				"abstractNote": "1. Ein pornographischer Roman kann Kunst i. S. von Art. GG Artikel 5 GG Artikel 5 Absatz III 1 GG sein.\n    2. Die Indizierung einer als Kunstwerk anzusehenden Schrift setzt auch dann eine Abwägung mit der Kunstfreiheit voraus, wenn die Schrift offensichtlich geeignet ist, Kinder oder Jugendliche sittlich schwer zu gefährden (§ 6 Nr. 3 des Gesetzes über die Verbreitung jugendgefährdender Schriften - GjS).\n    3. Die Vorschrift des § 9 II GjS ist verfassungsrechtlich unzulänglich, weil die Auswahl der Beisitzer für die Bundesprüfstelle nicht ausreichend geregelt ist.",
+				"court": "BVerfG",
+				"docketNumber": "1 BvR 402/87",
+				"extra": "{:jurisdiction: de}",
+				"firstPage": "1471-1475",
+				"reporter": "NJW",
+				"reporterVolume": "1991",
+				"shortTitle": "Indizierung eines pornographischen Romans (\"Josefine Mutzenbacher\") zur Fussnote †",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [
+					{
+						"note": "Additional Metadata: <h3>Beschreibung</h3><p>Indizierung eines pornographischen Romans (\"Josefine Mutzenbacher\") zur Fussnote †</p><h3>Parallelfundstellen</h3><p>BVerfGE 83, 130 ; NStZ 1991, 188 ; LSK 1991, 230089 (Ls.) ; NVwZ 1991, 663 (Ls.)</p><h3>Normen</h3><p>GG Art. GG Artikel 1 GG Artikel 1 Absatz I, GG Artikel 2 GG Artikel 2 Absatz I, GG Artikel 5 GG Artikel 5 Absatz III 1, GG Artikel 6 GG Artikel 6 Absatz II, GG Artikel 19 GG Artikel 19 Absatz I 2, GG Artikel 19 Absatz IV, GG Artikel 20 GG Artikel 20 Absatz III, GG Artikel 103 GG Artikel 103 Absatz I; GjS §§ 1, 6, 9 II</p><h3>Zeitschrift Titel</h3><p>Neue Juristische Wochenschrift</p>"
 					}
 				],
 				"seeAlso": []
