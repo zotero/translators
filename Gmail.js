@@ -9,13 +9,17 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-10-19 02:56:34"
+	"lastUpdated": "2015-04-08 01:50:09"
 }
 
 function detectWeb(doc, url) {
 	//only trigger on print pages
 	var docOnLoad = doc.body.attributes.onload;
 	if(docOnLoad && docOnLoad.textContent == 'Print()') {
+		return 'email';
+	}
+	var scriptNodesText = ZU.xpathText(doc, '//script');
+	if (scriptNodesText.indexOf("window.print()")>-1) {
 		return 'email';
 	}
 }
