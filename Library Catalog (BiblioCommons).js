@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-08-26 03:54:52"
+	"lastUpdated": "2015-04-08 11:54:52"
 }
 
 /*
@@ -102,6 +102,8 @@ function processor (obj) {
 		// Here, we split up the table and insert little placeholders between record bits
 		var marced = obj.text.replace(/\s+/g," ")
 					.replace(/^.*<div id="marc_details">(?:\s*<[^>"]+>\s*)*/,"")
+					.replace(/^.*<table class="table table-striped">\s*/g,"")
+					.replace(/<tr>\s*/g,"")
 					.replace(/<tr +class="(?:odd|even)">\s*/g,"")
 					.replace(/<td +scope="row" +class="marcTag"><strong>(\d+)<\/strong><\/td>\s*/g,"$1\x1F")
 					// We may be breaking the indicator here
