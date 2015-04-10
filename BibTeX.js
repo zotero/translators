@@ -287,7 +287,7 @@ function processField(item, field, value, rawValue) {
 		}
 	} else if(field == "fjournal") {
 		if(item.publicationTitle) {
-			// move publicationTitle to abbreviation, since itprobably came from 'journal'
+			// move publicationTitle to abbreviation, since it probably came from 'journal'
 			item.journalAbbreviation = item.publicationTitle;
 		}
 		item.publicationTitle = value;
@@ -1047,7 +1047,7 @@ function tidyAccents(s) {
 
 var numberRe = /^[0-9]+/;
 // Below is a list of words that should not appear as part of the citation key
-// in includes the indefinite articles of English, German, French and Spanish, as well as a small set of English prepositions whose 
+// it includes the indefinite articles of English, German, French and Spanish, as well as a small set of English prepositions whose 
 // force is more grammatical than lexical, i.e. which are likely to strike many as 'insignificant'.
 // The assumption is that most who want a title word in their key would prefer the first word of significance.
 // Also remove markup
