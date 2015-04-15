@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-04-08 17:19:58"
+	"lastUpdated": "2015-04-16 18:18:06"
 }
 
 function detectImport() {
@@ -33,6 +33,9 @@ var subfieldDelimiter = "\x1F";
 
 // general purpose cleaning
 function clean(value) {
+	if (value == null) {
+		return null;
+	}
 	value = value.replace(/^[\s\.\,\/\:;]+/, '');
 	value = value.replace(/[\s\.\,\/\:;]+$/, '');
 	value = value.replace(/ +/g, ' ');
@@ -75,6 +78,26 @@ function author(author, type, useComma) {
 	return Zotero.Utilities.cleanAuthor(author, type, useComma);
 }
 
+
+function glueTogether(part1, part2, delimiter) {
+	if (!part1 && !part2) {
+		return null;
+	}
+	if (!part2) {
+		return part1;
+	}
+	if (!part1) {
+		return part2;
+	}
+	if (!delimiter) {
+		return part1 + ' ' + part2;
+	}
+	//we only add the delimiter, if part1 is not ending with a punctation
+	if (part1.search(/[?:,.!;]\s*$/) > -1) {
+		return part1 + ' ' + part2;
+	}
+	return part1 + delimiter + part2;
+}
 /*
  * END CLEANING FUNCTIONS
  */
@@ -298,6 +321,8 @@ record.prototype.translate = function(item) {
 		var marcType = this.leader.substr(6, 1);
 		if(marcType == "g") {
 			item.itemType = "film";
+		} else if(marcType == "j" || marcType == "i") {
+			item.itemType = "audioRecording";
 		} else if(marcType == "e" || marcType == "f") {
 			item.itemType = "map";
 		} else if(marcType == "k") {
@@ -384,16 +409,9 @@ record.prototype.translate = function(item) {
 						.replace(	//chop off any translations, since they may have repeated $e fields
 							new RegExp('\\' + subfieldDelimiter + 'd.+'), '');
 		title = this.extractSubfields(title, '200');
-		item.title = title.a;
-		if(title.e) {
-			//If the title proper did not end in a punctuation mark, we should add a colon
-			if(item.title.search(/[A-Za-z0-9]\s*/) != -1) {
-				item.title += ':';
-			}
+		item.title = glueTogether(title.a, title.e, ': ');
+		item.title = clean(item.title);
 
-			item.title += ' ' + title.e;
-		}
-		
 		// Extract edition
 		this._associateDBField(item, "205", "a", "edition");
 		
@@ -465,6 +483,10 @@ record.prototype.translate = function(item) {
 					if (creatorFields[i] == "100" || creatorFields[i] == "700" ) {
 						creatorObject = ZU.cleanAuthor(authorTab[j]['a'], "author", true)
 					} else {
+						//same replacements as in the function ZU.cleanAuthor for institutional authors:
+						authorTab[j]['a'] = authorTab[j]['a'].replace(/^[\s\u00A0\.\,\/\[\]\:]+/, '')
+							.replace(/[\s\u00A0\.\,\/\[\]\:]+$/, '')
+							.replace(/[\s\u00A0]+/, ' ');
 						creatorObject = {lastName:authorTab[j]['a'], creatorType:"contributor", fieldMode:true}
 					}
 					//some heuristic for the default values:
@@ -541,7 +563,18 @@ record.prototype.translate = function(item) {
 		this._associateNotes(item, "545", "ab");
 		
 		// Extract title
-		this._associateDBField(item, "245", "abn", "title");
+		//  a = main title
+		//  b = subtitle
+		//  n = Number of part/section of a work
+		//  p = Name of part/section of a work
+		var titlesubfields = this.getFieldSubfields("245")[0];
+		item.title = glueTogether(
+			glueTogether(titlesubfields["a"], titlesubfields["b"], ": "),
+			glueTogether(titlesubfields["n"], titlesubfields["p"], ": "),
+			". "
+		);
+		item.title = clean(item.title);
+		
 		// Extract edition
 		this._associateDBField(item, "250", "a", "edition");
 		// Extract place info
@@ -847,6 +880,41 @@ var testCases = [
 						"note": "\"Unter dem Thema 'Eigentumsverfassung und Finanzkrise' veranstaltete die Deutsche Stiftung Eigentum am 22. April 2009 in Berlin ein Symposion"
 					}
 				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "01527pam a2200421 cc4500001001000000003000700010005001700017007000300034008004100037015003400078016002200112020008000134024001800214028002300232035002500255035002100280040003500301041000800336044001300344082002900357084002700386090000600413100006900419245011400488250001400602259000700616260004600623300003200669653004200701653003200743653002800775653002600803653004800829773002600877856008100903856011400984925000701098\u001e987805282\u001eDE-101\u001e20080603235442.0\u001etu\u001e080304s2008    gw ||||| |||| 00||||ger  \u001e  \u001fa08,A24,0901\u001fz08,N12,0064\u001f2dnb\u001e7 \u001f2DE-101\u001fa987805282\u001e  \u001fa9783540774310\u001fckart. : EUR 24.95, sfr 41.00 (freier Pr.)\u001f9978-3-540-77431-0\u001e3 \u001fa9783540774310\u001e52\u001faBest.-Nr. 12208951\u001e  \u001fa(DE-599)DNB987805282\u001e  \u001fa(OCoLC)244010073\u001e  \u001fa1145\u001fbger\u001fcDE-101\u001fd9999\u001ferakwb\u001e  \u001fager\u001e  \u001fcXA-DE-BE\u001e74\u001fa510\u001fa004\u001fqDE-101\u001f222sdnb\u001e  \u001fa510\u001fa004\u001fqDE-101\u001f2sdnb\u001e  \u001fab\u001e1 \u001f0(DE-588)140501037\u001f0(DE-101)140501037\u001faTeschl, Gerald\u001fd1970-\u001f4aut\u001e10\u001faMathematik für Informatiker\u001fnBd. 1\u001fpDiskrete Mathematik und lineare Algebra\u001fcGerald Teschl ; Susanne Teschl\u001e  \u001fa3., Aufl.\u001e  \u001fa13\u001e3 \u001faBerlin\u001faHeidelberg\u001fbSpringer Vieweg\u001fc2008\u001e  \u001faXIII, 514 S.\u001fbgraph. Darst.\u001e  \u001fa(VLB-FS)Mathematik für Informatiker\u001e  \u001fa(VLB-FS)Diskrete Mathematik\u001e  \u001fa(VLB-FS)Lineare Algebra\u001e  \u001fa(VLB-PF)BC: Paperback\u001e  \u001fa(VLB-WN)1632: HC/Informatik, EDV/Informatik\u001e08\u001fq11\u001fw(DE-101)976481294\u001e42\u001fmB:DE-101\u001fqapplication/pdf\u001fuhttp://d-nb.info/987805282/04\u001f3Inhaltsverzeichnis\u001e42\u001fmX:MVB\u001fqtext/html\u001fuhttp://deposit.d-nb.de/cgi-bin/dokserv?id=3077737&prov=M&dok_var=1&dok_ext=htm\u001f3Inhaltstext\u001er \u001fara\u001e\u001d",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Mathematik für Informatiker. Bd. 1: Diskrete Mathematik und lineare Algebra",
+				"creators": [
+					{
+						"firstName": "Gerald",
+						"lastName": "Teschl",
+						"creatorType": "author"
+					}
+				],
+				"date": "2008",
+				"ISBN": "9783540774310",
+				"callNumber": "b",
+				"edition": "3., Aufl",
+				"language": "ger",
+				"numPages": "514",
+				"place": "Berlin Heidelberg",
+				"publisher": "Springer Vieweg",
+				"attachments": [],
+				"tags": [
+					"(VLB-FS)Diskrete Mathematik",
+					"(VLB-FS)Lineare Algebra",
+					"(VLB-FS)Mathematik für Informatiker",
+					"(VLB-PF)BC: Paperback",
+					"(VLB-WN)1632: HC/Informatik, EDV/Informatik"
+				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
