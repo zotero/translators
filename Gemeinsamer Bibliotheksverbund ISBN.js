@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 8,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-04-09 02:43:24"
+	"lastUpdated": "2015-04-16 18:45:00"
 }
 
 /*
@@ -62,6 +62,10 @@ function doSearch(item) {
 					mimeType: "application/pdf"
 				}];
 			}
+			//delete [u.a.] from place
+			if (item.place) {
+				item.place = item.place.replace(/\[?u\.[\s\u00A0]?a\.\]?\s*$/, '');
+			}
 			//DDC is not the callNumber in Germany
 			item.callNumber = "";
 			//place the queried ISBN as the first ISBN in the list (dublicates will be removed later)
@@ -72,3 +76,119 @@ function doSearch(item) {
 
 	});
 }
+
+// Testing locally in
+// chrome://zotero/content/tools/testTranslators/testTranslators.html
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "search",
+		"input": {
+			"ISBN": "9783830931492"
+		},
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Böttcher",
+						"firstName": "Wolfgang",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "DeGEval - Gesellschaft für Evaluation",
+						"creatorType": "editor",
+						"fieldMode": true
+					}
+				],
+				"notes": [ 
+					{ 
+						"note": "Literaturangaben" 
+					}
+				],
+				"tags": [
+					"Aufsatzsammlung",
+					"Deutschland",
+					"Evaluation",
+					"Professionalisierung",
+					"Qualität",
+					"Österreich"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Table of Contents PDF",
+						"mimeType": "application/pdf"
+						}
+				],
+				"libraryCatalog": "Gemeinsamer Bibliotheksverbund ISBN",
+				"place": "Münster",
+				"ISBN": "9783830931492 3830931492 9783830931492",
+				"title": "Evaluation in Deutschland und Österreich: Stand und Entwicklungsperspektiven in den Arbeitsfeldern der DeGEval - Gesellschaft für Evaluation",
+				"publisher": "Waxmann",
+				"date": "2014",
+				"numPages": "219",
+				"language": "ger",
+				"shortTitle": "Evaluation in Deutschland und Österreich"
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"ISBN": "3-86688-240-8"
+		},
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Katrin Bente",
+						"lastName": "Karl",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "Literaturverz. S. [373] - 387 Die CD-ROM enth. einen Anh. mit Dokumenten zur Sprachproduktion und Sprachbewertung"
+					},
+					{
+						"note": "Univ., FB SLM, Diss. u.d.T.: Karl, Katrin Bente: Nicht materieller lexikalischer Transfer als Folge der aktuellen russisch-deutschen Zweisprachigkeit--Hamburg, 2011"
+					}
+				],
+				"tags": [
+					"CD-ROM",
+					"Deutsch",
+					"Deutsch",
+					"Hochschulschrift",
+					"Russisch",
+					"Russisch",
+					"Wortschatz",
+					"Wortschatz",
+					"Zweisprachigkeit",
+					"Zweisprachigkeit"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Table of Contents PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"ISBN": "3866882408 9783866882409 9783866882416",
+				"language": "ger",
+				"place": "München",
+				"numPages": "387",
+				"series": "Slavolinguistica",
+				"seriesNumber": "15",
+				"libraryCatalog": "Gemeinsamer Bibliotheksverbund ISBN",
+				"shortTitle": "Bilinguale Lexik",
+				"title": "Bilinguale Lexik: nicht materieller lexikalischer Transfer als Folge der aktuellen russisch-deutschen Zweisprachigkeit",
+				"publisher": "Sagner",
+				"date": "2012"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
