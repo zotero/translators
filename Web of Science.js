@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2015-03-19 06:14:49"
+	"lastUpdated": "2015-04-17 21:20:22"
 }
 
 /*
@@ -37,7 +37,8 @@
 
 function detectWeb(doc, url) {
 	if ( (url.indexOf("full_record.do") !== -1
-			|| url.indexOf("InboundService.do") != -1)
+		|| url.indexOf("CitedFullRecord.do") !== -1
+		|| url.indexOf("InboundService.do") != -1)
 		&& getSingleItemId(doc)
 	) {
 		return "journalArticle";
@@ -67,11 +68,13 @@ function doWeb(doc, url) {
 		var recordID, title;
 		for(var i=0, n=records.length; i<n; i++) {
 			recordID = ZU.xpathText(records[i], './/input[@name="marked_list_candidates"]/@value');
-			title = ZU.xpathText(records[i], '(.//div[@class="search-results-content"]//a)[1]');
+			title = ZU.xpathText(records[i], './/a[contains(@href, "/full_record.do?")]|.//a[contains(@href, "/CitedFullRecord.do?")]');
+			
 			if(!title || !recordID) continue;
 			
 			items[recordID] = title.trim();
 		}
+		
 		Zotero.selectItems(items, function (items) {
 			if(!items) return true;
 
