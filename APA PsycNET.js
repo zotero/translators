@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-04-24 21:42:11"
+	"lastUpdated": "2015-04-24 21:47:37"
 }
 
 function detectWeb(doc, url) {
@@ -194,6 +194,7 @@ function fetchRIS(url, post, itemType, doc, retry) {
 		} else if(!foundRIS) {
 			Z.debug('No RIS data. Falling back to scraping the page directly.');
 			scrapePage(doc, itemType);
+			return;
 		}
 		
 		//clean up (double) spacing in RIS
