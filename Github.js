@@ -66,28 +66,28 @@ function getSelectedJSON(doc) {
 
 function getItem(doc, checkOnly) {
 	var url = ZU.xpathText(doc, '/html/head/meta[@property="og:url"]/@content');
- 
+
 	if (!url) return false;
 	if (checkOnly) return true;
-	
+
 	var item = new Z.Item("journalArticle");
 	item.url = url;
 	item.title = ZU.xpathText(doc, '/html/head/meta[@property="og:description"]/@content');
-	
+
 	// use archive and archive location
 	item.archive = "Github";
 	item.archiveLocation = url;
-	
+
 	var author = ZU.xpathText(doc, '/html/head/meta[@name="octolytics-dimension-user_login"]/@content');
-	item.creators = [{ "firstName": '', 
-					   "lastName": author, 
+	item.creators = [{ "firstName": '',
+					   "lastName": author,
 					   "creatorType": "author" }];
-	
+
 	// indicate that this is in fact a software repository
 	item.extra = "{:itemType: computer_program}";
-	
+
 	item.language = "en-US";
-	
+
 	var attachment = ZU.xpathText(doc, '//a[@class="js-directory-link"]');
 	if (attachment) {
 		item.attachments.push({
@@ -97,87 +97,12 @@ function getItem(doc, checkOnly) {
 			snapshot: false
 		});
 	}
-	
+
 	item.complete();
-	
+
 	return item;
 }
 
 function getItems(ids) {
 	return false;
-}/** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://www.ncbi.nlm.nih.gov/nuccore/?term=brca1",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://www.ncbi.nlm.nih.gov/nuccore/I01425.1",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Sequence 1 from Patent US 4849348",
-				"creators": [],
-				"date": "1993/03/05",
-				"archive": "NCBI Nucleotide Database",
-				"archiveLocation": "270186",
-				"callNumber": "I01425.1",
-				"extra": "{:itemType: dataset}",
-				"language": "en-US",
-				"libraryCatalog": "NCBI Nucleotide",
-				"rights": "Public domain",
-				"url": "http://www.ncbi.nlm.nih.gov/nuccore/I01425.1",
-				"attachments": [
-					{
-						"title": "Nucleotide sequence (gb)",
-						"mimeType": "chemical/x-genbank",
-						"snapshot": false
-					}
-				],
-				"tags": [
-					"dna",
-					"insd"
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.ncbi.nlm.nih.gov/nuccore/NM_078524.4",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Drosophila melanogaster smad on X (Smox), transcript variant A, mRNA",
-				"creators": [],
-				"date": "2014/08/05",
-				"archive": "NCBI Nucleotide Database",
-				"archiveLocation": "665390239",
-				"callNumber": "NM_078524.4",
-				"extra": "{:itemType: dataset}\n{:version: 4}",
-				"language": "en-US",
-				"libraryCatalog": "NCBI Nucleotide",
-				"rights": "Public domain",
-				"url": "http://www.ncbi.nlm.nih.gov/nuccore/NM_078524.4",
-				"attachments": [
-					{
-						"title": "Nucleotide sequence (gb)",
-						"mimeType": "chemical/x-genbank",
-						"snapshot": false
-					}
-				],
-				"tags": [
-					"Drosophila melanogaster",
-					"refseq",
-					"rna"
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	}
-]
-/** END TEST CASES **/
+}
