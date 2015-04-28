@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-04-28 04:17:22"
+	"lastUpdated": "2015-04-28 15:17:22"
 }
 
 /*
@@ -85,7 +85,7 @@ function setGSPCookie(doc, cf) {
 	if(cookie.search(/\bCF=/) != -1) {
 		cookie = cookie.replace(/\s*\bCF=\d*(:?)/,cf ? 'CF=' + cf + '$1' : '');
 	} else {
-		cookie += 'CF=' + cf;
+		cookie += separator + 'CF=' + cf;
 	}
 
 	// Make sure we capture "0-" in
