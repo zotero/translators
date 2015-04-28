@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2015-04-27 23:41:42"
+	"lastUpdated": "2015-04-28 17:02:52"
 }
 
 /**
@@ -31,78 +31,121 @@
 */
 
 function detectWeb(doc, url) {
-	// use item type journalArticle until item type computerProgram is used by citation styles
-	if (getItem(doc, true)) return "journalArticle";
-
-	// search results
-	if (url.indexOf("/search?utf8=✓&q=") != -1 && getSearchResults(doc, true)) return "multiple";
+	if(url.indexOf("/search?") != -1 && getResults(doc).length) {
+		return "multiple";
+	} else if(getResult(doc)) {
+		return "journalArticle";
+	}
 }
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		getItems(doc);
+		getSelectedItems(doc);
 	} else {
-		getItem(doc);
+		scrape(doc, url);
 	}
 }
 
-function getSearchResults(doc, checkOnly) {
-	return false;
+function getSearchResults(doc) {
+	var results = doc.getElementsByClassName('repo-list-item');
+	var items = {};
+	for (var i = 0; i < results.length; i++) {
+		var title = results[i].getElementsByTagName("a")[2];
+		if (title) { 
+			items[title.href] = ZU.trimInternal(title.textContent);
+		}
+	}
+	return items;
 }
 
-function getSelectedJSON(doc) {
+function getSelectedItems(doc) {
 	var items = getSearchResults(doc);
-	var ids = [];
 
-	Zotero.selectItems(items, function(selectedItems) {
-		if (!selectedItems) return true;
-
-		for (var i in selectedItems) {
-			ids.push(i.substr(1));
+	Z.selectItems(items, function(selectedItems) {
+		if(!selectedItems) return true;
+		
+		var urls = [];
+		for(var i in selectedItems) {
+			urls.push(i);
 		}
-		getJSON(ids);
+		ZU.processDocuments(urls, scrape);
 	});
 }
 
-function getItem(doc, checkOnly) {
-	var url = ZU.xpathText(doc, '/html/head/meta[@property="og:url"]/@content');
-
-	if (!url) return false;
-	if (checkOnly) return true;
-
+function scrape(doc, url) {	
 	var item = new Z.Item("journalArticle");
-	item.url = url;
+	item.url = ZU.xpathText(doc, '/html/head/meta[@property="og:url"]/@content');
 	item.title = ZU.xpathText(doc, '/html/head/meta[@property="og:description"]/@content');
-
+	
 	// use archive and archive location
 	item.archive = "Github";
-	item.archiveLocation = url;
-
-	var author = ZU.xpathText(doc, '/html/head/meta[@name="octolytics-dimension-user_login"]/@content');
-	item.creators = [{ "firstName": '',
-					   "lastName": author,
-					   "creatorType": "author" }];
-
+	item.archiveLocation = item.url;
+	
+	var username = ZU.xpathText(doc, '/html/head/meta[@name="octolytics-dimension-user_login"]/@content');
+	item.creators.push(getAuthor(username));
+	
 	// indicate that this is in fact a software repository
 	item.extra = "{:itemType: computer_program}";
-
+	
 	item.language = "en-US";
-
-	var attachment = ZU.xpathText(doc, '//a[@class="js-directory-link"]');
-	if (attachment) {
-		item.attachments.push({
-			url: url + "/blob/master/" + encodeURIComponent(attachment),
-			title: attachment,
-			mimeType: "text/plain",
-			snapshot: false
-		});
-	}
-
+	item.attachments.push({
+		mimeType: "text/plain",
+		document: doc,
+		snapshot: false
+	});
+	
 	item.complete();
-
 	return item;
 }
 
-function getItems(ids) {
-	return false;
+function getResult(doc) {
+	return ZU.xpathText(doc, '/html/head/meta[@property="og:description"]/@content');
 }
+
+function getResults(doc) {
+	return doc.getElementsByClassName('repo-list-item');
+}
+
+// get the full name from the author profile page
+function getAuthor(username) {
+    var url = "https://github.com/" + encodeURIComponent(username);	
+	ZU.processDocuments(url, function(text) {
+		var author = ZU.xpathText(text, '//span[@class="vcard-fullname"]');
+		if (!author) { author = ZU.xpathText(text, '//span[@class="vcard-username"]'); }
+	    if (!author) { author = ZU.xpathText(text, '/html/head/meta[@property="profile:username"]/@content'); }
+	    author = ZU.cleanAuthor(author, "author");
+	});
+	// temporary, until we get the author string out of the closure
+	return ZU.cleanAuthor(username, "author");
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://github.com/najoshi/sickle",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "sickle - Windowed Adaptive Trimming for fastq files using quality",
+				"creators": [
+					undefined
+				],
+				"archive": "Github",
+				"archiveLocation": "https://github.com/najoshi/sickle",
+				"extra": "{:itemType: computer_program}",
+				"language": "en-US",
+				"libraryCatalog": "Github",
+				"url": "https://github.com/najoshi/sickle",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://github.com/search?utf8=%E2%9C%93&q=zotero",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
