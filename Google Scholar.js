@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-01-06 12:25:05"
+	"lastUpdated": "2015-04-28 04:17:22"
 }
 
 /*
@@ -71,15 +71,21 @@ var detectWeb = function (doc, url) {
 //sets Google Scholar Preference cookie
 function setGSPCookie(doc, cf) {
 	var m = doc.cookie.match(/\bGSP=[^;]+/);
-	var cookie = m ? m[0] : '';
-	if(!cookie) return;
+	var cookie, separator;
+	if (m) {
+		cookie = m[0];
+		separator = ':';
+	} else {
+		cookie = 'GSP=';
+		separator = '';
+	}
 	
 	Z.debug('Changing cookie: ' + cookie);
 	
 	if(cookie.search(/\bCF=/) != -1) {
 		cookie = cookie.replace(/\s*\bCF=\d*(:?)/,cf ? 'CF=' + cf + '$1' : '');
 	} else {
-		cookie += ':CF=' + cf;
+		cookie += 'CF=' + cf;
 	}
 
 	// Make sure we capture "0-" in
@@ -130,11 +136,24 @@ function prepareCookie(doc, callback) {
 		}
 		callback(doc);
 	} else {
+		Zotero.debug("GSP cookie not set. Will set it to GSP=CF=4");
+		__old_CF = '';
+		setGSPCookie(doc, '4');
+		callback(doc);
+	}
+	
+	/** As of this writing, there seems to be some sort of issue with GS, where
+	 * a missing GSP cookie breaks changing Google Scholar Bibliography manager
+	 * setting. If we manually set the GSP cookie, it seems to fix the issues
+	 * both for the translator and Google Scholar settings in general.
+	 * /
+	else if (false) {
 		Z.debug("Attempting to set cookie through GS Settings page");
 		//some proxies do not pass cookies through, so we need to set this by
 		//going to the preferences page
 		setCookieThroughPrefs(doc, callback);
 	}
+	*/
 }
 
 function restoreCookie(doc) {
