@@ -1,7 +1,7 @@
 {
 	"translatorID": "1300cd65-d23a-4bbf-93e5-a3c9e00d1066",
 	"label": "Primo",
-	"creator": "Matt Burton, Avram Lyon, Etienne Cavalié, Rintze Zelle, Philipp Zumstein, Sebastian Karcher, Aurimas Vinckevicius",
+	"creator": "Matt Burton, Avram Lyon, Etienne Cavalié, Rintze Zelle, Philipp Zumstein, Sebastian Karcher, Aurimas Vinckevicius, Fondazione BEIC",
 	"target": "/primo_library/|/nebis/|^https?://www\\.recherche-portal\\.ch/zbz/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2015-04-02 18:40:40"
+	"lastUpdated": "2015-05-04 14:37:00"
 }
 
 /*
@@ -25,6 +25,9 @@ Primos with showPNX.jsp installed:
 (3) http://limo.libis.be/primo_library/libweb/action/search.do?vid=LIBISnet&fromLogin=true
 (4.a) http://virtuose.uqam.ca/primo_library/libweb/action/search.do?vid=UQAM
 (5) http://searchit.princeton.edu/primo_library/libweb/action/dlDisplay.do?docId=PRN_VOYAGER2778598&vid=PRINCETON&institution=PRN
+
+Other Primos where showPnx=true is available:
+(6) http://digitale.beic.it/primo_library/libweb/action/search.do?vid=beic
 */
 
 function getSearchResults(doc) {
@@ -212,7 +215,13 @@ function importPNX(text) {
 	
 	var itemType = ZU.xpathText(doc, '//display/type');
 	if(!itemType) {
-		throw new Error('Could not locate item type');
+		if ( ZU.xpathText(doc, '//facets/rsrctype') ) {
+			var itemType = ZU.xpathText(doc, '//facets/rsrctype');
+		} else if ( ZU.xpathText(doc, '//search/rsrctype') ) {
+			var itemType = ZU.xpathText(doc, '//search/rsrctype');
+		} else {
+			throw new Error('Could not locate item type');
+		}
 	}
 	
 	switch(itemType.toLowerCase()) {
@@ -260,7 +269,7 @@ function importPNX(text) {
 		creators = contributors;
 		contributors = [];
 	}
-	
+
 	// //addata/au is great because it lists authors in last, first format,
 	// but it can also have a bunch of junk. We'll use it to help split authors
 	var splitGuidance = {};
@@ -278,32 +287,87 @@ function importPNX(text) {
 	
 	fetchCreators(item, creators, 'author', splitGuidance);
 	fetchCreators(item, contributors, 'contributor', splitGuidance);
+
+	// For this section, contrastive examples:
+	// http://primo.bib.uni-mannheim.de/primo_library/libweb/action/display.do?doc=MAN_ALEPH000967205&showPnx=true
+	// http://digitale.beic.it/primo_library/libweb/action/display.do?doc=39bei_digitool2018516&showPnx=true
+	// http://digitale.beic.it/primo_library/libweb/action/display.do?doc=39bei_digitool2394625&showPnx=true
+	// Example: "Milano". Rarely: "Mediolani", "In Milano" etc.
+	// BEIC.it also uses //display/lds09, //search/lsr12, //search/lsr03, //facets/lfc03
+	item.place = ZU.xpathText(doc, '//addata/cop');
 	
+	// E.g. "Parma : Viotto", "Ambrogio : da Caponago", "Mantegazza, Filippo"
 	var publisher = ZU.xpathText(doc, '//display/publisher');
-	if(publisher) var pubplace = ZU.unescapeHTML(publisher).split(" : ");
-	if(pubplace && pubplace[1]) {
-		item.place = pubplace[0].replace(/,\s*c?\d+|[\(\)\[\]]|(\.\s*)?/g, "");
+	// E.g. "Viotto", "[Ambrogio da Caponago]", "per magistro Philippo dicto Cassano di Mantegatii"
+	if(!publisher) var publisher = ZU.xpathText(doc, '//addata/pub');
+	if(publisher) {
+		var pubplace = ZU.unescapeHTML(publisher).split(" : ");
+		var possibleplace = pubplace[0].replace(/,\s*c?\d+|[\(\)\[\]]|(\.\s*)?/g, "");
+	}
+	if(pubplace && pubplace[1] && item.place && item.place !== possibleplace) {
+		// The splitting produced something, but the first segment is not the place.
+		// Probably, the whole string was the publisher's name.
+		// Should also catch cases like "Meurs, Jacob : van "
+		item.publisher = publisher;
+	} else if(pubplace && pubplace[1]) {
+		// Hopefully we split in place, publisher name.
 		item.publisher = pubplace[1].replace(/,\s*c?\d+|[\(\)\[\]]|(\.\s*)?/g, "")
 			.replace(/^\s*"|,?"\s*$/g, '');
 	} else if(pubplace) {
-		item.publisher = pubplace[0].replace(/,\s*c?\d+|[\(\)\[\]]|(\.\s*)?/g, "")
-			.replace(/^\s*"|,?"\s*$/g, '');
+		// No splitting, use the whole (cleaned) string
+		item.publisher = possibleplace.replace(/^\s*"|,?"\s*$/g, '');
 	}
-	
+	if(!item.place && possibleplace && pubplace[1]) {
+		// Splitting happened and we need a place, we hope this is it
+		item.place = possibleplace;
+	}
+
+	// //addata/date is sometimes available: ever needed?
+	// //addata/risdate can contain the date as written on the manifestation and
+	// be the only date, e.g. "Anno domini MCCCCLXXXXV die XXVII februarii" in
+	// http://digitale.beic.it/primo_library/libweb/action/display.do?doc=39bei_digitool2394625&showPnx=true
 	var date = ZU.xpathText(doc, '//display/creationdate|//search/creationdate');
 	var m;
 	if(date && (m = date.match(/\d+/))) {
 		item.date = m[0];
 	}
-	
-	// the three letter ISO codes that should be in the language field work well:
+
+	// Old publishers may be written as "Last, First" etc. according to
+	// standards, but should be like authors when in citations.
+	// Source: Italian librarian https://it.wikipedia.org/?diff=69781295
+	// "Dozza, Evangelista (1.), eredi"
+	// "Marnef, Jérôme de & Cavellat, Guillaume, veuve"
+	// But:
+	// "The Minerals, Metals & Materials Society"
+	// "Hodges, Foster & Co."
+	// Also problematic and still to handle: annotations which are not proper names, like:
+	// "printed by Henry Hills, printer to the King's most Excellent Majesty, for His Household and Chappel"
+	// "Hessisches Ministerium für Landwirtschaft, Forsten und Naturschutz, Landentwicklung"
+	if( item.publisher
+		&& item.date
+		&& item.date < '1831'
+	) {
+		// Remove excess space and secondary disambiguations
+		// Do not replace "&" unless there is a second name-looking string
+		var declutter = ZU.trimInternal(item.publisher).replace(/ \& ([^&,;]+,)/g, "; $1").replace(/ *\([^)]+\)/g, "");
+		// Shuffle names with disambiguation and remove numbering
+		var shuffle3 = declutter.replace(/ *([^,;]+), +([^,;0-9]+) *[0-9]*, +([^,;]+) */g, "$2 $1 ($3)");
+		// Same, other names
+		var shuffle2 = shuffle3.replace(/ *([^,;]+), +([^,;0-9]+) *[0-9]* */g, "$2 $1");
+		// Use comma list, get rid of space buildup for numbered names, clean like authors
+		item.publisher = stripAuthor( shuffle2.replace(/ *[;] */g, ", ").replace(/  /g, " ") );
+	}
+
+	// The three letter codes, that should be in the language field, usually work well
+	// (although they may be in MARC21, or ISO 639-2, rather than ISO 639-3 or others)
 	item.language = ZU.xpathText(doc, '(//display/language|//facets/language)[1]');
-	
+
+	// BEIC.it uses //dedup/f9, unclear what that is
 	var pages = ZU.xpathText(doc, '//display/format');
 	if(item.itemType == 'book' && pages && pages.search(/\d/) != -1) {
 		item.numPages = extractNumPages(pages);
 	}
-	
+
 	item.series = ZU.xpathText(doc, '(//addata/seriestitle)[1]');
 
 	// The identifier field is supposed to have standardized format, but
@@ -318,6 +382,9 @@ function importPNX(text) {
 	item.edition = ZU.xpathText(doc, '//display/edition');
 	
 	var subjects = ZU.xpath(doc, '//search/subject');
+	if(!subjects.length) {
+		subjects = ZU.xpath(doc, '//display/subject');
+	}
 	for(var i=0, n=subjects.length; i<n; i++) {
 		item.tags.push(ZU.trimInternal(subjects[i].textContent));
 	}
@@ -351,11 +418,18 @@ function importPNX(text) {
 }
 
 function stripAuthor(str) {
+	// Example "Andrea : da Barberino (1370-circa 1431)"
+	// http://gutenberg.beic.it/webclient/MetadataManager?pid=3836862&descriptive_only=true
 	return str
-		// Remove year
-		.replace(/\s*,?\s*\(?\d{4}-?(\d{4})?\)?/g, '')
 		// Remove things like (illustrator). TODO: use this to assign creator type?
-		.replace(/\s*,?\s*\([^()]*\)$/, '');
+		// Also matches an empty parenthesis
+		.replace(/\s*,?\s*\([^()]*\)$/, '')
+		// Remove almost any remaining parenthesis, starting with numbers (dates) and
+		// letters used for common international abbreviations about dates
+		.replace(/\([\d\sabcefilr.? ]*[-–][\d\abcefilr.? ]*\)/gi, '')
+		// The full "continuous" name uses no separators, which need be removed
+		// cf. "Luc, Jean André : de (1727-1817)"
+		.replace(/ :/, "");
 }
 
 function fetchCreators(item, creators, type, splitGuidance) {
@@ -380,19 +454,28 @@ function fetchCreators(item, creators, type, splitGuidance) {
 }
 
 function extractNumPages(str) {
-	// Borrowed from Library Catalog (PICA). See #756
-	//make sure things like 2 partition don't match, but 2 p at the end of the field do
-	// f., p., and S. are "pages" in various languages
+	// Borrowed from Library Catalog (PICA). See #756.
+	// Make sure things like "2 partition" don't match,
+	// but "2 p" at the end of the field does.
+	// f., p., pp. and S. are "pages" in various languages
 	// For multi-volume works, we expect formats like:
 	//   x-109 p., 510 p. and X, 106 S.; 123 S.
-	var numPagesRE = /\[?\b((?:[ivxlcdm\d]+[ ,\-]*)+)\]?\s+[fps]\b/ig,
+	// For volumes with multiple paginations and other info, formats like:
+	// - [16], 228, [4] p. : ill. ; 4°
+
+	// Brackets are an (optional) "property" of each pagination
+	var numPagesRE = /\b((?:\[?[ivxlcdm\d]+\]?[ ,\-]*)+)\s+[fps]+\b/ig,
 		numPages = [], m;
 	while(m = numPagesRE.exec(str)) {
 		numPages.push(m[1].trim()
-			.replace(/[ ,\-]+/g,'+')
+			// Separate different paginations with a "+"
+			.replace(/[ ,\-\[\]]+(?!$)/g, '+')
+			// We may have some trailing punctuation
+			.replace(/[,\-\[\]]+$/g, '')
 			.toLowerCase() // for Roman numerals
 		);
 	}
+	// Separate volumes with a ";"
 	return numPages.join('; ');
 }/** BEGIN TEST CASES **/
 var testCases = [
@@ -519,12 +602,70 @@ var testCases = [
 				"language": "eng",
 				"libraryCatalog": "Primo",
 				"publisher": "Boston Boston Book and Art Chop",
+				"place": "Boston",
 				"series": "Art and society 1",
 				"attachments": [],
 				"tags": [
 					"ART",
 					"GUERRE",
 					"WAR"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://digitale.beic.it/primo_library/libweb/action/display.do?dscnt=1&fromLogin=true&doc=39bei_digitool4783627&dstmp=1420050573310&vid=beic&fromLogin=true&fromLogin=true",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "De scientia stellarum",
+				"creators": [
+					{
+						"firstName": "Muhammad",
+						"lastName": "al-Battani",
+						"creatorType": "author"
+					}
+				],
+				"date": "1645",
+				"language": "lat",
+				"libraryCatalog": "Primo",
+				"numPages": "16+228+4",
+				"publisher": "Vittorio Benacci",
+				"attachments": [],
+				"tags": [
+					"Stelle fisse - Novae"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://digitale.beic.it/primo_library/libweb/action/display.do?doc=39bei_digitool2018516",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Grida per i Milanesi che avevano seguito Ludovico il Moro",
+				"creators": [
+					{
+						"lastName": "Milano",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "1500",
+				"language": "ita",
+				"libraryCatalog": "Primo",
+				"place": "Milano",
+				"publisher": "Ambrogio da Caponago",
+				"attachments": [],
+				"tags": [
+					"Italia - Storia medioevale",
+					"Leggi"
 				],
 				"notes": [],
 				"seeAlso": []
