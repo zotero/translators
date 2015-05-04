@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-04-29 01:50:05"
+	"lastUpdated": "2015-05-04 14:51:49"
 }
 
 /*
@@ -131,6 +131,12 @@ getAttachment.mimeTypes = {
 	'DOC': 'application/msword',
 	'HTML': 'text/html'
 };
+
+function getHTMLTitle(text) {
+	var title = text.match(/<title>(.*?)<\/title>/i);
+	if (title) return title[1];
+	return false;
+}
 
 /*********************
  * Scraper functions *
@@ -394,19 +400,22 @@ function doWeb(doc, url) {
 			var onclick = ZU.xpathText(results[i], './/div[@class="gs_fl"]/a[@aria-controls="gs_cit"]/@onclick');
 			if (!onclick) {
 				// Should never hit this, since we check it in getViableResults
-				throw new Error("Could not locate Cite onclick attribute in\n" + results[i].innerHTML);
+				Zotero.debug(results[i].innerHTML);
+				throw new Error("Could not locate Cite onclick attribute");
 			}
 			
 			citeUrl = makeCiteUrl(onclick);
 			if (!citeUrl) {
 				// This could happen if GS changes their code around
-				throw new Error("Could not determine Cite link parameters from\n" + onclick);
+				Zotero.debug(onclick);
+				throw new Error("Could not determine Cite link parameters");
 			}
 			
 			var title = ZU.xpathText(results[i], './/h3[@class="gs_rt"]');
 			if (!title) {
 				// Should never hit this, since we check it in getViableResults
-				throw new Error("Could not determine title for\n" + results[i].innerHTML);
+				Zotero.debug(results[i].innerHTML);
+				throw new Error("Could not determine title");
 			}
 			
 			items[citeUrl] = title;
@@ -495,7 +504,11 @@ function scrapeAll(doc, itemObjs) {
 		ZU.doGet(item.citeUrl, function(text) {
 			var m = text.match(/href="(\/scholar.bib\?[^"]+)/);
 			if (!m) {
-				throw new Error("Could not find BibTeX URL in\n" + text);
+				Zotero.debug(text);
+				var msg = "Could not find BibTeX URL"
+				var title = getHTMLTitle(text);
+				if (title) msg += ' Got page with title "' + title +'"';
+				throw new Error(msg);
 			}
 			
 			fetchBibTeX(doc, item, ZU.unescapeHTML(m[1]), callback);
@@ -503,7 +516,8 @@ function scrapeAll(doc, itemObjs) {
 	} else if (item.bibtexUrl) {
 		fetchBibTeX(doc, item, item.bibtexUrl, callback);
 	} else {
-		throw new Error("Item missing citeUrl or bibtexUrl\n" + ZU.varDump(item));
+		Zotero.debug(item);
+		throw new Error("Item missing citeUrl and bibtexUrl");
 	}
 }
 
@@ -511,6 +525,14 @@ function scrapeAll(doc, itemObjs) {
 function fetchBibTeX(doc, item, bibtexUrl, doneCallback) {
 	ZU.doGet(bibtexUrl,
 		function(text) {
+			if (!/^\s*@\w+{/.test(text)) {
+				var msg = 'BibTeX not found.';
+				var title = getHTMLTitle(text);
+				if (title) msg += ' Got page with title "' + title +'"';
+				
+				throw new Error(msg);
+			}
+			
 			switch (item.type) {
 				case 'case':
 					importCaseResult(doc, item.result, text, item.factory, doneCallback);
