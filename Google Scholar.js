@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-05-07 23:15:02"
+	"lastUpdated": "2015-05-07 23:55:08"
 }
 
 /*
@@ -356,6 +356,12 @@ function importPatentResult(doc, patent, bibtex) {
 	translator.translate();
 }
 
+function unescapeJSString(str) {
+	return str.replace(/\\x([\da-f]{2})/gi, function(m, hex) {
+		return String.fromCharCode(parseInt(hex, 16));
+	});
+}
+
 // Builds Cite URL from the link "onclick" attribute
 var gs_ocit_url; // Fetch directly from page. Seems like this may vary
 function makeCiteUrl(onclick, doc) {
@@ -378,9 +384,7 @@ function makeCiteUrl(onclick, doc) {
 			throw new Error('Could not extract gs_ocit_url from gs_ocit script');
 		}
 		
-		gs_ocit_url = gs_ocit_url[1].replace(/\\x([\da-f]{2})/gi, function(m, hex) {
-			return String.fromCharCode(parseInt(hex, 16));
-		})
+		gs_ocit_url = unescapeJSString(gs_ocit_url[1]);
 		Zotero.debug('Using ' + gs_ocit_url + ' as gs_ocit_url');
 	}
 	
@@ -392,17 +396,24 @@ function makeCiteUrl(onclick, doc) {
 function doWeb(doc, url) {
 	var type = detectWeb(doc, url);
 	if(type != 'multiple' && url.indexOf('/citations?') != -1) {
-		//individual saved citation
-		var citationKey = ZU.xpathText(doc,
-			'(//div[@id="gsc_md_cont"]/form|//form[@id="gsc_eaf"])[1]\
-				/input[@name="s"]/@value'
-		);
-		if(!citationKey) throw new Error("Could not find citation key");
+		// Individual saved citation
+		
+		// Extract URL from script
+		var script = ZU.xpathText(doc.head, './script[contains(text(), "function gsc_export(")][1]');
+		if (!script) {
+			Zotero.debug(doc.head.innerHTML);
+			throw new Error('Could not find gsc_export script');
+		}
+		var exportUrl = script.match(/function gsc_export\([^}]+\bgsc_go\(['"]([^'"]+)/);
+		if (!exportUrl) {
+			Zotero.debug(script);
+			throw new Error('Could not extract export url from script');
+		}
+		
+		exportUrl = unescapeJSString(exportUrl[1]);
 		
 		var data = {
-			bibtexUrl: '/citations?view_op=export_citations&hl=en&citilm=1&cit_fmt=0'
-				+ '&citation_for_view=' + citationKey
-				+ '&s=' + citationKey,
+			bibtexUrl: exportUrl + '0', // BibTeX format
 			result: doc.getElementById('gsc_ccl'),
 			type: type
 		};
@@ -1204,6 +1215,43 @@ var testCases = [
 					{
 						"title": "Google Scholar Judgement",
 						"type": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://scholar.google.com/citations?view_op=view_citation&hl=fr&user=6dUTpTYAAAAJ&cstart=20&sortby=pubdate&citation_for_view=6dUTpTYAAAAJ:4DMP91E08xMC",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Users, narcissism and control: tracking the impact of scholarly publications in the 21st century",
+				"creators": [
+					{
+						"firstName": "Paul",
+						"lastName": "Wouters",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Rodrigo",
+						"lastName": "Costas",
+						"creatorType": "author"
+					}
+				],
+				"date": "2012",
+				"itemID": "wouters2012users",
+				"libraryCatalog": "Google Scholar",
+				"publisher": "SURFfoundation",
+				"shortTitle": "Users, narcissism and control",
+				"url": "http://sticonference.org/Proceedings/vol2/Wouters_Users_847.pdf",
+				"attachments": [
+					{
+						"title": "[PDF] à partir de sticonference.org",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
