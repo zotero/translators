@@ -1225,33 +1225,41 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://scholar.google.com/citations?view_op=view_citation&hl=fr&user=6dUTpTYAAAAJ&cstart=20&sortby=pubdate&citation_for_view=6dUTpTYAAAAJ:4DMP91E08xMC",
+		"url": "http://scholar.google.com/citations?view_op=view_citation&hl=fr&user=6dUTpTYAAAAJ&cstart=20&sortby=pubdate&citation_for_view=6dUTpTYAAAAJ:kO05sadLmrgC",
 		"items": [
 			{
-				"itemType": "book",
-				"title": "Users, narcissism and control: tracking the impact of scholarly publications in the 21st century",
+				"itemType": "journalArticle",
+				"title": "The value of research data metrics for datasets from a cultural and technical point of view. A knowledge exchange report",
 				"creators": [
 					{
-						"firstName": "Paul",
+						"firstName": "R. Meijer I.",
+						"lastName": "Costas",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Z.",
+						"lastName": "Zahedi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "P. F.",
 						"lastName": "Wouters",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Rodrigo",
-						"lastName": "Costas",
-						"creatorType": "author"
+						"lastName": "others",
+						"creatorType": "author",
+						"fieldMode": 1
 					}
 				],
-				"date": "2012",
-				"itemID": "wouters2012users",
+				"date": "2013",
+				"itemID": "costas2013value",
 				"libraryCatalog": "Google Scholar",
-				"publisher": "SURFfoundation",
-				"shortTitle": "Users, narcissism and control",
-				"url": "http://sticonference.org/Proceedings/vol2/Wouters_Users_847.pdf",
+				"url": "https://openaccess.leidenuniv.nl/handle/1887/23586",
 				"attachments": [
 					{
-						"title": "[PDF] à partir de sticonference.org",
-						"mimeType": "application/pdf"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
