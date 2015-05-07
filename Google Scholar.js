@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-05-04 14:51:49"
+	"lastUpdated": "2015-05-07 23:15:02"
 }
 
 /*
@@ -357,12 +357,34 @@ function importPatentResult(doc, patent, bibtex) {
 }
 
 // Builds Cite URL from the link "onclick" attribute
-function makeCiteUrl(onclick) {
+var gs_ocit_url; // Fetch directly from page. Seems like this may vary
+function makeCiteUrl(onclick, doc) {
 	var m = onclick.match(/\bgs_ocit\(event,\s*'([^']+)'\s*,\s*'(\d+)'\s*\)/);
 	if (!m) return;
 	
-	// Taken directly from gs_ocit function
-	return '/scholar?q\x3dinfo:{id}:scholar.google.com/\x26output\x3dcite\x26scirp\x3d{p}\x26hl\x3den'
+	if (!gs_ocit_url) {
+		var root = doc.getElementById('gs_cit');
+		if (!root) {
+			Zotero.debug('Could not find gs_cit div');
+			root = doc.body;
+		}
+		
+		var script = ZU.xpathText(root, './/script[starts-with(text(),"function gs_ocit(")][1]');
+		if (!script) throw new Error('Could not locate gs_ocit script');
+		
+		gs_ocit_url = script.match(/\bgs_ajax\('([^']+)/);
+		if (!gs_ocit_url) {
+			Zotero.debug(script);
+			throw new Error('Could not extract gs_ocit_url from gs_ocit script');
+		}
+		
+		gs_ocit_url = gs_ocit_url[1].replace(/\\x([\da-f]{2})/gi, function(m, hex) {
+			return String.fromCharCode(parseInt(hex, 16));
+		})
+		Zotero.debug('Using ' + gs_ocit_url + ' as gs_ocit_url');
+	}
+	
+	return gs_ocit_url
 		.replace('{id}', m[1])
 		.replace('{p}', m[2]);
 }
@@ -404,7 +426,7 @@ function doWeb(doc, url) {
 				throw new Error("Could not locate Cite onclick attribute");
 			}
 			
-			citeUrl = makeCiteUrl(onclick);
+			citeUrl = makeCiteUrl(onclick, doc);
 			if (!citeUrl) {
 				// This could happen if GS changes their code around
 				Zotero.debug(onclick);
