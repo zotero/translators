@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-04-16 09:59:55"
+	"lastUpdated": "2015-05-20 00:05:55"
 }
 
 function detectImport() {
@@ -32,7 +32,7 @@ function detectImport() {
 function doImport() {
 	var text = "";
 	var line;
-	while (line = Zotero.read()) {
+	while ((line = Zotero.read()) !== false) {
 		text += line;
 	}
 	//call MARC translator

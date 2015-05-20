@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-03-18 11:56:01"
+	"lastUpdated": "2015-05-20 00:05:55"
 }
 
 /*
@@ -51,7 +51,7 @@
 function detectImport() {
 	// read at most 100 lines and checks for ctx-namespace
 	var line, i=0;
-	while ((line = Zotero.read()) && i<100) {
+	while ((line = Zotero.read()) !== false && i<100) {
 		if ( line.indexOf("info:ofi/fmt:xml:xsd:ctx")>-1 ) {
 			return true;
 		}
