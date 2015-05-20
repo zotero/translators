@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-12-03 22:31:52"
+	"lastUpdated": "2015-05-20 22:33:03"
 }
 
 /*
@@ -110,7 +110,16 @@ function scrape(doc) {
 		if (inproceedingsIndex != -1) {
 			var ts = text.substring(inproceedingsIndex);
 			text = ts.substring(0, ts.toLowerCase().indexOf('</pre>'));
+		} else if(text.toLowerCase().indexOf('</pre>') != -1) {
+			// Get first PRE block containing something that may look like BibTeX
+			var m = text.match(/<pre.*?>\s*(@\w[\s\S]+?)<\/pre>/i);
+			if (!m) {
+				Zotero.debug('PRE block not found');
+			} else {
+				text = m[1].trim();
+			}
 		}
+
 		var translator = Zotero.loadTranslator("import");
 		var haveImported = false;
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
@@ -369,6 +378,60 @@ var testCases = [
 			}
 		],
 		"defer": true
+	},
+	{
+		"type": "web",
+		"url": "http://dl.acm.org/citation.cfm?id=2566617",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Check-ins in “Blau Space”: Applying Blau’s Macrosociological Theory to Foursquare Check-ins from New York City",
+				"creators": [
+					{
+						"firstName": "Kenneth",
+						"lastName": "Joseph",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kathleen M.",
+						"lastName": "Carley",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jason I.",
+						"lastName": "Hong",
+						"creatorType": "author"
+					}
+				],
+				"date": "September 2014",
+				"DOI": "10.1145/2566617",
+				"ISSN": "2157-6904",
+				"abstractNote": "Peter Blau was one of the first to define a latent social space and utilize it to provide concrete hypotheses. Blau defines social structure via social “parameters” (constraints). Actors that are closer together (more homogenous) in this social parameter space are more likely to interact. One of Blau’s most important hypotheses resulting from this work was that the consolidation of parameters could lead to isolated social groups. For example, the consolidation of race and income might lead to segregation. In the present work, we use Foursquare data from New York City to explore evidence of homogeneity along certain social parameters and consolidation that breeds social isolation in communities of locations checked in to by similar users. More specifically, we first test the extent to which communities detected via Latent Dirichlet Allocation are homogenous across a set of four social constraints—racial homophily, income homophily, personal interest homophily and physical space. Using a bootstrapping approach, we find that 14 (of 20) communities are statistically, and all but one qualitatively, homogenous along one of these social constraints, showing the relevance of Blau’s latent space model in venue communities determined via user check-in behavior. We then consider the extent to which communities with consolidated parameters, those homogenous on more than one parameter, represent socially isolated populations. We find communities homogenous on multiple parameters, including a homosexual community and a “hipster” community, that show support for Blau’s hypothesis that consolidation breeds social isolation. We consider these results in the context of mediated communication, in particular in the context of self-representation on social media.",
+				"issue": "3",
+				"itemID": "Joseph:2014:CLS:2648782.2566617",
+				"libraryCatalog": "ACM Digital Library",
+				"pages": "46:1–46:22",
+				"publicationTitle": "ACM Trans. Intell. Syst. Technol.",
+				"shortTitle": "Check-ins in “Blau Space”",
+				"url": "http://doi.acm.org/10.1145/2566617",
+				"volume": "5",
+				"attachments": [
+					{
+						"title": "ACM Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					"Foursquare",
+					"community structure",
+					"latent social space",
+					"urban analytics"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

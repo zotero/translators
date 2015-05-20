@@ -18,7 +18,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-04-05 20:50:00"
+	"lastUpdated": "2015-05-20 22:03:17"
 }
 
 function detectImport() {
@@ -634,6 +634,16 @@ function unescapeBibTeX(value) {
 	}
 	value = value.replace(/\\\\/g, "\\");
 	value = value.replace(/\s+/g, " ");
+	
+	// Unescape HTML entities coming from web translators
+	if (Zotero.parentTranslator && value.indexOf('&') != -1) {
+		value = value.replace(/&#?\w+;/g, function(entity) {
+			var char = ZU.unescapeHTML(entity);
+			if (char == entity) char = ZU.unescapeHTML(entity.toLowerCase()); // Sometimes case can be incorrect and entities are case-sensitive
+			
+			return char;
+		});
+	}
 	
 	return value;
 }
