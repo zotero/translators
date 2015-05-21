@@ -2,7 +2,7 @@
 	"translatorID": "d8341c22-8cf4-428f-be3b-ada9fa8933eb",
 	"label": "Deutsche Nationalbibliothek",
 	"creator": "Philipp Zumstein",
-	"target": "https?://portal\\.dnb\\.de/opac\\.htm\\?",
+	"target": "^https?://portal\\.dnb\\.de/opac\\.htm\\?",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
