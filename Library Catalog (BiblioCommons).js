@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-04-08 16:16:22"
+	"lastUpdated": "2015-06-01 21:54:42"
 }
 
 /*
@@ -124,7 +124,7 @@ function processor (obj) {
 		var record = new marc.record();
 		// The first piece is the MARC leader
 		record.leader = fields.shift();
-		for each (var field in fields) {
+		for (let field of fields) {
 			//Z.debug(field)
 			// Skip blanks
 			if (field.replace(/\x1F|\s/g,"") == "") continue;
@@ -145,6 +145,7 @@ function processor (obj) {
 		item.complete();
 		return true;
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -190,7 +191,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://nypl.bibliocommons.com/item/show/10974089052_labour",
+		"url": "https://nypl.bibliocommons.com/item/show/10974089052_labour",
 		"items": [
 			{
 				"itemType": "book",
@@ -209,6 +210,7 @@ var testCases = [
 				],
 				"date": "1980",
 				"callNumber": "JFD 87-5272",
+				"language": "eng",
 				"libraryCatalog": "nypl Library Catalog",
 				"numPages": "139",
 				"place": "London",

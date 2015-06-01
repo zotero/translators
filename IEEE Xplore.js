@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-29 22:35:22"
+	"lastUpdated": "2015-06-01 21:50:44"
 }
 
 function detectWeb(doc, url) {
@@ -53,7 +53,7 @@ function doWeb(doc, url) {
 			var link = linknode.href;
 			var title = "";
 			var strongs = tableRow.getElementsByTagName("h3");
-			for each(var strong in strongs) {
+			for (let strong of strongs) {
 				if (strong.textContent) {
 					title += strong.textContent + " ";
 				}

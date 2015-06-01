@@ -64,7 +64,7 @@ var typeMap = {
 
 function formatAuthors(authors, useTypes) {
 	var text = "";
-	for each(var author in authors) {
+	for (let author of authors) {
 		text += ", "+author.firstName;
 		if(author.firstName && author.lastName) text += " ";
 		text += author.lastName;

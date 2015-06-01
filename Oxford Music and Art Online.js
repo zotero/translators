@@ -47,7 +47,7 @@ function doWeb(doc, url) {
 }	
 
 function scrape(ids, host){
-	for each (var id in ids) {
+	for (let id of ids) {
 		var get = 'http://' + host + '/subscriber/article_export_citation/' + id;
 		Zotero.Utilities.HTTP.doGet(get, function(text) {
 			var translator = Zotero.loadTranslator("import");

@@ -278,7 +278,7 @@ function doExport() {
 		// tags
 		if(item.tags) {
 			var keywordTag = "";
-			for each(var tag in item.tags) {
+			for (let tag of item.tags) {
 				keywordTag += "\r\n"+tag.tag;
 			}
 			addTag("K", keywordTag.substr(2));

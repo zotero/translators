@@ -95,7 +95,7 @@ function scrapeSingle(doc, url) {
 		else
 			authors.push(author_text);
 	}
-	for each(var a in authors) {
+	for (let a of authors) {
 		if (a == 'null')
 			continue;
 		if (a.match(RE_SKIP_AUTHOR_PARSING))

@@ -86,7 +86,7 @@ function getData(ids){
 		var keywords;
 		if ((keywords = ZU.xpathText(doc, '//media:group/media:keywords', ns))) {
 			keywords = keywords.split(",");
-			for each(var tag in keywords){
+			for (let tag of keywords){
 				newItem.tags.push(Zotero.Utilities.trimInternal(tag));
 			}
 		}

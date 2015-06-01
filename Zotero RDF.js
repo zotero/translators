@@ -81,7 +81,7 @@ function generateCollection(collection) {
 function getDisplayTitle(item) {
 	if(!item.title && (item.itemType == "interview" || item.itemType == "letter")) {
 		var participants = []
-		for each(var creator in item.creators) {
+		for (let creator of item.creators) {
 			if (item.itemType == "letter" && creator.creatorType == "recipient" ||
 					item.itemType == "interview" && creator.creatorType == "interviewer") {
 			   participants.push(creator);
@@ -92,7 +92,7 @@ function getDisplayTitle(item) {
 		if(participants.length) {
 			//var names = [creator.firstName ? creator.firstName+" "+creator.lastName : creator.lastName
 			var names = [];
-			for each(var creator in participants) {
+			for (let creator of participants) {
 				names.push(creator.lastName);
 			}
 			
@@ -322,7 +322,7 @@ function generateItem(item, zoteroType, resource) {
 	
 	// child attachments
 	if(item.attachments) {
-		for each(var attachment in item.attachments) {
+		for (let attachment of item.attachments) {
 			var attachmentResource = itemResources[attachment.itemID];
 			Zotero.RDF.addStatement(resource, n.link+"link", attachmentResource, false);
 			generateItem(attachment, "attachment", attachmentResource);
@@ -538,13 +538,13 @@ function doExport() {
 			itemResources[item.notes[j].itemID] = "#item_"+item.notes[j].itemID;
 		}
 		
-		for each(var attachment in item.attachments) {
+		for (let attachment of item.attachments) {
 			// just specify a node ID
 			itemResources[attachment.itemID] = "#item_"+attachment.itemID;
 		}
 	}
 	
-	for each(item in items) {
+	for (let item of items) {
 		// these items are global
 		generateItem(item, item.itemType, itemResources[item.itemID]);
 	}

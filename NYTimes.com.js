@@ -142,7 +142,7 @@ function scrape(doc, url) {
 		}
 
 		var authors = author.split(" and ");
-		for each(var author in authors) {
+		for (let author of authors) {
 			// fix capitalization
 			var words = author.split(" ");
 			for (var i in words) {

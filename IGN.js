@@ -54,7 +54,7 @@ function scrape(doc, url) {
 	//authors
 	var byline = doc.evaluate('//div[@class="article_author"]', doc, null, XPathResult.ANY_TYPE, null);
 	var authors = byline.iterateNext().textContent.replace(/^by\s*/, "").split(" and ");
-	for each(var a in authors) {
+	for (let a of authors) {
 		newItem.creators.push(Zotero.Utilities.cleanAuthor(a, "author"));
 	}
 	

@@ -243,12 +243,12 @@ function scrape(newDoc, marc, url) {
 		var oldCreators = newItem.creators;
 		newItem.creators = new Array();
 		var transient = new Array();
-		for each (var a in oldCreators) {
+		for (let a of oldCreators) {
 			if (a.lastName) {
 				if (!a.lastName.match(/\d+/)) transient.push(a);
 			}
 		}
-		for each (var a in transient) {
+		for (let a of transient) {
 			if (a.firstName) {
 				if (a.firstName.match(/\|/)) a.firstName = a.firstName.match(/([^|]+)\s+|/)[1];
 			}

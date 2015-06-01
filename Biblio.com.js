@@ -56,7 +56,7 @@ function scrape(doc, url) {
 		if (authors.match(/\w/)) {
 			authors = authors.replace(/^\s*by/, "");
 			multiAuthors = authors.split(";");
-			for each (var aut in multiAuthors) {
+			for (let aut of multiAuthors) {
 				newItem.creators.push(Zotero.Utilities.cleanAuthor(aut, "author", aut.match(/,/)));
 			}
 		}

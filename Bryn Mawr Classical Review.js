@@ -67,7 +67,7 @@ function doWeb(doc, url) {
 		var splitRe = new RegExp(title);
 		var authors = data.split(splitRe)[0].replace(/\([^)]+\)/, "").split(/(,|and)\s+/);
 		Zotero.debug(authors);
-		for each (var aut in authors) {
+		for (let aut of authors) {
 			if (aut.match(/\w/) && (aut != "and")) {
 				item.creators.push(Zotero.Utilities.cleanAuthor(aut, "reviewedAuthor"));
 			}

@@ -54,7 +54,7 @@ function doWeb(doc, url) {
 		}
 		if (data['Subjects:']) {
 			var kws = data['Subjects:'].split(".");
-			for each (var key in kws) {
+			for (let key of kws) {
 				if (key.match(/\w+/)) item.tags.push(key);
 			}
 		}

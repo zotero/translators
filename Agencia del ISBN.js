@@ -63,7 +63,7 @@ function doWeb(doc, url) {
 		author = data['Autores'];
 		if (author) {
 			var authors = author.match(/\b.*,\s+\w+[^([]/g);
-			for each (aut in authors) {
+			for (let aut of authors) {
 				item.creators.push(Zotero.Utilities.cleanAuthor(Zotero.Utilities.trimInternal(aut), "author", true));
 			}
 		}

@@ -70,7 +70,7 @@ function scrape(doc) {
 		info = info.toString();
 		var data = new Array();
 		var parts = info.split(/[?&]/);
-		for each(var part in parts) {
+		for (let part of parts) {
 			var index = part.indexOf("=");
 			if(index !== -1) {
 				data[part.substr(0, index)] = part.substr(index+1);

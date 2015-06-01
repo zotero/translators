@@ -45,7 +45,7 @@ function doWeb(doc, url) {
 			var auts = doc.evaluate('//div[@id="docBody"]/p/i', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 			item.abstractNote = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="docBody"]/p[1]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(auts, ""));
 			auts = auts.replace('By ', "").split(/\//);
-			for each (var aut in auts) {
+			for (let aut of auts) {
 				item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
 			}
 		} else {

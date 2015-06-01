@@ -68,7 +68,7 @@ function doWeb(doc, url) {
 		}
 	} else { arts = [url]; }
 	Zotero.debug(arts);
-	for each (var art in arts) {
+	for (let art of arts) {
 		var newurl = art;
 		Zotero.Utilities.HTTP.doGet(art, function(text) {
 			var newItem = new Zotero.Item("case");
@@ -89,7 +89,7 @@ function doWeb(doc, url) {
 			
 			var metareg = /<META NAME[^>]+\>/g;
 			var tags = text.match(metareg);
-			for each (var tag in tags) {
+			for (let tag of tags) {
 				var stuff = tag.match(/NAME=\"([^"]+)\"\s+CONTENT=\"([^"]+)\"/);
 				regexMeta([stuff[1], stuff[2]], newItem);
 			}

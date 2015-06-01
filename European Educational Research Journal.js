@@ -22,7 +22,7 @@ function titleCase(str) {
 	var skipWords = ["but", "or", "yet", "so", "for", "and", "nor", "a", "an", "the", "at", "by", "from", "in", "into", "of", "on", "to", "with", "up", "down", "as"];
 	var words = str.toLowerCase().split(/\s+/);
 	var newstr = "";
-	for each (var word in words) {
+	for (let word of words) {
 		if (skipWords.indexOf(word.replace(/[^a-zA-Z]+/, "")) != -1) {
 			newstr += " " + word;
 		} else if (word.indexOf("-") != -1) {
@@ -75,7 +75,7 @@ function doWeb(doc, url) {
 				authors = authors.replace(bit.textContent, ",");
 			}
 			authors = authors.split(/\s*(,|&)\s*/);
-			for each (var aut in authors) {
+			for (let aut of authors) {
 				if (aut.match(/\w/)) {
 					aut = titleCase(Zotero.Utilities.trimInternal(aut));
 					item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));

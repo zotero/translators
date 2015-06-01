@@ -75,7 +75,7 @@ function scrape(doc, url) {
 		var byline = ZU.xpathText(doc, '//div[@id="articleInfo"]//p[@class="byline"]');
 		if (byline) {
 			var authors = byline.substr(3).split(/and |,/);
-			for each(var aut in authors) {
+			for (let aut of authors) {
 				item.creators.push(authorFix(aut));
 			}
 		}
@@ -88,7 +88,7 @@ function scrape(doc, url) {
 		var byline = ZU.xpathText(doc, '//div[@class="author"]');
 		if (byline) {
 			var authors = byline.split(/and |,/);
-			for each(var aut in authors) {
+			for (let aut of authors) {
 				item.creators.push(authorFix(aut));
 			}
 		}

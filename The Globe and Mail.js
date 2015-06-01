@@ -167,7 +167,7 @@ function scrape(doc, url) {
 			}
 		
 			var authors = author.toLowerCase().split(" and ");
-			for each(var author in authors) {
+			for (let author of authors) {
 				var words = author.split(" ");
 				
 				for (var i in words) {

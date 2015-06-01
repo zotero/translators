@@ -104,7 +104,7 @@ function scrape(doc, url) {
 			else
 				authors.push(author_text);
 		}
-		for each(var a in authors)
+		for (let a of authors)
 			if (a != 'null')
 				newItem.creators.push(
 					Zotero.Utilities.cleanAuthor(a, "author"));
@@ -123,14 +123,14 @@ function scrape(doc, url) {
 	   the items which were selected */
 	if (post_count > 1) {
 		var sel_items = new Object();
-		for each(var i in items)
+		for (let i of items)
 			sel_items[i.url] = i.title;
 		sel_items = Zotero.selectItems(sel_items);
 		
 		for (var i in sel_items)
 			items[i].complete();
 	} else if (post_count == 1)
-		for each(var i in items)
+		for (let i of items)
 			i.complete();
 }
 

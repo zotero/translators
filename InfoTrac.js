@@ -151,7 +151,7 @@ function extractCitation(url, elmts, title, doc) {
 			
 			// ensure author is not already there
 			var add = true;
-			for each(var existingAuthor in newItem.creators) {
+			for (let existingAuthor of newItem.creators) {
 				if(existingAuthor.firstName == author.firstName && existingAuthor.lastName == author.lastName) {
 					add = false;
 					break;

@@ -75,7 +75,7 @@ function parseRIS(uris) {
 				var cre = new Array();
 				cre = item.creators;
 				
-				for each(var e in cre) {
+				for (let e of cre) {
 					
 					if(!e['firstName']) {
 						// Rather than parse, change creator to a single field.

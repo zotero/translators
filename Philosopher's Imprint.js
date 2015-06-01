@@ -54,13 +54,13 @@ function doWeb(doc, url) {
 			item.creators.push(Zotero.Utilities.cleanAuthor(data['Author'], "author"));
 		} else if (data['Authors']) {
 			var authors = data['Authors'].split(",");
-			for each (var a in authors) {
+			for (let a of authors) {
 				item.creators.push(Zotero.Utilities.cleanAuthor(a, "author"));
 			}
 		}
 		if (data['Keywords']) {
 			var kws = data['Keywords'].split(/\n/);
-			for each (var kw in kws) {
+			for (let kw of kws) {
 				if (kw != "") item.tags.push(kw);
 			}
 		}

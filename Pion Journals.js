@@ -47,7 +47,7 @@ function scrape(doc, url){
 		item.publicationTitle = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="footer"]/div[@class="left"]/i', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 		item.title = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="total"]/p[2]//b', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 		var authors = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="total"]/p[3]/b', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent).split(/,\s*/);
-		for each (var aut in authors) {
+		for (let aut of authors) {
 			item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
 		}
 		if (doc.evaluate('//div[@id="title"]/div[@class="left"]/font', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/\d+/)) {

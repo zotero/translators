@@ -57,7 +57,7 @@ function doWeb(doc, url) {
 		for (var tag in metaTags) {
 			if (tag == "DC.creator") {
 				var authors = data['DC.creator'].split(";");
-				for each (var aut in authors) {
+				for (let aut of authors) {
 					aut = aut.replace(/^([^,]+),\s+(.*)$/, "$2 $1");
 					item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
 				}

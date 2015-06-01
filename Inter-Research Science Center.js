@@ -91,7 +91,7 @@ function scrape(doc, url){
 		item.journalAbbreviation = journals[jour][1];
 		item.abstractNote = Zotero.Utilities.trimInternal(doc.evaluate('//p[@class="abstract_block"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 		var authors = Zotero.Utilities.trimInternal(doc.evaluate('//div[@class="bb"]/h3', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent).split(/,\s+/);
-		for each (var aut in authors) {
+		for (let aut of authors) {
 			aut = aut.replace(/[^\w^\s^\.]/g, "").replace(/\d/g, "");
 			item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
 		}

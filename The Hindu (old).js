@@ -56,7 +56,7 @@ function doWeb(doc, url) {
 		}
 		
 	} else { arts = [url]; }
-	for each (var art in arts) {
+	for (let art of arts) {
 		Zotero.debug(art);
 		Zotero.Utilities.HTTP.doGet(art, function(text) {
 			var newItem = new Zotero.Item("newspaperArticle");
