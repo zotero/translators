@@ -255,6 +255,9 @@ var fieldMap = {
 		"creators/counsel":["case"],
 		"creators/contributor":["conferencePaper", "film"]	//translator does not fit these
 	},
+	A5: {
+		"creators/contributor":["book", "bookSection"]	//translator does not fit these
+	}
 	C1: {
 		filingDate:["patent"], //not in spec
 		"creators/castMember":["radioBroadcast", "tvBroadcast", "videoRecording"],
@@ -1763,7 +1766,7 @@ function doImport() {
 //RIS files have a certain structure, which is often meaningful
 //Records always start with TY and end with ER. This is hardcoded below
 var exportOrder = {
-	"__default": ["TI", "AU", "T2", "A2", "T3", "A3", "A4", "AB", "C1", "C2", "C3",
+	"__default": ["TI", "AU", "T2", "A2", "T3", "A3", "A4", "A5", "AB", "C1", "C2", "C3",
 	"C4", "C5", "C6", "CN", "CY", "DA", "PY", "DO", "DP", "ET", "VL", "IS", "SP",
 	"J2", "LA", "M1", "M3", "NV", "OP", "PB", "SE", "SN", "ST", "SV", "UR", "AN",
 	"DB", "Y2", "L1", "L2", "L4", "N1", "KW"],
