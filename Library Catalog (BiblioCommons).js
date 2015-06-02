@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-06-01 21:54:42"
+	"lastUpdated": "2015-06-02 20:44:02"
 }
 
 /*
@@ -124,7 +124,8 @@ function processor (obj) {
 		var record = new marc.record();
 		// The first piece is the MARC leader
 		record.leader = fields.shift();
-		for (let field of fields) {
+		for (var i=0; i<fields.length; i++) {
+			var field = fields[i];
 			//Z.debug(field)
 			// Skip blanks
 			if (field.replace(/\x1F|\s/g,"") == "") continue;

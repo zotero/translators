@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-04-04 10:10:58"
+	"lastUpdated": "2015-06-02 21:03:02"
 }
 
 function detectWeb(doc, url) {
@@ -68,7 +68,8 @@ function doWeb(doc, url) {
 		}
 	} else { arts = [url]; }
 	Zotero.debug(arts);
-	for (let art of arts) {
+	for (var j=0; j<arts.length; j++) {
+		var art = arts[j];
 		var newurl = art;
 		Zotero.Utilities.HTTP.doGet(art, function(text) {
 			var newItem = new Zotero.Item("case");
@@ -89,9 +90,12 @@ function doWeb(doc, url) {
 			
 			var metareg = /<META NAME[^>]+\>/g;
 			var tags = text.match(metareg);
-			for (let tag of tags) {
-				var stuff = tag.match(/NAME=\"([^"]+)\"\s+CONTENT=\"([^"]+)\"/);
-				regexMeta([stuff[1], stuff[2]], newItem);
+			if (tags) {
+				for (var k=0; k<tags.length; k++) {
+					var tag = tags[k];
+					var stuff = tag.match(/NAME=\"([^"]+)\"\s+CONTENT=\"([^"]+)\"/);
+					regexMeta([stuff[1], stuff[2]], newItem);
+				}
 			}
 			pdfurl = 'http://judis.openarchive.in/makepdf.php?filename=' + newItem.url;
 			newItem.attachments = [

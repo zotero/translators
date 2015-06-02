@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-06-23 12:06:33"
+	"lastUpdated": "2015-06-02 21:05:15"
 }
 
 function detectWeb(doc, url) {
@@ -47,7 +47,8 @@ function doWeb(doc, url) {
 }	
 
 function scrape(ids, host){
-	for (let id of ids) {
+	for (var i=0; i<ids.length; i++) {
+		var id = ids[i];
 		var get = 'http://' + host + '/subscriber/article_export_citation/' + id;
 		Zotero.Utilities.HTTP.doGet(get, function(text) {
 			var translator = Zotero.loadTranslator("import");
@@ -55,10 +56,10 @@ function scrape(ids, host){
 			translator.setString(text);
 			translator.setHandler("itemDone", function(obj, item) {
 				var authors = new Array();
-				for (var i in item.creators) {
-				if (!item.creators[i].firstName){
-					names = item.creators[i].lastName.match(/(.*)\s([^\s]+)$/);
-					item.creators[i] = {firstName:names[1], lastName:names[2], creatorType:"author"};
+				for (var j in item.creators) {
+				if (!item.creators[j].firstName){
+					names = item.creators[j].lastName.match(/(.*)\s([^\s]+)$/);
+					item.creators[j] = {firstName:names[1], lastName:names[2], creatorType:"author"};
 				} 
 				}
 				item.complete();
@@ -66,7 +67,9 @@ function scrape(ids, host){
 			translator.translate();
 		});
 	}
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",

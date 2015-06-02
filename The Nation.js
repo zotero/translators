@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-04 09:56:16"
+	"lastUpdated": "2015-06-02 21:32:54"
 }
 
 /*
@@ -95,7 +95,8 @@ function scrapeSingle(doc, url) {
 		else
 			authors.push(author_text);
 	}
-	for (let a of authors) {
+	for (var i=0; i<authors.length; i++) {
+		var a = authors[i];
 		if (a == 'null')
 			continue;
 		if (a.match(RE_SKIP_AUTHOR_PARSING))

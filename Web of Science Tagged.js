@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-06-01 22:05:05"
+	"lastUpdated": "2015-06-02 21:33:13"
 }
 
 function detectImport() {
@@ -45,14 +45,16 @@ function processTag(item, field, content) {
 	} else if ((field == "AF" || field == "AU")) {
 		//Z.debug("author: " + content);
 		authors = content.split("\n");
-		for (let author of authors) {
+		for (var i=0; i<authors.length; i++) {
+			var author = authors[i];
 			author = author.replace(/\s+\(.*/, '');
 			item.creators[0][field].push(ZU.cleanAuthor(author, "author", author.match(/,/)));
 		}
 	} else if ((field == "BE")) {
 		//Z.debug(content);
 		authors = content.split("\n");
-		for (let author of authors) {
+		for (var i=0; i<authors.length; i++) {
+			var author = authors[i];
 			item.creators[1].push(ZU.cleanAuthor(author, "editor", author.match(/,/)));
 		}
 	} else if (field == "TI") {

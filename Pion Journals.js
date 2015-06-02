@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-02-09 12:26:39"
+	"lastUpdated": "2015-06-02 21:11:22"
 }
 
 function detectWeb(doc, url) {
@@ -47,7 +47,8 @@ function scrape(doc, url){
 		item.publicationTitle = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="footer"]/div[@class="left"]/i', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 		item.title = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="total"]/p[2]//b', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 		var authors = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="total"]/p[3]/b', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent).split(/,\s*/);
-		for (let aut of authors) {
+		for (var i=0; i<authors.length; i++) {
+			var aut = authors[i];
 			item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
 		}
 		if (doc.evaluate('//div[@id="title"]/div[@class="left"]/font', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/\d+/)) {
@@ -70,6 +71,7 @@ function scrape(doc, url){
 		item.abstractNote = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="total"]/p[5]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent).substr(10);
 		item.complete();
 	}
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{

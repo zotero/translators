@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-04-03 17:39:30"
+	"lastUpdated": "2015-06-02 17:33:54"
 }
 
 function detectWeb(doc, url) {
@@ -169,7 +169,8 @@ function doWeb(doc, url) {
 				var baseURL = 'http://' + doc.location.host + '/cgi/citmgr?type=refman';
 				
 				var thisRequest = null;
-				for (let request of requests) {
+				for (var i=0; i<requests.length; i++) {
+					var request = requests[i];
 					if(request.baseURL == baseURL) {
 						thisRequest = request;
 						break;

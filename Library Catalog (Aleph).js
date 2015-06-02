@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-08-26 03:48:17"
+	"lastUpdated": "2015-06-02 19:19:06"
 }
 
 /*
@@ -243,12 +243,14 @@ function scrape(newDoc, marc, url) {
 		var oldCreators = newItem.creators;
 		newItem.creators = new Array();
 		var transient = new Array();
-		for (let a of oldCreators) {
+		for (var j=0; j<oldCreators.length; j++) {
+			var a = oldCreators[j];
 			if (a.lastName) {
 				if (!a.lastName.match(/\d+/)) transient.push(a);
 			}
 		}
-		for (let a of transient) {
+		for (var k=0; k<transient.length; k++) {
+			var a = transient[k];
 			if (a.firstName) {
 				if (a.firstName.match(/\|/)) a.firstName = a.firstName.match(/([^|]+)\s+|/)[1];
 			}

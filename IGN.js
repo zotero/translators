@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-03 17:39:52"
+	"lastUpdated": "2015-06-02 19:11:09"
 }
 
 /*
@@ -48,14 +48,14 @@ function scrape(doc, url) {
 		newItem.pages = p.textContent;
 	
 	// date
-	var dates = doc.evaluate('//div[@class="article_pub_date"]/text()', doc, null, XPathResult.ANY_TYPE, null);
+	var dates = doc.evaluate('//div[@class="article_pub_date"]/text()|//span[@class="article-publish-date"]/text()', doc, null, XPathResult.ANY_TYPE, null);
 	newItem.date = dates.iterateNext().textContent.replace(/^\s+|\s+$/g,'');
 	
 	//authors
-	var byline = doc.evaluate('//div[@class="article_author"]', doc, null, XPathResult.ANY_TYPE, null);
-	var authors = byline.iterateNext().textContent.replace(/^by\s*/, "").split(" and ");
-	for (let a of authors) {
-		newItem.creators.push(Zotero.Utilities.cleanAuthor(a, "author"));
+	var byline = doc.evaluate('//div[@class="article_author"]|//span[contains(@class,"article-byline")]', doc, null, XPathResult.ANY_TYPE, null);
+	var authors = byline.iterateNext().textContent.replace(/^by\s*/i, "").split(" and ");
+	for (var i=0; i<authors.length; i++) {
+		newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i], "author"));
 	}
 	
 	// attach html

@@ -1,14 +1,15 @@
 {
-	"translatorID":"a77690cf-c5d1-8fc4-110f-d1fc765dcf88",
-	"translatorType":4,
-	"label":"ProQuest Legacy",
-	"creator":"Simon Kornblith",
-	"target":"^https?://[^/]+/pqdweb\\?((?:.*\\&)?did=.*&Fmt=[0-9]|(?:.*\\&)Fmt=[0-9].*&did=|(?:.*\\&)searchInterface=|(?:.*\\&)TS=[0-9])",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-07-24 07:55:00"
+	"translatorID": "a77690cf-c5d1-8fc4-110f-d1fc765dcf88",
+	"label": "ProQuest Legacy",
+	"creator": "Simon Kornblith",
+	"target": "^https?://[^/]+/pqdweb\\?((?:.*\\&)?did=.*&Fmt=[0-9]|(?:.*\\&)Fmt=[0-9].*&did=|(?:.*\\&)searchInterface=|(?:.*\\&)TS=[0-9])",
+	"minVersion": "1.0.0b3.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2015-06-02 21:47:36"
 }
 
 function detectWeb(doc, url) {
@@ -18,7 +19,7 @@ function detectWeb(doc, url) {
 	} : null;
 	
 	if(doc.evaluate('//img[substring(@src, string-length(@src)-32) = "/images/common/logo_proquest.gif" or substring(@src, string-length(@src)-38) = "/images/common/logo_proquest_small.gif"]',
-	                doc, nsResolver, XPathResult.ANY_TYPE, null)) {    
+					doc, nsResolver, XPathResult.ANY_TYPE, null)) {    
 		
 		
 		var xpath = '//table[@id="tableIndexTerms"]/tbody/tr/td[@class="textSmall"]';
@@ -75,7 +76,8 @@ function parseRIS(uris) {
 				var cre = new Array();
 				cre = item.creators;
 				
-				for (let e of cre) {
+				for (var i=0; i<cre.length; i++) {
+					var e = cre[i];
 					
 					if(!e['firstName']) {
 						// Rather than parse, change creator to a single field.
@@ -112,7 +114,7 @@ function doWeb(doc, url) {
 
 	
 	if(doc.evaluate('//img[substring(@src, string-length(@src)-32) = "/images/common/logo_proquest.gif" or substring(@src, string-length(@src)-38) = "/images/common/logo_proquest_small.gif"]',
-		                doc, nsResolver, XPathResult.ANY_TYPE, null)) {
+						doc, nsResolver, XPathResult.ANY_TYPE, null)) {
 			if(doc.title.match("Results")) {
 				
 				//Get Client ID

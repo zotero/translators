@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-06-11 21:54:15"
+	"lastUpdated": "2015-06-02 20:52:10"
 }
 
 function detectWeb(doc, url) {
@@ -142,11 +142,12 @@ function scrape(doc, url) {
 		}
 
 		var authors = author.split(" and ");
-		for (let author of authors) {
+		for (var j=0; j<authors.length; j++) {
+			var author = authors[j];
 			// fix capitalization
 			var words = author.split(" ");
-			for (var i in words) {
-				words[i] = words[i][0].toUpperCase() + words[i].substr(1).toLowerCase();
+			for (var k in words) {
+				words[k] = words[k][0].toUpperCase() + words[k].substr(1).toLowerCase();
 			}
 			author = words.join(" ");
 
@@ -165,8 +166,8 @@ function scrape(doc, url) {
 	if (metaTags["keywords"]) {
 		var keywords = metaTags["keywords"];
 		newItem.tags = keywords.split(",");
-		for (var i in newItem.tags) {
-			newItem.tags[i] = newItem.tags[i].replace("  ", ", ");
+		for (var t in newItem.tags) {
+			newItem.tags[t] = newItem.tags[t].replace("  ", ", ");
 		}
 	}
 	

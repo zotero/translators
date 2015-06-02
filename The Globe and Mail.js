@@ -1,14 +1,15 @@
 {
-	"translatorID":"e0234bcf-bc56-4577-aa94-fe86a27f6fd6",
-	"translatorType":4,
-	"label":"The Globe and Mail",
-	"creator":"Adam Crymble",
-	"target":"http://www.theglobeandmail.com",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-08-04 07:10:00"
+	"translatorID": "e0234bcf-bc56-4577-aa94-fe86a27f6fd6",
+	"label": "The Globe and Mail",
+	"creator": "Adam Crymble",
+	"target": "http://www.theglobeandmail.com",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2015-06-02 21:28:35"
 }
 
 function detectWeb(doc, url) {
@@ -147,10 +148,10 @@ function scrape(doc, url) {
 		}
 		
 		for (var i = 0; i < tagsContent.length; i++) {
-		     	if (tagsContent[i] != (" ") && tagsContent[i] != ("")) {
-			     	newItem.tags[i] = tagsContent[i];
-		     	}
-	     	}	
+			 	if (tagsContent[i] != (" ") && tagsContent[i] != ("")) {
+				 	newItem.tags[i] = tagsContent[i];
+			 	}
+		 	}	
 		
 		associateMeta (newItem, metaTags, "headline", "title");
 		associateMeta (newItem, metaTags, "summary", "abstractNote");
@@ -167,12 +168,13 @@ function scrape(doc, url) {
 			}
 		
 			var authors = author.toLowerCase().split(" and ");
-			for (let author of authors) {
+			for (var i=0; i<authors.length; i++) {
+				var author = authors[i];
 				var words = author.split(" ");
 				
-				for (var i in words) {
-					if (words[i] != "") {
-						words[i] = words[i][0].toUpperCase() + words[i].substr(1).toLowerCase();
+				for (var j in words) {
+					if (words[j] != "") {
+						words[j] = words[j][0].toUpperCase() + words[j].substr(1).toLowerCase();
 					}
 				}
 				author = words.join(" ");

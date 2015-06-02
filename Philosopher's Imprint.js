@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-05 23:35:13"
+	"lastUpdated": "2015-06-02 21:09:41"
 }
 
 function detectWeb(doc, url) {
@@ -54,13 +54,15 @@ function doWeb(doc, url) {
 			item.creators.push(Zotero.Utilities.cleanAuthor(data['Author'], "author"));
 		} else if (data['Authors']) {
 			var authors = data['Authors'].split(",");
-			for (let a of authors) {
+			for (var i=0; i<authors.length; i++) {
+				var a = authors[i];
 				item.creators.push(Zotero.Utilities.cleanAuthor(a, "author"));
 			}
 		}
 		if (data['Keywords']) {
 			var kws = data['Keywords'].split(/\n/);
-			for (let kw of kws) {
+			for (var j=0; j<kws.length; j++) {
+				var kw = kws[j];
 				if (kw != "") item.tags.push(kw);
 			}
 		}
