@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-01-23 12:41:08"
+	"lastUpdated": "2015-06-02 10:52:41"
 }
 
 function detectWeb(doc, url) {
@@ -67,7 +67,8 @@ function doWeb(doc, url) {
 		var splitRe = new RegExp(title);
 		var authors = data.split(splitRe)[0].replace(/\([^)]+\)/, "").split(/(,|and)\s+/);
 		Zotero.debug(authors);
-		for (let aut of authors) {
+		for (var i=0; i<authors.length; i++) {
+			var aut = authors[i];
 			if (aut.match(/\w/) && (aut != "and")) {
 				item.creators.push(Zotero.Utilities.cleanAuthor(aut, "reviewedAuthor"));
 			}

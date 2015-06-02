@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-06-01 21:47:01"
+	"lastUpdated": "2015-06-02 10:55:49"
 }
 
 function detectWeb(doc, url) {
@@ -55,11 +55,12 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	var item = new Zotero.Item("book");
-	item.title = Zotero.Utilities.trimInternal(ZU.xpathText(doc, '//h1[@id="_booktitle"]'));Z.debug(title);
+	item.title = Zotero.Utilities.trimInternal(ZU.xpathText(doc, '//h1[@id="_booktitle"]'));
 	var authors = Zotero.Utilities.trimInternal(ZU.xpathText(doc, '//p[@id="_authors"]'));
 	//we parse the author string - first assign roles and then split multiple authors in those groups.
 	var auts = authors.split(/;/);
-	for (let aut of auts) {
+	for (var i=0; i<auts.length; i++) {
+		var aut = auts[i];
 		if (aut.match(/Edited/)) {
 			var autType = "editor";
 			aut = aut.replace(/Edited (by)?/, "");
@@ -70,7 +71,8 @@ function scrape(doc, url) {
 			var autType = "author";
 		}
 		aut = aut.split(/\band\b|,/);
-		for (let aut2 of aut) {
+		for (var j=0; j<aut.length; j++) {
+			var aut2 = aut[j];
 			item.creators.push(Zotero.Utilities.cleanAuthor(aut2, autType));
 		}
 	}

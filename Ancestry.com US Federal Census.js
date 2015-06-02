@@ -1,14 +1,15 @@
 {
-	"translatorID":"0dda3f89-15de-4479-987f-cc13f1ba7999",
-	"translatorType":4,
-	"label":"Ancestry.com US Federal Census",
-	"creator":"Elena Razlogova",
-	"target":"^https?://search.ancestry.com/(.*)usfedcen|1890orgcen|1910uscenindex",
-	"minVersion":"1.0.0b4.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"translatorID": "0dda3f89-15de-4479-987f-cc13f1ba7999",
+	"label": "Ancestry.com US Federal Census",
+	"creator": "Elena Razlogova",
+	"target": "^https?://search.ancestry.com/(.*)usfedcen|1890orgcen|1910uscenindex",
+	"minVersion": "1.0.0b4.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2015-06-02 10:57:09"
 }
 
 function detectWeb(doc, url) {
@@ -18,7 +19,7 @@ function detectWeb(doc, url) {
 	} : null;
 		
 	var result = doc.evaluate('//div[@class="g_container"]/div[@class="g_panelWrap"]/div[@class="g_panelCore"]/div[@class="s_container"]/div[@class="p_rsltList"]', doc, nsResolver,
-	             XPathResult.ANY_TYPE, null).iterateNext();
+				 XPathResult.ANY_TYPE, null).iterateNext();
 
 	var rows = doc.evaluate('//div[@class="g_container"]/div[@class="g_panelWrap"]/div[@class="g_panelCore"]/div[@class="s_container"]/div[@class="p_rsltList"]/table/tbody/tr[@class="tblrow record"]', 
 				doc, nsResolver, XPathResult.ANY_TYPE, null);
@@ -70,7 +71,8 @@ function scrape(doc) {
 		info = info.toString();
 		var data = new Array();
 		var parts = info.split(/[?&]/);
-		for (let part of parts) {
+		for (var i=0; i<parts.length; i++) {
+			var part = parts[i];
 			var index = part.indexOf("=");
 			if(index !== -1) {
 				data[part.substr(0, index)] = part.substr(index+1);
@@ -103,9 +105,9 @@ function scrape(doc) {
 	var censusNo = "";
 	var censusNos = new Array("1790", "First", "1800", "Second", "1810", "Third", "1820", "Fourth", "1830", "Fifth", "1840", "Sixth", "1850", "Seventh", "1860", "Eighth", "1870", "Ninth", 
 			"1880", "Tenth", "1890", "Eleventh", "1900", "Twelfth", "1910", "Thirteenth", "1920", "Fourteenth", "1930", "Fifteenth")
-	for(var i in censusNos) {
-			if(censusYear == 1) { censusNo = censusNos[i] };
-			if(censusNos[i] == year) { censusYear = 1 } else {censusYear= 0 };
+	for(var j in censusNos) {
+			if(censusYear == 1) { censusNo = censusNos[j] };
+			if(censusNos[j] == year) { censusYear = 1 } else {censusYear= 0 };
 		}
 
 	//begin adding item
