@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-29 22:35:22"
+	"lastUpdated": "2015-06-02 18:43:27"
 }
 
 function detectWeb(doc, url) {
@@ -27,46 +27,28 @@ function detectWeb(doc, url) {
 	return false;
 }
 
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//xpl-result//h2/a|//ul[@class="results"]//h3/a[@class="art-abs-url"]');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
 function doWeb(doc, url) {
-	var hostRe = new RegExp("^(https?://[^/]+)/");
-	var hostMatch = hostRe.exec(url);
-
-	var articleRe = /[?&]ar(?:N|n)umber=([0-9]+)/;
-	var m = articleRe.exec(url);
-
 	if (detectWeb(doc, url) == "multiple") {
-		// search page
-		var items = new Object();
-
-		var xPathRows = '//ul[@class="Results"]/li[@class="noAbstract"]/div[@class="header"]';
-		if (ZU.xpath(doc, xPathRows).length<1){
-			var xPathRows = '//ul[@class="results"]/li/div[@class="txt"]'
-		}
-		var tableRows = doc.evaluate(xPathRows, doc, null, XPathResult.ANY_TYPE, null);
-		var tableRow;
-		while (tableRow = tableRows.iterateNext()) {
-			var linknode = doc.evaluate('.//h3/a', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext();
-			if (!linknode) {
-				// There are things like tables of contents that don't have item pages, so we'll just skip them
-				continue;
-			}
-			var link = linknode.href;
-			var title = "";
-			var strongs = tableRow.getElementsByTagName("h3");
-			for each(var strong in strongs) {
-				if (strong.textContent) {
-					title += strong.textContent + " ";
-				}
-			}
-
-			items[link] = Zotero.Utilities.trimInternal(title);
-		}
-
-		Zotero.selectItems(items, function (items) {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
 				return true;
 			}
-			var urls = new Array();
+			var articles = new Array();
 			for (var i in items) {
 				// Some pages don't show the metadata we need (http://forums.zotero.org/discussion/16283)
 				// No data: http://ieeexplore.ieee.org/search/srchabstract.jsp?tp=&arnumber=1397982
@@ -74,11 +56,10 @@ function doWeb(doc, url) {
 				// Data: http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1397982
 				var arnumber = i.match(/arnumber=(\d+)/)[1];
 				i = i.replace(/\/(?:search|stamp)\/.*$/, "/xpls/abs_all.jsp?arnumber=" + arnumber);
-				urls.push(i);
+				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(urls, scrape);
+			ZU.processDocuments(articles, scrape); 
 		});
-
 	} else {
 		if (url.indexOf("/search/") !== -1 || url.indexOf("/stamp/") !== -1 || url.indexOf("/ielx4/") !== -1 || url.indexOf("/ielx5/") !== -1) {
 			// Address the same missing metadata problem as above
@@ -164,6 +145,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Fuzzy Turing Machines: Variants and Universality",
 				"creators": [
 					{
 						"firstName": "Yongming",
@@ -171,7 +153,23 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
+				"date": "December 2008",
+				"DOI": "10.1109/TFUZZ.2008.2004990",
+				"ISSN": "1063-6706",
+				"abstractNote": "In this paper, we study some variants of fuzzy Turing machines (FTMs) and universal FTM. First, we give several formulations of FTMs, including, in particular, deterministic FTMs (DFTMs) and nondeterministic FTMs (NFTMs). We then show that DFTMs and NFTMs are not equivalent as far as the power of recognizing fuzzy languages is concerned. This contrasts sharply with classical TMs. Second, we show that there is no universal FTM that can exactly simulate any FTM on it. But if the membership degrees of fuzzy sets are restricted to a fixed finite subset A of [0,1], such a universal machine exists. We also show that a universal FTM exists in some approximate sense. This means, for any prescribed accuracy, that we can construct a universal machine that simulates any FTM with the given accuracy. Finally, we introduce the notions of fuzzy polynomial time-bounded computation and nondeterministic fuzzy polynomial time-bounded computation, and investigate their connections with polynomial time-bounded computation and nondeterministic polynomial time-bounded computation.",
+				"issue": "6",
+				"itemID": "4607247",
+				"libraryCatalog": "IEEE Xplore",
+				"pages": "1491-1502",
+				"publicationTitle": "IEEE Transactions on Fuzzy Systems",
+				"shortTitle": "Fuzzy Turing Machines",
+				"volume": "16",
+				"attachments": [
+					{
+						"title": "IEEE Xplore Abstract Record",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [
 					"Deterministic fuzzy Turing machine (DFTM)",
 					"Turing machines",
@@ -192,25 +190,8 @@ var testCases = [
 					"nondeterministic polynomial time-bounded computation",
 					"universal fuzzy Turing machine (FTM)"
 				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "IEEE Xplore Abstract Record",
-						"mimeType": "text/html"
-					}
-				],
-				"itemID": "4607247",
-				"publicationTitle": "IEEE Transactions on Fuzzy Systems",
-				"title": "Fuzzy Turing Machines: Variants and Universality",
-				"date": "December 2008",
-				"volume": "16",
-				"issue": "6",
-				"pages": "1491-1502",
-				"abstractNote": "In this paper, we study some variants of fuzzy Turing machines (FTMs) and universal FTM. First, we give several formulations of FTMs, including, in particular, deterministic FTMs (DFTMs) and nondeterministic FTMs (NFTMs). We then show that DFTMs and NFTMs are not equivalent as far as the power of recognizing fuzzy languages is concerned. This contrasts sharply with classical TMs. Second, we show that there is no universal FTM that can exactly simulate any FTM on it. But if the membership degrees of fuzzy sets are restricted to a fixed finite subset A of [0,1], such a universal machine exists. We also show that a universal FTM exists in some approximate sense. This means, for any prescribed accuracy, that we can construct a universal machine that simulates any FTM with the given accuracy. Finally, we introduce the notions of fuzzy polynomial time-bounded computation and nondeterministic fuzzy polynomial time-bounded computation, and investigate their connections with polynomial time-bounded computation and nondeterministic polynomial time-bounded computation.",
-				"DOI": "10.1109/TFUZZ.2008.2004990",
-				"ISSN": "1063-6706",
-				"libraryCatalog": "IEEE Xplore",
-				"shortTitle": "Fuzzy Turing Machines"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -220,6 +201,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Graph Matching for Adaptation in Remote Sensing",
 				"creators": [
 					{
 						"firstName": "D.",
@@ -242,7 +224,26 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
+				"date": "January 2013",
+				"DOI": "10.1109/TGRS.2012.2200045",
+				"ISSN": "0196-2892",
+				"abstractNote": "We present an adaptation algorithm focused on the description of the data changes under different acquisition conditions. When considering a source and a destination domain, the adaptation is carried out by transforming one data set to the other using an appropriate nonlinear deformation. The eventually nonlinear transform is based on vector quantization and graph matching. The transfer learning mapping is defined in an unsupervised manner. Once this mapping has been defined, the samples in one domain are projected onto the other, thus allowing the application of any classifier or regressor in the transformed domain. Experiments on challenging remote sensing scenarios, such as multitemporal very high resolution image classification and angular effects compensation, show the validity of the proposed method to match-related domains and enhance the application of cross-domains image processing techniques.",
+				"issue": "1",
+				"itemID": "6221978",
+				"libraryCatalog": "IEEE Xplore",
+				"pages": "329-341",
+				"publicationTitle": "IEEE Transactions on Geoscience and Remote Sensing",
+				"volume": "51",
+				"attachments": [
+					{
+						"title": "IEEE Xplore Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "IEEE Xplore Abstract Record",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [
 					"Adaptation models",
 					"Domain adaptation",
@@ -276,28 +277,8 @@ var testCases = [
 					"transfer learning mapping",
 					"vector quantization"
 				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "IEEE Xplore Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "IEEE Xplore Abstract Record",
-						"mimeType": "text/html"
-					}
-				],
-				"itemID": "6221978",
-				"publicationTitle": "IEEE Transactions on Geoscience and Remote Sensing",
-				"title": "Graph Matching for Adaptation in Remote Sensing",
-				"date": "January 2013",
-				"volume": "51",
-				"issue": "1",
-				"pages": "329-341",
-				"abstractNote": "We present an adaptation algorithm focused on the description of the data changes under different acquisition conditions. When considering a source and a destination domain, the adaptation is carried out by transforming one data set to the other using an appropriate nonlinear deformation. The eventually nonlinear transform is based on vector quantization and graph matching. The transfer learning mapping is defined in an unsupervised manner. Once this mapping has been defined, the samples in one domain are projected onto the other, thus allowing the application of any classifier or regressor in the transformed domain. Experiments on challenging remote sensing scenarios, such as multitemporal very high resolution image classification and angular effects compensation, show the validity of the proposed method to match-related domains and enhance the application of cross-domains image processing techniques.",
-				"DOI": "10.1109/TGRS.2012.2200045",
-				"ISSN": "0196-2892",
-				"libraryCatalog": "IEEE Xplore"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -309,6 +290,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://ieeexplore.ieee.org/xpl/mostRecentIssue.jsp?punumber=6221021",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://ieeexplore.ieee.org/search/searchresult.jsp?queryText=Wind%20Farms&newsearch=true",
 		"items": "multiple"
 	}
 ]
