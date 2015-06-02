@@ -2,14 +2,14 @@
 	"translatorID": "92d4ed84-8d0-4d3c-941f-d4b9124cfbb",
 	"label": "IEEE Xplore",
 	"creator": "Simon Kornblith, Michael Berkowitz, Bastian Koenings, and Avram Lyon",
-	"target": "^https?://[^/]*ieeexplore\\.ieee\\.org[^/]*/(?:[^\\?]+\\?(?:|.*&)arnumber=[0-9]+|search/(?:searchresult.jsp|selected.jsp)|xpl\\/(mostRecentIssue|tocresult).jsp\\?)",
+	"target": "^https?://([^/]+\\.)?ieeexplore\\.ieee\\.org/([^#]+[&?]arnumber=\\d+|search/(searchresult|selected)\\.jsp|xpl\\/(mostRecentIssue|tocresult).jsp\\?)",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-06-02 18:43:27"
+	"lastUpdated": "2015-06-02 20:38:02"
 }
 
 function detectWeb(doc, url) {
@@ -20,14 +20,14 @@ function detectWeb(doc, url) {
 
 	if (m) {
 		return "journalArticle";
-	} else {
+	} else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
 
 	return false;
 }
 
-function getSearchResults(doc, checkOnly) {
+function getSearchResults(doc, checkOnly) { 
 	var items = {};
 	var found = false;
 	var rows = ZU.xpath(doc, '//xpl-result//h2/a|//ul[@class="results"]//h3/a[@class="art-abs-url"]');
