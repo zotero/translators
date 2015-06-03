@@ -159,7 +159,7 @@ function processCollection(node, collection) {
 	
 	// check for children
 	var children = getFirstResults(node, [n.dcterms+"hasPart"]);
-	for (let child of children) {
+	for each(var child in children) {
 		var type = Zotero.RDF.getTargets(child, rdf+"type");
 		if(type) {
 			type = Zotero.RDF.getResourceURI(type[0]);
@@ -186,7 +186,7 @@ function processSeeAlso(node, newItem) {
 	newItem.itemID = Zotero.RDF.getResourceURI(node);
 	newItem.seeAlso = new Array();
 	if(relations = getFirstResults(node, [n.dc+"relation", n.dc1_0+"relation", n.dcterms+"relation"])) {
-		for (let relation of relations) {
+		for each(var relation in relations) {
 			newItem.seeAlso.push(Zotero.RDF.getResourceURI(relation));
 		}
 	}
@@ -196,7 +196,7 @@ function processTags(node, newItem) {
 	var subjects;
 	newItem.tags = new Array();
 	if(subjects = getFirstResults(node, [n.dc+"subject", n.dc1_0+"subject", n.dcterms+"subject"])) {
-		for (let subject of subjects) {
+		for each(var subject in subjects) {
 			if(typeof(subject) == "string") {	// a regular tag
 				newItem.tags.push(subject);
 			} else {
@@ -242,7 +242,7 @@ function getNodeByType(nodes, type) {
 function isPart(node) {
 	var arcs = Zotero.RDF.getArcsIn(node);
 	var skip = false;
-	for (let arc of arcs) {
+	for each(var arc in arcs) {
 		arc = Zotero.RDF.getResourceURI(arc);
 		if(arc != n.dc+"relation" && arc != n.dc1_0+"relation"
 			&& arc != n.dcterms+"relation" && arc != n.dcterms+"hasPart") {	
@@ -739,7 +739,7 @@ function importItem(newItem, node) {
 	// regular author-type creators
 	var possibleCreatorTypes = Zotero.Utilities.getCreatorsForType(newItem.itemType);
 	var creators;
-	for (let creatorType of possibleCreatorTypes) {
+	for each(var creatorType in possibleCreatorTypes) {
 		if(creatorType == "author") {
 			creators = getFirstResults(node, [n.bib+"authors", n.dc+"creator", n.dc1_0+"creator",
 				n.dcterms+"creator", n.eprints+"creators_name",
@@ -951,7 +951,7 @@ function importItem(newItem, node) {
 	var typeProperties = ["reportType", "letterType", "manuscriptType",
 				"mapType", "thesisType", "websiteType",
 				"presentationType", "postType",	"audioFileType"];
-	for (let property of typeProperties) {
+	for each(var property in typeProperties) {
 		newItem[property] = type;
 	}
 	
@@ -1015,7 +1015,7 @@ function importItem(newItem, node) {
 	/** NOTES **/
 	
 	var referencedBy = Zotero.RDF.getTargets(node, n.dcterms+"isReferencedBy");
-	for (let referentNode of referencedBy) {
+	for each(var referentNode in referencedBy) {
 		var type = Zotero.RDF.getTargets(referentNode, rdf+"type");
 		if(type && Zotero.RDF.getResourceURI(type[0]) == n.bib+"Memo") {
 			// if this is a memo
@@ -1044,7 +1044,7 @@ function importItem(newItem, node) {
 	
 	var subjects = getFirstResults(node, [n.dc+"subject", n.dc1_0+"subject", n.dcterms+"subject", n.article+"tag",
 		n.prism2_0+"keyword", n.prism2_1+"keyword", n.prism2_0+"object", n.prism2_1+"object", n.prism2_0+"organization", n.prism2_1+"organization", n.prism2_0+"person", n.prism2_1+"person"]);
-	for (let subject of subjects) {
+	for each(var subject in subjects) {
 		if(typeof(subject) == "string") {	// a regular tag
 			newItem.tags.push(subject);
 		} else {							// a call number or automatic tag
@@ -1062,7 +1062,7 @@ function importItem(newItem, node) {
 	
 	/** ATTACHMENTS **/
 	var relations = getFirstResults(node, [n.link+"link"]);
-	for (let relation of relations) {			
+	for each(var relation in relations) {			
 		var type = Zotero.RDF.getTargets(relation, rdf+"type");
 		if(Zotero.RDF.getResourceURI(type[0]) == n.z+"Attachment") {
 			var attachment = new Zotero.Item();
@@ -1082,7 +1082,7 @@ function importItem(newItem, node) {
 	
 	/** OTHER FIELDS **/
 	var arcs = Zotero.RDF.getArcsOut(node);
-	for (let arc of arcs) {
+	for each(var arc in arcs) {
 		var uri = Zotero.RDF.getResourceURI(arc);
 		if(uri.substr(0, n.z.length) == n.z) {
 			var property = uri.substr(n.z.length);
@@ -1097,7 +1097,7 @@ function getNodes(skipCollections) {
 	var nodes = Zotero.RDF.getAllResources();
 
 	var goodNodes = new Array();
-	for (let node of nodes) {
+	for each(var node in nodes) {
 		// figure out if this is a part of another resource, or a linked
 		// attachment, or a creator
 		if(Zotero.RDF.getSources(node, n.dcterms+"isPartOf") ||
@@ -1136,7 +1136,7 @@ function doImport() {
 	var collections = new Array();
 	
 	var i = 0;
-	for (let node of nodes) {
+	for each(var node in nodes) {
 		// type
 		var type = Zotero.RDF.getTargets(node, rdf+"type");
 		if(type) {
@@ -1166,7 +1166,7 @@ function doImport() {
 	
 	/* COLLECTIONS */
 	
-	for (let collection of collections) {
+	for each(var collection in collections) {
 		if(!Zotero.RDF.getArcsIn(collection)) {
 			var newCollection = new Zotero.Collection();
 			processCollection(collection, newCollection);
