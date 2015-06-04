@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2015-03-21 03:18:14"
+	"lastUpdated": "2015-06-04 16:47:36"
 }
 
 /*
@@ -253,6 +253,11 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 			//title
 			if(item.title && item.title.toUpperCase() == item.title) {
 				item.title = ZU.capitalizeTitle(item.title, true);
+			}
+			
+			//date in the cochraine library RIS is wrong
+			if (ZU.xpathText(doc, '//meta[@name="citation_book_title"]/@content') == "The Cochrane Library") {
+				item.date = ZU.xpathText(doc, '//meta[@name="citation_online_date"]/@content');
 			}
 			
 			//tags
@@ -1150,6 +1155,59 @@ var testCases = [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://onlinelibrary.wiley.com/doi/10.1002/14651858.CD009192.pub2/abstract",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Telephone communication of HIV testing results for improving knowledge of HIV infection status",
+				"creators": [
+					{
+						"lastName": "Tudor Car",
+						"firstName": "Lorainne",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Gentry",
+						"firstName": "Sarah",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "van-Velthoven",
+						"firstName": "Michelle HMMT",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Car",
+						"firstName": "Josip",
+						"creatorType": "author"
+					}
+				],
+				"date": "2013/01/31",
+				"abstractNote": "Background\nBackground\n\nThis is one of three Cochrane reviews that examine the role of the telephone in HIV/AIDS services. Both in developed and developing countries there is a large proportion of people who do not know they are infected with HIV. Knowledge of one's own HIV serostatus is necessary to access HIV support, care and treatment and to prevent acquisition or further transmission of HIV. Using telephones instead of face-to-face or other means of HIV test results delivery could lead to more people receiving their HIV test results.\n\nObjectives\nObjectives\n\nTo assess the effectiveness of telephone use for delivery of HIV test results and post-test counselling.\nTo evaluate the effectiveness of delivering HIV test results by telephone, we were interested in whether they can increase the proportion of people who receive their HIV test results and the number of people knowing their HIV status.\n\nSearch methods\nSearch methods\n\nWe searched The Cochrane Central Register of Controlled Trials (CENTRAL), MEDLINE, PubMed Central, PsycINFO, ISI Web of Science, Cumulative Index to Nursing & Allied Health (CINAHL), WHOs The Global Health Library and Current Controlled Trials from 1980 to June 2011. We also searched grey literature sources such as Dissertation Abstracts International,CAB Direct Global Health, OpenSIGLE, The Healthcare Management Information Consortium, Google Scholar, Conference on Retroviruses and Opportunistic Infections, International AIDS Society and AEGIS Education Global Information System, and reference lists of relevant studies for this review.\n\nSelection criteria\nSelection criteria\n\nRandomised controlled trials (RCTs), quasi-randomised controlled trials (qRCTs), controlled before and after studies (CBAs), and interrupted time series (ITS) studies comparing the effectiveness of telephone HIV test results notification and post-test counselling to face-to-face or other ways of HIV test result delivery in people regardless of their demographic characteristics and in all settings.\n\nData collection and analysis\nData collection and analysis\n\nTwo reviewers independently searched, screened, assessed study quality and extracted data. A third reviewer resolved any disagreement.\n\nMain results\nMain results\n\nOut of 14 717 citations, only one study met the inclusion criteria; an RCT conducted on homeless and high-risk youth between September 1998 and October 1999 in Portland, United States. Participants (n=351) were offered counselling and oral HIV testing and were randomised into face-to-face (n=187 participants) and telephone (n=167) notification groups. The telephone notification group had the option of receiving HIV test results either by telephone or face-to-face. Overall, only 48% (n=168) of participants received their HIV test results and post-test counselling. Significantly more participants received their HIV test results in the telephone notification group compared to the face-to-face notification group; 58% (n=106) vs. 37% (n=62) (p < 0.001). In the telephone notification group, the majority of participants who received their HIV test results did so by telephone (88%, n=93). The study could not offer information about the effectiveness of telephone HIV test notification with HIV-positive participants because only two youth tested positive and both were assigned to the face-to-face notification group. The study had a high risk of bias.\n\nAuthors' conclusions\nAuthors' conclusions\n\nWe found only one eligible study. Although this study showed the use of the telephone for HIV test results notification was more effective than face-to-face delivery, it had a high-risk of bias. The study was conducted about 13 years ago in a high-income country, on a high-risk population, with low HIV prevalence, and the applicability of its results to other settings and contexts is unclear. The study did not provide information about telephone HIV test results notification of HIV positive people since none of the intervention group participants were HIV positive. We found no information about the acceptability of the intervention to patients’ and providers’, its economic outcomes or potential adverse effects. There is a need for robust evidence from various settings on the effectiveness of telephone use for HIV test results notification.",
+				"bookTitle": "Cochrane Database of Systematic Reviews",
+				"language": "en",
+				"libraryCatalog": "Wiley Online Library",
+				"publisher": "John Wiley & Sons, Ltd",
+				"rights": "Copyright © 2013 The Cochrane Collaboration. Published by John Wiley & Sons, Ltd.",
+				"url": "http://onlinelibrary.wiley.com/doi/10.1002/14651858.CD009192.pub2/abstract",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
