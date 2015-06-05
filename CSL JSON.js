@@ -3,13 +3,13 @@
 	"label": "CSL JSON",
 	"creator": "Simon Kornblith",
 	"target": "json",
-	"minVersion": "3.0b3",
+	"minVersion": "4.0.27",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-10-24 05:03:52"
+	"lastUpdated": "2015-06-05 23:03:52"
 }
 
 var parsedData;
