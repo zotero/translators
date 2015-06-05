@@ -3,13 +3,13 @@
 	"label": "ACS Publications",
 	"creator": "Sean Takats, Michael Berkowitz, Santawort, and Aurimas Vinckevicius",
 	"target": "https?://pubs\\.acs\\.org/(toc/|journal/|topic/|isbn/\\d|doi/(full|abs)/10\\.|action/doSearch\\?)",
-	"minVersion": "3.0",
+	"minVersion": "4.0.5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-06-05 19:12:42"
+	"lastUpdated": "2015-06-05 20:36:28"
 }
 
 function getSearchResults(doc, checkOnly, itemOpts) {
@@ -94,8 +94,7 @@ function attachSupp(item, doi, opts) {
 		attachment = {
 			title: opts.attach[i]
 		};
-		attachment.url = opts.host + '/doi/suppl/'
-			+ doi + '/suppl_file/' + attachment.title;	
+		attachment.url = '/doi/suppl/' + doi + '/suppl_file/' + attachment.title;	
 		attachment.mimeType = getSuppMimeType(attachment.title);
 		if(opts.attachAsLink || !attachment.mimeType) { //don't download unknown file types
 			attachment.snapshot = false;
@@ -125,10 +124,7 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url){
-	var opts = {
-		// Used for building attachment urls
-		host: doc.location.origin
-	};
+	var opts = {};
 	//reduce some overhead by fetching these only once
 	if (Z.getHiddenPref) {
 		opts.attachSupp = Z.getHiddenPref("attachSupplementary");
@@ -228,7 +224,7 @@ function processCallback(fetchItem, opts, downloadFileName) {
 				) {
 					item.attachments.push({
 						title: "ACS Full Text PDF w/ Links",
-						url: opts.host + '/doi/pdfplus/' + doi,
+						url: '/doi/pdfplus/' + doi,
 						mimeType:"application/pdf"
 					});
 				}
@@ -238,14 +234,14 @@ function processCallback(fetchItem, opts, downloadFileName) {
 				) {
 					item.attachments.push({
 						title: "ACS Full Text PDF",
-						url: opts.host + '/doi/pdf/' + doi,
+						url: '/doi/pdf/' + doi,
 						mimeType:"application/pdf"
 					});
 				}
 				
 				item.attachments.push({
 					title: "ACS Full Text Snapshot",
-					url: opts.host + '/doi/full/' + doi,
+					url: '/doi/full/' + doi,
 					mimeType:"text/html"
 				});
 				
@@ -256,7 +252,7 @@ function processCallback(fetchItem, opts, downloadFileName) {
 						attachSupp(item, doi, opts);
 					} else if(opts.attachSupp && fetchItem.opts.hasSupp) {
 						//was a search result and has supp info
-						var suppUrl = opts.host + '/doi/suppl/' + doi;
+						var suppUrl = '/doi/suppl/' + doi;
 						
 						if(opts.attachAsLink) {
 							//if we're only attaching links, it's not worth linking to each doc
@@ -273,7 +269,6 @@ function processCallback(fetchItem, opts, downloadFileName) {
 									if(div) {
 										var files = getSuppFiles(div);
 										attachSupp(item, doi, {
-											host: opts.host,
 											attach: files,
 											attachAsLink: opts.attachAsLink
 										});
