@@ -2,14 +2,14 @@
 	"translatorID": "c73a4a8c-3ef1-4ec8-8229-7531ee384cc4",
 	"label": "Open WorldCat",
 	"creator": "Simon Kornblith, Sebastian Karcher",
-	"target": "^https?://[^/]+\\.worldcat\\.org",
+	"target": "^https?://[^/]+\\.worldcat\\.org/",
 	"minVersion": "3.0.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2015-03-04 19:58:35"
+	"lastUpdated": "2015-06-07 17:46:05"
 }
 
 /**
@@ -67,18 +67,21 @@ function getFirstContextObj(doc) {
 }
 
 function detectWeb(doc, url) {
-	var results = getSearchResults(doc);
+	//distinguish from Worldcat Discovery
+	if (doc.body.id == "worldcat"){
+	    var results = getSearchResults(doc);
 
-	//single result
-	if(results.length) {
+	    //single result
+	    if(results.length) {
 		return "multiple";
+	    }
+
+	    var co = getFirstContextObj(doc);
+	    if(!co) return false;
+
+	    // generate item and return type
+	    return generateItem(doc, co).itemType;
 	}
-
-	var co = getFirstContextObj(doc);
-	if(!co) return false;
-
-	// generate item and return type
-	return generateItem(doc, co).itemType;
 }
 
 /**
@@ -375,7 +378,7 @@ var testCases = [
 					}
 				],
 				"date": "1996",
-				"ISBN": "9780585030159",
+				"ISBN": "0585030154  9780585030159",
 				"language": "English",
 				"libraryCatalog": "Open WorldCat",
 				"place": "Cambridge, Mass.",
@@ -403,7 +406,7 @@ var testCases = [
 					}
 				],
 				"date": "2006",
-				"ISBN": "9780521770590 9780521779241",
+				"ISBN": "0521770599 0521779243 9780521770590 9780521779241",
 				"abstractNote": "\"Adam Smith is best known as the founder of scientific economics and as an early proponent of the modern market economy. Political economy, however, was only one part of Smith's comprehensive intellectual system. Consisting of a theory of mind and its functions in language, arts, science, and social intercourse, Smith's system was a towering contribution to the Scottish Enlightenment. His ideas on social intercourse, in fact, also served as the basis for a moral theory that provided both historical and theoretical accounts of law, politics, and economics. This companion volume provides an up-to-date examination of all aspects of Smith's thought. Collectively, the essays take into account Smith's multiple contexts - Scottish, British, European, Atlantic, biographical, institutional, political, philosophical - and they draw on all his works, including student notes from his lectures. Pluralistic in approach, the volume provides a contextualist history of Smith, as well as direct philosophical engagement with his ideas.\"--Jacket.",
 				"language": "English",
 				"libraryCatalog": "Open WorldCat",
@@ -441,7 +444,7 @@ var testCases = [
 					}
 				],
 				"date": "2011",
-				"ISBN": "9789067183840",
+				"ISBN": "9067183849 9789067183840",
 				"language": "English",
 				"libraryCatalog": "Open WorldCat",
 				"place": "Leiden",
@@ -473,7 +476,6 @@ var testCases = [
 				"libraryCatalog": "Open WorldCat",
 				"place": "London",
 				"publisher": "s.n.",
-				"url": "http://www.archive.org/details/a626827800smituoft/",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -506,7 +508,7 @@ var testCases = [
 					}
 				],
 				"date": "2000",
-				"ISBN": "9781881563020",
+				"ISBN": "1881563022  9781881563020",
 				"language": "English",
 				"libraryCatalog": "Open WorldCat",
 				"place": "Collinsville, Ill.",
@@ -594,3 +596,4 @@ var testCases = [
 	}
 ]
 /** END TEST CASES **/
+
