@@ -3,73 +3,101 @@
 	"label": "IEEE Xplore",
 	"creator": "Simon Kornblith, Michael Berkowitz, Bastian Koenings, and Avram Lyon",
 	"target": "^https?://([^/]+\\.)?ieeexplore\\.ieee\\.org/([^#]+[&?]arnumber=\\d+|search/(searchresult|selected)\\.jsp|xpl\\/(mostRecentIssue|tocresult).jsp\\?)",
-	"minVersion": "2.1",
+	"minVersion": "3.0.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-06-02 20:38:02"
+	"lastUpdated": "2015-06-09 07:32:25"
 }
 
 function detectWeb(doc, url) {
-	if(doc.defaultView !== doc.defaultView.top) return false;
+	if(doc.defaultView !== doc.defaultView.top) return;
 	
-	var articleRe = /[?&]ar(N|n)umber=([0-9]+)/;
-	var m = articleRe.exec(url);
-
-	if (m) {
+	if (/[?&]arnumber=(\d+)/i.test(url)) {
 		return "journalArticle";
-	} else if (getSearchResults(doc, true)) {
+	}
+	
+	// Issue page
+	var results = doc.getElementById('results-blk');
+	if (results) {
+		return getSearchResults(doc, true) ? "multiple" : false;
+	}
+	
+	var search = ZU.xpath(doc, '//div[@ng-app="xpl.search"]')[0];
+	if (!search) {
+		Zotero.debug("No search scope");
+		return;
+	}
+	
+	Z.monitorDOMChanges(search, {childList: true});
+	
+	var searchResults = search.getElementsByClassName('search-results')[0];
+	if (!searchResults) {
+		Zotero.debug("no search results");
+		return;
+	}
+	
+	if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
-
-	return false;
 }
 
-function getSearchResults(doc, checkOnly) { 
-	var items = {};
-	var found = false;
-	var rows = ZU.xpath(doc, '//xpl-result//h2/a|//ul[@class="results"]//h3/a[@class="art-abs-url"]');
+function getSearchResults(doc, checkOnly) {
+	var articleList = doc.getElementsByClassName('article-list')[0],
+		rows;
+	if (!articleList) {
+		articleList = doc.getElementById('results-blk');
+		if (articleList) {
+			rows = articleList.getElementsByClassName('art-abs-url');
+		}
+	} else {
+		rows = ZU.xpath(articleList, './/a[@ng-bind-html="::record.title"]')
+	}
+	
+	if (!articleList || !rows) return checkOnly ? false : {};
+	
+	var items = {},
+		found = false;
 	for (var i=0; i<rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
-		items[href] = title;
+		items[fixUrl(href)] = title;
 	}
 	return found ? items : false;
 }
 
+// Some pages don't show the metadata we need (http://forums.zotero.org/discussion/16283)
+// No data: http://ieeexplore.ieee.org/search/srchabstract.jsp?tp=&arnumber=1397982
+// No data: http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1397982
+// Data: http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1397982
+// Also address issue of saving from PDF itself, I hope
+// URL like http://ieeexplore.ieee.org/ielx4/78/2655/00080767.pdf?tp=&arnumber=80767&isnumber=2655
+// Or: http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1575188&tag=1
+function fixUrl(url) {
+	var arnumber = url.match(/arnumber=(\d+)/)[1];
+	return url.replace(/\/(?:search|stamp|ielx[45])\/.*$/, "/xpls/abs_all.jsp?arnumber=" + arnumber);
+}
+
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+		Zotero.selectItems(getSearchResults(doc), function (items) {
 			if (!items) {
 				return true;
 			}
-			var articles = new Array();
+			var articles = [];
 			for (var i in items) {
-				// Some pages don't show the metadata we need (http://forums.zotero.org/discussion/16283)
-				// No data: http://ieeexplore.ieee.org/search/srchabstract.jsp?tp=&arnumber=1397982
-				// No data: http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1397982
-				// Data: http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1397982
-				var arnumber = i.match(/arnumber=(\d+)/)[1];
-				i = i.replace(/\/(?:search|stamp)\/.*$/, "/xpls/abs_all.jsp?arnumber=" + arnumber);
 				articles.push(i);
 			}
 			ZU.processDocuments(articles, scrape); 
 		});
 	} else {
 		if (url.indexOf("/search/") !== -1 || url.indexOf("/stamp/") !== -1 || url.indexOf("/ielx4/") !== -1 || url.indexOf("/ielx5/") !== -1) {
-			// Address the same missing metadata problem as above
-			// Also address issue of saving from PDF itself, I hope
-			// URL like http://ieeexplore.ieee.org/ielx4/78/2655/00080767.pdf?tp=&arnumber=80767&isnumber=2655
-			// Or: http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1575188&tag=1
-			var arnumber = url.match(/arnumber=(\d+)/)[1];
-			url = url.replace(/\/(?:search|stamp|ielx[45])\/.*$/, "/xpls/abs_all.jsp?arnumber=" + arnumber);
-			Zotero.Utilities.processDocuments([url], scrape);
-			Zotero.wait();
+			ZU.processDocuments([fixUrl(url)], scrape);
 		} else {
 			scrape(doc, url);
 		}
@@ -77,14 +105,12 @@ function doWeb(doc, url) {
 }
 
 function scrape (doc, url) {
- 	var arnumber = url.match(/arnumber=\d+/)[0].replace(/arnumber=/, "");
-  	var pdf;
-  	pdf = ZU.xpathText(doc, '//span[contains(@class, "button")]/a[@class="pdf"]/@href')
-  	Z.debug(pdf)
-  	Z.debug(arnumber)
-  	var get = 'http://ieeexplore.ieee.org/xpl/downloadCitations';
+ 	var arnumber = url.match(/arnumber=(\d+)/)[1];
+  	var pdf = ZU.xpathText(doc, '//span[contains(@class, "button")]/a[@class="pdf"]/@href')
+  	Z.debug(pdf);
+  	Z.debug("arNumber = " + arnumber);
   	var post = "recordIds=" + arnumber + "&fromPage=&citations-format=citation-abstract&download-format=download-bibtex";
-  	Zotero.Utilities.HTTP.doPost(get, post, function(text) {
+  	ZU.doPost('/xpl/downloadCitations', post, function(text) {
   		text = ZU.unescapeHTML(text.replace(/(&[^\s;]+) and/g, '$1;'));
 		//remove empty tag - we can take this out once empty tags are ignored
 		text = text.replace(/(keywords=\{.+);\}/, "$1}");
@@ -114,7 +140,7 @@ function scrape (doc, url) {
 				item.pages = "";
 			}
 			if (pdf) {
-				Zotero.Utilities.doGet(pdf, function (src) {
+				ZU.doGet(pdf, function (src) {
 					var m = /<frame src="(.*\.pdf.*)"/.exec(src);
 					if (m) item.attachments = [{
 						url: m[1],
@@ -285,6 +311,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://ieeexplore.ieee.org/search/searchresult.jsp?queryText%3Dlabor&refinements=4291944246&pageNumber=1&resultAction=REFINE",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
@@ -295,7 +322,87 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://ieeexplore.ieee.org/search/searchresult.jsp?queryText=Wind%20Farms&newsearch=true",
+		"defer": true,
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://ieeexplore.ieee.org/xpl/login.jsp?tp=&arnumber=1397982",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Analysis and circuit modeling of waveguide-separated absorption charge multiplication-avalanche photodetector (WG-SACM-APD)",
+				"creators": [
+					{
+						"firstName": "Yasser M.",
+						"lastName": "El-Batawy",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "M.J.",
+						"lastName": "Deen",
+						"creatorType": "author"
+					}
+				],
+				"date": "March 2005",
+				"DOI": "10.1109/TED.2005.843884",
+				"ISSN": "0018-9383",
+				"abstractNote": "Waveguide photodetectors are considered leading candidates to overcome the bandwidth efficiency tradeoff of conventional photodetectors. In this paper, a theoretical physics-based model of the waveguide separated absorption charge multiplication avalanche photodetector (WG-SACM-APD) is presented. Both time and frequency modeling for this photodetector are developed and simulated results for different thicknesses of the absorption and multiplication layers and for different areas of the photodetector are presented. These simulations provide guidelines for the design of these high-performance photodiodes. In addition, a circuit model of the photodetector is presented in which the photodetector is a lumped circuit element so that circuit simulation of the entire photoreceiver is now feasible. The parasitics of the photodetector are included in the circuit model and it is shown how these parasitics degrade the photodetectors performance and how they can be partially compensated by an external inductor in series with the load resistor. The results obtained from the circuit model of the WG-SACM-APD are compared with published experimental results and good agreement is obtained. This circuit modeling can easily be applied to any WG-APD structure. The gain-bandwidth characteristic of WG-SACM-APD is studied for different areas and thicknesses of both the absorption and the multiplication layers. The dependence of the performance of the photodetector on the dimensions, the material parameters and the multiplication gain are also investigated.",
+				"issue": "3",
+				"itemID": "1397982",
+				"libraryCatalog": "IEEE Xplore",
+				"pages": "335-344",
+				"publicationTitle": "IEEE Transactions on Electron Devices",
+				"volume": "52",
+				"attachments": [
+					{
+						"title": "IEEE Xplore Abstract Record",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					"Absorption",
+					"Avalanche photodetectors",
+					"Bandwidth",
+					"Circuit analysis",
+					"Circuit simulation",
+					"Degradation",
+					"Frequency",
+					"Guidelines",
+					"Photodetectors",
+					"Photodiodes",
+					"SACM photodetectors",
+					"WG-SACM-APD circuit modeling",
+					"Waveguide theory",
+					"absorption layers",
+					"avalanche photodiodes",
+					"circuit model of photodetectors",
+					"circuit modeling",
+					"circuit simulation",
+					"external inductor",
+					"frequency modeling",
+					"high-performance photodiodes",
+					"high-speed photodetectors",
+					"load resistor",
+					"lumped circuit element",
+					"lumped parameter networks",
+					"multiplication layers",
+					"optical receivers",
+					"parasitics effects",
+					"photodetector analysis",
+					"photodetectors",
+					"photoreceiver",
+					"physics-based modeling",
+					"semiconductor device models",
+					"theoretical physics-based model",
+					"time modeling",
+					"waveguide photodetectors",
+					"waveguide separated absorption charge multiplication avalanche photodetector"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
