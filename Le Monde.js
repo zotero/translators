@@ -2,14 +2,14 @@
 	"translatorID": "6bc635a4-6823-4f95-acaf-b43e8a158144",
 	"label": "Le Monde",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.)?(campus\\.)?lemonde\\.fr/",
+	"target": "^https?://(www\\.)?lemonde\\.fr/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-03-14 09:33:21"
+	"lastUpdated": "2015-06-09 20:21:01"
 }
 
 /*
@@ -79,7 +79,8 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 
 	var translator = Zotero.loadTranslator('web');
-	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');//https://github.com/zotero/translators/blob/master/Embedded%20Metadata.js
+	// Embedded Metadata
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setDocument(doc);
 	
 	translator.setHandler('itemDone', function (obj, item) {
@@ -91,6 +92,13 @@ function scrape(doc, url) {
 			// The url contain the publication date as well
 			// e.g. http://campus.lemonde.fr/palmares/article/2015/03/13/...
 			item.date = url.replace(/^.*\/article\/(\d\d\d\d)\/(\d\d)\/(\d\d)\/.*$/, '$1-$2-$3');
+		}
+		
+		if (!item.url) {
+			item.url = url;
+		} else if (item.url.indexOf('/') == 0) {
+			// og:url is now relative and we don't currently resolve it
+			item.url = url.match(/^https?:\/\/[^\/]+/i)[0] + item.url;
 		}
 		
 		var author = ZU.xpathText(doc, '//span[@itemprop="author"]');
@@ -177,17 +185,60 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://campus.lemonde.fr/palmares/article/2015/03/13/classement-international-les-universites-francaises-en-manque-de-prestige_4593287_4401467.html",
+		"url": "http://www.lemonde.fr/campus/article/2015/03/13/classement-international-les-universites-francaises-en-manque-de-prestige_4593287_4401467.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Les universités françaises peinent à soigner leur réputation internationale",
-				"creators": [],
-				"date": "2015-03-13",
-				"abstractNote": "En matière de prestige académique, Harvard  ...",
+				"title": "Classement international : les universités françaises en manque de prestige",
+				"creators": [
+					{
+						"firstName": "Matteo",
+						"lastName": "Maillard",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015-03-13T22:03:36+01:00",
+				"ISSN": "1950-6244",
+				"abstractNote": "Selon le dernier classement du magazine « Times Higher Education », les universités françaises peinent à obtenir la reconnaissance internationale de leurs pairs.",
+				"language": "fr",
 				"libraryCatalog": "Le Monde",
 				"publicationTitle": "Le Monde.fr",
-				"url": "http://campus.lemonde.fr/palmares/article/2015/03/13/classement-international-les-universites-francaises-en-manque-de-prestige_4593287_4401467.html",
+				"section": "Campus",
+				"shortTitle": "Classement international",
+				"url": "http://www.lemonde.fr/campus/article/2015/03/13/classement-international-les-universites-francaises-en-manque-de-prestige_4593287_4401467.html",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.lemonde.fr/culture/article/2013/09/28/arturo-brachetti-dans-son-repaire-a-turin_3486315_3246.html#meter_toaster",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Dans le repaire turinois d'Arturo Brachetti",
+				"creators": [
+					{
+						"firstName": "Sandrine Blanchard (Turin, envoyée",
+						"lastName": "spéciale)",
+						"creatorType": "author"
+					}
+				],
+				"date": "2013-09-28T09:26:28+02:00",
+				"ISSN": "1950-6244",
+				"abstractNote": "Visiter la maison de l'artiste, en spectacle à Paris à partir du 3 octobre, c'est entrer dans un monde empli de magie.",
+				"language": "fr",
+				"libraryCatalog": "Le Monde",
+				"publicationTitle": "Le Monde.fr",
+				"section": "Culture",
+				"url": "http://www.lemonde.fr/culture/article/2013/09/28/arturo-brachetti-dans-son-repaire-a-turin_3486315_3246.html",
 				"attachments": [
 					{
 						"title": "Snapshot"
