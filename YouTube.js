@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-10-19 03:31:27"
+	"lastUpdated": "2015-06-10 10:46:40"
 }
 
 function detectWeb(doc, url) {
@@ -86,8 +86,8 @@ function getData(ids){
 		var keywords;
 		if ((keywords = ZU.xpathText(doc, '//media:group/media:keywords', ns))) {
 			keywords = keywords.split(",");
-			for (let tag of keywords){
-				newItem.tags.push(Zotero.Utilities.trimInternal(tag));
+			for (var i=0; i<keywords.length; i++) {
+				newItem.tags.push(Zotero.Utilities.trimInternal(keywords[i]));
 			}
 		}
 		var date;
