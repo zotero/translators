@@ -104,10 +104,10 @@ function scrape(doc, url) {
 			else
 				authors.push(author_text);
 		}
-		for (var j=0; j<authors.length; j++) {
-			if (authors[j] != 'null') {
+		for (var i=0; i<authors.length; i++) {
+			if (authors[i] != 'null') {
 				newItem.creators.push(
-					Zotero.Utilities.cleanAuthor(authors[j], "author"));
+					Zotero.Utilities.cleanAuthor(authors[i], "author"));
 			}
 		}
 

@@ -243,14 +243,14 @@ function scrape(newDoc, marc, url) {
 		var oldCreators = newItem.creators;
 		newItem.creators = new Array();
 		var transient = new Array();
-		for (var j=0; j<oldCreators.length; j++) {
-			var a = oldCreators[j];
+		for (var i=0; i<oldCreators.length; i++) {
+			var a = oldCreators[i];
 			if (a.lastName) {
 				if (!a.lastName.match(/\d+/)) transient.push(a);
 			}
 		}
-		for (var k=0; k<transient.length; k++) {
-			var a = transient[k];
+		for (var i=0; i<transient.length; i++) {
+			var a = transient[i];
 			if (a.firstName) {
 				if (a.firstName.match(/\|/)) a.firstName = a.firstName.match(/([^|]+)\s+|/)[1];
 			}

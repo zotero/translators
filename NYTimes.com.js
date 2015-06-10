@@ -142,12 +142,12 @@ function scrape(doc, url) {
 		}
 
 		var authors = author.split(" and ");
-		for (var j=0; j<authors.length; j++) {
-			var author = authors[j];
+		for (var i=0; i<authors.length; i++) {
+			var author = authors[i];
 			// fix capitalization
 			var words = author.split(" ");
-			for (var k in words) {
-				words[k] = words[k][0].toUpperCase() + words[k].substr(1).toLowerCase();
+			for (var j in words) {
+				words[j] = words[j][0].toUpperCase() + words[j].substr(1).toLowerCase();
 			}
 			author = words.join(" ");
 
@@ -166,8 +166,8 @@ function scrape(doc, url) {
 	if (metaTags["keywords"]) {
 		var keywords = metaTags["keywords"];
 		newItem.tags = keywords.split(",");
-		for (var t in newItem.tags) {
-			newItem.tags[t] = newItem.tags[t].replace("  ", ", ");
+		for (var i in newItem.tags) {
+			newItem.tags[i] = newItem.tags[i].replace("  ", ", ");
 		}
 	}
 	

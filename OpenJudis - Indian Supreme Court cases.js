@@ -68,8 +68,8 @@ function doWeb(doc, url) {
 		}
 	} else { arts = [url]; }
 	Zotero.debug(arts);
-	for (var j=0; j<arts.length; j++) {
-		var art = arts[j];
+	for (var i=0; i<arts.length; i++) {
+		var art = arts[i];
 		var newurl = art;
 		Zotero.Utilities.HTTP.doGet(art, function(text) {
 			var newItem = new Zotero.Item("case");

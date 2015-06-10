@@ -61,8 +61,8 @@ function doWeb(doc, url) {
 		}
 		if (data['Keywords']) {
 			var kws = data['Keywords'].split(/\n/);
-			for (var j=0; j<kws.length; j++) {
-				var kw = kws[j];
+			for (var i=0; i<kws.length; i++) {
+				var kw = kws[i];
 				if (kw != "") item.tags.push(kw);
 			}
 		}

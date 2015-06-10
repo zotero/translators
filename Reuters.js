@@ -88,8 +88,8 @@ function scrape(doc, url) {
 		var byline = ZU.xpathText(doc, '//div[@class="author"]');
 		if (byline) {
 			var authors = byline.split(/and |,/);
-			for (var j=0; j<authors.length; j++) {
-				item.creators.push(authorFix(authors[j]));
+			for (var i=0; i<authors.length; i++) {
+				item.creators.push(authorFix(authors[i]));
 			}
 		}
 

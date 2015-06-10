@@ -105,9 +105,9 @@ function scrape(doc) {
 	var censusNo = "";
 	var censusNos = new Array("1790", "First", "1800", "Second", "1810", "Third", "1820", "Fourth", "1830", "Fifth", "1840", "Sixth", "1850", "Seventh", "1860", "Eighth", "1870", "Ninth", 
 			"1880", "Tenth", "1890", "Eleventh", "1900", "Twelfth", "1910", "Thirteenth", "1920", "Fourteenth", "1930", "Fifteenth")
-	for(var j in censusNos) {
-			if(censusYear == 1) { censusNo = censusNos[j] };
-			if(censusNos[j] == year) { censusYear = 1 } else {censusYear= 0 };
+	for(var i in censusNos) {
+			if(censusYear == 1) { censusNo = censusNos[i] };
+			if(censusNos[i] == year) { censusYear = 1 } else {censusYear= 0 };
 		}
 
 	//begin adding item
