@@ -2,7 +2,7 @@
 	"translatorID": "6f5f1b24-7519-4314-880f-d7004fbcfe7e",
 	"label": "ReliefWeb",
 	"creator": "Michael Berkowitz",
-	"target": "http://(www.)?reliefweb.int/",
+	"target": "^https?://(www\\.)?reliefweb\\.int/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,

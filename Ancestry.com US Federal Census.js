@@ -2,7 +2,7 @@
 	"translatorID": "0dda3f89-15de-4479-987f-cc13f1ba7999",
 	"label": "Ancestry.com US Federal Census",
 	"creator": "Elena Razlogova",
-	"target": "^https?://search.ancestry.com/(.*)usfedcen|1890orgcen|1910uscenindex",
+	"target": "^https?://search.ancestry.com/.*(usfedcen|1890orgcen|1910uscenindex)",
 	"minVersion": "1.0.0b4.r1",
 	"maxVersion": "",
 	"priority": 100,

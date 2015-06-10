@@ -2,7 +2,7 @@
 	"translatorID": "e0234bcf-bc56-4577-aa94-fe86a27f6fd6",
 	"label": "The Globe and Mail",
 	"creator": "Adam Crymble",
-	"target": "http://www.theglobeandmail.com",
+	"target": "^https?://www\\.theglobeandmail\\.com/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
