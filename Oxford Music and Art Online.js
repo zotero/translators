@@ -67,9 +67,7 @@ function scrape(ids, host){
 			translator.translate();
 		});
 	}
-}
-
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",

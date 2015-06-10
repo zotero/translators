@@ -19,7 +19,7 @@ function detectWeb(doc, url) {
 	} : null;
 		
 	var result = doc.evaluate('//div[@class="g_container"]/div[@class="g_panelWrap"]/div[@class="g_panelCore"]/div[@class="s_container"]/div[@class="p_rsltList"]', doc, nsResolver,
-				 XPathResult.ANY_TYPE, null).iterateNext();
+	             XPathResult.ANY_TYPE, null).iterateNext();
 
 	var rows = doc.evaluate('//div[@class="g_container"]/div[@class="g_panelWrap"]/div[@class="g_panelCore"]/div[@class="s_container"]/div[@class="p_rsltList"]/table/tbody/tr[@class="tblrow record"]', 
 				doc, nsResolver, XPathResult.ANY_TYPE, null);

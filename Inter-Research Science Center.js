@@ -108,9 +108,7 @@ function scrape(doc, url){
 			{url:pdfurl, title:item.publicationTitle + " Full Text PDF", mimeType:"application/pdf"}
 		];
 		item.complete();
-}
-
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",

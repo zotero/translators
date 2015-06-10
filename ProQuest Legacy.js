@@ -19,7 +19,7 @@ function detectWeb(doc, url) {
 	} : null;
 	
 	if(doc.evaluate('//img[substring(@src, string-length(@src)-32) = "/images/common/logo_proquest.gif" or substring(@src, string-length(@src)-38) = "/images/common/logo_proquest_small.gif"]',
-					doc, nsResolver, XPathResult.ANY_TYPE, null)) {    
+	                doc, nsResolver, XPathResult.ANY_TYPE, null)) {    
 		
 		
 		var xpath = '//table[@id="tableIndexTerms"]/tbody/tr/td[@class="textSmall"]';
@@ -114,7 +114,7 @@ function doWeb(doc, url) {
 
 	
 	if(doc.evaluate('//img[substring(@src, string-length(@src)-32) = "/images/common/logo_proquest.gif" or substring(@src, string-length(@src)-38) = "/images/common/logo_proquest_small.gif"]',
-						doc, nsResolver, XPathResult.ANY_TYPE, null)) {
+		                doc, nsResolver, XPathResult.ANY_TYPE, null)) {
 			if(doc.title.match("Results")) {
 				
 				//Get Client ID

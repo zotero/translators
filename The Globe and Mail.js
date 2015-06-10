@@ -148,10 +148,10 @@ function scrape(doc, url) {
 		}
 		
 		for (var i = 0; i < tagsContent.length; i++) {
-			 	if (tagsContent[i] != (" ") && tagsContent[i] != ("")) {
-				 	newItem.tags[i] = tagsContent[i];
-			 	}
-		 	}	
+		     	if (tagsContent[i] != (" ") && tagsContent[i] != ("")) {
+			     	newItem.tags[i] = tagsContent[i];
+		     	}
+	     	}	
 		
 		associateMeta (newItem, metaTags, "headline", "title");
 		associateMeta (newItem, metaTags, "summary", "abstractNote");

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2015-06-02 06:04:02"
+	"lastUpdated": "2015-06-10 11:33:38"
 }
 
 function detectWeb(doc, url) {
@@ -46,69 +46,32 @@ function doWeb(doc, url) {
 }
 		
 		
-function scrape (doc, url){	
-	var data = new Object();
-	var rows = doc.evaluate('//div[@class="fichaISBN"]/table/tbody/tr', doc, null, XPathResult.ANY_TYPE, null);
-	var next_row;
-	while (next_row = rows.iterateNext()) {
-		var heading = doc.evaluate('./th', next_row, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		var value = doc.evaluate('./td', next_row, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		data[heading.replace(/\W/g, "")] = value;
-	}
-	var isbn = Zotero.Utilities.trimInternal(doc.evaluate('//span[@class="cabTitulo"]/strong', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-	var item = new Zotero.Item("book");
-	item.ISBN = isbn;
-	item.title = Zotero.Utilities.trimInternal(data['Ttulo']);
-	item.title= item.title.replace(/\s+:/, ":");
-	author = data['Autores'];
-	if (author) {
-		var authors = author.match(/\b.*,\s+\w+[^([]/g);
-		for (var i=0; i<authors.length; i++) {
-			var aut = Zotero.Utilities.trimInternal(authors[i]);
-			item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author", true));
+	function scrape (doc, url){	
+		var data = new Object();
+		var rows = doc.evaluate('//div[@class="fichaISBN"]/table/tbody/tr', doc, null, XPathResult.ANY_TYPE, null);
+		var next_row;
+		while (next_row = rows.iterateNext()) {
+			var heading = doc.evaluate('./th', next_row, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			var value = doc.evaluate('./td', next_row, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			data[heading.replace(/\W/g, "")] = value;
 		}
-	}
-	if (data['Publicacin']) item.publisher = Zotero.Utilities.trimInternal(data['Publicacin']);
-	if (data['FechaEdicin']) item.date = Zotero.Utilities.trimInternal(data['FechaEdicin']);
-	item.complete();
-}
-
-/** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://www.mcu.es/webISBN/tituloDetalle.do?sidTitul=292802&action=busquedaInicial&noValidating=true&POS=0&MAX=50&TOTAL=0&prev_layout=busquedaisbn&layout=busquedaisbn&language=es",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "La actitud intencional",
-				"creators": [
-					{
-						"firstName": "Daniel",
-						"lastName": "Dennett",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Daniel",
-						"lastName": "Dennett",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Gabriela",
-						"lastName": "Ventureira",
-						"creatorType": "author"
-					}
-				],
-				"date": "03/1991",
-				"ISBN": "9788474323955",
-				"libraryCatalog": "Agencia del ISBN",
-				"publisher": "GEDISA",
-				"attachments": [],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
+		var isbn = Zotero.Utilities.trimInternal(doc.evaluate('//span[@class="cabTitulo"]/strong', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		var item = new Zotero.Item("book");
+		item.ISBN = isbn;
+		item.title = Zotero.Utilities.trimInternal(data['Ttulo']);
+		item.title= item.title.replace(/\s+:/, ":");
+		author = data['Autores'];
+		if (author) {
+			var authors = author.match(/\b.*,\s+\w+[^([]/g);
+			for (var i=0; i<authors.length; i++) {
+				var aut = Zotero.Utilities.trimInternal(authors[i]);
+				item.creators.push(Zotero.Utilities.cleanAuthor(Zotero.Utilities.trimInternal(aut), "author", true));
 			}
-		]
+		}
+		if (data['Publicacin']) item.publisher = Zotero.Utilities.trimInternal(data['Publicacin']);
+		if (data['FechaEdicin']) item.date = Zotero.Utilities.trimInternal(data['FechaEdicin']);
+		item.complete();
 	}
-]
+/** BEGIN TEST CASES **/
+var testCases = []
 /** END TEST CASES **/

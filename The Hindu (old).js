@@ -55,9 +55,7 @@ function doWeb(doc, url) {
 			arts.push(i);
 		}
 		
-	} else {
-		arts = [url];
-	}
+	} else { arts = [url]; }
 	for (var i=0; i<arts.length; i++) {
 		var art = arts[i];
 		Zotero.debug(art);
@@ -92,9 +90,7 @@ function doWeb(doc, url) {
 		});
 		Zotero.wait();
 	}
-}
-
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",

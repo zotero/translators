@@ -71,7 +71,6 @@ function scrape(doc, url){
 		item.abstractNote = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="total"]/p[5]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent).substr(10);
 		item.complete();
 	}
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{

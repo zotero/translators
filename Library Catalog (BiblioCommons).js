@@ -147,7 +147,6 @@ function processor (obj) {
 		return true;
 }
 
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
