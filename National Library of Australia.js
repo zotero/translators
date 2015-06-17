@@ -1,14 +1,15 @@
 {
-	"translatorID":"fc410e64-0252-4cd3-acb1-25e584775fa2",
-	"translatorType":4,
-	"label":"National Library of Australia",
-	"creator":"Michael Berkowitz",
-	"target":"http://librariesaustralia.nla.gov.au/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2012-08-05 08:09:33"
+	"translatorID": "fc410e64-0252-4cd3-acb1-25e584775fa2",
+	"label": "National Library of Australia",
+	"creator": "Michael Berkowitz",
+	"target": "^https?://librariesaustralia\\.nla\\.gov\\.au/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2015-06-02 20:55:32"
 }
 
 function detectWeb(doc, url) {
@@ -54,7 +55,8 @@ function doWeb(doc, url) {
 		}
 		if (data['Subjects:']) {
 			var kws = data['Subjects:'].split(".");
-			for each (var key in kws) {
+			for (var i=0; i<kws.length; i++) {
+				var key = kws[i];
 				if (key.match(/\w+/)) item.tags.push(key);
 			}
 		}

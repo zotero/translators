@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-19 06:10:54"
+	"lastUpdated": "2015-06-02 21:16:57"
 }
 
 /*
@@ -75,8 +75,8 @@ function scrape(doc, url) {
 		var byline = ZU.xpathText(doc, '//div[@id="articleInfo"]//p[@class="byline"]');
 		if (byline) {
 			var authors = byline.substr(3).split(/and |,/);
-			for each(var aut in authors) {
-				item.creators.push(authorFix(aut));
+			for (var i=0; i<authors.length; i++) {
+				item.creators.push(authorFix(authors[i]));
 			}
 		}
 		item.publicationTitle = "Reuters";
@@ -88,8 +88,8 @@ function scrape(doc, url) {
 		var byline = ZU.xpathText(doc, '//div[@class="author"]');
 		if (byline) {
 			var authors = byline.split(/and |,/);
-			for each(var aut in authors) {
-				item.creators.push(authorFix(aut));
+			for (var i=0; i<authors.length; i++) {
+				item.creators.push(authorFix(authors[i]));
 			}
 		}
 

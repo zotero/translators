@@ -2,14 +2,14 @@
 	"translatorID": "5d506fe3-dbde-4424-90e8-d219c63faf72",
 	"label": "Library Catalog (BiblioCommons)",
 	"creator": "Avram Lyon",
-	"target": "^https?://[^.]+\\.bibliocommons\\.com\\/",
+	"target": "^https?://[^/]+\\.bibliocommons\\.com\\/",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-04-08 16:16:22"
+	"lastUpdated": "2015-06-02 20:44:02"
 }
 
 /*
@@ -124,7 +124,8 @@ function processor (obj) {
 		var record = new marc.record();
 		// The first piece is the MARC leader
 		record.leader = fields.shift();
-		for each (var field in fields) {
+		for (var i=0; i<fields.length; i++) {
+			var field = fields[i];
 			//Z.debug(field)
 			// Skip blanks
 			if (field.replace(/\x1F|\s/g,"") == "") continue;
@@ -190,7 +191,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://nypl.bibliocommons.com/item/show/10974089052_labour",
+		"url": "https://nypl.bibliocommons.com/item/show/10974089052_labour",
 		"items": [
 			{
 				"itemType": "book",
@@ -209,6 +210,7 @@ var testCases = [
 				],
 				"date": "1980",
 				"callNumber": "JFD 87-5272",
+				"language": "eng",
 				"libraryCatalog": "nypl Library Catalog",
 				"numPages": "139",
 				"place": "London",

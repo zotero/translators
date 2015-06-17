@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-05-31 00:13:13"
+	"lastUpdated": "2015-06-10 10:50:04"
 }
 
 /*
@@ -260,7 +260,8 @@ function doWeb(doc, url) {
 //extract PMID from a context object
 function getPMID(co) {
 	var coParts = co.split("&");
-	for each(part in coParts) {
+	for (var i=0; i<coParts.length; i++) {
+		var part = coParts[i];
 		if(part.substr(0, 7) == "rft_id=") {
 			var value = unescape(part.substr(7));
 			if(value.substr(0, 10) == "info:pmid/") {

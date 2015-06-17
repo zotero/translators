@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-12-17 22:35:48"
+	"lastUpdated": "2015-06-10 10:48:54"
 }
 
 function detectImport() {
@@ -278,8 +278,8 @@ function doExport() {
 		// tags
 		if(item.tags) {
 			var keywordTag = "";
-			for each(var tag in item.tags) {
-				keywordTag += "\r\n"+tag.tag;
+			for (var i=0; i<item.tags.length; i++) {
+				keywordTag += "\r\n"+item.tags[i].tag;
 			}
 			addTag("K", keywordTag.substr(2));
 		}

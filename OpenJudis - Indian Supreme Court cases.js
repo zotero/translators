@@ -2,14 +2,14 @@
 	"translatorID": "fe39e97d-7397-4f3f-a5f3-396a1a79213c",
 	"label": "OpenJudis - Indian Supreme Court cases",
 	"creator": "Prashant Iyengar and Michael Berkowitz",
-	"target": "^https?://(www.)?openarchive\\.in/(judis|newcases)",
+	"target": "^https?://(www\\.)?openarchive\\.in/(judis|newcases)",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-04-04 10:10:58"
+	"lastUpdated": "2015-06-02 21:03:02"
 }
 
 function detectWeb(doc, url) {
@@ -68,7 +68,8 @@ function doWeb(doc, url) {
 		}
 	} else { arts = [url]; }
 	Zotero.debug(arts);
-	for each (var art in arts) {
+	for (var i=0; i<arts.length; i++) {
+		var art = arts[i];
 		var newurl = art;
 		Zotero.Utilities.HTTP.doGet(art, function(text) {
 			var newItem = new Zotero.Item("case");
@@ -89,9 +90,12 @@ function doWeb(doc, url) {
 			
 			var metareg = /<META NAME[^>]+\>/g;
 			var tags = text.match(metareg);
-			for each (var tag in tags) {
-				var stuff = tag.match(/NAME=\"([^"]+)\"\s+CONTENT=\"([^"]+)\"/);
-				regexMeta([stuff[1], stuff[2]], newItem);
+			if (tags) {
+				for (var k=0; k<tags.length; k++) {
+					var tag = tags[k];
+					var stuff = tag.match(/NAME=\"([^"]+)\"\s+CONTENT=\"([^"]+)\"/);
+					regexMeta([stuff[1], stuff[2]], newItem);
+				}
 			}
 			pdfurl = 'http://judis.openarchive.in/makepdf.php?filename=' + newItem.url;
 			newItem.attachments = [

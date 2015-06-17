@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-03 23:31:06"
+	"lastUpdated": "2015-06-10 11:34:28"
 }
 
 function detectWeb(doc, url) {
@@ -22,7 +22,8 @@ function titleCase(str) {
 	var skipWords = ["but", "or", "yet", "so", "for", "and", "nor", "a", "an", "the", "at", "by", "from", "in", "into", "of", "on", "to", "with", "up", "down", "as"];
 	var words = str.toLowerCase().split(/\s+/);
 	var newstr = "";
-	for each (var word in words) {
+	for (var i=0; i<words.length; i++) {
+		var word = words[i];
 		if (skipWords.indexOf(word.replace(/[^a-zA-Z]+/, "")) != -1) {
 			newstr += " " + word;
 		} else if (word.indexOf("-") != -1) {
@@ -75,7 +76,8 @@ function doWeb(doc, url) {
 				authors = authors.replace(bit.textContent, ",");
 			}
 			authors = authors.split(/\s*(,|&)\s*/);
-			for each (var aut in authors) {
+			for (var i=0; i<authors.length; i++) {
+				var aut = authors[i];
 				if (aut.match(/\w/)) {
 					aut = titleCase(Zotero.Utilities.trimInternal(aut));
 					item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
@@ -86,6 +88,7 @@ function doWeb(doc, url) {
 		}
 	}
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [

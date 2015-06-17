@@ -2,14 +2,14 @@
 	"translatorID": "7e51d3fb-082e-4063-8601-cda08f6004a3",
 	"label": "Education Week",
 	"creator": "Ben Parr",
-	"target": "^https?://(?:www\\.|blogs\\.|www2\\.)?edweek",
+	"target": "^https?://(www2?\\.|blogs\\.)?edweek\\.org/",
 	"minVersion": "1.0.0b4.r1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-08-06 19:23:07"
+	"lastUpdated": "2015-06-02 11:18:49"
 }
 
 function detectWeb(doc,url)
@@ -65,7 +65,8 @@ function scrape(doc, url) {
 			  }
 
 			  var authors = author.split(" and ");
-			  for each(var author in authors) {
+			  for (var j=0; j<authors.length; j++) {
+					var author = authors[j];
 					  var words = author.split(" ");
 					  for (var i in words) {
 							  words[i] = words[i][0].toUpperCase() +words[i].substr(1).toLowerCase();
@@ -103,6 +104,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "magazineArticle",
+				"title": "Obama Using Education Issue as Political Sword - Education Week",
 				"creators": [
 					{
 						"firstName": "Michele",
@@ -110,17 +112,15 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"url": "http://www.edweek.org/ew/articles/2011/10/28/10jobs.h31.html?tkn=PUOFjigAbQPNufjjHPxYeafVz7T5Tf16qNb4&cmp=clp-edweek",
-				"title": "Obama Using Education Issue as Political Sword",
 				"date": "2011-11-02",
 				"abstractNote": "The Obama administration highlights its education record, while drawing a sharp contrast with the GOP in Congress.",
-				"publicationTitle": "Education Week",
 				"libraryCatalog": "Education Week",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"publicationTitle": "Education Week",
+				"url": "http://www.edweek.org/ew/articles/2011/10/28/10jobs.h31.html?tkn=PUOFjigAbQPNufjjHPxYeafVz7T5Tf16qNb4&cmp=clp-edweek",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

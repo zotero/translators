@@ -2,14 +2,14 @@
 	"translatorID": "d3b1d34c-f8a1-43bb-9dd6-27aa6403b217",
 	"label": "YouTube",
 	"creator": "Sean Takats, Michael Berkowitz, Matt Burton and Rintze Zelle",
-	"target": "https?://[^/]*youtube\\.com\\/",
+	"target": "^https?://([^/]+\\.)?youtube\\.com\\/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-10-19 03:31:27"
+	"lastUpdated": "2015-06-10 10:46:40"
 }
 
 function detectWeb(doc, url) {
@@ -86,8 +86,8 @@ function getData(ids){
 		var keywords;
 		if ((keywords = ZU.xpathText(doc, '//media:group/media:keywords', ns))) {
 			keywords = keywords.split(",");
-			for each(var tag in keywords){
-				newItem.tags.push(Zotero.Utilities.trimInternal(tag));
+			for (var i=0; i<keywords.length; i++) {
+				newItem.tags.push(Zotero.Utilities.trimInternal(keywords[i]));
 			}
 		}
 		var date;

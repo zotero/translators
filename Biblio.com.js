@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-28 19:32:32"
+	"lastUpdated": "2015-06-02 08:32:10"
 }
 
 function detectWeb(doc, url) {
@@ -43,7 +43,7 @@ function scrape(doc, url) {
 	var content = doc.evaluate('//div[@id="description"]/ul/li', doc, null, XPathResult.ANY_TYPE,  null);
 	var xPathCount = doc.evaluate('count (//div[@id="description"]/ul/li)', doc, null, XPathResult.ANY_TYPE,  null);
 	
-	for (i=0; i<xPathCount.numberValue; i++) {	 	
+	for (var i=0; i<xPathCount.numberValue; i++) {	 	
 	 		contents = content.iterateNext().textContent.split(": ");
 	 		if (contents.length>1){
 	 		fieldTitle = contents[0].replace(/\s*/g, '');
@@ -56,7 +56,8 @@ function scrape(doc, url) {
 		if (authors.match(/\w/)) {
 			authors = authors.replace(/^\s*by/, "");
 			multiAuthors = authors.split(";");
-			for each (var aut in multiAuthors) {
+			for (var j=0; j<multiAuthors.length; j++) {
+				var aut = multiAuthors[j];
 				newItem.creators.push(Zotero.Utilities.cleanAuthor(aut, "author", aut.match(/,/)));
 			}
 		}
