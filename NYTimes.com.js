@@ -2,7 +2,7 @@
 	"translatorID": "ce7a3727-d184-407f-ac12-52837f3361ff",
 	"label": "NYTimes.com",
 	"creator": "Simon Kornblith",
-	"target": "^https?://(?:query\\.nytimes\\.com/(?:search|gst)/(?:alternate/)?|(?:select\\.|www\\.|\\.blogs\\.)?nytimes\\.com/)",
+	"target": "^https?://(query\\.nytimes\\.com/(search|gst)/(alternate/)?|(select\\.|www\\.|\\.blogs\\.)?nytimes\\.com/)",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
@@ -146,7 +146,7 @@ function scrape(doc, url) {
 			var author = authors[i];
 			// fix capitalization
 			var words = author.split(" ");
-			for (var j in words) {
+			for (var j=0; j<words.length; j++) {
 				words[j] = words[j][0].toUpperCase() + words[j].substr(1).toLowerCase();
 			}
 			author = words.join(" ");

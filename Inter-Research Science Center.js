@@ -92,7 +92,7 @@ function scrape(doc, url){
 		item.abstractNote = Zotero.Utilities.trimInternal(doc.evaluate('//p[@class="abstract_block"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 		var authors = Zotero.Utilities.trimInternal(doc.evaluate('//div[@class="bb"]/h3', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent).split(/,\s+/);
 		for (var i=0; i<authors.length; i++) {
-			var aut = authors[i].replace(/[^\w^\s^\.]/g, "").replace(/\d/g, "");
+			var aut = authors[i].replace(/[^A-Z\s.]+/gi, '');
 			item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
 		}
 		item.date = doc.evaluate('//div[@class="abs-footer"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/date:\s+(.*)/)[1];

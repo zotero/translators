@@ -2,7 +2,7 @@
 	"translatorID": "635c1246-e0c8-40a0-8799-a73a0b013ad8",
 	"label": "Bryn Mawr Classical Review",
 	"creator": "Michael Berkowitz",
-	"target": "^https?://bmcr\\.brynmawr\\.edu",
+	"target": "^https?://bmcr\\.brynmawr\\.edu/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,

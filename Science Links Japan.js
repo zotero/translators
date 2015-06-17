@@ -21,7 +21,7 @@ function scrape(doc) {
 		if (m = datum.match(/^Title;(.*)$/)) {
 			item.title = ZU.capitalizeTitle(m[1]);
 		} else if (datum.indexOf('Author;') == 0 && (m = datum.match(/\b[A-Z'\-]+\s+[A-Z'\-]+/g))) {
-			for (var j=0; j<m.length; j++) {;
+			for (var j=0; j<m.length; j++) {
 				item.creators.push(Zotero.Utilities.cleanAuthor(Zotero.Utilities.capitalizeTitle(m[j], true), "author"));
 			}
 		} else if (m = datum.match(/^Journal Title;(.*)$/)) {

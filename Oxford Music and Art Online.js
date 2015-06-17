@@ -2,7 +2,7 @@
 	"translatorID": "f203db7f-7b7b-4dc4-b018-115b7885fe3b",
 	"label": "Oxford Music and Art Online",
 	"creator": "Michael Berkowitz",
-	"target": "http://[^/]*www.oxford(music|art)online.com[^/]*/",
+	"target": "^https?://([^/]+\\.)?www\\.oxford(music|art)online\\.com/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
@@ -55,12 +55,11 @@ function scrape(ids, host){
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			translator.setString(text);
 			translator.setHandler("itemDone", function(obj, item) {
-				var authors = new Array();
-				for (var j in item.creators) {
-				if (!item.creators[j].firstName){
-					names = item.creators[j].lastName.match(/(.*)\s([^\s]+)$/);
-					item.creators[j] = {firstName:names[1], lastName:names[2], creatorType:"author"};
-				} 
+				for (var j=0; j<item.creators.length; j++) {
+					if (!item.creators[j].firstName){
+						names = item.creators[j].lastName.match(/(.*)\s([^\s]+)$/);
+						item.creators[j] = {firstName:names[1], lastName:names[2], creatorType:"author"};
+					} 
 				}
 				item.complete();
 			});

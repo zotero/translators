@@ -172,7 +172,7 @@ function scrape(doc, url) {
 				var author = authors[i];
 				var words = author.split(" ");
 				
-				for (var j in words) {
+				for (var j=0; j<words.length; j++) {
 					if (words[j] != "") {
 						words[j] = words[j][0].toUpperCase() + words[j].substr(1).toLowerCase();
 					}

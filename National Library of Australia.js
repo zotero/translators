@@ -2,7 +2,7 @@
 	"translatorID": "fc410e64-0252-4cd3-acb1-25e584775fa2",
 	"label": "National Library of Australia",
 	"creator": "Michael Berkowitz",
-	"target": "http://librariesaustralia.nla.gov.au/",
+	"target": "^https?://librariesaustralia\\.nla\\.gov\\.au/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,

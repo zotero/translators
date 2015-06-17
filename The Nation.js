@@ -2,7 +2,7 @@
 	"translatorID": "0d6f8450-72e8-4d8f-bdc2-b7fa03e6f2c5",
 	"label": "The Nation",
 	"creator": "odie5533",
-	"target": "^https?://www\\.thenation\\.com",
+	"target": "^https?://www\\.thenation\\.com/",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,

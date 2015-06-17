@@ -2,7 +2,7 @@
 	"translatorID": "180a62bf-efdd-4d38-8d85-8971af04dd85",
 	"label": "TV by the Numbers",
 	"creator": "odie5533",
-	"target": "^https?://tvbythenumbers\\.com",
+	"target": "^https?://tvbythenumbers\\.com/",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,

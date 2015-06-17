@@ -2,7 +2,7 @@
 	"translatorID": "fe39e97d-7397-4f3f-a5f3-396a1a79213c",
 	"label": "OpenJudis - Indian Supreme Court cases",
 	"creator": "Prashant Iyengar and Michael Berkowitz",
-	"target": "^https?://(www.)?openarchive\\.in/(judis|newcases)",
+	"target": "^https?://(www\\.)?openarchive\\.in/(judis|newcases)",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,

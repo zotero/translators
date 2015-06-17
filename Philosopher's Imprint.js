@@ -2,7 +2,7 @@
 	"translatorID": "b0abb562-218c-4bf6-af66-c320fdb8ddd3",
 	"label": "Philosopher's Imprint",
 	"creator": "Michael Berkowitz",
-	"target": "http://quod.lib.umich.edu/p/phimp",
+	"target": "^https?://quod\\.lib\\.umich\\.edu/p/phimp",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
