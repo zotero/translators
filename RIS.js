@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-03-11 23:06:20"
+	"lastUpdated": "2015-06-19 19:24:24"
 }
 
 function detectImport() {
@@ -1889,6 +1889,8 @@ function doExport() {
 							addTag(tag, m[1]);
 							tag = "EP";
 							value = m[2];
+						} else {
+							value = item.pages;
 						}
 					}
 				break;
