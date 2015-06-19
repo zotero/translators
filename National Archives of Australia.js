@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-04-03 17:48:28"
+	"lastUpdated": "2015-06-08 22:01:00"
 }
 
 /*
@@ -34,7 +34,7 @@ function detectWeb(doc, url) {
 	//RecordSearch - items and series - or Photosearch results
 	if (url.match(/SeriesListing\.asp/i) || url.match(/ItemsListing\.asp/i) || url.match(/PhotoSearchSearchResults\.asp/i)) {
 			return "multiple";
-	} else if (url.match(/SeriesDetail\.asp/i) || url.match(/ItemDetail\.asp/i) || url.match(/PhotoSearchItemDetail\.asp/i) || url.match(/imagine\.asp/i)) {
+	} else if (url.match(/SeriesDetail\.asp/i) || url.match(/ItemDetail\.asp/i) || url.match(/PhotoSearchItemDetail\.asp/i) || url.match(/ViewImage\.aspx/i)) {
 			return "manuscript";
 	}
 }
@@ -50,49 +50,31 @@ function doWeb(doc, url) {
 			var item = new Zotero.Item("manuscript");
 			item.archive = "National Archives of Australia";
 			var tags = new Array();
-			if (record.match(/Imagine\.asp/i)) {
-				var postString, barcode, page, numPages;
+			if (record.match(/ViewImage\.aspx/i)) {
 				item.libraryCatalog = "RecordSearch";
-				if (doc.body.innerHTML.match(/Digital copy of NAA:/)) {
-					doc.evaluate('//img[@id="fileimage"]/@src', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent.match(/B=(\d+)&S=(\d+)&/);
-					barcode = RegExp.$1;
-					page = RegExp.$2;
-					numPages = Zotero.Utilities.trimInternal(doc.evaluate('//input[@id="printto"]/@value', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
-				// You're using the original RS interface
+				var barcode = Zotero.Utilities.trimInternal(doc.evaluate('//span[@id="lblBarcode"]', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
+				if (doc.evaluate('//span[@id="lblEndPage"]', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue != null) {
+					item.pages = Zotero.Utilities.trimInternal(doc.evaluate('//span[@id="lblStartPage"]', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
+					item.numPages = Zotero.Utilities.trimInternal(doc.evaluate('//span[@id="lblEndPage"]', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
 				} else {
-					barcode = Zotero.Utilities.trimInternal(doc.evaluate('//input[@id="Hidden1"]/@value', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
-					page = Zotero.Utilities.trimInternal(doc.evaluate('//input[@id="Text1"]/@value', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
-					numPages = Zotero.Utilities.trimInternal(doc.evaluate('//input[@id="Hidden3"]/@value', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
+					item.pages = "1";
+					item.numPages = "1";
 				}
 				// This is a digital image -- ie a folio
-				item.pages = page;
-				item.numPages = numPages;
-				item.url = 'http://recordsearch.naa.gov.au/NaaMedia/ShowImage.asp?B=' + barcode + '&S=' + page + '&T=P';
-				if (doc.referrer.match(/NameSearch/i)) {
-					var itemURL = baseURL + "/NameSearch/Interface/ItemDetail.aspx?Barcode=" + barcode;
-				} else {
-					var itemURL = baseURL + '/SearchNRetrieve/Interface/DetailsReports/ItemDetail.aspx?Barcode=' + barcode;
-				}
+				var series = Zotero.Utilities.trimInternal(doc.evaluate('//span[@id="lblSeries"]', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
+				var control = Zotero.Utilities.trimInternal(doc.evaluate('//span[@id="lblControlSymbol"]', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
+				var refNumber = series + ", " + control;
+				item.title = 'Page ' + item.pages + ' of NAA: ' + refNumber;
+				item.archiveLocation = refNumber;
+				item.url = 'http://recordsearch.naa.gov.au/SearchNRetrieve/Gallery151/dist/JGalleryViewer.aspx?B=' + barcode + '&S=' + item.pages + '&N=' + item.numPages + '#/SearchNRetrieve/NAAMedia/ShowImage.aspx?B=' + barcode + '&T=P&S=' + item.pages;
+				var imageUrl = 'http://recordsearch.naa.gov.au/SearchNRetrieve/NAAMedia/ShowImage.aspx?B=' + barcode + '&T=P&S=' + item.pages
 				item.manuscriptType = 'folio';
-				Zotero.Utilities.processDocuments(itemURL, function(itemDoc) {
-					var series = Zotero.Utilities.trimInternal(itemDoc.evaluate('//td[@class="field"][. ="Series number"]/following-sibling::td/a', itemDoc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.lastChild.textContent);
-					var control = Zotero.Utilities.trimInternal(itemDoc.evaluate('//td[@class="field"][. ="Control symbol"]/following-sibling::td', itemDoc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.lastChild.textContent);
-					var refNumber = series + ", " + control;
-					item.title = 'Page ' + page + ' of NAA: ' + refNumber;
-					item.archiveLocation = refNumber;
-					// Save a copy of the image
-					item.attachments = [{url:item.url, title:'Digital copy of NAA: ' + refNumber + ', p. ' + page, mimeType:"image/jpeg" }];
-					// MACHINE TAGS
-					// The file of which this page is a part.
-					// item.tags.push('dcterms:isPartOf="http://www.naa.gov.au/cgi-bin/Search?O=I&Number=' + barcode + '"');
-					// Citation
-					// item.tags.push('dcterms:bibliographicCitation="NAA: ' + refNumber + ', p. ' + page + '"');
-					// item.tags.push('xmlns:dcterms="http://purl.org/dc/terms/"');
-					item.complete();
-					setupCallback();
-				});
+				// Save a copy of the image
+				item.attachments = [{url:imageUrl, title:'Digital copy of NAA: ' + refNumber + ', p. ' + item.pages, mimeType:"image/jpeg" }];
+				item.complete();
+				setupCallback();
 			} else if (record.match(/PhotoSearchItemDetail\.asp/i)) {
-		item.libraryCatalog = "PhotoSearch";
+				item.libraryCatalog = "PhotoSearch";
 				Zotero.Utilities.processDocuments(record, function (doc) {
 					item.title = Zotero.Utilities.trimInternal(doc.evaluate('//b[. ="Title :"]/following-sibling::text()[1]', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
 					item.manuscriptType = "photograph";
@@ -128,10 +110,10 @@ function doWeb(doc, url) {
 					// item.tags.push('xmlns:dcterms="http://purl.org/dc/terms/"');
 					// item.tags.push('xmlns:owl="http://www.w3.org/2002/07/owl#"');
 					// Attach copy of photo as attachment
-					var imgURL = "http://recordsearch.naa.gov.au/NaaMedia/ShowImage.asp?B=" + barcode + "&S=1&T=P";
-					item.attachments = [{url:imgURL, title:"Digital image of NAA: "+ item.archiveLocation, mimeType:"image/jpeg" }];
+					var imageUrl = 'http://recordsearch.naa.gov.au/SearchNRetrieve/NAAMedia/ShowImage.aspx?B=' + barcode + '&T=P'
+					item.attachments = [{url:imageUrl, title:"Digital image of NAA: "+ item.archiveLocation, mimeType:"image/jpeg" }];
 					item.complete();
-			setupCallback();
+					setupCallback();
 				});
 			} else if (record.match(/SeriesDetail\.asp/i)) {
 				item.libraryCatalog = "RecordSearch";
@@ -237,10 +219,15 @@ function doWeb(doc, url) {
 					// Is there a digital copy? - if so find the number of pages in the digitised file
 					if (doc.evaluate('//a[. ="View digital copy "]', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue != null) {
 						item.extra += "Digitised\n";
-						itemURL = baseURL + "/scripts/Imagine.asp?B=" + barcode + "&z=ignore";
+						itemURL = baseURL + "/SearchNRetrieve/Interface/ViewImage.aspx?B=" + barcode;
 						// Retrieve the digitised file
 						Zotero.Utilities.processDocuments(itemURL, function (itemDoc) {
-							item.numPages = Zotero.Utilities.trimInternal(itemDoc.evaluate('//input[@id="Hidden3"]/@value', itemDoc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
+							if (itemDoc.evaluate('//span[@id="lblEndPage"]', itemDoc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue != null) {
+								item.numPages = Zotero.Utilities.trimInternal(itemDoc.evaluate('//span[@id="lblEndPage"]', itemDoc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
+							} else {
+								item.numPages = "1";
+							}
+							console.log(item.numPages);
 							item.complete();
 							setupCallback();
 						});
