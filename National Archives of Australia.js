@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-06-20 00:29:32"
+	"lastUpdated": "2015-06-25 06:51:40"
 }
 
 /*
@@ -180,10 +180,7 @@ function scrapeItem(doc, url) {
 	item.archiveLocation = meta.citation.replace(/^NAA\s*:\s*/i, '');
 	
 	var barcode = encodeURIComponent(meta['item barcode']);
-	/* Seems to expire *
-	item.url = getHost(url) + '/SearchNRetrieve/Interface/DetailsReports/ItemDetail.aspx?'
-		+ 'Barcode=' + barcode;
-	*/
+	item.url = 'http://www.naa.gov.au/cgi-bin/Search?O=I&Number=' + barcode;
 	
 	if (meta['item notes']) {
 		item.notes.push(meta['item notes']);
@@ -210,6 +207,14 @@ function scrapeSeries(doc, url) {
 	item.date = meta['contents dates'];
 	item.medium = meta['predominant physical format'];
 	item.abstractNote = meta['series note'];
+	
+	var seriesNumber = encodeURIComponent(meta['series number']);
+	item.attachments.push({
+		title: "National Archives of Australia Record",
+		url: 'http://www.naa.gov.au/cgi-bin/Search?O=S&Number=' + seriesNumber,
+		mimeType: 'text/html',
+		snapshot: false
+	})
 	
 	// Agencies recording into this series
 	var agencies = ZU.xpath(doc, '//div[@id="provenanceRecording"]//div[@class="linkagesInfo"]');
@@ -350,7 +355,8 @@ function scrapePhoto(doc, url) {
 	item.date = meta.date;
 	item.place = meta.location;
 	
-	item.url = getHost(url) + "/scripts/PhotoSearchItemDetail.asp?B=" + encodeURIComponent(meta.barcode);
+	item.url = 'http://www.naa.gov.au/cgi-bin/Search?O=PSI&Number=' // Magic. Not sure where this is pulled from, but it's stable
+		+ encodeURIComponent(meta.barcode);
 	
 	item.archiveLocation = meta['image no.'];
 	
@@ -373,11 +379,12 @@ function scrapePhoto(doc, url) {
 	}
 	
 	return item;
-}/** BEGIN TEST CASES **/
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://recordsearch.naa.gov.au/scripts/PhotoSearchItemDetail.asp?B=1646857",
+		"url": "http://www.naa.gov.au/cgi-bin/Search?O=PSI&Number=1646857",
 		"items": [
 			{
 				"itemType": "manuscript",
@@ -389,7 +396,7 @@ var testCases = [
 				"libraryCatalog": "National Archives of Australia",
 				"manuscriptType": "photograph",
 				"place": "Sydney",
-				"url": "http://recordsearch.naa.gov.au/scripts/PhotoSearchItemDetail.asp?B=1646857",
+				"url": "http://www.naa.gov.au/cgi-bin/Search?O=PSI&Number=1646857",
 				"attachments": [
 					{
 						"title": "Digital image of NAA: C4078, N1005B",
@@ -432,19 +439,20 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://recordsearch.naa.gov.au/SearchNRetrieve/Interface/DetailsReports/ItemDetail.aspx?Barcode=8606210&isAv=N",
+		"url": "http://www.naa.gov.au/cgi-bin/Search?O=I&Number=8606210",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "manuscript",
-				"title": "Prisoner of War/Internee: Wong, Nang Lok; Date of birth - 14 Janaury 1926; Nationality - Chinese",
+				"title": "Prisoner of War/Internee: Wong, Koy; Date of birth - June 1919; Nationality - Chinese",
 				"creators": [],
 				"date": "1944 - 1944",
 				"archive": "National Archives of Australia",
-				"archiveLocation": "MP1103/1, PWJAUSA100074",
+				"archiveLocation": "MP1103/1, PWJAUSA100061",
 				"libraryCatalog": "National Archives of Australia",
 				"place": "Melbourne",
 				"shortTitle": "Prisoner of War/Internee",
-				"url": "http://recordsearch.naa.gov.au/SearchNRetrieve/Interface/DetailsReports/ItemDetail.aspx?Barcode=8606223",
+				"url": "http://www.naa.gov.au/cgi-bin/Search?O=I&Number=8606210",
 				"attachments": [
 					{
 						"title": "Digital copy at National Archives of Australia",
@@ -460,7 +468,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://recordsearch.naa.gov.au/SearchNRetrieve/Interface/DetailsReports/ItemDetail.aspx?Barcode=1339624&isAv=N",
+		"url": "http://www.naa.gov.au/cgi-bin/Search?O=I&Number=1339624",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "manuscript",
@@ -471,8 +480,40 @@ var testCases = [
 				"archiveLocation": "A4940, C1007",
 				"libraryCatalog": "National Archives of Australia",
 				"place": "Canberra",
-				"url": "http://recordsearch.naa.gov.au/SearchNRetrieve/Interface/DetailsReports/ItemDetail.aspx?Barcode=1339624",
+				"url": "http://www.naa.gov.au/cgi-bin/Search?O=I&Number=1339624",
 				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.naa.gov.au/cgi-bin/Search?O=S&Number=A10950",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "manuscript",
+				"title": "'A Report on war crimes by individual members of the armed forces of the enemy against Australians by Sir William Webb Kt' [Second Webb Report]",
+				"creators": [
+					{
+						"lastName": "CA 284, Australian War Crimes Commission [I]",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "14 Aug 1944 - 31 Oct 1944",
+				"abstractNote": "This series consists of one volume bound in black with the title 'A report on war crimes by individual members of the armed forces of the enemy against Australians by Sir William Webb Kt' embossed on the front cover in gold.\n\nBackground\n\nThe United Nations War Crimes Commission had two stated objectives (1) to hear evidence of war crimes brought to it by member governments and to list the perpetrator for arrest and (2) to make recommendations to member governments on how war criminals could be brought to trial. It held its first meeting on 20 October 1943 and in reporting to Dr Evatt the Secretary of the Department of External Affairs recommended that a Commission be given to Sir William Webb to investigate war crimes against Australians and to bring to the government such cases as could be forwarded to the UNWCC. \n\nOn 9 February Dr Evatt approached Sir William with an invitation and this was accepted on 24 February. The new commission was issued on 8 June 1944 with prime responsibility for administrative matters held by the Department of External Affairs though the report was to be submitted also to the Attorney Generals Department.\n\nThe hearings commenced on 14 August and concluded on 20 October 1944. The report was tendered to the Minister on 31 October 1944.",
+				"archive": "National Archives of Australia",
+				"libraryCatalog": "National Archives of Australia",
+				"attachments": [
+					{
+						"title": "National Archives of Australia Record",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
