@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2015-06-14 23:43:23"
+	"lastUpdated": "2015-06-24 23:43:23"
 }
 
 function detectWeb(doc, url) {
@@ -23,7 +23,7 @@ function detectWeb(doc, url) {
 	//single result
 	// generate item and return type
 	var co = getFirstContextObj(doc);
-	if (!co) return false;
+	if (!co | url.indexOf("?databaseList") == -1) return false;
 
 	return generateItem(doc, co).itemType;
 }
