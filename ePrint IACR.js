@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-03-25 09:43:59"
+	"lastUpdated": "2015-06-27 02:17:58"
 }
 
 function detectWeb(doc, url) {
@@ -55,7 +55,8 @@ function scrape(doc, url) {
 	
 	newItem.date = year;
 	newItem.reportNumber = no;
-	newItem.url = "http://eprint.iacr.org/"+year+"/"+no;
+	//we want to use this later & make sure we don't make http--> https requests or vice versa. 
+	newItem.url = url.match(/^https?:\/\/[^\/]+/)[0] + "/" + year + "/" + no;
 	newItem.title = title;
 	newItem.abstractNote = abstr;
 	for (var i in authors) {
@@ -111,6 +112,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "report",
+				"title": "An Attack on CFB Mode Encryption As Used By OpenPGP",
 				"creators": [
 					{
 						"firstName": "Serge",
@@ -123,13 +125,12 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"cryptographic protocols",
-					"applications",
-					"cryptanalysis"
-				],
-				"seeAlso": [],
+				"date": "2005",
+				"abstractNote": "This paper describes an adaptive-chosen-ciphertext attack on the Cipher Feedback (CFB) mode of encryption as used in OpenPGP.  In most circumstances it will allow an attacker to determine 16 bits of any block of plaintext with about $2^{15}$ oracle queries for the initial \nsetup work and $2^{15}$ oracle queries for each block.  Standard CFB mode encryption does not appear to be affected by this attack.  It applies to a particular variation of CFB used by OpenPGP.  In particular it exploits an ad-hoc integrity check feature in OpenPGP which was meant as a \"quick check\" to determine the correctness of the decrypting symmetric key.",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "ePrint IACR",
+				"reportNumber": "033",
+				"url": "http://eprint.iacr.org/2005/033",
 				"attachments": [
 					{
 						"url": "http://eprint.iacr.org/2005/033",
@@ -142,13 +143,13 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"date": "2005",
-				"reportNumber": "033",
-				"url": "http://eprint.iacr.org/2005/033",
-				"title": "An Attack on CFB Mode Encryption As Used By OpenPGP",
-				"abstractNote": "This paper describes an adaptive-chosen-ciphertext attack on the Cipher Feedback (CFB) mode of encryption as used in OpenPGP.  In most circumstances it will allow an attacker to determine 16 bits of any block of plaintext with about $2^{15}$ oracle queries for the initial \nsetup work and $2^{15}$ oracle queries for each block.  Standard CFB mode encryption does not appear to be affected by this attack.  It applies to a particular variation of CFB used by OpenPGP.  In particular it exploits an ad-hoc integrity check feature in OpenPGP which was meant as a \"quick check\" to determine the correctness of the decrypting symmetric key.",
-				"libraryCatalog": "ePrint IACR",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [
+					"applications",
+					"cryptanalysis",
+					"cryptographic protocols"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
