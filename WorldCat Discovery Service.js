@@ -9,8 +9,30 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2015-06-24 23:43:23"
+	"lastUpdated": "2015-06-27 03:23:48"
 }
+
+/*
+	***** BEGIN LICENSE BLOCK *****
+	
+	WorldCat Discovery Service translator; Copyright © 2015 Sebastian Karcher 
+	This file is part of Zotero.
+	
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+	
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+	
+	***** END LICENSE BLOCK *****
+*/
 
 function detectWeb(doc, url) {
 
@@ -122,7 +144,7 @@ function scrape(risURL) {
 				.replace(/^A1\s+-\s+/mg, 'A3  - ');
 		})
 
-		Zotero.debug("Importing corrected RIS: \n" + text);
+		//Zotero.debug("Importing corrected RIS: \n" + text);
 
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -191,7 +213,7 @@ function doWeb(doc, url) {
 		var items = {};
 		var articles = [];
 		for (var i = 0, n = results.length; i < n; i++) {
-			var title = ZU.xpathText(results[i], './/div[@class="title"]');
+			var title = ZU.xpathText(results[i], './/div[contains(@class, "title") and a[@class="record-title"]]');
 			//Z.debug(title)
 			if (!title) continue;
 			var oclcID = ZU.xpathText(results[i], './@data-oclcnum');
@@ -222,61 +244,74 @@ function doWeb(doc, url) {
 	}
 }
 /** BEGIN TEST CASES **/
-var testCases = [{
+var testCases = [
+	{
 		"type": "web",
 		"url": "https://sbts.on.worldcat.org/oclc/795005226?databaseList=239,283,638",
-		"items": [{
-			"itemType": "journalArticle",
-			"title": "Steven E. Runge. Discourse Grammar of the Greek New Testament",
-			"creators": [{
-				"lastName": "Long",
-				"firstName": "C.",
-				"creatorType": "author"
-			}],
-			"date": "2012",
-			"ISSN": "0360-3032",
-			"issue": "1",
-			"libraryCatalog": "WorldCat Discovery Service",
-			"pages": "129-132",
-			"publicationTitle": "Trinity journal",
-			"volume": "33",
-			"attachments": [],
-			"tags": [],
-			"notes": [],
-			"seeAlso": []
-		}]
-	}, {
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Steven E. Runge. Discourse Grammar of the Greek New Testament",
+				"creators": [
+					{
+						"lastName": "Long",
+						"firstName": "C.",
+						"creatorType": "author"
+					}
+				],
+				"date": "2012",
+				"ISSN": "0360-3032",
+				"issue": "1",
+				"libraryCatalog": "WorldCat Discovery Service",
+				"pages": "129-132",
+				"publicationTitle": "Trinity journal",
+				"volume": "33",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
 		"type": "web",
 		"url": "http://lpts.on.worldcat.org/search?queryString=au:Mary%20GrandPre%CC%81&databaseList=638",
 		"items": "multiple"
-	}, {
+	},
+	{
 		"type": "web",
 		"url": "http://sbts.on.worldcat.org/search?databaseList=&queryString=runge+discourse+grammar",
 		"items": "multiple"
-	}, {
+	},
+	{
 		"type": "web",
 		"url": "https://sbts.on.worldcat.org/oclc/667874424?databaseList=239,283,638",
-		"items": [{
-			"itemType": "book",
-			"title": "Discourse grammar of the Greek New Testament: a practical introduction for teaching and exegesis",
-			"creators": [{
-				"lastName": "Runge",
-				"firstName": "Steven E.",
-				"creatorType": "author"
-			}],
-			"date": "2010",
-			"ISBN": "9781598565836\n1598565834",
-			"language": "English",
-			"libraryCatalog": "WorldCat Discovery Service",
-			"numPages": "xx, 404",
-			"place": "Peabody, Mass.",
-			"publisher": "Hendrickson Publishers Marketing",
-			"series": "Lexham Bible reference series; Lexham Bible reference series.",
-			"shortTitle": "Discourse grammar of the Greek New Testament",
-			"attachments": [],
-			"tags": [],
-			"notes": [],
-			"seeAlso": []
-		}]
-	}]
-	/** END TEST CASES **/
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Discourse grammar of the Greek New Testament: a practical introduction for teaching and exegesis",
+				"creators": [
+					{
+						"lastName": "Runge",
+						"firstName": "Steven E.",
+						"creatorType": "author"
+					}
+				],
+				"date": "2010",
+				"ISBN": "9781598565836\n1598565834",
+				"language": "English",
+				"libraryCatalog": "WorldCat Discovery Service",
+				"numPages": "xx, 404",
+				"place": "Peabody, Mass.",
+				"publisher": "Hendrickson Publishers Marketing",
+				"series": "Lexham Bible reference series; Lexham Bible reference series.",
+				"shortTitle": "Discourse grammar of the Greek New Testament",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
