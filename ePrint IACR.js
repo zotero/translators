@@ -55,7 +55,7 @@ function scrape(doc, url) {
 	
 	newItem.date = year;
 	newItem.reportNumber = no;
-	newItem.url = "http://eprint.iacr.org/"+year+"/"+no;
+	newItem.url = "https://eprint.iacr.org/"+year+"/"+no;
 	newItem.title = title;
 	newItem.abstractNote = abstr;
 	for (var i in authors) {
