@@ -19,7 +19,7 @@
 		"Full TEI Document": false,
 		"Export Collections": false
 	},
-	"lastUpdated": "2015-06-21 23:45:13"
+	"lastUpdated": "2015-06-27 15:00:00"
 }
 
 // ********************************************************************
@@ -105,9 +105,9 @@ var ns = {"tei": "http://www.tei-c.org/ns/1.0",
 
 
 
-var exportedXMLIds = [];
-var generatedItems = [];
-var allItems = [];
+var exportedXMLIds = {};
+var generatedItems = {};
+var allItems = {};
 
 
 function genXMLId (item){
@@ -563,7 +563,7 @@ function doExport() {
     }
     else {
         var listBibl = teiDoc.createElementNS(ns.tei, "listBibl");
-        for (var i=0; i<allItems.length; i++) {
+        for (var i in allItems) {
             var item = allItems[i];
             //skip attachments
             if(item.itemType == "attachment"){
