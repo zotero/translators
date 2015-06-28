@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2015-06-27 19:45:13"
+	"lastUpdated": "2015-06-28 16:42:37"
 }
 
 /*
@@ -159,24 +159,26 @@ function processCollection(node, collection) {
 	
 	// check for children
 	var children = getFirstResults(node, [n.dcterms+"hasPart"]);
-	for (var i=0; i<children.length; i++) {
-		var child = children[i];
-		var type = Zotero.RDF.getTargets(child, rdf+"type");
-		if(type) {
-			type = Zotero.RDF.getResourceURI(type[0]);
-		}
-		
-		if(type == n.bib+"Collection" || type == n.z+"Collection") {
-			// for collections, process recursively
-			collection.children.push(processCollection(child));
-		} else {
-			if(isPart(child)) {
-				Zotero.debug("Not adding child item <" + Zotero.RDF.getResourceURI(child) + "> to collection", 2);
-				continue;
+	if (children) {
+		for (var i=0; i<children.length; i++) {
+			var child = children[i];
+			var type = Zotero.RDF.getTargets(child, rdf+"type");
+			if(type) {
+				type = Zotero.RDF.getResourceURI(type[0]);
 			}
 			
-			// all other items are added by ID
-			collection.children.push({id:Zotero.RDF.getResourceURI(child), type:"item"});
+			if(type == n.bib+"Collection" || type == n.z+"Collection") {
+				// for collections, process recursively
+				collection.children.push(processCollection(child));
+			} else {
+				if(isPart(child)) {
+					Zotero.debug("Not adding child item <" + Zotero.RDF.getResourceURI(child) + "> to collection", 2);
+					continue;
+				}
+				
+				// all other items are added by ID
+				collection.children.push({id:Zotero.RDF.getResourceURI(child), type:"item"});
+			}
 		}
 	}
 	return collection;
@@ -1050,18 +1052,20 @@ function importItem(newItem, node) {
 	
 	var subjects = getFirstResults(node, [n.dc+"subject", n.dc1_0+"subject", n.dcterms+"subject", n.article+"tag",
 		n.prism2_0+"keyword", n.prism2_1+"keyword", n.prism2_0+"object", n.prism2_1+"object", n.prism2_0+"organization", n.prism2_1+"organization", n.prism2_0+"person", n.prism2_1+"person"]);
-	for (var i=0; i<subjects.length; i++) {
-		var subject = subjects[i];
-		if(typeof(subject) == "string") {	// a regular tag
-			newItem.tags.push(subject);
-		} else {							// a call number or automatic tag
-			var type = Zotero.RDF.getTargets(subject, rdf+"type");
-			if(type) {
-				type = Zotero.RDF.getResourceURI(type[0]);
-				if(callNumberTypes.indexOf(type) !== -1) {
-					newItem.callNumber = getFirstResults(subject, [rdf+"value"], true);
-				} else if(type == n.z+"AutomaticTag") {
-					newItem.tags.push({tag:getFirstResults(subject, [rdf+"value"], true), type:1});
+	if (subjects) {
+		for (var i=0; i<subjects.length; i++) {
+			var subject = subjects[i];
+			if(typeof(subject) == "string") {	// a regular tag
+				newItem.tags.push(subject);
+			} else {							// a call number or automatic tag
+				var type = Zotero.RDF.getTargets(subject, rdf+"type");
+				if(type) {
+					type = Zotero.RDF.getResourceURI(type[0]);
+					if(callNumberTypes.indexOf(type) !== -1) {
+						newItem.callNumber = getFirstResults(subject, [rdf+"value"], true);
+					} else if(type == n.z+"AutomaticTag") {
+						newItem.tags.push({tag:getFirstResults(subject, [rdf+"value"], true), type:1});
+					}
 				}
 			}
 		}
@@ -1069,13 +1073,15 @@ function importItem(newItem, node) {
 	
 	/** ATTACHMENTS **/
 	var relations = getFirstResults(node, [n.link+"link"]);
-	for (var i=0; i<relations.length; i++) {
-		var relation = relations[i];		
-		var type = Zotero.RDF.getTargets(relation, rdf+"type");
-		if(Zotero.RDF.getResourceURI(type[0]) == n.z+"Attachment") {
-			var attachment = new Zotero.Item();
-			newItem.attachments.push(attachment);
-			importItem(attachment, relation, n.z+"Attachment");
+	if (relations) {
+		for (var i=0; i<relations.length; i++) {
+			var relation = relations[i];		
+			var type = Zotero.RDF.getTargets(relation, rdf+"type");
+			if(Zotero.RDF.getResourceURI(type[0]) == n.z+"Attachment") {
+				var attachment = new Zotero.Item();
+				newItem.attachments.push(attachment);
+				importItem(attachment, relation, n.z+"Attachment");
+			}
 		}
 	}
 	
