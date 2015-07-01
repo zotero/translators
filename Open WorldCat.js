@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2015-06-07 17:46:05"
+	"lastUpdated": "2015-07-01 16:19:31"
 }
 
 /**
@@ -69,18 +69,18 @@ function getFirstContextObj(doc) {
 function detectWeb(doc, url) {
 	//distinguish from Worldcat Discovery
 	if (doc.body.id == "worldcat"){
-	    var results = getSearchResults(doc);
+		var results = getSearchResults(doc);
 
-	    //single result
-	    if(results.length) {
-		return "multiple";
-	    }
+		//single result
+		if(results.length) {
+			return "multiple";
+		}
 
-	    var co = getFirstContextObj(doc);
-	    if(!co) return false;
+		var co = getFirstContextObj(doc);
+		if(!co) return false;
 
-	    // generate item and return type
-	    return generateItem(doc, co).itemType;
+		// generate item and return type
+		return generateItem(doc, co).itemType;
 	}
 }
 
@@ -104,9 +104,17 @@ function scrape(ids, data) {
 	
 	if (!oclcID) return;
 	
-	var risURL = baseURL + "/oclc/" + oclcID + "?page=endnotealt&client=worldcat.org-detailed_record";
-	ZU.doGet(risURL, function (text) {
-		//Z.debug(text);
+	var risURL = baseURL + "/oclc/" + oclcID
+		+ "?client=worldcat.org-detailed_record&page=endnote";
+	var tryAgain = true;
+	ZU.doGet(risURL + 'alt' /* non-latin RIS first **/, function parseRIS(text) {
+		// Sometimes non-latin RIS is blank
+		if (tryAgain && !/^TY\s\s?-/m.test(text)) {
+			Z.debug("WorldCat did not return valid RIS. Trying Latin RIS.");
+			tryAgain = false;
+			ZU.doGet(risURL, parseRIS);
+			return;
+		}
 		
 		//2013-05-28 RIS export currently has messed up authors
 		// e.g. A1  - Gabbay, Dov M., Woods, John Hayden., Hartmann, Stephan, 
@@ -325,6 +333,7 @@ function fetchIDs(isbns, ids, callback) {
 	);
 }
 
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -378,7 +387,7 @@ var testCases = [
 					}
 				],
 				"date": "1996",
-				"ISBN": "0585030154  9780585030159",
+				"ISBN": "9780585030159",
 				"language": "English",
 				"libraryCatalog": "Open WorldCat",
 				"place": "Cambridge, Mass.",
@@ -406,7 +415,7 @@ var testCases = [
 					}
 				],
 				"date": "2006",
-				"ISBN": "0521770599 0521779243 9780521770590 9780521779241",
+				"ISBN": "9780521770590 9780521779241",
 				"abstractNote": "\"Adam Smith is best known as the founder of scientific economics and as an early proponent of the modern market economy. Political economy, however, was only one part of Smith's comprehensive intellectual system. Consisting of a theory of mind and its functions in language, arts, science, and social intercourse, Smith's system was a towering contribution to the Scottish Enlightenment. His ideas on social intercourse, in fact, also served as the basis for a moral theory that provided both historical and theoretical accounts of law, politics, and economics. This companion volume provides an up-to-date examination of all aspects of Smith's thought. Collectively, the essays take into account Smith's multiple contexts - Scottish, British, European, Atlantic, biographical, institutional, political, philosophical - and they draw on all his works, including student notes from his lectures. Pluralistic in approach, the volume provides a contextualist history of Smith, as well as direct philosophical engagement with his ideas.\"--Jacket.",
 				"language": "English",
 				"libraryCatalog": "Open WorldCat",
@@ -444,7 +453,7 @@ var testCases = [
 					}
 				],
 				"date": "2011",
-				"ISBN": "9067183849 9789067183840",
+				"ISBN": "9789067183840",
 				"language": "English",
 				"libraryCatalog": "Open WorldCat",
 				"place": "Leiden",
@@ -508,7 +517,7 @@ var testCases = [
 					}
 				],
 				"date": "2000",
-				"ISBN": "1881563022  9781881563020",
+				"ISBN": "9781881563020",
 				"language": "English",
 				"libraryCatalog": "Open WorldCat",
 				"place": "Collinsville, Ill.",
@@ -593,7 +602,42 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.worldcat.org/title/navigating-the-trilemma-capital-flows-and-monetary-policy-in-china/oclc/4933578953&referer=brief_results",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Navigating the trilemma: Capital flows and monetary policy in China",
+				"creators": [
+					{
+						"lastName": "Glick",
+						"firstName": "Reuven",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Hutchison",
+						"firstName": "Michael",
+						"creatorType": "author"
+					}
+				],
+				"date": "2009",
+				"ISSN": "1049-0078",
+				"abstractNote": "In recent years China has faced an increasing trilemmahow to pursue an independent domestic monetary policy and limit exchange rate flexibility, while at the same time facing large and growing international capital flows. This paper analyzes the impact of the trilemma on China's monetary policy as the country liberalizes its good and financial markets and integrates with the world economy. It shows how China has sought to insulate its reserve money from the effects of balance of payments inflows by sterilizing through the issuance of central bank liabilities. However, we report empirical results indicating that sterilization dropped precipitously in 2006 in the face of the ongoing massive buildup of international reserves, leading to a surge in reserve money growth. We also estimate a vector error correction model linking the surge in China's reserve money to broad money, real GDP, and the price level. We use this model to explore the inflationary implications of different policy scenarios. Under a scenario of continued rapid reserve money growth (consistent with limited sterilization of foreign exchange reserve accumulation) and strong economic growth, the model predicts a rapid increase in inflation. A model simulation using an extension of the framework that incorporates recent increases in bank reserve requirements also implies a rapid rise in inflation. By contrast, model simulations incorporating a sharp slowdown in economic growth such as that seen in late 2008 and 2009 lead to less inflation pressure even with a substantial buildup in international reserves.",
+				"issue": "3",
+				"language": "English",
+				"libraryCatalog": "Open WorldCat",
+				"pages": "205-224",
+				"publicationTitle": "ASIECO Journal of Asian Economics",
+				"shortTitle": "Navigating the trilemma",
+				"volume": "20",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
-
