@@ -1,3 +1,4 @@
+
 {
     "translatorID": "5278b20c-7c2c-4599-a785-12198ea648bf",
     "label": "ARTstor",
@@ -13,30 +14,27 @@
 }
 
 /*
-	This translator works for Artstor library site (http://library.artstor.org) and
-	Artstor Shared Shelf Commons (http://www.sscommons.org)
-
-
-	***** BEGIN LICENSE BLOCK *****
-	
-	Artstor Translator, Copyright © 2015 John Justin, Charles Zeng
-	
-	Zotero is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Affero General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-	
-	Zotero is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU Affero General Public License for more details.
-	
-	You should have received a copy of the GNU Affero General Public License
-	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
-	
-	***** END LICENSE BLOCK *****
+    This translator works for Artstor library sites (http://library.artstor.org) and
+    Artstor Shared Shelf Commons (http://www.sscommons.org)
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Artstor Translator, Copyright © 2015 John Justin, Charles Zeng
+    
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+    
+    ***** END LICENSE BLOCK *****
 */
-
 
 /**
     detectWeb is run to determine whether item metadata can indeed be retrieved from the webpage. 
@@ -44,12 +42,6 @@
     see the overview of Zotero item types), or, if multiple items are found, “multiple”. 
 **/
 function detectWeb(doc, url) {
-    Zotero.debug("detectWeb:" + url);
-    var sUrl = url.substring(0, url.indexOf('#'));
-    Zotero.debug("sUrl:" + sUrl);
-    sUrl = sUrl.substring(0, url.lastIndexOf('/') + 1);
-    Zotero.debug("sUrl:" + sUrl);
-
     if (url.match(/iv2/)) {
         // Image viewer window
         return "artwork";
@@ -57,27 +49,21 @@ function detectWeb(doc, url) {
         // Thumbnail window page
         if ((doc.getElementsByClassName('MetaDataWidgetRoot') != null) && (doc.getElementsByClassName('MetaDataWidgetRoot').length > 0)) {
             // There are multiple metadata windows visible
-            Zotero.debug("#3: metadata window present");
             return "artwork";
         } else if ((doc.getElementById("floatingPlaceHolder") != null) && (doc.getElementById("floatingPlaceHolder").style.display == "block")) {
             // Don't capture date if small window is present
-            Zotero.debug("#3: small window present");
             return false;
         } else if ((doc.getElementById("thumbNavSave1") != null) && (doc.getElementById("thumbNavSave1").style.display == "block")) {
             // Don't capture data if image group window is in editing state.
-            Zotero.debug("Save on");
             return false;
         } else if ((doc.getElementById("ssContentWrap") != null) && (doc.getElementById("ssContentWrap").style.display == "inline")) {
             // Don't capture data if slide show window is present
-            Zotero.debug("slide sorter is on");
             return false;
         } else {
-            if (url.match('zMode')) {
-                Zotero.debug("zMode is on");
+            if (url.match(/zMode/)) {
                 return "artwork";
             }
         }
-        Zotero.debug("thumbnail page");
         // Allow thumbnail window.
         return "multiple";
     }
@@ -120,9 +106,7 @@ function detectWeb(doc, url) {
     available, allowing for a simple detectWeb function, e.g. (example from Cell Press.js): 
 **/
 function doWeb(doc, url) {
-    Zotero.debug("doWeb:" + url);
     if (url.match(/iv2/)) {
-        Zotero.debug("image viewer present");
         doImageViewer(doc, url);
     }
     if (url.match(/#3/)) {
@@ -133,20 +117,16 @@ function doWeb(doc, url) {
             var skipThumbnail = false;
             if ((doc.getElementById("floatingPlaceHolder") != null) && (doc.getElementById("floatingPlaceHolder").style.display == "block")) {
                 // Don't capture date if small window is present
-                Zotero.debug("#3: small window present");
                 skipThumbnail = true;
             }
             if ((doc.getElementById("thumbNavSave1") != null) && (doc.getElementById("thumbNavSave1").style.display == "block")) {
                 // Don't capture data if image group window is in editing state.
-                Zotero.debug("slide sorter is on");
                 skipThumbnail = true;
             }
             if ((doc.getElementById("ssContentWrap") != null) && (doc.getElementById("ssContentWrap").style.display == "inline")) {
                 // Don't capture data if slide show window is present
-                Zotero.debug("slide sorter is on");
                 skipThumbnail = true;
             }
-            Zotero.debug("#3: thumbnail page");
             // Allow thumbnail window.
             if (!skipThumbnail) {
                 doThumbnails(doc, url);
@@ -159,12 +139,10 @@ function doImageViewer(doc, url) {
     // get the image id and object type from the page
     // this contains the objId and object type separate by : as in "AWSS35953_35953_25701160:11"
     var objID = doc.getElementById("objID");
-    Zotero.debug("doImageViewer objID:" + objID);
     if (objID != null) {
         var objItems = [];
         var objItem = doc.getElementById("objID").title;
         objItems.push(objItem);
-        Zotero.debug("doImageViewer:" + objItem);
         processObjects(doc, url, objItems);
     }
 }
@@ -184,27 +162,22 @@ function doMetadataWindow(doc, url) {
 function processSelectedObject(doc, url, selectedObjs, selectionType) {
     var serviceURL = getThumbnailServiceURL(doc, url);
     Zotero.Utilities.HTTP.doGet(serviceURL, function(text) {
-        //Zotero.debug("jsonText:" + text);
         // get the master object list
         var json = JSON.parse(text);
         var objDescItem;
         var masterObjList = [];
         for (var i = 0; i < json.thumbnails.length; i++) {
             var thumbnail = json.thumbnails[i];
-            //            Zotero.debug("thumbnail:" + thumbnail.objectId);
             objDescItem = new Object();
             objDescItem.id = thumbnail.objectId;
             objDescItem.type = thumbnail.objectTypeId;
             objDescItem.title = thumbnail.thumbnail1;
-            Zotero.debug("objDescItem:" + objDescItem.id);
             masterObjList.push(objDescItem);
         }
-        Zotero.debug("master object list:" + masterObjList.length);
         // Proccess the selected items by look up the data from master list.
         var zMode = false;
         if (url.match(/zMode/)) {
             zMode = true;
-            Zotero.debug("zMode:" + zMode);
         }
         switch (selectionType) {
             case 2: // selection from thumbnals
@@ -213,7 +186,6 @@ function processSelectedObject(doc, url, selectedObjs, selectionType) {
                 if (selectedObjs.length > 0) {
                     for (var j = 0; j < selectedObjs.length; j++) {
                         var idx = selectedObjs[j];
-                        Zotero.debug("idx:" + idx);
                         masterObj = masterObjList[idx];
                         var key = masterObj.id + ":" + masterObj.type;
                         candidateItems[key] = masterObj.title;
@@ -222,14 +194,12 @@ function processSelectedObject(doc, url, selectedObjs, selectionType) {
                     for (var j = 0; j < masterObjList.length; j++) {
                         masterObj = masterObjList[j];
                         var key = masterObj.id + ":" + masterObj.type;
-                        Zotero.debug("adding master object: " + key);
                         candidateItems[key] = masterObj.title;
                     }
                 }
                 if (zMode && Object.keys(candidateItems).length > 0) {
                     var objItems = [];
                     for (var objItem in candidateItems) {
-                        Zotero.debug("zMode:" + objItem);
                         objItems.push(objItem);
                         processObjects(doc, url, objItems);
                         break;
@@ -240,7 +210,6 @@ function processSelectedObject(doc, url, selectedObjs, selectionType) {
                         for (var objItem in selectItems) {
                             objItems.push(objItem);
                         }
-                        Zotero.debug("selected item:" + objItems.length);
                         processObjects(doc, url, objItems);
                     });
                 }
@@ -254,7 +223,6 @@ function processSelectedObject(doc, url, selectedObjs, selectionType) {
                 var objItems = [];
                 for (var i = 0; i < selectedObjs.length; i++) {
                     var id = selectedObjs[i];
-                    Zotero.debug("id=" + id);
                     if (masterLookup[id] == "") {
                         var item = id + ":10"; // default type as image.
                         objItems.push(item);
@@ -263,7 +231,6 @@ function processSelectedObject(doc, url, selectedObjs, selectionType) {
                         objItems.push(item);
                     }
                 }
-                Zotero.debug("doMetadataWindow  " + objItems);
                 processObjects(doc, url, objItems);
                 break;
         }
@@ -285,22 +252,17 @@ function getMasterThumbnailList(doc, url, objDescItems) {
     // var objDescItems = [];
     var serviceURL = getThumbnailServiceURL(doc, url);
     Zotero.Utilities.HTTP.doGet(serviceURL, function(text) {
-        //Zotero.debug("jsonText:" + text);
         var json = JSON.parse(text);
         var objDescItem;
         for (var i = 0; i < json.thumbnails.length; i++) {
             var thumbnail = json.thumbnails[i];
-            Zotero.debug("thumbnail:" + thumbnail.objectId);
             objDescItem = new Object();
             objDescItem.id = thumbnail.objectId;
             objDescItem.type = thumbnail.objectTypeId;
             objDescItem.title = thumbnail.thumbnail1;
-            Zotero.debug("objDescItem:" + objDescItem.objectId);
             objDescItems.push(objDescItem);
         }
-        Zotero.debug("service list:" + objDescItems.length);
     });
-    Zotero.debug("getMasterThumbnailList:" + objDescItems.length);
     return objDescItems;
 }
 
@@ -324,7 +286,6 @@ function getSelectedItems(doc, url) {
             }
         }
     }
-    Zotero.debug("getSelectedItems:" + indexes.length);
     return indexes;
 }
 
@@ -380,10 +341,8 @@ function getMetaDataItem(url, objItem, dataItem) {
 
     var itemAry = objItem.split(':');
     var serviceUrl = getServiceUrlRoot(url) + "metadata/" + itemAry[0];
-    Zotero.debug("serviceUrl: " + serviceUrl);
     Zotero.Utilities.HTTP.doGet(serviceUrl, function(text) {
         var json = JSON.parse(text);
-        Zotero.debug("metadata json=" + text);
         var portal = getPortal(url);
         if (!(portal in portalMap)) {
             portal = 'default';
@@ -396,7 +355,6 @@ function getMetaDataItem(url, objItem, dataItem) {
 }
 
 function processPortalData(dataItem, json, fieldMap, portal) {
-    Zotero.debug("processPortalData");
     var fieldName;
     var fieldValue;
     if (portal == 'archaeology') {
@@ -443,11 +401,29 @@ function processPortalData(dataItem, json, fieldMap, portal) {
 }
 
 function setItemCreator(dataItem, fieldValue) {
-    dataItem.creators.push(ZU.cleanAuthor(fieldValue.replace(/<\/?[^>]+(>|$)/g, " ").replace(/(&gt;)|(&lt;)/g, ""), "author", false));
+    fieldValue = fieldValue.replace(/<wbr\/>/g, "");
+    var names = [];
+    if (fieldValue.indexOf(';')) {
+        names = fieldValue.split(';')
+    }
+    else {
+        names.push(fieldValue);
+    }
+    for (var i = 0; i < names.length; i++) {
+        var str = names[i];
+        var contributor = "author";
+        var name = str;
+
+        if (str.indexOf(':') > 0) {
+            var params = str.split(':');
+            contributor = params[0];
+            name = params[1];
+        }
+        dataItem.creators.push(ZU.cleanAuthor(name.replace(/<\/?[^>]+(>|$)/g, " ").replace(/(&gt;)|(&lt;)/g, ""), contributor, false));
+    }
 }
 
 function setItemLabelValue(dataItem, key, label, value) {
-    Zotero.debug("setItemValue: key=" + key + ", label=" + label + " value=" + value);
     var cleanValue = value.replace(/<\/?[^>]+(>|$)/g, " ");
     cleanValue = cleanValue.replace(/\./, "");
     cleanValue = cleanValue.replace(/<wbr\/>/g, "");
@@ -467,7 +443,6 @@ function setItemLabelValue(dataItem, key, label, value) {
 }
 
 function setItemValue(dataItem, key, value, override) {
-    Zotero.debug("setItemValue: key=" + key + " value=" + value);
     var cleanValue = value.replace(/<\/?[^>]+(>|$)/g, " ");
     cleanValue = cleanValue.replace(/\./, "");
     cleanValue = cleanValue.replace(/<wbr\/>/g, "");
@@ -481,15 +456,12 @@ function setItemValue(dataItem, key, value, override) {
 }
 
 function getNotesDataItem(url, objItem, dataItem) {
-    Zotero.debug("getNotesDataItem objItem:" + objItem);
     var itemAry = objItem.split(':');
     var objType = itemAry[1];
     var serviceURL = getServiceUrlRoot(url) + "icommentary/" + itemAry[0];
-    Zotero.debug("serviceURL:" + serviceURL);
     Zotero.Utilities.HTTP.doGet(serviceURL,
         function(text) {
             var json = JSON.parse(text);
-            Zotero.debug("getNotesDataItem: " + json.numberOfCommentaries);
             for (var j = 0; j < json.numberOfCommentaries; j = j + 1) {
                 if (json.ICommentary[j].status == 2) {
                     //public commentary
@@ -515,7 +487,6 @@ function getNotesDataItem(url, objItem, dataItem) {
 function getResourceDataItem(url, objItem, dataItem) {
     var itemAry = objItem.split(':');
     var serviceURL = getServiceUrlRoot(url) + "metadata/" + itemAry[0] + "/" + "?_method=FpHtml";
-    Zotero.debug("serviceURL:" + serviceURL);
 
     Zotero.Utilities.HTTP.doGet(serviceURL, function(text) {
         var service = text.substring(text.indexOf("secure"));
@@ -524,7 +495,6 @@ function getResourceDataItem(url, objItem, dataItem) {
         service = service.substring(service.indexOf("?"));
         service = service.trim();
         dataItem.url = getServerUrl(url) + "secure/ViewImages" + service + "&zoomparams=&fs=true"; 
-        Zotero.debug("processIVURL service2 ivURL " + dataItem.url);
         getNonImageDataItem(url, objItem, dataItem);
     });
 }
@@ -543,17 +513,14 @@ function getNonImageDataItem(url, objItem, dataItem) {
     var itemAry = objItem.split(':');
     var objType = itemAry[1];
     var mediaInfo = ARTSTOR_MEDIA_MAPPINGS[objType];
-    Zotero.debug("mediaInfo: " + mediaInfo);
     if (mediaInfo !== undefined) {
         var serviceURL = getServiceUrlRoot(url) + "imagefpx/" + itemAry[0] + "/" + mediaInfo[0];
-        Zotero.debug("serviceURL:" + serviceURL);
 
         Zotero.Utilities.HTTP.doGet(serviceURL, function(text) {
 
             var json = JSON.parse(text);
             var imageUrl = json.imageUrl;
             var mediaUrl;
-            Zotero.debug("resource url: " + imageUrl);
             if (imageUrl.indexOf('http') >= 0) {
                 mediaUrl = json.imageUrl;
             } else {
@@ -563,7 +530,6 @@ function getNonImageDataItem(url, objItem, dataItem) {
                     mediaUrl = getFileRoot(url) + "/thumb/" + imageUrl;
                 }
             }
-            Zotero.debug("media url: " + mediaUrl);
             dataItem.attachments.push({
                 title: mediaInfo[1],
                 url: mediaUrl,
@@ -571,13 +537,10 @@ function getNonImageDataItem(url, objItem, dataItem) {
             });
             dataItem.url = url;
             dataItem.complete();
-            Zotero.debug("done.....");
         });
     } else {
         dataItem.complete();
-        Zotero.debug("done.....");
     }
-    Zotero.debug("all done....");
     Zotero.done();
 }
 
@@ -594,7 +557,6 @@ function getServerUrl(url) {
         serverUrl = url.substring(0, url.indexOf('#3'));
     }
     serverUrl = serverUrl.substring(0, serverUrl.lastIndexOf('/'));
-    Zotero.debug("serverUrl: " + serverUrl);
     return serverUrl;
 }
 
@@ -612,7 +574,11 @@ function getThumbnailServiceURL(doc, url) {
     var contentId = params[2];
 
     // get page number
-    var pageNo = parseInt(doc.getElementById("pageNo").value);
+    var pageNo = 0;
+    var pageNoDOM = doc.getElementById("pageNo");
+    if (pageNoDOM != null) {
+        pageNo = parseInt(pageNoDOM.value);
+    }
 
     // get page size
     var imagesPerPage = "1";
@@ -625,7 +591,7 @@ function getThumbnailServiceURL(doc, url) {
     // get sort order
     var sortOrder = 0; //scrape from page
     var sortUL = doc.getElementById("sub0sortList");
-    if (sorUL !== undefined) {
+    if (sortUL !== null) {
         var sortElemWChk = sortUL.getElementsByClassName('sortListItemNav');
         if ((sortElemWChk != null) &&  (sortElemWChk.length > 0)) {
             switch (sortElemWChk[0].id) {
@@ -648,14 +614,10 @@ function getThumbnailServiceURL(doc, url) {
     var serviceURL = "";
     switch (pageType) {
         case "search":
-            Zotero.debug("searchParam: " + params[7]);
             var searchTerm = decodeSearchData(decrypt(params[7]));
-            Zotero.debug(searchTerm);
 
             var kw = searchTerm.kw;
-            Zotero.debug("kw " + kw);
             kw = encrypt(kw);
-            Zotero.debug("encrypt kw " + kw);
             var type = searchTerm.type;
 
             var origKW = searchTerm.origKW;
@@ -675,7 +637,6 @@ function getThumbnailServiceURL(doc, url) {
                 //KW search type=6, PC, All Coll, Inst Coll, Adv Srch
                 var collectionTit = decrypt(params[3]);
                 var collectionTitle = collectionTit.split(":");
-                Zotero.debug("collectionTitle  " + collectionTitle[0]);
                 var id = searchTerm.id; //get from URL
                 var geoIds = searchTerm.geoIds; //get from URL
                 var clsIds = searchTerm.clsIds; //get from URL
@@ -703,13 +664,11 @@ function getThumbnailServiceURL(doc, url) {
         default:
             serviceURL = getServiceUrlRoot(url) + pageType + "/" + contentId + "/thumbnails/" + startIdx + "/" + pageSize + "/" + sortOrder;
     }
-    Zotero.debug("getThumbnailServiceURL:" + serviceURL);
     return serviceURL;
 }
 
 function getServiceUrlRoot(url) {
     var serviceRoot = getServerUrl(url) + "/secure/";
-    Zotero.debug("getServiceUrlRoot: " + serviceRoot);
     return serviceRoot;
 
 }
@@ -724,7 +683,6 @@ function getFileRoot(url) {
     It converts the search url parameter into arrary of parameter values.
 **/
 function decodeSearchData(str) {
-    Zotero.debug("decodeSearchData: " + str);
     var searchParam = str;
     searchParam = searchParam.replace(/(&gt;)/, ":");
     var param = searchParam.split('&');
@@ -744,7 +702,6 @@ function decodeSearchData(str) {
         } else {
             searchData[id] = value;
         }
-        Zotero.debug("key value:" + id + " : " + value);
     }
     return searchData;
 }
@@ -902,35 +859,41 @@ function encrypt(s) {
     }
     return newS;
 }
-/** This test case does not run correctly in Zotero test framework due to AJAX nature of Artstor application **/
+
+/* Not working in test framework */
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "artwork",
-		"url": "http://www.sscommons.org/openlibrary/welcome.html#3|collections|7729815||zModeCollege20Library20Archives20Image20Gallery|||",
-		"items": [
-			{
-				"itemType": "artwork",
-				"title": "Museum of Art exhibit opening; Opening of exhibition \"The Portrayal of the Negro in American Painting\" at the Bowdoin College Museum of Art, May 16, 1964",
-				"creators": [],
-				"date": "1964",
-				"artworkMedium": "Negative, B&amp;W, 35 mm",
-				"artworkSize": "3 x 4",
-				"callNumber": "Local Call Number: 61.13; Local Item Number: nb64-5-16b19a; Local Negative Number: nb64-5-16b19a",
-				"extra": "Collection: Bowdoin College Library Archives Image Gallery; Digital Master Date: 08/25/2014; Digital Master Format: TIFF Scan 2400; Location of Original: Basement file cabinet; Subjects Added: Yes",
-				"libraryCatalog": "Artstor",
-				"rights": "George J Mitchell Department of Special Collections &amp; Archives, Bowdoin College Library, 3000 College Station, Brunswick, ME 04011. Phone: (207) 725-3288 E-mail: scaref@bowdoin.edu; George J Mitchell Department of Special Collections & Archives, Bowdoin College Library, 3000 College Station, Brunswick, ME 04011. Phone: (207) 725-3288 E-mail: scaref@bowdoin.edu; This image has been  selected and made av ailable by a user us ing Artstor's softwa re tools Artstor ha s not screened or se lected this image or  cleared any rights  to it and is acting  as an online service  provider pursuant t o 17 U.S.C. §512. Ar tstor disclaims any  liability associated  with the use of thi s image. Should you  have any legal objec tion to the use of t his image, please vi sit http://www.artst or.org/our-organizat ion/o-html/copyright .shtml for contact i nformation and instr uctions on how to pr oceed.",
-				"url": "http://www.sscommons.org/openlibrarysecure/ViewImages?id=4jEkdDAtKz03RkY6fjZ7TX1DOHQmd1d9dA%3D%3D&userId=gDFB&zoomparams=&fs=true",
-				"attachments": [
-					{
-						"title": "Artstor Thumbnails"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	}
+    {
+        "type": "artwork",
+        "url": "http://www.sscommons.org/openlibrary/welcome.html#3|collections|7730455||zModeBryn20Mawr20College20Faculty2FStaff2FStudent20Photographs||||||",
+        "defer": true,
+        "items": [
+            {
+                "itemType": "artwork",
+                "title": "Trailer Home; Exterior view",
+                "creators": [
+                    {
+                        "firstName": "Barbara",
+                        "lastName": "Lane",
+                        "creatorType": "Image by"
+                    }
+                ],
+                "date": "Photographed: 2001",
+                "extra": "Location: Bradford County, Pennsylvania; Collection: Bryn Mawr College Faculty/Staff/Student Photographs; ID Number: 01-07828; Source: Personal photographs of Professor Barbara Lane, 2001",
+                "libraryCatalog": "ARTstor",
+                "rights": "Copyright is owned by the photographer Questions can be directed to sscommons@brynmawr.edu.; This image has been  selected and made av ailable by a user us ing Artstor's softwa re tools Artstor ha s not screened or se lected this image or  cleared any rights  to it and is acting  as an online service  provider pursuant t o 17 U.S.C. §512. Ar tstor disclaims any  liability associated  with the use of thi s image. Should you  have any legal objec tion to the use of t his image, please vi sit http://www.artst or.org/our-organizat ion/o-html/copyright .shtml for contact i nformation and instr uctions on how to pr oceed.",
+                "url": "http://www.sscommons.org/openlibrarysecure/ViewImages?id=4jEkdDElLjUzRkY6fz5%2BRXlDOHkje1x9fg%3D%3D&userId=gDFB&zoomparams=&fs=true",
+                "attachments": [
+                    {
+                        "title": "Artstor Thumbnails"
+                    }
+                ],
+                "tags": [],
+                "notes": [],
+                "seeAlso": []
+            }
+        ]
+    }
 ]
 /** END TEST CASES **/
+
