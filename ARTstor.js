@@ -42,10 +42,10 @@
     see the overview of Zotero item types), or, if multiple items are found, “multiple”. 
 **/
 function detectWeb(doc, url) {
-    if (url.match(/iv2/)) {
+    if (url.match(/\/iv2/)) {
         // Image viewer window
         return "artwork";
-    } else if (url.match(/\#3/)) {
+    } else if (url.match(/\#3\|/)) {
         // Thumbnail window page
         if ((doc.getElementsByClassName('MetaDataWidgetRoot') != null) && (doc.getElementsByClassName('MetaDataWidgetRoot').length > 0)) {
             // There are multiple metadata windows visible
@@ -99,17 +99,12 @@ function detectWeb(doc, url) {
 
     doWeb is run when a user, wishing to save one or more items, activates the selected translator. 
     Sidestepping the retrieval of item metadata, we'll first focus on how doWeb can be used to save 
-    retrieved item metadata (as well as attachments and notes) to your Zotero library.
-
-    detectWeb receives two arguments, the webpage document object and URL (typically named doc and url). 
-    In some cases, the URL provides all the information needed to determine whether item metadata is 
-    available, allowing for a simple detectWeb function, e.g. (example from Cell Press.js): 
-**/
+    retrieved item metadata (as well as attachments and notes) to your Zotero library.**/
 function doWeb(doc, url) {
-    if (url.match(/iv2/)) {
+    if (url.match(/\/iv2/)) {
         doImageViewer(doc, url);
     }
-    if (url.match(/#3/)) {
+    if (url.match(/#3\|/)) {
         // Thumbnail window page
         if ((doc.getElementsByClassName('MetaDataWidgetRoot') != null) && (doc.getElementsByClassName('MetaDataWidgetRoot').length > 0)) {
             doMetadataWindow(doc, url);
@@ -304,7 +299,6 @@ function processObjects(doc, url, objIds) {
 
         getMetaDataItem(url, objItem, dataItem);
     }
-    Zotero.done();
 }
 
 function getMetaDataItem(url, objItem, dataItem) {
@@ -405,8 +399,7 @@ function setItemCreator(dataItem, fieldValue) {
     var names = [];
     if (fieldValue.indexOf(';')) {
         names = fieldValue.split(';')
-    }
-    else {
+    } else {
         names.push(fieldValue);
     }
     for (var i = 0; i < names.length; i++) {
@@ -490,11 +483,8 @@ function getResourceDataItem(url, objItem, dataItem) {
 
     Zotero.Utilities.HTTP.doGet(serviceURL, function(text) {
         var service = text.substring(text.indexOf("secure"));
-        service = service.substring(0, service.indexOf("</td>"));
-        service = service.replace(/<wbr\/>/g, "");
-        service = service.substring(service.indexOf("?"));
-        service = service.trim();
-        dataItem.url = getServerUrl(url) + "secure/ViewImages" + service + "&zoomparams=&fs=true"; 
+        service = service.substring(0, service.indexOf("</td>")).replace(/<wbr\/>/g, "").substring(service.indexOf("?")).trim();
+        dataItem.url = getServerUrl(url) + "secure/ViewImages" + service + "&zoomparams=&fs=true";
         getNonImageDataItem(url, objItem, dataItem);
     });
 }
@@ -584,7 +574,7 @@ function getThumbnailServiceURL(doc, url) {
     var imagesPerPage = "1";
     var pageDOM = doc.getElementById("thumbNavImageButt");
     if (pageDOM != null)
-            imagesPerPage = pageDOM.innerHTML;
+        imagesPerPage = pageDOM.innerHTML;
     var pageSize = parseInt(imagesPerPage);
     var startIdx = (pageNo - 1) * pageSize + 1;
 
@@ -593,7 +583,7 @@ function getThumbnailServiceURL(doc, url) {
     var sortUL = doc.getElementById("sub0sortList");
     if (sortUL !== null) {
         var sortElemWChk = sortUL.getElementsByClassName('sortListItemNav');
-        if ((sortElemWChk != null) &&  (sortElemWChk.length > 0)) {
+        if ((sortElemWChk != null) && (sortElemWChk.length > 0)) {
             switch (sortElemWChk[0].id) {
                 case "thumbSortRelevance0":
                     sortOrder = 0;
@@ -631,26 +621,18 @@ function getThumbnailServiceURL(doc, url) {
             } else if (type == "4") {
                 //search notes
                 var aType = searchTerm.aType;
-                serviceURL = getServiceUrlRoot(url) + pageType + "/" + params[2] + "/" + startIdx + "/" + pageSize + "/" + sortOrder + "?type=" + type + "&kw=" + kw + "&origKW=" + origKW + "&aType=" + aType + "&order=" + order + "&tn=1";
+                serviceURL = getServiceUrlRoot(url) + pageType + "/" + params[2] + "/" + startIdx + "/" + pageSize + "/" + sortOrder + "?type=" + type + "&kw=" +
+                    kw + "&origKW=" + origKW + "&aType=" + aType + "&order=" + order + "&tn=1";
 
             } else {
                 //KW search type=6, PC, All Coll, Inst Coll, Adv Srch
                 var collectionTit = decrypt(params[3]);
                 var collectionTitle = collectionTit.split(":");
-                var id = searchTerm.id; //get from URL
-                var geoIds = searchTerm.geoIds; //get from URL
-                var clsIds = searchTerm.clsIds; //get from URL
-                var collTypes = searchTerm.collTypes; //get from URL
-                var prGeoId = searchTerm.prGeoId; //get from URL
-                var name = collectionTitle[0];
-                name = escape(name);
-                var bDate = searchTerm.bDate; //get from URL
-                var eDate = searchTerm.eDate; //get from URL
-                var dExact = searchTerm.dExact; //get from URL
-
+                var name = escape(collectionTitle[0]);
                 serviceURL = getServiceUrlRoot(url) + pageType + "/" + params[2] + "/" + startIdx + "/" + pageSize + "/" + sortOrder + "?type=" + type + "&kw=" +
-                    kw + "&origKW=" + origKW + "&geoIds=" + geoIds + "&clsIds=" + clsIds + "&collTypes=" + collTypes + "&id=" + id + "&name=" + name + "&bDate=" + bDate +
-                    "&eDate=" + eDate + "&dExact=" + dExact + "&order=" + order + "&isHistory=false&prGeoId=" + prGeoId + "&tn=1";
+                    kw + "&origKW=" + origKW + "&geoIds=" + searchTerm.geoIds + "&clsIds=" + searchTerm.clsIds + "&collTypes=" + searchTerm.collTypes + "&id=" +
+                    searchTerm.id + "&name=" + name + "&bDate=" + searchTerm.bDate +
+                    "&eDate=" + searchTerm.eDate + "&dExact=" + searchTerm.dExact + "&order=" + order + "&isHistory=false&prGeoId=" + searchTerm.prGeoId + "&tn=1";
             }
             //p=escape(p);
             break;
@@ -681,19 +663,32 @@ function getFileRoot(url) {
 /**
     decodeSearchData is an helper function to process the search result page.
     It converts the search url parameter into arrary of parameter values.
+
+    It converts
+    type=6&kw=stimson hall|all#and,1925|all&geoIds=&clsIds=&collTypes=&id=all&bDate=-2019&eDate=2030&dExact=1&prGeoId=&origKW=stimson hall|all#and,1925|all
+    to  {
+             "type": 6
+             "kw": "stimson hall|all#and,1925|all"
+             "geoIds": ""
+             "clsIds": ""
+             "collTypes": ""
+             "id": "all"
+             "bDate": "-2019"
+             "eDate": "2030"
+             "dExact": "1"
+             "prGeoId": ""
+             "origKW": "stimson hall|all#and,1925|all"
+         }
 **/
 function decodeSearchData(str) {
-    var searchParam = str;
-    searchParam = searchParam.replace(/(&gt;)/, ":");
+    var searchParam = str.replace(/(&gt;)/g, ":");
     var param = searchParam.split('&');
     var searchData = new Object();
-    var item;
     var sparam;
     var id;
     var value;
-    for (var i = 0; i < param.length; i = i + 1) {
-        item = param[i];
-        sparam = item.split('=');
+    for (var i = 0; i < param.length; i++) {
+        sparam = param[i].split('=');
         id = sparam[0];
         value = sparam[1];
 
@@ -796,6 +791,9 @@ encodeMap = {
     '~': '7E'
 };
 
+/**
+    Converts two character number character to special character
+**/
 function decrypt(s) {
     var len = s.length;
     var i = 0;
@@ -835,6 +833,9 @@ function decrypt(s) {
     return newS;
 }
 
+/**
+    Converts speial character to two digit code.
+**/
 function encrypt(s) {
     var newS = '';
     if (s !== undefined) {
@@ -860,7 +861,6 @@ function encrypt(s) {
     return newS;
 }
 
-/* Not working in test framework */
 /** BEGIN TEST CASES **/
 var testCases = [
     {
