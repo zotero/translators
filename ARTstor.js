@@ -1,3 +1,4 @@
+
 {
     "translatorID": "5278b20c-7c2c-4599-a785-12198ea648bf",
     "label": "ARTstor",
@@ -9,100 +10,696 @@
     "inRepository": true,
     "translatorType": 4,
     "browserSupport": "gcs",
-    "lastUpdated": "2015-06-02 15:48:45"
+    "lastUpdated": "2015-07-01 18:45:45"
 }
 
 /*
-	This translator works for Artstor library site (http://library.artstor.org) and
-	Artstor Shared Shelf Commons (http://www.sscommons.org)
-
-
-	***** BEGIN LICENSE BLOCK *****
-	
-	Artstor Translator, Copyright © 2015 John Justin, Charles Zeng
-	
-	Zotero is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Affero General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-	
-	Zotero is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU Affero General Public License for more details.
-	
-	You should have received a copy of the GNU Affero General Public License
-	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
-	
-	***** END LICENSE BLOCK *****
+    This translator works for Artstor library sites (http://library.artstor.org) and
+    Artstor Shared Shelf Commons (http://www.sscommons.org)
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Artstor Translator, Copyright © 2015 John Justin, Charles Zeng
+    
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+    
+    ***** END LICENSE BLOCK *****
 */
 
+/**
+    detectWeb is run to determine whether item metadata can indeed be retrieved from the webpage. 
+    The return value of this function should be the detected item type (e.g. “journalArticle”, 
+    see the overview of Zotero item types), or, if multiple items are found, “multiple”. 
+**/
 function detectWeb(doc, url) {
-
-    if (url.match(/iv2/)) {
-
+    if (url.match(/\/iv2/)) {
+        // Image viewer window
         return "artwork";
-    }
-    if (url.match(/imagegroup/) && doc.getElementById("ssContentWrap").style.display == "inline") {
-
-        return false;
-    }
-    if (url.match(/imagegroup/) && doc.getElementById("thumbNavSave1").style.display == "block") {
-        Zotero.debug("Save on");
-        return false;
-    }
-    if (url.match(/(S|s)earch/) || url.match(/categories/) || url.match(/imagegroup/) || url.match(/collections/) || url.match(/collaboratoryfiltering/) || url.match(/cluster/)) {
-        if (doc.getElementsByClassName('MetaDataWidgetRoot').length > 0) {
+    } else if (url.match(/\#3\|/)) {
+        // Thumbnail window page
+        if ((doc.getElementsByClassName('MetaDataWidgetRoot') != null) && (doc.getElementsByClassName('MetaDataWidgetRoot').length > 0)) {
+            // There are multiple metadata windows visible
             return "artwork";
-
-        } else
-        if (doc.getElementById("floatingPlaceHolder").style.display == "block") {
+        } else if ((doc.getElementById("floatingPlaceHolder") != null) && (doc.getElementById("floatingPlaceHolder").style.display == "block")) {
+            // Don't capture date if small window is present
             return false;
+        } else if ((doc.getElementById("thumbNavSave1") != null) && (doc.getElementById("thumbNavSave1").style.display == "block")) {
+            // Don't capture data if image group window is in editing state.
+            return false;
+        } else if ((doc.getElementById("ssContentWrap") != null) && (doc.getElementById("ssContentWrap").style.display == "inline")) {
+            // Don't capture data if slide show window is present
+            return false;
+        } else {
+            if (url.match(/zMode/)) {
+                return "artwork";
+            }
+        }
+        // Allow thumbnail window.
+        return "multiple";
+    }
+    // all other page, data can not be captured.
+    return false;
+}
+
+/**
+    Overall logic:
+    - Detect the page context:
+        - check if the page is main window (ignore)
+        - check if the page is collection splash (ignore)
+        - check if the page is thumbnail page
+            - ignore small window
+            - if small windows is popped up, process only small window
+                get the object ids from small windows, then process the ids.
+            - if no small window, get the selected object and process them
+                get the object ids from selected objects, then process the ids.
+            - otherwise, select all objects in the thumbnails
+                get the object ids from the thumbnail windows, then process the ids.
+        - check if the page is image viewer
+            - get the object from the image viewer, then process the id.
+    - Process the id
+        - find the object type.
+        - get the metadta service url from id using service call  http://library.artstor.org/library/secure/metadata/id
+            - fetch and convert the metadata from the metadata service call
+                - take into consideration of different metadata field for the portals
+                - may need to convert/format the data values.
+            - fetch the item notes using: 
+        - get the resource link url from id: :http://library.artstor.org/library/secure/metadata/id?_method=FpHtml
+            - fetch the resource from resource url
+            - set the item title and item mine type.
+
+    doWeb is run when a user, wishing to save one or more items, activates the selected translator. 
+    Sidestepping the retrieval of item metadata, we'll first focus on how doWeb can be used to save 
+    retrieved item metadata (as well as attachments and notes) to your Zotero library.**/
+function doWeb(doc, url) {
+    if (url.match(/\/iv2/)) {
+        doImageViewer(doc, url);
+    }
+    if (url.match(/#3\|/)) {
+        // Thumbnail window page
+        if ((doc.getElementsByClassName('MetaDataWidgetRoot') != null) && (doc.getElementsByClassName('MetaDataWidgetRoot').length > 0)) {
+            doMetadataWindow(doc, url);
+        } else {
+            var skipThumbnail = false;
+            if ((doc.getElementById("floatingPlaceHolder") != null) && (doc.getElementById("floatingPlaceHolder").style.display == "block")) {
+                // Don't capture date if small window is present
+                skipThumbnail = true;
+            }
+            if ((doc.getElementById("thumbNavSave1") != null) && (doc.getElementById("thumbNavSave1").style.display == "block")) {
+                // Don't capture data if image group window is in editing state.
+                skipThumbnail = true;
+            }
+            if ((doc.getElementById("ssContentWrap") != null) && (doc.getElementById("ssContentWrap").style.display == "inline")) {
+                // Don't capture data if slide show window is present
+                skipThumbnail = true;
+            }
+            // Allow thumbnail window.
+            if (!skipThumbnail) {
+                doThumbnails(doc, url);
+            }
+        }
+    }
+}
+
+function doImageViewer(doc, url) {
+    // get the image id and object type from the page
+    // this contains the objId and object type separate by : as in "AWSS35953_35953_25701160:11"
+    var objID = doc.getElementById("objID");
+    if (objID != null) {
+        var objItems = [];
+        var objItem = doc.getElementById("objID").title;
+        objItems.push(objItem);
+        processObjects(doc, url, objItems);
+    }
+}
+
+function doMetadataWindow(doc, url) {
+    // get object id from metadata window.
+    var metaWindows = doc.getElementsByClassName('MetaDataWidgetRoot');
+    var objItems = [];
+    for (var i = 0; i < metaWindows.length; i++) {
+        var id = metaWindows[i].id.substring(3);
+        objItems.push(id);
+    }
+
+    processSelectedObject(doc, url, objItems, 1);
+}
+
+function processSelectedObject(doc, url, selectedObjs, selectionType) {
+    var serviceURL = getThumbnailServiceURL(doc, url);
+    Zotero.Utilities.HTTP.doGet(serviceURL, function(text) {
+        // get the master object list
+        var json = JSON.parse(text);
+        var objDescItem;
+        var masterObjList = [];
+        for (var i = 0; i < json.thumbnails.length; i++) {
+            var thumbnail = json.thumbnails[i];
+            objDescItem = new Object();
+            objDescItem.id = thumbnail.objectId;
+            objDescItem.type = thumbnail.objectTypeId;
+            objDescItem.title = thumbnail.thumbnail1;
+            masterObjList.push(objDescItem);
+        }
+        // Proccess the selected items by look up the data from master list.
+        var zMode = false;
+        if (url.match(/zMode/)) {
+            zMode = true;
+        }
+        switch (selectionType) {
+            case 2: // selection from thumbnals
+                var candidateItems = new Object();
+                var masterObj;
+                if (selectedObjs.length > 0) {
+                    for (var j = 0; j < selectedObjs.length; j++) {
+                        var idx = selectedObjs[j];
+                        masterObj = masterObjList[idx];
+                        var key = masterObj.id + ":" + masterObj.type;
+                        candidateItems[key] = masterObj.title;
+                    }
+                } else {
+                    for (var j = 0; j < masterObjList.length; j++) {
+                        masterObj = masterObjList[j];
+                        var key = masterObj.id + ":" + masterObj.type;
+                        candidateItems[key] = masterObj.title;
+                    }
+                }
+                if (zMode && Object.keys(candidateItems).length > 0) {
+                    var objItems = [];
+                    for (var objItem in candidateItems) {
+                        objItems.push(objItem);
+                        processObjects(doc, url, objItems);
+                        break;
+                    }
+                } else {
+                    Zotero.selectItems(candidateItems, function(selectItems) {
+                        var objItems = [];
+                        for (var objItem in selectItems) {
+                            objItems.push(objItem);
+                        }
+                        processObjects(doc, url, objItems);
+                    });
+                }
+                break;
+            case 1: // item from metadata window or image viewer
+                // build look up table for eazy look up.
+                var masterLookup = new Object();
+                for (var m = 0; m < masterObjList.length; m++) {
+                    masterLookup[masterObjList[m].id] = masterObjList[m];
+                }
+                var objItems = [];
+                for (var i = 0; i < selectedObjs.length; i++) {
+                    var id = selectedObjs[i];
+                    if (masterLookup[id] == "") {
+                        var item = id + ":10"; // default type as image.
+                        objItems.push(item);
+                    } else {
+                        var item = masterLookup[id].id + ":" + masterLookup[id].type;
+                        objItems.push(item);
+                    }
+                }
+                processObjects(doc, url, objItems);
+                break;
+        }
+    }); // Zotero..doGet
+};
+
+
+function doThumbnails(doc, url) {
+    var selectedObjs = getSelectedItems(doc, url);
+    processSelectedObject(doc, url, selectedObjs, 2);
+}
+
+/**
+    getMasterThumbnailList gets the thumbnail object id by calling the thumbnail 
+    service to get a list of object id and its title.
+    It returns with a list of object with object id, and object title.
+**/
+function getMasterThumbnailList(doc, url, objDescItems) {
+    // var objDescItems = [];
+    var serviceURL = getThumbnailServiceURL(doc, url);
+    Zotero.Utilities.HTTP.doGet(serviceURL, function(text) {
+        var json = JSON.parse(text);
+        var objDescItem;
+        for (var i = 0; i < json.thumbnails.length; i++) {
+            var thumbnail = json.thumbnails[i];
+            objDescItem = new Object();
+            objDescItem.id = thumbnail.objectId;
+            objDescItem.type = thumbnail.objectTypeId;
+            objDescItem.title = thumbnail.thumbnail1;
+            objDescItems.push(objDescItem);
+        }
+    });
+    return objDescItems;
+}
+
+/**
+    getSelectedItems gets the selected item by checking the items selected.
+    It returns with a list of object with index id.
+**/
+function getSelectedItems(doc, url) {
+    var indexes = [];
+    var wrap = doc.getElementById("thumbContentWrap");
+    if ((wrap !== null) && (wrap.style.display == "none")) {
+        wrap = doc.getElementById("listContentWrap");
+    }
+    if (wrap != null) {
+        var imageElems = wrap.getElementsByClassName("thumbNailImageSelected");
+        for (var i = 0; i < imageElems.length; i++) {
+            if (imageElems[i].parentNode.parentNode.style.display == "block") {
+                var id = imageElems[i].id; // we need to get the index (1) from id string "custom1_imageHolder"
+                var imageNum = id.substring(id.indexOf("m") + 1, id.indexOf("_"));
+                indexes.push(parseInt(imageNum));
+            }
+        }
+    }
+    return indexes;
+}
+
+/**
+    processObjects gets the object data using service call.
+    objIds has the following member: id, type
+**/
+function processObjects(doc, url, objIds) {
+    for (var i = 0; i < objIds.length; i++) {
+        var objItem = objIds[i];
+        var dataItem = new Zotero.Item('artwork');
+        dataItem.attachments.push({
+            title: "Artstor Thumbnails",
+            document: doc
+        });
+
+        getMetaDataItem(url, objItem, dataItem);
+    }
+}
+
+function getMetaDataItem(url, objItem, dataItem) {
+    var portalMap = {
+        'flexspace': {
+            'Campus': 'title',
+            'Square Footage': 'artworkSize',
+            'General Description': 'abstractNote',
+            'Comments (Technology Integration)': 'abstractNote',
+            'Rights': 'rights'
+        },
+        'archaeology': {
+            'Site Name': 'title',
+            'Artifact Title': 'title',
+            'Artifact Description': 'abstractNote',
+            'Artifact Repository': 'archive',
+            'Rights': 'rights',
+            'Site Date': 'date',
+            'Artifact Materials/Techniques': 'artworkMedium',
+            'Artifact Dimensions': 'artworkSize'
+        },
+        'default': {
+            'Creator': 'creators',
+            'Title': 'title',
+            'Date': 'date',
+            'Material': 'artworkMedium',
+            'Measurements': 'artworkSize',
+            'Repository': 'archive',
+            'Rights': 'rights',
+            'Description': 'abstractNote',
+            'Accession Number': 'callNumber'
+        }
+    };
+
+    var itemAry = objItem.split(':');
+    var serviceUrl = getServiceUrlRoot(url) + "metadata/" + itemAry[0];
+    Zotero.Utilities.HTTP.doGet(serviceUrl, function(text) {
+        var json = JSON.parse(text);
+        var portal = getPortal(url);
+        if (!(portal in portalMap)) {
+            portal = 'default';
+        }
+        processPortalData(dataItem, json, portalMap[portal], portal);
+        getNotesDataItem(url, objItem, dataItem);
+    });
+
+    return dataItem;
+}
+
+function processPortalData(dataItem, json, fieldMap, portal) {
+    var fieldName;
+    var fieldValue;
+    if (portal == 'archaeology') {
+        var hasSiteName = false;
+        for (var i = 0; i < json.metaData.length; i++) {
+            fieldName = json.metaData[i].fieldName;
+            fieldValue = json.metaData[i].fieldValue;
+            if (fieldName in fieldMap) {
+                var key = fieldMap[fieldName];
+                if (fieldName == 'Site Name') {
+                    hasSiteName = true;
+                    setItemValue(dataItem, "title", fieldValue);
+                } else if (fieldName == 'Artifact Title') {
+                    if (hasSiteName) {
+                        setItemLabelValue(dataItem, "extra", fieldName, dataItem.title);
+                        hasSiteName = false;
+                    }
+                    setItemValue(dataItem, "title", fieldValue);
+                }
+            } else {
+                setItemLabelValue(dataItem, "extra", fieldName, fieldValue);
+            }
+        }
+
+    } else {
+        for (var i = 0; i < json.metaData.length; i++) {
+            fieldName = json.metaData[i].fieldName;
+            fieldValue = json.metaData[i].fieldValue;
+            if (fieldName in fieldMap) {
+                var key = fieldMap[fieldName];
+                if (key == 'creators') {
+                    setItemCreator(dataItem, fieldValue);
+                } else {
+                    setItemValue(dataItem, key, fieldValue);
+                }
+            } else {
+                setItemLabelValue(dataItem, "extra", fieldName, fieldValue);
+            }
+        }
+    }
+    if (dataItem.title == undefined) {
+        dataItem.title = "Unknown";
+    }
+}
+
+function setItemCreator(dataItem, fieldValue) {
+    fieldValue = fieldValue.replace(/<wbr\/>/g, "");
+    var names = [];
+    if (fieldValue.indexOf(';')) {
+        names = fieldValue.split(';')
+    } else {
+        names.push(fieldValue);
+    }
+    for (var i = 0; i < names.length; i++) {
+        var str = names[i];
+        var contributor = "author";
+        var name = str;
+
+        if (str.indexOf(':') > 0) {
+            var params = str.split(':');
+            contributor = params[0];
+            name = params[1];
+        }
+        dataItem.creators.push(ZU.cleanAuthor(name.replace(/<\/?[^>]+(>|$)/g, " ").replace(/(&gt;)|(&lt;)/g, ""), contributor, false));
+    }
+}
+
+function setItemLabelValue(dataItem, key, label, value) {
+    var cleanValue = value.replace(/<\/?[^>]+(>|$)/g, " ");
+    cleanValue = cleanValue.replace(/\./, "");
+    cleanValue = cleanValue.replace(/<wbr\/>/g, "");
+
+    if (!(key in dataItem)) {
+        dataItem[key] = label + ": " + cleanValue;
+
+    } else {
+        var fieldValue = dataItem[key];
+        if (fieldValue.indexOf(label) >= 0) {
+            dataItem[key] += ", " + cleanValue;
+        } else {
+            dataItem[key] += "; " + label + ": " + cleanValue;
 
         }
-        return "multiple";
-    } else {
-        return false;
     }
+}
+
+function setItemValue(dataItem, key, value, override) {
+    var cleanValue = value.replace(/<\/?[^>]+(>|$)/g, " ");
+    cleanValue = cleanValue.replace(/\./, "");
+    cleanValue = cleanValue.replace(/<wbr\/>/g, "");
+
+    if (!(key in dataItem) || override) {
+        dataItem[key] = cleanValue;
+
+    } else {
+        dataItem[key] += "; " + cleanValue;
+    }
+}
+
+function getNotesDataItem(url, objItem, dataItem) {
+    var itemAry = objItem.split(':');
+    var objType = itemAry[1];
+    var serviceURL = getServiceUrlRoot(url) + "icommentary/" + itemAry[0];
+    Zotero.Utilities.HTTP.doGet(serviceURL,
+        function(text) {
+            var json = JSON.parse(text);
+            for (var j = 0; j < json.numberOfCommentaries; j = j + 1) {
+                if (json.ICommentary[j].status == 2) {
+                    //public commentary
+                    var comment = "";
+                    if (json.ICommentary[j].ownerName == "") {
+                        comment = "Note: ";
+                    } else {
+                        comment = "Note by: " + json.ICommentary[j].ownerName + " -  ";
+                    }
+                    comment += json.ICommentary[j].commentary;
+                    dataItem.notes.push({
+                        note: comment
+                    });
+                }
+            }
+            getResourceDataItem(url, objItem, dataItem);
+        }
+    ); //doGet
 
 }
 
+
+function getResourceDataItem(url, objItem, dataItem) {
+    var itemAry = objItem.split(':');
+    var serviceURL = getServiceUrlRoot(url) + "metadata/" + itemAry[0] + "/" + "?_method=FpHtml";
+
+    Zotero.Utilities.HTTP.doGet(serviceURL, function(text) {
+        var service = text.substring(text.indexOf("secure"));
+        service = service.substring(0, service.indexOf("</td>")).replace(/<wbr\/>/g, "").substring(service.indexOf("?")).trim();
+        dataItem.url = getServerUrl(url) + "secure/ViewImages" + service + "&zoomparams=&fs=true";
+        getNonImageDataItem(url, objItem, dataItem);
+    });
+}
+
+function getNonImageDataItem(url, objItem, dataItem) {
+    var ARTSTOR_MEDIA_MAPPINGS = {
+        "11": ["7", "Artstor QuickTime Movie Attachment", "video/quicktime"], //qtvr
+        "12": ["10", "Artstor Audio File Attachment", "audio/mpeg3"], // audio
+        "20": ["20", "Artstor PDF Attachment", "application/pdf"], // pdf
+        "21": ["21", "Artstor PowerPoint Attachment", "application/powerpoint"], // powerpoint
+        "22": ["22", "Artstor Word Attachment", "application/msword"], // word
+        "23": ["23", "Artstor Excel Attachment", "application/excel"], // excel
+        "24": ["24", "Artstor Video File Attachment", "text/html"], // video
+    };
+
+    var itemAry = objItem.split(':');
+    var objType = itemAry[1];
+    var mediaInfo = ARTSTOR_MEDIA_MAPPINGS[objType];
+    if (mediaInfo !== undefined) {
+        var serviceURL = getServiceUrlRoot(url) + "imagefpx/" + itemAry[0] + "/" + mediaInfo[0];
+
+        Zotero.Utilities.HTTP.doGet(serviceURL, function(text) {
+
+            var json = JSON.parse(text);
+            var imageUrl = json.imageUrl;
+            var mediaUrl;
+            if (imageUrl.indexOf('http') >= 0) {
+                mediaUrl = json.imageUrl;
+            } else {
+                if (imageUrl.indexOf('/') == 0) {
+                    mediaUrl = getFileRoot(url) + "/thumb" + imageUrl;
+                } else {
+                    mediaUrl = getFileRoot(url) + "/thumb/" + imageUrl;
+                }
+            }
+            dataItem.attachments.push({
+                title: mediaInfo[1],
+                url: mediaUrl,
+                mimeType: mediaInfo[2]
+            });
+            dataItem.url = url;
+            dataItem.complete();
+        });
+    } else {
+        dataItem.complete();
+    }
+    Zotero.done();
+}
+
+function getPortal(url) {
+    var portal = url.substring(7, url.indexOf("."));
+    return portal;
+}
+
+function getServerUrl(url) {
+    var serverUrl;
+    if (url.indexOf('/iv2') > 0) {
+        serverUrl = url.substring(0, url.indexOf('iv2\.'));
+    } else {
+        serverUrl = url.substring(0, url.indexOf('#3'));
+    }
+    serverUrl = serverUrl.substring(0, serverUrl.lastIndexOf('/'));
+    return serverUrl;
+}
+
+function getThumbnailServiceURL(doc, url) {
+    var serverUrl = getServerUrl(url);
+    var paramStr = url.substring(url.indexOf('#'));
+
+    // process escapde "|"
+    if (paramStr.indexOf('|') < 0) {
+        paramStr = parramStr.replace(/%7c/gi, "|");
+    }
+
+    var params = paramStr.split('|');
+    var pageType = params[1];
+    var contentId = params[2];
+
+    // get page number
+    var pageNo = 0;
+    var pageNoDOM = doc.getElementById("pageNo");
+    if (pageNoDOM != null) {
+        pageNo = parseInt(pageNoDOM.value);
+    }
+
+    // get page size
+    var imagesPerPage = "1";
+    var pageDOM = doc.getElementById("thumbNavImageButt");
+    if (pageDOM != null)
+        imagesPerPage = pageDOM.innerHTML;
+    var pageSize = parseInt(imagesPerPage);
+    var startIdx = (pageNo - 1) * pageSize + 1;
+
+    // get sort order
+    var sortOrder = 0; //scrape from page
+    var sortUL = doc.getElementById("sub0sortList");
+    if (sortUL !== null) {
+        var sortElemWChk = sortUL.getElementsByClassName('sortListItemNav');
+        if ((sortElemWChk != null) && (sortElemWChk.length > 0)) {
+            switch (sortElemWChk[0].id) {
+                case "thumbSortRelevance0":
+                    sortOrder = 0;
+                    break;
+                case "thumbSortTitle0":
+                    sortOrder = 1;
+                    break;
+                case "thumbSortCreator0":
+                    sortOrder = 2;
+                    break;
+                case "thumbSortDate0":
+                    sortOrder = 3;
+                    break;
+            }
+        }
+    }
+
+    var serviceURL = "";
+    switch (pageType) {
+        case "search":
+            var searchTerm = decodeSearchData(decrypt(params[7]));
+
+            var kw = searchTerm.kw;
+            kw = encrypt(kw);
+            var type = searchTerm.type;
+
+            var origKW = searchTerm.origKW;
+            origKW = escape(origKW);
+            var order = 0;
+            if (type == "3" || type == "2") {
+                //search within IG and categories
+                serviceURL = getServiceUrlRoot(url) + pageType + "/" + params[2] + "/" + startIdx + "/" + pageSize + "/" + sortOrder + "?type=" + type + "&kw=" +
+                    kw + "&origKW=" + origKW + "&id=" + searchTerm.id + "&name=" + escape(searchTerm.name); + "&order=" + order + "&tn=1";
+
+            } else if (type == "4") {
+                //search notes
+                var aType = searchTerm.aType;
+                serviceURL = getServiceUrlRoot(url) + pageType + "/" + params[2] + "/" + startIdx + "/" + pageSize + "/" + sortOrder + "?type=" + type + "&kw=" +
+                    kw + "&origKW=" + origKW + "&aType=" + aType + "&order=" + order + "&tn=1";
+
+            } else {
+                //KW search type=6, PC, All Coll, Inst Coll, Adv Srch
+                var collectionTit = decrypt(params[3]);
+                var collectionTitle = collectionTit.split(":");
+                var name = escape(collectionTitle[0]);
+                serviceURL = getServiceUrlRoot(url) + pageType + "/" + params[2] + "/" + startIdx + "/" + pageSize + "/" + sortOrder + "?type=" + type + "&kw=" +
+                    kw + "&origKW=" + origKW + "&geoIds=" + searchTerm.geoIds + "&clsIds=" + searchTerm.clsIds + "&collTypes=" + searchTerm.collTypes + "&id=" +
+                    searchTerm.id + "&name=" + name + "&bDate=" + searchTerm.bDate +
+                    "&eDate=" + searchTerm.eDate + "&dExact=" + searchTerm.dExact + "&order=" + order + "&isHistory=false&prGeoId=" + searchTerm.prGeoId + "&tn=1";
+            }
+            //p=escape(p);
+            break;
+        case "collaboratoryfiltering":
+            var serviceURL = getServiceUrlRoot(url) + pageType + "/" + params[2] + "/thumbnails/" + startIdx + "/" + pageSize + "/" + sortOrder + "?collectionId=" + params[8];
+            break;
+        case "imagegroup": // image group
+        case "collections":
+        case "categories":
+        case "cluster":
+        default:
+            serviceURL = getServiceUrlRoot(url) + pageType + "/" + contentId + "/thumbnails/" + startIdx + "/" + pageSize + "/" + sortOrder;
+    }
+    return serviceURL;
+}
+
+function getServiceUrlRoot(url) {
+    var serviceRoot = getServerUrl(url) + "/secure/";
+    return serviceRoot;
+
+}
+
+function getFileRoot(url) {
+    var fileRoot = getServerUrl(url).substring(0, getServerUrl(url).lastIndexOf('/'));
+    return fileRoot;
+}
+
+/**
+    decodeSearchData is an helper function to process the search result page.
+    It converts the search url parameter into arrary of parameter values.
+
+    It converts
+    type=6&kw=stimson hall|all#and,1925|all&geoIds=&clsIds=&collTypes=&id=all&bDate=-2019&eDate=2030&dExact=1&prGeoId=&origKW=stimson hall|all#and,1925|all
+    to  {
+             "type": 6
+             "kw": "stimson hall|all#and,1925|all"
+             "geoIds": ""
+             "clsIds": ""
+             "collTypes": ""
+             "id": "all"
+             "bDate": "-2019"
+             "eDate": "2030"
+             "dExact": "1"
+             "prGeoId": ""
+             "origKW": "stimson hall|all#and,1925|all"
+         }
+**/
 function decodeSearchData(str) {
-    var searchParam = str;
-    searchParam = searchParam.replace(/(&gt;)/, ":");
+    var searchParam = str.replace(/(&gt;)/g, ":");
     var param = searchParam.split('&');
     var searchData = new Object();
-    var item;
     var sparam;
     var id;
     var value;
-    for (var i = 0; i < param.length; i = i + 1) {
-        item = param[i];
-        sparam = item.split('=');
+    for (var i = 0; i < param.length; i++) {
+        sparam = param[i].split('=');
         id = sparam[0];
         value = sparam[1];
 
         if (id === 'type') {
             searchData[id] = parseInt(value);
-        } else
+        } else {
             searchData[id] = value;
+        }
     }
     return searchData;
 }
-
-function doWeb(doc, url) {
-    var docType = detectWeb(doc, url);
-    if (docType == "multiple") {
-        scrape(doc, url);
-    } else if (docType == "artwork") {
-        if (url.match(/iv2/)) {
-            scrapeIV(doc, url);
-        } else {
-            scrapeMetaWindow(doc, url);
-        }
-    }
-}
-
 
 var decodeMap = {
     '20': ' ',
@@ -138,7 +735,7 @@ var decodeMap = {
     '3E': '>',
     '3F': '?',
     '5B': '[',
-    //				'5C' : '\\',
+    //              '5C' : '\\',
     '5D': ']',
     '5E': '^',
     '5F': '_',
@@ -149,8 +746,55 @@ var decodeMap = {
     '7E': '~'
 };
 
-function decrypt(s) {
+encodeMap = {
+    ' ': '20',
+    '!': '21',
+    '"': '22',
+    '#': '23',
+    '$': '24',
+    '%': '25',
+    '&': '26',
+    "'": '27',
+    '(': '28',
+    ')': '29',
+    '*': '2A',
+    '+': '2B',
+    ',': '2C',
+    '-': '2D',
+    '.': '2E',
+    '/': '2F',
+    '0': '30',
+    '1': '31',
+    '2': '32',
+    '3': '33',
+    '4': '34',
+    '5': '35',
+    '6': '36',
+    '7': '37',
+    '8': '38',
+    '9': '39',
+    ':': '3A',
+    ';': '3B',
+    '<': '3C',
+    '=': '3D',
+    '>': '3E',
+    '?': '3F',
+    '[': '5B',
+    // '\\' : '5C',
+    ']': '5D',
+    '^': '5E',
+    '_': '5F',
+    '`': '60',
+    '{': '7B',
+    '|': '7C',
+    '}': '7D',
+    '~': '7E'
+};
 
+/**
+    Converts two character number character to special character
+**/
+function decrypt(s) {
     var len = s.length;
     var i = 0;
     var newS = '';
@@ -189,10 +833,12 @@ function decrypt(s) {
     return newS;
 }
 
+/**
+    Converts speial character to two digit code.
+**/
 function encrypt(s) {
     var newS = '';
     if (s !== undefined) {
-        //var eMap = _getEncodeMap();
         var len = s.length;
         i = 0;
         var ch;
@@ -212,868 +858,42 @@ function encrypt(s) {
             i++;
         }
     }
-
     return newS;
 }
 
-
-encodeMap = {
-    ' ': '20',
-    '!': '21',
-    '"': '22',
-    '#': '23',
-    '$': '24',
-    '%': '25',
-    '&': '26',
-    "'": '27',
-    '(': '28',
-    ')': '29',
-    '*': '2A',
-    '+': '2B',
-    ',': '2C',
-    '-': '2D',
-    '.': '2E',
-    '/': '2F',
-    '0': '30',
-    '1': '31',
-    '2': '32',
-    '3': '33',
-    '4': '34',
-    '5': '35',
-    '6': '36',
-    '7': '37',
-    '8': '38',
-    '9': '39',
-    ':': '3A',
-    ';': '3B',
-    '<': '3C',
-    '=': '3D',
-    '>': '3E',
-    '?': '3F',
-    '[': '5B',
-    //				'\\' : '5C',
-    ']': '5D',
-    '^': '5E',
-    '_': '5F',
-    '`': '60',
-    '{': '7B',
-    '|': '7C',
-    '}': '7D',
-    '~': '7E'
-};
-
-
-function processIVURL(text1, artItem, serverURL, url) {
-    Zotero.debug("processIVURL  text " + text1);
-    var text = text1;
-    var service = text.substring(text.indexOf("secure"));
-
-    service = service.substring(0, service.indexOf("</td>"));
-    //	Zotero.debug("processIVURL service1 "+service);
-    service = service.replace(/<wbr\/>/g, "");
-    service = service.substring(service.indexOf("?"));
-    service = service.trim();
-    var ivURL = serverURL + "secure/ViewImages" + service + "&zoomparams=&fs=true";
-
-    if (url == "") {
-        artItem.url = ivURL;
-    } else {
-        //	artItem.url=url;
-        artItem.url = ivURL;
-    }
-
-    Zotero.debug("processIVURL service2 ivURL " + ivURL);
-}
-
-function getMetadata(itemsArray, serverURL, url, doc) {
-    var serviceURL4Metadata = serverURL + "secure/metadata/";
-
-
-    (function next() {
-        if (!itemsArray.length) return;
-        var objectIdMod = itemsArray.shift();
-        var items = objectIdMod.split(":");
-        var item = items[0];
-        var objectTypeId = items[1];
-        Zotero.debug("getMetadata  service URL  " + serviceURL4Metadata + item);
-        Zotero.debug("getMetadata  objectTypeId  " + objectTypeId);
-        Zotero.Utilities.HTTP.doGet(serviceURL4Metadata + item, function(text) {
-
-
-            var artItem = processMetadata(text, item, doc, serverURL);
-            artItem.attachments.push({
-                title: "Artstor Thumbnails",
-
-                document: doc
-
-            });
-            var server = serverURL.substring(0, serverURL.length - 8);
-            switch (objectTypeId) {
-                case "13":
-                case "10":
-                    var serviceURL4IVURL = serviceURL4Metadata + item + "?_method=FpHtml";
-                    Zotero.Utilities.HTTP.doGet(serviceURL4IVURL, function(text) {
-                        processIVURL(text, artItem, serverURL, url);
-                    });
-
-                    break;
-                case "11":
-                    var serviceURL4QTVR = serverURL + "secure/imagefpx/" + item + "/7"; //QTVR
-                    Zotero.Utilities.HTTP.doGet(serviceURL4QTVR, function(text) {
-                        var jsonQTVR = eval('(' + text + ')');
-                        var urlQTVR = server + "thumb/" + jsonQTVR.imageUrl;
-                        artItem.attachments.push({
-                            title: "Artstor QuickTime Movie Attachment",
-                            url: urlQTVR,
-                            mimeType: "video/quicktime"
-
-                        });
-
-                    });
-                    artItem.url = url;
-                    break;
-                case "12":
-                    var serviceURL4AUD = serverURL + "secure/imagefpx/" + item + "/10"; //audio 
-                    Zotero.Utilities.HTTP.doGet(serviceURL4AUD, function(text) {
-                        var jsonAUD = eval('(' + text + ')');
-                        var urlAUD = server + "thumb/" + jsonAUD.imageUrl;
-                        artItem.attachments.push({
-                            title: "Artstor Audio File Attachment",
-                            url: urlAUD,
-                            mimeType: "audio/mpeg3"
-
-                        });
-                    });
-                    artItem.url = url;
-                    break;
-                case "20":
-                    var serviceURL4PDF = serverURL + "secure/imagefpx/" + item + "/20"; //PDF
-                    Zotero.Utilities.HTTP.doGet(serviceURL4PDF, function(text) {
-                        var jsonPDF = eval('(' + text + ')');
-                        var urlPDF = server + "thumb" + jsonPDF.imageUrl;
-                        Zotero.debug("PDF url  " + urlPDF);
-                        artItem.attachments.push({
-                            title: "Artstor PDF Attachment",
-                            url: urlPDF,
-                            mimeType: "application/pdf"
-
-                        });
-                    });
-                    artItem.url = url;
-                    break;
-                case "21":
-                    var serviceURL4PPT = serverURL + "secure/imagefpx/" + item + "/21"; //PPT
-                    Zotero.Utilities.HTTP.doGet(serviceURL4PPT, function(text) {
-                        var jsonPPT = eval('(' + text + ')');
-                        var urlPPT = server + "thumb" + jsonPPT.imageUrl;
-                        artItem.attachments.push({
-                            title: "Artstor PowerPoint Attachment",
-                            url: urlPPT,
-                            mimeType: "application/powerpoint"
-
-                        });
-                    });
-                    artItem.url = url;
-                    break;
-                case "22":
-                    var serviceURL4DOC = serverURL + "secure/imagefpx/" + item + "/22"; //DOC
-                    Zotero.Utilities.HTTP.doGet(serviceURL4DOC, function(text) {
-                        var jsonDOC = eval('(' + text + ')');
-                        var urlDOC = server + "thumb" + jsonDOC.imageUrl;
-                        artItem.attachments.push({
-                            title: "Artstor Word Attachment",
-                            url: urlDOC,
-                            mimeType: "application/msword"
-
-                        });
-                    });
-                    artItem.url = url;
-                    break;
-                case "23":
-                    var serviceURL4XXLS = serverURL + "secure/imagefpx/" + item + "/23"; //XLS
-                    Zotero.Utilities.HTTP.doGet(serviceURL4XXLS, function(text) {
-                        var jsonXLS = eval('(' + text + ')');
-                        var urlXLS = server + "thumb" + jsonXLS.imageUrl;
-                        artItem.attachments.push({
-                            title: "Artstor Excel Attachment",
-                            url: urlXLS,
-                            mimeType: "application/excel"
-
-                        });
-                    });
-                    artItem.url = url;
-                    break;
-                case "24":
-                    var serviceURL4VID = serverURL + "secure/imagefpx/" + item + "/24"; //Video
-                    Zotero.Utilities.HTTP.doGet(serviceURL4VID, function(text) {
-                        var jsonVID = eval('(' + text + ')');
-                        var urlVID = jsonVID.imageUrl;
-                        artItem.attachments.push({
-                            title: "Artstor Video File Attachment",
-                            url: urlVID,
-                            mimeType: "text/html"
-
-                        });
-                    });
-                    artItem.url = url;
-                    break;
-            }
-            var service4Commentary = serverURL + "/secure/icommentary/" + item;
-            Zotero.Utilities.HTTP.doGet(service4Commentary, function(text) {
-
-                var jsonCommentary = eval('(' + text + ')');
-                Zotero.debug("commentary " + jsonCommentary.numberOfCommentaries);
-                for (var j = 0; j < jsonCommentary.numberOfCommentaries; j = j + 1) {
-                    if (jsonCommentary.ICommentary[j].status == 2) {
-                        //public commentary
-                        var comment = "";
-
-                        if (jsonCommentary.ICommentary[j].ownerName == "") {
-                            comment = "Note: "
-
-                        } else {
-
-                            comment = "Note by: " + jsonCommentary.ICommentary[j].ownerName + " -  ";
-
-                        }
-                        comment += jsonCommentary.ICommentary[j].commentary;
-                        artItem.notes.push({
-                            note: comment
-                        });
+/** BEGIN TEST CASES **/
+var testCases = [
+    {
+        "type": "artwork",
+        "url": "http://www.sscommons.org/openlibrary/welcome.html#3|collections|7730455||zModeBryn20Mawr20College20Faculty2FStaff2FStudent20Photographs||||||",
+        "defer": true,
+        "items": [
+            {
+                "itemType": "artwork",
+                "title": "Trailer Home; Exterior view",
+                "creators": [
+                    {
+                        "firstName": "Barbara",
+                        "lastName": "Lane",
+                        "creatorType": "Image by"
                     }
-
-                }
-
-
-            });
-            artItem.complete();
-            next();
-        })
-    })();
-    Zotero.done();
-
-}
-
-function processMetadata(text, id, doc, serverURL) {
-    Zotero.debug("processMetadata " + text);
-
-    var json = eval('(' + text + ')');
-    var newArtItem = new Zotero.Item('artwork');
-    var author = new Object();
-
-    newArtItem.archive = "";
-    newArtItem.rights = "";
-    newArtItem.date = "";
-    newArtItem.artworkMedium = "";
-    newArtItem.artist = "";
-    newArtItem.artworkSize = "";
-    newArtItem.title = "Unknown";
-    newArtItem.abstractNote = "";
-    newArtItem.archiveLocation = "";
-    newArtItem.extra = "";
-
-    var portal = serverURL.substring(7, serverURL.indexOf("."));
-
-    Zotero.debug("getMetadata  portal  " + portal);
-    switch (portal) {
-        case "archaeology":
-            var siteName = false;
-
-            for (var i = 0; i < json.metaData.length; i++) {
-                switch (json.metaData[i].fieldName) {
-                    case "Site Name":
-                        newArtItem.title = (newArtItem.title == "Unknown") ? json.metaData[i].fieldValue.replace(/<\/?[^>]+(>|$)/g, " ") : newArtItem.title + "; " + json.metaData[i].fieldValue.replace(/<\/?[^>]+(>|$)/g, " ");
-                        siteName = true;
-
-                        //	newArtItem.extra=addToExtra(newArtItem.extra,json.metaData[i].fieldValue.replace(/<wbr\/>/g,""),"Site Name");
-                        break;
-                    case "Artifact Title":
-                        if (siteName) {
-
-                            newArtItem.extra = addToExtra(newArtItem.extra, newArtItem.title, "Site Name");
-                            newArtItem.title = "Unknown";
-                            siteName = false;
-                        }
-                        newArtItem.title = (newArtItem.title == "Unknown") ? json.metaData[i].fieldValue.replace(/<\/?[^>]+(>|$)/g, " ") : newArtItem.title + "; " + json.metaData[i].fieldValue.replace(/<\/?[^>]+(>|$)/g, " ");
-                        break;
-                    case "Director":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Director");
-                        break;
-                    case "Artifact Description":
-                        newArtItem.abstractNote = (newArtItem.abstractNote == "") ? json.metaData[i].fieldValue.replace(/<\/?[^>]+(>|$)/g, " ") : newArtItem.abstractNote + ". " + json.metaData[i].fieldValue.replace(/<\/?[^>]+(>|$)/g, " ");
-
-                        break;
-                    case "Artifact Repository":
-                        newArtItem.archive = (newArtItem.archive == "") ? json.metaData[i].fieldValue.replace(/<\/?[^>]+(>|$)/g, " ") : newArtItem.archive + ": " + (json.metaData[i].fieldValue).replace(/<wbr\/>/g, "").replace(/<\/?[^>]+(>|$)/g, " ");
-                        break;
-
-                    case "Rights":
-                        newArtItem.rights = (newArtItem.rights == "") ? json.metaData[i].fieldValue.replace(/<\/?[^>]+(>|$)/g, " ") : newArtItem.rights + ". " + json.metaData[i].fieldValue.replace(/<\/?[^>]+(>|$)/g, " ");
-                        break;
-                    case "Culture":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Culture");
-                        break;
-                    case "Period":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Period");
-                        break;
-                    case "Site Date":
-                        newArtItem.date = (newArtItem.date == "") ? json.metaData[i].fieldValue : newArtItem.date + ", " + json.metaData[i].fieldValue;
-                        break;
-                    case "Artifact Materials/Techniques":
-                        newArtItem.artworkMedium = (newArtItem.artworkMedium == "") ? json.metaData[i].fieldValue : newArtItem.artworkMedium + " " + json.metaData[i].fieldValue;
-                        break;
-                    case "Artifact Dimensions":
-                        newArtItem.artworkSize = (newArtItem.artworkSize == "") ? json.metaData[i].fieldValue : newArtItem.artworkSize + ", " + json.metaData[i].fieldValue;
-                        break;
-                    case "Collection":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Collection");
-                        break;
-                    case "Site Region":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Site Region");
-                        break;
-                    case "Feature Type":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Feature Type");
-                        break;
-                    case "Site Modern Location":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Site Modern Location");
-                        break;
-                    case "Campaign Title":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Campaign Title");
-                        break;
-                    case "Photographer":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Photographer");
-                        break;
-                    case "Artifact Title":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Artifact Title");
-                        break;
-                    case "Artifact Current Location":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Artifact Current Location");
-                        break;
-                    case "Artifact Condition":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Artifact Condition");
-                        break;
-                    case "Contributor":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Contributor");
-                        break;
-                    case "Era":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Era");
-                        break;
-                    case "Site Number":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Site Number");
-                        break;
-                    case "Source":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Source");
-                        break;
-                    case "Artifact Origin":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Artifact Origin");
-                        break;
-                    case "Artifact Sponsor":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Artifact Sponsor");
-                        break;
-                    case "Artifact Date":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Artifact Date");
-                        break;
-                }
-            }
-            break;
-        case "flexspace":
-            for (var i = 0; i < json.metaData.length; i++) {
-                switch (json.metaData[i].fieldName) {
-
-                    case "Collection":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Collection");
-                        break;
-
-                    case "Campus":
-                        newArtItem.title = (newArtItem.title == "Unknown") ? json.metaData[i].fieldValue.replace(/<\/?[^>]+(>|$)/g, " ") : newArtItem.title + "; " + json.metaData[i].fieldValue.replace(/<\/?[^>]+(>|$)/g, " ");
-                    case "Square Footage":
-                        newArtItem.artworkSize = (newArtItem.artworkSize == "") ? json.metaData[i].fieldValue : newArtItem.artworkSize + ", " + json.metaData[i].fieldValue;
-                        break;
-                    case "General Description":
-                        newArtItem.abstractNote = (newArtItem.abstractNote == "") ? json.metaData[i].fieldValue.replace(/<\/?[^>]+(>|$)/g, " ") : newArtItem.abstractNote + ". " + json.metaData[i].fieldValue.replace(/<\/?[^>]+(>|$)/g, " ");
-                        break;
-                    case "Comments (Technology Integration)":
-                        newArtItem.abstractNote = (newArtItem.abstractNote == "") ? json.metaData[i].fieldValue.replace(/<\/?[^>]+(>|$)/g, " ") : newArtItem.abstractNote + ". " + json.metaData[i].fieldValue.replace(/<\/?[^>]+(>|$)/g, " ");
-                        break;
-                    case "Space Design Type":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Space Design Type");
-                        break;
-                    case "Building Name":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Building Name");
-                        break;
-                    case "Room Name":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Room Name");
-                        break;
-                    case "Primary Room Utilization":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Primary Room Utilization");
-                        break;
-                    case "Rights":
-                        newArtItem.rights = (newArtItem.rights == "") ? json.metaData[i].fieldValue.replace(/<\/?[^>]+(>|$)/g, " ") : newArtItem.rights + ". " + json.metaData[i].fieldValue.replace(/<\/?[^>]+(>|$)/g, " ");
-                        break;
-                    case "Technology Contact Email":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Technology Contact Email");
-                        break;
-                }
-            }
-            break;
-        default:
-            for (var i = 0; i < json.metaData.length; i++) {
-                switch (json.metaData[i].fieldName) {
-                    case "Creator":
-                        newArtItem.creators.push(ZU.cleanAuthor(json.metaData[i].fieldValue.replace(/<\/?[^>]+(>|$)/g, " ").replace(/(&gt;)|(&lt;)/g, ""), "author", false));
-                        break;
-                    case "Related Item":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Related Item");
-                        break;
-                    case "Period": ///newArtItem.extra=(newArtItem.extra=="")?"Culture: "+json.metaData[i].fieldValue:newArtItem.extra+", "+json.metaData[i].fieldValue;
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Period");
-                        break;
-                    case "Style Period": ///newArtItem.extra=(newArtItem.extra=="")?"Culture: "+json.metaData[i].fieldValue:newArtItem.extra+", "+json.metaData[i].fieldValue;
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Style Period");
-                        break;
-                    case "ID Number": ///newArtItem.extra=(newArtItem.extra=="")?"Culture: "+json.metaData[i].fieldValue:newArtItem.extra+", "+json.metaData[i].fieldValue;
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "ID Number");
-                        break;
-                    case "Site": ///newArtItem.extra=(newArtItem.extra=="")?"Culture: "+json.metaData[i].fieldValue:newArtItem.extra+", "+json.metaData[i].fieldValue;
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Site");
-                        break;
-                    case "Technique": ///newArtItem.extra=(newArtItem.extra=="")?"Culture: "+json.metaData[i].fieldValue:newArtItem.extra+", "+json.metaData[i].fieldValue;
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Technique");
-                        break;
-                    case "Culture": ///newArtItem.extra=(newArtItem.extra=="")?"Culture: "+json.metaData[i].fieldValue:newArtItem.extra+", "+json.metaData[i].fieldValue;
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Culture");
-                        break;
-                    case "Title":
-                        newArtItem.title = (newArtItem.title == "Unknown") ? json.metaData[i].fieldValue.replace(/<\/?[^>]+(>|$)/g, " ") : newArtItem.title + "; " + json.metaData[i].fieldValue.replace(/<\/?[^>]+(>|$)/g, " ");
-                        break;
-                    case "Date":
-                        newArtItem.date = (newArtItem.date == "") ? json.metaData[i].fieldValue : newArtItem.date + ", " + json.metaData[i].fieldValue;
-                        break;
-                    case "Location": //newArtItem.extra=(newArtItem.extra=="")?"Location: "+json.metaData[i].fieldValue.replace(/<wbr\/>/,""):newArtItem.extra+", "+json.metaData[i].fieldValue.replace(/<wbr\/>/,"");
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Location");
-                        break;
-                    case "Material":
-                        newArtItem.artworkMedium = (newArtItem.artworkMedium == "") ? json.metaData[i].fieldValue : newArtItem.artworkMedium + " " + json.metaData[i].fieldValue;
-                        break;
-                    case "Measurements":
-                        newArtItem.artworkSize = (newArtItem.artworkSize == "") ? json.metaData[i].fieldValue : newArtItem.artworkSize + ", " + json.metaData[i].fieldValue;
-                        break;
-                    case "Work Type":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Work Type");
-                        break;
-                    case "Credit Line":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Credit Line");
-                        break;
-                    case "Accesssion Number":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Accesssion Number");
-                        break;
-                    case "Image Copyright Notice":
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Image Copyright Notice");
-
-                        break;
-                    case "Repository":
-                        newArtItem.archive = (newArtItem.archive == "") ? json.metaData[i].fieldValue.replace(/<\/?[^>]+(>|$)/g, " ") : newArtItem.archive + ": " + (json.metaData[i].fieldValue).replace(/<wbr\/>/g, "").replace(/<\/?[^>]+(>|$)/g, " ");
-                        break;
-
-
-                    case "Source": //newArtItem.extra=(newArtItem.extra=="")?"Source: "+json.metaData[i].fieldValue.replace(/<wbr\/>/,""):newArtItem.extra+"; "+(json.metaData[i].fieldValue).replace(/<wbr\/>/,"");
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue.replace(/<wbr\/>/g, ""), "Source");
-                        break;
-                    case "Rights":
-                        newArtItem.rights = (newArtItem.rights == "") ? json.metaData[i].fieldValue.replace(/<\/?[^>]+(>|$)/g, " ") : newArtItem.rights + ". " + json.metaData[i].fieldValue.replace(/<\/?[^>]+(>|$)/g, " ");
-                        break;
-                    case "Description":
-                        newArtItem.abstractNote = (newArtItem.abstractNote == "") ? json.metaData[i].fieldValue.replace(/<\/?[^>]+(>|$)/g, " ") : newArtItem.abstractNote + ". " + json.metaData[i].fieldValue.replace(/<\/?[^>]+(>|$)/g, " ");
-
-                        break;
-                    case "Subject": //newArtItem.extra=(newArtItem.extra=="")?"Subject: "+json.metaData[i].fieldValue:newArtItem.extra+", "+json.metaData[i].fieldValue;
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue, "Subject");
-
-                        break;
-                    case "Artstor Collection": //newArtItem.extra=(newArtItem.extra=="")?"Subject: "+json.metaData[i].fieldValue:newArtItem.extra+", "+json.metaData[i].fieldValue;
-                        newArtItem.extra = addToExtra(newArtItem.extra, json.metaData[i].fieldValue, "Artstor Collection");
-
-                        break;
-                    default:
-                }
-            }
-    }
-    return newArtItem;
-
-}
-
-function addToExtra(extraValue, value, label) {
-    value = value.replace(/\./, "");
-    value = value.replace(/<\/?[^>]+(>|$)/g, " ");
-    if (extraValue == "") {
-        extraValue = label + ": " + value;
-    } else {
-        if (extraValue.indexOf(label) == -1) {
-            extraValue += "; " + label + ": " + value;
-
-        } else {
-
-            extraValue += ", " + value;
-        }
-
-    }
-    return extraValue;
-}
-
-function scrape(doc, url, metaWindowIds) {
-    var savedItems = new Array();
-    var saved = 0;
-    var urlstub = url.substring(url.indexOf('.org/') + 5, url.length);
-    //Zotero.debug(urlstub);
-
-    hash = url;
-    if (hash.indexOf("|") < 0) {
-        hash = hash.replace(/%7c/gi, "|");
-
-    }
-    var param = hash.split("|");
-
-    var suburl = hash.substring(hash.indexOf('|') + 1, url.length);
-    var service = param[0].replace(/welcome\.html/, "");
-    //var serverURL = param[0].substring(0,param[0].length-2);// http://library.artstor.org:8080/library/
-    var serverURL = service.substring(0, service.length - 2);
-    Zotero.debug("serverURL  " + serverURL);
-
-    //check TN page type
-    var pageType = param[1]; //search, imagegroup, categories, My Personal Collection 
-    Zotero.debug("pageType " + pageType);
-
-    var imagesPerPage = doc.getElementById("thumbNavImageButt").innerHTML;
-    var pageNo = doc.getElementById("pageNo").value;
-    var firstImg = (parseInt(pageNo) - 1) * (parseInt(imagesPerPage)) + 1;
-
-    var sortUL = doc.getElementById("sub0sortList");
-    var sortElemWChk = sortUL.getElementsByClassName('sortListItemNav');
-    var sortOrder = 0; //scrape from page
-    if (sortElemWChk.length > 0) {
-        switch (sortElemWChk[0].id) {
-            case "thumbSortRelevance0":
-                sortOrder = 0;
-                break;
-            case "thumbSortTitle0":
-                sortOrder = 1;
-                break;
-            case "thumbSortCreator0":
-                sortOrder = 2;
-                break;
-            case "thumbSortDate0":
-                sortOrder = 3;
-                break;
-
-        }
-    }
-    switch (pageType) {
-        case "search":
-            var searchTerm = decodeSearchData(decrypt(param[7]));
-            Zotero.debug(searchTerm);
-            var kw = searchTerm.kw;
-            Zotero.debug("kw " + kw);
-            kw = encrypt(kw);
-            Zotero.debug("encrypt kw " + kw);
-            var type = searchTerm.type;
-            var origKW = searchTerm.origKW;
-            origKW = escape(origKW);
-            var order = 0;
-            if (type == "3" || type == "2") {
-                //search within IG and categories
-                var id = searchTerm.id; //get from URL
-                var name = searchTerm.name;
-                name = escape(name);
-                var p = "secure/search/" + param[2] + "/" + firstImg + "/" + imagesPerPage + "/" + sortOrder + "?type=" + type + "&kw=" +
-                    kw + "&origKW=" + origKW + "&id=" + id + "&name=" + name + "&order=" + order + "&tn=1";
-
-            } else if (type == "4") {
-                //search notes
-                var aType = searchTerm.aType;
-                var p = "secure/search/" + param[2] + "/" + firstImg + "/" + imagesPerPage + "/" + sortOrder + "?type=" + type + "&kw=" + kw + "&origKW=" + origKW + "&aType=" + aType + "&order=" + order + "&tn=1";
-            } else {
-                //KW search type=6, PC, All Coll, Inst Coll, Adv Srch
-                var collectionTit = decrypt(param[3]);
-                var collectionTitle = collectionTit.split(":");
-                Zotero.debug("collectionTitle  " + collectionTitle[0]);
-                var id = searchTerm.id; //get from URL
-                var geoIds = searchTerm.geoIds; //get from URL
-                var clsIds = searchTerm.clsIds; //get from URL
-                var collTypes = searchTerm.collTypes; //get from URL
-                var prGeoId = searchTerm.prGeoId; //get from URL
-                var name = collectionTitle[0];
-                name = escape(name);
-                var bDate = searchTerm.bDate; //get from URL
-                var eDate = searchTerm.eDate; //get from URL
-                var dExact = searchTerm.dExact; //get from URL
-                var p = "secure/search/" + param[2] + "/" + firstImg + "/" + imagesPerPage + "/" + sortOrder + "?type=" + type + "&kw=" +
-                    kw + "&origKW=" + origKW + "&geoIds=" + geoIds + "&clsIds=" + clsIds + "&collTypes=" + collTypes + "&id=" + id + "&name=" + name + "&bDate=" + bDate +
-                    "&eDate=" + eDate + "&dExact=" + dExact + "&order=" + order + "&isHistory=false&prGeoId=" + prGeoId + "&tn=1";
-            }
-            break;
-        case "imagegroup":
-            //Browse IG
-            var p = "secure/imagegroup/" + param[2] + "/thumbnails/" + firstImg + "/" + imagesPerPage + "/" + sortOrder;
-            break;
-        case "collections":
-            //Browse AS Category, PC, Inst Colls
-            var p = "secure/collections/" + param[2] + "/thumbnails/" + firstImg + "/" + imagesPerPage + "/" + sortOrder;
-            break;
-        case "categories":
-            var p = "secure/categories/" + param[2] + "/thumbnails/" + firstImg + "/" + imagesPerPage + "/" + sortOrder;
-            break;
-        case "collaboratoryfiltering":
-            var p = "secure/collaboratoryfiltering/" + param[2] + "/thumbnails/" + firstImg + "/" + imagesPerPage + "/" + sortOrder + "?collectionId=" + param[8];
-            break;
-        case "cluster":
-            var p = "secure/cluster/" + param[2] + "/thumbnails/" + firstImg + "/" + imagesPerPage + "/" + sortOrder;
-            break;
-    }
-    var serviceURL4IDs = serverURL + p;
-    Zotero.debug(serviceURL4IDs);
-    Zotero.Utilities.HTTP.doGet(serviceURL4IDs, function(text) {
-        var selected = [];
-        var json = eval('(' + text + ')');
-        /*var json = JSON.parse(text);*/
-        items = new Object();
-        var objIdArray = [];
-        var idArrayLength = json.thumbnails.length;
-        var objTitleArray = [];
-        for (var i = 0; i < idArrayLength; i++) {
-            objIdArray.push(json.thumbnails[i].objectId + ":" + json.thumbnails[i].objectTypeId); //array of all objectids on page
-            objTitleArray.push(json.thumbnails[i].thumbnail1); //array of all titles on page
-        }
-
-        Zotero.debug("objTitleArray  " + objTitleArray);
-        var itemsArray = [];
-        if (metaWindowIds != undefined) {
-            //process metadata windows instead of TNs
-            for (var j = 0; j < metaWindowIds.length; j++) {
-                for (var k = 0; k < objIdArray.length; k++) {
-                    if (metaWindowIds[j] == objIdArray[k].substring(0, objIdArray[k].indexOf(":"))) {
-                        metaWindowIds[j] = objIdArray[k];
+                ],
+                "date": "Photographed: 2001",
+                "extra": "Location: Bradford County, Pennsylvania; Collection: Bryn Mawr College Faculty/Staff/Student Photographs; ID Number: 01-07828; Source: Personal photographs of Professor Barbara Lane, 2001",
+                "libraryCatalog": "ARTstor",
+                "rights": "Copyright is owned by the photographer Questions can be directed to sscommons@brynmawr.edu.; This image has been  selected and made av ailable by a user us ing Artstor's softwa re tools Artstor ha s not screened or se lected this image or  cleared any rights  to it and is acting  as an online service  provider pursuant t o 17 U.S.C. §512. Ar tstor disclaims any  liability associated  with the use of thi s image. Should you  have any legal objec tion to the use of t his image, please vi sit http://www.artst or.org/our-organizat ion/o-html/copyright .shtml for contact i nformation and instr uctions on how to pr oceed.",
+                "url": "http://www.sscommons.org/openlibrarysecure/ViewImages?id=4jEkdDElLjUzRkY6fz5%2BRXlDOHkje1x9fg%3D%3D&userId=gDFB&zoomparams=&fs=true",
+                "attachments": [
+                    {
+                        "title": "Artstor Thumbnails"
                     }
-                }
+                ],
+                "tags": [],
+                "notes": [],
+                "seeAlso": []
             }
-
-            getMetadata(metaWindowIds, serverURL, url, doc);
-            return;
-        }
-        var wrap = doc.getElementById("thumbContentWrap");
-
-
-        var thumbClass = "thumbImageHolder";
-        if (wrap.style.display == "none") {
-            wrap = doc.getElementById("listContentWrap");
-            thumbClass = "listImageHolder";
-        }
-
-        var imageElems = wrap.getElementsByClassName(thumbClass + " thumbNailImageSelected");
-        var arrayLength = imageElems.length;
-        for (var i = 0; i < imageElems.length; i++) {
-            var id = imageElems[i].id;
-            var imageNum = id.substring(id.indexOf("m") + 1, id.indexOf("_"));
-            if (parseInt(imageNum) > idArrayLength) {
-                arrayLength--;
-            }
-        }
-
-        if (arrayLength == 0) {
-            //all images	
-            imageElems = wrap.getElementsByClassName(thumbClass);
-            arrayLength = idArrayLength;
-        }
-
-        //selected images
-        for (var i = 0; i < arrayLength; i++) {
-            var id = imageElems[i].id;
-            var imageNum = id.substring(id.indexOf("m") + 1, id.indexOf("_"));
-            if (objTitleArray[imageNum - 1] == "") {
-                items[objIdArray[imageNum - 1]] = "Untitled";
-
-            } else {
-                items[objIdArray[imageNum - 1]] = objTitleArray[imageNum - 1];
-
-            }
-
-
-
-        }
-
-        Zotero.selectItems(items, function(selectItems) {
-            for (var j in selectItems) {
-                itemsArray.push(j);
-            }
-            getMetadata(itemsArray, serverURL, url, doc);
-        });
-    });
-
-}
-
-function scrapeIV(doc, url) {
-    var ivServerURL = url.substring(0, url.indexOf("iv2")); 
-
-    var serviceURL4IVMetadata = ivServerURL + "secure/metadata/";
-    var objectIdMod = doc.getElementById("objID").title;
-    var items = objectIdMod.split(":");
-    var item = items[0];
-    var objectTypeId = items[1];
-    var serviceURL = serviceURL4IVMetadata + item;
-    //Zotero.debug("item  " +item+" serviceURL "+serviceURL);
-    Zotero.Utilities.HTTP.doGet(serviceURL, function(text) {
-        Zotero.debug("iv text  " + text + "  doc " + doc + "  objectTypeId  " + objectTypeId);
-        var artItem = processMetadata(text, item, doc, ivServerURL);
-        var server = ivServerURL.substring(0, ivServerURL.length - 8);
-        switch (objectTypeId) {
-            case "10":
-                /*	var serviceURL4IVURL = serviceURL4IVMetadata+item+"?_method=FpHtml";
-                						Zotero.Utilities.HTTP.doGet(serviceURL4IVURL, function(text) {
-                						processIVURL(text, artItem,ivServerURL,"");
-                						
-                						});*/
-                break;
-            case "11":
-                var serviceURL4QTVR = ivServerURL + "secure/imagefpx/" + item + "/7"; //QTVR
-                Zotero.Utilities.HTTP.doGet(serviceURL4QTVR, function(text) {
-                    var jsonQTVR = eval('(' + text + ')');
-                    var urlQTVR = server + "thumb/" + jsonQTVR.imageUrl;
-                    artItem.attachments.push({
-                        title: "Artstor QuickTime Movie Attachment",
-                        url: urlQTVR,
-                        mimeType: "video/quicktime"
-
-                    });
-                });
-                break;
-            case "12":
-                var serviceURL4AUD = ivServerURL + "secure/imagefpx/" + item + "/10"; //audio 
-                Zotero.Utilities.HTTP.doGet(serviceURL4AUD, function(text) {
-                    var jsonAUD = eval('(' + text + ')');
-                    var urlAUD = server + "thumb/" + jsonAUD.imageUrl;
-                    artItem.attachments.push({
-                        title: "Artstor Audio File Attachment",
-                        url: urlAUD,
-                        mimeType: "audio/mpeg3"
-
-                    });
-                });
-                break;
-            case "20":
-                var serviceURL4PDF = ivServerURL + "secure/imagefpx/" + item + "/20"; //PDF
-                Zotero.Utilities.HTTP.doGet(serviceURL4PDF, function(text) {
-                    var jsonPDF = eval('(' + text + ')');
-                    var urlPDF = server + "thumb" + jsonPDF.imageUrl;
-                    Zotero.debug("PDF url  " + urlPDF);
-                    artItem.attachments.push({
-                        title: "Artstor PDF Attachment",
-                        url: urlPDF,
-                        mimeType: "application/pdf"
-
-                    });
-                });
-                break;
-            case "21":
-                var serviceURL4PPT = ivServerURL + "secure/imagefpx/" + item + "/21"; //PPT
-                Zotero.Utilities.HTTP.doGet(serviceURL4PPT, function(text) {
-                    var jsonPPT = eval('(' + text + ')');
-                    var urlPPT = server + "thumb" + jsonPPT.imageUrl;
-                    artItem.attachments.push({
-                        title: "Artstor PowerPoint Attachment",
-                        url: urlPPT,
-                        mimeType: "application/powerpoint"
-
-                    });
-                });
-                break;
-            case "22":
-                var serviceURL4DOC = ivServerURL + "secure/imagefpx/" + item + "/22"; //DOC
-                Zotero.Utilities.HTTP.doGet(serviceURL4DOC, function(text) {
-                    var jsonDOC = eval('(' + text + ')');
-                    var urlDOC = server + "thumb" + jsonDOC.imageUrl;
-                    artItem.attachments.push({
-                        title: "Artstor Word Documnet Attachment",
-                        url: urlDOC,
-                        mimeType: "application/msword"
-
-                    });
-                });
-                break;
-            case "23":
-                var serviceURL4XXLS = ivServerURL + "secure/imagefpx/" + item + "/23"; //XLS
-                Zotero.Utilities.HTTP.doGet(serviceURL4XXLS, function(text) {
-                    var jsonXLS = eval('(' + text + ')');
-                    var urlXLS = server + "thumb" + jsonXLS.imageUrl;
-                    artItem.attachments.push({
-                        title: "Artstor Excel Attachment",
-                        url: urlXLS,
-                        mimeType: "application/excel"
-
-                    });
-                });
-                break;
-            case "24":
-                var serviceURL4VID = ivServerURL + "secure/imagefpx/" + item + "/24"; //Video
-                Zotero.Utilities.HTTP.doGet(serviceURL4VID, function(text) {
-                    var jsonVID = eval('(' + text + ')');
-                    var urlVID = jsonVID.imageUrl;
-                    artItem.attachments.push({
-                        title: "Artstor Video File Attachment",
-                        url: urlVID,
-                        mimeType: "text/html"
-
-                    });
-                });
-                break;
-        }
-        var serviceURL4IVURL = serviceURL4IVMetadata + item + "?_method=FpHtml";
-        Zotero.Utilities.HTTP.doGet(serviceURL4IVURL, function(text) {
-            processIVURL(text, artItem, ivServerURL, "");
-
-        });
-        var service4Commentary = ivServerURL + "/secure/icommentary/" + item;
-        Zotero.Utilities.HTTP.doGet(service4Commentary, function(text) {
-
-            var jsonCommentary = eval('(' + text + ')');
-            Zotero.debug("commentary " + jsonCommentary.numberOfCommentaries);
-            for (var j = 0; j < jsonCommentary.numberOfCommentaries; j = j + 1) {
-                if (jsonCommentary.ICommentary[j].status == 2) {
-                    //public commentary
-                    var comment = "";
-                    if (jsonCommentary.ICommentary[j].ownerName == "") {
-                        comment = "Note: "
-
-                    } else {
-
-                        comment = "Note by: " + jsonCommentary.ICommentary[j].ownerName + " -  ";
-
-                    }
-                    comment += jsonCommentary.ICommentary[j].commentary;
-                    artItem.notes.push({
-                        note: comment
-                    });
-                }
-
-            }
-
-
-        });
-        artItem.complete();
-    });
-
-    Zotero.done();
-
-
-}
-
-function scrapeMetaWindow(doc, url) {
-    var metaWindowIds = [];
-    var metaWindows = doc.getElementsByClassName('MetaDataWidgetRoot');
-    for (var i = 0; i < metaWindows.length; i++) {
-        metaWindowIds.push(metaWindows[i].id.substring(3));
-
+        ]
     }
-    Zotero.debug("scrapeMetaWindow  " + metaWindowIds);
-    scrape(doc, url, metaWindowIds);
+]
+/** END TEST CASES **/
 
-    Zotero.done();
-}
