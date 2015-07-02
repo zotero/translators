@@ -15,7 +15,7 @@
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
-	"lastUpdated": "2014-08-25 06:43:15"
+	"lastUpdated": "2015-07-02 02:03:17"
 }
 
 
@@ -438,6 +438,7 @@ var filePathSpecialChars = '\\\\:;{}$'; // $ for Mendeley
 var encodeFilePathRE = new RegExp('[' + filePathSpecialChars + ']', 'g');
 
 function encodeFilePathComponent(value) {
+	if (!value) return '';
 	return value.replace(encodeFilePathRE, "\\$&");
 }
 

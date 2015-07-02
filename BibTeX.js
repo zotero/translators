@@ -18,7 +18,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-05-20 22:03:17"
+	"lastUpdated": "2015-07-02 02:03:17"
 }
 
 function detectImport() {
@@ -1014,14 +1014,17 @@ var encodeFilePathRE = new RegExp('[' + filePathSpecialChars + ']', 'g');
 
 // We strip out {} in general, because \{ and \} still break BibTeX (0.99d)
 function cleanFilePath(str) {
+	if (!str) return '';
 	return str.replace(/(?:\s*[{}]+)+\s*/g, ' ');
 }
 
 function encodeFilePathComponent(value) {
+	if (!value) return '';
 	return value.replace(encodeFilePathRE, "\\$&");
 }
 
 function decodeFilePathComponent(value) {
+	if (!value) return '';
 	return value.replace(/\\([^A-Za-z0-9.])/g, "$1");
 }
 
