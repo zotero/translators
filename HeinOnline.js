@@ -37,30 +37,30 @@
 
 function detectWeb (doc, url) {
 	if (url.indexOf("/LuceneSearch?") > -1) {
-        if (getSearchResults(doc)) {
-		    return "multiple";
-        }
+		if (getSearchResults(doc)) {
+			return "multiple";
+		}
 	} else {
 		return "journalArticle";
 	}
-    return false;
+	return false;
 }
 
 function getXPathStr(attr, elem, path) {
-    var res = ZU.xpath(elem, path);
-    res = res.length ? res[0][attr] : '';
-    return res ? res : '';
+	var res = ZU.xpath(elem, path);
+	res = res.length ? res[0][attr] : '';
+	return res ? res : '';
 }
 
 function Data(doc) {
-	this.node = doc.getElementById("Print1");
+	this.node = ZU.xpath(doc, '//form[@id="Print1"]');
 	this.urlbase = "PDFsearchable?sectioncount=1&ext=.pdf&nocover=";
 	this.queryElems = [];
 }
 
 Data.prototype.getVal = function(name, returnOnly) {
 
-	var val = getXPathStr("value", this.node, '//input[@name="' + name + '"]');
+	var val = getXPathStr("value", this.node, './/input[@name="' + name + '"]');
 	val = encodeURIComponent(val);
 
 	if (!returnOnly) {
@@ -78,12 +78,11 @@ function getSearchResults(doc) {
 		items = {},
 		found = false
 	for (var i=0; i<results.length; i++) {
-		
-		var url = getXPathStr("textContent", results[i], './/a[contains(@href, "Print")]');
+		var url = getXPathStr("href", results[i], './/a[contains(@href, "Print")]');
 		url = url.replace(/Print/, "Page");
 		url = url.replace(/&terms=[^&]*/, '');
 
-		var title = getXPathStr("href", results[i], './/a[1]');
+		var title = getXPathStr("textContent", results[i], './/a[1]');
 		title = ZU.trimInternal(title);
 		title = title.replace(/\s*\[[^\]]*\]$/, '');
 
