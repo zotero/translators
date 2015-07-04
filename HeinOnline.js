@@ -2,7 +2,7 @@
 	"translatorID": "3dcbb947-f7e3-4bbd-a4e5-717f3701d624",
 	"label": "HeinOnline",
 	"creator": "Frank Bennett",
-	"target": "https?://heinonline.org/HOL/(?:LuceneSearch|Page)\\?",
+	"target": "^https?://heinonline\.org/HOL/(?:LuceneSearch|Page)\\?",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -13,7 +13,7 @@
 }
 
 function detectWeb (doc, url) {
-	if (url.match(/\/LuceneSearch\?/)) {
+	if (url.indexOf("/LuceneSearch?") > -1) {
 		return "multiple";
 	} else {
 		return "journalArticle";
@@ -22,18 +22,22 @@ function detectWeb (doc, url) {
 
 function Data(doc) {
 	this.node = ZU.xpath(doc, '//form[@id="Print1"]');
-	this.urlbase = "http://heinonline.org/HOL/PDFsearchable?";
+	var urlLst = doc.location.href.split('/');
+	this.urlbase = urlLst.slice(0, 4).join('/') + "/PDFsearchable?";
 	this.queryElems = [];
 	this.tail = "&sectioncount=1&ext=.pdf&nocover=";
 }
 
-Data.prototype.getval = function(name) {
+Data.prototype.getval = function(name, returnOnly) {
 	var val = '';
 	var input = ZU.xpath(this.node, './/input[@name="' + name + '"]');
 	if (input && input.length) {
-		val = input[0].value ? input[0].value : '';
+		val = input[0].value ? encodeURIComponent(input[0].value) : '';
 	}
-	this.queryElems.push(name + "=" + val);
+	if (!returnOnly) {
+		this.queryElems.push(name + "=" + val);
+	}
+	return val;
 }
 
 Data.prototype.dump = function() {
@@ -62,7 +66,7 @@ function getSearchResults(doc) {
 	return found ? items : false;
 }
 
-function scrapePage(doc, isSingle) {
+function scrapePage(doc) {
 	var pdfPageURL = doc.location.href.replace(/\/Page\?/, "/Print?");
 	var item = new Zotero.Item();
 	var spans = ZU.xpath(doc, '//span[contains(@class, " Z3988") or contains(@class, "Z3988 ") or @class="Z3988"][@title]');
@@ -73,14 +77,21 @@ function scrapePage(doc, isSingle) {
 	ZU.processDocuments([pdfPageURL], 
 		function(pdoc){
 			var input = new Data(pdoc);
+			var endingID = input.getval("toid", true);
+			
 			input.getval("handle");
 			input.getval("collection");
 			input.getval("section");
-			input.getval("id");
+			var startingID = input.getval("id");
 			input.getval("print");
 			input.getval("nocover");
 			var pdfURL = input.dump();
 			
+			item.pages = item.pages + "-" 
+				+ (parseInt(item.pages) 
+				+  parseInt(endingID) 
+				-  parseInt(startingID));
+
 			item.attachments.push({
 				url:pdfURL,
 				title:"HeinOnline PDF",
@@ -106,7 +117,9 @@ function doWeb (doc, url) {
 	} else {
 		scrapePage(doc);
 	}
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
