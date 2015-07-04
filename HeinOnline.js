@@ -138,7 +138,7 @@ var testCases = [
 				"date": "1957",
 				"journalAbbreviation": "Howard L.J.",
 				"libraryCatalog": "HeinOnline",
-				"pages": "26",
+				"pages": "26-41",
 				"publicationTitle": "Howard Law Journal",
 				"url": "http://heinonline.org/HOL/Page?handle=hein.journals/howlj3&id=46&div=&collection=journals",
 				"volume": "3",
