@@ -54,14 +54,14 @@ function getXPathStr(attr, elem, path) {
 
 function Data(doc) {
 	this.node = ZU.xpath(doc, '//form[@id="Print1"]');
-	this.urlbase = "PDFsearchable?sectioncount=1&ext=.pdf&nocover=";
+	this.urlbase = "PDFsearchable?sectioncount=1&ext=.pdf&nocover=&";
 	this.queryElems = [];
 }
 
 Data.prototype.getVal = function(name, returnOnly) {
 
 	var val = getXPathStr("value", this.node, './/input[@name="' + name + '"]');
-	val = encodeURIComponent(val);
+	val = val ? encodeURIComponent(val) : '';
 
 	if (!returnOnly) {
 		this.queryElems.push(name + "=" + val);
@@ -109,7 +109,6 @@ function scrapePage(doc, url) {
 			input.getVal("collection");
 			input.getVal("section");
 			input.getVal("print");
-			input.getVal("nocover");
 			var pdfURL = input.dump();
 			
 			item.pages = item.pages + "-" 
