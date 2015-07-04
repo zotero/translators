@@ -2,38 +2,67 @@
 	"translatorID": "3dcbb947-f7e3-4bbd-a4e5-717f3701d624",
 	"label": "HeinOnline",
 	"creator": "Frank Bennett",
-	"target": "^https?://heinonline\.org/HOL/(?:LuceneSearch|Page)\\?",
-	"minVersion": "1.0",
+	"target": "^https?://heinonline\\.org/HOL/(LuceneSearch|Page)\\?",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
+	"browserSupport": "gcsbiv",
 	"lastUpdated": "2015-07-04 10:32:10"
 }
 
+/*
+    ***** BEGIN LICENSE BLOCK *****
+
+    Copyright © 2015 Frank Bennett
+
+    This file is part of Zotero.
+
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+    ***** END LICENSE BLOCK *****
+*/
+
 function detectWeb (doc, url) {
 	if (url.indexOf("/LuceneSearch?") > -1) {
-		return "multiple";
+        if (getSearchResults(doc)) {
+		    return "multiple";
+        }
 	} else {
 		return "journalArticle";
 	}
+    return false;
+}
+
+function getXPathStr(attr, elem, path) {
+    var res = ZU.xpath(elem, path);
+    res = res.length ? res[0][attr] : '';
+    return res ? res : '';
 }
 
 function Data(doc) {
-	this.node = ZU.xpath(doc, '//form[@id="Print1"]');
-	var urlLst = doc.location.href.split('/');
-	this.urlbase = urlLst.slice(0, 4).join('/') + "/PDFsearchable?";
+	this.node = doc.getElementById("Print1");
+	this.urlbase = "PDFsearchable?sectioncount=1&ext=.pdf&nocover=";
 	this.queryElems = [];
-	this.tail = "&sectioncount=1&ext=.pdf&nocover=";
 }
 
-Data.prototype.getval = function(name, returnOnly) {
-	var val = '';
-	var input = ZU.xpath(this.node, './/input[@name="' + name + '"]');
-	if (input && input.length) {
-		val = input[0].value ? encodeURIComponent(input[0].value) : '';
-	}
+Data.prototype.getVal = function(name, returnOnly) {
+
+	var val = getXPathStr("value", this.node, '//input[@name="' + name + '"]');
+	val = encodeURIComponent(val);
+
 	if (!returnOnly) {
 		this.queryElems.push(name + "=" + val);
 	}
@@ -45,20 +74,20 @@ Data.prototype.dump = function() {
 }
 
 function getSearchResults(doc) {
-	var results = ZU.xpath(doc, '//div[contains(@class, "lucene_search_result_b")]'),
+	var results = doc.getElementsByClassName("lucene_search_result_b"),
 		items = {},
 		found = false
 	for (var i=0; i<results.length; i++) {
 		
-		var url = ZU.xpath(results[i], './/a[contains(@href, "Print")]');
-		url = (url && url.length) ? url[0].href : false;
+		var url = getXPathStr("textContent", results[i], './/a[contains(@href, "Print")]');
+		url = url.replace(/Print/, "Page");
+		url = url.replace(/&terms=[^&]*/, '');
 
-		var title = ZU.trimInternal(ZU.xpath(results[i], './/a[1]')[0].textContent);		
+		var title = getXPathStr("href", results[i], './/a[1]');
+		title = ZU.trimInternal(title);
 		title = title.replace(/\s*\[[^\]]*\]$/, '');
 
 		if (!title || !url) continue;
-		url = url.replace(/Print/, "Page");
-		url = url.replace(/&terms=[^&]*/, '');
 		
 		items[url] = title;
 		found = true;
@@ -66,25 +95,22 @@ function getSearchResults(doc) {
 	return found ? items : false;
 }
 
-function scrapePage(doc) {
-	var pdfPageURL = doc.location.href.replace(/\/Page\?/, "/Print?");
+function scrapePage(doc, url) {
+	var pdfPageURL = url.replace(/\/Page\?/, "/Print?");
 	var item = new Zotero.Item();
-	var spans = ZU.xpath(doc, '//span[contains(@class, " Z3988") or contains(@class, "Z3988 ") or @class="Z3988"][@title]');
-	if (spans && spans.length) {
-		ZU.parseContextObject(spans[0].title, item);
-	}
+	var z3988title = getXPathStr("title", doc, '//span[contains(@class, " Z3988") or contains(@class, "Z3988 ") or @class="Z3988"][@title]');
+	ZU.parseContextObject(z3988title, item);
 
 	ZU.processDocuments([pdfPageURL], 
-		function(pdoc){
+		function(pdoc, purl){
 			var input = new Data(pdoc);
-			var endingID = input.getval("toid", true);
-			
-			input.getval("handle");
-			input.getval("collection");
-			input.getval("section");
-			var startingID = input.getval("id");
-			input.getval("print");
-			input.getval("nocover");
+			var startingID = input.getVal("id");
+			var endingID = input.getVal("toid", true);
+			input.getVal("handle");
+			input.getVal("collection");
+			input.getVal("section");
+			input.getVal("print");
+			input.getVal("nocover");
 			var pdfURL = input.dump();
 			
 			item.pages = item.pages + "-" 
@@ -109,13 +135,12 @@ function doWeb (doc, url) {
 			}
 			var urls = [];
 			for (var i in items) {
-				Zotero.debug(i);
 				urls.push(i);
 			}
 			ZU.processDocuments(urls, scrapePage);
 		});
 	} else {
-		scrapePage(doc);
+		scrapePage(doc, url);
 	}
 }
 
