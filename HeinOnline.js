@@ -72,7 +72,7 @@ Data.prototype.getVal = function(name, returnOnly) {
 }
 
 Data.prototype.dump = function() {
-	return this.urlbase + this.queryElems.join("&") + this.tail;
+	return this.urlbase + this.queryElems.join("&");
 }
 
 function getSearchResults(doc) {
@@ -96,7 +96,7 @@ function getSearchResults(doc) {
 	return found ? items : false;
 }
 
-function scrapePage(doc, url, listTitle) {
+function scrapePage(doc, url) {
 	var pdfPageURL = url.replace(/\/Page\?/, "/Print?");
 	var item = new Zotero.Item();
 	var z3988title = getXPathStr("title", doc, '//span[contains(@class, " Z3988") or contains(@class, "Z3988 ") or @class="Z3988"][@title]');
