@@ -35,6 +35,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+var listItems;
+
 function detectWeb (doc, url) {
 	if (url.indexOf("/LuceneSearch?") > -1) {
 		if (getSearchResults(doc)) {
@@ -94,12 +96,35 @@ function getSearchResults(doc) {
 	return found ? items : false;
 }
 
-function scrapePage(doc, url) {
+function scrapePage(doc, url, listTitle) {
 	var pdfPageURL = url.replace(/\/Page\?/, "/Print?");
 	var item = new Zotero.Item();
 	var z3988title = getXPathStr("title", doc, '//span[contains(@class, " Z3988") or contains(@class, "Z3988 ") or @class="Z3988"][@title]');
 	ZU.parseContextObject(z3988title, item);
-
+	
+	if (!item.itemType) {
+		// Sometimes items that report full-text PDF in the search listing
+		// resolve to a failure page. This builds a placeholder item out
+		// of the data that is available.
+		item.itemType = "journalArticle";
+		if (listItems) {
+			item.title = listItems[url];		
+		} else {
+			item.title = getXPathStr("textContent", doc, '//div[@id="content-container"]//a[1]');
+		}
+		var notAvailableURL = url.replace("/Page?", "/NotAvailable?").replace("handle=", "handle_bad=");
+		item.attachments.push({
+			url:notAvailableURL,
+			mimetype:"text/html",
+			snapshot:true,
+			title:"HeinOnline page placeholder"
+		});
+		item.url = url;
+		item.abstract = "CAUTION: Resource not yet available at HeinOnline";
+		item.complete();
+		return true;
+	}
+	
 	ZU.processDocuments([pdfPageURL], 
 		function(pdoc, purl){
 			var input = new Data(pdoc);
@@ -111,10 +136,12 @@ function scrapePage(doc, url) {
 			input.getVal("print");
 			var pdfURL = input.dump();
 			
-			item.pages = item.pages + "-" 
-				+ (parseInt(item.pages) 
-				+  parseInt(endingID) 
-				-  parseInt(startingID));
+			if (item.pages && endingID && startingID) {
+				item.pages = item.pages + "-" 
+					+ (parseInt(item.pages) 
+					+  parseInt(endingID) 
+					-  parseInt(startingID));
+			}
 
 			item.attachments.push({
 				url:pdfURL,
@@ -135,9 +162,11 @@ function doWeb (doc, url) {
 			for (var i in items) {
 				urls.push(i);
 			}
+			listItems = items;
 			ZU.processDocuments(urls, scrapePage);
 		});
 	} else {
+		listItems = null;
 		scrapePage(doc, url);
 	}
 }
