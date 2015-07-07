@@ -42,7 +42,7 @@
     see the overview of Zotero item types), or, if multiple items are found, “multiple”. 
 **/
 function detectWeb(doc, url) {
-    if (url.match(/\/iv2/)) {
+    if (url.match(/\/iv2|ExternalIV.jsp/)) {
         // Image viewer window
         return "artwork";
     } else if (url.match(/\#3\|/)) {
@@ -99,33 +99,18 @@ function detectWeb(doc, url) {
 
     doWeb is run when a user, wishing to save one or more items, activates the selected translator. 
     Sidestepping the retrieval of item metadata, we'll first focus on how doWeb can be used to save 
-    retrieved item metadata (as well as attachments and notes) to your Zotero library.**/
+    retrieved item metadata (as well as attachments and notes) to your Zotero library.
+**/
 function doWeb(doc, url) {
-    if (url.match(/\/iv2/)) {
+    if (url.match(/\/iv2|ExternalIV.jsp/)) {
         doImageViewer(doc, url);
     }
-    if (url.match(/#3\|/)) {
+    if (url.match(/\#3\|/)) {
         // Thumbnail window page
         if ((doc.getElementsByClassName('MetaDataWidgetRoot') != null) && (doc.getElementsByClassName('MetaDataWidgetRoot').length > 0)) {
             doMetadataWindow(doc, url);
         } else {
-            var skipThumbnail = false;
-            if ((doc.getElementById("floatingPlaceHolder") != null) && (doc.getElementById("floatingPlaceHolder").style.display == "block")) {
-                // Don't capture date if small window is present
-                skipThumbnail = true;
-            }
-            if ((doc.getElementById("thumbNavSave1") != null) && (doc.getElementById("thumbNavSave1").style.display == "block")) {
-                // Don't capture data if image group window is in editing state.
-                skipThumbnail = true;
-            }
-            if ((doc.getElementById("ssContentWrap") != null) && (doc.getElementById("ssContentWrap").style.display == "inline")) {
-                // Don't capture data if slide show window is present
-                skipThumbnail = true;
-            }
-            // Allow thumbnail window.
-            if (!skipThumbnail) {
-                doThumbnails(doc, url);
-            }
+            doThumbnails(doc, url);
         }
     }
 }
@@ -136,7 +121,7 @@ function doImageViewer(doc, url) {
     var objID = doc.getElementById("objID");
     if (objID != null) {
         var objItems = [];
-        var objItem = doc.getElementById("objID").title;
+        var objItem = objID.title;
         objItems.push(objItem);
         processObjects(doc, url, objItems);
     }
@@ -147,6 +132,8 @@ function doMetadataWindow(doc, url) {
     var metaWindows = doc.getElementsByClassName('MetaDataWidgetRoot');
     var objItems = [];
     for (var i = 0; i < metaWindows.length; i++) {
+        // the dom id is mdwSS7730455_7730455_8806769 that is object id
+        // prefixed with mdw.
         var id = metaWindows[i].id.substring(3);
         objItems.push(id);
     }
@@ -258,7 +245,6 @@ function getMasterThumbnailList(doc, url, objDescItems) {
             objDescItems.push(objDescItem);
         }
     });
-    return objDescItems;
 }
 
 /**
@@ -344,8 +330,6 @@ function getMetaDataItem(url, objItem, dataItem) {
         processPortalData(dataItem, json, portalMap[portal], portal);
         getNotesDataItem(url, objItem, dataItem);
     });
-
-    return dataItem;
 }
 
 function processPortalData(dataItem, json, fieldMap, portal) {
@@ -397,7 +381,7 @@ function processPortalData(dataItem, json, fieldMap, portal) {
 function setItemCreator(dataItem, fieldValue) {
     fieldValue = fieldValue.replace(/<wbr\/>/g, "");
     var names = [];
-    if (fieldValue.indexOf(';')) {
+    if (fieldValue.indexOf(';') > 0) {
         names = fieldValue.split(';')
     } else {
         names.push(fieldValue);
@@ -412,14 +396,19 @@ function setItemCreator(dataItem, fieldValue) {
             contributor = params[0];
             name = params[1];
         }
-        dataItem.creators.push(ZU.cleanAuthor(name.replace(/<\/?[^>]+(>|$)/g, " ").replace(/(&gt;)|(&lt;)/g, ""), contributor, false));
+        var value = name.replace(/<\/?[^>]+(>|$)/g, " ").replace(/(&gt;)|(&lt;)/g, "");
+        dataItem.creators.push(ZU.cleanAuthor(value, contributor, false));
     }
 }
 
+function cleanStringValue(str) {
+    var cleanValue = str.replace(/\<wbr\/>/g, "");
+    cleanValue = cleanValue.replace(/<\/?[^>]+(>|$)/g, " ");
+    return cleanValue;
+}
+ 
 function setItemLabelValue(dataItem, key, label, value) {
-    var cleanValue = value.replace(/<\/?[^>]+(>|$)/g, " ");
-    cleanValue = cleanValue.replace(/\./, "");
-    cleanValue = cleanValue.replace(/<wbr\/>/g, "");
+    var cleanValue = cleanStringValue(value);
 
     if (!(key in dataItem)) {
         dataItem[key] = label + ": " + cleanValue;
@@ -436,9 +425,7 @@ function setItemLabelValue(dataItem, key, label, value) {
 }
 
 function setItemValue(dataItem, key, value, override) {
-    var cleanValue = value.replace(/<\/?[^>]+(>|$)/g, " ");
-    cleanValue = cleanValue.replace(/\./, "");
-    cleanValue = cleanValue.replace(/<wbr\/>/g, "");
+    var cleanValue = cleanStringValue(value);
 
     if (!(key in dataItem) || override) {
         dataItem[key] = cleanValue;
@@ -484,7 +471,7 @@ function getResourceDataItem(url, objItem, dataItem) {
     Zotero.Utilities.HTTP.doGet(serviceURL, function(text) {
         var service = text.substring(text.indexOf("secure"));
         service = service.substring(0, service.indexOf("</td>")).replace(/<wbr\/>/g, "").substring(service.indexOf("?")).trim();
-        dataItem.url = getServerUrl(url) + "secure/ViewImages" + service + "&zoomparams=&fs=true";
+        dataItem.url = getServerUrl(url) + "/secure/ViewImages" + service + "&zoomparams=&fs=true";
         getNonImageDataItem(url, objItem, dataItem);
     });
 }
@@ -531,11 +518,10 @@ function getNonImageDataItem(url, objItem, dataItem) {
     } else {
         dataItem.complete();
     }
-    Zotero.done();
 }
 
 function getPortal(url) {
-    var portal = url.substring(7, url.indexOf("."));
+    var portal = url.substring(url.indexOf('://') + 3, url.indexOf('.'));
     return portal;
 }
 
@@ -543,7 +529,10 @@ function getServerUrl(url) {
     var serverUrl;
     if (url.indexOf('/iv2') > 0) {
         serverUrl = url.substring(0, url.indexOf('iv2\.'));
-    } else {
+    } else if (url.indexOf('/ExternalIV.jsp') > 0) {
+       serverUrl = url.substring(0, url.indexOf('ExternalIV.jsp'));
+    }
+    else {
         serverUrl = url.substring(0, url.indexOf('#3'));
     }
     serverUrl = serverUrl.substring(0, serverUrl.lastIndexOf('/'));
@@ -583,7 +572,7 @@ function getThumbnailServiceURL(doc, url) {
     var sortUL = doc.getElementById("sub0sortList");
     if (sortUL !== null) {
         var sortElemWChk = sortUL.getElementsByClassName('sortListItemNav');
-        if ((sortElemWChk != null) && (sortElemWChk.length > 0)) {
+        if (sortElemWChk.length > 0) {
             switch (sortElemWChk[0].id) {
                 case "thumbSortRelevance0":
                     sortOrder = 0;
@@ -607,7 +596,7 @@ function getThumbnailServiceURL(doc, url) {
             var searchTerm = decodeSearchData(decrypt(params[7]));
 
             var kw = searchTerm.kw;
-            kw = encrypt(kw);
+            kw = encodeURIComponent(kw);
             var type = searchTerm.type;
 
             var origKW = searchTerm.origKW;
@@ -746,53 +735,12 @@ var decodeMap = {
     '7E': '~'
 };
 
-encodeMap = {
-    ' ': '20',
-    '!': '21',
-    '"': '22',
-    '#': '23',
-    '$': '24',
-    '%': '25',
-    '&': '26',
-    "'": '27',
-    '(': '28',
-    ')': '29',
-    '*': '2A',
-    '+': '2B',
-    ',': '2C',
-    '-': '2D',
-    '.': '2E',
-    '/': '2F',
-    '0': '30',
-    '1': '31',
-    '2': '32',
-    '3': '33',
-    '4': '34',
-    '5': '35',
-    '6': '36',
-    '7': '37',
-    '8': '38',
-    '9': '39',
-    ':': '3A',
-    ';': '3B',
-    '<': '3C',
-    '=': '3D',
-    '>': '3E',
-    '?': '3F',
-    '[': '5B',
-    // '\\' : '5C',
-    ']': '5D',
-    '^': '5E',
-    '_': '5F',
-    '`': '60',
-    '{': '7B',
-    '|': '7C',
-    '}': '7D',
-    '~': '7E'
-};
-
 /**
     Converts two character number character to special character
+    it converts 
+        type3D3626kw3Dairstream20trailer26geoIds3D
+    to
+        type=6&kw=airstream trailer&geoIds=
 **/
 function decrypt(s) {
     var len = s.length;
@@ -833,40 +781,11 @@ function decrypt(s) {
     return newS;
 }
 
-/**
-    Converts speial character to two digit code.
-**/
-function encrypt(s) {
-    var newS = '';
-    if (s !== undefined) {
-        var len = s.length;
-        i = 0;
-        var ch;
-        while (i < len) {
-            ch = s.charAt(i);
-            if (((ch >= 'a') && (ch <= 'z')) ||
-                ((ch >= 'A') && (ch <= 'Z'))) {
-                newS = newS + ch;
-            } else {
-                var eCh = encodeMap[ch];
-                if (eCh === undefined) {
-                    newS = newS + "!" + ch.charCodeAt(0) + "!";
-                } else {
-                    newS = newS + "%" + eCh;
-                }
-            }
-            i++;
-        }
-    }
-    return newS;
-}
-
 /** BEGIN TEST CASES **/
 var testCases = [
     {
         "type": "artwork",
-        "url": "http://www.sscommons.org/openlibrary/welcome.html#3|collections|7730455||zModeBryn20Mawr20College20Faculty2FStaff2FStudent20Photographs||||||",
-        "defer": true,
+        "url": "http://www.sscommons.org/openlibrary/ExternalIV.jsp?objectId=4jEkdDElLjUzRkY6fz5%2BRXlDOHkje1x9fg%3D%3D&fs=true",
         "items": [
             {
                 "itemType": "artwork",
@@ -881,8 +800,8 @@ var testCases = [
                 "date": "Photographed: 2001",
                 "extra": "Location: Bradford County, Pennsylvania; Collection: Bryn Mawr College Faculty/Staff/Student Photographs; ID Number: 01-07828; Source: Personal photographs of Professor Barbara Lane, 2001",
                 "libraryCatalog": "ARTstor",
-                "rights": "Copyright is owned by the photographer Questions can be directed to sscommons@brynmawr.edu.; This image has been  selected and made av ailable by a user us ing Artstor's softwa re tools Artstor ha s not screened or se lected this image or  cleared any rights  to it and is acting  as an online service  provider pursuant t o 17 U.S.C. §512. Ar tstor disclaims any  liability associated  with the use of thi s image. Should you  have any legal objec tion to the use of t his image, please vi sit http://www.artst or.org/our-organizat ion/o-html/copyright .shtml for contact i nformation and instr uctions on how to pr oceed.",
-                "url": "http://www.sscommons.org/openlibrarysecure/ViewImages?id=4jEkdDElLjUzRkY6fz5%2BRXlDOHkje1x9fg%3D%3D&userId=gDFB&zoomparams=&fs=true",
+                "rights": "Copyright is owned by the photographer Questions can be directed to sscommons@brynmawredu; This image has been selected and made available by a user using Artstor's software tools Artstor has not screened or selected this image or cleared any rights to it and is acting as an online service provider pursuant to 17 USC §512 Artstor disclaims any liability associated with the use of this image Should you have any legal objection to the use of this image, please visit http://wwwartstororg/our-organization/o-html/copyrightshtml for contact information and instructions on how to proceed",
+                "url": "http://www.sscommons.org/openlibrary/secure/ViewImages?id=4jEkdDElLjUzRkY6fz5%2BRXlDOHkje1x9fg%3D%3D&userId=gDFB&zoomparams=&fs=true",
                 "attachments": [
                     {
                         "title": "Artstor Thumbnails"
@@ -896,4 +815,3 @@ var testCases = [
     }
 ]
 /** END TEST CASES **/
-
