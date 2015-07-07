@@ -10,31 +10,8 @@
     "inRepository": true,
     "translatorType": 4,
     "browserSupport": "gcs",
-    "lastUpdated": "2015-07-01 18:45:45"
+    "lastUpdated": "2015-07-07 14:45:45"
 }
-
-/*
-    This translator works for Artstor library sites (http://library.artstor.org) and
-    Artstor Shared Shelf Commons (http://www.sscommons.org)
-    ***** BEGIN LICENSE BLOCK *****
-    
-    Artstor Translator, Copyright © 2015 John Justin, Charles Zeng
-    
-    Zotero is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-    
-    Zotero is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Affero General Public License for more details.
-    
-    You should have received a copy of the GNU Affero General Public License
-    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
-    
-    ***** END LICENSE BLOCK *****
-*/
 
 /**
     detectWeb is run to determine whether item metadata can indeed be retrieved from the webpage. 
@@ -42,7 +19,7 @@
     see the overview of Zotero item types), or, if multiple items are found, “multiple”. 
 **/
 function detectWeb(doc, url) {
-    if (url.match(/\/iv2|ExternalIV.jsp/)) {
+    if (url.match(/\/iv2\.|ExternalIV.jsp/)) {
         // Image viewer window
         return "artwork";
     } else if (url.match(/\#3\|/)) {
@@ -59,10 +36,8 @@ function detectWeb(doc, url) {
         } else if ((doc.getElementById("ssContentWrap") != null) && (doc.getElementById("ssContentWrap").style.display == "inline")) {
             // Don't capture data if slide show window is present
             return false;
-        } else {
-            if (url.match(/zMode/)) {
-                return "artwork";
-            }
+        } else if (url.match(/zMode/)) {
+            return "artwork";
         }
         // Allow thumbnail window.
         return "multiple";
@@ -76,24 +51,24 @@ function detectWeb(doc, url) {
     - Detect the page context:
         - check if the page is main window (ignore)
         - check if the page is collection splash (ignore)
+        - check if the page is a viewer
+            - get the image id and type, process it.
         - check if the page is thumbnail page
             - ignore small window
             - if small windows is popped up, process only small window
                 get the object ids from small windows, then process the ids.
             - if no small window, get the selected object and process them
                 get the object ids from selected objects, then process the ids.
-            - otherwise, select all objects in the thumbnails
-                get the object ids from the thumbnail windows, then process the ids.
-        - check if the page is image viewer
-            - get the object from the image viewer, then process the id.
+            - otherwise, select all objects in the thumbnails and prompt user
+                get the object ids from users, then process the ids.
     - Process the id
         - find the object type.
-        - get the metadta service url from id using service call  http://library.artstor.org/library/secure/metadata/id
+        - get the metadta service url from id using service call  [domain]/[approot]/secure/metadata/id
             - fetch and convert the metadata from the metadata service call
                 - take into consideration of different metadata field for the portals
                 - may need to convert/format the data values.
             - fetch the item notes using: 
-        - get the resource link url from id: :http://library.artstor.org/library/secure/metadata/id?_method=FpHtml
+        - get the resource link url from id: :[domain]/[approot]/secure/metadata/id?_method=FpHtml
             - fetch the resource from resource url
             - set the item title and item mine type.
 
@@ -102,7 +77,7 @@ function detectWeb(doc, url) {
     retrieved item metadata (as well as attachments and notes) to your Zotero library.
 **/
 function doWeb(doc, url) {
-    if (url.match(/\/iv2|ExternalIV.jsp/)) {
+    if (url.match(/\/iv2\.|ExternalIV.jsp/)) {
         doImageViewer(doc, url);
     }
     if (url.match(/\#3\|/)) {
@@ -390,12 +365,6 @@ function setItemCreator(dataItem, fieldValue) {
         var str = names[i];
         var contributor = "author";
         var name = str;
-
-        if (str.indexOf(':') > 0) {
-            var params = str.split(':');
-            contributor = params[0];
-            name = params[1];
-        }
         var value = name.replace(/<\/?[^>]+(>|$)/g, " ").replace(/(&gt;)|(&lt;)/g, "");
         dataItem.creators.push(ZU.cleanAuthor(value, contributor, false));
     }
@@ -463,7 +432,6 @@ function getNotesDataItem(url, objItem, dataItem) {
 
 }
 
-
 function getResourceDataItem(url, objItem, dataItem) {
     var itemAry = objItem.split(':');
     var serviceURL = getServiceUrlRoot(url) + "metadata/" + itemAry[0] + "/" + "?_method=FpHtml";
@@ -527,7 +495,7 @@ function getPortal(url) {
 
 function getServerUrl(url) {
     var serverUrl;
-    if (url.indexOf('/iv2') > 0) {
+    if (url.indexOf('/iv2\.') > 0) {
         serverUrl = url.substring(0, url.indexOf('iv2\.'));
     } else if (url.indexOf('/ExternalIV.jsp') > 0) {
        serverUrl = url.substring(0, url.indexOf('ExternalIV.jsp'));
@@ -537,6 +505,31 @@ function getServerUrl(url) {
     }
     serverUrl = serverUrl.substring(0, serverUrl.lastIndexOf('/'));
     return serverUrl;
+}
+
+function getSortOrder(doc) {
+    var sortOrder = 0; 
+    var sortUL = doc.getElementById("sub0sortList");
+    if (sortUL !== null) {
+        var sortElemWChk = sortUL.getElementsByClassName('sortListItemNav');
+        if (sortElemWChk.length > 0) {
+            switch (sortElemWChk[0].id) {
+                case "thumbSortRelevance0":
+                    sortOrder = 0;
+                    break;
+                case "thumbSortTitle0":
+                    sortOrder = 1;
+                    break;
+                case "thumbSortCreator0":
+                    sortOrder = 2;
+                    break;
+                case "thumbSortDate0":
+                    sortOrder = 3;
+                    break;
+            }
+        }
+    }
+    return sortOrder;
 }
 
 function getThumbnailServiceURL(doc, url) {
@@ -562,33 +555,14 @@ function getThumbnailServiceURL(doc, url) {
     // get page size
     var imagesPerPage = "1";
     var pageDOM = doc.getElementById("thumbNavImageButt");
-    if (pageDOM != null)
+    if (pageDOM != null) {
         imagesPerPage = pageDOM.innerHTML;
+    }
     var pageSize = parseInt(imagesPerPage);
     var startIdx = (pageNo - 1) * pageSize + 1;
 
     // get sort order
-    var sortOrder = 0; //scrape from page
-    var sortUL = doc.getElementById("sub0sortList");
-    if (sortUL !== null) {
-        var sortElemWChk = sortUL.getElementsByClassName('sortListItemNav');
-        if (sortElemWChk.length > 0) {
-            switch (sortElemWChk[0].id) {
-                case "thumbSortRelevance0":
-                    sortOrder = 0;
-                    break;
-                case "thumbSortTitle0":
-                    sortOrder = 1;
-                    break;
-                case "thumbSortCreator0":
-                    sortOrder = 2;
-                    break;
-                case "thumbSortDate0":
-                    sortOrder = 3;
-                    break;
-            }
-        }
-    }
+    var sortOrder = getSortOrder(doc);
 
     var serviceURL = "";
     switch (pageType) {
@@ -670,8 +644,7 @@ function getFileRoot(url) {
          }
 **/
 function decodeSearchData(str) {
-    var searchParam = str.replace(/(&gt;)/g, ":");
-    var param = searchParam.split('&');
+    var param = str.split('&');
     var searchData = new Object();
     var sparam;
     var id;
@@ -690,51 +663,6 @@ function decodeSearchData(str) {
     return searchData;
 }
 
-var decodeMap = {
-    '20': ' ',
-    '21': '!',
-    '22': '"',
-    '23': '#',
-    '24': '$',
-    '25': '%',
-    '26': '&',
-    '27': "'",
-    '28': '(',
-    '29': ')',
-    '2A': '*',
-    '2B': '+',
-    '2C': ',',
-    '2D': '-',
-    '2E': '.',
-    '2F': '/',
-    '30': '0',
-    '31': '1',
-    '32': '2',
-    '33': '3',
-    '34': '4',
-    '35': '5',
-    '36': '6',
-    '37': '7',
-    '38': '8',
-    '39': '9',
-    '3A': ':',
-    '3B': ';',
-    '3C': '<',
-    '3D': '=',
-    '3E': '>',
-    '3F': '?',
-    '5B': '[',
-    //              '5C' : '\\',
-    '5D': ']',
-    '5E': '^',
-    '5F': '_',
-    '60': '`',
-    '7B': '{',
-    '7C': '|',
-    '7D': '}',
-    '7E': '~'
-};
-
 /**
     Converts two character number character to special character
     it converts 
@@ -743,43 +671,24 @@ var decodeMap = {
         type=6&kw=airstream trailer&geoIds=
 **/
 function decrypt(s) {
-    var len = s.length;
-    var i = 0;
-    var newS = '';
-    var key;
-    while (i < len) {
-        var ch = s.charAt(i);
-        if ((ch >= '0') && (ch <= '9')) {
-            key = s.slice(i, i + 2);
-            newS = newS + decodeMap[key];
-            i = i + 2;
-        } else {
-            if (ch == "!") {
-                var nCh = '';
-                if ((i + 1) < len) {
-                    nCh = s.charAt(i + 1);
-                }
-                if ((nCh >= '0') && (nCh <= '9')) {
-                    var rStr = s.substr(i + 1);
-                    var code = parseInt(rStr);
-                    nCh = String.fromCharCode(code);
-                    var nIdx = rStr.indexOf("!");
-                    if (nIdx > 0) {
-                        i = i + nIdx + 2;
-                        newS = newS + nCh;
-                    }
-                } else {
-                    newS = newS + ch;
-                    i++;
-                }
-            } else {
-                newS = newS + ch;
-                i++;
-            }
+    return s.replace(/!(\d{1,5})!|(\d[\dA-F])/g, function(m, unicode, hex) {
+        // Either unicode or hex are set, not both. unicode has priority over hex in the match
+        if (unicode) {
+            return String.fromCharCode(parseInt(unicode)); // Always parses because of regexp
+        } 
+
+        // must be hex
+        try {  
+            return decodeURIComponent('%' + hex) 
         }
-    }
-    return newS;
+        catch(e) { 
+            /* Some hex character escapes are invalid */ 
+        }
+
+        return m; // Fail-safe
+    });
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -792,15 +701,15 @@ var testCases = [
                 "title": "Trailer Home; Exterior view",
                 "creators": [
                     {
-                        "firstName": "Barbara",
+                        "firstName": "Image by: Barbara",
                         "lastName": "Lane",
-                        "creatorType": "Image by"
+                        "creatorType": "author"
                     }
                 ],
                 "date": "Photographed: 2001",
                 "extra": "Location: Bradford County, Pennsylvania; Collection: Bryn Mawr College Faculty/Staff/Student Photographs; ID Number: 01-07828; Source: Personal photographs of Professor Barbara Lane, 2001",
                 "libraryCatalog": "ARTstor",
-                "rights": "Copyright is owned by the photographer Questions can be directed to sscommons@brynmawredu; This image has been selected and made available by a user using Artstor's software tools Artstor has not screened or selected this image or cleared any rights to it and is acting as an online service provider pursuant to 17 USC §512 Artstor disclaims any liability associated with the use of this image Should you have any legal objection to the use of this image, please visit http://wwwartstororg/our-organization/o-html/copyrightshtml for contact information and instructions on how to proceed",
+                "rights": "Copyright is owned by the photographer. Questions can be directed to sscommons@brynmawr.edu.; This image has been selected and made available by a user using Artstor's software tools. Artstor has not screened or selected this image or cleared any rights to it and is acting as an online service provider pursuant to 17 U.S.C. §512. Artstor disclaims any liability associated with the use of this image. Should you have any legal objection to the use of this image, please visit http://www.artstor.org/our-organization/o-html/copyright.shtml for contact information and instructions on how to proceed.",
                 "url": "http://www.sscommons.org/openlibrary/secure/ViewImages?id=4jEkdDElLjUzRkY6fz5%2BRXlDOHkje1x9fg%3D%3D&userId=gDFB&zoomparams=&fs=true",
                 "attachments": [
                     {
@@ -815,3 +724,4 @@ var testCases = [
     }
 ]
 /** END TEST CASES **/
+
