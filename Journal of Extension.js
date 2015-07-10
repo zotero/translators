@@ -33,8 +33,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 
 function detectWeb(doc, url) { return FW.detectWeb(doc, url); }
-function doWeb(doc, url) { 
-	return FW.doWeb(doc, url); }
+function doWeb(doc, url) { return FW.doWeb(doc, url); }
 
 
 
@@ -44,7 +43,7 @@ FW.Scraper({
   title				:FW.Xpath('//div[@class="DIV-title"]').text().trim(),
   creators			:FW.Xpath('//div[@class="DIV-author"]/p/b|//div[@class="DIV-author"]/p/strong').text().cleanAuthor("author"),
   publicationTitle	:"Journal of Extension",
-  abstractNote		:FW.Xpath('//div[@class="DIV-abstract"]/p').text().trim(),
+  abstractNote		:FW.Xpath('//div[@class="DIV-abstract"]/p').text()..remove(/^\s*Abstract:\s*/)trim(),
   date				:FW.Xpath('//p[@class="DIV-number"]|//p[@class="DIV-number screen_only"]').text().split(/\/\//),
   volume			:FW.Xpath('//p[@class="DIV-number"]|//p[@class="DIV-number screen_only"]').text().match(/Volume\s(\d+)/, 1),
   issue 			:FW.Xpath('//p[@class="DIV-number"]|//p[@class="DIV-number screen_only"]').text().match(/Number\s(\d+)/, 1),
@@ -53,12 +52,12 @@ FW.Scraper({
   							type		:"application/pdf",
   							snapshot	: false,
   							url			:FW.Xpath('//div[@id="article-nav"]/ul/li[4]/a').key('href').text()
-  						},	
+  						},
   ISSN				:'1077-5315'
   });
-  
 
- 
+
+
  FW.MultiScraper({
   itemType		:'multiple',
   detect		:FW.Url().match(/\d+\w+\/$/),
@@ -354,7 +353,7 @@ FW.Scraper({
 //		 -   "accessDate": "CURRENT_TIMESTAMP",
 			 "shortTitle": "Putting a Face on Hunger",
 		   }]
-		   
-		   
+
+
 	}/**END 2014**/
 	];/**END TEST CASES**/
