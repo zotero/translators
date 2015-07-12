@@ -95,7 +95,13 @@ var testCases = [
 				"shortTitle": "Game Definitions",
 				"url": "http://gamestudies.org/1401/articles/arjoranta",
 				"volume": "14",
-				"attachments": [],
+				"attachments": [
+					{
+						"title"			:"Article Snapshot",
+						"type"			:"text/html",
+						"snapshot"	:true
+					}
+				],
 				"tags": [
 					"game definition",
 					"Wittgenstein",
