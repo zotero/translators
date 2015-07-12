@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2015-06-28 16:42:37"
+	"lastUpdated": "2015-07-12 15:13:59"
 }
 
 /*
@@ -908,14 +908,20 @@ function importItem(newItem, node) {
 				// grab other things
 				var beforeSpace = identifiers[i].substr(0, identifiers[i].indexOf(" ")).toUpperCase();
 			
-				// Attempt to determine type of identifier	
+				// Attempt to determine type of identifier by prefix label
 				if(beforeSpace == "ISBN") {
 					newItem.ISBN = identifiers[i].substr(5).toUpperCase();
 				} else if(beforeSpace == "ISSN") {
 					newItem.ISSN = identifiers[i].substr(5).toUpperCase();
 				} else if(beforeSpace == "DOI") {
 					newItem.DOI = identifiers[i].substr(4);
-				} else if(identifiers[i].substr(0,3) == "10.") {
+				}
+				// Or just try parsing values
+				else if(ZU.cleanISBN(identifiers[i])) {
+					newItem.ISBN = identifiers[i];
+				} else if(ZU.cleanISSN(identifiers[i])) {
+					newItem.ISSN = identifiers[i];
+				} else if(ZU.cleanDOI(identifiers[i])) {
 					newItem.DOI = identifiers[i];
 				}
 			} else {

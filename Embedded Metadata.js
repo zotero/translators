@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-06-28 14:44:06"
+	"lastUpdated": "2015-07-12 15:17:36"
 }
 
 /*
@@ -1206,6 +1206,38 @@ var testCases = [
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://books.upress.virginia.edu/title/4539",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "The Papers of George Washington : 1 August–21 October 1779",
+				"creators": [
+					{
+						"firstName": "George",
+						"lastName": "Washington",
+						"creatorType": "author"
+					}
+				],
+				"date": "2013",
+				"ISBN": "9780813933665",
+				"language": "eng",
+				"libraryCatalog": "books.upress.virginia.edu",
+				"publisher": "University of Virginia Press",
+				"shortTitle": "The Papers of George Washington",
+				"url": "http://books.upress.virginia.edu/title/4539",
+				"attachments": [
 					{
 						"title": "Snapshot"
 					}
