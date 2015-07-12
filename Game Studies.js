@@ -39,22 +39,22 @@ function doWeb(doc, url) { return FW.doWeb(doc, url); }
 
 FW.Scraper({
   itemType			:'journalArticle',
-  detect			:FW.Url().match(/gamestudies\.org\/\d+\/articles\/\w+/),
-  title				:FW.Xpath('//div[@id="article"]/h2').text().trim(),
-  creators			:FW.Xpath('//div[@id="article"]/small').text().remove(/by/).cleanAuthor("author"),
-  publicationTitle	:"Game Studies",
-  abstractNote		:FW.Xpath('//div[@id="article"]/p[1]').text().trim(),
-  date				:FW.Xpath('//span[@class="date"]').text(),
-  volume			:FW.Xpath('//span[@class="volume"]').text().match(/volume\s(\d+)/, 1),
-  issue 			:FW.Xpath('//span[@class="issueno"]').text().match(/issue\s(\d+)/, 1),
-  tags				:FW.Xpath('//div[@id="article"]/p[2]').text().remove(/^\s*Keywords:\s*/).split(/,/).trim(),
-	attachments	:{
-							url				:FW.Url(),
-							title			:"Article Snapshot",
-							type			:"text/html",
-							snapshot	:true
-							},
-  ISSN				:'1604-7982'
+  	detect			:FW.Url().match(/gamestudies\.org\/\d+\/articles\/\w+/),
+  	title			:FW.Xpath('//div[@id="article"]/h2').text().trim(),
+  	creators		:FW.Xpath('//div[@id="article"]/small').text().remove(/by/).cleanAuthor("author"),
+  	publicationTitle	:"Game Studies",
+  	abstractNote		:FW.Xpath('//div[@id="article"]/p[1]').text().trim(),
+  	date			:FW.Xpath('//span[@class="date"]').text(),
+  	volume			:FW.Xpath('//span[@class="volume"]').text().match(/volume\s(\d+)/, 1),
+  	issue 			:FW.Xpath('//span[@class="issueno"]').text().match(/issue\s(\d+)/, 1),
+  	tags			:FW.Xpath('//div[@id="article"]/p[2]').text().remove(/^\s*Keywords:\s*/).split(/,/).trim(),
+	attachments:{
+		url			:FW.Url(),
+		title			:"Article Snapshot",
+		type			:"text/html",
+		snapshot		:true
+		},
+  	ISSN			:'1604-7982'
   });
 
 FW.MultiScraper({
