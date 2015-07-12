@@ -38,38 +38,41 @@ function doWeb(doc, url) { return FW.doWeb(doc, url); }
 
 
 FW.Scraper({
-  itemType			:'journalArticle',
-  detect						:FW.Url().match(/\w+\d+(\.php|\.shtml)$/),
-  title							:FW.Xpath('//div[@class="DIV-title"]').text().trim(),
-  creators					:FW.Xpath('//div[@class="DIV-author"]/p/b|//div[@class="DIV-author"]/p/strong').text().cleanAuthor("author"),
+  itemType		:'journalArticle',
+  detect		:FW.Url().match(/\w+\d+(\.php|\.shtml)$/),
+  title			:FW.Xpath('//div[@class="DIV-title"]').text().trim(),
+  creators		:FW.Xpath('//div[@class="DIV-author"]/p/b|//div[@class="DIV-author"]/p/strong').text().cleanAuthor("author"),
   publicationTitle	:"Journal of Extension",
-  abstractNote			:FW.Xpath('//div[@class="DIV-abstract"]/p').text().remove(/^Abstract/).trim(),
-  date							:FW.Xpath('//p[@class="DIV-number"]|//p[@class="DIV-number screen_only"]').text().match(/(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|(Nov|Dec)(?:ember)?)?\D?((19[7-9]\d|20\d{2})|\d{2})/),
-  volume						:FW.Xpath('//p[@class="DIV-number"]|//p[@class="DIV-number screen_only"]').text().match(/Volume\s(\d+)/, 1),
-  issue 						:FW.Xpath('//p[@class="DIV-number"]|//p[@class="DIV-number screen_only"]').text().match(/Number\s(\d+)/, 1),
-  tags							:FW.Xpath('//div[@class="DIV-keywords"]/a').text().split(/,/).trim(),
-  attachments				:[{	title			:"Full Text PDF",
-  											type			:"application/pdf",
-  											snapshot	:false,
-  											url				:FW.Xpath('//div[@id="article-nav"]/ul/li[4]/a').key('href').text()
-  									},
-											{ url				:FW.Url(),
-												title			:"Article Snapshot",
-									  		type			:"text/html",
-									  		snapshot	:true
-									  	}],
-  ISSN							:'1077-5315'
+  abstractNote		:FW.Xpath('//div[@class="DIV-abstract"]/p').text().remove(/^Abstract/).trim(),
+  date			:FW.Xpath('//p[@class="DIV-number"]|//p[@class="DIV-number screen_only"]').text().match(/(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|(Nov|Dec)(?:ember)?)?\D?((19[7-9]\d|20\d{2})|\d{2})/),
+  volume		:FW.Xpath('//p[@class="DIV-number"]|//p[@class="DIV-number screen_only"]').text().match(/Volume\s(\d+)/, 1),
+  issue 		:FW.Xpath('//p[@class="DIV-number"]|//p[@class="DIV-number screen_only"]').text().match(/Number\s(\d+)/, 1),
+  tags			:FW.Xpath('//div[@class="DIV-keywords"]/a').text().split(/,/).trim(),
+  attachments		:
+  	[{
+  		title		:"Full Text PDF",
+  		type		:"application/pdf",
+  		snapshot	:false,
+  		url		:FW.Xpath('//div[@id="article-nav"]/ul/li[4]/a').key('href').text()
+  	},
+	{ 
+		url		:FW.Url(),
+		title		:"Article Snapshot",
+		type		:"text/html",
+		snapshot	:true
+	}],
+  ISSN			:'1077-5315'
   });
 
 
 
  FW.MultiScraper({
-  itemType		:'multiple',
-  detect			:FW.Url().match(/(index\.php)|(\d{4}\w+\/)|(journal-current-issue\.php)$/),
-  choices			:{
-  							titles			:FW.Xpath('//h4/a|//div[@class="row-fluid"]/div/p/a').text().trim(),
-  							url					:FW.Xpath('//h4/a|//div[@class="row-fluid"]/div/p/a').key("href")
-  						}
+  itemType	:'multiple',
+  detect	:FW.Url().match(/(index\.php)|(\d{4}\w+\/)|(journal-current-issue\.php)$/),
+  choices	:{
+  		titles		:FW.Xpath('//h4/a|//div[@class="row-fluid"]/div/p/a').text().trim(),
+  		url		:FW.Xpath('//h4/a|//div[@class="row-fluid"]/div/p/a').key("href")
+  		}
  });
 /** BEGIN TEST CASES **/
 var testCases = [
