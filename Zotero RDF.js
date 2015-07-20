@@ -10,7 +10,7 @@
 	"configOptions":{"getCollections":"true", "dataMode":"rdf/xml"},
 	"displayOptions":{"exportNotes":true, "exportFileData":false},
 	"inRepository":true,
-	"lastUpdated":"2015-06-22 22:09:17"
+	"lastUpdated":"2015-07-20 06:39:12"
 }
 
 var item;
@@ -538,14 +538,18 @@ function doExport() {
 			itemResources[item.itemID] = "#item_"+item.itemID;
 		}
 		
-		for(var j in item.notes) {
-			itemResources[item.notes[j].itemID] = "#item_"+item.notes[j].itemID;
+		if (item.notes) {
+			for(var j in item.notes) {
+				itemResources[item.notes[j].itemID] = "#item_"+item.notes[j].itemID;
+			}
 		}
 		
-		for (var i=0; i<item.attachments.length; i++) {
-			var attachment = item.attachments[i];
-			// just specify a node ID
-			itemResources[attachment.itemID] = "#item_"+attachment.itemID;
+		if (item.attachments) {
+			for (var i=0; i<item.attachments.length; i++) {
+				var attachment = item.attachments[i];
+				// just specify a node ID
+				itemResources[attachment.itemID] = "#item_"+attachment.itemID;
+			}
 		}
 	}
 	

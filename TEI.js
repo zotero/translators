@@ -19,7 +19,7 @@
 		"Full TEI Document": false,
 		"Export Collections": false
 	},
-	"lastUpdated": "2015-06-27 15:00:00"
+	"lastUpdated":"2015-07-20 06:39:12"
 }
 
 // ********************************************************************
@@ -442,7 +442,7 @@ function generateItem(item, teiDoc) {
     }
 
     //export notes
-    if(Zotero.getOption("exportNotes")) {
+    if(item.notes && Zotero.getOption("exportNotes")) {
         for(var n in item.notes) {
             // do only some basic cleaning of the html
             // strip HTML tags
