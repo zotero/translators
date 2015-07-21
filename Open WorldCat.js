@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2015-07-01 16:19:31"
+	"lastUpdated": "2015-07-21 00:46:10"
 }
 
 /**
@@ -68,11 +68,8 @@ function getFirstContextObj(doc) {
 
 function detectWeb(doc, url) {
 	//distinguish from Worldcat Discovery
-	if (doc.body.id == "worldcat"){
-		var results = getSearchResults(doc);
-
-		//single result
-		if(results.length) {
+	if (doc.body.id == "worldcat") {
+		if(getSearchResults(doc).length) {
 			return "multiple";
 		}
 
@@ -229,6 +226,16 @@ function doWeb(doc, url) {
 		});
 	} else {
 		var oclcID = extractOCLCID(url);
+		if (!oclcID) {
+			// Seems like some single search results redirect to the item page,
+			// but the URL is still a search URL. Grab cannonical URL from meta tag
+			// to extract the OCLC ID
+			var canonicalURL = ZU.xpath(doc, '/html/head/link[@rel="canonical"][1]')[0];
+			if (canonicalURL) {
+				oclcID = extractOCLCID(canonicalURL.href);
+			}
+		}
+		
 		if(!oclcID) throw new Error("WorldCat: Failed to extract OCLC ID from URL: " + url);
 		scrape([oclcID]);
 	}
@@ -632,6 +639,38 @@ var testCases = [
 				"publicationTitle": "ASIECO Journal of Asian Economics",
 				"shortTitle": "Navigating the trilemma",
 				"volume": "20",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.worldcat.org/search?q=isbn%3A7112062314",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "中囯园林假山",
+				"creators": [
+					{
+						"lastName": "毛培琳",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "朱志红",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2004",
+				"ISBN": "9787112062317",
+				"language": "Chinese",
+				"libraryCatalog": "Open WorldCat",
+				"place": "北京",
+				"publisher": "中囯建筑工业出版社",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
