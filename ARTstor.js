@@ -116,6 +116,22 @@ function doMetadataWindow(doc, url) {
     processSelectedObject(doc, url, objItems, 1);
 }
 
+function htmlDecode(doc, input){
+    var fieldValue = input.replace(/<wbr\/>/g, "");
+    fieldValue = fieldValue.replace(/<br\/>/g, "");
+ 
+    var decodedValue;
+    if (fieldValue.match(/&(?:[a-z\d]+|#\d+|#x[a-f\d]+);/i)) {
+        var e = doc.createElement('div');
+        e.innerHTML = fieldValue;
+         decodedValue = e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;
+    }
+    else {
+        decodedValue = fieldValue;
+    }
+    return decodedValue;
+}
+
 function processSelectedObject(doc, url, selectedObjs, selectionType) {
     var serviceURL = getThumbnailServiceURL(doc, url);
     Zotero.Utilities.HTTP.doGet(serviceURL, function(text) {
@@ -145,13 +161,14 @@ function processSelectedObject(doc, url, selectedObjs, selectionType) {
                         var idx = selectedObjs[j];
                         masterObj = masterObjList[idx];
                         var key = masterObj.id + ":" + masterObj.type;
-                        candidateItems[key] = masterObj.title;
+                        // candidateItems[key] = masterObj.title;
+                        candidateItems[key] = htmlDecode(doc, masterObj.title);
                     }
                 } else {
                     for (var j = 0; j < masterObjList.length; j++) {
                         masterObj = masterObjList[j];
                         var key = masterObj.id + ":" + masterObj.type;
-                        candidateItems[key] = masterObj.title;
+                        candidateItems[key] = htmlDecode(doc, masterObj.title);
                     }
                 }
                 if (zMode && Object.keys(candidateItems).length > 0) {
@@ -235,10 +252,19 @@ function getSelectedItems(doc, url) {
     if (wrap != null) {
         var imageElems = wrap.getElementsByClassName("thumbNailImageSelected");
         for (var i = 0; i < imageElems.length; i++) {
-            if (imageElems[i].parentNode.parentNode.style.display == "block") {
-                var id = imageElems[i].id; // we need to get the index (1) from id string "custom1_imageHolder"
-                var imageNum = id.substring(id.indexOf("m") + 1, id.indexOf("_"));
-                indexes.push(parseInt(imageNum));
+            var ele = imageElems[i];
+            var divId = ele.id;
+            var visible = false;
+            if (divId.indexOf('large') >= 0) {
+               visible = ele.parentNode.parentNode.parentNode.style.display == "block";
+            } 
+            else {
+                visible = ele.parentNode.parentNode.style.display == "block";
+            }
+            if (visible) {
+                // we need to get the index (1) from id string "custom1_imageHolder"
+                var imageNum = divId.substring(divId.indexOf("m") + 1, divId.indexOf("_"));
+                indexes.push(parseInt(imageNum) - 1);
             }
         }
     }
@@ -258,11 +284,11 @@ function processObjects(doc, url, objIds) {
             document: doc
         });
 
-        getMetaDataItem(url, objItem, dataItem);
+        getMetaDataItem(doc, url, objItem, dataItem);
     }
 }
 
-function getMetaDataItem(url, objItem, dataItem) {
+function getMetaDataItem(doc, url, objItem, dataItem) {
     var portalMap = {
         'flexspace': {
             'Campus': 'title',
@@ -279,7 +305,8 @@ function getMetaDataItem(url, objItem, dataItem) {
             'Rights': 'rights',
             'Site Date': 'date',
             'Artifact Materials/Techniques': 'artworkMedium',
-            'Artifact Dimensions': 'artworkSize'
+            'Artifact Dimensions': 'artworkSize',
+            'Rights': 'rights'
         },
         'default': {
             'Creator': 'creators',
@@ -302,19 +329,19 @@ function getMetaDataItem(url, objItem, dataItem) {
         if (!(portal in portalMap)) {
             portal = 'default';
         }
-        processPortalData(dataItem, json, portalMap[portal], portal);
+        processPortalData(doc, dataItem, json, portalMap[portal], portal);
         getNotesDataItem(url, objItem, dataItem);
     });
 }
 
-function processPortalData(dataItem, json, fieldMap, portal) {
+function processPortalData(doc, dataItem, json, fieldMap, portal) {
     var fieldName;
     var fieldValue;
     if (portal == 'archaeology') {
         var hasSiteName = false;
         for (var i = 0; i < json.metaData.length; i++) {
             fieldName = json.metaData[i].fieldName;
-            fieldValue = json.metaData[i].fieldValue;
+            fieldValue = htmlDecode(doc, json.metaData[i].fieldValue);
             if (fieldName in fieldMap) {
                 var key = fieldMap[fieldName];
                 if (fieldName == 'Site Name') {
@@ -322,20 +349,24 @@ function processPortalData(dataItem, json, fieldMap, portal) {
                     setItemValue(dataItem, "title", fieldValue);
                 } else if (fieldName == 'Artifact Title') {
                     if (hasSiteName) {
-                        setItemLabelValue(dataItem, "extra", fieldName, dataItem.title);
+                        setItemLabelValue(doc, dataItem, "extra", fieldName, dataItem.title);
                         hasSiteName = false;
                     }
                     setItemValue(dataItem, "title", fieldValue);
                 }
+                else {
+                    setItemValue(dataItem, key, fieldValue);
+                }
             } else {
-                setItemLabelValue(dataItem, "extra", fieldName, fieldValue);
+                setItemLabelValue(doc, dataItem, "extra", fieldName, fieldValue);
             }
         }
 
     } else {
         for (var i = 0; i < json.metaData.length; i++) {
             fieldName = json.metaData[i].fieldName;
-            fieldValue = json.metaData[i].fieldValue;
+            fieldValue = htmlDecode(doc, json.metaData[i].fieldValue);
+            // fieldValue = json.metaData[i].fieldValue;
             if (fieldName in fieldMap) {
                 var key = fieldMap[fieldName];
                 if (key == 'creators') {
@@ -344,7 +375,7 @@ function processPortalData(dataItem, json, fieldMap, portal) {
                     setItemValue(dataItem, key, fieldValue);
                 }
             } else {
-                setItemLabelValue(dataItem, "extra", fieldName, fieldValue);
+                setItemLabelValue(doc, dataItem, "extra", fieldName, fieldValue);
             }
         }
     }
@@ -354,7 +385,6 @@ function processPortalData(dataItem, json, fieldMap, portal) {
 }
 
 function setItemCreator(dataItem, fieldValue) {
-    fieldValue = fieldValue.replace(/<wbr\/>/g, "");
     var names = [];
     if (fieldValue.indexOf(';') > 0) {
         names = fieldValue.split(';')
@@ -376,9 +406,9 @@ function cleanStringValue(str) {
     return cleanValue;
 }
  
-function setItemLabelValue(dataItem, key, label, value) {
+function setItemLabelValue(doc, dataItem, key, label, value) {
     var cleanValue = cleanStringValue(value);
-
+ 
     if (!(key in dataItem)) {
         dataItem[key] = label + ": " + cleanValue;
 
@@ -440,52 +470,8 @@ function getResourceDataItem(url, objItem, dataItem) {
         var service = text.substring(text.indexOf("secure"));
         service = service.substring(0, service.indexOf("</td>")).replace(/<wbr\/>/g, "").substring(service.indexOf("?")).trim();
         dataItem.url = getServerUrl(url) + "/secure/ViewImages" + service + "&zoomparams=&fs=true";
-        getNonImageDataItem(url, objItem, dataItem);
-    });
-}
-
-function getNonImageDataItem(url, objItem, dataItem) {
-    var ARTSTOR_MEDIA_MAPPINGS = {
-        "11": ["7", "Artstor QuickTime Movie Attachment", "video/quicktime"], //qtvr
-        "12": ["10", "Artstor Audio File Attachment", "audio/mpeg3"], // audio
-        "20": ["20", "Artstor PDF Attachment", "application/pdf"], // pdf
-        "21": ["21", "Artstor PowerPoint Attachment", "application/powerpoint"], // powerpoint
-        "22": ["22", "Artstor Word Attachment", "application/msword"], // word
-        "23": ["23", "Artstor Excel Attachment", "application/excel"], // excel
-        "24": ["24", "Artstor Video File Attachment", "text/html"], // video
-    };
-
-    var itemAry = objItem.split(':');
-    var objType = itemAry[1];
-    var mediaInfo = ARTSTOR_MEDIA_MAPPINGS[objType];
-    if (mediaInfo !== undefined) {
-        var serviceURL = getServiceUrlRoot(url) + "imagefpx/" + itemAry[0] + "/" + mediaInfo[0];
-
-        Zotero.Utilities.HTTP.doGet(serviceURL, function(text) {
-
-            var json = JSON.parse(text);
-            var imageUrl = json.imageUrl;
-            var mediaUrl;
-            if (imageUrl.indexOf('http') >= 0) {
-                mediaUrl = json.imageUrl;
-            } else {
-                if (imageUrl.indexOf('/') == 0) {
-                    mediaUrl = getFileRoot(url) + "/thumb" + imageUrl;
-                } else {
-                    mediaUrl = getFileRoot(url) + "/thumb/" + imageUrl;
-                }
-            }
-            dataItem.attachments.push({
-                title: mediaInfo[1],
-                url: mediaUrl,
-                mimeType: mediaInfo[2]
-            });
-            dataItem.url = url;
-            dataItem.complete();
-        });
-    } else {
         dataItem.complete();
-    }
+    });
 }
 
 function getPortal(url) {
