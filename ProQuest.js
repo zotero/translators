@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-11-18 10:31:47"
+	"lastUpdated": "2015-07-21 19:54:02"
 }
 
 /*
@@ -97,15 +97,16 @@ function fetchEmbeddedPdf(url, item, callback) {
 		//try to fall back to the URL of the embedded PDF
 		if(!pdfLink.length) {
 			Zotero.debug('PDF link not found. Falling back to embedded PDF.');
-			pdfLink = ZU.xpath(doc, '//embed');
+			pdfLink = doc.getElementById('EmbedFile')
+				|| doc.getElementsByTagName('embed')[0];
 			attr = 'src';
 		}
 
-		if(!pdfLink.length) {
+		if(!pdfLink) {
 			Zotero.debug('Could not determine PDF url.');
 			Zotero.debug('Will try to use supplied url: ' + url);
 		} else {
-			url = pdfLink[0][attr];
+			url = pdfLink[attr];
 		}
 
 		if(pdfLink.length) {
@@ -236,13 +237,12 @@ function doWeb(doc, url, pdfUrl) {
 
 		//see if we can get the full text PDF link before we go
 		//the logic here is actually slightly different from fetchEmbeddedPdf
-		if(url.indexOf('fulltextPDF') != -1) {
-			pdfUrl = ZU.xpath(doc, '//embed');
-			if(pdfUrl.length) {
-				pdfUrl = pdfUrl[0].src;
-			} else {
-				pdfUrl = false;
-			}
+		if (pdfUrl = doc.getElementById('EmbedFile')
+				|| doc.getElementsByTagName('embed')[0]
+		) {
+			pdfUrl = pdfUrl.src;
+		} else {
+			pdfUrl = false;
 		}
 
 		ZU.processDocuments(link, function(doc) {
@@ -450,16 +450,18 @@ function scrape(doc, url, type, pdfUrl) {
 		});
 	} else {
 		var pdfLink = ZU.xpath(doc, '(//div[@id="side_panel"]//\
-			a[contains(@class,"format_pdf") and contains(@href,"fulltext") or contains(@href, "preview")])[last()]');
-		if(pdfLink.length) {
-			fetchEmbeddedPdf(pdfLink[0].href, item,
+			a[contains(@class,"format_pdf")\
+				and (contains(@href,"fulltext")\
+					or contains(@href, "preview"))\
+			])[last()]')[0];
+		if (pdfLink) {
+			fetchEmbeddedPdf(pdfLink.href, item,
 				function() { item.complete(); });
+			return;
 		}
 	}
 
-	if(pdfUrl || !pdfLink.length) {
-		item.complete();
-	}
+	item.complete();
 }
 
 function getItemType(types) {
