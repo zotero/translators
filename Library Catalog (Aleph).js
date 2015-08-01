@@ -2,14 +2,14 @@
 	"translatorID": "cf87eca8-041d-b954-795a-2d86348999d5",
 	"label": "Library Catalog (Aleph)",
 	"creator": "Simon Kornblith, Michael Berkowitz, Ming Yeung Cheung",
-	"target": "^https?://[^/]+/F(/[A-Z0-9\\-]+(\\?.*)?$|\\?func=find|\\?func=scan|\\?func=short)",
+	"target": "^https?://[^/]+/F(/[A-Z0-9\\-]*(\\?.*)?$|\\?func=find|\\?func=scan|\\?func=short)",
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
 	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2015-06-02 19:19:06"
+	"lastUpdated": "2015-08-01 17:14:52"
 }
 
 /*
@@ -45,7 +45,7 @@ http://alephdai.ub.hu-berlin.de
 */
 
 function detectWeb(doc, url) {
-	var singleRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set|func=direct|func=myshelf-full.*)");
+	var singleRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]*\?.*(?:func=full-set-set|func=direct|func=myshelf-full.*)");
 	
 	if(singleRe.test(doc.location.href)) {
 		return "book";
@@ -60,7 +60,7 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var detailRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set|func=direct|func=myshelf-full|func=myself_full.*)");
+	var detailRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]*\?.*(?:func=full-set-set|func=direct|func=myshelf-full|func=myself_full.*)");
 	var mab2Opac = new RegExp("^https?://(?!alephdai)[^/]+berlin|193\.30\.112\.134|duisburg-essen/F/[A-Z0-9\-]+\?.*|^https?://katalog\.ub\.uni-duesseldorf\.de/F/");
 	var uri = doc.location.href;
 	var newUris = new Array();
