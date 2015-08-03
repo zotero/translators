@@ -15,7 +15,7 @@
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
-	"lastUpdated": "2015-07-02 02:03:17"
+	"lastUpdated": "2015-08-03 08:45:20"
 }
 
 
@@ -471,8 +471,9 @@ function encodeFilePathComponent(value) {
 			if(item.itemType == "book" && !creatorCheck(item,"author") &&
 			   creatorCheck(item, "editor")) type = "collection";
 
-			//biblatex recommends us to use mvbook for multi-volume books
-			if (type == "book" && item.volume) type = "mvbook"
+			//biblatex recommends us to use mvbook for multi-volume book
+			//i.e. a book with "# of vols" filled
+			if (type == "book" && item.numberOfVolumes) type = "mvbook"
 
 			if (!type) type = "misc";
 
