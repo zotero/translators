@@ -3,14 +3,14 @@
     "translatorID": "5278b20c-7c2c-4599-a785-12198ea648bf",
     "label": "ARTstor",
     "creator": "John Justin, Charles Zeng",
-    "target": "\.artstor|\.sscommons\.org:?\w*\/(open)*library",
+    "target": "\.artstor|\.sscommons\.org:?\w*\/(open)?library",
     "minVersion": "3.1",
     "maxVersion": "",
     "priority": 100,
     "inRepository": true,
     "translatorType": 4,
     "browserSupport": "gcs",
-    "lastUpdated": "2015-07-07 14:45:45"
+    "lastUpdated": "2015-08-05 09:30:15"
 }
 
 /**
