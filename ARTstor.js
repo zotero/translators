@@ -1,16 +1,15 @@
-
 {
     "translatorID": "5278b20c-7c2c-4599-a785-12198ea648bf",
     "label": "ARTstor",
     "creator": "John Justin, Charles Zeng",
-    "target": "\.artstor|\.sscommons\.org:?\w*\/(open)?library",
+    "target": "https?://([^/]+\\.)?(artstor|sscommons)\\.org\/(open)?library",
     "minVersion": "3.1",
     "maxVersion": "",
     "priority": 100,
     "inRepository": true,
     "translatorType": 4,
     "browserSupport": "gcs",
-    "lastUpdated": "2015-08-05 09:30:15"
+    "lastUpdated": "2015-07-07 14:45:45"
 }
 
 /**
@@ -24,7 +23,7 @@ function detectWeb(doc, url) {
         return "artwork";
     } else if (url.match(/\#3\|/)) {
         // Thumbnail window page
-        if ((doc.getElementsByClassName('MetaDataWidgetRoot') != null) && (doc.getElementsByClassName('MetaDataWidgetRoot').length > 0)) {
+        if (doc.getElementsByClassName('MetaDataWidgetRoot').length > 0) {
             // There are multiple metadata windows visible
             return "artwork";
         } else if ((doc.getElementById("floatingPlaceHolder") != null) && (doc.getElementById("floatingPlaceHolder").style.display == "block")) {
@@ -82,7 +81,7 @@ function doWeb(doc, url) {
     }
     if (url.match(/\#3\|/)) {
         // Thumbnail window page
-        if ((doc.getElementsByClassName('MetaDataWidgetRoot') != null) && (doc.getElementsByClassName('MetaDataWidgetRoot').length > 0)) {
+        if (doc.getElementsByClassName('MetaDataWidgetRoot').length > 0) {
             doMetadataWindow(doc, url);
         } else {
             doThumbnails(doc, url);
