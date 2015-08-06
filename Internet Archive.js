@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-08-02 20:09:40"
+	"lastUpdated": "2015-08-06 01:24:43"
 }
 
 function detectWeb(doc, url) {
@@ -56,9 +56,15 @@ function getSearchResults(doc, url, testOnly) {
 	} else return false
 }
 
-function scrape(apiurl) {
+function scrape(doc, url) {
+	//maximum PDF size to be downloaded. default to 10 MB
+	var pref_maxPdfSizeMB = 10;
+	var pdfurl = ZU.xpathText(doc, '//div[contains(@class, "thats-right")]/div/div/a[contains(text(), "PDF") and not(contains(text(), "B/W"))]/@href');
+	var pdfSize = ZU.xpathText(doc, '//div[contains(@class, "thats-right")]/div/div/a[contains(text(), "PDF") and not(contains(text(), "B/W"))]/@data-original-title');
+	Z.debug(pdfurl);
+	var apiurl = url  + "&output=json";
 	ZU.doGet(apiurl, function(text) {
-		Z.debug(text)
+		Z.debug(text);
 		try {
 			var obj = JSON.parse(text).metadata;
 		} catch (e) {
@@ -103,6 +109,22 @@ function scrape(apiurl) {
 		for (i in tags) {
 			newItem.tags.push(tags[i]);
 		}
+		//download PDFs; We're being conservative here, only downloading if we understand the filesize
+		if (pdfurl && pdfSize && parseFloat(pdfSize)){
+			//calculate file size in MB
+			var pdfSizeMB;
+			if (pdfSize.indexOf("M")!=-1){
+				pdfSizeMB = parseFloat(pdfSize);
+			} else if (pdfSize.indexOf("K")!=-1){
+				pdfSizeMB = parseFloat(pdfSize) / 1000;
+			} else if (pdfSize.indexOf("G")!=-1){
+				pdfSizeMB = parseFloat(pdfSize) * 1000;
+			};
+			Z.debug(pdfSizeMB);
+			if (pdfSizeMB < pref_maxPdfSizeMB){
+				newItem.attachments.push({"url": pdfurl, "title": "Internet Archive Fulltext PDF", "mimeType": "application/pdf" })	
+			}
+		}
 		newItem.date = test(date);
 		newItem.medium = test(obj.medium);
 		newItem.publisher = test(obj.publisher);
@@ -137,18 +159,18 @@ function doWeb(doc, url) {
 				return true;
 			}
 			for (var i in items) {
-				articles.push(i + "&output=json");
+				articles.push(i);
 			}
-			scrape(articles)
+			ZU.processDocuments(articles, scrape)
 		});
 	} else {
-		scrape(url + "&output=json");
+		scrape(doc, url);
 	}
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://archive.org/details/gullshornbookstu00dekk",
+		"url": "https://archive.org/details/gullshornbookstu00dekk",
 		"items": [
 			{
 				"itemType": "book",
@@ -172,7 +194,6 @@ var testCases = [
 				],
 				"date": "1812",
 				"abstractNote": "Notes by John Nott; Bibliography of Dekker: p. iii-ix",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"callNumber": "31735060398496",
 				"language": "eng",
 				"libraryCatalog": "Internet Archive",
@@ -180,7 +201,12 @@ var testCases = [
 				"publisher": "Bristol, Reprinted for J.M. Gutch and Sold in London by R. Baldwin, and R. Triphook",
 				"shortTitle": "The gull's hornbook",
 				"url": "http://archive.org/details/gullshornbookstu00dekk",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Internet Archive Fulltext PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
