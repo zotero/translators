@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2015-07-12 15:13:59"
+	"lastUpdated": "2015-08-07 21:09:00"
 }
 
 /*
@@ -857,7 +857,7 @@ function importItem(newItem, node) {
 			var type = Zotero.RDF.getTargets(publisher[0], rdf+"type");
 			if(type) {
 				type = Zotero.RDF.getResourceURI(type[0]);
-				if(type == n.foaf+"Organization") {	// handle foaf organizational publishers
+				if(type == n.foaf+"Organization" || type == n.foaf+"Agent") {	// handle foaf organizational publishers
 					newItem.publisher = getFirstResults(publisher[0], [n.foaf+"name"], true);
 					var place = getFirstResults(publisher[0], [n.vcard+"adr"]);
 					if(place) {
