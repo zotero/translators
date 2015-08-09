@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2015-04-02 18:40:40"
+	"lastUpdated": "2015-08-07 17:04:56"
 }
 
 /*
@@ -220,7 +220,8 @@ function importPNX(text) {
 		case 'ebook':
 		case 'pbook' :
 		case 'books':
-			item.itemType = "book";
+		case 'journal':		//as long as we don't have a periodical item type;
+ 			item.itemType = "book";
 		break;
 		case 'audio':
 			item.itemType = "audioRecording";
@@ -306,15 +307,26 @@ function importPNX(text) {
 	
 	item.series = ZU.xpathText(doc, '(//addata/seriestitle)[1]');
 
+	var isbn;
+	var issn;
+	if (isbn = ZU.xpathText(doc, '//addata/isbn')){
+		item.ISBN = ZU.cleanISBN(isbn);
+	}
+	
+	if (issn = ZU.xpathText(doc, '//addata/issn')){
+		item.ISSN = ZU.cleanISSN(issn);
+	}
+	
+	// Try this if we can't find an isbn/issn in addata
 	// The identifier field is supposed to have standardized format, but
 	// the super-tolerant idCheck should be better than a regex.
 	// (although note that it will reject invalid ISBNs)
 	var locators = ZU.xpathText(doc, '//display/identifier');
-	if(locators) {
+	if(!(item.ISBN || item.ISSN) && locators) {
 		item.ISBN = ZU.cleanISBN(locators);
 		item.ISSN = ZU.cleanISSN(locators);
 	}
-	
+
 	item.edition = ZU.xpathText(doc, '//display/edition');
 	
 	var subjects = ZU.xpath(doc, '//search/subject');
