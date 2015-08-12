@@ -19,7 +19,7 @@
 		"Full TEI Document": false,
 		"Export Collections": false
 	},
-	"lastUpdated":"2015-09-01 06:39:12"
+	"lastUpdated":"2015-09-22 15:19:00"
 }
 
 // ********************************************************************
@@ -109,6 +109,30 @@ var exportedXMLIds = {};
 var generatedItems = {};
 var allItems = {};
 
+// replace formatting with TEI tags
+function replaceFormatting (title){
+    var titleText = title;
+    // italics
+    titleText = titleText.replace(/<i>/g, '<hi rend="italics">');
+    titleText = titleText.replace(/<\/i>/g, '</hi>');
+    // bold
+    titleText = titleText.replace(/<b>/g, '<hi rend="bold">');
+    titleText = titleText.replace(/<\/b>/g, '</hi>');
+    // subscript
+    titleText = titleText.replace(/<sub>/g, '<hi rend="sub">');
+    titleText = titleText.replace(/<\/sub>/g, '</hi>');
+    // superscript
+    titleText = titleText.replace(/<sup>/g, '<hi rend="sup">');
+    titleText = titleText.replace(/<\/sup>/g, '</hi>');
+    // small caps
+    titleText = titleText.replace(/<span style="font-variant:\s*small-caps;">(.*?)<\/span>/g, '<hi rend="smallcaps">$1</hi>');
+    titleText = titleText.replace(/<sc>/g, '<hi rend="smallcaps">');
+    titleText = titleText.replace(/<\/sc>/g, '</hi>');
+    // no capitalization
+    titleText = titleText.replace(/<span class="nocase">(.*?)<\/span>/g, '<hi rend="nocase">$1</hi>');
+            
+    return titleText;
+}
 
 function genXMLId (item){
     var xmlid = '';
@@ -196,6 +220,8 @@ function generateItem(item, teiDoc) {
             bibl.setAttributeNS(ns.xml, "xml:id", myXmlid);
             exportedXMLIds[myXmlid] = bibl;
         }
+        //create attribute for Zotero item URI
+        bibl.setAttribute("corresp", item.uri);
     }
 
     generatedItems[item.itemID] = bibl;
@@ -214,7 +240,7 @@ function generateItem(item, teiDoc) {
         analyticTitle.setAttribute("level", "a");
         analytic.appendChild(analyticTitle);
         if(item.title){
-            analyticTitle.appendChild(teiDoc.createTextNode(item.title));
+            analyticTitle.appendChild(teiDoc.createTextNode(replaceFormatting(item.title)));
         }
 
         // there should be a publication title!
@@ -226,7 +252,7 @@ function generateItem(item, teiDoc) {
             else{
                 pubTitle.setAttribute("level", "m");
             }
-            pubTitle.appendChild(teiDoc.createTextNode(item.publicationTitle));
+            pubTitle.appendChild(teiDoc.createTextNode(replaceFormatting(item.publicationTitle)));
             monogr.appendChild(pubTitle);
         }
         // nonetheless if the user pleases this has to be possible
@@ -235,26 +261,40 @@ function generateItem(item, teiDoc) {
             pubTitle.setAttribute("level", "m");
             monogr.appendChild(pubTitle);
         }
+        // short title
+        if(item.shortTitle){
+            var shortTitle = teiDoc.createElementNS(ns.tei, "title");
+            shortTitle.setAttribute("type", "short");
+            shortTitle.appendChild(teiDoc.createTextNode(item.shortTitle));
+            analytic.appendChild(shortTitle);		
+        }
     }
     else {
         bibl.appendChild(monogr);
         if(item.title){
             var title = teiDoc.createElementNS(ns.tei, "title");
             title.setAttribute("level", "m");
-            title.appendChild(teiDoc.createTextNode(item.title));
+            title.appendChild(teiDoc.createTextNode(replaceFormatting(item.title)));
             monogr.appendChild(title);
         }
         else if(!item.conferenceName){
             var title = teiDoc.createElementNS(ns.tei, "title");
             monogr.appendChild(title);
         }
+        // short title
+        if(item.shortTitle){
+            var shortTitle = teiDoc.createElementNS(ns.tei, "title");
+            shortTitle.setAttribute("type", "short");
+            shortTitle.appendChild(teiDoc.createTextNode(item.shortTitle));
+            monogr.appendChild(shortTitle);		
+        } 
     }
 
     // add name of conference
     if(item.conferenceName){
         var conferenceName = teiDoc.createElementNS(ns.tei, "title");
         conferenceName.setAttribute("type", "conferenceName");
-        conferenceName.appendChild(teiDoc.createTextNode(item.conferenceName));
+        conferenceName.appendChild(teiDoc.createTextNode(replaceFormatting(item.conferenceName)));
         monogr.appendChild(conferenceName);
     }
 
@@ -267,14 +307,14 @@ function generateItem(item, teiDoc) {
         if(item.series){
             var title = teiDoc.createElementNS(ns.tei, "title");
             title.setAttribute("level", "s");
-            title.appendChild(teiDoc.createTextNode(item.series));
+            title.appendChild(teiDoc.createTextNode(replaceFormatting(item.series)));
             series.appendChild(title);
         }
         if(item.seriesTitle){
             var seriesTitle = teiDoc.createElementNS(ns.tei, "title");
             seriesTitle.setAttribute("level", "s");
             seriesTitle.setAttribute("type", "alternative");
-            seriesTitle.appendChild(teiDoc.createTextNode(item.seriesTitle));
+            seriesTitle.appendChild(teiDoc.createTextNode(replaceFormatting(item.seriesTitle)));
             series.appendChild(seriesTitle);
         }
         if(item.seriesText){
