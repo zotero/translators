@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 8,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-04-16 18:45:00"
+	"lastUpdated": "2015-08-14 17:06:00"
 }
 
 /*
@@ -44,24 +44,36 @@ function doSearch(item) {
 	//search the ISBN over the SRU of the GBV, and take the result it as MARCXML
 	//documentation: https://www.gbv.de/wikis/cls/SRU
 	var url = "http://sru.gbv.de/gvk?version=1.1&operation=searchRetrieve&query=pica.isb=" + queryISBN + " AND pica.mat%3DB&maximumRecords=1";
+	//Z.debug(url);
 	ZU.doGet(url, function (text) {
-		Z.debug(text);
+		//Z.debug(text);
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("edd87d07-9194-42f8-b2ad-997c4c7deefd");
 		translator.setString(text);
-		
 		translator.setHandler("itemDone", function (obj, item) {
-			// The url to the table of contents (scanned through DNB)
-			// can be contained in field 856 $3 and the url schema is unique:
-			// prefix (http://d-nb.info/) + id + suffix for toc (/04) 
-			var tocURL = text.match(/http:\/\/d-nb\.info\/.*\/04/);
-			if (tocURL) {
+			// Table of Contents = Inhaltsverzeichnis
+			/* e.g.
+			<datafield tag="856" ind1="4" ind2="2">
+			  <subfield code="u">http://d-nb.info/1054452857/04</subfield>
+			  <subfield code="m">DE-101</subfield>
+			  <subfield code="3">Inhaltsverzeichnis</subfield>
+			</datafield>
+			*/
+			var parser = new DOMParser();
+			var xml = parser.parseFromString(text);
+			var ns = {
+				"marc": "http://www.loc.gov/MARC21/slim"
+			};
+			var tocURL = ZU.xpath(xml, '//marc:datafield[@tag="856"][ marc:subfield[text()="Inhaltsverzeichnis"] ]/marc:subfield[@code="u"]', ns);
+			if (tocURL.length) {
+				//Z.debug(tocURL[0].textContent);
 				item.attachments = [{
-					url: tocURL[0],
+					url: tocURL[0].textContent,
 					title: "Table of Contents PDF",
 					mimeType: "application/pdf"
 				}];
 			}
+			
 			//delete [u.a.] from place
 			if (item.place) {
 				item.place = item.place.replace(/\[?u\.[\s\u00A0]?a\.\]?\s*$/, '');
@@ -124,7 +136,7 @@ var testCases = [
 				],
 				"libraryCatalog": "Gemeinsamer Bibliotheksverbund ISBN",
 				"place": "Münster",
-				"ISBN": "9783830931492 3830931492 9783830931492",
+				"ISBN": "9783830931492",
 				"title": "Evaluation in Deutschland und Österreich: Stand und Entwicklungsperspektiven in den Arbeitsfeldern der DeGEval - Gesellschaft für Evaluation",
 				"publisher": "Waxmann",
 				"date": "2014",
@@ -176,7 +188,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"ISBN": "3866882408 9783866882409 9783866882416",
+				"ISBN": "9783866882409 9783866882416",
 				"language": "ger",
 				"place": "München",
 				"numPages": "387",
@@ -187,6 +199,61 @@ var testCases = [
 				"title": "Bilinguale Lexik: nicht materieller lexikalischer Transfer als Folge der aktuellen russisch-deutschen Zweisprachigkeit",
 				"publisher": "Sagner",
 				"date": "2012"
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"ISBN": "978-1-4073-0412-0"
+		},
+		"items": [
+			{
+				"itemType": "book",
+				"title": "The harbour of Sebastos (Caesarea Maritima) in its Roman Mediterranean context",
+				"creators": [
+					 {
+						"firstName": "Avnēr",
+						"lastName": "Rabbān",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michal",
+						"lastName": "Artzy",
+						"creatorType": "author" 
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Ausgrabung",
+					"Caesarea (Israel) Antiquities",
+					"Caesarea Maritima",
+					"Excavations (Archaeology)",
+					"Excavations (Archaeology) Israel Caesarea",
+					"Funde",
+					"Hafen",
+					"Harbors",
+					"Harbors Israel Caesarea",
+					"Israel Caesarea",
+					"Underwater archaeology",
+					"Underwater archaeology Israel Caesarea"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Table of Contents PDF",
+						"mimeType": "application/pdf"
+					} 
+				],
+				"ISBN": "9781407304120",
+				"language": "eng",
+				"place": "Oxford",
+				"numPages": "222",
+				"series": "BAR International series",
+				"seriesNumber": "1930",
+				"libraryCatalog": "Gemeinsamer Bibliotheksverbund ISBN",
+				"publisher": "Archaeopress" ,
+				"date": "2009" 
 			}
 		]
 	}
