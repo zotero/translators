@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-07-12 15:17:36"
+	"lastUpdated": "2015-08-17 05:44:51"
 }
 
 /*
@@ -602,6 +602,8 @@ function getAuthorFromByline(doc, newItem) {
 		byline = doc.getElementsByClassName(bylineClasses[i]);
 		Z.debug("Found " + byline.length + " elements with '" + bylineClasses[i] + "' class");
 		for(var j=0; j<byline.length; j++) {
+			if (!byline[j].textContent.trim()) continue;
+			
 			bylines.push(byline[j]);
 		}
 	}
@@ -613,14 +615,17 @@ function getAuthorFromByline(doc, newItem) {
 	} else if(bylines.length == 1) {
 		actualByline = bylines[0];
 	} else if(newItem.title) {
-		Z.debug(bylines.length + " bylines found. Locating the one closest to title.")
+		Z.debug(bylines.length + " bylines found:");
+		Z.debug(bylines.map(function(n) { return ZU.trimInternal(n.textContent)}).join('\n'));
+		Z.debug("Locating the one closest to title.");
+		
 		//find the closest one to the title (in DOM)
 		actualByline = false;
 		var parentLevel = 1;
 		var skipList = [];
 		
 		// Wrap title in quotes so we can use it in the xpath
-		var xpathTitle = newItem.title;
+		var xpathTitle = newItem.title.toLowerCase();
 		if(xpathTitle.indexOf('"') != -1) {
 			if(xpathTitle.indexOf("'") == -1) {
 				// We can just use single quotes then
@@ -634,7 +639,7 @@ function getAuthorFromByline(doc, newItem) {
 			xpathTitle = '"' + xpathTitle + '"';
 		}
 		
-		var titleXPath = './/*[normalize-space(translate(text(),"\u00a0"," "))='
+		var titleXPath = './/*[normalize-space(translate(text(),"ABCDEFGHJIKLMNOPQRSTUVWXYZ\u00a0","abcdefghjiklmnopqrstuvwxyz "))='
 			+ xpathTitle + ']';
 		Z.debug("Looking for title using: " + titleXPath);
 		while(!actualByline && bylines.length != skipList.length && parentLevel < 5) {
@@ -680,31 +685,39 @@ function getAuthorFromByline(doc, newItem) {
 	}
 	
 	if(actualByline) {
-		byline = ZU.trimInternal(actualByline.textContent);
+		var byline = ZU.trimInternal(actualByline.textContent);
 		Z.debug("Extracting author(s) from byline: " + byline);
-		byline = byline.split(/\bby[:\s]+/i);
-		byline = byline[byline.length-1].replace(/\s*[[(].+?[)\]]\s*/g, '');
-		var authors = byline.split(/\s*(?:(?:,\s*)?and|,|&)\s*/i);
-		if(authors.length == 2 && authors[0].split(' ').length == 1) {
-			//this was probably last, first
-			newItem.creators.push(ZU.cleanAuthor(fixCase(byline), 'author', true));
+		var li = actualByline.getElementsByTagName('li');
+		if (li.length) {
+			for (var i=0; i<li.length; i++) {
+				var author = ZU.trimInternal(li[i].textContent);
+				newItem.creators.push(ZU.cleanAuthor(fixCase(author), 'author', author.indexOf(',') != -1));
+			}
 		} else {
-			for(var i=0, n=authors.length; i<n; i++) {
-				if(!authors[i].length || authors[i].indexOf('@') !== -1) {
-					//skip some odd splits and twitter handles
-					continue;
-				}
-				
-				if(authors[i].split(/\s/).length == 1) {
-					//probably corporate author
-					newItem.creators.push({
-						lastName: authors[i],
-						creatorType: 'author',
-						fieldMode: 1
-					});
-				} else {
-					newItem.creators.push(
-						ZU.cleanAuthor(fixCase(authors[i]), 'author'));
+			byline = byline.split(/\bby[:\s]+/i);
+			byline = byline[byline.length-1].replace(/\s*[[(].+?[)\]]\s*/g, '');
+			var authors = byline.split(/\s*(?:(?:,\s*)?and|,|&)\s*/i);
+			if(authors.length == 2 && authors[0].split(' ').length == 1) {
+				//this was probably last, first
+				newItem.creators.push(ZU.cleanAuthor(fixCase(byline), 'author', true));
+			} else {
+				for(var i=0, n=authors.length; i<n; i++) {
+					if(!authors[i].length || authors[i].indexOf('@') !== -1) {
+						//skip some odd splits and twitter handles
+						continue;
+					}
+					
+					if(authors[i].split(/\s/).length == 1) {
+						//probably corporate author
+						newItem.creators.push({
+							lastName: authors[i],
+							creatorType: 'author',
+							fieldMode: 1
+						});
+					} else {
+						newItem.creators.push(
+							ZU.cleanAuthor(fixCase(authors[i]), 'author'));
+					}
 				}
 			}
 		}
@@ -781,7 +794,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "10/10/2011",
+				"date": "2011/10/10",
 				"ISSN": "1548-7083",
 				"abstractNote": "Este trabajo se propone realizar un análisis de las   relaciones de género y clase a través de un estudio de caso: la “Huelga de   los Conventillos” de la fábrica textil Gratry en 1936, que se extendió por   más de tres meses, pasando casi inadvertida, sin embargo, para la   investigación histórica. Siendo la textil una rama de industria con una   mayoría de mano de obra femenina, el caso de la casa Gratry, donde el 60% de   los 800 obreros eran mujeres, aparece como ejemplar para la observación de la   actividad de las mujeres en conflicto.   En el trabajo se analiza el rol de las trabajadoras en   la huelga, su participación política, sus formas de organización y   resistencia, haciendo eje en las determinaciones de género y de clase que son   abordadas de manera complementaria e interrelacionada, así como el complejo   entramado de tensiones y solidaridades que éstas generan. De éste modo, se   pretende ahondar en la compleja conformación de una identidad obrera   femenina, a la vez que se discute con aquella mirada historiográfica tradicional   que ha restado importancia a la participación de la mujer en el conflicto   social. Esto se realizará a través de la exploración de una serie de   variables: las relaciones inter-género e inter-clase (fundamentalmente el   vínculo entre las trabajadoras y la patronal masculina), inter-género e   intra-clase (la relación entre trabajadoras y trabajadores), intra-género e   inter-clase (los lazos entre las trabajadoras y las vecinas comerciantes del   barrio), intra-género e intra-clase (relaciones de solidaridad entre   trabajadoras en huelga, y de antagonismo entre huelguistas y “carneras”).   Para ello se trabajó un corpus documental que incluye   información de tipo cuantitativa (las estadísticas del Boletín Informativo   del Departamento Nacional del Trabajo), y cualitativa: periódicos obreros   –fundamentalmente  El Obrero Textil , órgano gremial de la Unión   Obrera Textil,  Semanario de la CGT-Independencia  (órgano de   la Confederación General del Trabajo (CGT)-Independencia) y  La   Vanguardia  (periódico del Partido Socialista), entre otros, y   entrevistas orales a vecinas de Nueva Pompeya y familiares de trabajadoras de   la fábrica Gratry. Se desarrollará una metodología cuali-cuantitativa para el   cruce de estas fuentes.",
 				"issue": "1",
@@ -789,7 +802,7 @@ var testCases = [
 				"libraryCatalog": "acontracorriente.chass.ncsu.edu",
 				"pages": "1-37",
 				"publicationTitle": "A Contracorriente",
-				"rights": "1. Author hereby grants, transfers, and assigns to  A Contracorriente :  (a) the exclusive first serial rights in the Work for publication and distribution throughout the world, as  A Contracorriente  sees fit, in all languages and formats, by print or any electronic means, including, without limitation, the internet, other public and/or private proprietary intranets and computer networks and on CD-ROMs, DVDs and other discs, before the Work shall appear in any other publication (whether print or electronic), in any manner, format or language, or in any other medium now known or hereafter devised. The first serial rights granted to  A Contracorriente  by this Paragraph 1(a) shall be exclusive to  A Contracorriente  until one year following the date of the first serial publication of the Work by  A Contracorriente ; in addition, this grant of rights shall include the non-exclusive right in perpetuity to include the Work in any collection, or compilation produced or authorized by  A Contracorriente , and containing at least 75% material that has appeared in  A Contracorriente , for distribution throughout the world, in all languages and formats, by print or any electronic means, including, without limitation, the internet and other public and proprietary intranets and computer networks and on CDROMs, DVDs and other discs;  (b) further, the non-exclusive right to authorize, reproduce and distribute reprints of the Work throughout the world, in all languages and formats, by print or any electronic means, after the Work appears in a publication produced or authorized by  A Contracorriente ; the right to permit subscribers and other users of the services and publications in which the Work may appear electronically to download, reproduce, and otherwise utilize the Work for their personal, non-commercial use throughout the universe; and the non-exclusive perpetual right, throughout the world, to use the Work, in whole or in part, and Author’s name, likeness, or biography in promoting, advertising, and/or publicizing any publication in which the Work is authorized to appear consistent with this Agreement.  2.  A Contracorriente  reserves the right to publish the Work with illustrations and other graphic materials. Nothing contained herein shall obligate  A Contracorriente  to exploit any of the rights granted to  A Contracorriente  hereunder. All rights not granted to  A Contracorriente  are reserved to Author for Author’s own use and/or transfer, assignment, or disposition.  3. Author represents and warrants: the Work is original to Author, has not been copied in whole or in part, and does not infringe upon the copyright or any other rights of any person or entity; Author has the right to grant the rights granted to  A Contracorriente  under this Agreement free of any and all claims and encumbrances; Author has not granted or transferred any rights in or to the Work to any third party; and Author has not done and will not do anything that has impaired, might impair or will impair in any way any of the rights granted to  A Contracorriente  hereunder.  4. Author shall defend, indemnify, and hold harmless the NC State and its employees, agents, affiliates, successors, licensees, and assigns from and against all claims, damages, liabilities, losses, costs, and expenses, including, without limitation, attorney’s fees and costs, arising out of any breach or alleged breach of any of Author’s representations, warranties, or agreements. Any remedies that Author may have against  A Contracorriente  for breach of this Agreement shall be limited to the right to recover damages, if any, in an action at law. Author hereby waives any right or remedy in equity, including any right to terminate this Agreement, to rescind  A Contracorriente ’s rights in the Work, or to enjoin, restrain, or otherwise impair in any manner the production or distribution of any publication that is authorized or produced by  A Contracorriente .   5.  A Contracorriente  shall have the right to assign this Agreement, either in whole or in part, to any entity affiliated with  A Contracorriente  or to any party that acquires all or substantially all of  A Contracorriente 's assets. Author shall not have the right to further assign any of the rights conferred pursuant to this Agreement, either in whole or in part, or any of the rights granted to Author herein.   6. This Agreement is intended by the parties hereto as the final expression of their understanding with respect to the subject matter herein, as a complete and exclusive statement of the terms herein, and supersedes any and all prior or contemporaneous negotiations, understandings, and agreements between the parties relating thereto.   7. The Agreement may be modified only by a writing signed by both parties to the Agreement. The laws and courts of the State of North Carolina shall govern and control the resolution of any and all conflicts and disputes that may arise hereunder.",
+				"rights": "Copyright (c)",
 				"url": "http://acontracorriente.chass.ncsu.edu/index.php/acontracorriente/article/view/174",
 				"volume": "9",
 				"attachments": [
@@ -1124,35 +1137,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.newyorker.com/books/double-take/rescue-at-the-hearst-tower",
-		"items": [
-			{
-				"itemType": "webpage",
-				"title": "Rescue at the Hearst Tower",
-				"creators": [
-					{
-						"firstName": "Joshua",
-						"lastName": "Rothman",
-						"creatorType": "author"
-					}
-				],
-				"date": "6/12/2013",
-				"abstractNote": "Just a few minutes ago, rescuers successfully retrieved two scaffold-maintenance workers at the Hearst Tower, in Midtown, who had become trapped between the forty-fourth and forty-fifth floors. (The rescue workers appear to have removed some windows on the forty-fourth floor, and to have helped the men step off the scaffold and into the building.) Earlier this year, Adam Higginbotham wrote about the challenges of window washing at the Hearst Tower for The New Yorker, in an article called “Life at the Top.” The Hearst Tower, Higginbotham reports, isn’t like other buildings in New York. It has a unique shape, and requires a particularly complex window-washing scaffold:",
-				"url": "http://www.newyorker.com/books/double-take/rescue-at-the-hearst-tower",
-				"websiteTitle": "The New Yorker",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "http://volokh.com/2013/12/22/northwestern-cant-quit-asa-boycott-member/",
 		"items": [
 			{
@@ -1237,6 +1221,44 @@ var testCases = [
 				"publisher": "University of Virginia Press",
 				"shortTitle": "The Papers of George Washington",
 				"url": "http://books.upress.virginia.edu/title/4539",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://hbr.org/2015/08/how-to-do-walking-meetings-right",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "How to Do Walking Meetings Right",
+				"creators": [
+					{
+						"firstName": "Russell",
+						"lastName": "Clayton",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Chris",
+						"lastName": "Thomas",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jack",
+						"lastName": "Smothers",
+						"creatorType": "author"
+					}
+				],
+				"abstractNote": "New research finds creativity benefits.",
+				"url": "https://hbr.org/2015/08/how-to-do-walking-meetings-right",
+				"websiteTitle": "Harvard Business Review",
 				"attachments": [
 					{
 						"title": "Snapshot"
