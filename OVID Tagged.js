@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-12-17 22:33:06"
+	"lastUpdated": "2015-08-19 19:29:09"
 }
 
 /*
@@ -154,26 +154,9 @@ function doImport() {
 		line = line.replace(/^\s+/, "");
 		
 		checkID = line.match(/^<\s*(\d+)\.\s*>\s*$/);
-		if (checkID) potentialItemID = checkID[1];
+		if (checkID && !potentialItemID) potentialItemID = checkID[1];
 		
-		if (!line) {
-			if (tag) {
-				//there are empty lines in the SY tag
-				if (tag == "SY" || tag == "DE") {
-					data += " " + line;
-				} else {
-					processTag(item, tag, data);
-					// unset info
-					tag = data = false;
-					// new item
-					finalizeItem(item)
-					item = new Zotero.Item();
-					item.creatorsBackup = [];
-					if (potentialItemID) item.itemID = potentialItemID;
-					potentialItemID = null;
-				}
-			}
-		} else if (line.search(/^[A-Z0-9]+\s*-/) != -1) {
+		if (line.search(/^[A-Z0-9]+\s*-/) != -1) {
 			// if this line is a tag, take a look at the previous line to map
 			// its tag
 			if (tag) {
@@ -182,6 +165,17 @@ function doImport() {
 
 			// then fetch the tag and data from this line
 			tag = line.match(/^[A-Z0-9]+/)[0];
+			
+			if (tag == 'VN') {
+				// New item, finalize last one
+				finalizeItem(item);
+				
+				item = new Zotero.Item();
+				item.creatorsBackup = [];
+				if (potentialItemID) item.itemID = potentialItemID;
+				potentialItemID = null;
+			}
+			
 			data = line.substr(line.indexOf("-") + 1);
 		} else {
 			// otherwise, assume this is data from the previous line continued
@@ -264,18 +258,20 @@ function finalizeItem(item) {
 		var pageRangeRE = /(\d+)-(\d+)/g;
 		pageRangeRE.lastIndex = 0;
 		var range = pageRangeRE.exec(item.pages);
-		var pageRangeStart = range[1];
-		var pageRangeEnd = range[2];
-		var diff = pageRangeStart.length - pageRangeEnd.length;
-		if (diff > 0) {
-			pageRangeEnd = pageRangeStart.substring(0, diff) + pageRangeEnd;
-			var newRange = pageRangeStart + "-" + pageRangeEnd;
-			var fullPageRange = item.pages.substring(0, range.index) //everything before current range
-			+ newRange //insert the new range
-			+ item.pages.substring(range.index + range[0].length); //everything after the old range
-			//adjust RE index
-			pageRangeRE.lastIndex += newRange.length - range[0].length;
-			item.pages = fullPageRange;
+		if (range) {
+			var pageRangeStart = range[1];
+			var pageRangeEnd = range[2];
+			var diff = pageRangeStart.length - pageRangeEnd.length;
+			if (diff > 0) {
+				pageRangeEnd = pageRangeStart.substring(0, diff) + pageRangeEnd;
+				var newRange = pageRangeStart + "-" + pageRangeEnd;
+				var fullPageRange = item.pages.substring(0, range.index) //everything before current range
+				+ newRange //insert the new range
+				+ item.pages.substring(range.index + range[0].length); //everything after the old range
+				//adjust RE index
+				pageRangeRE.lastIndex += newRange.length - range[0].length;
+				item.pages = fullPageRange;
+			}
 		}
 	}
 	if (item.publisher && !item.pace) {
@@ -859,6 +855,101 @@ var testCases = [
 				"place": "Novosibirsk",
 				"publisher": "ISiEZH SO RAN",
 				"rights": "Copyright 2009 Thomson Reuters",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": " <7. >\n VN  - Ovid Technologies\n DB  - PsycINFO\n AN  - Peer Reviewed Journal: 2015-33942-012.\n TI  - A comparison of manifestations and impact of reassurance seeking among Japanese individuals with OCD and depression. [References].\n DP  - Sep 2015\n YR  - 2015\n PH  - First Posting: Jun 2014\n LG  - English\n AU  - Kobori, Osamu\n AU  - Sawamiya, Yoko\n AU  - Iyo, Masaomi\n AU  - Shimizu, Eiji\n MA  - Kobori, Osamu: chelsea@chiba-u.jp\n CQ  - Kobori, Osamu: Centre for Forensic Mental Health, Chiba University, 1-8-1, Inohana, Chuo-ku, Chiba, Japan, 2608670, chelsea@chiba-u.jp\n IN  - Kobori, Osamu: Chiba University, Chiba, Japan\n \n       Sawamiya, Yoko: University of Tsukuba, Tsukuba, Japan\n \n       Iyo, Masaomi: Chiba University, Chiba, Japan\n \n       Shimizu, Eiji: Chiba University, Chiba, Japan\n SO  - Behavioural and Cognitive Psychotherapy. Vol.43(5), Sep 2015, pp. 623-634. \n IS  - 1352-4658\n IT  - 1469-1833\n OL  - Behavioural Psychotherapy\n PU  - Cambridge University Press; United Kingdom\n FO  - Electronic\n PT  - Journal\n PT  - Peer Reviewed Journal\n DT  - Journal Article\n AB  - Background: One of the most common interpersonal reactions to threat and anxiety is to seek reassurance from a trusted person. The Reassurance Seeking Questionnaire (ReSQ) measures several key aspects of reassurance seeking behaviour, including frequency, trust of sources, intensity, carefulness, and the emotional consequences of reassurance seeking. Aims: The current study compares patterns and consequences of reassurance seeking in obsessive-compulsive disorder (OCD) and depression. Method: ReSQ scores were compared for three groups: 32 individuals with OCD, 17 individuals with depression, and 24 healthy comparison participants. Results: We found that individuals with OCD tended to seek reassurance more intensely and employ self-reassurance more frequently than individuals with depression or healthy participants, and that if reassurance was not provided, they tended to feel a greater urge to seek additional reassurance. Conclusions: This study is the first to quantitatively elucidate differences in reassurance seeking between OCD and depression. (PsycINFO Database Record (c) 2015 APA, all rights reserved) (journal abstract).\n DO  - http://dx.doi.org/10.1017/S1352465814000277\n PM  - 24892981\n ID  - Obsessive-compulsive disorder, cognitive model, depression, reassurance seeking\n MH  - *Japanese Cultural Groups\n MH  - *Major Depression\n MH  - *Obsessive Compulsive Disorder\n MH  - Anxiety\n MH  - Help Seeking Behavior\n MH  - Threat\n CC  - Psychological Disorders [3210].\n PO  - Human.  Male.  Female.  Outpatient. Adulthood (18 yrs & older)\n LO  - Japan.\n MD  - Empirical Study; Quantitative Study\n TM  - Carefulness Scale\n       Reassurance Seeking Questionnaire-Japanese Version\n       Beck Depression Inventory-II\n       Structured Clinical Interview for DSM-IV\n       Obsessive-Compulsive Inventory\n TD  - Beck Depression Inventory-II [doi: http://dx.doi.org/10.1037/t00742-000] (9999-00742-000)\n       Obsessive-Compulsive Inventory [doi: http://dx.doi.org/10.1037/t10199-000] (9999-10199-000)\n GS  - <b>Sponsor: </b>Japan Society for the Promotion of Science. Japan\n <b>Other Details: </b>Grants-in-Aid for Young Scientists (B)\n <b>Recepient: </b>No recipient indicated\n \n CP  - HOLDER: British Association for Behavioural and Cognitive Psychotherapies\n       YEAR: 2014\n RF  - Beck, A. T., Steer, R. A., & Brown, G. K. (1996). Manual for the Beck Depression Inventory-2. San Antonio, TX: Psychological Corporation.\n \n       Brislin, R. W. (1970). Back-translation for cross-cultural research. Journal of Cross-Cultural Psychology, 1, 185-216. http://dx.doi.org/10.1177/135910457000100301\n \n       Brislin, R. W. (1986). The wording and translation of research instruments. In W. J. Lonner and J. W. Berry (Eds.), Field Methods in Cross-Cultural Research (pp. 137-164). Thousand Oaks, CA: Sage.1987-97046-005\n \n       Coyne, J. C. (1976). Toward an interactional description of depression. Psychiatry, 39, 28-40.1979-01146-0011257353\n \n       de Silva, P., Menzies, R. G., & Shafran, R. (2003). Spontaneous decay of compulsive urges: the case of covert compulsions. Behaviour Research and Therapy, 41, 129-137. http://dx.doi.org/10.1016/S0005-7967(01)00132-2\n \n       First, M., Spitzer, R., Gibbon, M., & Williams, J. (1995). Structured Clinical Interview for DSM-IV Axis I Disorders-Patient edition. New York: Biometrics Research Department, NY State Psychiatric Institute.\n \n       Foa, E. B., Kozak, M. J., Salkovskis, P. M., Coles, M. E., & Amir, N. (1998). The validation of a new obsessive-compulsive disorder scale: the Obsessive-Compulsive Inventory. Psychological Assessment, 3, 206-214. http://dx.doi.org/10.1037/1040-3590.10.3.206\n \n       Ishikawa, R., Kobori, O., & Shimizu, E. (2013). Development and validation of the Japanese version of the Obsessive-Compulsive Inventory. Manuscript submitted for publication.\n \n       Joiner, T. E., Metalsky, G. I., Katz, J., & Beach, S. R. H. (1999). Depression and excessive reassurance seeking. Psychological Inquiry, 10, 269-278.2000-13319-001\n \n       Kobori, O., & Salkovskis, P. M. (2013). Patterns of reassurance seeking and reassurance-related behaviours in OCD and anxiety disorders. Behavioural and Cognitive Psychotherapy, 41, 1-23. http://dx.doi.org/10.1017/S1352465812000665\n \n       Kobori, O., & Sawamiya, Y. (2012). Development of the Japanese version of Reassurance Seeking Questionnaire. Unpublished manuscript.\n \n       Kobori, O., Salkovskis, P. M., Read, J., Lounes, N., & Wong, V. (2012). A qualitative study of the investigation of reassurance seeking in obsessive-compulsive disorder. Journal of Obsessive-Compulsive and Related Disorders, 1, 25-32\n \n       Kojima, M., Furukawa, T. A., Takahashi, H., Kawai, M., Nagaya, T., & Tokudome, S. (2002). Cross-cultural validation of the Beck Depression Inventory-II in Japan. Psychiatry Research, 110, 291-299. http://dx.doi.org/10.1016/S0165-1781(02)00106-3\n \n       Parrish, C. L., & Radomsky, A. S. (2006). An experimental investigation of responsibility and reassurance: relationships with compulsive checking. International Journal of Behavioural and Consultation Therapy, 2, 174-191. http://dx.doi.org/10.1037/h0100775\n \n       Parrish, C. L., & Radomsky, A. S. (2010). Why do people seek reassurance and check repeatedly? An investigation of factors involved in compulsive behaviour in OCD and depression. Journal of Anxiety Disorders, 24, 211-222. http://dx.doi.org/10.1016/j.janxdis.2009.10.010\n \n       Rachman, S. J. (2002). A cognitive theory of compulsive checking. Behaviour Research and Therapy, 40, 625-639. http://dx.doi.org/10.1016/S0005-7967(01)00028-6\n \n       Rachman, S. J., & Hodgson, R. J. (1980). Obsessions and Compulsions. Englewood Cliffs, NJ: Prentice Hall.\n \n       Rachman, S. J., de Silva, P., & Roper, G. (1976). Spontaneous decay of compulsive urges. Behaviour Research and Therapy, 14, 445-453. http://dx.doi.org/10.1016/0005-7967(76)90091-7\n \n       Salkovskis, P. M. (1999). Understanding and treating obsessive-compulsive disorder. Behaviour Research and Therapy, 37, S29http://dx.doi.org/10.1016/S0005-7967(99)00049-2\n \n       Salkovskis, P. M., & Kobori, O. (2013). Reassuringly calm? Self-reported patterns of responses to reassurance seeking in Obsessive Compulsive Disorder. Manuscript submitted for publication.\n \n       Starr, L. R., & Davila, J. (2008). Excessive reassurance seeking, depression, and inter-personal rejection: a meta-analytic review. Journal of Abnormal Psychology, 117, 762-775. http://dx.doi.org/10.1037/a0013866\n \n       van den Hout, M., & Kindt, M. (2004). Obsessive-compulsive disorder and the paradoxical effects of perseverative behaviour on experienced uncertainty. Journal of Behaviour Therapy and Experimental Psychiatry, 35, 165-181. http://dx.doi.org/10.1016/j.jbtep.2004.04.007\n UP  - 20150810 (PsycINFO)\n JN  - Behavioural and Cognitive Psychotherapy\n VO  - 43\n IP  - 5\n MO  - Sep\n PG  - 623-634\n XL  - http://ovidsp.ovid.com/ovidweb.cgi?T=JS&CSC=Y&NEWS=N&PAGE=fulltext&D=psyc11&AN=2015-33942-012\n \n <8. >\n VN  - Ovid Technologies\n DB  - PsycINFO\n AN  - Peer Reviewed Journal: 2015-33942-007.\n TI  - A meta-analysis of transdiagnostic cognitive behavioural therapy in the treatment of child and young person anxiety disorders. [References].\n DP  - Sep 2015\n YR  - 2015\n PH  - First Posting: Dec 2013\n LG  - English\n AU  - Ewing, Donna L\n AU  - Monsen, Jeremy J\n AU  - Thompson, Ellen J\n AU  - Cartwright-Hatton, Sam\n AU  - Field, Andy\n MA  - Ewing, Donna L.: d.l.ewing@sussex.ac.uk\n CQ  - Ewing, Donna L.: School of Psychology, University of Sussex, Falmer, Brighton, United Kingdom, BN1 9QH, d.l.ewing@sussex.ac.uk\n IN  - Ewing, Donna L.: University of Sussex, Brighton, United Kingdom\n \n       Monsen, Jeremy J.: East London Consortium of Educational Psychologists, London, United Kingdom\n \n       Thompson, Ellen J.: University of Sussex, Brighton, United Kingdom\n \n       Cartwright-Hatton, Sam: University of Sussex, Brighton, United Kingdom\n \n       Field, Andy: University of Sussex, Brighton, United Kingdom\n SO  - Behavioural and Cognitive Psychotherapy. Vol.43(5), Sep 2015, pp. 562-577. \n IS  - 1352-4658\n IT  - 1469-1833\n OL  - Behavioural Psychotherapy\n PU  - Cambridge University Press; United Kingdom\n FO  - Electronic\n PT  - Journal\n PT  - Peer Reviewed Journal\n DT  - Journal Article\n AB  - Background: Previous meta-analyses of cognitive-behavioural therapy (CBT) for children and young people with anxiety disorders have not considered the efficacy of transdiagnostic CBT for the remission of childhood anxiety. Aim: To provide a meta-analysis on the efficacy of transdiagnostic CBT for children and young people with anxiety disorders. Methods: The analysis included randomized controlled trials using transdiagnostic CBT for children and young people formally diagnosed with an anxiety disorder. An electronic search was conducted using the following databases: ASSIA, Cochrane Controlled Trials Register, Current Controlled Trials, Medline, PsycArticles, PsychInfo, and Web of Knowledge. The search terms included \"anxiety disorder(s)\", \"anxi*\", \"cognitive behavio*, \"CBT\", \"child*\", \"children\", \"paediatric\", \"adolescent(s)\", \"adolescence\", \"youth\" and \"young pe*\". The studies identified from this search were screened against the inclusion and exclusion criteria, and 20 studies were identified as appropriate for inclusion in the current meta-analysis. Pre- and posttreatment (or control period) data were used for analysis. Results: Findings indicated significantly greater odds of anxiety remission from pre- to posttreatment for those engaged in the transdiagnostic CBT intervention compared with those in the control group, with children in the treatment condition 9.15 times more likely to recover from their anxiety diagnosis than children in the control group. Risk of bias was not correlated with study effect sizes. Conclusions: Transdiagnostic CBT seems effective in reducing symptoms of anxiety in children and young people. Further research is required to investigate the efficacy of CBT for children under the age of 6. (PsycINFO Database Record (c) 2015 APA, all rights reserved) (journal abstract).\n DO  - http://dx.doi.org/10.1017/S1352465813001094\n PM  - 24331028\n ID  - Meta-analysis, anxiety, children, cognitive-behavioural therapy (CBT)\n MH  - *Anxiety Disorders\n MH  - *Cognitive Behavior Therapy\n MH  - Anxiety\n CC  - Cognitive Therapy [3311].\n PO  - Human. Childhood (birth-12 yrs)\n MD  - Meta Analysis\n GS  - <b>Sponsor: </b>National Institute for Health Research\n <b>Other Details: </b>Career Development Award\n <b>Recepient: </b>Cartwright-Hatton, Sam\n \n       <b>Sponsor: </b>Medical Research Council\n <b>Grant: </b>G108/604\n <b>Other Details: </b>Clinician Scientist Fellowship\n <b>Recepient: </b>Cartwright-Hatton, Sam\n \n CP  - HOLDER: British Association for Behavioural and Cognitive Psychotherapies\n       YEAR: 2013\n RF  - American Psychological Association. (2013). Highlights of Changes from DSM-IV-TR to DSM-5. Washington, DC: Author. Retrieved from http://www.dsm5.org/Pages/Default.aspx\n \n       Bennett, K., Manassis, K., Walter, S. D., Cheung, A., Wilansky-Traynor, P., Diaz-Granados, N., et al. (2013). Cognitive behavioral therapy age effects in child and adolescent anxiety: an individual patient data metaanalysis. http://dx.doi.org/10.1002/da.22099\n \n       Bland, J. M., & Altman, D. G. (2000). Statistics notes: the odds ratio. British Medical Journal, 320, 1468.\n \n       Cartwright-Hatton, S., McNicol, K., & Doubleday, E. (2006). Anxiety in a neglected population: prevalence of anxiety disorders in pre-adolescent children. Clinical Psychology Review, 26, 817-833. http://dx.doi.org/10.1016/j.cpr.2005.12.002\n \n       Cartwright-Hatton, S., Roberts, C., Chitsabesan, P., Fothergill, C., & Harrington, R. (2004). Systematic review of the efficacy of cognitive behaviour therapies for childhood and adolescent anxiety disorders. The British Journal of Clinical Psychology, 43, 421-436. http://dx.doi.org/10.1348/0144665042388928\n \n       Chalfant, A. M., Rapee, R., & Carroll, L. (2007). Treating anxiety disorders in children with high functioning autism spectrum disorders: a controlled trial. Journal of Autism and Developmental Disorders, 37, 1842-1857. http://dx.doi.org/10.1007/s10803-006-0318-4\n \n       Cobham, V. E. (2012). Do anxiety-disordered children need to come into the clinic for efficacious treatment?. Journal of Consulting and Clinical Psychology, 80, 465-476. http://dx.doi.org/10.1037/a0028205\n \n       Cohen, J. A., & Mannarino, A. P. (1996). A treatment outcome study for sexually abused preschool children: initial findings. Journal of the American Academy of Child and Adolescent Psychiatry, 35, 42-50. http://dx.doi.org/10.1097/00004583-199601000-00011\n \n       Cohen, J. A., & Mannarino, A. P. (1998). Interventions for sexually abused children: initial treatment outcome findings. Child Maltreatment, 3, 17-26. http://dx.doi.org/10.1177/1077559598003001002\n \n       Compton, S. N., March, J. S., Brent, D., Albano, A. M., Weersing, V. R., & Curry, J. (2004). Cognitive-behavioral psychotherapy for anxiety and depressive disorders in children and adolescents: an evidence-based medicine review. Journal of the American Academy of Child and Adolescent Psychiatry, 43, 930-959. http://dx.doi.org/10.1097/01.chi.0000127589.57468.bf\n \n       Davis, T. E., May, A., & Whiting, S. E. (2011). Evidence-based treatment of anxiety and phobia in children and adolescents: current status and effects on the emotional response. Clinical Psychology Review, 31, 592-602. http://dx.doi.org/10.1016/j.cpr.2011.01.001\n \n       Field, A. P., & Gillett, R. (2010). How to do a meta-analysis. The British Journal of Mathematical and Statistical Psychology, 63, 665-694. http://dx.doi.org/10.1348/000711010X502733\n \n       Ginsburg, G. S., Kendall, P. C., Sakolsky, D., Compton, S. N., Piacentini, J., Albano, A. M., et al. (2011). Remission after acute treatment in children and adolescents with anxiety disorders: findings from the CAMS. Journal of Consulting and Clinical Psychology, 79, 806-813. http://dx.doi.org/10.1037/a0025933\n \n       Hoff Esbjorn, B., Hoeyer, M., Dyrborg, J., Leth, I., & Kendall, P. C. (2010). Prevalence and co-morbidity among anxiety disorders in a national cohort of psychiatrically referred children and adolescents. Journal of Anxiety Disorders, 24, 866-872. http://dx.doi.org/10.1016/j.janxdis.2010.06.009\n \n       Hofmann, S. G. (2007). Cognitive factors that maintain social anxiety disorder: comprehensive model and its treatment implications. Cognitive Behavioral Therapy, 36, 193-209. http://dx.doi.org/10.1080/16506070701421313\n \n       In-Albon, T., & Schneider, S. (2007). Psychotherapy of childhood anxiety disorders: a meta-analysis. Psychotherapy and Psychosomatics, 76, 15-24. http://dx.doi.org/10.1159/000096361\n \n       Ishikawa, S., Okajima, I., Matsuoka, H., & Sakano, Y. (2007). Cognitive behavioural therapy for anxiety disorders in children and adolescents: a meta-analysis. Child and Adolescent Mental Health, 12, 164-172. http://dx.doi.org/10.1111/j.1475-3588.2006.00433.x\n \n       James, A. C., James, G., Cowdrey, F. A., Soler, A., & Choke, A. (2013). Cognitive behavioural therapy for anxiety disorders in children and adolescents (Review). Cochrane Database of Systematic Reviews, 6. doi:10.1002/14651858.CD004690.pub3\n \n       Kendall, P. C., Compton, S. N., Walkup, J. T., Birmaher, B., Albano, A. M., Sherrill, J., et al. (2010). Clinical characteristics of anxiety disordered youth. Journal of Anxiety Disorders, 24, 360-365. http://dx.doi.org/10.1016/j.janxdis.2010.01.009\n \n       Klein, R. G. (2009). Anxiety disorders. Journal of Child Psychology and Psychiatry, 50, 153-162. http://dx.doi.org/10.1111/j.1469-7610.2008.02061.x\n \n       Leyfer, O., Gallo, K. P., Cooper-Vince, C., & Pincus, D. B. (2013). Patterns and predictors of comorbidity of DSM-IV anxiety disorders in a clinical sample of children and adolescents. Journal of Anxiety Disorders, 27, 306-311. http://dx.doi.org/10.1016/j.janxdis.2013.01.010\n \n       Masia Warner, C., Colognori, D., Kim, R. E., Reigada, L. C., Klein, R. G., Browner-Elhanan, K. J., et al. (2011). Cognitive-behavioral treatment of persistent functional somatic complaints and pediatric anxiety: an initial controlled trial. Depression and Anxiety, 28, 551-559. http://dx.doi.org/10.1002/da.20821\n \n       McManus, F., Shafran, R., & Cooper, Z. (2010). What does a transdiagnostic approach have to offer the treatment of anxiety disorders?. The British Journal of Clinical Psychology, 49, 491-505. http://dx.doi.org/10.1348/014466509X476567\n \n       McNally Keehn, R. H., Lincoln, A. J., Brown, M. Z., & Chavira, D. A. (2013). The Coping Cat program for children with anxiety and autism spectrum disorder: a pilot randomized controlled trial. Journal of Autism and Developmental Disorders, 43, 57-67. http://dx.doi.org/10.1007/s10803-012-1541-9\n \n       Moher, D., Liberati, A., Tetzlaff, J., & Altman, D. G. (2009). Preferred reporting items for systematic reviews and meta-analyses: the PRISMA statement. PLoS Medicine, 6, e1000097.\n \n       Muris, P., Mayer, B., den Adel, M., Roos, T., & van Wamelen, J. (2009). Predictors of change following cognitive-behavioral treatment of children with anxiety problems: a preliminary investigation on negative automatic thoughts and anxiety control. Child Psychiatry and Human Development, 40, 139-151. http://dx.doi.org/10.1007/s10578-008-0116-7\n \n       Norton, P. J., & Barrera, T. L. (2012). Transdiagnostic versus diagnosis-specific CBT for anxiety disorders: a preliminary randomized controlled noninferiority trial. Depression and Anxiety, 29, 874-882. doi:10.1002/da.219742012-26844-00622767410\n \n       Prins, P. (2001). Affective and cognitive processes and the development and maintenance of anxiety and its disorders. In Anxiety Disorders in Children and Adolescents: research, assessment and intervention (pp. 23-44). Cambridge: Cambridge University Press. Retrieved from http://dare.uva.nl/record/1137862001-00080-002\n \n       Rapee, R. M., Abbott, M. J., & Lyneham, H. J. (2006). Bibliotherapy for children with anxiety disorders using written materials for parents: a randomized controlled trial. Journal of Consulting and Clinical Psychology, 74, 436-444. http://dx.doi.org/10.1037/0022-006X.74.3.436\n \n       Reynolds, S., Wilson, C., Austin, J., & Hooper, L. (2012). Effects of psychotherapy for anxiety in children and adolescents: a meta-analytic review. Clinical Psychology Review, 32, 251-262. http://dx.doi.org/10.1016/j.cpr.2012.01.005\n \n       Silverman, W. K., Pina, A. A., & Viswesvaran, C. (2008). Evidence-based psychosocial treatments for phobic and anxiety disorders in children and adolescents. Journal of Clinical Child and Adolescent Psychology, 37, 105-130. http://dx.doi.org/10.1080/15374410701817907\n \n       Spence, S. H., Donovan, C., & Brechman-Toussaint, M. (2000). The treatment of childhood social phobia: the effectiveness of a social skills training-based, cognitive-behavioural intervention, with and without parental involvement. Journal of Child Psychology and Psychiatry, 41, 713-726. http://www.ncbi.nlm.nih.gov/pubmed/11039684 http://dx.doi.org/10.1111/1469-7610.00659\n \n       The Cochrane Collaboration. (2002). Cochrane Collaboration open learning material for reviewers. Retrieved from http://www.cochrane-net.org/openlearning/PDF/Openlearning-full.pdf\n \n       Williams, T. I., Salkovskis, P. M., Forrester, L., Turner, S., White, H., & Allsopp, M. A. (2010). A randomised controlled trial of cognitive behavioural treatment for obsessive compulsive disorder in children and adolescents. European Child and Adolescent Psychiatry, 19, 449-456. http://dx.doi.org/10.1007/s00787-009-0077-9\n \n       Wood, J. J., Drahota, A., Sze, K., Har, K., Chiu, A., & Langer, D. A. (2009). Cognitive behavioral therapy for anxiety in children with autism spectrum disorders: a randomized, controlled trial. Journal of Child Psychology and Psychiatry, 50, 224-234. http://dx.doi.org/10.1111/j.1469-7610.2008.01948.x\n UP  - 20150810 (PsycINFO)\n JN  - Behavioural and Cognitive Psychotherapy\n VO  - 43\n IP  - 5\n MO  - Sep\n PG  - 562-577\n XL  - http://ovidsp.ovid.com/ovidweb.cgi?T=JS&CSC=Y&NEWS=N&PAGE=fulltext&D=psyc11&AN=2015-33942-007\n ",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "A comparison of manifestations and impact of reassurance seeking among Japanese individuals with OCD and depression. [References]",
+				"creators": [
+					{
+						"firstName": "Osamu",
+						"lastName": "Kobori",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yoko",
+						"lastName": "Sawamiya",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Masaomi",
+						"lastName": "Iyo",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Eiji",
+						"lastName": "Shimizu",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015 Sep",
+				"DOI": "http://dx.doi.org/10.1017/S1352465814000277",
+				"ISSN": "1352-4658",
+				"abstractNote": "Background: One of the most common interpersonal reactions to threat and anxiety is to seek reassurance from a trusted person. The Reassurance Seeking Questionnaire (ReSQ) measures several key aspects of reassurance seeking behaviour, including frequency, trust of sources, intensity, carefulness, and the emotional consequences of reassurance seeking. Aims: The current study compares patterns and consequences of reassurance seeking in obsessive-compulsive disorder (OCD) and depression. Method: ReSQ scores were compared for three groups: 32 individuals with OCD, 17 individuals with depression, and 24 healthy comparison participants. Results: We found that individuals with OCD tended to seek reassurance more intensely and employ self-reassurance more frequently than individuals with depression or healthy participants, and that if reassurance was not provided, they tended to feel a greater urge to seek additional reassurance. Conclusions: This study is the first to quantitatively elucidate differences in reassurance seeking between OCD and depression. (PsycINFO Database Record (c) 2015 APA, all rights reserved) (journal abstract).",
+				"callNumber": "Peer Reviewed Journal: 2015-33942-012.",
+				"issue": "5",
+				"itemID": "7",
+				"language": "English",
+				"libraryCatalog": "PsycINFO",
+				"pages": "623-634",
+				"publicationTitle": "Behavioural and Cognitive Psychotherapy",
+				"volume": "43",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			},
+			{
+				"itemType": "journalArticle",
+				"title": "A meta-analysis of transdiagnostic cognitive behavioural therapy in the treatment of child and young person anxiety disorders. [References]",
+				"creators": [
+					{
+						"firstName": "Donna L.",
+						"lastName": "Ewing",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jeremy J.",
+						"lastName": "Monsen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ellen J.",
+						"lastName": "Thompson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sam",
+						"lastName": "Cartwright-Hatton",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Andy",
+						"lastName": "Field",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015 Sep",
+				"DOI": "http://dx.doi.org/10.1017/S1352465813001094",
+				"ISSN": "1352-4658",
+				"abstractNote": "Background: Previous meta-analyses of cognitive-behavioural therapy (CBT) for children and young people with anxiety disorders have not considered the efficacy of transdiagnostic CBT for the remission of childhood anxiety. Aim: To provide a meta-analysis on the efficacy of transdiagnostic CBT for children and young people with anxiety disorders. Methods: The analysis included randomized controlled trials using transdiagnostic CBT for children and young people formally diagnosed with an anxiety disorder. An electronic search was conducted using the following databases: ASSIA, Cochrane Controlled Trials Register, Current Controlled Trials, Medline, PsycArticles, PsychInfo, and Web of Knowledge. The search terms included \"anxiety disorder(s)\", \"anxi*\", \"cognitive behavio*, \"CBT\", \"child*\", \"children\", \"paediatric\", \"adolescent(s)\", \"adolescence\", \"youth\" and \"young pe*\". The studies identified from this search were screened against the inclusion and exclusion criteria, and 20 studies were identified as appropriate for inclusion in the current meta-analysis. Pre- and posttreatment (or control period) data were used for analysis. Results: Findings indicated significantly greater odds of anxiety remission from pre- to posttreatment for those engaged in the transdiagnostic CBT intervention compared with those in the control group, with children in the treatment condition 9.15 times more likely to recover from their anxiety diagnosis than children in the control group. Risk of bias was not correlated with study effect sizes. Conclusions: Transdiagnostic CBT seems effective in reducing symptoms of anxiety in children and young people. Further research is required to investigate the efficacy of CBT for children under the age of 6. (PsycINFO Database Record (c) 2015 APA, all rights reserved) (journal abstract).",
+				"callNumber": "Peer Reviewed Journal: 2015-33942-007.",
+				"issue": "5",
+				"itemID": "8",
+				"language": "English",
+				"libraryCatalog": "PsycINFO",
+				"pages": "562-577",
+				"publicationTitle": "Behavioural and Cognitive Psychotherapy",
+				"volume": "43",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
