@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-08-20 19:22:26"
+	"lastUpdated": "2015-08-20 19:56:13"
 }
 
 function detectImport() {
@@ -1229,6 +1229,7 @@ function processTag(item, tagValue, risEntry) {
 	var processFields = true; //whether we should continue processing by zField
 	switch(tag) {
 		case "N1":
+		case "RN":
 			//seems that EndNote duplicates title in the note field sometimes
 			if(item.title == value) {
 				value = undefined;
