@@ -13,7 +13,7 @@
 	"inRepository": true,
 	"translatorType": 2,
 	"browserSupport": "g",
-	"lastUpdated": "2015-04-23 21:28:32"
+	"lastUpdated": "2015-08-19 21:28:32"
 }
 
 /*
@@ -84,7 +84,7 @@ var creatorBaseTypes = {
 	artist: 'author',
 	sponsor: 'author',
 	contributor: 'author',
-	inventor: 'auhtor',
+	inventor: 'author',
 	cartographer: 'author',
 	performer: 'author',
 	presenter: 'author',
