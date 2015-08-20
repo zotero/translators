@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-06-19 19:24:24"
+	"lastUpdated": "2015-08-20 19:22:26"
 }
 
 function detectImport() {
@@ -689,7 +689,7 @@ var RISReader = new function() {
 				var newLineAdded = false;
 				var cleanLine = line.trim();
 				//new lines would probably only be meaningful in notes and abstracts
-				if((['AB', 'N1', 'N2']).indexOf(tagValue.tag) !== -1
+				if((['AB', 'N1', 'N2', 'RN']).indexOf(tagValue.tag) !== -1
 					//if all lines are not trimmed to ~80 characters or previous line was
 					// short, this would probably be on a new line. Might want to consider
 					// looking for periods and capital letters to make a better call.
