@@ -1,39 +1,57 @@
 {
 	"translatorID": "d71e9b6d-2baa-44ed-acb4-13fe2fe592c0",
 	"label": "Google Patents",
-	"creator": "Adam Crymble, Avram Lyon",
-	"target": "^https?://(www\\.)?google\\.[^/]+/(?:patents|[^/]*[&?#]tbm=pts)",
+	"creator": "Adam Crymble, Avram Lyon, Sebastian Karcher",
+	"target": "^https?://((www\\.)?google\\.[^/]+/(?:patents|[^/]*[&?#]tbm=pts)|patents\\.google\\.[^/]+/(\\?q=|patent/))",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-08-15 02:22:24"
+	"lastUpdated": "2015-08-21 23:12:43"
 }
 
 function detectWeb(doc, url) {
 	if (!doc.getElementsByTagName("body")[0].hasChildNodes()) return;
-
 	if (getSearchResults(doc).length) {
 		return "multiple";
-	} else if(getScraper(doc)) {
+	} else if (getScraper(doc)) {
 		return "patent";
 	}
 }
 
 function getSearchResults(doc) {
-	return ZU.xpath(doc, '//div[@id="ires"]//li[@class="g"]//h3/a');
+	return ZU.xpath(doc, '//div[@id="ires"]//div[@class="g"]//h3/a');
+	//new format should be '//search-result-item/article/a' but isn't working yet
 }
 
 function fixAuthorCase(name) {
-	if(name.toUpperCase() == name) {
-		return ZU.capitalizeTitle(name, true).replace(/\sa(\.?)\s/,' A$1 ');
+	if (name.toUpperCase() == name) {
+		return ZU.capitalizeTitle(name, true).replace(/\sa(\.?)\s/, ' A$1 ');
 	} else {
 		return name;
 	}
 }
 
+function getPatentOffice(number) {
+	//get the PatentOffice from the first two letters of the patentNumber
+	var country;
+	if (number.indexOf('EP') === 0) {
+		country = 'European Union';
+	} else if (number.indexOf('US') === 0) {
+		country = 'United States';
+	} else if (number.indexOf('WO') === 0) {
+		country = 'World Intellectual Property Organization';
+	} else if (number.indexOf('CN') === 0) {
+		country = 'China';
+	} else if (number.indexOf('CA') === 0) {
+		country = 'Canada';
+	} else if (number.indexOf('DE') === 0) {
+		country = 'Germany';
+	}
+	return country;
+}
 var scrapers = [
 	//U.S. (?) patent page. E.g. http://www.google.com/patents/US20090289560
 	{
@@ -53,144 +71,135 @@ var scrapers = [
 			'INVENTOR': 'creators',
 			'CURRENT U.S. CLASSIFICATION': 'extra/U.S. Classification',
 			'INTERNATIONAL CLASSIFICATION': 'extra/International Classification'
-		/*	'PRIMARY EXAMINER':
-			'SECONDARY EXAMINER':
-			'ATTORNEY':
-			'ATTORNEYS':
-		*/
+				/*	'PRIMARY EXAMINER':
+					'SECONDARY EXAMINER':
+					'ATTORNEY':
+					'ATTORNEYS':
+				*/
 		},
 		addField: function(fields, label, value) {
-			if(!value.length) return;
+			if (!value.length) return;
 			var zField = this.fieldMap[label];
-			if(value.length && zField) {
+			if (value.length && zField) {
 				zField = zField.split('/');
-				switch(zField[0]) {
+				switch (zField[0]) {
 					case 'creators':
-						if(!fields.creators) fields.creators = [];
+						if (!fields.creators) fields.creators = [];
 						fields.creators = fields.creators.concat(value);
-					break;
+						break;
 					case 'extra':
-						if(fields.extra) fields.extra += '\n';
+						if (fields.extra) fields.extra += '\n';
 						else fields.extra = '';
-
-						if(zField[1]) fields.extra += zField[1] + ': ';
+						if (zField[1]) fields.extra += zField[1] + ': ';
 						fields.extra += value.join('; ');
-					break;
+						break;
 					default:
-						if(fields[zField[0]]) return;	//do not overwrite previous fields
+						if (fields[zField[0]]) return; //do not overwrite previous fields
 						fields[zField[0]] = value.join('; ');
 				}
 			}
 		},
 		addValue: function(label, value, node) {
-			switch(label) {
+			switch (label) {
 				case 'PATENT NUMBER':
 				case 'FILING DATE':
 				case 'ISSUE DATE':
 				case 'APPLICATION NUMBER':
 				case 'PRIMARY EXAMINER':
 				case 'SECONDARY EXAMINER':
-					value[0] = node.textContent.trim().replace(/^:\s*/,'');
-				break;
+					value[0] = node.textContent.trim().replace(/^:\s*/, '');
+					break;
 				case 'ATTORNEY':
 				case 'ATTORNEYS':
-					value = value.concat(
-						fixAuthorCase(
-							node.textContent.trim()
-									.replace(/^:\s*/,'')
-						).split(/\s*,\s*(?=\S)(?!(?:LLC|LLP|Esq)\b)/i));
-				break;
+					value = value.concat(fixAuthorCase(node.textContent.trim().replace(/^:\s*/, '')).split(/\s*,\s*(?=\S)(?!(?:LLC|LLP|Esq)\b)/i));
+					break;
 				case 'ORIGINAL ASSIGNEE':
-					if(node.nodeName.toUpperCase() != 'A') break;
+					if (node.nodeName.toUpperCase() != 'A') break;
 					value[0] = fixAuthorCase(node.textContent.trim());
-				break;
+					break;
 				case 'INVENTORS':
 				case 'INVENTOR':
-					if(node.nodeName.toUpperCase() != 'A') break;
-					var name = node.textContent.trim().split(/\s*,\s*/);	//look for suffix
+					if (node.nodeName.toUpperCase() != 'A') break;
+					var name = node.textContent.trim().split(/\s*,\s*/); //look for suffix
 					var inv = ZU.cleanAuthor(fixAuthorCase(name[0]), 'inventor');
-					if(name[1]) {	//re-add suffix if we had one
+					if (name[1]) { //re-add suffix if we had one
 						inv.firstName += ', ' + name[1];
 					}
 					value.push(inv);
-				break;
+					break;
 				case 'CURRENT U.S. CLASSIFICATION':
-					if(node.nodeName.toUpperCase() != 'A') break;
+					if (node.nodeName.toUpperCase() != 'A') break;
 					value.push(node.textContent.trim());
-				break;
+					break;
 				case 'INTERNATIONAL CLASSIFICATION':
-					value = value.concat(node.textContent.trim()
-									.replace(/^:\s*/,'')
-									.split(/\s*;\s*/));
-				break;
+					value = value.concat(node.textContent.trim().replace(/^:\s*/, '').split(/\s*;\s*/));
+					break;
 			}
 			return value;
 		},
 		getMetadata: function(doc) {
 			var fieldBoxes = this.getBoxes(doc);
 			var fields = {};
-			for(var i=0, n=fieldBoxes.length; i<n; i++) {
+			for (var i = 0, n = fieldBoxes.length; i < n; i++) {
 				//within each box, the fields are labeled in bold and separated by a <br/>
 				var box = fieldBoxes[i];
 				var node = box.firstChild;
 				var label, value = [];
-				while(node) {
-					switch(node.nodeName.toUpperCase()) {
+				while (node) {
+					switch (node.nodeName.toUpperCase()) {
 						case 'B':
-							if(!label) {
+							if (!label) {
 								label = node.textContent.trim().toUpperCase();
 							} else {
 								value = this.addValue(label, value, node);
 							}
-						break;
+							break;
 						case 'BR':
-							if(label) {
-								if(value.length) {
+							if (label) {
+								if (value.length) {
 									this.addField(fields, label, value);
 								}
 								label = undefined;
 								value = [];
 							}
-						break;
+							break;
 						default:
-							if(!label) break;
+							if (!label) break;
 							value = this.addValue(label, value, node);
 					}
 					node = node.nextSibling;
 				}
-				if(label && value.length) {
+				if (label && value.length) {
 					this.addField(fields, label, value);
 				}
 			}
-
 			//add some other fields
 			fields.abstractNote = ZU.xpathText(doc, '//p[@class="patent_abstract_text"]');
 			fields.title = ZU.xpathText(doc, '//h1[@class="gb-volume-title"]');
-			if(fields.title.toUpperCase() == fields.title) {
+			if (fields.title.toUpperCase() == fields.title) {
 				fields.title = ZU.capitalizeTitle(fields.title, true);
 			}
-			if(fields.extra && fields.extra.indexOf('U.S. Classification') != -1) {
+			if (fields.extra && fields.extra.indexOf('U.S. Classification') != -1) {
 				fields.country = "United States";
 			}
-
 			var url = doc.location.href;
 			fields.url = 'http://' + doc.location.host + doc.location.pathname;
 			var m;
-			if(m = url.match(/[?&](id=[^&]+)/)) fields.url += '?' + m[1];
+			if (m = url.match(/[?&](id=[^&]+)/)) fields.url += '?' + m[1];
 			Z.debug(fields.url)
-			fields.attachments = [
-				{
-					url: ZU.xpathText(doc, '//a[@id="appbar-download-pdf-link"]/@href'),
-					title: "Google Patents PDF",
-					mimeType: "application/pdf"
-				}
-			];
+			fields.attachments = [{
+				url: ZU.xpathText(doc, '//a[@id="appbar-download-pdf-link"]/@href'),
+				title: "Google Patents PDF",
+				mimeType: "application/pdf"
+			}];
 			return fields;
 		}
 	},
 	//European (?) patent page. E.g. http://www.google.com/patents/EP0011951A1
 	{
-		detect: function(doc) { return this.getRows(doc).length; },
+		detect: function(doc) {
+			return this.getRows(doc).length;
+		},
 		getRows: function(doc) {
 			return ZU.xpath(doc, '//table[contains(@class,"patent-bibdata")]//tr[not(@class) or @class="" or @class="patent-bibdata-list-row "][./td[@class="patent-bibdata-heading"]]');
 		},
@@ -198,59 +207,53 @@ var scrapers = [
 			var rows = this.getRows(doc);
 			var label, values, zField;
 			var fields = {};
-			for(var i=0, n=rows.length; i<n; i++) {
+			for (var i = 0, n = rows.length; i < n; i++) {
 				label = ZU.xpathText(rows[i], './td[@class="patent-bibdata-heading"]');
 				values = ZU.xpath(rows[i], './td[@class="single-patent-bibdata"]|.//div[@class="patent-bibdata-value"]|.//span[@class="patent-bibdata-value"]');
 				//Z.debug(label)
 				//Z.debug(values[0].textContent)
-				if(!values.length) continue;
+				if (!values.length) continue;
 				//Z.debug("European")
-				switch(label.trim().toUpperCase()) {
+				switch (label.trim().toUpperCase()) {
 					case 'PUBLICATION NUMBER':
-						if(!zField) zField = 'patentNumber';
+						if (!zField) zField = 'patentNumber';
 					case 'PUBLICATION DATE':
-						if(!zField) zField = 'date';
+						if (!zField) zField = 'date';
 					case 'FILING DATE':
-						if(!zField) zField = 'filingDate';
+						if (!zField) zField = 'filingDate';
 					case 'APPLICANT':
 					case 'ASSIGNEE':
 					case 'ORIGINAL ASSIGNEE':
-						if(!zField) zField = 'assignee';
+						if (!zField) zField = 'assignee';
 						fields[zField] = values[0].textContent.trim();
-					break;
-					//case 'PRIORITY DATE':
-					//case 'ALSO PUBLISHED AS':
+						break;
+						//case 'PRIORITY DATE':
+						//case 'ALSO PUBLISHED AS':
 					case 'INVENTORS':
 						fields.creators = [];
-						for(var j=0, m=values.length; j<m; j++) {
-							fields.creators.push(
-								ZU.cleanAuthor(values[j].textContent.trim(), 'inventor')
-							);
+						for (var j = 0, m = values.length; j < m; j++) {
+							fields.creators.push(ZU.cleanAuthor(values[j].textContent.trim(), 'inventor'));
 						}
-					break;
+						break;
 					case 'INTERNATIONAL CLASSIFICATION':
-						if(!zField) zField = 'International Classification';
+						if (!zField) zField = 'International Classification';
 					case 'EUROPEAN CLASSIFICATION':
-						if(!zField) zField = 'U.S. Classification';
-
-						if(fields.extra) fields.extra += '\n';
+						if (!zField) zField = 'U.S. Classification';
+						if (fields.extra) fields.extra += '\n';
 						else fields.extra = '';
-
-						fields.extra += zField + ': '
-							+ values.map(function(v) { 
-									return v.textContent.trim();
-								}).join('; ');
-					break;
+						fields.extra += zField + ': ' + values.map(function(v) {
+							return v.textContent.trim();
+						}).join('; ');
+						break;
 					default:
 				}
 				zField = undefined;
 			}
-			
 			//add other data
 			fields.title = ZU.xpathText(doc, '//span[@class="patent-title"]');
 			var abs = ZU.xpath(doc, '//div[@class="abstract"]|//p[@class="abstract"]');
 			fields.abstractNote = '';
-			for(var i=0, n=abs.length; i<n; i++) {
+			for (var i = 0, n = abs.length; i < n; i++) {
 				fields.abstractNote += ZU.trimInternal(abs[i].textContent) + '\n';
 			}
 			fields.abstractNote = fields.abstractNote.trim();
@@ -258,72 +261,149 @@ var scrapers = [
 			// Below seems to no longer be necessry. There used to be /about?id=XXXX
 			// pages that now simply redirect to the /XXXX URL, but we'll leave it for now
 			var m, url = doc.location.href;
-			if(m = url.match(/[?&](id=[^&]+)/)) fields.url += '?' + m[1];
-
-			if(fields.patentNumber && fields.patentNumber.indexOf('EP') === 0) {
-				fields.country = 'European Union';
-			} else if(fields.patentNumber && fields.patentNumber.indexOf('US') === 0) {
-				fields.country = 'United States';
-				//looks like only US patents have PDFs
-				//the api works for all versions of the page
-				var pdfurl = doc.location.href.replace(/[\?#].+/, "").replace(/.+\//, "http://patentimages.storage.googleapis.com/pdfs/") + ".pdf"
+			if (m = url.match(/[?&](id=[^&]+)/)) fields.url += '?' + m[1];
+			if (fields.patentNumber) {
+				fields.country = getPatentOffice(fields.patentNumber);
+			} //the api works for all versions of the page
+			var pdfurl = doc.location.href.replace(/[\?#].+/, "").replace(/.+\//, "http://patentimages.storage.googleapis.com/pdfs/") + ".pdf"
 				//var pdfurl = "http://patentimages.storage.googleapis.com/pdfs/" + fields.patentNumber + ".pdf"
-				fields.attachments = [
-					{
-						url: pdfurl,
-						title: "Google Patents PDF",
-						mimeType: "application/pdf"
-					}
-				];
-			}
-			if(!fields.extra){
+			fields.attachments = [{
+				url: pdfurl,
+				title: "Google Patents PDF",
+				mimeType: "application/pdf"
+			}];
+			if (!fields.extra) {
 				//classifications are at the bottom of the page in modern outline.
 				var classification = ZU.xpath(doc, '//div[a[@id="classifications"]]//tbody/tr[td[contains(@class, "patent-data-table")]]')
 				var classificationArray = [];
-				for (i in classification){
-					classificationArray.push(ZU.xpathText(classification[i], './td[contains(@class, "patent-data-table")][1]') + " " 
-					+ ZU.xpathText(classification[i], './td[contains(@class, "patent-data-table")][2]'));
+				for (i in classification) {
+					classificationArray.push(ZU.xpathText(classification[i], './td[contains(@class, "patent-data-table")][1]') + " " + ZU.xpathText(classification[i], './td[contains(@class, "patent-data-table")][2]'));
 				}
-				if(classificationArray) fields.extra = classificationArray.join("; ")
+				if (classificationArray) fields.extra = classificationArray.join("; ")
 			}
-					
+			return fields;
+		}
+	}, {
+		//New page format: https://patents.google.com/patent/US7853881B1/en?q=networks
+		detect: function(doc) {
+			var knowledgeCard = doc.getElementsByClassName('knowledge-card')[0];
+			if (!knowledgeCard) {
+				// Wait for page to load (loads in stages, so we'll need to check this several times)
+				var monitorNode = ZU.xpath(doc, '//search-app/search-result/search-ui//paper-header-panel[@id="mainCoreHeaderPanel"]//div[contains(@class,"flex-2")]')[0] || ZU.xpath(doc, '//search-app/search-result/search-ui//div[@id="content"]/paper-header-panel[@id="mainCoreHeaderPanel"]')[0] || ZU.xpath(doc, '//search-app/search-result/search-ui//div[@id="content"]')[0] || ZU.xpath(doc, '//search-app')[0];
+				if (monitorNode) {
+					Z.debug("individual detect")
+					Z.debug("Monitoring node: " + monitorNode.outerHTML.replace(monitorNode.innerHTML, ''))
+					Z.monitorDOMChanges(monitorNode, {
+						childList: true
+					});
+				} else {
+					Z.debug("Did not find a node to monitor for changes. Knowledge card not found.");
+				}
+				return;
+			}
+			return this.getBox(doc).length;
+		},
+		getBox: function(doc) {
+			return ZU.xpath(doc, '//section[contains(@class, "knowledge-card")]//dt[contains(@class, "style-scope")]');
+		},
+		getMetadata: function(doc) {
+			var rows = this.getBox(doc);
+			var label, values, zField;
+			var fields = {};
+			for (var i = 0, n = rows.length; i < n; i++) {
+				label = rows[i].textContent.trim();
+				values = ZU.xpath(rows[i], './following-sibling::dd');
+				/*Z.debug(label)
+				for (var j = 0; j < values.length; j++) {
+					Z.debug(values[j].textContent)
+				}*/
+				if (!values.length) continue;
+				switch (label.trim().toUpperCase()) {
+					case 'PUBLICATION DATE':
+						if (!zField) zField = 'date';
+					case 'FILING DATE':
+						if (!zField) zField = 'filingDate';
+					case 'APPLICANT':
+					case 'ASSIGNEE':
+					case 'ORIGINAL ASSIGNEE':
+						if (!zField) zField = 'assignee';
+						fields[zField] = values[0].textContent.trim();
+						break;
+						//case 'PRIORITY DATE':
+						//case 'ALSO PUBLISHED AS':
+					case 'INVENTOR':
+						fields.creators = [];
+						var inventor;
+						for (var j = 0, m = values.length; j < m; j++) {
+							//this captures both assignees and inventors -- make sure we get only inventors here;
+							if (inventor = ZU.xpathText(values[j], './a[@add-inventor]')) {
+								fields.creators.push(ZU.cleanAuthor(inventor.trim(), 'inventor'));
+							}
+						}
+						break;
+					default:
+				}
+				zField = undefined;
+			}
+			//add other data
+			fields.title = ZU.xpathText(doc, '//h1[@id="title"]');
+			fields.patentNumber = ZU.xpathText(doc, '//section[contains(@class, "knowledge-card")]//h2');
+			var abs = ZU.xpathText(doc, '//abstract/div');
+			fields.abstractNote = abs.trim();
+			fields.url = 'http://' + doc.location.host + doc.location.pathname;
+			if (fields.patentNumber) {
+				fields.country = getPatentOffice(fields.patentNumber)
+			}
+			//patent number/URL and what's used in the API can vary; grap PDF URL from the page.
+			var pdfurl = ZU.xpathText(doc, '//div[contains(@class, "knowledge-card")]/a[contains(@href, "https://patentimages.storage.googleapis.com/pdfs/")]/@href');
+			//Z.debug(pdfurl)
+			fields.attachments = [{
+				url: pdfurl,
+				title: "Google Patents PDF",
+				mimeType: "application/pdf"
+			}];
+			if (!fields.extra) {
+				//classifications are in a box half-way down
+				var classification = ZU.xpath(doc, '//div[contains(@class, "classification-tree") and not( @hidden="")]/a')
+				var classificationArray = [];
+				for (var i = 0; i < classification.length; i++) {
+					classificationArray.push(classification[i].textContent.trim());
+				}
+				//the layout only provides the cooperative classifications
+				if (classificationArray) {
+					fields.extra = "Cooperative Classifications: " + classificationArray.join(", ");
+				}
+			}
 			return fields;
 		}
 	}
 ];
 
 function getScraper(doc) {
-	for(var i=0, n=scrapers.length; i<n; i++) {
-		if(scrapers[i].detect(doc)) return scrapers[i];
+	for (var i = 0, n = scrapers.length; i < n; i++) {
+		if (scrapers[i].detect(doc)) return scrapers[i];
 	}
 }
 
 function scrape(doc) {
 	var scraper = getScraper(doc);
-
-	if(!scraper) return;
-
+	if (!scraper) return;
 	//go through all the fields and add them to an item
 	var item = new Zotero.Item("patent");
-
 	var fields = scraper.getMetadata(doc);
 	var f;
-	for(f in fields) {
+	for (f in fields) {
 		item[f] = fields[f];
 	}
-
 	item.complete();
 }
-
 //Fix url so it leads us to the right page
 function fixUrl(url) {
 	if (url.match(/printsec=|v=onepage|v=thumbnail|google\.(?!com\/)|[&?]hl=(?!en)(?:&|$)/)) {
 		var id;
-		var cLang = url.match(/[&?#]cl=([^&#]+)/);	//content language
-		var cleanUrl = url.replace(/[#?].*/, '')
-			+ '?hl=en'		//interface language
-			+ (cLang?'&cl=' + cLang[1]:'');	//content language
-
+		var cLang = url.match(/[&?#]cl=([^&#]+)/); //content language
+		var cleanUrl = url.replace(/[#?].*/, '') + '?hl=en' //interface language
+			+ (cLang ? '&cl=' + cLang[1] : ''); //content language
 		//patent pages directly navigated to from search results have the id somewhere in the URL
 		if (id = url.match(/[&?#]id=([^&#]+)/)) {
 			cleanUrl += '&id=' + id[1];
@@ -335,27 +415,25 @@ function fixUrl(url) {
 
 function doWeb(doc, url) {
 	var host = 'http://' + doc.location.host + "/";
-
 	if (detectWeb(doc, url) == "multiple") {
 		var res = getSearchResults(doc);
 		var items = {};
-		for (var i=0, n=res.length; i<n; i++) {
-			items[fixUrl(res[i].href)] = res[i].textContent;
+		for (var i = 0, n = res.length; i < n; i++) {
+			items[fixUrl(res[i].href)] = res[i].textContent.trim();
 		}
-
-		Zotero.selectItems(items, function (items) {
-			if(!items) return true;
-
+		Zotero.selectItems(items, function(items) {
+			if (!items) return true;
 			var articles = new Array();
 			for (var i in items) {
 				articles.push(i);
 			}
+			Z.debug(articles)
 			ZU.processDocuments(articles, scrape);
 		});
 	} else {
 		var newurl = fixUrl(url);
-		if(newurl != url) {
-			ZU.processDocuments(newurl, scrape)
+		if (newurl != url) {
+			ZU.processDocuments(newurl, scrape);
 		} else {
 			scrape(doc, url);
 		}
@@ -528,8 +606,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"defer": true,
 		"url": "http://www.google.fr/#q=ordinateur&hl=fr&prmd=imvns&source=lnms&tbm=pts&sa=X&ei=oJJfUJKgBOiU2gWqwIHYCg&ved=0CBIQ_AUoBQ&tbo=1&prmdo=1&bav=on.2,or.r_gc.r_pw.r_qf.&fp=ec5bd0c9391b4cc0&biw=1024&bih=589",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
@@ -554,7 +632,12 @@ var testCases = [
 				"filingDate": "Jan 16, 2006",
 				"patentNumber": "EP1808414 A1",
 				"url": "http://www.google.com/patents/EP1808414A1",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Google Patents PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -583,7 +666,12 @@ var testCases = [
 				"filingDate": "Nov 6, 1979",
 				"patentNumber": "EP0011951 A1",
 				"url": "http://www.google.com/patents/EP0011951A1",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Google Patents PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -596,7 +684,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "patent",
-				"title": "For christmas",
+				"title": "Artificial tree",
 				"creators": [
 					{
 						"firstName": "Chester L. Craig",
@@ -764,9 +852,58 @@ var testCases = [
 				"assignee": "Rhodia Operations",
 				"country": "United States",
 				"extra": "U.S. Classification 510/299; International Classification C11D3/60; Cooperative Classification C11D1/345, C11D3/361, C11D3/3784, C11D11/0017, C11D3/362, C11D3/0036, C11D1/342; European Classification C11D3/36B, C11D11/00B2A, C11D3/37C10, C11D3/00B7, C11D1/34C, C11D3/36C, C11D1/34B",
-				"filingDate": "Mar 24, 2011",
 				"patentNumber": "US20110172136 A1",
 				"url": "http://www.google.com/patents/US20110172136",
+				"attachments": [
+					{
+						"title": "Google Patents PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"defer": true,
+		"url": "https://patents.google.com/patent/US20090197681A1/en?q=networks&cpc=G06Q30%2f02",
+		"items": [
+			{
+				"itemType": "patent",
+				"title": "System and method for targeted recommendations using social gaming networks",
+				"creators": [
+					{
+						"firstName": "Shyam",
+						"lastName": "Krishnamoorthy",
+						"creatorType": "inventor"
+					},
+					{
+						"firstName": "Pooja",
+						"lastName": "Mathur",
+						"creatorType": "inventor"
+					},
+					{
+						"firstName": "Shaykat",
+						"lastName": "Chaudhuri",
+						"creatorType": "inventor"
+					},
+					{
+						"firstName": "Theodore Ludovicus",
+						"lastName": "Michel",
+						"creatorType": "inventor"
+					}
+				],
+				"issueDate": "2009-08-06",
+				"abstractNote": "Systems, methods and computer readable media are disclosed for targeting a recommendation to a first user of an online multi-player gaming environment based on tracked data of a second user with which the first user has a relationship on the online multi-player gaming environment. In addition to the general system, methods and computer readable medium for such recommendations, the recommendations can be further refined by incorporating information about the first user, including how the user accesses the online multi-player gaming environment.",
+				"assignee": "Microsoft Corporation",
+				"country": "United States",
+				"extra": "Cooperative Classifications: A63F13/12, G06Q30/02, G07F17/32, G07F17/3223, G07F17/3272, A63F2300/5506, A63F2300/552, A63F2300/5533, A63F2300/556, A63F2300/5566, A63F2300/572",
+				"filingDate": "2008-01-31",
+				"patentNumber": "US20090197681A1",
+				"url": "http://patents.google.com/patent/US20090197681A1/en",
 				"attachments": [
 					{
 						"title": "Google Patents PDF",
