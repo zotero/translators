@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-06-10 10:50:04"
+	"lastUpdated": "2015-08-29 22:51:34"
 }
 
 /*
@@ -132,20 +132,56 @@ function scrapeItemProps(itemprops) {
 	item.complete();
 }
 
-//retrieves a list of result nodes from a search results page (perhaps others too)
-function getResultList(doc) {
-	var results = ZU.xpath(doc, '//div[./div[@class="rslt"][./p[@class="title"] or ./h1]]');
-	if(results.length) return results;
+/**
+ * Handles:
+ * search results: http://www.ncbi.nlm.nih.gov/pubmed/?term=cell
+ * NCBI collections; http://www.ncbi.nlm.nih.gov/myncbi/browse/collection/40383442/?sort=&direction=
+ * My Bibliography
+ */
+function getSearchResults(doc, checkOnly) {
+	var results = doc.getElementsByClassName('rprt');
+	if (!results.length) {
+		//My Bibliography
+		results = doc.getElementsByClassName('citationListItem');
+	}
 	
-	//My Bibliography
-	results = ZU.xpath(doc, '//li[@class="citationListItem"]\
-		[./div[@class="chkBoxLeftCol"]/input[@ref-system="pubmed"]]');
-	return results;
+	if (!results.length) return false;
+	
+	var items = {}, found = false;
+	
+	for (var i=0; i<results.length; i++) {
+		var title = ZU.xpathText(results[i], '(.//p[@class="title"]|.//h1)[1]')
+			|| ZU.xpathText(results[i], './div[@class="docsumRightcol"]/a'); //My Bibliography
+		
+		var uid = ZU.xpathText(results[i], './/input[starts-with(@id,"UidCheckBox")]/@value')
+			|| ZU.xpathText(results[i], './div[@class="chkBoxLeftCol"]/input/@refuid') //My Bibliography
+			|| ZU.xpathText(results[i], './/dl[@class="rprtid"]/dd[preceding-sibling::*[1][text()="PMID:"]]');
+		
+		if(!uid) {
+			uid = ZU.xpathText(results[i], './/p[@class="title"]/a/@href');
+			if(uid) uid = uid.match(/\/(\d+)/);
+			if(uid) uid = uid[1];
+		}
+		
+		if (!uid || !title) continue;
+		
+		if (checkOnly) return true;
+		found = true;
+		
+		var checkbox = ZU.xpath(results[i], './/input[@type="checkbox"]')[0];
+		
+		// Keys must be strings. Otherwise, Chrome sorts numerically instead of by insertion order.
+		items["u"+uid] = {
+			title: ZU.trimInternal(title),
+			checked: checkbox && checkbox.checked
+		};	
+	}
+	
+	return found ? items : false;
 }
 
 function detectWeb(doc, url) {
-	var items = getResultList(doc);
-	if (items.length > 0 && url.indexOf("/books/") == -1) {
+	if (getSearchResults(doc, true) && url.indexOf("/books/") == -1) {
 		return "multiple";
 	}
 	
@@ -174,31 +210,8 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var type = detectWeb(doc, url);
-	if (type == "multiple") {
-		var results = getResultList(doc);
-		var items = {};
-		var title, uid;
-		for(var i=0, n=results.length; i<n; i++) {
-			title = ZU.xpathText(results[i], '(.//p[@class="title"]|.//h1)[1]')
-				|| ZU.xpathText(results[i], './div[@class="docsumRightcol"]/a'); //My Bibliography
-			uid = ZU.xpathText(results[i], './/input[starts-with(@id,"UidCheckBox")]/@value')
-				|| ZU.xpathText(results[i], './div[@class="chkBoxLeftCol"]/input/@ref-uid') //My Bibliography
-				|| ZU.xpathText(results[i], './/dl[@class="rprtid"]/dd[preceding-sibling::*[1][text()="PMID:"]]');
-				
-			if(!uid) {
-				uid = ZU.xpathText(results[i], './/p[@class="title"]/a/@href');
-				if(uid) uid = uid.match(/\/(\d+)/);
-				if(uid) uid = uid[1];
-			}
-
-			if(uid && title) {
-				// Keys must be strings. Otherwise, Chrome sorts numerically instead of by insertion order.
-				items["u"+uid] = title;
-			}
-		}
-
-		Zotero.selectItems(items, function(selectedItems) {
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc), function(selectedItems) {
 			if(!selectedItems) return true;
 
 			var uids = [];
