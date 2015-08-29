@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-08-25 21:15:09"
+	"lastUpdated": "2015-08-29 22:03:20"
 }
 
 /*
@@ -32,10 +32,6 @@
 
 var language="English";
 var L={};
-
-//this boolean variable is true on pdf pages
-//where we have to follow a link to the abstract/metadata page
-var followLink;
 
 //returns an array of values for a given field or array of fields
 //the values are in the same order as the field names
@@ -93,33 +89,28 @@ function initLang(doc, url) {
 
 function getSearchResults(doc, checkOnly) {
 	var root;
-	//AURIMASV will change the logic here accordingly to his github issue comments
-	// for old, deprecated search results format with tabs
-	// and we can probably remove it later
-	var tabs = doc.getElementsByClassName('tabContent');
-	for (var i = 0; i < tabs.length; i++) {
-		if (tabs[i].offsetHeight) {
-			if (Zotero.isBookmarklet && tabs[i].id != 'allResults-content') return false;
-			root = tabs[i].getElementsByClassName('resultListContainer')[0];
+	
+	var elements = doc.getElementsByClassName('resultListContainer');
+	for (var i=0; i<elements.length; i++) {
+		if (elements[i] && elements[i].offsetHeight>0) {
+			// Bookmarklet cannot handle ebrary results, because they are cross-origin
+			if (Zotero.isBookmarklet
+				&& ZU.xpath(elements[i], './/ancestor::div[@id="allResults-content"]').length
+			) {
+				return false;
+			}
+			
+			root = elements[i];
 			break;
 		}
 	}
-	if (!root) {
-		var elements = doc.getElementsByClassName('resultListContainer');
-		for (var i=0; i<elements.length; i++) {
-			if (elements[i] && elements[i].offsetHeight>0) {
-				root = elements[i];
-				break;
-			}
-		}
-	}
+	
 	if (!root) {
 		Z.debug("No root found");
 		return false;
 	}
 
-	var results = root.querySelectorAll('.resultTitle, .previewTitle')
-
+	var results = root.querySelectorAll('.resultTitle, .previewTitle');
 	var items = {}, found = false;
 	for(var i=0, n=results.length; i<n; i++) {
 		var title = results[i];
@@ -128,8 +119,7 @@ function getSearchResults(doc, checkOnly) {
 		if (checkOnly) return true;
 		found = true;
 		
-		items[title.href] = title.textContent;
-
+		items[title.href] = ZU.trimInternal(title.textContent);
 	}
 		
 	return found ? items : false;
@@ -151,9 +141,6 @@ var map = {
 
 function detectWeb(doc, url) {
 	initLang(doc, url);
-	
-	var abstractTab = doc.getElementById('tab-AbstractRecord-null'); // Seems like that null is a bug and it might change at some point
-	followLink = !(abstractTab && abstractTab.classList.contains('active'));
 	
 	//Check for multiple first
 	if (url.indexOf('docview') == -1 && url.indexOf('pagepdf') == -1) {
@@ -185,13 +172,13 @@ function detectWeb(doc, url) {
 	
 }
 
-function doWeb(doc, url, secondTime) {
+function doWeb(doc, url, noFollow) {
 	var type = detectWeb(doc, url);
 	if (type == "multiple") {
 		// detect web returned multiple
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) return true;
-
+			
 			var articles = new Array();
 			for(var item in items) {
 				articles.push(item);
@@ -203,31 +190,27 @@ function doWeb(doc, url, secondTime) {
 					var translator = Zotero.loadTranslator("web");
 					translator.setTranslator("2abe2519-2f0a-48c0-ad3a-b87b9c059459");
 					translator.setDocument(doc);
-					translator.setHandler("itemDone", function(obj, item) {
-						item.complete();
-					});
 					translator.translate();
 				});
-			}
-			else {			
+			} else {
 				ZU.processDocuments(articles, doWeb);
 			}
 		});
-	} else if (!followLink) {//i.e. we are on an abstract/metadata page
-		scrape(doc, url, type);
-	} else {//i.e. we are on pdf page
-		var link = ZU.xpathText(doc, '//li[@id="tab-AbstractRecord-null"]/a/@href');
-		if (!link) {
-			Z.debug("Error: Could not find the abstract/metadata page");
-			return;
+	} else {
+		var abstractTab = doc.getElementById('tab-AbstractRecord-null'); // Seems like that null is a bug and it might change at some point
+		var followLink = abstractTab && !abstractTab.classList.contains('active');
+		if (!followLink) {//i.e. we are on an abstract/metadata page
+			scrape(doc, url, type);
+		} else if (noFollow) {
+			Z.debug('Not following link again. Attempting to scrape');
+			scrape(doc, url, type);
+		} else {
+			var link = abstractTab.getElementsByTagName('a')[0];
+			if (!link) {
+				throw new Error("Could not find the abstract/metadata link");
+			}
+			ZU.processDocuments(link.href, function(doc, url) { doWeb(doc, url, true) });
 		}
-		if (secondTime) {
-			Z.debug("Error: Stoped because of possible infinite loop");
-			return;
-		}
-		ZU.processDocuments(link, function(doc, url) { doWeb(doc, url, true) });
-		//ZU.processDocuments(link, function(doc) {
-		//	doWeb(doc, doc.location.href) });
 	}
 }
 
@@ -416,20 +399,24 @@ function scrape(doc, url, type) {
 	if(!item.tags.length && altKeywords.length) {
 		item.tags = altKeywords.join(',').split(/\s*(?:,|;)\s*/);
 	}
-
-	item.attachments.push({
-		title: 'Snapshot',
-		document: doc
-	});
-
+	
 	if(doc.getElementById('downloadPDFLink')) {
 		item.attachments.push({
 			title: 'Full Text PDF',
 			url: doc.getElementById('downloadPDFLink').href,
 			mimeType: 'application/pdf'
 		});
+	} else {
+		var fullText = ZU.xpath(doc, '//li[@id="tab-Fulltext-null"]/a')[0];
+		if (fullText) {
+			item.attachments.push({
+				title: 'Full Text Snapshot',
+				url: fullText.href,
+				mimeType: 'text/html'
+			});
+		}
 	}
-
+	
 	item.complete();
 }
 
