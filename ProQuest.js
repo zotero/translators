@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-08-29 22:03:20"
+	"lastUpdated": "2015-08-29 22:16:34"
 }
 
 /*
@@ -110,16 +110,26 @@ function getSearchResults(doc, checkOnly) {
 		return false;
 	}
 
-	var results = root.querySelectorAll('.resultTitle, .previewTitle');
+	var results = root.getElementsByClassName('resultItem');
+	//root.querySelectorAll('.resultTitle, .previewTitle');
 	var items = {}, found = false;
 	for(var i=0, n=results.length; i<n; i++) {
-		var title = results[i];
+		var title = results[i].querySelectorAll('.resultTitle, .previewTitle')[0];
 		if (!title || title.nodeName != 'A') continue;
 		
 		if (checkOnly) return true;
 		found = true;
 		
-		items[title.href] = ZU.trimInternal(title.textContent);
+		var item = ZU.trimInternal(title.textContent);
+		var preselect = results[i].getElementsByClassName('marked_list_checkbox')[0];
+		if (preselect) {
+			item = {
+				title: item,
+				checked: preselect.checked
+			};
+		}
+		
+		items[title.href] = item;
 	}
 		
 	return found ? items : false;
