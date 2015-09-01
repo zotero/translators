@@ -1183,6 +1183,7 @@ function doExport() {
 			// err on the side of caution.
 			if (item["type"] && item["type"].toLowerCase() == "masters") {
 				type = "mastersthesis";
+				item["type"] = "";
 			}
 		}
 
