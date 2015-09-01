@@ -1173,6 +1173,19 @@ function doExport() {
 		// determine type
 		var type = zotero2bibtexTypeMap[item.itemType];
 		if (typeof(type) == "function") { type = type(item); }
+
+		// The thesis Zotero type doesn't nicely map onto a BibTeX type,
+		// as BibTeX uses both @mastersthesis and @phdthesis. We thus have
+		// to tell them apart by the "Type" field as well as by the item type.
+		if (type == "phdthesis") {
+			// In practice, we just want to separate out masters theses,
+			// and will assume everything else maps to @phdthesis. Better to
+			// err on the side of caution.
+			if (item["type"] && item["type"].toLowerCase() == "masters") {
+				type = "mastersthesis";
+			}
+		}
+
 		if(!type) type = "misc";
 		
 		// create a unique citation key
