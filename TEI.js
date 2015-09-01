@@ -19,7 +19,7 @@
 		"Full TEI Document": false,
 		"Export Collections": false
 	},
-	"lastUpdated":"2015-07-20 06:39:12"
+	"lastUpdated":"2015-09-01 06:39:12"
 }
 
 // ********************************************************************
@@ -285,7 +285,7 @@ function generateItem(item, teiDoc) {
         }
         if(item.seriesNumber){
             var seriesNumber = teiDoc.createElementNS(ns.tei, "biblScope");
-            seriesNumber.setAttribute("type", "vol");
+            seriesNumber.setAttribute("unit", "volume");
             seriesNumber.appendChild(teiDoc.createTextNode(item.seriesNumber));
             series.appendChild(seriesNumber);
         }
@@ -378,25 +378,25 @@ function generateItem(item, teiDoc) {
     }
     if(item.volume){
         var volume = teiDoc.createElementNS(ns.tei, "biblScope");
-        volume.setAttribute("type","vol");
+        volume.setAttribute("unit","volume");
         volume.appendChild(teiDoc.createTextNode(item.volume));
         imprint.appendChild(volume);
     }
     if(item.issue){
         var issue = teiDoc.createElementNS(ns.tei, "biblScope");
-        issue.setAttribute("type","issue");
+        issue.setAttribute("unit","issue");
         issue.appendChild(teiDoc.createTextNode(item.issue));
         imprint.appendChild(issue);
     }
     if(item.section){
         var section = teiDoc.createElementNS(ns.tei, "biblScope");
-        section.setAttribute("type","chap");
+        section.setAttribute("unit","chapter");
         section.appendChild(teiDoc.createTextNode(item.section));
         imprint.appendChild(section);
     }
     if(item.pages){
         var pages = teiDoc.createElementNS(ns.tei, "biblScope");
-        pages.setAttribute("type","pp");
+        pages.setAttribute("unit","page");
         pages.appendChild(teiDoc.createTextNode(item.pages));
         imprint.appendChild(pages);
     }
