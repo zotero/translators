@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2015-08-19 19:29:45"
+	"lastUpdated": "2015-09-01 17:03:10"
 }
 
 /*
@@ -252,7 +252,8 @@ function fetchMetadata(doc, url, ids, extras) {
 			if (item.DOI) {
 				item.DOI = ZU.cleanDOI(item.DOI);
 			}
-			
+			//strip extraneous label at the end of title
+			item.title = item.title.replace(/\[References\]\s*$/, "");
 			if (item.itemID && extras[item.itemID]) {
 				retrievePdfUrl(item, extras[item.itemID]);
 			} else {
