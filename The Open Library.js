@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2015-08-02 18:53:58"
+	"lastUpdated": "2015-08-31 16:05:29"
 }
 
 /*
@@ -71,9 +71,7 @@ function scrape(doc, url) {
 		isbnscrape = ZU.xpathText(doc, '//td[@class="title" and span[contains(text(), "ISBN 10")]]/following-sibling::td');
 	}
 	Zotero.Utilities.doGet(dcUrl, function (text) {
-		//fix broken RDF; Reported the error to OL on 08/01/2015
-		text = text.replace(/<rdf:RDF/, "<rdf:RDF\nxmlns:ov='http://open.vocab.org/terms.ttl'");
-		Z.debug(text)
+		//Z.debug(text)
 		var docxml = (new DOMParser()).parseFromString(text, "text/xml");
   	 	ns = {	"rdf" : "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
 				"rdfs" : "http://www.w3.org/2000/01/rdf-schema#",
