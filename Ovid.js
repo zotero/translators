@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2015-09-01 17:03:10"
+	"lastUpdated": "2015-09-02 03:36:00"
 }
 
 /*
@@ -164,6 +164,14 @@ function getSearchResults(doc, checkOnly, extras) {
 		found = true;
 		items[id] = title;
 		
+		var checkbox = row.querySelectorAll('input.bibrecord-checkbox')[0];
+		if (checkbox) {
+			items[id] = {
+				title: title,
+				checked: checkbox.checked
+			};
+		}
+		
 		if (extras) {
 			// Look for PDF link
 			var pdfLink = ZU.xpath(row, './/a[starts-with(@name, "PDF")]')[0];
@@ -253,7 +261,8 @@ function fetchMetadata(doc, url, ids, extras) {
 				item.DOI = ZU.cleanDOI(item.DOI);
 			}
 			//strip extraneous label at the end of title
-			item.title = item.title.replace(/\[References\]\s*$/, "");
+			item.title = item.title.replace(/\s*\[References\]\s*$/, "");
+			
 			if (item.itemID && extras[item.itemID]) {
 				retrievePdfUrl(item, extras[item.itemID]);
 			} else {
