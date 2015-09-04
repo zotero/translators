@@ -13,7 +13,7 @@
 	"inRepository": true,
 	"translatorType": 2,
 	"browserSupport": "g",
-	"lastUpdated": "2015-08-19 21:28:32"
+	"lastUpdated": "2015-09-03 21:28:32"
 }
 
 /*
@@ -101,6 +101,7 @@ function doExport() {
 	writeColumnHeaders();
 	var item, line;
 	while (item = Zotero.nextItem()) {
+		if(item.itemType == "note" || item.itemType == "attachment") continue;
 		line = '';
 		for (var i=0; i<exportedFields.length; i++) {
 			line += (i ? fieldDelimiter : recordDelimiter)
