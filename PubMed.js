@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-08-29 22:51:34"
+	"lastUpdated": "2015-09-07 18:20:45"
 }
 
 /*
@@ -139,7 +139,7 @@ function scrapeItemProps(itemprops) {
  * My Bibliography
  */
 function getSearchResults(doc, checkOnly) {
-	var results = doc.getElementsByClassName('rprt');
+	var results = doc.getElementsByClassName('rslt');
 	if (!results.length) {
 		//My Bibliography
 		results = doc.getElementsByClassName('citationListItem');
