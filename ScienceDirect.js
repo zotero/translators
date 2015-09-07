@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-12-04 23:08:27"
+	"lastUpdated": "2015-09-07 03:38:24"
 }
 
 function detectWeb(doc, url) {
@@ -227,7 +227,6 @@ function processRIS(doc, text) {
 			return pre + name;
 		}
 	);
-	
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 	translator.setString(text);
@@ -248,7 +247,9 @@ function processRIS(doc, text) {
 		if(!item.abstractNote) {
 			item.abstractNote = getAbstract(doc);
 		}
-		
+		if (item.abstractNote){
+			item.abstractNote = item.abstractNote.replace(/^Abstract[\s:\n]*/, "");
+		}
 		item.attachments.push({
 			title: "ScienceDirect Snapshot",
 			document: doc
