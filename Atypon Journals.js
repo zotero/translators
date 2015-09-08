@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-10-04 22:19:55"
+	"lastUpdated": "2015-09-08 20:16:55"
 }
 
 /*
@@ -185,8 +185,8 @@ function scrape(doc, url, extras) {
 	url = url.replace(/[?#].*/, "");
 	var doi = url.match(/10\.[^?#]+/)[0];
 	var citationurl = url.replace(replURLRegExp, "/action/showCitFormats?doi=");
-	var abstract = ZU.xpathText(doc, '//div[@class="abstractSection"]')
-	var tags = ZU.xpath(doc, '//p[@class="fulltext"]//a[contains(@href, "keywordsfield") or contains(@href, "Keyword=")]');
+	var abstract = doc.getElementsByClassName('abstractSection')[0];
+	var tags = ZU.xpath(doc, '//p[@class="fulltext"]//a[contains(@href, "keyword") or contains(@href, "Keyword=")]');
 	Z.debug("Citation URL: " + citationurl);
 	ZU.processDocuments(citationurl, function(citationDoc){
 		var filename = citationDoc.evaluate('//form//input[@name="downloadFileName"]', citationDoc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
@@ -215,7 +215,15 @@ function scrape(doc, url, extras) {
 				for (var i in tags){
 					item.tags.push(tags[i].textContent)
 				}
-				item.abstractNote = abstract;
+				
+				if (abstract) {
+					// Drop "Abstract" prefix
+					// This is not excellent, since some abstracts could
+					// conceivably begin with the word "abstract"
+					item.abstractNote = abstract.textContent
+						.replace(/^\s*abstract\s*/i, '');
+				}
+				
 				item.attachments = [];
 				if (extras.pdf) {
 					item.attachments.push({
@@ -421,7 +429,7 @@ var testCases = [
 					}
 				],
 				"date": "January 1, 2001",
-				"ISBN": "978-0-89871-478-4",
+				"ISBN": "9780898714784",
 				"abstractNote": "The first part of this monograph's title, Combinatorial Data Analysis (CDA), refers to a wide class of methods for the study of relevant data sets in which the arrangement of a collection of objects is absolutely central. Characteristically, CDA is involved either with the identification of arrangements that are optimal for a specific representation of a given data set (usually operationalized with some specific loss or merit function that guides a combinatorial search defined over a domain constructed from the constraints imposed by the particular representation selected), or with the determination in a confirmatory manner of whether a specific object arrangement given a priori reflects the observed data. As the second part of the title, Optimization by Dynamic Programming, suggests, the sole focus of this monograph is on the identification of arrangements; it is then restricted further, to where the combinatorial search is carried out by a recursive optimization process based on the general principles of dynamic programming. For an introduction to confirmatory CDA without any type of optimization component, the reader is referred to the monograph by Hubert (1987). For the use of combinatorial optimization strategies other than dynamic programming for some (clustering) problems in CDA, the recent comprehensive review by Hansen and Jaumard (1997) provides a particularly good introduction.",
 				"libraryCatalog": "epubs.siam.org (Atypon)",
 				"numPages": "172",
@@ -453,7 +461,7 @@ var testCases = [
 				"title": "6. Extensions and Generalizations",
 				"creators": [],
 				"date": "January 1, 2001",
-				"ISBN": "978-0-89871-478-4",
+				"ISBN": "9780898714784",
 				"abstractNote": "6.1 Introduction There are a variety of extensions of the topics introduced in the previous chapters that could be pursued, several of which have been mentioned earlier along with a comment that they would not be developed in any detail within this monograph. Among some of these possibilities are: (a) the development of a mechanism for generating all the optimal solutions for a specific optimization task when multiple optima may be present, not just one representative exemplar; (b) the incorporation of other loss or merit measures within the various sequencing and partitioning contexts discussed; (c) extensions to the analysis of arbitrary t-mode data, with possible (order) restrictions on some modes but not others, or to a framework in which proximity is given on more than just a pair of objects, e.g., proximity could be defined for all distinct object triples (see Daws (1996)); (d) the generalization of the task of constructing optimal ordered partitions to a two- or higher-mode context that may be hierarchical and/or have various types of order or precedence constraints imposed; and (e) the extension of object ordering constraints when they are to be imposed (e.g., in various partitioning and two-mode sequencing tasks) to the use of circular object orders, where optimal subsets or ordered sequences must now be consistent with respect to a circular contiguity structure.",
 				"bookTitle": "Combinatorial Data Analysis",
 				"libraryCatalog": "epubs.siam.org (Atypon)",
@@ -582,7 +590,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "BLOCK COPOLYMER THIN FILMS: Physics and Applications1",
+				"title": "BLOCK COPOLYMER THIN FILMS: Physics and Applications",
 				"creators": [
 					{
 						"lastName": "Fasolka",
@@ -634,12 +642,12 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Irish coffee? Well, something better …",
+				"title": "Irish coffee? Well, something better …null",
 				"creators": [
 					{
-						"lastName": "Rao",
-						"firstName": "Pramila",
-						"creatorType": "author"
+						"lastName": "Pramila Rao",
+						"creatorType": "author",
+						"fieldMode": 1
 					}
 				],
 				"date": "August 16, 2013",
@@ -664,6 +672,69 @@ var testCases = [
 					}
 				],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://journals.ametsoc.org/doi/abs/10.1175/JAS-D-14-0363.1",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Observations of Ice Microphysics through the Melting Layer",
+				"creators": [
+					{
+						"lastName": "Heymsfield",
+						"firstName": "Andrew J.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bansemer",
+						"firstName": "Aaron",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Poellot",
+						"firstName": "Michael R.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wood",
+						"firstName": "Norm",
+						"creatorType": "author"
+					}
+				],
+				"date": "April 30, 2015",
+				"DOI": "10.1175/JAS-D-14-0363.1",
+				"ISSN": "0022-4928",
+				"abstractNote": "The detailed microphysical processes and properties within the melting layer (ML)—the continued growth of the aggregates by the collection of the small particles, the breakup of these aggregates, the effects of relative humidity on particle melting—are largely unresolved. This study focuses on addressing these questions for in-cloud heights from just above to just below the ML. Observations from four field programs employing in situ measurements from above to below the ML are used to characterize the microphysics through this region. With increasing temperatures from about −4° to +1°C, and for saturated conditions, slope and intercept parameters of exponential fits to the particle size distributions (PSD) fitted to the data continue to decrease downward, the maximum particle size (largest particle sampled for each 5-s PSD) increases, and melting proceeds from the smallest to the largest particles. With increasing temperature from about −4° to +2°C for highly subsaturated conditions, the PSD slope and intercept continue to decrease downward, the maximum particle size increases, and there is relatively little melting, but all particles experience sublimation.",
+				"issue": "8",
+				"journalAbbreviation": "J. Atmos. Sci.",
+				"libraryCatalog": "journals.ametsoc.org (Atypon)",
+				"pages": "2902-2928",
+				"publicationTitle": "Journal of the Atmospheric Sciences",
+				"url": "http://journals.ametsoc.org/doi/abs/10.1175/JAS-D-14-0363.1",
+				"volume": "72",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					"Cloud microphysics",
+					"Cloud retrieval",
+					"Cloud water/phase",
+					"Ice crystals",
+					"Ice particles",
+					"In situ atmospheric observations"
+				],
 				"notes": [],
 				"seeAlso": []
 			}
