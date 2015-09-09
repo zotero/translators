@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2015-08-01 17:14:52"
+	"lastUpdated": "2015-09-09 06:33:08"
 }
 
 /*
@@ -42,6 +42,9 @@ Germany:
 http://aleph-www.ub.fu-berlin.de
 http://opac.hu-berlin.de
 http://alephdai.ub.hu-berlin.de
+
+Mexico:
+iibiblio.unam.mx
 */
 
 function detectWeb(doc, url) {
@@ -163,8 +166,8 @@ function scrape(newDoc, marc, url) {
 		}	else if (newDoc.evaluate('//tbody[tr/td[@scope="row"]/strong[contains(text(), "LDR")]]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 			//UCSB Pegasus
 			xpath = '//tbody[tr/td[@scope="row"]/strong[contains(text(), "LDR")]]/tr';
-		} else if (newDoc.evaluate('//*[tr[th/text()="LDR"]]/tr[td[1]]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		  xpath = '//*[tr[th/text()="LDR"]]/tr[td[1]]';
+		} else if (newDoc.evaluate('//*[tr[th[normalize-space(text())="LDR"]]]/tr[td[1]]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		  xpath = '//*[tr[th[normalize-space(text())="LDR"]]]/tr[td[1]]';
 		  th = true;
 		} else if (newDoc.evaluate('//tr[2]//table[2]//tr', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 			xpath = '//tr[2]//table[2]//tr[td[2]]';
