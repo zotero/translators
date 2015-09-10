@@ -15,7 +15,7 @@
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
-	"lastUpdated": "2015-08-03 08:45:20"
+	"lastUpdated": "2015-09-10 08:45:20"
 }
 
 
@@ -520,7 +520,7 @@ function encodeFilePathComponent(value) {
 				} else if (item.itemType == "magazineArticle" || item.itemType == "newspaperArticle") {
 					writeField("journaltitle", item.publicationTitle);
 				} else if (item.itemType == "journalArticle") {
-					if (Zotero.getOption("useJournalAbbreviation")) {
+					if (Zotero.getOption("useJournalAbbreviation") && item.journalAbbreviation) {
 						writeField("journaltitle", item.journalAbbreviation);
 					} else {
 						writeField("journaltitle", item.publicationTitle);
