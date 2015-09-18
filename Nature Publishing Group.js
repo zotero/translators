@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-09-10 22:54:24"
+	"lastUpdated": "2015-09-18 22:31:12"
 }
 
 /**
@@ -592,6 +592,15 @@ function scrape(doc, url) {
 		if(!item) {
 			Z.debug('Could not retrieve metadata.');
 			return;	//both translators failed
+		}
+		
+		if (!item.pages) {
+			// For some online-only publications this should be the "Article number"
+			// but is not present in either EM or RIS. We grab it from page
+			var page = doc.querySelector('.citation .page');
+			if (page) {
+				item.pages = ZU.trimInternal(page.textContent);
+			}
 		}
 
 		if(item.journalAbbreviation == 'Nature') {
@@ -2349,6 +2358,95 @@ var testCases = [
 					}
 				],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.nature.com/ncomms/2015/150203/ncomms7186/full/ncomms7186.html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "ZNF143 provides sequence specificity to secure chromatin interactions at gene promoters",
+				"creators": [
+					{
+						"firstName": "Swneke D.",
+						"lastName": "Bailey",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Xiaoyang",
+						"lastName": "Zhang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kinjal",
+						"lastName": "Desai",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Malika",
+						"lastName": "Aid",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Olivia",
+						"lastName": "Corradin",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Richard",
+						"lastName": "Cowper-Sal·lari",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Batool",
+						"lastName": "Akhtar-Zaidi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Peter C.",
+						"lastName": "Scacheri",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Benjamin",
+						"lastName": "Haibe-Kains",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Mathieu",
+						"lastName": "Lupien",
+						"creatorType": "author"
+					}
+				],
+				"date": "February 3, 2015",
+				"DOI": "10.1038/ncomms7186",
+				"abstractNote": "Chromatin interactions connect distal regulatory elements to target gene promoters guiding stimulus- and lineage-specific transcription. Few factors securing chromatin interactions have so far been identified. Here, by integrating chromatin interaction maps with the large collection of transcription factor-binding profiles provided by the ENCODE project, we demonstrate that the zinc-finger protein ​ZNF143 preferentially occupies anchors of chromatin interactions connecting promoters with distal regulatory elements. It binds directly to promoters and associates with lineage-specific chromatin interactions and gene expression. Silencing ​ZNF143 or modulating its DNA-binding affinity using single-nucleotide polymorphisms (SNPs) as a surrogate of site-directed mutagenesis reveals the sequence dependency of chromatin interactions at gene promoters. We also find that chromatin interactions alone do not regulate gene expression. Together, our results identify ​ZNF143 as a novel chromatin-looping factor that contributes to the architectural foundation of the genome by providing sequence specificity at promoters connected with distal regulatory elements.",
+				"journalAbbreviation": "Nat Commun",
+				"language": "en",
+				"libraryCatalog": "www.nature.com",
+				"pages": "6186",
+				"publicationTitle": "Nature Communications",
+				"rights": "© 2015 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
+				"url": "http://www.nature.com/ncomms/2015/150203/ncomms7186/full/ncomms7186.html",
+				"volume": "2",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					"Biological sciences",
+					"Genetics",
+					"Molecular biology"
+				],
 				"notes": [],
 				"seeAlso": []
 			}
