@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-04-03 19:53:34"
+	"lastUpdated": "2015-09-18 22:51:42"
 }
 
 /*
@@ -49,8 +49,6 @@ function scrape(doc) {
 	translator.setDocument(doc);
 
 	translator.setHandler("itemDone", function(obj, item) {
-		item.abstractNote = item.extra;
-		delete item.extra;
 		//once we have a PMID field put this there.
 		if (pmid) item.extra = "PMID: " + pmid.match(/\d+/)[0]
 
@@ -68,12 +66,24 @@ function scrape(doc) {
 				document: doc
 			}];
 		}
+		
+		// Abstract may be missing
+		if (!item.abstractNote) {
+			var abstract = ZU.xpath(doc, '//h3[normalize-space(text())="Abstract"]')[0];
+			if (abstract) {
+				var content = abstract.nextElementSibling;
+				if (content && content.nodeName == 'P') {
+					item.abstractNote = ZU.trimInternal(content.textContent);
+				}
+			}
+		}
 
 		//sometimes there's no url specified in the meta tags,
 		//only og:url, which is for the website.
 		//In that case, include current url
-		if(!item.url.match(/[^\/]\/[^\/]/))
+		if(!item.url.match(/[^\/]\/[^\/]/)) {
 			item.url = doc.location.href;
+		}
 
 		//keywords
 		var keywords = ZU.xpathText(doc, '//*[@id="keywords"]/text()', null, '; ');
@@ -138,6 +148,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Approximately cubic functional equations and cubic multipliers",
 				"creators": [
 					{
 						"firstName": "Abasalt",
@@ -155,14 +166,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Hyers-Ulam stability",
-					"Superstability",
-					"cubic functional equation",
-					"multiplier"
-				],
-				"seeAlso": [],
+				"date": "2011-09-13",
+				"DOI": "10.1186/1029-242X-2011-53",
+				"ISSN": "1029-242X",
+				"abstractNote": "In this paper, we prove the Hyers-Ulam stability and the superstability for cubic functional equation by using the fixed point alternative theorem. As a consequence, we show that the cubic multipliers are superstable under some conditions.",
+				"issue": "1",
+				"language": "en",
+				"libraryCatalog": "www.journalofinequalitiesandapplications.com",
+				"pages": "53",
+				"publicationTitle": "Journal of Inequalities and Applications",
+				"rights": "2011 Bodaghi et al; licensee Springer.",
+				"url": "http://www.journalofinequalitiesandapplications.com/content/2011/1/53/abstract",
+				"volume": "2011",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -172,19 +187,14 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"title": "Approximately cubic functional equations and cubic multipliers",
-				"publicationTitle": "Journal of Inequalities and Applications",
-				"rights": "2011 Bodaghi et al; licensee Springer.",
-				"volume": "2011",
-				"issue": "1",
-				"pages": "53",
-				"date": "2011-09-13",
-				"DOI": "10.1186/1029-242X-2011-53",
-				"ISSN": "1029-242X",
-				"language": "en",
-				"url": "http://www.journalofinequalitiesandapplications.com/content/2011/1/53/abstract",
-				"abstractNote": "In this paper, we prove the Hyers-Ulam stability and the superstability for cubic functional equation by using the fixed point alternative theorem. As a consequence, we show that the cubic multipliers are superstable under some conditions.",
-				"libraryCatalog": "www.journalofinequalitiesandapplications.com"
+				"tags": [
+					"Hyers-Ulam stability",
+					"Superstability",
+					"cubic functional equation",
+					"multiplier"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -194,6 +204,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Nanoscale potassium niobate crystal structure and phase transition",
 				"creators": [
 					{
 						"firstName": "Haiyan",
@@ -211,14 +222,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"crystal structure",
-					"nanoscale powder.",
-					"phase transition",
-					"potassium niobate"
-				],
-				"seeAlso": [],
+				"date": "2011-09-23",
+				"DOI": "10.1186/1556-276X-6-530",
+				"ISSN": "1556-276X",
+				"abstractNote": "Nanoscale potassium niobate (KNbO3) powders of orthorhombic structure were synthesized using the sol-gel method. The heat-treatment temperature of the gels had a pronounced effect on KNbO3 particle size and morphology. Field emission scanning electron microscopy and transmission electron microscopy were used to determine particle size and morphology. The average KNbO3 grain size was estimated to be less than 100 nm, and transmission electron microscopy images indicated that KNbO3 particles had a brick-like morphology. Synchrotron X-ray diffraction was used to identify the room-temperature structures using Rietveld refinement. The ferroelectric orthorhombic phase was retained even for particles smaller than 50 nm. The orthorhombic to tetragonal and tetragonal to cubic phase transitions of nanocrystalline KNbO3 were investigated using temperature-dependent powder X-ray diffraction. Differential scanning calorimetry was used to examine the temperature dependence of KNbO3 phase transition. The Curie temperature and phase transition were independent of particle size, and Rietveld analyses showed increasing distortions with decreasing particle size.",
+				"extra": "PMID: 21943345",
+				"issue": "1",
+				"language": "en",
+				"libraryCatalog": "www.nanoscalereslett.com",
+				"pages": "530",
+				"publicationTitle": "Nanoscale Research Letters",
+				"rights": "2011 Chen et al; licensee Springer.",
+				"url": "http://www.nanoscalereslett.com/content/6/1/530/abstract",
+				"volume": "6",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -228,20 +244,14 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"title": "Nanoscale potassium niobate crystal structure and phase transition",
-				"publicationTitle": "Nanoscale Research Letters",
-				"rights": "2011 Chen et al; licensee Springer.",
-				"volume": "6",
-				"issue": "1",
-				"pages": "530",
-				"date": "2011-09-23",
-				"DOI": "10.1186/1556-276X-6-530",
-				"ISSN": "1556-276X",
-				"language": "en",
-				"url": "http://www.nanoscalereslett.com/content/6/1/530/abstract",
-				"abstractNote": "Nanoscale potassium niobate (KNbO3) powders of orthorhombic structure were synthesized using the sol-gel method. The heat-treatment temperature of the gels had a pronounced effect on KNbO3 particle size and morphology. Field emission scanning electron microscopy and transmission electron microscopy were used to determine particle size and morphology. The average KNbO3 grain size was estimated to be less than 100 nm, and transmission electron microscopy images indicated that KNbO3 particles had a brick-like morphology. Synchrotron X-ray diffraction was used to identify the room-temperature structures using Rietveld refinement. The ferroelectric orthorhombic phase was retained even for particles smaller than 50 nm. The orthorhombic to tetragonal and tetragonal to cubic phase transitions of nanocrystalline KNbO3 were investigated using temperature-dependent powder X-ray diffraction. Differential scanning calorimetry was used to examine the temperature dependence of KNbO3 phase transition. The Curie temperature and phase transition were independent of particle size, and Rietveld analyses showed increasing distortions with decreasing particle size.\nPMID: 21943345",
-				"libraryCatalog": "www.nanoscalereslett.com",
-				"extra": "PMID: 21943345"
+				"tags": [
+					"crystal structure",
+					"nanoscale powder.",
+					"phase transition",
+					"potassium niobate"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -252,15 +262,16 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://respiratory-research.com/search/results?terms=cells",
+		"url": "http://www.respiratory-research.com/search/results?terms=cells",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://respiratory-research.com/content/11/1/133",
+		"url": "http://www.respiratory-research.com/content/11/1/133",
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Nicotinic receptors on rat alveolar macrophages dampen ATP-induced increase in cytosolic calcium concentration",
 				"creators": [
 					{
 						"firstName": "Zbigniew",
@@ -323,9 +334,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2010-09-29",
+				"DOI": "10.1186/1465-9921-11-133",
+				"ISSN": "1465-9921",
+				"abstractNote": "Nicotinic acetylcholine receptors (nAChR) have been identified on a variety of cells of the immune system and are generally considered to trigger anti-inflammatory events. In the present study, we determine the nAChR inventory of rat alveolar macrophages (AM), and investigate the cellular events evoked by stimulation with nicotine.",
+				"extra": "PMID: 20920278",
+				"issue": "1",
+				"language": "en",
+				"libraryCatalog": "www.respiratory-research.com",
+				"pages": "133",
+				"publicationTitle": "Respiratory Research",
+				"rights": "2010 Mikulski et al; licensee BioMed Central Ltd.",
+				"url": "http://respiratory-research.com/content/11/1/133/abstract",
+				"volume": "11",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -335,20 +356,9 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"title": "Nicotinic receptors on rat alveolar macrophages dampen ATP-induced increase in cytosolic calcium concentration",
-				"publicationTitle": "Respiratory Research",
-				"rights": "2010 Mikulski et al; licensee BioMed Central Ltd.",
-				"volume": "11",
-				"issue": "1",
-				"pages": "133",
-				"date": "2010-09-29",
-				"DOI": "10.1186/1465-9921-11-133",
-				"ISSN": "1465-9921",
-				"language": "en",
-				"url": "http://respiratory-research.com/content/11/1/133/abstract",
-				"abstractNote": "Nicotinic acetylcholine receptors (nAChR) have been identified on a variety of cells of the immune system and are generally considered to trigger anti-inflammatory events. In the present study, we determine the nAChR inventory of rat alveolar macrophages (AM), and investigate the cellular events evoked by stimulation with nicotine.\nPMID: 20920278",
-				"libraryCatalog": "respiratory-research.com",
-				"extra": "PMID: 20920278"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -358,6 +368,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Cacao seeds are a",
 				"creators": [
 					{
 						"firstName": "Stephen J.",
@@ -395,9 +406,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2011-02-07",
+				"DOI": "10.1186/1752-153X-5-5",
+				"ISSN": "1752-153X",
+				"abstractNote": "Numerous popular media sources have developed lists of \"Super Foods\" and, more recently, \"Super Fruits\". Such distinctions often are based on the antioxidant capacity and content of naturally occurring compounds such as polyphenols within those whole fruits or juices of the fruit which may be linked to potential health benefits. Cocoa powder and chocolate are made from an extract of the seeds of the fruit of the Theobroma cacao tree. In this study, we compared cocoa powder and cocoa products to powders and juices derived from fruits commonly considered \"Super Fruits\".",
+				"extra": "PMID: 21299842",
+				"issue": "1",
+				"language": "en",
+				"libraryCatalog": "journal.chemistrycentral.com",
+				"pages": "5",
+				"publicationTitle": "Chemistry Central Journal",
+				"rights": "2011 Crozier et al",
+				"url": "http://journal.chemistrycentral.com/content/5/1/5/abstract",
+				"volume": "5",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -407,29 +428,19 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"title": "Cacao seeds are a",
-				"publicationTitle": "Chemistry Central Journal",
-				"rights": "2011 Crozier et al",
-				"volume": "5",
-				"issue": "1",
-				"pages": "5",
-				"date": "2011-02-07",
-				"DOI": "10.1186/1752-153X-5-5",
-				"ISSN": "1752-153X",
-				"language": "en",
-				"url": "http://journal.chemistrycentral.com/content/5/1/5/abstract",
-				"abstractNote": "Numerous popular media sources have developed lists of \"Super Foods\" and, more recently, \"Super Fruits\". Such distinctions often are based on the antioxidant capacity and content of naturally occurring compounds such as polyphenols within those whole fruits or juices of the fruit which may be linked to potential health benefits. Cocoa powder and chocolate are made from an extract of the seeds of the fruit of the Theobroma cacao tree. In this study, we compared cocoa powder and cocoa products to powders and juices derived from fruits commonly considered \"Super Fruits\".\nPMID: 21299842",
-				"libraryCatalog": "journal.chemistrycentral.com",
-				"extra": "PMID: 21299842"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://genomebiology.com/2003/4/7/223/abstract",
+		"url": "http://www.genomebiology.com/2003/4/7/223/abstract",
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Poly(A)-binding proteins: multifunctional scaffolds for the post-transcriptional control of gene expression",
 				"creators": [
 					{
 						"firstName": "David A.",
@@ -447,9 +458,20 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2003-07-01",
+				"DOI": "10.1186/gb-2003-4-7-223",
+				"ISSN": "1465-6906",
+				"abstractNote": "Most eukaryotic mRNAs are subject to considerable post-transcriptional modification, including capping, splicing, and polyadenylation. The process of polyadenylation adds a 3' poly(A) tail and provides the mRNA with a binding site for a major class of regulatory factors, the poly(A)-binding proteins (PABPs). These highly conserved polypeptides are found only in eukaryotes; single-celled eukaryotes each have a single PABP, whereas humans have five and Arabidopis has eight. They typically bind poly(A) using one or more RNA-recognition motifs, globular domains common to numerous other eukaryotic RNA-binding proteins. Although they lack catalytic activity, PABPs have several roles in mediating gene expression. Nuclear PABPs are necessary for the synthesis of the poly(A) tail, regulating its ultimate length and stimulating maturation of the mRNA. Association with PABP is also a requirement for some mRNAs to be exported from the nucleus. In the cytoplasm, PABPs facilitate the formation of the 'closed loop' structure of the messenger ribonucleoprotein particle that is crucial for additional PABP activities that promote translation initiation and termination, recycling of ribosomes, and stability of the mRNA. Collectively, these sequential nuclear and cytoplasmic contributions comprise a cycle in which PABPs and the poly(A) tail first create and then eliminate a network of cis- acting interactions that control mRNA function.",
+				"extra": "PMID: 12844354",
+				"issue": "7",
+				"language": "en",
+				"libraryCatalog": "www.genomebiology.com",
+				"pages": "223",
+				"publicationTitle": "Genome Biology",
+				"rights": "2003 BioMed Central Ltd",
+				"shortTitle": "Poly(A)-binding proteins",
+				"url": "http://www.genomebiology.com/2003/4/7/223/abstract",
+				"volume": "4",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -459,21 +481,9 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"title": "Poly(A)-binding proteins: multifunctional scaffolds for the post-transcriptional control of gene expression",
-				"publicationTitle": "Genome Biology",
-				"rights": "2003 BioMed Central Ltd",
-				"volume": "4",
-				"issue": "7",
-				"pages": "223",
-				"date": "2003-07-01",
-				"DOI": "10.1186/gb-2003-4-7-223",
-				"ISSN": "1465-6906",
-				"language": "en",
-				"url": "http://genomebiology.com/2003/4/7/223/abstract",
-				"libraryCatalog": "genomebiology.com",
-				"abstractNote": "PMID: 12844354",
-				"extra": "PMID: 12844354",
-				"shortTitle": "Poly(A)-binding proteins"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -483,6 +493,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Inference of hierarchical regulatory network of estrogen-dependent breast cancer through ChIP-based data",
 				"creators": [
 					{
 						"firstName": "Fei",
@@ -525,9 +536,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2010-12-17",
+				"DOI": "10.1186/1752-0509-4-170",
+				"ISSN": "1752-0509",
+				"abstractNote": "Global profiling of in vivo protein-DNA interactions using ChIP-based technologies has evolved rapidly in recent years. Although many genome-wide studies have identified thousands of ERα binding sites and have revealed the associated transcription factor (TF) partners, such as AP1, FOXA1 and CEBP, little is known about ERα associated hierarchical transcriptional regulatory networks.",
+				"extra": "PMID: 21167036",
+				"issue": "1",
+				"language": "en",
+				"libraryCatalog": "www.biomedcentral.com",
+				"pages": "170",
+				"publicationTitle": "BMC Systems Biology",
+				"rights": "2010 Gu et al; licensee BioMed Central Ltd.",
+				"url": "http://www.biomedcentral.com/1752-0509/4/170/abstract",
+				"volume": "4",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -537,20 +558,9 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"title": "Inference of hierarchical regulatory network of estrogen-dependent breast cancer through ChIP-based data",
-				"publicationTitle": "BMC Systems Biology",
-				"rights": "2010 Gu et al; licensee BioMed Central Ltd.",
-				"volume": "4",
-				"issue": "1",
-				"pages": "170",
-				"date": "2010-12-17",
-				"DOI": "10.1186/1752-0509-4-170",
-				"ISSN": "1752-0509",
-				"language": "en",
-				"url": "http://www.biomedcentral.com/1752-0509/4/170/abstract",
-				"abstractNote": "Global profiling of in vivo protein-DNA interactions using ChIP-based technologies has evolved rapidly in recent years. Although many genome-wide studies have identified thousands of ERα binding sites and have revealed the associated transcription factor (TF) partners, such as AP1, FOXA1 and CEBP, little is known about ERα associated hierarchical transcriptional regulatory networks.\nPMID: 21167036",
-				"libraryCatalog": "www.biomedcentral.com",
-				"extra": "PMID: 21167036"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -560,6 +570,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Plantar fascia thickness and first metatarsal mobility in patients with diabetes and neuropathy",
 				"creators": [
 					{
 						"firstName": "Smita",
@@ -577,9 +588,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2008-09-26",
+				"DOI": "10.1186/1757-1146-1-S1-O4",
+				"ISSN": "1757-1146",
+				"issue": "Suppl 1",
+				"language": "en",
+				"libraryCatalog": "www.jfootankleres.com",
+				"pages": "O4",
+				"publicationTitle": "Journal of Foot and Ankle Research",
+				"rights": "2008 Rao et al; licensee BioMed Central Ltd.",
+				"url": "http://www.jfootankleres.com/content/1/S1/O4",
+				"volume": "1",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -589,18 +608,9 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"title": "Plantar fascia thickness and first metatarsal mobility in patients with diabetes and neuropathy",
-				"publicationTitle": "Journal of Foot and Ankle Research",
-				"rights": "2008 Rao et al; licensee BioMed Central Ltd.",
-				"volume": "1",
-				"issue": "Suppl 1",
-				"pages": "O4",
-				"date": "2008-09-26",
-				"DOI": "10.1186/1757-1146-1-S1-O4",
-				"ISSN": "1757-1146",
-				"language": "en",
-				"url": "http://www.jfootankleres.com/content/1/S1/O4",
-				"libraryCatalog": "www.jfootankleres.com"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
