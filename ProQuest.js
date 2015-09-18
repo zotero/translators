@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-08-29 22:16:34"
+	"lastUpdated": "2015-09-18 21:39:31"
 }
 
 /*
@@ -207,9 +207,10 @@ function doWeb(doc, url, noFollow) {
 			}
 		});
 	} else {
-		var abstractTab = doc.getElementById('tab-AbstractRecord-null'); // Seems like that null is a bug and it might change at some point
-		var followLink = abstractTab && !abstractTab.classList.contains('active');
-		if (!followLink) {//i.e. we are on an abstract/metadata page
+		var abstractTab = doc.getElementById('tab-AbstractRecord-null') // Seems like that null is a bug and it might change at some point
+			|| doc.getElementById('tab-Record-null'); // Shown as Details
+		if (!(abstractTab && !abstractTab.classList.contains('active'))) {
+			Zotero.debug("On Abstract page, scraping")
 			scrape(doc, url, type);
 		} else if (noFollow) {
 			Z.debug('Not following link again. Attempting to scrape');
@@ -219,6 +220,7 @@ function doWeb(doc, url, noFollow) {
 			if (!link) {
 				throw new Error("Could not find the abstract/metadata link");
 			}
+			Zotero.debug("Going to the Abstract tab");
 			ZU.processDocuments(link.href, function(doc, url) { doWeb(doc, url, true) });
 		}
 	}
@@ -302,6 +304,9 @@ function scrape(doc, url, type) {
 			case 'Pages':
 				item.pages = value;
 			break;
+			case 'First page':
+				item.firstPage = value;
+			break;
 			case 'University/institution':
 			case 'School':
 				item.university = value;
@@ -360,7 +365,7 @@ function scrape(doc, url, type) {
 		}
 	}
 
-	item.url = url.replace(/\baccountid=[^&#]+&?/, '');
+	item.url = url.replace(/\baccountid=[^&#]*&?/, '').replace(/\?(?:#|$)/, '');
 	if (item.itemType=="thesis" && place.schoolLocation) {
 		item.place = place.schoolLocation;
 	}
@@ -373,6 +378,17 @@ function scrape(doc, url, type) {
 	} 
 
 	item.date = dates.pop();
+
+	// Sometimes we can get first page and num pages for a journal article
+	if (item.firstPage && !item.pages) {
+		var firstPage = parseInt(item.firstPage);
+		var numPages = parseInt(item.numPages);
+		if (!numPages || numPages < 2) {
+			item.pages = item.firstPage;
+		} else {
+			item.pages = firstPage + '–' + (firstPage + numPages - 1);
+		}
+	}
 
 	//sometimes number of pages ends up in pages
 	if(!item.numPages) item.numPages = item.pages;
@@ -1437,6 +1453,50 @@ var testCases = [
 					"Growth Regulators",
 					"Mammalian Genetics",
 					"PLANT SCIENCE"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://search.proquest.com/docview/1297954386/citation?accountid=12861",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Women's Rights as Human Rights: Toward a Re-Vision of Human Rights",
+				"creators": [
+					{
+						"firstName": "Charlotte",
+						"lastName": "Bunch",
+						"creatorType": "author"
+					}
+				],
+				"date": "Nov 1, 1990",
+				"ISSN": "0275-0392",
+				"issue": "4",
+				"language": "English",
+				"libraryCatalog": "ProQuest",
+				"pages": "486–498",
+				"publicationTitle": "Human Rights Quarterly",
+				"shortTitle": "Women's Rights as Human Rights",
+				"url": "http://search.proquest.com/docview/1297954386/citation",
+				"volume": "12",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					"Law",
+					"Law--Civil Law",
+					"Political Science",
+					"Political Science--Civil Rights",
+					"Social Sciences (General)",
+					"Social Sciences: Comprehensive Works",
+					"Sociology"
 				],
 				"notes": [],
 				"seeAlso": []
