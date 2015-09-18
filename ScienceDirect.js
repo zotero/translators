@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2015-09-07 03:38:24"
+	"lastUpdated": "2015-09-18 21:15:35"
 }
 
 function detectWeb(doc, url) {
@@ -44,16 +44,6 @@ function detectWeb(doc, url) {
 			return "journalArticle";
 		}
 	} 
-}
-
-function getExportLink(doc) {
-	var link = ZU.xpath(doc, '//div[@class="icon_exportarticlesci_dir"]/a/@href');
-	return link.length ? link[0].textContent : false;
-}
-
-function getExportFormAction(doc) {
-	var form = ZU.xpath(doc, '//div[@id="export_popup"]/form')[0];
-	return form ? form.action : false;
 }
 
 function getPDFLink(doc) {
@@ -153,15 +143,7 @@ function attachSupplementary(doc, item) {
 	}
 }
 
-function scrapeByDirectExport(doc) {
-	Z.debug("ScienceDirect: Scrapping by RIS directly through export form");
-	var url = getExportFormAction(doc);
-	var postParams = 'citation-type=RIS&zone=exportDropDown&export=Export&format=cite-abs';
-	ZU.doPost(url, postParams, function(text) { processRIS(doc, text) });
-}
-
 function scrapeByExport(doc) {
-	Z.debug("ScienceDirect: Scraping by RIS export through an intermediate page");
 	var url = getExportLink(doc);
 	ZU.doGet(url, function(text) {
 		//select the correct form
@@ -291,7 +273,6 @@ function processRIS(doc, text) {
 }
 
 function scrapeByISBN(doc) {
-	Z.debug("ScienceDirect: Scraping by ISBN");
 	var isbn = getISBN(doc);
 	var translator = Zotero.loadTranslator("search");
 	translator.setTranslator("c73a4a8c-3ef1-4ec8-8229-7531ee384cc4");
@@ -331,15 +312,78 @@ function doWeb(doc, url) {
 	}
 }
 
+function getFormInput(form) {
+	var inputs = form.elements;
+	var values = {}
+	for (var i=0; i<inputs.length; i++) {
+		if (!inputs[i].name) continue;
+		values[inputs[i].name] = inputs[i].value;
+	}
+	
+	return values;
+}
+
+function formValuesToPostData(values) {
+	var s = '';
+	for (var v in values) {
+		s += '&' + encodeURIComponent(v) + '=' + encodeURIComponent(values[v]);
+	}
+	
+	if (!s) {
+		Zotero.debug("No values provided for POST string");
+		return false;
+	}
+	
+	return s.substr(1);
+}
+
 function scrape(doc) {
-	if(getExportFormAction(doc)) {
-		scrapeByDirectExport(doc);
-	} else if(getExportLink(doc)) {
-		//we might no longer be hitting this case
+	// On most page the export form uses the POST method
+	var form = ZU.xpath(doc, '//form[@name="exportCite"]')[0];
+	if (form) {
+		Z.debug("Fetching RIS via POST form");
+		var values = getFormInput(form);
+		values['citation-type'] = 'RIS';
+		values.format = 'cite-abs';
+		ZU.doPost(form.action, formValuesToPostData(values), function(text) {
+			processRIS(doc, text);
+		});
+		return;
+	}
+	
+	// On some older article pages, there seems to be a different form
+	// that uses GET
+	form = doc.getElementById('export-form');
+	if (form) {
+		Z.debug("Fetching RIS via GET form");
+		var url = form.action
+			+ '?export-format=RIS&export-content=cite-abs';
+		ZU.doGet(url, function(text) { processRIS(doc, text) });
+		return;
+	}
+	
+	/***
+	 * Probably deprecated. Let's see if we break anything
+	 * 
+	var link = ZU.xpath(doc, '//div[@class="icon_exportarticlesci_dir"]/a')[0];
+	if (link) {
+		Z.debug("Fetching RIS via intermediate page");
 		scrapeByExport(doc);
-	} else if(getISBN(doc)) {
+		return;
+	}
+	*/
+	
+	/***
+	 * Also probably no longer necessary, since fetching via POST seems to cover
+	 * all test cases
+	 * 
+	if(getISBN(doc)) {
+		Z.debug("Scraping by ISBN");
 		scrapeByISBN(doc);
 	}
+	*/
+	
+	throw new Error("Could not scrape metadata via known methods")
 }
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -508,7 +552,7 @@ var testCases = [
 					}
 				],
 				"date": "2007",
-				"ISBN": "978-0-12-369468-3",
+				"ISBN": "9780123694683",
 				"abstractNote": "This chapter provides an introduction to discrete dislocation statics and dynamics. The chapter deals with the simulation of plasticity of metals at the microscopic and mesoscopic scale using space- and time-discretized dislocation statics and dynamics. The complexity of discrete dislocation models is due to the fact that the mechanical interaction of ensembles of such defects is of an elastic nature and, therefore, involves long-range interactions. Space-discretized dislocation simulations idealize dislocations outside the dislocation cores as linear defects that are embedded within an otherwise homogeneous, isotropic or anisotropic, linear elastic medium. The aim of the chapter is to concentrate on those simulations that are discrete in both space and time. It explicitly incorporates the properties of individual lattice defects in a continuum formulation. The theoretical framework of linear continuum elasticity theory is overviewed as required for the formulation of basic dislocation mechanics. The chapter also discusses the dislocation statics, where the fundamentals of linear isotropic and anisotropic elasticity theory that are required in dislocation theory are reviewed. The chapter describes the dislocation dynamics, where it is concerned with the introduction of continuum dislocation dynamics. The last two sections deal with kinematics of discrete dislocation dynamics and dislocation reactions and annihilation.",
 				"bookTitle": "Computational Materials Engineering",
 				"libraryCatalog": "ScienceDirect",
@@ -519,10 +563,6 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "ScienceDirect Snapshot"
-					},
-					{
-						"title": "ScienceDirect Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -551,7 +591,7 @@ var testCases = [
 					}
 				],
 				"date": "2009",
-				"ISBN": "978-0-12-370626-3",
+				"ISBN": "9780123706263",
 				"abstractNote": "The African continent (30.1 million km2) extends from 37°17′N to 34°52 S and covers a great variety of climates except the polar climate. Although Africa is often associated to extended arid areas as the Sahara (7 million km2) and Kalahari (0.9 million km2), it is also characterized by a humid belt in its equatorial part and by few very wet regions as in Cameroon and in Sierra Leone. Some of the largest river basins are found in this continent such as the Congo, also termed Zaire, Nile, Zambezi, Orange, and Niger basins. Common features of Africa river basins are (i) warm temperatures, (ii) general smooth relief due to the absence of recent mountain ranges, except in North Africa and in the Rift Valley, (iii) predominance of old shields and metamorphic rocks with very developed soil cover, and (iv) moderate human impacts on river systems except for the recent spread of river damming. African rivers are characterized by very similar hydrochemical and physical features (ionic contents, suspended particulate matter, or SPM) but differ greatly by their hydrological regimes, which are more developed in this article.",
 				"bookTitle": "Encyclopedia of Inland Waters",
 				"libraryCatalog": "ScienceDirect",
@@ -562,10 +602,6 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "ScienceDirect Snapshot"
-					},
-					{
-						"title": "ScienceDirect Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
@@ -728,11 +764,13 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "http://www.sciencedirect.com/science/journal/22126716",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "http://www.sciencedirect.com/science/handbooks/18745709",
 		"items": "multiple"
 	},
@@ -743,8 +781,60 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "http://www.sciencedirect.com/science/bookseries/00652458",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.sciencedirect.com/science/article/pii/0584853976801316",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The low frequency absorption spectra and assignments of fluoro benzenes",
+				"creators": [
+					{
+						"lastName": "Eaton",
+						"firstName": "Valerie J.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Pearce",
+						"firstName": "R. A. R.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Steele",
+						"firstName": "D.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Tindle",
+						"firstName": "J. W.",
+						"creatorType": "author"
+					}
+				],
+				"date": "January 1, 1976",
+				"DOI": "10.1016/0584-8539(76)80131-6",
+				"ISSN": "0584-8539",
+				"abstractNote": "The absorption spectra between 400 and 50 cm−1 have been measured for the following compounds; 1,2-C6H4F2; 1,4-C6H4F2; 1,2,4-C6H3F3; 1,3,5-C6H3F3; 1,2,4,5-C6H2F4; 1,2,3,4-C6H2F4 (to 200 cm−1 only), 1,2,3,5,-C6H2F4; C6F5H and C6F6. Some new Raman data is also presented. Vibrational assignments have been criticallly examine by seeking consistency between assignments for different molecules and by comparison with predicted frequencies. There is clear evidence for a steady reduction in the force constant for the out-of-plane CH deformation with increasing fluorine substitution.",
+				"issue": "4",
+				"journalAbbreviation": "Spectrochimica Acta Part A: Molecular Spectroscopy",
+				"libraryCatalog": "ScienceDirect",
+				"pages": "663-672",
+				"publicationTitle": "Spectrochimica Acta Part A: Molecular Spectroscopy",
+				"url": "http://www.sciencedirect.com/science/article/pii/0584853976801316",
+				"volume": "32",
+				"attachments": [
+					{
+						"title": "ScienceDirect Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
