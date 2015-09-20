@@ -1,396 +1,151 @@
 {
 	"translatorID": "73be930f-5773-41b2-a7a1-37c0eeade92f",
 	"label": "OZON.ru",
-	"creator": "Victor Rybynok",
-	"target": "^https?://www\\.ozon\\.ru",
+	"creator": "Mikhail Akimov",
+	"target": "^https?://www\\.ozon\\.ru/context/detail/id/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-03 18:47:00"
+	"lastUpdated": "2015-10-07 13:03:19"
 }
 
-/**
-	OZON.ru translator. Only supports "Book" "Item Type".
-	Copyright (c) 2012 Victor Rybynok, v.rybynok@gmail.com
+/*
+	OZON.ru Translator
+	Copyright (C) 2015 Mikhail Akimov
 
-	Description
-	===========
-
-	Zotero translator for OZON.ru on-line store.
-
-	Comments
-	========
-
-	This version of OZON.ru translator only supports "Book" "Item Type"
-	for "Книги" and "Цифровые книги" ozon.ru site sections.
-
-	Change log
-	==========
-
-	2013-05-27
-
-	* New page layout parsing.
-
-	2012-08-11
-
-	* Corrected detail description parsing to accommodate the new book
-	  description pages template.
-	* Corrected "edition number" recognition.
-	* Introduced change log and to do comment sections.
-	* Few minor issue fixes.
-
-	2012-04-02
-
-	* Initial release.
-
-	TODO
-	====
-
-	* Develop more universal algorithm for "edition number" recognition.
-	  Currently it only recognises up to 10 editions in Russian verbal
-	  representation.
-
-	Legal notice
-	============
-
-	This program is free software: you can redistribute it and/or
-	modify it under the terms of the GNU Affero General Public License
-	as published by the Free Software Foundation, either version 3 of
-	the License, or (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-	Affero General Public License for more details.
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
 
-	You should have received a copy of the GNU Affero General Public
-	License along with this program.  If not, see
-	<http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU Affero General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 function detectWeb(doc, url) {
-	var itemTypeXPath = '//ul[@class="navLine"]/li[1]/a';
-	var itemTypeDOMNode =
-	doc.evaluate(itemTypeXPath, doc, null,
-	XPathResult.ANY_TYPE, null).iterateNext();
-	var itemType;
-	if (itemTypeDOMNode) itemType = itemTypeDOMNode.textContent;
-	else return "";
-	if (itemType == "Книги") {
-		var nameXPath = '//div[@class="techDescription"]/div/div[2]/span';
-		var valueXPath = '//div[@class="techDescription"]/div/div[3]/span';
-		var nameXPathRes = doc.evaluate(
-		nameXPath, doc, null, XPathResult.ANY_TYPE, null);
-		var valueXPathRes = doc.evaluate(
-		valueXPath, doc, null, XPathResult.ANY_TYPE, null);
-		if (!IsAudioBook(nameXPathRes, valueXPathRes)) return "book";
-	} else {
-		itemTypeXPath = '//ul[@class="navLine"]/li[2]/a';
-		itemTypeDOMNode =
-		doc.evaluate(itemTypeXPath, doc, null,
-		XPathResult.ANY_TYPE, null).iterateNext();
-		if (itemTypeDOMNode) itemType = itemTypeDOMNode.textContent;
-		else return "";
-		if (itemType == "Цифровые книги") return "book";
-	}
-}
+	var hasIsbn = ZU.xpathText(doc, '//*[@itemprop="isbn"]') !== null;
+	var hasContent = ZU.xpath(doc, '//div[@class="bContentBlock"]').length > 0;
 
-function IsAudioBook(nameXPathRes, valueXPathRes) {
-	var nameDOMNode;
-	var valueDOMNode;
-	while( (nameDOMNode = nameXPathRes.iterateNext()) &&
-	(valueDOMNode = valueXPathRes.iterateNext()) ) {
-		var nameText = CleanText(nameDOMNode.textContent);
-		var valueText = CleanText(valueDOMNode.textContent);
-		if (nameText == "Формат аудиокниги") return true;
-	}
-	return false;
-}
-
-function MergeObjects(obj1, obj2) {
-	var result = new Object();
-	for (var attrName in obj1) {
-		result[attrName] = obj1[attrName];
-	}
-	for (var attrName in obj2) {
-		result[attrName] = obj2[attrName];
-	}
-	return result;
-}
-
-function CleanText(text) {
-	var result = text.replace(/^\s*|\s*$/g, '');
-	result = result.replace(/\s+/g, ' ');
-	return result;
-}
-
-function CleanCreator(creatorStr) {
-	return CleanText(creatorStr);
-}
-
-function GetCreators(creatorsStr, creatorsCategory) {
-	var result = new Array();
-	var creator;
-	if (creatorsStr.match(",")) {
-		// http://www.ozon.ru/context/detail/id/7341440/
-		var authors = creatorsStr.split(",");
-		for (var i in authors) {
-			creator = CleanCreator(authors[i]);
-			creator = Zotero.Utilities.cleanAuthor(creator, creatorsCategory);
-			result.push(creator);
-		}
-	} else {
-		// http://www.ozon.ru/context/detail/id/7586040/
-		creator = CleanCreator(creatorsStr);
-		creator = Zotero.Utilities.cleanAuthor(creator, creatorsCategory);
-		result.push(creator);
-	}
-	return result;
-}
-
-function GetLanguage(languageStr) {
-	switch (languageStr) {
-	case "Русский":
-		return "ru";
-	case "Английский":
-		return "en";
-	default:
-		return languageStr;
-	}
-}
-
-function GetISBN(isbnDateStr) {
-	return isbnDateStr.replace(/;\s.*$/, "");
-}
-
-function GetDate(isbnDateStr) {
-	var dateSlash = isbnDateStr.replace(/^.*;\s|\sг\.$/g, "");
-	var dateArray = dateSlash.split("/");
-	var dateZotero = dateArray.reverse().join("-");
-	return dateZotero;
-}
-
-function GetNumPages(numPagesStr) {
-	var result = numPagesStr.replace(/\sстр\./, "");
-	if (result == "0") return "";
-	return result;
-}
-
-function GetEdition(editionStr) {
-	var numStr;
-
-	// example: 5-е издание, исправленное.
-	// http://www.ozon.ru/context/detail/id/8378725/
-	numStr = editionStr.match(/^\d+-е\sиздание/);
-	if(numStr) return editionStr.replace(/-е\sиздание.*/, "");
-
-	// example: Издание 6-е, исправленное.
-	// http://www.ozon.ru/context/detail/id/92650/
-	numStr = editionStr.match(/^издание\s\d+-е/i);
-	if(numStr) return editionStr.replace(/^издание|-е.*$/ig, "");
-
-	// example: 5-е изд.
-	// http://www.ozon.ru/context/detail/id/4579288/
-	numStr = editionStr.match(/\d+-е\sизд\./);
-	if(numStr) return editionStr.replace(/-е\sизд\..*/, "");
-
-	// example: Издание третье, переработанное и дополненное.
-	// http://www.ozon.ru/context/detail/id/2476706/
-	numStr = editionStr.match(/^издание\s\S+[\.,\,]/i);
-	if(numStr) {
-		numStr = numStr[0].replace(/^издание\s|[\.,\,]$/ig,"");
-		numStr = numStr.toLowerCase();
-		// Zotero.debug("Издание -> " + numStr);
-		switch(numStr) {
-		case "второе":
-			return "2";
-		case "третье":
-			return "3";
-		case "четвертое":
-		case "четвёртое":
-			return "4";
-		case "пятое":
-			return "5";
-		case "шестое":
-			return "6";
-		case "седьмое":
-			return "7";
-		case "восьмое":
-			return "8";
-		case "девятое":
-			return "9";
-		case "десятое":
-			return "10";
-		default:
-			return numStr;
-		}
-	}
-	return "";
-}
-
-function ParseProductDetail(pdXPathRes) {
-	var result = new Object();
-	var creatorsObject = new Object();
-	var pdDOMNode;
-	while (pdDOMNode = pdXPathRes.iterateNext()) {
-		var text = CleanText(pdDOMNode.textContent);
-		var name = text.replace(/[:,\s].*$/, "");
-		var value = text.replace(/^\S*\s+/, "");
-		//Zotero.debug(name + " -> " + value);
-		switch (name) {
-		case "Автор":
-		case "Авторы":
-			creatorsObject["authors"] = GetCreators(value, "author");
-			break;
-		case "Составитель":
-			creatorsObject["compilers"] = GetCreators(value, "editor");
-			break;
-		case "Переводчик":
-		case "Переводчики":
-			creatorsObject["translators"] = GetCreators(value, "translator");
-			break;
-		case "Редактор":
-		case "Редакторы":
-			creatorsObject["editors"] = GetCreators(value, "editor");
-			break;
-		case "Язык":
-		case "Языки":
-			result["language"] = GetLanguage(value);
-			break;
-		case "Издательство":
-			result["publisher"] = value;
-			break;
-		case "Серия":
-			result["series"] = value;
-			break;
-		case "ISBN":
-			result["ISBN"] = GetISBN(value);
-			result["date"] = GetDate(value);
-			break;
-		default:
-			//"Naked" year
-			if (name.match(/^\d\d\d\d$/) && !result["date"]) {
-				result["date"] = name;
-			}
-		}
-	}
-	creatorsObject["all"] = new Array();
-	if(creatorsObject["authors"]) {
-		creatorsObject["all"] =
-		creatorsObject["all"].concat(creatorsObject["authors"]);
-	}
-	if(creatorsObject["compilers"]) {
-		creatorsObject["all"] =
-		creatorsObject["all"].concat(creatorsObject["compilers"]);
-	}
-	if(creatorsObject["translators"]) {
-		creatorsObject["all"] =
-		creatorsObject["all"].concat(creatorsObject["translators"]);
-	}
-	if(creatorsObject["editors"]) {
-		creatorsObject["all"] =
-		creatorsObject["all"].concat(creatorsObject["editors"]);
-	}
-	if(creatorsObject["all"]) {
-		result["creators"] = creatorsObject["all"];
-	}
-	return result;
-}
-
-function ParseTechDesc(nameXPathRes, valueXPathRes) {
-	var result = Object();
-	var nameDOMNode;
-	var valueDOMNode;
-	while( (nameDOMNode = nameXPathRes.iterateNext()) &&
-	(valueDOMNode = valueXPathRes.iterateNext()) ) {
-		var nameText = CleanText(nameDOMNode.textContent);
-		var valueText = CleanText(valueDOMNode.textContent);
-		if (nameText == "Страниц") {
-			result["numPages"] = GetNumPages(valueText);
-			return result;
-		}
-	}
-}
-
-function ParseDetailDesc(nameXPathRes, valueXPathRes) {
-	var result = Object();
-	var nameDOMNode;
-	var valueDOMNode;
-	while( (nameDOMNode = nameXPathRes.iterateNext()) &&
-	(valueDOMNode = valueXPathRes.iterateNext()) ) {
-		var nameText = CleanText(nameDOMNode.textContent);
-		var valueText;
-		switch(nameText) {
-		case "От производителя":
-			valueText =
-			valueDOMNode.innerHTML.replace(/^[\s\S]*ANNOTATION\] -->/, "");
-			//Zotero.debug("valueText -> " + valueText);
-			valueText = Zotero.Utilities.cleanTags(valueText);
-			result["abstractNote"] = valueText;
-			break;
-		case "От OZON.ru":
-			valueText =
-			valueDOMNode.textContent.replace(/^[\s\S]*От OZON.ru/, "");
-			valueText = CleanText(valueText);
-			result["edition"] = GetEdition(valueText);
-			break;
-		}
-	}
-	return result;
+	if (hasContent && hasIsbn) return 'book';
 }
 
 function doWeb(doc, url) {
-	var pdObject = new Object();
-	//pdObject["url"] = url;
+	var book = new Zotero.Item('book');
 
-	// For the reason I do not understand, OZON.ru may alter its layout
-	// even within the same browser and screen resolution. I only noticed
-	// two layout types so far. Therefore the xpath expressions are
-	// extended with 'or' operator to accommodate both layouts types.
+	var content = ZU.xpath(doc, '//div[@class="bContentBlock"]')[0];
 
-	var pdXPath = '//div[@class="bContentBlock"]/h1|//div[@class="l h1"]/h1';
-	var pdXPathRes = doc.evaluate(
-	pdXPath, doc, null, XPathResult.ANY_TYPE, null);
-	pdObject["title"] = CleanText(pdXPathRes.iterateNext().textContent);
-	pdXPath = '//div[@id="js_basic_properties"]/p|//div[@class="product-detail"]/p';
-	pdXPathRes = doc.evaluate(
-	pdXPath, doc, null, XPathResult.ANY_TYPE, null);
-	pdObject = MergeObjects(pdObject, ParseProductDetail(pdXPathRes));
+	// basic info
+	book.title = ZU.xpathText(content, './h1[@itemprop="name"]');
 
-	var nameXPath = '//div[@class="bTechDescription"]/div/div[2]/span|//div[@class="techDescription"]/div/div[2]/span';
-	var valueXPath = '//div[@class="bTechDescription"]/div/div[3]/span|//div[@class="techDescription"]/div/div[3]/span';
-	var nameXPathRes = doc.evaluate(
-	nameXPath, doc, null, XPathResult.ANY_TYPE, null);
-	var valueXPathRes = doc.evaluate(
-	valueXPath, doc, null, XPathResult.ANY_TYPE, null);
-	pdObject = MergeObjects(
-	pdObject, ParseTechDesc(nameXPathRes, valueXPathRes));
+	book.publisher = ZU.xpathText(content, './/*[@itemprop="publisher"]/a');
+	book.numPages = ZU.xpathText(content, './/*[@itemprop="numberOfPages"]');
 
-	nameXPath = '//div[@id="detail_description"]/div/table/tbody/tr/td/h3|//div[@id="detail_description"]/table/tbody/tr/td/h3';
-	valueXPath = '//div[@id="detail_description"]/div/table/tbody/tr/td|//div[@id="detail_description"]/table/tbody/tr/td';
-	nameXPathRes = doc.evaluate(
-	nameXPath, doc, null, XPathResult.ANY_TYPE, null);
-	valueXPathRes = doc.evaluate(
-	valueXPath, doc, null, XPathResult.ANY_TYPE, null);
-	pdObject = MergeObjects(
-	pdObject, ParseDetailDesc(nameXPathRes, valueXPathRes));
 
-	var newItem = new Zotero.Item("book");
-	for (var field in pdObject) newItem[field] = pdObject[field];
+	var isbnField = ZU.xpathText(content, './/*[@itemprop="isbn"]');
+	var isbnRe = /[\d\-]{9,}/g;
+	var isbn;
+	book.ISBN = [];
+	if (isbnField !== null) {
+		while ((isbn = isbnRe.exec(isbnField)) !== null) {
+			book.ISBN.push(ZU.cleanISBN(isbn[0]));
+		}
+		book.date = /\d{4}(?=\sг\.)/.exec(isbnField)[0];
+	}
+	book.ISBN = book.ISBN.join(' ');
 
-	var linkurl = url;
-	newItem.attachments = [{
-		"url": linkurl,
-		"title": "OZON.ru Link",
-		"mimeType": "text/html",
-		"snapshot": false
-	}];
+	// volume (parsed from the title)
+	var volume = /(т(\.|ом)|vol(\.|ume))\s+(\d+)/i.exec(book.title);
+	if (volume !== null) book.volume = volume[4];
 
-	newItem.complete();
+	// language
+	var language = ZU.xpathText(content, './/*[@itemprop="inLanguage"]');
+	if (language !== null) book.language = encodeLanguage(language);
+
+	// description
+	book.abstractNote = ZU.xpathText(doc, '//*[@itemprop="description"]//td[1]')
+		.replace(/От производителя\s*/, '');
+
+	// authors
+	var authors = ZU.xpath(content, './/*[@itemprop="author"]/a/text()');
+	book.creators = authors.map(function(d, i) {
+		return ZU.cleanAuthor(d.textContent, 'author', false);
+	});
+
+	// translators, editors, etc.
+	var additionalProperties = ZU.xpath(content, './/p[not(@itemprop)]').map(getAdditionalProperty);
+	var techProperties = ZU.xpath(content, './/div[@class="bTechDescription"]/div[@class="bTechCover "]').map(getTechProperty);
+	additionalProperties = additionalProperties.concat(techProperties);
+
+	for (var i = 0; i < additionalProperties.length; i++) {
+		var property = additionalProperties[i];
+		if (typeof property === 'undefined') continue;
+		if (/Переводчики?/.test(property.name)) {
+			book.creators = book.creators.concat(getMultipleCreators(property.value, 'translator'));
+		}
+		if (/(Редакторы?|Составител[ьи])/.test(property.name)) {
+			book.creators = book.creators.concat(getMultipleCreators(property.value, 'editor'));
+		}
+		if (property.name === 'Серия') book.series = property.value;
+	}
+
+	book.complete();
 }
+
+function getAdditionalProperty(element) {
+	// cyrillic alphabet
+	var matches = /[\u0410-\u044fёЁ]+(?=:)/.exec(element.textContent);
+	if (matches === null) return undefined;
+	var propertyName = matches[0];
+	var propertyValue = ZU.xpathText(element, './a/@title');
+
+	return {
+		name: propertyName,
+		value: propertyValue
+	}
+}
+
+function getTechProperty(element) {
+	return {
+		name: ZU.xpathText(element, './div[@class="bTechName"]'),
+		value: ZU.xpathText(element, './div[@class="bTechDescr"]')
+	}
+}
+
+function getMultipleCreators(value, creatorType) {
+	return value.split(',')
+		.map(function (d) {
+			return ZU.cleanAuthor(d, creatorType, false);
+		});
+}
+
+function encodeLanguage(name) {
+	var codes = {
+		'русский': 'ru',
+		'английский': 'en',
+		'французский': 'fr',
+		'немецкий': 'de',
+		'итальянский': 'it',
+		'испанский': 'es'
+	}
+	// return first matching code
+	for (key in codes) {
+		if (name.toLowerCase().indexOf(key) > -1) {
+			return codes[key];
+		}
+	}
+	// or null
+	return null;
+}
+
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -399,6 +154,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Язык программирования C++",
 				"creators": [
 					{
 						"firstName": "Бьерн",
@@ -406,24 +162,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "OZON.ru Link",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
-				"title": "Язык программирования C++",
-				"language": "ru",
-				"publisher": "Бином, Невский Диалект",
-				"ISBN": "5-7940-0031-7, 5-7989-0127-0, 0-201-88954-4",
-				"date": "1999-1-1",
-				"numPages": "991",
+				"date": "1999",
+				"ISBN": "9785794000313 9785798901272 9780201889543",
 				"abstractNote": "Книга Бьерна Страуструпа является каноническим изложением возможностей С++, написанным автором этого популярнейшего языка программирования. Помимо подробного описания самого языка, на страницах книги вы найдете множество доказавших свою эффективность подходов к решению разнообразных задач программирования и проектирования. Многочисленные примеры демонстрируют как хороший стиль программирования на С - совместимом ядре С++, так и современный объектно - ориентированный подход к созданию программных продуктов. Данное третье издание бестселлера было существенно переработано автором. С одной стороны, результатом этой переработки стала большая доступность книги для новичков. С другой стороны, текст обогатился сведениями и техниками программирования, которые могут оказаться полезными даже для многоопытных специалистов по С++. Разумеется, не обойдены вниманием и нововведения языка: стандартная библиотека шаблонов (STL), пространства имен (namespaces), механизм идентификации типов во время выполнения (RTTI), явныеприведения типов (cast - операторы) и другие. Книга адресована программистам, использующим в своей повседневной работе С++. Она также будет полезна преподавателям, студентам и всем, кто хочет ознакомиться с описанием языка `из первых рук`.",
-				"libraryCatalog": "OZON.ru"
+				"language": "ru",
+				"libraryCatalog": "OZON.ru",
+				"numPages": "991",
+				"publisher": "Бином, Невский Диалект",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -433,6 +182,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Объектно - ориентированный анализ и проектирование с примерами приложений на С++",
 				"creators": [
 					{
 						"firstName": "Автор не",
@@ -450,24 +200,17 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "OZON.ru Link",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
-				"title": "Объектно - ориентированный анализ и проектирование с примерами приложений на С++",
-				"language": "ru",
-				"publisher": "Бином, Невский Диалект",
-				"ISBN": "0-8053-5340-2, 5-7989-0067-3, 5-7940-0017-1",
 				"date": "1998",
-				"numPages": "560",
+				"ISBN": "9780805353402 9785798900671 9785794000177",
 				"abstractNote": "Книга Гради Буча, признанного эксперта в области объекто - ориентированной методологии разработки программного обеспечения, содержит классическое изложение вопросов анализа и проектирования сложных систем. В первой части книги автор исследует суть фундаментальных понятий ООП (таких как `класс`, `объект`, `наследование`), анализирует концепции, лежащие в основе объектно - ориентированных языков и методик разработки. Вторая часть содержит подробное описание обозначений (известных как `нотация Буча`), давноуже ставших родными для тысяч разработчиков во всем мире. Здесь же автор делится своим богатым опытом организации процесса разработки программ, дает рекомендации по подбору команды и планированию промежуточных релизов. В третьей части изложенные ранее методы применяются для анализа и проектирования нескольких приложений. На глазах у читателя создается каркас соответствующих систем, принимаются принципиальные проектные решения. Книга будет полезна аналитикам и разработчикам программного обеспечения, преподавателям и студентам высших учебных заведений. По сравнению с первым изданием книга несколько дополнена (что отразилось и в названии), все примеры приведены на языке С++.",
-				"libraryCatalog": "OZON.ru"
+				"language": "ru",
+				"libraryCatalog": "OZON.ru",
+				"numPages": "560",
+				"publisher": "Бином, Невский Диалект",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -477,6 +220,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Применение UML и шаблонов проектирования. Введение в объектно-ориентированный анализ и проектирование",
 				"creators": [
 					{
 						"firstName": "Крэг",
@@ -484,24 +228,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "OZON.ru Link",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
-				"title": "Применение UML и шаблонов проектирования. Введение в объектно-ориентированный анализ и проектирование",
-				"language": "ru",
-				"publisher": "Вильямс",
-				"ISBN": "5-8459-0125-1, 0-13-748880-7",
-				"date": "2001-1-1",
-				"numPages": "496",
+				"date": "2001",
+				"ISBN": "9785845901255 9780137488803",
 				"abstractNote": "Те, кто еще не знакомы с вопросами объектно-ориентированного анализа и проектирования, наверняка планируют освоить эту область знаний. Данная книга станет хорошим путеводителем и позволит шаг за шагом пройти путь от определения требований к системе до создания кода. В книге рассматривается унифицированный язык моделирования UML, который является признанным стандартом для описания моделей и обеспечивает возможность общения между разработчиками. Для иллюстрации всего процесса объектно-ориентированного анализа и проектирования в книге приводится исчерпывающее описание реального примера. В нем показано, как перейти от этапа объектно-ориентированного проектирования к созданию кода на языке Java. Книга рассчитана на читателей с различным уровнем подготовки, интересующихся вопросами объектно-ориентированного анализа и проектирования.",
-				"libraryCatalog": "OZON.ru"
+				"language": "ru",
+				"libraryCatalog": "OZON.ru",
+				"numPages": "496",
+				"publisher": "Вильямс",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -511,6 +248,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Искусство программирования. Том 1. Основные алгоритмы",
 				"creators": [
 					{
 						"firstName": "Дональд Эрвин",
@@ -538,26 +276,19 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "OZON.ru Link",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
-				"title": "Искусство программирования. Том 1. Основные алгоритмы",
+				"date": "2015",
+				"ISBN": "9785845919847 9785845900807 9780201896831",
+				"abstractNote": "Первый том серии книг \"Искусство программирования\" начинается с описания основных понятий и методов программирования. Затем автор сосредоточивается на рассмотрении информационных структур - представлении информации внутри компьютера, структурных связях между элементами данных и способах эффективной работы с ними. Для методов имитации, символьных вычислений, числовых методов и методов разработки программного обеспечения даны примеры элементарных приложений. По сравнению с предыдущим изданием добавлены десятки простых, но в то же время очень важных алгоритмов. В соответствии с современными направлениями исследований был существенно переработан также раздел математического введения.",
 				"language": "ru",
+				"libraryCatalog": "OZON.ru",
+				"numPages": "720",
 				"publisher": "Вильямс",
 				"series": "Искусство программирования",
-				"ISBN": "978-5-8459-0080-7, 0-201-89683-4",
-				"date": "2010",
-				"numPages": "720",
-				"abstractNote": "Первый том серии книг \"Искусство программирования\" начинается с описания основных понятий и методов программирования. Затем автор сосредоточивается на рассмотрении информационных структур - представлении информации внутри компьютера, структурных связях между элементами данных и способах эффективной работы с ними. Для методов имитации, символьных вычислений, числовых методов и методов разработки программного обеспечения даны примеры элементарных приложений. По сравнению с предыдущим изданием добавлены десятки простых, но в то же время очень важных алгоритмов. В соответствии с современными направлениями исследований был существенно переработан также раздел математического введения.",
-				"edition": "3",
-				"libraryCatalog": "OZON.ru"
+				"volume": "1",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -567,6 +298,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Алгоритмы на C++",
 				"creators": [
 					{
 						"firstName": "Роберт",
@@ -579,24 +311,144 @@ var testCases = [
 						"creatorType": "translator"
 					}
 				],
-				"notes": [],
+				"date": "2011",
+				"ISBN": "9785845916501 9780321606334",
+				"abstractNote": "Роберт Седжвик тщательно переписал, существенно расширил и обновил свою популярную книгу, чтобы получилось современное и исчерпывающее описание важных алгоритмов и структур данных. Вместе с Кристофером Ван Виком он разработал новые реализации на C++, которые выражают эти методы в сжатом, но наглядном виде, а также предоставляют программистам практические средства для их проверки в реальных приложениях.  В книге представлено много новых алгоритмов, а их объяснения гораздо более подробны, чем в предыдущем издании. Новая структура текста и подробные иллюстрации к нему вместе с сопутствующими комментариями значительно улучшают представление материала. Третье издание также содержит удачное сочетание теории и практики, которые делают работу Седжвика бесценным источником сведений для более чем 250 000 программистов!  В частях 1–4 книги рассматриваются фундаментальные алгоритмы, структуры данных, сортировка и поиск. В ней приведено подробное описание фундаментальных структур данных и алгоритмов для сортировки, поиска и сопутствующих приложений. Хотя, по сути, материал книги применим к программированию на любом языке, реализации Ван Вика и Седжвика используют естественную связь между классами C++ и реализациями абстрактных типов данных (АТД). В части 5 книги рассматриваются алгоритмы на графах, которые играют все более важную роль во множестве приложений, таких как сетевая связность, конструирование электронных схем, составление графиков, обработка транзакций и выделение ресурсов. Каждая часть содержит новые алгоритмы и реализации, усовершенствованные описания и диаграммы, а также множество новых упражнений для лучшего усвоения материала. Акцент на АТД расширяет диапазон применения программ и лучше соотносится с современными средами объектно-ориентированного программирования.  В этой книге описаны следующие темы   Подробное описание массивов, связных списков, строк, деревьев и других базовых структур данных Акцентирование внимание на абстрактных типах данных (АТД), модульном программировании, объектно-ориентированном программировании и классах C++ Более 100 алгоритмов сортировки, выбора, реализаций АТД очереди с приоритетами и реализаций АТД таблицы символов (для поиска) Новые реализации биномиальных очередей, многопутевой поразрядной сортировки, рандомизированных BST-деревьев, скошенных деревьев, слоеных списков, многопутевых trie-деревьев, B-деревьев, расширяемого хеширования и многих других методов Больший объем численных характеристик алгоритмов, позволяющих сравнивать их Более 1000 новых упражнений, которые помогают разобраться в свойствах алгоритмов Полный обзор свойств и типов графов Орграфы и DAG-графы Минимальные остовные деревья Кратчайшие пути Сетевые потоки Диаграммы, примеры кода на C++ и подробные описания алгоритмов  Настоящее издание предоставляет программистам полный инструментальный набор для реализации, отладки и использования алгоритмов в широком диапазоне компьютерных приложений.",
+				"language": "ru",
+				"libraryCatalog": "OZON.ru",
+				"numPages": "1056",
+				"publisher": "Вильямс",
+				"attachments": [],
 				"tags": [],
-				"seeAlso": [],
-				"attachments": [
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.ozon.ru/context/detail/id/2527036/",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Искусство программирования. Том 3. Сортировка и поиск",
+				"creators": [
 					{
-						"title": "OZON.ru Link",
-						"mimeType": "text/html",
-						"snapshot": false
+						"firstName": "Дональд Эрвин",
+						"lastName": "Кнут",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "В.",
+						"lastName": "Тертышный",
+						"creatorType": "translator"
+					},
+					{
+						"firstName": "Игорь",
+						"lastName": "Красиков",
+						"creatorType": "translator"
 					}
 				],
-				"title": "Алгоритмы на C++",
+				"date": "2012",
+				"ISBN": "9785845900821 9780201896855",
+				"abstractNote": "Во втором издании третьего тома содержится полный обзор классических алгоритмов сортировки и поиска. Представленная в нем информация дополняет приведенное в первом томе обсуждение структур данных. Автор рассматривает принципы построения больших и малых баз данных, а также внутренней и внешней памяти. В книге приведена подборка тщательно проверенных компьютерных алгоритмов и представлен анализ их эффективности. Кроме того, специальный раздел посвящен методам оптимальной сортировки и описанию новой теории перестановки и универсального хеширования.",
 				"language": "ru",
+				"libraryCatalog": "OZON.ru",
+				"numPages": "824",
 				"publisher": "Вильямс",
-				"ISBN": "978-5-8459-1650-1, 978-0-321-60633-4",
+				"series": "Искусство программирования",
+				"volume": "3",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.ozon.ru/context/detail/id/23968713/",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Алгоритмические трюки для программистов",
+				"creators": [
+					{
+						"firstName": "Генри С. Уоррен",
+						"lastName": "мл",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Игорь",
+						"lastName": "Красиков",
+						"creatorType": "translator"
+					}
+				],
+				"date": "2014",
+				"ISBN": "9785845918383",
+				"abstractNote": "Книга \"Алгоритмические трюки для программистов\" позволит повысить квалификацию профессиональному программисту, но при этом книга будет понятна и чрезвычайно полезна даже начинающему и даже студенту, тем более что в новом издании появилась масса упражнений, интересных как с теоретической, так и с практической точки зрений. Работа программиста всегда немного хакерство, а также смесь арифметики и логики, особенно это касается программиста, который создает элегантный и эффективно работающий код. В этой книге программист-ветеран IBM Генри Уоррен делится с читателями разнообразными приемами из своей коллекции, пополняемой в течение многих десятилетий работы в области разработки компиляторов и архитектуры компьютеров, прикладного и системного программирования. Большинство из них носят практический характер, хотя некоторые представляют в первую очередь теоретический интерес.  Автор книги много лет систематически собирал программные перлы, а затем свел их воедино, организовал и снабдил четким описанием. В этой книге слову \"хакер\" возвращено его первозданное значение - человека увлеченного, талантливого программиста, способного к созданию чрезвычайно эффективного и элегантного кода. В книге воплощен пятидесятилетний стаж ее автора в области разработки компиляторов и архитектуры компьютеров. Здесь вы найдете множество приемов для работы с отдельными битами, байтами, вычисления различных целочисленных функций; большей части материала сопутствует строгое математическое обоснование. Каким бы ни был ваш профессионализм - вы обязательно найдете в этой книге новое для себя; кроме того, книга заставит вас посмотреть на уже знакомые вещи с новой стороны.  В новом издании своей книги автор вновь сумел собрать неотразимую коллекцию программистских трюков, позволяющих программисту писать элегантные и эффективные программы, быстро создавать эффективно работающий код, становясь при этом настоящим, глубоко знающим свое дело профессионалом. Трюки автора в высшей степени практичны, но при этом чрезвычайно интересны, а иногда и просто неожиданны - как решение большой головоломки. Изложенный материал позволит повысить квалификацию даже бывалому программисту, но при этом книга будет понятна и полезна даже начинающему.  Добавления во второе издание включают:   Новую главу, посвященную циклическому избыточному коду (CRC), включая широко используемый код CRC-32.  Новую главу о кодах с коррекцией ошибок (ECC), включая подпрограммы для работы с кодом Хэмминга.   Большее количество материала, посвященного делению на константы, включая методы, использующие только сдвиги и сложения.   Вычисление остатков от деления без вычисления частного.   Более подробное изложение методов подсчета количества единичных битов и ведущих нулевых битов.   Подсчет единичных битов в массивах.   Новые алгоритмы сжатия и расширения.   Алгоритм LRU.   Преобразования между числами с плавающей точкой и целыми числами.   Программу приближенного вычисления обратного к квадратному корню.   Галерею графиков дискретных функций.   Появившиеся во втором издании упражнения и ответы к ним.   Об авторе Генри Уоррен, мл. имеет пятидесятилетний стаж работы в IBM, его деятельность простирается от IBM 704 до PowerPC и далее. Он работал над рядом военных командно-управляющих систем и над проектом SETL под руководством Джека Шварца (Jack Schwartz) из университета Нью-Йорка. С 1973 года Уоррен занимается компиляторами и архитектурой компьютеров в исследовательском подразделении IBM. В настоящее время он работает над проектами суперкомпьютеров, которые должны достичь быстродействия, измеряемого эксафлопсами (EFLOPS). Генри Уоррен получил докторскую степень в области информационных технологий в университете Нью-Йорка.  \"Это первая книга, в которой так глубоко раскрыты секреты компьютерной арифметики. В ней есть все известные мне трюки и множество ранее не известных. Эта книга - настоящая находка для разработчиков библиотек и компиляторов, для всех, кто обожает элегантность в программировании. Место этой книги на полке - рядом с книгами Кнута. Все десять лет, прошедших с выхода первого издания, книга была неоценимым помощником в моей работе в Sun и Google. Я просто дрожу от нетерпения познакомиться с новым материалом во втором издании\".  Джошуа Блох (Joshua Bloch)   \"Впервые увидев эту книгу, я решил, что это не то советы по взлому компьютеров, не то набор мелких программистских трюков. И только познакомившись с ней поближе, я понял, что под ее обложкой скрыта целая компьютерная энциклопедия. Второе издание охватывает две большие новые темы, и расширяет коллекцию десятками новых небольших трюков, включая те, которые я тут же применил на практике - например, вычисление среднего двух целых чисел без риска переполнения. Этот хакер действительно умеет принести удовольствие читателю!\"  Гай Стил (Guy Steele)",
+				"language": "ru",
+				"libraryCatalog": "OZON.ru",
+				"numPages": "512",
+				"publisher": "Вильямс",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.ozon.ru/context/detail/id/6037655/",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Клетки",
+				"creators": [
+					{
+						"firstName": "И.",
+						"lastName": "Филиппович",
+						"creatorType": "translator"
+					},
+					{
+						"firstName": "Юрий",
+						"lastName": "Ченцов",
+						"creatorType": "translator"
+					},
+					{
+						"firstName": "Бенджамин",
+						"lastName": "Льюин",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Линн",
+						"lastName": "Кассимерис",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Вишванат Р.",
+						"lastName": "Лингаппа",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Джордж",
+						"lastName": "Плоппер",
+						"creatorType": "editor"
+					}
+				],
 				"date": "2011",
-				"numPages": "1056",
-				"abstractNote": "Роберт Седжвик тщательно переписал, существенно расширил и обновил свою популярную книгу, чтобы получилось современное и исчерпывающее описание важных алгоритмов и структур данных. Вместе с Кристофером Ван Виком он разработал новые реализации на C++, которые выражают эти методы в сжатом, но наглядном виде, а также предоставляют программистам практические средства для их проверки в реальных приложениях. \n \nВ книге представлено много новых алгоритмов, а их объяснения гораздо более подробны, чем в предыдущем издании. Новая структура текста и подробные иллюстрации к нему вместе с сопутствующими комментариями значительно улучшают представление материала. Третье издание также содержит удачное сочетание теории и практики, которые делают работу Седжвика бесценным источником сведений для более чем 250 000 программистов! \n \nВ частях 1–4 книги рассматриваются фундаментальные алгоритмы, структуры данных, сортировка и поиск. В ней приведено подробное описание фундаментальных структур данных и алгоритмов для сортировки, поиска и сопутствующих приложений. Хотя, по сути, материал книги применим к программированию на любом языке, реализации Ван Вика и Седжвика используют естественную связь между классами C++ и реализациями абстрактных типов данных (АТД). В части 5 книги рассматриваются алгоритмы на графах, которые играют все более важную роль во множестве приложений, таких как сетевая связность, конструирование электронных схем, составление графиков, обработка транзакций и выделение ресурсов. Каждая часть содержит новые алгоритмы и реализации, усовершенствованные описания и диаграммы, а также множество новых упражнений для лучшего усвоения материала. Акцент на АТД расширяет диапазон применения программ и лучше соотносится с современными средами объектно-ориентированного программирования. \n \nВ этой книге описаны следующие темы \n  Подробное описание массивов, связных списков, строк, деревьев и других базовых структур данных Акцентирование внимание на абстрактных типах данных (АТД), модульном программировании, объектно-ориентированном программировании и классах C++ Более 100 алгоритмов сортировки, выбора, реализаций АТД очереди с приоритетами и реализаций АТД таблицы символов (для поиска) Новые реализации биномиальных очередей, многопутевой поразрядной сортировки, рандомизированных BST-деревьев, скошенных деревьев, слоеных списков, многопутевых trie-деревьев, B-деревьев, расширяемого хеширования и многих других методов Больший объем численных характеристик алгоритмов, позволяющих сравнивать их Более 1000 новых упражнений, которые помогают разобраться в свойствах алгоритмов Полный обзор свойств и типов графов Орграфы и DAG-графы Минимальные остовные деревья Кратчайшие пути Сетевые потоки Диаграммы, примеры кода на C++ и подробные описания алгоритмов  Настоящее издание предоставляет программистам полный инструментальный набор для реализации, отладки и использования алгоритмов в широком диапазоне компьютерных приложений.",
-				"libraryCatalog": "OZON.ru"
+				"ISBN": "9785947747942",
+				"abstractNote": "В книге описаны последние достижения в области клеточной биологии. Ее особенностями можно смело назвать наличие многочисленных богатых иллюстраций и хорошо выверенной современной терминологии, четкую структуру и удобное расположение материала.  Важное значение в книге придается обсуждению молекулярных основ заболеваний человека и перспективных направлений исследований в этой области науки.  Для студентов и аспирантов медико-биологических специальностей, начинающих и продолжающих изучение клеточной биологии, а также для исследователей, нуждающихся в современной информации по цитологии, и преподавателей.",
+				"language": "ru",
+				"libraryCatalog": "OZON.ru",
+				"numPages": "952",
+				"publisher": "Бином. Лаборатория знаний",
+				"series": "Лучший зарубежный учебник",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
