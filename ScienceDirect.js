@@ -9,11 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2015-09-18 21:15:35"
+	"lastUpdated": "2015-09-21 03:34:49"
 }
 
 function detectWeb(doc, url) {
-  	if ((url.indexOf("_ob=DownloadURL") !== -1) 
+	if (!doc.body.textContent.trim()) return;
+	
+	if ((url.indexOf("_ob=DownloadURL") !== -1) 
 		|| doc.title == "ScienceDirect Login" 
 		|| doc.title == "ScienceDirect - Dummy"
 		|| (url.indexOf("/science/advertisement/") !== -1)) { 
