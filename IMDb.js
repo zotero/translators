@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-06-05 07:43:14"
+	"lastUpdated": "2015-09-23 21:04:11"
 }
 
 /*
@@ -73,16 +73,13 @@ function doWeb(doc, url) {
 		var id = url.match(/\/title\/(tt\d+)/)[1];
 		apiFetch([id]);
 	}
-	Zotero.wait();
 }
 
 // Takes IMDB IDs and makes items
 function apiFetch(ids) {
-	var apiRoot = "http://imdbapi.com/?i="; //&tomatoes=true removed as it often breaks the API
+	var apiRoot = "http://omdbapi.com/?i="; //&tomatoes=true removed as it often breaks the API
 	for (i in ids) ids[i] = apiRoot + ids[i];
-	Zotero.Utilities.doGet(ids, parseIMDBapi, function () {
-		Zotero.done()
-	});
+	Zotero.Utilities.doGet(ids, parseIMDBapi);
 }
 
 // parse result from imdbapi.com
@@ -135,6 +132,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "film",
+				"title": "The Official Story",
 				"creators": [
 					{
 						"firstName": "Luis",
@@ -172,21 +170,20 @@ var testCases = [
 						"creatorType": "contributor"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "08 Nov 1985",
+				"abstractNote": "After the end of the Dirty War, a high school teacher sets out to find out who the mother of her adopted daughter is.",
+				"extra": "IMDB ID: tt0089276\nIMDB Rating: 7.7 (4,844 votes)",
+				"genre": "Drama, History, War",
+				"libraryCatalog": "IMDb",
+				"runningTime": "112 min",
 				"attachments": [
 					{
 						"title": "Poster"
 					}
 				],
-				"genre": "Drama, History, War",
-				"abstractNote": "After the end of the Dirty War, a high school teacher sets out to find out who the mother of her adopted daughter is.",
-				"runningTime": "112 min",
-				"extra": "IMDB ID: tt0089276\nIMDB Rating: 7.8 (4,193 votes)",
-				"libraryCatalog": "IMDb",
-				"title": "The Official Story",
-				"date": "08 Nov 1985"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -201,6 +198,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "film",
+				"title": "Skin, Skin",
 				"creators": [
 					{
 						"firstName": "Mikko",
@@ -238,21 +236,20 @@ var testCases = [
 						"creatorType": "contributor"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "21 Oct 1966",
+				"abstractNote": "N/A",
+				"extra": "IMDB ID: tt0060613\nIMDB Rating: 6.9 (411 votes)",
+				"genre": "Drama",
+				"libraryCatalog": "IMDb",
+				"runningTime": "89 min",
 				"attachments": [
 					{
 						"title": "Poster"
 					}
 				],
-				"title": "Skin, Skin",
-				"date": "21 Oct 1966",
-				"genre": "Drama",
-				"abstractNote": "N/A",
-				"runningTime": "89 min",
-				"extra": "IMDB ID: tt0060613\nIMDB Rating: 6.9 (398 votes)",
-				"libraryCatalog": "IMDb"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
