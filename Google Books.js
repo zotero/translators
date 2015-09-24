@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-12-11 17:17:45"
+	"lastUpdated": "2015-09-24 15:24:15"
 }
 
 /*
@@ -163,7 +163,8 @@ function getItemArrayGB (doc, inHere, urlRe, rejectRe) {
 	var availableItems = new Object();	// Technically, associative arrays are objects
 
 	//quick check for new format
-	var bookList = ZU.xpath(doc, '//ol[@id="rso"]/li|//ol[@id="rso"]/div/li');
+	//As of 09/23/2015 I only see the last of these options, but leaving the others in for now to be safe.
+	var bookList = ZU.xpath(doc, '//ol[@id="rso"]/li|//ol[@id="rso"]/div/li|//ol[@id="rso"]/div/div[@class="g"]');
 	if(bookList.length) {
 		Z.debug("newFormat")
 		for(var i=0, n=bookList.length; i<n; i++) {
