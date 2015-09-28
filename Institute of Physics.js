@@ -2,14 +2,14 @@
 	"translatorID": "9346ddef-126b-47ec-afef-8809ed1972ab",
 	"label": "Institute of Physics",
 	"creator": "Michael Berkowitz and Avram Lyon and Sebastian Karcher",
-	"target": "^https?://iopscience\\.iop\\.org/(?:(article/10\\.[^/]+/)?[0-9-X]+/.+|nsearch\\?.+)",
+	"target": "^https?://iopscience\\.iop\\.org/(?:(article/10\\.[^/]+/)?[0-9-X]+/.+|n?search\\?.+)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 99,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2015-09-28 02:39:06"
+	"lastUpdated": "2015-09-28 14:50:45"
 }
 
 /*
@@ -343,6 +343,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://iopscience.iop.org/nsearch?terms=energy&searchType=yourSearch&navsubmit=Search",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
