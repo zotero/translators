@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-08-17 05:44:51"
+	"lastUpdated": "2015-09-29 18:37:33"
 }
 
 /*
@@ -563,8 +563,9 @@ function addLowQualityMetadata(doc, newItem) {
 	if(newItem.title) {
 		newItem.title = newItem.title.replace(/\s+/g, ' '); //make sure all spaces are \u0020
 		if(newItem.publicationTitle) {
-			//remove publication title from the end of title
-			var removePubTitleRegex = new RegExp('\\s*\\W\\s*'
+			//remove publication title from the end of title (see #604)
+			//this can occur if we have to doc.title, og:title etc.
+			var removePubTitleRegex = new RegExp('\\s*[-–—=_:|~#]\\s*'
 				+ newItem.publicationTitle + '\\s*$','i');
 			newItem.title = newItem.title.replace(removePubTitleRegex, '');
 		}
@@ -1184,7 +1185,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "apps.who.int",
 				"publisher": "World Health Organization",
-				"url": "http://apps.who.int//iris/handle/10665/97603",
+				"url": "http://www.who.int/iris/handle/10665/97603",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -1260,6 +1261,51 @@ var testCases = [
 				"url": "https://hbr.org/2015/08/how-to-do-walking-meetings-right",
 				"websiteTitle": "Harvard Business Review",
 				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://olh.openlibhums.org/article/10.16995/olh.46/",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Opening the Open Library of Humanities",
+				"creators": [
+					{
+						"firstName": "Martin",
+						"lastName": "Eve",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Caroline",
+						"lastName": "Edwards",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015-09-22T13:13:04",
+				"DOI": "10.16995/olh.46",
+				"ISSN": "2056-6700",
+				"abstractNote": "Article: Opening the Open Library of Humanities",
+				"issue": "1",
+				"language": "en",
+				"libraryCatalog": "olh.openlibhums.org",
+				"publicationTitle": "Open Library of Humanities",
+				"rights": "Authors who publish with this journal agree to the following terms:    Authors retain copyright and grant the journal right of first publication with the work simultaneously licensed under a  Creative Commons Attribution License  that allows others to share the work with an acknowledgement of the work's authorship and initial publication in this journal.  Authors are able to enter into separate, additional contractual arrangements for the non-exclusive distribution of the journal's published version of the work (e.g., post it to an institutional repository or publish it in a book), with an acknowledgement of its initial publication in this journal.  Authors are permitted and encouraged to post their work online (e.g., in institutional repositories or on their website) prior to and during the submission process, as it can lead to productive exchanges, as well as earlier and greater citation of published work (See  The Effect of Open Access ).  All third-party images reproduced on this journal are shared under Educational Fair Use. For more information on  Educational Fair Use , please see  this useful checklist prepared by Columbia University Libraries .   All copyright  of third-party content posted here for research purposes belongs to its original owners.  Unless otherwise stated all references to characters and comic art presented on this journal are ©, ® or ™ of their respective owners. No challenge to any owner’s rights is intended or should be inferred.",
+				"url": "http://olh.openlibhums.org/article/10.16995/olh.46/",
+				"volume": "1",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
 					{
 						"title": "Snapshot"
 					}
