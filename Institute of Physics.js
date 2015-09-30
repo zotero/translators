@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2015-09-28 14:50:45"
+	"lastUpdated": "2015-09-30 00:38:50"
 }
 
 /*
@@ -88,7 +88,7 @@ function scrape (doc, url){
 	var ISSN = ZU.xpathText(doc, '//meta[@name="citation_issn"]/@content');
 	var journalAbbr = ZU.xpathText(doc, '//meta[@name="citation_journal_abbrev"]/@content');
 	var language = ZU.xpathText(doc, '//meta[@name="dc.language"]/@content');
-	var pdfURL = "/article/" + encodeURIComponent(DOI) + "/pdf"
+	var pdfURL = url.replace(/[#?].+$/, "") + "/pdf"
 	var bibtexurl = ZU.xpathText(doc, '//a[contains(@class, "btn-cit-abs-bib")]/@href');
 	//Z.debug(bibtexurl)
 	ZU.doGet(bibtexurl, function (text) {
