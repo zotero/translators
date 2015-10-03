@@ -2,21 +2,21 @@
 	"translatorID": "938ebe32-2b2e-4349-a5b3-b3a05d3de627",
 	"label": "ACS Publications",
 	"creator": "Sean Takats, Michael Berkowitz, Santawort, and Aurimas Vinckevicius",
-	"target": "https?://pubs\\.acs\\.org/(toc/|journal/|topic/|isbn/\\d|doi/(full|abs)/10\\.|action/doSearch\\?)",
+	"target": "https?://pubs\\.acs\\.org/(toc/|journal/|topic/|isbn/\\d|doi/(full/|abs/)?10\\.|action/doSearch\\?)",
 	"minVersion": "4.0.5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-06-05 20:36:28"
+	"lastUpdated": "2015-10-03 20:47:10"
 }
 
 function getSearchResults(doc, checkOnly, itemOpts) {
 	var items = {}, found = false;
 	var titles = doc.getElementsByClassName('titleAndAuthor');
 	for(var i=0; i<titles.length; i++){
-		var a = ZU.xpath(titles[i], './h2/a')[0];
+		var a = ZU.xpath(titles[i], './/h2/a')[0];
 		if (!a) continue;
 		
 		var title = ZU.trimInternal(a.textContent);
@@ -50,7 +50,8 @@ function getSearchResults(doc, checkOnly, itemOpts) {
 }
 
 function getDoi(url) {
-	var m = url.match(/https?:\/\/[^\/]*\/doi\/(?:abs|full)\/([^\?#]+)/);
+	var m = url.match(/https?:\/\/[^\/]*\/doi\/(?:abs\/|full\/)?(10\.[^\?#]+)/);
+	
 	if(m) {
 		var doi = m[1];
 		if(doi.indexOf("prevSearch") != -1) {
