@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-01-03 10:59:23"
+	"lastUpdated": "2015-10-04 16:20:41"
 }
 
 /*
@@ -65,12 +65,23 @@ function getSearchResults(doc, checkOnly) {
 
 
 function detectWeb(doc, url) {
-	var type = ZU.xpath(doc, '//meta[@name="DC.type"]/@content');
+	var type = ZU.xpath(doc, '//meta[@name="DC.type"]');
 	if (type.length>0) {
-		if (mappingTable[type[0].value]) {
-			return mappingTable[type[0].value];
-		} else {//generic fallback
-			Z.debug('Unrecognized item type: ' + type[0].value);
+		if (mappingTable[type[0].content]) {
+			return mappingTable[type[0].content];
+		} else {
+			Z.debug('Unrecognized or ambiguous item type: ' + type[0].content);
+			//ambiguous item type, e.g. "Articles in periodicals and books"
+			var citation = ZU.xpath(doc, '//meta[@name="DCTERMS.bibliographicCitation"]');
+			if (citation.length && citation[0].content.indexOf("Proceeding") == 0) {
+				Z.debug('Found "Proceeding" in citation string --> conferencePaper');
+				return "conferencePaper";
+			}
+			if (ZU.xpath(doc, '//meta[@name="citation_isbn"]').length) {
+				Z.debug("Found ISBN --> bookSection");
+				return "bookSection";
+			}
+			Z.debug('Generic fallback --> journalArticle');
 			return "journalArticle";
 		}
 	}
@@ -81,12 +92,23 @@ function detectWeb(doc, url) {
 
 //We need a different name for the same function, because of calling another translator inside scrape makes problems.
 function detectWebHere(doc, url) {
-	var type = ZU.xpath(doc, '//meta[contains(@name, "DC.type")]/@content');
+	var type = ZU.xpath(doc, '//meta[@name="DC.type"]');
 	if (type.length>0) {
-		if (mappingTable[type[0].textContent]) {
-			return mappingTable[type[0].textContent];
-		} else {//generic fallback
-			Z.debug('Unrecognized item type: ' + type[0].textContent);
+		if (mappingTable[type[0].content]) {
+			return mappingTable[type[0].content];
+		} else {
+			Z.debug('Unrecognized or ambiguous item type: ' + type[0].content);
+			//ambiguous item type, e.g. "Articles in periodicals and books"
+			var citation = ZU.xpath(doc, '//meta[@name="DCTERMS.bibliographicCitation"]');
+			if (citation.length && citation[0].content.indexOf("Proceeding") == 0) {
+				Z.debug('Found "Proceeding" in citation string --> conferencePaper');
+				return "conferencePaper";
+			}
+			if (ZU.xpath(doc, '//meta[@name="citation_isbn"]').length) {
+				Z.debug("Found ISBN --> bookSection");
+				return "bookSection";
+			}
+			Z.debug('Generic fallback --> journalArticle');
 			return "journalArticle";
 		}
 	}
@@ -204,7 +226,9 @@ function scrape(doc, url) {
 		for (var t=0; t<tags.length; t++) {
 			item.tags.push(tags[t].content);
 			//if the tags will end wrongly in the extra field, we delete them
-			item.extra = item.extra.replace(tags[t].content, '');
+			if (item.extra) {
+				item.extra = item.extra.replace(tags[t].content, '');
+			}
 		}
 		
 		//Try to find a pdf if there is not already one attached to it.
@@ -356,7 +380,7 @@ var testCases = [
 					}
 				],
 				"date": "2009",
-				"ISBN": "978-0-230-20206-1",
+				"ISBN": "9780230202061",
 				"abstractNote": "Eco-Innovation considers the impact economic activities have on our environmental surroundings whilst exploring new ways towards more sustainable development. The concept of eco-innovation is addressed with regard to competitiveness and sustainability from the viewpoints of both business leaders and policy-makers in this thought-provoking new book.",
 				"archiveLocation": "JRC56837",
 				"language": "ENG",
@@ -466,7 +490,7 @@ var testCases = [
 				],
 				"date": "2013",
 				"DOI": "10.1109/IVS.2013.6629473",
-				"ISBN": "978-1-4673-2754-1",
+				"ISBN": "9781467327541",
 				"abstractNote": "Cognitive vehicular networks provide the necessary intelligence for vehicular communication networks in order to optimally utilize the limited resources and maximize the performance. One of the important functions of cognitive networks is to learn the radio environment by means of detecting and identifying existing radios. In this context we use the cyclostationarity features of dedicated short range communication (DSRC) signals to blindly detect them in the environment. We present experimental results on the cyclostationarity properties of DSRC wireless transmissions considering the CEN (European) standards for both uplink and downlink signals. By performing\ncyclostationarity analysis we compute the cyclic power spectrum (CPS) of the CEN DSRC signals which is then used for detecting\nthe presence of the CEN DSRC radios. We obtain CEN DSRC signals from experiments and use the recorded data to perform post-signal analysis to determine the detection performance. The probability of false alarm and the probability of missed detection are computed and the results are presented for different detection strategies. Results show that the cyclostationarity feature based detection can be robust compared to the well known energy based technique for low signal to noise ratio levels.",
 				"archiveLocation": "JRC80762",
 				"language": "ENG",
@@ -481,6 +505,60 @@ var testCases = [
 				],
 				"tags": [
 					"JRC.G.7-Digital Citizen Security"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://publications.jrc.ec.europa.eu/repository/handle/JRC66342",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Inorganic mass spectrometry as a tool of destructive nuclear forensic analysis",
+				"creators": [
+					{
+						"lastName": "Mayer",
+						"firstName": "Klaus",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wallenius",
+						"firstName": "Maria",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Varga",
+						"firstName": "Zsolt",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Hedberg",
+						"firstName": "Magnus",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Erdmann",
+						"firstName": "Nicole",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015",
+				"ISBN": "9780198736646",
+				"abstractNote": "Mass spectrometry is a well-established, highly versatile technique that offers high sensitivity, high selectivity and high precision in combination with the potential for high accuracy. Credible nuclear forensic conclusions, however, need to be based on validated procedures and on measurement techniques that are well understood. Nuclear forensic investigations typically start with non-destructive determination (i.e. high-resolution gamma spectrometry) of the radionuclides present in the sample and a visual inspection, followed by optical microscopy of the material. Subsequently, samples are taken for electron microscopy and for chemical analysis. Mass spectrometry is certainly the most prominent and versatile analytical methodology that can be applied.\nA number of variants of mass spectrometry can be used in nuclear forensics, each able to provide valuable information to nuclear scientists analysing nuclear material that enables the drawing of conclusions in support of non-proliferation and law enforcement investigations (see table 3.1). Thermal ionization mass spectrometry (TIMS), inductively coupled plasma mass spectrometry (ICP-MS) and secondary ion mass spectrometry (SIMS) allow determination of key parameters such as isotopic composition of major and minor constituents and the concentration of chemical impurities in the nuclear material. More sophisticated techniques, such as accelerator mass spectrometry (AMS) and resonance ionization mass spectrometry (RIMS), are currently being investigated for their applicability to nuclear forensics challenges.\nThis chapter provides some details on different mass spectrometric techniques, outlines their general principles and limitations, and illustrates their application in nuclear forensic investigations. Sections I-III describe the most prominent mass spectrometric techniques: TIMS, ICP-MS and SIMS, respectively. Section IV describes two techniques, AMS and RIMS, that are applied only in special cases.",
+				"archiveLocation": "JRC66342",
+				"language": "ENG",
+				"libraryCatalog": "publications.jrc.ec.europa.eu",
+				"publisher": "Oxford University Press",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					"JRC.E.7-Nuclear Safeguards and Forensics"
 				],
 				"notes": [],
 				"seeAlso": []
