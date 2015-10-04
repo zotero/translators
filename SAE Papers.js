@@ -2,19 +2,19 @@
 	"translatorID": "2c98b8e6-6138-4b60-a999-15e3a7c8cb4b",
 	"label": "SAE Papers",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://(www\\.)?papers\\.sae\\.org/",
+	"target": "^https?://(www|papers)\\.sae\\.org/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-10-04 18:10:11"
+	"lastUpdated": "2015-10-04 20:39:54"
 }
 
 /*
 	SAE Technical Papers Translator
-	Copyright (C) 2012-105 Sebastian Karcher
+	Copyright (C) 2012-2015 Sebastian Karcher
 
 	This file is part of Zotero.
 
@@ -100,8 +100,8 @@ function scrape(doc, url) {
 		item.complete();
 	});
 	translator.getTranslatorObject(function(trans) {
-        trans.doWeb(doc, url);
-    });
+		trans.doWeb(doc, url);
+	});
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
