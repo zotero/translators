@@ -2,14 +2,14 @@
 	"translatorID": "5af42734-7cd5-4c69-97fc-bc406999bdba",
 	"label": "Atypon Journals",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://[^?#]+(?:/doi/(?:abs|abstract|full|figure|ref|citedby|book)/10\\.|/action/doSearch\\?)|^https?://[^/]+/toc/",
+	"target": "^https?://[^?#]+(?:/doi/((?:abs|abstract|full|figure|ref|citedby|book)/)?10\\.|/action/doSearch\\?)|^https?://[^/]+/toc/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 270,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-09-08 20:16:55"
+	"lastUpdated": "2015-10-07 04:41:53"
 }
 
 /*
@@ -111,7 +111,7 @@ function getSearchResults(doc, checkOnly, extras) {
 }
 
 // Keep this in line with target regexp
-var replURLRegExp = /\/doi\/(?:abs|abstract|full|figure|ref|citedby|book)\//;
+var replURLRegExp = /\/doi\/((?:abs|abstract|full|figure|ref|citedby|book)\/)?/;
 
 function buildPdfUrl(url, root) {
 	if (!replURLRegExp.test(url)) return false; // The whole thing is probably going to fail anyway
@@ -211,6 +211,10 @@ function scrape(doc, url, extras) {
 				}
 				
 				item.url = url;
+				//for Emerald, get rid of the "null" that they add at the end of every title:
+				if (url.indexOf("www.emeraldinsight.com")!=-1){
+					item.title = item.title.replace(/null$/, "")
+				}
 				item.notes = [];
 				for (var i in tags){
 					item.tags.push(tags[i].textContent)
@@ -642,7 +646,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Irish coffee? Well, something better …null",
+				"title": "Irish coffee? Well, something better …",
 				"creators": [
 					{
 						"lastName": "Pramila Rao",
@@ -735,6 +739,86 @@ var testCases = [
 					"Ice particles",
 					"In situ atmospheric observations"
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://trrjournalonline.trb.org/doi/10.3141/2503-12",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Development of the Worldwide Harmonized Test Procedure for Light-Duty Vehicles",
+				"creators": [
+					{
+						"lastName": "Ciuffo",
+						"firstName": "Biagio",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Marotta",
+						"firstName": "Alessandro",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Tutuianu",
+						"firstName": "Monica",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Anagnostopoulos",
+						"firstName": "Konstantinos",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Fontaras",
+						"firstName": "Georgios",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Pavlovic",
+						"firstName": "Jelica",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Serra",
+						"firstName": "Simone",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Tsiakmakis",
+						"firstName": "Stefanos",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Zacharof",
+						"firstName": "Nikiforos",
+						"creatorType": "author"
+					}
+				],
+				"date": "August 1, 2015",
+				"DOI": "10.3141/2503-12",
+				"ISSN": "0361-1981",
+				"abstractNote": "To assess vehicle performance on criteria compounds, carbon dioxide emissions, and fuel energy consumption, laboratory tests are generally carried out. During these tests, a vehicle is driven on a chassis dynamometer (which simulates the resistances the vehicle encounters during its motion) to follow a predefined test cycle. In addition, all conditions for running a test must strictly adhere to a predefined test procedure. The procedure is necessary to ensure that all tests are carried out in a comparable way, following the requirements set by the relevant legislation. Test results are used to assess vehicle compliance with emissions limits or to evaluate the fuel consumption that will be communicated to customers. Every region in the world follows its own approach in carrying out these types of tests. The variations in approaches have resulted in a series of drawbacks for vehicle manufacturers and regulating authorities, leading to a plethora of different conditions and results. As a step toward the harmonization of the test procedures, the United Nations Economic Commission for Europe launched a project in 2009 for the development of a worldwide harmonized light-duty test procedure (WLTP), including a new test cycle. The objective of the study reported here was to provide a brief description of WLTP and outline the plausible pathway for its introduction in European legislation.",
+				"journalAbbreviation": "Transportation Research Record: Journal of the Transportation Research Board",
+				"libraryCatalog": "trrjournalonline.trb.org (Atypon)",
+				"pages": "110-118",
+				"publicationTitle": "Transportation Research Record: Journal of the Transportation Research Board",
+				"url": "http://trrjournalonline.trb.org/doi/10.3141/2503-12",
+				"volume": "2503",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
