@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2015-09-30 00:38:50"
+	"lastUpdated": "2015-10-06 04:11:11"
 }
 
 /*
@@ -88,7 +88,8 @@ function scrape (doc, url){
 	var ISSN = ZU.xpathText(doc, '//meta[@name="citation_issn"]/@content');
 	var journalAbbr = ZU.xpathText(doc, '//meta[@name="citation_journal_abbrev"]/@content');
 	var language = ZU.xpathText(doc, '//meta[@name="dc.language"]/@content');
-	var pdfURL = url.replace(/[#?].+$/, "") + "/pdf"
+	var pdfURL = url.replace(/(\/meta)?([#?].+)?$/, "") + "/pdf"
+	//Z.debug("pdfURL: " + pdfURL)
 	var bibtexurl = ZU.xpathText(doc, '//a[contains(@class, "btn-cit-abs-bib")]/@href');
 	//Z.debug(bibtexurl)
 	ZU.doGet(bibtexurl, function (text) {
@@ -327,6 +328,7 @@ var testCases = [
 				"issue": "1",
 				"itemID": "0004-637X-768-1-87",
 				"journalAbbreviation": "ApJ",
+				"language": "en",
 				"libraryCatalog": "Institute of Physics",
 				"pages": "87",
 				"publicationTitle": "The Astrophysical Journal",
