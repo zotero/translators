@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-02-26 05:47:57"
+	"lastUpdated": "2015-10-11 17:07:44"
 }
 
 /*
@@ -64,7 +64,8 @@ function getSearchResults(doc, url, checkOnly) {
 	];
 	
 	var found = false, items = {},
-		linkx = '(.//a[not(contains(@href, "hasaccess.xhtml"))])[1]';
+		//exclude cit-site-url for Sage Advanced Search (no stable URLs for testing)
+		linkx = '(.//a[not(contains(@href, "hasaccess.xhtml")) and not(@class="cit-site-url")])[1]';
 	for(var i=0; i<xpaths.length && !found; i++) {
 		var rows = ZU.xpath(doc, xpaths[i].searchx);
 		if(!rows.length) continue;
@@ -282,7 +283,7 @@ function attachSupplementary(doc, item, next) {
 }
 
 //add using embedded metadata
-function addEmbMeta(doc) {
+function addEmbMeta(doc, url) {
 	var translator = Zotero.loadTranslator("web");
 	//Embedded Metadata translator
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
@@ -353,7 +354,9 @@ function addEmbMeta(doc) {
 		}
 	});
 
-	translator.translate();
+	translator.getTranslatorObject(function(trans) {
+        trans.doWeb(doc, url);
+   	});
 }
 
 function detectWeb(doc, url) {
@@ -388,6 +391,7 @@ function doWeb(doc, url) {
 	if (!url) url = doc.documentElement.location;
 	
 	var items = getSearchResults(doc, url);
+	//Z.debug(items)
 	if(items) {
 		Zotero.selectItems(items, function(selectedItems) {
 			if(!selectedItems) return true;
@@ -396,14 +400,14 @@ function doWeb(doc, url) {
 			for( var item in selectedItems ) {
 				urls.push(item);
 			}
-
+			//Z.debug(urls)
 			Zotero.Utilities.processDocuments(urls, addEmbMeta);
 		});
 	} else if(url.indexOf('.full.pdf+html') != -1) {
 		//abstract in EM is not reliable. Fetch abstract page and scrape from there.
 		ZU.processDocuments(url.replace(/\.full\.pdf\+html.*/, ''), addEmbMeta);
 	} else {
-		addEmbMeta(doc);
+		addEmbMeta(doc, url);
 	}
 }
 /** BEGIN TEST CASES **/
@@ -1280,9 +1284,9 @@ var testCases = [
 				"date": "2001/01/06",
 				"DOI": "10.1136/bmj.322.7277.29",
 				"ISSN": "0959-8138, 1468-5833",
-				"abstractNote": "By 2010 the number of people with diabetes is expected to exceed 350 million. Late diabetic complications will cause considerable morbidity in 5-10% of these patients and place an enormous burden on society. Transplantation of insulin producing islet cells isolated in vitro from a donor pancreas could be a cure for type 1 and some cases of type 2 diabetes. Currently, however, lack of sufficient donor organs and the side effects of immunosuppressive therapy limit its potential. Ways to overcome these problems include deriving islet cells from other sources such as pigs, human pancreatic duct cells, fetal pancreatic stem cells, embryonic stem cells, and by therapeutic cloning. This article outlines these developments and discusses how islet cell transplantation is likely to become the treatment of choice for most insulin dependent diabetics within the next five to 10 years.\n\nOur article is based on information from the following core references: the international islet transplant registry; recently published articles describing improvements in islet cell transplantation, reporting treatment of diabetes in animal models with islet cells grown in vitro, and describing novel molecular mechanisms in pancreatic endocrine development (including our own recent work); papers in embryonic and adult stem cell research that have had a major influence on our thinking; and the seminal work from the Roslin Institute and other groups on nuclear transfer.\n\nIn many cases current diabetes drug therapies do not provide sufficiently tight control of blood glucose to avoid diabetic late complications. 1 2 Transplantation of whole donor pancreas is an effective form of treatment but is of limited application since it entails major surgery and long term immunosuppression. This failure to prevent the morbidity associated with diabetes places an enormous burden not only on patients and their relatives but also on society. The costs of treating late diabetic complications …",
 				"extra": "PMID: 11141151",
 				"issue": "7277",
+				"journalAbbreviation": "BMJ",
 				"language": "en",
 				"libraryCatalog": "www.bmj.com",
 				"pages": "29-32",
@@ -1352,7 +1356,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "www.bmj.com",
 				"pages": "h696",
-				"publicationTitle": "BMJ",
+				"publicationTitle": "The BMJ",
 				"rights": "© Nordström et al 2015. This is an Open Access article distributed in accordance with the Creative Commons Attribution Non Commercial (CC BY-NC 4.0) license, which permits others to distribute, remix, adapt, build upon this work non-commercially, and license their derivative works on different terms, provided the original work is properly cited and the use is non-commercial. See:  http://creativecommons.org/licenses/by-nc/4.0/.",
 				"shortTitle": "Length of hospital stay after hip fracture and short term risk of death after discharge",
 				"url": "http://www.bmj.com/content/350/bmj.h696",
