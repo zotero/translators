@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-03-11 22:36:38"
+	"lastUpdated": "2015-10-15 05:27:29"
 }
 
 /*
@@ -84,6 +84,20 @@ function doWeb(doc,url)
 						tags.push(keywords[i])
 					}
 				}
+
+				// The default value for PDF download is on an HTML page that calls the actual download
+				// we need to add this attachment after the import translator has been running
+				// We remove the attached PDF because they won't be working
+				for(var i=item.attachments.length - 1; i>=0; i--) {
+					if(item.attachments[i].mimeType == 'application/pdf') {
+						item.attachments.splice(i, 1);
+					}
+				}
+				
+				var pdfUrl = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
+				pdfUrlDownload = pdfUrl + "&download=1";
+				item.attachments.push({title : "Full Text PDF", mimeType: "application/pdf", url: pdfUrlDownload});
+				
 				item.complete();
 				});
 		translator.getTranslatorObject(function (obj) {
