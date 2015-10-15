@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-10-07 04:41:53"
+	"lastUpdated": "2015-10-15 22:24:05"
 }
 
 /*
@@ -36,13 +36,16 @@ function detectWeb(doc, url) {
 		return getSearchResults(doc, true) ? "multiple" : false;
 	}
 	
-	if (url.indexOf('/doi/book/') != -1) {
-		return 'book';
+	var citLinks = ZU.xpath(doc, '//a[contains(@href, "/action/showCitFormats")]');
+	if (citLinks.length > 0) {
+		if (url.indexOf('/doi/book/') != -1) {
+			return 'book';
+		}
+		else if (url.search(/\.ch\d+$/)!=-1){
+			return 'bookSection';
+		}
+		return "journalArticle";
 	}
-	else if (url.search(/\.ch\d+$/)!=-1){
-		return 'bookSection';
-	}
-	return "journalArticle";
 }
 
 function getSearchResults(doc, checkOnly, extras) {
