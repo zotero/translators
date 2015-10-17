@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-22 21:36:13"
+	"lastUpdated": "2015-10-17 17:37:33"
 }
 
 function getSearchResults(doc) {
@@ -72,7 +72,7 @@ function scrape(doc, url) {
 		}
 		
 		
-		var pdf = ZU.xpath(doc, '//li[@class="pdf"]/a[@class="pdf" and @href]')[0];
+		var pdf = ZU.xpath(doc, '//div[@class="pdfItem"]/a[@class="pdf" and @href]')[0];
 		if(pdf) {
 			item.attachments.push({
 				title: "Full Text PDF",
