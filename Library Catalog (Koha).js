@@ -2,14 +2,14 @@
 	"translatorID": "8e66aa6d-5b2a-4b44-b384-a838e23b8538",
 	"label": "Library Catalog (Koha)",
 	"creator": "Sebastian Karcher",
-	"target": "cgi-bin/koha/opac-(detail|search)",
+	"target": "^https?://[^/]+/cgi-bin/koha/opac-(detail|search|shelves)\\.pl\\?",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 260,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-10-17 18:09:32"
+	"lastUpdated": "2015-10-17 18:23:11"
 }
 
 /*
@@ -35,8 +35,8 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.match(/\/opac-search\.pl\?/) && getSearchResults(doc, true)) return "multiple";
-	if (url.match(/\/opac-detail\.pl\?/)) return "book";
+	if (url.search(/\/opac-(search|shelves)\.pl\?/)!=-1 && getSearchResults(doc, true)) return "multiple";
+	if (url.indexOf("/opac-detail.pl?")!=-1) return "book";
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -214,6 +214,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://catalog.bywatersolutions.com/cgi-bin/koha/opac-search.pl?idx=&q=thelen&branch_group_limit=",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://librarytestnew-opac.usj.edu.mo/cgi-bin/koha/opac-shelves.pl?viewshelf=3&sortfield=",
 		"items": "multiple"
 	}
 ]
