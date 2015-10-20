@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2015-08-19 19:29:09"
+	"lastUpdated": "2015-10-20 05:49:35"
 }
 
 /*
@@ -282,11 +282,18 @@ function finalizeItem(item) {
 	}
 	if (item.ISBN) item.ISBN = ZU.cleanISBN(item.ISBN);
 	if (item.ISSN) item.ISSN = ZU.cleanISSN(item.ISSN);
+	if (item.DOI) item.DOI = ZU.cleanDOI(item.DOI);
+	if (item.callNumber) {
+		item.callNumber = item.callNumber.replace(/[.\s]+$/, '');
+	}
+	//strip extraneous label at the end of title (reported for Psycinfo)
+	item.title = item.title.replace(/\s*\[References\]\s*$/, "");
 	if (item.libraryCatalog && item.libraryCatalog.indexOf("MEDLINE") != -1 && item.PMID) {
 		item.extra = item.PMID;
 		delete item.PMID;
 	}
 	delete item.citation;
+	delete item.itemID;
 	item.complete();
 }/** BEGIN TEST CASES **/
 var testCases = [
@@ -543,7 +550,7 @@ var testCases = [
 				"date": "2010 January/February",
 				"DOI": "10.1249/FIT.0b013e3181c6723d",
 				"ISSN": "1091-5397",
-				"callNumber": "00135124-201001000-00018.",
+				"callNumber": "00135124-201001000-00018",
 				"issue": "1",
 				"language": "English.",
 				"libraryCatalog": "Journals@Ovid",
@@ -598,7 +605,7 @@ var testCases = [
 				"DOI": "10.1093/abbs/gmr050",
 				"ISSN": "1672-9145",
 				"abstractNote": "Human epidermal growth factor receptor 2 (HER2/neu, also known as ErbB2) overexpression is correlated with the poor prognosis and chemoresistance in cancer. Breast cancer resistance protein (BCRP and ABCG2) is a drug efflux pump responsible for multidrug resistance (MDR) in a variety of cancer cells. HER2 and BCRP are associated with poor treatment response in breast cancer patients, although the relationship between HER2 and BCRP expression is not clear. Here, we showed that transfection of HER2 into MCF7 breast cancer cells (MCF7/HER2) resulted in an up-regulation of BCRP via the phosphatidylinositol 3-kinase (PI3K)/Akt and nuclear factor-kappa B (NF-[kappa]B) signaling. Treatment of MCF/HER2 cells with the PI3K inhibitor LY294002, the I[kappa]B phosphorylation inhibitor Bay11-7082, and the dominant negative mutant of I[kappa]B[alpha] inhibited HER2-induced BCRP promoter activity. Furthermore, we found that HER2 overexpression led to an increased resistance of MCF7 cells to multiple antitumor drugs such as paclitaxel (Taxol), cisplatin (DDP), etoposide (VP-16), adriamycin (ADM), mitoxantrone (MX), and 5-fluorouracil (5-FU). Moreover, silencing the expression of BCRP or selectively inhibiting the activity of Akt or NF-[kappa]B sensitized the MCF7/HER2 cells to these chemotherapy agents at least in part. Taken together, up-regulation of BCRP through PI3K/AKT/NF-[kappa]B signaling pathway played an important role in HER2-mediated chemoresistance of MCF7 cells, and AKT, NF-[kappa]B, and BCRP pathways might serve as potential targets for therapeutic intervention., Copyright (C) 2011 Blackwell Publishing Ltd.",
-				"callNumber": "01189059-201108000-00009.",
+				"callNumber": "01189059-201108000-00009",
 				"issue": "8",
 				"language": "English.",
 				"libraryCatalog": "Journals@Ovid",
@@ -641,7 +648,7 @@ var testCases = [
 				],
 				"date": "2010 November/December",
 				"ISSN": "0001-5458",
-				"callNumber": "00000042-201011000-00010.",
+				"callNumber": "00000042-201011000-00010",
 				"language": "English.",
 				"libraryCatalog": "Journals@Ovid",
 				"pages": "611-613",
@@ -671,7 +678,7 @@ var testCases = [
 				"DOI": "10.1097/DAD.0b013e31820d9c0e",
 				"ISSN": "0193-1091",
 				"abstractNote": "Tumor to tumor metastasis is a rare phenomenon, in which one, benign or malignant, tumor is involved by metastatic deposits from another. Most documented tumor to tumor metastases have been located intracranially, in which, in the majority of cases, either a breast or a lung carcinoma metastasized to a meningioma. Only 7 cases of metastases to schwannoma have so far been reported in the English literature, in 6 cases to an intracranial acoustic schwannoma and in a single case to a subcutaneous schwannoma. We present a case of dermal/subcutaneous plexiform schwannoma containing metastatic deposits of an occult lobular breast carcinoma, creating a unique schwannoma with epithelioid cells. Differential diagnosis of schwannoma with epithelioid cells includes malignant transformation of schwannoma and metastasis of a carcinoma or melanoma to schwannoma, epithelioid schwannoma, and schwannoma with glandular or pseudo glandular elements., (C) 2011 Lippincott Williams & Wilkins, Inc.",
-				"callNumber": "00000372-201112000-00014.",
+				"callNumber": "00000372-201112000-00014",
 				"issue": "8",
 				"language": "English.",
 				"libraryCatalog": "Your Journals@Ovid",
@@ -868,7 +875,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "A comparison of manifestations and impact of reassurance seeking among Japanese individuals with OCD and depression. [References]",
+				"title": "A comparison of manifestations and impact of reassurance seeking among Japanese individuals with OCD and depression.",
 				"creators": [
 					{
 						"firstName": "Osamu",
@@ -892,12 +899,11 @@ var testCases = [
 					}
 				],
 				"date": "2015 Sep",
-				"DOI": "http://dx.doi.org/10.1017/S1352465814000277",
+				"DOI": "10.1017/S1352465814000277",
 				"ISSN": "1352-4658",
 				"abstractNote": "Background: One of the most common interpersonal reactions to threat and anxiety is to seek reassurance from a trusted person. The Reassurance Seeking Questionnaire (ReSQ) measures several key aspects of reassurance seeking behaviour, including frequency, trust of sources, intensity, carefulness, and the emotional consequences of reassurance seeking. Aims: The current study compares patterns and consequences of reassurance seeking in obsessive-compulsive disorder (OCD) and depression. Method: ReSQ scores were compared for three groups: 32 individuals with OCD, 17 individuals with depression, and 24 healthy comparison participants. Results: We found that individuals with OCD tended to seek reassurance more intensely and employ self-reassurance more frequently than individuals with depression or healthy participants, and that if reassurance was not provided, they tended to feel a greater urge to seek additional reassurance. Conclusions: This study is the first to quantitatively elucidate differences in reassurance seeking between OCD and depression. (PsycINFO Database Record (c) 2015 APA, all rights reserved) (journal abstract).",
-				"callNumber": "Peer Reviewed Journal: 2015-33942-012.",
+				"callNumber": "Peer Reviewed Journal: 2015-33942-012",
 				"issue": "5",
-				"itemID": "7",
 				"language": "English",
 				"libraryCatalog": "PsycINFO",
 				"pages": "623-634",
@@ -910,7 +916,7 @@ var testCases = [
 			},
 			{
 				"itemType": "journalArticle",
-				"title": "A meta-analysis of transdiagnostic cognitive behavioural therapy in the treatment of child and young person anxiety disorders. [References]",
+				"title": "A meta-analysis of transdiagnostic cognitive behavioural therapy in the treatment of child and young person anxiety disorders.",
 				"creators": [
 					{
 						"firstName": "Donna L.",
@@ -939,12 +945,11 @@ var testCases = [
 					}
 				],
 				"date": "2015 Sep",
-				"DOI": "http://dx.doi.org/10.1017/S1352465813001094",
+				"DOI": "10.1017/S1352465813001094",
 				"ISSN": "1352-4658",
 				"abstractNote": "Background: Previous meta-analyses of cognitive-behavioural therapy (CBT) for children and young people with anxiety disorders have not considered the efficacy of transdiagnostic CBT for the remission of childhood anxiety. Aim: To provide a meta-analysis on the efficacy of transdiagnostic CBT for children and young people with anxiety disorders. Methods: The analysis included randomized controlled trials using transdiagnostic CBT for children and young people formally diagnosed with an anxiety disorder. An electronic search was conducted using the following databases: ASSIA, Cochrane Controlled Trials Register, Current Controlled Trials, Medline, PsycArticles, PsychInfo, and Web of Knowledge. The search terms included \"anxiety disorder(s)\", \"anxi*\", \"cognitive behavio*, \"CBT\", \"child*\", \"children\", \"paediatric\", \"adolescent(s)\", \"adolescence\", \"youth\" and \"young pe*\". The studies identified from this search were screened against the inclusion and exclusion criteria, and 20 studies were identified as appropriate for inclusion in the current meta-analysis. Pre- and posttreatment (or control period) data were used for analysis. Results: Findings indicated significantly greater odds of anxiety remission from pre- to posttreatment for those engaged in the transdiagnostic CBT intervention compared with those in the control group, with children in the treatment condition 9.15 times more likely to recover from their anxiety diagnosis than children in the control group. Risk of bias was not correlated with study effect sizes. Conclusions: Transdiagnostic CBT seems effective in reducing symptoms of anxiety in children and young people. Further research is required to investigate the efficacy of CBT for children under the age of 6. (PsycINFO Database Record (c) 2015 APA, all rights reserved) (journal abstract).",
-				"callNumber": "Peer Reviewed Journal: 2015-33942-007.",
+				"callNumber": "Peer Reviewed Journal: 2015-33942-007",
 				"issue": "5",
-				"itemID": "8",
 				"language": "English",
 				"libraryCatalog": "PsycINFO",
 				"pages": "562-577",
