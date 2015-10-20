@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2015-09-02 03:36:00"
+	"lastUpdated": "2015-10-20 05:37:26"
 }
 
 /*
@@ -253,16 +253,6 @@ function fetchMetadata(doc, url, ids, extras) {
 		trans.setTranslator('59e7e93e-4ef0-4777-8388-d6eddb3261bf');
 		trans.setString(text);
 		trans.setHandler('itemDone', function(obj, item) {
-			if (item.callNumber) {
-				item.callNumber = item.callNumber.replace(/[.\s]+$/, '');
-			}
-			
-			if (item.DOI) {
-				item.DOI = ZU.cleanDOI(item.DOI);
-			}
-			//strip extraneous label at the end of title
-			item.title = item.title.replace(/\s*\[References\]\s*$/, "");
-			
 			if (item.itemID && extras[item.itemID]) {
 				retrievePdfUrl(item, extras[item.itemID]);
 			} else {
