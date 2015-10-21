@@ -2,14 +2,14 @@
 	"translatorID": "cf87eca8-041d-b954-795a-2d86348999d5",
 	"label": "Library Catalog (Aleph)",
 	"creator": "Simon Kornblith, Michael Berkowitz, Ming Yeung Cheung",
-	"target": "^https?://[^/]+/F(/[A-Z0-9\\-]*(\\?.*)?$|\\?func=find|\\?func=scan|\\?func=short)",
+	"target": "^https?://[^/]+/F(/[A-Z0-9\\-]*(\\?.*)?$|\\?func=find|\\?func=scan|\\?func=short|\\?local_base=)",
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
 	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2015-09-09 06:33:08"
+	"lastUpdated": "2015-10-21 17:23:12"
 }
 
 /*
