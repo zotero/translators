@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2015-02-24 05:27:00"
+	"lastUpdated": "2015-10-22 06:04:00"
 }
 
 function detectWeb(doc, url) {
@@ -33,9 +33,10 @@ function getSearchResults(doc, checkOnly) {
 	// We have multiple results
 	var resultsBlock = doc.getElementsByClassName('list-searchResults')[0];
 	if (!resultsBlock) resultsBlock = doc.getElementById('results');
+	if (!resultsBlock) resultsBlock = doc.getElementsByClassName('no-bullet mll');
 	if (!resultsBlock) return false;
 	var titles = ZU.xpath(resultsBlock, '//li//a[@class="title"]|\
-		//li//div[@class="title" and not(a[@class="title"]) and a[contains(@href, "10.2307")]]');
+		//li//div[@class="title" and not(a[@class="title"]) and a[contains(@href, "10.2307") or contains(@href, "/stable/")]]');
 	var items = {}, found = false;
 	for (var i=0; i<titles.length; i++) {
 		var title = ZU.trimInternal(titles[i].textContent);
