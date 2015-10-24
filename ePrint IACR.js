@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-06-27 02:17:58"
+	"lastUpdated": "2015-10-24 06:16:44"
 }
 
 function detectWeb(doc, url) {
@@ -30,10 +30,11 @@ function scrape(doc, url) {
 	var keywordsXPath = "//p[starts-with(b/text(),\"Category\")]";
 
 	var reportNo = doc.evaluate(reportNoXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	reportNo = reportNo.match(/(\d{4})\/(\d{3})$/);
-	var year = reportNo[1];
-	var no   = reportNo[2];
-
+	reportNo = reportNo.match(/(\d{4})\/(\d{3,4})$/);
+	if (reportNo){
+		var year = reportNo[1];
+		var no   = reportNo[2];
+	}
 	var title = doc.evaluate(titleXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 
 	var authors = doc.evaluate(authorsXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
@@ -93,7 +94,6 @@ function doWeb(doc, url) {
 		}
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
-				Zotero.done();
 				return true;
 			}
 			for (var i in items) {
