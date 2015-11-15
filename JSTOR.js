@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2015-11-08 20:08:19"
+	"lastUpdated": "2015-11-15 21:12:01"
 }
 
 function detectWeb(doc, url) {
@@ -24,8 +24,13 @@ function detectWeb(doc, url) {
 	
 	// If this is a view page, find the link to the citation
 	var favLink = getFavLink(doc);
-	if( (favLink && getJID(favLink.href)) || getJID(url) ) {
-		return "journalArticle";
+	if ( (favLink && getJID(favLink.href)) || getJID(url) ) {
+		if (ZU.xpathText(doc, '//div[@class="book-title"]')){
+			return "book"
+		}
+		else {
+			return "journalArticle";
+		}
 	}
 }
 
@@ -67,7 +72,7 @@ function getFavLink(doc) {
 }
 
 function getJID(url) {
-	var m = url.match(/(?:discover|pss|stable(?:\/info)?)\/(10\.\d+(?:%2F|\/)[^?]+|[a-z]*\d+)/);
+	var m = url.match(/(?:discover|pss|stable(?:\/info)?)\/(10\.\d+(?:%2F|\/)[^?]+|[a-z0-9.]*)/);
 	if (m) {
 		var jid = decodeURIComponent(m[1]);
 		if (jid.search(/10\.\d+\//) != 0) {
@@ -120,10 +125,10 @@ function scrape(jids) {
 
 function convertCharRefs(string) {
 	//converts hex decimal encoded html entities used by JSTOR to regular utf-8
-    return string
-        .replace(/&#x([A-Za-z0-9]+);/g, function(match, num) {
-            return String.fromCharCode(parseInt(num, 16));
-        });
+	return string
+		.replace(/&#x([A-Za-z0-9]+);/g, function(match, num) {
+			return String.fromCharCode(parseInt(num, 16));
+		});
 }
 
 function processRIS(text, jid) {
@@ -151,9 +156,10 @@ function processRIS(text, jid) {
 			}
 		}
 		
-		//fix special characters in abstract
+		//fix special characters in abstract, convert html linebreaks and italics, remove stray p tags; don't think they use anything else
 		if (item.abstractNote){
 			item.abstractNote = convertCharRefs(item.abstractNote);
+			item.abstractNote = item.abstractNote.replace(/<\/p><p>/g, "\n").replace(/<em>(.+?)<\/em>/g, " <i>$1</i> ").replace(/<\/?p>/g, "");
 		}
 		// Don't save HTML snapshot from 'UR' tag
 		item.attachments = [];
@@ -521,6 +527,65 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.jstor.org/stable/i250748",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.jstor.org/stable/10.7312/kara15848",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Bonded Labor: Tackling the System of Slavery in South Asia",
+				"creators": [
+					{
+						"lastName": "Kara",
+						"firstName": "Siddharth",
+						"creatorType": "author"
+					}
+				],
+				"date": "2012",
+				"abstractNote": "Siddharth Kara's <i>Sex Trafficking</i> has become a critical resource for its revelations into an unconscionable business, and its detailed analysis of the trade's immense economic benefits and human cost. This volume is Kara's second, explosive study of slavery, this time focusing on the deeply entrenched and wholly unjust system of bonded labor.\nDrawing on eleven years of research in India, Nepal, Bangladesh, and Pakistan, Kara delves into an ancient and ever-evolving mode of slavery that ensnares roughly six out of every ten slaves in the world and generates profits that exceeded $17.6 billion in 2011. In addition to providing a thorough economic, historical, and legal overview of bonded labor, Kara travels to the far reaches of South Asia, from cyclone-wracked southwestern Bangladesh to the Thar desert on the India-Pakistan border, to uncover the brutish realities of such industries as hand-woven-carpet making, tea and rice farming, construction, brick manufacture, and frozen-shrimp production. He describes the violent enslavement of millions of impoverished men, women, and children who toil in the production of numerous products at minimal cost to the global market. He also follows supply chains directly to Western consumers, vividly connecting regional bonded labor practices to the appetites of the world. Kara's pioneering analysis encompasses human trafficking, child labor, and global security, and he concludes with specific initiatives to eliminate the system of bonded labor from South Asia once and for all.",
+				"libraryCatalog": "JSTOR",
+				"publisher": "Columbia University Press",
+				"shortTitle": "Bonded Labor",
+				"url": "http://www.jstor.org/stable/10.7312/kara15848",
+				"attachments": [
+					{
+						"title": "JSTOR Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.jstor.org/stable/j.ctt7ztj7f?seq=1#page_scan_tab_contents",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Ulysses' Sail: An Ethnographic Odyssey of Power, Knowledge, and Geographical Distance",
+				"creators": [
+					{
+						"lastName": "Helms",
+						"firstName": "Mary W.",
+						"creatorType": "author"
+					}
+				],
+				"date": "1988",
+				"abstractNote": "What do long-distance travelers gain from their voyages, especially when faraway lands are regarded as the source of esoteric knowledge? Mary Helms explains how various cultures interpret space and distance in cosmological terms, and why they associate political power with information about strange places, peoples, and things. She assesses the diverse goals of travelers, be they Hindu pilgrims in India, Islamic scholars of West Africa, Navajo traders, or Tlingit chiefs, and discusses the most extensive experience of longy2Ddistance contact on record--that between Europeans and native peoples--and the clash of cultures that arose from conflicting expectations about the \"faraway.\".\nThe author describes her work as \"especially concerned with the political and ideological contexts or auras within which long-distance interests and activities may be conducted .. Not only exotic materials but also intangible knowledge of distant realms and regions can be politically valuable `goods,' both for those who have endured the perils of travel and for those sedentary homebodies who are able to acquire such knowledge by indirect means and use it for political advantage.\"\nOriginally published in 1988.\nThePrinceton Legacy Libraryuses the latest print-on-demand technology to again make available previously out-of-print books from the distinguished backlist of Princeton University Press. These paperback editions preserve the original texts of these important books while presenting them in durable paperback editions. The goal of the Princeton Legacy Library is to vastly increase access to the rich scholarly heritage found in the thousands of books published by Princeton University Press since its founding in 1905.",
+				"libraryCatalog": "JSTOR",
+				"publisher": "Princeton University Press",
+				"shortTitle": "Ulysses' Sail",
+				"url": "http://www.jstor.org/stable/j.ctt7ztj7f",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
