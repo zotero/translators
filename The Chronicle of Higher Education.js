@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-12-09 23:24:00"
+	"lastUpdated": "2015-11-10 15:22:00"
 }
 
 /*
@@ -107,11 +107,11 @@ function scrape (doc, url){
 			var blogname = ZU.xpathText(doc, '//div[@class="blog__mast"]//h2[contains(@class, "blog__name")]');
 			if (blogname) item.publicationTitle = item.publicationTitle + " Blogs: " + blogname;
 		} else {
-			var dateline = doc.evaluate('//p[@class="dateline"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+			var dateline = doc.evaluate('//p[@class="content-item__date"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 			if (dateline !== null) {
 				item.date = dateline.textContent;
 			}
-			item.title = ZU.xpathText(doc, '//div[@class="article"]/h1');
+			item.title = ZU.xpathText(doc, '//div[@class="content-item__title"]/h1');
 			var section = ZU.xpathText(doc, '//div[@class="header-breadcrumb-wrap"]/h1');
 			if (section) item.section = ZU.trimInternal(section)
 			
