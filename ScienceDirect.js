@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2015-09-21 03:34:49"
+	"lastUpdated": "2015-12-08 05:47:08"
 }
 
 function detectWeb(doc, url) {
@@ -49,9 +49,11 @@ function detectWeb(doc, url) {
 }
 
 function getPDFLink(doc) {
-	return ZU.xpathText(doc,
-		'//div[@id="articleNav"]//div[contains(@class, "icon_pdf")]\
-			/a[not(@title="Purchase PDF")]/@href[1]');
+	var pdfLink = ZU.xpathText(doc, '//div[@id="articleNav"]//a[@id="pdfLink" and not(@title="Purchase PDF")]/@href');
+	if (!pdfLink){
+		pdfLink = ZU.xpathText(doc, '//div[@class="extendedPdfBox"]//a[@id="pdfLink" and not(@title="Purchase PDF")]/@href');
+	}
+	return pdfLink
 }
 
 function getISBN(doc) {
