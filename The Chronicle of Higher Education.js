@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-12-09 23:24:00"
+	"lastUpdated": "2015-12-13 17:20:38"
 }
 
 /*
@@ -55,7 +55,7 @@ function doWeb (doc, url) {
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = {};
-		var results = ZU.xpath(doc, '//h4[@class="result-title"]/a')
+		var results = ZU.xpath(doc, '//span[@class="content-card__heading"]/h4/a')
 		if (results.length<1){
 			var results = ZU.xpath(doc, '//div[@id="portal"]//h4/a[contains(@href, "/article/")]|//div[@id="portal"]//h2/a[contains(@href, "/article/")]|//div[@class="blogpost-container"]/a' )
 		}
@@ -79,7 +79,7 @@ function doWeb (doc, url) {
 }
 
 function scrape (doc, url){
-		var type = detectWeb(doc, doc.location.href);
+		var type = detectWeb(doc, url);
 		var item = new Zotero.Item(type);
 
 		item.url = doc.location.href;
@@ -87,10 +87,10 @@ function scrape (doc, url){
 		// Does the ISSN apply to online-only blog posts?
 		item.ISSN = "0009-5982";
 		
-		var byline = doc.evaluate('//p[@class="byline"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+		var byline = doc.evaluate('//header/div/span[@class="content-item__byline"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 		if (!byline) byline = doc.evaluate('//div[@class="blog__author"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 		if (byline !== null) {
-			var authors = parseAuthors(byline.textContent);
+			var authors = parseAuthors(byline.textContent.trim());
 			for (var i = 0; i < authors.length; i++) {
 				item.creators.push(Zotero.Utilities.cleanAuthor(authors[i], "author"));
 			}
@@ -107,11 +107,8 @@ function scrape (doc, url){
 			var blogname = ZU.xpathText(doc, '//div[@class="blog__mast"]//h2[contains(@class, "blog__name")]');
 			if (blogname) item.publicationTitle = item.publicationTitle + " Blogs: " + blogname;
 		} else {
-			var dateline = doc.evaluate('//p[@class="dateline"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-			if (dateline !== null) {
-				item.date = dateline.textContent;
-			}
-			item.title = ZU.xpathText(doc, '//div[@class="article"]/h1');
+			item.date = ZU.xpathText(doc, '//header/div/span[@class="content-item__date"]')
+			item.title = ZU.xpathText(doc, '//header/h1');
 			var section = ZU.xpathText(doc, '//div[@class="header-breadcrumb-wrap"]/h1');
 			if (section) item.section = ZU.trimInternal(section)
 			
@@ -166,6 +163,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "blogPost",
+				"title": "The Second Day of THATCamp",
 				"creators": [
 					{
 						"firstName": "Amy",
@@ -173,22 +171,21 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "March 26, 2010",
+				"ISSN": "0009-5982",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "The Chronicle of Higher Education",
+				"publicationTitle": "The Chronicle of Higher Education Blogs: ProfHacker",
+				"url": "http://chronicle.com/blogs/profhacker/the-second-day-of-thatcamp/23068",
 				"attachments": [
 					{
 						"title": "Chronicle of Higher Education Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"url": "http://chronicle.com/blogs/profhacker/the-second-day-of-thatcamp/23068",
-				"publicationTitle": "The Chronicle of Higher Education Blogs: ProfHacker",
-				"ISSN": "0009-5982",
-				"date": "March 26, 2010",
-				"title": "The Second Day of THATCamp",
-				"libraryCatalog": "The Chronicle of Higher Education",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -198,6 +195,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "magazineArticle",
+				"title": "A Little Advice From 32,000 Graduate Students",
 				"creators": [
 					{
 						"firstName": "Adam",
@@ -210,23 +208,22 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "January 14, 2002",
+				"ISSN": "0009-5982",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "The Chronicle of Higher Education",
+				"publicationTitle": "The Chronicle of Higher Education",
+				"section": "Advice",
+				"url": "http://chronicle.com/article/A-Little-Advice-From-32000/46210/",
 				"attachments": [
 					{
 						"title": "Chronicle of Higher Education Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"url": "http://chronicle.com/article/A-Little-Advice-From-32000/46210/",
-				"publicationTitle": "The Chronicle of Higher Education",
-				"ISSN": "0009-5982",
-				"date": "January 14, 2002",
-				"title": "A Little Advice From 32,000 Graduate Students",
-				"section": "Advice",
-				"libraryCatalog": "The Chronicle of Higher Education",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -236,6 +233,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "magazineArticle",
+				"title": "Grinnell's Green Secrets",
 				"creators": [
 					{
 						"firstName": "Xiao-Bo",
@@ -243,34 +241,30 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "June 16, 2006",
+				"ISSN": "0009-5982",
+				"libraryCatalog": "The Chronicle of Higher Education",
+				"publicationTitle": "The Chronicle of Higher Education",
+				"url": "http://chronicle.com/article/Grinnells-Green-Secrets/2653/",
 				"attachments": [
 					{
 						"title": "Chronicle of Higher Education Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"url": "http://chronicle.com/article/Grinnells-Green-Secrets/2653/",
-				"publicationTitle": "The Chronicle of Higher Education",
-				"ISSN": "0009-5982",
-				"date": "June 16, 2006",
-				"title": "Grinnell's Green Secrets",
-				"section": "News : Short Subjects",
-				"pages": "A9",
-				"edition": "Volume 52, Issue 41",
-				"libraryCatalog": "The Chronicle of Higher Education",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://chronicle.com/blogPost/humanities-cyberinfrastructure-project-bamboo/6138",
+		"url": "http://chronicle.com/blogs/brainstorm/humanities-cyberinfrastructure-project-bamboo/6138",
 		"items": [
 			{
 				"itemType": "blogPost",
+				"title": "Humanities Cyberinfrastructure: Project Bamboo",
 				"creators": [
 					{
 						"firstName": "Stan",
@@ -278,23 +272,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "July 17, 2008",
+				"blogTitle": "The Chronicle of Higher Education Blogs: Brainstorm",
+				"shortTitle": "Humanities Cyberinfrastructure",
+				"url": "http://chronicle.com/blogs/brainstorm/humanities-cyberinfrastructure-project-bamboo/6138",
 				"attachments": [
 					{
 						"title": "Chronicle of Higher Education Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"url": "http://chronicle.com/blogPost/humanities-cyberinfrastructure-project-bamboo/6138",
-				"publicationTitle": "The Chronicle of Higher Education",
-				"ISSN": "0009-5982",
-				"date": "July 17, 2008, 01:29 PM ET",
-				"title": "Humanities Cyberinfrastructure: Project Bamboo",
-				"libraryCatalog": "The Chronicle of Higher Education",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Humanities Cyberinfrastructure"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
