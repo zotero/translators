@@ -504,10 +504,20 @@ FW.doWeb = function(c, a) {
 };
 
 function detectWeb(doc, url) {
+    //namespace code
+    var namespace = doc.documentElement.namespaceURI;
+    var nsResolver = namespace ? function(prefix) {
+        if (prefix == 'x') return namespace;
+        else return null;
+    } : null;
+
     if (doc.title.match("DABI. Datensatz Vollanzeige")) {
         return "journalArticle";
     } else if (doc.title.match("DABI: Rechercheergebnis")) {
-        return "multiple";
+        var treffer = doc.evaluate('//*[text()="Keine Treffer für die Suche nach:"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+        if (treffer == null) {
+            return "multiple";
+        }
     }
 }
 
@@ -538,9 +548,11 @@ function doWeb(doc, url) {
             articles.push(i);
         }
 
-    } else {
+    } else if (detectWeb(doc, url) == "journalArticle") {
         //saves single page items
         articles = [url];
+    } else {
+        return false;
     }
 
     //Tells Zotero to process everything. Calls the "scrape" function to do the dirty work.
@@ -605,7 +617,7 @@ function scrape(doc, url) {
     //Formatting and saving "title" fields
     if (items["Titel"]) {
         newItem.title = items["Titel"].replace(/\*/g, '');
-        var short = newItem.title.replace(/^(Die )|(Der )|(Das )/,'');
+        var short = newItem.title.replace(/^(Die )|(Der )|(Das )/, '');
         short = short.replace(/(?:\S+\s+){2}\S+/);
         newItem.shortTitle = short.substring(0, 1).toUpperCase() + short.slice(1);
     }
