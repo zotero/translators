@@ -605,7 +605,8 @@ function scrape(doc, url) {
     //Formatting and saving "title" fields
     if (items["Titel"]) {
         newItem.title = items["Titel"].replace(/\*/g, '');
-        var short = /(?:\S+\s+){2}\S+/.exec(newItem.title.replace(/^(Die )|(Der )|(Das )/, '')).toString();
+        var short = newItem.title.replace(/^(Die )|(Der )|(Das )/,'');
+        short = short.replace(/(?:\S+\s+){2}\S+/);
         newItem.shortTitle = short.substring(0, 1).toUpperCase() + short.slice(1);
     }
 
