@@ -9,13 +9,15 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-02-12 07:40:24"
+	"lastUpdated": "2016-01-18 22:06:26"
 }
 
+// The variables items and selectArray will be filled during the first
+// as well as the second retrieveDOIs function call and therefore they
+// are defined global.
 var items = {};
 var selectArray = {};
 
-var __num_DOIs;
 
 // builds a list of DOIs
 function getDOIs(doc) {
@@ -35,7 +37,7 @@ function getDOIs(doc) {
 	const DOIXPath = "//text()[contains(., '10.')]\
 						[not(parent::script or parent::style)]";
 
-	var DOIs = [];
+	var dois = [];
 
 	var node, m, DOI;
 	var results = doc.evaluate(DOIXPath, doc, null, XPathResult.ANY_TYPE, null);
@@ -48,13 +50,13 @@ function getDOIs(doc) {
 				DOI = DOI.substr(0, DOI.length-1);
 			}
 			// only add new DOIs
-			if(DOIs.indexOf(DOI) == -1) {
-				DOIs.push(DOI);
+			if(dois.indexOf(DOI) == -1) {
+				dois.push(DOI);
 			}
 		}
 	}
 
-	return DOIs;
+	return dois;
 }
 
 function detectWeb(doc, url) {
@@ -93,33 +95,47 @@ function completeDOIs(doc) {
 	}
 }
 
-function retrieveDOIs(DOIs, doc) {
-	__num_DOIs = DOIs.length;
+function retrieveDOIs(dois, doc, providers) {
+	var numDois = dois.length;
+	var provider = providers.shift();
+	
+	var remainingDOIs = dois.slice();//copy array but not by reference
 
-	for(var i=0, n=DOIs.length; i<n; i++) {
+	for(var i=0, n=dois.length; i<n; i++) {
 		(function(doc, DOI) {
 			var translate = Zotero.loadTranslator("search");
-			translate.setTranslator("11645bd1-0420-45c1-badb-53fb41eeb753");
+			translate.setTranslator(provider.id);
 	
 			var item = {"itemType":"journalArticle", "DOI":DOI};
 			translate.setSearch(item);
 	
 			// don't save when item is done
 			translate.setHandler("itemDone", function(translate, item) {
+				selectArray[item.DOI] = item.title;
 				if (!item.title) {
-					Zotero.debug("No title available for " + DOI);
-					return;
+					Zotero.debug("No title available for " + item.DOI);
+					item.title = "[No Title]";
+					selectArray[item.DOI] = "[" + item.DOI + "]";
 				}
-				
-				item.repository = "CrossRef";
-				items[DOI] = item;
-				selectArray[DOI] = item.title;
+				items[item.DOI] = item;
+
+				// done means not remaining anymore
+				if (remainingDOIs.indexOf(item.DOI) > -1) {
+					remainingDOIs.splice(remainingDOIs.indexOf(item.DOI), 1);
+				} else {
+					Z.debug(item.DOI + " not anymore in the list of remainingDOIs = " + remainingDOIs);
+				}
 			});
 	
 			translate.setHandler("done", function(translate) {
-				__num_DOIs--;
-				if(__num_DOIs <= 0) {
-					completeDOIs(doc);
+				numDois--;
+				if(numDois <= 0) {
+					Z.debug("Done with " + provider.name + ". Remaining DOIs: " + remainingDOIs);
+					if (providers.length > 0 && remainingDOIs.length > 0) {
+						retrieveDOIs(remainingDOIs, doc, providers);
+					} else {
+						completeDOIs(doc);
+					}
 				}
 			});
 	
@@ -127,18 +143,25 @@ function retrieveDOIs(DOIs, doc) {
 			translate.setHandler("error", function() {});
 	
 			translate.translate();
-		})(doc, DOIs[i]);
+		})(doc, dois[i]);
 	}
 }
 
 function doWeb(doc, url) {
-	var DOIs = getDOIs(doc);
-
-	// retrieve full items asynchronously
-	retrieveDOIs(DOIs, doc);
+	var dois = getDOIs(doc);
+	Z.debug(dois);
+	var providers = [
+		{
+			id : "11645bd1-0420-45c1-badb-53fb41eeb753",
+			name : "CrossRef"
+		},
+		{
+			id : "9f1fb86b-92c8-4db7-b8ee-0b481d456428",
+			name : "DataCite"
+		}
+	];
+	retrieveDOIs(dois, doc, providers);
 }
-
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -149,6 +172,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://libguides.csuchico.edu/citingbusiness",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.egms.de/static/de/journals/mbi/2015-15/mbi000336.shtml",
 		"items": "multiple"
 	}
 ]
