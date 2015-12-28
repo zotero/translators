@@ -9,10 +9,8 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcs",
-	"lastUpdated": "2015-06-05 23:03:52"
+	"lastUpdated": "2016-01-18 22:04:27"
 }
-
-var parsedData;
 
 function parseInput() {
 	var str, json = "";
@@ -23,7 +21,7 @@ function parseInput() {
 	while((str = Z.read(1048576)) !== false) json += str;
 	
 	try {
-		parsedData = JSON.parse(json);	
+		return JSON.parse(json);
 	} catch(e) {
 		Zotero.debug(e);
 	}
@@ -40,7 +38,7 @@ function detectImport() {
 		"post":true, "post-weblog":true, "report":true, "review":true, "review-book":true,
 		"song":true, "speech":true, "thesis":true, "treaty":true, "webpage":true};
 		
-	parseInput();
+	var parsedData = parseInput();
 	if(!parsedData) return false;
 	
 	if(typeof parsedData !== "object") return false;
@@ -56,7 +54,7 @@ function detectImport() {
 }
 
 function doImport() {
-	if(!parsedData) parseInput();
+	var parsedData = parseInput();
 	if(!parsedData) return;
 	
 	for(var i=0; i<parsedData.length; i++) {
