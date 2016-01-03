@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2015-11-15 21:12:01"
+	"lastUpdated": "2016-01-03 17:28:36"
 }
 
 function detectWeb(doc, url) {
@@ -41,7 +41,7 @@ function getSearchResults(doc, checkOnly) {
 	if (!resultsBlock) resultsBlock = doc.getElementsByClassName('no-bullet mll');
 	if (!resultsBlock) return false;
 	var titles = ZU.xpath(resultsBlock, '//li//a[@class="title"]|\
-		//li//div[@class="title" and not(a[@class="title"]) and a[contains(@href, "10.2307") or contains(@href, "/stable/")]]');
+		//li//div[(@class="title" or @class="rw") and not(a[@class="title"]) and a[contains(@href, "10.2307") or contains(@href, "/stable/")]]');
 	var items = {}, found = false;
 	for (var i=0; i<titles.length; i++) {
 		var title = ZU.trimInternal(titles[i].textContent);
@@ -378,10 +378,10 @@ var testCases = [
 				"date": "1998",
 				"ISSN": "0036-0341",
 				"issue": "2",
-				"journalAbbreviation": "Russian Review",
+				"journalAbbreviation": "The Russian Review",
 				"libraryCatalog": "JSTOR",
 				"pages": "310-311",
-				"publicationTitle": "Russian Review",
+				"publicationTitle": "The Russian Review",
 				"url": "http://www.jstor.org/stable/131548",
 				"volume": "57",
 				"attachments": [
@@ -586,6 +586,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.jstor.org/action/doAdvancedSearch?q3=&re=on&q4=&f3=all&c3=AND&group=none&q1=&f5=all&c5=AND&la=&q2=&c6=AND&sd=&c2=AND&c1=AND&pt=&acc=off&q6=&q5=&c4=AND&f6=all&f0=all&q0=%22Reading+Rousseau+in+the+nuclear+age%22&f4=all&ed=&f2=all&f1=all&isbn=",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
