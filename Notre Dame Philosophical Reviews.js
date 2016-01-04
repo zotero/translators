@@ -34,13 +34,13 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 var detectWeb, doWeb, scrape, testCases;
 
 detectWeb = function(doc, url) {
-  if (url.indexOf('https://ndpr.nd.edu/news') === 0) {
+  if (url.indexOf('://ndpr.nd.edu/news') > 0) {
     return 'journalArticle';
   }
-  if (url.indexOf('https://ndpr.nd.edu/recent-reviews') === 0) {
+  if (url.indexOf('://ndpr.nd.edu/recent-reviews') > 0) {
     return 'multiple';
   }
-  if (url.indexOf('https://ndpr.nd.edu/search') === 0) {
+  if (url.indexOf('://ndpr.nd.edu/search') > 0) {
     return 'multiple';
   }
   return null;
