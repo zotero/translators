@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-10-24 06:16:44"
+	"lastUpdated": "2016-01-04 13:32:05"
 }
 
 function detectWeb(doc, url) {
@@ -24,8 +24,8 @@ function detectWeb(doc, url) {
 
 function scrape(doc, url) {
 	var reportNoXPath = "//h2";
-	var titleXPath    = "//p[1]/b";
-	var authorsXPath  = "//p[2]/i";
+	var titleXPath    = "(//p/b)[1]";
+	var authorsXPath  = "(//p/i)[1]";
 	var abstractXPath = "//p[starts-with(b/text(),\"Abstract\")]/text() | //p[not(*)]";
 	var keywordsXPath = "//p[starts-with(b/text(),\"Category\")]";
 
