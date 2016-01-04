@@ -2,7 +2,7 @@
     "translatorID": "5cf8bb21-e350-444f-b9b4-f46d9fab7827",
     "label": "DABI",
     "creator": "Jens Mittelbach",
-    "target": "dabi.ib.hu-berlin\\.de/.*?",
+    "target": "^https?://dabi\\.ib\\.hu-berlin\\.de/",
     "minVersion": "1.0",
     "maxVersion": "",
     "priority": 100,
