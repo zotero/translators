@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcs",
-	"lastUpdated": "2015-06-10 10:48:54"
+	"lastUpdated": "2016-01-05 18:01:38"
 }
 
 function detectImport() {
@@ -51,7 +51,8 @@ var fieldMap = {
 	M:"accessionNumber",
 	U:"url",
 	7:"edition",
-	X:"abstractNote"
+	X:"abstractNote",
+	G: "language"
 };
 
 var inputFieldMap = {
@@ -293,6 +294,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "参考文献管理工具研究",
 				"creators": [
 					{
 						"firstName": "",
@@ -310,22 +312,22 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
+				"date": "2009",
+				"abstractNote": "介绍了参考文献管理的基本方法,对参考文献管理工具的主要功能进行了对比,最后分析了参考文献管理的趋势.",
+				"archiveLocation": "北京万方数据股份有限公司",
+				"extra": "Yu Min\nZhu Jiang\nDing Zhaolei",
+				"issue": "2",
+				"language": "chi",
+				"pages": "94-98,93",
+				"publicationTitle": "JOURNAL OF MODERN INFORMATION",
+				"url": "http://d.wanfangdata.com.cn/Periodical_xdqb200902027.aspx",
+				"volume": "29",
+				"attachments": [],
 				"tags": [
 					"参考文献管理 文献管理软件 学术书签网站 Zotero"
 				],
-				"seeAlso": [],
-				"attachments": [],
-				"extra": "Yu Min\nZhu Jiang\nDing Zhaolei",
-				"issue": "2",
-				"abstractNote": "介绍了参考文献管理的基本方法,对参考文献管理工具的主要功能进行了对比,最后分析了参考文献管理的趋势.",
-				"url": "http://d.wanfangdata.com.cn/Periodical_xdqb200902027.aspx",
-				"archiveLocation": "北京万方数据股份有限公司",
-				"title": "参考文献管理工具研究",
-				"publicationTitle": "JOURNAL OF MODERN INFORMATION",
-				"date": "2009",
-				"volume": "29",
-				"pages": "94-98,93"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
