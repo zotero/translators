@@ -2,14 +2,14 @@
 	"translatorID": "186efdd2-3621-4703-aac6-3b5e286bdd86",
 	"label": "Hindawi Publishers",
 	"creator": "Sebastian Karcher",
-	"target": "http://www.hindawi.com/(journals|search)/",
+	"target": "^https?://www\\.hindawi\\.com/(journals|search)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2015-11-27 22:23:46"
+	"lastUpdated": "2016-01-06 05:33:07"
 }
 
 /*
@@ -29,9 +29,9 @@
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+var namespace = {"x"  : "http://www.w3.org/1999/xhtml"}
 
 function detectWeb(doc,url) {
-	var namespace = {"x"  : "http://www.w3.org/1999/xhtml"}
 	var xpath='//x:meta[@name="citation_journal_title"]';
 
 	if (ZU.xpath(doc, xpath, namespace).length > 0) {
@@ -49,16 +49,11 @@ function detectWeb(doc,url) {
 	return false;
 }
 
-function decodeEntities(doc, encodedString) {
-	var textArea = doc.createElement('textarea');
-	textArea.innerHTML = encodedString;
-	return textArea.value;
-}
+
 
 function doWeb(doc,url)
 {
 	if (detectWeb(doc, url) == "multiple") {
-		var namespace = {"x"  : "http://www.w3.org/1999/xhtml"}
 		var hits = {};
 		var urls = [];
 		resultxpath = '//x:div[@class="middle_content"]/x:ul/x:li/x:a[contains(@href, "/journals/")]|\
@@ -76,10 +71,6 @@ function doWeb(doc,url)
 			ZU.processDocuments(urls, doWeb);
 		});
 	} else {
-		var namespace = {"x"  : "http://www.w3.org/1999/xhtml"}
-	        var abstract = ZU.xpathText(doc, '//x:meta[@name="citation_abstract"][1]/@content', namespace);
-	        //convert html entities in abstract
-		abstract = decodeEntities(doc, abstract);
 		var translator = Zotero.loadTranslator('web');
 		//use Embedded Metadata
 		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
@@ -90,26 +81,28 @@ function doWeb(doc,url)
 				item.pages = 'e' + item.DOI.substr(item.DOI.lastIndexOf('/') + 1);
 			}
 			//remove duplicate metadata			
-			for (i in item){
+			for (var i in item){
 				if (typeof item[i] == "string" && item[i].match(/^.+,/)){
 					//Z.debug(item[i])
-					if (item[i].match(/^(?:PMID: )?(.+),/)[1] == item[i].match(/, (.+)$/)[1]){
-						item[i] = item[i].replace(/,.+?$/, "")
-					}
+					  item[i] = item[i].replace(/^(PMID: )?(.+), \2$/, "$1$2");
 				}
 			}
 			//remove duplicate authors
-			if (item.creators.length%2 == 0){
-				var j=item.creators.length -1
-				for (var i = item.creators.length/2 -1; i>=0; i--, j--){
-					if (item.creators[i].firstName === item.creators[j].firstName &&
-						item.creators[i].lastName === item.creators[j].lastName){
-							item.creators.splice(j, 1);
-						}
-				}
+			if (item.creators.length && item.creators.length % 2 == 0) {
+  				var duplicate = true;
+  				for (var i = 0, j = item.creators.length / 2; duplicate && j < item.creators.length; i++, j++) {
+					var a1 = item.creators[i], a2 = item.creators[j];
+					duplicate = a1.firstName == a2.firstName && a1.lastName == a2.lastName;
+  				}
+
+				if (duplicate) {
+					item.creators = item.creators.slice(0, item.creators.length / 2);
+  				}
 			}
-			item.abstractNote=abstract;
-			//item.extra = "";
+			//convert html entities in abstract
+			if (item.abstractNote){
+				item.abstractNote = ZU.unescapeHTML(item.abstractNote);
+			}
 			item.complete();
 		});
 		translator.translate();
