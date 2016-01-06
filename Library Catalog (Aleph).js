@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2015-10-21 17:23:12"
+	"lastUpdated": "2016-01-06 15:10:06"
 }
 
 /*
@@ -42,6 +42,7 @@ Germany:
 http://aleph-www.ub.fu-berlin.de
 http://opac.hu-berlin.de
 http://alephdai.ub.hu-berlin.de
+https://aleph.mpg.de
 
 Mexico:
 iibiblio.unam.mx
@@ -64,7 +65,7 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 	var detailRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]*\?.*(?:func=full-set-set|func=direct|func=myshelf-full|func=myself_full.*)");
-	var mab2Opac = new RegExp("^https?://(?!alephdai)[^/]+berlin|193\.30\.112\.134|duisburg-essen/F/[A-Z0-9\-]+\?.*|^https?://katalog\.ub\.uni-duesseldorf\.de/F/");
+	var mab2Opac = new RegExp("^https?://(?!alephdai)[^/]+berlin|193\.30\.112\.134|duisburg-essen/F/[A-Z0-9\-]+\?.*|^https?://katalog\.ub\.uni-duesseldorf\.de/F/|^https?://aleph\.mpg\.de/F/");
 	var uri = doc.location.href;
 	var newUris = new Array();
 	
