@@ -12,666 +12,340 @@
     "lastUpdated": "2015-12-15 18:59:56"
 }
 
-/* FW LINE 57:6869c32952b1 */
-function flatten(c) {
-    var b = new Array();
-    for (var d in c) {
-        var e = c[d];
-        if (e instanceof Array) {
-            b = b.concat(flatten(e))
-        } else {
-            b.push(e)
-        }
-    }
-    return b
-}
-var FW = {
-    _scrapers: new Array()
-};
-FW._Base = function() {
-    this.callHook = function(b, c, e, a) {
-        if (typeof this["hooks"] === "object") {
-            var d = this["hooks"][b];
-            if (typeof d === "function") {
-                d(c, e, a)
-            }
-        }
-    };
-    this.evaluateThing = function(f, e, c) {
-        var b = typeof f;
-        if (b === "object") {
-            if (f instanceof Array) {
-                var d = this.evaluateThing;
-                var a = f.map(function(g) {
-                    return d(g, e, c)
-                });
-                return flatten(a)
-            } else {
-                return f.evaluate(e, c)
-            }
-        } else {
-            if (b === "function") {
-                return f(e, c)
-            } else {
-                return f
-            }
-        }
-    }
-};
-FW.Scraper = function(a) {
-    FW._scrapers.push(new FW._Scraper(a))
-};
-FW._Scraper = function(a) {
-    for (x in a) {
-        this[x] = a[x]
-    }
-    this._singleFieldNames = ["abstractNote", "applicationNumber", "archive", "archiveLocation", "artworkMedium", "artworkSize", "assignee", "audioFileType", "audioRecordingType", "billNumber", "blogTitle", "bookTitle", "callNumber", "caseName", "code", "codeNumber", "codePages", "codeVolume", "committee", "company", "conferenceName", "country", "court", "date", "dateDecided", "dateEnacted", "dictionaryTitle", "distributor", "docketNumber", "documentNumber", "DOI", "edition", "encyclopediaTitle", "episodeNumber", "extra", "filingDate", "firstPage", "forumTitle", "genre", "history", "institution", "interviewMedium", "ISBN", "ISSN", "issue", "issueDate", "issuingAuthority", "journalAbbreviation", "label", "language", "legalStatus", "legislativeBody", "letterType", "libraryCatalog", "manuscriptType", "mapType", "medium", "meetingName", "nameOfAct", "network", "number", "numberOfVolumes", "numPages", "pages", "patentNumber", "place", "postType", "presentationType", "priorityNumbers", "proceedingsTitle", "programTitle", "programmingLanguage", "publicLawNumber", "publicationTitle", "publisher", "references", "reportNumber", "reportType", "reporter", "reporterVolume", "rights", "runningTime", "scale", "section", "series", "seriesNumber", "seriesText", "seriesTitle", "session", "shortTitle", "studio", "subject", "system", "thesisType", "title", "type", "university", "url", "version", "videoRecordingType", "volume", "websiteTitle", "websiteType"];
-    this._makeAttachments = function(p, b, g, t) {
-        if (g instanceof Array) {
-            g.forEach(function(k) {
-                this._makeAttachments(p, b, k, t)
-            }, this)
-        } else {
-            if (typeof g === "object") {
-                var o = g.urls || g.url;
-                var m = g.types || g.type;
-                var f = g.titles || g.title;
-                var q = g.snapshots || g.snapshot;
-                var j = this.evaluateThing(o, p, b);
-                var n = this.evaluateThing(f, p, b);
-                var s = this.evaluateThing(m, p, b);
-                var d = this.evaluateThing(q, p, b);
-                if (!(j instanceof Array)) {
-                    j = [j]
-                }
-                for (var l in j) {
-                    var c = j[l];
-                    var h;
-                    var e;
-                    var r;
-                    if (s instanceof Array) {
-                        h = s[l]
-                    } else {
-                        h = s
-                    }
-                    if (n instanceof Array) {
-                        e = n[l]
-                    } else {
-                        e = n
-                    }
-                    if (d instanceof Array) {
-                        r = d[l]
-                    } else {
-                        r = d
-                    }
-                    t.attachments.push({
-                        url: c,
-                        title: e,
-                        type: h,
-                        snapshot: r
-                    })
-                }
-            }
-        }
-    };
-    if (this.itemTrans !== undefined) {
-        this.makeItems = this.itemTrans.makeItems
-    } else {
-        this.makeItems = function(o, b, m, c, l) {
-            var q = new Zotero.Item(this.itemType);
-            q.url = b;
-            for (var h in this._singleFieldNames) {
-                var n = this._singleFieldNames[h];
-                if (this[n]) {
-                    var g = this.evaluateThing(this[n], o, b);
-                    if (g instanceof Array) {
-                        q[n] = g[0]
-                    } else {
-                        q[n] = g
-                    }
-                }
-            }
-            var r = ["creators", "tags"];
-            for (var f in r) {
-                var p = r[f];
-                var d = this.evaluateThing(this[p], o, b);
-                if (d) {
-                    for (var e in d) {
-                        q[p].push(d[e])
-                    }
-                }
-            }
-            this._makeAttachments(o, b, this["attachments"], q);
-            c(q, this, o, b);
-            l([q])
-        }
-    }
-};
-FW._Scraper.prototype = new FW._Base;
-FW.MultiScraper = function(a) {
-    FW._scrapers.push(new FW._MultiScraper(a))
-};
-FW._MultiScraper = function(a) {
-    for (x in a) {
-        this[x] = a[x]
-    }
-    this._mkSelectItems = function(e, d) {
-        var b = new Object;
-        for (var c in e) {
-            b[d[c]] = e[c]
-        }
-        return b
-    };
-    this._selectItems = function(d, c, e) {
-        var b = new Array();
-        Zotero.selectItems(this._mkSelectItems(d, c), function(f) {
-            for (var g in f) {
-                b.push(g)
-            }
-            e(b)
-        })
-    };
-    this._mkAttachments = function(g, d, f) {
-        var b = this.evaluateThing(this["attachments"], g, d);
-        var c = new Object();
-        if (b) {
-            for (var e in f) {
-                c[f[e]] = b[e]
-            }
-        }
-        return c
-    };
-    this._makeChoices = function(f, p, c, d, h) {
-        if (f instanceof Array) {
-            f.forEach(function(k) {
-                this._makeTitlesUrls(k, p, c, d, h)
-            }, this)
-        } else {
-            if (typeof f === "object") {
-                var m = f.urls || f.url;
-                var e = f.titles || f.title;
-                var n = this.evaluateThing(m, p, c);
-                var j = this.evaluateThing(e, p, c);
-                var l = (j instanceof Array);
-                if (!(n instanceof Array)) {
-                    n = [n]
-                }
-                for (var g in n) {
-                    var b = n[g];
-                    var o;
-                    if (l) {
-                        o = j[g]
-                    } else {
-                        o = j
-                    }
-                    h.push(b);
-                    d.push(o)
-                }
-            }
-        }
-    };
-    this.makeItems = function(j, b, g, c, f) {
-        if (this.beforeFilter) {
-            var k = this.beforeFilter(j, b);
-            if (k != b) {
-                this.makeItems(j, k, g, c, f);
-                return
-            }
-        }
-        var e = [];
-        var h = [];
-        this._makeChoices(this["choices"], j, b, e, h);
-        var d = this._mkAttachments(j, b, h);
-        this._selectItems(e, h, function(m) {
-            if (!m) {
-                f([])
-            } else {
-                var l = [];
-                var n = this.itemTrans;
-                Zotero.Utilities.processDocuments(m, function(q) {
-                    var p = q.documentURI;
-                    var o = n;
-                    if (o === undefined) {
-                        o = FW.getScraper(q, p)
-                    }
-                    if (o === undefined) {} else {
-                        o.makeItems(q, p, d[p], function(r) {
-                            l.push(r);
-                            c(r, o, q, p)
-                        }, function() {})
-                    }
-                }, function() {
-                    f(l)
-                })
-            }
-        })
-    }
-};
-FW._MultiScraper.prototype = new FW._Base;
-FW.DelegateTranslator = function(a) {
-    return new FW._DelegateTranslator(a)
-};
-FW._DelegateTranslator = function(a) {
-    for (x in a) {
-        this[x] = a[x]
-    }
-    this._translator = Zotero.loadTranslator(this.translatorType);
-    this._translator.setTranslator(this.translatorId);
-    this.makeItems = function(g, d, b, f, c) {
-        var e;
-        Zotero.Utilities.HTTP.doGet(d, function(h) {
-            this._translator.setHandler("itemDone", function(k, j) {
-                e = j;
-                if (b) {
-                    j.attachments = b
-                }
-            });
-            if (this.preProcess) {
-                h = this.preProcess(h)
-            }
-            this._translator.setString(h);
-            this._translator.translate();
-            f(e)
-        }, function() {
-            c([e])
-        })
-    }
-};
-FW.DelegateTranslator.prototype = new FW._Scraper;
-FW._StringMagic = function() {
-    this._filters = new Array();
-    this.addFilter = function(a) {
-        this._filters.push(a);
-        return this
-    };
-    this.split = function(a) {
-        return this.addFilter(function(b) {
-            return b.split(a).filter(function(c) {
-                return (c != "")
-            })
-        })
-    };
-    this.replace = function(c, b, a) {
-        return this.addFilter(function(d) {
-            if (d.match(c)) {
-                return d.replace(c, b, a)
-            } else {
-                return d
-            }
-        })
-    };
-    this.prepend = function(a) {
-        return this.replace(/^/, a)
-    };
-    this.append = function(a) {
-        return this.replace(/$/, a)
-    };
-    this.remove = function(b, a) {
-        return this.replace(b, "", a)
-    };
-    this.trim = function() {
-        return this.addFilter(function(a) {
-            return Zotero.Utilities.trim(a)
-        })
-    };
-    this.trimInternal = function() {
-        return this.addFilter(function(a) {
-            return Zotero.Utilities.trimInternal(a)
-        })
-    };
-    this.match = function(a, b) {
-        if (!b) {
-            b = 0
-        }
-        return this.addFilter(function(d) {
-            var c = d.match(a);
-            if (c === undefined || c === null) {
-                return undefined
-            } else {
-                return c[b]
-            }
-        })
-    };
-    this.cleanAuthor = function(b, a) {
-        return this.addFilter(function(c) {
-            return Zotero.Utilities.cleanAuthor(c, b, a)
-        })
-    };
-    this.key = function(a) {
-        return this.addFilter(function(b) {
-            return b[a]
-        })
-    };
-    this.capitalizeTitle = function() {
-        if (arguments.length > 0 && arguments[0] == true) {
-            return this.addFilter(function(a) {
-                return Zotero.Utilities.capitalizeTitle(a, true)
-            })
-        } else {
-            return this.addFilter(function(a) {
-                return Zotero.Utilities.capitalizeTitle(a)
-            })
-        }
-    };
-    this.unescapeHTML = function() {
-        return this.addFilter(function(a) {
-            return Zotero.Utilities.unescapeHTML(a)
-        })
-    };
-    this.unescape = function() {
-        return this.addFilter(function(a) {
-            return unescape(a)
-        })
-    };
-    this._applyFilters = function(c, e) {
-        for (i in this._filters) {
-            c = flatten(c);
-            c = c.filter(function(a) {
-                return ((a !== undefined) && (a !== null))
-            });
-            for (var d = 0; d < c.length; d++) {
-                try {
-                    if ((c[d] === undefined) || (c[d] === null)) {
-                        continue
-                    } else {
-                        c[d] = this._filters[i](c[d], e)
-                    }
-                } catch (b) {
-                    c[d] = undefined;
-                    Zotero.debug("Caught exception " + b + "on filter: " + this._filters[i])
-                }
-            }
-            c = c.filter(function(a) {
-                return ((a !== undefined) && (a !== null))
-            })
-        }
-        return flatten(c)
-    }
-};
-FW.PageText = function() {
-    return new FW._PageText()
-};
-FW._PageText = function() {
-    this._filters = new Array();
-    this.evaluate = function(c) {
-        var b = [c.documentElement.innerHTML];
-        b = this._applyFilters(b, c);
-        if (b.length == 0) {
-            return false
-        } else {
-            return b
-        }
-    }
-};
-FW._PageText.prototype = new FW._StringMagic();
-FW.Url = function() {
-    return new FW._Url()
-};
-FW._Url = function() {
-    this._filters = new Array();
-    this.evaluate = function(d, c) {
-        var b = [c];
-        b = this._applyFilters(b, d);
-        if (b.length == 0) {
-            return false
-        } else {
-            return b
-        }
-    }
-};
-FW._Url.prototype = new FW._StringMagic();
-FW.Xpath = function(a) {
-    return new FW._Xpath(a)
-};
-FW._Xpath = function(a) {
-    this._xpath = a;
-    this._filters = new Array();
-    this.text = function() {
-        var b = function(c) {
-            if (typeof c === "object" && c.textContent) {
-                return c.textContent
-            } else {
-                return c
-            }
-        };
-        this.addFilter(b);
-        return this
-    };
-    this.sub = function(b) {
-        var c = function(f, e) {
-            var d = e.evaluate(b, f, null, XPathResult.ANY_TYPE, null);
-            if (d) {
-                return d.iterateNext()
-            } else {
-                return undefined
-            }
-        };
-        this.addFilter(c);
-        return this
-    };
-    this.evaluate = function(f) {
-        var e = f.evaluate(this._xpath, f, null, XPathResult.ANY_TYPE, null);
-        var d = e.resultType;
-        var c = new Array();
-        if (d == XPathResult.STRING_TYPE) {
-            c.push(e.stringValue)
-        } else {
-            if (d == XPathResult.ORDERED_NODE_ITERATOR_TYPE || d == XPathResult.UNORDERED_NODE_ITERATOR_TYPE) {
-                var b;
-                while ((b = e.iterateNext())) {
-                    c.push(b)
-                }
-            }
-        }
-        c = this._applyFilters(c, f);
-        if (c.length == 0) {
-            return false
-        } else {
-            return c
-        }
-    }
-};
-FW._Xpath.prototype = new FW._StringMagic();
-FW.detectWeb = function(e, b) {
-    for (var c in FW._scrapers) {
-        var d = FW._scrapers[c];
-        var f = d.evaluateThing(d.itemType, e, b);
-        var a = d.evaluateThing(d.detect, e, b);
-        if (a.length > 0 && a[0]) {
-            return f
-        }
-    }
-    return undefined
-};
-FW.getScraper = function(b, a) {
-    var c = FW.detectWeb(b, a);
-    return FW._scrapers.filter(function(d) {
-        return (d.evaluateThing(d.itemType, b, a) == c) && (d.evaluateThing(d.detect, b, a))
-    })[0]
-};
-FW.doWeb = function(c, a) {
-    var b = FW.getScraper(c, a);
-    b.makeItems(c, a, [], function(f, e, g, d) {
-        e.callHook("scraperDone", f, g, d);
-        if (!f.title) {
-            f.title = ""
-        }
-        f.complete()
-    }, function() {
-        Zotero.done()
-    });
-    Zotero.wait()
-};
-
 function detectWeb(doc, url) {
-    //namespace code
-    var namespace = doc.documentElement.namespaceURI;
-    var nsResolver = namespace ? function(prefix) {
-        if (prefix == 'x') return namespace;
-        else return null;
-    } : null;
-
-    if (doc.title.match("DABI. Datensatz Vollanzeige")) {
+    if (doc.title.trim().indexOf("DABI. Datensatz Vollanzeige") == 0) {
         return "journalArticle";
-    } else if (doc.title.match("DABI: Rechercheergebnis")) {
-        var treffer = doc.evaluate('//*[text()="Keine Treffer für die Suche nach:"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-        if (treffer == null) {
+    } else if (doc.title.trim().indexOf("DABI: Rechercheergebnis") == 0) {
+        var keinTreffer = doc.getElementsByTagName("br")[7].nextSibling.data.indexOf("Keine Treffer für die Suche nach:")
+        if (keinTreffer == -1) {
             return "multiple";
         }
     }
 }
 
 function doWeb(doc, url) {
-    //namespace code
-    var namespace = doc.documentElement.namespaceURI;
-    var nsResolver = namespace ? function(prefix) {
-        if (prefix == 'x') return namespace;
-        else return null;
-    } : null;
-
-    //variable declarations
-    var articles = new Array();
-    var items = new Object();
-    var nextLink;
+    var ids = [];
 
     //If Statement checks if page is a Search Result, then saves requested Items
     if (detectWeb(doc, url) == "multiple") {
-        var links = doc.evaluate('//tr/td[1]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
-        var title = doc.evaluate('//tr/td[3]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-
-        while (nextLink = links.iterateNext()) {
-            items[nextLink.href] = title.iterateNext().textContent;
-
-        }
-        items = Zotero.selectItems(items);
-        for (var i in items) {
-            articles.push(i);
-        }
-
+        Z.selectItems(getSearchResults(doc), function(items) {
+            if (!items) return true;
+            for (var i in items) {
+                ids.push(i);
+            }
+        });
     } else if (detectWeb(doc, url) == "journalArticle") {
         //saves single page items
-        articles = [url];
-    } else {
-        return false;
+        ids = [url];
     }
-
-    //Tells Zotero to process everything. Calls the "scrape" function to do the dirty work.
-    Zotero.Utilities.processDocuments(articles, scrape, function() {
-        Zotero.done();
-    });
-    Zotero.wait();
-    //Translator is FINISHED after running this line. Note: code doesn't run from top to bottom only.
+    ZU.processDocuments(ids, scrape);
 }
 
-//The function used to save well formatted data to Zotero
-function associateData(newItem, items, field, zoteroField) {
-    if (items[field]) {
-        newItem[zoteroField] = items[field];
+
+function getSearchResults(doc) {
+    var trs = doc.getElementsByTagName("tr"),
+        tds = null,
+        items = {};
+
+    for (var i = 1; i < trs.length; i++) {
+        tds = trs[i].getElementsByTagName("td");
+        for (var n = 0; n < tds.length; n++) {
+            var url = doc.location.origin + "/cgi-bin/dabi/" + tds[0].firstChild.getAttribute("href"),
+                author = tds[1].innerHTML,
+                title = tds[2].innerHTML.replace(/<br>/g, '. ');
+
+            if (!author == '') {
+                var item = author.replace(/; <br>.*/, ' et al.') + ": " + title;
+            } else {
+                var item = title;
+            }
+            if (!item || !url) continue;
+
+            items[url] = item;
+        }
     }
+    return items;
 }
 
 function scrape(doc, url) {
-    //namespace code
-    var namespace = doc.documentElement.namespaceURI;
-    var nsResolver = namespace ? function(prefix) {
-        if (prefix == 'x') return namespace;
-        else return null;
-    } : null;
-
-    //variable declarations
     var newItem = new Zotero.Item('journalArticle');
-    newItem.url = doc.location.href;
-    newItem.title = "No Title Found";
+    var trs = doc.getElementsByTagName("tr"),
+        headers,
+        contents,
+        items = {};
 
-    var items = new Object();
-    var headers;
-    var contents;
-    var link;
-    var blankCell = "temp";
-    var headersTemp;
-    var tagsContent = new Array();
+    //For Loop to populate "items" Object and save tags to an Array.
+    for (var i = 0; i < trs.length; i++) {
+        headers = trs[i].getElementsByTagName("th")[0].textContent;
+        contents = trs[i].getElementsByTagName("td")[0].innerHTML;
 
-    var myXPathObject = doc.evaluate('//tr/th', doc, nsResolver, XPathResult.ANY_TYPE, null);
-    var myXPathObject2 = doc.evaluate('//tr/td', doc, nsResolver, XPathResult.ANY_TYPE, null);
-    var link = doc.evaluate('//tr/td/a', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-
-    //While Loop to populate "items" Object and save tags to an Array.
-    while (headers = myXPathObject.iterateNext()) {
-
-        headersTemp = headers.textContent;
-        if (!headersTemp.match(/\w/)) {
-            headersTemp = blankCell;
-            blankCell = blankCell + "1";
-        }
-
-        contents = myXPathObject2.iterateNext().textContent;
-
-        if (headersTemp.match("temp")) {
-            tagsContent.push(contents);
-        }
-
-        items[headersTemp.replace(/\s+/g, '')] = contents.replace(/^\s*|\s*$/g, '');
-
+        items[headers.replace(/\s+/g, '')] = contents.trim();
     }
+
+    //set url to fulltext resource, if present; else to database item
+    if (items["URL"] == '') {
+        newItem.url = url;
+    } else {
+        var link = doc.createElement('a');
+        link.innerHTML = items["URL"];
+        newItem.url = link.firstChild.getAttribute("href");
+
+        if (/\.pdf(#.*)?$/.test(newItem.url)) {
+            newItem.attachments = [{
+                url: newItem.url,
+                title: "DABI Full Text PDF",
+                mimeType: "application/pdf"
+            }];
+        }
+    }
+
 
     //Formatting and saving "title" fields
     if (items["Titel"]) {
         newItem.title = items["Titel"].replace(/\*/g, '');
-        var short = newItem.title.replace(/^(Die )|(Der )|(Das )/, '');
-        short = short.replace(/(?:\S+\s+){2}\S+/);
+        var short = newItem.title.replace(/^\W?(?:Die |Der |Das |\.{3}\s?)/, '');
+        short = short.replace(/(,|:|\?|!|\.|\").*$/, '').split(' ').slice(0, 6).join(' ');
+        short = short.replace(/\W?$/, '');
         newItem.shortTitle = short.substring(0, 1).toUpperCase() + short.slice(1);
+        if (items["Untertitel"]) {
+        	if (/(\?|!|\.)\W?$/.test(newItem.title)) {
+            	newItem.title += " " + items["Untertitel"];
+        	} else {
+        	    newItem.title += ": " + items["Untertitel"];
+        	}
+        }
     }
 
-    if (items["Untertitel"]) {
-        newItem.title = newItem.title.concat(": ", items["Untertitel"]);
+    //Sometimes titles are missing
+    if (items["Untertitel"] && !items["Titel"]) {
+        newItem.title = items["Untertitel"].replace(/\*/g, '');
+        var short = newItem.title.replace(/^\W?(?:Die |Der |Das |\.{3}\s?)/, '');
+        short = short.replace(/(,|:|\?|!|\.|\").*$/, '').split(' ').slice(0, 6).join(' ');
+        short = short.replace(/\W?$/, '');
+        newItem.shortTitle = short.substring(0, 1).toUpperCase() + short.slice(1);
     }
 
     //Formatting and saving "Author" field
     if (items["Autoren"]) {
-        var author = items["Autoren"];
-        if (author.match("; ")) {
-            var authors = author.split("; ");
-            for (var i in authors) {
-                newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i], "author", true));
-            }
-        } else {
-            newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author", true));
+        var authors = items["Autoren"].split("; ");
+        for (var i = 0; i < authors.length; i++) {
+            newItem.creators.push(ZU.cleanAuthor(authors[i], "author", true));
         }
     }
 
     //Formatting and saving "pages" field
-    if (items["Anfangsseite"] && items["Endseite"]) {
-        newItem.pages = items["Anfangsseite"].concat("-", items["Endseite"]);
-    } else {
-        newItem.pages = items["Anfangsseite"];
+    if (items["Anfangsseite"]) {
+        newItem.pages = items["Anfangsseite"] + (items["Endseite"] ? "-" + items["Endseite"] : "");
     }
 
     //Saving the tags to Zotero
     if (items["Schlagwörter"]) {
-        var tags = items["Schlagwörter"];
-        if (tags.match("; ")) {
-            var tagsContent = tags.split("; ");
-        } else {
-            newItem.tags.push(tagsContent);
-        }
-        for (var i in tagsContent) {
-            newItem.tags.push(tagsContent[i]);
+        var tags = items["Schlagwörter"].split("; ");
+        for (var i = 0; i < tags.length; i++) {
+            newItem.tags.push(tags[i]);
         }
     }
 
-    //Link
-    newItem.url = link;
+    //Making the publication title orthographic
+    if (items["Zeitschrift"]) {
+        newItem.publicationTitle = items["Zeitschrift"].replace(/ : /g, ": ");
+    }
 
     //Associating and saving the well formatted data to Zotero
-    associateData(newItem, items, "Zeitschrift", "publicationTitle");
-    associateData(newItem, items, "Jahr", "date");
-    associateData(newItem, items, "Heft", "issue");
-    associateData(newItem, items, "Band", "volume");
-    associateData(newItem, items, "Abstract", "abstractNote");
+    var fieldMap = {
+        "date": items["Jahr"],
+        "issue": items["Heft"],
+        "volume": items["Band"],
+        "abstractNote": items["Abstract"]
+    };
 
+    for (var key in fieldMap) {
+        if (fieldMap.hasOwnProperty(key)) {
+            newItem[key] = fieldMap[key];
+        }
+    };
 
-    newItem.repository = "DABI";
+    newItem.libraryCatalog = "DABI";
 
     //Scrape is COMPLETE!
     newItem.complete();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://dabi.ib.hu-berlin.de/cgi-bin/dabi/vollanzeige.pl?artikel_id=13028&modus=html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "\"Mich interessierten kostengünstige Alternativen zu Citavi\": Über den Fortbildungsworkshop \"Literaturverwaltung im Fokus\" im Rahmen der AGMB-Tagung 2012:",
+				"creators": [
+					{
+						"firstName": "Matti",
+						"lastName": "Stöhr",
+						"creatorType": "author"
+					}
+				],
+				"date": "2012",
+				"abstractNote": "Zum Programm der AGMB-Tagung 2012 in Aachen gehörte u.a. der zweistündige Fortbildungsworkshop \"Literaturverwaltung im Fokus - Softwaretypen, bibliothekarische Services und mehr\". Im Beitrag werden weniger die referierten Workshopinhalte beschrieben, als vielmehr die Perspektive der Teilnehmerinnen und Teilnehmer anhand einer eMail-basierten Umfrage vorgestellt. Die Kernfrage lautet hierbei: War der Workshop für sie gewinnbringend?",
+				"issue": "3",
+				"libraryCatalog": "DABI",
+				"pages": "0-0",
+				"publicationTitle": "GMS Medizin, Bibliothek, Information",
+				"shortTitle": "Mich interessierten kostengünstige Alternativen zu Citavi",
+				"url": "http://www.egms.de/static/de/journals/mbi/2012-12/mbi000261.shtml",
+				"volume": "12",
+				"attachments": [],
+				"tags": [
+					"Arbeitsgemeinschaft für Medizinisches Bibliothekswesen (AGMB)",
+					"Citavi",
+					"Literaturverwaltung",
+					"Literaturverwaltungssoftware",
+					"Tagung",
+					"Teilnehmerumfrage",
+					"Veranstaltungsbericht",
+					"Workshop"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://dabi.ib.hu-berlin.de/cgi-bin/dabi/suche.pl?titel=&autor=st%F6hr&schlagwort=&styp=&notation=&zeitschrift=&jahr=&heft=&andor=AND&ordnung=titel&modus=html",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://dabi.ib.hu-berlin.de/cgi-bin/dabi/vollanzeige.pl?artikel_id=16013&modus=html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "\"Frage stellen, Antwort bekommen, weiterarbeiten!\" - Umfrage zur Benutzung von UpToDate an den Universitäten Freiburg, Leipzig, Münster und Regensburg:",
+				"creators": [
+					{
+						"firstName": "Oliver",
+						"lastName": "Obst",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Helge",
+						"lastName": "Knüttel",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Christiane",
+						"lastName": "Hofmann",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Petra",
+						"lastName": "Zöller",
+						"creatorType": "author"
+					}
+				],
+				"date": "2013",
+				"abstractNote": "UpToDate ist eine evidenzbasierte, von Ärzten erstellte Ressource zur Unterstützung der klinischen Entscheidungsfindung mit weitem Verbreitungsgrad in Deutschland. In einer Multicenter-Studie wurden Mediziner, Studierende, Wissenschaftler und sonstiges medizinisches Fachpersonal an vier deutschen Universitäten nach ihrer Nutzung und Beurteilung von UpToDate befragt. Insgesamt wurde die Umfrage 1.083-mal beantwortet, darunter von 540 Ärzten. 76% aller befragten Ärzte (aber nur 54% der Chefärzte) nutzten UpToDate. Die Unkenntnis über UpToDate betrug je nach Benutzergruppe zwischen 10 und 41%. 90 bis 95% aller klinisch tätigen Personen nannten als Hauptvorteil von UpToDate die schnelle, allgemeine Übersicht über Diagnose und Therapie von Erkrankungen. Jeder vierte Oberarzt wies auf verringerte Liegezeiten als Folge von UpToDate hin, (fast) jeder vierte Chefarzt gab an, dass UpToDate Kosten einspare. UpToDate ist eine wichtige, aber auch kostspielige Ressource in der Patientenbehandlung und sollte - angesichts der vorhandenen Unkenntnis über die Existenz dieser Ressource - stärker von den Bibliotheken beworben werden.",
+				"issue": "3",
+				"libraryCatalog": "DABI",
+				"pages": "0-0",
+				"publicationTitle": "GMS Medizin, Bibliothek, Information",
+				"shortTitle": "Frage stellen",
+				"url": "http://www.egms.de/static/de/journals/mbi/2013-13/mbi000290.shtml",
+				"volume": "13",
+				"attachments": [],
+				"tags": [
+					"Freiburg",
+					"Krankenversorgung",
+					"Leipzig",
+					"Medizin",
+					"Medizinbibliothek",
+					"Multicenter-Studie",
+					"Münster",
+					"Regensburg",
+					"Umfrage",
+					"Universität Freiburg",
+					"Universität Leipzig",
+					"Universität Münster",
+					"Universität Regensburg"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://dabi.ib.hu-berlin.de/cgi-bin/dabi/vollanzeige.pl?artikel_id=18305&modus=html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "\"Was ihr wollt!\" Nutzungsgesteuerter Einkauf von Medien an der Staatsbibliothek zu Berlin",
+				"creators": [
+					{
+						"firstName": "Janin",
+						"lastName": "Taubert",
+						"creatorType": "author"
+					}
+				],
+				"date": "2014",
+				"issue": "3",
+				"libraryCatalog": "DABI",
+				"pages": "79-81",
+				"publicationTitle": "Bibliotheks-Magazin",
+				"shortTitle": "Was ihr wollt",
+				"url": "http://www.bsb-muenchen.de/fileadmin/imageswww/pdf-dateien/bibliotheksmagazin/BM2014-3.pdf",
+				"volume": "9",
+				"attachments": [
+					{
+						"title": "DABI Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					"Benutzerorientierter Bestandsaufbau",
+					"Benutzerorientierung",
+					"Berlin",
+					"Bestand",
+					"Bestandsaufbau",
+					"Bibliothekswesen",
+					"Demand Driven Acquisition (DDA)",
+					"E-Book",
+					"Evidence Based Selection (EBS)",
+					"Kundenorientierter Bestandsaufbau",
+					"Patron Driven Acquisition (PDA)",
+					"Purchase On Demand (POD)",
+					"Staatsbibliothek zu Berlin - Preußischer Kulturbesitz (SBB PK)"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://dabi.ib.hu-berlin.de/cgi-bin/dabi/vollanzeige.pl?artikel_id=5676&modus=html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Anpassung der Personalstruktur der Fachhochschulbibliotheken in Nordrhein-Westfalen an die Erfordernisse der neunziger Jahre",
+				"creators": [],
+				"date": "1992",
+				"issue": "1",
+				"libraryCatalog": "DABI",
+				"pages": "364-372",
+				"publicationTitle": "Mitteilungsblatt des Verbandes der Bibliotheken des Landes Nordrhein-Westfalen",
+				"shortTitle": "Anpassung der Personalstruktur der Fachhochschulbibliotheken in",
+				"url": "http://dabi.ib.hu-berlin.de/cgi-bin/dabi/vollanzeige.pl?artikel_id=5676&modus=html",
+				"volume": "4",
+				"attachments": [],
+				"tags": [
+					"Nordrhein-Westfalen"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
