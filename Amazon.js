@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2015-03-13 21:29:32"
+	"lastUpdated": "2016-01-09 20:45:00"
 }
 
 function detectWeb(doc, url) {
@@ -243,7 +243,7 @@ function scrape(doc, url) {
 	}
 	
 	//Abstract
-	var abstractNode = doc.getElementById('postBodyPS');
+	var abstractNode = doc.getElementById('bookDesc_postBodyPS');
 	if (abstractNode) {
 		item.abstractNote = abstractNode.textContent.trim();
 		if (!item.abstractNote) {
