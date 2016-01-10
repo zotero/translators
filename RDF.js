@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2015-08-07 21:09:00"
+	"lastUpdated": "2016-01-16 21:09:00"
 }
 
 /*
@@ -754,8 +754,14 @@ function importItem(newItem, node) {
 		} else if(creatorType == "editor" || creatorType == "contributor") {
 			creators = getFirstResults(node, [n.bib+creatorType+"s", n.eprints+creatorType+"s_name"]);
 		//get presenters in unpublished conference papers on eprints
-		}else if(creatorType == "presenter") {
+		} else if(creatorType == "presenter") {
 			creators = getFirstResults(node, [n.z+creatorType+"s", n.eprints+"creators_name"]);
+
+		} else if(creatorType == "castMember") {
+			creators = getFirstResults(node, [n.video+"actor"]);
+
+		} else if(creatorType == "scriptwriter") {
+			creators = getFirstResults(node, [n.video+"writer"]);
 
 		} else {
 			creators = getFirstResults(node, [n.z+creatorType+"s"]);
@@ -766,7 +772,8 @@ function importItem(newItem, node) {
 	
 	
 	// publicationTitle -- first try PRISM, then DC
-	newItem.publicationTitle = getFirstResults(node, [n.prism+"publicationName", n.prism2_0+"publicationName", n.prism2_1+"publicationName", n.eprints+"publication", n.eprints+"book_title",	n.dc+"source", n.dc1_0+"source", n.dcterms+"source", n.og+"site_name"], true);
+	newItem.publicationTitle = getFirstResults(node, [n.prism+"publicationName", n.prism2_0+"publicationName", n.prism2_1+"publicationName", n.eprints+"publication", n.eprints+"book_title",
+		n.dc+"source", n.dc1_0+"source", n.dcterms+"source", n.og+"site_name"], true);
 	
 
 	// rights
@@ -880,7 +887,8 @@ function importItem(newItem, node) {
 	newItem.distributor = newItem.label = newItem.company = newItem.institution = newItem.publisher;
 	
 	// date
-	newItem.date = getFirstResults(node, [n.eprints+"date", n.prism+"publicationDate", n.prism2_0+"publicationDate", n.prism2_1+"publicationDate", n.og+"published_time",
+	newItem.date = getFirstResults(node, [n.eprints+"date", n.prism+"publicationDate", n.prism2_0+"publicationDate", n.prism2_1+"publicationDate",
+		n.og+"published_time", n.article+"published_time", n.book+"release_date", n.music+"release_date", n.video+"release_date",
 		n.dc+"date.issued", n.dcterms+"date.issued", n.dcterms+"issued", n.dc+"date", n.dc1_0+"date", n.dcterms+"date",
 		n.dcterms+"dateSubmitted", n.eprints+"datestamp"], true);
 	// accessDate
@@ -937,8 +945,8 @@ function importItem(newItem, node) {
 	// ISSN, if encoded per PRISM (DC uses "identifier")
 	newItem.ISSN = getFirstResults((container ? container : node), [n.prism+"issn", n.prism2_0+"issn", n.prism2_1+"issn", n.eprints+"issn", n.bibo+"issn",
 		n.prism+"eIssn", n.prism2_0+"eIssn", n.prism2_1+"eIssn", n.bibo+"eissn"], true) || newItem.ISSN;
-	// ISBN from PRISM
-	newItem.ISBN = getFirstResults((container ? container : node), [n.prism2_1+"isbn", n.bibo+"isbn", n.bibo+"isbn13", n.bibo+"isbn10"], true) || newItem.ISBN;
+	// ISBN from PRISM or OG
+	newItem.ISBN = getFirstResults((container ? container : node), [n.prism2_1+"isbn", n.bibo+"isbn", n.bibo+"isbn13", n.bibo+"isbn10", n.book+"isbn"], true) || newItem.ISBN;
 	// ISBN from eprints
 	newItem.ISBN = getFirstResults(node, [n.eprints+"isbn"], true) || newItem.ISBN;
 	// DOI from PRISM
@@ -996,7 +1004,10 @@ function importItem(newItem, node) {
 
 	// journalAbbreviation
 	newItem.journalAbbreviation = getFirstResults((container ? container : node), [n.dcterms+"alternative"], true);
-	
+
+	//running Time
+	newItem.runningTime == getFirstResults(node, [n.video+"duration", n.song+"duration"], true);
+
 	// address
 	var adr = getFirstResults(node, [n.vcard2+"adr"]);
 	if(adr) {
