@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-09-29 18:37:33"
+	"lastUpdated": "2016-01-17 17:54:53"
 }
 
 /*
@@ -94,6 +94,8 @@ var _prefixes = {
 	og:"http://ogp.me/ns#",				// Used for Facebook's OpenGraph Protocol
 	article:"http://ogp.me/ns/article#",
 	book:"http://ogp.me/ns/book#",
+	music:"http://ogp.me/ns/music#",
+	video:"http://ogp.me/ns/video#",
 	rdf:"http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 };
 
@@ -254,7 +256,7 @@ function init(doc, url, callback, forceLoadRDF) {
 
 			if(_prefixes[prefix]) {
 				var prop = tag.substr(delimIndex+1, 1).toLowerCase()+tag.substr(delimIndex+2);
-				
+
 				//bib and bibo types are special, they use rdf:type to define type
 				var specialNS = [_prefixes['bib'], _prefixes['bibo']];
 				if(prop == 'type' && specialNS.indexOf(_prefixes[prefix]) != -1) {
@@ -570,9 +572,22 @@ function addLowQualityMetadata(doc, newItem) {
 			newItem.title = newItem.title.replace(removePubTitleRegex, '');
 		}
 	}
-	
-	if(!newItem.creators.length) getAuthorFromByline(doc, newItem);
-	
+
+	if(!newItem.creators.length) {
+		//the authors in the standard W3 author tag are safer than byline guessing
+		var w3authors = ZU.xpath(doc, '//meta[@name="author"]');
+		if (w3authors.length>0){
+			for (var i = 0; i<w3authors.length; i++){
+				newItem.creators.push(ZU.cleanAuthor(w3authors[i].content, "author"));
+			}
+		}
+		else if (tryOgAuthors(doc)) {
+			newItem.creators = tryOgAuthors(doc);
+		}
+		else {
+			getAuthorFromByline(doc, newItem);
+		}
+	}
 	//fall back to "keywords"
 	if(!newItem.tags.length) {
 		 newItem.tags = ZU.xpath(doc, '//x:meta[@name="keywords"]/@content', namespaces)
@@ -593,6 +608,20 @@ function addLowQualityMetadata(doc, newItem) {
 	
 	// add access date
 	newItem.accessDate = 'CURRENT_TIMESTAMP';
+}
+
+function tryOgAuthors(doc) {
+	/*returns an array of objects of Og authors, but only where they do not contain a URL to prevent getting facebook profiles
+	In a worst case scenario, where real authors and social media profiles are mixed, we might miss some, but that's still
+	preferable to garbage */
+	var authors = [];
+	var ogAuthors = ZU.xpath(doc, '//meta[@property="article:author" or @property="video:director" or @property="music:musician"]');
+	for (var i = 0; i<ogAuthors.length; i++) {
+		if (ogAuthors[i].content && ogAuthors[i].content.search(/(https?:\/\/)?[\da-z\.-]+\.[a-z\.]{2,6}/) < 0) {
+			authors.push(ZU.cleanAuthor(ogAuthors[i].content, "author"))
+		}
+	}
+	return authors.length ? authors : null;
 }
 
 function getAuthorFromByline(doc, newItem) {
@@ -865,7 +894,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2011/10/17",
+				"date": "2011",
 				"DOI": "10.4314/thrb.v13i4.63347",
 				"ISSN": "1821-9241",
 				"abstractNote": "The synergistic interaction between Human Immunodeficiency virus (HIV) disease and Malaria makes it mandatory for patients with HIV to respond appropriately in preventing and treating malaria. Such response will help to control the two diseases. This study assessed the knowledge of 495 patients attending the HIV clinic, in Lagos University Teaching Hospital, Nigeria.&nbsp; Their treatment seeking, preventive practices with regards to malaria, as well as the impact of socio &ndash; demographic / socio - economic status were assessed. Out of these patients, 245 (49.5 %) used insecticide treated bed nets; this practice was not influenced by socio &ndash; demographic or socio &ndash; economic factors.&nbsp; However, knowledge of the cause, knowledge of prevention of malaria, appropriate use of antimalarial drugs and seeking treatment from the right source increased with increasing level of education (p &lt; 0.05). A greater proportion of the patients, 321 (64.9 %) utilized hospitals, pharmacy outlets or health centres when they perceived an attack of malaria. Educational intervention may result in these patients seeking treatment from the right place when an attack of malaria fever is perceived.",
@@ -1034,17 +1063,12 @@ var testCases = [
 				"date": "12/2007",
 				"DOI": "10.1590/S0034-89102007000900015",
 				"ISSN": "0034-8910",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "www.scielosp.org",
 				"pages": "94-100",
 				"publicationTitle": "Revista de Saúde Pública",
 				"url": "http://www.scielosp.org/scielo.php?script=sci_abstract&pid=S0034-89102007000900015&lng=en&nrm=iso&tlng=pt",
 				"volume": "41",
 				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
 					{
 						"title": "Snapshot"
 					}
@@ -1115,16 +1139,12 @@ var testCases = [
 						"firstName": "Gregg",
 						"lastName": "Barrios",
 						"creatorType": "author"
-					},
-					{
-						"firstName": "LA Review of",
-						"lastName": "Books",
-						"creatorType": "author"
 					}
 				],
 				"abstractNote": "The effervescent author of \"This is How You Lose Her\" explains the darkness coursing through his fiction",
 				"shortTitle": "Junot Díaz",
 				"url": "http://www.salon.com/2012/10/10/junot_diaz_my_stories_come_from_trauma/",
+				"websiteTitle": "Salon",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -1150,7 +1170,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "12/22/2013",
+				"date": "2013-12-22T11:58:34+00:00",
 				"abstractNote": "Northwestern University recently condemned the American Studies Association boycott of Israel. Unlike some other schools that quit their institutional membership in the ASA over the boycott, Northwestern has not. Many of my Northwestern colleagues were about to start urging a similar withdrawal.\nThen we learned from our administration that despite being listed as in institutional member by the ASA,  the university has, after checking, concluded it has no such membership, does not plan to get one, and is unclear why the ASA would list us as institutional member.\nApparently, at least several other schools listed by the ASA as institutional members say they have no such relationship.\nThe ASA has been spending a great deal of energy on political activism far from its mission, but apparently cannot keep its books in order. The association has yet to explain how it has come to list as institutional members so many schools that know nothing about such a membership. The ASA’s membership rolls may get much shorter in the coming weeks even without any quitting.\nHow this confusion came to arise is unclear. ASA membership, like that of many academic organizations, comes with a subscription to their journal. Some have suggested that perhaps  the ASA also counts as members any institution whose library happened to subscribe to the journal, ie tacking on membership to a subscription, rather than vice versa. This would not be fair on their part. A library may subscribe to all sorts of journals for academic research purposes (ie Pravda), without endorsing the organization that publishes it. That is the difference between subscription and membership.\nI eagerly await the ASA’s explanation of the situation. [...]",
 				"blogTitle": "The Volokh Conspiracy",
 				"url": "http://volokh.com/2013/12/22/northwestern-cant-quit-asa-boycott-member/",
@@ -1257,6 +1277,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2015-08-05T12:05:17Z",
 				"abstractNote": "New research finds creativity benefits.",
 				"url": "https://hbr.org/2015/08/how-to-do-walking-meetings-right",
 				"websiteTitle": "Harvard Business Review",
@@ -1290,7 +1311,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2015-09-22T13:13:04",
+				"date": "2015-09-28",
 				"DOI": "10.16995/olh.46",
 				"ISSN": "2056-6700",
 				"abstractNote": "Article: Opening the Open Library of Humanities",
@@ -1306,6 +1327,35 @@ var testCases = [
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.vox.com/2016/1/7/10726296/wheres-rey-star-wars-monopoly",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "#WheresRey and the big Star Wars toy controversy, explained",
+				"creators": [
+					{
+						"firstName": "Caroline",
+						"lastName": "Framke",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016-01-09T21:20:00Z",
+				"abstractNote": "Excluding female characters in merchandise is an ongoing pattern.",
+				"url": "http://www.vox.com/2016/1/7/10726296/wheres-rey-star-wars-monopoly",
+				"websiteTitle": "Vox",
+				"attachments": [
 					{
 						"title": "Snapshot"
 					}
