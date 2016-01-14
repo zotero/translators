@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-09-18 21:39:31"
+	"lastUpdated": "2016-01-21 21:15:20"
 }
 
 /*
@@ -32,6 +32,7 @@
 
 var language="English";
 var L={};
+var isEbrary = false;
 
 //returns an array of values for a given field or array of fields
 //the values are in the same order as the field names
@@ -87,19 +88,12 @@ function initLang(doc, url) {
 	L = {};
 }
 
-function getSearchResults(doc, checkOnly) {
+function getSearchResults(doc, checkOnly, extras) {
 	var root;
-	
 	var elements = doc.getElementsByClassName('resultListContainer');
+	
 	for (var i=0; i<elements.length; i++) {
 		if (elements[i] && elements[i].offsetHeight>0) {
-			// Bookmarklet cannot handle ebrary results, because they are cross-origin
-			if (Zotero.isBookmarklet
-				&& ZU.xpath(elements[i], './/ancestor::div[@id="allResults-content"]').length
-			) {
-				return false;
-			}
-			
 			root = elements[i];
 			break;
 		}
@@ -113,6 +107,9 @@ function getSearchResults(doc, checkOnly) {
 	var results = root.getElementsByClassName('resultItem');
 	//root.querySelectorAll('.resultTitle, .previewTitle');
 	var items = {}, found = false;
+	isEbrary = (results && results[0] && results[0].getElementsByClassName('ebraryitem').length > 0);
+	// if the first result is Ebrary, they all are - we're looking at the Ebrary results tab
+	
 	for(var i=0, n=results.length; i<n; i++) {
 		var title = results[i].querySelectorAll('.resultTitle, .previewTitle')[0];
 		if (!title || title.nodeName != 'A') continue;
@@ -130,8 +127,16 @@ function getSearchResults(doc, checkOnly) {
 		}
 		
 		items[title.href] = item;
-	}
 		
+		if (isEbrary && Zotero.isBookmarklet) {
+			extras[title.href] = {
+				html: results[i],
+				title: item,
+				url: title.href
+			};
+		}
+	}
+
 	return found ? items : false;
 }
 
@@ -179,14 +184,15 @@ function detectWeb(doc, url) {
 
 	// Fall back on journalArticle-- even if we couldn't guess the type
 	if(types.length) return "journalArticle";
-	
 }
 
 function doWeb(doc, url, noFollow) {
 	var type = detectWeb(doc, url);
 	if (type == "multiple") {
 		// detect web returned multiple
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+		var resultData = {};
+		
+		Zotero.selectItems(getSearchResults(doc, false, resultData), function (items) {
 			if (!items) return true;
 			
 			var articles = new Array();
@@ -194,14 +200,25 @@ function doWeb(doc, url, noFollow) {
 				articles.push(item);
 			}
 			
-			if (articles[0].indexOf("ebraryresults") > -1) {
-				// if the first result is for ebrary, the rest are also ebrary
-				ZU.processDocuments(articles, function(doc) {
-					var translator = Zotero.loadTranslator("web");
-					translator.setTranslator("2abe2519-2f0a-48c0-ad3a-b87b9c059459");
-					translator.setDocument(doc);
-					translator.translate();
-				});
+			if (isEbrary) {
+				if(Zotero.isBookmarklet) {
+					// The bookmarklet can't use the ebrary translator
+					
+					var refs = [];
+					
+					for(var i in items) {
+						refs.push(resultData[i]);
+					}
+					
+					scrapeEbraryResults(refs);
+				} else {
+					ZU.processDocuments(articles, function(doc) {
+						var translator = Zotero.loadTranslator("web");
+						translator.setTranslator("2abe2519-2f0a-48c0-ad3a-b87b9c059459");
+						translator.setDocument(doc);
+						translator.translate();
+					});
+				}
 			} else {
 				ZU.processDocuments(articles, doWeb);
 			}
@@ -497,6 +514,63 @@ function getItemType(types) {
 	}
 
 	return guessType;
+}
+
+function scrapeEbraryResults(refs) {
+	// Since we can't chase URLs, let's get what we can from the page
+	
+	for(var i = 0; i < refs.length; i++) {
+		var ref = refs[i];
+		var hiddenData = ZU.xpathText(ref.html, './span');
+		var visibleData = Array.prototype.map.call(ref.html.getElementsByClassName('results_list_copy'), function(node) {
+			// The text returned by textContent is of the following format:
+			// book title \n author, first; [author, second; ...;] publisher name; publisher location (date) \n
+			return /\n(.*)\n?/.exec(node.textContent)[1].split(';').reverse();
+		})[0];
+		var item = new Zotero.Item("book");
+		var date = /\(([\w\s]+)\)/.exec(visibleData[0]);
+		var place = /([\w,\s]+)\(/.exec(visibleData[0]);
+		var isbn = /isbn,\svalue\s=\s\'([\dX]+)\'/i.exec(hiddenData);
+		var language = /language_code,\svalue\s=\s\'([A-Za-z]+)\'\n/i.exec(hiddenData);
+		var numPages = /page_count,\svalue\s=\s\'(\d+)\'\n/i.exec(hiddenData);
+		var locNum = /lccn,\svalue\s=\s\'([-.\s\w]+)\'\n/i.exec(hiddenData);
+
+		item.title = ref.title;
+		item.url = ref.url;
+		
+		if(date) {
+			item.date = date[1];
+		}
+		
+		if(place) {
+			item.place = place[1].trim();
+		}
+		
+		item.publisher = visibleData[1].trim();
+		
+		// Push the authors in reverse to restore the original order
+		for(var j = visibleData.length - 1; j >= 2; j--) {
+			item.creators.push(ZU.cleanAuthor(visibleData[j], "author", true));
+		}
+		
+		if(isbn) {
+			item.ISBN = isbn[1];
+		}
+		
+		if(language) {
+			item.language = language[1];
+		}
+		
+		if(numPages) {
+			item.numPages = numPages[1];
+		}
+		
+		if(locNum) {
+			item.callNumber = locNum[1];
+		}
+		
+		item.complete();
+	}
 }
 
 //localized field names
