@@ -2,93 +2,102 @@
 	"translatorID": "92d4ed84-8d0-4d3c-941f-d4b9124cfbb",
 	"label": "IEEE Xplore",
 	"creator": "Simon Kornblith, Michael Berkowitz, Bastian Koenings, and Avram Lyon",
-	"target": "^https?://[^/]*ieeexplore\\.ieee\\.org[^/]*/(?:[^\\?]+\\?(?:|.*&)arnumber=[0-9]+|search/(?:searchresult.jsp|selected.jsp)|xpl\\/(mostRecentIssue|tocresult).jsp\\?)",
-	"minVersion": "2.1",
+	"target": "^https?://([^/]+\\.)?ieeexplore\\.ieee\\.org/([^#]+[&?]arnumber=\\d+|search/(searchresult|selected)\\.jsp|xpl\\/(mostRecentIssue|tocresult).jsp\\?)",
+	"minVersion": "3.0.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-29 22:35:22"
+	"lastUpdated": "2015-06-09 07:32:25"
 }
 
 function detectWeb(doc, url) {
-	if(doc.defaultView !== doc.defaultView.top) return false;
+	if(doc.defaultView !== doc.defaultView.top) return;
 	
-	var articleRe = /[?&]ar(N|n)umber=([0-9]+)/;
-	var m = articleRe.exec(url);
-
-	if (m) {
+	if (/[?&]arnumber=(\d+)/i.test(url)) {
 		return "journalArticle";
-	} else {
+	}
+	
+	// Issue page
+	var results = doc.getElementById('results-blk');
+	if (results) {
+		return getSearchResults(doc, true) ? "multiple" : false;
+	}
+	
+	var search = ZU.xpath(doc, '//div[@ng-app="xpl.search"]')[0];
+	if (!search) {
+		Zotero.debug("No search scope");
+		return;
+	}
+	
+	Z.monitorDOMChanges(search, {childList: true});
+	
+	var searchResults = search.getElementsByClassName('search-results')[0];
+	if (!searchResults) {
+		Zotero.debug("no search results");
+		return;
+	}
+	
+	if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+}
 
-	return false;
+function getSearchResults(doc, checkOnly) {
+	var articleList = doc.getElementsByClassName('article-list')[0],
+		rows;
+	if (!articleList) {
+		articleList = doc.getElementById('results-blk');
+		if (articleList) {
+			rows = articleList.getElementsByClassName('art-abs-url');
+		}
+	} else {
+		rows = ZU.xpath(articleList, './/a[@ng-bind-html="::record.title"]')
+	}
+	
+	if (!articleList || !rows) return checkOnly ? false : {};
+	
+	var items = {},
+		found = false;
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[fixUrl(href)] = title;
+	}
+	return found ? items : false;
+}
+
+// Some pages don't show the metadata we need (http://forums.zotero.org/discussion/16283)
+// No data: http://ieeexplore.ieee.org/search/srchabstract.jsp?tp=&arnumber=1397982
+// No data: http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1397982
+// Data: http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1397982
+// Also address issue of saving from PDF itself, I hope
+// URL like http://ieeexplore.ieee.org/ielx4/78/2655/00080767.pdf?tp=&arnumber=80767&isnumber=2655
+// Or: http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1575188&tag=1
+function fixUrl(url) {
+	var arnumber = url.match(/arnumber=(\d+)/)[1];
+	return url.replace(/\/(?:search|stamp|ielx[45])\/.*$/, "/xpls/abs_all.jsp?arnumber=" + arnumber);
 }
 
 function doWeb(doc, url) {
-	var hostRe = new RegExp("^(https?://[^/]+)/");
-	var hostMatch = hostRe.exec(url);
-
-	var articleRe = /[?&]ar(?:N|n)umber=([0-9]+)/;
-	var m = articleRe.exec(url);
-
 	if (detectWeb(doc, url) == "multiple") {
-		// search page
-		var items = new Object();
-
-		var xPathRows = '//ul[@class="Results"]/li[@class="noAbstract"]/div[@class="header"]';
-		if (ZU.xpath(doc, xPathRows).length<1){
-			var xPathRows = '//ul[@class="results"]/li/div[@class="txt"]'
-		}
-		var tableRows = doc.evaluate(xPathRows, doc, null, XPathResult.ANY_TYPE, null);
-		var tableRow;
-		while (tableRow = tableRows.iterateNext()) {
-			var linknode = doc.evaluate('.//h3/a', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext();
-			if (!linknode) {
-				// There are things like tables of contents that don't have item pages, so we'll just skip them
-				continue;
-			}
-			var link = linknode.href;
-			var title = "";
-			var strongs = tableRow.getElementsByTagName("h3");
-			for each(var strong in strongs) {
-				if (strong.textContent) {
-					title += strong.textContent + " ";
-				}
-			}
-
-			items[link] = Zotero.Utilities.trimInternal(title);
-		}
-
-		Zotero.selectItems(items, function (items) {
+		Zotero.selectItems(getSearchResults(doc), function (items) {
 			if (!items) {
 				return true;
 			}
-			var urls = new Array();
+			var articles = [];
 			for (var i in items) {
-				// Some pages don't show the metadata we need (http://forums.zotero.org/discussion/16283)
-				// No data: http://ieeexplore.ieee.org/search/srchabstract.jsp?tp=&arnumber=1397982
-				// No data: http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1397982
-				// Data: http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1397982
-				var arnumber = i.match(/arnumber=(\d+)/)[1];
-				i = i.replace(/\/(?:search|stamp)\/.*$/, "/xpls/abs_all.jsp?arnumber=" + arnumber);
-				urls.push(i);
+				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(urls, scrape);
+			ZU.processDocuments(articles, scrape); 
 		});
-
 	} else {
 		if (url.indexOf("/search/") !== -1 || url.indexOf("/stamp/") !== -1 || url.indexOf("/ielx4/") !== -1 || url.indexOf("/ielx5/") !== -1) {
-			// Address the same missing metadata problem as above
-			// Also address issue of saving from PDF itself, I hope
-			// URL like http://ieeexplore.ieee.org/ielx4/78/2655/00080767.pdf?tp=&arnumber=80767&isnumber=2655
-			// Or: http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1575188&tag=1
-			var arnumber = url.match(/arnumber=(\d+)/)[1];
-			url = url.replace(/\/(?:search|stamp|ielx[45])\/.*$/, "/xpls/abs_all.jsp?arnumber=" + arnumber);
-			Zotero.Utilities.processDocuments([url], scrape);
-			Zotero.wait();
+			ZU.processDocuments([fixUrl(url)], scrape);
 		} else {
 			scrape(doc, url);
 		}
@@ -96,14 +105,12 @@ function doWeb(doc, url) {
 }
 
 function scrape (doc, url) {
- 	var arnumber = url.match(/arnumber=\d+/)[0].replace(/arnumber=/, "");
-  	var pdf;
-  	pdf = ZU.xpathText(doc, '//span[contains(@class, "button")]/a[@class="pdf"]/@href')
-  	Z.debug(pdf)
-  	Z.debug(arnumber)
-  	var get = 'http://ieeexplore.ieee.org/xpl/downloadCitations';
+ 	var arnumber = url.match(/arnumber=(\d+)/)[1];
+  	var pdf = ZU.xpathText(doc, '//span[contains(@class, "button")]/a[@class="pdf"]/@href')
+  	Z.debug(pdf);
+  	Z.debug("arNumber = " + arnumber);
   	var post = "recordIds=" + arnumber + "&fromPage=&citations-format=citation-abstract&download-format=download-bibtex";
-  	Zotero.Utilities.HTTP.doPost(get, post, function(text) {
+  	ZU.doPost('/xpl/downloadCitations', post, function(text) {
   		text = ZU.unescapeHTML(text.replace(/(&[^\s;]+) and/g, '$1;'));
 		//remove empty tag - we can take this out once empty tags are ignored
 		text = text.replace(/(keywords=\{.+);\}/, "$1}");
@@ -133,7 +140,7 @@ function scrape (doc, url) {
 				item.pages = "";
 			}
 			if (pdf) {
-				Zotero.Utilities.doGet(pdf, function (src) {
+				ZU.doGet(pdf, function (src) {
 					var m = /<frame src="(.*\.pdf.*)"/.exec(src);
 					if (m) item.attachments = [{
 						url: m[1],
@@ -164,6 +171,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Fuzzy Turing Machines: Variants and Universality",
 				"creators": [
 					{
 						"firstName": "Yongming",
@@ -171,7 +179,23 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
+				"date": "December 2008",
+				"DOI": "10.1109/TFUZZ.2008.2004990",
+				"ISSN": "1063-6706",
+				"abstractNote": "In this paper, we study some variants of fuzzy Turing machines (FTMs) and universal FTM. First, we give several formulations of FTMs, including, in particular, deterministic FTMs (DFTMs) and nondeterministic FTMs (NFTMs). We then show that DFTMs and NFTMs are not equivalent as far as the power of recognizing fuzzy languages is concerned. This contrasts sharply with classical TMs. Second, we show that there is no universal FTM that can exactly simulate any FTM on it. But if the membership degrees of fuzzy sets are restricted to a fixed finite subset A of [0,1], such a universal machine exists. We also show that a universal FTM exists in some approximate sense. This means, for any prescribed accuracy, that we can construct a universal machine that simulates any FTM with the given accuracy. Finally, we introduce the notions of fuzzy polynomial time-bounded computation and nondeterministic fuzzy polynomial time-bounded computation, and investigate their connections with polynomial time-bounded computation and nondeterministic polynomial time-bounded computation.",
+				"issue": "6",
+				"itemID": "4607247",
+				"libraryCatalog": "IEEE Xplore",
+				"pages": "1491-1502",
+				"publicationTitle": "IEEE Transactions on Fuzzy Systems",
+				"shortTitle": "Fuzzy Turing Machines",
+				"volume": "16",
+				"attachments": [
+					{
+						"title": "IEEE Xplore Abstract Record",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [
 					"Deterministic fuzzy Turing machine (DFTM)",
 					"Turing machines",
@@ -192,25 +216,8 @@ var testCases = [
 					"nondeterministic polynomial time-bounded computation",
 					"universal fuzzy Turing machine (FTM)"
 				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "IEEE Xplore Abstract Record",
-						"mimeType": "text/html"
-					}
-				],
-				"itemID": "4607247",
-				"publicationTitle": "IEEE Transactions on Fuzzy Systems",
-				"title": "Fuzzy Turing Machines: Variants and Universality",
-				"date": "December 2008",
-				"volume": "16",
-				"issue": "6",
-				"pages": "1491-1502",
-				"abstractNote": "In this paper, we study some variants of fuzzy Turing machines (FTMs) and universal FTM. First, we give several formulations of FTMs, including, in particular, deterministic FTMs (DFTMs) and nondeterministic FTMs (NFTMs). We then show that DFTMs and NFTMs are not equivalent as far as the power of recognizing fuzzy languages is concerned. This contrasts sharply with classical TMs. Second, we show that there is no universal FTM that can exactly simulate any FTM on it. But if the membership degrees of fuzzy sets are restricted to a fixed finite subset A of [0,1], such a universal machine exists. We also show that a universal FTM exists in some approximate sense. This means, for any prescribed accuracy, that we can construct a universal machine that simulates any FTM with the given accuracy. Finally, we introduce the notions of fuzzy polynomial time-bounded computation and nondeterministic fuzzy polynomial time-bounded computation, and investigate their connections with polynomial time-bounded computation and nondeterministic polynomial time-bounded computation.",
-				"DOI": "10.1109/TFUZZ.2008.2004990",
-				"ISSN": "1063-6706",
-				"libraryCatalog": "IEEE Xplore",
-				"shortTitle": "Fuzzy Turing Machines"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -220,6 +227,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Graph Matching for Adaptation in Remote Sensing",
 				"creators": [
 					{
 						"firstName": "D.",
@@ -242,7 +250,26 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
+				"date": "January 2013",
+				"DOI": "10.1109/TGRS.2012.2200045",
+				"ISSN": "0196-2892",
+				"abstractNote": "We present an adaptation algorithm focused on the description of the data changes under different acquisition conditions. When considering a source and a destination domain, the adaptation is carried out by transforming one data set to the other using an appropriate nonlinear deformation. The eventually nonlinear transform is based on vector quantization and graph matching. The transfer learning mapping is defined in an unsupervised manner. Once this mapping has been defined, the samples in one domain are projected onto the other, thus allowing the application of any classifier or regressor in the transformed domain. Experiments on challenging remote sensing scenarios, such as multitemporal very high resolution image classification and angular effects compensation, show the validity of the proposed method to match-related domains and enhance the application of cross-domains image processing techniques.",
+				"issue": "1",
+				"itemID": "6221978",
+				"libraryCatalog": "IEEE Xplore",
+				"pages": "329-341",
+				"publicationTitle": "IEEE Transactions on Geoscience and Remote Sensing",
+				"volume": "51",
+				"attachments": [
+					{
+						"title": "IEEE Xplore Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "IEEE Xplore Abstract Record",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [
 					"Adaptation models",
 					"Domain adaptation",
@@ -276,40 +303,106 @@ var testCases = [
 					"transfer learning mapping",
 					"vector quantization"
 				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "IEEE Xplore Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "IEEE Xplore Abstract Record",
-						"mimeType": "text/html"
-					}
-				],
-				"itemID": "6221978",
-				"publicationTitle": "IEEE Transactions on Geoscience and Remote Sensing",
-				"title": "Graph Matching for Adaptation in Remote Sensing",
-				"date": "January 2013",
-				"volume": "51",
-				"issue": "1",
-				"pages": "329-341",
-				"abstractNote": "We present an adaptation algorithm focused on the description of the data changes under different acquisition conditions. When considering a source and a destination domain, the adaptation is carried out by transforming one data set to the other using an appropriate nonlinear deformation. The eventually nonlinear transform is based on vector quantization and graph matching. The transfer learning mapping is defined in an unsupervised manner. Once this mapping has been defined, the samples in one domain are projected onto the other, thus allowing the application of any classifier or regressor in the transformed domain. Experiments on challenging remote sensing scenarios, such as multitemporal very high resolution image classification and angular effects compensation, show the validity of the proposed method to match-related domains and enhance the application of cross-domains image processing techniques.",
-				"DOI": "10.1109/TGRS.2012.2200045",
-				"ISSN": "0196-2892",
-				"libraryCatalog": "IEEE Xplore"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
 		"url": "http://ieeexplore.ieee.org/search/searchresult.jsp?queryText%3Dlabor&refinements=4291944246&pageNumber=1&resultAction=REFINE",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "http://ieeexplore.ieee.org/xpl/mostRecentIssue.jsp?punumber=6221021",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://ieeexplore.ieee.org/search/searchresult.jsp?queryText=Wind%20Farms&newsearch=true",
+		"defer": true,
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://ieeexplore.ieee.org/xpl/login.jsp?tp=&arnumber=1397982",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Analysis and circuit modeling of waveguide-separated absorption charge multiplication-avalanche photodetector (WG-SACM-APD)",
+				"creators": [
+					{
+						"firstName": "Yasser M.",
+						"lastName": "El-Batawy",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "M.J.",
+						"lastName": "Deen",
+						"creatorType": "author"
+					}
+				],
+				"date": "March 2005",
+				"DOI": "10.1109/TED.2005.843884",
+				"ISSN": "0018-9383",
+				"abstractNote": "Waveguide photodetectors are considered leading candidates to overcome the bandwidth efficiency tradeoff of conventional photodetectors. In this paper, a theoretical physics-based model of the waveguide separated absorption charge multiplication avalanche photodetector (WG-SACM-APD) is presented. Both time and frequency modeling for this photodetector are developed and simulated results for different thicknesses of the absorption and multiplication layers and for different areas of the photodetector are presented. These simulations provide guidelines for the design of these high-performance photodiodes. In addition, a circuit model of the photodetector is presented in which the photodetector is a lumped circuit element so that circuit simulation of the entire photoreceiver is now feasible. The parasitics of the photodetector are included in the circuit model and it is shown how these parasitics degrade the photodetectors performance and how they can be partially compensated by an external inductor in series with the load resistor. The results obtained from the circuit model of the WG-SACM-APD are compared with published experimental results and good agreement is obtained. This circuit modeling can easily be applied to any WG-APD structure. The gain-bandwidth characteristic of WG-SACM-APD is studied for different areas and thicknesses of both the absorption and the multiplication layers. The dependence of the performance of the photodetector on the dimensions, the material parameters and the multiplication gain are also investigated.",
+				"issue": "3",
+				"itemID": "1397982",
+				"libraryCatalog": "IEEE Xplore",
+				"pages": "335-344",
+				"publicationTitle": "IEEE Transactions on Electron Devices",
+				"volume": "52",
+				"attachments": [
+					{
+						"title": "IEEE Xplore Abstract Record",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					"Absorption",
+					"Avalanche photodetectors",
+					"Bandwidth",
+					"Circuit analysis",
+					"Circuit simulation",
+					"Degradation",
+					"Frequency",
+					"Guidelines",
+					"Photodetectors",
+					"Photodiodes",
+					"SACM photodetectors",
+					"WG-SACM-APD circuit modeling",
+					"Waveguide theory",
+					"absorption layers",
+					"avalanche photodiodes",
+					"circuit model of photodetectors",
+					"circuit modeling",
+					"circuit simulation",
+					"external inductor",
+					"frequency modeling",
+					"high-performance photodiodes",
+					"high-speed photodetectors",
+					"load resistor",
+					"lumped circuit element",
+					"lumped parameter networks",
+					"multiplication layers",
+					"optical receivers",
+					"parasitics effects",
+					"photodetector analysis",
+					"photodetectors",
+					"photoreceiver",
+					"physics-based modeling",
+					"semiconductor device models",
+					"theoretical physics-based model",
+					"time modeling",
+					"waveguide photodetectors",
+					"waveguide separated absorption charge multiplication avalanche photodetector"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

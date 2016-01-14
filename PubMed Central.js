@@ -2,14 +2,14 @@
 	"translatorID": "27ee5b2c-2a5a-4afc-a0aa-d386642d4eed",
 	"label": "PubMed Central",
 	"creator": "Michael Berkowitz and Rintze Zelle",
-	"target": "^https?://(www\\.)?ncbi.nlm.nih.gov/pmc/",
+	"target": "^https?://(www\\.)?ncbi\\.nlm\\.nih\\.gov/pmc",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-11-15 08:24:57"
+	"lastUpdated": "2015-01-16 05:50:52"
 }
 
 function detectWeb(doc, url) {

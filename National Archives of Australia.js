@@ -1,15 +1,15 @@
 {
 	"translatorID": "50a4cf3f-92ef-4e9f-ab15-815229159b16",
 	"label": "National Archives of Australia",
-	"creator": "Tim Sherratt",
+	"creator": "Tim Sherratt, Aurimas Vinckevicius",
 	"target": "^https?://recordsearch\\.naa\\.gov\\.au/",
-	"minVersion": "1.0",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-04-03 17:48:28"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2015-06-25 06:51:40"
 }
 
 /*
@@ -30,268 +30,495 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+var multiplesRE = /\/(SeriesListing|ItemsListing|PhotoSearchSearchResults)\.asp/i;
+var singleItemRE = /\/(SeriesDetail|ItemDetail|PhotoSearchItemDetail|ViewImage)\.asp/i;
 function detectWeb(doc, url) {
 	//RecordSearch - items and series - or Photosearch results
-	if (url.match(/SeriesListing\.asp/i) || url.match(/ItemsListing\.asp/i) || url.match(/PhotoSearchSearchResults\.asp/i)) {
-			return "multiple";
-	} else if (url.match(/SeriesDetail\.asp/i) || url.match(/ItemDetail\.asp/i) || url.match(/PhotoSearchItemDetail\.asp/i) || url.match(/imagine\.asp/i)) {
+	if (multiplesRE.test(url)) {
+			return getSearchResults(doc, url, true) ? "multiple" : false;
+	} else if (singleItemRE.test(url)) {
 			return "manuscript";
 	}
 }
 
 function doWeb(doc, url) {
-	// To avoid cross domain errors make sure links match current sub-domain
-	var baseURL = doc.location.href.match(/(https?:\/\/[a-z0-9]+\.naa\.gov\.au)/)[1];
-	var records = new Array();
-	var titles, links, title, link;
-	var setupCallback = function () {
-	if (records.length) {
-			var record = records.shift();
-			var item = new Zotero.Item("manuscript");
-			item.archive = "National Archives of Australia";
-			var tags = new Array();
-			if (record.match(/Imagine\.asp/i)) {
-				var postString, barcode, page, numPages;
-				item.libraryCatalog = "RecordSearch";
-				if (doc.body.innerHTML.match(/Digital copy of NAA:/)) {
-					doc.evaluate('//img[@id="fileimage"]/@src', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent.match(/B=(\d+)&S=(\d+)&/);
-					barcode = RegExp.$1;
-					page = RegExp.$2;
-					numPages = Zotero.Utilities.trimInternal(doc.evaluate('//input[@id="printto"]/@value', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
-				// You're using the original RS interface
-				} else {
-					barcode = Zotero.Utilities.trimInternal(doc.evaluate('//input[@id="Hidden1"]/@value', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
-					page = Zotero.Utilities.trimInternal(doc.evaluate('//input[@id="Text1"]/@value', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
-					numPages = Zotero.Utilities.trimInternal(doc.evaluate('//input[@id="Hidden3"]/@value', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
-				}
-				// This is a digital image -- ie a folio
-				item.pages = page;
-				item.numPages = numPages;
-				item.url = 'http://recordsearch.naa.gov.au/NaaMedia/ShowImage.asp?B=' + barcode + '&S=' + page + '&T=P';
-				if (doc.referrer.match(/NameSearch/i)) {
-					var itemURL = baseURL + "/NameSearch/Interface/ItemDetail.aspx?Barcode=" + barcode;
-				} else {
-					var itemURL = baseURL + '/SearchNRetrieve/Interface/DetailsReports/ItemDetail.aspx?Barcode=' + barcode;
-				}
-				item.manuscriptType = 'folio';
-				Zotero.Utilities.processDocuments(itemURL, function(itemDoc) {
-					var series = Zotero.Utilities.trimInternal(itemDoc.evaluate('//td[@class="field"][. ="Series number"]/following-sibling::td/a', itemDoc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.lastChild.textContent);
-					var control = Zotero.Utilities.trimInternal(itemDoc.evaluate('//td[@class="field"][. ="Control symbol"]/following-sibling::td', itemDoc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.lastChild.textContent);
-					var refNumber = series + ", " + control;
-					item.title = 'Page ' + page + ' of NAA: ' + refNumber;
-					item.archiveLocation = refNumber;
-					// Save a copy of the image
-					item.attachments = [{url:item.url, title:'Digital copy of NAA: ' + refNumber + ', p. ' + page, mimeType:"image/jpeg" }];
-					// MACHINE TAGS
-					// The file of which this page is a part.
-					// item.tags.push('dcterms:isPartOf="http://www.naa.gov.au/cgi-bin/Search?O=I&Number=' + barcode + '"');
-					// Citation
-					// item.tags.push('dcterms:bibliographicCitation="NAA: ' + refNumber + ', p. ' + page + '"');
-					// item.tags.push('xmlns:dcterms="http://purl.org/dc/terms/"');
-					item.complete();
-					setupCallback();
-				});
-			} else if (record.match(/PhotoSearchItemDetail\.asp/i)) {
-		item.libraryCatalog = "PhotoSearch";
-				Zotero.Utilities.processDocuments(record, function (doc) {
-					item.title = Zotero.Utilities.trimInternal(doc.evaluate('//b[. ="Title :"]/following-sibling::text()[1]', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
-					item.manuscriptType = "photograph";
-					var barcode = Zotero.Utilities.trimInternal(doc.evaluate('//b[. ="Barcode : "]/following-sibling::text()[1]', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
-					var series = Zotero.Utilities.trimInternal(doc.evaluate('//b[. ="Find other items in this series :"]/following-sibling::a/text()[1]', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
-					var refNumber = Zotero.Utilities.trimInternal(doc.evaluate('//b[. ="Image no. :"]/following-sibling::text()[1]', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
-					item.archiveLocation = refNumber;
-					item.url = "http://www.naa.gov.au/cgi-bin/Search?O=PSI&Number=" + barcode;
-					if (doc.evaluate('//b[. ="Date :"]/following-sibling::text()[1]', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue != null) {
-							item.date = Zotero.Utilities.trimInternal(doc.evaluate('//b[. ="Date :"]/following-sibling::text()[1]', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
-					}
-					if (doc.evaluate('//b[. ="Location : "]/following-sibling::text()[1]', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue != null) {
-							item.place = Zotero.Utilities.trimInternal(doc.evaluate('//b[. ="Location : "]/following-sibling::text()[1]', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
-					}
-					// Save subjects as tags
-					subjects = new Array();
-					subjects.push(Zotero.Utilities.trimInternal(doc.evaluate('//b[. ="Primary subject :"]/following-sibling::*[1]', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent).toLowerCase());
-					subjects.push(Zotero.Utilities.trimInternal(doc.evaluate('//b[. ="Secondary subject :"]/following-sibling::*[1]', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent).toLowerCase());
-					for (var i in subjects) {
-							if (subjects[i] != '') {
-									item.tags.push(subjects[i]);
-							}
-					}
-					// Citation
-					// item.tags.push('dcterms:bibliographicCitation="NAA: ' + refNumber + '"');
-					// Save barcode as identifier
-					// item.tags.push('dcterms:identifier="' + barcode + '"');
-					// Series of which this is a member
-					// item.tags.push('dcterms:isPartOf="http://www.naa.gov.au/cgi-bin/Search?Number=' + series + '"');
-					// Same file in RecordSearch
-					// item.tags.push('owl:sameAs="http://www.naa.gov.au/cgi-bin/Search?O=I&Number=' + barcode + '"');
-					// Namespace declarations
-					// item.tags.push('xmlns:dcterms="http://purl.org/dc/terms/"');
-					// item.tags.push('xmlns:owl="http://www.w3.org/2002/07/owl#"');
-					// Attach copy of photo as attachment
-					var imgURL = "http://recordsearch.naa.gov.au/NaaMedia/ShowImage.asp?B=" + barcode + "&S=1&T=P";
-					item.attachments = [{url:imgURL, title:"Digital image of NAA: "+ item.archiveLocation, mimeType:"image/jpeg" }];
-					item.complete();
-			setupCallback();
-				});
-			} else if (record.match(/SeriesDetail\.asp/i)) {
-				item.libraryCatalog = "RecordSearch";
-				Zotero.Utilities.processDocuments(record, function (doc) {
-					item.title = Zotero.Utilities.trimInternal(doc.evaluate('//td[@class="field"][contains(.,"Title")]/following-sibling::td', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.lastChild.textContent);
-					var refNumber = Zotero.Utilities.trimInternal(doc.evaluate('//td[@class="field"][contains(.,"Series number")]/following-sibling::td', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.lastChild.textContent);
-					item.archiveLocation = refNumber;
-					item.manuscriptType = "series";
-					// Link into RecordSearch
-					item.url = "http://www.naa.gov.au/cgi-bin/Search?Number=" + refNumber;
-					// Contents dates
-					try {
-						item.date = Zotero.Utilities.trimInternal(doc.evaluate('//td[@class="field"]/div[contains(.,"Contents dates")]/../following-sibling::td', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.lastChild.textContent);
-					} catch(e) {
-						// Not all series have contents dates
-					}
-					// Agencies recording into this series
-					var agencies = doc.evaluate('//div[@id="provenanceRecording"]/ul/li/div[@class="linkagesInfo"]', doc, null, XPathResult.ANY_TYPE, null);
-					while (agency = agencies.iterateNext()) {
-						item.creators.push({lastName: agency.textContent, creatorType: "creator"});
-					}
-					// Save series note as abstract
-					try {
-						var note = Zotero.Utilities.cleanTags(Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="notes"]', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent));
-						item.abstractNote = note;
-					} catch(e) {
-						// Not all series have notes?
-					}
-					// MACHINE TAGS
-					item.extra = "";
-					// Format
-					try {
-						var format = Zotero.Utilities.trimInternal(doc.evaluate('//td[@class="field"][div="Predominant physical format"]/following-sibling::td', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.lastChild.textContent);
-						// item.tags.push('dcterms:format="' + format + '"');
-						item.extra = "Format: " + format + "\n";
-					} catch(e) {
-						// Not sure if all series have formats
-					}
-					// Number of items described on RecordSearch
-					try {
-						var described = doc.evaluate('//td[@class="field"][contains(.,"Items in this series on RecordSearch")]/following-sibling::td/a', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent;
-						// item.tags.push('dcterms:extent="' + described + ' items described"');
-						item.extra += "Items on RecordSearch: " + described + "\n";
-					} catch(e) {
-						// Not all series have items described
-					}
-					// Quantities and locations
-					var quantities = doc.evaluate('//td[@class="field"][contains(.,"Quantity and location")]/following-sibling::td/ul/li', doc, null, XPathResult.ANY_TYPE, null);
-					while (quantity = quantities.iterateNext()) {
-						// item.tags.push('dcterms:extent="' + quantity.textContent + '"');
-						item.extra += "Quantity and location: " + quantity.textContent + "\n";
-					}
-					// Citation
-					item.tags.push('dcterms:bibliographicCitation="NAA: ' + refNumber + '"');
-					// Declare dcterms namespace
-					// item.tags.push('xmlns:dcterms="http://purl.org/dc/terms/"');
-					item.complete();
-			setupCallback();
-				});
-			} else if (record.match(/ItemDetail\.asp/i)) {
-				item.manuscriptType = 'file';
-				item.libraryCatalog = "RecordSearch";
-				Zotero.Utilities.processDocuments(record, function (doc) {
-					item.title = Zotero.Utilities.trimInternal(doc.evaluate('//td[@class="field"][contains(.,"Title")]/following-sibling::td', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.lastChild.textContent);
-					var series = Zotero.Utilities.trimInternal(doc.evaluate('//td[@class="field"][contains(.,"Series number")]/following-sibling::td/a', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.lastChild.textContent);
-					var control = Zotero.Utilities.trimInternal(doc.evaluate('//td[@class="field"][contains(.,"Control symbol")]/following-sibling::td', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.lastChild.textContent);
-					var refNumber = series + ', ' + control;
-					item.archiveLocation = refNumber;
-					var barcode = Zotero.Utilities.trimInternal(doc.evaluate('//td[@class="field"][contains(.,"Item barcode")]/following-sibling::td', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.lastChild.textContent);
-					// Link into RecordSearch
-					item.url = "http://www.naa.gov.au/cgi-bin/Search?O=I&Number=" + barcode;
-					// Contents dates
-					item.date = Zotero.Utilities.trimInternal(doc.evaluate('//td[@class="field"][contains(.,"Contents date range")]/following-sibling::td', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.lastChild.textContent);
-					// Location
-					if (doc.evaluate('//td[@class="field"][contains(.,"Location")]/following-sibling::td', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue != null) {
-							item.place = Zotero.Utilities.trimInternal(doc.evaluate('//td[@class="field"][contains(.,"Location")]/following-sibling::td', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.lastChild.textContent);
-					}
-					// Save item note as abstract
-					if (doc.evaluate('//div[@id="notes"]', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue != null) {
-							item.abstractNote = Zotero.Utilities.cleanTags(Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="notes"]', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent));
-					}
-					// MACHINE TAGS
-					// The series this item belongs to
-					// item.tags.push('dcterms:isPartOf="http://www.naa.gov.au/cgi-bin/Search?Number=' + series + '"');
-					// Citation
-					// item.tags.push('dcterms:bibliographicCitation="NAA: ' + refNumber + '"');
-					// Save the barcode as an identifier
-					// item.tags.push('dcterms:identifier="' + barcode + '"');
-					// Access status
-					var access = Zotero.Utilities.trimInternal(doc.evaluate('//td[@class="field"][contains(.,"Access status")]/following-sibling::td', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.lastChild.textContent);
-					// item.tags.push('dcterms:accessRights="' + access + '"');
-					item.extra = "Access: " + access + "\n";
-					// Format
-					try {
-						var format = Zotero.Utilities.trimInternal(doc.evaluate('//td[@class="field"][div="Physical format"]/following-sibling::td', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.lastChild.textContent);
-						// item.tags.push('dcterms:format="' + format + '"');
-						item.extra += "Format: " + format + "\n";
-					} catch(e) {
-						// Not sure if there's always a format
-					}
-					// Declare dcterms namespace
-					// item.tags.push('xmlns:dcterms="http://purl.org/dc/terms/"');
-					// Is there a digital copy? - if so find the number of pages in the digitised file
-					if (doc.evaluate('//a[. ="View digital copy "]', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue != null) {
-						item.extra += "Digitised\n";
-						itemURL = baseURL + "/scripts/Imagine.asp?B=" + barcode + "&z=ignore";
-						// Retrieve the digitised file
-						Zotero.Utilities.processDocuments(itemURL, function (itemDoc) {
-							item.numPages = Zotero.Utilities.trimInternal(itemDoc.evaluate('//input[@id="Hidden3"]/@value', itemDoc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent);
-							item.complete();
-							setupCallback();
-						});
-					} else {
-						item.complete();
-						setupCallback();
-					}
-				});
-			}
-		} else {
-		Zotero.done();
-	}
-	}
 	if (detectWeb(doc, url) == "multiple") {
-		var titles, links, title, link;
-		var items = new Object();
-		// Files
-		if (url.match(/ItemsListing\.asp/i)) {
-				titles = doc.evaluate('//td[4][@title="Go to Item details"]', doc, null, XPathResult.ANY_TYPE, null);
-				links = doc.evaluate('//td[3][@title="Go to Item details"]/a', doc, null, XPathResult.ANY_TYPE, null);
-				// Photos
-		} else if (url.match(/PhotoSearchSearchResults\.asp/i)) {
-				titles = doc.evaluate('//td[b="Title :"]/a[1]', doc, null, XPathResult.ANY_TYPE, null);
-				links = doc.evaluate('//td[b="Title :"]/a[1]', doc, null, XPathResult.ANY_TYPE, null);
-				//Series
-		} else if (url.match(/SeriesListing\.asp/i)) {
-				titles = doc.evaluate('//td[3][@title="Go to Series details"]', doc, null, XPathResult.ANY_TYPE, null);
-				links = doc.evaluate('//td[2][@title="Go to Series details"]/a', doc, null, XPathResult.ANY_TYPE, null);
-		}
-		while ((title = titles.iterateNext()) && (link = links.iterateNext())) {
-				if (url.match(/PhotoSearchSearchResults\.asp/i)) {
-						items[link.href] = Zotero.Utilities.trimInternal(title.lastChild.textContent);
-				} else {
-						items[link.href] = Zotero.Utilities.trimInternal(title.firstChild.textContent);
-				}
-		}
-		Zotero.selectItems(items, function(items) {
+		Zotero.selectItems(getSearchResults(doc, url), function(items) {
 			if(!items) {
 				return true;
 			}
+			
+			var urls = [];
 			for (var i in items) {
-				records.push(i);
+				urls.push(i);
 			}
-			setupCallback();
+			
+			ZU.processDocuments(urls, scrape);
 		});
 	} else {
-		records = [url];
-		setupCallback();
+		scrape(doc, url);
 	}
 }
 
+function getSearchResults(doc, url, checkOnly) {
+	var m = url.match(multiplesRE);
+	if (!m) return false;
+	
+	var items = {},
+		found = false;
+	switch(m[1].toLowerCase()) {
+		case 'serieslisting':
+		case 'itemslisting':
+			var table = doc.getElementsByClassName('SearchResults')[0];
+			if (!table) return false;
+			
+			var results = ZU.xpath(doc, '//table[@class="SearchResults"]//tr[@class!="header"]');
+			for (var i=0; i<results.length; i++) {
+				var link = ZU.xpath(results[i], './td/a')[0];
+				if (!link) continue;
+				var title = link.parentElement.nextElementSibling;
+				if (!title) continue;
+				
+				if (checkOnly) return true;
+				found = true;
+				items[link.href] = ZU.trimInternal(title.textContent);
+			}
+		break;
+		case 'photosearchsearchresults': // not a typo
+			var records = ZU.xpath(doc, '//table[@id="PhotoResultTable"]//td[@class="norm"]');
+			for (var i=0; i<records.length; i++) {
+				var title = records[i].getElementsByTagName('a')[0];
+				if (!title) continue;
+				
+				if (checkOnly) return true;
+				found = true;
+				items[title.href] = ZU.trimInternal(title.textContent);
+			}
+		break;
+	}
+	
+	return found ? items : false;
+}
+
+function getHost(url) {
+	return url.match(/^http:\/\/[^\/]+/)[0];
+}
+
+function scrape(doc, url) {
+	var m = url.match(singleItemRE);
+	if (!m) return;
+	
+	var item;
+	switch(m[1].toLowerCase()) {
+		case 'viewimage':
+			item = scrapeImage(doc, url);
+		break;
+		case 'photosearchitemdetail':
+			item = scrapePhoto(doc, url);
+		break;
+		case 'seriesdetail':
+			item = scrapeSeries(doc, url);
+		break;
+		case 'itemdetail':
+			item = scrapeItem(doc, url);
+		break;
+		default:
+			throw new Error("Unknown page type: " + m[1]);
+	}
+	
+	if (item) {
+		item.archive = item.libraryCatalog = "National Archives of Australia";
+		item.complete();
+	}
+}
+
+/**
+ * Series/Item scraping
+ */
+
+function parseItemTable(table) {
+	var meta = {},
+		rows = table.getElementsByTagName('tr');
+	for (var i=0; i<rows.length; i++) {
+		var td = rows[i].getElementsByTagName('td');
+		if (td.length != 2) continue;
+		
+		var label = ZU.trimInternal(td[0].textContent).toLowerCase();
+		
+		var data;
+		if (label == 'series note') {
+			// grab the full note, instead of the truncation
+			var notes = table.ownerDocument.getElementById('notes');
+			if (notes && notes.children.length == 2
+				&& (notes = notes.getElementsByTagName('pre')[0])
+			) {
+				data = notes.textContent;
+			} else {
+				data = ZU.trimInternal(td[1].textContent);
+			}
+		} else {
+			data = ZU.trimInternal(td[1].textContent);
+		}
+		
+		
+		if (!label || !data) continue;
+		
+		meta[label] = data;
+	}
+	
+	return meta;
+}
+
+function scrapeItem(doc, url) {
+	var meta = parseItemTable(ZU.xpath(doc, '//div[@class="detailsTable"]//tbody')[0]);
+	
+	var item = new Zotero.Item('manuscript');
+	item.title = meta.title;
+	item.date = meta['contents date range'];
+	item.place = meta.location;
+	item.medium = meta['physical format'];
+	item.archiveLocation = meta.citation.replace(/^NAA\s*:\s*/i, '');
+	
+	var barcode = encodeURIComponent(meta['item barcode']);
+	item.url = 'http://www.naa.gov.au/cgi-bin/Search?O=I&Number=' + barcode;
+	
+	if (meta['item notes']) {
+		item.notes.push(meta['item notes']);
+	}
+	
+	// Add link to digital copy if available
+	if (ZU.xpath(doc, '//div[contains(@id, "_pnlDigitalCopy")]/a[normalize-space(text())="View digital copy"]').length) {
+		item.attachments.push({
+			title: "Digital copy at National Archives of Australia",
+			url: '/SearchNRetrieve/Interface/ViewImage.aspx?B=' + barcode,
+			mimeType: 'text/html',
+			snapshot: false
+		});
+	}
+	
+	return item;
+}
+
+function scrapeSeries(doc, url) {
+	var meta = parseItemTable(ZU.xpath(doc, '//div[@class="detailsTable"]//tbody')[0]);
+	
+	var item = new Zotero.Item('manuscript');
+	item.title = meta.title;
+	item.date = meta['contents dates'];
+	item.medium = meta['predominant physical format'];
+	item.abstractNote = meta['series note'];
+	
+	var seriesNumber = encodeURIComponent(meta['series number']);
+	item.attachments.push({
+		title: "National Archives of Australia Record",
+		url: 'http://www.naa.gov.au/cgi-bin/Search?O=S&Number=' + seriesNumber,
+		mimeType: 'text/html',
+		snapshot: false
+	})
+	
+	// Agencies recording into this series
+	var agencies = ZU.xpath(doc, '//div[@id="provenanceRecording"]//div[@class="linkagesInfo"]');
+	for (var i=0; i<agencies.length; i++) {
+		item.creators.push({
+			lastName: ZU.trimInternal(agencies[i].textContent),
+			creatorType: "author",
+			fieldMode: 1
+		});
+	}
+	
+	return item;
+}
+
+/**
+ * ViewImage
+ */
+
+function getImageField(doc, label) {
+	label = 'lbl' + label;
+	var data = doc.getElementById(label);
+	if (!data) return '';
+	
+	return ZU.trimInternal(data.textContent);
+}
+
+function scrapeImage(doc, url) {
+	var image = doc.getElementById('divImage'),
+		singleView = image && image.offsetParent; // check if visble
+	
+	var total = doc.getElementsByName('hTotalPages')[0],
+		page = doc.getElementsByName('hCurrentPage')[0];
+	page = page && Number.parseInt(page.value);
+	total = total && Number.parseInt(total.value);
+	
+	var item = new Zotero.Item('manuscript');
+	
+	item.title = getImageField(doc, 'Title');
+	if (singleView && page && total != 1) {
+		item.title += ' [' + page + (total ? ' of ' + total : '') + ']';
+	}
+	
+	item.date = getImageField(doc, 'ContentsDate');
+	item.archiveLocation = getImageField(doc, 'Series') + ', ' + getImageField(doc, 'ControlSymbol');
+	
+	var barcode = getImageField(doc, 'Barcode');
+	item.url = getHost(url) + '/SearchNRetrieve/Interface/ViewImage.aspx?'
+		+ 'B=' + encodeURIComponent(barcode)
+		+ (singleView ? '&S=' + page : '');
+	
+	var imageUrlBase = '/SearchNRetrieve/NAAMedia/ShowImage.aspx?T=P&B=' + encodeURIComponent(barcode);
+	// In single view, save current image. In multiples view, save all
+	// (unless more than 10, then don't save at all)
+	if ((singleView && page) || (!singleView && total && total < 11)) {
+		var from = singleView ? page - 1 : 0,
+			to = singleView ? page : total,
+			includeCount = total != 1;
+		
+		for (var i=from; i<to; i++) {
+			item.attachments.push({
+				title: 'Folio'
+					+ (total != 1
+						? ' ' + (i + 1) + (total ? ' of ' + total : '' )
+						: '')
+					+ ' [' + item.archiveLocation + ']',
+				url: imageUrlBase + '&S=' + page,
+				mimeType: 'image/jpeg'
+			});
+		}
+	}
+	
+	return item;
+}
+
+/**
+ * PhotoSearch
+ */
+// Parse "<b>label</b>: data" format into a JS hash table
+function parseMeta(td) {
+	var meta = {},
+		labels = td.getElementsByTagName('b');
+	for (var i=0; i<labels.length; i++) {
+		if (labels[i].parentElement != td) continue; // Might be something b within metadata
+		var label = ZU.trimInternal(labels[i].textContent);
+		if (label.charAt(label.length-1) != ':') continue; // Probably not a label either
+		label = label.substr(0,label.length-1).trim().toLowerCase();
+		if (!label) continue;
+		
+		var data = labels[i].nextElementSibling;
+		if (!data || data.nodeName == 'BR') data = labels[i].nextSibling; // text node
+		
+		meta[label] = ZU.trimInternal(data.textContent);
+	}
+	
+	return meta;
+}
+
+// Parse photo title into separate parts
+//
+// e.g.  TITLE: Bondi Beach [post office interior, mail sorter at work] May 1940
+// CATEGORY: photograph FORMAT: b&w negative QUANTITY: 1 of 4 images
+// TYPE: cellulose acetate STATUS: preservation material
+function parsePhotoTitle(title) {
+	if (!title || !/\bTITLE:\s/.test(title)) return false;
+	
+	var meta = {},
+		partsRE = /\b([A-Z]+)\s*:\s+((?:.(?![A-Z]+\s*:\s))*)/g,
+		m;
+	while (m = partsRE.exec(title)) {
+		meta[m[1].toLowerCase()] = m[2];
+	}
+	
+	return meta;
+}
+
+function scrapePhoto(doc, url) {
+	table = ZU.xpath(doc, '(//table[@id="PhotoDetailTable"]//tr)[1]/td[last()]')[0];
+	if (!table) return;
+	
+	var meta = parseMeta(table);
+	
+	var item = new Zotero.Item('manuscript'); // Transition to artwork or similar when fields become available
+	
+	var titleParts = parsePhotoTitle(meta.title);
+	if (titleParts) {
+		item.title = titleParts.title;
+		item.type = titleParts.category;
+		item.medium = titleParts.type;
+		item.format = titleParts.format;
+	} else {
+		item.title = meta.title;
+	}
+	
+	if (!item.type) {
+		item.type = 'photograph'
+	}
+	
+	item.date = meta.date;
+	item.place = meta.location;
+	
+	item.url = 'http://www.naa.gov.au/cgi-bin/Search?O=PSI&Number=' // Magic. Not sure where this is pulled from, but it's stable
+		+ encodeURIComponent(meta.barcode);
+	
+	item.archiveLocation = meta['image no.'];
+	
+	// Save subjects as tags
+	if (meta['primary subject']) {
+		item.tags.push(meta['primary subject']);
+	}
+	if (meta['secondary subject']) {
+		item.tags.push(meta['secondary subject']);
+	}
+	
+	var image = table.parentElement.getElementsByTagName('img')[0];
+	if (image) {
+		var url = image.src.replace(/([?&])T=[^&]*(?:&|$)/g, '$1') + '&T=P'; // T=P better quality
+		item.attachments.push({
+			title: 'Digital image of NAA: ' + item.archiveLocation,
+			url: url,
+			mimeType: 'image/jpeg' // Seems like that is generally the case
+		});
+	}
+	
+	return item;
+}
 /** BEGIN TEST CASES **/
-var testCases = []
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.naa.gov.au/cgi-bin/Search?O=PSI&Number=1646857",
+		"items": [
+			{
+				"itemType": "manuscript",
+				"title": "Ford V8 three ton lorry loaded with mail [rear view]",
+				"creators": [],
+				"date": "1937",
+				"archive": "National Archives of Australia",
+				"archiveLocation": "C4078, N1005B",
+				"libraryCatalog": "National Archives of Australia",
+				"manuscriptType": "photograph",
+				"place": "Sydney",
+				"url": "http://www.naa.gov.au/cgi-bin/Search?O=PSI&Number=1646857",
+				"attachments": [
+					{
+						"title": "Digital image of NAA: C4078, N1005B",
+						"mimeType": "image/jpeg"
+					}
+				],
+				"tags": [
+					"Communications",
+					"Postal"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://recordsearch.naa.gov.au/SearchNRetrieve/Interface/ViewImage.aspx?B=12048&S=4",
+		"items": [
+			{
+				"itemType": "manuscript",
+				"title": "Carl Gustav Opitz - Naturalization [4 of 7]",
+				"creators": [],
+				"date": "1911 - 1912",
+				"archive": "National Archives of Australia",
+				"archiveLocation": "A1, 1911/18393",
+				"libraryCatalog": "National Archives of Australia",
+				"url": "http://recordsearch.naa.gov.au/SearchNRetrieve/Interface/ViewImage.aspx?B=12048&S=4",
+				"attachments": [
+					{
+						"title": "Folio 4 of 7 [A1, 1911/18393]",
+						"mimeType": "image/jpeg"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.naa.gov.au/cgi-bin/Search?O=I&Number=8606210",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "manuscript",
+				"title": "Prisoner of War/Internee: Wong, Koy; Date of birth - June 1919; Nationality - Chinese",
+				"creators": [],
+				"date": "1944 - 1944",
+				"archive": "National Archives of Australia",
+				"archiveLocation": "MP1103/1, PWJAUSA100061",
+				"libraryCatalog": "National Archives of Australia",
+				"place": "Melbourne",
+				"shortTitle": "Prisoner of War/Internee",
+				"url": "http://www.naa.gov.au/cgi-bin/Search?O=I&Number=8606210",
+				"attachments": [
+					{
+						"title": "Digital copy at National Archives of Australia",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.naa.gov.au/cgi-bin/Search?O=I&Number=1339624",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "manuscript",
+				"title": "El Alamein War Memorial Ceremony - 1954",
+				"creators": [],
+				"date": "1954 - 1954",
+				"archive": "National Archives of Australia",
+				"archiveLocation": "A4940, C1007",
+				"libraryCatalog": "National Archives of Australia",
+				"place": "Canberra",
+				"url": "http://www.naa.gov.au/cgi-bin/Search?O=I&Number=1339624",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.naa.gov.au/cgi-bin/Search?O=S&Number=A10950",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "manuscript",
+				"title": "'A Report on war crimes by individual members of the armed forces of the enemy against Australians by Sir William Webb Kt' [Second Webb Report]",
+				"creators": [
+					{
+						"lastName": "CA 284, Australian War Crimes Commission [I]",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "14 Aug 1944 - 31 Oct 1944",
+				"abstractNote": "This series consists of one volume bound in black with the title 'A report on war crimes by individual members of the armed forces of the enemy against Australians by Sir William Webb Kt' embossed on the front cover in gold.\n\nBackground\n\nThe United Nations War Crimes Commission had two stated objectives (1) to hear evidence of war crimes brought to it by member governments and to list the perpetrator for arrest and (2) to make recommendations to member governments on how war criminals could be brought to trial. It held its first meeting on 20 October 1943 and in reporting to Dr Evatt the Secretary of the Department of External Affairs recommended that a Commission be given to Sir William Webb to investigate war crimes against Australians and to bring to the government such cases as could be forwarded to the UNWCC. \n\nOn 9 February Dr Evatt approached Sir William with an invitation and this was accepted on 24 February. The new commission was issued on 8 June 1944 with prime responsibility for administrative matters held by the Department of External Affairs though the report was to be submitted also to the Attorney Generals Department.\n\nThe hearings commenced on 14 August and concluded on 20 October 1944. The report was tendered to the Minister on 31 October 1944.",
+				"archive": "National Archives of Australia",
+				"libraryCatalog": "National Archives of Australia",
+				"attachments": [
+					{
+						"title": "National Archives of Australia Record",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
 /** END TEST CASES **/

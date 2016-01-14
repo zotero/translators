@@ -9,25 +9,31 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-19 06:10:54"
+	"lastUpdated": "2015-06-02 21:16:57"
 }
 
 /*
-   Reuters Translator
-   Copyright (C) 2011 Avram Lyon, ajlyon@gmail.com, Sebastian Karcher
+	***** BEGIN LICENSE BLOCK *****
 
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+	Reuters Translator
+	Copyright © 2011 Avram Lyon, ajlyon@gmail.com, Sebastian Karcher
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+	This file is part of Zotero.
 
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
 */
 
 function detectWeb(doc, url) {
@@ -75,8 +81,8 @@ function scrape(doc, url) {
 		var byline = ZU.xpathText(doc, '//div[@id="articleInfo"]//p[@class="byline"]');
 		if (byline) {
 			var authors = byline.substr(3).split(/and |,/);
-			for each(var aut in authors) {
-				item.creators.push(authorFix(aut));
+			for (var i=0; i<authors.length; i++) {
+				item.creators.push(authorFix(authors[i]));
 			}
 		}
 		item.publicationTitle = "Reuters";
@@ -88,8 +94,8 @@ function scrape(doc, url) {
 		var byline = ZU.xpathText(doc, '//div[@class="author"]');
 		if (byline) {
 			var authors = byline.split(/and |,/);
-			for each(var aut in authors) {
-				item.creators.push(authorFix(aut));
+			for (var i=0; i<authors.length; i++) {
+				item.creators.push(authorFix(authors[i]));
 			}
 		}
 

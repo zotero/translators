@@ -2,14 +2,14 @@
 	"translatorID": "2bedae3c-bab5-447f-b127-e9babc0e9cfe",
 	"label": "Legislative Insight",
 	"creator": "Kari Hemdal",
-	"target": "^https?://www\\.(?:conquest-leg-insight-cert|conquest-leg-insight)\\.com/legislativeinsight/LegHistMain\\.jsp",
+	"target": "^https?://(preprod\\.)?li\\.proquest\\.com/legislativeinsight/LegHistMain\\.jsp",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-04-03 17:41:39"
+	"lastUpdated": "2015-04-10 10:10:29"
 }
 
 /*

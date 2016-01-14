@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-12-03 21:49:46"
+	"lastUpdated": "2015-04-08 20:15:24"
 }
 
 /*
@@ -42,7 +42,9 @@
 // Array with the different - recognized - types
 var mappingClassNameToItemType = {
 	'URTEIL' : 'case',
-	'BESCHLUSS' : 'case'
+	'URT.' : 'case',
+	'BESCHLUSS' : 'case',
+	'BESCHL.' : 'case'
 }
 
 // most information in Juris is saved in tables where the description of the data is of class TD30 => gather this data

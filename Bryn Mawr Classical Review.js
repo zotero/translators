@@ -2,14 +2,14 @@
 	"translatorID": "635c1246-e0c8-40a0-8799-a73a0b013ad8",
 	"label": "Bryn Mawr Classical Review",
 	"creator": "Michael Berkowitz",
-	"target": "^https?://bmcr\\.brynmawr\\.edu",
+	"target": "^https?://bmcr\\.brynmawr\\.edu/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-01-23 12:41:08"
+	"lastUpdated": "2015-06-02 10:52:41"
 }
 
 function detectWeb(doc, url) {
@@ -67,7 +67,8 @@ function doWeb(doc, url) {
 		var splitRe = new RegExp(title);
 		var authors = data.split(splitRe)[0].replace(/\([^)]+\)/, "").split(/(,|and)\s+/);
 		Zotero.debug(authors);
-		for each (var aut in authors) {
+		for (var i=0; i<authors.length; i++) {
+			var aut = authors[i];
 			if (aut.match(/\w/) && (aut != "and")) {
 				item.creators.push(Zotero.Utilities.cleanAuthor(aut, "reviewedAuthor"));
 			}

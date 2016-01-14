@@ -2,73 +2,107 @@
 	"translatorID": "2c98b8e6-6138-4b60-a999-15e3a7c8cb4b",
 	"label": "SAE Papers",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://(www\\.)?papers\\.sae\\.org",
+	"target": "^https?://(www|papers)\\.sae\\.org/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-11-19 00:45:29"
+	"lastUpdated": "2015-10-04 20:39:54"
 }
 
-/* FW LINE 57:6869c32952b1 */ function flatten(c){var b=new Array();for(var d in c){var e=c[d];if(e instanceof Array){b=b.concat(flatten(e))}else{b.push(e)}}return b}var FW={_scrapers:new Array()};FW._Base=function(){this.callHook=function(b,c,e,a){if(typeof this["hooks"]==="object"){var d=this["hooks"][b];if(typeof d==="function"){d(c,e,a)}}};this.evaluateThing=function(f,e,c){var b=typeof f;if(b==="object"){if(f instanceof Array){var d=this.evaluateThing;var a=f.map(function(g){return d(g,e,c)});return flatten(a)}else{return f.evaluate(e,c)}}else{if(b==="function"){return f(e,c)}else{return f}}}};FW.Scraper=function(a){FW._scrapers.push(new FW._Scraper(a))};FW._Scraper=function(a){for(x in a){this[x]=a[x]}this._singleFieldNames=["abstractNote","applicationNumber","archive","archiveLocation","artworkMedium","artworkSize","assignee","audioFileType","audioRecordingType","billNumber","blogTitle","bookTitle","callNumber","caseName","code","codeNumber","codePages","codeVolume","committee","company","conferenceName","country","court","date","dateDecided","dateEnacted","dictionaryTitle","distributor","docketNumber","documentNumber","DOI","edition","encyclopediaTitle","episodeNumber","extra","filingDate","firstPage","forumTitle","genre","history","institution","interviewMedium","ISBN","ISSN","issue","issueDate","issuingAuthority","journalAbbreviation","label","language","legalStatus","legislativeBody","letterType","libraryCatalog","manuscriptType","mapType","medium","meetingName","nameOfAct","network","number","numberOfVolumes","numPages","pages","patentNumber","place","postType","presentationType","priorityNumbers","proceedingsTitle","programTitle","programmingLanguage","publicLawNumber","publicationTitle","publisher","references","reportNumber","reportType","reporter","reporterVolume","rights","runningTime","scale","section","series","seriesNumber","seriesText","seriesTitle","session","shortTitle","studio","subject","system","thesisType","title","type","university","url","version","videoRecordingType","volume","websiteTitle","websiteType"];this._makeAttachments=function(p,b,g,t){if(g instanceof Array){g.forEach(function(k){this._makeAttachments(p,b,k,t)},this)}else{if(typeof g==="object"){var o=g.urls||g.url;var m=g.types||g.type;var f=g.titles||g.title;var q=g.snapshots||g.snapshot;var j=this.evaluateThing(o,p,b);var n=this.evaluateThing(f,p,b);var s=this.evaluateThing(m,p,b);var d=this.evaluateThing(q,p,b);if(!(j instanceof Array)){j=[j]}for(var l in j){var c=j[l];var h;var e;var r;if(s instanceof Array){h=s[l]}else{h=s}if(n instanceof Array){e=n[l]}else{e=n}if(d instanceof Array){r=d[l]}else{r=d}t.attachments.push({url:c,title:e,type:h,snapshot:r})}}}};if(this.itemTrans!==undefined){this.makeItems=this.itemTrans.makeItems}else{this.makeItems=function(o,b,m,c,l){var q=new Zotero.Item(this.itemType);q.url=b;for(var h in this._singleFieldNames){var n=this._singleFieldNames[h];if(this[n]){var g=this.evaluateThing(this[n],o,b);if(g instanceof Array){q[n]=g[0]}else{q[n]=g}}}var r=["creators","tags"];for(var f in r){var p=r[f];var d=this.evaluateThing(this[p],o,b);if(d){for(var e in d){q[p].push(d[e])}}}this._makeAttachments(o,b,this["attachments"],q);c(q,this,o,b);l([q])}}};FW._Scraper.prototype=new FW._Base;FW.MultiScraper=function(a){FW._scrapers.push(new FW._MultiScraper(a))};FW._MultiScraper=function(a){for(x in a){this[x]=a[x]}this._mkSelectItems=function(e,d){var b=new Object;for(var c in e){b[d[c]]=e[c]}return b};this._selectItems=function(d,c,e){var b=new Array();Zotero.selectItems(this._mkSelectItems(d,c),function(f){for(var g in f){b.push(g)}e(b)})};this._mkAttachments=function(g,d,f){var b=this.evaluateThing(this["attachments"],g,d);var c=new Object();if(b){for(var e in f){c[f[e]]=b[e]}}return c};this._makeChoices=function(f,p,c,d,h){if(f instanceof Array){f.forEach(function(k){this._makeTitlesUrls(k,p,c,d,h)},this)}else{if(typeof f==="object"){var m=f.urls||f.url;var e=f.titles||f.title;var n=this.evaluateThing(m,p,c);var j=this.evaluateThing(e,p,c);var l=(j instanceof Array);if(!(n instanceof Array)){n=[n]}for(var g in n){var b=n[g];var o;if(l){o=j[g]}else{o=j}h.push(b);d.push(o)}}}};this.makeItems=function(j,b,g,c,f){if(this.beforeFilter){var k=this.beforeFilter(j,b);if(k!=b){this.makeItems(j,k,g,c,f);return}}var e=[];var h=[];this._makeChoices(this["choices"],j,b,e,h);var d=this._mkAttachments(j,b,h);this._selectItems(e,h,function(m){if(!m){f([])}else{var l=[];var n=this.itemTrans;Zotero.Utilities.processDocuments(m,function(q){var p=q.documentURI;var o=n;if(o===undefined){o=FW.getScraper(q,p)}if(o===undefined){}else{o.makeItems(q,p,d[p],function(r){l.push(r);c(r,o,q,p)},function(){})}},function(){f(l)})}})}};FW._MultiScraper.prototype=new FW._Base;FW.DelegateTranslator=function(a){return new FW._DelegateTranslator(a)};FW._DelegateTranslator=function(a){for(x in a){this[x]=a[x]}this._translator=Zotero.loadTranslator(this.translatorType);this._translator.setTranslator(this.translatorId);this.makeItems=function(g,d,b,f,c){var e;Zotero.Utilities.HTTP.doGet(d,function(h){this._translator.setHandler("itemDone",function(k,j){e=j;if(b){j.attachments=b}});if(this.preProcess){h=this.preProcess(h)}this._translator.setString(h);this._translator.translate();f(e)},function(){c([e])})}};FW.DelegateTranslator.prototype=new FW._Scraper;FW._StringMagic=function(){this._filters=new Array();this.addFilter=function(a){this._filters.push(a);return this};this.split=function(a){return this.addFilter(function(b){return b.split(a).filter(function(c){return(c!="")})})};this.replace=function(c,b,a){return this.addFilter(function(d){if(d.match(c)){return d.replace(c,b,a)}else{return d}})};this.prepend=function(a){return this.replace(/^/,a)};this.append=function(a){return this.replace(/$/,a)};this.remove=function(b,a){return this.replace(b,"",a)};this.trim=function(){return this.addFilter(function(a){return Zotero.Utilities.trim(a)})};this.trimInternal=function(){return this.addFilter(function(a){return Zotero.Utilities.trimInternal(a)})};this.match=function(a,b){if(!b){b=0}return this.addFilter(function(d){var c=d.match(a);if(c===undefined||c===null){return undefined}else{return c[b]}})};this.cleanAuthor=function(b,a){return this.addFilter(function(c){return Zotero.Utilities.cleanAuthor(c,b,a)})};this.key=function(a){return this.addFilter(function(b){return b[a]})};this.capitalizeTitle=function(){if(arguments.length>0&&arguments[0]==true){return this.addFilter(function(a){return Zotero.Utilities.capitalizeTitle(a,true)})}else{return this.addFilter(function(a){return Zotero.Utilities.capitalizeTitle(a)})}};this.unescapeHTML=function(){return this.addFilter(function(a){return Zotero.Utilities.unescapeHTML(a)})};this.unescape=function(){return this.addFilter(function(a){return unescape(a)})};this._applyFilters=function(c,e){for(i in this._filters){c=flatten(c);c=c.filter(function(a){return((a!==undefined)&&(a!==null))});for(var d=0;d<c.length;d++){try{if((c[d]===undefined)||(c[d]===null)){continue}else{c[d]=this._filters[i](c[d],e)}}catch(b){c[d]=undefined;Zotero.debug("Caught exception "+b+"on filter: "+this._filters[i])}}c=c.filter(function(a){return((a!==undefined)&&(a!==null))})}return flatten(c)}};FW.PageText=function(){return new FW._PageText()};FW._PageText=function(){this._filters=new Array();this.evaluate=function(c){var b=[c.documentElement.innerHTML];b=this._applyFilters(b,c);if(b.length==0){return false}else{return b}}};FW._PageText.prototype=new FW._StringMagic();FW.Url=function(){return new FW._Url()};FW._Url=function(){this._filters=new Array();this.evaluate=function(d,c){var b=[c];b=this._applyFilters(b,d);if(b.length==0){return false}else{return b}}};FW._Url.prototype=new FW._StringMagic();FW.Xpath=function(a){return new FW._Xpath(a)};FW._Xpath=function(a){this._xpath=a;this._filters=new Array();this.text=function(){var b=function(c){if(typeof c==="object"&&c.textContent){return c.textContent}else{return c}};this.addFilter(b);return this};this.sub=function(b){var c=function(f,e){var d=e.evaluate(b,f,null,XPathResult.ANY_TYPE,null);if(d){return d.iterateNext()}else{return undefined}};this.addFilter(c);return this};this.evaluate=function(f){var e=f.evaluate(this._xpath,f,null,XPathResult.ANY_TYPE,null);var d=e.resultType;var c=new Array();if(d==XPathResult.STRING_TYPE){c.push(e.stringValue)}else{if(d==XPathResult.ORDERED_NODE_ITERATOR_TYPE||d==XPathResult.UNORDERED_NODE_ITERATOR_TYPE){var b;while((b=e.iterateNext())){c.push(b)}}}c=this._applyFilters(c,f);if(c.length==0){return false}else{return c}}};FW._Xpath.prototype=new FW._StringMagic();FW.detectWeb=function(e,b){for(var c in FW._scrapers){var d=FW._scrapers[c];var f=d.evaluateThing(d.itemType,e,b);var a=d.evaluateThing(d.detect,e,b);if(a.length>0&&a[0]){return f}}return undefined};FW.getScraper=function(b,a){var c=FW.detectWeb(b,a);return FW._scrapers.filter(function(d){return(d.evaluateThing(d.itemType,b,a)==c)&&(d.evaluateThing(d.detect,b,a))})[0]};FW.doWeb=function(c,a){var b=FW.getScraper(c,a);b.makeItems(c,a,[],function(f,e,g,d){e.callHook("scraperDone",f,g,d);if(!f.title){f.title=""}f.complete()},function(){Zotero.done()});Zotero.wait()};
 /*
-SAE Technical Papers Translator
-Created as part of the 2012 Zotero Trainer Workshop in Syracus and with contributions from participants.
-Copyright (C) 2012 Sebastian Karcher 
+	SAE Technical Papers Translator
+	Copyright (C) 2012-2015 Sebastian Karcher
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+	This file is part of Zotero.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-function detectWeb(doc, url) { return FW.detectWeb(doc, url); }
-function doWeb(doc, url) { return FW.doWeb(doc, url); }
- 
-
-
-/** Articles */
-FW.Scraper({
-itemType : 'report',
-detect : FW.Xpath('//div[@class="cols-dtheader-content"]//h1'),
-title : FW.Xpath('//div[@class="cols-dtheader-content"]//h1').text().trim(),
-attachments : {
-  url : FW.Url(),
-  title : "SAE Technical Papers Snapshot",
-  type : "text/html"
-},
-creators : FW.Xpath('//div[@class="crit-h" and div[contains(text(), "Author")]]/following-sibling::div').text().split(/\n/).cleanAuthor("author"),
-abstractNote : FW.Xpath('//div[@class="dt-scope-c"]').text().trim().remove(/\n.+/g),
-number:	FW.Xpath('//div[@class="crit-h" and div[contains(text(), "Paper #")]]/following-sibling::div').text().trim(),	
-date : FW.Xpath('//div[@class="crit-h" and div[contains(text(), "Published")]]/following-sibling::div').text(),
-DOI  : FW.Xpath('//div[@class="crit-h" and div[contains(text(), "DOI")]]/following-sibling::div').text(),
-reportType : "SAE Technical Paper",
-place : "Warrendale, PA",
-publisher : "SAE International"
-});
-
-
-/** Search results */
-FW.MultiScraper({
-itemType : "multiple",
-detect : FW.Xpath('//div[@class="brw-i"]//div[@class="ct-b"]/a'),
-choices : {
-  titles : FW.Xpath('//div[@class="brw-i"]//div[@class="ct-b"]/a').text(),
-  urls : FW.Xpath('//div[@class="brw-i"]//div[@class="ct-b"]/a').key('href').text()
+function detectWeb(doc, url) {
+	// Dryad search page
+	if (ZU.xpathText(doc, '//meta[@name="citation_journal_title"]/@content')){
+		return "journalArticle";
+	}
+	else if (ZU.xpathText(doc, '//meta[@name="citation_title"]/@content')){
+		return "report";
+	}
+	else if (getSearchResults(doc, true)){
+		return "multiple"
+	}
+	return false;
 }
-});
-/** BEGIN TEST CASES **/
+
+function doWeb(doc, url) {
+	var itemType = detectWeb(doc, url);
+	 if (itemType === 'multiple') {
+		Zotero.selectItems(getSearchResults(doc), function(items) {
+			if (!items) return true;
+			var urls = [];
+			for (var i in items) {
+				urls.push(i);
+			}
+			ZU.processDocuments(urls, scrape);
+		})
+	}
+	else {
+		scrape(doc, url);
+	}
+}
+
+function getSearchResults(doc, checkOnly) {
+	var results = ZU.xpath(doc, '//div[@class="brw-i"]//div[@class="ct-b"]/a'),
+	items = {},
+	found = false;
+	for (var i=0; i<results.length; i++) {
+		var title = results[i].textContent;
+		if (!title) continue;
+		if (checkOnly) return true;
+		found = true;
+		title = title.trim();
+		items[results[i].href] = title;
+	}
+	return found ? items : false;
+}
+
+function scrape(doc, url) {
+	var abstract = ZU.xpathText(doc, '//div[@class="dt-scope" and div/div[contains(text(), "Abstract")]]//div[@class="dt-scope-c-content"]');
+	var translator = Zotero.loadTranslator('web');
+	// use the Embedded Metadata translator
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+	translator.setDocument(doc);
+	translator.setHandler('itemDone', function(obj, item) {
+		if (item.itemType=="report"){
+			//map DOI to extra until we have DOI field for reports
+			if (item.DOI) item.extra = "DOI: " + item.DOI;
+			item.reportType = "SAE Technical Paper";
+			item.place = "Warrendale, PA";
+			item.publisher = "SAE International"
+		}
+		//prevent all caps titles for some older titles
+		if (item.title == item.title.toUpperCase()){
+			item.title = ZU.capitalizeTitle(item.title, true)
+		}
+		if (abstract) item.abstractNote = abstract.trim();
+		item.complete();
+	});
+	translator.getTranslatorObject(function(trans) {
+		trans.doWeb(doc, url);
+	});
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -76,6 +110,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "report",
+				"title": "Profile Milling of Titanium",
 				"creators": [
 					{
 						"firstName": "A. Larry",
@@ -83,26 +118,28 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "1966-02-01",
+				"abstractNote": "Profile milling of titanium combines the problems of a relatively new manufacturing process with those of machining a new material. Titanium is not difficult to machine as compared to steel of equivalent strength; however, it must be properly processed or higher cutter costs and low production output will result. The process of profile milling can be greatly improved through the use of adaptive control. Two elements of the numerical control machining process, the part programmer and the machine operator, are sources of considerable process variability. Consequently, in the foreseeable future adaptive control concepts will be applied to the process to improve efficiency by reducing this “people” influence on machine output.",
+				"extra": "DOI: 10.4271/660289",
+				"institution": "SAE International",
+				"language": "English",
+				"libraryCatalog": "papers.sae.org",
+				"place": "Warrendale, PA",
+				"reportNumber": "660289",
+				"reportType": "SAE Technical Paper",
+				"url": "http://papers.sae.org/660289/",
 				"attachments": [
 					{
-						"title": "SAE Technical Papers Snapshot",
-						"type": "text/html"
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
 					}
 				],
-				"url": "http://papers.sae.org/660289/",
-				"abstractNote": "Profile milling of titanium combines the problems of a relatively new manufacturing process with those of machining a new material. Titanium is not difficult to machine as compared to steel of equivalent strength; however, it must be properly processed or higher cutter costs and low production output will result. The process of profile milling can be greatly improved through the use of adaptive control. Two elements of the numerical control machining process, the part programmer and the machine operator, are sources of considerable process variability. Consequently, in the foreseeable future adaptive control concepts will be applied to the process to improve efficiency by reducing this “people” influence on machine output.",
-				"date": "1966-02-01",
-				"DOI": "10.4271/660289",
-				"number": "660289",
-				"place": "Warrendale, PA",
-				"publisher": "SAE International",
-				"reportType": "SAE Technical Paper",
-				"title": "Profile Milling of Titanium",
-				"libraryCatalog": "SAE Papers",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -116,7 +153,8 @@ var testCases = [
 		"url": "http://papers.sae.org/2013-01-9096/",
 		"items": [
 			{
-				"itemType": "report",
+				"itemType": "journalArticle",
+				"title": "Full Field Non-Contact Investigation of Deformation Fields in Fillet and Plug Welds",
 				"creators": [
 					{
 						"firstName": "Kil Won",
@@ -134,27 +172,76 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2014-01-15",
+				"DOI": "10.4271/2013-01-9096",
+				"ISSN": "1946-3987",
+				"abstractNote": "Fillet and plug weld are commonly used in structural applications in commercial heavy vehicles. This paper is primarily concerned with an investigation of the full field deformations fields in fillet and plug welds using three dimensional digital image correlation (3D-DIC). Two identical vehicle parts are constructed using a fillet weld for one specimen, and a plug weld for the other. The specimens are loaded under quasi-static conditions with simultaneous measurement of load, displacements and strain gage measurements. Strain gage locations are selected based on the results of a finite element analysis model. 3D-DIC measurements are constructed using a two camera setup. Thus, 3D-DIC measurements are compared to strain gage measurements and finite element predictions. The effectiveness of the non-contact full field method is evaluated for application to studying the weld details considered and potential for fatigue damage and durability.",
+				"issue": "1",
+				"journalAbbreviation": "SAE Int. J. Mater. Manf.",
+				"language": "English",
+				"libraryCatalog": "papers.sae.org",
+				"pages": "157-161",
+				"publicationTitle": "SAE International Journal of Materials and Manufacturing",
+				"url": "http://papers.sae.org/2013-01-9096/",
+				"volume": "7",
 				"attachments": [
 					{
-						"title": "SAE Technical Papers Snapshot",
-						"type": "text/html"
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
 					}
 				],
-				"url": "http://papers.sae.org/2013-01-9096/",
-				"abstractNote": "Fillet and plug weld are commonly used in structural applications in commercial heavy vehicles.  This paper is primarily concerned with an investigation of the full field deformations fields in fillet and plug welds using three dimensional digital image correlation (3D-DIC).  Two identical vehicle parts are constructed using a fillet weld for one specimen, and a plug weld for the other.  The specimens are loaded under quasi-static conditions with simultaneous measurement of load, displacements and strain gage measurements.  Strain gage locations are selected based on the results of a finite element analysis model.  3D-DIC measurements are constructed using a two camera setup.   Thus, 3D-DIC measurements are compared to strain gage measurements and finite element predictions.  The effectiveness of the non-contact full field method is evaluated for application to studying the weld details considered and potential for fatigue damage and durability.",
-				"date": "2014-01-15",
-				"number": "2013-01-9096",
-				"place": "Warrendale, PA",
-				"publisher": "SAE International",
-				"reportType": "SAE Technical Paper",
-				"title": "Full Field Non-Contact Investigation of Deformation Fields in Fillet and Plug Welds",
-				"libraryCatalog": "SAE Papers",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://papers.sae.org/540090/",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "Combustion Effects",
+				"creators": [
+					{
+						"firstName": "J. C.",
+						"lastName": "Porter",
+						"creatorType": "author"
+					}
+				],
+				"date": "1954-01-01",
+				"abstractNote": "The air standard cycle, the ideal fuel-air cycle and the fundamental concepts of combustion in a spark ignition engine are briefly described.The effect of combustion processes at various air fuel ratios on power, efficiency and composition of exhaust products are reviewed.It is recognized some degree of incomplete combustion is always present, and the effects of “poor” combustion on engine operations are discussed.",
+				"extra": "DOI: 10.4271/540090",
+				"institution": "SAE International",
+				"language": "English",
+				"libraryCatalog": "papers.sae.org",
+				"place": "Warrendale, PA",
+				"reportNumber": "540090",
+				"reportType": "SAE Technical Paper",
+				"url": "http://papers.sae.org/540090/",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.sae.org/search/?content-type=%28%22PAPER%22%29&qt=effects&x=0&y=0",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

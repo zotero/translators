@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-03-25 09:43:59"
+	"lastUpdated": "2016-01-04 13:32:05"
 }
 
 function detectWeb(doc, url) {
@@ -24,16 +24,17 @@ function detectWeb(doc, url) {
 
 function scrape(doc, url) {
 	var reportNoXPath = "//h2";
-	var titleXPath    = "//p[1]/b";
-	var authorsXPath  = "//p[2]/i";
+	var titleXPath    = "(//p/b)[1]";
+	var authorsXPath  = "(//p/i)[1]";
 	var abstractXPath = "//p[starts-with(b/text(),\"Abstract\")]/text() | //p[not(*)]";
 	var keywordsXPath = "//p[starts-with(b/text(),\"Category\")]";
 
 	var reportNo = doc.evaluate(reportNoXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	reportNo = reportNo.match(/(\d{4})\/(\d{3})$/);
-	var year = reportNo[1];
-	var no   = reportNo[2];
-
+	reportNo = reportNo.match(/(\d{4})\/(\d{3,4})$/);
+	if (reportNo){
+		var year = reportNo[1];
+		var no   = reportNo[2];
+	}
 	var title = doc.evaluate(titleXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 
 	var authors = doc.evaluate(authorsXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
@@ -55,7 +56,8 @@ function scrape(doc, url) {
 	
 	newItem.date = year;
 	newItem.reportNumber = no;
-	newItem.url = "http://eprint.iacr.org/"+year+"/"+no;
+	//we want to use this later & make sure we don't make http--> https requests or vice versa. 
+	newItem.url = url.match(/^https?:\/\/[^\/]+/)[0] + "/" + year + "/" + no;
 	newItem.title = title;
 	newItem.abstractNote = abstr;
 	for (var i in authors) {
@@ -92,7 +94,6 @@ function doWeb(doc, url) {
 		}
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
-				Zotero.done();
 				return true;
 			}
 			for (var i in items) {
@@ -111,6 +112,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "report",
+				"title": "An Attack on CFB Mode Encryption As Used By OpenPGP",
 				"creators": [
 					{
 						"firstName": "Serge",
@@ -123,13 +125,12 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"cryptographic protocols",
-					"applications",
-					"cryptanalysis"
-				],
-				"seeAlso": [],
+				"date": "2005",
+				"abstractNote": "This paper describes an adaptive-chosen-ciphertext attack on the Cipher Feedback (CFB) mode of encryption as used in OpenPGP.  In most circumstances it will allow an attacker to determine 16 bits of any block of plaintext with about $2^{15}$ oracle queries for the initial \nsetup work and $2^{15}$ oracle queries for each block.  Standard CFB mode encryption does not appear to be affected by this attack.  It applies to a particular variation of CFB used by OpenPGP.  In particular it exploits an ad-hoc integrity check feature in OpenPGP which was meant as a \"quick check\" to determine the correctness of the decrypting symmetric key.",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"libraryCatalog": "ePrint IACR",
+				"reportNumber": "033",
+				"url": "http://eprint.iacr.org/2005/033",
 				"attachments": [
 					{
 						"url": "http://eprint.iacr.org/2005/033",
@@ -142,13 +143,13 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"date": "2005",
-				"reportNumber": "033",
-				"url": "http://eprint.iacr.org/2005/033",
-				"title": "An Attack on CFB Mode Encryption As Used By OpenPGP",
-				"abstractNote": "This paper describes an adaptive-chosen-ciphertext attack on the Cipher Feedback (CFB) mode of encryption as used in OpenPGP.  In most circumstances it will allow an attacker to determine 16 bits of any block of plaintext with about $2^{15}$ oracle queries for the initial \nsetup work and $2^{15}$ oracle queries for each block.  Standard CFB mode encryption does not appear to be affected by this attack.  It applies to a particular variation of CFB used by OpenPGP.  In particular it exploits an ad-hoc integrity check feature in OpenPGP which was meant as a \"quick check\" to determine the correctness of the decrypting symmetric key.",
-				"libraryCatalog": "ePrint IACR",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [
+					"applications",
+					"cryptanalysis",
+					"cryptographic protocols"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},

@@ -2,14 +2,14 @@
 	"translatorID": "9a0ecbda-c0e9-4a19-84a9-fc8e7c845afa",
 	"label": "Lulu",
 	"creator": "Aurimas Vinckevicius",
-	"target": "https?://www.lulu.com/shop/",
+	"target": "^https?://www\\.lulu\\.com/shop/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 101,
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-10-11 03:33:45"
+	"lastUpdated": "2015-07-03 01:15:45"
 }
 
 function getSearchResults(doc) {
@@ -127,7 +127,7 @@ function doSearch(items) {
 						return;
 					}
 					
-					ZU.processDocuments('http://www.lulu.com' + ZU.xpathText(results[0], './@href'), function(doc, url) {
+					ZU.processDocuments(results[0].href, function(doc, url) {
 						var newItem = makeItem(doc, url);
 						if(newItem.ISBN == isbn) {
 							newItem.complete();

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-12-23 02:53:47"
+	"lastUpdated": "2015-02-12 07:40:24"
 }
 
 var items = {};
@@ -66,7 +66,7 @@ function detectWeb(doc, url) {
 	if(!blacklistRe.test(url)) {
 		var DOIs = getDOIs(doc);
 		if(DOIs.length) {
-			return DOIs.length == 1 ? "journalArticle" : "multiple";
+			return "multiple";
 		}
 	}
 	return false;
@@ -82,11 +82,6 @@ function completeDOIs(doc) {
 	}
 	if(numDOIs == 0) {
 		throw "DOI Translator: could not find DOI";
-	} else if(numDOIs == 1) {
-		// do we want to add URL of the page?
-		items[DOI].url = doc.location.href;
-		items[DOI].attachments = [{document:doc}];
-		items[DOI].complete();
 	} else {
 		Zotero.selectItems(selectArray, function(selectedDOIs) {
 			if(!selectedDOIs) return true;
@@ -154,41 +149,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://libguides.csuchico.edu/citingbusiness",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"creatorType": "author",
-						"firstName": "Jean M.",
-						"lastName": "Twenge"
-					},
-					{
-						"creatorType": "author",
-						"firstName": "Stacy M.",
-						"lastName": "Campbell"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{}
-				],
-				"publicationTitle": "Journal of Managerial Psychology",
-				"volume": "23",
-				"issue": "8",
-				"language": "en",
-				"ISSN": "0268-3946",
-				"date": "2008",
-				"pages": "862-877",
-				"DOI": "10.1108/02683940810904367",
-				"url": "http://libguides.csuchico.edu/citingbusiness",
-				"title": "Generational differences in psychological traits and their impact on the workplace",
-				"libraryCatalog": "CrossRef",
-				"accessDate": "CURRENT_TIMESTAMP"
-			}
-		]
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

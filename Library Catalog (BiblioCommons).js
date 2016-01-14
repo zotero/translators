@@ -2,32 +2,38 @@
 	"translatorID": "5d506fe3-dbde-4424-90e8-d219c63faf72",
 	"label": "Library Catalog (BiblioCommons)",
 	"creator": "Avram Lyon",
-	"target": "^https?://[^.]+\\.bibliocommons\\.com\\/",
+	"target": "^https?://[^/]+\\.bibliocommons\\.com\\/",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-08-26 03:54:52"
+	"lastUpdated": "2015-06-02 20:44:02"
 }
 
 /*
-   BiblioCommons Translator
-   Copyright (C) 2011 Avram Lyon, ajlyon@gmail.com
+	***** BEGIN LICENSE BLOCK *****
 
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+	BiblioCommons Translator
+	Copyright © 2011 Avram Lyon, ajlyon@gmail.com
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+	This file is part of Zotero.
 
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
 */
 
 function detectWeb(doc, url) {
@@ -53,6 +59,7 @@ function doWeb(doc, url) {
 	if (url.match(/\/item\/show/)) {
 		Zotero.Utilities.doGet(url.replace(/\/item\/show/,"/item/catalogue_info"),
 					function (text) {
+						//Z.debug(text)
 						translator.getTranslatorObject(function (obj) {
 							processor({	
 								translator: obj,
@@ -98,11 +105,13 @@ function doWeb(doc, url) {
 
 function processor (obj) {
 		// Gets {translator: , text: }
-		//Z.debug(obj.text)
+		//	Z.debug(obj.text)
 		// Here, we split up the table and insert little placeholders between record bits
 		var marced = obj.text.replace(/\s+/g," ")
 					.replace(/^.*<div id="marc_details">(?:\s*<[^>"]+>\s*)*/,"")
-					.replace(/<tr +class="(?:odd|even)">\s*/g,"")
+					.replace(/\s*(<table.*?>|<tbody>)\s*/g, "")
+					//looks like the odd/even attribute has mostly been remove from tr
+					.replace(/<tr( +class="(?:odd|even)")?>\s*/g,"")
 					.replace(/<td +scope="row" +class="marcTag"><strong>(\d+)<\/strong><\/td>\s*/g,"$1\x1F")
 					// We may be breaking the indicator here
 					.replace(/<td\s+class="marcIndicator">\s*(\d*)\s*<\/td>\s*/g,"$1\x1F")
@@ -121,7 +130,8 @@ function processor (obj) {
 		var record = new marc.record();
 		// The first piece is the MARC leader
 		record.leader = fields.shift();
-		for each (var field in fields) {
+		for (var i=0; i<fields.length; i++) {
+			var field = fields[i];
 			//Z.debug(field)
 			// Skip blanks
 			if (field.replace(/\x1F|\s/g,"") == "") continue;
@@ -147,10 +157,11 @@ function processor (obj) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://bostonpl.bibliocommons.com/item/show/2051015075_labor",
+		"url": "https://bostonpl.bibliocommons.com/item/show/2051015075_labor",
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Labor",
 				"creators": [
 					{
 						"firstName": "Marcia McKenna",
@@ -158,30 +169,24 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [
-					{
-						"note": "Brief biographies of five women prominently involved in the labor movement in the United States: Mother Jones, Mary Heaton Vorse, Frances Perkins, Addie Wyatt, and Dolores Huerta. Also includes 11 other women who have made outstanding contributions"
-					}
-				],
+				"date": "1979",
+				"ISBN": "9780875181677",
+				"abstractNote": "Brief biographies of five women prominently involved in the labor movement in the United States: Mother Jones, Mary Heaton Vorse, Frances Perkins, Addie Wyatt, and Dolores Huerta. Also includes 11 other women who have made outstanding contributions",
+				"callNumber": "HD6079.2.U5 B52",
+				"libraryCatalog": "bostonpl Library Catalog",
+				"numPages": "126",
+				"place": "Minneapolis",
+				"publisher": "Dillon Press",
+				"series": "Contributions of women",
+				"attachments": [],
 				"tags": [
-					"Women labor union members",
 					"United States",
 					"Women",
-					"United States",
 					"Women labor union members",
 					"Working class"
 				],
-				"seeAlso": [],
-				"attachments": [],
-				"ISBN": "0875181678",
-				"title": "Labor",
-				"place": "Minneapolis",
-				"publisher": "Dillon Press",
-				"date": "1979",
-				"numPages": "126",
-				"series": "Contributions of women",
-				"callNumber": "HD6079.2.U5 B52",
-				"libraryCatalog": "bostonpl Library Catalog"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -192,10 +197,11 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://nypl.bibliocommons.com/item/show/10974089052_labour",
+		"url": "https://nypl.bibliocommons.com/item/show/10974089052_labour",
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Labour",
 				"creators": [
 					{
 						"firstName": "György",
@@ -208,23 +214,23 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
+				"date": "1980",
+				"callNumber": "JFD 87-5272",
+				"language": "eng",
+				"libraryCatalog": "nypl Library Catalog",
+				"numPages": "139",
+				"place": "London",
+				"publisher": "Merlin Press",
+				"series": "The Ontology of social being",
+				"seriesNumber": "3",
+				"attachments": [],
 				"tags": [
 					"Labor",
 					"Philosophy",
 					"Philosophy, Marxist"
 				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Labour",
-				"place": "London",
-				"publisher": "Merlin Press",
-				"date": "1980",
-				"numPages": "139",
-				"series": "The Ontology of social being",
-				"seriesNumber": "3",
-				"callNumber": "JFD 87-5272",
-				"libraryCatalog": "nypl Library Catalog"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

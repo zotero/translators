@@ -18,7 +18,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-11-22 12:43:04"
+	"lastUpdated": "2016-01-06 01:12:48"
 }
 
 function detectImport() {
@@ -87,6 +87,15 @@ var fieldMap = {
   	language:"language",
   	assignee:"assignee"
 };
+
+// Fields for which upper case letters will be protected on export
+var caseProtectedFields = [
+	"title",
+	"type",
+	"shorttitle",
+	"booktitle",
+	"series"
+];
 
 // Import/export in BibTeX
 var extraIdentifiers = {
@@ -220,16 +229,20 @@ var alwaysMap = {
 	"~":"{\\textasciitilde}",
 	"^":"{\\textasciicircum}",
 	"\\":"{\\textbackslash}",
-	"{" : "\\{",
-	"}" : "\\}"
+	// See http://tex.stackexchange.com/questions/230750/open-brace-in-bibtex-fields/230754
+	"{" : "\\{\\vphantom{\\}}",
+	"}" : "\\vphantom{\\{}\\}"
 };
 
 
 var strings = {};
 var keyRe = /[a-zA-Z0-9\-]/;
-var keywordSplitOnSpace = true;
-var keywordDelimRe = '\\s*[,;]\\s*';
-var keywordDelimReFlags = '';
+
+// Split keywords on space by default when called from another translator
+// This is purely for historical reasons. Otherwise we risk breaking tag import
+// from some websites
+var keywordSplitOnSpace = !!Zotero.parentTranslator;
+var keywordDelimRe = /\s*[,;]\s*/;
 
 function setKeywordSplitOnSpace( val ) {
 	keywordSplitOnSpace = val;
@@ -238,12 +251,12 @@ function setKeywordSplitOnSpace( val ) {
 function setKeywordDelimRe( val, flags ) {
 	//expect string, but it could be RegExp
 	if(typeof(val) != 'string') {
-		keywordDelimRe = val.toString().slice(1, val.toString().lastIndexOf('/'));
-		keywordDelimReFlags = val.toString().slice(val.toString().lastIndexOf('/')+1);
-	} else {
-		keywordDelimRe = val;
-		keywordDelimReFlags = flags;
+		val = val.toString();
+		flags = val.slice(val.lastIndexOf('/')+1);
+		val = val.slice(1, val.lastIndexOf('/'));
 	}
+	
+	keywordDelimRe = new RegExp(val, flags);
 }
 
 function processField(item, field, value, rawValue) {
@@ -274,13 +287,13 @@ function processField(item, field, value, rawValue) {
 		}
 	} else if(field == "fjournal") {
 		if(item.publicationTitle) {
-			// move publicationTitle to abbreviation, since itprobably came from 'journal'
+			// move publicationTitle to abbreviation, since it probably came from 'journal'
 			item.journalAbbreviation = item.publicationTitle;
 		}
 		item.publicationTitle = value;
 	} else if(field == "author" || field == "editor" || field == "translator") {
 		// parse authors/editors/translators
-		var names = splitUnprotected(rawValue.trim(), /\sand\s/gi);
+		var names = splitUnprotected(rawValue.trim(), /\s+and\s+/gi);
 		for(var i in names) {
 			var name = names[i];
 			// skip empty names
@@ -376,12 +389,9 @@ function processField(item, field, value, rawValue) {
 	else if (field == "lastchecked"|| field == "urldate"){
 		item.accessDate = value;
 	} else if(field == "keywords" || field == "keyword") {
-		var re = new RegExp(keywordDelimRe, keywordDelimReFlags);
-		if(!value.match(re) && keywordSplitOnSpace) {
-			// keywords/tags
+		item.tags = value.split(keywordDelimRe);
+		if(item.tags.length == 1 && keywordSplitOnSpace) {
 			item.tags = value.split(/\s+/);
-		} else {
-			item.tags = value.split(re);
 		}
 	} else if (field == "comment" || field == "annote" || field == "review" || field == "notes") {
 		item.notes.push({note:Zotero.Utilities.text2html(value)});
@@ -624,6 +634,16 @@ function unescapeBibTeX(value) {
 	}
 	value = value.replace(/\\\\/g, "\\");
 	value = value.replace(/\s+/g, " ");
+	
+	// Unescape HTML entities coming from web translators
+	if (Zotero.parentTranslator && value.indexOf('&') != -1) {
+		value = value.replace(/&#?\w+;/g, function(entity) {
+			var char = ZU.unescapeHTML(entity);
+			if (char == entity) char = ZU.unescapeHTML(entity.toLowerCase()); // Sometimes case can be incorrect and entities are case-sensitive
+			
+			return char;
+		});
+	}
 	
 	return value;
 }
@@ -890,25 +910,10 @@ function writeField(field, value, isMacro) {
 	// Other fields (DOI?) may need similar treatment
 	if (!isMacro && !(field == "url" || field == "doi" || field == "file" || field == "lccn" )) {
 		// I hope these are all the escape characters!
-		value = value.replace(/[|\<\>\~\^\\\{\}]/g, mapEscape).replace(/([\#\$\%\&\_])/g, "\\$1");
-
-		//disable 
-		/** if (field == "title" || field == "type" || field == "shorttitle" || field == "booktitle" || field == "series") {
-			if (!isTitleCase(value)) {
-				//protect caps for everything but the first letter
-				value = value.replace(/(.)([A-Z]+)/g, "$1{$2}");
-			} else {	//protect all-caps vords and initials
-				value = value.replace(/([\s.-])([A-Z]+)(?=\.)/g, "$1{$2}");	//protect initials
-				if(value.toUpperCase() != value) value = value.replace(/(\s)([A-Z]{2,})(?=[\.,\s]|$)/g, "$1{$2}");
-			}
-		} 
-		**/
-
-		// Case of words with uppercase characters in non-initial positions is preserved with braces.
-		// we're looking at all unicode letters
-		var protectCaps = new ZU.XRegExp("\\b\\p{Letter}+\\p{Uppercase_Letter}\\p{Letter}*", 'g')
-		if (field != "pages") {
-			value = ZU.XRegExp.replace(value, protectCaps, "{$0}");
+		value = escapeSpecialCharacters(value);
+		
+		if (caseProtectedFields.indexOf(field) != -1) {
+			value = ZU.XRegExp.replace(value, protectCapsRE, "$1{$2$3}"); // only $2 or $3 will have a value, not both
 		}
 	}
 	if (Zotero.getOption("exportCharset") != "UTF-8") {
@@ -978,22 +983,48 @@ function isTitleCase(string) {
 }
 */
 
-function mapEscape(character) {
-	return alwaysMap[character];
+// See http://tex.stackexchange.com/questions/230750/open-brace-in-bibtex-fields/230754
+var vphantomRe = /\\vphantom{\\}}((?:.(?!\\vphantom{\\}}))*)\\vphantom{\\{}/g;
+function escapeSpecialCharacters(str) {
+	var newStr = str.replace(/[|\<\>\~\^\\\{\}]/g, function(c) { return alwaysMap[c] })
+		.replace(/([\#\$\%\&\_])/g, "\\$1");
+	
+	// We escape each brace in the text by making sure that it has a counterpart,
+	// but sometimes this is overkill if the brace already has a counterpart in
+	// the text.
+	if (newStr.indexOf('\\vphantom') != -1) {
+		var m;
+		while (m = vphantomRe.exec(newStr)) {
+			// Can't use a simple replace, because we want to match up inner with inner
+			// and outer with outer
+			newStr = newStr.substr(0,m.index) + m[1] + newStr.substr(m.index + m[0].length);
+			vphantomRe.lastIndex = 0; // Start over, because the previous replacement could have created a new pair
+		}
+	}
+	
+	return newStr;
 }
 
 function mapAccent(character) {
 	return (mappingTable[character] ? mappingTable[character] : "?");
 }
 
-var filePathSpecialChars = '\\\\:;{}$'; // $ for Mendeley
+var filePathSpecialChars = '\\\\:;$'; // $ for Mendeley (see cleanFilePath for {})
 var encodeFilePathRE = new RegExp('[' + filePathSpecialChars + ']', 'g');
 
+// We strip out {} in general, because \{ and \} still break BibTeX (0.99d)
+function cleanFilePath(str) {
+	if (!str) return '';
+	return str.replace(/(?:\s*[{}]+)+\s*/g, ' ');
+}
+
 function encodeFilePathComponent(value) {
+	if (!value) return '';
 	return value.replace(encodeFilePathRE, "\\$&");
 }
 
 function decodeFilePathComponent(value) {
+	if (!value) return '';
 	return value.replace(/\\([^A-Za-z0-9.])/g, "$1");
 }
 
@@ -1029,10 +1060,11 @@ function tidyAccents(s) {
 
 var numberRe = /^[0-9]+/;
 // Below is a list of words that should not appear as part of the citation key
-// in includes the indefinite articles of English, German, French and Spanish, as well as a small set of English prepositions whose 
+// it includes the indefinite articles of English, German, French and Spanish, as well as a small set of English prepositions whose 
 // force is more grammatical than lexical, i.e. which are likely to strike many as 'insignificant'.
 // The assumption is that most who want a title word in their key would prefer the first word of significance.
-var citeKeyTitleBannedRe = /\b(a|an|the|some|from|on|in|to|of|do|with|der|die|das|ein|eine|einer|eines|einem|einen|un|une|la|le|l\'|el|las|los|al|uno|una|unos|unas|de|des|del|d\')(\s+|\b)/g;
+// Also remove markup
+var citeKeyTitleBannedRe = /\b(a|an|the|some|from|on|in|to|of|do|with|der|die|das|ein|eine|einer|eines|einem|einen|un|une|la|le|l\'|el|las|los|al|uno|una|unos|unas|de|des|del|d\')(\s+|\b)|(<\/?(i|b|sup|sub|sc|span style=\"small-caps\"|span)>)/g;
 var citeKeyConversionsRe = /%([a-zA-Z])/;
 var citeKeyCleanRe = /[^a-z0-9\!\$\&\*\+\-\.\/\:\;\<\>\?\[\]\^\_\`\|]+/g;
 
@@ -1110,7 +1142,23 @@ function buildCiteKey (item,citekeys) {
 	return citekey;
 }
 
+var protectCapsRE;
 function doExport() {
+	if (Zotero.getHiddenPref && Zotero.getHiddenPref('BibTeX.export.dontProtectInitialCase')) {
+		// Case of words with uppercase characters in non-initial positions is
+		// preserved with braces.
+		// Two extra captures because of the other regexp below
+		protectCapsRE = new ZU.XRegExp("()()\\b(\\p{Letter}+\\p{Uppercase_Letter}\\p{Letter}*)", 'g');
+	} else {
+		// Protect all upper case letters, even if the uppercase letter is only in
+		// initial position of the word.
+		// Don't protect first word if only first letter is capitalized
+		protectCapsRE = new ZU.XRegExp(
+			"(.)\\b(\\p{Letter}*\\p{Uppercase_Letter}\\p{Letter}*)" // Non-initial words with capital letter anywhere
+				+ "|^(\\p{Letter}+\\p{Uppercase_Letter}\\p{Letter}*)" // Initial word with capital in non-initial position
+			, 'g');
+	}
+	
 	//Zotero.write("% BibTeX export generated by Zotero "+Zotero.Utilities.getVersion());
 	// to make sure the BOM gets ignored
 	Zotero.write("\n");
@@ -1188,9 +1236,8 @@ function doExport() {
 					creatorString = creator.lastName;
 				}
 				
-				creatorString = creatorString.replace(/[|\<\>\~\^\\\{\}]/g, mapEscape)
-					.replace(/([\#\$\%\&\_])/g, "\\$1");
-																			
+				creatorString = escapeSpecialCharacters(creatorString);
+				
 				if (creator.fieldMode == true) { // fieldMode true, assume corporate author
 					creatorString = "{" + creatorString + "}";
 				} else {
@@ -1286,14 +1333,22 @@ function doExport() {
 			
 			for(var i in item.attachments) {
 				var attachment = item.attachments[i];
+				// Unfortunately, it looks like \{ in file field breaks BibTeX (0.99d)
+				// even if properly backslash escaped, so we have to make sure that
+				// it doesn't make it into this field at all
+				var title = cleanFilePath(attachment.title),
+					path = null;
+				
 				if(Zotero.getOption("exportFileData") && attachment.saveFile) {
-					attachment.saveFile(attachment.defaultPath, true);
-					attachmentString += ";" + encodeFilePathComponent(attachment.title)
-						+ ":" + encodeFilePathComponent(attachment.defaultPath)
-						+ ":" + encodeFilePathComponent(attachment.mimeType);
+					path = cleanFilePath(attachment.defaultPath);
+					attachment.saveFile(path, true);
 				} else if(attachment.localPath) {
-					attachmentString += ";" + encodeFilePathComponent(attachment.title)
-						+ ":" + encodeFilePathComponent(attachment.localPath)
+					path = cleanFilePath(attachment.localPath);
+				}
+				
+				if (path) {
+					attachmentString += ";" + encodeFilePathComponent(title)
+						+ ":" + encodeFilePathComponent(path)
 						+ ":" + encodeFilePathComponent(attachment.mimeType);
 				}
 			}

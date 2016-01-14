@@ -2,14 +2,14 @@
 	"translatorID": "d0b1914a-11f1-4dd7-8557-b32fe8a3dd47",
 	"label": "EBSCOhost",
 	"creator": "Simon Kornblith, Michael Berkowitz, Josh Geller",
-	"target": "^https?://[^/]+/(?:eds|bsi|ehost)/(?:results|detail|folder|pdfviewer)",
-	"minVersion": "2.1",
+	"target": "^https?://[^/]+/(eds|bsi|ehost)/(results|detail|folder|pdfviewer)",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-09-09 19:59:20"
+	"lastUpdated": "2015-05-21 22:39:54"
 }
 
 function detectWeb(doc, url) {
@@ -296,9 +296,10 @@ function ebscoToZoteroItemType(ebscoType) {
 			case "academicJournal":
 				return "journalArticle";
 			break;
-			case "serialPeriodical":
-				return "magazineArticle";	//is this right?
-			break;
+			// This isn't always right. See https://forums.zotero.org/discussion/42535/atlas-codes-journals-as-magazines/
+			//case "serialPeriodical":
+			//	return "magazineArticle";	//is this right?
+			//break;
 			case "newspaperArticle":
 				return "newspaperArticle";
 			break;

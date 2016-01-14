@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-11-28 22:10:10"
+	"lastUpdated": "2015-02-16 04:51:10"
 }
 
 /**
@@ -31,13 +31,14 @@
 */
 
 function detectWeb(doc, url) {
-	if(ZU.xpathText(doc, '//h1[@id="firstHeading"]/span'))
+	if(doc.getElementById('firstHeading')) {
 		return 'encyclopediaArticle';
+	}
 }
 
 function doWeb(doc, url) {
 	var item = new Zotero.Item('encyclopediaArticle');
-	item.title = ZU.xpathText(doc, '//h1[@id="firstHeading"]/span');
+	item.title = ZU.trimInternal(doc.getElementById('firstHeading').textContent);
 	
 	/* Removing the creator and publisher. Wikipedia is pushing the creator in their own
   	directions on how to cite http://en.wikipedia.org/w/index.php?title=Special%3ACite&page=Psychology
@@ -69,9 +70,10 @@ function doWeb(doc, url) {
 	}
 
 	item.url = ZU.xpathText(doc, '//li[@id="t-permalink"]/a/@href');
+	var revID;
 	if(item.url) {
-		item.extra = 'Page Version ID: ' + 
-						item.url.match(/[&?]oldid=(\d+)/)[1];
+		revID = item.url.match(/[&?]oldid=(\d+)/)[1];
+		item.extra = 'Page Version ID: ' + revID;
 		item.url = doc.location.protocol + '//' + doc.location.hostname
 					+ item.url;
 	} else {
@@ -86,21 +88,33 @@ function doWeb(doc, url) {
 	});
 
 	item.language = doc.documentElement.lang;
-
-	var abs = ZU.xpathText(doc, '//div[@id="mw-content-text"]/p[1]', null, '');
-	if(abs) item.abstractNote = ZU.trimInternal(abs);
-
+	
 	//last modified date is hard to get from the page because it is localized
-	var pageInfoURL = '/w/api.php?action=query&prop=info&format=json&' + 
-						'inprop=url%7Cdisplaytitle&titles=' +
-						item.title;
+	var pageInfoURL = '/w/api.php?action=query&format=json'
+		+ '&inprop=url%7Cdisplaytitle'
+		+ '&exintro=true&explaintext=true' // Intro section in plain text
+		+ '&prop=info%7Cextracts'
+		+ (revID // Different if we want a specific revision (this should be the general case)
+			? '%7Crevisions&rvprop=timestamp&revids=' + encodeURIComponent(revID)
+			: '&titles=' + encodeURIComponent(item.title)
+		);
 	ZU.doGet(pageInfoURL, function(text) {
 		var retObj = JSON.parse(text);
 		if(retObj && !retObj.query.pages['-1']) {
 			var pages = retObj.query.pages;
 			for(var i in pages) {
-				item.date = pages[i].touched;
+				if (pages[i].revisions) {
+					item.date = pages[i].revisions[0].timestamp;
+				} else {
+					item.date = pages[i].touched;
+				}
+				
 				item.title = pages[i].displaytitle;
+				
+				// Note that this is the abstract for the latest revision,
+				// not necessarily the revision that is being queried
+				item.abstractNote = pages[i].extract;
+				
 				//we should never have more than one page returned,
 				//but break just in case
 				break;
@@ -116,10 +130,16 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "encyclopediaArticle",
+				"title": "Россия",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2012-04-06T20:11:32Z",
+				"abstractNote": "Росси́я (от греч. Ρωσία — Русь; официально Росси́йская Федера́ция или Росси́я, на практике используется также сокращение РФ) — государство в Восточной Европе и Северной Азии. Население — 146 270 033 чел. (2015), территория — 17 125 187 км². Занимает первое место в мире по территории и девятое место по численности населения.\nСтолица — Москва. Государственный язык — русский.\nСмешанная республика федеративного устройства. В мае 2012 года пост президента занял Владимир Путин, председателя правительства — Дмитрий Медведев.\nВ составе Российской Федерации находятся 85 субъектов, 46 из которых именуются областями, 22 — республиками, 9 — краями, 3 — городами федерального значения, 4 — автономными округами и 1 — автономной областью.\nРоссия граничит с девятнадцатью странами (самый большой показатель в мире), включая две частично признанных, из них по суше со следующими государствами: Норвегией, Финляндией, Эстонией, Латвией, Литвой, Польшей, Белоруссией, Украиной, Абхазией, Грузией, Южной Осетией, Азербайджаном, Казахстаном, КНР, КНДР, Монголией, по морю с Турцией, Японией и США.\nОтличается значительным этнокультурным разнообразием. Бо́льшая часть (около 75 %) населения относит себя к православию, что делает Россию страной с самым многочисленным православным населением в мире.\nПо данным Всемирного банка, объём ВВП по ППС за 2014 год составил $3,461 трлн ($24,120 на человека). Денежная единица — российский рубль (усреднённый курс за 2014 год — 36 рублей за 1 доллар США).\nЯвляется великой державой и энергетической сверхдержавой — кандидатом-сверхдержавой, постоянный член Совета безопасности ООН. Одна из ведущих космических держав мира, обладает ядерным оружием и средствами его «доставки».\nПосле распада СССР в конце 1991 года Российская Федерация была признана международным сообществом как государство-продолжатель СССР в вопросах ядерного потенциала СССР, внешнего долга СССР, собственности СССР за рубежом, а также членства в Совете Безопасности ООН. Россия состоит в ряде международных организаций — ООН, ОБСЕ, Совет Европы, ЕАЭС, СНГ, ОЧЭС, ОДКБ, ВТО, ВФП, ЦАС, ШОС, АТЭС, БРИКС, МОК, ISO и других.",
+				"encyclopediaTitle": "Википедия",
+				"extra": "Page Version ID: 43336101",
+				"language": "ru",
+				"libraryCatalog": "Wikipedia",
+				"rights": "Creative Commons Attribution-ShareAlike License",
+				"url": "http://ru.wikipedia.org/w/index.php?title=%D0%A0%D0%BE%D1%81%D1%81%D0%B8%D1%8F&oldid=43336101",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -127,16 +147,9 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"title": "Россия",
-				"rights": "Creative Commons Attribution-ShareAlike License",
-				"encyclopediaTitle": "Википедия",
-				"url": "http://ru.wikipedia.org/w/index.php?title=%D0%A0%D0%BE%D1%81%D1%81%D0%B8%D1%8F&oldid=43336101",
-				"extra": "Page Version ID: 43336101",
-				"language": "ru",
-				"abstractNote": "Росси́я (от греч. Ρωσία — Русь[1]; официально — Росси́йская Федера́ция или Росси́я[2], на практике используется также сокращение — РФ[3]) — страна, расположенная в Восточной Европе и Северной Азии. Является самым большим государством мира (17 098 246 км²[4], что составляет 11,46 % (~1 / 9 часть, равная 11,11 %) площади всей суши Земли, или 12,65 % (~1 / 8 часть, равная 12,5 %) заселённой человеком суши, что почти вдвое больше, чем у занимающей второе место Канады). Население на 2012 год составляет 143 030 106 человек[5], в настоящее время страна занимает девятое место в мире по этому показателю. Государственный язык на всей территории страны — русский. В 23 субъектах федерации наряду с русским используются другие государственные языки. Столица — город Москва. Всего в России 13 городов с населением более миллиона человек: Москва, Санкт-Петербург, Новосибирск, Екатеринбург, Нижний Новгород, Самара, Омск, Казань, Челябинск, Ростов-на-Дону, Уфа, Волгоград[6], Пермь[7].",
-				"date": "2012-10-31T19:07:35Z",
-				"libraryCatalog": "Wikipedia",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -146,10 +159,16 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "encyclopediaArticle",
+				"title": "Zotero",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2012-04-03T14:41:27Z",
+				"abstractNote": "Zotero /zoʊˈtɛroʊ/ is free and open-source reference management software to manage bibliographic data and related research materials (such as PDF files). Notable features include web browser integration, online syncing, generation of in-text citations, footnotes and bibliographies, as well as integration with the word processors Microsoft Word, LibreOffice, OpenOffice.org Writer and NeoOffice. It is produced by the Center for History and New Media of George Mason University (GMU).",
+				"encyclopediaTitle": "Wikipedia, the free encyclopedia",
+				"extra": "Page Version ID: 485342619",
+				"language": "en",
+				"libraryCatalog": "Wikipedia",
+				"rights": "Creative Commons Attribution-ShareAlike License",
+				"url": "http://en.wikipedia.org/w/index.php?title=Zotero&oldid=485342619",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -157,16 +176,9 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"title": "Zotero",
-				"rights": "Creative Commons Attribution-ShareAlike License",
-				"encyclopediaTitle": "Wikipedia, the free encyclopedia",
-				"url": "http://en.wikipedia.org/w/index.php?title=Zotero&oldid=485342619",
-				"extra": "Page Version ID: 485342619",
-				"language": "en",
-				"abstractNote": "Zotero ( /zoʊˈtɛroʊ/) is free, open source reference management software to manage bibliographic data and related research materials (such as PDFs). Notable features include web browser integration, online syncing, generation of in-text citations, footnotes and bibliographies, as well as integration with the word processors Microsoft Word, LibreOffice, OpenOffice.org Writer and NeoOffice. It is produced by the Center for History and New Media of George Mason University (GMU).",
-				"date": "2012-10-24T08:29:51Z",
-				"libraryCatalog": "Wikipedia",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -176,10 +188,16 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "encyclopediaArticle",
+				"title": "Wikipedia:Article wizard",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2015-02-10T10:51:06Z",
+				"encyclopediaTitle": "Wikipedia, the free encyclopedia",
+				"extra": "Page Version ID: 646481896",
+				"language": "en",
+				"libraryCatalog": "Wikipedia",
+				"rights": "Creative Commons Attribution-ShareAlike License",
+				"shortTitle": "Wikipedia",
+				"url": "http://en.wikipedia.org/w/index.php?title=Wikipedia:Article_wizard&oldid=646481896",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -187,16 +205,9 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"title": "Wikipedia:Article wizard",
-				"rights": "Creative Commons Attribution-ShareAlike License",
-				"encyclopediaTitle": "Wikipedia, the free encyclopedia",
-				"url": "http://en.wikipedia.org/w/index.php?title=Wikipedia:Article_wizard&oldid=521878824",
-				"extra": "Page Version ID: 521878824",
-				"language": "en",
-				"date": "2012-11-07T20:23:45Z",
-				"libraryCatalog": "Wikipedia",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Wikipedia"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

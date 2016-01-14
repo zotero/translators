@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-04-26 22:24:41"
+	"lastUpdated": "2015-02-18 16:51:35"
 }
 
 /*
@@ -90,8 +90,7 @@ function scrape(doc, url) {
 	var bibUrl = url+"?style=bibtex";
 
 	ZU.doGet(bibUrl, function(text) {
-		
-		bibTexContent = text.substring(text.indexOf("<pre>")+5, text.indexOf("</pre>"));
+		bibTexContent = ZU.cleanTags(text);
 		bibTexContent = bibTexContent.replace(/&#13;/g, "\n");
 		
 		var trans = Zotero.loadTranslator('import');
@@ -145,7 +144,7 @@ function scrape(doc, url) {
 				var rights = linkedFields[linkedFields.length-1];
 				item.rights = ZU.trimInternal(rights.textContent) + " cf. " + rights.href;
 			}
-			
+
 			item.complete();
 		});
 		
@@ -160,6 +159,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "bookSection",
+				"title": "Verstehen: Alltagspraxis und wissenschaftliches Programm",
 				"creators": [
 					{
 						"firstName": "Ronald",
@@ -177,31 +177,30 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "1993",
+				"ISBN": "3-518-28648-X",
+				"abstractNote": "Der Autor skizziert das Problem \"verstehender Soziologen\" zu \"erklären\", was ihr \"Tun zu einem wissenschaftlichen Unternehmen\" mache und es vom alltäglichen Verstehen unterscheidet. Er versucht den Nachweis der Relevanz zu führen und das Verhältnis von soziologischen und alltäglichen Verstehen zu analysieren, wie es in der phänomenologisch orientierten Tradition der Soziologie in Deutschland diskutiert werde. Die Soziologie sei dabei eine Form theoretischer Einstellung zur Wirklichkeit, die zwar auf alltäglicher Erfahrung aufbaue, aber eine andere Perspektive habe. Sozialwissenschaftliches Verstehen ist eine \"Kunstlehre\", so der Autor, gesellschaftliche Realität zuverlässig und überprüfbar zu rekonstruieren. Überlegungen zum \"Verstehen als Sinn-Rekonstruktion\" in der Soziologie schließen den Beitrag ab. (rk)",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"itemID": "Hitzler1993",
+				"language": "de",
+				"libraryCatalog": "SSOAR",
+				"pages": "223-240",
+				"place": "Frankfurt am Main",
+				"publisher": "Suhrkamp",
+				"rights": "Creative Commons - Attribution-Noncommercial-No Derivative Works cf. http://creativecommons.org/licenses/by-nc-nd/3.0/",
+				"series": "Suhrkamp-Taschenbuch Wissenschaft",
+				"seriesNumber": "1048",
+				"shortTitle": "Verstehen",
+				"url": "http://nbn-resolving.de/urn:nbn:de:0168-ssoar-19196",
 				"attachments": [
 					{
 						"title": "SSOAR Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"itemID": "Hitzler1993",
-				"title": "Verstehen: Alltagspraxis und wissenschaftliches Programm",
-				"pages": "223-240",
-				"date": "1993",
-				"publisher": "Suhrkamp",
-				"ISBN": "3-518-28648-X",
-				"url": "http://nbn-resolving.de/urn:nbn:de:0168-ssoar-19196",
-				"abstractNote": "Der Autor skizziert das Problem \"verstehender Soziologen\" zu \"erklären\", was ihr \"Tun zu einem wissenschaftlichen Unternehmen\" mache und es vom alltäglichen Verstehen unterscheidet. Er versucht den Nachweis der Relevanz zu führen und das Verhältnis von soziologischen und alltäglichen Verstehen zu analysieren, wie es in der phänomenologisch orientierten Tradition der Soziologie in Deutschland diskutiert werde. Die Soziologie sei dabei eine Form theoretischer Einstellung zur Wirklichkeit, die zwar auf alltäglicher Erfahrung aufbaue, aber eine andere Perspektive habe. Sozialwissenschaftliches Verstehen ist eine \"Kunstlehre\", so der Autor, gesellschaftliche Realität zuverlässig und überprüfbar zu rekonstruieren. Überlegungen zum \"Verstehen als Sinn-Rekonstruktion\" in der Soziologie schließen den Beitrag ab. (rk)",
-				"language": "de",
-				"place": "Frankfurt am Main",
-				"series": "Suhrkamp-Taschenbuch Wissenschaft",
-				"seriesNumber": "1048",
-				"rights": "Creative Commons - Attribution-Noncommercial-No Derivative Works cf. http://creativecommons.org/licenses/by-nc-nd/3.0/",
-				"libraryCatalog": "SSOAR",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Verstehen"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -211,6 +210,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "bookSection",
+				"title": "Neue Regionalisierungsansätze und Raumkategorien in Nordrhein-Westfalen: der kulturlandschaftliche Fachbeitrag der Landschaftsverbände Rheinland und Westfalen-Lippe zum Landesentwicklungsplan",
 				"creators": [
 					{
 						"firstName": "Peter",
@@ -238,32 +238,31 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2010",
+				"ISBN": "978-3-88838-352-6",
+				"ISSN": "0946-7807",
+				"abstractNote": "Für die Neuaufstellung des Landesentwicklungsplanes in Nordrhein-Westfalen haben die Landschaftsverbände Westfalen-Lippe und Rheinland vorbereitend einen eigenständigen kulturlandschaftlichen Fachbeitrag erstellt. Neben der flächendeckenden Markierung von Kulturlandschaften wurden darin bedeutsame und landesbedeutsame Kulturlandschaftsbereiche hervorgehoben. Der Beitrag beschreibt das Vorgehen und die daraus abgeleiteten Leitlinien und Leitbilder sowie die konzeptionellen Konsequenzen für die Landes- und Regionalplanung in NRW. Letztlich soll ein zukünftig verantwortungsvoller Umgang mit der Kulturlandschaft und ihrem kulturellen Erbe erreicht werden. Hervorzuheben ist die interdisziplinäre Herangehensweise durch die Kulturdienststellen der beiden Landschaftsverbände mit einem gemeinsam abgestimmten Ergebnis, das für die Aufstellung des LEP eine Arbeitsgrundlage bildet.As a preparatory contribution to the framing of a new state development plan for North Rhine-Westphalia, the regional councils for the Rhineland and Westfalen-Lippe have produced an independent technical report on cultural landscapes. In addition to identifying all cultural landscapes throughout the plan area, the report also highlights examples of cultural landscapes which are of significance for the entire state. This paper provides a description of the approach adopted and describes the guidelines and visions which have been derived; it also outlines the conceptual consequences which ensue for state-level and regional planning in North Rhine-Westphalia. Ultimately the objective is to ensure that both cultural landscapes and the cultural heritage will in future be treated in a more responsible manner. One particularly noteworthy feature is the interdisciplinary approach adopted by the cultural services sections of both regional councils, resulting in one joint conclusion which forms the basis for further work to frame the new LEP, or state development plan.",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"itemID": "Burggraaff2010",
+				"language": "de",
+				"libraryCatalog": "SSOAR",
+				"pages": "184-202",
+				"place": "Hannover",
+				"publisher": "Verl. d. ARL",
+				"rights": "Deposit Licence - No Redistribution, No Modifications cf. http://www.ssoar.info/en/home/how-to-deposit-documents/legal-issues/licences.html#c1219",
+				"series": "Arbeitsmaterial",
+				"seriesNumber": "352",
+				"shortTitle": "Neue Regionalisierungsansätze und Raumkategorien in Nordrhein-Westfalen",
+				"url": "http://nbn-resolving.de/urn:nbn:de:0168-ssoar-356214",
 				"attachments": [
 					{
 						"title": "SSOAR Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"itemID": "Burggraaff2010",
-				"title": "Neue Regionalisierungsansätze und Raumkategorien in Nordrhein-Westfalen: der kulturlandschaftliche Fachbeitrag der Landschaftsverbände Rheinland und Westfalen-Lippe zum Landesentwicklungsplan",
-				"pages": "184-202",
-				"date": "2010",
-				"publisher": "Verl. d. ARL",
-				"ISSN": "0946-7807",
-				"ISBN": "978-3-88838-352-6",
-				"url": "http://nbn-resolving.de/urn:nbn:de:0168-ssoar-356214",
-				"abstractNote": "Für die Neuaufstellung des Landesentwicklungsplanes in Nordrhein-Westfalen haben die Landschaftsverbände Westfalen-Lippe und Rheinland vorbereitend einen eigenständigen kulturlandschaftlichen Fachbeitrag erstellt. Neben der flächendeckenden Markierung von Kulturlandschaften wurden darin bedeutsame und landesbedeutsame Kulturlandschaftsbereiche hervorgehoben. Der Beitrag beschreibt das Vorgehen und die daraus abgeleiteten Leitlinien und Leitbilder sowie die konzeptionellen Konsequenzen für die Landes- und Regionalplanung in NRW. Letztlich soll ein zukünftig verantwortungsvoller Umgang mit der Kulturlandschaft und ihrem kulturellen Erbe erreicht werden. Hervorzuheben ist die interdisziplinäre Herangehensweise durch die Kulturdienststellen der beiden Landschaftsverbände mit einem gemeinsam abgestimmten Ergebnis, das für die Aufstellung des LEP eine Arbeitsgrundlage bildet.As a preparatory contribution to the framing of a new state development plan for North Rhine-Westphalia, the regional councils for the Rhineland and Westfalen-Lippe have produced an independent technical report on cultural landscapes. In addition to identifying all cultural landscapes throughout the plan area, the report also highlights examples of cultural landscapes which are of significance for the entire state. This paper provides a description of the approach adopted and describes the guidelines and visions which have been derived; it also outlines the conceptual consequences which ensue for state-level and regional planning in North Rhine-Westphalia. Ultimately the objective is to ensure that both cultural landscapes and the cultural heritage will in future be treated in a more responsible manner. One particularly noteworthy feature is the interdisciplinary approach adopted by the cultural services sections of both regional councils, resulting in one joint conclusion which forms the basis for further work to frame the new LEP, or state development plan.",
-				"language": "de",
-				"place": "Hannover",
-				"series": "Arbeitsmaterial",
-				"seriesNumber": "352",
-				"rights": "Deposit Licence - No Redistribution, No Modifications cf. http://www.ssoar.info/en/home/how-to-deposit-documents/legal-issues/licences.html#c1219",
-				"libraryCatalog": "SSOAR",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Neue Regionalisierungsansätze und Raumkategorien in Nordrhein-Westfalen"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -273,6 +272,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Book review of \"Transatlantic Feminisms in the Age of Revolutions\" by Lisa L. Moore, Joanna Brooks and Caroline Wigginton (Eds.)",
 				"creators": [
 					{
 						"firstName": "Alexandra",
@@ -280,28 +280,26 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2013",
+				"ISSN": "2285-4916",
+				"issue": "2",
+				"itemID": "Petrescu2013",
+				"language": "en",
+				"libraryCatalog": "SSOAR",
+				"pages": "77-78",
+				"publicationTitle": "European Quarterly of Political Attitudes and Mentalities",
+				"rights": "Creative Commons - Attribution-Noncommercial-No Derivative Works cf. http://creativecommons.org/licenses/by-nc-nd/3.0/",
+				"url": "http://nbn-resolving.de/urn:nbn:de:0168-ssoar-341882",
+				"volume": "2",
 				"attachments": [
 					{
 						"title": "SSOAR Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"itemID": "Petrescu2013",
-				"title": "Book review of “Transatlantic Feminisms in the Age of Revolutions” by Lisa L. Moore, Joanna Brooks and Caroline Wigginton (Eds.)",
-				"publicationTitle": "European Quarterly of Political Attitudes and Mentalities",
-				"issue": "2",
-				"pages": "77-78",
-				"volume": "2",
-				"date": "2013",
-				"ISSN": "2285-4916",
-				"url": "http://nbn-resolving.de/urn:nbn:de:0168-ssoar-341882",
-				"language": "en",
-				"rights": "Creative Commons - Attribution-Noncommercial-No Derivative Works cf. http://creativecommons.org/licenses/by-nc-nd/3.0/",
-				"libraryCatalog": "SSOAR",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -311,6 +309,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Die Ordnung des Diskurses in der Flüchtlingskonstruktion : eine postkoloniale Re-Lektüre",
 				"creators": [
 					{
 						"firstName": "Heike",
@@ -323,30 +322,29 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2010",
+				"ISSN": "1862-5002",
+				"abstractNote": "\"Ziel dieses Beitrages ist eine postkoloniale Dekonstruktion der essentialisierenden Kategorie 'Flüchtling'. Die Analyse geht davon aus, dass der 'Flüchtling' ein politisch-rechtliches und soziales Konstrukt ist, das bestimmte Funktionen für die national kodierte Selbstdeutung der Mehrheitsgesellschaft hat. Die Positionen in der Dreiecksstruktur Täter-Opfer-Retter werden in den dominanten diskursiven Formationen in einer Weise zugeordnet, die eine kollektive weiße europäische Identität konstruiert: Die Abwehr der 'falschen Flüchtlinge' (Täter) stabilisiert das imaginierte Zentrum durch Ausgrenzung der Nicht-Dazugehörigen; als 'Retter' der 'echten Flüchtlinge' (Opfer) wird das Bild von 'Europa' als Hort der Menschenrechte und der politischen wie moralischen Überlegenheit aufrecht erhalten, was allerdings die Ausblendung (post-)kolonialer Täterschaft und Verantwortlichkeit voraussetzt. Anhand der biographischen Narration eines 'Flüchtlingsjungen' werden Einblicke in (diskursive) Strategien der Selbstpositionierung im Rahmen dieses narrativen Machtraums gegeben. Den Abschluss bildet das Plädoyer für eine 'Entmoralisierung' des Flüchtlingsdiskurses in wissenschaftlichen und pädagogischen Kontexten.\" (Autorenreferat)\"This contribution endeavors to deconstruct the essentializing category 'refugee' from a postcolonial perspective. The starting point of the discourse analysis is the assumption that the 'refugee' is a political-legal and social construct, which has specific functions for the nationally coded self-definition of the social majority: The positions in the triangular structure aggressor-victim-rescuer are applied in such a manner within the dominant discursive formation as to construct a collective White European identity: Repulsing the 'false refugees' (aggressors) serves to stabilize the imagined centre by exclusion of those who do not belong; in the role of 'rescuer' of the 'true refugees' (victims) 'Europe' maintains its self-image as a stronghold of human rights and its position of political and moral superiority, a strategy which requires, however, collective amnesia with respect to (post-)colonial aggression and responsibilities. The biographic narration of a 'refugee boy' allows us to provide a glimpse into (discursive) strategies of self-positioning within this framework of narrative power. In the conclusion the authors plead for a 'demoralization' of the refugee discourse in scientific and educational contexts.\" (author's abstract)",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"issue": "2",
+				"itemID": "Niedrig2010",
+				"language": "de",
+				"libraryCatalog": "SSOAR",
+				"pages": "181-193",
+				"publicationTitle": "Diskurs Kindheits- und Jugendforschung",
+				"rights": "Deposit Licence - No Redistribution, No Modifications cf. http://www.ssoar.info/en/home/how-to-deposit-documents/legal-issues/licences.html#c1219",
+				"shortTitle": "Die Ordnung des Diskurses in der Flüchtlingskonstruktion",
+				"url": "http://nbn-resolving.de/urn:nbn:de:0168-ssoar-354632",
+				"volume": "5",
 				"attachments": [
 					{
 						"title": "SSOAR Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"itemID": "Niedrig2010",
-				"title": "Die Ordnung des Diskurses in der Flüchtlingskonstruktion : eine postkoloniale Re-Lektüre",
-				"publicationTitle": "Diskurs Kindheits- und Jugendforschung",
-				"issue": "2",
-				"pages": "181-193",
-				"volume": "5",
-				"date": "2010",
-				"ISSN": "1862-5002",
-				"url": "http://nbn-resolving.de/urn:nbn:de:0168-ssoar-354632",
-				"abstractNote": "\"Ziel dieses Beitrages ist eine postkoloniale Dekonstruktion der essentialisierenden Kategorie 'Flüchtling'. Die Analyse geht davon aus, dass der 'Flüchtling' ein politisch-rechtliches und soziales Konstrukt ist, das bestimmte Funktionen für die national kodierte Selbstdeutung der Mehrheitsgesellschaft hat. Die Positionen in der Dreiecksstruktur Täter-Opfer-Retter werden in den dominanten diskursiven Formationen in einer Weise zugeordnet, die eine kollektive weiße europäische Identität konstruiert: Die Abwehr der 'falschen Flüchtlinge' (Täter) stabilisiert das imaginierte Zentrum durch Ausgrenzung der Nicht-Dazugehörigen; als 'Retter' der 'echten Flüchtlinge' (Opfer) wird das Bild von 'Europa' als Hort der Menschenrechte und der politischen wie moralischen Überlegenheit aufrecht erhalten, was allerdings die Ausblendung (post-)kolonialer Täterschaft und Verantwortlichkeit voraussetzt. Anhand der biographischen Narration eines 'Flüchtlingsjungen' werden Einblicke in (diskursive) Strategien der Selbstpositionierung im Rahmen dieses narrativen Machtraums gegeben. Den Abschluss bildet das Plädoyer für eine 'Entmoralisierung' des Flüchtlingsdiskurses in wissenschaftlichen und pädagogischen Kontexten.\" (Autorenreferat)\"This contribution endeavors to deconstruct the essentializing category 'refugee' from a postcolonial perspective. The starting point of the discourse analysis is the assumption that the 'refugee' is a political-legal and social construct, which has specific functions for the nationally coded self-definition of the social majority: The positions in the triangular structure aggressor-victim-rescuer are applied in such a manner within the dominant discursive formation as to construct a collective White European identity: Repulsing the 'false refugees' (aggressors) serves to stabilize the imagined centre by exclusion of those who do not belong; in the role of 'rescuer' of the 'true refugees' (victims) 'Europe' maintains its self-image as a stronghold of human rights and its position of political and moral superiority, a strategy which requires, however, collective amnesia with respect to (post-)colonial aggression and responsibilities. The biographic narration of a 'refugee boy' allows us to provide a glimpse into (discursive) strategies of self-positioning within this framework of narrative power. In the conclusion the authors plead for a 'demoralization' of the refugee discourse in scientific and educational contexts.\" (author's abstract)",
-				"language": "de",
-				"rights": "Deposit Licence - No Redistribution, No Modifications cf. http://www.ssoar.info/en/home/how-to-deposit-documents/legal-issues/licences.html#c1219",
-				"libraryCatalog": "SSOAR",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Die Ordnung des Diskurses in der Flüchtlingskonstruktion"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

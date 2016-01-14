@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-04 10:16:45"
+	"lastUpdated": "2015-03-06 09:02:26"
 }
 
 /*
@@ -39,151 +39,110 @@ http://www.spiegel.de/international/europe/0,1518,700530,00.html
 */
 
 function detectWeb(doc, url) {
-
-	var spiegel_article_XPath = './/div[@class="column-both"]/h2[@class="article-title"]|.//div[@class="column-wide"]/h2[contains(@class, "headline")]';
-	//the print edition is a magazine. Since the online edition is updated constantly it
-	//makes sense to treat it like a newspaper.
-	if (url.match(/\/print\//) && ZU.xpathText(doc, spiegel_article_XPath)){
-		return "magazineArticle";
+	var spiegel_article_XPath = '//h2[@class="article-title"]';
+	if ( url.indexOf('/thema/')>-1 || url.indexOf('/suche/')>-1 || url.indexOf('/international/search/')>-1 || url.indexOf('/international/topic/')>-1 ) { 
+		return "multiple";
+	} else if (ZU.xpathText(doc, spiegel_article_XPath)) {
+		//the print edition is a magazine. Since the online edition is updated constantly it
+		//makes sense to treat it like a newspaper.
+		if (url.indexOf('/print/')>-1) {
+			return "magazineArticle";
+		} else { 
+			return "newspaperArticle";
+		}
 	}
-	else if (doc.evaluate(spiegel_article_XPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
-		//Zotero.debug("newspaperArticle");
-		return "newspaperArticle";
-	} else if (doc.location.href.match(/^https?\:\/\/www\.spiegel\.de\/thema/)){ 
-		//Zotero.debug("multiple");
-		return "multiple";
-	}  else if (doc.location.href.match(/^https?\:\/\/www\.spiegel\.de\/suche/)){ 
-		//Zotero.debug("multiple");
-		return "multiple";
-	}  else if (doc.location.href.match(/^https?\:\/\/www\.spiegel\.de\/international\/search/)){ 
-		//Zotero.debug("multiple");
-		return "multiple";
-	} else if (doc.location.href.match(/^https?\:\/\/www\.spiegel\.de\/international\/topic/)){ 
-		//Zotero.debug("multiple");
-		return "multiple";
-	} 
 }
 
 function scrape(doc, url) {
-	
- 	if (detectWeb(doc, url)=="magazineArticle") {
- 			var newItem = new Zotero.Item("magazineArticle");
- 	}
- 	else{
-		var newItem = new Zotero.Item("newspaperArticle");
- 	}
-	newItem.url = doc.location.href; 
+	var newItem = new Zotero.Item(detectWeb(doc, url));
+
+	newItem.url = url; 
 
 	// This is for the title 
-	
-	var title_xPath = '//div[@class="column-wide"]/h2[contains(@class, "headline")]';
-	if (doc.evaluate(title_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
-		var title = doc.evaluate(title_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		newItem.title = title;
-	} else if (ZU.xpathText(doc, '//div[@id="spArticleColumn"]/h2')) {
-		newItem.title = ZU.xpathText(doc, '//div[@id="spArticleColumn"]/h2');
-	} else {
-		var title = doc.evaluate('//title', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		title = title.split(" - ")[0];
-		newItem.title = title;
-	}
+	newItem.title = ZU.xpathText(doc, '//h2[@class="article-title"]') 
+		|| ZU.xpathText(doc, '//meta[@property="og:title"]/@content') 
+		|| ZU.xpathText(doc, '//title');
+	newItem.title = ZU.trimInternal(newItem.title);
+
 
 	// Tags
-	var tags_xPath = '//meta[contains(@name, "keywords")]';
-	var tags= doc.evaluate(tags_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().content;
-	tags = tags.split(/,/);
-	tags = tags.slice(5); // The first six 5 Tags are generic or section info.
-	if (tags[0] != "" ) {
-		for (var i in tags) {
-			tags[i] = tags[i].replace(/^\s*|\s*$/g, '');
-			newItem.tags.push(tags[i]);
-		}
+	var tags = ZU.xpathText(doc, '//meta[contains(@name, "keywords")][1]/@content');
+	if (tags) {
+		// The first 5 Tags are generic or section info. TODO check if that is anymore true
+		newItem.tags = tags.trim().split(/(?:\s*,\s*)+/).slice(5);
 	}
 	
 	// Author
-	var author_XPath1 = ".//p[contains(@class, 'author')]"; // Most of the time, the author has its own tag. Easy Case, really.
-	var author_XPath2 =  ".//*[@id='spIntroTeaser']/strong/i"; // Sometimes, though, the author is in italics in the teaser.
-	if (doc.evaluate(author_XPath1, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		var author = doc.evaluate(author_XPath1, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		//Zotero.debug(author);	 
-	} else if  (doc.evaluate(author_XPath2, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		var author = doc.evaluate(author_XPath2, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		//Zotero.debug(author);	 
-	} else {
-		author = "";
-	}
-	author = author.replace(/^\s*By\s|^\s*(Ein.+?)?[Vv]on\s|\s*$/g, ''); // remove whitespace around the author and the "Von "at the beginning
-	if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/spiegel/)){ // Spiegel Online and the Spiegel Archive have different formatting for the author line
-		author = author.split(/\sund\s|\su\.\s|\;\s|\sand\s/); 
-		for (var i in author) {
-			author[i] = author[i].replace(/(.*),\s(.*)/, '$2 $1');
+	var author = ZU.xpathText(doc, '//p[contains(@class, "author")]') // Most of the time, the author has its own tag. Easy Case, really.
+		|| ZU.xpathText(doc, '//span[contains(@class, "author")]')
+		|| ZU.xpathText(doc, '//*[@id="spIntroTeaser"]/strong/i'); // Sometimes, though, the author is in italics in the teaser.
+	if (author) {
+		author = author.replace(/^\s*By\s|^\s*Von\s/, '');
+		author = author.replace(/^\s*Ein.+? von\s|\s*$/, '');//e.g "Ein Kommentar von Peter Müller, Leipzig"
+		author = author.replace(/^\s*Aus.+?berichtet\s*/, "");
+		author = author.replace(/^\s*Interview (Conducted )?by /, '');// e.g. Interview Conducted by Klaus Brinkbäumer
+
+		// Spiegel Online and the Spiegel Archive have different formatting for the author line
+		var formatSpiegelArchive = url.indexOf('http://www.spiegel.de/spiegel/')>-1;
+		
+		if (formatSpiegelArchive) {
+			//e.g. Von Neubacher, Alexander; Neumann, Conny; Winter, Steffen
+			author = author.split(/\sund\s|\su\.\s|\;\s|\sand\s/); 
+		} else {
+			//e.g. By Jörg Diehl, Hubert Gude, Barbara Schmid and Fidelius Schmid
+			author = author.replace(/,\s\S*$/, ''); //e.g "Ein Kommentar von Peter Müller, Leipzig"
+			author = author.replace(/\sin\s\S*(,\s\S*)?$/g, ""); //e.g. "By Susanne Beyer in Kaliningrad, Russia"
+			author = author.split(/\sund\s|\su\.\s|\,\s|\sand\s/); 
 		}
-	} else {
-	
-		author = author.replace(/(,\s|in\s)\S*$|^\s*Aus.+?berichtet\s*/g, ""); //remove ", location" or "in location"
-		author = author.split(/\sund\s|\su\.\s|\,\s|\sand\s/); 
-	}
-	for (var i in author) {
-		if (author[i].match(/\s/)) { // only names that contain a space!
-			newItem.creators.push(Zotero.Utilities.cleanAuthor(author[i], "author"));
+		for (var i in author) {
+			newItem.creators.push(Zotero.Utilities.cleanAuthor(author[i], "author", author[i].indexOf(',')>-1));
 		}
 	}
 	
 	// Section
-	var section_xPath = ".//ul[contains(@id, 'spChannel')]/li/ul/li/a[contains(@class, 'spActive')]";
-	 if (doc.evaluate(section_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
-		var section = doc.evaluate(section_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		newItem.section = section;
-	} 
-
-	if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/spiegel/)){
+	newItem.section = ZU.xpathText(doc, '//a[@class="channel-name"]');
+	
+	// attachement
+	if (url.match(/^http\:\/\/www\.spiegel\.de\/spiegel/)){
 		var printurl_xPath = ".//div[contains(@class, 'article-function-box')]/ul/li[1]/a/@href";
 		var printurl = ZU.xpathText(doc, printurl_xPath);
 		//Zotero.debug(printurl);
-		newItem.attachments.push({url:printurl, title:doc.title, mimeType:"application/pdf"});
+		newItem.attachments.push({url:printurl, title:"Full Text PDF", mimeType:"application/pdf"});
 	} else { 
 		// Attachment. Difficult. They want something inserted into the URL.
-		var printurl = doc.location.href;
+		var printurl = url;
 		printurl = printurl.replace(/(\d+\,\d+\.html.*$)/, 'druck-$1'); //done!
-		newItem.attachments.push({url:printurl, title:doc.title, mimeType:"text/html"});
+		newItem.attachments.push({url:printurl, title:"Snapshot", mimeType:"text/html"});
 	}
 	
-	//Ausgabe/Volume für Print
+	// Ausgabe/Volume für Print
 	if (ZU.xpathText(doc, '//div[@class="spiegel-magazin-title asset-title"]') && newItem.itemType == "magazineArticle"){
 		newItem.volume = ZU.xpathText(doc, '//div[@class="spiegel-magazin-title asset-title"]').match(/(\d+)\/\d{4}/)[1];
 	}
 	
 	// Summary
-	var summary_xPath = ".//p[@class='article-intro']";
-	if (doc.evaluate(summary_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
-		var summary= doc.evaluate(summary_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		newItem.abstractNote = Zotero.Utilities.trim(summary);
+	var summary = ZU.xpathText(doc, './/p[@class="article-intro"]')
+	if (summary) { 
+		newItem.abstractNote = summary.trim();
 	}
 	
-	// Date - sometimes xpath1 doesn't yield anything. Fortunately, there's another possibility...
-	var date1_xPath = ".//h5[contains(@id, 'ShortDate')]"; 
-	var date2_xPath = "//meta[@name='date']";
-	var date3_xPath = "//div[@id='spShortDate']"
-	if (doc.evaluate(date1_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
-		var date= doc.evaluate(date1_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		if (date.match('/')) {
-			date = date.replace(/(\d\d)\/(\d\d)\/(\d\d\d\d)/, "$2.$1.$3").replace(/T.+/,"");
-		}
-	} else if (doc.evaluate(date2_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
-		var date= doc.evaluate(date2_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().content;
-		date=date.replace(/(\d\d\d\d)-(\d\d)-(\d\d)/, '$3.$2.$1').replace(/T.+/,"");
-	} else	if (doc.evaluate(date3_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext() ){ 
-		var date= doc.evaluate(date3_xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	// Date
+	var date = ZU.xpathText(doc, './/h5[contains(@id, "ShortDate")]')
+		|| ZU.xpathText(doc, '//meta[@name="date"]/@content')
+		|| ZU.xpathText(doc, '//div[@id="spShortDate"]');
+	if (date) {
+		date = date.replace(/(\d\d)\/(\d\d)\/(\d\d\d\d)/, "$3-$1-$2");
+		date = date.replace(/(\d\d)\.(\d\d)\.(\d\d\d\d)/, "$3-$2-$1");
+		date = date.replace(/T.+/,""); // e.g. date = "2014-10-20T12:10:00+0200"
+		newItem.date = date.trim();
 	}
 	
-	newItem.date = Zotero.Utilities.trim(date);
-	
-	if (doc.location.href.match(/^http\:\/\/www\.spiegel\.de\/spiegel/)){
+	// publicationTitle
+	if (url.indexOf('http://www.spiegel.de/spiegel')>-1) {
 		newItem.publicationTitle = "Der Spiegel";
-	}else { 
+	} else { 
 		newItem.publicationTitle = "Spiegel Online";
 	}
-	
 
 	newItem.complete()
 }
@@ -193,9 +152,9 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		
-		 if (doc.location.href.match(/^https?\:\/\/www\.spiegel\.de\/(suche|international\/search)/)){ 
+		 if (url.match(/^https?\:\/\/www\.spiegel\.de\/(suche|international\/search)/)){ 
 			var titles = doc.evaluate(".//div[@class='search-teaser']/a", doc, null, XPathResult.ANY_TYPE, null);
-		} else  if (doc.location.href.match(/^https?\:\/\/www\.spiegel\.de\/(thema\/|international\/topic)/)){ 
+		} else  if (url.match(/^https?\:\/\/www\.spiegel\.de\/(thema\/|international\/topic)/)){ 
 			var titles = doc.evaluate(".//div[contains(@class, 'teaser')]/h2/a", doc, null, XPathResult.ANY_TYPE, null);
 		} 
 	
@@ -228,6 +187,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "CDU-Parteitag: Partei im Koma",
 				"creators": [
 					{
 						"firstName": "Peter",
@@ -235,27 +195,26 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Mindestlohn",
-					"Euro-Krise",
-					"Betreuungsgeld"
-				],
-				"seeAlso": [],
+				"date": "2011-11-15",
+				"abstractNote": "Die CDU feiert sich in Leipzig selbst, doch in Wahrheit befindet sie sich in einem traurigen Zustand: Die Partei ist in ein kollektives Koma gefallen, politische Debatten finden kaum noch statt. Hauptverantwortlich dafür ist Angela Merkel.",
+				"libraryCatalog": "Spiegel Online",
+				"publicationTitle": "Spiegel Online",
+				"section": "Politik",
+				"shortTitle": "CDU-Parteitag",
+				"url": "http://www.spiegel.de/politik/deutschland/cdu-parteitag-partei-im-koma-a-797954.html",
 				"attachments": [
 					{
-						"title": "CDU-Parteitag: Partei im Koma - SPIEGEL ONLINE",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"url": "http://www.spiegel.de/politik/deutschland/cdu-parteitag-partei-im-koma-a-797954.html",
-				"title": "CDU-Parteitag: Partei im Koma",
-				"abstractNote": "Die CDU feiert sich in Leipzig selbst, doch in Wahrheit befindet sie sich in einem traurigen Zustand: Die Partei ist in ein kollektives Koma gefallen, politische Debatten finden kaum noch statt. Hauptverantwortlich dafür ist Angela Merkel.",
-				"date": "15.11.2011",
-				"publicationTitle": "Spiegel Online",
-				"libraryCatalog": "Spiegel Online",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "CDU-Parteitag"
+				"tags": [
+					"Betreuungsgeld",
+					"Eurokrise",
+					"Mindestlohn"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -280,6 +239,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "magazineArticle",
+				"title": "WIRTSCHAFTSPOLITIK VEB Energiewende",
 				"creators": [
 					{
 						"firstName": "Alexander",
@@ -297,21 +257,20 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2012-04-07",
+				"libraryCatalog": "Spiegel Online",
+				"publicationTitle": "Der Spiegel",
+				"url": "http://www.spiegel.de/spiegel/print/d-84789653.html",
+				"volume": "15",
 				"attachments": [
 					{
-						"title": "DER SPIEGEL 15/2012 - VEB Energiewende",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"url": "http://www.spiegel.de/spiegel/print/d-84789653.html",
-				"title": "VEB Energiewende",
-				"volume": "15",
-				"date": "07.04.2012",
-				"publicationTitle": "Der Spiegel",
-				"libraryCatalog": "Spiegel Online"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -319,6 +278,76 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.spiegel.de/thema/atomkraftwerke/",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.spiegel.de/international/europe/madame-non-and-monsieur-duracell-german-french-relations-on-the-rocks-a-700530.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Madame Non and Monsieur Duracell: German-French Relations On the Rocks",
+				"creators": [],
+				"date": "2010-06-14",
+				"abstractNote": "For decades, the German-French relationship has been the most important one in the European Union. These days, however, Chancellor Angela Merkel and President Nicolas Sarkozy can hardly stand each other. Why can't they just get along?",
+				"libraryCatalog": "Spiegel Online",
+				"publicationTitle": "Spiegel Online",
+				"section": "International",
+				"shortTitle": "Madame Non and Monsieur Duracell",
+				"url": "http://www.spiegel.de/international/europe/madame-non-and-monsieur-duracell-german-french-relations-on-the-rocks-a-700530.html",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.spiegel.de/einestages/kinder-vom-kamper-see-grab-unter-wasser-a-1021273.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Kinder vom Kamper See Das Grab im Wasser",
+				"creators": [
+					{
+						"firstName": "Matthias",
+						"lastName": "Kneip",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015-03-03",
+				"abstractNote": "Am 5. März 1945 stürzte ein Flugzeug in den Kamper See. An Bord: fast 80 deutsche Kinder auf der Flucht vor der Roten Armee. Eine Initiative will nun ihre Leichen vom Grund des Sees bergen.\n\t\t\t\t\t\t\tVon Matthias Kneip",
+				"libraryCatalog": "Spiegel Online",
+				"publicationTitle": "Spiegel Online",
+				"section": "einestages",
+				"url": "http://www.spiegel.de/einestages/kinder-vom-kamper-see-grab-unter-wasser-a-1021273.html",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					"Flucht",
+					"Flucht und Vertreibung",
+					"Flugzeugabsturz",
+					"Flugzeugunglücke",
+					"Kamper See",
+					"Kinder",
+					"Kriegsende",
+					"Zweiter Weltkrieg",
+					"]1945",
+					"einestages"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

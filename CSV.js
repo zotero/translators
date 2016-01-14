@@ -13,8 +13,31 @@
 	"inRepository": true,
 	"translatorType": 2,
 	"browserSupport": "g",
-	"lastUpdated": "2014-09-10 22:58:51"
+	"lastUpdated": "2015-09-03 21:28:32"
 }
+
+/*
+    ***** BEGIN LICENSE BLOCK *****
+
+    Copyright © 2014 Philipp Zumstein, Aurimas Vinckevicius
+
+    This file is part of Zotero.
+
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+    ***** END LICENSE BLOCK *****
+*/
 
 //The export will be stuck if you try to export to a csv-file
 //which is already opend with Excel. Thus, close it before or rename
@@ -61,7 +84,7 @@ var creatorBaseTypes = {
 	artist: 'author',
 	sponsor: 'author',
 	contributor: 'author',
-	inventor: 'auhtor',
+	inventor: 'author',
 	cartographer: 'author',
 	performer: 'author',
 	presenter: 'author',
@@ -78,6 +101,7 @@ function doExport() {
 	writeColumnHeaders();
 	var item, line;
 	while (item = Zotero.nextItem()) {
+		if(item.itemType == "note" || item.itemType == "attachment") continue;
 		line = '';
 		for (var i=0; i<exportedFields.length; i++) {
 			line += (i ? fieldDelimiter : recordDelimiter)

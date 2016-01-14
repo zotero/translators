@@ -15,7 +15,7 @@
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
-	"lastUpdated": "2014-08-25 06:43:15"
+	"lastUpdated": "2015-09-10 08:45:20"
 }
 
 
@@ -438,6 +438,7 @@ var filePathSpecialChars = '\\\\:;{}$'; // $ for Mendeley
 var encodeFilePathRE = new RegExp('[' + filePathSpecialChars + ']', 'g');
 
 function encodeFilePathComponent(value) {
+	if (!value) return '';
 	return value.replace(encodeFilePathRE, "\\$&");
 }
 
@@ -470,8 +471,9 @@ function encodeFilePathComponent(value) {
 			if(item.itemType == "book" && !creatorCheck(item,"author") &&
 			   creatorCheck(item, "editor")) type = "collection";
 
-			//biblatex recommends us to use mvbook for multi-volume books
-			if (type == "book" && item.volume) type = "mvbook"
+			//biblatex recommends us to use mvbook for multi-volume book
+			//i.e. a book with "# of vols" filled
+			if (type == "book" && item.numberOfVolumes) type = "mvbook"
 
 			if (!type) type = "misc";
 
@@ -518,7 +520,7 @@ function encodeFilePathComponent(value) {
 				} else if (item.itemType == "magazineArticle" || item.itemType == "newspaperArticle") {
 					writeField("journaltitle", item.publicationTitle);
 				} else if (item.itemType == "journalArticle") {
-					if (Zotero.getOption("useJournalAbbreviation")) {
+					if (Zotero.getOption("useJournalAbbreviation") && item.journalAbbreviation) {
 						writeField("journaltitle", item.journalAbbreviation);
 					} else {
 						writeField("journaltitle", item.publicationTitle);

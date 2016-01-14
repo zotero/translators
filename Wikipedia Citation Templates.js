@@ -10,7 +10,7 @@
 	"displayOptions":{"exportCharset":"UTF-8"},
 	"browserSupport":"gcs",
 	"inRepository":true,
-	"lastUpdated":"2013-01-12 8:00:26"
+	"lastUpdated":"2015-02-21 07:16:26"
 }
 
 var fieldMap = {
@@ -36,7 +36,7 @@ var typeMap = {
 	letter:"Cite",
 	manuscript:"Cite book",
 	interview:"Cite interview",
-	film:"Cite video",
+	film:"Cite AV media",
 	artwork:"Cite",
 	webpage:"Cite web",
 	report:"Cite conference",
@@ -51,7 +51,7 @@ var typeMap = {
 	forumPost:"Cite web",
 	audioRecording:"Cite",
 	presentation:"Cite paper",
-	videoRecording:"Cite video",
+	videoRecording:"Cite AV media",
 	tvBroadcast:"Cite episode",
 	radioBroadcast:"Cite episode",
 	podcast:"Cite podcast",
@@ -64,7 +64,8 @@ var typeMap = {
 
 function formatAuthors(authors, useTypes) {
 	var text = "";
-	for each(var author in authors) {
+	for (var i=0; i<authors.length; i++) {
+		var author = authors[i];
 		text += ", "+author.firstName;
 		if(author.firstName && author.lastName) text += " ";
 		text += author.lastName;
@@ -110,7 +111,7 @@ function doExport() {
 			if(type == "Cite episode") {
 				// now add additional creators
 				properties.credits = formatAuthors(item.creators, true);
-			} else if(type == "Cite video") {
+			} else if(type == "Cite AV media") {
 				properties.people = "";
 				
 				// make first creator first, last
@@ -215,26 +216,20 @@ function doExport() {
 					others += formatAuthors(translators)+" (trans.)";
 				}
 				
-				// pop off first author, if there is one
-				if(item.creators.length) {
-					var firstAuthor = item.creators.shift();
-					properties.last = firstAuthor.lastName;
-					properties.first = firstAuthor.firstName;
-					
-					// add supplemental authors
-					if(item.creators.length) {
-						properties.coauthors = formatAuthors(item.creators);
-					}
+				// We need to be certain that these come out in the right order, so
+				// deal with it when actually writing output
+				if (item.creators.length) {
+					properties.authors = item.creators.map(function(c) {
+						return {
+							last: c.lastName,
+							first: c.firstName
+						};
+					});
 				}
 				
 				// attach others
 				if(others) {
-					if(type == "Cite book") {
-						properties.others = others;
-					} else {
-						properties.coauthors = (properties.coauthors ? properties.coauthors+", " : "");
-						properties.coauthors += others;
-					}
+					properties.others = others;
 				}
 			}
 		}
@@ -276,7 +271,8 @@ function doExport() {
 			properties.series = item.seriesText;
 		}
 		
-		if(item.accessDate) {
+		// Don't include access date for journals with no URL
+		if(item.accessDate && !(item.itemType == 'journalArticle' && !item.url)) {
 			properties.accessdate = formatDate(item.accessDate);
 		}
 		
@@ -285,27 +281,26 @@ function doExport() {
 				properties.senddate = formatDate(item.date);
 			} else {
 				var date = Zotero.Utilities.strToDate(item.date);
-				var mm = "00";
-				var dd = "00";
-				if (date["month"] != undefined){
-					mm = date["month"];
-					mm = mm + 1;
-					if (mm < 10){
-						mm = "0" + mm;
-					} 
-				}
-				if (date["day"] != undefined){
-					dd = date["day"];
-					if (dd < 10){
-						dd = "0" + dd;
-					} 
-				}
-				if (date["year"] != undefined){
-					var yyyy = date["year"].toString();
-					while (yyyy.length < 4){
-						yyyy = "0"+yyyy;
+				if (date["year"] != undefined) {
+					var mm = "00";
+					if (date.month !== undefined) {
+						mm = date["month"];
+						mm = ZU.lpad(mm + 1, '0', 2);
 					}
-					properties.date = formatDate(yyyy+"-"+mm+"-"+dd+" ");
+					
+					var dd = "00";
+					if (date["day"] !== undefined) {
+						dd = ZU.lpad(date.day, '0', 2);
+					}
+					
+					var yyyy = ZU.lpad(date.year.toString(), '0', 4);
+					var date = formatDate(yyyy + '-' + mm + '-' + dd + ' ');
+					
+					if(type == "Cite email") {
+						properties.senddate = date;
+					} else {
+						properties.date = date;
+					}
 				}
 			}
 		}
@@ -359,11 +354,23 @@ function doExport() {
 		}
 		
 		// write out properties
-		Zotero.write((first ? "" : "\r\n\r\n") + "{{"+type);
+		Zotero.write((first ? "" : "\r\n") + "{{"+type);
 		for(var key in properties) {
-			if(properties[key]) Zotero.write("\r\n| "+key+" = "+properties[key]);
+			if (!properties[key]) continue;
+			
+			if (key == 'authors') {
+				var index = properties.authors.length > 1;
+				for (var i=0; i<properties.authors.length; i++) {
+					Zotero.write('| last' + (i|| index ? i+1 : '') + ' = ' + properties.authors[i].last);
+					if (properties.authors[i].first) {
+						Zotero.write('| first' + (i || index ? i+1 : '') + ' = ' + properties.authors[i].first);
+					}
+				}
+			} else {
+				Zotero.write("| "+key+" = "+properties[key]);
+			}
 		}
-		Zotero.write("\r\n}}");
+		Zotero.write("}}");
 		
 		first = false;
 	}

@@ -2,14 +2,14 @@
 	"translatorID": "c54d1932-73ce-dfd4-a943-109380e06574",
 	"label": "Project MUSE",
 	"creator": "Simon Kornblith, Avram Lyon, Sean Takats",
-	"target": "^https?://[^/]*muse\\.jhu\\.edu[^/]*/(login\\?.+ur[il]=/)?(?:journals/[^/]+/(summary/)?[^/]+/[^/]+\\.html|search/results|results)",
+	"target": "^https?://[^/]*muse\\.jhu\\.edu[^/]*/(login\\?.+ur[il]=/)?(?:journals/[^/]+/(summary/)?[^/]+/[^/]+\\.html|search/results|results|books/\\d+)",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-08-27 02:47:50"
+	"lastUpdated": "2015-04-12 16:54:33"
 }
 
 function detectWeb(doc, url) {
@@ -180,6 +180,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Terror, Trauma and the 'Young Marx' Explanation of Jacobin Politics",
 				"creators": [
 					{
 						"firstName": "Patrice L. R.",
@@ -187,8 +188,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2006",
+				"ISSN": "1477-464X",
+				"abstractNote": "Past & Present 191.1 (2006) 121-164",
+				"extra": "<p>Number 191, May 2006</p>",
+				"issue": "1",
+				"libraryCatalog": "Project MUSE",
+				"pages": "121-164",
+				"publicationTitle": "Past & Present",
+				"url": "https://muse.jhu.edu/journals/past_and_present/v191/191.1higonnet.html",
+				"volume": "191",
 				"attachments": [
 					{
 						"title": "Project MUSE Snapshot"
@@ -198,19 +207,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "Terror, Trauma and the 'Young Marx' Explanation of Jacobin Politics",
-				"publicationTitle": "Past & Present",
-				"volume": "191",
-				"issue": "1",
-				"pages": "121-164",
-				"publisher": "Oxford University Press",
-				"ISSN": "1477-464X",
-				"url": "http://muse.jhu.edu/journals/past_and_present/v191/191.1higonnet.html",
-				"date": "2006",
-				"extra": "<p>Number 191, May 2006</p>",
-				"abstractNote": "Past & Present 191.1 (2006) 121-164",
-				"libraryCatalog": "Project MUSE",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -230,6 +228,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Writing the Forest in Early Modern England: A Sylvan Pastoral Nation",
 				"creators": [
 					{
 						"lastName": "Theis",
@@ -237,22 +236,21 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2009",
+				"ISBN": "9780820705057",
+				"abstractNote": "In Writing the Forest in Early Modern England: A Sylvan Pastoral Nation, Jeffrey S. Theis focuses on pastoral literature in early modern England as an emerging form of nature writing. In particular, Theis analyzes what happens when pastoral writing is set in forests — what he terms “sylvan pastoral.” During the sixteenth and seventeenth centuries, forests and woodlands played an instrumental role in the formation of individual and national identities in England. Although environmentalism as we know it did not yet exist, persistent fears of timber shortages led to a larger anxiety about the status of forests. Perhaps more important, forests were dynamic and contested sites of largely undeveloped spaces where the poor would migrate in a time of rising population when land became scarce. And in addition to being a place where the poor would go, the forest also was a playground for monarchs and aristocrats where they indulged in the symbolically rich sport of hunting. Conventional pastoral literature, then, transforms when writers use it to represent and define forests and the multiple ways in which English society saw these places. In exploring these themes, authors expose national concerns regarding deforestation and forest law and present views relating to land ownership, nationhood, and the individual’s relationship to nature. Of particular interest are the ways in which cultures turn confusing spaces into known places and how this process is shaped by nature, history, gender, and class. Theis examines the playing out of these issues in familiar works by Shakespeare, such as A Midsummer Night’s Dream, The Merry Wives of Windsor, and As You Like It, Andrew Marvell’s “Upon Appleton House,” John Milton’s Mask and Paradise Lost, as well as in lesser known prose works of the English Revolution, such as James Howell’s Dendrologia>/i> and John Evelyn’s Sylva. As a unique ecocritical study of forests in early modern English literature, Writing the Forest makes an important contribution to the growing field of the history of environmentalism, and will be of interest to those working in literary and cultural history as well as philosophers concerned with nature and space theory. show less, In Writing the Forest in Early Modern England: A Sylvan Pastoral Nation, Jeffrey S. Theis focuses on pastoral literature in early modern England as an emerging form of nature writing. In particular, Theis analyzes what happens when pastoral writing is set in forests — what he terms “sylvan pastoral.” During the sixteenth and seventeenth centuries, forests and woodlands played an instrumental role in the formation of individual and national identities in England. Although environmentalism as we know it did not yet exist, persistent fears of timber shortages led to a larger anxiety about the status of forests. Perhaps more important . . . show more",
+				"libraryCatalog": "Project MUSE",
+				"place": "Pittsburgh",
+				"publisher": "Duquesne University Press",
+				"shortTitle": "Writing the Forest in Early Modern England",
 				"attachments": [
 					{
 						"title": "Project MUSE Snapshot"
 					}
 				],
-				"title": "Writing the Forest in Early Modern England: A Sylvan Pastoral Nation",
-				"publisher": "Duquesne University Press",
-				"place": "Pittsburgh, PA",
-				"ISBN": "9780820705057",
-				"date": "2009",
-				"abstractNote": "In Writing the Forest in Early Modern England: A Sylvan Pastoral Nation, Jeffrey S. Theis focuses on pastoral literature in early modern England as an emerging form of nature writing. In particular, Theis analyzes what happens when pastoral writing is set in forests — what he terms “sylvan pastoral.”\nDuring the sixteenth and seventeenth centuries, forests and woodlands played an instrumental role in the formation of individual and national identities in England. Although environmentalism as we know it did not yet exist, persistent fears of timber shortages led to a larger anxiety about the status of forests. Perhaps more important, forests were dynamic and contested sites of largely undeveloped spaces where the poor would migrate in a time of rising population when land became scarce. And in addition to being a place where the poor would go, the forest also was a playground for monarchs and aristocrats where they indulged in the symbolically rich sport of hunting.\nConventional pastoral literature, then, transforms when writers use it to represent and define forests and the multiple ways in which English society saw these places. In exploring these themes, authors expose national concerns regarding deforestation and forest law and present views relating to land ownership, nationhood, and the individual’s relationship to nature. Of particular interest are the ways in which cultures turn confusing spaces into known places and how this process is shaped by nature, history, gender, and class.\nTheis examines the playing out of these issues in familiar works by Shakespeare, such as A Midsummer Night’s Dream, The Merry Wives of Windsor, and As You Like It, Andrew Marvell’s “Upon Appleton House,” John Milton’s Mask and Paradise Lost, as well as in lesser known prose works of the English Revolution, such as James Howell’s Dendrologia>/i> and John Evelyn’s Sylva.\nAs a unique ecocritical study of forests in early modern English literature, Writing the Forest makes an important contribution to the growing field of the history of environmentalism, and will be of interest to those working in literary and cultural history as well as philosophers concerned with nature and space theory.\n       show less, In Writing the Forest in Early Modern England: A Sylvan Pastoral Nation, Jeffrey S. Theis focuses on pastoral literature in early modern England as an emerging form of nature writing. In particular, Theis analyzes what happens when pastoral writing is set in forests — what he terms “sylvan pastoral.” During the sixteenth and seventeenth centuries, forests and woodlands played an instrumental role in the formation of individual and national identities in England. Although environmentalism as we know it did not yet exist, persistent fears of timber shortages led to a larger anxiety about the status of forests. Perhaps more important . . .  show more",
-				"libraryCatalog": "Project MUSE",
-				"shortTitle": "Writing the Forest in Early Modern England"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -262,6 +260,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "The Pill at Fifty: Scientific Commemoration and the Politics of American Memory",
 				"creators": [
 					{
 						"firstName": "Heather",
@@ -269,37 +268,35 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2013",
+				"DOI": "10.1353/tech.2013.0137",
+				"ISSN": "1097-3729",
+				"abstractNote": "This article uses coverage of the fiftieth anniversary of the Pill as an example of what Richard Hirsh describes as the “real world” role of historians of technology. It explores how the presentation of historical topics on the world wide web has complicated how the history of technology is conveyed to the public. The article shows that that the Pill is especially suited to demonstrating the public role of historians of technology because, as the most popular form of reversible birth control, it has touched the lives of millions of Americans. Thus, an exploration of how the Pill’s fiftieth anniversary was covered illustrates how historians can use their expertise to provide a nuanced interpretation of a controversial topic in the history of technology.",
+				"extra": "<p>Volume 54, Number 4, October 2013</p>",
+				"issue": "4",
+				"libraryCatalog": "Project MUSE",
+				"pages": "735-745",
+				"publicationTitle": "Technology and Culture",
+				"shortTitle": "The Pill at Fifty",
+				"url": "https://muse.jhu.edu/journals/technology_and_culture/v054/54.4.prescott.html",
+				"volume": "54",
 				"attachments": [
 					{
 						"title": "Project MUSE Snapshot"
 					}
 				],
-				"title": "The Pill at Fifty: Scientific Commemoration and the Politics of American Memory",
-				"publicationTitle": "Technology and Culture",
-				"volume": "54",
-				"issue": "4",
-				"pages": "735-745",
-				"publisher": "The Johns Hopkins University Press",
-				"ISSN": "1097-3729",
-				"url": "http://muse.jhu.edu/journals/technology_and_culture/v054/54.4.prescott.html",
-				"date": "2013",
-				"extra": "<p>Volume 54, Number 4, October 2013</p>",
-				"DOI": "10.1353/tech.2013.0137",
-				"abstractNote": "This article uses coverage of the fiftieth anniversary of the Pill as an example of what Richard Hirsh describes as the “real world” role of historians of technology. It explores how the presentation of historical topics on the world wide web has complicated how the history of technology is conveyed to the public. The article shows that that the Pill is especially suited to demonstrating the public role of historians of technology because, as the most popular form of reversible birth control, it has touched the lives of millions of Americans. Thus, an exploration of how the Pill’s fiftieth anniversary was covered illustrates how historians can use their expertise to provide a nuanced interpretation of a controversial topic in the history of technology.",
-				"libraryCatalog": "Project MUSE",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "The Pill at Fifty"
+				"tags": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://muse.jhu.edu.turing.library.northwestern.edu/journals/latin_american_research_review/v049/49.2.manzetti.html",
+		"url": "http://muse.jhu.edu/journals/latin_american_research_review/v049/49.2.manzetti.html",
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Accountability and Corruption in Argentina During the Kirchners’ Era",
 				"creators": [
 					{
 						"firstName": "Luigi",
@@ -307,8 +304,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2014",
+				"ISSN": "1542-4278",
+				"abstractNote": "This article highlights an important paradox: in Argentina between 2003 and 2013 the center-left Peronist government’s approach to governance mirrors that of the center-right Peronist administration of the 1990s. While the latter centralized authority to pursue neoliberal reforms, the former have centralized authority in the name of expanding government intervention in the economy. In both cases, corruption has tended to go unchecked due to insufficient government accountability. Therefore, although economic policies and political rhetoric have changed dramatically, government corruption remains a constant of the Argentine political system due to the executive branch’s ability to emasculate constitutional checks and balances.",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"extra": "<p>Volume 49, Number 2, 2014</p>",
+				"issue": "2",
+				"libraryCatalog": "Project MUSE",
+				"pages": "173-195",
+				"publicationTitle": "Latin American Research Review",
+				"publisher": "Latin American Studies Association",
+				"url": "http://muse.jhu.edu.turing.library.northwestern.edu/journals/latin_american_research_review/v049/49.2.manzetti.html",
+				"volume": "49",
 				"attachments": [
 					{
 						"title": "Project MUSE Snapshot"
@@ -318,19 +325,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "Accountability and Corruption in Argentina During the Kirchners’ Era",
-				"publicationTitle": "Latin American Research Review",
-				"volume": "49",
-				"issue": "2",
-				"pages": "173-195",
-				"publisher": "Latin American Studies Association",
-				"ISSN": "1542-4278",
-				"url": "http://muse.jhu.edu.turing.library.northwestern.edu/journals/latin_american_research_review/v049/49.2.manzetti.html",
-				"date": "2014",
-				"extra": "<p>Volume 49, Number 2, 2014</p>",
-				"abstractNote": "This article highlights an important paradox: in Argentina between 2003 and 2013 the center-left Peronist government’s approach to governance mirrors that of the center-right Peronist administration of the 1990s. While the latter centralized authority to pursue neoliberal reforms, the former have centralized authority in the name of expanding government intervention in the economy. In both cases, corruption has tended to go unchecked due to insufficient government accountability. Therefore, although economic policies and political rhetoric have changed dramatically, government corruption remains a constant of the Argentine political system due to the executive branch’s ability to emasculate constitutional checks and balances.",
-				"libraryCatalog": "Project MUSE",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"seeAlso": []
 			}
 		]
 	}

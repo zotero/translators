@@ -1,14 +1,15 @@
 {
 	"translatorID":"59cce211-9d77-4cdd-876d-6229ea20367f",
 	"translatorType":4,
-	"label":"Bibliothèque et Archives nationales du Québec",
+	"label":"Bibliothèque et Archives Nationales du Québec",
 	"creator":"Adam Crymble",
-	"target":"http://catalogue.banq.qc.ca",
-	"minVersion":"1.0.0b4.r5",
+	"target":"^https?://catalogue\\.banq\\.qc\\.ca/",
+	"minVersion":"3.0",
 	"maxVersion":"",
 	"priority":100,
+	"browserSupport": "gcsibv",
 	"inRepository":true,
-	"lastUpdated":"2008-12-12 12:35:00"
+	"lastUpdated":"2015-06-29 17:02:02"
 }
 
 function detectWeb(doc, url) {
@@ -212,8 +213,6 @@ function doWeb(doc, url) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
 	
-	var articles = new Array();
-	
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		var next_title = new Array();
@@ -251,14 +250,17 @@ function doWeb(doc, url) {
 		}
 		
 		
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
+		Zotero.selectItems(items, function(items) {
+			if (!items) return true;
+			
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
+			}
+			
+			ZU.processDocuments(articles, scrape);
+		});
 	} else {
-		articles = [url];
+		ZU.processDocuments([url], scrape);
 	}
-	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-	Zotero.wait();
-	
 }

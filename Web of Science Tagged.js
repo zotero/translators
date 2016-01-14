@@ -1,190 +1,15 @@
 {
 	"translatorID": "594ebe3c-90a0-4830-83bc-9502825a6810",
-	"label": "ISI Web of Knowledge",
+	"label": "Web of Science Tagged",
 	"creator": "Michael Berkowitz, Avram Lyon",
-	"target": "^https?://[^/]*webofknowledge\\.com/",
+	"target": "txt",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
-	"translatorType": 5,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2014-07-24 21:53:33"
-}
-
-function detectWeb(doc, url) {
-	if ( (url.indexOf("full_record.do") !== -1
-			|| url.indexOf("InboundService.do") != -1)
-		&& getSingleItemId(doc)
-	) {
-		return "journalArticle";
-	} else if (((doc.title.indexOf(" Results") !== -1) 
-		|| url.indexOf("search_mode=") !== -1)
-		&& getRecords(doc).length) {
-		return "multiple";
-	}
-}
-
-function getRecords(doc) {
-	return ZU.xpath(doc, '//span[@id="records_chunks"]//div[starts-with(@id,"RECORD_")]');
-}
-
-function getSingleItemId(doc) {
-	var form = doc.forms['records_form'];
-	if(form) return (form.elements.namedItem('marked_list_candidates') || {}).value;
-
-	return false;
-}
-
-function doWeb(doc, url) {
-	var ids = new Array();
-	if (detectWeb(doc, url) == "multiple") {
-		var items = new Object;
-		var records = getRecords(doc);
-		var recordID, title;
-		for(var i=0, n=records.length; i<n; i++) {
-			recordID = ZU.xpathText(records[i], './/input[@name="marked_list_candidates"]/@value');
-			title = ZU.xpathText(records[i], '(.//div[@class="search-results-content"]//a)[1]');
-			if(!title || !recordID) continue;
-			
-			items[recordID] = title.trim();
-		}
-		Zotero.selectItems(items, function (items) {
-			if(!items) return true;
-
-			var ids = [];
-			for(var i in items) {
-				ids.push(i);
-			}
-			fetchIds(ids, doc);
-		});
-	} else {
-		fetchIds([getSingleItemId(doc)], doc);
-	}
-}
-
-function getHiddenValues(form) {
-	var inputs = form.elements;
-	var values = {};
-	var node;
-	for(var i=0; node = inputs.item(i); i++) {
-		if(node.type == 'hidden') {
-			values[node.name] = node.value;
-		}
-	}
-	return values;
-}
-
-function serializePostData(data) {
-	var str = '';
-	for(var i in data) {
-		str += '&' + encodeURIComponent(i) + '='
-			+ encodeURIComponent(data[i]).replace(/%20/g, "+");
-	}
-	return str.substr(1);
-}
-
-function getOutputForm(doc) {
-	return doc.forms['output_form'] || doc.forms['records_form'] || doc.forms['summary_records_form'];
-}
-
-function importISIRecord(text) {
-	Z.debug(text);
-	var importer = Zotero.loadTranslator("import");
-	importer.setTranslator("594ebe3c-90a0-4830-83bc-9502825a6810");
-	importer.setString(text);
-	importer.setHandler('itemDone', function(obj, item) {
-		if(item.title.toUpperCase() == item.title) {
-			item.title = ZU.capitalizeTitle(item.title, true);
-		}
-		
-		var creator;
-		for(var i=0, n=item.creators.length; i<n; i++) {
-			creator = item.creators[i];
-			if(creator.firstName.toUpperCase() == creator.firstName) {
-				creator.firstName = ZU.capitalizeTitle(creator.firstName, true);
-			}
-			if(creator.lastName.toUpperCase() == creator.lastName) {
-				creator.lastName = ZU.capitalizeTitle(creator.lastName, true);
-			}
-		}
-		item.complete();
-	});
-	importer.translate();
-}
-
-function fetchIds(ids, doc) {
-	var outputForm = getOutputForm(doc);
-	var postData = getHiddenValues(outputForm);
-	var filters = 'USAGEIND RESEARCHERID ACCESSION_NUM FUNDING SUBJECT_CATEGORY '
-		+ 'JCR_CATEGORY LANG IDS PAGEC SABBR CITREFC ISSN PUBINFO KEYWORDS '
-		+ 'CITTIMES ADDRS CONFERENCE_SPONSORS DOCTYPE ABSTRACT CONFERENCE_INFO '
-		+ 'SOURCE TITLE AUTHORS '
-		//additional fields from INSPEC
-		+ 'ADDRESS AUTHORS_EDITORS AUTHORSIDENTIFIERS CLASSIFICATION_CODES '
-		+ 'CONFERENCE_SPONSORS DESCRIPTORS IDENTIFYING_CODES IMAGES '
-		+ 'INVENTORS_ASSIGNEES IPC NUM_OF_REF PATENT_INFO SPONSORS TRANSLATORS '
-		+ 'TREATMENT UNCONTROLLED_TERMS';
-	postData['value(record_select_type)'] = 'selrecords';
-	postData['markFrom'] = '';
-	postData['markTo'] = '';
-	postData['fields_selection'] = filters;
-	postData['filters'] = filters;
-	postData['save_options'] = 'othersoftware';
-	postData['format'] = 'saveToRef';
-
-	//add selected items
-	var selectedIds = ids.join(';');
-	postData['selectedIds'] = selectedIds;
-
-	var postUrl = outputForm.action;
-	Z.debug("Posting to " + postUrl);
-	ZU.doPost(postUrl, serializePostData(postData), function (text) {
-		//check if there's an intermediate page
-		if(text.indexOf('FN ') === 0) {
-			importISIRecord(text);
-			return;
-		}
-		
-		//otherwise we have an intermediate page (maybe... it just kind of went away one day)
-		//everything it mostly the same as above except for a few fields
-		var postData2 = {}
-		postData2['locale'] = postData['locale'];
-		postData2['colName'] = postData['colName'];
-		postData2['sortBy'] = postData['sortBy'];
-		postData2['SID'] = postData['SID'];
-		postData2['filters'] = postData['filters'];
-		postData2['fileOpt'] = 'fieldtagged';
-		postData2['action'] = 'saveDataToRef';
-		postData2['product'] = 'UA';
-		postData2['numRecords'] = ids.length;
-		postData2['numRecsToRetrieve'] = 500;
-		
-		var qid = text.match(/<input[^>]+name=(['"]?)qid\1[\s\/][^>]*/);
-		if(qid) qid = qid[0].match(/value=['"]?(\d+)/);
-		if(qid) {
-			qid = qid[1];
-		} else {
-			qid = postData['qid']*1+1;	//this can be wrong if pages are refreshed
-			Z.debug("Could not find qid on page. Using 1 + previous qid: " + qid);
-			text = text.replace(/\s*[\r\n]\s*/g, '\n');	//trim out the extra newlines
-			var forms = text.match(/<form[\s\S]+?<\/form>/ig);
-			if(forms) {
-				Z.debug("Page contained the following forms:");
-				Z.debug(forms.join('\n==============================\n'));
-			} else {
-				Z.debug("Could not find any forms on the page. Here's the whole HTML");
-				Z.debug(text);
-			}
-		}
-		postData2['qid'] = qid;
-
-		var postUrl2 = 'http://ets.webofknowledge.com/ETS/saveDataToRef.do';	//Zotero should take care of proxies
-		ZU.doPost(postUrl2, serializePostData(postData2), function(text) {
-			importISIRecord(text);
-		}, { 'Referer': postUrl });
-
-	}, { 'Referer': doc.location.href });
+	"translatorType": 1,
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2015-06-02 21:33:13"
 }
 
 function detectImport() {
@@ -220,14 +45,16 @@ function processTag(item, field, content) {
 	} else if ((field == "AF" || field == "AU")) {
 		//Z.debug("author: " + content);
 		authors = content.split("\n");
-		for each (var author in authors) {
+		for (var i=0; i<authors.length; i++) {
+			var author = authors[i];
 			author = author.replace(/\s+\(.*/, '');
 			item.creators[0][field].push(ZU.cleanAuthor(author, "author", author.match(/,/)));
 		}
 	} else if ((field == "BE")) {
 		//Z.debug(content);
 		authors = content.split("\n");
-			for each (var author in authors) {
+		for (var i=0; i<authors.length; i++) {
+			var author = authors[i];
 			item.creators[1].push(ZU.cleanAuthor(author, "editor", author.match(/,/)));
 		}
 	} else if (field == "TI") {
@@ -437,6 +264,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Anaplerotic Role for Cytosolic Malic Enzyme in Engineered Saccharomyces   cerevisiae Strains",
 				"creators": [
 					{
 						"firstName": "Rintze M.",
@@ -459,23 +287,23 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
+				"date": "FEB  2011",
+				"DOI": "10.1128/AEM.02132-10",
+				"ISSN": "0099-2240",
+				"abstractNote": "Malic enzyme catalyzes the reversible oxidative decarboxylation of   malate to pyruvate and CO(2). The Saccharomyces cerevisiae MAE1 gene   encodes a mitochondrial malic enzyme whose proposed physiological roles   are related to the oxidative, malate-decarboxylating reaction. Hitherto,   the inability of pyruvate carboxylase-negative (Pyc(-)) S. cerevisiae   strains to grow on glucose suggested that Mae1p cannot act as a   pyruvate-carboxylating, anaplerotic enzyme. In this study, relocation of   malic enzyme to the cytosol and creation of thermodynamically favorable   conditions for pyruvate carboxylation by metabolic engineering, process   design, and adaptive evolution, enabled malic enzyme to act as the sole   anaplerotic enzyme in S. cerevisiae. The Escherichia coli NADH-dependent   sfcA malic enzyme was expressed in a Pyc(-) S. cerevisiae background.   When PDC2, a transcriptional regulator of pyruvate decarboxylase genes,   was deleted to increase intracellular pyruvate levels and cells were   grown under a CO(2) atmosphere to favor carboxylation, adaptive   evolution yielded a strain that grew on glucose (specific growth rate,   0.06 +/- 0.01 h(-1)). Growth of the evolved strain was enabled by a   single point mutation (Asp336Gly) that switched the cofactor preference   of E. coli malic enzyme from NADH to NADPH. Consistently, cytosolic   relocalization of the native Mae1p, which can use both NADH and NADPH,   in a pyc1,2 Delta pdc2 Delta strain grown under a CO(2) atmosphere, also   enabled slow-growth on glucose. Although growth rates of these strains   are still low, the higher ATP efficiency of carboxylation via malic   enzyme, compared to the pyruvate carboxylase pathway, may contribute to   metabolic engineering of S. cerevisiae for anaerobic, high-yield   C(4)-dicarboxylic acid production.",
 				"extra": "WOS:000286597100004",
-				"title": "Anaplerotic Role for Cytosolic Malic Enzyme in Engineered Saccharomyces   cerevisiae Strains",
-				"publicationTitle": "Applied and Environmental Microbiology",
-				"volume": "77",
 				"issue": "3",
 				"pages": "732-738",
-				"DOI": "10.1128/AEM.02132-10",
-				"date": "FEB  2011",
-				"abstractNote": "Malic enzyme catalyzes the reversible oxidative decarboxylation of   malate to pyruvate and CO(2). The Saccharomyces cerevisiae MAE1 gene   encodes a mitochondrial malic enzyme whose proposed physiological roles   are related to the oxidative, malate-decarboxylating reaction. Hitherto,   the inability of pyruvate carboxylase-negative (Pyc(-)) S. cerevisiae   strains to grow on glucose suggested that Mae1p cannot act as a   pyruvate-carboxylating, anaplerotic enzyme. In this study, relocation of   malic enzyme to the cytosol and creation of thermodynamically favorable   conditions for pyruvate carboxylation by metabolic engineering, process   design, and adaptive evolution, enabled malic enzyme to act as the sole   anaplerotic enzyme in S. cerevisiae. The Escherichia coli NADH-dependent   sfcA malic enzyme was expressed in a Pyc(-) S. cerevisiae background.   When PDC2, a transcriptional regulator of pyruvate decarboxylase genes,   was deleted to increase intracellular pyruvate levels and cells were   grown under a CO(2) atmosphere to favor carboxylation, adaptive   evolution yielded a strain that grew on glucose (specific growth rate,   0.06 +/- 0.01 h(-1)). Growth of the evolved strain was enabled by a   single point mutation (Asp336Gly) that switched the cofactor preference   of E. coli malic enzyme from NADH to NADPH. Consistently, cytosolic   relocalization of the native Mae1p, which can use both NADH and NADPH,   in a pyc1,2 Delta pdc2 Delta strain grown under a CO(2) atmosphere, also   enabled slow-growth on glucose. Although growth rates of these strains   are still low, the higher ATP efficiency of carboxylation via malic   enzyme, compared to the pyruvate carboxylase pathway, may contribute to   metabolic engineering of S. cerevisiae for anaerobic, high-yield   C(4)-dicarboxylic acid production.",
-				"ISSN": "0099-2240"
+				"publicationTitle": "Applied and Environmental Microbiology",
+				"volume": "77",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Phosphoenolpyruvate Carboxykinase as the Sole Anaplerotic Enzyme in   Saccharomyces cerevisiae",
 				"creators": [
 					{
 						"firstName": "Rintze M.",
@@ -503,23 +331,23 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
+				"date": "AUG  2010",
+				"DOI": "10.1128/AEM.01077-10",
+				"ISSN": "0099-2240",
+				"abstractNote": "Pyruvate carboxylase is the sole anaplerotic enzyme in glucose-grown   cultures of wild-type Saccharomyces cerevisiae. Pyruvate   carboxylase-negative (Pyc(-)) S. cerevisiae strains cannot grow on   glucose unless media are supplemented with C(4) compounds, such as   aspartic acid. In several succinate-producing prokaryotes,   phosphoenolpyruvate carboxykinase (PEPCK) fulfills this anaplerotic   role. However, the S. cerevisiae PEPCK encoded by PCK1 is repressed by   glucose and is considered to have a purely decarboxylating and   gluconeogenic function. This study investigates whether and under which   conditions PEPCK can replace the anaplerotic function of pyruvate   carboxylase in S. cerevisiae. Pyc(-) S. cerevisiae strains   constitutively overexpressing the PEPCK either from S. cerevisiae or   from Actinobacillus succinogenes did not grow on glucose as the sole   carbon source. However, evolutionary engineering yielded mutants able to   grow on glucose as the sole carbon source at a maximum specific growth   rate of ca. 0.14 h(-1), one-half that of the (pyruvate   carboxylase-positive) reference strain grown under the same conditions.   Growth was dependent on high carbon dioxide concentrations, indicating   that the reaction catalyzed by PEPCK operates near thermodynamic   equilibrium. Analysis and reverse engineering of two independently   evolved strains showed that single point mutations in pyruvate kinase,   which competes with PEPCK for phosphoenolpyruvate, were sufficient to   enable the use of PEPCK as the sole anaplerotic enzyme. The PEPCK   reaction produces one ATP per carboxylation event, whereas the original   route through pyruvate kinase and pyruvate carboxylase is ATP neutral.   This increased ATP yield may prove crucial for engineering of efficient   and low-cost anaerobic production of C(4) dicarboxylic acids in S.   cerevisiae.",
 				"extra": "WOS:000280633400006",
-				"title": "Phosphoenolpyruvate Carboxykinase as the Sole Anaplerotic Enzyme in   Saccharomyces cerevisiae",
-				"publicationTitle": "Applied and Environmental Microbiology",
-				"volume": "76",
 				"issue": "16",
 				"pages": "5383-5389",
-				"DOI": "10.1128/AEM.01077-10",
-				"date": "AUG  2010",
-				"abstractNote": "Pyruvate carboxylase is the sole anaplerotic enzyme in glucose-grown   cultures of wild-type Saccharomyces cerevisiae. Pyruvate   carboxylase-negative (Pyc(-)) S. cerevisiae strains cannot grow on   glucose unless media are supplemented with C(4) compounds, such as   aspartic acid. In several succinate-producing prokaryotes,   phosphoenolpyruvate carboxykinase (PEPCK) fulfills this anaplerotic   role. However, the S. cerevisiae PEPCK encoded by PCK1 is repressed by   glucose and is considered to have a purely decarboxylating and   gluconeogenic function. This study investigates whether and under which   conditions PEPCK can replace the anaplerotic function of pyruvate   carboxylase in S. cerevisiae. Pyc(-) S. cerevisiae strains   constitutively overexpressing the PEPCK either from S. cerevisiae or   from Actinobacillus succinogenes did not grow on glucose as the sole   carbon source. However, evolutionary engineering yielded mutants able to   grow on glucose as the sole carbon source at a maximum specific growth   rate of ca. 0.14 h(-1), one-half that of the (pyruvate   carboxylase-positive) reference strain grown under the same conditions.   Growth was dependent on high carbon dioxide concentrations, indicating   that the reaction catalyzed by PEPCK operates near thermodynamic   equilibrium. Analysis and reverse engineering of two independently   evolved strains showed that single point mutations in pyruvate kinase,   which competes with PEPCK for phosphoenolpyruvate, were sufficient to   enable the use of PEPCK as the sole anaplerotic enzyme. The PEPCK   reaction produces one ATP per carboxylation event, whereas the original   route through pyruvate kinase and pyruvate carboxylase is ATP neutral.   This increased ATP yield may prove crucial for engineering of efficient   and low-cost anaerobic production of C(4) dicarboxylic acids in S.   cerevisiae.",
-				"ISSN": "0099-2240"
+				"publicationTitle": "Applied and Environmental Microbiology",
+				"volume": "76",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Key Process Conditions for Production of C(4) Dicarboxylic Acids in   Bioreactor Batch Cultures of an Engineered Saccharomyces cerevisiae   Strain",
 				"creators": [
 					{
 						"firstName": "Rintze M.",
@@ -547,23 +375,23 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
+				"date": "FEB  2010",
+				"DOI": "10.1128/AEM.02396-09",
+				"ISSN": "0099-2240",
+				"abstractNote": "A recent effort to improve malic acid production by Saccharomyces   cerevisiae by means of metabolic engineering resulted in a strain that   produced up to 59 g liter(-1) of malate at a yield of 0.42 mol (mol   glucose)(-1) in calcium carbonate-buffered shake flask cultures. With   shake flasks, process parameters that are important for scaling up this   process cannot be controlled independently. In this study, growth and   product formation by the engineered strain were studied in bioreactors   in order to separately analyze the effects of pH, calcium, and carbon   dioxide and oxygen availability. A near-neutral pH, which in shake   flasks was achieved by adding CaCO(3), was required for efficient C(4)   dicarboxylic acid production. Increased calcium concentrations, a side   effect of CaCO(3) dissolution, had a small positive effect on malate   formation. Carbon dioxide enrichment of the sparging gas (up to 15%   [vol/vol]) improved production of both malate and succinate. At higher   concentrations, succinate titers further increased, reaching 0.29 mol   (mol glucose)(-1), whereas malate formation strongly decreased. Although   fully aerobic conditions could be achieved, it was found that moderate   oxygen limitation benefitted malate production. In conclusion, malic   acid production with the engineered S. cerevisiae strain could be   successfully transferred from shake flasks to 1-liter batch bioreactors   by simultaneous optimization of four process parameters (pH and   concentrations of CO(2), calcium, and O(2)). Under optimized conditions,   a malate yield of 0.48 +/- 0.01 mol (mol glucose)(-1) was obtained in   bioreactors, a 19% increase over yields in shake flask experiments.",
 				"extra": "WOS:000274017400015",
-				"title": "Key Process Conditions for Production of C(4) Dicarboxylic Acids in   Bioreactor Batch Cultures of an Engineered Saccharomyces cerevisiae   Strain",
-				"publicationTitle": "Applied and Environmental Microbiology",
-				"volume": "76",
 				"issue": "3",
 				"pages": "744-750",
-				"DOI": "10.1128/AEM.02396-09",
-				"date": "FEB  2010",
-				"abstractNote": "A recent effort to improve malic acid production by Saccharomyces   cerevisiae by means of metabolic engineering resulted in a strain that   produced up to 59 g liter(-1) of malate at a yield of 0.42 mol (mol   glucose)(-1) in calcium carbonate-buffered shake flask cultures. With   shake flasks, process parameters that are important for scaling up this   process cannot be controlled independently. In this study, growth and   product formation by the engineered strain were studied in bioreactors   in order to separately analyze the effects of pH, calcium, and carbon   dioxide and oxygen availability. A near-neutral pH, which in shake   flasks was achieved by adding CaCO(3), was required for efficient C(4)   dicarboxylic acid production. Increased calcium concentrations, a side   effect of CaCO(3) dissolution, had a small positive effect on malate   formation. Carbon dioxide enrichment of the sparging gas (up to 15%   [vol/vol]) improved production of both malate and succinate. At higher   concentrations, succinate titers further increased, reaching 0.29 mol   (mol glucose)(-1), whereas malate formation strongly decreased. Although   fully aerobic conditions could be achieved, it was found that moderate   oxygen limitation benefitted malate production. In conclusion, malic   acid production with the engineered S. cerevisiae strain could be   successfully transferred from shake flasks to 1-liter batch bioreactors   by simultaneous optimization of four process parameters (pH and   concentrations of CO(2), calcium, and O(2)). Under optimized conditions,   a malate yield of 0.48 +/- 0.01 mol (mol glucose)(-1) was obtained in   bioreactors, a 19% increase over yields in shake flask experiments.",
-				"ISSN": "0099-2240"
+				"publicationTitle": "Applied and Environmental Microbiology",
+				"volume": "76",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Metabolic engineering of Saccharomyces cerevisiae for production of   carboxylic acids: current status and challenges",
 				"creators": [
 					{
 						"firstName": "Derek A.",
@@ -586,23 +414,23 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
+				"date": "DEC  2009",
+				"DOI": "10.1111/j.1567-1364.2009.00537.x",
+				"ISSN": "1567-1356",
+				"abstractNote": "To meet the demands of future generations for chemicals and energy and   to reduce the environmental footprint of the chemical industry,   alternatives for petrochemistry are required. Microbial conversion of   renewable feedstocks has a huge potential for cleaner, sustainable   industrial production of fuels and chemicals. Microbial production of   organic acids is a promising approach for production of chemical   building blocks that can replace their petrochemically derived   equivalents. Although Saccharomyces cerevisiae does not naturally   produce organic acids in large quantities, its robustness, pH tolerance,   simple nutrient requirements and long history as an industrial workhorse   make it an excellent candidate biocatalyst for such processes. Genetic   engineering, along with evolution and selection, has been successfully   used to divert carbon from ethanol, the natural endproduct of S.   cerevisiae, to pyruvate. Further engineering, which included expression   of heterologous enzymes and transporters, yielded strains capable of   producing lactate and malate from pyruvate. Besides these metabolic   engineering strategies, this review discusses the impact of transport   and energetics as well as the tolerance towards these organic acids. In   addition to recent progress in engineering S. cerevisiae for organic   acid production, the key limitations and challenges are discussed in the   context of sustainable industrial production of organic acids from   renewable feedstocks.",
 				"extra": "WOS:000271264400001",
-				"title": "Metabolic engineering of Saccharomyces cerevisiae for production of   carboxylic acids: current status and challenges",
-				"publicationTitle": "Fems Yeast Research",
-				"volume": "9",
 				"issue": "8",
 				"pages": "1123-1136",
-				"DOI": "10.1111/j.1567-1364.2009.00537.x",
-				"date": "DEC  2009",
-				"abstractNote": "To meet the demands of future generations for chemicals and energy and   to reduce the environmental footprint of the chemical industry,   alternatives for petrochemistry are required. Microbial conversion of   renewable feedstocks has a huge potential for cleaner, sustainable   industrial production of fuels and chemicals. Microbial production of   organic acids is a promising approach for production of chemical   building blocks that can replace their petrochemically derived   equivalents. Although Saccharomyces cerevisiae does not naturally   produce organic acids in large quantities, its robustness, pH tolerance,   simple nutrient requirements and long history as an industrial workhorse   make it an excellent candidate biocatalyst for such processes. Genetic   engineering, along with evolution and selection, has been successfully   used to divert carbon from ethanol, the natural endproduct of S.   cerevisiae, to pyruvate. Further engineering, which included expression   of heterologous enzymes and transporters, yielded strains capable of   producing lactate and malate from pyruvate. Besides these metabolic   engineering strategies, this review discusses the impact of transport   and energetics as well as the tolerance towards these organic acids. In   addition to recent progress in engineering S. cerevisiae for organic   acid production, the key limitations and challenges are discussed in the   context of sustainable industrial production of organic acids from   renewable feedstocks.",
-				"ISSN": "1567-1356"
+				"publicationTitle": "Fems Yeast Research",
+				"volume": "9",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Malic acid production by Saccharomyces cerevisiae: Engineering of   pyruvate carboxylation, oxaloacetate reduction, and malate export",
 				"creators": [
 					{
 						"firstName": "Rintze M.",
@@ -655,20 +483,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
+				"date": "MAY  2008",
+				"DOI": "10.1128/AEM.02591-07",
+				"ISSN": "0099-2240",
+				"abstractNote": "Malic acid is a potential biomass-derivable \"building block\" for   chemical synthesis. Since wild-type Saccharomyces cerevisiae strains   produce only low levels of malate, metabolic engineering is required to   achieve efficient malate production with this yeast. A promising pathway   for malate production from glucose proceeds via carboxylation of   pyruvate, followed by reduction of oxaloacetate to malate. This redox-   and ATP-neutral, CO2-fixing pathway has a theoretical maximum yield of 2   mol malate (mol glucose)(-1). A previously engineered glucose-tolerant,   C-2-independent pyruvate decarboxylase-negative S. cerevisiae strain was   used as the platform to evaluate the impact of individual and combined   introduction of three genetic modifications: (i) overexpression of the   native pyruvate carboxylase encoded by PYC2, (ii) high-level expression   of an allele of the MDH3 gene, of which the encoded malate dehydrogenase   was retargeted to the cytosol by deletion of the C-terminal peroxisomal   targeting sequence, and (iii) functional expression of the   Schizosaccharomyces pombe malate transporter gene SpMAE1. While single   or double modifications improved malate production, the highest malate   yields and titers were obtained with the simultaneous introduction of   all three modifications. In glucose-grown batch cultures, the resulting   engineered strain produced malate at titers of up to 59 g liter(-1) at a   malate yield of 0.42 mol (mol glucose)(-1). Metabolic flux analysis   showed that metabolite labeling patterns observed upon nuclear magnetic   resonance analyses of cultures grown on C-13-labeled glucose were   consistent with the envisaged nonoxidative, fermentative pathway for   malate production. The engineered strains still produced substantial   amounts of pyruvate, indicating that the pathway efficiency can be   further improved.",
 				"extra": "WOS:000255567900024",
-				"title": "Malic acid production by Saccharomyces cerevisiae: Engineering of   pyruvate carboxylation, oxaloacetate reduction, and malate export",
-				"publicationTitle": "Applied and Environmental Microbiology",
-				"volume": "74",
 				"issue": "9",
 				"pages": "2766-2777",
-				"DOI": "10.1128/AEM.02591-07",
-				"date": "MAY  2008",
-				"abstractNote": "Malic acid is a potential biomass-derivable \"building block\" for   chemical synthesis. Since wild-type Saccharomyces cerevisiae strains   produce only low levels of malate, metabolic engineering is required to   achieve efficient malate production with this yeast. A promising pathway   for malate production from glucose proceeds via carboxylation of   pyruvate, followed by reduction of oxaloacetate to malate. This redox-   and ATP-neutral, CO2-fixing pathway has a theoretical maximum yield of 2   mol malate (mol glucose)(-1). A previously engineered glucose-tolerant,   C-2-independent pyruvate decarboxylase-negative S. cerevisiae strain was   used as the platform to evaluate the impact of individual and combined   introduction of three genetic modifications: (i) overexpression of the   native pyruvate carboxylase encoded by PYC2, (ii) high-level expression   of an allele of the MDH3 gene, of which the encoded malate dehydrogenase   was retargeted to the cytosol by deletion of the C-terminal peroxisomal   targeting sequence, and (iii) functional expression of the   Schizosaccharomyces pombe malate transporter gene SpMAE1. While single   or double modifications improved malate production, the highest malate   yields and titers were obtained with the simultaneous introduction of   all three modifications. In glucose-grown batch cultures, the resulting   engineered strain produced malate at titers of up to 59 g liter(-1) at a   malate yield of 0.42 mol (mol glucose)(-1). Metabolic flux analysis   showed that metabolite labeling patterns observed upon nuclear magnetic   resonance analyses of cultures grown on C-13-labeled glucose were   consistent with the envisaged nonoxidative, fermentative pathway for   malate production. The engineered strains still produced substantial   amounts of pyruvate, indicating that the pathway efficiency can be   further improved.",
-				"ISSN": "0099-2240"
+				"publicationTitle": "Applied and Environmental Microbiology",
+				"volume": "74",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -678,6 +505,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Pharmacokinetics of intravenous mivacurium in halothane-anesthetized dogs.",
 				"creators": [
 					{
 						"firstName": "L. J.",
@@ -710,34 +538,34 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"anaesthesia",
-					"halothane",
-					"muscle relaxants",
-					"pharmacokinetics",
-					"dogs",
-					"Canis",
-					"Canidae",
-					"Fissipeda",
-					"carnivores",
-					"mammals",
-					"vertebrates",
-					"Chordata",
-					"animals",
-					"small mammals",
-					"eukaryotes"
-				],
-				"seeAlso": [],
-				"attachments": [],
+				"date": "1998",
+				"ISSN": "0161-3499",
 				"extra": "CABI:19982209000",
-				"title": "Pharmacokinetics of intravenous mivacurium in halothane-anesthetized   dogs.",
+				"issue": "2",
+				"language": "English",
+				"pages": "170",
 				"publicationTitle": "Veterinary Surgery",
 				"volume": "27",
-				"issue": "2",
-				"date": "1998",
-				"language": "English",
-				"ISSN": "0161-3499"
+				"attachments": [],
+				"tags": [
+					"Canidae",
+					"Canis",
+					"Chordata",
+					"Fissipeda",
+					"anaesthesia",
+					"animals",
+					"carnivores",
+					"dogs",
+					"eukaryotes",
+					"halothane",
+					"mammals",
+					"muscle relaxants",
+					"pharmacokinetics",
+					"small mammals",
+					"vertebrates"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -747,6 +575,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Gripewater",
 				"creators": [
 					{
 						"firstName": "J. Mark",
@@ -754,21 +583,20 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"extra": "WOS:000290115300030",
-				"title": "Gripewater",
-				"publicationTitle": "Fiddlehead",
-				"language": "English",
-				"publisher": "Univ New Brunswick",
-				"place": "Fredericton",
-				"ISSN": "0015-0630",
-				"journalAbbreviation": "Fiddlehead",
 				"date": "SPR 2011",
+				"ISSN": "0015-0630",
+				"extra": "WOS:000290115300030",
 				"issue": "247",
-				"pages": "82-82"
+				"journalAbbreviation": "Fiddlehead",
+				"language": "English",
+				"pages": "82-82",
+				"place": "Fredericton",
+				"publicationTitle": "Fiddlehead",
+				"publisher": "Univ New Brunswick",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -778,6 +606,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "bookSection",
+				"title": "Prematurity: An Overview and Public Health Implications",
 				"creators": [
 					{
 						"firstName": "Marie C.",
@@ -815,38 +644,37 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"notes": [],
+				"date": "2011",
+				"DOI": "10.1146/annurev-publhealth-090810-182459",
+				"ISBN": "978-0-8243-2732-3",
+				"ISSN": "0163-7525",
+				"abstractNote": "The high rate of premature births in the United States remains a public   health concern. These infants experience substantial morbidity and   mortality in the newborn period, which translate into significant   medical costs. In early childhood, survivors are characterized by a   variety of health problems, including motor delay and/or cerebral palsy,   lower IQs, behavior problems, and respiratory illness, especially   asthma. Many experience difficulty with school work, lower   health-related quality of life, and family stress. Emerging information   in adolescence and young adulthood paints a more optimistic picture,   with persistence of many problems but with better adaptation and more   positive expectations by the young adults. Few opportunities for   prevention have been identified; therefore, public health approaches to   prematurity include assurance of delivery in a facility capable of   managing neonatal complications, quality improvement to minimize   interinstitutional variations, early developmental support for such   infants, and attention to related family health issues.",
+				"extra": "WOS:000290776200020",
+				"journalAbbreviation": "Annu. Rev. Public Health",
+				"language": "English",
+				"pages": "367-379",
+				"place": "Palo Alto",
+				"publicationTitle": "Annual Review of Public Health, Vol 32",
+				"publisher": "Annual Reviews",
+				"volume": "32",
+				"attachments": [],
 				"tags": [
-					"infant mortality",
+					"age 8 years",
+					"bronchopulmonary dysplasia",
 					"childhood morbidity",
-					"prevention",
+					"children born",
+					"extreme prematurity",
+					"extremely   preterm birth",
+					"infant mortality",
+					"learning-disabilities",
 					"low-birth-weight",
 					"neonatal intensive-care",
+					"prevention",
 					"quality-of-life",
-					"extremely   preterm birth",
-					"young-adults born",
-					"age 8 years",
-					"children born",
-					"bronchopulmonary dysplasia",
-					"learning-disabilities",
-					"extreme prematurity"
+					"young-adults born"
 				],
-				"seeAlso": [],
-				"attachments": [],
-				"extra": "WOS:000290776200020",
-				"title": "Prematurity: An Overview and Public Health Implications",
-				"publicationTitle": "Annual Review of Public Health, Vol 32",
-				"language": "English",
-				"abstractNote": "The high rate of premature births in the United States remains a public   health concern. These infants experience substantial morbidity and   mortality in the newborn period, which translate into significant   medical costs. In early childhood, survivors are characterized by a   variety of health problems, including motor delay and/or cerebral palsy,   lower IQs, behavior problems, and respiratory illness, especially   asthma. Many experience difficulty with school work, lower   health-related quality of life, and family stress. Emerging information   in adolescence and young adulthood paints a more optimistic picture,   with persistence of many problems but with better adaptation and more   positive expectations by the young adults. Few opportunities for   prevention have been identified; therefore, public health approaches to   prematurity include assurance of delivery in a facility capable of   managing neonatal complications, quality improvement to minimize   interinstitutional variations, early developmental support for such   infants, and attention to related family health issues.",
-				"place": "Palo Alto",
-				"publisher": "Annual Reviews",
-				"ISSN": "0163-7525",
-				"ISBN": "978-0-8243-2732-3",
-				"journalAbbreviation": "Annu. Rev. Public Health",
-				"date": "2011",
-				"volume": "32",
-				"pages": "367-379",
-				"DOI": "10.1146/annurev-publhealth-090810-182459"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -856,6 +684,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "patent",
+				"title": "Indexing cell delivery catheter",
 				"creators": [
 					{
 						"firstName": "Matthew S.",
@@ -878,28 +707,27 @@ var testCases = [
 						"creatorType": "inventor"
 					}
 				],
-				"notes": [],
+				"date": "JUN 28 2011",
+				"issueDate": "June 28, 2011",
+				"ISSN": "0098-1133",
+				"abstractNote": "An insertion device with an insertion axis includes an axial actuator   with a first portion and a second portion. The first portion is moveable   along the insertion axis relative to the second portion. The insertion   device further includes a first tube coupled to the first portion of the   axial actuator, and the first tube is movable along the insertion axis   in response to movement of the first portion relative to the second   portion. The device further includes a second tube having a radially   biased distal end. The distal end is substantially contained within the   first tube in a first state, and the second tube is rotatable with   respect to the first tube. Also, the second tube is axially movable to a   second state, and a portion of a distal end of the second tube is   exposed from a distal end of the first tube in the second state.",
+				"assignee": "Medtronic Inc",
+				"country": "USA",
+				"extra": "BIOSIS:PREV201100469175",
+				"language": "English",
+				"patentNumber": "US 07967789",
+				"place": "Indialantic, FL USA",
+				"priorityNumber": "604-16501",
+				"publicationTitle": "Official Gazette of the United States Patent and Trademark Office   Patents",
+				"attachments": [],
 				"tags": [
-					"Human Medicine (Medical Sciences)",
 					"Equipment Apparatus Devices and   Instrumentation",
+					"Human Medicine (Medical Sciences)",
 					"indexing cell delivery catheter",
 					"medical supplies"
 				],
-				"seeAlso": [],
-				"attachments": [],
-				"extra": "BIOSIS:PREV201100469175",
-				"title": "Indexing cell delivery catheter",
-				"patentNumber": "US 07967789",
-				"assignee": "Medtronic Inc",
-				"issueDate": "June 28, 2011",
-				"country": "USA",
-				"priorityNumber": "604-16501",
-				"publicationTitle": "Official Gazette of the United States Patent and Trademark Office   Patents",
-				"date": "JUN 28 2011",
-				"language": "English",
-				"abstractNote": "An insertion device with an insertion axis includes an axial actuator   with a first portion and a second portion. The first portion is moveable   along the insertion axis relative to the second portion. The insertion   device further includes a first tube coupled to the first portion of the   axial actuator, and the first tube is movable along the insertion axis   in response to movement of the first portion relative to the second   portion. The device further includes a second tube having a radially   biased distal end. The distal end is substantially contained within the   first tube in a first state, and the second tube is rotatable with   respect to the first tube. Also, the second tube is axially movable to a   second state, and a portion of a distal end of the second tube is   exposed from a distal end of the first tube in the second state.",
-				"place": "Indialantic, FL USA",
-				"ISSN": "0098-1133"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -909,6 +737,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Ecological anthropology of households in East Madura, Indonesia.",
 				"creators": [
 					{
 						"firstName": "W. G.",
@@ -916,18 +745,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"extra": "CABI:20113178956",
-				"title": "Ecological anthropology of households in East Madura, Indonesia.",
-				"publicationTitle": "Ecological anthropology of households in East Madura, Indonesia",
 				"date": "2011",
-				"ISBN": "978-90-8585933-8"
+				"ISBN": "978-90-8585933-8",
+				"extra": "CABI:20113178956",
+				"publicationTitle": "Ecological anthropology of households in East Madura, Indonesia",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Production and characterization of polyclonal antibodies to   hexanal-lysine adducts for use in an ELISA to monitor lipid oxidation in   a meat model system.",
 				"creators": [
 					{
 						"firstName": "S. A.",
@@ -935,20 +764,20 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
+				"date": ", thesis publ. 1997 1998",
+				"ISSN": "0419-4217",
 				"extra": "FSTA:1998-09-Sn1570",
-				"title": "Production and characterization of polyclonal antibodies to   hexanal-lysine adducts for use in an ELISA to monitor lipid oxidation in   a meat model system.",
+				"issue": "9",
 				"publicationTitle": "Dissertation Abstracts International, B",
 				"volume": "58",
-				"issue": "9",
-				"date": ", thesis publ. 1997 1998",
-				"ISSN": "0419-4217"
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "The enzymic oxidation of linoleic and linolenic acid.",
 				"creators": [
 					{
 						"firstName": "E. H.",
@@ -956,21 +785,21 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
+				"date": "1988",
+				"ISSN": "0419-4217",
 				"extra": "FSTA:1989-04-N-0004",
-				"title": "The enzymic oxidation of linoleic and linolenic acid.",
-				"publicationTitle": "Dissertation Abstracts International, B",
-				"volume": "49",
 				"issue": "4",
 				"pages": "BRD",
-				"date": "1988",
-				"ISSN": "0419-4217"
+				"publicationTitle": "Dissertation Abstracts International, B",
+				"volume": "49",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "The syneresis of renneted milk gels.",
 				"creators": [
 					{
 						"firstName": "C. S.",
@@ -978,18 +807,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
+				"date": "1988",
+				"ISSN": "0419-4217",
 				"extra": "CABI:19910448509",
-				"title": "The syneresis of renneted milk gels.",
-				"publicationTitle": "Dissertation Abstracts International. B, Sciences and Engineering",
-				"volume": "49",
 				"issue": "5",
 				"pages": "1459",
-				"date": "1988",
-				"ISSN": "0419-4217"
+				"publicationTitle": "Dissertation Abstracts International. B, Sciences and Engineering",
+				"volume": "49",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -999,6 +827,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Importance of methane-derived carbon as a basal resource for two benthic consumers in arctic lakes",
 				"creators": [
 					{
 						"firstName": "Cassandra A.",
@@ -1011,20 +840,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"extra": "BCI:BCI201300112663",
-				"title": "Importance of methane-derived carbon as a basal resource for two benthic consumers in arctic lakes",
-				"publicationTitle": "Hydrobiologia",
 				"date": "JAN 2013",
-				"volume": "700",
+				"DOI": "10.1007/s10750-012-1232-8",
+				"ISSN": "0018-8158",
+				"abstractNote": "Microbial processing of detritus is known to be important to benthic invertebrate nutrition, but the role of dissolved (DOC) versus particulate organic carbon (POC), and pathways by which those resources are obtained, are poorly understood. We used stable isotopes to determine the importance of DOC, POC, and CH4-derived carbon to benthic invertebrate consumers from arctic Alaskan Lakes. Intact sediment cores from Lake GTH 112 were enriched with C-13-labeled organic matter, including algal detritus, algal-derived DOC, methyl-labeled acetate, and carboxyl-labeled acetate, and incubated for 1 month with either caddisflies (Grensia praeterita ) or fingernail clams (Sphaerium nitidum), two invertebrate species that are important to fish nutrition. Both species used basal resources derived from POC and DOC. Results generally suggest greater reliance on POC. Differential assimilation from acetate treatments suggests Sphaerium assimilated CH4-derived carbon, which likely occurred through deposit-feeding. Grensia assimilated some microbially processed acetate, although its survivorship was poor in acetate treatments. Our data extend previous studies reporting use of CH4-derived carbon by Chironomidae and oligochaetes. Taken together, these results suggest that the use of CH4-derived carbon is common among deposit-feeding benthic invertebrates.",
+				"extra": "BCI:BCI201300112663",
 				"issue": "1",
 				"pages": "221-230",
-				"abstractNote": "Microbial processing of detritus is known to be important to benthic invertebrate nutrition, but the role of dissolved (DOC) versus particulate organic carbon (POC), and pathways by which those resources are obtained, are poorly understood. We used stable isotopes to determine the importance of DOC, POC, and CH4-derived carbon to benthic invertebrate consumers from arctic Alaskan Lakes. Intact sediment cores from Lake GTH 112 were enriched with C-13-labeled organic matter, including algal detritus, algal-derived DOC, methyl-labeled acetate, and carboxyl-labeled acetate, and incubated for 1 month with either caddisflies (Grensia praeterita ) or fingernail clams (Sphaerium nitidum), two invertebrate species that are important to fish nutrition. Both species used basal resources derived from POC and DOC. Results generally suggest greater reliance on POC. Differential assimilation from acetate treatments suggests Sphaerium assimilated CH4-derived carbon, which likely occurred through deposit-feeding. Grensia assimilated some microbially processed acetate, although its survivorship was poor in acetate treatments. Our data extend previous studies reporting use of CH4-derived carbon by Chironomidae and oligochaetes. Taken together, these results suggest that the use of CH4-derived carbon is common among deposit-feeding benthic invertebrates.",
-				"ISSN": "0018-8158",
-				"DOI": "10.1007/s10750-012-1232-8"
+				"publicationTitle": "Hydrobiologia",
+				"volume": "700",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

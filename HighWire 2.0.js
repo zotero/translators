@@ -2,14 +2,14 @@
 	"translatorID": "8c1f42d5-02fa-437b-b2b2-73afc768eb07",
 	"label": "HighWire 2.0",
 	"creator": "Matt Burton",
-	"target": "^[^?#]+(?:/content/(?:[0-9]+[A-Z\\-]*/(?:suppl_)?[A-Z]?[0-9]|current|firstcite|early)|/search\\?.*?\\bsubmit=|/search(?:/results)?\\?fulltext=|/cgi/collection/.)",
+	"target": "^[^?#]+(/content/([0-9]+[A-Z\\-]*/|current|firstcite|early)|/search\\?.*?\\bsubmit=|/search(/results)?\\?fulltext=|/cgi/collection/.|/search/.)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-08-26 03:44:11"
+	"lastUpdated": "2015-10-11 17:07:44"
 }
 
 /*
@@ -49,11 +49,23 @@ function getSearchResults(doc, url, checkOnly) {
 			searchx: '//div[contains(@class,"main-content-wrapper")]\
 				//div[contains(@class, "highwire-article-citation")]',
 			titlex:	'.//a[contains(@class, "highwire-cite-linked-title")]'
+		},
+		{
+			// BMJ quick search
+			searchx: '//ol[contains(@class, "search-results")]/li[h3[@class="title"]]',
+			titlex: './h3[@class="title"]'
+		},
+		{
+			// BMJ advanced search
+			searchx: '//ul[contains(@class,"highwire-search-results-list")]\
+				//li[contains(@class, "search-result")]',
+			titlex:	'.//a[contains(@class, "highwire-cite-linked-title")]'
 		}
 	];
 	
 	var found = false, items = {},
-		linkx = '(.//a[not(contains(@href, "hasaccess.xhtml"))])[1]';
+		//exclude cit-site-url for Sage Advanced Search (no stable URLs for testing)
+		linkx = '(.//a[not(contains(@href, "hasaccess.xhtml")) and not(@class="cit-site-url")])[1]';
 	for(var i=0; i<xpaths.length && !found; i++) {
 		var rows = ZU.xpath(doc, xpaths[i].searchx);
 		if(!rows.length) continue;
@@ -271,7 +283,7 @@ function attachSupplementary(doc, item, next) {
 }
 
 //add using embedded metadata
-function addEmbMeta(doc) {
+function addEmbMeta(doc, url) {
 	var translator = Zotero.loadTranslator("web");
 	//Embedded Metadata translator
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
@@ -342,7 +354,9 @@ function addEmbMeta(doc) {
 		}
 	});
 
-	translator.translate();
+	translator.getTranslatorObject(function(trans) {
+        trans.doWeb(doc, url);
+   	});
 }
 
 function detectWeb(doc, url) {
@@ -365,8 +379,9 @@ function detectWeb(doc, url) {
 	if(highwiretest) {
 		if (getSearchResults(doc, url, true)) {
 			return "multiple";
-		} else if ( url.match("content/(early/)?[0-9]+") && 
-					url.indexOf('/suppl/') == -1 ) {
+		} else if ( /content\/(early\/)?[0-9]+/.test(url)
+			&& url.indexOf('/suppl/') == -1
+		) {
 			return "journalArticle";
 		}
 	}
@@ -376,6 +391,7 @@ function doWeb(doc, url) {
 	if (!url) url = doc.documentElement.location;
 	
 	var items = getSearchResults(doc, url);
+	//Z.debug(items)
 	if(items) {
 		Zotero.selectItems(items, function(selectedItems) {
 			if(!selectedItems) return true;
@@ -384,14 +400,14 @@ function doWeb(doc, url) {
 			for( var item in selectedItems ) {
 				urls.push(item);
 			}
-
+			//Z.debug(urls)
 			Zotero.Utilities.processDocuments(urls, addEmbMeta);
 		});
 	} else if(url.indexOf('.full.pdf+html') != -1) {
 		//abstract in EM is not reliable. Fetch abstract page and scrape from there.
 		ZU.processDocuments(url.replace(/\.full\.pdf\+html.*/, ''), addEmbMeta);
 	} else {
-		addEmbMeta(doc);
+		addEmbMeta(doc, url);
 	}
 }
 /** BEGIN TEST CASES **/
@@ -402,6 +418,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "The Role of the Laboratory in Science Teaching: Neglected Aspects of Research",
 				"creators": [
 					{
 						"firstName": "Avi",
@@ -414,9 +431,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "06/01/1982",
+				"DOI": "10.3102/00346543052002201",
+				"ISSN": "0034-6543, 1935-1046",
+				"abstractNote": "The laboratory has been given a central and distinctive role in science education, and science educators have suggested that there are rich benefits in learning from using laboratory activities. At this time, however, some educators have begun to question seriously the effectiveness and the role of laboratory work, and the case for laboratory teaching is not as self-evident as it once seemed. This paper provides perspectives on these issues through a review of the history, goals, and research findings regarding the laboratory as a medium of instruction in introductory science teaching. The analysis of research culminates with suggestions for researchers who are working to clarify the role of the laboratory in science education.",
+				"issue": "2",
+				"journalAbbreviation": "REVIEW OF EDUCATIONAL RESEARCH",
+				"language": "en",
+				"libraryCatalog": "rer.sagepub.com",
+				"pages": "201-217",
+				"publicationTitle": "Review of Educational Research",
+				"shortTitle": "The Role of the Laboratory in Science Teaching",
+				"url": "http://rer.sagepub.com/content/52/2/201",
+				"volume": "52",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -426,20 +453,9 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"DOI": "10.3102/00346543052002201",
-				"language": "en",
-				"journalAbbreviation": "REVIEW OF EDUCATIONAL RESEARCH",
-				"issue": "2",
-				"url": "http://rer.sagepub.com/content/52/2/201",
-				"ISSN": "0034-6543, 1935-1046",
-				"libraryCatalog": "rer.sagepub.com",
-				"abstractNote": "The laboratory has been given a central and distinctive role in science education, and science educators have suggested that there are rich benefits in learning from using laboratory activities. At this time, however, some educators have begun to question seriously the effectiveness and the role of laboratory work, and the case for laboratory teaching is not as self-evident as it once seemed. This paper provides perspectives on these issues through a review of the history, goals, and research findings regarding the laboratory as a medium of instruction in introductory science teaching. The analysis of research culminates with suggestions for researchers who are working to clarify the role of the laboratory in science education.",
-				"shortTitle": "The Role of the Laboratory in Science Teaching",
-				"title": "The Role of the Laboratory in Science Teaching: Neglected Aspects of Research",
-				"date": "06/01/1982",
-				"publicationTitle": "Review of Educational Research",
-				"volume": "52",
-				"pages": "201-217"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -449,6 +465,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Modding the History of Science: Values at Play in Modder Discussions of Sid Meier’s CIVILIZATION",
 				"creators": [
 					{
 						"firstName": "Trevor",
@@ -456,9 +473,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2010-05-27",
+				"DOI": "10.1177/1046878110366277",
+				"ISSN": "1046-8781, 1552-826X",
+				"abstractNote": "Sid Meier’s CIVILIZATION has been promoted as an educational tool, used as a platform for building educational simulations, and maligned as promoting Eurocentrism, bioimperialism, and racial superiority. This article explores the complex issues involved in interpreting a game through analysis of the ways modders (gamers who modify the game) have approached the history of science, technology, and knowledge embodied in the game. Through text analysis of modder discussion, this article explores the assumed values and tone of the community’s discourse. The study offers initial findings that CIVILIZATION modders value a variety of positive discursive practices for developing historical models. Community members value a form of historical authenticity, they prize subtlety and nuance in models for science in the game, and they communicate through civil consensus building. Game theorists, players, and scholars, as well as those interested in modeling the history, sociology, and philosophy of science, will be interested to see the ways in which CIVILIZATION III cultivates an audience of modders who spend their time reimagining how science and technology could work in the game.",
+				"journalAbbreviation": "Simulation Gaming",
+				"language": "en",
+				"libraryCatalog": "sag.sagepub.com",
+				"publicationTitle": "Simulation & Gaming",
+				"shortTitle": "Modding the History of Science",
+				"url": "http://sag.sagepub.com/content/early/2010/04/23/1046878110366277",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -468,17 +492,9 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"DOI": "10.1177/1046878110366277",
-				"language": "en",
-				"journalAbbreviation": "Simulation Gaming",
-				"url": "http://sag.sagepub.com/content/early/2010/04/23/1046878110366277",
-				"ISSN": "1046-8781, 1552-826X",
-				"libraryCatalog": "sag.sagepub.com",
-				"abstractNote": "Sid Meier’s CIVILIZATION has been promoted as an educational tool, used as a platform for building educational simulations, and maligned as promoting Eurocentrism, bioimperialism, and racial superiority. This article explores the complex issues involved in interpreting a game through analysis of the ways modders (gamers who modify the game) have approached the history of science, technology, and knowledge embodied in the game. Through text analysis of modder discussion, this article explores the assumed values and tone of the community’s discourse. The study offers initial findings that CIVILIZATION modders value a variety of positive discursive practices for developing historical models. Community members value a form of historical authenticity, they prize subtlety and nuance in models for science in the game, and they communicate through civil consensus building. Game theorists, players, and scholars, as well as those interested in modeling the history, sociology, and philosophy of science, will be interested to see the ways in which CIVILIZATION III cultivates an audience of modders who spend their time reimagining how science and technology could work in the game.",
-				"shortTitle": "Modding the History of Science",
-				"title": "Modding the History of Science: Values at Play in Modder Discussions of Sid Meier’s CIVILIZATION",
-				"date": "2010-05-27",
-				"publicationTitle": "Simulation & Gaming"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -504,7 +520,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://bloodjournal.hematologylibrary.org/content/early/recent",
+		"url": "http://www.bloodjournal.org/content/early/recent?sso-checked=true",
 		"items": "multiple"
 	},
 	{
@@ -513,6 +529,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "A yeast functional screen predicts new candidate ALS disease genes",
 				"creators": [
 					{
 						"firstName": "Julien",
@@ -720,9 +737,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "12/27/2011",
+				"DOI": "10.1073/pnas.1109434108",
+				"ISSN": "0027-8424, 1091-6490",
+				"abstractNote": "Amyotrophic lateral sclerosis (ALS) is a devastating and universally fatal neurodegenerative disease. Mutations in two related RNA-binding proteins, TDP-43 and FUS, that harbor prion-like domains, cause some forms of ALS. There are at least 213 human proteins harboring RNA recognition motifs, including FUS and TDP-43, raising the possibility that additional RNA-binding proteins might contribute to ALS pathogenesis. We performed a systematic survey of these proteins to find additional candidates similar to TDP-43 and FUS, followed by bioinformatics to predict prion-like domains in a subset of them. We sequenced one of these genes, TAF15, in patients with ALS and identified missense variants, which were absent in a large number of healthy controls. These disease-associated variants of TAF15 caused formation of cytoplasmic foci when expressed in primary cultures of spinal cord neurons. Very similar to TDP-43 and FUS, TAF15 aggregated in vitro and conferred neurodegeneration in Drosophila, with the ALS-linked variants having a more severe effect than wild type. Immunohistochemistry of postmortem spinal cord tissue revealed mislocalization of TAF15 in motor neurons of patients with ALS. We propose that aggregation-prone RNA-binding proteins might contribute very broadly to ALS pathogenesis and the genes identified in our yeast functional screen, coupled with prion-like domain prediction analysis, now provide a powerful resource to facilitate ALS disease gene discovery.",
+				"extra": "PMID: 22065782",
+				"issue": "52",
+				"journalAbbreviation": "PNAS",
+				"language": "en",
+				"libraryCatalog": "www.pnas.org",
+				"pages": "20881-20890",
+				"publicationTitle": "Proceedings of the National Academy of Sciences",
+				"url": "http://www.pnas.org/content/108/52/20881",
+				"volume": "108",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -737,20 +764,9 @@ var testCases = [
 						"snapshot": false
 					}
 				],
-				"DOI": "10.1073/pnas.1109434108",
-				"language": "en",
-				"journalAbbreviation": "PNAS",
-				"issue": "52",
-				"url": "http://www.pnas.org/content/108/52/20881",
-				"ISSN": "0027-8424, 1091-6490",
-				"extra": "PMID: 22065782",
-				"libraryCatalog": "www.pnas.org",
-				"abstractNote": "Amyotrophic lateral sclerosis (ALS) is a devastating and universally fatal neurodegenerative disease. Mutations in two related RNA-binding proteins, TDP-43 and FUS, that harbor prion-like domains, cause some forms of ALS. There are at least 213 human proteins harboring RNA recognition motifs, including FUS and TDP-43, raising the possibility that additional RNA-binding proteins might contribute to ALS pathogenesis. We performed a systematic survey of these proteins to find additional candidates similar to TDP-43 and FUS, followed by bioinformatics to predict prion-like domains in a subset of them. We sequenced one of these genes, TAF15, in patients with ALS and identified missense variants, which were absent in a large number of healthy controls. These disease-associated variants of TAF15 caused formation of cytoplasmic foci when expressed in primary cultures of spinal cord neurons. Very similar to TDP-43 and FUS, TAF15 aggregated in vitro and conferred neurodegeneration in Drosophila, with the ALS-linked variants having a more severe effect than wild type. Immunohistochemistry of postmortem spinal cord tissue revealed mislocalization of TAF15 in motor neurons of patients with ALS. We propose that aggregation-prone RNA-binding proteins might contribute very broadly to ALS pathogenesis and the genes identified in our yeast functional screen, coupled with prion-like domain prediction analysis, now provide a powerful resource to facilitate ALS disease gene discovery.",
-				"title": "A yeast functional screen predicts new candidate ALS disease genes",
-				"date": "12/27/2011",
-				"publicationTitle": "Proceedings of the National Academy of Sciences",
-				"volume": "108",
-				"pages": "20881-20890"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -760,6 +776,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "G9a histone methyltransferase plays a dominant role in euchromatic histone H3 lysine 9 methylation and is essential for early embryogenesis",
 				"creators": [
 					{
 						"firstName": "Makoto",
@@ -817,16 +834,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Euchromatin",
-					"G9a HMTase",
-					"heterochromatin",
-					"histone H3-K9 methylation",
-					"mammalian development",
-					"transcriptional regulation"
-				],
-				"seeAlso": [],
+				"date": "07/15/2002",
+				"DOI": "10.1101/gad.989402",
+				"ISSN": "0890-9369, 1549-5477",
+				"abstractNote": "Covalent modification of histone tails is crucial for transcriptional regulation, mitotic chromosomal condensation, and heterochromatin formation. Histone H3 lysine 9 (H3-K9) methylation catalyzed by the Suv39h family proteins is essential for establishing the architecture of pericentric heterochromatin. We recently identified a mammalian histone methyltransferase (HMTase), G9a, which has strong HMTase activity towards H3-K9 in vitro. To investigate the in vivo functions of G9a, we generated G9a-deficient mice and embryonic stem (ES) cells. We found that H3-K9 methylation was drastically decreased in G9a-deficient embryos, which displayed severe growth retardation and early lethality. G9a-deficient ES cells also exhibited reduced H3-K9 methylation compared to wild-type cells, indicating that G9a is a dominant H3-K9 HMTase in vivo. Importantly, the loss of G9a abolished methylated H3-K9 mostly in euchromatic regions. Finally, G9a exerted a transcriptionally suppressive function that depended on its HMTase activity. Our results indicate that euchromatic H3-K9 methylation regulated by G9a is essential for early embryogenesis and is involved in the transcriptional repression of developmental genes.",
+				"extra": "PMID: 12130538",
+				"issue": "14",
+				"journalAbbreviation": "Genes Dev.",
+				"language": "en",
+				"libraryCatalog": "genesdev.cshlp.org",
+				"pages": "1779-1791",
+				"publicationTitle": "Genes & Development",
+				"url": "http://genesdev.cshlp.org/content/16/14/1779",
+				"volume": "16",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -841,20 +861,16 @@ var testCases = [
 						"snapshot": false
 					}
 				],
-				"DOI": "10.1101/gad.989402",
-				"language": "en",
-				"journalAbbreviation": "Genes Dev.",
-				"issue": "14",
-				"url": "http://genesdev.cshlp.org/content/16/14/1779",
-				"abstractNote": "Covalent modification of histone tails is crucial for transcriptional regulation, mitotic chromosomal condensation, and heterochromatin formation. Histone H3 lysine 9 (H3-K9) methylation catalyzed by the Suv39h family proteins is essential for establishing the architecture of pericentric heterochromatin. We recently identified a mammalian histone methyltransferase (HMTase), G9a, which has strong HMTase activity towards H3-K9 in vitro. To investigate the in vivo functions of G9a, we generated G9a-deficient mice and embryonic stem (ES) cells. We found that H3-K9 methylation was drastically decreased in G9a-deficient embryos, which displayed severe growth retardation and early lethality. G9a-deficient ES cells also exhibited reduced H3-K9 methylation compared to wild-type cells, indicating that G9a is a dominant H3-K9 HMTase in vivo. Importantly, the loss of G9a abolished methylated H3-K9 mostly in euchromatic regions. Finally, G9a exerted a transcriptionally suppressive function that depended on its HMTase activity. Our results indicate that euchromatic H3-K9 methylation regulated by G9a is essential for early embryogenesis and is involved in the transcriptional repression of developmental genes.",
-				"ISSN": "0890-9369, 1549-5477",
-				"extra": "PMID: 12130538",
-				"libraryCatalog": "genesdev.cshlp.org",
-				"title": "G9a histone methyltransferase plays a dominant role in euchromatic histone H3 lysine 9 methylation and is essential for early embryogenesis",
-				"date": "07/15/2002",
-				"publicationTitle": "Genes & Development",
-				"volume": "16",
-				"pages": "1779-1791"
+				"tags": [
+					"Euchromatin",
+					"G9a HMTase",
+					"heterochromatin",
+					"histone H3-K9 methylation",
+					"mammalian development",
+					"transcriptional regulation"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -864,6 +880,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Current concepts in osteolysis",
 				"creators": [
 					{
 						"firstName": "B.",
@@ -886,16 +903,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Arthroplasty",
-					"Hip",
-					"Knee",
-					"Loosening",
-					"Osteolysis",
-					"Revision"
-				],
-				"seeAlso": [],
+				"date": "01/01/2012",
+				"DOI": "10.1302/0301-620X.94B1.28047",
+				"ISSN": "2049-4394, 2049-4408",
+				"abstractNote": "The most frequent cause of failure after total hip replacement in all reported arthroplasty registries is peri-prosthetic osteolysis. Osteolysis is an active biological process initiated in response to wear debris. The eventual response to this process is the activation of macrophages and loss of bone.\nActivation of macrophages initiates a complex biological cascade resulting in the final common pathway of an increase in osteolytic activity. The biological initiators, mechanisms for and regulation of this process are beginning to be understood. This article explores current concepts in the causes of, and underlying biological mechanism resulting in peri-prosthetic osteolysis, reviewing the current basic science and clinical literature surrounding the topic.",
+				"extra": "PMID: 22219240",
+				"issue": "1",
+				"journalAbbreviation": "J Bone Joint Surg Br",
+				"language": "en",
+				"libraryCatalog": "www.bjj.boneandjoint.org.uk",
+				"pages": "10-15",
+				"publicationTitle": "Journal of Bone & Joint Surgery, British Volume",
+				"url": "http://www.bjj.boneandjoint.org.uk/content/94-B/1/10",
+				"volume": "94-B",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -910,20 +930,16 @@ var testCases = [
 						"snapshot": false
 					}
 				],
-				"DOI": "10.1302/0301-620X.94B1.28047",
-				"language": "en",
-				"journalAbbreviation": "J Bone Joint Surg Br",
-				"issue": "1",
-				"url": "http://www.bjj.boneandjoint.org.uk/content/94-B/1/10",
-				"ISSN": "2049-4394, 2049-4408",
-				"extra": "PMID: 22219240",
-				"libraryCatalog": "www.bjj.boneandjoint.org.uk",
-				"abstractNote": "The most frequent cause of failure after total hip replacement in all reported arthroplasty registries is peri-prosthetic osteolysis. Osteolysis is an active biological process initiated in response to wear debris. The eventual response to this process is the activation of macrophages and loss of bone.\nActivation of macrophages initiates a complex biological cascade resulting in the final common pathway of an increase in osteolytic activity. The biological initiators, mechanisms for and regulation of this process are beginning to be understood. This article explores current concepts in the causes of, and underlying biological mechanism resulting in peri-prosthetic osteolysis, reviewing the current basic science and clinical literature surrounding the topic.",
-				"title": "Current concepts in osteolysis",
-				"date": "01/01/2012",
-				"publicationTitle": "Journal of Bone & Joint Surgery, British Volume",
-				"volume": "94-B",
-				"pages": "10-15"
+				"tags": [
+					"Arthroplasty",
+					"Hip",
+					"Knee",
+					"Loosening",
+					"Osteolysis",
+					"Revision"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -938,6 +954,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "MEME: discovering and analyzing DNA and protein sequence motifs",
 				"creators": [
 					{
 						"firstName": "Timothy L.",
@@ -960,9 +977,20 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "07/01/2006",
+				"DOI": "10.1093/nar/gkl198",
+				"ISSN": "0305-1048, 1362-4962",
+				"abstractNote": "MEME (Multiple EM for Motif Elicitation) is one of the most widely used tools for searching for novel ‘signals’ in sets of biological sequences. Applications include the discovery of new transcription factor binding sites and protein domains. MEME works by searching for repeated, ungapped sequence patterns that occur in the DNA or protein sequences provided by the user. Users can perform MEME searches via the web server hosted by the National Biomedical Computation Resource (http://meme.nbcr.net) and several mirror sites. Through the same web server, users can also access the Motif Alignment and Search Tool to search sequence databases for matches to motifs encoded in several popular formats. By clicking on buttons in the MEME output, users can compare the motifs discovered in their input sequences with databases of known motifs, search sequence databases for matches to the motifs and display the motifs in various formats. This article describes the freely accessible web server and its architecture, and discusses ways to use MEME effectively to find new sequence patterns in biological sequences and analyze their significance.",
+				"extra": "PMID: 16845028",
+				"issue": "suppl 2",
+				"journalAbbreviation": "Nucl. Acids Res.",
+				"language": "en",
+				"libraryCatalog": "nar.oxfordjournals.org",
+				"pages": "W369-W373",
+				"publicationTitle": "Nucleic Acids Research",
+				"shortTitle": "MEME",
+				"url": "http://nar.oxfordjournals.org/content/34/suppl_2/W369",
+				"volume": "34",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -977,21 +1005,9 @@ var testCases = [
 						"snapshot": false
 					}
 				],
-				"DOI": "10.1093/nar/gkl198",
-				"language": "en",
-				"journalAbbreviation": "Nucl. Acids Res.",
-				"issue": "suppl 2",
-				"url": "http://nar.oxfordjournals.org/content/34/suppl_2/W369",
-				"ISSN": "0305-1048, 1362-4962",
-				"extra": "PMID: 16845028",
-				"libraryCatalog": "nar.oxfordjournals.org",
-				"abstractNote": "MEME (Multiple EM for Motif Elicitation) is one of the most widely used tools for searching for novel ‘signals’ in sets of biological sequences. Applications include the discovery of new transcription factor binding sites and protein domains. MEME works by searching for repeated, ungapped sequence patterns that occur in the DNA or protein sequences provided by the user. Users can perform MEME searches via the web server hosted by the National Biomedical Computation Resource (http://meme.nbcr.net) and several mirror sites. Through the same web server, users can also access the Motif Alignment and Search Tool to search sequence databases for matches to motifs encoded in several popular formats. By clicking on buttons in the MEME output, users can compare the motifs discovered in their input sequences with databases of known motifs, search sequence databases for matches to the motifs and display the motifs in various formats. This article describes the freely accessible web server and its architecture, and discusses ways to use MEME effectively to find new sequence patterns in biological sequences and analyze their significance.",
-				"shortTitle": "MEME",
-				"title": "MEME: discovering and analyzing DNA and protein sequence motifs",
-				"date": "07/01/2006",
-				"publicationTitle": "Nucleic Acids Research",
-				"volume": "34",
-				"pages": "W369-W373"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1001,6 +1017,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Potent Social Learning and Conformity Shape a Wild Primate’s Foraging Decisions",
 				"creators": [
 					{
 						"firstName": "Erica van de",
@@ -1018,9 +1035,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "04/26/2013",
+				"DOI": "10.1126/science.1232769",
+				"ISSN": "0036-8075, 1095-9203",
+				"abstractNote": "Conformity to local behavioral norms reflects the pervading role of culture in human life. Laboratory experiments have begun to suggest a role for conformity in animal social learning, but evidence from the wild remains circumstantial. Here, we show experimentally that wild vervet monkeys will abandon personal foraging preferences in favor of group norms new to them. Groups first learned to avoid the bitter-tasting alternative of two foods. Presentations of these options untreated months later revealed that all new infants naïve to the foods adopted maternal preferences. Males who migrated between groups where the alternative food was eaten switched to the new local norm. Such powerful effects of social learning represent a more potent force than hitherto recognized in shaping group differences among wild animals.\nAnimal Culture\nCultural transmission of information occurs when individuals learn from others with more experience or when individuals come to accept particular modes of behavior as the local norm. Such information transfer can be expected in highly social or long-lived species where contact and time for learning are maximized and are seen in humans (see the Perspective by de Waal). Using a network-based diffusion analysis on a long-term data set that includes tens of thousands of observations of individual humpback whales, Allen et al. (p. 485) show that an innovative feeding behavior has spread through social transmission since it first emerged in a single individual in 1980. The “lobtail” feeding has passed among associating individuals for more than three decades. Van de Waal et al. (p. 483), on the other hand, used a controlled experimental approach in vervet monkeys to show that individuals learn what to eat from more experienced individuals within their social group. Not only did young animals learn from observing older animals, but immigrating males switched their food preference to that of their new group.",
+				"extra": "PMID: 23620053",
+				"issue": "6131",
+				"journalAbbreviation": "Science",
+				"language": "en",
+				"libraryCatalog": "www.sciencemag.org",
+				"pages": "483-485",
+				"publicationTitle": "Science",
+				"url": "http://www.sciencemag.org/content/340/6131/483",
+				"volume": "340",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -1035,20 +1062,9 @@ var testCases = [
 						"snapshot": false
 					}
 				],
-				"DOI": "10.1126/science.1232769",
-				"language": "en",
-				"journalAbbreviation": "Science",
-				"issue": "6131",
-				"url": "http://www.sciencemag.org/content/340/6131/483",
-				"ISSN": "0036-8075, 1095-9203",
-				"extra": "PMID: 23620053",
-				"libraryCatalog": "www.sciencemag.org",
-				"abstractNote": "Conformity to local behavioral norms reflects the pervading role of culture in human life. Laboratory experiments have begun to suggest a role for conformity in animal social learning, but evidence from the wild remains circumstantial. Here, we show experimentally that wild vervet monkeys will abandon personal foraging preferences in favor of group norms new to them. Groups first learned to avoid the bitter-tasting alternative of two foods. Presentations of these options untreated months later revealed that all new infants naïve to the foods adopted maternal preferences. Males who migrated between groups where the alternative food was eaten switched to the new local norm. Such powerful effects of social learning represent a more potent force than hitherto recognized in shaping group differences among wild animals.\nAnimal Culture\nCultural transmission of information occurs when individuals learn from others with more experience or when individuals come to accept particular modes of behavior as the local norm. Such information transfer can be expected in highly social or long-lived species where contact and time for learning are maximized and are seen in humans (see the Perspective by de Waal). Using a network-based diffusion analysis on a long-term data set that includes tens of thousands of observations of individual humpback whales, Allen et al. (p. 485) show that an innovative feeding behavior has spread through social transmission since it first emerged in a single individual in 1980. The “lobtail” feeding has passed among associating individuals for more than three decades. Van de Waal et al. (p. 483), on the other hand, used a controlled experimental approach in vervet monkeys to show that individuals learn what to eat from more experienced individuals within their social group. Not only did young animals learn from observing older animals, but immigrating males switched their food preference to that of their new group.",
-				"title": "Potent Social Learning and Conformity Shape a Wild Primate’s Foraging Decisions",
-				"date": "04/26/2013",
-				"publicationTitle": "Science",
-				"volume": "340",
-				"pages": "483-485"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1068,6 +1084,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Temporal stability and precision of ventricular defibrillation threshold data",
 				"creators": [
 					{
 						"firstName": "C. F.",
@@ -1085,9 +1102,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "1978/11/01",
+				"ISSN": "0363-6135, 1522-1539",
+				"abstractNote": "Over 200 measurements of the minimum damped sinusoidal current and energy for transchest electrical ventricular defibrillation (ventricular defibrillation threshold) were made to determine the stability and precision of threshold data in 15 pentobarbital-anesthetized dogs. Threshold was determined by repeated trials of fibrillation and defibrillation with successive shocks of diminishing current, each 10% less than that of the preceding shock. The lowest shock intensity that defibrillated was defined as threshold. In three groups of five dogs each, threshold was measured at intervals of 60, 15, and 5 min over periods of 8, 5, and 1 h, respectively. Similar results were obtained for all groups. There was no significant change in mean threshold current with time. Owing to a decrease in transchest impedance, threshold delivered energy decreased by 10% during the first hour of testing. The standard deviations for threshold peak current and delivered energy in a given animal were 11% and 22% of their respective mean values. Arterial blood pH, Pco2, and Po2 averaged change of pH, PCO2 and PO2 were not significantly different from zero. The data demonstrate that ventricular defibrillation threshold is a stable physiological parameter that may be measured with reasonable precision.",
+				"extra": "PMID: 31797",
+				"issue": "5",
+				"language": "en",
+				"libraryCatalog": "ajpheart.physiology.org",
+				"pages": "H553-H558",
+				"publicationTitle": "American Journal of Physiology - Heart and Circulatory Physiology",
+				"rights": "Copyright © 1978 the American Physiological Society",
+				"url": "http://ajpheart.physiology.org/content/235/5/H553",
+				"volume": "235",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -1102,18 +1128,9 @@ var testCases = [
 						"snapshot": false
 					}
 				],
-				"title": "Temporal stability and precision of ventricular defibrillation threshold data",
-				"publicationTitle": "American Journal of Physiology - Heart and Circulatory Physiology",
-				"rights": "Copyright © 1978 the American Physiological Society",
-				"date": "1978/11/01",
-				"url": "http://ajpheart.physiology.org/content/235/5/H553",
-				"language": "en",
-				"extra": "Over 200 measurements of the minimum damped sinusoidal current and energy for transchest electrical ventricular defibrillation (ventricular defibrillation threshold) were made to determine the stability and precision of threshold data in 15 pentobarbital-anesthetized dogs. Threshold was determined by repeated trials of fibrillation and defibrillation with successive shocks of diminishing current, each 10% less than that of the preceding shock. The lowest shock intensity that defibrillated was defined as threshold. In three groups of five dogs each, threshold was measured at intervals of 60, 15, and 5 min over periods of 8, 5, and 1 h, respectively. Similar results were obtained for all groups. There was no significant change in mean threshold current with time. Owing to a decrease in transchest impedance, threshold delivered energy decreased by 10% during the first hour of testing. The standard deviations for threshold peak current and delivered energy in a given animal were 11% and 22% of their respective mean values. Arterial blood pH, Pco2, and Po2 averaged change of pH, PCO2 and PO2 were not significantly different from zero. The data demonstrate that ventricular defibrillation threshold is a stable physiological parameter that may be measured with reasonable precision.\nPMID: 31797",
-				"volume": "235",
-				"issue": "5",
-				"pages": "H553-H558",
-				"libraryCatalog": "ajpheart.physiology.org",
-				"abstractNote": "Over 200 measurements of the minimum damped sinusoidal current and energy for transchest electrical ventricular defibrillation (ventricular defibrillation threshold) were made to determine the stability and precision of threshold data in 15 pentobarbital-anesthetized dogs. Threshold was determined by repeated trials of fibrillation and defibrillation with successive shocks of diminishing current, each 10% less than that of the preceding shock. The lowest shock intensity that defibrillated was defined as threshold. In three groups of five dogs each, threshold was measured at intervals of 60, 15, and 5 min over periods of 8, 5, and 1 h, respectively. Similar results were obtained for all groups. There was no significant change in mean threshold current with time. Owing to a decrease in transchest impedance, threshold delivered energy decreased by 10% during the first hour of testing. The standard deviations for threshold peak current and delivered energy in a given animal were 11% and 22% of their respective mean values. Arterial blood pH, Pco2, and Po2 averaged change of pH, PCO2 and PO2 were not significantly different from zero. The data demonstrate that ventricular defibrillation threshold is a stable physiological parameter that may be measured with reasonable precision."
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1128,6 +1145,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Non-B DB v2.0: a database of predicted non-B DNA-forming motifs and its associated tools",
 				"creators": [
 					{
 						"firstName": "Regina Z.",
@@ -1195,9 +1213,20 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "01/01/2013",
+				"DOI": "10.1093/nar/gks955",
+				"ISSN": "0305-1048, 1362-4962",
+				"abstractNote": "The non-B DB, available at http://nonb.abcc.ncifcrf.gov, catalogs predicted non-B DNA-forming sequence motifs, including Z-DNA, G-quadruplex, A-phased repeats, inverted repeats, mirror repeats, direct repeats and their corresponding subsets: cruciforms, triplexes and slipped structures, in several genomes. Version 2.0 of the database revises and re-implements the motif discovery algorithms to better align with accepted definitions and thresholds for motifs, expands the non-B DNA-forming motifs coverage by including short tandem repeats and adds key visualization tools to compare motif locations relative to other genomic annotations. Non-B DB v2.0 extends the ability for comparative genomics by including re-annotation of the five organisms reported in non-B DB v1.0, human, chimpanzee, dog, macaque and mouse, and adds seven additional organisms: orangutan, rat, cow, pig, horse, platypus and Arabidopsis thaliana. Additionally, the non-B DB v2.0 provides an overall improved graphical user interface and faster query performance.",
+				"extra": "PMID: 23125372",
+				"issue": "D1",
+				"journalAbbreviation": "Nucl. Acids Res.",
+				"language": "en",
+				"libraryCatalog": "nar.oxfordjournals.org",
+				"pages": "D94-D100",
+				"publicationTitle": "Nucleic Acids Research",
+				"shortTitle": "Non-B DB v2.0",
+				"url": "http://nar.oxfordjournals.org/content/41/D1/D94",
+				"volume": "41",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -1212,28 +1241,145 @@ var testCases = [
 						"snapshot": false
 					}
 				],
-				"DOI": "10.1093/nar/gks955",
-				"language": "en",
-				"journalAbbreviation": "Nucl. Acids Res.",
-				"issue": "D1",
-				"url": "http://nar.oxfordjournals.org/content/41/D1/D94",
-				"ISSN": "0305-1048, 1362-4962",
-				"extra": "PMID: 23125372",
-				"libraryCatalog": "nar.oxfordjournals.org",
-				"abstractNote": "The non-B DB, available at http://nonb.abcc.ncifcrf.gov, catalogs predicted non-B DNA-forming sequence motifs, including Z-DNA, G-quadruplex, A-phased repeats, inverted repeats, mirror repeats, direct repeats and their corresponding subsets: cruciforms, triplexes and slipped structures, in several genomes. Version 2.0 of the database revises and re-implements the motif discovery algorithms to better align with accepted definitions and thresholds for motifs, expands the non-B DNA-forming motifs coverage by including short tandem repeats and adds key visualization tools to compare motif locations relative to other genomic annotations. Non-B DB v2.0 extends the ability for comparative genomics by including re-annotation of the five organisms reported in non-B DB v1.0, human, chimpanzee, dog, macaque and mouse, and adds seven additional organisms: orangutan, rat, cow, pig, horse, platypus and Arabidopsis thaliana. Additionally, the non-B DB v2.0 provides an overall improved graphical user interface and faster query performance.",
-				"shortTitle": "Non-B DB v2.0",
-				"title": "Non-B DB v2.0: a database of predicted non-B DNA-forming motifs and its associated tools",
-				"date": "01/01/2013",
-				"publicationTitle": "Nucleic Acids Research",
-				"volume": "41",
-				"pages": "D94-D100"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://bloodjournal.hematologylibrary.org/content/123/22",
+		"url": "http://www.bloodjournal.org/content/123/22",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.bmj.com/search/cell",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.bmj.com/content/322/7277/29.1",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Islet and stem cell transplantation for treating diabetes",
+				"creators": [
+					{
+						"firstName": "Palle",
+						"lastName": "Serup",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ole D.",
+						"lastName": "Madsen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Thomas",
+						"lastName": "Mandrup-Poulsen",
+						"creatorType": "author"
+					}
+				],
+				"date": "2001/01/06",
+				"DOI": "10.1136/bmj.322.7277.29",
+				"ISSN": "0959-8138, 1468-5833",
+				"extra": "PMID: 11141151",
+				"issue": "7277",
+				"journalAbbreviation": "BMJ",
+				"language": "en",
+				"libraryCatalog": "www.bmj.com",
+				"pages": "29-32",
+				"publicationTitle": "BMJ",
+				"rights": "© 2001 BMJ Publishing Group Ltd.",
+				"url": "http://www.bmj.com/content/322/7277/29.1",
+				"volume": "322",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					},
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.bmj.com/search/advanced/title%3Acell%20title_flags%3Amatch-all%20limit_from%3A1840-01-01%20limit_to%3A2015-02-25%20numresults%3A10%20sort%3Arelevance-rank%20format_result%3Astandard",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.bmj.com/content/350/bmj.h696",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Length of hospital stay after hip fracture and short term risk of death after discharge: a total cohort study in Sweden",
+				"creators": [
+					{
+						"firstName": "Peter",
+						"lastName": "Nordström",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yngve",
+						"lastName": "Gustafson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Karl",
+						"lastName": "Michaëlsson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Anna",
+						"lastName": "Nordström",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015/02/20",
+				"DOI": "10.1136/bmj.h696",
+				"ISSN": "1756-1833",
+				"abstractNote": "Objective To investigate relation between inpatient length of stay after hip fracture and risk of death after hospital discharge.\nSetting Population ≥50 years old living in Sweden as of 31 December 2005 with a first hip fracture the years 2006-12.\nParticipants 116 111 patients with an incident hip fracture from a closed nationwide cohort.\nMain outcome measure Death within 30 days of hospital discharge in relation to hospital length of stay after adjustment for multiple covariates.\nResults Mean inpatient length of stay after a hip fracture decreased from 14.2 days in 2006 to 11.6 days in 2012 (P<0.001). The association between length of stay and risk of death after discharge was non-linear (P<0.001), with a threshold for this non-linear effect of about 10 days. Thus, for patients with length of stay of ≤10 days (n=59 154), each 1-day reduction in length of stay increased the odds of death within 30 days of discharge by 8% in 2006 (odds ratio 1.08 (95% confidence interval 1.04 to 1.12)), which increased to16% in 2012 (odds ratio 1.16 (1.12 to 1.20)). In contrast, for patients with a length of stay of ≥11 days (n=56 957), a 1-day reduction in length of stay was not associated with an increased risk of death after discharge during any of the years of follow up.\nLimitations No accurate evaluation of the underlying cause of death could be performed.\nConclusion Shorter length of stay in hospital after hip fracture is associated with increased risk of death after hospital discharge, but only among patients with length of stay of 10 days or less. This association remained robust over consecutive years.",
+				"extra": "PMID: 25700551",
+				"language": "en",
+				"libraryCatalog": "www.bmj.com",
+				"pages": "h696",
+				"publicationTitle": "The BMJ",
+				"rights": "© Nordström et al 2015. This is an Open Access article distributed in accordance with the Creative Commons Attribution Non Commercial (CC BY-NC 4.0) license, which permits others to distribute, remix, adapt, build upon this work non-commercially, and license their derivative works on different terms, provided the original work is properly cited and the use is non-commercial. See:  http://creativecommons.org/licenses/by-nc/4.0/.",
+				"shortTitle": "Length of hospital stay after hip fracture and short term risk of death after discharge",
+				"url": "http://www.bmj.com/content/350/bmj.h696",
+				"volume": "350",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					},
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

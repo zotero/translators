@@ -2,14 +2,14 @@
 	"translatorID": "291934d5-36ec-4b81-ac9c-c5ad5313dba4",
 	"label": "Pion Journals",
 	"creator": "Michael Berkowitz",
-	"target": "http://(www.)?(hthpweb|envplan|perceptionweb)\\.com/",
+	"target": "^https?://(www\\.)?(hthpweb|envplan|perceptionweb)\\.com/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-02-09 12:26:39"
+	"lastUpdated": "2015-06-02 21:11:22"
 }
 
 function detectWeb(doc, url) {
@@ -47,7 +47,8 @@ function scrape(doc, url){
 		item.publicationTitle = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="footer"]/div[@class="left"]/i', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 		item.title = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="total"]/p[2]//b', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 		var authors = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="total"]/p[3]/b', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent).split(/,\s*/);
-		for each (var aut in authors) {
+		for (var i=0; i<authors.length; i++) {
+			var aut = authors[i];
 			item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
 		}
 		if (doc.evaluate('//div[@id="title"]/div[@class="left"]/font', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/\d+/)) {

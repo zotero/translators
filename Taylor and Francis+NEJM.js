@@ -9,25 +9,31 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-12-07 14:59:05"
+	"lastUpdated": "2015-02-12 22:42:23"
 }
 
 /*
-Taylor and Francis Translator
-Copyright (C) 2011 Sebastian Karcher
+	***** BEGIN LICENSE BLOCK *****
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+	Taylor and Francis Translator
+	Copyright © 2011 Sebastian Karcher
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
+	This file is part of Zotero.
 
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
 */
 
 function getTitles(doc) {
@@ -132,6 +138,11 @@ function scrape(doc, url, dois) {
 					//unfortunately, bibtex is missing some data
 					//publisher, ISSN/ISBN
 					ZU.doPost(postUrl, postBody + doi + risFormat, function(text) {
+						// Y1 is online publication date
+						if (/^DA\s+-\s+/m.test(text)) {
+							text = text.replace(/^Y1(\s+-.*)/gm, '');
+						}
+						
 						risTrans = Zotero.loadTranslator("import");
 						risTrans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 						risTrans.setString(text);
@@ -292,7 +303,7 @@ var testCases = [
 				"libraryCatalog": "Taylor and Francis+NEJM",
 				"pages": "37-46",
 				"publicationTitle": "Applied Economics",
-				"url": "http://www.tandfonline.com/doi/abs/10.1080/00036846.2011.568404",
+				"url": "http://dx.doi.org/10.1080/00036846.2011.568404",
 				"volume": "45",
 				"attachments": [
 					{
@@ -353,7 +364,7 @@ var testCases = [
 				"libraryCatalog": "Taylor and Francis+NEJM",
 				"pages": "1179-1181",
 				"publicationTitle": "New England Journal of Medicine",
-				"url": "http://www.nejm.org/doi/full/10.1056/NEJMp1207920",
+				"url": "http://dx.doi.org/10.1056/NEJMp1207920",
 				"volume": "367",
 				"attachments": [
 					{

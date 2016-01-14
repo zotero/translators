@@ -2,14 +2,14 @@
 	"translatorID": "8e66aa6d-5b2a-4b44-b384-a838e23b8538",
 	"label": "Library Catalog (Koha)",
 	"creator": "Sebastian Karcher",
-	"target": "cgi-bin/koha/opac-(detail|search)",
+	"target": "^https?://[^/]+/cgi-bin/koha/opac-(detail|search|shelves)\\.pl\\?",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 260,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-09-25 15:46:46"
+	"lastUpdated": "2015-10-17 18:23:11"
 }
 
 /*
@@ -35,8 +35,8 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.match(/\/opac-search\.pl\?/) && getSearchResults(doc, true)) return "multiple";
-	if (url.match(/\/opac-detail\.pl\?/)) return "book";
+	if (url.search(/\/opac-(search|shelves)\.pl\?/)!=-1 && getSearchResults(doc, true)) return "multiple";
+	if (url.indexOf("/opac-detail.pl?")!=-1) return "book";
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -46,7 +46,13 @@ function getSearchResults(doc, checkOnly) {
 	
 	resultContainer = doc.getElementsByTagName('tr');
 	for (var i=0; i<resultContainer.length; i++) {
-		var item = ZU.xpath(resultContainer[i], '(.//a[contains(@href, "opac-detail.pl")])[1]')[0];
+		//newer KOHA versions, e.g. http://catalog.bywatersolutions.com
+		var item = ZU.xpath(resultContainer[i], '(.//a[@class="title" and contains(@href, "opac-detail.pl")])[1]')[0];
+		if (!item){
+			//older KOHA versions, e.g. https://catalogue.univ-lyon3.fr/
+			item = ZU.xpath(resultContainer[i], '(.//a[contains(@href, "opac-detail.pl")])[1]')[0];
+		}
+		
 		if (!item) continue;
 		
 		if(checkOnly) return true;
@@ -122,10 +128,12 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Collège Ahuntsic",
+						"creatorType": "editor",
 						"fieldMode": true
 					}
 				],
 				"date": "2011",
+				"abstractNote": "Les finissants et finissantes du Collège Ahuntsic soulignent les connaissances acquises au sein du profil Cinéma et médias en faisant découvrir leurs coups de coeur, « des films qui, à leur façon, les ont marqués par une recherche formelle, une originalité thématique, une authenticité sociologique et/ou une valeur historique. » -- P. 5",
 				"libraryCatalog": "Library Catalog (Koha)",
 				"place": "Montréal",
 				"publisher": "Collège Ahuntsic",
@@ -134,11 +142,7 @@ var testCases = [
 				"tags": [
 					"Cinéma"
 				],
-				"notes": [
-					{
-						"note": "Les finissants et finissantes du Collège Ahuntsic soulignent les connaissances acquises au sein du profil Cinéma et médias en faisant découvrir leurs coups de coeur, « des films qui, à leur façon, les ont marqués par une recherche formelle, une originalité thématique, une authenticité sociologique et/ou une valeur historique. » -- P. 5"
-					}
-				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
@@ -179,6 +183,7 @@ var testCases = [
 				],
 				"date": "2010",
 				"ISBN": "9782746713666",
+				"abstractNote": "« Le sujet préoccupe les jeunes eux-mêmes, bien entendu, mais aussi les adultes qui les entourent, parents, enseignants, travailleurs sociaux, médecins, juges, responsables politiques... Il inquiète, il paraît sulfureux, ou tabou. L'émotion suscitée dans les médias en témoigne : tournantes, tourisme sexuel, \"dédipix\" échangés, pilule du lendemain, difficulté d'assumer son homosexualité, etc. Sur les plateaux de télévision, à la radio ou dans les magazines, la parole est donnée aux \"psy\" ou aux \"témoins\", qui renforcent bien souvent les normes et les idées reçues. En contrepoint, ici sont réunis des historiens, des sociologues, des philosophes : trente-cinq chercheurs qui ont dépouillé les archives et mené l'enquête sur le terrain, en France, en Espagne, aux États-Unis, mais aussi en Argentine, au Cameroun, à Madagascar, en Iran, en Thaïlande, en Nouvelle-Zélande... Ce vaste panorama en trois volets, initiations, interdits, identités, permet de s'interroger sur notre actualité sexuelle : peu réprimée jusqu'à une époque récente, pourquoi la pédophilie est-elle aujourd'hui considérée comme le crime le plus abominable? Quel rôle joue la pornographie dans l'éducation sexuelle? La violence sexuelle des jeunes est-elle plus marquée aujourd'hui? Comment se construisent les identités de genre et les orientations sexuelles chez les jeunes? Faut-il avoir peur des jeunes et de la sexualité? Voilà de quoi alimenter la réflexion individuelle et les débats publics tout à la fois... » -- P. 4 de la couv",
 				"callNumber": "HQ 27 J485",
 				"libraryCatalog": "Library Catalog (Koha)",
 				"numPages": "407",
@@ -196,137 +201,6 @@ var testCases = [
 					"Sexualité",
 					"Tourisme sexuel"
 				],
-				"notes": [
-					{
-						"note": "« Le sujet préoccupe les jeunes eux-mêmes, bien entendu, mais aussi les adultes qui les entourent, parents, enseignants, travailleurs sociaux, médecins, juges, responsables politiques... Il inquiète, il paraît sulfureux, ou tabou. L'émotion suscitée dans les médias en témoigne : tournantes, tourisme sexuel, \"dédipix\" échangés, pilule du lendemain, difficulté d'assumer son homosexualité, etc. Sur les plateaux de télévision, à la radio ou dans les magazines, la parole est donnée aux \"psy\" ou aux \"témoins\", qui renforcent bien souvent les normes et les idées reçues. En contrepoint, ici sont réunis des historiens, des sociologues, des philosophes : trente-cinq chercheurs qui ont dépouillé les archives et mené l'enquête sur le terrain, en France, en Espagne, aux États-Unis, mais aussi en Argentine, au Cameroun, à Madagascar, en Iran, en Thaïlande, en Nouvelle-Zélande... Ce vaste panorama en trois volets, initiations, interdits, identités, permet de s'interroger sur notre actualité sexuelle : peu réprimée jusqu'à une époque récente, pourquoi la pédophilie est-elle aujourd'hui considérée comme le crime le plus abominable? Quel rôle joue la pornographie dans l'éducation sexuelle? La violence sexuelle des jeunes est-elle plus marquée aujourd'hui? Comment se construisent les identités de genre et les orientations sexuelles chez les jeunes? Faut-il avoir peur des jeunes et de la sexualité? Voilà de quoi alimenter la réflexion individuelle et les débats publics tout à la fois... » -- P. 4 de la couv"
-					}
-				],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://biblio.esd.ipl.pt/cgi-bin/koha/opac-detail.pl?biblionumber=2367",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Dia Mundial da Dança: Dança Caldas 21h30",
-				"creators": [
-					{
-						"firstName": "Úxia",
-						"lastName": "Vaello",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Inês",
-						"lastName": "Oliveira",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Catarina",
-						"lastName": "Câmara",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Bruno",
-						"lastName": "Alexandre",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Maria",
-						"lastName": "Cerveira",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Célia",
-						"lastName": "Cardoso",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Ricardo",
-						"lastName": "Carmona",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Catarina",
-						"lastName": "Ascensão",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Ana Sofia",
-						"lastName": "Leite",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Claúdia",
-						"lastName": "Silva",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Diana",
-						"lastName": "Alves",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Eliana",
-						"lastName": "Campos",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Guida",
-						"lastName": "Maurício",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Lib",
-						"lastName": "Pitalúa",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Mariana",
-						"lastName": "Saraiva",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Francisco",
-						"lastName": "Pedro",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "João Carlos",
-						"lastName": "Andrade",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Miguel",
-						"lastName": "Oliveira",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Luísa",
-						"lastName": "Taveira",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Escola Superior de Dança",
-						"creatorType": "contributor",
-						"fieldMode": true
-					},
-					{
-						"lastName": "Escola Vocacional de Dança",
-						"creatorType": "contributor",
-						"fieldMode": true
-					}
-				],
-				"date": "2005",
-				"language": "por",
-				"libraryCatalog": "Library Catalog (Koha)",
-				"place": "Lisboa",
-				"publisher": "ESD",
-				"shortTitle": "Dia Mundial da Dança",
-				"attachments": [],
-				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -335,6 +209,16 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://rdl.koha.ccsr.qc.ca/cgi-bin/koha/opac-search.pl?q=test",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://catalog.bywatersolutions.com/cgi-bin/koha/opac-search.pl?idx=&q=thelen&branch_group_limit=",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://librarytestnew-opac.usj.edu.mo/cgi-bin/koha/opac-shelves.pl?viewshelf=3&sortfield=",
 		"items": "multiple"
 	}
 ]

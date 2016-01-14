@@ -2,21 +2,21 @@
 	"translatorID": "2c310a37-a4dd-48d2-82c9-bd29c53c1c76",
 	"label": "APS",
 	"creator": "Aurimas Vinckevicius",
-	"target": "^https?://journals\\.aps\\.org",
+	"target": "^https?://journals\\.aps\\.org/([^/]+/(abstract|supplemental|references|cited-by|issues)/|search\\?)",
 	"minVersion": "3.0.12",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-05-08 21:55:24"
+	"lastUpdated": "2015-03-18 01:28:18"
 }
 
 function getSearchResults(doc) {
-	var articles = doc.getElementsByClassName('article');
+	var articles = doc.getElementsByClassName('article-result');
 	var results = [];
 	for(var i=0; i<articles.length; i++) {
-		if(articles[i].getElementsByClassName('reveal-export').length) {
+		if(articles[i].getElementsByClassName('row').length) {
 			results.push(articles[i]);
 		}
 	}
@@ -58,8 +58,45 @@ function doWeb(doc, url) {
 	}
 }
 
+// Extension to mimeType mapping
+var suppTypeMap = {
+	'pdf': 'application/pdf',
+	'zip': 'application/zip',
+	'doc': 'application/msword',
+	'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+	'xls': 'application/vnd.ms-excel',
+	'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+	'mov': 'video/quicktime'
+};
+
+var dontDownload = [
+	'application/zip',
+	'video/quicktime'
+];
+
 function scrape(doc, url) {
-	url = url.replace(/[?#].*/, '').replace(/\/abstract\//, '/{REPLACE}/');
+	url = url.replace(/[?#].*/, '');
+	
+	if (url.indexOf('/abstract/') == -1) {
+		// Go to Abstract page first so we can scrape the abstract
+		url = url.replace(/\/(?:supplemental|references|cited-by)\//, '/abstract/');
+		if (url.indexOf('/abstract/') == -1) {
+			Zotero.debug('Unrecognized URL ' + url);
+			return;
+		}
+		
+		ZU.processDocuments(url, function(doc, url) {
+			if (url.indexOf('/abstract/') == -1) {
+				Zotero.debug('Redirected when trying to go to abstract page. ' + url);
+				return;
+			}
+			scrape(doc, url)
+		});
+		return;
+	}
+	
+	url = url.replace(/\/abstract\//, '/{REPLACE}/');
+	
 	// fetch RIS
 	var risUrl = url.replace('{REPLACE}', 'export')
 			   + '?type=ris&download=true';
@@ -75,7 +112,7 @@ function scrape(doc, url) {
 			));
 			
 			// attach PDF
-			if(ZU.xpath(doc, '//section[@id="title"]//a[starts-with(text(), "PDF")]').length) {
+			if(ZU.xpath(doc, '//div[@class="article-nav-actions"]/a[contains(text(), "PDF")]').length) {
 				item.attachments.push({
 					title: 'Full Text PDF',
 					url: url.replace('{REPLACE}', 'pdf'),
@@ -89,35 +126,35 @@ function scrape(doc, url) {
 			});
 			
 			if(Z.getHiddenPref && Z.getHiddenPref('attachSupplementary')) {
-				try {
-					// Fetch supplemental info as JSON
-					ZU.doGet(url.replace('{REPLACE}', 'supplemental'), function(text) {
-						var suppInfo = JSON.parse(text);
+				ZU.processDocuments(url.replace('{REPLACE}', 'supplemental'), function(doc) {
+					try {
 						var asLink = Z.getHiddenPref('supplementaryAsLink');
-						for(var i=0; i<suppInfo.components.length; i++) {
-							var supp = suppInfo.components[i];
-							if(!supp.path) continue;
-							var title = supp.filename || 'Supplementary Data';
-							if(asLink) {
+						var suppFiles = doc.getElementsByClassName('supplemental-file');
+						for(var i=0; i<suppFiles.length; i++) {
+							var link = suppFiles[i].getElementsByTagName('a')[0];
+							if (!link || !link.href) continue;
+							var title = link.getAttribute('data-id') || 'Supplementary Data';
+							var type = suppTypeMap[link.href.split('.').pop()];
+							if(asLink || dontDownload.indexOf(type) != -1) {
 								item.attachments.push({
 									title: title,
-									url: supp.path,
-									mimeType: 'text/html',
+									url: link.href,
+									mimeType: type || 'text/html',
 									snapshot: false
 								});
 							} else {
 								item.attachments.push({
 									title: title,
-									url: supp.path
-									//probably PDF, but not sure it's always the case
+									url: link.href,
+									mimeType: type
 								});
 							}
 						}
-					}, function() { item.complete() });
-				} catch(e) {
-					Z.debug('Could not attach supplemental data. ' + e.message);
-					item.complete();
-				}
+					} catch (e) {
+						Z.debug('Could not attach supplemental data');
+						Z.debug(e);
+					}
+				}, function() { item.complete() });
 			} else {
 				item.complete();
 			}
@@ -138,6 +175,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Hints for a nonstandard Higgs boson from the LHC",
 				"creators": [
 					{
 						"lastName": "Raidal",
@@ -150,9 +188,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "October 21, 2011",
+				"DOI": "10.1103/PhysRevD.84.077701",
+				"abstractNote": "We reconsider Higgs boson invisible decays into Dark Matter in the light of recent Higgs searches at the LHC. Present hints in the Compact Muon Solenoid and ATLAS data favor a nonstandard Higgs boson with approximately 50% invisible branching ratio, and mass around 143 GeV. This situation can be realized within the simplest thermal scalar singlet Dark Matter model, predicting a Dark Matter mass around 50 GeV and direct detection cross section just below present bound. The present runs of the Xenon100 and LHC experiments can test this possibility.",
+				"issue": "7",
+				"journalAbbreviation": "Phys. Rev. D",
+				"libraryCatalog": "APS",
+				"pages": "077701",
+				"publicationTitle": "Physical Review D",
+				"url": "http://link.aps.org/doi/10.1103/PhysRevD.84.077701",
+				"volume": "84",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -162,17 +207,9 @@ var testCases = [
 						"title": "APS Snapshot"
 					}
 				],
-				"DOI": "10.1103/PhysRevD.84.077701",
-				"url": "http://link.aps.org/doi/10.1103/PhysRevD.84.077701",
-				"journalAbbreviation": "Phys. Rev. D",
-				"issue": "7",
-				"abstractNote": "We reconsider Higgs boson invisible decays into Dark Matter in the light of recent Higgs searches at the LHC. Present hints in the Compact Muon Solenoid and ATLAS data favor a nonstandard Higgs boson with approximately 50% invisible branching ratio, and mass around 143 GeV. This situation can be realized within the simplest thermal scalar singlet Dark Matter model, predicting a Dark Matter mass around 50 GeV and direct detection cross section just below present bound. The present runs of the Xenon100 and LHC experiments can test this possibility.",
-				"libraryCatalog": "APS",
-				"title": "Hints for a nonstandard Higgs boson from the LHC",
-				"publicationTitle": "Physical Review D",
-				"volume": "84",
-				"pages": "077701",
-				"date": "October 21, 2011"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -180,6 +217,252 @@ var testCases = [
 		"type": "web",
 		"url": "http://journals.aps.org/prd/issues/84/7",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://journals.aps.org/search?field=all&q=test&sort=recent&date=&start_date=&end_date=",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://journals.aps.org/prl/abstract/10.1103/PhysRevLett.114.098105",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Magnetic Flattening of Stem-Cell Spheroids Indicates a Size-Dependent Elastocapillary Transition",
+				"creators": [
+					{
+						"lastName": "Mazuel",
+						"firstName": "Francois",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Reffay",
+						"firstName": "Myriam",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Du",
+						"firstName": "Vicard",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bacri",
+						"firstName": "Jean-Claude",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Rieu",
+						"firstName": "Jean-Paul",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wilhelm",
+						"firstName": "Claire",
+						"creatorType": "author"
+					}
+				],
+				"date": "March 4, 2015",
+				"DOI": "10.1103/PhysRevLett.114.098105",
+				"abstractNote": "Cellular aggregates (spheroids) are widely used in biophysics and tissue engineering as model systems for biological tissues. In this Letter we propose novel methods for molding stem-cell spheroids, deforming them, and measuring their interfacial and elastic properties with a single method based on cell tagging with magnetic nanoparticles and application of a magnetic field gradient. Magnetic molding yields spheroids of unprecedented sizes (up to a few mm in diameter) and preserves tissue integrity. On subjecting these spheroids to magnetic flattening (over 150g), we observed a size-dependent elastocapillary transition with two modes of deformation: liquid-drop-like behavior for small spheroids, and elastic-sphere-like behavior for larger spheroids, followed by relaxation to a liquidlike drop.",
+				"issue": "9",
+				"journalAbbreviation": "Phys. Rev. Lett.",
+				"libraryCatalog": "APS",
+				"pages": "098105",
+				"publicationTitle": "Physical Review Letters",
+				"url": "http://link.aps.org/doi/10.1103/PhysRevLett.114.098105",
+				"volume": "114",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "APS Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://journals.aps.org/prx/supplemental/10.1103/PhysRevX.5.011029",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Weyl Semimetal Phase in Noncentrosymmetric Transition-Metal Monophosphides",
+				"creators": [
+					{
+						"lastName": "Weng",
+						"firstName": "Hongming",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Fang",
+						"firstName": "Chen",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Fang",
+						"firstName": "Zhong",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bernevig",
+						"firstName": "B. Andrei",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Dai",
+						"firstName": "Xi",
+						"creatorType": "author"
+					}
+				],
+				"date": "March 17, 2015",
+				"DOI": "10.1103/PhysRevX.5.011029",
+				"abstractNote": "Based on first-principle calculations, we show that a family of nonmagnetic materials including TaAs, TaP, NbAs, and NbP are Weyl semimetals (WSM) without inversion centers. We find twelve pairs of Weyl points in the whole Brillouin zone (BZ) for each of them. In the absence of spin-orbit coupling (SOC), band inversions in mirror-invariant planes lead to gapless nodal rings in the energy-momentum dispersion. The strong SOC in these materials then opens full gaps in the mirror planes, generating nonzero mirror Chern numbers and Weyl points off the mirror planes. The resulting surface-state Fermi arc structures on both (001) and (100) surfaces are also obtained, and they show interesting shapes, pointing to fascinating playgrounds for future experimental studies.",
+				"issue": "1",
+				"journalAbbreviation": "Phys. Rev. X",
+				"libraryCatalog": "APS",
+				"pages": "011029",
+				"publicationTitle": "Physical Review X",
+				"url": "http://link.aps.org/doi/10.1103/PhysRevX.5.011029",
+				"volume": "5",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "APS Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://journals.aps.org/prx/references/10.1103/PhysRevX.5.011029",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Weyl Semimetal Phase in Noncentrosymmetric Transition-Metal Monophosphides",
+				"creators": [
+					{
+						"lastName": "Weng",
+						"firstName": "Hongming",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Fang",
+						"firstName": "Chen",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Fang",
+						"firstName": "Zhong",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bernevig",
+						"firstName": "B. Andrei",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Dai",
+						"firstName": "Xi",
+						"creatorType": "author"
+					}
+				],
+				"date": "March 17, 2015",
+				"DOI": "10.1103/PhysRevX.5.011029",
+				"abstractNote": "Based on first-principle calculations, we show that a family of nonmagnetic materials including TaAs, TaP, NbAs, and NbP are Weyl semimetals (WSM) without inversion centers. We find twelve pairs of Weyl points in the whole Brillouin zone (BZ) for each of them. In the absence of spin-orbit coupling (SOC), band inversions in mirror-invariant planes lead to gapless nodal rings in the energy-momentum dispersion. The strong SOC in these materials then opens full gaps in the mirror planes, generating nonzero mirror Chern numbers and Weyl points off the mirror planes. The resulting surface-state Fermi arc structures on both (001) and (100) surfaces are also obtained, and they show interesting shapes, pointing to fascinating playgrounds for future experimental studies.",
+				"issue": "1",
+				"journalAbbreviation": "Phys. Rev. X",
+				"libraryCatalog": "APS",
+				"pages": "011029",
+				"publicationTitle": "Physical Review X",
+				"url": "http://link.aps.org/doi/10.1103/PhysRevX.5.011029",
+				"volume": "5",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "APS Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://journals.aps.org/prx/cited-by/10.1103/PhysRevX.5.011003",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Ideal Negative Measurements in Quantum Walks Disprove Theories Based on Classical Trajectories",
+				"creators": [
+					{
+						"lastName": "Robens",
+						"firstName": "Carsten",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Alt",
+						"firstName": "Wolfgang",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Meschede",
+						"firstName": "Dieter",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Emary",
+						"firstName": "Clive",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Alberti",
+						"firstName": "Andrea",
+						"creatorType": "author"
+					}
+				],
+				"date": "January 20, 2015",
+				"DOI": "10.1103/PhysRevX.5.011003",
+				"abstractNote": "We report on a stringent test of the nonclassicality of the motion of a massive quantum particle, which propagates on a discrete lattice. Measuring temporal correlations of the position of single atoms performing a quantum walk, we observe a 6σ violation of the Leggett-Garg inequality. Our results rigorously excludes (i.e., falsifies) any explanation of quantum transport based on classical, well-defined trajectories. We use so-called ideal negative measurements—an essential requisite for any genuine Leggett-Garg test—to acquire information about the atom’s position, yet avoiding any direct interaction with it. The interaction-free measurement is based on a novel atom transport system, which allows us to directly probe the absence rather than the presence of atoms at a chosen lattice site. Beyond the fundamental aspect of this test, we demonstrate the application of the Leggett-Garg correlation function as a witness of quantum superposition. Here, we employ the witness to discriminate different types of walks spanning from merely classical to wholly quantum dynamics.",
+				"issue": "1",
+				"journalAbbreviation": "Phys. Rev. X",
+				"libraryCatalog": "APS",
+				"pages": "011003",
+				"publicationTitle": "Physical Review X",
+				"url": "http://link.aps.org/doi/10.1103/PhysRevX.5.011003",
+				"volume": "5",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "APS Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

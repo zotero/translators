@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-11-22 10:24:38"
+	"lastUpdated": "2015-04-24 21:47:37"
 }
 
 function detectWeb(doc, url) {
@@ -194,6 +194,7 @@ function fetchRIS(url, post, itemType, doc, retry) {
 		} else if(!foundRIS) {
 			Z.debug('No RIS data. Falling back to scraping the page directly.');
 			scrapePage(doc, itemType);
+			return;
 		}
 		
 		//clean up (double) spacing in RIS
@@ -344,7 +345,7 @@ function scrape (doc, newurl, type) {
 	var id = ids.id;
 	var lstUID = ids.lstUID;
 	if (id || lstUID) {
-		var url = '//psycnet.apa.org/index.cfm?fa=search.export'
+		var url = '/index.cfm?fa=search.export'
 		var post = 'id=' + id + '&lstUIDs=' + lstUID
 			+ '&records=records&exportFormat=referenceSoftware';
 		Zotero.debug("Url: " + url);
@@ -488,7 +489,7 @@ var testCases = [
 					}
 				],
 				"date": "1977",
-				"ISBN": "0-7167-0368-8 (Hardcover); 0-7167-0367-X (Paperback)",
+				"ISBN": "9780716703686 9780716703679",
 				"abstractNote": "tonic immobility [animal hypnosis] might be a useful laboratory analog or research model for catatonia / we have been collaborating on an interdisciplinary program of research in an effort to pinpoint the behavioral antecedents and biological bases for tonic immobility / attempt to briefly summarize our findings, and . . . discuss the implications of these data in terms of the model characteristics of tonic immobility / hypnosis / catatonia, catalepsy, and cataplexy / tonic immobility as a model for catatonia / fear potentiation / fear alleviation / fear or arousal / learned helplessness / neurological correlates / pharmacology and neurochemistry / genetic underpinnings / evolutionary considerations / implications for human psychopathology",
 				"bookTitle": "Psychopathology: Experimental models",
 				"libraryCatalog": "APA PsycNET",
@@ -715,7 +716,7 @@ var testCases = [
 					}
 				],
 				"date": "2011",
-				"ISBN": "1-4338-0861-7 (Hardcover); 1-4338-0862-5 (PDF); 978-1-4338-0861-6 (Hardcover); 978-1-43380-862-3 (PDF)",
+				"ISBN": "9781433808616 9781433808623",
 				"abstractNote": "In this chapter, I seek to redress vocational psychology’s inattention to the self and address the ambiguity of the meaning of self. To begin, I offer a chronological survey of vocational psychology’s three main views of human singularity. During succeeding historical eras, different aspects of human singularity interested vocational psychologists, so they developed a new set of terms and concepts to deal with shifts in the meaning of individuality. Over time, vocational psychology developed what Kuhn (2000) referred to as language communities, each with its own paradigm for understanding the self and vocational behavior. Because the self is fundamentally ambiguous, adherents to each paradigm describe it with an agreed on language and metaphors. Thus, each paradigm has a textual tradition, or way of talking about the self. As readers shall see, when they talk about individuals, differentialists use the language of personality, developmentalists use the language of personhood, and constructionists use the language of identity.",
 				"bookTitle": "Developing self in work and career: Concepts, cases, and contexts",
 				"libraryCatalog": "APA PsycNET",

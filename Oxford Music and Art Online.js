@@ -2,14 +2,14 @@
 	"translatorID": "f203db7f-7b7b-4dc4-b018-115b7885fe3b",
 	"label": "Oxford Music and Art Online",
 	"creator": "Michael Berkowitz",
-	"target": "http://[^/]*www.oxford(music|art)online.com[^/]*/",
+	"target": "^https?://([^/]+\\.)?www\\.oxford(music|art)online\\.com/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-06-23 12:06:33"
+	"lastUpdated": "2015-06-02 21:05:15"
 }
 
 function detectWeb(doc, url) {
@@ -47,19 +47,19 @@ function doWeb(doc, url) {
 }	
 
 function scrape(ids, host){
-	for each (var id in ids) {
+	for (var i=0; i<ids.length; i++) {
+		var id = ids[i];
 		var get = 'http://' + host + '/subscriber/article_export_citation/' + id;
 		Zotero.Utilities.HTTP.doGet(get, function(text) {
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			translator.setString(text);
 			translator.setHandler("itemDone", function(obj, item) {
-				var authors = new Array();
-				for (var i in item.creators) {
-				if (!item.creators[i].firstName){
-					names = item.creators[i].lastName.match(/(.*)\s([^\s]+)$/);
-					item.creators[i] = {firstName:names[1], lastName:names[2], creatorType:"author"};
-				} 
+				for (var j=0; j<item.creators.length; j++) {
+					if (!item.creators[j].firstName){
+						names = item.creators[j].lastName.match(/(.*)\s([^\s]+)$/);
+						item.creators[j] = {firstName:names[1], lastName:names[2], creatorType:"author"};
+					} 
 				}
 				item.complete();
 			});

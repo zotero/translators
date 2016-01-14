@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-03-12 21:40:16"
+	"lastUpdated": "2015-05-20 00:05:55"
 }
 
 function detectImport() {
@@ -32,7 +32,7 @@ function detectImport() {
 function doImport() {
 	var text = "";
 	var line;
-	while (line = Zotero.read()) {
+	while ((line = Zotero.read()) !== false) {
 		text += line;
 	}
 	//call MARC translator
@@ -52,6 +52,7 @@ function doImport() {
 			//create one new item per record
 			var record = new marc.record();
 			var newItem = new Zotero.Item();
+			record.leader = ZU.xpathText(records[i], "./marc:leader", ns);
 			var fields = ZU.xpath(records[i], "./marc:datafield", ns);
 			for (var j in fields) {
 				//go through every datafield (corresponds to a MARC field)
@@ -79,13 +80,25 @@ var testCases = [
 		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!-- edited with XML Spy v4.3 U (http://www.xmlspy.com) by Morgan Cundiff (Library of Congress) -->\n<marc:collection xmlns:marc=\"http://www.loc.gov/MARC21/slim\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.loc.gov/MARC21/slim\nhttp://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd\">\n    <marc:record>\n\t\t<marc:leader>00925njm  22002777a 4500</marc:leader>\n\t\t<marc:controlfield tag=\"001\">5637241</marc:controlfield>\n\t\t<marc:controlfield tag=\"003\">DLC</marc:controlfield>\n\t\t<marc:controlfield tag=\"005\">19920826084036.0</marc:controlfield>\n\t\t<marc:controlfield tag=\"007\">sdubumennmplu</marc:controlfield>\n\t\t<marc:controlfield tag=\"008\">910926s1957    nyuuun              eng  </marc:controlfield>\n\t\t<marc:datafield tag=\"010\" ind1=\" \" ind2=\" \">\n\t\t\t<marc:subfield code=\"a\">   91758335 </marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"028\" ind1=\"0\" ind2=\"0\">\n\t\t\t<marc:subfield code=\"a\">1259</marc:subfield>\n\t\t\t<marc:subfield code=\"b\">Atlantic</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"040\" ind1=\" \" ind2=\" \">\n\t\t\t<marc:subfield code=\"a\">DLC</marc:subfield>\n\t\t\t<marc:subfield code=\"c\">DLC</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"050\" ind1=\"0\" ind2=\"0\">\n\t\t\t<marc:subfield code=\"a\">Atlantic 1259</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"245\" ind1=\"0\" ind2=\"4\">\n\t\t\t<marc:subfield code=\"a\">The Great Ray Charles</marc:subfield>\n\t\t\t<marc:subfield code=\"h\">[sound recording].</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"260\" ind1=\" \" ind2=\" \">\n\t\t\t<marc:subfield code=\"a\">New York, N.Y. :</marc:subfield>\n\t\t\t<marc:subfield code=\"b\">Atlantic,</marc:subfield>\n\t\t\t<marc:subfield code=\"c\">[1957?]</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"300\" ind1=\" \" ind2=\" \">\n\t\t\t<marc:subfield code=\"a\">1 sound disc :</marc:subfield>\n\t\t\t<marc:subfield code=\"b\">analog, 33 1/3 rpm ;</marc:subfield>\n\t\t\t<marc:subfield code=\"c\">12 in.</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"511\" ind1=\"0\" ind2=\" \">\n\t\t\t<marc:subfield code=\"a\">Ray Charles, piano &amp; celeste.</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"505\" ind1=\"0\" ind2=\" \">\n\t\t\t<marc:subfield code=\"a\">The Ray -- My melancholy baby -- Black coffee -- There's no you -- Doodlin' -- Sweet sixteen bars -- I surrender dear -- Undecided.</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"500\" ind1=\" \" ind2=\" \">\n\t\t\t<marc:subfield code=\"a\">Brief record.</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"650\" ind1=\" \" ind2=\"0\">\n\t\t\t<marc:subfield code=\"a\">Jazz</marc:subfield>\n\t\t\t<marc:subfield code=\"y\">1951-1960.</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"650\" ind1=\" \" ind2=\"0\">\n\t\t\t<marc:subfield code=\"a\">Piano with jazz ensemble.</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"700\" ind1=\"1\" ind2=\" \">\n\t\t\t<marc:subfield code=\"a\">Charles, Ray,</marc:subfield>\n\t\t\t<marc:subfield code=\"d\">1930-</marc:subfield>\n\t\t\t<marc:subfield code=\"4\">prf</marc:subfield>\n\t\t</marc:datafield>\n\t</marc:record>\n\t<marc:record>\n\t\t<marc:leader>01832cmma 2200349 a 4500</marc:leader>\n\t\t<marc:controlfield tag=\"001\">12149120</marc:controlfield>\n\t\t<marc:controlfield tag=\"005\">20001005175443.0</marc:controlfield>\n\t\t<marc:controlfield tag=\"007\">cr |||</marc:controlfield>\n\t\t<marc:controlfield tag=\"008\">000407m19949999dcu    g   m        eng d</marc:controlfield>\n\t\t<marc:datafield tag=\"906\" ind1=\" \" ind2=\" \">\n\t\t\t<marc:subfield code=\"a\">0</marc:subfield>\n\t\t\t<marc:subfield code=\"b\">ibc</marc:subfield>\n\t\t\t<marc:subfield code=\"c\">copycat</marc:subfield>\n\t\t\t<marc:subfield code=\"d\">1</marc:subfield>\n\t\t\t<marc:subfield code=\"e\">ncip</marc:subfield>\n\t\t\t<marc:subfield code=\"f\">20</marc:subfield>\n\t\t\t<marc:subfield code=\"g\">y-gencompf</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"925\" ind1=\"0\" ind2=\" \">\n\t\t\t<marc:subfield code=\"a\">undetermined</marc:subfield>\n\t\t\t<marc:subfield code=\"x\">web preservation project (wpp)</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"955\" ind1=\" \" ind2=\" \">\n\t\t\t<marc:subfield code=\"a\">vb07 (stars done) 08-19-00 to HLCD lk00; AA3s lk29 received for subject Aug 25, 2000; to DEWEY 08-25-00; aa11 08-28-00</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"010\" ind1=\" \" ind2=\" \">\n\t\t\t<marc:subfield code=\"a\">   00530046 </marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"035\" ind1=\" \" ind2=\" \">\n\t\t\t<marc:subfield code=\"a\">(OCoLC)ocm44279786</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"040\" ind1=\" \" ind2=\" \">\n\t\t\t<marc:subfield code=\"a\">IEU</marc:subfield>\n\t\t\t<marc:subfield code=\"c\">IEU</marc:subfield>\n\t\t\t<marc:subfield code=\"d\">N@F</marc:subfield>\n\t\t\t<marc:subfield code=\"d\">DLC</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"042\" ind1=\" \" ind2=\" \">\n\t\t\t<marc:subfield code=\"a\">lccopycat</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"043\" ind1=\" \" ind2=\" \">\n\t\t\t<marc:subfield code=\"a\">n-us-dc</marc:subfield>\n\t\t\t<marc:subfield code=\"a\">n-us---</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"050\" ind1=\"0\" ind2=\"0\">\n\t\t\t<marc:subfield code=\"a\">F204.W5</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"082\" ind1=\"1\" ind2=\"0\">\n\t\t\t<marc:subfield code=\"a\">975.3</marc:subfield>\n\t\t\t<marc:subfield code=\"2\">13</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"245\" ind1=\"0\" ind2=\"4\">\n\t\t\t<marc:subfield code=\"a\">The White House</marc:subfield>\n\t\t\t<marc:subfield code=\"h\">[computer file].</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"256\" ind1=\" \" ind2=\" \">\n\t\t\t<marc:subfield code=\"a\">Computer data.</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"260\" ind1=\" \" ind2=\" \">\n\t\t\t<marc:subfield code=\"a\">Washington, D.C. :</marc:subfield>\n\t\t\t<marc:subfield code=\"b\">White House Web Team,</marc:subfield>\n\t\t\t<marc:subfield code=\"c\">1994-</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"538\" ind1=\" \" ind2=\" \">\n\t\t\t<marc:subfield code=\"a\">Mode of access: Internet.</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"500\" ind1=\" \" ind2=\" \">\n\t\t\t<marc:subfield code=\"a\">Title from home page as viewed on Aug. 19, 2000.</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"520\" ind1=\"8\" ind2=\" \">\n\t\t\t<marc:subfield code=\"a\">Features the White House. Highlights the Executive Office of the President, which includes senior policy advisors and offices responsible for the President's correspondence and communications, the Office of the Vice President, and the Office of the First Lady. Posts contact information via mailing address, telephone and fax numbers, and e-mail. Contains the Interactive Citizens' Handbook with information on health, travel and tourism, education and training, and housing. Provides a tour and the history of the White House. Links to White House for Kids.</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"610\" ind1=\"2\" ind2=\"0\">\n\t\t\t<marc:subfield code=\"a\">White House (Washington, D.C.)</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"610\" ind1=\"1\" ind2=\"0\">\n\t\t\t<marc:subfield code=\"a\">United States.</marc:subfield>\n\t\t\t<marc:subfield code=\"b\">Executive Office of the President.</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"610\" ind1=\"1\" ind2=\"0\">\n\t\t\t<marc:subfield code=\"a\">United States.</marc:subfield>\n\t\t\t<marc:subfield code=\"b\">Office of the Vice President.</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"610\" ind1=\"1\" ind2=\"0\">\n\t\t\t<marc:subfield code=\"a\">United States.</marc:subfield>\n\t\t\t<marc:subfield code=\"b\">Office of the First Lady.</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"710\" ind1=\"2\" ind2=\" \">\n\t\t\t<marc:subfield code=\"a\">White House Web Team.</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"856\" ind1=\"4\" ind2=\"0\">\n\t\t\t<marc:subfield code=\"u\">http://www.whitehouse.gov</marc:subfield>\n\t\t</marc:datafield>\n\t\t<marc:datafield tag=\"856\" ind1=\"4\" ind2=\"0\">\n\t\t\t<marc:subfield code=\"u\">http://lcweb.loc.gov/staff/wpp/whitehouse.html</marc:subfield>\n\t\t\t<marc:subfield code=\"z\">Web site archive</marc:subfield>\n\t\t</marc:datafield>\n\t</marc:record>\n</marc:collection>",
 		"items": [
 			{
-				"itemType": "book",
+				"itemType": "audioRecording",
+				"title": "The Great Ray Charles",
 				"creators": [
 					{
 						"firstName": "Ray",
 						"lastName": "Charles",
-						"creatorType": "editor"
+						"creatorType": "performer"
 					}
+				],
+				"date": "1957",
+				"audioRecordingFormat": "sound recording",
+				"callNumber": "Atlantic 1259",
+				"label": "Atlantic",
+				"place": "New York, N.Y",
+				"attachments": [],
+				"tags": [
+					"1951-1960",
+					"Jazz",
+					"Piano with jazz ensemble"
 				],
 				"notes": [
 					{
@@ -95,46 +108,39 @@ var testCases = [
 						"note": "The Ray -- My melancholy baby -- Black coffee -- There's no you -- Doodlin' -- Sweet sixteen bars -- I surrender dear -- Undecided"
 					}
 				],
-				"tags": [
-					"Jazz",
-					"1951-1960",
-					"Piano with jazz ensemble"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "The Great Ray Charles",
-				"place": "New York, N.Y",
-				"publisher": "Atlantic",
-				"date": "1957",
-				"numPages": "1",
-				"callNumber": "Atlantic 1259",
-				"medium": "sound recording"
+				"seeAlso": []
 			},
 			{
 				"itemType": "book",
+				"title": "The White House",
 				"creators": [
 					{
 						"lastName": "White House Web Team",
+						"creatorType": "editor",
 						"fieldMode": true
 					}
+				],
+				"date": "1994",
+				"abstractNote": "Features the White House. Highlights the Executive Office of the President, which includes senior policy advisors and offices responsible for the President's correspondence and communications, the Office of the Vice President, and the Office of the First Lady. Posts contact information via mailing address, telephone and fax numbers, and e-mail. Contains the Interactive Citizens' Handbook with information on health, travel and tourism, education and training, and housing. Provides a tour and the history of the White House. Links to White House for Kids",
+				"callNumber": "F204.W5",
+				"place": "Washington, D.C",
+				"publisher": "White House Web Team",
+				"attachments": [],
+				"tags": [
+					"Executive Office of the President",
+					"Office of the First Lady",
+					"Office of the Vice President",
+					"United States",
+					"United States",
+					"United States",
+					"White House (Washington, D.C.)"
 				],
 				"notes": [
 					{
 						"note": "Title from home page as viewed on Aug. 19, 2000"
-					},
-					{
-						"note": "Features the White House. Highlights the Executive Office of the President, which includes senior policy advisors and offices responsible for the President's correspondence and communications, the Office of the Vice President, and the Office of the First Lady. Posts contact information via mailing address, telephone and fax numbers, and e-mail. Contains the Interactive Citizens' Handbook with information on health, travel and tourism, education and training, and housing. Provides a tour and the history of the White House. Links to White House for Kids"
 					}
 				],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "The White House",
-				"place": "Washington, D.C",
-				"publisher": "White House Web Team",
-				"date": "1994",
-				"callNumber": "F204.W5",
-				"medium": "computer file"
+				"seeAlso": []
 			}
 		]
 	},
@@ -144,20 +150,25 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Active ageing and solidarity between generations: a statistical portrait of the European Union 2012",
 				"creators": [
 					{
 						"lastName": "Statistical Office of the European Communities",
+						"creatorType": "editor",
 						"fieldMode": true
 					}
 				],
-				"notes": [
-					{
-						"note": "Theme: Population and social conditions Mode of access : World Wide Web (available in electronic format only) Description based on the Internet version on the World Wide Web"
-					},
-					{
-						"note": "Provides details in relation to population ageing and setting the scene as regards the dynamics of demographic change, and details the past, present and projected future structure of the EU's population. Presents information in relation to the demand for healthcare services, as well as the budgetary implications facing governments as their populations continue to age. Contains information relating to the active participation of older generations within society, with a particular focus on inter-generational issues and also includes information on the leisure pursuits and social activities undertaken by older persons"
-					}
-				],
+				"date": "2012",
+				"ISBN": "9789279215070",
+				"abstractNote": "Provides details in relation to population ageing and setting the scene as regards the dynamics of demographic change, and details the past, present and projected future structure of the EU's population. Presents information in relation to the demand for healthcare services, as well as the budgetary implications facing governments as their populations continue to age. Contains information relating to the active participation of older generations within society, with a particular focus on inter-generational issues and also includes information on the leisure pursuits and social activities undertaken by older persons",
+				"callNumber": "WWW ACCESS ONLY",
+				"edition": "2012 ed",
+				"numPages": "141",
+				"place": "Luxembourg",
+				"publisher": "Publications Office of the European Union",
+				"series": "Statistical books",
+				"url": "http://www.ilo.org/public/libdoc/igo/2011/468303.pdf",
+				"attachments": [],
 				"tags": [
 					"EU countries",
 					"EU pub",
@@ -190,18 +201,12 @@ var testCases = [
 					"travailleur retraité",
 					"vieillissement de la population"
 				],
-				"seeAlso": [],
-				"attachments": [],
-				"ISBN": "9789279215070",
-				"edition": "2012 ed",
-				"place": "Luxembourg",
-				"numPages": "141",
-				"series": "Statistical books",
-				"callNumber": "WWW ACCESS ONLY",
-				"url": "http://www.ilo.org/public/libdoc/igo/2011/468303.pdf",
-				"title": "Active ageing and solidarity between generations a statistical portrait of the European Union 2012",
-				"publisher": "Publications Office of the European Union",
-				"date": "2012"
+				"notes": [
+					{
+						"note": "Theme: Population and social conditions Mode of access : World Wide Web (available in electronic format only) Description based on the Internet version on the World Wide Web"
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	}

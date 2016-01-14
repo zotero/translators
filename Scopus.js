@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-04-14 16:54:39"
+	"lastUpdated": "2015-12-16 08:21:08"
 }
 
 /*
@@ -49,9 +49,9 @@ function getBoxes(doc) {
 }
 
 function doWeb(doc, url) {
-	var articles = new Array();
+	var articles = [];
 	if (detectWeb(doc, url) == "multiple") {
-		items = new Object();
+	    items = {};
 		var boxes = getBoxes(doc);
 		var box;
 		while (box = boxes.iterateNext()) {
@@ -62,7 +62,7 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(articles, scrape);
+			ZU.processDocuments(articles, scrape);
 		});
 	} else {
 		scrape(doc, url);
@@ -70,17 +70,16 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	//DOI, ISBN, language, and ISSN are not in the export data - get them from the page
-	var doi = ZU.xpathText(doc, '//div[contains(@class, "formatSourceExtended")]/span[strong[contains(text(), "DOI:")]]');
+	//ISBN, language, and ISSN are not in the export data - get them from the page
 	var ISSN = ZU.xpathText(doc, '//div[contains(@class, "formatSourceExtended")]/span[strong[contains(text(), "ISSN:")]]');
 	var ISBN = ZU.xpathText(doc, '//div[contains(@class, "formatSourceExtended")]/span[strong[contains(text(), "ISBN:")]]');
 	var language = ZU.xpathText(doc, '//div[contains(@class, "formatSourceExtended")]/span[strong[contains(text(), "Original language:")]]');
 	var prefix= url.match(/^https?:\/\//)[0];
 	var get = prefix + doc.location.host + 
-		'/onclick/export.url?oneClickExport=%7b%22Format%22%3a%22RIS%22%2c%22View%22%3a%22CiteAbsKeyws%22%7d&origin=recordpage&eid=';
+		'/onclick/export.uri?oneClickExport=%7b%22Format%22%3a%22RIS%22%2c%22View%22%3a%22CiteAbsKeyws%22%7d&origin=recordpage&eid=';
 		//this is the encoded version of oneClickExport={"Format":"RIS","View":"CiteAbsKeyws"} but since it's always the same, no need to run encodeURL
 	var eid = getEID(url)
-	var rislink = get + eid;	
+	var rislink = get + eid + "&zone=recordPageHeader&outputType=export&txGid=0";
 	Z.debug(rislink)
 	Zotero.Utilities.HTTP.doGet(rislink, function(text) {
 		// load translator for RIS
@@ -91,7 +90,12 @@ function scrape(doc, url) {
 			text = text.replace(/T2  -/, "N1  -" ).replace(/JF  -/, "T2  -");
 			
 		}
-			var translator = Zotero.loadTranslator("import");
+		//Scopus places a stray TY right above the DB field
+		text = text.replace(/TY.+\nDB/, "DB")
+		//Some Journal Articles are oddly SER
+		text = text.replace(/TY  - SER/, "TY  - JOUR")
+		//Z.debug(text)
+		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
 		translator.setHandler("itemDone", function(obj, item) {
@@ -103,8 +107,17 @@ function scrape(doc, url) {
 			}
 			item.notes = notes;
 			item.url = "";
+			for (var i in item.creators){
+				if (item.creators[i].fieldMode = 1 && item.creators[i].lastName.indexOf(" ")!=-1){
+					item.creators[i].firstName = item.creators[i].lastName.match(/\s(.+)/)[1];
+					item.creators[i].lastName = item.creators[i].lastName.replace(/\s.+/, "");
+					item.creators[i].fieldMode = 2
+				}
+			}
 			item.attachments.push({document: doc, title: "SCOPUS Snapshot", mimeType: "text/html"});
-			if (doi) item.DOI = doi.replace(/DOI:/, "").trim();
+			if (item.DOI && item.itemType != "journalArticle"){
+				item.extra = "DOI: " + item.DOI
+			}
 			if (ISSN) item.ISSN = ZU.cleanISSN(ISSN);
 			if (ISBN) item.ISBN = ZU.cleanISBN(ISBN);
 			if (language) item.language = language.replace(/Original language:/, "").trim();

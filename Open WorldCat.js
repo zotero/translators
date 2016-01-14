@@ -2,14 +2,14 @@
 	"translatorID": "c73a4a8c-3ef1-4ec8-8229-7531ee384cc4",
 	"label": "Open WorldCat",
 	"creator": "Simon Kornblith, Sebastian Karcher",
-	"target": "^https?://[^/]+\\.worldcat\\.org",
+	"target": "^https?://[^/]+\\.worldcat\\.org/",
 	"minVersion": "3.0.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-04-10 23:30:53"
+	"lastUpdated": "2015-07-21 00:46:10"
 }
 
 /**
@@ -67,18 +67,18 @@ function getFirstContextObj(doc) {
 }
 
 function detectWeb(doc, url) {
-	var results = getSearchResults(doc);
+	//distinguish from Worldcat Discovery
+	if (doc.body.id == "worldcat") {
+		if(getSearchResults(doc).length) {
+			return "multiple";
+		}
 
-	//single result
-	if(results.length) {
-		return "multiple";
+		var co = getFirstContextObj(doc);
+		if(!co) return false;
+
+		// generate item and return type
+		return generateItem(doc, co).itemType;
 	}
-
-	var co = getFirstContextObj(doc);
-	if(!co) return false;
-
-	// generate item and return type
-	return generateItem(doc, co).itemType;
 }
 
 /**
@@ -95,15 +95,27 @@ function extractOCLCID(url) {
  *
  */
 var baseURL = ''; //we need to set this when calling from doSearch
-function scrape(oclcID, itemData) {
-	var risURL = baseURL + "/oclc/" + oclcID + "?page=endnotealt&client=worldcat.org-detailed_record";
+function scrape(ids, data) {
+	var oclcID = ids.shift(),
+		itemData = (data || []).shift();
 	
-	ZU.doGet(risURL, function (text) {
-		//Z.debug(text);
+	if (!oclcID) return;
+	
+	var risURL = baseURL + "/oclc/" + oclcID
+		+ "?client=worldcat.org-detailed_record&page=endnote";
+	var tryAgain = true;
+	ZU.doGet(risURL + 'alt' /* non-latin RIS first **/, function parseRIS(text) {
+		// Sometimes non-latin RIS is blank
+		if (tryAgain && !/^TY\s\s?-/m.test(text)) {
+			Z.debug("WorldCat did not return valid RIS. Trying Latin RIS.");
+			tryAgain = false;
+			ZU.doGet(risURL, parseRIS);
+			return;
+		}
 		
 		//2013-05-28 RIS export currently has messed up authors
 		// e.g. A1  - Gabbay, Dov M., Woods, John Hayden., Hartmann, Stephan, 
-		text = text.replace(/^((?:A1|ED)\s+-\s+)(.+)/mg, function(m, tag, value) {
+		text = text.replace(/^((?:A[123U]|ED)\s+-\s+)(.+)/mg, function(m, tag, value) {
 			var authors = value.replace(/[.,\s]+$/, '')
 					.split(/[.,],/);
 			var replStr = '';
@@ -114,11 +126,14 @@ function scrape(oclcID, itemData) {
 			}
 			return replStr.trim();
 		});
-		//conference proceedings exported as CONF, but fields match BOOK better
-		text = text.replace(/TY\s+-\s+CONF\s+[\s\S]+\n\s*ER\s+-/g, function(m) {
-			return m.replace(/^TY\s+-\s+CONF\s*$/mg, 'TY  - BOOK')
-				//authors are actually editors
-				.replace(/^A1\s+-\s+/mg, 'A3  - ');
+		
+		// Conference proceedings should be imported as book (below), but authors
+		// are actually editors
+		text = text.replace(/^TY\s+-\s+CONF\s[\s\S]*?^ER\s+-\s/mg, function(m) {
+			if (!/^ED\s+-/m.test(m)) {
+				m = m.replace(/^A[U1](\s+-)/mg, 'ED$1');
+			}
+			return m;
 		})
 		
 		Zotero.debug("Importing corrected RIS: \n" + text);
@@ -151,12 +166,18 @@ function scrape(oclcID, itemData) {
 			
 			item.complete();
 		});
+		
 		translator.getTranslatorObject(function(trans) {
 			trans.options.defaultItemType = 'book'; //if not supplied, default to book
-			trans.options.typeMap = {'ELEC': 'book'}; //ebooks should be imported as books
-
+			trans.options.typeMap = {
+				'ELEC': 'book', //ebooks should be imported as books
+				'CONF': 'book' // proceedings rather than papers
+			};
+			
 			trans.doImport();
 		});
+		
+		scrape(ids, data);
 	});
 }
 
@@ -194,39 +215,131 @@ function doWeb(doc, url) {
 
 		Zotero.selectItems(items, function(items) {
 			if (!items) return true;
-
+			
+			var ids = [], data = [];
 			for (var i in items) {
-				scrape(i, itemData[i]);
+				ids.push(i);
+				data.push(itemData[i]);
 			}
+			
+			scrape(ids, data);
 		});
 	} else {
 		var oclcID = extractOCLCID(url);
-		if(!oclcID) throw new Error("WorldCat: Failed to extract OCLC ID from URL: " + url);
-		scrape(oclcID);
-	}
-}
-
-function detectSearch(item) {
-	if(item.ISBN && typeof(item.ISBN) == 'string') {
-		return !!ZU.cleanISBN(item.ISBN);
-	}
-}
-
-function doSearch(item) {
-	var ISBN = item.ISBN && ZU.cleanISBN('' + item.ISBN);
-	if(!ISBN) return;
-
-	var url = "http://www.worldcat.org/search?qt=results_page&q=bn%3A"
-		+ encodeURIComponent(ISBN);
-	ZU.processDocuments(url, function (doc) {
-		//we take the first search result and run scrape on it
-		var results = getSearchResults(doc);
-		if (results.length > 0) {
-			baseURL = "http://www.worldcat.org";
-			scrape(extractOCLCID(getTitleNode(results[0]).href));
+		if (!oclcID) {
+			// Seems like some single search results redirect to the item page,
+			// but the URL is still a search URL. Grab cannonical URL from meta tag
+			// to extract the OCLC ID
+			var canonicalURL = ZU.xpath(doc, '/html/head/link[@rel="canonical"][1]')[0];
+			if (canonicalURL) {
+				oclcID = extractOCLCID(canonicalURL.href);
+			}
 		}
+		
+		if(!oclcID) throw new Error("WorldCat: Failed to extract OCLC ID from URL: " + url);
+		scrape([oclcID]);
+	}
+}
+
+function sanitizeInput(items, checkOnly) {
+	if (items.length === undefined || typeof items == 'string') {
+		items = [items];
+	}
+	
+	var cleanItems = [];
+	for (var i=0; i<items.length; i++) {
+		var item = ZU.deepCopy(items[i]),
+			valid = false;
+		if (item.ISBN && typeof item.ISBN == 'string'
+			&& (item.ISBN = ZU.cleanISBN(item.ISBN))
+		) {
+			valid = true;
+		} else {
+			delete item.ISBN;
+		}
+		
+		if (item.identifiers && typeof item.identifiers.oclc == 'string'
+			&& /^\d+$/.test(item.identifiers.oclc.trim())
+		) {
+			valid = true;
+			item.identifiers.oclc = item.identifiers.oclc.trim();
+		} else if (item.identifiers) {
+			delete item.identifiers.oclc;
+		}
+		
+		if (valid) {
+			if (checkOnly) return true;
+			cleanItems.push(item);
+		}
+	}
+	
+	return checkOnly ? !!cleanItems.length : cleanItems;
+}
+
+function detectSearch(items) {
+	return sanitizeInput(items, true);
+}
+
+function doSearch(items) {
+	items = sanitizeInput(items);
+	if (!items.length) {
+		Z.debug("Search query does not contain valid identifiers");
+		return false;
+	}
+	
+	baseURL = "http://www.worldcat.org"; // Translator-global
+	
+	var ids = [], isbns = [];
+	for (var i=0; i<items.length; i++) {
+		if (items[i].identifiers && items[i].identifiers.oclc) {
+			ids.push(items[i].identifiers.oclc);
+			continue;
+		}
+		
+		isbns.push(items[i].ISBN);
+	}
+	
+	fetchIDs(isbns, ids, function(ids) {
+		if (!ids.length) {
+			Z.debug("Could not retrieve any OCLC IDs");
+			Zotero.done(false);
+			return;
+		}
+		scrape(ids);
 	});
 }
+
+function fetchIDs(isbns, ids, callback) {
+	if (!isbns.length) {
+		callback(ids);
+		return;
+	}
+	
+	var isbn = isbns.shift();
+	var url = "http://www.worldcat.org/search?qt=results_page&q=bn%3A"
+		+ encodeURIComponent(isbn);
+	ZU.processDocuments(url,
+		function (doc) {
+			//we take the first search result
+			var results = getSearchResults(doc);
+			if (results.length) {
+				var title = getTitleNode(results[0]);
+				if (title) {
+					var id = extractOCLCID(title.href);
+					if (id) ids.push(id);
+				} else {
+					Z.debug("Could not extract OCLC ID for ISBN " + isbn);
+				}
+			} else {
+				Z.debug("No search results found for ISBN " + isbn);
+			}
+		},
+		function() {
+			fetchIDs(isbns, ids, callback)
+		}
+	);
+}
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -241,6 +354,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Argentina",
 				"creators": [
 					{
 						"lastName": "Whitaker",
@@ -248,16 +362,15 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "Open WorldCat",
+				"date": "1964",
 				"language": "English",
-				"title": "Argentina",
-				"publisher": "Prentice-Hall",
+				"libraryCatalog": "Open WorldCat",
 				"place": "Englewood Cliffs, N.J.",
-				"date": "1964"
+				"publisher": "Prentice-Hall",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -267,6 +380,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "A dynamic systems approach to the development of cognition and action",
 				"creators": [
 					{
 						"lastName": "Thelen",
@@ -279,19 +393,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "Open WorldCat",
-				"language": "English",
-				"url": "http://search.ebscohost.com/login.aspx?direct=true&scope=site&db=nlebk&db=nlabk&AN=1712",
-				"title": "A dynamic systems approach to the development of cognition and action",
-				"publisher": "MIT Press",
-				"place": "Cambridge, Mass.",
 				"date": "1996",
-				"ISBN": "0585030154  9780585030159",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"ISBN": "9780585030159",
+				"language": "English",
+				"libraryCatalog": "Open WorldCat",
+				"place": "Cambridge, Mass.",
+				"publisher": "MIT Press",
+				"url": "http://search.ebscohost.com/login.aspx?direct=true&scope=site&db=nlebk&db=nlabk&AN=1712",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -301,6 +413,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "The Cambridge companion to Adam Smith",
 				"creators": [
 					{
 						"lastName": "Haakonssen",
@@ -308,18 +421,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "Open WorldCat",
-				"language": "English",
-				"title": "The Cambridge companion to Adam Smith",
-				"publisher": "Cambridge University Press",
-				"place": "Cambridge; New York",
 				"date": "2006",
-				"ISBN": "0521770599 0521779243  9780521770590 9780521779241",
-				"abstractNote": "\"Adam Smith is best known as the founder of scientific economics and as an early proponent of the modern market economy. Political economy, however, was only one part of Smith's comprehensive intellectual system. Consisting of a theory of mind and its functions in language, arts, science, and social intercourse, Smith's system was a towering contribution to the Scottish Enlightenment. His ideas on social intercourse, in fact, also served as the basis for a moral theory that provided both historical and theoretical accounts of law, politics, and economics. This companion volume provides an up-to-date examination of all aspects of Smith's thought. Collectively, the essays take into account Smith's multiple contexts - Scottish, British, European, Atlantic, biographical, institutional, political, philosophical - and they draw on all his works, including student notes from his lectures. Pluralistic in approach, the volume provides a contextualist history of Smith, as well as direct philosophical engagement with his ideas.\"--Jacket."
+				"ISBN": "9780521770590 9780521779241",
+				"abstractNote": "\"Adam Smith is best known as the founder of scientific economics and as an early proponent of the modern market economy. Political economy, however, was only one part of Smith's comprehensive intellectual system. Consisting of a theory of mind and its functions in language, arts, science, and social intercourse, Smith's system was a towering contribution to the Scottish Enlightenment. His ideas on social intercourse, in fact, also served as the basis for a moral theory that provided both historical and theoretical accounts of law, politics, and economics. This companion volume provides an up-to-date examination of all aspects of Smith's thought. Collectively, the essays take into account Smith's multiple contexts - Scottish, British, European, Atlantic, biographical, institutional, political, philosophical - and they draw on all his works, including student notes from his lectures. Pluralistic in approach, the volume provides a contextualist history of Smith, as well as direct philosophical engagement with his ideas.\"--Jacket.",
+				"language": "English",
+				"libraryCatalog": "Open WorldCat",
+				"place": "Cambridge; New York",
+				"publisher": "Cambridge University Press",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -329,6 +441,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "From Laṅkā eastwards: the Rāmāyaṇa in the literature and visual arts of Indonesia",
 				"creators": [
 					{
 						"lastName": "Acri",
@@ -346,18 +459,17 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "Open WorldCat",
+				"date": "2011",
+				"ISBN": "9789067183840",
 				"language": "English",
+				"libraryCatalog": "Open WorldCat",
 				"place": "Leiden",
-				"ISBN": "9067183849 9789067183840",
-				"shortTitle": "From Laṅkā eastwards",
-				"title": "From Laṅkā eastwards: the Rāmāyaṇa in the literature and visual arts of Indonesia",
 				"publisher": "KITLV Press",
-				"date": "2011"
+				"shortTitle": "From Laṅkā eastwards",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -367,6 +479,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Newman's relation to modernism",
 				"creators": [
 					{
 						"lastName": "Smith",
@@ -374,18 +487,15 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "Open WorldCat",
-				"language": "English",
-				"url": "http://www.archive.org/details/a626827800smituoft/",
-				"title": "Newman's relation to modernism",
-				"publisher": "s.n.",
-				"place": "London",
 				"date": "1912",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"language": "English",
+				"libraryCatalog": "Open WorldCat",
+				"place": "London",
+				"publisher": "s.n.",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -395,6 +505,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "[Cahokia Mounds replicas]",
 				"creators": [
 					{
 						"lastName": "Grimont",
@@ -412,17 +523,16 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"libraryCatalog": "Open WorldCat",
+				"date": "2000",
+				"ISBN": "9781881563020",
 				"language": "English",
+				"libraryCatalog": "Open WorldCat",
 				"place": "Collinsville, Ill.",
-				"ISBN": "1881563022  9781881563020",
-				"title": "[Cahokia Mounds replicas]",
 				"publisher": "Cahokia Mounds Museum Society]",
-				"date": "2000"
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -457,8 +567,114 @@ var testCases = [
 				"publisher": "MIT Press",
 				"place": "Cambridge, Mass.",
 				"date": "1996",
-				"ISBN": "0585030154  9780585030159",
+				"ISBN": "9780585030159",
 				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"identifiers": {
+				"oclc": "42854423"
+			}
+		},
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Thelen",
+						"firstName": "Esther",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Smith",
+						"firstName": "Linda B",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"libraryCatalog": "Open WorldCat",
+				"language": "English",
+				"url": "http://search.ebscohost.com/login.aspx?direct=true&scope=site&db=nlebk&db=nlabk&AN=1712",
+				"title": "A dynamic systems approach to the development of cognition and action",
+				"publisher": "MIT Press",
+				"place": "Cambridge, Mass.",
+				"date": "1996",
+				"ISBN": "9780585030159",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.worldcat.org/title/navigating-the-trilemma-capital-flows-and-monetary-policy-in-china/oclc/4933578953&referer=brief_results",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Navigating the trilemma: Capital flows and monetary policy in China",
+				"creators": [
+					{
+						"lastName": "Glick",
+						"firstName": "Reuven",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Hutchison",
+						"firstName": "Michael",
+						"creatorType": "author"
+					}
+				],
+				"date": "2009",
+				"ISSN": "1049-0078",
+				"abstractNote": "In recent years China has faced an increasing trilemmahow to pursue an independent domestic monetary policy and limit exchange rate flexibility, while at the same time facing large and growing international capital flows. This paper analyzes the impact of the trilemma on China's monetary policy as the country liberalizes its good and financial markets and integrates with the world economy. It shows how China has sought to insulate its reserve money from the effects of balance of payments inflows by sterilizing through the issuance of central bank liabilities. However, we report empirical results indicating that sterilization dropped precipitously in 2006 in the face of the ongoing massive buildup of international reserves, leading to a surge in reserve money growth. We also estimate a vector error correction model linking the surge in China's reserve money to broad money, real GDP, and the price level. We use this model to explore the inflationary implications of different policy scenarios. Under a scenario of continued rapid reserve money growth (consistent with limited sterilization of foreign exchange reserve accumulation) and strong economic growth, the model predicts a rapid increase in inflation. A model simulation using an extension of the framework that incorporates recent increases in bank reserve requirements also implies a rapid rise in inflation. By contrast, model simulations incorporating a sharp slowdown in economic growth such as that seen in late 2008 and 2009 lead to less inflation pressure even with a substantial buildup in international reserves.",
+				"issue": "3",
+				"language": "English",
+				"libraryCatalog": "Open WorldCat",
+				"pages": "205-224",
+				"publicationTitle": "ASIECO Journal of Asian Economics",
+				"shortTitle": "Navigating the trilemma",
+				"volume": "20",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.worldcat.org/search?q=isbn%3A7112062314",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "中囯园林假山",
+				"creators": [
+					{
+						"lastName": "毛培琳",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "朱志红",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2004",
+				"ISBN": "9787112062317",
+				"language": "Chinese",
+				"libraryCatalog": "Open WorldCat",
+				"place": "北京",
+				"publisher": "中囯建筑工业出版社",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
