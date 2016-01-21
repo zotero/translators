@@ -2,14 +2,14 @@
 	"translatorID": "f3f092bf-ae09-4be6-8855-a22ddd817925",
 	"label": "ACM Digital Library",
 	"creator": "Simon Kornblith, Michael Berkowitz, John McCaffery, and Sebastian Karcher",
-	"target": "^https?://([^/]+\\.)?dl\\.acm\\.org/(results|citation)\\.cfm",
+	"target": "^https?://([^/]+\\.)?dl\\.acm\\.org/(results|citation|author_page)\\.cfm",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-05-21 02:23:33"
+	"lastUpdated": "2016-01-21 13:29:55"
 }
 
 /*
@@ -30,7 +30,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 function detectWeb(doc, url) {
-	if (url.indexOf("/results.cfm") != -1) {
+	if (url.indexOf("/results.cfm") != -1 || url.indexOf("/author_page.cfm") != -1) {
 		return getSearchResults(doc, true) ? 'multiple' : false;
 	} else if (url.indexOf("/citation.cfm") != -1) {
 		return getArticleType(doc);
@@ -56,7 +56,7 @@ function doWeb(doc, url) {
 }
 
 function getSearchResults(doc, checkOnly) {
-	var results = ZU.xpath(doc, '//tr/td/a[@target="_self"]'),
+	var results = ZU.xpath(doc, '//div[@id="results"]//div[@class="title"]/a[@target="_self"]'),
 		items = {},
 		found = false;
 	for (var i=0; i<results.length; i++) {
@@ -372,6 +372,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://dl.acm.org/author_page.cfm?id=81100246710",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
