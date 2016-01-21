@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2015-10-19 18:10:15"
+	"lastUpdated": "2016-01-21 21:22:38"
 }
 
 /*
@@ -98,6 +98,7 @@ function scrapeRIS(doc, url) {
 	var abstract = doc.getElementById('overviewContent') || 
 					ZU.xpath(doc,'//div[@class="articleBody_abstract"]/p')[0] || 
 					ZU.xpath(doc,'//div[@class="articleBody_transAbstract"]/p')[0];
+	var pdfUrl = ZU.xpathText(doc,'//div[@class="fullContentLink"]/a[@class="pdf-link"]/@href');
 
 	var biblRemark = doc.getElementById('biblRemark');
 
@@ -170,6 +171,15 @@ function scrapeRIS(doc, url) {
 					//they don't make sense for citations
 					delete item.journalAbbreviation;
 
+					if (pdfUrl) {
+						Z.debug(pdfUrl);
+						item.attachments.push({
+							url: pdfUrl,
+							title: "Full Text PDF",
+							mimeType: "application/pdf"
+						});
+					}
+
 					item.complete();
 				});
 				trans.translate();
@@ -221,7 +231,12 @@ var testCases = [
 				"shortTitle": "The Midterm Landslide of 2010",
 				"url": "http://www.degruyter.com/view/j/for.2011.8.4_20120105083457/for.2011.8.4/for.2011.8.4.1405/for.2011.8.4.1405.xml?format=INT",
 				"volume": "8",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -252,7 +267,12 @@ var testCases = [
 				"shortTitle": "Comment on Nordhaus",
 				"url": "http://www.degruyter.com/view/j/ev.2010.7.4/ev.2010.7.4.1796/ev.2010.7.4.1796.xml?format=INT",
 				"volume": "7",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -328,7 +348,12 @@ var testCases = [
 				"shortTitle": "Did Magic Matter?",
 				"url": "http://www.degruyter.com/view/j/jah-2013-1-issue-2/jah-2013-0010/jah-2013-0010.xml",
 				"volume": "1",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
