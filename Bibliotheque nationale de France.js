@@ -1,7 +1,7 @@
 {
 	"translatorID": "47533cd7-ccaa-47a7-81bb-71c45e68a74d",
 	"label": "Bibliothèque nationale de France",
-	"creator": "Florian Ziche",
+	"creator": "Florian Ziche, Sylvain Machefert",
 	"target": "^https?://[^/]*catalogue\\.bnf\\.fr",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2013-02-28 14:51:02"
+	"lastUpdated": "2016-01-26 22:29:34"
 }
 
 /*
@@ -476,15 +476,15 @@ var BnfClass = function() {
 
 	/* Get the UNIMARC URL for a given single result page. */
 	this.reformURL = function(url) {
-		return url.replace(/&FormatAffichage=[^&]*/, "")
-			.replace(/&idNoeud=[^&]*/, "") + "&FormatAffichage=4";
+		url = url.replace(".public", ""); // Not sure that would happen as there is no reason user switching to unimarc view before going back to normal
+		return url + ".unimarc";
 	};
 
 	
 	/* Get the results table from a list page, if any. Looks for //table[@class="ListeNotice"]. */
 	this.getResultsTable = function(doc) {
 		try {
-			var xPath = '//table[@class="ListeNotice"]';
+			var xPath = '//div[@class="liste-notices"]';
 			var xPathObject = doc.evaluate(xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 			return xPathObject;
 		} catch(x) {
@@ -495,12 +495,12 @@ var BnfClass = function() {
 
 	/* Get the DC type from the web page. Returns the first DC.type from meta tags. 
 		2010-10-01: No DC meta tags any more... simply test for //td[@class="texteNotice"] cells and return "printed text".
+		2016-01-26: we are using the same solution with the new website but should test more to have a correct icon.
 	*/
 	this.getDCType = function(doc, url) {
 		try {
-//			var xPath = '//head/meta[@name="DC.type" and @lang="eng"]/@content';
-			var xPath = '//td[@class="texteNotice"]';
-			var xPathObject = doc.evaluate(xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();;
+			var xPath = '//div[@class="notice-detail"]//div[@id="type"]';
+			var xPathObject = doc.evaluate(xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 			return xPathObject ? "printed text" : undefined;
 		} catch(x) {
 			Zotero.debug(x.lineNumber + " " + x.message);
@@ -528,34 +528,29 @@ var BnfClass = function() {
 	*/
 	this.getSelectedItems = function(doc) {
 		var items = new Object();
-		
-		var baseUri = /^(https?:\/\/[^\/]+)/.exec(doc.location.href)[1];
-		var cellPath = '//td[@class="mn_partienoticesynthetique"]';
-		var spanPath = './/span';
+		var cellPath = '//div[@class="liste-notices"]/div[@class="notice-item"]';
 		var cells = doc.evaluate(cellPath, doc, null, XPathResult.ANY_TYPE, null);
-		var cell = undefined;
-		var regexLink = /\s*window.location='([^']+)'\s*/;
-		
-		//Cell loop
 		while(cell = cells.iterateNext()) {
-			//Get link
-			var link = cell.attributes.item("onclick").textContent;
-			var url = baseUri + regexLink.exec(link)[1];
-			//Get title
-			var title = "";
-			var span = undefined;
-			var spans = doc.evaluate(spanPath, cell, null, XPathResult.ANY_TYPE, null);
-			//Span loop
-			while(span = spans.iterateNext()) {
-				if(title.length > 0) {
-					title += " – ";
+			var link = doc.evaluate('./div[@class="notice-contenu"]/a', cell, null, XPathResult.ANY_TYPE, null).iterateNext();
+			
+			var title = doc.evaluate('./h2', link, null, XPathResult.ANY_TYPE, null).iterateNext(); 
+			if (title) {
+				title = ZU.trim(title.textContent);
+			} else 	{
+				// 2016-01-26 : Sometimes there is no H2, we then need to get everything, example when searching for : 
+				// "Se souvenir de Tonnay-Charente"
+				title = ZU.trim(link.textContent);
 			}
-				title += Zotero.Utilities.trim(span.textContent);
+			
+			var documentYear = doc.evaluate('./div[@class="notice-ordre"]', cell, null, XPathResult.ANY_TYPE, null).iterateNext();
+			if ( documentYear ) {
+				title += " / " + documentYear.textContent;
 			}
+			var url = link.href;
 			items[url] = title;
 		}
-
-		return items;        
+		
+		return items;
 	};
 
 	
@@ -588,16 +583,15 @@ var BnfClass = function() {
 		translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
 		translator.getTranslatorObject( function (obj) {
 			 var record = new obj.record();
-		
 			/* Get table cell containing MARC code. */
-			var elmts = newDoc.evaluate('//td[@class="texteNotice"]/text()',
+			var elmts = newDoc.evaluate('//div[@class="notice-detail"]/div/div[@class="zone"]',
 					newDoc, null, XPathResult.ANY_TYPE, null);
 			/* Line loop. */
 			var elmt, tag, content;
 			var ind = "";
 	
 			while(elmt = elmts.iterateNext()) {
-				var line = Zotero.Utilities.superCleanString(elmt.nodeValue);
+				var line = Zotero.Utilities.superCleanString(elmt.textContent);
 				if(line.length == 0) {
 					continue;
 				}
@@ -648,7 +642,7 @@ var Bnf = new BnfClass();
 
 
 function detectWeb(doc, url) {
-	var resultRegexp = /ID=[0-9]+/i;
+	var resultRegexp = /ark:\/12148\/cb[0-9]+/i;
 	//Single result ?
 	if(resultRegexp.test(url)) {
 		var type = Bnf.getDCType(doc, url);
