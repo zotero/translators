@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-06-09 07:32:25"
+	"lastUpdated": "2016-01-30 18:30:13"
 }
 
 function detectWeb(doc, url) {
@@ -141,9 +141,14 @@ function scrape (doc, url) {
 			}
 			if (pdf) {
 				ZU.doGet(pdf, function (src) {
-					var m = /<frame src="(.*\.pdf.*)"/.exec(src);
-					if (m) item.attachments = [{
+					var m = /<frame src="(.*\.pdf.*)"|<meta HTTP-EQUIV="REFRESH" content="0; url=(.*\.pdf.*)"/.exec(src);
+					if (m[1]) item.attachments = [{
 						url: m[1],
+						title: "IEEE Xplore Full Text PDF",
+						mimeType: "application/pdf"
+					}, {url: url, title: "IEEE Xplore Abstract Record", mimeType: "text/html"}];
+					else if (m[2]) item.attachments = [{
+						url: m[2],
 						title: "IEEE Xplore Full Text PDF",
 						mimeType: "application/pdf"
 					}, {url: url, title: "IEEE Xplore Abstract Record", mimeType: "text/html"}];
@@ -355,6 +360,10 @@ var testCases = [
 				"publicationTitle": "IEEE Transactions on Electron Devices",
 				"volume": "52",
 				"attachments": [
+					{
+						"title": "IEEE Xplore Full Text PDF",
+						"mimeType": "application/pdf"
+					},
 					{
 						"title": "IEEE Xplore Abstract Record",
 						"mimeType": "text/html"
