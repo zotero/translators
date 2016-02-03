@@ -2,14 +2,14 @@
 	"translatorID": "136d5c30-d8b1-476f-9564-702a41b6126e",
 	"label": "wiso",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://www\\.wiso-net\\.de/webcgi\\?",
+	"target": "^https?://www\\.wiso-net\\.de/(document/|dosearch\\?)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-11-03 23:58:44"
+	"lastUpdated": "2016-02-04 08:08:19"
 }
 
 /*
@@ -36,19 +36,22 @@
 
 
 function detectWeb(doc, url) {
-	if (url.search(/START=A[246]0/) !== -1) {
+	if (url.search(/document/) !== -1) {
 		if( ZU.xpath(doc, '//a[contains(@class, "boxExport")]').length>0 ) {
 			//single item --> generic fallback = journalArticle
 			return "journalArticle";
 		}
-	} else if ( ZU.xpath(doc, '//a/span[contains(@class, "boxHeader")]').length>0 ) {
+	} else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
 }
 
 
 function scrape(doc, url) {
-	var risUrl = url+"&OHNE_SAVE=1&T_TEMPLATE=ris";
+	var address = ZU.xpathText(doc, '//pre[strong and contains(text(), "https://www.wiso-net.de/document/")]');
+	var docUid = address.substr(address.lastIndexOf('/')+1);
+	var risUrl = "/stream/exportDocuments?docUids="
+		+ docUid + "&dbShortcut=&query=&source=Document&format=Citavi";
 
 	ZU.doGet(risUrl, function(text) {
 		
@@ -145,21 +148,29 @@ function cleanAuthorFields(m, tag, authorStr) {
 	return str.substr(1);
 }
 
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//a[./span[contains(@class,"boxHeader")]]');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.xpathText(rows[i], './span[contains(@class,"boxHeader")]');
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		var items = new Object();
-		var articles = new Array();
-		var rows = ZU.xpath(doc, '//a[./span[@class="boxHeader"]]')
-		for(var i=0; i<rows.length; i++) {
-			var title = ZU.xpathText(rows[i], './span[@class="boxHeader"]');
-			var link = ZU.xpathText(rows[i], './@href');
-			items[link] = title;
-		}
-		Zotero.selectItems(items, function (items) {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
 				return true;
 			}
+			var articles = new Array();
 			for (var i in items) {
 				articles.push(i);
 			}
@@ -168,14 +179,16 @@ function doWeb(doc, url) {
 	} else {
 		scrape(doc, url);
 	}
-}/** BEGIN TEST CASES **/
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.wiso-net.de/webcgi?START=A60&DOKV_DB=ZECO&DOKV_NO=AUIN425053660&DOKV_HS=0&PP=1",
+		"url": "https://www.wiso-net.de/document/ZECO__AUIN425053660",
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Die Technologie fällt nicht vom Himmel",
 				"creators": [
 					{
 						"lastName": "von Michael Ziegler",
@@ -183,33 +196,32 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2014-03-03",
+				"ISSN": "0005-1306",
+				"abstractNote": "Automatisiertes Fahren: Wie verändert dieser Megatrend unsere Fahrzeuge, die Wertschöpfungskette und die Mobilität allgemein? Fünf ausgewiesene Experten beantworten beim »Automobil Industrie« Round-Table-Gespräch die wichtigsten Fragen.",
+				"archive": "powered by GENIOS",
+				"issue": "003",
+				"libraryCatalog": "wiso",
+				"publicationTitle": "AI",
+				"url": "https://www.wiso-net.de/document/AUIN__425053660",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"title": "Die Technologie fällt nicht vom Himmel",
-				"date": "2014-03-03",
-				"publicationTitle": "AI",
-				"ISSN": "0005-1306",
-				"issue": "003",
-				"url": "http://www.wiso-net.de/webcgi?START=A60&DOKV_DB=ZECO&DOKV_NO=AUIN425053660&DOKV_HS=0&PP=1",
-				"abstractNote": "Automatisiertes Fahren: Wie verändert dieser Megatrend unsere Fahrzeuge, die Wertschöpfungskette und die Mobilität allgemein? Fünf ausgewiesene Experten beantworten beim »Automobil Industrie« Round-Table-Gespräch die wichtigsten Fragen.",
-				"archive": "powered by GENIOS",
-				"libraryCatalog": "wiso",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.wiso-net.de/webcgi?START=A60&DOKV_DB=ZWIW&DOKV_NO=BEFO20071105986-E-FIZT-BEFO-DOMA-ZDEE-ETEC&DOKV_HS=0&PP=1",
+		"url": "https://www.wiso-net.de/document/ZWIW__BEFO20071105986-E-FIZT-BEFO-DOMA-ZDEE-ETEC",
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Eigentor für die Stromwirtschaft",
 				"creators": [
 					{
 						"lastName": "Köpke",
@@ -222,48 +234,37 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Energiepolitik",
-					"Energiemarkt",
-					"Preisentwicklung",
-					"Betriebswirtschaft",
-					"Energiehandel",
-					"Energiemanagement",
-					"Energiepolitik",
-					"Europaeische Union",
-					"Preisentwicklung",
-					"Regenerative Energie",
-					"Wettbewerb",
-					"Wirtschaftsrecht",
-					"Zertifizierung"
-				],
-				"seeAlso": [],
+				"date": "2007",
+				"ISSN": "0945-8794",
+				"abstractNote": "Der Stromkonzern E.ON kündigt zum Jahresbeginn 2008 Strompreiserhöhungen von knapp 10 % aufgrund höherer Beschaffungskosten und gestiegener Aufwendungen für erneuerbare Energien an. Diese vermeintliche Rechtfertigung wird widerlegt. Rein rechnerisch ergäben sich lediglich 0,8 % wegen der Brennstoffkosten und 0,2 % wegen der EEG-Umlage (Erneuerbare-Energien-Gesetz). Der angekündigte hohe Sprung lässt sich nicht nachvollziehen. Die Strompreisentwicklung an der Leipziger Strombörse EEX seit 2002 wird grafisch dargestellt. Daraus kann abgeleitet werden, in welchem Maße sich die vier Erzeugungsoligopolisten bereits an der CO2-Einpreisung der kostenlos zugeteilten CO2-Zertifikate bereichert haben. Die Bundesregierung arbeitet an einer Kartellrechtsänderung, aber es bleiben Bedenken, ob die vorgesehenen Regulierungen Wirkung zeigen werden. Denn Regionalversorger und Stadtwerke hängen an der Preispolitik von E.ON und RWE, und wenn der Durchschnitt insgesamt steigt, wird es keine deutlichen Einzelabweichungen nach oben geben.",
+				"archive": "(c) WTI Frankfurt",
+				"language": "Deutsch",
+				"libraryCatalog": "wiso",
+				"pages": "6",
+				"publicationTitle": "Energie und Management",
+				"url": "https://www.wiso-net.de/document/BEFO__20071105986-E-FIZT-BEFO-DOMA-ZDEE-ETEC",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"title": "Eigentor für die Stromwirtschaft",
-				"publicationTitle": "Energie und Management",
-				"ISSN": "0945-8794",
-				"pages": "6",
-				"url": "http://www.wiso-net.de/webcgi?START=A60&DOKV_DB=ZWIW&DOKV_NO=BEFO20071105986-E-FIZT-BEFO-DOMA-ZDEE-ETEC&DOKV_HS=0&PP=1",
-				"abstractNote": "Der Stromkonzern E.ON kündigt zum Jahresbeginn 2008 Strompreiserhöhungen von knapp 10 % aufgrund höherer Beschaffungskosten und gestiegener Aufwendungen für erneuerbare Energien an. Diese vermeintliche Rechtfertigung wird widerlegt. Rein rechnerisch ergäben sich lediglich 0,8 % wegen der Brennstoffkosten und 0,2 % wegen der EEG-Umlage (Erneuerbare-Energien-Gesetz). Der angekündigte hohe Sprung lässt sich nicht nachvollziehen. Die Strompreisentwicklung an der Leipziger Strombörse EEX seit 2002 wird grafisch dargestellt. Daraus kann abgeleitet werden, in welchem Maße sich die vier Erzeugungsoligopolisten bereits an der CO2-Einpreisung der kostenlos zugeteilten CO2-Zertifikate bereichert haben. Die Bundesregierung arbeitet an einer Kartellrechtsänderung, aber es bleiben Bedenken, ob die vorgesehenen Regulierungen Wirkung zeigen werden. Denn Regionalversorger und Stadtwerke hängen an der Preispolitik von E.ON und RWE, und wenn der Durchschnitt insgesamt steigt, wird es keine deutlichen Einzelabweichungen nach oben geben.",
-				"language": "Deutsch",
-				"archive": "BEFO (C) WTI Frankfurt",
-				"date": "2007",
-				"libraryCatalog": "wiso",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [
+					"Energiemarkt",
+					"Energiepolitik",
+					"Preisentwicklung"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.wiso-net.de/webcgi?START=A60&DOKV_DB=ZWIW&DOKV_NO=BLISED1E880E5071CB2CCEDB0885805C993A&DOKV_HS=0&PP=1",
+		"url": "https://www.wiso-net.de/document/ZWIW__BLISED1E880E5071CB2CCEDB0885805C993A",
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "How Interorganizational Networks Can Become Path-Dependent: Bargaining Practic es in the Photonic s Industry",
 				"creators": [
 					{
 						"lastName": "Burger",
@@ -276,35 +277,38 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Unternehmensnetzwerk",
-					"Empirische Methode",
-					"Unternehmenskooperation",
-					"Organisationstheorie"
-				],
-				"seeAlso": [],
+				"date": "2014-01-17",
+				"ISSN": "1439-2917",
+				"abstractNote": "The authors investigate whether and how path dependence can develop in interorganizational networks. They focus our analysis on one particular type of network management practices - bargaining practices, which we define as recurrent activities through which network partners agree to identify and distribute their cooperative surplus. They conduct three empirical case studies of regional networks in the photonics industry, using qualitative interviews and content analysis. A major finding is that network bargaining practices can indeed exhibit interorganizational path dependencies. This paper contributes by operationalizing the theory of organizational path dependence and by extending this theory to parsimoniously explain the dynamics of networks.",
+				"archive": "Alle Rechte vorbehalten. (c) GBI-Genios, München",
+				"issue": "1",
+				"language": "Englisch",
+				"libraryCatalog": "wiso",
+				"pages": "73-97",
+				"publicationTitle": "sbr Schmalenbach Business Review",
+				"shortTitle": "How Interorganizational Networks Can Become Path-Dependent",
+				"url": "https://www.wiso-net.de/document/BLIS__ED1E880E5071CB2CCEDB0885805C993A",
+				"volume": "66",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"title": "How Interorganizational Networks Can Become Path-Dependent: Bargaining Practic es in the Photonic s Industry",
-				"date": "2014-01-17",
-				"publicationTitle": "sbr Schmalenbach Business Review",
-				"ISSN": "1439-2917",
-				"volume": "66",
-				"issue": "1",
-				"pages": "73-97",
-				"url": "http://www.wiso-net.de/webcgi?START=A60&DOKV_DB=ZWIW&DOKV_NO=BLISED1E880E5071CB2CCEDB0885805C993A&DOKV_HS=0&PP=1",
-				"abstractNote": "The authors investigate whether and how path dependence can develop in interorganizational networks. They focus our analysis on one particular type of network management practices - bargaining practices, which we define as recurrent activities through which network partners agree to identify and distribute their cooperative surplus. They conduct three empirical case studies of regional networks in the photonics industry, using qualitative interviews and content analysis. A major finding is that network bargaining practices can indeed exhibit interorganizational path dependencies. This paper contributes by operationalizing the theory of organizational path dependence and by extending this theory to parsimoniously explain the dynamics of networks.",
-				"language": "Englisch",
-				"archive": "BLIS (c) GBI-Genios",
-				"libraryCatalog": "wiso",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "How Interorganizational Networks Can Become Path-Dependent"
+				"tags": [
+					"Empirische Methode",
+					"Organisationstheorie",
+					"Unternehmenskooperation",
+					"Unternehmensnetzwerk"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.wiso-net.de/dosearch?explicitSearch=true&q=mannheim&x=0&y=0&dbShortcut=%3A3%3AALLEQUELLEN&searchMask=5461&TI%2CUT%2CDZ%2CBT%2COT%2CSE=&NN%2CAU%2CMM%2CZ2=&CO%2CC2%2CTA%2CKA%2CVA%2CZ1=&CT%2CDE%2CZ4=&BR%2CGW%2CN1%2CN2%2CNC%2CND%2CSC%2CWZ%2CZ5%2CAI=&Z3=&DT_from=&DT_to=&timeFilterType=selected&timeFilter=NONE",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
