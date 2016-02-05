@@ -13,7 +13,7 @@
 	"inRepository": true,
 	"translatorType": 2,
 	"browserSupport": "g",
-	"lastUpdated": "2015-09-03 21:28:32"
+	"lastUpdated": "2016-01-05 23:10:00"
 }
 
 /*
@@ -48,6 +48,7 @@ var recordDelimiter = "\n",
 	fieldWrapperCharacter = '"',
 	replaceNewlinesWith = " ", // Set to `false` for no replacement
 	valueSeparator = "; "; // For multi-value fields, like creators, tags, etc.
+	normalizeDate = true; // Set to `false` if the date should be written as it is
 
 // Exported columns in order of export
 var exportedFields = [
@@ -194,6 +195,16 @@ function getValue(item, field) {
 				notes.push(item.notes[i].note);
 			}
 			value += escapeValue(notes.join(valueSeparator));
+		break;
+		case 'date':
+			if (item.date) {
+				var dateISO = ZU.strToISO(item.date);
+				if (normalizeDate && dateISO)  {
+					value += dateISO;
+				} else {
+					value += item.date;
+				}
+			}
 		break;
 		default:
 			if (item[field] || item.uniqueFields[field]) {
