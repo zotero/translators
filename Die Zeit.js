@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-12-06 21:11:25"
+	"lastUpdated": "2016-02-09 06:45:07"
 }
 
 /*
@@ -130,9 +130,12 @@ function scrape(doc, url){
 			keywords[i].trim()
 		)
 	}
-	
+
+	// if present, use the link to show the whole content on a single page
+	var snapshotNode = ZU.xpath(doc, '//li[@class="article-pager__all"]/a');
+	var snapshotUrl = (snapshotNode.length > 0) ? snapshotNode[0].href : url;
 	newItem.attachments.push({
-		url : url+"?page=all&print=true",
+		url : snapshotUrl,
 		title : "Snapshot", 
 		mimeType : "text/html"
 	}); 
