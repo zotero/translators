@@ -9,39 +9,42 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2016-02-02 13:53:31"
+	"lastUpdated": "2016-02-09 14:04:56"
 }
 
 /*
-    ***** BEGIN LICENSE BLOCK *****
+	***** BEGIN LICENSE BLOCK *****
 
-    Copyright © 2016 Roald Frøsig
+	Copyright © 2016 Roald Frøsig
 
-    This file is part of Zotero.
+	This file is part of Zotero.
 
-    Zotero is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    Zotero is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Affero General Public License for more details.
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
 
-    You should have received a copy of the GNU Affero General Public License
-    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
-    ***** END LICENSE BLOCK *****
+	***** END LICENSE BLOCK *****
 */
 
 function detectWeb(doc, url){
-	if (ZU.xpathText(doc, '//div[@class="wrapper2"]/table[@id="ctl00_MainContent_ResultGrid1"]') && getSelectItems(doc, url).length) {
+	if (
+		ZU.xpathText(doc, '//div[@class="wrapper2"]/table[@id="ctl00_MainContent_ResultGrid1"]')
+	 && getSelectItems(doc, url).length
+	) {
 		return "multiple";
 	} else if (url.indexOf("R0710") != -1) {
 		type = getType(doc, url);
 		return type;
-	} else return false;
+	}
 }
 
 function doWeb(doc, url) {
@@ -65,14 +68,14 @@ function doWeb(doc, url) {
 }
 
 function getSelectItems(doc, url) {
-	if (/(R0900|R0920|R0930)/.test(url)) {
-		var titles = ZU.xpath(doc, '//table[@id="ctl00_MainContent_ResultGrid1"]/tbody/tr[@class!="th"]/td[1]/a[1]');
-	} else if (/(R0210|R0310)/.test(url)) {
+	if (/(R0210|R0310)/.test(url)) {
 		var titles = ZU.xpath(doc, '//table[@id="ctl00_MainContent_ResultGrid1"]/tbody/tr[@class!="th"]/td[2]/a[1]');
 	} else if (/R0700.aspx\\?res/.test(url)) {
 		var titles = ZU.xpath(doc, '//table[@id="ctl00_MainContent_ResultGrid1"]/tbody/tr[@class!="th"]/td[3]/a[1]');
 	} else if (/(R0220|R0415|R0700)/.test(url)) {
 		var titles = ZU.xpath(doc, '//table[@id="ctl00_MainContent_ResultGrid1"]/tbody/tr[@class!="th"]/td[4]/a[1]');
+	} else {
+		var titles = ZU.xpath(doc, '//table[@id="ctl00_MainContent_ResultGrid1"]/tbody/tr[@class!="th"]/td[1]/a[1]');
 	}
 	return titles;
 }
@@ -82,45 +85,42 @@ function scrape(doc, url) {
 	var newItem = new Zotero.Item(type);
 	newItem.title = getTitle(doc, url);
 	newItem.url = url;
+	var kortNavn = getKortNavn(doc, url);
+	var ressort = getRessort(doc, url);
+	if (!/L(BK|OV)/.test(kortNavn.threeLetters)) {
+		newItem.creators[0] = {};
+		newItem.creators[0].creatorType = "author";
+		newItem.creators[0].lastName = ressort.ressort;
+		newItem.creators[0].fieldMode = 1;
+	}
 	if (type=="statute") {
-//		newItem.nameOfAct = newItem.title
-		newItem.codeNumber = getKortNavn(doc, url).id;
-		newItem.publicLawNumber = newItem.codeNumber;
-		newItem.dateEnacted = getKortNavn(doc, url).date;
-		newItem.shortTitle = getRessort(doc, url).shortTitle;
-		if (/L(BK|OV)/.test(newItem.publicLawNumber.substr(0,3))) {
-		} else {
-			newItem = addAuthor (newItem, getRessort(doc, url).ressort);
-		};
+		newItem.publicLawNumber = kortNavn.id;
+		newItem.dateEnacted = kortNavn.date;
+		newItem.shortTitle = ressort.shortTitle;
 	} else if (type=="case") {
-		newItem.caseName = newItem.title
-		newItem = addAuthor (newItem, getRessort(doc, url).ressort);		
-		newItem.docketNumber = getKortNavn(doc, url).id;
-		newItem.dateDecided = getKortNavn(doc, url).date;
-		newItem.shortTitle = getRessort(doc, url).shortTitle;
+		newItem.docketNumber = kortNavn.id;
+		newItem.dateDecided = kortNavn.date;
+		newItem.shortTitle = ressort.shortTitle;
 	} else if (type=="report") {
-		newItem = addAuthor (newItem, getRessort(doc, url).ressort);
-		newItem.date = getRessort(doc, url).pubDate;
+		newItem.date = ressort.pubDate;
 		newItem.institution = "Folketinget";
-		threeLetters = getKortNavn(doc, url).threeLetters;
-		if (threeLetters=="EDP") {
+		if (kortNavn.threeLetters=="EDP") {
 			newItem.seriesTitle = "Folketingets Ombudsmands driftundersøgelser";
-		} else if (threeLetters=="ISP") {
+		} else if (kortNavn.threeLetters=="ISP") {
 			newItem.seriesTitle = "Folketingets Ombudsmands Inspektioner";
-		} else if (threeLetters=="FOU") {
+		} else if (kortNavn.threeLetters=="FOU") {
 			newItem.seriesTitle = "Folketingets Ombudsmands udtalelser";
 		};
-		newItem.reportNumber = getKortNavn(doc, url).id;
+		newItem.reportNumber = kortNavn.id;
 	} else if (type=="bill") {
-		newItem = addAuthor (newItem, getRessort(doc, url).ressort);
-		newItem.billNumber = getKortNavn(doc, url).id;
-		newItem.date = getRessort(doc, url).pubDate;
+		newItem.billNumber = kortNavn.id;
+		newItem.date = ressort.pubDate;
 	}
 	newItem.complete();
 }
 
 function getType (doc, url) {
-	threeLetters = getKortNavn(doc, url).threeLetters;
+	var threeLetters = getKortNavn(doc, url).threeLetters;
 	if (/(DOM|AFG|KEN|UDT)/.test(threeLetters)) {
 		return "case";
 	}
@@ -135,24 +135,26 @@ function getType (doc, url) {
 }
 
 function getTitle (doc, url) {
-	var baseXPath = '//div[@class="wrapper2"]/div/';
-	var xPath1 = baseXPath + 'p[@class="Titel2"]';
-	baseXPath = baseXPath + 'div[@id="INDHOLD"]/';
-	var xPath2 = baseXPath + 'p[@class="Titel"]';
-	var xPath3 = baseXPath + 'font/p[@align="CENTER"]';
-	var xPath4 = baseXPath + 'h1[@class="TITLE"]';
-	var xPath5 = baseXPath + 'center/h1[@class="TITLE"]';
-	var title = ZU.xpathText(doc, xPath1) || ZU.xpathText(doc, xPath2) || ZU.xpathText(doc, xPath3) || ZU.xpathText(doc, xPath4) || ZU.xpathText(doc, xPath5);
+	var title = ZU.xpathText(doc, '//div[@class="wrapper2"]/div/p[@class="Titel2"]')
+	 || ZU.xpathText(doc, '//div[@class="wrapper2"]/div/div[@id="INDHOLD"]/p[@class="Titel"]') 
+	 || ZU.xpathText(doc, '//div[@class="wrapper2"]/div/div[@id="INDHOLD"]/font/p[@align="CENTER"]') 
+	 || ZU.xpathText(doc, '//div[@class="wrapper2"]/div/div[@id="INDHOLD"]/h1[@class="TITLE"]') 
+	 || ZU.xpathText(doc, '//div[@class="wrapper2"]/div/div[@id="INDHOLD"]/center/h1[@class="TITLE"]');
+// If the xpaths above fail to find the title, we will scrape the title from the <head> element.
+	if (title) {
+		title = ZU.trimInternal(title);
+	}
 	if (!title) {
-		var myXPath = '/html/head/title';
-		title = ZU.xpathText(doc, myXPath);
+		Z.debug("L157");
+		title = doc.title;
+// The <title>-element consist of three parts: a short title (if one exists); the title of the document; and "- retsinformation.dk".
+// The following lines extracts the document title
 		title = title.substring(0,title.lastIndexOf("-"));
-		if (getRessort(doc, url)[0]) {
-			title = title.substring(getRessort(doc, url)[0].length+4,title.length);
+		if (getRessort(doc, url).shortTitle) {
+			title = title.substr(getRessort(doc, url).shortTitle.length+2);
 		};
 	}; 
-	title = ZU.trimInternal(title);
-	return title;
+	return ZU.trimInternal(title);
 }
 
 function getKortNavn (doc, url) {
@@ -170,22 +172,17 @@ function getKortNavn (doc, url) {
 function getRessort (doc, url) {
 	var myXPath = '//div[@class="ressort"]';
 	var fodder = ZU.xpathText(doc, myXPath);
+// the 'fodder' string here consists of three parts:
+//  - a short title in parentheses (if one exists)
+//  - the publication date in the form dd-mm-yyyy
+//  - the 'ressort', i.e. the ministry responsible for the document
 	fodder = fodder.trim();
 	var item = new Object();
 	if (fodder.charAt(0) == "(") {
-		item.shortTitle = fodder.substring(1,fodder.lastIndexOf(")")-1);
+		item.shortTitle = fodder.substring(1,fodder.lastIndexOf(")"));
 	}
 	var datePosition = fodder.search(/\d{2}\-\d{2}\-\d{4}/);
+	item.pubDate = fodder.substr(datePosition,10).replace(/-/g,"/");
 	item.ressort = fodder.substr(datePosition+10);
-	item.pubDate = fodder.substr(datePosition,10);
-	return item;
-}
-
-
-function addAuthor (item, author) {
-	item.creators[0] = {};
-	item.creators[0].creatorType = "author";
-	item.creators[0].lastName = author;
-	item.creators[0].fieldMode = 1;
 	return item;
 }
