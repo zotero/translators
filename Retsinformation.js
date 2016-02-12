@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2016-02-09 14:04:56"
+	"lastUpdated": "2016-02-12 10:47:21"
 }
 
 /*
@@ -90,7 +90,11 @@ function scrape(doc, url) {
 	if (!/L(BK|OV)/.test(kortNavn.threeLetters)) {
 		newItem.creators[0] = {};
 		newItem.creators[0].creatorType = "author";
-		newItem.creators[0].lastName = ressort.ressort;
+		if (/(EDP|ISP|FOU)/.test(kortNavn.threeLetters)) {
+			newItem.creators[0].lastName = "Folketingets Ombudsmand";
+		} else {
+			newItem.creators[0].lastName = ressort.ressort;		
+		}
 		newItem.creators[0].fieldMode = 1;
 	}
 	if (type=="statute") {
@@ -101,17 +105,8 @@ function scrape(doc, url) {
 		newItem.docketNumber = kortNavn.id;
 		newItem.dateDecided = kortNavn.date;
 		newItem.shortTitle = ressort.shortTitle;
-	} else if (type=="report") {
+	} else if (type=="webpage") {
 		newItem.date = ressort.pubDate;
-		newItem.institution = "Folketinget";
-		if (kortNavn.threeLetters=="EDP") {
-			newItem.seriesTitle = "Folketingets Ombudsmands driftundersøgelser";
-		} else if (kortNavn.threeLetters=="ISP") {
-			newItem.seriesTitle = "Folketingets Ombudsmands Inspektioner";
-		} else if (kortNavn.threeLetters=="FOU") {
-			newItem.seriesTitle = "Folketingets Ombudsmands udtalelser";
-		};
-		newItem.reportNumber = kortNavn.id;
 	} else if (type=="bill") {
 		newItem.billNumber = kortNavn.id;
 		newItem.date = ressort.pubDate;
@@ -121,31 +116,34 @@ function scrape(doc, url) {
 
 function getType (doc, url) {
 	var threeLetters = getKortNavn(doc, url).threeLetters;
+	if (/(ADI|AND|BEK|BKI|BST|CIR|CIS|DSK|FIN|KON|LBK|LOV|LTB|PJE|SKR|VEJ|ÅBR)/.test(threeLetters)) {
+		return "statute";
+	}
 	if (/(DOM|AFG|KEN|UDT)/.test(threeLetters)) {
 		return "case";
-	}
-	if (/(EDP|ISP|FOU)/.test(threeLetters)) {
-		return "report";
 	}
 	if (/\d{3}/.test(threeLetters)) {
 		return "bill";
 	} else {
-		return "statute";
+		return "webpage";
 	}
 }
 
 function getTitle (doc, url) {
-	var title = ZU.xpathText(doc, '//div[@class="wrapper2"]/div/p[@class="Titel2"]')
-	 || ZU.xpathText(doc, '//div[@class="wrapper2"]/div/div[@id="INDHOLD"]/p[@class="Titel"]') 
-	 || ZU.xpathText(doc, '//div[@class="wrapper2"]/div/div[@id="INDHOLD"]/font/p[@align="CENTER"]') 
-	 || ZU.xpathText(doc, '//div[@class="wrapper2"]/div/div[@id="INDHOLD"]/h1[@class="TITLE"]') 
-	 || ZU.xpathText(doc, '//div[@class="wrapper2"]/div/div[@id="INDHOLD"]/center/h1[@class="TITLE"]');
-// If the xpaths above fail to find the title, we will scrape the title from the <head> element.
-	if (title) {
-		title = ZU.trimInternal(title);
+	var title = "";
+// the html for 'bill' type is very idiosynchratic, so we wont attempt to scrape the title of bills from the <body> element.
+	if (getType(doc, url) != "bill") {
+		title = ZU.xpathText(doc, '//div[@class="wrapper2"]/div/p[@class="Titel2"]')
+		 || ZU.xpathText(doc, '//div[@class="wrapper2"]/div/div[@id="INDHOLD"]//p[@class="Titel"]') 
+		 || ZU.xpathText(doc, '//div[@class="wrapper2"]/div/div[@id="INDHOLD"]//font/p[@align="CENTER"]') 
+		 || ZU.xpathText(doc, '//div[@class="wrapper2"]/div/div[@id="INDHOLD"]//h1[@class="TITLE"]') 
+		 || ZU.xpathText(doc, '//div[@class="wrapper2"]/div/div[@id="INDHOLD"]//span[1]')
+		if (title) {
+			title = ZU.trimInternal(title);
+		}
 	}
+// If it's a 'bill' or the xpaths above fail to find the title, we will scrape the title from the <head> element.
 	if (!title) {
-		Z.debug("L157");
 		title = doc.title;
 // The <title>-element consist of three parts: a short title (if one exists); the title of the document; and "- retsinformation.dk".
 // The following lines extracts the document title
@@ -186,3 +184,163 @@ function getRessort (doc, url) {
 	item.ressort = fodder.substr(datePosition+10);
 	return item;
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.retsinformation.dk/forms/R0710.aspx?id=168340",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Bekendtgørelse af lov om dag-, fritids- og klubtilbud m.v. til børn og unge (dagtilbudsloven)",
+				"creators": [],
+				"dateEnacted": "20/02/2015",
+				"publicLawNumber": "LBK nr 167",
+				"shortTitle": "Dagtilbudsloven",
+				"url": "https://www.retsinformation.dk/forms/R0710.aspx?id=168340",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.retsinformation.dk/forms/R0710.aspx?id=160621",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Bekendtgørelse om regnskab for folkehøjskoler, efterskoler, husholdningsskoler og håndarbejdsskoler (frie kostskoler), frie grundskoler, private skoler for gymnasiale uddannelser m.v. og produktionsskoler",
+				"creators": [
+					{
+						"creatorType": "author",
+						"lastName": "Undervisningsministeriet",
+						"fieldMode": 1
+					}
+				],
+				"dateEnacted": "16/12/2013",
+				"publicLawNumber": "BEK nr 1490",
+				"shortTitle": "Regnskabsbekendtgørelse",
+				"url": "https://www.retsinformation.dk/forms/R0710.aspx?id=160621",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.retsinformation.dk/forms/R0710.aspx?id=170044",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Bekendtgørelse om dagtilbud",
+				"creators": [
+					{
+						"creatorType": "author",
+						"lastName": "Ministeriet for Børn, Ligestilling, Integration og Sociale Forhold",
+						"fieldMode": 1
+					}
+				],
+				"dateEnacted": "30/04/2015",
+				"publicLawNumber": "BEK nr 599",
+				"url": "https://www.retsinformation.dk/forms/R0710.aspx?id=170044",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.retsinformation.dk/forms/R0710.aspx?id=95024",
+		"items": [
+			{
+				"itemType": "bill",
+				"title": "Forslag til folketingsbeslutning om bedre økonomiske forhold for skolefritidsordninger på friskoler og private grundskoler",
+				"creators": [
+					{
+						"creatorType": "author",
+						"lastName": "Folketinget",
+						"fieldMode": 1
+					}
+				],
+				"date": "17/01/2002",
+				"billNumber": "2001/2 BSF 55",
+				"url": "https://www.retsinformation.dk/forms/R0710.aspx?id=95024",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.retsinformation.dk/forms/R0710.aspx?id=131109",
+		"items": [
+			{
+				"itemType": "bill",
+				"title": "Forslag til folketingsbeslutning om harmonisering af regler om skolefritidsordninger og fritidshjem efter dagtilbudsloven",
+				"creators": [
+					{
+						"creatorType": "author",
+						"lastName": "Folketinget",
+						"fieldMode": 1
+					}
+				],
+				"date": "27/03/2010",
+				"billNumber": "2009/1 BSF 193",
+				"url": "https://www.retsinformation.dk/forms/R0710.aspx?id=131109",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.retsinformation.dk/forms/R0710.aspx?id=141932",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Bekendtgørelse om mindre fartøjer der medtager op til 12 passagerer",
+				"creators": [
+					{
+						"creatorType": "author",
+						"lastName": "Erhvervs- og Vækstministeriet",
+						"fieldMode": 1
+					}
+				],
+				"dateEnacted": "26/09/2012",
+				"publicLawNumber": "BEK nr 956",
+				"url": "https://www.retsinformation.dk/forms/R0710.aspx?id=141932",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.retsinformation.dk/Forms/R0930.aspx?q=huse&col=a&smode=simpel",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.retsinformation.dk/Forms/R0310.aspx?res=5&nres=1",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.retsinformation.dk/Forms/R0220.aspx?char=R",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
