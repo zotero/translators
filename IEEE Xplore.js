@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-06-09 07:32:25"
+	"lastUpdated": "2016-01-30 20:32:15"
 }
 
 function detectWeb(doc, url) {
@@ -141,9 +141,10 @@ function scrape (doc, url) {
 			}
 			if (pdf) {
 				ZU.doGet(pdf, function (src) {
-					var m = /<frame src="(.*\.pdf.*)"/.exec(src);
-					if (m) item.attachments = [{
-						url: m[1],
+					var m = /<frame src="(.*\.pdf.*)"|<meta HTTP-EQUIV="REFRESH" content="0; url=(.*\.pdf.*)"/.exec(src);
+					var pdfUrl = m && (m[1] || m[2]);
+					if (pdfUrl) item.attachments = [{
+						url: pdfUrl,
 						title: "IEEE Xplore Full Text PDF",
 						mimeType: "application/pdf"
 					}, {url: url, title: "IEEE Xplore Abstract Record", mimeType: "text/html"}];
