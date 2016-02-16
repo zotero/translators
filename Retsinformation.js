@@ -2,14 +2,14 @@
 	"translatorID": "feef66bf-4b52-498f-a586-8e9a99dc07a0",
 	"label": "Retsinformation",
 	"creator": "Roald Frøsig",
-	"target": "^https?://(?:www\\.)?retsinformation\\.dk/",
+	"target": "^https?://(www\\.)?retsinformation\\.dk/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2016-02-12 10:47:21"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2016-02-16 05:42:04"
 }
 
 /*
@@ -36,27 +36,18 @@
 */
 
 function detectWeb(doc, url){
-	if (
-		ZU.xpathText(doc, '//div[@class="wrapper2"]/table[@id="ctl00_MainContent_ResultGrid1"]')
-	 && getSelectItems(doc, url).length
-	) {
+	if (getSearchResults(doc, url, true)) {
 		return "multiple";
 	} else if (url.indexOf("R0710") != -1) {
-		type = getType(doc, url);
-		return type;
+		return getType(doc);
 	}
 }
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		var items = new Object();
-		var titles = getSelectItems(doc, url);
-		for (i = 0; i < titles.length; i++) {
-			items[titles[i].href] = ZU.trimInternal(titles[i].text);
-		}
-		Z.selectItems(items, function(selectedItems) {
+		Z.selectItems(getSearchResults(doc, url), function(selectedItems) {
 			if (!selectedItems) return true;
-			var urls = new Array();
+			var urls = [];
 			for (var i in selectedItems) {
 				urls.push(i);
 			}
@@ -67,122 +58,151 @@ function doWeb(doc, url) {
 	}
 }
 
-function getSelectItems(doc, url) {
+function getSearchResults(doc, url, checkOnly) {
+	var titles,
+		table = doc.getElementById("ctl00_MainContent_ResultGrid1");
+	if (!table) return false;
+
 	if (/(R0210|R0310)/.test(url)) {
-		var titles = ZU.xpath(doc, '//table[@id="ctl00_MainContent_ResultGrid1"]/tbody/tr[@class!="th"]/td[2]/a[1]');
+		titles = ZU.xpath(table, './/tr[@class!="th"]/td[2]/a[1]');
 	} else if (/R0700.aspx\\?res/.test(url)) {
-		var titles = ZU.xpath(doc, '//table[@id="ctl00_MainContent_ResultGrid1"]/tbody/tr[@class!="th"]/td[3]/a[1]');
+		titles = ZU.xpath(table, './/tr[@class!="th"]/td[3]/a[1]');
 	} else if (/(R0220|R0415|R0700)/.test(url)) {
-		var titles = ZU.xpath(doc, '//table[@id="ctl00_MainContent_ResultGrid1"]/tbody/tr[@class!="th"]/td[4]/a[1]');
+		titles = ZU.xpath(table, './/tr[@class!="th"]/td[4]/a[1]');
 	} else {
-		var titles = ZU.xpath(doc, '//table[@id="ctl00_MainContent_ResultGrid1"]/tbody/tr[@class!="th"]/td[1]/a[1]');
+		titles = ZU.xpath(table, './/tr[@class!="th"]/td[1]/a[1]');
 	}
-	return titles;
+	
+	if (checkOnly || !titles.length) return !!titles.length;
+
+	var items = {};
+	for (var i = 0; i < titles.length; i++) {
+		items[titles[i].href] = ZU.trimInternal(titles[i].textContent);
+	}
+	
+	return items;
 }
 
 function scrape(doc, url) {
-	var type = getType(doc, url);
+	var type = getType(doc);
 	var newItem = new Zotero.Item(type);
-	newItem.title = getTitle(doc, url);
+	newItem.title = getTitle(doc);
 	newItem.url = url;
-	var kortNavn = getKortNavn(doc, url);
-	var ressort = getRessort(doc, url);
-	if (!/L(BK|OV)/.test(kortNavn.threeLetters)) {
-		newItem.creators[0] = {};
-		newItem.creators[0].creatorType = "author";
-		if (/(EDP|ISP|FOU)/.test(kortNavn.threeLetters)) {
+	
+	var kortNavn = getKortNavn(doc);
+	var ressort = getRessort(doc);
+	
+	if (!/LBK|LOV/.test(kortNavn.threeLetters)) {
+		newItem.creators[0] = {
+			creatorType: "author",
+			fieldMode: 1
+		};
+		
+		if (/EDP|ISP|FOU/.test(kortNavn.threeLetters)) {
 			newItem.creators[0].lastName = "Folketingets Ombudsmand";
 		} else {
 			newItem.creators[0].lastName = ressort.ressort;		
 		}
-		newItem.creators[0].fieldMode = 1;
 	}
-	if (type=="statute") {
-		newItem.publicLawNumber = kortNavn.id;
-		newItem.dateEnacted = kortNavn.date;
+	
+	newItem.number = kortNavn.id;
+	
+	if (type == "statute" || type == "case") {
+		newItem.date = kortNavn.date;
 		newItem.shortTitle = ressort.shortTitle;
-	} else if (type=="case") {
-		newItem.docketNumber = kortNavn.id;
-		newItem.dateDecided = kortNavn.date;
-		newItem.shortTitle = ressort.shortTitle;
-	} else if (type=="webpage") {
-		newItem.date = ressort.pubDate;
-	} else if (type=="bill") {
-		newItem.billNumber = kortNavn.id;
+	} else {
 		newItem.date = ressort.pubDate;
 	}
+	
 	newItem.complete();
 }
 
-function getType (doc, url) {
-	var threeLetters = getKortNavn(doc, url).threeLetters;
-	if (/(ADI|AND|BEK|BKI|BST|CIR|CIS|DSK|FIN|KON|LBK|LOV|LTB|PJE|SKR|VEJ|ÅBR)/.test(threeLetters)) {
+function getType (doc) {
+	var threeLetters = getKortNavn(doc).threeLetters;
+	if (/ADI|AND|BEK|BKI|BST|CIR|CIS|DSK|FIN|KON|LBK|LOV|LTB|PJE|SKR|VEJ|ÅBR/
+		.test(threeLetters)
+	) {
 		return "statute";
 	}
-	if (/(DOM|AFG|KEN|UDT)/.test(threeLetters)) {
+
+	if (/DOM|AFG|KEN|UDT/.test(threeLetters)) {
 		return "case";
 	}
+
 	if (/\d{3}/.test(threeLetters)) {
 		return "bill";
-	} else {
-		return "webpage";
 	}
+
+	return "webpage";
 }
 
-function getTitle (doc, url) {
-	var title = "";
-// the html for 'bill' type is very idiosynchratic, so we wont attempt to scrape the title of bills from the <body> element.
-	if (getType(doc, url) != "bill") {
-		title = ZU.xpathText(doc, '//div[@class="wrapper2"]/div/p[@class="Titel2"]')
-		 || ZU.xpathText(doc, '//div[@class="wrapper2"]/div/div[@id="INDHOLD"]//p[@class="Titel"]') 
-		 || ZU.xpathText(doc, '//div[@class="wrapper2"]/div/div[@id="INDHOLD"]//font/p[@align="CENTER"]') 
-		 || ZU.xpathText(doc, '//div[@class="wrapper2"]/div/div[@id="INDHOLD"]//h1[@class="TITLE"]') 
-		 || ZU.xpathText(doc, '//div[@class="wrapper2"]/div/div[@id="INDHOLD"]//span[1]')
+function getTitle (doc) {
+	var title;
+	// the html for 'bill' type is very idiosynchratic, so we wont attempt to
+	// scrape the title of bills from the <body> element.
+	if (getType(doc) != "bill") {
+		title = ZU.xpathText(doc, '//div[@class="wrapper2"]//p[@class="Titel2"]');
 		if (title) {
-			title = ZU.trimInternal(title);
+			var indhold = doc.getElementById("INDHOLD");
+			if (indhold) {
+				title = ZU.xpathText(indhold, './/p[@class="Titel"]')
+					 || ZU.xpathText(indhold, './/font/p[@align="CENTER"]') 
+					 || ZU.xpathText(indhold, './/h1[@class="TITLE"]') 
+					 || ZU.xpathText(indhold, './/span[1]');
+			}
+		}
+		
+		if (title) {
+			title = title.trim();
 		}
 	}
-// If it's a 'bill' or the xpaths above fail to find the title, we will scrape the title from the <head> element.
+
+	// If it's a 'bill' or the xpaths above fail to find the title, we will
+	// scrape the title from the <head> element.
+	// The <title>-element consist of three parts: a short title (if one
+	// exists); the title of the document; and "- retsinformation.dk".
 	if (!title) {
-		title = doc.title;
-// The <title>-element consist of three parts: a short title (if one exists); the title of the document; and "- retsinformation.dk".
-// The following lines extracts the document title
-		title = title.substring(0,title.lastIndexOf("-"));
-		if (getRessort(doc, url).shortTitle) {
-			title = title.substr(getRessort(doc, url).shortTitle.length+2);
-		};
-	}; 
+		title = doc.title.substring(0, doc.title.lastIndexOf("-"));
+		if (getRessort(doc).shortTitle) {
+			title = title.substr(getRessort(doc).shortTitle.length+2);
+		}
+	}
+
 	return ZU.trimInternal(title);
 }
 
-function getKortNavn (doc, url) {
-	var myXPath = '//span[starts-with(@class,"kortNavn")]';
-	var fodder = ZU.xpathText(doc, myXPath);
-	fodder = fodder.replace(/ (Gældende|Historisk)/,"");
-	var item = new Object();
-	item.threeLetters = fodder.substr(0,3);
-	fodder = fodder.split(" af ");
-	item.date = fodder[1];
-	item.id = fodder[0];
-	return item;
+function getKortNavn (doc) {
+	var fodder = doc.getElementsByClassName("kortNavn")[0].textContent;
+	var m = fodder.match(/^\s*(.+)\s+af\s+(\d{2})\/(\d{2})\/(\d{4})\b/);
+	if (m) {
+		return {
+			id: m[1],
+			date: m[4] + '-' + m[3] + '-' + m[2],
+			threeLetters: m[1].substr(0,3)
+		};
+	} else {
+		return {
+			id: fodder,
+			threeLetters: fodder.substr(0,3)
+		};
+	}
 }
 
-function getRessort (doc, url) {
-	var myXPath = '//div[@class="ressort"]';
-	var fodder = ZU.xpathText(doc, myXPath);
-// the 'fodder' string here consists of three parts:
-//  - a short title in parentheses (if one exists)
-//  - the publication date in the form dd-mm-yyyy
-//  - the 'ressort', i.e. the ministry responsible for the document
-	fodder = fodder.trim();
-	var item = new Object();
-	if (fodder.charAt(0) == "(") {
-		item.shortTitle = fodder.substring(1,fodder.lastIndexOf(")"));
-	}
-	var datePosition = fodder.search(/\d{2}\-\d{2}\-\d{4}/);
-	item.pubDate = fodder.substr(datePosition,10).replace(/-/g,"/");
-	item.ressort = fodder.substr(datePosition+10);
-	return item;
+function getRessort (doc) {
+	var fodder = ZU.trimInternal(
+		doc.getElementsByClassName('ressort')[0].textContent);
+
+	// the 'fodder' string here consists of three parts:
+	//  - a short title in parentheses (if one exists)
+	//  - the publication date in the form dd-mm-yyyy
+	//  - the 'ressort', i.e. the ministry responsible for the document
+	var m = fodder.match(/(?:\((.+)\))?.*\b(\d{2})-(\d{2})-(\d{4})(.+)/);
+
+	return {
+		shortTitle: m[1],
+		pubDate: m[4] + '-' + m[3] + '-' + m[2],
+		ressort: m[5].trim()
+	};
 }
 
 /** BEGIN TEST CASES **/
@@ -195,7 +215,7 @@ var testCases = [
 				"itemType": "statute",
 				"nameOfAct": "Bekendtgørelse af lov om dag-, fritids- og klubtilbud m.v. til børn og unge (dagtilbudsloven)",
 				"creators": [],
-				"dateEnacted": "20/02/2015",
+				"dateEnacted": "2015-02-20",
 				"publicLawNumber": "LBK nr 167",
 				"shortTitle": "Dagtilbudsloven",
 				"url": "https://www.retsinformation.dk/forms/R0710.aspx?id=168340",
@@ -216,11 +236,11 @@ var testCases = [
 				"creators": [
 					{
 						"creatorType": "author",
-						"lastName": "Undervisningsministeriet",
-						"fieldMode": 1
+						"fieldMode": 1,
+						"lastName": "Undervisningsministeriet"
 					}
 				],
-				"dateEnacted": "16/12/2013",
+				"dateEnacted": "2013-12-16",
 				"publicLawNumber": "BEK nr 1490",
 				"shortTitle": "Regnskabsbekendtgørelse",
 				"url": "https://www.retsinformation.dk/forms/R0710.aspx?id=160621",
@@ -241,11 +261,11 @@ var testCases = [
 				"creators": [
 					{
 						"creatorType": "author",
-						"lastName": "Ministeriet for Børn, Ligestilling, Integration og Sociale Forhold",
-						"fieldMode": 1
+						"fieldMode": 1,
+						"lastName": "Ministeriet for Børn, Ligestilling, Integration og Sociale Forhold"
 					}
 				],
-				"dateEnacted": "30/04/2015",
+				"dateEnacted": "2015-04-30",
 				"publicLawNumber": "BEK nr 599",
 				"url": "https://www.retsinformation.dk/forms/R0710.aspx?id=170044",
 				"attachments": [],
@@ -265,11 +285,11 @@ var testCases = [
 				"creators": [
 					{
 						"creatorType": "author",
-						"lastName": "Folketinget",
-						"fieldMode": 1
+						"fieldMode": 1,
+						"lastName": "Folketinget"
 					}
 				],
-				"date": "17/01/2002",
+				"date": "2002-01-17",
 				"billNumber": "2001/2 BSF 55",
 				"url": "https://www.retsinformation.dk/forms/R0710.aspx?id=95024",
 				"attachments": [],
@@ -289,11 +309,11 @@ var testCases = [
 				"creators": [
 					{
 						"creatorType": "author",
-						"lastName": "Folketinget",
-						"fieldMode": 1
+						"fieldMode": 1,
+						"lastName": "Folketinget"
 					}
 				],
-				"date": "27/03/2010",
+				"date": "2010-03-27",
 				"billNumber": "2009/1 BSF 193",
 				"url": "https://www.retsinformation.dk/forms/R0710.aspx?id=131109",
 				"attachments": [],
@@ -313,11 +333,11 @@ var testCases = [
 				"creators": [
 					{
 						"creatorType": "author",
-						"lastName": "Erhvervs- og Vækstministeriet",
-						"fieldMode": 1
+						"fieldMode": 1,
+						"lastName": "Erhvervs- og Vækstministeriet"
 					}
 				],
-				"dateEnacted": "26/09/2012",
+				"dateEnacted": "2012-09-26",
 				"publicLawNumber": "BEK nr 956",
 				"url": "https://www.retsinformation.dk/forms/R0710.aspx?id=141932",
 				"attachments": [],
