@@ -2,14 +2,14 @@
 	"translatorID": "8b73dd9c-b873-4d13-b36a-45922b9f04a1",
 	"label": "WikiLeaks PlusD",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://search\\.wikileaks\\.org/plusd/",
+	"target": "^https?://(search\\.)?wikileaks\\.org/plusd/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-02-20 03:40:13"
+	"lastUpdated": "2016-02-22 03:40:13"
 }
 
 /*
