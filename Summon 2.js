@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-12-08 15:45:09"
+	"lastUpdated": "2015-10-17 04:48:41"
 }
 
 /*
@@ -113,7 +113,7 @@ function doWeb(doc, url) {
 				indexes.push(item.substr(1));
 			}
 			
-			fetchData(getApiData(url, indexes), dbName)
+			fetchData(getApiData(doc, url, indexes), dbName)
 		});
 	} else {
 		var id = getIDFromUrl(url);
@@ -155,7 +155,9 @@ function fetchData(apiData, dbName) {
 }
 
 var pageSize = 10; // Number of results to fetch per page
-function getApiData(url, indexes) {
+function getApiData(doc, url, indexes) {
+	url = doc.location.href;
+	//Z.debug(url)
 	var urlArray = url.split('?');
 	var apiURL = '/api/search?'
 		+ urlArray.pop().replace(/(^|&)fvf=([^&#]*)/, function(m, sep, fvf) {

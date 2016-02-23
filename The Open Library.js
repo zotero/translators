@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-04-17 03:10:37"
+	"lastUpdated": "2015-08-31 16:05:29"
 }
 
 /*
@@ -46,21 +46,32 @@ function detectWeb(doc, url) {
 }
 
 function getEdition(doc, url){
-	if (url.search(/\/books\/OL\d+M\//)!=-1) scrape(url);
+	if (url.search(/\/books\/OL\d+M\//)!=-1) {
+		scrape(doc, url);
+	}
 	else if (ZU.xpathText(doc, '//h1/span/a[@title="View this edition"]')){
 		var editionurl = ZU.xpathText(doc, '//h1/span/a[@title="View this edition"]/@href');
-		scrape (editionurl)
+		ZU.processDocuments(editionurl, scrape);
 	}
 	else {
 		var editionurl = ZU.xpathText(doc, '//table[@id="editions"]/tbody/tr[1]/td/div[@class="title"]/a/@href');
-		scrape (editionurl)
+		ZU.processDocuments(editionurl, scrape);
 	}
 	
 }
 
-function scrape(url) {
+function scrape(doc, url) {
 	var dcUrl = url.replace(/(OL[A-Z0-9]+)\/.+/, "$1.rdf");
+	//no ISBN in the RDF data; scraping that from the page; sigh.
+	var isbnscrape;
+	if (ZU.xpathText(doc, '//td[@class="title" and span[contains(text(), "ISBN 13")]]') ){
+		isbnscrape = ZU.xpathText(doc, '//td[@class="title" and span[contains(text(), "ISBN 13")]]/following-sibling::td');
+	}
+	else{
+		isbnscrape = ZU.xpathText(doc, '//td[@class="title" and span[contains(text(), "ISBN 10")]]/following-sibling::td');
+	}
 	Zotero.Utilities.doGet(dcUrl, function (text) {
+		//Z.debug(text)
 		var docxml = (new DOMParser()).parseFromString(text, "text/xml");
   	 	ns = {	"rdf" : "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
 				"rdfs" : "http://www.w3.org/2000/01/rdf-schema#",
@@ -72,8 +83,9 @@ function scrape(url) {
 				"dcterms" : "http://purl.org/dc/terms/",
 				"dc" : "http://purl.org/dc/elements/1.1/",
 				"dcam" : "http://purl.org/dc/dcam/",
-				"foaf" : "http://xmlns.com/foaf/0.1/"};
-		var authors = ZU.xpath(docxml, '//bibo:authorList//rdf:value', ns);
+				"foaf" : "http://xmlns.com/foaf/0.1/",
+				"ov"	: "http://open.vocab.org/terms.ttl"};
+		var authors = ZU.xpath(docxml, '//bibo:authorList//rdf:Description/foaf:name', ns);
 		var numPages = ZU.xpathText(docxml, '//dcterms:extent', ns);
 		var place = ZU.xpathText(docxml, '//rdvocab:placeOfPublication', ns);
 		var isbn = ZU.xpathText(docxml, '//bibo:isbn10|//bibo:isbn13', ns);
@@ -94,8 +106,10 @@ function scrape(url) {
 			if (note) item.notes.push(note);
 			if (item.extra) item.abstractNote=item.extra; item.extra="";
 			item.place = place;
-			item.ISBN= isbn;
+			if (isbn) item.ISBN= isbn;
+			else item.ISBN = isbnscrape;
 			item.itemID = "";
+			item.title = item.title.replace(/\s:/, ":")
 			item.complete();
 		});
 	translator.translate();
@@ -128,7 +142,7 @@ function doWeb(doc, url) {
 		});
 	} else {
 		if (url.search(/\/works\/OL\d+W/)!=-1) getEdition(doc, url);
-		else scrape(url);
+		else scrape(doc, url);
 	}
 }/** BEGIN TEST CASES **/
 var testCases = [
@@ -144,10 +158,11 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://openlibrary.org/works/OL2079351W/Etats_et_r%C3%A9volutions_sociales",
+		"url": "https://openlibrary.org/works/OL2079351W/Etats_et_r%c3%a9volutions_sociales",
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Etats et révolutions sociales",
 				"creators": [
 					{
 						"firstName": "Theda",
@@ -155,30 +170,25 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Etats et révolutions sociales",
-				"publisher": "Fayard",
-				"institution": "Fayard",
-				"company": "Fayard",
-				"label": "Fayard",
-				"distributor": "Fayard",
 				"date": "April 3, 1985",
-				"lastModified": "2010-04-13 09:13:29.453663",
+				"ISBN": "9782213014012",
+				"libraryCatalog": "The Open Library",
 				"numPages": "486",
-				"ISBN": "2213014019, 9782213014012",
-				"libraryCatalog": "The Open Library"
+				"publisher": "Fayard",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://openlibrary.org/books/OL13188011M/Borges",
+		"url": "https://openlibrary.org/books/OL13188011M/Borges",
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Borges: Prosa Completa  4 Volumes",
 				"creators": [
 					{
 						"firstName": "Jorge Luis",
@@ -186,20 +196,15 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Borges  Prosa Completa  4 Volumes",
-				"publisher": "Bruguera",
-				"institution": "Bruguera",
-				"company": "Bruguera",
-				"label": "Bruguera",
-				"distributor": "Bruguera",
 				"date": "1985",
-				"lastModified": "2010-04-16 09:16:01.121796",
-				"ISBN": "8402103227",
-				"libraryCatalog": "The Open Library"
+				"ISBN": "9788402103222",
+				"libraryCatalog": "The Open Library",
+				"publisher": "Bruguera",
+				"shortTitle": "Borges",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

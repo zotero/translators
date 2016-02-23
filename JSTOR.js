@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2015-02-24 05:27:00"
+	"lastUpdated": "2016-01-03 17:28:36"
 }
 
 function detectWeb(doc, url) {
@@ -24,8 +24,13 @@ function detectWeb(doc, url) {
 	
 	// If this is a view page, find the link to the citation
 	var favLink = getFavLink(doc);
-	if( (favLink && getJID(favLink.href)) || getJID(url) ) {
-		return "journalArticle";
+	if ( (favLink && getJID(favLink.href)) || getJID(url) ) {
+		if (ZU.xpathText(doc, '//div[@class="book-title"]')){
+			return "book"
+		}
+		else {
+			return "journalArticle";
+		}
 	}
 }
 
@@ -33,9 +38,10 @@ function getSearchResults(doc, checkOnly) {
 	// We have multiple results
 	var resultsBlock = doc.getElementsByClassName('list-searchResults')[0];
 	if (!resultsBlock) resultsBlock = doc.getElementById('results');
+	if (!resultsBlock) resultsBlock = doc.getElementsByClassName('no-bullet mll');
 	if (!resultsBlock) return false;
 	var titles = ZU.xpath(resultsBlock, '//li//a[@class="title"]|\
-		//li//div[@class="title" and not(a[@class="title"]) and a[contains(@href, "10.2307")]]');
+		//li//div[(@class="title" or @class="rw") and not(a[@class="title"]) and a[contains(@href, "10.2307") or contains(@href, "/stable/")]]');
 	var items = {}, found = false;
 	for (var i=0; i<titles.length; i++) {
 		var title = ZU.trimInternal(titles[i].textContent);
@@ -66,7 +72,7 @@ function getFavLink(doc) {
 }
 
 function getJID(url) {
-	var m = url.match(/(?:discover|pss|stable(?:\/info)?)\/(10\.\d+(?:%2F|\/)[^?]+|[a-z]*\d+)/);
+	var m = url.match(/(?:discover|pss|stable(?:\/info)?)\/(10\.\d+(?:%2F|\/)[^?]+|[a-z0-9.]*)/);
 	if (m) {
 		var jid = decodeURIComponent(m[1]);
 		if (jid.search(/10\.\d+\//) != 0) {
@@ -105,32 +111,24 @@ function doWeb(doc, url) {
 	}
 }
 
-function getTitleFromPage(doc) {
-	var title = 
-		// http://www.jstor.org/stable/131548
-		ZU.xpathText(doc, '//div[@class="rw" and ./cite]/node()[position()>1]', null, ' ')
-		//same page but not logged in 
-		||ZU.xpathText(doc, '//div[@class="main"]//h2[cite[@class="rw"]]')
-		// Need examples. May no longer be relevant
-		|| ZU.xpathText(doc, '(//div[@class="bd"]/div[cite[@class="rw"]])[1]')
-		|| ZU.xpathText(doc, '//div[@class="mainCite"]/h3')
-		|| ZU.xpathText(doc, '//div[@class="bd"]/h2');
-	if (title) return ZU.trimInternal(title);
-}
-
 function scrape(jids) {
-	var postUrl = "/action/downloadSingleCitationSec?"
-		+ "userAction=export&format=refman&direct=true&singleCitation=true";
-	var postBody = "noDoi=yesDoi&doi=";
-	
+	var risURL = "/citation/ris/";
 	(function next() {
 		if (!jids.length) return;
 		var jid = jids.shift()
-		ZU.doPost(postUrl, postBody + encodeURIComponent(jid), function(text) {
+		ZU.doGet(risURL + jid, function(text) {
 			processRIS(text, jid);
 			next();
 		})
 	})();
+}
+
+function convertCharRefs(string) {
+	//converts hex decimal encoded html entities used by JSTOR to regular utf-8
+	return string
+		.replace(/&#x([A-Za-z0-9]+);/g, function(match, num) {
+			return String.fromCharCode(parseInt(num, 16));
+		});
 }
 
 function processRIS(text, jid) {
@@ -139,15 +137,16 @@ function processRIS(text, jid) {
 	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 	//Z.debug(text);
 	
-	//M1 is mostly useless and sometimes ends up in the issue field
-	//we can use it to check if the article is a review though
-	var review = text.search(/^M1\s+-\s+ArticleType:\s*book-review/m) !== -1;
-	
+	//Reviews have a RI tag now (official RIS for Reviewed Item)
+	var review = text.match(/^RI\s+-\s+(.+)/m);
+	//sometimes we have subtitles stored in T1. These are part of the title, we want to add them later
+	var subtitle = text.match(/^T1\s+-\s+(.+)/m);
 	translator.setString(text);
 	translator.setHandler("itemDone", function(obj, item) {
-		//author names are not supplied as lastName, firstName in RIS
-		//we fix it here
-		var m;
+		//author names are not (always) supplied as lastName, firstName in RIS
+		//we fix it here (note sure if still need with new RIS)
+	
+ 		var m;
 		for(var i=0, n=item.creators.length; i<n; i++) {
 			if(!item.creators[i].firstName
 				&& (m = item.creators[i].lastName.match(/^(.+)\s+(\S+)$/))) {
@@ -157,6 +156,11 @@ function processRIS(text, jid) {
 			}
 		}
 		
+		//fix special characters in abstract, convert html linebreaks and italics, remove stray p tags; don't think they use anything else
+		if (item.abstractNote){
+			item.abstractNote = convertCharRefs(item.abstractNote);
+			item.abstractNote = item.abstractNote.replace(/<\/p><p>/g, "\n").replace(/<em>(.+?)<\/em>/g, " <i>$1</i> ").replace(/<\/?p>/g, "");
+		}
 		// Don't save HTML snapshot from 'UR' tag
 		item.attachments = [];
 		
@@ -175,35 +179,32 @@ function processRIS(text, jid) {
 		
 		if (!item.DOI) item.DOI = jid; // validate later
 		
+		if (subtitle){
+			item.title = item.title + ": " + subtitle[1]
+		}
 		//reviews don't have titles in RIS - we get them from the item page
 		if (!item.title && review){
-			if(item.url) {
-				Zotero.debug("Attempting to retrieve review title from " + item.url);
-				ZU.processDocuments(item.url, function(doc){
-					item.title = getTitleFromPage(doc);
-					if(item.title) {
-						item.title = "Review of " + item.title;
-					} else {
-						item.title = "Review";
-					}
-					
-					finalizeItem(item);
-				});
-				return;
-			} else {
-				item.title = "Review";
+			reviewedTitle =  review[1];
+			//A2 for reviews is actually the reviewed author
+			var reviewedAuthors = []
+			for (i =0; i<item.creators.length; i++){
+				if (item.creators[i].creatorType == "editor"){
+					reviewedAuthors.push(item.creators[i].firstName + " " + item.creators[i].lastName); 
+					item.creators[i].creatorType = "reviewedAuthor"
+				}
 			}
+			//remove any reviewed authors from the title
+		  	for (i=0; i<reviewedAuthors.length; i++){
+		  		reviewedTitle = reviewedTitle.replace(reviewedAuthors[i], "");
+		  	}
+		  	reviewedTitle = reviewedTitle.replace(/[\s.,]+$/, "");
+		  	item.title =  "Review of " + reviewedTitle
 		}
 		
 		finalizeItem(item);
 	});
 		
 	translator.getTranslatorObject(function (trans) {
-		trans.options.fieldMap = {
-			'M1': {
-				'__default': '__ignore'
-			}
-		}
 		trans.doImport();	
 	});
 }
@@ -227,8 +228,7 @@ function finalizeItem(item) {
 		}
 	);
 }
-	
-/** BEGIN TEST CASES **/
+	/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -259,7 +259,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "September 1, 2004",
+				"date": "2004",
 				"ISSN": "0005-2086",
 				"abstractNote": "A reproducible and original method for the preparation of chicken intestine epithelial cells from 18-day-old embryos for long-term culture was obtained by using a mechanical isolation procedure, as opposed to previous isolation methods using relatively high concentrations of trypsin, collagenase, or EDTA. Chicken intestine epithelial cells typically expressed keratin and chicken E-cadherin, in contrast to chicken embryo fibroblasts, and they increased cell surface MHC II after activation with crude IFN-γ containing supernatants, obtained from chicken spleen cells stimulated with concanavalin A or transformed by reticuloendotheliosis virus. Eimeria tenella was shown to be able to develop until the schizont stage after 46 hr of culture in these chicken intestinal epithelial cells, but it was not able to develop further. However, activation with IFN-γ containing supernatants resulted in strong inhibition of parasite replication, as shown by incorporation of [3 H]uracil. Thus, chicken enterocytes, which are the specific target of Eimeria development in vivo, could be considered as potential local effector cells involved in the protective response against this parasite. /// Se desarrolló un método reproducible y original para la preparación de células epiteliales de intestino de embriones de pollo de 18 días de edad para ser empleadas como cultivo primario de larga duración. Las células epiteliales de intestino fueron obtenidas mediante un procedimiento de aislamiento mecánico, opuesto a métodos de aislamientos previos empleando altas concentraciones de tripsina, colagenasa o EDTA. Las células epiteliales de intestino expresaron típicamente keratina y caderina E, a diferencia de los fibroblastos de embrión de pollo, e incrementaron el complejo mayor de histocompatibilidad tipo II en la superficie de la célula posterior a la activación con sobrenadantes de interferón gamma. Los sobrenadantes de interferón gamma fueron obtenidos a partir de células de bazos de pollos estimuladas con concanavalina A o transformadas con el virus de reticuloendoteliosis. Se observó el desarrollo de la Eimeria tenella hasta la etapa de esquizonte después de 46 horas de cultivo en las células intestinales epiteliales de pollo pero no se observó un desarrollo posterior. Sin embargo, la activación de los enterocitos con los sobrenadantes con interferón gamma resultó en una inhibición fuerte de la replicación del parásito, comprobada mediante la incorporación de uracilo [3 H]. Por lo tanto, los enterocitos de pollo, blanco específico del desarrollo in vivo de la Eimeria, podrían ser considerados como células efectoras locales, involucradas en la respuesta protectora contra este parásito.",
 				"issue": "3",
@@ -267,7 +267,6 @@ var testCases = [
 				"libraryCatalog": "JSTOR",
 				"pages": "617-624",
 				"publicationTitle": "Avian Diseases",
-				"rights": "Copyright © 2004 American Association of Avian Pathologists",
 				"shortTitle": "Chicken Primary Enterocytes",
 				"url": "http://www.jstor.org/stable/1593514",
 				"volume": "48",
@@ -293,11 +292,11 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Engel",
-						"creatorType": "author",
-						"firstName": "Barbara Alpern"
+						"firstName": "Barbara Alpern",
+						"creatorType": "author"
 					}
 				],
-				"date": "December 1, 1997",
+				"date": "1997",
 				"DOI": "10.1086/245591",
 				"ISSN": "0022-2801",
 				"issue": "4",
@@ -305,7 +304,6 @@ var testCases = [
 				"libraryCatalog": "JSTOR",
 				"pages": "696-721",
 				"publicationTitle": "The Journal of Modern History",
-				"rights": "Copyright © 1997 The University of Chicago Press",
 				"shortTitle": "Not by Bread Alone",
 				"url": "http://www.jstor.org/stable/10.1086/245591",
 				"volume": "69",
@@ -331,11 +329,11 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Satz",
-						"creatorType": "author",
-						"firstName": "Debra"
+						"firstName": "Debra",
+						"creatorType": "author"
 					}
 				],
-				"date": "January 1, 2007",
+				"date": "2007",
 				"DOI": "10.1086/508232",
 				"ISSN": "0097-9740",
 				"issue": "2",
@@ -343,7 +341,6 @@ var testCases = [
 				"libraryCatalog": "JSTOR",
 				"pages": "523-538",
 				"publicationTitle": "Signs",
-				"rights": "Copyright © 2007 The University of Chicago Press",
 				"shortTitle": "Remaking Families",
 				"url": "http://www.jstor.org/stable/10.1086/508232",
 				"volume": "32",
@@ -365,22 +362,26 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Review of Soviet Criminal Justice under Stalin by Peter H. Solomon",
+				"title": "Review of Soviet Criminal Justice under Stalin",
 				"creators": [
 					{
 						"lastName": "Burbank",
 						"firstName": "Jane",
 						"creatorType": "author"
+					},
+					{
+						"lastName": "Solomon",
+						"firstName": "Peter H.",
+						"creatorType": "reviewedAuthor"
 					}
 				],
-				"date": "April 1, 1998",
+				"date": "1998",
 				"ISSN": "0036-0341",
 				"issue": "2",
-				"journalAbbreviation": "Russian Review",
+				"journalAbbreviation": "The Russian Review",
 				"libraryCatalog": "JSTOR",
 				"pages": "310-311",
-				"publicationTitle": "Russian Review",
-				"rights": "Copyright © 1998 The Editors and Board of Trustees of the Russian Review",
+				"publicationTitle": "The Russian Review",
 				"url": "http://www.jstor.org/stable/131548",
 				"volume": "57",
 				"attachments": [
@@ -419,7 +420,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "December 1, 2005",
+				"date": "2005",
 				"ISSN": "0742-1222",
 				"abstractNote": "From the social network perspective, this study explores the ontological structure of knowledge sharing activities engaged in by researchers in the field of information systems (IS) over the past three decades. We construct a knowledge network based on coauthorship patterns extracted from four major journals in the IS field in order to analyze the distinctive characteristics of each subfield and to assess the amount of internal and external knowledge exchange that has taken place among IS researchers. This study also tests the role of different types of social capital that influence the academic impact of researchers. Our results indicate that the proportion of coauthored IS articles in the four journals has doubled over the past 25 years, from merely 40 percent in 1978 to over 80 percent in 2002. However, a significant variation exists in terms of the shape, density, and centralization of knowledge exchange networks across the four subfields of IS—namely, behavioral science, organizational science, computer science, and economic science. For example, the behavioral science subgroup, in terms of internal cohesion among researchers, tends to develop the most dense collaborative relationships, whereas the computer science subgroup is the most fragmented. Moreover, external collaboration across these subfields appears to be limited and severely unbalanced. Across the four subfields, on average, less than 20 percent of the research collaboration ties involved researchers from different subdisciplines. Finally, the regression analysis reveals that knowledge capital derived from a network rich in structural holes has a positive influence on an individual researcher's academic performance.",
 				"issue": "3",
@@ -427,7 +428,6 @@ var testCases = [
 				"libraryCatalog": "JSTOR",
 				"pages": "265-292",
 				"publicationTitle": "Journal of Management Information Systems",
-				"rights": "Copyright © 2005 M.E. Sharpe, Inc.",
 				"shortTitle": "Coauthorship Dynamics and Knowledge Capital",
 				"url": "http://www.jstor.org/stable/40398803",
 				"volume": "22",
@@ -450,7 +450,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.jstor.org/stable/info/10.1525/rep.2014.128.1.1",
+		"url": "http://www.jstor.org/stable/10.1525/rep.2014.128.1.1#page_scan_tab_contents",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -462,7 +462,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "November 1, 2014",
+				"date": "2014",
 				"DOI": "10.1525/rep.2014.128.1.1",
 				"ISSN": "0734-6018",
 				"abstractNote": "This article traces a long history in Christian political thought of linking politics, statecraft, and worldly authority to the broader category of carnal literalism, typed as “Jewish” by the Pauline tradition. This tradition produced a tendency to discuss political error in terms of Judaism, with the difference between mortal and eternal, private and public, tyrant and legitimate monarch, mapped onto the difference between Jew and Christian. As a result of this history, transcendence as a political ideal has often figured (and perhaps still figures?) its enemies as Jewish.",
@@ -471,7 +471,6 @@ var testCases = [
 				"libraryCatalog": "JSTOR",
 				"pages": "1-29",
 				"publicationTitle": "Representations",
-				"rights": "Copyright © 2014 University of California Press",
 				"shortTitle": "“Judaism” as Political Concept",
 				"url": "http://www.jstor.org/stable/10.1525/rep.2014.128.1.1",
 				"volume": "128",
@@ -489,7 +488,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.jstor.org/discover/10.1086/378695?uid=3739832&uid=2&uid=4&uid=3739256&sid=21105503736473",
+		"url": "http://www.jstor.org/stable/10.1086/378695",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -497,20 +496,19 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Boylan",
-						"creatorType": "author",
-						"firstName": "Richard T."
+						"firstName": "Richard T.",
+						"creatorType": "author"
 					}
 				],
-				"date": "April 1, 2004",
+				"date": "2004",
 				"DOI": "10.1086/378695",
 				"ISSN": "0022-2186",
 				"abstractNote": "Abstract The effect of salaries on turnover and performance is analyzed for U.S. attorneys in office during the years 1969 through 1999. Lower salaries are shown to increase the turnover of U.S. attorneys, and higher turnover is shown to reduce output. Two features distinguish U.S. attorneys (chief federal prosecutors) from other public‐ and private‐sector employees. First, since 1977, U.S. attorney salaries have been tied to the salaries of members of Congress and are thus exogenously determined. Second, there are public measures for the output of U.S. attorneys. Both features simplify the study of the effect of salaries on turnover and performance.",
 				"issue": "1",
-				"journalAbbreviation": "Journal of Law and Economics",
+				"journalAbbreviation": "The Journal of Law & Economics",
 				"libraryCatalog": "JSTOR",
 				"pages": "75-92",
-				"publicationTitle": "Journal of Law and Economics",
-				"rights": "Copyright © 2004 The University of Chicago",
+				"publicationTitle": "The Journal of Law & Economics",
 				"url": "http://www.jstor.org/stable/10.1086/378695",
 				"volume": "47",
 				"attachments": [
@@ -528,6 +526,70 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.jstor.org/stable/i250748",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.jstor.org/stable/10.7312/kara15848",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Bonded Labor: Tackling the System of Slavery in South Asia",
+				"creators": [
+					{
+						"lastName": "Kara",
+						"firstName": "Siddharth",
+						"creatorType": "author"
+					}
+				],
+				"date": "2012",
+				"abstractNote": "Siddharth Kara's <i>Sex Trafficking</i> has become a critical resource for its revelations into an unconscionable business, and its detailed analysis of the trade's immense economic benefits and human cost. This volume is Kara's second, explosive study of slavery, this time focusing on the deeply entrenched and wholly unjust system of bonded labor.\nDrawing on eleven years of research in India, Nepal, Bangladesh, and Pakistan, Kara delves into an ancient and ever-evolving mode of slavery that ensnares roughly six out of every ten slaves in the world and generates profits that exceeded $17.6 billion in 2011. In addition to providing a thorough economic, historical, and legal overview of bonded labor, Kara travels to the far reaches of South Asia, from cyclone-wracked southwestern Bangladesh to the Thar desert on the India-Pakistan border, to uncover the brutish realities of such industries as hand-woven-carpet making, tea and rice farming, construction, brick manufacture, and frozen-shrimp production. He describes the violent enslavement of millions of impoverished men, women, and children who toil in the production of numerous products at minimal cost to the global market. He also follows supply chains directly to Western consumers, vividly connecting regional bonded labor practices to the appetites of the world. Kara's pioneering analysis encompasses human trafficking, child labor, and global security, and he concludes with specific initiatives to eliminate the system of bonded labor from South Asia once and for all.",
+				"libraryCatalog": "JSTOR",
+				"publisher": "Columbia University Press",
+				"shortTitle": "Bonded Labor",
+				"url": "http://www.jstor.org/stable/10.7312/kara15848",
+				"attachments": [
+					{
+						"title": "JSTOR Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.jstor.org/stable/j.ctt7ztj7f?seq=1#page_scan_tab_contents",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Ulysses' Sail: An Ethnographic Odyssey of Power, Knowledge, and Geographical Distance",
+				"creators": [
+					{
+						"lastName": "Helms",
+						"firstName": "Mary W.",
+						"creatorType": "author"
+					}
+				],
+				"date": "1988",
+				"abstractNote": "What do long-distance travelers gain from their voyages, especially when faraway lands are regarded as the source of esoteric knowledge? Mary Helms explains how various cultures interpret space and distance in cosmological terms, and why they associate political power with information about strange places, peoples, and things. She assesses the diverse goals of travelers, be they Hindu pilgrims in India, Islamic scholars of West Africa, Navajo traders, or Tlingit chiefs, and discusses the most extensive experience of longy2Ddistance contact on record--that between Europeans and native peoples--and the clash of cultures that arose from conflicting expectations about the \"faraway.\".\nThe author describes her work as \"especially concerned with the political and ideological contexts or auras within which long-distance interests and activities may be conducted .. Not only exotic materials but also intangible knowledge of distant realms and regions can be politically valuable `goods,' both for those who have endured the perils of travel and for those sedentary homebodies who are able to acquire such knowledge by indirect means and use it for political advantage.\"\nOriginally published in 1988.\nThePrinceton Legacy Libraryuses the latest print-on-demand technology to again make available previously out-of-print books from the distinguished backlist of Princeton University Press. These paperback editions preserve the original texts of these important books while presenting them in durable paperback editions. The goal of the Princeton Legacy Library is to vastly increase access to the rich scholarly heritage found in the thousands of books published by Princeton University Press since its founding in 1905.",
+				"libraryCatalog": "JSTOR",
+				"publisher": "Princeton University Press",
+				"shortTitle": "Ulysses' Sail",
+				"url": "http://www.jstor.org/stable/j.ctt7ztj7f",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.jstor.org/action/doAdvancedSearch?q3=&re=on&q4=&f3=all&c3=AND&group=none&q1=&f5=all&c5=AND&la=&q2=&c6=AND&sd=&c2=AND&c1=AND&pt=&acc=off&q6=&q5=&c4=AND&f6=all&f0=all&q0=%22Reading+Rousseau+in+the+nuclear+age%22&f4=all&ed=&f2=all&f1=all&isbn=",
 		"items": "multiple"
 	}
 ]

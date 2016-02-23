@@ -2,21 +2,21 @@
 	"translatorID": "938ebe32-2b2e-4349-a5b3-b3a05d3de627",
 	"label": "ACS Publications",
 	"creator": "Sean Takats, Michael Berkowitz, Santawort, and Aurimas Vinckevicius",
-	"target": "https?://pubs\\.acs\\.org/(toc/|journal/|topic/|isbn/\\d|doi/(full|abs)/10\\.|action/doSearch\\?)",
+	"target": "https?://pubs\\.acs\\.org/(toc/|journal/|topic/|isbn/\\d|doi/(full/|abs/)?10\\.|action/doSearch\\?)",
 	"minVersion": "4.0.5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-06-05 20:36:28"
+	"lastUpdated": "2015-12-22 11:05:06"
 }
 
 function getSearchResults(doc, checkOnly, itemOpts) {
 	var items = {}, found = false;
 	var titles = doc.getElementsByClassName('titleAndAuthor');
 	for(var i=0; i<titles.length; i++){
-		var a = ZU.xpath(titles[i], './h2/a')[0];
+		var a = ZU.xpath(titles[i], './/h2//a')[0];
 		if (!a) continue;
 		
 		var title = ZU.trimInternal(a.textContent);
@@ -50,7 +50,8 @@ function getSearchResults(doc, checkOnly, itemOpts) {
 }
 
 function getDoi(url) {
-	var m = url.match(/https?:\/\/[^\/]*\/doi\/(?:abs|full)\/([^\?#]+)/);
+	var m = url.match(/https?:\/\/[^\/]*\/doi\/(?:abs\/|full\/)?(10\.[^\?#]+)/);
+	
 	if(m) {
 		var doi = m[1];
 		if(doi.indexOf("prevSearch") != -1) {
@@ -109,13 +110,13 @@ function attachSupp(item, doi, opts) {
  ***************************/
 
 function detectWeb(doc, url) {
-	if (doc.getElementById('articleListHeader_selectAllToc')
+	if (doc.getElementsByClassName('articleBoxMeta').length
 		&& getSearchResults(doc, true)
 	) {
 		return "multiple";
 	} else if (getDoi(url)) {
-		var h2 = doc.querySelector('.content-header > h2');
-		if(h2 && h2.textContent.indexOf("Chapter") !=-1) {
+		var type  = doc.getElementsByClassName("manuscriptType");
+		if(type.length && type[0].textContent.indexOf("Chapter") !=-1) {
 			return "bookSection";
 		} else {
 			return "journalArticle";
@@ -171,8 +172,8 @@ function doWeb(doc, url){
 		// See if we have pdfplus
 		var div = doc.getElementsByClassName('fulltext-formats')[0];
 		var itemOpts = {};
-		itemOpts.highRes = !!div.getElementsByClassName('pdf-high-res').length;
-		itemOpts.pdfPlus = !!div.getElementsByClassName('pdf-low-res').length;
+		itemOpts.highRes = ZU.xpathText(doc, '//a[contains(@title, "High-Res PDF")]');
+		itemOpts.pdfPlus = ZU.xpathText(doc, '//a[contains(@title, "Low-Res PDF")]');
 		
 		scrape([{doi: doi, opts: itemOpts}], opts);
 	}

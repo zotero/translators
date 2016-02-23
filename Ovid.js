@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-11-27 11:19:01"
+	"lastUpdated": "2015-10-20 05:37:26"
 }
 
 /*
@@ -164,6 +164,14 @@ function getSearchResults(doc, checkOnly, extras) {
 		found = true;
 		items[id] = title;
 		
+		var checkbox = row.querySelectorAll('input.bibrecord-checkbox')[0];
+		if (checkbox) {
+			items[id] = {
+				title: title,
+				checked: checkbox.checked
+			};
+		}
+		
 		if (extras) {
 			// Look for PDF link
 			var pdfLink = ZU.xpath(row, './/a[starts-with(@name, "PDF")]')[0];
@@ -227,19 +235,24 @@ function fetchMetadata(doc, url, ids, extras) {
 	var postData = getMetadataPost(doc, url, ids);
 	Zotero.debug("POST: " + postData);
 	ZU.doPost('./ovidweb.cgi', postData, function (text) {
+		// Get rid of some extra HTML fluff from the request if it's there
+		// The section we want starts with something like
+		// --HMvBAmfg|xxEGNm@\<{bVtBLgneqH?vKCw?nsIZhjcjsyRFVQ=
+		// Content-type: application/x-bibliographic
+		// Content-Transfer-Encoding: quoted-printable
+		// Content-Description: Ovid Citations
+		//
+		// and ends with
+		// --HMvBAmfg|xxEGNm@\<{bVtBLgneqH?vKCw?nsIZhjcjsyRFVQ=--
+
+		text = text.replace(/[\s\S]*(--\S+)\s+Content-type:\s*application\/x-bibliographic[^<]+([\s\S]+?)\s*\1[\s\S]*/, '$2')
+		Z.debug(text);
+		
 		var trans = Zotero.loadTranslator('import');
 		// OVID Tagged
 		trans.setTranslator('59e7e93e-4ef0-4777-8388-d6eddb3261bf');
 		trans.setString(text);
 		trans.setHandler('itemDone', function(obj, item) {
-			if (item.callNumber) {
-				item.callNumber = item.callNumber.replace(/[.\s]+$/, '');
-			}
-			
-			if (item.DOI) {
-				item.DOI = ZU.cleanDOI(item.DOI);
-			}
-			
 			if (item.itemID && extras[item.itemID]) {
 				retrievePdfUrl(item, extras[item.itemID]);
 			} else {

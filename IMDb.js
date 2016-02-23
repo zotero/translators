@@ -9,25 +9,31 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-06-05 07:43:14"
+	"lastUpdated": "2015-09-23 21:04:11"
 }
 
 /*
-   IMDB Translator
-   Copyright (C) 2011 Avram Lyon, ajlyon@gmail.com
+	***** BEGIN LICENSE BLOCK *****
 
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+	IMDB Translator
+	Copyright © 2011 Avram Lyon, ajlyon@gmail.com
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+	This file is part of Zotero.
 
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
 */
 
 function detectWeb(doc, url) {
@@ -73,16 +79,13 @@ function doWeb(doc, url) {
 		var id = url.match(/\/title\/(tt\d+)/)[1];
 		apiFetch([id]);
 	}
-	Zotero.wait();
 }
 
 // Takes IMDB IDs and makes items
 function apiFetch(ids) {
-	var apiRoot = "http://imdbapi.com/?i="; //&tomatoes=true removed as it often breaks the API
+	var apiRoot = "http://omdbapi.com/?i="; //&tomatoes=true removed as it often breaks the API
 	for (i in ids) ids[i] = apiRoot + ids[i];
-	Zotero.Utilities.doGet(ids, parseIMDBapi, function () {
-		Zotero.done()
-	});
+	Zotero.Utilities.doGet(ids, parseIMDBapi);
 }
 
 // parse result from imdbapi.com
@@ -135,6 +138,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "film",
+				"title": "The Official Story",
 				"creators": [
 					{
 						"firstName": "Luis",
@@ -172,21 +176,20 @@ var testCases = [
 						"creatorType": "contributor"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "08 Nov 1985",
+				"abstractNote": "After the end of the Dirty War, a high school teacher sets out to find out who the mother of her adopted daughter is.",
+				"extra": "IMDB ID: tt0089276\nIMDB Rating: 7.7 (4,844 votes)",
+				"genre": "Drama, History, War",
+				"libraryCatalog": "IMDb",
+				"runningTime": "112 min",
 				"attachments": [
 					{
 						"title": "Poster"
 					}
 				],
-				"genre": "Drama, History, War",
-				"abstractNote": "After the end of the Dirty War, a high school teacher sets out to find out who the mother of her adopted daughter is.",
-				"runningTime": "112 min",
-				"extra": "IMDB ID: tt0089276\nIMDB Rating: 7.8 (4,193 votes)",
-				"libraryCatalog": "IMDb",
-				"title": "The Official Story",
-				"date": "08 Nov 1985"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -201,6 +204,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "film",
+				"title": "Skin, Skin",
 				"creators": [
 					{
 						"firstName": "Mikko",
@@ -238,21 +242,20 @@ var testCases = [
 						"creatorType": "contributor"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "21 Oct 1966",
+				"abstractNote": "N/A",
+				"extra": "IMDB ID: tt0060613\nIMDB Rating: 6.9 (411 votes)",
+				"genre": "Drama",
+				"libraryCatalog": "IMDb",
+				"runningTime": "89 min",
 				"attachments": [
 					{
 						"title": "Poster"
 					}
 				],
-				"title": "Skin, Skin",
-				"date": "21 Oct 1966",
-				"genre": "Drama",
-				"abstractNote": "N/A",
-				"runningTime": "89 min",
-				"extra": "IMDB ID: tt0060613\nIMDB Rating: 6.9 (398 votes)",
-				"libraryCatalog": "IMDb"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

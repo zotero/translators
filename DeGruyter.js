@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-04-21 10:39:45"
+	"lastUpdated": "2016-01-21 21:22:38"
 }
 
 /*
@@ -98,16 +98,19 @@ function scrapeRIS(doc, url) {
 	var abstract = doc.getElementById('overviewContent') || 
 					ZU.xpath(doc,'//div[@class="articleBody_abstract"]/p')[0] || 
 					ZU.xpath(doc,'//div[@class="articleBody_transAbstract"]/p')[0];
+	var pdfUrl = ZU.xpathText(doc,'//div[@class="fullContentLink"]/a[@class="pdf-link"]/@href');
+
+	var biblRemark = doc.getElementById('biblRemark');
+
 	ZU.doGet(urlRIS, function(text) {
 		//Z.debug(text);
 		var ac = /<input value="([^"]+)" name="t:ac" type="hidden"\/>/.exec(text)[1];
 		var formdata = /<input value="([^"]+)" name="t:formdata" type="hidden"\/>/.exec(text)[1];
-		var poststring = "t:ac="+encodeURIComponent(ac)+"&t:formdata="+encodeURIComponent(formdata)+"&submit=Export";
+		var poststring = "t:ac="+encodeURIComponent(ac)+"&t:formdata="+encodeURIComponent(formdata)+"&previewFormat=mla&submit=Export";
 		
 		//at the moment the page (end)numbers are only in MLA correct
 		//e.g. Journal of Ancient History, 1.2 (2013): 170-229. Retrieved 18 Apr. 2014
 		var pageRange = /\):\s+(\d+)-(\d+)\.\s+Retrieved /.exec(text);
-		
 		ZU.doPost("/dg/cite.form", poststring, function(risData) {
 			if (risData.indexOf("<") == 0) {
 				Z.debug("No RIS");
@@ -130,6 +133,7 @@ function scrapeRIS(doc, url) {
 							item.pages += "–"+pageRange[2];
 						}
 					}
+
 					//correct authors from RIS data
 					//they are of the form lastname firstname withouth a comma
 					//e.g., AU  - Meggitt Justin J.
@@ -147,8 +151,35 @@ function scrapeRIS(doc, url) {
 					}
 					//add abstract
 					if (abstract) {
-						item.abstractNote = ZU.trimInternal(abstract.textContent);
+						abstract = abstract.textContent.replace(/\u0092/,"’");
+						item.abstractNote = ZU.trimInternal(abstract);
 					}
+
+					//biblRemark e.g. edition maybe more
+					if (biblRemark) {
+						if ((item.itemType == "book" || item.itemType == "bookSection") && !item.edition) {
+							item.edition = biblRemark.textContent;
+						} else {
+							item.notes.push({ note : biblRemark.textContent});
+						}
+					}
+
+					//url is saved in RIS withouth the http(s) protocoll
+					item.url = url;
+
+					//journalAbbreviations are more like internal codes
+					//they don't make sense for citations
+					delete item.journalAbbreviation;
+
+					if (pdfUrl) {
+						Z.debug(pdfUrl);
+						item.attachments.push({
+							url: pdfUrl,
+							title: "Full Text PDF",
+							mimeType: "application/pdf"
+						});
+					}
+
 					item.complete();
 				});
 				trans.translate();
@@ -182,35 +213,33 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "The Midterm Landslide of 2010: A Triple Wave Election",
 				"creators": [
 					{
-						"firstName": "James E.",
 						"lastName": "Campbell",
-						"creatorType": "author"
+						"creatorType": "author",
+						"firstName": "James E."
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2011",
+				"DOI": "10.2202/1540-8884.1405",
+				"ISSN": "1540-8884",
+				"abstractNote": "Democrats were trounced in the 2010 midterm elections. They lost six seats in the U.S. Senate, six governorships, and about 700 seats in state legislatures. Compared to 2008, Democrats lost 64 seats in the House and Republicans regained their House majority. The Republican majority elected in 2010 was the largest number of Republicans elected since 1946. The analysis finds that Republican seat gains resulted from the receding of the pro-Democratic waves of 2006 and 2008 as well as the incoming pro-Republican wave of 2010. Voters rejected Democrats in 2010 for their failure to revive the economy, but also for their advancement of the national healthcare reform and other liberal policies. The analysis speculates that Democrats are likely to gain House seats and lose Senate seats in 2012. Finally, President Obama’s prospects of re-election have probably been improved because of the Republican gains in the 2010 midterm.",
+				"issue": "4",
+				"libraryCatalog": "DeGruyter",
+				"publicationTitle": "The Forum",
+				"shortTitle": "The Midterm Landslide of 2010",
+				"url": "http://www.degruyter.com/view/j/for.2011.8.4_20120105083457/for.2011.8.4/for.2011.8.4.1405/for.2011.8.4.1405.xml?format=INT",
+				"volume": "8",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
 					}
 				],
-				"title": "The Midterm Landslide of 2010: A Triple Wave Election",
-				"publicationTitle": "The Forum",
-				"volume": "8",
-				"issue": "4",
-				"url": "http://www.degruyter.com/view/j/for.2011.8.4_20120105083457/for.2011.8.4/for.2011.8.4.1405/for.2011.8.4.1405.xml?format=INT",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "www.degruyter.com",
-				"abstractNote": "Democrats were trounced in the 2010 midterm elections. They lost six seats in the U.S. Senate, six governorships, and about 700 seats in state legislatures. Compared to 2008, Democrats lost 64 seats in the House and Republicans regained their House majority. The Republican majority elected in 2010 was the largest number of Republicans elected since 1946. The analysis finds that Republican seat gains resulted from the receding of the pro-Democratic waves of 2006 and 2008 as well as the incoming  pro-Republican wave of 2010. Voters rejected Democrats in 2010 for their failure to revive the economy, but also for their advancement of the national healthcare reform and other liberal policies. The analysis speculates that Democrats are likely to gain House seats and lose Senate seats in 2012. Finally, President Obama’s prospects of re-election have probably been improved because of the Republican gains in the 2010 midterm.",
-				"date": "2011/01/10",
-				"shortTitle": "The Midterm Landslide of 2010"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -220,35 +249,33 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Comment on Nordhaus: Carbon Tax Calculations",
 				"creators": [
 					{
-						"firstName": "Yoram",
 						"lastName": "Bauman",
-						"creatorType": "author"
+						"creatorType": "author",
+						"firstName": "Yoram"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2010",
+				"DOI": "10.2202/1553-3832.1796",
+				"ISSN": "1553-3832",
+				"abstractNote": "William Nordhaus confuses the impact of a tax on carbon and a tax on carbon dioxide, according to Yoram Bauman.",
+				"issue": "4",
+				"libraryCatalog": "DeGruyter",
+				"publicationTitle": "The Economists' Voice",
+				"shortTitle": "Comment on Nordhaus",
+				"url": "http://www.degruyter.com/view/j/ev.2010.7.4/ev.2010.7.4.1796/ev.2010.7.4.1796.xml?format=INT",
+				"volume": "7",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
 					}
 				],
-				"title": "Comment on Nordhaus: Carbon Tax Calculations",
-				"publicationTitle": "The Economists' Voice",
-				"volume": "7",
-				"issue": "4",
-				"url": "http://www.degruyter.com/view/j/ev.2010.7.4/ev.2010.7.4.1796/ev.2010.7.4.1796.xml?format=INT",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "www.degruyter.com",
-				"abstractNote": "William Nordhaus confuses the impact of a tax on carbon and a tax on carbon dioxide, according to Yoram Bauman.",
-				"date": "2010/10/08",
-				"shortTitle": "Comment on Nordhaus"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -259,10 +286,11 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.degruyter.com/view/product/218879",
+		"url": "http://www.degruyter.com/view/product/462324?rskey=UXcy67&result=1",
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Datenbanksysteme, Eine Einführung",
 				"creators": [
 					{
 						"lastName": "Kemper",
@@ -275,19 +303,23 @@ var testCases = [
 						"firstName": "André"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Datenbanksysteme, Eine Einführung",
-				"publisher": "De Gruyter",
-				"place": "Berlin, Boston",
-				"ISBN": "978-3-486-59834-6",
-				"url": "http://www.degruyter.com/view/product/218879",
+				"date": "2015",
+				"ISBN": "9783110443752",
+				"abstractNote": "This textbook provides a systematic and thorough introduction to modern database systems. It presents today's leading relational technology in special detail. The 10th edition updates and expands the presentation of recent developments (i.e. main memory database systems and Big Data applications). Extensive examples illustrate the concepts, making the book especially suitable for self study.",
+				"edition": "10th expanded and updated edition",
 				"language": "DT",
-				"date": "2011",
-				"abstractNote": "Dieses Buch vermittelt eine systematische und umfassende Einführung in moderne Datenbanksysteme. Der Schwerpunkt der Darstellung liegt auf der derzeit marktbeherrschenden relationalen Datenbanktechnologie, aber auch Entwicklungen wie XML und Web-Services werden ausführlich behandelt. Das Besondere an diesem Buch: - Das Buch behandelt auch Implementierungsaspekte und betont die praktischen Aspekte des Datenbankbereichs -- ohne jedoch die theoretischen Grundlagen zu vernachlässigen. - Der Einsatz von Datenbanken als Data Warehouse für Decision Support-Anfragen sowie für das Data Mining wird beschrieben. - Ein umfangreiches Kapitel behandelt die Realisierung von Internet-Datenbanken mit Hilfe der Java-Anbindungen. - Inhaltliche Abhängigkeiten zwischen den Kapiteln sind gering gehalten, so dass im Grundstudium vermittelte Gebiete problemlos im Hauptstudium mit den übrigen Kapiteln zu vervollständigen sind. - Alle Konzepte werden an gut verständlichen Beispielen veranschaulicht, so dass sich das Buch hervorragend zum Selbststudium eignet. Eine ideale Ergänzung bietet darüber hinaus das Übungsbuch Datenbanksysteme von Kemper und Wimmer, das Lösungsvorschlage für die Übungsaufgaben und weitergehende (teilweise multimediale) Lernhilfen enthält. Für die 8. Auflage wurden die Ausführungen aktualisiert und neuere Entwicklungen aufgegriffen. Techniken für die Beherrschbarkeit der Informationsflut des Webs, wie NoSQL Key-Value-Speicher, RDF/SPARQL als Grundlage des Semantic Web, Information Retrieval und Suchmaschinen-Grundlagen (u.a. PageRank), hochgradig verteilte Datenverarbeitung (MapReduce), Datenströme, Hauptspeicher-Datenbanken und Cloud/Multi-Tenancy Datenbanken sind einige der neuen Themen.",
-				"libraryCatalog": "DeGruyter"
+				"libraryCatalog": "DeGruyter",
+				"place": "Berlin, Boston",
+				"publisher": "De Gruyter",
+				"url": "http://www.degruyter.com/view/product/462324?rskey=UXcy67&result=1",
+				"attachments": [],
+				"tags": [
+					"Big Data",
+					"Database systems",
+					"SQL"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -297,6 +329,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Did Magic Matter? The Saliency of Magic in the Early Roman Empire",
 				"creators": [
 					{
 						"lastName": "Meggitt",
@@ -304,24 +337,26 @@ var testCases = [
 						"firstName": "Justin J."
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Did Magic Matter? The Saliency of Magic in the Early Roman Empire",
-				"publicationTitle": "Journal of Ancient History",
-				"journalAbbreviation": "jah",
-				"volume": "1",
-				"issue": "2",
-				"pages": "170–229",
-				"ISSN": "2324-8114",
-				"DOI": "10.1515/jah-2013-0010",
-				"url": "http://www.degruyter.com/view/j/jah-2013-1-issue-2/jah-2013-0010/jah-2013-0010.xml",
 				"date": "2013",
+				"DOI": "10.1515/jah-2013-0010",
+				"ISSN": "2324-8114",
 				"abstractNote": "Magic is usually assumed to have been ubiquitous and culturally significant in the early Roman Empire, something exemplified by Pliny the Elder’s claim that “there is no one who does not fear to be spell-bound by curse tablets”.1 A variety of written and material evidence is commonly taken to be indicative of both the regular use of magic and widespread anxiety about its deployment. However, this paper argues that if we attempt, having determined a contextually appropriate definition of magic, to gauge the prevalence and significance of magic in this period, it can be seen to have had little cultural salience. Not only is evidence for its presence more equivocal than usually presumed, but magic is found to be strikingly absent from major popular cultural sources that shed light on the presuppositions and preoccupations of most of the empire’s inhabitants, and to have had little explanatory or symbolic utility. The paper then proceeds to suggest possible reasons for magic’s lack of salience in the early Empire, including the role of various sceptical discourses concerned with the supernatural in general and magic in particular, and the consequence of the largely agonistic context of its use on the limited occasions that it was employed.",
+				"issue": "2",
 				"libraryCatalog": "DeGruyter",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Did Magic Matter?"
+				"pages": "170–229",
+				"publicationTitle": "Journal of Ancient History",
+				"shortTitle": "Did Magic Matter?",
+				"url": "http://www.degruyter.com/view/j/jah-2013-1-issue-2/jah-2013-0010/jah-2013-0010.xml",
+				"volume": "1",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -336,6 +371,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "The Principle of the Eternal-Feminine in Rossini’s L’Italiana in Algeri: Isabella as the Italian Super-Woman",
 				"creators": [
 					{
 						"lastName": "Zamir",
@@ -343,7 +379,17 @@ var testCases = [
 						"firstName": "Sara"
 					}
 				],
-				"notes": [],
+				"date": "2011",
+				"ISSN": "0211-3538",
+				"abstractNote": "La expresión Eterno Femenino (Eternal-Feminine, o Das Ewig-Weibliche), apareció por primera vez en los últimos versos de la segunda parte del Fausto de Goethe (acabado en 1832). Posteriormente, se convirtió en tema de especulación, y en un enigma que los estudiosos han estado intentando resolver desde entonces. La expresión vino a identificar, con el paso del tiempo, un principio cultural relacionado con la imagen de la feminidad y alcanzó su extremo romántico, en el siglo XIX, cuando diversos arquetipos femeninos se fundieron en una sola heroína. El presente artículo pretende explorar el personaje de Isabella en La italianaen Argel de Rossini, a la luz del principio del Eterno Femenino. Aunque Goethe se encontraba todavía escribiendo la segunda parte de su Fausto cuando se estrenó La italiana (1813) en Italia, el principio cultural del Eterno Femenino puede utilizarse retrospectivamente en el análisis de Isabella como protagonista femenino central de la ópera. La lectura minuciosa de su personaje sugiere una aproximación estética que hace uso de ciertos aspectos románticos del principio del Eterno Femenino. El presente artículo se centra específicamente en la escena del Cruda sorte! Amor tiranno! y se refiere brevemente, también, a otras escenas",
+				"archive": "IBZ Online",
+				"issue": "66",
+				"libraryCatalog": "DeGruyter",
+				"pages": "165-180",
+				"publicationTitle": "Anuario Musical",
+				"shortTitle": "The Principle of the Eternal-Feminine in Rossini’s L’Italiana in Algeri",
+				"url": "http://www.degruyter.com/view/IBZ/55568460-8061-41c8-8479-783eefecc02f",
+				"attachments": [],
 				"tags": [
 					"Italian music",
 					"Italienische Musik",
@@ -360,19 +406,8 @@ var testCases = [
 					"orientalism",
 					"theatre"
 				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "The Principle of the Eternal-Feminine in Rossini’s L’Italiana in Algeri: Isabella as the Italian Super-Woman",
-				"archive": "IBZ Online",
-				"ISSN": "0211-3538",
-				"publicationTitle": "Anuario Musical",
-				"issue": "66",
-				"pages": "165-180",
-				"abstractNote": "La expresión Eterno Femenino (Eternal-Feminine, o Das Ewig-Weibliche), apareció por primera vez en los últimos versos de la segunda parte del Fausto de Goethe (acabado en 1832). Posteriormente, se convirtió en tema de especulación, y en un enigma que los estudiosos han estado intentando resolver desde entonces. La expresión vino a identificar, con el paso del tiempo, un principio cultural relacionado con la imagen de la feminidad y alcanzó su extremo romántico, en el siglo XIX, cuando diversos arquetipos femeninos se fundieron en una sola heroína. El presente artículo pretende explorar el personaje de Isabella en La italianaen Argel de Rossini, a la luz del principio del Eterno Femenino. Aunque Goethe se encontraba todavía escribiendo la segunda parte de su Fausto cuando se estrenó La italiana (1813) en Italia, el principio cultural del Eterno Femenino puede utilizarse retrospectivamente en el análisis de Isabella como protagonista femenino central de la ópera. La lectura minuciosa de su personaje sugiere una aproximación estética que hace uso de ciertos aspectos románticos del principio del Eterno Femenino. El presente artículo se centra específicamente en la escena del Cruda sorte! Amor tiranno! y se refiere brevemente, también, a otras escenas",
-				"url": "http://www.degruyter.com/view/IBZ/55568460-8061-41c8-8479-783eefecc02f",
-				"date": "2011",
-				"libraryCatalog": "DeGruyter",
-				"shortTitle": "The Principle of the Eternal-Feminine in Rossini’s L’Italiana in Algeri"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},

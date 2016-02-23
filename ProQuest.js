@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-11-18 10:31:47"
+	"lastUpdated": "2015-09-18 21:39:31"
 }
 
 /*
@@ -32,8 +32,6 @@
 
 var language="English";
 var L={};
-
-var followLink;
 
 //returns an array of values for a given field or array of fields
 //the values are in the same order as the field names
@@ -67,7 +65,7 @@ function getTextValue(doc, fields) {
 
 //initializes field map translations
 function initLang(doc, url) {
-	var lang = ZU.xpathText(doc, '//a[@id="changeLanguageLink"]/text()');
+	var lang = ZU.xpathText(doc, '//a[span[contains(@class,"uxf-globe")]]');
 	if(lang && lang.trim() != "English") {
 		lang = lang.trim();
 
@@ -89,87 +87,90 @@ function initLang(doc, url) {
 	L = {};
 }
 
-function fetchEmbeddedPdf(url, item, callback) {
-	ZU.processDocuments(url, function(doc) {
-		var pdfLink = ZU.xpath(doc, '//span[@class="pdfReader_link"]/a');
-		var attr = 'href';
-
-		//try to fall back to the URL of the embedded PDF
-		if(!pdfLink.length) {
-			Zotero.debug('PDF link not found. Falling back to embedded PDF.');
-			pdfLink = ZU.xpath(doc, '//embed');
-			attr = 'src';
-		}
-
-		if(!pdfLink.length) {
-			Zotero.debug('Could not determine PDF url.');
-			Zotero.debug('Will try to use supplied url: ' + url);
-		} else {
-			url = pdfLink[0][attr];
-		}
-
-		if(pdfLink.length) {
-			item.attachments.push({
-				title: 'Full Text PDF',
-				url: url,
-				mimeType: 'application/pdf'
-			});
-		}
-	}, callback);
-}
-
 function getSearchResults(doc, checkOnly) {
-	var tabs = doc.getElementsByClassName('tabContent');
 	var root;
-	if (tabs.length) {
-		for (var i = 0; i < tabs.length; i++) {
-			if (tabs[i].offsetHeight) {
-				if (Zotero.isBookmarklet && tabs[i].id != 'allResults-content') return false;
-				root = tabs[i].getElementsByClassName('resultListContainer')[0];
-				break;
+	
+	var elements = doc.getElementsByClassName('resultListContainer');
+	for (var i=0; i<elements.length; i++) {
+		if (elements[i] && elements[i].offsetHeight>0) {
+			// Bookmarklet cannot handle ebrary results, because they are cross-origin
+			if (Zotero.isBookmarklet
+				&& ZU.xpath(elements[i], './/ancestor::div[@id="allResults-content"]').length
+			) {
+				return false;
 			}
+			
+			root = elements[i];
+			break;
 		}
-	} else {
-		root = doc.getElementsByClassName('resultListContainer')[0];
-		if (root && !root.offsetHeight) return false; // Not sure if this can actually happen
+	}
+	
+	if (!root) {
+		Z.debug("No root found");
+		return false;
 	}
 
-	if (!root) return false;
-
-	var results = doc.getElementsByClassName('resultItem');
-	//ZU.xpath(root, './/a[contains(@class,"previewTitle") or contains(@class,"resultTitle")]');
-	
+	var results = root.getElementsByClassName('resultItem');
+	//root.querySelectorAll('.resultTitle, .previewTitle');
 	var items = {}, found = false;
 	for(var i=0, n=results.length; i<n; i++) {
-		var title = results[i].getElementsByClassName('resultTitle')[0]
-			|| results[i].getElementsByClassName('previewTitle')[0];
+		var title = results[i].querySelectorAll('.resultTitle, .previewTitle')[0];
 		if (!title || title.nodeName != 'A') continue;
 		
 		if (checkOnly) return true;
 		found = true;
 		
-		items[title.href] = title.textContent;
+		var item = ZU.trimInternal(title.textContent);
+		var preselect = results[i].getElementsByClassName('marked_list_checkbox')[0];
+		if (preselect) {
+			item = {
+				title: item,
+				checked: preselect.checked
+			};
+		}
+		
+		items[title.href] = item;
 	}
 		
 	return found ? items : false;
 }
 
+var map = {
+	"newspaperArticle" : "newspaperArticle",
+	"jnlArticle" : "journalArticle", //also magazineArticles
+	"dissertationPublished" : "thesis",
+	"reportSerial" : "report",
+	"workingPaper" : "report",
+	"book" : "book",
+	"webPage" : "webpage",
+	"blog" : "blogPost",
+	"report" : "report",
+	"audioVideo" : "videoRecording",
+	"default" : "conferencePaper" //also default = manuscript?, referenceWork, encyclopedia
+}
+
 function detectWeb(doc, url) {
 	initLang(doc, url);
-
-	followLink = false;
-
+	
 	//Check for multiple first
-	if (url.indexOf('docview') == -1 &&
-		url.indexOf('pagepdf') == -1) {
-		if (getSearchResults(doc, true))
-			return "multiple";
+	if (url.indexOf('docview') == -1 && url.indexOf('pagepdf') == -1) {
+		return getSearchResults(doc, true) ? 'multiple' : false;
 	}
-
+	
+	//if we are on Abstract/Details page,
+	//then we can read the type from the corresponding field
 	var types = getTextValue(doc, ["Source type", "Document type", "Record type"]);
 	var zoteroType = getItemType(types);
-	if(zoteroType) return zoteroType;
+	if (zoteroType) return zoteroType;
 
+	//search for comments like
+	//<!-- Open:block:newspaperArticle -->
+	//these are also present on the pdf sites
+	var type = doc.getElementById('mainContentLeft');
+	type = type && type.innerHTML.match(/\bopen:block:\S+/i);
+	type = type && map[type[0].substring(11)];
+	if (type) return type;
+	
 	//hack for NYTs, which misses crucial data.
 	var db = getTextValue(doc, "Database")[0];
 	if (db && db.indexOf("The New York Times") !== -1) {
@@ -178,33 +179,16 @@ function detectWeb(doc, url) {
 
 	// Fall back on journalArticle-- even if we couldn't guess the type
 	if(types.length) return "journalArticle";
-
-	if (url.indexOf("/results/") === -1) {
-		//we might be on a page with a link to the abstract/metadata
-		//e.g. pdf view
-		var abstract_link = ZU.xpath(doc, '//a[@class="formats_base_sprite format_abstract"]');
-		if (abstract_link.length == 1) {
-			//let the tranlator know that, instead of scraping this page,
-			//we need to follow the link
-			followLink = true;
-			return (url.indexOf('/dissertations/') != -1)? "thesis" : "journalArticle";
-		}
-	}
-
-	return false;
+	
 }
 
-//we can pass pdfUrl to doWeb if we're coming to abstract/metadata page
-//from full text pdf view
-function doWeb(doc, url, pdfUrl) {
+function doWeb(doc, url, noFollow) {
 	var type = detectWeb(doc, url);
-	if (type != "multiple" && !followLink) {	//see detectWeb
-		scrape(doc, url, type, pdfUrl);
-	} else if(type == "multiple") {
+	if (type == "multiple") {
 		// detect web returned multiple
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) return true;
-
+			
 			var articles = new Array();
 			for(var item in items) {
 				articles.push(item);
@@ -216,45 +200,37 @@ function doWeb(doc, url, pdfUrl) {
 					var translator = Zotero.loadTranslator("web");
 					translator.setTranslator("2abe2519-2f0a-48c0-ad3a-b87b9c059459");
 					translator.setDocument(doc);
-					translator.setHandler("itemDone", function(obj, item) {
-						item.complete();
-					});
 					translator.translate();
 				});
-			}
-			else {			
+			} else {
 				ZU.processDocuments(articles, doWeb);
 			}
 		});
-	//pdfUrl should be undefined unless we are calling doWeb from the following
-	//block, where it is set to false or an actual value
-	} else if(followLink && pdfUrl === undefined) {
-		pdfUrl = false;
-		var link = ZU.xpathText(doc,
-			'//a[@class="formats_base_sprite format_abstract"]/@href');
-		if(!link) return;
-
-		//see if we can get the full text PDF link before we go
-		//the logic here is actually slightly different from fetchEmbeddedPdf
-		if(url.indexOf('fulltextPDF') != -1) {
-			pdfUrl = ZU.xpath(doc, '//embed');
-			if(pdfUrl.length) {
-				pdfUrl = pdfUrl[0].src;
-			} else {
-				pdfUrl = false;
+	} else {
+		var abstractTab = doc.getElementById('tab-AbstractRecord-null') // Seems like that null is a bug and it might change at some point
+			|| doc.getElementById('tab-Record-null'); // Shown as Details
+		if (!(abstractTab && !abstractTab.classList.contains('active'))) {
+			Zotero.debug("On Abstract page, scraping")
+			scrape(doc, url, type);
+		} else if (noFollow) {
+			Z.debug('Not following link again. Attempting to scrape');
+			scrape(doc, url, type);
+		} else {
+			var link = abstractTab.getElementsByTagName('a')[0];
+			if (!link) {
+				throw new Error("Could not find the abstract/metadata link");
 			}
+			Zotero.debug("Going to the Abstract tab");
+			ZU.processDocuments(link.href, function(doc, url) { doWeb(doc, url, true) });
 		}
-
-		ZU.processDocuments(link, function(doc) {
-			doWeb(doc, doc.location.href, pdfUrl) });
 	}
 }
 
-function scrape(doc, url, type, pdfUrl) {
+function scrape(doc, url, type) {
 	var item = new Zotero.Item(type);
 
 	//get all rows
-	var rows = ZU.xpath(doc, '//div[@class="display_record_indexing_row"]');
+	var rows = doc.getElementsByClassName('display_record_indexing_row');
 
 	var label, value, enLabel;
 	var dates = [], place = {}, altKeywords = [];
@@ -328,6 +304,9 @@ function scrape(doc, url, type, pdfUrl) {
 			case 'Pages':
 				item.pages = value;
 			break;
+			case 'First page':
+				item.firstPage = value;
+			break;
 			case 'University/institution':
 			case 'School':
 				item.university = value;
@@ -386,7 +365,7 @@ function scrape(doc, url, type, pdfUrl) {
 		}
 	}
 
-	item.url = url;
+	item.url = url.replace(/\baccountid=[^&#]*&?/, '').replace(/\?(?:#|$)/, '');
 	if (item.itemType=="thesis" && place.schoolLocation) {
 		item.place = place.schoolLocation;
 	}
@@ -399,6 +378,17 @@ function scrape(doc, url, type, pdfUrl) {
 	} 
 
 	item.date = dates.pop();
+
+	// Sometimes we can get first page and num pages for a journal article
+	if (item.firstPage && !item.pages) {
+		var firstPage = parseInt(item.firstPage);
+		var numPages = parseInt(item.numPages);
+		if (!numPages || numPages < 2) {
+			item.pages = item.firstPage;
+		} else {
+			item.pages = firstPage + '–' + (firstPage + numPages - 1);
+		}
+	}
 
 	//sometimes number of pages ends up in pages
 	if(!item.numPages) item.numPages = item.pages;
@@ -435,31 +425,25 @@ function scrape(doc, url, type, pdfUrl) {
 	if(!item.tags.length && altKeywords.length) {
 		item.tags = altKeywords.join(',').split(/\s*(?:,|;)\s*/);
 	}
-
-	item.attachments.push({
-		title: 'Snapshot',
-		document: doc
-	});
-
-	//we may already have a link to the full length PDF
-	if(pdfUrl) {
+	
+	if(doc.getElementById('downloadPDFLink')) {
 		item.attachments.push({
 			title: 'Full Text PDF',
-			url: pdfUrl,
+			url: doc.getElementById('downloadPDFLink').href,
 			mimeType: 'application/pdf'
 		});
 	} else {
-		var pdfLink = ZU.xpath(doc, '(//div[@id="side_panel"]//\
-			a[contains(@class,"format_pdf") and contains(@href,"fulltext") or contains(@href, "preview")])[last()]');
-		if(pdfLink.length) {
-			fetchEmbeddedPdf(pdfLink[0].href, item,
-				function() { item.complete(); });
+		var fullText = ZU.xpath(doc, '//li[@id="tab-Fulltext-null"]/a')[0];
+		if (fullText) {
+			item.attachments.push({
+				title: 'Full Text Snapshot',
+				url: fullText.href,
+				mimeType: 'text/html'
+			});
 		}
 	}
-
-	if(pdfUrl || !pdfLink.length) {
-		item.complete();
-	}
+	
+	item.complete();
 }
 
 function getItemType(types) {
@@ -1121,6 +1105,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "thesis",
+				"title": "Beyond Stanislavsky: The influence of Russian modernism on the American theatre",
 				"creators": [
 					{
 						"firstName": "Valleri Jane",
@@ -1128,17 +1113,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Communication and the arts",
-					"Konstantin",
-					"Konstantin Stanislavsky",
-					"Modernism",
-					"Russian",
-					"Stanislavsky",
-					"Theater"
-				],
-				"seeAlso": [],
+				"date": "2001",
+				"abstractNote": "Russian modernist theatre greatly influenced the development of American theatre during the first three decades of the twentieth century. Several developments encouraged the relationships between Russian artists and their American counterparts, including key tours by Russian artists in America, the advent of modernism in the American theatre, the immigration of Eastern Europeans to the United States, American advertising and consumer culture, and the Bolshevik Revolution and all of its domestic and international ramifications. Within each of these major and overlapping developments, Russian culture became increasingly acknowledged and revered by American artists and thinkers, who were seeking new art forms to express new ideas. This study examines some of the most significant contributions of Russian theatre and its artists in the early decades of the twentieth century. Looking beyond the important visit of the Moscow Art Theatre in 1923, this study charts the contributions of various Russian artists and their American supporters.\nCertainly, the influence of Stanislavsky and the Moscow Art Theatre on the modern American theatre has been significant, but theatre historians' attention to his influence has overshadowed the contributions of other Russian artists, especially those who provided non-realistic approaches to theatre. In order to understand the extent to which Russian theatre influenced the American stage, this study focuses on the critics, intellectuals, producers, and touring artists who encouraged interaction between Russians and Americans, and in the process provided the catalyst for American theatrical experimentation. The key figures in this study include some leaders in the Yiddish intellectual and theatrical communities in New York City, Morris Gest and Otto H. Kahn, who imported many important Russian performers for American audiences, and a number of Russian émigré artists, including Jacob Gordin, Jacob Ben-Ami, Benno Schneider, Boris Aronson, and Michel Fokine, who worked in the American theatre during the first three decades of the twentieth century.",
+				"language": "English",
+				"libraryCatalog": "ProQuest",
+				"numPages": "233",
+				"place": "United States -- Ohio",
+				"rights": "Copyright UMI - Dissertations Publishing 2001",
+				"shortTitle": "Beyond Stanislavsky",
+				"thesisType": "Ph.D.",
+				"university": "The Ohio State University",
+				"url": "http://search.proquest.com/dissertations/docview/251755786/abstract/132B8A749B71E82DBA1/1",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -1148,18 +1133,17 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"numPages": "233",
-				"university": "The Ohio State University",
-				"thesisType": "Ph.D.",
-				"language": "English",
-				"rights": "Copyright UMI - Dissertations Publishing 2001",
-				"url": "http://search.proquest.com/dissertations/docview/251755786/abstract/132B8A749B71E82DBA1/1",
-				"place": "United States -- Ohio",
-				"abstractNote": "Russian modernist theatre greatly influenced the development of American theatre during the first three decades of the twentieth century. Several developments encouraged the relationships between Russian artists and their American counterparts, including key tours by Russian artists in America, the advent of modernism in the American theatre, the immigration of Eastern Europeans to the United States, American advertising and consumer culture, and the Bolshevik Revolution and all of its domestic and international ramifications. Within each of these major and overlapping developments, Russian culture became increasingly acknowledged and revered by American artists and thinkers, who were seeking new art forms to express new ideas. This study examines some of the most significant contributions of Russian theatre and its artists in the early decades of the twentieth century. Looking beyond the important visit of the Moscow Art Theatre in 1923, this study charts the contributions of various Russian artists and their American supporters.\nCertainly, the influence of Stanislavsky and the Moscow Art Theatre on the modern American theatre has been significant, but theatre historians' attention to his influence has overshadowed the contributions of other Russian artists, especially those who provided non-realistic approaches to theatre. In order to understand the extent to which Russian theatre influenced the American stage, this study focuses on the critics, intellectuals, producers, and touring artists who encouraged interaction between Russians and Americans, and in the process provided the catalyst for American theatrical experimentation. The key figures in this study include some leaders in the Yiddish intellectual and theatrical communities in New York City, Morris Gest and Otto H. Kahn, who imported many important Russian performers for American audiences, and a number of Russian émigré artists, including Jacob Gordin, Jacob Ben-Ami, Benno Schneider, Boris Aronson, and Michel Fokine, who worked in the American theatre during the first three decades of the twentieth century.",
-				"libraryCatalog": "ProQuest",
-				"shortTitle": "Beyond Stanislavsky",
-				"title": "Beyond Stanislavsky: The influence of Russian modernism on the American theatre",
-				"date": "2001"
+				"tags": [
+					"Communication and the arts",
+					"Konstantin",
+					"Konstantin Stanislavsky",
+					"Modernism",
+					"Russian",
+					"Stanislavsky",
+					"Theater"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1169,6 +1153,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Peacemaking: moral & policy challenges for a new world // Review",
 				"creators": [
 					{
 						"firstName": "Gerald F.",
@@ -1186,37 +1171,36 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Peace",
-					"Book reviews",
-					"Sciences: Comprehensive Works",
-					"Sociology",
-					"Political Science--International Relations"
-				],
-				"seeAlso": [],
+				"date": "May 1995",
+				"ISSN": "00084697",
+				"abstractNote": "In his \"Introduction\" to the book entitled Peacemaking: Moral and Policy Challenges for a New World, Rev. Drew Christiansen points out that the Roman Catholic bishops of the United States have made a clear distinction between the social teachings of the Church--comprising universally binding moral and ethical principles--and the particular positions they have taken on public policy issues--such as those relating to war, peace, justice, human rights and other socio-political matters. While the former are not to be mitigated under any circumstances, the latter, being particular applications, observations and recommendations, can allow for plurality of opinion and diversity of focus in the case of specific social, political and opinion and diversity of focus in the case of specific social, political and moral issues.(f.1) Peacemaking aligns itself with this second category. The objectives of this review essay are the following: to summarize the main topics and themes, of some of the recently-published documents on Catholic political thought, relating to peacemaking and peacekeeping; and to provide a brief critique of their main contents, recommendations and suggestions.\nThe Directions of Peacemaking: As in the earlier documents, so too are the virtues of faith, hope, courage, compassion, humility, kindness, patience, perseverance, civility and charity emphasized, in The Harvest of Justice, as definite aids in peacemaking and peacekeeping. The visions of global common good, social and economic development consistent with securing and nurturing conditions for justice and peace, solidarity among people, as well as cooperation among the industrial rich and the poor developing nations are also emphasized as positive enforcements in the peacemaking and peacekeeping processes. All of these are laudable commitments, so long as they are pursued through completely pacifist perspectives. The Harvest of Justice also emphasizes that, \"as far as possible, justice should be sought through nonviolent means;\" however, \"when sustained attempt at nonviolent action fails, then legitimate political authorities are permitted as a last resort to employ limited force to rescue the innocent and establish justice.\"(f.13) The document also frankly admits that \"the vision of Christian nonviolence is not passive.\"(f.14) Such a position may disturb many pacifists. Even though some restrictive conditions--such as a \"just cause,\" \"comparative justice,\" legitimate authority\" to pursue justice issues, \"right intentions,\" probability of success, proportionality of gains and losses in pursuing justice, and the use of force as last resort--are indicated and specified in the document, the use of violence and devastation are sanctioned, nevertheless, by its reaffirmation of the use of force in setting issues and by its support of the validity of the \"just war\" tradition.\nThe first section, entitled \"Theology, Morality, and Foreign Policy in A New World,\" contains four essays. These deal with the new challenges of peace, the illusion of control, creating peace conditions through a theological framework, as well as moral reasoning and foreign policy after the containment. The second, comprising six essays, is entitled \"Human Rights, Self-Determination, and Sustainable Development.\" These essays deal with effective human rights agenda, religious nationalism and human rights, identity, sovereignty, and self-determination, peace and the moral imperatives of democracy, and political economy of peace. The two essays which comprise the third section, entitled \"Global Institutions,\" relate the strengthening of the global institutions and action for the future. The fourth, entitled \"The Use of Force After the Cold War,\" is both interesting and controversial. Its six essays discuss ethical dilemmas in the use of force, development of the just-war tradition, in a multicultural world, casuistry, pacifism, and the just-war tradition, possibilities and limits of humanitarian intervention, and the challenge of peace and stability in a new international order. The last section, devoted to \"Education and Action for Peace,\" contains three essays, which examine the education for peacemaking, the challenge of conscience and the pastoral response to ongoing challenge of peace.",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"issue": "2",
+				"language": "English",
+				"libraryCatalog": "ProQuest",
+				"numPages": "0",
+				"pages": "90-100",
+				"place": "Winnipeg, Canada",
+				"publicationTitle": "Peace Research",
+				"publisher": "Menno Simons College",
+				"rights": "Copyright Peace Research May 1995",
+				"shortTitle": "Peacemaking",
+				"url": "http://search.proquest.com/docview/213445241",
+				"volume": "27",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"title": "Peacemaking: moral & policy challenges for a new world // Review",
-				"publicationTitle": "Peace Research",
-				"volume": "27",
-				"issue": "2",
-				"pages": "90-100",
-				"numPages": "0",
-				"publisher": "Menno Simons College",
-				"ISSN": "00084697",
-				"language": "English",
-				"rights": "Copyright Peace Research May 1995",
-				"url": "http://search.proquest.com/docview/213445241",
-				"place": "Winnipeg, Canada",
-				"date": "May 1995",
-				"abstractNote": "In his \"Introduction\" to the book entitled Peacemaking: Moral and Policy Challenges for a New World, Rev. Drew Christiansen points out that the Roman Catholic bishops of the United States have made a clear distinction between the social teachings of the Church--comprising universally binding moral and ethical principles--and the particular positions they have taken on public policy issues--such as those relating to war, peace, justice, human rights and other socio-political matters. While the former are not to be mitigated under any circumstances, the latter, being particular applications, observations and recommendations, can allow for plurality of opinion and diversity of focus in the case of specific social, political and opinion and diversity of focus in the case of specific social, political and moral issues.(f.1) Peacemaking aligns itself with this second category. The objectives of this review essay are the following: to summarize the main topics and themes, of some of the recently-published documents on Catholic political thought, relating to peacemaking and peacekeeping; and to provide a brief critique of their main contents, recommendations and suggestions.\nThe Directions of Peacemaking: As in the earlier documents, so too are the virtues of faith, hope, courage, compassion, humility, kindness, patience, perseverance, civility and charity emphasized, in The Harvest of Justice, as definite aids in peacemaking and peacekeeping. The visions of global common good, social and economic development consistent with securing and nurturing conditions for justice and peace, solidarity among people, as well as cooperation among the industrial rich and the poor developing nations are also emphasized as positive enforcements in the peacemaking and peacekeeping processes. All of these are laudable commitments, so long as they are pursued through completely pacifist perspectives. The Harvest of Justice also emphasizes that, \"as far as possible, justice should be sought through nonviolent means;\" however, \"when sustained attempt at nonviolent action fails, then legitimate political authorities are permitted as a last resort to employ limited force to rescue the innocent and establish justice.\"(f.13) The document also frankly admits that \"the vision of Christian nonviolence is not passive.\"(f.14) Such a position may disturb many pacifists. Even though some restrictive conditions--such as a \"just cause,\" \"comparative justice,\" legitimate authority\" to pursue justice issues, \"right intentions,\" probability of success, proportionality of gains and losses in pursuing justice, and the use of force as last resort--are indicated and specified in the document, the use of violence and devastation are sanctioned, nevertheless, by its reaffirmation of the use of force in setting issues and by its support of the validity of the \"just war\" tradition.\nThe first section, entitled \"Theology, Morality, and Foreign Policy in A New World,\" contains four essays. These deal with the new challenges of peace, the illusion of control, creating peace conditions through a theological framework, as well as moral reasoning and foreign policy after the containment. The second, comprising six essays, is entitled \"Human Rights, Self-Determination, and Sustainable Development.\" These essays deal with effective human rights agenda, religious nationalism and human rights, identity, sovereignty, and self-determination, peace and the moral imperatives of democracy, and political economy of peace. The two essays which comprise the third section, entitled \"Global Institutions,\" relate the strengthening of the global institutions and action for the future. The fourth, entitled \"The Use of Force After the Cold War,\" is both interesting and controversial. Its six essays discuss ethical dilemmas in the use of force, development of the just-war tradition, in a multicultural world, casuistry, pacifism, and the just-war tradition, possibilities and limits of humanitarian intervention, and the challenge of peace and stability in a new international order. The last section, devoted to \"Education and Action for Peace,\" contains three essays, which examine the education for peacemaking, the challenge of conscience and the pastoral response to ongoing challenge of peace.",
-				"libraryCatalog": "ProQuest",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Peacemaking"
+				"tags": [
+					"Book reviews",
+					"Peace",
+					"Political Science--International Relations",
+					"Sciences: Comprehensive Works",
+					"Sociology"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1226,6 +1210,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "Rethinking Policy on East Germany",
 				"creators": [
 					{
 						"firstName": "F. Stephen",
@@ -1238,11 +1223,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"General Interest Periodicals--United States"
-				],
-				"seeAlso": [],
+				"date": "Aug 22, 1984",
+				"ISSN": "03624331",
+				"abstractNote": "For some months now, a gradual thaw has been in the making between East Germany and West Germany. So far, the United States has paid scant attention -- an attitude very much in keeping with our neglect of East Germany throughout the postwar period. We should reconsider this policy before things much further -- and should in particular begin to look more closely at what is going on in East Germany.",
+				"language": "English",
+				"libraryCatalog": "ProQuest",
+				"pages": "A23",
+				"place": "New York, N.Y., United States",
+				"publicationTitle": "New York Times (1923-Current file)",
+				"rights": "Copyright New York Times Company Aug 22, 1984",
+				"url": "http://search.proquest.com/hnpnewyorktimes/docview/122485317/abstract/1357D8A4FC136DF28E3/11?accountid=12861",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -1252,17 +1242,11 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"ISSN": "03624331",
-				"language": "English",
-				"rights": "Copyright New York Times Company Aug 22, 1984",
-				"url": "http://search.proquest.com/hnpnewyorktimes/docview/122485317/abstract/1357D8A4FC136DF28E3/11?accountid=12861",
-				"place": "New York, N.Y., United States",
-				"abstractNote": "For some months now, a gradual thaw has been in the making between East Germany and West Germany. So far, the United States has paid scant attention -- an attitude very much in keeping with our neglect of East Germany throughout the postwar period. We should reconsider this policy before things much further -- and should in particular begin to look more closely at what is going on in East Germany.",
-				"libraryCatalog": "ProQuest",
-				"title": "Rethinking Policy on East Germany",
-				"publicationTitle": "New York Times (1923-Current file)",
-				"pages": "A23",
-				"date": "Aug 22, 1984"
+				"tags": [
+					"General Interest Periodicals--United States"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1272,12 +1256,18 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "THE PRESIDENT AND ALDRICH.: Railway Age Relates Happenings Behind the Scenes Regarding Rate Regulation.",
 				"creators": [],
-				"notes": [],
-				"tags": [
-					"Business And Economics--Banking And Finance"
-				],
-				"seeAlso": [],
+				"date": "Dec 5, 1905",
+				"abstractNote": "The Railway Age says: \"The history of the affair (railroad rate question) as it has gone on behind the scenes, is about as follows.",
+				"language": "English",
+				"libraryCatalog": "ProQuest",
+				"pages": "7",
+				"place": "New York, N.Y., United States",
+				"publicationTitle": "Wall Street Journal (1889-1922)",
+				"rights": "Copyright Dow Jones & Company Inc Dec 5, 1905",
+				"shortTitle": "THE PRESIDENT AND ALDRICH.",
+				"url": "http://search.proquest.com/docview/129023293/abstract?",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -1287,20 +1277,11 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "THE PRESIDENT AND ALDRICH.: Railway Age Relates Happenings Behind the Scenes Regarding Rate Regulation.",
-				"publicationTitle": "Wall Street Journal (1889-1922)",
-				"pages": "7",
-				"numPages": "1",
-				"publisher": "Dow Jones & Company Inc",
-				"language": "English",
-				"rights": "Copyright Dow Jones & Company Inc Dec 5, 1905",
-				"url": "http://search.proquest.com/docview/129023293/abstract?accountid=12861",
-				"place": "New York, N.Y., United States",
-				"date": "Dec 5, 1905",
-				"abstractNote": "The Railway Age says: \"The history of the affair (railroad rate question) as it has gone on behind the scenes, is about as follows.",
-				"libraryCatalog": "ProQuest",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "THE PRESIDENT AND ALDRICH."
+				"tags": [
+					"Business And Economics--Banking And Finance"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1310,6 +1291,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "thesis",
+				"title": "Beyond Stanislavsky: The influence of Russian modernism on the American theatre",
 				"creators": [
 					{
 						"firstName": "Valleri Jane",
@@ -1317,17 +1299,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Communication and the arts",
-					"Konstantin",
-					"Konstantin Stanislavsky",
-					"Modernism",
-					"Russian",
-					"Stanislavsky",
-					"Theater"
-				],
-				"seeAlso": [],
+				"date": "2001",
+				"abstractNote": "Russian modernist theatre greatly influenced the development of American theatre during the first three decades of the twentieth century. Several developments encouraged the relationships between Russian artists and their American counterparts, including key tours by Russian artists in America, the advent of modernism in the American theatre, the immigration of Eastern Europeans to the United States, American advertising and consumer culture, and the Bolshevik Revolution and all of its domestic and international ramifications. Within each of these major and overlapping developments, Russian culture became increasingly acknowledged and revered by American artists and thinkers, who were seeking new art forms to express new ideas. This study examines some of the most significant contributions of Russian theatre and its artists in the early decades of the twentieth century. Looking beyond the important visit of the Moscow Art Theatre in 1923, this study charts the contributions of various Russian artists and their American supporters.\nCertainly, the influence of Stanislavsky and the Moscow Art Theatre on the modern American theatre has been significant, but theatre historians' attention to his influence has overshadowed the contributions of other Russian artists, especially those who provided non-realistic approaches to theatre. In order to understand the extent to which Russian theatre influenced the American stage, this study focuses on the critics, intellectuals, producers, and touring artists who encouraged interaction between Russians and Americans, and in the process provided the catalyst for American theatrical experimentation. The key figures in this study include some leaders in the Yiddish intellectual and theatrical communities in New York City, Morris Gest and Otto H. Kahn, who imported many important Russian performers for American audiences, and a number of Russian émigré artists, including Jacob Gordin, Jacob Ben-Ami, Benno Schneider, Boris Aronson, and Michel Fokine, who worked in the American theatre during the first three decades of the twentieth century.",
+				"language": "English",
+				"libraryCatalog": "ProQuest",
+				"numPages": "233",
+				"place": "United States -- Ohio",
+				"rights": "Copyright UMI - Dissertations Publishing 2001",
+				"shortTitle": "Beyond Stanislavsky",
+				"thesisType": "Ph.D.",
+				"university": "The Ohio State University",
+				"url": "http://search.proquest.com/dissertations/docview/251755786/abstract?",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -1337,18 +1319,17 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"numPages": "233",
-				"university": "The Ohio State University",
-				"thesisType": "Ph.D.",
-				"language": "English",
-				"rights": "Copyright UMI - Dissertations Publishing 2001",
-				"url": "http://search.proquest.com/dissertations/docview/251755786/abstract?accountid=14541",
-				"place": "United States -- Ohio",
-				"abstractNote": "Russian modernist theatre greatly influenced the development of American theatre during the first three decades of the twentieth century. Several developments encouraged the relationships between Russian artists and their American counterparts, including key tours by Russian artists in America, the advent of modernism in the American theatre, the immigration of Eastern Europeans to the United States, American advertising and consumer culture, and the Bolshevik Revolution and all of its domestic and international ramifications. Within each of these major and overlapping developments, Russian culture became increasingly acknowledged and revered by American artists and thinkers, who were seeking new art forms to express new ideas. This study examines some of the most significant contributions of Russian theatre and its artists in the early decades of the twentieth century. Looking beyond the important visit of the Moscow Art Theatre in 1923, this study charts the contributions of various Russian artists and their American supporters.\nCertainly, the influence of Stanislavsky and the Moscow Art Theatre on the modern American theatre has been significant, but theatre historians' attention to his influence has overshadowed the contributions of other Russian artists, especially those who provided non-realistic approaches to theatre. In order to understand the extent to which Russian theatre influenced the American stage, this study focuses on the critics, intellectuals, producers, and touring artists who encouraged interaction between Russians and Americans, and in the process provided the catalyst for American theatrical experimentation. The key figures in this study include some leaders in the Yiddish intellectual and theatrical communities in New York City, Morris Gest and Otto H. Kahn, who imported many important Russian performers for American audiences, and a number of Russian émigré artists, including Jacob Gordin, Jacob Ben-Ami, Benno Schneider, Boris Aronson, and Michel Fokine, who worked in the American theatre during the first three decades of the twentieth century.",
-				"libraryCatalog": "ProQuest",
-				"shortTitle": "Beyond Stanislavsky",
-				"title": "Beyond Stanislavsky: The influence of Russian modernism on the American theatre",
-				"date": "2001"
+				"tags": [
+					"Communication and the arts",
+					"Konstantin",
+					"Konstantin Stanislavsky",
+					"Modernism",
+					"Russian",
+					"Stanislavsky",
+					"Theater"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1358,6 +1339,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "thesis",
+				"title": "Beyond Stanislavsky: The influence of Russian modernism on the American theatre",
 				"creators": [
 					{
 						"firstName": "Valleri Jane",
@@ -1365,17 +1347,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Communication and the arts",
-					"Konstantin",
-					"Konstantin Stanislavsky",
-					"Modernism",
-					"Russian",
-					"Stanislavsky",
-					"Theater"
-				],
-				"seeAlso": [],
+				"date": "2001",
+				"abstractNote": "Russian modernist theatre greatly influenced the development of American theatre during the first three decades of the twentieth century. Several developments encouraged the relationships between Russian artists and their American counterparts, including key tours by Russian artists in America, the advent of modernism in the American theatre, the immigration of Eastern Europeans to the United States, American advertising and consumer culture, and the Bolshevik Revolution and all of its domestic and international ramifications. Within each of these major and overlapping developments, Russian culture became increasingly acknowledged and revered by American artists and thinkers, who were seeking new art forms to express new ideas. This study examines some of the most significant contributions of Russian theatre and its artists in the early decades of the twentieth century. Looking beyond the important visit of the Moscow Art Theatre in 1923, this study charts the contributions of various Russian artists and their American supporters.\nCertainly, the influence of Stanislavsky and the Moscow Art Theatre on the modern American theatre has been significant, but theatre historians' attention to his influence has overshadowed the contributions of other Russian artists, especially those who provided non-realistic approaches to theatre. In order to understand the extent to which Russian theatre influenced the American stage, this study focuses on the critics, intellectuals, producers, and touring artists who encouraged interaction between Russians and Americans, and in the process provided the catalyst for American theatrical experimentation. The key figures in this study include some leaders in the Yiddish intellectual and theatrical communities in New York City, Morris Gest and Otto H. Kahn, who imported many important Russian performers for American audiences, and a number of Russian émigré artists, including Jacob Gordin, Jacob Ben-Ami, Benno Schneider, Boris Aronson, and Michel Fokine, who worked in the American theatre during the first three decades of the twentieth century.",
+				"language": "English",
+				"libraryCatalog": "ProQuest",
+				"numPages": "233",
+				"place": "United States -- Ohio",
+				"rights": "Copyright UMI - Dissertations Publishing 2001",
+				"shortTitle": "Beyond Stanislavsky",
+				"thesisType": "Ph.D.",
+				"university": "The Ohio State University",
+				"url": "http://search.proquest.com/dissertations/docview/251755786/abstract?",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -1385,18 +1367,17 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"numPages": "233",
-				"university": "The Ohio State University",
-				"thesisType": "Ph.D.",
-				"language": "English",
-				"rights": "Copyright UMI - Dissertations Publishing 2001",
-				"url": "http://search.proquest.com/dissertations/docview/251755786/abstract?accountid=14541",
-				"place": "United States -- Ohio",
-				"abstractNote": "Russian modernist theatre greatly influenced the development of American theatre during the first three decades of the twentieth century. Several developments encouraged the relationships between Russian artists and their American counterparts, including key tours by Russian artists in America, the advent of modernism in the American theatre, the immigration of Eastern Europeans to the United States, American advertising and consumer culture, and the Bolshevik Revolution and all of its domestic and international ramifications. Within each of these major and overlapping developments, Russian culture became increasingly acknowledged and revered by American artists and thinkers, who were seeking new art forms to express new ideas. This study examines some of the most significant contributions of Russian theatre and its artists in the early decades of the twentieth century. Looking beyond the important visit of the Moscow Art Theatre in 1923, this study charts the contributions of various Russian artists and their American supporters.\nCertainly, the influence of Stanislavsky and the Moscow Art Theatre on the modern American theatre has been significant, but theatre historians' attention to his influence has overshadowed the contributions of other Russian artists, especially those who provided non-realistic approaches to theatre. In order to understand the extent to which Russian theatre influenced the American stage, this study focuses on the critics, intellectuals, producers, and touring artists who encouraged interaction between Russians and Americans, and in the process provided the catalyst for American theatrical experimentation. The key figures in this study include some leaders in the Yiddish intellectual and theatrical communities in New York City, Morris Gest and Otto H. Kahn, who imported many important Russian performers for American audiences, and a number of Russian émigré artists, including Jacob Gordin, Jacob Ben-Ami, Benno Schneider, Boris Aronson, and Michel Fokine, who worked in the American theatre during the first three decades of the twentieth century.",
-				"libraryCatalog": "ProQuest",
-				"shortTitle": "Beyond Stanislavsky",
-				"title": "Beyond Stanislavsky: The influence of Russian modernism on the American theatre",
-				"date": "2001"
+				"tags": [
+					"Communication and the arts",
+					"Konstantin",
+					"Konstantin Stanislavsky",
+					"Modernism",
+					"Russian",
+					"Stanislavsky",
+					"Theater"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -1406,6 +1387,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Microsatellite variation and significant population genetic structure of endangered finless porpoises (Neophocaena phocaenoides) in Chinese coastal waters and the Yangtze River",
 				"creators": [
 					{
 						"firstName": "Lian",
@@ -1433,25 +1415,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"CABSCLASS",
-					"84.5.22",
-					"GENETICS AND MOLECULAR BIOLOGY",
-					"EUKARYOTIC GENETICS",
-					"Ecological and Population Genetics",
-					"CABSCLASS",
-					"84.5.34",
-					"GENETICS AND MOLECULAR BIOLOGY",
-					"EUKARYOTIC GENETICS",
-					"Mammalian Genetics",
-					"CABSCLASS",
-					"92.7.2",
-					"PLANT SCIENCE",
-					"DEVELOPMENT",
-					"Growth Regulators"
-				],
-				"seeAlso": [],
+				"date": "2020",
+				"DOI": "http://dx.doi.org/10.1007/s00227-010-1420-x",
+				"ISSN": "0025-3162",
+				"abstractNote": "The finless porpoise (Neophocaena phocaenoides) inhabits a wide range of tropical and temperate waters of the Indo-Pacific region. Genetic structure of finless porpoises in Chinese waters in three regions (Yangtze River, Yellow Sea, and South China Sea) was analyzed, including the Yangtze finless porpoise which is widely known because of its highly endangered status and unusual adaptation to freshwater. To assist in conservation and management of this species, ten microsatellite loci were used to genotype 125 individuals from the three regions. Contrary to the low genetic diversity revealed in previous mtDNA control region sequence analyses, relatively high levels of genetic variation in microsatellite profiles (HE= 0.732-0.795) were found. Bayesian clustering analysis suggested that finless porpoises in Chinese waters could be described as three distinct genetic groups, which corresponded well to population \"units\" (populations, subspecies, or species) delimited in earlier studies, based on morphological variation, distribution, and genetic analyses. Genetic differentiation between regions was significant, with FST values ranging from 0.07 to 0.137. Immigration rates estimated using a Bayesian method and population ancestry analyses suggested no or very limited gene flow among regional types, even in the area of overlap between types. These results strongly support the classification of porpoises in these regions into distinct evolutionarily significant units, including at least two separate species, and therefore they should be treated as different management units in the design and implementation of conservation programmes. © 2010 Springer-Verlag.",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"issue": "7",
+				"language": "English",
+				"libraryCatalog": "ProQuest",
+				"numPages": "10",
+				"pages": "1453-1462",
+				"publicationTitle": "Marine Biology",
+				"url": "http://search.proquest.com/docview/925553601/137CCF69B9E7916BDCF/1?accountid=14541",
+				"volume": "157",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -1461,20 +1437,69 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "Microsatellite variation and significant population genetic structure of endangered finless porpoises (Neophocaena phocaenoides) in Chinese coastal waters and the Yangtze River",
-				"publicationTitle": "Marine Biology",
-				"volume": "157",
-				"issue": "7",
-				"pages": "1453-1462",
-				"numPages": "10",
-				"ISSN": "0025-3162",
+				"tags": [
+					"84.5.22",
+					"84.5.34",
+					"92.7.2",
+					"CABSCLASS",
+					"CABSCLASS",
+					"CABSCLASS",
+					"DEVELOPMENT",
+					"EUKARYOTIC GENETICS",
+					"EUKARYOTIC GENETICS",
+					"Ecological and Population Genetics",
+					"GENETICS AND MOLECULAR BIOLOGY",
+					"GENETICS AND MOLECULAR BIOLOGY",
+					"Growth Regulators",
+					"Mammalian Genetics",
+					"PLANT SCIENCE"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://search.proquest.com/docview/1297954386/citation?accountid=12861",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Women's Rights as Human Rights: Toward a Re-Vision of Human Rights",
+				"creators": [
+					{
+						"firstName": "Charlotte",
+						"lastName": "Bunch",
+						"creatorType": "author"
+					}
+				],
+				"date": "Nov 1, 1990",
+				"ISSN": "0275-0392",
+				"issue": "4",
 				"language": "English",
-				"DOI": "http://dx.doi.org/10.1007/s00227-010-1420-x",
-				"url": "http://search.proquest.com/docview/925553601/137CCF69B9E7916BDCF/1?accountid=14541",
-				"date": "2020",
-				"abstractNote": "The finless porpoise (Neophocaena phocaenoides) inhabits a wide range of tropical and temperate waters of the Indo-Pacific region. Genetic structure of finless porpoises in Chinese waters in three regions (Yangtze River, Yellow Sea, and South China Sea) was analyzed, including the Yangtze finless porpoise which is widely known because of its highly endangered status and unusual adaptation to freshwater. To assist in conservation and management of this species, ten microsatellite loci were used to genotype 125 individuals from the three regions. Contrary to the low genetic diversity revealed in previous mtDNA control region sequence analyses, relatively high levels of genetic variation in microsatellite profiles (HE= 0.732-0.795) were found. Bayesian clustering analysis suggested that finless porpoises in Chinese waters could be described as three distinct genetic groups, which corresponded well to population \"units\" (populations, subspecies, or species) delimited in earlier studies, based on morphological variation, distribution, and genetic analyses. Genetic differentiation between regions was significant, with FST values ranging from 0.07 to 0.137. Immigration rates estimated using a Bayesian method and population ancestry analyses suggested no or very limited gene flow among regional types, even in the area of overlap between types. These results strongly support the classification of porpoises in these regions into distinct evolutionarily significant units, including at least two separate species, and therefore they should be treated as different management units in the design and implementation of conservation programmes. © 2010 Springer-Verlag.",
 				"libraryCatalog": "ProQuest",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"pages": "486–498",
+				"publicationTitle": "Human Rights Quarterly",
+				"shortTitle": "Women's Rights as Human Rights",
+				"url": "http://search.proquest.com/docview/1297954386/citation",
+				"volume": "12",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					"Law",
+					"Law--Civil Law",
+					"Political Science",
+					"Political Science--Civil Rights",
+					"Social Sciences (General)",
+					"Social Sciences: Comprehensive Works",
+					"Sociology"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

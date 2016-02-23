@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-06-09 07:32:25"
+	"lastUpdated": "2016-02-16 03:42:26"
 }
 
 function detectWeb(doc, url) {
@@ -105,13 +105,13 @@ function doWeb(doc, url) {
 }
 
 function scrape (doc, url) {
- 	var arnumber = url.match(/arnumber=(\d+)/)[1];
-  	var pdf = ZU.xpathText(doc, '//span[contains(@class, "button")]/a[@class="pdf"]/@href')
-  	Z.debug(pdf);
-  	Z.debug("arNumber = " + arnumber);
-  	var post = "recordIds=" + arnumber + "&fromPage=&citations-format=citation-abstract&download-format=download-bibtex";
-  	ZU.doPost('/xpl/downloadCitations', post, function(text) {
-  		text = ZU.unescapeHTML(text.replace(/(&[^\s;]+) and/g, '$1;'));
+	var arnumber = url.match(/arnumber=(\d+)/)[1];
+	var pdf = ZU.xpathText(doc, '//span[contains(@class, "button")]/a[@class="pdf"]/@href')
+	Z.debug(pdf);
+	Z.debug("arNumber = " + arnumber);
+	var post = "recordIds=" + arnumber + "&fromPage=&citations-format=citation-abstract&download-format=download-bibtex";
+	ZU.doPost('/xpl/downloadCitations', post, function(text) {
+		text = ZU.unescapeHTML(text.replace(/(&[^\s;]+) and/g, '$1;'));
 		//remove empty tag - we can take this out once empty tags are ignored
 		text = text.replace(/(keywords=\{.+);\}/, "$1}");
 		var earlyaccess = false;
@@ -139,18 +139,28 @@ function scrape (doc, url) {
 				item.issue = "";
 				item.pages = "";
 			}
+			
+			item.attachments.push({
+				document: doc,
+				title: "IEEE Xplore Abstract Record"
+			});
+			
 			if (pdf) {
 				ZU.doGet(pdf, function (src) {
-					var m = /<frame src="(.*\.pdf.*)"/.exec(src);
-					if (m) item.attachments = [{
-						url: m[1],
-						title: "IEEE Xplore Full Text PDF",
-						mimeType: "application/pdf"
-					}, {url: url, title: "IEEE Xplore Abstract Record", mimeType: "text/html"}];
+					// Either the PDF is embedded in the page, or (e.g. for iOS)
+					// the page has a redirect to the full-page PDF
+					var m = /<frame src="([^"]+\.pdf\b[^"]*)"|<meta HTTP-EQUIV="REFRESH" content="0; url=([^\s"]+\.pdf\b[^\s"]*)"/.exec(src);
+					var pdfUrl = m && (m[1] || m[2]);
+					if (pdfUrl) {
+						item.attachments.unshift({
+							url: pdfUrl,
+							title: "IEEE Xplore Full Text PDF",
+							mimeType: "application/pdf"
+						});
+					}
 					item.complete();
 				}, null);
 			} else {
-				item.attachments=[{url: url, title: "IEEE Xplore Abstract Record", mimeType: "text/html"}];
 				item.complete();
 			}
 		});
@@ -192,8 +202,7 @@ var testCases = [
 				"volume": "16",
 				"attachments": [
 					{
-						"title": "IEEE Xplore Abstract Record",
-						"mimeType": "text/html"
+						"title": "IEEE Xplore Abstract Record"
 					}
 				],
 				"tags": [
@@ -262,12 +271,7 @@ var testCases = [
 				"volume": "51",
 				"attachments": [
 					{
-						"title": "IEEE Xplore Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "IEEE Xplore Abstract Record",
-						"mimeType": "text/html"
+						"title": "IEEE Xplore Abstract Record"
 					}
 				],
 				"tags": [
@@ -295,7 +299,6 @@ var testCases = [
 					"multitemporal very high resolution image classification",
 					"nonlinear deformation",
 					"nonlinear transform",
-					"remote sensing",
 					"remote sensing",
 					"source domain",
 					"support vector machine (SVM)",
@@ -356,8 +359,7 @@ var testCases = [
 				"volume": "52",
 				"attachments": [
 					{
-						"title": "IEEE Xplore Abstract Record",
-						"mimeType": "text/html"
+						"title": "IEEE Xplore Abstract Record"
 					}
 				],
 				"tags": [
@@ -398,6 +400,95 @@ var testCases = [
 					"time modeling",
 					"waveguide photodetectors",
 					"waveguide separated absorption charge multiplication avalanche photodetector"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://ieeexplore.ieee.org/xpl/articleDetails.jsp?arnumber=6919256&punumber%3D6287639",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Information Security in Big Data: Privacy and Data Mining",
+				"creators": [
+					{
+						"firstName": "Lei",
+						"lastName": "Xu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Chunxiao",
+						"lastName": "Jiang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jian",
+						"lastName": "Wang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jian",
+						"lastName": "Yuan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yong",
+						"lastName": "Ren",
+						"creatorType": "author"
+					}
+				],
+				"date": "2014",
+				"DOI": "10.1109/ACCESS.2014.2362522",
+				"ISSN": "2169-3536",
+				"abstractNote": "The growing popularity and development of data mining technologies bring serious threat to the security of individual,'s sensitive information. An emerging research topic in data mining, known as privacy-preserving data mining (PPDM), has been extensively studied in recent years. The basic idea of PPDM is to modify the data in such a way so as to perform data mining algorithms effectively without compromising the security of sensitive information contained in the data. Current studies of PPDM mainly focus on how to reduce the privacy risk brought by data mining operations, while in fact, unwanted disclosure of sensitive information may also happen in the process of data collecting, data publishing, and information (i.e., the data mining results) delivering. In this paper, we view the privacy issues related to data mining from a wider perspective and investigate various approaches that can help to protect sensitive information. In particular, we identify four different types of users involved in data mining applications, namely, data provider, data collector, data miner, and decision maker. For each type of user, we discuss his privacy concerns and the methods that can be adopted to protect sensitive information. We briefly introduce the basics of related research topics, review state-of-the-art approaches, and present some preliminary thoughts on future research directions. Besides exploring the privacy-preserving approaches for each type of user, we also review the game theoretical approaches, which are proposed for analyzing the interactions among different users in a data mining scenario, each of whom has his own valuation on the sensitive information. By differentiating the responsibilities of different users with respect to security of sensitive information, we would like to provide some useful insights into the study of PPDM.",
+				"itemID": "6919256",
+				"libraryCatalog": "IEEE Xplore",
+				"pages": "1149-1176",
+				"publicationTitle": "IEEE Access",
+				"shortTitle": "Information Security in Big Data",
+				"volume": "2",
+				"attachments": [
+					{
+						"title": "IEEE Xplore Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "IEEE Xplore Abstract Record"
+					}
+				],
+				"tags": [
+					"Algorithm design and analysis",
+					"Big Data",
+					"Computer security",
+					"Data mining",
+					"Data privacy",
+					"Game theory",
+					"PPDM",
+					"Privacy",
+					"Tracking",
+					"anonymization",
+					"anti-tracking",
+					"data acquisition",
+					"data collector",
+					"data miner",
+					"data mining",
+					"data protection",
+					"data provider",
+					"data publishing",
+					"decision maker",
+					"game theory",
+					"information protection",
+					"information security",
+					"privacy auction",
+					"privacy preserving data mining",
+					"privacy-preserving data mining",
+					"privacypreserving data mining",
+					"provenance",
+					"security of data",
+					"sensitive information"
 				],
 				"notes": [],
 				"seeAlso": []

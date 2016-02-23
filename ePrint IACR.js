@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-06-27 02:17:58"
+	"lastUpdated": "2016-01-04 13:32:05"
 }
 
 function detectWeb(doc, url) {
@@ -24,16 +24,17 @@ function detectWeb(doc, url) {
 
 function scrape(doc, url) {
 	var reportNoXPath = "//h2";
-	var titleXPath    = "//p[1]/b";
-	var authorsXPath  = "//p[2]/i";
+	var titleXPath    = "(//p/b)[1]";
+	var authorsXPath  = "(//p/i)[1]";
 	var abstractXPath = "//p[starts-with(b/text(),\"Abstract\")]/text() | //p[not(*)]";
 	var keywordsXPath = "//p[starts-with(b/text(),\"Category\")]";
 
 	var reportNo = doc.evaluate(reportNoXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	reportNo = reportNo.match(/(\d{4})\/(\d{3})$/);
-	var year = reportNo[1];
-	var no   = reportNo[2];
-
+	reportNo = reportNo.match(/(\d{4})\/(\d{3,4})$/);
+	if (reportNo){
+		var year = reportNo[1];
+		var no   = reportNo[2];
+	}
 	var title = doc.evaluate(titleXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 
 	var authors = doc.evaluate(authorsXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
@@ -93,7 +94,6 @@ function doWeb(doc, url) {
 		}
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
-				Zotero.done();
 				return true;
 			}
 			for (var i in items) {
