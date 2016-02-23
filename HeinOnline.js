@@ -2,20 +2,20 @@
 	"translatorID": "3dcbb947-f7e3-4bbd-a4e5-717f3701d624",
 	"label": "HeinOnline",
 	"creator": "Frank Bennett",
-	"target": "^https?://heinonline\\.org/HOL/(LuceneSearch|Page)\\?",
-	"minVersion": "3.0",
+	"target": "https?://heinonline.org/HOL/(?:LuceneSearch|Page|IFLPMetaData)\\?",
+	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbiv",
-	"lastUpdated": "2015-07-04 10:32:10"
+	"browserSupport": "gcsbv",
+	"lastUpdated": "2016-02-22 23:08:21"
 }
 
 /*
     ***** BEGIN LICENSE BLOCK *****
 
-    Copyright © 2015 Frank Bennett
+    Copyright © 2015-2016 Frank Bennett
 
     This file is part of Zotero.
 
@@ -35,7 +35,141 @@
     ***** END LICENSE BLOCK *****
 */
 
-var listItems;
+
+/*
+    ***************
+    ** Utilities **
+    ***************
+*/
+
+// Get any search results from current page
+// Used in detectWeb() and doWeb()
+function getSearchResults(doc, url) {
+	var results = doc.getElementsByClassName("lucene_search_result_b"),
+		items = {},
+		found = false
+	for (var i=0, ilen=results.length; i<ilen; i++) {
+		var url = getXPathStr("href", results[i], './/a[1]');
+
+		var title = getXPathStr("textContent", results[i], './/a[1]');
+		title = ZU.trimInternal(title);
+		//title = title.replace(/\s*\[[^\]]*\]$/, '');
+
+		if (!title || !url) continue;
+		
+		items[url] = title;
+		found = true;
+	}
+	return found ? items : false;
+}
+
+// Get the string value of the first object matching XPath
+function getXPathStr(attr, elem, path) {
+	var res = ZU.xpath(elem, path);
+	res = res.length ? res[0][attr] : '';
+	return res ? res : '';
+}
+
+// Extract query values to keys on an object
+function extractQueryValues(url) {
+	var ret = {};
+	ret.base = url.replace(/(.*?)[a-zA-Z]+\?.*/, "$1");
+	var query = url.replace(/.*?\?/, "");
+	query = query.split("&");
+	for (var i=0,ilen=query.length;i<ilen;i++) {
+		let pair = query[i].split("=");
+		ret[pair[0]] = pair[1];
+	}
+	return ret;
+}
+
+// Remangle HeinOnline RIS to form expected by translator
+function fixRIS (ris) {
+	var lines = ris.split("\n");
+	for (var i=0,ilen=lines.length;i<ilen;i++) {
+		lines[i] = lines[i].replace(/^([A-Z0-9][A-Z0-9]) /, "$1  - ");
+		lines[i] = lines[i].replace(/^VO  /, "VL  ");
+		lines[i] = lines[i].replace(/^YR  /, "DA  ");
+		lines[i] = lines[i].replace(/^OP  /, "EP  ");
+	}
+	ris = lines.join("\n");
+	return ris;
+}
+
+// Not all pages have a downloadable PDF
+function translateRIS(ris, pdfURL) {
+	var trans = Zotero.loadTranslator('import');
+	trans.setTranslator('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7');//https://github.com/zotero/translators/blob/master/RIS.js
+	trans.setString(ris);
+	if (pdfURL) {
+		trans.setHandler('itemDone', function (obj, item) {
+			item.attachments = [{
+				title: "Full Text PDF",
+				url: pdfURL,
+				mimeType: "application/pdf"
+			}];
+			item.complete();
+		});
+	} else {
+		trans.setHandler('itemDone', function (obj, item) {
+			item.complete();
+		});
+	}
+	trans.translate();
+}
+
+function translateCOinS(COinS) {
+    var item = new Zotero.Item();
+    try {
+        Zotero.Utilities.parseContextObject(COinS, item);
+        item.complete();
+    } catch(e) {
+        Zotero.debug("error parsing COinS");
+    }
+}
+
+// Build URL for RIS, and for PDF if available
+function scrapePage(doc, url) {
+	var risPopupURL = getXPathStr("href", doc, '//form[@id="pagepicker"]//a[contains(@href, "PrintRequest")][1]');
+    if (risPopupURL) {
+        // If page has RIS, use that
+	    var docParams = extractQueryValues(risPopupURL);
+	    var risURL = docParams.base 
+            + "CitationFile?kind=ris&handle=" + docParams.handle 
+            + "&div=" + docParams.div 
+            + "&id=" + docParams.id 
+            + "&base=js";
+	    var pdfPageURL = getXPathStr("href", doc, '//a[contains(@class, "updatediv")]');
+	    ZU.doGet(risURL, function(ris) {
+		    ris = fixRIS(ris);
+		    if (pdfPageURL) {
+			    ZU.doGet(pdfPageURL, function(pdfPage) {
+				    // Call to pdfPageURL prepares PDF for download via META refresh URL
+				    pdfURL = null;
+				    var m = pdfPage.match(/<META.*URL=([^\"]+)/);
+				    if (m) {
+					    var pdfURL = m[1];
+				    }
+				    translateRIS(ris, pdfURL);
+			    } , null , "UTF-8");
+		    } else {
+			    translateRIS(ris);
+		    }
+	    } , null , "UTF-8");
+    } else {
+        // No RIS available in page, try COinS
+        var COinS = getXPathStr("title", doc, '//span[contains(@class, "Z3988")]');
+        if (COinS) {
+            translateCOinS(COinS);
+        }
+    }
+}
+
+/*
+    *********
+    ** API **
+    *********
+*/
 
 function detectWeb (doc, url) {
 	if (url.indexOf("/LuceneSearch?") > -1) {
@@ -48,113 +182,10 @@ function detectWeb (doc, url) {
 	return false;
 }
 
-function getXPathStr(attr, elem, path) {
-	var res = ZU.xpath(elem, path);
-	res = res.length ? res[0][attr] : '';
-	return res ? res : '';
-}
-
-function Data(doc) {
-	this.node = ZU.xpath(doc, '//form[@id="Print1"]');
-	this.urlbase = "PDFsearchable?sectioncount=1&ext=.pdf&nocover=&";
-	this.queryElems = [];
-}
-
-Data.prototype.getVal = function(name, returnOnly) {
-
-	var val = getXPathStr("value", this.node, './/input[@name="' + name + '"]');
-	val = val ? encodeURIComponent(val) : '';
-
-	if (!returnOnly) {
-		this.queryElems.push(name + "=" + val);
-	}
-	return val;
-}
-
-Data.prototype.dump = function() {
-	return this.urlbase + this.queryElems.join("&");
-}
-
-function getSearchResults(doc) {
-	var results = doc.getElementsByClassName("lucene_search_result_b"),
-		items = {},
-		found = false
-	for (var i=0; i<results.length; i++) {
-		var url = getXPathStr("href", results[i], './/a[contains(@href, "Print")]');
-		url = url.replace(/Print/, "Page");
-		url = url.replace(/&terms=[^&]*/, '');
-
-		var title = getXPathStr("textContent", results[i], './/a[1]');
-		title = ZU.trimInternal(title);
-		title = title.replace(/\s*\[[^\]]*\]$/, '');
-
-		if (!title || !url) continue;
-		
-		items[url] = title;
-		found = true;
-	}
-	return found ? items : false;
-}
-
-function scrapePage(doc, url) {
-	var pdfPageURL = url.replace(/\/Page\?/, "/Print?");
-	var item = new Zotero.Item();
-	var z3988title = getXPathStr("title", doc, '//span[contains(@class, " Z3988") or contains(@class, "Z3988 ") or @class="Z3988"][@title]');
-	ZU.parseContextObject(z3988title, item);
-	
-	if (!item.itemType) {
-		// Sometimes items that report full-text PDF in the search listing
-		// resolve to a failure page. This builds a placeholder item out
-		// of the data that is available.
-		item.itemType = "journalArticle";
-		if (listItems) {
-			item.title = listItems[url];		
-		} else {
-			item.title = getXPathStr("textContent", doc, '//div[@id="content-container"]//a[1]');
-		}
-		var notAvailableURL = url.replace("/Page?", "/NotAvailable?").replace("handle=", "handle_bad=");
-		item.attachments.push({
-			url:notAvailableURL,
-			mimetype:"text/html",
-			snapshot:true,
-			title:"HeinOnline page placeholder"
-		});
-		item.url = url;
-		item.abstract = "CAUTION: Resource not yet available at HeinOnline";
-		item.complete();
-		return true;
-	}
-	
-	ZU.processDocuments([pdfPageURL], 
-		function(pdoc, purl){
-			var input = new Data(pdoc);
-			var startingID = input.getVal("id");
-			var endingID = input.getVal("toid", true);
-			input.getVal("handle");
-			input.getVal("collection");
-			input.getVal("section");
-			input.getVal("print");
-			var pdfURL = input.dump();
-			
-			if (item.pages && endingID && startingID) {
-				item.pages = item.pages + "-" 
-					+ (parseInt(item.pages) 
-					+  parseInt(endingID) 
-					-  parseInt(startingID));
-			}
-
-			item.attachments.push({
-				url:pdfURL,
-				title:"HeinOnline PDF",
-				mimeType:"application/pdf"
-			});
-			item.complete();
-		});
-}
-
 function doWeb (doc, url) {
 	if (detectWeb(doc, url) === "multiple") {
-		Zotero.selectItems(getSearchResults(doc), function (items) {
+		Zotero.selectItems(getSearchResults(doc, url), function (items) {
+
 			if (!items) {
 				return true;
 			}
@@ -162,11 +193,10 @@ function doWeb (doc, url) {
 			for (var i in items) {
 				urls.push(i);
 			}
-			listItems = items;
+
 			ZU.processDocuments(urls, scrapePage);
 		});
 	} else {
-		listItems = null;
 		scrapePage(doc, url);
 	}
 }
@@ -179,20 +209,20 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Law, Logic and Experience",
+				"title": "Law, Logic and Experience Leading Article",
 				"creators": [
 					{
-						"firstName": "Grant",
 						"lastName": "Gilmore",
+						"firstName": "Grant",
 						"creatorType": "author"
 					}
 				],
 				"date": "1957",
 				"journalAbbreviation": "Howard L.J.",
+				"language": "eng",
 				"libraryCatalog": "HeinOnline",
 				"pages": "26-41",
 				"publicationTitle": "Howard Law Journal",
-				"url": "http://heinonline.org/HOL/Page?handle=hein.journals/howlj3&id=46&div=&collection=journals",
 				"volume": "3",
 				"attachments": [
 					{
