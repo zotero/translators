@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-02-16 05:42:04"
+	"lastUpdated": "2016-02-24 02:31:08"
 }
 
 /*
@@ -142,7 +142,7 @@ function getTitle (doc) {
 	// scrape the title of bills from the <body> element.
 	if (getType(doc) != "bill") {
 		title = ZU.xpathText(doc, '//div[@class="wrapper2"]//p[@class="Titel2"]');
-		if (title) {
+		if (!title) {
 			var indhold = doc.getElementById("INDHOLD");
 			if (indhold) {
 				title = ZU.xpathText(indhold, './/p[@class="Titel"]')
