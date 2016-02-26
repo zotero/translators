@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-12-08 06:33:27"
+	"lastUpdated": "2016-02-26 10:57:53"
 }
 
 /*
@@ -66,7 +66,7 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-		var risURL = url.replace(/articles\.php\?/, "content/articles/include/file_export.php?") + "&format=ris&type=txt";
+		var risURL = url.replace(/articles\.php\?/, "content/articles/include/file_export.php?") + "&format=ris";
 		Z.debug(risURL)
 		var abstract = ZU.xpathText(doc, '//div[@class="sub_head_dialog" and contains(text(), "Abstract")]/following-sibling::div[1]');
 		//Z.debug(abstract)
