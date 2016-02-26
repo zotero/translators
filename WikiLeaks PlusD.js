@@ -2,14 +2,14 @@
 	"translatorID": "8b73dd9c-b873-4d13-b36a-45922b9f04a1",
 	"label": "WikiLeaks PlusD",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://(search\\.)?wikileaks\\.org/plusd/",
+	"target": "^https?://(search\\.|www\\.)?wikileaks\\.org/plusd/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-02-22 03:40:13"
+	"lastUpdated": "2016-02-25 02:40:23"
 }
 
 /*
@@ -35,44 +35,44 @@
 
 function detectWeb(doc, url) {
 	if (url.indexOf("/plusd/?")!=-1  && getSearchResults(doc, url, true)) {
-	    return "multiple";
+		return "multiple";
 	}
 	else if (url.indexOf("/plusd/cables/")!=-1) {
-	    return "report";
+		return "report";
 	}
 }
 
 
 function getSearchResults(doc, checkOnly) {
-    var items = {};
-    var found = false;
-    var toc = doc.getElementById("doc_list");
-    var rows = ZU.xpath(toc, '//tr[@class="sclick"]/td[3]/a[contains(@href, "/cables/")]');
-    for (var i=0; i<rows.length; i++) {
-        var href = rows[i].href;
-        var title = ZU.trimInternal(rows[i].textContent);
-        if (!href || !title) continue;
-        if (checkOnly) return true;
-        found = true;
-        items[href] = title;
-    }
-    return found ? items : false;
+	var items = {};
+	var found = false;
+	var toc = doc.getElementById("doc_list");
+	var rows = ZU.xpath(toc, '//tr[@class="sclick"]/td[3]/a[contains(@href, "/cables/")]');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
 }
 
 
 function doWeb(doc, url) {
-    if (detectWeb(doc, url) == "multiple") {
-        Zotero.selectItems(getSearchResults(doc, false), function (items) {
-            if (!items) {
-                return true;
-            }
-            var articles = new Array();
-            for (var i in items) {
-                articles.push(i);
-            }
-            //Z.debug(articles)
-            ZU.processDocuments(articles, scrape);
-        });
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
+				return true;
+			}
+			var articles = new Array();
+			for (var i in items) {
+				articles.push(i);
+			}
+			//Z.debug(articles)
+			ZU.processDocuments(articles, scrape);
+		});
 	} else {
 		scrape(doc, url);
 	}
