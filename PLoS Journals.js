@@ -1,7 +1,7 @@
 {
 	"translatorID": "9575e804-219e-4cd6-813d-9b690cbfc0fc",
 	"label": "PLoS Journals",
-	"creator": "Michael Berkowitz And Rintze Zelle",
+	"creator": "Michael Berkowitz, Rintze Zelle, and Sebastian Karcher",
 	"target": "^https?://(www\\.plos(one|ntds|compbiol|pathogens|genetics|medicine|biology)\\.org|journals\\.plos\\.org)/(search/|\\w+/article)",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,141 +9,99 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-01-15 03:50:06"
+	"lastUpdated": "2016-02-27 21:46:37"
 }
+
+/*
+    ***** BEGIN LICENSE BLOCK *****
+
+    Copyright © 2012-2016 Rintze Zelle, Michael Berkowitz, and Sebastian Karcher
+
+    This file is part of Zotero.
+
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+    ***** END LICENSE BLOCK *****
+*/
 
 function detectWeb(doc, url) {
 	if (url.indexOf("Search.action") != -1
 		|| url.indexOf("browse.action") != -1
 		|| url.indexOf("browseIssue.action") != -1
+		|| url.indexOf("/search?") != -1
 		|| url.indexOf("/search/") != -1) {
 		return getSearchResults(doc, url, true) ? "multiple" : false;
 	}
-	
-	var host = getHost(doc);
-	if (url.indexOf("/article?") != -1 && getID(url) && host) {
-		// For individual articles we have to fetch data from different host,
-		// so we have to defer to server translation
-		return Zotero.isBookmarklet && url.indexOf(host) == -1 ? "server" : "journalArticle";
+	else if (ZU.xpathText(doc, '//meta[@name="citation_title"]/@content')) {
+		return "journalArticle";
 	}
 }
 
 function getSearchResults(doc, url, checkOnly) {
 	var articlex;
-	if(url.indexOf('browseIssue.action') == -1) {
+	if (url.indexOf("/search?") != -1) {
+		articlex = '//dt[@class="search-results-title"]/a';
+	} else if(url.indexOf('browseIssue.action') == -1) {
 		articlex = '//span[@class="article"]/a';
 	} else {
 		articlex = '//div[@class="header"]/h3/a';
 	}
-	
+	//Z.debug(articlex)
 	var articles = ZU.xpath(doc, articlex),
 		items = {},
 		found = false;
 	for (var i=0; i<articles.length; i++) {
-		var id = getID(articles[i].href);
-		if (!id) {
-			Z.debug("Could not extract ID from URL: " + articles[i].href);
-			continue;
-		}
-		
+		var url = articles[i].href;
 		if (checkOnly) return true;
-		items[id] = ZU.trimInternal(articles[i].textContent);
+		items[url] = ZU.trimInternal(articles[i].textContent);
 		found = true;
 	}
 	
 	return found ? items : false;
 }
 
-function getID(url) {
-	var m = url.match(/[?&]id=([^&?#]+)/);
-	if (m) return m[1];
-	
-	m = url.match(/info(%3A|:)doi(?:%2F|\/)([^&?#]+)/);
-	if (m) {
-		if (m[1] != ':')  {
-			return decodeURIComponent(m[2]);
-		} else {
-			return m[2];
-		}
-	}
-}
-
-function getHost(doc) {
-	// Retrieve host for RIS
-	var downloadLink = doc.getElementById('downloadCitation');
-	if (!downloadLink) return;
-	return downloadLink.href.replace(/(https?:\/\/.+?)\/.*$/, '$1');
-}
-function getSelectedItems(doc, articleXPath) {
-	var items = {};
-	var articles = doc.evaluate(articleXPath, doc, null, XPathResult.ANY_TYPE, null);
-	var next_art;
-	while (next_art = articles.iterateNext()) {
-		items[next_art.href] = next_art.textContent.trim();
-	}
-	Zotero.selectItems(items, function (items) {
-		if(!items) return true;
-		
-		var texts = [];
-		for (var i in items) {
-			texts.push(i);
-		}
-		processTexts(texts);
-	});
-}
-
 function doWeb(doc, url) {
-	var risBaseURL = '/article/getRisCitation.action?articleURI=info%3Adoi%2F';
 	if (detectWeb(doc, url) == 'multiple') {
 		Zotero.selectItems(getSearchResults(doc, url), function(items) {
 			if (!items) return true;
-			
+			//Z.debug(items)
 			var urls = [];
 			for (var i in items) {
-				urls.push(risBaseURL + encodeURIComponent(i));
+				urls.push(i);
 			}
-			processTexts(urls);
-		})
+			ZU.processDocuments(urls, scrape);
+		});
 	} else {
-		var host = getHost(doc);
-		var id = getID(url);
-		
-		processTexts([host + risBaseURL + encodeURIComponent(id)]);
+		scrape(doc, url);
 	}
 }
 
-function processTexts(texts) {
-	var risLinks = [];
-	for (var i in texts) {
-		var risLink = texts[i];
-		var pdfURL = risLink.replace("getRisCitation.action?articleURI=", "fetchObject.action?uri=")
-			+ '&representation=PDF';
-		(function(risLink, pdfURL) {
-			//Z.debug(pdfURL)
-			ZU.doGet(risLink, function (text) {
-				var translator = Zotero.loadTranslator("import");
-				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-				translator.setString(text);
-				translator.setHandler("itemDone", function (obj, item) {
-					item.attachments = [{
-						url: pdfURL,
-						title: "PLoS Full Text PDF",
-						mimeType: "application/pdf"
-					}];
-					
-					if (item.url) {
-						item.url = item.url.replace('%2F', '/');
-					}
-					
-					item.complete();
-				});
-				translator.translate();
-			});
-		})(risLink, pdfURL);
-	}
-}
-
-/** BEGIN TEST CASES **/
+function scrape(doc, url) {
+	var translator = Zotero.loadTranslator('web');
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');//https://github.com/zotero/translators/blob/master/Embedded%20Metadata.js
+	translator.setDocument(doc);
+	translator.setHandler('itemDone', function (obj, item) {
+		item.libraryCatalog = "PLoS Journals";
+		if (item.abstractNote) {
+			item.abstractNote = item.abstractNote.replace(/\s*\n\s*/, "\n")
+		}
+		item.complete();
+	});
+	translator.getTranslatorObject(function(trans) {
+		trans.doWeb(doc, url);
+	});
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -299,7 +257,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.plosbiology.org/search/simple?from=globalSimpleSearch&filterJournals=PLoSBiology&query=amygdala&x=0&y=0",
+		"url": "http://www.plosbiology.org/search/simple?from=globalSimpleSearch&filterJournals=PLoSBiology&query=amygdala&x=0&y=1",
 		"items": "multiple"
 	}
 ]
