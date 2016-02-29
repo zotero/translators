@@ -2,28 +2,56 @@
 	"translatorID": "5ac0fd37-5578-4f82-8340-0e135b6336ee",
 	"label": "Scholars Portal Journals",
 	"creator": "Bartek Kawula",
-	"target": "https?://journals[1-2]\\.scholarsportal\\.info/",
+	"target": "^https?://journals\\d\\.scholarsportal\\.info/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-02-19 04:18:37"
+	"lastUpdated": "2016-02-29 19:31:00"
 }
 
+/*
+    ***** BEGIN LICENSE BLOCK *****
+
+    Copyright © 2016 Bartek Kawula
+
+    This file is part of Zotero.
+
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+    ***** END LICENSE BLOCK *****
+*/
+
 function detectWeb(doc, url) { 
+	var myArticles = doc.getElementById('my-articles');
+	if (myArticles) {
+  		Zotero.monitorDOMChanges(myArticles.parentElement, {attributes: true, attributeFilter: ["style"]});
+	}
 	// see if saved list is toggled open
 	if (doc.getElementsByClassName('inner-wrap-open') [0]) {
-		return 'multiple'
-	} else {
-		if(url.indexOf("/search?q") != -1 || url.indexOf("/browse/") != -1){
+		if (getItems(doc, true)) {
 			return 'multiple'
 		}
-		else {
-			return 'journalArticle';
+	} else if (url.indexOf("/search?q") != -1 || url.indexOf("/browse/") != -1) {
+		if (getItems(doc, true)) {
+			return 'multiple'
 		}
-	}
+	} else if (url.indexOf("/details/") != -1) {
+		return 'journalArticle'
+	} 
 }
 
 function doWeb(doc, url) {
@@ -32,76 +60,78 @@ function doWeb(doc, url) {
 		var list = getItems(doc, url);
 		Zotero.selectItems(list, function(selectedItems) {
 			if(!selectedItems) return true;
-			var uri = [];
+			var articles = [];
 			for(var i in selectedItems) {
-				uri.push(list[i].uri)
+				var article = 'http://'+doc.domain+'/ris?uri='+i
+				articles.push(article);
 			}
-			for(var i=0; i<uri.length; i++) {
-				var url = uri[i].replace(/(\/details)/g,"");
-				scrape(doc, url)
-			}
+			ZU.doGet(articles, scrape);
 		})
 	} else {
+		var uri = getURI(url);
+		var article = 'http://'+doc.domain+'/ris?uri='+uri
+		ZU.doGet(article, scrape);
+	}
+}
+
+function getURI(url){
+	if(url.indexOf("xml") != -1){
 		var a = url.indexOf("details");
 		var b = url.indexOf("xml");
-		url = url.substring(a+7,b+3);
-		scrape(doc, url)
+		uri = url.substring(a+7,b+3);
+		return uri
+	} else if(url.indexOf("resolver.scholarsportal.info/resolve/") != -1)  {
+		uri = url.split("resolver.scholarsportal.info/resolve")[1] + ".xml";
+		return uri
 	}
 }
 
 function getItems(doc, url) {
+	var items = {}, found = false;
 	if (doc.getElementsByClassName('inner-wrap-open') [0]) {
-		var titles = ZU.xpath(doc.getElementById('my-articles-list'), '//div[@class = "title"]/h3/a');
-		var items = {};
+		var titles = ZU.xpath(doc.getElementById('my-articles-list'), './/div[@class = "title"]/h3/a');
 		for (var i=0; i<titles.length; i++) { 
 			var title = ZU.trimInternal(titles[i].textContent);
-			var uri = ZU.trimInternal(titles[i].pathname);
-			items[i] = {'title':title,'uri':uri};
+			var uri = getURI(titles[i].href);
+			items[uri] = title;
+			found = true;
 		}
-		return items
 	} else {
-		if(url.indexOf("/browse") != -1){
-			var titles = ZU.xpath(doc, '//div/h4/a');
+		if(doc.URL.indexOf("/browse") != -1){
+			var titles = ZU.xpath(doc, './/div/h4/a');
 		}
 		else {
-			var titles = ZU.xpath(doc.getElementById('result-list'), '//div[@class = "details"]/h3/a');
+			var titles = ZU.xpath(doc.getElementById('result-list'), './/div[@class = "details"]/h3/a');
+		
 		}
-		var items = {};
 		for (var i=0; i<titles.length; i++) { 
-			var title = titles[i].textContent;
-			var uri = titles[i].pathname;
-			items[i] = {'title':title,'uri':uri};
+			var title = ZU.trimInternal(titles[i].textContent);
+			var uri = getURI(titles[i].href);
+			items[uri] = title;
+			found = true;
 		}
-		return items
 	}
+	return found ? items : false;
 }
 
-function extras(doc, item) { 
-	var currentdate = new Date(); 
-	item.accessed = currentdate.toLocaleString();
-	return item
-}
-
-function scrape(doc, uri) { 
-		var risURL = 'http://'+doc.domain+'/ris?uri='+uri;
+function scrape(text, doc) { 
+	// loading RIS transformer. 
+	var translator = Zotero.loadTranslator("import");
+	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+	translator.setString(text);
+	translator.setHandler("itemDone", function(obj, item) {
+		var uri = getURI(item.attachments[0].path);
 		var pdfURL = "/pdf" + uri;
-		ZU.doGet(risURL, function(text) {
-			var translator = Zotero.loadTranslator("import");
-			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-			translator.setString(text);
-			translator.setHandler("itemDone", function(obj, item) {
-				item = extras(doc, item);
-				item.url = "http://resolver.scholarsportal.info/resolve" + uri;
-				item.attachments = [];
-				item.attachments.push({
-					url: pdfURL,
-					title: "Scholars Portal Full Text PDF",
-					mimeType: "application/pdf"
-				})
-				item.complete();
-			})
-			translator.translate();
+		item.url = "http://journals.scholarsportal.info/details" + uri;
+		item.attachments = [{}];
+		item.attachments.push({
+			url: pdfURL,
+			title: "Scholars Portal Full Text PDF",
+			mimeType: "application/pdf"
 		})
+		item.complete();
+	})
+	translator.translate();
 }
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -129,18 +159,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2008",
 				"DOI": "10.1007/s10953-008-9276-0",
 				"ISSN": "0095-9782",
 				"issue": "6",
-				"journalAbbreviation": "J Solution Chem",
-				"language": "en",
+				"journalAbbreviation": "Journal of Solution Chemistry",
 				"libraryCatalog": "Scholars Portal Journals",
 				"pages": "841-856",
 				"publicationTitle": "Journal of Solution Chemistry",
-				"url": "http://resolver.scholarsportal.info/resolve/00959782/v37i0006/841_tnowhbdbmoxs.xml",
+				"url": "http://journals.scholarsportal.info/details/00959782/v37i0006/841_tnowhbdbmoxs.xml",
 				"volume": "37",
 				"attachments": [
+					{},
 					{
 						"title": "Scholars Portal Full Text PDF",
 						"mimeType": "application/pdf"
@@ -154,11 +183,7 @@ var testCases = [
 					"Water-water hydrogen bonds",
 					"X-ray scattering"
 				],
-				"notes": [
-					{
-						"note": "<p>From Ontario Scholars Portal (klsp04222008)</p>"
-					}
-				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
