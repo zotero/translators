@@ -4,7 +4,7 @@
 	"label": "TEI",
 	"creator": "Stefan Majewski",
 	"target": "xml",
-	"minVersion": "2.1b3",
+	"minVersion": "4.0.27",
 	"maxVersion": null,
 	"priority": 25,
 	"inRepository": true,
@@ -19,7 +19,7 @@
 		"Full TEI Document": false,
 		"Export Collections": false
 	},
-	"lastUpdated":"2015-09-22 15:19:00"
+	"lastUpdated":"2016-03-10 15:19:00"
 }
 
 // ********************************************************************
@@ -400,9 +400,9 @@ function generateItem(item, teiDoc) {
         monogr.appendChild(edition);
     }
     // software
-    else if (item.version){
+    else if (item.versionNumber){
         var edition = teiDoc.createElementNS(ns.tei, "edition");
-        edition.appendChild(teiDoc.createTextNode(item.version));
+        edition.appendChild(teiDoc.createTextNode(item.versionNumber));
         monogr.appendChild(edition);
     }
 
