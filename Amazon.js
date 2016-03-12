@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2016-01-09 20:45:00"
+	"lastUpdated": "2016-03-12 17:57:05"
 }
 
 function detectWeb(doc, url) {
@@ -60,8 +60,15 @@ function getSearchResults(doc, checkOnly) {
 		}
 	}
 	
-	if(!links.length) return false;
+	if(!links.length) {
+		//author pages
+		container = doc.getElementById('mainResults');
+		if(container) {
+			links = ZU.xpath(container, './/li[starts-with(@id, "result_")]//a[h2]');
+		}
+	}
 	
+	if(!links.length) return false;
 	var availableItems = {}, found = false,
 		asinRe = /\/(?:dp|product)\/(?:[^?#]+)\//;
 	for(var i=0; i<links.length; i++) {
@@ -180,6 +187,7 @@ function scrape(doc, url) {
 	var title = doc.getElementById('btAsinTitle')
 		|| doc.getElementById('title_row')
 		|| doc.getElementById('productTitle')
+		|| doc.getElementById('ebooksProductTitle')
 		|| doc.getElementById('title_feature_div');
 	// get first non-empty text node (other text nodes are things like [Paperback] and dates)
 	item.title = ZU.trimInternal(
@@ -193,6 +201,7 @@ function scrape(doc, url) {
 		!(// ways to identify a node encompasing title and authors
 			baseNode.id == 'booksTitle'
 			|| baseNode.id == 'ppd-center'
+			|| baseNode.id == 'title_feature_div'
 			|| bncl.contains('buying')
 			|| bncl.contains('content')
 			|| bncl.contains('DigitalMusicInfoColumn')
@@ -210,6 +219,7 @@ function scrape(doc, url) {
 		if(!authors.length) authors = ZU.xpath(baseNode, './/a[following-sibling::*[1][@class="byLinePipe"]]');
 		if(!authors.length) authors = ZU.xpath(baseNode, './/a[contains(@href, "field-author=")]');
 		if(!authors.length) authors = ZU.xpath(baseNode, './/a[@id="ProductInfoArtistLink"]');
+			if(!authors.length) authors = ZU.xpath(baseNode, './/a[@id="ProductInfoArtistLink"]');
 		for(var i=0; i<authors.length; i++) {
 			var role = ZU.xpathText(authors[i], '(.//following::text()[normalize-space(self::text())])[1]');
 			if(role) {
@@ -243,7 +253,7 @@ function scrape(doc, url) {
 	}
 	
 	//Abstract
-	var abstractNode = doc.getElementById('bookDesc_postBodyPS');
+	var abstractNode = doc.getElementById('postBodyPS');
 	if (abstractNode) {
 		item.abstractNote = abstractNode.textContent.trim();
 		if (!item.abstractNote) {
@@ -396,7 +406,7 @@ var testCases = [
 				"abstractNote": "Now in paperback! Pass, and have it made. Fail, and suffer the consequences. A master of teen thrillers tests readers’ courage in an edge-of-your-seat novel that echoes the fears of exam-takers everywhere. Ann, a teenage girl living in the security-obsessed, elitist United States of the very near future, is threatened on her way home from school by a mysterious man on a black motorcycle. Soon she and a new friend are caught up in a vast conspiracy of greed involving the mega-wealthy owner of a school testing company. Students who pass his test have it made; those who don’t, disappear . . . or worse. Will Ann be next? For all those who suspect standardized tests are an evil conspiracy, here’s a thriller that really satisfies! Praise for Test “Fast-paced with short chapters that end in cliff-hangers . . . good read for moderately reluctant readers. Teens will be able to draw comparisons to contemporary society’s shift toward standardized testing and ecological concerns, and are sure to appreciate the spoofs on NCLB.” —School Library Journal “Part mystery, part action thriller, part romance . . . environmental and political overtones . . . fast pace and unique blend of genres holds attraction for younger teen readers.” —Booklist",
 				"edition": "Reprint edition",
 				"language": "English",
-				"libraryCatalog": "Amazon.com",
+				"libraryCatalog": "Amazon",
 				"numPages": 320,
 				"place": "New York",
 				"publisher": "Amulet Paperbacks",
@@ -425,17 +435,11 @@ var testCases = [
 			{
 				"itemType": "audioRecording",
 				"title": "Loveless",
-				"creators": [
-					{
-						"lastName": "My Bloody Valentine",
-						"creatorType": "performer",
-						"fieldMode": 1
-					}
-				],
+				"creators": [],
 				"date": "November 5, 1991",
 				"audioRecordingFormat": "Audio CD",
 				"label": "Sire / London/Rhino",
-				"libraryCatalog": "Amazon.com",
+				"libraryCatalog": "Amazon",
 				"attachments": [
 					{
 						"title": "Amazon.com Link",
@@ -463,6 +467,11 @@ var testCases = [
 				"title": "Adaptation",
 				"creators": [
 					{
+						"firstName": "Maggie",
+						"lastName": "Gyllenhaal",
+						"creatorType": "castMember"
+					},
+					{
 						"firstName": "Nicolas",
 						"lastName": "Cage",
 						"creatorType": "castMember"
@@ -473,18 +482,13 @@ var testCases = [
 						"creatorType": "castMember"
 					},
 					{
-						"firstName": "Chris",
-						"lastName": "Cooper",
-						"creatorType": "castMember"
-					},
-					{
 						"firstName": "Tilda",
 						"lastName": "Swinton",
 						"creatorType": "castMember"
 					},
 					{
-						"firstName": "Jay",
-						"lastName": "Tavare",
+						"firstName": "Chris",
+						"lastName": "Cooper",
 						"creatorType": "castMember"
 					},
 					{
@@ -493,12 +497,7 @@ var testCases = [
 						"creatorType": "director"
 					},
 					{
-						"firstName": "Charlie",
-						"lastName": "Kaufman",
-						"creatorType": "producer"
-					},
-					{
-						"firstName": "Edward",
+						"firstName": "Ed",
 						"lastName": "Saxon",
 						"creatorType": "producer"
 					},
@@ -508,30 +507,15 @@ var testCases = [
 						"creatorType": "producer"
 					},
 					{
-						"firstName": "Peter",
-						"lastName": "Saraf",
+						"firstName": "Vincent",
+						"lastName": "Landay",
 						"creatorType": "producer"
-					},
-					{
-						"firstName": "Charlie",
-						"lastName": "Kaufman",
-						"creatorType": "scriptwriter"
-					},
-					{
-						"firstName": "Donald",
-						"lastName": "Kaufman",
-						"creatorType": "scriptwriter"
-					},
-					{
-						"firstName": "Susan",
-						"lastName": "Orlean",
-						"creatorType": "scriptwriter"
 					}
 				],
 				"date": "May 20, 2003",
 				"language": "English (Dolby Digital 2.0 Surround), English (Dolby Digital 5.1), English (DTS 5.1), French (Dolby Digital 5.1)",
-				"libraryCatalog": "Amazon.com",
-				"runningTime": "114 minutes",
+				"libraryCatalog": "Amazon",
+				"runningTime": "115 minutes",
 				"studio": "Sony Pictures Home Entertainment",
 				"attachments": [
 					{
@@ -570,7 +554,7 @@ var testCases = [
 				"abstractNote": "Que signifie ce nom \"Candide\" : innocence de celui qui ne connaît pas le mal ou illusion du naïf qui n'a pas fait l'expérience du monde ? Voltaire joue en 1759, après le tremblement de terre de Lisbonne, sur ce double sens. Il nous fait partager les épreuves fictives d'un jeune homme simple, confronté aux leurres de l'optimisme, mais qui n'entend pas désespérer et qui en vient à une sagesse finale, mesurée et mystérieuse. Candide n'en a pas fini de nous inviter au gai savoir et à la réflexion.",
 				"edition": "Larousse",
 				"language": "Français",
-				"libraryCatalog": "Amazon.com",
+				"libraryCatalog": "Amazon",
 				"numPages": 176,
 				"place": "Paris",
 				"publisher": "Larousse",
@@ -604,11 +588,10 @@ var testCases = [
 				"date": "1. Mai 1992",
 				"ISBN": "9783596105816",
 				"abstractNote": "Gleich bei seinem Erscheinen in den 40er Jahren löste Jorge Luis Borges’ erster Erzählband »Fiktionen« eine literarische Revolution aus. Erfundene Biographien, fiktive Bücher, irreale Zeitläufe und künstliche Realitäten verflocht Borges zu einem geheimnisvollen Labyrinth, das den Leser mit seinen Rätseln stets auf neue herausfordert. Zugleich begründete er mit seinen berühmten Erzählungen wie»›Die Bibliothek zu Babel«, «Die kreisförmigen Ruinen« oder»›Der Süden« den modernen »Magischen Realismus«.   »Obwohl sie sich im Stil derart unterscheiden, zeigen zwei Autoren uns ein Bild des nächsten Jahrtausends: Joyce und Borges.« Umberto Eco",
-				"edition": "12",
+				"edition": "13",
 				"language": "Deutsch",
-				"libraryCatalog": "Amazon.com",
+				"libraryCatalog": "Amazon",
 				"numPages": 192,
-				"place": "Frankfurt am Main",
 				"publisher": "FISCHER Taschenbuch",
 				"shortTitle": "Fiktionen",
 				"attachments": [
@@ -641,8 +624,8 @@ var testCases = [
 				"date": "1 Dec. 2010",
 				"abstractNote": "Novel by Charles Dickens, published both serially and in book form in 1859. The story is set in the late 18th century against the background of the French Revolution. Although Dickens borrowed from Thomas Carlyle's history, The French Revolution, for his sprawling tale of London and revolutionary Paris, the novel offers more drama than accuracy. The scenes of large-scale mob violence are especially vivid, if superficial in historical understanding. The complex plot involves Sydney Carton's sacrifice of his own life on behalf of his friends Charles Darnay and Lucie Manette. While political events drive the story, Dickens takes a decidedly antipolitical tone, lambasting both aristocratic tyranny and revolutionary excess--the latter memorably caricatured in Madame Defarge, who knits beside the guillotine. The book is perhaps best known for its opening lines, \"It was the best of times, it was the worst of times,\" and for Carton's last speech, in which he says of his replacing Darnay in a prison cell, \"It is a far, far better thing that I do, than I have ever done; it is a far, far better rest that I go to, than I have ever known.\" -- The Merriam-Webster Encyclopedia of Literature",
 				"language": "English",
-				"libraryCatalog": "Amazon.com",
-				"numPages": 341,
+				"libraryCatalog": "Amazon",
+				"numPages": 477,
 				"publisher": "Public Domain Books",
 				"attachments": [
 					{
@@ -686,7 +669,7 @@ var testCases = [
 				"abstractNote": "Si pensa che soprattutto in una casa moderna, con prese elettriche, gas, balconi altissimi un bambino possa mettersi in pericolo: Emil vive in una tranquilla casa di campagna, ma riesce a ficcare la testa in una zuppiera e a rimanervi incastrato, a issare la sorellina Ida in cima all'asta di una bandiera, e a fare una tale baldoria alla fiera del paese che i contadini decideranno di organizzare una colletta per spedirlo in America e liberare così la sua povera famiglia. Ma questo succederà nel prossimo libro di Emil, perché ce ne sarà un altro, anzi due, tante sono le sue monellerie. Età di lettura: da 7 anni.",
 				"edition": "3 edizione",
 				"language": "Italiano",
-				"libraryCatalog": "Amazon.com",
+				"libraryCatalog": "Amazon",
 				"numPages": 72,
 				"place": "Milano",
 				"publisher": "Nord-Sud",
@@ -736,9 +719,9 @@ var testCases = [
 				"ISBN": "9787030329202",
 				"abstractNote": "《汉语语音合成:原理和技术》介绍语音合成的原理和针对汉语的各项合成技术，以及应用的范例。全书分基础篇和专题篇两大部分。基础篇介绍语音合成技术的发展历程和作为语音合成技术基础的声学语音学知识，尤其是作者获得的相关研究成果（填补了汉语语音学知识中的某些空白），并对各种合成器的工作原理和基本结构进行系统的阐述。专题篇结合近十年来国内外技术发展的热点和方向，讨论韵律分析与建模、数据驱动的语音合成方法、语音合成数据库的构建技术、文语转换系统的评估方法、语音合成技术的应用等。 《汉语语音合成:原理和技术》面向从事语言声学、语音通信技术，特别是语音合成的科学工作者、工程技术人员、大学教师、研究生和高年级的大学生，可作为他们研究、开发、进修的参考书。",
 				"edition": "第1版",
-				"libraryCatalog": "Amazon.com",
+				"libraryCatalog": "Amazon",
 				"numPages": 373,
-				"place": "Beijing",
+				"place": "北京",
 				"publisher": "科学出版社",
 				"shortTitle": "汉语语音合成",
 				"attachments": [
@@ -760,7 +743,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "videoRecording",
-				"title": "Walt Disney / Pixar - Up",
+				"title": "Up",
 				"creators": [
 					{
 						"firstName": "Ed",
@@ -789,9 +772,9 @@ var testCases = [
 					}
 				],
 				"date": "15 Feb. 2010",
-				"language": "English",
-				"libraryCatalog": "Amazon.com",
-				"runningTime": "96 minutes",
+				"language": "English, Hindi",
+				"libraryCatalog": "Amazon",
+				"runningTime": "93 minutes",
 				"studio": "Walt Disney Studios Home Entertainment",
 				"attachments": [
 					{
@@ -808,7 +791,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.amazon.de/dp/B00GKBYC3E/",
+		"url": "https://www.amazon.de/gp/product/B00GKBYC3E?ie=UTF8&*Version*=1&*entries*=0",
 		"items": [
 			{
 				"itemType": "audioRecording",
@@ -820,7 +803,7 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"libraryCatalog": "Amazon.com",
+				"libraryCatalog": "Amazon",
 				"runningTime": "1:08:58",
 				"attachments": [
 					{
@@ -851,9 +834,11 @@ var testCases = [
 				],
 				"date": "2012/8/2",
 				"ISBN": "9780099578079",
-				"language": "英語, 英語, 英語",
-				"libraryCatalog": "Amazon.com",
+				"edition": "Combined volume版",
+				"language": "英語",
+				"libraryCatalog": "Amazon",
 				"numPages": 1328,
+				"place": "New York",
 				"publisher": "Vintage",
 				"shortTitle": "1Q84",
 				"attachments": [
@@ -900,7 +885,7 @@ var testCases = [
 				],
 				"date": "February 26, 2013",
 				"language": "English",
-				"libraryCatalog": "Amazon.com",
+				"libraryCatalog": "Amazon",
 				"runningTime": "166 minutes",
 				"studio": "Kultur",
 				"attachments": [
@@ -939,9 +924,9 @@ var testCases = [
 				"ISBN": "9780521653909",
 				"abstractNote": "The first printed text of Shakespeare's Hamlet is about half the length of the more familiar second quarto and Folio versions. It reorders and combines key plot elements to present its own workable alternatives. This is the only modernized critical edition of the 1603 quarto in print. Kathleen Irace explains its possible origins, special features and surprisingly rich performance history, and while describing textual differences between it and other versions, offers alternatives that actors or directors might choose for specific productions.",
 				"language": "English",
-				"libraryCatalog": "Amazon.com",
+				"libraryCatalog": "Amazon",
 				"numPages": 144,
-				"place": "Cambridge",
+				"place": "New York",
 				"publisher": "Cambridge University Press",
 				"attachments": [
 					{
@@ -972,8 +957,44 @@ var testCases = [
 				],
 				"date": "1977/9/16",
 				"ISBN": "9784003314210",
-				"libraryCatalog": "Amazon.com",
+				"language": "日本語",
+				"libraryCatalog": "Amazon",
 				"publisher": "岩波書店",
+				"attachments": [
+					{
+						"title": "Amazon.com Link",
+						"snapshot": false,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.amazon.com/gp/product/B00TWK3NFS",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Key Performance Indicators: Developing, Implementing, and Using Winning KPIs",
+				"creators": [
+					{
+						"firstName": "David",
+						"lastName": "Parmenter",
+						"creatorType": "author"
+					}
+				],
+				"date": "April 3, 2015",
+				"abstractNote": "Streamline KPIs to craft a simpler, more effective system of performance measurement Key Performance Indicators provides an in-depth look at how KPIs can be most effectively used to assess and drive organizational performance. Now in its third edition, this bestselling guide provides a model for simplifying KPIs and avoiding the pitfalls ready to trap the unprepared organization. New information includes guidance toward defining critical success factors, project leader essentials, new tools including worksheets and questionnaires, and real-world case studies that illustrate the practical application of the strategies presented. The book includes a variety of templates, checklists, and performance measures to help streamline processes, and is fully supported by the author’s website to provide even more in-depth information. Key Performance Indicators are a set of measures that focus on the factors most critical to an organization’s success. Most companies have too many, rendering the strategy ineffective due to overwhelming complexity. Key Performance Indicators guides readers toward simplification, paring down to the most fundamental issues to better define and measure progress toward goals. Readers will learn to:  separate out performance measures between those that can be tied to a team and result in a follow-up phone call (performance measures) and those that are a summation of a number of teams working together (result indicators) look for and eradicate those measures that have a damaging unintended consequence, a major darkside Sell a KPI project to the Board, the CEO, and the senior management team using best practice leading change techniques Develop and use KPIs effectively with a simple five stage  model Ascertain essential performance measures, and develop a reporting strategy   Learn the things that a KPI project leader needs to know  A KPI project is a chance at a legacy – the project leader, facilitator, or coordinator savvy enough to craft a winning strategy can affect the organization for years to come. KPI projects entail some risk, but this book works to minimize that risk by arming stakeholders with the tools and information they need up front. Key Performance Indicators helps leaders shape a performance measurement initiative that works.",
+				"edition": "3 edition",
+				"language": "English",
+				"libraryCatalog": "Amazon",
+				"numPages": 412,
+				"publisher": "Wiley",
+				"shortTitle": "Key Performance Indicators",
 				"attachments": [
 					{
 						"title": "Amazon.com Link",
