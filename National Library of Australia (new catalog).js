@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-17 19:42:02"
+	"lastUpdated": "2016-03-14 15:46:49"
 }
 
 function detectWeb(doc, url) {
@@ -58,23 +58,6 @@ function computeFormat(format){
 		return "book";
 	}
 
-}
-
-// TODO: Remove this when we drop support for Fx3
-if (!JSON) {
-	var JSON = new function() {
-		this.parse = function (arg) {
-			var j;
-			if (/^[,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]*$/.test(arg.
-					replace(/\\./g, '@').
-					replace(/"[^"\\\n\r]*"/g, ''))) {
-				// Friendly AMO reviewer: This is the official json.org library and is safe.
-				j = eval('(' + arg + ')');
-				return j;
-			}
-			throw new SyntaxError('parseJSON');
-		}
-	}
 }
 
 function load_item(responseText, url, format) {
