@@ -9,30 +9,30 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-02-29 19:31:00"
+	"lastUpdated": "2016-03-17 18:04:20"
 }
 
 /*
-    ***** BEGIN LICENSE BLOCK *****
+	***** BEGIN LICENSE BLOCK *****
 
-    Copyright © 2016 Bartek Kawula
+	Copyright © 2016 Bartek Kawula
 
-    This file is part of Zotero.
+	This file is part of Zotero.
 
-    Zotero is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    Zotero is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Affero General Public License for more details.
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
 
-    You should have received a copy of the GNU Affero General Public License
-    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
-    ***** END LICENSE BLOCK *****
+	***** END LICENSE BLOCK *****
 */
 
 function detectWeb(doc, url) { 
@@ -50,7 +50,7 @@ function detectWeb(doc, url) {
 			return 'multiple'
 		}
 	} else if (url.indexOf("/details/") != -1) {
-		return 'journalArticle'
+		return 'journalArticle';
 	} 
 }
 
@@ -69,7 +69,7 @@ function doWeb(doc, url) {
 		})
 	} else {
 		var uri = getURI(url);
-		var article = 'http://'+doc.domain+'/ris?uri='+uri
+		var article = '/ris?uri='+uri
 		ZU.doGet(article, scrape);
 	}
 }
@@ -123,12 +123,11 @@ function scrape(text, doc) {
 		var uri = getURI(item.attachments[0].path);
 		var pdfURL = "/pdf" + uri;
 		item.url = "http://journals.scholarsportal.info/details" + uri;
-		item.attachments = [{}];
-		item.attachments.push({
-			url: pdfURL,
-			title: "Scholars Portal Full Text PDF",
-			mimeType: "application/pdf"
-		})
+		item.attachments = [{
+        	url: pdfURL,
+        	title: "Scholars Portal Full Text PDF",
+        	mimeType: "application/pdf"
+    	}];
 		item.complete();
 	})
 	translator.translate();
@@ -169,7 +168,6 @@ var testCases = [
 				"url": "http://journals.scholarsportal.info/details/00959782/v37i0006/841_tnowhbdbmoxs.xml",
 				"volume": "37",
 				"attachments": [
-					{},
 					{
 						"title": "Scholars Portal Full Text PDF",
 						"mimeType": "application/pdf"
