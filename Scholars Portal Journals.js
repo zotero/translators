@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-03-17 18:04:20"
+	"lastUpdated": "2016-03-17 18:20:41"
 }
 
 /*
@@ -62,7 +62,7 @@ function doWeb(doc, url) {
 			if(!selectedItems) return true;
 			var articles = [];
 			for(var i in selectedItems) {
-				var article = 'http://'+doc.domain+'/ris?uri='+i
+				var article = '/ris?uri='+i
 				articles.push(article);
 			}
 			ZU.doGet(articles, scrape);
@@ -124,10 +124,10 @@ function scrape(text, doc) {
 		var pdfURL = "/pdf" + uri;
 		item.url = "http://journals.scholarsportal.info/details" + uri;
 		item.attachments = [{
-        	url: pdfURL,
-        	title: "Scholars Portal Full Text PDF",
-        	mimeType: "application/pdf"
-    	}];
+			url: pdfURL,
+			title: "Scholars Portal Full Text PDF",
+			mimeType: "application/pdf"
+		}];
 		item.complete();
 	})
 	translator.translate();
