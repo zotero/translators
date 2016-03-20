@@ -9,7 +9,7 @@
     "inRepository": true,
     "translatorType": 4,
     "browserSupport": "gcv",
-    "lastUpdated": "2013-11-19 08:23:18"
+    "lastUpdated": "2016-03-22 15:08:45"
 }
 
 /*****
@@ -94,7 +94,7 @@ function scrape(doc, url){
     
     
     //Get author(s) of the article
-    var authorXPath = '//span[@class="author"]';
+    var authorXPath = '//span[@class="artauthor"]//li';
     var authorListObject = doc.evaluate(authorXPath, doc, null, 
 					XPathResult.ANY_TYPE, null);
     var authorObject = authorListObject.iterateNext();
