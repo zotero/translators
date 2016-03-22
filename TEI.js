@@ -19,7 +19,7 @@
 		"Full TEI Document": false,
 		"Export Collections": false
 	},
-	"lastUpdated":"2016-03-10 15:19:00"
+	"lastUpdated":"2016-03-21 15:19:00"
 }
 
 // ********************************************************************
@@ -162,7 +162,7 @@ function genXMLId (item){
         xmlid = xmlid.replace(/[^-A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\u10000-\uEFFFF.0-9\u00B7\u0300-\u036F\u203F-\u2040]/g, "");
     }
     else{
-        xmlid += 'zoteroItem_' + item.itemID;
+        xmlid += 'zoteroItem_' + item.uri;
     }
     // this is really inefficient
     var curXmlId = xmlid;
@@ -206,14 +206,14 @@ function generateItem(item, teiDoc) {
     bibl.setAttribute("type", item.itemType);
 
     if(Zotero.getOption("Generate XML IDs")){
-        if(!generatedItems[item.itemID]){ 
+        if(!generatedItems[item.uri]){ 
             var xmlid =  genXMLId(item);
             bibl.setAttributeNS(ns.xml, "xml:id", xmlid);
             exportedXMLIds[xmlid] = bibl;
         }
         else{
-            var xmlid = "#" + generatedItems[item.itemID].getAttributeNS(ns.xml, "id");
-            var myXmlid = "zoteroItem_" + item.itemID;
+            var xmlid = "#" + generatedItems[item.uri].getAttributeNS(ns.xml, "id");
+            var myXmlid = "zoteroItem_" + item.uri;
 
             bibl.setAttribute("sameAs", xmlid);
 
@@ -224,7 +224,7 @@ function generateItem(item, teiDoc) {
         bibl.setAttribute("corresp", item.uri);
     }
 
-    generatedItems[item.itemID] = bibl;
+    generatedItems[item.uri] = bibl;
 
     /** CORE FIELDS **/
     
@@ -400,9 +400,9 @@ function generateItem(item, teiDoc) {
         monogr.appendChild(edition);
     }
     // software
-    else if (item.versionNumber){
+    else if (item.version){
         var edition = teiDoc.createElementNS(ns.tei, "edition");
-        edition.appendChild(teiDoc.createTextNode(item.versionNumber));
+        edition.appendChild(teiDoc.createTextNode(item.version));
         monogr.appendChild(edition);
     }
 
@@ -583,7 +583,7 @@ function doExport() {
 
     var item = null;
     while(item = Zotero.nextItem()){
-        allItems[item.itemID] = item;
+        allItems[item.uri] = item;
     }
 
 
@@ -641,3 +641,4 @@ function doExport() {
     var serializer = new XMLSerializer();
     Zotero.write(serializer.serializeToString(outputElement));
 }
+
