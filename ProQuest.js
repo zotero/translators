@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-01-21 21:15:20"
+	"lastUpdated": "2016-03-22 11:58:30"
 }
 
 /*
@@ -378,7 +378,7 @@ function scrape(doc, url, type) {
 			break;
 
 			default:
-				Z.debug('Unhandled field: "' + label + '"');
+				Z.debug('Unhandled field: "' + label + '": ' +  value);
 		}
 	}
 
@@ -640,6 +640,39 @@ var fieldNames = {
 		"Identifier / keyword":'Pengidentifikasi/kata kunci',
 		"Subject":'Subjek',
 		"Journal subject":'Subjek jurnal'
+	},
+	'Čeština': {
+		"Source type":'Typ zdroje',
+		"Document type":'Typ dokumentu',
+		//"Record type"
+		"Database":'Databáze',
+		"Title":'Název',
+		"Author":'Autor',
+		//"Editor":
+		"Publication title":'Název publikace',
+		"Volume":'Svazek',
+		"Issue":'Číslo',
+		"Number of pages":'Počet stránek',
+		"ISSN":'ISSN',
+		"ISBN":'ISBN',
+		//"DOI":
+		"Copyright":'Copyright',
+		"Language":'Jazyk',
+		"Language of publication":'Jazyk publikace',
+		"Section":'Sekce',
+		"Publication date":'Datum vydání',
+		"Publication year":'Rok vydání',
+		"Year":'Rok',
+		"Pages":'Strany',
+		"School":'Instituce',
+		"Degree":'Stupeň',
+		"Publisher":'Vydavatel',
+		"Place of publication":'Místo vydání',
+		"School location":'Místo instituce',
+		"Country of publication":'Země vydání',
+		"Identifier / keyword":'Identifikátor/klíčové slovo',
+		"Subject":'Předmět',
+		"Journal subject":'Předmět časopisu'
 	},
 	'Deutsch': {
 		"Source type":'Quellentyp',
