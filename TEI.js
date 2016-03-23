@@ -19,7 +19,7 @@
 		"Full TEI Document": false,
 		"Export Collections": false
 	},
-	"lastUpdated":"2016-03-21 15:19:00"
+	"lastUpdated":"2016-03-23 10:19:00"
 }
 
 // ********************************************************************
@@ -56,47 +56,6 @@
 // figure out where which information might be appropriately placed. I
 // hope this works.
 //
-// INSTALLATION
-//
-// For installation in Zotero 2 or above, you just have to drop this
-// file into the folder
-//
-// <mozProfileDir>/zotero/translators
-//
-// using Linux, this should be typically something like:
-// /home/username/.mozilla/firefox/ca9dfjvs.default/zotero/translators
-//
-// For Windows 6-7, people told me that you find this folder somewhere like
-// C:\Users\UserName\AppData\Roaming\Mozilla\Firefox\ca9dfjvs.default\zotero\translators
-//
-// For Windows -5 probably (not tested) C:\Documents and Settings\UserName\Application Data\Mozilla\Firefox\ca9dfjvs.default\zotero\translators
-//
-// The important thing is that you locate your Firefox profile dir. If
-// you can't find it
-// http://kb.mozillazine.org/Profile_folder_-_Firefox#Finding_the_profile_folder
-// could be helpful.
-//
-// Zotero 1.x is not supported, mainly due to installation
-// issues. Zotero 1.x stores translators in the sqlite database and
-// not in file-space. If you feel brave enough you may use the
-// scaffold add-on for firefox, to manually add the translator to the
-// database.
-//
-// TROUBLESHOOTING
-//
-// As far as I have tested it so far, it should be rather robust. So, chances
-// are good that you will not run into trouble.
-//
-// But, if it doesn't work, it doesn't work. Unfortunately the error
-// messages are not very specific. Usually, when there is something
-// wrong with the translator it does not work at all. Sometimes,
-// nevertheless, there are messages in the JavaScript error console.
-//
-// If you encounter a non-responsive Firefox after having installed
-// this script, just delete the script and everything should be
-// alright again.
-// ******************************************************************
-
 // Zotero.addOption("exportNotes", false);
 // Zotero.addOption("generateXMLIds", true);
 
@@ -400,9 +359,9 @@ function generateItem(item, teiDoc) {
         monogr.appendChild(edition);
     }
     // software
-    else if (item.version){
+    else if (item.versionNumber){
         var edition = teiDoc.createElementNS(ns.tei, "edition");
-        edition.appendChild(teiDoc.createTextNode(item.version));
+        edition.appendChild(teiDoc.createTextNode(item.versionNumber));
         monogr.appendChild(edition);
     }
 
