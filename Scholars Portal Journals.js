@@ -78,11 +78,9 @@ function getURI(url){
 	if(url.indexOf("xml") != -1){
 		var a = url.indexOf("details");
 		var b = url.indexOf("xml");
-		uri = url.substring(a+7,b+3);
-		return uri;
+		return url.substring(a+7,b+3);
 	} else if(url.indexOf("resolver.scholarsportal.info/resolve/") != -1)  {
-		uri = url.split("resolver.scholarsportal.info/resolve")[1] + ".xml";
-		return uri;
+		return url.split("resolver.scholarsportal.info/resolve")[1] + ".xml";
 	}
 }
 
