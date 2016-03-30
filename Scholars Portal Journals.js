@@ -43,11 +43,11 @@ function detectWeb(doc, url) {
 	// see if saved list is toggled open
 	if (doc.getElementsByClassName('inner-wrap-open') [0]) {
 		if (getItems(doc, true)) {
-			return 'multiple'
+			return 'multiple';
 		}
 	} else if (url.indexOf("/search?q") != -1 || url.indexOf("/browse/") != -1) {
 		if (getItems(doc, true)) {
-			return 'multiple'
+			return 'multiple';
 		}
 	} else if (url.indexOf("/details/") != -1) {
 		return 'journalArticle';
@@ -62,14 +62,14 @@ function doWeb(doc, url) {
 			if(!selectedItems) return true;
 			var articles = [];
 			for(var i in selectedItems) {
-				var article = '/ris?uri='+i
+				var article = '/ris?uri='+i;
 				articles.push(article);
 			}
 			ZU.doGet(articles, scrape);
-		})
+		});
 	} else {
 		var uri = getURI(url);
-		var article = '/ris?uri='+uri
+		var article = '/ris?uri='+uri;
 		ZU.doGet(article, scrape);
 	}
 }
@@ -78,11 +78,9 @@ function getURI(url){
 	if(url.indexOf("xml") != -1){
 		var a = url.indexOf("details");
 		var b = url.indexOf("xml");
-		uri = url.substring(a+7,b+3);
-		return uri
+		return url.substring(a+7,b+3);
 	} else if(url.indexOf("resolver.scholarsportal.info/resolve/") != -1)  {
-		uri = url.split("resolver.scholarsportal.info/resolve")[1] + ".xml";
-		return uri
+		return url.split("resolver.scholarsportal.info/resolve")[1] + ".xml";
 	}
 }
 
@@ -129,7 +127,7 @@ function scrape(text, doc) {
 			mimeType: "application/pdf"
 		}];
 		item.complete();
-	})
+	});
 	translator.translate();
 }
 /** BEGIN TEST CASES **/
