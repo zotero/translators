@@ -1,15 +1,15 @@
 {
-    "translatorID": "5278b20c-7c2c-4599-a785-12198ea648bf",
-    "label": "ARTstor",
-    "creator": "John Justin, Charles Zeng",
-    "target": "https?://([^/]+\\.)?(artstor|sscommons)\\.org\/(open)?library",
-    "minVersion": "3.1",
-    "maxVersion": "",
-    "priority": 100,
-    "inRepository": true,
-    "translatorType": 4,
-    "browserSupport": "gcs",
-    "lastUpdated": "2015-07-07 14:45:45"
+	"translatorID": "7a690951-ed76-43f5-b761-707fef0345d4",
+	"label": "ARTstor",
+	"creator": "John Justin, Charles Zeng",
+	"target": "\\.artstor|\\.sscommons\\.org:?\\w*\\/(open)*library",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcs",
+	"lastUpdated": "2016-03-31 21:07:27"
 }
 
 /**
@@ -18,31 +18,32 @@
     see the overview of Zotero item types), or, if multiple items are found, “multiple”. 
 **/
 function detectWeb(doc, url) {
+    var itemType = false; // default - ignore
     if (url.match(/\/iv2\.|ExternalIV.jsp/)) {
         // Image viewer window
-        return "artwork";
+        itemType = "artwork";
     } else if (url.match(/\#3\|/)) {
         // Thumbnail window page
-        if (doc.getElementsByClassName('MetaDataWidgetRoot').length > 0) {
+        if ((doc.getElementsByClassName('MetaDataWidgetRoot') != null) &&
+            (doc.getElementsByClassName('MetaDataWidgetRoot').length > 0)) {
             // There are multiple metadata windows visible
-            return "artwork";
-        } else if ((doc.getElementById("floatingPlaceHolder") != null) && (doc.getElementById("floatingPlaceHolder").style.display == "block")) {
-            // Don't capture date if small window is present
-            return false;
-        } else if ((doc.getElementById("thumbNavSave1") != null) && (doc.getElementById("thumbNavSave1").style.display == "block")) {
-            // Don't capture data if image group window is in editing state.
-            return false;
-        } else if ((doc.getElementById("ssContentWrap") != null) && (doc.getElementById("ssContentWrap").style.display == "inline")) {
-            // Don't capture data if slide show window is present
-            return false;
-        } else if (url.match(/zMode/)) {
-            return "artwork";
+            itemType = "artwork";
+        } else if ((doc.getElementById("floatingPlaceHolder") != null) &&
+            (doc.getElementById("floatingPlaceHolder").style.display == "block")) {
+            // Don't capture date if small window is present, ignore
+        } else if ((doc.getElementById("thumbNavSave1") != null) &&
+            (doc.getElementById("thumbNavSave1").style.display == "block")) {
+            // Don't capture data if image group window is in editing state. Ignore
+        } else if ((doc.getElementById("ssContentWrap") != null) &&
+            (doc.getElementById("ssContentWrap").style.display == "inline")) {
+            // Don't capture data if slide show window is present, ignore
+        } else {
+            // Allow thumbnail window.
+            itemType = "multiple";
         }
-        // Allow thumbnail window.
-        return "multiple";
     }
     // all other page, data can not be captured.
-    return false;
+    return itemType;
 }
 
 /**
@@ -54,8 +55,8 @@ function detectWeb(doc, url) {
             - get the image id and type, process it.
         - check if the page is thumbnail page
             - ignore small window
-            - if small windows is popped up, process only small window
-                get the object ids from small windows, then process the ids.
+			- check if metadata window is visisble. If so, get the image id from each 
+				small window and process them
             - if no small window, get the selected object and process them
                 get the object ids from selected objects, then process the ids.
             - otherwise, select all objects in the thumbnails and prompt user
@@ -81,193 +82,135 @@ function doWeb(doc, url) {
     }
     if (url.match(/\#3\|/)) {
         // Thumbnail window page
-        if (doc.getElementsByClassName('MetaDataWidgetRoot').length > 0) {
+        if ((doc.getElementsByClassName('MetaDataWidgetRoot') != null) &&
+            (doc.getElementsByClassName('MetaDataWidgetRoot').length > 0)) {
             doMetadataWindow(doc, url);
         } else {
-            doThumbnails(doc, url);
+            doList(doc, url);
         }
     }
 }
+/**
+	Process the thumbnail list by grabing the data from DOM
+	and add it to the list for user to select.
+	Once the items are selected, process them and add them to 
+	Zotero.
+**/
+function doList(doc, url) {
+    var visibleDomIdName = "custom";
+    var zinfoDomNamePre = "custom";
+    var zinfoDomNamePost = "_thumbMetaWrap";
+    var selectDomIdNamePre = "custom";
+    var selectDomIdNamePost = "_imageHolder";
+    var candidateItems = new Object();
+    var selectItems = new Object();
 
+    if ((doc.getElementById("listContentWrap") != null) &&
+        (doc.getElementById("listContentWrap").style.display == "block")) {
+        // If list view is active.
+        visibleDomIdName = "largeCustom";
+        zinfoDomNamePre = "largeCustom";
+        zinfoDomNamePost = "_MainArea";
+        selectDomIdNamePre = "largeCustom";
+        selectDomIdNamePost = "_imageHolder";
+    }
+    var i = 1;
+    var found = true;
+    do {
+        var visibleDom = doc.getElementById(visibleDomIdName + i);
+        if ((visibleDom != null) &&
+            (visibleDom.style.display == "block")) {
+            getDomData(doc, candidateItems, selectItems,
+                zinfoDomNamePre + i + zinfoDomNamePost,
+                selectDomIdNamePre + i + selectDomIdNamePost);
+        } else {
+            found = false;
+        }
+        i++;
+    } while (found);
+
+    if (Object.keys(selectItems).length > 0) {
+        candidateItems = selectItems;
+    }
+    // Now we got candidate list, have user select it
+    Zotero.selectItems(candidateItems, function(selectedItems) {
+        var objItems = [];
+        for (var objItem in selectedItems) {
+            objItems.push(objItem);
+        }
+        processObjects(doc, url, objItems);
+    });
+}
+
+/**
+	Get the data from DOM and added it to candidateItems.
+	If the item is selected, also adds it to the selectItems.
+**/
+function getDomData(doc, candidateItems, selectItems, zinfoName, selectName) {
+    var zinfoDom = doc.getElementById(zinfoName);
+    var selectDom = doc.getElementById(selectName);
+    var ztitle = zinfoDom.getAttribute("ztitle");
+    var zid = zinfoDom.getAttribute("zid");
+    var ztid = zinfoDom.getAttribute("ztid");
+
+    var key = zid + ":" + ztid;
+    candidateItems[key] = htmlDecode(doc, ztitle);
+    if (selectDom.className.indexOf("thumbNailImageSelected") > -1) {
+        // The item is selected.
+        selectItems[key] = htmlDecode(doc, ztitle);
+    }
+}
+
+/**
+	This procedure gets the image id and type from the DOM, added it to 
+	the list and sends the list to processor.
+**/
 function doImageViewer(doc, url) {
-    // get the image id and object type from the page
-    // this contains the objId and object type separate by : as in "AWSS35953_35953_25701160:11"
     var objID = doc.getElementById("objID");
     if (objID != null) {
         var objItems = [];
         var objItem = objID.title;
+        // Get the image id and object type from the title attribute.
+        // This contains the objId and object type separate by : as in "AWSS35953_35953_25701160:11"
         objItems.push(objItem);
         processObjects(doc, url, objItems);
     }
 }
 
+/**
+	Process the metadata window data by getting the ID from the 
+	window DOM and retries data with extra calls.
+**/
 function doMetadataWindow(doc, url) {
     // get object id from metadata window.
     var metaWindows = doc.getElementsByClassName('MetaDataWidgetRoot');
     var objItems = [];
     for (var i = 0; i < metaWindows.length; i++) {
-        // the dom id is mdwSS7730455_7730455_8806769 that is object id
-        // prefixed with mdw.
+        // the dom id is in the form "mdwSS7730455_7730455_8806769" 
+        // that is object id prefixed with mdw.
         var id = metaWindows[i].id.substring(3);
-        objItems.push(id);
+        objItems.push(id + ":10"); // default type to image
     }
-
-    processSelectedObject(doc, url, objItems, 1);
+    processObjects(doc, url, objItems);
 }
 
-function htmlDecode(doc, input){
+/**
+	This functions removes extra format tag from string and also decodes the
+	html entity string.
+**/
+function htmlDecode(doc, input) {
     var fieldValue = input.replace(/<wbr\/>/g, "");
     fieldValue = fieldValue.replace(/<br\/>/g, "");
- 
+
     var decodedValue;
     if (fieldValue.match(/&(?:[a-z\d]+|#\d+|#x[a-f\d]+);/i)) {
         var e = doc.createElement('div');
         e.innerHTML = fieldValue;
-         decodedValue = e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;
-    }
-    else {
+        decodedValue = e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;
+    } else {
         decodedValue = fieldValue;
     }
     return decodedValue;
-}
-
-function processSelectedObject(doc, url, selectedObjs, selectionType) {
-    var serviceURL = getThumbnailServiceURL(doc, url);
-    Zotero.Utilities.HTTP.doGet(serviceURL, function(text) {
-        // get the master object list
-        var json = JSON.parse(text);
-        var objDescItem;
-        var masterObjList = [];
-        for (var i = 0; i < json.thumbnails.length; i++) {
-            var thumbnail = json.thumbnails[i];
-            objDescItem = new Object();
-            objDescItem.id = thumbnail.objectId;
-            objDescItem.type = thumbnail.objectTypeId;
-            objDescItem.title = thumbnail.thumbnail1;
-            masterObjList.push(objDescItem);
-        }
-        // Proccess the selected items by look up the data from master list.
-        var zMode = false;
-        if (url.match(/zMode/)) {
-            zMode = true;
-        }
-        switch (selectionType) {
-            case 2: // selection from thumbnals
-                var candidateItems = new Object();
-                var masterObj;
-                if (selectedObjs.length > 0) {
-                    for (var j = 0; j < selectedObjs.length; j++) {
-                        var idx = selectedObjs[j];
-                        masterObj = masterObjList[idx];
-                        var key = masterObj.id + ":" + masterObj.type;
-                        // candidateItems[key] = masterObj.title;
-                        candidateItems[key] = htmlDecode(doc, masterObj.title);
-                    }
-                } else {
-                    for (var j = 0; j < masterObjList.length; j++) {
-                        masterObj = masterObjList[j];
-                        var key = masterObj.id + ":" + masterObj.type;
-                        candidateItems[key] = htmlDecode(doc, masterObj.title);
-                    }
-                }
-                if (zMode && Object.keys(candidateItems).length > 0) {
-                    var objItems = [];
-                    for (var objItem in candidateItems) {
-                        objItems.push(objItem);
-                        processObjects(doc, url, objItems);
-                        break;
-                    }
-                } else {
-                    Zotero.selectItems(candidateItems, function(selectItems) {
-                        var objItems = [];
-                        for (var objItem in selectItems) {
-                            objItems.push(objItem);
-                        }
-                        processObjects(doc, url, objItems);
-                    });
-                }
-                break;
-            case 1: // item from metadata window or image viewer
-                // build look up table for eazy look up.
-                var masterLookup = new Object();
-                for (var m = 0; m < masterObjList.length; m++) {
-                    masterLookup[masterObjList[m].id] = masterObjList[m];
-                }
-                var objItems = [];
-                for (var i = 0; i < selectedObjs.length; i++) {
-                    var id = selectedObjs[i];
-                    if (masterLookup[id] == "") {
-                        var item = id + ":10"; // default type as image.
-                        objItems.push(item);
-                    } else {
-                        var item = masterLookup[id].id + ":" + masterLookup[id].type;
-                        objItems.push(item);
-                    }
-                }
-                processObjects(doc, url, objItems);
-                break;
-        }
-    }); // Zotero..doGet
-};
-
-
-function doThumbnails(doc, url) {
-    var selectedObjs = getSelectedItems(doc, url);
-    processSelectedObject(doc, url, selectedObjs, 2);
-}
-
-/**
-    getMasterThumbnailList gets the thumbnail object id by calling the thumbnail 
-    service to get a list of object id and its title.
-    It returns with a list of object with object id, and object title.
-**/
-function getMasterThumbnailList(doc, url, objDescItems) {
-    // var objDescItems = [];
-    var serviceURL = getThumbnailServiceURL(doc, url);
-    Zotero.Utilities.HTTP.doGet(serviceURL, function(text) {
-        var json = JSON.parse(text);
-        var objDescItem;
-        for (var i = 0; i < json.thumbnails.length; i++) {
-            var thumbnail = json.thumbnails[i];
-            objDescItem = new Object();
-            objDescItem.id = thumbnail.objectId;
-            objDescItem.type = thumbnail.objectTypeId;
-            objDescItem.title = thumbnail.thumbnail1;
-            objDescItems.push(objDescItem);
-        }
-    });
-}
-
-/**
-    getSelectedItems gets the selected item by checking the items selected.
-    It returns with a list of object with index id.
-**/
-function getSelectedItems(doc, url) {
-    var indexes = [];
-    var wrap = doc.getElementById("thumbContentWrap");
-    if ((wrap !== null) && (wrap.style.display == "none")) {
-        wrap = doc.getElementById("listContentWrap");
-    }
-    if (wrap != null) {
-        var imageElems = wrap.getElementsByClassName("thumbNailImageSelected");
-        for (var i = 0; i < imageElems.length; i++) {
-            var ele = imageElems[i];
-            var divId = ele.id;
-            var visible = false;
-            if (divId.indexOf('large') >= 0) {
-               visible = ele.parentNode.parentNode.parentNode.style.display == "block";
-            } 
-            else {
-                visible = ele.parentNode.parentNode.style.display == "block";
-            }
-            if (visible) {
-                // we need to get the index (1) from id string "custom1_imageHolder"
-                var imageNum = divId.substring(divId.indexOf("m") + 1, divId.indexOf("_"));
-                indexes.push(parseInt(imageNum) - 1);
-            }
-        }
-    }
-    return indexes;
 }
 
 /**
@@ -333,6 +276,10 @@ function getMetaDataItem(doc, url, objItem, dataItem) {
     });
 }
 
+/**
+	This procedure process the json, and add the json value to the 
+	Zotero item.
+**/
 function processPortalData(doc, dataItem, json, fieldMap, portal) {
     var fieldName;
     var fieldValue;
@@ -352,8 +299,7 @@ function processPortalData(doc, dataItem, json, fieldMap, portal) {
                         hasSiteName = false;
                     }
                     setItemValue(dataItem, "title", fieldValue);
-                }
-                else {
+                } else {
                     setItemValue(dataItem, key, fieldValue);
                 }
             } else {
@@ -377,6 +323,9 @@ function processPortalData(doc, dataItem, json, fieldMap, portal) {
                 setItemLabelValue(doc, dataItem, "extra", fieldName, fieldValue);
             }
         }
+    }
+    if (json.SSID !== undefined && json.SSID !== "") {
+        setItemLabelValue(doc, dataItem, "extra", "SSID", json.SSID);
     }
     if (dataItem.title == undefined) {
         dataItem.title = "Unknown";
@@ -404,10 +353,10 @@ function cleanStringValue(str) {
     cleanValue = cleanValue.replace(/<\/?[^>]+(>|$)/g, " ");
     return cleanValue;
 }
- 
+
 function setItemLabelValue(doc, dataItem, key, label, value) {
     var cleanValue = cleanStringValue(value);
- 
+
     if (!(key in dataItem)) {
         dataItem[key] = label + ": " + cleanValue;
 
@@ -432,7 +381,10 @@ function setItemValue(dataItem, key, value, override) {
         dataItem[key] += "; " + cleanValue;
     }
 }
-
+/**
+	This procedure makes the extra call to get the notes associated
+	with the image records and add it to the Zotero data item.
+**/
 function getNotesDataItem(url, objItem, dataItem) {
     var itemAry = objItem.split(':');
     var objType = itemAry[1];
@@ -483,199 +435,19 @@ function getServerUrl(url) {
     if (url.indexOf('/iv2\.') > 0) {
         serverUrl = url.substring(0, url.indexOf('iv2\.'));
     } else if (url.indexOf('/ExternalIV.jsp') > 0) {
-       serverUrl = url.substring(0, url.indexOf('ExternalIV.jsp'));
-    }
-    else {
+        serverUrl = url.substring(0, url.indexOf('ExternalIV.jsp'));
+    } else {
         serverUrl = url.substring(0, url.indexOf('#3'));
     }
     serverUrl = serverUrl.substring(0, serverUrl.lastIndexOf('/'));
     return serverUrl;
 }
 
-function getSortOrder(doc) {
-    var sortOrder = 0; 
-    var sortUL = doc.getElementById("sub0sortList");
-    if (sortUL !== null) {
-        var sortElemWChk = sortUL.getElementsByClassName('sortListItemNav');
-        if (sortElemWChk.length > 0) {
-            switch (sortElemWChk[0].id) {
-                case "thumbSortRelevance0":
-                    sortOrder = 0;
-                    break;
-                case "thumbSortTitle0":
-                    sortOrder = 1;
-                    break;
-                case "thumbSortCreator0":
-                    sortOrder = 2;
-                    break;
-                case "thumbSortDate0":
-                    sortOrder = 3;
-                    break;
-            }
-        }
-    }
-    return sortOrder;
-}
-
-function getThumbnailServiceURL(doc, url) {
-    var serverUrl = getServerUrl(url);
-    var paramStr = url.substring(url.indexOf('#'));
-
-    // process escapde "|"
-    if (paramStr.indexOf('|') < 0) {
-        paramStr = parramStr.replace(/%7c/gi, "|");
-    }
-
-    var params = paramStr.split('|');
-    var pageType = params[1];
-    var contentId = params[2];
-
-    // get page number
-    var pageNo = 0;
-    var pageNoDOM = doc.getElementById("pageNo");
-    if (pageNoDOM != null) {
-        pageNo = parseInt(pageNoDOM.value);
-    }
-
-    // get page size
-    var imagesPerPage = "1";
-    var pageDOM = doc.getElementById("thumbNavImageButt");
-    if (pageDOM != null) {
-        imagesPerPage = pageDOM.innerHTML;
-    }
-    var pageSize = parseInt(imagesPerPage);
-    var startIdx = (pageNo - 1) * pageSize + 1;
-
-    // get sort order
-    var sortOrder = getSortOrder(doc);
-
-    var serviceURL = "";
-    switch (pageType) {
-        case "search":
-            var searchTerm = decodeSearchData(decrypt(params[7]));
-
-            var kw = searchTerm.kw;
-            kw = encodeURIComponent(kw);
-            var type = searchTerm.type;
-
-            var origKW = searchTerm.origKW;
-            origKW = escape(origKW);
-            var order = 0;
-            if (type == "3" || type == "2") {
-                //search within IG and categories
-                serviceURL = getServiceUrlRoot(url) + pageType + "/" + params[2] + "/" + startIdx + "/" + pageSize + "/" + sortOrder + "?type=" + type + "&kw=" +
-                    kw + "&origKW=" + origKW + "&id=" + searchTerm.id + "&name=" + escape(searchTerm.name); + "&order=" + order + "&tn=1";
-
-            } else if (type == "4") {
-                //search notes
-                var aType = searchTerm.aType;
-                serviceURL = getServiceUrlRoot(url) + pageType + "/" + params[2] + "/" + startIdx + "/" + pageSize + "/" + sortOrder + "?type=" + type + "&kw=" +
-                    kw + "&origKW=" + origKW + "&aType=" + aType + "&order=" + order + "&tn=1";
-
-            } else {
-                //KW search type=6, PC, All Coll, Inst Coll, Adv Srch
-                var collectionTit = decrypt(params[3]);
-                var collectionTitle = collectionTit.split(":");
-                var name = escape(collectionTitle[0]);
-                serviceURL = getServiceUrlRoot(url) + pageType + "/" + params[2] + "/" + startIdx + "/" + pageSize + "/" + sortOrder + "?type=" + type + "&kw=" +
-                    kw + "&origKW=" + origKW + "&geoIds=" + searchTerm.geoIds + "&clsIds=" + searchTerm.clsIds + "&collTypes=" + searchTerm.collTypes + "&id=" +
-                    searchTerm.id + "&name=" + name + "&bDate=" + searchTerm.bDate +
-                    "&eDate=" + searchTerm.eDate + "&dExact=" + searchTerm.dExact + "&order=" + order + "&isHistory=false&prGeoId=" + searchTerm.prGeoId + "&tn=1";
-            }
-            //p=escape(p);
-            break;
-        case "collaboratoryfiltering":
-            var serviceURL = getServiceUrlRoot(url) + pageType + "/" + params[2] + "/thumbnails/" + startIdx + "/" + pageSize + "/" + sortOrder + "?collectionId=" + params[8];
-            break;
-        case "imagegroup": // image group
-        case "collections":
-        case "categories":
-        case "cluster":
-        default:
-            serviceURL = getServiceUrlRoot(url) + pageType + "/" + contentId + "/thumbnails/" + startIdx + "/" + pageSize + "/" + sortOrder;
-    }
-    return serviceURL;
-}
-
 function getServiceUrlRoot(url) {
     var serviceRoot = getServerUrl(url) + "/secure/";
     return serviceRoot;
 
-}
-
-function getFileRoot(url) {
-    var fileRoot = getServerUrl(url).substring(0, getServerUrl(url).lastIndexOf('/'));
-    return fileRoot;
-}
-
-/**
-    decodeSearchData is an helper function to process the search result page.
-    It converts the search url parameter into arrary of parameter values.
-
-    It converts
-    type=6&kw=stimson hall|all#and,1925|all&geoIds=&clsIds=&collTypes=&id=all&bDate=-2019&eDate=2030&dExact=1&prGeoId=&origKW=stimson hall|all#and,1925|all
-    to  {
-             "type": 6
-             "kw": "stimson hall|all#and,1925|all"
-             "geoIds": ""
-             "clsIds": ""
-             "collTypes": ""
-             "id": "all"
-             "bDate": "-2019"
-             "eDate": "2030"
-             "dExact": "1"
-             "prGeoId": ""
-             "origKW": "stimson hall|all#and,1925|all"
-         }
-**/
-function decodeSearchData(str) {
-    var param = str.split('&');
-    var searchData = new Object();
-    var sparam;
-    var id;
-    var value;
-    for (var i = 0; i < param.length; i++) {
-        sparam = param[i].split('=');
-        id = sparam[0];
-        value = sparam[1];
-
-        if (id === 'type') {
-            searchData[id] = parseInt(value);
-        } else {
-            searchData[id] = value;
-        }
-    }
-    return searchData;
-}
-
-/**
-    Converts two character number character to special character
-    it converts 
-        type3D3626kw3Dairstream20trailer26geoIds3D
-    to
-        type=6&kw=airstream trailer&geoIds=
-**/
-function decrypt(s) {
-    return s.replace(/!(\d{1,5})!|(\d[\dA-F])/g, function(m, unicode, hex) {
-        // Either unicode or hex are set, not both. unicode has priority over hex in the match
-        if (unicode) {
-            return String.fromCharCode(parseInt(unicode)); // Always parses because of regexp
-        } 
-
-        // must be hex
-        try {  
-            return decodeURIComponent('%' + hex) 
-        }
-        catch(e) { 
-            /* Some hex character escapes are invalid */ 
-        }
-
-        return m; // Fail-safe
-    });
-}
-
-
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
     {
         "type": "artwork",
